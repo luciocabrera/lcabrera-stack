@@ -1,3 +1,4 @@
+export { buildColumnSizingCookieEntry } from './buildColumnSizingCookieEntry.util';
 export { buildPersistencePayload } from './buildPersistencePayload.util';
 export { commitResolvedPinningState } from './commitResolvedPinningState.util';
 export { commitResolvedVisibilityState } from './commitResolvedVisibilityState.util';
@@ -6,6 +7,6 @@ export { resolveBatchColumnSettingsUpdate } from './resolveBatchColumnSettingsUp
 export { resolveBatchTableSettingsUpdate } from './resolveBatchTableSettingsUpdate.util';
 export { resolveColumnFilterUpdate } from './resolveColumnFilterUpdate.util';
 export { resolveColumnPinningUpdate } from './resolveColumnPinningUpdate.util';
-export { resolveColumnSizingUpdate } from './resolveColumnSizingUpdate.util';
 export { resolveColumnSortingUpdate } from './resolveColumnSortingUpdate.util';
 export { resolveColumnVisibilityUpdate } from './resolveColumnVisibilityUpdate.util';
+export { writeColumnSizing } from './writeColumnSizing.util';

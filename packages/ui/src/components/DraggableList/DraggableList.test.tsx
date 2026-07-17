@@ -27,7 +27,7 @@ describe('DraggableList', () => {
   it('renders a drag handle for each draggable item', () => {
     render(<DraggableList items={items} />);
 
-    expect(screen.getAllByLabelText('Drag handle')).toHaveLength(3);
+    expect(screen.getAllByTestId('drag-handle')).toHaveLength(3);
   });
 
   it('omits drag handle for non-draggable items', () => {
@@ -38,7 +38,7 @@ describe('DraggableList', () => {
 
     render(<DraggableList items={mixedItems} />);
 
-    expect(screen.getAllByLabelText('Drag handle')).toHaveLength(1);
+    expect(screen.getAllByTestId('drag-handle')).toHaveLength(1);
   });
 
   it('sets draggable attribute to true on enabled items', () => {

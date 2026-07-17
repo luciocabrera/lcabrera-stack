@@ -99,7 +99,7 @@ type UserId = string & { readonly __brand: 'UserId' };
 
 ## Import Standards
 
-> **Tooling note:** Import order is enforced and auto-fixed by `vp lint . --fix` (Oxlint). Do not reorder imports manually, and do not flag import ordering in review — the quality gate catches it before merge.
+> **Tooling note:** Import order is enforced and auto-fixed by the **eslint** pass (`eslint-plugin-perfectionist`'s `sort-imports` / `sort-modules`), **not** by Oxlint. `vp lint . --fix` alone will not touch import order — Oxlint loads no `import/order` rule, and only pulls perfectionist into `*.stylex.ts` to switch two rules _off_. Run **`vp run lint`** in the workspace (it chains `vp lint . --fix` then `vp run lint:eslint`, which is `eslint --fix`), or `vp run lint:all` from the root. Do not reorder imports manually, and do not flag import ordering in review — the quality gate catches it before merge.
 
 Use `@/` as the root alias for `src/`. Relative imports only within the same directory.
 
@@ -449,8 +449,7 @@ type First = FirstParam<(name: string, age: number) => void>; // string
 ```typescript
 // API response helper
 type ApiResult<T> =
-  | { success: true; data: T }
-  | { success: false; error: string };
+  { success: true; data: T } | { success: false; error: string };
 
 // Extract data type from result
 type ExtractData<T> = T extends { success: true; data: infer D } ? D : never;

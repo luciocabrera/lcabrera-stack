@@ -17,15 +17,13 @@ export const toGlobalNavigationPreferences = (value: unknown) => {
     return;
   }
 
-  const collapsed = isNavigationCollapsedPreference(value['collapsed'])
-    ? value['collapsed']
+  const collapsed = isNavigationCollapsedPreference(value.collapsed)
+    ? value.collapsed
     : undefined;
-  const pinned = isNavigationPinnedPreference(value['pinned'])
-    ? value['pinned']
+  const pinned = isNavigationPinnedPreference(value.pinned)
+    ? value.pinned
     : undefined;
-  const size = isNavigationSizePreference(value['size'])
-    ? value['size']
-    : undefined;
+  const size = isNavigationSizePreference(value.size) ? value.size : undefined;
 
   return { collapsed, pinned, size };
 };

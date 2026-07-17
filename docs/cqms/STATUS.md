@@ -43,6 +43,7 @@ These are known and recorded — not drift:
 - **Streaming uploads** — the push endpoint buffers the whole archive in memory, bounded by `CQMS_MAX_PUSH_BYTES` (default 500 MB) → 413. Real large-repo support needs streaming (ADR-029, restated ADR-031).
 - **Git metadata / diff scoping** — snapshots are whole-tree; diff-based scanning (`code-smell-zen`) is unresolved (ADR-029; PRD_V2 §14.1).
 - **DB test order-coupling** — `listApiTokens` / `failStaleRunningScans` pass in the full run but fail as a subset, so there is deliberately no `test:integration` task (`packages/scan-ingestion/vite.config.ts`).
+- **Biome as a CQMS scanner** — Biome (ADR-035) gates PRs and emits `reports/biome/full-latest.json`, but its findings do not reach the DB (no scanner row, no `biome_runs` master, not in `linter-checker`). Approved to build, then parked before implementation; execute-ready spec in [`BIOME_SCANNER_PLAN.md`](BIOME_SCANNER_PLAN.md).
 
 ---
 

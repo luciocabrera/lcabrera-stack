@@ -242,26 +242,25 @@ export const useGetFilterData = <TData>(columnKey: DataKey<TData>) =>
 ```typescript
 export const useSetColumnSorting = <TData>() => {
   const { columnsStore } = useTableConfigContextValue<TData>();
+  const persistTableState = usePersistTableStateAction();
 
   return useCallback(
     ({ columnKey, direction }: SetColumnSortingArgs<TData>) => {
-      const columnsState = columnsStore.get();
-
       // Business logic: update sorting array
       const newSorting = direction ? [{ key: columnKey, direction }] : [];
 
-      // Persist to storage
-      writeStateSlice({
+      // Persist through the /_action/persist-cookie server action (Set-Cookie);
+      // the loader reads the cookie back to seed SSR — no client document.cookie.
+      persistTableState({
         persistenceKey,
         slice: 'sorting',
-        storageType: 'cookie',
-        value: newSorting,
+        valueSlice: newSorting,
       });
 
       // Update store
       columnsStore.set({ sorting: newSorting });
     },
-    [columnsStore],
+    [columnsStore, persistTableState],
   );
 };
 ```
@@ -579,25 +578,27 @@ useInfiniteScroll({
 
 **Mechanism**:
 
-- `writeStateSlice()` saves to cookie/localStorage
-- `readStateSlice()` restores on mount
-- URL search params for shareable state
+- `usePersistTableStateAction()` submits table state to the
+  `/_action/persist-cookie` server action, which writes the cookie via a
+  `Set-Cookie` response header (no client `document.cookie` write)
+- The loader reads that cookie back on the next document request to seed SSR
+- Column sizing persists the same way through `usePersistColumnSizingAction()`
+- URL search params (carried on the same entry) for shareable state
 
 **Example**:
 
 ```typescript
-// Save to cookie
-writeStateSlice({
+const persistTableState = usePersistTableStateAction();
+
+// Persist to the cookie (Set-Cookie). Supplying a search param also syncs the
+// URL in the same round-trip, so the loader revalidates; omit it for a
+// cookie-only write (a 204, no revalidation).
+persistTableState({
   persistenceKey: 'users-table',
   slice: 'columnFilters',
-  storageType: 'cookie',
-  value: newFilters,
-});
-
-// Update URL
-setSearchParams((params) => {
-  params.set('filters', JSON.stringify(newFilters));
-  return params;
+  valueSlice: newFilters,
+  searchParamKey: 'filters',
+  searchParamValue: JSON.stringify(newFilters),
 });
 ```
 

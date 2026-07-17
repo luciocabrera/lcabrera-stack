@@ -13,18 +13,27 @@ This is a **pnpm monorepo** built with the **Vite+** unified toolchain (`vp` CLI
 ```
 apps/
 ├── react-router/     # Main SSR frontend app (React 19 + StyleX + React Router 7)
-├── admin_system/     # Separate React Router SSR admin app
+├── admin_system/     # Separate React Router SSR admin app (CQMS routes)
 ├── api-server/       # Express + PostgreSQL REST API (port 3001)
 ├── api-server-fast/  # Fastify alternative API server
+├── scan-orchestrator/# Standalone CQMS scan runner (Postgres LISTEN + ws server)
 └── shared/           # Shared code between apps
 packages/
+├── agent-runner/        # Spawns the Claude Agent SDK CLI subprocess
+├── data-access/         # Reusable server/api code — browser fetch (src/api) + Postgres (src/db)
 ├── eslint-local-rules/  # Custom lint rules for this repo
 ├── node-runtime/        # Process-lifecycle primitives for long-running services (signals)
 ├── plugins/             # Shared Vite plugins
-├── ts-configs/          # Shared TypeScript configurations
+├── scan-ingestion/      # CQMS scan ingestion core + migrations
+├── ts-configs/          # Shared TypeScript configurations (generated — see its README)
+├── ui/                  # Shared UI component library
 ├── utils/               # Shared utilities — pure and side-effect free (see its ARCHITECTURE.md)
 └── vite-configs/        # Shared Vite config factories
 ```
+
+That is **16 workspaces** — the count several rules below depend on. `packages/ui`
+and `packages/data-access` are becoming public packages and are held strictest:
+never baseline, scope, or inline-disable a finding in either.
 
 `utils` and `node-runtime` split on purity, and the split is deliberate:
 `@repo/utils` guarantees pure, side-effect-free helpers, so anything that must
@@ -91,7 +100,6 @@ Skills are on-demand task workflows in `.github/skills/`. Use them as the first 
 | `code-smell-checker`          | Baseline maintainability audits and tech-debt triage                                                        |
 | `code-smell-zen`              | Diff-based smell review against target branch                                                               |
 | `fallow-code-checker`         | Full fallow monorepo hygiene scan with prioritized report (`vp run fallow:full` from root; scope with `-w`) |
-| `config-audit`                | Run claudelint, triage against known exceptions, produce fix plan for genuine issues                        |
 
 Selection guideline:
 
@@ -105,6 +113,19 @@ Selection guideline:
 
 ## 4. Toolchain — Vite+ (`vp`)
 
+> **[COMMANDS.md](COMMANDS.md) is the canonical command reference** — every root
+> script, every per-workspace task, what CI runs, and how `vp run <task>`
+> resolves. This section keeps only the daily commands and the **policy** behind
+> them; it deliberately does not re-list everything, because the duplicate lists
+> are what drifted (they claimed 15 workspaces when there were 16). Add a
+> command → add it to COMMANDS.md in the same commit.
+>
+> **`vp run commands:verify` enforces that** (CI step in `check-safe.yml`): a new
+> root script that is undocumented, a documented command that no longer resolves,
+> a wrong per-workspace claim, a broken link, or a stale workspace count all fail
+> the build. So do not re-list commands here — a copy in this file is a copy the
+> checker does not police, which is exactly how the last set rotted.
+
 **Never use pnpm/npm/yarn directly.** All operations go through `vp`:
 
 | Task                 | Command                                                                                |
@@ -116,7 +137,7 @@ Selection guideline:
 | Lint (check only)    | `vp lint .`                                                                            |
 | Format               | `vp fmt .`                                                                             |
 | Format check         | `vp fmt --check .`                                                                     |
-| Type check           | `react-router typegen && tsc --noEmit` (or `vp check`)                                 |
+| Type check           | `vp run typecheck` (real tsc) — `vp check` runs tsgolint, which is a different pass    |
 | Run tests            | `vp run test` (never `vp test` — see the `quality-gate-workflow` skill)                |
 | Full validation      | The canonical quality gate — see [Post-Change Quality Gate](#post-change-quality-gate) |
 | Add a package        | `vp add <package>`                                                                     |
@@ -126,27 +147,40 @@ Selection guideline:
 
 Root scripts are **orchestration only** — anything project-specific lives in that project's own package.json. The `<task>:all` family fans out recursively in workspace dependency order.
 
-| Task                                     | Command                                                |
-| ---------------------------------------- | ------------------------------------------------------ |
-| Verify everything is ready               | `vp run ready`                                         |
-| Run all tests (every workspace)          | `vp run test:all`                                      |
-| Build all workspaces                     | `vp run build:all`                                     |
-| Lint everything WITH fix (oxlint+eslint) | `vp run lint:all`                                      |
-| Regenerate lint JSON reports             | `vp run lint:report`                                   |
-| Merge coverage for the fallow gate       | `vp run coverage:merge`                                |
-| Format everything                        | `vp run format:all`                                    |
-| Typegen (both React Router apps)         | `vp run typegen:all`                                   |
-| Full gate (typegen+check+tests)          | `vp run check:safe`                                    |
-| Dev servers (frontend + express api)     | `vp run dev` (`dev:fast` = fastify, `dev:cqms` = CQMS) |
-| Prod servers (frontend + express api)    | `vp run start` (`start:fast`, `start:cqms`)            |
+**Full list: [COMMANDS.md §4](COMMANDS.md#4-root-orchestration-scripts).** The
+policy that governs them:
 
 There is deliberately **no `start:all`/`dev:all`**: `car-sales-api` and `car-sales-api-fast` are performance-comparison alternatives serving the same domain and must never run at the same time — always pick one combo.
 
-**Both linters run in every workspace.** Oxlint (`vp lint`) covers the whole tree from the root; the eslint pass (`vp run lint:eslint` / `lint:eslint:check`) exists in all 15 workspaces — React workspaces use `@repo/vite-configs/eslint-custom-rules`, node/library workspaces use `@repo/vite-configs/eslint-base-custom-rules` (same stack minus React/StyleX, and without `clean-import-paths`, which strips the import extensions node-resolution code requires). Inherited eslint violations are baselined per workspace in `eslint-suppressions.json` (ESLint bulk suppressions) — **new violations fail the gate**; burn debt down and shrink the baseline with `npx eslint . --config eslint.config.mjs --prune-suppressions`. Never add new entries by hand, and never inline-`// eslint-disable`/`oxlint-disable` a finding or switch the rule off in config — **verify, then fix the code instead** (see Non-Negotiable Rule 11). A lint finding is real until you've read the flagged code and confirmed otherwise; stylistic `unicorn/*` rules (e.g. `prefer-simple-condition-first`, `no-nested-ternary`) get fixed by restructuring, never silenced. **Exception: `packages/ui` is never silenced** — it must not carry an `eslint-suppressions.json` at all; every finding there gets fixed, never baselined or disabled.
+**`vp check` type-checks, but it is not `tsc` — both run, and `typecheck:all` is the authority.** `vp check`'s type pass is **tsgolint** (Oxlint's type-aware path, enabled by `lint.options.typeCheck` in the root `vite.config.ts`), and it does resolve each workspace's own strict `tsconfig.app.json` — `strict`, `noUncheckedIndexedAccess` and `noUnusedLocals` all fire under it. What it does **not** do is run the per-workspace `typecheck` scripts, and those carry work no linter replicates: `packages/ui` gates its public API against server-only `node:*` imports (`check:public-api`), and both React Router apps regenerate route types first. Every one of the 16 workspaces now has a `typecheck` script, CI runs `vp run typecheck:all` as its own step in `check-safe.yml`, and `check:safe` chains it. Keep the two passes in sync: a new workspace gets a `typecheck` script **and** a tsconfig, or it silently falls back to the near-empty root `tsconfig.json` and is checked far more loosely than every other workspace (this is exactly how `utils`/`plugins`/`vite-configs` went un-strict for so long — `noUncheckedIndexedAccess` never fired there).
 
-**Lint JSON reports** follow the fallow output convention: `vp run lint:report` (script: `scripts/generate-lint-reports.mjs`, supports `--only=eslint|oxlint`) regenerates `reports/oxlint/full-latest.json` (one repo-wide `vp lint . --format=json` run) and `reports/eslint/full-latest.json` (the standard eslint `--format json` result array merged across all 15 workspaces, repo-relative paths). Both are tracked. ESLint runs in check mode — regenerating a report never mutates sources — and the baselined debt is visible per file in each entry's `suppressedMessages`, so the report is the place to inspect what the suppressions actually cover.
+**tsconfigs are generated — never hand-edit them.** `packages/ts-configs/generate.ts` + `tsconfig.shared.ts` are the source of truth for every `tsconfig.app.json`/`tsconfig.node.json`; run `vp run --filter @repo/ts-configs generate` after changing either. A hand-edit survives exactly until the next unrelated regeneration silently reverts it — the `@repo/ui` bare-specifier alias in both apps was lost this way and had to be folded back into the generator. If a config needs something bespoke, add it to the generator entry, not to the JSON.
+
+**Three linters run, and none of them is `vp check`.** Oxlint (`vp lint`) covers the whole tree from the root; the eslint pass (`vp run lint:eslint` / `lint:eslint:check`) exists in all 16 workspaces — React workspaces use `@repo/vite-configs/eslint-custom-rules`, node/library workspaces use `@repo/vite-configs/eslint-base-custom-rules` (same stack minus React/StyleX, and without `clean-import-paths`, which strips the import extensions node-resolution code requires). Inherited eslint violations are baselined per workspace in `eslint-suppressions.json` (ESLint bulk suppressions) — **new violations fail the gate**: CI runs `vp run -r lint:eslint:check` as its own step in `check-safe.yml`, because `vp check` covers only fmt + Oxlint + the tsgolint type pass and would let every eslint-only finding through. Burn debt down and shrink the baseline with `npx eslint . --config eslint.config.mjs --prune-suppressions`. Never add new entries by hand, and never inline-`// eslint-disable`/`oxlint-disable` a finding or switch the rule off in config — **verify, then fix the code instead** (see Non-Negotiable Rule 11). A lint finding is real until you've read the flagged code and confirmed otherwise; stylistic `unicorn/*` rules (e.g. `prefer-simple-condition-first`, `no-nested-ternary`) get fixed by restructuring, never silenced. **Exception: `packages/ui` is never silenced** — it must not carry an `eslint-suppressions.json` at all; every finding there gets fixed, never baselined or disabled.
+
+**Biome is the third linter** (`vp run lint:biome:check`, CI step in `check-safe.yml` after the eslint pass, and a pre-commit `staged` entry in the root `vite.config.ts`). It is configured **once at the root** in `biome.jsonc` and runs one repo-wide pass — like Oxlint, unlike the per-workspace eslint fan-out. Do not add per-workspace `biome.jsonc` files or `lint:biome` scripts; `overrides` already scope per project. Full rationale — including why it is lint-only and why it is not a CQMS scanner — is in [ADR-035](docs/cqms/decisions/ADR-035-biome-third-linter.md). Four constraints hold it in place:
+
+- **Formatter and assist are OFF** (`formatter.enabled: false`, `assist.enabled: false`). Oxfmt owns formatting and eslint-perfectionist owns import order. Turning either on restarts the formatter/linter fight that the `eslint-suppressions.json` ignore rule already had to settle once.
+- **Domains are scoped per project, not global.** The `react` domain is enabled in an `overrides` entry covering only the three React workspaces (`apps/react-router`, `apps/admin_system`, `packages/ui`) — enabling it globally would apply React rules to the Express/Fastify/node workspaces. `test` is scoped to test files; `project` runs repo-wide. Both add zero findings today and exist to guard future code.
+- **`domains: { react: "recommended" }` does NOT enable every react rule** — this is the trap. `noNestedComponentDefinitions` and `noDuplicatedSpreadProps` are react-domain rules that fire only under `"all"` or when listed explicitly, so they are pinned by name at `error` in the same override (`noDuplicatedSpreadProps` also defaults to `warn`, which would not fail the gate). Verify any new rule with a deliberate violation before trusting a green run: a rule that is off reports the same clean pass as code that is correct.
+- **Do not adopt `domains: { react: "all" }`.** It adds ~180 findings that contradict this repo's own ADRs — `noJsxPropsBind`/`noLeakedRender` vs ADR-004 (React Compiler owns memoization) and `useComponentExportOnlyModules` vs ADR-007 (barrel exports).
+- **The config is `biome.jsonc`, not `biome.json`, and that is load-bearing.** Biome's config parser rejects `//` comments in a `.json` file — and it does not fail loudly: it **discards the entire config and silently falls back to defaults**, which lints `node_modules` and reports tens of thousands of findings (or, on a single file, a plausible-looking count with your `overrides` quietly not applied). Every rule scoped off here needs its reason next to it, so the file must stay `.jsonc`. If Biome ever starts reporting absurd counts or ignoring an override, suspect a config parse error first: `biome lint <file> 2>&1 | grep parse`.
+
+Six rules are scoped off in `overrides`, each with its reason inline — all six are cases where Biome is wrong, not where the code is (`noThenProperty`, `useExhaustiveDependencies`, `noAriaHiddenOnFocusable`, `noNoninteractiveTabindex`, `useSemanticElements`, `noStaticElementInteractions`). **ADR-035 §5 is the table** listing each with its justification; read it before adding a seventh, and match that bar. Four of the six are Biome mismodelling an ARIA pattern the code implements correctly (window splitter, APG tabs panel, non-grid table row, conditional tooltip role).
+
+**Prefer a rule option over a scope-off.** An option keeps the rule live everywhere else; a scope-off blinds it for a whole file. `noLabelWithoutControl` is the worked example: a `<label>` wrapping the `Checkbox` _component_ is correct HTML — Biome just cannot see through the component boundary — so `inputComponents: ["Checkbox"]` teaches it the name instead of disabling it, and a bare `<label>` with no control still fails. Add future input-rendering components to that list.
+
+**Biome conflicts with eslint on how to return "nothing" from a `map` callback.** `useIterableCallbackReturn` demands a returned value, while `unicorn/no-null` bans `null` and `unicorn/no-useless-undefined` bans `undefined` — all three spellings fail one linter or the other. Restructure instead: `filter` the empty cases out before the `map`, so the callback always returns an element (`NotificationCenter.component.tsx` is the worked example). The same pairing bites nullish checks: `== undefined` trips Biome's `noDoubleEquals` and `== null` trips `unicorn/no-null`, so lean on arrays/objects always being truthy (`merge-arrays.util.ts`).
+
+Rule 11 applies to Biome exactly as it does to the other two: no `// biome-ignore`, no rule-off to dodge a real finding, and nothing baselined in `packages/ui`.
+
+**Lint JSON reports** follow the fallow output convention: `vp run lint:report` (script: `scripts/generate-lint-reports.mjs`, supports `--only=biome|eslint|oxlint`) regenerates `reports/oxlint/full-latest.json` (one repo-wide `vp lint . --format=json` run), `reports/eslint/full-latest.json` (the standard eslint `--format json` result array merged across all 16 workspaces, repo-relative paths), and `reports/biome/full-latest.json` (one repo-wide `biome lint . --reporter=json` run — root-only, mirroring the gate, since `biome.jsonc`'s `overrides` already scope the react domain and there is nothing to fan out). All three are tracked. ESLint runs in check mode — regenerating a report never mutates sources — and the baselined debt is visible per file in each entry's `suppressedMessages`, so the report is the place to inspect what the suppressions actually cover.
 
 Known constraint: `scan-orchestrator`'s queue integration test shares the local CQMS Postgres queue — while `vp run dev:cqms` is running, the live orchestrator races the test for queued scans and `vp run test:all` can flake on `runQueuedScan.test.ts` (duplicate `reports_scan_id_key`). Stop the CQMS dev session before a full test run, or treat that single failure as environmental.
+
+**`test:all` vs `test:ci`.** `test:all` runs every workspace and needs a database. CI has no Postgres, so its unit-tests job runs `vp run test:ci`, which is every DB-free suite in the repo: each workspace's `test`, except that `@repo/scan-ingestion` and `@repo/scan-orchestrator` contribute their DB-free `test:unit` subsets (their full `test` tasks stay real-Postgres, so `test:all` still covers everything), and `vite-react-compiler` runs last via its own `test:ci` so the coverage summary the PR comment reads is the fresh one. Run `vp run test:ci` before pushing if you don't have a DB up.
+
+**A workspace with real-Postgres tests must split them**, the way `scan-ingestion` and `scan-orchestrator` do: keep the full suite as `test`, and expose a `test:unit` (plus `test:coverage`) that `--exclude`s the DB-bound files. Without the split the whole workspace has to be dropped from `test:ci`, which silently takes its pure tests with it.
 
 ### Fallow Static Analysis (run from repo root)
 
@@ -166,30 +200,20 @@ Fallow is configured once at the repo root (`.fallowrc.json`) and auto-detects e
 
 Sole exception: CQMS UI-triggered scans run by `apps/scan-orchestrator` use their own `.tmp/scan-orchestrator/<scan_id>/` workspace — their results land in the CQMS database, not the filesystem.
 
-| Task                                  | Command                                                                      |
-| ------------------------------------- | ---------------------------------------------------------------------------- |
-| Full scan (dead code, dupes, health)  | `vp run fallow:full`                                                         |
-| Dead code only                        | `vp run fallow:dead-code`                                                    |
-| Complexity/health report              | `vp run fallow:health`                                                       |
-| Duplication report                    | `vp run fallow:dupes`                                                        |
-| PR-style gate vs main (run before PR) | `vp run fallow:audit --base main`                                            |
-| Refresh complexity threshold report   | `vp run fallow:refresh-report` (optionally `<workspace-glob>` and `--top=N`) |
+The commands live in [COMMANDS.md §4 → Fallow](COMMANDS.md#fallow-static-analysis).
+Before a PR, run `vp run fallow:audit --base main`. The policy:
 
 CI runs `fallow audit --gate new-only` on every PR (`check-safe.yml`) — it fails only on newly-introduced dead code, complexity, or duplication; inherited debt is covered by baselines in `reports/fallow/baselines/`.
 
 **Always feed the audit real coverage** (`--coverage reports/fallow/coverage/coverage-final.json`, produced by `vp run coverage:merge`; the CI job does this for you). Fallow scores CRAP as `cyclomatic² × (1 − coverage)³ + cyclomatic` against a threshold of **30**, and with no coverage data it _estimates_ coverage from whether a colocated test file merely exists (`none` → 0%, `partial` → 40%, `high` → 85%). At an estimated 0%, **every function with cyclomatic ≥ 5 breaches the threshold** — so an unfed audit reports trivially simple code (`login.action.ts`, cyclomatic 5 / cognitive 2) as `critical`. When triaging a complexity finding, read its **`exceeded`** field, not `severity`: `crap` alone means "untested", while `all`/`cognitive` means genuinely complex. `coverage_source: "mixed"` is expected — files with no tests at all have nothing to measure and still fall back to the estimate.
 
-`vp run coverage:merge` (`scripts/merge-coverage.mjs`) runs `test:coverage` in the **DB-free** workspaces only and merges their reports. Coverage must never require Postgres: the first attempt at this lever was reverted (2026-07-14) because it ran scan-ingestion's `queries/*` suites in CI, where `getPool()` → `readEnvConfig()` throws on the missing `DB_*`. That is why `@repo/scan-ingestion` splits `test` (full, needs a DB) from `test:unit` / `test:coverage` (DB-free subset).
+`vp run coverage:merge` (`scripts/merge-coverage.mjs`) runs `test:coverage` in the **DB-free** workspaces only (`data-access`, `node-runtime`, `scan-ingestion`, `ui`, `admin_system`, `scan-orchestrator`) and merges their reports. Coverage must never require Postgres: the first attempt at this lever was reverted (2026-07-14) because it ran scan-ingestion's `queries/*` suites in CI, where `getPool()` → `readEnvConfig()` throws on the missing `DB_*`. That is why `@repo/scan-ingestion` splits `test` (full, needs a DB) from `test:unit` / `test:coverage` (DB-free subset).
 
 ### Local Database Workflow (run from repo root)
 
-| Task                     | Command                                                              |
-| ------------------------ | -------------------------------------------------------------------- |
-| Start local PostgreSQL   | `vp run db:up`                                                       |
-| Check DB status          | `vp run db:status`                                                   |
-| Seed data                | `vp run --filter car-sales-api seed` (or `vp run seed` from the app) |
-| Start + seed in one step | `vp run --filter car-sales-api db:seed`                              |
-| Stop local PostgreSQL    | `vp run db:down`                                                     |
+Commands: [COMMANDS.md §4 → Database](COMMANDS.md#database). `vp run db:up` starts
+local Postgres; seeding goes through `vp run --filter car-sales-api seed`, because
+`seed`/`db:seed` are **api-server scripts, not root scripts**.
 
 The API server (`apps/api-server/`) reads env from `docker/local/.env`. The frontend proxies `/api` to `http://localhost:3001`.
 
@@ -244,7 +268,7 @@ Before making **any** code change, read every `ARCHITECTURE.md` that covers the 
 - Parent directories if the change crosses boundaries (e.g. `src/hooks/ARCHITECTURE.md`)
 - Shared type files (`src/types/ARCHITECTURE.md`) when filter or UI types are involved
 - `src/components/PATTERNS.md` — always read this before creating or modifying any component; it defines naming conventions, StyleX composition order, the drawer-section pattern, filter contract, context+store pattern, and props-forwarding rules
-- `docs/decisions/` — read the relevant ADR(s) before working in an area they cover: Modal → ADR-001, Tooltip → ADR-002, store → ADR-003, memoization/React Compiler → ADR-004, styling → ADR-005, infinite-scroll prefetch → ADR-006, barrel-export boundaries → ADR-007, primary-key sort tiebreaker / columns-derived id → ADR-008, filter-options fetch descriptors → ADR-009
+- `docs/decisions/` — read the relevant ADR(s) before working in an area they cover: Modal → ADR-001, Tooltip → ADR-002, store → ADR-003, memoization/React Compiler → ADR-004, styling → ADR-005, infinite-scroll prefetch → ADR-006, barrel-export boundaries → ADR-007, primary-key sort tiebreaker / columns-derived id → ADR-008, filter-options fetch descriptors → ADR-009, cookie persistence via `/_action/persist-cookie` → ADR-010
 
 If no `ARCHITECTURE.md` exists yet for the area you are changing, create one **before** implementing.
 
@@ -263,11 +287,22 @@ When in doubt: a codebase with 18 components and 25 utilities that each do one t
 The canonical validation sequence is owned by the **`quality-gate-workflow` skill** — invoke it after every code change. In short (run from `apps/react-router/`, in order, fix failures before proceeding):
 
 ```bash
-vp fmt .        # 1. auto-format (Oxfmt)
-vp lint .       # 2. lint (Oxlint) — fix all reported issues (use --fix first)
-vp check        # 3. TypeScript type-check — zero errors required
-vp run test     # 4. unit/integration tests — all must pass (never `vp test`)
+vp fmt .                    # 1. auto-format (Oxfmt)
+vp lint .                   # 2. lint (Oxlint) — fix all reported issues (use --fix first)
+vp run lint:eslint:check    # 3. eslint custom-rules pass — NOT covered by `vp check` (autofix: `vp run lint:eslint`)
+vp run lint:biome:check     # 4. Biome pass — NOT covered by `vp check`; run from the ROOT (autofix: `vp run lint:biome`)
+vp check                    # 5. fmt + Oxlint + tsgolint type pass — zero errors required
+vp run typecheck            # 6. real tsc for this workspace — NOT the same pass as step 5
+vp run test                 # 7. unit/integration tests — all must pass (never `vp test`)
 ```
+
+Steps 3, 4 and 6 are the ones that get skipped, and none is redundant:
+
+- **Step 3** — `vp check` is Vite+'s built-in fmt + **Oxlint** + tsgolint and never runs the eslint pass, so `perfectionist` import/module ordering, the react/stylex rule sets, and `local-rules` surface only there.
+- **Step 4** — `vp check` does not run Biome either. Unlike the other two linters this is a **root-only, repo-wide** pass; there is no per-workspace `lint:biome` script, because `biome.jsonc`'s `overrides` already scope the react domain to the three React workspaces.
+- **Step 6** — `vp check`'s type pass is tsgolint, not `tsc`, and it knows nothing about the workspace's `typecheck` script. In `packages/ui` that script is also what runs `check:public-api` (the server-only `node:*` import guard); in the React Router apps it regenerates route types first.
+
+From the repo root, `vp run typecheck:all` covers all 16 workspaces in dependency order, and `vp run check:safe` chains the whole gate the way CI does. While iterating, `vp run lint` in a workspace chains both lint autofixes (`vp lint . --fix` then `vp run lint:eslint`) and is the fastest loop.
 
 ### Documentation Update Rule
 
@@ -299,6 +334,6 @@ Docs are local at `node_modules/vite-plus/docs` or online at https://viteplus.de
 ## Review Checklist
 
 - [ ] Run `vp install` after pulling remote changes and before getting started.
-- [ ] Run the quality gate (`vp fmt .`, `vp lint .`, `vp check`, `vp run test`) to format, lint, type check and test changes.
+- [ ] Run the quality gate (`vp fmt .`, `vp lint .`, `vp run lint:eslint:check`, `vp run lint:biome:check` from the root, `vp check`, `vp run typecheck`, `vp run test`) to format, lint, type check and test changes.
 - [ ] Check if there are `vite.config.ts` tasks or `package.json` scripts necessary for validation, run via `vp run <script>`.
 - [ ] If setup, runtime, or package-manager behavior looks wrong, run `vp env doctor` and include its output when asking for help.

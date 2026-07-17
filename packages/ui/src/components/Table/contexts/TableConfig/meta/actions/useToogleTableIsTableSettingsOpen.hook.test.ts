@@ -35,6 +35,10 @@ vi.mock('../../useTableConfigContextValue.hook', () => ({
   useTableConfigContextValue: mockUseTableConfigContextValue,
 }));
 
+vi.mock('./usePersistTableUiFlagsAction.hook', () => ({
+  usePersistTableUiFlagsAction: () => vi.fn(),
+}));
+
 describe('table settings toggle hooks', () => {
   beforeEach(() => {
     setMetaState({

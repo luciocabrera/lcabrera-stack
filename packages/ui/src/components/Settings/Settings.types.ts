@@ -1,3 +1,4 @@
+import type { useGetGlobalNavigationPreferences } from '@repo/ui/contexts/GlobalSettingsContext/selectors';
 import type {
   GlobalNavigationCollapsedPreference,
   GlobalNavigationPinnedPreference,
@@ -9,8 +10,6 @@ import type {
   PinSidePreferenceOption,
   UnpinConflictResolutionPreferenceOption,
 } from '@repo/ui/types/pinningPreferences.types';
-
-import { useGetGlobalNavigationPreferences } from '@repo/ui/contexts/GlobalSettingsContext/selectors';
 
 export type BuildNavigationUpdateArgs = {
   readonly draft: SettingsDraft;

@@ -6,6 +6,7 @@ import { getInitialValues } from './getInitialValues.util';
 
 type Values = {
   readonly accepted: boolean;
+  readonly amount: number | undefined;
   readonly name: string;
   readonly tags: string[];
 };
@@ -13,6 +14,7 @@ type Values = {
 const leafFields: readonly LeafFieldDef<Values>[] = [
   { accessor: 'name', label: 'Name', type: 'text' },
   { accessor: 'accepted', label: 'Accepted', type: 'boolean' },
+  { accessor: 'amount', label: 'Amount', type: 'number' },
   {
     accessor: 'tags',
     label: 'Tags',
@@ -48,5 +50,24 @@ describe('getInitialValues', () => {
     const values = getInitialValues<Values>({ leafFields });
 
     expect(values.name).toBe('');
+  });
+
+  // A number field stores `undefined` when cleared. Seeding `''` here made an
+  // untouched-then-cleared field compare unequal to its initial value, leaving
+  // the form permanently dirty.
+  it('defaults number fields to undefined, matching what a cleared field stores', () => {
+    const values = getInitialValues<Values>({ leafFields });
+
+    expect(values.amount).toBeUndefined();
+    expect('amount' in values).toBe(true);
+  });
+
+  it('keeps a provided number value, including 0', () => {
+    const values = getInitialValues<Values>({
+      initialValues: { amount: 0 },
+      leafFields,
+    });
+
+    expect(values.amount).toBe(0);
   });
 });

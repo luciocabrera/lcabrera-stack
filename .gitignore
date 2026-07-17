@@ -25,15 +25,20 @@ coverage/
 *.sln
 *.sw?
 node_modules/
-docker/.env
 docker/pgpass
-docker/local/.env
 docker/local/pgpass
 
+# Env files are local-only, anywhere in the tree — only `.env.example`
+# templates are tracked (AGENTS.md § Security: never commit .env files or
+# credentials). These patterns are deliberately path-less so they cover every
+# workspace: the previous per-path list left the repo root and most of
+# packages/* uncovered, and `apps/api-server/.env` still reached git carrying
+# a DB_PASSWORD.
+.env
+.env.*
+!.env.example
+
 packages/eslint-local-rules/build/
-apps/api-server/.env
-apps/scan-orchestrator/.env
-.claudelint-cache/
 
 # Fallow per-run artifacts (canonical root: reports/fallow/ — see AGENTS.md)
 reports/fallow/runs/

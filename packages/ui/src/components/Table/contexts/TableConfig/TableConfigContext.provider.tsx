@@ -3,7 +3,6 @@ import type {
   TableMetaState,
 } from '@repo/ui/components/Table/Table.types';
 
-import { readPersistedUiStateFromSessionStorage } from '@repo/ui/components/Table/utils';
 import { useStore } from '@repo/ui/hooks';
 
 import type {
@@ -21,18 +20,11 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
 }: TableConfigProviderProps<TData>) => {
   const normalizedColumnsState = getInitialColumnsState<TData>({
     ...columnsState,
-    appId: metaState?.appId,
     crud: metaState?.crud,
-    persistenceKey: metaState?.persistenceKey ?? '',
   });
-  const persistedUiState = readPersistedUiStateFromSessionStorage({
-    appId: metaState?.appId,
-    persistenceKey: metaState?.persistenceKey ?? '',
-  });
-  const normalizedMetaState = getInitialMetaState({
-    ...metaState,
-    persistedUiState,
-  });
+  // Both stores seed purely from the loader's cookie-derived state, so the
+  // client renders exactly what the server did — see getInitialColumnsState.
+  const normalizedMetaState = getInitialMetaState({ ...metaState });
 
   const columnsStore = useStore<TableColumnsState<TData>>(
     normalizedColumnsState,

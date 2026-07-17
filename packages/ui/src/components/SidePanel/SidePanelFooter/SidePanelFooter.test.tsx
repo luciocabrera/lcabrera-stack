@@ -9,7 +9,7 @@ describe('SidePanelFooter', () => {
   it("renders children inside a div with data-testid='side-panel-footer'", () => {
     render(
       <SidePanelFooter>
-        <button>Save</button>
+        <button type='button'>Save</button>
       </SidePanelFooter>,
     );
 

@@ -4,7 +4,7 @@
  * Enforces: import type { X } from 'module'
  */
 
-import type { TSESTree } from '@typescript-eslint/utils';
+import type { TSESLint, TSESTree } from '@typescript-eslint/utils';
 
 import { ESLintUtils } from '@typescript-eslint/utils';
 
@@ -26,6 +26,38 @@ const isImportSpecifier = (
 ): specifier is TSESTree.ImportSpecifier =>
   specifier.type === 'ImportSpecifier';
 
+type BuildTypeImportTextArgs = {
+  readonly node: TSESTree.ImportDeclaration;
+  readonly sourceCode: Readonly<TSESLint.SourceCode>;
+};
+
+/**
+ * Renders the `import type { ... } from '...'` replacement for a declaration,
+ * dropping every inline `type` keyword while keeping each specifier (and any
+ * `as` alias) in source order.
+ *
+ * An ImportDeclaration's range covers its trailing semicolon, so replacing the
+ * node wholesale silently drops one. The semicolon is mirrored from the source
+ * rather than always emitted: punctuation style belongs to Oxfmt, and a fixer
+ * that imposes its own is how a linter/formatter fight starts.
+ */
+const buildTypeImportText = ({ node, sourceCode }: BuildTypeImportTextArgs) => {
+  const importedNames = node.specifiers
+    .filter(isImportSpecifier)
+    .map((specifier) => {
+      const importedName = getImportedName(specifier.imported);
+      return importedName === specifier.local.name
+        ? importedName
+        : `${importedName} as ${specifier.local.name}`;
+    })
+    .join(', ');
+
+  const fromClause = sourceCode.getText(node.source);
+  const semicolon = sourceCode.getText(node).endsWith(';') ? ';' : '';
+
+  return `import type { ${importedNames} } from ${fromClause}${semicolon}`;
+};
+
 export default createRule({
   create(context) {
     return {
@@ -44,30 +76,11 @@ export default createRule({
 
             context.report({
               data: { names: redundantNames },
-              fix(fixer) {
-                const sourceCode = context.sourceCode;
-
-                // Build the fixed import by removing inline 'type' keywords
-                const importedNames = node.specifiers
-                  .map((specifier) => {
-                    if (specifier.type !== 'ImportSpecifier') return;
-
-                    const importedName = getImportedName(specifier.imported);
-                    return importedName === specifier.local.name
-                      ? importedName
-                      : `${importedName} as ${specifier.local.name}`;
-                  })
-                  .filter(
-                    (name: string | undefined): name is string =>
-                      name !== undefined,
-                  )
-                  .join(', ');
-
-                const fromClause = sourceCode.getText(node.source);
-                const newImport = `import type { ${importedNames} } from ${fromClause}`;
-
-                return fixer.replaceText(node, newImport);
-              },
+              fix: (fixer) =>
+                fixer.replaceText(
+                  node,
+                  buildTypeImportText({ node, sourceCode: context.sourceCode }),
+                ),
               messageId: 'redundantInlineType',
               node,
             });
@@ -100,24 +113,11 @@ export default createRule({
 
         context.report({
           data: { names },
-          fix(fixer) {
-            const sourceCode = context.sourceCode;
-
-            const importedNames = node.specifiers
-              .filter(isImportSpecifier)
-              .map((specifier) => {
-                const importedName = getImportedName(specifier.imported);
-                return importedName === specifier.local.name
-                  ? importedName
-                  : `${importedName} as ${specifier.local.name}`;
-              })
-              .join(', ');
-
-            const fromClause = sourceCode.getText(node.source);
-            const newImport = `import type { ${importedNames} } from ${fromClause}`;
-
-            return fixer.replaceText(node, newImport);
-          },
+          fix: (fixer) =>
+            fixer.replaceText(
+              node,
+              buildTypeImportText({ node, sourceCode: context.sourceCode }),
+            ),
           messageId: 'noInlineTypeImport',
           node,
         });

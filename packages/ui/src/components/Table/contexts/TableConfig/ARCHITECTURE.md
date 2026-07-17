@@ -15,26 +15,32 @@ TableConfig/
 ├── index.ts                                 → Barrel: TableConfigProvider, hooks
 │
 ├── columns/                                 → Column-related store, actions, selectors
-│   ├── useColumnsStore.hook.ts              → useSyncExternalStore + selector
+│   ├── useColumnsStore.hook.ts              → Resolves the config columnsStore, delegates to useStoreSelector
 │   │
-│   ├── actions/
+│   ├── actions/                                 → Public API: every hook here is an executable action, all barrel-exported
+│   │   ├── hooks/                               → Internal to actions/ — shared hooks, never barrel-exported
+│   │   │   ├── usePersistTableStateAction.hook.ts → Cookie persistence (server action) used by six actions
+│   │   │   └── usePersistColumnSizingAction.hook.ts → Reads the store + submits the current widths via usePersistCookieAction (server action)
 │   │   ├── utils/buildPersistencePayload.util.ts       → Shared persistence-entry builder for batch settings hooks
 │   │   ├── utils/resolveBatchColumnSettingsUpdate.util.ts → Build next derived column config slices for one batch column update
 │   │   ├── utils/resolveBatchTableSettingsUpdate.util.ts → Build next derived column config slices for one table-wide settings update
 │   │   ├── utils/commitPinningAndOrderUpdate.util.ts → Shared persist+store commit helper for pinning actions
 │   │   ├── utils/commitResolvedVisibilityState.util.ts → Shared persist+store commit helper for visibility actions
+│   │   ├── utils/buildColumnSizingCookieEntry.util.ts → Pure: build the columnSizing cookie entry (serialize widths, scoped by appId + persistenceKey)
 │   │   ├── utils/resolveColumnPinningUpdate.util.ts  → Build next pinning state + synced order for one pinning change
 │   │   ├── utils/resolveColumnSizingUpdate.util.ts   → Build next sizing map + pinned offsets for one column resize
 │   │   ├── utils/resolveColumnVisibilityUpdate.util.ts → Build next columnVisibility Set for one column show/hide
+│   │   ├── utils/writeColumnSizing.util.ts       → Shared: write one column's width + recompute pinned offsets
 │   │   ├── useBatchSetColumnSettings.hook.ts    → Bulk-update multiple column fields
 │   │   ├── useBatchSetTableSettings.hook.ts     → Push settings from drawer → store
 │   │   ├── useResetColumnFilter.hook.ts         → Clear filter for one column
 │   │   ├── useSetColumnFilter.hook.ts           → Set filter for one column
 │   │   ├── useSetColumnPinning.hook.ts          → Set pinning state
-│   │   ├── useSetColumnSizing.hook.ts           → Set column widths
+│   │   ├── useSetColumnSizing.hook.ts           → Set a column width and persist it
+│   │   ├── useSetColumnSizingWithoutSync.hook.ts → Set a column width, skip the cookie write (drag frames only)
 │   │   ├── useSetColumnSorting.hook.ts          → Set sorting state
 │   │   ├── useSetColumnVisibility.hook.ts       → Show/hide a single column directly on the live store (not a drawer draft)
-│   │   └── useSyncColumnsSizing.hook.ts         → Sync sizing after layout changes
+│   │   └── useSyncColumnsSizing.hook.ts         → Persist the stored widths without changing any
 │   │
 │   └── selectors/
 │       ├── useGetColumnFilters.hook.ts          → All column filters
@@ -191,17 +197,18 @@ so SSR and the initial client render already agree on the seeded state.
 
 ## Columns Actions
 
-| Hook                        | Reads From     | Writes To      | Description                                                                                                                   |
-| --------------------------- | -------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `useBatchSetColumnSettings` | —              | `columnsStore` | Bulk-set multiple column fields at once                                                                                       |
-| `useBatchSetTableSettings`  | —              | `columnsStore` | Push all settings from TableSettingsDrawer                                                                                    |
-| `useResetColumnFilter`      | —              | `columnsStore` | Remove filter for a single column                                                                                             |
-| `useSetColumnFilter`        | —              | `columnsStore` | Set filter value for a single column                                                                                          |
-| `useSetColumnPinning`       | `columnsStore` | `columnsStore` | Update pinning, keep column order synced (including header unpin reorder-to-fill), and commit pinning/order via shared helper |
-| `useSetColumnSizing`        | `columnsStore` | `columnsStore` | Set column width map and recompute pinned offsets via shared sizing resolver                                                  |
-| `useSetColumnSorting`       | `columnsStore` | `columnsStore` | Toggle/set sort for a column                                                                                                  |
-| `useSetColumnVisibility`    | `columnsStore` | `columnsStore` | Show/hide a single column directly (quick-access affordance, e.g. the header actions menu) and commit via shared helper       |
-| `useSyncColumnsSizing`      | `columnsStore` | `columnsStore` | Recalculate sizing after layout shift                                                                                         |
+| Hook                            | Reads From     | Writes To      | Description                                                                                                                             |
+| ------------------------------- | -------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `useBatchSetColumnSettings`     | —              | `columnsStore` | Bulk-set multiple column fields at once                                                                                                 |
+| `useBatchSetTableSettings`      | —              | `columnsStore` | Push all settings from TableSettingsDrawer                                                                                              |
+| `useResetColumnFilter`          | —              | `columnsStore` | Remove filter for a single column                                                                                                       |
+| `useSetColumnFilter`            | —              | `columnsStore` | Set filter value for a single column                                                                                                    |
+| `useSetColumnPinning`           | `columnsStore` | `columnsStore` | Update pinning, keep column order synced (including header unpin reorder-to-fill), and commit pinning/order via shared helper           |
+| `useSetColumnSizing`            | `columnsStore` | `columnsStore` | Set column width map, recompute pinned offsets, and persist; the default for any completed resize, so callers never pair it with a sync |
+| `useSetColumnSizingWithoutSync` | `columnsStore` | `columnsStore` | The same store write with the cookie write omitted — **only** for `useColumnResize`'s per-frame drag updates; kept out of the barrel    |
+| `useSetColumnSorting`           | `columnsStore` | `columnsStore` | Toggle/set sort for a column                                                                                                            |
+| `useSetColumnVisibility`        | `columnsStore` | `columnsStore` | Show/hide a single column directly (quick-access affordance, e.g. the header actions menu) and commit via shared helper                 |
+| `useSyncColumnsSizing`          | `columnsStore` | `columnsStore` | Recalculate sizing after layout shift                                                                                                   |
 
 Direct mutation actions (`useSetColumnSorting`, `useSetColumnPinning`,
 `useSetColumnVisibility`) also bump
@@ -213,15 +220,118 @@ state aligned with source-of-truth column state.
 
 The two batch settings hooks now share two focused pure helpers instead of each inlining their derived-view and persistence-array construction.
 
-| Utility                            | Location                  | Purpose                                                                                |
-| ---------------------------------- | ------------------------- | -------------------------------------------------------------------------------------- |
-| `deriveColumnViewState`            | `components/Table/utils/` | Compose `normalizedColumns` with `getPinnedDerivedColumnsState()` output               |
-| `buildPersistencePayload`          | `columns/actions/utils/`  | Build the persistence entry array for batch settings updates                           |
-| `getColumnSettingsNextStatePatch`  | `components/Table/utils/` | Build the persisted meta patch after applying column settings                          |
-| `getHasQueryChanged`               | `components/Table/utils/` | Compare current vs next filters/sorting to decide whether query revalidation is needed |
-| `getIsTableSettingsOpen`           | `components/Table/utils/` | Restore the table-settings drawer when column settings borrowed its open state         |
-| `resolveBatchColumnSettingsUpdate` | `columns/actions/utils/`  | Compose the next per-column batch update from shared sort/filter/size/pin resolvers    |
-| `resolveBatchTableSettingsUpdate`  | `columns/actions/utils/`  | Compose the next table-wide settings update from incoming settings plus derived slices |
+| Utility                            | Location                  | Purpose                                                                                       |
+| ---------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------- |
+| `deriveColumnViewState`            | `components/Table/utils/` | Compose `normalizedColumns` with `getPinnedDerivedColumnsState()` output                      |
+| `buildPersistencePayload`          | `columns/actions/utils/`  | Build the persistence entry array for batch settings updates                                  |
+| `getColumnSettingsNextStatePatch`  | `components/Table/utils/` | Build the persisted meta patch after applying column settings                                 |
+| `getHasQueryChanged`               | `components/Table/utils/` | Compare current vs next filters/sorting to decide whether query revalidation is needed        |
+| `getIsTableSettingsOpen`           | `components/Table/utils/` | Restore the table-settings drawer when column settings borrowed its open state                |
+| `resolveBatchColumnSettingsUpdate` | `columns/actions/utils/`  | Compose the next per-column batch update from shared sort/filter/size/pin resolvers           |
+| `resolveBatchTableSettingsUpdate`  | `columns/actions/utils/`  | Compose the next table-wide settings update from incoming settings plus derived slices        |
+| `writeColumnSizing`                | `columns/actions/utils/`  | Write one column's width to the store and recompute pinned offsets                            |
+| `buildColumnSizingCookieEntry`     | `columns/actions/utils/`  | Pure: build the `columnSizing` cookie entry from the stored widths (the loader reads it back) |
+
+## How Actions Share Logic
+
+**An action never calls another action.** `actions/` is the public API of this
+context: each hook is an executable action, and every one of them is exported
+from `actions/index.ts`. Anything only used _inside_ that layer lives beside it
+instead — `actions/utils/` for pure helpers, `actions/hooks/` for shared hooks —
+and never appears in the barrel.
+
+Reusable logic is shared through those helpers, which take the stores (and any
+collaborator, like `persistTableState`) **as arguments** rather than reaching for
+context themselves. `commitResolvedPinningState` is the reference example; the
+three sizing actions follow it:
+
+| Action                          | Composition                                          |
+| ------------------------------- | ---------------------------------------------------- |
+| `useSetColumnSizing`            | `writeColumnSizing` + `usePersistColumnSizingAction` |
+| `useSetColumnSizingWithoutSync` | `writeColumnSizing`                                  |
+| `useSyncColumnsSizing`          | `usePersistColumnSizingAction`                       |
+
+Each grabs its stores from context once and delegates; none of them imports
+another action. That is what keeps `useSetColumnSizing` a single call for its
+consumers without stacking actions on top of one another.
+
+`usePersistTableStateAction` and `usePersistColumnSizingAction`
+(`actions/hooks/`) are the shared-hook cases: actions inside this context need
+them, nothing outside `actions/` does. `usePersistColumnSizingAction` reads the
+store and submits the current widths through `usePersistCookieAction`, so the
+three sizing actions compose it the same way six column actions compose
+`usePersistTableStateAction`. `usePersistTableStateAction` previously sat in
+`Table/hooks/`, which forced every action to import the hooks barrel and closed
+an `actions → hooks → actions` import cycle. Nothing under `contexts/` imports
+`Table/hooks/` now, so the dependency runs one way only and the cycle is
+structurally impossible rather than merely avoided.
+
+### Persistence — the cookie is the only channel
+
+Every persisted slice (`columnSizing`, `columnOrder`, `columnPinning`,
+`columnVisibility`, `sorting`, `columnFilters`, and the drawer's UI state) is
+written to a **cookie** and to nothing else:
+
+| Written by                     | Writes                     | Read back by                                         |
+| ------------------------------ | -------------------------- | ---------------------------------------------------- |
+| `usePersistTableStateAction`   | cookie (via server action) | the loader — `readTableLoaderStateFromRequest` (SSR) |
+| `usePersistColumnSizingAction` | cookie (via server action) | the loader — same                                    |
+| `usePersistTableUiFlagsAction` | cookie (via server action) | the loader — `readPersistedUiFlagsFromCookie`        |
+
+**Why one channel, not two.** The cookie is the only thing SSR can read, and both
+stores seed exclusively from what the loader passes down. So the server's markup
+and the client's first render are guaranteed to agree — a hydration mismatch is
+not merely avoided, it is unrepresentable.
+
+A second, client-only channel (sessionStorage) cannot be SSR'd by definition, so
+whatever it holds can only be applied _after_ the server's markup has painted.
+That is a layout shift by construction, and it was not hypothetical: the table
+used to read `columnSizing` and the drawer flags from sessionStorage and prefer
+them (`sessionState.columnSizing ?? columnSizing`), so any drift between the
+channels both **reverted** the user's change on reload and **shifted** the
+columns after the skeleton had already painted. Tab-scoped layout state and a
+shift-free first paint are mutually exclusive; this table chooses the latter.
+
+The consequence to accept: tables are **not** isolated per tab — two tabs share
+one cookie, and the last write wins.
+
+`PersistedUiState` therefore carries the _whole_ drawer state: open/pinned
+reserves the drawer's width, and the selected tab and expanded filters decide
+what is painted inside it. Anything omitted could not be SSR'd.
+
+Only `dataState` (the skeleton's cached rows) remains in sessionStorage. It is
+not layout: SSR paints blank placeholders either way, and the rows are a
+per-tab cache, not state the server could seed.
+
+### usePersistTableStateAction
+
+Persists column-oriented table state slices by submitting the cookie update
+through a React Router server action (Set-Cookie).
+
+```mermaid
+graph TD
+  Action["persistTableState(entries)"] --> Serialize["serializeStateSlice per entry"]
+  Serialize --> Check{"any entry too large?"}
+  Check -->|Yes| Warn["notify warning + abort"]
+  Check -->|No| Submit["fetcher.submit({ entries, currentUrl })"]
+  Submit --> Route["POST /_action/persist-cookie"]
+  Route --> Cookie["Set-Cookie response header"]
+  Route --> Decision{"search params changed?"}
+  Decision -->|Yes| Redirect["redirect(url) and route revalidation"]
+  Decision -->|No| NoRedirect["204 response without revalidation"]
+```
+
+Supports both single entries and batch submissions. Each entry specifies:
+
+- `persistenceKey` — cookie name namespace
+- `slice` — which state slice (columnFilters, sorting, etc.)
+- `valueSlice` — the data to persist
+- `searchParamKey/Value` — optional URL search param sync
+- Revalidation happens only when persisted `searchParamKey/Value` produce an
+  effective URL search-param change; otherwise the action returns `204` and
+  only cookie persistence occurs.
+- Oversized entries block the entire apply flow before URL sync or cookie persistence to avoid partial restored state
+- No-op when `persistenceKey` is empty
 
 ## Columns Selectors
 
@@ -245,9 +355,10 @@ The two batch settings hooks now share two focused pure helpers instead of each 
 ## Meta Actions
 
 Persisted meta UI fields are mutation-owned: each action that changes drawer UI
-state calls `persistTableMetaUiState()` before committing its
-`metaStore.set(...)` patch. This keeps sessionStorage aligned without a
-subscription effect in the provider.
+state submits the update through `usePersistTableUiFlagsAction()` (which POSTs to
+the `/_action/persist-cookie` server action for the `Set-Cookie`) before
+committing its `metaStore.set(...)` patch. This keeps the cookie aligned without
+a subscription effect in the provider.
 
 | Hook                                   | Writes To   | Description                                                                 |
 | -------------------------------------- | ----------- | --------------------------------------------------------------------------- |
@@ -264,29 +375,28 @@ subscription effect in the provider.
 
 ## Meta Selectors
 
-| Hook                                 | Returns                                                                | Description                             |
-| ------------------------------------ | ---------------------------------------------------------------------- | --------------------------------------- |
-| `useGetTableAdditionalMetadata`      | `Record<string, TableMetadataValue \| null \| undefined> \| undefined` | Optional custom metadata map            |
-| `useGetTableColumnSelectedKey`       | `string \| null`                                                       | Currently selected column key           |
-| `useGetTableDensity`                 | `TableDensity`                                                         | Table density setting                   |
-| `useGetTableDrawersSyncNonce`        | `number`                                                               | Drawer remount nonce for panel sync     |
-| `useGetTableEnablePrefetch`          | `boolean`                                                              | Whether prefetch buffer is active       |
-| `useGetTableInitialPageSize`         | `number`                                                               | Initial page row count                  |
-| `useGetTableIsBordered`              | `boolean`                                                              | Whether borders are shown               |
-| `useGetTableIsColumnSettingsOpen`    | `boolean`                                                              | Column settings drawer state            |
-| `useGetTableIsTableSettingsPinned`   | `boolean`                                                              | Table settings pinned state             |
-| `useGetTableIsStriped`               | `boolean`                                                              | Whether rows are striped                |
-| `useGetTableIsTableSettingsOpen`     | `boolean`                                                              | Table settings drawer state             |
-| `useGetTableLoadMorePageSize`        | `number`                                                               | Subsequent page row count               |
-| `useGetTableOverscan`                | `number`                                                               | Virtual scroll overscan count           |
-| `useGetTableAppId`                   | `string \| undefined`                                                  | App id used to namespace persisted keys |
-| `useGetTablePersistenceKey`          | `string`                                                               | Persistence key for URL/cookie sync     |
-| `useGetTablePlaceholderRowCount`     | `number`                                                               | Skeleton row count                      |
-| `useGetTableRowHeight`               | `number`                                                               | Row height in px                        |
-| `useGetTableSchemaName`              | `string \| undefined`                                                  | Optional schema name                    |
-| `useGetTableSettingsExpandedFilters` | `string[]`                                                             | Persisted expanded filter keys          |
-| `useGetTableSettingsSelectedTab`     | `string`                                                               | Persisted table settings tab key        |
-| `useGetTableTableName`               | `string \| undefined`                                                  | Optional table name                     |
-| `useGetTableThreshold`               | `number`                                                               | Fetch-more scroll threshold             |
-| `useGetTableTitlePlural`             | `string`                                                               | Plural table display title              |
-| `useGetTableTitleSingular`           | `string`                                                               | Singular table display title            |
+| Hook                                 | Returns                                                                | Description                         |
+| ------------------------------------ | ---------------------------------------------------------------------- | ----------------------------------- |
+| `useGetTableAdditionalMetadata`      | `Record<string, TableMetadataValue \| null \| undefined> \| undefined` | Optional custom metadata map        |
+| `useGetTableColumnSelectedKey`       | `string \| null`                                                       | Currently selected column key       |
+| `useGetTableDensity`                 | `TableDensity`                                                         | Table density setting               |
+| `useGetTableDrawersSyncNonce`        | `number`                                                               | Drawer remount nonce for panel sync |
+| `useGetTableEnablePrefetch`          | `boolean`                                                              | Whether prefetch buffer is active   |
+| `useGetTableInitialPageSize`         | `number`                                                               | Initial page row count              |
+| `useGetTableIsBordered`              | `boolean`                                                              | Whether borders are shown           |
+| `useGetTableIsColumnSettingsOpen`    | `boolean`                                                              | Column settings drawer state        |
+| `useGetTableIsTableSettingsPinned`   | `boolean`                                                              | Table settings pinned state         |
+| `useGetTableIsStriped`               | `boolean`                                                              | Whether rows are striped            |
+| `useGetTableIsTableSettingsOpen`     | `boolean`                                                              | Table settings drawer state         |
+| `useGetTableLoadMorePageSize`        | `number`                                                               | Subsequent page row count           |
+| `useGetTableOverscan`                | `number`                                                               | Virtual scroll overscan count       |
+| `useGetTablePersistenceKey`          | `string`                                                               | Persistence key for URL/cookie sync |
+| `useGetTablePlaceholderRowCount`     | `number`                                                               | Skeleton row count                  |
+| `useGetTableRowHeight`               | `number`                                                               | Row height in px                    |
+| `useGetTableSchemaName`              | `string \| undefined`                                                  | Optional schema name                |
+| `useGetTableSettingsExpandedFilters` | `string[]`                                                             | Persisted expanded filter keys      |
+| `useGetTableSettingsSelectedTab`     | `string`                                                               | Persisted table settings tab key    |
+| `useGetTableTableName`               | `string \| undefined`                                                  | Optional table name                 |
+| `useGetTableThreshold`               | `number`                                                               | Fetch-more scroll threshold         |
+| `useGetTableTitlePlural`             | `string`                                                               | Plural table display title          |
+| `useGetTableTitleSingular`           | `string`                                                               | Singular table display title        |

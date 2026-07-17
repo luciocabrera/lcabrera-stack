@@ -3,8 +3,8 @@ import type { ColumnFilter } from '@repo/ui/types/filterOperators.types';
 
 import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useTableDataContextValue } from '@repo/ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
-import { usePersistTableStateAction } from '@repo/ui/components/Table/hooks';
 
+import { usePersistTableStateAction } from './hooks/usePersistTableStateAction.hook';
 import { resolveColumnFilterUpdate } from './utils';
 
 type SetColumnFilterArgs<TData> = {

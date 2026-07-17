@@ -1,16 +1,10 @@
 import type { ThemeMode } from '@repo/ui/types/theme.types';
 
 import { PERSIST_COOKIE_ACTION } from '@repo/ui/constants/globalSettings.constants';
+import { buildPersistCookieEntry } from '@repo/ui/routing/buildPersistCookieEntry.util';
 import { getAppScopedCookieKey } from '@repo/ui/utils/storage';
 
 import { THEME_COOKIE_NAME } from './themeCookie.constants';
-
-type PersistThemeCookieEntry = {
-  readonly key: string;
-  readonly searchParamKey: string;
-  readonly searchParamValue: string;
-  readonly value: ThemeMode;
-};
 
 type SetThemeCookieArgs = {
   /**
@@ -22,6 +16,14 @@ type SetThemeCookieArgs = {
   readonly theme: ThemeMode;
 };
 
+/**
+ * Persist the theme through the same `/_action/persist-cookie` action every
+ * other cookie write uses, so the `Set-Cookie` comes from the server. Shares the
+ * `buildPersistCookieEntry` payload shape with `usePersistCookieAction`, but
+ * submits with a router-free `fetch` rather than the hook: the theme provider
+ * can render outside a data router (e.g. in isolated component tests), where a
+ * fetcher hook would throw.
+ */
 const persistThemeCookieServerSide = ({ appId, theme }: SetThemeCookieArgs) => {
   if (
     globalThis.fetch === undefined ||
@@ -32,13 +34,11 @@ const persistThemeCookieServerSide = ({ appId, theme }: SetThemeCookieArgs) => {
   }
 
   const currentUrl = `${globalThis.location.pathname}${globalThis.location.search}`;
-  const entries: readonly PersistThemeCookieEntry[] = [
-    {
+  const entries = [
+    buildPersistCookieEntry({
       key: getAppScopedCookieKey({ appId, key: THEME_COOKIE_NAME }),
-      searchParamKey: '',
-      searchParamValue: '',
       value: theme,
-    },
+    }),
   ];
 
   const formData = new FormData();

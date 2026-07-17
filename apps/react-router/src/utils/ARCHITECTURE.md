@@ -25,7 +25,7 @@ utils/
 ├── security/
 │   └── ARCHITECTURE.md      -> Security helpers (CSP nonce parsing)
 ├── storage/
-│   └── ARCHITECTURE.md      -> Cookie/localStorage read/write utilities
+│   └── ARCHITECTURE.md      -> SSR-safe cookie read + pure cookie-string helpers
 ├── theme/
 │   └── ARCHITECTURE.md      -> Theme cookie read/write helpers
 ├── typeGuards/
@@ -61,16 +61,16 @@ graph TD
 
 ## Subfolder Documentation
 
-| Folder        | Description                                                                                                                                   |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `api/`        | `getApiBaseUrl` — SSR/client-aware API base URL resolver                                                                                      |
-| `comparison/` | `areArraysEqual` for ordered array equality plus `shallowEqual` for one-level object comparison                                               |
-| `filters/`    | `createStaticFilterOptions` — static array → Table filter contract                                                                            |
-| `formatters/` | `formatDate`, `formatCurrency`, `formatNumber`, `parseDate`, etc.                                                                             |
-| `logger/`     | `createLogger`, `logger` — level-filtered, tree-shakeable app logging                                                                         |
-| `prefetch/`   | `resolveFromCacheOrFetch`, `firePrefetch` — generic prefetch cache resolution and ref-applied prefetch firing; _internal:_ `prefetchNextPage` |
-| `security/`   | `getRequestCspNonce` — standardized `x-csp-nonce` request header parser                                                                       |
-| `storage/`    | `readFromCookie`, `writeToCookie`, `writeToLocalStorage`; _internal:_ `parseCookies`                                                          |
-| `theme/`      | `getThemeFromCookie` (`getThemeFromCookie.util.ts`), `setThemeCookie` (`setThemeCookie.util.ts`)                                              |
-| `typeGuards/` | `isObject` — shared non-null object guard used by services and cookie/payload validators                                                      |
-| `urlState/`   | `encodeStateToURL`, `decodeStateFromURL`, `readTableStateFromURL`                                                                             |
+| Folder        | Description                                                                                                                                             |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `api/`        | `getApiBaseUrl` — SSR/client-aware API base URL resolver                                                                                                |
+| `comparison/` | `areArraysEqual` for ordered array equality plus `shallowEqual` for one-level object comparison                                                         |
+| `filters/`    | `createStaticFilterOptions` — static array → Table filter contract                                                                                      |
+| `formatters/` | `formatDate`, `formatCurrency`, `formatNumber`, `parseDate`, etc.                                                                                       |
+| `logger/`     | `createLogger`, `logger` — level-filtered, tree-shakeable app logging                                                                                   |
+| `prefetch/`   | `resolveFromCacheOrFetch`, `firePrefetch` — generic prefetch cache resolution and ref-applied prefetch firing; _internal:_ `prefetchNextPage`           |
+| `security/`   | `getRequestCspNonce` — standardized `x-csp-nonce` request header parser                                                                                 |
+| `storage/`    | `readFromCookie`; _internal:_ `parseCookies`, `buildCookieString`, `getAppScopedCookieKey` (client cookie **writes** moved to `usePersistCookieAction`) |
+| `theme/`      | `getThemeFromCookie` (`getThemeFromCookie.util.ts`), `setThemeCookie` (`setThemeCookie.util.ts`)                                                        |
+| `typeGuards/` | `isObject` — shared non-null object guard used by services and cookie/payload validators                                                                |
+| `urlState/`   | `encodeStateToURL`, `decodeStateFromURL`, `readTableStateFromURL`                                                                                       |

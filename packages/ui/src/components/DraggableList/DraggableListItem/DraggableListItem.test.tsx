@@ -33,7 +33,7 @@ describe('DraggableListItem', () => {
     renderItem();
 
     expect(screen.getByText('Row')).not.toBeNull();
-    expect(screen.getByLabelText('Drag handle')).not.toBeNull();
+    expect(screen.getByTestId('drag-handle')).not.toBeNull();
     expect(screen.getByRole('listitem').getAttribute('draggable')).toBe('true');
   });
 
@@ -63,7 +63,7 @@ describe('DraggableListItem', () => {
     expect(li.getAttribute('draggable')).toBe('false');
     fireEvent.dragStart(li);
     expect(onDragStart).not.toHaveBeenCalled();
-    expect(screen.queryByLabelText('Drag handle')).toBeNull();
+    expect(screen.queryByTestId('drag-handle')).toBeNull();
   });
 
   it('disables dragging and shows the shimmer overlay when busy', () => {

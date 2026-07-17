@@ -1,0 +1,35 @@
+{
+  "summary": {
+    "changed": 0,
+    "unchanged": 2841,
+    "matches": 0,
+    "duration": 183035026,
+    "errors": 0,
+    "warnings": 1,
+    "infos": 0,
+    "skipped": 0,
+    "suggestedFixesSkipped": 0,
+    "diagnosticsNotPrinted": 0,
+    "scannerDuration": 243331489
+  },
+  "diagnostics": [
+    {
+      "severity": "warning",
+      "message": "Direct assigning to document.cookie is not recommended.",
+      "category": "lint/suspicious/noDocumentCookie",
+      "location": {
+        "path": "packages/ui/src/utils/storage/writeToCookie.service.ts",
+        "start": {
+          "line": 47,
+          "column": 3
+        },
+        "end": {
+          "line": 47,
+          "column": 32
+        }
+      },
+      "advices": []
+    }
+  ],
+  "command": "lint"
+}

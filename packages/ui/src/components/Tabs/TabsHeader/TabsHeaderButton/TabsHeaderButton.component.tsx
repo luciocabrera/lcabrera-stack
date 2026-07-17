@@ -17,7 +17,7 @@ export const TabsHeaderButton = ({
   tab,
 }: TabsHeaderButtonProps) => {
   const handleTabSelect = (event: MouseEvent<HTMLButtonElement>) => {
-    const key = event.currentTarget.dataset['tabKey'];
+    const key = event.currentTarget.dataset.tabKey;
     if (key !== undefined) onSelectTab(key);
   };
 

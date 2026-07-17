@@ -4,8 +4,6 @@ import { createTableConfigColumnsActionMocks } from '@repo/ui/utils/tests/create
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useSetColumnSizing } from './useSetColumnSizing.hook';
-
 const createInitialColumnsState = () => ({
   columnPinning: { left: ['id'], right: [] },
   columnSizing: { id: 100 },
@@ -25,18 +23,9 @@ const {
   persistenceKey: 'orders-table',
 });
 
-const { mockResolveColumnSizingUpdate } = vi.hoisted(() => ({
-  mockResolveColumnSizingUpdate: vi.fn(() => ({
-    columnSizing: { id: 100, name: 220 },
-    pinnedColumnOffsets: {
-      id: {
-        isFirstPinnedRight: false,
-        isLastPinnedLeft: true,
-        offset: 0,
-        side: 'left',
-      },
-    },
-  })),
+const { mockPersistColumnSizing, mockWriteColumnSizing } = vi.hoisted(() => ({
+  mockPersistColumnSizing: vi.fn(),
+  mockWriteColumnSizing: vi.fn(),
 }));
 
 vi.mock(
@@ -51,49 +40,65 @@ vi.mock('./utils', async (importOriginal) => {
 
   return {
     ...actual,
-    resolveColumnSizingUpdate: mockResolveColumnSizingUpdate,
+    writeColumnSizing: mockWriteColumnSizing,
   };
 });
+
+vi.mock('./hooks/usePersistColumnSizingAction.hook', () => ({
+  usePersistColumnSizingAction: () => mockPersistColumnSizing,
+}));
+
+import { useSetColumnSizing } from './useSetColumnSizing.hook';
+
+const renderAction = () =>
+  renderHook(() => useSetColumnSizing<{ readonly name: string }>());
 
 describe('useSetColumnSizing', () => {
   beforeEach(() => {
     setColumnsState(createInitialColumnsState());
     resetMocks();
-    mockResolveColumnSizingUpdate.mockClear();
+    vi.clearAllMocks();
   });
 
-  it('delegates sizing computation to the local util and writes the result to the columns store', () => {
-    const { result } = renderHook(() =>
-      useSetColumnSizing<{
-        readonly id: string;
-        readonly name: string;
-      }>(),
-    );
+  it('writes the width and persists it, so callers never pair it with a sync', () => {
+    const { result } = renderAction();
 
     act(() => {
       result.current({ columnKey: 'name', width: 220 });
     });
 
-    expect(mockResolveColumnSizingUpdate).toHaveBeenCalledWith({
+    expect(mockWriteColumnSizing).toHaveBeenCalledWith({
       columnKey: 'name',
-      columnPinning: { left: ['id'], right: [] },
-      columnSizingState: { id: 100 },
-      effectiveColumns: [
-        { key: 'id', label: 'ID' },
-        { key: 'name', label: 'Name' },
-      ],
+      columnsStore: mockColumnsStore,
       width: 220,
     });
-    expect(mockColumnsStore.set).toHaveBeenCalledWith({
-      columnSizing: { id: 100, name: 220 },
-      pinnedColumnOffsets: {
-        id: {
-          isFirstPinnedRight: false,
-          isLastPinnedLeft: true,
-          offset: 0,
-          side: 'left',
-        },
-      },
+    expect(mockPersistColumnSizing).toHaveBeenCalledTimes(1);
+  });
+
+  it('persists a reset to the default width too', () => {
+    const { result } = renderAction();
+
+    act(() => {
+      result.current({ columnKey: 'name', width: undefined });
     });
+
+    expect(mockWriteColumnSizing).toHaveBeenCalledWith({
+      columnKey: 'name',
+      columnsStore: mockColumnsStore,
+      width: undefined,
+    });
+    expect(mockPersistColumnSizing).toHaveBeenCalledTimes(1);
+  });
+
+  it('writes before it persists, so the sync sees the new width', () => {
+    const { result } = renderAction();
+
+    act(() => {
+      result.current({ columnKey: 'name', width: 220 });
+    });
+
+    expect(mockWriteColumnSizing.mock.invocationCallOrder[0]).toBeLessThan(
+      mockPersistColumnSizing.mock.invocationCallOrder[0] ?? 0,
+    );
   });
 });

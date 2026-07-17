@@ -1,13 +1,11 @@
+import { usePersistTableUiFlagsAction } from '@repo/ui/components/Table/contexts/TableConfig/meta/actions/usePersistTableUiFlagsAction.hook';
 import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useTableDataContextValue } from '@repo/ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
-import { usePersistTableStateAction } from '@repo/ui/components/Table/hooks';
-import {
-  getHasQueryChanged,
-  persistTableMetaUiState,
-} from '@repo/ui/components/Table/utils';
+import { getHasQueryChanged } from '@repo/ui/components/Table/utils';
 
 import type { BatchTableSettingsUpdate } from './utils/resolveBatchTableSettingsUpdate.util';
 
+import { usePersistTableStateAction } from './hooks/usePersistTableStateAction.hook';
 import {
   buildPersistencePayload,
   resolveBatchTableSettingsUpdate,
@@ -17,6 +15,7 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
   const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
   const { dataStore } = useTableDataContextValue();
   const persistTableState = usePersistTableStateAction();
+  const persistUiFlags = usePersistTableUiFlagsAction();
 
   return (settings: BatchTableSettingsUpdate<TData>) => {
     const columnsState = columnsStore.get();
@@ -58,7 +57,7 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
     if (!metaState?.isTableSettingsPinned) {
       const nextStatePatch = { isTableSettingsOpen: false };
 
-      persistTableMetaUiState({
+      persistUiFlags({
         currentState: metaState,
         nextStatePatch,
       });

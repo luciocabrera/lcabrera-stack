@@ -11,7 +11,7 @@ ColumnDrawerContext/
 ├── ColumnDrawerContext.provider.tsx        → Provider: reads table state → creates store
 ├── ColumnDrawerContext.types.ts            → ColumnDrawerState, ProviderProps, ContextValue
 ├── useColumnDrawerContextValue.hook.ts    → use(ColumnDrawerContext)
-├── useColumnsStore.hook.ts                → useSyncExternalStore + selector
+├── useColumnsStore.hook.ts                → Resolves the drawer's columnStore, delegates to useStoreSelector
 │
 ├── actions/                               → 9 hooks that write to the store
 │   ├── useBatchSetColumnDrawerSettings    → Push all drawer state to table

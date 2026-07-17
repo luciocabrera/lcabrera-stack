@@ -10,8 +10,8 @@ const {
   mockColumnsStore,
   mockDataStore,
   mockMetaStore,
-  mockPersistTableMetaUiState,
   mockPersistTableState,
+  mockPersistUiFlags,
   mockResolveBatchColumnSettingsUpdate,
   setColumnsState,
 } = vi.hoisted(() => {
@@ -50,8 +50,8 @@ const {
       })),
       set: vi.fn(),
     },
-    mockPersistTableMetaUiState: vi.fn(),
     mockPersistTableState: vi.fn(),
+    mockPersistUiFlags: vi.fn(),
     mockResolveBatchColumnSettingsUpdate: vi.fn(() => ({
       columnFilters: {
         name: { operator: 'contains', type: 'text', value: 'ali' },
@@ -112,19 +112,16 @@ vi.mock(
   }),
 );
 
-vi.mock('@repo/ui/components/Table/hooks', () => ({
+vi.mock('./hooks/usePersistTableStateAction.hook', () => ({
   usePersistTableStateAction: () => mockPersistTableState,
 }));
 
-vi.mock('@repo/ui/components/Table/utils', async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import('@repo/ui/components/Table/utils')>();
-
-  return {
-    ...actual,
-    persistTableMetaUiState: mockPersistTableMetaUiState,
-  };
-});
+vi.mock(
+  '@repo/ui/components/Table/contexts/TableConfig/meta/actions/usePersistTableUiFlagsAction.hook',
+  () => ({
+    usePersistTableUiFlagsAction: () => mockPersistUiFlags,
+  }),
+);
 
 vi.mock('./utils/buildPersistencePayload.util', () => ({
   buildPersistencePayload: mockBuildPersistencePayload,
@@ -156,7 +153,7 @@ describe('useBatchSetColumnSettings', () => {
     mockDataStore.set.mockClear();
     mockMetaStore.get.mockClear();
     mockMetaStore.set.mockClear();
-    mockPersistTableMetaUiState.mockClear();
+    mockPersistUiFlags.mockClear();
     mockPersistTableState.mockClear();
     mockPersistTableState.mockReturnValue(true);
     mockResolveBatchColumnSettingsUpdate.mockClear();
@@ -224,7 +221,7 @@ describe('useBatchSetColumnSettings', () => {
     expect(mockColumnsStore.set).toHaveBeenCalledWith(
       mockResolveBatchColumnSettingsUpdate.mock.results[0]?.value,
     );
-    expect(mockPersistTableMetaUiState).toHaveBeenCalledWith({
+    expect(mockPersistUiFlags).toHaveBeenCalledWith({
       currentState: {
         isColumnSettingsPinned: false,
         isTableSettingsOpen: false,

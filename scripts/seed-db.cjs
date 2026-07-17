@@ -204,7 +204,9 @@ const main = () => {
 
   ensureDatabaseExists();
 
-  sqlFilePaths.forEach((sqlFilePath) => runSqlFile(sqlFilePath));
+  sqlFilePaths.forEach((sqlFilePath) => {
+    runSqlFile(sqlFilePath);
+  });
 
   console.log('Seeding finished successfully');
 };

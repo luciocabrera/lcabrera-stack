@@ -36,8 +36,8 @@ describe('deriveColumnViewState', () => {
       sorting: [{ columnKey: 'name', direction: 'asc' }],
     });
 
-    expect(result.normalizedColumns['name']?.sortDirection).toBe('asc');
-    expect(result.normalizedColumns['name']?.sortIndex).toBe(0);
+    expect(result.normalizedColumns.name?.sortDirection).toBe('asc');
+    expect(result.normalizedColumns.name?.sortIndex).toBe(0);
     expect(result.effectiveColumns.map(({ key }) => key)).toEqual([
       'id',
       'name',
@@ -52,8 +52,8 @@ describe('deriveColumnViewState', () => {
     expect(result.columnGroups.rightPinnedCols.map(({ key }) => key)).toEqual([
       'age',
     ]);
-    expect(result.pinnedColumnOffsets['id']?.offset).toBe(0);
-    expect(result.pinnedColumnOffsets['age']?.side).toBe('right');
+    expect(result.pinnedColumnOffsets.id?.offset).toBe(0);
+    expect(result.pinnedColumnOffsets.age?.side).toBe('right');
   });
 
   it('applies hidden-column filtering before grouping', () => {
@@ -71,6 +71,6 @@ describe('deriveColumnViewState', () => {
       'age',
     ]);
     expect(result.columnGroups.centerCols).toEqual([]);
-    expect(result.normalizedColumns['name']?.label).toBe('Name');
+    expect(result.normalizedColumns.name?.label).toBe('Name');
   });
 });

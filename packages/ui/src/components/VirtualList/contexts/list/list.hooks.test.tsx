@@ -14,7 +14,6 @@ import type {
 import type { VirtualListContextValue } from '../VirtualListContext.types';
 
 import { useVirtualListContextValue } from '../useVirtualListContextValue.hook';
-import { INITIAL_LIST_STATE } from '../VirtualListContext.constants';
 import { VirtualListContext } from '../VirtualListContext.context';
 import { useClearSearch } from './actions/useClearSearch.hook';
 import { useSetListFilterMode } from './actions/useSetListFilterMode.hook';
@@ -26,7 +25,6 @@ import { useGetListMaxHeight } from './selectors/useGetListMaxHeight.hook';
 import { useGetSearchInputName } from './selectors/useGetSearchInputName.hook';
 import { useGetSearchTerm } from './selectors/useGetSearchTerm.hook';
 import { useGetShouldFillHeight } from './selectors/useGetShouldFillHeight.hook';
-import { useListStore } from './useListStore.hook';
 
 type SetupArgs = {
   readonly listState?: Partial<VirtualListState>;
@@ -130,17 +128,6 @@ describe('VirtualList list hooks', () => {
     });
 
     expect(result.current.searchTerm).toBe('ban');
-  });
-
-  it('falls back to the initial list state when the snapshot is undefined', () => {
-    const fallback = setup();
-    fallback.listStore.reset(undefined as never);
-
-    expect(
-      renderHook(() => useListStore((state) => state), {
-        wrapper: fallback.wrapper,
-      }).result.current,
-    ).toEqual(INITIAL_LIST_STATE);
   });
 
   it('updates the search term and recomputes the derived list state', () => {

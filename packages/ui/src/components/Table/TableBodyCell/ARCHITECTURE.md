@@ -67,6 +67,10 @@ graph TD
 | Matches `YYYY-MM-DD` | `date`        |
 | Everything else      | `string`      |
 
+## Blank Values
+
+A blank value renders as an empty cell for **every** data type — `number` and `currency` included. `renderCellContent` treats an empty/whitespace-only string as absent rather than parsing it, because `Number('')` is `0` (not `NaN`) and would otherwise format as `0` / `$ 0.00`. This keeps the skeleton loading state consistent, since `generatePlaceholderData` fills every column with `''` regardless of type. A real `0` still formats normally.
+
 ## Alignment
 
 - **Right-aligned**: number, currency

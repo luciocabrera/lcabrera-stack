@@ -11,11 +11,9 @@ const columns: TableColumn<Row>[] = [
   { dataType: 'string', key: 'name', label: 'Name' },
 ];
 
-const persistenceKey = 'test-table';
-
 describe('getInitialColumnsState (TableConfig)', () => {
   it('returns default values when no args provided', () => {
-    const result = getInitialColumnsState({ persistenceKey });
+    const result = getInitialColumnsState({});
     expect(result.columns).toEqual([]);
     expect(result.columnOrder).toEqual([]);
     expect(result.sorting).toEqual([]);
@@ -25,7 +23,7 @@ describe('getInitialColumnsState (TableConfig)', () => {
   });
 
   it('computes effectiveColumns from inputs', () => {
-    const result = getInitialColumnsState({ columns, persistenceKey });
+    const result = getInitialColumnsState({ columns });
     expect(result.effectiveColumns).toHaveLength(2);
   });
 
@@ -34,14 +32,13 @@ describe('getInitialColumnsState (TableConfig)', () => {
       // A `{}` pinning value can arrive when no pinning cookie is present.
       columnPinning: {} as never,
       columns,
-      persistenceKey,
     });
     expect(result.columnPinning).toEqual({ left: [], right: [] });
     expect(result.pinnedColumnOffsets).toEqual({});
   });
 
   it('computes normalizedColumns', () => {
-    const result = getInitialColumnsState({ columns, persistenceKey });
+    const result = getInitialColumnsState({ columns });
     // normalizedColumns is a Record keyed by column key, not an array
     expect(typeof result.normalizedColumns).toBe('object');
     expect('id' in result.normalizedColumns).toBe(true);
@@ -53,13 +50,13 @@ describe('getInitialColumnsState (TableConfig)', () => {
       { dataType: 'string', isStatic: true, key: 'id', label: 'ID' },
       { dataType: 'string', key: 'name', label: 'Name' },
     ];
-    const result = getInitialColumnsState({ columns: cols, persistenceKey });
+    const result = getInitialColumnsState({ columns: cols });
     expect(result.staticKeys.has('id')).toBe(true);
     expect(result.staticKeys.has('name')).toBe(false);
   });
 
   it('does not add or pin an actions column when crud is undefined', () => {
-    const result = getInitialColumnsState({ columns, persistenceKey });
+    const result = getInitialColumnsState({ columns });
     expect(result.columns.some((column) => column.key === 'actions')).toBe(
       false,
     );
@@ -70,7 +67,6 @@ describe('getInitialColumnsState (TableConfig)', () => {
     const result = getInitialColumnsState({
       columns,
       crud: { create: true },
-      persistenceKey,
     });
     expect(result.columns.some((column) => column.key === 'actions')).toBe(
       false,
@@ -82,7 +78,6 @@ describe('getInitialColumnsState (TableConfig)', () => {
     const result = getInitialColumnsState({
       columns,
       crud: { delete: true },
-      persistenceKey,
     });
     expect(result.columns.some((column) => column.key === 'actions')).toBe(
       true,

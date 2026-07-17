@@ -20,7 +20,7 @@ describe('getInitialFiltersDataState', () => {
 
   it('each entry has default values', () => {
     const result = getInitialFiltersDataState({ columns });
-    const entry = result['id'];
+    const entry = result.id;
     expect(entry?.data).toEqual([]);
     expect(entry?.hasMore).toBe(false);
     expect(entry?.isLoading).toBe(false);

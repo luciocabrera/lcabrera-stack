@@ -2,6 +2,7 @@ import type { IconProps } from '../Icons.types';
 
 export const SettingsIcon = ({ size = 24, ...props }: IconProps) => (
   <svg
+    aria-hidden='true'
     fill='none'
     height={size}
     stroke='currentColor'

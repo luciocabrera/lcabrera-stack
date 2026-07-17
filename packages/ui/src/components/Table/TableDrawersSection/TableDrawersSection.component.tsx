@@ -28,5 +28,4 @@ export const TableDrawersSection = () => {
         <TableSettingsDrawer />
       </TableDrawerProvider>
     );
-  return <></>;
 };

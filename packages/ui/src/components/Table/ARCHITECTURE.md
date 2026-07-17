@@ -77,7 +77,7 @@ Table/
 ├── TableSettingsDrawer/           → Table-wide settings panel (filters, sort, columns)
 ├── TableSettingsDrawerSkeleton/   → Legacy pinned loading shell (kept for reference; not used by drawer routing)
 ├── filters/                       → Filter input components (boolean, text, number, date, select)
-├── hooks/                         → useColumnResize, useInfiniteScroll, usePersistTableStateAction
+├── hooks/                         → useColumnResize, useColumnDragSession, useInfiniteScroll, useScrollResetAfterLoad
 ├── utils/                         → Column processing + persistence utilities
 └── docs/                          → Supplementary architecture docs
 ```
@@ -174,9 +174,10 @@ graph LR
   Decision -->|Yes| Revalidate["redirect + loader revalidation"]
   Decision -->|No| Stable["204 response, no revalidation"]
 
-  MetaChange["meta UI mutation"] --> MetaAction["persistTableMetaUiState()"]
+  MetaChange["meta UI mutation"] --> MetaAction["usePersistTableUiFlagsAction()"]
   MetaAction --> MetaSession["sessionStorage write"]
-  MetaAction --> MetaFlagsCookie["-uiFlags cookie (open/pinned) for SSR seed"]
+  MetaAction --> MetaRoute["POST /_action/persist-cookie"]
+  MetaRoute --> MetaFlagsCookie["-uiFlags Set-Cookie (open/pinned) for SSR seed"]
 
   Load["Page load"] --> CookieRead["readPersistedStateFromCookie() + readPersistedUiFlagsFromCookie()"]
   CookieRead --> Init["Provider initial state (columns + drawer flags)"]

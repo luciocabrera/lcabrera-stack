@@ -1,7 +1,4 @@
-import {
-  DEFAULT_MAX_COLUMN_WIDTH,
-  DEFAULT_MIN_COLUMN_WIDTH,
-} from '@repo/ui/components/Table/Table.constants';
+import { resolveColumnWidthBounds } from '@repo/ui/components/Table/utils';
 
 type CreateResizeStartDataArgs = {
   readonly clientX: number;
@@ -21,12 +18,12 @@ export const createResizeStartData = ({
   maxWidth,
   minWidth,
 }: CreateResizeStartDataArgs) => {
-  const effectiveMinWidth = minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
+  const bounds = resolveColumnWidthBounds({ maxWidth, minWidth });
 
   return {
-    initialWidth: currentWidth ?? effectiveMinWidth,
+    initialWidth: currentWidth ?? bounds.minWidth,
     initialX: clientX,
-    maxWidth: maxWidth ?? DEFAULT_MAX_COLUMN_WIDTH,
-    minWidth: effectiveMinWidth,
+    maxWidth: bounds.maxWidth,
+    minWidth: bounds.minWidth,
   };
 };

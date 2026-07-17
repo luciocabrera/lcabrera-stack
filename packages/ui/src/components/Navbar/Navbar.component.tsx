@@ -14,7 +14,6 @@ export const Navbar = ({
 }: NavbarProps) => {
   return (
     <nav
-      role='navigation'
       {...props}
       {...stylex.props(
         styles.navbar,

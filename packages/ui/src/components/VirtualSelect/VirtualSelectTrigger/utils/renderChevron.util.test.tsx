@@ -15,7 +15,7 @@ describe('renderChevron', () => {
   });
 
   it('renders a chevron element when the trigger can toggle', () => {
-    render(<>{renderChevron({ isAlwaysOpen: false, isOpen: true })}</>);
+    render(renderChevron({ isAlwaysOpen: false, isOpen: true }));
 
     expect(screen.getByText('', { selector: '[data-chevron]' })).toBeTruthy();
   });

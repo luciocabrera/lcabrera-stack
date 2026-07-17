@@ -51,9 +51,11 @@ const OUTPUT_PATH = join(
  * Workspaces whose `test:coverage` task runs without a database, a browser
  * beyond jsdom, or any other external service.
  *
+ * Opt-in by design: an earlier attempt at this lever was reverted (2026-07-14)
+ * for pulling in a suite that needed Postgres, so a new workspace is added here
+ * only once its coverage task is known to run clean without one.
+ *
  * Deliberately absent:
- * - `@repo/ui` — its suite is currently red (missing ThemeProvider wrappers in
- *   Modal/drawer test trees); add it once green.
  * - `vite-react-compiler` (apps/react-router) — the showcase app. Its fallow
  *   findings are baselined, so coverage buys the gate nothing today, and its
  *   suite is the largest in the repo. Add it if showcase findings ever gate.
@@ -62,7 +64,9 @@ const COVERAGE_WORKSPACES = [
   { dir: 'packages/data-access', name: '@repo/data-access' },
   { dir: 'packages/node-runtime', name: '@repo/node-runtime' },
   { dir: 'packages/scan-ingestion', name: '@repo/scan-ingestion' },
+  { dir: 'packages/ui', name: '@repo/ui' },
   { dir: 'apps/admin_system', name: 'admin-system' },
+  { dir: 'apps/scan-orchestrator', name: '@repo/scan-orchestrator' },
 ];
 
 const shouldRun = !process.argv.includes('--no-run');
@@ -96,8 +100,7 @@ const readWorkspaceCoverage = async ({ dir, name }) => {
  * Istanbul keys every entry by absolute source path, so entries from different
  * workspaces never collide and a shallow merge is exactly right.
  */
-const mergeCoverage = (reports) =>
-  reports.reduce((merged, report) => ({ ...merged, ...report }), {});
+const mergeCoverage = (reports) => Object.assign({}, ...reports);
 
 const main = async () => {
   if (shouldRun) {
@@ -121,7 +124,9 @@ const main = async () => {
   );
 };
 
-main().catch((error) => {
+try {
+  await main();
+} catch (error) {
   process.stderr.write(`\n✖ ${error.message}\n`);
   process.exitCode = 1;
-});
+}

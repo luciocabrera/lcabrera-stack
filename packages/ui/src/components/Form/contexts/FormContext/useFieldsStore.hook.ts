@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from 'react';
+import { useStoreSelector } from '@repo/ui/hooks/useStoreSelector.hook';
 
 import type { FormFieldsState } from './FormContext.types';
 
@@ -12,9 +12,5 @@ export const useFieldsStore = <
 ) => {
   const { fieldsStore } = useFormContextValue<TValues>();
 
-  return useSyncExternalStore(
-    fieldsStore.subscribe,
-    () => selector(fieldsStore.get() as FormFieldsState<TValues>),
-    () => selector(fieldsStore.getServerSnapshot() as FormFieldsState<TValues>),
-  );
+  return useStoreSelector({ selector, store: fieldsStore });
 };

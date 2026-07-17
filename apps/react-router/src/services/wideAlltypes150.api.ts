@@ -187,9 +187,9 @@ const isWideAlltypes150Response = (
   value: unknown,
 ): value is WideAlltypes150Response =>
   isObject(value) &&
-  Array.isArray(value['data']) &&
-  typeof value['hasMore'] === 'boolean' &&
-  typeof value['total'] === 'number';
+  Array.isArray(value.data) &&
+  typeof value.hasMore === 'boolean' &&
+  typeof value.total === 'number';
 
 type FetchWideAlltypes150Params = {
   readonly limit: number;

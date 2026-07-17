@@ -22,7 +22,7 @@ describe('SidePanelHeader', () => {
 
   it('renders actions slot when provided', () => {
     render(
-      <SidePanelHeader actions={<button>Close</button>}>
+      <SidePanelHeader actions={<button type='button'>Close</button>}>
         <h2>Panel Title</h2>
       </SidePanelHeader>,
     );

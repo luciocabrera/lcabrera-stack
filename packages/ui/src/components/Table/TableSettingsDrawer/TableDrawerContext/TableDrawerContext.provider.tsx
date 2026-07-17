@@ -1,5 +1,3 @@
-import type { TableColumnsState } from '@repo/ui/components/Table/Table.types';
-
 import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useStore } from '@repo/ui/hooks';
 
@@ -13,8 +11,7 @@ import { TableDrawerContext } from './TableDrawerContext.context';
 export const TableDrawerProvider = ({ children }: TableDrawerProviderProps) => {
   const { columnsStore: tableColumnsStore } = useTableConfigContextValue();
 
-  const tableColumnsState =
-    tableColumnsStore.get() ?? ({} as TableColumnsState);
+  const tableColumnsState = tableColumnsStore.get();
   const {
     columnFilters,
     columnOrder,

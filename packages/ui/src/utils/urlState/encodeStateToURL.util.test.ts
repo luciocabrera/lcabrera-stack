@@ -31,7 +31,7 @@ describe('encodeStateToURL', () => {
           .padEnd(result.length + ((4 - (result.length % 4)) % 4), '='),
       ),
     ) as Record<string, unknown>;
-    expect(Array.isArray(decoded['columnVisibility'])).toBe(true);
+    expect(Array.isArray(decoded.columnVisibility)).toBe(true);
   });
 
   it('encodes empty object', () => {

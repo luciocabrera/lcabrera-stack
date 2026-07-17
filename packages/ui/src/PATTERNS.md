@@ -216,10 +216,7 @@ State shared across a component tree is provided via React context backed by `us
 
 ```tsx
 // 1. Create the store hook
-const useMyStore = () =>
-  useStore<MyState>({
-    /* initial state */
-  });
+const useMyStore = () => useStore<MyState>({/* initial state */});
 
 // 2. Create the context
 const MyContext = createContext<ReturnType<typeof useMyStore> | undefined>(

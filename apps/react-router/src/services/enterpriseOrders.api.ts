@@ -94,15 +94,15 @@ type EnterpriseOrderDetailResponse = {
 const isEnterpriseOrderDetailResponse = (
   value: unknown,
 ): value is EnterpriseOrderDetailResponse =>
-  isObject(value) && isObject(value['data']);
+  isObject(value) && isObject(value.data);
 
 const isEnterpriseOrdersResponse = (
   value: unknown,
 ): value is EnterpriseOrdersResponse & { hasMore: boolean } =>
   isObject(value) &&
-  Array.isArray(value['data']) &&
-  typeof value['total'] === 'number' &&
-  typeof value['hasMore'] === 'boolean';
+  Array.isArray(value.data) &&
+  typeof value.total === 'number' &&
+  typeof value.hasMore === 'boolean';
 
 type FetchEnterpriseOrdersParams = {
   readonly filter?: ColumnFiltersState<EnterpriseOrder>;

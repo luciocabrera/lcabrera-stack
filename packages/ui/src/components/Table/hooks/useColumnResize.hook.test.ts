@@ -2,176 +2,193 @@
 
 import type React from 'react';
 
-import { act, cleanup, renderHook } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { act, renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useColumnResize } from './useColumnResize.hook';
-
-const { mockUseSyncColumnsSizing, syncColumnsSizingMock } = vi.hoisted(() => {
-  const syncColumnsSizingMock = vi.fn();
-  const mockUseSyncColumnsSizing = () => syncColumnsSizingMock;
-
-  return { mockUseSyncColumnsSizing, syncColumnsSizingMock };
-});
+const { mockOnMouseDown, mockSetColumnSizing, mockUseColumnDragSession } =
+  vi.hoisted(() => ({
+    mockOnMouseDown: vi.fn(),
+    mockSetColumnSizing: vi.fn(),
+    mockUseColumnDragSession: vi.fn(),
+  }));
 
 vi.mock(
-  '../contexts/TableConfig/columns/actions/useSyncColumnsSizing.hook',
+  '@repo/ui/components/Table/contexts/TableConfig/columns/actions',
   () => ({
-    useSyncColumnsSizing: mockUseSyncColumnsSizing,
+    useSetColumnSizing: () => mockSetColumnSizing,
   }),
 );
 
-type CreateMouseDownEventArgs = {
-  readonly clientX: number;
+vi.mock('./useColumnDragSession.hook', () => ({
+  useColumnDragSession: mockUseColumnDragSession,
+}));
+
+import { useColumnResize } from './useColumnResize.hook';
+
+type CreateKeyEventArgs = {
+  readonly key: string;
+  readonly shiftKey?: boolean;
 };
 
-const createMouseDownEvent = ({
-  clientX,
-}: CreateMouseDownEventArgs): React.MouseEvent<HTMLDivElement> =>
+type Row = { readonly name: string };
+
+const createKeyEvent = ({ key, shiftKey = false }: CreateKeyEventArgs) =>
   ({
-    clientX,
+    key,
+    preventDefault: vi.fn(),
+    shiftKey,
+    stopPropagation: vi.fn(),
+  }) as unknown as React.KeyboardEvent<HTMLElement>;
+
+const createMouseEvent = () =>
+  ({
     preventDefault: vi.fn(),
     stopPropagation: vi.fn(),
-  }) as unknown as React.MouseEvent<HTMLDivElement>;
+  }) as unknown as React.MouseEvent<HTMLElement>;
+
+const renderResize = (args?: { readonly currentWidth?: number }) =>
+  renderHook(() =>
+    useColumnResize<Row>({
+      columnKey: 'name',
+      currentWidth: 120,
+      maxWidth: 400,
+      minWidth: 80,
+      ...args,
+    }),
+  );
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  mockUseColumnDragSession.mockReturnValue({
+    isResizing: false,
+    onMouseDown: mockOnMouseDown,
+  });
+});
 
 describe('useColumnResize', () => {
-  beforeEach(() => {
-    vi.stubGlobal('cancelAnimationFrame', vi.fn());
-    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
-      callback(0);
-      return 1;
+  it('exposes the width and resolved bounds a splitter has to announce', () => {
+    const { result } = renderResize();
+
+    expect(result.current.width).toBe(120);
+    expect(result.current.bounds).toEqual({ maxWidth: 400, minWidth: 80 });
+  });
+
+  it('falls back to the min bound when the column has no width yet', () => {
+    const { result } = renderResize({ currentWidth: undefined });
+
+    expect(result.current.width).toBe(80);
+  });
+
+  it('hands the pointer gesture to the drag session untouched', () => {
+    const { result } = renderResize();
+
+    expect(mockUseColumnDragSession).toHaveBeenCalledWith({
+      columnKey: 'name',
+      currentWidth: 120,
+      maxWidth: 400,
+      minWidth: 80,
+    });
+    expect(result.current.onMouseDown).toBe(mockOnMouseDown);
+  });
+
+  it('reports the drag session isResizing flag', () => {
+    mockUseColumnDragSession.mockReturnValue({
+      isResizing: true,
+      onMouseDown: mockOnMouseDown,
+    });
+
+    expect(renderResize().result.current.isResizing).toBe(true);
+  });
+
+  it('resets the width on double-click', () => {
+    const { result } = renderResize();
+
+    act(() => {
+      result.current.onDoubleClick(createMouseEvent());
+    });
+
+    expect(mockSetColumnSizing).toHaveBeenCalledWith({
+      columnKey: 'name',
+      width: undefined,
     });
   });
 
-  afterEach(() => {
-    // Unmount hooks so in-flight drag sessions release their document listeners
-    cleanup();
-    document.body.style.cursor = '';
-    document.body.style.userSelect = '';
-    syncColumnsSizingMock.mockReset();
-    vi.clearAllMocks();
-    vi.unstubAllGlobals();
+  it('steps the width with the arrow keys, coarser while shift is held', () => {
+    const { result } = renderResize();
+
+    act(() => {
+      result.current.onKeyDown(createKeyEvent({ key: 'ArrowRight' }));
+    });
+
+    expect(mockSetColumnSizing).toHaveBeenCalledWith({
+      columnKey: 'name',
+      width: 128,
+    });
+
+    act(() => {
+      result.current.onKeyDown(
+        createKeyEvent({ key: 'ArrowRight', shiftKey: true }),
+      );
+    });
+
+    expect(mockSetColumnSizing).toHaveBeenLastCalledWith({
+      columnKey: 'name',
+      width: 160,
+    });
   });
 
-  it('starts resizing on mouse down and emits clamped widths on mouse move', () => {
-    const onResize = vi.fn();
-    const { result } = renderHook(() =>
-      useColumnResize({
-        columnKey: 'name',
-        currentWidth: 200,
-        maxWidth: 260,
-        minWidth: 120,
-        onResize,
-      }),
-    );
+  it('jumps to the bounds on Home and End', () => {
+    const { result } = renderResize();
 
     act(() => {
-      result.current.onMouseDown(createMouseDownEvent({ clientX: 100 }));
+      result.current.onKeyDown(createKeyEvent({ key: 'End' }));
     });
 
-    expect(result.current.isResizing).toBe(true);
-    expect(document.body.style.cursor).toBe('col-resize');
-    expect(document.body.style.userSelect).toBe('none');
+    expect(mockSetColumnSizing).toHaveBeenLastCalledWith({
+      columnKey: 'name',
+      width: 400,
+    });
 
     act(() => {
-      document.dispatchEvent(new MouseEvent('mousemove', { clientX: 400 }));
+      result.current.onKeyDown(createKeyEvent({ key: 'Home' }));
     });
 
-    expect(onResize).toHaveBeenCalledWith({ columnKey: 'name', width: 260 });
-
-    act(() => {
-      document.dispatchEvent(new MouseEvent('mouseup'));
+    expect(mockSetColumnSizing).toHaveBeenLastCalledWith({
+      columnKey: 'name',
+      width: 80,
     });
-
-    expect(result.current.isResizing).toBe(false);
-    expect(syncColumnsSizingMock).toHaveBeenCalledTimes(1);
-    expect(document.body.style.cursor).toBe('');
-    expect(document.body.style.userSelect).toBe('');
   });
 
-  it('falls back to default min width when current width is undefined', () => {
-    const onResize = vi.fn();
-    const { result } = renderHook(() =>
-      useColumnResize({
-        columnKey: 'name',
-        currentWidth: undefined,
-        onResize,
-      }),
-    );
+  it('resets the width on Enter', () => {
+    const { result } = renderResize();
 
     act(() => {
-      result.current.onMouseDown(createMouseDownEvent({ clientX: 100 }));
-      document.dispatchEvent(new MouseEvent('mousemove', { clientX: 80 }));
+      result.current.onKeyDown(createKeyEvent({ key: 'Enter' }));
     });
 
-    expect(onResize).toHaveBeenCalledWith({ columnKey: 'name', width: 60 });
+    expect(mockSetColumnSizing).toHaveBeenCalledWith({
+      columnKey: 'name',
+      width: undefined,
+    });
   });
 
-  it('cleans up listeners and body styles on unmount while resizing', () => {
-    const onResize = vi.fn();
-    const { result, unmount } = renderHook(() =>
-      useColumnResize({
-        columnKey: 'name',
-        currentWidth: 200,
-        onResize,
-      }),
-    );
+  it('leaves a key it does not own alone, without swallowing the event', () => {
+    const { result } = renderResize();
+    const preventDefault = vi.fn();
+    const stopPropagation = vi.fn();
 
     act(() => {
-      result.current.onMouseDown(createMouseDownEvent({ clientX: 100 }));
+      result.current.onKeyDown({
+        key: 'ArrowDown',
+        preventDefault,
+        shiftKey: false,
+        stopPropagation,
+      } as unknown as React.KeyboardEvent<HTMLElement>);
     });
 
-    expect(document.body.style.cursor).toBe('col-resize');
-    expect(document.body.style.userSelect).toBe('none');
-
-    unmount();
-
-    document.dispatchEvent(new MouseEvent('mousemove', { clientX: 400 }));
-
-    expect(onResize).not.toHaveBeenCalled();
-    expect(document.body.style.cursor).toBe('');
-    expect(document.body.style.userSelect).toBe('');
-  });
-
-  it('stops listening to document mouse moves once the drag ends', () => {
-    const onResize = vi.fn();
-    const { result } = renderHook(() =>
-      useColumnResize({
-        columnKey: 'name',
-        currentWidth: 200,
-        onResize,
-      }),
-    );
-
-    act(() => {
-      result.current.onMouseDown(createMouseDownEvent({ clientX: 100 }));
-      document.dispatchEvent(new MouseEvent('mouseup'));
-      document.dispatchEvent(new MouseEvent('mousemove', { clientX: 400 }));
-    });
-
-    expect(onResize).not.toHaveBeenCalled();
-    expect(syncColumnsSizingMock).toHaveBeenCalledTimes(1);
-  });
-
-  it('supersedes an in-flight session when a new drag starts', () => {
-    const onResize = vi.fn();
-    const { result } = renderHook(() =>
-      useColumnResize({
-        columnKey: 'name',
-        currentWidth: 200,
-        minWidth: 100,
-        onResize,
-      }),
-    );
-
-    act(() => {
-      result.current.onMouseDown(createMouseDownEvent({ clientX: 100 }));
-      result.current.onMouseDown(createMouseDownEvent({ clientX: 200 }));
-      document.dispatchEvent(new MouseEvent('mousemove', { clientX: 150 }));
-    });
-
-    // Only the second session's start position is live: 200 + (150 - 200)
-    expect(onResize).toHaveBeenCalledTimes(1);
-    expect(onResize).toHaveBeenCalledWith({ columnKey: 'name', width: 150 });
+    expect(mockSetColumnSizing).not.toHaveBeenCalled();
+    // An unowned key must keep bubbling — the table still handles it
+    expect(preventDefault).not.toHaveBeenCalled();
+    expect(stopPropagation).not.toHaveBeenCalled();
   });
 });

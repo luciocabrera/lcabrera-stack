@@ -22,9 +22,15 @@ export const buildPresetColumnSizing = <TData = Record<string, unknown>>({
     return {} as ColumnSizingState<TData>;
   }
 
-  return columns.reduce<ColumnSizingState<TData>>((sizing, column) => {
-    const width = preset === 'max' ? column.maxWidth : column.minWidth;
+  const sizedEntries = columns
+    .map(
+      (column) =>
+        [
+          column.key,
+          preset === 'max' ? column.maxWidth : column.minWidth,
+        ] as const,
+    )
+    .filter(([, width]) => width);
 
-    return width ? { ...sizing, [column.key]: width } : sizing;
-  }, {} as ColumnSizingState<TData>);
+  return Object.fromEntries(sizedEntries) as ColumnSizingState<TData>;
 };

@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from 'react';
+import { useStoreSelector } from '@repo/ui/hooks/useStoreSelector.hook';
 
 import type { FormMetaState } from './FormContext.types';
 
@@ -12,9 +12,5 @@ export const useMetaStore = <
 ) => {
   const { metaStore } = useFormContextValue<TValues>();
 
-  return useSyncExternalStore(
-    metaStore.subscribe,
-    () => selector(metaStore.get() as FormMetaState<TValues>),
-    () => selector(metaStore.getServerSnapshot() as FormMetaState<TValues>),
-  );
+  return useStoreSelector({ selector, store: metaStore });
 };

@@ -26,6 +26,6 @@ describe('readStateFromURL', () => {
       key: 'k',
       searchParams,
     });
-    expect(result?.['columnVisibility']).toBeInstanceOf(Set);
+    expect(result?.columnVisibility).toBeInstanceOf(Set);
   });
 });

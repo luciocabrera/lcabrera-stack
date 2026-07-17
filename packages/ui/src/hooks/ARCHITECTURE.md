@@ -14,6 +14,7 @@ hooks/
 ├── useNotifyOnError.hook.ts              → Fire error toast whenever error identity changes
 ├── useResizeObserver.hook.ts             → Low-level ResizeObserver lifecycle (lazy target, deferred initial measure, SSR-safe)
 ├── useStore.hook.ts                      → Lightweight external store (useSyncExternalStore-compatible)
+├── useStoreSelector.hook.ts              → Subscribe to a slice of a useStore store (shared useSyncExternalStore wiring)
 ├── useTheme.hook.ts                      → Access ThemeContext via React 19 use()
 ├── useVirtualization.hook.ts             → Vertical virtual-scroll geometry computation (ResizeObserver-based)
 └── utils/
@@ -34,6 +35,7 @@ hooks/
 | `useInfiniteScrollObserver` | Layout/scroll | `void`                                         | `IntersectionObserver` on a sentinel element  |
 | `useNotifyOnError`          | Notification  | `void`                                         | `useNotifyAction`, `useEffect`                |
 | `useStore`                  | State mgmt    | `TStore<TData>`                                | `useRef`, `shallowEqual`                      |
+| `useStoreSelector`          | State mgmt    | `TSelected`                                    | `useSyncExternalStore`, `TStore`              |
 | `useTheme`                  | Context       | `ThemeContextValue`                            | `ThemeContext`, `use()`                       |
 | `useVirtualization`         | Layout/scroll | `{ startIndex, endIndex, offsetY, … }`         | `ResizeObserver` + RAF-batched scroll events  |
 
@@ -226,15 +228,21 @@ Creates a ref-based external store that is compatible with `useSyncExternalStore
 ### Signature
 
 ```ts
-useStore<TData extends Record<string, unknown>>(initialState?: TData): TStore<TData>
+useStore<TData extends Record<string, unknown>>(initialState: TData): TStore<TData>
 ```
+
+`initialState` is **required**, which is what lets `get()` return `TData` rather
+than `TData | undefined`. A store is never empty, so no reader needs an
+empty-store fallback or a cast — the `?? ({} as SomeState)` defaults that habit
+produced were unreachable, and one of them (`{} as ColumnVisibilityState`, a
+`Set`) was actively wrong.
 
 ### `TStore<TData>` interface
 
 | Method                | Signature                         | Description                                                     |
 | --------------------- | --------------------------------- | --------------------------------------------------------------- |
-| `get()`               | `() => TData \| undefined`        | Returns current state                                           |
-| `getServerSnapshot()` | `() => TData \| undefined`        | Returns **initial** state — used by SSR hydration               |
+| `get()`               | `() => TData`                     | Returns current state — never undefined; the store is seeded    |
+| `getServerSnapshot()` | `() => TData`                     | Returns **initial** state — used by SSR hydration               |
 | `set(partial)`        | `(value: Partial<TData>) => void` | Merges partial update; notifies listeners only if state changed |
 | `reset()`             | `() => void`                      | Restores state to `initialState`; always notifies               |
 | `subscribe(cb)`       | `(cb: () => void) => () => void`  | Registers a listener; returns unsubscribe function              |
@@ -272,11 +280,8 @@ graph LR
 ```tsx
 const store = useStore<{ count: number }>({ count: 0 });
 
-const count = useSyncExternalStore(
-  store.subscribe,
-  () => store.get()?.count ?? 0,
-  () => store.getServerSnapshot()?.count ?? 0,
-);
+// Read through useStoreSelector rather than wiring useSyncExternalStore by hand
+const count = useStoreSelector({ selector: (state) => state.count, store });
 
 store.set({ count: count + 1 });
 ```
@@ -287,6 +292,66 @@ store.set({ count: count + 1 });
 - **Shallow equality guard** prevents `set` from notifying listeners when the merged object is identical to the previous state.
 - **`getServerSnapshot`** always returns the `initialState` snapshot, satisfying React's SSR hydration contract.
 - The listener `Set` is also a ref, so subscribe/unsubscribe operations are stable across renders.
+
+---
+
+## `useStoreSelector`
+
+Subscribes to a slice of a `useStore` store. This is the read half of the store
+pattern — `useStore` creates the store, `useStoreSelector` reads from it — and
+it owns the `useSyncExternalStore` wiring (client snapshot, server snapshot,
+subscribe) so no per-context hook repeats it.
+
+### Signature
+
+```ts
+useStoreSelector<TState extends Record<string, unknown>, TSelected>(args: {
+  selector: (state: TState) => TSelected;
+  store: TStore<TState>;
+}): TSelected
+```
+
+`useStore` requires an initial state, so `get()` always returns one. There is no
+empty-store fallback and no cast — a selector always receives real state.
+
+### Consumers
+
+This hook owns **every** `useSyncExternalStore` call in the package. Each
+per-context `use*Store` infrastructure hook resolves its own store from its own
+context and delegates here:
+
+| Hook                                             | Context                     |
+| ------------------------------------------------ | --------------------------- |
+| `TableConfig/columns/useColumnsStore`            | `TableConfigContext`        |
+| `TableConfig/meta/useMetaStore`                  | `TableConfigContext`        |
+| `TableData/data/useDataStore`                    | `TableDataContext`          |
+| `FiltersData/filters/useFiltersStore`            | `FiltersDataContext`        |
+| `TableSettingsDrawer/.../useColumnsStore`        | `TableDrawerContext`        |
+| `ColumnSettingsDrawer/.../useColumnsStore`       | `ColumnDrawerContext`       |
+| `ColumnOrderSection/.../useModalsStore`          | `ColumnOrderSectionContext` |
+| `Form/contexts/FormContext/useFieldsStore`       | `FormContext`               |
+| `Form/contexts/FormContext/useMetaStore`         | `FormContext`               |
+| `Settings/SettingsDraftContext/useDraftStore`    | `SettingsDraftContext`      |
+| `VirtualList/contexts/list/useListStore`         | `VirtualListContext`        |
+| `VirtualList/contexts/data/useListDataStore`     | `VirtualListContext`        |
+| `VirtualSelect/contexts/meta/useSelectMetaStore` | `VirtualSelectContext`      |
+| `GlobalSettingsContext/useGlobalSettingsStore`   | `GlobalSettingsContext`     |
+| `NotificationContext/useNotificationStore`       | `NotificationContext`       |
+
+Each hook types its selector against **its own store's state** — the drawer
+stores hold a narrower slice than `TableConfig`, and typing them against the
+full `TableColumnsState` would let selectors read fields the store never holds.
+
+### Design Notes
+
+- **Re-render granularity comes from the selector's _result_, not the store.**
+  `useStore.set` notifies on any change, so the selector re-runs on every
+  update; `useSyncExternalStore` then compares the result with `Object.is` and
+  skips the re-render when it is unchanged. Selecting a primitive is therefore
+  stable, while a selector building a **new object/array each call re-renders on
+  every store write** — select stored values, not freshly-derived containers.
+- Selector hooks (`useGet*`) are the intended consumers; view components read
+  through those, never through this hook directly.
 
 ---
 

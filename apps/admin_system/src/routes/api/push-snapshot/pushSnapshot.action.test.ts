@@ -34,7 +34,7 @@ const USER_ID = 'a1b2c3d4-0000-4000-8000-0000000000ff';
 // Uint8Array<ArrayBufferLike> is not a BodyInit — that union admits
 // SharedArrayBuffer-backed views, which fetch bodies reject.
 const buildRequest = (body: Uint8Array<ArrayBuffer>) =>
-  new Request('https://cqms.example/_action/push-snapshot/' + PROJECT_ID, {
+  new Request(`https://cqms.example/_action/push-snapshot/${PROJECT_ID}`, {
     body,
     headers: { 'X-CodePulse-Host': 'ada-laptop' },
     method: 'POST',

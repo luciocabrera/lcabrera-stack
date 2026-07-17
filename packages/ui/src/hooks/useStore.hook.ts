@@ -6,9 +6,9 @@ import { useRef } from 'react';
  */
 export type TStore<TData> = {
   /** Get current state */
-  get: () => TData | undefined;
+  get: () => TData;
   /** Get server snapshot for SSR hydration */
-  getServerSnapshot: () => TData | undefined;
+  getServerSnapshot: () => TData;
   /** Reset state to initial value */
   reset: () => void;
   /** Merge partial state update (only notifies if changed) */
@@ -30,15 +30,12 @@ export type TStore<TData> = {
  * ```tsx
  * const store = useStore<{ count: number }>({ count: 0 });
  *
- * // In component with useSyncExternalStore
- * const count = useSyncExternalStore(
- *   store.subscribe,
- *   () => store.get()?.count ?? 0
- * );
+ * // Read through useStoreSelector — it owns the useSyncExternalStore wiring
+ * const count = useStoreSelector({ selector: (state) => state.count, store });
  * ```
  */
 export const useStore = <TData extends Record<string, unknown>>(
-  initialState?: TData,
+  initialState: TData,
 ) => {
   const store = useRef(initialState);
   const initialRef = useRef(initialState);

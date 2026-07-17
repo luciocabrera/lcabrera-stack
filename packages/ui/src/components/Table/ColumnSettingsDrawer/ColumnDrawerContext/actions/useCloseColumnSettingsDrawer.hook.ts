@@ -1,6 +1,6 @@
 import { getClosedColumnSettingsStatePatch } from '@repo/ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils';
+import { usePersistTableUiFlagsAction } from '@repo/ui/components/Table/contexts/TableConfig/meta/actions/usePersistTableUiFlagsAction.hook';
 import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import { persistTableMetaUiState } from '@repo/ui/components/Table/utils';
 
 /**
  * Closes the column settings drawer: reads the current meta state, computes the
@@ -10,12 +10,13 @@ import { persistTableMetaUiState } from '@repo/ui/components/Table/utils';
  */
 export const useCloseColumnSettingsDrawer = () => {
   const { metaStore } = useTableConfigContextValue();
+  const persistUiFlags = usePersistTableUiFlagsAction();
 
   return () => {
     const metaState = metaStore.get();
     const nextStatePatch = getClosedColumnSettingsStatePatch({ metaState });
 
-    persistTableMetaUiState({
+    persistUiFlags({
       currentState: metaState,
       nextStatePatch,
     });

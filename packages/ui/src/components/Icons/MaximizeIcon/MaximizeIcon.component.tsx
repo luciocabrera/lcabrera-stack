@@ -2,6 +2,7 @@ import type { IconProps } from '../Icons.types';
 
 export const MaximizeIcon = ({ size = 16, ...props }: IconProps) => (
   <svg
+    aria-hidden='true'
     fill='none'
     height={size}
     viewBox='0 0 16 16'

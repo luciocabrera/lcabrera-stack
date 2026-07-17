@@ -81,10 +81,10 @@ graph LR
 
 `TooltipProps`:
 
-| Prop        | Type        | Default  | Description             |
+| Prop | Type | Default | Description |
 | ----------- | ----------- | -------- | ----------------------- | -------- | ------- | --------------------------- |
-| `children`  | `ReactNode` | -        | Trigger element content |
-| `content`   | `ReactNode` | -        | Tooltip body content    |
+| `children` | `ReactNode` | - | Trigger element content |
+| `content` | `ReactNode` | - | Tooltip body content |
 | `placement` | `'top'      | 'bottom' | 'left'                  | 'right'` | `'top'` | Preferred tooltip placement |
 
 The component also exports `TooltipPlacement` for reuse by consumers.

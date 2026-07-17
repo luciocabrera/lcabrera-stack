@@ -19,7 +19,7 @@ selectors and dispatches the actions it needs itself:
 | `FiltersSectionToolbar` | columnFilters, expandedFilters                                                             | clearFilters, resetFilters, setTableSettingsExpandedFilters                   |
 
 `expandedFilters` is a `readonly string[]` slice of the table meta store
-(`tableSettingsExpandedFilters`), persisted via `persistTableMetaUiState` —
+(`tableSettingsExpandedFilters`), persisted via `usePersistTableUiFlagsAction` —
 single ownership; the former local `Set` mirror in the shell was removed.
 
 ## File Structure

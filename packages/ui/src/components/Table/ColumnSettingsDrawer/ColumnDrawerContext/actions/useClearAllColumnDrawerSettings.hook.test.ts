@@ -3,35 +3,30 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { columnStore, metaStore, persistTableMetaUiStateMock } = vi.hoisted(
+const { columnStore, metaStore, persistUiFlagsMock } = vi.hoisted(() => ({
+  columnStore: {
+    get: vi.fn<() => { readonly columnKey: string | undefined }>(() => ({
+      columnKey: 'status',
+    })),
+    set: vi.fn(),
+  },
+  metaStore: {
+    get: vi.fn(() => ({
+      isTableSettingsOpen: false,
+      persistenceKey: 'orders',
+      wasTableSettingsOpenBeforeColumnSettings: true,
+    })),
+    set: vi.fn(),
+  },
+  persistUiFlagsMock: vi.fn(),
+}));
+
+vi.mock(
+  '@repo/ui/components/Table/contexts/TableConfig/meta/actions/usePersistTableUiFlagsAction.hook',
   () => ({
-    columnStore: {
-      get: vi.fn<() => { readonly columnKey: string | undefined }>(() => ({
-        columnKey: 'status',
-      })),
-      set: vi.fn(),
-    },
-    metaStore: {
-      get: vi.fn(() => ({
-        isTableSettingsOpen: false,
-        persistenceKey: 'orders',
-        wasTableSettingsOpenBeforeColumnSettings: true,
-      })),
-      set: vi.fn(),
-    },
-    persistTableMetaUiStateMock: vi.fn(),
+    usePersistTableUiFlagsAction: () => persistUiFlagsMock,
   }),
 );
-
-vi.mock('@repo/ui/components/Table/utils', async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import('@repo/ui/components/Table/utils')>();
-
-  return {
-    ...actual,
-    persistTableMetaUiState: persistTableMetaUiStateMock,
-  };
-});
 
 vi.mock(
   '@repo/ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook',
@@ -65,7 +60,7 @@ describe('useClearAllColumnDrawerSettings', () => {
       wasTableSettingsOpenBeforeColumnSettings: true,
     });
     metaStore.set.mockReset();
-    persistTableMetaUiStateMock.mockReset();
+    persistUiFlagsMock.mockReset();
   });
 
   it('clears the drawer state and persists the close patch when requested', () => {
@@ -82,7 +77,7 @@ describe('useClearAllColumnDrawerSettings', () => {
       columnSizing: undefined,
       sorting: undefined,
     });
-    expect(persistTableMetaUiStateMock).toHaveBeenCalledWith({
+    expect(persistUiFlagsMock).toHaveBeenCalledWith({
       currentState: {
         isTableSettingsOpen: false,
         persistenceKey: 'orders',
@@ -113,7 +108,7 @@ describe('useClearAllColumnDrawerSettings', () => {
     });
 
     expect(columnStore.set).not.toHaveBeenCalled();
-    expect(persistTableMetaUiStateMock).not.toHaveBeenCalled();
+    expect(persistUiFlagsMock).not.toHaveBeenCalled();
     expect(metaStore.set).not.toHaveBeenCalled();
   });
 });

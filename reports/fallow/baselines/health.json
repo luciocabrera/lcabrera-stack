@@ -50,11 +50,6 @@
         "count": 1
       }
     },
-    "packages/utils/merge-arrays.util.ts": {
-      "crap_moderate": {
-        "count": 1
-      }
-    },
     "packages/vite-configs/eslint.custom-rules.shared.config.mjs": {
       "crap_critical": {
         "count": 2
@@ -70,6 +65,11 @@
     },
     "scripts/bootstrap-agenting-handoff.cjs": {
       "crap_moderate": {
+        "count": 1
+      }
+    },
+    "scripts/generate-lint-reports.mjs": {
+      "crap_high": {
         "count": 1
       }
     },
@@ -92,6 +92,11 @@
     "scripts/seed-db.cjs": {
       "crap_high": {
         "count": 1
+      }
+    },
+    "scripts/verify-commands-doc.mjs": {
+      "crap_moderate": {
+        "count": 3
       }
     }
   },

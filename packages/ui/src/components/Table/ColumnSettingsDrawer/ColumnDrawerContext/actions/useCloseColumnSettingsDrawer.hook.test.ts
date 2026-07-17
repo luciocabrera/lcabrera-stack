@@ -3,7 +3,7 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { metaStore, persistTableMetaUiStateMock } = vi.hoisted(() => ({
+const { metaStore, persistUiFlagsMock } = vi.hoisted(() => ({
   metaStore: {
     get: vi.fn(() => ({
       isTableSettingsOpen: false,
@@ -12,18 +12,15 @@ const { metaStore, persistTableMetaUiStateMock } = vi.hoisted(() => ({
     })),
     set: vi.fn(),
   },
-  persistTableMetaUiStateMock: vi.fn(),
+  persistUiFlagsMock: vi.fn(),
 }));
 
-vi.mock('@repo/ui/components/Table/utils', async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import('@repo/ui/components/Table/utils')>();
-
-  return {
-    ...actual,
-    persistTableMetaUiState: persistTableMetaUiStateMock,
-  };
-});
+vi.mock(
+  '@repo/ui/components/Table/contexts/TableConfig/meta/actions/usePersistTableUiFlagsAction.hook',
+  () => ({
+    usePersistTableUiFlagsAction: () => persistUiFlagsMock,
+  }),
+);
 
 vi.mock(
   '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
@@ -45,7 +42,7 @@ describe('useCloseColumnSettingsDrawer', () => {
       wasTableSettingsOpenBeforeColumnSettings: true,
     });
     metaStore.set.mockReset();
-    persistTableMetaUiStateMock.mockReset();
+    persistUiFlagsMock.mockReset();
   });
 
   it('persists and applies the closed-drawer meta patch', () => {
@@ -61,7 +58,7 @@ describe('useCloseColumnSettingsDrawer', () => {
       wasTableSettingsOpenBeforeColumnSettings: false,
     };
 
-    expect(persistTableMetaUiStateMock).toHaveBeenCalledWith({
+    expect(persistUiFlagsMock).toHaveBeenCalledWith({
       currentState: {
         isTableSettingsOpen: false,
         persistenceKey: 'orders',

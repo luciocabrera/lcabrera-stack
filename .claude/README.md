@@ -69,17 +69,16 @@ Skills are on-demand task workflows. `.claude/skills` is a **symlink** to `.gith
 
 Auto-invocation is driven by the `description` field (Claude matches it against user intent) and, where present, the `paths` frontmatter (skill surfaces when editing matching files). `user-invocable: true` skills can also be triggered explicitly with `/skill-name`.
 
-| Skill                         | Purpose                                                    | Auto-invokes via                                                |
-| ----------------------------- | ---------------------------------------------------------- | --------------------------------------------------------------- |
-| `react-19`                    | React 19 patterns, hooks, compiler rules                   | description + `paths: **/*.tsx, **/*.jsx`                       |
-| `react-router-framework-mode` | Loaders, actions, forms, navigation                        | description + `paths: **/routes/**, routes.ts, …`               |
-| `store-pattern`               | Split-context external store architecture                  | description + `paths: **/contexts/**`                           |
-| `quality-gate-workflow`       | **Canonical** post-change validation sequence              | description (after finishing a code change)                     |
-| `codebase-explorer`           | Phased investigation; owns `.tmp/exploration/` scratchpads | description (understand/trace/investigate)                      |
-| `code-smell-checker`          | Maintainability audits (runs in forked context)            | description                                                     |
-| `code-smell-zen`              | Diff-based smell review (runs in forked context)           | description                                                     |
-| `fallow-code-checker`         | Fallow static hygiene scan (runs in forked context)        | description                                                     |
-| `config-audit`                | claudelint triage + fix plan                               | description + `paths: AGENTS.md, .claude/**, .github/skills/**` |
+| Skill                         | Purpose                                                    | Auto-invokes via                                  |
+| ----------------------------- | ---------------------------------------------------------- | ------------------------------------------------- |
+| `react-19`                    | React 19 patterns, hooks, compiler rules                   | description + `paths: **/*.tsx, **/*.jsx`         |
+| `react-router-framework-mode` | Loaders, actions, forms, navigation                        | description + `paths: **/routes/**, routes.ts, …` |
+| `store-pattern`               | Split-context external store architecture                  | description + `paths: **/contexts/**`             |
+| `quality-gate-workflow`       | **Canonical** post-change validation sequence              | description (after finishing a code change)       |
+| `codebase-explorer`           | Phased investigation; owns `.tmp/exploration/` scratchpads | description (understand/trace/investigate)        |
+| `code-smell-checker`          | Maintainability audits (runs in forked context)            | description                                       |
+| `code-smell-zen`              | Diff-based smell review (runs in forked context)           | description                                       |
+| `fallow-code-checker`         | Fallow static hygiene scan (runs in forked context)        | description                                       |
 
 **Skill anatomy:**
 
@@ -112,10 +111,9 @@ Agents are sub-agents spawned explicitly by Claude (or by you) for isolated, hea
 
 Hooks are shell commands the harness runs automatically on lifecycle events. They live in the **committed** `.claude/settings.json` (the standard location — not a separate hooks file) so the whole team shares them.
 
-| Event          | Command                                                                                                                  | Purpose                                                           |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
-| `SessionStart` | `claudelint check-all --format json`                                                                                     | Audits AI config health at the top of every session               |
-| `Stop`         | `cd apps/react-router && git diff --quiet HEAD -- . \|\| (vp fmt . && vp lint . --fix && vp check --fix && vp run test)` | Runs the quality gate when Claude finishes, only if files changed |
+| Event  | Command                                                                                                                  | Purpose                                                           |
+| ------ | ------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
+| `Stop` | `cd apps/react-router && git diff --quiet HEAD -- . \|\| (vp fmt . && vp lint . --fix && vp check --fix && vp run test)` | Runs the quality gate when Claude finishes, only if files changed |
 
 **Adding a hook:** edit the `hooks` block in `.claude/settings.json`. For automated behaviours ("always run X after Y"), hooks are the right mechanism — not memory or preferences.
 
@@ -125,7 +123,7 @@ Hooks are shell commands the harness runs automatically on lifecycle events. The
 
 Two layers:
 
-- **`settings.json` (committed)** — team-shared allow-list: the `vp` toolchain, quality-gate commands, claudelint, skill scripts. Anything every contributor will run repeatedly and trusts unconditionally.
+- **`settings.json` (committed)** — team-shared allow-list: the `vp` toolchain, quality-gate commands, skill scripts. Anything every contributor will run repeatedly and trusts unconditionally.
 - **`settings.local.json` (not committed — ignored via global gitignore)** — personal one-off approvals accumulated during your own sessions. Keep it small; when an entry proves generally useful, promote it to `settings.json`.
 
 Entries use glob-style patterns: `Bash(cd apps/react-router && vp lint*)` approves any `vp lint` invocation prefixed with that `cd`.
@@ -169,5 +167,4 @@ Stop hook fires — if apps/react-router changed, runs the quality gate
 | Pre-approve a Bash command for the team                  | `.claude/settings.json` → `permissions.allow`                                 |
 | Pre-approve a Bash command just for me                   | `.claude/settings.local.json` → `permissions.allow`                           |
 | Add a background/isolated agent                          | `.claude/agents/<name>.md`                                                    |
-| See what claudelint thinks of the config                 | Run `/config-audit`                                                           |
 | Understand the Table store architecture                  | `.github/skills/store-pattern/SKILL.md`                                       |

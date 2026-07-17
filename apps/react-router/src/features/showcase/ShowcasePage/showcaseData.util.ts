@@ -4,7 +4,6 @@ import {
   getInitialColumnsState,
   getInitialMetaState,
 } from '@repo/ui/components/Table/contexts/TableConfig/utils';
-import { readPersistedUiStateFromSessionStorage } from '@repo/ui/components/Table/utils';
 
 import type {
   GenerateCellValueArgs,
@@ -93,13 +92,9 @@ const PERSISTENCE_KEY = 'app-showcase-table';
 
 export const SHOWCASE_COLUMNS_STATE = getInitialColumnsState({
   columns: COLUMNS,
-  persistenceKey: PERSISTENCE_KEY,
 });
 
 export const SHOWCASE_META_STATE = getInitialMetaState({
-  persistedUiState: readPersistedUiStateFromSessionStorage({
-    persistenceKey: PERSISTENCE_KEY,
-  }),
   persistenceKey: PERSISTENCE_KEY,
   title: {
     plural: 'Data Table',

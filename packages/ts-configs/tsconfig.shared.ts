@@ -15,6 +15,8 @@ type CreateNodeTsConfigArgs = {
   /** Path aliases for this config — node configs have none by default. */
   readonly paths?: Record<string, readonly string[]>;
   readonly tsBuildInfoFile: string;
+  /** Ambient type roots — defaults to `['node']`. Pass `[]` for a package contractually barred from Node globals (e.g. `@repo/utils`, which is pure and side-effect free), so the config cannot hand it the APIs it must not reach for. */
+  readonly types?: readonly string[];
 };
 
 type TsConfig = {
@@ -78,6 +80,7 @@ const createAppCompilerOptions = ({
 const createNodeCompilerOptions = ({
   paths,
   tsBuildInfoFile,
+  types = ['node'],
 }: CreateNodeTsConfigArgs): Record<string, unknown> => ({
   allowImportingTsExtensions: true,
   erasableSyntaxOnly: true,
@@ -88,6 +91,10 @@ const createNodeCompilerOptions = ({
   moduleResolution: 'bundler',
   noEmit: true,
   noFallthroughCasesInSwitch: true,
+  // Kept in lockstep with createAppCompilerOptions: without it the Node-context
+  // packages were type-checked strictly less than the browser ones, so an
+  // unchecked arr[0] passed here and failed there for no principled reason.
+  noUncheckedIndexedAccess: true,
   noUncheckedSideEffectImports: true,
   noUnusedLocals: true,
   noUnusedParameters: true,
@@ -96,7 +103,7 @@ const createNodeCompilerOptions = ({
   strict: true,
   target: 'ES2025',
   tsBuildInfoFile,
-  types: ['node'],
+  types,
   verbatimModuleSyntax: true,
 });
 
@@ -144,10 +151,15 @@ export const createNodeTsConfig = ({
   include,
   paths,
   tsBuildInfoFile,
+  types,
 }: CreateNodeTsConfigArgs): TsConfig =>
   mergeTsConfig(
     {
-      compilerOptions: createNodeCompilerOptions({ paths, tsBuildInfoFile }),
+      compilerOptions: createNodeCompilerOptions({
+        paths,
+        tsBuildInfoFile,
+        types,
+      }),
       exclude: NODE_TS_CONFIG.exclude,
       include: NODE_TS_CONFIG.include,
     },
