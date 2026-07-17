@@ -1,5 +1,4 @@
 export const PERSISTENCE_VERSION = 1;
-export const DATA_STATE_SESSION_KEY_SUFFIX = 'dataState';
 
 /**
  * Cookie slice suffix for the drawer UI state. It must be readable during SSR

@@ -8,7 +8,6 @@ export { getNormalizedColumns } from './getNormalizedColumns.util';
 export { getPinnedColumnOffsets } from './getPinnedColumnOffsets.util';
 export { getPinnedDerivedColumnsState } from './getPinnedDerivedColumnsState.util';
 export { persistTableMetaUiState } from './persistTableMetaUiState.service';
-export { readPersistedDataStateFromSessionStorage } from './readPersistedDataStateFromSessionStorage.util';
 export { readPersistedStateFromCookie } from './readPersistedStateFromCookie.util';
 export { readPersistedUiFlagsFromCookie } from './readPersistedUiFlagsFromCookie.util';
 export { resolveColumnWidthBounds } from './resolveColumnWidthBounds.util';

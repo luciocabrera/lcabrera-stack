@@ -55,6 +55,15 @@ describe('AppShell', () => {
     expect(screen.getByTestId('app-navigation').textContent).toBe('0');
   });
 
+  it('exposes routed content as the one main landmark', () => {
+    render(<AppShell getNavigationItems={getNavigationItemsMock} />);
+
+    const main = screen.getByRole('main');
+
+    expect(main.contains(screen.getByTestId('outlet'))).toBe(true);
+    expect(document.querySelectorAll('main')).toHaveLength(1);
+  });
+
   it('passes getNavigationItems into AppNavigation', () => {
     getNavigationItemsMock.mockReturnValue([{ label: 'Home', type: 'button' }]);
 
