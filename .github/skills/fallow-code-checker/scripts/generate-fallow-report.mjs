@@ -82,8 +82,8 @@ const runFallow = (rawArtifactPath) => {
   const nodeBinDir = dirname(process.execPath);
   const fixedPathEnv =
     process.platform === 'win32'
-      ? nodeBinDir + ';' + String.raw`C:\Windows\System32`
-      : nodeBinDir + ':/usr/bin:/bin';
+      ? `${nodeBinDir};${String.raw`C:\Windows\System32`}`
+      : `${nodeBinDir}:/usr/bin:/bin`;
 
   const result = spawnSync(
     process.execPath,

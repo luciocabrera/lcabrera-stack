@@ -19,8 +19,10 @@ describe('buildRunnerScriptScaffold', () => {
     expect(script).toContain("scannerId: 'cycle-finder'");
     expect(script).toContain('deterministicScannerConfigs.constants.ts');
     // No unresolved generation-time interpolations may leak into the output.
-    expect(script).not.toContain('${scannerId}');
-    expect(script).not.toContain('${rawFileName}');
+    // Matched as regexes so the `${...}` needle is not itself a string that
+    // reads as a template placeholder (Biome's noTemplateCurlyInString).
+    expect(script).not.toMatch(/\$\{scannerId\}/);
+    expect(script).not.toMatch(/\$\{rawFileName\}/);
   });
 
   it('defaults the raw artifact name to <scannerId>.raw.json', () => {

@@ -100,8 +100,7 @@ const readWorkspaceCoverage = async ({ dir, name }) => {
  * Istanbul keys every entry by absolute source path, so entries from different
  * workspaces never collide and a shallow merge is exactly right.
  */
-const mergeCoverage = (reports) =>
-  reports.reduce((merged, report) => ({ ...merged, ...report }), {});
+const mergeCoverage = (reports) => Object.assign({}, ...reports);
 
 const main = async () => {
   if (shouldRun) {

@@ -88,8 +88,8 @@ const fallowBinPath = path.resolve(
 const nodeBinDir = path.dirname(process.execPath);
 const fixedPathEnv =
   process.platform === 'win32'
-    ? nodeBinDir + ';' + String.raw`C:\Windows\System32`
-    : nodeBinDir + ':/usr/bin:/bin';
+    ? `${nodeBinDir};${String.raw`C:\Windows\System32`}`
+    : `${nodeBinDir}:/usr/bin:/bin`;
 const analysisPath = path.join(
   repoRoot,
   'reports',

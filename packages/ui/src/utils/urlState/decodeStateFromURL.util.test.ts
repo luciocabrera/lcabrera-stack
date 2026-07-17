@@ -30,7 +30,9 @@ describe('decodeStateFromURL', () => {
       convertArraysToSets: ['columnVisibility'],
       encoded,
     });
-    expect((result!.columnVisibility as Set<string>).has('id')).toBe(true);
+    const columnVisibility = result?.columnVisibility;
+    expect(columnVisibility).toBeInstanceOf(Set);
+    expect((columnVisibility as Set<string>).has('id')).toBe(true);
   });
 
   it('skips convertArraysToSets when key is not an array', () => {

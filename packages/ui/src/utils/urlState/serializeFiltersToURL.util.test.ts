@@ -2,6 +2,17 @@ import { describe, expect, it } from 'vitest';
 
 import { serializeFiltersToURL } from './serializeFiltersToURL.util';
 
+// serialize*ToURL returns `string | undefined` (undefined for empty input);
+// every case below serializes a non-empty value, so the result is a string.
+// The typeof guard narrows it without a non-null assertion (Biome's
+// noNonNullAssertion) and throws a clear message if the invariant ever breaks.
+const parseSerialized = (result: string | undefined) => {
+  if (typeof result !== 'string') {
+    throw new TypeError('expected serialize to return a JSON string');
+  }
+  return JSON.parse(result) as Record<string, unknown>;
+};
+
 describe('serializeFiltersToURL', () => {
   it('returns undefined for empty filters', () => {
     expect(serializeFiltersToURL({})).toBeUndefined();
@@ -11,7 +22,7 @@ describe('serializeFiltersToURL', () => {
     const result = serializeFiltersToURL({
       active: { type: 'boolean', value: true },
     });
-    const parsed = JSON.parse(result!) as Record<string, unknown>;
+    const parsed = parseSerialized(result);
     expect(parsed.active).toBe(true);
   });
 
@@ -19,7 +30,7 @@ describe('serializeFiltersToURL', () => {
     const result = serializeFiltersToURL({
       name: { operator: 'contains', type: 'text', value: 'hello' },
     });
-    const parsed = JSON.parse(result!) as Record<string, unknown>;
+    const parsed = parseSerialized(result);
     expect(parsed.name).toEqual(['ct', 'hello']);
   });
 
@@ -27,7 +38,7 @@ describe('serializeFiltersToURL', () => {
     const result = serializeFiltersToURL({
       age: { operator: 'between', type: 'number', value: 10, value2: 20 },
     });
-    const parsed = JSON.parse(result!) as Record<string, unknown>;
+    const parsed = parseSerialized(result);
     expect(parsed.age).toEqual(['bw', 10, 20]);
   });
 
@@ -35,7 +46,7 @@ describe('serializeFiltersToURL', () => {
     const result = serializeFiltersToURL({
       age: { operator: 'equals', type: 'number', value: 42 },
     });
-    const parsed = JSON.parse(result!) as Record<string, unknown>;
+    const parsed = parseSerialized(result);
     expect(parsed.age).toEqual(['eq', 42]);
   });
 
@@ -47,7 +58,7 @@ describe('serializeFiltersToURL', () => {
         values: ['Active', 'Inactive'],
       },
     });
-    const parsed = JSON.parse(result!) as Record<string, unknown>;
+    const parsed = parseSerialized(result);
     expect(parsed.status).toEqual(['Active', 'Inactive']);
   });
 
@@ -55,7 +66,7 @@ describe('serializeFiltersToURL', () => {
     const result = serializeFiltersToURL({
       status: { operator: 'notEquals', type: 'select', values: ['Draft'] },
     });
-    const parsed = JSON.parse(result!) as Record<string, unknown>;
+    const parsed = parseSerialized(result);
     expect(parsed.status).toEqual(['!', 'Draft']);
   });
 
@@ -68,7 +79,7 @@ describe('serializeFiltersToURL', () => {
         value2: '2024-12-31',
       },
     });
-    const parsed = JSON.parse(result!) as Record<string, unknown>;
+    const parsed = parseSerialized(result);
     expect(parsed.date).toEqual(['bw', '2024-01-01', '2024-12-31']);
   });
 
@@ -76,7 +87,7 @@ describe('serializeFiltersToURL', () => {
     const result = serializeFiltersToURL({
       date: { operator: 'after', type: 'date', value: '2024-01-01' },
     });
-    const parsed = JSON.parse(result!) as Record<string, unknown>;
+    const parsed = parseSerialized(result);
     expect(parsed.date).toEqual(['af', '2024-01-01']);
   });
 
@@ -84,7 +95,7 @@ describe('serializeFiltersToURL', () => {
     const result = serializeFiltersToURL({
       status: { operator: 'equals', type: 'select', value: 'Active' },
     });
-    const parsed = JSON.parse(result!) as Record<string, unknown>;
+    const parsed = parseSerialized(result);
 
     expect(parsed.status).toEqual(['Active']);
   });
@@ -93,7 +104,7 @@ describe('serializeFiltersToURL', () => {
     const result = serializeFiltersToURL({
       amount: { operator: 'between', type: 'number', value: 100 },
     });
-    const parsed = JSON.parse(result!) as Record<string, unknown>;
+    const parsed = parseSerialized(result);
 
     expect(parsed.amount).toEqual(['bw', 100]);
   });
@@ -102,7 +113,7 @@ describe('serializeFiltersToURL', () => {
     const result = serializeFiltersToURL({
       date: { operator: 'between', type: 'date', value: '2024-01-01' },
     });
-    const parsed = JSON.parse(result!) as Record<string, unknown>;
+    const parsed = parseSerialized(result);
 
     expect(parsed.date).toEqual(['bw', '2024-01-01']);
   });

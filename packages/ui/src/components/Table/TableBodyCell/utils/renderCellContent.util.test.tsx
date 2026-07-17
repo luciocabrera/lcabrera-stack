@@ -24,13 +24,11 @@ describe('renderCellContent', () => {
 
   it('renders a boolean value using TableCheckDisplay', () => {
     render(
-      <>
-        {renderCellContent({
-          dataType: 'boolean',
-          label: 'Enabled',
-          value: true,
-        })}
-      </>,
+      renderCellContent({
+        dataType: 'boolean',
+        label: 'Enabled',
+        value: true,
+      }),
     );
 
     const checkbox = screen.getByRole('checkbox', {
