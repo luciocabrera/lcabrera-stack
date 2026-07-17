@@ -9,8 +9,7 @@ tsconfig.shared.ts          ← edit this to change any compiler option
         │
         ▼  node --experimental-strip-types generate.ts
         │
-        ├── packages/ts-configs/tsconfig.app.json
-        ├── packages/ts-configs/tsconfig.node.json
+        ├── packages/ts-configs/tsconfig.app.json   ← this package's own (Node)
         ├── apps/react-router/tsconfig.app.json    ← generated
         ├── apps/react-router/tsconfig.node.json   ← generated
         ├── apps/admin_system/tsconfig.app.json    ← generated
@@ -33,10 +32,19 @@ The `tsconfig.app.json` and `tsconfig.node.json` files are **build artifacts** �
 
 ## Config variants
 
-| Config               | Used for                                 | Key features                                                                  |
-| -------------------- | ---------------------------------------- | ----------------------------------------------------------------------------- |
-| `createAppTsConfig`  | React / browser apps                     | `jsx: react-jsx`, `DOM` libs, `@/*` path alias, `.react-router/types` rootDir |
-| `createNodeTsConfig` | Node.js configs (`vite.config.ts`, etc.) | No JSX, `types: ["node"]`, minimal lib                                        |
+| Config               | Used for                               | Key features                                                                  |
+| -------------------- | -------------------------------------- | ----------------------------------------------------------------------------- |
+| `createAppTsConfig`  | React / browser apps                   | `jsx: react-jsx`, `DOM` libs, `@/*` path alias, `.react-router/types` rootDir |
+| `createNodeTsConfig` | Node.js configs and Node-only packages | No JSX, `types: ["node"]` (override with `types`), minimal lib                |
+
+Both variants set the same strictness — `strict`, `noUncheckedIndexedAccess`,
+`noUnusedLocals`, `noUnusedParameters`. Keep them in lockstep: when the node
+variant lacked `noUncheckedIndexedAccess`, the Node-context packages were
+type-checked strictly less than the browser ones for no principled reason.
+
+`createNodeTsConfig`'s `types` accepts `[]` for a package that must stay free of
+Node globals — `@repo/utils` uses this, because it is pure and side-effect free by
+contract and anything touching the process belongs in `@repo/node-runtime`.
 
 ## Running the generator
 
@@ -67,6 +75,12 @@ cd packages/ts-configs && vp run generate
 ```
 
 Run this whenever you change `tsconfig.shared.ts` or add a new app.
+
+**Always follow it with `vp fmt .` from the workspace root.** The generator writes
+plain `JSON.stringify` output (one array element per line); Oxfmt collapses short
+arrays inline. Skipping the format pass leaves every regenerated file dirty
+against the tracked copy and fails the gate's format stage — the diff looks like
+a real change but is pure whitespace.
 
 ## Adding a new app
 
@@ -104,9 +118,15 @@ createAppTsConfig({
 
 ## Files
 
-| File                 | Purpose                                                      |
-| -------------------- | ------------------------------------------------------------ |
-| `tsconfig.shared.ts` | Source of truth — all compiler options and factory functions |
-| `generate.ts`        | Script that writes JSON files into every app                 |
-| `tsconfig.app.json`  | Generated — app config for this package itself               |
-| `tsconfig.node.json` | Generated — node config for this package itself              |
+| File                 | Purpose                                                                                 |
+| -------------------- | --------------------------------------------------------------------------------------- |
+| `tsconfig.shared.ts` | Source of truth — all compiler options and factory functions                            |
+| `generate.ts`        | Script that writes JSON files into every app                                            |
+| `tsconfig.app.json`  | Generated — this package's own config, and a **Node** one: its source runs under `node` |
+
+> This package used to also generate a `tsconfig.node.json` for itself. Both of
+> its self-configs were dead: the app one required `vite/client` types that this
+> package has no dependency on (tsc exited before reading a file), and the node
+> one included only a `vite.config.ts` that does not exist here. They are
+> replaced by the single Node config above, which actually covers
+> `generate.ts` / `tsconfig.shared.ts` and is enforced by `vp run typecheck:all`.

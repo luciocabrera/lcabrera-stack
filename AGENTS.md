@@ -116,7 +116,7 @@ Selection guideline:
 | Lint (check only)    | `vp lint .`                                                                            |
 | Format               | `vp fmt .`                                                                             |
 | Format check         | `vp fmt --check .`                                                                     |
-| Type check           | `react-router typegen && tsc --noEmit` (or `vp check`)                                 |
+| Type check           | `vp run typecheck` (real tsc) — `vp check` runs tsgolint, which is a different pass    |
 | Run tests            | `vp run test` (never `vp test` — see the `quality-gate-workflow` skill)                |
 | Full validation      | The canonical quality gate — see [Post-Change Quality Gate](#post-change-quality-gate) |
 | Add a package        | `vp add <package>`                                                                     |
@@ -137,11 +137,16 @@ Root scripts are **orchestration only** — anything project-specific lives in t
 | Merge coverage for the fallow gate       | `vp run coverage:merge`                                  |
 | Format everything                        | `vp run format:all`                                      |
 | Typegen (both React Router apps)         | `vp run typegen:all`                                     |
-| Full gate (typegen+check+tests)          | `vp run check:safe`                                      |
+| Type-check every workspace with real tsc | `vp run typecheck:all`                                   |
+| Full gate (typegen+check+types+tests)    | `vp run check:safe`                                      |
 | Dev servers (frontend + express api)     | `vp run dev` (`dev:fast` = fastify, `dev:cqms` = CQMS)   |
 | Prod servers (frontend + express api)    | `vp run start` (`start:fast`, `start:cqms`)              |
 
 There is deliberately **no `start:all`/`dev:all`**: `car-sales-api` and `car-sales-api-fast` are performance-comparison alternatives serving the same domain and must never run at the same time — always pick one combo.
+
+**`vp check` type-checks, but it is not `tsc` — both run, and `typecheck:all` is the authority.** `vp check`'s type pass is **tsgolint** (Oxlint's type-aware path, enabled by `lint.options.typeCheck` in the root `vite.config.ts`), and it does resolve each workspace's own strict `tsconfig.app.json` — `strict`, `noUncheckedIndexedAccess` and `noUnusedLocals` all fire under it. What it does **not** do is run the per-workspace `typecheck` scripts, and those carry work no linter replicates: `packages/ui` gates its public API against server-only `node:*` imports (`check:public-api`), and both React Router apps regenerate route types first. Every one of the 16 workspaces now has a `typecheck` script, CI runs `vp run typecheck:all` as its own step in `check-safe.yml`, and `check:safe` chains it. Keep the two passes in sync: a new workspace gets a `typecheck` script **and** a tsconfig, or it silently falls back to the near-empty root `tsconfig.json` and is checked far more loosely than every other workspace (this is exactly how `utils`/`plugins`/`vite-configs` went un-strict for so long — `noUncheckedIndexedAccess` never fired there).
+
+**tsconfigs are generated — never hand-edit them.** `packages/ts-configs/generate.ts` + `tsconfig.shared.ts` are the source of truth for every `tsconfig.app.json`/`tsconfig.node.json`; run `vp run --filter @repo/ts-configs generate` after changing either. A hand-edit survives exactly until the next unrelated regeneration silently reverts it — the `@repo/ui` bare-specifier alias in both apps was lost this way and had to be folded back into the generator. If a config needs something bespoke, add it to the generator entry, not to the JSON.
 
 **Both linters run in every workspace.** Oxlint (`vp lint`) covers the whole tree from the root; the eslint pass (`vp run lint:eslint` / `lint:eslint:check`) exists in all 15 workspaces — React workspaces use `@repo/vite-configs/eslint-custom-rules`, node/library workspaces use `@repo/vite-configs/eslint-base-custom-rules` (same stack minus React/StyleX, and without `clean-import-paths`, which strips the import extensions node-resolution code requires). Inherited eslint violations are baselined per workspace in `eslint-suppressions.json` (ESLint bulk suppressions) — **new violations fail the gate**: CI runs `vp run -r lint:eslint:check` as its own step in `check-safe.yml`, because `vp check` covers only fmt + Oxlint + tsc and would let every eslint-only finding through. Burn debt down and shrink the baseline with `npx eslint . --config eslint.config.mjs --prune-suppressions`. Never add new entries by hand, and never inline-`// eslint-disable`/`oxlint-disable` a finding or switch the rule off in config — **verify, then fix the code instead** (see Non-Negotiable Rule 11). A lint finding is real until you've read the flagged code and confirmed otherwise; stylistic `unicorn/*` rules (e.g. `prefer-simple-condition-first`, `no-nested-ternary`) get fixed by restructuring, never silenced. **Exception: `packages/ui` is never silenced** — it must not carry an `eslint-suppressions.json` at all; every finding there gets fixed, never baselined or disabled.
 
@@ -271,11 +276,17 @@ The canonical validation sequence is owned by the **`quality-gate-workflow` skil
 vp fmt .                    # 1. auto-format (Oxfmt)
 vp lint .                   # 2. lint (Oxlint) — fix all reported issues (use --fix first)
 vp run lint:eslint:check    # 3. eslint custom-rules pass — NOT covered by `vp check` (autofix: `vp run lint:eslint`)
-vp check                    # 4. TypeScript type-check — zero errors required
-vp run test                 # 5. unit/integration tests — all must pass (never `vp test`)
+vp check                    # 4. fmt + Oxlint + tsgolint type pass — zero errors required
+vp run typecheck            # 5. real tsc for this workspace — NOT the same pass as step 4
+vp run test                 # 6. unit/integration tests — all must pass (never `vp test`)
 ```
 
-Step 3 is the one that gets skipped: `vp check` is Vite+'s built-in fmt + **Oxlint** + tsc and never runs the eslint pass, so `perfectionist` import/module ordering, the react/stylex rule sets, and `local-rules` surface only there. While iterating, `vp run lint` in a workspace chains both autofixes (`vp lint . --fix` then `vp run lint:eslint`) and is the fastest loop.
+Steps 3 and 5 are the ones that get skipped, and neither is redundant:
+
+- **Step 3** — `vp check` is Vite+'s built-in fmt + **Oxlint** + tsgolint and never runs the eslint pass, so `perfectionist` import/module ordering, the react/stylex rule sets, and `local-rules` surface only there.
+- **Step 5** — `vp check`'s type pass is tsgolint, not `tsc`, and it knows nothing about the workspace's `typecheck` script. In `packages/ui` that script is also what runs `check:public-api` (the server-only `node:*` import guard); in the React Router apps it regenerates route types first.
+
+From the repo root, `vp run typecheck:all` covers all 16 workspaces in dependency order, and `vp run check:safe` chains the whole gate the way CI does. While iterating, `vp run lint` in a workspace chains both lint autofixes (`vp lint . --fix` then `vp run lint:eslint`) and is the fastest loop.
 
 ### Documentation Update Rule
 
@@ -307,6 +318,6 @@ Docs are local at `node_modules/vite-plus/docs` or online at https://viteplus.de
 ## Review Checklist
 
 - [ ] Run `vp install` after pulling remote changes and before getting started.
-- [ ] Run the quality gate (`vp fmt .`, `vp lint .`, `vp check`, `vp run test`) to format, lint, type check and test changes.
+- [ ] Run the quality gate (`vp fmt .`, `vp lint .`, `vp run lint:eslint:check`, `vp check`, `vp run typecheck`, `vp run test`) to format, lint, type check and test changes.
 - [ ] Check if there are `vite.config.ts` tasks or `package.json` scripts necessary for validation, run via `vp run <script>`.
 - [ ] If setup, runtime, or package-manager behavior looks wrong, run `vp env doctor` and include its output when asking for help.

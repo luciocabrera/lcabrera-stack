@@ -13,16 +13,13 @@
     "noUncheckedSideEffectImports": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "paths": {
-      "@repo/scan-orchestrator/*": ["./src/*"]
-    },
     "skipLibCheck": true,
     "strict": true,
     "target": "ES2025",
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
-    "types": ["node"],
+    "types": [],
     "verbatimModuleSyntax": true
   },
-  "exclude": ["utils"],
-  "include": ["src", "vite.config.ts"]
+  "exclude": ["node_modules"],
+  "include": ["**/*.ts"]
 }

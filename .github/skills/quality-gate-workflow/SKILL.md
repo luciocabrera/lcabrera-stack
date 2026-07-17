@@ -29,17 +29,28 @@ This skill defines the mandatory validation sequence after code changes.
 1. `vp fmt .`
 2. `vp lint .` — Oxlint
 3. `vp run lint:eslint:check` — the eslint custom-rules pass (`--fix` variant: `vp run lint:eslint`)
-4. `vp check`
-5. `vp run test`
+4. `vp check` — fmt + Oxlint + the **tsgolint** type pass
+5. `vp run typecheck` — the real **tsc** pass (plus `check:public-api` in `packages/ui`)
+6. `vp run test`
 
 Use this exact order because each stage catches issues earlier/cheaper than the next.
 
 **Stage 3 is not optional and is not covered by stage 4.** `vp check` is Vite+'s
-built-in fmt + **Oxlint** + tsc; it does not know about the per-workspace eslint
-pass. Every eslint-only rule set lives behind stage 3 — `perfectionist`
+built-in fmt + **Oxlint** + tsgolint; it does not know about the per-workspace
+eslint pass. Every eslint-only rule set lives behind stage 3 — `perfectionist`
 import/module ordering, the react/stylex rule sets, and `local-rules`. Running
 only `vp lint .` will report clean on code that fails CI, which now runs
 `vp run -r lint:eslint:check` as its own step.
+
+**Stage 5 is not optional and is not covered by stage 4 either.** Stage 4's type
+pass is tsgolint — Oxlint's type-aware path. It does read each workspace's own
+strict `tsconfig.app.json`, so it is a genuine type-check, but it is not `tsc`
+and it never runs the workspace's `typecheck` script. That script is where
+`packages/ui` enforces `check:public-api` (its guard against server-only `node:*`
+imports reaching the public API) and where the React Router apps regenerate route
+types before checking. CI runs `vp run typecheck:all` as its own step in
+`check-safe.yml`. From the root, `vp run typecheck:all` covers all 16 workspaces
+in dependency order.
 
 Shortcut: `vp run lint` in a workspace chains `vp lint . --fix` **and**
 `vp run lint:eslint` (autofix for both), which is usually what you want while

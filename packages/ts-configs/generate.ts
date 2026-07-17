@@ -25,16 +25,21 @@ const writeConfigFile = async ({
 
 const configs = [
   {
-    config: createAppTsConfig({
+    // This package's own source (generate.ts + tsconfig.shared.ts) is
+    // Node-only: node:fs/node:path/node:url, run via `node`, no bundler and
+    // no browser context. It previously emitted an app-config/node-config
+    // demo pair for itself, but neither one ever checked this source: the app
+    // config demanded `vite/client` types from a package that does not depend
+    // on vite (so tsc exited 2 before reading a single file), and the node
+    // config included only `vite.config.ts`, which this package does not have.
+    // A generator that defines the repo's strictness while being exempt from
+    // it is the one config here that has to be right.
+    config: createNodeTsConfig({
+      exclude: ['node_modules'],
+      include: ['**/*.ts'],
       tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
     }),
     filePath: resolve(packageDirectory, 'tsconfig.app.json'),
-  },
-  {
-    config: createNodeTsConfig({
-      tsBuildInfoFile: './node_modules/.tmp/tsconfig.node.tsbuildinfo',
-    }),
-    filePath: resolve(packageDirectory, 'tsconfig.node.json'),
   },
   {
     // admin_system consumes @repo/data-access/@repo/scan-ingestion/@repo/ui
@@ -48,6 +53,11 @@ const configs = [
       paths: {
         '@repo/data-access/*': ['../../packages/data-access/src/*'],
         '@repo/scan-ingestion/*': ['../../packages/scan-ingestion/src/*'],
+        // Bare specifier — `@repo/ui` resolves to the public-api barrel, not
+        // a subpath. Distinct from the wildcard below and NOT implied by it
+        // (`@repo/ui/*` never matches the bare form), so dropping it breaks
+        // every `from '@repo/ui'` import in this app.
+        '@repo/ui': ['../../packages/ui/src/public-api.ts'],
         '@repo/ui/*': ['../../packages/ui/src/*'],
       },
       tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
@@ -64,6 +74,8 @@ const configs = [
     config: createAppTsConfig({
       paths: {
         '@repo/data-access/*': ['../../packages/data-access/src/*'],
+        // Bare specifier — see the identical entry under admin_system above.
+        '@repo/ui': ['../../packages/ui/src/public-api.ts'],
         '@repo/ui/*': ['../../packages/ui/src/*'],
       },
       tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
@@ -167,6 +179,47 @@ const configs = [
       workspaceRoot,
       'apps/scan-orchestrator/tsconfig.app.json',
     ),
+  },
+  {
+    // @repo/utils is pure and side-effect free by contract (AGENTS.md §1),
+    // which is exactly why it gets `types: []` rather than the default
+    // ['node']: denying it the Node ambient globals means a stray process/fs
+    // reach-in fails typecheck here instead of quietly eroding the guarantee
+    // that keeps this package the safe half of the utils/node-runtime split.
+    //
+    // Flat package (no src/ — the *.util.ts files sit at the package root),
+    // so include is overridden. Naming an `exclude` at all opts out of
+    // TypeScript's implicit node_modules exclusion, so it must be restated —
+    // otherwise `**/*.ts` drags the entire dependency tree into the program.
+    config: createNodeTsConfig({
+      exclude: ['node_modules'],
+      include: ['**/*.ts'],
+      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
+      types: [],
+    }),
+    filePath: resolve(workspaceRoot, 'packages/utils/tsconfig.app.json'),
+  },
+  {
+    // Genuinely Node-only: a Vite build plugin reading the emitted manifest
+    // through node:fs/node:path off process.cwd(). Flat package, same
+    // include/exclude reasoning as @repo/utils above.
+    config: createNodeTsConfig({
+      exclude: ['node_modules'],
+      include: ['**/*.ts'],
+      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
+    }),
+    filePath: resolve(workspaceRoot, 'packages/plugins/tsconfig.app.json'),
+  },
+  {
+    // Genuinely Node-only: the shared Vite/lint/fmt config factories every
+    // workspace's vite.config.ts imports. Flat package, same include/exclude
+    // reasoning as @repo/utils above.
+    config: createNodeTsConfig({
+      exclude: ['node_modules'],
+      include: ['**/*.ts'],
+      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
+    }),
+    filePath: resolve(workspaceRoot, 'packages/vite-configs/tsconfig.app.json'),
   },
 ] as const;
 

@@ -21,6 +21,7 @@
     "lint:check": "vp run --filter eslint-local-rules-shared build && vp lint . && vp run lint:eslint:check",
     "lint:eslint": "eslint . --config eslint.config.mjs --fix --max-warnings 0",
     "lint:eslint:check": "eslint . --config eslint.config.mjs --max-warnings 0",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json",
     "test": "node node_modules/vitest/vitest.mjs run --passWithNoTests"
   },
   "devDependencies": {
@@ -30,6 +31,7 @@
     "@repo/plugins": "workspace:*",
     "@repo/utils": "workspace:*",
     "@stylexjs/unplugin": "catalog:",
+    "@types/node": "catalog:",
     "babel-plugin-react-compiler": "catalog:",
     "eslint": "catalog:",
     "eslint-config-prettier": "catalog:",
@@ -37,6 +39,7 @@
     "eslint-plugin-security": "catalog:",
     "eslint-plugin-unicorn": "catalog:",
     "globals": "catalog:",
+    "typescript": "catalog:",
     "typescript-eslint": "catalog:",
     "vite-plugin-babel": "catalog:",
     "vite-plus": "catalog:",

@@ -36,6 +36,18 @@ jobs:
         id: quality_gate
         run: vp check
 
+      - name: TypeScript project type-check (tsc)
+        id: typecheck_gate
+        # `vp check`'s type pass is tsgolint driving each workspace's
+        # tsconfig — close to tsc, but not tsc, and it knows nothing about
+        # the per-workspace `typecheck` scripts. Those scripts carry work
+        # tsgolint does not do: packages/ui gates its public API against
+        # server-only node:* imports (check:public-api), and the React Router
+        # apps regenerate route types before checking. Running the real
+        # compiler here is the reference implementation the other passes are
+        # approximations of.
+        run: vp run typecheck:all
+
       - name: ESLint custom-rules pass
         id: eslint_gate
         # `vp check` is fmt + Oxlint + tsc only — it does not know about the
@@ -60,6 +72,12 @@ jobs:
             ESLINT_STATUS="❌ Failed"
           fi
 
+          if [[ "${{ steps.typecheck_gate.outcome }}" == "success" ]]; then
+            TYPECHECK_STATUS="✅ Passed"
+          else
+            TYPECHECK_STATUS="❌ Failed"
+          fi
+
           if [[ "${{ steps.preflight.outcome }}" == "success" ]]; then
             PREFLIGHT_STATUS="✅ Passed"
           else
@@ -74,7 +92,8 @@ jobs:
           echo "| Format | $CHECK_STATUS |" >> "$GITHUB_STEP_SUMMARY"
           echo "| Lint (Oxlint) | $CHECK_STATUS |" >> "$GITHUB_STEP_SUMMARY"
           echo "| Lint (ESLint custom rules) | $ESLINT_STATUS |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| TypeScript | $CHECK_STATUS |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| TypeScript (tsgolint via vp check) | $CHECK_STATUS |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| TypeScript (tsc · every workspace) | $TYPECHECK_STATUS |" >> "$GITHUB_STEP_SUMMARY"
 
   fallow-audit:
     name: Fallow Audit (new-only gate)
