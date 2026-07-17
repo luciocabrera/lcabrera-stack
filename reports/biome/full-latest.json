@@ -1,16 +1,16 @@
 {
   "summary": {
     "changed": 0,
-    "unchanged": 2831,
+    "unchanged": 2837,
     "matches": 0,
-    "duration": 169945500,
-    "errors": 7,
+    "duration": 183925584,
+    "errors": 0,
     "warnings": 20,
     "infos": 100,
     "skipped": 0,
     "suggestedFixesSkipped": 0,
     "diagnosticsNotPrinted": 0,
-    "scannerDuration": 235617394
+    "scannerDuration": 246122815
   },
   "diagnostics": [
     {
@@ -326,11 +326,11 @@
       "location": {
         "path": "packages/ui/src/components/Table/TableBodyCell/utils/renderDisplayedContent.util.test.tsx",
         "start": {
-          "line": 13,
+          "line": 29,
           "column": 7
         },
         "end": {
-          "line": 19,
+          "line": 35,
           "column": 10
         }
       },
@@ -343,11 +343,11 @@
       "location": {
         "path": "packages/ui/src/components/Table/TableBodyCell/utils/renderDisplayedContent.util.test.tsx",
         "start": {
-          "line": 29,
+          "line": 13,
           "column": 7
         },
         "end": {
-          "line": 35,
+          "line": 19,
           "column": 10
         }
       },
@@ -479,11 +479,11 @@
       "location": {
         "path": "packages/ui/src/components/Table/utils/getNormalizedColumns.test.ts",
         "start": {
-          "line": 29,
+          "line": 23,
           "column": 19
         },
         "end": {
-          "line": 29,
+          "line": 23,
           "column": 25
         }
       },
@@ -496,11 +496,28 @@
       "location": {
         "path": "packages/ui/src/components/Table/utils/getNormalizedColumns.test.ts",
         "start": {
-          "line": 23,
+          "line": 24,
           "column": 19
         },
         "end": {
-          "line": 23,
+          "line": 24,
+          "column": 24
+        }
+      },
+      "advices": []
+    },
+    {
+      "severity": "info",
+      "message": "The computed expression can be simplified without the use of a string literal.",
+      "category": "lint/complexity/useLiteralKeys",
+      "location": {
+        "path": "packages/ui/src/components/Table/utils/getNormalizedColumns.test.ts",
+        "start": {
+          "line": 29,
+          "column": 19
+        },
+        "end": {
+          "line": 29,
           "column": 25
         }
       },
@@ -630,48 +647,14 @@
       "message": "The computed expression can be simplified without the use of a string literal.",
       "category": "lint/complexity/useLiteralKeys",
       "location": {
-        "path": "packages/ui/src/components/Table/utils/getNormalizedColumns.test.ts",
-        "start": {
-          "line": 24,
-          "column": 19
-        },
-        "end": {
-          "line": 24,
-          "column": 24
-        }
-      },
-      "advices": []
-    },
-    {
-      "severity": "info",
-      "message": "The computed expression can be simplified without the use of a string literal.",
-      "category": "lint/complexity/useLiteralKeys",
-      "location": {
         "path": "packages/ui/src/components/Table/utils/getPinnedColumnOffsets.util.test.ts",
         "start": {
-          "line": 34,
+          "line": 37,
           "column": 19
         },
         "end": {
-          "line": 34,
-          "column": 23
-        }
-      },
-      "advices": []
-    },
-    {
-      "severity": "info",
-      "message": "The computed expression can be simplified without the use of a string literal.",
-      "category": "lint/complexity/useLiteralKeys",
-      "location": {
-        "path": "packages/ui/src/components/Table/utils/getPinnedColumnOffsets.util.test.ts",
-        "start": {
-          "line": 35,
-          "column": 19
-        },
-        "end": {
-          "line": 35,
-          "column": 23
+          "line": 37,
+          "column": 25
         }
       },
       "advices": []
@@ -700,12 +683,12 @@
       "location": {
         "path": "packages/ui/src/components/Table/utils/getPinnedColumnOffsets.util.test.ts",
         "start": {
-          "line": 37,
+          "line": 34,
           "column": 19
         },
         "end": {
-          "line": 37,
-          "column": 25
+          "line": 34,
+          "column": 23
         }
       },
       "advices": []
@@ -910,6 +893,23 @@
         "end": {
           "line": 100,
           "column": 28
+        }
+      },
+      "advices": []
+    },
+    {
+      "severity": "info",
+      "message": "The computed expression can be simplified without the use of a string literal.",
+      "category": "lint/complexity/useLiteralKeys",
+      "location": {
+        "path": "packages/ui/src/components/Table/utils/getPinnedColumnOffsets.util.test.ts",
+        "start": {
+          "line": 35,
+          "column": 19
+        },
+        "end": {
+          "line": 35,
+          "column": 23
         }
       },
       "advices": []
@@ -1006,12 +1006,12 @@
       "location": {
         "path": "packages/ui/src/utils/globalSettings/getGlobalSettingsFromCookie.util.ts",
         "start": {
-          "line": 64,
-          "column": 21
+          "line": 62,
+          "column": 68
         },
         "end": {
-          "line": 64,
-          "column": 33
+          "line": 62,
+          "column": 77
         }
       },
       "advices": []
@@ -1023,12 +1023,12 @@
       "location": {
         "path": "packages/ui/src/utils/globalSettings/getGlobalSettingsFromCookie.util.ts",
         "start": {
-          "line": 62,
-          "column": 68
+          "line": 64,
+          "column": 21
         },
         "end": {
-          "line": 62,
-          "column": 77
+          "line": 64,
+          "column": 33
         }
       },
       "advices": []
@@ -1142,12 +1142,12 @@
       "location": {
         "path": "packages/ui/src/utils/globalSettings/toGlobalPinningPreferences.util.ts",
         "start": {
-          "line": 35,
-          "column": 13
+          "line": 21,
+          "column": 35
         },
         "end": {
-          "line": 35,
-          "column": 38
+          "line": 21,
+          "column": 44
         }
       },
       "advices": []
@@ -1159,12 +1159,12 @@
       "location": {
         "path": "packages/ui/src/utils/globalSettings/toGlobalPinningPreferences.util.ts",
         "start": {
-          "line": 21,
-          "column": 35
+          "line": 35,
+          "column": 13
         },
         "end": {
-          "line": 21,
-          "column": 44
+          "line": 35,
+          "column": 38
         }
       },
       "advices": []
@@ -1635,11 +1635,11 @@
       "location": {
         "path": "packages/ui/src/utils/urlState/serializeSortingToURL.util.test.ts",
         "start": {
-          "line": 24,
+          "line": 15,
           "column": 19
         },
         "end": {
-          "line": 24,
+          "line": 15,
           "column": 25
         }
       },
@@ -1652,11 +1652,11 @@
       "location": {
         "path": "packages/ui/src/utils/urlState/serializeSortingToURL.util.test.ts",
         "start": {
-          "line": 15,
+          "line": 24,
           "column": 19
         },
         "end": {
-          "line": 15,
+          "line": 24,
           "column": 25
         }
       },
@@ -1686,12 +1686,12 @@
       "location": {
         "path": "scripts/refresh-fallow-complexity-report.cjs",
         "start": {
-          "line": 92,
+          "line": 91,
           "column": 7
         },
         "end": {
-          "line": 92,
-          "column": 36
+          "line": 91,
+          "column": 57
         }
       },
       "advices": []
@@ -1703,12 +1703,12 @@
       "location": {
         "path": "scripts/refresh-fallow-complexity-report.cjs",
         "start": {
-          "line": 91,
+          "line": 92,
           "column": 7
         },
         "end": {
-          "line": 91,
-          "column": 57
+          "line": 92,
+          "column": 36
         }
       },
       "advices": []
@@ -1856,11 +1856,11 @@
       "location": {
         "path": "packages/ui/src/utils/urlState/serializeFiltersToURL.util.test.ts",
         "start": {
-          "line": 71,
+          "line": 22,
           "column": 31
         },
         "end": {
-          "line": 71,
+          "line": 22,
           "column": 38
         }
       },
@@ -1873,11 +1873,11 @@
       "location": {
         "path": "packages/ui/src/utils/urlState/serializeFiltersToURL.util.test.ts",
         "start": {
-          "line": 14,
+          "line": 71,
           "column": 31
         },
         "end": {
-          "line": 14,
+          "line": 71,
           "column": 38
         }
       },
@@ -1907,11 +1907,11 @@
       "location": {
         "path": "packages/ui/src/utils/urlState/serializeFiltersToURL.util.test.ts",
         "start": {
-          "line": 87,
+          "line": 30,
           "column": 31
         },
         "end": {
-          "line": 87,
+          "line": 30,
           "column": 38
         }
       },
@@ -1924,11 +1924,11 @@
       "location": {
         "path": "packages/ui/src/utils/urlState/serializeFiltersToURL.util.test.ts",
         "start": {
-          "line": 22,
+          "line": 87,
           "column": 31
         },
         "end": {
-          "line": 22,
+          "line": 87,
           "column": 38
         }
       },
@@ -1958,6 +1958,23 @@
       "location": {
         "path": "packages/ui/src/utils/urlState/serializeFiltersToURL.util.test.ts",
         "start": {
+          "line": 38,
+          "column": 31
+        },
+        "end": {
+          "line": 38,
+          "column": 38
+        }
+      },
+      "advices": []
+    },
+    {
+      "severity": "warning",
+      "message": "Forbidden non-null assertion.",
+      "category": "lint/style/noNonNullAssertion",
+      "location": {
+        "path": "packages/ui/src/utils/urlState/serializeFiltersToURL.util.test.ts",
+        "start": {
           "line": 105,
           "column": 31
         },
@@ -1975,28 +1992,11 @@
       "location": {
         "path": "packages/ui/src/utils/urlState/serializeFiltersToURL.util.test.ts",
         "start": {
-          "line": 30,
+          "line": 14,
           "column": 31
         },
         "end": {
-          "line": 30,
-          "column": 38
-        }
-      },
-      "advices": []
-    },
-    {
-      "severity": "warning",
-      "message": "Forbidden non-null assertion.",
-      "category": "lint/style/noNonNullAssertion",
-      "location": {
-        "path": "packages/ui/src/utils/urlState/serializeFiltersToURL.util.test.ts",
-        "start": {
-          "line": 38,
-          "column": 31
-        },
-        "end": {
-          "line": 38,
+          "line": 14,
           "column": 38
         }
       },
@@ -2049,125 +2049,6 @@
         "end": {
           "line": 104,
           "column": 50
-        }
-      },
-      "advices": []
-    },
-    {
-      "severity": "error",
-      "message": "The ARIA attribute 'aria-label' is not supported by this element.",
-      "category": "lint/a11y/useAriaPropsSupportedByRole",
-      "location": {
-        "path": "packages/ui/src/components/DraggableList/DraggableListItem/DraggableListItem.component.tsx",
-        "start": {
-          "line": 58,
-          "column": 9
-        },
-        "end": {
-          "line": 58,
-          "column": 77
-        }
-      },
-      "advices": []
-    },
-    {
-      "severity": "error",
-      "message": "Provide a valid value for the attribute href.",
-      "category": "lint/a11y/useValidAnchor",
-      "location": {
-        "path": "packages/ui/src/components/NavLink/NavLink.test.tsx",
-        "start": {
-          "line": 32,
-          "column": 69
-        },
-        "end": {
-          "line": 32,
-          "column": 77
-        }
-      },
-      "advices": []
-    },
-    {
-      "severity": "error",
-      "message": "The elements with this role can be changed to the following elements:\n<hr>",
-      "category": "lint/a11y/useSemanticElements",
-      "location": {
-        "path": "packages/ui/src/components/Table/TableHeaderCell/ResizeHandle/ResizeHandle.component.tsx",
-        "start": {
-          "line": 37,
-          "column": 7
-        },
-        "end": {
-          "line": 37,
-          "column": 23
-        }
-      },
-      "advices": []
-    },
-    {
-      "severity": "error",
-      "message": "The HTML element div is non-interactive. Do not use tabIndex.",
-      "category": "lint/a11y/noNoninteractiveTabindex",
-      "location": {
-        "path": "packages/ui/src/components/Tabs/TabsContent/TabsContent.component.tsx",
-        "start": {
-          "line": 25,
-          "column": 13
-        },
-        "end": {
-          "line": 25,
-          "column": 25
-        }
-      },
-      "advices": []
-    },
-    {
-      "severity": "error",
-      "message": "Unexpected event handler on static element.",
-      "category": "lint/a11y/noStaticElementInteractions",
-      "location": {
-        "path": "packages/ui/src/components/Tooltip/TooltipTrigger/TooltipTrigger.component.tsx",
-        "start": {
-          "line": 39,
-          "column": 5
-        },
-        "end": {
-          "line": 55,
-          "column": 6
-        }
-      },
-      "advices": []
-    },
-    {
-      "severity": "error",
-      "message": "A form label must be associated with an input.",
-      "category": "lint/a11y/noLabelWithoutControl",
-      "location": {
-        "path": "packages/ui/src/components/VirtualList/SelectAllOption/SelectAllOption.component.tsx",
-        "start": {
-          "line": 13,
-          "column": 3
-        },
-        "end": {
-          "line": 27,
-          "column": 11
-        }
-      },
-      "advices": []
-    },
-    {
-      "severity": "error",
-      "message": "A form label must be associated with an input.",
-      "category": "lint/a11y/noLabelWithoutControl",
-      "location": {
-        "path": "packages/ui/src/components/VirtualList/SelectOption/SelectOption.component.tsx",
-        "start": {
-          "line": 45,
-          "column": 5
-        },
-        "end": {
-          "line": 52,
-          "column": 13
         }
       },
       "advices": []

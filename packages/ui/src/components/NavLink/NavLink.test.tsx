@@ -29,7 +29,7 @@ const { mockRouterNavLink } = vi.hoisted(() => {
       typeof children === 'function' ? children(mockRenderProps) : children;
 
     return (
-      <a aria-disabled={ariaDisabled} className={resolvedClassName} href='#'>
+      <a aria-disabled={ariaDisabled} className={resolvedClassName} href='/'>
         {resolvedChildren}
       </a>
     );

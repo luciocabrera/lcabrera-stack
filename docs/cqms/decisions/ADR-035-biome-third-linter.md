@@ -73,9 +73,22 @@ resolved once. Biome is here for **lint rules only**.
 No `// biome-ignore` to dodge a real finding, no rule-off in config to make a
 gate green, and nothing baselined in `packages/ui`. A scoped-off rule in
 `biome.jsonc` requires a written reason proving the finding is wrong _for that
-code_ — the two current ones (`SpacerRow`'s `noAriaHiddenOnFocusable`,
-`enterpriseOrders.schema.ts`'s `noThenProperty`) each carry that argument, and
-the second records that Oxlint already adjudicated the identical finding.
+code_, and each of the six carries that argument inline:
+
+| Scope                          | Rule                          | Why Biome is wrong here                                                                                                                          |
+| ------------------------------ | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `enterpriseOrders.schema.ts`   | `noThenProperty`              | JSON Schema `if`/`then` keywords, never awaited. Oxlint already adjudicated the identical finding in this file.                                  |
+| react workspaces               | `useExhaustiveDependencies`   | `eslint-plugin-react-hooks` already owns this rule and passes. Two engines must not both arbitrate one rule.                                     |
+| `SpacerRow.component.tsx`      | `noAriaHiddenOnFocusable`     | Models `<tr>` as a focusable grid row; this Table sets no `role=grid`/`tabIndex`. Every alternative trips another rule or announces a blank row. |
+| `TabsContent.component.tsx`    | `noNoninteractiveTabindex`    | The APG Tabs pattern mandates `tabindex="0"` on a tabpanel. jsx-a11y allows it via `roles: ['tabpanel']`; Biome's port has no options.           |
+| `ResizeHandle.component.tsx`   | `useSemanticElements`         | ARIA window splitter — a focusable, valued separator. The suggested `<hr>` can take neither focus nor a value.                                   |
+| `TooltipTrigger.component.tsx` | `noStaticElementInteractions` | The role IS set, under the same ternary as the keyboard handler. Biome cannot correlate the two; probing confirms an unconditional role passes.  |
+
+Prefer a rule **option** over a scope-off whenever one exists — it keeps the rule
+live everywhere else. `noLabelWithoutControl` is the worked example: rather than
+disabling it where a `<label>` wraps the `Checkbox` component, `inputComponents:
+["Checkbox"]` teaches it the component name, and a deliberate bare `<label>`
+still fails. Add future input-rendering components there rather than scoping off.
 
 ### 6. `reports/biome/full-latest.json`
 

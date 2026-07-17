@@ -39,6 +39,17 @@
       "linter": {
         "domains": { "react": "recommended" },
         "rules": {
+          "a11y": {
+            // `Checkbox` renders a real `<input type="checkbox">`, so a <label>
+            // wrapping one IS labelling a control — Biome just cannot see
+            // through the component boundary. Naming it here keeps the rule ON
+            // and still catching genuine unlabelled controls, rather than
+            // silencing it. Add any future input-rendering component here.
+            "noLabelWithoutControl": {
+              "level": "error",
+              "options": { "inputComponents": ["Checkbox"] },
+            },
+          },
           "correctness": {
             "noNestedComponentDefinitions": "error",
             "useExhaustiveDependencies": "off",
@@ -51,6 +62,44 @@
       "includes": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts"],
       "linter": {
         "domains": { "test": "recommended" },
+      },
+    },
+    {
+      // WAI-ARIA APG Tabs pattern: a tabpanel carries tabindex="0" so keyboard
+      // users can reach panel content that holds no focusable element of its
+      // own. This is the spec's own recommendation and what Radix/Reach ship;
+      // removing it would strand keyboard users in the panel. eslint's
+      // jsx-a11y equivalent recognises this via `roles: ['tabpanel']` in its
+      // recommended config — Biome's port has no options at all, so the file
+      // is the only available scope.
+      "includes": ["**/TabsContent.component.tsx"],
+      "linter": {
+        "rules": { "a11y": { "noNoninteractiveTabindex": "off" } },
+      },
+    },
+    {
+      // ARIA window-splitter pattern: a FOCUSABLE separator carrying
+      // aria-valuenow/min/max, which is a widget role, not the structural
+      // separator `<hr>` Biome suggests. `<hr>` cannot take focus or express a
+      // value, so the suggested rewrite would delete the whole interaction.
+      // The rule only maps role→element and does not model the focusable case.
+      "includes": ["**/ResizeHandle.component.tsx"],
+      "linter": {
+        "rules": { "a11y": { "useSemanticElements": "off" } },
+      },
+    },
+    {
+      // The trigger DOES set `role='button'` — but conditionally, under exactly
+      // the same `shouldUseInteractiveTrigger` condition that adds its keyboard
+      // handler and tabIndex. Biome cannot correlate the two ternaries: probing
+      // shows an identical span passes with an unconditional role and fails with
+      // a conditional one. The conditional is the point — when the child is
+      // already a native button, a second role='button' would nest one inside
+      // the other. Do not "fix" this by extracting the host element either; that
+      // breaks getIsNativeInteractiveElement and regresses to nested role=button.
+      "includes": ["**/TooltipTrigger.component.tsx"],
+      "linter": {
+        "rules": { "a11y": { "noStaticElementInteractions": "off" } },
       },
     },
     {
