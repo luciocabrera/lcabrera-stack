@@ -86,9 +86,10 @@ const fallowBinPath = path.resolve(
   fallowBinRelativePath,
 );
 const nodeBinDir = path.dirname(process.execPath);
+const windowsSystem32 = String.raw`C:\Windows\System32`;
 const fixedPathEnv =
   process.platform === 'win32'
-    ? `${nodeBinDir};${String.raw`C:\Windows\System32`}`
+    ? `${nodeBinDir};${windowsSystem32}`
     : `${nodeBinDir}:/usr/bin:/bin`;
 const analysisPath = path.join(
   repoRoot,

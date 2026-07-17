@@ -217,8 +217,9 @@ const parseOnlyArgument = () => {
   }
   const only = argument.slice('--only='.length);
   if (!TOOLS.includes(only)) {
+    const quotedTools = TOOLS.map((tool) => `"${tool}"`).join(', ');
     throw new TypeError(
-      `--only expects one of ${TOOLS.map((tool) => `"${tool}"`).join(', ')}, received "${only}"`,
+      `--only expects one of ${quotedTools}, received "${only}"`,
     );
   }
   return only;

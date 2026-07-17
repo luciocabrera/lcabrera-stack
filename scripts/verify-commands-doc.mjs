@@ -144,7 +144,7 @@ const toAnchor = (heading) =>
 
 const collectAnchors = (markdown) =>
   new Set(
-    [...markdown.matchAll(/^#{2,4}\s+(.+)$/gm)].map(([, heading]) =>
+    [...markdown.matchAll(/^#{2,4}\s+(\S.*)$/gm)].map(([, heading]) =>
       toAnchor(heading),
     ),
   );
