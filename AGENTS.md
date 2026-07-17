@@ -13,18 +13,27 @@ This is a **pnpm monorepo** built with the **Vite+** unified toolchain (`vp` CLI
 ```
 apps/
 ├── react-router/     # Main SSR frontend app (React 19 + StyleX + React Router 7)
-├── admin_system/     # Separate React Router SSR admin app
+├── admin_system/     # Separate React Router SSR admin app (CQMS routes)
 ├── api-server/       # Express + PostgreSQL REST API (port 3001)
 ├── api-server-fast/  # Fastify alternative API server
+├── scan-orchestrator/# Standalone CQMS scan runner (Postgres LISTEN + ws server)
 └── shared/           # Shared code between apps
 packages/
+├── agent-runner/        # Spawns the Claude Agent SDK CLI subprocess
+├── data-access/         # Reusable server/api code — browser fetch (src/api) + Postgres (src/db)
 ├── eslint-local-rules/  # Custom lint rules for this repo
 ├── node-runtime/        # Process-lifecycle primitives for long-running services (signals)
 ├── plugins/             # Shared Vite plugins
-├── ts-configs/          # Shared TypeScript configurations
+├── scan-ingestion/      # CQMS scan ingestion core + migrations
+├── ts-configs/          # Shared TypeScript configurations (generated — see its README)
+├── ui/                  # Shared UI component library
 ├── utils/               # Shared utilities — pure and side-effect free (see its ARCHITECTURE.md)
 └── vite-configs/        # Shared Vite config factories
 ```
+
+That is **16 workspaces** — the count several rules below depend on. `packages/ui`
+and `packages/data-access` are becoming public packages and are held strictest:
+never baseline, scope, or inline-disable a finding in either.
 
 `utils` and `node-runtime` split on purity, and the split is deliberate:
 `@repo/utils` guarantees pure, side-effect-free helpers, so anything that must
@@ -105,6 +114,13 @@ Selection guideline:
 
 ## 4. Toolchain — Vite+ (`vp`)
 
+> **[COMMANDS.md](COMMANDS.md) is the canonical command reference** — every root
+> script, every per-workspace task, what CI runs, and how `vp run <task>`
+> resolves. This section keeps only the daily commands and the **policy** behind
+> them; it deliberately does not re-list everything, because the duplicate lists
+> are what drifted (they claimed 15 workspaces when there were 16). Add a
+> command → add it to COMMANDS.md in the same commit.
+
 **Never use pnpm/npm/yarn directly.** All operations go through `vp`:
 
 | Task                 | Command                                                                                |
@@ -126,21 +142,8 @@ Selection guideline:
 
 Root scripts are **orchestration only** — anything project-specific lives in that project's own package.json. The `<task>:all` family fans out recursively in workspace dependency order.
 
-| Task                                     | Command                                                  |
-| ---------------------------------------- | -------------------------------------------------------- |
-| Verify everything is ready               | `vp run ready`                                           |
-| Run all tests (every workspace)          | `vp run test:all` (needs Postgres — see `test:ci` below) |
-| Run the DB-free suites (what CI runs)    | `vp run test:ci`                                         |
-| Build all workspaces                     | `vp run build:all`                                       |
-| Lint everything WITH fix (oxlint+eslint) | `vp run lint:all`                                        |
-| Regenerate lint JSON reports             | `vp run lint:report`                                     |
-| Merge coverage for the fallow gate       | `vp run coverage:merge`                                  |
-| Format everything                        | `vp run format:all`                                      |
-| Typegen (both React Router apps)         | `vp run typegen:all`                                     |
-| Type-check every workspace with real tsc | `vp run typecheck:all`                                   |
-| Full gate (typegen+check+types+tests)    | `vp run check:safe`                                      |
-| Dev servers (frontend + express api)     | `vp run dev` (`dev:fast` = fastify, `dev:cqms` = CQMS)   |
-| Prod servers (frontend + express api)    | `vp run start` (`start:fast`, `start:cqms`)              |
+**Full list: [COMMANDS.md §4](COMMANDS.md#4-root-orchestration-scripts).** The
+policy that governs them:
 
 There is deliberately **no `start:all`/`dev:all`**: `car-sales-api` and `car-sales-api-fast` are performance-comparison alternatives serving the same domain and must never run at the same time — always pick one combo.
 
@@ -148,9 +151,9 @@ There is deliberately **no `start:all`/`dev:all`**: `car-sales-api` and `car-sal
 
 **tsconfigs are generated — never hand-edit them.** `packages/ts-configs/generate.ts` + `tsconfig.shared.ts` are the source of truth for every `tsconfig.app.json`/`tsconfig.node.json`; run `vp run --filter @repo/ts-configs generate` after changing either. A hand-edit survives exactly until the next unrelated regeneration silently reverts it — the `@repo/ui` bare-specifier alias in both apps was lost this way and had to be folded back into the generator. If a config needs something bespoke, add it to the generator entry, not to the JSON.
 
-**Both linters run in every workspace.** Oxlint (`vp lint`) covers the whole tree from the root; the eslint pass (`vp run lint:eslint` / `lint:eslint:check`) exists in all 15 workspaces — React workspaces use `@repo/vite-configs/eslint-custom-rules`, node/library workspaces use `@repo/vite-configs/eslint-base-custom-rules` (same stack minus React/StyleX, and without `clean-import-paths`, which strips the import extensions node-resolution code requires). Inherited eslint violations are baselined per workspace in `eslint-suppressions.json` (ESLint bulk suppressions) — **new violations fail the gate**: CI runs `vp run -r lint:eslint:check` as its own step in `check-safe.yml`, because `vp check` covers only fmt + Oxlint + tsc and would let every eslint-only finding through. Burn debt down and shrink the baseline with `npx eslint . --config eslint.config.mjs --prune-suppressions`. Never add new entries by hand, and never inline-`// eslint-disable`/`oxlint-disable` a finding or switch the rule off in config — **verify, then fix the code instead** (see Non-Negotiable Rule 11). A lint finding is real until you've read the flagged code and confirmed otherwise; stylistic `unicorn/*` rules (e.g. `prefer-simple-condition-first`, `no-nested-ternary`) get fixed by restructuring, never silenced. **Exception: `packages/ui` is never silenced** — it must not carry an `eslint-suppressions.json` at all; every finding there gets fixed, never baselined or disabled.
+**Both linters run in every workspace.** Oxlint (`vp lint`) covers the whole tree from the root; the eslint pass (`vp run lint:eslint` / `lint:eslint:check`) exists in all 16 workspaces — React workspaces use `@repo/vite-configs/eslint-custom-rules`, node/library workspaces use `@repo/vite-configs/eslint-base-custom-rules` (same stack minus React/StyleX, and without `clean-import-paths`, which strips the import extensions node-resolution code requires). Inherited eslint violations are baselined per workspace in `eslint-suppressions.json` (ESLint bulk suppressions) — **new violations fail the gate**: CI runs `vp run -r lint:eslint:check` as its own step in `check-safe.yml`, because `vp check` covers only fmt + Oxlint + the tsgolint type pass and would let every eslint-only finding through. Burn debt down and shrink the baseline with `npx eslint . --config eslint.config.mjs --prune-suppressions`. Never add new entries by hand, and never inline-`// eslint-disable`/`oxlint-disable` a finding or switch the rule off in config — **verify, then fix the code instead** (see Non-Negotiable Rule 11). A lint finding is real until you've read the flagged code and confirmed otherwise; stylistic `unicorn/*` rules (e.g. `prefer-simple-condition-first`, `no-nested-ternary`) get fixed by restructuring, never silenced. **Exception: `packages/ui` is never silenced** — it must not carry an `eslint-suppressions.json` at all; every finding there gets fixed, never baselined or disabled.
 
-**Lint JSON reports** follow the fallow output convention: `vp run lint:report` (script: `scripts/generate-lint-reports.mjs`, supports `--only=eslint|oxlint`) regenerates `reports/oxlint/full-latest.json` (one repo-wide `vp lint . --format=json` run) and `reports/eslint/full-latest.json` (the standard eslint `--format json` result array merged across all 15 workspaces, repo-relative paths). Both are tracked. ESLint runs in check mode — regenerating a report never mutates sources — and the baselined debt is visible per file in each entry's `suppressedMessages`, so the report is the place to inspect what the suppressions actually cover.
+**Lint JSON reports** follow the fallow output convention: `vp run lint:report` (script: `scripts/generate-lint-reports.mjs`, supports `--only=eslint|oxlint`) regenerates `reports/oxlint/full-latest.json` (one repo-wide `vp lint . --format=json` run) and `reports/eslint/full-latest.json` (the standard eslint `--format json` result array merged across all 16 workspaces, repo-relative paths). Both are tracked. ESLint runs in check mode — regenerating a report never mutates sources — and the baselined debt is visible per file in each entry's `suppressedMessages`, so the report is the place to inspect what the suppressions actually cover.
 
 Known constraint: `scan-orchestrator`'s queue integration test shares the local CQMS Postgres queue — while `vp run dev:cqms` is running, the live orchestrator races the test for queued scans and `vp run test:all` can flake on `runQueuedScan.test.ts` (duplicate `reports_scan_id_key`). Stop the CQMS dev session before a full test run, or treat that single failure as environmental.
 
@@ -176,14 +179,8 @@ Fallow is configured once at the repo root (`.fallowrc.json`) and auto-detects e
 
 Sole exception: CQMS UI-triggered scans run by `apps/scan-orchestrator` use their own `.tmp/scan-orchestrator/<scan_id>/` workspace — their results land in the CQMS database, not the filesystem.
 
-| Task                                  | Command                                                                      |
-| ------------------------------------- | ---------------------------------------------------------------------------- |
-| Full scan (dead code, dupes, health)  | `vp run fallow:full`                                                         |
-| Dead code only                        | `vp run fallow:dead-code`                                                    |
-| Complexity/health report              | `vp run fallow:health`                                                       |
-| Duplication report                    | `vp run fallow:dupes`                                                        |
-| PR-style gate vs main (run before PR) | `vp run fallow:audit --base main`                                            |
-| Refresh complexity threshold report   | `vp run fallow:refresh-report` (optionally `<workspace-glob>` and `--top=N`) |
+The commands live in [COMMANDS.md §4 → Fallow](COMMANDS.md#fallow-static-analysis).
+Before a PR, run `vp run fallow:audit --base main`. The policy:
 
 CI runs `fallow audit --gate new-only` on every PR (`check-safe.yml`) — it fails only on newly-introduced dead code, complexity, or duplication; inherited debt is covered by baselines in `reports/fallow/baselines/`.
 
@@ -193,13 +190,9 @@ CI runs `fallow audit --gate new-only` on every PR (`check-safe.yml`) — it fai
 
 ### Local Database Workflow (run from repo root)
 
-| Task                     | Command                                                              |
-| ------------------------ | -------------------------------------------------------------------- |
-| Start local PostgreSQL   | `vp run db:up`                                                       |
-| Check DB status          | `vp run db:status`                                                   |
-| Seed data                | `vp run --filter car-sales-api seed` (or `vp run seed` from the app) |
-| Start + seed in one step | `vp run --filter car-sales-api db:seed`                              |
-| Stop local PostgreSQL    | `vp run db:down`                                                     |
+Commands: [COMMANDS.md §4 → Database](COMMANDS.md#database). `vp run db:up` starts
+local Postgres; seeding goes through `vp run --filter car-sales-api seed`, because
+`seed`/`db:seed` are **api-server scripts, not root scripts**.
 
 The API server (`apps/api-server/`) reads env from `docker/local/.env`. The frontend proxies `/api` to `http://localhost:3001`.
 
