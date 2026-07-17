@@ -10,6 +10,7 @@ import {
   FormProvider,
   useGetFieldValue,
 } from '@repo/ui/components/Form/contexts';
+import { useGetIsFormDirty } from '@repo/ui/components/Form/contexts/FormContext/selectors/useGetIsFormDirty.hook';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -39,6 +40,16 @@ const ValueProbe = ({ accessor }: { readonly accessor: keyof Values }) => {
   const value = useGetFieldValue<Values>(accessor);
 
   return <output>{`${typeof value}:${String(value)}`}</output>;
+};
+
+/**
+ * Reports live dirty state. Uses a `data-testid` rather than another `<output>`
+ * so it does not collide with `ValueProbe`'s `status` role.
+ */
+const DirtyProbe = () => {
+  const isDirty = useGetIsFormDirty<Values>(['amount']);
+
+  return <p data-testid='dirty'>{String(isDirty)}</p>;
 };
 
 const renderNumberField = ({
@@ -76,7 +87,7 @@ describe('NumberField', () => {
     expect(input.name).toBe('amount');
   });
 
-  it('renders the empty-string default value as an empty input', () => {
+  it('renders the default value as an empty input', () => {
     renderNumberField({
       field: { accessor: 'amount', label: 'Amount', type: 'number' },
     });
@@ -260,5 +271,31 @@ describe('NumberField', () => {
     });
 
     expect(getAmountInput().autocomplete).toBe('one-time-code');
+  });
+
+  // Regression: the field initialised to `''` but stored `undefined` on clear,
+  // so `'' !== undefined` left the form dirty forever — Save stayed enabled and
+  // Cancel raised a spurious "Discard changes?" on a visibly untouched field.
+  it('leaves the form pristine when a number is typed and then cleared', () => {
+    const field: NumberFieldDef<Values> = {
+      accessor: 'amount',
+      label: 'Amount',
+      type: 'number',
+    };
+
+    render(
+      <FormProvider<Values> cancelTo='/' fields={[field]} mode='create'>
+        <NumberField<Values> field={field} />
+        <DirtyProbe />
+      </FormProvider>,
+    );
+
+    expect(screen.getByTestId('dirty').textContent).toBe('false');
+
+    fireEvent.change(getAmountInput(), { target: { value: '42' } });
+    expect(screen.getByTestId('dirty').textContent).toBe('true');
+
+    fireEvent.change(getAmountInput(), { target: { value: '' } });
+    expect(screen.getByTestId('dirty').textContent).toBe('false');
   });
 });

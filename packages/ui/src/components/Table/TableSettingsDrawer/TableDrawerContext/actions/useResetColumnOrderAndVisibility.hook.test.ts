@@ -81,18 +81,13 @@ describe('useResetColumnOrderAndVisibility', () => {
     });
   });
 
-  // NOTE: `columnVisibility: {}` pins CURRENT behavior, not intended behavior.
-  // ColumnVisibilityState is a Set, but the hook defaults the missing slice to
-  // `{} as ColumnVisibilityState` — the cast hides the mismatch from tsc. The
-  // sibling reset path (buildBatchTableSettingsUpdate) correctly uses `new Set()`.
-  // Update these two assertions to `new Set()` when the source is fixed.
   it('applies empty defaults when the table config store is still empty', () => {
     resetColumnOrderAndVisibility();
 
     expect(drawerColumnsStore.set).toHaveBeenCalledWith({
       columnOrder: [],
       columnPinning: { left: [], right: [] },
-      columnVisibility: {},
+      columnVisibility: new Set(),
     });
   });
 
@@ -171,7 +166,7 @@ describe('useResetColumnOrderAndVisibility', () => {
     expect(drawerColumnsStore.set).toHaveBeenLastCalledWith({
       columnOrder: ['status'],
       columnPinning: { left: [], right: [] },
-      columnVisibility: {},
+      columnVisibility: new Set(),
     });
   });
 });

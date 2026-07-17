@@ -1,7 +1,6 @@
 import type {
   ColumnOrderState,
   ColumnPinningState,
-  ColumnVisibilityState,
 } from '@repo/ui/components/Table/Table.types';
 
 import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
@@ -23,8 +22,7 @@ export const useResetColumnOrderAndVisibility = () => {
       columnPinning:
         columnsState?.columnPinning ??
         ({ left: [], right: [] } as ColumnPinningState),
-      columnVisibility:
-        columnsState?.columnVisibility ?? ({} as ColumnVisibilityState),
+      columnVisibility: columnsState?.columnVisibility ?? new Set(),
     });
   };
 };
