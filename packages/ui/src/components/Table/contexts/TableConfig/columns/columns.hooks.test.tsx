@@ -16,11 +16,6 @@ const createInitialColumnsState = () => {
         value: 'paid',
       },
     },
-    columnGroups: {
-      center: [{ key: 'status' }],
-      left: [{ key: 'id' }],
-      right: [{ key: 'actions' }],
-    },
     columnOrder: ['id', 'status', 'actions'],
     columnPinning: { left: ['id'], right: ['actions'] },
     columns: [{ key: 'id' }, { key: 'status' }, { key: 'actions' }],
@@ -34,6 +29,11 @@ const createInitialColumnsState = () => {
     pinnedColumnOffsets: {
       left: { id: 0 },
       right: { actions: 0 },
+    },
+    pinnedColumnPartition: {
+      center: [{ key: 'status' }],
+      left: [{ key: 'id' }],
+      right: [{ key: 'actions' }],
     },
     sorting: [{ columnKey: 'status', direction: 'desc' }],
     staticKeys: new Set(['id']),
@@ -61,7 +61,6 @@ vi.mock(
 );
 
 import { useGetColumnFilters } from './selectors/useGetColumnFilters.hook';
-import { useGetColumnGroups } from './selectors/useGetColumnGroups.hook';
 import { useGetColumnOrder } from './selectors/useGetColumnOrder.hook';
 import { useGetColumnPinning } from './selectors/useGetColumnPinning.hook';
 import { useGetColumns } from './selectors/useGetColumns.hook';
@@ -73,6 +72,7 @@ import { useGetNormalizedColumn } from './selectors/useGetNormalizedColumn.hook'
 import { useGetNormalizedColumnFilters } from './selectors/useGetNormalizedColumnFilters.hook';
 import { useGetNormalizedColumns } from './selectors/useGetNormalizedColumns.hook';
 import { useGetPinnedColumnOffsets } from './selectors/useGetPinnedColumnOffsets.hook';
+import { useGetPinnedColumnPartition } from './selectors/useGetPinnedColumnPartition.hook';
 import { useGetStaticColumnKeys } from './selectors/useGetStaticColumnKeys.hook';
 import { useColumnsStore } from './useColumnsStore.hook';
 
@@ -109,7 +109,9 @@ describe('TableConfig column hooks', () => {
         value: 'paid',
       },
     });
-    expect(renderHook(() => useGetColumnGroups()).result.current).toEqual({
+    expect(
+      renderHook(() => useGetPinnedColumnPartition()).result.current,
+    ).toEqual({
       center: [{ key: 'status' }],
       left: [{ key: 'id' }],
       right: [{ key: 'actions' }],

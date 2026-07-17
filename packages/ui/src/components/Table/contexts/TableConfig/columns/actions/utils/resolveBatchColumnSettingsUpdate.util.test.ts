@@ -17,11 +17,6 @@ const {
   mockSyncColumnOrderWithPinning,
 } = vi.hoisted(() => ({
   mockDeriveColumnViewState: vi.fn(() => ({
-    columnGroups: {
-      centerCols: [{ key: 'age', label: 'Age' }],
-      leftPinnedCols: [{ key: 'id', label: 'ID' }],
-      rightPinnedCols: [{ key: 'name', label: 'Name' }],
-    },
     effectiveColumns: [
       { key: 'id', label: 'ID' },
       { key: 'age', label: 'Age' },
@@ -44,6 +39,11 @@ const {
         offset: 0,
         side: 'right',
       },
+    },
+    pinnedColumnPartition: {
+      centerCols: [{ key: 'age', label: 'Age' }],
+      leftPinnedCols: [{ key: 'id', label: 'ID' }],
+      rightPinnedCols: [{ key: 'name', label: 'Name' }],
     },
   })),
   mockGetColumnPinSide: vi.fn(() => {}),
@@ -195,11 +195,6 @@ describe('resolveBatchColumnSettingsUpdate', () => {
       columnFilters: {
         name: { operator: 'contains', type: 'text', value: 'ali' },
       },
-      columnGroups: {
-        centerCols: [{ key: 'age', label: 'Age' }],
-        leftPinnedCols: [{ key: 'id', label: 'ID' }],
-        rightPinnedCols: [{ key: 'name', label: 'Name' }],
-      },
       columnOrder: ['id', 'age', 'name'],
       columnPinning: { left: ['id'], right: ['name'] },
       columnSizing: { actions: 0, age: 80, id: 100, name: 220 },
@@ -225,6 +220,11 @@ describe('resolveBatchColumnSettingsUpdate', () => {
           offset: 0,
           side: 'right',
         },
+      },
+      pinnedColumnPartition: {
+        centerCols: [{ key: 'age', label: 'Age' }],
+        leftPinnedCols: [{ key: 'id', label: 'ID' }],
+        rightPinnedCols: [{ key: 'name', label: 'Name' }],
       },
       sorting: [{ columnKey: 'name', direction: 'desc' }],
     });

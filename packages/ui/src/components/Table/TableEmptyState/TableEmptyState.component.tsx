@@ -1,6 +1,6 @@
 import { Button } from '@repo/ui/components/Button';
 import { NoDataDescriptive } from '@repo/ui/components/Icons';
-import { useGetColumnGroups } from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors';
+import { useGetPinnedColumnPartition } from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors';
 import { useTableContainerRef } from '@repo/ui/components/Table/contexts/TableWrapper';
 import { useElementSize, useResizeObserver } from '@repo/ui/hooks';
 import * as stylex from '@stylexjs/stylex';
@@ -21,7 +21,8 @@ const DEFAULT_MESSAGE =
  * vertical scrollbar, even when the table body overflows horizontally.
  */
 export const TableEmptyState = () => {
-  const { centerCols, leftPinnedCols, rightPinnedCols } = useGetColumnGroups();
+  const { centerCols, leftPinnedCols, rightPinnedCols } =
+    useGetPinnedColumnPartition();
   const titleSingular = useGetTableTitleSingular();
 
   const containerRef = useTableContainerRef();

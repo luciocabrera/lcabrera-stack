@@ -8,14 +8,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const {
   revalidateMock,
   useElementSizeMock,
-  useGetColumnGroupsMock,
+  useGetPinnedColumnPartitionMock,
   useGetTableTitleSingularMock,
   useResizeObserverMock,
   useTableContainerRefMock,
 } = vi.hoisted(() => ({
   revalidateMock: vi.fn(),
   useElementSizeMock: vi.fn(),
-  useGetColumnGroupsMock: vi.fn(),
+  useGetPinnedColumnPartitionMock: vi.fn(),
   useGetTableTitleSingularMock: vi.fn(),
   useResizeObserverMock: vi.fn(),
   useTableContainerRefMock: vi.fn(),
@@ -46,7 +46,7 @@ vi.mock('@repo/ui/components/Icons', () => ({
 vi.mock(
   '@repo/ui/components/Table/contexts/TableConfig/columns/selectors',
   () => ({
-    useGetColumnGroups: useGetColumnGroupsMock,
+    useGetPinnedColumnPartition: useGetPinnedColumnPartitionMock,
   }),
 );
 
@@ -73,7 +73,7 @@ const renderInTable = (ui: ReactNode) =>
   );
 
 beforeEach(() => {
-  useGetColumnGroupsMock.mockReturnValue({
+  useGetPinnedColumnPartitionMock.mockReturnValue({
     centerCols: [{ key: 'name' }, { key: 'amount' }],
     leftPinnedCols: [{ key: 'id' }],
     rightPinnedCols: [],

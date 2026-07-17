@@ -1,8 +1,8 @@
 import type {
-  ColumnGroupsState,
   ColumnOrderState,
   ColumnPinningState,
   PinnedColumnOffsetsState,
+  PinnedColumnPartitionState,
   TableColumn,
   TableColumnsState,
   TablePersistenceSliceEntry,
@@ -10,7 +10,6 @@ import type {
 import type { TStore } from '@repo/ui/hooks/useStore.hook';
 
 type CommitPinningAndOrderUpdateArgs<TData> = {
-  readonly columnGroups: ColumnGroupsState<TData>;
   readonly columnsStore: Pick<TStore<TableColumnsState<TData>>, 'set'>;
   readonly effectiveColumns: TableColumn<TData>[];
   readonly newColumnOrder: ColumnOrderState<TData>;
@@ -20,10 +19,10 @@ type CommitPinningAndOrderUpdateArgs<TData> = {
     entries: TablePersistenceSliceEntry<'columnOrder' | 'columnPinning'>[],
   ) => boolean;
   readonly pinnedColumnOffsets: PinnedColumnOffsetsState<TData>;
+  readonly pinnedColumnPartition: PinnedColumnPartitionState<TData>;
 };
 
 export const commitPinningAndOrderUpdate = <TData>({
-  columnGroups,
   columnsStore,
   effectiveColumns,
   newColumnOrder,
@@ -31,6 +30,7 @@ export const commitPinningAndOrderUpdate = <TData>({
   persistenceKey,
   persistTableState,
   pinnedColumnOffsets,
+  pinnedColumnPartition,
 }: CommitPinningAndOrderUpdateArgs<TData>) => {
   if (
     !persistTableState([
@@ -50,11 +50,11 @@ export const commitPinningAndOrderUpdate = <TData>({
   }
 
   columnsStore.set({
-    columnGroups,
     columnOrder: newColumnOrder,
     columnPinning: newPinning,
     effectiveColumns,
     pinnedColumnOffsets,
+    pinnedColumnPartition,
   });
 
   return true;

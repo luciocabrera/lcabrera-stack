@@ -24,7 +24,7 @@ export const commitResolvedVisibilityState = <TData>({
   persistenceKey,
   persistTableState,
 }: CommitResolvedVisibilityStateArgs<TData>) => {
-  const { columnGroups, effectiveColumns, pinnedColumnOffsets } =
+  const { effectiveColumns, pinnedColumnOffsets, pinnedColumnPartition } =
     getPinnedDerivedColumnsState<TData>({
       columnOrder,
       columnPinning,
@@ -44,10 +44,10 @@ export const commitResolvedVisibilityState = <TData>({
   if (!didPersist) return false;
 
   columnsStore.set({
-    columnGroups,
     columnVisibility,
     effectiveColumns,
     pinnedColumnOffsets,
+    pinnedColumnPartition,
   });
 
   metaStore.set({ drawersSyncNonce: drawersSyncNonce + 1 });

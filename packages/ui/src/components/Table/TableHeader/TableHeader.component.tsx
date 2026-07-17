@@ -1,6 +1,6 @@
 import {
-  useGetColumnGroups,
   useGetPinnedColumnOffsets,
+  useGetPinnedColumnPartition,
 } from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors';
 import {
   useGetTableIsLoading,
@@ -19,7 +19,8 @@ export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
   ...rest
 }: TableHeaderProps<TData, TResponse>) => {
   const pinnedOffsets = useGetPinnedColumnOffsets();
-  const { centerCols, leftPinnedCols, rightPinnedCols } = useGetColumnGroups();
+  const { centerCols, leftPinnedCols, rightPinnedCols } =
+    useGetPinnedColumnPartition();
   const isLoading = useGetTableIsLoading();
   const isLoadingMore = useGetTableIsLoadingMore();
   const isLoadingState = isLoading || isLoadingMore;

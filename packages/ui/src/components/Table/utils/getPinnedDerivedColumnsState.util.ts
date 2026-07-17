@@ -33,7 +33,7 @@ export const getPinnedDerivedColumnsState = <TData>({
     columnVisibility,
   });
 
-  const columnGroups = splitColumnsByPinning<TData>({
+  const pinnedColumnPartition = splitColumnsByPinning<TData>({
     columnPinning,
     effectiveColumns,
   });
@@ -45,8 +45,8 @@ export const getPinnedDerivedColumnsState = <TData>({
   });
 
   return {
-    columnGroups,
     effectiveColumns,
     pinnedColumnOffsets,
+    pinnedColumnPartition,
   };
 };

@@ -33,7 +33,7 @@ export const deriveColumnViewState = <TData>({
     sorting,
   });
 
-  const { columnGroups, effectiveColumns, pinnedColumnOffsets } =
+  const { effectiveColumns, pinnedColumnOffsets, pinnedColumnPartition } =
     getPinnedDerivedColumnsState<TData>({
       columnOrder,
       columnPinning,
@@ -45,10 +45,10 @@ export const deriveColumnViewState = <TData>({
   const staticKeys = getStaticColumnKeys<TData>(columns);
 
   return {
-    columnGroups,
     effectiveColumns,
     normalizedColumns,
     pinnedColumnOffsets,
+    pinnedColumnPartition,
     staticKeys,
   };
 };

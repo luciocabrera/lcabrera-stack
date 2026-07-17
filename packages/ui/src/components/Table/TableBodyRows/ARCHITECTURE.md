@@ -24,19 +24,19 @@ TableBodyRows/
 
 ## Context Dependencies
 
-| Selector                    | Purpose                                        |
-| --------------------------- | ---------------------------------------------- |
-| `useGetTableData`           | Full data array — sliced to visible window     |
-| `useGetColumnGroups`        | Pre-split column groups (left, center, right)  |
-| `useGetColumnSizing`        | Column widths for cell rendering               |
-| `useGetPinnedColumnOffsets` | Pre-computed sticky offsets for pinned columns |
+| Selector                      | Purpose                                        |
+| ----------------------------- | ---------------------------------------------- |
+| `useGetTableData`             | Full data array — sliced to visible window     |
+| `useGetPinnedColumnPartition` | Pre-split left/center/right pinning partition  |
+| `useGetColumnSizing`          | Column widths for cell rendering               |
+| `useGetPinnedColumnOffsets`   | Pre-computed sticky offsets for pinned columns |
 
 ## Render Flow
 
 ```mermaid
 graph TD
   TBR["TableBodyRows"] --> data["useGetTableData()"]
-  TBR --> CG["useGetColumnGroups()"]
+  TBR --> CG["useGetPinnedColumnPartition()"]
   TBR --> CS["useGetColumnSizing()"]
   TBR --> PO["useGetPinnedColumnOffsets()"]
 
@@ -46,9 +46,9 @@ graph TD
 
   slice --> map["visibleRows.map(row => ...)"]
   map --> TR["TableRow"]
-  TR --> left["renderTableBodyColumnGroup(leftPinnedCols)"]
-  TR --> center["renderTableBodyColumnGroup(centerCols)"]
-  TR --> right["renderTableBodyColumnGroup(rightPinnedCols)"]
+  TR --> left["renderTableBodyPinnedGroup(leftPinnedCols)"]
+  TR --> center["renderTableBodyPinnedGroup(centerCols)"]
+  TR --> right["renderTableBodyPinnedGroup(rightPinnedCols)"]
   renderer --> left
   renderer --> center
   renderer --> right
@@ -61,7 +61,7 @@ delegates row rendering to `TableBodyRows`. This separation means:
 
 - **`TableBody`** subscribes to `totalLoadedRows` (a number) instead of the
   full `data` array, avoiding re-renders when row content changes.
-- **`TableBodyRows`** subscribes to `data`, column groups, sizing, and pinned
+- **`TableBodyRows`** subscribes to `data`, the pinned column partition, sizing, and pinned
   offsets — re-renders when any of those change.
 
 ## Utility Reuse
@@ -69,4 +69,4 @@ delegates row rendering to `TableBodyRows`. This separation means:
 Uses existing utilities from `TableBody/utils/`:
 
 - `createRenderTableBodyCell` — factory that binds sizing + pinned offsets into a cell renderer
-- `renderTableBodyColumnGroup` — maps a column group through the bound renderer
+- `renderTableBodyPinnedGroup` — maps one pinning partition through the bound renderer

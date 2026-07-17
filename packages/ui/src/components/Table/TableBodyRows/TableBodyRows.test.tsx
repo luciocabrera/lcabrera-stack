@@ -34,14 +34,14 @@ const formatMockCellValue = (value: unknown): string => {
 };
 
 const {
-  useGetColumnGroupsMock,
   useGetColumnSizingMock,
   useGetPinnedColumnOffsetsMock,
+  useGetPinnedColumnPartitionMock,
   useGetTableDataMock,
 } = vi.hoisted(() => ({
-  useGetColumnGroupsMock: vi.fn(),
   useGetColumnSizingMock: vi.fn(),
   useGetPinnedColumnOffsetsMock: vi.fn(),
+  useGetPinnedColumnPartitionMock: vi.fn(),
   useGetTableDataMock: vi.fn(),
 }));
 
@@ -69,9 +69,9 @@ const MockTableRow = vi.hoisted(() => {
 vi.mock(
   '@repo/ui/components/Table/contexts/TableConfig/columns/selectors',
   () => ({
-    useGetColumnGroups: useGetColumnGroupsMock,
     useGetColumnSizing: useGetColumnSizingMock,
     useGetPinnedColumnOffsets: useGetPinnedColumnOffsetsMock,
+    useGetPinnedColumnPartition: useGetPinnedColumnPartitionMock,
   }),
 );
 
@@ -88,7 +88,7 @@ vi.mock('../contexts/TableData/data/selectors', () => ({
 }));
 
 const setupDefaultMocks = () => {
-  useGetColumnGroupsMock.mockReturnValue({
+  useGetPinnedColumnPartitionMock.mockReturnValue({
     centerCols: [
       { key: 'name', label: 'Name' },
       { key: 'amount', label: 'Amount' },
@@ -126,7 +126,7 @@ describe('TableBodyRows', () => {
   });
 
   it('uses custom column render when provided', () => {
-    useGetColumnGroupsMock.mockReturnValue({
+    useGetPinnedColumnPartitionMock.mockReturnValue({
       centerCols: [
         {
           key: 'name',
@@ -154,7 +154,7 @@ describe('TableBodyRows', () => {
   });
 
   it('renders cells for pinned and center column groups', () => {
-    useGetColumnGroupsMock.mockReturnValue({
+    useGetPinnedColumnPartitionMock.mockReturnValue({
       centerCols: [{ key: 'name', label: 'Name' }],
       leftPinnedCols: [{ key: 'id', label: 'ID' }],
       rightPinnedCols: [{ key: 'status', label: 'Status' }],

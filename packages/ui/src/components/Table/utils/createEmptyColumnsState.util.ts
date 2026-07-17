@@ -11,10 +11,10 @@ type CreateEmptyColumnsStateArgs<TData extends Record<string, unknown>> = {
 
 type EmptyColumnsState<TData extends Record<string, unknown>> = Omit<
   TableColumnsState<TData>,
-  | 'columnGroups'
   | 'effectiveColumns'
   | 'normalizedColumns'
   | 'pinnedColumnOffsets'
+  | 'pinnedColumnPartition'
   | 'staticKeys'
 >;
 

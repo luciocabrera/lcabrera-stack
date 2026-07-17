@@ -17,19 +17,11 @@ export type ColumnFiltersState<TData = Record<string, unknown>> = Record<
 >;
 
 /**
- * Pre-computed column groups split by pinning side, stored in columnsStore.
- */
-export type ColumnGroupsState<TData = Record<string, unknown>> = {
-  readonly centerCols: readonly TableColumn<TData>[];
-  readonly leftPinnedCols: readonly TableColumn<TData>[];
-  readonly rightPinnedCols: readonly TableColumn<TData>[];
-};
-
-/**
  * Column order state - array of column keys in display order
  */
 export type ColumnOrderState<TData = Record<string, unknown>> =
   readonly DataKey<TData>[];
+
 /**
  * Column pinning state
  */
@@ -39,7 +31,6 @@ export type ColumnPinningState<TData = Record<string, unknown>> = {
   /** Columns pinned to the right */
   readonly right: readonly DataKey<TData>[];
 };
-
 /**
  * Column sizing state - maps column key to custom width
  */
@@ -142,6 +133,15 @@ export type PinnedColumnOffsetsState<TData = Record<string, unknown>> = Partial<
 >;
 
 /**
+ * Pre-computed column groups split by pinning side, stored in columnsStore.
+ */
+export type PinnedColumnPartitionState<TData = Record<string, unknown>> = {
+  readonly centerCols: readonly TableColumn<TData>[];
+  readonly leftPinnedCols: readonly TableColumn<TData>[];
+  readonly rightPinnedCols: readonly TableColumn<TData>[];
+};
+
+/**
  * Sorting state for a single column
  */
 export type SortingState<TData = Record<string, unknown>> = Sorting<TData>[];
@@ -222,8 +222,6 @@ export type TableColumnFormat = {
 export type TableColumnsState<TData = Record<string, unknown>> = {
   /** Column filters state */
   readonly columnFilters: ColumnFiltersState<TData>;
-  /** Pre-computed column groups split by pinning side */
-  readonly columnGroups: ColumnGroupsState<TData>;
   /** Column order state */
   readonly columnOrder: ColumnOrderState<TData>;
   /** Column pinning state */
@@ -237,6 +235,8 @@ export type TableColumnsState<TData = Record<string, unknown>> = {
   readonly normalizedColumns: NormalizedColumnsState<TData>;
   /** Pre-computed pinned column offset map */
   readonly pinnedColumnOffsets: PinnedColumnOffsetsState<TData>;
+  /** Pre-computed column groups split by pinning side */
+  readonly pinnedColumnPartition: PinnedColumnPartitionState<TData>;
   /** Sorting state */
   readonly sorting: SortingState<TData>;
   /** Keys of columns marked as static (computed once from columns) */
@@ -251,10 +251,10 @@ export type TableColumnsState<TData = Record<string, unknown>> = {
  */
 export type TableColumnsStateInput<TData = Record<string, unknown>> = Omit<
   TableColumnsState<TData>,
-  | 'columnGroups'
   | 'effectiveColumns'
   | 'normalizedColumns'
   | 'pinnedColumnOffsets'
+  | 'pinnedColumnPartition'
   | 'staticKeys'
 >;
 

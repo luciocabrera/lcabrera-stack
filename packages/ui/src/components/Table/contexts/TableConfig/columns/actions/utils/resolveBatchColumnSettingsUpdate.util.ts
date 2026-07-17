@@ -81,10 +81,10 @@ export const resolveBatchColumnSettingsUpdate = <TData>({
         });
 
   const {
-    columnGroups,
     effectiveColumns,
     normalizedColumns,
     pinnedColumnOffsets,
+    pinnedColumnPartition,
   } = deriveColumnViewState<TData>({
     columnOrder: newColumnOrder,
     columnPinning: newPinning,
@@ -95,13 +95,13 @@ export const resolveBatchColumnSettingsUpdate = <TData>({
 
   return {
     columnFilters: newColumnFilters,
-    columnGroups,
     columnOrder: newColumnOrder,
     columnPinning: newPinning,
     columnSizing: newColumnSizing,
     effectiveColumns,
     normalizedColumns,
     pinnedColumnOffsets,
+    pinnedColumnPartition,
     sorting: newSorting,
   };
 };

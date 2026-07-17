@@ -25,7 +25,7 @@ graph TD
   TWC["TableWrapperContext<br/><small>wrapperRef</small>"]
   TTitle["TableTitle"]
   TBase["TableBase<br/><small>density · borders · stripes</small>"]
-  TH["TableHeader<br/><small>column groups + pinned offsets</small>"]
+  TH["TableHeader<br/><small>pinned partition + pinned offsets</small>"]
   TBody["TableBody<br/><small>virtualized rows</small>"]
   TDS["TableDrawersSection"]
 

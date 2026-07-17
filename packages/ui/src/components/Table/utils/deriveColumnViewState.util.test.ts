@@ -43,15 +43,15 @@ describe('deriveColumnViewState', () => {
       'name',
       'age',
     ]);
-    expect(result.columnGroups.leftPinnedCols.map(({ key }) => key)).toEqual([
-      'id',
-    ]);
-    expect(result.columnGroups.centerCols.map(({ key }) => key)).toEqual([
-      'name',
-    ]);
-    expect(result.columnGroups.rightPinnedCols.map(({ key }) => key)).toEqual([
-      'age',
-    ]);
+    expect(
+      result.pinnedColumnPartition.leftPinnedCols.map(({ key }) => key),
+    ).toEqual(['id']);
+    expect(
+      result.pinnedColumnPartition.centerCols.map(({ key }) => key),
+    ).toEqual(['name']);
+    expect(
+      result.pinnedColumnPartition.rightPinnedCols.map(({ key }) => key),
+    ).toEqual(['age']);
     expect(result.pinnedColumnOffsets.id?.offset).toBe(0);
     expect(result.pinnedColumnOffsets.age?.side).toBe('right');
   });
@@ -70,7 +70,7 @@ describe('deriveColumnViewState', () => {
       'id',
       'age',
     ]);
-    expect(result.columnGroups.centerCols).toEqual([]);
+    expect(result.pinnedColumnPartition.centerCols).toEqual([]);
     expect(result.normalizedColumns.name?.label).toBe('Name');
   });
 });

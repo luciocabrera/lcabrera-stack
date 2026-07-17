@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { TableBody } from './TableBody.component';
 
 const {
-  useGetColumnGroupsMock,
+  useGetPinnedColumnPartitionMock,
   useGetTableIsLoadingMock,
   useGetTableIsLoadingMoreMock,
   useGetTableOverscanMock,
@@ -15,7 +15,7 @@ const {
   useGetTableTotalLoadedRowsMock,
   useVirtualizationMock,
 } = vi.hoisted(() => ({
-  useGetColumnGroupsMock: vi.fn(),
+  useGetPinnedColumnPartitionMock: vi.fn(),
   useGetTableIsLoadingMock: vi.fn(),
   useGetTableIsLoadingMoreMock: vi.fn(),
   useGetTableOverscanMock: vi.fn(),
@@ -67,7 +67,7 @@ const MockTableBodyRows = vi.hoisted(() => {
 vi.mock(
   '@repo/ui/components/Table/contexts/TableConfig/columns/selectors',
   () => ({
-    useGetColumnGroups: useGetColumnGroupsMock,
+    useGetPinnedColumnPartition: useGetPinnedColumnPartitionMock,
   }),
 );
 
@@ -109,7 +109,7 @@ const setupDefaultMocks = () => {
   useGetTableIsLoadingMock.mockReturnValue(false);
   useGetTableIsLoadingMoreMock.mockReturnValue(false);
   useGetTableTotalLoadedRowsMock.mockReturnValue(3);
-  useGetColumnGroupsMock.mockReturnValue({
+  useGetPinnedColumnPartitionMock.mockReturnValue({
     centerCols: [
       { key: 'name', label: 'Name' },
       { key: 'amount', label: 'Amount' },

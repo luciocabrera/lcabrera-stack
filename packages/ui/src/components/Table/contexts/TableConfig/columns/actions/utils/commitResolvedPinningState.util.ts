@@ -21,7 +21,7 @@ export const commitResolvedPinningState = <TData>({
   persistenceKey,
   persistTableState,
 }: CommitResolvedPinningStateArgs<TData>) => {
-  const { columnGroups, effectiveColumns, pinnedColumnOffsets } =
+  const { effectiveColumns, pinnedColumnOffsets, pinnedColumnPartition } =
     getPinnedDerivedColumnsState<TData>({
       columnOrder,
       columnPinning,
@@ -32,7 +32,6 @@ export const commitResolvedPinningState = <TData>({
 
   if (
     !commitPinningAndOrderUpdate<TData>({
-      columnGroups,
       columnsStore,
       effectiveColumns,
       newColumnOrder: columnOrder,
@@ -40,6 +39,7 @@ export const commitResolvedPinningState = <TData>({
       persistenceKey,
       persistTableState,
       pinnedColumnOffsets,
+      pinnedColumnPartition,
     })
   ) {
     return;

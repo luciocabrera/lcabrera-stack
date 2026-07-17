@@ -8,8 +8,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 const {
   MockTableHeaderCell,
   MockTableRow,
-  useGetColumnGroupsMock,
   useGetPinnedColumnOffsetsMock,
+  useGetPinnedColumnPartitionMock,
   useGetTableIsLoadingMock,
   useGetTableIsLoadingMoreMock,
 } = vi.hoisted(() => ({
@@ -19,8 +19,8 @@ const {
   MockTableRow: vi.fn(({ children }: { readonly children: ReactNode }) => (
     <tr>{children}</tr>
   )),
-  useGetColumnGroupsMock: vi.fn(),
   useGetPinnedColumnOffsetsMock: vi.fn(),
+  useGetPinnedColumnPartitionMock: vi.fn(),
   useGetTableIsLoadingMock: vi.fn(),
   useGetTableIsLoadingMoreMock: vi.fn(),
 }));
@@ -28,8 +28,8 @@ const {
 vi.mock(
   '@repo/ui/components/Table/contexts/TableConfig/columns/selectors',
   () => ({
-    useGetColumnGroups: useGetColumnGroupsMock,
     useGetPinnedColumnOffsets: useGetPinnedColumnOffsetsMock,
+    useGetPinnedColumnPartition: useGetPinnedColumnPartitionMock,
   }),
 );
 
@@ -58,7 +58,7 @@ describe('TableHeader', () => {
       { key: 'name', label: 'Name' },
       { key: 'age', label: 'Age' },
     ];
-    useGetColumnGroupsMock.mockReturnValue({
+    useGetPinnedColumnPartitionMock.mockReturnValue({
       centerCols: columns,
       leftPinnedCols: [],
       rightPinnedCols: [],
@@ -80,7 +80,7 @@ describe('TableHeader', () => {
     useGetTableIsLoadingMock.mockReturnValue(false);
     useGetTableIsLoadingMoreMock.mockReturnValue(false);
     const columns = [{ key: 'name', label: 'Name' }];
-    useGetColumnGroupsMock.mockReturnValue({
+    useGetPinnedColumnPartitionMock.mockReturnValue({
       centerCols: columns,
       leftPinnedCols: [],
       rightPinnedCols: [],
@@ -101,7 +101,7 @@ describe('TableHeader', () => {
     useGetTableIsLoadingMoreMock.mockReturnValue(false);
     const leftCol = { key: 'id', label: 'ID' };
     const centerCols = [{ key: 'name', label: 'Name' }];
-    useGetColumnGroupsMock.mockReturnValue({
+    useGetPinnedColumnPartitionMock.mockReturnValue({
       centerCols,
       leftPinnedCols: [leftCol],
       rightPinnedCols: [],

@@ -21,7 +21,7 @@ The table body can be wider than the scroll container (columns overflow → the
 container scrolls horizontally). A naive centered cell would center against the
 **body width**, drifting off-screen. Instead:
 
-- The `<td>` spans every visible column via `colSpan` (from `useGetColumnGroups`).
+- The `<td>` spans every visible column via `colSpan` (from `useGetPinnedColumnPartition`).
 - Its inner box is `position: sticky; top: 0; left: 0` so it pins to the
   scroll container's visible top-left corner.
 - The box is sized to the scroll container's measured client box
@@ -53,7 +53,7 @@ flowchart TD
   TES[TableEmptyState] --> Icon[NoDataDescriptive]
   TES --> Btn[Button]
   TES --> RR[react-router useRevalidator]
-  TES --> CG[useGetColumnGroups]
+  TES --> CG[useGetPinnedColumnPartition]
   TES --> CR[useTableContainerRef]
   TES --> ES[useElementSize]
 ```

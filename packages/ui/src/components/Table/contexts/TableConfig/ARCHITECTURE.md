@@ -44,7 +44,7 @@ TableConfig/
 │   │
 │   └── selectors/
 │       ├── useGetColumnFilters.hook.ts          → All column filters
-│       ├── useGetColumnGroups.hook.ts           → Pre-split column groups (derived)
+│       ├── useGetPinnedColumnPartition.hook.ts           → Pre-split pinning partition (derived)
 │       ├── useGetColumnOrder.hook.ts            → Column order array
 │       ├── useGetColumnPinning.hook.ts          → Pinning state { left, right }
 │       ├── useGetColumnSizing.hook.ts           → Column width map
@@ -121,7 +121,7 @@ and vice versa.
 TableColumnsState<TData> = {
   columns: ColumnDef<TData>[];           // Raw column definitions
   columnFilters: ColumnFilters;          // Record<string, ColumnFilter>
-  columnGroups: ColumnGroupsState;       // Pre-split { leftPinnedCols, centerCols, rightPinnedCols }
+  pinnedColumnPartition: PinnedColumnPartitionState;       // Pre-split { leftPinnedCols, centerCols, rightPinnedCols }
   columnOrder: ColumnOrderState;         // string[]
   columnPinning: ColumnPinningState;     // { left: string[], right: string[] }
   columnSizing: ColumnSizingState;       // Record<string, number>
@@ -335,22 +335,22 @@ Supports both single entries and batch submissions. Each entry specifies:
 
 ## Columns Selectors
 
-| Hook                            | Returns                    | Description                           |
-| ------------------------------- | -------------------------- | ------------------------------------- |
-| `useGetColumns`                 | `ColumnDef[]`              | Raw column definitions                |
-| `useGetColumnFilters`           | `ColumnFilters`            | All active column filters             |
-| `useGetColumnOrder`             | `ColumnOrderState`         | Column order array                    |
-| `useGetColumnPinning`           | `ColumnPinningState`       | Pinning state `{ left, right }`       |
-| `useGetColumnSizing`            | `ColumnSizingState`        | Column width map                      |
-| `useGetColumnVisibility`        | `Set<string>`              | Set of hidden column keys             |
-| `useGetColumnsSorting`          | `SortingState[]`           | Active sorting entries                |
-| `useGetEffectiveColumns`        | `EffectiveColumn[]`        | Columns with all settings applied     |
-| `useGetNormalizedColumn`        | `NormalizedColumn`         | Single enriched column by key         |
-| `useGetNormalizedColumns`       | `NormalizedColumn[]`       | All enriched column descriptors       |
-| `useGetNormalizedColumnFilters` | `NormalizedFilter[]`       | Filters enriched with column metadata |
-| `useGetColumnGroups`            | `ColumnGroupsState`        | Pre-split left/center/right columns   |
-| `useGetPinnedColumnOffsets`     | `PinnedColumnOffsetsState` | Sticky offsets for pinned columns     |
-| `useGetStaticColumnKeys`        | `Set<string>`              | Non-reorderable column keys           |
+| Hook                            | Returns                      | Description                           |
+| ------------------------------- | ---------------------------- | ------------------------------------- |
+| `useGetColumns`                 | `ColumnDef[]`                | Raw column definitions                |
+| `useGetColumnFilters`           | `ColumnFilters`              | All active column filters             |
+| `useGetColumnOrder`             | `ColumnOrderState`           | Column order array                    |
+| `useGetColumnPinning`           | `ColumnPinningState`         | Pinning state `{ left, right }`       |
+| `useGetColumnSizing`            | `ColumnSizingState`          | Column width map                      |
+| `useGetColumnVisibility`        | `Set<string>`                | Set of hidden column keys             |
+| `useGetColumnsSorting`          | `SortingState[]`             | Active sorting entries                |
+| `useGetEffectiveColumns`        | `EffectiveColumn[]`          | Columns with all settings applied     |
+| `useGetNormalizedColumn`        | `NormalizedColumn`           | Single enriched column by key         |
+| `useGetNormalizedColumns`       | `NormalizedColumn[]`         | All enriched column descriptors       |
+| `useGetNormalizedColumnFilters` | `NormalizedFilter[]`         | Filters enriched with column metadata |
+| `useGetPinnedColumnPartition`   | `PinnedColumnPartitionState` | Pre-split left/center/right columns   |
+| `useGetPinnedColumnOffsets`     | `PinnedColumnOffsetsState`   | Sticky offsets for pinned columns     |
+| `useGetStaticColumnKeys`        | `Set<string>`                | Non-reorderable column keys           |
 
 ## Meta Actions
 
