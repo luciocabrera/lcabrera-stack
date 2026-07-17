@@ -7,8 +7,14 @@ const __dirname = dirname(__filename);
 const uiRootDir = resolve(__dirname, '..');
 const publicApiFilePath = resolve(uiRootDir, 'src/public-api.ts');
 
+// The pre-`from` segment uses a single greedy quantifier (`[^'"\n]+`) with a
+// single `\s` separator rather than a lazy `[^'"\n]+?` next to a greedy `\s+`.
+// Because `\s` is a subset of `[^'"\n]`, the old adjacent quantifiers matched
+// overlapping input and backtracked quadratically on import/export lines with no
+// `from` before the quote (e.g. a long `export const … ` line). This form
+// matches exactly the same strings with linear scanning.
 const importExportPattern =
-  /(?:import|export)\s+(?:type\s+)?(?:[^'"\n]+?\s+from\s+)?['"]([^'"\n]+)['"]/g;
+  /(?:import|export)\s+(?:type\s+)?(?:[^'"\n]+\sfrom\s+)?['"]([^'"\n]+)['"]/g;
 
 // `matchAll` iterates against an internal clone of the regex, so the module-level
 // /g pattern's `lastIndex` is never advanced and needs no reset between calls.
