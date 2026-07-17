@@ -59,9 +59,9 @@ export const getGlobalSettingsFromCookie = ({
       return fallback;
     }
 
-    const parsedPinning = toGlobalPinningPreferences(payload.value['pinning']);
+    const parsedPinning = toGlobalPinningPreferences(payload.value.pinning);
     const parsedNavigation = toGlobalNavigationPreferences(
-      payload.value['navigation'],
+      payload.value.navigation,
     );
 
     return {

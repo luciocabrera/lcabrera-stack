@@ -12,7 +12,7 @@ describe('serializeFiltersToURL', () => {
       active: { type: 'boolean', value: true },
     });
     const parsed = JSON.parse(result!) as Record<string, unknown>;
-    expect(parsed['active']).toBe(true);
+    expect(parsed.active).toBe(true);
   });
 
   it('serializes a text filter', () => {
@@ -20,7 +20,7 @@ describe('serializeFiltersToURL', () => {
       name: { operator: 'contains', type: 'text', value: 'hello' },
     });
     const parsed = JSON.parse(result!) as Record<string, unknown>;
-    expect(parsed['name']).toEqual(['ct', 'hello']);
+    expect(parsed.name).toEqual(['ct', 'hello']);
   });
 
   it('serializes a number filter with between operator', () => {
@@ -28,7 +28,7 @@ describe('serializeFiltersToURL', () => {
       age: { operator: 'between', type: 'number', value: 10, value2: 20 },
     });
     const parsed = JSON.parse(result!) as Record<string, unknown>;
-    expect(parsed['age']).toEqual(['bw', 10, 20]);
+    expect(parsed.age).toEqual(['bw', 10, 20]);
   });
 
   it('serializes a number filter without between', () => {
@@ -36,7 +36,7 @@ describe('serializeFiltersToURL', () => {
       age: { operator: 'equals', type: 'number', value: 42 },
     });
     const parsed = JSON.parse(result!) as Record<string, unknown>;
-    expect(parsed['age']).toEqual(['eq', 42]);
+    expect(parsed.age).toEqual(['eq', 42]);
   });
 
   it('serializes a select filter with equals', () => {
@@ -48,7 +48,7 @@ describe('serializeFiltersToURL', () => {
       },
     });
     const parsed = JSON.parse(result!) as Record<string, unknown>;
-    expect(parsed['status']).toEqual(['Active', 'Inactive']);
+    expect(parsed.status).toEqual(['Active', 'Inactive']);
   });
 
   it('serializes a select filter with notEquals', () => {
@@ -56,7 +56,7 @@ describe('serializeFiltersToURL', () => {
       status: { operator: 'notEquals', type: 'select', values: ['Draft'] },
     });
     const parsed = JSON.parse(result!) as Record<string, unknown>;
-    expect(parsed['status']).toEqual(['!', 'Draft']);
+    expect(parsed.status).toEqual(['!', 'Draft']);
   });
 
   it('serializes a date filter with between operator', () => {
@@ -69,7 +69,7 @@ describe('serializeFiltersToURL', () => {
       },
     });
     const parsed = JSON.parse(result!) as Record<string, unknown>;
-    expect(parsed['date']).toEqual(['bw', '2024-01-01', '2024-12-31']);
+    expect(parsed.date).toEqual(['bw', '2024-01-01', '2024-12-31']);
   });
 
   it('serializes a date filter without between', () => {
@@ -77,7 +77,7 @@ describe('serializeFiltersToURL', () => {
       date: { operator: 'after', type: 'date', value: '2024-01-01' },
     });
     const parsed = JSON.parse(result!) as Record<string, unknown>;
-    expect(parsed['date']).toEqual(['af', '2024-01-01']);
+    expect(parsed.date).toEqual(['af', '2024-01-01']);
   });
 
   it('falls back to single select value when values array is not provided', () => {
@@ -86,7 +86,7 @@ describe('serializeFiltersToURL', () => {
     });
     const parsed = JSON.parse(result!) as Record<string, unknown>;
 
-    expect(parsed['status']).toEqual(['Active']);
+    expect(parsed.status).toEqual(['Active']);
   });
 
   it('serializes a number between filter without value2 as a single-value tuple', () => {
@@ -95,7 +95,7 @@ describe('serializeFiltersToURL', () => {
     });
     const parsed = JSON.parse(result!) as Record<string, unknown>;
 
-    expect(parsed['amount']).toEqual(['bw', 100]);
+    expect(parsed.amount).toEqual(['bw', 100]);
   });
 
   it('serializes a date between filter without value2 as a single-value tuple', () => {
@@ -104,6 +104,6 @@ describe('serializeFiltersToURL', () => {
     });
     const parsed = JSON.parse(result!) as Record<string, unknown>;
 
-    expect(parsed['date']).toEqual(['bw', '2024-01-01']);
+    expect(parsed.date).toEqual(['bw', '2024-01-01']);
   });
 });

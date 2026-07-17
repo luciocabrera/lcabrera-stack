@@ -117,8 +117,8 @@ describe('scanner registry (register/update/detail table/generic ingest)', () =>
       scannerId: TEST_SCANNER_ID,
     });
     expect(versions.map((row) => row.version)).toEqual([2, 1]);
-    expect(versions[0]?.snapshot['description']).toBe('Updated description.');
-    expect(versions[1]?.snapshot['description']).toBe(
+    expect(versions[0]?.snapshot.description).toBe('Updated description.');
+    expect(versions[1]?.snapshot.description).toBe(
       'Registry E2E test scanner.',
     );
   });

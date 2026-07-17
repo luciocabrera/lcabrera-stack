@@ -24,6 +24,6 @@ describe('parseCookies', () => {
 
   it('skips cookies without a name', () => {
     const result = parseCookies('=value; theme=light');
-    expect(result['theme']).toBe('light');
+    expect(result.theme).toBe('light');
   });
 });

@@ -18,21 +18,21 @@ export const toGlobalPinningPreferences = (value: unknown) => {
     return;
   }
 
-  const pinSide = isPinSide(value['pinSide']) ? value['pinSide'] : undefined;
+  const pinSide = isPinSide(value.pinSide) ? value.pinSide : undefined;
   const orderConflictResolution = isOrderConflictResolution(
-    value['orderConflictResolution'],
+    value.orderConflictResolution,
   )
-    ? value['orderConflictResolution']
+    ? value.orderConflictResolution
     : undefined;
   const pinConflictResolution = isPinConflictResolution(
-    value['pinConflictResolution'],
+    value.pinConflictResolution,
   )
-    ? value['pinConflictResolution']
+    ? value.pinConflictResolution
     : undefined;
   const unpinConflictResolution = isUnpinConflictResolution(
-    value['unpinConflictResolution'],
+    value.unpinConflictResolution,
   )
-    ? value['unpinConflictResolution']
+    ? value.unpinConflictResolution
     : undefined;
 
   return {

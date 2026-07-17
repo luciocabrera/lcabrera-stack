@@ -12,7 +12,7 @@ describe('serializeSortingToURL', () => {
       { columnKey: 'name', direction: 'asc' },
     ]);
     const parsed = JSON.parse(result!) as Record<string, unknown>;
-    expect(parsed['name']).toBe('asc');
+    expect(parsed.name).toBe('asc');
   });
 
   it('serializes multiple sort entries', () => {
@@ -21,8 +21,8 @@ describe('serializeSortingToURL', () => {
       { columnKey: 'age', direction: 'desc' },
     ]);
     const parsed = JSON.parse(result!) as Record<string, unknown>;
-    expect(parsed['name']).toBe('asc');
-    expect(parsed['age']).toBe('desc');
+    expect(parsed.name).toBe('asc');
+    expect(parsed.age).toBe('desc');
   });
 
   it('returns undefined when all entries have undefined direction', () => {

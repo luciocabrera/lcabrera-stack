@@ -20,14 +20,14 @@ describe('getNormalizedColumns', () => {
 
   it('preserves all column properties', () => {
     const result = getNormalizedColumns({ columns: baseColumns, sorting: [] });
-    expect(result['name']?.label).toBe('Name');
-    expect(result['age']?.dataType).toBe('number');
+    expect(result.name?.label).toBe('Name');
+    expect(result.age?.dataType).toBe('number');
   });
 
   it('sets sortDirection and sortIndex to undefined when column is not sorted', () => {
     const result = getNormalizedColumns({ columns: baseColumns, sorting: [] });
-    expect(result['name']?.sortDirection).toBeUndefined();
-    expect(result['name']?.sortIndex).toBeUndefined();
+    expect(result.name?.sortDirection).toBeUndefined();
+    expect(result.name?.sortIndex).toBeUndefined();
   });
 
   it('attaches sortDirection and sortIndex for sorted columns', () => {
@@ -36,12 +36,12 @@ describe('getNormalizedColumns', () => {
       { columnKey: 'name' as const, direction: 'asc' as const },
     ];
     const result = getNormalizedColumns({ columns: baseColumns, sorting });
-    expect(result['age']?.sortDirection).toBe('desc');
-    expect(result['age']?.sortIndex).toBe(0);
-    expect(result['name']?.sortDirection).toBe('asc');
-    expect(result['name']?.sortIndex).toBe(1);
-    expect(result['active']?.sortDirection).toBeUndefined();
-    expect(result['active']?.sortIndex).toBeUndefined();
+    expect(result.age?.sortDirection).toBe('desc');
+    expect(result.age?.sortIndex).toBe(0);
+    expect(result.name?.sortDirection).toBe('asc');
+    expect(result.name?.sortIndex).toBe(1);
+    expect(result.active?.sortDirection).toBeUndefined();
+    expect(result.active?.sortIndex).toBeUndefined();
   });
 
   it('returns an empty record for an empty columns array', () => {

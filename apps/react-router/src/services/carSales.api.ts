@@ -58,9 +58,9 @@ const isCarSalesPaginatedResponse = (
   value: unknown,
 ): value is CarSalesResponse & { hasMore: boolean } =>
   isObject(value) &&
-  Array.isArray(value['data']) &&
-  typeof value['total'] === 'number' &&
-  typeof value['hasMore'] === 'boolean';
+  Array.isArray(value.data) &&
+  typeof value.total === 'number' &&
+  typeof value.hasMore === 'boolean';
 
 export const carSalesApi = {
   /**

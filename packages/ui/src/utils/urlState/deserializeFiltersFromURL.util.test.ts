@@ -10,13 +10,13 @@ describe('deserializeFiltersFromURL', () => {
   it('deserializes a boolean filter', () => {
     const param = JSON.stringify({ active: true });
     const result = deserializeFiltersFromURL(param) as AnyFilters;
-    expect(result['active']).toEqual({ type: 'boolean', value: true });
+    expect(result.active).toEqual({ type: 'boolean', value: true });
   });
 
   it('deserializes a text filter', () => {
     const param = JSON.stringify({ name: ['ct', 'hello'] });
     const result = deserializeFiltersFromURL(param) as AnyFilters;
-    expect(result['name']).toEqual({
+    expect(result.name).toEqual({
       operator: 'contains',
       type: 'text',
       value: 'hello',
@@ -26,7 +26,7 @@ describe('deserializeFiltersFromURL', () => {
   it('deserializes a select equals filter', () => {
     const param = JSON.stringify({ status: ['Active', 'Inactive'] });
     const result = deserializeFiltersFromURL(param) as AnyFilters;
-    expect(result['status']).toEqual({
+    expect(result.status).toEqual({
       operator: 'equals',
       type: 'select',
       values: ['Active', 'Inactive'],
@@ -36,7 +36,7 @@ describe('deserializeFiltersFromURL', () => {
   it('deserializes a select notEquals filter', () => {
     const param = JSON.stringify({ status: ['!', 'Draft'] });
     const result = deserializeFiltersFromURL(param) as AnyFilters;
-    expect(result['status']).toEqual({
+    expect(result.status).toEqual({
       operator: 'notEquals',
       type: 'select',
       values: ['Draft'],
@@ -51,6 +51,6 @@ describe('deserializeFiltersFromURL', () => {
     const param = JSON.stringify({ bad: [], name: ['ct', 'test'] });
     const result = deserializeFiltersFromURL(param) as AnyFilters;
     expect('bad' in result).toBe(false);
-    expect(result['name']).toBeDefined();
+    expect(result.name).toBeDefined();
   });
 });
