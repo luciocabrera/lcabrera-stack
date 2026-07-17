@@ -157,16 +157,6 @@ and reports trivially simple code as `critical`.
 | `vp run skills:source-audit` | source smell report + handoff bootstrap     |
 | `vp run skills:handoff`      | bootstrap the agenting handoff runbook      |
 | `vp run prepare`             | `vp config` — runs automatically on install |
-| `vp run lint:claude`         | `claudelint check-all` — **see caveat**     |
-| `vp run lint:claude:fix`     | `claudelint format --fix` — **see caveat**  |
-
-> **Caveat — `claudelint` is not installed and not declared.** Both `lint:claude`
-> scripts, the `/config-audit` skill, and the `SessionStart` hook documented in
-> `.claude/README.md` invoke a `claudelint` binary that appears in no
-> `package.json` and has no documented install path, so they fail with
-> `cannot find binary path`. Either declare it as a dependency or drop the
-> scripts — as of now they are decoration, and the SessionStart hook fails
-> silently on every session.
 
 ---
 

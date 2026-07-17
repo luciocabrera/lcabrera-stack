@@ -39,7 +39,6 @@ docker/local/pgpass
 !.env.example
 
 packages/eslint-local-rules/build/
-.claudelint-cache/
 
 # Fallow per-run artifacts (canonical root: reports/fallow/ — see AGENTS.md)
 reports/fallow/runs/

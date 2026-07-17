@@ -100,7 +100,6 @@ Skills are on-demand task workflows in `.github/skills/`. Use them as the first 
 | `code-smell-checker`          | Baseline maintainability audits and tech-debt triage                                                        |
 | `code-smell-zen`              | Diff-based smell review against target branch                                                               |
 | `fallow-code-checker`         | Full fallow monorepo hygiene scan with prioritized report (`vp run fallow:full` from root; scope with `-w`) |
-| `config-audit`                | Run claudelint, triage against known exceptions, produce fix plan for genuine issues                        |
 
 Selection guideline:
 

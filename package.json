@@ -34,9 +34,7 @@
     "fallow:dupes": "fallow dupes",
     "fallow:audit": "fallow audit",
     "fallow:refresh-report": "node scripts/refresh-fallow-complexity-report.cjs",
-    "prepare": "vp config",
-    "lint:claude": "claudelint check-all",
-    "lint:claude:fix": "claudelint format --fix"
+    "prepare": "vp config"
   },
   "devDependencies": {
     "@repo/vite-configs": "workspace:*",
