@@ -139,6 +139,11 @@ independent scanner rows, master/detail tables, and runner scripts; the
 `linter-checker` skill drives them. Biome gates PRs and produces a report, but
 has no scanner row and is not in `linter-checker`. That is a deliberate scope
 line, not an oversight — extending it is a follow-up with its own migration.
+The full, execute-ready spec for that follow-up (approved then parked before
+implementation) is [`docs/cqms/BIOME_SCANNER_PLAN.md`](../BIOME_SCANNER_PLAN.md):
+it records the JSON-shape facts, the error/warning/info→HIGH/MEDIUM/LOW mapping,
+and the load-bearing gotcha — `lint_violations.source` is a closed CHECK, so a
+half-built integration ingests and then fails at INSERT in production.
 
 **A third pass costs CI time.** It is one Biome run over ~2,800 files (sub-second
 in practice), which is why a root-only pass was chosen over a fan-out.
