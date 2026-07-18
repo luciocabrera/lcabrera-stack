@@ -13,7 +13,7 @@
         "status": "ERROR",
         "comparator": "GT",
         "errorThreshold": "3",
-        "actualValue": "8.8"
+        "actualValue": "8.6"
       },
       {
         "metric": "new_maintainability_rating",
@@ -46,80 +46,23 @@
     ]
   },
   "summary": {
-    "issues": 3,
+    "issues": 1,
     "hotspots": 0,
     "bySeverity": {
-      "MINOR": 2,
       "MAJOR": 1
     },
     "byType": {
-      "CODE_SMELL": 3
+      "CODE_SMELL": 1
     }
   },
   "issues": [
-    {
-      "key": "AZ92Fzu0_8yZka3MRAQY",
-      "rule": "javascript:S7758",
-      "type": "CODE_SMELL",
-      "severity": "MINOR",
-      "file": "scripts/generate-changelog.mjs",
-      "line": 29,
-      "message": "Prefer `String.fromCodePoint()` over `String.fromCharCode()`.",
-      "effort": "5min",
-      "tags": [
-        "es2015",
-        "internationalization",
-        "unicode"
-      ],
-      "impacts": [
-        {
-          "softwareQuality": "MAINTAINABILITY",
-          "severity": "LOW"
-        },
-        {
-          "softwareQuality": "RELIABILITY",
-          "severity": "LOW"
-        }
-      ],
-      "cleanCodeCategory": "CONSISTENT",
-      "status": "OPEN",
-      "creationDate": "2026-07-18T16:36:08+0000"
-    },
-    {
-      "key": "AZ92Fzu0_8yZka3MRAQZ",
-      "rule": "javascript:S7758",
-      "type": "CODE_SMELL",
-      "severity": "MINOR",
-      "file": "scripts/generate-changelog.mjs",
-      "line": 30,
-      "message": "Prefer `String.fromCodePoint()` over `String.fromCharCode()`.",
-      "effort": "5min",
-      "tags": [
-        "es2015",
-        "internationalization",
-        "unicode"
-      ],
-      "impacts": [
-        {
-          "softwareQuality": "MAINTAINABILITY",
-          "severity": "LOW"
-        },
-        {
-          "softwareQuality": "RELIABILITY",
-          "severity": "LOW"
-        }
-      ],
-      "cleanCodeCategory": "CONSISTENT",
-      "status": "OPEN",
-      "creationDate": "2026-07-18T16:36:08+0000"
-    },
     {
       "key": "AZ92FzsY_8yZka3MRAQX",
       "rule": "javascript:S8786",
       "type": "CODE_SMELL",
       "severity": "MAJOR",
       "file": "scripts/lib/git-remote.mjs",
-      "line": 12,
+      "line": 11,
       "message": "Simplify this regular expression to reduce its runtime, as it has super-linear performance due to backtracking.",
       "effort": "20min",
       "tags": [

@@ -8,7 +8,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-const OWNER_REPO = /[:/]([^/]+)\/([^/]+?)(?:\.git)?$/;
+const DOT_GIT = /\.git$/;
 
 /** The `url` of the `[remote "origin"]` section — a line scan, not a backtracking
  *  regex over the whole file. */
@@ -28,6 +28,16 @@ const originUrl = (configText) => {
   return undefined;
 };
 
+/** The last two path segments of an origin URL (owner/repo), handling both
+ *  `https://host/owner/repo(.git)` and `git@host:owner/repo(.git)`. Split-based,
+ *  so no backtracking regex. */
+const ownerRepo = (url) => {
+  const segments = url.replace(DOT_GIT, '').split(/[:/]/).filter(Boolean);
+  return segments.length < 2
+    ? undefined
+    : { owner: segments.at(-2), repo: segments.at(-1) };
+};
+
 export const readRepoSlug = (repoRoot) => {
   const configPath = join(repoRoot, '.git', 'config');
   if (!existsSync(configPath)) {
@@ -37,10 +47,8 @@ export const readRepoSlug = (repoRoot) => {
   if (url === undefined) {
     return undefined;
   }
-  const slug = OWNER_REPO.exec(url);
-  if (slug === null) {
-    return undefined;
-  }
-  const [, owner, repo] = slug;
-  return { owner, repo, httpsUrl: `https://github.com/${owner}/${repo}` };
+  const slug = ownerRepo(url);
+  return slug === undefined
+    ? undefined
+    : { ...slug, httpsUrl: `https://github.com/${slug.owner}/${slug.repo}` };
 };
