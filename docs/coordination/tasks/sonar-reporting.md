@@ -34,7 +34,10 @@ the Biome work owns `biome.jsonc` + ADR-035.
   script, docs, `.env.example`, tracked `reports/sonar/full-latest.json`. Report
   is deterministic (byte-stable across runs); `reports/sonar/` is fmt-ignored so
   the generator and Oxfmt don't fight.
-- Blockers: none locally. CI enforcement (a `sonar:verify` gate step) needs the
-  user to add `SONAR_TOKEN` as a GitHub Actions secret first — teed up, not wired.
-- Next (needs the user): (1) add `SONAR_TOKEN` repo secret; (2) tighten the
-  SonarCloud quality gate + make the check required; then (3) wire the CI gate step.
+- Enforcement decision (2026-07-18): use SonarCloud's **native required check**,
+  not a CI `sonar:verify` step — it's synced to the analysis (race-free) and needs
+  no CI code. `sonar:report`/`sonar:verify` stay on-demand tools; `SONAR_TOKEN`
+  (repo secret, added) powers them + the tracked report.
+- Next (needs the user, dashboard only): (1) tighten the SonarCloud quality gate
+  (currently New-Code-only); (2) mark "SonarCloud Code Analysis" a required check
+  in `main` branch protection. No further code from this task.
