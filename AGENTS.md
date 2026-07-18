@@ -101,11 +101,13 @@ Skills are on-demand task workflows in `.github/skills/`. Use them as the first 
 | `code-smell-checker`          | Baseline maintainability audits and tech-debt triage                                                        |
 | `code-smell-zen`              | Diff-based smell review against target branch                                                               |
 | `fallow-code-checker`         | Full fallow monorepo hygiene scan with prioritized report (`vp run fallow:full` from root; scope with `-w`) |
+| `commit-and-pr`               | Write commit messages + PR descriptions that pass the enforced standard (hook + CI gate)                    |
 
 Selection guideline:
 
 - **Working in complex UI state?** Start with `store-pattern`.
 - **Finishing any code change?** Run `quality-gate-workflow`.
+- **Committing or opening a PR?** Use `commit-and-pr`.
 - **Routing/data mutations?** Use `react-router-framework-mode`.
 - **React component implementation?** Use `react-19`.
 - **Understanding unfamiliar code before changing it?** Use `codebase-explorer`.
@@ -257,6 +259,7 @@ The headline rules every agent must know regardless of which files are open. Ful
 10. **Never use workaround-only fixes** — always address and solve the underlying issue. If there is any doubt about intent, trade-offs, or risk, ask the user before applying a workaround or partial fix.
 11. **Never ignore, suppress, or omit a lint finding — verify, then fix.** Oxlint/eslint violations (including stylistic `unicorn/*` rules like `prefer-simple-condition-first` / `no-nested-ternary`) are real until you have read the flagged code and confirmed otherwise. Do **not** dismiss one as a false positive without checking, and do **not** silence a new one — no inline `// eslint-disable`/`oxlint-disable`, no rule-off in config, no hand-added `eslint-suppressions.json` entry. Fix the code (reorder operands, restructure logic, wire up/delete the export). If it is a genuine false positive, explain why rather than disabling. `packages/ui` is held strictest — its `eslint-suppressions.json` is gitignored so none is ever committed and it never baselines (§4).
 12. **Claim shared work before you touch it.** Multiple agents and humans work this repo in parallel. Before non-trivial work, register it in [`docs/coordination/`](docs/coordination/README.md): check for an area overlap, then create a task file (`tasks/_TEMPLATE.md`) with the `area` globs you own, branch, and keep `status`/`updated` current until it merges. Never edit files inside another active task's `area` without coordinating. The register — not `~/.claude/plans/` scratch, which is invisible to everyone else — is the shared record. `vp run coordination:verify` (CI) keeps it honest. (See "Multi-Agent Coordination" in §7.)
+13. **Commits and PRs follow the enforced format.** Every commit message is a Conventional Commit (`type(scope): subject`) and every PR has a conforming title plus the required `## What` / `## Verification` sections — checked by the `commit-msg` git hook locally and the `pr-standards.yml` gate in CI. The one spec is `scripts/lib/commit-convention.mjs`; don't restate its type list elsewhere, and (Rule 11) fix a failing message/description rather than weakening the check. (See "Commit & PR Standards" in §7 and the `commit-and-pr` skill.)
 
 ## 6. Security
 
@@ -322,6 +325,34 @@ Before creating any new component, hook, utility, constant, or type, **consult `
 3. Only create something new when nothing in the inventory is a reasonable fit.
 
 When in doubt: a codebase with 18 components and 25 utilities that each do one thing well is better than 40 components and 50 utilities with overlapping concerns.
+
+### Commit & PR Standards
+
+Commit messages and PR descriptions in this repo are **enforced**, not just
+conventional — the same way `commands:verify` keeps COMMANDS.md honest. The one
+spec is [`scripts/lib/commit-convention.mjs`](scripts/lib/commit-convention.mjs);
+the `commit-and-pr` skill is the how-to. Two layers, so a mixed crew of agents and
+humans follows it without exception:
+
+- **Commit messages** are Conventional Commits — `type(scope): subject`. The
+  `type` is one of the spec's `ALLOWED_TYPES`; the `scope` is preferably the
+  workspace you touched (`ui`, `admin_system`, `api-server`, … — derived from
+  `pnpm-workspace.yaml`, so it self-updates) or a cross-cutting area (`ci`,
+  `docs`, `tooling`, …). An unrecognised scope only warns; a malformed header
+  fails. The `.vite-hooks/commit-msg` hook (`commit:verify`) checks this on every
+  commit; merge/revert/`fixup!` messages are skipped, and the `Co-Authored-By:`
+  trailer is always accepted.
+- **Pull requests** need a conforming title (same format) and a description with
+  the required `## What` and `## Verification` (or `## Testing`) sections — fill in
+  [`.github/pull_request_template.md`](.github/pull_request_template.md). CI's
+  [`pr-standards.yml`](.github/workflows/pr-standards.yml) runs `pr:verify` on the
+  title + body and `commit:verify` over every non-merge commit in the range, so
+  nothing that skipped the local hook (`--no-verify`) reaches `main`.
+
+**Do not restate the type list in prose** (this section, the skill, PR template) —
+link to the spec so they cannot drift. If the standard itself must change, change
+`commit-convention.mjs`; the hook, CI, template, and docs all follow from it.
+(Non-Negotiable Rule 13.)
 
 ### Post-Change Quality Gate
 

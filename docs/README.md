@@ -13,20 +13,21 @@ Start here when you're not sure where something belongs, or where to look.
 
 ## By question
 
-| You want to know…                                                                | Canonical home                                                                                   |
-| -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| **The rules** — TS/React/StyleX standards, the non-negotiables, the quality gate | [`AGENTS.md`](../AGENTS.md) (+ path-scoped [`.claude/rules/`](../.claude/rules/))                |
-| **How to run something** — every `vp` command, what CI runs                      | [`COMMANDS.md`](../COMMANDS.md)                                                                  |
-| **Why a thing is built the way it is** — an architectural decision               | an **ADR** (two namespaces — see the warning below)                                              |
-| **Who's working on what right now** — in-flight work, owners, area locks         | [`docs/coordination/BOARD.md`](./coordination/BOARD.md) — the work register                      |
-| **What's built vs. specified for CQMS/CodePulse**                                | [`docs/cqms/STATUS.md`](./cqms/STATUS.md) — the living page; start there                         |
-| **The CQMS product spec** (canonical requirements)                               | [`docs/cqms/PRD_V2.md`](./cqms/PRD_V2.md)                                                        |
-| **Planned-but-unbuilt work** (approved, deferred)                                | a `docs/cqms/*_PLAN.md` spec, indexed from [STATUS.md §2](./cqms/STATUS.md)                      |
-| **How one component/hook is wired**                                              | that directory's `ARCHITECTURE.md` (152 of them)                                                 |
-| **Naming / structure / StyleX conventions**                                      | the nearest `PATTERNS.md` (e.g. [`packages/ui/src/PATTERNS.md`](../packages/ui/src/PATTERNS.md)) |
-| **Does an artifact already exist before I build one**                            | the app/package `INVENTORY.md` (react-router, ui, data-access, admin_system)                     |
-| **A task workflow** (review, fallow scan, quality gate…)                         | [`.github/skills/`](../.github/skills/) `SKILL.md` files                                         |
-| **Toolchain notes** (Vite+, fallow)                                              | [`docs/tooling/`](./tooling/)                                                                    |
+| You want to know…                                                                | Canonical home                                                                                                                                             |
+| -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **The rules** — TS/React/StyleX standards, the non-negotiables, the quality gate | [`AGENTS.md`](../AGENTS.md) (+ path-scoped [`.claude/rules/`](../.claude/rules/))                                                                          |
+| **How to run something** — every `vp` command, what CI runs                      | [`COMMANDS.md`](../COMMANDS.md)                                                                                                                            |
+| **Why a thing is built the way it is** — an architectural decision               | an **ADR** (two namespaces — see the warning below)                                                                                                        |
+| **Who's working on what right now** — in-flight work, owners, area locks         | [`docs/coordination/BOARD.md`](./coordination/BOARD.md) — the work register                                                                                |
+| **What's built vs. specified for CQMS/CodePulse**                                | [`docs/cqms/STATUS.md`](./cqms/STATUS.md) — the living page; start there                                                                                   |
+| **The CQMS product spec** (canonical requirements)                               | [`docs/cqms/PRD_V2.md`](./cqms/PRD_V2.md)                                                                                                                  |
+| **Planned-but-unbuilt work** (approved, deferred)                                | a `docs/cqms/*_PLAN.md` spec, indexed from [STATUS.md §2](./cqms/STATUS.md)                                                                                |
+| **How one component/hook is wired**                                              | that directory's `ARCHITECTURE.md` (152 of them)                                                                                                           |
+| **Naming / structure / StyleX conventions**                                      | the nearest `PATTERNS.md` (e.g. [`packages/ui/src/PATTERNS.md`](../packages/ui/src/PATTERNS.md))                                                           |
+| **Does an artifact already exist before I build one**                            | the app/package `INVENTORY.md` (react-router, ui, data-access, admin_system)                                                                               |
+| **A task workflow** (review, fallow scan, quality gate…)                         | [`.github/skills/`](../.github/skills/) `SKILL.md` files                                                                                                   |
+| **How to write a commit / PR** (the enforced format)                             | the [`commit-and-pr`](../.github/skills/commit-and-pr/SKILL.md) skill; spec in [`scripts/lib/commit-convention.mjs`](../scripts/lib/commit-convention.mjs) |
+| **Toolchain notes** (Vite+, fallow)                                              | [`docs/tooling/`](./tooling/)                                                                                                                              |
 
 ## By document, what it is and its lifetime
 
