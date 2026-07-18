@@ -9,18 +9,11 @@
     "status": "OK",
     "conditions": [
       {
-        "metric": "new_reliability_rating",
+        "metric": "new_duplicated_lines_density",
         "status": "OK",
         "comparator": "GT",
-        "errorThreshold": "1",
-        "actualValue": "1"
-      },
-      {
-        "metric": "new_security_rating",
-        "status": "OK",
-        "comparator": "GT",
-        "errorThreshold": "1",
-        "actualValue": "1"
+        "errorThreshold": "3",
+        "actualValue": "0.3"
       },
       {
         "metric": "new_maintainability_rating",
@@ -30,11 +23,11 @@
         "actualValue": "1"
       },
       {
-        "metric": "new_duplicated_lines_density",
+        "metric": "new_reliability_rating",
         "status": "OK",
         "comparator": "GT",
-        "errorThreshold": "3",
-        "actualValue": "0.3"
+        "errorThreshold": "1",
+        "actualValue": "1"
       },
       {
         "metric": "new_security_hotspots_reviewed",
@@ -42,6 +35,13 @@
         "comparator": "LT",
         "errorThreshold": "100",
         "actualValue": "100.0"
+      },
+      {
+        "metric": "new_security_rating",
+        "status": "OK",
+        "comparator": "GT",
+        "errorThreshold": "1",
+        "actualValue": "1"
       }
     ]
   },

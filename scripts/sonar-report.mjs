@@ -134,8 +134,14 @@ const normIssue = (issue) => ({
   line: issue.line ?? null,
   message: issue.message,
   effort: issue.effort ?? null,
-  tags: issue.tags ?? [],
-  impacts: issue.impacts ?? [],
+  // Sonar returns tags/impacts in an unstable order; sort so the tracked
+  // report is byte-identical run to run (no git churn).
+  tags: (issue.tags ?? []).toSorted(),
+  impacts: (issue.impacts ?? []).toSorted(
+    (a, b) =>
+      a.softwareQuality.localeCompare(b.softwareQuality) ||
+      a.severity.localeCompare(b.severity),
+  ),
   cleanCodeCategory: issue.cleanCodeAttributeCategory ?? null,
   status: issue.issueStatus ?? issue.status,
   creationDate: issue.creationDate,
@@ -154,13 +160,15 @@ const normHotspot = (hotspot) => ({
 
 const normGate = (projectStatus) => ({
   status: projectStatus?.status ?? 'NONE',
-  conditions: (projectStatus?.conditions ?? []).map((condition) => ({
-    metric: condition.metricKey,
-    status: condition.status,
-    comparator: condition.comparator,
-    errorThreshold: condition.errorThreshold ?? null,
-    actualValue: condition.actualValue ?? null,
-  })),
+  conditions: (projectStatus?.conditions ?? [])
+    .map((condition) => ({
+      metric: condition.metricKey,
+      status: condition.status,
+      comparator: condition.comparator,
+      errorThreshold: condition.errorThreshold ?? null,
+      actualValue: condition.actualValue ?? null,
+    }))
+    .toSorted((a, b) => a.metric.localeCompare(b.metric)),
 });
 
 /** Stable ordering so an unchanged tree writes a byte-identical report. */
@@ -180,8 +188,8 @@ const countBy = (items, pick) => {
 };
 
 const buildReport = (target, gate, issues, hotspots) => {
-  const normIssues = issues.map(normIssue).sort(byLocation);
-  const normHotspots = hotspots.map(normHotspot).sort(byLocation);
+  const normIssues = issues.map(normIssue).toSorted(byLocation);
+  const normHotspots = hotspots.map(normHotspot).toSorted(byLocation);
   return {
     project: CONFIG.project,
     source: CONFIG.base,
