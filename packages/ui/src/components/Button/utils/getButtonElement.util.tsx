@@ -75,7 +75,7 @@ export const getButtonElement = ({
             buttonStyles.linear,
             buttonStyles.overlayOverwrite,
           )}
-        ></div>
+        />
       )}
     </button>
   );

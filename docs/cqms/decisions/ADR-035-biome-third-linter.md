@@ -2,6 +2,7 @@
 
 **Status:** Accepted
 **Amends:** ADR-019 (which split `linter` into independent `eslint` / `oxlint` scanners — this adds a third rule engine alongside them, but deliberately **not** a third CQMS scanner; see Consequences).
+**Amended:** 2026-07-18 — §7 adds the phased rule-hardening beyond the `recommended` preset.
 
 ## Context
 
@@ -99,6 +100,49 @@ still fails. Add future input-rendering components there rather than scoping off
 repo-relative, run root-only to mirror the gate. `--only=biome` scopes a
 regeneration. Check-mode, like the other two — generating a report never mutates
 sources.
+
+### 7. Hardening beyond `recommended` — a phased, measured ratchet
+
+The `recommended` preset is the floor, not the ceiling. Biome ships hundreds of
+opt-in rules, and the ones that catch a real bug or enforce a convention this
+repo already follows by hand are enabled on top of `recommended`, in
+**approval-gated phases** so the fix effort of each is visible before it lands.
+`preset` and the group keys are valid siblings under `linter.rules` in 2.5.4:
+`"preset": "recommended"` stays, and individual group rules layer on top of it
+without disabling the recommended set.
+
+**Selection principle.**
+
+- **Adopt** an opt-in rule when it catches a genuine defect class or locks in a
+  convention already followed by hand — e.g. `useConsistentArrayType` is the
+  _only_ enforcer of the `T[]` / `readonly T[]` convention in `typescript.md`.
+- **Overlap with Oxlint/eslint is a safety net, not a conflict — when the engines
+  agree.** §5's "two engines must not both arbitrate one rule" is about engines
+  that _disagree_ (the `noDoubleEquals` / `no-null` trap in Consequences, or
+  `useExhaustiveDependencies`, where two dep-array heuristics diverge). A rule
+  where Biome and another engine reach the _same_ verdict is redundant
+  enforcement that survives either config drifting — keep it. Drop a candidate
+  only when the engines would fight or when it is pure noise (false positives).
+- **Measure before enabling.** Each candidate is run in isolation against the live
+  tree (`biome lint . --only=<group>/<rule> --reporter=summary`, read-only). A
+  0-finding rule is a free ratchet; a high-count rule carries a fix budget and is
+  scheduled into a later phase. Rules are never enabled blind.
+
+**Phase 1 (2026-07-18) — free ratchets** (2 findings total, both autofixed).
+Universal: `noVar`, `noUnusedExpressions`, `useErrorMessage`, `useArrayFind`,
+`useConsistentArrayType` (`shorthand`), `noInferrableTypes`, `noYodaExpression`,
+`useCollapsedElseIf`, `noUselessElse`, `noEnum`, `noParameterProperties`,
+`noDelete`. React-only: `useSelfClosingElements`, `useFragmentSyntax`,
+`noInlineStyles` (enforces StyleX-only, Rule 2). Node-only (a new override over
+the 13 non-React workspaces): `useNodeAssertStrict`. Test-only:
+`noExcessiveNestedTestSuites`, `useTestHooksOnTop`. Each rule carries its
+justification inline in `biome.jsonc`.
+
+**Nursery rules carry an upgrade duty.** `noInlineStyles` and `useTestHooksOnTop`
+(and any future nursery adoption) can be renamed, change behaviour, or graduate
+to another group on a Biome minor bump. Biome is pinned (`2.5.4`, via the
+`pnpm-workspace.yaml` catalog and the `$schema` URL); on every upgrade, re-run the
+per-rule `--only` sweep for each nursery rule before trusting a green gate.
 
 ## Consequences
 

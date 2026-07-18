@@ -27,7 +27,38 @@
   "linter": {
     "enabled": true,
     "domains": { "project": "recommended" },
-    "rules": { "preset": "recommended" },
+    "rules": {
+      "preset": "recommended",
+      // === Hardening Phase 1 — universal free ratchets (see ADR-035 §Rule
+      // hardening). Every rule here is 0 findings today: they lock in conventions
+      // the codebase already follows so no dev or agent can regress them. ===
+      "suspicious": {
+        "noVar": "error",
+        "noUnusedExpressions": "error",
+        "useErrorMessage": "error",
+      },
+      "complexity": {
+        "useArrayFind": "error", // filter(...)[0] -> find(...)
+      },
+      "style": {
+        // Sole enforcer of the repo array-type convention (typescript.md); no
+        // Oxlint/ESLint rule covers it. "shorthand" keeps `T[]`/`readonly T[]`
+        // and rewrites `Array<T>`/`ReadonlyArray<T>`.
+        "useConsistentArrayType": {
+          "level": "error",
+          "options": { "syntax": "shorthand" },
+        },
+        "noInferrableTypes": "error", // redundant annotations — let TS infer (Rule 9)
+        "noYodaExpression": "error",
+        "useCollapsedElseIf": "error",
+        "noUselessElse": "error",
+        "noEnum": "error", // repo prefers `as const` unions over TS enums
+        "noParameterProperties": "error", // explicit fields, not constructor params
+      },
+      "performance": {
+        "noDelete": "error", // aligns with immutability (Rule 6)
+      },
+    },
   },
   "overrides": [
     {
@@ -62,6 +93,13 @@
           "style": {
             "useReactFunctionComponents": "error",
             "useComponentExportOnlyModules": "error",
+            "useSelfClosingElements": "error", // <div></div> -> <div/>
+            "useFragmentSyntax": "error", // <React.Fragment> -> <>
+          },
+          "nursery": {
+            // Enforces StyleX-only (Rule 2): bans inline `style={{…}}`. NURSERY —
+            // re-check on any Biome upgrade (see ADR-035 §Rule hardening).
+            "noInlineStyles": "error",
           },
         },
       },
@@ -81,6 +119,41 @@
             // The rule stays ON and clean for every source file, where it
             // enforces the one-component bundle.
             "useComponentExportOnlyModules": "off",
+          },
+          "complexity": {
+            "noExcessiveNestedTestSuites": "error", // cap describe() nesting depth
+          },
+          "nursery": {
+            // NURSERY — re-check on any Biome upgrade (see ADR-035 §Rule hardening).
+            "useTestHooksOnTop": "error", // before/after hooks grouped at top of block
+          },
+        },
+      },
+    },
+    {
+      // Node/library workspaces (the 13 non-React workspaces — no JSX). Rules that
+      // only make sense off the browser live here so they never touch the React
+      // apps. Kept in lockstep with the React override's `includes`: every
+      // workspace is in exactly one of the two lists.
+      "includes": [
+        "apps/api-server/**",
+        "apps/api-server-fast/**",
+        "apps/scan-orchestrator/**",
+        "apps/shared/**",
+        "packages/agent-runner/**",
+        "packages/data-access/**",
+        "packages/node-runtime/**",
+        "packages/scan-ingestion/**",
+        "packages/ts-configs/**",
+        "packages/eslint-local-rules/**",
+        "packages/plugins/**",
+        "packages/utils/**",
+        "packages/vite-configs/**",
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "useNodeAssertStrict": "error", // node:assert -> node:assert/strict
           },
         },
       },
