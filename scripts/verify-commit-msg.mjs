@@ -23,12 +23,13 @@ import { fileURLToPath } from 'node:url';
 
 import { validateCommitMessage } from './lib/commit-convention.mjs';
 import { reportWarnings } from './lib/report-warnings.mjs';
+import { readTextWithin } from './lib/safe-read.mjs';
 import { deriveWorkspaceScopes } from './lib/workspace-scopes.mjs';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
 
 const readMessage = (source) =>
-  source === '-' ? readFileSync(0, 'utf8') : readFileSync(source, 'utf8');
+  source === '-' ? readFileSync(0, 'utf8') : readTextWithin(source, REPO_ROOT);
 
 const main = () => {
   const source = process.argv[2];

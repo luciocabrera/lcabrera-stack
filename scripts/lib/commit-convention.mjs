@@ -151,8 +151,9 @@ const validateScope = (scope, workspaces) => {
     (part) => SCOPE_TOKEN.test(part) && !isRecognizedScope(part, workspaces),
   );
   if (unknown.length > 0) {
+    const quoted = unknown.map((part) => `\`${part}\``).join(', ');
     warnings.push(
-      `scope ${unknown.map((u) => `\`${u}\``).join(', ')} is not a known workspace or area — ` +
+      `scope ${quoted} is not a known workspace or area — ` +
         `prefer a workspace (${sampleWorkspaces(workspaces)}) or a cross-cutting area (ci, docs, tooling, deps, …).`,
     );
   }

@@ -17,12 +17,12 @@
  *
  * Exit codes: 0 = valid (warnings allowed), 1 = a rule was broken.
  */
-import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { validatePrBody, validatePrTitle } from './lib/commit-convention.mjs';
 import { reportWarnings } from './lib/report-warnings.mjs';
+import { readTextWithin } from './lib/safe-read.mjs';
 import { deriveWorkspaceScopes } from './lib/workspace-scopes.mjs';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
@@ -38,7 +38,7 @@ const readInputs = () => {
   const body =
     bodyFile === undefined
       ? (process.env.PR_BODY ?? '')
-      : readFileSync(bodyFile, 'utf8');
+      : readTextWithin(bodyFile, REPO_ROOT);
   return { title, body };
 };
 
