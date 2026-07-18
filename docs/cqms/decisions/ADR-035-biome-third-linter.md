@@ -230,6 +230,19 @@ the file-name suffix rules — so the rule's marginal value is low while its
 A specific future naming gap is better served by a narrow `local-rules/*` rule
 than by this sweeping, contract-hostile one.
 
+**Phase 4 (2026-07-18) — `noDefaultExport`.** Hard-bans `export default` in
+ordinary code. The repo is named-export-only, so there were **0 code fixes** —
+all 81 default exports are framework/tooling contracts (38 React Router route
+modules, 31 configs, 8 eslint rules, 4 `entry`/`root`), exempted by glob in an
+override. Reaching a true zero took two passes: the `apps/*/src/routes.ts` route
+config and the eslint-rule files needed `**/routes.ts` and `**/eslint-local-rules/**`
+specifically (a bare `packages/eslint-local-rules/**` did not match the dir-root
+files). The cost is a small maintenance coupling — a new route/config/entry file
+must match those globs or it false-positives, but _loudly_, at the gate, never
+silently. The value is a hard stop on a stray default export that the named-export
+convention (and `single-component-export` / `useComponentExportOnlyModules`) only
+discouraged softly — worth it for a mixed-skill, multi-agent codebase.
+
 **Nursery rules carry an upgrade duty.** `noInlineStyles` and `useTestHooksOnTop`
 (and any future nursery adoption) can be renamed, change behaviour, or graduate
 to another group on a Biome minor bump. Biome is pinned (`2.5.4`, via the

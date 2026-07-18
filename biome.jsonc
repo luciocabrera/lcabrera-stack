@@ -76,6 +76,12 @@
         },
         "noNamespace": "error", // agrees with tseslint no-namespace (safety net)
         "useThrowNewError": "error", // throw new Error(); agrees with unicorn (safety net)
+        // === Phase 4 (ADR-035 §7) ===
+        // Hard-ban `export default` in ordinary code — the repo is named-export
+        // only (0 strays today). Framework/tooling files that MUST default-export
+        // (RR routes, config, entry/root, eslint rules) are exempt in the override
+        // below; keep that list in sync when a new such file class appears.
+        "noDefaultExport": "error",
         // NOTE: useNumberNamespace is deliberately NOT enabled — it wants
         // `Number.POSITIVE_INFINITY`/`Number.NaN`, which directly CONFLICTS with
         // ESLint's `unicorn/prefer-global-number-constants` (wants the globals
@@ -238,6 +244,27 @@
       ],
       "linter": {
         "rules": { "suspicious": { "noConsole": "off" } },
+      },
+    },
+    {
+      // Framework/tooling files whose default export is a contract, exempt from
+      // noDefaultExport: React Router route modules + the `routes.ts` route config;
+      // Vite/tool configs; the SSR `entry.*`/`root.tsx`; and eslint rule files
+      // (a default export IS the ESLint rule API). Every other file must use named
+      // exports (0 strays today). Keep this list current as new such files appear.
+      "includes": [
+        "**/routes/**",
+        "**/routes.ts",
+        "**/*.config.ts",
+        "**/*.config.mjs",
+        "**/*.config.cjs",
+        "**/config/**",
+        "**/entry.*.tsx",
+        "**/root.tsx",
+        "**/eslint-local-rules/**",
+      ],
+      "linter": {
+        "rules": { "style": { "noDefaultExport": "off" } },
       },
     },
     {
