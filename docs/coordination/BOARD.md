@@ -6,6 +6,13 @@ coordination:verify` fails if this drifts. See [README.md](./README.md).
 
 ## Tasks
 
-| Task                                                                   | Owner       | Status | Branch          | Area                                  | Updated    |
-| ---------------------------------------------------------------------- | ----------- | ------ | --------------- | ------------------------------------- | ---------- |
-| [Four independent fixes in packages/ui Table](tasks/table-ui-fixes.md) | agent:other | active | `(uncommitted)` | `packages/ui/src/components/Table/**` | 2026-07-18 |
+| Task                                                                                                | Owner        | Status | Branch                         | Area                                             | Updated    |
+| --------------------------------------------------------------------------------------------------- | ------------ | ------ | ------------------------------ | ------------------------------------------------ | ---------- |
+| [SonarCloud findings → tracked report + local gate (sonar:report/verify)](tasks/sonar-reporting.md) | agent:claude | active | `chore/biome-linter-hardening` | `scripts/sonar-report.mjs`<br>`reports/sonar/**` | 2026-07-18 |
+| [Four independent fixes in packages/ui Table](tasks/table-ui-fixes.md)                              | agent:other  | active | `(uncommitted)`                | `packages/ui/src/components/Table/**`            | 2026-07-18 |
+
+## Shared branches
+
+| Branch                                                                     | Base → Target | Integrator  | Status | Participants    | Updated    |
+| -------------------------------------------------------------------------- | ------------- | ----------- | ------ | --------------- | ---------- |
+| [`chore/biome-linter-hardening`](branches/chore-biome-linter-hardening.md) | main → main   | human:lucio | active | sonar-reporting | 2026-07-18 |

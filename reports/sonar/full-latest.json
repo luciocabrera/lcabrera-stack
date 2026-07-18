@@ -1,0 +1,85 @@
+{
+  "project": "luciocabrera_vite-react-compiler",
+  "source": "https://sonarcloud.io",
+  "target": {
+    "type": "branch",
+    "value": "main"
+  },
+  "qualityGate": {
+    "status": "OK",
+    "conditions": [
+      {
+        "metric": "new_reliability_rating",
+        "status": "OK",
+        "comparator": "GT",
+        "errorThreshold": "1",
+        "actualValue": "1"
+      },
+      {
+        "metric": "new_security_rating",
+        "status": "OK",
+        "comparator": "GT",
+        "errorThreshold": "1",
+        "actualValue": "1"
+      },
+      {
+        "metric": "new_maintainability_rating",
+        "status": "OK",
+        "comparator": "GT",
+        "errorThreshold": "1",
+        "actualValue": "1"
+      },
+      {
+        "metric": "new_duplicated_lines_density",
+        "status": "OK",
+        "comparator": "GT",
+        "errorThreshold": "3",
+        "actualValue": "0.3"
+      },
+      {
+        "metric": "new_security_hotspots_reviewed",
+        "status": "OK",
+        "comparator": "LT",
+        "errorThreshold": "100",
+        "actualValue": "100.0"
+      }
+    ]
+  },
+  "summary": {
+    "issues": 1,
+    "hotspots": 0,
+    "bySeverity": {
+      "MAJOR": 1
+    },
+    "byType": {
+      "CODE_SMELL": 1
+    }
+  },
+  "issues": [
+    {
+      "key": "AZ8JptItxRTRgvXsOjTt",
+      "rule": "typescript:S6772",
+      "type": "CODE_SMELL",
+      "severity": "MAJOR",
+      "file": "apps/react-router/src/features/showcase/ShowcasePage/SidePanelSection/SidePanelSection.component.tsx",
+      "line": 90,
+      "message": "Ambiguous spacing after previous element span",
+      "effort": "5min",
+      "tags": ["react"],
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "LOW"
+        },
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "MEDIUM"
+        }
+      ],
+      "cleanCodeCategory": "CONSISTENT",
+      "status": "OPEN",
+      "creationDate": "2026-06-26T15:53:56+0000"
+    }
+  ],
+  "hotspots": []
+}
