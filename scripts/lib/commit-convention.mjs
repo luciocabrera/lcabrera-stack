@@ -1,0 +1,267 @@
+/**
+ * The single source of truth for this repo's commit-message and PR-description
+ * format. Pure: constants plus validators that take their inputs (a message
+ * string and the derived workspace list) and return `{ errors, warnings }` —
+ * string arrays the caller buckets into blocking problems vs non-blocking hints.
+ *
+ * Consumed by BOTH `scripts/verify-commit-msg.mjs` (the commit-msg git hook and
+ * the per-commit CI check) and `scripts/verify-pr.mjs` (the PR title + body CI
+ * gate), so the hook, CI, and the pull-request template all validate against ONE
+ * spec and cannot drift. Prose docs (AGENTS.md, the commit-and-pr skill) link
+ * here instead of restating the type list, so they cannot drift either.
+ *
+ * Grammar (Conventional Commits): type, optional scope, optional breaking `!`,
+ * a colon-space, then the subject —
+ *   type     one of ALLOWED_TYPES (lowercase)
+ *   scope    optional; a workspace name (ui, admin_system, api-server, …) or a
+ *            cross-cutting area (ci, docs, tooling, …). Free-form in shape; an
+ *            unrecognised scope is a WARNING, never a hard failure.
+ *   subject  non-empty, no trailing period, within HEADER_MAX.
+ *
+ * See `.claude/rules/scripts.md` for the standards this file follows.
+ */
+
+/** Allowed commit/PR-title types. Includes `revert` (git history uses it) and
+ *  `build`/`style` (Conventional-Commit standard; pre-empt bot false-positives).
+ *  This array is the canonical type list — prose docs link here, not restate it. */
+const ALLOWED_TYPES = [
+  'feat',
+  'fix',
+  'chore',
+  'docs',
+  'test',
+  'refactor',
+  'perf',
+  'ci',
+  'build',
+  'revert',
+  'style',
+];
+
+/** Hard ceiling for the header (first) line; soft target above which we hint. */
+const HEADER_MAX = 100;
+const HEADER_SOFT = 72;
+
+/** Cross-cutting scopes that are not a single workspace. Kept generous so real
+ *  practice does not trip the (non-blocking) unknown-scope hint. */
+const CROSSCUTTING_SCOPES = new Set([
+  'ci',
+  'build',
+  'deps',
+  'deps-dev',
+  'release',
+  'docs',
+  'agents',
+  'repo',
+  'scripts',
+  'tooling',
+  'coordination',
+  'biome',
+  'sonar',
+  'eslint',
+  'oxlint',
+  'cqms',
+  'showcase',
+  'admin',
+  'db',
+  'config',
+  'workflow',
+  'hooks',
+]);
+
+/** Required PR-description sections (heading match, any level, case-insensitive).
+ *  The pull-request template mirrors these labels exactly. */
+const REQUIRED_PR_SECTIONS = [
+  { label: 'What', re: /^#{1,6}\s+what\b/im },
+  {
+    label: 'Verification / Testing',
+    re: /^#{1,6}\s+(verification|testing|test plan|how to test|qa|tests)\b/im,
+  },
+];
+
+/** Auto-generated message shapes that are NOT authored subjects — skip them. */
+const SKIP_PATTERNS = [
+  /^Merge (branch|pull request|remote-tracking branch|tag|commit) /,
+  /^Revert "/,
+  /^(fixup|squash|amend)! /,
+];
+
+const HEADER_RE =
+  /^(?<type>[A-Za-z]+)(?:\((?<scope>[^)]*)\))?(?<breaking>!)?: (?<subject>.+)$/;
+const SCOPE_TOKEN = /^[a-z0-9]+(?:[/_.-][a-z0-9]+)*$/;
+const ADR_SCOPE = /^adr-\d+$/;
+const SCISSORS = /^#\s*-+\s*>8\s*-+/;
+
+/** Splits a raw commit-message file into its subject line and body, replicating
+ *  git `cleanup=strip`: drop `#` comment lines, cut everything after a scissors
+ *  line, then trim surrounding blank lines. `header` is undefined when empty. */
+const parseCommitMessage = (raw) => {
+  const kept = [];
+  for (const line of raw.split(/\r?\n/)) {
+    if (SCISSORS.test(line)) {
+      break;
+    }
+    if (!line.startsWith('#')) {
+      kept.push(line);
+    }
+  }
+  while (kept.length > 0 && kept[0].trim() === '') {
+    kept.shift();
+  }
+  while (kept.length > 0 && kept.at(-1).trim() === '') {
+    kept.pop();
+  }
+  return { header: kept[0], body: kept.slice(1).join('\n') };
+};
+
+/** True for auto-generated merge/revert/autosquash headers we must not validate. */
+const shouldSkip = (header) =>
+  header !== undefined && SKIP_PATTERNS.some((re) => re.test(header));
+
+/** First path segment of a scope part — `ui/table` → `ui`. */
+const scopeRoot = (part) => part.split('/')[0];
+
+const isRecognizedScope = (part, workspaces) => {
+  const root = scopeRoot(part);
+  return (
+    workspaces.has(root) ||
+    CROSSCUTTING_SCOPES.has(root) ||
+    ADR_SCOPE.test(root)
+  );
+};
+
+const sampleWorkspaces = (workspaces) => {
+  const names = [...workspaces].sort((a, b) => a.localeCompare(b));
+  return names.length > 4
+    ? `${names.slice(0, 4).join(', ')}, …`
+    : names.join(', ');
+};
+
+const validateScope = (scope, workspaces) => {
+  const errors = [];
+  const warnings = [];
+  const parts = scope.split(',');
+  const malformed = parts.filter((part) => !SCOPE_TOKEN.test(part));
+  for (const part of malformed) {
+    errors.push(
+      `scope \`${part}\` must be a lowercase token (letters, digits, and \` / _ . - \`).`,
+    );
+  }
+  const unknown = parts.filter(
+    (part) => SCOPE_TOKEN.test(part) && !isRecognizedScope(part, workspaces),
+  );
+  if (unknown.length > 0) {
+    warnings.push(
+      `scope ${unknown.map((u) => `\`${u}\``).join(', ')} is not a known workspace or area — ` +
+        `prefer a workspace (${sampleWorkspaces(workspaces)}) or a cross-cutting area (ci, docs, tooling, deps, …).`,
+    );
+  }
+  return { errors, warnings };
+};
+
+const validateSubject = (subject) => {
+  const errors = [];
+  if (subject.trim() === '') {
+    errors.push('subject must not be empty.');
+  }
+  if (subject.trimEnd().endsWith('.')) {
+    errors.push('subject must not end with a period.');
+  }
+  return errors;
+};
+
+const validateLength = (header) => {
+  if (header.length > HEADER_MAX) {
+    return {
+      errors: [
+        `header is ${header.length} chars — keep it under ${HEADER_MAX}.`,
+      ],
+      warnings: [],
+    };
+  }
+  if (header.length > HEADER_SOFT) {
+    return {
+      errors: [],
+      warnings: [
+        `header is ${header.length} chars — aim for ${HEADER_SOFT} or fewer.`,
+      ],
+    };
+  }
+  return { errors: [], warnings: [] };
+};
+
+/**
+ * Validates one Conventional-Commit header line (a commit subject or a PR title).
+ * `kind` labels messages ("commit message" | "PR title"). Returns
+ * `{ errors, warnings }` — never throws.
+ */
+const validateHeader = (header, { workspaces, kind }) => {
+  const match = HEADER_RE.exec(header ?? '');
+  if (match === null) {
+    return {
+      errors: [
+        `${kind} is not in Conventional Commit format \`type(scope): subject\` — got \`${header ?? ''}\`. ` +
+          `Allowed types: ${ALLOWED_TYPES.join(', ')}.`,
+      ],
+      warnings: [],
+    };
+  }
+  const { type, scope, subject } = match.groups;
+  const errors = [];
+  const warnings = [];
+  if (type !== type.toLowerCase() || !ALLOWED_TYPES.includes(type)) {
+    errors.push(`type \`${type}\` is not one of ${ALLOWED_TYPES.join(', ')}.`);
+  }
+  if (scope !== undefined) {
+    const scoped = validateScope(scope, workspaces);
+    errors.push(...scoped.errors);
+    warnings.push(...scoped.warnings);
+  }
+  errors.push(...validateSubject(subject));
+  const length = validateLength(header);
+  errors.push(...length.errors);
+  warnings.push(...length.warnings);
+  return { errors, warnings };
+};
+
+/** Validates a full raw commit-message file. Returns `{ skipped, errors, warnings }`. */
+export const validateCommitMessage = (raw, { workspaces }) => {
+  const { header } = parseCommitMessage(raw);
+  if (header === undefined) {
+    return {
+      skipped: false,
+      errors: ['commit message is empty.'],
+      warnings: [],
+    };
+  }
+  if (shouldSkip(header)) {
+    return { skipped: true, errors: [], warnings: [] };
+  }
+  return {
+    skipped: false,
+    ...validateHeader(header, { workspaces, kind: 'commit message' }),
+  };
+};
+
+/** Validates a PR title (a Conventional-Commit header). */
+export const validatePrTitle = (title, { workspaces }) =>
+  validateHeader(title, { workspaces, kind: 'PR title' });
+
+/** Validates a PR description body — required sections must be present. */
+export const validatePrBody = (body) => {
+  const errors = [];
+  if ((body ?? '').trim() === '') {
+    errors.push(
+      'PR description is empty — fill in the template (.github/pull_request_template.md).',
+    );
+    return { errors, warnings: [] };
+  }
+  for (const { label, re } of REQUIRED_PR_SECTIONS) {
+    if (!re.test(body)) {
+      errors.push(
+        `PR description is missing a \`## ${label}\` section — see .github/pull_request_template.md.`,
+      );
+    }
+  }
+  return { errors, warnings: [] };
+};

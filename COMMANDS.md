@@ -192,6 +192,19 @@ The in-git "who is working on what" register under [`docs/coordination/`](docs/c
 | `vp run coordination:verify` | check the task register + `BOARD.md` are consistent (CI gate) |
 | `vp run coordination:board`  | regenerate `docs/coordination/BOARD.md` from the task files   |
 
+### Commit & PR standards
+
+Conventional-Commit messages and structured PR descriptions, enforced from one
+spec ([`scripts/lib/commit-convention.mjs`](scripts/lib/commit-convention.mjs)).
+The `commit-msg` git hook runs `commit:verify` locally; `.github/workflows/pr-standards.yml`
+runs both in CI. See the [`commit-and-pr`](.github/skills/commit-and-pr/SKILL.md) skill.
+
+| Command                                           | Does                                                                            |
+| ------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `vp run commit:verify -- <file \| ->`             | validate a commit message (file path, or `-` for stdin) — used by the hook      |
+| `vp run pr:verify`                                | validate a PR title (`PR_TITLE`) + description (`PR_BODY`) against the standard |
+| `vp run pr:verify -- --title <t> --body-file <p>` | simulate the PR check locally without opening a PR                              |
+
 ### SonarCloud reporting
 
 SonarCloud runs in **Automatic Analysis** mode (the GitHub App analyses each push
@@ -272,7 +285,10 @@ Biome, and it does not run `tsc`.
 The three jobs run in **parallel** — "Biome runs before Fallow" holds within the
 Quality Gate job's step order, not across jobs.
 
-Other workflows: `lighthouse.yml`, `validate-skills.yml`.
+Other workflows: `lighthouse.yml`, `validate-skills.yml`, and
+[`pr-standards.yml`](.github/workflows/pr-standards.yml) — on every pull request
+it runs `pr:verify` (title + description) and `commit:verify` over each non-merge
+commit in the range, so nothing that skipped the local hook reaches `main`.
 
 ---
 
@@ -294,9 +310,16 @@ Biome is **check-only** here on purpose: `vp check --fix` autofixes, but a Biome
 autofix could rewrite a staged file after you reviewed it, so a violation fails the
 commit and you apply the fix deliberately with `vp run lint:biome`.
 
-The hook only sees **staged** files — CI's repo-wide pass is what catches anything
-arriving via `--no-verify` or an unhooked push. Note the eslint pass is not in the
-hook either; it is a CI-and-local-gate step.
+`.vite-hooks/commit-msg` runs `node scripts/verify-commit-msg.mjs "$1"`, validating
+the commit message against the Conventional-Commit standard before the commit is
+created (merge/revert/`fixup!` messages are skipped). The `_/` shims are gitignored
+but the committed sibling hooks (`pre-commit`, `commit-msg`) persist across every
+`vp config` regeneration.
+
+The hooks only see **staged** files / the local message — CI's repo-wide passes
+(`check-safe.yml` for code, `pr-standards.yml` for commits + the PR) are what catch
+anything arriving via `--no-verify` or an unhooked push. Note the eslint pass is not
+in a hook either; it is a CI-and-local-gate step.
 
 ---
 
