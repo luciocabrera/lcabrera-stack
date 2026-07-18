@@ -2,7 +2,7 @@
 id: per-workspace-coverage-report
 title: Per-workspace + monorepo coverage in the CI PR comment
 owner: agent:claude
-status: active
+status: review
 branch: feat/per-workspace-coverage-report
 area:
   - scripts/coverage-report.mjs
@@ -12,7 +12,7 @@ area:
 started: 2026-07-18
 updated: 2026-07-18
 plan: (none)
-pr: (none)
+pr: https://github.com/luciocabrera/vite-react-compiler/pull/32
 ---
 
 ## What
@@ -46,6 +46,6 @@ Also edits (shared, high-traffic — not claimed as narrow area globs): root
 
 ## Status / next
 
-- Current step: implementing script + CI wiring
+- Current step: PR #32 open, in review. Quality gate green; live `coverage:report` verified.
 - Blockers: none
-- Next: local test with fixtures + live `vp run coverage:report`, then quality gate + PR
+- Next: address review, then merge and delete this task file (Phase 2 = remaining packages, tracked in docs/tooling/coverage-reporting.md)
