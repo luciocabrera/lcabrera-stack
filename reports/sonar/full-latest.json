@@ -3,17 +3,17 @@
   "source": "https://sonarcloud.io",
   "target": {
     "type": "pullRequest",
-    "value": "39"
+    "value": "40"
   },
   "qualityGate": {
     "status": "ERROR",
     "conditions": [
       {
         "metric": "new_duplicated_lines_density",
-        "status": "OK",
+        "status": "ERROR",
         "comparator": "GT",
         "errorThreshold": "3",
-        "actualValue": "0.0"
+        "actualValue": "8.8"
       },
       {
         "metric": "new_maintainability_rating",
@@ -38,71 +38,103 @@
       },
       {
         "metric": "new_security_rating",
-        "status": "ERROR",
+        "status": "OK",
         "comparator": "GT",
         "errorThreshold": "1",
-        "actualValue": "3"
+        "actualValue": "1"
       }
     ]
   },
   "summary": {
-    "issues": 2,
+    "issues": 3,
     "hotspots": 0,
     "bySeverity": {
-      "MAJOR": 2
+      "MINOR": 2,
+      "MAJOR": 1
     },
     "byType": {
-      "CODE_SMELL": 1,
-      "VULNERABILITY": 1
+      "CODE_SMELL": 3
     }
   },
   "issues": [
     {
-      "key": "AZ919QRC_8yZka3MQDmx",
-      "rule": "javascript:S4624",
+      "key": "AZ92Fzu0_8yZka3MRAQY",
+      "rule": "javascript:S7758",
       "type": "CODE_SMELL",
-      "severity": "MAJOR",
-      "file": "scripts/lib/commit-convention.mjs",
-      "line": 155,
-      "message": "Refactor this code to not use nested template literals.",
-      "effort": "10min",
+      "severity": "MINOR",
+      "file": "scripts/generate-changelog.mjs",
+      "line": 29,
+      "message": "Prefer `String.fromCodePoint()` over `String.fromCharCode()`.",
+      "effort": "5min",
       "tags": [
-        "brain-overload",
-        "confusing",
-        "editable-source",
-        "es2015"
+        "es2015",
+        "internationalization",
+        "unicode"
       ],
       "impacts": [
         {
           "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        },
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "cleanCodeCategory": "CONSISTENT",
+      "status": "OPEN",
+      "creationDate": "2026-07-18T16:36:08+0000"
+    },
+    {
+      "key": "AZ92Fzu0_8yZka3MRAQZ",
+      "rule": "javascript:S7758",
+      "type": "CODE_SMELL",
+      "severity": "MINOR",
+      "file": "scripts/generate-changelog.mjs",
+      "line": 30,
+      "message": "Prefer `String.fromCodePoint()` over `String.fromCharCode()`.",
+      "effort": "5min",
+      "tags": [
+        "es2015",
+        "internationalization",
+        "unicode"
+      ],
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        },
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "cleanCodeCategory": "CONSISTENT",
+      "status": "OPEN",
+      "creationDate": "2026-07-18T16:36:08+0000"
+    },
+    {
+      "key": "AZ92FzsY_8yZka3MRAQX",
+      "rule": "javascript:S8786",
+      "type": "CODE_SMELL",
+      "severity": "MAJOR",
+      "file": "scripts/lib/git-remote.mjs",
+      "line": 12,
+      "message": "Simplify this regular expression to reduce its runtime, as it has super-linear performance due to backtracking.",
+      "effort": "20min",
+      "tags": [
+        "performance",
+        "regex"
+      ],
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
           "severity": "MEDIUM"
         }
       ],
       "cleanCodeCategory": "INTENTIONAL",
       "status": "OPEN",
-      "creationDate": "2026-07-18T15:58:29+0000"
-    },
-    {
-      "key": "AZ919QTF_8yZka3MQDmy",
-      "rule": "jssecurity:S8707",
-      "type": "VULNERABILITY",
-      "severity": "MAJOR",
-      "file": "scripts/verify-commit-msg.mjs",
-      "line": 31,
-      "message": "LLMs running this code with faulty CLI arguments can escape file system restrictions. Refactor this code to validate the constructed path before accessing the file system.",
-      "effort": "30min",
-      "tags": [
-        "cwe"
-      ],
-      "impacts": [
-        {
-          "softwareQuality": "SECURITY",
-          "severity": "HIGH"
-        }
-      ],
-      "cleanCodeCategory": "INTENTIONAL",
-      "status": "OPEN",
-      "creationDate": "2026-07-18T15:58:29+0000"
+      "creationDate": "2026-07-18T16:36:08+0000"
     }
   ],
   "hotspots": []

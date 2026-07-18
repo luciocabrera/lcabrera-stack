@@ -26,8 +26,8 @@ import { readRepoSlug } from './lib/git-remote.mjs';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
 // Field / record separators matching the git `--format` bytes (%x1f / %x1e).
-const UNIT = String.fromCharCode(0x1f);
-const RECORD = String.fromCharCode(0x1e);
+const UNIT = String.fromCodePoint(0x1f);
+const RECORD = String.fromCodePoint(0x1e);
 
 /** commit type → section heading, in the order sections should appear. */
 const TYPE_SECTIONS = [

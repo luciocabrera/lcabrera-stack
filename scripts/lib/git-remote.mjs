@@ -8,19 +8,36 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-const ORIGIN_URL = /\[remote "origin"\][^[]*?url\s*=\s*(\S+)/;
 const OWNER_REPO = /[:/]([^/]+)\/([^/]+?)(?:\.git)?$/;
+
+/** The `url` of the `[remote "origin"]` section — a line scan, not a backtracking
+ *  regex over the whole file. */
+const originUrl = (configText) => {
+  let inOrigin = false;
+  for (const raw of configText.split('\n')) {
+    const line = raw.trim();
+    if (line.startsWith('[')) {
+      inOrigin = line === '[remote "origin"]';
+    } else if (inOrigin && line.startsWith('url')) {
+      const equals = line.indexOf('=');
+      if (equals !== -1) {
+        return line.slice(equals + 1).trim();
+      }
+    }
+  }
+  return undefined;
+};
 
 export const readRepoSlug = (repoRoot) => {
   const configPath = join(repoRoot, '.git', 'config');
   if (!existsSync(configPath)) {
     return undefined;
   }
-  const urlMatch = ORIGIN_URL.exec(readFileSync(configPath, 'utf8'));
-  if (urlMatch === null) {
+  const url = originUrl(readFileSync(configPath, 'utf8'));
+  if (url === undefined) {
     return undefined;
   }
-  const slug = OWNER_REPO.exec(urlMatch[1]);
+  const slug = OWNER_REPO.exec(url);
   if (slug === null) {
     return undefined;
   }
