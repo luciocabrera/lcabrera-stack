@@ -312,19 +312,21 @@ because a falsy non-boolean (`0`, `''`, `NaN`) renders literally (`{count && …
 prints a stray `0`). Wrap non-boolean conditions in `Boolean(...)`:
 
 ```tsx
-// ✅ non-boolean condition (string | undefined, ReactNode, number) → Boolean()
-{Boolean(errorMessage) && <p role="alert">{errorMessage}</p>}
-{Boolean(icon) && <span>{icon}</span>}
+const Example = ({ errorMessage, icon, isOpen, isHidden }: ExampleProps) => (
+  <div>
+    {/* ✅ non-boolean (string | undefined, ReactNode, number) → Boolean() */}
+    {Boolean(errorMessage) && <p role='alert'>{errorMessage}</p>}
+    {Boolean(icon) && <span>{icon}</span>}
 
-// ✅ already-syntactically-boolean (comparison / negation) → leave BARE.
-//    Do NOT wrap these in Boolean() — unicorn/no-useless-coercion rejects it.
-{isOpen !== false && <Panel />}
-{!isHidden && <Toolbar />}
+    {/* ✅ already boolean (comparison / negation) → leave BARE;
+        Boolean() here would trip unicorn/no-useless-coercion */}
+    {isOpen !== false && <Panel />}
+    {!isHidden && <Toolbar />}
 
-// ❌ bare non-boolean — noLeakedRender
-{errorMessage && <p>{errorMessage}</p>}
-// ❌ !! — banned by noImplicitCoercions
-{!!errorMessage && <p>…</p>}
+    {/* ❌ {errorMessage && <p/>}  — bare non-boolean, noLeakedRender */}
+    {/* ❌ {!!errorMessage && <p/>} — banned by noImplicitCoercions */}
+  </div>
+);
 ```
 
 Do **not** reach for a ternary to dodge it: `{cond ? <X/> : null}` is banned by
