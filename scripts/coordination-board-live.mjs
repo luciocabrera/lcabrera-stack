@@ -87,10 +87,13 @@ const prForTask = (data, byBranch, byNumber) =>
   byBranch.get(data.branch) ??
   (data.pr === undefined ? undefined : byNumber.get(String(data.pr).trim()));
 
-const prCell = (pr) =>
-  pr === undefined
-    ? '—'
-    : `#${pr.number} ${pr.isDraft ? '📝draft' : '🟢open'} ${checksGlyph(pr.statusCheckRollup)}`;
+const prCell = (pr) => {
+  if (pr === undefined) {
+    return '—';
+  }
+  const kind = pr.isDraft ? '📝draft' : '🟢open';
+  return `#${pr.number} ${kind} ${checksGlyph(pr.statusCheckRollup)}`;
+};
 
 const pad = (rows) => {
   const widths = rows[0].map((_, i) =>
