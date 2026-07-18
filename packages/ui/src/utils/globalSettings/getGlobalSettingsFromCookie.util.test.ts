@@ -69,6 +69,42 @@ describe('getGlobalSettingsFromCookie', () => {
     ).toEqual(fallbackSettings);
   });
 
+  it('returns fallback when the cookie value is not an object', () => {
+    const cookieString = buildCookieString({
+      value: 'not-an-object',
+      version: GLOBAL_SETTINGS_COOKIE_VERSION,
+    });
+
+    expect(
+      getGlobalSettingsFromCookie({ cookieString, fallback: fallbackSettings }),
+    ).toEqual(fallbackSettings);
+  });
+
+  it('returns fallback when the cookie payload is malformed JSON', () => {
+    // A raw cookie value that is not valid JSON drives the catch branch.
+    const cookieString = `${GLOBAL_SETTINGS_COOKIE_KEY}=${encodeURIComponent('{not valid json')}`;
+
+    expect(
+      getGlobalSettingsFromCookie({ cookieString, fallback: fallbackSettings }),
+    ).toEqual(fallbackSettings);
+  });
+
+  it('scopes the cookie key by appId when one is provided', () => {
+    const cookieString = buildCookieString({
+      value: { navigation: { size: 'large' } },
+      version: GLOBAL_SETTINGS_COOKIE_VERSION,
+    });
+
+    // The default (unscoped) key is absent once an appId scopes the lookup.
+    expect(
+      getGlobalSettingsFromCookie({
+        appId: 'admin',
+        cookieString,
+        fallback: fallbackSettings,
+      }),
+    ).toEqual(fallbackSettings);
+  });
+
   it('filters invalid pinning preference values', () => {
     const cookieString = buildCookieString({
       value: {

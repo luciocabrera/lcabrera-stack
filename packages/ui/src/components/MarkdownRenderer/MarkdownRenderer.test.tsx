@@ -29,4 +29,46 @@ describe('MarkdownRenderer', () => {
 
     expect(document.querySelector('script')).toBeNull();
   });
+
+  it('renders level-2 and level-3 headings with their own tags', () => {
+    render(<MarkdownRenderer content={'## Section\n\n### Subsection'} />);
+
+    expect(screen.getByRole('heading', { level: 2 }).textContent).toBe(
+      'Section',
+    );
+    expect(screen.getByRole('heading', { level: 3 }).textContent).toBe(
+      'Subsection',
+    );
+  });
+
+  it('renders links as anchors carrying the href', () => {
+    render(<MarkdownRenderer content={'[docs](https://example.test/docs)'} />);
+
+    const link = screen.getByRole('link', { name: 'docs' });
+    expect(link.tagName).toBe('A');
+    expect(link.getAttribute('href')).toBe('https://example.test/docs');
+  });
+
+  it('renders blockquotes as blockquote elements', () => {
+    render(<MarkdownRenderer content={'> quoted wisdom'} />);
+
+    const quote = document.querySelector('blockquote');
+    expect(quote).not.toBeNull();
+    expect(quote?.textContent).toContain('quoted wisdom');
+  });
+
+  it('renders ordered lists as <ol> with their items', () => {
+    render(<MarkdownRenderer content={'1. first\n2. second'} />);
+
+    const orderedList = document.querySelector('ol');
+    expect(orderedList).not.toBeNull();
+    expect(screen.getAllByRole('listitem')).toHaveLength(2);
+  });
+
+  it('renders inline code spans as <code>', () => {
+    render(<MarkdownRenderer content={'Use `npm run build` to compile.'} />);
+
+    const inlineCode = screen.getByText('npm run build');
+    expect(inlineCode.tagName).toBe('CODE');
+  });
 });
