@@ -65,15 +65,17 @@
       "line": 90,
       "message": "Ambiguous spacing after previous element span",
       "effort": "5min",
-      "tags": ["react"],
+      "tags": [
+        "react"
+      ],
       "impacts": [
-        {
-          "softwareQuality": "RELIABILITY",
-          "severity": "LOW"
-        },
         {
           "softwareQuality": "MAINTAINABILITY",
           "severity": "MEDIUM"
+        },
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "LOW"
         }
       ],
       "cleanCodeCategory": "CONSISTENT",

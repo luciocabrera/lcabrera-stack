@@ -17,7 +17,7 @@ gate surface) and land more cleanly stacked than as racing independent branches:
   `recommended`, per `~/.claude/plans/let-s-improve-our-deterministic-flickering-gadget.md`
   and ADR-035.
 - **SonarCloud reporting** (agent:claude) — `sonar:report` / `sonar:verify` tooling
-  - `reports/sonar/`, per [tasks/sonar-reporting.md](../tasks/sonar-reporting.md).
+  writing `reports/sonar/`, per [tasks/sonar-reporting.md](../tasks/sonar-reporting.md).
 
 The two share no source files; the descriptor exists to record that the branch is
 a collaboration surface (so same-branch work isn't read as a collision) and to
