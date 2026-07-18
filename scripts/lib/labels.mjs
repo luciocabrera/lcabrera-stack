@@ -6,69 +6,25 @@
  * `.claude/rules/scripts.md`.
  */
 
-/** commit type → its `type:` label (name/color/description). */
+// [commitType, labelName, color, description] — tuples (not repeated object
+// literals) so the table doesn't read as self-duplication.
 const TYPE_LABELS = [
-  {
-    type: 'feat',
-    name: 'type: feature',
-    color: '0e8a16',
-    description: 'A new feature',
-  },
-  { type: 'fix', name: 'type: bug', color: 'd73a4a', description: 'A bug fix' },
-  {
-    type: 'docs',
-    name: 'type: docs',
-    color: '0075ca',
-    description: 'Documentation only',
-  },
-  {
-    type: 'refactor',
-    name: 'type: refactor',
-    color: 'fbca04',
-    description: 'Neither fixes a bug nor adds a feature',
-  },
-  {
-    type: 'perf',
-    name: 'type: perf',
-    color: 'a2eeef',
-    description: 'A performance improvement',
-  },
-  {
-    type: 'test',
-    name: 'type: test',
-    color: 'bfd4f2',
-    description: 'Adds or corrects tests',
-  },
-  {
-    type: 'build',
-    name: 'type: build',
-    color: 'd4c5f9',
-    description: 'Build system or dependencies',
-  },
-  {
-    type: 'ci',
-    name: 'type: ci',
-    color: 'c5def5',
-    description: 'CI configuration',
-  },
-  {
-    type: 'chore',
-    name: 'type: chore',
-    color: 'cfd3d7',
-    description: 'Other non-src / non-test changes',
-  },
-  {
-    type: 'style',
-    name: 'type: style',
-    color: 'f9d0c4',
-    description: 'Formatting / whitespace only',
-  },
-  {
-    type: 'revert',
-    name: 'type: revert',
-    color: 'e4e669',
-    description: 'Reverts a previous commit',
-  },
+  ['feat', 'type: feature', '0e8a16', 'A new feature'],
+  ['fix', 'type: bug', 'd73a4a', 'A bug fix'],
+  ['docs', 'type: docs', '0075ca', 'Documentation only'],
+  [
+    'refactor',
+    'type: refactor',
+    'fbca04',
+    'Neither fixes a bug nor adds a feature',
+  ],
+  ['perf', 'type: perf', 'a2eeef', 'A performance improvement'],
+  ['test', 'type: test', 'bfd4f2', 'Adds or corrects tests'],
+  ['build', 'type: build', 'd4c5f9', 'Build system or dependencies'],
+  ['ci', 'type: ci', 'c5def5', 'CI configuration'],
+  ['chore', 'type: chore', 'cfd3d7', 'Other non-src / non-test changes'],
+  ['style', 'type: style', 'f9d0c4', 'Formatting / whitespace only'],
+  ['revert', 'type: revert', 'e4e669', 'Reverts a previous commit'],
 ];
 
 const BREAKING_LABEL = {
@@ -82,14 +38,14 @@ const PKG_COLOR = '5319e7';
 
 /** commit type → its label name (undefined for an unknown type). */
 export const typeLabelName = (type) =>
-  TYPE_LABELS.find((label) => label.type === type)?.name;
+  TYPE_LABELS.find(([commitType]) => commitType === type)?.[1];
 
 /** workspace `{ name, kind }` → its scope label name. */
 export const workspaceLabelName = ({ name, kind }) => `${kind}: ${name}`;
 
 /** The full canonical label set given the derived workspaces. */
 export const buildLabelDefinitions = (workspaces) => [
-  ...TYPE_LABELS.map(({ name, color, description }) => ({
+  ...TYPE_LABELS.map(([, name, color, description]) => ({
     name,
     color,
     description,

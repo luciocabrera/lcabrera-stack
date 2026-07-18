@@ -13,7 +13,7 @@
         "status": "ERROR",
         "comparator": "GT",
         "errorThreshold": "3",
-        "actualValue": "8.6"
+        "actualValue": "8.5"
       },
       {
         "metric": "new_maintainability_rating",
@@ -46,39 +46,11 @@
     ]
   },
   "summary": {
-    "issues": 1,
+    "issues": 0,
     "hotspots": 0,
-    "bySeverity": {
-      "MAJOR": 1
-    },
-    "byType": {
-      "CODE_SMELL": 1
-    }
+    "bySeverity": {},
+    "byType": {}
   },
-  "issues": [
-    {
-      "key": "AZ92FzsY_8yZka3MRAQX",
-      "rule": "javascript:S8786",
-      "type": "CODE_SMELL",
-      "severity": "MAJOR",
-      "file": "scripts/lib/git-remote.mjs",
-      "line": 11,
-      "message": "Simplify this regular expression to reduce its runtime, as it has super-linear performance due to backtracking.",
-      "effort": "20min",
-      "tags": [
-        "performance",
-        "regex"
-      ],
-      "impacts": [
-        {
-          "softwareQuality": "RELIABILITY",
-          "severity": "MEDIUM"
-        }
-      ],
-      "cleanCodeCategory": "INTENTIONAL",
-      "status": "OPEN",
-      "creationDate": "2026-07-18T16:36:08+0000"
-    }
-  ],
+  "issues": [],
   "hotspots": []
 }
