@@ -86,7 +86,7 @@ const initDatabase = async (): Promise<boolean> => {
       // Note: CREATE DATABASE cannot accept parameters via $1, so we escape it safely
       await initClient.query(`CREATE DATABASE "${dbName}"`);
       console.info(`Database "${dbName}" created successfully.`);
-      await new Promise((res) => setTimeout(res, 200));
+      await new Promise((resolve) => setTimeout(resolve, 200));
     } else {
       console.info(`Database "${dbName}" already exists.`);
     }

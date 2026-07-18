@@ -45,6 +45,9 @@
         },
         "noDeprecatedImports": "error", // importing an @deprecated export
         "noTsIgnore": "error", // prefer @ts-expect-error; agrees w/ tseslint (safety net)
+        // === Phase 3 (net-new; no eslint/oxlint equivalent — see ADR-035 §7) ===
+        "noShadow": "error", // an inner binding hiding an outer one is a bug magnet
+        "noEmptyBlockStatements": "error", // empty {} block = incomplete refactor
       },
       "complexity": {
         "useArrayFind": "error", // filter(...)[0] -> find(...)
@@ -158,6 +161,20 @@
             // AppDocument.test asserts the literal `<div id="app-root">` markup.
             "useUniqueElementIds": "off",
           },
+          "suspicious": {
+            // An empty function IS the intent in tests: `mockImplementation(() => {})`
+            // is the idiomatic vitest way to stub a call to a no-op (e.g. silencing
+            // `console.warn`), and `onClick: () => {}` is a standard no-op fixture
+            // handler. Every empty block flagged here is in a test file; none are
+            // in source, where the rule stays ON to catch incomplete refactors.
+            "noEmptyBlockStatements": "off",
+            // Test shadows are the idiomatic `vi.hoisted(() => function MockX() {})`
+            // mock pattern — the named function expression deliberately shares its
+            // const's name for readable stack traces; renaming would only mismatch
+            // the pair. Test-scope shadowing is low-stakes; the rule stays ON for
+            // source (3 genuine shadows there were fixed, not silenced).
+            "noShadow": "off",
+          },
           "complexity": {
             "noExcessiveNestedTestSuites": "error", // cap describe() nesting depth
           },
@@ -194,6 +211,14 @@
         "rules": {
           "style": {
             "useNodeAssertStrict": "error", // node:assert -> node:assert/strict
+            // NOTE: noProcessEnv is deliberately NOT enabled. The repo already
+            // centralizes env through Zod schemas (`readEnvConfig({ env: process.env })`,
+            // `envSchema.parse(process.env)`), so every `process.env` read is the
+            // legitimate validation boundary (plus agent-runner forwarding raw env
+            // to a spawned subprocess, which cannot route through config). The
+            // reads sit in ordinary util files, not a tidy `config/` dir, so there
+            // is no clean glob exemption; enforcing it would need a cross-workspace
+            // env-reader refactor touching the vital `data-access` package. See ADR-035 §7.
           },
         },
       },

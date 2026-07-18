@@ -194,8 +194,27 @@ leading `!`, which Biome traces). This is the documented convention in
 `packages/ui/src/PATTERNS.md` → "Conditional Rendering". Two sites needed a
 structural touch: a compound `a && b` boolean local Biome would not trace was
 inlined, and one `Boolean()` wrap opaqued TS `&&`-narrowing so its rendered body
-was made null-safe (`data?.x`). `noShadow` / `noEmptyBlockStatements` /
-`noProcessEnv` remain for the rest of Phase 3.
+was made null-safe (`data?.x`).
+
+The rest of Phase 3 completed with two more rules and one deferral:
+
+- `noEmptyBlockStatements` — every empty block was an idiomatic test no-op
+  (`mockImplementation(() => {})`, no-op fixture handlers), so it is **off for
+  test files**; the two source cases (the logger's `noop`, a test-mock's
+  swallow-`catch`) got an intentional-`/* … */` comment.
+- `noShadow` — 52 of 55 were the idiomatic `vi.hoisted(() => function MockX(){})`
+  pattern (a named function expression deliberately sharing its const's name), so
+  it is **off for test files**; the 3 genuine source shadows were renamed (a
+  promise-callback `res` that hid a query result; a `column` const the map/filter
+  callbacks shadowed → `targetColumn`).
+- `noProcessEnv` — **deliberately not enabled.** The repo already centralizes env
+  through Zod schemas (`readEnvConfig({ env: process.env })`, `envSchema.parse(process.env)`),
+  so every `process.env` read is the validation boundary — plus agent-runner
+  forwarding raw env to a spawned subprocess, which cannot route through config.
+  The reads sit in ordinary util files, not a tidy `config/` dir, so there is no
+  clean glob exemption; enforcing it would need a cross-workspace env-reader
+  refactor touching the vital `data-access` package, disproportionate to a lint
+  pass. Revisit if env access is ever consolidated to one reader per workspace.
 
 **Nursery rules carry an upgrade duty.** `noInlineStyles` and `useTestHooksOnTop`
 (and any future nursery adoption) can be renamed, change behaviour, or graduate
