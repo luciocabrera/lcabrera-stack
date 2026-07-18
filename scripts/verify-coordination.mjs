@@ -221,7 +221,7 @@ const packedRefHas = (gitDir, branch) => {
   if (!existsSync(packed)) {
     return false;
   }
-  const wanted = new Set(REF_PATHS(branch).map((p) => p.split('\\').join('/')));
+  const wanted = new Set(REF_PATHS(branch).map((p) => p.replaceAll('\\', '/')));
   return readFileSync(packed, 'utf8')
     .split('\n')
     .some((line) => wanted.has(line.slice(line.indexOf(' ') + 1)));
