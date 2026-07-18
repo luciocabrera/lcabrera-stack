@@ -306,8 +306,12 @@ Other workflows: `lighthouse.yml`, `validate-skills.yml`, and
 it runs `pr:verify` (title + description) and `commit:verify` over each non-merge
 commit in the range, so nothing that skipped the local hook reaches `main`.
 [`labeler.yml`](.github/workflows/labeler.yml) auto-labels each PR
-(`app:`/`pkg:`/`type:`), and [`changelog.yml`](.github/workflows/changelog.yml)
-publishes release notes on a `v*` tag.
+(`app:`/`pkg:`/`type:`), [`sync-labels.yml`](.github/workflows/sync-labels.yml)
+syncs the label set when the manifest/workspace list changes on `main`,
+[`update-changelog.yml`](.github/workflows/update-changelog.yml) regenerates
+`CHANGELOG.md` after every merge to `main`, and
+[`changelog.yml`](.github/workflows/changelog.yml) publishes release notes on a
+`v*` tag.
 
 ---
 

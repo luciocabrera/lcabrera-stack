@@ -362,15 +362,20 @@ so they never diverge from what the gate accepts:
 - **Changelog** — [`CHANGELOG.md`](CHANGELOG.md) is **generated** (`vp run
 changelog:generate`, `scripts/generate-changelog.mjs`): Conventional-Commit
   history grouped by version (git tags) then by type, each entry scope-labelled and
-  linked, with breaking changes called out. Never hand-edit it. On a `v*` tag,
-  [`changelog.yml`](.github/workflows/changelog.yml) publishes that release's
-  section as the GitHub Release notes.
+  linked, with breaking changes called out. Never hand-edit it —
+  [`update-changelog.yml`](.github/workflows/update-changelog.yml) regenerates and
+  commits it (`[skip ci]`) after every merge to `main`, via a bot commit that
+  bypasses the ruleset and is itself excluded from the changelog (`':!CHANGELOG.md'`).
+  On a `v*` tag, [`changelog.yml`](.github/workflows/changelog.yml) also publishes
+  that release's section as the GitHub Release notes.
 - **Labels** — a canonical `app:`/`pkg:`/`type:` + `breaking-change` taxonomy
   (`scripts/lib/labels.mjs`; the `app:`/`pkg:` set is derived from the workspaces,
-  so it self-updates). `vp run labels:sync` creates/updates them on GitHub;
-  [`labeler.yml`](.github/workflows/labeler.yml) applies them to every PR — scope
-  from the changed workspaces (`scripts/pr-labels.mjs`), type from the PR title. Add
-  a workspace and its `app:`/`pkg:` label appears on the next sync automatically.
+  so it self-updates). [`sync-labels.yml`](.github/workflows/sync-labels.yml)
+  creates/updates them on GitHub whenever `labels.mjs` or the workspace list changes
+  on `main` (or on demand via `vp run labels:sync`), so adding a workspace
+  auto-creates its label — no manual step. [`labeler.yml`](.github/workflows/labeler.yml)
+  applies them to every PR — scope from the changed workspaces (`scripts/pr-labels.mjs`),
+  type from the PR title.
 
 ### Post-Change Quality Gate
 

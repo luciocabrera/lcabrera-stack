@@ -1,0 +1,35 @@
+name: Sync Labels
+
+# Keeps the app:/pkg:/type: label taxonomy on GitHub in sync with its manifest.
+# Runs when the label definitions or the workspace list change on main, so adding
+# a workspace (or editing labels.mjs) auto-creates/updates the labels — no manual
+# `vp run labels:sync`. Idempotent; creates/updates only, never deletes.
+# Also runnable on demand from the Actions tab (workflow_dispatch).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - scripts/lib/labels.mjs
+      - scripts/sync-labels.mjs
+      - scripts/lib/workspace-scopes.mjs
+      - pnpm-workspace.yaml
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  sync:
+    name: Sync labels from the manifest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Sync labels
+        # sync-labels.mjs uses only Node built-ins + the REST API via fetch; the
+        # runner sets GITHUB_TOKEN and GITHUB_REPOSITORY.
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/sync-labels.mjs
