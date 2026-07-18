@@ -2,7 +2,7 @@
 id: changelog-and-labels
 title: Changelog generator + PR auto-labels (app/pkg/type), from the commit convention
 owner: agent:claude
-status: active
+status: review
 branch: feat/changelog-and-labels
 area:
   - scripts/generate-changelog.mjs
@@ -16,7 +16,7 @@ area:
 started: 2026-07-18
 updated: 2026-07-18
 plan: we-want-to-have-greedy-parrot.md
-pr: (none)
+pr: https://github.com/luciocabrera/vite-react-compiler/pull/40
 ---
 
 ## What
