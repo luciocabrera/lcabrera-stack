@@ -3,17 +3,17 @@
   "source": "https://sonarcloud.io",
   "target": {
     "type": "pullRequest",
-    "value": "40"
+    "value": "39"
   },
   "qualityGate": {
     "status": "ERROR",
     "conditions": [
       {
         "metric": "new_duplicated_lines_density",
-        "status": "ERROR",
+        "status": "OK",
         "comparator": "GT",
         "errorThreshold": "3",
-        "actualValue": "8.5"
+        "actualValue": "0.0"
       },
       {
         "metric": "new_maintainability_rating",
@@ -38,19 +38,72 @@
       },
       {
         "metric": "new_security_rating",
-        "status": "OK",
+        "status": "ERROR",
         "comparator": "GT",
         "errorThreshold": "1",
-        "actualValue": "1"
+        "actualValue": "3"
       }
     ]
   },
   "summary": {
-    "issues": 0,
+    "issues": 2,
     "hotspots": 0,
-    "bySeverity": {},
-    "byType": {}
+    "bySeverity": {
+      "MAJOR": 2
+    },
+    "byType": {
+      "CODE_SMELL": 1,
+      "VULNERABILITY": 1
+    }
   },
-  "issues": [],
+  "issues": [
+    {
+      "key": "AZ919QRC_8yZka3MQDmx",
+      "rule": "javascript:S4624",
+      "type": "CODE_SMELL",
+      "severity": "MAJOR",
+      "file": "scripts/lib/commit-convention.mjs",
+      "line": 155,
+      "message": "Refactor this code to not use nested template literals.",
+      "effort": "10min",
+      "tags": [
+        "brain-overload",
+        "confusing",
+        "editable-source",
+        "es2015"
+      ],
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "MEDIUM"
+        }
+      ],
+      "cleanCodeCategory": "INTENTIONAL",
+      "status": "OPEN",
+      "creationDate": "2026-07-18T15:58:29+0000"
+    },
+    {
+      "key": "AZ919QTF_8yZka3MQDmy",
+      "rule": "jssecurity:S8707",
+      "type": "VULNERABILITY",
+      "severity": "MAJOR",
+      "file": "scripts/verify-commit-msg.mjs",
+      "line": 31,
+      "message": "LLMs running this code with faulty CLI arguments can escape file system restrictions. Refactor this code to validate the constructed path before accessing the file system.",
+      "effort": "30min",
+      "tags": [
+        "cwe"
+      ],
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
+        }
+      ],
+      "cleanCodeCategory": "INTENTIONAL",
+      "status": "OPEN",
+      "creationDate": "2026-07-18T15:58:29+0000"
+    }
+  ],
   "hotspots": []
 }
