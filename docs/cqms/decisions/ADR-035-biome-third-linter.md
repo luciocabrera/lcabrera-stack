@@ -138,6 +138,42 @@ the 13 non-React workspaces): `useNodeAssertStrict`. Test-only:
 `noExcessiveNestedTestSuites`, `useTestHooksOnTop`. Each rule carries its
 justification inline in `biome.jsonc`.
 
+**Phase 2 (2026-07-18) — cheap high-value + agreeing safety nets** (~20 fixes).
+New rules: `noConsole` (allow-lists `error`/`warn`/`info`; scripts, CLIs, `.mjs`/`.cjs`
+and the one sanctioned `logger.util.ts` are exempt via an override),
+`noDeprecatedImports`, `noTsIgnore`, `noImplicitCoercions`, `noParameterAssign`,
+`useUniqueElementIds` (React; **off for test files**, where fixtures legitimately
+hard-code ids to assert on them), and the test rules `useConsistentTestIt` +
+`noIdenticalTestTitle` (nursery). Plus **agreeing safety-net duplicates** — rules
+another engine already owns and enforces in the _same direction_, kept as
+redundant nets (0 findings): `useConsistentTypeDefinitions` (`style: "type"`,
+matches ESLint `consistent-type-definitions`), `noNamespace` / `noTsIgnore`
+(tseslint), `useThrowNewError` (unicorn), `noReactForwardRef` (Oxlint
+`react-x/no-forward-ref`), `noUndeclaredVariables` (`no-undef`).
+`noIdenticalTestTitle` earned its place immediately — it caught a verbatim-duplicated
+`describe` block in `serializeFilter.util.test.ts`.
+
+**Dropped after measurement, and the safety-net caveat.** Two candidates were
+removed rather than fought into place:
+
+- `noMisplacedAssertion` — flags `expect()` outside an `it`/`test` body, but cannot
+  see through a helper. This repo uses the custom-assertion-helper pattern
+  (`expectLoginRedirect`, controller helpers) which is good test hygiene, so the
+  rule false-positives on a pattern worth keeping.
+- `useNumberNamespace` — wants `Number.POSITIVE_INFINITY` / `Number.NaN`, which
+  **directly conflicts** with the repo's ESLint `unicorn/prefer-global-number-constants`
+  (wants the globals `Infinity` / `NaN` — also the repo's own convention, and its
+  autofix would just revert Biome's). The rule has **no options** to skip the
+  constants, and its only non-conflicting coverage (`parseInt`/`isNaN`) is already
+  owned by ESLint + Biome's recommended `noGlobalIsNan`. This is the §5 case, not a
+  safety net.
+
+  **The caveat this taught:** a "safety-net duplicate" is only safe when the two
+  engines enforce the **same direction** — verify that with an isolated probe
+  (`biome lint --only=<rule>` vs the ESLint/Oxlint result on the same snippet),
+  never assume it from the rule name. `useNumberNamespace` was _assumed_ to agree
+  with unicorn; unicorn enforces the exact opposite.
+
 **Nursery rules carry an upgrade duty.** `noInlineStyles` and `useTestHooksOnTop`
 (and any future nursery adoption) can be renamed, change behaviour, or graduate
 to another group on a Biome minor bump. Biome is pinned (`2.5.4`, via the

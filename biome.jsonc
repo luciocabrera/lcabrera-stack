@@ -36,9 +36,19 @@
         "noVar": "error",
         "noUnusedExpressions": "error",
         "useErrorMessage": "error",
+        // === Phase 2 (see ADR-035 §7) ===
+        "noConsole": {
+          "level": "error",
+          // error/warn/info are legitimate operational signal; log/debug are the
+          // strays. Scripts/CLIs/.mjs/.cjs are exempt entirely (override below).
+          "options": { "allow": ["error", "warn", "info"] },
+        },
+        "noDeprecatedImports": "error", // importing an @deprecated export
+        "noTsIgnore": "error", // prefer @ts-expect-error; agrees w/ tseslint (safety net)
       },
       "complexity": {
         "useArrayFind": "error", // filter(...)[0] -> find(...)
+        "noImplicitCoercions": "error", // Phase 2: +x / !!x -> explicit conversion
       },
       "style": {
         // Sole enforcer of the repo array-type convention (typescript.md); no
@@ -54,9 +64,27 @@
         "noUselessElse": "error",
         "noEnum": "error", // repo prefers `as const` unions over TS enums
         "noParameterProperties": "error", // explicit fields, not constructor params
+        // === Phase 2 — new rule + agreeing safety-net duplicates (ADR-035 §7) ===
+        "noParameterAssign": "error", // never reassign params (Rule 6)
+        "useConsistentTypeDefinitions": {
+          "level": "error",
+          // `type` not `interface` (Rule 1); agrees with ESLint consistent-type-definitions.
+          "options": { "style": "type" },
+        },
+        "noNamespace": "error", // agrees with tseslint no-namespace (safety net)
+        "useThrowNewError": "error", // throw new Error(); agrees with unicorn (safety net)
+        // NOTE: useNumberNamespace is deliberately NOT enabled — it wants
+        // `Number.POSITIVE_INFINITY`/`Number.NaN`, which directly CONFLICTS with
+        // ESLint's `unicorn/prefer-global-number-constants` (wants the globals
+        // `Infinity`/`NaN`, the repo's convention). The rule has no options to
+        // reconcile, and its other coverage (parseInt/isNaN) is already owned by
+        // ESLint + Biome's recommended `noGlobalIsNan`. See ADR-035 §7.
       },
       "performance": {
         "noDelete": "error", // aligns with immutability (Rule 6)
+      },
+      "correctness": {
+        "noUndeclaredVariables": "error", // Phase 2: agrees with `no-undef` (safety net)
       },
     },
   },
@@ -85,10 +113,12 @@
             "noNestedComponentDefinitions": "error",
             "useExhaustiveDependencies": "off",
             "noReactPropAssignments": "error",
+            "useUniqueElementIds": "error", // Phase 2: no static literal id on JSX elements
           },
           "suspicious": {
             "noDuplicatedSpreadProps": "error",
             // "noLeakedRender": "error",
+            "noReactForwardRef": "error", // Phase 2: React 19 ref-as-prop; agrees w/ oxlint react-x
           },
           "style": {
             "useReactFunctionComponents": "error",
@@ -120,12 +150,22 @@
             // enforces the one-component bundle.
             "useComponentExportOnlyModules": "off",
           },
+          "correctness": {
+            // Test fixtures legitimately hard-code element ids so the test can
+            // assert on them (id-forwarding tests; SSR-markup snapshots): the
+            // production "two mounted instances collide" concern does not apply
+            // to a single test render. Card.test asserts getAttribute('id'),
+            // AppDocument.test asserts the literal `<div id="app-root">` markup.
+            "useUniqueElementIds": "off",
+          },
           "complexity": {
             "noExcessiveNestedTestSuites": "error", // cap describe() nesting depth
           },
           "nursery": {
             // NURSERY — re-check on any Biome upgrade (see ADR-035 §Rule hardening).
             "useTestHooksOnTop": "error", // before/after hooks grouped at top of block
+            "useConsistentTestIt": "error", // Phase 2: consistent it()/test() (nursery)
+            "noIdenticalTestTitle": "error", // Phase 2: no duplicate test titles (nursery)
           },
         },
       },
@@ -156,6 +196,23 @@
             "useNodeAssertStrict": "error", // node:assert -> node:assert/strict
           },
         },
+      },
+    },
+    {
+      // Console output IS the product here — build/config scripts, CLIs, and
+      // `.mjs`/`.cjs` tooling — not a stray debug left in shipped app code.
+      // `logger.util.ts` is the one sanctioned console wrapper (it already
+      // carries `eslint-disable no-console` per call). `noConsole` stays ON
+      // everywhere else (allow-listing error/warn/info); in these it is off.
+      "includes": [
+        "**/*.mjs",
+        "**/*.cjs",
+        "**/scripts/**",
+        "**/*.cli.ts",
+        "**/logger.util.ts",
+      ],
+      "linter": {
+        "rules": { "suspicious": { "noConsole": "off" } },
       },
     },
     {

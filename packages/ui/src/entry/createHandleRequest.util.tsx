@@ -64,6 +64,10 @@ export const createHandleRequest = ({
     const cspNonce = getRequestCspNonce(request);
     addPreloadHeaders({ responseHeaders, stylexCssHref });
 
+    // A render error after the shell is committed bumps the status to 500 —
+    // tracked in a local (noParameterAssign) rather than mutating the param.
+    let statusCode = responseStatusCode;
+
     const { promise, reject, resolve } = Promise.withResolvers<Response>();
 
     let isShellRendered = false;
@@ -93,7 +97,7 @@ export const createHandleRequest = ({
       {
         nonce: cspNonce,
         onError(error: unknown) {
-          responseStatusCode = 500;
+          statusCode = 500;
           // Log streaming rendering errors from inside the shell. Don't
           // log errors encountered during initial shell rendering since
           // they'll reject and get logged via onShellError.
@@ -112,7 +116,7 @@ export const createHandleRequest = ({
               clearRenderTimeout,
               pipe,
               responseHeaders,
-              responseStatusCode,
+              responseStatusCode: statusCode,
             }),
           );
         },
