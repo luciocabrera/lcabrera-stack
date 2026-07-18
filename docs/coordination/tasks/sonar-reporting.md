@@ -2,7 +2,7 @@
 id: sonar-reporting
 title: SonarCloud findings → tracked report + local gate (sonar:report/verify)
 owner: agent:claude
-status: active
+status: review
 branch: chore/biome-linter-hardening
 area:
   - scripts/sonar-report.mjs
@@ -30,7 +30,11 @@ the Biome work owns `biome.jsonc` + ADR-035.
 
 ## Status / next
 
-- Current step: script built, live-tested against PR #31 + `main`.
+- Current step: **landed + pushed** to `chore/biome-linter-hardening` (PR #31) —
+  script, docs, `.env.example`, tracked `reports/sonar/full-latest.json`. Report
+  is deterministic (byte-stable across runs); `reports/sonar/` is fmt-ignored so
+  the generator and Oxfmt don't fight.
 - Blockers: none locally. CI enforcement (a `sonar:verify` gate step) needs the
   user to add `SONAR_TOKEN` as a GitHub Actions secret first — teed up, not wired.
-- Next: land the script + docs; offer the CI gate step once the secret exists.
+- Next (needs the user): (1) add `SONAR_TOKEN` repo secret; (2) tighten the
+  SonarCloud quality gate + make the check required; then (3) wire the CI gate step.
