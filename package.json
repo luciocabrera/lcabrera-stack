@@ -35,6 +35,8 @@
     "sonar:report": "node scripts/sonar-report.mjs",
     "sonar:verify": "node scripts/sonar-report.mjs --gate",
     "scripts:verify": "node scripts/verify-script-size.mjs",
+    "changelog:generate": "git log --no-merges --format=%H%x1f%D%x1f%cI%x1f%s%x1f%b%x1e | node scripts/generate-changelog.mjs",
+    "labels:sync": "node scripts/sync-labels.mjs",
     "skills:validate": "node scripts/validate-skills.cjs",
     "skills:report": "node scripts/generate-skills-compliance-report.cjs",
     "skills:source-audit": "node scripts/generate-source-smell-report.cjs && node scripts/bootstrap-agenting-handoff.cjs",

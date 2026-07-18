@@ -1,0 +1,44 @@
+name: PR Labeler
+
+# Auto-labels every pull request from one source of truth (the workspace list +
+# the commit convention): `app:`/`pkg:` scope labels for the changed workspaces,
+# and a `type:` label (+ breaking-change) from the PR title. `edited` re-runs it
+# when the title changes. Same-repo PRs only — a fork PR's token can't write
+# labels, and that is fine (the labels are a convenience, not a gate).
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  label:
+    name: Apply labels
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - name: Checkout PR head (full history for the file range)
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Compute + apply labels
+        # Title comes in through env (never a shell interpolation); the changed
+        # files are piped in from git. Both are consumed by pr-labels.mjs, which
+        # uses only Node built-ins — no install step.
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          labels=$(git diff --name-only "$BASE_SHA..$HEAD_SHA" | node scripts/pr-labels.mjs)
+          echo "computed labels: ${labels:-<none>}"
+          if [ -n "$labels" ]; then
+            gh pr edit "$PR_NUMBER" --add-label "$labels"
+          fi

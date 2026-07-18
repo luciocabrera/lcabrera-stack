@@ -225,6 +225,26 @@ const validateHeader = (header, { workspaces, kind }) => {
   return { errors, warnings };
 };
 
+/**
+ * Parses a Conventional-Commit header into `{ type, scope, breaking, subject }`,
+ * or null when it doesn't match. Lenient about the type value (does not check it
+ * against ALLOWED_TYPES) — callers that only need the shape (the changelog
+ * generator, the PR labeler) decide what to do with an unknown type.
+ */
+export const parseCommitHeader = (header) => {
+  const match = HEADER_RE.exec(header ?? '');
+  if (match === null) {
+    return null;
+  }
+  const { type, scope, breaking, subject } = match.groups;
+  return {
+    type: type.toLowerCase(),
+    scope,
+    breaking: breaking === '!',
+    subject,
+  };
+};
+
 /** Validates a full raw commit-message file. Returns `{ skipped, errors, warnings }`. */
 export const validateCommitMessage = (raw, { workspaces }) => {
   const { header } = parseCommitMessage(raw);

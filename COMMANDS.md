@@ -205,6 +205,22 @@ runs both in CI. See the [`commit-and-pr`](.github/skills/commit-and-pr/SKILL.md
 | `vp run pr:verify`                                | validate a PR title (`PR_TITLE`) + description (`PR_BODY`) against the standard |
 | `vp run pr:verify -- --title <t> --body-file <p>` | simulate the PR check locally without opening a PR                              |
 
+### Changelog & labels
+
+Both derive from the same commit convention: the changelog groups
+Conventional-Commit history by type; the labels are the `app:`/`pkg:`/`type:`
+taxonomy applied to PRs. See the [`commit-and-pr`](.github/skills/commit-and-pr/SKILL.md) skill.
+
+| Command                     | Does                                                                               |
+| --------------------------- | ---------------------------------------------------------------------------------- |
+| `vp run changelog:generate` | regenerate `CHANGELOG.md` from git history, grouped by version → type              |
+| `vp run labels:sync`        | create/update the `app:`/`pkg:`/`type:` label set on GitHub (needs `GITHUB_TOKEN`) |
+
+`CHANGELOG.md` is generated — never hand-edit it. `.github/workflows/labeler.yml`
+auto-applies labels to every PR (scope from the changed workspaces via
+`scripts/pr-labels.mjs`, type from the PR title); `.github/workflows/changelog.yml`
+publishes per-release notes on a `v*` tag.
+
 ### SonarCloud reporting
 
 SonarCloud runs in **Automatic Analysis** mode (the GitHub App analyses each push
@@ -289,6 +305,9 @@ Other workflows: `lighthouse.yml`, `validate-skills.yml`, and
 [`pr-standards.yml`](.github/workflows/pr-standards.yml) — on every pull request
 it runs `pr:verify` (title + description) and `commit:verify` over each non-merge
 commit in the range, so nothing that skipped the local hook reaches `main`.
+[`labeler.yml`](.github/workflows/labeler.yml) auto-labels each PR
+(`app:`/`pkg:`/`type:`), and [`changelog.yml`](.github/workflows/changelog.yml)
+publishes release notes on a `v*` tag.
 
 ---
 
