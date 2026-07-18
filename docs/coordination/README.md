@@ -141,8 +141,10 @@ hand-merging rows). Touch `BOARD.md` only in the claim/close PRs on `main`.
 
 **Where progress lives:** `BOARD.md` answers _who owns what area, on which branch_
 (coarse, from the claims on `main`). **Live progress lives in the draft PR** — its
-commits, checks, and status. Read `gh pr list` / `gh pr view` for "how far along",
-not `BOARD.md`. Open the PR early; that is the human-visible progress surface.
+commits, checks, and status. For a live view that joins the claims with real PR
+state (draft, checks, and any open PR with _no_ task), run
+`vp run coordination:board:live` (needs `gh`; it prints, never writes `BOARD.md`).
+Open the PR early; that is the human-visible progress surface.
 
 **Close on merge.** When your PR merges (with `--delete-branch`), delete the task
 file. If a PR can't delete the task that tracks itself, do it in a tiny follow-up.

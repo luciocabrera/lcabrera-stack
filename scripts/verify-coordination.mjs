@@ -42,13 +42,7 @@
  *
  * Exit codes: 0 = consistent (warnings allowed), 1 = an ERROR check failed.
  */
-import {
-  existsSync,
-  readdirSync,
-  readFileSync,
-  statSync,
-  writeFileSync,
-} from 'node:fs';
+import { existsSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -57,11 +51,8 @@ import {
   parseBoard,
   renderBoard,
 } from './lib/coordination-board.mjs';
-import {
-  branchSlug,
-  globsOverlap,
-  parseFrontmatter,
-} from './lib/coordination-parse.mjs';
+import { branchSlug, globsOverlap } from './lib/coordination-parse.mjs';
+import { readEntries } from './lib/coordination-read.mjs';
 import {
   branchErrors,
   ISO_DATE,
@@ -79,21 +70,6 @@ const STALE_DAYS = 14;
 const GHOST_DAYS = 3;
 const NO_BRANCH = new Set(['(uncommitted)', '(none)', '(worktree)']);
 const NO_PR = new Set(['(none)', '']);
-
-/** Parsed `.md` files in a register dir (missing dir → none). */
-const readEntries = (dir) =>
-  existsSync(dir)
-    ? readdirSync(dir, { withFileTypes: true })
-        .filter(
-          (e) =>
-            e.isFile() && e.name.endsWith('.md') && !e.name.startsWith('_'),
-        )
-        .map((e) => ({
-          name: e.name,
-          slug: e.name.replace(/\.md$/, ''),
-          data: parseFrontmatter(readFileSync(join(dir, e.name), 'utf8')),
-        }))
-    : [];
 
 const isLive = ({ data }) => data !== undefined && data.status !== 'done';
 
