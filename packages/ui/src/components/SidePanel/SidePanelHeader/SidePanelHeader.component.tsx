@@ -17,7 +17,7 @@ export const SidePanelHeader = ({
     >
       <div {...stylex.props(sidePanelHeaderStyles.content)}>
         {children}
-        {actions && (
+        {Boolean(actions) && (
           <div {...stylex.props(sidePanelHeaderStyles.actions)}>{actions}</div>
         )}
       </div>

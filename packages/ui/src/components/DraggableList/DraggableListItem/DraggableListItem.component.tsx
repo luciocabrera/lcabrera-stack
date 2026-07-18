@@ -49,7 +49,7 @@ export const DraggableListItem = ({
       onDragOver={isDragEnabled ? handleDragOver : undefined}
       onDragStart={isDragEnabled ? handleDragStart : undefined}
     >
-      {isBusy && (
+      {Boolean(isBusy) && (
         <div {...stylex.props(busyStyles.overlay)}>
           <div {...stylex.props(busyStyles.wave)} />
         </div>

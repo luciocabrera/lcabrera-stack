@@ -82,13 +82,13 @@ const initDatabase = async (): Promise<boolean> => {
     );
 
     if (res.rowCount === 0) {
-      console.log(`Database "${dbName}" does not exist. Creating it now...`);
+      console.info(`Database "${dbName}" does not exist. Creating it now...`);
       // Note: CREATE DATABASE cannot accept parameters via $1, so we escape it safely
       await initClient.query(`CREATE DATABASE "${dbName}"`);
-      console.log(`Database "${dbName}" created successfully.`);
-      await new Promise((res) => setTimeout(res, 200));
+      console.info(`Database "${dbName}" created successfully.`);
+      await new Promise((resolve) => setTimeout(resolve, 200));
     } else {
-      console.log(`Database "${dbName}" already exists.`);
+      console.info(`Database "${dbName}" already exists.`);
     }
     return true;
   } catch (error) {

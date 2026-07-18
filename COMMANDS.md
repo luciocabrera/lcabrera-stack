@@ -191,6 +191,22 @@ The in-git "who is working on what" register under [`docs/coordination/`](docs/c
 | `vp run coordination:verify` | check the task register + `BOARD.md` are consistent (CI gate) |
 | `vp run coordination:board`  | regenerate `docs/coordination/BOARD.md` from the task files   |
 
+### SonarCloud reporting
+
+SonarCloud runs in **Automatic Analysis** mode (the GitHub App analyses each push
+server-side — no scanner in this repo). These pull its findings into a tracked
+report so agents/CI act on them from a file, not the dashboard. Needs a read-only
+`SONAR_TOKEN` (gitignored root `.env` or a CI secret — see `.env.example`); without
+one the script skips gracefully. Feature branches are analysed as PRs, so target
+them with `--pr <n>` (the tracked snapshot is `main`).
+
+| Command                                           | Does                                                                      |
+| ------------------------------------------------- | ------------------------------------------------------------------------- |
+| `vp run sonar:report`                             | fetch issues + hotspots + quality gate → `reports/sonar/full-latest.json` |
+| `vp run sonar:report -- --pr 31`                  | report scoped to a pull request                                           |
+| `vp run sonar:verify`                             | gate mode — exit non-zero when the SonarCloud quality gate is failing     |
+| `vp run sonar:verify -- --pr 31 --fail-on-issues` | stricter: also fail on any open issue, not just gate ERROR                |
+
 ---
 
 ## 5. Per-workspace tasks

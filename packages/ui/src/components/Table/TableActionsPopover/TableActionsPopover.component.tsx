@@ -55,7 +55,7 @@ export const TableActionsPopover = ({
             : styles.menuHidden,
         )}
       >
-        {isMenuOpen && children({ closeMenu })}
+        {Boolean(isMenuOpen) && children({ closeMenu })}
       </div>
     </div>
   );

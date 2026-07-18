@@ -1,0 +1,38 @@
+name: Sonar Issue Gate
+
+# Strict, free-plan-friendly Sonar enforcement. SonarCloud's own required check
+# runs the "Sonar way" quality gate, which is rating-based and lets new *code
+# smells* through (assigning a stricter custom gate is a paid feature). This job
+# closes that gap: it fails the PR on ANY open Sonar issue, using the repo's
+# sonar-report.mjs. `--wait` polls the Compute Engine until THIS commit's
+# analysis has finished (Automatic Analysis runs async, in parallel with CI), so
+# it never races; on timeout it skips rather than blocks. Without a token (fork
+# PRs) the script skips and the job stays green.
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  sonar-issue-gate:
+    name: Strict Sonar issue gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Wait for SonarCloud analysis, then fail on any new issue
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        # sonar-report.mjs needs only Node built-ins + global fetch (present on
+        # ubuntu-latest), so no workspace install. --since = the PR head commit
+        # time, the freshness guard so a previous commit's analysis isn't accepted.
+        run: |
+          SINCE="$(git show -s --format=%cI HEAD)"
+          echo "PR #${{ github.event.pull_request.number }} head committed at $SINCE"
+          node scripts/sonar-report.mjs --gate --fail-on-issues \
+            --pr "${{ github.event.pull_request.number }}" --wait --since "$SINCE"

@@ -42,11 +42,11 @@ export const resolvePinConflictState = <TData>({
     let newOrder: ColumnOrderState<TData> = allOrderedColumns
       .filter((column) => column.key !== columnKey)
       .map((column) => column.key);
-    const column = allOrderedColumns[index];
+    const targetColumn = allOrderedColumns[index];
 
-    if (column?.key) {
+    if (targetColumn?.key) {
       newOrder = insertAdjacentToPinnedGroup<TData>({
-        columnKey: column.key,
+        columnKey: targetColumn.key,
         columnPinning: currentPinning,
         order: newOrder,
         side,

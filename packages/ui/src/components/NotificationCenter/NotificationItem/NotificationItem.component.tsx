@@ -25,9 +25,9 @@ export const NotificationItem = ({
       >
         <div {...stylex.props(styles.itemBody)}>
           <div {...stylex.props(styles.itemContent)}>
-            {notification.title ? (
+            {Boolean(notification.title) && (
               <p {...stylex.props(styles.title)}>{notification.title}</p>
-            ) : undefined}
+            )}
             <p {...stylex.props(styles.message)}>{notification.message}</p>
           </div>
           <button

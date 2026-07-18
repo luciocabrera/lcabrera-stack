@@ -2,6 +2,7 @@
 
 **Status:** Accepted
 **Amends:** ADR-019 (which split `linter` into independent `eslint` / `oxlint` scanners — this adds a third rule engine alongside them, but deliberately **not** a third CQMS scanner; see Consequences).
+**Amended:** 2026-07-18 — §7 adds the phased rule-hardening beyond the `recommended` preset.
 
 ## Context
 
@@ -99,6 +100,154 @@ still fails. Add future input-rendering components there rather than scoping off
 repo-relative, run root-only to mirror the gate. `--only=biome` scopes a
 regeneration. Check-mode, like the other two — generating a report never mutates
 sources.
+
+### 7. Hardening beyond `recommended` — a phased, measured ratchet
+
+The `recommended` preset is the floor, not the ceiling. Biome ships hundreds of
+opt-in rules, and the ones that catch a real bug or enforce a convention this
+repo already follows by hand are enabled on top of `recommended`, in
+**approval-gated phases** so the fix effort of each is visible before it lands.
+`preset` and the group keys are valid siblings under `linter.rules` in 2.5.4:
+`"preset": "recommended"` stays, and individual group rules layer on top of it
+without disabling the recommended set.
+
+**Selection principle.**
+
+- **Adopt** an opt-in rule when it catches a genuine defect class or locks in a
+  convention already followed by hand — e.g. `useConsistentArrayType` is the
+  _only_ enforcer of the `T[]` / `readonly T[]` convention in `typescript.md`.
+- **Overlap with Oxlint/eslint is a safety net, not a conflict — when the engines
+  agree.** §5's "two engines must not both arbitrate one rule" is about engines
+  that _disagree_ (the `noDoubleEquals` / `no-null` trap in Consequences, or
+  `useExhaustiveDependencies`, where two dep-array heuristics diverge). A rule
+  where Biome and another engine reach the _same_ verdict is redundant
+  enforcement that survives either config drifting — keep it. Drop a candidate
+  only when the engines would fight or when it is pure noise (false positives).
+- **Measure before enabling.** Each candidate is run in isolation against the live
+  tree (`biome lint . --only=<group>/<rule> --reporter=summary`, read-only). A
+  0-finding rule is a free ratchet; a high-count rule carries a fix budget and is
+  scheduled into a later phase. Rules are never enabled blind.
+
+**Phase 1 (2026-07-18) — free ratchets** (2 findings total, both autofixed).
+Universal: `noVar`, `noUnusedExpressions`, `useErrorMessage`, `useArrayFind`,
+`useConsistentArrayType` (`shorthand`), `noInferrableTypes`, `noYodaExpression`,
+`useCollapsedElseIf`, `noUselessElse`, `noEnum`, `noParameterProperties`,
+`noDelete`. React-only: `useSelfClosingElements`, `useFragmentSyntax`,
+`noInlineStyles` (enforces StyleX-only, Rule 2). Node-only (a new override over
+the 13 non-React workspaces): `useNodeAssertStrict`. Test-only:
+`noExcessiveNestedTestSuites`, `useTestHooksOnTop`. Each rule carries its
+justification inline in `biome.jsonc`.
+
+**Phase 2 (2026-07-18) — cheap high-value + agreeing safety nets** (~20 fixes).
+New rules: `noConsole` (allow-lists `error`/`warn`/`info`; scripts, CLIs, `.mjs`/`.cjs`
+and the one sanctioned `logger.util.ts` are exempt via an override),
+`noDeprecatedImports`, `noTsIgnore`, `noImplicitCoercions`, `noParameterAssign`,
+`useUniqueElementIds` (React; **off for test files**, where fixtures legitimately
+hard-code ids to assert on them), and the test rules `useConsistentTestIt` +
+`noIdenticalTestTitle` (nursery). Plus **agreeing safety-net duplicates** — rules
+another engine already owns and enforces in the _same direction_, kept as
+redundant nets (0 findings): `useConsistentTypeDefinitions` (`style: "type"`,
+matches ESLint `consistent-type-definitions`), `noNamespace` / `noTsIgnore`
+(tseslint), `useThrowNewError` (unicorn), `noReactForwardRef` (Oxlint
+`react-x/no-forward-ref`), `noUndeclaredVariables` (`no-undef`).
+`noIdenticalTestTitle` earned its place immediately — it caught a verbatim-duplicated
+`describe` block in `serializeFilter.util.test.ts`.
+
+**Dropped after measurement, and the safety-net caveat.** Two candidates were
+removed rather than fought into place:
+
+- `noMisplacedAssertion` — flags `expect()` outside an `it`/`test` body, but cannot
+  see through a helper. This repo uses the custom-assertion-helper pattern
+  (`expectLoginRedirect`, controller helpers) which is good test hygiene, so the
+  rule false-positives on a pattern worth keeping.
+- `useNumberNamespace` — wants `Number.POSITIVE_INFINITY` / `Number.NaN`, which
+  **directly conflicts** with the repo's ESLint `unicorn/prefer-global-number-constants`
+  (wants the globals `Infinity` / `NaN` — also the repo's own convention, and its
+  autofix would just revert Biome's). The rule has **no options** to skip the
+  constants, and its only non-conflicting coverage (`parseInt`/`isNaN`) is already
+  owned by ESLint + Biome's recommended `noGlobalIsNan`. This is the §5 case, not a
+  safety net.
+
+  **The caveat this taught:** a "safety-net duplicate" is only safe when the two
+  engines enforce the **same direction** — verify that with an isolated probe
+  (`biome lint --only=<rule>` vs the ESLint/Oxlint result on the same snippet),
+  never assume it from the rule name. `useNumberNamespace` was _assumed_ to agree
+  with unicorn; unicorn enforces the exact opposite.
+
+**Phase 3 (2026-07-18) — `noLeakedRender` and the forced idiom.** Enabling
+`noLeakedRender` (React override) flagged 55 sites. The rule is **syntactic, not
+type-aware** — it flags every bare `identifier && <JSX/>`, even a strict
+`boolean`. Finding the clean fix was a four-linter negotiation, and the engines
+between them left exactly one shape standing:
+
+- a `getIsTruthy` / `(v) => Boolean(v)` helper → rejected by eslint
+  `unicorn/prefer-native-coercion-functions` (it _is_ `Boolean`);
+- a ternary `cond ? <X/> : null` → rejected by `unicorn/no-null`; `: undefined`
+  → itself a `noLeakedRender` leak;
+- `!!cond` → rejected by `noImplicitCoercions`;
+- wrapping an _already-boolean_ condition in `Boolean()` → rejected by eslint
+  `unicorn/no-useless-coercion`.
+
+The survivor: **`Boolean(cond) && <JSX/>`** for a non-boolean condition, and the
+**bare** form left as-is for a syntactically-boolean one (a comparison or a
+leading `!`, which Biome traces). This is the documented convention in
+`packages/ui/src/PATTERNS.md` → "Conditional Rendering". Two sites needed a
+structural touch: a compound `a && b` boolean local Biome would not trace was
+inlined, and one `Boolean()` wrap opaqued TS `&&`-narrowing so its rendered body
+was made null-safe (`data?.x`).
+
+The rest of Phase 3 completed with two more rules and one deferral:
+
+- `noEmptyBlockStatements` — every empty block was an idiomatic test no-op
+  (`mockImplementation(() => {})`, no-op fixture handlers), so it is **off for
+  test files**; the two source cases (the logger's `noop`, a test-mock's
+  swallow-`catch`) got an intentional-`/* … */` comment.
+- `noShadow` — 52 of 55 were the idiomatic `vi.hoisted(() => function MockX(){})`
+  pattern (a named function expression deliberately sharing its const's name), so
+  it is **off for test files**; the 3 genuine source shadows were renamed (a
+  promise-callback `res` that hid a query result; a `column` const the map/filter
+  callbacks shadowed → `targetColumn`).
+- `noProcessEnv` — **deliberately not enabled.** The repo already centralizes env
+  through Zod schemas (`readEnvConfig({ env: process.env })`, `envSchema.parse(process.env)`),
+  so every `process.env` read is the validation boundary — plus agent-runner
+  forwarding raw env to a spawned subprocess, which cannot route through config.
+  The reads sit in ordinary util files, not a tidy `config/` dir, so there is no
+  clean glob exemption; enforcing it would need a cross-workspace env-reader
+  refactor touching the vital `data-access` package, disproportionate to a lint
+  pass. Revisit if env access is ever consolidated to one reader per workspace.
+
+**`useNamingConvention` — declined (Phase 4 candidate, measured).** 7,218 findings
+at default; even tuned (`strictCase: false` + any-case object/type properties) it
+stays at **1,139**. The cause is structural: this is a Postgres/REST app whose DB
+and API contract is snake_case _by design_ (`scan.project_id`, `run.git_branch`,
+`res.rowCount`), and that snake_case leaks from properties into destructured local
+identifiers, so no selector cleanly separates "external contract" from "identifier
+I control." The naming that actually matters here is already enforced by
+repo-aware rules — `local-rules/type-suffix-naming` (`Args`/`Props`), unicorn's
+`consistent-boolean-name` (`is`/`has`/`should`), `useReactFunctionComponents` plus
+the file-name suffix rules — so the rule's marginal value is low while its
+`conventions` block is a living liability that silently under-enforces when wrong.
+A specific future naming gap is better served by a narrow `local-rules/*` rule
+than by this sweeping, contract-hostile one.
+
+**Phase 4 (2026-07-18) — `noDefaultExport`.** Hard-bans `export default` in
+ordinary code. The repo is named-export-only, so there were **0 code fixes** —
+all 81 default exports are framework/tooling contracts (38 React Router route
+modules, 31 configs, 8 eslint rules, 4 `entry`/`root`), exempted by glob in an
+override. Reaching a true zero took two passes: the `apps/*/src/routes.ts` route
+config and the eslint-rule files needed `**/routes.ts` and `**/eslint-local-rules/**`
+specifically (a bare `packages/eslint-local-rules/**` did not match the dir-root
+files). The cost is a small maintenance coupling — a new route/config/entry file
+must match those globs or it false-positives, but _loudly_, at the gate, never
+silently. The value is a hard stop on a stray default export that the named-export
+convention (and `single-component-export` / `useComponentExportOnlyModules`) only
+discouraged softly — worth it for a mixed-skill, multi-agent codebase.
+
+**Nursery rules carry an upgrade duty.** `noInlineStyles` and `useTestHooksOnTop`
+(and any future nursery adoption) can be renamed, change behaviour, or graduate
+to another group on a Biome minor bump. Biome is pinned (`2.5.4`, via the
+`pnpm-workspace.yaml` catalog and the `$schema` URL); on every upgrade, re-run the
+per-rule `--only` sweep for each nursery rule before trusting a green gate.
 
 ## Consequences
 

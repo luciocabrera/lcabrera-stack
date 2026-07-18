@@ -25,7 +25,7 @@ export const RunDetail = () => {
         />
       </h1>
       <p>Origin: {run.origin}</p>
-      {run.git_branch && <p>Branch: {run.git_branch}</p>}
+      {Boolean(run.git_branch) && <p>Branch: {run.git_branch}</p>}
 
       <h2>Scans</h2>
       <TableLayout<RunScanRow, readonly RunScanRow[]>

@@ -30,7 +30,7 @@ export const resolveTableActionsColumn = <
     (column) => column.key === ACTIONS_COLUMN_KEY,
   );
   const requiresRowActions =
-    !!crud &&
+    crud !== undefined &&
     (crud.read === true || crud.update === true || crud.delete === true);
 
   if (!requiresRowActions && !customColumn) {

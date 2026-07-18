@@ -21,7 +21,7 @@ export const SectionCard = ({
   <Card color='default' customStylex={customStylex} elevation='sm' padding='lg'>
     <section {...stylex.props(styles.section)}>
       <h2 {...stylex.props(styles.sectionTitle)}>{title}</h2>
-      {description && (
+      {Boolean(description) && (
         <p {...stylex.props(styles.description)}>{description}</p>
       )}
       {children}

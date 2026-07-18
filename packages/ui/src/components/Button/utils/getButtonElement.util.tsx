@@ -54,12 +54,14 @@ export const getButtonElement = ({
         isPrimary && buttonStyles.overlayParent,
       )}
     >
-      {isBusy && (
+      {Boolean(isBusy) && (
         <span {...stylex.props(buttonStyles.busyOverlay)}>
           <span {...stylex.props(buttonStyles.busyWave)} />
         </span>
       )}
-      {icon && <span {...stylex.props(buttonStyles.icon)}>{icon}</span>}
+      {Boolean(icon) && (
+        <span {...stylex.props(buttonStyles.icon)}>{icon}</span>
+      )}
       <span
         {...stylex.props(
           buttonStyles.label,
@@ -75,7 +77,7 @@ export const getButtonElement = ({
             buttonStyles.linear,
             buttonStyles.overlayOverwrite,
           )}
-        ></div>
+        />
       )}
     </button>
   );

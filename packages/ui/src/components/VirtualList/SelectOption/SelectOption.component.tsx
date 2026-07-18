@@ -15,7 +15,7 @@ export const SelectOption = ({
   const content = (
     <>
       <span {...stylex.props(styles.label)}>{option}</span>
-      {isLoading && (
+      {Boolean(isLoading) && (
         <div {...stylex.props(skeletonStyles.loadingOverlay)}>
           <div {...stylex.props(skeletonStyles.shimmerWave)} />
         </div>

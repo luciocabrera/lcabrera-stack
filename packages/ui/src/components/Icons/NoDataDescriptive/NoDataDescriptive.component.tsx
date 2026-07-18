@@ -1,4 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
+import { useId } from 'react';
 
 import { FloatingParticles } from './FloatingParticles';
 import { MagnifyingGlass } from './MagnifyingGlass';
@@ -13,18 +14,21 @@ import { TableSheet } from './TableSheet';
  * - Respects `prefers-reduced-motion`.
  */
 export const NoDataDescriptive = () => {
+  const titleId = useId();
+  const descId = useId();
+
   return (
     <svg
       {...stylex.props(styles.svg)}
-      aria-labelledby='noDataTitle noDataDesc'
+      aria-labelledby={`${titleId} ${descId}`}
       height='100%'
       role='img'
       viewBox='0 0 360 220'
       width='100%'
       xmlns='http://www.w3.org/2000/svg'
     >
-      <title id='noDataTitle'>No data found</title>
-      <desc id='noDataDesc'>
+      <title id={titleId}>No data found</title>
+      <desc id={descId}>
         An empty table sheet with a magnifying glass, indicating that no records
         matched.
       </desc>

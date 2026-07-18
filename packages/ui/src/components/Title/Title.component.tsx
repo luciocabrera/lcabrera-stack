@@ -15,10 +15,14 @@ export const Title = ({
   return (
     <div {...stylex.props(styles.container, customStylex)}>
       <div {...stylex.props(styles.titleSection)}>
-        {icon && <div {...stylex.props(styles.icon)}>{icon}</div>}
-        {children && <h2 {...stylex.props(styles.title)}>{children}</h2>}
+        {Boolean(icon) && <div {...stylex.props(styles.icon)}>{icon}</div>}
+        {Boolean(children) && (
+          <h2 {...stylex.props(styles.title)}>{children}</h2>
+        )}
       </div>
-      {actions && <div {...stylex.props(styles.actions)}>{actions}</div>}
+      {Boolean(actions) && (
+        <div {...stylex.props(styles.actions)}>{actions}</div>
+      )}
     </div>
   );
 };

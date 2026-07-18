@@ -15,7 +15,9 @@ export const SidePanelTitle = ({
       {...props}
       {...stylex.props(sidePanelTitleStyles.title)}
     >
-      {icon && <span {...stylex.props(sidePanelTitleStyles.icon)}>{icon}</span>}
+      {Boolean(icon) && (
+        <span {...stylex.props(sidePanelTitleStyles.icon)}>{icon}</span>
+      )}
       {children}
     </h2>
   );

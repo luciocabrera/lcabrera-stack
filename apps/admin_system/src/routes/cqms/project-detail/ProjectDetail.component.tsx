@@ -79,7 +79,7 @@ export const ProjectDetail = () => {
         metaState={{ title: { plural: 'Runs', singular: 'Run' } }}
       />
 
-      {canManageGrants && (
+      {Boolean(canManageGrants) && (
         <>
           <h2>Access Grants</h2>
           <Suspense fallback={<p>Loading grants…</p>}>

@@ -49,7 +49,7 @@ export const TableBodyCell = <TData extends Record<string, unknown>>({
         width,
       })}
     >
-      {isLoadingState && (
+      {Boolean(isLoadingState) && (
         <div {...stylex.props(skeletonStyles.loadingOverlay)}>
           <div {...stylex.props(skeletonStyles.shimmerWave)} />
         </div>

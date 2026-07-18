@@ -29,6 +29,8 @@
     "commands:verify": "node scripts/verify-commands-doc.mjs",
     "coordination:verify": "node scripts/verify-coordination.mjs",
     "coordination:board": "node scripts/verify-coordination.mjs --write-board",
+    "sonar:report": "node scripts/sonar-report.mjs",
+    "sonar:verify": "node scripts/sonar-report.mjs --gate",
     "scripts:verify": "node scripts/verify-script-size.mjs",
     "skills:validate": "node scripts/validate-skills.cjs",
     "skills:report": "node scripts/generate-skills-compliance-report.cjs",

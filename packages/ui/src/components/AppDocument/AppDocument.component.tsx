@@ -23,7 +23,7 @@ export const AppDocument = ({
       <head>
         <meta charSet='utf-8' />
         <meta content='width=device-width, initial-scale=1' name='viewport' />
-        {cspNonce ? <meta nonce={cspNonce} property='csp-nonce' /> : undefined}
+        {Boolean(cspNonce) && <meta nonce={cspNonce} property='csp-nonce' />}
         <Meta />
         <DevStyleXInject cssHref={stylexCssHref} />
         <Links />

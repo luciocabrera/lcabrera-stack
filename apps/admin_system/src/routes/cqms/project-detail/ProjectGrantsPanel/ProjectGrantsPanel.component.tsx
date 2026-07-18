@@ -90,7 +90,7 @@ export const ProjectGrantsPanel = ({
         </Button>
       </fetcher.Form>
 
-      {grantError && <p role='alert'>{grantError}</p>}
+      {Boolean(grantError) && <p role='alert'>{grantError}</p>}
     </div>
   );
 };

@@ -18,14 +18,16 @@ export const FormFieldChrome = ({
       {!hideLabel && (
         <label {...stylex.props(styles.label)} htmlFor={fieldId}>
           {label}
-          {isRequired && <span {...stylex.props(styles.required)}> *</span>}
+          {Boolean(isRequired) && (
+            <span {...stylex.props(styles.required)}> *</span>
+          )}
         </label>
       )}
       {children}
       {description && !error && (
         <p {...stylex.props(styles.description)}>{description}</p>
       )}
-      {error && (
+      {Boolean(error) && (
         <p role='alert' {...stylex.props(styles.error)}>
           {error}
         </p>

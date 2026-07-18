@@ -28,7 +28,7 @@ export const AppBackground = ({
             styles.radial,
             styles.backgroundOverlay,
           )}
-        ></div>
+        />
         {children}
       </div>
     </div>

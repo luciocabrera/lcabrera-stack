@@ -37,7 +37,7 @@ export const TableHeaderActionsMenu = <TData,>({
     >
       {({ closeMenu }) => (
         <div {...stylex.props(tableActionsPopoverStyles.menuActions)}>
-          {isSortable && (
+          {Boolean(isSortable) && (
             <SortActions<TData>
               columnKey={columnKey}
               onClose={closeMenu}
@@ -52,7 +52,7 @@ export const TableHeaderActionsMenu = <TData,>({
               pinSide={pinSide}
             />
           )}
-          {hasSettings && (
+          {Boolean(hasSettings) && (
             <ManageColumnAction<TData>
               columnKey={columnKey}
               hasSectionAbove={isSortable || !isStatic}

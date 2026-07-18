@@ -1,9 +1,9 @@
-import { describe, expect, test } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { pinAllBetween } from './pinAllBetween.util';
 
 describe('pinAllBetween', () => {
-  test('pins all columns up to index on left side', () => {
+  it('pins all columns up to index on left side', () => {
     const result = pinAllBetween({
       allOrderedKeys: ['a', 'b', 'c', 'd'],
       columnPinning: { left: ['a'], right: ['d'] },
@@ -15,7 +15,7 @@ describe('pinAllBetween', () => {
     expect(result.right).toEqual(['d']);
   });
 
-  test('pins all columns from index on right side', () => {
+  it('pins all columns from index on right side', () => {
     const result = pinAllBetween({
       allOrderedKeys: ['a', 'b', 'c', 'd'],
       columnPinning: { left: ['a'], right: ['d'] },
@@ -27,7 +27,7 @@ describe('pinAllBetween', () => {
     expect(result.right).toEqual(['d', 'b', 'c']);
   });
 
-  test('removes keys from opposite side while pinning', () => {
+  it('removes keys from opposite side while pinning', () => {
     const result = pinAllBetween({
       allOrderedKeys: ['a', 'b', 'c', 'd'],
       columnPinning: { left: ['a', 'c'], right: ['b', 'd'] },

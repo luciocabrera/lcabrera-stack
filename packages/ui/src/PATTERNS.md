@@ -304,6 +304,41 @@ All form-like components are **fully controlled** — no internal state for the 
 
 ---
 
+## Conditional Rendering (`noLeakedRender`)
+
+Never render with a bare `{cond && <JSX/>}`. Biome's `noLeakedRender` is
+**syntactic** — it flags _every_ `identifier && <JSX/>` (even a real `boolean`),
+because a falsy non-boolean (`0`, `''`, `NaN`) renders literally (`{count && …}`
+prints a stray `0`). Wrap non-boolean conditions in `Boolean(...)`:
+
+```tsx
+const Example = ({ errorMessage, icon, isOpen, isHidden }: ExampleProps) => (
+  <div>
+    {/* ✅ non-boolean (string | undefined, ReactNode, number) → Boolean() */}
+    {Boolean(errorMessage) && <p role='alert'>{errorMessage}</p>}
+    {Boolean(icon) && <span>{icon}</span>}
+
+    {/* ✅ already boolean (comparison / negation) → leave BARE;
+        Boolean() here would trip unicorn/no-useless-coercion */}
+    {isOpen !== false && <Panel />}
+    {!isHidden && <Toolbar />}
+
+    {/* ❌ {errorMessage && <p/>}  — bare non-boolean, noLeakedRender */}
+    {/* ❌ {!!errorMessage && <p/>} — banned by noImplicitCoercions */}
+  </div>
+);
+```
+
+Do **not** reach for a ternary to dodge it: `{cond ? <X/> : null}` is banned by
+`unicorn/no-null` and `{cond ? <X/> : undefined}` is itself a `noLeakedRender`
+leak. And do **not** add a `getIsTruthy`-style helper — a `(v) => Boolean(v)`
+wrapper is banned by `unicorn/prefer-native-coercion-functions` (it _is_
+`Boolean`). `Boolean(cond) &&` is the one idiom that satisfies every linter.
+(Wrapping in `Boolean()` opaques TS `&&`-narrowing, so make the rendered body
+null-safe — `{Boolean(data?.err) && <p>{data?.err}</p>}`.) See ADR-035 §7.
+
+---
+
 ## Naming Conventions
 
 | Thing                  | Convention                                     | Example                      |

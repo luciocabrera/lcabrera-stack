@@ -205,7 +205,9 @@ const runAgentSkill = async ({
   });
 
   const succeeded =
-    result.success && !!result.reportMarkdownPath && !!result.reportJsonPath;
+    result.success &&
+    result.reportMarkdownPath !== undefined &&
+    result.reportJsonPath !== undefined;
 
   // Logged regardless of success/failure — a failed run may still have
   // consumed real, non-refundable API cost, and it must count toward the
