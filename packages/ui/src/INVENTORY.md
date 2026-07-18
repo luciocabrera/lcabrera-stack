@@ -196,6 +196,16 @@ Covers `packages/ui` only. API-layer utilities (`api.util.ts`, `buildPaginatedQu
 | `syncColumnOrderWithPinning`             | `components/Table/utils/syncColumnOrderWithPinning.util.ts`               | Reorders column order array to keep pinned columns grouped; tolerates missing current order                                          |
 | `writePersistedUiStateToSessionStorage`  | `components/Table/utils/writePersistedUiStateToSessionStorage.service.ts` | Writes tab-scoped persisted table UI slices                                                                                          |
 
+### `src/components/Table/commands/` — grid command layer (ADR-011)
+
+Per-capability command **identity** + **enablement derivation**, defined once and shared by every surface. See `components/Table/commands/ARCHITECTURE.md`.
+
+| Artifact                                                         | Location                                                          | Description                                                                                                                                  |
+| ---------------------------------------------------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CommandDescriptor`, `CommandId`                                 | `components/Table/commands/CommandDescriptor.types.ts`            | Presentation-neutral command identity `{ id, label, icon }` — no handler, no enablement (those stay in action hooks / per-context selectors) |
+| `PIN_LEFT_COMMAND`, `PIN_RIGHT_COMMAND`, `CLEAR_PINNING_COMMAND` | `components/Table/commands/pinning/pinningCommands.ts`            | Pinning-capability command descriptors (identity), consumed by the header menu (live) and the drawer (draft)                                 |
+| `derivePinCommandState`                                          | `components/Table/commands/pinning/derivePinCommandState.util.ts` | Pure `{ isActive, isEnabled }` for a pinning command from `{ currentSide, targetSide, isStatic }`; fed by each surface's own selector        |
+
 ### `src/components/Table/contexts/TableConfig/columns/actions/`
 
 | Artifact                           | Location                                                                                               | Description                                                                                                                                                                                                                                           |

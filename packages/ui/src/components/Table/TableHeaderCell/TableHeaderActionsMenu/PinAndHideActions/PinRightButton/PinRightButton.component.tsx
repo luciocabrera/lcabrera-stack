@@ -1,5 +1,8 @@
 import { Button } from '@repo/ui/components/Button';
-import { PinRightIcon } from '@repo/ui/components/Icons';
+import {
+  derivePinCommandState,
+  PIN_RIGHT_COMMAND,
+} from '@repo/ui/components/Table/commands';
 import { useSetColumnPinning } from '@repo/ui/components/Table/contexts/TableConfig/columns/actions';
 import { tableActionsPopoverStyles } from '@repo/ui/components/Table/TableActionsPopover';
 import * as stylex from '@stylexjs/stylex';
@@ -9,7 +12,9 @@ import type { PinRightButtonProps } from './PinRightButton.types';
 /**
  * "Pin Right" item of the pin/hide section: toggles right pinning on/off and
  * highlights itself (via the `primary` variant + `aria-pressed`) while pinned
- * right. Closes the menu via `onClose`.
+ * right. Closes the menu via `onClose`. Identity and active-state come from the
+ * shared `PIN_RIGHT_COMMAND` (ADR-011); this surface owns only its live
+ * commit-context and menu presentation.
  */
 export const PinRightButton = <TData,>({
   columnKey,
@@ -17,28 +22,33 @@ export const PinRightButton = <TData,>({
   pinSide,
 }: PinRightButtonProps<TData>) => {
   const setColumnPinning = useSetColumnPinning<TData>();
-  const isPinnedRight = pinSide === 'right';
+  const { icon: PinRightCommandIcon, label } = PIN_RIGHT_COMMAND;
+  const { isActive } = derivePinCommandState({
+    currentSide: pinSide,
+    isStatic: false,
+    targetSide: 'right',
+  });
 
   const handlePinRight = () => {
-    setColumnPinning({ columnKey, side: isPinnedRight ? undefined : 'right' });
+    setColumnPinning({ columnKey, side: isActive ? undefined : 'right' });
     onClose();
   };
 
   return (
     <Button
-      aria-pressed={isPinnedRight}
+      aria-pressed={isActive}
       customStylex={tableActionsPopoverStyles.menuItem}
       icon={
         <span {...stylex.props(tableActionsPopoverStyles.menuIcon)}>
-          <PinRightIcon size={16} />
+          <PinRightCommandIcon size={16} />
         </span>
       }
       onClick={handlePinRight}
       orientation='horizontal'
       size='mini'
-      variant={isPinnedRight ? 'primary' : 'ghost'}
+      variant={isActive ? 'primary' : 'ghost'}
     >
-      Pin Right
+      {label}
     </Button>
   );
 };

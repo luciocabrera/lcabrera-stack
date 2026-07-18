@@ -1,10 +1,14 @@
 import { Button } from '@repo/ui/components/Button';
-import { PinLeftIcon, PinRightIcon } from '@repo/ui/components/Icons';
 import {
   SidePanelSection,
   SidePanelSectionHeader,
   SidePanelSectionMain,
 } from '@repo/ui/components/SidePanel';
+import {
+  derivePinCommandState,
+  PIN_LEFT_COMMAND,
+  PIN_RIGHT_COMMAND,
+} from '@repo/ui/components/Table/commands';
 import { ICON_SIZE_MD } from '@repo/ui/design-system/constants';
 import * as stylex from '@stylexjs/stylex';
 
@@ -15,14 +19,34 @@ import { useGetColumnPinning } from '../ColumnDrawerContext/selectors';
 import { styles } from './PinningSection.stylex';
 import { PinningSectionToolbar } from './PinningSectionToolbar';
 
+/**
+ * Column-pinning controls in the settings drawer. Identity and active-state come
+ * from the shared pinning commands (ADR-011); crucially the active-state is
+ * derived from the DRAFT store (`useGetColumnPinning` here reads the drawer's
+ * per-column draft, not committed state) so the drawer reflects pending edits
+ * while open. This surface owns its draft commit-context and its presentation.
+ */
 export const PinningSection = ({ isBusy = false }: PinningSectionProps) => {
   const columnPinning = useGetColumnPinning();
   const setColumnPinning = useSetColumnPinning();
 
+  const { icon: PinLeftCommandIcon, label: pinLeftLabel } = PIN_LEFT_COMMAND;
+  const { icon: PinRightCommandIcon, label: pinRightLabel } = PIN_RIGHT_COMMAND;
+  const { isActive: isPinnedLeft } = derivePinCommandState({
+    currentSide: columnPinning,
+    isStatic: false,
+    targetSide: 'left',
+  });
+  const { isActive: isPinnedRight } = derivePinCommandState({
+    currentSide: columnPinning,
+    isStatic: false,
+    targetSide: 'right',
+  });
+
   const handlePinLeft = () =>
-    setColumnPinning(columnPinning === 'left' ? undefined : 'left');
+    setColumnPinning(isPinnedLeft ? undefined : 'left');
   const handlePinRight = () =>
-    setColumnPinning(columnPinning === 'right' ? undefined : 'right');
+    setColumnPinning(isPinnedRight ? undefined : 'right');
 
   return (
     <SidePanelSectionMain>
@@ -33,22 +57,22 @@ export const PinningSection = ({ isBusy = false }: PinningSectionProps) => {
         />
         <div {...stylex.props(styles.buttonGroup)}>
           <Button
-            icon={<PinLeftIcon size={ICON_SIZE_MD} />}
+            icon={<PinLeftCommandIcon size={ICON_SIZE_MD} />}
             isBusy={isBusy}
             onClick={handlePinLeft}
             size='sm'
-            variant={columnPinning === 'left' ? 'primary' : 'outline'}
+            variant={isPinnedLeft ? 'primary' : 'outline'}
           >
-            Pin Left
+            {pinLeftLabel}
           </Button>
           <Button
-            icon={<PinRightIcon size={ICON_SIZE_MD} />}
+            icon={<PinRightCommandIcon size={ICON_SIZE_MD} />}
             isBusy={isBusy}
             onClick={handlePinRight}
             size='sm'
-            variant={columnPinning === 'right' ? 'primary' : 'outline'}
+            variant={isPinnedRight ? 'primary' : 'outline'}
           >
-            Pin Right
+            {pinRightLabel}
           </Button>
         </div>
       </SidePanelSection>
