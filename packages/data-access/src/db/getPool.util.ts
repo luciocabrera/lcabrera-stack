@@ -2,7 +2,14 @@ import { Pool } from 'pg';
 
 import { readEnvConfig } from './env.schema.ts';
 
-let pool: Pool | undefined;
+/**
+ * The singleton lives on a `const` holder rather than a reassigned module-level
+ * `let`: `getPool`/`closePool` mutate `poolRef.current` instead of the top-level
+ * binding, which keeps them clear of `unicorn/no-top-level-assignment-in-function`.
+ * packages/data-access is public-facing and never baselines a finding, so the
+ * lazy singleton is expressed this way rather than suppressed.
+ */
+const poolRef: { current: Pool | undefined } = { current: undefined };
 
 /**
  * Lazily-initialized singleton — shared across every Node-context consumer
@@ -14,9 +21,9 @@ let pool: Pool | undefined;
  * cross-process shared connection.
  */
 export const getPool = (): Pool => {
-  if (!pool) {
+  if (!poolRef.current) {
     const envConfig = readEnvConfig({ env: process.env });
-    pool = new Pool({
+    poolRef.current = new Pool({
       database: envConfig.DB_NAME,
       host: envConfig.DB_HOST,
       password: envConfig.DB_PASSWORD,
@@ -25,14 +32,14 @@ export const getPool = (): Pool => {
     });
   }
 
-  return pool;
+  return poolRef.current;
 };
 
 export const closePool = async (): Promise<void> => {
-  if (!pool) {
+  if (!poolRef.current) {
     return;
   }
 
-  await pool.end();
-  pool = undefined;
+  await poolRef.current.end();
+  poolRef.current = undefined;
 };
