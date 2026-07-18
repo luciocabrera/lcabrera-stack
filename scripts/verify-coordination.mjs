@@ -37,21 +37,31 @@
  *
  * Exit codes: 0 = consistent (warnings allowed), 1 = an ERROR check failed.
  */
-import { execFileSync } from 'node:child_process';
-import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  readdirSync,
+  readFileSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import {
+  boardTuple,
+  parseBoard,
+  renderBoard,
+} from './lib/coordination-board.mjs';
 import {
   branchSlug,
   globsOverlap,
   parseFrontmatter,
 } from './lib/coordination-parse.mjs';
 import {
-  boardTuple,
-  parseBoard,
-  renderBoard,
-} from './lib/coordination-board.mjs';
+  branchErrors,
+  ISO_DATE,
+  taskErrors,
+} from './lib/coordination-schema.mjs';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
 const COORD_DIR = join(REPO_ROOT, 'docs', 'coordination');
@@ -61,28 +71,6 @@ const BOARD_DOC = join(COORD_DIR, 'BOARD.md');
 const BOARD_REL = 'docs/coordination/BOARD.md';
 
 const STALE_DAYS = 14;
-const STATUSES = new Set(['active', 'blocked', 'review', 'paused', 'done']);
-const BRANCH_STATUSES = new Set(['active', 'merging', 'done']);
-const TASK_REQUIRED = [
-  'id',
-  'title',
-  'owner',
-  'status',
-  'branch',
-  'area',
-  'started',
-  'updated',
-];
-const BRANCH_REQUIRED = [
-  'branch',
-  'base',
-  'target',
-  'integrator',
-  'status',
-  'updated',
-];
-const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
-const OWNER = /^(agent|human):.+/;
 const NO_BRANCH = new Set(['(uncommitted)', '(none)', '(worktree)']);
 
 /** Parsed `.md` files in a register dir (missing dir → none). */
@@ -104,79 +92,32 @@ const isLive = ({ data }) => data !== undefined && data.status !== 'done';
 
 const checkTaskSchema = (tasks, problems) => {
   const seen = new Map();
-  for (const { name, slug, data } of tasks) {
-    if (data === undefined) {
-      problems.push(`${name}: no YAML frontmatter — copy tasks/_TEMPLATE.md.`);
+  for (const task of tasks) {
+    if (task.data === undefined) {
+      problems.push(
+        `${task.name}: no YAML frontmatter — copy tasks/_TEMPLATE.md.`,
+      );
       continue;
     }
-    for (const field of TASK_REQUIRED) {
-      const value = data[field];
-      if (value === undefined || (Array.isArray(value) && value.length === 0)) {
-        problems.push(`${name}: missing required field \`${field}\`.`);
-      }
+    for (const message of taskErrors(task, seen)) {
+      problems.push(`${task.name}: ${message}.`);
     }
-    if (data.status !== undefined && !STATUSES.has(data.status)) {
-      problems.push(
-        `${name}: status \`${data.status}\` is not one of ${[...STATUSES].join(', ')}.`,
-      );
-    }
-    if (data.owner !== undefined && !OWNER.test(data.owner)) {
-      problems.push(
-        `${name}: owner \`${data.owner}\` must look like \`agent:<name>\` or \`human:<name>\`.`,
-      );
-    }
-    if (data.id !== undefined && data.id !== slug) {
-      problems.push(
-        `${name}: id \`${data.id}\` must match the filename slug \`${slug}\`.`,
-      );
-    }
-    for (const field of ['started', 'updated']) {
-      if (data[field] !== undefined && !ISO_DATE.test(data[field])) {
-        problems.push(
-          `${name}: ${field} \`${data[field]}\` is not YYYY-MM-DD.`,
-        );
-      }
-    }
-    const prior = data.id !== undefined && seen.get(data.id);
-    if (prior) {
-      problems.push(`${name}: duplicate id \`${data.id}\` (also in ${prior}).`);
-    }
-    if (data.id !== undefined) {
-      seen.set(data.id, name);
+    if (task.data.id !== undefined) {
+      seen.set(task.data.id, task.name);
     }
   }
 };
 
 const checkBranchSchema = (branches, problems) => {
-  for (const { name, slug, data } of branches) {
-    if (data === undefined) {
+  for (const branch of branches) {
+    if (branch.data === undefined) {
       problems.push(
-        `${name}: no YAML frontmatter — copy branches/_TEMPLATE.md.`,
+        `${branch.name}: no YAML frontmatter — copy branches/_TEMPLATE.md.`,
       );
       continue;
     }
-    for (const field of BRANCH_REQUIRED) {
-      if (data[field] === undefined) {
-        problems.push(`${name}: missing required field \`${field}\`.`);
-      }
-    }
-    if (data.status !== undefined && !BRANCH_STATUSES.has(data.status)) {
-      problems.push(
-        `${name}: status \`${data.status}\` is not one of ${[...BRANCH_STATUSES].join(', ')}.`,
-      );
-    }
-    if (data.integrator !== undefined && !OWNER.test(data.integrator)) {
-      problems.push(
-        `${name}: integrator \`${data.integrator}\` must look like \`agent:<name>\` or \`human:<name>\`.`,
-      );
-    }
-    if (data.updated !== undefined && !ISO_DATE.test(data.updated)) {
-      problems.push(`${name}: updated \`${data.updated}\` is not YYYY-MM-DD.`);
-    }
-    if (data.branch !== undefined && slug !== branchSlug(data.branch)) {
-      problems.push(
-        `${name}: filename must be the branch slug \`${branchSlug(data.branch)}.md\`.`,
-      );
+    for (const message of branchErrors(branch)) {
+      problems.push(`${branch.name}: ${message}.`);
     }
   }
 };
@@ -203,35 +144,46 @@ const checkOverlap = (tasks, warnings) => {
   }
 };
 
+/** Live tasks grouped by real (non-placeholder) branch → the task ids on it. */
+const liveByBranch = (tasks) => {
+  const byBranch = new Map();
+  for (const { data } of tasks.filter(isLive)) {
+    if (!NO_BRANCH.has(data.branch)) {
+      byBranch.set(data.branch, [
+        ...(byBranch.get(data.branch) ?? []),
+        data.id,
+      ]);
+    }
+  }
+  return byBranch;
+};
+
+const undeclaredSharedWarning = (branch, ids, declared) =>
+  ids.length > 1 && !declared.has(branch)
+    ? `branch \`${branch}\` is shared by ${ids.length} active tasks (${ids.join(', ')}) ` +
+      `but has no descriptor — add \`branches/${branchSlug(branch)}.md\` or move to independent branches.`
+    : undefined;
+
+const orphanBranchWarning = ({ name, data }, byBranch) =>
+  data !== undefined && data.status !== 'done' && !byBranch.has(data.branch)
+    ? `${name}: shared branch \`${data.branch}\` has no active task — delete the descriptor or add its tasks.`
+    : undefined;
+
 const checkSharedBranches = (tasks, branches, warnings) => {
   const declared = new Set(
     branches.filter(({ data }) => data).map(({ data }) => data.branch),
   );
-  const byBranch = new Map();
-  for (const task of tasks.filter(isLive)) {
-    const { branch } = task.data;
-    if (NO_BRANCH.has(branch)) {
-      continue;
-    }
-    byBranch.set(branch, [...(byBranch.get(branch) ?? []), task.data.id]);
-  }
+  const byBranch = liveByBranch(tasks);
   for (const [branch, ids] of byBranch) {
-    if (ids.length > 1 && !declared.has(branch)) {
-      warnings.push(
-        `branch \`${branch}\` is shared by ${ids.length} active tasks (${ids.join(', ')}) ` +
-          `but has no descriptor — add \`branches/${branchSlug(branch)}.md\` or move to independent branches.`,
-      );
+    const warning = undeclaredSharedWarning(branch, ids, declared);
+    if (warning) {
+      warnings.push(warning);
     }
   }
-  for (const { name, data } of branches) {
-    if (
-      data !== undefined &&
-      data.status !== 'done' &&
-      !byBranch.has(data.branch)
-    ) {
-      warnings.push(
-        `${name}: shared branch \`${data.branch}\` has no active task — delete the descriptor or add its tasks.`,
-      );
+  for (const branch of branches) {
+    const warning = orphanBranchWarning(branch, byBranch);
+    if (warning) {
+      warnings.push(warning);
     }
   }
 };
@@ -258,20 +210,37 @@ const checkStale = (tasks, warnings) => {
   }
 };
 
-/** Best-effort: git may be unavailable (shallow CI), so failure to resolve is silent. */
-const gitRefExists = (branch) => {
-  for (const ref of [`refs/heads/${branch}`, `refs/remotes/origin/${branch}`]) {
-    try {
-      execFileSync('git', ['rev-parse', '--verify', '--quiet', ref], {
-        cwd: REPO_ROOT,
-        stdio: 'ignore',
-      });
-      return true;
-    } catch {
-      // try the next ref form
-    }
+const REF_PATHS = (branch) => [
+  join('refs', 'heads', branch),
+  join('refs', 'remotes', 'origin', branch),
+];
+
+/** Is `branch` in `.git/packed-refs`? Each line is `<sha> refs/heads/<name>`. */
+const packedRefHas = (gitDir, branch) => {
+  const packed = join(gitDir, 'packed-refs');
+  if (!existsSync(packed)) {
+    return false;
   }
-  return false;
+  const wanted = new Set(REF_PATHS(branch).map((p) => p.split('\\').join('/')));
+  return readFileSync(packed, 'utf8')
+    .split('\n')
+    .some((line) => wanted.has(line.slice(line.indexOf(' ') + 1)));
+};
+
+/**
+ * Best-effort ref check via the filesystem — no `git` subprocess, so nothing is
+ * resolved through PATH. Lenient: if there's no plain `.git` directory (e.g. a
+ * worktree, where it's a file), we can't tell, so we don't warn.
+ */
+const gitRefExists = (branch) => {
+  const gitDir = join(REPO_ROOT, '.git');
+  if (!existsSync(gitDir) || !statSync(gitDir).isDirectory()) {
+    return true;
+  }
+  const looseExists = REF_PATHS(branch).some((ref) =>
+    existsSync(join(gitDir, ref)),
+  );
+  return looseExists || packedRefHas(gitDir, branch);
 };
 
 const checkTaskBranches = (tasks, warnings) => {
