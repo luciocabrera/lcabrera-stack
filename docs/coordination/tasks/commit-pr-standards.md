@@ -2,7 +2,7 @@
 id: commit-pr-standards
 title: Enforced commit-message + PR-description standards (hook + CI gate)
 owner: agent:claude
-status: active
+status: review
 branch: feat/commit-pr-standards
 area:
   - scripts/verify-commit-msg.mjs
@@ -15,7 +15,7 @@ area:
 started: 2026-07-18
 updated: 2026-07-18
 plan: we-want-to-have-greedy-parrot.md
-pr: (none)
+pr: https://github.com/luciocabrera/vite-react-compiler/pull/39
 ---
 
 ## What
