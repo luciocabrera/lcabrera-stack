@@ -72,6 +72,11 @@ const COVERAGE_REPORT_WORKSPACES = [
   { dir: 'packages/ui', name: '@repo/ui', run: true },
   { dir: 'packages/data-access', name: '@repo/data-access', run: true },
   { dir: 'apps/react-router', name: 'vite-react-compiler', run: false },
+  // Phase 2 — remaining library packages with a DB-free test:coverage.
+  // scan-ingestion's task measures its DB-free subset only (its real-Postgres
+  // queries/* stay out), same as the fallow coverage merge.
+  { dir: 'packages/node-runtime', name: '@repo/node-runtime', run: true },
+  { dir: 'packages/scan-ingestion', name: '@repo/scan-ingestion', run: true },
 ];
 
 const runAll = process.argv.includes('--all');
