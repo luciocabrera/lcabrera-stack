@@ -354,6 +354,24 @@ link to the spec so they cannot drift. If the standard itself must change, chang
 `commit-convention.mjs`; the hook, CI, template, and docs all follow from it.
 (Non-Negotiable Rule 13.)
 
+### Changelog & Labels
+
+Two things fall out of the enforced commit convention, both reusing the same spec
+so they never diverge from what the gate accepts:
+
+- **Changelog** — [`CHANGELOG.md`](CHANGELOG.md) is **generated** (`vp run
+changelog:generate`, `scripts/generate-changelog.mjs`): Conventional-Commit
+  history grouped by version (git tags) then by type, each entry scope-labelled and
+  linked, with breaking changes called out. Never hand-edit it. On a `v*` tag,
+  [`changelog.yml`](.github/workflows/changelog.yml) publishes that release's
+  section as the GitHub Release notes.
+- **Labels** — a canonical `app:`/`pkg:`/`type:` + `breaking-change` taxonomy
+  (`scripts/lib/labels.mjs`; the `app:`/`pkg:` set is derived from the workspaces,
+  so it self-updates). `vp run labels:sync` creates/updates them on GitHub;
+  [`labeler.yml`](.github/workflows/labeler.yml) applies them to every PR — scope
+  from the changed workspaces (`scripts/pr-labels.mjs`), type from the PR title. Add
+  a workspace and its `app:`/`pkg:` label appears on the next sync automatically.
+
 ### Post-Change Quality Gate
 
 The canonical validation sequence is owned by the **`quality-gate-workflow` skill** — invoke it after every code change. In short (run from `apps/react-router/`, in order, fix failures before proceeding):

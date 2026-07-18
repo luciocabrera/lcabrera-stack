@@ -45,24 +45,37 @@ const expandStarGlob = (repoRoot, prefix) => {
     .map((entry) => entry.name);
 };
 
+/** `apps/*` globs describe apps; everything else (packages/*) is a package. */
+const kindOf = (glob) => (glob.startsWith('apps/') ? 'app' : 'pkg');
+
+/**
+ * The workspaces, derived from pnpm-workspace.yaml, each tagged with its `kind`
+ * (`app` | `pkg`). Returns an empty array when the file is absent. The richer
+ * shape powers the `app:`/`pkg:` label taxonomy; `deriveWorkspaceScopes` narrows
+ * it to just the names for scope validation.
+ */
+export const deriveWorkspaces = (repoRoot) => {
+  const yamlPath = join(repoRoot, 'pnpm-workspace.yaml');
+  if (!existsSync(yamlPath)) {
+    return [];
+  }
+  const workspaces = [];
+  for (const glob of parsePackageGlobs(readFileSync(yamlPath, 'utf8'))) {
+    const kind = kindOf(glob);
+    if (glob.endsWith('/*')) {
+      for (const name of expandStarGlob(repoRoot, glob.slice(0, -2))) {
+        workspaces.push({ name, kind });
+      }
+    } else if (existsSync(join(repoRoot, glob, 'package.json'))) {
+      workspaces.push({ name: basename(glob), kind });
+    }
+  }
+  return workspaces;
+};
+
 /**
  * The recognised workspace scope names, derived from pnpm-workspace.yaml. Returns
  * an empty set when the file is absent (callers treat that as "no nudge").
  */
-export const deriveWorkspaceScopes = (repoRoot) => {
-  const yamlPath = join(repoRoot, 'pnpm-workspace.yaml');
-  if (!existsSync(yamlPath)) {
-    return new Set();
-  }
-  const names = new Set();
-  for (const glob of parsePackageGlobs(readFileSync(yamlPath, 'utf8'))) {
-    if (glob.endsWith('/*')) {
-      for (const name of expandStarGlob(repoRoot, glob.slice(0, -2))) {
-        names.add(name);
-      }
-    } else if (existsSync(join(repoRoot, glob, 'package.json'))) {
-      names.add(basename(glob));
-    }
-  }
-  return names;
-};
+export const deriveWorkspaceScopes = (repoRoot) =>
+  new Set(deriveWorkspaces(repoRoot).map((workspace) => workspace.name));
