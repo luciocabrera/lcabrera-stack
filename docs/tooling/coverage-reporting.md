@@ -70,11 +70,13 @@ critical first. These are the public-facing / highest-value surfaces
 (`packages/ui` and `packages/data-access` are heading for public release;
 `apps/react-router` is the showcase app):
 
-| Workspace              | Package               | `run` | Why                                                                                            |
-| ---------------------- | --------------------- | ----- | ---------------------------------------------------------------------------------------------- |
-| `packages/ui`          | `@repo/ui`            | true  | Runs `test:coverage` here (plain `test` in `test:ci`, no coverage)                             |
-| `packages/data-access` | `@repo/data-access`   | true  | Same                                                                                           |
-| `apps/react-router`    | `vite-react-compiler` | false | Its `test:ci` already emits the summary; re-running the repo's largest suite would be wasteful |
+| Workspace                 | Package                | `run` | Why                                                                                                                              |
+| ------------------------- | ---------------------- | ----- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/ui`             | `@repo/ui`             | true  | Runs `test:coverage` here (plain `test` in `test:ci`, no coverage)                                                               |
+| `packages/data-access`    | `@repo/data-access`    | true  | Same                                                                                                                             |
+| `apps/react-router`       | `vite-react-compiler`  | false | Its `test:ci` already emits the summary; re-running the repo's largest suite would be wasteful                                   |
+| `packages/node-runtime`   | `@repo/node-runtime`   | true  | Phase 2 — DB-free `test:coverage`                                                                                                |
+| `packages/scan-ingestion` | `@repo/scan-ingestion` | true  | Phase 2 — DB-free `test:coverage` **subset** (its real-Postgres `queries/*` stay out, so the number is the DB-free portion only) |
 
 `run: false` reuses a summary produced upstream; `--all` forces every workspace
 to run (standalone local use, where `test:ci` has not run first).
@@ -100,20 +102,20 @@ only once its coverage runs clean and means something.** Checklist:
 
 ### Phased rollout
 
-- **Phase 1 — critical surfaces (this PR).** `packages/ui`,
-  `packages/data-access`, `apps/react-router`. ✅ done.
-- **Phase 2 — remaining packages (next).** Evaluate, in order:
-  `packages/node-runtime` (has DB-free `test:coverage`),
-  `packages/scan-ingestion` (DB-free `test:coverage` subset already exists),
-  then `packages/utils` (add a `test:coverage` task if it has tests). These are
-  library packages — the next-most-valuable coverage after the public two.
+- **Phase 1 — critical surfaces.** `packages/ui`, `packages/data-access`,
+  `apps/react-router`. ✅ done (PR #32).
+- **Phase 2 — remaining library packages.** `packages/node-runtime` and
+  `packages/scan-ingestion` (both have a DB-free `test:coverage`). ✅ done.
+  `packages/utils` was evaluated and **deferred**: it has zero test files
+  (`test` runs `--passWithNoTests`), so there is nothing to measure — admit it
+  once it has tests. `agent-runner`, `plugins`, `ts-configs`,
+  `eslint-local-rules` are config/CLI-only with nothing to cover.
 - **Phase 3 — apps & server workspaces.** `apps/admin_system` and
   `apps/scan-orchestrator` (both already have DB-free `test:coverage`),
   `apps/shared`; then `apps/api-server` / `apps/api-server-fast` **only after**
   each grows a DB-free `test:coverage` subset (today their suites are real-DB).
 
-Do Phase 2 as one PR and Phase 3 as another, keeping each reviewable and each
-green before the next.
+Each phase is its own PR, kept reviewable and green before the next.
 
 ## Known costs & caveats
 
