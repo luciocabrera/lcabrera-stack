@@ -2,7 +2,7 @@
 
 <!-- Audience: Claude, Gemini, and other non-GitHub agents — for GitHub Copilot see .github/copilot-instructions.md -->
 
-This file provides guidance to AI agents when working with code in this repository. It contains the **universal, always-relevant** standards. Detailed per-file-type conventions live in `.claude/rules/` (see [Path-Specific Rules](#path-specific-rules)), and task workflows live in `.github/skills/`.
+This file provides guidance to AI agents when working with code in this repository. It contains the **universal, always-relevant** standards. Detailed per-file-type conventions live in `.claude/rules/` (see [Path-Specific Rules](#2-path-specific-rules)), and task workflows live in `.github/skills/`.
 
 ## 1. Project Overview
 
@@ -233,6 +233,7 @@ The API server (`apps/api-server/`) reads env from `docker/local/.env`. The fron
 ### Agent Checklist
 
 - Run `vp install` after pulling changes and before starting work.
+- **Before non-trivial work, claim it in [`docs/coordination/`](docs/coordination/README.md)** — check [`BOARD.md`](docs/coordination/BOARD.md) (or `vp run coordination:verify`) for an area overlap first, then copy `tasks/_TEMPLATE.md`. Multiple agents and humans work this repo in parallel; the register is the only signal of who owns what. (Non-Negotiable Rule 12.)
 - **Always verify zero linting errors and zero TypeScript errors before considering any task complete.**
 - Run the full quality gate (see below) to validate all changes before finishing.
 
@@ -253,6 +254,7 @@ The headline rules every agent must know regardless of which files are open. Ful
 9. **No explicit return types on functions/hooks/components — let TypeScript infer** — annotate only when inference genuinely fails (recursion, overloads, complex conditional types) or must be widened. (`.claude/rules/typescript.md`)
 10. **Never use workaround-only fixes** — always address and solve the underlying issue. If there is any doubt about intent, trade-offs, or risk, ask the user before applying a workaround or partial fix.
 11. **Never ignore, suppress, or omit a lint finding — verify, then fix.** Oxlint/eslint violations (including stylistic `unicorn/*` rules like `prefer-simple-condition-first` / `no-nested-ternary`) are real until you have read the flagged code and confirmed otherwise. Do **not** dismiss one as a false positive without checking, and do **not** silence a new one — no inline `// eslint-disable`/`oxlint-disable`, no rule-off in config, no hand-added `eslint-suppressions.json` entry. Fix the code (reorder operands, restructure logic, wire up/delete the export). If it is a genuine false positive, explain why rather than disabling. `packages/ui` is held strictest — it carries no suppressions file at all (§4).
+12. **Claim shared work before you touch it.** Multiple agents and humans work this repo in parallel. Before non-trivial work, register it in [`docs/coordination/`](docs/coordination/README.md): check for an area overlap, then create a task file (`tasks/_TEMPLATE.md`) with the `area` globs you own, branch, and keep `status`/`updated` current until it merges. Never edit files inside another active task's `area` without coordinating. The register — not `~/.claude/plans/` scratch, which is invisible to everyone else — is the shared record. `vp run coordination:verify` (CI) keeps it honest. (See "Multi-Agent Coordination" in §7.)
 
 ## 6. Security
 
@@ -268,6 +270,32 @@ The headline rules every agent must know regardless of which files are open. Ful
 - JSDoc comments on all exported functions, types, and components.
 - Each feature directory should have a README.
 - Architecture docs live in `apps/react-router/docs/` and component-level `ARCHITECTURE.md` files.
+
+### Multi-Agent Coordination
+
+This repo is worked by multiple agents (Claude, Copilot, Gemini) and humans in
+parallel, so **who is working on what** must be visible in git — not left in
+per-agent scratch (`~/.claude/plans/`) or auto-memory, which no one else can see.
+[`docs/coordination/`](docs/coordination/README.md) is that shared register.
+
+**Before non-trivial work** (anything beyond a one-file fix you commit immediately):
+
+1. **Check for collisions** — skim [`docs/coordination/BOARD.md`](docs/coordination/BOARD.md) or run `vp run coordination:verify`; it warns when your intended `area` overlaps an active task. Resolve overlaps (coordinate, or narrow scope) before starting.
+2. **Claim it** — copy [`tasks/_TEMPLATE.md`](docs/coordination/tasks/_TEMPLATE.md) to `tasks/<id>.md`, fill in the frontmatter (especially the `area` globs — the soft lock), then `vp run coordination:board`.
+3. **Pick a branch strategy** — an independent branch (default), or a **shared
+   branch** when several agents need each other's WIP (declare it with a
+   `branches/<slug>.md` descriptor + an integrator; overlap between tasks on the
+   same shared branch is then treated as collaboration, not a collision). Open a
+   **draft PR early** (the human-visible progress surface).
+4. **Keep `status`/`updated` current**; move through `active → review`.
+5. **Close it** — delete the task file when the work merges and regenerate the board.
+
+The check runs in CI (`check-safe.yml`). It fails on register _integrity_ (a
+malformed task/branch file, `BOARD.md` drift); overlap/shared-branch/staleness/
+missing-branch are non-blocking warnings. Full protocol and schema — including
+[independent vs shared branches](docs/coordination/README.md#independent-vs-shared-branches) —
+are in the coordination README. Historical scratch plans are catalogued in
+[`PLAN_TRIAGE.md`](docs/coordination/PLAN_TRIAGE.md).
 
 ### Architecture-First Workflow
 

@@ -68,6 +68,11 @@
         "maxCrap": 1000000,
         "maxUnitSize": 100000,
         "reason": "Dev tooling, not shipped product: the fallow/lint/app-graph report generators and the custom ESLint rule visitors are inherently procedural CLI/AST-walker code where complexity/CRAP/unit-size limits do not apply."
+      },
+      {
+        "files": ["scripts/**/*.{mjs,cjs}", "apps/*/scripts/**/*.{mjs,cjs}"],
+        "maxCrap": 1000000,
+        "reason": "Root/app build & tooling scripts are procedural CLI code the repo does not unit-test (by convention — see .claude/rules/scripts.md). CRAP = cyclomatic² × (1 − coverage)³ + cyclomatic, so at an untested script's estimated 0% coverage it flags ordinary branching (a cyclomatic-5 function scores CRAP 30) — the coverage-driven false signal AGENTS.md §4 calls out ('crap alone means untested'). Only CRAP is relaxed here: cyclomatic, cognitive, and unit-size limits still apply, so genuinely complex script code is still caught, and per-file size is separately gated by scripts:verify."
       }
     ]
   },

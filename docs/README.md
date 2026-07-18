@@ -18,6 +18,7 @@ Start here when you're not sure where something belongs, or where to look.
 | **The rules** — TS/React/StyleX standards, the non-negotiables, the quality gate | [`AGENTS.md`](../AGENTS.md) (+ path-scoped [`.claude/rules/`](../.claude/rules/))                |
 | **How to run something** — every `vp` command, what CI runs                      | [`COMMANDS.md`](../COMMANDS.md)                                                                  |
 | **Why a thing is built the way it is** — an architectural decision               | an **ADR** (two namespaces — see the warning below)                                              |
+| **Who's working on what right now** — in-flight work, owners, area locks         | [`docs/coordination/BOARD.md`](./coordination/BOARD.md) — the work register                      |
 | **What's built vs. specified for CQMS/CodePulse**                                | [`docs/cqms/STATUS.md`](./cqms/STATUS.md) — the living page; start there                         |
 | **The CQMS product spec** (canonical requirements)                               | [`docs/cqms/PRD_V2.md`](./cqms/PRD_V2.md)                                                        |
 | **Planned-but-unbuilt work** (approved, deferred)                                | a `docs/cqms/*_PLAN.md` spec, indexed from [STATUS.md §2](./cqms/STATUS.md)                      |
@@ -72,7 +73,11 @@ repo docs above, not left in these:
 - **Plans** (`~/.claude/plans/`) — one agent's scratch for one task. Ephemeral.
   When a plan yields a durable decision or spec, it **graduates** into the repo
   (an ADR, a STATUS entry, or a `*_PLAN.md`) — the way `BIOME_SCANNER_PLAN.md`
-  did — and the scratch file is then disposable.
+  did — and the scratch file is then disposable. A plan's _claim_ (who's on it,
+  which files) graduates to the in-git work register at
+  [`docs/coordination/`](./coordination/README.md), so parallel agents can see it;
+  the old opaque scratch names are catalogued in
+  [`PLAN_TRIAGE.md`](./coordination/PLAN_TRIAGE.md).
 
 ---
 

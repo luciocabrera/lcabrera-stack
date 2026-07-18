@@ -8,7 +8,7 @@ allowBuilds:
 blockExoticSubdeps: true
 
 catalog:
-  '@anthropic-ai/claude-agent-sdk': ^0.3.212
+  '@anthropic-ai/claude-agent-sdk': ^0.3.214
   '@babel/preset-typescript': ^8.0.1
   '@eslint/js': ^10.0.1
   '@fastify/cors': ^11.3.0
@@ -83,31 +83,22 @@ minimumReleaseAgeExclude:
   - '@vitest/*'
 
   - '@babel/*'
-  - typescript-eslint@8.62.0 || 8.62.1 || 8.63.0
   - '@fallow-cli/*'
-
   - '@react-router/*'
 
   - '@voidzero-dev/*'
-  - eslint-plugin-react-dom@5.10.1 || 5.10.2 || 5.10.3 || 5.11.0 || 5.12.0 || 5.14.2 || 5.14.5 || 5.14.10 || 5.16.1 || 5.17.1
-  - eslint-plugin-react-x@5.10.1 || 5.10.2 || 5.10.3 || 5.11.0 || 5.12.0 || 5.14.2 || 5.14.5 || 5.14.10 || 5.16.1 || 5.17.1
-  - vite-plus@0.2.2 || 0.2.4 || 0.2.5
-  - fallow@3.0.0 || 3.5.1 || 3.6.0
-  - '@anthropic-ai/claude-agent-sdk-darwin-arm64@0.3.202 || 0.3.204 || 0.3.207 || 0.3.210 || 0.3.211 || 0.3.212'
-  - '@anthropic-ai/claude-agent-sdk-darwin-x64@0.3.202 || 0.3.204 || 0.3.207 || 0.3.210 || 0.3.211 || 0.3.212'
-  - '@anthropic-ai/claude-agent-sdk-linux-arm64-musl@0.3.202 || 0.3.204 || 0.3.207 || 0.3.210 || 0.3.211 || 0.3.212'
-  - '@anthropic-ai/claude-agent-sdk-linux-arm64@0.3.202 || 0.3.204 || 0.3.207 || 0.3.210 || 0.3.211 || 0.3.212'
-  - '@anthropic-ai/claude-agent-sdk-linux-x64-musl@0.3.202 || 0.3.204 || 0.3.207 || 0.3.210 || 0.3.211 || 0.3.212'
-  - '@anthropic-ai/claude-agent-sdk-linux-x64@0.3.202 || 0.3.204 || 0.3.207 || 0.3.210 || 0.3.211 || 0.3.212'
-  - '@anthropic-ai/claude-agent-sdk-win32-arm64@0.3.202 || 0.3.204 || 0.3.207 || 0.3.210 || 0.3.211 || 0.3.212'
-  - '@anthropic-ai/claude-agent-sdk-win32-x64@0.3.202 || 0.3.204 || 0.3.207 || 0.3.210 || 0.3.211 || 0.3.212'
-  - '@anthropic-ai/claude-agent-sdk@0.3.202 || 0.3.204 || 0.3.207 || 0.3.210 || 0.3.211 || 0.3.212'
-  - eslint@10.7.0
-  - knip@6.26.0 || 6.27.0
-  - eslint-plugin-unicorn@72.0.0
-  - isbot@5.2.1
-  - ws@8.21.1
-  - vite@8.1.5
+  - eslint-plugin-react-dom@5.17.1
+  - eslint-plugin-react-x@5.17.1
+
+  - '@anthropic-ai/claude-agent-sdk-darwin-arm64@0.3.214'
+  - '@anthropic-ai/claude-agent-sdk-darwin-x64@0.3.214'
+  - '@anthropic-ai/claude-agent-sdk-linux-arm64-musl@0.3.214'
+  - '@anthropic-ai/claude-agent-sdk-linux-arm64@0.3.214'
+  - '@anthropic-ai/claude-agent-sdk-linux-x64-musl@0.3.214'
+  - '@anthropic-ai/claude-agent-sdk-linux-x64@0.3.214'
+  - '@anthropic-ai/claude-agent-sdk-win32-arm64@0.3.214'
+  - '@anthropic-ai/claude-agent-sdk-win32-x64@0.3.214'
+  - '@anthropic-ai/claude-agent-sdk@0.3.214'
 
 # overrides:
 #   vite: "catalog:"
