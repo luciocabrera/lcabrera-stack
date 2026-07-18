@@ -101,6 +101,17 @@ jobs:
         # unrelated PR. See docs/coordination/README.md.
         run: vp run coordination:verify
 
+      - name: Tooling scripts within size ceiling
+        id: scripts_gate
+        # `.mjs`/`.cjs` build/tooling scripts have no rule coverage otherwise:
+        # `.claude/rules/` targets TS/TSX, the eslint fan-out is per-workspace so
+        # it never reaches root `scripts/`, and fallow's maxUnitSize is
+        # per-FUNCTION — a 650-line file of small functions passes it. This caps
+        # code lines per file (inherited offenders grandfathered in
+        # scripts/script-size-baseline.json, which may not grow). See
+        # .claude/rules/scripts.md.
+        run: vp run scripts:verify
+
       - name: Write quality summary
         if: always()
         run: |
