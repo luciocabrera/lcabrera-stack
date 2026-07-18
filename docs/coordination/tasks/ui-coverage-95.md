@@ -2,7 +2,7 @@
 id: ui-coverage-95
 title: Raise @repo/ui unit-test coverage toward 95%
 owner: agent:claude
-status: active
+status: review
 branch: test/ui-coverage-95
 area:
   - packages/ui/src/**/*.test.ts
@@ -10,7 +10,7 @@ area:
 started: 2026-07-18
 updated: 2026-07-18
 plan: (none)
-pr: (none)
+pr: https://github.com/luciocabrera/vite-react-compiler/pull/34
 ---
 
 ## What
@@ -39,6 +39,7 @@ Table **source**. This is a **tests-only** overlap:
 
 ## Status / next
 
-- Current step: measuring baseline, writing non-Table tests first.
+- Current step: PR #34 open; coverage reached **95.19%** lines (from 91.83%).
 - Blockers: none.
-- Next: work down the per-file uncovered-line list; re-measure after each batch.
+- Next: await review/merge. Recommended: merge `table-ui-fixes` first, then rebase
+  and re-run the Table tests before merging this.

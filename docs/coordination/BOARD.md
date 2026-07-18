@@ -9,8 +9,8 @@ coordination:verify` fails if this drifts. See [README.md](./README.md).
 | Task                                                                                                | Owner        | Status | Branch                         | Area                                                              | Updated    |
 | --------------------------------------------------------------------------------------------------- | ------------ | ------ | ------------------------------ | ----------------------------------------------------------------- | ---------- |
 | [Four independent fixes in packages/ui Table](tasks/table-ui-fixes.md)                              | agent:other  | active | `(uncommitted)`                | `packages/ui/src/components/Table/**`                             | 2026-07-18 |
-| [Raise @repo/ui unit-test coverage toward 95%](tasks/ui-coverage-95.md)                             | agent:claude | active | `test/ui-coverage-95`          | `packages/ui/src/**/*.test.ts`<br>`packages/ui/src/**/*.test.tsx` | 2026-07-18 |
 | [SonarCloud findings → tracked report + local gate (sonar:report/verify)](tasks/sonar-reporting.md) | agent:claude | review | `chore/biome-linter-hardening` | `scripts/sonar-report.mjs`<br>`reports/sonar/**`                  | 2026-07-18 |
+| [Raise @repo/ui unit-test coverage toward 95%](tasks/ui-coverage-95.md)                             | agent:claude | review | `test/ui-coverage-95`          | `packages/ui/src/**/*.test.ts`<br>`packages/ui/src/**/*.test.tsx` | 2026-07-18 |
 
 ## Shared branches
 
