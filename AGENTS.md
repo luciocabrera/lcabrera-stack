@@ -79,12 +79,13 @@ src/
 
 Detailed conventions are split into rule files under `.claude/rules/`, each scoped by glob patterns in its `paths:` frontmatter. **Claude Code loads them automatically when editing matching files. Other agents (Copilot, Gemini, etc.): read the matching rule file below before editing files it covers — nothing there is optional.**
 
-| Rule file                           | Applies to                                                      | Contents                                                                                                                       |
-| ----------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `.claude/rules/typescript.md`       | `**/*.ts`, `**/*.tsx`                                           | Strict TS rules, `type` not `interface`, readonly, Args/Props/Result naming, file-name suffixes, FP/immutability, import alias |
-| `.claude/rules/react-components.md` | `**/*.tsx`, `**/*.jsx`, `**/*.stylex.ts`                        | Component bundle structure, declaration/props naming, barrel files, React 19 mandatory rules, StyleX-only styling              |
-| `.claude/rules/testing.md`          | `**/*.test.*`, `**/*.spec.*`                                    | Vitest/Testing Library conventions, `vp run test` usage, coverage target                                                       |
-| `.claude/rules/routes-data.md`      | `**/routes/**`, `**/services/**`, `**/*.api.ts`, config/entries | Loader/action data flow, zero `useEffect` fetching, store-pattern rule, error boundaries, Zod validation                       |
+| Rule file                           | Applies to                                                      | Contents                                                                                                                                                |
+| ----------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.claude/rules/typescript.md`       | `**/*.ts`, `**/*.tsx`                                           | Strict TS rules, `type` not `interface`, readonly, Args/Props/Result naming, file-name suffixes, FP/immutability, import alias                          |
+| `.claude/rules/react-components.md` | `**/*.tsx`, `**/*.jsx`, `**/*.stylex.ts`                        | Component bundle structure, declaration/props naming, barrel files, React 19 mandatory rules, StyleX-only styling                                       |
+| `.claude/rules/testing.md`          | `**/*.test.*`, `**/*.spec.*`                                    | Vitest/Testing Library conventions, `vp run test` usage, coverage target                                                                                |
+| `.claude/rules/routes-data.md`      | `**/routes/**`, `**/services/**`, `**/*.api.ts`, config/entries | Loader/action data flow, zero `useEffect` fetching, store-pattern rule, error boundaries, Zod validation                                                |
+| `.claude/rules/scripts.md`          | `**/*.mjs`, `**/*.cjs`, `**/scripts/**/*.js`                    | Build/tooling script standards — JSDoc "why" header, small pure functions, effects at edges, `node:` builtins, 350-line size ceiling (`scripts:verify`) |
 
 ## 3. Quick Skill Index
 
@@ -125,6 +126,16 @@ Selection guideline:
 > a wrong per-workspace claim, a broken link, or a stale workspace count all fail
 > the build. So do not re-list commands here — a copy in this file is a copy the
 > checker does not police, which is exactly how the last set rotted.
+
+**The `.mjs`/`.cjs` scripts running these checks are themselves governed** — see
+[`.claude/rules/scripts.md`](.claude/rules/scripts.md). This was a real blind spot:
+the path-specific rules target TS/TSX, the eslint fan-out is per-workspace so it
+never reaches root `scripts/`, and fallow's `maxUnitSize` is per-function — so
+tooling scripts grew to 400–650 lines ungoverned. `vp run scripts:verify` (CI step
+in `check-safe.yml`) caps code lines per file; inherited offenders are
+grandfathered in `scripts/script-size-baseline.json` and may not grow (rebaseline
+with `--write`, reviewed via the JSON diff). Correctness still comes from Oxlint +
+Biome (repo-wide) and fallow (per-function complexity/dead-code).
 
 **Never use pnpm/npm/yarn directly.** All operations go through `vp`:
 
