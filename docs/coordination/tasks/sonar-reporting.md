@@ -34,10 +34,12 @@ the Biome work owns `biome.jsonc` + ADR-035.
   script, docs, `.env.example`, tracked `reports/sonar/full-latest.json`. Report
   is deterministic (byte-stable across runs); `reports/sonar/` is fmt-ignored so
   the generator and Oxfmt don't fight.
-- Enforcement decision (2026-07-18): use SonarCloud's **native required check**,
-  not a CI `sonar:verify` step — it's synced to the analysis (race-free) and needs
-  no CI code. `sonar:report`/`sonar:verify` stay on-demand tools; `SONAR_TOKEN`
-  (repo secret, added) powers them + the tracked report.
-- Next (needs the user, dashboard only): (1) tighten the SonarCloud quality gate
-  (currently New-Code-only); (2) mark "SonarCloud Code Analysis" a required check
-  in `main` branch protection. No further code from this task.
+- Enforcement (2026-07-18) is **two-layer**: (1) SonarCloud's native
+  "SonarCloud Code Analysis" required check (ruleset on `main`, done) — but its
+  gate is "Sonar way" (rating-based) and assigning a stricter custom gate is a
+  **paid** feature, so it misses new code smells. (2) `.github/workflows/sonar-issue-gate.yml`
+  closes that gap for free — runs `sonar-report.mjs --gate --fail-on-issues --wait`
+  per PR and fails on any open issue. `--wait`/`--since` (new, + `scripts/lib/sonar-wait.mjs`)
+  poll the Compute Engine so it doesn't race async Automatic Analysis.
+- Next (needs the user): add the **"Strict Sonar issue gate"** check to the `main`
+  ruleset's required checks after it runs once on a PR, to make layer 2 blocking.

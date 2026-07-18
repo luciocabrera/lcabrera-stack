@@ -33,13 +33,23 @@
  *   vp run sonar:report -- --branch main
  *   vp run sonar:verify                    # gate mode: exit 1 if the gate is failing
  *   vp run sonar:verify -- --pr 31 --fail-on-issues
+ *   vp run sonar:verify -- --pr 31 --fail-on-issues --wait --since <iso>
  *
- * Exit codes: 0 = report written / gate OK (or skipped when no token),
- *             1 = gate failing, fetch error, or bad arguments.
+ * `--wait` (CI use) polls the Compute Engine until this target's analysis has
+ * finished before reading — Automatic Analysis is async, so a bare read races it.
+ * `--since <iso>` (the PR head commit time) guards freshness so a previous
+ * commit's analysis isn't accepted; on timeout the check is skipped, not failed,
+ * so Sonar latency never blocks a merge (the required SonarCloud check still gates).
+ *
+ * Exit codes: 0 = report written / gate OK (or skipped when no token / wait
+ *             timeout), 1 = gate failing, new issues (--fail-on-issues),
+ *             analysis failed, fetch error, or bad arguments.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { waitForAnalysis } from './lib/sonar-wait.mjs';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
 const OUT_REL = 'reports/sonar/full-latest.json';
@@ -59,8 +69,10 @@ const parseArgs = (argv) => {
   const args = {
     gate: false,
     failOnIssues: false,
+    wait: false,
     pr: undefined,
     branch: undefined,
+    since: undefined,
   };
   const queue = [...argv];
   while (queue.length > 0) {
@@ -74,12 +86,20 @@ const parseArgs = (argv) => {
       args.failOnIssues = true;
       continue;
     }
+    if (flag === '--wait') {
+      args.wait = true;
+      continue;
+    }
     if (flag === '--pr') {
       args.pr = queue.shift();
       continue;
     }
     if (flag === '--branch') {
       args.branch = queue.shift();
+      continue;
+    }
+    if (flag === '--since') {
+      args.since = queue.shift();
       continue;
     }
     throw new Error(
@@ -367,6 +387,24 @@ const main = async () => {
   if (!token) {
     printNoToken(args.gate);
     return;
+  }
+
+  if (args.wait) {
+    const ready = await waitForAnalysis({
+      fetchJson,
+      token,
+      base: CONFIG.base,
+      project: CONFIG.project,
+      target,
+      since: args.since,
+    });
+    if (!ready) {
+      console.warn(
+        `Timed out waiting for SonarCloud analysis of ${target.type} ${target.value} — ` +
+          'skipping the strict issue check (the required SonarCloud check still gates).',
+      );
+      return;
+    }
   }
 
   const [gate, issues, hotspots] = await Promise.all([
