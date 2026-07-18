@@ -86,55 +86,68 @@ const writeBaseline = (measured) => {
   );
 };
 
-const verify = (measured) => {
-  const baseline = readBaseline();
-  const problems = [];
-  const warnings = [];
-
-  for (const { file, lines } of measured) {
-    const allowed = baseline[file] ?? MAX_CODE_LINES;
-    if (lines > allowed) {
-      problems.push(
-        baseline[file] === undefined
-          ? `${file}: ${lines} code lines exceeds the ${MAX_CODE_LINES} ceiling — split cohesive helpers into a sibling module (see .claude/rules/scripts.md).`
-          : `${file}: ${lines} code lines exceeds its grandfathered ${allowed} — it grew. Shrink it, don't raise the baseline.`,
-      );
-    } else if (baseline[file] !== undefined && lines <= MAX_CODE_LINES) {
-      warnings.push(
-        `${file}: now ${lines} (≤ ${MAX_CODE_LINES}) — remove its baseline entry with \`--write\`.`,
-      );
-    } else if (baseline[file] !== undefined && lines < baseline[file]) {
-      warnings.push(
-        `${file}: shrank to ${lines} (baseline ${baseline[file]}) — ratchet down with \`--write\`.`,
-      );
-    }
+/** A blocking error for one file, or undefined if it's within its limit (pure). */
+const sizeProblem = (file, lines, grandfathered) => {
+  if (lines <= (grandfathered ?? MAX_CODE_LINES)) {
+    return undefined;
   }
+  return grandfathered === undefined
+    ? `${file}: ${lines} code lines exceeds the ${MAX_CODE_LINES} ceiling — split cohesive helpers into a sibling module (see .claude/rules/scripts.md).`
+    : `${file}: ${lines} code lines exceeds its grandfathered ${grandfathered} — it grew. Shrink it, don't raise the baseline.`;
+};
 
+/** A "rebaseline me" hint for a grandfathered file that shrank, or undefined (pure). */
+const baselineWarning = (file, lines, grandfathered) => {
+  if (grandfathered === undefined) {
+    return undefined;
+  }
+  if (lines <= MAX_CODE_LINES) {
+    return `${file}: now ${lines} (≤ ${MAX_CODE_LINES}) — remove its baseline entry with \`--write\`.`;
+  }
+  if (lines < grandfathered) {
+    return `${file}: shrank to ${lines} (baseline ${grandfathered}) — ratchet down with \`--write\`.`;
+  }
+  return undefined;
+};
+
+const printWarnings = (warnings) => {
   for (const warning of warnings) {
-    console.error(
+    const line =
       process.env.GITHUB_ACTIONS === 'true'
         ? `::warning::${warning}`
-        : `  ⚠ ${warning}`,
-    );
+        : `  ⚠ ${warning}`;
+    console.error(line);
   }
+};
 
+const printProblems = (problems) => {
+  console.error(`\nScript-size gate — ${problems.length} file(s) too large:\n`);
+  for (const problem of problems) {
+    console.error(`  - ${problem}`);
+  }
+  console.error(
+    '\nKeep tooling scripts focused. See `.claude/rules/scripts.md`.',
+  );
+};
+
+const verify = (measured) => {
+  const baseline = readBaseline();
+  const problems = measured
+    .map(({ file, lines }) => sizeProblem(file, lines, baseline[file]))
+    .filter(Boolean);
+  const warnings = measured
+    .map(({ file, lines }) => baselineWarning(file, lines, baseline[file]))
+    .filter(Boolean);
+
+  printWarnings(warnings);
   if (problems.length > 0) {
-    console.error(
-      `\nScript-size gate — ${problems.length} file(s) too large:\n`,
-    );
-    for (const problem of problems) {
-      console.error(`  - ${problem}`);
-    }
-    console.error(
-      '\nKeep tooling scripts focused. See `.claude/rules/scripts.md`.',
-    );
+    printProblems(problems);
     process.exitCode = 1;
     return;
   }
-
   console.log(
     `Script-size gate passed: ${measured.length} script(s), ` +
-      `${Object.keys(readBaseline()).length} grandfathered, ceiling ${MAX_CODE_LINES}.`,
+      `${Object.keys(baseline).length} grandfathered, ceiling ${MAX_CODE_LINES}.`,
   );
 };
 
