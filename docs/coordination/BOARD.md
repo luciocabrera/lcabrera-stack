@@ -6,11 +6,10 @@ coordination:verify` fails if this drifts. See [README.md](./README.md).
 
 ## Tasks
 
-| Task                                                                                                | Owner        | Status | Branch                          | Area                                                                  | Updated    |
-| --------------------------------------------------------------------------------------------------- | ------------ | ------ | ------------------------------- | --------------------------------------------------------------------- | ---------- |
-| [Four independent fixes in packages/ui Table](tasks/table-ui-fixes.md)                              | agent:other  | active | `(uncommitted)`                 | `packages/ui/src/components/Table/**`                                 | 2026-07-18 |
-| [Coverage report Phase 2 — add node-runtime + scan-ingestion](tasks/coverage-report-phase-2.md)     | agent:claude | review | `chore/reland-coverage-phase-2` | `scripts/coverage-report.mjs`<br>`docs/tooling/coverage-reporting.md` | 2026-07-18 |
-| [SonarCloud findings → tracked report + local gate (sonar:report/verify)](tasks/sonar-reporting.md) | agent:claude | review | `chore/biome-linter-hardening`  | `scripts/sonar-report.mjs`<br>`reports/sonar/**`                      | 2026-07-18 |
+| Task                                                                                                | Owner        | Status | Branch                         | Area                                             | Updated    |
+| --------------------------------------------------------------------------------------------------- | ------------ | ------ | ------------------------------ | ------------------------------------------------ | ---------- |
+| [Four independent fixes in packages/ui Table](tasks/table-ui-fixes.md)                              | agent:other  | active | `(uncommitted)`                | `packages/ui/src/components/Table/**`            | 2026-07-18 |
+| [SonarCloud findings → tracked report + local gate (sonar:report/verify)](tasks/sonar-reporting.md) | agent:claude | review | `chore/biome-linter-hardening` | `scripts/sonar-report.mjs`<br>`reports/sonar/**` | 2026-07-18 |
 
 ## Shared branches
 
