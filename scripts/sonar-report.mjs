@@ -230,8 +230,10 @@ const gateProblems = (report, failOnIssues) => {
 
 // --- effects (edges) ------------------------------------------------------
 
-const authHeader = (token) =>
-  `Basic ${Buffer.from(`${token}:`).toString('base64')}`;
+const authHeader = (token) => {
+  const encoded = Buffer.from(`${token}:`).toString('base64');
+  return `Basic ${encoded}`;
+};
 
 const fetchJson = async (url, token) => {
   const response = await fetch(url, {
@@ -296,19 +298,27 @@ const writeReport = (report) => {
   writeFileSync(OUT_PATH, `${JSON.stringify(report, null, 2)}\n`);
 };
 
+/**
+ * Strip line breaks from anything interpolated into a log line. The report data
+ * is fetched from the SonarCloud API and the target comes from CLI args /
+ * `.git/HEAD` — external input a log-forging payload could ride in on (CWE-117).
+ * Sonar's S5145 flags logging it unsanitised; this is Sonar's own recommended fix.
+ */
+const logSafe = (value) => String(value).replaceAll(/[\n\r]/gu, ' ');
+
 const printSummary = (report) => {
   const { target, qualityGate, summary } = report;
   const severities = Object.entries(summary.bySeverity)
     .map(([sev, count]) => `${sev} ${count}`)
     .join(', ');
-  console.log(
+  const severitySuffix = severities ? ` (${severities})` : '';
+  const lines = [
     `SonarCloud — ${report.project} @ ${target.type} ${target.value}`,
-  );
-  console.log(`  quality gate: ${qualityGate.status}`);
-  console.log(
-    `  issues: ${summary.issues}${severities ? ` (${severities})` : ''}  hotspots: ${summary.hotspots}`,
-  );
-  console.log(`  written: ${OUT_REL}`);
+    `  quality gate: ${qualityGate.status}`,
+    `  issues: ${summary.issues}${severitySuffix}  hotspots: ${summary.hotspots}`,
+    `  written: ${OUT_REL}`,
+  ];
+  for (const line of lines) console.log(logSafe(line));
 };
 
 const printNoToken = (gateMode) => {
@@ -328,7 +338,9 @@ const printNoToken = (gateMode) => {
 
 const printBranchHint = (branch) => {
   console.log(
-    `On branch \`${branch}\`. SonarCloud analyses feature branches as pull requests,`,
+    logSafe(
+      `On branch \`${branch}\`. SonarCloud analyses feature branches as pull requests,`,
+    ),
   );
   console.log(
     'so there is no standalone branch analysis to fetch. Re-run targeting the PR:',
@@ -370,7 +382,7 @@ const main = async () => {
     const problems = gateProblems(report, args.failOnIssues);
     if (problems.length > 0) {
       console.error('\nSonar gate FAILED:');
-      for (const problem of problems) console.error(`  - ${problem}`);
+      for (const problem of problems) console.error(logSafe(`  - ${problem}`));
       process.exitCode = 1;
       return;
     }
@@ -381,6 +393,6 @@ const main = async () => {
 try {
   await main();
 } catch (error) {
-  console.error(error.message);
+  console.error(logSafe(error.message));
   process.exitCode = 1;
 }
