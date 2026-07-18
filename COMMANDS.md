@@ -172,14 +172,15 @@ and reports trivially simple code as `critical`.
 
 ### AI config & skills tooling
 
-| Command                      | Does                                        |
-| ---------------------------- | ------------------------------------------- |
-| `vp run commands:verify`     | check this file still matches reality       |
-| `vp run skills:validate`     | validate skill definitions                  |
-| `vp run skills:report`       | skills compliance report                    |
-| `vp run skills:source-audit` | source smell report + handoff bootstrap     |
-| `vp run skills:handoff`      | bootstrap the agenting handoff runbook      |
-| `vp run prepare`             | `vp config` — runs automatically on install |
+| Command                      | Does                                                     |
+| ---------------------------- | -------------------------------------------------------- |
+| `vp run commands:verify`     | check this file still matches reality                    |
+| `vp run scripts:verify`      | check `.mjs`/`.cjs` size ceiling (`--write` rebaselines) |
+| `vp run skills:validate`     | validate skill definitions                               |
+| `vp run skills:report`       | skills compliance report                                 |
+| `vp run skills:source-audit` | source smell report + handoff bootstrap                  |
+| `vp run skills:handoff`      | bootstrap the agenting handoff runbook                   |
+| `vp run prepare`             | `vp config` — runs automatically on install              |
 
 ---
 
