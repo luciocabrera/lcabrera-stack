@@ -117,7 +117,7 @@
           },
           "suspicious": {
             "noDuplicatedSpreadProps": "error",
-            // "noLeakedRender": "error",
+            "noLeakedRender": "error", // Phase 3: cond && <X/> must be a real boolean
             "noReactForwardRef": "error", // Phase 2: React 19 ref-as-prop; agrees w/ oxlint react-x
           },
           "style": {

@@ -19,7 +19,7 @@ export const SelectAllOption = ({
     <span {...stylex.props(styles.label)}>
       {isAllSelected ? 'Deselect All' : 'Select All'}
     </span>
-    {isLoading && (
+    {Boolean(isLoading) && (
       <div {...stylex.props(skeletonStyles.loadingOverlay)}>
         <div {...stylex.props(skeletonStyles.shimmerWave)} />
       </div>

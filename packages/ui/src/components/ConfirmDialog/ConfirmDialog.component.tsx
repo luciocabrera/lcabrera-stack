@@ -41,6 +41,6 @@ export const ConfirmDialog = ({
     onClose={onCancel}
     title={title}
   >
-    {description && <p>{description}</p>}
+    {Boolean(description) && <p>{description}</p>}
   </Modal>
 );

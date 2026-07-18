@@ -41,7 +41,7 @@ export const TabsHeaderButton = ({
       type='button'
     >
       {tab.header}
-      {isBusy && (
+      {Boolean(isBusy) && (
         <span {...stylex.props(busyStyles.overlay)}>
           <span {...stylex.props(busyStyles.wave)} />
         </span>

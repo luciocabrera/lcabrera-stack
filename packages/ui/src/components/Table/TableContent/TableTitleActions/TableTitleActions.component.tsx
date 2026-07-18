@@ -34,7 +34,7 @@ export const TableTitleActions = ({ actions }: TableTitleActionsProps) => {
   return (
     <>
       {actions}
-      {crud?.create && (
+      {Boolean(crud?.create) && (
         <TableCreateLink
           isBusy={isBusy}
           title={resolvedTitleSingular}

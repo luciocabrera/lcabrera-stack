@@ -40,12 +40,14 @@ export const NavLink = ({
       prefetch={prefetch}
       {...props}
     >
-      {isBusy && (
+      {Boolean(isBusy) && (
         <span {...stylex.props(linkItemStyles.busyOverlay)}>
           <span {...stylex.props(linkItemStyles.busyWave)} />
         </span>
       )}
-      {icon && <span {...stylex.props(linkItemStyles.icon)}>{icon}</span>}
+      {Boolean(icon) && (
+        <span {...stylex.props(linkItemStyles.icon)}>{icon}</span>
+      )}
       <span
         {...stylex.props(
           linkItemStyles.label,

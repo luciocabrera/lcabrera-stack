@@ -84,7 +84,7 @@ export const ProjectSyncPanel = ({ project }: ProjectSyncPanelProps) => {
           {folderUpload.isBusy ? 'Packing…' : 'Pack & Sync Folder'}
         </Button>
       </form>
-      {folderUpload.error && <p>{folderUpload.error}</p>}
+      {Boolean(folderUpload.error) && <p>{folderUpload.error}</p>}
 
       <p>or</p>
 
@@ -95,7 +95,9 @@ export const ProjectSyncPanel = ({ project }: ProjectSyncPanelProps) => {
           {isZipUploading ? 'Uploading…' : 'Upload .zip'}
         </Button>
       </zipFetcher.Form>
-      {zipFetcher.data?.syncError && <p>{zipFetcher.data.syncError}</p>}
+      {Boolean(zipFetcher.data?.syncError) && (
+        <p>{zipFetcher.data?.syncError}</p>
+      )}
     </div>
   );
 };

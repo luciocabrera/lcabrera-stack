@@ -20,7 +20,7 @@ export const DetailsSection = ({ isBusy = false }: DetailsSectionProps) => {
         <dl {...stylex.props(styles.rows)}>
           {rows.map((row) => (
             <div key={row.key} {...stylex.props(styles.row)}>
-              {isBusy && (
+              {Boolean(isBusy) && (
                 <div {...stylex.props(busyStyles.overlay)}>
                   <div {...stylex.props(busyStyles.wave)} />
                 </div>

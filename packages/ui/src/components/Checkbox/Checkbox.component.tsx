@@ -29,7 +29,7 @@ export const Checkbox = ({
           isDisabled && styles.inputDisabled,
         )}
       />
-      {isChecked && (
+      {Boolean(isChecked) && (
         <span
           aria-hidden='true'
           data-testid={dataTestId}

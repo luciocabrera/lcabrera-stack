@@ -174,6 +174,29 @@ removed rather than fought into place:
   never assume it from the rule name. `useNumberNamespace` was _assumed_ to agree
   with unicorn; unicorn enforces the exact opposite.
 
+**Phase 3 (2026-07-18) — `noLeakedRender` and the forced idiom.** Enabling
+`noLeakedRender` (React override) flagged 55 sites. The rule is **syntactic, not
+type-aware** — it flags every bare `identifier && <JSX/>`, even a strict
+`boolean`. Finding the clean fix was a four-linter negotiation, and the engines
+between them left exactly one shape standing:
+
+- a `getIsTruthy` / `(v) => Boolean(v)` helper → rejected by eslint
+  `unicorn/prefer-native-coercion-functions` (it _is_ `Boolean`);
+- a ternary `cond ? <X/> : null` → rejected by `unicorn/no-null`; `: undefined`
+  → itself a `noLeakedRender` leak;
+- `!!cond` → rejected by `noImplicitCoercions`;
+- wrapping an _already-boolean_ condition in `Boolean()` → rejected by eslint
+  `unicorn/no-useless-coercion`.
+
+The survivor: **`Boolean(cond) && <JSX/>`** for a non-boolean condition, and the
+**bare** form left as-is for a syntactically-boolean one (a comparison or a
+leading `!`, which Biome traces). This is the documented convention in
+`packages/ui/src/PATTERNS.md` → "Conditional Rendering". Two sites needed a
+structural touch: a compound `a && b` boolean local Biome would not trace was
+inlined, and one `Boolean()` wrap opaqued TS `&&`-narrowing so its rendered body
+was made null-safe (`data?.x`). `noShadow` / `noEmptyBlockStatements` /
+`noProcessEnv` remain for the rest of Phase 3.
+
 **Nursery rules carry an upgrade duty.** `noInlineStyles` and `useTestHooksOnTop`
 (and any future nursery adoption) can be renamed, change behaviour, or graduate
 to another group on a Biome minor bump. Biome is pinned (`2.5.4`, via the

@@ -30,7 +30,7 @@ export const AccountTokens = () => {
       description='Personal tokens authenticate the CodePulse CLI (codepulse push). Treat them like passwords — a token carries your own permissions.'
       title='API Tokens'
     >
-      {issued && (
+      {Boolean(issued) && (
         <p role='status'>
           <strong>Copy your new token now — it will not be shown again:</strong>{' '}
           <code>{issued}</code>
@@ -58,7 +58,7 @@ export const AccountTokens = () => {
           Create Token
         </Button>
       </issueFetcher.Form>
-      {issueError && <p role='alert'>{issueError}</p>}
+      {Boolean(issueError) && <p role='alert'>{issueError}</p>}
 
       {tokens.length === 0 ? (
         <p>No tokens yet.</p>
@@ -82,7 +82,7 @@ export const AccountTokens = () => {
           ))}
         </ul>
       )}
-      {revokeError && <p role='alert'>{revokeError}</p>}
+      {Boolean(revokeError) && <p role='alert'>{revokeError}</p>}
     </SectionCard>
   );
 };

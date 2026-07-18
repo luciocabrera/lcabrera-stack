@@ -34,7 +34,7 @@ export const FilterItem = ({ columnKey, isBusy }: FilterItemProps) => {
       {...stylex.props(styles.filterItem)}
       data-testid={`filter-item-${columnKey}`}
     >
-      {isBusy && (
+      {Boolean(isBusy) && (
         <div {...stylex.props(styles.busyOverlay)}>
           <div {...stylex.props(styles.busyWave)} />
         </div>

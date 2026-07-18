@@ -47,7 +47,7 @@ export const RadioOptionGroup = <TValue extends string>({
               <span id={labelId} {...stylex.props(styles.label)}>
                 {option.label}
               </span>
-              {option.description && (
+              {Boolean(option.description) && (
                 <>
                   <br />
                   <span

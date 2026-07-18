@@ -65,10 +65,10 @@ export const ToggleSwitch = ({
           {...stylex.props(styles.thumb, isChecked && styles.thumbChecked)}
           aria-hidden='true'
         >
-          {isChecked && <CheckIcon size={ICON_SIZE_XXS} />}
+          {Boolean(isChecked) && <CheckIcon size={ICON_SIZE_XXS} />}
         </span>
       </label>
-      {label && (
+      {Boolean(label) && (
         <label
           {...stylex.props(styles.label, isDisabled && styles.labelDisabled)}
           htmlFor={id}
@@ -76,7 +76,7 @@ export const ToggleSwitch = ({
           {label}
         </label>
       )}
-      {isBusyState && (
+      {Boolean(isBusyState) && (
         <div {...stylex.props(busyStyles.overlay)}>
           <div {...stylex.props(busyStyles.wave)} />
         </div>

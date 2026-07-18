@@ -49,7 +49,7 @@ export const Modal = ({
     <dialog ref={dialogRef} {...stylex.props(modalStyles.dialog)}>
       <AppBackground shouldFillViewport={false}>
         <AppDotted>
-          {title && (
+          {Boolean(title) && (
             <Title
               actions={
                 <Button
@@ -65,7 +65,9 @@ export const Modal = ({
             </Title>
           )}
           <div {...stylex.props(modalStyles.body)}>{children}</div>
-          {footer && <div {...stylex.props(modalStyles.footer)}>{footer}</div>}
+          {Boolean(footer) && (
+            <div {...stylex.props(modalStyles.footer)}>{footer}</div>
+          )}
         </AppDotted>
       </AppBackground>
     </dialog>

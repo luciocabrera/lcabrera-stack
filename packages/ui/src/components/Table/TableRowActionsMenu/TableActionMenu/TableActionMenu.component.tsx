@@ -17,7 +17,7 @@ export const TableActionMenu = ({
 }: TableActionMenuProps) => {
   return (
     <div {...stylex.props(tableActionsPopoverStyles.menuActions)}>
-      {crud.read && (
+      {Boolean(crud.read) && (
         <NavLink
           customStylex={tableActionsPopoverStyles.menuItem}
           icon={
@@ -33,7 +33,7 @@ export const TableActionMenu = ({
           {`View ${resolvedTitleSingular}`}
         </NavLink>
       )}
-      {crud.update && (
+      {Boolean(crud.update) && (
         <NavLink
           customStylex={tableActionsPopoverStyles.menuItem}
           icon={
@@ -49,7 +49,7 @@ export const TableActionMenu = ({
           {`Edit ${resolvedTitleSingular}`}
         </NavLink>
       )}
-      {crud.delete && (
+      {Boolean(crud.delete) && (
         <Button
           customStylex={tableActionsPopoverStyles.menuItem}
           icon={
@@ -65,7 +65,7 @@ export const TableActionMenu = ({
           {`Delete ${resolvedTitleSingular}`}
         </Button>
       )}
-      {customActions && (
+      {Boolean(customActions) && (
         <div {...stylex.props(styles.customActions)}>{customActions}</div>
       )}
     </div>

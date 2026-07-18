@@ -11,7 +11,7 @@ export const SidePanelSectionOverlay = ({
   <div
     {...stylex.props(styles.restArea, isOpen && styles.restAreaOverflowHidden)}
   >
-    {isOpen && <div {...stylex.props(styles.overlay)} />}
+    {Boolean(isOpen) && <div {...stylex.props(styles.overlay)} />}
     {children}
   </div>
 );

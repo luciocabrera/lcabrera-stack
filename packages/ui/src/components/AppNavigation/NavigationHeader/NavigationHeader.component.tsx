@@ -83,9 +83,9 @@ export const NavigationHeader = ({
             Navigation
           </span>
         </div>
-        {isExpanded ? headerActions : undefined}
+        {isExpanded && headerActions}
       </div>
-      {isExpanded ? undefined : headerActions}
+      {!isExpanded && headerActions}
     </header>
   );
 };

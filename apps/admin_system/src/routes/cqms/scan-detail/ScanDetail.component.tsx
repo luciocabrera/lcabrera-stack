@@ -24,7 +24,7 @@ export const ScanDetail = () => {
           tone={resolveRunStatusTone(scan.status)}
         />
       </h1>
-      {scan.error_message && <p>{scan.error_message}</p>}
+      {Boolean(scan.error_message) && <p>{scan.error_message}</p>}
 
       <Tabs
         tabs={[

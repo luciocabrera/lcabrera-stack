@@ -20,7 +20,7 @@ export const FormFieldGroup = <TValues extends Record<string, unknown>>({
 
   return (
     <div {...stylex.props(styles.group)}>
-      {field.label && (
+      {Boolean(field.label) && (
         <span {...stylex.props(styles.groupLabel)}>{field.label}</span>
       )}
       {renderFields(

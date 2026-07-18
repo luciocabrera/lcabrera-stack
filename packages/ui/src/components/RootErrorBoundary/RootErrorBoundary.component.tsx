@@ -21,7 +21,7 @@ export const RootErrorBoundary = ({ error }: RootErrorBoundaryProps) => {
     <main>
       <h1>{message}</h1>
       <p>{details}</p>
-      {stack && (
+      {Boolean(stack) && (
         <pre>
           <code>{stack}</code>
         </pre>

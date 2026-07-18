@@ -32,7 +32,6 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   const currentWidth = width ?? effectiveMinWidth;
   const sortDirection = column.sortDirection;
   const isSortable = column.isSortable !== false;
-  const isResizable = column.isResizable !== false && !column.isStatic;
   const isStatic = column.isStatic === true;
 
   const pinnedStylex = getPinnedStyle(pinInfo);
@@ -48,7 +47,7 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
         customStylex,
       )}
     >
-      {isLoadingState && (
+      {Boolean(isLoadingState) && (
         <div {...stylex.props(skeletonStyles.loadingOverlay)}>
           <div {...stylex.props(skeletonStyles.shimmerWave)} />
         </div>
@@ -56,7 +55,7 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
       {!isHeaderHidden && (
         <>
           <span {...stylex.props(tableHeaderCellStyles.content)}>{label}</span>
-          {isResizable && (
+          {column.isResizable !== false && !column.isStatic && (
             <ResizeHandle columnKey={columnKey} columnLabel={label} />
           )}
           <TableHeaderActionsMenu
