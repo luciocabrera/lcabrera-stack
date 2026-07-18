@@ -1,6 +1,6 @@
 import { Button } from '@repo/ui/components/Button';
 import {
-  derivePinCommandState,
+  deriveToggleCommandState,
   PIN_RIGHT_COMMAND,
 } from '@repo/ui/components/Table/commands';
 import { useSetColumnPinning } from '@repo/ui/components/Table/contexts/TableConfig/columns/actions';
@@ -23,10 +23,10 @@ export const PinRightButton = <TData,>({
 }: PinRightButtonProps<TData>) => {
   const setColumnPinning = useSetColumnPinning<TData>();
   const { icon: PinRightCommandIcon, label } = PIN_RIGHT_COMMAND;
-  const { isActive } = derivePinCommandState({
-    currentSide: pinSide,
-    isStatic: false,
-    targetSide: 'right',
+  const { isActive } = deriveToggleCommandState({
+    current: pinSide,
+    isDisabled: false,
+    target: 'right',
   });
 
   const handlePinRight = () => {

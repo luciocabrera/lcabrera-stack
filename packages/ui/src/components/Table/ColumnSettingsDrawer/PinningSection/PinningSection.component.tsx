@@ -5,7 +5,7 @@ import {
   SidePanelSectionMain,
 } from '@repo/ui/components/SidePanel';
 import {
-  derivePinCommandState,
+  deriveToggleCommandState,
   PIN_LEFT_COMMAND,
   PIN_RIGHT_COMMAND,
 } from '@repo/ui/components/Table/commands';
@@ -32,15 +32,15 @@ export const PinningSection = ({ isBusy = false }: PinningSectionProps) => {
 
   const { icon: PinLeftCommandIcon, label: pinLeftLabel } = PIN_LEFT_COMMAND;
   const { icon: PinRightCommandIcon, label: pinRightLabel } = PIN_RIGHT_COMMAND;
-  const { isActive: isPinnedLeft } = derivePinCommandState({
-    currentSide: columnPinning,
-    isStatic: false,
-    targetSide: 'left',
+  const { isActive: isPinnedLeft } = deriveToggleCommandState({
+    current: columnPinning,
+    isDisabled: false,
+    target: 'left',
   });
-  const { isActive: isPinnedRight } = derivePinCommandState({
-    currentSide: columnPinning,
-    isStatic: false,
-    targetSide: 'right',
+  const { isActive: isPinnedRight } = deriveToggleCommandState({
+    current: columnPinning,
+    isDisabled: false,
+    target: 'right',
   });
 
   const handlePinLeft = () =>

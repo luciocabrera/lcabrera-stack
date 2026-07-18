@@ -1,5 +1,8 @@
 import { Button } from '@repo/ui/components/Button';
-import { SortAscIcon } from '@repo/ui/components/Icons';
+import {
+  deriveToggleCommandState,
+  SORT_ASCENDING_COMMAND,
+} from '@repo/ui/components/Table/commands';
 import { useSetColumnSorting } from '@repo/ui/components/Table/contexts/TableConfig/columns/actions';
 import { tableActionsPopoverStyles } from '@repo/ui/components/Table/TableActionsPopover';
 import * as stylex from '@stylexjs/stylex';
@@ -9,7 +12,9 @@ import type { SortAscendingButtonProps } from './SortAscendingButton.types';
 /**
  * "Ascending" item of the sorting section: toggles ascending sort on/off and
  * highlights itself (via the `primary` variant + `aria-pressed`) while it is
- * the applied direction. Closes the menu via `onClose`.
+ * the applied direction. Closes the menu via `onClose`. Identity and
+ * active-state come from the shared `SORT_ASCENDING_COMMAND` (ADR-011); this
+ * surface owns only its live commit-context and menu presentation.
  */
 export const SortAscendingButton = <TData,>({
   columnKey,
@@ -17,28 +22,33 @@ export const SortAscendingButton = <TData,>({
   sortDirection,
 }: SortAscendingButtonProps<TData>) => {
   const setSorting = useSetColumnSorting<TData>();
-  const isAscending = sortDirection === 'asc';
+  const { icon: SortAscendingCommandIcon, label } = SORT_ASCENDING_COMMAND;
+  const { isActive } = deriveToggleCommandState({
+    current: sortDirection,
+    isDisabled: false,
+    target: 'asc',
+  });
 
   const handleAscending = () => {
-    setSorting({ columnKey, direction: isAscending ? undefined : 'asc' });
+    setSorting({ columnKey, direction: isActive ? undefined : 'asc' });
     onClose();
   };
 
   return (
     <Button
-      aria-pressed={isAscending}
+      aria-pressed={isActive}
       customStylex={tableActionsPopoverStyles.menuItem}
       icon={
         <span {...stylex.props(tableActionsPopoverStyles.menuIcon)}>
-          <SortAscIcon size={16} />
+          <SortAscendingCommandIcon size={16} />
         </span>
       }
       onClick={handleAscending}
       orientation='horizontal'
       size='mini'
-      variant={isAscending ? 'primary' : 'ghost'}
+      variant={isActive ? 'primary' : 'ghost'}
     >
-      Ascending
+      {label}
     </Button>
   );
 };

@@ -1,10 +1,14 @@
 import { Button } from '@repo/ui/components/Button';
-import { SortAscIcon, SortDescIcon } from '@repo/ui/components/Icons';
 import {
   SidePanelSection,
   SidePanelSectionHeader,
   SidePanelSectionMain,
 } from '@repo/ui/components/SidePanel';
+import {
+  deriveToggleCommandState,
+  SORT_ASCENDING_COMMAND,
+  SORT_DESCENDING_COMMAND,
+} from '@repo/ui/components/Table/commands';
 import { ICON_SIZE_MD } from '@repo/ui/design-system/constants';
 import * as stylex from '@stylexjs/stylex';
 
@@ -15,16 +19,39 @@ import { useGetColumnSorting } from '../ColumnDrawerContext/selectors';
 import { styles } from './SortingSection.stylex';
 import { SortingSectionToolbar } from './SortingSectionToolbar';
 
+/**
+ * Column-sorting controls in the settings drawer. Mirrors `PinningSection`:
+ * identity and active-state come from the shared sorting commands (ADR-011), and
+ * the active-state is derived from the DRAFT store (`useGetColumnSorting` reads
+ * the drawer's per-column draft, not committed state) so the drawer reflects
+ * pending edits while open. This surface owns its draft commit-context and its
+ * presentation.
+ */
 export const SortingSection = ({ isBusy = false }: SortingSectionProps) => {
   const sortDirection = useGetColumnSorting();
   const setColumnSorting = useSetColumnSorting();
 
+  const { icon: SortAscendingCommandIcon, label: ascendingLabel } =
+    SORT_ASCENDING_COMMAND;
+  const { icon: SortDescendingCommandIcon, label: descendingLabel } =
+    SORT_DESCENDING_COMMAND;
+  const { isActive: isAscending } = deriveToggleCommandState({
+    current: sortDirection,
+    isDisabled: false,
+    target: 'asc',
+  });
+  const { isActive: isDescending } = deriveToggleCommandState({
+    current: sortDirection,
+    isDisabled: false,
+    target: 'desc',
+  });
+
   const handleAsc = () => {
-    setColumnSorting(sortDirection === 'asc' ? undefined : 'asc');
+    setColumnSorting(isAscending ? undefined : 'asc');
   };
 
   const handleDesc = () => {
-    setColumnSorting(sortDirection === 'desc' ? undefined : 'desc');
+    setColumnSorting(isDescending ? undefined : 'desc');
   };
 
   return (
@@ -36,22 +63,22 @@ export const SortingSection = ({ isBusy = false }: SortingSectionProps) => {
         />
         <div {...stylex.props(styles.list)}>
           <Button
-            icon={<SortAscIcon size={ICON_SIZE_MD} />}
+            icon={<SortAscendingCommandIcon size={ICON_SIZE_MD} />}
             isBusy={isBusy}
             onClick={handleAsc}
             size='sm'
-            variant={sortDirection === 'asc' ? 'primary' : 'outline'}
+            variant={isAscending ? 'primary' : 'outline'}
           >
-            Ascending
+            {ascendingLabel}
           </Button>
           <Button
-            icon={<SortDescIcon size={ICON_SIZE_MD} />}
+            icon={<SortDescendingCommandIcon size={ICON_SIZE_MD} />}
             isBusy={isBusy}
             onClick={handleDesc}
             size='sm'
-            variant={sortDirection === 'desc' ? 'primary' : 'outline'}
+            variant={isDescending ? 'primary' : 'outline'}
           >
-            Descending
+            {descendingLabel}
           </Button>
         </div>
       </SidePanelSection>

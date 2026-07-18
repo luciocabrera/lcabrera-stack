@@ -1,7 +1,7 @@
 import { Button } from '@repo/ui/components/Button';
 import {
   CLEAR_PINNING_COMMAND,
-  derivePinCommandState,
+  deriveToggleCommandState,
 } from '@repo/ui/components/Table/commands';
 import { useSetColumnPinning } from '@repo/ui/components/Table/contexts/TableConfig/columns/actions';
 import { tableActionsPopoverStyles } from '@repo/ui/components/Table/TableActionsPopover';
@@ -23,10 +23,10 @@ export const ClearPinningButton = <TData,>({
 }: ClearPinningButtonProps<TData>) => {
   const setColumnPinning = useSetColumnPinning<TData>();
   const { icon: ClearPinningCommandIcon, label } = CLEAR_PINNING_COMMAND;
-  const { isEnabled } = derivePinCommandState({
-    currentSide: pinSide,
-    isStatic: false,
-    targetSide: undefined,
+  const { isEnabled } = deriveToggleCommandState({
+    current: pinSide,
+    isDisabled: false,
+    target: undefined,
   });
 
   const handleClearPinning = () => {

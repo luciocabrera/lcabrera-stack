@@ -200,11 +200,12 @@ Covers `packages/ui` only. API-layer utilities (`api.util.ts`, `buildPaginatedQu
 
 Per-capability command **identity** + **enablement derivation**, defined once and shared by every surface. See `components/Table/commands/ARCHITECTURE.md`.
 
-| Artifact                                                         | Location                                                          | Description                                                                                                                                  |
-| ---------------------------------------------------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `CommandDescriptor`, `CommandId`                                 | `components/Table/commands/CommandDescriptor.types.ts`            | Presentation-neutral command identity `{ id, label, icon }` — no handler, no enablement (those stay in action hooks / per-context selectors) |
-| `PIN_LEFT_COMMAND`, `PIN_RIGHT_COMMAND`, `CLEAR_PINNING_COMMAND` | `components/Table/commands/pinning/pinningCommands.ts`            | Pinning-capability command descriptors (identity), consumed by the header menu (live) and the drawer (draft)                                 |
-| `derivePinCommandState`                                          | `components/Table/commands/pinning/derivePinCommandState.util.ts` | Pure `{ isActive, isEnabled }` for a pinning command from `{ currentSide, targetSide, isStatic }`; fed by each surface's own selector        |
+| Artifact                                                                     | Location                                                     | Description                                                                                                                                                  |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `CommandDescriptor`, `CommandId`                                             | `components/Table/commands/CommandDescriptor.types.ts`       | Presentation-neutral command identity `{ id, label, icon }` — no handler, no enablement (those stay in action hooks / per-context selectors)                 |
+| `deriveToggleCommandState`                                                   | `components/Table/commands/deriveToggleCommandState.util.ts` | Capability-agnostic pure `{ isActive, isEnabled }` from `{ current, target, isDisabled }`; shared by pinning and sorting, fed by each surface's own selector |
+| `PIN_LEFT_COMMAND`, `PIN_RIGHT_COMMAND`, `CLEAR_PINNING_COMMAND`             | `components/Table/commands/pinning/pinningCommands.ts`       | Pinning-capability command descriptors (identity), consumed by the header menu (live) and the drawer (draft)                                                 |
+| `SORT_ASCENDING_COMMAND`, `SORT_DESCENDING_COMMAND`, `CLEAR_SORTING_COMMAND` | `components/Table/commands/sorting/sortingCommands.ts`       | Sorting-capability command descriptors (identity); the ADR-011 cross-capability check that the shape is not fitted to pinning                                |
 
 ### `src/components/Table/contexts/TableConfig/columns/actions/`
 
