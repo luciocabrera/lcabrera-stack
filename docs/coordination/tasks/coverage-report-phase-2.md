@@ -10,7 +10,7 @@ area:
 started: 2026-07-18
 updated: 2026-07-18
 plan: (none)
-pr: (none)
+pr: https://github.com/luciocabrera/vite-react-compiler/pull/33
 ---
 
 ## What
