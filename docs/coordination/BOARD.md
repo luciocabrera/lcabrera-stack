@@ -6,10 +6,11 @@ coordination:verify` fails if this drifts. See [README.md](./README.md).
 
 ## Tasks
 
-| Task                                                                                                | Owner        | Status | Branch                         | Area                                             | Updated    |
-| --------------------------------------------------------------------------------------------------- | ------------ | ------ | ------------------------------ | ------------------------------------------------ | ---------- |
-| [Four independent fixes in packages/ui Table](tasks/table-ui-fixes.md)                              | agent:other  | active | `(uncommitted)`                | `packages/ui/src/components/Table/**`            | 2026-07-18 |
-| [SonarCloud findings → tracked report + local gate (sonar:report/verify)](tasks/sonar-reporting.md) | agent:claude | review | `chore/biome-linter-hardening` | `scripts/sonar-report.mjs`<br>`reports/sonar/**` | 2026-07-18 |
+| Task                                                                                                | Owner        | Status | Branch                               | Area                                                                                                                                                             | Updated    |
+| --------------------------------------------------------------------------------------------------- | ------------ | ------ | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| [Per-workspace + monorepo coverage in the CI PR comment](tasks/per-workspace-coverage-report.md)    | agent:claude | active | `feat/per-workspace-coverage-report` | `scripts/coverage-report.mjs`<br>`packages/vite-configs/vite.run.shared.config.ts`<br>`.github/workflows/check-safe.yml`<br>`docs/tooling/coverage-reporting.md` | 2026-07-18 |
+| [Four independent fixes in packages/ui Table](tasks/table-ui-fixes.md)                              | agent:other  | active | `(uncommitted)`                      | `packages/ui/src/components/Table/**`                                                                                                                            | 2026-07-18 |
+| [SonarCloud findings → tracked report + local gate (sonar:report/verify)](tasks/sonar-reporting.md) | agent:claude | review | `chore/biome-linter-hardening`       | `scripts/sonar-report.mjs`<br>`reports/sonar/**`                                                                                                                 | 2026-07-18 |
 
 ## Shared branches
 
