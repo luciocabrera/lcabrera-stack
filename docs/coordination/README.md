@@ -45,6 +45,13 @@ immediately):
 That's it. The ceremony is one file and two commands; the payoff is that no one
 collides blind.
 
+**Shortcut:** `vp run coordination:claim -- <id> "<title>" [--area <glob> ...]`
+does steps 2–3 and opens the draft PR (step 5) in one command — scaffolds the
+task, branches off `main`, regenerates the board, commits, and opens a draft PR
+so the claim is visible immediately (via `coordination:board:live`). Add
+`--worktree` to work in an isolated worktree (recommended when other agents are
+active), or `--dry-run` to preview every action first.
+
 ---
 
 ## The task file
