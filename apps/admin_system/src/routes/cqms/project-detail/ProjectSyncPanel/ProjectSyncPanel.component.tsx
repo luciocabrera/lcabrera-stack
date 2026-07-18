@@ -73,7 +73,7 @@ export const ProjectSyncPanel = ({ project }: ProjectSyncPanelProps) => {
             checked={includeNodeModules}
             onChange={handleIncludeNodeModulesChange}
             type='checkbox'
-          />
+          />{' '}
           Include node_modules
         </label>
         <Button

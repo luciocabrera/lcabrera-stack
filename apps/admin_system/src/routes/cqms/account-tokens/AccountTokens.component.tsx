@@ -31,10 +31,10 @@ export const AccountTokens = () => {
       title='API Tokens'
     >
       {Boolean(issued) && (
-        <p role='status'>
+        <output>
           <strong>Copy your new token now — it will not be shown again:</strong>{' '}
           <code>{issued}</code>
-        </p>
+        </output>
       )}
 
       <issueFetcher.Form method='post'>
