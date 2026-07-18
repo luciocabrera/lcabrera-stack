@@ -1,0 +1,12 @@
+# packages/ui must NEVER baseline an eslint finding (AGENTS.md §4). ESLint's
+# bulk-suppressions tooling — an editor ESLint extension, or `eslint
+# --prune-suppressions` run across every workspace — writes an empty `{}`
+# suppressions file for any workspace that has nothing to suppress, which ui
+# never does. Committing then deleting that empty file was an endless loop.
+#
+# Ignoring the path here breaks the loop AND hardens the rule: CI checks out no
+# file, so ui is eslint-suppression-free by construction and any real finding
+# fails the gate. Every other workspace tracks its own eslint-suppressions.json
+# (inherited debt is baselined there) — that is why this ignore is scoped to ui,
+# not global. Never un-ignore this or commit a non-empty suppressions file here.
+eslint-suppressions.json
