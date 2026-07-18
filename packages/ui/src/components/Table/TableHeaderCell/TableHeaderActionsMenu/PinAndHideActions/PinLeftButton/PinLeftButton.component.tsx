@@ -1,5 +1,8 @@
 import { Button } from '@repo/ui/components/Button';
-import { PinLeftIcon } from '@repo/ui/components/Icons';
+import {
+  deriveToggleCommandState,
+  PIN_LEFT_COMMAND,
+} from '@repo/ui/components/Table/commands';
 import { useSetColumnPinning } from '@repo/ui/components/Table/contexts/TableConfig/columns/actions';
 import { tableActionsPopoverStyles } from '@repo/ui/components/Table/TableActionsPopover';
 import * as stylex from '@stylexjs/stylex';
@@ -10,7 +13,9 @@ import type { PinLeftButtonProps } from './PinLeftButton.types';
  * "Pin Left" item of the pin/hide section: toggles left pinning on/off and
  * highlights itself (via the `primary` variant + `aria-pressed`) while pinned
  * left. Carries the section divider above it when `hasSectionAbove` is set.
- * Closes the menu via `onClose`.
+ * Closes the menu via `onClose`. Identity and active-state come from the shared
+ * `PIN_LEFT_COMMAND` (ADR-011); this surface owns only its live commit-context
+ * and menu presentation.
  */
 export const PinLeftButton = <TData,>({
   columnKey,
@@ -19,31 +24,36 @@ export const PinLeftButton = <TData,>({
   pinSide,
 }: PinLeftButtonProps<TData>) => {
   const setColumnPinning = useSetColumnPinning<TData>();
-  const isPinnedLeft = pinSide === 'left';
+  const { icon: PinLeftCommandIcon, label } = PIN_LEFT_COMMAND;
+  const { isActive } = deriveToggleCommandState({
+    current: pinSide,
+    isDisabled: false,
+    target: 'left',
+  });
 
   const handlePinLeft = () => {
-    setColumnPinning({ columnKey, side: isPinnedLeft ? undefined : 'left' });
+    setColumnPinning({ columnKey, side: isActive ? undefined : 'left' });
     onClose();
   };
 
   return (
     <Button
-      aria-pressed={isPinnedLeft}
+      aria-pressed={isActive}
       customStylex={[
         tableActionsPopoverStyles.menuItem,
         hasSectionAbove && tableActionsPopoverStyles.menuSectionDivider,
       ]}
       icon={
         <span {...stylex.props(tableActionsPopoverStyles.menuIcon)}>
-          <PinLeftIcon size={16} />
+          <PinLeftCommandIcon size={16} />
         </span>
       }
       onClick={handlePinLeft}
       orientation='horizontal'
       size='mini'
-      variant={isPinnedLeft ? 'primary' : 'ghost'}
+      variant={isActive ? 'primary' : 'ghost'}
     >
-      Pin Left
+      {label}
     </Button>
   );
 };
