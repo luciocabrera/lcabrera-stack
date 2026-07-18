@@ -146,6 +146,13 @@ should not regenerate it** — every branch that rewrites a generated file confl
 with every other on merge (resolve any such conflict by regenerating, never by
 hand-merging rows). Touch `BOARD.md` only in the claim/close PRs on `main`.
 
+> A git **merge-driver can't automate this away** — it runs on the two `BOARD.md`
+> versions and is _not_ handed the merged task files, so it can't regenerate the
+> correct board (regenerating from the working tree yields "ours"; a row-union
+> breaks on a task deleted on one side, which `board-sync` then fails). The fix is
+> the discipline above, not tooling; on the rare conflict, `vp run coordination:board`
+> is the one-command resolution and `board-sync` is the backstop.
+
 **Where progress lives:** `BOARD.md` answers _who owns what area, on which branch_
 (coarse, from the claims on `main`). **Live progress lives in the draft PR** — its
 commits, checks, and status. For a live view that joins the claims with real PR
