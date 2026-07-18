@@ -269,8 +269,20 @@ jobs:
         # This job has no Postgres, so `test:ci` runs every DB-free suite:
         # all workspaces except scan-orchestrator (real CQMS queue), plus
         # scan-ingestion's DB-free `test:unit` subset, then react-router's
-        # `test:ci` last so the coverage summary below is the fresh one.
+        # `test:ci` last so it emits its coverage-summary.json for the step below.
         run: vp run test:ci
+
+      - name: Per-workspace + monorepo coverage report
+        # Builds coverage/monorepo-coverage-summary.json — one entry per reported
+        # workspace (ui, data-access, react-router) plus an aggregated total —
+        # which the PR-comment step renders as a matrix. Best-effort and
+        # `always()`: `test:ci` above is the authoritative pass/fail gate, so a
+        # coverage hiccup here must not fail the job, and a partial report on a
+        # test failure is more useful than none. It re-runs test:coverage for the
+        # package workspaces (their `test:ci` run above is plain `test`, no
+        # coverage) and reuses react-router's fresh summary.
+        if: always()
+        run: vp run coverage:report
 
       - name: Upload coverage report
         if: always() && vars.ENABLE_ARTIFACT_UPLOADS == 'true'
@@ -278,6 +290,7 @@ jobs:
         with:
           name: coverage-report
           path: |
+            ./coverage/monorepo-coverage-summary.json
             ./apps/react-router/coverage/coverage-summary.json
             ./coverage/coverage-summary.json
           if-no-files-found: ignore
@@ -290,35 +303,62 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const candidateSummaryPaths = [
-              './apps/react-router/coverage/coverage-summary.json',
-              './coverage/coverage-summary.json',
-            ];
-            const summaryPath = candidateSummaryPaths.find(path => fs.existsSync(path));
-
-            if (!summaryPath) {
-              console.log('No coverage-summary.json found, skipping comment');
-              return;
-            }
-
-            const summary = JSON.parse(fs.readFileSync(summaryPath, 'utf-8'));
-            const total = summary.total;
 
             const fmt = (v) => `${v.pct.toFixed(1)}% (${v.covered}/${v.total})`;
             const badge = (pct) => pct >= 80 ? '✅' : pct >= 60 ? '⚠️' : '❌';
+            const cell = (v, bold) => {
+              const text = `${badge(v.pct)} ${fmt(v)}`;
+              return bold ? `**${text}**` : text;
+            };
+            const runLink = `[workflow logs](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`;
 
-            const body = [
-              '## 📊 Coverage Report',
-              '',
-              '| Metric | Coverage | Status |',
-              '|--------|----------|--------|',
-              `| Lines | ${fmt(total.lines)} | ${badge(total.lines.pct)} |`,
-              `| Statements | ${fmt(total.statements)} | ${badge(total.statements.pct)} |`,
-              `| Functions | ${fmt(total.functions)} | ${badge(total.functions.pct)} |`,
-              `| Branches | ${fmt(total.branches)} | ${badge(total.branches.pct)} |`,
-              '',
-              `> 📁 Coverage summary JSON generated in this run: [workflow logs](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`,
-            ].join('\n');
+            // Preferred: the per-workspace + monorepo matrix from coverage-report.mjs.
+            const buildMatrix = () => {
+              const path = './coverage/monorepo-coverage-summary.json';
+              if (!fs.existsSync(path)) return null;
+              const report = JSON.parse(fs.readFileSync(path, 'utf-8'));
+              const row = (label, total, bold = false) =>
+                `| ${label} | ${cell(total.lines, bold)} | ${cell(total.statements, bold)} | ${cell(total.functions, bold)} | ${cell(total.branches, bold)} |`;
+              return [
+                '## 📊 Coverage Report',
+                '',
+                'Per-workspace and monorepo-wide coverage from this run.',
+                '',
+                '| Workspace | Lines | Statements | Functions | Branches |',
+                '|-----------|-------|------------|-----------|----------|',
+                ...report.workspaces.map((w) => row(`\`${w.name}\``, w.total)),
+                row('**🏛 Monorepo total**', report.total, true),
+                '',
+                `> 📁 Coverage summary JSON generated in this run: ${runLink}`,
+              ].join('\n');
+            };
+
+            // Fallback: the legacy single-workspace table, so the comment never
+            // regresses to nothing if the matrix file is absent.
+            const buildLegacy = () => {
+              const path = ['./apps/react-router/coverage/coverage-summary.json', './coverage/coverage-summary.json']
+                .find((p) => fs.existsSync(p));
+              if (!path) return null;
+              const total = JSON.parse(fs.readFileSync(path, 'utf-8')).total;
+              return [
+                '## 📊 Coverage Report',
+                '',
+                '| Metric | Coverage | Status |',
+                '|--------|----------|--------|',
+                `| Lines | ${fmt(total.lines)} | ${badge(total.lines.pct)} |`,
+                `| Statements | ${fmt(total.statements)} | ${badge(total.statements.pct)} |`,
+                `| Functions | ${fmt(total.functions)} | ${badge(total.functions.pct)} |`,
+                `| Branches | ${fmt(total.branches)} | ${badge(total.branches.pct)} |`,
+                '',
+                `> 📁 Coverage summary JSON generated in this run: ${runLink}`,
+              ].join('\n');
+            };
+
+            const body = buildMatrix() ?? buildLegacy();
+            if (!body) {
+              console.log('No coverage summary found, skipping comment');
+              return;
+            }
 
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,

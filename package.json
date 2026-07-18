@@ -11,6 +11,7 @@
     "lint:biome:check": "biome lint .",
     "lint:report": "vp run --filter eslint-local-rules-shared build && node scripts/generate-lint-reports.mjs",
     "coverage:merge": "node scripts/merge-coverage.mjs",
+    "coverage:report": "node scripts/coverage-report.mjs",
     "format:all": "vp fmt .",
     "typegen:all": "vp run -r typegen",
     "typecheck:all": "vp run -r typecheck",

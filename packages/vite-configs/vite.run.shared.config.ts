@@ -1,17 +1,20 @@
 /**
- * Emits an Istanbul-shaped `coverage/coverage-final.json` via the v8
- * provider's `json` reporter — the format `fallow audit --coverage` reads.
+ * Emits two Istanbul-shaped reports under `coverage/` via the v8 provider:
  *
- * Shared so every workspace reports coverage identically and the merged
- * report the fallow gate consumes (scripts/merge-coverage.mjs) stays
- * consistent. Without real coverage fallow *estimates* it from whether a
- * colocated test file exists (none → 0%), and since CRAP is
- * `cyclomatic² × (1 − coverage)³ + cyclomatic` against a threshold of 30,
- * every function with cyclomatic ≥ 5 then fails the gate on complexity it
- * does not actually have.
+ * - `coverage-final.json` (`json` reporter) — the per-statement detail
+ *   `fallow audit --coverage` reads (via scripts/merge-coverage.mjs).
+ * - `coverage-summary.json` (`json-summary` reporter) — the per-workspace
+ *   totals the CI coverage comment reads (via scripts/coverage-report.mjs).
+ *
+ * Shared so every workspace reports coverage identically and both consumers —
+ * the fallow gate and the PR coverage matrix — stay consistent. Without real
+ * coverage fallow *estimates* it from whether a colocated test file exists
+ * (none → 0%), and since CRAP is `cyclomatic² × (1 − coverage)³ + cyclomatic`
+ * against a threshold of 30, every function with cyclomatic ≥ 5 then fails the
+ * gate on complexity it does not actually have.
  */
 export const VITEST_COVERAGE_FLAGS =
-  '--coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reportsDirectory=coverage';
+  '--coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reportsDirectory=coverage';
 
 export const createReactRouterRunConfig = () => ({
   tasks: {

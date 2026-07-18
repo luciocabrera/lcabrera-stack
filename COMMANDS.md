@@ -99,21 +99,22 @@ project-specific belongs in that project's own `package.json`.
 
 ### Gate & CI
 
-| Command                   | Does                                                                           |
-| ------------------------- | ------------------------------------------------------------------------------ |
-| `vp run ready`            | `check:safe` + `build:all` — the full "is it shippable" check                  |
-| `vp run check:safe`       | typegen → eslint-rules build → `vp check` → typecheck → eslint → biome → tests |
-| `vp run typecheck:all`    | real tsc in all 16 workspaces, dependency order                                |
-| `vp run typegen:all`      | route types for both React Router apps                                         |
-| `vp run lint:all`         | Oxlint + eslint + Biome **with autofix**, every workspace                      |
-| `vp run lint:biome`       | Biome repo-wide **with autofix** (`--write`, safe fixes only)                  |
-| `vp run lint:biome:check` | Biome repo-wide, check only — what CI runs                                     |
-| `vp run lint:report`      | regenerate `reports/{oxlint,eslint,biome}/full-latest.json`                    |
-| `vp run format:all`       | `vp fmt .` across the tree                                                     |
-| `vp run build:all`        | build every workspace                                                          |
-| `vp run test:all`         | every suite — **needs Postgres**                                               |
-| `vp run test:ci`          | every DB-free suite — what CI runs, no Postgres needed                         |
-| `vp run coverage:merge`   | merged coverage for the fallow gate (DB-free workspaces only)                  |
+| Command                   | Does                                                                                         |
+| ------------------------- | -------------------------------------------------------------------------------------------- |
+| `vp run ready`            | `check:safe` + `build:all` — the full "is it shippable" check                                |
+| `vp run check:safe`       | typegen → eslint-rules build → `vp check` → typecheck → eslint → biome → tests               |
+| `vp run typecheck:all`    | real tsc in all 16 workspaces, dependency order                                              |
+| `vp run typegen:all`      | route types for both React Router apps                                                       |
+| `vp run lint:all`         | Oxlint + eslint + Biome **with autofix**, every workspace                                    |
+| `vp run lint:biome`       | Biome repo-wide **with autofix** (`--write`, safe fixes only)                                |
+| `vp run lint:biome:check` | Biome repo-wide, check only — what CI runs                                                   |
+| `vp run lint:report`      | regenerate `reports/{oxlint,eslint,biome}/full-latest.json`                                  |
+| `vp run format:all`       | `vp fmt .` across the tree                                                                   |
+| `vp run build:all`        | build every workspace                                                                        |
+| `vp run test:all`         | every suite — **needs Postgres**                                                             |
+| `vp run test:ci`          | every DB-free suite — what CI runs, no Postgres needed                                       |
+| `vp run coverage:merge`   | merged coverage for the fallow gate (DB-free workspaces only)                                |
+| `vp run coverage:report`  | per-workspace + monorepo coverage summary for the PR comment (ui, data-access, react-router) |
 
 `test:all` vs `test:ci`: CI has no database, so `test:ci` substitutes the DB-free
 `test:unit` subsets for `@repo/scan-ingestion` / `@repo/scan-orchestrator` and runs
@@ -262,7 +263,7 @@ Notes on the non-obvious ones:
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | **Quality Gate** | `typegen:all` + eslint-rules build → `vp check` → `vp run typecheck:all` → `vp run -r lint:eslint:check` → `vp run lint:biome:check` |
 | **Fallow Audit** | `typegen:all` → `coverage:merge` → `fallow:audit --base <PR base> --coverage …` (PRs only)                                           |
-| **Unit Tests**   | `vp run test:ci` → coverage summary comment on the PR                                                                                |
+| **Unit Tests**   | `vp run test:ci` → `vp run coverage:report` → per-workspace + monorepo coverage matrix comment on the PR                             |
 
 Each pass is a **separate step on purpose** so a failure names itself instead of
 hiding behind a neighbour. `vp check` does not run the eslint pass, it does not run
