@@ -181,6 +181,15 @@ and reports trivially simple code as `critical`.
 | `vp run skills:handoff`      | bootstrap the agenting handoff runbook      |
 | `vp run prepare`             | `vp config` — runs automatically on install |
 
+### Coordination register
+
+The in-git "who is working on what" register under [`docs/coordination/`](docs/coordination/README.md).
+
+| Command                      | Does                                                          |
+| ---------------------------- | ------------------------------------------------------------- |
+| `vp run coordination:verify` | check the task register + `BOARD.md` are consistent (CI gate) |
+| `vp run coordination:board`  | regenerate `docs/coordination/BOARD.md` from the task files   |
+
 ---
 
 ## 5. Per-workspace tasks

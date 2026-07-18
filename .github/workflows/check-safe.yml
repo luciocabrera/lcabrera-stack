@@ -88,6 +88,19 @@ jobs:
         # @repo/vite-configs factories) instead of re-implementing resolution.
         run: vp run commands:verify
 
+      - name: Coordination register is consistent
+        id: coordination_gate
+        # The in-git "who is working on what" register under docs/coordination/.
+        # Multiple agents + humans work this repo in parallel; the only prior
+        # signals were `git branch -vv` and per-agent scratch in ~/.claude/plans/
+        # (opaque names, invisible to everyone else) — which is how one agent
+        # nearly edited code another already owned. This fails only on register
+        # INTEGRITY the PR author controls (malformed task file, BOARD.md drift);
+        # coordination signals (area overlap, staleness, missing branch) are
+        # emitted as ::warning:: annotations so they surface without blocking an
+        # unrelated PR. See docs/coordination/README.md.
+        run: vp run coordination:verify
+
       - name: Write quality summary
         if: always()
         run: |

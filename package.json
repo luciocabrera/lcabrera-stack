@@ -27,6 +27,8 @@
     "db:status": "docker compose -f docker/local/docker-compose.yml --env-file docker/local/.env ps",
     "db:down": "docker compose -f docker/local/docker-compose.yml --env-file docker/local/.env down",
     "commands:verify": "node scripts/verify-commands-doc.mjs",
+    "coordination:verify": "node scripts/verify-coordination.mjs",
+    "coordination:board": "node scripts/verify-coordination.mjs --write-board",
     "skills:validate": "node scripts/validate-skills.cjs",
     "skills:report": "node scripts/generate-skills-compliance-report.cjs",
     "skills:source-audit": "node scripts/generate-source-smell-report.cjs && node scripts/bootstrap-agenting-handoff.cjs",
