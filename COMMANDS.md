@@ -187,11 +187,12 @@ and reports trivially simple code as `critical`.
 
 The in-git "who is working on what" register under [`docs/coordination/`](docs/coordination/README.md).
 
-| Command                          | Does                                                                                                             |
-| -------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `vp run coordination:verify`     | check the task register + `BOARD.md` are consistent (CI gate)                                                    |
-| `vp run coordination:board`      | regenerate `docs/coordination/BOARD.md` from the task files                                                      |
-| `vp run coordination:board:live` | live view: claims joined with open-PR state (draft/checks) + unregistered PRs (needs `gh`; prints, never writes) |
+| Command                                       | Does                                                                                                             |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `vp run coordination:verify`                  | check the task register + `BOARD.md` are consistent (CI gate)                                                    |
+| `vp run coordination:board`                   | regenerate `docs/coordination/BOARD.md` from the task files                                                      |
+| `vp run coordination:board:live`              | live view: claims joined with open-PR state (draft/checks) + unregistered PRs (needs `gh`; prints, never writes) |
+| `vp run coordination:claim -- <id> "<title>"` | scaffold a task + branch (or `--worktree`) + draft PR in one step (`--dry-run` to preview)                       |
 
 ### Commit & PR standards
 
