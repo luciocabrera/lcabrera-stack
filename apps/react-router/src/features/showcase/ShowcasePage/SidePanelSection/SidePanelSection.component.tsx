@@ -54,10 +54,10 @@ export const SidePanelSection = () => {
               <span {...stylex.props(styles.iconLeft)}>
                 <MenuIcon size={ICON_SIZE_MD} />
               </span>
-              {'Open Left Panel'}
+              <span>Open Left Panel</span>
             </Button>
             <Button onClick={handleOpenRight}>
-              {'Open Right Panel'}
+              <span>Open Right Panel</span>
               <span {...stylex.props(styles.iconRight)}>
                 <MenuIcon size={ICON_SIZE_MD} />
               </span>
@@ -88,7 +88,7 @@ export const SidePanelSection = () => {
             <span {...stylex.props(styles.iconLeft)}>
               <MenuCloseIcon size={ICON_SIZE_MD} />
             </span>
-            {'Close'}
+            <span>Close</span>
           </Button>
         </SidePanelFooter>
       </SidePanel>
