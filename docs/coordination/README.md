@@ -32,7 +32,9 @@ immediately):
    `tasks/<id>.md`, fill in the frontmatter — crucially the `area` globs, which
    are the soft lock others read — then `vp run coordination:board` to add it to
    the board.
-3. **Branch.** Never commit non-trivial work straight to `main`.
+3. **Pick a branch strategy** — an independent branch (the default) or join a
+   shared one. See [Independent vs shared branches](#independent-vs-shared-branches)
+   below. Never commit non-trivial work straight to `main`.
 4. **Keep it current.** Bump `updated:` as you make progress; move `status:`
    through `active → review` (and `blocked`/`paused` when true). Stale tasks are
    flagged so abandoned work surfaces instead of rotting like the old plan files.
@@ -74,6 +76,43 @@ depth (even `.../Modal/Table/...`), so it over-triggers the overlap warning —
 
 ---
 
+## Independent vs shared branches
+
+Two agents don't always want isolation. Sometimes they're building one thing in
+parallel slices and **each needs the other's in-progress changes** — isolating
+them onto separate branches would mean constant cross-merging. So the register
+supports both modes, and makes the choice explicit.
+
+**Independent branch — the default.** Your work is separable and can merge on its
+own. Put a unique `branch:` on your task and go. Nothing else to do; another agent
+whose `area` overlaps yours gets an overlap warning and coordinates.
+
+**Shared branch — when changes are mutually dependent.** Multiple agents commit to
+**one** branch. Declare it with a descriptor, [`branches/<slug>.md`](./branches/_TEMPLATE.md)
+(copy the template), naming its `base`, merge `target`, and one **`integrator`** —
+the single owner who rebases the branch onto `base` and does the final merge, so
+rebases don't race. Each agent still keeps their own task file with a **narrow,
+non-overlapping `area`**, all pointing at that `branch:`. The check is branch-aware:
+
+- Overlapping areas on **different** branches → a collision warning (coordinate).
+- Overlapping areas on the **same shared** branch → **no warning** — that's the
+  collaboration you asked for; the within-branch protocol below governs it instead.
+- 2+ active tasks on one branch with **no descriptor** → a warning to declare it
+  shared or split. (Sharing a branch silently is the thing to avoid.)
+
+**Within a shared branch:** each agent works their own `area`; coordinate before
+touching a file outside it. **Pull/rebase before every push, and push small and
+often** — a shared branch only works if everyone stays near its head. The
+integrator owns the rebase onto `base` and the merge to `target`. Delete the
+descriptor when the branch merges.
+
+Deciding: reach for a shared branch only when the mutual dependency is real
+(you'd otherwise cross-merge constantly). It costs rebase discipline and risks
+conflicts; an independent branch that merges cleanly on its own is simpler when
+the work genuinely separates.
+
+---
+
 ## The check — `coordination:verify`
 
 `vp run coordination:verify` (CI step in `check-safe.yml`; script:
@@ -83,19 +122,20 @@ distinguishes **errors** (fail the build) from **warnings** (surfaced, never
 blocking — a warning must not fail an unrelated PR because someone else's task
 drifted):
 
-| Check          | Level | Fails when…                                                                |
-| -------------- | ----- | -------------------------------------------------------------------------- |
-| **schema**     | error | a task file is missing a field, has a bad status/owner, or a mismatched id |
-| **unique-id**  | error | two task files share an id                                                 |
-| **board-sync** | error | `BOARD.md` doesn't match the task files (compared as data, not text)       |
-| **overlap**    | warn  | two non-done tasks declare intersecting `area` globs                       |
-| **stale**      | warn  | a non-done task's `updated:` is older than 14 days                         |
-| **branch**     | warn  | a task's branch resolves to no local/origin ref (best effort)              |
+| Check             | Level | Fails when…                                                                          |
+| ----------------- | ----- | ------------------------------------------------------------------------------------ |
+| **schema**        | error | a task or branch file is missing a field, has a bad status/owner, or a mismatched id |
+| **unique-id**     | error | two task files share an id                                                           |
+| **board-sync**    | error | `BOARD.md` doesn't match the task + branch files (compared as data, not text)        |
+| **overlap**       | warn  | two non-done tasks on **different** branches declare intersecting `area` globs       |
+| **shared-branch** | warn  | 2+ active tasks share a branch with no descriptor, or a descriptor has no tasks      |
+| **stale**         | warn  | a non-done task's `updated:` is older than 14 days                                   |
+| **branch**        | warn  | a task's branch resolves to no local/origin ref (best effort)                        |
 
 `BOARD.md` is **generated** — `vp run coordination:board` rewrites it from the
-task files. Never hand-edit it; edit the task file and regenerate. board-sync
-compares the _parsed row data_, so Oxfmt reflowing the table is invisible while a
-genuinely missing or mislabelled row still fails.
+task + branch files. Never hand-edit it; edit the source file and regenerate.
+board-sync compares the _parsed row data_, so Oxfmt reflowing the table is
+invisible while a genuinely missing or mislabelled row still fails.
 
 An overlap warning looks like:
 
@@ -103,7 +143,8 @@ An overlap warning looks like:
 Coordination register — 1 warning(s):
 
   ⚠ table-ui-fixes.md and table-refresh.md claim overlapping areas
-    (e.g. `packages/ui/src/components/Table/**`) — narrow a glob or serialise the work.
+    (e.g. `packages/ui/src/components/Table/**`) on different branches —
+    narrow a glob, serialise, or share one branch (branches/<slug>.md).
 ```
 
 ---

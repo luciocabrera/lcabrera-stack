@@ -21,7 +21,10 @@ Fields:
   id       kebab-case, must equal the filename (e.g. table-ui-fixes.md → table-ui-fixes)
   owner    agent:<name> (claude, copilot, gemini, …) or human:<name>
   status   active | blocked | review | paused | done
-  branch   the git branch, or (uncommitted) if not yet committed, or (worktree)
+  branch   the git branch, or (uncommitted) if not yet committed, or (worktree).
+           To collaborate on ONE branch with other agents, point several tasks at
+           the same branch and add a branches/<slug>.md descriptor (see README →
+           "Independent vs shared branches").
   area     one or more globs this work OWNS — the soft lock other agents read
            before touching. Keep them as NARROW as the work really is; a wide
            glob blocks more than it should. Prefer a concrete path prefix

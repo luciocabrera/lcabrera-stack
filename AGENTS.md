@@ -2,7 +2,7 @@
 
 <!-- Audience: Claude, Gemini, and other non-GitHub agents — for GitHub Copilot see .github/copilot-instructions.md -->
 
-This file provides guidance to AI agents when working with code in this repository. It contains the **universal, always-relevant** standards. Detailed per-file-type conventions live in `.claude/rules/` (see [Path-Specific Rules](#path-specific-rules)), and task workflows live in `.github/skills/`.
+This file provides guidance to AI agents when working with code in this repository. It contains the **universal, always-relevant** standards. Detailed per-file-type conventions live in `.claude/rules/` (see [Path-Specific Rules](#2-path-specific-rules)), and task workflows live in `.github/skills/`.
 
 ## 1. Project Overview
 
@@ -271,14 +271,20 @@ per-agent scratch (`~/.claude/plans/`) or auto-memory, which no one else can see
 
 1. **Check for collisions** — skim [`docs/coordination/BOARD.md`](docs/coordination/BOARD.md) or run `vp run coordination:verify`; it warns when your intended `area` overlaps an active task. Resolve overlaps (coordinate, or narrow scope) before starting.
 2. **Claim it** — copy [`tasks/_TEMPLATE.md`](docs/coordination/tasks/_TEMPLATE.md) to `tasks/<id>.md`, fill in the frontmatter (especially the `area` globs — the soft lock), then `vp run coordination:board`.
-3. **Branch**, and open a **draft PR early** (the human-visible progress surface).
+3. **Pick a branch strategy** — an independent branch (default), or a **shared
+   branch** when several agents need each other's WIP (declare it with a
+   `branches/<slug>.md` descriptor + an integrator; overlap between tasks on the
+   same shared branch is then treated as collaboration, not a collision). Open a
+   **draft PR early** (the human-visible progress surface).
 4. **Keep `status`/`updated` current**; move through `active → review`.
 5. **Close it** — delete the task file when the work merges and regenerate the board.
 
 The check runs in CI (`check-safe.yml`). It fails on register _integrity_ (a
-malformed task file, `BOARD.md` drift); overlap/staleness/missing-branch are
-non-blocking warnings. Full protocol and schema: the coordination README. The
-historical scratch plans are catalogued in [`PLAN_TRIAGE.md`](docs/coordination/PLAN_TRIAGE.md).
+malformed task/branch file, `BOARD.md` drift); overlap/shared-branch/staleness/
+missing-branch are non-blocking warnings. Full protocol and schema — including
+[independent vs shared branches](docs/coordination/README.md#independent-vs-shared-branches) —
+are in the coordination README. Historical scratch plans are catalogued in
+[`PLAN_TRIAGE.md`](docs/coordination/PLAN_TRIAGE.md).
 
 ### Architecture-First Workflow
 
