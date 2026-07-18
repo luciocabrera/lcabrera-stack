@@ -29,7 +29,12 @@
  *   WARN   shared-branch — 2+ active tasks share a branch with no descriptor
  *                          (declare it or split), or a descriptor has no tasks.
  *   WARN   stale         — a non-done task's `updated:` is older than STALE_DAYS.
- *   WARN   branch        — a task's branch resolves to no local/remote ref.
+ *   WARN   branch        — a task's branch resolves to no local/remote ref (may
+ *                          mean it merged and was deleted → close the task).
+ *   WARN   ghost         — a live task older than GHOST_DAYS records neither a
+ *                          branch nor a PR, so its work is invisible (or already
+ *                          merged). Precise "is it merged?" detection would need a
+ *                          git/gh subprocess, which this script avoids (S4036).
  *
  * Modes:
  *   node scripts/verify-coordination.mjs                 → verify (default)
@@ -71,7 +76,9 @@ const BOARD_DOC = join(COORD_DIR, 'BOARD.md');
 const BOARD_REL = 'docs/coordination/BOARD.md';
 
 const STALE_DAYS = 14;
+const GHOST_DAYS = 3;
 const NO_BRANCH = new Set(['(uncommitted)', '(none)', '(worktree)']);
+const NO_PR = new Set(['(none)', '']);
 
 /** Parsed `.md` files in a register dir (missing dir → none). */
 const readEntries = (dir) =>
@@ -210,6 +217,38 @@ const checkStale = (tasks, warnings) => {
   }
 };
 
+/**
+ * A live task recording neither a real branch nor a PR is a "ghost" — nobody can
+ * see the work in flight, and if it already merged nothing else flags it (this is
+ * how a completed task sat `active` for days). Warns after a short grace period so
+ * a freshly-filed claim isn't nagged before its first branch/PR.
+ */
+const checkGhostTasks = (tasks, warnings) => {
+  const today = new Date();
+  for (const { name, data } of tasks) {
+    if (data === undefined || data.status === 'done') {
+      continue;
+    }
+    const prless = data.pr === undefined || NO_PR.has(String(data.pr).trim());
+    if (
+      !NO_BRANCH.has(data.branch) ||
+      !prless ||
+      !ISO_DATE.test(data.updated ?? '')
+    ) {
+      continue;
+    }
+    const days = Math.floor(
+      (today - new Date(`${data.updated}T00:00:00Z`)) / 86_400_000,
+    );
+    if (days >= GHOST_DAYS) {
+      warnings.push(
+        `${name}: ${days} day(s) with no branch or PR recorded (status \`${data.status}\`) — ` +
+          'record `branch:`/`pr:` so others can see the work, or delete the file if it already merged.',
+      );
+    }
+  }
+};
+
 const REF_PATHS = (branch) => [
   join('refs', 'heads', branch),
   join('refs', 'remotes', 'origin', branch),
@@ -250,7 +289,7 @@ const checkTaskBranches = (tasks, warnings) => {
       continue;
     }
     warnings.push(
-      `${name}: branch \`${branch}\` resolves to no local or origin ref — fix the field, or set it to \`(uncommitted)\`.`,
+      `${name}: branch \`${branch}\` resolves to no local or origin ref — fix the field, set it to \`(uncommitted)\`, or delete the task if the branch merged and was removed.`,
     );
   }
 };
@@ -320,6 +359,7 @@ const main = () => {
   checkSharedBranches(tasks, branches, warnings);
   checkStale(tasks, warnings);
   checkTaskBranches(tasks, warnings);
+  checkGhostTasks(tasks, warnings);
 
   if (warnings.length > 0) {
     console.error(`Coordination register — ${warnings.length} warning(s):\n`);

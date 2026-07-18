@@ -113,6 +113,45 @@ the work genuinely separates.
 
 ---
 
+## Keeping the register current across branches
+
+The register only works if agents can _see_ each other's claims. Three rules make
+that hold when several agents work at once — and skipping them is what makes
+`BOARD.md` drift or conflict.
+
+**1. One working tree per agent — never a shared directory.** A git working tree
+has _one_ checked-out branch and _one_ index; two agents in the same folder means
+their uncommitted files, staged changes, and branch switches clobber each other
+(one agent's `git checkout` silently reverts the other's edits). Isolate with a
+worktree — `git worktree add ../vrc-<task> -b <branch>` — or a separate clone.
+"Different branches" only helps if they're in _different working trees_.
+
+**2. The claim lives on `main`, landed early — not on your feature branch.** A
+task file is a shared lock only once it's on `main`, where every other agent
+branching off `main` sees it. So commit `tasks/<id>.md` + a board regen to `main`
+**first** — a tiny claim-only PR, before the real work — separate from the work
+branch. If claims sit only on feature branches, no one sees them until merge and
+the register fragments.
+
+**3. `BOARD.md` is a generated view — don't hand-maintain it per branch.** It's
+rebuilt from the task files by `vp run coordination:board`, so **feature branches
+should not regenerate it** — every branch that rewrites a generated file conflicts
+with every other on merge (resolve any such conflict by regenerating, never by
+hand-merging rows). Touch `BOARD.md` only in the claim/close PRs on `main`.
+
+**Where progress lives:** `BOARD.md` answers _who owns what area, on which branch_
+(coarse, from the claims on `main`). **Live progress lives in the draft PR** — its
+commits, checks, and status. Read `gh pr list` / `gh pr view` for "how far along",
+not `BOARD.md`. Open the PR early; that is the human-visible progress surface.
+
+**Close on merge.** When your PR merges (with `--delete-branch`), delete the task
+file. If a PR can't delete the task that tracks itself, do it in a tiny follow-up.
+A merged task left `active` is drift — `coordination:verify` nudges on the
+tell-tales (a branch that no longer resolves; a task active for days with no
+branch or PR recorded).
+
+---
+
 ## The check — `coordination:verify`
 
 `vp run coordination:verify` (CI step in `check-safe.yml`; script:
