@@ -216,6 +216,20 @@ The rest of Phase 3 completed with two more rules and one deferral:
   refactor touching the vital `data-access` package, disproportionate to a lint
   pass. Revisit if env access is ever consolidated to one reader per workspace.
 
+**`useNamingConvention` — declined (Phase 4 candidate, measured).** 7,218 findings
+at default; even tuned (`strictCase: false` + any-case object/type properties) it
+stays at **1,139**. The cause is structural: this is a Postgres/REST app whose DB
+and API contract is snake_case _by design_ (`scan.project_id`, `run.git_branch`,
+`res.rowCount`), and that snake_case leaks from properties into destructured local
+identifiers, so no selector cleanly separates "external contract" from "identifier
+I control." The naming that actually matters here is already enforced by
+repo-aware rules — `local-rules/type-suffix-naming` (`Args`/`Props`), unicorn's
+`consistent-boolean-name` (`is`/`has`/`should`), `useReactFunctionComponents` plus
+the file-name suffix rules — so the rule's marginal value is low while its
+`conventions` block is a living liability that silently under-enforces when wrong.
+A specific future naming gap is better served by a narrow `local-rules/*` rule
+than by this sweeping, contract-hostile one.
+
 **Nursery rules carry an upgrade duty.** `noInlineStyles` and `useTestHooksOnTop`
 (and any future nursery adoption) can be renamed, change behaviour, or graduate
 to another group on a Biome minor bump. Biome is pinned (`2.5.4`, via the
