@@ -16,7 +16,7 @@ area:
 started: 2026-07-18
 updated: 2026-07-18
 plan: we-want-to-have-greedy-parrot.md
-pr: https://github.com/luciocabrera/vite-react-compiler/pull/40
+pr: https://github.com/luciocabrera/vite-react-compiler/pull/41
 ---
 
 ## What
