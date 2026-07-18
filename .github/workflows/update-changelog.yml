@@ -1,0 +1,48 @@
+name: Update Changelog
+
+# After every merge to main, regenerate CHANGELOG.md and commit it straight back
+# with [skip ci] so it never re-triggers a run. The bot pushes directly to main,
+# which needs the GitHub Actions app (id 15368) added as a bypass actor on the
+# "main protection" ruleset; until it is, the push is skipped with a warning
+# instead of failing the job. The bot's own changelog commits touch only
+# CHANGELOG.md and are kept out of the changelog via the ':!CHANGELOG.md' pathspec.
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-changelog
+  cancel-in-progress: false
+
+jobs:
+  update:
+    name: Regenerate CHANGELOG.md
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main (full history for the changelog range)
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Regenerate and push if changed
+        run: |
+          git log --no-merges --format=%H%x1f%D%x1f%cI%x1f%s%x1f%b%x1e -- ':!CHANGELOG.md' \
+            | node scripts/generate-changelog.mjs
+          if git diff --quiet -- CHANGELOG.md; then
+            echo "CHANGELOG.md already current."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git commit -m "docs(changelog): regenerate CHANGELOG.md [skip ci]"
+          if git push origin HEAD:main; then
+            echo "Pushed updated CHANGELOG.md."
+          else
+            echo "::warning::Could not push CHANGELOG.md (add GitHub Actions app 15368 as a bypass actor on the main ruleset, or main advanced mid-run — it will catch up on the next merge)."
+          fi
