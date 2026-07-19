@@ -14,7 +14,8 @@ descriptor; just a task file with its own branch.
 
 Copy to `<branch-slug>.md`, where the slug is the branch with every non-word
 character replaced by `-` (feat/big-thing → feat-big-thing.md). Then run
-`vp run coordination:board` and `vp run coordination:verify`.
+`vp run coordination:verify`. (`vp run coordination:board` renders a local,
+gitignored table view; it is never committed — ADR-037.)
 
 Fields:
   branch      the git branch these tasks share

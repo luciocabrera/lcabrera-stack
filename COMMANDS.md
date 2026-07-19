@@ -217,8 +217,8 @@ The in-git "who is working on what" register under [`docs/coordination/`](docs/c
 
 | Command                                       | Does                                                                                                             |
 | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `vp run coordination:verify`                  | check the task register + `BOARD.md` are consistent (CI gate)                                                    |
-| `vp run coordination:board`                   | regenerate `docs/coordination/BOARD.md` from the task files                                                      |
+| `vp run coordination:verify`                  | check the task register (schema, unique ids, `area` overlap) — CI gate                                           |
+| `vp run coordination:board`                   | write the local, gitignored `docs/coordination/BOARD.md` table view (never committed — ADR-037)                  |
 | `vp run coordination:board:live`              | live view: claims joined with open-PR state (draft/checks) + unregistered PRs (needs `gh`; prints, never writes) |
 | `vp run coordination:claim -- <id> "<title>"` | scaffold a task + branch (or `--worktree`) + draft PR in one step (`--dry-run` to preview)                       |
 
