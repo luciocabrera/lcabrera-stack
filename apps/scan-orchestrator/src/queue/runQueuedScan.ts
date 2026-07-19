@@ -2,6 +2,7 @@ import type { QueuedScanRow } from '@repo/scan-ingestion/queries/getQueuedScans.
 
 import { runSkillAgent } from '@repo/agent-runner';
 import { ingestReport } from '@repo/scan-ingestion/ingestion/ingestReport';
+import { collectRunSnapshotFiles } from '@repo/scan-ingestion/ingestion/snapshots/collectRunSnapshotFiles';
 import { claimQueuedScan } from '@repo/scan-ingestion/queries/claimQueuedScan.util';
 import { getTrailingLlmCostUsd } from '@repo/scan-ingestion/queries/getTrailingLlmCostUsd.util';
 import { markScanFailed } from '@repo/scan-ingestion/queries/markScanFailed.util';
@@ -335,4 +336,17 @@ export const runQueuedScan = async ({
   }
 
   publishStatus({ hub, scan, status: finalStatus });
+
+  // ADR-034: once this scan's run has finished, reclaim the tree of the snapshot
+  // it pinned (returns early inside if the run is still running). Best-effort —
+  // a failed collection must never fail an already-completed scan; the
+  // stale-run sweep / next pass reclaims at most one leaked snapshot.
+  try {
+    await collectRunSnapshotFiles({ runId: scan.run_id });
+  } catch (error) {
+    console.error(
+      `⚠️ Snapshot collection failed for run ${scan.run_id}:`,
+      error,
+    );
+  }
 };

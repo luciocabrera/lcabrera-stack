@@ -53,12 +53,12 @@ These are known and recorded — not drift:
 does not match the canonical spec. Most are decisions rather than bugs to fix in
 isolation.
 
-| #   | Item                                      | State                                                    |
-| --- | ----------------------------------------- | -------------------------------------------------------- |
-| 3.1 | §8 "no queuing" vs the LISTEN/NOTIFY code | **Resolved** — ADR-033; was a misreading, not a conflict |
-| 3.2 | Unsandboxed host execution                | Accepted pre-hosting; Phase 2 fixes it                   |
-| 3.3 | `/ws/runs` unauthenticated                | Accepted pre-hosting; Phase 2 fixes it                   |
-| 3.4 | Snapshot replaceable under a running scan | **Decided** — ADR-034 (pin the run); live until `0029`   |
+| #   | Item                                      | State                                                          |
+| --- | ----------------------------------------- | -------------------------------------------------------------- |
+| 3.1 | §8 "no queuing" vs the LISTEN/NOTIFY code | **Resolved** — ADR-033; was a misreading, not a conflict       |
+| 3.2 | Unsandboxed host execution                | Accepted pre-hosting; Phase 2 fixes it                         |
+| 3.3 | `/ws/runs` unauthenticated                | Accepted pre-hosting; Phase 2 fixes it                         |
+| 3.4 | Snapshot replaceable under a running scan | **Built** — ADR-034, migration `0029` (pin + retain + collect) |
 
 ### 3.1 The §8 "queue" contradiction — **RESOLVED 2026-07-16 (ADR-033)**
 
@@ -102,10 +102,10 @@ makes that model safe, so Phase 3 must not land before Phase 2.
 lists "Authenticate `/ws/runs`" under Phase 2. Same reasoning as 3.2: fine for a
 local tool, real exposure once hosted.
 
-### 3.4 A snapshot can be replaced under a running scan — **decided (ADR-034), not yet built**
+### 3.4 A snapshot can be replaced under a running scan — **built (migration `0029`)**
 
-Still live. Nothing blocks a sync while a run is active, and it fails two ways —
-the second worse than the first:
+Was live; **fixed by ADR-034 in migration `0029`** (issue #62). The two failure
+modes it closed:
 
 1. **The path is re-resolved, not pinned.** A run carries no snapshot reference;
    `v_queued_scans` joins on `projects.latest_snapshot_id`, so the orchestrator
@@ -126,9 +126,13 @@ governs the next trigger. §8's one-run-per-project lock keeps "is anything stil
 reading this?" a single-row check, and ADR-026's stale sweep is what makes a
 crashed run's snapshot collectable — no orphan reaper needed.
 
-**To build:** migration `0029` + the collection hook on `fn_finalize_run_status`.
-Worth reproducing the bug in a test first (sync mid-run; assert the run still
-reads the tree it was triggered on, and that the tree still exists).
+**Built (migration `0029`):** `runs.snapshot_id` captured in `fn_create_run`;
+`v_queued_scans` repointed through it; `fn_set_project_snapshot` returns the
+replaced path only when no active run pins it (otherwise retains); and
+`fn_collect_finished_run_snapshot` — called by the orchestrator after each scan —
+returns the collectable path and deletes the row, which the app rmSyncs. A DB-level
+test reproduces the original bug (sync mid-run → the run still reads its triggered
+tree, and the tree still exists) before asserting collection on finish.
 
 ---
 
