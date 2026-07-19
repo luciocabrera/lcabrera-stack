@@ -1,4 +1,5 @@
 import { discoverProjectWorkspaces } from '@repo/scan-ingestion/ingestion/workspaces/discoverProjectWorkspaces.util';
+import { getProjectActiveRun } from '@repo/scan-ingestion/queries/getProjectActiveRun.util';
 import { getProjectById } from '@repo/scan-ingestion/queries/getProjectById.util';
 import { replaceProjectWorkspaces } from '@repo/scan-ingestion/queries/replaceProjectWorkspaces.util';
 import { triggerScan as triggerScanMutation } from '@repo/scan-ingestion/queries/triggerScan.util';
@@ -10,6 +11,8 @@ import { requireUser } from '@/auth/requireUser.util';
 import { isCheckboxChecked } from '../utils/isCheckboxChecked.util';
 import { parseRouteParams } from '../utils/parseRouteParams.util';
 import { computeFanOutCount } from './computeFanOutCount.util';
+import { formatRunElapsed } from './formatRunElapsed.util';
+import { hasPostgresErrorCode } from './hasPostgresErrorCode.util';
 import { FAN_OUT_CONFIRMATION_THRESHOLD } from './triggerScan.constants';
 import { triggerScanSchema } from './triggerScan.schema';
 
@@ -119,8 +122,32 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
 
     return redirect(`/cqms/projects/view/${projectId}/runs/${runId}`);
   } catch (error) {
-    // fn_create_run's typed rejection (e.g. a viewer without the
-    // execute/scan grant, ADR-024) renders as a field error, not a 500.
+    // The per-project concurrency guard (migration 0021) raises ERRCODE 55000
+    // when a run started between page load and submit. Surface it as a real
+    // 409 carrying the active run's id + elapsed time (PRD_V2 §8) so the UI can
+    // link to it — not a generic field error. The snapshot check above already
+    // handled the other 55000 case (no snapshot), so a 55000 here with an active
+    // run is the concurrency conflict; if none is found, fall through.
+    if (hasPostgresErrorCode({ code: '55000', error })) {
+      const activeRun = await getProjectActiveRun({ projectId });
+      if (activeRun) {
+        return data(
+          {
+            conflict: {
+              elapsed: formatRunElapsed({
+                nowMs: Date.now(),
+                startedAtMs: Date.parse(activeRun.startedAt),
+              }),
+              runId: activeRun.runId,
+            },
+          },
+          { status: 409 },
+        );
+      }
+    }
+
+    // fn_create_run's other typed rejections (e.g. a viewer without the
+    // execute/scan grant, ADR-024) render as a field error, not a 500.
     return {
       errors: {
         scannerIds:
