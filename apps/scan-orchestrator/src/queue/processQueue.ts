@@ -4,25 +4,31 @@ import { getUserByUsername } from '@repo/scan-ingestion/queries/getUserByUsernam
 import type { RunStatusHub } from '../ws/runStatusHub.ts';
 
 import { runQueuedScan } from './runQueuedScan.ts';
+import { runWithConcurrencyLimit } from './runWithConcurrencyLimit.util.ts';
 
 const SYSTEM_USERNAME = 'system';
 
 type CreateQueueProcessorArgs = {
   readonly dailyCapUsd: number;
   readonly hub: RunStatusHub;
+  readonly maxConcurrentScans: number;
 };
 
 /**
- * Sequential drain loop (TECH_SPEC §2.7 — one queued scan at a time is
- * sufficient for v1, a low-traffic internal tool; a worker pool is a
- * straightforward later enhancement, not a v1 requirement). Re-entrant
- * wake-ups (a NOTIFY arriving mid-drain, or the reconciliation timer
- * firing while a scan is still running) just set a flag rather than
- * starting a second overlapping drain.
+ * Bounded-concurrency drain loop. Each pass claims the currently-queued scans
+ * and executes them through a worker pool sized by `maxConcurrentScans` — the
+ * global host-protection cap of PRD_V2 §9 / ADR-033 — so no more than that many
+ * scans ever run on the host at once; the rest wait for a slot (TECH_SPEC §2.7's
+ * "worker pool is a straightforward later enhancement"). Re-entrant wake-ups (a
+ * NOTIFY arriving mid-drain, or the reconciliation timer firing while a scan is
+ * still running) just set a flag rather than starting a second overlapping
+ * drain — the atomic per-scan claim (ADR-026) is what keeps the pool's workers
+ * from executing the same scan twice.
  */
 export const createQueueProcessor = ({
   dailyCapUsd,
   hub,
+  maxConcurrentScans,
 }: CreateQueueProcessorArgs) => {
   let isProcessing = false;
   let isWakeRequestedDuringProcessing = false;
@@ -40,9 +46,12 @@ export const createQueueProcessor = ({
 
     let queued = await getQueuedScans();
     while (queued.length > 0) {
-      for (const scan of queued) {
-        await runQueuedScan({ dailyCapUsd, hub, scan, userId: systemUser.id });
-      }
+      await runWithConcurrencyLimit({
+        items: queued,
+        limit: maxConcurrentScans,
+        worker: (scan) =>
+          runQueuedScan({ dailyCapUsd, hub, scan, userId: systemUser.id }),
+      });
       queued = await getQueuedScans();
     }
   };
