@@ -15,27 +15,38 @@ individually but imported only within its own folder.
 See `db/ARCHITECTURE.md` for the pure (`queryBuilder/`) vs impure (execution)
 split this folder is built around.
 
-| Artifact        | Location                | Description                                                                                                 |
-| --------------- | ----------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `readEnvConfig` | `db/env.schema.ts`      | Zod schema + parser for `DB_HOST`/`DB_NAME`/`DB_PASSWORD`/`DB_PORT`/`DB_USER`                               |
-| `getPool`       | `db/getPool.util.ts`    | Lazily-initialized `pg.Pool` singleton, one per Node process                                                |
-| `closePool`     | `db/getPool.util.ts`    | Tears down the pool singleton (test teardown)                                                               |
-| `selectRows`    | `db/selectRows.util.ts` | Builds a `SelectQueryDescriptor` and runs it on the pool — the one place `buildSelectQuery` meets `getPool` |
+| Artifact        | Location                 | Description                                                                                                     |
+| --------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| `readEnvConfig` | `db/env.schema.ts`       | Zod schema + parser for `DB_HOST`/`DB_NAME`/`DB_PASSWORD`/`DB_PORT`/`DB_USER`                                   |
+| `getPool`       | `db/getPool.util.ts`     | Lazily-initialized `pg.Pool` singleton, one per Node process                                                    |
+| `closePool`     | `db/getPool.util.ts`     | Tears down the pool singleton (test teardown)                                                                   |
+| `selectRows`    | `db/selectRows.util.ts`  | Builds a `SelectQueryDescriptor` and runs it on the pool — the one place `buildSelectQuery` meets `getPool`     |
+| `insertRow`     | `db/insertRow.util.ts`   | Builds + runs an `InsertQueryDescriptor`; defaults `RETURNING *`, returns the inserted row(s)                   |
+| `updateRows`    | `db/updateRows.util.ts`  | Builds + runs an `UpdateQueryDescriptor`; defaults `RETURNING *`, returns the updated row(s)                    |
+| `deleteRows`    | `db/deleteRows.util.ts`  | Builds + runs a `DeleteQueryDescriptor`; defaults `RETURNING *`, returns the deleted row(s)                     |
+| `getMaxValue`   | `db/getMaxValue.util.ts` | Runs `buildMaxValueQuery` and returns the numeric `MAX(col)` (0 if empty) — generic "next id" for id assignment |
 
 ### `src/db/queryBuilder/` — see its own `ARCHITECTURE.md`
 
-Generic, schema/table-agnostic SQL SELECT/count/distinct builder for the
-"flat list view, optional filter/sort/pagination" shape. Public entry
-points: `buildSelectQuery` (`queryBuilder/buildSelectQuery.util.ts`),
-`buildCountQuery` (`queryBuilder/buildCountQuery.util.ts`), and
-`buildDistinctQuery` (`queryBuilder/buildDistinctQuery.util.ts` — paginated
-`SELECT DISTINCT` for one column, the query behind filter-option lists, ADR-009),
+Generic, schema/table-agnostic SQL builder for the common single-table
+read **and** write shapes. Public entry points:
+
+- **Reads:** `buildSelectQuery` (`buildSelectQuery.util.ts`), `buildCountQuery`
+  (`buildCountQuery.util.ts`), and `buildDistinctQuery`
+  (`buildDistinctQuery.util.ts` — paginated `SELECT DISTINCT` for one column,
+  the query behind filter-option lists, ADR-009).
+- **Writes:** `buildInsertQuery` (`buildInsertQuery.util.ts`), `buildUpdateQuery`
+  (`buildUpdateQuery.util.ts`), `buildDeleteQuery` (`buildDeleteQuery.util.ts` —
+  update/delete require ≥1 filter, never build an unfiltered mutation), and
+  `buildMaxValueQuery` (`buildMaxValueQuery.util.ts` — `COALESCE(MAX(col), 0)`
+  for id assignment).
+
 plus the shared `QueryBuilder.types.ts` types. Every other file in that
 folder (`assertSafeIdentifier`, `assertColumnAllowed`, `appendFilterClause`,
-`buildWhereClause`, `buildOrderByClause`, `buildOptionalNumericClauses`,
-`quoteIdentifier`) is a private, individually-tested implementation detail
-composed by those entry points — import them directly only from within
-`queryBuilder/`.
+`buildWhereClause`, `buildReturningClause`, `buildOrderByClause`,
+`buildOptionalNumericClauses`, `quoteIdentifier`) is a private,
+individually-tested implementation detail composed by those entry points —
+import them directly only from within `queryBuilder/`.
 
 ---
 
