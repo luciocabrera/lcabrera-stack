@@ -1,0 +1,39 @@
+name: Add to project board
+
+# Auto-adds every new issue and (same-repo) PR to the planning Project board, so
+# the durable backlog (ADR-036) gets a live kanban with ZERO bespoke sync code —
+# GitHub's own action owns the wiring, one-directional (issue/PR → board).
+#
+# Inert until the board is configured: the job is gated on the `PROJECT_URL` repo
+# variable, so it no-ops (green) until an owner grants the Projects scope, creates
+# the board, and sets `PROJECT_URL` (variable) + `ADD_TO_PROJECT_PAT` (secret).
+# See issue #56 and docs/tooling/github-planning.md. Projects v2 needs a PAT with
+# the `project` scope — the default GITHUB_TOKEN cannot write it, which is exactly
+# why this is a one-time owner step rather than something CI can self-serve.
+
+on:
+  issues:
+    types: [opened, reopened]
+  pull_request:
+    types: [opened, reopened, ready_for_review]
+
+# Least privilege: the action authenticates with the PAT, not GITHUB_TOKEN.
+permissions:
+  contents: read
+
+jobs:
+  add-to-project:
+    name: Add issue/PR to the board
+    runs-on: ubuntu-latest
+    # Inert until configured; never runs for fork PRs (their runs lack the PAT
+    # secret — labeler.yml uses the same head-repo guard).
+    if: >-
+      vars.PROJECT_URL != '' &&
+      (github.event_name == 'issues' ||
+      github.event.pull_request.head.repo.full_name == github.repository)
+    steps:
+      - name: Add to project
+        uses: actions/add-to-project@5afcf98fcd03f1c2f92c3c83f58ae24323cc57fd # v2.0.0
+        with:
+          project-url: ${{ vars.PROJECT_URL }}
+          github-token: ${{ secrets.ADD_TO_PROJECT_PAT }}
