@@ -4,4 +4,8 @@
 > Do not hand-edit — edit the source file, then regenerate. `vp run
 coordination:verify` fails if this drifts. See [README.md](./README.md).
 
-_No active tasks. Claim one by copying `tasks/_TEMPLATE.md`._
+## Tasks
+
+| Task                                                                                                                                                              | Owner        | Status | Branch                               | Area                                                                                                                                                                    | Updated    |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | ------ | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| ["@repo/ui Form showcase enhancements (read-only display, card groups, span rows, currency, glass recipe, radio accent)"](tasks/ui-form-showcase-enhancements.md) | agent:claude | active | `feat/ui-form-showcase-enhancements` | `packages/ui/src/components/Form/**`<br>`packages/ui/src/components/Modal/**`<br>`packages/ui/src/components/RadioOptionGroup/**`<br>`packages/ui/src/design-system/**` | 2026-07-19 |
