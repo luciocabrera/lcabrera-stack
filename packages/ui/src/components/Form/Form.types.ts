@@ -62,6 +62,10 @@ export type FormProps<TValues extends Record<string, unknown>> = {
 export type FormSubmission = 'fetcher' | 'navigation';
 
 export type GroupFieldNode<TValues extends Record<string, unknown>> = {
+  /** When true, the group renders a clickable header that collapses/expands its fields. */
+  readonly collapsible?: boolean;
+  /** Initial collapsed state for a `collapsible` group (ignored otherwise). */
+  readonly defaultCollapsed?: boolean;
   readonly fields: readonly FieldNode<TValues>[];
   readonly label?: string;
   readonly type: 'group';

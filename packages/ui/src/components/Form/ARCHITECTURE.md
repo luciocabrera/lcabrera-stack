@@ -69,7 +69,7 @@ Form/
 │   │       ├── FormFieldsRendererContext.context.ts → createContext (undefined default)
 │   │       ├── FormFieldsRendererContext.types.ts   → RenderFieldsFn (TValues erased to Record<string, unknown> at the boundary, mirrors AnyFieldComponent)
 │   │       └── useFormFieldsRendererContext.hook.ts → use(context) with guard (infra only)
-│   ├── FormFieldGroup/           → `group` node: optional label + nested fields (.component + .types + .stylex + .test)
+│   ├── FormFieldGroup/           → `group` node: bordered card section with an optional header; `collapsible`/`defaultCollapsed` make the header a toggle button (collapsed body is display:none, not unmounted, so values still submit) (.component + .types + .stylex + .test)
 │   ├── FormFieldRow/             → `row` node: horizontal equal-flex cells of nested fields (.component + .types + .stylex + .test)
 │   ├── FormFieldTabs/            → `tab` node: one Tabs panel per tab (.component + .types + .test)
 │   └── utils/
