@@ -78,10 +78,17 @@ See [ADR-033](./decisions/ADR-033-no-queue-is-per-project-admission-control.md).
 §8 and §9 are amended accordingly; the alignment review's "retire the queue"
 Phase-2 bullet is annotated as corrected.
 
-**Still to build (Phase 2), narrower than it looked:**
+**Built (#63, PR #76):** the **`409` surface** — the trigger action maps the DB's
+`ERRCODE 55000` to a `409 Conflict` carrying the active `run_id` and elapsed time,
+the loader detects an in-flight run to disable the trigger, and both paths render
+the shared `ActiveRunNotice` banner linking to the running scan.
 
-- The **`409` surface**: there is no `409` anywhere in `apps/admin_system/src` — the DB's rejection currently reaches the UI as a generic form error. §8 wants a `409 Conflict` carrying the active `run_id` and elapsed time, plus a live-status trigger-disable and an alert banner.
-- A **global concurrency cap** (env var): nothing limits how many runs execute at once platform-wide. Host protection, not admission control — runs beyond the cap wait.
+**Built (#64):** the **global concurrency cap** — `MAX_CONCURRENT_SCANS` (env var,
+default 3) bounds how many scans the orchestrator executes on the host at once
+(`runWithConcurrencyLimit` turns the drain into a bounded worker pool). Host
+protection, not admission control — scans beyond the cap wait for a slot.
+
+**Still to build (Phase 2):** the run container (§3.2) — see below.
 
 ### 3.2 Scanners execute unsandboxed on the host — accepted pre-hosting
 

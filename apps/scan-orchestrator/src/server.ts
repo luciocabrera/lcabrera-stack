@@ -19,6 +19,7 @@ const hub = createRunStatusHub();
 const queueProcessor = createQueueProcessor({
   dailyCapUsd: envConfig.LLM_DAILY_COST_CAP_USD,
   hub,
+  maxConcurrentScans: envConfig.MAX_CONCURRENT_SCANS,
 });
 
 const httpServer = createHttpServer();

@@ -24,11 +24,14 @@ does, and the only one that ever needs `ANTHROPIC_API_KEY`.
 2. That DB function's last line is `PERFORM pg_notify('cqms_scan_queued', ...)`.
 3. This process's dedicated `LISTEN` connection wakes `processQueue`'s
    `wake()`, which drains every currently-`queued` scan
-   (`getQueuedScans()`) one at a time. Each scan is CLAIMED first
-   (`fn_claim_queued_scan`, an atomic queued→running flip that reports
-   whether this caller won — ADR-026); a lost claim is skipped silently,
-   so a duplicate orchestrator or overlapping wake never executes a scan
-   twice.
+   (`getQueuedScans()`) through a bounded worker pool
+   (`runWithConcurrencyLimit`, sized by `MAX_CONCURRENT_SCANS` — the
+   global host-protection cap of PRD_V2 §9 / ADR-033), so at most that
+   many scans run on the host at once and the rest wait for a slot. Each
+   scan is CLAIMED first (`fn_claim_queued_scan`, an atomic queued→running
+   flip that reports whether this caller won — ADR-026); a lost claim is
+   skipped silently, so a duplicate orchestrator, an overlapping wake, or
+   two pool workers never execute a scan twice.
 4. A reconciliation poll (every 30s, plus once on startup) re-checks the
    same query — the correctness backstop for `NOTIFY`'s fire-and-forget
    nature (dropped if nobody's listening when it fires).

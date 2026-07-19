@@ -4,4 +4,8 @@
 > Do not hand-edit — edit the source file, then regenerate. `vp run
 coordination:verify` fails if this drifts. See [README.md](./README.md).
 
-_No active tasks. Claim one by copying `tasks/_TEMPLATE.md`._
+## Tasks
+
+| Task                                                                                                          | Owner        | Status | Branch                             | Area                                                                                                                                 | Updated    |
+| ------------------------------------------------------------------------------------------------------------- | ------------ | ------ | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ---------- |
+| [Global concurrency cap (env var) for scanner runs (CQMS Phase 2, #64)](tasks/cqms-global-concurrency-cap.md) | agent:claude | review | `feat/cqms-global-concurrency-cap` | `apps/scan-orchestrator/src/config/env.schema.ts`<br>`apps/scan-orchestrator/src/queue/**`<br>`apps/scan-orchestrator/src/server.ts` | 2026-07-19 |
