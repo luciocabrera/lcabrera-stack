@@ -39,6 +39,11 @@ immediately):
 4. **Keep it current.** Bump `updated:` as you make progress; move `status:`
    through `active → review` (and `blocked`/`paused` when true). Stale tasks are
    flagged so abandoned work surfaces instead of rotting like the old plan files.
+   If the task tracks a backlog issue (`issue:`), **self-assign that issue the
+   moment you start** (`gh issue edit <n> --add-assignee @me`) — that's the signal
+   that moves its Planning-board card to In Progress before any PR exists (the rest
+   of the Status column is automated; see
+   [github-planning.md → Status automation](../tooling/github-planning.md#status-automation)).
 5. **Close it.** When the work merges, **delete the task file** (its history lives
    in the PR and commits). Open a PR early — a draft PR is the human-visible
    progress surface that pairs with this register.

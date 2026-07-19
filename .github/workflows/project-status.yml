@@ -1,0 +1,47 @@
+name: Project status sync
+
+# Keeps the Planning project's Status column tracking reality without anyone
+# dragging cards — the board was going stale because status was manual (an agent
+# works in its own tree and the issue sits in Todo until a PR shows up). The
+# event→status map lives in scripts/sync-project-status.mjs:
+#   issue assigned            → In Progress   (self-assign = "I've started")
+#   PR opened/reopened draft  → In Progress
+#   PR ready for review       → In Review
+#   PR converted to draft     → In Progress
+#   PR merged                 → Done
+#   PR closed unmerged        → Todo
+#
+# Needs the ADD_TO_PROJECT_PAT secret (a PAT with project + repo scopes) — the same
+# one add-to-project.yml uses. Without it (fork PRs) the script skips, so the job
+# stays green. The job is gated to same-repo events so a fork PR never fails here.
+
+on:
+  issues:
+    types: [assigned]
+  pull_request:
+    types: [opened, reopened, ready_for_review, converted_to_draft, closed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: project-status-${{ github.event.issue.number || github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Sync Planning board status
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'issues' ||
+      github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - name: Checkout (for the sync script)
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Sync status
+        env:
+          GH_PROJECT_TOKEN: ${{ secrets.ADD_TO_PROJECT_PAT }}
+          PROJECT_NUMBER: '4'
+          PROJECT_OWNER: luciocabrera
+        run: node scripts/sync-project-status.mjs

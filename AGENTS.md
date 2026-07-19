@@ -302,7 +302,10 @@ never moved to Issues — a task file is readable offline on any branch and gate
    same shared branch is then treated as collaboration, not a collision). Open a
    **draft PR early** (the human-visible progress surface).
 4. **Keep `status`/`updated` current**; move through `active → review`. (Status also
-   lives in the linked Issue + the Planning board — the GitHub-visible source.)
+   lives in the linked Issue + the Planning board — the GitHub-visible source. If the
+   task has an `issue:`, **self-assign it when you start** — `gh issue edit <n> --add-assignee @me` —
+   which moves its board card to In Progress; the rest of the Status column is automated,
+   see [github-planning.md](docs/tooling/github-planning.md#status-automation).)
 5. **Close it** — delete the task file when the work merges.
 
 The check runs in CI (`check-safe.yml`). It fails on register _integrity_ (a
