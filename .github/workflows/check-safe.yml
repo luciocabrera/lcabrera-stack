@@ -189,18 +189,28 @@ jobs:
       - name: Generate route types
         run: vp run typegen:all
 
-      - name: Coverage for the DB-free suites
+      - name: Coverage for the DB-free suites (changed only)
         # Feeds `fallow audit --coverage` real numbers. Without them fallow
         # ESTIMATES coverage from whether a colocated test file exists (none →
         # 0%), and since CRAP is cyclomatic² × (1 − coverage)³ + cyclomatic
         # against a threshold of 30, every function with cyclomatic >= 5 would
         # fail the gate on complexity it does not have.
         #
+        # `--changed` scopes it to the covered workspaces this diff actually
+        # touched: the audit is new-only (it scores only the diff's own files),
+        # so an untouched workspace's coverage is never consulted — running it
+        # was pure waste. If the diff touches no covered workspace it writes an
+        # empty (valid) coverage file and fallow falls back to estimation.
+        #
         # DB-free suites ONLY — this job has no Postgres, and that is exactly
         # what broke the previous attempt at this (reverted 2026-07-14):
         # scan-ingestion's queries/* tests call getPool() → readEnvConfig(),
         # which throws on the missing DB_*. See scripts/merge-coverage.mjs.
-        run: vp run coverage:merge
+        env:
+          TEST_CHANGED_BASE: origin/${{ github.base_ref }}
+        run: |
+          git diff --name-only "$(git merge-base "$TEST_CHANGED_BASE" HEAD)" \
+            | node scripts/merge-coverage.mjs --changed
 
       - name: Fallow audit vs base branch
         id: fallow_audit
@@ -255,6 +265,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          # test:changed diffs the PR head against its base ref, so it needs the
+          # full history and the base branch — same reason the fallow-audit job
+          # fetches everything.
+          fetch-depth: 0
 
       - name: Setup Vite+
         uses: voidzero-dev/setup-vp@8ecb39174989ce55af90f45cf55b02738599831d
@@ -265,24 +280,96 @@ jobs:
       - name: Install dependencies
         run: vp install --frozen-lockfile --ignore-scripts && vp config
 
-      - name: Run the DB-free suites (every workspace) + showcase coverage
-        # This job has no Postgres, so `test:ci` runs every DB-free suite:
-        # all workspaces except scan-orchestrator (real CQMS queue), plus
-        # scan-ingestion's DB-free `test:unit` subset, then react-router's
-        # `test:ci` last so it emits its coverage-summary.json for the step below.
-        run: vp run test:ci
+      - name: Run the DB-free suites (changed on PRs, all on main)
+        # On a PR, `test:changed --ci` runs only the workspaces the diff touched
+        # plus their dependents — a root/shared change still falls back to the
+        # full suite. On a push to `main` (no base ref) it runs the full DB-free
+        # `test:ci`. Either way the task substitution is identical: scan packages
+        # use their DB-free `test:unit`, and react-router runs its coverage
+        # `test:ci` last so it emits coverage-summary.json for the step below.
+        # (When a PR skips react-router, the coverage step degrades gracefully —
+        # it filters absent summaries out.)
+        env:
+          TEST_CHANGED_BASE: origin/${{ github.base_ref }}
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            vp run test:changed -- --ci
+          else
+            vp run test:ci
+          fi
+
+      - name: Test selection summary
+        # Make the change-based selection visible instead of buried in the test
+        # log: the per-workspace "running / skipped" breakdown goes to the job
+        # summary and (below) a sticky PR comment, so a reviewer can see exactly
+        # what was checked and what was skipped. Report-only — runs no tests.
+        if: github.event_name == 'pull_request' && always()
+        env:
+          TEST_CHANGED_BASE: origin/${{ github.base_ref }}
+        run: |
+          git diff --name-only "$(git merge-base "$TEST_CHANGED_BASE" HEAD)" \
+            | node scripts/test-changed.mjs --ci --markdown \
+            | tee test-selection.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Post test selection to PR
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        with:
+          script: |
+            const fs = require('fs');
+            const path = './test-selection.md';
+            if (!fs.existsSync(path)) return;
+            const body = fs.readFileSync(path, 'utf-8').trim();
+            if (!body) return;
+
+            const marker = '## 🧪 Test Selection';
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(
+              (c) => c.user.login === 'github-actions[bot]' && c.body.includes(marker),
+            );
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
 
       - name: Per-workspace + monorepo coverage report
         # Builds coverage/monorepo-coverage-summary.json — one entry per reported
         # workspace (ui, data-access, react-router) plus an aggregated total —
         # which the PR-comment step renders as a matrix. Best-effort and
-        # `always()`: `test:ci` above is the authoritative pass/fail gate, so a
+        # `always()`: the test step above is the authoritative pass/fail gate, so a
         # coverage hiccup here must not fail the job, and a partial report on a
         # test failure is more useful than none. It re-runs test:coverage for the
-        # package workspaces (their `test:ci` run above is plain `test`, no
-        # coverage) and reuses react-router's fresh summary.
+        # package workspaces (their test run above is plain `test`, no coverage)
+        # and reuses react-router's fresh summary.
+        #
+        # On a PR it scopes to the same changed workspaces the test step ran
+        # (`--changed`), so an unrelated PR doesn't re-run coverage that was
+        # skipped; pushes to main report every workspace.
         if: always()
-        run: vp run coverage:report
+        env:
+          TEST_CHANGED_BASE: origin/${{ github.base_ref }}
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git diff --name-only "$(git merge-base "$TEST_CHANGED_BASE" HEAD)" \
+              | node scripts/coverage-report.mjs --changed
+          else
+            vp run coverage:report
+          fi
 
       - name: Upload coverage report
         if: always() && vars.ENABLE_ARTIFACT_UPLOADS == 'true'

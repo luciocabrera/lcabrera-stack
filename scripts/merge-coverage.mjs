@@ -33,11 +33,13 @@
  * uncovered files as 0% and fail the gate on phantom complexity).
  */
 import { execFile } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
+
+import { readWorkspaceGraph, resolveAffected } from './lib/affected-tests.mjs';
 
 const execFileAsync = promisify(execFile);
 
@@ -46,6 +48,10 @@ const OUTPUT_PATH = join(
   REPO_ROOT,
   'reports/fallow/coverage/coverage-final.json',
 );
+
+// The workspace's own vp shim by absolute path — never a bare `vp` off $PATH
+// (the Sonar S4036 hotspot). `vp install` always provides it.
+const VP_BIN = join(REPO_ROOT, 'node_modules', '.bin', 'vp');
 
 /**
  * Workspaces whose `test:coverage` task runs without a database, a browser
@@ -70,11 +76,41 @@ const COVERAGE_WORKSPACES = [
 ];
 
 const shouldRun = !process.argv.includes('--no-run');
+const changedOnly = process.argv.includes('--changed');
+
+/**
+ * The workspaces to measure. With `--changed`, scopes to the covered workspaces
+ * a diff (paths on stdin) DIRECTLY changed — so the fallow job stops running
+ * coverage for workspaces the change never touched. The audit is new-only (it
+ * scores only the diff's own files), so only a directly-changed workspace's
+ * coverage is ever consulted; dependents don't need it. A root/shared change
+ * (mode `full`) keeps the whole set.
+ */
+const targetWorkspaces = () => {
+  if (!changedOnly) {
+    return COVERAGE_WORKSPACES;
+  }
+  const files = readFileSync(0, 'utf8')
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const { mode, changed } = resolveAffected({
+    files,
+    graph: readWorkspaceGraph(REPO_ROOT),
+  });
+  if (mode === 'full') {
+    return COVERAGE_WORKSPACES;
+  }
+  const changedSet = new Set(changed);
+  return COVERAGE_WORKSPACES.filter((workspace) =>
+    changedSet.has(workspace.name),
+  );
+};
 
 const runCoverage = async ({ dir, name }) => {
   process.stdout.write(`• ${name} — running test:coverage…\n`);
   try {
-    await execFileAsync('vp', ['run', '--filter', name, 'test:coverage'], {
+    await execFileAsync(VP_BIN, ['run', '--filter', name, 'test:coverage'], {
       cwd: REPO_ROOT,
       maxBuffer: 64 * 1024 * 1024,
     });
@@ -102,24 +138,40 @@ const readWorkspaceCoverage = async ({ dir, name }) => {
  */
 const mergeCoverage = (reports) => Object.assign({}, ...reports);
 
+const writeMerged = async (merged) => {
+  await mkdir(dirname(OUTPUT_PATH), { recursive: true });
+  await writeFile(OUTPUT_PATH, `${JSON.stringify(merged)}\n`);
+};
+
 const main = async () => {
+  const workspaces = targetWorkspaces();
+
+  // Scoped run that touched no covered workspace: still write an empty (valid)
+  // coverage file so `fallow audit --coverage` has an input and falls back to
+  // estimation for the diff's files. Nothing to measure is a success.
+  if (changedOnly && workspaces.length === 0) {
+    await writeMerged({});
+    process.stdout.write(
+      'coverage: no covered workspace changed — wrote empty coverage-final.json.\n',
+    );
+    return;
+  }
+
   if (shouldRun) {
-    for (const workspace of COVERAGE_WORKSPACES) {
+    for (const workspace of workspaces) {
       await runCoverage(workspace);
     }
   }
 
   const reports = await Promise.all(
-    COVERAGE_WORKSPACES.map((workspace) => readWorkspaceCoverage(workspace)),
+    workspaces.map((workspace) => readWorkspaceCoverage(workspace)),
   );
   const merged = mergeCoverage(reports);
-
-  await mkdir(dirname(OUTPUT_PATH), { recursive: true });
-  await writeFile(OUTPUT_PATH, `${JSON.stringify(merged)}\n`);
+  await writeMerged(merged);
 
   const fileCount = Object.keys(merged).length;
   process.stdout.write(
-    `\n✔ merged ${fileCount} files from ${COVERAGE_WORKSPACES.length} workspaces → reports/fallow/coverage/coverage-final.json\n` +
+    `\n✔ merged ${fileCount} files from ${workspaces.length} workspace(s) → reports/fallow/coverage/coverage-final.json\n` +
       `  feed it to the gate: vp run fallow:audit --base origin/main --coverage reports/fallow/coverage/coverage-final.json\n`,
   );
 };
