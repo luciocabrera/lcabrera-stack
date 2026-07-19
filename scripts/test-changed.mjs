@@ -22,6 +22,7 @@ import { fileURLToPath } from 'node:url';
 
 import {
   readWorkspaceGraph,
+  renderSelectionMarkdown,
   resolveTestGroups,
   workspaceDispositions,
 } from './lib/affected-tests.mjs';
@@ -81,6 +82,7 @@ const printReport = (mode, dispositions) => {
 
 const main = async () => {
   const args = new Set(process.argv.slice(2));
+  const markdown = args.has('--markdown');
   const dryRun = args.has('--dry-run');
   const ci = args.has('--ci');
 
@@ -91,11 +93,21 @@ const main = async () => {
     graph,
     ci,
   });
+  const dispositions = workspaceDispositions({
+    graph,
+    affected: packages,
+    changed,
+    groups,
+  });
 
-  printReport(
-    mode,
-    workspaceDispositions({ graph, affected: packages, changed, groups }),
-  );
+  // Report-only: emit the markdown selection summary for CI (job summary + PR
+  // comment) and run nothing.
+  if (markdown) {
+    process.stdout.write(`${renderSelectionMarkdown(mode, dispositions)}\n`);
+    return;
+  }
+
+  printReport(mode, dispositions);
 
   if (groups.length === 0) {
     process.stdout.write('Nothing to test.\n');

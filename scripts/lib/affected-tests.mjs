@@ -214,3 +214,50 @@ export const workspaceDispositions = ({ graph, affected, changed, groups }) => {
     };
   });
 };
+
+/**
+ * A GitHub-flavoured markdown version of the disposition report, for the CI
+ * job summary and the PR comment — so the change-based selection is visible in
+ * the PR, not hidden in the logs. The `## 🧪 Test Selection` heading is the
+ * sticky-comment marker; keep it stable.
+ */
+export const renderSelectionMarkdown = (mode, dispositions) => {
+  const running = dispositions.filter((disposition) => disposition.running);
+  const skipped = dispositions.filter((disposition) => !disposition.running);
+  const total = dispositions.length;
+  const headline =
+    mode === 'full'
+      ? `**Full run** — a shared or root file changed, so all ${total} workspaces run.`
+      : `**${running.length} of ${total} workspaces** affected by this change; the rest are skipped (no changes detected).`;
+  const runningBlock =
+    running.length === 0
+      ? []
+      : [
+          '### ▶ Running',
+          '',
+          '| Workspace | Task | Why |',
+          '| --- | --- | --- |',
+          ...running.map(
+            ({ dir, task, reason }) =>
+              `| \`${dir}\` | \`${task}\` | ${reason} |`,
+          ),
+          '',
+        ];
+  const skippedBlock =
+    skipped.length === 0
+      ? []
+      : [
+          '### ⏭ Skipped — no changes detected',
+          '',
+          skipped.map(({ dir }) => `\`${dir}\``).join(', '),
+          '',
+        ];
+  return [
+    '## 🧪 Test Selection',
+    '',
+    headline,
+    '',
+    ...runningBlock,
+    ...skippedBlock,
+  ].join('\n');
+};
