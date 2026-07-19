@@ -36,6 +36,7 @@
  *   node scripts/coverage-report.mjs    # same, direct
  *   node scripts/coverage-report.mjs --all       # also run react-router's test:coverage (standalone local use)
  *   node scripts/coverage-report.mjs --no-run     # aggregate already-generated summaries only, run nothing
+ *   git diff --name-only BASE | node scripts/coverage-report.mjs --changed  # only workspaces a diff affected (CI PRs)
  *
  * Best-effort by design: a workspace whose coverage is missing or whose suite
  * fails is warned about and skipped, not fatal — the actual test gate is
@@ -43,16 +44,22 @@
  * non-zero only when it can produce no report at all.
  */
 import { execFile } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 
+import { readWorkspaceGraph, resolveAffected } from './lib/affected-tests.mjs';
+
 const execFileAsync = promisify(execFile);
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
 const OUTPUT_PATH = join(REPO_ROOT, 'coverage/monorepo-coverage-summary.json');
+
+// The workspace's own vp shim by absolute path — never a bare `vp` off $PATH
+// (the Sonar S4036 hotspot). `vp install` always provides it.
+const VP_BIN = join(REPO_ROOT, 'node_modules', '.bin', 'vp');
 
 /** The four metrics Istanbul's json-summary exposes on `.total` that we report. */
 const METRICS = ['lines', 'statements', 'functions', 'branches'];
@@ -81,6 +88,35 @@ const COVERAGE_REPORT_WORKSPACES = [
 
 const runAll = process.argv.includes('--all');
 const shouldRun = !process.argv.includes('--no-run');
+const changedOnly = process.argv.includes('--changed');
+
+/**
+ * The workspaces to report on. With `--changed`, scopes the list to the ones a
+ * diff (paths on stdin) actually affected — changed workspaces plus their
+ * dependents — so an unrelated PR does not re-run coverage the test step
+ * already skipped. A root/shared change (mode `full`) keeps the whole list.
+ * Without the flag, reports every workspace (local + main-branch behaviour).
+ */
+const reportedWorkspaces = () => {
+  if (!changedOnly) {
+    return COVERAGE_REPORT_WORKSPACES;
+  }
+  const files = readFileSync(0, 'utf8')
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const { mode, packages } = resolveAffected({
+    files,
+    graph: readWorkspaceGraph(REPO_ROOT),
+  });
+  if (mode === 'full') {
+    return COVERAGE_REPORT_WORKSPACES;
+  }
+  const affected = new Set(packages);
+  return COVERAGE_REPORT_WORKSPACES.filter((workspace) =>
+    affected.has(workspace.name),
+  );
+};
 
 const summaryPathFor = ({ dir }) =>
   join(REPO_ROOT, dir, 'coverage/coverage-summary.json');
@@ -88,7 +124,7 @@ const summaryPathFor = ({ dir }) =>
 const runCoverage = async ({ name }) => {
   process.stdout.write(`• ${name} — running test:coverage…\n`);
   try {
-    await execFileAsync('vp', ['run', '--filter', name, 'test:coverage'], {
+    await execFileAsync(VP_BIN, ['run', '--filter', name, 'test:coverage'], {
       cwd: REPO_ROOT,
       maxBuffer: 64 * 1024 * 1024,
     });
@@ -163,15 +199,27 @@ const printTable = (workspaces, total) => {
 };
 
 const main = async () => {
+  const workspaces = reportedWorkspaces();
+
+  // Scoped run that touched no reported workspace: there is nothing to measure,
+  // and that is a success, not a failure. The PR-comment step already treats a
+  // missing summary gracefully.
+  if (changedOnly && workspaces.length === 0) {
+    process.stdout.write(
+      'coverage: no coverage-reported workspace changed — skipping report.\n',
+    );
+    return;
+  }
+
   if (shouldRun) {
-    for (const workspace of COVERAGE_REPORT_WORKSPACES) {
+    for (const workspace of workspaces) {
       if (workspace.run || runAll) await runCoverage(workspace);
     }
   }
 
   // Filter the absent summaries out before reading — a missing suite degrades
   // the report gracefully (warned + skipped) instead of crashing it.
-  const missing = COVERAGE_REPORT_WORKSPACES.filter(
+  const missing = workspaces.filter(
     (workspace) => !existsSync(summaryPathFor(workspace)),
   );
   for (const { name, dir } of missing) {
@@ -180,10 +228,18 @@ const main = async () => {
     );
   }
 
-  const present = COVERAGE_REPORT_WORKSPACES.filter((workspace) =>
+  const present = workspaces.filter((workspace) =>
     existsSync(summaryPathFor(workspace)),
   );
   if (present.length === 0) {
+    // In --changed mode a coverage hiccup must not fail the job (test:changed is
+    // the gate); elsewhere an empty result means the run was misconfigured.
+    if (changedOnly) {
+      process.stdout.write(
+        'coverage: no summaries produced for the changed workspaces — skipping report.\n',
+      );
+      return;
+    }
     throw new Error(
       'no workspace coverage found — run without --no-run, or run `vp run test:ci` first.',
     );

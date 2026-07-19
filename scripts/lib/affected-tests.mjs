@@ -49,6 +49,10 @@ const INERT_PATTERNS = [
   /^\.github\//,
   /^\.vscode\//,
   /^reports\//,
+  // Root tooling: gates, report generators, seeders. No workspace test imports
+  // from here, so a scripts-only change never changes a suite's outcome. (Only
+  // ROOT scripts/ — `apps/x/scripts/` matches its workspace above.)
+  /^scripts\//,
   /^\.gitignore$/,
   /^\.env\.example$/,
   /^LICENSE$/,
@@ -152,29 +156,41 @@ export const partitionTasks = (affectedPackages, { ci = false } = {}) => {
 };
 
 /**
- * The plan for a diff: `{ mode, groups }`, where mode is `none` (nothing to run),
- * `full` (root/shared change → every workspace), or `scoped` (changed workspaces
- * plus their dependents). `groups` are ready to hand to `vp run`.
+ * The affected package names for a diff: `{ mode, packages }`, where mode is
+ * `none` (nothing to run), `full` (root/shared change → every workspace), or
+ * `scoped` (changed workspaces plus their transitive dependents). The shared
+ * core both the test runner and the coverage report scope themselves by.
  */
-export const resolveTestGroups = ({ files, graph, ci = false }) => {
+export const resolveAffected = ({ files, graph }) => {
   if (files.length === 0) {
-    return { mode: 'none', groups: [] };
+    return { mode: 'none', packages: [] };
   }
   const changed = workspacesForFiles(files, graph);
   const forceFull =
     hasGlobalChange(files) ||
     changed.some((workspace) => GLOBAL_PACKAGES.has(workspace.pkgName));
   if (forceFull) {
-    const all = graph.map((workspace) => workspace.pkgName);
-    return { mode: 'full', groups: partitionTasks(all, { ci }) };
+    return {
+      mode: 'full',
+      packages: graph.map((workspace) => workspace.pkgName),
+    };
   }
   if (changed.length === 0) {
-    return { mode: 'none', groups: [] };
+    return { mode: 'none', packages: [] };
   }
   const dependents = buildDependents(graph);
   const affected = withDependents(
     changed.map((workspace) => workspace.pkgName),
     dependents,
   );
-  return { mode: 'scoped', groups: partitionTasks([...affected], { ci }) };
+  return { mode: 'scoped', packages: [...affected] };
+};
+
+/**
+ * The plan for a diff: `{ mode, groups }` — `resolveAffected` split into the
+ * ordered `vp run` groups (see `partitionTasks`), ready to hand to `vp run`.
+ */
+export const resolveTestGroups = ({ files, graph, ci = false }) => {
+  const { mode, packages } = resolveAffected({ files, graph });
+  return { mode, groups: partitionTasks(packages, { ci }) };
 };

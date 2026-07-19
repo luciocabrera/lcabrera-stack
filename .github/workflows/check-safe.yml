@@ -292,13 +292,25 @@ jobs:
         # Builds coverage/monorepo-coverage-summary.json — one entry per reported
         # workspace (ui, data-access, react-router) plus an aggregated total —
         # which the PR-comment step renders as a matrix. Best-effort and
-        # `always()`: `test:ci` above is the authoritative pass/fail gate, so a
+        # `always()`: the test step above is the authoritative pass/fail gate, so a
         # coverage hiccup here must not fail the job, and a partial report on a
         # test failure is more useful than none. It re-runs test:coverage for the
-        # package workspaces (their `test:ci` run above is plain `test`, no
-        # coverage) and reuses react-router's fresh summary.
+        # package workspaces (their test run above is plain `test`, no coverage)
+        # and reuses react-router's fresh summary.
+        #
+        # On a PR it scopes to the same changed workspaces the test step ran
+        # (`--changed`), so an unrelated PR doesn't re-run coverage that was
+        # skipped; pushes to main report every workspace.
         if: always()
-        run: vp run coverage:report
+        env:
+          TEST_CHANGED_BASE: origin/${{ github.base_ref }}
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git diff --name-only "$(git merge-base "$TEST_CHANGED_BASE" HEAD)" \
+              | node scripts/coverage-report.mjs --changed
+          else
+            vp run coverage:report
+          fi
 
       - name: Upload coverage report
         if: always() && vars.ENABLE_ARTIFACT_UPLOADS == 'true'

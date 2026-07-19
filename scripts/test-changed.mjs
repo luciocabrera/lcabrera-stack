@@ -17,7 +17,7 @@
  */
 import { spawn } from 'node:child_process';
 import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
@@ -26,6 +26,11 @@ import {
 } from './lib/affected-tests.mjs';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
+
+// Run the workspace's own vp binary by absolute path — never a bare `vp`
+// resolved through $PATH, which would let a directory earlier in PATH shadow it
+// (the Sonar S4036 hotspot). `vp install` always provides this shim.
+const VP_BIN = join(REPO_ROOT, 'node_modules', '.bin', 'vp');
 
 const readChangedFiles = () =>
   readFileSync(0, 'utf8')
@@ -41,7 +46,7 @@ const vpArgsFor = ({ task, packages }) => [
 
 const runGroup = (group) =>
   new Promise((res) => {
-    const child = spawn('vp', vpArgsFor(group), {
+    const child = spawn(VP_BIN, vpArgsFor(group), {
       cwd: REPO_ROOT,
       stdio: 'inherit',
     });
@@ -50,9 +55,9 @@ const runGroup = (group) =>
   });
 
 const main = async () => {
-  const args = process.argv.slice(2);
-  const dryRun = args.includes('--dry-run');
-  const ci = args.includes('--ci');
+  const args = new Set(process.argv.slice(2));
+  const dryRun = args.has('--dry-run');
+  const ci = args.has('--ci');
 
   const files = readChangedFiles();
   const graph = readWorkspaceGraph(REPO_ROOT);
