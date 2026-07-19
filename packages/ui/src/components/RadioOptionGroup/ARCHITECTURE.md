@@ -50,11 +50,11 @@ The component is **fully controlled** — `value` is always the source of truth.
 
 ## Visual States
 
-| State     | Trigger                  | Style change                                                             |
-| --------- | ------------------------ | ------------------------------------------------------------------------ |
-| Default   | `value !== option.value` | `borderColor: borderSecondary`, transparent background                   |
-| Selected  | `value === option.value` | `borderColor: brandPrimary`, `backgroundColor: brandPrimaryBackground`   |
-| Radio dot | checked                  | `backgroundColor: brandPrimary`, inner white ring via `box-shadow inset` |
+| State     | Trigger                  | Style change                                                                             |
+| --------- | ------------------------ | ---------------------------------------------------------------------------------------- |
+| Default   | `value !== option.value` | `borderColor: borderSecondary`, `surfacePrimary` radio fill, transparent card            |
+| Selected  | `value === option.value` | `borderColor: brandSecondary` (accent), `backgroundColor: brandPrimaryBackground`        |
+| Radio dot | checked                  | `brandSecondary` fill + border, inner ring via `box-shadow inset brandPrimaryBackground` |
 
 ## Types
 
@@ -77,7 +77,7 @@ The component is **fully controlled** — `value` is always the source of truth.
 
 ## Notes
 
-- The custom radio dot uses `appearance: none` + `box-shadow: inset 0 0 0 3px white` to create the inner circle — no SVG or pseudo-elements needed.
+- The custom radio dot uses `appearance: none` + a tokenized `box-shadow: inset 0 0 0 3px brandPrimaryBackground` over a `brandSecondary` fill to create the inner circle — no SVG or pseudo-elements needed. Selected option cards also gain a tokenized `brandSecondary` accent border.
 - Each `<label>` wraps the `<input>` so the entire card is clickable without `htmlFor`.
 - The radio's accessible name comes from the label text only; optional description text is attached separately via `aria-describedby`.
 - Transition (`background-color 0.15s, border-color 0.15s`) is applied directly in StyleX for smooth selection feedback.

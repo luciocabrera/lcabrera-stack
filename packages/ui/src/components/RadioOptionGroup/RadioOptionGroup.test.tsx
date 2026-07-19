@@ -1,9 +1,11 @@
 // @vitest-environment jsdom
 
+import * as stylex from '@stylexjs/stylex';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { RadioOptionGroup } from './RadioOptionGroup.component';
+import { styles } from './RadioOptionGroup.stylex';
 
 afterEach(cleanup);
 
@@ -58,6 +60,38 @@ describe('RadioOptionGroup', () => {
     fireEvent.click(screen.getByRole('radio', { name: /Option B/i }));
 
     expect(handleChange).toHaveBeenCalledWith('b');
+  });
+
+  it('applies the selected-accent styles only to the checked option card', () => {
+    render(
+      <RadioOptionGroup
+        name='group'
+        onChange={vi.fn()}
+        options={[...options]}
+        value='b'
+      />,
+    );
+
+    const selectedClassName =
+      stylex.props(styles.optionSelected).className ?? '';
+    expect(selectedClassName.length).toBeGreaterThan(0);
+
+    const selectedCard = screen
+      .getByRole<HTMLInputElement>('radio', { name: /Option B/i })
+      .closest('label') as HTMLLabelElement;
+    const unselectedCard = screen
+      .getByRole<HTMLInputElement>('radio', { name: /Option A/i })
+      .closest('label') as HTMLLabelElement;
+
+    const selectedHasAccent = selectedClassName
+      .split(' ')
+      .every((cls) => selectedCard.className.includes(cls));
+    const unselectedHasAccent = selectedClassName
+      .split(' ')
+      .some((cls) => unselectedCard.className.includes(cls));
+
+    expect(selectedHasAccent).toBe(true);
+    expect(unselectedHasAccent).toBe(false);
   });
 
   it('renders description text when provided', () => {

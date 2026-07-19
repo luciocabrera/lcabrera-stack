@@ -5,7 +5,7 @@ import type { GroupFieldNode } from '@repo/ui/components/Form/Form.types';
 import { FormProvider } from '@repo/ui/components/Form/contexts';
 import { FormFieldsRendererContext } from '@repo/ui/components/Form/FormFields/contexts/FormFieldsRendererContext/FormFieldsRendererContext.context';
 import { FormFieldsList } from '@repo/ui/components/Form/FormFields/FormFieldsList/FormFieldsList.component';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { FormFieldGroup } from './FormFieldGroup.component';
@@ -59,5 +59,66 @@ describe('FormFieldGroup', () => {
 
     expect(screen.getByLabelText('Name', { exact: false })).not.toBeNull();
     expect(screen.getByLabelText('Bio', { exact: false })).not.toBeNull();
+  });
+
+  it('does not render a toggle button for a non-collapsible group', () => {
+    renderGroup({
+      fields: [{ accessor: 'name', label: 'Name', type: 'text' }],
+      label: 'Personal details',
+      type: 'group',
+    });
+
+    expect(screen.queryByRole('button')).toBeNull();
+  });
+
+  it('renders an expanded toggle button for a collapsible group', () => {
+    renderGroup({
+      collapsible: true,
+      fields: [{ accessor: 'name', label: 'Name', type: 'text' }],
+      label: 'Audit',
+      type: 'group',
+    });
+
+    const toggle = screen.getByRole('button', { name: 'Audit' });
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    expect(screen.getByLabelText('Name', { exact: false })).not.toBeNull();
+  });
+
+  it('starts collapsed when defaultCollapsed is set but keeps fields mounted', () => {
+    renderGroup({
+      collapsible: true,
+      defaultCollapsed: true,
+      fields: [{ accessor: 'name', label: 'Name', type: 'text' }],
+      label: 'Audit',
+      type: 'group',
+    });
+
+    const toggle = screen.getByRole('button', { name: 'Audit' });
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+
+    const bodyId = toggle.getAttribute('aria-controls') ?? '';
+    expect(document.getElementById(bodyId)?.hidden).toBe(true);
+    // Collapsed fields remain in the DOM so their values still submit.
+    expect(screen.getByLabelText('Name', { exact: false })).not.toBeNull();
+  });
+
+  it('toggles collapse state when the header button is clicked', () => {
+    renderGroup({
+      collapsible: true,
+      fields: [{ accessor: 'name', label: 'Name', type: 'text' }],
+      label: 'Audit',
+      type: 'group',
+    });
+
+    const toggle = screen.getByRole('button', { name: 'Audit' });
+    const bodyId = toggle.getAttribute('aria-controls') ?? '';
+
+    fireEvent.click(toggle);
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(document.getElementById(bodyId)?.hidden).toBe(true);
+
+    fireEvent.click(toggle);
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    expect(document.getElementById(bodyId)?.hidden).toBe(false);
   });
 });

@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
 
+import { surfaceStyles } from '@repo/ui/design-system/tokens/surfaces.stylex';
 import { mockDialogElement } from '@repo/ui/utils/tests/mockDialogElement.util';
+import * as stylex from '@stylexjs/stylex';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -119,6 +121,25 @@ describe('Modal', () => {
     );
 
     expect(dialogMocksRef.current.closeMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('applies the shared glass surface recipe to the dialog', () => {
+    render(
+      <Modal isOpen onClose={() => void 0}>
+        <span>content</span>
+      </Modal>,
+    );
+
+    const dialog = screen
+      .getByText('content')
+      .closest('dialog') as HTMLDialogElement;
+    const glassClassName = stylex.props(surfaceStyles.glass).className ?? '';
+
+    expect(glassClassName.length).toBeGreaterThan(0);
+    const hasAllGlassClasses = glassClassName
+      .split(' ')
+      .every((cls) => dialog.className.includes(cls));
+    expect(hasAllGlassClasses).toBe(true);
   });
 
   it('calls onClose when the native dialog close event fires', () => {

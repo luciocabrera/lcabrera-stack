@@ -69,8 +69,8 @@ Form/
 │   │       ├── FormFieldsRendererContext.context.ts → createContext (undefined default)
 │   │       ├── FormFieldsRendererContext.types.ts   → RenderFieldsFn (TValues erased to Record<string, unknown> at the boundary, mirrors AnyFieldComponent)
 │   │       └── useFormFieldsRendererContext.hook.ts → use(context) with guard (infra only)
-│   ├── FormFieldGroup/           → `group` node: optional label + nested fields (.component + .types + .stylex + .test)
-│   ├── FormFieldRow/             → `row` node: horizontal equal-flex cells of nested fields (.component + .types + .stylex + .test)
+│   ├── FormFieldGroup/           → `group` node: bordered card section with an optional header; `collapsible`/`defaultCollapsed` make the header a toggle button (collapsed body is display:none, not unmounted, so values still submit) (.component + .types + .stylex + .test)
+│   ├── FormFieldRow/             → `row` node: horizontal cells of nested fields; equal-width by default, optional positional `spans` widen individual cells (per-cell grow factor via dynamic StyleX) (.component + .types + .stylex + .test)
 │   ├── FormFieldTabs/            → `tab` node: one Tabs panel per tab (.component + .types + .test)
 │   └── utils/
 │       ├── collectAccessors.util.ts → Node → flattened leaf accessors (recursive, + .test)
@@ -85,14 +85,18 @@ Form/
 │
 ├── fields/
 │   ├── useFormField.hook.ts → Shared per-leaf-field wiring: useId + value/error/mode selectors + isDisabled + accessor-bound setValue (every leaf field consumes it)
+│   ├── formInput.stylex.ts → The Form's own leaf-input styles (tokenized radius + focus-accent ring), deliberately separate from the Table's filters.stylex; consumed by Text/Number/Date/CurrencyField
 │   ├── TextField/     → text | email | password | textarea (new bare input)
-│   ├── NumberField/   → number (new bare input)
+│   ├── NumericFieldControl/ → shared number-input control (FormFieldChrome + type=number wired via useFormField, optional adornment); NumberField & CurrencyField render it so the wiring is not duplicated
+│   ├── NumberField/   → number (renders NumericFieldControl)
+│   ├── CurrencyField/ → currency (NumericFieldControl + currency-symbol adornment; view/read formats as currency). utils/getCurrencySymbol.util
 │   ├── DateField/     → date | datetime (new bare input)
 │   ├── BooleanField/  → wraps Checkbox or ToggleSwitch
 │   ├── SelectField/   → wraps VirtualSelect + hidden inputs for FormData
 │   ├── RadioField/    → wraps RadioOptionGroup
-│   └── CustomField/   → escape hatch via field.renderField(...)
-│   (each: <Name>.component.tsx + <Name>.types.ts, TextField/RadioField also <Name>.stylex.ts)
+│   ├── CustomField/   → escape hatch via field.renderField(...)
+│   └── FormFieldDisplay/ → read-only `view`-mode renderer: label + formatted value text (not a disabled widget). utils/{formatFieldDisplayValue,resolveOptionLabels,stringifyLeafValue}.util
+│   (each: <Name>.component.tsx + <Name>.types.ts; TextField/RadioField/FormFieldDisplay/CurrencyField/NumericFieldControl also <Name>.stylex.ts; per-consumer helpers live in <Name>/utils/ behind an index.ts barrel)
 │   (the former PathField/PathBrowserModal `path` leaf was removed by ADR-028 — no filesystem-coupled field types)
 │
 └── utils/
@@ -219,8 +223,13 @@ it changes identity.
   baseline (`isFormDirty`, array-aware — a regenerated-but-unchanged array
   from `VirtualSelect` does not count as dirty). Avoids writing to the DB
   when nothing actually changed.
-- **`view`**: every leaf field forced `isDisabled`; the footer (submit/
-  cancel buttons) is not rendered at all.
+- **`view`**: each leaf renders read-only as **label + formatted value text**
+  (`FormFieldDisplay`), not a disabled input — currency/number are locale-
+  formatted, dates via the shared date formatter, booleans as Yes/No, and
+  select/radio as their option label(s); empty values show an em dash. Custom
+  fields keep their own `renderField` escape hatch (forced `isDisabled`). The
+  footer (submit/cancel buttons) is not rendered at all. `FormField` routes to
+  `FormFieldDisplay` when `mode === 'view'`.
 
 ## Cancel & Discard-Changes Flow
 

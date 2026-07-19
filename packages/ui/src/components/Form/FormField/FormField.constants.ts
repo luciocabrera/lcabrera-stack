@@ -2,6 +2,7 @@ import type { LeafFieldDef } from '@repo/ui/components/Form/Form.types';
 import type { ReactNode } from 'react';
 
 import { BooleanField } from '@repo/ui/components/Form/fields/BooleanField/BooleanField.component';
+import { CurrencyField } from '@repo/ui/components/Form/fields/CurrencyField/CurrencyField.component';
 import { CustomField } from '@repo/ui/components/Form/fields/CustomField/CustomField.component';
 import { DateField } from '@repo/ui/components/Form/fields/DateField/DateField.component';
 import { NumberField } from '@repo/ui/components/Form/fields/NumberField/NumberField.component';
@@ -25,6 +26,7 @@ export const fieldRegistry: Record<
   AnyFieldComponent
 > = {
   boolean: BooleanField as AnyFieldComponent,
+  currency: CurrencyField as AnyFieldComponent,
   custom: CustomField as AnyFieldComponent,
   date: DateField as AnyFieldComponent,
   datetime: DateField as AnyFieldComponent,

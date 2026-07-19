@@ -4,6 +4,7 @@ import { Button } from '@repo/ui/components/Button';
 import { MenuCloseIcon } from '@repo/ui/components/Icons';
 import { Title } from '@repo/ui/components/Title';
 import { ICON_SIZE_MD } from '@repo/ui/design-system/constants/iconSizes.constants';
+import { surfaceStyles } from '@repo/ui/design-system/tokens/surfaces.stylex';
 import * as stylex from '@stylexjs/stylex';
 import { useEffect, useRef } from 'react';
 
@@ -46,7 +47,10 @@ export const Modal = ({
   }, [onClose]);
 
   return (
-    <dialog ref={dialogRef} {...stylex.props(modalStyles.dialog)}>
+    <dialog
+      ref={dialogRef}
+      {...stylex.props(surfaceStyles.glass, modalStyles.dialog)}
+    >
       <AppBackground shouldFillViewport={false}>
         <AppDotted>
           {Boolean(title) && (

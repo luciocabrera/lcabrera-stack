@@ -6,6 +6,13 @@ export type BooleanFieldDef<TValues extends Record<string, unknown>> =
     readonly variant?: 'checkbox' | 'toggle';
   };
 
+export type CurrencyFieldDef<TValues extends Record<string, unknown>> =
+  BaseFieldDef<TValues> & {
+    /** ISO currency code used for display/read formatting (defaults to USD). */
+    readonly currency?: string;
+    readonly type: 'currency';
+  };
+
 export type CustomFieldDef<TValues extends Record<string, unknown>> =
   BaseFieldDef<TValues> & {
     readonly renderField: (args: RenderFieldArgs) => ReactNode;
@@ -62,6 +69,10 @@ export type FormProps<TValues extends Record<string, unknown>> = {
 export type FormSubmission = 'fetcher' | 'navigation';
 
 export type GroupFieldNode<TValues extends Record<string, unknown>> = {
+  /** When true, the group renders a clickable header that collapses/expands its fields. */
+  readonly collapsible?: boolean;
+  /** Initial collapsed state for a `collapsible` group (ignored otherwise). */
+  readonly defaultCollapsed?: boolean;
   readonly fields: readonly FieldNode<TValues>[];
   readonly label?: string;
   readonly type: 'group';
@@ -69,6 +80,7 @@ export type GroupFieldNode<TValues extends Record<string, unknown>> = {
 
 export type LeafFieldDef<TValues extends Record<string, unknown>> =
   | BooleanFieldDef<TValues>
+  | CurrencyFieldDef<TValues>
   | CustomFieldDef<TValues>
   | DateFieldDef<TValues>
   | NumberFieldDef<TValues>
@@ -96,6 +108,13 @@ export type RenderFieldArgs = {
 
 export type RowFieldNode<TValues extends Record<string, unknown>> = {
   readonly fields: readonly FieldNode<TValues>[];
+  /**
+   * Optional per-cell grow factor, positional to `fields`. A cell with span `2`
+   * is twice as wide as a span-`1` cell; omitted or missing entries default to
+   * `1` (equal-width, the previous behaviour). Use a larger span for a
+   * full-width or emphasised field within a multi-column row.
+   */
+  readonly spans?: readonly number[];
   readonly type: 'row';
 };
 
