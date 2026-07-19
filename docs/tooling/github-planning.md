@@ -12,12 +12,13 @@ this page is the operational runbook.
 | **Home**     | in-git register — [`docs/coordination/`](../coordination/README.md) | GitHub Issues / sub-issues / Milestones / Projects |
 | **Answers**  | who is touching what, on which branch, **right now**                | what should happen, eventually, and **why**        |
 | **Read by**  | every agent, **offline on any branch**                              | humans + agents with `gh` + network                |
-| **Gated by** | `coordination:verify` / `board-sync` (CI)                           | GitHub itself                                      |
+| **Gated by** | `coordination:verify` (CI)                                          | GitHub itself                                      |
 
 The register is **not** moving to GitHub — an agent on a fork or a headless/cron
-run has no `gh` auth, but can always read `docs/coordination/BOARD.md` from the
-filesystem. GitHub covers the layer the register never did: the prioritised,
-cross-referenced, human-browsable backlog and a kanban.
+run has no `gh` auth, but can always read the task files under
+`docs/coordination/tasks/` from the filesystem (`vp run coordination:board`
+renders them as a local table). GitHub covers the layer the register never did:
+the prioritised, cross-referenced, human-browsable backlog and a kanban.
 
 ## What lives where
 
@@ -46,8 +47,9 @@ no custom reconciler to maintain (that is deliberate; see ADR-036):
    auto-adds new issues and same-repo PRs to the board.
 
 There is **no** Project → files sync and **no** bidirectional sync — a files↔Project
-reconciler is a maintenance sink and a drift source (the same reason the `BOARD.md`
-merge-driver isn't built).
+reconciler is a maintenance sink and a drift source. (The `BOARD.md` merge-driver
+isn't built either, for the same reason; the board is now a gitignored local view
+that is never committed, so nothing conflicts — ADR-037.)
 
 ## One-time setup — activating the Project board
 

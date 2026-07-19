@@ -237,7 +237,7 @@ The API server (`apps/api-server/`) reads env from `docker/local/.env`. The fron
 ### Agent Checklist
 
 - Run `vp install` after pulling changes and before starting work.
-- **Before non-trivial work, claim it in [`docs/coordination/`](docs/coordination/README.md)** — check [`BOARD.md`](docs/coordination/BOARD.md) (or `vp run coordination:verify`) for an area overlap first, then copy `tasks/_TEMPLATE.md`. Multiple agents and humans work this repo in parallel; the register is the only signal of who owns what. (Non-Negotiable Rule 12.)
+- **Before non-trivial work, claim it in [`docs/coordination/`](docs/coordination/README.md)** — run `vp run coordination:verify` to check for an area overlap first, then copy `tasks/_TEMPLATE.md`. Multiple agents and humans work this repo in parallel; the register is the only signal of who owns what. (Non-Negotiable Rule 12.)
 - **Always verify zero linting errors and zero TypeScript errors before considering any task complete.**
 - Run the full quality gate (see below) to validate all changes before finishing.
 
@@ -290,22 +290,23 @@ This register is **in-flight** work only (who is touching what, right now). The
 [`docs/tooling/github-planning.md`](docs/tooling/github-planning.md). A task that
 picks up a backlog item links it with the optional `issue:` field. The register is
 never moved to Issues — a task file is readable offline on any branch and gated by
-`board-sync`; GitHub Issues are not.
+`coordination:verify`; GitHub Issues are not.
 
 **Before non-trivial work** (anything beyond a one-file fix you commit immediately):
 
-1. **Check for collisions** — skim [`docs/coordination/BOARD.md`](docs/coordination/BOARD.md) or run `vp run coordination:verify`; it warns when your intended `area` overlaps an active task. Resolve overlaps (coordinate, or narrow scope) before starting.
-2. **Claim it** — copy [`tasks/_TEMPLATE.md`](docs/coordination/tasks/_TEMPLATE.md) to `tasks/<id>.md`, fill in the frontmatter (especially the `area` globs — the soft lock), then `vp run coordination:board`.
+1. **Check for collisions** — run `vp run coordination:verify`; it warns when your intended `area` overlaps an active task. Resolve overlaps (coordinate, or narrow scope) before starting. (`vp run coordination:board` writes a local, gitignored `BOARD.md` table view — never committed, [ADR-037](docs/cqms/decisions/ADR-037-coordination-board-is-a-local-view.md).)
+2. **Claim it** — copy [`tasks/_TEMPLATE.md`](docs/coordination/tasks/_TEMPLATE.md) to `tasks/<id>.md`, fill in the frontmatter (especially the `area` globs — the soft lock). That file **is** the claim — there is no board to regenerate or commit, so concurrent claims never collide (each is a distinct file).
 3. **Pick a branch strategy** — an independent branch (default), or a **shared
    branch** when several agents need each other's WIP (declare it with a
    `branches/<slug>.md` descriptor + an integrator; overlap between tasks on the
    same shared branch is then treated as collaboration, not a collision). Open a
    **draft PR early** (the human-visible progress surface).
-4. **Keep `status`/`updated` current**; move through `active → review`.
-5. **Close it** — delete the task file when the work merges and regenerate the board.
+4. **Keep `status`/`updated` current**; move through `active → review`. (Status also
+   lives in the linked Issue + the Planning board — the GitHub-visible source.)
+5. **Close it** — delete the task file when the work merges.
 
 The check runs in CI (`check-safe.yml`). It fails on register _integrity_ (a
-malformed task/branch file, `BOARD.md` drift); overlap/shared-branch/staleness/
+malformed task/branch file); overlap/shared-branch/staleness/
 missing-branch are non-blocking warnings. Full protocol and schema — including
 [independent vs shared branches](docs/coordination/README.md#independent-vs-shared-branches) —
 are in the coordination README. Historical scratch plans are catalogued in

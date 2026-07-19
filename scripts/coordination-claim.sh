@@ -3,8 +3,8 @@
 # coordination-claim.sh — start coordinated work in one step.
 #
 # Turns the multi-step "claim before you touch" ceremony (scaffold a task file,
-# open a branch, regenerate the board, commit, open a draft PR) into one command,
-# so the safe path is the easy path. The draft PR makes the claim visible via
+# open a branch, commit, open a draft PR) into one command, so the safe path is
+# the easy path. The draft PR makes the claim visible via
 # `vp run coordination:board:live` immediately, even before it merges. See
 # docs/coordination/README.md.
 #
@@ -20,9 +20,9 @@
 #               other agents are active) instead of switching this checkout
 #   --dry-run   print every git/gh/file action without performing it
 #
-# Effects live here (git, gh, fs); the board regen + schema validation are the
-# existing subprocess-free node tooling this calls. The commit's pre-commit hook
-# formats the board and task file.
+# Effects live here (git, gh, fs); schema validation is the existing
+# subprocess-free node tooling. BOARD.md is a gitignored local view (ADR-037),
+# so the claim commits only the task file; the pre-commit hook formats it.
 set -euo pipefail
 
 die() { local msg="$1"; printf 'coordination-claim: %s\n' "$msg" >&2; exit 1; }
@@ -93,10 +93,11 @@ else
   } > "$task"
 fi
 
-# 3. regenerate the board, commit the claim (the pre-commit hook formats both),
-#    push, and open a draft PR so the claim is immediately visible.
-run node scripts/verify-coordination.mjs --write-board
-run git add "$task" docs/coordination/BOARD.md
+# 3. commit the claim (the pre-commit hook formats the task file), push, and open
+#    a draft PR so the claim is immediately visible. BOARD.md is a gitignored
+#    local view (ADR-037) — regenerate it any time with `vp run coordination:board`;
+#    it is never committed, so there is nothing here for concurrent claims to conflict on.
+run git add "$task"
 run git commit -q -m "chore(coordination): claim ${id}"
 run git push -q -u origin "$branch"
 body="## What
