@@ -7,11 +7,11 @@ construction, and query execution.
 
 This folder is split deliberately, and the split is the thing to preserve:
 
-| Layer                  | Files                                           | Touches the DB?                                      |
-| ---------------------- | ----------------------------------------------- | ---------------------------------------------------- |
-| Query **construction** | `queryBuilder/` (see its own `ARCHITECTURE.md`) | **No** — pure functions returning `{ text, values }` |
-| Query **execution**    | `getPool.util.ts`, `selectRows.util.ts`         | **Yes**                                              |
-| Configuration          | `env.schema.ts`                                 | Reads env only                                       |
+| Layer                  | Files                                                                                                                           | Touches the DB?                                      |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| Query **construction** | `queryBuilder/` (see its own `ARCHITECTURE.md`)                                                                                 | **No** — pure functions returning `{ text, values }` |
+| Query **execution**    | `getPool.util.ts`, `selectRows.util.ts`, `insertRow.util.ts`, `updateRows.util.ts`, `deleteRows.util.ts`, `getMaxValue.util.ts` | **Yes**                                              |
+| Configuration          | `env.schema.ts`                                                                                                                 | Reads env only                                       |
 
 `queryBuilder/` is pure so that every SQL string in the repo is testable
 without a database — that is why its suite runs in the DB-free coverage job
@@ -26,22 +26,31 @@ usage example.
 
 ## Files
 
-| File                 | Role                                                                                                     |
-| -------------------- | -------------------------------------------------------------------------------------------------------- |
-| `env.schema.ts`      | Zod schema + `readEnvConfig` for `DB_HOST`/`DB_NAME`/`DB_PASSWORD`/`DB_PORT`/`DB_USER`                   |
-| `getPool.util.ts`    | Lazily-initialized `pg.Pool` singleton (one per Node process) + `closePool` for teardown                 |
-| `selectRows.util.ts` | **Public entry point.** Builds a `SelectQueryDescriptor` and executes it on the pool, returning its rows |
-| `queryBuilder/`      | Pure SELECT/count/distinct construction — see `queryBuilder/ARCHITECTURE.md`                             |
+| File                  | Role                                                                                                     |
+| --------------------- | -------------------------------------------------------------------------------------------------------- |
+| `env.schema.ts`       | Zod schema + `readEnvConfig` for `DB_HOST`/`DB_NAME`/`DB_PASSWORD`/`DB_PORT`/`DB_USER`                   |
+| `getPool.util.ts`     | Lazily-initialized `pg.Pool` singleton (one per Node process) + `closePool` for teardown                 |
+| `selectRows.util.ts`  | **Public entry point.** Builds a `SelectQueryDescriptor` and executes it on the pool, returning its rows |
+| `insertRow.util.ts`   | **Public entry point.** Builds + runs an `InsertQueryDescriptor`; defaults `RETURNING *`, returns rows   |
+| `updateRows.util.ts`  | **Public entry point.** Builds + runs an `UpdateQueryDescriptor`; defaults `RETURNING *`, returns rows   |
+| `deleteRows.util.ts`  | **Public entry point.** Builds + runs a `DeleteQueryDescriptor`; defaults `RETURNING *`, returns rows    |
+| `getMaxValue.util.ts` | **Public entry point.** Runs `buildMaxValueQuery` and returns the numeric `MAX(col)` (0 if empty)        |
+| `queryBuilder/`       | Pure SELECT/count/distinct/insert/update/delete/max construction — see `queryBuilder/ARCHITECTURE.md`    |
 
 ## Choosing an entry point
 
 - **Reading a flat list/rollup?** Use `selectRows` — it is the whole path.
+- **Writing a single-row-shaped mutation?** Use `insertRow`/`updateRows`/
+  `deleteRows` — each pairs its builder with `getPool` and defaults to
+  `RETURNING *`, so the affected row(s) come back. `getMaxValue` is the
+  companion "next id" read for tables without a sequence.
 - **Need the SQL without running it** (a count paired to a data query, a
   DB-function call, an `EXISTS` check)? Use `buildSelectQuery`/
-  `buildCountQuery`/`buildDistinctQuery` and run it yourself via `getPool`.
-- **Anything the builder does not cover** (joins, writes, single-scalar
-  aggregates) stays hand-written SQL through `getPool` — forcing every query
-  through the builder is the hand-rolled-SQL anti-pattern inverted.
+  `buildCountQuery`/`buildDistinctQuery`/`buildInsertQuery`/`buildUpdateQuery`/
+  `buildDeleteQuery`/`buildMaxValueQuery` and run it yourself via `getPool`.
+- **Anything the builders do not cover** (joins, multi-row inserts, upserts,
+  single-scalar aggregates) stays hand-written SQL through `getPool` — forcing
+  every query through the builder is the hand-rolled-SQL anti-pattern inverted.
 
 ## Row types are a contract, not a guarantee
 

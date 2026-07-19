@@ -1,10 +1,12 @@
 # Query Builder Architecture
 
-Generic, schema/table-agnostic Postgres query construction for the "flat
-list view, optional filter/sort/pagination" shape — the pattern every
-`scan-ingestion` list/rollup query used to hand-roll per file. Pure
+Generic, schema/table-agnostic Postgres query construction for the common
+single-table shapes — reads (flat list view, optional filter/sort/pagination;
+count; distinct) and writes (insert/update/delete; max-value) — the pattern
+every `scan-ingestion` list/rollup query used to hand-roll per file. Pure
 functions only; no DB access lives in this folder (see `@repo/data-access/db/getPool.util`
-for that) — callers execute the returned `{ text, values }` themselves.
+for that) — callers execute the returned `{ text, values }` themselves (or use
+the `../*.util.ts` executors that pair each builder with `getPool`).
 
 > **Executing a plain SELECT? Prefer `../selectRows.util.ts`.** It composes
 > `buildSelectQuery` with `getPool` so callers don't re-wire the two by hand
@@ -15,19 +17,24 @@ for that) — callers execute the returned `{ text, values }` themselves.
 
 ## Files
 
-| File                                  | Role                                                                                                                                        |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `QueryBuilder.types.ts`               | `ComparisonOperator`, `QueryFilter`, `QuerySort`, `SelectQueryDescriptor`, `CountQueryDescriptor`, `DistinctQueryDescriptor`, `BuiltQuery`  |
-| `quoteIdentifier.util.ts`             | Safe double-quote identifier escaping                                                                                                       |
-| `assertSafeIdentifier.util.ts`        | **Mandatory**, always called — syntax check (see Security model)                                                                            |
-| `assertColumnAllowed.util.ts`         | **Optional**, opt-in — membership check (see Security model)                                                                                |
-| `appendFilterClause.util.ts`          | Reducer step used by `buildWhereClause`: one filter → one SQL clause + values                                                               |
-| `buildWhereClause.util.ts`            | `QueryFilter[]` → `{ text, values }`, correctly incrementing `$n` placeholders                                                              |
-| `buildOrderByClause.util.ts`          | `QuerySort[]` → `ORDER BY ...`                                                                                                              |
-| `buildOptionalNumericClauses.util.ts` | `LIMIT`/`OFFSET` fragment builder, skips `undefined` values without gapping `$n`                                                            |
-| `buildSelectQuery.util.ts`            | **Public entry point.** Composes everything above into one `SELECT`                                                                         |
-| `buildCountQuery.util.ts`             | `count(id)` query sharing `buildWhereClause`'s output, so a data query and its matching count query can never drift apart                   |
-| `buildDistinctQuery.util.ts`          | **Public entry point.** Paginated `SELECT DISTINCT` for one column (filter-option lists, ADR-009); excludes NULL/empty and orders ascending |
+| File                                  | Role                                                                                                                                                               |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `QueryBuilder.types.ts`               | `ComparisonOperator`, `QueryFilter`, `QuerySort`, `BuiltQuery`, and the `Select`/`Count`/`Distinct`/`Insert`/`Update`/`Delete`/`MaxValue` `…QueryDescriptor` types |
+| `quoteIdentifier.util.ts`             | Safe double-quote identifier escaping                                                                                                                              |
+| `assertSafeIdentifier.util.ts`        | **Mandatory**, always called — syntax check (see Security model)                                                                                                   |
+| `assertColumnAllowed.util.ts`         | **Optional**, opt-in — membership check (see Security model)                                                                                                       |
+| `appendFilterClause.util.ts`          | Reducer step used by `buildWhereClause`: one filter → one SQL clause + values                                                                                      |
+| `buildWhereClause.util.ts`            | `QueryFilter[]` → `{ text, values }`, correctly incrementing `$n` placeholders                                                                                     |
+| `buildReturningClause.util.ts`        | Shared `RETURNING` builder for the write builders: `''`, `RETURNING *` (the `['*']` wildcard), or a quoted column projection                                       |
+| `buildOrderByClause.util.ts`          | `QuerySort[]` → `ORDER BY ...`                                                                                                                                     |
+| `buildOptionalNumericClauses.util.ts` | `LIMIT`/`OFFSET` fragment builder, skips `undefined` values without gapping `$n`                                                                                   |
+| `buildSelectQuery.util.ts`            | **Public entry point.** Composes everything above into one `SELECT`                                                                                                |
+| `buildCountQuery.util.ts`             | `count(id)` query sharing `buildWhereClause`'s output, so a data query and its matching count query can never drift apart                                          |
+| `buildDistinctQuery.util.ts`          | **Public entry point.** Paginated `SELECT DISTINCT` for one column (filter-option lists, ADR-009); excludes NULL/empty and orders ascending                        |
+| `buildInsertQuery.util.ts`            | **Public entry point.** `INSERT INTO … (cols) VALUES ($1, …) [RETURNING …]` from a `{ values }` map; keys quoted, values parameterized                             |
+| `buildUpdateQuery.util.ts`            | **Public entry point.** `UPDATE … SET col = $n WHERE … [RETURNING …]`; reuses `buildWhereClause` with an offset `startParamIndex`, requires ≥1 filter              |
+| `buildDeleteQuery.util.ts`            | **Public entry point.** `DELETE FROM … WHERE … [RETURNING …]`; reuses `buildWhereClause`, requires ≥1 filter                                                       |
+| `buildMaxValueQuery.util.ts`          | **Public entry point.** `SELECT COALESCE(MAX(col), 0)` — the generic "next id" read for tables without a sequence/default                                          |
 
 ## Security model — read this before adding a call site
 
@@ -59,12 +66,26 @@ for that day to come, only remembered at the new call site.
 Filter **values** are always parameterized, never string-interpolated,
 regardless of `allowedColumns`.
 
+## Mutation safety
+
+The write builders carry one extra guard the reads don't need: `buildUpdateQuery`
+and `buildDeleteQuery` **require at least one filter** and throw otherwise. An
+unfiltered `UPDATE`/`DELETE` rewrites or empties the whole table, so it is refused
+at construction time — a caller that genuinely wants every row must say so with an
+explicit always-true filter, never by omission. `RETURNING` is delegated to the
+shared `buildReturningClause`; the executors default it to `RETURNING *` so the
+affected row(s) come back without the caller enumerating columns (`*` is a fixed
+SQL token, never routed through identifier checks; an explicit column list still
+is).
+
 ## What this does NOT do
 
 - No joins, no subqueries, no raw SQL fragments — single table/view only.
   A view that already encodes a join (e.g. `llm_usage.v_scanner_llm_cost`)
   is queried as a flat target; this builder doesn't build the join itself.
-- No write mutations (`INSERT`/`UPDATE`/`DELETE`) — read-side only.
+- No multi-row `INSERT … VALUES (…), (…)`, no `ON CONFLICT`/upsert, no
+  `UPDATE … FROM` — the write builders cover the single-row-shaped mutation
+  the same way the read builders cover the flat list.
 - Not a replacement for every query. Single-scalar aggregates, `EXISTS`
   checks, and DB-function-backed writes are simpler hand-written — forcing
   every query through this builder would be the same mistake as the
