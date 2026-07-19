@@ -21,6 +21,13 @@ CREATE INDEX runs_snapshot_active_idx
   ON cqms.runs (snapshot_id)
   WHERE snapshot_id IS NOT NULL;
 
+-- Single source for "a run is still active" — the states in which a run holds
+-- its snapshot (queued or running). Used by the pin/retention/collection checks
+-- below so the concept lives in one place rather than being repeated inline.
+CREATE FUNCTION cqms.fn_active_run_statuses() RETURNS text[] AS $$
+  SELECT ARRAY['queued', 'running'];
+$$ LANGUAGE sql IMMUTABLE;
+
 -- ── 2. Capture the pin at run creation ──────────────────────────────────────
 -- fn_create_run is the single choke point both trigger paths
 -- (fn_create_run_with_scans, fn_create_run_with_scoped_scans) call, and it holds
@@ -40,7 +47,8 @@ BEGIN
 
   IF EXISTS (
     SELECT 1 FROM cqms.runs
-    WHERE project_id = p_project_id AND status IN ('queued', 'running')
+    WHERE project_id = p_project_id
+      AND status = ANY (cqms.fn_active_run_statuses())
   ) THEN
     RAISE EXCEPTION 'A scan is already running for this project. Wait for it to finish before starting another.'
       USING ERRCODE = '55000'; -- object_not_in_prerequisite_state
@@ -58,11 +66,13 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- ── 3. Resolve the scan target through the pin, never through latest ────────
--- The only change from 0027's view: join cqms.runs and resolve the snapshot via
+-- The change from 0027's view: join cqms.runs and resolve the snapshot via
 -- runs.snapshot_id instead of projects.latest_snapshot_id. A run analyzes the
 -- code it was triggered on, whatever syncs land afterwards. INNER JOIN on the
 -- run's snapshot keeps the guarantee that a scan with no resolvable target drops
--- out of the queue rather than dispatching a NULL path.
+-- out of the queue rather than dispatching a NULL path. The soft-deleted-project
+-- guard is a correlated scalar subquery, not a fourth join — the view selects no
+-- `projects` column, and a filter-only lookup keeps the join count to three.
 DROP VIEW cqms.v_queued_scans;
 CREATE VIEW cqms.v_queued_scans AS
   SELECT
@@ -74,11 +84,12 @@ CREATE VIEW cqms.v_queued_scans AS
   JOIN cqms.scanners sc ON sc.scanner_id = s.scanner_id
   JOIN cqms.runs r ON r.id = s.run_id
   JOIN cqms.project_snapshots ps ON ps.id = r.snapshot_id
-  JOIN cqms.projects p ON p.id = s.project_id
   WHERE s.status = 'queued'
     AND s.deleted_at IS NULL
     AND sc.deleted_at IS NULL
-    AND p.deleted_at IS NULL;
+    AND (
+      SELECT p.deleted_at FROM cqms.projects p WHERE p.id = s.project_id
+    ) IS NULL;
 
 -- ── 4. Retain a snapshot that an active run still pins ──────────────────────
 -- fn_set_project_snapshot returns the replaced path ONLY when nothing active
@@ -123,7 +134,8 @@ BEGIN
   -- with this function's RETURNS TABLE OUT column of the same name (ambiguous).
   IF v_replaced_id IS NOT NULL AND EXISTS (
     SELECT 1 FROM cqms.runs r
-    WHERE r.snapshot_id = v_replaced_id AND r.status IN ('queued', 'running')
+    WHERE r.snapshot_id = v_replaced_id
+      AND r.status = ANY (cqms.fn_active_run_statuses())
   ) THEN
     v_replaced_path := NULL;
   END IF;
@@ -173,7 +185,8 @@ BEGIN
     AND ps.id IS DISTINCT FROM (SELECT latest_snapshot_id FROM cqms.projects WHERE id = v_project_id)
     AND NOT EXISTS (
       SELECT 1 FROM cqms.runs
-      WHERE snapshot_id = ps.id AND id <> p_run_id AND status IN ('queued','running')
+      WHERE snapshot_id = ps.id AND id <> p_run_id
+        AND status = ANY (cqms.fn_active_run_statuses())
     );
 
   IF v_collect_path IS NOT NULL THEN
