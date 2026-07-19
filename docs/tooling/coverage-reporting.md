@@ -114,6 +114,10 @@ only once its coverage runs clean and means something.** Checklist:
   `apps/scan-orchestrator` (both already have DB-free `test:coverage`),
   `apps/shared`; then `apps/api-server` / `apps/api-server-fast` **only after**
   each grows a DB-free `test:coverage` subset (today their suites are real-DB).
+  Tracked as GitHub epic
+  [#50](https://github.com/luciocabrera/vite-react-compiler/issues/50)
+  (children #51–#55, milestone _Coverage rollout — Phase 3_) — the durable-backlog
+  layer from [ADR-036](../cqms/decisions/ADR-036-github-planning-layer.md).
 
 Each phase is its own PR, kept reviewable and green before the next.
 

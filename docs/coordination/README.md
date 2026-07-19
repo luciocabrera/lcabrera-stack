@@ -71,6 +71,7 @@ started: 2026-07-18
 updated: 2026-07-18
 plan: task-four-independent-vast-galaxy.md # optional out-of-git scratch pointer
 pr: (none) # PR number/URL once opened
+issue: (none) # optional — the GitHub backlog issue this picks up (e.g. #50); see ADR-036
 ---
 ```
 
@@ -206,6 +207,17 @@ Coordination register — 1 warning(s):
 
 ## Relationship to the other surfaces
 
+- **GitHub Issues / sub-issues / Milestones / Projects** — the **durable backlog**
+  (_what should happen, eventually, and why_), the complement to this register's
+  _in-flight_ view (_who is touching what, right now_). Adopted in
+  [ADR-036](../cqms/decisions/ADR-036-github-planning-layer.md); runbook in
+  [`docs/tooling/github-planning.md`](../tooling/github-planning.md). The two link
+  one-way: a task that picks up a backlog item points to it with its optional
+  `issue:` field, and PRs close issues (`Closes #N`). The register is **not** moved
+  to Issues — Issues need `gh` + auth + network and are invisible to fork/headless
+  agents, whereas a task file is read offline on any branch and gated by
+  `board-sync`. There is deliberately **no** bidirectional file↔Project sync (the
+  same reason the `BOARD.md` merge-driver isn't built).
 - **`~/.claude/plans/<name>.md`** — one agent's private scratch for one task. Fine
   for thinking; **not** the shared record. When a plan describes work others need
   to see, its _claim_ graduates here (a task file) and its _decisions_ graduate to
