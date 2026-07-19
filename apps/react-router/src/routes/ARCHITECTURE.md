@@ -25,6 +25,17 @@ loader, metadata, error boundary, and page component.
 - `/wide-alltypes-150` remains the baseline stress-test page backed by the
   shared `TableLayout`.
 
+## Auth Routes
+
+- `/login` (`login/`) renders the `@repo/ui` Form; a `clientAction` Zod-validates
+  in the browser and only delegates to the credential-verifying server `action`
+  on success, which mints the signed auth cookie and redirects to the sanitized
+  `?redirectTo`.
+- `/logout` (`logout/`) is action-only — it clears the auth cookie and redirects
+  to `/login`.
+- Both build on the server-only auth module in [`src/auth/`](../auth/ARCHITECTURE.md),
+  whose reusable `authMiddleware` guards any route via `middleware = [authMiddleware]`.
+
 ## Enterprise Orders Route
 
 - `/enterprise-orders` uses a route-local constants map for column definitions,
