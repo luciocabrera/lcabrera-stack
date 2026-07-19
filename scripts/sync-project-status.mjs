@@ -3,15 +3,15 @@
  * happening, so the board reflects reality without anyone dragging cards.
  *
  * The board was going stale because status was manual: an agent works in its own
- * tree and the linked issue sits in `Todo` until a PR appears. This closes that
- * gap by reacting to the events GitHub already emits, driven from a workflow:
+ * tree and the linked issue sits in the backlog until a PR appears. This closes
+ * that gap by reacting to the events GitHub already emits, driven from a workflow:
  *
  *   - issue **assigned**              → In Progress  (self-assign = "I've started")
  *   - PR opened/reopened as **draft** → In Progress  (work is underway)
  *   - PR **ready for review**         → In Review
  *   - PR **converted back to draft**  → In Progress
  *   - PR **merged**                   → Done
- *   - PR **closed unmerged**          → Todo          (back to the backlog)
+ *   - PR **closed unmerged**          → back to the backlog
  *
  * For a PR it updates the PR's own card **and** every issue the PR closes
  * (`closingIssuesReferences`), so the backlog issue moves even though the PR is

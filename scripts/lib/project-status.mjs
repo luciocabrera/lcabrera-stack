@@ -14,7 +14,7 @@ const DRAFT_TRANSITIONS = new Set(['opened', 'reopened', 'converted_to_draft']);
  *   PR ready for review       → In Review
  *   PR converted to draft     → In Progress
  *   PR merged                 → Done
- *   PR closed unmerged        → Todo
+ *   PR closed unmerged        → back to the backlog
  */
 export const targetStatus = ({ eventName, payload }) => {
   if (eventName === 'issues') {
