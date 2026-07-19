@@ -20,12 +20,42 @@ export type CountQueryDescriptor = {
   readonly table: string;
 };
 
+export type DeleteQueryDescriptor = {
+  /** Same opt-in authorization semantics as SelectQueryDescriptor. */
+  readonly allowedColumns?: readonly string[];
+  /** At least one filter is required — an unfiltered DELETE is refused. */
+  readonly filters: readonly QueryFilter[];
+  /** Columns to return from the deleted row(s); `['*']` returns the whole row. */
+  readonly returning?: readonly string[];
+  readonly schema: string;
+  readonly table: string;
+};
+
 export type DistinctQueryDescriptor = {
   /** Same opt-in authorization semantics as SelectQueryDescriptor. */
   readonly allowedColumns?: readonly string[];
   readonly column: string;
   readonly limit?: number;
   readonly offset?: number;
+  readonly schema: string;
+  readonly table: string;
+};
+
+export type InsertQueryDescriptor = {
+  /** Same opt-in authorization semantics as SelectQueryDescriptor. */
+  readonly allowedColumns?: readonly string[];
+  /** Columns to return from the inserted row(s); `['*']` returns the whole row. */
+  readonly returning?: readonly string[];
+  readonly schema: string;
+  readonly table: string;
+  /** Column→value map; keys become quoted identifiers, values become `$n` params. */
+  readonly values: Readonly<Record<string, unknown>>;
+};
+
+export type MaxValueQueryDescriptor = {
+  /** Same opt-in authorization semantics as SelectQueryDescriptor. */
+  readonly allowedColumns?: readonly string[];
+  readonly column: string;
   readonly schema: string;
   readonly table: string;
 };
@@ -56,4 +86,17 @@ export type SelectQueryDescriptor = {
   readonly schema: string;
   readonly sort?: readonly QuerySort[];
   readonly table: string;
+};
+
+export type UpdateQueryDescriptor = {
+  /** Same opt-in authorization semantics as SelectQueryDescriptor. */
+  readonly allowedColumns?: readonly string[];
+  /** At least one filter is required — an unfiltered UPDATE is refused. */
+  readonly filters: readonly QueryFilter[];
+  /** Columns to return from the updated row(s); `['*']` returns the whole row. */
+  readonly returning?: readonly string[];
+  readonly schema: string;
+  readonly table: string;
+  /** Column→value map for the SET clause; values become `$n` params. */
+  readonly values: Readonly<Record<string, unknown>>;
 };
