@@ -17,6 +17,22 @@ import {
   toFieldOptions,
   WAREHOUSE_LOCATION_VALUES,
 } from './config';
+import { orderChoiceField } from './orderChoiceField.util';
+import { orderField } from './orderField.util';
+import { orderGroup } from './orderGroup.util';
+import { orderRow } from './orderRow.util';
+import { orderToggle } from './orderToggle.util';
+
+// Precomputed select/radio option sets — hoisted so the field factories stay
+// shallow (avoids nesting `toFieldOptions` inside group→row→field calls).
+const CARRIER_OPTIONS = toFieldOptions(CARRIER_VALUES);
+const CUSTOMER_TYPE_OPTIONS = toFieldOptions(CUSTOMER_TYPE_VALUES);
+const ORDER_STATUS_OPTIONS = toFieldOptions(ORDER_STATUS_VALUES);
+const PAYMENT_METHOD_OPTIONS = toFieldOptions(PAYMENT_METHOD_VALUES);
+const PAYMENT_STATUS_OPTIONS = toFieldOptions(PAYMENT_STATUS_VALUES);
+const PRIORITY_OPTIONS = toFieldOptions(PRIORITY_VALUES);
+const PRODUCT_CATEGORY_OPTIONS = toFieldOptions(PRODUCT_CATEGORY_VALUES);
+const WAREHOUSE_OPTIONS = toFieldOptions(WAREHOUSE_LOCATION_VALUES);
 
 export type BuildOrderFormFieldsArgs = {
   readonly mode: FormMode;
@@ -28,7 +44,9 @@ export type BuildOrderFormFieldsArgs = {
  * sets as selects, and money fields as currency. Server-assigned identity,
  * computed money totals and audit columns are read-only and only appear in
  * edit/view (create derives them on save); `view` mode renders every field
- * read-only via the Form itself.
+ * read-only via the Form itself. The tree is assembled from small typed
+ * factories (`orderField`/`orderChoiceField`/`orderToggle`/`orderRow`/
+ * `orderGroup`) so the repeated field scaffolding lives in one place.
  */
 export const buildOrderFormFields = ({
   mode,
@@ -40,612 +58,569 @@ export const buildOrderFormFields = ({
       tabs: [
         {
           fields: [
-            {
+            orderGroup({
               collapsible: false,
               fields: [
                 ...(isCreate
                   ? []
-                  : ([
-                      {
+                  : [
+                      orderField({
                         accessor: 'order_number',
                         disabled: true,
                         label: 'Order Number',
                         type: 'text',
-                      },
-                    ] as const)),
-                {
+                      }),
+                    ]),
+                orderField({
                   accessor: 'order_date',
-                  clientValidation: { required: true },
                   label: 'Order Date',
+                  required: true,
                   type: 'date',
-                },
-                {
+                }),
+                orderChoiceField({
                   accessor: 'order_status',
-                  clientValidation: { required: true },
                   label: 'Status',
-                  options: toFieldOptions(ORDER_STATUS_VALUES),
+                  options: ORDER_STATUS_OPTIONS,
+                  required: true,
                   type: 'select',
-                },
-                {
+                }),
+                orderChoiceField({
                   accessor: 'priority',
-                  clientValidation: { required: true },
                   label: 'Priority',
-                  options: toFieldOptions(PRIORITY_VALUES),
+                  options: PRIORITY_OPTIONS,
+                  required: true,
                   type: 'radio',
-                },
+                }),
               ],
               label: 'Summary',
-              type: 'group',
-            },
-            {
+            }),
+            orderGroup({
               fields: [
-                {
+                orderRow({
                   fields: [
-                    {
+                    orderToggle({
                       accessor: 'is_rush_order',
                       label: 'Rush order',
-                      type: 'boolean',
-                      variant: 'toggle',
-                    },
-                    {
-                      accessor: 'is_gift',
-                      label: 'Gift',
-                      type: 'boolean',
-                      variant: 'toggle',
-                    },
-                    {
-                      accessor: 'is_fragile',
-                      label: 'Fragile',
-                      type: 'boolean',
-                      variant: 'toggle',
-                    },
-                    {
+                    }),
+                    orderToggle({ accessor: 'is_gift', label: 'Gift' }),
+                    orderToggle({ accessor: 'is_fragile', label: 'Fragile' }),
+                    orderToggle({
                       accessor: 'requires_signature',
                       label: 'Requires signature',
-                      type: 'boolean',
-                      variant: 'toggle',
-                    },
+                    }),
                   ],
-                  type: 'row',
-                },
+                }),
               ],
               label: 'Flags',
-              type: 'group',
-            },
+            }),
           ],
           label: 'Order',
         },
         {
           fields: [
-            {
+            orderGroup({
               fields: [
-                {
+                orderRow({
                   fields: [
-                    {
+                    orderField({
                       accessor: 'customer_name',
-                      clientValidation: { maxLength: 200, required: true },
                       label: 'Customer Name',
+                      maxLength: 200,
+                      required: true,
                       type: 'text',
-                    },
-                    {
+                    }),
+                    orderField({
                       accessor: 'customer_email',
-                      clientValidation: {
-                        pattern: EMAIL_PATTERN,
-                        required: true,
-                      },
                       label: 'Email',
+                      pattern: EMAIL_PATTERN,
+                      required: true,
                       type: 'email',
-                    },
+                    }),
                   ],
-                  type: 'row',
-                },
-                {
+                }),
+                orderRow({
                   fields: [
-                    {
+                    orderField({
                       accessor: 'customer_phone',
-                      clientValidation: {
-                        pattern: PHONE_PATTERN,
-                        required: true,
-                      },
                       label: 'Phone',
+                      pattern: PHONE_PATTERN,
+                      required: true,
                       type: 'text',
-                    },
-                    {
+                    }),
+                    orderChoiceField({
                       accessor: 'customer_type',
-                      clientValidation: { required: true },
                       label: 'Customer Type',
-                      options: toFieldOptions(CUSTOMER_TYPE_VALUES),
+                      options: CUSTOMER_TYPE_OPTIONS,
+                      required: true,
                       type: 'radio',
-                    },
+                    }),
                   ],
-                  type: 'row',
-                },
-                {
+                }),
+                orderField({
                   accessor: 'customer_id',
-                  clientValidation: { min: 1, required: true },
                   label: 'Customer ID',
+                  min: 1,
+                  required: true,
                   type: 'number',
-                },
+                }),
               ],
               label: 'Identity',
-              type: 'group',
-            },
-            {
+            }),
+            orderGroup({
               fields: [
-                {
+                orderRow({
                   fields: [
-                    {
+                    orderToggle({
                       accessor: 'is_vip_customer',
                       label: 'VIP customer',
-                      type: 'boolean',
-                      variant: 'toggle',
-                    },
-                    {
+                    }),
+                    orderField({
                       accessor: 'loyalty_points',
-                      clientValidation: { min: 0, required: true },
                       label: 'Loyalty Points',
+                      min: 0,
+                      required: true,
                       type: 'number',
-                    },
+                    }),
                   ],
-                  type: 'row',
-                },
-                {
+                }),
+                orderRow({
                   fields: [
-                    {
+                    orderField({
                       accessor: 'customer_since',
-                      clientValidation: { required: true },
                       label: 'Customer Since',
+                      required: true,
                       type: 'date',
-                    },
-                    {
+                    }),
+                    orderField({
                       accessor: 'customer_rating',
-                      clientValidation: { max: 5, min: 1 },
                       description: 'Optional, 1–5.',
                       label: 'Rating',
+                      max: 5,
+                      min: 1,
                       type: 'number',
-                    },
+                    }),
                   ],
-                  type: 'row',
-                },
+                }),
               ],
               label: 'Loyalty',
-              type: 'group',
-            },
+            }),
           ],
           label: 'Customer',
         },
         {
           fields: [
-            {
+            orderGroup({
               fields: [
-                {
+                orderRow({
                   fields: [
-                    {
+                    orderChoiceField({
                       accessor: 'product_category',
-                      clientValidation: { required: true },
                       label: 'Category',
-                      options: toFieldOptions(PRODUCT_CATEGORY_VALUES),
+                      options: PRODUCT_CATEGORY_OPTIONS,
+                      required: true,
                       type: 'select',
-                    },
-                    {
+                    }),
+                    orderField({
                       accessor: 'product_subcategory',
-                      clientValidation: { maxLength: 100, required: true },
                       label: 'Subcategory',
+                      maxLength: 100,
+                      required: true,
                       type: 'text',
-                    },
+                    }),
                   ],
-                  type: 'row',
-                },
-                {
+                }),
+                orderRow({
                   fields: [
-                    {
+                    orderField({
                       accessor: 'quantity',
-                      clientValidation: { min: 1, required: true },
                       label: 'Quantity',
+                      min: 1,
+                      required: true,
                       type: 'number',
-                    },
-                    {
+                    }),
+                    orderField({
                       accessor: 'unit_price',
-                      clientValidation: { min: 0, required: true },
                       label: 'Unit Price',
+                      min: 0,
+                      required: true,
                       type: 'currency',
-                    },
+                    }),
                   ],
-                  type: 'row',
-                },
-                {
+                }),
+                orderRow({
                   fields: [
-                    {
+                    orderField({
                       accessor: 'weight_kg',
-                      clientValidation: { min: 0, required: true },
                       label: 'Weight (kg)',
+                      min: 0,
+                      required: true,
                       type: 'number',
-                    },
-                    {
+                    }),
+                    orderField({
                       accessor: 'volume_m3',
-                      clientValidation: { min: 0, required: true },
                       label: 'Volume (m³)',
+                      min: 0,
+                      required: true,
                       type: 'number',
-                    },
+                    }),
                   ],
-                  type: 'row',
-                },
+                }),
               ],
               label: 'Product',
-              type: 'group',
-            },
+            }),
           ],
           label: 'Product',
         },
         {
           fields: [
-            {
+            orderGroup({
               fields: [
-                {
+                orderRow({
                   fields: [
-                    {
+                    orderField({
                       accessor: 'discount_percentage',
-                      clientValidation: { max: 100, min: 0, required: true },
                       label: 'Discount %',
+                      max: 100,
+                      min: 0,
+                      required: true,
                       type: 'number',
-                    },
-                    {
+                    }),
+                    orderField({
                       accessor: 'shipping_cost',
-                      clientValidation: { min: 0, required: true },
                       label: 'Shipping Cost',
+                      min: 0,
+                      required: true,
                       type: 'currency',
-                    },
-                    {
+                    }),
+                    orderField({
                       accessor: 'paid_amount',
-                      clientValidation: { min: 0, required: true },
                       label: 'Paid Amount',
+                      min: 0,
+                      required: true,
                       type: 'currency',
-                    },
+                    }),
                   ],
                   spans: [1, 1, 1],
-                  type: 'row',
-                },
+                }),
               ],
               label: 'Pricing Inputs',
-              type: 'group',
-            },
+            }),
             ...(isCreate
               ? []
-              : ([
-                  {
+              : [
+                  orderGroup({
                     fields: [
-                      {
+                      orderRow({
                         fields: [
-                          {
+                          orderField({
                             accessor: 'subtotal',
                             disabled: true,
                             label: 'Subtotal',
                             type: 'currency',
-                          },
-                          {
+                          }),
+                          orderField({
                             accessor: 'discount_amount',
                             disabled: true,
                             label: 'Discount',
                             type: 'currency',
-                          },
+                          }),
                         ],
-                        type: 'row',
-                      },
-                      {
+                      }),
+                      orderRow({
                         fields: [
-                          {
+                          orderField({
                             accessor: 'tax_amount',
                             disabled: true,
                             label: 'Tax',
                             type: 'currency',
-                          },
-                          {
+                          }),
+                          orderField({
                             accessor: 'total_amount',
                             disabled: true,
                             label: 'Total',
                             type: 'currency',
-                          },
+                          }),
                         ],
-                        type: 'row',
-                      },
-                      {
+                      }),
+                      orderField({
                         accessor: 'balance_due',
                         disabled: true,
                         label: 'Balance Due',
                         type: 'currency',
-                      },
+                      }),
                     ],
                     label: 'Computed Totals',
-                    type: 'group',
-                  },
-                ] as const)),
+                  }),
+                ]),
           ],
           label: 'Pricing',
         },
         {
           fields: [
-            {
+            orderGroup({
               fields: [
-                {
+                orderRow({
                   fields: [
-                    {
+                    orderField({
                       accessor: 'shipping_address_line1',
-                      clientValidation: { maxLength: 200, required: true },
                       label: 'Address Line 1',
+                      maxLength: 200,
+                      required: true,
                       type: 'text',
-                    },
-                    {
+                    }),
+                    orderField({
                       accessor: 'shipping_address_line2',
-                      clientValidation: { maxLength: 200 },
                       label: 'Address Line 2',
+                      maxLength: 200,
                       type: 'text',
-                    },
+                    }),
                   ],
                   spans: [2, 1],
-                  type: 'row',
-                },
-                {
+                }),
+                orderRow({
                   fields: [
-                    {
+                    orderField({
                       accessor: 'shipping_city',
-                      clientValidation: { required: true },
                       label: 'City',
+                      required: true,
                       type: 'text',
-                    },
-                    {
+                    }),
+                    orderField({
                       accessor: 'shipping_state',
-                      clientValidation: { required: true },
                       label: 'State',
+                      required: true,
                       type: 'text',
-                    },
+                    }),
                   ],
-                  type: 'row',
-                },
-                {
+                }),
+                orderRow({
                   fields: [
-                    {
+                    orderField({
                       accessor: 'shipping_country',
-                      clientValidation: { required: true },
                       label: 'Country',
+                      required: true,
                       type: 'text',
-                    },
-                    {
+                    }),
+                    orderField({
                       accessor: 'shipping_postal_code',
-                      clientValidation: {
-                        maxLength: 20,
-                        pattern: POSTAL_CODE_PATTERN,
-                        required: true,
-                      },
                       label: 'Postal Code',
+                      maxLength: 20,
+                      pattern: POSTAL_CODE_PATTERN,
+                      required: true,
                       type: 'text',
-                    },
+                    }),
                   ],
-                  type: 'row',
-                },
+                }),
               ],
               label: 'Address',
-              type: 'group',
-            },
-            {
+            }),
+            orderGroup({
               fields: [
-                {
+                orderRow({
                   fields: [
-                    {
+                    orderChoiceField({
                       accessor: 'carrier',
-                      clientValidation: { required: true },
                       label: 'Carrier',
-                      options: toFieldOptions(CARRIER_VALUES),
+                      options: CARRIER_OPTIONS,
+                      required: true,
                       type: 'radio',
-                    },
-                    {
+                    }),
+                    orderChoiceField({
                       accessor: 'warehouse_location',
-                      clientValidation: { required: true },
                       label: 'Warehouse',
-                      options: toFieldOptions(WAREHOUSE_LOCATION_VALUES),
+                      options: WAREHOUSE_OPTIONS,
+                      required: true,
                       type: 'radio',
-                    },
+                    }),
                   ],
-                  type: 'row',
-                },
-                {
+                }),
+                orderRow({
                   fields: [
-                    {
+                    orderField({
                       accessor: 'estimated_delivery_days',
-                      clientValidation: { min: 0, required: true },
                       label: 'ETA (days)',
+                      min: 0,
+                      required: true,
                       type: 'number',
-                    },
-                    {
+                    }),
+                    orderField({
                       accessor: 'tracking_number',
-                      clientValidation: { maxLength: 100 },
                       label: 'Tracking Number',
+                      maxLength: 100,
                       type: 'text',
-                    },
+                    }),
                   ],
-                  type: 'row',
-                },
-                {
+                }),
+                orderRow({
                   fields: [
-                    {
+                    orderField({
                       accessor: 'shipped_date',
                       label: 'Shipped Date',
                       type: 'date',
-                    },
-                    {
+                    }),
+                    orderField({
                       accessor: 'delivery_date',
                       label: 'Delivery Date',
                       type: 'date',
-                    },
+                    }),
                   ],
-                  type: 'row',
-                },
+                }),
               ],
               label: 'Logistics',
-              type: 'group',
-            },
+            }),
           ],
           label: 'Shipping',
         },
         {
           fields: [
-            {
+            orderGroup({
               fields: [
-                {
+                orderField({
                   accessor: 'billing_address_line1',
-                  clientValidation: { maxLength: 200, required: true },
                   label: 'Address Line 1',
+                  maxLength: 200,
+                  required: true,
                   type: 'text',
-                },
-                {
+                }),
+                orderRow({
                   fields: [
-                    {
+                    orderField({
                       accessor: 'billing_city',
-                      clientValidation: { required: true },
                       label: 'City',
+                      required: true,
                       type: 'text',
-                    },
-                    {
+                    }),
+                    orderField({
                       accessor: 'billing_state',
-                      clientValidation: { required: true },
                       label: 'State',
+                      required: true,
                       type: 'text',
-                    },
+                    }),
                   ],
-                  type: 'row',
-                },
-                {
+                }),
+                orderRow({
                   fields: [
-                    {
+                    orderField({
                       accessor: 'billing_country',
-                      clientValidation: { required: true },
                       label: 'Country',
+                      required: true,
                       type: 'text',
-                    },
-                    {
+                    }),
+                    orderField({
                       accessor: 'billing_postal_code',
-                      clientValidation: {
-                        maxLength: 20,
-                        pattern: POSTAL_CODE_PATTERN,
-                        required: true,
-                      },
                       label: 'Postal Code',
+                      maxLength: 20,
+                      pattern: POSTAL_CODE_PATTERN,
+                      required: true,
                       type: 'text',
-                    },
+                    }),
                   ],
-                  type: 'row',
-                },
+                }),
               ],
               label: 'Billing Address',
-              type: 'group',
-            },
+            }),
           ],
           label: 'Billing',
         },
         {
           fields: [
-            {
+            orderGroup({
               fields: [
-                {
+                orderRow({
                   fields: [
-                    {
+                    orderChoiceField({
                       accessor: 'payment_status',
-                      clientValidation: { required: true },
                       label: 'Payment Status',
-                      options: toFieldOptions(PAYMENT_STATUS_VALUES),
+                      options: PAYMENT_STATUS_OPTIONS,
+                      required: true,
                       type: 'select',
-                    },
-                    {
+                    }),
+                    orderChoiceField({
                       accessor: 'payment_method',
-                      clientValidation: { required: true },
                       label: 'Payment Method',
-                      options: toFieldOptions(PAYMENT_METHOD_VALUES),
+                      options: PAYMENT_METHOD_OPTIONS,
+                      required: true,
                       type: 'select',
-                    },
+                    }),
                   ],
-                  type: 'row',
-                },
-                {
+                }),
+                orderRow({
                   fields: [
-                    {
+                    orderField({
                       accessor: 'payment_date',
                       label: 'Payment Date',
                       type: 'date',
-                    },
-                    {
+                    }),
+                    orderField({
                       accessor: 'payment_reference',
-                      clientValidation: { maxLength: 100 },
                       label: 'Payment Reference',
+                      maxLength: 100,
                       type: 'text',
-                    },
+                    }),
                   ],
-                  type: 'row',
-                },
+                }),
               ],
               label: 'Payment',
-              type: 'group',
-            },
+            }),
           ],
           label: 'Payment',
         },
         {
           fields: [
-            {
+            orderGroup({
               fields: [
-                {
+                orderField({
                   accessor: 'order_notes',
                   label: 'Order Notes',
                   type: 'textarea',
-                },
-                {
+                }),
+                orderField({
                   accessor: 'internal_notes',
                   label: 'Internal Notes',
                   type: 'textarea',
-                },
+                }),
               ],
               label: 'Notes',
-              type: 'group',
-            },
+            }),
             ...(isCreate
               ? []
-              : ([
-                  {
+              : [
+                  orderGroup({
                     collapsible: true,
                     defaultCollapsed: true,
                     fields: [
-                      {
+                      orderRow({
                         fields: [
-                          {
+                          orderField({
                             accessor: 'created_at',
                             disabled: true,
                             label: 'Created At',
                             type: 'text',
-                          },
-                          {
+                          }),
+                          orderField({
                             accessor: 'updated_at',
                             disabled: true,
                             label: 'Updated At',
                             type: 'text',
-                          },
+                          }),
                         ],
-                        type: 'row',
-                      },
-                      {
+                      }),
+                      orderField({
                         accessor: 'order_id',
                         disabled: true,
                         label: 'Order ID',
                         type: 'number',
-                      },
-                      {
+                      }),
+                      orderField({
                         accessor: 'last_modified_by',
                         disabled: true,
                         label: 'Last Modified By',
                         type: 'text',
-                      },
+                      }),
                     ],
                     label: 'Audit',
-                    type: 'group',
-                  },
-                ] as const)),
+                  }),
+                ]),
           ],
           label: 'Notes & Audit',
         },
