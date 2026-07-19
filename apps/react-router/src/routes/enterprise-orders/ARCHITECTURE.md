@@ -7,6 +7,11 @@ Enterprise table route for large-order operational data with a dedicated constan
 - Expose `/enterprise-orders` as a table-centric operational view.
 - Configure table columns, pinning defaults, and route-specific rendering behavior.
 - Keep route wiring (`loader`, `meta`, `layout`, `errorBoundary`) local to this folder.
+- **Secured subtree:** `layout.ts` exports `middleware = [authMiddleware]` (`@/auth`),
+  so the list and the `new` / `edit/:orderId` / `view/:orderId` child modal routes
+  require authentication — unauthenticated requests are redirected to
+  `/login?redirectTo=<url>`. The create/edit actions read the authenticated user from
+  `context.get(authContext)` and record it in `last_modified_by`.
 
 ## Constants Responsibilities
 

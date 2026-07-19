@@ -23,8 +23,11 @@ type RunArgs = {
   readonly orderId: string;
 };
 
+const authClaims = { exp: 0, iat: 0, jti: 't', sub: 'demo@example.com' };
+
 const run = ({ fields, orderId }: RunArgs) =>
   action({
+    context: { get: () => authClaims },
     params: { orderId },
     request: new Request(`http://localhost/enterprise-orders/edit/${orderId}`, {
       body: new URLSearchParams(fields),
@@ -46,6 +49,7 @@ it('recomputes totals, updates and redirects to the view', async () => {
   );
   const values = vi.mocked(updateOrder).mock.calls[0]?.[0].values;
   expect(values?.total_amount).toBe(199.4);
+  expect(values?.last_modified_by).toBe('demo@example.com');
   expect(values).not.toHaveProperty('order_id');
 });
 

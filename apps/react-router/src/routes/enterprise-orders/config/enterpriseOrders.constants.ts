@@ -88,13 +88,6 @@ export const ENTERPRISE_ORDER_COLUMNS = [
 export const ENTERPRISE_ORDER_ALLOWED_COLUMNS: readonly string[] =
   ENTERPRISE_ORDER_COLUMNS;
 
-/**
- * Fallback actor recorded in `last_modified_by`. The auth track (separate
- * work-package) will replace this with the authenticated user's identity via
- * the request context; until then every write is attributed to the system.
- */
-export const SYSTEM_ACTOR = 'system';
-
 // ---------------------------------------------------------------------------
 // Enum value sets (convention-only in the DB — no CHECK constraints). Used for
 // Form select/radio options and Zod `z.enum(...)` validation.

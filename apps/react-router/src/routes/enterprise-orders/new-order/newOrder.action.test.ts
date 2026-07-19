@@ -20,8 +20,11 @@ const buildRequest = (fields: Record<string, string>) =>
     method: 'POST',
   });
 
+const authClaims = { exp: 0, iat: 0, jti: 't', sub: 'demo@example.com' };
+
 const run = (fields: Record<string, string>) =>
   action({
+    context: { get: () => authClaims },
     request: buildRequest(fields),
   } as unknown as ActionFunctionArgs);
 
@@ -38,6 +41,7 @@ it('assigns the id, derives totals and redirects to the new order view', async (
   expect(values?.order_id).toBe(8);
   expect(values?.order_number).toBe('ORD-00000008');
   expect(values?.total_amount).toBe(199.4);
+  expect(values?.last_modified_by).toBe('demo@example.com');
 });
 
 it('returns field errors and does not persist for an invalid submission', async () => {

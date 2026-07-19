@@ -11,7 +11,6 @@ export {
   PAYMENT_STATUS_VALUES,
   PRIORITY_VALUES,
   PRODUCT_CATEGORY_VALUES,
-  SYSTEM_ACTOR,
   WAREHOUSE_LOCATION_VALUES,
 } from './enterpriseOrders.constants';
 export {
