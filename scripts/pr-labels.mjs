@@ -15,20 +15,17 @@ import { fileURLToPath } from 'node:url';
 
 import { parseCommitHeader } from './lib/commit-convention.mjs';
 import { typeLabelName, workspaceLabelName } from './lib/labels.mjs';
-import { deriveWorkspaces } from './lib/workspace-scopes.mjs';
+import {
+  deriveWorkspaces,
+  workspacesForFiles,
+} from './lib/workspace-scopes.mjs';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
 
-const scopeLabels = (files, workspaces) => {
-  const dir = { app: 'apps', pkg: 'packages' };
-  return workspaces
-    .filter((workspace) =>
-      files.some((file) =>
-        file.startsWith(`${dir[workspace.kind]}/${workspace.name}/`),
-      ),
-    )
-    .map((workspace) => workspaceLabelName(workspace));
-};
+const scopeLabels = (files, workspaces) =>
+  workspacesForFiles(files, workspaces).map((workspace) =>
+    workspaceLabelName(workspace),
+  );
 
 const titleLabels = (title) => {
   const parsed = parseCommitHeader(title);

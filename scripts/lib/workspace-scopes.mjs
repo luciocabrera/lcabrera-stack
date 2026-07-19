@@ -79,3 +79,19 @@ export const deriveWorkspaces = (repoRoot) => {
  */
 export const deriveWorkspaceScopes = (repoRoot) =>
   new Set(deriveWorkspaces(repoRoot).map((workspace) => workspace.name));
+
+/**
+ * The workspaces whose directory contains at least one of the given changed
+ * files — the soft path→workspace mapping every change-scoped tool shares: a file
+ * under `apps/<name>/` or `packages/<name>/` belongs to that workspace. `files`
+ * are repo-relative paths; `workspaces` are `{ name, kind }` from
+ * `deriveWorkspaces` (or a richer shape carrying those two fields).
+ */
+export const workspacesForFiles = (files, workspaces) => {
+  const dir = { app: 'apps', pkg: 'packages' };
+  return workspaces.filter((workspace) =>
+    files.some((file) =>
+      file.startsWith(`${dir[workspace.kind]}/${workspace.name}/`),
+    ),
+  );
+};

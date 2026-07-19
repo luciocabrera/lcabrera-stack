@@ -255,6 +255,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          # test:changed diffs the PR head against its base ref, so it needs the
+          # full history and the base branch — same reason the fallow-audit job
+          # fetches everything.
+          fetch-depth: 0
 
       - name: Setup Vite+
         uses: voidzero-dev/setup-vp@8ecb39174989ce55af90f45cf55b02738599831d
@@ -265,12 +270,23 @@ jobs:
       - name: Install dependencies
         run: vp install --frozen-lockfile --ignore-scripts && vp config
 
-      - name: Run the DB-free suites (every workspace) + showcase coverage
-        # This job has no Postgres, so `test:ci` runs every DB-free suite:
-        # all workspaces except scan-orchestrator (real CQMS queue), plus
-        # scan-ingestion's DB-free `test:unit` subset, then react-router's
-        # `test:ci` last so it emits its coverage-summary.json for the step below.
-        run: vp run test:ci
+      - name: Run the DB-free suites (changed on PRs, all on main)
+        # On a PR, `test:changed --ci` runs only the workspaces the diff touched
+        # plus their dependents — a root/shared change still falls back to the
+        # full suite. On a push to `main` (no base ref) it runs the full DB-free
+        # `test:ci`. Either way the task substitution is identical: scan packages
+        # use their DB-free `test:unit`, and react-router runs its coverage
+        # `test:ci` last so it emits coverage-summary.json for the step below.
+        # (When a PR skips react-router, the coverage step degrades gracefully —
+        # it filters absent summaries out.)
+        env:
+          TEST_CHANGED_BASE: origin/${{ github.base_ref }}
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            vp run test:changed -- --ci
+          else
+            vp run test:ci
+          fi
 
       - name: Per-workspace + monorepo coverage report
         # Builds coverage/monorepo-coverage-summary.json — one entry per reported

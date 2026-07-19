@@ -113,6 +113,7 @@ project-specific belongs in that project's own `package.json`.
 | `vp run build:all`        | build every workspace                                                                        |
 | `vp run test:all`         | every suite — **needs Postgres**                                                             |
 | `vp run test:ci`          | every DB-free suite — what CI runs, no Postgres needed                                       |
+| `vp run test:changed`     | only the suites a diff touched (changed workspaces + their dependents) — see below           |
 | `vp run coverage:merge`   | merged coverage for the fallow gate (DB-free workspaces only)                                |
 | `vp run coverage:report`  | per-workspace + monorepo coverage summary for the PR comment (ui, data-access, react-router) |
 
@@ -120,6 +121,18 @@ project-specific belongs in that project's own `package.json`.
 `test:unit` subsets for `@repo/scan-ingestion` / `@repo/scan-orchestrator` and runs
 `vite-react-compiler` last so the PR's coverage summary is the fresh one. Run
 `test:ci` before pushing if you have no DB up.
+
+`test:changed` runs only the suites a diff touched, for a fast local loop. It
+diffs the working tree against the branch point (`git merge-base` with
+`origin/main`; override the base with `TEST_CHANGED_BASE`), maps changed files to
+workspaces, and adds every workspace that transitively **depends on** them — so a
+`packages/ui` edit still exercises `apps/react-router`. A root/shared change (root
+config, the lockfile, `vite-configs`/`ts-configs`) falls back to the full suite;
+a docs-only change runs nothing. Task substitution mirrors `test:ci`: the scan
+packages run their DB-free `test:unit`, and with `--ci` (`node
+scripts/test-changed.mjs --ci`) `vite-react-compiler` runs its coverage `test:ci`
+last. `--dry-run` prints the `vp run` commands without executing them. CI's Unit
+Tests job uses it on pull requests; pushes to `main` still run the full `test:ci`.
 
 ### Dev & prod servers
 
