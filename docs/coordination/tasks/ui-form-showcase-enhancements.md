@@ -2,7 +2,7 @@
 id: ui-form-showcase-enhancements
 title: '@repo/ui Form showcase enhancements (read-only display, card groups, span rows, currency, glass recipe, radio accent)'
 owner: agent:claude
-status: active
+status: review
 branch: feat/ui-form-showcase-enhancements
 area:
   - packages/ui/src/components/Form/**
@@ -12,7 +12,7 @@ area:
 started: 2026-07-19
 updated: 2026-07-19
 plan: ~/.claude/plans/let-s-create-a-detailed-golden-map.md
-pr: (none)
+pr: https://github.com/luciocabrera/vite-react-compiler/pull/97
 issue: '#79'
 ---
 
@@ -30,6 +30,6 @@ opt-in `@repo/ui` enhancements — sub-issues #80–#85:
 
 ## Status / next
 
-- Current step: implementing #80–#85 in order, one commit per sub-issue
+- Current step: all six sub-issues (#80–#85) implemented, tested, green gate, pushed
 - Blockers: none
-- Next: finish gate + tests per sub-issue, push draft PR
+- Next: PR #97 review + merge
