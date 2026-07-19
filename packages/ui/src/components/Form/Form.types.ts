@@ -6,6 +6,13 @@ export type BooleanFieldDef<TValues extends Record<string, unknown>> =
     readonly variant?: 'checkbox' | 'toggle';
   };
 
+export type CurrencyFieldDef<TValues extends Record<string, unknown>> =
+  BaseFieldDef<TValues> & {
+    /** ISO currency code used for display/read formatting (defaults to USD). */
+    readonly currency?: string;
+    readonly type: 'currency';
+  };
+
 export type CustomFieldDef<TValues extends Record<string, unknown>> =
   BaseFieldDef<TValues> & {
     readonly renderField: (args: RenderFieldArgs) => ReactNode;
@@ -73,6 +80,7 @@ export type GroupFieldNode<TValues extends Record<string, unknown>> = {
 
 export type LeafFieldDef<TValues extends Record<string, unknown>> =
   | BooleanFieldDef<TValues>
+  | CurrencyFieldDef<TValues>
   | CustomFieldDef<TValues>
   | DateFieldDef<TValues>
   | NumberFieldDef<TValues>

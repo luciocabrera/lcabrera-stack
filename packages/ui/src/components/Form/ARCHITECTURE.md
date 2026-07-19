@@ -87,6 +87,7 @@ Form/
 │   ├── useFormField.hook.ts → Shared per-leaf-field wiring: useId + value/error/mode selectors + isDisabled + accessor-bound setValue (every leaf field consumes it)
 │   ├── TextField/     → text | email | password | textarea (new bare input)
 │   ├── NumberField/   → number (new bare input)
+│   ├── CurrencyField/ → currency (number input + currency-symbol adornment; view/read formats as currency). getCurrencySymbol.util
 │   ├── DateField/     → date | datetime (new bare input)
 │   ├── BooleanField/  → wraps Checkbox or ToggleSwitch
 │   ├── SelectField/   → wraps VirtualSelect + hidden inputs for FormData

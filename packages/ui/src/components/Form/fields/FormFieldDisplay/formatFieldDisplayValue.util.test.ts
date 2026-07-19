@@ -30,6 +30,18 @@ describe('formatFieldDisplayValue', () => {
     expect(formatFieldDisplayValue({ field, value: '42' })).toBe('42');
   });
 
+  it('formats currency fields as a currency string', () => {
+    const field: LeafFieldDef<Values> = {
+      accessor: 'total',
+      label: 'Total',
+      type: 'currency',
+    };
+
+    expect(formatFieldDisplayValue({ field, value: 1234.5 })).toContain(
+      '1,234.50',
+    );
+  });
+
   it('formats dates via the shared date formatter', () => {
     const field: LeafFieldDef<Values> = {
       accessor: 'when',

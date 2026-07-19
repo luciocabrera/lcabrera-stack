@@ -1,5 +1,6 @@
 import type { LeafFieldDef } from '@repo/ui/components/Form/Form.types';
 
+import { formatCurrency } from '@repo/ui/utils/formatters/formatCurrency.util';
 import { formatDate } from '@repo/ui/utils/formatters/formatDate.util';
 import { formatNumber } from '@repo/ui/utils/formatters/formatNumber.util';
 
@@ -34,6 +35,13 @@ export const formatFieldDisplayValue = <
   }
 
   switch (field.type) {
+    case 'currency': {
+      const numeric = typeof value === 'number' ? value : Number(value);
+
+      return Number.isFinite(numeric)
+        ? formatCurrency({ currency: field.currency, value: numeric })
+        : stringifyLeafValue(value);
+    }
     case 'date':
     case 'datetime': {
       return formatDate({ value });
