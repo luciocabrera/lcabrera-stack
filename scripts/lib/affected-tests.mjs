@@ -218,10 +218,14 @@ export const workspaceDispositions = ({ graph, affected, changed, groups }) => {
 /**
  * A GitHub-flavoured markdown version of the disposition report, for the CI
  * job summary and the PR comment — so the change-based selection is visible in
- * the PR, not hidden in the logs. The `## 🧪 Test Selection` heading is the
- * sticky-comment marker; keep it stable.
+ * the PR, not hidden in the logs. `title` is also the sticky-comment marker (a
+ * distinct one per task), so keep it stable; it defaults to the tests' heading.
  */
-export const renderSelectionMarkdown = (mode, dispositions) => {
+export const renderSelectionMarkdown = (
+  mode,
+  dispositions,
+  { title = '🧪 Test Selection' } = {},
+) => {
   const running = dispositions.filter((disposition) => disposition.running);
   const skipped = dispositions.filter((disposition) => !disposition.running);
   const total = dispositions.length;
@@ -253,7 +257,7 @@ export const renderSelectionMarkdown = (mode, dispositions) => {
           '',
         ];
   return [
-    '## 🧪 Test Selection',
+    `## ${title}`,
     '',
     headline,
     '',

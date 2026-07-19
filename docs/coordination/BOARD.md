@@ -6,6 +6,6 @@ coordination:verify` fails if this drifts. See [README.md](./README.md).
 
 ## Tasks
 
-| Task                                                                                                    | Owner        | Status | Branch                        | Area                                                                                                                            | Updated    |
-| ------------------------------------------------------------------------------------------------------- | ------------ | ------ | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| [Add change-based test selection (vp run test:changed) for local + CI](tasks/test-changed-selection.md) | agent:claude | review | `feat/test-changed-selection` | `scripts/test-changed.mjs`<br>`scripts/lib/affected-tests.mjs`<br>`scripts/lib/workspace-scopes.mjs`<br>`scripts/pr-labels.mjs` | 2026-07-19 |
+| Task                                                                                             | Owner        | Status | Branch                             | Area                                                                                                                            | Updated    |
+| ------------------------------------------------------------------------------------------------ | ------------ | ------ | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| [Scope the Quality Gate's typecheck to changed workspaces](tasks/typecheck-changed-selection.md) | agent:claude | active | `feat/typecheck-changed-selection` | `scripts/run-changed.mjs`<br>`scripts/lib/changed-runner.mjs`<br>`scripts/test-changed.mjs`<br>`scripts/lib/affected-tests.mjs` | 2026-07-19 |

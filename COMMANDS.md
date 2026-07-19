@@ -99,23 +99,24 @@ project-specific belongs in that project's own `package.json`.
 
 ### Gate & CI
 
-| Command                   | Does                                                                                         |
-| ------------------------- | -------------------------------------------------------------------------------------------- |
-| `vp run ready`            | `check:safe` + `build:all` — the full "is it shippable" check                                |
-| `vp run check:safe`       | typegen → eslint-rules build → `vp check` → typecheck → eslint → biome → tests               |
-| `vp run typecheck:all`    | real tsc in all 16 workspaces, dependency order                                              |
-| `vp run typegen:all`      | route types for both React Router apps                                                       |
-| `vp run lint:all`         | Oxlint + eslint + Biome **with autofix**, every workspace                                    |
-| `vp run lint:biome`       | Biome repo-wide **with autofix** (`--write`, safe fixes only)                                |
-| `vp run lint:biome:check` | Biome repo-wide, check only — what CI runs                                                   |
-| `vp run lint:report`      | regenerate `reports/{oxlint,eslint,biome}/full-latest.json`                                  |
-| `vp run format:all`       | `vp fmt .` across the tree                                                                   |
-| `vp run build:all`        | build every workspace                                                                        |
-| `vp run test:all`         | every suite — **needs Postgres**                                                             |
-| `vp run test:ci`          | every DB-free suite — what CI runs, no Postgres needed                                       |
-| `vp run test:changed`     | only the suites a diff touched (changed workspaces + their dependents) — see below           |
-| `vp run coverage:merge`   | merged coverage for the fallow gate (DB-free workspaces only)                                |
-| `vp run coverage:report`  | per-workspace + monorepo coverage summary for the PR comment (ui, data-access, react-router) |
+| Command                    | Does                                                                                         |
+| -------------------------- | -------------------------------------------------------------------------------------------- |
+| `vp run ready`             | `check:safe` + `build:all` — the full "is it shippable" check                                |
+| `vp run check:safe`        | typegen → eslint-rules build → `vp check` → typecheck → eslint → biome → tests               |
+| `vp run typecheck:all`     | real tsc in all 16 workspaces, dependency order                                              |
+| `vp run typecheck:changed` | real tsc for the changed workspaces + dependents only — see below                            |
+| `vp run typegen:all`       | route types for both React Router apps                                                       |
+| `vp run lint:all`          | Oxlint + eslint + Biome **with autofix**, every workspace                                    |
+| `vp run lint:biome`        | Biome repo-wide **with autofix** (`--write`, safe fixes only)                                |
+| `vp run lint:biome:check`  | Biome repo-wide, check only — what CI runs                                                   |
+| `vp run lint:report`       | regenerate `reports/{oxlint,eslint,biome}/full-latest.json`                                  |
+| `vp run format:all`        | `vp fmt .` across the tree                                                                   |
+| `vp run build:all`         | build every workspace                                                                        |
+| `vp run test:all`          | every suite — **needs Postgres**                                                             |
+| `vp run test:ci`           | every DB-free suite — what CI runs, no Postgres needed                                       |
+| `vp run test:changed`      | only the suites a diff touched (changed workspaces + their dependents) — see below           |
+| `vp run coverage:merge`    | merged coverage for the fallow gate (DB-free workspaces only)                                |
+| `vp run coverage:report`   | per-workspace + monorepo coverage summary for the PR comment (ui, data-access, react-router) |
 
 `test:all` vs `test:ci`: CI has no database, so `test:ci` substitutes the DB-free
 `test:unit` subsets for `@repo/scan-ingestion` / `@repo/scan-orchestrator` and runs
@@ -138,6 +139,15 @@ scripts/test-changed.mjs --ci`) `vite-react-compiler` runs its coverage `test:ci
 last. `--dry-run` prints the `vp run` commands without executing them. CI's Unit
 Tests job (and its coverage report) scope to the diff on pull requests; pushes to
 `main` still run the full `test:ci`.
+
+`typecheck:changed` applies the same change-based selection to the Quality Gate's
+slowest per-workspace step — real `tsc` across all 16 workspaces. It runs
+`typecheck` only for the changed workspaces plus their dependents (a type error a
+diff introduces surfaces where the type is used, which the dependents walk covers),
+falling back to the full run on the same shared/root triggers and on pushes to
+`main`. The generic runner is `scripts/run-changed.mjs <task>`; `vp check`'s
+repo-wide tsgolint pass still type-checks every PR as a net. CI's Quality Gate uses
+it on pull requests and posts the per-workspace selection to the job summary.
 
 ### Dev & prod servers
 

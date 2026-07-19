@@ -15,6 +15,7 @@
     "format:all": "vp fmt .",
     "typegen:all": "vp run -r typegen",
     "typecheck:all": "vp run -r typecheck",
+    "typecheck:changed": "git diff --name-only $(git merge-base ${TEST_CHANGED_BASE:-origin/main} HEAD) | node scripts/run-changed.mjs typecheck",
     "check:safe": "vp run typegen:all && vp run --filter eslint-local-rules-shared build && vp check && vp run typecheck:all && vp run -r lint:eslint:check && vp run lint:biome:check && vp run test:all",
     "test:ci": "vp run --filter '!@repo/scan-ingestion' --filter '!@repo/scan-orchestrator' --filter '!vite-react-compiler' test && vp run --filter @repo/scan-ingestion test:unit && vp run --filter @repo/scan-orchestrator test:unit && vp run --filter vite-react-compiler test:ci",
     "test:changed": "git diff --name-only $(git merge-base ${TEST_CHANGED_BASE:-origin/main} HEAD) | node scripts/test-changed.mjs",

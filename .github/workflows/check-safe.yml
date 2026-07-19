@@ -18,6 +18,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          # typecheck:changed diffs the PR head against its base ref, so it needs
+          # the full history and the base branch.
+          fetch-depth: 0
 
       - name: Setup Vite+
         uses: voidzero-dev/setup-vp@8ecb39174989ce55af90f45cf55b02738599831d
@@ -46,7 +50,31 @@ jobs:
         # apps regenerate route types before checking. Running the real
         # compiler here is the reference implementation the other passes are
         # approximations of.
-        run: vp run typecheck:all
+        #
+        # On a PR, `typecheck:changed` runs tsc only for the changed workspaces
+        # plus their dependents — a type error a diff introduces surfaces where
+        # the type is used, which the dependents walk covers, and `vp check`'s
+        # tsgolint pass above still type-checks the whole tree as a net. A
+        # root/shared change or a push to `main` runs the full `typecheck:all`.
+        env:
+          TEST_CHANGED_BASE: origin/${{ github.base_ref }}
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            vp run typecheck:changed
+          else
+            vp run typecheck:all
+          fi
+
+      - name: Type-check selection summary
+        # Make the change-based selection visible in the run, not buried in the
+        # type-check log — the per-workspace running/skipped breakdown goes to
+        # the job summary. Report-only; type-checks nothing.
+        if: github.event_name == 'pull_request' && always()
+        env:
+          TEST_CHANGED_BASE: origin/${{ github.base_ref }}
+        run: |
+          git diff --name-only "$(git merge-base "$TEST_CHANGED_BASE" HEAD)" \
+            | node scripts/run-changed.mjs typecheck --markdown >> "$GITHUB_STEP_SUMMARY"
 
       - name: ESLint custom-rules pass
         id: eslint_gate
