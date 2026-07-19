@@ -1,9 +1,11 @@
 import { discoverProjectWorkspaces } from '@repo/scan-ingestion/ingestion/workspaces/discoverProjectWorkspaces.util';
 import { getActiveScanners } from '@repo/scan-ingestion/queries/getActiveScanners.util';
+import { getProjectActiveRun } from '@repo/scan-ingestion/queries/getProjectActiveRun.util';
 import { getProjectById } from '@repo/scan-ingestion/queries/getProjectById.util';
-import { getProjectHasActiveRun } from '@repo/scan-ingestion/queries/getProjectHasActiveRun.util';
 import { data, type LoaderFunctionArgs } from 'react-router';
 import { z } from 'zod';
+
+import { formatRunElapsed } from './formatRunElapsed.util';
 
 const paramsSchema = z.object({ projectId: z.string().uuid() });
 
@@ -39,7 +41,16 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
   // active or no snapshot is synced, and the server-side functions assert
   // both too (migrations 0021/0027), but this stops the form from even
   // rendering as the third layer.
-  const hasActiveRun = await getProjectHasActiveRun({ projectId });
+  const activeRunRow = await getProjectActiveRun({ projectId });
+  const activeRun = activeRunRow
+    ? {
+        elapsed: formatRunElapsed({
+          nowMs: Date.now(),
+          startedAtMs: Date.parse(activeRunRow.startedAt),
+        }),
+        runId: activeRunRow.runId,
+      }
+    : undefined;
   const project = await getProjectById({ projectId });
   const hasSnapshot = Boolean(project?.latest_snapshot_id);
 
@@ -47,7 +58,7 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
   const workspacesPromise = loadWorkspaces(projectId);
 
   return {
-    hasActiveRun,
+    activeRun,
     hasSnapshot,
     projectId,
     scannersPromise,

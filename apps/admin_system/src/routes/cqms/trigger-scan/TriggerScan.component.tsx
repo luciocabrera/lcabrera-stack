@@ -5,11 +5,12 @@ import { useActionData, useLoaderData } from 'react-router';
 import type { action } from './triggerScan.action';
 import type { loader } from './triggerScan.loader';
 
+import { ActiveRunNotice } from './ActiveRunNotice';
 import { TriggerScanForm } from './TriggerScanForm';
 
 export const TriggerScan = () => {
   const {
-    hasActiveRun,
+    activeRun,
     hasSnapshot,
     projectId,
     scannersPromise,
@@ -31,19 +32,26 @@ export const TriggerScan = () => {
     );
   }
 
+  const conflict =
+    actionData && 'conflict' in actionData ? actionData.conflict : undefined;
   const serverErrors =
     actionData && 'errors' in actionData ? actionData.errors : undefined;
+
+  // A run that was already active at load, or one that started between load and
+  // submit (the action's 409). Either way the form is replaced by the banner.
+  const blockingRun = activeRun ?? conflict;
 
   return (
     <SectionCard
       description='Pick which scanners to run against this project, optionally scoped to specific workspaces.'
       title='Trigger Scan'
     >
-      {hasActiveRun ? (
-        <p>
-          A scan is already running for this project — wait for it to finish
-          before starting another.
-        </p>
+      {blockingRun ? (
+        <ActiveRunNotice
+          elapsed={blockingRun.elapsed}
+          projectId={projectId}
+          runId={blockingRun.runId}
+        />
       ) : (
         <Suspense fallback={<p>Loading scanners…</p>}>
           <TriggerScanForm
