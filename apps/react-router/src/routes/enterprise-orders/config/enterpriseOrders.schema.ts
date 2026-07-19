@@ -12,8 +12,8 @@ import {
 } from './enterpriseOrders.constants';
 
 /** Validation patterns exercised by the create/edit forms (feature plan §2). */
-export const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-export const PHONE_PATTERN = /^\+?[0-9][\d\s().-]{6,29}$/;
+export const EMAIL_PATTERN = /^[^\s@]+@[^\s@.]+\.[^\s@]+$/;
+export const PHONE_PATTERN = /^\+?\d[\d\s().-]{6,29}$/;
 export const POSTAL_CODE_PATTERN = /^[A-Za-z0-9][A-Za-z0-9\s-]{2,19}$/;
 export const ORDER_NUMBER_PATTERN = /^ORD-\d{8}$/;
 
