@@ -2,7 +2,7 @@
 id: cqms-global-concurrency-cap
 title: Global concurrency cap (env var) for scanner runs (CQMS Phase 2, #64)
 owner: agent:claude
-status: active
+status: review
 branch: feat/cqms-global-concurrency-cap
 area:
   - apps/scan-orchestrator/src/config/env.schema.ts
@@ -11,7 +11,7 @@ area:
 started: 2026-07-19
 updated: 2026-07-19
 plan: (none)
-pr: (none)
+pr: '#78'
 issue: '#64'
 ---
 
