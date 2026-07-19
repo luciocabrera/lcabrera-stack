@@ -59,16 +59,31 @@ http://localhost:5173/enterprise-orders
 
 ```
 src/routes/enterprise-orders/
-├── EnterpriseOrders.component.tsx     # Main component with table
-├── EnterpriseOrders.constants.tsx     # Column definitions (31 columns)
-├── EnterpriseOrders.stylex.ts         # Styles
-├── EnterpriseOrders.types.ts          # TypeScript types
-├── enterprise-orders.loader.ts        # Data loader with Suspense
-├── enterprise-orders.meta.ts          # Page metadata
-├── enterprise-orders.errorBoundary.tsx # Error handling
-├── enterprise-orders.errorBoundary.stylex.ts
-└── root.ts                            # Route exports
+├── layout.ts / enterprise-orders.layout.tsx  # List route: table + <Outlet/> for modals
+├── EnterpriseOrders.component.tsx             # Data table
+├── EnterpriseOrders.constants.tsx             # Table column definitions
+├── enterprise-orders.loader.ts               # List loader (Suspense streaming)
+├── enterprise-orders.meta.ts                 # Page metadata
+├── enterprise-orders.errorBoundary.tsx       # Error handling
+├── config/                                    # Entity data + pure rules (types, Zod, derivation)
+├── server/enterpriseOrders.service.ts         # Server-only Postgres access (generic data-access)
+├── OrderFormModal/                            # Shared Modal + Form wrapper
+├── orderFormFields.util.ts                    # Tab → group → row field-tree builder
+├── orderClientAction.ts                       # Shared browser Zod gate
+├── parseOrderIdParam.util.ts                  # `:orderId` param validation
+├── new-order/                                 # Create route (clientAction + action)
+├── edit-order/                                # Edit route (loader + clientAction + action)
+└── order-detail/                              # Read-only view route (Form `view` mode)
 ```
+
+## CRUD flow
+
+Create / view / edit render **inside `@repo/ui` Modal** overlaid on the list (route-driven
+modals — the parent renders the table + `<Outlet/>`). Submissions validate client-first via
+`clientAction` (Zod), then delegate to the server `action`, which re-validates, persists via
+the generic `@repo/data-access` write builders (direct Postgres — no api-server), and
+redirects. Requires local Postgres (`vp run db:up`) with the `DB_*` env the `dev` script
+sources from `docker/local/.env`.
 
 ## API Service
 
@@ -173,10 +188,10 @@ curl -G "http://localhost:3001/api/enterprise-orders/paginated" \
 
 ## Next Steps
 
-- [ ] Add filtering UI component
+- [x] Add detail view for individual orders (read-only `view`-mode Form modal)
+- [x] Add create/edit flows (Form modals with client-first Zod validation)
 - [ ] Add export to CSV functionality
 - [ ] Add charts/analytics view
-- [ ] Add detail view for individual orders
 - [ ] Implement real-time updates
 
 ## Related Documentation

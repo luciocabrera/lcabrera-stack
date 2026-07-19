@@ -1,18 +1,5 @@
-import { SectionCard } from '@repo/ui/components/SectionCard';
-import { useParams } from 'react-router';
-
-const EditOrder = () => {
-  const params = useParams();
-
-  return (
-    <SectionCard
-      description='Edit flow for enterprise orders is not implemented yet.'
-      title='Edit Order'
-    >
-      {`Edit order placeholder for #${params.orderId ?? 'unknown'}.`}
-    </SectionCard>
-  );
-};
-
-// React Router framework-mode route modules require a default export
-export default EditOrder;
+export { orderClientAction as clientAction } from '../orderClientAction';
+export { action } from './editOrder.action';
+export { EditOrder as default } from './EditOrder.component';
+export { loader } from './editOrder.loader';
+export { meta } from './editOrder.meta';

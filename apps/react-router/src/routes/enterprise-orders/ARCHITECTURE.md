@@ -45,3 +45,39 @@ column.
 - Repeated string columns are composed through `createBasicColumn(...)` from `@repo/ui/components/Table/utils` in [src/routes/enterprise-orders/EnterpriseOrders.constants.tsx](src/routes/enterprise-orders/EnterpriseOrders.constants.tsx); their distinct filter descriptors are appended once in the loader by `appendDistinctFilterDescriptors` (ADR-009) instead of per-column wiring.
 - This keeps the descriptor params (`schemaName`/`tableName`/`columnName`) consistent across customer and shipping fields while preserving each column's label/width metadata.
 - The row-actions column is likewise never hand-declared here — it's synthesized by `TableConfigProvider` (via `getInitialColumnsState` / `resolveTableActionsColumn`) from `CRUD`, keeping store initialization explicit and side-effect free.
+
+## CRUD via route-driven modals
+
+The list route is the **parent layout** (`layout.ts` → `enterprise-orders.layout.tsx`),
+which renders the table **plus an `<Outlet/>`**. The create/view/edit routes are its
+children and render `<Modal><Form/></Modal>` into that outlet, so each opens as a modal
+overlaid on the still-visible list (feature plan §4). At `/enterprise-orders` the outlet is
+empty. `Modal.onClose` and the Form's Cancel navigate back to the list; a successful action
+`redirect`s to the new/updated record's view.
+
+- `new-order/` — `clientAction` (browser Zod validation → `serverAction` only on pass) +
+  `action` (re-validate → assign `order_id` via `getMaxValue`+1 → derive totals →
+  `insertRow` → redirect to view).
+- `edit-order/` — `loader` (`selectRows` by `order_id`, 404 if missing) + `clientAction` +
+  `action` (re-validate → recompute totals → `updateRows` → redirect to view).
+- `order-detail/` — read-only `view`-mode Form; serves both `view/:orderId` and the bare
+  `:orderId` route (the intentional duplicate detail routes, feature plan §8 item 5).
+- `OrderFormModal/` — shared Modal+Form wrapper; `orderFormFields.util.ts` builds the tab →
+  card-group → row field tree per mode; `orderClientAction.ts` is the shared browser gate.
+
+### `config/` — entity data + pure rules (no SQL, no `pg`)
+
+Client-safe types (`EnterpriseOrder`, `EnterpriseOrderValues`), the `{ schema, table }` +
+column/`allowedColumns`/enum sets, the shared create/update **Zod schema**, and pure
+derivation/mapping utils (`deriveOrderTotals`, `toOrderInsertValues`/`toOrderUpdateValues`,
+`readOrderFormValues`, `toOrderFieldErrors`, `toOrderFormValues`). Each util is pure with a
+colocated test.
+
+### `server/enterpriseOrders.service.ts` — server-only Postgres access
+
+Wraps the generic `@repo/data-access` executors (`selectRows`/`insertRow`/`updateRows`/
+`deleteRows`/`getMaxValue`) with the enterprise-orders `{ schema, table, allowedColumns }`
+baked in — **no entity-specific SQL**. Imported only from loaders/actions (never client
+components); it reaches Postgres via `getPool`, which reads `DB_*` env (sourced from
+`docker/local/.env` by the app's `dev` script). The `/_action/enterprise-orders/delete`
+action now calls `deleteOrder` here, fixing the prior api-server 404 (feature plan §8 bug 1).

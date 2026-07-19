@@ -12,7 +12,6 @@ export default [
   route('car-sales', 'routes/car-sales/root.ts'),
   route('car-sales-infinite', 'routes/car-sales-infinite/root.ts'),
   route('enterprise-orders', 'routes/enterprise-orders/layout.ts', [
-    index('routes/enterprise-orders/root.tsx'),
     route('new', 'routes/enterprise-orders/new-order/root.tsx'),
     route('edit/:orderId', 'routes/enterprise-orders/edit-order/root.tsx'),
     route(

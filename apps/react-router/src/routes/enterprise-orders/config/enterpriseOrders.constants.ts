@@ -14,6 +14,9 @@
 export const ENTERPRISE_ORDERS_SCHEMA = 'public';
 export const ENTERPRISE_ORDERS_TABLE = 'enterprise_orders';
 
+/** The list route the create/edit/view modals overlay and return to. */
+export const ENTERPRISE_ORDERS_PATH = '/enterprise-orders';
+
 /** Every column of `enterprise_orders`, in alphabetical order. */
 export const ENTERPRISE_ORDER_COLUMNS = [
   'balance_due',

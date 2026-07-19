@@ -4,6 +4,7 @@ export {
   CUSTOMER_TYPE_VALUES,
   ENTERPRISE_ORDER_ALLOWED_COLUMNS,
   ENTERPRISE_ORDER_COLUMNS,
+  ENTERPRISE_ORDERS_PATH,
   ENTERPRISE_ORDERS_SCHEMA,
   ENTERPRISE_ORDERS_TABLE,
   ORDER_STATUS_VALUES,
@@ -16,15 +17,21 @@ export {
   WAREHOUSE_LOCATION_VALUES,
 } from './enterpriseOrders.constants';
 export {
+  EMAIL_PATTERN,
   type EnterpriseOrderInput,
   enterpriseOrderSchema,
+  PHONE_PATTERN,
+  POSTAL_CODE_PATTERN,
 } from './enterpriseOrders.schema';
 export type {
   EnterpriseOrder,
   EnterpriseOrdersResponse,
   EnterpriseOrderValues,
 } from './enterpriseOrders.types';
+export { parseOrderFormData } from './parseOrderFormData.util';
 export { readOrderFormValues } from './readOrderFormValues.util';
+export { toFieldOptions } from './toFieldOptions.util';
 export { toOrderFieldErrors } from './toOrderFieldErrors.util';
+export { toOrderFormValues } from './toOrderFormValues.util';
 export { toOrderInsertValues } from './toOrderInsertValues.util';
 export { toOrderUpdateValues } from './toOrderUpdateValues.util';
