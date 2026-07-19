@@ -2,7 +2,7 @@ import type { TableColumn } from '@repo/ui/components/Table';
 
 import { describe, expect, it } from 'vitest';
 
-import type { EnterpriseOrder } from '@/services';
+import type { EnterpriseOrder } from '../config';
 
 import { buildEnterpriseOrdersQuery } from './buildEnterpriseOrdersQuery.util';
 

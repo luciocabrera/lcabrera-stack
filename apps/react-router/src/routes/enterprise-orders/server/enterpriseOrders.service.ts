@@ -1,16 +1,24 @@
+import type {
+  QueryFilter,
+  QuerySort,
+} from '@repo/data-access/db/queryBuilder/QueryBuilder.types';
+
 import { deleteRows } from '@repo/data-access/db/deleteRows.util';
 import { getMaxValue } from '@repo/data-access/db/getMaxValue.util';
+import { getPool } from '@repo/data-access/db/getPool.util';
 import { insertRow } from '@repo/data-access/db/insertRow.util';
+import { buildSelectQuery } from '@repo/data-access/db/queryBuilder/buildSelectQuery.util';
 import { selectRows } from '@repo/data-access/db/selectRows.util';
 import { updateRows } from '@repo/data-access/db/updateRows.util';
 
-import type { EnterpriseOrder } from '../config';
+import type { EnterpriseOrder, EnterpriseOrdersResponse } from '../config';
 
 import {
   ENTERPRISE_ORDER_ALLOWED_COLUMNS,
   ENTERPRISE_ORDER_COLUMNS,
   ENTERPRISE_ORDERS_SCHEMA,
   ENTERPRISE_ORDERS_TABLE,
+  toCountSubquery,
 } from '../config';
 
 /**
@@ -25,6 +33,45 @@ const TARGET = {
   schema: ENTERPRISE_ORDERS_SCHEMA,
   table: ENTERPRISE_ORDERS_TABLE,
 } as const;
+
+export type SelectOrdersPageArgs = {
+  readonly filters: readonly QueryFilter[];
+  readonly limit: number;
+  readonly offset: number;
+  readonly sort: readonly QuerySort[];
+};
+
+/**
+ * Read a page of orders plus the total row count for the same filters. The
+ * count reuses the data query's WHERE clause via `toCountSubquery` (the generic
+ * `buildCountQuery` cannot count this table — see that util).
+ */
+export const selectOrdersPage = async ({
+  filters,
+  limit,
+  offset,
+  sort,
+}: SelectOrdersPageArgs): Promise<EnterpriseOrdersResponse> => {
+  const data = await selectRows<EnterpriseOrder>({
+    ...TARGET,
+    fields: ENTERPRISE_ORDER_COLUMNS,
+    filters,
+    limit,
+    offset,
+    sort,
+  });
+
+  const countQuery = toCountSubquery(
+    buildSelectQuery({ ...TARGET, fields: ['order_id'], filters }),
+  );
+  const countResult = await getPool().query<{ readonly count: number }>(
+    countQuery.text,
+    [...countQuery.values],
+  );
+  const total = Number(countResult.rows[0]?.count ?? 0);
+
+  return { data, hasMore: offset + data.length < total, total };
+};
 
 /** Read a single order by primary key, or `undefined` when it does not exist. */
 export const selectOrderById = async (orderId: number) => {

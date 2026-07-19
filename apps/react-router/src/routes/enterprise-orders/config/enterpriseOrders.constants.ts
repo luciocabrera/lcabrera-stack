@@ -89,29 +89,6 @@ export const ENTERPRISE_ORDER_ALLOWED_COLUMNS: readonly string[] =
   ENTERPRISE_ORDER_COLUMNS;
 
 /**
- * Server-assigned columns — set by the action, never by the Form.
- * `order_id` (getMaxValue+1), `order_number` (`ORD-` + padded id), the three
- * timestamps (`now()`) and `last_modified_by`.
- */
-export const SERVER_ASSIGNED_COLUMNS = [
-  'order_id',
-  'order_number',
-  'order_timestamp',
-  'created_at',
-  'updated_at',
-  'last_modified_by',
-] as const;
-
-/** Money columns derived server-side from the pricing inputs. */
-export const COMPUTED_MONEY_COLUMNS = [
-  'subtotal',
-  'discount_amount',
-  'tax_amount',
-  'total_amount',
-  'balance_due',
-] as const;
-
-/**
  * Fallback actor recorded in `last_modified_by`. The auth track (separate
  * work-package) will replace this with the authenticated user's identity via
  * the request context; until then every write is attributed to the system.

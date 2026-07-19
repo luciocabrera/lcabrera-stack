@@ -1,7 +1,7 @@
 import { roundToCents } from './roundToCents.util';
 
 /** Fixed sales-tax rate applied to the discounted subtotal. */
-export const TAX_RATE = 0.08;
+const TAX_RATE = 0.08;
 
 export type DeriveOrderTotalsArgs = {
   readonly discountPercentage: number;

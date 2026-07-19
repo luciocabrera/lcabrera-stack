@@ -3,12 +3,10 @@ import type { Pagination } from '@repo/ui';
 import { TableLayout } from '@repo/ui';
 import { useLoaderData } from 'react-router';
 
-import type { EnterpriseOrder, EnterpriseOrdersResponse } from '@/services';
-
-import { enterpriseOrdersApi } from '@/services';
-
+import type { EnterpriseOrder, EnterpriseOrdersResponse } from './config';
 import type { loader } from './enterprise-orders.loader';
 
+import { fetchOrdersPage } from './fetchOrdersPage.service';
 import { buildEnterpriseOrdersQuery } from './utils/buildEnterpriseOrdersQuery.util';
 
 export const EnterpriseOrders = () => {
@@ -16,9 +14,7 @@ export const EnterpriseOrders = () => {
     useLoaderData<typeof loader>();
 
   const handleLoadMore = async ({ limit, skip }: Pagination) =>
-    enterpriseOrdersApi.fetchEnterpriseOrdersPaginated(
-      buildEnterpriseOrdersQuery({ columnsState, limit, skip }),
-    );
+    fetchOrdersPage(buildEnterpriseOrdersQuery({ columnsState, limit, skip }));
 
   return (
     <TableLayout<EnterpriseOrder, EnterpriseOrdersResponse>

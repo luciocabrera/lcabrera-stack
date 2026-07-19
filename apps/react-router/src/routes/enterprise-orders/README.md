@@ -6,7 +6,8 @@ This route displays enterprise orders data with infinite scrolling capabilities.
 
 - **Path**: `/enterprise-orders`
 - **Component**: `EnterpriseOrders`
-- **API Endpoint**: `/api/enterprise-orders/paginated`
+- **Data**: server-side Postgres via `@repo/data-access` (list loader +
+  `_api/enterprise-orders/paginated` resource route for load-more)
 
 ## Features
 
@@ -85,17 +86,20 @@ the generic `@repo/data-access` write builders (direct Postgres — no api-serve
 redirects. Requires local Postgres (`vp run db:up`) with the `DB_*` env the `dev` script
 sources from `docker/local/.env`.
 
-## API Service
+## Data access
 
-```typescript
-// src/services/enterpriseOrders.api.ts
-enterpriseOrdersApi.fetchEnterpriseOrdersPaginated({
-  skip: 0,
-  limit: 50,
-  sorting: [{ columnKey: 'order_date', direction: 'desc' }],
-  filter: {/* optional filters */},
-});
-```
+Reads go through the generic `@repo/data-access` query builders/executors (no
+api-server). `server/enterpriseOrders.service.ts` exposes `selectOrdersPage`
+(list + count), `selectOrderById`, `getNextOrderId`, `insertOrder`,
+`updateOrder`, `deleteOrder`. The table's `ColumnFiltersState`/`SortingState`
+are translated to generic `QueryFilter[]`/`QuerySort[]` by the `config/`
+`toOrderQueryFilters` / `toOrderQuerySort` utils; the browser load-more calls
+`fetchOrdersPage` → the `_api/enterprise-orders/paginated` resource route.
+
+> Filter translation note: the generic `QueryFilter` operator set has no
+> `NOT ILIKE`, so a text **notContains** filter is dropped (the column is left
+> unfiltered). Every other operator — including range (`between`) and
+> multi-select NOT-IN — is preserved.
 
 ## Columns (31 displayed by default)
 
@@ -170,21 +174,22 @@ enterpriseOrdersApi.fetchEnterpriseOrdersPaginated({
 
 ## Testing
 
-Test the API directly:
+With `vp dev` running (local Postgres up via `vp run db:up`), exercise the
+load-more resource route directly:
 
 ```bash
-# Basic query
-curl "http://localhost:3001/api/enterprise-orders/paginated?skip=0&limit=10"
-
-# With sorting
-curl "http://localhost:3001/api/enterprise-orders/paginated?skip=0&limit=10&sort=%5B%7B%22columnKey%22%3A%22order_date%22%2C%22direction%22%3A%22desc%22%7D%5D"
+# Basic page
+curl "http://localhost:3000/_api/enterprise-orders/paginated?skip=0&limit=10"
 
 # With filters (VIP customers)
-curl -G "http://localhost:3001/api/enterprise-orders/paginated" \
+curl -G "http://localhost:3000/_api/enterprise-orders/paginated" \
   --data-urlencode 'skip=0' \
   --data-urlencode 'limit=10' \
   --data-urlencode 'filter={"is_vip_customer":{"type":"boolean","value":true}}'
 ```
+
+Unit tests cover the pure translation utils, the param parser, the fetcher, the
+resource loader, and the service (`vp run test`).
 
 ## Next Steps
 

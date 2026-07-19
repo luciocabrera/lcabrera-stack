@@ -10,9 +10,15 @@ import {
   getNextOrderId,
   insertOrder,
   selectOrderById,
+  selectOrdersPage,
   updateOrder,
 } from './enterpriseOrders.service';
 
+vi.mock('@repo/data-access/db/getPool.util', () => ({
+  getPool: vi.fn(() => ({
+    query: vi.fn(async () => ({ rows: [{ count: 42 }] })),
+  })),
+}));
 vi.mock('@repo/data-access/db/deleteRows.util', () => ({
   deleteRows: vi.fn(async () => []),
 }));
@@ -41,6 +47,19 @@ it('selects one order by its primary key', async () => {
       table: 'enterprise_orders',
     }),
   );
+});
+
+it('returns a page with total and hasMore from the count query', async () => {
+  const page = await selectOrdersPage({
+    filters: [],
+    limit: 10,
+    offset: 0,
+    sort: [],
+  });
+
+  expect(page.data).toStrictEqual([{ order_id: 7 }]);
+  expect(page.total).toBe(42);
+  expect(page.hasMore).toBe(true);
 });
 
 it('returns the max order_id plus one', async () => {
