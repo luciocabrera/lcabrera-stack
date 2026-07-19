@@ -10,6 +10,7 @@ started: 2026-07-18
 updated: 2026-07-18
 plan: (none)
 pr: (none)
+issue: (none)
 ---
 
 <!--
@@ -36,6 +37,9 @@ Fields:
   updated  YYYY-MM-DD — bump this whenever you make progress; stale tasks are flagged
   plan     optional pointer to out-of-git scratch (~/.claude/plans/<name>.md) or a *_PLAN.md
   pr       PR number/URL once opened
+  issue    optional pointer to the GitHub backlog issue this work picks up (e.g. #50).
+           Backlog/planning lives in GitHub Issues (ADR-036); this field links the
+           in-flight claim to the durable item. Free-form, unvalidated — like `pr`.
 
 Delete this file when the work merges (its history lives in the PR/commits).
 -->

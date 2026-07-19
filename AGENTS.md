@@ -283,6 +283,15 @@ parallel, so **who is working on what** must be visible in git — not left in
 per-agent scratch (`~/.claude/plans/`) or auto-memory, which no one else can see.
 [`docs/coordination/`](docs/coordination/README.md) is that shared register.
 
+This register is **in-flight** work only (who is touching what, right now). The
+**durable backlog** — what should happen next, epics, milestones — lives in
+**GitHub Issues / sub-issues / Milestones / Projects**; the boundary is
+[ADR-036](docs/cqms/decisions/ADR-036-github-planning-layer.md) and the runbook is
+[`docs/tooling/github-planning.md`](docs/tooling/github-planning.md). A task that
+picks up a backlog item links it with the optional `issue:` field. The register is
+never moved to Issues — a task file is readable offline on any branch and gated by
+`board-sync`; GitHub Issues are not.
+
 **Before non-trivial work** (anything beyond a one-file fix you commit immediately):
 
 1. **Check for collisions** — skim [`docs/coordination/BOARD.md`](docs/coordination/BOARD.md) or run `vp run coordination:verify`; it warns when your intended `area` overlaps an active task. Resolve overlaps (coordinate, or narrow scope) before starting.
