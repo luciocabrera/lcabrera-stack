@@ -14,6 +14,11 @@ coverage/
 .tmp/
 *.local
 
+# Agent git worktrees (isolation). Never committed, and — because Biome uses
+# `vcs.useIgnoreFile` — this keeps their nested biome.jsonc from tripping the
+# repo-wide Biome pass with a "nested root configuration" error.
+.claude/worktrees/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

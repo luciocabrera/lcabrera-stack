@@ -39,6 +39,10 @@ const SKIP_DIRS = new Set([
   'coverage',
   'reports',
   '.git',
+  // Agent config + isolation worktrees. `.claude/` holds no governed scripts
+  // (those live under scripts/, .github/skills/, apps/*/scripts/); a worktree
+  // there is a full repo copy whose scripts must not be double-counted.
+  '.claude',
 ]);
 
 /** Every `.mjs`/`.cjs` under the repo, repo-relative, excluding SKIP_DIRS. */
