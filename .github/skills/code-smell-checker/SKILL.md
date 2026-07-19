@@ -3,8 +3,6 @@ name: code-smell-checker
 description: Systematically detect and triage code smells across a codebase. Use for maintainability audits, refactor planning, PR hygiene checks, and tech debt reviews. Includes severity scoring, false-positive filtering, and fix-priority decisions.
 argument-hint: 'Target area or language, for example: src/, TypeScript services, or React frontend app'
 user-invocable: true
-context: fork
-agent: general-purpose
 allowed-tools: Bash(cat:*,date:*,git:*,mkdir:*,node:*,tee:*), Read, Grep, Glob
 ---
 
