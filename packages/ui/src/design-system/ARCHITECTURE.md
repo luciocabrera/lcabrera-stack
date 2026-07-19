@@ -23,7 +23,8 @@ src/design-system/
     ├── colors.stylex.ts         # Semantic color tokens: theme-variable CSS custom properties
     ├── commons.stylex.ts        # Reusable style recipes: interactive elements, ripple, variants, skeleton
     ├── drawerSection.stylex.ts  # Shared layout styles for Table Settings Drawer sections
-    └── filters.stylex.ts        # Shared input styles for filter components
+    ├── filters.stylex.ts        # Shared input styles for filter components
+    └── surfaces.stylex.ts       # Shared surface recipes: `glass` (blur + translucent fill + gradient tint)
 ```
 
 ---
@@ -147,16 +148,17 @@ Defines CSS custom property placeholders with `stylex.defineVars`. Values are CS
 
 Color categories:
 
-| Category                | Tokens                                                                                          |
-| ----------------------- | ----------------------------------------------------------------------------------------------- |
-| **Brand**               | `brandPrimary`, `brandSecondary` + `Hover`, `Active`, `Background`, `CardText`, `Text` variants |
-| **Semantic**            | `success`, `error`, `warning`, `info` + `Background`, `CardText`, `Hover`, `Text` variants      |
-| **Neutral backgrounds** | `backgroundPrimary`, `backgroundSecondary`, `backgroundTertiary`                                |
-| **Surfaces**            | `surfacePrimary`, `surfaceSecondary`, `surfaceElevated`, `surfaceStripe`                        |
-| **Borders**             | `borderPrimary`, `borderSecondary`, `borderFocus`                                               |
-| **Text**                | `textPrimary`, `textSecondary`, `textTertiary`, `textInverse`                                   |
-| **Interactive**         | `hover`, `active`, `overlay`, `shadowHover`                                                     |
-| **Disabled**            | `disabled`, `disabledText`                                                                      |
+| Category                | Tokens                                                                                                                                                                                               |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Brand**               | `brandPrimary`, `brandSecondary` + `Hover`, `Active`, `Background`, `CardText`, `Text` variants                                                                                                      |
+| **Semantic**            | `success`, `error`, `warning`, `info` + `Background`, `CardText`, `Hover`, `Text` variants                                                                                                           |
+| **Neutral backgrounds** | `backgroundPrimary`, `backgroundSecondary`, `backgroundTertiary`                                                                                                                                     |
+| **Surfaces**            | `surfacePrimary`, `surfaceSecondary`, `surfaceElevated`, `surfaceStripe`                                                                                                                             |
+| **Borders**             | `borderPrimary`, `borderSecondary`, `borderFocus`                                                                                                                                                    |
+| **Text**                | `textPrimary`, `textSecondary`, `textTertiary`, `textInverse`                                                                                                                                        |
+| **Interactive**         | `hover`, `active`, `overlay`, `shadowHover`                                                                                                                                                          |
+| **Disabled**            | `disabled`, `disabledText`                                                                                                                                                                           |
+| **Glass / gradient**    | `glassBackgroundColorPrimary/Secondary/Tertiary`, `glassBackdropFilterPrimary/Secondary`, `glassGradientBackground`, `glassGradientBackdrop`, `gradientLinearBackground`, `gradientRadialBackground` |
 
 ---
 
@@ -231,6 +233,23 @@ Domain-scoped styles for filter input components in the Table. Provides consiste
 | `filterBaseStyles.inputGroup`   | Horizontal input + addon row                                |
 | `filterBaseStyles.select`       | Styled native `<select>` with focus ring                    |
 | `filterBaseStyles.separator`    | Secondary text for "between" operators                      |
+
+---
+
+### `tokens/surfaces.stylex.ts` — Shared Surface Recipes
+
+Reusable surface `stylex.create` recipes composed ahead of a component's own
+layout styles. The `glass` recipe is the single source for the blurred,
+gradient-lit translucent surface (previously inlined in `Modal.stylex.ts`).
+
+| Export                | Composed from                                                                            |
+| --------------------- | ---------------------------------------------------------------------------------------- |
+| `surfaceStyles.glass` | `glassBackdropFilterPrimary` + `glassBackgroundColorPrimary` + `glassGradientBackground` |
+
+`Modal` consumes it as `stylex.props(surfaceStyles.glass, modalStyles.dialog)`;
+the `glassGradientBackground`/`glassGradientBackdrop` tokens are theme-invariant
+(identical light/dark) so the Modal renders pixel-identically to the former
+hardcoded gradient.
 
 ---
 
@@ -322,6 +341,9 @@ import {
 // Domain styles
 import { drawerSectionStyles } from '@/design-system/tokens/drawerSection.stylex';
 import { filterBaseStyles } from '@/design-system/tokens/filters.stylex';
+
+// Shared surface recipes
+import { surfaceStyles } from '@/design-system/tokens/surfaces.stylex';
 
 // Theme objects (Root only)
 import { lightTheme } from '@/design-system/themes/light.stylex';

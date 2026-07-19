@@ -9,7 +9,7 @@ Modal/
 ├── index.ts                  → Barrel export
 ├── Modal.component.tsx       → Native dialog wrapper
 ├── Modal.types.ts            → ModalProps
-├── Modal.stylex.ts           → dialog, backdrop, body, footer styles
+├── Modal.stylex.ts           → dialog frame/layout, backdrop, body, footer styles (glass surface via surfaceStyles.glass)
 └── Modal.test.tsx            → Tests
 ```
 
@@ -24,9 +24,18 @@ graph LR
   Modal --> MenuCloseIcon
   Modal --> ICON_SIZE_MD["ICON_SIZE_MD (constant)"]
   Modal --> Modal_stylex["Modal.stylex (modalStyles)"]
+  Modal --> surfaces["design-system/tokens/surfaces.stylex (surfaceStyles.glass)"]
   Modal_stylex --> base_tokens["design-system/tokens/base.stylex"]
   Modal_stylex --> colors["design-system/tokens/colors.stylex"]
+  surfaces --> colors
 ```
+
+The glass surface (blur + translucent fill + gradient tint) is supplied by the
+shared `surfaceStyles.glass` recipe, composed ahead of the dialog's own
+frame/layout styles: `stylex.props(surfaceStyles.glass, modalStyles.dialog)`.
+The gradient lives in the theme-invariant `glassGradientBackground` /
+`glassGradientBackdrop` tokens (see `design-system/ARCHITECTURE.md`), so the
+dialog and its `::backdrop` no longer inline a hardcoded gradient.
 
 ## Render Structure
 

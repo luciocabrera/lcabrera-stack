@@ -20,6 +20,13 @@ export const lightTheme = stylex.createTheme(colors, {
   glassBackdropFilterPrimary: 'blur(42px) brightness(.9)',
 
   glassBackdropFilterSecondary: 'blur(42px) saturate(0.9)',
+
+  // Modal glass gradients — theme-invariant (identical in light/dark) so the
+  // shared `glass` recipe reproduces the previously-hardcoded Modal surface.
+  glassGradientBackground:
+    'radial-gradient(46% 52% at 18% 25%, #5a90ff8c, #0000 71%), radial-gradient(44% 44% at 82% 24%, #28e4c24f, #0000 71%), radial-gradient(52% 56% at 84% 82%, #c478ff4d, #0000 73%), radial-gradient(40% 40% at 53% 62%, #7e9eff7a, #0000 74%)',
+  glassGradientBackdrop:
+    'radial-gradient(46% 52% at 18% 25%, #5a90ff8c, #0000 71%), radial-gradient(44% 44% at 82% 24%, #28e4c269, #0000 71%), radial-gradient(52% 56% at 84% 82%, #c478ff45, #0000 73%), radial-gradient(40% 40% at 53% 62%, #7e9effa3, #0000 74%)',
   gradientLinearBackground:
     'linear-gradient(90deg, #213c71a8, #21183896, #6e00c3b0)',
   // gradientLinearBackground:

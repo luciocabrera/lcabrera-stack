@@ -19,6 +19,10 @@ export const colors = stylex.defineVars({
   glassBackgroundColorTertiary: 'var(--glass-background-color-tertiary)',
   glassBackdropFilterPrimary: 'var(--glass-backdrop-filter-primary)',
   glassBackdropFilterSecondary: 'var(--glass-backdrop-filter-secondary)',
+  // Layered radial gradient painted onto the glass surface (Modal dialog) and
+  // its ::backdrop — consumed via the shared `glass` recipe (surfaces.stylex).
+  glassGradientBackground: 'var(--glass-gradient-background)',
+  glassGradientBackdrop: 'var(--glass-gradient-backdrop)',
   gradientLinearBackground: 'var(--gradient-linear-background)',
   gradientRadialBackground: 'var(--gradient-radial-background)',
   gradientOpacityPrimary: 'var(--gradient-opacity-primary)',
