@@ -6,7 +6,7 @@
   "scripts": {
     "audit:lighthouse": "node scripts/lighthouse-audit.mjs",
     "audit:lighthouse:check": "node scripts/check-lighthouse-scores.mjs",
-    "dev": "react-router dev",
+    "dev": "sh -c 'set -a; eval \"$(tr -d \"\\r\" < ../../docker/local/.env)\"; eval \"$(tr -d \"\\r\" < ./.env 2>/dev/null)\"; set +a; exec react-router dev'",
     "lint": "vp run --filter eslint-local-rules-shared build && vp lint . --fix && vp run lint:eslint",
     "lint:check": "vp run --filter eslint-local-rules-shared build && vp lint . && vp run lint:eslint:check",
     "lint:eslint": "eslint . --config eslint.config.mjs --fix --max-warnings 0 --no-inline-config",
@@ -27,7 +27,8 @@
     "@stylexjs/stylex": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "react-router": "catalog:"
+    "react-router": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@babel/preset-typescript": "catalog:",
