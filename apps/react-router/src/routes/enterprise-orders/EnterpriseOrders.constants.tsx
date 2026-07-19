@@ -7,7 +7,7 @@ import type {
 import { createBasicColumn } from '@repo/ui/components/Table/utils';
 import { createStaticFilterOptions } from '@repo/ui/utils/filters';
 
-import type { EnterpriseOrder } from '@/services';
+import type { EnterpriseOrder } from './config';
 
 export const TITLE = {
   plural: 'Enterprise Orders',

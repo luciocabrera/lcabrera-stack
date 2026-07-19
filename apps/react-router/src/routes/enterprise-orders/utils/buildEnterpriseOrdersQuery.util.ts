@@ -7,7 +7,7 @@ import type {
 import { appendPrimaryKeySorting } from '@repo/ui/routing/appendPrimaryKeySorting.util';
 import { sanitizeSorting } from '@repo/ui/routing/sanitizeSorting.util';
 
-import type { EnterpriseOrder } from '@/services';
+import type { EnterpriseOrder } from '../config';
 
 type BuildEnterpriseOrdersQueryArgs = {
   readonly columnsState: {

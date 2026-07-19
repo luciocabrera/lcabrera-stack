@@ -1,9 +1,14 @@
 import { type ActionFunctionArgs, data } from 'react-router';
 
-import { enterpriseOrdersApi } from '@/services';
+import { deleteOrder } from '@/routes/enterprise-orders/server/enterpriseOrders.service';
 
 import { parseOrderId } from './parseOrderId.util';
 
+/**
+ * Delete an enterprise order via the generic `deleteRows` executor (direct
+ * Postgres), replacing the retired browser-fetch call to the api-server that
+ * returned a 404 (feature plan §8, bug 1).
+ */
 export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const intent = formData.get('intent');
@@ -14,10 +19,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   const orderId = parseOrderId(formData.get('id'));
 
-  await enterpriseOrdersApi.deleteEnterpriseOrder({
-    orderId,
-    requestUrl: request.url,
-  });
+  await deleteOrder(orderId);
 
   return data({ ok: true, orderId });
 };

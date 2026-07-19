@@ -6,11 +6,11 @@ import { appendPrimaryKeySorting } from '@repo/ui/routing/appendPrimaryKeySortin
 import { readTableLoaderStateFromRequest } from '@repo/ui/routing/readTableLoaderStateFromRequest.util';
 import { sanitizeSorting } from '@repo/ui/routing/sanitizeSorting.util';
 
-import type { EnterpriseOrder, EnterpriseOrdersResponse } from '@/services';
-
 import { APP_ID } from '@/constants/app.constants';
-import { enterpriseOrdersApi } from '@/services';
 
+import type { EnterpriseOrder } from './config';
+
+import { toOrderQueryFilters, toOrderQuerySort } from './config';
 import {
   COLUMNS,
   CRUD,
@@ -21,6 +21,7 @@ import {
   TABLE_NAME,
   TITLE,
 } from './EnterpriseOrders.constants';
+import { selectOrdersPage } from './server/enterpriseOrders.service';
 
 /**
  * Loader for enterprise orders route
@@ -63,15 +64,14 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     sorting: sanitizedSorting,
   });
 
-  // Return the promise directly (not awaited) for Suspense streaming
-  const enterpriseOrdersPromise: Promise<EnterpriseOrdersResponse> =
-    enterpriseOrdersApi.fetchEnterpriseOrdersPaginated({
-      filter: filters,
-      limit: INITIAL_PAGE_SIZE,
-      requestUrl: request.url,
-      skip: 0,
-      sorting: effectiveSorting,
-    });
+  // Return the promise directly (not awaited) for Suspense streaming. The
+  // generic executors read Postgres server-side — no api-server round-trip.
+  const enterpriseOrdersPromise = selectOrdersPage({
+    filters: toOrderQueryFilters({ filters }),
+    limit: INITIAL_PAGE_SIZE,
+    offset: 0,
+    sort: toOrderQuerySort({ sorting: effectiveSorting }),
+  });
 
   return {
     columnsState: {

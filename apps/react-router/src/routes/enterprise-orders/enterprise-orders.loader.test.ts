@@ -4,12 +4,8 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { loader } from './enterprise-orders.loader';
 
-vi.mock('@/services', () => ({
-  enterpriseOrdersApi: {
-    fetchEnterpriseOrdersPaginated: vi.fn(() =>
-      Promise.resolve({ data: [], total: 0 }),
-    ),
-  },
+vi.mock('./server/enterpriseOrders.service', () => ({
+  selectOrdersPage: vi.fn(async () => ({ data: [], hasMore: false, total: 0 })),
 }));
 
 type CollectFunctionPathsArgs = {

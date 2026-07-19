@@ -1,19 +1,22 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
-import { enterpriseOrdersApi } from '@/services';
+import { data } from 'react-router';
 
-export const loader = async ({ params, request }: LoaderFunctionArgs) => {
-  const orderId = Number(params.orderId ?? '');
+import { parseOrderIdParam } from '../parseOrderIdParam.util';
+import { selectOrderById } from '../server/enterpriseOrders.service';
 
-  if (!Number.isSafeInteger(orderId)) {
-    // oxlint-disable-next-line @typescript-eslint/only-throw-error -- React Router expects thrown Response objects
-    throw new Response('Invalid order ID', { status: 400 });
+/**
+ * Loader for the read-only order view: read the order by id and 404 when it is
+ * missing. Serves both `/enterprise-orders/view/:orderId` and the bare
+ * `/enterprise-orders/:orderId` route.
+ */
+export const loader = async ({ params }: LoaderFunctionArgs) => {
+  const orderId = parseOrderIdParam(params.orderId);
+  const order = await selectOrderById(orderId);
+
+  if (!order) {
+    throw data('Order not found.', { status: 404 });
   }
-
-  const { data: order } = await enterpriseOrdersApi.fetchEnterpriseOrderById({
-    orderId,
-    requestUrl: request.url,
-  });
 
   return { order };
 };
