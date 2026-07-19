@@ -18,7 +18,7 @@ export const ActiveRunNotice = ({
   runId,
 }: ActiveRunNoticeProps) => {
   return (
-    <div role='status' {...stylex.props(styles.notice)}>
+    <output {...stylex.props(styles.notice)}>
       <p {...stylex.props(styles.text)}>
         A scan is already running for this project — it has been running for{' '}
         {elapsed}. Wait for it to finish before starting another.
@@ -29,6 +29,6 @@ export const ActiveRunNotice = ({
       >
         View the running scan →
       </Link>
-    </div>
+    </output>
   );
 };
