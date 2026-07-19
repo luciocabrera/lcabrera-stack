@@ -91,8 +91,9 @@ Form/
 │   ├── BooleanField/  → wraps Checkbox or ToggleSwitch
 │   ├── SelectField/   → wraps VirtualSelect + hidden inputs for FormData
 │   ├── RadioField/    → wraps RadioOptionGroup
-│   └── CustomField/   → escape hatch via field.renderField(...)
-│   (each: <Name>.component.tsx + <Name>.types.ts, TextField/RadioField also <Name>.stylex.ts)
+│   ├── CustomField/   → escape hatch via field.renderField(...)
+│   └── FormFieldDisplay/ → read-only `view`-mode renderer: label + formatted value text (not a disabled widget). formatFieldDisplayValue.util + resolveOptionLabels.util
+│   (each: <Name>.component.tsx + <Name>.types.ts, TextField/RadioField/FormFieldDisplay also <Name>.stylex.ts)
 │   (the former PathField/PathBrowserModal `path` leaf was removed by ADR-028 — no filesystem-coupled field types)
 │
 └── utils/
@@ -219,8 +220,13 @@ it changes identity.
   baseline (`isFormDirty`, array-aware — a regenerated-but-unchanged array
   from `VirtualSelect` does not count as dirty). Avoids writing to the DB
   when nothing actually changed.
-- **`view`**: every leaf field forced `isDisabled`; the footer (submit/
-  cancel buttons) is not rendered at all.
+- **`view`**: each leaf renders read-only as **label + formatted value text**
+  (`FormFieldDisplay`), not a disabled input — currency/number are locale-
+  formatted, dates via the shared date formatter, booleans as Yes/No, and
+  select/radio as their option label(s); empty values show an em dash. Custom
+  fields keep their own `renderField` escape hatch (forced `isDisabled`). The
+  footer (submit/cancel buttons) is not rendered at all. `FormField` routes to
+  `FormFieldDisplay` when `mode === 'view'`.
 
 ## Cancel & Discard-Changes Flow
 

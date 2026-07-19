@@ -147,17 +147,17 @@ describe('Form', () => {
     expect(action).not.toHaveBeenCalled();
   });
 
-  it('disables all fields and hides the footer in view mode', () => {
+  it('renders read-only value text (not disabled inputs) and hides the footer in view mode', () => {
     renderForm({
       action: vi.fn(),
       initialValues: { name: 'Ada' },
       mode: 'view',
     });
 
-    const nameInput = screen.getByLabelText('Name', {
-      exact: false,
-    }) as HTMLInputElement;
-    expect(nameInput.disabled).toBe(true);
+    // View mode renders each leaf as label + value text, so there is no
+    // editable input for the field at all — just its formatted value.
+    expect(screen.queryByLabelText('Name', { exact: false })).toBeNull();
+    expect(screen.getByText('Ada')).not.toBeNull();
     expect(screen.queryByRole('button', { name: 'Save' })).toBeNull();
   });
 
