@@ -2,6 +2,7 @@
 
 **Status:** Accepted
 **Relates to:** the in-git coordination register (`docs/coordination/`, README + `verify-coordination.mjs`) — this adds a **second, complementary layer** and draws the boundary between them; it does **not** change the register.
+**Amended by:** [ADR-037](./ADR-037-coordination-board-is-a-local-view.md) — the register's committed `BOARD.md` and its `board-sync` drift check are retired; the board is now a gitignored local view, and GitHub-visible status leans on this layer's Issues + Planning board. The `area` soft lock in the task files is unchanged.
 
 ## Context
 

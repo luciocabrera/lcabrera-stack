@@ -16,13 +16,18 @@
  *                                       active tasks does.
  * `_TEMPLATE.md` and any `_*`-prefixed file are ignored.
  *
+ * BOARD.md is NOT a checked artifact: it is a gitignored, local-only VIEW
+ * (regenerate it with `--write-board` to read the register as a table). The
+ * source of truth is the task files themselves; nothing here compares against a
+ * committed board, because a committed generated file is exactly what made every
+ * concurrent coordination PR collide (ADR-037). GitHub-visible status lives in
+ * the linked Issues + the Planning board (projects/4).
+ *
  * Checks (ERROR fails the build; WARN is surfaced but never blocks — a warning
  * must not fail an unrelated PR because someone else's task drifted):
  *   ERROR  schema        — task/branch files have the required, well-typed fields
  *                          and an id/slug matching the filename.
  *   ERROR  unique-id     — no two task files share an id.
- *   ERROR  board-sync    — BOARD.md matches the task + branch files (compared as
- *                          DATA, not text). Fix with `vp run coordination:board`.
  *   WARN   overlap       — two non-done tasks on DIFFERENT branches claim
  *                          intersecting areas (a real collision). Same-branch
  *                          overlap is intended collaboration and is not warned.
@@ -38,7 +43,8 @@
  *
  * Modes:
  *   node scripts/verify-coordination.mjs                 → verify (default)
- *   node scripts/verify-coordination.mjs --write-board   → regenerate BOARD.md
+ *   node scripts/verify-coordination.mjs --write-board   → write the local,
+ *                                                          gitignored BOARD.md view
  *
  * Exit codes: 0 = consistent (warnings allowed), 1 = an ERROR check failed.
  */
@@ -46,11 +52,7 @@ import { existsSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import {
-  boardTuple,
-  parseBoard,
-  renderBoard,
-} from './lib/coordination-board.mjs';
+import { renderBoard } from './lib/coordination-board.mjs';
 import { branchSlug, globsOverlap } from './lib/coordination-parse.mjs';
 import { readEntries } from './lib/coordination-read.mjs';
 import {
@@ -64,7 +66,6 @@ const COORD_DIR = join(REPO_ROOT, 'docs', 'coordination');
 const TASKS_DIR = join(COORD_DIR, 'tasks');
 const BRANCHES_DIR = join(COORD_DIR, 'branches');
 const BOARD_DOC = join(COORD_DIR, 'BOARD.md');
-const BOARD_REL = 'docs/coordination/BOARD.md';
 
 const STALE_DAYS = 14;
 const GHOST_DAYS = 3;
@@ -270,43 +271,6 @@ const checkTaskBranches = (tasks, warnings) => {
   }
 };
 
-const checkBoardSync = (tasks, branches, problems) => {
-  const expectedTasks = new Set(
-    tasks
-      .filter(({ data }) => data !== undefined)
-      .map(({ data }) => boardTuple(data)),
-  );
-  const expectedBranches = new Set(
-    branches.filter(({ data }) => data !== undefined).map(({ slug }) => slug),
-  );
-  const actual = parseBoard(readFileSync(BOARD_DOC, 'utf8'));
-  const fix = `run \`vp run coordination:board\``;
-  for (const t of expectedTasks) {
-    if (!actual.tasks.has(t)) {
-      problems.push(
-        `${BOARD_REL} is missing/stale for task \`${t.split(' | ')[0]}\` — ${fix}.`,
-      );
-    }
-  }
-  for (const t of actual.tasks) {
-    if (!expectedTasks.has(t)) {
-      problems.push(
-        `${BOARD_REL} has a phantom task row \`${t.split(' | ')[0]}\` — ${fix}.`,
-      );
-    }
-  }
-  for (const s of expectedBranches) {
-    if (!actual.branches.has(s)) {
-      problems.push(`${BOARD_REL} is missing shared branch \`${s}\` — ${fix}.`);
-    }
-  }
-  for (const s of actual.branches) {
-    if (!expectedBranches.has(s)) {
-      problems.push(`${BOARD_REL} has a phantom branch row \`${s}\` — ${fix}.`);
-    }
-  }
-};
-
 const report = (warnings) => {
   const underActions = process.env.GITHUB_ACTIONS === 'true';
   for (const warning of warnings) {
@@ -321,7 +285,8 @@ const main = () => {
   if (process.argv.includes('--write-board')) {
     writeFileSync(BOARD_DOC, renderBoard(tasks, branches));
     console.log(
-      `Wrote ${BOARD_REL} (${tasks.length} task(s), ${branches.length} shared branch(es)).`,
+      `Wrote the local docs/coordination/BOARD.md view (gitignored) — ` +
+        `${tasks.length} task(s), ${branches.length} shared branch(es).`,
     );
     return;
   }
@@ -330,7 +295,6 @@ const main = () => {
   const warnings = [];
   checkTaskSchema(tasks, problems);
   checkBranchSchema(branches, problems);
-  checkBoardSync(tasks, branches, problems);
   checkOverlap(tasks, warnings);
   checkSharedBranches(tasks, branches, warnings);
   checkStale(tasks, warnings);

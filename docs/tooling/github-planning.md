@@ -12,12 +12,13 @@ this page is the operational runbook.
 | **Home**     | in-git register — [`docs/coordination/`](../coordination/README.md) | GitHub Issues / sub-issues / Milestones / Projects |
 | **Answers**  | who is touching what, on which branch, **right now**                | what should happen, eventually, and **why**        |
 | **Read by**  | every agent, **offline on any branch**                              | humans + agents with `gh` + network                |
-| **Gated by** | `coordination:verify` / `board-sync` (CI)                           | GitHub itself                                      |
+| **Gated by** | `coordination:verify` (CI)                                          | GitHub itself                                      |
 
 The register is **not** moving to GitHub — an agent on a fork or a headless/cron
-run has no `gh` auth, but can always read `docs/coordination/BOARD.md` from the
-filesystem. GitHub covers the layer the register never did: the prioritised,
-cross-referenced, human-browsable backlog and a kanban.
+run has no `gh` auth, but can always read the task files under
+`docs/coordination/tasks/` from the filesystem (`vp run coordination:board`
+renders them as a local table). GitHub covers the layer the register never did:
+the prioritised, cross-referenced, human-browsable backlog and a kanban.
 
 ## What lives where
 
@@ -35,7 +36,7 @@ cross-referenced, human-browsable backlog and a kanban.
 
 ## The bridge — one-way, no bespoke sync
 
-Three links connect the layers, and **GitHub owns every one of them** — there is
+Four links connect the layers, and **GitHub owns every one of them** — there is
 no custom reconciler to maintain (that is deliberate; see ADR-036):
 
 1. **Task → issue.** A coordination task that picks up a backlog item sets its
@@ -44,10 +45,39 @@ no custom reconciler to maintain (that is deliberate; see ADR-036):
 2. **PR → issue.** PRs close issues with `Closes #N` in the description.
 3. **Issue/PR → Project.** [`.github/workflows/add-to-project.yml`](../../.github/workflows/add-to-project.yml)
    auto-adds new issues and same-repo PRs to the board.
+4. **PR/issue state → Project Status.** [`.github/workflows/project-status.yml`](../../.github/workflows/project-status.yml)
+   (script: [`scripts/sync-project-status.mjs`](../../scripts/sync-project-status.mjs))
+   moves the Status column so the board tracks reality without anyone dragging
+   cards — see [Status automation](#status-automation) below.
 
 There is **no** Project → files sync and **no** bidirectional sync — a files↔Project
-reconciler is a maintenance sink and a drift source (the same reason the `BOARD.md`
-merge-driver isn't built).
+reconciler is a maintenance sink and a drift source. (The `BOARD.md` merge-driver
+isn't built either, for the same reason; the board is now a gitignored local view
+that is never committed, so nothing conflicts — ADR-037.) Note the four links above
+are all **GitHub → GitHub or files → GitHub**; nothing writes back to the files.
+
+## Status automation
+
+The board went stale because Status was manual: an agent works in its own tree and
+the linked issue sits in **Todo** until a PR appears. `project-status.yml` closes
+that gap by reacting to events GitHub already emits (needs the same
+`ADD_TO_PROJECT_PAT` secret; without it — fork PRs — it skips and stays green):
+
+| Signal                        | Status      |
+| ----------------------------- | ----------- |
+| issue **assigned**            | In Progress |
+| PR opened/reopened as a draft | In Progress |
+| PR **ready for review**       | In Review   |
+| PR converted back to draft    | In Progress |
+| PR **merged**                 | Done        |
+| PR closed unmerged            | Todo        |
+
+For a PR it moves the PR's card **and** every issue the PR closes
+(`closingIssuesReferences`), so the backlog issue advances with the work. The one
+transition GitHub can't infer is "I've started but there's no PR yet" — so
+**self-assign the issue the moment you pick it up** (`gh issue edit <n> --add-assignee @me`);
+that flips it to In Progress immediately. Then a draft PR keeps it there, ready
+review moves it to In Review, and merge closes it out — all automatically.
 
 ## One-time setup — activating the Project board
 
@@ -79,9 +109,11 @@ done, Issues / sub-issues / Milestones work fully; only auto-add-to-board waits.
    skipped) until `PROJECT_URL` is set, then activates with no code change.
 5. **Backfill** the already-open issues onto the board once (UI "Add items", or
    `gh project item-add <N> --owner luciocabrera --url <issue-url>`).
-6. **(Optional) Built-in workflows** on the Project: auto-move items to **Done**
-   when their linked PR merges / issue closes; auto-set status to **In progress**
-   when a PR is opened.
+6. **Status automation** is handled by [`project-status.yml`](../../.github/workflows/project-status.yml)
+   (see [Status automation](#status-automation)), which reuses the same
+   `ADD_TO_PROJECT_PAT`. GitHub's built-in Project workflows can stay on as a
+   backstop (e.g. item-added → Todo), but the Status transitions are owned by the
+   workflow so they behave identically for every contributor.
 
 ## Conventions
 

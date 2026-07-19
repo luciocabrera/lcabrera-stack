@@ -12,7 +12,7 @@
  * script and is piped in; this file never spawns a subprocess. That keeps it off
  * the "OS command resolved via PATH" hotspot (Sonar S4036) the same way
  * `generate-changelog.mjs` takes `git log` on stdin. Prints to stdout only — it
- * never writes `BOARD.md` (that stays the committed, generated snapshot).
+ * never writes `BOARD.md` (that stays a gitignored, local-only view — ADR-037).
  *
  * Usage (from the repo root):
  *   vp run coordination:board:live

@@ -15,8 +15,9 @@ issue: (none)
 
 <!--
 Copy this file to `<id>.md` (id must equal the filename slug) and fill it in.
-Then run `vp run coordination:board` to add it to BOARD.md, and
-`vp run coordination:verify` to confirm the register is consistent.
+This file **is** the claim — run `vp run coordination:verify` to confirm the
+register is consistent. (`vp run coordination:board` renders a local, gitignored
+table view; it is never committed — ADR-037.)
 
 Fields:
   id       kebab-case, must equal the filename (e.g. table-ui-fixes.md → table-ui-fixes)

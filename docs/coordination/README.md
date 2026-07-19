@@ -24,31 +24,36 @@ have warned it. Putting the claim in git fixes that.
 Before starting **non-trivial** work (anything beyond a one-file fix you'll commit
 immediately):
 
-1. **Check for collisions.** Skim [`BOARD.md`](./BOARD.md), or run
-   `vp run coordination:verify` — it warns when an area you're about to claim
-   overlaps an existing active task. If it does, coordinate with that owner or
-   narrow your scope before proceeding.
+1. **Check for collisions.** Run `vp run coordination:verify` — it warns when an
+   area you're about to claim overlaps an existing active task. (For a table view
+   of the register, `vp run coordination:board` writes a local, gitignored
+   `BOARD.md`; it is never committed — see [ADR-037](../cqms/decisions/ADR-037-coordination-board-is-a-local-view.md).)
+   If there's an overlap, coordinate with that owner or narrow your scope first.
 2. **Claim it.** Copy [`tasks/_TEMPLATE.md`](./tasks/_TEMPLATE.md) to
    `tasks/<id>.md`, fill in the frontmatter — crucially the `area` globs, which
-   are the soft lock others read — then `vp run coordination:board` to add it to
-   the board.
+   are the soft lock others read. That file **is** the claim; there is no board
+   to regenerate or commit.
 3. **Pick a branch strategy** — an independent branch (the default) or join a
    shared one. See [Independent vs shared branches](#independent-vs-shared-branches)
    below. Never commit non-trivial work straight to `main`.
 4. **Keep it current.** Bump `updated:` as you make progress; move `status:`
    through `active → review` (and `blocked`/`paused` when true). Stale tasks are
    flagged so abandoned work surfaces instead of rotting like the old plan files.
+   If the task tracks a backlog issue (`issue:`), **self-assign that issue the
+   moment you start** (`gh issue edit <n> --add-assignee @me`) — that's the signal
+   that moves its Planning-board card to In Progress before any PR exists (the rest
+   of the Status column is automated; see
+   [github-planning.md → Status automation](../tooling/github-planning.md#status-automation)).
 5. **Close it.** When the work merges, **delete the task file** (its history lives
-   in the PR and commits) and regenerate the board. Open a PR early — a draft PR
-   is the human-visible progress surface that pairs with this register.
+   in the PR and commits). Open a PR early — a draft PR is the human-visible
+   progress surface that pairs with this register.
 
-That's it. The ceremony is one file and two commands; the payoff is that no one
-collides blind.
+That's it. The ceremony is one file; the payoff is that no one collides blind.
 
 **Shortcut:** `vp run coordination:claim -- <id> "<title>" [--area <glob> ...]`
 does steps 2–3 and opens the draft PR (step 5) in one command — scaffolds the
-task, branches off `main`, regenerates the board, commits, and opens a draft PR
-so the claim is visible immediately (via `coordination:board:live`). Add
+task, branches off `main`, commits the task file, and opens a draft PR so the
+claim is visible immediately (via `coordination:board:live`). Add
 `--worktree` to work in an isolated worktree (recommended when other agents are
 active), or `--dry-run` to preview every action first.
 
@@ -123,9 +128,8 @@ the work genuinely separates.
 
 ## Keeping the register current across branches
 
-The register only works if agents can _see_ each other's claims. Three rules make
-that hold when several agents work at once — and skipping them is what makes
-`BOARD.md` drift or conflict.
+The register only works if agents can _see_ each other's claims. Two rules make
+that hold when several agents work at once.
 
 **1. One working tree per agent — never a shared directory.** A git working tree
 has _one_ checked-out branch and _one_ index; two agents in the same folder means
@@ -136,30 +140,26 @@ worktree — `git worktree add ../vrc-<task> -b <branch>` — or a separate clon
 
 **2. The claim lives on `main`, landed early — not on your feature branch.** A
 task file is a shared lock only once it's on `main`, where every other agent
-branching off `main` sees it. So commit `tasks/<id>.md` + a board regen to `main`
-**first** — a tiny claim-only PR, before the real work — separate from the work
-branch. If claims sit only on feature branches, no one sees them until merge and
-the register fragments.
+branching off `main` sees it. So commit `tasks/<id>.md` to `main` **first** — a
+tiny claim-only PR, before the real work — separate from the work branch. If
+claims sit only on feature branches, no one sees them until merge and the register
+fragments.
 
-**3. `BOARD.md` is a generated view — don't hand-maintain it per branch.** It's
-rebuilt from the task files by `vp run coordination:board`, so **feature branches
-should not regenerate it** — every branch that rewrites a generated file conflicts
-with every other on merge (resolve any such conflict by regenerating, never by
-hand-merging rows). Touch `BOARD.md` only in the claim/close PRs on `main`.
+**`BOARD.md` never conflicts, by construction.** It is a **gitignored, local-only
+view** ([ADR-037](../cqms/decisions/ADR-037-coordination-board-is-a-local-view.md)):
+`vp run coordination:board` rebuilds it from the task files whenever you want to
+read the register as a table, but it is never committed. Because no PR ever
+contains `BOARD.md`, two concurrent claims/closes can never collide on it — the
+recurring conflict that a committed generated board caused (and that a git
+merge-driver could not fix, since GitHub's server-side merge never runs one) is
+gone. Claims and closes touch only `tasks/<id>.md`, which are distinct files.
 
-> A git **merge-driver can't automate this away** — it runs on the two `BOARD.md`
-> versions and is _not_ handed the merged task files, so it can't regenerate the
-> correct board (regenerating from the working tree yields "ours"; a row-union
-> breaks on a task deleted on one side, which `board-sync` then fails). The fix is
-> the discipline above, not tooling; on the rare conflict, `vp run coordination:board`
-> is the one-command resolution and `board-sync` is the backstop.
-
-**Where progress lives:** `BOARD.md` answers _who owns what area, on which branch_
-(coarse, from the claims on `main`). **Live progress lives in the draft PR** — its
-commits, checks, and status. For a live view that joins the claims with real PR
-state (draft, checks, and any open PR with _no_ task), run
-`vp run coordination:board:live` (needs `gh`; it prints, never writes `BOARD.md`).
-Open the PR early; that is the human-visible progress surface.
+**Where progress lives:** the task files answer _who owns what area, on which
+branch_ (the `area` soft lock); GitHub Issues + the Planning board answer _status_.
+**Live progress lives in the draft PR** — its commits, checks, and status. For a
+terminal view that joins the claims with real PR state (draft, checks, and any open
+PR with _no_ task), run `vp run coordination:board:live` (needs `gh`; it prints,
+never writes a file). Open the PR early; that is the human-visible progress surface.
 
 **Close on merge.** When your PR merges (with `--delete-branch`), delete the task
 file. If a PR can't delete the task that tracks itself, do it in a tiny follow-up.
@@ -182,16 +182,15 @@ drifted):
 | ----------------- | ----- | ------------------------------------------------------------------------------------ |
 | **schema**        | error | a task or branch file is missing a field, has a bad status/owner, or a mismatched id |
 | **unique-id**     | error | two task files share an id                                                           |
-| **board-sync**    | error | `BOARD.md` doesn't match the task + branch files (compared as data, not text)        |
 | **overlap**       | warn  | two non-done tasks on **different** branches declare intersecting `area` globs       |
 | **shared-branch** | warn  | 2+ active tasks share a branch with no descriptor, or a descriptor has no tasks      |
 | **stale**         | warn  | a non-done task's `updated:` is older than 14 days                                   |
 | **branch**        | warn  | a task's branch resolves to no local/origin ref (best effort)                        |
 
-`BOARD.md` is **generated** — `vp run coordination:board` rewrites it from the
-task + branch files. Never hand-edit it; edit the source file and regenerate.
-board-sync compares the _parsed row data_, so Oxfmt reflowing the table is
-invisible while a genuinely missing or mislabelled row still fails.
+There is no board-drift check: `BOARD.md` is a gitignored local view, never
+committed, so there is nothing to keep in sync ([ADR-037](../cqms/decisions/ADR-037-coordination-board-is-a-local-view.md)).
+`vp run coordination:board` rewrites the local view from the task + branch files
+whenever you want to read the register as a table.
 
 An overlap warning looks like:
 
@@ -216,8 +215,9 @@ Coordination register — 1 warning(s):
   `issue:` field, and PRs close issues (`Closes #N`). The register is **not** moved
   to Issues — Issues need `gh` + auth + network and are invisible to fork/headless
   agents, whereas a task file is read offline on any branch and gated by
-  `board-sync`. There is deliberately **no** bidirectional file↔Project sync (the
-  same reason the `BOARD.md` merge-driver isn't built).
+  `coordination:verify`. There is deliberately **no** bidirectional file↔Project
+  sync: status lives in the Issue, the `area` soft lock lives in the task file, and
+  neither is a generated file that two branches can conflict on (ADR-037).
 - **`~/.claude/plans/<name>.md`** — one agent's private scratch for one task. Fine
   for thinking; **not** the shared record. When a plan describes work others need
   to see, its _claim_ graduates here (a task file) and its _decisions_ graduate to
