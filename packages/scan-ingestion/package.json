@@ -8,6 +8,7 @@
     "./ingestion/ignoredDirectories.constants": "./src/ingestion/ignoredDirectories.constants.ts",
     "./ingestion/ingestReport": "./src/ingestion/ingestReport.ts",
     "./ingestion/ingestReport.types": "./src/ingestion/ingestReport.types.ts",
+    "./ingestion/snapshots/collectRunSnapshotFiles": "./src/ingestion/snapshots/collectRunSnapshotFiles.ts",
     "./ingestion/snapshots/saveProjectSnapshot": "./src/ingestion/snapshots/saveProjectSnapshot.ts",
     "./ingestion/workspaces/discoverProjectWorkspaces.util": "./src/ingestion/workspaces/discoverProjectWorkspaces.util.ts",
     "./queries/*.util": "./src/queries/*.util.ts",

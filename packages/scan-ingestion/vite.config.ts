@@ -33,6 +33,7 @@ const UNIT_ONLY = [
   '**/dist/**',
   'src/queries/**',
   'src/ingestion/ingestReport.test.ts',
+  'src/db/migrations/**', // 0029 pin-run-to-snapshot integration test — needs a live DB
 ]
   .map((pattern) => `--exclude '${pattern}'`)
   .join(' ');

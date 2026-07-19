@@ -5,6 +5,7 @@ import path from 'node:path';
 import { setProjectSnapshot } from '../../queries/setProjectSnapshot.util.ts';
 import { extractZipArchive } from './extractZipArchive.util.ts';
 import { getSnapshotsRoot } from './getSnapshotsRoot.util.ts';
+import { isPathWithinSnapshotsRoot } from './isPathWithinSnapshotsRoot.util.ts';
 
 export type SaveProjectSnapshotResult = {
   readonly fileCount: number;
@@ -59,11 +60,15 @@ export const saveProjectSnapshot = async ({
       userId,
     });
 
+    // With ADR-034, fn_set_project_snapshot returns NULL here while a run still
+    // pins the replaced snapshot — so this rmSync is skipped and that run's tree
+    // survives until it finishes and the orchestrator collects it.
     if (
       replacedStoragePath &&
-      path
-        .resolve(replacedStoragePath)
-        .startsWith(`${snapshotsRoot}${path.sep}`)
+      isPathWithinSnapshotsRoot({
+        candidatePath: replacedStoragePath,
+        snapshotsRoot,
+      })
     ) {
       rmSync(replacedStoragePath, { force: true, recursive: true });
     }

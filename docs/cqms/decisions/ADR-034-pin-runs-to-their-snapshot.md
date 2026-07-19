@@ -1,6 +1,6 @@
 # ADR-034: Pin a run to its snapshot id; retain that snapshot until the run finishes, then collect it
 
-**Status:** Accepted (owner decision, 2026-07-16) — **specified, not yet implemented.**
+**Status:** Accepted (owner decision, 2026-07-16) — **implemented in migration `0029`** (issue #62).
 **Amends:** [PRD_V2.md](../PRD_V2.md) §3 (qualifies "old snapshots are not retained"), ADR-028 (adds the run→snapshot pin the snapshot model left out).
 **Fixes:** [STATUS.md](../STATUS.md) §3.4, found while settling [ADR-033](./ADR-033-no-queue-is-per-project-admission-control.md).
 
@@ -109,15 +109,22 @@ Two existing mechanisms make this cheap rather than a refcounting problem:
 - **`ON DELETE RESTRICT` + never delete.** Rejected: run history is permanent,
   so this retains every snapshot forever — exactly what §3 rules out.
 
-## Implementation notes (not yet done)
+## Implementation notes (done — migration `0029`)
 
-Migration `0029`: add `runs.snapshot_id`; capture it in
-`fn_create_run_with_scoped_scans`; repoint `v_queued_scans` at
-`runs.snapshot_id`; make `fn_set_project_snapshot`'s replaced-path return
-conditional; extend `fn_finalize_run_status` to return collectable paths.
-App side: `saveProjectSnapshot` keeps its `rmSync` but only for a non-NULL
-return; the orchestrator collects on finalize.
+Migration `0029` adds `runs.snapshot_id` and captures it in **`fn_create_run`** —
+the single choke point both trigger paths call under the §8 advisory lock, so the
+pin covers `fn_create_run_with_scans` and `fn_create_run_with_scoped_scans` at once
+(a small improvement on the original note, which named only the scoped path). It
+repoints `v_queued_scans` through `runs.snapshot_id`, and makes
+`fn_set_project_snapshot`'s replaced-path return conditional on no active run
+pinning it. Collection is a **separate `fn_collect_finished_run_snapshot`** rather
+than an extension of `fn_finalize_run_status`: the latter is `PERFORM`-invoked
+inside `sp_ingest_scan_result`, which would discard a return value, so a dedicated
+function the orchestrator calls explicitly (after each scan) is cleaner and leaves
+the run roll-up untouched. App side: `saveProjectSnapshot` keeps its guarded
+`rmSync` (now skipped on a NULL return), and the orchestrator calls
+`collectRunSnapshotFiles` after each scan.
 
-Worth a test that reproduces the current bug first: trigger a run, sync a new
-snapshot mid-run, and assert the run still reads the tree it was triggered on
-and that the tree still exists.
+A DB-level test reproduces the original bug first (trigger a run, sync a new
+snapshot mid-run, assert the run still reads its triggered tree and the tree still
+exists) before asserting collection on finish.
