@@ -3,8 +3,8 @@ import * as stylex from '@stylexjs/stylex';
 
 import type { FormFieldDisplayProps } from './FormFieldDisplay.types';
 
-import { formatFieldDisplayValue } from './formatFieldDisplayValue.util';
 import { styles } from './FormFieldDisplay.stylex';
+import { formatFieldDisplayValue } from './utils';
 
 /**
  * Read-only leaf renderer for `view` mode (ADR-005): shows the field's label

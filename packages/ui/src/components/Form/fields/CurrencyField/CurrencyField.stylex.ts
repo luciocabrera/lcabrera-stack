@@ -3,9 +3,6 @@ import { colors } from '@repo/ui/design-system/tokens/colors.stylex';
 import * as stylex from '@stylexjs/stylex';
 
 export const styles = stylex.create({
-  input: {
-    paddingInlineStart: '1.75rem',
-  },
   symbol: {
     color: colors.textSecondary,
     fontSize: typography.fontSizeSm,

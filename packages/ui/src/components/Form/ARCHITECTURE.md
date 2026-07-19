@@ -87,15 +87,16 @@ Form/
 │   ├── useFormField.hook.ts → Shared per-leaf-field wiring: useId + value/error/mode selectors + isDisabled + accessor-bound setValue (every leaf field consumes it)
 │   ├── formInput.stylex.ts → The Form's own leaf-input styles (tokenized radius + focus-accent ring), deliberately separate from the Table's filters.stylex; consumed by Text/Number/Date/CurrencyField
 │   ├── TextField/     → text | email | password | textarea (new bare input)
-│   ├── NumberField/   → number (new bare input)
-│   ├── CurrencyField/ → currency (number input + currency-symbol adornment; view/read formats as currency). getCurrencySymbol.util
+│   ├── NumericFieldControl/ → shared number-input control (FormFieldChrome + type=number wired via useFormField, optional adornment); NumberField & CurrencyField render it so the wiring is not duplicated
+│   ├── NumberField/   → number (renders NumericFieldControl)
+│   ├── CurrencyField/ → currency (NumericFieldControl + currency-symbol adornment; view/read formats as currency). utils/getCurrencySymbol.util
 │   ├── DateField/     → date | datetime (new bare input)
 │   ├── BooleanField/  → wraps Checkbox or ToggleSwitch
 │   ├── SelectField/   → wraps VirtualSelect + hidden inputs for FormData
 │   ├── RadioField/    → wraps RadioOptionGroup
 │   ├── CustomField/   → escape hatch via field.renderField(...)
-│   └── FormFieldDisplay/ → read-only `view`-mode renderer: label + formatted value text (not a disabled widget). formatFieldDisplayValue.util + resolveOptionLabels.util
-│   (each: <Name>.component.tsx + <Name>.types.ts, TextField/RadioField/FormFieldDisplay also <Name>.stylex.ts)
+│   └── FormFieldDisplay/ → read-only `view`-mode renderer: label + formatted value text (not a disabled widget). utils/{formatFieldDisplayValue,resolveOptionLabels,stringifyLeafValue}.util
+│   (each: <Name>.component.tsx + <Name>.types.ts; TextField/RadioField/FormFieldDisplay/CurrencyField/NumericFieldControl also <Name>.stylex.ts; per-consumer helpers live in <Name>/utils/ behind an index.ts barrel)
 │   (the former PathField/PathBrowserModal `path` leaf was removed by ADR-028 — no filesystem-coupled field types)
 │
 └── utils/
