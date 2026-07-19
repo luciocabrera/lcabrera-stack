@@ -1,7 +1,7 @@
+import { formInputStyles } from '@repo/ui/components/Form/fields/formInput.stylex';
 import { useFormField } from '@repo/ui/components/Form/fields/useFormField.hook';
 import { FormFieldChrome } from '@repo/ui/components/Form/FormFieldChrome/FormFieldChrome.component';
 import { NO_AUTOFILL_INPUT_PROPS } from '@repo/ui/components/Table/filters/filterInput.constants';
-import { filterBaseStyles } from '@repo/ui/design-system/tokens/filters.stylex';
 import * as stylex from '@stylexjs/stylex';
 
 import type { TextFieldProps } from './TextField.types';
@@ -41,10 +41,10 @@ export const TextField = <TValues extends Record<string, unknown>>({
           placeholder={field.placeholder}
           required={field.clientValidation?.required}
           value={stringValue}
-          {...stylex.props(filterBaseStyles.input, styles.textareaOverride)}
+          {...stylex.props(formInputStyles.input, styles.textareaOverride)}
         />
       ) : (
-        <div {...stylex.props(filterBaseStyles.inputWrapper)}>
+        <div {...stylex.props(formInputStyles.inputWrapper)}>
           <input
             {...NO_AUTOFILL_INPUT_PROPS}
             disabled={isDisabled}
@@ -58,7 +58,7 @@ export const TextField = <TValues extends Record<string, unknown>>({
             required={field.clientValidation?.required}
             type={field.type}
             value={stringValue}
-            {...stylex.props(filterBaseStyles.input)}
+            {...stylex.props(formInputStyles.input)}
           />
         </div>
       )}

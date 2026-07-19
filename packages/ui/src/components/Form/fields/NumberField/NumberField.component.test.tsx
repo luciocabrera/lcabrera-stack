@@ -11,6 +11,8 @@ import {
   useGetFieldValue,
 } from '@repo/ui/components/Form/contexts';
 import { useGetIsFormDirty } from '@repo/ui/components/Form/contexts/FormContext/selectors/useGetIsFormDirty.hook';
+import { formInputStyles } from '@repo/ui/components/Form/fields/formInput.stylex';
+import * as stylex from '@stylexjs/stylex';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -271,6 +273,21 @@ describe('NumberField', () => {
     });
 
     expect(getAmountInput().autocomplete).toBe('one-time-code');
+  });
+
+  it('styles the input with the shared Form input token set', () => {
+    renderNumberField({
+      field: { accessor: 'amount', label: 'Amount', type: 'number' },
+    });
+
+    const inputClassName = stylex.props(formInputStyles.input).className ?? '';
+    expect(inputClassName.length).toBeGreaterThan(0);
+
+    const rendered = getAmountInput().className;
+    const hasFormInputStyles = inputClassName
+      .split(' ')
+      .every((cls) => rendered.includes(cls));
+    expect(hasFormInputStyles).toBe(true);
   });
 
   // Regression: the field initialised to `''` but stored `undefined` on clear,

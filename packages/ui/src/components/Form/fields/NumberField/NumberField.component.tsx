@@ -1,7 +1,7 @@
+import { formInputStyles } from '@repo/ui/components/Form/fields/formInput.stylex';
 import { useFormField } from '@repo/ui/components/Form/fields/useFormField.hook';
 import { FormFieldChrome } from '@repo/ui/components/Form/FormFieldChrome/FormFieldChrome.component';
 import { NO_AUTOFILL_INPUT_PROPS } from '@repo/ui/components/Table/filters/filterInput.constants';
-import { filterBaseStyles } from '@repo/ui/design-system/tokens/filters.stylex';
 import * as stylex from '@stylexjs/stylex';
 
 import type { NumberFieldProps } from './NumberField.types';
@@ -28,7 +28,7 @@ export const NumberField = <TValues extends Record<string, unknown>>({
       isRequired={field.clientValidation?.required}
       label={field.label}
     >
-      <div {...stylex.props(filterBaseStyles.inputWrapper)}>
+      <div {...stylex.props(formInputStyles.inputWrapper)}>
         <input
           {...NO_AUTOFILL_INPUT_PROPS}
           disabled={isDisabled}
@@ -41,7 +41,7 @@ export const NumberField = <TValues extends Record<string, unknown>>({
           required={field.clientValidation?.required}
           type='number'
           value={stringValue}
-          {...stylex.props(filterBaseStyles.input)}
+          {...stylex.props(formInputStyles.input)}
         />
       </div>
     </FormFieldChrome>

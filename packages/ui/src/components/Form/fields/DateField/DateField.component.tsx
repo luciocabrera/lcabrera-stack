@@ -1,6 +1,6 @@
+import { formInputStyles } from '@repo/ui/components/Form/fields/formInput.stylex';
 import { useFormField } from '@repo/ui/components/Form/fields/useFormField.hook';
 import { FormFieldChrome } from '@repo/ui/components/Form/FormFieldChrome/FormFieldChrome.component';
-import { filterBaseStyles } from '@repo/ui/design-system/tokens/filters.stylex';
 import * as stylex from '@stylexjs/stylex';
 
 import type { DateFieldProps } from './DateField.types';
@@ -23,7 +23,7 @@ export const DateField = <TValues extends Record<string, unknown>>({
       isRequired={field.clientValidation?.required}
       label={field.label}
     >
-      <div {...stylex.props(filterBaseStyles.inputWrapper)}>
+      <div {...stylex.props(formInputStyles.inputWrapper)}>
         <input
           disabled={isDisabled}
           id={fieldId}
@@ -32,7 +32,7 @@ export const DateField = <TValues extends Record<string, unknown>>({
           required={field.clientValidation?.required}
           type={field.type === 'datetime' ? 'datetime-local' : 'date'}
           value={(value as string | undefined) ?? ''}
-          {...stylex.props(filterBaseStyles.input)}
+          {...stylex.props(formInputStyles.input)}
         />
       </div>
     </FormFieldChrome>

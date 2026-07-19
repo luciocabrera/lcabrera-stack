@@ -37,7 +37,7 @@ export const styles = stylex.create({
     display: 'flex',
   },
   optionSelected: {
-    // borderColor: colors.brandPrimary,
+    borderColor: colors.brandSecondary,
     backgroundColor: colors.brandPrimaryBackground,
   },
   radio: {
@@ -47,15 +47,15 @@ export const styles = stylex.create({
     borderStyle: 'solid',
     borderWidth: '1px',
     appearance: 'none',
-    backgroundColor: 'white',
+    backgroundColor: colors.surfacePrimary,
     cursor: 'pointer',
     flexShrink: 0,
     height: '16px',
-    // marginTop: '2px',
     width: '16px',
   },
   radioChecked: {
-    backgroundColor: colors.brandPrimary,
-    boxShadow: 'inset 0 0 0 3px white',
+    borderColor: colors.brandSecondary,
+    backgroundColor: colors.brandSecondary,
+    boxShadow: `inset 0 0 0 3px ${colors.brandPrimaryBackground}`,
   },
 });

@@ -85,6 +85,7 @@ Form/
 │
 ├── fields/
 │   ├── useFormField.hook.ts → Shared per-leaf-field wiring: useId + value/error/mode selectors + isDisabled + accessor-bound setValue (every leaf field consumes it)
+│   ├── formInput.stylex.ts → The Form's own leaf-input styles (tokenized radius + focus-accent ring), deliberately separate from the Table's filters.stylex; consumed by Text/Number/Date/CurrencyField
 │   ├── TextField/     → text | email | password | textarea (new bare input)
 │   ├── NumberField/   → number (new bare input)
 │   ├── CurrencyField/ → currency (number input + currency-symbol adornment; view/read formats as currency). getCurrencySymbol.util
