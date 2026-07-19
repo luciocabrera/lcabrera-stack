@@ -126,13 +126,18 @@ project-specific belongs in that project's own `package.json`.
 diffs the working tree against the branch point (`git merge-base` with
 `origin/main`; override the base with `TEST_CHANGED_BASE`), maps changed files to
 workspaces, and adds every workspace that transitively **depends on** them — so a
-`packages/ui` edit still exercises `apps/react-router`. A root/shared change (root
-config, the lockfile, `vite-configs`/`ts-configs`) falls back to the full suite;
-a docs-only change runs nothing. Task substitution mirrors `test:ci`: the scan
-packages run their DB-free `test:unit`, and with `--ci` (`node
+`packages/ui` edit still exercises `apps/react-router`. It prints a per-workspace
+summary of what runs and what is skipped. Only the few files that change how every
+workspace resolves its tests — `pnpm-lock.yaml`, `pnpm-workspace.yaml`, the root
+`vite.config.ts`, and the shared `vite-configs`/`ts-configs` packages — force the
+full suite (a real dependency change always bumps the lockfile); every other
+out-of-workspace change (root package.json scripts, lint/tsconfig configs, docs,
+root `scripts/`) affects no suite and runs nothing. Task substitution mirrors
+`test:ci`: the scan packages run their DB-free `test:unit`, and with `--ci` (`node
 scripts/test-changed.mjs --ci`) `vite-react-compiler` runs its coverage `test:ci`
 last. `--dry-run` prints the `vp run` commands without executing them. CI's Unit
-Tests job uses it on pull requests; pushes to `main` still run the full `test:ci`.
+Tests job (and its coverage report) scope to the diff on pull requests; pushes to
+`main` still run the full `test:ci`.
 
 ### Dev & prod servers
 

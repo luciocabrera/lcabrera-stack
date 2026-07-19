@@ -23,6 +23,7 @@ import { fileURLToPath } from 'node:url';
 import {
   readWorkspaceGraph,
   resolveTestGroups,
+  workspaceDispositions,
 } from './lib/affected-tests.mjs';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
@@ -54,6 +55,30 @@ const runGroup = (group) =>
     child.on('error', () => res(1));
   });
 
+/** Print each workspace's disposition — what runs, what is skipped, and why. */
+const printReport = (mode, dispositions) => {
+  const running = dispositions.filter((disposition) => disposition.running);
+  const skipped = dispositions.filter((disposition) => !disposition.running);
+  process.stdout.write(
+    `\ntest:changed — ${mode} run: ${running.length}/${dispositions.length} workspace(s) affected\n`,
+  );
+  if (running.length > 0) {
+    process.stdout.write('\nRunning:\n');
+    for (const { dir, reason, task } of running) {
+      process.stdout.write(`  • ${dir} — ${reason}, running tests (${task})\n`);
+    }
+  }
+  if (skipped.length > 0) {
+    process.stdout.write('\nSkipped:\n');
+    for (const { dir } of skipped) {
+      process.stdout.write(
+        `  • ${dir} — no changes detected, skipping tests\n`,
+      );
+    }
+  }
+  process.stdout.write('\n');
+};
+
 const main = async () => {
   const args = new Set(process.argv.slice(2));
   const dryRun = args.has('--dry-run');
@@ -61,19 +86,21 @@ const main = async () => {
 
   const files = readChangedFiles();
   const graph = readWorkspaceGraph(REPO_ROOT);
-  const { mode, groups } = resolveTestGroups({ files, graph, ci });
+  const { mode, groups, packages, changed } = resolveTestGroups({
+    files,
+    graph,
+    ci,
+  });
 
-  if (mode === 'none') {
-    process.stdout.write(
-      'test:changed — no test-relevant changes; nothing to run.\n',
-    );
+  printReport(
+    mode,
+    workspaceDispositions({ graph, affected: packages, changed, groups }),
+  );
+
+  if (groups.length === 0) {
+    process.stdout.write('Nothing to test.\n');
     return;
   }
-
-  const count = groups.flatMap((group) => group.packages).length;
-  process.stdout.write(
-    `test:changed — ${mode} run across ${count} workspace(s)\n`,
-  );
 
   if (dryRun) {
     for (const group of groups) {

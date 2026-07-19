@@ -4,9 +4,10 @@
  * must also re-test every workspace that DEPENDS on it (a `packages/ui` edit can
  * break `apps/react-router`), so this walks the workspace dependency graph
  * (built from each package.json's `workspace:*` deps) to add transitive
- * dependents. Anything that could affect every workspace at once — a root config,
- * the lockfile, the shared `vite-configs`/`ts-configs` — forces the FULL suite,
- * because guessing narrow there would silently skip real breakage.
+ * dependents. Only the few files that change how every workspace resolves its
+ * tests — the lockfile, the workspace manifest, the root Vite+ config, the shared
+ * `vite-configs`/`ts-configs` — force the FULL suite; every other out-of-workspace
+ * file (root package.json scripts, docs, tooling) affects no suite and is ignored.
  *
  * The per-workspace task substitution mirrors `test:ci` exactly so the two never
  * diverge: the DB-bound scan packages run their DB-free `test:unit`, and (in CI
@@ -38,37 +39,24 @@ export const COVERAGE_TASK_PACKAGE = 'vite-react-compiler';
 const GLOBAL_PACKAGES = new Set(['@repo/vite-configs', '@repo/ts-configs']);
 
 /**
- * Out-of-workspace paths that never change a test's outcome, so a diff touching
- * only these runs nothing. Everything else outside a workspace is treated as a
- * global change (full run) — conservative on purpose.
+ * Files that change how EVERY workspace builds or resolves its tests, so a diff
+ * touching one forces the full suite: the lockfile, the workspace manifest, and
+ * the root Vite+ config (which owns the shared run/test tasks). This stays small
+ * on purpose — a real dependency change always updates `pnpm-lock.yaml`, so every
+ * OTHER out-of-workspace file (root package.json scripts, lint/tsconfig configs,
+ * docs, root tooling under `scripts/`) affects no workspace suite and is simply
+ * ignored. The shared config packages force a full run too, via GLOBAL_PACKAGES.
  */
-const INERT_PATTERNS = [
-  /^[^/]+\.md$/,
-  /^docs\//,
-  /^\.claude\//,
-  /^\.github\//,
-  /^\.vscode\//,
-  /^reports\//,
-  // Root tooling: gates, report generators, seeders. No workspace test imports
-  // from here, so a scripts-only change never changes a suite's outcome. (Only
-  // ROOT scripts/ — `apps/x/scripts/` matches its workspace above.)
-  /^scripts\//,
-  /^\.gitignore$/,
-  /^\.env\.example$/,
-  /^LICENSE$/,
+const FORCE_FULL_PATTERNS = [
+  /^pnpm-lock\.yaml$/,
+  /^pnpm-workspace\.yaml$/,
+  /^vite\.config\.ts$/,
 ];
 
-const isInWorkspace = (file) =>
-  /^apps\/[^/]+\//.test(file) || /^packages\/[^/]+\//.test(file);
-
-const isInert = (file) => INERT_PATTERNS.some((pattern) => pattern.test(file));
-
-/**
- * True when the diff touches a file outside every workspace that is not on the
- * inert allowlist (a root config, the lockfile, a new top-level file, …).
- */
-const hasGlobalChange = (files) =>
-  files.some((file) => !isInWorkspace(file) && !isInert(file));
+const forcesFullRun = (files) =>
+  files.some((file) =>
+    FORCE_FULL_PATTERNS.some((pattern) => pattern.test(file)),
+  );
 
 /** The workspace package names declared as `workspace:*` deps of a manifest. */
 const workspaceDeps = (manifest, packageNames) => {
@@ -163,34 +151,66 @@ export const partitionTasks = (affectedPackages, { ci = false } = {}) => {
  */
 export const resolveAffected = ({ files, graph }) => {
   if (files.length === 0) {
-    return { mode: 'none', packages: [] };
+    return { mode: 'none', packages: [], changed: [] };
   }
-  const changed = workspacesForFiles(files, graph);
+  const changedWorkspaces = workspacesForFiles(files, graph);
+  const changed = changedWorkspaces.map((workspace) => workspace.pkgName);
   const forceFull =
-    hasGlobalChange(files) ||
-    changed.some((workspace) => GLOBAL_PACKAGES.has(workspace.pkgName));
+    forcesFullRun(files) ||
+    changedWorkspaces.some((workspace) =>
+      GLOBAL_PACKAGES.has(workspace.pkgName),
+    );
   if (forceFull) {
     return {
       mode: 'full',
       packages: graph.map((workspace) => workspace.pkgName),
+      changed,
     };
   }
   if (changed.length === 0) {
-    return { mode: 'none', packages: [] };
+    return { mode: 'none', packages: [], changed: [] };
   }
-  const dependents = buildDependents(graph);
-  const affected = withDependents(
-    changed.map((workspace) => workspace.pkgName),
-    dependents,
-  );
-  return { mode: 'scoped', packages: [...affected] };
+  const affected = withDependents(changed, buildDependents(graph));
+  return { mode: 'scoped', packages: [...affected], changed };
 };
 
 /**
- * The plan for a diff: `{ mode, groups }` — `resolveAffected` split into the
- * ordered `vp run` groups (see `partitionTasks`), ready to hand to `vp run`.
+ * The plan for a diff: `{ mode, groups, packages, changed }` — `resolveAffected`
+ * split into the ordered `vp run` groups (see `partitionTasks`), plus the raw
+ * affected/changed package sets so the caller can report per-workspace.
  */
 export const resolveTestGroups = ({ files, graph, ci = false }) => {
-  const { mode, packages } = resolveAffected({ files, graph });
-  return { mode, groups: partitionTasks(packages, { ci }) };
+  const { mode, packages, changed } = resolveAffected({ files, graph });
+  return { mode, packages, changed, groups: partitionTasks(packages, { ci }) };
+};
+
+/** The reason a workspace is (not) running, for the human summary. */
+const dispositionReason = (running, isChanged) => {
+  if (!running) {
+    return 'no changes detected';
+  }
+  return isChanged ? 'changed' : 'depends on a changed package';
+};
+
+/**
+ * Per-workspace disposition for a human summary: every workspace tagged running
+ * (with its task and why) or skipped. `changed` are the directly-changed
+ * packages; the rest of `affected` are pulled in as dependents.
+ */
+export const workspaceDispositions = ({ graph, affected, changed, groups }) => {
+  const affectedSet = new Set(affected);
+  const changedSet = new Set(changed);
+  const taskByPackage = new Map(
+    groups.flatMap((group) => group.packages.map((pkg) => [pkg, group.task])),
+  );
+  return graph.map((workspace) => {
+    const running = affectedSet.has(workspace.pkgName);
+    return {
+      dir: workspace.dir,
+      pkgName: workspace.pkgName,
+      running,
+      reason: dispositionReason(running, changedSet.has(workspace.pkgName)),
+      task: taskByPackage.get(workspace.pkgName),
+    };
+  });
 };
