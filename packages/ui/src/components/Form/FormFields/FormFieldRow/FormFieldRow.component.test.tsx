@@ -50,4 +50,42 @@ describe('FormFieldRow', () => {
 
     expect(screen.getByLabelText('Name', { exact: false })).not.toBeNull();
   });
+
+  it('renders every field and applies distinct per-cell widths when spans differ', () => {
+    const { container } = renderRow({
+      fields: [
+        { accessor: 'name', label: 'Name', type: 'text' },
+        { accessor: 'bio', label: 'Bio', type: 'textarea' },
+      ],
+      spans: [3, 1],
+      type: 'row',
+    });
+
+    expect(screen.getByLabelText('Name', { exact: false })).not.toBeNull();
+    expect(screen.getByLabelText('Bio', { exact: false })).not.toBeNull();
+
+    const [first, second] = [
+      ...(container.firstElementChild?.children ?? []),
+    ] as HTMLElement[];
+    // Dynamic StyleX writes the grow factor as an inline custom property, so a
+    // span-3 cell resolves to different inline styling than the span-1 cell.
+    expect(first?.getAttribute('style')).not.toBe(
+      second?.getAttribute('style'),
+    );
+  });
+
+  it('defaults to equal-width cells when spans are omitted', () => {
+    const { container } = renderRow({
+      fields: [
+        { accessor: 'name', label: 'Name', type: 'text' },
+        { accessor: 'bio', label: 'Bio', type: 'textarea' },
+      ],
+      type: 'row',
+    });
+
+    const [first, second] = [
+      ...(container.firstElementChild?.children ?? []),
+    ] as HTMLElement[];
+    expect(first?.getAttribute('style')).toBe(second?.getAttribute('style'));
+  });
 });

@@ -100,6 +100,13 @@ export type RenderFieldArgs = {
 
 export type RowFieldNode<TValues extends Record<string, unknown>> = {
   readonly fields: readonly FieldNode<TValues>[];
+  /**
+   * Optional per-cell grow factor, positional to `fields`. A cell with span `2`
+   * is twice as wide as a span-`1` cell; omitted or missing entries default to
+   * `1` (equal-width, the previous behaviour). Use a larger span for a
+   * full-width or emphasised field within a multi-column row.
+   */
+  readonly spans?: readonly number[];
   readonly type: 'row';
 };
 

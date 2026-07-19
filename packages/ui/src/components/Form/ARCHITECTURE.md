@@ -70,7 +70,7 @@ Form/
 │   │       ├── FormFieldsRendererContext.types.ts   → RenderFieldsFn (TValues erased to Record<string, unknown> at the boundary, mirrors AnyFieldComponent)
 │   │       └── useFormFieldsRendererContext.hook.ts → use(context) with guard (infra only)
 │   ├── FormFieldGroup/           → `group` node: bordered card section with an optional header; `collapsible`/`defaultCollapsed` make the header a toggle button (collapsed body is display:none, not unmounted, so values still submit) (.component + .types + .stylex + .test)
-│   ├── FormFieldRow/             → `row` node: horizontal equal-flex cells of nested fields (.component + .types + .stylex + .test)
+│   ├── FormFieldRow/             → `row` node: horizontal cells of nested fields; equal-width by default, optional positional `spans` widen individual cells (per-cell grow factor via dynamic StyleX) (.component + .types + .stylex + .test)
 │   ├── FormFieldTabs/            → `tab` node: one Tabs panel per tab (.component + .types + .test)
 │   └── utils/
 │       ├── collectAccessors.util.ts → Node → flattened leaf accessors (recursive, + .test)
