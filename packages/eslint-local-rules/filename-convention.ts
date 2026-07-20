@@ -28,15 +28,22 @@ const createRule = ESLintUtils.RuleCreator(
 
 const PASCAL_CASE = /^[A-Z][A-Za-z0-9]*$/;
 const CAMEL_CASE = /^[a-z][A-Za-z0-9]*$/;
-const KEBAB_CASE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+// A kebab segment is validated per-`-`-split part rather than with a single
+// `[a-z0-9]+(-[a-z0-9]+)*` regex, whose nested quantifier trips
+// security/detect-unsafe-regex (ReDoS heuristic). Splitting is linear and safe.
+const KEBAB_SEGMENT = /^[a-z0-9]+$/;
+const isKebabCase = (value: string) =>
+  value.length > 0 &&
+  value.split('-').every((segment) => KEBAB_SEGMENT.test(segment));
 
-// Only the unambiguous, explicitly-documented conventions are enforced in this
-// first rule. Deliberately EXCLUDED for now (each needs a convention decision,
-// not a guess): `.util`/`.service`/`.api`/`.schema` case (apps use camelCase,
-// but `@repo/utils` deliberately uses kebab-case).
+// The casing model (see .claude/rules/typescript.md): a filename's case follows
+// what it names — a React component (PascalCase), the route/resource it belongs
+// to (kebab-case), or the function/value module it exports (camelCase).
+// `@repo/utils` is the one documented exception (it keeps kebab-case for its
+// `.util` files) and turns this rule off for them in its own eslint config.
 const KEBAB_SUFFIXES = new Set(['action', 'clientAction', 'loader', 'meta']);
 const PASCAL_SUFFIXES = new Set(['component', 'error-boundary', 'layout']);
-const CAMEL_SUFFIXES = new Set(['hook']);
+const CAMEL_SUFFIXES = new Set(['api', 'hook', 'schema', 'service', 'util']);
 
 // Deprecated suffix spellings → their canonical replacement. A multi-word
 // suffix is hyphenated (`error-boundary`), so the old camelCase form is
@@ -55,7 +62,7 @@ const parseFileName = (filename: string) => {
   const withoutTest = withoutExt.replace(/\.(?:test|spec)$/, '');
   const lastDot = withoutTest.lastIndexOf('.');
   if (lastDot <= 0) {
-    return undefined;
+    return;
   }
   return {
     name: withoutTest.slice(0, lastDot),
@@ -74,12 +81,17 @@ const expectedCaseFor = (suffix: string) => {
   if (CAMEL_SUFFIXES.has(suffix)) {
     return 'camelCase';
   }
-  return undefined;
+  return;
 };
 
-const matchesCase = (name: string, expected: string) => {
+type MatchesCaseArgs = {
+  readonly expected: string;
+  readonly name: string;
+};
+
+const matchesCase = ({ expected, name }: MatchesCaseArgs) => {
   if (expected === 'kebab-case') {
-    return KEBAB_CASE.test(name);
+    return isKebabCase(name);
   }
   if (expected === 'PascalCase') {
     return PASCAL_CASE.test(name);
@@ -111,7 +123,7 @@ export default createRule({
           return;
         }
 
-        if (!matchesCase(parsed.name, expected)) {
+        if (!matchesCase({ expected, name: parsed.name })) {
           context.report({
             data: { case: expected, name: parsed.name, suffix: parsed.suffix },
             messageId: 'wrongCase',

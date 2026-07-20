@@ -1,6 +1,6 @@
 import type { OxlintConfig } from 'vite-plus/lint';
 
-import { mergeOxlintConfig } from './vite.config-merge.util.ts';
+import { mergeOxlintConfig } from './viteConfigMerge.util.ts';
 
 const LOCAL_RULES_SPECIFIER = '../../packages/eslint-local-rules/index.js';
 

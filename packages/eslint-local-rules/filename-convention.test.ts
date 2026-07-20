@@ -68,6 +68,18 @@ ruleTester.run('filename-convention', rule, {
       errors: [{ messageId: 'deprecatedSuffix' }],
       filename: 'src/routes/x/car-sales.errorBoundary.tsx',
     },
+    // function-modules (util / service) must be camelCase. The rule flags kebab
+    // here; `@repo/utils` is exempted at the CONFIG layer, not in the rule.
+    {
+      code,
+      errors: [{ messageId: 'wrongCase' }],
+      filename: 'packages/utils/merge-arrays.util.ts',
+    },
+    {
+      code,
+      errors: [{ messageId: 'wrongCase' }],
+      filename: 'src/routes/x/enterprise-orders.service.ts',
+    },
   ],
   valid: [
     { code, filename: 'src/routes/x/order-detail/order-detail.loader.ts' },
@@ -78,13 +90,13 @@ ruleTester.run('filename-convention', rule, {
     { code, filename: 'src/routes/x/EnterpriseOrders.error-boundary.tsx' },
     { code, filename: 'src/routes/x/EnterpriseOrders.layout.tsx' },
     { code, filename: 'src/root/Root.layout.tsx' },
+    // function-modules → camelCase
+    { code, filename: 'src/utils/getFilteredOptions.util.ts' },
+    { code, filename: 'src/routes/x/enterpriseOrders.service.ts' },
     // unenforced / unrecognised shapes are skipped
     { code, filename: 'src/routes/x/root.ts' },
     { code, filename: 'src/components/Card/index.ts' },
     { code, filename: 'src/design-system/tokens/colors.stylex.ts' },
     { code, filename: 'src/routes/x/orderClientAction.ts' },
-    // deferred suffixes: util convention differs per package, so unenforced
-    { code, filename: 'packages/utils/merge-arrays.util.ts' },
-    { code, filename: 'src/utils/getFilteredOptions.util.ts' },
   ],
 });
