@@ -10,7 +10,7 @@ area:
 started: 2026-07-20
 updated: 2026-07-20
 plan: (none)
-pr: (none)
+pr: #123
 issue: #122
 ---
 
@@ -20,6 +20,6 @@ Promote enterprise-orders Form field-builders to a generic @repo/ui DSL
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: builders + factory built & tested in `@repo/ui/components/Form/builders`; enterprise-orders rewired; `orderFormFields`/`parseOrderIdParam` colocated into `utils/`; docs updated; gate green (fmt/oxlint/eslint/biome/typecheck/tests).
 - Blockers: none
-- Next:
+- Next: push, flip PR #123 to ready.

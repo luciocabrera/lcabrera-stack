@@ -132,6 +132,21 @@ Covers `packages/ui` only. API-layer utilities (`api.util.ts`, `buildPaginatedQu
 | ------------- | ------------------------------------------------------ | -------------------------------------------------------------------------- |
 | `getNewIndex` | `components/Tabs/TabsHeader/utils/getNewIndex.util.ts` | Resolves the target tab index for ArrowLeft/ArrowRight/Home/End navigation |
 
+### `src/components/Form/builders/` _(public — field-tree DSL)_
+
+Ergonomic builders for the `fields` tree, exported from `@repo/ui/components/Form`. A generic builder cannot infer `TValues` from a string `accessor`, so `createFieldBuilders<TValues>()` binds the value shape once and returns the tree builders with `accessor` type-checked against the value keys; `buildFieldValidation`/`toFieldOptions` are value-shape-agnostic and exported standalone.
+
+| Function               | Location                                                | Description                                                                            |
+| ---------------------- | ------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `createFieldBuilders`  | `components/Form/builders/createFieldBuilders.util.ts`  | Binds `TValues`, returns `{ field, choiceField, toggleField, fieldRow, fieldGroup }`   |
+| `field`                | `components/Form/builders/field.util.ts`                | Base leaf builder (text/email/number/currency/date/textarea) + flat `clientValidation` |
+| `choiceField`          | `components/Form/builders/choiceField.util.ts`          | Options leaf builder (`select`/`radio`)                                                |
+| `toggleField`          | `components/Form/builders/toggleField.util.ts`          | Boolean toggle leaf builder (`variant: 'toggle'`)                                      |
+| `fieldRow`             | `components/Form/builders/fieldRow.util.ts`             | Row container builder (optional positional `spans`)                                    |
+| `fieldGroup`           | `components/Form/builders/fieldGroup.util.ts`           | Card-group builder (optional `collapsible`/`defaultCollapsed`)                         |
+| `buildFieldValidation` | `components/Form/builders/buildFieldValidation.util.ts` | Flat validation opts → `{ clientValidation }`, dropping unset keys                     |
+| `toFieldOptions`       | `components/Form/builders/toFieldOptions.util.ts`       | `readonly string[]` → `{ label, value }[]` for select/radio options                    |
+
 ### `src/components/Form/utils/` _(private delegates)_
 
 | Function              | Location                                            | Description                                                                                 |

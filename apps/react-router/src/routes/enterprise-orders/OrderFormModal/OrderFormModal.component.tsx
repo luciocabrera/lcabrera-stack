@@ -6,7 +6,7 @@ import type { EnterpriseOrderValues } from '../config';
 import type { OrderFormModalProps } from './OrderFormModal.types';
 
 import { ENTERPRISE_ORDERS_PATH } from '../config';
-import { buildOrderFormFields } from '../orderFormFields.util';
+import { buildOrderFormFields } from '../utils/orderFormFields.util';
 
 /**
  * Renders the enterprise-order Form inside a `@repo/ui` Modal, overlaid on the
