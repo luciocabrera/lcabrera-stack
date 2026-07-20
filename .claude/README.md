@@ -111,9 +111,12 @@ Agents are sub-agents spawned explicitly by Claude (or by you) for isolated, hea
 
 Hooks are shell commands the harness runs automatically on lifecycle events. They live in the **committed** `.claude/settings.json` (the standard location — not a separate hooks file) so the whole team shares them.
 
-| Event  | Command                                                                                                                  | Purpose                                                           |
-| ------ | ------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
-| `Stop` | `cd apps/react-router && git diff --quiet HEAD -- . \|\| (vp fmt . && vp lint . --fix && vp check --fix && vp run test)` | Runs the quality gate when Claude finishes, only if files changed |
+| Event                                    | Command                                                                                                                  | Purpose                                                                                                           |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `PostToolUse` (`Write\|Edit\|MultiEdit`) | `node scripts/claude-autofix.mjs`                                                                                        | Per-file autofix after each Write/Edit — Oxlint `--fix` → Biome `--write` → Oxfmt (the "fast trio"); non-blocking |
+| `Stop`                                   | `cd apps/react-router && git diff --quiet HEAD -- . \|\| (vp fmt . && vp lint . --fix && vp check --fix && vp run test)` | Runs the full quality gate when Claude finishes, only if files changed                                            |
+
+The `PostToolUse` fixer ([`scripts/claude-autofix.mjs`](../scripts/claude-autofix.mjs)) reads the tool payload from stdin and runs only the Rust-fast linters on the single file just touched. The per-workspace **ESLint pass is deliberately excluded** — it cold-starts a Node process per file — so it stays in the `Stop` hook and the pre-push gate, mirroring the pre-commit `staged` config in root `vite.config.ts`. The hook always exits 0: unfixable findings are left to the quality gate, never blocking the edit.
 
 **Adding a hook:** edit the `hooks` block in `.claude/settings.json`. For automated behaviours ("always run X after Y"), hooks are the right mechanism — not memory or preferences.
 
@@ -141,6 +144,9 @@ Skills auto-invoke when intent matches description or paths
         │
         ▼
 Claude works — reads files, edits code
+        │
+        ├─ After each Write/Edit → PostToolUse hook autofixes that one file
+        │       (Oxlint --fix, Biome --write, Oxfmt)
         │
         ├─ Needs heavy/isolated work? → spawns an Agent
         │       (or a skill with context: fork runs in its own sub-agent)
