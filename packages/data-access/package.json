@@ -42,6 +42,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
   "dependencies": {
+    "@repo/utils": "workspace:*",
     "pg": "catalog:",
     "zod": "catalog:"
   },

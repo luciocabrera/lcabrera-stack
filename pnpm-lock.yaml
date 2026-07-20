@@ -654,6 +654,9 @@ importers:
 
   packages/data-access:
     dependencies:
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../utils
       pg:
         specifier: 'catalog:'
         version: 8.22.0

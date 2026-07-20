@@ -1,8 +1,11 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
-import { fetchDistinctValues, getApiBaseUrl } from '@repo/data-access/api';
-
-import { parseFilterOptionsParams } from './parseFilterOptionsParams.util';
+import {
+  fetchDistinctValues,
+  getApiBaseUrl,
+  parseFilterOptionsParams,
+} from '@repo/data-access/api';
+import { DEFAULT_FILTER_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
 
 /**
  * Resource route serving distinct filter options for descriptors with
@@ -14,7 +17,10 @@ import { parseFilterOptionsParams } from './parseFilterOptionsParams.util';
  */
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
-  const params = parseFilterOptionsParams(url.searchParams);
+  const params = parseFilterOptionsParams({
+    defaultPageSize: DEFAULT_FILTER_PAGE_SIZE,
+    searchParams: url.searchParams,
+  });
 
   if (!params) {
     return Response.json(

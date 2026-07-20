@@ -8,7 +8,8 @@ const { fetchDistinctValuesMock } = vi.hoisted(() => ({
   fetchDistinctValuesMock: vi.fn(),
 }));
 
-vi.mock('@repo/data-access/api', () => ({
+vi.mock('@repo/data-access/api', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@repo/data-access/api')>()),
   fetchDistinctValues: fetchDistinctValuesMock,
   getApiBaseUrl: vi.fn(() => 'http://localhost:3001/api'),
 }));
