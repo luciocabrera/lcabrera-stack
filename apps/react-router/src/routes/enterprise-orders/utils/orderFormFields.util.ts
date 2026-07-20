@@ -13,11 +13,11 @@ import {
   PAYMENT_METHOD_VALUES,
   PAYMENT_STATUS_VALUES,
   PHONE_PATTERN,
-  POSTAL_CODE_PATTERN,
   PRIORITY_VALUES,
   PRODUCT_CATEGORY_VALUES,
   WAREHOUSE_LOCATION_VALUES,
 } from '../config';
+import { buildAddressLocalityRows } from './buildAddressLocalityRows.util';
 
 const { choiceField, field, fieldGroup, fieldRow, toggleField } =
   createFieldBuilders<EnterpriseOrderValues>();
@@ -377,40 +377,7 @@ export const buildOrderFormFields = ({
                   ],
                   spans: [2, 1],
                 }),
-                fieldRow({
-                  fields: [
-                    field({
-                      accessor: 'shipping_city',
-                      label: 'City',
-                      required: true,
-                      type: 'text',
-                    }),
-                    field({
-                      accessor: 'shipping_state',
-                      label: 'State',
-                      required: true,
-                      type: 'text',
-                    }),
-                  ],
-                }),
-                fieldRow({
-                  fields: [
-                    field({
-                      accessor: 'shipping_country',
-                      label: 'Country',
-                      required: true,
-                      type: 'text',
-                    }),
-                    field({
-                      accessor: 'shipping_postal_code',
-                      label: 'Postal Code',
-                      maxLength: 20,
-                      pattern: POSTAL_CODE_PATTERN,
-                      required: true,
-                      type: 'text',
-                    }),
-                  ],
-                }),
+                ...buildAddressLocalityRows('shipping'),
               ],
               label: 'Address',
             }),
@@ -482,40 +449,7 @@ export const buildOrderFormFields = ({
                   required: true,
                   type: 'text',
                 }),
-                fieldRow({
-                  fields: [
-                    field({
-                      accessor: 'billing_city',
-                      label: 'City',
-                      required: true,
-                      type: 'text',
-                    }),
-                    field({
-                      accessor: 'billing_state',
-                      label: 'State',
-                      required: true,
-                      type: 'text',
-                    }),
-                  ],
-                }),
-                fieldRow({
-                  fields: [
-                    field({
-                      accessor: 'billing_country',
-                      label: 'Country',
-                      required: true,
-                      type: 'text',
-                    }),
-                    field({
-                      accessor: 'billing_postal_code',
-                      label: 'Postal Code',
-                      maxLength: 20,
-                      pattern: POSTAL_CODE_PATTERN,
-                      required: true,
-                      type: 'text',
-                    }),
-                  ],
-                }),
+                ...buildAddressLocalityRows('billing'),
               ],
               label: 'Billing Address',
             }),
