@@ -68,12 +68,20 @@ ruleTester.run('filename-convention', rule, {
       errors: [{ messageId: 'deprecatedSuffix' }],
       filename: 'src/routes/x/car-sales.errorBoundary.tsx',
     },
-    // function-modules (util / service) must be camelCase. The rule flags kebab
-    // here; `@repo/utils` is exempted at the CONFIG layer, not in the rule.
+    // function-modules (util / service) default to camelCase — the rule flags a
+    // kebab `.util` here with no options.
     {
       code,
       errors: [{ messageId: 'wrongCase' }],
       filename: 'packages/utils/merge-arrays.util.ts',
+    },
+    // …but with `@repo/utils`'s `{ suffixCase: { util: 'kebab-case' } }` option,
+    // a camelCase `.util` is what fails — the rule stays live, not turned off.
+    {
+      code,
+      errors: [{ messageId: 'wrongCase' }],
+      filename: 'packages/utils/src/arrays/mergeArrays.util.ts',
+      options: [{ suffixCase: { util: 'kebab-case' } }],
     },
     {
       code,
@@ -93,6 +101,12 @@ ruleTester.run('filename-convention', rule, {
     // function-modules → camelCase
     { code, filename: 'src/utils/getFilteredOptions.util.ts' },
     { code, filename: 'src/routes/x/enterpriseOrders.service.ts' },
+    // …unless the suffixCase option overrides it (kebab `.util` in @repo/utils)
+    {
+      code,
+      filename: 'packages/utils/src/arrays/merge-arrays.util.ts',
+      options: [{ suffixCase: { util: 'kebab-case' } }],
+    },
     // unenforced / unrecognised shapes are skipped
     { code, filename: 'src/routes/x/root.ts' },
     { code, filename: 'src/components/Card/index.ts' },

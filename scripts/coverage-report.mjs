@@ -84,6 +84,7 @@ const COVERAGE_REPORT_WORKSPACES = [
   // queries/* stay out), same as the fallow coverage merge.
   { dir: 'packages/node-runtime', name: '@repo/node-runtime', run: true },
   { dir: 'packages/scan-ingestion', name: '@repo/scan-ingestion', run: true },
+  { dir: 'packages/utils', name: '@repo/utils', run: true },
 ];
 
 const runAll = process.argv.includes('--all');

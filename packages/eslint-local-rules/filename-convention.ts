@@ -26,6 +26,17 @@ const createRule = ESLintUtils.RuleCreator(
   (name) => `https://github.com/luciocabrera/vite-react-compiler/rules/${name}`,
 );
 
+type MessageIds = 'deprecatedSuffix' | 'hookPrefix' | 'wrongCase';
+
+// A single optional options object. `suffixCase` overrides the expected case
+// for a given suffix (e.g. `{ util: 'kebab-case' }` in `@repo/utils`), so the
+// rule stays live there instead of being turned off.
+type Options = readonly [
+  { readonly suffixCase?: Readonly<Record<string, SuffixCase>> }?,
+];
+
+type SuffixCase = 'camelCase' | 'kebab-case' | 'PascalCase';
+
 const PASCAL_CASE = /^[A-Z][A-Za-z0-9]*$/;
 const CAMEL_CASE = /^[a-z][A-Za-z0-9]*$/;
 // A kebab segment is validated per-`-`-split part rather than with a single
@@ -39,8 +50,9 @@ const isKebabCase = (value: string) =>
 // The casing model (see .claude/rules/typescript.md): a filename's case follows
 // what it names — a React component (PascalCase), the route/resource it belongs
 // to (kebab-case), or the function/value module it exports (camelCase).
-// `@repo/utils` is the one documented exception (it keeps kebab-case for its
-// `.util` files) and turns this rule off for them in its own eslint config.
+// `@repo/utils` keeps kebab-case for its `.util` files; rather than turning this
+// rule off there, its eslint config passes `{ suffixCase: { util: 'kebab-case' } }`
+// so a camelCase `.util` file in that package still fails the gate.
 const KEBAB_SUFFIXES = new Set(['action', 'clientAction', 'loader', 'meta']);
 const PASCAL_SUFFIXES = new Set(['component', 'error-boundary', 'layout']);
 const CAMEL_SUFFIXES = new Set(['api', 'hook', 'schema', 'service', 'util']);
@@ -75,7 +87,16 @@ const parseFileName = (filename: string) => {
  * not an explicit `return` — unicorn/no-useless-undefined bans `return undefined`
  * and Sonar S3626 bans the redundant bare `return`) when the suffix is unenforced.
  */
-const expectedCaseFor = (suffix: string) => {
+type ExpectedCaseForArgs = {
+  readonly overrides: ReadonlyMap<string, SuffixCase>;
+  readonly suffix: string;
+};
+
+const expectedCaseFor = ({ overrides, suffix }: ExpectedCaseForArgs) => {
+  const override = overrides.get(suffix);
+  if (override !== undefined) {
+    return override;
+  }
   if (KEBAB_SUFFIXES.has(suffix)) {
     return 'kebab-case';
   }
@@ -102,8 +123,13 @@ const matchesCase = ({ expected, name }: MatchesCaseArgs) => {
   return CAMEL_CASE.test(name);
 };
 
-export default createRule({
+export default createRule<Options, MessageIds>({
   create(context) {
+    const [options] = context.options;
+    const overrides = new Map<string, SuffixCase>(
+      Object.entries(options?.suffixCase ?? {}),
+    );
+
     return {
       Program(node: TSESTree.Program) {
         const parsed = parseFileName(context.filename);
@@ -121,7 +147,7 @@ export default createRule({
           return;
         }
 
-        const expected = expectedCaseFor(parsed.suffix);
+        const expected = expectedCaseFor({ overrides, suffix: parsed.suffix });
         if (expected === undefined) {
           return;
         }
@@ -145,7 +171,7 @@ export default createRule({
       },
     };
   },
-  defaultOptions: [],
+  defaultOptions: [{}],
   meta: {
     docs: {
       description:
@@ -159,7 +185,21 @@ export default createRule({
       wrongCase:
         "A '.{{suffix}}' file must be named in {{case}} — '{{name}}' is not. Rename the file (git mv) and update its imports.",
     },
-    schema: [],
+    schema: [
+      {
+        additionalProperties: false,
+        properties: {
+          suffixCase: {
+            additionalProperties: {
+              enum: ['PascalCase', 'camelCase', 'kebab-case'],
+              type: 'string',
+            },
+            type: 'object',
+          },
+        },
+        type: 'object',
+      },
+    ],
     type: 'problem',
   },
   name: 'filename-convention',

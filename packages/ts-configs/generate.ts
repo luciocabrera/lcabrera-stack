@@ -208,13 +208,11 @@ const configs = [
     // reach-in fails typecheck here instead of quietly eroding the guarantee
     // that keeps this package the safe half of the utils/node-runtime split.
     //
-    // Flat package (no src/ — the *.util.ts files sit at the package root),
-    // so include is overridden. Naming an `exclude` at all opts out of
-    // TypeScript's implicit node_modules exclusion, so it must be restated —
-    // otherwise `**/*.ts` drags the entire dependency tree into the program.
+    // Sources live under src/ (domain-grouped) with a root vite.config.ts, so
+    // include names both — matching the other library packages. `types: []`
+    // still denies Node ambient globals to keep the purity guarantee.
     config: createNodeTsConfig({
-      exclude: ['node_modules'],
-      include: ['**/*.ts'],
+      include: ['src', 'vite.config.ts'],
       tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
       types: [],
     }),
