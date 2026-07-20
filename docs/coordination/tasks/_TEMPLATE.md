@@ -38,9 +38,13 @@ Fields:
   updated  YYYY-MM-DD — bump this whenever you make progress; stale tasks are flagged
   plan     optional pointer to out-of-git scratch (~/.claude/plans/<name>.md) or a *_PLAN.md
   pr       PR number/URL once opened
-  issue    optional pointer to the GitHub backlog issue this work picks up (e.g. #50).
-           Backlog/planning lives in GitHub Issues (ADR-036); this field links the
-           in-flight claim to the durable item. Free-form, unvalidated — like `pr`.
+  issue    REQUIRED — the GitHub backlog issue this work picks up (`#50` or an
+           issues URL). Backlog/planning lives in GitHub Issues (ADR-036); this
+           field links the in-flight claim to the durable item, and
+           `coordination:verify` REJECTS a live task without a real reference
+           (`(none)` fails). Prefer `vp run coordination:claim` — it creates or
+           links the issue, writes this field, and self-assigns the issue at
+           claim time (its board card → In Progress at the START of the work).
 
 Delete this file when the work merges (its history lives in the PR/commits).
 -->

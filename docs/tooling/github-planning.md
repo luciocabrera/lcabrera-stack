@@ -39,9 +39,11 @@ the prioritised, cross-referenced, human-browsable backlog and a kanban.
 Four links connect the layers, and **GitHub owns every one of them** — there is
 no custom reconciler to maintain (that is deliberate; see ADR-036):
 
-1. **Task → issue.** A coordination task that picks up a backlog item sets its
-   optional `issue:` frontmatter field (e.g. `issue: #50`). Free-form, unvalidated
-   — same as `pr:`.
+1. **Task → issue.** Every coordination task sets its `issue:` frontmatter field
+   (e.g. `issue: #50`) to the backlog item it advances. This is **required** and
+   **validated** — `coordination:verify` fails a live task whose `issue:` is
+   missing or not a real reference. `vp run coordination:claim` fills it in (and
+   self-assigns the issue) for you.
 2. **PR → issue.** PRs close issues with `Closes #N` in the description.
 3. **Issue/PR → Project.** [`.github/workflows/add-to-project.yml`](../../.github/workflows/add-to-project.yml)
    auto-adds new issues and same-repo PRs to the board.
@@ -75,7 +77,8 @@ that gap by reacting to events GitHub already emits (needs the same
 For a PR it moves the PR's card **and** every issue the PR closes
 (`closingIssuesReferences`), so the backlog issue advances with the work. The one
 transition GitHub can't infer is "I've started but there's no PR yet" — so
-**self-assign the issue the moment you pick it up** (`gh issue edit <n> --add-assignee @me`);
+**self-assign the issue the moment you pick it up** (`gh issue edit <n> --add-assignee @me`,
+which `vp run coordination:claim` does for you at claim time);
 that flips it to In Progress immediately. Then a draft PR keeps it there, ready
 review moves it to In Review, and merge closes it out — all automatically.
 

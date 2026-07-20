@@ -9,16 +9,26 @@
 # docs/coordination/README.md.
 #
 # Usage:
-#   vp run coordination:claim -- <id> "<title>" [--area <glob> ...] [--branch <name>]
+#   vp run coordination:claim -- <id> "<title>" (--issue <n> | --new-issue)
+#                                [--area <glob> ...] [--branch <name>]
 #                                [--worktree] [--dry-run]
 #
-#   <id>        kebab-case task id (== the task filename slug)
-#   <title>     one-line human-readable description
-#   --area      a glob this work OWNS (repeatable; defaults to a TODO placeholder)
-#   --branch    branch name (default: the id)
-#   --worktree  work in an isolated ../vrc-<id> git worktree (recommended when
-#               other agents are active) instead of switching this checkout
-#   --dry-run   print every git/gh/file action without performing it
+#   <id>         kebab-case task id (== the task filename slug)
+#   <title>      one-line human-readable description
+#   --issue <n>  link an EXISTING GitHub backlog issue (ADR-036) this work picks up
+#   --new-issue  create a fresh tracking issue titled <title> and link it
+#   --area       a glob this work OWNS (repeatable; defaults to a TODO placeholder)
+#   --branch     branch name (default: the id)
+#   --worktree   work in an isolated ../vrc-<id> git worktree (recommended when
+#                other agents are active) instead of switching this checkout
+#   --dry-run    print every git/gh/file action without performing it
+#
+# Exactly one of --issue / --new-issue is REQUIRED: every claim links a backlog
+# item, and the issue is self-assigned at claim time so its Projects card flips
+# to In Progress at the START of the work — not when the branch is later pushed —
+# closing the window where another agent could pick up the same issue. The
+# `issue:` field this writes is enforced by `coordination:verify` (a claim
+# without it fails the gate).
 #
 # Effects live here (git, gh, fs); schema validation is the existing
 # subprocess-free node tooling. BOARD.md is a gitignored local view (ADR-037),
@@ -30,24 +40,33 @@ die() { local msg="$1"; printf 'coordination-claim: %s\n' "$msg" >&2; exit 1; }
 REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || die "not in a git repo"
 cd "$REPO_ROOT"
 
-id=""; title=""; branch=""; worktree=0; dry=0; areas=()
+id=""; title=""; branch=""; worktree=0; dry=0; issue=""; new_issue=0; areas=()
 while [[ $# -gt 0 ]]; do
   arg="$1"
   case "$arg" in
-    --area)     areas+=("$2"); shift 2 ;;
-    --branch)   branch="$2"; shift 2 ;;
-    --worktree) worktree=1; shift ;;
-    --dry-run)  dry=1; shift ;;
-    -h|--help)  grep '^#' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
-    --*)        die "unknown flag: $arg" ;;
-    *)          if [[ -z "$id" ]]; then id="$arg";
-                elif [[ -z "$title" ]]; then title="$arg";
-                else die "unexpected arg: $arg"; fi; shift ;;
+    --issue)     issue="${2#\#}"; shift 2 ;;
+    --new-issue) new_issue=1; shift ;;
+    --area)      areas+=("$2"); shift 2 ;;
+    --branch)    branch="$2"; shift 2 ;;
+    --worktree)  worktree=1; shift ;;
+    --dry-run)   dry=1; shift ;;
+    -h|--help)   grep '^#' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    --*)         die "unknown flag: $arg" ;;
+    *)           if [[ -z "$id" ]]; then id="$arg";
+                 elif [[ -z "$title" ]]; then title="$arg";
+                 else die "unexpected arg: $arg"; fi; shift ;;
   esac
 done
 
-[[ -n "$id" && -n "$title" ]] || die 'usage: coordination:claim -- <id> "<title>" [--area <glob> ...]'
+[[ -n "$id" && -n "$title" ]] || die 'usage: coordination:claim -- <id> "<title>" (--issue <n> | --new-issue) [--area <glob> ...]'
 [[ "$id" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]] || die "id must be kebab-case (got '$id')"
+# Exactly one issue source — a claim always links a backlog item (ADR-036).
+if [[ -n "$issue" && "$new_issue" == 1 ]]; then
+  die 'pass either --issue <n> or --new-issue, not both'
+elif [[ -z "$issue" && "$new_issue" == 0 ]]; then
+  die 'an issue is required: pass --issue <n> to link a backlog item, or --new-issue to create one'
+fi
+[[ -z "$issue" || "$issue" =~ ^[0-9]+$ ]] || die "--issue must be a number (got '$issue')"
 task="docs/coordination/tasks/${id}.md"
 [[ -e "$task" ]] && die "task already exists: $task"
 [[ -n "$branch" ]] || branch="$id"
@@ -62,6 +81,26 @@ enter() { local dir="$1"; if [[ "$dry" == 1 ]]; then printf '  + cd %s\n' "$dir"
 wt_note=""
 [[ "$worktree" == 1 ]] && wt_note=" (worktree)"
 printf 'Claiming %s on branch %s%s\n' "$id" "$branch" "$wt_note"
+
+# 0. resolve the backlog issue (create it when --new-issue) and self-assign it
+#    NOW — so its Projects card moves to In Progress at the START of the work,
+#    closing the window where another agent could pick up the same issue.
+if [[ "$new_issue" == 1 ]]; then
+  if [[ "$dry" == 1 ]]; then
+    printf '  + gh issue create --title "%s" --body <tracking>\n' "$title"
+    issue="<new>"
+  else
+    issue=$(gh issue create --title "$title" \
+      --body "Tracked by coordination task \`${id}\` (docs/coordination/tasks/${id}.md)." \
+      | grep -oE '[0-9]+$')
+    [[ -n "$issue" ]] || die "could not create the tracking issue"
+    printf '  created issue #%s\n' "$issue"
+  fi
+elif [[ "$dry" == 0 ]]; then
+  gh issue view "$issue" --json number >/dev/null 2>&1 ||
+    die "issue #$issue not found (pass --new-issue to create one)"
+fi
+run gh issue edit "$issue" --add-assignee @me
 
 # 1. branch / worktree off the latest main
 run git fetch -q origin main
@@ -88,7 +127,7 @@ else
     printf -- '---\nid: %s\ntitle: %s\nowner: agent:claude\nstatus: active\n' "$id" "$title"
     printf 'branch: %s\narea:\n' "$branch"
     printf -- '  - %s\n' "${areas[@]}"
-    printf 'started: %s\nupdated: %s\nplan: (none)\npr: (none)\n---\n\n' "$today" "$today"
+    printf 'started: %s\nupdated: %s\nplan: (none)\npr: (none)\nissue: #%s\n---\n\n' "$today" "$today" "$issue"
     printf '## What\n\n%s\n\n## Status / next\n\n- Current step: just claimed\n- Blockers: none\n- Next:\n' "$title"
   } > "$task"
 fi
@@ -102,7 +141,7 @@ run git commit -q -m "chore(coordination): claim ${id}"
 run git push -q -u origin "$branch"
 body="## What
 
-Claims **${id}** — ${title}.
+Claims **${id}** — ${title}. Part of #${issue}.
 
 ## Verification
 
