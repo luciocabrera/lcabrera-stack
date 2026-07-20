@@ -1,0 +1,22 @@
+#!/usr/bin/env sh
+# pre-push: run the DB-free CI Quality Gate locally, before anything reaches CI.
+#
+# Why this exists: the pre-commit hook runs `vp staged` (fmt + Oxlint + tsgolint
+# + Biome on staged files) but NOT the ESLint pass or a full type-check, so an
+# ESLint-only finding (unicorn / perfectionist / local-rules) or a cross-file
+# type error first turns red in CI. `check:push` mirrors the
+# "Quality Gate (Format · Lint · Types)" job in
+# .github/workflows/check-safe.yml — the same checks, run the same way — so a
+# push that would fail that job fails here first.
+#
+# It does NOT run tests or the fallow audit: those stay in CI (the test suites
+# need a database, which a hook cannot assume). `vp run` caches per task, so an
+# unchanged workspace is a cache hit and a warm push is quick.
+#
+# Bypass for a work-in-progress push: `git push --no-verify`.
+if ! vp run check:push; then
+  echo ""
+  echo "✗ pre-push gate failed — fix the findings above (they would fail CI)."
+  echo "  To push work-in-progress anyway: git push --no-verify"
+  exit 1
+fi
