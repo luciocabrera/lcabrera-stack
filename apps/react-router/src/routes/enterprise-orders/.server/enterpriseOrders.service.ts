@@ -22,9 +22,14 @@ import {
 
 /**
  * Server-only Postgres data access for `enterprise_orders`, built entirely on
- * the generic `@repo/data-access` executors (no entity-specific SQL). Import
- * ONLY from loaders/actions — it reaches the pool via `getPool` and must never
- * enter the client bundle.
+ * the generic `@repo/data-access` executors (no entity-specific SQL). It reaches
+ * the pool via `getPool`, so it must never enter the client bundle.
+ *
+ * This file lives in a `.server/` directory (a React Router framework
+ * convention): every module inside is stripped from the client graph, and the
+ * build FAILS if client code imports it — so the "loaders/actions only" rule is
+ * enforced at build time, not just by comment. Import it only from loaders,
+ * actions, and middleware.
  */
 
 const TARGET = {

@@ -1,6 +1,6 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
-import { selectOrdersPage } from '@/routes/enterprise-orders/server/enterpriseOrders.service';
+import { selectOrdersPage } from '@/routes/enterprise-orders/.server/enterpriseOrders.service';
 
 import { parseOrdersPageParams } from './parseOrdersPageParams.util';
 

@@ -11,6 +11,7 @@ import { APP_ID } from '@/constants/app.constants';
 
 import type { EnterpriseOrder } from './config';
 
+import { selectOrdersPage } from './.server/enterpriseOrders.service';
 import { toOrderQuerySort } from './config';
 import {
   COLUMNS,
@@ -22,7 +23,6 @@ import {
   TABLE_NAME,
   TITLE,
 } from './EnterpriseOrders.constants';
-import { selectOrdersPage } from './server/enterpriseOrders.service';
 
 /**
  * Loader for enterprise orders route

@@ -2,14 +2,14 @@ import type { ActionFunctionArgs } from 'react-router';
 
 import { expect, it, vi } from 'vitest';
 
-import { buildValidOrderFormFields } from '../config/enterpriseOrders.fixtures';
 import {
   getNextOrderId,
   insertOrder,
-} from '../server/enterpriseOrders.service';
+} from '../.server/enterpriseOrders.service';
+import { buildValidOrderFormFields } from '../config/enterpriseOrders.fixtures';
 import { action } from './new-order.action';
 
-vi.mock('../server/enterpriseOrders.service', () => ({
+vi.mock('../.server/enterpriseOrders.service', () => ({
   getNextOrderId: vi.fn(async () => 8),
   insertOrder: vi.fn(async () => ({ order_id: 8 })),
 }));

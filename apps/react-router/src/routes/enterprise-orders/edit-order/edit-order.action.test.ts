@@ -4,14 +4,14 @@ import { expect, it, vi } from 'vitest';
 
 import type { EnterpriseOrder } from '../config';
 
-import { buildValidOrderFormFields } from '../config/enterpriseOrders.fixtures';
 import {
   selectOrderById,
   updateOrder,
-} from '../server/enterpriseOrders.service';
+} from '../.server/enterpriseOrders.service';
+import { buildValidOrderFormFields } from '../config/enterpriseOrders.fixtures';
 import { action } from './edit-order.action';
 
-vi.mock('../server/enterpriseOrders.service', () => ({
+vi.mock('../.server/enterpriseOrders.service', () => ({
   selectOrderById: vi.fn(),
   updateOrder: vi.fn(async () => ({ order_id: 7 })),
 }));

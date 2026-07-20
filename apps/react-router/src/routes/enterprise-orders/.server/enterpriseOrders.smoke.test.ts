@@ -5,9 +5,6 @@ import { afterAll, describe, expect, it } from 'vitest';
 
 import { getDemoCredential } from '@/auth/getDemoCredential.util';
 import { verifyCredentials } from '@/auth/verifyCredentials.util';
-import { buildValidOrderInput } from '@/routes/enterprise-orders/config/enterpriseOrders.fixtures';
-import { toOrderInsertValues } from '@/routes/enterprise-orders/config/toOrderInsertValues.util';
-import { toOrderUpdateValues } from '@/routes/enterprise-orders/config/toOrderUpdateValues.util';
 import {
   deleteOrder,
   getNextOrderId,
@@ -15,7 +12,10 @@ import {
   selectOrderById,
   selectOrdersPage,
   updateOrder,
-} from '@/routes/enterprise-orders/server/enterpriseOrders.service';
+} from '@/routes/enterprise-orders/.server/enterpriseOrders.service';
+import { buildValidOrderInput } from '@/routes/enterprise-orders/config/enterpriseOrders.fixtures';
+import { toOrderInsertValues } from '@/routes/enterprise-orders/config/toOrderInsertValues.util';
+import { toOrderUpdateValues } from '@/routes/enterprise-orders/config/toOrderUpdateValues.util';
 
 /**
  * Live-database smoke test for the secured enterprise-orders showcase. Unlike the

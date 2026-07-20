@@ -2,11 +2,11 @@ import type { LoaderFunctionArgs } from 'react-router';
 
 import { expect, it, vi } from 'vitest';
 
-import { selectOrdersPage } from '@/routes/enterprise-orders/server/enterpriseOrders.service';
+import { selectOrdersPage } from '@/routes/enterprise-orders/.server/enterpriseOrders.service';
 
 import { loader } from './enterprise-orders-paginated.loader';
 
-vi.mock('@/routes/enterprise-orders/server/enterpriseOrders.service', () => ({
+vi.mock('@/routes/enterprise-orders/.server/enterpriseOrders.service', () => ({
   selectOrdersPage: vi.fn(async () => ({
     data: [{ order_id: 1 }],
     hasMore: true,
