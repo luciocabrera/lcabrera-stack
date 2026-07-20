@@ -35,6 +35,10 @@ export for each helper:
 | `comparison` | `isShallowEqual`    | `@repo/utils/comparison/is-shallow-equal.util`  |
 | `errors`     | `getErrorMessage`   | `@repo/utils/errors/get-error-message.util`     |
 | `errors`     | `toError`           | `@repo/utils/errors/to-error.util`              |
+| `formatters` | `formatCurrency`    | `@repo/utils/formatters/format-currency.util`   |
+| `formatters` | `formatDate`        | `@repo/utils/formatters/format-date.util`       |
+| `formatters` | `formatNumber`      | `@repo/utils/formatters/format-number.util`     |
+| `formatters` | `parseDate`         | `@repo/utils/formatters/parse-date.util`        |
 | `guards`     | `isObject`          | `@repo/utils/guards/is-object.util`             |
 | `objects`    | `dropNullishValues` | `@repo/utils/objects/drop-nullish-values.util`  |
 | `objects`    | `mergeObjects`      | `@repo/utils/objects/merge-objects.util`        |

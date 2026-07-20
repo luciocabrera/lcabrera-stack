@@ -3,7 +3,7 @@ import {
   useGetTableTotalLoadedRows,
   useGetTableTotalRows,
 } from '@repo/ui/components/Table/contexts/TableData/data/selectors';
-import { formatNumber } from '@repo/ui/utils/formatters/formatNumber.util';
+import { formatNumber } from '@repo/utils/formatters/format-number.util';
 
 import type { DetailsRow } from '../DetailsSection.types';
 

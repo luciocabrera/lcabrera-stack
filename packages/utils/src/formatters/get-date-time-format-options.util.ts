@@ -1,4 +1,4 @@
-import type { DateFormatPreset } from '../../types/format.types';
+import type { DateFormatPreset } from './format.types';
 
 /**
  * Map preset names to Intl.DateTimeFormat options

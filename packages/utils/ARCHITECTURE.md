@@ -45,6 +45,14 @@ specifier, which would create a workspace cycle that breaks `vp run -r`.
 - `./comparison/is-shallow-equal.util` — one-level key/value equality
 - `./errors/get-error-message.util` — narrow a caught `unknown` to its message
 - `./errors/to-error.util` — normalise an `unknown` throw into a real `Error`
+- `./formatters/format-currency.util` — locale/currency-aware money formatting
+- `./formatters/format-date.util` — preset-based date formatting
+- `./formatters/format-number.util` — locale-aware number formatting
+- `./formatters/format.types` — shared `Intl`-formatter option types
+- `./formatters/formatters.constants` — default locale/currency/date-preset
+- `./formatters/get-date-time-format-options.util` — preset → `Intl` date options
+- `./formatters/get-default-locale.util` — resolve the runtime default locale
+- `./formatters/parse-date.util` — coerce a date-like input to a `Date`
 - `./guards/is-object.util` — narrow `unknown` to a plain object record
 - `./objects/drop-nullish-values.util` — omit null/undefined entries from a record
 - `./objects/merge-objects.util`

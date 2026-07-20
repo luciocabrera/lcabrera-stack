@@ -1,6 +1,6 @@
-import type { NumberFormatOptions } from '../../types/format.types';
+import type { NumberFormatOptions } from './format.types';
 
-import { getDefaultLocale } from './getDefaultLocale.util';
+import { getDefaultLocale } from './get-default-locale.util';
 
 type FormatNumberArgs = NumberFormatOptions & {
   readonly value: number;

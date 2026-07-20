@@ -1,7 +1,7 @@
 import type { CappedLlmUsageAttemptRow } from '@repo/scan-ingestion/queries/getCappedLlmUsageAttempts.util';
 import type { TableColumn } from '@repo/ui/components/Table';
 
-import { formatDate } from '@repo/ui/utils/formatters/formatDate.util';
+import { formatDate } from '@repo/utils/formatters/format-date.util';
 
 export const CAPPED_LLM_USAGE_ATTEMPTS_COLUMNS: readonly TableColumn<CappedLlmUsageAttemptRow>[] =
   [

@@ -1,6 +1,6 @@
 import type { TableMetadataValue } from '@repo/ui/components/Table/Table.types';
 
-import { formatNumber } from '@repo/ui/utils/formatters/formatNumber.util';
+import { formatNumber } from '@repo/utils/formatters/format-number.util';
 
 /**
  * Convert a metadata value into a display string.

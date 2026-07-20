@@ -1,9 +1,9 @@
-import type { DateFormatOptions } from '../../types/format.types';
+import type { DateFormatOptions } from './format.types';
 
 import { DEFAULT_DATE_PRESET } from './formatters.constants';
-import { getDateTimeFormatOptions } from './getDateTimeFormatOptions.util';
-import { getDefaultLocale } from './getDefaultLocale.util';
-import { parseDate } from './parseDate.util';
+import { getDateTimeFormatOptions } from './get-date-time-format-options.util';
+import { getDefaultLocale } from './get-default-locale.util';
+import { parseDate } from './parse-date.util';
 
 type FormatDateArgs = DateFormatOptions & {
   readonly value: unknown;

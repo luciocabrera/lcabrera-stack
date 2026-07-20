@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getDefaultLocale } from './getDefaultLocale.util';
+import { getDefaultLocale } from './get-default-locale.util';
 
 describe('getDefaultLocale', () => {
   it('returns en-US', () => {

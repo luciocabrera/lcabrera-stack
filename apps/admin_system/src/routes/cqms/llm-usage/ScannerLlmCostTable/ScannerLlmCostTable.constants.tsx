@@ -1,7 +1,7 @@
 import type { ScannerLlmCostRow } from '@repo/scan-ingestion/queries/getScannerLlmCost.util';
 import type { TableColumn } from '@repo/ui/components/Table';
 
-import { formatCurrency } from '@repo/ui/utils/formatters/formatCurrency.util';
+import { formatCurrency } from '@repo/utils/formatters/format-currency.util';
 
 export const SCANNER_LLM_COST_COLUMNS: readonly TableColumn<ScannerLlmCostRow>[] =
   [
