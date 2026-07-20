@@ -23,3 +23,11 @@ export const LOGIN_ROUTE = '/login';
 
 /** The logout route path — a POST-only action that clears the auth cookie. */
 export const LOGOUT_ROUTE = '/logout';
+
+/**
+ * Audit actor recorded in `last_modified_by` when no authenticated user is on
+ * the request — i.e. while the auth guard is disabled. When the middleware is
+ * re-enabled it publishes the real actor on `authContext` and this fallback is
+ * no longer reached.
+ */
+export const SYSTEM_ACTOR = 'system';
