@@ -1,9 +1,9 @@
 import { expect, it } from 'vitest';
 
-import { toOrderQueryFilters } from './toOrderQueryFilters.util';
+import { toQueryFilters } from './toQueryFilters.util.ts';
 
 it('dispatches each column filter to its type mapper and flattens', () => {
-  const result = toOrderQueryFilters({
+  const result = toQueryFilters({
     filters: {
       is_vip_customer: { type: 'boolean', value: true },
       order_status: { type: 'multiSelect', values: ['Pending'] },
@@ -19,6 +19,18 @@ it('dispatches each column filter to its type mapper and flattens', () => {
   ]);
 });
 
+it('routes a text notContains filter through to a notIlike entry', () => {
+  expect(
+    toQueryFilters({
+      filters: {
+        customer_name: { operator: 'notContains', type: 'text', value: 'temp' },
+      },
+    }),
+  ).toStrictEqual([
+    { column: 'customer_name', operator: 'notIlike', value: '%temp%' },
+  ]);
+});
+
 it('returns an empty array for no filters', () => {
-  expect(toOrderQueryFilters({ filters: {} })).toStrictEqual([]);
+  expect(toQueryFilters({ filters: {} })).toStrictEqual([]);
 });

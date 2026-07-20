@@ -18,7 +18,11 @@ Shared TypeScript types used across components, hooks, and utilities.
 
 ## `filterOperators.types.ts`
 
-Defines the `ColumnFilter` discriminated union and all operator enums. Consumed by Table column filters, `VirtualList`, and `VirtualSelect`.
+The filter _shapes_ — the `ColumnFilter` discriminated union — are defined in
+`@repo/data-access/filters/columnFilter.types` (the shared UI↔query contract) and
+re-exported by `@repo/ui/types/filterOperators.types`, which adds the operator/
+option label enums documented below. Consumed by Table column filters,
+`VirtualList`, and `VirtualSelect`, and by the app's `toQueryFilters` call sites.
 
 ### `ColumnFilter` union
 

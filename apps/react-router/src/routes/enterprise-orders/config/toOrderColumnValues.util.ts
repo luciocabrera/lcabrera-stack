@@ -1,7 +1,8 @@
+import { emptyToUndefined } from '@repo/data-access/records/emptyToUndefined.util';
+
 import type { EnterpriseOrderInput } from './enterpriseOrders.schema';
 
 import { deriveOrderTotals } from './deriveOrderTotals.util';
-import { emptyToUndefined } from './emptyToUndefined.util';
 
 export type ToOrderColumnValuesArgs = {
   readonly input: EnterpriseOrderInput;

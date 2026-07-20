@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 
-import { toNumberQueryFilters } from './toNumberQueryFilters.util';
+import { toNumberQueryFilters } from './toNumberQueryFilters.util.ts';
 
 it('maps comparison operators directly', () => {
   expect(

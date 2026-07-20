@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 
-import { toSelectQueryFilters } from './toSelectQueryFilters.util';
+import { toSelectQueryFilters } from './toSelectQueryFilters.util.ts';
 
 it('maps a multi-value equals to an in filter', () => {
   expect(
