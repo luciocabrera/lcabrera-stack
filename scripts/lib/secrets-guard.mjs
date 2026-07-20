@@ -158,9 +158,10 @@ const PROVIDER_PATTERNS = [
   },
 ];
 
-// A `key = "value"` / `"key": "value"` assignment. The key-name test is done in
-// JS (below), not baked into a huge regex alternation — simpler and extensible.
-const ASSIGNMENT = /([A-Za-z][\w-]*)["']?\s*[:=]\s*["']([^"'\s]{16,})["']/;
+// A quoted value of 16+ non-space chars. Linear, no backtracking — unlike a
+// key+value regex whose unanchored identifier scan is quadratic (S8786). The
+// key-name test is done in JS (below).
+const QUOTED_VALUE = /["']([^"'\s]{16,})["']/g;
 const ENV_ASSIGNMENT =
   /^\s*[A-Z][A-Z0-9_]{2,}\s*=\s*([A-Za-z0-9+/=._-]{20,})\s*$/;
 
@@ -254,21 +255,17 @@ const looksLikeRealSecret = (value) =>
   shannonEntropy(value) >= 4;
 
 const genericSecretValue = (line) => {
-  const assignment = ASSIGNMENT.exec(line);
-  if (assignment) {
-    const normalizedKey = assignment[1].toLowerCase().replace(/[_-]/g, '');
-    const value = assignment[2];
-    if (
-      SECRET_KEY_HINTS.some((hint) => normalizedKey.includes(hint)) &&
-      looksLikeRealSecret(value)
-    ) {
-      return value;
-    }
-  }
   const envValue = ENV_ASSIGNMENT.exec(line)?.[1];
-  return envValue !== undefined && looksLikeRealSecret(envValue)
-    ? envValue
-    : undefined;
+  if (envValue !== undefined && looksLikeRealSecret(envValue)) {
+    return envValue;
+  }
+  const lower = line.toLowerCase();
+  if (!SECRET_KEY_HINTS.some((hint) => lower.includes(hint))) {
+    return undefined;
+  }
+  return [...line.matchAll(QUOTED_VALUE)]
+    .map((match) => match[1])
+    .find((value) => looksLikeRealSecret(value));
 };
 
 // Paths where the entropy-based generic rules do more harm than good: test

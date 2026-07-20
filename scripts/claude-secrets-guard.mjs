@@ -57,183 +57,78 @@ const runHook = () => {
 
 // ---- self-test matrix -------------------------------------------------------
 
-const AKIA = `AKIA${'IOSFODNN7EXAMPLE'}`; // AWS docs example key, split so this file is not itself a hit
+// Split so this file is not itself a hit for its own patterns.
+const AKIA = `AKIA${'IOSFODNN7EXAMPLE'}`;
 const GHP = `ghp_${'A1b2C3d4E5f6G7h8I9j0K1l2M3n4O5p6Q7r8'}`;
-const HIGH_ENTROPY = 'aZ3x9Kp2Qw7Lm4Rt8Nv6Bs1'; // 24 mixed chars, no spaces
+const SECRET = 'aZ3x9Kp2Qw7Lm4Rt8Nv6Bs1'; // 24 mixed chars, high entropy, no spaces
 
-const SELFTEST_CASES = [
-  {
-    name: 'Read real .env → deny',
-    event: 'PreToolUse',
-    tool: 'Read',
-    input: { file_path: '/t/docker/local/.env' },
-    want: 'deny',
-  },
-  {
-    name: 'Read .env.example → allow',
-    event: 'PreToolUse',
-    tool: 'Read',
-    input: { file_path: '/t/.env.example' },
-    want: 'allow',
-  },
-  {
-    name: 'Read source file → allow',
-    event: 'PreToolUse',
-    tool: 'Read',
-    input: { file_path: '/t/src/app.ts' },
-    want: 'allow',
-  },
-  {
-    name: 'Read *.pem → deny',
-    event: 'PreToolUse',
-    tool: 'Read',
-    input: { file_path: '/t/certs/server.pem' },
-    want: 'deny',
-  },
-  {
-    name: 'Read id_rsa → deny',
-    event: 'PreToolUse',
-    tool: 'Read',
-    input: { file_path: '/home/u/.ssh/id_rsa' },
-    want: 'deny',
-  },
-  {
-    name: 'Bash cat .env.local → deny',
-    event: 'PreToolUse',
-    tool: 'Bash',
-    input: { command: 'cat .env.local' },
-    want: 'deny',
-  },
-  {
-    name: 'Bash cat .env.example → allow',
-    event: 'PreToolUse',
-    tool: 'Bash',
-    input: { command: 'cat .env.example' },
-    want: 'allow',
-  },
-  {
-    name: 'Bash normal command → allow',
-    event: 'PreToolUse',
-    tool: 'Bash',
-    input: { command: 'npm run build' },
-    want: 'allow',
-  },
-  {
-    name: 'Grep glob .env → deny',
-    event: 'PreToolUse',
-    tool: 'Grep',
-    input: { glob: '.env', path: '.' },
-    want: 'deny',
-  },
-  {
-    name: 'Grep pattern ".env" in src → allow',
-    event: 'PreToolUse',
-    tool: 'Grep',
-    input: { pattern: '.env', path: 'src' },
-    want: 'allow',
-  },
-  {
-    name: 'Write AWS key → deny',
-    event: 'PreToolUse',
-    tool: 'Write',
-    input: { file_path: 'src/config.ts', content: `const key = "${AKIA}";` },
-    want: 'deny',
-  },
-  {
-    name: 'Write GitHub token → deny',
-    event: 'PreToolUse',
-    tool: 'Write',
-    input: { file_path: 'src/config.ts', content: `const t = "${GHP}";` },
-    want: 'deny',
-  },
-  {
-    name: 'Write private key → deny',
-    event: 'PreToolUse',
-    tool: 'Write',
-    input: {
+// [toolName, toolInput] tuples — all PreToolUse events.
+const DENY_CASES = [
+  ['Read', { file_path: '/t/docker/local/.env' }],
+  ['Read', { file_path: '/t/certs/server.pem' }],
+  ['Read', { file_path: '/home/u/.ssh/id_rsa' }],
+  ['Bash', { command: 'cat .env.local' }],
+  ['Grep', { glob: '.env', path: '.' }],
+  ['Write', { file_path: 'src/c.ts', content: `k = "${AKIA}"` }],
+  ['Write', { file_path: 'src/c.ts', content: `t = "${GHP}"` }],
+  [
+    'Write',
+    { file_path: 'src/x.ts', content: '-----BEGIN RSA PRIVATE KEY-----' },
+  ],
+  ['Edit', { file_path: 'src/x.ts', new_string: `const token = "${SECRET}";` }],
+  [
+    'MultiEdit',
+    {
       file_path: 'src/x.ts',
-      content: '-----BEGIN RSA PRIVATE KEY-----\nMIIE...',
+      edits: [{ new_string: 'const ok = 1;' }, { new_string: `k = "${AKIA}"` }],
     },
-    want: 'deny',
-  },
-  {
-    name: 'Write placeholder → allow',
-    event: 'PreToolUse',
-    tool: 'Write',
-    input: { file_path: '.env.example', content: 'API_KEY=your-key-here' },
-    want: 'allow',
-  },
-  {
-    name: 'Edit high-entropy secret → deny',
-    event: 'PreToolUse',
-    tool: 'Edit',
-    input: {
+  ],
+];
+const ALLOW_CASES = [
+  ['Read', { file_path: '/t/.env.example' }],
+  ['Read', { file_path: '/t/src/app.ts' }],
+  ['Bash', { command: 'cat .env.example' }],
+  ['Bash', { command: 'npm run build' }],
+  ['Grep', { pattern: '.env', path: 'src' }],
+  ['Write', { file_path: '.env.example', content: 'API_KEY=your-key-here' }],
+  [
+    'Edit',
+    { file_path: 'src/x.test.ts', new_string: `const token = "${SECRET}";` },
+  ],
+  [
+    'Write',
+    {
       file_path: 'src/x.ts',
-      new_string: `const token = "${HIGH_ENTROPY}";`,
+      content: `const token = "${SECRET}"; // gitleaks:allow`,
     },
-    want: 'deny',
-  },
-  {
-    name: 'Edit same secret in a test file → allow',
-    event: 'PreToolUse',
-    tool: 'Edit',
-    input: {
-      file_path: 'src/x.test.ts',
-      new_string: `const token = "${HIGH_ENTROPY}";`,
-    },
-    want: 'allow',
-  },
-  {
-    name: 'Write secret with allow marker → allow',
-    event: 'PreToolUse',
-    tool: 'Write',
-    input: {
-      file_path: 'src/x.ts',
-      content: `const token = "${HIGH_ENTROPY}"; // gitleaks:allow`,
-    },
-    want: 'allow',
-  },
-  {
-    name: 'MultiEdit with a secret → deny',
-    event: 'PreToolUse',
-    tool: 'MultiEdit',
-    input: {
-      file_path: 'src/x.ts',
-      edits: [
-        { new_string: 'const ok = 1;' },
-        { new_string: `const k = "${AKIA}";` },
-      ],
-    },
-    want: 'deny',
-  },
-  {
-    name: 'non-PreToolUse event → allow',
-    event: 'PostToolUse',
-    tool: 'Read',
-    input: { file_path: '/t/.env' },
-    want: 'allow',
-  },
+  ],
 ];
 
+const decisionFor = ({ event = 'PreToolUse', toolInput, toolName }) =>
+  evaluatePreToolUse({ hookEventName: event, toolInput, toolName }).decision;
+
+const runCases = (cases, want) =>
+  cases.map(([toolName, toolInput]) => ({
+    label: `${want} ${toolName} ${JSON.stringify(toolInput).slice(0, 44)}`,
+    ok: decisionFor({ toolInput, toolName }) === want,
+  }));
+
 const runSelftest = () => {
-  const results = SELFTEST_CASES.map((testCase) => {
-    const { decision } = evaluatePreToolUse({
-      hookEventName: testCase.event,
-      toolInput: testCase.input,
-      toolName: testCase.tool,
-    });
-    return {
-      name: testCase.name,
-      ok: decision === testCase.want,
-      got: decision,
-      want: testCase.want,
-    };
-  });
+  const results = [
+    ...runCases(DENY_CASES, 'deny'),
+    ...runCases(ALLOW_CASES, 'allow'),
+    {
+      label: 'non-PreToolUse event passthrough',
+      ok:
+        decisionFor({
+          event: 'PostToolUse',
+          toolInput: { file_path: '/t/.env' },
+          toolName: 'Read',
+        }) === 'allow',
+    },
+  ];
   for (const result of results) {
-    const status = result.ok ? 'PASS' : 'FAIL';
-    console.log(
-      `${status}  ${result.name} (want ${result.want}, got ${result.got})`,
-    );
+    console.log(`${result.ok ? 'PASS' : 'FAIL'}  ${result.label}`);
   }
   const passed = results.filter((result) => result.ok).length;
   console.log(`\n${passed}/${results.length} self-test cases passed`);
