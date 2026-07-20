@@ -50,12 +50,16 @@ immediately):
 
 That's it. The ceremony is one file; the payoff is that no one collides blind.
 
-**Shortcut:** `vp run coordination:claim -- <id> "<title>" [--area <glob> ...]`
-does steps 2–3 and opens the draft PR (step 5) in one command — scaffolds the
-task, branches off `main`, commits the task file, and opens a draft PR so the
-claim is visible immediately (via `coordination:board:live`). Add
-`--worktree` to work in an isolated worktree (recommended when other agents are
-active), or `--dry-run` to preview every action first.
+**Shortcut (the recommended path):**
+`vp run coordination:claim -- <id> "<title>" (--issue <n> | --new-issue) [--area <glob> ...]`
+does steps 2–5 in one command — it **creates (`--new-issue`) or links (`--issue <n>`)
+the backlog issue and self-assigns it right away** (so its board card moves to In
+Progress at the START, before any PR — closing the window where another agent
+picks up the same issue), writes the required `issue:` field, scaffolds the task,
+branches off `main`, commits, and opens a draft PR so the claim is visible
+immediately (via `coordination:board:live`). Add `--worktree` to work in an
+isolated worktree (recommended when other agents are active), or `--dry-run` to
+preview every action first. Exactly one of `--issue` / `--new-issue` is required.
 
 ---
 
@@ -76,7 +80,7 @@ started: 2026-07-18
 updated: 2026-07-18
 plan: task-four-independent-vast-galaxy.md # optional out-of-git scratch pointer
 pr: (none) # PR number/URL once opened
-issue: (none) # optional — the GitHub backlog issue this picks up (e.g. #50); see ADR-036
+issue: #50 # REQUIRED — the GitHub backlog issue this picks up; coordination:verify rejects a live task without a real reference (ADR-036)
 ---
 ```
 

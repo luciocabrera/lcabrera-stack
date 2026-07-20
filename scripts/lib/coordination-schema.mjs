@@ -8,6 +8,11 @@ import { branchSlug } from './coordination-parse.mjs';
 
 export const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const OWNER = /^(agent|human):.+/;
+// A GitHub issue reference: `#123`, a bare `123`, or a full issues URL. The
+// custom frontmatter parser keeps `#` literally (it is not YAML), so `#123` is
+// safe unquoted. `(none)` and other placeholders deliberately fail — every
+// claim must link its backlog item (ADR-036).
+const ISSUE_REF = /^(#?\d+|https?:\/\/\S+\/issues\/\d+)$/;
 const TASK_STATUSES = new Set([
   'active',
   'blocked',
@@ -23,6 +28,7 @@ const TASK_REQUIRED = [
   'status',
   'branch',
   'area',
+  'issue',
   'started',
   'updated',
 ];
@@ -64,6 +70,15 @@ const ownerError = (label, value) =>
 const dateError = (label, value) =>
   patternError(label, value, ISO_DATE, 'is not YYYY-MM-DD');
 
+const issueError = (label, value) =>
+  patternError(
+    label,
+    value,
+    ISSUE_REF,
+    'must link a GitHub issue — `#<n>` or an issues URL (every claim links its ' +
+      'backlog item; see ADR-036) — run `coordination:claim` to create/link one',
+  );
+
 const slugMismatch = (slug, id) =>
   id !== undefined && id !== slug
     ? `id \`${id}\` must match the filename slug \`${slug}\``
@@ -86,6 +101,7 @@ export const taskErrors = ({ slug, data }, seen) =>
     ...missingFields(data, TASK_REQUIRED),
     enumError('status', data.status, TASK_STATUSES),
     ownerError('owner', data.owner),
+    issueError('issue', data.issue),
     dateError('started', data.started),
     dateError('updated', data.updated),
     slugMismatch(slug, data.id),

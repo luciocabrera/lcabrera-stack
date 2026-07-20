@@ -288,14 +288,16 @@ This register is **in-flight** work only (who is touching what, right now). The
 **GitHub Issues / sub-issues / Milestones / Projects**; the boundary is
 [ADR-036](docs/cqms/decisions/ADR-036-github-planning-layer.md) and the runbook is
 [`docs/tooling/github-planning.md`](docs/tooling/github-planning.md). A task that
-picks up a backlog item links it with the optional `issue:` field. The register is
-never moved to Issues — a task file is readable offline on any branch and gated by
-`coordination:verify`; GitHub Issues are not.
+picks up a backlog item links it with the **required** `issue:` field —
+`coordination:verify` fails a live task without a real issue reference, and
+`vp run coordination:claim` creates/links the issue (and self-assigns it) for you.
+The register is never moved to Issues — a task file is readable offline on any
+branch and gated by `coordination:verify`; GitHub Issues are not.
 
 **Before non-trivial work** (anything beyond a one-file fix you commit immediately):
 
 1. **Check for collisions** — run `vp run coordination:verify`; it warns when your intended `area` overlaps an active task. Resolve overlaps (coordinate, or narrow scope) before starting. (`vp run coordination:board` writes a local, gitignored `BOARD.md` table view — never committed, [ADR-037](docs/cqms/decisions/ADR-037-coordination-board-is-a-local-view.md).)
-2. **Claim it** — copy [`tasks/_TEMPLATE.md`](docs/coordination/tasks/_TEMPLATE.md) to `tasks/<id>.md`, fill in the frontmatter (especially the `area` globs — the soft lock). That file **is** the claim — there is no board to regenerate or commit, so concurrent claims never collide (each is a distinct file).
+2. **Claim it** — the one-step path is `vp run coordination:claim -- <id> "<title>" (--issue <n> | --new-issue) [--area <glob> ...]`, which links/creates the backlog issue, self-assigns it, scaffolds the task, branches, and opens a draft PR. (By hand: copy [`tasks/_TEMPLATE.md`](docs/coordination/tasks/_TEMPLATE.md) to `tasks/<id>.md` and fill in the frontmatter — especially the `area` globs (the soft lock) and the **required** `issue:`.) That file **is** the claim — there is no board to regenerate or commit, so concurrent claims never collide (each is a distinct file).
 3. **Pick a branch strategy** — an independent branch (default), or a **shared
    branch** when several agents need each other's WIP (declare it with a
    `branches/<slug>.md` descriptor + an integrator; overlap between tasks on the
@@ -303,8 +305,10 @@ never moved to Issues — a task file is readable offline on any branch and gate
    **draft PR early** (the human-visible progress surface).
 4. **Keep `status`/`updated` current**; move through `active → review`. (Status also
    lives in the linked Issue + the Planning board — the GitHub-visible source. If the
-   task has an `issue:`, **self-assign it when you start** — `gh issue edit <n> --add-assignee @me` —
-   which moves its board card to In Progress; the rest of the Status column is automated,
+   **self-assign the `issue:` when you start** — `gh issue edit <n> --add-assignee @me`
+   (or just use `coordination:claim`, which does it at claim time) — which moves its
+   board card to In Progress at the START, not when the branch is later pushed; the
+   rest of the Status column is automated,
    see [github-planning.md](docs/tooling/github-planning.md#status-automation).)
 5. **Close it** — delete the task file when the work merges.
 
