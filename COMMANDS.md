@@ -78,6 +78,15 @@ Steps 3, 4 and 6 are the ones that get skipped, and none is redundant — see
 [AGENTS.md §4](AGENTS.md#4-toolchain--vite-vp). From the root, `vp run check:safe`
 chains the whole thing the way CI does.
 
+The **`pre-push` git hook** (`.vite-hooks/pre-push`) runs `vp run check:push` — the
+**DB-free CI Quality Gate** (steps 3–6 plus `commands`/`coordination`/`scripts:verify`,
+mirroring the "Quality Gate (Format · Lint · Types)" job in `check-safe.yml`). This
+closes the gap the pre-commit hook leaves: `vp staged` covers only fmt + Oxlint +
+tsgolint + Biome on staged files, so the ESLint pass and a full type-check first turn
+red in CI otherwise. Tests and the fallow audit stay CI-only (the suites need a
+database). `vp run` caches per task, so a warm push is quick; bypass a WIP push with
+`git push --no-verify`.
+
 Step 4 is a **root-only, repo-wide** pass (like Oxlint, unlike the per-workspace
 eslint fan-out): `biome.jsonc` at the root scopes the react domain to the three
 React workspaces via `overrides`, so there is nothing to fan out. Autofix with
@@ -103,6 +112,7 @@ project-specific belongs in that project's own `package.json`.
 | -------------------------- | -------------------------------------------------------------------------------------------- |
 | `vp run ready`             | `check:safe` + `build:all` — the full "is it shippable" check                                |
 | `vp run check:safe`        | typegen → eslint-rules build → `vp check` → typecheck → eslint → biome → tests               |
+| `vp run check:push`        | the DB-free CI Quality Gate (no tests/fallow) — what the `pre-push` hook runs                |
 | `vp run typecheck:all`     | real tsc in all 16 workspaces, dependency order                                              |
 | `vp run typecheck:changed` | real tsc for the changed workspaces + dependents only — see below                            |
 | `vp run typegen:all`       | route types for both React Router apps                                                       |
