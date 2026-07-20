@@ -42,6 +42,19 @@ describe('appendFilterClause', () => {
     });
   });
 
+  it('renders a "notIlike" filter as a NOT ILIKE clause', () => {
+    const result = appendFilterClause({
+      accumulator: { clauses: [], paramIndex: 1, values: [] },
+      filter: { column: 'title', operator: 'notIlike', value: '%draft%' },
+    });
+
+    expect(result).toEqual({
+      clauses: ['"title" NOT ILIKE $1'],
+      paramIndex: 2,
+      values: ['%draft%'],
+    });
+  });
+
   it('continues incrementing from an existing accumulator', () => {
     const result = appendFilterClause({
       accumulator: {
