@@ -4,3 +4,4 @@ export { buildPaginatedQueryParams } from './buildPaginatedQueryParams.util';
 export { fakeDelay } from './fakeDelay.util';
 export { fetchAndValidate } from './fetchAndValidate.util';
 export { fetchDistinctValues } from './fetchDistinctValues.util';
+export { parseFilterOptionsParams } from './parseFilterOptionsParams.util';
