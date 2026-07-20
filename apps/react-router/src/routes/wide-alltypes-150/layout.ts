@@ -1,2 +1,2 @@
-export { ErrorBoundary } from './wide-alltypes-150.errorBoundary';
-export { WideAlltypes150Layout as default } from './wide-alltypes-150.layout';
+export { ErrorBoundary } from './WideAlltypes150.error-boundary';
+export { WideAlltypes150Layout as default } from './WideAlltypes150.layout';

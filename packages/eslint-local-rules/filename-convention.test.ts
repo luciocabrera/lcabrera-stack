@@ -46,12 +46,38 @@ ruleTester.run('filename-convention', rule, {
       errors: [{ messageId: 'hookPrefix' }],
       filename: 'src/hooks/virtualization.hook.ts',
     },
+    // components: .layout / .error-boundary must be PascalCase
+    {
+      code,
+      errors: [{ messageId: 'wrongCase' }],
+      filename: 'src/routes/x/enterprise-orders.error-boundary.tsx',
+    },
+    {
+      code,
+      errors: [{ messageId: 'wrongCase' }],
+      filename: 'src/routes/x/enterprise-orders.layout.tsx',
+    },
+    // the old camelCase .errorBoundary suffix is deprecated
+    {
+      code,
+      errors: [{ messageId: 'deprecatedSuffix' }],
+      filename: 'src/routes/x/EnterpriseOrders.errorBoundary.tsx',
+    },
+    {
+      code,
+      errors: [{ messageId: 'deprecatedSuffix' }],
+      filename: 'src/routes/x/car-sales.errorBoundary.tsx',
+    },
   ],
   valid: [
     { code, filename: 'src/routes/x/order-detail/order-detail.loader.ts' },
     { code, filename: 'src/routes/x/order-detail/order-detail.meta.ts' },
     { code, filename: 'src/components/OrderDetail/OrderDetail.component.tsx' },
     { code, filename: 'src/hooks/useVirtualization.hook.ts' },
+    // components: PascalCase base for view / layout / error boundary
+    { code, filename: 'src/routes/x/EnterpriseOrders.error-boundary.tsx' },
+    { code, filename: 'src/routes/x/EnterpriseOrders.layout.tsx' },
+    { code, filename: 'src/root/Root.layout.tsx' },
     // unenforced / unrecognised shapes are skipped
     { code, filename: 'src/routes/x/root.ts' },
     { code, filename: 'src/components/Card/index.ts' },
@@ -60,7 +86,5 @@ ruleTester.run('filename-convention', rule, {
     // deferred suffixes: util convention differs per package, so unenforced
     { code, filename: 'packages/utils/merge-arrays.util.ts' },
     { code, filename: 'src/utils/getFilteredOptions.util.ts' },
-    // .errorBoundary / .layout are unenforced (route vs component-bundle)
-    { code, filename: 'src/root/Root.errorBoundary.tsx' },
   ],
 });

@@ -78,14 +78,21 @@ type UserId = string & { readonly __brand: 'UserId' };
 
 **The base-name CASE is gate-enforced** by the `local-rules/filename-convention`
 ESLint rule (part of the `lint:eslint` pass) — a wrong-cased file fails the
-build, so this is no longer prose-only. Enforced today: route modules
-(`*.loader.ts` / `*.action.ts` / `*.clientAction.ts` / `*.meta.ts`) →
-**kebab-case** (e.g. `order-detail.loader.ts`, never `orderDetail.loader.ts`);
-`*.component.tsx` → **PascalCase**; `*.hook.ts` → **camelCase** with a `use`
-prefix. Deliberately not yet enforced (each needs a convention decision, not a
-guess): `*.util` / `*.service` / `*.api` / `*.schema` case (apps use camelCase
-but `@repo/utils` uses kebab-case), and `*.errorBoundary` / `*.layout` (kebab in
-a route folder vs PascalCase in a component bundle like `Root.errorBoundary.tsx`).
+build, so this is no longer prose-only. Enforced today:
+
+- **Route modules** (`*.loader.ts` / `*.action.ts` / `*.clientAction.ts` /
+  `*.meta.ts`) → **kebab-case** (e.g. `order-detail.loader.ts`, never
+  `orderDetail.loader.ts`).
+- **Components** — the view (`*.component.tsx`), its layout (`*.layout.tsx`),
+  and its error boundary (`*.error-boundary.tsx`) → **PascalCase** base, named
+  after the component (`EnterpriseOrders.error-boundary.tsx`). The old camelCase
+  `*.errorBoundary.tsx` suffix is rejected in favour of the hyphenated
+  `*.error-boundary.tsx`.
+- **Hooks** (`*.hook.ts`) → **camelCase** with a `use` prefix.
+
+Deliberately not yet enforced (each needs a convention decision, not a guess):
+`*.util` / `*.service` / `*.api` / `*.schema` case — apps use camelCase but
+`@repo/utils` uses kebab-case (see the phase-2 note in the coordination register).
 
 ## One Util Per File
 

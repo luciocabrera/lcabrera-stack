@@ -1,4 +1,9 @@
 {
+  "src/root/Root.errorBoundary.tsx": {
+    "local-rules/filename-convention": {
+      "count": 1
+    }
+  },
   "src/routes/api/push-snapshot/pushSnapshot.action.test.ts": {
     "local-rules/filename-convention": {
       "count": 1
@@ -25,6 +30,16 @@
     }
   },
   "src/routes/cqms/account-tokens/accountTokens.meta.ts": {
+    "local-rules/filename-convention": {
+      "count": 1
+    }
+  },
+  "src/routes/cqms/cqms.errorBoundary.tsx": {
+    "local-rules/filename-convention": {
+      "count": 1
+    }
+  },
+  "src/routes/cqms/cqms.layout.tsx": {
     "local-rules/filename-convention": {
       "count": 1
     }

@@ -3,8 +3,15 @@
 // checked by the gate instead of only living in prose.
 //
 //   Route modules  .loader / .action / .clientAction / .meta  → kebab-case
-//   Components     .component.tsx                              → PascalCase
+//   Components     .component / .layout / .error-boundary      → PascalCase
 //   Hooks          .hook.ts                          → camelCase, `use` prefix
+//
+// A component is anything that renders JSX for a route slot — the view
+// (`.component`), its layout wrapper (`.layout`), and its error boundary
+// (`.error-boundary`) — so all three are named after the PascalCase component
+// (`EnterpriseOrders.error-boundary.tsx`, never `enterprise-orders.errorBoundary.tsx`).
+// The old camelCase `.errorBoundary` suffix is flagged as deprecated in favour
+// of the hyphenated `.error-boundary`.
 //
 // Only the unambiguous, explicitly-documented conventions are enforced. Files
 // with no recognised `<base>.<suffix>.<ext>` shape (index.ts, root.ts, plain
@@ -25,13 +32,16 @@ const KEBAB_CASE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 // Only the unambiguous, explicitly-documented conventions are enforced in this
 // first rule. Deliberately EXCLUDED for now (each needs a convention decision,
-// not a guess): `.util`/`.service`/`.api`/`.schema` (apps use camelCase, but
-// `@repo/utils` deliberately uses kebab-case), and `.errorBoundary`/`.layout`
-// (kebab in a route folder like `enterprise-orders.errorBoundary.tsx`, but
-// PascalCase in a component bundle like `Root.errorBoundary.tsx`).
+// not a guess): `.util`/`.service`/`.api`/`.schema` case (apps use camelCase,
+// but `@repo/utils` deliberately uses kebab-case).
 const KEBAB_SUFFIXES = new Set(['action', 'clientAction', 'loader', 'meta']);
-const PASCAL_SUFFIXES = new Set(['component']);
+const PASCAL_SUFFIXES = new Set(['component', 'error-boundary', 'layout']);
 const CAMEL_SUFFIXES = new Set(['hook']);
+
+// Deprecated suffix spellings → their canonical replacement. A multi-word
+// suffix is hyphenated (`error-boundary`), so the old camelCase form is
+// rejected with a rename hint.
+const DEPRECATED_SUFFIXES = new Map([['errorBoundary', 'error-boundary']]);
 
 /**
  * Split a filename into its `{ name, suffix }`, or `undefined` when the file
@@ -86,6 +96,16 @@ export default createRule({
           return;
         }
 
+        const canonicalSuffix = DEPRECATED_SUFFIXES.get(parsed.suffix);
+        if (canonicalSuffix !== undefined) {
+          context.report({
+            data: { canonical: canonicalSuffix, suffix: parsed.suffix },
+            messageId: 'deprecatedSuffix',
+            node,
+          });
+          return;
+        }
+
         const expected = expectedCaseFor(parsed.suffix);
         if (expected === undefined) {
           return;
@@ -117,6 +137,8 @@ export default createRule({
         'Enforce filename base-name case per type suffix (kebab route modules, PascalCase components, camelCase logic files)',
     },
     messages: {
+      deprecatedSuffix:
+        "The '.{{suffix}}' suffix is deprecated — use '.{{canonical}}' (e.g. 'EnterpriseOrders.{{canonical}}.tsx'). Rename the file (git mv) and update its imports.",
       hookPrefix:
         "Hook file '{{name}}.hook.ts' must start with 'use' (e.g. 'useThing.hook.ts').",
       wrongCase:

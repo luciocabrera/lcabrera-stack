@@ -1,5 +1,5 @@
-export { ErrorBoundary } from './enterprise-orders.errorBoundary';
-export { EnterpriseOrdersLayout as default } from './enterprise-orders.layout';
+export { ErrorBoundary } from './EnterpriseOrders.error-boundary';
+export { EnterpriseOrdersLayout as default } from './EnterpriseOrders.layout';
 export { loader } from './enterprise-orders.loader';
 export { meta } from './enterprise-orders.meta';
 export { shouldRevalidatePersistCookieAction as shouldRevalidate } from '@repo/ui/routing/shouldRevalidatePersistCookieAction.util';
