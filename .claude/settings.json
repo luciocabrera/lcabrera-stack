@@ -29,7 +29,10 @@
       {
         "matcher": "Write|Edit|MultiEdit|Read|Bash|Grep|Glob",
         "hooks": [
-          { "type": "command", "command": "node scripts/claude-secrets-guard.mjs" }
+          {
+            "type": "command",
+            "command": "node scripts/claude-secrets-guard.mjs"
+          }
         ]
       }
     ],
