@@ -1,6 +1,6 @@
 import { useActionData } from 'react-router';
 
-import type { action } from './newOrder.action';
+import type { action } from './new-order.action';
 
 import { OrderFormModal } from '../OrderFormModal';
 

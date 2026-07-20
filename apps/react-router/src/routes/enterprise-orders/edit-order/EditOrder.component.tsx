@@ -1,7 +1,7 @@
 import { useActionData, useLoaderData } from 'react-router';
 
-import type { action } from './editOrder.action';
-import type { loader } from './editOrder.loader';
+import type { action } from './edit-order.action';
+import type { loader } from './edit-order.loader';
 
 import { toOrderFormValues } from '../config';
 import { OrderFormModal } from '../OrderFormModal';

@@ -9,7 +9,7 @@ import {
   selectOrderById,
   updateOrder,
 } from '../server/enterpriseOrders.service';
-import { action } from './editOrder.action';
+import { action } from './edit-order.action';
 
 vi.mock('../server/enterpriseOrders.service', () => ({
   selectOrderById: vi.fn(),

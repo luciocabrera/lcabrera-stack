@@ -7,7 +7,7 @@ import {
   getNextOrderId,
   insertOrder,
 } from '../server/enterpriseOrders.service';
-import { action } from './newOrder.action';
+import { action } from './new-order.action';
 
 vi.mock('../server/enterpriseOrders.service', () => ({
   getNextOrderId: vi.fn(async () => 8),

@@ -5,7 +5,7 @@ import { expect, it, vi } from 'vitest';
 import type { EnterpriseOrder } from '../config';
 
 import { selectOrderById } from '../server/enterpriseOrders.service';
-import { loader } from './editOrder.loader';
+import { loader } from './edit-order.loader';
 
 vi.mock('../server/enterpriseOrders.service', () => ({
   selectOrderById: vi.fn(),
