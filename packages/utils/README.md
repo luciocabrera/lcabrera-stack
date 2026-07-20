@@ -27,22 +27,27 @@ vp install
 Sources live under `src/`, grouped by domain, with an explicit per-file subpath
 export for each helper:
 
-| Domain       | Helper              | Import                                          |
-| ------------ | ------------------- | ----------------------------------------------- |
-| `arrays`     | `mergeArrays`       | `@repo/utils/arrays/merge-arrays.util`          |
-| `comparison` | `areArraysEqual`    | `@repo/utils/comparison/are-arrays-equal.util`  |
-| `comparison` | `areEqualByJson`    | `@repo/utils/comparison/are-equal-by-json.util` |
-| `comparison` | `isShallowEqual`    | `@repo/utils/comparison/is-shallow-equal.util`  |
-| `errors`     | `getErrorMessage`   | `@repo/utils/errors/get-error-message.util`     |
-| `errors`     | `toError`           | `@repo/utils/errors/to-error.util`              |
-| `formatters` | `formatCurrency`    | `@repo/utils/formatters/format-currency.util`   |
-| `formatters` | `formatDate`        | `@repo/utils/formatters/format-date.util`       |
-| `formatters` | `formatNumber`      | `@repo/utils/formatters/format-number.util`     |
-| `formatters` | `parseDate`         | `@repo/utils/formatters/parse-date.util`        |
-| `guards`     | `isObject`          | `@repo/utils/guards/is-object.util`             |
-| `objects`    | `dropNullishValues` | `@repo/utils/objects/drop-nullish-values.util`  |
-| `objects`    | `mergeObjects`      | `@repo/utils/objects/merge-objects.util`        |
-| `strings`    | `emptyToUndefined`  | `@repo/utils/strings/empty-to-undefined.util`   |
+| Domain       | Helper                 | Import                                            |
+| ------------ | ---------------------- | ------------------------------------------------- |
+| `arrays`     | `mergeArrays`          | `@repo/utils/arrays/merge-arrays.util`            |
+| `comparison` | `areArraysEqual`       | `@repo/utils/comparison/are-arrays-equal.util`    |
+| `comparison` | `areEqualByJson`       | `@repo/utils/comparison/are-equal-by-json.util`   |
+| `comparison` | `isShallowEqual`       | `@repo/utils/comparison/is-shallow-equal.util`    |
+| `errors`     | `getErrorMessage`      | `@repo/utils/errors/get-error-message.util`       |
+| `errors`     | `toError`              | `@repo/utils/errors/to-error.util`                |
+| `formatters` | `formatCurrency`       | `@repo/utils/formatters/format-currency.util`     |
+| `formatters` | `formatDate`           | `@repo/utils/formatters/format-date.util`         |
+| `formatters` | `formatNumber`         | `@repo/utils/formatters/format-number.util`       |
+| `formatters` | `parseDate`            | `@repo/utils/formatters/parse-date.util`          |
+| `forms`      | `isCheckboxChecked`    | `@repo/utils/forms/is-checkbox-checked.util`      |
+| `forms`      | `readFormString`       | `@repo/utils/forms/read-form-string.util`         |
+| `guards`     | `isObject`             | `@repo/utils/guards/is-object.util`               |
+| `json`       | `safeJsonParse`        | `@repo/utils/json/safe-json-parse.util`           |
+| `numbers`    | `parsePositiveInteger` | `@repo/utils/numbers/parse-positive-integer.util` |
+| `numbers`    | `roundToCents`         | `@repo/utils/numbers/round-to-cents.util`         |
+| `objects`    | `dropNullishValues`    | `@repo/utils/objects/drop-nullish-values.util`    |
+| `objects`    | `mergeObjects`         | `@repo/utils/objects/merge-objects.util`          |
+| `strings`    | `emptyToUndefined`     | `@repo/utils/strings/empty-to-undefined.util`     |
 
 ```ts
 import { getErrorMessage } from '@repo/utils/errors/get-error-message.util';

@@ -4,13 +4,12 @@ import type { ColumnFilter } from '@repo/ui/types/filterOperators.types';
 import { toQueryFilters } from '@repo/data-access/filters/toQueryFilters.util';
 import { INITIAL_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
 import { isObject } from '@repo/utils/guards/is-object.util';
+import { safeJsonParse } from '@repo/utils/json/safe-json-parse.util';
+import { parsePositiveInteger } from '@repo/utils/numbers/parse-positive-integer.util';
 
 import type { EnterpriseOrder } from '@/routes/enterprise-orders/config';
 
-import { parsePositiveInteger } from '@/routes/api/filter-options/parsePositiveInteger.util';
 import { toOrderQuerySort } from '@/routes/enterprise-orders/config';
-
-import { safeJsonParse } from './safeJsonParse.util';
 
 export type ParsedOrdersPageParams = {
   readonly filters: ReturnType<typeof toQueryFilters>;

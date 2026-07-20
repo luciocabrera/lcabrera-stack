@@ -1,6 +1,5 @@
 import { DEFAULT_FILTER_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
-
-import { parsePositiveInteger } from './parsePositiveInteger.util';
+import { parsePositiveInteger } from '@repo/utils/numbers/parse-positive-integer.util';
 
 type FilterOptionsParams = {
   readonly columnName: string;

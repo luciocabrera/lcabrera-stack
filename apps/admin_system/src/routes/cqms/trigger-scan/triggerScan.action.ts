@@ -3,12 +3,12 @@ import { getProjectActiveRun } from '@repo/scan-ingestion/queries/getProjectActi
 import { getProjectById } from '@repo/scan-ingestion/queries/getProjectById.util';
 import { replaceProjectWorkspaces } from '@repo/scan-ingestion/queries/replaceProjectWorkspaces.util';
 import { triggerScan as triggerScanMutation } from '@repo/scan-ingestion/queries/triggerScan.util';
+import { isCheckboxChecked } from '@repo/utils/forms/is-checkbox-checked.util';
 import { type ActionFunctionArgs, data, redirect } from 'react-router';
 import { z } from 'zod';
 
 import { requireUser } from '@/auth/requireUser.util';
 
-import { isCheckboxChecked } from '../utils/isCheckboxChecked.util';
 import { parseRouteParams } from '../utils/parseRouteParams.util';
 import { computeFanOutCount } from './computeFanOutCount.util';
 import { formatRunElapsed } from './formatRunElapsed.util';

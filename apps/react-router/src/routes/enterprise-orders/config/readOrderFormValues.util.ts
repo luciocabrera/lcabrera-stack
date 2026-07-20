@@ -1,5 +1,5 @@
-import { isCheckboxChecked } from './isCheckboxChecked.util';
-import { readFormString } from './readFormString.util';
+import { isCheckboxChecked } from '@repo/utils/forms/is-checkbox-checked.util';
+import { readFormString } from '@repo/utils/forms/read-form-string.util';
 
 export type ReadOrderFormValuesArgs = {
   readonly formData: FormData;

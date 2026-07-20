@@ -53,7 +53,12 @@ specifier, which would create a workspace cycle that breaks `vp run -r`.
 - `./formatters/get-date-time-format-options.util` — preset → `Intl` date options
 - `./formatters/get-default-locale.util` — resolve the runtime default locale
 - `./formatters/parse-date.util` — coerce a date-like input to a `Date`
+- `./forms/is-checkbox-checked.util` — strict `'on'` checkbox read from `FormData`
+- `./forms/read-form-string.util` — read a named `FormData` text value (or `''`)
 - `./guards/is-object.util` — narrow `unknown` to a plain object record
+- `./json/safe-json-parse.util` — parse JSON, returning `undefined` instead of throwing
+- `./numbers/parse-positive-integer.util` — parse a non-negative integer with a fallback
+- `./numbers/round-to-cents.util` — round a monetary amount to two decimal places
 - `./objects/drop-nullish-values.util` — omit null/undefined entries from a record
 - `./objects/merge-objects.util`
 - `./strings/empty-to-undefined.util` — map an empty string to `undefined`
