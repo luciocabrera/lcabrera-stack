@@ -11,7 +11,7 @@ vi.mock('@repo/ui/utils/storage/buildCookieString.util', () => ({
 
 import { buildCookieString } from '@repo/ui/utils/storage/buildCookieString.util';
 
-import { action } from './persistCookie.action';
+import { action } from './persist-cookie.action';
 
 type ActionCallArgs = {
   readonly currentUrl: string;

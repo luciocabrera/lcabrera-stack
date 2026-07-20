@@ -76,6 +76,17 @@ type UserId = string & { readonly __brand: 'UserId' };
 | Constant  | `*.constants.ts`             | `api.constants.ts`          |
 | Schema    | `*.schema.ts`                | `user.schema.ts`            |
 
+**The base-name CASE is gate-enforced** by the `local-rules/filename-convention`
+ESLint rule (part of the `lint:eslint` pass) — a wrong-cased file fails the
+build, so this is no longer prose-only. Enforced today: route modules
+(`*.loader.ts` / `*.action.ts` / `*.clientAction.ts` / `*.meta.ts`) →
+**kebab-case** (e.g. `order-detail.loader.ts`, never `orderDetail.loader.ts`);
+`*.component.tsx` → **PascalCase**; `*.hook.ts` → **camelCase** with a `use`
+prefix. Deliberately not yet enforced (each needs a convention decision, not a
+guess): `*.util` / `*.service` / `*.api` / `*.schema` case (apps use camelCase
+but `@repo/utils` uses kebab-case), and `*.errorBoundary` / `*.layout` (kebab in
+a route folder vs PascalCase in a component bundle like `Root.errorBoundary.tsx`).
+
 ## One Util Per File
 
 - **Every utility function lives in its own `*.util.ts` file with a colocated `*.util.test.ts`** — never stack multiple module-level helper functions inside one util file, even "private" ones only used by the main export. Extract each helper to its own file with its own unit test (see `packages/ui/src/entry/`: `createHandleRequest.util.tsx` imports `toError.util.ts`, `buildShellStreamResponse.util.ts`, `addPreloadHeaders.util.ts`, each individually tested).

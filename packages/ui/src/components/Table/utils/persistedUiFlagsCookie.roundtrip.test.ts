@@ -17,7 +17,7 @@ import { readPersistedUiFlagsFromCookie } from './readPersistedUiFlagsFromCookie
  * hydration.
  *
  * This exercises the real production pair — `buildUiFlagsCookieEntry` feeds
- * `buildSetCookieHeaders` (the same path `persistCookie.action` takes) — over a
+ * `buildSetCookieHeaders` (the same path `persist-cookie.action` takes) — over a
  * real Set-Cookie header. No mocks.
  */
 const captureCookieHeader = (uiFlags: PersistedUiState) => {
