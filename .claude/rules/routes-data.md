@@ -59,6 +59,12 @@ Rules:
   module and the loader/action **imports** it (it does not `getPool()` directly).
 - **`.clientAction` runs in the browser** — it must not import a `.server` module.
 - A plain `server/` folder gives **no** guarantee — it is just a folder. Use `.server/`.
+- **Lint catches it before the build.** The RR apps opt into `enforceServerClientImportBoundary`
+  (shared eslint config), which fails the gate when a non-`.server` file makes a runtime import of
+  a server-only primitive — `node:*`, `pg`, or anything under `@repo/data-access/db` (the pool +
+  executors). Matched by path, so new db utils are covered automatically; type-only imports stay
+  allowed (e.g. the erasable `db/queryBuilder` `*.types`). So the boundary is enforced twice: fast
+  at lint time, and definitively at build time.
 - **Blueprint:** `apps/react-router/src/routes/enterprise-orders/.server/` is the reference; new
   apps and features follow it. All tooling (vitest, oxlint, eslint, oxfmt) still discovers and
   checks files inside `.server/` — the dot does not exempt them.
