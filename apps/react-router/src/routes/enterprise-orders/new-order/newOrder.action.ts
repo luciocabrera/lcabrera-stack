@@ -1,6 +1,7 @@
 import { getErrorMessage } from '@repo/data-access/errors/getErrorMessage.util';
 import { type ActionFunctionArgs, redirect } from 'react-router';
 
+import { SYSTEM_ACTOR } from '@/auth/auth.constants';
 import { authContext } from '@/auth/authContext';
 
 import {
@@ -28,7 +29,7 @@ export const action = async ({ context, request }: ActionFunctionArgs) => {
   }
 
   try {
-    const { sub: actor } = context.get(authContext);
+    const actor = context.get(authContext)?.sub ?? SYSTEM_ACTOR;
     const orderId = await getNextOrderId();
     const values = toOrderInsertValues({
       actor,

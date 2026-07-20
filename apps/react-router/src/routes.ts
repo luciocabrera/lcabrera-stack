@@ -17,7 +17,7 @@ export default [
   route('settings', 'routes/settings/root.ts'),
   route('car-sales', 'routes/car-sales/root.ts'),
   route('car-sales-infinite', 'routes/car-sales-infinite/root.ts'),
-  route('enterprise-orders', 'routes/enterprise-orders/layout.ts', [
+  route('enterprise-orders', 'routes/enterprise-orders/root.ts', [
     route('new', 'routes/enterprise-orders/new-order/root.tsx'),
     route('edit/:orderId', 'routes/enterprise-orders/edit-order/root.tsx'),
     route(
