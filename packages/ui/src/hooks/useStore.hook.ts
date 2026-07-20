@@ -1,4 +1,4 @@
-import { isShallowEqual } from '@repo/ui/utils';
+import { isShallowEqual } from '@repo/utils/comparison/is-shallow-equal.util';
 import { useRef } from 'react';
 
 /**

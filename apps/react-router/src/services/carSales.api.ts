@@ -7,7 +7,7 @@ import {
   getApiBaseUrl,
 } from '@repo/data-access/api';
 import { createLogger } from '@repo/ui/utils/logger';
-import { isObject } from '@repo/ui/utils/typeGuards';
+import { isObject } from '@repo/utils/guards/is-object.util';
 
 /**
  * Car Sales API Service

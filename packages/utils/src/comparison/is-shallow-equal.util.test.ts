@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { isShallowEqual } from './isShallowEqual.util';
+import { isShallowEqual } from './is-shallow-equal.util';
 
 describe('isShallowEqual', () => {
   it('returns true for identical object references', () => {

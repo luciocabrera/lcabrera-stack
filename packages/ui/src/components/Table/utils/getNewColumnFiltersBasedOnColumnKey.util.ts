@@ -1,6 +1,6 @@
 import type { ColumnFilter } from '@repo/ui/types/filterOperators.types';
 
-import { isShallowEqual } from '@repo/ui/utils';
+import { isShallowEqual } from '@repo/utils/comparison/is-shallow-equal.util';
 
 import type { ColumnFiltersState, DataKey } from '../Table.types';
 

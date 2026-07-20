@@ -3,7 +3,7 @@ import type { GlobalSettingsState } from '@repo/ui/types/globalSettings.types';
 import { logger } from '@repo/ui/utils/logger';
 import { getAppScopedCookieKey } from '@repo/ui/utils/storage';
 import { readFromCookie } from '@repo/ui/utils/storage/readFromCookie.util';
-import { isObject } from '@repo/ui/utils/typeGuards';
+import { isObject } from '@repo/utils/guards/is-object.util';
 
 import {
   GLOBAL_SETTINGS_COOKIE_KEY,

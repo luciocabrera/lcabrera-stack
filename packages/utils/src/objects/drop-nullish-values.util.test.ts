@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { dropNullishValues } from './dropNullishValues.util.ts';
+import { dropNullishValues } from './drop-nullish-values.util';
 
 /**
  * Nulls reach this util from parsed JSON — a scan artifact, an API response —

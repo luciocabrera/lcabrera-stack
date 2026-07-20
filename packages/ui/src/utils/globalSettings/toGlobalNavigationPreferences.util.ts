@@ -1,4 +1,4 @@
-import { isObject } from '@repo/ui/utils/typeGuards';
+import { isObject } from '@repo/utils/guards/is-object.util';
 
 import { isNavigationCollapsedPreference } from './isNavigationCollapsedPreference.util';
 import { isNavigationPinnedPreference } from './isNavigationPinnedPreference.util';

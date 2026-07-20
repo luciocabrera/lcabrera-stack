@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { areArraysEqual } from './areArraysEqual.util';
+import { areArraysEqual } from './are-arrays-equal.util';
 
 describe('areArraysEqual', () => {
   it('returns true for identical array references', () => {

@@ -1,11 +1,11 @@
 import type { ActionFunctionArgs } from 'react-router';
 
-import { getErrorMessage } from '@repo/data-access/errors/getErrorMessage.util';
 import { saveProjectSnapshot } from '@repo/scan-ingestion/ingestion/snapshots/saveProjectSnapshot';
 import { discoverProjectWorkspaces } from '@repo/scan-ingestion/ingestion/workspaces/discoverProjectWorkspaces.util';
 import { createResourceGrant } from '@repo/scan-ingestion/queries/createResourceGrant.util';
 import { deleteResourceGrant } from '@repo/scan-ingestion/queries/deleteResourceGrant.util';
 import { replaceProjectWorkspaces } from '@repo/scan-ingestion/queries/replaceProjectWorkspaces.util';
+import { getErrorMessage } from '@repo/utils/errors/get-error-message.util';
 import { z } from 'zod';
 
 import { requireUser } from '@/auth/requireUser.util';

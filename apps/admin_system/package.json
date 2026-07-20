@@ -15,9 +15,9 @@
   },
   "dependencies": {
     "@react-router/serve": "catalog:",
-    "@repo/data-access": "workspace:*",
     "@repo/scan-ingestion": "workspace:*",
     "@repo/ui": "workspace:*",
+    "@repo/utils": "workspace:*",
     "@stylexjs/stylex": "catalog:",
     "fflate": "catalog:",
     "react": "catalog:",

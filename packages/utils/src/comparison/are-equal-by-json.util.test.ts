@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { areEqualByJson } from './areEqualByJson.util';
+import { areEqualByJson } from './are-equal-by-json.util';
 
 type TestObject = {
   readonly id: number;

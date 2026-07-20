@@ -2,6 +2,7 @@ import type { RenderToPipeableStreamOptions } from 'react-dom/server';
 import type { EntryContext } from 'react-router';
 
 import { getRequestCspNonce } from '@repo/ui/utils/security';
+import { toError } from '@repo/utils/errors/to-error.util';
 import { isbot } from 'isbot';
 import { renderToPipeableStream } from 'react-dom/server';
 import { ServerRouter } from 'react-router';
@@ -9,7 +10,6 @@ import { ServerRouter } from 'react-router';
 import { addPreloadHeaders } from './addPreloadHeaders.util';
 import { buildShellStreamResponse } from './buildShellStreamResponse.util';
 import { getStreamTimeout } from './getStreamTimeout.util';
-import { toError } from './toError.util';
 
 type CreateHandleRequestArgs = {
   /** The app's own compiled StyleX stylesheet URL (`import stylexCssHref from './stylex.css?url'`) — a per-app build artifact, cannot be sourced from this package. */

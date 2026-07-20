@@ -7,7 +7,7 @@ import { toOrderFormValues } from './toOrderFormValues.util';
 /**
  * The nullable columns arrive as SQL NULL from the driver — build them from
  * parsed JSON rather than with `null` literals (repo convention, mirrors
- * `dropNullishValues.util.test.ts`).
+ * `drop-nullish-values.util.test.ts`).
  */
 const nullableColumns = () =>
   JSON.parse(

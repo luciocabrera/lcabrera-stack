@@ -27,14 +27,26 @@ vp install
 Sources live under `src/`, grouped by domain, with an explicit per-file subpath
 export for each helper:
 
+| Domain       | Helper              | Import                                          |
+| ------------ | ------------------- | ----------------------------------------------- |
+| `arrays`     | `mergeArrays`       | `@repo/utils/arrays/merge-arrays.util`          |
+| `comparison` | `areArraysEqual`    | `@repo/utils/comparison/are-arrays-equal.util`  |
+| `comparison` | `areEqualByJson`    | `@repo/utils/comparison/are-equal-by-json.util` |
+| `comparison` | `isShallowEqual`    | `@repo/utils/comparison/is-shallow-equal.util`  |
+| `errors`     | `getErrorMessage`   | `@repo/utils/errors/get-error-message.util`     |
+| `errors`     | `toError`           | `@repo/utils/errors/to-error.util`              |
+| `guards`     | `isObject`          | `@repo/utils/guards/is-object.util`             |
+| `objects`    | `dropNullishValues` | `@repo/utils/objects/drop-nullish-values.util`  |
+| `objects`    | `mergeObjects`      | `@repo/utils/objects/merge-objects.util`        |
+| `strings`    | `emptyToUndefined`  | `@repo/utils/strings/empty-to-undefined.util`   |
+
 ```ts
-import { mergeArrays } from '@repo/utils/arrays/merge-arrays.util';
-import { mergeObjects } from '@repo/utils/objects/merge-objects.util';
+import { getErrorMessage } from '@repo/utils/errors/get-error-message.util';
+import { isShallowEqual } from '@repo/utils/comparison/is-shallow-equal.util';
 ```
 
-`mergeArrays` and `mergeObjects` are shared shallow-merge helpers used by the
-workspace config packages. `@repo/utils` is side-effect free
-(`"sideEffects": false`) to keep tree-shaking effective.
+`@repo/utils` is side-effect free (`"sideEffects": false`) to keep tree-shaking
+effective; each helper is a standalone subpath so consumers pull in exactly one.
 
 ## Adding a utility
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { isObject } from './isObject.util';
+import { isObject } from './is-object.util';
 
 describe('isObject', () => {
   it('returns true for plain objects', () => {

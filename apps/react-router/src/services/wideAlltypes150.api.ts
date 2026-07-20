@@ -5,7 +5,7 @@ import {
   fetchAndValidate,
   getApiBaseUrl,
 } from '@repo/data-access/api';
-import { isObject } from '@repo/ui/utils/typeGuards';
+import { isObject } from '@repo/utils/guards/is-object.util';
 
 /**
  * Wide All-Types 150 API Service
