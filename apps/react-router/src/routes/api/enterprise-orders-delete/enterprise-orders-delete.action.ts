@@ -1,6 +1,6 @@
 import { type ActionFunctionArgs, data } from 'react-router';
 
-import { deleteOrder } from '@/routes/enterprise-orders/server/enterpriseOrders.service';
+import { deleteOrder } from '@/routes/enterprise-orders/.server/enterpriseOrders.service';
 
 import { parseOrderId } from './parseOrderId.util';
 

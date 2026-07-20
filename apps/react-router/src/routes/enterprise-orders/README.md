@@ -67,7 +67,7 @@ src/routes/enterprise-orders/
 ├── enterprise-orders.meta.ts                 # Page metadata
 ├── enterprise-orders.errorBoundary.tsx       # Error handling
 ├── config/                                    # Entity data + pure rules (types, Zod, derivation)
-├── server/enterpriseOrders.service.ts         # Server-only Postgres access (generic data-access)
+├── .server/enterpriseOrders.service.ts        # Server-only Postgres access (RR `.server/`: build-stripped from client)
 ├── OrderFormModal/                            # Shared Modal + Form wrapper
 ├── orderFormFields.util.ts                    # Tab → group → row field-tree builder
 ├── orderClientAction.ts                       # Shared browser Zod gate
@@ -89,7 +89,7 @@ sources from `docker/local/.env`.
 ## Data access
 
 Reads go through the generic `@repo/data-access` query builders/executors (no
-api-server). `server/enterpriseOrders.service.ts` exposes `selectOrdersPage`
+api-server). `.server/enterpriseOrders.service.ts` exposes `selectOrdersPage`
 (list + count), `selectOrderById`, `getNextOrderId`, `insertOrder`,
 `updateOrder`, `deleteOrder`. The table's `ColumnFiltersState`/`SortingState`
 are translated to generic `QueryFilter[]`/`QuerySort[]` by the generic
@@ -193,7 +193,7 @@ Unit tests cover the pure translation utils, the param parser, the fetcher, the
 resource loader, and the service (`vp run test`) — all with the pg pool and fetch
 mocked, so they need no database.
 
-A **live-DB smoke test** (`server/enterpriseOrders.smoke.test.ts`) covers what the
+A **live-DB smoke test** (`.server/enterpriseOrders.smoke.test.ts`) covers what the
 mocks can't: the demo-login credential check against the env-configured hash, and a
 real create → read → update → list/count → delete round-trip through the generic
 `@repo/data-access` builders. It is **gated behind `SMOKE_DB`** so the default

@@ -82,11 +82,23 @@ derivation/mapping utils (`deriveOrderTotals`, `toOrderInsertValues`/`toOrderUpd
 `readOrderFormValues`, `toOrderFieldErrors`, `toOrderFormValues`). Each util is pure with a
 colocated test.
 
-### `server/enterpriseOrders.service.ts` — server-only Postgres access
+### `.server/enterpriseOrders.service.ts` — server-only Postgres access
 
 Wraps the generic `@repo/data-access` executors (`selectRows`/`insertRow`/`updateRows`/
 `deleteRows`/`getMaxValue`) with the enterprise-orders `{ schema, table, allowedColumns }`
-baked in — **no entity-specific SQL**. Imported only from loaders/actions (never client
-components); it reaches Postgres via `getPool`, which reads `DB_*` env (sourced from
-`docker/local/.env` by the app's `dev` script). The `/_action/enterprise-orders/delete`
-action now calls `deleteOrder` here, fixing the prior api-server 404 (feature plan §8 bug 1).
+baked in — **no entity-specific SQL**. It reaches Postgres via `getPool`, which reads `DB_*`
+env (sourced from `docker/local/.env` by the app's `dev` script). The
+`/_action/enterprise-orders/delete` action calls `deleteOrder` here, fixing the prior
+api-server 404 (feature plan §8 bug 1).
+
+**Why `.server/` and not `server/`:** the leading dot makes this a React Router
+[server-only module](https://reactrouter.com/api/framework-conventions/server-modules)
+directory — every file inside is stripped from the client bundle, and the **build fails**
+if any client-reachable module imports it (RR 8's plugin matches `/\.server\//` on the
+resolved path, so a nested `.server/` under `routes/` is enforced too). This upgrades the
+old "imported only from loaders/actions" comment from a convention into a build-time
+guarantee. Its consumers are exactly the server-only route modules: the list `loader`, the
+`new`/`edit` `action`s, the `order-detail` `loader`, and the two resource routes
+(`_api/enterprise-orders/paginated` loader, `_action/enterprise-orders/delete` action).
+Route modules themselves must **never** be `.server` — they need both graphs — so the
+server-only code lives here and they import it.
