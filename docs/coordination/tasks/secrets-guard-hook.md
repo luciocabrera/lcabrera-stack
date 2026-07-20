@@ -2,7 +2,7 @@
 id: secrets-guard-hook
 title: chore(tooling): PreToolUse secrets guard for Claude Code
 owner: agent:claude
-status: active
+status: review
 branch: feat/secrets-guard-hook
 area:
   - scripts/claude-secrets-guard.mjs
@@ -10,7 +10,7 @@ area:
 started: 2026-07-20
 updated: 2026-07-20
 plan: (none)
-pr: (none)
+pr: '#134'
 issue: #133
 ---
 
