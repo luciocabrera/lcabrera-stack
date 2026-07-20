@@ -25,6 +25,7 @@
     "@react-router/serve": "catalog:",
     "@repo/data-access": "workspace:*",
     "@repo/ui": "workspace:*",
+    "@repo/utils": "workspace:*",
     "@stylexjs/stylex": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",

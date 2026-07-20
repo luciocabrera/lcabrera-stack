@@ -40,4 +40,12 @@ specifier, which would create a workspace cycle that breaks `vp run -r`.
 ## Current Exports
 
 - `./arrays/merge-arrays.util`
+- `./comparison/are-arrays-equal.util` — ordered strict array equality
+- `./comparison/are-equal-by-json.util` — deep structural equality via JSON
+- `./comparison/is-shallow-equal.util` — one-level key/value equality
+- `./errors/get-error-message.util` — narrow a caught `unknown` to its message
+- `./errors/to-error.util` — normalise an `unknown` throw into a real `Error`
+- `./guards/is-object.util` — narrow `unknown` to a plain object record
+- `./objects/drop-nullish-values.util` — omit null/undefined entries from a record
 - `./objects/merge-objects.util`
+- `./strings/empty-to-undefined.util` — map an empty string to `undefined`

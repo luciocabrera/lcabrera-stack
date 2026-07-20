@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 
-import { emptyToUndefined } from './emptyToUndefined.util.ts';
+import { emptyToUndefined } from './empty-to-undefined.util';
 
 it('maps an empty string to undefined', () => {
   expect(emptyToUndefined('')).toBeUndefined();

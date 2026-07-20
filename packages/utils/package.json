@@ -6,7 +6,15 @@
   "sideEffects": false,
   "exports": {
     "./arrays/merge-arrays.util": "./src/arrays/merge-arrays.util.ts",
-    "./objects/merge-objects.util": "./src/objects/merge-objects.util.ts"
+    "./comparison/are-arrays-equal.util": "./src/comparison/are-arrays-equal.util.ts",
+    "./comparison/are-equal-by-json.util": "./src/comparison/are-equal-by-json.util.ts",
+    "./comparison/is-shallow-equal.util": "./src/comparison/is-shallow-equal.util.ts",
+    "./errors/get-error-message.util": "./src/errors/get-error-message.util.ts",
+    "./errors/to-error.util": "./src/errors/to-error.util.ts",
+    "./guards/is-object.util": "./src/guards/is-object.util.ts",
+    "./objects/drop-nullish-values.util": "./src/objects/drop-nullish-values.util.ts",
+    "./objects/merge-objects.util": "./src/objects/merge-objects.util.ts",
+    "./strings/empty-to-undefined.util": "./src/strings/empty-to-undefined.util.ts"
   },
   "scripts": {
     "format": "vp fmt .",

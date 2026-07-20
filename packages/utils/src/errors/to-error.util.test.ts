@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { toError } from './toError.util';
+import { toError } from './to-error.util';
 
 describe('toError', () => {
   it('returns Error instances unchanged', () => {

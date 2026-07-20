@@ -1,4 +1,4 @@
-import { isObject } from '@repo/ui/utils/typeGuards';
+import { isObject } from '@repo/utils/guards/is-object.util';
 
 import { isOrderConflictResolution } from './isOrderConflictResolution.util';
 import { isPinConflictResolution } from './isPinConflictResolution.util';

@@ -1,4 +1,4 @@
-import { emptyToUndefined } from '@repo/data-access/records/emptyToUndefined.util';
+import { emptyToUndefined } from '@repo/utils/strings/empty-to-undefined.util';
 
 import type { EnterpriseOrderInput } from './enterpriseOrders.schema';
 

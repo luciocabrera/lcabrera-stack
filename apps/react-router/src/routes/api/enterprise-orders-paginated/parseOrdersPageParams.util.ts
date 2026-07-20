@@ -3,7 +3,7 @@ import type { ColumnFilter } from '@repo/ui/types/filterOperators.types';
 
 import { toQueryFilters } from '@repo/data-access/filters/toQueryFilters.util';
 import { INITIAL_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
-import { isObject } from '@repo/ui/utils/typeGuards';
+import { isObject } from '@repo/utils/guards/is-object.util';
 
 import type { EnterpriseOrder } from '@/routes/enterprise-orders/config';
 

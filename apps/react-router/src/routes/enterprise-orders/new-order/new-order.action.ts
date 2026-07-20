@@ -1,4 +1,4 @@
-import { getErrorMessage } from '@repo/data-access/errors/getErrorMessage.util';
+import { getErrorMessage } from '@repo/utils/errors/get-error-message.util';
 import { type ActionFunctionArgs, redirect } from 'react-router';
 
 import { SYSTEM_ACTOR } from '@/auth/auth.constants';
