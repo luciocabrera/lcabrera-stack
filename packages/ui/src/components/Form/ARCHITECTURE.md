@@ -99,6 +99,16 @@ Form/
 │   (each: <Name>.component.tsx + <Name>.types.ts; TextField/RadioField/FormFieldDisplay/CurrencyField/NumericFieldControl also <Name>.stylex.ts; per-consumer helpers live in <Name>/utils/ behind an index.ts barrel)
 │   (the former PathField/PathBrowserModal `path` leaf was removed by ADR-028 — no filesystem-coupled field types)
 │
+├── builders/                   → Public field-tree DSL (exported from the barrel):
+│   ├── createFieldBuilders.util.ts → Binds TValues once → { field, choiceField, toggleField, fieldRow, fieldGroup } (a generic builder can't infer TValues from a string accessor)
+│   ├── field.util.ts               → Base leaf (text/email/number/currency/date/textarea) + flat clientValidation
+│   ├── choiceField.util.ts         → Options leaf (select | radio)
+│   ├── toggleField.util.ts         → Boolean toggle leaf (variant: 'toggle')
+│   ├── fieldRow.util.ts / fieldGroup.util.ts → Row / card-group containers
+│   ├── buildFieldValidation.util.ts → Flat opts → { clientValidation } (value-shape-agnostic)
+│   ├── toFieldOptions.util.ts       → string[] → { label, value }[] (value-shape-agnostic)
+│   └── index.ts                     → Barrel (each builder: .util + .test)
+│
 └── utils/
     ├── flattenFields.util.ts    → Recursive walker → readonly LeafFieldDef[]
     ├── getInitialValues.util.ts → leafFields + initialValues → full TValues

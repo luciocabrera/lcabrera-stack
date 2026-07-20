@@ -69,9 +69,8 @@ src/routes/enterprise-orders/
 ├── config/                                    # Entity data + pure rules (types, Zod, derivation)
 ├── .server/enterpriseOrders.service.ts        # Server-only Postgres access (RR `.server/`: build-stripped from client)
 ├── OrderFormModal/                            # Shared Modal + Form wrapper
-├── orderFormFields.util.ts                    # Tab → group → row field-tree builder
 ├── orderClientAction.ts                       # Shared browser Zod gate
-├── parseOrderIdParam.util.ts                  # `:orderId` param validation
+├── utils/                                     # Route-local utils: orderFormFields (field-tree builder via @repo/ui createFieldBuilders), parseOrderIdParam, buildEnterpriseOrdersQuery
 ├── new-order/                                 # Create route (clientAction + action)
 ├── edit-order/                                # Edit route (loader + clientAction + action)
 └── order-detail/                              # Read-only view route (Form `view` mode)

@@ -71,8 +71,10 @@ empty. `Modal.onClose` and the Form's Cancel navigate back to the list; a succes
   `action` (re-validate → recompute totals → `updateRows` → redirect to view).
 - `order-detail/` — read-only `view`-mode Form; serves both `view/:orderId` and the bare
   `:orderId` route (the intentional duplicate detail routes, feature plan §8 item 5).
-- `OrderFormModal/` — shared Modal+Form wrapper; `orderFormFields.util.ts` builds the tab →
-  card-group → row field tree per mode; `orderClientAction.ts` is the shared browser gate.
+- `OrderFormModal/` — shared Modal+Form wrapper; `utils/orderFormFields.util.ts` builds the
+  tab → card-group → row field tree per mode from the shared `@repo/ui` Form builders
+  (`createFieldBuilders<EnterpriseOrderValues>()`); `orderClientAction.ts` is the shared
+  browser gate.
 
 ### `config/` — entity data + pure rules (no SQL, no `pg`)
 

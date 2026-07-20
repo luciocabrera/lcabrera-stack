@@ -24,7 +24,6 @@ export type {
   EnterpriseOrderValues,
 } from './enterpriseOrders.types';
 export { parseOrderFormData } from './parseOrderFormData.util';
-export { toFieldOptions } from './toFieldOptions.util';
 export { toOrderFieldErrors } from './toOrderFieldErrors.util';
 export { toOrderFormValues } from './toOrderFormValues.util';
 export { toOrderInsertValues } from './toOrderInsertValues.util';

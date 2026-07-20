@@ -1,10 +1,9 @@
 import type { FieldValidationOpts } from './buildFieldValidation.util';
-import type { EnterpriseOrderValues } from './config';
 
 import { buildFieldValidation } from './buildFieldValidation.util';
 
 /** Leaf field types built from the base field shape (no options/variant). */
-export type OrderBaseFieldType =
+export type BaseFieldType =
   | 'currency'
   | 'date'
   | 'datetime'
@@ -14,24 +13,28 @@ export type OrderBaseFieldType =
   | 'text'
   | 'textarea';
 
-export type OrderFieldArgs<T extends OrderBaseFieldType> =
-  FieldValidationOpts & {
-    readonly accessor: keyof EnterpriseOrderValues;
-    readonly description?: string;
-    readonly disabled?: boolean;
-    readonly label: string;
-    readonly type: T;
-  };
-
-// TODO: Consider moving this util to the shared `@repo/ui` package, since it is used in multiple apps.
-// make sure we make it generic enough to be used in other apps, not just enterprise-orders
+export type FieldArgs<
+  TValues extends Record<string, unknown>,
+  T extends BaseFieldType,
+> = FieldValidationOpts & {
+  readonly accessor: keyof TValues & string;
+  readonly description?: string;
+  readonly disabled?: boolean;
+  readonly label: string;
+  readonly type: T;
+};
 
 /**
  * Build a base leaf field (text/email/number/currency/date/textarea…). Bakes
  * the structural keys and assembles `clientValidation` from flat rules, so a
- * call carries only the field's distinctive data.
+ * call carries only the field's distinctive data. `TValues` is the Form's
+ * value shape — bind it once via `createFieldBuilders<TValues>()` so call sites
+ * need no explicit type arguments.
  */
-export const orderField = <T extends OrderBaseFieldType>({
+export const field = <
+  TValues extends Record<string, unknown>,
+  T extends BaseFieldType,
+>({
   accessor,
   description,
   disabled,
@@ -43,7 +46,7 @@ export const orderField = <T extends OrderBaseFieldType>({
   pattern,
   required,
   type,
-}: OrderFieldArgs<T>) => ({
+}: FieldArgs<TValues, T>) => ({
   accessor,
   label,
   type,

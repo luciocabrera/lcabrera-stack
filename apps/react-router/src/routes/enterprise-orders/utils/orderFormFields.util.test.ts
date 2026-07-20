@@ -2,7 +2,7 @@ import type { FieldNode } from '@repo/ui/components/Form';
 
 import { expect, it } from 'vitest';
 
-import type { EnterpriseOrderValues } from './config';
+import type { EnterpriseOrderValues } from '../config';
 
 import { buildOrderFormFields } from './orderFormFields.util';
 

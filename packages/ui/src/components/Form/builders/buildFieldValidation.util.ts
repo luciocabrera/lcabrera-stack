@@ -8,7 +8,7 @@ export type FieldValidationOpts = {
   readonly pattern?: RegExp;
   readonly required?: boolean;
 };
-// TODO: Consider moving this util to the shared `@repo/ui` package, since it is used in multiple apps.
+
 /**
  * Assemble a Form `clientValidation` object from flat validation options,
  * dropping every unset key. Returns `{ clientValidation }` only when at least

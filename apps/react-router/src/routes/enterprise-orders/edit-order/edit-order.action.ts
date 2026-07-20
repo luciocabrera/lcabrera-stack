@@ -14,7 +14,7 @@ import {
   toOrderFieldErrors,
   toOrderUpdateValues,
 } from '../config';
-import { parseOrderIdParam } from '../parseOrderIdParam.util';
+import { parseOrderIdParam } from '../utils/parseOrderIdParam.util';
 
 /**
  * Server action for editing an order: re-check the target exists, re-validate
