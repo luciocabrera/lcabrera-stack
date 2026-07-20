@@ -25,6 +25,14 @@
     ]
   },
   "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          { "type": "command", "command": "node scripts/claude-autofix.mjs" }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [
