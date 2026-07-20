@@ -14,6 +14,4 @@ export const parseDate = (value: unknown) => {
       return date;
     }
   }
-
-  return;
 };

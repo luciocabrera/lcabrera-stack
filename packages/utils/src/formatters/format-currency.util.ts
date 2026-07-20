@@ -1,7 +1,7 @@
-import type { CurrencyFormatOptions } from '../../types/format.types';
+import type { CurrencyFormatOptions } from './format.types';
 
 import { DEFAULT_CURRENCY } from './formatters.constants';
-import { getDefaultLocale } from './getDefaultLocale.util';
+import { getDefaultLocale } from './get-default-locale.util';
 
 type FormatCurrencyArgs = CurrencyFormatOptions & {
   readonly value: number;

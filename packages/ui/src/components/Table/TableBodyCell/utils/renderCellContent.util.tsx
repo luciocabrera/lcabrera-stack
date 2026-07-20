@@ -4,11 +4,9 @@ import type {
 } from '@repo/ui/components/Table/Table.types';
 
 import { TableCheckDisplay } from '@repo/ui/components/Table/TableCheckDisplay';
-import {
-  formatCurrency,
-  formatDate,
-  formatNumber,
-} from '@repo/ui/utils/formatters';
+import { formatCurrency } from '@repo/utils/formatters/format-currency.util';
+import { formatDate } from '@repo/utils/formatters/format-date.util';
+import { formatNumber } from '@repo/utils/formatters/format-number.util';
 
 type RenderCellContentArgs = {
   readonly dataType: TableColumnDataType;

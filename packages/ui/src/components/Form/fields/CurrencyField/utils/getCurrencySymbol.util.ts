@@ -1,5 +1,5 @@
-import { DEFAULT_CURRENCY } from '@repo/ui/utils/formatters/formatters.constants';
-import { getDefaultLocale } from '@repo/ui/utils/formatters/getDefaultLocale.util';
+import { DEFAULT_CURRENCY } from '@repo/utils/formatters/formatters.constants';
+import { getDefaultLocale } from '@repo/utils/formatters/get-default-locale.util';
 
 type GetCurrencySymbolArgs = {
   readonly currency?: string;

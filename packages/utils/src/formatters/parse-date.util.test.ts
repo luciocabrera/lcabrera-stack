@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseDate } from './parseDate.util';
+import { parseDate } from './parse-date.util';
 
 describe('parseDate', () => {
   it('returns the same Date object when passed a Date', () => {

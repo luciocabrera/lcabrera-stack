@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getDateTimeFormatOptions } from './getDateTimeFormatOptions.util';
+import { getDateTimeFormatOptions } from './get-date-time-format-options.util';
 
 describe('getDateTimeFormatOptions', () => {
   it('returns full dateStyle for full preset', () => {

@@ -1,42 +1,55 @@
 # Formatters Utils Architecture
 
 Locale-safe, SSR-consistent formatting helpers for numbers, currency, and dates.
+Pure `Intl` wrappers with no React/DOM dependency — they live in `@repo/utils`
+(the lowest layer) and are consumed by `@repo/ui` and the apps.
 
 ## File Structure
 
 ```
 formatters/
 ├── ARCHITECTURE.md
-├── index.ts
+├── format.types.ts
 ├── formatters.constants.ts
-├── getDefaultLocale.util.ts
-├── getDateTimeFormatOptions.util.ts
-├── parseDate.util.ts
-├── formatDate.util.ts
-├── formatCurrency.util.ts
-└── formatNumber.util.ts
+├── get-default-locale.util.ts
+├── get-date-time-format-options.util.ts
+├── parse-date.util.ts
+├── format-date.util.ts
+├── format-currency.util.ts
+└── format-number.util.ts
 ```
 
 ## Dependency Graph
 
 ```mermaid
 graph TD
-  Index[index.ts] --> Date[formatDate.util.ts]
-  Index --> Currency[formatCurrency.util.ts]
-  Index --> Number[formatNumber.util.ts]
+  Date[format-date.util.ts]
+  Currency[format-currency.util.ts]
+  Number[format-number.util.ts]
 
-  Date --> ParseDate[parseDate.util.ts]
-  Date --> Locale[getDefaultLocale.util.ts]
-  Date --> DateOpts[getDateTimeFormatOptions.util.ts]
+  Date --> ParseDate[parse-date.util.ts]
+  Date --> Locale[get-default-locale.util.ts]
+  Date --> DateOpts[get-date-time-format-options.util.ts]
   Date --> Constants[formatters.constants.ts]
 
   Currency --> Locale
   Currency --> Constants
 
   Number --> Locale
+
+  Date --> Types[format.types.ts]
+  Currency --> Types
+  Number --> Types
+  DateOpts --> Types
 ```
 
 ## Utilities
+
+### format.types.ts
+
+Shared `Intl`-formatter option types (`CurrencyFormatOptions`,
+`DateFormatOptions`, `DateFormatPreset`, `NumberFormatOptions`) consumed by the
+formatters and by `@repo/ui`'s `Table.types`.
 
 ### formatters.constants.ts
 
@@ -53,7 +66,7 @@ flowchart TD
   A --> D[DEFAULT_DATE_PRESET]
 ```
 
-### getDefaultLocale.util.ts
+### get-default-locale.util.ts
 
 Returns deterministic locale default to avoid SSR/client hydration mismatches.
 
@@ -62,7 +75,7 @@ flowchart TD
   A[Get default locale] --> B[Return default locale]
 ```
 
-### getDateTimeFormatOptions.util.ts
+### get-date-time-format-options.util.ts
 
 Maps date preset names to `Intl.DateTimeFormatOptions`.
 
@@ -75,7 +88,7 @@ flowchart TD
   B -- short --> F[Return date style short]
 ```
 
-### parseDate.util.ts
+### parse-date.util.ts
 
 Normalizes unknown date-like input into a valid `Date` or returns `undefined`.
 
@@ -91,7 +104,7 @@ flowchart TD
   G -- no --> I[undefined]
 ```
 
-### formatDate.util.ts
+### format-date.util.ts
 
 Formats unknown value as localized date string with safe fallbacks.
 
@@ -115,7 +128,7 @@ Key behavior:
 - Accepts `unknown` input and defends against invalid date values.
 - Preserves incoming string when parsing fails (useful for opaque backend values).
 
-### formatCurrency.util.ts
+### format-currency.util.ts
 
 Formats number as currency and normalizes symbol/sign output.
 
@@ -134,7 +147,7 @@ Normalization rules:
 - Moves leading minus after currency symbol when needed.
 - Ensures a space between symbol and numeric sign/value.
 
-### formatNumber.util.ts
+### format-number.util.ts
 
 Formats number with optional precision controls.
 
@@ -152,10 +165,16 @@ Key behavior:
 - Omits undefined fraction digit options to avoid unintended defaults.
 - Gracefully degrades when Intl fails.
 
-## Barrel Exports
+## Subpath Exports
 
-`index.ts` exports only the public formatter entry points:
+`@repo/utils` uses **explicit per-file subpath exports** — there is no barrel.
+Each helper is imported directly so consumers pull in exactly one:
 
-- `formatCurrency`
-- `formatDate`
-- `formatNumber`
+- `@repo/utils/formatters/format-currency.util`
+- `@repo/utils/formatters/format-date.util`
+- `@repo/utils/formatters/format-number.util`
+- `@repo/utils/formatters/parse-date.util`
+- `@repo/utils/formatters/get-date-time-format-options.util`
+- `@repo/utils/formatters/get-default-locale.util`
+- `@repo/utils/formatters/formatters.constants`
+- `@repo/utils/formatters/format.types`

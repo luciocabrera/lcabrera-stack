@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatNumber } from './formatNumber.util';
+import { formatNumber } from './format-number.util';
 
 describe('formatNumber', () => {
   it('formats a number with default locale', () => {

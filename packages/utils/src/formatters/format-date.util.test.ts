@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatDate } from './formatDate.util';
+import { formatDate } from './format-date.util';
 
 describe('formatDate', () => {
   it('formats a Date object', () => {
