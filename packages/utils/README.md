@@ -1,12 +1,12 @@
 # `@repo/utils`
 
-> **Work in progress.** This package is a placeholder for future shared runtime utilities.
-
-Shared TypeScript utilities for apps in this monorepo — things like merge helpers, type guards, and pure helpers with no framework dependencies.
+Shared, framework-agnostic **pure** utilities for the monorepo — the lowest
+layer, importable by any consumer (`@repo/ui`, `@repo/data-access`, apps). No
+React/DOM/StyleX, no `fetch`/`node:*`/`pg`/db, no side effects.
 
 ## Install in a consumer app/package
 
-To use this package from another workspace package (for example an app), add it to that package's `package.json`:
+Add it to that workspace's `package.json`:
 
 ```json
 {
@@ -16,50 +16,57 @@ To use this package from another workspace package (for example an app), add it 
 }
 ```
 
-Then install dependencies from the workspace root:
+Then install from the workspace root:
 
 ```bash
 vp install
 ```
 
-## Adding utilities
-
 ## Current exports
 
-```ts
-import { mergeArrays, mergeObjects } from '@repo/utils/merge';
-```
-
-`mergeArrays` and `mergeObjects` are shared shallow-merge helpers used by workspace config packages.
-
-For more granular imports as the package grows:
+Sources live under `src/`, grouped by domain, with an explicit per-file subpath
+export for each helper:
 
 ```ts
-import { mergeArrays } from '@repo/utils/merge-arrays';
-import { mergeObjects } from '@repo/utils/merge-objects';
+import { mergeArrays } from '@repo/utils/arrays/merge-arrays.util';
+import { mergeObjects } from '@repo/utils/objects/merge-objects.util';
 ```
 
-`@repo/utils` is published as side-effect free (`"sideEffects": false`) to keep tree shaking effective.
+`mergeArrays` and `mergeObjects` are shared shallow-merge helpers used by the
+workspace config packages. `@repo/utils` is side-effect free
+(`"sideEffects": false`) to keep tree-shaking effective.
 
-Create a new `.ts` file in this directory, export what you need, and add an entry to the `exports` map in `package.json`:
+## Adding a utility
+
+Create a **kebab-case** `*.util.ts` file under the matching domain folder in
+`src/` (e.g. `src/strings/`, `src/guards/`) with a colocated `*.util.test.ts`,
+then add an explicit subpath to the `exports` map in `package.json`:
 
 ```json
 {
   "exports": {
-    "./format": "./format.ts",
-    "./guards": "./guards.ts"
+    "./strings/slugify.util": "./src/strings/slugify.util.ts"
   }
 }
 ```
 
-Then import it in any app:
+Then import it anywhere:
 
 ```ts
-import { formatCurrency } from '@repo/utils/format';
+import { slugify } from '@repo/utils/strings/slugify.util';
 ```
 
 ## Guidelines
 
-- All functions must be **pure** — same input always produces the same output, no side effects.
-- No framework imports (`react`, `vite`, etc.) — this package must stay runtime-agnostic.
-- Export only named exports, never `export default`.
+- All functions must be **pure** — same input → same output, no side effects,
+  no argument mutation.
+- **No framework imports** (`react`, `vite`, `pg`, `node:*`, …) — this package
+  stays runtime-agnostic and browser-or-server safe. `tsconfig` denies Node
+  ambient globals (`types: []`) so a stray `process`/`fs` reach-in fails typecheck.
+- **Named exports only**, never `export default`.
+- **kebab-case `*.util.ts`, one util per file**, grouped by domain under `src/`.
+  Enforced by `local-rules/filename-convention` via its `suffixCase` option (the
+  rule stays live — a camelCase `.util` here fails the gate; it is not turned off).
+- **≥95% coverage** (statements/branches/functions/lines), gated by
+  `test:coverage`. This is a public-facing package: it never baselines and is
+  suppression-free by construction (its `eslint-suppressions.json` is gitignored).

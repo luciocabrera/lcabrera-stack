@@ -91,8 +91,11 @@ build, so this is no longer prose-only. Enforced today:
 - **Hooks** (`*.hook.ts`) → **camelCase** with a `use` prefix.
 
 Deliberately not yet enforced (each needs a convention decision, not a guess):
-`*.util` / `*.service` / `*.api` / `*.schema` case — apps use camelCase but
-`@repo/utils` uses kebab-case (see the phase-2 note in the coordination register).
+`*.service` / `*.api` / `*.schema` case. `*.util` **is** enforced — camelCase
+everywhere, except `@repo/utils`, whose eslint config passes the
+`filename-convention` rule's `suffixCase: { util: 'kebab-case' }` option so its
+kebab-case `.util` files are asserted (a camelCase one there fails the gate),
+rather than turning the rule off.
 
 ## One Util Per File
 

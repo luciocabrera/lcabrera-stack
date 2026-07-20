@@ -71,6 +71,7 @@ const COVERAGE_WORKSPACES = [
   { dir: 'packages/node-runtime', name: '@repo/node-runtime' },
   { dir: 'packages/scan-ingestion', name: '@repo/scan-ingestion' },
   { dir: 'packages/ui', name: '@repo/ui' },
+  { dir: 'packages/utils', name: '@repo/utils' },
   { dir: 'apps/admin_system', name: 'admin-system' },
   { dir: 'apps/scan-orchestrator', name: '@repo/scan-orchestrator' },
 ];
