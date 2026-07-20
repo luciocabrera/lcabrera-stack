@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { parsePositiveInteger } from './parsePositiveInteger.util';
+import { parsePositiveInteger } from './parse-positive-integer.util';
 
 describe('parsePositiveInteger', () => {
   it('parses a valid non-negative integer', () => {

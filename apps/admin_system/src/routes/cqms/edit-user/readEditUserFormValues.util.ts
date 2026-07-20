@@ -1,4 +1,4 @@
-import { isCheckboxChecked } from '../utils/isCheckboxChecked.util';
+import { isCheckboxChecked } from '@repo/utils/forms/is-checkbox-checked.util';
 
 type ReadEditUserFormValuesArgs = {
   readonly formData: FormData;

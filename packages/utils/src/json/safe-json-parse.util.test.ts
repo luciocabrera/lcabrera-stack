@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 
-import { safeJsonParse } from './safeJsonParse.util';
+import { safeJsonParse } from './safe-json-parse.util';
 
 it('parses valid JSON', () => {
   expect(safeJsonParse('{"a":1}')).toStrictEqual({ a: 1 });

@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 
-import { readFormString } from './readFormString.util';
+import { readFormString } from './read-form-string.util';
 
 it('reads a present string value', () => {
   const formData = new FormData();

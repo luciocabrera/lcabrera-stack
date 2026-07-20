@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 
-import { roundToCents } from './roundToCents.util';
+import { roundToCents } from './round-to-cents.util';
 
 it('leaves a two-decimal amount unchanged', () => {
   expect(roundToCents(12.34)).toBe(12.34);

@@ -19,7 +19,12 @@
     "./formatters/get-date-time-format-options.util": "./src/formatters/get-date-time-format-options.util.ts",
     "./formatters/get-default-locale.util": "./src/formatters/get-default-locale.util.ts",
     "./formatters/parse-date.util": "./src/formatters/parse-date.util.ts",
+    "./forms/is-checkbox-checked.util": "./src/forms/is-checkbox-checked.util.ts",
+    "./forms/read-form-string.util": "./src/forms/read-form-string.util.ts",
     "./guards/is-object.util": "./src/guards/is-object.util.ts",
+    "./json/safe-json-parse.util": "./src/json/safe-json-parse.util.ts",
+    "./numbers/parse-positive-integer.util": "./src/numbers/parse-positive-integer.util.ts",
+    "./numbers/round-to-cents.util": "./src/numbers/round-to-cents.util.ts",
     "./objects/drop-nullish-values.util": "./src/objects/drop-nullish-values.util.ts",
     "./objects/merge-objects.util": "./src/objects/merge-objects.util.ts",
     "./strings/empty-to-undefined.util": "./src/strings/empty-to-undefined.util.ts"

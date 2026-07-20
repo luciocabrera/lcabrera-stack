@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 
-import { isCheckboxChecked } from './isCheckboxChecked.util';
+import { isCheckboxChecked } from './is-checkbox-checked.util';
 
 it('is true when the checkbox posted "on"', () => {
   const formData = new FormData();
