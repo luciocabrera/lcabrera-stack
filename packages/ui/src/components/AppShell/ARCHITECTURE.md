@@ -7,6 +7,7 @@ The reusable app frame rendered inside `AppProviders`: themed background, `AppNa
 ## Public API
 
 - `AppShell` — `getNavigationItems: (iconSize: number) => readonly ToolbarItemConfig[]`, forwarded straight to `AppNavigation` (each consuming app supplies its own — see `AppNavigation`'s own doc for why). Theme state comes from `useTheme()` (reads the `ThemeProvider` above it, supplied by `AppProviders`); routed content comes from React Router's own route tree via `<Outlet />`.
+- `sessionActions?: (args: { isCollapsed: boolean }) => ReactNode` — optional render-prop for a session control (e.g. a logout button), forwarded to `AppNavigation` → `NavigationFooter` and rendered beside the theme toggle. It's a render-prop, not a plain node, so the app can render an icon-only control (with a tooltip) when the sidebar is collapsed — the collapsed state lives in the footer. Apps without a session concept omit it and the footer shows the theme toggle alone. `NavigationSessionActions` is the shared type (`AppNavigation.types`).
 
 ## Composition
 

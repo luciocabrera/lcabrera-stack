@@ -97,4 +97,38 @@ describe('NavigationFooter', () => {
     expect(button.dataset.iconOnly).toBe('true');
     expect(button.dataset.tooltip).toBe('Dark Mode');
   });
+
+  it('renders the session-actions slot with the expanded collapsed state', () => {
+    const sessionActions = vi.fn(
+      ({ isCollapsed }: { readonly isCollapsed: boolean }) => (
+        <span data-testid='session'>{String(isCollapsed)}</span>
+      ),
+    );
+
+    render(
+      <NavigationFooter
+        isDarkMode={false}
+        onToggleTheme={vi.fn()}
+        sessionActions={sessionActions}
+      />,
+    );
+
+    expect(sessionActions).toHaveBeenCalledWith({ isCollapsed: false });
+    expect(screen.getByTestId('session').textContent).toBe('false');
+  });
+
+  it('passes isCollapsed=true to the session-actions slot when collapsed', () => {
+    collapsedPreferenceMock.mockReturnValue('collapsed');
+    const sessionActions = vi.fn(() => <span data-testid='session'>x</span>);
+
+    render(
+      <NavigationFooter
+        isDarkMode={false}
+        onToggleTheme={vi.fn()}
+        sessionActions={sessionActions}
+      />,
+    );
+
+    expect(sessionActions).toHaveBeenCalledWith({ isCollapsed: true });
+  });
 });

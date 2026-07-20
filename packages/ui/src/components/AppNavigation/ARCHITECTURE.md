@@ -24,7 +24,7 @@ AppNavigation/
 │   ├── NavigationBody.types.ts
 │   └── NavigationBody.test.tsx
 │
-├── NavigationFooter/                → Theme toggle button
+├── NavigationFooter/                → Theme toggle + optional session-actions slot
 │   ├── NavigationFooter.component.tsx
 │   ├── NavigationFooter.types.ts
 │   └── NavigationFooter.test.tsx

@@ -29,6 +29,16 @@ Self-contained, server-only auth for the secured-routes showcase. See [`src/auth
 | `resolveAuthClaims`                       | `auth/resolveAuthClaims.util.ts` | Read the cookie + verify — the shared gate used by the middleware and the login loader                                                                                                         |
 | `getDemoCredential` / `verifyCredentials` | `auth/*.util.ts`                 | Env-configured demo account (`hashSecret` hash) + `isSecretHashValid` password check                                                                                                           |
 
+The guard is applied to the enterprise-orders **UI subtree** (`enterprise-orders/layout.ts`) and to its two resource routes — `_action/enterprise-orders/delete` and `_api/enterprise-orders/paginated` both export `middleware = [authMiddleware]`, so the mutation and data endpoints can't be driven without a session.
+
+---
+
+## Root shell (`src/root/`)
+
+| Artifact        | Location                           | Description                                                                                                                                                                  |
+| --------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LogoutControl` | `root/LogoutControl.component.tsx` | Session control for the `@repo/ui` `AppShell` `sessionActions` slot: a POST `<Form>` to `/logout`; icon-only + tooltip when the nav is collapsed, mirroring the theme toggle |
+
 ---
 
 ## Keeping This Inventory Current

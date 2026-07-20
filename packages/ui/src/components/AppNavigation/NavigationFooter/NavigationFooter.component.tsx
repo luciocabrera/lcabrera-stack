@@ -20,6 +20,7 @@ import { resolveThemeLabel } from '../utils';
 export const NavigationFooter = ({
   isDarkMode,
   onToggleTheme,
+  sessionActions,
 }: NavigationFooterProps) => {
   const navigationCollapsedPreference =
     useGetGlobalNavigationCollapsedPreference();
@@ -47,6 +48,7 @@ export const NavigationFooter = ({
         >
           {themeLabel}
         </Button>
+        {sessionActions?.({ isCollapsed })}
       </div>
     </SidePanelFooter>
   );

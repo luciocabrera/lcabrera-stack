@@ -9,10 +9,16 @@ import { AppBackground } from '../AppBackground';
 import { AppDotted } from '../AppDotted';
 import { styles } from './AppShell.stylex';
 
-export const AppShell = ({ getNavigationItems }: AppShellProps) => {
+export const AppShell = ({
+  getNavigationItems,
+  sessionActions,
+}: AppShellProps) => {
   return (
     <AppBackground>
-      <AppNavigation getNavigationItems={getNavigationItems} />
+      <AppNavigation
+        getNavigationItems={getNavigationItems}
+        sessionActions={sessionActions}
+      />
       <AppDotted>
         <main {...stylex.props(styles.main)}>
           <Outlet />
