@@ -70,7 +70,11 @@ const parseFileName = (filename: string) => {
   };
 };
 
-/** The expected case label for a suffix, or `undefined` if unenforced. */
+/**
+ * The expected case label for a suffix. Returns `undefined` (by falling through,
+ * not an explicit `return` — unicorn/no-useless-undefined bans `return undefined`
+ * and Sonar S3626 bans the redundant bare `return`) when the suffix is unenforced.
+ */
 const expectedCaseFor = (suffix: string) => {
   if (KEBAB_SUFFIXES.has(suffix)) {
     return 'kebab-case';
@@ -81,7 +85,6 @@ const expectedCaseFor = (suffix: string) => {
   if (CAMEL_SUFFIXES.has(suffix)) {
     return 'camelCase';
   }
-  return;
 };
 
 type MatchesCaseArgs = {
