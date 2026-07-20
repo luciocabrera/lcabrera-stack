@@ -11,10 +11,17 @@ export type ComparisonOperator =
   | 'in'
   | 'lt'
   | 'lte'
-  | 'neq';
+  | 'neq'
+  | 'notIlike';
 
 export type CountQueryDescriptor = {
   readonly allowedColumns?: readonly string[];
+  /**
+   * Column passed to `count()`; defaults to `*` (count every matching row).
+   * Pass a specific column — typically the primary key — for a table with no
+   * `id` column, or when NULLs in that column should not be counted.
+   */
+  readonly column?: string;
   readonly filters?: readonly QueryFilter[];
   readonly schema: string;
   readonly table: string;

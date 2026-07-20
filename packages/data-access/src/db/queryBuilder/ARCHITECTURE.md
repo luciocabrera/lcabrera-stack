@@ -17,24 +17,24 @@ the `../*.util.ts` executors that pair each builder with `getPool`).
 
 ## Files
 
-| File                                  | Role                                                                                                                                                               |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `QueryBuilder.types.ts`               | `ComparisonOperator`, `QueryFilter`, `QuerySort`, `BuiltQuery`, and the `Select`/`Count`/`Distinct`/`Insert`/`Update`/`Delete`/`MaxValue` `…QueryDescriptor` types |
-| `quoteIdentifier.util.ts`             | Safe double-quote identifier escaping                                                                                                                              |
-| `assertSafeIdentifier.util.ts`        | **Mandatory**, always called — syntax check (see Security model)                                                                                                   |
-| `assertColumnAllowed.util.ts`         | **Optional**, opt-in — membership check (see Security model)                                                                                                       |
-| `appendFilterClause.util.ts`          | Reducer step used by `buildWhereClause`: one filter → one SQL clause + values                                                                                      |
-| `buildWhereClause.util.ts`            | `QueryFilter[]` → `{ text, values }`, correctly incrementing `$n` placeholders                                                                                     |
-| `buildReturningClause.util.ts`        | Shared `RETURNING` builder for the write builders: `''`, `RETURNING *` (the `['*']` wildcard), or a quoted column projection                                       |
-| `buildOrderByClause.util.ts`          | `QuerySort[]` → `ORDER BY ...`                                                                                                                                     |
-| `buildOptionalNumericClauses.util.ts` | `LIMIT`/`OFFSET` fragment builder, skips `undefined` values without gapping `$n`                                                                                   |
-| `buildSelectQuery.util.ts`            | **Public entry point.** Composes everything above into one `SELECT`                                                                                                |
-| `buildCountQuery.util.ts`             | `count(id)` query sharing `buildWhereClause`'s output, so a data query and its matching count query can never drift apart                                          |
-| `buildDistinctQuery.util.ts`          | **Public entry point.** Paginated `SELECT DISTINCT` for one column (filter-option lists, ADR-009); excludes NULL/empty and orders ascending                        |
-| `buildInsertQuery.util.ts`            | **Public entry point.** `INSERT INTO … (cols) VALUES ($1, …) [RETURNING …]` from a `{ values }` map; keys quoted, values parameterized                             |
-| `buildUpdateQuery.util.ts`            | **Public entry point.** `UPDATE … SET col = $n WHERE … [RETURNING …]`; reuses `buildWhereClause` with an offset `startParamIndex`, requires ≥1 filter              |
-| `buildDeleteQuery.util.ts`            | **Public entry point.** `DELETE FROM … WHERE … [RETURNING …]`; reuses `buildWhereClause`, requires ≥1 filter                                                       |
-| `buildMaxValueQuery.util.ts`          | **Public entry point.** `SELECT COALESCE(MAX(col), 0)` — the generic "next id" read for tables without a sequence/default                                          |
+| File                                  | Role                                                                                                                                                                                                                  |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `QueryBuilder.types.ts`               | `ComparisonOperator`, `QueryFilter`, `QuerySort`, `BuiltQuery`, and the `Select`/`Count`/`Distinct`/`Insert`/`Update`/`Delete`/`MaxValue` `…QueryDescriptor` types                                                    |
+| `quoteIdentifier.util.ts`             | Safe double-quote identifier escaping                                                                                                                                                                                 |
+| `assertSafeIdentifier.util.ts`        | **Mandatory**, always called — syntax check (see Security model)                                                                                                                                                      |
+| `assertColumnAllowed.util.ts`         | **Optional**, opt-in — membership check (see Security model)                                                                                                                                                          |
+| `appendFilterClause.util.ts`          | Reducer step used by `buildWhereClause`: one filter → one SQL clause + values                                                                                                                                         |
+| `buildWhereClause.util.ts`            | `QueryFilter[]` → `{ text, values }`, correctly incrementing `$n` placeholders                                                                                                                                        |
+| `buildReturningClause.util.ts`        | Shared `RETURNING` builder for the write builders: `''`, `RETURNING *` (the `['*']` wildcard), or a quoted column projection                                                                                          |
+| `buildOrderByClause.util.ts`          | `QuerySort[]` → `ORDER BY ...`                                                                                                                                                                                        |
+| `buildOptionalNumericClauses.util.ts` | `LIMIT`/`OFFSET` fragment builder, skips `undefined` values without gapping `$n`                                                                                                                                      |
+| `buildSelectQuery.util.ts`            | **Public entry point.** Composes everything above into one `SELECT`                                                                                                                                                   |
+| `buildCountQuery.util.ts`             | `count(<column>)` query sharing `buildWhereClause`'s output, so a data query and its matching count query can never drift apart; `column` defaults to `*`, or names the column to count (e.g. a non-`id` primary key) |
+| `buildDistinctQuery.util.ts`          | **Public entry point.** Paginated `SELECT DISTINCT` for one column (filter-option lists, ADR-009); excludes NULL/empty and orders ascending                                                                           |
+| `buildInsertQuery.util.ts`            | **Public entry point.** `INSERT INTO … (cols) VALUES ($1, …) [RETURNING …]` from a `{ values }` map; keys quoted, values parameterized                                                                                |
+| `buildUpdateQuery.util.ts`            | **Public entry point.** `UPDATE … SET col = $n WHERE … [RETURNING …]`; reuses `buildWhereClause` with an offset `startParamIndex`, requires ≥1 filter                                                                 |
+| `buildDeleteQuery.util.ts`            | **Public entry point.** `DELETE FROM … WHERE … [RETURNING …]`; reuses `buildWhereClause`, requires ≥1 filter                                                                                                          |
+| `buildMaxValueQuery.util.ts`          | **Public entry point.** `SELECT COALESCE(MAX(col), 0)` — the generic "next id" read for tables without a sequence/default                                                                                             |
 
 ## Security model — read this before adding a call site
 

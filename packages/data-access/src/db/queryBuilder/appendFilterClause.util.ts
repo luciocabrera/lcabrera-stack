@@ -19,6 +19,7 @@ const OPERATOR_SQL: Record<ComparisonOperator, string> = {
   lt: '<',
   lte: '<=',
   neq: '<>',
+  notIlike: 'NOT ILIKE',
 };
 
 type AppendFilterClauseArgs = {

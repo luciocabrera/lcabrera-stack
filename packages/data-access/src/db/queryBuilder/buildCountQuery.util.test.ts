@@ -3,14 +3,27 @@ import { describe, expect, it } from 'vitest';
 import { buildCountQuery } from './buildCountQuery.util.ts';
 
 describe('buildCountQuery', () => {
-  it('builds a bare count query with no filters', () => {
+  it('counts every row with `count(*)` by default', () => {
     const result = buildCountQuery({
       schema: 'cqms',
       table: 'v_scan_findings',
     });
 
     expect(result).toEqual({
-      text: 'SELECT count(id) AS count FROM "cqms"."v_scan_findings"',
+      text: 'SELECT count(*) AS count FROM "cqms"."v_scan_findings"',
+      values: [],
+    });
+  });
+
+  it('counts the given column when `column` is provided', () => {
+    const result = buildCountQuery({
+      column: 'order_id',
+      schema: 'public',
+      table: 'enterprise_orders',
+    });
+
+    expect(result).toEqual({
+      text: 'SELECT count("order_id") AS count FROM "public"."enterprise_orders"',
       values: [],
     });
   });
@@ -23,7 +36,7 @@ describe('buildCountQuery', () => {
     });
 
     expect(result).toEqual({
-      text: 'SELECT count(id) AS count FROM "cqms"."v_scan_findings" WHERE "severity" = $1',
+      text: 'SELECT count(*) AS count FROM "cqms"."v_scan_findings" WHERE "severity" = $1',
       values: ['HIGH'],
     });
   });
@@ -31,6 +44,27 @@ describe('buildCountQuery', () => {
   it('rejects an unsafe table name', () => {
     expect(() =>
       buildCountQuery({ schema: 'cqms', table: 't; DROP TABLE cqms.users' }),
+    ).toThrow();
+  });
+
+  it('rejects an unsafe count column', () => {
+    expect(() =>
+      buildCountQuery({
+        column: 'id); DROP TABLE cqms.users --',
+        schema: 'cqms',
+        table: 'v_scan_findings',
+      }),
+    ).toThrow();
+  });
+
+  it('rejects a count column outside allowedColumns', () => {
+    expect(() =>
+      buildCountQuery({
+        allowedColumns: ['severity'],
+        column: 'password_hash',
+        schema: 'cqms',
+        table: 'v_scan_findings',
+      }),
     ).toThrow();
   });
 });
