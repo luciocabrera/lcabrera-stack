@@ -25,6 +25,14 @@
     ]
   },
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit|Read|Bash|Grep|Glob",
+        "hooks": [
+          { "type": "command", "command": "node scripts/claude-secrets-guard.mjs" }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Write|Edit|MultiEdit",
