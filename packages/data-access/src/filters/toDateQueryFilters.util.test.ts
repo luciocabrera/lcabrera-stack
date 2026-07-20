@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 
-import { toDateQueryFilters } from './toDateQueryFilters.util';
+import { toDateQueryFilters } from './toDateQueryFilters.util.ts';
 
 it('maps after/before/equals', () => {
   expect(

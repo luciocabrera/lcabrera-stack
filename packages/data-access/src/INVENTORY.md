@@ -86,6 +86,26 @@ consumer, because both `@repo/ui` and the apps need it.
 
 ---
 
+## `src/filters/`
+
+The column-filter contract shared by the Table filter UI (`@repo/ui`, which
+re-exports the types from `filters/columnFilter.types`) and the generic query
+layer, plus the mappers that translate it to `QueryFilter[]` for the builders.
+Table-agnostic — any table's filter state maps through `toQueryFilters`.
+
+| Artifact               | Location                               | Description                                                                                          |
+| ---------------------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `columnFilter.types`   | `filters/columnFilter.types.ts`        | `BooleanFilter`/`ColumnFilter`/`DateFilter`/`NumberFilter`/`SelectFilter`/`TextFilter` filter shapes |
+| `toQueryFilters`       | `filters/toQueryFilters.util.ts`       | Dispatches a `Record<column, ColumnFilter>` to the per-type mappers, flattening to `QueryFilter[]`   |
+| `toDateQueryFilters`   | `filters/toDateQueryFilters.util.ts`   | Date filter → `gt`/`lt`/`eq`, or `gte`+`lte` for `between`                                           |
+| `toNumberQueryFilters` | `filters/toNumberQueryFilters.util.ts` | Number/currency filter → comparison ops; `between` → `gte`+`lte`                                     |
+| `toTextQueryFilters`   | `filters/toTextQueryFilters.util.ts`   | Text filter → `ilike`/`notIlike` patterns and `eq`/`neq`                                             |
+| `toSelectQueryFilters` | `filters/toSelectQueryFilters.util.ts` | Select/multi-select → `in`/`eq`/`neq` (multi-value `notEquals` → an AND of `neq`, i.e. NOT IN)       |
+
+See `filters/ARCHITECTURE.md`.
+
+---
+
 ## `src/records/`
 
 Generic shaping helpers for write payloads.
@@ -93,6 +113,7 @@ Generic shaping helpers for write payloads.
 | Artifact            | Location                            | Description                                                                              |
 | ------------------- | ----------------------------------- | ---------------------------------------------------------------------------------------- |
 | `dropNullishValues` | `records/dropNullishValues.util.ts` | Drops null/undefined entries so the key is omitted (→ SQL NULL / absent) rather than set |
+| `emptyToUndefined`  | `records/emptyToUndefined.util.ts`  | Maps an empty string to `undefined` (→ SQL NULL) for optional form fields; no trim       |
 
 Shallow by design. Reach for it when building the optional half of a write
 input: one call replaces a

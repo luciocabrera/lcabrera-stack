@@ -7,7 +7,7 @@ import { deleteRows } from '@repo/data-access/db/deleteRows.util';
 import { getMaxValue } from '@repo/data-access/db/getMaxValue.util';
 import { getPool } from '@repo/data-access/db/getPool.util';
 import { insertRow } from '@repo/data-access/db/insertRow.util';
-import { buildSelectQuery } from '@repo/data-access/db/queryBuilder/buildSelectQuery.util';
+import { buildCountQuery } from '@repo/data-access/db/queryBuilder/buildCountQuery.util';
 import { selectRows } from '@repo/data-access/db/selectRows.util';
 import { updateRows } from '@repo/data-access/db/updateRows.util';
 
@@ -18,7 +18,6 @@ import {
   ENTERPRISE_ORDER_COLUMNS,
   ENTERPRISE_ORDERS_SCHEMA,
   ENTERPRISE_ORDERS_TABLE,
-  toCountSubquery,
 } from '../config';
 
 /**
@@ -43,8 +42,8 @@ export type SelectOrdersPageArgs = {
 
 /**
  * Read a page of orders plus the total row count for the same filters. The
- * count reuses the data query's WHERE clause via `toCountSubquery` (the generic
- * `buildCountQuery` cannot count this table — see that util).
+ * count reuses the data query's WHERE clause via the generic `buildCountQuery`,
+ * counting the `order_id` primary key so the page and its total can never drift.
  */
 export const selectOrdersPage = async ({
   filters,
@@ -61,9 +60,11 @@ export const selectOrdersPage = async ({
     sort,
   });
 
-  const countQuery = toCountSubquery(
-    buildSelectQuery({ ...TARGET, fields: ['order_id'], filters }),
-  );
+  const countQuery = buildCountQuery({
+    ...TARGET,
+    column: 'order_id',
+    filters,
+  });
   const countResult = await getPool().query<{ readonly count: number }>(
     countQuery.text,
     [...countQuery.values],

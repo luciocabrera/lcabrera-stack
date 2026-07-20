@@ -1,21 +1,19 @@
 import type { SortingState } from '@repo/ui/components/Table';
 import type { ColumnFilter } from '@repo/ui/types/filterOperators.types';
 
+import { toQueryFilters } from '@repo/data-access/filters/toQueryFilters.util';
 import { INITIAL_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
 import { isObject } from '@repo/ui/utils/typeGuards';
 
 import type { EnterpriseOrder } from '@/routes/enterprise-orders/config';
 
 import { parsePositiveInteger } from '@/routes/api/filter-options/parsePositiveInteger.util';
-import {
-  toOrderQueryFilters,
-  toOrderQuerySort,
-} from '@/routes/enterprise-orders/config';
+import { toOrderQuerySort } from '@/routes/enterprise-orders/config';
 
 import { safeJsonParse } from './safeJsonParse.util';
 
 export type ParsedOrdersPageParams = {
-  readonly filters: ReturnType<typeof toOrderQueryFilters>;
+  readonly filters: ReturnType<typeof toQueryFilters>;
   readonly limit: number;
   readonly skip: number;
   readonly sort: ReturnType<typeof toOrderQuerySort>;
@@ -34,7 +32,7 @@ export const parseOrdersPageParams = (
   const rawSort = safeJsonParse(params.get('sort'));
 
   return {
-    filters: toOrderQueryFilters({
+    filters: toQueryFilters({
       filters: isObject(rawFilter)
         ? (rawFilter as Readonly<Record<string, ColumnFilter>>)
         : {},

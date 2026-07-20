@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 
-import { toTextQueryFilters } from './toTextQueryFilters.util';
+import { toTextQueryFilters } from './toTextQueryFilters.util.ts';
 
 it('maps contains/startsWith/endsWith to ilike patterns', () => {
   expect(
@@ -29,6 +29,17 @@ it('maps contains/startsWith/endsWith to ilike patterns', () => {
   ]);
 });
 
+it('maps notContains to a notIlike pattern', () => {
+  expect(
+    toTextQueryFilters({
+      column: 'customer_name',
+      filter: { operator: 'notContains', type: 'text', value: 'temp' },
+    }),
+  ).toStrictEqual([
+    { column: 'customer_name', operator: 'notIlike', value: '%temp%' },
+  ]);
+});
+
 it('maps equals/notEquals to eq/neq', () => {
   expect(
     toTextQueryFilters({
@@ -44,13 +55,7 @@ it('maps equals/notEquals to eq/neq', () => {
   ).toStrictEqual([{ column: 'carrier', operator: 'neq', value: 'UPS' }]);
 });
 
-it('drops notContains (not expressible generically) and empty values', () => {
-  expect(
-    toTextQueryFilters({
-      column: 'carrier',
-      filter: { operator: 'notContains', type: 'text', value: 'x' },
-    }),
-  ).toStrictEqual([]);
+it('drops empty values', () => {
   expect(
     toTextQueryFilters({
       column: 'carrier',

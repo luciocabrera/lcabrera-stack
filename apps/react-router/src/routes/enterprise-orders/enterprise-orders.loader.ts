@@ -1,5 +1,6 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
+import { toQueryFilters } from '@repo/data-access/filters/toQueryFilters.util';
 import { INITIAL_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
 import { appendDistinctFilterDescriptors } from '@repo/ui/routing/appendDistinctFilterDescriptors.util';
 import { appendPrimaryKeySorting } from '@repo/ui/routing/appendPrimaryKeySorting.util';
@@ -10,7 +11,7 @@ import { APP_ID } from '@/constants/app.constants';
 
 import type { EnterpriseOrder } from './config';
 
-import { toOrderQueryFilters, toOrderQuerySort } from './config';
+import { toOrderQuerySort } from './config';
 import {
   COLUMNS,
   CRUD,
@@ -67,7 +68,7 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
   // Return the promise directly (not awaited) for Suspense streaming. The
   // generic executors read Postgres server-side — no api-server round-trip.
   const enterpriseOrdersPromise = selectOrdersPage({
-    filters: toOrderQueryFilters({ filters }),
+    filters: toQueryFilters({ filters }),
     limit: INITIAL_PAGE_SIZE,
     offset: 0,
     sort: toOrderQuerySort({ sorting: effectiveSorting }),

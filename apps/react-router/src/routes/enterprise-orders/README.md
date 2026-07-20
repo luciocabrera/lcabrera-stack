@@ -92,14 +92,15 @@ Reads go through the generic `@repo/data-access` query builders/executors (no
 api-server). `server/enterpriseOrders.service.ts` exposes `selectOrdersPage`
 (list + count), `selectOrderById`, `getNextOrderId`, `insertOrder`,
 `updateOrder`, `deleteOrder`. The table's `ColumnFiltersState`/`SortingState`
-are translated to generic `QueryFilter[]`/`QuerySort[]` by the `config/`
-`toOrderQueryFilters` / `toOrderQuerySort` utils; the browser load-more calls
-`fetchOrdersPage` → the `_api/enterprise-orders/paginated` resource route.
+are translated to generic `QueryFilter[]`/`QuerySort[]` by the generic
+`@repo/data-access/filters` `toQueryFilters` mapper (table-agnostic, shared by
+any table) and the app-local `config/toOrderQuerySort` util; the browser
+load-more calls `fetchOrdersPage` → the `_api/enterprise-orders/paginated`
+resource route.
 
-> Filter translation note: the generic `QueryFilter` operator set has no
-> `NOT ILIKE`, so a text **notContains** filter is dropped (the column is left
-> unfiltered). Every other operator — including range (`between`) and
-> multi-select NOT-IN — is preserved.
+> Filter translation note: every table filter operator maps to SQL — range
+> (`between`), multi-select NOT-IN, and text **notContains** (now `NOT ILIKE`,
+> via the generic `notIlike` operator) are all preserved.
 
 ## Columns (31 displayed by default)
 

@@ -1,5 +1,5 @@
-import type { QueryFilter } from '@repo/data-access/db/queryBuilder/QueryBuilder.types';
-import type { TextFilter } from '@repo/ui/types/filterOperators.types';
+import type { QueryFilter } from '../db/queryBuilder/QueryBuilder.types.ts';
+import type { TextFilter } from './columnFilter.types.ts';
 
 export type ToTextQueryFiltersArgs = {
   readonly column: string;
@@ -8,9 +8,9 @@ export type ToTextQueryFiltersArgs = {
 
 /**
  * Translate a table text filter to generic `QueryFilter`s. `contains`,
- * `startsWith` and `endsWith` map to `ilike` patterns; `equals`/`notEquals` to
- * `eq`/`neq`. `notContains` (NOT ILIKE) has no equivalent in the generic
- * operator set and is intentionally dropped (the column is left unfiltered).
+ * `startsWith` and `endsWith` map to `ilike` patterns; `notContains` to a
+ * `notIlike` (`NOT ILIKE`) pattern; `equals`/`notEquals` to `eq`/`neq`. An
+ * empty value yields nothing.
  */
 export const toTextQueryFilters = ({
   column,
@@ -29,8 +29,8 @@ export const toTextQueryFilters = ({
     case 'endsWith': {
       return [{ column, operator: 'ilike', value: `%${value}` }];
     }
-    case 'equals': {
-      return [{ column, operator: 'eq', value }];
+    case 'notContains': {
+      return [{ column, operator: 'notIlike', value: `%${value}%` }];
     }
     case 'notEquals': {
       return [{ column, operator: 'neq', value }];
@@ -39,8 +39,8 @@ export const toTextQueryFilters = ({
       return [{ column, operator: 'ilike', value: `${value}%` }];
     }
     default: {
-      // notContains — NOT ILIKE is not expressible generically; drop it.
-      return [];
+      // 'equals'
+      return [{ column, operator: 'eq', value }];
     }
   }
 };
