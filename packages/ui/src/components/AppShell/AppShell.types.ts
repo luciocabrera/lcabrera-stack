@@ -1,3 +1,4 @@
+import type { NavigationSessionActions } from '@/components/AppNavigation/AppNavigation.types';
 import type { NavbarItemConfig } from '@/components/Navbar/Navbar.types';
 
 export type AppShellProps = {
@@ -5,4 +6,10 @@ export type AppShellProps = {
   readonly getNavigationItems: (
     iconSize: number,
   ) => readonly NavbarItemConfig[];
+  /**
+   * Optional session-action slot rendered in the navigation footer (e.g. a
+   * logout control). A render-prop so it can adapt to the sidebar's collapsed
+   * state — see `NavigationSessionActions`.
+   */
+  readonly sessionActions?: NavigationSessionActions;
 };

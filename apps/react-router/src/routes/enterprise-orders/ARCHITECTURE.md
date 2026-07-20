@@ -11,7 +11,11 @@ Enterprise table route for large-order operational data with a dedicated constan
   so the list and the `new` / `edit/:orderId` / `view/:orderId` child modal routes
   require authentication — unauthenticated requests are redirected to
   `/login?redirectTo=<url>`. The create/edit actions read the authenticated user from
-  `context.get(authContext)` and record it in `last_modified_by`.
+  `context.get(authContext)` and record it in `last_modified_by`. The two **resource
+  routes** that back the table — `_action/enterprise-orders/delete` (delete action) and
+  `_api/enterprise-orders/paginated` (load-more loader) — apply the same
+  `middleware = [authMiddleware]`, so the mutation and data endpoints are guarded too,
+  not just the UI subtree.
 
 ## Constants Responsibilities
 

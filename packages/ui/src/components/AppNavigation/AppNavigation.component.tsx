@@ -25,6 +25,7 @@ import { isNavigationPinned } from './utils';
 export const AppNavigation = ({
   defaultIsPinned = true,
   getNavigationItems,
+  sessionActions,
 }: AppNavigationProps) => {
   const navigationCollapsedPreference =
     useGetGlobalNavigationCollapsedPreference();
@@ -62,7 +63,11 @@ export const AppNavigation = ({
     >
       <NavigationHeader isPinned={isPinned} onClose={handleClose} />
       <NavigationBody getNavigationItems={getNavigationItems} />
-      <NavigationFooter isDarkMode={isDarkMode} onToggleTheme={toggleTheme} />
+      <NavigationFooter
+        isDarkMode={isDarkMode}
+        onToggleTheme={toggleTheme}
+        sessionActions={sessionActions}
+      />
     </SidePanel>
   );
 

@@ -20,3 +20,6 @@ export const DEFAULT_AUTHENTICATED_REDIRECT = '/';
 
 /** The login route path, used to build guard redirects. */
 export const LOGIN_ROUTE = '/login';
+
+/** The logout route path — a POST-only action that clears the auth cookie. */
+export const LOGOUT_ROUTE = '/logout';

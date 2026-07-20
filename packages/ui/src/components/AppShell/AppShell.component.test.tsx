@@ -1,5 +1,7 @@
 // @vitest-environment jsdom
 
+import type { ReactNode } from 'react';
+
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -22,9 +24,18 @@ vi.mock('react-router', async () => {
 vi.mock('@repo/ui/components/AppNavigation', () => ({
   AppNavigation: ({
     getNavigationItems,
+    sessionActions,
   }: {
     readonly getNavigationItems: () => readonly unknown[];
-  }) => <div data-testid='app-navigation'>{getNavigationItems().length}</div>,
+    readonly sessionActions?: (args: {
+      readonly isCollapsed: boolean;
+    }) => ReactNode;
+  }) => (
+    <div data-testid='app-navigation'>
+      {getNavigationItems().length}
+      {sessionActions?.({ isCollapsed: false })}
+    </div>
+  ),
 }));
 
 vi.mock('@repo/ui/components/NotificationCenter', () => ({
@@ -71,5 +82,20 @@ describe('AppShell', () => {
 
     expect(screen.getByTestId('app-navigation').textContent).toBe('1');
     expect(getNavigationItemsMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('forwards the sessionActions slot to AppNavigation', () => {
+    render(
+      <AppShell
+        getNavigationItems={getNavigationItemsMock}
+        sessionActions={({ isCollapsed }) => (
+          <span data-testid='session'>
+            {isCollapsed ? 'collapsed' : 'expanded'}
+          </span>
+        )}
+      />,
+    );
+
+    expect(screen.getByTestId('session').textContent).toBe('expanded');
   });
 });

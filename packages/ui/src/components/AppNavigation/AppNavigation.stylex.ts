@@ -65,8 +65,10 @@ export const styles = stylex.create({
     padding: spacing.md,
   },
   footer: {
+    gap: spacing.sm,
     alignItems: 'center',
     display: 'flex',
+    flexDirection: 'column',
     justifyContent: 'center',
     width: '100%',
   },
