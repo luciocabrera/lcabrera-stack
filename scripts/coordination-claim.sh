@@ -44,6 +44,7 @@ id=""; title=""; branch=""; worktree=0; dry=0; issue=""; new_issue=0; areas=()
 while [[ $# -gt 0 ]]; do
   arg="$1"
   case "$arg" in
+    --)          shift ;; # end-of-options separator (e.g. `vp run … -- <id>`)
     --issue)     issue="${2#\#}"; shift 2 ;;
     --new-issue) new_issue=1; shift ;;
     --area)      areas+=("$2"); shift 2 ;;
