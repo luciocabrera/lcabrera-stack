@@ -23,6 +23,9 @@ export type OrderFieldArgs<T extends OrderBaseFieldType> =
     readonly type: T;
   };
 
+// TODO: Consider moving this util to the shared `@repo/ui` package, since it is used in multiple apps.
+// make sure we make it generic enough to be used in other apps, not just enterprise-orders
+
 /**
  * Build a base leaf field (text/email/number/currency/date/textarea…). Bakes
  * the structural keys and assembles `clientValidation` from flat rules, so a
