@@ -106,6 +106,29 @@ const UI_PUBLIC_IMPORT_BOUNDARY_PATTERNS = [
   },
 ];
 
+// Runtime database access is server-only. Match the whole `@repo/data-access/db`
+// import path — not individual utils, which drift as they are added and removed —
+// plus the raw `pg` driver, and cover both direct imports and barrel re-exports.
+// Type-only imports are erased at compile time, so they stay allowed (e.g. the
+// `QueryBuilder.types` the pure `db/queryBuilder/*` builders share); the guard is
+// on runtime access, which is what pulls the DB connection into the bundle.
+const SERVER_ONLY_DB_MESSAGE =
+  'Direct database access is server-only (the pg driver and @repo/data-access/db runtime helpers). Move this import to a `.server.ts` file or a `.server/` directory — or reach it through a server-only module.';
+
+const DB_IMPORT_BOUNDARY_RESTRICTIONS = [
+  'ImportDeclaration',
+  'ExportAllDeclaration',
+  'ExportNamedDeclaration',
+].flatMap((declaration) => {
+  const kind =
+    declaration === 'ImportDeclaration' ? 'importKind' : 'exportKind';
+
+  return [
+    String.raw`${declaration}[${kind}!='type'][source.value=/^@repo\/data-access\/db\//]`,
+    `${declaration}[${kind}!='type'][source.value='pg']`,
+  ].map((selector) => ({ message: SERVER_ONLY_DB_MESSAGE, selector }));
+});
+
 const CLIENT_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS = [
   {
     message:
@@ -133,6 +156,7 @@ const CLIENT_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS = [
       'The @repo/ui/server entrypoint is server-only and must not be imported from client/shared files.',
     selector: "ImportDeclaration[source.value='@repo/ui/server']",
   },
+  ...DB_IMPORT_BOUNDARY_RESTRICTIONS,
 ];
 
 export const createCustomRulesLintConfig = async ({
@@ -284,6 +308,11 @@ export const createCustomRulesLintConfig = async ({
               'src/entry.server.tsx',
               'src/**/*.server.ts',
               'src/**/*.server.tsx',
+              // A `.server/` directory is a React Router server-only module
+              // (every file inside is stripped from the client bundle), so the
+              // server-only import bans do not apply to its contents — the same
+              // exemption the `.server.ts` suffix gets.
+              'src/**/.server/**',
             ],
             rules: {
               'no-restricted-syntax': [
