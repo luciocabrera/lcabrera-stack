@@ -9,88 +9,86 @@
  * an allow/deny decision, with no I/O, so it is trivially unit-testable and the
  * entry script (`claude-secrets-guard.mjs`) stays a thin stdin→stdout shell.
  *
- * The file-path taxonomy and per-tool path extraction are a faithful port of
- * ADR-020 (packages/agent-runner/src/isSecretFilePath.util.ts and
- * collectToolInputPaths.util.ts) so the two guards agree on what "secret" means;
- * the `--selftest` cases in the entry mirror that package's tests to keep parity.
- * The write-content scanner is new (ADR-020 does not scan writes).
+ * The secret-file policy is the SAME as ADR-020
+ * (packages/agent-runner/src/isSecretFilePath.util.ts) — the two guards must
+ * agree on what "secret" means. It is an INDEPENDENT implementation, not a
+ * shared module: the CLI hook is bare-node `.mjs` and the SDK guard is TS, so
+ * sharing one module would couple a security control to another package's
+ * internals or to the experimental TS loader. Each runtime is instead locked to
+ * the shared spec by its own tests (here: the entry's `--selftest`, mirroring
+ * secretFileGuardHook.util.test.ts). Keep the taxonomy VALUES in sync.
  *
  * Governed by .claude/rules/scripts.md.
  */
 import { basename } from 'node:path';
 
-// ---- file-path taxonomy (ADR-020: isSecretFilePath.util.ts) -----------------
+// ---- secret-file taxonomy (spec: ADR-020) -----------------------------------
 
-// `.env.<suffix>` variants that are documentation/templates by convention,
-// never real credentials — the only carve-outs from the .env family.
-const SAFE_ENV_SUFFIXES = new Set(['.example', '.sample', '.template']);
-const SECRET_BASENAMES = new Set([
-  '.dockercfg',
-  '.envrc',
-  '.git-credentials',
-  '.netrc',
-  '.npmrc',
-  '.pgpass',
-  'credentials',
-  'credentials.json',
-]);
-const SECRET_EXTENSIONS = new Set(['.key', '.p12', '.pem', '.pfx']);
-const SECRET_KEY_PREFIXES = ['id_dsa', 'id_ecdsa', 'id_ed25519', 'id_rsa'];
+const SECRET_FILE = {
+  // `.env.<suffix>` variants that are templates by convention, never real
+  // credentials — the only carve-outs from the .env family.
+  envTemplateSuffixes: ['.example', '.sample', '.template'],
+  credentialBasenames: [
+    '.dockercfg',
+    '.envrc',
+    '.git-credentials',
+    '.netrc',
+    '.npmrc',
+    '.pgpass',
+    'credentials',
+    'credentials.json',
+  ],
+  keyMaterialExtensions: ['.key', '.p12', '.pem', '.pfx'],
+  sshKeyPrefixes: ['id_dsa', 'id_ecdsa', 'id_ed25519', 'id_rsa'],
+};
+
+const fileExtension = (name) =>
+  name.includes('.') ? name.slice(name.lastIndexOf('.')) : '';
 
 /** Name-based: does this path point at a credential-bearing file? */
-const isSecretFilePath = (candidatePath) => {
-  const name = basename(String(candidatePath).trim()).toLowerCase();
+const isSecretFilePath = (candidate) => {
+  const name = basename(String(candidate).trim()).toLowerCase();
   if (name.length === 0) {
     return false;
   }
-  if (name.startsWith('.env.')) {
-    return !SAFE_ENV_SUFFIXES.has(name.slice('.env'.length));
+  if (name === '.env' || name.endsWith('.env') || name.startsWith('.env.')) {
+    const suffix = name.startsWith('.env.') ? name.slice('.env'.length) : '';
+    return !SECRET_FILE.envTemplateSuffixes.includes(suffix);
   }
-  if (name === '.env' || name.endsWith('.env')) {
-    return true;
-  }
-  if (SECRET_BASENAMES.has(name)) {
-    return true;
-  }
-  if (SECRET_KEY_PREFIXES.some((prefix) => name.startsWith(prefix))) {
-    return true;
-  }
-  const dotIndex = name.lastIndexOf('.');
-  const extension = dotIndex === -1 ? '' : name.slice(dotIndex);
-  return SECRET_EXTENSIONS.has(extension);
+  return (
+    SECRET_FILE.credentialBasenames.includes(name) ||
+    SECRET_FILE.sshKeyPrefixes.some((prefix) => name.startsWith(prefix)) ||
+    SECRET_FILE.keyMaterialExtensions.includes(fileExtension(name))
+  );
 };
 
-// ---- per-tool path extraction (ADR-020: collectToolInputPaths.util.ts) ------
+// ---- per-tool candidate paths (spec: ADR-020) -------------------------------
 
 // Grep's `pattern` is deliberately absent — it is a CONTENT regex (grepping
 // source for the string ".env" is legitimate); its glob/path fields are paths.
-const PATH_FIELDS_BY_TOOL = {
+const TOOL_PATH_FIELDS = {
   Glob: ['path', 'pattern'],
   Grep: ['glob', 'path'],
   Read: ['file_path'],
 };
+// Split a Bash command into tokens; `=` is a separator so `--env-file=.env`
+// yields the `.env` token.
+const BASH_TOKEN_SPLIT = /[\s"'`;|&<>()=]+/;
 const GLOB_WILDCARDS = /[*?[\]]/g;
-const BASH_SEPARATORS = /[\s"'`;|&<>()]+/;
 
-const collectToolInputPaths = ({ toolInput, toolName }) => {
+const candidatePathsFor = ({ toolInput, toolName }) => {
   if (!toolInput || typeof toolInput !== 'object') {
     return [];
   }
   if (toolName === 'Bash') {
     const command =
       typeof toolInput.command === 'string' ? toolInput.command : '';
-    return command
-      .split(BASH_SEPARATORS)
-      .flatMap((token) => token.split('='))
-      .filter((fragment) => fragment.length > 0);
+    return command.split(BASH_TOKEN_SPLIT).filter((token) => token.length > 0);
   }
-  const pathFields = PATH_FIELDS_BY_TOOL[toolName] ?? [];
-  return pathFields.flatMap((field) => {
-    const value = toolInput[field];
-    return typeof value === 'string'
-      ? [value.replaceAll(GLOB_WILDCARDS, '')]
-      : [];
-  });
+  return (TOOL_PATH_FIELDS[toolName] ?? [])
+    .map((field) => toolInput[field])
+    .filter((value) => typeof value === 'string')
+    .map((value) => value.replace(GLOB_WILDCARDS, ''));
 };
 
 // ---- content secret patterns ------------------------------------------------
@@ -111,12 +109,12 @@ const PROVIDER_PATTERNS = [
   {
     id: 'github-fine-grained-pat',
     description: 'GitHub fine-grained PAT',
-    re: /\bgithub_pat_[A-Za-z0-9_]{22,}\b/,
+    re: /\bgithub_pat_\w{22,}\b/,
   },
   {
     id: 'openai-key',
     description: 'OpenAI-style secret key',
-    re: /\bsk-(?:proj-)?[A-Za-z0-9_-]{20,}\b/,
+    re: /\bsk-(?:proj-)?[\w-]{20,}\b/,
   },
   {
     id: 'stripe-live-key',
@@ -136,12 +134,12 @@ const PROVIDER_PATTERNS = [
   {
     id: 'google-api-key',
     description: 'Google API key',
-    re: /\bAIza[0-9A-Za-z_-]{35}\b/,
+    re: /\bAIza[\w-]{35}\b/,
   },
   {
     id: 'google-oauth-token',
     description: 'Google OAuth token',
-    re: /\bya29\.[0-9A-Za-z_-]{20,}/,
+    re: /\bya29\.[\w-]{20,}/,
   },
   {
     id: 'npm-token',
@@ -156,30 +154,61 @@ const PROVIDER_PATTERNS = [
   {
     id: 'jwt',
     description: 'JSON Web Token',
-    re: /\beyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{6,}\.[A-Za-z0-9_-]{10,}\b/,
+    re: /\beyJ[\w-]{10,}\.eyJ[\w-]{6,}\.[\w-]{10,}\b/,
   },
 ];
 
-// Generic assignments — only trusted when the VALUE is itself high-entropy and
-// not a placeholder, and only outside the exempt paths below (the repo's whole
-// false-positive surface is test fixtures + the guard's own constant tables).
-const GENERIC_PATTERNS = [
-  {
-    id: 'hardcoded-secret-assignment',
-    description: 'hardcoded secret assignment',
-    re: /(?:password|passwd|pwd|secret|token|api[_-]?key|access[_-]?key|client[_-]?secret|private[_-]?key|auth[_-]?token)["']?\s*[:=]\s*["']([^"'\s]{16,})["']/i,
-  },
-  {
-    id: 'high-entropy-env-value',
-    description: 'high-entropy env assignment',
-    re: /^\s*[A-Z][A-Z0-9_]{2,}\s*=\s*([A-Za-z0-9+/=._-]{20,})\s*$/,
-  },
+// A `key = "value"` / `"key": "value"` assignment. The key-name test is done in
+// JS (below), not baked into a huge regex alternation — simpler and extensible.
+const ASSIGNMENT = /([A-Za-z][\w-]*)["']?\s*[:=]\s*["']([^"'\s]{16,})["']/;
+const ENV_ASSIGNMENT =
+  /^\s*[A-Z][A-Z0-9_]{2,}\s*=\s*([A-Za-z0-9+/=._-]{20,})\s*$/;
+
+// Key names (normalized: lowercased, separators stripped) that mark a value as
+// credential-bearing when it is also high-entropy.
+const SECRET_KEY_HINTS = [
+  'password',
+  'passwd',
+  'pwd',
+  'secret',
+  'token',
+  'apikey',
+  'accesskey',
+  'clientsecret',
+  'privatekey',
+  'authtoken',
+  'credential',
+];
+// Value prefixes that mark an obvious placeholder rather than a real secret.
+const PLACEHOLDER_WORDS = [
+  'your',
+  'my',
+  'the',
+  'a',
+  'an',
+  'example',
+  'sample',
+  'test',
+  'dummy',
+  'fake',
+  'changeme',
+  'placeholder',
+  'redacted',
+  'secret',
+  'token',
+  'password',
+  'value',
+  'todo',
+  'none',
+  'null',
+  'undefined',
+  'xxx',
+  'foo',
+  'bar',
 ];
 
 const ALLOW_MARKER =
   /gitleaks:allow|pragma:\s*allowlist secret|secrets-guard:\s*allow/i;
-const PLACEHOLDER =
-  /^(?:your|my|the|an?|example|sample|test|dummy|fake|changeme|change_me|placeholder|redacted|secret|token|password|value|todo|none|null|undefined|xxx+|abc|foo|bar|baz)\b/i;
 const FORMAT_HINT = /[<>]|\$\{|\bhere\b/i;
 const FILLER_ONLY = /^[x*.\s_-]+$/i;
 
@@ -199,16 +228,48 @@ const shannonEntropy = (value) => {
   }, 0);
 };
 
-const isPlaceholderValue = (value) =>
-  value.length === 0 ||
-  PLACEHOLDER.test(value) ||
-  FORMAT_HINT.test(value) ||
-  FILLER_ONLY.test(value);
+// `word` followed by a word boundary (mirrors the old /word\b/): the next char
+// must be absent or a non-word char.
+const startsWithWord = ({ text, word }) => {
+  if (!text.startsWith(word)) {
+    return false;
+  }
+  const nextChar = text.charAt(word.length);
+  return nextChar === '' || /\W/.test(nextChar);
+};
+
+const isPlaceholderValue = (value) => {
+  const lower = value.toLowerCase();
+  return (
+    value.length === 0 ||
+    FORMAT_HINT.test(value) ||
+    FILLER_ONLY.test(value) ||
+    PLACEHOLDER_WORDS.some((word) => startsWithWord({ text: lower, word }))
+  );
+};
 
 const looksLikeRealSecret = (value) =>
   value.length >= 16 &&
   !isPlaceholderValue(value) &&
   shannonEntropy(value) >= 4;
+
+const genericSecretValue = (line) => {
+  const assignment = ASSIGNMENT.exec(line);
+  if (assignment) {
+    const normalizedKey = assignment[1].toLowerCase().replace(/[_-]/g, '');
+    const value = assignment[2];
+    if (
+      SECRET_KEY_HINTS.some((hint) => normalizedKey.includes(hint)) &&
+      looksLikeRealSecret(value)
+    ) {
+      return value;
+    }
+  }
+  const envValue = ENV_ASSIGNMENT.exec(line)?.[1];
+  return envValue !== undefined && looksLikeRealSecret(envValue)
+    ? envValue
+    : undefined;
+};
 
 // Paths where the entropy-based generic rules do more harm than good: test
 // fixtures, doc/decision records, and the secret-guard sources themselves all
@@ -224,7 +285,7 @@ const isGenericScanExempt = (filePath) => {
   );
 };
 
-const matchLine = ({ line, lineNumber, allowGeneric }) => {
+const matchLine = ({ allowGeneric, line, lineNumber }) => {
   if (ALLOW_MARKER.test(line)) {
     return [];
   }
@@ -235,16 +296,17 @@ const matchLine = ({ line, lineNumber, allowGeneric }) => {
     line: lineNumber,
     ruleId: rule.id,
   }));
-  if (!allowGeneric) {
+  if (!allowGeneric || genericSecretValue(line) === undefined) {
     return providerHits;
   }
-  const genericHits = GENERIC_PATTERNS.flatMap((rule) => {
-    const captured = rule.re.exec(line)?.[1];
-    return captured !== undefined && looksLikeRealSecret(captured)
-      ? [{ description: rule.description, line: lineNumber, ruleId: rule.id }]
-      : [];
-  });
-  return [...providerHits, ...genericHits];
+  return [
+    ...providerHits,
+    {
+      description: 'hardcoded secret',
+      line: lineNumber,
+      ruleId: 'generic-secret',
+    },
+  ];
 };
 
 /** Scan write content; returns one finding per matched line/rule. */
@@ -291,7 +353,7 @@ export const evaluatePreToolUse = ({ hookEventName, toolInput, toolName }) => {
   }
 
   // 1) Deterministic read/exfil guard — Read/Grep/Glob and Bash tokens.
-  const blockedPath = collectToolInputPaths({ toolInput, toolName }).find(
+  const blockedPath = candidatePathsFor({ toolInput, toolName }).find(
     (candidate) => isSecretFilePath(candidate),
   );
   if (blockedPath !== undefined) {
