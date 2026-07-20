@@ -190,7 +190,22 @@ curl -G "http://localhost:3000/_api/enterprise-orders/paginated" \
 ```
 
 Unit tests cover the pure translation utils, the param parser, the fetcher, the
-resource loader, and the service (`vp run test`).
+resource loader, and the service (`vp run test`) — all with the pg pool and fetch
+mocked, so they need no database.
+
+A **live-DB smoke test** (`server/enterpriseOrders.smoke.test.ts`) covers what the
+mocks can't: the demo-login credential check against the env-configured hash, and a
+real create → read → update → list/count → delete round-trip through the generic
+`@repo/data-access` builders. It is **gated behind `SMOKE_DB`** so the default
+`vp run test` and the DB-less CI unit job skip it. Run it against a local Postgres:
+
+```bash
+vp run db:up          # once, from the repo root
+vp run test:smoke     # from apps/react-router — sources DB_* + sets SMOKE_DB
+```
+
+The suite deletes the single row it creates (the delete is part of the flow), so it
+is safe to re-run.
 
 ## Next Steps
 
