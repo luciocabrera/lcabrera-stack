@@ -65,11 +65,31 @@ const MAX_PAGES = 20;
 
 // --- pure helpers ---------------------------------------------------------
 
+/**
+ * Flags that simply flip a boolean, and flags that consume the next argv value.
+ * Table-driven so adding a flag is a table entry, not another branch: this
+ * function is on the strictest cognitive-complexity budget in the repo and a
+ * per-flag `if` chain had already outgrown it.
+ */
+const BOOLEAN_FLAGS = new Map([
+  ['--gate', 'gate'],
+  ['--fail-on-issues', 'failOnIssues'],
+  ['--wait', 'wait'],
+  ['--require-token', 'requireToken'],
+]);
+
+const VALUE_FLAGS = new Map([
+  ['--pr', 'pr'],
+  ['--branch', 'branch'],
+  ['--since', 'since'],
+]);
+
 const parseArgs = (argv) => {
   const args = {
     gate: false,
     failOnIssues: false,
     wait: false,
+    requireToken: false,
     pr: undefined,
     branch: undefined,
     since: undefined,
@@ -77,34 +97,21 @@ const parseArgs = (argv) => {
   const queue = [...argv];
   while (queue.length > 0) {
     const flag = queue.shift();
-    if (flag === '--') continue;
-    if (flag === '--gate') {
-      args.gate = true;
+    const booleanKey = BOOLEAN_FLAGS.get(flag);
+    if (booleanKey !== undefined) {
+      args[booleanKey] = true;
       continue;
     }
-    if (flag === '--fail-on-issues') {
-      args.failOnIssues = true;
+    const valueKey = VALUE_FLAGS.get(flag);
+    if (valueKey !== undefined) {
+      args[valueKey] = queue.shift();
       continue;
     }
-    if (flag === '--wait') {
-      args.wait = true;
-      continue;
+    if (flag !== '--') {
+      throw new Error(
+        `unknown argument: ${flag} (see the header comment for usage)`,
+      );
     }
-    if (flag === '--pr') {
-      args.pr = queue.shift();
-      continue;
-    }
-    if (flag === '--branch') {
-      args.branch = queue.shift();
-      continue;
-    }
-    if (flag === '--since') {
-      args.since = queue.shift();
-      continue;
-    }
-    throw new Error(
-      `unknown argument: ${flag} (see the header comment for usage)`,
-    );
   }
   return args;
 };
@@ -385,7 +392,16 @@ const main = async () => {
 
   const token = process.env.SONAR_TOKEN;
   if (!token) {
-    printNoToken(args.gate);
+    printNoToken(args.gate && !args.requireToken);
+    if (args.requireToken) {
+      console.error(
+        'SONAR_TOKEN is required in this context but was not provided — ' +
+          'refusing to report a gate as passing when it never ran. ' +
+          'Pass --require-token only where the secret is available ' +
+          '(same-repo pull requests); fork PRs must omit it.',
+      );
+      process.exitCode = 1;
+    }
     return;
   }
 

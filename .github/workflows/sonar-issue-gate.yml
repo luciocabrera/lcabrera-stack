@@ -6,8 +6,10 @@ name: Sonar Issue Gate
 # closes that gap: it fails the PR on ANY open Sonar issue, using the repo's
 # sonar-report.mjs. `--wait` polls the Compute Engine until THIS commit's
 # analysis has finished (Automatic Analysis runs async, in parallel with CI), so
-# it never races; on timeout it skips rather than blocks. Without a token (fork
-# PRs) the script skips and the job stays green.
+# it never races; on timeout it skips rather than blocks. Fork PRs get no
+# secrets, so the script skips there and the job stays green — but on a
+# same-repo PR a missing token now FAILS (--require-token) instead of reporting
+# this required check green without having run.
 
 on:
   pull_request:
@@ -34,5 +36,13 @@ jobs:
         run: |
           SINCE="$(git show -s --format=%cI HEAD)"
           echo "PR #${{ github.event.pull_request.number }} head committed at $SINCE"
-          node scripts/sonar-report.mjs --gate --fail-on-issues \
+          # --require-token on same-repo PRs only: there the secret IS available,
+          # so a missing one is a misconfiguration and must fail rather than
+          # report this required check green without ever running. Fork PRs get
+          # no secrets by design, so they omit it and still skip cleanly.
+          REQUIRE_TOKEN=""
+          if [ "${{ github.event.pull_request.head.repo.full_name }}" = "${{ github.repository }}" ]; then
+            REQUIRE_TOKEN="--require-token"
+          fi
+          node scripts/sonar-report.mjs --gate --fail-on-issues $REQUIRE_TOKEN \
             --pr "${{ github.event.pull_request.number }}" --wait --since "$SINCE"

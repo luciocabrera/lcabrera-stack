@@ -73,8 +73,8 @@ jobs:
         env:
           TEST_CHANGED_BASE: origin/${{ github.base_ref }}
         run: |
-          git diff --name-only "$(git merge-base "$TEST_CHANGED_BASE" HEAD)" \
-            | node scripts/run-changed.mjs typecheck --markdown >> "$GITHUB_STEP_SUMMARY"
+          bash scripts/changed-files.sh \
+            node scripts/run-changed.mjs typecheck --markdown >> "$GITHUB_STEP_SUMMARY"
 
       - name: ESLint custom-rules pass
         id: eslint_gate
@@ -237,8 +237,7 @@ jobs:
         env:
           TEST_CHANGED_BASE: origin/${{ github.base_ref }}
         run: |
-          git diff --name-only "$(git merge-base "$TEST_CHANGED_BASE" HEAD)" \
-            | node scripts/merge-coverage.mjs --changed
+          bash scripts/changed-files.sh node scripts/merge-coverage.mjs --changed
 
       - name: Fallow audit vs base branch
         id: fallow_audit
@@ -335,8 +334,8 @@ jobs:
         env:
           TEST_CHANGED_BASE: origin/${{ github.base_ref }}
         run: |
-          git diff --name-only "$(git merge-base "$TEST_CHANGED_BASE" HEAD)" \
-            | node scripts/test-changed.mjs --ci --markdown \
+          bash scripts/changed-files.sh \
+            node scripts/test-changed.mjs --ci --markdown \
             | tee test-selection.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Post test selection to PR
@@ -393,8 +392,7 @@ jobs:
           TEST_CHANGED_BASE: origin/${{ github.base_ref }}
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            git diff --name-only "$(git merge-base "$TEST_CHANGED_BASE" HEAD)" \
-              | node scripts/coverage-report.mjs --changed
+            bash scripts/changed-files.sh node scripts/coverage-report.mjs --changed
           else
             vp run coverage:report
           fi
