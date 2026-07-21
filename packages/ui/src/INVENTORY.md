@@ -9,7 +9,12 @@ Before creating anything new, check this inventory. If something here does the j
 
 Private delegates are catalogued here on purpose — reuse or lift one before writing a duplicate — but treat them as internal: prefer enhancing or relocating over importing them across unrelated modules.
 
-Covers `packages/ui` only. API-layer utilities (`api.util.ts`, `buildPaginatedQueryParams`, `fetchAndValidate`, `api.constants.ts`, `api.types.ts`), Postgres-access utilities (`db/env.schema.ts`, `db/getPool.util.ts`), and the generic SQL query builder (`db/queryBuilder/`) live in `@repo/data-access` (`packages/data-access/src/`) — see its own `src/INVENTORY.md`. App-local artifacts (routes, route-specific services) are tracked in each app's own `src/INVENTORY.md`.
+Covers `packages/ui` only. Two sibling packages own what used to be listed here, split by runtime:
+
+- **`@repo/api`** (`packages/api/src/`) — browser-safe HTTP: `fetch-and-validate.util.ts`, `build-paginated-query-params.util.ts`, base-URL resolution, and the distinct-values client.
+- **`@repo/server`** (`packages/server/src/`) — Node-only: Postgres access (`db/env.schema.ts`, `db/get-pool.util.ts`), the generic SQL query builder (`db/query-builder/`), query filters, and the credential primitives under `crypto/` and `tokens/`.
+
+Each has its own `src/INVENTORY.md`. App-local artifacts (routes, route-specific services) are tracked in each app's own `src/INVENTORY.md`.
 
 ---
 
@@ -370,7 +375,7 @@ Per-capability command **identity** + **enablement derivation**, defined once an
 | -------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
 | `createStaticFilterOptions`      | `utils/filters/createStaticFilterOptions.util.ts`      | Emits a serializable `{ kind: 'static', values }` filter-options descriptor for build-time enum lists (ADR-009) |
 | `getFilterOptionsBaseUrl`        | `utils/filters/getFilterOptionsBaseUrl.util.ts`        | Resolves a descriptor transport (`bff`/`loader`) to its request base URL                                        |
-| `resolveDistinctFilterOptions`   | `utils/filters/resolveDistinctFilterOptions.util.ts`   | Executor for `kind: 'distinct'` descriptors — pages via `@repo/data-access/api` `fetchDistinctValues`           |
+| `resolveDistinctFilterOptions`   | `utils/filters/resolveDistinctFilterOptions.util.ts`   | Executor for `kind: 'distinct'` descriptors — pages via `@repo/api` `fetchDistinctValues`                       |
 | `resolveFilterOptionsDescriptor` | `utils/filters/resolveFilterOptionsDescriptor.util.ts` | The client tool: dispatches a descriptor to its executor, yielding the `useFetchFilterData` contract            |
 | `resolveStaticFilterOptions`     | `utils/filters/resolveStaticFilterOptions.util.ts`     | Executor for `kind: 'static'` descriptors — serves pages by slicing baked values client-side                    |
 

@@ -1,5 +1,5 @@
-import { closePool, getPool } from '@repo/data-access/db/getPool.util';
 import { getUserByUsername } from '@repo/scan-ingestion/queries/getUserByUsername.util';
+import { closePool, getPool } from '@repo/server/db/get-pool.util';
 import { randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 

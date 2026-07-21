@@ -14,7 +14,7 @@
  *
  * Check 2 is the one that matters and it did not exist. Check 1 only followed
  * paths starting with `.`, so it never crossed a package boundary: it reported
- * PASS while `@repo/ui` depended on `@repo/data-access`, which depends on `pg`
+ * PASS while `@repo/ui` depended on `@repo/server`, which depends on `pg`
  * and imports `node:crypto` — meaning anyone installing `@repo/ui` pulled a
  * Postgres driver into their dependency graph. A guard that answers a narrower
  * question than the one it appears to answer is worse than no guard, because it

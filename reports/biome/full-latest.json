@@ -1,16 +1,16 @@
 {
   "summary": {
     "changed": 0,
-    "unchanged": 2842,
+    "unchanged": 3101,
     "matches": 0,
-    "duration": 175276281,
+    "duration": 255168395,
     "errors": 0,
     "warnings": 0,
     "infos": 0,
     "skipped": 0,
     "suggestedFixesSkipped": 0,
     "diagnosticsNotPrinted": 0,
-    "scannerDuration": 211862725
+    "scannerDuration": 296862469
   },
   "diagnostics": [],
   "command": "lint"

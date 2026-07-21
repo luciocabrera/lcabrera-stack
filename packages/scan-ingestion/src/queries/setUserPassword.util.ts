@@ -1,5 +1,5 @@
-import { hashSecret } from '@repo/data-access/crypto/hashSecret.util';
-import { getPool } from '@repo/data-access/db/getPool.util';
+import { hashSecret } from '@repo/server/crypto/hash-secret.util';
+import { getPool } from '@repo/server/db/get-pool.util';
 
 type SetUserPasswordArgs = {
   readonly password: string;

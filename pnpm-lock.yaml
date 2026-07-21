@@ -425,9 +425,9 @@ importers:
       '@repo/api':
         specifier: workspace:*
         version: link:../../packages/api
-      '@repo/data-access':
+      '@repo/server':
         specifier: workspace:*
-        version: link:../../packages/data-access
+        version: link:../../packages/server
       '@repo/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -558,15 +558,15 @@ importers:
       '@repo/agent-runner':
         specifier: workspace:*
         version: link:../../packages/agent-runner
-      '@repo/data-access':
-        specifier: workspace:*
-        version: link:../../packages/data-access
       '@repo/node-runtime':
         specifier: workspace:*
         version: link:../../packages/node-runtime
       '@repo/scan-ingestion':
         specifier: workspace:*
         version: link:../../packages/scan-ingestion
+      '@repo/server':
+        specifier: workspace:*
+        version: link:../../packages/server
       pg:
         specifier: 'catalog:'
         version: 8.22.0
@@ -610,9 +610,9 @@ importers:
       '@repo/api':
         specifier: workspace:*
         version: link:../../packages/api
-      '@repo/data-access':
+      '@repo/server':
         specifier: workspace:*
-        version: link:../../packages/data-access
+        version: link:../../packages/server
     devDependencies:
       '@repo/vite-configs':
         specifier: workspace:*
@@ -670,43 +670,6 @@ importers:
       '@repo/vite-configs':
         specifier: workspace:*
         version: link:../vite-configs
-      '@vitest/coverage-v8':
-        specifier: 'catalog:'
-        version: 4.1.10(@vitest/browser@4.1.10)(vitest@4.1.10)
-      eslint:
-        specifier: 'catalog:'
-        version: 10.7.0(jiti@2.7.0)
-      typescript:
-        specifier: 'catalog:'
-        version: 6.0.3
-      vite:
-        specifier: 'catalog:'
-        version: 8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0)
-      vite-plus:
-        specifier: 'catalog:'
-        version: 0.2.5(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(jiti@2.7.0)(jsdom@29.1.1)(typescript@6.0.3)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))(yaml@2.9.0)
-      vitest:
-        specifier: 'catalog:'
-        version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/browser-preview@4.1.10)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))
-
-  packages/data-access:
-    dependencies:
-      pg:
-        specifier: 'catalog:'
-        version: 8.22.0
-      zod:
-        specifier: 'catalog:'
-        version: 4.4.3
-    devDependencies:
-      '@repo/vite-configs':
-        specifier: workspace:*
-        version: link:../vite-configs
-      '@types/node':
-        specifier: 'catalog:'
-        version: 26.1.1
-      '@types/pg':
-        specifier: 'catalog:'
-        version: 8.20.0
       '@vitest/coverage-v8':
         specifier: 'catalog:'
         version: 4.1.10(@vitest/browser@4.1.10)(vitest@4.1.10)
@@ -797,15 +760,52 @@ importers:
 
   packages/scan-ingestion:
     dependencies:
-      '@repo/data-access':
+      '@repo/server':
         specifier: workspace:*
-        version: link:../data-access
+        version: link:../server
       '@repo/utils':
         specifier: workspace:*
         version: link:../utils
       fflate:
         specifier: 'catalog:'
         version: 0.8.3
+      pg:
+        specifier: 'catalog:'
+        version: 8.22.0
+      zod:
+        specifier: 'catalog:'
+        version: 4.4.3
+    devDependencies:
+      '@repo/vite-configs':
+        specifier: workspace:*
+        version: link:../vite-configs
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.1.1
+      '@types/pg':
+        specifier: 'catalog:'
+        version: 8.20.0
+      '@vitest/coverage-v8':
+        specifier: 'catalog:'
+        version: 4.1.10(@vitest/browser@4.1.10)(vitest@4.1.10)
+      eslint:
+        specifier: 'catalog:'
+        version: 10.7.0(jiti@2.7.0)
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+      vite:
+        specifier: 'catalog:'
+        version: 8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0)
+      vite-plus:
+        specifier: 'catalog:'
+        version: 0.2.5(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(jiti@2.7.0)(jsdom@29.1.1)(typescript@6.0.3)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))(yaml@2.9.0)
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/browser-preview@4.1.10)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))
+
+  packages/server:
+    dependencies:
       pg:
         specifier: 'catalog:'
         version: 8.22.0
@@ -7200,7 +7200,7 @@ snapshots:
 
   '@types/pg-pool@2.0.6':
     dependencies:
-      '@types/pg': 8.6.1
+      '@types/pg': 8.20.0
 
   '@types/pg@8.20.0':
     dependencies:

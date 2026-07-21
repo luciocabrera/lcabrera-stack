@@ -68,9 +68,9 @@ const VP_BIN = join(REPO_ROOT, 'node_modules', '.bin', 'vp');
  */
 const COVERAGE_WORKSPACES = [
   { dir: 'packages/api', name: '@repo/api' },
-  { dir: 'packages/data-access', name: '@repo/data-access' },
   { dir: 'packages/node-runtime', name: '@repo/node-runtime' },
   { dir: 'packages/scan-ingestion', name: '@repo/scan-ingestion' },
+  { dir: 'packages/server', name: '@repo/server' },
   { dir: 'packages/ui', name: '@repo/ui' },
   { dir: 'packages/utils', name: '@repo/utils' },
   { dir: 'apps/admin_system', name: 'admin-system' },

@@ -13,7 +13,7 @@ badged per metric (✅ ≥ 80 %, ⚠️ ≥ 60 %, ❌ below).
 | Workspace             | Lines | Statements | Functions | Branches |
 | --------------------- | ----- | ---------- | --------- | -------- |
 | `@repo/ui`            | …     | …          | …         | …        |
-| `@repo/data-access`   | …     | …          | …         | …        |
+| `@repo/server`        | …     | …          | …         | …        |
 | `vite-react-compiler` | …     | …          | …         | …        |
 | **🏛 Monorepo total**  | …     | …          | …         | …        |
 
@@ -54,10 +54,10 @@ Three moving parts:
 
 They feed different consumers and must not be merged:
 
-| Script            | Feeds                     | Reporter        | Workspaces                                                                                   | react-router?                                           |
-| ----------------- | ------------------------- | --------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| `coverage:merge`  | the **fallow audit gate** | `json` (detail) | DB-free set (ui, data-access, node-runtime, scan-ingestion, admin_system, scan-orchestrator) | **excluded** (largest suite; fallow findings baselined) |
-| `coverage:report` | the **PR comment**        | `json-summary`  | the reported set below                                                                       | **included** (it is a critical surface)                 |
+| Script            | Feeds                     | Reporter        | Workspaces                                                                              | react-router?                                           |
+| ----------------- | ------------------------- | --------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| `coverage:merge`  | the **fallow audit gate** | `json` (detail) | DB-free set (ui, server, node-runtime, scan-ingestion, admin_system, scan-orchestrator) | **excluded** (largest suite; fallow findings baselined) |
+| `coverage:report` | the **PR comment**        | `json-summary`  | the reported set below                                                                  | **included** (it is a critical surface)                 |
 
 Coupling them would drag react-router into the fallow merge it is deliberately
 kept out of. See [`scripts/merge-coverage.mjs`](../../scripts/merge-coverage.mjs)
@@ -67,13 +67,13 @@ for the fallow side.
 
 Defined in `COVERAGE_REPORT_WORKSPACES` in `scripts/coverage-report.mjs`, most-
 critical first. These are the public-facing / highest-value surfaces
-(`packages/ui` and `packages/data-access` are heading for public release;
+(`packages/ui` and `packages/server` are heading for public release;
 `apps/react-router` is the showcase app):
 
 | Workspace                 | Package                | `run` | Why                                                                                                                              |
 | ------------------------- | ---------------------- | ----- | -------------------------------------------------------------------------------------------------------------------------------- |
 | `packages/ui`             | `@repo/ui`             | true  | Runs `test:coverage` here (plain `test` in `test:ci`, no coverage)                                                               |
-| `packages/data-access`    | `@repo/data-access`    | true  | Same                                                                                                                             |
+| `packages/server`         | `@repo/server`         | true  | Same                                                                                                                             |
 | `apps/react-router`       | `vite-react-compiler`  | false | Its `test:ci` already emits the summary; re-running the repo's largest suite would be wasteful                                   |
 | `packages/node-runtime`   | `@repo/node-runtime`   | true  | Phase 2 — DB-free `test:coverage`                                                                                                |
 | `packages/scan-ingestion` | `@repo/scan-ingestion` | true  | Phase 2 — DB-free `test:coverage` **subset** (its real-Postgres `queries/*` stay out, so the number is the DB-free portion only) |
@@ -102,7 +102,7 @@ only once its coverage runs clean and means something.** Checklist:
 
 ### Phased rollout
 
-- **Phase 1 — critical surfaces.** `packages/ui`, `packages/data-access`,
+- **Phase 1 — critical surfaces.** `packages/ui`, `packages/server`,
   `apps/react-router`. ✅ done (PR #32).
 - **Phase 2 — remaining library packages.** `packages/node-runtime` and
   `packages/scan-ingestion` (both have a DB-free `test:coverage`). ✅ done.
@@ -124,7 +124,7 @@ Each phase is its own PR, kept reviewable and green before the next.
 ## Known costs & caveats
 
 - **The package suites run twice in the `unit-tests` job.** `test:ci` runs
-  `@repo/ui` / `@repo/data-access` as plain `test` (the pass/fail gate), then
+  `@repo/ui` / `@repo/server` as plain `test` (the pass/fail gate), then
   `coverage:report` re-runs them as `test:coverage`. This keeps `test:ci`
   untouched and the change purely additive — the same "coverage runs are
   separate from the pass/fail run" split the fallow-audit job already uses.

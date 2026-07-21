@@ -1,6 +1,6 @@
-import { closePool, getPool } from '@repo/data-access/db/getPool.util';
 import { acquireAdvisoryTestLock } from '@repo/scan-ingestion/testing/acquireAdvisoryTestLock.util.ts';
 import { makeTempDirectory } from '@repo/scan-ingestion/testing/makeTempDirectory.util.ts';
+import { closePool, getPool } from '@repo/server/db/get-pool.util';
 import { rmSync } from 'node:fs';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 

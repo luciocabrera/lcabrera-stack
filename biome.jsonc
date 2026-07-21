@@ -204,7 +204,7 @@
         "apps/scan-orchestrator/**",
         "apps/shared/**",
         "packages/agent-runner/**",
-        "packages/data-access/**",
+        "packages/server/**",
         "packages/node-runtime/**",
         "packages/scan-ingestion/**",
         "packages/ts-configs/**",
@@ -224,7 +224,7 @@
             // to a spawned subprocess, which cannot route through config). The
             // reads sit in ordinary util files, not a tidy `config/` dir, so there
             // is no clean glob exemption; enforcing it would need a cross-workspace
-            // env-reader refactor touching the vital `data-access` package. See ADR-035 §7.
+            // env-reader refactor touching the vital `server` package. See ADR-035 §7.
           },
         },
       },

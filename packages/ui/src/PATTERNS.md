@@ -205,7 +205,7 @@ Column filter-option fetching is described by **data, never functions** (ADR-009
 ```
 
 - **Server bakes the args** — loaders call `appendDistinctFilterDescriptors` (`src/routing/`) over the columns they have (constants today, introspection rows tomorrow); `createStaticFilterOptions` (`src/utils/filters/`) emits static descriptors inline.
-- **Client owns the tools** — `resolveFilterOptionsDescriptor` (`src/utils/filters/`) dispatches on `kind` and returns the `{ onLoadMore, dataSelector, dataTotalSelector }` contract consumed by `useFetchFilterData`; HTTP + validation delegate to `@repo/data-access/api` (`fetchDistinctValues`). Nothing below `SelectFilterInput` knows descriptors exist.
+- **Client owns the tools** — `resolveFilterOptionsDescriptor` (`src/utils/filters/`) dispatches on `kind` and returns the `{ onLoadMore, dataSelector, dataTotalSelector }` contract consumed by `useFetchFilterData`; HTTP + validation delegate to `@repo/api` (`fetchDistinctValues`). Nothing below `SelectFilterInput` knows descriptors exist.
 - Adding a descriptor kind = a new serializable variant + a new executor util + a dispatcher case — never a new function member on `TableColumn`.
 
 ---

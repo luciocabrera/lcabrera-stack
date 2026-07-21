@@ -5,7 +5,7 @@ The client half of the serializable filter-options descriptor system
 JSON baked by a loader) into the `{ onLoadMore, dataSelector,
 dataTotalSelector }` contract the Table's filter fetch chain
 (`useFetchFilterData`) consumes. HTTP + response validation delegate to
-`@repo/data-access/api`; nothing here is ever a function on a column.
+`@repo/api`; nothing here is ever a function on a column.
 
 ## Files
 
@@ -14,7 +14,7 @@ dataTotalSelector }` contract the Table's filter fetch chain
 | `createStaticFilterOptions.util.ts`      | Emits a `{ kind: 'static', values }` descriptor for build-time enum lists (spread into a column definition)        |
 | `filters.constants.ts`                   | Transport request targets: `/_api/filter-options` (loader) and the `/distinct` BFF path suffix                     |
 | `getFilterOptionsBaseUrl.util.ts`        | Resolves a transport to its request base (`getApiBaseUrl() + '/distinct'` for bff, resource-route path for loader) |
-| `resolveDistinctFilterOptions.util.ts`   | Executor for `kind: 'distinct'`: pages via `fetchDistinctValues` (`@repo/data-access/api`), maps `skip`→`offset`   |
+| `resolveDistinctFilterOptions.util.ts`   | Executor for `kind: 'distinct'`: pages via `fetchDistinctValues` (`@repo/api`), maps `skip`→`offset`               |
 | `resolveStaticFilterOptions.util.ts`     | Executor for `kind: 'static'`: serves pages by slicing the baked values client-side (no network)                   |
 | `resolveFilterOptionsDescriptor.util.ts` | The client tool: dispatches on `descriptor.kind` to the matching executor                                          |
 

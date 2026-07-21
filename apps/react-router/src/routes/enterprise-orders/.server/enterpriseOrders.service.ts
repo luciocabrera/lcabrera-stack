@@ -1,15 +1,15 @@
 import type {
   QueryFilter,
   QuerySort,
-} from '@repo/data-access/db/queryBuilder/queryBuilder.types';
+} from '@repo/server/db/query-builder/query-builder.types';
 
-import { deleteRows } from '@repo/data-access/db/deleteRows.util';
-import { getMaxValue } from '@repo/data-access/db/getMaxValue.util';
-import { getPool } from '@repo/data-access/db/getPool.util';
-import { insertRow } from '@repo/data-access/db/insertRow.util';
-import { buildCountQuery } from '@repo/data-access/db/queryBuilder/buildCountQuery.util';
-import { selectRows } from '@repo/data-access/db/selectRows.util';
-import { updateRows } from '@repo/data-access/db/updateRows.util';
+import { deleteRows } from '@repo/server/db/delete-rows.util';
+import { getMaxValue } from '@repo/server/db/get-max-value.util';
+import { getPool } from '@repo/server/db/get-pool.util';
+import { insertRow } from '@repo/server/db/insert-row.util';
+import { buildCountQuery } from '@repo/server/db/query-builder/build-count-query.util';
+import { selectRows } from '@repo/server/db/select-rows.util';
+import { updateRows } from '@repo/server/db/update-rows.util';
 
 import type { EnterpriseOrder, EnterpriseOrdersResponse } from '../config';
 
@@ -22,7 +22,7 @@ import {
 
 /**
  * Server-only Postgres data access for `enterprise_orders`, built entirely on
- * the generic `@repo/data-access` executors (no entity-specific SQL). It reaches
+ * the generic `@repo/server` executors (no entity-specific SQL). It reaches
  * the pool via `getPool`, so it must never enter the client bundle.
  *
  * This file lives in a `.server/` directory (a React Router framework

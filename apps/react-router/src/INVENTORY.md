@@ -2,7 +2,7 @@
 
 Before creating anything new, check this inventory. If something here does the job — or could do it with a small enhancement to make it more generic — **prefer enhancing the existing artifact** over creating a new one.
 
-Shared components/hooks/utils/design-tokens live in `@repo/ui` — see [`packages/ui/src/INVENTORY.md`](../../../packages/ui/src/INVENTORY.md). API-layer (browser fetch) and Postgres-access utilities live in `@repo/data-access` (`packages/data-access/src/`). This file tracks only artifacts genuinely local to this app.
+Shared components/hooks/utils/design-tokens live in `@repo/ui` — see [`packages/ui/src/INVENTORY.md`](../../../packages/ui/src/INVENTORY.md). API-layer (browser fetch) and Postgres-access utilities live in `@repo/server` (`packages/server/src/`). This file tracks only artifacts genuinely local to this app.
 
 ---
 

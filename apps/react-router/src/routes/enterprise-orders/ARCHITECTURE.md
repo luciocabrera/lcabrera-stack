@@ -86,7 +86,7 @@ colocated test.
 
 ### `.server/enterpriseOrders.service.ts` — server-only Postgres access
 
-Wraps the generic `@repo/data-access` executors (`selectRows`/`insertRow`/`updateRows`/
+Wraps the generic `@repo/server` executors (`selectRows`/`insertRow`/`updateRows`/
 `deleteRows`/`getMaxValue`) with the enterprise-orders `{ schema, table, allowedColumns }`
 baked in — **no entity-specific SQL**. It reaches Postgres via `getPool`, which reads `DB_*`
 env (sourced from `docker/local/.env` by the app's `dev` script). The

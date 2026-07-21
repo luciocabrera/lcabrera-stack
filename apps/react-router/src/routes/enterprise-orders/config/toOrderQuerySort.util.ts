@@ -1,4 +1,4 @@
-import type { QuerySort } from '@repo/data-access/db/queryBuilder/queryBuilder.types';
+import type { QuerySort } from '@repo/server/db/query-builder/query-builder.types';
 import type { SortingState } from '@repo/ui/components/Table';
 
 import type { EnterpriseOrder } from './enterpriseOrders.types';

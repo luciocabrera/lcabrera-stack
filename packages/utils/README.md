@@ -1,7 +1,7 @@
 # `@repo/utils`
 
 Shared, framework-agnostic **pure** utilities for the monorepo — the lowest
-layer, importable by any consumer (`@repo/ui`, `@repo/data-access`, apps). No
+layer, importable by any consumer (`@repo/ui`, `@repo/server`, apps). No
 React/DOM/StyleX, no `fetch`/`node:*`/`pg`/db, no side effects.
 
 ## Install in a consumer app/package

@@ -17,9 +17,9 @@
   },
   "dependencies": {
     "@repo/agent-runner": "workspace:*",
-    "@repo/data-access": "workspace:*",
     "@repo/node-runtime": "workspace:*",
     "@repo/scan-ingestion": "workspace:*",
+    "@repo/server": "workspace:*",
     "pg": "catalog:",
     "ws": "catalog:",
     "zod": "catalog:"

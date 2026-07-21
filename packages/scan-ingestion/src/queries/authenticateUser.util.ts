@@ -1,5 +1,5 @@
-import { isSecretHashValid } from '@repo/data-access/crypto/isSecretHashValid.util';
-import { getPool } from '@repo/data-access/db/getPool.util';
+import { isSecretHashValid } from '@repo/server/crypto/is-secret-hash-valid.util';
+import { getPool } from '@repo/server/db/get-pool.util';
 
 export type AuthenticatedUser = {
   readonly displayName: string;

@@ -1,5 +1,5 @@
-import { hashSecret } from '@repo/data-access/crypto/hashSecret.util';
-import { closePool, getPool } from '@repo/data-access/db/getPool.util';
+import { hashSecret } from '@repo/server/crypto/hash-secret.util';
+import { closePool, getPool } from '@repo/server/db/get-pool.util';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { authenticateUser } from './authenticateUser.util.ts';

@@ -1,12 +1,12 @@
 # Package Architecture (`@repo/api`)
 
-The **browser-safe** half of what used to be `@repo/data-access`: resolving the
+The **browser-safe** half of what used to be `@repo/server`: resolving the
 API base URL, fetching and validating responses, and the distinct-values
 contract behind the Table's filter dropdowns.
 
 ## Why this package exists
 
-`@repo/data-access` held two things at once — browser `fetch` utilities and
+`@repo/server` held two things at once — browser `fetch` utilities and
 Node/Postgres access — and [ADR-008](../../docs/cqms/decisions/ADR-008-packages-api-renamed-data-access.md)
 accepted that deliberately, because nothing depended on only one half.
 

@@ -108,25 +108,25 @@ project-specific belongs in that project's own `package.json`.
 
 ### Gate & CI
 
-| Command                    | Does                                                                                         |
-| -------------------------- | -------------------------------------------------------------------------------------------- |
-| `vp run ready`             | `check:safe` + `build:all` — the full "is it shippable" check                                |
-| `vp run check:safe`        | typegen → eslint-rules build → `vp check` → typecheck → eslint → biome → tests               |
-| `vp run check:push`        | the DB-free CI Quality Gate (no tests/fallow) — what the `pre-push` hook runs                |
-| `vp run typecheck:all`     | real tsc in all 17 workspaces, dependency order                                              |
-| `vp run typecheck:changed` | real tsc for the changed workspaces + dependents only — see below                            |
-| `vp run typegen:all`       | route types for both React Router apps                                                       |
-| `vp run lint:all`          | Oxlint + eslint + Biome **with autofix**, every workspace                                    |
-| `vp run lint:biome`        | Biome repo-wide **with autofix** (`--write`, safe fixes only)                                |
-| `vp run lint:biome:check`  | Biome repo-wide, check only — what CI runs                                                   |
-| `vp run lint:report`       | regenerate `reports/{oxlint,eslint,biome}/full-latest.json`                                  |
-| `vp run format:all`        | `vp fmt .` across the tree                                                                   |
-| `vp run build:all`         | build every workspace                                                                        |
-| `vp run test:all`          | every suite — **needs Postgres**                                                             |
-| `vp run test:ci`           | every DB-free suite — what CI runs, no Postgres needed                                       |
-| `vp run test:changed`      | only the suites a diff touched (changed workspaces + their dependents) — see below           |
-| `vp run coverage:merge`    | merged coverage for the fallow gate (DB-free workspaces only)                                |
-| `vp run coverage:report`   | per-workspace + monorepo coverage summary for the PR comment (ui, data-access, react-router) |
+| Command                    | Does                                                                                    |
+| -------------------------- | --------------------------------------------------------------------------------------- |
+| `vp run ready`             | `check:safe` + `build:all` — the full "is it shippable" check                           |
+| `vp run check:safe`        | typegen → eslint-rules build → `vp check` → typecheck → eslint → biome → tests          |
+| `vp run check:push`        | the DB-free CI Quality Gate (no tests/fallow) — what the `pre-push` hook runs           |
+| `vp run typecheck:all`     | real tsc in all 17 workspaces, dependency order                                         |
+| `vp run typecheck:changed` | real tsc for the changed workspaces + dependents only — see below                       |
+| `vp run typegen:all`       | route types for both React Router apps                                                  |
+| `vp run lint:all`          | Oxlint + eslint + Biome **with autofix**, every workspace                               |
+| `vp run lint:biome`        | Biome repo-wide **with autofix** (`--write`, safe fixes only)                           |
+| `vp run lint:biome:check`  | Biome repo-wide, check only — what CI runs                                              |
+| `vp run lint:report`       | regenerate `reports/{oxlint,eslint,biome}/full-latest.json`                             |
+| `vp run format:all`        | `vp fmt .` across the tree                                                              |
+| `vp run build:all`         | build every workspace                                                                   |
+| `vp run test:all`          | every suite — **needs Postgres**                                                        |
+| `vp run test:ci`           | every DB-free suite — what CI runs, no Postgres needed                                  |
+| `vp run test:changed`      | only the suites a diff touched (changed workspaces + their dependents) — see below      |
+| `vp run coverage:merge`    | merged coverage for the fallow gate (DB-free workspaces only)                           |
+| `vp run coverage:report`   | per-workspace + monorepo coverage summary for the PR comment (ui, server, react-router) |
 
 `test:all` vs `test:ci`: CI has no database, so `test:ci` substitutes the DB-free
 `test:unit` subsets for `@repo/scan-ingestion` / `@repo/scan-orchestrator` and runs
@@ -298,7 +298,7 @@ Beyond that, tasks are per-workspace. `build` and `test` are common but come fro
 | `apps/scan-orchestrator`      | `@repo/scan-orchestrator`   | `start`, `test:unit`, `test:coverage`                                                               |
 | `apps/shared`                 | `api-shared`                | `build`, `test`                                                                                     |
 | `packages/ui`                 | `@repo/ui`                  | `check:public-api`, `test:coverage`                                                                 |
-| `packages/data-access`        | `@repo/data-access`         | `test:coverage`                                                                                     |
+| `packages/server`             | `@repo/server`              | `test:coverage`                                                                                     |
 | `packages/scan-ingestion`     | `@repo/scan-ingestion`      | `migrate`, `push`, `test:unit`, `test:coverage`                                                     |
 | `packages/node-runtime`       | `@repo/node-runtime`        | `test:coverage`                                                                                     |
 | `packages/agent-runner`       | `@repo/agent-runner`        | —                                                                                                   |

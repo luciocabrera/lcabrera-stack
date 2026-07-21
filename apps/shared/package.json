@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@repo/api": "workspace:*",
-    "@repo/data-access": "workspace:*"
+    "@repo/server": "workspace:*"
   },
   "devDependencies": {
     "@repo/vite-configs": "workspace:*",

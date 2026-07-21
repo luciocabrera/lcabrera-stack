@@ -1,4 +1,4 @@
-import { isSecretHashValid } from '@repo/data-access/crypto/isSecretHashValid.util';
+import { isSecretHashValid } from '@repo/server/crypto/is-secret-hash-valid.util';
 
 import type { DemoCredential } from './auth.types';
 

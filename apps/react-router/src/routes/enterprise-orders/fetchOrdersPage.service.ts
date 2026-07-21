@@ -19,7 +19,7 @@ export type FetchOrdersPageArgs = {
 /**
  * Browser fetcher for the table's infinite-scroll load-more: calls the app's
  * own `_api/enterprise-orders/paginated` resource route (server-side Postgres
- * via `@repo/data-access`), replacing the retired api-server call.
+ * via `@repo/server`), replacing the retired api-server call.
  */
 export const fetchOrdersPage = async ({
   filter,

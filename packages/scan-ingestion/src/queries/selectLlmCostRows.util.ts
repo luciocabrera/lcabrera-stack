@@ -1,7 +1,7 @@
-import type { QuerySort } from '@repo/data-access/db/queryBuilder/queryBuilder.types';
+import type { QuerySort } from '@repo/server/db/query-builder/query-builder.types';
 import type { QueryResultRow } from 'pg';
 
-import { selectRows } from '@repo/data-access/db/selectRows.util';
+import { selectRows } from '@repo/server/db/select-rows.util';
 
 import { LLM_USAGE_SCHEMA } from './llmUsage.constants.ts';
 

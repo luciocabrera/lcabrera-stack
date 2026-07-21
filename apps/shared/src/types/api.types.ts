@@ -15,7 +15,7 @@ export type DbSanityResult = {
 };
 
 /**
- * Re-exported rather than re-declared: `@repo/data-access` owns this wire
+ * Re-exported rather than re-declared: `@repo/server` owns this wire
  * contract, and the client half (`fetchDistinctValues`) validates responses
  * against it. Two copies of a shape that has to match across the wire is a
  * silent-drift hazard, not a convenience.

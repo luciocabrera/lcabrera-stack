@@ -29,7 +29,7 @@ Format: **`type(scope): subject`**
   `revert`, `style`). Lowercase.
 - **scope** _(optional but preferred)_ — the workspace you touched, by its
   directory name: `ui`, `admin_system`, `api-server`, `scan-orchestrator`,
-  `data-access`, … (derived automatically from `pnpm-workspace.yaml`), or a
+  `server`, … (derived automatically from `pnpm-workspace.yaml`), or a
   cross-cutting area: `ci`, `docs`, `tooling`, `deps`, `coordination`, …. A
   sub-path like `ui/table` is fine. An unrecognised scope only **warns** — it
   never blocks.

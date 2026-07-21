@@ -77,7 +77,7 @@ const METRICS = ['lines', 'statements', 'functions', 'branches'];
  */
 const COVERAGE_REPORT_WORKSPACES = [
   { dir: 'packages/ui', name: '@repo/ui', run: true },
-  { dir: 'packages/data-access', name: '@repo/data-access', run: true },
+  { dir: 'packages/server', name: '@repo/server', run: true },
   { dir: 'apps/react-router', name: 'vite-react-compiler', run: false },
   // Phase 2 — remaining library packages with a DB-free test:coverage.
   // scan-ingestion's task measures its DB-free subset only (its real-Postgres
