@@ -140,6 +140,17 @@ jobs:
         # .claude/rules/scripts.md.
         run: vp run scripts:verify
 
+      - name: Documented paths resolve
+        id: docs_gate
+        # The largest unchecked surface in the repo: ~230 markdown files naming
+        # paths that nothing verified. A single audit corrected 30 files and
+        # deleted 2 documents describing directories that no longer existed —
+        # AGENTS.md itself listed 6 app directories that were gone. Only
+        # root-anchored paths and relative markdown links are checked, so
+        # teaching examples and suffix conventions never fail the build;
+        # inherited breakage is grandfathered in scripts/docs-paths-baseline.json.
+        run: vp run docs:verify
+
       - name: Write quality summary
         if: always()
         run: |

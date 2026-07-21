@@ -350,7 +350,7 @@ Before making **any** code change, read every `ARCHITECTURE.md` that covers the 
 - The component/hook/util directory being modified (e.g. `packages/ui/src/components/Table/ARCHITECTURE.md`)
 - Parent directories if the change crosses boundaries (e.g. `packages/ui/src/hooks/ARCHITECTURE.md`)
 - `packages/ui/src/PATTERNS.md` — always read this before creating or modifying any component; it defines naming conventions, StyleX composition order, the drawer-section pattern, filter contract, context+store pattern, and props-forwarding rules
-- `docs/decisions/` — read the relevant ADR(s) before working in an area they cover: Modal → ADR-001, Tooltip → ADR-002, store → ADR-003, memoization/React Compiler → ADR-004, styling → ADR-005, infinite-scroll prefetch → ADR-006, barrel-export boundaries → ADR-007, primary-key sort tiebreaker / columns-derived id → ADR-008, filter-options fetch descriptors → ADR-009, cookie persistence via `/_action/persist-cookie` → ADR-010, grid interaction architecture (capability/command/surface) → ADR-011, column width → ADR-012
+- `apps/react-router/docs/decisions/` — read the relevant ADR(s) before working in an area they cover: Modal → ADR-001, Tooltip → ADR-002, store → ADR-003, memoization/React Compiler → ADR-004, styling → ADR-005, infinite-scroll prefetch → ADR-006, barrel-export boundaries → ADR-007, primary-key sort tiebreaker / columns-derived id → ADR-008, filter-options fetch descriptors → ADR-009, cookie persistence via `/_action/persist-cookie` → ADR-010, grid interaction architecture (capability/command/surface) → ADR-011, column width → ADR-012
 
 If no `ARCHITECTURE.md` exists yet for the area you are changing, create one **before** implementing.
 
@@ -454,7 +454,7 @@ After the quality gate passes, update every doc affected by the change:
 - **Type added/changed** → update the `ARCHITECTURE.md` of the directory that owns the type.
 - **New dependency added** → update the Dependencies diagram in the affected `ARCHITECTURE.md`.
 - **New naming/structural convention established** → update `packages/ui/src/PATTERNS.md` and the matching `.claude/rules/` file.
-- **New architectural decision made** → add a new ADR to `docs/decisions/` following the ADR-NNN naming scheme, and add it to the ADR map in this file.
+- **New architectural decision made** → add a new ADR to `apps/react-router/docs/decisions/` following the ADR-NNN naming scheme, and add it to the ADR map in this file.
 - **New artifact created or existing artifact enhanced/renamed** → update the relevant row in the owning workspace's `INVENTORY.md` (`packages/ui/src/`, `packages/server/src/`, `apps/react-router/src/`, …).
 
 Documentation updates must be part of the **same commit** as the code change.

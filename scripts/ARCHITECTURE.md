@@ -21,13 +21,8 @@ Shared repository-level automation scripts.
   - Writes `reports/skills/code-smell-compliance-report.md`.
   - Appends run history to `reports/skills/agenting-plan-progress.md`.
   - Refreshes the compliance report.
-  - Generates `reports/skills/fix-plan.md` from findings.
-  - Generates `reports/skills/handoff-prompts.md` for planner/fixer/verifier agents.
-  - Generates `reports/skills/handoff-runbook.md` with step-by-step flow and copy/paste prompts.
-  - Generates `reports/skills/handoff-runbook-source-audit.md` focused on full source-audit remediation flow.
   - Appends run history to `reports/skills/agenting-plan-progress.md`.
   - Scans `apps/**` source files and detects high-signal maintainability/type-safety patterns.
-  - Writes `reports/skills/code-smell-full-audit.md` using the shared smell report schema shape.
   - Appends run history to `reports/skills/agenting-plan-progress.md`.
 
 ## Root Script Entry Points
