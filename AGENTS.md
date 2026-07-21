@@ -6,7 +6,26 @@ This file provides guidance to AI agents when working with code in this reposito
 
 ## 1. Project Overview
 
-This is a **pnpm monorepo** built with the **Vite+** unified toolchain (`vp` CLI). The primary app is a **React 19 + TypeScript + StyleX + React Router 7** application with SSR support (`apps/react-router/`). It demonstrates enterprise-grade patterns including a feature-rich data Table component with custom store-based state management, virtualization, infinite scroll, and granular subscriptions via `useSyncExternalStore`.
+This is a **pnpm monorepo** built with the **Vite+** unified toolchain (`vp` CLI).
+
+**The `packages/` are the product. The `apps/` exist to exercise them.** Read
+that as the tie-breaker it is: when package cleanliness and app convenience pull
+in opposite directions, the package wins. A package must stand on its own —
+declared dependencies, a resolvable public surface, no reliance on a consumer's
+tsconfig `paths` to make an import work — because it is meant to be consumed from
+outside this repo, where none of this monorepo's wiring exists. `packages/ui`,
+`packages/api`, `packages/server` and `packages/utils` are held strictest for
+exactly that reason (§4). This is why the column-filter shapes are **duplicated**
+in `@repo/ui` and `@repo/server` rather than shared through an elegant edge that
+only resolves in-repo ([ADR-039](docs/cqms/decisions/ADR-039-duplicate-over-undeclared-edges.md)).
+
+The apps are the harness. `apps/react-router` is a **React 19 + TypeScript +
+StyleX + React Router 7** SSR application that puts the packages under load —
+a feature-rich data Table with store-based state management, virtualization,
+infinite scroll, and granular subscriptions via `useSyncExternalStore`. It is
+also where cross-package integration is verified, since it is the only thing that
+legitimately depends on several packages at once. Never put a guarantee a
+_package_ relies on into an app.
 
 ### Monorepo Layout
 
@@ -456,7 +475,7 @@ After the quality gate passes, update every doc affected by the change:
 - **Type added/changed** → update the `ARCHITECTURE.md` of the directory that owns the type.
 - **New dependency added** → update the Dependencies diagram in the affected `ARCHITECTURE.md`.
 - **New naming/structural convention established** → update `packages/ui/src/PATTERNS.md` and the matching `.claude/rules/` file.
-- **New architectural decision made** → add a new ADR to `apps/react-router/docs/decisions/` following the ADR-NNN naming scheme, and add it to the ADR map in this file.
+- **New architectural decision made** → add a new ADR following the ADR-NNN naming scheme, and add it to the ADR map in this file. Two homes, chosen by subject: decisions about a **component or route inside the app** go in `apps/react-router/docs/decisions/`, decisions about the **repo, its packages or its tooling** go in [`docs/cqms/decisions/`](docs/cqms/decisions/) (package topology, for instance, is ADR-038/ADR-039 there). **The two sequences both start at ADR-001 and overlap through ADR-012, so a bare number in that range is ambiguous** — there are two ADR-008s, one about the primary-key sort tiebreaker and one about the `@repo/api` rename. Always cite a low-numbered ADR with its path or link, never the number alone. The overlap is not renumbered on purpose: an ADR is a dated record, and rewriting old ones to tidy the sequence would break every existing cross-reference.
 - **New artifact created or existing artifact enhanced/renamed** → update the relevant row in the owning workspace's `INVENTORY.md` (`packages/ui/src/`, `packages/server/src/`, `apps/react-router/src/`, …).
 
 Documentation updates must be part of the **same commit** as the code change.
