@@ -409,7 +409,7 @@ jobs:
           fi
 
       - name: Upload coverage report
-        if: always() && vars.ENABLE_ARTIFACT_UPLOADS == 'true'
+        if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: coverage-report
@@ -434,7 +434,9 @@ jobs:
               const text = `${badge(v.pct)} ${fmt(v)}`;
               return bold ? `**${text}**` : text;
             };
-            const runLink = `[workflow logs](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`;
+            // The run summary page is where artifacts are downloadable; GitHub
+            // exposes no stable direct URL for an artifact by name.
+            const runLink = `[run summary](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`;
 
             // Preferred: the per-workspace + monorepo matrix from coverage-report.mjs.
             const buildMatrix = () => {
@@ -453,7 +455,7 @@ jobs:
                 ...report.workspaces.map((w) => row(`\`${w.name}\``, w.total)),
                 row('**🏛 Monorepo total**', report.total, true),
                 '',
-                `> 📁 Coverage summary JSON generated in this run: ${runLink}`,
+                `> 📁 Coverage summary JSON is attached to this run as the \`coverage-report\` artifact: ${runLink}`,
               ].join('\n');
             };
 
@@ -474,7 +476,7 @@ jobs:
                 `| Functions | ${fmt(total.functions)} | ${badge(total.functions.pct)} |`,
                 `| Branches | ${fmt(total.branches)} | ${badge(total.branches.pct)} |`,
                 '',
-                `> 📁 Coverage summary JSON generated in this run: ${runLink}`,
+                `> 📁 Coverage summary JSON is attached to this run as the \`coverage-report\` artifact: ${runLink}`,
               ].join('\n');
             };
 
