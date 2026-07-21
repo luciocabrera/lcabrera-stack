@@ -27,9 +27,10 @@
  *
  * ROLLOUT
  * -------
- * COVERAGE_REPORT_WORKSPACES starts with the three most critical public-facing
- * surfaces. The phased plan for adding the rest (packages first) lives in
- * docs/tooling/coverage-reporting.md.
+ * The reported set is COVERAGE_REPORT_WORKSPACES in lib/coverage-workspaces.mjs
+ * — shared with the fallow merge's own list so both can be asserted by
+ * lib/coverage-workspaces.test.mjs, which fails if a public package drops out.
+ * The phased plan for adding the rest lives in docs/tooling/coverage-reporting.md.
  *
  * Usage (from the repo root):
  *   vp run coverage:report              # run test:coverage for `run:true` workspaces, read the rest, aggregate
@@ -51,6 +52,7 @@ import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 
 import { readWorkspaceGraph, resolveAffected } from './lib/affected-tests.mjs';
+import { COVERAGE_REPORT_WORKSPACES } from './lib/coverage-workspaces.mjs';
 
 const execFileAsync = promisify(execFile);
 
@@ -63,35 +65,6 @@ const VP_BIN = join(REPO_ROOT, 'node_modules', '.bin', 'vp');
 
 /** The four metrics Istanbul's json-summary exposes on `.total` that we report. */
 const METRICS = ['lines', 'statements', 'functions', 'branches'];
-
-/**
- * Workspaces whose coverage the PR comment reports, most-critical first.
- *
- * `run: true`  — this script runs its `test:coverage` (it runs plain `test`
- *                during `test:ci`, so no summary exists yet).
- * `run: false` — its `coverage-summary.json` is already produced upstream
- *                (react-router emits it from its own `test:ci`, and re-running
- *                the repo's largest suite here would be wasteful). `--all`
- *                overrides this for standalone local runs where `test:ci` has
- *                not run first.
- */
-const COVERAGE_REPORT_WORKSPACES = [
-  { dir: 'packages/ui', name: '@repo/ui', run: true },
-  // The two halves of the former `data-access`, split by runtime (ADR-038).
-  // `@repo/api` is listed explicitly because the split dropped it: #158 rewrote
-  // the single `data-access` row into `server`, which is a rename of the Node
-  // half only, so the browser half stopped being reported while still being
-  // merged for the fallow gate. Both are public packages with a 95% threshold.
-  { dir: 'packages/server', name: '@repo/server', run: true },
-  { dir: 'packages/api', name: '@repo/api', run: true },
-  { dir: 'apps/react-router', name: 'vite-react-compiler', run: false },
-  // Phase 2 — remaining library packages with a DB-free test:coverage.
-  // scan-ingestion's task measures its DB-free subset only (its real-Postgres
-  // queries/* stay out), same as the fallow coverage merge.
-  { dir: 'packages/node-runtime', name: '@repo/node-runtime', run: true },
-  { dir: 'packages/scan-ingestion', name: '@repo/scan-ingestion', run: true },
-  { dir: 'packages/utils', name: '@repo/utils', run: true },
-];
 
 const runAll = process.argv.includes('--all');
 const shouldRun = !process.argv.includes('--no-run');

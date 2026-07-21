@@ -1,0 +1,114 @@
+/**
+ * The workspace membership behind the two coverage lanes, in one importable
+ * place so it can be asserted instead of only reviewed.
+ *
+ * These lists used to live as module-scope consts inside `coverage-report.mjs`
+ * and `merge-coverage.mjs`, which both run `main()` on import — so no test could
+ * reach them. That is how `@repo/api` went missing from the PR comment for the
+ * whole life of the runtime split (ADR-038): #158 rewrote the single
+ * `data-access` row into `server`, correct for the Node half, while the browser
+ * half became its own package and never got a row. Nothing failed, because a
+ * report with a row missing looks exactly like a complete one.
+ *
+ * The two lanes are related but deliberately NOT derived from each other — see
+ * each list's own note for what it excludes and why.
+ *
+ * `publicPackageDirs` resolves the never-baseline packages from the same
+ * authority AGENTS.md names — the workspaces whose gitignore covers
+ * `eslint-suppressions.json` — rather than restating a list that would drift the
+ * moment a fifth package joins. Keying on the DIRECTORY, not the package name,
+ * also keeps the invariant intact across an npm scope rename.
+ */
+import { readdirSync } from 'node:fs';
+import { join } from 'node:path';
+
+import { readTextWithin } from './safe-read.mjs';
+
+/** Workspace roots that can hold a publishable package. */
+const WORKSPACE_ROOTS = ['packages', 'apps'];
+
+/** The gitignore entry that marks a package as never-baseline (AGENTS.md §4). */
+const SUPPRESSIONS_MARKER = 'eslint-suppressions';
+
+/**
+ * Workspaces the PR comment reports, most-critical first.
+ *
+ * `run: true`  — this script runs its `test:coverage` (it runs plain `test`
+ *                during `test:ci`, so no summary exists yet).
+ * `run: false` — its `coverage-summary.json` is already produced upstream
+ *                (react-router emits it from its own `test:ci`, and re-running
+ *                the repo's largest suite here would be wasteful). `--all`
+ *                overrides this for standalone local runs where `test:ci` has
+ *                not run first.
+ */
+export const COVERAGE_REPORT_WORKSPACES = [
+  { dir: 'packages/ui', name: '@repo/ui', run: true },
+  // The two halves of the former `data-access`, split by runtime (ADR-038).
+  { dir: 'packages/server', name: '@repo/server', run: true },
+  { dir: 'packages/api', name: '@repo/api', run: true },
+  { dir: 'apps/react-router', name: 'vite-react-compiler', run: false },
+  // Phase 2 — remaining library packages with a DB-free test:coverage.
+  // scan-ingestion's task measures its DB-free subset only (its real-Postgres
+  // queries/* stay out), same as the fallow coverage merge.
+  { dir: 'packages/node-runtime', name: '@repo/node-runtime', run: true },
+  { dir: 'packages/scan-ingestion', name: '@repo/scan-ingestion', run: true },
+  { dir: 'packages/utils', name: '@repo/utils', run: true },
+];
+
+/**
+ * Workspaces merged into the coverage fallow reads.
+ *
+ * Opt-in by design: an earlier attempt at this lever was reverted (2026-07-14)
+ * for pulling in a suite that needed Postgres, so a new workspace is added here
+ * only once its coverage task is known to run clean without one.
+ *
+ * Deliberately absent: `vite-react-compiler` (apps/react-router) — the showcase
+ * app. Its fallow findings are baselined, so coverage buys the gate nothing
+ * today, and its suite is the largest in the repo. This is why the two lists are
+ * not derived from one another.
+ */
+export const COVERAGE_MERGE_WORKSPACES = [
+  { dir: 'packages/api', name: '@repo/api' },
+  { dir: 'packages/node-runtime', name: '@repo/node-runtime' },
+  { dir: 'packages/scan-ingestion', name: '@repo/scan-ingestion' },
+  { dir: 'packages/server', name: '@repo/server' },
+  { dir: 'packages/ui', name: '@repo/ui' },
+  { dir: 'packages/utils', name: '@repo/utils' },
+  { dir: 'apps/admin_system', name: 'admin-system' },
+  { dir: 'apps/scan-orchestrator', name: '@repo/scan-orchestrator' },
+];
+
+/** Whether a workspace directory gitignores its eslint suppressions file. */
+const ignoresSuppressions = (repoRoot, dir) => {
+  try {
+    return readTextWithin(join(repoRoot, dir, '.gitignore'), repoRoot).includes(
+      SUPPRESSIONS_MARKER,
+    );
+  } catch {
+    // No gitignore at all — the common case, and not a public package.
+    return false;
+  }
+};
+
+/** Workspace directories inside one root, as repo-relative paths. */
+const workspaceDirsIn = (repoRoot, root) => {
+  try {
+    return readdirSync(join(repoRoot, root), { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => `${root}/${entry.name}`);
+  } catch {
+    return [];
+  }
+};
+
+/**
+ * The never-baseline (public-facing) package directories, repo-relative.
+ *
+ * Derived rather than listed: AGENTS.md states the authority is which
+ * workspaces gitignore `eslint-suppressions.json`, so a fifth public package
+ * extends every check built on this without editing them.
+ */
+export const publicPackageDirs = (repoRoot) =>
+  WORKSPACE_ROOTS.flatMap((root) => workspaceDirsIn(repoRoot, root))
+    .filter((dir) => ignoresSuppressions(repoRoot, dir))
+    .sort();

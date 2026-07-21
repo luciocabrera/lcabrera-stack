@@ -40,6 +40,7 @@ import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 
 import { readWorkspaceGraph, resolveAffected } from './lib/affected-tests.mjs';
+import { COVERAGE_MERGE_WORKSPACES as COVERAGE_WORKSPACES } from './lib/coverage-workspaces.mjs';
 
 const execFileAsync = promisify(execFile);
 
@@ -52,30 +53,6 @@ const OUTPUT_PATH = join(
 // The workspace's own vp shim by absolute path — never a bare `vp` off $PATH
 // (the Sonar S4036 hotspot). `vp install` always provides it.
 const VP_BIN = join(REPO_ROOT, 'node_modules', '.bin', 'vp');
-
-/**
- * Workspaces whose `test:coverage` task runs without a database, a browser
- * beyond jsdom, or any other external service.
- *
- * Opt-in by design: an earlier attempt at this lever was reverted (2026-07-14)
- * for pulling in a suite that needed Postgres, so a new workspace is added here
- * only once its coverage task is known to run clean without one.
- *
- * Deliberately absent:
- * - `vite-react-compiler` (apps/react-router) — the showcase app. Its fallow
- *   findings are baselined, so coverage buys the gate nothing today, and its
- *   suite is the largest in the repo. Add it if showcase findings ever gate.
- */
-const COVERAGE_WORKSPACES = [
-  { dir: 'packages/api', name: '@repo/api' },
-  { dir: 'packages/node-runtime', name: '@repo/node-runtime' },
-  { dir: 'packages/scan-ingestion', name: '@repo/scan-ingestion' },
-  { dir: 'packages/server', name: '@repo/server' },
-  { dir: 'packages/ui', name: '@repo/ui' },
-  { dir: 'packages/utils', name: '@repo/utils' },
-  { dir: 'apps/admin_system', name: 'admin-system' },
-  { dir: 'apps/scan-orchestrator', name: '@repo/scan-orchestrator' },
-];
 
 const shouldRun = !process.argv.includes('--no-run');
 const changedOnly = process.argv.includes('--changed');
