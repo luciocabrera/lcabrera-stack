@@ -2,7 +2,6 @@ import type { SortRule } from '../../types/api.types.js';
 
 const wideColumnNumbers = Array.from(
   { length: 149 },
-  // eslint-disable-next-line local-rules/destructuring-for-functions
   (_value, index) => `c_${String(index + 1).padStart(3, '0')}`,
 );
 

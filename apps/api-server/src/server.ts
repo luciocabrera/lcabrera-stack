@@ -30,19 +30,16 @@ const server = app.listen(envConfig.API_PORT, '0.0.0.0', () => {
 const dbSanityRepository = createDbSanityRepository({ pool });
 
 const closeServer = (): Promise<void> =>
-  new Promise(
-    // eslint-disable-next-line local-rules/destructuring-for-functions
-    (resolve, reject) => {
-      server.close((error) => {
-        if (error) {
-          reject(error);
-          return;
-        }
+  new Promise((resolve, reject) => {
+    server.close((error) => {
+      if (error) {
+        reject(error);
+        return;
+      }
 
-        resolve();
-      });
-    },
-  );
+      resolve();
+    });
+  });
 
 const shutdown = async (): Promise<void> => {
   console.warn('🛑 Shutting down API server');

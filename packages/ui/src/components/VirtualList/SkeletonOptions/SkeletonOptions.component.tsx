@@ -14,13 +14,9 @@ export const SkeletonOptions = ({ containerHeight }: SkeletonOptionsProps) => {
       ? Math.floor(containerHeight / ITEM_HEIGHT)
       : DEFAULT_SKELETON_ROW_COUNT;
 
-  const placeholders = Array.from(
-    { length: count },
-    // eslint-disable-next-line local-rules/destructuring-for-functions
-    (_, index) => ({
-      key: index,
-    }),
-  );
+  const placeholders = Array.from({ length: count }, (_, index) => ({
+    key: index,
+  }));
   return (
     <>
       {placeholders.map((item) => (

@@ -12,7 +12,6 @@ export const sortPinnedKeysByOrder = ({
   const orderIndex = new Map(newOrder.map((key, i) => [key, i]));
 
   return [...keys].toSorted(
-    // eslint-disable-next-line local-rules/destructuring-for-functions
     (a, b) => (orderIndex.get(a) ?? Infinity) - (orderIndex.get(b) ?? Infinity),
   );
 };

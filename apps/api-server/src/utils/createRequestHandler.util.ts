@@ -15,7 +15,6 @@ type RequestHandlerArgs = {
  */
 export const createRequestHandler =
   ({ handler }: CreateRequestHandlerArgs): RequestHandler =>
-  // eslint-disable-next-line local-rules/destructuring-for-functions
   (request, response, next) => {
     Promise.resolve(handler({ next, request, response })).catch(next);
   };

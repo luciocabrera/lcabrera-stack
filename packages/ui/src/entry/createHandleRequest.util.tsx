@@ -44,7 +44,6 @@ export const createHandleRequest = ({
   const streamTimeout = getStreamTimeout();
   const abortDelay = streamTimeout + 1000;
 
-  // eslint-disable-next-line local-rules/destructuring-for-functions
   const handleRequest: HandleRequest = (
     request,
     responseStatusCode,
