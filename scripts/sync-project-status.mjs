@@ -15,8 +15,16 @@
  *
  * For a PR it updates the PR's own card **and** every issue the PR closes
  * (`closingIssuesReferences`), so the backlog issue moves even though the PR is
- * the thing that changed. Items not yet on the board are added first
- * (`addProjectV2ItemById` is idempotent), so a brand-new PR still lands correctly.
+ * the thing that changed. Items not yet on the board are added first, so a
+ * brand-new PR still lands correctly.
+ *
+ * That add is **not** exclusive to this workflow and `addProjectV2ItemById` is
+ * **not** idempotent under a race: `add-to-project.yml` fires on the same
+ * `pull_request` events and adds the same content, so one of the two is told
+ * `Content already exists in this project` and used to exit 1. The card existing
+ * is the outcome this step wanted, so that response is recovered from rather
+ * than raised — see `addOrFindBoardItem`. This comment previously claimed the
+ * mutation was idempotent, which is why the failure went unnoticed.
  *
  * Effects (the GraphQL calls) are at the edges; the event→status decision is the
  * pure `targetStatus` in `./lib/project-status.mjs`. No `child_process` — it talks
@@ -46,7 +54,13 @@ const graphql = async ({ query, token, variables }) => {
   });
   const body = await response.json();
   if (body.errors) {
-    throw new Error(`GraphQL: ${body.errors.map((e) => e.message).join('; ')}`);
+    const error = new Error(
+      `GraphQL: ${body.errors.map((e) => e.message).join('; ')}`,
+    );
+    // Carried so callers can branch on a specific failure instead of matching
+    // against the joined message, which is built for humans.
+    error.graphqlErrors = body.errors;
+    throw error;
   }
   return body.data;
 };
@@ -111,14 +125,54 @@ const SET_STATUS_MUTATION = `
     }) { projectV2Item { id } }
   }`;
 
+const EXISTING_ITEM_QUERY = `
+  query ($contentId: ID!) {
+    node(id: $contentId) {
+      ... on Issue { projectItems(first: 50) { nodes { id project { id } } } }
+      ... on PullRequest { projectItems(first: 50) { nodes { id project { id } } } }
+    }
+  }`;
+
+/** The id of this content's existing card on our board, if it has one. */
+const findBoardItemId = async ({ contentId, projectId, token }) => {
+  const data = await graphql({
+    query: EXISTING_ITEM_QUERY,
+    token,
+    variables: { contentId },
+  });
+  const items = data.node?.projectItems?.nodes ?? [];
+  return items.find((item) => item.project?.id === projectId)?.id;
+};
+
+/**
+ * Adding is not exclusive to this workflow: `add-to-project.yml` fires on the
+ * same `pull_request` events and adds the same content, so on every new PR the
+ * two race and whichever loses is told the content is already there. That is
+ * not a failure — the card exists, which is all this step wanted — so recover
+ * the existing item's id and carry on. Any other GraphQL error still throws.
+ */
+const addOrFindBoardItem = async ({ contentId, meta, token }) => {
+  try {
+    const added = await graphql({
+      query: ADD_ITEM_MUTATION,
+      token,
+      variables: { contentId, projectId: meta.projectId },
+    });
+    return added.addProjectV2ItemById?.item?.id;
+  } catch (error) {
+    const isAlreadyOnBoard = (error.graphqlErrors ?? []).some((e) =>
+      e.message?.includes('already exists in this project'),
+    );
+    if (!isAlreadyOnBoard) {
+      throw error;
+    }
+    return findBoardItemId({ contentId, projectId: meta.projectId, token });
+  }
+};
+
 /** Add the content to the board if needed, then set its Status. */
 const applyStatus = async ({ contentId, meta, optionId, token }) => {
-  const added = await graphql({
-    query: ADD_ITEM_MUTATION,
-    token,
-    variables: { contentId, projectId: meta.projectId },
-  });
-  const itemId = added.addProjectV2ItemById?.item?.id;
+  const itemId = await addOrFindBoardItem({ contentId, meta, token });
   if (!itemId) {
     return;
   }
