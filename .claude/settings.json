@@ -40,7 +40,10 @@
       {
         "matcher": "Write|Edit|MultiEdit",
         "hooks": [
-          { "type": "command", "command": "node scripts/claude-autofix.mjs" }
+          {
+            "type": "command",
+            "command": "node scripts/claude-autofix.mjs"
+          }
         ]
       }
     ],
@@ -49,7 +52,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd apps/react-router && git diff --quiet HEAD -- . || (vp fmt . && vp lint . --fix && vp check --fix && vp run test)"
+            "command": "test -n \"$(git status --porcelain)\" || exit 0; vp fmt . && vp lint . --fix && vp check --fix && { git diff --name-only HEAD; git ls-files --others --exclude-standard; } | node scripts/run-changed.mjs test"
           }
         ]
       }

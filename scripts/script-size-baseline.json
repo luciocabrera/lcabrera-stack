@@ -1,5 +1,3 @@
 {
-  ".github/skills/app-graph/scripts/generate-app-graph-report.mjs": 516,
-  "scripts/bootstrap-agenting-handoff.cjs": 358,
-  "scripts/generate-source-smell-report.cjs": 391
+  ".github/skills/app-graph/scripts/generate-app-graph-report.mjs": 516
 }

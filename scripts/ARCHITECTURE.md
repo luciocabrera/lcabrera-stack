@@ -20,14 +20,12 @@ Shared repository-level automation scripts.
 - `generate-skills-compliance-report.cjs` - emits markdown compliance artifacts from skill validation.
   - Writes `reports/skills/code-smell-compliance-report.md`.
   - Appends run history to `reports/skills/agenting-plan-progress.md`.
-- `bootstrap-agenting-handoff.cjs` - one-command handoff pack generator for agent workflows.
   - Refreshes the compliance report.
   - Generates `reports/skills/fix-plan.md` from findings.
   - Generates `reports/skills/handoff-prompts.md` for planner/fixer/verifier agents.
   - Generates `reports/skills/handoff-runbook.md` with step-by-step flow and copy/paste prompts.
   - Generates `reports/skills/handoff-runbook-source-audit.md` focused on full source-audit remediation flow.
   - Appends run history to `reports/skills/agenting-plan-progress.md`.
-- `generate-source-smell-report.cjs` - full source-code smell audit generator for app code.
   - Scans `apps/**` source files and detects high-signal maintainability/type-safety patterns.
   - Writes `reports/skills/code-smell-full-audit.md` using the shared smell report schema shape.
   - Appends run history to `reports/skills/agenting-plan-progress.md`.
@@ -43,11 +41,7 @@ Defined in root `package.json`:
 - `db:seed` - convenience sequence: `db:up` then `seed`.
 - `skills:validate` - runs `node scripts/validate-skills.cjs`.
 - `skills:report` - runs `node scripts/generate-skills-compliance-report.cjs`.
-- `skills:source-audit` - runs full source-audit flow:
-  - `node scripts/generate-source-smell-report.cjs`
-  - `node scripts/bootstrap-agenting-handoff.cjs`
   - Outcome: source findings report plus refreshed fix-plan/prompts/runbooks.
-- `skills:handoff` - runs `node scripts/bootstrap-agenting-handoff.cjs`.
 
 ## Guardrails
 
