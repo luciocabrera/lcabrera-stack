@@ -2,7 +2,7 @@
 id: coverage-phase-3
 title: Coverage Phase 3: admit scan-orchestrator, shared and both API servers to the report
 owner: agent:claude
-status: active
+status: review
 branch: coverage-phase-3
 area:
   - apps/shared/vite.config.ts
@@ -13,7 +13,7 @@ area:
 started: 2026-07-21
 updated: 2026-07-21
 plan: (none)
-pr: (none)
+pr: '#234'
 issue: #52
 ---
 
@@ -23,6 +23,6 @@ Coverage Phase 3: admit scan-orchestrator, shared and both API servers to the re
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: in review — PR #234 open, full gate green
 - Blockers: none
-- Next:
+- Next: merge, closing #52/#53/#54. #51 (admin_system) is the last Phase 3 child.
