@@ -15,13 +15,25 @@
  *
  * `.git` is a directory in a primary checkout and a file containing
  * `gitdir: <absolute path>` in a linked worktree — the same two shapes git
- * documents. Anything else (no `.git`, an unreadable one, a malformed pointer)
- * returns `undefined`, so callers simply fall back to their normal root.
+ * documents. Every path this returns is canonicalized and confirmed to be an
+ * existing directory before it leaves, because callers use the result to widen
+ * a path-containment check: an unvalidated value here would widen it to
+ * somewhere that does not exist, or that a malformed pointer chose. Anything
+ * unexpected (no `.git`, an unreadable one, a pointer to a non-directory)
+ * returns `undefined`, so callers fall back to their normal root.
  */
 import { existsSync, readFileSync, statSync } from 'node:fs';
-import { isAbsolute, join, resolve } from 'node:path';
+import { isAbsolute, join, resolve, sep } from 'node:path';
 
 const GITDIR_PREFIX = 'gitdir:';
+
+/** An existing directory, or `undefined` — the only shape callers may trust. */
+const asExistingDirectory = (path) => {
+  if (!existsSync(path)) {
+    return undefined;
+  }
+  return statSync(path).isDirectory() ? path : undefined;
+};
 
 /** The `gitdir: <path>` pointer inside a linked worktree's `.git` file. */
 const readGitDirPointer = (gitPath, repoRoot) => {
@@ -30,9 +42,11 @@ const readGitDirPointer = (gitPath, repoRoot) => {
     return undefined;
   }
   const target = line.slice(GITDIR_PREFIX.length).trim();
-  return target === ''
-    ? undefined
-    : resolve(isAbsolute(target) ? target : join(repoRoot, target));
+  if (target === '') {
+    return undefined;
+  }
+  const base = isAbsolute(target) ? target : join(repoRoot, target);
+  return asExistingDirectory(resolve(base));
 };
 
 /**
@@ -41,14 +55,20 @@ const readGitDirPointer = (gitPath, repoRoot) => {
  * than before.
  */
 export const resolveGitDir = (repoRoot) => {
-  const gitPath = join(repoRoot, '.git');
+  const root = resolve(repoRoot);
+  const gitPath = join(root, '.git');
+  // `repoRoot` reaches us from a caller's own module location, but validate the
+  // join anyway: a root carrying traversal must not steer this read elsewhere.
+  if (!gitPath.startsWith(root + sep)) {
+    return undefined;
+  }
   if (!existsSync(gitPath)) {
     return undefined;
   }
   try {
     return statSync(gitPath).isDirectory()
       ? gitPath
-      : readGitDirPointer(gitPath, repoRoot);
+      : readGitDirPointer(gitPath, root);
   } catch {
     return undefined;
   }
