@@ -404,10 +404,17 @@ changelog:generate`, `scripts/generate-changelog.mjs`): Conventional-Commit
   (`scripts/lib/labels.mjs`; the `app:`/`pkg:` set is derived from the workspaces,
   so it self-updates). [`sync-labels.yml`](.github/workflows/sync-labels.yml)
   creates/updates them on GitHub whenever `labels.mjs` or the workspace list changes
-  on `main` (or on demand via `vp run labels:sync`), so adding a workspace
-  auto-creates its label — no manual step. [`labeler.yml`](.github/workflows/labeler.yml)
-  applies them to every PR — scope from the changed workspaces (`scripts/pr-labels.mjs`),
-  type from the PR title.
+  on `main` (or on demand via `vp run labels:sync`), and
+  [`labeler.yml`](.github/workflows/labeler.yml) applies them to every PR — scope
+  from the changed workspaces (`scripts/pr-labels.mjs`), type from the PR title.
+  Adding a workspace needs no manual step: the labeler **syncs the taxonomy from
+  the PR head before applying**, so the new label exists on the PR that
+  introduces it, not only after the merge. Do not remove that step — labels are
+  created via the Issues API, which is also why that job needs `issues: write`.
+  Note the sync workflow watches `apps/*/package.json` and
+  `packages/*/package.json`, **not** just `pnpm-workspace.yaml`: that file holds
+  only the globs, which a new workspace never edits, so watching it alone meant
+  the workflow never fired for one.
 
 ### Post-Change Quality Gate
 

@@ -5,6 +5,17 @@ name: PR Labeler
 # and a `type:` label (+ breaking-change) from the PR title. `edited` re-runs it
 # when the title changes. Same-repo PRs only — a fork PR's token can't write
 # labels, and that is fine (the labels are a convenience, not a gate).
+#
+# The sync step ahead of it exists because a PR that ADDS a workspace computes a
+# label that does not exist yet: sync-labels.yml runs on push to main, i.e. after
+# the merge, while this runs before it, so `gh pr edit --add-label` failed with
+# `'pkg: api' not found` and took the whole job down. Syncing here first fixes the
+# ordering at the source — this checkout is the PR head, so it is the version that
+# knows about the new workspace. The script is idempotent (create/update only,
+# never delete), so on every other PR this is a no-op that costs one API listing.
+#
+# `issues: write` is required for it: labels live under the Issues API, so
+# `pull-requests: write` alone cannot create one.
 
 on:
   pull_request:
@@ -12,6 +23,7 @@ on:
 
 permissions:
   contents: read
+  issues: write
   pull-requests: write
 
 jobs:
@@ -25,6 +37,13 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
+
+      - name: Ensure the taxonomy covers this PR's workspaces
+        # Same script sync-labels.yml runs, against the PR head — so a workspace
+        # added by this PR has its label before the next step asks for it.
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/sync-labels.mjs
 
       - name: Compute + apply labels
         # Title comes in through env (never a shell interpolation); the changed
