@@ -376,7 +376,7 @@ jobs:
 
       - name: Per-workspace + monorepo coverage report
         # Builds coverage/monorepo-coverage-summary.json — one entry per reported
-        # workspace (ui, data-access, react-router) plus an aggregated total —
+        # workspace (ui, server, react-router) plus an aggregated total —
         # which the PR-comment step renders as a matrix. Best-effort and
         # `always()`: the test step above is the authoritative pass/fail gate, so a
         # coverage hiccup here must not fail the job, and a partial report on a
