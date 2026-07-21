@@ -49,6 +49,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { logSafe, summaryLines } from './lib/sonar-summary.mjs';
 import { waitForAnalysis } from './lib/sonar-wait.mjs';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
@@ -214,13 +215,18 @@ const countBy = (items, pick) => {
   return counts;
 };
 
-const buildReport = (target, gate, issues, hotspots) => {
+const buildReport = (target, gate, issues, hotspots, analysisDate) => {
   const normIssues = issues.map(normIssue).toSorted(byLocation);
   const normHotspots = hotspots.map(normHotspot).toSorted(byLocation);
   return {
     project: CONFIG.project,
     source: CONFIG.base,
     target,
+    // The analysis this snapshot came from, so a reader of the tracked file can
+    // tell an old result from a current one. Still deterministic: it is a
+    // property of the analysis, not of the run, so two fetches of the same
+    // analysis produce identical bytes. Only a genuinely new analysis moves it.
+    analysisDate: analysisDate ?? null,
     qualityGate: normGate(gate),
     summary: {
       issues: normIssues.length,
@@ -315,6 +321,18 @@ const fetchGate = async (token, target) => {
   return body.projectStatus;
 };
 
+/**
+ * When SonarCloud last analysed this target. Undefined for a target it has
+ * never analysed — which the freshness helper deliberately treats as stale.
+ */
+const fetchAnalysisDate = async (token, target) => {
+  const body = await fetchJson(
+    `${CONFIG.base}/api/components/show?component=${CONFIG.project}&${targetParam(target)}`,
+    token,
+  );
+  return body.component?.analysisDate;
+};
+
 const loadEnv = () => {
   const envFile = join(REPO_ROOT, '.env');
   if (existsSync(envFile)) process.loadEnvFile(envFile);
@@ -325,27 +343,14 @@ const writeReport = (report) => {
   writeFileSync(OUT_PATH, `${JSON.stringify(report, null, 2)}\n`);
 };
 
-/**
- * Strip line breaks from anything interpolated into a log line. The report data
- * is fetched from the SonarCloud API and the target comes from CLI args /
- * `.git/HEAD` — external input a log-forging payload could ride in on (CWE-117).
- * Sonar's S5145 flags logging it unsanitised; this is Sonar's own recommended fix.
- */
-const logSafe = (value) => String(value).replaceAll(/[\n\r]/gu, ' ');
-
 const printSummary = (report) => {
-  const { target, qualityGate, summary } = report;
-  const severities = Object.entries(summary.bySeverity)
-    .map(([sev, count]) => `${sev} ${count}`)
-    .join(', ');
-  const severitySuffix = severities ? ` (${severities})` : '';
-  const lines = [
-    `SonarCloud — ${report.project} @ ${target.type} ${target.value}`,
-    `  quality gate: ${qualityGate.status}`,
-    `  issues: ${summary.issues}${severitySuffix}  hotspots: ${summary.hotspots}`,
-    `  written: ${OUT_REL}`,
-  ];
-  for (const line of lines) console.log(logSafe(line));
+  const parts = summaryLines(report, OUT_REL, Date.now());
+  for (const line of parts.findings) console.log(logSafe(line));
+  // A stale freshness note goes to stderr so it survives a `| tail` or a grep
+  // for the gate line — how a ten-day-old analysis got read as current once.
+  const emit = parts.stale ? console.warn : console.log;
+  for (const line of parts.freshness) emit(logSafe(line));
+  console.log(logSafe(parts.written));
 };
 
 const printNoToken = (gateMode) => {
@@ -423,12 +428,13 @@ const main = async () => {
     }
   }
 
-  const [gate, issues, hotspots] = await Promise.all([
+  const [gate, issues, hotspots, analysisDate] = await Promise.all([
     fetchGate(token, target),
     fetchIssues(token, target),
     fetchHotspots(token, target),
+    fetchAnalysisDate(token, target),
   ]);
-  const report = buildReport(target, gate, issues, hotspots);
+  const report = buildReport(target, gate, issues, hotspots, analysisDate);
   writeReport(report);
   printSummary(report);
 
