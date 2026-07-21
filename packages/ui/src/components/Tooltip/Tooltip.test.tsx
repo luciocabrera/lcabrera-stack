@@ -6,9 +6,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Tooltip } from './Tooltip.component';
 import { TRANSITION_DURATION_MS } from './Tooltip.constants';
 
-// eslint-disable-next-line typescript-eslint/unbound-method -- Saving prototype method for teardown restore; binding would create a new function and break restoration
+// oxlint-disable-next-line typescript-eslint/unbound-method -- Saving prototype method for teardown restore; binding would create a new function and break restoration (Oxlint rule: ESLint has no `typescript-eslint/` prefix, so it read this as unused)
 const savedShowPopover = HTMLElement.prototype.showPopover;
-// eslint-disable-next-line typescript-eslint/unbound-method -- Saving prototype method for teardown restore; binding would create a new function and break restoration
+// oxlint-disable-next-line typescript-eslint/unbound-method -- Saving prototype method for teardown restore; binding would create a new function and break restoration (Oxlint rule: ESLint has no `typescript-eslint/` prefix, so it read this as unused)
 const savedHidePopover = HTMLElement.prototype.hidePopover;
 const popoverMocksRef: {
   current: {

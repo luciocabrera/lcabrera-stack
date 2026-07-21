@@ -22,7 +22,6 @@ export const BooleanFilterInput = ({
     } else {
       onChange({
         type: 'boolean' as const,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         value: newValue === 'true',
       });
     }

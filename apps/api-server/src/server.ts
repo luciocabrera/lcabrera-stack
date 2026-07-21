@@ -47,7 +47,6 @@ const shutdown = async (): Promise<void> => {
   await pool.end();
 };
 
-// eslint-disable-next-line unicorn/prefer-top-level-await
 void runStartupDbSanityCheck({
   dbSanityRepository,
   repopulateCommand: '`vp run seed` in api-server',

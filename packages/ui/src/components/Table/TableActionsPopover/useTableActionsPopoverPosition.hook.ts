@@ -85,7 +85,6 @@ export const useTableActionsPopoverPosition = ({
       intersectionObserver?.disconnect();
       resizeObserver?.disconnect();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps, react-x/exhaustive-deps -- closeMenu is stable per render and re-derived from refs, not reactive state
   }, [containerRef, isEnabled, triggerId]);
 
   return {
