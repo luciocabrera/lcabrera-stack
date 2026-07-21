@@ -1,9 +1,9 @@
-import { selectRows } from '@repo/data-access/db/selectRows.util';
+import { selectRows } from '@repo/server/db/select-rows.util';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { selectLlmCostRows } from './selectLlmCostRows.util.ts';
 
-vi.mock('@repo/data-access/db/selectRows.util', () => ({
+vi.mock('@repo/server/db/select-rows.util', () => ({
   selectRows: vi.fn(),
 }));
 

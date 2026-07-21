@@ -1,4 +1,4 @@
-import { buildDistinctQuery } from '@repo/data-access/db/queryBuilder/buildDistinctQuery.util';
+import { buildDistinctQuery } from '@repo/server/db/query-builder/build-distinct-query.util';
 
 import type {
   DistinctValuesResponse,
@@ -30,7 +30,7 @@ type GetDistinctValuesArgs = {
 /**
  * Generic distinct-values access behind /api/distinct: allow-list
  * validation via parseDistinctSource, then a parameterized SELECT DISTINCT
- * composed by @repo/data-access's buildDistinctQuery.
+ * composed by @repo/server's buildDistinctQuery.
  */
 export const createDistinctRepository = ({
   pool,

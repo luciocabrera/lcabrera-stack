@@ -7,7 +7,7 @@ import { parseOrdersPageParams } from './parseOrdersPageParams.util';
 /**
  * Resource route serving a page of enterprise orders for the table's
  * infinite-scroll load-more. Runs the query server-side via the generic
- * data-access executors and returns a raw JSON `{ data, hasMore, total }`
+ * /server executors and returns a raw JSON `{ data, hasMore, total }`
  * Response — the client consumes it with plain `fetch`, not the single-fetch
  * protocol.
  */

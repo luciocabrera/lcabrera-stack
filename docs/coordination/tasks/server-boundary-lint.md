@@ -17,7 +17,7 @@ issue: #118
 
 Phase 2 of the `.server` adoption (Phase 1 merged: #117). Extend the existing
 `enforceServerClientImportBoundary` eslint mechanism so direct database access
-(`pg`, anything under `@repo/data-access/db`) is server-only, and exempt
+(`pg`, anything under `@repo/server/db`) is server-only, and exempt
 `.server/` directories (not just the `.server.ts` file suffix).
 
 ## Status / next

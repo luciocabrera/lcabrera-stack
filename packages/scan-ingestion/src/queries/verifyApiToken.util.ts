@@ -1,6 +1,6 @@
-import { isSecretHashValid } from '@repo/data-access/crypto/isSecretHashValid.util';
-import { getPool } from '@repo/data-access/db/getPool.util';
-import { parseApiToken } from '@repo/data-access/tokens/parseApiToken.util';
+import { isSecretHashValid } from '@repo/server/crypto/is-secret-hash-valid.util';
+import { getPool } from '@repo/server/db/get-pool.util';
+import { parseApiToken } from '@repo/server/tokens/parse-api-token.util';
 
 import { API_TOKEN_PREFIX } from '../auth/apiToken.constants.ts';
 

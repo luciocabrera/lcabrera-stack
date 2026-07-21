@@ -1,4 +1,4 @@
-import { readEnvConfig } from '@repo/data-access/db/env.schema';
+import { readEnvConfig } from '@repo/server/db/env.schema';
 import { readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

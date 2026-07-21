@@ -42,7 +42,7 @@ const configs = [
     filePath: resolve(packageDirectory, 'tsconfig.app.json'),
   },
   {
-    // admin_system consumes @repo/data-access/@repo/scan-ingestion/@repo/ui
+    // admin_system consumes @repo/server/@repo/scan-ingestion/@repo/ui
     // directly (CQMS routes, TECH_SPEC §2.4/§2.8) — without these, this
     // config drifts from the actual hand-verified tsconfig.app.json the
     // moment this generator re-runs for an unrelated reason (found the
@@ -51,8 +51,8 @@ const configs = [
     // entire cqms routes tree).
     config: createAppTsConfig({
       paths: {
-        '@repo/data-access/*': ['../../packages/data-access/src/*'],
         '@repo/scan-ingestion/*': ['../../packages/scan-ingestion/src/*'],
+        '@repo/server/*': ['../../packages/server/src/*'],
         // Bare specifier — `@repo/ui` resolves to the public-api barrel, not
         // a subpath. Distinct from the wildcard below and NOT implied by it
         // (`@repo/ui/*` never matches the bare form), so dropping it breaks
@@ -73,7 +73,7 @@ const configs = [
   {
     config: createAppTsConfig({
       paths: {
-        '@repo/data-access/*': ['../../packages/data-access/src/*'],
+        '@repo/server/*': ['../../packages/server/src/*'],
         // Bare specifier — see the identical entry under admin_system above.
         '@repo/ui': ['../../packages/ui/src/public-api.ts'],
         '@repo/ui/*': ['../../packages/ui/src/*'],
@@ -96,10 +96,10 @@ const configs = [
       // tsconfig.json from a file *inside* packages/ui (an editor's
       // language server, or tsc/lint invoked directly against this
       // package) can still resolve @repo/ui's own self-referencing
-      // imports and @repo/data-access cross-imports — without it, only a
+      // imports and @repo/server cross-imports — without it, only a
       // consuming app's own tsconfig knew about these aliases.
       paths: {
-        '@repo/data-access/*': ['../data-access/src/*'],
+        '@repo/server/*': ['../server/src/*'],
         '@repo/ui/*': ['./src/*'],
       },
       tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
@@ -113,33 +113,31 @@ const configs = [
     filePath: resolve(workspaceRoot, 'packages/ui/tsconfig.app.json'),
   },
   {
-    // packages/data-access has two genuinely different runtime contexts in
-    // one package, deliberately (renamed from packages/api when it grew a
-    // Postgres db/ subtree alongside its original browser fetch utilities —
-    // see ADR-008): src/api/ runs in the browser (fetch utilities executed
-    // client-side, needs import.meta.env/vite/client + DOM lib for its
-    // Window/Location test references) while src/db/ is Node-only (pg
-    // client, process.env). Mirrors packages/ui's own precedent exactly
-    // (its src/entry/ SSR utilities mix into an otherwise browser-context
-    // package) — createAppTsConfig + types: ['node'] appended, one project
-    // covers both since this package has no vite.config-anchored node
-    // split either.
-    config: createAppTsConfig({
+    // @repo/server is Node-only, and this entry is now a plain node config
+    // rather than an app config with 'node' bolted on.
+    //
+    // It used to be the latter because the package carried two runtimes at
+    // once (ADR-008): a browser src/api/ half needing DOM + vite/client
+    // alongside a Node src/db/ half. That half is gone — it is @repo/api now
+    // — so the DOM lib was left granting Window, document and fetch to a
+    // package that has no business touching any of them. Dropping to
+    // createNodeTsConfig makes a browser reach-in fail typecheck here, the
+    // exact mirror of @repo/api omitting 'node' to keep itself client-safe.
+    config: createNodeTsConfig({
+      include: ['src', 'vite.config.ts'],
       paths: {
-        '@repo/data-access/*': ['./src/*'],
+        '@repo/server/*': ['./src/*'],
       },
       tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
-      types: ['node'],
     }),
-    filePath: resolve(workspaceRoot, 'packages/data-access/tsconfig.app.json'),
+    filePath: resolve(workspaceRoot, 'packages/server/tsconfig.app.json'),
   },
   {
     // Genuinely Node-only (pg client, fs/path, git CLI via child_process,
-    // no DOM/vite.client usage anywhere) — unlike packages/data-access's
-    // src/api/ half. Overrides
-    // createNodeTsConfig's default include (['vite.config.ts'] only, meant
-    // for an app's Node-context sibling config) since this package has no
-    // app-context tsconfig to pair with — its own src/ needs typechecking.
+    // no DOM/vite.client usage anywhere). Overrides createNodeTsConfig's
+    // default include (['vite.config.ts'] only, meant for an app's
+    // Node-context sibling config) since this package has no app-context
+    // tsconfig to pair with — its own src/ needs typechecking.
     config: createNodeTsConfig({
       include: ['src', 'vite.config.ts'],
       paths: {
@@ -205,7 +203,7 @@ const configs = [
     // @repo/api is the browser half of the old data-access package: fetch
     // client, HTTP contracts, base-URL resolution. It needs the DOM lib and
     // vite/client that createAppTsConfig supplies by default (Window, Location,
-    // fetch, the Vite env object) — but, unlike packages/data-access, it must
+    // fetch, the Vite env object) — but, unlike packages/server, it must
     // NOT append 'node'. That omission is the point: a stray process/fs reach-in
     // fails typecheck here rather than quietly making a client-safe package
     // server-only again, which is the regression

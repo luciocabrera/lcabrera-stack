@@ -1,4 +1,4 @@
-import { closePool, getPool } from '@repo/data-access/db/getPool.util';
+import { closePool, getPool } from '@repo/server/db/get-pool.util';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { getUserByUsername } from './getUserByUsername.util.ts';

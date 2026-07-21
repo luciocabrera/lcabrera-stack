@@ -26,7 +26,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
   "dependencies": {
-    "@repo/data-access": "workspace:*",
+    "@repo/server": "workspace:*",
     "@repo/utils": "workspace:*",
     "fflate": "catalog:",
     "pg": "catalog:",

@@ -1,7 +1,7 @@
-import { closePool } from '@repo/data-access/db/getPool.util';
 import { registerShutdownSignals } from '@repo/node-runtime/registerShutdownSignals.util';
 import { failStaleRunningScans } from '@repo/scan-ingestion/queries/failStaleRunningScans.util';
 import { getUserByUsername } from '@repo/scan-ingestion/queries/getUserByUsername.util';
+import { closePool } from '@repo/server/db/get-pool.util';
 
 import { readEnvConfig } from './config/env.schema.ts';
 import { listenForQueuedScans } from './queue/listenForQueuedScans.ts';

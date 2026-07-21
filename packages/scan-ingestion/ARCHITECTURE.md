@@ -21,14 +21,14 @@ scan-ingestion/
 ├── src/
 │   ├── auth/
 │   │   └── apiToken.constants.ts     → API_TOKEN_PREFIX ('cqms_'), the CQMS tag on token plaintexts (ADR-029)
-│   │       (hashing lives in @repo/data-access/crypto — hashSecret/isSecretHashValid, shared by
+│   │       (hashing lives in @repo/server/crypto — hashSecret/isSecretHashValid, shared by
 │   │        passwords and token secrets alike; hashes still never leave this package)
 │   │
 │   ├── db/
 │   │   ├── migrations/          → 0001_init_cqms.sql .. 0009_audit_and_functions.sql (ADR-006/017/018)
 │   │   ├── env.schema.ts         → Zod-validated DB_HOST/PORT/USER/PASSWORD/NAME
 │   │   └── runMigrations.ts      → Minimal runner (ADR-006) — plain node script, relative imports
-│   │       (getPool.util.ts moved to @repo/data-access — ADR-008)
+│   │       (get-pool.util.ts moved to @repo/server — ADR-008)
 │   │
 │   ├── fs/
 │   │   ├── canonicalRealPath.util.ts     → realpath canonicalization of operator-supplied paths
@@ -77,7 +77,7 @@ the import style deliberately differs between them:
 
 Concretely: `ingestReport.ts` is loaded by **both** contexts (Vitest tests,
 _and_ transitively via `ingest.cli.ts`), so it — and everything on that
-transitive path (`getPool.util.ts`) — uses **relative** imports. Only
+transitive path (`get-pool.util.ts`) — uses **relative** imports. Only
 `ingestReport.test.ts` (Vitest-only, never bare-node) safely uses the
 `@repo/scan-ingestion/*` alias. Getting this backwards produces a working
 `tsc`/`vitest` run that then fails at real CLI runtime with
@@ -198,10 +198,10 @@ monorepo, goes through this directory — no other package or app touches
 `getDailyLlmCost`, `getProjectLlmCost`, and `getScannerLlmCost` differ only in
 view, columns, and sort — so everything else lives in one place:
 
-| File                        | Role                                                                                                    |
-| --------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `llmUsage.constants.ts`     | `LLM_USAGE_SCHEMA` — shared so the readers cannot drift onto different schemas                          |
-| `selectLlmCostRows.util.ts` | Runs a cost view via `@repo/data-access/db/selectRows.util` and coerces `total_cost_usd` to a JS number |
+| File                        | Role                                                                                                |
+| --------------------------- | --------------------------------------------------------------------------------------------------- |
+| `llmUsage.constants.ts`     | `LLM_USAGE_SCHEMA` — shared so the readers cannot drift onto different schemas                      |
+| `selectLlmCostRows.util.ts` | Runs a cost view via `@repo/server/db/select-rows.util` and coerces `total_cost_usd` to a JS number |
 
 Postgres `numeric` arrives from pg as a **string**, so each reader types its DB
 row's `total_cost_usd` as `string` and `selectLlmCostRows` returns it as a

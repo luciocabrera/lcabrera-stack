@@ -1,8 +1,8 @@
-import { deleteRows } from '@repo/data-access/db/deleteRows.util';
-import { getMaxValue } from '@repo/data-access/db/getMaxValue.util';
-import { insertRow } from '@repo/data-access/db/insertRow.util';
-import { selectRows } from '@repo/data-access/db/selectRows.util';
-import { updateRows } from '@repo/data-access/db/updateRows.util';
+import { deleteRows } from '@repo/server/db/delete-rows.util';
+import { getMaxValue } from '@repo/server/db/get-max-value.util';
+import { insertRow } from '@repo/server/db/insert-row.util';
+import { selectRows } from '@repo/server/db/select-rows.util';
+import { updateRows } from '@repo/server/db/update-rows.util';
 import { expect, it, vi } from 'vitest';
 
 import {
@@ -14,24 +14,24 @@ import {
   updateOrder,
 } from './enterpriseOrders.service';
 
-vi.mock('@repo/data-access/db/getPool.util', () => ({
+vi.mock('@repo/server/db/get-pool.util', () => ({
   getPool: vi.fn(() => ({
     query: vi.fn(async () => ({ rows: [{ count: 42 }] })),
   })),
 }));
-vi.mock('@repo/data-access/db/deleteRows.util', () => ({
+vi.mock('@repo/server/db/delete-rows.util', () => ({
   deleteRows: vi.fn(async () => []),
 }));
-vi.mock('@repo/data-access/db/getMaxValue.util', () => ({
+vi.mock('@repo/server/db/get-max-value.util', () => ({
   getMaxValue: vi.fn(async () => 41),
 }));
-vi.mock('@repo/data-access/db/insertRow.util', () => ({
+vi.mock('@repo/server/db/insert-row.util', () => ({
   insertRow: vi.fn(async () => [{ order_id: 7 }]),
 }));
-vi.mock('@repo/data-access/db/selectRows.util', () => ({
+vi.mock('@repo/server/db/select-rows.util', () => ({
   selectRows: vi.fn(async () => [{ order_id: 7 }]),
 }));
-vi.mock('@repo/data-access/db/updateRows.util', () => ({
+vi.mock('@repo/server/db/update-rows.util', () => ({
   updateRows: vi.fn(async () => [{ order_id: 7 }]),
 }));
 

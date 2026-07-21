@@ -1,0 +1,59 @@
+{
+  "name": "@repo/server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    "./crypto/hash-secret.util": "./src/crypto/hash-secret.util.ts",
+    "./crypto/is-secret-hash-valid.util": "./src/crypto/is-secret-hash-valid.util.ts",
+    "./db/delete-rows.util": "./src/db/delete-rows.util.ts",
+    "./db/env.schema": "./src/db/env.schema.ts",
+    "./db/get-max-value.util": "./src/db/get-max-value.util.ts",
+    "./db/get-pool.util": "./src/db/get-pool.util.ts",
+    "./db/insert-row.util": "./src/db/insert-row.util.ts",
+    "./db/query-builder/build-count-query.util": "./src/db/query-builder/build-count-query.util.ts",
+    "./db/query-builder/build-delete-query.util": "./src/db/query-builder/build-delete-query.util.ts",
+    "./db/query-builder/build-distinct-query.util": "./src/db/query-builder/build-distinct-query.util.ts",
+    "./db/query-builder/build-insert-query.util": "./src/db/query-builder/build-insert-query.util.ts",
+    "./db/query-builder/build-order-by-clause.util": "./src/db/query-builder/build-order-by-clause.util.ts",
+    "./db/query-builder/build-max-value-query.util": "./src/db/query-builder/build-max-value-query.util.ts",
+    "./db/query-builder/build-select-query.util": "./src/db/query-builder/build-select-query.util.ts",
+    "./db/query-builder/build-update-query.util": "./src/db/query-builder/build-update-query.util.ts",
+    "./db/query-builder/query-builder.types": "./src/db/query-builder/query-builder.types.ts",
+    "./db/select-rows.util": "./src/db/select-rows.util.ts",
+    "./db/update-rows.util": "./src/db/update-rows.util.ts",
+    "./filters/filters.types": "./src/filters/filters.types.ts",
+    "./filters/to-date-query-filters.util": "./src/filters/to-date-query-filters.util.ts",
+    "./filters/to-number-query-filters.util": "./src/filters/to-number-query-filters.util.ts",
+    "./filters/to-query-filters.util": "./src/filters/to-query-filters.util.ts",
+    "./filters/to-select-query-filters.util": "./src/filters/to-select-query-filters.util.ts",
+    "./filters/to-text-query-filters.util": "./src/filters/to-text-query-filters.util.ts",
+    "./tokens/generate-api-token.util": "./src/tokens/generate-api-token.util.ts",
+    "./tokens/parse-api-token.util": "./src/tokens/parse-api-token.util.ts"
+  },
+  "scripts": {
+    "format": "vp fmt .",
+    "format:check": "vp fmt --check .",
+    "lint": "vp run --filter eslint-local-rules-shared build && vp lint . --fix && vp run lint:eslint",
+    "lint:check": "vp run --filter eslint-local-rules-shared build && vp lint . && vp run lint:eslint:check",
+    "lint:eslint": "eslint . --config eslint.config.mjs --fix --max-warnings 0",
+    "lint:eslint:check": "eslint . --config eslint.config.mjs --max-warnings 0",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json"
+  },
+  "dependencies": {
+    "pg": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@repo/vite-configs": "workspace:*",
+    "@types/node": "catalog:",
+    "@types/pg": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "eslint": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plus": "catalog:",
+    "vitest": "catalog:"
+  }
+}

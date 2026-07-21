@@ -164,7 +164,7 @@ lost in a point-in-time document:
 | `packages/scan-ingestion` | `test` **yes** / `test:unit`+`test:coverage` **no** | The split is deliberate (ADR-032): the DB-free subset excludes `src/queries/**` and `ingestion/ingestReport.test.ts` so the fallow gate gets real coverage without provisioning a DB. |
 | `apps/scan-orchestrator`  | DB-env coupled                                      | Loads `docker/local/.env`; no unit/coverage split.                                                                                                                                    |
 | `apps/admin_system`       | **No**                                              | Mock-based, incl. route-action tests.                                                                                                                                                 |
-| `packages/data-access`    | **No**                                              | Pure; `test` + `test:coverage`.                                                                                                                                                       |
+| `packages/server`         | **No**                                              | Pure; `test` + `test:coverage`.                                                                                                                                                       |
 | `packages/node-runtime`   | **No**                                              | Pure.                                                                                                                                                                                 |
 
 The fallow audit gate (`fallow audit --gate new-only`) passes with **0 introduced

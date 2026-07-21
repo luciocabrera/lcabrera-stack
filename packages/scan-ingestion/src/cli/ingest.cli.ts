@@ -1,4 +1,4 @@
-import { closePool } from '@repo/data-access/db/getPool.util';
+import { closePool } from '@repo/server/db/get-pool.util';
 import path from 'node:path';
 
 import type {
@@ -11,7 +11,7 @@ import type {
 // outside Vite/tsc's module graph entirely — the @repo/scan-ingestion/*
 // self-referencing alias only resolves through tsconfig paths (tsc) and
 // vite.config.ts's resolve.alias (Vite/Vitest), neither of which plain
-// `node` execution goes through. @repo/data-access works here because it's
+// `node` execution goes through. @repo/server works here because it's
 // a genuine cross-package import resolved via a real package.json
 // `exports` map, not a self-referencing alias.
 import { ingestReport } from '../ingestion/ingestReport.ts';

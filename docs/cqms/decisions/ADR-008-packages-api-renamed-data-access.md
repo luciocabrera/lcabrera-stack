@@ -1,6 +1,11 @@
 # ADR-008: `packages/api` renamed to `packages/data-access`; Postgres pool/env utilities moved there from `packages/scan-ingestion`
 
-**Status:** Accepted
+**Status:** Superseded by [ADR-038](ADR-038-public-package-topology-by-runtime.md)
+
+> The body below is left exactly as written — a dated record of what was true at
+> the time, per its own Decision #1. `packages/data-access` has since been split
+> by runtime into `@repo/api` (browser-safe) and `@repo/server` (Node-only), and
+> the file names referenced here are now kebab-case. See ADR-038.
 
 ## Context
 

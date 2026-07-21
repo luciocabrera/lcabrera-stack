@@ -13,7 +13,7 @@ does, and the only one that ever needs `ANTHROPIC_API_KEY`.
   `apps/api-server`'s `tsc`-then-`dist` pattern).
 - HTTP server: plain `node:http`, only for the `/ws/runs` WebSocket upgrade
   and a bare `GET /healthz`.
-- Database: `@repo/data-access`'s pooled `getPool()` for normal queries, plus
+- Database: `@repo/server`'s pooled `getPool()` for normal queries, plus
   one dedicated non-pooled `pg.Client` (`listenForQueuedScans.ts`) held open
   for `LISTEN cqms_scan_queued`.
 
@@ -82,7 +82,7 @@ process.
 - `SCAN_ORCHESTRATOR_PORT` (default `4100`)
 - `ANTHROPIC_API_KEY` — required, Zod-validated at startup; never logged.
 - `DB_HOST`/`DB_NAME`/`DB_PASSWORD`/`DB_PORT`/`DB_USER` — via
-  `@repo/data-access`'s own schema, loaded the same way every other CQMS
+  `@repo/server`'s own schema, loaded the same way every other CQMS
   package loads them (`docker/local/.env` + a package-local `.env` override
   for `DB_NAME=cqms_db`).
 

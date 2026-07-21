@@ -1,4 +1,4 @@
-import { getPool } from '@repo/data-access/db/getPool.util';
+import { getPool } from '@repo/server/db/get-pool.util';
 
 export type ScanAppGraphSummary = {
   readonly analyzed_file_count: number;

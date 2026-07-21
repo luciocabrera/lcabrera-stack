@@ -1,7 +1,7 @@
 # Package Architecture (`@repo/utils`)
 
 Shared framework-agnostic utility primitives — the lowest layer of the monorepo,
-importable by any consumer (`@repo/ui`, `@repo/data-access`, apps).
+importable by any consumer (`@repo/ui`, `@repo/server`, apps).
 
 ## Design Goals
 

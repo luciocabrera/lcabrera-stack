@@ -16,7 +16,7 @@ was wrong in its own way:
 | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | `@repo/utils`       | Its `ARCHITECTURE.md` commits to "keep utilities pure and side-effect free". Registering signal handlers is a side effect by definition. |
 | `api-shared`        | The car-sales demo's shared lib. `scan-orchestrator` is CQMS product code; depending on it would couple product to demo.                 |
-| `@repo/data-access` | Owns DB/query/crypto/token concerns. A process signal is not data access.                                                                |
+| `@repo/server`      | Owns DB/query/crypto/token concerns. A process signal is not data access.                                                                |
 | Duplicating per app | What we had: 12 lines of identical `process.on` wiring in two servers, flagged as a fallow clone group.                                  |
 
 Both consumers depend on **this** package, not on each other — the demo and

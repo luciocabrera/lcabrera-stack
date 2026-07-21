@@ -1,6 +1,6 @@
-import { hashSecret } from '@repo/data-access/crypto/hashSecret.util';
-import { getPool } from '@repo/data-access/db/getPool.util';
-import { generateApiToken } from '@repo/data-access/tokens/generateApiToken.util';
+import { hashSecret } from '@repo/server/crypto/hash-secret.util';
+import { getPool } from '@repo/server/db/get-pool.util';
+import { generateApiToken } from '@repo/server/tokens/generate-api-token.util';
 
 import { API_TOKEN_PREFIX } from '../auth/apiToken.constants.ts';
 

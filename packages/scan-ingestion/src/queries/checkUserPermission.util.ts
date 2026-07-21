@@ -1,4 +1,4 @@
-import { getPool } from '@repo/data-access/db/getPool.util';
+import { getPool } from '@repo/server/db/get-pool.util';
 
 const INSUFFICIENT_PRIVILEGE = '42501';
 

@@ -23,9 +23,9 @@ export default defineConfig({
         replacement: `${fileURLToPath(new URL('src', import.meta.url))}/`,
       },
       {
-        find: '@repo/data-access',
+        find: '@repo/server',
         replacement: fileURLToPath(
-          new URL('../../packages/data-access/src', import.meta.url),
+          new URL('../../packages/server/src', import.meta.url),
         ),
       },
       {

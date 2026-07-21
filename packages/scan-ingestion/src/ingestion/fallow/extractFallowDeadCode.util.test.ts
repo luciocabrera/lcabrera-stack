@@ -32,7 +32,7 @@ describe('extractFallowDeadCode', () => {
             actions: [],
             line: 18,
             location: 'dependencies',
-            package_name: '@repo/data-access',
+            package_name: '@repo/server',
             path: 'apps/admin_system/package.json',
             used_in_workspaces: ['apps/react-router'],
           },
@@ -103,7 +103,7 @@ describe('extractFallowDeadCode', () => {
       category: 'unused_dependency',
       dependency_location: 'dependencies',
       file_path: 'apps/admin_system/package.json',
-      package_name: '@repo/data-access',
+      package_name: '@repo/server',
       rule_id: 'fallow/unused-dependency',
       severity: 'HIGH',
     });

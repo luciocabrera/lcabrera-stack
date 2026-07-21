@@ -106,14 +106,14 @@ const UI_PUBLIC_IMPORT_BOUNDARY_PATTERNS = [
   },
 ];
 
-// Runtime database access is server-only. Match the whole `@repo/data-access/db`
+// Runtime database access is server-only. Match the whole `@repo/server/db`
 // import path — not individual utils, which drift as they are added and removed —
 // plus the raw `pg` driver, and cover both direct imports and barrel re-exports.
 // Type-only imports are erased at compile time, so they stay allowed (e.g. the
-// `QueryBuilder.types` the pure `db/queryBuilder/*` builders share); the guard is
+// `query-builder.types` the pure `db/query-builder/*` builders share); the guard is
 // on runtime access, which is what pulls the DB connection into the bundle.
 const SERVER_ONLY_DB_MESSAGE =
-  'Direct database access is server-only (the pg driver and @repo/data-access/db runtime helpers). Move this import to a `.server.ts` file or a `.server/` directory — or reach it through a server-only module.';
+  'Direct database access is server-only (the pg driver and @repo/server/db runtime helpers). Move this import to a `.server.ts` file or a `.server/` directory — or reach it through a server-only module.';
 
 const DB_IMPORT_BOUNDARY_RESTRICTIONS = [
   'ImportDeclaration',
@@ -124,7 +124,7 @@ const DB_IMPORT_BOUNDARY_RESTRICTIONS = [
     declaration === 'ImportDeclaration' ? 'importKind' : 'exportKind';
 
   return [
-    String.raw`${declaration}[${kind}!='type'][source.value=/^@repo\/data-access\/db\//]`,
+    String.raw`${declaration}[${kind}!='type'][source.value=/^@repo\/server\/db\//]`,
     `${declaration}[${kind}!='type'][source.value='pg']`,
   ].map((selector) => ({ message: SERVER_ONLY_DB_MESSAGE, selector }));
 });

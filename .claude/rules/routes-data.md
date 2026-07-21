@@ -39,7 +39,7 @@ const MyPage = () => {
 ## Server-Only Modules (`.server`)
 
 Code that must never reach the browser — database access (`getPool`, `pg`, the
-`@repo/data-access/db` executors), secret handling, `node:*` builtins — belongs in a
+`@repo/server/db` executors), secret handling, `node:*` builtins — belongs in a
 **server-only module** ([RR framework convention](https://reactrouter.com/api/framework-conventions/server-modules)).
 Two equivalent forms; both make the build **fail** if a client-reachable module imports
 them (RR 8's plugin matches `/\.server\//` on the resolved path **and** the `.server.<ext>`
@@ -61,9 +61,9 @@ Rules:
 - A plain `server/` folder gives **no** guarantee — it is just a folder. Use `.server/`.
 - **Lint catches it before the build.** The RR apps opt into `enforceServerClientImportBoundary`
   (shared eslint config), which fails the gate when a non-`.server` file makes a runtime import of
-  a server-only primitive — `node:*`, `pg`, or anything under `@repo/data-access/db` (the pool +
+  a server-only primitive — `node:*`, `pg`, or anything under `@repo/server/db` (the pool +
   executors). Matched by path, so new db utils are covered automatically; type-only imports stay
-  allowed (e.g. the erasable `db/queryBuilder` `*.types`). So the boundary is enforced twice: fast
+  allowed (e.g. the erasable `db/query-builder` `*.types`). So the boundary is enforced twice: fast
   at lint time, and definitively at build time.
 - **Blueprint:** `apps/react-router/src/routes/enterprise-orders/.server/` is the reference; new
   apps and features follow it. All tooling (vitest, oxlint, eslint, oxfmt) still discovers and
