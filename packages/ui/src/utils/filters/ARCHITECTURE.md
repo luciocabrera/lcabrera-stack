@@ -12,7 +12,7 @@ dataTotalSelector }` contract the Table's filter fetch chain
 | File                                     | Description                                                                                                        |
 | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | `createStaticFilterOptions.util.ts`      | Emits a `{ kind: 'static', values }` descriptor for build-time enum lists (spread into a column definition)        |
-| `filterOptions.constants.ts`             | Transport request targets: `/_api/filter-options` (loader) and the `/distinct` BFF path suffix                     |
+| `filters.constants.ts`                   | Transport request targets: `/_api/filter-options` (loader) and the `/distinct` BFF path suffix                     |
 | `getFilterOptionsBaseUrl.util.ts`        | Resolves a transport to its request base (`getApiBaseUrl() + '/distinct'` for bff, resource-route path for loader) |
 | `resolveDistinctFilterOptions.util.ts`   | Executor for `kind: 'distinct'`: pages via `fetchDistinctValues` (`@repo/data-access/api`), maps `skip`→`offset`   |
 | `resolveStaticFilterOptions.util.ts`     | Executor for `kind: 'static'`: serves pages by slicing the baked values client-side (no network)                   |

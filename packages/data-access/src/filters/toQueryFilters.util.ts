@@ -1,5 +1,5 @@
 import type { QueryFilter } from '../db/queryBuilder/queryBuilder.types.ts';
-import type { ColumnFilter } from './columnFilter.types.ts';
+import type { ColumnFilter } from './filters.types.ts';
 
 import { toDateQueryFilters } from './toDateQueryFilters.util.ts';
 import { toNumberQueryFilters } from './toNumberQueryFilters.util.ts';

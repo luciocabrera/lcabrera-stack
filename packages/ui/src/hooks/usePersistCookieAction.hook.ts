@@ -1,4 +1,4 @@
-import type { PersistCookieEntry } from '@repo/ui/routing/persistCookie.types';
+import type { PersistCookieEntry } from '@repo/ui/routing/routing.types';
 
 import { PERSIST_COOKIE_ACTION } from '@repo/ui/constants/globalSettings.constants';
 import { useFetcher, useLocation } from 'react-router';

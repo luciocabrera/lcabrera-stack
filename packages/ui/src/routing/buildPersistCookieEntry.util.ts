@@ -1,4 +1,4 @@
-import type { PersistCookieEntry } from './persistCookie.types';
+import type { PersistCookieEntry } from './routing.types';
 
 type BuildPersistCookieEntryArgs = {
   readonly key: string;

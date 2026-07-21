@@ -1,9 +1,6 @@
 import { scryptSync, timingSafeEqual } from 'node:crypto';
 
-import {
-  SCRYPT_KEY_LENGTH,
-  SCRYPT_SALT_BYTES,
-} from './scryptHash.constants.ts';
+import { SCRYPT_KEY_LENGTH, SCRYPT_SALT_BYTES } from './crypto.constants.ts';
 
 const SALT_HEX_LENGTH = SCRYPT_SALT_BYTES * 2;
 const HASH_HEX_LENGTH = SCRYPT_KEY_LENGTH * 2;

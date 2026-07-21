@@ -4,7 +4,7 @@ import {
   SortDescIcon,
 } from '@repo/ui/components/Icons';
 
-import type { CommandDescriptor, CommandId } from '../CommandDescriptor.types';
+import type { CommandDescriptor, CommandId } from '../commands.types';
 
 /**
  * The sorting capability's commands (ADR-011). Identical shape to the pinning

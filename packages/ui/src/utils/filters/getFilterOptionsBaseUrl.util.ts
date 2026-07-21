@@ -5,7 +5,7 @@ import { getApiBaseUrl } from '@repo/data-access/api';
 import {
   BFF_DISTINCT_PATH,
   LOADER_FILTER_OPTIONS_PATH,
-} from './filterOptions.constants';
+} from './filters.constants';
 
 /**
  * Resolves the request base for a distinct descriptor's transport: the

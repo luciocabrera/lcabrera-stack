@@ -4,7 +4,7 @@ import {
   PinRightIcon,
 } from '@repo/ui/components/Icons';
 
-import type { CommandDescriptor, CommandId } from '../CommandDescriptor.types';
+import type { CommandDescriptor, CommandId } from '../commands.types';
 
 /**
  * The pinning capability's commands (ADR-011). Identity lives here once; every

@@ -1,7 +1,7 @@
 import { formInputStyles } from '@repo/ui/components/Form/fields/formInput.stylex';
 import { useFormField } from '@repo/ui/components/Form/fields/useFormField.hook';
 import { FormFieldChrome } from '@repo/ui/components/Form/FormFieldChrome/FormFieldChrome.component';
-import { NO_AUTOFILL_INPUT_PROPS } from '@repo/ui/components/Table/filters/filterInput.constants';
+import { NO_AUTOFILL_INPUT_PROPS } from '@repo/ui/components/Table/filters/filters.constants';
 import * as stylex from '@stylexjs/stylex';
 
 import type { TextFieldProps } from './TextField.types';
