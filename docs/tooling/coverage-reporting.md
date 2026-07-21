@@ -126,7 +126,14 @@ only once its coverage runs clean and means something.** Checklist:
   `eslint-local-rules` are config/CLI-only with nothing to cover.
 - **Phase 3 — apps & server workspaces.** `apps/scan-orchestrator`,
   `apps/shared`, `apps/api-server` and `apps/api-server-fast`. ✅ done
-  (#52/#53/#54); `apps/admin_system` (#51) is the one left.
+  (#52/#53/#54).
+
+  `apps/admin_system` (#51) is **deferred while that app is being refactored** —
+  adding a row now would report coverage against a surface that is changing
+  underneath it. Note this defers only the _report row_: the workspace inherits
+  `test` and `test:coverage` from `createReactRouterRunConfig()`, so its suites
+  already run in `test:ci`, and it is already in the fallow coverage merge.
+  Nothing goes unrun in the meantime.
 
   The plan expected the two API servers to need a DB-free `test:coverage`
   **subset** carved out of real-Postgres suites, the way `scan-ingestion` and
