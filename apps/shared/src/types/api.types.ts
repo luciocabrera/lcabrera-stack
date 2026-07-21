@@ -14,10 +14,13 @@ export type DbSanityResult = {
   readonly tableCounts: Readonly<Record<string, number | undefined>>;
 };
 
-export type DistinctValuesResponse = {
-  readonly hasMore: boolean;
-  readonly values: readonly string[];
-};
+/**
+ * Re-exported rather than re-declared: `@repo/data-access` owns this wire
+ * contract, and the client half (`fetchDistinctValues`) validates responses
+ * against it. Two copies of a shape that has to match across the wire is a
+ * silent-drift hazard, not a convenience.
+ */
+export type { DistinctValuesResponse } from '@repo/data-access/api/api.types';
 
 export type PaginatedResponse<TData> = {
   readonly data: readonly TData[];

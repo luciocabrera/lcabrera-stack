@@ -6,6 +6,7 @@
   "sideEffects": false,
   "exports": {
     "./api": "./src/api/index.ts",
+    "./api/api.types": "./src/api/api.types.ts",
     "./crypto/hashSecret.util": "./src/crypto/hashSecret.util.ts",
     "./crypto/isSecretHashValid.util": "./src/crypto/isSecretHashValid.util.ts",
     "./db/deleteRows.util": "./src/db/deleteRows.util.ts",
@@ -17,6 +18,7 @@
     "./db/queryBuilder/buildDeleteQuery.util": "./src/db/queryBuilder/buildDeleteQuery.util.ts",
     "./db/queryBuilder/buildDistinctQuery.util": "./src/db/queryBuilder/buildDistinctQuery.util.ts",
     "./db/queryBuilder/buildInsertQuery.util": "./src/db/queryBuilder/buildInsertQuery.util.ts",
+    "./db/queryBuilder/buildOrderByClause.util": "./src/db/queryBuilder/buildOrderByClause.util.ts",
     "./db/queryBuilder/buildMaxValueQuery.util": "./src/db/queryBuilder/buildMaxValueQuery.util.ts",
     "./db/queryBuilder/buildSelectQuery.util": "./src/db/queryBuilder/buildSelectQuery.util.ts",
     "./db/queryBuilder/buildUpdateQuery.util": "./src/db/queryBuilder/buildUpdateQuery.util.ts",

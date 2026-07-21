@@ -5,7 +5,10 @@ import type {
 } from './carSales.types.js';
 
 import { buildOrderByClause } from '../../utils/buildOrderByClause.util.js';
-import { DEFAULT_CAR_SALES_SORTING } from './carSales.constants.js';
+import {
+  CAR_SALES_SORTABLE_COLUMNS,
+  DEFAULT_CAR_SALES_SORTING,
+} from './carSales.constants.js';
 
 export type CarSalesRepository = {
   readonly getAll: () => Promise<CarSalesResponse>;
@@ -41,6 +44,7 @@ export const createCarSalesRepository = ({
 
   getPaginated: async ({ limit, skip, sorting }) => {
     const orderByClause = buildOrderByClause({
+      allowedColumns: CAR_SALES_SORTABLE_COLUMNS,
       fallbackSorting: DEFAULT_CAR_SALES_SORTING,
       sorting,
     });

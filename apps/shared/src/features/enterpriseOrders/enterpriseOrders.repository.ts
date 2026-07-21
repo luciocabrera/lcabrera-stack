@@ -14,7 +14,10 @@ import type {
 import { buildOrderByClause } from '../../utils/buildOrderByClause.util.js';
 import { formatPgAdminQuery } from '../../utils/formatPgAdminQuery.util.js';
 import { buildEnterpriseOrdersWhereClause } from './buildEnterpriseOrdersWhereClause.util.js';
-import { DEFAULT_ENTERPRISE_ORDER_SORTING } from './enterpriseOrders.constants.js';
+import {
+  DEFAULT_ENTERPRISE_ORDER_SORTING,
+  ENTERPRISE_ORDER_ALLOWED_COLUMNS,
+} from './enterpriseOrders.constants.js';
 
 export type EnterpriseOrdersRepository = {
   readonly getOrderById: (
@@ -62,6 +65,7 @@ export const createEnterpriseOrdersRepository = ({
 
   getPaginated: async ({ filters, limit, skip, sorting }) => {
     const orderByClause = buildOrderByClause({
+      allowedColumns: ENTERPRISE_ORDER_ALLOWED_COLUMNS,
       fallbackSorting: DEFAULT_ENTERPRISE_ORDER_SORTING,
       sorting,
     });

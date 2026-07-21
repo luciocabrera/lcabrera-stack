@@ -42,6 +42,7 @@ export const createWideAlltypes150Repository = ({
       .slice(0, MAX_WIDE_ALLTYPES_SORT_RULES);
 
     const orderByClause = buildOrderByClause({
+      allowedColumns: WIDE_ALLTYPES_SORTABLE_COLUMNS,
       fallbackSorting: DEFAULT_WIDE_ALLTYPES_SORTING,
       sorting: safeSorting,
     });
