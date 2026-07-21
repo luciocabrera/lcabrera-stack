@@ -142,6 +142,16 @@ their uncommitted files, staged changes, and branch switches clobber each other
 worktree — `git worktree add ../vrc-<task> -b <branch>` — or a separate clone.
 "Different branches" only helps if they're in _different working trees_.
 
+A hand-made worktree needs its **own** `vp install`. Symlinking the primary
+checkout's `node_modules` looks like a shortcut and is a trap: the pnpm workspace
+links inside it still point at the primary checkout's packages, so `@repo/*`
+resolves _there_ while you edit here. Tooling then reads code you did not change
+— and picks up another agent's uncommitted work, the exact cross-contamination
+the worktree was for. It fails silently, and only for changes that touch a
+workspace package. `coordination:claim --worktree` installs for you (and
+generates the route types, which are not committed); anything DB-touching also
+needs the gitignored local env files copied across.
+
 **2. The claim lives on `main`, landed early — not on your feature branch.** A
 task file is a shared lock only once it's on `main`, where every other agent
 branching off `main` sees it. So commit `tasks/<id>.md` to `main` **first** — a
