@@ -38,6 +38,15 @@ import { B } from './module';
 import { A, B } from './module';
 ```
 
+Imports that bind a namespace are left alone — `import { * as ns }` is not valid
+JavaScript, so there is no single statement to merge them into:
+
+```typescript
+// ✅ Allowed: not mergeable, so not reported
+import * as ns from './module';
+import { B } from './module';
+```
+
 ### 3. `destructuring-for-functions`
 
 Enforces object parameter pattern for functions with 2+ parameters.
@@ -87,6 +96,10 @@ type ButtonProps = { label: string };
 ### 5. `no-type-definitions-in-components`
 
 Enforces that type definitions live in separate `*.types.ts` files rather than inside component files.
+
+A component file is one whose suffix is `.component.tsx`, `.layout.tsx` or
+`.error-boundary.tsx` — the set is declared once in `component-files.ts` and
+shared with `filename-convention`, so the two rules cannot disagree about it.
 
 **❌ Disallowed:**
 
