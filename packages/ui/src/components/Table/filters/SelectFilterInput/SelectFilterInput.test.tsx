@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { TableColumn } from '../../Table.types';
 
+import { FILTER_OPTIONS_TIMEOUT_MS } from '../../Table.constants';
 import { SelectFilterInput } from './SelectFilterInput.component';
 
 afterEach(cleanup);
@@ -177,6 +178,7 @@ describe('SelectFilterInput', () => {
       offset: 50,
       schemaName: 'public',
       tableName: 'orders',
+      timeoutMs: FILTER_OPTIONS_TIMEOUT_MS,
     });
   });
 

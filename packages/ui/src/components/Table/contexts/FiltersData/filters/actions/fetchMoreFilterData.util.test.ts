@@ -247,6 +247,45 @@ describe('fetchMoreFilterData', () => {
     });
   });
 
+  it('blocks every later page while a request has not settled, which is why requests must be time-bounded', async () => {
+    // Characterizes the in-flight guard rather than asserting a fix here. The
+    // guard is what makes concurrent pages impossible, and it is cleared only
+    // when the request settles — so an endpoint that goes silent leaves this
+    // filter unable to load anything more, permanently. The bound that stops
+    // that is FILTER_OPTIONS_TIMEOUT_MS, applied where the request is built
+    // (resolveDistinctFilterOptions), not here.
+    const { result } = renderHook(() =>
+      fetchMoreFilterData<TestData, TestResponse>({
+        columnKey: 'status',
+        filtersDataStore: getHarness().dataStore as unknown as TStore<
+          FiltersDataState<TestData>
+        >,
+        metaStore: getHarness().metaStore as unknown as TStore<TableMetaState>,
+      }),
+    );
+
+    // A loader that accepts the request and never answers — the failure mode a
+    // rejection would not produce.
+    const neverSettles = vi.fn(() => new Promise<TestResponse>(() => {}));
+    const args = {
+      dataSelector: (response: TestResponse) => [...response.rows],
+      dataTotalSelector: (response: TestResponse) => response.total,
+      onLoadMore: neverSettles,
+    };
+
+    await act(async () => {
+      void result.current(args);
+      void result.current(args);
+      void result.current(args);
+      await Promise.resolve();
+    });
+
+    expect(neverSettles).toHaveBeenCalledTimes(1);
+    expect(getHarness().dataStore.get()).toMatchObject({
+      status: { isLoadingMore: true },
+    });
+  });
+
   it('prefetches the next page when enabled and more rows remain', async () => {
     getHarness().setMetaState({ enablePrefetch: true });
     getHarness().resolveFromCacheOrFetchMock.mockResolvedValue({

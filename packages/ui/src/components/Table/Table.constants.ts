@@ -28,6 +28,21 @@ export const LOAD_MORE_PAGE_SIZE = 150;
 export const DEFAULT_FILTER_PAGE_SIZE = 50;
 export const INFINITE_SCROLL_THRESHOLD = 200;
 
+/**
+ * How long a filter-options page request may hang before it is abandoned.
+ *
+ * This is a recovery bound, not a latency target. The filter fetchers guard
+ * against concurrent requests with an `isLoading`/`isLoadingMore` flag that is
+ * only cleared when the request settles — so a request that never settles
+ * leaves the flag set and every later page request returns early, wedging that
+ * dropdown until the table remounts. A rejection is not the problem; the
+ * existing catch clears the flag and reports. Silence is.
+ *
+ * Generous on purpose: it must not fire for a merely slow endpoint, only for
+ * one that has stopped answering.
+ */
+export const FILTER_OPTIONS_TIMEOUT_MS = 30_000;
+
 export const DEFAULT_OVERSCAN = 20;
 
 export const DEFAULT_COLUMN_OVERSCAN = 2;

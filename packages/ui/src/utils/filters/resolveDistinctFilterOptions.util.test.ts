@@ -1,3 +1,4 @@
+import { FILTER_OPTIONS_TIMEOUT_MS } from '@repo/ui/components/Table/Table.constants';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { resolveDistinctFilterOptions } from './resolveDistinctFilterOptions.util';
@@ -45,8 +46,28 @@ describe('resolveDistinctFilterOptions', () => {
       offset: 100,
       schemaName: 'public',
       tableName: 'enterprise_orders',
+      timeoutMs: FILTER_OPTIONS_TIMEOUT_MS,
     });
     expect(page).toEqual({ hasMore: true, values: ['a@x.com'] });
+  });
+
+  it('bounds every page request so a hung endpoint cannot wedge the dropdown', async () => {
+    // Without this the request never settles, the fetch chain's in-flight guard
+    // is never cleared, and the filter can load no further page — see
+    // FILTER_OPTIONS_TIMEOUT_MS. Asserted on both transports because both go
+    // over the network.
+    const bff = resolveDistinctFilterOptions(descriptor);
+    const loader = resolveDistinctFilterOptions({
+      ...descriptor,
+      transport: 'loader',
+    });
+
+    await bff.onLoadMore({ limit: 50, skip: 0 });
+    await loader.onLoadMore({ limit: 50, skip: 0 });
+
+    for (const call of fetchDistinctValuesMock.mock.calls) {
+      expect(call[0]).toMatchObject({ timeoutMs: FILTER_OPTIONS_TIMEOUT_MS });
+    }
   });
 
   it('targets the same-origin resource route for the loader transport', async () => {

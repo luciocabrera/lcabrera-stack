@@ -54,18 +54,39 @@ graph LR
 ## State Shape
 
 ```typescript
-// Per-column filter data
-FiltersDataColumnState = {
-  data: unknown[];       // Available filter options
-  hasMore: boolean;      // More pages available
-  isLoading: boolean;    // Currently fetching
-  isLoadingMore: boolean; // Fetching next page
-  searchText: string;    // Current search filter
+// Per-column filter data (`FilterData` in Table.types.ts)
+FilterData = {
+  data: string[];          // Available filter options loaded so far
+  hasMore: boolean;        // More pages available
+  isLoading: boolean;      // Initial page in flight
+  isLoadingMore: boolean;  // Next page in flight
+  totalLoadedRows: number; // Options currently in `data`
+  totalRows: number;       // Options the source reports in total
 };
 
 // Top-level state: keyed by column accessor
-FiltersDataState = Record<string, FiltersDataColumnState>;
+FiltersDataState = Record<string, FilterData>;
 ```
+
+## Request Serialization (and why requests must be time-bounded)
+
+`isLoading` and `isLoadingMore` are the in-flight guards. Both fetchers read the
+guard and set it with **no `await` in between**, so on JavaScript's single
+thread the check and the claim are atomic: rapid calls — a fast scroll, a
+repeated open — issue exactly one request, and the extras return early. There is
+no request-cancellation machinery here because there is nothing to cancel.
+
+The cost of that design is that the guard is cleared **only when the request
+settles**. A rejection is handled (`handleFetchMoreFilterDataError` clears the
+flag and records the message); silence is not. An endpoint that accepts the
+request and never answers leaves the flag set forever, and every later page for
+that column returns early — the dropdown is wedged until the table remounts.
+
+Network-backed descriptors therefore bound every request with
+`FILTER_OPTIONS_TIMEOUT_MS`, applied in `resolveDistinctFilterOptions` where the
+request is built. That converts silence into the rejection the error path
+already handles. A descriptor kind that resolves without I/O (`static`) needs no
+bound.
 
 ## Provider Initialization
 
