@@ -115,17 +115,37 @@ Agents are sub-agents spawned explicitly by Claude (or by you) for isolated, hea
 
 Hooks are shell commands the harness runs automatically on lifecycle events. They live in the **committed** `.claude/settings.json` (the standard location — not a separate hooks file) so the whole team shares them.
 
-| Event                                                   | Command                                                                                                                                                                                                           | Purpose                                                                                                                                                                           |
-| ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `PreToolUse` (`Read\|Bash\|Grep\|Glob\|Write\|Edit\|…`) | `node scripts/claude-secrets-guard.mjs`                                                                                                                                                                           | **Security guard** — denies reading a `.env`/secret file (Read/Bash/Grep/Glob) and writing a credential (Write/Edit); `.env.example`/`.sample`/`.template` are the only exception |
-| `PostToolUse` (`Write\|Edit\|MultiEdit`)                | `node scripts/claude-autofix.mjs`                                                                                                                                                                                 | Per-file autofix after each Write/Edit — Oxlint `--fix` → Biome `--write` → Oxfmt (the "fast trio"); non-blocking                                                                 |
-| `Stop`                                                  | `test -n "$(git status --porcelain)" \|\| exit 0; vp fmt . && vp lint . --fix && vp check --fix && { git diff --name-only HEAD; git ls-files --others --exclude-standard; } \| node scripts/run-changed.mjs test` | Repo-wide autofix + tsgolint when Claude finishes, then tests for the **affected workspaces only**. Skips instantly on a clean tree                                               |
+| Event                                                   | Command                                 | Purpose                                                                                                                                                                           |
+| ------------------------------------------------------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PreToolUse` (`Read\|Bash\|Grep\|Glob\|Write\|Edit\|…`) | `node scripts/claude-secrets-guard.mjs` | **Security guard** — denies reading a `.env`/secret file (Read/Bash/Grep/Glob) and writing a credential (Write/Edit); `.env.example`/`.sample`/`.template` are the only exception |
+| `PostToolUse` (`Write\|Edit\|MultiEdit`)                | `node scripts/claude-autofix.mjs`       | Per-file autofix after each Write/Edit — Oxlint `--fix` → Biome `--write` → Oxfmt (the "fast trio"); non-blocking                                                                 |
 
 The `PreToolUse` **secrets guard** ([`scripts/claude-secrets-guard.mjs`](../scripts/claude-secrets-guard.mjs)) runs _before_ a tool executes and emits a `permissionDecision: "deny"` when a call would read a secret file (`.env`, `*.pem/.key/.p12`, `id_rsa`, `.npmrc`, `credentials`…) or write a credential (provider-format tokens + high-entropy assignments). It reuses the ADR-020 secret-file taxonomy (`packages/agent-runner/src/isSecretFilePath.util.ts`) so the CLI and the agent-runner SDK guard agree; the pure core is `scripts/lib/secrets-guard.mjs`, self-verified by `node scripts/claude-secrets-guard.mjs --selftest`. False positives are handled by `.example` files, placeholder values, and inline `gitleaks:allow` markers.
 
-The `PostToolUse` fixer ([`scripts/claude-autofix.mjs`](../scripts/claude-autofix.mjs)) reads the tool payload from stdin and runs only the Rust-fast linters on the single file just touched. The per-workspace **ESLint pass is deliberately excluded** — it cold-starts a Node process per file — so it stays in the `Stop` hook and the pre-push gate, mirroring the pre-commit `staged` config in root `vite.config.ts`. The hook always exits 0: unfixable findings are left to the quality gate, never blocking the edit.
+The `PostToolUse` fixer ([`scripts/claude-autofix.mjs`](../scripts/claude-autofix.mjs)) reads the tool payload from stdin and runs only the Rust-fast linters on the single file just touched. The per-workspace **ESLint pass is deliberately excluded** — it cold-starts a Node process per file — so it stays in the pre-push gate, mirroring the pre-commit `staged` config in root `vite.config.ts`. The hook always exits 0: unfixable findings are left to the quality gate, never blocking the edit.
 
-The `Stop` hook is **repo-wide and untracked-aware**, which it previously was not. It used to `cd apps/react-router` and test `git diff --quiet HEAD -- .`, so a session that touched only `packages/**`, `scripts/**` or `apps/admin_system` ran no gate at all, and a session that only _created_ files looked clean to `git diff` and also ran nothing. It now checks `git status --porcelain` (which sees untracked files), runs the fast repo-wide fixers, and pipes the changed paths through `scripts/run-changed.mjs`, so tests run for the affected workspaces and their dependents rather than one hard-coded app. A clean tree exits immediately.
+**There is deliberately no `Stop` hook.** One used to run a repo-wide
+`vp fmt`/`vp lint --fix`/`vp check --fix` plus the affected workspaces' tests
+every time Claude finished answering. The two tool-level hooks above replaced the
+fixing half — they keep the tree clean continuously, per file, instead of in one
+slow sweep at the end of every turn — so the sweep was removed as duplicated
+work.
+
+Know what that gave up, because the tool hooks are **not** a superset: the `Stop`
+hook was the only thing that ran **tests** locally. What still covers the rest:
+
+| Layer                          | Covers                                                           |
+| ------------------------------ | ---------------------------------------------------------------- |
+| `PostToolUse` (per file)       | Oxfmt, Oxlint `--fix`, Biome — formatting and lint, continuously |
+| pre-commit (`vp staged`)       | fmt + Oxlint + tsgolint on staged files, plus a Biome check      |
+| pre-push (`vp run check:push`) | the CI Quality Gate: fmt, Oxlint, **ESLint**, full type-check    |
+| CI                             | tests, fallow audit, Sonar, secret scan                          |
+
+So **types are still caught before a commit and ESLint before a push; tests now
+fire first in CI.** If that feedback gap matters, the place to close it is the
+pre-push hook — its comment says tests stay in CI because "the test suites need a
+database, which a hook cannot assume", and that is no longer true: `test:ci` is
+the DB-free suite by construction and now spans 11 workspaces.
 
 **Adding a hook:** edit the `hooks` block in `.claude/settings.json`. For automated behaviours ("always run X after Y"), hooks are the right mechanism — not memory or preferences.
 
@@ -154,6 +174,9 @@ Skills auto-invoke when intent matches description or paths
         ▼
 Claude works — reads files, edits code
         │
+        ├─ Before each tool call → PreToolUse hook may DENY it
+        │       (secrets guard: reading a secret file, writing a credential)
+        │
         ├─ After each Write/Edit → PostToolUse hook autofixes that one file
         │       (Oxlint --fix, Biome --write, Oxfmt)
         │
@@ -161,13 +184,14 @@ Claude works — reads files, edits code
         │       (or a skill with context: fork runs in its own sub-agent)
         │
         ▼
-Claude stops responding
+Claude stops responding — no Stop hook; the tree is already clean
         │
         ▼
-Stop hook fires — if apps/react-router changed, runs the quality gate
+git commit  → pre-commit: fmt + Oxlint + tsgolint on staged files, Biome check
+git push    → pre-push:   the full CI Quality Gate (adds ESLint + type-check)
 ```
 
-There is no `SessionStart` hook. The three above — `PreToolUse`, `PostToolUse`, `Stop` — are the complete set defined in `.claude/settings.json`.
+There is no `SessionStart` hook and no `Stop` hook. The two above — `PreToolUse` and `PostToolUse` — are the complete set defined in `.claude/settings.json`.
 
 ---
 
