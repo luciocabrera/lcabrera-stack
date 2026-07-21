@@ -382,6 +382,9 @@ importers:
       '@fastify/cors':
         specifier: 'catalog:'
         version: 11.3.0
+      '@repo/node-runtime':
+        specifier: workspace:*
+        version: link:../../packages/node-runtime
       api-shared:
         specifier: workspace:*
         version: link:../shared
