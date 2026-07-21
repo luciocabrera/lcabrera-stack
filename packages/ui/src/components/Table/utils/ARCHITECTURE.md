@@ -6,7 +6,6 @@ Pure utility functions for column processing and state persistence.
 
 ```
 utils/
-├── arePersistedUiStatesEqual.util.ts             → Compare persisted table UI slices only
 ├── createActionsColumn.util.ts                   → Build the row-actions column, merging consumer overrides onto defaults
 ├── createBasicColumn.util.ts                     → Build generic non-render table columns from shared metadata
 ├── deriveColumnViewState.util.ts                 → Compose normalized columns + pinning-derived slices
@@ -148,7 +147,6 @@ graph LR
 | Function                       | Purpose                                                                                       |
 | ------------------------------ | --------------------------------------------------------------------------------------------- |
 | readPersistedStateFromCookie   | Parse persisted state from cookies (SSR-safe)                                                 |
-| arePersistedUiStatesEqual      | Legacy compare helper for persisted UI slices                                                 |
 | getPersistedUiState            | Extract the persisted UI subset from `TableMetaState` (consumed by `buildUiFlagsCookieEntry`) |
 | serializeStateSlice            | Convert a state slice to a `{ key, value }` payload (consumed by the cookie-entry builders)   |
 | readPersistedUiFlagsFromCookie | SSR-safe read of drawer open/pinned flags from cookie                                         |

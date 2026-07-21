@@ -3,7 +3,7 @@
 Loader/action-side utilities shared by the React Router apps: pure helpers a
 route's server code composes to read persisted table state, sanitize
 URL-provided input, and decorate columns before returning loader data. All
-utils here are pure and SSR-safe; the one action (`persistCookie.action`) is
+utils here are pure and SSR-safe; the one action (`persist-cookie.action`) is
 a designated side-effect home.
 
 ## Files
@@ -17,7 +17,7 @@ a designated side-effect home.
 | `getRootLoaderData.util.ts`                   | Typed access to the root route's loader data                                                                            |
 | `isFilterCompatibleWithColumn.util.ts`        | Guard used when sanitizing URL filters against column definitions                                                       |
 | `isPersistCookieAction.util.ts`               | Matches a request path against `PERSIST_COOKIE_ACTION`                                                                  |
-| `persistCookie.action.ts`                     | Action behind `/_action/persist-cookie` (Set-Cookie persistence)                                                        |
+| `persist-cookie.action.ts`                    | Action behind `/_action/persist-cookie` (Set-Cookie persistence)                                                        |
 | `readTableLoaderStateFromRequest.util.ts`     | Reads shared table loader state from URL + cookies                                                                      |
 | `sanitizeFiltersByColumns.util.ts`            | Drops URL filters that don't match a known column                                                                       |
 | `sanitizeSorting.util.ts`                     | Drops invalid/actions-column sort entries                                                                               |

@@ -7,15 +7,16 @@ Enterprise table route for large-order operational data with a dedicated constan
 - Expose `/enterprise-orders` as a table-centric operational view.
 - Configure table columns, pinning defaults, and route-specific rendering behavior.
 - Keep route wiring (`loader`, `meta`, `layout`, `errorBoundary`) local to this folder.
-- **Secured subtree:** `layout.ts` exports `middleware = [authMiddleware]` (`@/auth`),
-  so the list and the `new` / `edit/:orderId` / `view/:orderId` child modal routes
-  require authentication — unauthenticated requests are redirected to
-  `/login?redirectTo=<url>`. The create/edit actions read the authenticated user from
-  `context.get(authContext)` and record it in `last_modified_by`. The two **resource
-  routes** that back the table — `_action/enterprise-orders/delete` (delete action) and
-  `_api/enterprise-orders/paginated` (load-more loader) — apply the same
-  `middleware = [authMiddleware]`, so the mutation and data endpoints are guarded too,
-  not just the UI subtree.
+- **The auth guard is currently NOT applied.** `authMiddleware` (`@/auth`) exists and
+  is unit-tested, but `export const middleware = [authMiddleware]` is commented out in
+  `root.ts` — it broke client-side navigation into the subtree — and the two resource
+  routes (`_action/enterprise-orders/delete`, `_api/enterprise-orders/paginated`) do
+  not export it either. **Treat this subtree and both endpoints as unauthenticated
+  until that is resolved.** The create/edit actions still read the user from
+  `context.get(authContext)` for `last_modified_by`.
+- **Once re-enabled**, the guard belongs in three places — `root.ts` plus both resource
+  routes — so the mutation and data endpoints are covered, not just the UI subtree.
+  Unauthenticated requests then redirect to `/login?redirectTo=<url>`.
 
 ## Constants Responsibilities
 
@@ -57,7 +58,7 @@ column.
 
 ## CRUD via route-driven modals
 
-The list route is the **parent layout** (`layout.ts` → `enterprise-orders.layout.tsx`),
+The list route is the **parent layout** (`root.ts` → `EnterpriseOrders.layout.tsx`),
 which renders the table **plus an `<Outlet/>`**. The create/view/edit routes are its
 children and render `<Modal><Form/></Modal>` into that outlet, so each opens as a modal
 overlaid on the still-visible list (feature plan §4). At `/enterprise-orders` the outlet is

@@ -9,7 +9,7 @@ Pure utility functions shared by API server features.
 
 ## Current Utilities
 
-- `buildOrderByClause.util.ts` - Build safe SQL ORDER BY clauses from allowlisted rules.
+- `createRequestHandler.util.ts` - Adapt object-argument handlers to Express request handlers.
 - `delay.util.ts` - Async delay helper used for simulated latency.
 - `formatPgAdminQuery.util.ts` - Normalize SQL output for pgAdmin display.
 - `parseJsonQueryParam.util.ts` - Parse unknown query input into JSON values when possible.

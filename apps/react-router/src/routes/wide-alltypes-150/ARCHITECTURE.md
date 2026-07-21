@@ -21,9 +21,10 @@ wide-alltypes-150/
 ├── WideAlltypes150.constants.ts
 ├── wide-alltypes-150.loader.ts
 ├── wide-alltypes-150.meta.ts
-├── wide-alltypes-150.errorBoundary.tsx
-├── wide-alltypes-150.errorBoundary.stylex.ts
-├── wide-alltypes-150.layout.tsx
+├── WideAlltypes150.error-boundary.tsx
+├── WideAlltypes150.layout.tsx
+├── WideAlltypes150.component.tsx
+├── WideAlltypes150.constants.ts
 ├── layout.ts
 └── root.ts
 ```

@@ -73,19 +73,6 @@ replaced were themselves a duplication finding.
 
 ---
 
-## `src/errors/`
-
-| Artifact          | Location                         | Description                                                                       |
-| ----------------- | -------------------------------- | --------------------------------------------------------------------------------- |
-| `getErrorMessage` | `errors/getErrorMessage.util.ts` | `error.message` for an `Error`, else a `fallback` (default `'An error occurred'`) |
-
-`catch` binds `unknown`, so every caller that surfaces a message needs the
-same narrowing — route actions returning a typed error to their page, Table
-fetch actions writing one into the store. It lives here, not in either
-consumer, because both `@repo/ui` and the apps need it.
-
----
-
 ## `src/filters/`
 
 The column-filter contract shared by the Table filter UI (`@repo/ui`, which
@@ -106,22 +93,6 @@ See `filters/ARCHITECTURE.md`.
 
 ---
 
-## `src/records/`
-
-Generic shaping helpers for write payloads.
-
-| Artifact            | Location                            | Description                                                                              |
-| ------------------- | ----------------------------------- | ---------------------------------------------------------------------------------------- |
-| `dropNullishValues` | `records/dropNullishValues.util.ts` | Drops null/undefined entries so the key is omitted (→ SQL NULL / absent) rather than set |
-| `emptyToUndefined`  | `records/emptyToUndefined.util.ts`  | Maps an empty string to `undefined` (→ SQL NULL) for optional form fields; no trim       |
-
-Shallow by design. Reach for it when building the optional half of a write
-input: one call replaces a
-`...(value !== null && value !== undefined && { key: value })` spread per
-field, which costs a conditional per column and adds up fast on wide rows.
-
----
-
 ## `src/tokens/`
 
 Reusable, DB-free bearer-token primitives (ADR-029). The CQMS-specific
@@ -137,18 +108,6 @@ are exported per-file in the `exports` map. Hashing a token's secret half is
 
 These are fully generic — no product-specific value is baked in; the caller
 supplies any token `prefix` (e.g. CodePulse passes `cqms_` from scan-ingestion).
-
----
-
-## `src/api/` — see its own `ARCHITECTURE.md`
-
-Client-side fetch helpers, exported via the `./api` entry in the
-`package.json` exports map (and also reachable through the apps' Vite
-alias): `getApiBaseUrl` (`api.util.ts`), `buildPaginatedQueryParams`,
-`fetchAndValidate`, `fetchDistinctValues` (pages a generic distinct-values
-endpoint — the HTTP half of the ADR-009 filter-options descriptors, with
-`isDistinctValuesResponse` guard and the canonical `DistinctValuesResponse`
-type in `src/api.types.ts`), `fakeDelay`.
 
 ---
 

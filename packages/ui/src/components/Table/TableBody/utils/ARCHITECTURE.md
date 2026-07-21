@@ -7,7 +7,7 @@ Pure helper utilities used by `TableBody.component.tsx`.
 ```
 utils/
 ├── ARCHITECTURE.md                        -> This overview
-├── buildTableBodyCellDescriptor.util.ts   -> Derives pure cell-render descriptor data
+├── buildTableBodyCellDescriptor.util.tsx   -> Derives pure cell-render descriptor data
 ├── createRenderTableBodyCell.util.ts      -> Binds sizing/pinning and renders TableBodyCell from descriptors
 ├── generatePlaceholderData.util.ts        -> Creates placeholder row objects for skeletons
 ├── getTotalVisibleColumnCount.util.ts     -> Computes rendered-column count for spacer row colSpan

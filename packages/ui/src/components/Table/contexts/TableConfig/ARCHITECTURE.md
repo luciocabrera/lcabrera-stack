@@ -92,7 +92,6 @@ TableConfig/
 ├── utils/
   ├── getInitialColumnsState.util.ts       → Build initial columns state from props; synthesizes the `actions` column via `resolveTableActionsColumn` when `crud.read/update/delete` is enabled (or a consumer `actions` column is declared), and only force-pins it right when it actually exists
   ├── getInitialMetaState.util.ts          → Build initial meta state from props
-  ├── resolveHydratedTableConfigState.util.ts → Merge route defaults with persisted column/UI state
   └── index.ts                             → Barrel: utils
 ```
 
@@ -193,8 +192,8 @@ so SSR and the initial client render already agree on the seeded state.
 
 ## Testing Pattern
 
-- `columns.hooks.test.tsx` and `meta.hooks.test.tsx` share a common store scaffold through [src/components/test-utils/createMockStore.util.ts](src/components/test-utils/createMockStore.util.ts).
-- Columns action-hook tests share a dedicated mock wiring utility via [src/components/test-utils/createTableConfigColumnsActionMocks.util.ts](src/components/test-utils/createTableConfigColumnsActionMocks.util.ts).
+- `columns.hooks.test.tsx` and `meta.hooks.test.tsx` share a common store scaffold through [src/utils/tests/createMockStore.util.ts](src/utils/tests/createMockStore.util.ts).
+- Columns action-hook tests share a dedicated mock wiring utility via [src/utils/tests/createTableConfigColumnsActionMocks.util.ts](src/utils/tests/createTableConfigColumnsActionMocks.util.ts).
 - Tests keep `vi.mock(...)` stable while reassigning local store instances in `beforeEach`, which avoids `vi.hoisted` initialization-order pitfalls.
 
 ## Columns Actions
