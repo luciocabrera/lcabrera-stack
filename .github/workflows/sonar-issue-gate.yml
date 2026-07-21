@@ -22,19 +22,35 @@ jobs:
     name: Strict Sonar issue gate
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout PR head
+      # Checks out the MERGE ref (actions/checkout's default for pull_request),
+      # not the PR head, and that is load-bearing. GitHub runs the workflow file
+      # from the merge result but a `ref:` checkout brings the PR head's copy of
+      # the repo — so a change that teaches a script a new flag lands in the YAML
+      # immediately while every open PR still carries the old script, and the run
+      # dies on an unknown argument. That is exactly how #175 broke #177: the
+      # step passed --require-token to a sonar-report.mjs that predated it.
+      #
+      # This job needs nothing from the head except its commit timestamp, which
+      # comes from the event payload below, so the merge ref costs it nothing.
+      # fetch-depth 2 reaches the merge commit's second parent — the PR head —
+      # so that timestamp is resolvable.
+      - name: Check out the PR merge ref
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
 
       - name: Wait for SonarCloud analysis, then fail on any new issue
         env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         # sonar-report.mjs needs only Node built-ins + global fetch (present on
         # ubuntu-latest), so no workspace install. --since = the PR head commit
         # time, the freshness guard so a previous commit's analysis isn't accepted.
+        # HEAD_SHA comes through env, never a shell interpolation. If it cannot be
+        # resolved the step fails rather than dating the guard from the merge
+        # commit, which would be newer than the analysis and reject every run.
         run: |
-          SINCE="$(git show -s --format=%cI HEAD)"
+          SINCE="$(git show -s --format=%cI "$HEAD_SHA")"
           echo "PR #${{ github.event.pull_request.number }} head committed at $SINCE"
           # --require-token on same-repo PRs only: there the secret IS available,
           # so a missing one is a misconfiguration and must fail rather than
