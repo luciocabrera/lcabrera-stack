@@ -1,6 +1,3 @@
-/* oxlint-disable @typescript-eslint/no-unsafe-assignment */
-
-/* eslint-disable @stylexjs/valid-styles */
 import {
   borderRadius,
   easing,
@@ -15,6 +12,7 @@ import * as stylex from '@stylexjs/stylex';
 
 export const styles = stylex.create({
   tooltip: (positionAnchor: string) => ({
+    // eslint-disable-next-line @stylexjs/valid-styles -- CSS anchor positioning; StyleX's allowlist predates the spec (ADR-002)
     positionAnchor,
     inset: 'unset',
     margin: 0,
@@ -31,6 +29,7 @@ export const styles = stylex.create({
     boxShadow: shadows.md,
     color: colors.textPrimary,
     fontSize: typography.fontSizeXs,
+    // eslint-disable-next-line @stylexjs/valid-styles -- CSS anchor positioning; StyleX's allowlist predates the spec (ADR-002)
     justifySelf: 'anchor-center',
     lineHeight: typography.lineHeightTight,
     opacity: 0,
@@ -79,21 +78,25 @@ export const styles = stylex.create({
     top: `${offset}px`,
   }),
   top: {
+    // eslint-disable-next-line @stylexjs/valid-styles -- CSS anchor positioning; StyleX's allowlist predates the spec (ADR-002)
     positionArea: 'top',
     transform: `translateY(${tooltip.slideDistance})`,
     marginBottom: spacing.xs,
   },
   bottom: {
+    // eslint-disable-next-line @stylexjs/valid-styles -- CSS anchor positioning; StyleX's allowlist predates the spec (ADR-002)
     positionArea: 'bottom',
     transform: `translateY(calc(-1 * ${tooltip.slideDistance}))`,
     marginTop: spacing.xs,
   },
   left: {
+    // eslint-disable-next-line @stylexjs/valid-styles -- CSS anchor positioning; StyleX's allowlist predates the spec (ADR-002)
     positionArea: 'left',
     transform: `translateX(${tooltip.slideDistance})`,
     marginRight: spacing.xs,
   },
   right: {
+    // eslint-disable-next-line @stylexjs/valid-styles -- CSS anchor positioning; StyleX's allowlist predates the spec (ADR-002)
     positionArea: 'right',
     transform: `translateX(calc(-1 * ${tooltip.slideDistance}))`,
     marginLeft: spacing.xs,

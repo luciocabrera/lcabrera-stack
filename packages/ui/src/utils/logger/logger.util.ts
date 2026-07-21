@@ -49,7 +49,6 @@ export const createLogger = ({ level, prefix }: CreateLoggerArgs = {}) => {
       import.meta.env.PROD || priority < LOG_LEVEL_PRIORITY.debug
         ? noop
         : (...args: readonly unknown[]) => {
-            // eslint-disable-next-line no-console -- Logger utility wraps console intentionally
             console.debug(...withPrefix(args));
           },
 
@@ -57,7 +56,6 @@ export const createLogger = ({ level, prefix }: CreateLoggerArgs = {}) => {
       priority < LOG_LEVEL_PRIORITY.error
         ? noop
         : (...args: readonly unknown[]) => {
-            // eslint-disable-next-line no-console -- Logger utility wraps console intentionally
             console.error(...withPrefix(args));
           },
 
@@ -65,7 +63,6 @@ export const createLogger = ({ level, prefix }: CreateLoggerArgs = {}) => {
       import.meta.env.PROD || priority < LOG_LEVEL_PRIORITY.info
         ? noop
         : (...args: readonly unknown[]) => {
-            // eslint-disable-next-line no-console -- Logger utility wraps console intentionally
             console.info(...withPrefix(args));
           },
 
@@ -73,7 +70,6 @@ export const createLogger = ({ level, prefix }: CreateLoggerArgs = {}) => {
       import.meta.env.PROD || priority < LOG_LEVEL_PRIORITY.warn
         ? noop
         : (...args: readonly unknown[]) => {
-            // eslint-disable-next-line no-console -- Logger utility wraps console intentionally
             console.warn(...withPrefix(args));
           },
   };

@@ -38,11 +38,27 @@ export const createBaseCustomRulesLintConfig = ({
 } = {}) => {
   return [
     {
-      // Oxlint consumes eslint-disable comments too — eslint must never
-      // remove directives it considers "unused" (they may be suppressing an
-      // oxlint rule of the same name), so unused-directive reporting is off.
+      // A directive that suppresses nothing is worse than no directive: it
+      // reports zero findings, exactly like compliant code, while its `--`
+      // comment keeps describing a problem that no longer exists. Thirteen had
+      // accumulated across the repo, four of them claiming to hold back
+      // `no-console` in a logger that no rule was flagging.
+      //
+      // This WAS off, for a real reason: Oxlint honours `eslint-disable`
+      // comments too, so a directive eslint calls "unused" may be the only
+      // thing suppressing an Oxlint finding of the same name — and `--fix`
+      // would silently delete it. Five such directives existed, spelled
+      // `typescript-eslint/unbound-method` (no `@`, which eslint does not
+      // recognise but Oxlint does).
+      //
+      // Those five now say `oxlint-disable-next-line`, which names the engine
+      // that actually consumes them, and every workspace verifies clean. The
+      // ambiguity that made this unsafe is therefore what the rule now
+      // enforces: `eslint-disable` is for ESLint findings, `oxlint-disable` for
+      // Oxlint's. "Unused" means the directive is either dead (delete it) or an
+      // Oxlint directive wearing the wrong name (respell it).
       linterOptions: {
-        reportUnusedDisableDirectives: 'off',
+        reportUnusedDisableDirectives: 'error',
       },
     },
     // 1. Core ESLint

@@ -26,11 +26,11 @@ const setAllDialogsOpen = ({ isOpen }: { readonly isOpen: boolean }) => {
 };
 
 export const mockDialogElement = (shouldSetOpenOnShow = true) => {
-  // eslint-disable-next-line typescript-eslint/unbound-method -- Saving prototype methods for test teardown restoration
+  // oxlint-disable-next-line typescript-eslint/unbound-method -- Saving prototype methods for test teardown restoration (Oxlint rule: ESLint has no `typescript-eslint/` prefix, so it read this as unused)
   const savedClose = HTMLDialogElement.prototype.close;
-  // eslint-disable-next-line typescript-eslint/unbound-method -- Saving prototype methods for test teardown restoration
+  // oxlint-disable-next-line typescript-eslint/unbound-method -- Saving prototype methods for test teardown restoration (Oxlint rule: ESLint has no `typescript-eslint/` prefix, so it read this as unused)
   const savedShow = HTMLDialogElement.prototype.show;
-  // eslint-disable-next-line typescript-eslint/unbound-method -- Saving prototype methods for test teardown restoration
+  // oxlint-disable-next-line typescript-eslint/unbound-method -- Saving prototype methods for test teardown restoration (Oxlint rule: ESLint has no `typescript-eslint/` prefix, so it read this as unused)
   const savedShowModal = HTMLDialogElement.prototype.showModal;
 
   const closeMock = vi.fn(() => {

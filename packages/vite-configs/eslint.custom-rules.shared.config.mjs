@@ -148,11 +148,13 @@ export const createCustomRulesLintConfig = async ({
 
   return [
     {
-      // Oxlint consumes eslint-disable comments too — eslint must never
-      // remove directives it considers "unused" (they may be suppressing an
-      // oxlint rule of the same name), so unused-directive reporting is off.
+      // See the matching block in `eslint.base-custom-rules.shared.config.mjs`
+      // for why this was off and what had to change before it could be on: in
+      // short, `eslint-disable` is for ESLint findings and `oxlint-disable` for
+      // Oxlint's, so "unused" now means the directive is either dead or
+      // misnamed — never load-bearing.
       linterOptions: {
-        reportUnusedDisableDirectives: 'off',
+        reportUnusedDisableDirectives: 'error',
       },
     },
     // 1. Core ESLint
