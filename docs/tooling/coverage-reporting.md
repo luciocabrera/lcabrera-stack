@@ -54,10 +54,10 @@ Three moving parts:
 
 They feed different consumers and must not be merged:
 
-| Script            | Feeds                     | Reporter        | Workspaces                                                                              | react-router?                                           |
-| ----------------- | ------------------------- | --------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| `coverage:merge`  | the **fallow audit gate** | `json` (detail) | DB-free set (ui, server, node-runtime, scan-ingestion, admin_system, scan-orchestrator) | **excluded** (largest suite; fallow findings baselined) |
-| `coverage:report` | the **PR comment**        | `json-summary`  | the reported set below                                                                  | **included** (it is a critical surface)                 |
+| Script            | Feeds                     | Reporter        | Workspaces                                                      | react-router?                                           |
+| ----------------- | ------------------------- | --------------- | --------------------------------------------------------------- | ------------------------------------------------------- |
+| `coverage:merge`  | the **fallow audit gate** | `json` (detail) | the DB-free set — `COVERAGE_WORKSPACES` in `merge-coverage.mjs` | **excluded** (largest suite; fallow findings baselined) |
+| `coverage:report` | the **PR comment**        | `json-summary`  | the reported set below                                          | **included** (it is a critical surface)                 |
 
 Coupling them would drag react-router into the fallow merge it is deliberately
 kept out of. See [`scripts/merge-coverage.mjs`](../../scripts/merge-coverage.mjs)
@@ -66,17 +66,19 @@ for the fallow side.
 ## Reported workspaces
 
 Defined in `COVERAGE_REPORT_WORKSPACES` in `scripts/coverage-report.mjs`, most-
-critical first. These are the public-facing / highest-value surfaces
-(`packages/ui` and `packages/server` are heading for public release;
+critical first. These are the public-facing / highest-value surfaces (all four
+packages heading for public release — `ui`, `api`, `server`, `utils` — are here;
 `apps/react-router` is the showcase app):
 
 | Workspace                 | Package                | `run` | Why                                                                                                                              |
 | ------------------------- | ---------------------- | ----- | -------------------------------------------------------------------------------------------------------------------------------- |
 | `packages/ui`             | `@repo/ui`             | true  | Runs `test:coverage` here (plain `test` in `test:ci`, no coverage)                                                               |
 | `packages/server`         | `@repo/server`         | true  | Same                                                                                                                             |
+| `packages/api`            | `@repo/api`            | true  | Same — the browser half of the former `data-access` ([ADR-038](../cqms/decisions/ADR-038-public-package-topology-by-runtime.md)) |
 | `apps/react-router`       | `vite-react-compiler`  | false | Its `test:ci` already emits the summary; re-running the repo's largest suite would be wasteful                                   |
 | `packages/node-runtime`   | `@repo/node-runtime`   | true  | Phase 2 — DB-free `test:coverage`                                                                                                |
 | `packages/scan-ingestion` | `@repo/scan-ingestion` | true  | Phase 2 — DB-free `test:coverage` **subset** (its real-Postgres `queries/*` stay out, so the number is the DB-free portion only) |
+| `packages/utils`          | `@repo/utils`          | true  | Phase 2 — pure helpers, own 95% threshold ([#124](https://github.com/luciocabrera/vite-react-compiler/issues/124))               |
 
 `run: false` reuses a summary produced upstream; `--all` forces every workspace
 to run (standalone local use, where `test:ci` has not run first).
@@ -104,11 +106,11 @@ only once its coverage runs clean and means something.** Checklist:
 
 - **Phase 1 — critical surfaces.** `packages/ui`, `packages/server`,
   `apps/react-router`. ✅ done (PR #32).
-- **Phase 2 — remaining library packages.** `packages/node-runtime` and
-  `packages/scan-ingestion` (both have a DB-free `test:coverage`). ✅ done.
-  `packages/utils` was evaluated and **deferred**: it has zero test files
-  (`test` runs `--passWithNoTests`), so there is nothing to measure — admit it
-  once it has tests. `agent-runner`, `plugins`, `ts-configs`,
+- **Phase 2 — remaining library packages.** `packages/node-runtime`,
+  `packages/scan-ingestion`, `packages/utils` and `packages/api` (each has a
+  DB-free `test:coverage`). ✅ done. `utils` was deferred at first for having no
+  test files; it now carries 21 suites and its own 95% threshold (#124), so it
+  was admitted alongside the others. `agent-runner`, `plugins`, `ts-configs`,
   `eslint-local-rules` are config/CLI-only with nothing to cover.
 - **Phase 3 — apps & server workspaces.** `apps/admin_system` and
   `apps/scan-orchestrator` (both already have DB-free `test:coverage`),
