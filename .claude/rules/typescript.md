@@ -122,7 +122,7 @@ rather than turning the rule off.
 
 > **Tooling note:** Import order is enforced and auto-fixed by the **eslint** pass (`eslint-plugin-perfectionist`'s `sort-imports` / `sort-modules`), **not** by Oxlint. `vp lint . --fix` alone will not touch import order — Oxlint loads no `import/order` rule, and only pulls perfectionist into `*.stylex.ts` to switch two rules _off_. Run **`vp run lint`** in the workspace (it chains `vp lint . --fix` then `vp run lint:eslint`, which is `eslint --fix`), or `vp run lint:all` from the root. Do not reorder imports manually, and do not flag import ordering in review — the quality gate catches it before merge.
 
-Use `@/` as the root alias for `src/`. Relative imports only within the same directory.
+**In an app**, use `@/` as the root alias for `src/`. Relative imports only within the same directory.
 
 ```typescript
 // ✅
@@ -132,6 +132,18 @@ import { styles } from './Card.stylex';
 // ❌
 import { Button } from '../../../../components/Button';
 ```
+
+**In a publishable package** (`packages/ui`, `api`, `server`, `utils`) use the
+package's **own name** instead — `@repo/ui/components/Button`. `@/` resolves only
+through a tsconfig `paths` entry, so it cannot survive publication: a consumer
+compiling our source has no such alias and the import fails to resolve. The
+package's own name resolves via Node's self-reference through `exports`, which
+works identically inside and outside this repo.
+
+You do not have to remember which is which. The four publishable packages are
+generated with `srcAlias: false` (`packages/ts-configs/generate.ts`), so they
+have no `@/*` mapping at all and tsc rejects such an import outright. Do not add
+the alias back to make one compile — rewrite the import.
 
 ## The satisfies Operator
 

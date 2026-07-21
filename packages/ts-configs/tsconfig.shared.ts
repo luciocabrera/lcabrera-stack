@@ -4,6 +4,8 @@ type CreateAppTsConfigArgs = {
   /** Extra path aliases merged on top of the default `@/*` → `./src/*` mapping — for a package's own self-referencing alias (e.g. `@repo/ui/*`) or a cross-package one. */
   readonly paths?: Record<string, readonly string[]>;
   readonly rootDirs?: readonly string[];
+  /** Set `false` to omit the default `@/*` → `./src/*` alias. Publishable packages pass this: `@/` resolves only through a tsconfig, so an `@/` import cannot survive publication, and dropping the alias makes tsc reject one instead of a reviewer having to spot it. */
+  readonly srcAlias?: boolean;
   readonly tsBuildInfoFile: string;
   /** Extra ambient type roots appended to the default `['vite/client']` — e.g. `'node'` for a package whose src/ mixes browser-context and Node-context (SSR entry) files. */
   readonly types?: readonly string[];
@@ -44,6 +46,7 @@ const NODE_TS_CONFIG: Omit<TsConfig, 'compilerOptions'> = {
 const createAppCompilerOptions = ({
   paths,
   rootDirs = ['.', './.react-router/types'],
+  srcAlias = true,
   tsBuildInfoFile,
   types = [],
 }: CreateAppTsConfigArgs): Record<string, unknown> => ({
@@ -63,7 +66,7 @@ const createAppCompilerOptions = ({
   noUnusedLocals: true,
   noUnusedParameters: true,
   paths: {
-    '@/*': ['./src/*'],
+    ...(srcAlias && { '@/*': ['./src/*'] }),
     ...paths,
   },
   resolveJsonModule: true,
@@ -126,6 +129,7 @@ export const createAppTsConfig = ({
   include,
   paths,
   rootDirs,
+  srcAlias,
   tsBuildInfoFile,
   types,
 }: CreateAppTsConfigArgs): TsConfig =>
@@ -134,6 +138,7 @@ export const createAppTsConfig = ({
       compilerOptions: createAppCompilerOptions({
         paths,
         rootDirs,
+        srcAlias,
         tsBuildInfoFile,
         types,
       }),

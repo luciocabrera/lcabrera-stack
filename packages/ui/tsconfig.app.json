@@ -16,8 +16,6 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "paths": {
-      "@/*": ["./src/*"],
-      "@repo/server/*": ["../server/src/*"],
       "@repo/ui/*": ["./src/*"]
     },
     "resolveJsonModule": true,

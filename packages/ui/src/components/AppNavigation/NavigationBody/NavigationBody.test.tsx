@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 
+import type { NavbarItemConfig } from '@repo/ui/components/Navbar/Navbar.types';
+
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
-import type { NavbarItemConfig } from '@/components/Navbar/Navbar.types';
 
 const { collapsedPreferenceMock, sizePreferenceMock } = vi.hoisted(() => ({
   collapsedPreferenceMock: vi.fn<() => string | undefined>(() => {}),

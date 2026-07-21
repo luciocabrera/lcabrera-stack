@@ -11,6 +11,7 @@
   "sideEffects": false,
   "exports": {
     ".": "./src/public-api.ts",
+    "./package.json": "./package.json",
     "./server": "./src/server.ts",
     "./entry/*": "./src/entry/*",
     "./routing/*": "./src/routing/*",

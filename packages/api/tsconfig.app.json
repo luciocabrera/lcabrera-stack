@@ -15,9 +15,7 @@
     "noUncheckedSideEffectImports": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "paths": {
-      "@/*": ["./src/*"]
-    },
+    "paths": {},
     "resolveJsonModule": true,
     "rootDirs": [".", "./.react-router/types"],
     "skipLibCheck": true,

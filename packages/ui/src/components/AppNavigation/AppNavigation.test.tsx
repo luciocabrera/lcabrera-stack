@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import type { NavbarItemConfig } from '@repo/ui/components/Navbar/Navbar.types';
 import type { GlobalSettingsState } from '@repo/ui/types/globalSettings.types';
 
 import { GlobalSettingsProvider } from '@repo/ui/contexts/GlobalSettingsContext';
@@ -8,8 +9,6 @@ import { mockDialogElement } from '@repo/ui/utils/tests/mockDialogElement.util';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
-import type { NavbarItemConfig } from '@/components/Navbar/Navbar.types';
 
 import { AppNavigation } from './AppNavigation.component';
 

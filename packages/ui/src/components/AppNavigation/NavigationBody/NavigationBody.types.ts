@@ -1,4 +1,4 @@
-import type { NavbarItemConfig } from '@/components/Navbar/Navbar.types';
+import type { NavbarItemConfig } from '@repo/ui/components/Navbar/Navbar.types';
 
 /**
  * NavigationBody component props
