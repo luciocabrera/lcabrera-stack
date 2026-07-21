@@ -50,11 +50,11 @@ export const SidePanelSection = () => {
       <ShowcaseSection title='Side Panels'>
         <ShowcaseSubsection title='Positions & Sizes'>
           <div {...stylex.props(pageStyles.buttonGrid)}>
-            <Button onClick={handleOpenLeft}>
-              <span {...stylex.props(styles.iconLeft)}>
-                <MenuIcon size={ICON_SIZE_MD} />
-              </span>
-              <span>Open Left Panel</span>
+            <Button
+              icon={<MenuIcon size={ICON_SIZE_MD} />}
+              onClick={handleOpenLeft}
+            >
+              Open Left Panel
             </Button>
             <Button onClick={handleOpenRight}>
               <span>Open Right Panel</span>
@@ -84,11 +84,12 @@ export const SidePanelSection = () => {
           <p>Press Escape or click the overlay to close.</p>
         </SidePanelBody>
         <SidePanelFooter>
-          <Button onClick={handleCloseLeft} size='sm'>
-            <span {...stylex.props(styles.iconLeft)}>
-              <MenuCloseIcon size={ICON_SIZE_MD} />
-            </span>
-            <span>Close</span>
+          <Button
+            icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
+            onClick={handleCloseLeft}
+            size='sm'
+          >
+            Close
           </Button>
         </SidePanelFooter>
       </SidePanel>
