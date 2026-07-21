@@ -35,7 +35,7 @@ allowed-tools: Read
 ```typescript
 // ✅ ALWAYS: Named imports
 import { useState, useEffect, useRef, use } from 'react';
-import type { ComponentWithChildren } from 'react';
+import type { ReactNode } from 'react';
 
 // ❌ NEVER: Default or namespace imports
 import React from 'react';
@@ -46,11 +46,12 @@ React.useState(); // Wrong
 ## Component Declaration (REQUIRED)
 
 ```typescript
-// ✅ ALWAYS: Arrow function + ComponentWithChildren + named export
-type ProductListProps = ComponentWithChildren<{
-  products: Product[];
-  onSelect: (id: string) => void;
-}>;
+// ✅ ALWAYS: Arrow function + readonly props + named export
+type ProductListProps = {
+  readonly children?: ReactNode;
+  readonly onSelect: (id: string) => void;
+  readonly products: readonly Product[];
+};
 
 export const ProductList = ({ products, onSelect }: ProductListProps) => {
   return (
@@ -65,7 +66,10 @@ export const ProductList = ({ products, onSelect }: ProductListProps) => {
 };
 
 // ❌ NEVER: function declaration for components
-export const ProductList = ({ products }: ProductListProps) => { ... }
+export function ProductList({ products }: ProductListProps) { ... }
+
+// ❌ NEVER: React.FC — banned repo-wide (AGENTS.md Rule 1)
+export const ProductList: React.FC<ProductListProps> = ({ products }) => { ... }
 
 // ❌ NEVER: default export (unless required by framework)
 export default ProductList;
@@ -104,7 +108,7 @@ const handleAddToCart = useCallback((id) => addToCart(id), []);
 ## 🚫 Critical Anti-Patterns
 
 - **DO NOT** use `useMemo`, `useCallback`, or `memo` manually → React Compiler handles this automatically.
-- **DO NOT** use function declarations for components → Use arrow functions + `ComponentWithChildren` + named export.
+- **DO NOT** use function declarations for components → Use arrow functions + a `readonly` props type + named export.
 - **DO NOT** create promises inside a component's render and pass them to `use()` → Always pass promises from outside or parent.
 - **DO NOT** use `forwardRef` → In React 19, `ref` is a regular prop.
 - **DO NOT** use `useContext()` → Always use `use()` instead; it supports conditional calls and `useContext` is forbidden project-wide.
@@ -120,9 +124,9 @@ Read promises in render. React suspends until resolved.
 ```typescript
 import { use, Suspense } from "react";
 
-type CommentsProps = ComponentWithChildren<{
-  commentsPromise: Promise<Comment[]>;
-}>;
+type CommentsProps = {
+  readonly commentsPromise: Promise<Comment[]>;
+};
 
 // Read promises (requires Suspense boundary)
 export const Comments = ({ commentsPromise }: CommentsProps) => {
@@ -173,7 +177,7 @@ Read Context conditionally (not possible with `useContext`).
 ```typescript
 import { use } from "react";
 
-type HeadingProps = ComponentWithChildren<{}>;
+type HeadingProps = { readonly children: ReactNode };
 
 export const Heading = ({ children }: HeadingProps) => {
   if (children == null) {
@@ -290,10 +294,10 @@ const styles = stylex.create({
   pending: { opacity: 0.5 },
 });
 
-type TodoListProps = ComponentWithChildren<{
-  todos: Todo[];
-  addTodo: (title: string) => Promise<void>;
-}>;
+type TodoListProps = {
+  readonly addTodo: (title: string) => Promise<void>;
+  readonly todos: readonly Todo[];
+};
 
 export const TodoList = ({ todos, addTodo }: TodoListProps) => {
   const [optimisticTodos, addOptimisticTodo] = useOptimistic(
@@ -394,19 +398,21 @@ export const VideoPlayer= () => {
 
 ```typescript
 import { createContext, use } from "react";
+import type { ReactNode } from "react";
 
 const ThemeContext = createContext("light");
 
 type AppProps = {
-  children: React.ReactNode;
-}
+  readonly children: ReactNode;
+};
 
 // ✅ React 19: Use Context directly as provider
 export const App = ({ children }: AppProps) => {
   return <ThemeContext value="dark">{children}</ThemeContext>;
 };
 
-// ❌ Old way (still works but will be deprecated)
+// ❌ Old way — and `React.FC` is banned repo-wide (AGENTS.md Rule 1), as is
+//    the `React.` namespace access shown here. Kept only to name the pattern.
 export const AppOld: React.FC<AppProps> = ({ children }) => {
   return (
     <ThemeContext.Provider value="dark">{children}</ThemeContext.Provider>

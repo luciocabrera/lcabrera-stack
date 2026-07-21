@@ -15,7 +15,8 @@ This document describes every layer of the AI config for this project — what e
 │   ├── typescript.md       ← paths: **/*.ts, **/*.tsx
 │   ├── react-components.md ← paths: **/*.tsx, **/*.jsx, **/*.stylex.ts
 │   ├── testing.md          ← paths: **/*.test.*, **/*.spec.*
-│   └── routes-data.md      ← paths: **/routes/**, **/services/**, **/*.api.ts, …
+│   ├── routes-data.md      ← paths: **/routes/**, **/services/**, **/*.api.ts, …
+│   └── scripts.md          ← paths: **/*.mjs, **/*.cjs, **/scripts/**/*.js
 ├── skills → ../.github/skills   ← symlink (canonical source is .github/skills/)
 └── agents/
     ├── quality-gate.md
@@ -25,7 +26,7 @@ This document describes every layer of the AI config for this project — what e
 .github/
 ├── ARCHITECTURE.md
 ├── copilot-instructions.md → ../AGENTS.md   (Copilot alias)
-└── skills/                 ← canonical skill sources (9 skills + code-smell-shared docs)
+└── skills/                 ← canonical skill sources (10 skills + code-smell-shared docs)
 
 AGENTS.md   ← single source of truth for universal agent instructions
 CLAUDE.md → AGENTS.md   (symlink — Claude Code reads this)
@@ -56,6 +57,7 @@ Each rule file has a `paths:` frontmatter with glob patterns. Claude Code loads 
 | `react-components.md` | any `.tsx` / `.jsx` / `.stylex.ts`              | component bundle pattern, props naming, React 19 rules, StyleX-only styling  |
 | `testing.md`          | any `.test.*` / `.spec.*`                       | Vitest/Testing Library conventions, `vp run test`, coverage target           |
 | `routes-data.md`      | routes, services, `.api.ts`, RR config, entries | loader/action data flow, store-pattern rule, error handling, Zod             |
+| `scripts.md`          | any `.mjs` / `.cjs` / `scripts/**/*.js`         | JSDoc "why" header, small pure functions, `node:` builtins, 350-line ceiling |
 
 **Non-Claude agents** (Copilot, Gemini) don't auto-load these — AGENTS.md §2 tells them to read the matching rule file before editing covered files.
 
@@ -79,6 +81,8 @@ Auto-invocation is driven by the `description` field (Claude matches it against 
 | `code-smell-checker`          | Maintainability audits (runs in forked context)            | description                                       |
 | `code-smell-zen`              | Diff-based smell review (runs in forked context)           | description                                       |
 | `fallow-code-checker`         | Fallow static hygiene scan (runs in forked context)        | description                                       |
+| `linter-checker`              | Deterministic oxlint + eslint report (forked context)      | description                                       |
+| `commit-and-pr`               | Commit message + PR body that pass the enforced standard   | description (before committing / opening a PR)    |
 
 **Skill anatomy:**
 
@@ -111,15 +115,17 @@ Agents are sub-agents spawned explicitly by Claude (or by you) for isolated, hea
 
 Hooks are shell commands the harness runs automatically on lifecycle events. They live in the **committed** `.claude/settings.json` (the standard location — not a separate hooks file) so the whole team shares them.
 
-| Event                                                   | Command                                                                                                                  | Purpose                                                                                                                                                                           |
-| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `PreToolUse` (`Read\|Bash\|Grep\|Glob\|Write\|Edit\|…`) | `node scripts/claude-secrets-guard.mjs`                                                                                  | **Security guard** — denies reading a `.env`/secret file (Read/Bash/Grep/Glob) and writing a credential (Write/Edit); `.env.example`/`.sample`/`.template` are the only exception |
-| `PostToolUse` (`Write\|Edit\|MultiEdit`)                | `node scripts/claude-autofix.mjs`                                                                                        | Per-file autofix after each Write/Edit — Oxlint `--fix` → Biome `--write` → Oxfmt (the "fast trio"); non-blocking                                                                 |
-| `Stop`                                                  | `cd apps/react-router && git diff --quiet HEAD -- . \|\| (vp fmt . && vp lint . --fix && vp check --fix && vp run test)` | Runs the full quality gate when Claude finishes, only if files changed                                                                                                            |
+| Event                                                   | Command                                                                                                                                                                                                           | Purpose                                                                                                                                                                           |
+| ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PreToolUse` (`Read\|Bash\|Grep\|Glob\|Write\|Edit\|…`) | `node scripts/claude-secrets-guard.mjs`                                                                                                                                                                           | **Security guard** — denies reading a `.env`/secret file (Read/Bash/Grep/Glob) and writing a credential (Write/Edit); `.env.example`/`.sample`/`.template` are the only exception |
+| `PostToolUse` (`Write\|Edit\|MultiEdit`)                | `node scripts/claude-autofix.mjs`                                                                                                                                                                                 | Per-file autofix after each Write/Edit — Oxlint `--fix` → Biome `--write` → Oxfmt (the "fast trio"); non-blocking                                                                 |
+| `Stop`                                                  | `test -n "$(git status --porcelain)" \|\| exit 0; vp fmt . && vp lint . --fix && vp check --fix && { git diff --name-only HEAD; git ls-files --others --exclude-standard; } \| node scripts/run-changed.mjs test` | Repo-wide autofix + tsgolint when Claude finishes, then tests for the **affected workspaces only**. Skips instantly on a clean tree                                               |
 
 The `PreToolUse` **secrets guard** ([`scripts/claude-secrets-guard.mjs`](../scripts/claude-secrets-guard.mjs)) runs _before_ a tool executes and emits a `permissionDecision: "deny"` when a call would read a secret file (`.env`, `*.pem/.key/.p12`, `id_rsa`, `.npmrc`, `credentials`…) or write a credential (provider-format tokens + high-entropy assignments). It reuses the ADR-020 secret-file taxonomy (`packages/agent-runner/src/isSecretFilePath.util.ts`) so the CLI and the agent-runner SDK guard agree; the pure core is `scripts/lib/secrets-guard.mjs`, self-verified by `node scripts/claude-secrets-guard.mjs --selftest`. False positives are handled by `.example` files, placeholder values, and inline `gitleaks:allow` markers.
 
 The `PostToolUse` fixer ([`scripts/claude-autofix.mjs`](../scripts/claude-autofix.mjs)) reads the tool payload from stdin and runs only the Rust-fast linters on the single file just touched. The per-workspace **ESLint pass is deliberately excluded** — it cold-starts a Node process per file — so it stays in the `Stop` hook and the pre-push gate, mirroring the pre-commit `staged` config in root `vite.config.ts`. The hook always exits 0: unfixable findings are left to the quality gate, never blocking the edit.
+
+The `Stop` hook is **repo-wide and untracked-aware**, which it previously was not. It used to `cd apps/react-router` and test `git diff --quiet HEAD -- .`, so a session that touched only `packages/**`, `scripts/**` or `apps/admin_system` ran no gate at all, and a session that only _created_ files looked clean to `git diff` and also ran nothing. It now checks `git status --porcelain` (which sees untracked files), runs the fast repo-wide fixers, and pipes the changed paths through `scripts/run-changed.mjs`, so tests run for the affected workspaces and their dependents rather than one hard-coded app. A clean tree exits immediately.
 
 **Adding a hook:** edit the `hooks` block in `.claude/settings.json`. For automated behaviours ("always run X after Y"), hooks are the right mechanism — not memory or preferences.
 
@@ -161,7 +167,7 @@ Claude stops responding
 Stop hook fires — if apps/react-router changed, runs the quality gate
 ```
 
-**SessionStart hook** fires once when the conversation begins, independently of the above flow.
+There is no `SessionStart` hook. The three above — `PreToolUse`, `PostToolUse`, `Stop` — are the complete set defined in `.claude/settings.json`.
 
 ---
 

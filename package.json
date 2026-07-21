@@ -44,8 +44,6 @@
     "labels:sync": "node scripts/sync-labels.mjs",
     "skills:validate": "node scripts/validate-skills.cjs",
     "skills:report": "node scripts/generate-skills-compliance-report.cjs",
-    "skills:source-audit": "node scripts/generate-source-smell-report.cjs && node scripts/bootstrap-agenting-handoff.cjs",
-    "skills:handoff": "node scripts/bootstrap-agenting-handoff.cjs",
     "fallow:full": "fallow",
     "fallow:dead-code": "fallow dead-code",
     "fallow:health": "fallow health --file-scores --hotspots --targets --score",

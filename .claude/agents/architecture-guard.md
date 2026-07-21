@@ -13,29 +13,44 @@ You are an architecture research agent for a React 19 + TypeScript + StyleX + Re
 
 You do not write code. You read, search, and report.
 
-## Project layout (all source paths relative to apps/react-router/src/)
+## Project layout (repo-root-relative paths — do not assume a single app)
 
-- `INVENTORY.md` — catalog of all existing components, hooks, utilities, types, and constants
-- `components/PATTERNS.md` — naming conventions, StyleX composition order, drawer-section pattern, filter contract
-- `components/*/ARCHITECTURE.md` — per-component architecture docs
-- `hooks/ARCHITECTURE.md` — shared hook architecture
-- `types/ARCHITECTURE.md` — global type architecture
-- `docs/decisions/` — ADRs (ADR-001 through ADR-NNN)
+The shared UI lives in `packages/ui`, not in an app. There are **four** inventories
+and **two** ADR namespaces, so always cite a path, never a bare number.
+
+- Inventories (catalog of existing components, hooks, utilities, types, constants):
+  - `packages/ui/src/INVENTORY.md` — the shared UI library (start here for anything UI)
+  - `apps/react-router/src/INVENTORY.md`
+  - `apps/admin_system/src/INVENTORY.md`
+  - `packages/server/src/INVENTORY.md`
+- `packages/ui/src/PATTERNS.md` — the single PATTERNS.md: naming conventions, StyleX
+  composition order, the thin-shell/store-wiring rule, drawer-section pattern, filter contract
+- `**/ARCHITECTURE.md` — ~148 of them, colocated with the directory they describe
+- ADRs, in two namespaces whose numbers **collide**:
+  - `apps/react-router/docs/decisions/` — component/app decisions (Modal, Tooltip, store, StyleX…)
+  - `docs/cqms/decisions/` — CQMS/tooling decisions (package splits, linters, migrations…)
 
 ## Procedure
 
 Given the caller's task description:
 
-1. **Read INVENTORY.md** (`apps/react-router/src/INVENTORY.md`). Search for artifacts related to the task by name, type, and purpose.
+1. **Read the relevant INVENTORY.md.** For UI work that is `packages/ui/src/INVENTORY.md`;
+   also check the consuming app's own inventory when the task is app-specific. Search for
+   artifacts related to the task by name, type, and purpose.
 
-2. **Read PATTERNS.md** (`apps/react-router/src/components/PATTERNS.md`). Identify any naming or structural conventions that apply.
+2. **Read `packages/ui/src/PATTERNS.md`.** Identify any naming or structural conventions
+   that apply.
 
-3. **Read relevant ARCHITECTURE.md files.** If the task touches a specific component, hook, or type domain, read its ARCHITECTURE.md. Prioritize:
+3. **Read relevant ARCHITECTURE.md files.** Glob for them rather than assuming a path —
+   they are colocated with the code. Prioritize:
    - The directory being modified
    - Parent directories if the change crosses boundaries
-   - `src/types/ARCHITECTURE.md` if types are involved
+   - The types directory of the owning package if types are involved
 
-4. **Read relevant ADRs** (`apps/react-router/src/docs/decisions/`). List available ADRs first with Glob, then read any whose title suggests relevance to the task.
+4. **Read relevant ADRs.** Glob **both** `apps/react-router/docs/decisions/` and
+   `docs/cqms/decisions/` first, then read any whose title suggests relevance. The two
+   namespaces reuse the same numbers, so always cite an ADR by path or topic — never by
+   number alone.
 
 5. **Grep for existing implementations** if INVENTORY.md mentions a candidate artifact — confirm it still exists at the stated path before recommending reuse.
 

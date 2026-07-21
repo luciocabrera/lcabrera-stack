@@ -27,10 +27,19 @@ Return exactly this structure:
 
 | Step | Status | Notes |
 |------|--------|-------|
-| 1. Format  | ✅ pass / ❌ fail | errors if any |
-| 2. Lint    | ✅ pass / ❌ fail | error count + first 3 messages |
-| 3. Typecheck | ✅ pass / ❌ fail | error count + first 3 messages |
-| 4. Tests   | ✅ pass / ❌ fail | pass/fail counts + first 3 failures |
+| 1. Format (`vp fmt .`)                | ✅ pass / ❌ fail / ⏭️ not reached | errors if any |
+| 2. Oxlint (`vp lint .`)               | ✅ pass / ❌ fail / ⏭️ not reached | error count + first 3 messages |
+| 3. ESLint (`lint:eslint:check`)       | ✅ pass / ❌ fail / ⏭️ not reached | error count + first 3 messages |
+| 4. Biome (`lint:biome:check`, root)   | ✅ pass / ❌ fail / ⏭️ not reached | error count + first 3 messages |
+| 5. tsgolint (`vp check`)              | ✅ pass / ❌ fail / ⏭️ not reached | error count + first 3 messages |
+| 6. tsc (`vp run typecheck`)           | ✅ pass / ❌ fail / ⏭️ not reached | error count + first 3 messages |
+| 7. Tests (`vp run test`)              | ✅ pass / ❌ fail / ⏭️ not reached | pass/fail counts + first 3 failures |
+
+**Report all seven rows, every time.** Steps 3, 4 and 6 are the ones that get
+skipped in practice and none is covered by another: `vp check` runs neither the
+ESLint pass nor Biome nor real `tsc`. A four-row table hides exactly the stages a
+caller most needs to know ran. Because you stop at the first failure, mark every
+later stage **⏭️ not reached** — never omit the row, and never imply it passed.
 
 **Overall: ✅ PASS** or **❌ FAIL — blocked at step N**
 

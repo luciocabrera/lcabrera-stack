@@ -120,6 +120,7 @@ Skills are on-demand task workflows in `.github/skills/`. Use them as the first 
 | `code-smell-checker`          | Baseline maintainability audits and tech-debt triage                                                        |
 | `code-smell-zen`              | Diff-based smell review against target branch                                                               |
 | `fallow-code-checker`         | Full fallow monorepo hygiene scan with prioritized report (`vp run fallow:full` from root; scope with `-w`) |
+| `linter-checker`              | Deterministic oxlint + eslint sweep of one workspace, persisted as a schema-aligned report                  |
 | `commit-and-pr`               | Write commit messages + PR descriptions that pass the enforced standard (hook + CI gate)                    |
 
 Selection guideline:
