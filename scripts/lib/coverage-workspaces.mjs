@@ -111,4 +111,7 @@ const workspaceDirsIn = (repoRoot, root) => {
 export const publicPackageDirs = (repoRoot) =>
   WORKSPACE_ROOTS.flatMap((root) => workspaceDirsIn(repoRoot, root))
     .filter((dir) => ignoresSuppressions(repoRoot, dir))
-    .sort();
+    // Explicit comparator: a bare `.sort()` coerces to string and sorts by UTF-16
+    // code unit, which happens to be right for these paths but is not stated
+    // (Sonar S2871). Ordering only needs to be stable for readable output.
+    .sort((left, right) => left.localeCompare(right));
