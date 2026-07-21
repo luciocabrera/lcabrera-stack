@@ -82,5 +82,3 @@ export const createQueueProcessor = ({
 
   return { wake };
 };
-
-export type QueueProcessor = ReturnType<typeof createQueueProcessor>;
