@@ -20,6 +20,7 @@
     "eslint": "catalog:",
     "typescript": "catalog:",
     "typescript-eslint": "catalog:",
+    "vite-plus": "catalog:",
     "vitest": "catalog:"
   }
 }

@@ -1,13 +1,5 @@
 import type { WebSocket } from 'ws';
 
-export type RunStatusPayload = {
-  readonly runId: string;
-  readonly scanId: string;
-  readonly scannerId: string;
-  readonly status: string;
-  readonly type: 'scan-progress' | 'scan-status';
-};
-
 /**
  * In-memory Map<runId, Set<WebSocket>> (TECH_SPEC §2.7) — lives in this
  * process because execution and the hub now share one process (the whole
@@ -18,6 +10,16 @@ export type RunStatusPayload = {
 type PublishArgs = {
   readonly payload: RunStatusPayload;
   readonly runId: string;
+};
+
+// Module-local: the hub's publish/subscribe functions are the API, and every
+// caller builds this payload inline at the call site.
+type RunStatusPayload = {
+  readonly runId: string;
+  readonly scanId: string;
+  readonly scannerId: string;
+  readonly status: string;
+  readonly type: 'scan-progress' | 'scan-status';
 };
 
 type SubscribeArgs = {

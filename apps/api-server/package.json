@@ -33,6 +33,7 @@
     "eslint": "catalog:",
     "nodemon": "catalog:",
     "typescript": "catalog:",
+    "vite-plus": "catalog:",
     "vitest": "catalog:"
   }
 }

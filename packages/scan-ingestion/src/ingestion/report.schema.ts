@@ -83,17 +83,24 @@ export const scanFindingSchema = z.object({
   verification_steps: lenientStringArraySchema.default([]),
   why: z.string().min(1),
 });
-export type ScanFinding = z.infer<typeof scanFindingSchema>;
 
-/** Mirrors cqms.run_files' NOT NULL columns. */
-export const runFileSchema = z.object({
-  extension: z.string().min(1),
-  file_path: z.string().min(1),
-  file_type_category: z.string().min(1),
-  line_count: z.number().int().nonnegative().nullish(),
-  nested_level: z.number().int().nonnegative(),
-});
-export type RunFileInput = z.infer<typeof runFileSchema>;
+/**
+ * Mirrors cqms.run_files' NOT NULL columns.
+ *
+ * A plain type, unlike everything else in this file. The other schemas here
+ * parse `report.json`, which arrives from outside this process and must be
+ * validated. Run-file rows never do: `buildFileInventory` constructs them from
+ * an already-validated report, so they are type-checked at the point they are
+ * built. Declaring them as a Zod object instead would ship a validator into the
+ * bundle that nothing ever calls — which is precisely what it had become.
+ */
+export type RunFileInput = {
+  readonly extension: string;
+  readonly file_path: string;
+  readonly file_type_category: string;
+  readonly line_count?: null | number;
+  readonly nested_level: number;
+};
 
 /**
  * The report.json contract — deliberately shaped to match what

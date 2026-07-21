@@ -373,6 +373,9 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
+      vite-plus:
+        specifier: 'catalog:'
+        version: 0.2.5(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(jiti@2.7.0)(jsdom@29.1.1)(typescript@6.0.3)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))(yaml@2.9.0)
       vitest:
         specifier: 'catalog:'
         version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/browser-preview@4.1.10)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))
@@ -413,6 +416,9 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
+      vite-plus:
+        specifier: 'catalog:'
+        version: 0.2.5(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(jiti@2.7.0)(jsdom@29.1.1)(typescript@6.0.3)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))(yaml@2.9.0)
       vitest:
         specifier: 'catalog:'
         version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/browser-preview@4.1.10)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))
@@ -626,6 +632,9 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
+      vite-plus:
+        specifier: 'catalog:'
+        version: 0.2.5(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(jiti@2.7.0)(jsdom@29.1.1)(typescript@6.0.3)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))(yaml@2.9.0)
       vitest:
         specifier: 'catalog:'
         version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/browser-preview@4.1.10)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))
@@ -709,6 +718,9 @@ importers:
       typescript-eslint:
         specifier: 'catalog:'
         version: 8.64.0(eslint@10.7.0(jiti@2.7.0))(typescript@6.0.3)
+      vite-plus:
+        specifier: 'catalog:'
+        version: 0.2.5(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(jiti@2.7.0)(jsdom@29.1.1)(typescript@6.0.3)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))(yaml@2.9.0)
       vitest:
         specifier: 'catalog:'
         version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/browser-preview@4.1.10)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))

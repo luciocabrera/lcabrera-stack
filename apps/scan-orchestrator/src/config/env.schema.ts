@@ -16,7 +16,10 @@ import { z } from 'zod';
 // start at once with nothing bounding them. Scans beyond the cap wait for a
 // slot rather than being rejected. Default 3 is a conservative starting point;
 // raise it as host capacity (and, in Phase 2, the run container) allows.
-export const envSchema = z.object({
+// Not exported: `readEnvConfig` below is the only way this schema is meant to
+// be applied, so exporting the raw schema would invite a second parse path that
+// could drift from it.
+const envSchema = z.object({
   ANTHROPIC_API_KEY: z.string().min(1),
   LLM_DAILY_COST_CAP_USD: z.coerce.number().positive().default(50),
   MAX_CONCURRENT_SCANS: z.coerce.number().int().positive().default(3),
