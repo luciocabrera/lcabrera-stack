@@ -1,6 +1,6 @@
-import { spacing } from '@repo/ui/design-system/tokens/base.stylex';
-import { colors } from '@repo/ui/design-system/tokens/colors.stylex';
-import { skeleton } from '@repo/ui/design-system/tokens/commons.stylex';
+import { spacing } from '@lcabrera/ui/design-system/tokens/base.stylex';
+import { colors } from '@lcabrera/ui/design-system/tokens/colors.stylex';
+import { skeleton } from '@lcabrera/ui/design-system/tokens/commons.stylex';
 import * as stylex from '@stylexjs/stylex';
 
 export const styles = stylex.create({

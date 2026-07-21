@@ -1,10 +1,10 @@
-import type { TableColumnDataType } from '@repo/ui/components/Table/Table.types';
+import type { TableColumnDataType } from '@lcabrera/ui/components/Table/Table.types';
 
 import {
   DATE_OPERATORS,
   NUMBER_OPERATORS,
   TEXT_OPERATORS,
-} from '@repo/ui/constants/filterOperators.constants';
+} from '@lcabrera/ui/constants/filterOperators.constants';
 
 export type GetOperatorOptionsParams = {
   readonly dataType?: TableColumnDataType;

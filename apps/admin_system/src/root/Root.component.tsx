@@ -1,4 +1,4 @@
-import { AppProviders, AppShell } from '@repo/ui';
+import { AppProviders, AppShell } from '@lcabrera/ui';
 import { useLoaderData } from 'react-router';
 
 import { APP_ID } from '@/constants/app.constants';

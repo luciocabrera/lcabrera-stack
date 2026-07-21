@@ -2,8 +2,8 @@
 
 import type { ReactNode } from 'react';
 
-import { TableConfigProvider } from '@repo/ui/components/Table/contexts';
-import { DEFAULT_ROW_HEIGHT } from '@repo/ui/components/Table/Table.constants';
+import { TableConfigProvider } from '@lcabrera/ui/components/Table/contexts';
+import { DEFAULT_ROW_HEIGHT } from '@lcabrera/ui/components/Table/Table.constants';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 

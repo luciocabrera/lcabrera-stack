@@ -1,6 +1,6 @@
-import type { FieldNode } from '@repo/ui/components/Form';
+import type { FieldNode } from '@lcabrera/ui/components/Form';
 
-import { Form } from '@repo/ui/components/Form';
+import { Form } from '@lcabrera/ui/components/Form';
 import { use } from 'react';
 
 import type { NewUserValues } from '../newUser.schema';

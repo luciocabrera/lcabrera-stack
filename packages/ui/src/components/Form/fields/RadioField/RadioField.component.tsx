@@ -1,6 +1,6 @@
-import { useFormField } from '@repo/ui/components/Form/fields/useFormField.hook';
-import { FormFieldChrome } from '@repo/ui/components/Form/FormFieldChrome/FormFieldChrome.component';
-import { RadioOptionGroup } from '@repo/ui/components/RadioOptionGroup';
+import { useFormField } from '@lcabrera/ui/components/Form/fields/useFormField.hook';
+import { FormFieldChrome } from '@lcabrera/ui/components/Form/FormFieldChrome/FormFieldChrome.component';
+import { RadioOptionGroup } from '@lcabrera/ui/components/RadioOptionGroup';
 import * as stylex from '@stylexjs/stylex';
 
 import type { RadioFieldProps } from './RadioField.types';

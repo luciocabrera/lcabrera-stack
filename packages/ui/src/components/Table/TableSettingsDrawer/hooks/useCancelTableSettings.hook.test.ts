@@ -13,12 +13,15 @@ const {
   setTableIsTableSettingsOpenMock: vi.fn(),
 }));
 
-vi.mock('@repo/ui/components/Table/contexts/TableConfig/meta/actions', () => ({
-  useSetTableIsTableSettingsOpen: () => setTableIsTableSettingsOpenMock,
-}));
+vi.mock(
+  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions',
+  () => ({
+    useSetTableIsTableSettingsOpen: () => setTableIsTableSettingsOpenMock,
+  }),
+);
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/meta/selectors',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors',
   () => ({
     useGetTableIsTableSettingsPinned: () => isTableSettingsPinnedMock(),
   }),

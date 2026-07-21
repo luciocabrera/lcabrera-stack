@@ -1,5 +1,5 @@
-import { Button } from '@repo/ui/components/Button';
-import { SectionCard } from '@repo/ui/components/SectionCard';
+import { Button } from '@lcabrera/ui/components/Button';
+import { SectionCard } from '@lcabrera/ui/components/SectionCard';
 import { useFetcher, useLoaderData } from 'react-router';
 
 import type { action } from './accountTokens.action';

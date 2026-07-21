@@ -1,16 +1,16 @@
-import { resolveFromCacheOrFetch } from '@repo/ui/utils/prefetch/resolveFromCacheOrFetch.util';
-import { createMockStore } from '@repo/ui/utils/tests/createMockStore.util';
+import { resolveFromCacheOrFetch } from '@lcabrera/ui/utils/prefetch/resolveFromCacheOrFetch.util';
+import { createMockStore } from '@lcabrera/ui/utils/tests/createMockStore.util';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { DataState } from './fetchMoreData.types';
 
 import { executeFetchMore } from './executeFetchMore.util';
 
-vi.mock('@repo/ui/utils/prefetch/resolveFromCacheOrFetch.util', () => ({
+vi.mock('@lcabrera/ui/utils/prefetch/resolveFromCacheOrFetch.util', () => ({
   resolveFromCacheOrFetch: vi.fn(),
 }));
 
-vi.mock('@repo/ui/utils/prefetch/firePrefetch.util', () => ({
+vi.mock('@lcabrera/ui/utils/prefetch/firePrefetch.util', () => ({
   firePrefetch: vi.fn(),
 }));
 

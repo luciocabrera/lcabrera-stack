@@ -1,5 +1,5 @@
-import type { FieldErrors } from '@repo/ui/components/Form';
-import type { FormMode } from '@repo/ui/components/Form/Form.types';
+import type { FieldErrors } from '@lcabrera/ui/components/Form';
+import type { FormMode } from '@lcabrera/ui/components/Form/Form.types';
 
 import type { EnterpriseOrderValues } from '../config';
 

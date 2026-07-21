@@ -12,8 +12,8 @@ badged per metric (✅ ≥ 80 %, ⚠️ ≥ 60 %, ❌ below).
 
 | Workspace             | Lines | Statements | Functions | Branches |
 | --------------------- | ----- | ---------- | --------- | -------- |
-| `@repo/ui`            | …     | …          | …         | …        |
-| `@repo/server`        | …     | …          | …         | …        |
+| `@lcabrera/ui`        | …     | …          | …         | …        |
+| `@lcabrera/server`    | …     | …          | …         | …        |
 | `vite-react-compiler` | …     | …          | …         | …        |
 | **🏛 Monorepo total**  | …     | …          | …         | …        |
 
@@ -79,13 +79,13 @@ Adding a fifth public package extends the check with no edit here:
 
 | Workspace                 | Package                   | `run` | Why                                                                                                                              |
 | ------------------------- | ------------------------- | ----- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `packages/ui`             | `@repo/ui`                | true  | Runs `test:coverage` here (plain `test` in `test:ci`, no coverage)                                                               |
-| `packages/server`         | `@repo/server`            | true  | Same                                                                                                                             |
-| `packages/api`            | `@repo/api`               | true  | Same — the browser half of the former `data-access` ([ADR-038](../cqms/decisions/ADR-038-public-package-topology-by-runtime.md)) |
+| `packages/ui`             | `@lcabrera/ui`            | true  | Runs `test:coverage` here (plain `test` in `test:ci`, no coverage)                                                               |
+| `packages/server`         | `@lcabrera/server`        | true  | Same                                                                                                                             |
+| `packages/api`            | `@lcabrera/api`           | true  | Same — the browser half of the former `data-access` ([ADR-038](../cqms/decisions/ADR-038-public-package-topology-by-runtime.md)) |
 | `apps/react-router`       | `vite-react-compiler`     | false | Its `test:ci` already emits the summary; re-running the repo's largest suite would be wasteful                                   |
 | `packages/node-runtime`   | `@repo/node-runtime`      | true  | Phase 2 — DB-free `test:coverage`                                                                                                |
 | `packages/scan-ingestion` | `@repo/scan-ingestion`    | true  | Phase 2 — DB-free `test:coverage` **subset** (its real-Postgres `queries/*` stay out, so the number is the DB-free portion only) |
-| `packages/utils`          | `@repo/utils`             | true  | Phase 2 — pure helpers, own 95% threshold ([#124](https://github.com/luciocabrera/vite-react-compiler/issues/124))               |
+| `packages/utils`          | `@lcabrera/utils`         | true  | Phase 2 — pure helpers, own 95% threshold ([#124](https://github.com/luciocabrera/vite-react-compiler/issues/124))               |
 | `apps/scan-orchestrator`  | `@repo/scan-orchestrator` | true  | Phase 3 — DB-free **subset** (`runQueuedScan` drives the real scan queue and stays out)                                          |
 | `apps/shared`             | `api-shared`              | true  | Phase 3 — whole suite is DB-free (every test injects its dependencies)                                                           |
 | `apps/api-server`         | `car-sales-api`           | true  | Phase 3 — same; its `test:coverage` deliberately loads no environment file                                                       |
@@ -156,7 +156,7 @@ Each phase is its own PR, kept reviewable and green before the next.
 ## Known costs & caveats
 
 - **The package suites run twice in the `unit-tests` job.** `test:ci` runs
-  `@repo/ui` / `@repo/server` as plain `test` (the pass/fail gate), then
+  `@lcabrera/ui` / `@lcabrera/server` as plain `test` (the pass/fail gate), then
   `coverage:report` re-runs them as `test:coverage`. This keeps `test:ci`
   untouched and the change purely additive — the same "coverage runs are
   separate from the pass/fail run" split the fallow-audit job already uses.
@@ -166,7 +166,7 @@ Each phase is its own PR, kept reviewable and green before the next.
   report set.
 - **The numbers reflect each suite's executed-file footprint.** v8 measures only
   files a test imports, so denominators differ wildly by suite maturity
-  (`@repo/ui` measures ~1244 files, `vite-react-compiler` ~12). Enabling
+  (`@lcabrera/ui` measures ~1244 files, `vite-react-compiler` ~12). Enabling
   `coverage.all` would count untested files too — a truer denominator and lower
   percentages — but that is a per-workspace coverage-quality decision, out of
   scope for the reporting plumbing here.

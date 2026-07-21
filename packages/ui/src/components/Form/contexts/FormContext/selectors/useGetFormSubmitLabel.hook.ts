@@ -1,4 +1,4 @@
-import { useMetaStore } from '@repo/ui/components/Form/contexts/FormContext/useMetaStore.hook';
+import { useMetaStore } from '@lcabrera/ui/components/Form/contexts/FormContext/useMetaStore.hook';
 
 /** Footer submit-button label (default resolved at store init). */
 export const useGetFormSubmitLabel = () =>

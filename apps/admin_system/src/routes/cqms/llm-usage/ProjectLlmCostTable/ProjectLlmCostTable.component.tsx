@@ -1,7 +1,7 @@
 import type { ProjectLlmCostRow } from '@repo/scan-ingestion/queries/getProjectLlmCost.util';
 
-import { TableLayout } from '@repo/ui/components/Table/TableLayout';
-import { createEmptyColumnsState } from '@repo/ui/components/Table/utils/createEmptyColumnsState.util';
+import { TableLayout } from '@lcabrera/ui/components/Table/TableLayout';
+import { createEmptyColumnsState } from '@lcabrera/ui/components/Table/utils/createEmptyColumnsState.util';
 
 import type { ProjectLlmCostTableProps } from './ProjectLlmCostTable.types';
 

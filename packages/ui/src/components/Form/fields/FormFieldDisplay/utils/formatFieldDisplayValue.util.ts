@@ -1,8 +1,8 @@
-import type { LeafFieldDef } from '@repo/ui/components/Form/Form.types';
+import type { LeafFieldDef } from '@lcabrera/ui/components/Form/Form.types';
 
-import { formatCurrency } from '@repo/utils/formatters/format-currency.util';
-import { formatDate } from '@repo/utils/formatters/format-date.util';
-import { formatNumber } from '@repo/utils/formatters/format-number.util';
+import { formatCurrency } from '@lcabrera/utils/formatters/format-currency.util';
+import { formatDate } from '@lcabrera/utils/formatters/format-date.util';
+import { formatNumber } from '@lcabrera/utils/formatters/format-number.util';
 
 import { resolveOptionLabels } from './resolveOptionLabels.util';
 import { stringifyLeafValue } from './stringifyLeafValue.util';

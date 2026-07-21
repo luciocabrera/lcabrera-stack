@@ -1,4 +1,4 @@
-import { selectRows } from '@repo/server/db/select-rows.util';
+import { selectRows } from '@lcabrera/server/db/select-rows.util';
 
 import { LLM_USAGE_SCHEMA } from './llmUsage.constants.ts';
 

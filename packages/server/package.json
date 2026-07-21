@@ -1,5 +1,5 @@
 {
-  "name": "@repo/server",
+  "name": "@lcabrera/server",
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
@@ -36,6 +36,9 @@
     "./filters/to-text-query-filters.util": "./src/filters/to-text-query-filters.util.ts",
     "./tokens/generate-api-token.util": "./src/tokens/generate-api-token.util.ts",
     "./tokens/parse-api-token.util": "./src/tokens/parse-api-token.util.ts"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "format": "vp fmt .",

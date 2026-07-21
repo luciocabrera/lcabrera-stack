@@ -1,10 +1,10 @@
-import type { ColumnFilter } from '@repo/ui/types/filterOperators.types';
-import type { InfiniteScroll, Sorting } from '@repo/ui/types/ui.types';
+import type { ColumnFilter } from '@lcabrera/ui/types/filterOperators.types';
+import type { InfiniteScroll, Sorting } from '@lcabrera/ui/types/ui.types';
 import type {
   CurrencyFormatOptions,
   DateFormatOptions,
   NumberFormatOptions,
-} from '@repo/utils/formatters/formatters.types';
+} from '@lcabrera/utils/formatters/formatters.types';
 import type { StyleXStyles } from '@stylexjs/stylex';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
 

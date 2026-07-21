@@ -2,8 +2,8 @@ import {
   ListAllIcon,
   ListCheckedIcon,
   ListUncheckedIcon,
-} from '@repo/ui/components/Icons';
-import { ICON_SIZE_MD } from '@repo/ui/design-system/constants';
+} from '@lcabrera/ui/components/Icons';
+import { ICON_SIZE_MD } from '@lcabrera/ui/design-system/constants';
 import * as stylex from '@stylexjs/stylex';
 
 import {

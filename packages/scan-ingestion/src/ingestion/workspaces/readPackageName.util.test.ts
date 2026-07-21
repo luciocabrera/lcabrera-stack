@@ -19,10 +19,10 @@ describe('readPackageName', () => {
   it('reads the name field', () => {
     writeTextFileWithin({
       baseDirectory: directoryPath,
-      content: JSON.stringify({ name: '@repo/ui' }),
+      content: JSON.stringify({ name: '@lcabrera/ui' }),
       targetPath: 'package.json',
     });
-    expect(readPackageName(directoryPath)).toBe('@repo/ui');
+    expect(readPackageName(directoryPath)).toBe('@lcabrera/ui');
   });
 
   it('returns undefined for missing, unparseable, or nameless files', () => {

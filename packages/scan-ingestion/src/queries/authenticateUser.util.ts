@@ -1,5 +1,5 @@
-import { isSecretHashValid } from '@repo/server/crypto/is-secret-hash-valid.util';
-import { getPool } from '@repo/server/db/get-pool.util';
+import { isSecretHashValid } from '@lcabrera/server/crypto/is-secret-hash-valid.util';
+import { getPool } from '@lcabrera/server/db/get-pool.util';
 
 export type AuthenticatedUser = {
   readonly displayName: string;

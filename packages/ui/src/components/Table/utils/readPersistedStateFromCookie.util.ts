@@ -1,4 +1,4 @@
-import { readFromCookie } from '@repo/ui/utils/storage';
+import { readFromCookie } from '@lcabrera/ui/utils/storage';
 
 import { collectPersistedStateSlices } from './collectPersistedStateSlices.util';
 

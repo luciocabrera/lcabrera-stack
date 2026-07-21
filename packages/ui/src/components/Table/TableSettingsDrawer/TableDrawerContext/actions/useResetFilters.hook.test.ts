@@ -20,7 +20,7 @@ const { configColumnsStore, drawerColumnsStore, setConfigState } = vi.hoisted(
 );
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
   () => ({
     useTableConfigContextValue: () => ({ columnsStore: configColumnsStore }),
   }),

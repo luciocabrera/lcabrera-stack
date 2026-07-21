@@ -2,7 +2,7 @@
  * Stable per-application identifier.
  *
  * Used to namespace app-level cookies (theme, global settings) and table
- * persisted keys. Because these UI pieces live in the shared `@repo/ui`
+ * persisted keys. Because these UI pieces live in the shared `@lcabrera/ui`
  * package and cookies are shared across ports on the same host, each app must
  * use a distinct id so preferences stay isolated per app.
  *

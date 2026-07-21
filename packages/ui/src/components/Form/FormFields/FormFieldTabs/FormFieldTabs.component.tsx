@@ -1,7 +1,7 @@
-import type { FieldNode } from '@repo/ui/components/Form/Form.types';
+import type { FieldNode } from '@lcabrera/ui/components/Form/Form.types';
 
-import { useFormFieldsRendererContext } from '@repo/ui/components/Form/FormFields/contexts/FormFieldsRendererContext/useFormFieldsRendererContext.hook';
-import { Tabs } from '@repo/ui/components/Tabs';
+import { useFormFieldsRendererContext } from '@lcabrera/ui/components/Form/FormFields/contexts/FormFieldsRendererContext/useFormFieldsRendererContext.hook';
+import { Tabs } from '@lcabrera/ui/components/Tabs';
 
 import type { FormFieldTabsProps } from './FormFieldTabs.types';
 

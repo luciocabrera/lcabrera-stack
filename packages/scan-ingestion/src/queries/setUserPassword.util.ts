@@ -1,5 +1,5 @@
-import { hashSecret } from '@repo/server/crypto/hash-secret.util';
-import { getPool } from '@repo/server/db/get-pool.util';
+import { hashSecret } from '@lcabrera/server/crypto/hash-secret.util';
+import { getPool } from '@lcabrera/server/db/get-pool.util';
 
 type SetUserPasswordArgs = {
   readonly password: string;

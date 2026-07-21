@@ -1,9 +1,9 @@
-import { Table } from '@repo/ui/components/Table';
+import { Table } from '@lcabrera/ui/components/Table';
 import {
   FiltersDataProvider,
   TableConfigProvider,
-} from '@repo/ui/components/Table/contexts';
-import { TableSuspenseBoundary } from '@repo/ui/components/Table/TableSuspenseBoundary';
+} from '@lcabrera/ui/components/Table/contexts';
+import { TableSuspenseBoundary } from '@lcabrera/ui/components/Table/TableSuspenseBoundary';
 import * as stylex from '@stylexjs/stylex';
 
 import type { TableLayoutProps } from './TableLayout.types';

@@ -5,7 +5,7 @@ import type {
   DataKey,
   PinnedColumnInfo,
   TableColumn,
-} from '@repo/ui/components/Table/Table.types';
+} from '@lcabrera/ui/components/Table/Table.types';
 import type { ReactNode } from 'react';
 
 import { cleanup, render, screen } from '@testing-library/react';
@@ -25,7 +25,7 @@ const { MockTableBodyCell } = vi.hoisted(() => ({
   ),
 }));
 
-vi.mock('@repo/ui/components/Table/TableBodyCell', () => ({
+vi.mock('@lcabrera/ui/components/Table/TableBodyCell', () => ({
   TableBodyCell: MockTableBodyCell,
 }));
 

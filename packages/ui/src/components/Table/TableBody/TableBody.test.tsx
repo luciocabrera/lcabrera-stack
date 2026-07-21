@@ -65,29 +65,29 @@ const MockTableBodyRows = vi.hoisted(() => {
 });
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/columns/selectors',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors',
   () => ({
     useGetPinnedColumnPartition: useGetPinnedColumnPartitionMock,
   }),
 );
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/meta/selectors',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors',
   () => ({
     useGetTableOverscan: useGetTableOverscanMock,
     useGetTableRowHeight: useGetTableRowHeightMock,
   }),
 );
 
-vi.mock('@repo/ui/components/Table/SpacerRow', () => ({
+vi.mock('@lcabrera/ui/components/Table/SpacerRow', () => ({
   SpacerRow: MockSpacerRow,
 }));
 
-vi.mock('@repo/ui/components/Table/TableBodyRows', () => ({
+vi.mock('@lcabrera/ui/components/Table/TableBodyRows', () => ({
   TableBodyRows: MockTableBodyRows,
 }));
 
-vi.mock('@repo/ui/components/Table/TableEmptyState', () => ({
+vi.mock('@lcabrera/ui/components/Table/TableEmptyState', () => ({
   TableEmptyState: () => (
     <tr data-testid='table-empty-state'>
       <td>empty</td>
@@ -95,7 +95,7 @@ vi.mock('@repo/ui/components/Table/TableEmptyState', () => ({
   ),
 }));
 
-vi.mock('@repo/ui/hooks', () => ({
+vi.mock('@lcabrera/ui/hooks', () => ({
   useVirtualization: useVirtualizationMock,
 }));
 

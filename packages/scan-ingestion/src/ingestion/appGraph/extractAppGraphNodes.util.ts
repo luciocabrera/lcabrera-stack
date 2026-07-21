@@ -1,4 +1,4 @@
-import { dropNullishValues } from '@repo/utils/objects/drop-nullish-values.util';
+import { dropNullishValues } from '@lcabrera/utils/objects/drop-nullish-values.util';
 
 import type { AppGraphNodeInput } from './appGraphDetail.types.ts';
 import type { AppGraphRaw, AppGraphRawNode } from './appGraphRaw.schema.ts';

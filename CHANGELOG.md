@@ -986,7 +986,7 @@ type. This file is generated — run `vp run changelog:generate`. Do not edit by
 - **admin:** extract shared parseRouteParams for CQMS routes ([`e9d29d9`](https://github.com/luciocabrera/vite-react-compiler/commit/e9d29d920098e914782443e5002531ac3c5627a3))
 - **admin_system:** CQMS component triage — extraction + render tests (WP9, WP8c) ([`b874bc5`](https://github.com/luciocabrera/vite-react-compiler/commit/b874bc5a39e7b5f2d9be94b22a20e55d98254c8f))
 - **api:** introduce buildPaginatedQueryParams and fetchAndValidate utilities for improved API request handling ([`8e796e7`](https://github.com/luciocabrera/vite-react-compiler/commit/8e796e731fffb16d7f835722b279e2d1a7838b01))
-- **api,ui:** extract @repo/api and cut the ui to pg dependency (#156) ([`af06971`](https://github.com/luciocabrera/vite-react-compiler/commit/af0697190aeb55433f387689a9fdfceba516ba30))
+- **api,ui:** extract @lcabrera/api and cut the ui to pg dependency (#156) ([`af06971`](https://github.com/luciocabrera/vite-react-compiler/commit/af0697190aeb55433f387689a9fdfceba516ba30))
 - **AppNavigation:** modularize navigation components and utilities ([`5fa529d`](https://github.com/luciocabrera/vite-react-compiler/commit/5fa529dc7e5ebd845226b0a318e92bb32682b9ed))
 - **data-access:** move parseFilterOptionsParams in, inject page-size default (#138) ([`d1177a9`](https://github.com/luciocabrera/vite-react-compiler/commit/d1177a9271b6175f3b74515e2f6aa08a85a59542))
 - **data-access:** relocate the column-filter contract into filters/ (#105) ([`23f89f4`](https://github.com/luciocabrera/vite-react-compiler/commit/23f89f48678cc0f8be883ba854d9a48af38a3d42))
@@ -1057,8 +1057,8 @@ type. This file is generated — run `vp run changelog:generate`. Do not edit by
 - **ui,data-access:** name types/constants after their directory (#154) ([`f2f86ab`](https://github.com/luciocabrera/vite-react-compiler/commit/f2f86ab0e2c3ed4b7ada210b7b48b66b5e28b69a))
 - **ui,server:** declare the filter shapes in each package (#213) ([`8e2f2e8`](https://github.com/luciocabrera/vite-react-compiler/commit/8e2f2e8975285fa01457fb310a6785de7618a274))
 - **utils:** promote pure parse/form utils, dedup isCheckboxChecked (#137) ([`5d2a592`](https://github.com/luciocabrera/vite-react-compiler/commit/5d2a59254738a1379aaba2c5c3299ae9311b6106))
-- **utils:** relocate the formatters subsystem into @repo/utils (#136) ([`8551bdb`](https://github.com/luciocabrera/vite-react-compiler/commit/8551bdb58bd98f5a2dede022e1caab0357f5f6a7))
-- **utils:** consolidate shared pure primitives into @repo/utils (#135) ([`85719d2`](https://github.com/luciocabrera/vite-react-compiler/commit/85719d2d694cce81cb9a1586eb27284bde5ffa22))
+- **utils:** relocate the formatters subsystem into @lcabrera/utils (#136) ([`8551bdb`](https://github.com/luciocabrera/vite-react-compiler/commit/8551bdb58bd98f5a2dede022e1caab0357f5f6a7))
+- **utils:** consolidate shared pure primitives into @lcabrera/utils (#135) ([`85719d2`](https://github.com/luciocabrera/vite-react-compiler/commit/85719d2d694cce81cb9a1586eb27284bde5ffa22))
 - **VirtualList:** simplify props and enhance composition ([`9e5e82e`](https://github.com/luciocabrera/vite-react-compiler/commit/9e5e82e3cf0648fcfae576943e3019059248abd9))
 - **VirtualSelect:** streamline dropdown and header components ([`68ea30f`](https://github.com/luciocabrera/vite-react-compiler/commit/68ea30fd38ef3bcfda99c8664c5b9768e4b8a61e))
 - **VirtualSelect:** decouple dropdown and header from selection logic ([`9836b18`](https://github.com/luciocabrera/vite-react-compiler/commit/9836b18836ecb17e1627d6734c3591d4bf1e08c4))
@@ -1275,7 +1275,7 @@ type. This file is generated — run `vp run changelog:generate`. Do not edit by
 - **ui:** remove empty eslint-suppressions.json ([`1f1458e`](https://github.com/luciocabrera/vite-react-compiler/commit/1f1458e10c6e00d861ed1fda1925eb03f611ff93))
 - **ui:** strip unimported Props-type re-exports from barrels (phase 2) ([`3a06d8f`](https://github.com/luciocabrera/vite-react-compiler/commit/3a06d8fda96d8d5474a93c236e61ab9e97b35bd9))
 - **ui:** remove fallow-verified dead code (phase 1) ([`affe1e4`](https://github.com/luciocabrera/vite-react-compiler/commit/affe1e439a25e6e1b1ef28beef97086ddf5c4a75))
-- **utils:** bring @repo/utils to public-package parity (#125) ([`328ed0c`](https://github.com/luciocabrera/vite-react-compiler/commit/328ed0ceecd151d0487eb294a51b63f759d6267b))
+- **utils:** bring @lcabrera/utils to public-package parity (#125) ([`328ed0c`](https://github.com/luciocabrera/vite-react-compiler/commit/328ed0ceecd151d0487eb294a51b63f759d6267b))
 
 ### ⏪ Reverts
 

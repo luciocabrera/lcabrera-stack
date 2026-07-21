@@ -1,4 +1,4 @@
-import { parseApiToken } from '@repo/server/tokens/parse-api-token.util';
+import { parseApiToken } from '@lcabrera/server/tokens/parse-api-token.util';
 
 import type { AuthClaims } from './auth.types';
 

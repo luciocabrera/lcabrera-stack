@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 
-import type { TablePersistenceConfig } from '@repo/ui/components/Table/Table.types';
+import type { TablePersistenceConfig } from '@lcabrera/ui/components/Table/Table.types';
 
-import { MAX_COOKIE_ENTRY_VALUE_LENGTH } from '@repo/ui/constants/globalSettings.constants';
+import { MAX_COOKIE_ENTRY_VALUE_LENGTH } from '@lcabrera/ui/constants/globalSettings.constants';
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -33,7 +33,7 @@ vi.mock('react-router', () => ({
 }));
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
   () => ({
     useTableConfigContextValue: () => ({
       metaStore: { get: metaStoreGetMock },
@@ -41,11 +41,11 @@ vi.mock(
   }),
 );
 
-vi.mock('@repo/ui/components/Table/utils', () => ({
+vi.mock('@lcabrera/ui/components/Table/utils', () => ({
   serializeStateSlice: serializeStateSliceMock,
 }));
 
-vi.mock('@repo/ui/contexts/NotificationContext/actions', () => ({
+vi.mock('@lcabrera/ui/contexts/NotificationContext/actions', () => ({
   useNotifyAction: () => notifyMock,
 }));
 

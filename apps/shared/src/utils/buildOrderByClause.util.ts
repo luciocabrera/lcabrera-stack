@@ -1,4 +1,4 @@
-import { buildOrderByClause as buildSafeOrderByClause } from '@repo/server/db/query-builder/build-order-by-clause.util';
+import { buildOrderByClause as buildSafeOrderByClause } from '@lcabrera/server/db/query-builder/build-order-by-clause.util';
 
 import type { SortRule } from '../types/api.types.js';
 
@@ -19,7 +19,7 @@ type BuildOrderByClauseArgs = {
  * Build a safe ORDER BY clause from validated sort rules.
  *
  * This is an adapter, not an implementation: the SQL is built by
- * `@repo/server`, which validates each identifier's shape, checks it
+ * `@lcabrera/server`, which validates each identifier's shape, checks it
  * against the allow-list, and quotes it. All this adds is the demo API's
  * own `SortRule` shape (`columnKey`) and its fallback-sorting rule, so the
  * two servers keep one clause builder between them instead of a second

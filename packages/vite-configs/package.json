@@ -27,9 +27,9 @@
   "devDependencies": {
     "@babel/preset-typescript": "catalog:",
     "@eslint/js": "catalog:",
+    "@lcabrera/utils": "workspace:*",
     "@react-router/dev": "catalog:",
     "@repo/plugins": "workspace:*",
-    "@repo/utils": "workspace:*",
     "@stylexjs/unplugin": "catalog:",
     "@types/node": "catalog:",
     "babel-plugin-react-compiler": "catalog:",

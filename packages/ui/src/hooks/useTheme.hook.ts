@@ -1,4 +1,4 @@
-import { ThemeContext } from '@repo/ui/contexts/ThemeContext';
+import { ThemeContext } from '@lcabrera/ui/contexts/ThemeContext';
 import { use } from 'react';
 
 /**

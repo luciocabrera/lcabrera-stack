@@ -1,4 +1,4 @@
-import type { NumberFilter } from '@repo/ui/types/filterOperators.types';
+import type { NumberFilter } from '@lcabrera/ui/types/filterOperators.types';
 
 export const computeInitialMaxValue = (
   filter: NumberFilter | undefined,

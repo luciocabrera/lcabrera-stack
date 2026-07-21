@@ -1,5 +1,5 @@
-import { useTableContainerRef } from '@repo/ui/components/Table/contexts/TableWrapper';
-import { TableActionButton } from '@repo/ui/components/Table/TableActionButton';
+import { useTableContainerRef } from '@lcabrera/ui/components/Table/contexts/TableWrapper';
+import { TableActionButton } from '@lcabrera/ui/components/Table/TableActionButton';
 import * as stylex from '@stylexjs/stylex';
 import { useId } from 'react';
 

@@ -1,4 +1,4 @@
-import type { DataKey } from '@repo/ui/components/Table/Table.types';
+import type { DataKey } from '@lcabrera/ui/components/Table/Table.types';
 import type { ReactNode } from 'react';
 
 export type InfiniteScroll<TData, TResponse> = {

@@ -1,4 +1,4 @@
-import type { FieldNode } from '@repo/ui/components/Form/Form.types';
+import type { FieldNode } from '@lcabrera/ui/components/Form/Form.types';
 
 /**
  * Collects every leaf `accessor` beneath a node. Accessors are unique keys of

@@ -20,7 +20,7 @@ const { MockTableActionsPopover } = vi.hoisted(() => ({
 const mockCloseMenu = vi.fn();
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/columns/actions',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/actions',
   () => ({
     useSetColumnPinning: () => vi.fn(),
     useSetColumnSorting: () => vi.fn(),
@@ -28,12 +28,15 @@ vi.mock(
   }),
 );
 
-vi.mock('@repo/ui/components/Table/contexts/TableConfig/meta/actions', () => ({
-  useSetTableColumnSelectedKey: () => vi.fn(),
-  useSetTableDrawersOpenState: () => vi.fn(),
-}));
+vi.mock(
+  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions',
+  () => ({
+    useSetTableColumnSelectedKey: () => vi.fn(),
+    useSetTableDrawersOpenState: () => vi.fn(),
+  }),
+);
 
-vi.mock('@repo/ui/components/Table/TableActionsPopover', () => ({
+vi.mock('@lcabrera/ui/components/Table/TableActionsPopover', () => ({
   TableActionsPopover: MockTableActionsPopover,
   tableActionsPopoverStyles: {
     menuActions: {},

@@ -1,6 +1,6 @@
-import { buildColumnSizingCookieEntry } from '@repo/ui/components/Table/contexts/TableConfig/columns/actions/utils';
-import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import { usePersistCookieAction } from '@repo/ui/hooks/usePersistCookieAction.hook';
+import { buildColumnSizingCookieEntry } from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/actions/utils';
+import { useTableConfigContextValue } from '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { usePersistCookieAction } from '@lcabrera/ui/hooks/usePersistCookieAction.hook';
 
 /**
  * Persists whatever column widths are currently in the store to the cookie, via

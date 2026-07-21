@@ -1,4 +1,4 @@
-import { useGetFieldValue } from '@repo/ui/components/Form/contexts/FormContext/selectors';
+import { useGetFieldValue } from '@lcabrera/ui/components/Form/contexts/FormContext/selectors';
 import * as stylex from '@stylexjs/stylex';
 
 import type { FormFieldDisplayProps } from './FormFieldDisplay.types';

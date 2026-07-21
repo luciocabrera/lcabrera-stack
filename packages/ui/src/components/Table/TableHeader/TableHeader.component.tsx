@@ -1,8 +1,8 @@
-import { useGetPinnedColumnPartition } from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors';
+import { useGetPinnedColumnPartition } from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors';
 import {
   useGetTableIsLoading,
   useGetTableIsLoadingMore,
-} from '@repo/ui/components/Table/contexts/TableData/data/selectors';
+} from '@lcabrera/ui/components/Table/contexts/TableData/data/selectors';
 import * as stylex from '@stylexjs/stylex';
 
 import type { TableHeaderProps } from './TableHeader.types';

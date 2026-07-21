@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 
-import type { RadioOption } from '@repo/ui/components/RadioOptionGroup';
+import type { RadioOption } from '@lcabrera/ui/components/RadioOptionGroup';
 
-import { mockDialogElement } from '@repo/ui/utils/tests/mockDialogElement.util';
+import { mockDialogElement } from '@lcabrera/ui/utils/tests/mockDialogElement.util';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 

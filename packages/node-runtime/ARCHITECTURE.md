@@ -14,9 +14,9 @@ was wrong in its own way:
 
 | Candidate           | Why not                                                                                                                                  |
 | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `@repo/utils`       | Its `ARCHITECTURE.md` commits to "keep utilities pure and side-effect free". Registering signal handlers is a side effect by definition. |
+| `@lcabrera/utils`   | Its `ARCHITECTURE.md` commits to "keep utilities pure and side-effect free". Registering signal handlers is a side effect by definition. |
 | `api-shared`        | The car-sales demo's shared lib. `scan-orchestrator` is CQMS product code; depending on it would couple product to demo.                 |
-| `@repo/server`      | Owns DB/query/crypto/token concerns. A process signal is not data access.                                                                |
+| `@lcabrera/server`  | Owns DB/query/crypto/token concerns. A process signal is not data access.                                                                |
 | Duplicating per app | What we had: 12 lines of identical `process.on` wiring in two servers, flagged as a fallow clone group.                                  |
 
 Both consumers depend on **this** package, not on each other — the demo and
@@ -24,9 +24,9 @@ the product stay decoupled.
 
 ## Design constraints
 
-- **Impurity is the point, and it is bounded.** Unlike `@repo/utils`, these
+- **Impurity is the point, and it is bounded.** Unlike `@lcabrera/utils`, these
   helpers exist to touch the process. That licence covers process lifecycle
-  only: anything computable as a pure function belongs in `@repo/utils`, and
+  only: anything computable as a pure function belongs in `@lcabrera/utils`, and
   anything domain-specific belongs to its own package.
 - **Entry points call these; libraries do not.** A module imported for
   something else must never register process handlers as a side effect of

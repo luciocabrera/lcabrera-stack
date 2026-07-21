@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import type { TableColumnDataType } from '@repo/ui/components/Table/Table.types';
-import type { ColumnFilter } from '@repo/ui/types/filterOperators.types';
+import type { TableColumnDataType } from '@lcabrera/ui/components/Table/Table.types';
+import type { ColumnFilter } from '@lcabrera/ui/types/filterOperators.types';
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -75,7 +75,7 @@ const MockVirtualSelect = vi.hoisted(() => {
   };
 });
 
-vi.mock('@repo/ui/components/VirtualSelect', () => ({
+vi.mock('@lcabrera/ui/components/VirtualSelect', () => ({
   VirtualSelect: MockVirtualSelect,
 }));
 

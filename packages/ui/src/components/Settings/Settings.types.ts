@@ -1,15 +1,15 @@
-import type { useGetGlobalNavigationPreferences } from '@repo/ui/contexts/GlobalSettingsContext/selectors';
+import type { useGetGlobalNavigationPreferences } from '@lcabrera/ui/contexts/GlobalSettingsContext/selectors';
 import type {
   GlobalNavigationCollapsedPreference,
   GlobalNavigationPinnedPreference,
   GlobalNavigationSizePreference,
-} from '@repo/ui/types/globalSettings.types';
+} from '@lcabrera/ui/types/globalSettings.types';
 import type {
   OrderConflictResolutionPreferenceOption,
   PinConflictResolutionPreferenceOption,
   PinSidePreferenceOption,
   UnpinConflictResolutionPreferenceOption,
-} from '@repo/ui/types/pinningPreferences.types';
+} from '@lcabrera/ui/types/pinningPreferences.types';
 
 export type BuildNavigationUpdateArgs = {
   readonly draft: SettingsDraft;

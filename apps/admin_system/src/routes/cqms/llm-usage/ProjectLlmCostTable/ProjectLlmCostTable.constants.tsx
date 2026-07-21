@@ -1,7 +1,7 @@
+import type { TableColumn } from '@lcabrera/ui/components/Table';
 import type { ProjectLlmCostRow } from '@repo/scan-ingestion/queries/getProjectLlmCost.util';
-import type { TableColumn } from '@repo/ui/components/Table';
 
-import { formatCurrency } from '@repo/utils/formatters/format-currency.util';
+import { formatCurrency } from '@lcabrera/utils/formatters/format-currency.util';
 
 export const PROJECT_LLM_COST_COLUMNS: readonly TableColumn<ProjectLlmCostRow>[] =
   [

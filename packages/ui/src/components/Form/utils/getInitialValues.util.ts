@@ -1,4 +1,4 @@
-import type { LeafFieldDef } from '@repo/ui/components/Form/Form.types';
+import type { LeafFieldDef } from '@lcabrera/ui/components/Form/Form.types';
 
 const getDefaultValueForField = <TValues extends Record<string, unknown>>(
   field: LeafFieldDef<TValues>,

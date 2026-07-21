@@ -13,7 +13,7 @@ const {
 }));
 
 vi.mock(
-  '@repo/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils',
+  '@lcabrera/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils',
   () => ({
     resolvePinOrderConflict: mockResolvePinOrderConflict,
     restoreStaticColumnOrder: mockRestoreStaticColumnOrder,

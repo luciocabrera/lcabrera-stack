@@ -1,7 +1,7 @@
 import type { ScanFindingsResult } from '@repo/scan-ingestion/queries/getScanFindings.util';
 
-import { JsonExplorer, StatusBadge, TableLayout, Tabs } from '@repo/ui';
-import { createEmptyColumnsState } from '@repo/ui/components/Table/utils/createEmptyColumnsState.util';
+import { JsonExplorer, StatusBadge, TableLayout, Tabs } from '@lcabrera/ui';
+import { createEmptyColumnsState } from '@lcabrera/ui/components/Table/utils/createEmptyColumnsState.util';
 import { Suspense } from 'react';
 import { useLoaderData } from 'react-router';
 

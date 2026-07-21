@@ -1,7 +1,7 @@
-import type { TableColumnsState } from '@repo/ui/components/Table/Table.types';
-import type { TStore } from '@repo/ui/hooks/useStore.hook';
+import type { TableColumnsState } from '@lcabrera/ui/components/Table/Table.types';
+import type { TStore } from '@lcabrera/ui/hooks/useStore.hook';
 
-import { createTableConfigColumnsActionMocks } from '@repo/ui/utils/tests/createTableConfigColumnsActionMocks.util';
+import { createTableConfigColumnsActionMocks } from '@lcabrera/ui/utils/tests/createTableConfigColumnsActionMocks.util';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { writeColumnSizing } from './writeColumnSizing.util';

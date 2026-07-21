@@ -1,9 +1,9 @@
 import {
   useGetColumnWidth,
   useGetNormalizedColumn,
-} from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors';
-import { useColumnResize } from '@repo/ui/components/Table/hooks';
-import { DEFAULT_MIN_COLUMN_WIDTH } from '@repo/ui/components/Table/Table.constants';
+} from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors';
+import { useColumnResize } from '@lcabrera/ui/components/Table/hooks';
+import { DEFAULT_MIN_COLUMN_WIDTH } from '@lcabrera/ui/components/Table/Table.constants';
 import * as stylex from '@stylexjs/stylex';
 
 import type { ResizeHandleProps } from './ResizeHandle.types';

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
-import type { GlobalSettingsState } from '@repo/ui/types/globalSettings.types';
-import type { ThemeMode } from '@repo/ui/types/theme.types';
+import type { GlobalSettingsState } from '@lcabrera/ui/types/globalSettings.types';
+import type { ThemeMode } from '@lcabrera/ui/types/theme.types';
 import type { ReactNode } from 'react';
 
 import { cleanup, render, screen } from '@testing-library/react';
@@ -22,7 +22,7 @@ type MockThemeProviderProps = {
   readonly initialTheme?: ThemeMode;
 };
 
-vi.mock('@repo/ui/contexts/ThemeContext', () => ({
+vi.mock('@lcabrera/ui/contexts/ThemeContext', () => ({
   ThemeProvider: ({
     children,
     defaultTheme,
@@ -38,7 +38,7 @@ vi.mock('@repo/ui/contexts/ThemeContext', () => ({
   ),
 }));
 
-vi.mock('@repo/ui/contexts/GlobalSettingsContext', () => ({
+vi.mock('@lcabrera/ui/contexts/GlobalSettingsContext', () => ({
   GlobalSettingsProvider: ({
     children,
     initialSettings,
@@ -52,7 +52,7 @@ vi.mock('@repo/ui/contexts/GlobalSettingsContext', () => ({
   ),
 }));
 
-vi.mock('@repo/ui/contexts/NotificationContext', () => ({
+vi.mock('@lcabrera/ui/contexts/NotificationContext', () => ({
   NotificationProvider: ({ children }: MockNotificationProviderProps) => (
     <div data-testid='notification-provider'>{children}</div>
   ),

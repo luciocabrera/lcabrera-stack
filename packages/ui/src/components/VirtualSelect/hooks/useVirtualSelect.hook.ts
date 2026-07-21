@@ -1,6 +1,6 @@
-import type { SelectFilter } from '@repo/ui/types/filterOperators.types';
+import type { SelectFilter } from '@lcabrera/ui/types/filterOperators.types';
 
-import { useClickOutside } from '@repo/ui/hooks';
+import { useClickOutside } from '@lcabrera/ui/hooks';
 import { useId, useRef } from 'react';
 
 import type { VirtualSelectProps } from '../VirtualSelect.types';

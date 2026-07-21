@@ -1,6 +1,6 @@
-import { darkTheme } from '@repo/ui/design-system/themes/dark.stylex';
-import { lightTheme } from '@repo/ui/design-system/themes/light.stylex';
-import { useTheme } from '@repo/ui/hooks/useTheme.hook';
+import { darkTheme } from '@lcabrera/ui/design-system/themes/dark.stylex';
+import { lightTheme } from '@lcabrera/ui/design-system/themes/light.stylex';
+import { useTheme } from '@lcabrera/ui/hooks/useTheme.hook';
 import * as stylex from '@stylexjs/stylex';
 
 import type { AppBackgroundProps } from './AppBackground.types';

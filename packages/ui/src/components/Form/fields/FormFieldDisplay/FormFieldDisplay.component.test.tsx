@@ -3,9 +3,9 @@
 import type {
   FieldNode,
   LeafFieldDef,
-} from '@repo/ui/components/Form/Form.types';
+} from '@lcabrera/ui/components/Form/Form.types';
 
-import { FormProvider } from '@repo/ui/components/Form/contexts';
+import { FormProvider } from '@lcabrera/ui/components/Form/contexts';
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 

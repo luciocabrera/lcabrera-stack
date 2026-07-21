@@ -2,7 +2,7 @@ import {
   EraserIcon,
   ListOrderedIcon,
   RefreshIcon,
-} from '@repo/ui/components/Icons';
+} from '@lcabrera/ui/components/Icons';
 
 import type { SectionToolbarButton } from '../../SectionToolbar';
 import type { SortingSectionToolbarProps } from './SortingSectionToolbar.types';

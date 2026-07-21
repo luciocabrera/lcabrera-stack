@@ -1,7 +1,7 @@
 import type {
   DataKey,
   NormalizedColumnsState,
-} from '@repo/ui/components/Table/Table.types';
+} from '@lcabrera/ui/components/Table/Table.types';
 
 import { useColumnsStore } from '../useColumnsStore.hook';
 

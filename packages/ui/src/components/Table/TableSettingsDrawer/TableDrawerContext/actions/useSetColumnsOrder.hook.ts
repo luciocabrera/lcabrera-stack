@@ -1,4 +1,4 @@
-import type { ColumnOrderState } from '@repo/ui/components/Table/Table.types';
+import type { ColumnOrderState } from '@lcabrera/ui/components/Table/Table.types';
 
 import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook';
 

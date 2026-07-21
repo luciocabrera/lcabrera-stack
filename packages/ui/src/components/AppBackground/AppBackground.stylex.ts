@@ -1,6 +1,6 @@
-import { typography } from '@repo/ui/design-system/tokens/base.stylex';
-import { colors } from '@repo/ui/design-system/tokens/colors.stylex';
-import { overlayStyles } from '@repo/ui/design-system/tokens/commons.stylex';
+import { typography } from '@lcabrera/ui/design-system/tokens/base.stylex';
+import { colors } from '@lcabrera/ui/design-system/tokens/colors.stylex';
+import { overlayStyles } from '@lcabrera/ui/design-system/tokens/commons.stylex';
 import * as stylex from '@stylexjs/stylex';
 
 const specific = stylex.create({

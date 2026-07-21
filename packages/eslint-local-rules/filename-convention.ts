@@ -31,7 +31,7 @@ const createRule = ESLintUtils.RuleCreator(
 type MessageIds = 'deprecatedSuffix' | 'hookPrefix' | 'wrongCase';
 
 // A single optional options object. `suffixCase` overrides the expected case
-// for a given suffix (e.g. `{ util: 'kebab-case' }` in `@repo/utils`), so the
+// for a given suffix (e.g. `{ util: 'kebab-case' }` in `@lcabrera/utils`), so the
 // rule stays live there instead of being turned off.
 type Options = readonly [
   { readonly suffixCase?: Readonly<Record<string, SuffixCase>> }?,
@@ -52,7 +52,7 @@ const isKebabCase = (value: string) =>
 // The casing model (see .claude/rules/typescript.md): a filename's case follows
 // what it names — a React component (PascalCase), the route/resource it belongs
 // to (kebab-case), or the function/value module it exports (camelCase).
-// `@repo/utils` keeps kebab-case for its `.util` files; rather than turning this
+// `@lcabrera/utils` keeps kebab-case for its `.util` files; rather than turning this
 // rule off there, its eslint config passes `{ suffixCase: { util: 'kebab-case' } }`
 // so a camelCase `.util` file in that package still fails the gate.
 const KEBAB_SUFFIXES = new Set(['action', 'clientAction', 'loader', 'meta']);

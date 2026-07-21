@@ -1,4 +1,4 @@
-import { createHandleRequest } from '@repo/ui/server';
+import { createHandleRequest } from '@lcabrera/ui/server';
 
 import stylexCssHref from './stylex.css?url';
 

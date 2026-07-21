@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 
-vi.mock('@repo/ui/components/DevStyleXInject', () => ({
+vi.mock('@lcabrera/ui/components/DevStyleXInject', () => ({
   DevStyleXInject: ({ cssHref }: { readonly cssHref: string }) => (
     <link data-testid='stylex-css' href={cssHref} rel='stylesheet' />
   ),

@@ -1,7 +1,7 @@
 import {
   DEFAULT_MAX_COLUMN_WIDTH,
   DEFAULT_MIN_COLUMN_WIDTH,
-} from '@repo/ui/components/Table/Table.constants';
+} from '@lcabrera/ui/components/Table/Table.constants';
 
 type ResolveColumnWidthBoundsArgs = {
   readonly maxWidth?: number;

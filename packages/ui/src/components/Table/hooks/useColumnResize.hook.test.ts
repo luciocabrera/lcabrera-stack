@@ -13,7 +13,7 @@ const { mockOnMouseDown, mockSetColumnSizing, mockUseColumnDragSession } =
   }));
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/columns/actions',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/actions',
   () => ({
     useSetColumnSizing: () => mockSetColumnSizing,
   }),

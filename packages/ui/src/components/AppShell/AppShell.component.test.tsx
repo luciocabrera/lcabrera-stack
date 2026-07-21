@@ -21,7 +21,7 @@ vi.mock('react-router', async () => {
   };
 });
 
-vi.mock('@repo/ui/components/AppNavigation', () => ({
+vi.mock('@lcabrera/ui/components/AppNavigation', () => ({
   AppNavigation: ({
     getNavigationItems,
     sessionActions,
@@ -38,7 +38,7 @@ vi.mock('@repo/ui/components/AppNavigation', () => ({
   ),
 }));
 
-vi.mock('@repo/ui/components/NotificationCenter', () => ({
+vi.mock('@lcabrera/ui/components/NotificationCenter', () => ({
   NotificationCenter: () => (
     <div data-testid='notification-center'>Notifications</div>
   ),

@@ -1,4 +1,4 @@
-import { isObject } from '@repo/utils/guards/is-object.util';
+import { isObject } from '@lcabrera/utils/guards/is-object.util';
 
 import { isOrderConflictResolution } from './isOrderConflictResolution.util';
 import { isPinConflictResolution } from './isPinConflictResolution.util';

@@ -21,14 +21,14 @@ scan-ingestion/
 ├── src/
 │   ├── auth/
 │   │   └── apiToken.constants.ts     → API_TOKEN_PREFIX ('cqms_'), the CQMS tag on token plaintexts (ADR-029)
-│   │       (hashing lives in @repo/server/crypto — hashSecret/isSecretHashValid, shared by
+│   │       (hashing lives in @lcabrera/server/crypto — hashSecret/isSecretHashValid, shared by
 │   │        passwords and token secrets alike; hashes still never leave this package)
 │   │
 │   ├── db/
 │   │   ├── migrations/          → 0001_init_cqms.sql .. 0009_audit_and_functions.sql (ADR-006/017/018)
 │   │   ├── env.schema.ts         → Zod-validated DB_HOST/PORT/USER/PASSWORD/NAME
 │   │   └── runMigrations.ts      → Minimal runner (ADR-006) — plain node script, relative imports
-│   │       (get-pool.util.ts moved to @repo/server — ADR-008)
+│   │       (get-pool.util.ts moved to @lcabrera/server — ADR-008)
 │   │
 │   ├── fs/
 │   │   ├── canonicalRealPath.util.ts     → realpath canonicalization of operator-supplied paths
@@ -198,10 +198,10 @@ monorepo, goes through this directory — no other package or app touches
 `getDailyLlmCost`, `getProjectLlmCost`, and `getScannerLlmCost` differ only in
 view, columns, and sort — so everything else lives in one place:
 
-| File                        | Role                                                                                                |
-| --------------------------- | --------------------------------------------------------------------------------------------------- |
-| `llmUsage.constants.ts`     | `LLM_USAGE_SCHEMA` — shared so the readers cannot drift onto different schemas                      |
-| `selectLlmCostRows.util.ts` | Runs a cost view via `@repo/server/db/select-rows.util` and coerces `total_cost_usd` to a JS number |
+| File                        | Role                                                                                                    |
+| --------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `llmUsage.constants.ts`     | `LLM_USAGE_SCHEMA` — shared so the readers cannot drift onto different schemas                          |
+| `selectLlmCostRows.util.ts` | Runs a cost view via `@lcabrera/server/db/select-rows.util` and coerces `total_cost_usd` to a JS number |
 
 Postgres `numeric` arrives from pg as a **string**, so each reader types its DB
 row's `total_cost_usd` as `string` and `selectLlmCostRows` returns it as a

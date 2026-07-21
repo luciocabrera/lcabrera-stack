@@ -9,7 +9,7 @@ import {
   useGetTablePersistenceKey,
   useGetTableRowHeight,
   useGetTableThreshold,
-} from '@repo/ui/components/Table/contexts/TableConfig/meta/selectors';
+} from '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors';
 
 /**
  * Read the technical configuration meta values for the details panel.

@@ -3,11 +3,11 @@
  * discriminated by `type`; the `to*QueryFilters` mappers in this folder
  * translate one into the flat `QueryFilter[]` the query builders consume.
  *
- * `@repo/ui` declares a structurally identical set for its Table filter UI.
- * That is duplication on purpose. `@repo/ui` used to import these, resolving
+ * `@lcabrera/ui` declares a structurally identical set for its Table filter UI.
+ * That is duplication on purpose. `@lcabrera/ui` used to import these, resolving
  * only through a tsconfig `paths` alias, which made a client-safe package
  * depend on a Node-only one whose graph includes the Postgres driver — fine
- * while both are private, unresolvable the moment `@repo/ui` is published.
+ * while both are private, unresolvable the moment `@lcabrera/ui` is published.
  * Neither package now knows the other exists; TypeScript's structural typing
  * means a filter built in the UI is assignable here with no adapter, and a
  * conformance test in the app that consumes both fails if they drift.

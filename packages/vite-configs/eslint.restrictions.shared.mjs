@@ -15,33 +15,33 @@
 
 export const UI_PUBLIC_IMPORT_BOUNDARY_PATTERNS = [
   {
-    group: ['@repo/ui/src/**'],
+    group: ['@lcabrera/ui/src/**'],
     message:
-      'Do not import from @repo/ui source internals. Use @repo/ui public exports or supported subpaths.',
+      'Do not import from @lcabrera/ui source internals. Use @lcabrera/ui public exports or supported subpaths.',
   },
   {
-    group: ['@repo/ui/**/index', '@repo/ui/**/index.*'],
+    group: ['@lcabrera/ui/**/index', '@lcabrera/ui/**/index.*'],
     message:
-      'Do not import @repo/ui index files directly. Use the folder path or @repo/ui root exports.',
+      'Do not import @lcabrera/ui index files directly. Use the folder path or @lcabrera/ui root exports.',
   },
   {
     group: [
-      '@repo/ui/**/*.component',
-      '!@repo/ui/components/Settings/Settings.component',
+      '@lcabrera/ui/**/*.component',
+      '!@lcabrera/ui/components/Settings/Settings.component',
     ],
     message:
-      'Do not import component implementation files directly from @repo/ui. Import from @repo/ui root exports or component barrels.',
+      'Do not import component implementation files directly from @lcabrera/ui. Import from @lcabrera/ui root exports or component barrels.',
   },
 ];
 
-// Runtime database access is server-only. Match the whole `@repo/server/db`
+// Runtime database access is server-only. Match the whole `@lcabrera/server/db`
 // import path — not individual utils, which drift as they are added and removed —
 // plus the raw `pg` driver, and cover both direct imports and barrel re-exports.
 // Type-only imports are erased at compile time, so they stay allowed (e.g. the
 // `query-builder.types` the pure `db/query-builder/*` builders share); the guard is
 // on runtime access, which is what pulls the DB connection into the bundle.
 const SERVER_ONLY_DB_MESSAGE =
-  'Direct database access is server-only (the pg driver and @repo/server/db runtime helpers). Move this import to a `.server.ts` file or a `.server/` directory — or reach it through a server-only module.';
+  'Direct database access is server-only (the pg driver and @lcabrera/server/db runtime helpers). Move this import to a `.server.ts` file or a `.server/` directory — or reach it through a server-only module.';
 
 const DB_IMPORT_BOUNDARY_RESTRICTIONS = [
   'ImportDeclaration',
@@ -52,7 +52,7 @@ const DB_IMPORT_BOUNDARY_RESTRICTIONS = [
     declaration === 'ImportDeclaration' ? 'importKind' : 'exportKind';
 
   return [
-    String.raw`${declaration}[${kind}!='type'][source.value=/^@repo\/server\/db\//]`,
+    String.raw`${declaration}[${kind}!='type'][source.value=/^@lcabrera\/server\/db\//]`,
     `${declaration}[${kind}!='type'][source.value='pg']`,
   ].map((selector) => ({ message: SERVER_ONLY_DB_MESSAGE, selector }));
 });
@@ -125,14 +125,14 @@ export const CLIENT_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS = [
   },
   {
     message:
-      'Server-only UI helpers must be imported via @repo/ui/server from server entry files only.',
+      'Server-only UI helpers must be imported via @lcabrera/ui/server from server entry files only.',
     selector:
-      "ImportDeclaration[source.value='@repo/ui/entry/createHandleRequest.util']",
+      "ImportDeclaration[source.value='@lcabrera/ui/entry/createHandleRequest.util']",
   },
   {
     message:
-      'The @repo/ui/server entrypoint is server-only and must not be imported from client/shared files.',
-    selector: "ImportDeclaration[source.value='@repo/ui/server']",
+      'The @lcabrera/ui/server entrypoint is server-only and must not be imported from client/shared files.',
+    selector: "ImportDeclaration[source.value='@lcabrera/ui/server']",
   },
   ...DB_IMPORT_BOUNDARY_RESTRICTIONS,
 ];

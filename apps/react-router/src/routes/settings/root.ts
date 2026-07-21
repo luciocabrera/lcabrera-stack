@@ -1,2 +1,2 @@
-export { Settings as default } from '@repo/ui/components/Settings/Settings.component';
-export { meta } from '@repo/ui/components/Settings/settings.meta';
+export { Settings as default } from '@lcabrera/ui/components/Settings/Settings.component';
+export { meta } from '@lcabrera/ui/components/Settings/settings.meta';

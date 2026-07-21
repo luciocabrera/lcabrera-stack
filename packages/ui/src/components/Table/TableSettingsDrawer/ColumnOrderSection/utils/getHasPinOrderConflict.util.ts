@@ -1,7 +1,7 @@
 import type {
   ColumnOrderState,
   ColumnPinningState,
-} from '@repo/ui/components/Table/Table.types';
+} from '@lcabrera/ui/components/Table/Table.types';
 
 type GetHasPinOrderConflictArgs<TData> = {
   readonly columnPinning: ColumnPinningState<TData>;

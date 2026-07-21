@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
-import { LOAD_MORE_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
-import { createPaginatedFetchActionMocks } from '@repo/ui/utils/tests/createPaginatedFetchActionMocks.util';
+import { LOAD_MORE_PAGE_SIZE } from '@lcabrera/ui/components/Table/Table.constants';
+import { createPaginatedFetchActionMocks } from '@lcabrera/ui/utils/tests/createPaginatedFetchActionMocks.util';
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -57,7 +57,7 @@ const getHarness = (): Harness => {
 };
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
   () => ({
     useTableConfigContextValue: () => ({ metaStore: getHarness().metaStore }),
   }),
@@ -67,12 +67,12 @@ vi.mock('../useTableDataContextValue.hook', () => ({
   useTableDataContextValue: () => ({ dataStore: getHarness().dataStore }),
 }));
 
-vi.mock('@repo/ui/utils/prefetch/firePrefetch.util', () => ({
+vi.mock('@lcabrera/ui/utils/prefetch/firePrefetch.util', () => ({
   firePrefetch: (...args: Parameters<Harness['firePrefetchMock']>) =>
     getHarness().firePrefetchMock(...args),
 }));
 
-vi.mock('@repo/ui/utils/prefetch/resolveFromCacheOrFetch.util', () => ({
+vi.mock('@lcabrera/ui/utils/prefetch/resolveFromCacheOrFetch.util', () => ({
   resolveFromCacheOrFetch: (
     ...args: Parameters<Harness['resolveFromCacheOrFetchMock']>
   ) => getHarness().resolveFromCacheOrFetchMock(...args),

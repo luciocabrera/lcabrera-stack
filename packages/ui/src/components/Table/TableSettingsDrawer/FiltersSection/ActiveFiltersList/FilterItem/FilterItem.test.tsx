@@ -15,7 +15,7 @@ const {
   mockSetExpandedFilters: vi.fn(),
 }));
 
-vi.mock('@repo/ui/components/Button', () => ({
+vi.mock('@lcabrera/ui/components/Button', () => ({
   Button: ({
     onClick,
     ...props
@@ -27,7 +27,7 @@ vi.mock('@repo/ui/components/Button', () => ({
   ),
 }));
 
-vi.mock('@repo/ui/components/Table/filters/FilterInputs', () => ({
+vi.mock('@lcabrera/ui/components/Table/filters/FilterInputs', () => ({
   FilterInputs: ({
     onChange,
   }: {
@@ -63,7 +63,7 @@ vi.mock('../../../TableDrawerContext/selectors', () => ({
 }));
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/columns/selectors',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors',
   () => ({
     useGetNormalizedColumns: () => ({
       price: { key: 'price', label: 'Price' },
@@ -72,12 +72,15 @@ vi.mock(
   }),
 );
 
-vi.mock('@repo/ui/components/Table/contexts/TableConfig/meta/actions', () => ({
-  useSetTableSettingsExpandedFilters: () => mockSetExpandedFilters,
-}));
+vi.mock(
+  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions',
+  () => ({
+    useSetTableSettingsExpandedFilters: () => mockSetExpandedFilters,
+  }),
+);
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/meta/selectors',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors',
   () => ({
     useGetTableSettingsExpandedFilters: () => expandedFiltersRef.current,
   }),

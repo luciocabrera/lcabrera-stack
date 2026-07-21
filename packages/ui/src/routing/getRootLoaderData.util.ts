@@ -1,7 +1,7 @@
-import { INITIAL_GLOBAL_SETTINGS } from '@repo/ui/contexts/GlobalSettingsContext/GlobalSettingsContext.constants';
-import { getGlobalSettingsFromCookie } from '@repo/ui/utils/globalSettings';
-import { getRequestCspNonce } from '@repo/ui/utils/security';
-import { getThemeFromCookie } from '@repo/ui/utils/theme';
+import { INITIAL_GLOBAL_SETTINGS } from '@lcabrera/ui/contexts/GlobalSettingsContext/GlobalSettingsContext.constants';
+import { getGlobalSettingsFromCookie } from '@lcabrera/ui/utils/globalSettings';
+import { getRequestCspNonce } from '@lcabrera/ui/utils/security';
+import { getThemeFromCookie } from '@lcabrera/ui/utils/theme';
 
 type GetRootLoaderDataArgs = {
   /**

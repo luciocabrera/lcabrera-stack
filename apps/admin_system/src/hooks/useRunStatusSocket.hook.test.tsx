@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
-import { NotificationProvider } from '@repo/ui/contexts/NotificationContext';
-import { useGetNotifications } from '@repo/ui/contexts/NotificationContext/selectors';
+import { NotificationProvider } from '@lcabrera/ui/contexts/NotificationContext';
+import { useGetNotifications } from '@lcabrera/ui/contexts/NotificationContext/selectors';
 import { act, cleanup, render, screen } from '@testing-library/react';
 import { createRoutesStub } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';

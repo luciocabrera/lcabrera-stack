@@ -1,5 +1,5 @@
-import { useGetNormalizedColumns } from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors';
-import { useGetTableSettingsExpandedFilters } from '@repo/ui/components/Table/contexts/TableConfig/meta/selectors';
+import { useGetNormalizedColumns } from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors';
+import { useGetTableSettingsExpandedFilters } from '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors';
 import * as stylex from '@stylexjs/stylex';
 
 import type { FilterItemProps } from './FilterItem.types';

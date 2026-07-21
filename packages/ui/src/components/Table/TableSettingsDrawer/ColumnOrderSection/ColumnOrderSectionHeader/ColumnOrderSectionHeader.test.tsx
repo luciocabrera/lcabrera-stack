@@ -14,7 +14,7 @@ const { mockColumns, mockColumnVisibility } = vi.hoisted(() => ({
   mockColumnVisibility: new Set(['name']),
 }));
 
-vi.mock('@repo/ui/components/SidePanel', () => ({
+vi.mock('@lcabrera/ui/components/SidePanel', () => ({
   SidePanelSectionHeader: ({
     title,
     toolbar,
@@ -30,14 +30,14 @@ vi.mock('@repo/ui/components/SidePanel', () => ({
 }));
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook',
   () => ({
     useGetColumns: () => mockColumns,
   }),
 );
 
 vi.mock(
-  '@repo/ui/components/Table/TableSettingsDrawer/TableDrawerContext/selectors',
+  '@lcabrera/ui/components/Table/TableSettingsDrawer/TableDrawerContext/selectors',
   () => ({
     useGetColumnVisibility: () => mockColumnVisibility,
   }),

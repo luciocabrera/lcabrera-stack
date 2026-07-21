@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import type { SortingState } from '@repo/ui/components/Table/Table.types';
+import type { SortingState } from '@lcabrera/ui/components/Table/Table.types';
 
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';

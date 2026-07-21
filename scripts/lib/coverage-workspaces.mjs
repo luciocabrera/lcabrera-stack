@@ -4,7 +4,7 @@
  *
  * These lists used to live as module-scope consts inside `coverage-report.mjs`
  * and `merge-coverage.mjs`, which both run `main()` on import — so no test could
- * reach them. That is how `@repo/api` went missing from the PR comment for the
+ * reach them. That is how `@lcabrera/api` went missing from the PR comment for the
  * whole life of the runtime split (ADR-038): #158 rewrote the single
  * `data-access` row into `server`, correct for the Node half, while the browser
  * half became its own package and never got a row. Nothing failed, because a
@@ -42,17 +42,17 @@ const SUPPRESSIONS_MARKER = 'eslint-suppressions';
  *                not run first.
  */
 export const COVERAGE_REPORT_WORKSPACES = [
-  { dir: 'packages/ui', name: '@repo/ui', run: true },
+  { dir: 'packages/ui', name: '@lcabrera/ui', run: true },
   // The two halves of the former `data-access`, split by runtime (ADR-038).
-  { dir: 'packages/server', name: '@repo/server', run: true },
-  { dir: 'packages/api', name: '@repo/api', run: true },
+  { dir: 'packages/server', name: '@lcabrera/server', run: true },
+  { dir: 'packages/api', name: '@lcabrera/api', run: true },
   { dir: 'apps/react-router', name: 'vite-react-compiler', run: false },
   // Phase 2 — remaining library packages with a DB-free test:coverage.
   // scan-ingestion's task measures its DB-free subset only (its real-Postgres
   // queries/* stay out), same as the fallow coverage merge.
   { dir: 'packages/node-runtime', name: '@repo/node-runtime', run: true },
   { dir: 'packages/scan-ingestion', name: '@repo/scan-ingestion', run: true },
-  { dir: 'packages/utils', name: '@repo/utils', run: true },
+  { dir: 'packages/utils', name: '@lcabrera/utils', run: true },
   // Phase 3 — apps and servers. Only scan-orchestrator needs a DB-free subset
   // (one suite drives the real scan queue); the rest inject their dependencies
   // throughout, so their whole suite runs with no database.
@@ -75,12 +75,12 @@ export const COVERAGE_REPORT_WORKSPACES = [
  * not derived from one another.
  */
 export const COVERAGE_MERGE_WORKSPACES = [
-  { dir: 'packages/api', name: '@repo/api' },
+  { dir: 'packages/api', name: '@lcabrera/api' },
   { dir: 'packages/node-runtime', name: '@repo/node-runtime' },
   { dir: 'packages/scan-ingestion', name: '@repo/scan-ingestion' },
-  { dir: 'packages/server', name: '@repo/server' },
-  { dir: 'packages/ui', name: '@repo/ui' },
-  { dir: 'packages/utils', name: '@repo/utils' },
+  { dir: 'packages/server', name: '@lcabrera/server' },
+  { dir: 'packages/ui', name: '@lcabrera/ui' },
+  { dir: 'packages/utils', name: '@lcabrera/utils' },
   { dir: 'apps/admin_system', name: 'admin-system' },
   { dir: 'apps/scan-orchestrator', name: '@repo/scan-orchestrator' },
 ];

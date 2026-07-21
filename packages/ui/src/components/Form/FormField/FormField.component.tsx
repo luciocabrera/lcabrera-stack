@@ -1,7 +1,7 @@
-import type { LeafFieldDef } from '@repo/ui/components/Form/Form.types';
+import type { LeafFieldDef } from '@lcabrera/ui/components/Form/Form.types';
 
-import { useGetFormMode } from '@repo/ui/components/Form/contexts/FormContext/selectors';
-import { FormFieldDisplay } from '@repo/ui/components/Form/fields/FormFieldDisplay/FormFieldDisplay.component';
+import { useGetFormMode } from '@lcabrera/ui/components/Form/contexts/FormContext/selectors';
+import { FormFieldDisplay } from '@lcabrera/ui/components/Form/fields/FormFieldDisplay/FormFieldDisplay.component';
 
 import type { FormFieldProps } from './FormField.types';
 

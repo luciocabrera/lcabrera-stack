@@ -1,4 +1,4 @@
-import { useInfiniteScrollObserver } from '@repo/ui/hooks';
+import { useInfiniteScrollObserver } from '@lcabrera/ui/hooks';
 import * as stylex from '@stylexjs/stylex';
 import { useRef } from 'react';
 

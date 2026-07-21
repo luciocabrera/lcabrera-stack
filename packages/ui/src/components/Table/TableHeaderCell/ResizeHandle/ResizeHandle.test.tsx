@@ -19,12 +19,12 @@ const {
   mockUseGetNormalizedColumn: vi.fn(),
 }));
 
-vi.mock('@repo/ui/components/Table/hooks', () => ({
+vi.mock('@lcabrera/ui/components/Table/hooks', () => ({
   useColumnResize: mockUseColumnResize,
 }));
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/columns/selectors',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors',
   () => ({
     useGetColumnWidth: mockUseGetColumnWidth,
     useGetNormalizedColumn: mockUseGetNormalizedColumn,

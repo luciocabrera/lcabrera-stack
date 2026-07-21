@@ -7,7 +7,7 @@ import {
   INITIAL_PAGE_SIZE,
   IS_PREFETCH_ENABLED,
   LOAD_MORE_PAGE_SIZE,
-} from '@repo/ui/components/Table/Table.constants';
+} from '@lcabrera/ui/components/Table/Table.constants';
 import { describe, expect, it } from 'vitest';
 
 import { getInitialMetaState } from './getInitialMetaState.util';

@@ -1,4 +1,4 @@
-import type { ColumnFilter } from '@repo/ui/types/filterOperators.types';
+import type { ColumnFilter } from '@lcabrera/ui/types/filterOperators.types';
 
 import { isDateFilterValid } from './isDateFilterValid.util';
 import { isNumberFilterValid } from './isNumberFilterValid.util';

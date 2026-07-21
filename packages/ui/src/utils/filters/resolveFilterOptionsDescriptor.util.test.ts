@@ -2,10 +2,10 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { resolveFilterOptionsDescriptor } from './resolveFilterOptionsDescriptor.util';
 
-vi.mock('@repo/api/distinct/fetch-distinct-values.util', () => ({
+vi.mock('@lcabrera/api/distinct/fetch-distinct-values.util', () => ({
   fetchDistinctValues: vi.fn(),
 }));
-vi.mock('@repo/api/config/get-api-base-url.util', () => ({
+vi.mock('@lcabrera/api/config/get-api-base-url.util', () => ({
   getApiBaseUrl: vi.fn(() => '/api'),
 }));
 

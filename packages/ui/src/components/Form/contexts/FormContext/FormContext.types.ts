@@ -5,8 +5,8 @@ import type {
   FormProps,
   FormSubmission,
   LeafFieldDef,
-} from '@repo/ui/components/Form/Form.types';
-import type { TStore } from '@repo/ui/hooks/useStore.hook';
+} from '@lcabrera/ui/components/Form/Form.types';
+import type { TStore } from '@lcabrera/ui/hooks/useStore.hook';
 import type { ReactNode } from 'react';
 
 export type FormContextValue<

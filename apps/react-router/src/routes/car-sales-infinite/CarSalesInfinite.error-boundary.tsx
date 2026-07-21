@@ -1,5 +1,5 @@
-import { RouteErrorBoundary } from '@repo/ui/components/RouteErrorBoundary';
-import { useNotifyOnError } from '@repo/ui/hooks';
+import { RouteErrorBoundary } from '@lcabrera/ui/components/RouteErrorBoundary';
+import { useNotifyOnError } from '@lcabrera/ui/hooks';
 
 import type { Route } from './+types/root';
 

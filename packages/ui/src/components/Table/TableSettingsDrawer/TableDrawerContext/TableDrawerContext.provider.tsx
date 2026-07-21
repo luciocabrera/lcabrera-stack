@@ -1,5 +1,5 @@
-import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import { useStore } from '@repo/ui/hooks';
+import { useTableConfigContextValue } from '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { useStore } from '@lcabrera/ui/hooks';
 
 import type {
   TableDrawerColumnsState,

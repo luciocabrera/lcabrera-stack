@@ -1,4 +1,4 @@
-import type { GlobalNavigationPreferences } from '@repo/ui/types/globalSettings.types';
+import type { GlobalNavigationPreferences } from '@lcabrera/ui/types/globalSettings.types';
 
 import { INITIAL_GLOBAL_SETTINGS } from '../GlobalSettingsContext.constants';
 import { useGlobalSettingsContextValue } from '../useGlobalSettingsContextValue.hook';

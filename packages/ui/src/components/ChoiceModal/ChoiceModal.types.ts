@@ -1,4 +1,4 @@
-import type { RadioOption } from '@repo/ui/components/RadioOptionGroup';
+import type { RadioOption } from '@lcabrera/ui/components/RadioOptionGroup';
 import type { ReactNode } from 'react';
 
 /**

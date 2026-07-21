@@ -16,10 +16,10 @@
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
   "dependencies": {
+    "@lcabrera/server": "workspace:*",
     "@repo/agent-runner": "workspace:*",
     "@repo/node-runtime": "workspace:*",
     "@repo/scan-ingestion": "workspace:*",
-    "@repo/server": "workspace:*",
     "pg": "catalog:",
     "ws": "catalog:",
     "zod": "catalog:"

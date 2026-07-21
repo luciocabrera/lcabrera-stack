@@ -1,5 +1,5 @@
-import { AppNavigation } from '@repo/ui/components/AppNavigation';
-import { NotificationCenter } from '@repo/ui/components/NotificationCenter';
+import { AppNavigation } from '@lcabrera/ui/components/AppNavigation';
+import { NotificationCenter } from '@lcabrera/ui/components/NotificationCenter';
 import * as stylex from '@stylexjs/stylex';
 import { Outlet } from 'react-router';
 

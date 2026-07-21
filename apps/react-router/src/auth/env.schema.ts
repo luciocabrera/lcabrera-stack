@@ -14,7 +14,7 @@ import { z } from 'zod';
  *   for the demo password. **No real secret is committed** — the default is a
  *   scrypt hash of the deliberately public demo password `demo-password-123`
  *   (documented in `src/auth/ARCHITECTURE.md`). Generate a replacement with
- *   `hashSecret({ secret })` from `@repo/server/crypto/hash-secret.util`.
+ *   `hashSecret({ secret })` from `@lcabrera/server/crypto/hash-secret.util`.
  */
 const authEnvSchema = z.object({
   AUTH_DEMO_EMAIL: z.string().min(1).default('demo@example.com'),

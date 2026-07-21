@@ -1,4 +1,4 @@
-# Artifact Inventory (`@repo/server`)
+# Artifact Inventory (`@lcabrera/server`)
 
 Before creating anything new, check this inventory. If something here does
 the job — or could do it with a small enhancement to make it more generic —
@@ -75,7 +75,7 @@ replaced were themselves a duplication finding.
 
 ## `src/filters/`
 
-The column-filter contract shared by the Table filter UI (`@repo/ui`, which
+The column-filter contract shared by the Table filter UI (`@lcabrera/ui`, which
 re-exports the types from `filters/filters.types`) and the generic query
 layer, plus the mappers that translate it to `QueryFilter[]` for the builders.
 Table-agnostic — any table's filter state maps through `toQueryFilters`.

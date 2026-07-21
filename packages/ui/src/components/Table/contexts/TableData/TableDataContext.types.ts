@@ -1,5 +1,5 @@
-import type { TableDataState } from '@repo/ui/components/Table/Table.types';
-import type { TStore } from '@repo/ui/hooks/useStore.hook';
+import type { TableDataState } from '@lcabrera/ui/components/Table/Table.types';
+import type { TStore } from '@lcabrera/ui/hooks/useStore.hook';
 
 export type TableDataContextValue<TData = Record<string, unknown>> = {
   /** Store managing data-related state */

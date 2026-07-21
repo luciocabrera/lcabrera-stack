@@ -8,13 +8,13 @@ const { mockSetSorting } = vi.hoisted(() => ({
 }));
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/columns/actions',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/actions',
   () => ({
     useSetColumnSorting: () => mockSetSorting,
   }),
 );
 
-vi.mock('@repo/ui/components/Table/TableActionsPopover', () => ({
+vi.mock('@lcabrera/ui/components/Table/TableActionsPopover', () => ({
   tableActionsPopoverStyles: {
     menuIcon: {},
     menuItem: {},

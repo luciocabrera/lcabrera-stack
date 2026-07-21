@@ -1,6 +1,6 @@
-import { GlobalSettingsProvider } from '@repo/ui/contexts/GlobalSettingsContext';
-import { NotificationProvider } from '@repo/ui/contexts/NotificationContext';
-import { ThemeProvider } from '@repo/ui/contexts/ThemeContext';
+import { GlobalSettingsProvider } from '@lcabrera/ui/contexts/GlobalSettingsContext';
+import { NotificationProvider } from '@lcabrera/ui/contexts/NotificationContext';
+import { ThemeProvider } from '@lcabrera/ui/contexts/ThemeContext';
 
 import type { AppProvidersProps } from './AppProviders.types';
 

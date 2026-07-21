@@ -1,4 +1,4 @@
-import type { SortingState, TableColumn } from '@repo/ui/components/Table';
+import type { SortingState, TableColumn } from '@lcabrera/ui/components/Table';
 
 import { describe, expect, it } from 'vitest';
 

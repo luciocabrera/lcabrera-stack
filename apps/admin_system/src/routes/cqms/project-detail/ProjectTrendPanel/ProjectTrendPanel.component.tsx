@@ -1,4 +1,4 @@
-import { TrendSparkline } from '@repo/ui/components/TrendSparkline';
+import { TrendSparkline } from '@lcabrera/ui/components/TrendSparkline';
 import { use } from 'react';
 
 import type { ProjectTrendPanelProps } from './ProjectTrendPanel.types';

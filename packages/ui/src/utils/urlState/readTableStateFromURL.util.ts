@@ -3,7 +3,7 @@ import type {
   ColumnOrderState,
   ColumnVisibilityState,
   SortingState,
-} from '@repo/ui/components/Table';
+} from '@lcabrera/ui/components/Table';
 
 import { readStateFromURL } from './readStateFromURL.util';
 

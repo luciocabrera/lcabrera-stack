@@ -1,4 +1,4 @@
-import { Checkbox } from '@repo/ui/components/Checkbox';
+import { Checkbox } from '@lcabrera/ui/components/Checkbox';
 
 import type { TableCheckDisplayProps } from './TableCheckDisplay.types';
 

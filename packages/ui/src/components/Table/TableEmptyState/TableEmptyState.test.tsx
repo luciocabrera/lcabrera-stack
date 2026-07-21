@@ -25,7 +25,7 @@ vi.mock('react-router', () => ({
   useRevalidator: () => ({ revalidate: revalidateMock }),
 }));
 
-vi.mock('@repo/ui/components/Button', () => ({
+vi.mock('@lcabrera/ui/components/Button', () => ({
   Button: ({
     children,
     onClick,
@@ -39,22 +39,22 @@ vi.mock('@repo/ui/components/Button', () => ({
   ),
 }));
 
-vi.mock('@repo/ui/components/Icons', () => ({
+vi.mock('@lcabrera/ui/components/Icons', () => ({
   NoDataDescriptive: () => <svg data-testid='no-data-icon' />,
 }));
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/columns/selectors',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors',
   () => ({
     useGetPinnedColumnPartition: useGetPinnedColumnPartitionMock,
   }),
 );
 
-vi.mock('@repo/ui/components/Table/contexts/TableWrapper', () => ({
+vi.mock('@lcabrera/ui/components/Table/contexts/TableWrapper', () => ({
   useTableContainerRef: useTableContainerRefMock,
 }));
 
-vi.mock('@repo/ui/hooks', () => ({
+vi.mock('@lcabrera/ui/hooks', () => ({
   useElementSize: useElementSizeMock,
   useResizeObserver: useResizeObserverMock,
 }));

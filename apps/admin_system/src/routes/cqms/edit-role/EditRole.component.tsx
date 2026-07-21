@@ -1,4 +1,4 @@
-import { SectionCard } from '@repo/ui/components/SectionCard';
+import { SectionCard } from '@lcabrera/ui/components/SectionCard';
 import { Suspense } from 'react';
 import { useActionData, useLoaderData } from 'react-router';
 

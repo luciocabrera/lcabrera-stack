@@ -17,7 +17,7 @@ const { mockAcceptPinSide, mockCancelPinSide, pinSideModalRef } = vi.hoisted(
   }),
 );
 
-vi.mock('@repo/ui/components/PinSideModal', () => ({
+vi.mock('@lcabrera/ui/components/PinSideModal', () => ({
   PinSideModal: ({
     columnLabel,
     isOpen,

@@ -1,7 +1,7 @@
 import type {
   ColumnOrderState,
   ColumnPinningState,
-} from '@repo/ui/components/Table/Table.types';
+} from '@lcabrera/ui/components/Table/Table.types';
 
 import type { OrderConflictResolution } from '../ColumnOrderSection.types';
 

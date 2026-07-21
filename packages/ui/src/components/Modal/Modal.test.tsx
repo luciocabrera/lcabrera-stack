@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
-import { surfaceStyles } from '@repo/ui/design-system/tokens/surfaces.stylex';
-import { mockDialogElement } from '@repo/ui/utils/tests/mockDialogElement.util';
+import { surfaceStyles } from '@lcabrera/ui/design-system/tokens/surfaces.stylex';
+import { mockDialogElement } from '@lcabrera/ui/utils/tests/mockDialogElement.util';
 import * as stylex from '@stylexjs/stylex';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';

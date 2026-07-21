@@ -92,7 +92,7 @@ build, so this is no longer prose-only. Enforced today:
 
 Deliberately not yet enforced (each needs a convention decision, not a guess):
 `*.service` / `*.api` / `*.schema` case. `*.util` **is** enforced — camelCase
-everywhere, except `@repo/utils`, whose eslint config passes the
+everywhere, except `@lcabrera/utils`, whose eslint config passes the
 `filename-convention` rule's `suffixCase: { util: 'kebab-case' }` option so its
 kebab-case `.util` files are asserted (a camelCase one there fails the gate),
 rather than turning the rule off.
@@ -134,7 +134,7 @@ import { Button } from '../../../../components/Button';
 ```
 
 **In a publishable package** (`packages/ui`, `api`, `server`, `utils`) use the
-package's **own name** instead — `@repo/ui/components/Button`. `@/` resolves only
+package's **own name** instead — `@lcabrera/ui/components/Button`. `@/` resolves only
 through a tsconfig `paths` entry, so it cannot survive publication: a consumer
 compiling our source has no such alias and the import fails to resolve. The
 package's own name resolves via Node's self-reference through `exports`, which

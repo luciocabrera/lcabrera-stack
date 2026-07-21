@@ -1,4 +1,4 @@
-import { getPinnedDerivedColumnsState } from '@repo/ui/components/Table/utils';
+import { getPinnedDerivedColumnsState } from '@lcabrera/ui/components/Table/utils';
 
 import type { CommitResolvedColumnStateArgs } from './commitResolvedColumnState.types';
 

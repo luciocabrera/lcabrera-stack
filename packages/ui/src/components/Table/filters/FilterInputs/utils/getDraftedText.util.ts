@@ -1,4 +1,4 @@
-import type { ColumnFilter } from '@repo/ui/types/filterOperators.types';
+import type { ColumnFilter } from '@lcabrera/ui/types/filterOperators.types';
 
 /**
  * The text a drafted filter carries into a text filter: a text filter's own

@@ -1,4 +1,4 @@
-import { getPool } from '@repo/server/db/get-pool.util';
+import { getPool } from '@lcabrera/server/db/get-pool.util';
 
 /**
  * Org-wide rolling-24h sum of real (non-capped) LLM spend — backs the

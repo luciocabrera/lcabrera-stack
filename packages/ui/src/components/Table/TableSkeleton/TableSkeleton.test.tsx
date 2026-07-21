@@ -22,14 +22,14 @@ const { MockTable, useGetColumnsMock, useGetTablePlaceholderRowCountMock } =
   }));
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/columns/selectors',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors',
   () => ({
     useGetColumns: useGetColumnsMock,
   }),
 );
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/meta/selectors',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors',
   () => ({
     useGetTablePlaceholderRowCount: useGetTablePlaceholderRowCountMock,
   }),

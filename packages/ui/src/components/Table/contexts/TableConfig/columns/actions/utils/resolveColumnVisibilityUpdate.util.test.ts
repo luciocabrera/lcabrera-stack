@@ -1,4 +1,4 @@
-import type { ColumnVisibilityState } from '@repo/ui/components/Table/Table.types';
+import type { ColumnVisibilityState } from '@lcabrera/ui/components/Table/Table.types';
 
 import { describe, expect, it } from 'vitest';
 

@@ -1,8 +1,8 @@
 # Formatters Utils Architecture
 
 Locale-safe, SSR-consistent formatting helpers for numbers, currency, and dates.
-Pure `Intl` wrappers with no React/DOM dependency — they live in `@repo/utils`
-(the lowest layer) and are consumed by `@repo/ui` and the apps.
+Pure `Intl` wrappers with no React/DOM dependency — they live in `@lcabrera/utils`
+(the lowest layer) and are consumed by `@lcabrera/ui` and the apps.
 
 ## File Structure
 
@@ -49,7 +49,7 @@ graph TD
 
 Shared `Intl`-formatter option types (`CurrencyFormatOptions`,
 `DateFormatOptions`, `DateFormatPreset`, `NumberFormatOptions`) consumed by the
-formatters and by `@repo/ui`'s `Table.types`.
+formatters and by `@lcabrera/ui`'s `Table.types`.
 
 ### formatters.constants.ts
 
@@ -167,14 +167,14 @@ Key behavior:
 
 ## Subpath Exports
 
-`@repo/utils` uses **explicit per-file subpath exports** — there is no barrel.
+`@lcabrera/utils` uses **explicit per-file subpath exports** — there is no barrel.
 Each helper is imported directly so consumers pull in exactly one:
 
-- `@repo/utils/formatters/format-currency.util`
-- `@repo/utils/formatters/format-date.util`
-- `@repo/utils/formatters/format-number.util`
-- `@repo/utils/formatters/parse-date.util`
-- `@repo/utils/formatters/get-date-time-format-options.util`
-- `@repo/utils/formatters/get-default-locale.util`
-- `@repo/utils/formatters/formatters.constants`
-- `@repo/utils/formatters/formatters.types`
+- `@lcabrera/utils/formatters/format-currency.util`
+- `@lcabrera/utils/formatters/format-date.util`
+- `@lcabrera/utils/formatters/format-number.util`
+- `@lcabrera/utils/formatters/parse-date.util`
+- `@lcabrera/utils/formatters/get-date-time-format-options.util`
+- `@lcabrera/utils/formatters/get-default-locale.util`
+- `@lcabrera/utils/formatters/formatters.constants`
+- `@lcabrera/utils/formatters/formatters.types`

@@ -1,4 +1,4 @@
-import { buildDistinctQuery } from '@repo/server/db/query-builder/build-distinct-query.util';
+import { buildDistinctQuery } from '@lcabrera/server/db/query-builder/build-distinct-query.util';
 
 import type {
   DistinctValuesResponse,
@@ -30,7 +30,7 @@ type GetDistinctValuesArgs = {
 /**
  * Generic distinct-values access behind /api/distinct: allow-list
  * validation via parseDistinctSource, then a parameterized SELECT DISTINCT
- * composed by @repo/server's buildDistinctQuery.
+ * composed by @lcabrera/server's buildDistinctQuery.
  */
 export const createDistinctRepository = ({
   pool,

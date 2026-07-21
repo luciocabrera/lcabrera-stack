@@ -1,5 +1,5 @@
-import { DEFAULT_CURRENCY } from '@repo/utils/formatters/formatters.constants';
-import { getDefaultLocale } from '@repo/utils/formatters/get-default-locale.util';
+import { DEFAULT_CURRENCY } from '@lcabrera/utils/formatters/formatters.constants';
+import { getDefaultLocale } from '@lcabrera/utils/formatters/get-default-locale.util';
 
 type GetCurrencySymbolArgs = {
   readonly currency?: string;

@@ -1,5 +1,5 @@
+import type { FieldErrors } from '@lcabrera/ui/components/Form';
 import type { RoleListViewRow } from '@repo/scan-ingestion/queries/getRoleListView.util';
-import type { FieldErrors } from '@repo/ui/components/Form';
 
 import type { NewUserValues } from '../newUser.schema';
 

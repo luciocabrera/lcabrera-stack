@@ -1,5 +1,5 @@
+import type { FieldErrors } from '@lcabrera/ui/components/Form';
 import type { PermissionRow } from '@repo/scan-ingestion/queries/getAllPermissions.util';
-import type { FieldErrors } from '@repo/ui/components/Form';
 
 import type { NewRoleValues } from '../newRole.schema';
 

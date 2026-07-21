@@ -1,4 +1,4 @@
-import { useGetTableRowHeight } from '@repo/ui/components/Table/contexts/TableConfig/meta/selectors';
+import { useGetTableRowHeight } from '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors';
 import * as stylex from '@stylexjs/stylex';
 
 import type { TableRowProps } from './TableRow.types';

@@ -1,4 +1,4 @@
-import type { GlobalNavigationSizePreference } from '@repo/ui/types/globalSettings.types';
+import type { GlobalNavigationSizePreference } from '@lcabrera/ui/types/globalSettings.types';
 
 import { styles } from '../AppNavigation.stylex';
 

@@ -42,7 +42,7 @@ const configs = [
     filePath: resolve(packageDirectory, 'tsconfig.app.json'),
   },
   {
-    // admin_system consumes @repo/server/@repo/scan-ingestion/@repo/ui
+    // admin_system consumes @lcabrera/server/@repo/scan-ingestion/@lcabrera/ui
     // directly (CQMS routes, TECH_SPEC §2.4/§2.8) — without these, this
     // config drifts from the actual hand-verified tsconfig.app.json the
     // moment this generator re-runs for an unrelated reason (found the
@@ -51,14 +51,14 @@ const configs = [
     // entire cqms routes tree).
     config: createAppTsConfig({
       paths: {
-        '@repo/scan-ingestion/*': ['../../packages/scan-ingestion/src/*'],
-        '@repo/server/*': ['../../packages/server/src/*'],
-        // Bare specifier — `@repo/ui` resolves to the public-api barrel, not
+        '@lcabrera/server/*': ['../../packages/server/src/*'],
+        // Bare specifier — `@lcabrera/ui` resolves to the public-api barrel, not
         // a subpath. Distinct from the wildcard below and NOT implied by it
-        // (`@repo/ui/*` never matches the bare form), so dropping it breaks
-        // every `from '@repo/ui'` import in this app.
-        '@repo/ui': ['../../packages/ui/src/public-api.ts'],
-        '@repo/ui/*': ['../../packages/ui/src/*'],
+        // (`@lcabrera/ui/*` never matches the bare form), so dropping it breaks
+        // every `from '@lcabrera/ui'` import in this app.
+        '@lcabrera/ui': ['../../packages/ui/src/public-api.ts'],
+        '@lcabrera/ui/*': ['../../packages/ui/src/*'],
+        '@repo/scan-ingestion/*': ['../../packages/scan-ingestion/src/*'],
       },
       tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
     }),
@@ -73,10 +73,10 @@ const configs = [
   {
     config: createAppTsConfig({
       paths: {
-        '@repo/server/*': ['../../packages/server/src/*'],
+        '@lcabrera/server/*': ['../../packages/server/src/*'],
         // Bare specifier — see the identical entry under admin_system above.
-        '@repo/ui': ['../../packages/ui/src/public-api.ts'],
-        '@repo/ui/*': ['../../packages/ui/src/*'],
+        '@lcabrera/ui': ['../../packages/ui/src/public-api.ts'],
+        '@lcabrera/ui/*': ['../../packages/ui/src/*'],
       },
       tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
     }),
@@ -95,15 +95,15 @@ const configs = [
       // processes it. This config exists so tools that resolve the nearest
       // tsconfig.json from a file *inside* packages/ui (an editor's
       // language server, or tsc/lint invoked directly against this
-      // package) can still resolve @repo/ui's own self-referencing
+      // package) can still resolve @lcabrera/ui's own self-referencing
       // imports — without it, only a consuming app's own tsconfig knew
       // about that alias.
       //
-      // `@repo/server/*` used to be here too. It is gone with the shapes it
-      // resolved (ADR-039): @repo/ui is client-safe and must not reach into
+      // `@lcabrera/server/*` used to be here too. It is gone with the shapes it
+      // resolved (ADR-039): @lcabrera/ui is client-safe and must not reach into
       // a Node-only package, and an alias is exactly how such an edge hides.
       paths: {
-        '@repo/ui/*': ['./src/*'],
+        '@lcabrera/ui/*': ['./src/*'],
       },
       // No `@/*`. It resolves only through a tsconfig, so an `@/` import
       // inside a published package is unresolvable for a consumer — the
@@ -121,20 +121,20 @@ const configs = [
     filePath: resolve(workspaceRoot, 'packages/ui/tsconfig.app.json'),
   },
   {
-    // @repo/server is Node-only, and this entry is now a plain node config
+    // @lcabrera/server is Node-only, and this entry is now a plain node config
     // rather than an app config with 'node' bolted on.
     //
     // It used to be the latter because the package carried two runtimes at
     // once (ADR-008): a browser src/api/ half needing DOM + vite/client
-    // alongside a Node src/db/ half. That half is gone — it is @repo/api now
+    // alongside a Node src/db/ half. That half is gone — it is @lcabrera/api now
     // — so the DOM lib was left granting Window, document and fetch to a
     // package that has no business touching any of them. Dropping to
     // createNodeTsConfig makes a browser reach-in fail typecheck here, the
-    // exact mirror of @repo/api omitting 'node' to keep itself client-safe.
+    // exact mirror of @lcabrera/api omitting 'node' to keep itself client-safe.
     config: createNodeTsConfig({
       include: ['src', 'vite.config.ts'],
       paths: {
-        '@repo/server/*': ['./src/*'],
+        '@lcabrera/server/*': ['./src/*'],
       },
       tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
     }),
@@ -172,7 +172,7 @@ const configs = [
   },
   {
     // Genuinely Node-only — process-lifecycle primitives (SIGINT/SIGTERM
-    // handlers), the deliberate impure counterpart to @repo/utils.
+    // handlers), the deliberate impure counterpart to @lcabrera/utils.
     //
     // This was the one tsconfig.app.json the generator did not own: it was
     // hand-written, so every tsconfig.shared.ts change silently skipped it
@@ -208,7 +208,7 @@ const configs = [
     ),
   },
   {
-    // @repo/api is the browser half of the old data-access package: fetch
+    // @lcabrera/api is the browser half of the old data-access package: fetch
     // client, HTTP contracts, base-URL resolution. It needs the DOM lib and
     // vite/client that createAppTsConfig supplies by default (Window, Location,
     // fetch, the Vite env object) — but, unlike packages/server, it must
@@ -218,7 +218,7 @@ const configs = [
     // packages/ui/scripts/check-public-api-client-safe.mjs now also guards.
     config: createAppTsConfig({
       include: ['src', 'vite.config.ts'],
-      // No `@/*` — @repo/api is publishable, and that alias resolves only
+      // No `@/*` — @lcabrera/api is publishable, and that alias resolves only
       // through a tsconfig. See the packages/ui entry above.
       srcAlias: false,
       tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
@@ -226,7 +226,7 @@ const configs = [
     filePath: resolve(workspaceRoot, 'packages/api/tsconfig.app.json'),
   },
   {
-    // @repo/utils is pure and side-effect free by contract (AGENTS.md §1),
+    // @lcabrera/utils is pure and side-effect free by contract (AGENTS.md §1),
     // which is exactly why it gets `types: []` rather than the default
     // ['node']: denying it the Node ambient globals means a stray process/fs
     // reach-in fails typecheck here instead of quietly eroding the guarantee
@@ -245,7 +245,7 @@ const configs = [
   {
     // Genuinely Node-only: a Vite build plugin reading the emitted manifest
     // through node:fs/node:path off process.cwd(). Flat package, same
-    // include/exclude reasoning as @repo/utils above.
+    // include/exclude reasoning as @lcabrera/utils above.
     config: createNodeTsConfig({
       exclude: ['node_modules'],
       include: ['**/*.ts'],
@@ -256,7 +256,7 @@ const configs = [
   {
     // Genuinely Node-only: the shared Vite/lint/fmt config factories every
     // workspace's vite.config.ts imports. Flat package, same include/exclude
-    // reasoning as @repo/utils above.
+    // reasoning as @lcabrera/utils above.
     config: createNodeTsConfig({
       exclude: ['node_modules'],
       include: ['**/*.ts'],

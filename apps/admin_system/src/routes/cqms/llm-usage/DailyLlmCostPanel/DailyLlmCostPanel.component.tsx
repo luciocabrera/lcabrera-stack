@@ -1,5 +1,5 @@
-import { TrendSparkline } from '@repo/ui/components/TrendSparkline';
-import { formatCurrency } from '@repo/utils/formatters/format-currency.util';
+import { TrendSparkline } from '@lcabrera/ui/components/TrendSparkline';
+import { formatCurrency } from '@lcabrera/utils/formatters/format-currency.util';
 import { use } from 'react';
 
 import type { DailyLlmCostPanelProps } from './DailyLlmCostPanel.types';

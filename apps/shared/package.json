@@ -21,8 +21,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@repo/api": "workspace:*",
-    "@repo/server": "workspace:*"
+    "@lcabrera/api": "workspace:*",
+    "@lcabrera/server": "workspace:*"
   },
   "devDependencies": {
     "@repo/vite-configs": "workspace:*",

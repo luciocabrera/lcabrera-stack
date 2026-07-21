@@ -1,4 +1,4 @@
-import type { TableColumn } from '@repo/ui/components/Table/Table.types';
+import type { TableColumn } from '@lcabrera/ui/components/Table/Table.types';
 
 /**
  * Filters table columns down to the entries manageable in the column order

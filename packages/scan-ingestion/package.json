@@ -26,8 +26,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
   "dependencies": {
-    "@repo/server": "workspace:*",
-    "@repo/utils": "workspace:*",
+    "@lcabrera/server": "workspace:*",
+    "@lcabrera/utils": "workspace:*",
     "fflate": "catalog:",
     "pg": "catalog:",
     "zod": "catalog:"

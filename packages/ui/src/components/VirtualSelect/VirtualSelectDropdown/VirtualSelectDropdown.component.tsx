@@ -1,5 +1,5 @@
-import { VirtualListContent } from '@repo/ui/components/VirtualList';
-import { useGetShouldFillHeight } from '@repo/ui/components/VirtualList/contexts/list/selectors';
+import { VirtualListContent } from '@lcabrera/ui/components/VirtualList';
+import { useGetShouldFillHeight } from '@lcabrera/ui/components/VirtualList/contexts/list/selectors';
 import * as stylex from '@stylexjs/stylex';
 
 import {

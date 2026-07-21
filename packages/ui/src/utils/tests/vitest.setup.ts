@@ -1,6 +1,6 @@
 import { vi } from 'vitest';
 
-vi.mock('@repo/ui/hooks/useTheme.hook', () => ({
+vi.mock('@lcabrera/ui/hooks/useTheme.hook', () => ({
   useTheme: () => ({
     isDarkMode: false,
     setTheme: vi.fn(),

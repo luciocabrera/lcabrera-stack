@@ -9,7 +9,7 @@ const { mockUseTableActionsPopoverPosition, mockUseTableContainerRef } =
     mockUseTableContainerRef: vi.fn(() => ({ current: undefined })),
   }));
 
-vi.mock('@repo/ui/components/Table/contexts/TableWrapper', () => ({
+vi.mock('@lcabrera/ui/components/Table/contexts/TableWrapper', () => ({
   useTableContainerRef: mockUseTableContainerRef,
 }));
 

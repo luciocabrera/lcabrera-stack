@@ -1,4 +1,4 @@
-import type { TableColumn } from '@repo/ui/components/Table';
+import type { TableColumn } from '@lcabrera/ui/components/Table';
 
 export type JsonExplorerProps = {
   /** Pre-shaped server-side (a loader calls `inferTableColumnsFromJson` — see its own doc for why this must not happen client-side). */

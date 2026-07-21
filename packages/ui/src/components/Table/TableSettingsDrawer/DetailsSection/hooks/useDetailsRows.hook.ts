@@ -1,9 +1,9 @@
-import { useGetColumns } from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors';
+import { useGetColumns } from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors';
 import {
   useGetTableTotalLoadedRows,
   useGetTableTotalRows,
-} from '@repo/ui/components/Table/contexts/TableData/data/selectors';
-import { formatNumber } from '@repo/utils/formatters/format-number.util';
+} from '@lcabrera/ui/components/Table/contexts/TableData/data/selectors';
+import { formatNumber } from '@lcabrera/utils/formatters/format-number.util';
 
 import type { DetailsRow } from '../DetailsSection.types';
 

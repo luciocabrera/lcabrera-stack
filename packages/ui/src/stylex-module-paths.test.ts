@@ -6,7 +6,7 @@
  * identity, and it is computed without reading the file. Moving or renaming
  * one of these modules therefore silently renames every variable it defines.
  * Inside this repo nothing breaks, because every consumer recompiles from
- * source in the same pass. For a published `@repo/ui` it is a breaking change
+ * source in the same pass. For a published `@lcabrera/ui` it is a breaking change
  * that no type, lint rule or test would otherwise catch: a consumer's
  * `createTheme` keeps compiling and simply stops matching, so their theme
  * silently reverts to defaults.
@@ -44,7 +44,7 @@ it('no *.stylex.ts module has moved or been renamed', () => {
 
   expect(
     missing,
-    `These *.stylex.ts modules moved, were renamed, or were deleted:\n  ${missing.join('\n  ')}\n\nEach path is the identity of the custom properties its defineVars calls produce, so this renames them for every consumer and silently breaks their createTheme. If the move is intended, it is a MAJOR bump for @repo/ui — update stylex-module-paths.test.json in the same commit.`,
+    `These *.stylex.ts modules moved, were renamed, or were deleted:\n  ${missing.join('\n  ')}\n\nEach path is the identity of the custom properties its defineVars calls produce, so this renames them for every consumer and silently breaks their createTheme. If the move is intended, it is a MAJOR bump for @lcabrera/ui — update stylex-module-paths.test.json in the same commit.`,
   ).toEqual([]);
 });
 

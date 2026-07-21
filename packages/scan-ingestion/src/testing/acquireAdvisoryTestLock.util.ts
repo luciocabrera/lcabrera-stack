@@ -1,6 +1,6 @@
 import type { PoolClient } from 'pg';
 
-import { getPool } from '@repo/server/db/get-pool.util';
+import { getPool } from '@lcabrera/server/db/get-pool.util';
 
 type AcquireAdvisoryTestLockArgs = {
   readonly lockName: string;

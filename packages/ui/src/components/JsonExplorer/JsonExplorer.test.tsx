@@ -2,8 +2,8 @@
 
 import type { ReactNode } from 'react';
 
-import { AppProviders } from '@repo/ui/components/AppProviders';
-import { inferTableColumnsFromJson } from '@repo/ui/components/Table/utils/inferTableColumnsFromJson.util';
+import { AppProviders } from '@lcabrera/ui/components/AppProviders';
+import { inferTableColumnsFromJson } from '@lcabrera/ui/components/Table/utils/inferTableColumnsFromJson.util';
 import { cleanup, render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';

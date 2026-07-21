@@ -2,10 +2,10 @@ import type {
   ColumnFiltersState,
   SortingState,
   TableColumn,
-} from '@repo/ui/components/Table';
+} from '@lcabrera/ui/components/Table';
 
-import { appendPrimaryKeySorting } from '@repo/ui/routing/appendPrimaryKeySorting.util';
-import { sanitizeSorting } from '@repo/ui/routing/sanitizeSorting.util';
+import { appendPrimaryKeySorting } from '@lcabrera/ui/routing/appendPrimaryKeySorting.util';
+import { sanitizeSorting } from '@lcabrera/ui/routing/sanitizeSorting.util';
 
 import type { EnterpriseOrder } from '../config';
 

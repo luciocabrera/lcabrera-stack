@@ -5,11 +5,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { goBackMock } = vi.hoisted(() => ({ goBackMock: vi.fn() }));
 
-vi.mock('@repo/ui/components/Form/contexts/FormContext/selectors', () => ({
+vi.mock('@lcabrera/ui/components/Form/contexts/FormContext/selectors', () => ({
   useGetFormCancelTo: () => '/orders',
 }));
 
-vi.mock('@repo/ui/hooks', () => ({
+vi.mock('@lcabrera/ui/hooks', () => ({
   useBackNavigate: () => goBackMock,
 }));
 

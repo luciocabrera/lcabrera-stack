@@ -177,12 +177,12 @@ export const RegisterForm = () => { ... };
 Enforces the base-name case that goes with each file suffix. Only files matching
 `<base>.<suffix>.<ext>` are checked, so `index.ts` and `root.tsx` are untouched.
 
-| Suffix                                       | Base-name case                                                                                                         | Example                                                  |
-| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| `.component` / `.layout` / `.error-boundary` | PascalCase                                                                                                             | `CarSales.error-boundary.tsx`                            |
-| `.hook`                                      | camelCase, `use` prefix                                                                                                | `useVirtualization.hook.ts`                              |
-| `.loader` / `.action` / `.meta`              | kebab-case                                                                                                             | `enterprise-orders.loader.ts`                            |
-| `.util`                                      | camelCase — kebab-case in the public packages (`@repo/api`, `@repo/server`, `@repo/utils`) via the `suffixCase` option | `fetchOrdersPage.util.ts` / `build-where-clause.util.ts` |
+| Suffix                                       | Base-name case                                                                                                                     | Example                                                  |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `.component` / `.layout` / `.error-boundary` | PascalCase                                                                                                                         | `CarSales.error-boundary.tsx`                            |
+| `.hook`                                      | camelCase, `use` prefix                                                                                                            | `useVirtualization.hook.ts`                              |
+| `.loader` / `.action` / `.meta`              | kebab-case                                                                                                                         | `enterprise-orders.loader.ts`                            |
+| `.util`                                      | camelCase — kebab-case in the public packages (`@lcabrera/api`, `@lcabrera/server`, `@lcabrera/utils`) via the `suffixCase` option | `fetchOrdersPage.util.ts` / `build-where-clause.util.ts` |
 
 `unicorn/filename-case` is deliberately **off**; this rule owns filename casing so
 the suffix drives the convention.

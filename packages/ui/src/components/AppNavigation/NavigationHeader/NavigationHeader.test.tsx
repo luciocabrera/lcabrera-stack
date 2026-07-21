@@ -22,15 +22,15 @@ type MockHeaderActionsProps = {
   readonly onTogglePinned: () => void;
 };
 
-vi.mock('@repo/ui/components/Icons', () => ({
+vi.mock('@lcabrera/ui/components/Icons', () => ({
   MenuIcon: () => <span>Menu icon</span>,
 }));
 
-vi.mock('@repo/ui/contexts/GlobalSettingsContext/actions', () => ({
+vi.mock('@lcabrera/ui/contexts/GlobalSettingsContext/actions', () => ({
   useSetGlobalNavigationPreferences: () => setGlobalNavigationPreferencesMock,
 }));
 
-vi.mock('@repo/ui/contexts/GlobalSettingsContext/selectors', () => ({
+vi.mock('@lcabrera/ui/contexts/GlobalSettingsContext/selectors', () => ({
   useGetGlobalNavigationCollapsedPreference: () => collapsedPreferenceMock(),
   useGetGlobalNavigationSizePreference: () => sizePreferenceMock(),
 }));

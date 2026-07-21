@@ -1,9 +1,9 @@
-import { Navbar } from '@repo/ui/components/Navbar';
-import { SidePanelBody } from '@repo/ui/components/SidePanel';
+import { Navbar } from '@lcabrera/ui/components/Navbar';
+import { SidePanelBody } from '@lcabrera/ui/components/SidePanel';
 import {
   useGetGlobalNavigationCollapsedPreference,
   useGetGlobalNavigationSizePreference,
-} from '@repo/ui/contexts/GlobalSettingsContext/selectors';
+} from '@lcabrera/ui/contexts/GlobalSettingsContext/selectors';
 import * as stylex from '@stylexjs/stylex';
 
 import type { NavigationBodyProps } from './NavigationBody.types';

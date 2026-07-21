@@ -1,7 +1,7 @@
-import type { TableMetaState } from '@repo/ui/components/Table/Table.types';
+import type { TableMetaState } from '@lcabrera/ui/components/Table/Table.types';
 
-import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import { useStoreSelector } from '@repo/ui/hooks/useStoreSelector.hook';
+import { useTableConfigContextValue } from '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { useStoreSelector } from '@lcabrera/ui/hooks/useStoreSelector.hook';
 
 export const useMetaStore = <TSelected>(
   selector: (state: TableMetaState) => TSelected,

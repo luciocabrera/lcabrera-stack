@@ -1,9 +1,9 @@
-import { MenuIcon } from '@repo/ui/components/Icons';
-import { useSetGlobalNavigationPreferences } from '@repo/ui/contexts/GlobalSettingsContext/actions';
+import { MenuIcon } from '@lcabrera/ui/components/Icons';
+import { useSetGlobalNavigationPreferences } from '@lcabrera/ui/contexts/GlobalSettingsContext/actions';
 import {
   useGetGlobalNavigationCollapsedPreference,
   useGetGlobalNavigationSizePreference,
-} from '@repo/ui/contexts/GlobalSettingsContext/selectors';
+} from '@lcabrera/ui/contexts/GlobalSettingsContext/selectors';
 import * as stylex from '@stylexjs/stylex';
 
 import type { NavigationHeaderProps } from './NavigationHeader.types';

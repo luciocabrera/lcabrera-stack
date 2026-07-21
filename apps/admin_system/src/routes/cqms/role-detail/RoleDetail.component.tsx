@@ -1,6 +1,6 @@
-import { NavLink } from '@repo/ui/components/NavLink';
-import { SectionCard } from '@repo/ui/components/SectionCard';
-import { StatusBadge } from '@repo/ui/components/StatusBadge';
+import { NavLink } from '@lcabrera/ui/components/NavLink';
+import { SectionCard } from '@lcabrera/ui/components/SectionCard';
+import { StatusBadge } from '@lcabrera/ui/components/StatusBadge';
 import { useLoaderData } from 'react-router';
 
 import type { loader } from './roleDetail.loader';

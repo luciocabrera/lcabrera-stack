@@ -1,15 +1,15 @@
 // @vitest-environment jsdom
 
-import type { ThemeContextValue } from '@repo/ui/types/theme.types';
+import type { ThemeContextValue } from '@lcabrera/ui/types/theme.types';
 import type { ReactNode } from 'react';
 
 import { renderHook } from '@testing-library/react';
 import { createElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
-vi.unmock('@repo/ui/hooks/useTheme.hook');
+vi.unmock('@lcabrera/ui/hooks/useTheme.hook');
 
-vi.mock('@repo/ui/contexts/ThemeContext', async () => {
+vi.mock('@lcabrera/ui/contexts/ThemeContext', async () => {
   const { createContext } = await import('react');
 
   return {
@@ -17,7 +17,7 @@ vi.mock('@repo/ui/contexts/ThemeContext', async () => {
   };
 });
 
-import { ThemeContext } from '@repo/ui/contexts/ThemeContext';
+import { ThemeContext } from '@lcabrera/ui/contexts/ThemeContext';
 
 import { useTheme } from './useTheme.hook';
 

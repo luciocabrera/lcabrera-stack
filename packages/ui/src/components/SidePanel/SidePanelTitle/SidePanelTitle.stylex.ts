@@ -1,5 +1,8 @@
-import { spacing, typography } from '@repo/ui/design-system/tokens/base.stylex';
-import { colors } from '@repo/ui/design-system/tokens/colors.stylex';
+import {
+  spacing,
+  typography,
+} from '@lcabrera/ui/design-system/tokens/base.stylex';
+import { colors } from '@lcabrera/ui/design-system/tokens/colors.stylex';
 import * as stylex from '@stylexjs/stylex';
 
 export const sidePanelTitleStyles = stylex.create({

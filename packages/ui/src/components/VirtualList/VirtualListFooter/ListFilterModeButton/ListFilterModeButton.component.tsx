@@ -1,4 +1,4 @@
-import { Button } from '@repo/ui/components/Button';
+import { Button } from '@lcabrera/ui/components/Button';
 
 import type { ListFilterModeButtonProps } from './ListFilterModeButton.types';
 

@@ -1,7 +1,7 @@
-import type { NotificationPlacement } from '@repo/ui/contexts/NotificationContext';
+import type { NotificationPlacement } from '@lcabrera/ui/contexts/NotificationContext';
 
-import { useDismissNotificationAction } from '@repo/ui/contexts/NotificationContext/actions';
-import { useGetNotifications } from '@repo/ui/contexts/NotificationContext/selectors';
+import { useDismissNotificationAction } from '@lcabrera/ui/contexts/NotificationContext/actions';
+import { useGetNotifications } from '@lcabrera/ui/contexts/NotificationContext/selectors';
 import * as stylex from '@stylexjs/stylex';
 import { useEffect, useRef } from 'react';
 

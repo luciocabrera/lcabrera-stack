@@ -3,12 +3,12 @@ import type {
   FilterData,
   FiltersDataState,
   TableMetaState,
-} from '@repo/ui/components/Table/Table.types';
-import type { TStore } from '@repo/ui/hooks/useStore.hook';
+} from '@lcabrera/ui/components/Table/Table.types';
+import type { TStore } from '@lcabrera/ui/hooks/useStore.hook';
 
-import { DEFAULT_FILTER_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
-import { resolveFetchMoreState } from '@repo/ui/components/Table/utils/resolveFetchMoreState.util';
-import { resolveFromCacheOrFetch } from '@repo/ui/utils/prefetch/resolveFromCacheOrFetch.util';
+import { DEFAULT_FILTER_PAGE_SIZE } from '@lcabrera/ui/components/Table/Table.constants';
+import { resolveFetchMoreState } from '@lcabrera/ui/components/Table/utils/resolveFetchMoreState.util';
+import { resolveFromCacheOrFetch } from '@lcabrera/ui/utils/prefetch/resolveFromCacheOrFetch.util';
 
 import type { FetchFilterDataActionArgs } from './useFetchFilterData.types';
 

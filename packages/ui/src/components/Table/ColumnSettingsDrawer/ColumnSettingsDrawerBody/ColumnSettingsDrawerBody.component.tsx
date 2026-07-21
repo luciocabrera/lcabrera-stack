@@ -1,17 +1,17 @@
-import type { TabItem } from '@repo/ui/components/Tabs';
+import type { TabItem } from '@lcabrera/ui/components/Tabs';
 
-import { SidePanelBody } from '@repo/ui/components/SidePanel';
-import { useGetNormalizedColumn } from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors';
-import { useSetTableColumnSettingsSelectedTab } from '@repo/ui/components/Table/contexts/TableConfig/meta/actions';
+import { SidePanelBody } from '@lcabrera/ui/components/SidePanel';
+import { useGetNormalizedColumn } from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors';
+import { useSetTableColumnSettingsSelectedTab } from '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions';
 import {
   useGetTableColumnSelectedKey,
   useGetTableColumnSettingsSelectedTab,
-} from '@repo/ui/components/Table/contexts/TableConfig/meta/selectors';
+} from '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors';
 import {
   useGetTableIsLoading,
   useGetTableIsLoadingMore,
-} from '@repo/ui/components/Table/contexts/TableData/data/selectors';
-import { Tabs } from '@repo/ui/components/Tabs';
+} from '@lcabrera/ui/components/Table/contexts/TableData/data/selectors';
+import { Tabs } from '@lcabrera/ui/components/Tabs';
 
 import { DetailsSection } from '../DetailsSection';
 import { FilterSection } from '../FilterSection';

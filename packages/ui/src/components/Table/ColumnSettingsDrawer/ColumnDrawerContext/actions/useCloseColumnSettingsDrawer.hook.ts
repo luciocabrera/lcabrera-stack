@@ -1,6 +1,6 @@
-import { getClosedColumnSettingsStatePatch } from '@repo/ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils';
-import { usePersistTableUiFlagsAction } from '@repo/ui/components/Table/contexts/TableConfig/meta/actions/usePersistTableUiFlagsAction.hook';
-import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { getClosedColumnSettingsStatePatch } from '@lcabrera/ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils';
+import { usePersistTableUiFlagsAction } from '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions/usePersistTableUiFlagsAction.hook';
+import { useTableConfigContextValue } from '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 
 /**
  * Closes the column settings drawer: reads the current meta state, computes the

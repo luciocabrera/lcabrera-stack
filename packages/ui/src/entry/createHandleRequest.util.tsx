@@ -1,8 +1,8 @@
 import type { RenderToPipeableStreamOptions } from 'react-dom/server';
 import type { EntryContext } from 'react-router';
 
-import { getRequestCspNonce } from '@repo/ui/utils/security';
-import { toError } from '@repo/utils/errors/to-error.util';
+import { getRequestCspNonce } from '@lcabrera/ui/utils/security';
+import { toError } from '@lcabrera/utils/errors/to-error.util';
 import { isbot } from 'isbot';
 import { renderToPipeableStream } from 'react-dom/server';
 import { ServerRouter } from 'react-router';

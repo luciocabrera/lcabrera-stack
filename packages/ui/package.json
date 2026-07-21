@@ -1,5 +1,5 @@
 {
-  "name": "@repo/ui",
+  "name": "@lcabrera/ui",
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
@@ -39,6 +39,9 @@
     "./utils/*": "./src/utils/*",
     "./design-system/*": "./src/design-system/*"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "check:public-api": "node ./scripts/check-public-api-client-safe.mjs",
     "format": "vp fmt .",
@@ -50,8 +53,8 @@
     "typecheck": "vp run check:public-api && tsc --noEmit -p tsconfig.app.json"
   },
   "dependencies": {
-    "@repo/api": "workspace:*",
-    "@repo/utils": "workspace:*",
+    "@lcabrera/api": "workspace:*",
+    "@lcabrera/utils": "workspace:*",
     "isbot": "catalog:",
     "react-markdown": "catalog:"
   },

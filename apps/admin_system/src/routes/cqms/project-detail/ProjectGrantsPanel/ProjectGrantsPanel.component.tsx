@@ -1,4 +1,4 @@
-import { Button } from '@repo/ui/components/Button';
+import { Button } from '@lcabrera/ui/components/Button';
 import { use } from 'react';
 import { useFetcher } from 'react-router';
 

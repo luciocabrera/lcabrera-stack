@@ -2,10 +2,10 @@ import type {
   ColumnPinningState,
   TableColumn,
   TableCrudConfig,
-} from '@repo/ui/components/Table/Table.types';
+} from '@lcabrera/ui/components/Table/Table.types';
 
-import { createBasicColumn } from '@repo/ui/components/Table/utils';
-import { createStaticFilterOptions } from '@repo/ui/utils/filters';
+import { createBasicColumn } from '@lcabrera/ui/components/Table/utils';
+import { createStaticFilterOptions } from '@lcabrera/ui/utils/filters';
 
 import type { EnterpriseOrder } from './config';
 

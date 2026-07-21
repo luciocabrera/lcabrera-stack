@@ -28,11 +28,11 @@ type MockSidePanelHeaderToolbarProps = {
   readonly onTogglePin: () => void;
 };
 
-vi.mock('@repo/ui/components/Icons', () => ({
+vi.mock('@lcabrera/ui/components/Icons', () => ({
   SettingsIcon: () => <span>Settings icon</span>,
 }));
 
-vi.mock('@repo/ui/components/SidePanel', () => ({
+vi.mock('@lcabrera/ui/components/SidePanel', () => ({
   SidePanelHeader: ({ actions, children }: MockSidePanelHeaderProps) => (
     <div>
       {children}
@@ -67,13 +67,16 @@ vi.mock('@repo/ui/components/SidePanel', () => ({
   ),
 }));
 
-vi.mock('@repo/ui/components/Table/contexts/TableConfig/meta/actions', () => ({
-  useSetTableIsTableSettingsOpen: () => setTableIsTableSettingsOpenMock,
-  useSetTableIsTableSettingsPinned: () => setTableIsTableSettingsPinnedMock,
-}));
+vi.mock(
+  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions',
+  () => ({
+    useSetTableIsTableSettingsOpen: () => setTableIsTableSettingsOpenMock,
+    useSetTableIsTableSettingsPinned: () => setTableIsTableSettingsPinnedMock,
+  }),
+);
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/meta/selectors',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors',
   () => ({
     useGetTableIsTableSettingsPinned: () => isTableSettingsPinnedMock(),
   }),

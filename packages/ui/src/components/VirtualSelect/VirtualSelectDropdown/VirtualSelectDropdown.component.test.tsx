@@ -21,14 +21,14 @@ const { contentRenderCount, metaState, setMetaState } = vi.hoisted(() => {
   };
 });
 
-vi.mock('@repo/ui/components/VirtualList', () => ({
+vi.mock('@lcabrera/ui/components/VirtualList', () => ({
   VirtualListContent: () => {
     contentRenderCount.current += 1;
     return <div data-testid='virtual-list-content'>Virtual list content</div>;
   },
 }));
 
-vi.mock('@repo/ui/components/VirtualList/contexts/list/selectors', () => ({
+vi.mock('@lcabrera/ui/components/VirtualList/contexts/list/selectors', () => ({
   useGetShouldFillHeight: () => metaState.current.shouldFillHeight,
 }));
 

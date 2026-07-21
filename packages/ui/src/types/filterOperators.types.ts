@@ -2,13 +2,13 @@
  * Column-filter types for the Table filter UI.
  *
  * These shapes are declared here rather than imported from
- * `@repo/server/filters/filters.types`, which is where they used to live. That
- * import resolved only through a tsconfig `paths` alias — `@repo/ui` does not
- * and must not depend on `@repo/server`, a Node-only package whose dependency
- * graph pulls in the Postgres driver. A published `@repo/ui` would have emitted
+ * `@lcabrera/server/filters/filters.types`, which is where they used to live. That
+ * import resolved only through a tsconfig `paths` alias — `@lcabrera/ui` does not
+ * and must not depend on `@lcabrera/server`, a Node-only package whose dependency
+ * graph pulls in the Postgres driver. A published `@lcabrera/ui` would have emitted
  * declarations referencing a specifier its consumers cannot resolve.
  *
- * `@repo/server` declares the same shapes independently for
+ * `@lcabrera/server` declares the same shapes independently for
  * `toQueryFilters`'s input. That is duplication on purpose: TypeScript is
  * structural, so a filter built here is assignable there with no adapter, and
  * neither package has to know the other exists. The two definitions are held in

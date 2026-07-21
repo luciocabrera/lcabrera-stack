@@ -1,6 +1,6 @@
+import type { FieldErrors } from '@lcabrera/ui/components/Form';
 import type { RoleListViewRow } from '@repo/scan-ingestion/queries/getRoleListView.util';
 import type { UserWithRoles } from '@repo/scan-ingestion/queries/getUserWithRoles.util';
-import type { FieldErrors } from '@repo/ui/components/Form';
 
 import type { EditUserValues } from '../editUser.schema';
 

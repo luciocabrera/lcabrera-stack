@@ -1,5 +1,5 @@
-import type { QuerySort } from '@repo/server/db/query-builder/query-builder.types';
-import type { SortingState } from '@repo/ui/components/Table';
+import type { QuerySort } from '@lcabrera/server/db/query-builder/query-builder.types';
+import type { SortingState } from '@lcabrera/ui/components/Table';
 
 import type { EnterpriseOrder } from './enterpriseOrders.types';
 

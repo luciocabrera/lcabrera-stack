@@ -3,9 +3,9 @@ import type {
   DataKey,
   PinnedColumnInfo,
   TableColumn,
-} from '@repo/ui/components/Table/Table.types';
+} from '@lcabrera/ui/components/Table/Table.types';
 
-import { TableBodyCell } from '@repo/ui/components/Table/TableBodyCell';
+import { TableBodyCell } from '@lcabrera/ui/components/Table/TableBodyCell';
 import { createElement } from 'react';
 
 import {

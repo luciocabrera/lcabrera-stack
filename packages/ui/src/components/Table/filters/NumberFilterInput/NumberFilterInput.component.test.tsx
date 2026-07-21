@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import type { NumberFilter } from '@repo/ui/types/filterOperators.types';
+import type { NumberFilter } from '@lcabrera/ui/types/filterOperators.types';
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';

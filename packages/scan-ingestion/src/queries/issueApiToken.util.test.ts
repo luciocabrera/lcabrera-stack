@@ -1,6 +1,6 @@
-import { isSecretHashValid } from '@repo/server/crypto/is-secret-hash-valid.util';
-import { closePool, getPool } from '@repo/server/db/get-pool.util';
-import { parseApiToken } from '@repo/server/tokens/parse-api-token.util';
+import { isSecretHashValid } from '@lcabrera/server/crypto/is-secret-hash-valid.util';
+import { closePool, getPool } from '@lcabrera/server/db/get-pool.util';
+import { parseApiToken } from '@lcabrera/server/tokens/parse-api-token.util';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { API_TOKEN_PREFIX } from '../auth/apiToken.constants.ts';

@@ -1,4 +1,4 @@
-import type { LeafFieldDef } from '@repo/ui/components/Form/Form.types';
+import type { LeafFieldDef } from '@lcabrera/ui/components/Form/Form.types';
 
 export type FormFieldDisplayProps<TValues extends Record<string, unknown>> = {
   readonly field: LeafFieldDef<TValues>;

@@ -1,4 +1,4 @@
-import type { TableColumnDataType } from '@repo/ui/components/Table/Table.types';
+import type { TableColumnDataType } from '@lcabrera/ui/components/Table/Table.types';
 import type { ReactNode } from 'react';
 
 import * as stylex from '@stylexjs/stylex';

@@ -1,5 +1,5 @@
 {
-  "name": "@repo/utils",
+  "name": "@lcabrera/utils",
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
@@ -33,6 +33,9 @@
     "./objects/drop-nullish-values.util": "./src/objects/drop-nullish-values.util.ts",
     "./objects/merge-objects.util": "./src/objects/merge-objects.util.ts",
     "./strings/empty-to-undefined.util": "./src/strings/empty-to-undefined.util.ts"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "format": "vp fmt .",

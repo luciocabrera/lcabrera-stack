@@ -1,7 +1,7 @@
 import type {
   ColumnFiltersState,
   TableColumnsState,
-} from '@repo/ui/components/Table/Table.types';
+} from '@lcabrera/ui/components/Table/Table.types';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -66,14 +66,14 @@ const {
   mockSyncColumnOrderWithPinning: vi.fn(() => ['id', 'age', 'name']),
 }));
 
-vi.mock('@repo/ui/components/Table/utils', () => ({
+vi.mock('@lcabrera/ui/components/Table/utils', () => ({
   deriveColumnViewState: mockDeriveColumnViewState,
   getColumnPinSide: mockGetColumnPinSide,
   syncColumnOrderWithPinning: mockSyncColumnOrderWithPinning,
 }));
 
 vi.mock(
-  '@repo/ui/components/Table/utils/getNewColumnFiltersBasedOnColumnKey.util',
+  '@lcabrera/ui/components/Table/utils/getNewColumnFiltersBasedOnColumnKey.util',
   () => ({
     getNewColumnFiltersBasedOnColumnKey:
       mockGetNewColumnFiltersBasedOnColumnKey,
@@ -81,21 +81,21 @@ vi.mock(
 );
 
 vi.mock(
-  '@repo/ui/components/Table/utils/getNewColumnSizingBasedOnColumnKey.util',
+  '@lcabrera/ui/components/Table/utils/getNewColumnSizingBasedOnColumnKey.util',
   () => ({
     getNewColumnSizingBasedOnColumnKey: mockGetNewColumnSizingBasedOnColumnKey,
   }),
 );
 
 vi.mock(
-  '@repo/ui/components/Table/utils/getNewPinningBasedOnColumnKey.util',
+  '@lcabrera/ui/components/Table/utils/getNewPinningBasedOnColumnKey.util',
   () => ({
     getNewPinningBasedOnColumnKey: mockGetNewPinningBasedOnColumnKey,
   }),
 );
 
 vi.mock(
-  '@repo/ui/components/Table/utils/getNewSortingBasedOnColumnKey.util',
+  '@lcabrera/ui/components/Table/utils/getNewSortingBasedOnColumnKey.util',
   () => ({
     getNewSortingBasedOnColumnKey: mockGetNewSortingBasedOnColumnKey,
   }),

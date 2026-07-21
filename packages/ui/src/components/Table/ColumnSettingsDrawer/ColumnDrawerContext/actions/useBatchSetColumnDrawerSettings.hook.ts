@@ -1,5 +1,5 @@
-import { useColumnDrawerContextValue } from '@repo/ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook';
-import { useBatchSetColumnSettings } from '@repo/ui/components/Table/contexts/TableConfig/columns/actions';
+import { useColumnDrawerContextValue } from '@lcabrera/ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook';
+import { useBatchSetColumnSettings } from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/actions';
 
 /**
  * Hook to batch update all table settings at once.

@@ -1,6 +1,6 @@
-import type { GlobalSettingsState } from '@repo/ui/types/globalSettings.types';
+import type { GlobalSettingsState } from '@lcabrera/ui/types/globalSettings.types';
 
-import { useStoreSelector } from '@repo/ui/hooks/useStoreSelector.hook';
+import { useStoreSelector } from '@lcabrera/ui/hooks/useStoreSelector.hook';
 
 import { useGlobalSettingsContextValue } from './useGlobalSettingsContextValue.hook';
 

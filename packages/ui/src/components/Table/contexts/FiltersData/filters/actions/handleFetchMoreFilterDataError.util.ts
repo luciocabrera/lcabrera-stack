@@ -3,10 +3,10 @@ import type {
   FilterData,
   FiltersDataState,
   TableMetaState,
-} from '@repo/ui/components/Table/Table.types';
-import type { TStore } from '@repo/ui/hooks/useStore.hook';
+} from '@lcabrera/ui/components/Table/Table.types';
+import type { TStore } from '@lcabrera/ui/hooks/useStore.hook';
 
-import { getErrorMessage } from '@repo/utils/errors/get-error-message.util';
+import { getErrorMessage } from '@lcabrera/utils/errors/get-error-message.util';
 
 import { setFilterSlice } from './setFilterSlice.util';
 

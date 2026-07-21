@@ -44,14 +44,14 @@ const {
 });
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
   () => ({
     useTableConfigContextValue: () => ({ columnsStore: tableColumnsStore }),
   }),
 );
 
 vi.mock(
-  '@repo/ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook',
+  '@lcabrera/ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook',
   () => ({
     useTableDrawerContextValue: () => ({ columnsStore: drawerColumnsStore }),
   }),

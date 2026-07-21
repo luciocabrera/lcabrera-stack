@@ -6,8 +6,8 @@ import type {
   TableColumn,
   TableColumnsState,
   TablePersistenceSliceEntry,
-} from '@repo/ui/components/Table/Table.types';
-import type { TStore } from '@repo/ui/hooks/useStore.hook';
+} from '@lcabrera/ui/components/Table/Table.types';
+import type { TStore } from '@lcabrera/ui/hooks/useStore.hook';
 
 type CommitPinningAndOrderUpdateArgs<TData> = {
   readonly columnsStore: Pick<TStore<TableColumnsState<TData>>, 'set'>;

@@ -1,6 +1,6 @@
-import type { FieldNode } from '@repo/ui';
+import type { FieldNode } from '@lcabrera/ui';
 
-import { Form, SectionCard } from '@repo/ui';
+import { Form, SectionCard } from '@lcabrera/ui';
 import { useActionData, useLoaderData } from 'react-router';
 
 import type { action } from './login.action';
@@ -26,7 +26,7 @@ const FIELDS: readonly FieldNode<LoginValues>[] = [
 ];
 
 /**
- * Login page built with the `@repo/ui` Form. Validation runs client-first via
+ * Login page built with the `@lcabrera/ui` Form. Validation runs client-first via
  * the route's `clientAction` (Zod, no network on failure); `serverErrors`
  * surfaces whatever the server `action` returns when it re-validates or
  * rejects the credentials. A hidden `redirectTo` field round-trips the

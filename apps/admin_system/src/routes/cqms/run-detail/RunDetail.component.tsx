@@ -1,7 +1,7 @@
 import type { RunScanRow } from '@repo/scan-ingestion/queries/getRunScans.util';
 
-import { StatusBadge, TableLayout } from '@repo/ui';
-import { createEmptyColumnsState } from '@repo/ui/components/Table/utils/createEmptyColumnsState.util';
+import { StatusBadge, TableLayout } from '@lcabrera/ui';
+import { createEmptyColumnsState } from '@lcabrera/ui/components/Table/utils/createEmptyColumnsState.util';
 import { useLoaderData } from 'react-router';
 
 import { useRunStatusSocket } from '@/hooks/useRunStatusSocket.hook';

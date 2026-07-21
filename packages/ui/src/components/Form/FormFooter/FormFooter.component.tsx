@@ -1,5 +1,5 @@
-import { ConfirmDialog } from '@repo/ui/components/ConfirmDialog';
-import { useGetFormMode } from '@repo/ui/components/Form/contexts/FormContext/selectors';
+import { ConfirmDialog } from '@lcabrera/ui/components/ConfirmDialog';
+import { useGetFormMode } from '@lcabrera/ui/components/Form/contexts/FormContext/selectors';
 
 import type { FormFooterProps } from './FormFooter.types';
 

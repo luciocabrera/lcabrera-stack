@@ -1,4 +1,4 @@
-import type { FieldErrors } from '@repo/ui/components/Form';
+import type { FieldErrors } from '@lcabrera/ui/components/Form';
 import type { ZodError } from 'zod';
 
 import type { EnterpriseOrderInput } from './enterpriseOrders.schema';

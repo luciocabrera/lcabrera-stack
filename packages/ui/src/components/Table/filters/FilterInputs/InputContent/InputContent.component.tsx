@@ -2,7 +2,7 @@ import type {
   DateOperatorType,
   NumberOperatorType,
   TextOperatorType,
-} from '@repo/ui/types/filterOperators.types';
+} from '@lcabrera/ui/types/filterOperators.types';
 
 import type { InputContentProps } from './InputContent.types';
 

@@ -15,12 +15,12 @@ export type DbSanityResult = {
 };
 
 /**
- * Re-exported rather than re-declared: `@repo/server` owns this wire
+ * Re-exported rather than re-declared: `@lcabrera/server` owns this wire
  * contract, and the client half (`fetchDistinctValues`) validates responses
  * against it. Two copies of a shape that has to match across the wire is a
  * silent-drift hazard, not a convenience.
  */
-export type { DistinctValuesResponse } from '@repo/api/distinct/distinct.types';
+export type { DistinctValuesResponse } from '@lcabrera/api/distinct/distinct.types';
 
 export type PaginatedResponse<TData> = {
   readonly data: readonly TData[];

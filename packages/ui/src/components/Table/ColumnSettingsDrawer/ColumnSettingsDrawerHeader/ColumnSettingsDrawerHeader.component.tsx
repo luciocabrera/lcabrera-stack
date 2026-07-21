@@ -1,16 +1,16 @@
-import { SettingsIcon } from '@repo/ui/components/Icons';
+import { SettingsIcon } from '@lcabrera/ui/components/Icons';
 import {
   SidePanelHeader,
   SidePanelHeaderToolbar,
   SidePanelTitle,
-} from '@repo/ui/components/SidePanel';
-import { useGetNormalizedColumn } from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors';
-import { useSetTableIsColumnSettingsPinned } from '@repo/ui/components/Table/contexts/TableConfig/meta/actions';
+} from '@lcabrera/ui/components/SidePanel';
+import { useGetNormalizedColumn } from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors';
+import { useSetTableIsColumnSettingsPinned } from '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions';
 import {
   useGetTableColumnSelectedKey,
   useGetTableIsColumnSettingsPinned,
-} from '@repo/ui/components/Table/contexts/TableConfig/meta/selectors';
-import { ICON_SIZE_LG } from '@repo/ui/design-system/constants';
+} from '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors';
+import { ICON_SIZE_LG } from '@lcabrera/ui/design-system/constants';
 
 import {
   useGetTableIsLoading,

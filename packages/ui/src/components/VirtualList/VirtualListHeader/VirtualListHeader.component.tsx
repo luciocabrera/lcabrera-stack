@@ -1,8 +1,8 @@
 import type { ChangeEvent } from 'react';
 
-import { Button } from '@repo/ui/components/Button';
-import { MenuCloseIcon } from '@repo/ui/components/Icons';
-import { ICON_SIZE_MD } from '@repo/ui/design-system/constants';
+import { Button } from '@lcabrera/ui/components/Button';
+import { MenuCloseIcon } from '@lcabrera/ui/components/Icons';
+import { ICON_SIZE_MD } from '@lcabrera/ui/design-system/constants';
 import * as stylex from '@stylexjs/stylex';
 
 import { useClearSearch, useSetSearchTerm } from '../contexts/list/actions';

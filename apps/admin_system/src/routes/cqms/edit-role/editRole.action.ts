@@ -1,7 +1,7 @@
+import { getErrorMessage } from '@lcabrera/utils/errors/get-error-message.util';
 import { getRoleWithPermissions } from '@repo/scan-ingestion/queries/getRoleWithPermissions.util';
 import { replaceRolePermissions } from '@repo/scan-ingestion/queries/replaceRolePermissions.util';
 import { updateRole } from '@repo/scan-ingestion/queries/updateRole.util';
-import { getErrorMessage } from '@repo/utils/errors/get-error-message.util';
 import { type ActionFunctionArgs, data, redirect } from 'react-router';
 import { z } from 'zod';
 

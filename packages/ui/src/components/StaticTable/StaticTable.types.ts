@@ -1,4 +1,4 @@
-import type { TableColumn } from '@repo/ui/components/Table';
+import type { TableColumn } from '@lcabrera/ui/components/Table';
 import type { ReactNode } from 'react';
 
 export type StaticTableProps<TData extends Record<string, unknown>> = {

@@ -1,4 +1,4 @@
-import { getPool } from '@repo/server/db/get-pool.util';
+import { getPool } from '@lcabrera/server/db/get-pool.util';
 
 export type ScanRow = {
   readonly duration_ms: null | number;

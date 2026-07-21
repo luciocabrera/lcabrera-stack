@@ -1,5 +1,5 @@
-import { Button } from '@repo/ui/components/Button';
-import { CheckIcon, CopyIcon } from '@repo/ui/components/Icons';
+import { Button } from '@lcabrera/ui/components/Button';
+import { CheckIcon, CopyIcon } from '@lcabrera/ui/components/Icons';
 import { useState } from 'react';
 
 import type { CopyButtonProps } from './CopyButton.types';

@@ -2,7 +2,7 @@
 // Dispatch behavior tests for useAcceptPinConflict.
 // Business logic is covered in resolvePinConflictState.util.test.ts.
 
-import { createColumnOrderSectionActionMocks } from '@repo/ui/utils/tests/createColumnOrderSectionActionMocks.util';
+import { createColumnOrderSectionActionMocks } from '@lcabrera/ui/utils/tests/createColumnOrderSectionActionMocks.util';
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -52,13 +52,13 @@ const { drawerColumnsStore, modalsStore, resetMocks, tableColumnsStore } =
   });
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
   () => ({
     useTableConfigContextValue: () => ({ columnsStore: tableColumnsStore }),
   }),
 );
 vi.mock(
-  '@repo/ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook',
+  '@lcabrera/ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook',
   () => ({
     useTableDrawerContextValue: () => ({ columnsStore: drawerColumnsStore }),
   }),
@@ -67,15 +67,15 @@ vi.mock('../useColumnOrderSectionContextValue.hook', () => ({
   useColumnOrderSectionContextValue: () => ({ modalsStore }),
 }));
 vi.mock(
-  '@repo/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils',
+  '@lcabrera/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils',
 );
 
-import type { TableColumn } from '@repo/ui/components/Table/Table.types';
+import type { TableColumn } from '@lcabrera/ui/components/Table/Table.types';
 
 import {
   buildAllOrderedColumns,
   resolvePinConflictState,
-} from '@repo/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
+} from '@lcabrera/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 
 const mockBuildAllOrderedColumns = vi.mocked(buildAllOrderedColumns);
 const mockResolvePinConflictState = vi.mocked(resolvePinConflictState);

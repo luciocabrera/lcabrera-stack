@@ -1,6 +1,6 @@
-import type { Pagination } from '@repo/ui';
+import type { Pagination } from '@lcabrera/ui';
 
-import { TableLayout } from '@repo/ui';
+import { TableLayout } from '@lcabrera/ui';
 import { useLoaderData } from 'react-router';
 
 import type { EnterpriseOrder, EnterpriseOrdersResponse } from './config';

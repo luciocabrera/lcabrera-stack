@@ -3,10 +3,10 @@ import type {
   ColumnPinningState,
   DataKey,
   TableColumn,
-} from '@repo/ui/components/Table/Table.types';
+} from '@lcabrera/ui/components/Table/Table.types';
 
-import { syncColumnOrderWithPinning } from '@repo/ui/components/Table/utils';
-import { getNewPinningBasedOnColumnKey } from '@repo/ui/components/Table/utils/getNewPinningBasedOnColumnKey.util';
+import { syncColumnOrderWithPinning } from '@lcabrera/ui/components/Table/utils';
+import { getNewPinningBasedOnColumnKey } from '@lcabrera/ui/components/Table/utils/getNewPinningBasedOnColumnKey.util';
 
 type ResolveColumnPinningUpdateArgs<TData> = {
   readonly columnKey: DataKey<TData>;

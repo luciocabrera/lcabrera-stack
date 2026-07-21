@@ -1,4 +1,4 @@
-import { TableDataResolver } from '@repo/ui/components/Table/TableDataResolver';
+import { TableDataResolver } from '@lcabrera/ui/components/Table/TableDataResolver';
 import { Suspense } from 'react';
 
 import type { TableSuspenseBoundaryProps } from './TableSuspenseBoundary.types';

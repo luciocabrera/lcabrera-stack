@@ -89,7 +89,7 @@ type MockTabsProps = {
   }[];
 };
 
-vi.mock('@repo/ui/components/Button', () => ({
+vi.mock('@lcabrera/ui/components/Button', () => ({
   Button: ({ children, isDisabled, onClick, title }: ButtonProps) => (
     <button disabled={isDisabled} onClick={onClick} title={title} type='button'>
       {children}
@@ -97,15 +97,15 @@ vi.mock('@repo/ui/components/Button', () => ({
   ),
 }));
 
-vi.mock('@repo/ui/components/Icons', () => ({
+vi.mock('@lcabrera/ui/components/Icons', () => ({
   SettingsIcon: () => <span>Settings icon</span>,
 }));
 
-vi.mock('@repo/ui/components/NotificationCenter', () => ({
+vi.mock('@lcabrera/ui/components/NotificationCenter', () => ({
   NotificationCenter: () => <div>Notification center</div>,
 }));
 
-vi.mock('@repo/ui/components/SidePanel', () => ({
+vi.mock('@lcabrera/ui/components/SidePanel', () => ({
   SidePanel: ({ children, isPinned, onClose }: MockSidePanelProps) => (
     <div data-pinned={String(isPinned)} data-testid='side-panel'>
       <button onClick={onClose} type='button'>
@@ -145,7 +145,7 @@ vi.mock('@repo/ui/components/SidePanel', () => ({
   ),
 }));
 
-vi.mock('@repo/ui/components/Tabs', () => ({
+vi.mock('@lcabrera/ui/components/Tabs', () => ({
   Tabs: ({ onSelectTab, selectedTab, tabs }: MockTabsProps) => (
     <div data-selected-tab={selectedTab}>
       <button
@@ -222,7 +222,7 @@ vi.mock('./TableDrawerContext/selectors', () => ({
   useGetColumnFilters: () => tableColumnFiltersMock,
 }));
 
-vi.mock('@repo/ui/contexts/NotificationContext/actions', () => ({
+vi.mock('@lcabrera/ui/contexts/NotificationContext/actions', () => ({
   useNotifyAction: () => notifyMock,
 }));
 

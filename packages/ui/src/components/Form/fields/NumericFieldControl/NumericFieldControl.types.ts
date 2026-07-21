@@ -1,7 +1,7 @@
 import type {
   CurrencyFieldDef,
   NumberFieldDef,
-} from '@repo/ui/components/Form/Form.types';
+} from '@lcabrera/ui/components/Form/Form.types';
 import type { ComponentProps, ReactNode } from 'react';
 
 export type NumericFieldControlProps<TValues extends Record<string, unknown>> =

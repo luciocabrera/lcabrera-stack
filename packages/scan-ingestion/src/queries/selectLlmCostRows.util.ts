@@ -1,7 +1,7 @@
-import type { QuerySort } from '@repo/server/db/query-builder/query-builder.types';
+import type { QuerySort } from '@lcabrera/server/db/query-builder/query-builder.types';
 import type { QueryResultRow } from 'pg';
 
-import { selectRows } from '@repo/server/db/select-rows.util';
+import { selectRows } from '@lcabrera/server/db/select-rows.util';
 
 import { LLM_USAGE_SCHEMA } from './llmUsage.constants.ts';
 

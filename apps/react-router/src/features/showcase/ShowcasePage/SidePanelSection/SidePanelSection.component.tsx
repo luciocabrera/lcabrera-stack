@@ -1,25 +1,25 @@
-import { Button } from '@repo/ui/components/Button';
+import { Button } from '@lcabrera/ui/components/Button';
 import {
   Card,
   CardBody,
   CardDescription,
   CardTitle,
-} from '@repo/ui/components/Card';
+} from '@lcabrera/ui/components/Card';
 import {
   InfoIcon,
   MenuCloseIcon,
   MenuIcon,
   SettingsIcon,
   SuccessIcon,
-} from '@repo/ui/components/Icons';
+} from '@lcabrera/ui/components/Icons';
 import {
   SidePanel,
   SidePanelBody,
   SidePanelFooter,
   SidePanelHeader,
   SidePanelTitle,
-} from '@repo/ui/components/SidePanel';
-import { ICON_SIZE_MD } from '@repo/ui/design-system/constants';
+} from '@lcabrera/ui/components/SidePanel';
+import { ICON_SIZE_MD } from '@lcabrera/ui/design-system/constants';
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 

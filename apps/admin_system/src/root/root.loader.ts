@@ -1,6 +1,6 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
-import { getRootLoaderData } from '@repo/ui/routing/getRootLoaderData.util';
+import { getRootLoaderData } from '@lcabrera/ui/routing/getRootLoaderData.util';
 
 import { APP_ID } from '@/constants/app.constants';
 

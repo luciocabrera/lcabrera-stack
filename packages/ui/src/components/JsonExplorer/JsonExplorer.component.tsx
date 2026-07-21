@@ -1,6 +1,6 @@
-import { CopyButton } from '@repo/ui/components/CopyButton';
-import { StaticTable } from '@repo/ui/components/StaticTable';
-import { Tabs } from '@repo/ui/components/Tabs';
+import { CopyButton } from '@lcabrera/ui/components/CopyButton';
+import { StaticTable } from '@lcabrera/ui/components/StaticTable';
+import { Tabs } from '@lcabrera/ui/components/Tabs';
 import * as stylex from '@stylexjs/stylex';
 
 import type { JsonExplorerProps } from './JsonExplorer.types';

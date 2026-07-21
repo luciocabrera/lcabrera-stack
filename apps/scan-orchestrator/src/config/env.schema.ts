@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-// DB_* vars are validated separately by @repo/server's own env.schema
+// DB_* vars are validated separately by @lcabrera/server's own env.schema
 // (getPool() reads them independently) — this schema only covers what's
 // genuinely local to this process: the WS port, the Agent SDK credential
 // (per TECH_SPEC §2.6's "apps/scan-orchestrator needs its own Zod-validated

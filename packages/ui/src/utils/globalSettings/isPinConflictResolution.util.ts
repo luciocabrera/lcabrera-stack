@@ -1,4 +1,4 @@
-import type { PinConflictResolution } from '@repo/ui/types/ui.types';
+import type { PinConflictResolution } from '@lcabrera/ui/types/ui.types';
 
 import { PIN_CONFLICT_VALUES } from './globalSettings.constants';
 

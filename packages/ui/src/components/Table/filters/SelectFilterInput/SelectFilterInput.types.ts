@@ -1,5 +1,5 @@
-import type { DataKey } from '@repo/ui/components/Table/Table.types';
-import type { SelectFilter } from '@repo/ui/types/filterOperators.types';
+import type { DataKey } from '@lcabrera/ui/components/Table/Table.types';
+import type { SelectFilter } from '@lcabrera/ui/types/filterOperators.types';
 
 export type SelectFilterInputProps<TData> = {
   readonly columnKey: DataKey<TData>;

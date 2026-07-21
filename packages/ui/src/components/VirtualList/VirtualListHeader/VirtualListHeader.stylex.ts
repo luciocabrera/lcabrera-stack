@@ -1,5 +1,5 @@
-import { spacing } from '@repo/ui/design-system/tokens/base.stylex';
-import { filterBaseStyles } from '@repo/ui/design-system/tokens/filters.stylex';
+import { spacing } from '@lcabrera/ui/design-system/tokens/base.stylex';
+import { filterBaseStyles } from '@lcabrera/ui/design-system/tokens/filters.stylex';
 import * as stylex from '@stylexjs/stylex';
 
 const localStyles = stylex.create({

@@ -1,9 +1,9 @@
 import {
   useGetColumns,
   useGetNormalizedColumns,
-} from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors';
-import { useSetTableSettingsExpandedFilters } from '@repo/ui/components/Table/contexts/TableConfig/meta/actions';
-import { useGetTableSettingsExpandedFilters } from '@repo/ui/components/Table/contexts/TableConfig/meta/selectors';
+} from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors';
+import { useSetTableSettingsExpandedFilters } from '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions';
+import { useGetTableSettingsExpandedFilters } from '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors';
 import { useState } from 'react';
 
 import { useSetColumnFilters } from '../../TableDrawerContext/actions';

@@ -1,5 +1,5 @@
+import type { TableColumn } from '@lcabrera/ui/components/Table';
 import type { ScanFindingRow } from '@repo/scan-ingestion/queries/getScanFindings.util';
-import type { TableColumn } from '@repo/ui/components/Table';
 
 export const SCAN_FINDINGS_COLUMNS: readonly TableColumn<ScanFindingRow>[] = [
   { dataType: 'string', key: 'severity', label: 'Severity', minWidth: 110 },

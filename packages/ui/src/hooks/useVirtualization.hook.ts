@@ -3,11 +3,11 @@ import type { RefObject } from 'react';
 import {
   DEFAULT_CONTAINER_HEIGHT,
   DEFAULT_ROW_OVERSCAN,
-} from '@repo/ui/constants/virtualization.constants';
+} from '@lcabrera/ui/constants/virtualization.constants';
 import {
   getVerticalVirtualizationWindow,
   setupObservedContainer,
-} from '@repo/ui/hooks/utils';
+} from '@lcabrera/ui/hooks/utils';
 import { useEffect, useState } from 'react';
 
 export type UseVirtualizationArgs = {

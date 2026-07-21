@@ -1,4 +1,4 @@
-import { Title } from '@repo/ui/components/Title/Title.component';
+import { Title } from '@lcabrera/ui/components/Title/Title.component';
 
 import type { TableTitleProps } from './TableTitle.types';
 

@@ -1,4 +1,4 @@
-import type { Pagination } from '@repo/ui/types/ui.types';
+import type { Pagination } from '@lcabrera/ui/types/ui.types';
 
 type OnLoadMore<TResponse> = (params: Pagination) => Promise<TResponse>;
 

@@ -1,9 +1,9 @@
-import type { DataKey } from '@repo/ui/components/Table/Table.types';
+import type { DataKey } from '@lcabrera/ui/components/Table/Table.types';
 
 import {
   useSetColumnSizingWithoutSync,
   useSyncColumnsSizing,
-} from '@repo/ui/components/Table/contexts/TableConfig/columns/actions';
+} from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/actions';
 import { useEffect, useRef, useState } from 'react';
 
 import { startColumnResizeSession } from './utils/startColumnResizeSession.service';

@@ -1,5 +1,5 @@
-import { Form } from '@repo/ui/components/Form';
-import { Modal } from '@repo/ui/components/Modal';
+import { Form } from '@lcabrera/ui/components/Form';
+import { Modal } from '@lcabrera/ui/components/Modal';
 import { useNavigate } from 'react-router';
 
 import type { EnterpriseOrderValues } from '../config';
@@ -9,7 +9,7 @@ import { ENTERPRISE_ORDERS_PATH } from '../config';
 import { buildOrderFormFields } from '../utils/orderFormFields.util';
 
 /**
- * Renders the enterprise-order Form inside a `@repo/ui` Modal, overlaid on the
+ * Renders the enterprise-order Form inside a `@lcabrera/ui` Modal, overlaid on the
  * list route via its `<Outlet/>`. Closing the modal (Esc, backdrop, the header
  * ✕, or the Form's Cancel) returns to the list; a successful action redirects
  * there (or to the new record's view) on its own. The Form posts to the

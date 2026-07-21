@@ -1,4 +1,4 @@
-import { useNotifyAction } from '@repo/ui/contexts/NotificationContext/actions';
+import { useNotifyAction } from '@lcabrera/ui/contexts/NotificationContext/actions';
 import { useEffect, useRef } from 'react';
 import { useRevalidator } from 'react-router';
 

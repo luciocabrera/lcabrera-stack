@@ -1,6 +1,6 @@
-import type { LayoutProps } from '@repo/ui';
+import type { LayoutProps } from '@lcabrera/ui';
 
-import { AppDocument } from '@repo/ui';
+import { AppDocument } from '@lcabrera/ui';
 import { useRouteLoaderData } from 'react-router';
 
 import type { loader as rootLoader } from './root.loader';

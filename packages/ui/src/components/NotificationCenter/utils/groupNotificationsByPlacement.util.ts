@@ -1,4 +1,4 @@
-import type { AppNotification } from '@repo/ui/contexts/NotificationContext';
+import type { AppNotification } from '@lcabrera/ui/contexts/NotificationContext';
 
 import type { NotificationsByPlacement } from '../NotificationCenter.types';
 

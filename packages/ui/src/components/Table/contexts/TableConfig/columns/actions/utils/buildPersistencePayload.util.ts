@@ -6,12 +6,12 @@ import type {
   ColumnVisibilityState,
   SortingState,
   TablePersistenceEntry,
-} from '@repo/ui/components/Table/Table.types';
+} from '@lcabrera/ui/components/Table/Table.types';
 
 import {
   serializeFiltersToURL,
   serializeSortingToURL,
-} from '@repo/ui/utils/urlState';
+} from '@lcabrera/ui/utils/urlState';
 
 type BuildPersistencePayloadArgs<TData> = {
   readonly columnFilters: ColumnFiltersState<TData>;

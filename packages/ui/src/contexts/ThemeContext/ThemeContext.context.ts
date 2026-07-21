@@ -1,4 +1,4 @@
-import type { ThemeContextValue } from '@repo/ui/types/theme.types';
+import type { ThemeContextValue } from '@lcabrera/ui/types/theme.types';
 
 import { createContext } from 'react';
 

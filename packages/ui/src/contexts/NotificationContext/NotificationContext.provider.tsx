@@ -1,4 +1,4 @@
-import { useStore } from '@repo/ui/hooks';
+import { useStore } from '@lcabrera/ui/hooks';
 import { useEffect, useRef } from 'react';
 
 import type {

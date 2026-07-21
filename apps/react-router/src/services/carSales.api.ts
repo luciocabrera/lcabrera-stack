@@ -1,10 +1,10 @@
-import type { SortingState } from '@repo/ui/components/Table';
+import type { SortingState } from '@lcabrera/ui/components/Table';
 
-import { getApiBaseUrl } from '@repo/api/config/get-api-base-url.util';
-import { buildPaginatedQueryParams } from '@repo/api/http/build-paginated-query-params.util';
-import { fetchAndValidate } from '@repo/api/http/fetch-and-validate.util';
-import { createLogger } from '@repo/ui/utils/logger';
-import { isObject } from '@repo/utils/guards/is-object.util';
+import { getApiBaseUrl } from '@lcabrera/api/config/get-api-base-url.util';
+import { buildPaginatedQueryParams } from '@lcabrera/api/http/build-paginated-query-params.util';
+import { fetchAndValidate } from '@lcabrera/api/http/fetch-and-validate.util';
+import { createLogger } from '@lcabrera/ui/utils/logger';
+import { isObject } from '@lcabrera/utils/guards/is-object.util';
 
 import { fakeDelay } from './fakeDelay.util';
 

@@ -1,4 +1,4 @@
-import { filterBaseStyles } from '@repo/ui/design-system/tokens/filters.stylex';
+import { filterBaseStyles } from '@lcabrera/ui/design-system/tokens/filters.stylex';
 import * as stylex from '@stylexjs/stylex';
 
 const localStyles = stylex.create({

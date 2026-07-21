@@ -16,7 +16,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "paths": {
-      "@repo/ui/*": ["./src/*"]
+      "@lcabrera/ui/*": ["./src/*"]
     },
     "resolveJsonModule": true,
     "rootDirs": [".", "./.react-router/types"],

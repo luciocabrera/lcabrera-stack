@@ -2,7 +2,7 @@ import type {
   ColumnFilter,
   DateOperatorType,
   OperatorType,
-} from '@repo/ui/types/filterOperators.types';
+} from '@lcabrera/ui/types/filterOperators.types';
 
 type ResolveDateOperatorChangeArgs = {
   readonly filter?: ColumnFilter;

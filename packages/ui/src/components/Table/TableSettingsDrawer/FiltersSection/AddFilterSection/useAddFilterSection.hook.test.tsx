@@ -3,7 +3,7 @@
 import type {
   ColumnFiltersState,
   TableColumn,
-} from '@repo/ui/components/Table/Table.types';
+} from '@lcabrera/ui/components/Table/Table.types';
 
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -27,19 +27,22 @@ const {
 }));
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/columns/selectors',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors',
   () => ({
     useGetColumns: () => columnsRef.current,
     useGetNormalizedColumns: () => normalizedColumnsRef.current,
   }),
 );
 
-vi.mock('@repo/ui/components/Table/contexts/TableConfig/meta/actions', () => ({
-  useSetTableSettingsExpandedFilters: () => mockSetExpandedFilters,
-}));
+vi.mock(
+  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions',
+  () => ({
+    useSetTableSettingsExpandedFilters: () => mockSetExpandedFilters,
+  }),
+);
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/meta/selectors',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors',
   () => ({
     useGetTableSettingsExpandedFilters: () => expandedFiltersRef.current,
   }),

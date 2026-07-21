@@ -1,7 +1,7 @@
 import {
   DEFAULT_MAX_COLUMN_WIDTH,
   DEFAULT_MIN_COLUMN_WIDTH,
-} from '@repo/ui/components/Table/Table.constants';
+} from '@lcabrera/ui/components/Table/Table.constants';
 import { describe, expect, it } from 'vitest';
 
 import { createResizeStartData } from './createResizeStartData.util';

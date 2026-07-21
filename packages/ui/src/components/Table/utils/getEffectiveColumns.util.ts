@@ -3,7 +3,7 @@ import type {
   ColumnPinningState,
   ColumnVisibilityState,
   TableColumn,
-} from '@repo/ui/components/Table/Table.types';
+} from '@lcabrera/ui/components/Table/Table.types';
 
 type GetEffectiveColumnsArgs<TData> = {
   readonly columnOrder?: ColumnOrderState<TData>;

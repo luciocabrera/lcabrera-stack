@@ -1,11 +1,11 @@
 import type {
   ColumnFiltersState,
   DataKey,
-} from '@repo/ui/components/Table/Table.types';
-import type { ColumnFilter } from '@repo/ui/types/filterOperators.types';
+} from '@lcabrera/ui/components/Table/Table.types';
+import type { ColumnFilter } from '@lcabrera/ui/types/filterOperators.types';
 
-import { getNewColumnFiltersBasedOnColumnKey } from '@repo/ui/components/Table/utils/getNewColumnFiltersBasedOnColumnKey.util';
-import { serializeFiltersToURL } from '@repo/ui/utils/urlState';
+import { getNewColumnFiltersBasedOnColumnKey } from '@lcabrera/ui/components/Table/utils/getNewColumnFiltersBasedOnColumnKey.util';
+import { serializeFiltersToURL } from '@lcabrera/ui/utils/urlState';
 
 type ResolveColumnFilterUpdateArgs<TData> = {
   readonly columnFiltersState?: ColumnFiltersState<TData>;

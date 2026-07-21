@@ -1,4 +1,4 @@
-import { Button } from '@repo/ui/components/Button';
+import { Button } from '@lcabrera/ui/components/Button';
 import { Form } from 'react-router';
 
 import { LOGOUT_ROUTE } from '@/auth/auth.constants';

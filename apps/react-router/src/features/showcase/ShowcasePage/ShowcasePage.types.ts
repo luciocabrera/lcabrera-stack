@@ -1,4 +1,4 @@
-import type { TableColumnDataType } from '@repo/ui/components/Table/Table.types';
+import type { TableColumnDataType } from '@lcabrera/ui/components/Table/Table.types';
 
 export type GenerateCellValueArgs = {
   readonly colIdx: number;

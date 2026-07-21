@@ -11,7 +11,7 @@ import {
 } from './coverage-workspaces.mjs';
 
 // The invariant these assertions defend: every never-baseline package is
-// visible in both coverage lanes. `@repo/api` fell out of the PR comment when
+// visible in both coverage lanes. `@lcabrera/api` fell out of the PR comment when
 // the runtime split (ADR-038) turned one `data-access` row into `server`, and
 // nothing noticed for the life of the split — the job stayed green, the fallow
 // merge kept the package, and a report missing a row reads exactly like a

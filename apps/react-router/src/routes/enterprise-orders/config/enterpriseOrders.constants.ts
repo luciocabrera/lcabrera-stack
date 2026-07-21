@@ -2,7 +2,7 @@
  * Entity configuration for the `enterprise_orders` table.
  *
  * App-local, data + pure rules only — NO SQL and NO `pg` here. The generic
- * `@repo/server` query builders/executors receive this configuration
+ * `@lcabrera/server` query builders/executors receive this configuration
  * (`schema`, `table`, column lists, `allowedColumns`) as plain data; the
  * enum value sets drive the Form select/radio options and the Zod schema.
  *

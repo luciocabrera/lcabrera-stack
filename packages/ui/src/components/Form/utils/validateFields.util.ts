@@ -1,7 +1,7 @@
 import type {
   FieldErrors,
   LeafFieldDef,
-} from '@repo/ui/components/Form/Form.types';
+} from '@lcabrera/ui/components/Form/Form.types';
 
 import { validateField } from './validateField.util';
 

@@ -1,13 +1,13 @@
-import type { DraggableItem } from '@repo/ui/components/DraggableList';
-import type { ColumnOrderState } from '@repo/ui/components/Table/Table.types';
+import type { DraggableItem } from '@lcabrera/ui/components/DraggableList';
+import type { ColumnOrderState } from '@lcabrera/ui/components/Table/Table.types';
 
-import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { useTableConfigContextValue } from '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import {
   recalculatePinSides,
   restoreStaticColumnOrder,
-} from '@repo/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
-import { useTableDrawerContextValue } from '@repo/ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
-import { useGetGlobalOrderConflictResolutionPreference } from '@repo/ui/contexts/GlobalSettingsContext/selectors';
+} from '@lcabrera/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
+import { useTableDrawerContextValue } from '@lcabrera/ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
+import { useGetGlobalOrderConflictResolutionPreference } from '@lcabrera/ui/contexts/GlobalSettingsContext/selectors';
 
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
 import { useAcceptOrderConflict } from './useAcceptOrderConflict.hook';

@@ -1,5 +1,5 @@
-import type { CardColor } from '@repo/ui/components/Card';
-import type { TStore } from '@repo/ui/hooks';
+import type { CardColor } from '@lcabrera/ui/components/Card';
+import type { TStore } from '@lcabrera/ui/hooks';
 import type { ReactNode } from 'react';
 
 export type AppNotification = {

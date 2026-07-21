@@ -1,5 +1,5 @@
+import { closePool, getPool } from '@lcabrera/server/db/get-pool.util';
 import { makeTempDirectory } from '@repo/scan-ingestion/testing/makeTempDirectory.util.ts';
-import { closePool, getPool } from '@repo/server/db/get-pool.util';
 import { rmSync } from 'node:fs';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
@@ -67,7 +67,7 @@ describe('getProjectWorkspaces + workspace attribution (ADR-021)', () => {
       projectId,
       userId: systemUserId,
       workspaces: [
-        { workspace_name: '@repo/ui', workspace_path: 'packages/ui' },
+        { workspace_name: '@lcabrera/ui', workspace_path: 'packages/ui' },
         {
           workspace_name: '@repo/ui-nested',
           workspace_path: 'packages/ui/nested',
@@ -144,7 +144,7 @@ describe('getProjectWorkspaces + workspace attribution (ADR-021)', () => {
     ]);
     // The nameless workspace round-trips as SQL NULL.
     expect(workspaces[0]?.workspace_name).toBeNull();
-    expect(workspaces[1]?.workspace_name).toBe('@repo/ui');
+    expect(workspaces[1]?.workspace_name).toBe('@lcabrera/ui');
     expect(workspaces[2]?.workspace_name).toBe('@repo/ui-nested');
   });
 

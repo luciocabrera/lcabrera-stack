@@ -4,7 +4,7 @@ Generic, schema/table-agnostic Postgres query construction for the common
 single-table shapes — reads (flat list view, optional filter/sort/pagination;
 count; distinct) and writes (insert/update/delete; max-value) — the pattern
 every `scan-ingestion` list/rollup query used to hand-roll per file. Pure
-functions only; no DB access lives in this folder (see `@repo/server/db/get-pool.util`
+functions only; no DB access lives in this folder (see `@lcabrera/server/db/get-pool.util`
 for that) — callers execute the returned `{ text, values }` themselves (or use
 the `../*.util.ts` executors that pair each builder with `getPool`).
 
@@ -94,8 +94,8 @@ is).
 ## Usage
 
 ```ts
-import { buildSelectQuery } from '@repo/server/db/query-builder/build-select-query.util';
-import { getPool } from '@repo/server/db/get-pool.util';
+import { buildSelectQuery } from '@lcabrera/server/db/query-builder/build-select-query.util';
+import { getPool } from '@lcabrera/server/db/get-pool.util';
 
 const { text, values } = buildSelectQuery({
   fields: ['scanner_id', 'display_name', 'total_cost_usd'],

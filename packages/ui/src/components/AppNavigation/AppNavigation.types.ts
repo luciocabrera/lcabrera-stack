@@ -1,4 +1,4 @@
-import type { NavbarItemConfig } from '@repo/ui/components/Navbar/Navbar.types';
+import type { NavbarItemConfig } from '@lcabrera/ui/components/Navbar/Navbar.types';
 import type { ReactNode } from 'react';
 
 export type AppNavigationProps = {

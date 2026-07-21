@@ -1,4 +1,4 @@
-import type { FieldOption } from '@repo/ui/components/Form/Form.types';
+import type { FieldOption } from '@lcabrera/ui/components/Form/Form.types';
 
 import type { FieldValidationOpts } from './buildFieldValidation.util';
 

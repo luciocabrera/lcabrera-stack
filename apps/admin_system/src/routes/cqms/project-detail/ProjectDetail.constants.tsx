@@ -1,7 +1,7 @@
+import type { TableColumn } from '@lcabrera/ui/components/Table';
 import type { ProjectRunRow } from '@repo/scan-ingestion/queries/getProjectRuns.util';
-import type { TableColumn } from '@repo/ui/components/Table';
 
-import { StatusBadge } from '@repo/ui/components/StatusBadge';
+import { StatusBadge } from '@lcabrera/ui/components/StatusBadge';
 
 import { resolveRunStatusTone } from '../utils/resolveRunStatusTone.util';
 import { RunLink } from './RunLink';

@@ -1,7 +1,7 @@
+import { getErrorMessage } from '@lcabrera/utils/errors/get-error-message.util';
 import { createScannerDetailTable } from '@repo/scan-ingestion/queries/createScannerDetailTable.util';
 import { registerScanner } from '@repo/scan-ingestion/queries/registerScanner.util';
 import { writeScannerArtifacts } from '@repo/scan-ingestion/registry/writeScannerArtifacts.util';
-import { getErrorMessage } from '@repo/utils/errors/get-error-message.util';
 import { type ActionFunctionArgs, redirect } from 'react-router';
 
 import { requireUser } from '@/auth/requireUser.util';

@@ -1,7 +1,7 @@
+import type { TableColumn } from '@lcabrera/ui/components/Table';
 import type { RoleListViewRow } from '@repo/scan-ingestion/queries/getRoleListView.util';
-import type { TableColumn } from '@repo/ui/components/Table';
 
-import { StatusBadge } from '@repo/ui/components/StatusBadge';
+import { StatusBadge } from '@lcabrera/ui/components/StatusBadge';
 
 export const ROLE_LIST_COLUMNS: readonly TableColumn<RoleListViewRow>[] = [
   {

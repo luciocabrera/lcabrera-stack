@@ -1,5 +1,5 @@
-import { PlusIcon } from '@repo/ui/components/Icons';
-import { NavLink } from '@repo/ui/components/NavLink';
+import { PlusIcon } from '@lcabrera/ui/components/Icons';
+import { NavLink } from '@lcabrera/ui/components/NavLink';
 
 import type { TableCreateLinkProps } from './TableCreateLink.types';
 

@@ -3,11 +3,11 @@
 import type {
   FiltersDataState,
   TableMetaState,
-} from '@repo/ui/components/Table/Table.types';
-import type { TStore } from '@repo/ui/hooks/useStore.hook';
+} from '@lcabrera/ui/components/Table/Table.types';
+import type { TStore } from '@lcabrera/ui/hooks/useStore.hook';
 
-import { DEFAULT_FILTER_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
-import { createPaginatedFetchActionMocks } from '@repo/ui/utils/tests/createPaginatedFetchActionMocks.util';
+import { DEFAULT_FILTER_PAGE_SIZE } from '@lcabrera/ui/components/Table/Table.constants';
+import { createPaginatedFetchActionMocks } from '@lcabrera/ui/utils/tests/createPaginatedFetchActionMocks.util';
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -64,13 +64,13 @@ const getHarness = (): Harness => {
 
 const loggerMock = vi.hoisted(() => ({ error: vi.fn() }));
 
-vi.mock('@repo/ui/utils/logger', () => ({
+vi.mock('@lcabrera/ui/utils/logger', () => ({
   logger: {
     error: loggerMock.error,
   },
 }));
 
-vi.mock('@repo/ui/utils/prefetch/firePrefetch.util', () => ({
+vi.mock('@lcabrera/ui/utils/prefetch/firePrefetch.util', () => ({
   firePrefetch: (...args: Parameters<Harness['firePrefetchMock']>) =>
     getHarness().firePrefetchMock(...args),
 }));

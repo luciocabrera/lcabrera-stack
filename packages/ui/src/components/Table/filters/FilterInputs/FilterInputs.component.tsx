@@ -1,4 +1,4 @@
-import { useGetNormalizedColumn } from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors/useGetNormalizedColumn.hook';
+import { useGetNormalizedColumn } from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors/useGetNormalizedColumn.hook';
 import * as stylex from '@stylexjs/stylex';
 import { Activity, useState } from 'react';
 

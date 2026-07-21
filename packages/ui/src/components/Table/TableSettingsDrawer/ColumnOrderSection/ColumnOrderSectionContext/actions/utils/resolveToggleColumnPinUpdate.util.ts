@@ -3,14 +3,14 @@ import type {
   ColumnPinningState,
   DataKey,
   TableColumn,
-} from '@repo/ui/components/Table/Table.types';
-import type { UnpinConflictResolution } from '@repo/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
-import type { PinSide } from '@repo/ui/types/ui.types';
+} from '@lcabrera/ui/components/Table/Table.types';
+import type { UnpinConflictResolution } from '@lcabrera/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
+import type { PinSide } from '@lcabrera/ui/types/ui.types';
 
 import {
   buildAllOrderedColumns,
   resolveToggleColumnPinIntent,
-} from '@repo/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
+} from '@lcabrera/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 
 export type ResolveToggleColumnPinUpdateResult =
   | {

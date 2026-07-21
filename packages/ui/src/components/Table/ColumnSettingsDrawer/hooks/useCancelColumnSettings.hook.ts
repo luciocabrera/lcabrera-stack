@@ -1,4 +1,4 @@
-import { useGetTableIsColumnSettingsPinned } from '@repo/ui/components/Table/contexts/TableConfig/meta/selectors';
+import { useGetTableIsColumnSettingsPinned } from '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors';
 
 import { useResetAllColumnDrawerSettings } from '../ColumnDrawerContext/actions';
 

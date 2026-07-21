@@ -1,4 +1,4 @@
-import type { GlobalSettingsState } from '@repo/ui/types/globalSettings.types';
+import type { GlobalSettingsState } from '@lcabrera/ui/types/globalSettings.types';
 
 import { GLOBAL_SETTINGS_COOKIE_VERSION } from './globalSettings.constants';
 

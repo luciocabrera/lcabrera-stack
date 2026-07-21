@@ -1,5 +1,5 @@
-import type { VirtualListProviderProps } from '@repo/ui/components/VirtualList/contexts/VirtualListContext.types';
-import type { TStore } from '@repo/ui/hooks/useStore.hook';
+import type { VirtualListProviderProps } from '@lcabrera/ui/components/VirtualList/contexts/VirtualListContext.types';
+import type { TStore } from '@lcabrera/ui/hooks/useStore.hook';
 
 import type { VirtualSelectMetaState } from '../VirtualSelect.types';
 

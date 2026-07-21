@@ -1,4 +1,4 @@
-import type { ColumnFilter } from '@repo/ui/types/filterOperators.types';
+import type { ColumnFilter } from '@lcabrera/ui/types/filterOperators.types';
 
 export const isNumberFilterValid = (
   filter: Extract<ColumnFilter, { type: 'number' }>,

@@ -1,7 +1,7 @@
-import type { InfiniteScroll } from '@repo/ui/types/ui.types';
+import type { InfiniteScroll } from '@lcabrera/ui/types/ui.types';
 import type { RefObject } from 'react';
 
-import { useInfiniteScrollObserver } from '@repo/ui/hooks';
+import { useInfiniteScrollObserver } from '@lcabrera/ui/hooks';
 
 type UseInfiniteScrollArgs<TData, TResponse> = InfiniteScroll<
   TData,

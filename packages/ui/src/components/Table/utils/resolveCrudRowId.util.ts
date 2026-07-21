@@ -1,6 +1,6 @@
-import type { TableColumn } from '@repo/ui/components/Table/Table.types';
+import type { TableColumn } from '@lcabrera/ui/components/Table/Table.types';
 
-import { PRIMARY_KEY_ID_DELIMITER } from '@repo/ui/components/Table/Table.constants';
+import { PRIMARY_KEY_ID_DELIMITER } from '@lcabrera/ui/components/Table/Table.constants';
 
 import { resolvePrimaryKeyColumnKeys } from './resolvePrimaryKeyColumnKeys.util';
 
