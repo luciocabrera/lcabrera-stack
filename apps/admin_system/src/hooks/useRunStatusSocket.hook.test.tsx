@@ -34,7 +34,7 @@ class FakeWebSocket {
   // Two positional params, matching the real WebSocket.addEventListener
   // signature exactly — this class stands in for the global WebSocket the
   // hook under test constructs, so it must accept calls the same way.
-  // eslint-disable-next-line local-rules/destructuring-for-functions
+  // eslint-disable-next-line local-rules/destructuring-for-functions -- mirrors EventTarget's addEventListener(type, listener), fixed by the API this fake stands in for
   addEventListener(event: string, handler: Listener): void {
     if (!this.listeners.has(event)) this.listeners.set(event, new Set());
     this.listeners.get(event)?.add(handler);

@@ -49,7 +49,7 @@ export const createApp = ({ envConfig, pool }: CreateAppArgs): Express => {
   apiRouter.use('/db-sanity', createDbSanityRoute({ pool }));
 
   app.use('/api', apiRouter);
-  // eslint-disable-next-line local-rules/destructuring-for-functions
+  // eslint-disable-next-line local-rules/destructuring-for-functions -- express's app.use handler signature is fixed by the framework
   app.use((_request, _response, next) => {
     next(new HttpError({ message: 'Route not found', statusCode: 404 }));
   });
