@@ -10,13 +10,13 @@ loader, metadata, error boundary, and page component.
 - `layout.ts` re-exports the route layout and error boundary when a route uses a
   layout wrapper.
 - Route-local implementation files follow the repo suffix conventions:
-  `*.loader.ts`, `*.meta.ts`, `*.layout.tsx`, `*.errorBoundary.tsx`,
+  `*.loader.ts`, `*.meta.ts`, `*.layout.tsx`, `*.error-boundary.tsx`,
   `*.component.tsx`, `*.constants.ts`, `*.types.ts`, `*.util.ts`,
   `*.stylex.ts`.
 
 ## Shared Loader Utilities
 
-- `utils/readTableLoaderStateFromRequest.util.ts` centralizes table loader
+- `@repo/ui/routing/readTableLoaderStateFromRequest.util.ts` centralizes table loader
   bootstrap state (URL + cookie merge, standalone sort/filter params) used by
   table-backed routes.
 

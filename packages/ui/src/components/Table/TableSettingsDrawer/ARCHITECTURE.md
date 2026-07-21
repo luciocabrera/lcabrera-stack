@@ -76,7 +76,7 @@ TableSettingsDrawer/
 ├── FiltersSection/                        → Multi-filter add/remove/expand/validate
 │   ├── FiltersSection.component.tsx        → Orchestrator
 │   ├── index.ts
-│   ├── validateFilter.util.ts
+│   ├── FiltersSection/utils/isFilterValid.util.ts
 │   ├── AddFilterSection/                  → VirtualSelect for adding filters
 │   ├── ActiveFiltersList/                 → Expandable filter items with FilterInputs
 │   └── FiltersSectionToolbar/             → Expand/collapse/clear/reset filter (toolbar + footer)
@@ -93,7 +93,6 @@ TableSettingsDrawer/
 └── ColumnOrderSection/                    → Drag-drop column order + pin + visibility
     ├── ColumnOrderSection.component.tsx    → DraggableList + conflict modals
     ├── ColumnOrderSection.types.ts         → Conflict resolution types
-    ├── ColumnOrderSection.stylex.ts
     ├── index.ts
     ├── ColumnOrderSectionContext/          → Nested context for modal state
     ├── ColumnOrderSectionToolbar/          → Order/clear/reset (toolbar + footer)

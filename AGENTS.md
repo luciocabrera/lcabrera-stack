@@ -70,23 +70,27 @@ All source paths below (e.g. `src/components/`) are relative to `apps/react-rout
 
 ```
 src/
-├── components/          # Reusable UI components (Button, Card, Modal, Table, etc.)
-│   ├── Table/           # Enterprise data table with custom store architecture
-│   └── PATTERNS.md      # Naming conventions, StyleX order, drawer-section pattern
-├── constants/           # App-level constants
-├── contexts/            # App-level contexts (GlobalSettings, Notification, Theme)
-├── design-system/       # StyleX tokens, themes, design constants
+├── auth/                # Route auth helpers (token/credential verification)
+├── constants/           # App-level constants (APP_ID — see its ARCHITECTURE.md)
 ├── features/            # Route-isolated feature modules (e.g. showcase/)
-├── hooks/               # Shared hooks (useStore, useVirtualization, useTheme, ...)
+├── root/                # App shell — layout, error boundary, navigation
 ├── routes/              # React Router route modules (loaders, actions, components)
 ├── services/            # External API integrations (*.api.ts)
-├── types/               # Global type definitions
-├── utils/               # Shared utilities (formatters, storage, URL state)
 ├── INVENTORY.md         # Artifact catalog — consult before creating anything new
+├── App.tsx              # App component
 ├── root.tsx             # App root with providers
 ├── routes.ts            # Route configuration
 └── entry.server.tsx     # SSR entry point
 ```
+
+**This app is deliberately thin.** Components, hooks, contexts, design tokens,
+shared utils and the Table live in `@repo/ui`; pure helpers in `@repo/utils`.
+The app no longer has `components/`, `hooks/`, `contexts/`, `design-system/`,
+`types/` or a populated `utils/` — so when a rule below says "the component
+directory", that is `packages/ui/src/components/`. Reach for the package
+inventories first:
+[`packages/ui/src/INVENTORY.md`](packages/ui/src/INVENTORY.md),
+[`packages/ui/src/PATTERNS.md`](packages/ui/src/PATTERNS.md).
 
 ---
 
@@ -340,10 +344,9 @@ Before making **any** code change, read every `ARCHITECTURE.md` that covers the 
 
 **Where to look:**
 
-- The component/hook/util directory being modified (e.g. `src/components/Table/ARCHITECTURE.md`)
-- Parent directories if the change crosses boundaries (e.g. `src/hooks/ARCHITECTURE.md`)
-- Shared type files (`src/types/ARCHITECTURE.md`) when filter or UI types are involved
-- `src/components/PATTERNS.md` — always read this before creating or modifying any component; it defines naming conventions, StyleX composition order, the drawer-section pattern, filter contract, context+store pattern, and props-forwarding rules
+- The component/hook/util directory being modified (e.g. `packages/ui/src/components/Table/ARCHITECTURE.md`)
+- Parent directories if the change crosses boundaries (e.g. `packages/ui/src/hooks/ARCHITECTURE.md`)
+- `packages/ui/src/PATTERNS.md` — always read this before creating or modifying any component; it defines naming conventions, StyleX composition order, the drawer-section pattern, filter contract, context+store pattern, and props-forwarding rules
 - `docs/decisions/` — read the relevant ADR(s) before working in an area they cover: Modal → ADR-001, Tooltip → ADR-002, store → ADR-003, memoization/React Compiler → ADR-004, styling → ADR-005, infinite-scroll prefetch → ADR-006, barrel-export boundaries → ADR-007, primary-key sort tiebreaker / columns-derived id → ADR-008, filter-options fetch descriptors → ADR-009, cookie persistence via `/_action/persist-cookie` → ADR-010, grid interaction architecture (capability/command/surface) → ADR-011, column width → ADR-012
 
 If no `ARCHITECTURE.md` exists yet for the area you are changing, create one **before** implementing.
@@ -445,11 +448,11 @@ After the quality gate passes, update every doc affected by the change:
 - **Props added/removed** → update the Props table in the component's `ARCHITECTURE.md`.
 - **Render flow changed** → update the relevant Mermaid diagram.
 - **New hook/util introduced** → add it to the parent directory `ARCHITECTURE.md` and create its own if the directory is new.
-- **Type added/changed** → update `src/types/ARCHITECTURE.md`.
+- **Type added/changed** → update the `ARCHITECTURE.md` of the directory that owns the type.
 - **New dependency added** → update the Dependencies diagram in the affected `ARCHITECTURE.md`.
-- **New naming/structural convention established** → update `src/components/PATTERNS.md` and the matching `.claude/rules/` file.
+- **New naming/structural convention established** → update `packages/ui/src/PATTERNS.md` and the matching `.claude/rules/` file.
 - **New architectural decision made** → add a new ADR to `docs/decisions/` following the ADR-NNN naming scheme, and add it to the ADR map in this file.
-- **New artifact created or existing artifact enhanced/renamed** → update the relevant row in `src/INVENTORY.md`.
+- **New artifact created or existing artifact enhanced/renamed** → update the relevant row in the owning workspace's `INVENTORY.md` (`packages/ui/src/`, `packages/server/src/`, `apps/react-router/src/`, …).
 
 Documentation updates must be part of the **same commit** as the code change.
 

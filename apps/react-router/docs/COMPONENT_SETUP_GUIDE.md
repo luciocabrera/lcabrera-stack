@@ -178,7 +178,7 @@ export type { ComponentTwoProps } from './ComponentTwo';
 ### Step 1: Create Directory Structure
 
 ```bash
-mkdir src/components/ComponentName
+mkdir packages/ui/src/components/ComponentName
 ```
 
 ### Step 2: Create Types File

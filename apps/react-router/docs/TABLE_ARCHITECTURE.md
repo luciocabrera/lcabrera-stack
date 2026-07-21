@@ -61,7 +61,7 @@ The Table component implements a scalable, performant data table with advanced f
 
 The foundation is a custom store hook that wraps React's `useSyncExternalStore`:
 
-**Location**: `src/hooks/useStore.hook.ts`
+**Location**: `packages/ui/src/hooks/useStore.hook.ts`
 
 ```typescript
 export type TStore<TData> = {
@@ -442,7 +442,7 @@ export const TableHeaderCell = <TData,>({ columnKey }: Props<TData>) => {
 
 ### 1. Virtualization
 
-**Location**: `src/hooks/useVirtualization.hook.ts`
+**Location**: `packages/ui/src/hooks/useVirtualization.hook.ts`
 
 **Purpose**: Render only visible rows for performance
 
@@ -480,7 +480,7 @@ return (
 
 ### 2. Infinite Scroll
 
-**Location**: `src/components/Table/hooks/useInfiniteScroll.hook.ts`
+**Location**: `packages/ui/src/components/Table/hooks/useInfiniteScroll.hook.ts`
 
 **Purpose**: Load more data when user scrolls near bottom
 

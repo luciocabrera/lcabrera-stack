@@ -18,7 +18,7 @@ Card/
 ├── CardTitle/               → h3 heading with optional icon
 │   ├── index.ts
 │   ├── CardTitle.component.tsx
-│   ├── CardTitle.types.tsx  → extends h3 + icon?: ReactNode
+│   ├── CardTitle.types.ts  → extends h3 + icon?: ReactNode
 │   └── CardTitle.stylex.ts
 │
 ├── CardDescription/         → Paragraph text below title

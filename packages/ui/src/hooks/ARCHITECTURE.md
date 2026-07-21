@@ -8,7 +8,6 @@ Custom React hooks shared across the application.
 hooks/
 ├── index.ts                              → Barrel export
 ├── useClickOutside.hook.ts               → Detect mousedown outside a DOM element
-├── useColumnVirtualization.hook.ts       → Horizontal virtual-scroll geometry computation
 ├── useElementSize.hook.ts                → Track a ref element's client size via ResizeObserver (SSR-safe)
 ├── useInfiniteScrollObserver.hook.ts     → IntersectionObserver sentinel trigger for infinite scroll
 ├── useNotifyOnError.hook.ts              → Fire error toast whenever error identity changes
@@ -19,25 +18,24 @@ hooks/
 ├── useVirtualization.hook.ts             → Vertical virtual-scroll geometry computation (ResizeObserver-based)
 └── utils/
   ├── ARCHITECTURE.md                   → Hook-local utility architecture
-  ├── findFirstOutOfViewIndex.util.ts   → Binary search for first start >= viewport end
-  ├── findFirstVisibleIndex.util.ts     → Binary search for first right-edge > viewport start
   └── index.ts                          → Utility barrel exports
 ```
 
 ## Hook Summary
 
-| Hook                        | Category      | Returns                                        | Key dependency                                |
-| --------------------------- | ------------- | ---------------------------------------------- | --------------------------------------------- |
-| `useClickOutside`           | DOM event     | `void`                                         | `document` mousedown                          |
-| `useColumnVirtualization`   | Layout/scroll | `{ startIndex, endIndex, leftSpacerWidth, … }` | `ResizeObserver` + scroll events on container |
-| `useElementSize`            | Layout        | `{ height, width }`                            | `useResizeObserver` on the ref element        |
-| `useResizeObserver`         | Layout        | `void`                                         | `ResizeObserver` on a lazily-resolved target  |
-| `useInfiniteScrollObserver` | Layout/scroll | `void`                                         | `IntersectionObserver` on a sentinel element  |
-| `useNotifyOnError`          | Notification  | `void`                                         | `useNotifyAction`, `useEffect`                |
-| `useStore`                  | State mgmt    | `TStore<TData>`                                | `useRef`, `shallowEqual`                      |
-| `useStoreSelector`          | State mgmt    | `TSelected`                                    | `useSyncExternalStore`, `TStore`              |
-| `useTheme`                  | Context       | `ThemeContextValue`                            | `ThemeContext`, `use()`                       |
-| `useVirtualization`         | Layout/scroll | `{ startIndex, endIndex, offsetY, … }`         | `ResizeObserver` + RAF-batched scroll events  |
+| Hook                        | Category      | Returns                                | Key dependency                               |
+| --------------------------- | ------------- | -------------------------------------- | -------------------------------------------- |
+| `useClickOutside`           | DOM event     | `void`                                 | `document` mousedown                         |
+| `useElementSize`            | Layout        | `{ height, width }`                    | `useResizeObserver` on the ref element       |
+| `useResizeObserver`         | Layout        | `void`                                 | `ResizeObserver` on a lazily-resolved target |
+| `useInfiniteScrollObserver` | Layout/scroll | `void`                                 | `IntersectionObserver` on a sentinel element |
+| `useNotifyOnError`          | Notification  | `void`                                 | `useNotifyAction`, `useEffect`               |
+| `useStore`                  | State mgmt    | `TStore<TData>`                        | `useRef`, `isShallowEqual`                   |
+| `useStoreSelector`          | State mgmt    | `TSelected`                            | `useSyncExternalStore`, `TStore`             |
+| `useTheme`                  | Context       | `ThemeContextValue`                    | `ThemeContext`, `use()`                      |
+| `useVirtualization`         | Layout/scroll | `{ startIndex, endIndex, offsetY, … }` | `ResizeObserver` + RAF-batched scroll events |
+| `useBackNavigate`           | Navigation    | `(fallbackTo: string) => void`         | `useNavigate`, `history.state.idx`           |
+| `usePersistCookieAction`    | Persistence   | `(entries) => void`                    | `useFetcher` → `/_action/persist-cookie`     |
 
 ---
 
@@ -71,96 +69,6 @@ graph TD
 | `onClickOutside` | `() => void`                     | Called on outside mousedown       |
 
 > Both `ref` and `onClickOutside` are dependencies of the `useEffect`. Consumers should stabilise `onClickOutside` with `useCallback` to avoid re-registering the listener on every render.
-
----
-
-## `useColumnVirtualization`
-
-Computes the horizontal virtual-scroll window for a list of columns with
-variable widths. Mirrors the geometry logic of `useVirtualization` but for
-the X-axis and variable-width items.
-
-Implementation details:
-
-- Initializes `containerWidth` from `containerRef.current.offsetWidth` when
-  available, falling back to `defaultContainerWidth` only when measurement is
-  unavailable.
-- Uses isomorphic layout effect so initial width/scroll sync runs before paint
-  on the client, reducing first-frame layout shift.
-- Attempts an immediate `offsetWidth` measurement on mount (fast path); falls
-  through when the measurement returns 0 (e.g. due to CSS `container-type:size`
-  containment on an ancestor requiring an extra browser layout pass).
-- Installs a `ResizeObserver` on the container element instead of listening to
-  `window.resize`. `ResizeObserver` fires after the browser resolves layout
-  (including containment passes), covers initial mount, and tracks container
-  size changes that do not trigger a window resize (sidebar toggles, panel
-  resizes, etc.).
-- Syncs initial `scrollLeft` on mount so restored horizontal position is
-  reflected before first user interaction.
-- Uses a passive scroll listener to avoid blocking native scrolling.
-- Batches scroll-driven `scrollLeft` updates with `requestAnimationFrame` to
-  reduce re-render pressure during rapid horizontal scrolling.
-- Reuses `setupObservedContainer()` from `hooks/utils` for shared
-  ResizeObserver + scroll subscription wiring.
-- Memoizes cumulative column start offsets and resolves visible boundaries via
-  binary search.
-- Binary-search logic is extracted to `hooks/utils/` as reusable pure utils.
-
-### Signature
-
-```ts
-useColumnVirtualization(args: UseColumnVirtualizationArgs): UseColumnVirtualizationReturn
-```
-
-### `UseColumnVirtualizationArgs`
-
-| Field                   | Type                             | Default | Description                                     |
-| ----------------------- | -------------------------------- | ------- | ----------------------------------------------- |
-| `columnWidths`          | `readonly number[]`              | —       | Pixel widths of the non-pinned (center) columns |
-| `containerRef`          | `RefObject<HTMLElement \| null>` | —       | Scrollable container element                    |
-| `defaultContainerWidth` | `number`                         | `800`   | Fallback width before DOM measurement           |
-| `overscan`              | `number`                         | `2`     | Extra columns rendered beyond each visible edge |
-
-### `UseColumnVirtualizationReturn`
-
-| Field              | Type     | Description                                               |
-| ------------------ | -------- | --------------------------------------------------------- |
-| `startIndex`       | `number` | First rendered center-column index (inclusive)            |
-| `endIndex`         | `number` | Last rendered center-column index (exclusive)             |
-| `leftSpacerWidth`  | `number` | Pixel width of the spacer cell inserted before the window |
-| `rightSpacerWidth` | `number` | Pixel width of the spacer cell inserted after the window  |
-| `totalWidth`       | `number` | Sum of all center-column widths                           |
-
-### Geometry
-
-```
-←──────────────── totalWidth ─────────────────→
-┌──────────────────────────────────────────────┐
-│ [skipped]  │  rendered window  │  [skipped]  │
-│← leftSpacer→← startIdx…endIdx →← rightSpacer→│
-└──────────────────────────────────────────────┘
-       ↑ container viewport ↑
-```
-
-### Usage in `TableHeader` / `TableBody`
-
-```tsx
-const { startIndex, endIndex, leftSpacerWidth, rightSpacerWidth } =
-  useColumnVirtualization({
-    columnWidths,
-    containerRef,
-    overscan,
-  });
-
-// Per row:
-[
-  ...leftPinnedCells,
-  leftSpacerWidth > 0 && <SpacerCell width={leftSpacerWidth} />,
-  ...centerCols.slice(startIndex, endIndex).map(renderCell),
-  rightSpacerWidth > 0 && <SpacerCell width={rightSpacerWidth} />,
-  ...rightPinnedCells,
-];
-```
 
 ---
 

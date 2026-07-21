@@ -28,5 +28,5 @@ Provides a central place to configure app-level preferences that apply to every 
 
 ## Implementation Notes
 
-- Repeated option-card markup is centralized in [src/routes/settings/SettingsOptionSection.component.tsx](src/routes/settings/SettingsOptionSection.component.tsx) with its props in [src/routes/settings/SettingsOptionSection.types.ts](src/routes/settings/SettingsOptionSection.types.ts).
-- `Settings.component.tsx` now contains only the route component and composes `SettingsOptionSection` instances for each option group.
+- The route is a thin re-export: `root.ts` points at `@repo/ui`'s `Settings` component. Nothing else lives here.
+- The implementation — `Settings.component.tsx`, the repeated option-card markup in `SettingsOptionSection.component.tsx`, and its props type — is in `packages/ui/src/components/Settings/`.

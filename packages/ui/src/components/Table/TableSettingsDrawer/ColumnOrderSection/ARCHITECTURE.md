@@ -84,7 +84,7 @@ ColumnOrderSection/
     ├── applyPin.util.ts                   → Apply pin respecting static columns
     ├── buildAllOrderedColumns.util.ts     → Build complete ordered column list
     ├── filterSettingsColumns.util.ts      → Columns manageable in the section (shared by header + body)
-    ├── detectPinOrderConflict.util.ts     → Detect order/pinning conflicts
+    ├── utils/getHasPinOrderConflict.util.ts     → Detect order/pinning conflicts
     ├── getIsContiguousPin.util.ts         → Check pin contiguity
     ├── insertAdjacentToPinnedGroup.util.ts → Insert next to pinned group
     ├── recalculatePinSides.util.ts        → Reassign left/right after reorder
@@ -224,7 +224,7 @@ Actions in ColumnOrderSectionContext read/write to both stores.
 | `buildAllOrderedColumns`       | Merge columnOrder with remaining columns                                                             |
 | `createDraggableItems`         | Maps ordered columns to draggable entries and delegates row content rendering                        |
 | `derivePinSideResolutionState` | Resolve pin-side choice to direct update or conflict, shared by drawer + header                      |
-| `detectPinOrderConflict`       | Check if new order breaks pin contiguity                                                             |
+| `getHasPinOrderConflict`       | Check if new order breaks pin contiguity                                                             |
 | `filterSettingsColumns`        | Columns manageable in the section (no custom render, or static); shared by header counts + body list |
 | `getIsContiguousPin`           | Check if pin side maintains contiguity                                                               |
 | `getPinnedEntries`             | Flatten left/right pinning into keyed entries                                                        |

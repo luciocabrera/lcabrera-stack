@@ -6,7 +6,7 @@
 SidePanel/
 ├── index.ts                          → Barrel export: SidePanel + all sub-components
 ├── SidePanel.component.tsx           → Root selector: isPinned ? PinnedSidePanel : DialogSidePanel
-├── SidePanel.types.tsx               → SidePanelProps + variant types
+├── SidePanel.types.ts               → SidePanelProps + variant types
 ├── SidePanel.stylex.ts               → All root styles (local variants)
 │
 ├── PinnedSidePanel/                  → Private delegate (no barrel): always-visible aside, optional portal, zero effects
@@ -20,7 +20,7 @@ SidePanel/
 ├── SidePanelHeader/                  → Top section with actions slot
 │   ├── index.ts
 │   ├── SidePanelHeader.component.tsx
-│   ├── SidePanelHeader.types.tsx     → extends div + actions?: ReactNode
+│   ├── SidePanelHeader.types.ts     → extends div + actions?: ReactNode
 │   └── SidePanelHeader.stylex.ts
 │
 ├── SidePanelHeaderToolbar/           → Reusable pin + close buttons for drawer headers
@@ -31,43 +31,43 @@ SidePanel/
 ├── SidePanelTitle/                   → h2 heading with optional icon
 │   ├── index.ts
 │   ├── SidePanelTitle.component.tsx
-│   ├── SidePanelTitle.types.tsx      → extends h2 + icon?: ReactNode
+│   ├── SidePanelTitle.types.ts      → extends h2 + icon?: ReactNode
 │   └── SidePanelTitle.stylex.ts
 │
 ├── SidePanelBody/                    → Scrollable main content area
 │   ├── index.ts
 │   ├── SidePanelBody.component.tsx
-│   ├── SidePanelBody.types.tsx       → extends div
+│   ├── SidePanelBody.types.ts       → extends div
 │   └── SidePanelBody.stylex.ts
 │
 ├── SidePanelFooter/                  → Bottom section with top border
 │   ├── index.ts
 │   ├── SidePanelFooter.component.tsx
-│   ├── SidePanelFooter.types.tsx     → extends div
+│   ├── SidePanelFooter.types.ts     → extends div
 │   └── SidePanelFooter.stylex.ts
 │
 ├── SidePanelSection/                 → Section container (uses shared drawerSection tokens)
 │   ├── index.ts
 │   ├── SidePanelSection.component.tsx
-│   ├── SidePanelSection.types.tsx    → extends div
+│   ├── SidePanelSection.types.ts    → extends div
 │   └── SidePanelSection.stylex.ts
 │
 ├── SidePanelSectionHeader/           → Section header with title + toolbar slot
 │   ├── index.ts
 │   ├── SidePanelSectionHeader.component.tsx
-│   ├── SidePanelSectionHeader.types.tsx → extends div + title: string, toolbar?: ReactNode
+│   ├── SidePanelSectionHeader.types.ts → extends div + title: string, toolbar?: ReactNode
 │   └── SidePanelSectionHeader.stylex.ts
 │
 ├── SidePanelSectionMain/             → Section main content area
 │   ├── index.ts
 │   ├── SidePanelSectionMain.component.tsx
-│   ├── SidePanelSectionMain.types.tsx → extends div
+│   ├── SidePanelSectionMain.types.ts → extends div
 │   └── SidePanelSectionMain.stylex.ts
 │
 └── SidePanelSectionOverlay/          → Blur overlay for inactive sections
     ├── index.ts
     ├── SidePanelSectionOverlay.component.tsx
-    ├── SidePanelSectionOverlay.types.tsx → children + isOpen: boolean
+    ├── SidePanelSectionOverlay.types.ts → children + isOpen: boolean
     └── SidePanelSectionOverlay.stylex.ts
 ```
 
