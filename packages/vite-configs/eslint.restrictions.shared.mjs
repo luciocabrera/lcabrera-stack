@@ -71,6 +71,22 @@ export const BARREL_SYNTAX_RESTRICTIONS = [
 // Non-Negotiable Rule 5: the store pattern is the only shared-state approach in
 // this repo. Adding a state library is a one-line change that no other check
 // would notice, so name them here rather than relying on review.
+// React's `PropsWithChildren<P>` expands to `P & { children?: ReactNode |
+// undefined }` — the child is OPTIONAL and NOT readonly, so it cannot satisfy
+// Non-Negotiable Rule 1, and it silently makes `children` optional on
+// components that require it (a provider cannot render without them). The
+// convention here: a component wrapping a native element takes
+// `ComponentPropsWithoutRef<'x'>` (which already carries `children`); anything
+// else declares `readonly children: ReactNode` itself.
+export const REACT_TYPE_IMPORT_PATHS = [
+  {
+    importNames: ['PropsWithChildren'],
+    message:
+      "`PropsWithChildren` makes children optional and non-readonly, which violates Rule 1. Use `ComponentPropsWithoutRef<'x'>` when wrapping a native element, otherwise declare `readonly children: ReactNode`.",
+    name: 'react',
+  },
+];
+
 export const STATE_LIBRARY_IMPORT_PATTERNS = [
   {
     group: [

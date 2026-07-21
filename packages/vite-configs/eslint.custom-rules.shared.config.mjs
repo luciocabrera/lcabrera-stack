@@ -7,6 +7,7 @@ import localRules from '../eslint-local-rules/index.js';
 import {
   BARREL_SYNTAX_RESTRICTIONS,
   CLIENT_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS,
+  REACT_TYPE_IMPORT_PATHS,
   STATE_LIBRARY_IMPORT_PATTERNS,
   UI_PUBLIC_IMPORT_BOUNDARY_PATTERNS,
 } from './eslint.restrictions.shared.mjs';
@@ -288,13 +289,15 @@ export const createCustomRulesLintConfig = async ({
         'local-rules/filename-convention': 'error',
         'local-rules/merge-duplicate-imports': 'error',
         'local-rules/no-inline-type-imports': 'error',
-        'local-rules/type-suffix-naming': 'error',
         // One value per rule: ESLint flat config replaces a rule wholesale when
         // a later config sets it again, so every restriction that applies to
         // these files is composed here rather than split across blocks.
+        'local-rules/readonly-props': 'error',
+        'local-rules/type-suffix-naming': 'error',
         'no-restricted-imports': [
           'error',
           {
+            paths: REACT_TYPE_IMPORT_PATHS,
             patterns: [
               ...(enforceUiPublicImportBoundary
                 ? UI_PUBLIC_IMPORT_BOUNDARY_PATTERNS

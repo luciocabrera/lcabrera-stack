@@ -55,6 +55,44 @@ export type { ButtonProps } from './Button.types';
 | Boolean props       | `is/has/should[State]` | `isLoading`, `hasError`       |
 | Render props        | `render[Thing]`        | `renderHeader`, `renderEmpty` |
 
+## Props Typing — which React helper to use
+
+Two shapes, decided by one question: **does this component wrap a native element?**
+
+| Situation                                                         | Use                                              | Why                                                                                                                                                    |
+| ----------------------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Wraps a native element (`button`, `div`, `nav`, `input`…)         | `ComponentPropsWithoutRef<'x'> & { readonly … }` | Inherits every native attribute, so `className`/`disabled`/`onClick` are never re-declared by hand — and `children` comes with it via `HTMLAttributes` |
+| Same, but forwards a ref                                          | `ComponentPropsWithRef<'x'>`                     | Adds the correct `ref` type for that element                                                                                                           |
+| No native element to extend (providers, shells, context wrappers) | `{ readonly children: ReactNode }`               | Nothing to inherit, so declare it — **required and `readonly`**                                                                                        |
+| Children genuinely optional                                       | `{ readonly children?: ReactNode }`              | `?` is about optionality; it never replaces `readonly`                                                                                                 |
+
+```typescript
+// ✅ wraps <div> — children inherited, extras readonly
+type CardProps = ComponentPropsWithoutRef<'div'> & {
+  readonly padding?: CardPadding;
+};
+
+// ✅ narrowing an inherited member is fine
+type ButtonProps = Omit<ComponentPropsWithoutRef<'button'>, 'onClick'> & {
+  readonly onClick?: () => void;
+};
+
+// ✅ no native element — declare children yourself
+type AppProvidersProps = {
+  readonly children: ReactNode;
+};
+```
+
+**Do not use React's `PropsWithChildren`.** It expands to
+`P & { children?: ReactNode | undefined }` — children becomes **optional** and
+loses **`readonly`**, so it cannot satisfy Rule 1 and it silently makes children
+optional on components that cannot render without them. The import is blocked by
+`no-restricted-imports`.
+
+**Every member a props type declares is `readonly`** — enforced by
+`local-rules/readonly-props` (autofixable). Members inherited through an
+intersection with a React type are React's, not ours, and are not checked.
+
 ## Composition Over Big JSX Blocks
 
 Prefer composition (children, slots) over props-driven configuration to avoid prop explosion.

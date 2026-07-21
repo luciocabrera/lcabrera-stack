@@ -26,6 +26,7 @@ Centralized custom ESLint rules used across monorepo apps.
   - `type-suffix-naming`
 - React-only rules (enabled only in React app lint overrides):
   - `no-type-definitions-in-components`
+  - `readonly-props`
   - `single-component-export`
 
 ## Build and Consumption
