@@ -19,12 +19,18 @@
  * correct in context.
  *
  * Inherited breakage is grandfathered in `scripts/docs-paths-baseline.json` so
- * the gate can land without a cleanup blocking it. The baseline may shrink, and
- * anything new fails.
+ * the gate can land without a cleanup blocking it. The baseline may SHRINK
+ * freely and may only GROW one reference at a time, with a stated reason —
+ * `--write` can no longer absorb a new failure. See `lib/docs-paths-baseline.mjs`
+ * for why the hatches are this narrow; the short version is that the first cut
+ * offered only all-or-nothing exemptions, and four of the five references it
+ * grandfathered turned out to be real broken links rather than illustrations.
  *
  * Usage:
  *   node scripts/verify-docs-paths.mjs            check, exit 1 on new breakage
- *   node scripts/verify-docs-paths.mjs --write    rebaseline (review the diff)
+ *   node scripts/verify-docs-paths.mjs --write    prune entries that now resolve
+ *   node scripts/verify-docs-paths.mjs --accept <doc> <ref> --reason "<why>"
+ *                                                 grandfather ONE reference
  *
  * Exit codes: 0 = clean or baselined, 1 = a document names a missing path.
  */
@@ -32,6 +38,13 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import {
+  isBaselined,
+  prunedBaseline,
+  prunedCount,
+  sortBaseline,
+  withAccepted,
+} from './lib/docs-paths-baseline.mjs';
 import {
   extractCandidates,
   isRootAnchored,
@@ -73,36 +86,51 @@ const SKIPPED_DIRS = new Set([
 ]);
 
 /**
- * Repo-relative directories holding a *second copy of this repo*, matched by
- * full path rather than by name because the name alone ("worktrees") is too
- * generic to skip everywhere.
+ * Whether this directory is a *separate checkout of the repo* rather than part
+ * of this one — a linked worktree (where `.git` is a file) or a nested clone
+ * (where it is a directory). Both are visible to the `readdirSync` the walk
+ * already performs, so this costs nothing and needs no subprocess.
  *
- * `coordination:claim --worktree` — which AGENTS.md recommends whenever other
- * agents are active — puts a full linked checkout under
- * `.claude/worktrees/<id>`. Walking into one scans every document a second time
- * and resolves its relative references against THIS root, so a doc that is
- * correct in its own tree is reported broken here. The directory is gitignored,
- * so CI's fresh checkout never has one: the failure appears only on the machine
- * that ran the recommended command, and the only way past it is `--no-verify`.
- * A gate that fires locally and nowhere else teaches people to bypass it.
+ * Descending into one scans every document a second time and resolves its
+ * relative references against THIS root, so a doc that is correct in its own
+ * tree gets reported broken here. `coordination:claim --worktree` — which
+ * AGENTS.md recommends whenever other agents are active — puts a full linked
+ * checkout under `.claude/worktrees/<id>`, and because that path is gitignored,
+ * CI's fresh checkout never has one: the gate failed only on the machine that
+ * ran the recommended command, and the only way past it was `--no-verify`. A
+ * gate that fires locally and nowhere else trains people to bypass the pre-push
+ * hook, which then stops catching everything else it guards.
+ *
+ * Matched by "is a checkout" rather than "is gitignored" deliberately. Reading
+ * `.gitignore` would cover this case too, but root-only is incomplete (this repo
+ * has nine nested gitignore files) and gitignore lines are patterns, not names —
+ * a naive reader risks skipping a directory of real documents, and the symptom
+ * of that is the gate quietly checking less. Silent loss of coverage is the
+ * failure this whole file exists to prevent.
  */
-const SKIPPED_PATHS = new Set(['.claude/worktrees']);
+const isSeparateCheckout = (entries, prefix) =>
+  prefix !== '' && entries.some((entry) => entry.name === '.git');
 
 /**
  * Every markdown file under the repo, found by walking rather than by shelling
  * out to `git ls-files`: these scripts launch no subprocess, so a PATH-resolved
  * process can never be substituted underneath a gate that runs on every push.
  */
-const walkMarkdown = (dir, prefix = '') =>
-  readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+const walkMarkdown = (dir, prefix = '') => {
+  const entries = readdirSync(dir, { withFileTypes: true });
+  if (isSeparateCheckout(entries, prefix)) {
+    return [];
+  }
+  return entries.flatMap((entry) => {
     const relativePath = prefix === '' ? entry.name : `${prefix}/${entry.name}`;
     if (entry.isDirectory()) {
-      return SKIPPED_DIRS.has(entry.name) || SKIPPED_PATHS.has(relativePath)
+      return SKIPPED_DIRS.has(entry.name)
         ? []
         : walkMarkdown(join(dir, entry.name), relativePath);
     }
     return entry.name.endsWith('.md') ? [relativePath] : [];
   });
+};
 
 const documentedFiles = () =>
   walkMarkdown(REPO_ROOT).filter((docPath) => !isIgnoredDoc(docPath));
@@ -190,58 +218,129 @@ const readBaseline = () =>
     ? JSON.parse(readFileSync(BASELINE_PATH, 'utf8'))
     : {};
 
-const toBaseline = (findings) =>
-  Object.fromEntries(
-    [...new Set(findings.map((finding) => finding.doc))]
-      .sort((left, right) => left.localeCompare(right))
-      .map((doc) => [
-        doc,
-        findings
-          .filter((finding) => finding.doc === doc)
-          .map((finding) => finding.token)
-          .sort((left, right) => left.localeCompare(right)),
-      ]),
+const saveBaseline = (baseline) =>
+  writeFileSync(
+    BASELINE_PATH,
+    `${JSON.stringify(sortBaseline(baseline), undefined, 2)}\n`,
   );
 
-const main = () => {
-  const findings = documentedFiles()
-    .flatMap((doc) => findingsFor(doc))
-    .filter((finding) => !isExpectedAbsent(finding.token));
-
-  if (process.argv.includes('--write')) {
-    writeFileSync(
-      BASELINE_PATH,
-      `${JSON.stringify(toBaseline(findings), undefined, 2)}\n`,
-    );
-    console.log(
-      `Documented-path baseline written: ${findings.length} grandfathered reference(s).`,
-    );
-    return;
+/** `--accept <doc> <reference> --reason "<why>"`, or undefined. (pure) */
+const parseAccept = (argv) => {
+  const at = argv.indexOf('--accept');
+  if (at === -1) {
+    return undefined;
   }
+  const reasonAt = argv.indexOf('--reason');
+  return {
+    doc: argv[at + 1],
+    reason: reasonAt === -1 ? undefined : argv[reasonAt + 1],
+    token: argv[at + 2],
+  };
+};
 
-  const baseline = readBaseline();
-  const introduced = findings.filter(
-    (finding) => !(baseline[finding.doc] ?? []).includes(finding.token),
-  );
-
-  if (introduced.length > 0) {
+/**
+ * Grandfather exactly one reference. Refuses anything that is not currently
+ * failing: an entry for a reference that already resolves is either a typo or a
+ * pre-emptive exemption, and both rot into "why is this here?" lines that nobody
+ * dares delete.
+ */
+const runAccept = (accept, findings, baseline) => {
+  const { doc, reason, token } = accept;
+  if (doc === undefined || token === undefined || reason === undefined) {
     console.error(
-      `Documented-path gate — ${introduced.length} reference(s) that do not resolve:\n`,
-    );
-    for (const finding of introduced) {
-      console.error(`  - ${finding.doc}: \`${finding.token}\``);
-    }
-    console.error(
-      '\nFix the path, or delete the claim. A documented path nobody checks becomes false.',
-    );
-    console.error(
-      'If the reference is genuinely illustrative, add its document to IGNORED_DOCS.',
+      'Usage: --accept <doc> <reference> --reason "why this path is illustrative"',
     );
     process.exitCode = 1;
     return;
   }
 
-  const grandfathered = Object.values(baseline).flat().length;
+  const isFailing = findings.some(
+    (finding) => finding.doc === doc && finding.token === token,
+  );
+  if (!isFailing) {
+    console.error(
+      `Not a current finding: ${doc} \`${token}\`. Only a reference the gate actually reports can be grandfathered.`,
+    );
+    process.exitCode = 1;
+    return;
+  }
+
+  saveBaseline(withAccepted(baseline, { doc, reason, token }));
+  console.log(`Grandfathered ${doc} \`${token}\` — ${reason}`);
+};
+
+/**
+ * Prune-only. `--write` may drop entries that now resolve; it may never absorb a
+ * new failure, which is what made the old rebaseline a one-keystroke way to make
+ * real breakage disappear.
+ */
+const runWrite = (findings, baseline) => {
+  const dropped = prunedCount(baseline, findings);
+  saveBaseline(prunedBaseline(baseline, findings));
+  console.log(
+    dropped === 0
+      ? 'Documented-path baseline unchanged — every grandfathered reference still fails.'
+      : `Documented-path baseline pruned: ${dropped} reference(s) now resolve.`,
+  );
+
+  const unbaselined = findings.filter(
+    (finding) => !isBaselined(baseline, finding.doc, finding.token),
+  );
+  if (unbaselined.length > 0) {
+    console.error(
+      `\n${unbaselined.length} failing reference(s) were NOT added — fix them, or grandfather each with --accept.`,
+    );
+    process.exitCode = 1;
+  }
+};
+
+const reportIntroduced = (introduced) => {
+  console.error(
+    `Documented-path gate — ${introduced.length} reference(s) that do not resolve:\n`,
+  );
+  for (const finding of introduced) {
+    console.error(`  - ${finding.doc}: \`${finding.token}\``);
+  }
+  console.error(
+    '\nFix the path, or delete the claim. A documented path nobody checks becomes false.',
+  );
+  console.error(
+    'Genuinely illustrative? Grandfather that ONE reference, with its reason:',
+  );
+  const [first] = introduced;
+  console.error(
+    `  node scripts/verify-docs-paths.mjs --accept ${first.doc} ${first.token} --reason "..."`,
+  );
+};
+
+const main = () => {
+  const findings = documentedFiles()
+    .flatMap((doc) => findingsFor(doc))
+    .filter((finding) => !isExpectedAbsent(finding.token));
+  const baseline = readBaseline();
+
+  const accept = parseAccept(process.argv);
+  if (accept !== undefined) {
+    runAccept(accept, findings, baseline);
+    return;
+  }
+
+  if (process.argv.includes('--write')) {
+    runWrite(findings, baseline);
+    return;
+  }
+
+  const introduced = findings.filter(
+    (finding) => !isBaselined(baseline, finding.doc, finding.token),
+  );
+
+  if (introduced.length > 0) {
+    reportIntroduced(introduced);
+    process.exitCode = 1;
+    return;
+  }
+
+  const grandfathered = Object.values(baseline).flatMap(Object.keys).length;
   console.log(
     `Documented-path gate passed: ${documentedFiles().length} doc(s) checked, ${grandfathered} grandfathered.`,
   );

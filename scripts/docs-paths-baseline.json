@@ -1,9 +1,1 @@
-{
-  ".claude/README.md": [".github/skills/new-skill/SKILL.md"],
-  ".github/skills/code-smell-shared/COMPLIANCE_AUDIT.md": [
-    "code-smell-checker/SKILL.md",
-    "code-smell-shared/RULE_FIX_QUICK_REFERENCE.md",
-    "code-smell-zen/SKILL.md",
-    "docs/decisions/"
-  ]
-}
+{}

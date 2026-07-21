@@ -173,13 +173,13 @@ There is no `SessionStart` hook. The three above — `PreToolUse`, `PostToolUse`
 
 ## Quick Reference
 
-| I want to…                                               | Go to…                                                                        |
-| -------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| Change universal project instructions                    | `AGENTS.md`                                                                   |
-| Change a file-type convention (TS, components, tests)    | `.claude/rules/<topic>.md`                                                    |
-| Add a new skill                                          | `.github/skills/new-skill/SKILL.md` (then `node scripts/validate-skills.cjs`) |
-| Add or change an automated behaviour (on stop, on start) | `hooks` block in `.claude/settings.json`                                      |
-| Pre-approve a Bash command for the team                  | `.claude/settings.json` → `permissions.allow`                                 |
-| Pre-approve a Bash command just for me                   | `.claude/settings.local.json` → `permissions.allow`                           |
-| Add a background/isolated agent                          | `.claude/agents/<name>.md`                                                    |
-| Understand the Table store architecture                  | `.github/skills/store-pattern/SKILL.md`                                       |
+| I want to…                                               | Go to…                                                                           |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Change universal project instructions                    | `AGENTS.md`                                                                      |
+| Change a file-type convention (TS, components, tests)    | `.claude/rules/<topic>.md`                                                       |
+| Add a new skill                                          | `.github/skills/<skill-name>/SKILL.md` (then `node scripts/validate-skills.cjs`) |
+| Add or change an automated behaviour (on stop, on start) | `hooks` block in `.claude/settings.json`                                         |
+| Pre-approve a Bash command for the team                  | `.claude/settings.json` → `permissions.allow`                                    |
+| Pre-approve a Bash command just for me                   | `.claude/settings.local.json` → `permissions.allow`                              |
+| Add a background/isolated agent                          | `.claude/agents/<name>.md`                                                       |
+| Understand the Table store architecture                  | `.github/skills/store-pattern/SKILL.md`                                          |
