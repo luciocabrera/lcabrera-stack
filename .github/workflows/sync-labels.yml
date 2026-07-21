@@ -5,6 +5,15 @@ name: Sync Labels
 # a workspace (or editing labels.mjs) auto-creates/updates the labels — no manual
 # `vp run labels:sync`. Idempotent; creates/updates only, never deletes.
 # Also runnable on demand from the Actions tab (workflow_dispatch).
+#
+# The `apps/*/package.json` + `packages/*/package.json` paths are what make the
+# "adding a workspace" half of that true, and they are easy to leave out: the
+# workspace list is NOT read from pnpm-workspace.yaml's text. That file holds the
+# globs (`packages/*`), and `deriveWorkspaces` expands them against the
+# filesystem — so a new workspace changes no file this filter used to watch, and
+# this workflow never fired for one. Both `pkg: api` and `pkg: server` had to be
+# created by hand. A workspace manifest appearing or disappearing is the only
+# on-disk signal that the set changed; watch it, not the globs.
 
 on:
   push:
@@ -14,6 +23,8 @@ on:
       - scripts/sync-labels.mjs
       - scripts/lib/workspace-scopes.mjs
       - pnpm-workspace.yaml
+      - apps/*/package.json
+      - packages/*/package.json
   workflow_dispatch:
 
 permissions:
