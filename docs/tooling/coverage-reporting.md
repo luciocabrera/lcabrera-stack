@@ -77,15 +77,19 @@ authority and fails if any of them is absent from either lane. It keys on the
 directory rather than the package name, so an npm scope rename cannot defeat it.
 Adding a fifth public package extends the check with no edit here:
 
-| Workspace                 | Package                | `run` | Why                                                                                                                              |
-| ------------------------- | ---------------------- | ----- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `packages/ui`             | `@repo/ui`             | true  | Runs `test:coverage` here (plain `test` in `test:ci`, no coverage)                                                               |
-| `packages/server`         | `@repo/server`         | true  | Same                                                                                                                             |
-| `packages/api`            | `@repo/api`            | true  | Same — the browser half of the former `data-access` ([ADR-038](../cqms/decisions/ADR-038-public-package-topology-by-runtime.md)) |
-| `apps/react-router`       | `vite-react-compiler`  | false | Its `test:ci` already emits the summary; re-running the repo's largest suite would be wasteful                                   |
-| `packages/node-runtime`   | `@repo/node-runtime`   | true  | Phase 2 — DB-free `test:coverage`                                                                                                |
-| `packages/scan-ingestion` | `@repo/scan-ingestion` | true  | Phase 2 — DB-free `test:coverage` **subset** (its real-Postgres `queries/*` stay out, so the number is the DB-free portion only) |
-| `packages/utils`          | `@repo/utils`          | true  | Phase 2 — pure helpers, own 95% threshold ([#124](https://github.com/luciocabrera/vite-react-compiler/issues/124))               |
+| Workspace                 | Package                   | `run` | Why                                                                                                                              |
+| ------------------------- | ------------------------- | ----- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/ui`             | `@repo/ui`                | true  | Runs `test:coverage` here (plain `test` in `test:ci`, no coverage)                                                               |
+| `packages/server`         | `@repo/server`            | true  | Same                                                                                                                             |
+| `packages/api`            | `@repo/api`               | true  | Same — the browser half of the former `data-access` ([ADR-038](../cqms/decisions/ADR-038-public-package-topology-by-runtime.md)) |
+| `apps/react-router`       | `vite-react-compiler`     | false | Its `test:ci` already emits the summary; re-running the repo's largest suite would be wasteful                                   |
+| `packages/node-runtime`   | `@repo/node-runtime`      | true  | Phase 2 — DB-free `test:coverage`                                                                                                |
+| `packages/scan-ingestion` | `@repo/scan-ingestion`    | true  | Phase 2 — DB-free `test:coverage` **subset** (its real-Postgres `queries/*` stay out, so the number is the DB-free portion only) |
+| `packages/utils`          | `@repo/utils`             | true  | Phase 2 — pure helpers, own 95% threshold ([#124](https://github.com/luciocabrera/vite-react-compiler/issues/124))               |
+| `apps/scan-orchestrator`  | `@repo/scan-orchestrator` | true  | Phase 3 — DB-free **subset** (`runQueuedScan` drives the real scan queue and stays out)                                          |
+| `apps/shared`             | `api-shared`              | true  | Phase 3 — whole suite is DB-free (every test injects its dependencies)                                                           |
+| `apps/api-server`         | `car-sales-api`           | true  | Phase 3 — same; its `test:coverage` deliberately loads no environment file                                                       |
+| `apps/api-server-fast`    | `car-sales-api-fast`      | true  | Phase 3 — same                                                                                                                   |
 
 `run: false` reuses a summary produced upstream; `--all` forces every workspace
 to run (standalone local use, where `test:ci` has not run first).
@@ -120,10 +124,21 @@ only once its coverage runs clean and means something.** Checklist:
   test files; it now carries 21 suites and its own 95% threshold (#124), so it
   was admitted alongside the others. `agent-runner`, `plugins`, `ts-configs`,
   `eslint-local-rules` are config/CLI-only with nothing to cover.
-- **Phase 3 — apps & server workspaces.** `apps/admin_system` and
-  `apps/scan-orchestrator` (both already have DB-free `test:coverage`),
-  `apps/shared`; then `apps/api-server` / `apps/api-server-fast` **only after**
-  each grows a DB-free `test:coverage` subset (today their suites are real-DB).
+- **Phase 3 — apps & server workspaces.** `apps/scan-orchestrator`,
+  `apps/shared`, `apps/api-server` and `apps/api-server-fast`. ✅ done
+  (#52/#53/#54); `apps/admin_system` (#51) is the one left.
+
+  The plan expected the two API servers to need a DB-free `test:coverage`
+  **subset** carved out of real-Postgres suites, the way `scan-ingestion` and
+  `scan-orchestrator` did. That turned out to be wrong: every suite in
+  `apps/shared`, `apps/api-server` and `apps/api-server-fast` injects its
+  dependencies — controllers and plugins take a repository, `readEnvConfig`
+  takes a plain object, the distinct repository test passes a pool mock — so
+  none of them opens a connection and no split was needed. Their
+  `test:coverage` tasks deliberately load **no** environment file, which is
+  what keeps that honest: if one ever starts needing a database, it fails here
+  instead of passing on a developer machine that happens to have Postgres up.
+
   Tracked as GitHub epic
   [#50](https://github.com/luciocabrera/vite-react-compiler/issues/50)
   (children #51–#55, milestone _Coverage rollout — Phase 3_) — the durable-backlog

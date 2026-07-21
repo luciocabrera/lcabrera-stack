@@ -53,6 +53,13 @@ export const COVERAGE_REPORT_WORKSPACES = [
   { dir: 'packages/node-runtime', name: '@repo/node-runtime', run: true },
   { dir: 'packages/scan-ingestion', name: '@repo/scan-ingestion', run: true },
   { dir: 'packages/utils', name: '@repo/utils', run: true },
+  // Phase 3 — apps and servers. Only scan-orchestrator needs a DB-free subset
+  // (one suite drives the real scan queue); the rest inject their dependencies
+  // throughout, so their whole suite runs with no database.
+  { dir: 'apps/scan-orchestrator', name: '@repo/scan-orchestrator', run: true },
+  { dir: 'apps/shared', name: 'api-shared', run: true },
+  { dir: 'apps/api-server', name: 'car-sales-api', run: true },
+  { dir: 'apps/api-server-fast', name: 'car-sales-api-fast', run: true },
 ];
 
 /**
