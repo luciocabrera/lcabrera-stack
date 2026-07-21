@@ -32,15 +32,22 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.pull_request.head.repo.full_name == github.repository
     steps:
-      - name: Checkout PR head (full history for the file range)
+      # The merge ref (actions/checkout's default for pull_request), not the PR
+      # head — see the same note in pr-standards.yml: GitHub runs this YAML from
+      # the merge result, so a head-pinned checkout puts the workflow and the
+      # scripts it runs on different commits (#177/#190). The file range comes
+      # from the event payload as BASE_SHA/HEAD_SHA below, and fetch-depth 0
+      # makes both reachable.
+      - name: Check out the PR merge ref (full history for the file range)
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
       - name: Ensure the taxonomy covers this PR's workspaces
-        # Same script sync-labels.yml runs, against the PR head — so a workspace
-        # added by this PR has its label before the next step asks for it.
+        # Same script sync-labels.yml runs, against the merged tree — so a
+        # workspace added by this PR has its label before the next step asks for
+        # it. The merge result contains the PR's new workspace as well as the
+        # base's, so this still holds now the checkout is not head-pinned.
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: node scripts/sync-labels.mjs

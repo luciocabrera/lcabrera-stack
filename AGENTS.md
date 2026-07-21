@@ -414,7 +414,7 @@ changelog:generate`, `scripts/generate-changelog.mjs`): Conventional-Commit
   [`labeler.yml`](.github/workflows/labeler.yml) applies them to every PR — scope
   from the changed workspaces (`scripts/pr-labels.mjs`), type from the PR title.
   Adding a workspace needs no manual step: the labeler **syncs the taxonomy from
-  the PR head before applying**, so the new label exists on the PR that
+  the PR's merged tree before applying**, so the new label exists on the PR that
   introduces it, not only after the merge. Do not remove that step — labels are
   created via the Issues API, which is also why that job needs `issues: write`.
   Note the sync workflow watches `apps/*/package.json` and

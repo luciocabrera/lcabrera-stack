@@ -22,10 +22,16 @@ jobs:
     name: Commit + PR standards
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout PR head (full history for the commit range)
+      # The merge ref (actions/checkout's default for pull_request), not the PR
+      # head. GitHub runs this workflow file from the merge result, so pinning
+      # the checkout to the head would put the YAML and the scripts it invokes on
+      # different commits — the skew that broke the Sonar gate in #177, fixed the
+      # same way in #190. Nothing here needs HEAD to be the PR head: the commit
+      # range comes from the event payload as BASE_SHA/HEAD_SHA below, and
+      # fetch-depth 0 makes both reachable.
+      - name: Check out the PR merge ref (full history for the commit range)
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
       - name: Validate PR title and description
