@@ -1,9 +1,13 @@
 name: Release Changelog
 
 # On a v* tag push, generate the changelog section for that release and publish it
-# as the GitHub Release notes. Releases aren't branch-protected, so this never
-# fights the `main` ruleset. The CHANGELOG.md file itself is maintained via
-# `vp run changelog:generate` in ordinary PRs.
+# as the GitHub Release notes. This reads `git log` directly and never opens
+# CHANGELOG.md, so it is unaffected by how that file is maintained. Releases
+# aren't branch-protected either, so this never fights the `main` ruleset.
+#
+# CHANGELOG.md itself is regenerated with `vp run changelog:generate` and
+# committed through an ordinary PR. A bot pushing it straight to `main` after
+# each merge was tried and removed — see AGENTS.md § Changelog & Labels.
 
 on:
   push:

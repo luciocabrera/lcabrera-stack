@@ -421,12 +421,30 @@ so they never diverge from what the gate accepts:
 - **Changelog** — [`CHANGELOG.md`](CHANGELOG.md) is **generated** (`vp run
 changelog:generate`, `scripts/generate-changelog.mjs`): Conventional-Commit
   history grouped by version (git tags) then by type, each entry scope-labelled and
-  linked, with breaking changes called out. Never hand-edit it —
-  [`update-changelog.yml`](.github/workflows/update-changelog.yml) regenerates and
-  commits it (`[skip ci]`) after every merge to `main`, via a bot commit that
-  bypasses the ruleset and is itself excluded from the changelog (`':!CHANGELOG.md'`).
-  On a `v*` tag, [`changelog.yml`](.github/workflows/changelog.yml) also publishes
-  that release's section as the GitHub Release notes.
+  linked, with breaking changes called out. Never hand-edit it — regenerate and
+  commit it through an ordinary PR (the bot's own changelog commits are excluded
+  from the changelog via the `':!CHANGELOG.md'` pathspec). It is a **release
+  artifact**: with no tags every entry falls into one `Unreleased` section, and
+  the file only becomes useful once `v*` tags split it per release. On a `v*` tag,
+  [`changelog.yml`](.github/workflows/changelog.yml) publishes that release's
+  section as the GitHub Release notes — reading `git log` directly, never
+  `CHANGELOG.md`, so release notes are unaffected by the file's freshness.
+
+  **A bot pushing this file to `main` after each merge was tried and removed.**
+  `update-changelog.yml` did exactly that and never once succeeded: the push is
+  rejected by the `main` ruleset's `required_status_checks` rule (`GH013 … 6 of 6
+required status checks are expected`), and the failure was converted to a
+  `::warning::`, so the job reported success through 159 commits while the file
+  stood still. Making it work needs either the GitHub Actions app added to the
+  ruleset's `bypass_actors` — which exempts **every** workflow with
+  `contents: write` from the whole ruleset — or a long-lived PAT any workflow on a
+  branch can read. Neither is worth it for a file that is only meaningful per
+  release. Generating it inside a PR instead does not work either: entries link
+  `/commit/<sha>` and this repo squash-merges, so PR-branch SHAs never exist on
+  `main`. If this is ever automated again, note that a PR opened with
+  `GITHUB_TOKEN` does not trigger `pull_request` workflows, so it can never
+  satisfy the required checks and can never be merged.
+
 - **Labels** — a canonical `app:`/`pkg:`/`type:` + `breaking-change` taxonomy
   (`scripts/lib/labels.mjs`; the `app:`/`pkg:` set is derived from the workspaces,
   so it self-updates). [`sync-labels.yml`](.github/workflows/sync-labels.yml)

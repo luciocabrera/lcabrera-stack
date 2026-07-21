@@ -156,7 +156,14 @@ const main = () => {
     (count, version) => count + version.commits.length,
     0,
   );
-  const content = `${HEADER}\n${versions.map((version) => renderVersion(version, slug)).join('\n')}\n`;
+  // Each rendered version ends in a blank line, so the join leaves a trailing
+  // one. Oxfmt strips it, which would make every regeneration produce a diff
+  // the formatter then has to undo — emit the file the way `vp fmt` wants it.
+  const body = versions
+    .map((version) => renderVersion(version, slug))
+    .join('\n')
+    .trimEnd();
+  const content = `${HEADER}\n${body}\n`;
   if (process.argv.includes('--stdout')) {
     process.stdout.write(content);
     return;

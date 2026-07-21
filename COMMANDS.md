@@ -353,11 +353,12 @@ it runs `pr:verify` (title + description) and `commit:verify` over each non-merg
 commit in the range, so nothing that skipped the local hook reaches `main`.
 [`labeler.yml`](.github/workflows/labeler.yml) auto-labels each PR
 (`app:`/`pkg:`/`type:`), [`sync-labels.yml`](.github/workflows/sync-labels.yml)
-syncs the label set when the manifest/workspace list changes on `main`,
-[`update-changelog.yml`](.github/workflows/update-changelog.yml) regenerates
-`CHANGELOG.md` after every merge to `main`, and
+syncs the label set when the manifest/workspace list changes on `main`, and
 [`changelog.yml`](.github/workflows/changelog.yml) publishes release notes on a
-`v*` tag.
+`v*` tag. `CHANGELOG.md` itself is regenerated with `vp run changelog:generate`
+and committed through an ordinary PR — see
+[AGENTS.md § Changelog & Labels](AGENTS.md#changelog--labels) for why no bot
+pushes it to `main`.
 
 [`secret-scan.yml`](.github/workflows/secret-scan.yml) scans repository
 **content** for credentials — the layer the two agent-boundary guards
