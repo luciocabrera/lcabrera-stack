@@ -30,6 +30,10 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const result = await fetchDistinctValues({
     ...params,
     baseUrl: `${getApiBaseUrl(request.url)}/distinct`,
+    // React Router aborts this request when the client navigates away or the
+    // fetch is superseded. Forwarding it means the BFF call is cancelled too,
+    // instead of running to completion for a response nobody will read.
+    signal: request.signal,
   });
 
   return Response.json(result);
