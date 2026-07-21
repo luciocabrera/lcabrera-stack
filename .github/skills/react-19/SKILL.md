@@ -47,8 +47,11 @@ React.useState(); // Wrong
 
 ```typescript
 // ✅ ALWAYS: Arrow function + readonly props + named export
+// Wrapping a native element? Take `ComponentPropsWithoutRef<'x'>` instead and
+// get its attributes (and `children`) for free. Full decision table in
+// .claude/rules/react-components.md § Props Typing. Never `PropsWithChildren`:
+// it makes children optional and non-readonly (blocked by no-restricted-imports).
 type ProductListProps = {
-  readonly children?: ReactNode;
   readonly onSelect: (id: string) => void;
   readonly products: readonly Product[];
 };

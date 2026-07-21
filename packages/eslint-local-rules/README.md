@@ -108,7 +108,36 @@ import type { ButtonProps } from './Button.types';
 export const Button = ({ label }: ButtonProps) => <button>{label}</button>;
 ```
 
-### 6. `single-component-export`
+### 6. `readonly-props`
+
+Requires every member a `*Props` type declares to be `readonly` — the clause of
+Non-Negotiable Rule 1 that no other linter enforces. Autofixable.
+
+Members inherited through an intersection with a React type belong to React, not
+to us, and are not checked.
+
+**❌ Disallowed:**
+
+```typescript
+type AppProvidersProps = {
+  children: ReactNode; // props are never mutated
+};
+```
+
+**✅ Enforced:**
+
+```typescript
+type AppProvidersProps = {
+  readonly children: ReactNode;
+};
+
+// inherited members are React's — only the declared extras are checked
+type CardProps = ComponentPropsWithoutRef<'div'> & {
+  readonly padding?: CardPadding;
+};
+```
+
+### 7. `single-component-export`
 
 Enforces that `*.component.tsx` files export exactly one component — no multi-component files.
 
@@ -130,7 +159,22 @@ export const LoginForm = () => { ... };
 export const RegisterForm = () => { ... };
 ```
 
-### 7. `clean-import-paths`
+### 8. `filename-convention`
+
+Enforces the base-name case that goes with each file suffix. Only files matching
+`<base>.<suffix>.<ext>` are checked, so `index.ts` and `root.tsx` are untouched.
+
+| Suffix                                       | Base-name case                                                                                                         | Example                                                  |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `.component` / `.layout` / `.error-boundary` | PascalCase                                                                                                             | `CarSales.error-boundary.tsx`                            |
+| `.hook`                                      | camelCase, `use` prefix                                                                                                | `useVirtualization.hook.ts`                              |
+| `.loader` / `.action` / `.meta`              | kebab-case                                                                                                             | `enterprise-orders.loader.ts`                            |
+| `.util`                                      | camelCase — kebab-case in the public packages (`@repo/api`, `@repo/server`, `@repo/utils`) via the `suffixCase` option | `fetchOrdersPage.util.ts` / `build-where-clause.util.ts` |
+
+`unicorn/filename-case` is deliberately **off**; this rule owns filename casing so
+the suffix drives the convention.
+
+### 9. `clean-import-paths`
 
 Enforces clean internal import/export paths by disallowing file extensions and trailing `/index` segments.
 
