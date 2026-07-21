@@ -79,7 +79,7 @@ Steps 3, 4 and 6 are the ones that get skipped, and none is redundant — see
 chains the whole thing the way CI does.
 
 The **`pre-push` git hook** (`.vite-hooks/pre-push`) runs `vp run check:push` — the
-**DB-free CI Quality Gate** (steps 3–6 plus `commands`/`coordination`/`scripts:verify`,
+**DB-free CI Quality Gate** (steps 3–6 plus `commands`/`coordination`/`scripts`/`docs:verify`,
 mirroring the "Quality Gate (Format · Lint · Types)" job in `check-safe.yml`). This
 closes the gap the pre-commit hook leaves: `vp staged` covers only fmt + Oxlint +
 tsgolint + Biome on staged files, so the ESLint pass and a full type-check first turn
@@ -211,13 +211,14 @@ and reports trivially simple code as `critical`.
 
 ### AI config & skills tooling
 
-| Command                  | Does                                                     |
-| ------------------------ | -------------------------------------------------------- |
-| `vp run commands:verify` | check this file still matches reality                    |
-| `vp run scripts:verify`  | check `.mjs`/`.cjs` size ceiling (`--write` rebaselines) |
-| `vp run skills:validate` | validate skill definitions                               |
-| `vp run skills:report`   | skills compliance report                                 |
-| `vp run prepare`         | `vp config` — runs automatically on install              |
+| Command                  | Does                                                                    |
+| ------------------------ | ----------------------------------------------------------------------- |
+| `vp run commands:verify` | check this file still matches reality                                   |
+| `vp run scripts:verify`  | check `.mjs`/`.cjs` size ceiling (`--write` rebaselines)                |
+| `vp run docs:verify`     | check every documented repository path resolves (`--write` rebaselines) |
+| `vp run skills:validate` | validate skill definitions                                              |
+| `vp run skills:report`   | skills compliance report                                                |
+| `vp run prepare`         | `vp config` — runs automatically on install                             |
 
 ### Coordination register
 

@@ -85,7 +85,7 @@ Reusable local templates:
 
 Documentation structure benchmark:
 
-- `apps/react-router/src/components/Button/ARCHITECTURE.md`
+- `packages/ui/src/components/Button/ARCHITECTURE.md`
 
 ## Review Checklist
 

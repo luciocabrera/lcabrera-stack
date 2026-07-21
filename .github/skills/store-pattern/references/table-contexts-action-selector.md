@@ -91,10 +91,10 @@ Rationale: concurrent updates between reads can yield inconsistent derived calcu
 ## Real Usage Patterns in Code
 
 - Component selectors:
-  - `apps/react-router/src/components/Table/TableHeader/TableHeader.component.tsx`
-  - `apps/react-router/src/components/Table/TableBody/TableBody.component.tsx`
+  - `packages/ui/src/components/Table/TableHeader/TableHeader.component.tsx`
+  - `packages/ui/src/components/Table/TableBody/TableBody.component.tsx`
 - Action orchestration:
-  - `apps/react-router/src/components/Table/contexts/TableConfig/columns/actions/useSetColumnFilter.hook.ts`
+  - `packages/ui/src/components/Table/contexts/TableConfig/columns/actions/useSetColumnFilter.hook.ts`
 
 ## Action Responsibilities
 
@@ -137,7 +137,7 @@ Selector hooks should not:
 
 Follow the architecture doc quality bar shown in:
 
-- `apps/react-router/src/components/Button/ARCHITECTURE.md`
+- `packages/ui/src/components/Button/ARCHITECTURE.md`
 
 Recommended sections:
 
