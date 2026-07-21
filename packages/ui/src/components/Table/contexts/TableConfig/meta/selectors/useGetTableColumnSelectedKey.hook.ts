@@ -1,6 +1,6 @@
-import { useMetaStore } from '@repo/ui/components/Table/contexts/TableConfig/meta/useMetaStore.hook';
+import type { DataKey } from '@repo/ui/components/Table/Table.types';
 
-import type { DataKey } from '@/components/Table/Table.types';
+import { useMetaStore } from '@repo/ui/components/Table/contexts/TableConfig/meta/useMetaStore.hook';
 
 export const useGetTableColumnSelectedKey = <
   TData extends Record<string, unknown>,

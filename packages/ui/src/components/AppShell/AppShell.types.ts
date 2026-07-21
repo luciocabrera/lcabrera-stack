@@ -1,5 +1,5 @@
-import type { NavigationSessionActions } from '@/components/AppNavigation/AppNavigation.types';
-import type { NavbarItemConfig } from '@/components/Navbar/Navbar.types';
+import type { NavigationSessionActions } from '@repo/ui/components/AppNavigation/AppNavigation.types';
+import type { NavbarItemConfig } from '@repo/ui/components/Navbar/Navbar.types';
 
 export type AppShellProps = {
   /** Forwarded to `AppNavigation` — see its own prop doc for why this is app-supplied. */

@@ -1,4 +1,4 @@
-import type { NavigationSessionActions } from '@/components/AppNavigation/AppNavigation.types';
+import type { NavigationSessionActions } from '@repo/ui/components/AppNavigation/AppNavigation.types';
 
 /**
  * NavigationFooter component props

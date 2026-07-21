@@ -1,6 +1,5 @@
+import type { NavbarItemConfig } from '@repo/ui/components/Navbar/Navbar.types';
 import type { ReactNode } from 'react';
-
-import type { NavbarItemConfig } from '@/components/Navbar/Navbar.types';
 
 export type AppNavigationProps = {
   readonly defaultIsPinned?: boolean;

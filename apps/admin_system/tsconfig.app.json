@@ -17,8 +17,8 @@
     "noUnusedParameters": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@repo/server/*": ["../../packages/server/src/*"],
       "@repo/scan-ingestion/*": ["../../packages/scan-ingestion/src/*"],
+      "@repo/server/*": ["../../packages/server/src/*"],
       "@repo/ui": ["../../packages/ui/src/public-api.ts"],
       "@repo/ui/*": ["../../packages/ui/src/*"]
     },

@@ -96,12 +96,20 @@ const configs = [
       // tsconfig.json from a file *inside* packages/ui (an editor's
       // language server, or tsc/lint invoked directly against this
       // package) can still resolve @repo/ui's own self-referencing
-      // imports and @repo/server cross-imports — without it, only a
-      // consuming app's own tsconfig knew about these aliases.
+      // imports — without it, only a consuming app's own tsconfig knew
+      // about that alias.
+      //
+      // `@repo/server/*` used to be here too. It is gone with the shapes it
+      // resolved (ADR-039): @repo/ui is client-safe and must not reach into
+      // a Node-only package, and an alias is exactly how such an edge hides.
       paths: {
-        '@repo/server/*': ['../server/src/*'],
         '@repo/ui/*': ['./src/*'],
       },
+      // No `@/*`. It resolves only through a tsconfig, so an `@/` import
+      // inside a published package is unresolvable for a consumer — the
+      // same class of undeclared edge as the alias above. Omitting it makes
+      // tsc, not review, the thing that catches one.
+      srcAlias: false,
       tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
       // packages/ui's src/ mixes browser-context components with
       // Node-context SSR entry utilities (packages/ui/src/entry/) — apps
@@ -210,6 +218,9 @@ const configs = [
     // packages/ui/scripts/check-public-api-client-safe.mjs now also guards.
     config: createAppTsConfig({
       include: ['src', 'vite.config.ts'],
+      // No `@/*` — @repo/api is publishable, and that alias resolves only
+      // through a tsconfig. See the packages/ui entry above.
+      srcAlias: false,
       tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
     }),
     filePath: resolve(workspaceRoot, 'packages/api/tsconfig.app.json'),
