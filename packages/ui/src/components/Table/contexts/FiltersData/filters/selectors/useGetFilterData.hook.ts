@@ -1,7 +1,7 @@
 import type {
   DataKey,
   FiltersDataState,
-} from '@repo/ui/components/Table/Table.types';
+} from '@lcabrera/ui/components/Table/Table.types';
 
 import { useFiltersStore } from '../useFiltersStore.hook';
 

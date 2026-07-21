@@ -1,4 +1,4 @@
-import type { TableColumnsState } from '@repo/ui/components/Table/Table.types';
+import type { TableColumnsState } from '@lcabrera/ui/components/Table/Table.types';
 
 import { describe, expect, it } from 'vitest';
 

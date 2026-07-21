@@ -1,6 +1,6 @@
-import type { FieldNode } from '@repo/ui';
+import type { FieldNode } from '@lcabrera/ui';
 
-import { Form, SectionCard } from '@repo/ui';
+import { Form, SectionCard } from '@lcabrera/ui';
 import { useActionData } from 'react-router';
 
 import type { action } from './login.action';

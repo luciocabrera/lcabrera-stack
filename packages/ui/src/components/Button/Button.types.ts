@@ -2,7 +2,7 @@ import type {
   DesignSystemColor,
   DesignSystemOrientation,
   DesignSystemSize,
-} from '@repo/ui/types/design-system.types';
+} from '@lcabrera/ui/types/design-system.types';
 import type { StyleXStyles } from '@stylexjs/stylex';
 import type {
   ComponentPropsWithoutRef,

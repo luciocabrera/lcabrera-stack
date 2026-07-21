@@ -17,7 +17,7 @@ type MockPresetButtonsProps = {
   readonly selectedPreset?: string;
 };
 
-vi.mock('@repo/ui/components/SidePanel', () => ({
+vi.mock('@lcabrera/ui/components/SidePanel', () => ({
   SidePanelSection: ({ children }: { readonly children: React.ReactNode }) => (
     <section>{children}</section>
   ),
@@ -27,17 +27,17 @@ vi.mock('@repo/ui/components/SidePanel', () => ({
 }));
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/columns/selectors',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors',
   () => ({
     useGetNormalizedColumn: () => useGetNormalizedColumnMock(),
   }),
 );
 
 vi.mock(
-  '@repo/ui/components/Table/shared/ColumnWidthPresetButtons',
+  '@lcabrera/ui/components/Table/shared/ColumnWidthPresetButtons',
   async (importOriginal) => ({
     ...(await importOriginal<
-      typeof import('@repo/ui/components/Table/shared/ColumnWidthPresetButtons')
+      typeof import('@lcabrera/ui/components/Table/shared/ColumnWidthPresetButtons')
     >()),
     ColumnWidthPresetButtons: ({
       isMaxDisabled,

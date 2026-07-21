@@ -1,5 +1,5 @@
 /**
- * Why this exists: `@repo/ui` ships a client bundle. Anything server-only that
+ * Why this exists: `@lcabrera/ui` ships a client bundle. Anything server-only that
  * reaches its public API — directly, or through a package it depends on —
  * breaks every consumer that bundles it for the browser.
  *
@@ -14,8 +14,8 @@
  *
  * Check 2 is the one that matters and it did not exist. Check 1 only followed
  * paths starting with `.`, so it never crossed a package boundary: it reported
- * PASS while `@repo/ui` depended on `@repo/server`, which depends on `pg`
- * and imports `node:crypto` — meaning anyone installing `@repo/ui` pulled a
+ * PASS while `@lcabrera/ui` depended on `@lcabrera/server`, which depends on `pg`
+ * and imports `node:crypto` — meaning anyone installing `@lcabrera/ui` pulled a
  * Postgres driver into their dependency graph. A guard that answers a narrower
  * question than the one it appears to answer is worse than no guard, because it
  * is trusted.
@@ -26,7 +26,7 @@
  *
  * Third-party dependencies are deliberately not scanned. `@react-router/node`
  * is a legitimate runtime dependency here, reached only through the SSR-only
- * `@repo/ui/server` subpath, never through `public-api.ts`.
+ * `@lcabrera/ui/server` subpath, never through `public-api.ts`.
  *
  * Usage: `node ./scripts/check-public-api-client-safe.mjs` (wired into this
  * package's `typecheck` task). Exits 1 listing every violation, not just the
@@ -160,7 +160,7 @@ const formatGraphViolations = (violations) =>
     : [
         '',
         'Server-only imports in the public API graph — remove the SSR-only',
-        'exports from the root barrel and use @repo/ui/server:',
+        'exports from the root barrel and use @lcabrera/ui/server:',
         ...violations.map(
           ({ filePath, source }) => `- ${filePath} imports ${source}`,
         ),

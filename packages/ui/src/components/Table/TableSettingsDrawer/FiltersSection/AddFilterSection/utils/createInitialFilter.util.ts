@@ -1,5 +1,5 @@
-import type { TableColumnDataType } from '@repo/ui/components/Table/Table.types';
-import type { ColumnFilter } from '@repo/ui/types/filterOperators.types';
+import type { TableColumnDataType } from '@lcabrera/ui/components/Table/Table.types';
+import type { ColumnFilter } from '@lcabrera/ui/types/filterOperators.types';
 
 /**
  * Builds the default draft filter for a newly added column based on its data

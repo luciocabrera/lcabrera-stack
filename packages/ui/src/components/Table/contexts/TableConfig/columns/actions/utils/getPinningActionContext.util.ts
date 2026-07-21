@@ -2,7 +2,7 @@ import type {
   ColumnOrderState,
   ColumnPinningState,
   TableColumnsState,
-} from '@repo/ui/components/Table/Table.types';
+} from '@lcabrera/ui/components/Table/Table.types';
 
 type GetPinningActionContextArgs<TData> = {
   readonly columnsStore: {

@@ -68,12 +68,12 @@ const MockTableSettingsDrawer = vi.hoisted(() => {
   };
 });
 
-vi.mock('@repo/ui/components/Table/TableSettingsDrawer', () => ({
+vi.mock('@lcabrera/ui/components/Table/TableSettingsDrawer', () => ({
   TableSettingsDrawer: MockTableSettingsDrawer,
 }));
 
 vi.mock(
-  '@repo/ui/components/Table/TableSettingsDrawer/TableDrawerContext/TableDrawerContext.provider',
+  '@lcabrera/ui/components/Table/TableSettingsDrawer/TableDrawerContext/TableDrawerContext.provider',
   () => ({
     TableDrawerProvider: MockTableDrawerProvider,
   }),

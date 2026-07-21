@@ -1,5 +1,5 @@
-import type { SidePanelSize } from '@repo/ui/components/SidePanel';
-import type { GlobalNavigationSizePreference } from '@repo/ui/types/globalSettings.types';
+import type { SidePanelSize } from '@lcabrera/ui/components/SidePanel';
+import type { GlobalNavigationSizePreference } from '@lcabrera/ui/types/globalSettings.types';
 
 import {
   ICON_SIZE_LG,
@@ -7,7 +7,7 @@ import {
   ICON_SIZE_SM,
   ICON_SIZE_XS,
   ICON_SIZE_XXS,
-} from '@repo/ui/design-system/constants';
+} from '@lcabrera/ui/design-system/constants';
 
 /**
  * Which brand icon box size style to apply (matches button height per density).

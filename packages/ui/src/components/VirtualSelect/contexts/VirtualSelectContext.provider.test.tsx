@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 
-import type { VirtualListDataState } from '@repo/ui/components/VirtualList';
+import type { VirtualListDataState } from '@lcabrera/ui/components/VirtualList';
 import type { ReactNode } from 'react';
 
-import { useGetHasCheckboxes } from '@repo/ui/components/VirtualList/contexts/list/selectors';
+import { useGetHasCheckboxes } from '@lcabrera/ui/components/VirtualList/contexts/list/selectors';
 import { renderHook, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 

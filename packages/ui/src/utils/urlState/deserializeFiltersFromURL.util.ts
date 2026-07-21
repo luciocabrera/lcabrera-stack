@@ -1,7 +1,7 @@
-import type { ColumnFiltersState } from '@repo/ui/components/Table';
-import type { ColumnFilter } from '@repo/ui/types/filterOperators.types';
+import type { ColumnFiltersState } from '@lcabrera/ui/components/Table';
+import type { ColumnFilter } from '@lcabrera/ui/types/filterOperators.types';
 
-import { logger } from '@repo/ui/utils/logger';
+import { logger } from '@lcabrera/ui/utils/logger';
 
 import { deserializeFilter } from './deserializeFilter.util';
 

@@ -15,7 +15,7 @@ const { MockButton } = vi.hoisted(() => ({
   ),
 }));
 
-vi.mock('@repo/ui/components/Button', () => ({
+vi.mock('@lcabrera/ui/components/Button', () => ({
   Button: MockButton,
 }));
 

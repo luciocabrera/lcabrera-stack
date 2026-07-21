@@ -1,5 +1,5 @@
-import { useFormField } from '@repo/ui/components/Form/fields/useFormField.hook';
-import { FormFieldChrome } from '@repo/ui/components/Form/FormFieldChrome/FormFieldChrome.component';
+import { useFormField } from '@lcabrera/ui/components/Form/fields/useFormField.hook';
+import { FormFieldChrome } from '@lcabrera/ui/components/Form/FormFieldChrome/FormFieldChrome.component';
 
 import type { CustomFieldProps } from './CustomField.types';
 

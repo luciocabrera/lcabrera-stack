@@ -1,6 +1,6 @@
-import type { TabItem } from '@repo/ui/components/Tabs';
+import type { TabItem } from '@lcabrera/ui/components/Tabs';
 
-import { Tabs } from '@repo/ui/components/Tabs';
+import { Tabs } from '@lcabrera/ui/components/Tabs';
 
 import { NavigationSettingsTab } from '../NavigationSettingsTab';
 import { PinningSettingsTab } from '../PinningSettingsTab';

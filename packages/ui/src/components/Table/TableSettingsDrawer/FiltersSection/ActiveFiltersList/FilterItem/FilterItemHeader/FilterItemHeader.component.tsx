@@ -1,9 +1,9 @@
-import { Button } from '@repo/ui/components/Button';
-import { MenuCloseIcon } from '@repo/ui/components/Icons';
-import { useGetNormalizedColumns } from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors';
-import { useSetTableSettingsExpandedFilters } from '@repo/ui/components/Table/contexts/TableConfig/meta/actions';
-import { useGetTableSettingsExpandedFilters } from '@repo/ui/components/Table/contexts/TableConfig/meta/selectors';
-import { ICON_SIZE_MD } from '@repo/ui/design-system/constants';
+import { Button } from '@lcabrera/ui/components/Button';
+import { MenuCloseIcon } from '@lcabrera/ui/components/Icons';
+import { useGetNormalizedColumns } from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors';
+import { useSetTableSettingsExpandedFilters } from '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions';
+import { useGetTableSettingsExpandedFilters } from '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors';
+import { ICON_SIZE_MD } from '@lcabrera/ui/design-system/constants';
 import * as stylex from '@stylexjs/stylex';
 
 import type { FilterItemHeaderProps } from './FilterItemHeader.types';

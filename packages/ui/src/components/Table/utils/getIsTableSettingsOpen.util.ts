@@ -1,4 +1,4 @@
-import type { TableMetaState } from '@repo/ui/components/Table/Table.types';
+import type { TableMetaState } from '@lcabrera/ui/components/Table/Table.types';
 
 type GetIsTableSettingsOpenArgs = {
   readonly metaState?: Partial<TableMetaState>;

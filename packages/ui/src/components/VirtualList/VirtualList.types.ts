@@ -1,4 +1,4 @@
-import type { SelectFilter } from '@repo/ui/types/filterOperators.types';
+import type { SelectFilter } from '@lcabrera/ui/types/filterOperators.types';
 
 export type ListFilterMode = 'all' | 'selected' | 'unselected';
 

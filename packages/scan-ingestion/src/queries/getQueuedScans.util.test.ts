@@ -1,5 +1,5 @@
+import { closePool, getPool } from '@lcabrera/server/db/get-pool.util';
 import { makeTempDirectory } from '@repo/scan-ingestion/testing/makeTempDirectory.util.ts';
-import { closePool, getPool } from '@repo/server/db/get-pool.util';
 import { rmSync } from 'node:fs';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 

@@ -1,12 +1,12 @@
-import type { DraggableItem } from '@repo/ui/components/DraggableList';
+import type { DraggableItem } from '@lcabrera/ui/components/DraggableList';
 
-import { DraggableList } from '@repo/ui/components/DraggableList';
-import { InfoBox } from '@repo/ui/components/InfoBox';
+import { DraggableList } from '@lcabrera/ui/components/DraggableList';
+import { InfoBox } from '@lcabrera/ui/components/InfoBox';
 import {
   SidePanelSection,
   SidePanelSectionHeader,
-} from '@repo/ui/components/SidePanel';
-import { useGetColumns } from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
+} from '@lcabrera/ui/components/SidePanel';
+import { useGetColumns } from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
 import * as stylex from '@stylexjs/stylex';
 
 import type { SortItem } from '../SortingSection.types';

@@ -1,5 +1,5 @@
-import { InfoBox } from '@repo/ui/components/InfoBox';
-import { SidePanelSectionHeader } from '@repo/ui/components/SidePanel';
+import { InfoBox } from '@lcabrera/ui/components/InfoBox';
+import { SidePanelSectionHeader } from '@lcabrera/ui/components/SidePanel';
 import * as stylex from '@stylexjs/stylex';
 
 import type { ActiveFiltersListProps } from './ActiveFiltersList.types';

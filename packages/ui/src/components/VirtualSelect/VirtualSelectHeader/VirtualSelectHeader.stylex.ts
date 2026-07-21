@@ -1,5 +1,5 @@
-import { zIndex } from '@repo/ui/design-system/tokens/base.stylex';
-import { skeleton } from '@repo/ui/design-system/tokens/commons.stylex';
+import { zIndex } from '@lcabrera/ui/design-system/tokens/base.stylex';
+import { skeleton } from '@lcabrera/ui/design-system/tokens/commons.stylex';
 import * as stylex from '@stylexjs/stylex';
 
 const styles = stylex.create({

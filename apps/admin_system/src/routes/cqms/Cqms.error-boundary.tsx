@@ -1,4 +1,4 @@
-import { RouteErrorBoundary, useNotifyOnError } from '@repo/ui';
+import { RouteErrorBoundary, useNotifyOnError } from '@lcabrera/ui';
 
 import type { Route } from './+types/root';
 

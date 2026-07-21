@@ -1,5 +1,5 @@
-import type { DataKey } from '@repo/ui/components/Table/Table.types';
-import type { ColumnFilter } from '@repo/ui/types/filterOperators.types';
+import type { DataKey } from '@lcabrera/ui/components/Table/Table.types';
+import type { ColumnFilter } from '@lcabrera/ui/types/filterOperators.types';
 
 export type FilterInputsProps<TData = Record<string, unknown>> = {
   /** Column key to identify which filter data to use from context */

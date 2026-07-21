@@ -54,22 +54,22 @@ const MockVirtualSelect = vi.hoisted(() => {
   };
 });
 
-vi.mock('@repo/api/distinct/fetch-distinct-values.util', () => ({
+vi.mock('@lcabrera/api/distinct/fetch-distinct-values.util', () => ({
   fetchDistinctValues: fetchDistinctValuesMock,
 }));
-vi.mock('@repo/api/config/get-api-base-url.util', () => ({
+vi.mock('@lcabrera/api/config/get-api-base-url.util', () => ({
   getApiBaseUrl: vi.fn(() => '/api'),
 }));
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/columns/selectors',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors',
   () => ({
     useGetNormalizedColumn: normalizedColumnMock,
   }),
 );
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/FiltersData/filters/selectors',
+  '@lcabrera/ui/components/Table/contexts/FiltersData/filters/selectors',
   () => ({
     useGetFilterData: vi.fn(() => ({
       data: [],
@@ -83,7 +83,7 @@ vi.mock(
 );
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/FiltersData/filters/actions',
+  '@lcabrera/ui/components/Table/contexts/FiltersData/filters/actions',
   () => ({
     useFetchFilterData: vi.fn(() => ({
       fetchInitial: fetchInitialMock,
@@ -92,7 +92,7 @@ vi.mock(
   }),
 );
 
-vi.mock('@repo/ui/components/VirtualSelect', () => ({
+vi.mock('@lcabrera/ui/components/VirtualSelect', () => ({
   VirtualSelect: MockVirtualSelect,
 }));
 

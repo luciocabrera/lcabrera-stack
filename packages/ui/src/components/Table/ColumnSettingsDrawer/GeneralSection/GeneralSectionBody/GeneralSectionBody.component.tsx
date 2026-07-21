@@ -1,4 +1,4 @@
-import { InfoBox } from '@repo/ui/components/InfoBox';
+import { InfoBox } from '@lcabrera/ui/components/InfoBox';
 
 /**
  * Body of the general section: static guidance describing how the width

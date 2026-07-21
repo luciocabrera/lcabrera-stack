@@ -1,4 +1,4 @@
-import { buildCookieString } from '@repo/ui/utils/storage/buildCookieString.util';
+import { buildCookieString } from '@lcabrera/ui/utils/storage/buildCookieString.util';
 
 type BuildSetCookieHeadersArgs = {
   readonly entries: readonly CookiePair[];

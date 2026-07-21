@@ -16,30 +16,47 @@ tsconfig `paths` to make an import work — because it is meant to be consumed f
 outside this repo, where none of this monorepo's wiring exists. `packages/ui`,
 `packages/api`, `packages/server` and `packages/utils` are held strictest for
 exactly that reason (§4). This is why the column-filter shapes are **duplicated**
-in `@repo/ui` and `@repo/server` rather than shared through an elegant edge that
+in `@lcabrera/ui` and `@lcabrera/server` rather than shared through an elegant edge that
 only resolves in-repo ([ADR-039](docs/cqms/decisions/ADR-039-duplicate-over-undeclared-edges.md)).
 
+**Two scopes, and the split carries meaning.** The four publishable packages are
+**`@lcabrera/*`**; the six internal ones (`vite-configs`, `ts-configs`, `plugins`,
+`agent-runner`, `node-runtime`, `scan-ingestion`) stay **`@repo/*`**. So the
+import line tells you which side of the product boundary you are on: `@lcabrera/`
+means it ships and has consumers outside this repo, `@repo/` means internal, change
+it freely. A new package picks its scope by one question — does it ship? — and a
+`@lcabrera/*` one inherits the never-baseline rule (§4) and the invariants below.
+Do not "tidy" the two into one ([ADR-040](docs/cqms/decisions/ADR-040-npm-scope-for-the-public-packages.md)).
+
 **Publishing invariants for those four.** They are not published yet — all four
-stay `private: true` until the npm scope and a real build exist, and that flag is
-the only thing preventing an accidental publish, so do not flip it as a
-convenience. What already holds, verified by packing each package and reading the
-tarball rather than by inspection:
+stay `private: true` until a real build exists, and that flag is the only thing
+preventing an accidental publish, so do not flip it as a convenience. What already
+holds, verified by packing each package and reading the tarball rather than by
+inspection:
 
 - **Each carries its own `LICENSE`** (MIT). npm only includes a `LICENSE` sitting
   in the package directory, so the root one does not reach a consumer — this is
   deliberate duplication, same reasoning as ADR-039.
 - **`files` is `["src", "!src/**/*.test.*"]`.** Without it npm ships whatever is
-  in the directory: `@repo/server` was shipping 29 test files plus its tsconfigs
+  in the directory: `@lcabrera/server` was shipping 29 test files plus its tsconfigs
   and `eslint.config.mjs`. The negated pattern is honoured by pnpm pack.
 - **Framework singletons are `peerDependencies`, not `dependencies`** — `react`,
-  `react-dom`, `react-router`, `@stylexjs/stylex` in `@repo/ui`. As ordinary
+  `react-dom`, `react-router`, `@stylexjs/stylex` in `@lcabrera/ui`. As ordinary
   dependencies a consumer would resolve a second copy of React, which breaks hooks
   outright. They are also listed in `devDependencies` so the workspace still
   resolves them for typecheck and tests. `@react-router/node` is an **optional**
   peer: only the `./entry/*` SSR helpers import it, so a browser-only consumer
   should not be forced to install it.
 - `catalog:` and `workspace:*` need no special handling — pnpm rewrites both to
-  real version ranges at pack time (`"pg": "^8.22.0"`, `"@repo/utils": "0.0.0"`).
+  real version ranges at pack time (`"pg": "^8.22.0"`, `"@lcabrera/utils": "0.0.0"`).
+- **`publishConfig.access: "public"`** on each. npm defaults a scoped package to
+  restricted and a free org cannot host private packages, so without it the first
+  publish fails on permissions without naming the missing field.
+- **Never rename a published package, and never move a `*.stylex.ts`.** StyleX
+  derives every custom-property name from `packageName:pathRelativeToPackageRoot`,
+  computed without reading the file, so either one silently renames the variables
+  and breaks a consumer's `createTheme`. `packages/ui/src/stylex-module-paths.test.ts`
+  guards the paths; nothing guards the package name but this sentence.
 
 The apps are the harness. `apps/react-router` is a **React 19 + TypeScript +
 StyleX + React Router 7** SSR application that puts the packages under load —
@@ -81,10 +98,10 @@ which workspaces gitignore `eslint-suppressions.json`; keep the two in step.
 
 `api` and `server` split on **runtime**, and the split is load-bearing, not
 cosmetic — the two names say which runtime each one is for, and the tsconfigs
-enforce it in both directions. `@repo/api` is browser-safe: its tsconfig omits
-`node` types, so a `process`/`fs` reach-in fails typecheck there. `@repo/server`
+enforce it in both directions. `@lcabrera/api` is browser-safe: its tsconfig omits
+`node` types, so a `process`/`fs` reach-in fails typecheck there. `@lcabrera/server`
 is Node-only (`pg`, `node:crypto`) and gets no DOM lib, so a `window`/`document`
-reach-in fails there. They were one package until the cost showed up: `@repo/ui`
+reach-in fails there. They were one package until the cost showed up: `@lcabrera/ui`
 depended on the combined package for two fetch helpers and so pulled the Postgres
 driver into every consumer's dependency graph. `packages/ui`'s `check:public-api`
 now enforces the invariant — **a client-safe package may only depend on workspace
@@ -94,7 +111,7 @@ instead of passing silently. The full topology and what each tsconfig denies is
 which supersedes ADR-008.
 
 `utils` and `node-runtime` split on purity, and the split is deliberate:
-`@repo/utils` guarantees pure, side-effect-free helpers, so anything that must
+`@lcabrera/utils` guarantees pure, side-effect-free helpers, so anything that must
 touch the process (signal handlers, exit paths) belongs in `@repo/node-runtime`
 instead of eroding that guarantee.
 
@@ -127,7 +144,7 @@ src/
 ```
 
 **This app is deliberately thin.** Components, hooks, contexts, design tokens,
-shared utils and the Table live in `@repo/ui`; pure helpers in `@repo/utils`.
+shared utils and the Table live in `@lcabrera/ui`; pure helpers in `@lcabrera/utils`.
 The app no longer has `components/`, `hooks/`, `contexts/`, `design-system/`,
 `types/` or a populated `utils/` — so when a rule below says "the component
 directory", that is `packages/ui/src/components/`. Reach for the package
@@ -230,7 +247,7 @@ There is deliberately **no `start:all`/`dev:all`**: `car-sales-api` and `car-sal
 
 **`vp check` type-checks, but it is not `tsc` — both run, and `typecheck:all` is the authority.** `vp check`'s type pass is **tsgolint** (Oxlint's type-aware path, enabled by `lint.options.typeCheck` in the root `vite.config.ts`), and it does resolve each workspace's own strict `tsconfig.app.json` — `strict`, `noUncheckedIndexedAccess` and `noUnusedLocals` all fire under it. What it does **not** do is run the per-workspace `typecheck` scripts, and those carry work no linter replicates: `packages/ui` gates its public API against server-only `node:*` imports (`check:public-api`), and both React Router apps regenerate route types first. Every one of the 17 workspaces now has a `typecheck` script, CI runs `vp run typecheck:all` as its own step in `check-safe.yml`, and `check:safe` chains it. Keep the two passes in sync: a new workspace gets a `typecheck` script **and** a tsconfig, or it silently falls back to the near-empty root `tsconfig.json` and is checked far more loosely than every other workspace (this is exactly how `utils`/`plugins`/`vite-configs` went un-strict for so long — `noUncheckedIndexedAccess` never fired there).
 
-**tsconfigs are generated — never hand-edit them.** `packages/ts-configs/generate.ts` + `tsconfig.shared.ts` are the source of truth for every `tsconfig.app.json`/`tsconfig.node.json`; run `vp run --filter @repo/ts-configs generate` after changing either. A hand-edit survives exactly until the next unrelated regeneration silently reverts it — the `@repo/ui` bare-specifier alias in both apps was lost this way and had to be folded back into the generator. If a config needs something bespoke, add it to the generator entry, not to the JSON.
+**tsconfigs are generated — never hand-edit them.** `packages/ts-configs/generate.ts` + `tsconfig.shared.ts` are the source of truth for every `tsconfig.app.json`/`tsconfig.node.json`; run `vp run --filter @repo/ts-configs generate` after changing either. A hand-edit survives exactly until the next unrelated regeneration silently reverts it — the `@lcabrera/ui` bare-specifier alias in both apps was lost this way and had to be folded back into the generator. If a config needs something bespoke, add it to the generator entry, not to the JSON.
 
 **Three linters run, and none of them is `vp check`.** Oxlint (`vp lint`) covers the whole tree from the root; the eslint pass (`vp run lint:eslint` / `lint:eslint:check`) exists in all 17 workspaces — React workspaces use `@repo/vite-configs/eslint-custom-rules`, node/library workspaces use `@repo/vite-configs/eslint-base-custom-rules` (same stack minus React/StyleX, and without `clean-import-paths`, which strips the import extensions node-resolution code requires). Inherited eslint violations are baselined per workspace in `eslint-suppressions.json` (ESLint bulk suppressions) — **new violations fail the gate**: CI runs `vp run -r lint:eslint:check` as its own step in `check-safe.yml`, because `vp check` covers only fmt + Oxlint + the tsgolint type pass and would let every eslint-only finding through. Burn debt down and shrink the baseline with `npx eslint . --config eslint.config.mjs --prune-suppressions`. Never add new entries by hand, and never inline-`// eslint-disable`/`oxlint-disable` a finding or switch the rule off in config — **verify, then fix the code instead** (see Non-Negotiable Rule 11). A lint finding is real until you've read the flagged code and confirmed otherwise; stylistic `unicorn/*` rules (e.g. `prefer-simple-condition-first`, `no-nested-ternary`) get fixed by restructuring, never silenced. **Exception: `packages/ui`, `packages/api`, `packages/server` and `packages/utils` are never silenced** — all four are public-facing, so every finding there gets fixed, never baselined or disabled. Each one's `eslint-suppressions.json` path is **gitignored** (`packages/ui/.gitignore`, `packages/api/.gitignore`, `packages/server/.gitignore`, `packages/utils/.gitignore`): ESLint's bulk-suppressions tooling — an editor extension, or `--prune-suppressions` run across every workspace — regenerates an empty `{}` for a workspace with nothing to suppress, and committing/deleting it was an endless loop. Because CI checks out no file, all four packages are suppression-free by construction and any real finding fails the gate. Never un-ignore any of them or commit a non-empty one. To check the real membership rather than trusting this list, grep the workspace `.gitignore`s for `eslint-suppressions`.
 
@@ -517,7 +534,7 @@ After the quality gate passes, update every doc affected by the change:
 - **Type added/changed** → update the `ARCHITECTURE.md` of the directory that owns the type.
 - **New dependency added** → update the Dependencies diagram in the affected `ARCHITECTURE.md`.
 - **New naming/structural convention established** → update `packages/ui/src/PATTERNS.md` and the matching `.claude/rules/` file.
-- **New architectural decision made** → add a new ADR following the ADR-NNN naming scheme, and add it to the ADR map in this file. Two homes, chosen by subject: decisions about a **component or route inside the app** go in `apps/react-router/docs/decisions/`, decisions about the **repo, its packages or its tooling** go in [`docs/cqms/decisions/`](docs/cqms/decisions/) (package topology, for instance, is ADR-038/ADR-039 there). **The two sequences both start at ADR-001 and overlap through ADR-012, so a bare number in that range is ambiguous** — there are two ADR-008s, one about the primary-key sort tiebreaker and one about the `@repo/api` rename. Always cite a low-numbered ADR with its path or link, never the number alone. The overlap is not renumbered on purpose: an ADR is a dated record, and rewriting old ones to tidy the sequence would break every existing cross-reference.
+- **New architectural decision made** → add a new ADR following the ADR-NNN naming scheme, and add it to the ADR map in this file. Two homes, chosen by subject: decisions about a **component or route inside the app** go in `apps/react-router/docs/decisions/`, decisions about the **repo, its packages or its tooling** go in [`docs/cqms/decisions/`](docs/cqms/decisions/) (package topology, for instance, is ADR-038/ADR-039/ADR-040 there). **The two sequences both start at ADR-001 and overlap through ADR-012, so a bare number in that range is ambiguous** — there are two ADR-008s, one about the primary-key sort tiebreaker and one about the `@repo/api` → `@repo/data-access` rename (both under their names at the time, which is how ADRs are cited here). Always cite a low-numbered ADR with its path or link, never the number alone. The overlap is not renumbered on purpose: an ADR is a dated record, and rewriting old ones to tidy the sequence would break every existing cross-reference.
 - **New artifact created or existing artifact enhanced/renamed** → update the relevant row in the owning workspace's `INVENTORY.md` (`packages/ui/src/`, `packages/server/src/`, `apps/react-router/src/`, …).
 
 Documentation updates must be part of the **same commit** as the code change.

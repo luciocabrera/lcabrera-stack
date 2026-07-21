@@ -1,4 +1,4 @@
-import type { GlobalNavigationPinnedPreference } from '@repo/ui/types/globalSettings.types';
+import type { GlobalNavigationPinnedPreference } from '@lcabrera/ui/types/globalSettings.types';
 
 import { NAVIGATION_PINNED_VALUES } from './globalSettings.constants';
 

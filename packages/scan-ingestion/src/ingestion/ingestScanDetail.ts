@@ -1,4 +1,4 @@
-import { getPool } from '@repo/server/db/get-pool.util';
+import { getPool } from '@lcabrera/server/db/get-pool.util';
 
 import type { FallowDetailInput } from './fallow/fallowDetail.types.ts';
 import type { Report } from './report.schema.ts';

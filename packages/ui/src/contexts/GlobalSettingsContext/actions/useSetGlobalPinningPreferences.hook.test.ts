@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 
-import type { GlobalSettingsState } from '@repo/ui/types/globalSettings.types';
+import type { GlobalSettingsState } from '@lcabrera/ui/types/globalSettings.types';
 
 import {
   createMockStore,
   type MockStore,
-} from '@repo/ui/utils/tests/createMockStore.util';
+} from '@lcabrera/ui/utils/tests/createMockStore.util';
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

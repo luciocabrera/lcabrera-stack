@@ -17,12 +17,12 @@ const {
   };
 });
 
-vi.mock('@repo/ui/contexts/GlobalSettingsContext/actions', () => ({
+vi.mock('@lcabrera/ui/contexts/GlobalSettingsContext/actions', () => ({
   useSetGlobalNavigationPreferences: () => setGlobalNavigationPreferencesMock,
   useSetGlobalPinningPreferences: () => setGlobalPinningPreferencesMock,
 }));
 
-vi.mock('@repo/ui/contexts/GlobalSettingsContext/selectors', () => ({
+vi.mock('@lcabrera/ui/contexts/GlobalSettingsContext/selectors', () => ({
   useGetGlobalNavigationPreferences: useGetGlobalNavigationPreferencesMock,
   useGetGlobalPinningPreferences: useGetGlobalPinningPreferencesMock,
 }));

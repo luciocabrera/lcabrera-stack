@@ -1,6 +1,6 @@
 // @vitest-environment node
 
-import { closePool } from '@repo/server/db/get-pool.util';
+import { closePool } from '@lcabrera/server/db/get-pool.util';
 import { afterAll, describe, expect, it } from 'vitest';
 
 import { getDemoCredential } from '@/auth/getDemoCredential.util';
@@ -22,7 +22,7 @@ import { toOrderUpdateValues } from '@/routes/enterprise-orders/config/toOrderUp
  * unit suites — which mock the pg pool and fetch — this exercises the real path
  * against a running Postgres: the env-configured login credential, and a full
  * create → read → update → list/count → delete round-trip through the generic
- * `@repo/server` builders. It is the one check that proves the wiring works
+ * `@lcabrera/server` builders. It is the one check that proves the wiring works
  * end to end at runtime, which no mocked test can.
  *
  * Gated behind `SMOKE_DB` so the DB-less CI unit job (and a bare `vp run test`)

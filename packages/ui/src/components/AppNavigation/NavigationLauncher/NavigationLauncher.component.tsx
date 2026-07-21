@@ -1,6 +1,6 @@
-import { Button } from '@repo/ui/components/Button';
-import { MenuIcon } from '@repo/ui/components/Icons';
-import { ICON_SIZE_LG } from '@repo/ui/design-system/constants';
+import { Button } from '@lcabrera/ui/components/Button';
+import { MenuIcon } from '@lcabrera/ui/components/Icons';
+import { ICON_SIZE_LG } from '@lcabrera/ui/design-system/constants';
 import * as stylex from '@stylexjs/stylex';
 
 import type { NavigationLauncherProps } from './NavigationLauncher.types';

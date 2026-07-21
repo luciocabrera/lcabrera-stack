@@ -1,4 +1,4 @@
-import { DevStyleXInject } from '@repo/ui/components/DevStyleXInject';
+import { DevStyleXInject } from '@lcabrera/ui/components/DevStyleXInject';
 import { Links, Meta, Scripts, ScrollRestoration } from 'react-router';
 
 import type { AppDocumentProps } from './AppDocument.types';

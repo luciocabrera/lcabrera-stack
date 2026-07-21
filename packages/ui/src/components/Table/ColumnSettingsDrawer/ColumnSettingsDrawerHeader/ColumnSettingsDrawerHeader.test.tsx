@@ -32,11 +32,11 @@ type MockSidePanelHeaderToolbarProps = {
   readonly onTogglePin: () => void;
 };
 
-vi.mock('@repo/ui/components/Icons', () => ({
+vi.mock('@lcabrera/ui/components/Icons', () => ({
   SettingsIcon: () => <span>Settings icon</span>,
 }));
 
-vi.mock('@repo/ui/components/SidePanel', () => ({
+vi.mock('@lcabrera/ui/components/SidePanel', () => ({
   SidePanelHeader: ({ actions, children }: MockSidePanelHeaderProps) => (
     <div>
       {children}
@@ -72,28 +72,34 @@ vi.mock('@repo/ui/components/SidePanel', () => ({
 }));
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/columns/selectors',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors',
   () => ({
     useGetNormalizedColumn: useGetNormalizedColumnMock,
   }),
 );
 
-vi.mock('@repo/ui/components/Table/contexts/TableConfig/meta/actions', () => ({
-  useSetTableIsColumnSettingsPinned: () => setIsColumnSettingsPinnedMock,
-}));
+vi.mock(
+  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions',
+  () => ({
+    useSetTableIsColumnSettingsPinned: () => setIsColumnSettingsPinnedMock,
+  }),
+);
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/meta/selectors',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors',
   () => ({
     useGetTableColumnSelectedKey: () => 'revenue',
     useGetTableIsColumnSettingsPinned: () => isColumnSettingsPinnedMock(),
   }),
 );
 
-vi.mock('@repo/ui/components/Table/contexts/TableData/data/selectors', () => ({
-  useGetTableIsLoading: () => useGetTableIsLoadingMock(),
-  useGetTableIsLoadingMore: () => useGetTableIsLoadingMoreMock(),
-}));
+vi.mock(
+  '@lcabrera/ui/components/Table/contexts/TableData/data/selectors',
+  () => ({
+    useGetTableIsLoading: () => useGetTableIsLoadingMock(),
+    useGetTableIsLoadingMore: () => useGetTableIsLoadingMoreMock(),
+  }),
+);
 
 vi.mock('../ColumnDrawerContext/actions', () => ({
   useResetAllColumnDrawerSettings: () => resetAllColumnDrawerSettingsMock,

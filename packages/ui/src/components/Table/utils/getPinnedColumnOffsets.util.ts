@@ -4,9 +4,9 @@ import type {
   DataKey,
   PinnedColumnInfo,
   TableColumn,
-} from '@repo/ui/components/Table/Table.types';
+} from '@lcabrera/ui/components/Table/Table.types';
 
-import { DEFAULT_MIN_COLUMN_WIDTH } from '@repo/ui/components/Table/Table.constants';
+import { DEFAULT_MIN_COLUMN_WIDTH } from '@lcabrera/ui/components/Table/Table.constants';
 
 type GetPinnedColumnOffsetsArgs<TData> = {
   readonly columnPinning: ColumnPinningState<TData>;

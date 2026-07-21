@@ -1,4 +1,4 @@
-import { parsePositiveInteger } from '@repo/utils/numbers/parse-positive-integer.util';
+import { parsePositiveInteger } from '@lcabrera/utils/numbers/parse-positive-integer.util';
 
 type FilterOptionsParams = {
   readonly columnName: string;
@@ -20,7 +20,7 @@ type ParseFilterOptionsParamsArgs = {
  * allow-list authorization happens downstream in the BFF.
  *
  * The page-size fallback is injected via `defaultPageSize` rather than read
- * from a UI constant, keeping this server-side helper free of any `@repo/ui`
+ * from a UI constant, keeping this server-side helper free of any `@lcabrera/ui`
  * dependency — the caller passes its own default.
  */
 export const parseFilterOptionsParams = ({

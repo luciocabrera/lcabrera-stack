@@ -1,11 +1,11 @@
 import type {
   DataKey,
   TableColumn,
-} from '@repo/ui/components/Table/Table.types';
+} from '@lcabrera/ui/components/Table/Table.types';
 import type {
   ColumnFilter,
   OperatorType,
-} from '@repo/ui/types/filterOperators.types';
+} from '@lcabrera/ui/types/filterOperators.types';
 
 export type InputContentProps<TData> = {
   /** Column key (for stable input names) */

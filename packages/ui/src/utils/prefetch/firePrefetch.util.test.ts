@@ -1,4 +1,4 @@
-import type { PrefetchCache } from '@repo/ui/types/ui.types';
+import type { PrefetchCache } from '@lcabrera/ui/types/ui.types';
 import type { RefObject } from 'react';
 
 import { describe, expect, it, vi } from 'vitest';

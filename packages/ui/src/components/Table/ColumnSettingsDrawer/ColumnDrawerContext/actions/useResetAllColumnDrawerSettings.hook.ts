@@ -1,6 +1,6 @@
-import { useColumnDrawerContextValue } from '@repo/ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook';
-import { getTableColumnDrawerState } from '@repo/ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils';
-import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { useColumnDrawerContextValue } from '@lcabrera/ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook';
+import { getTableColumnDrawerState } from '@lcabrera/ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils';
+import { useTableConfigContextValue } from '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 
 import { useCloseColumnSettingsDrawer } from './useCloseColumnSettingsDrawer.hook';
 

@@ -1,15 +1,15 @@
-import { Button } from '@repo/ui/components/Button';
+import { Button } from '@lcabrera/ui/components/Button';
 import {
   SidePanelSection,
   SidePanelSectionHeader,
   SidePanelSectionMain,
-} from '@repo/ui/components/SidePanel';
+} from '@lcabrera/ui/components/SidePanel';
 import {
   deriveToggleCommandState,
   PIN_LEFT_COMMAND,
   PIN_RIGHT_COMMAND,
-} from '@repo/ui/components/Table/commands';
-import { ICON_SIZE_MD } from '@repo/ui/design-system/constants';
+} from '@lcabrera/ui/components/Table/commands';
+import { ICON_SIZE_MD } from '@lcabrera/ui/design-system/constants';
 import * as stylex from '@stylexjs/stylex';
 
 import type { PinningSectionProps } from './PinningSection.types';

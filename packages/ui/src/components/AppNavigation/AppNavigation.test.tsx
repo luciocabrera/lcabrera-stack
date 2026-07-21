@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 
-import type { NavbarItemConfig } from '@repo/ui/components/Navbar/Navbar.types';
-import type { GlobalSettingsState } from '@repo/ui/types/globalSettings.types';
+import type { NavbarItemConfig } from '@lcabrera/ui/components/Navbar/Navbar.types';
+import type { GlobalSettingsState } from '@lcabrera/ui/types/globalSettings.types';
 
-import { GlobalSettingsProvider } from '@repo/ui/contexts/GlobalSettingsContext';
-// import { useSetGlobalNavigationPreferences } from '@repo/ui/contexts/GlobalSettingsContext/actions';
-import { mockDialogElement } from '@repo/ui/utils/tests/mockDialogElement.util';
+import { GlobalSettingsProvider } from '@lcabrera/ui/contexts/GlobalSettingsContext';
+// import { useSetGlobalNavigationPreferences } from '@lcabrera/ui/contexts/GlobalSettingsContext/actions';
+import { mockDialogElement } from '@lcabrera/ui/utils/tests/mockDialogElement.util';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -17,7 +17,7 @@ const { toggleThemeMock, useThemeMock } = vi.hoisted(() => ({
   useThemeMock: vi.fn(),
 }));
 
-vi.mock('@repo/ui/hooks/useTheme.hook', () => ({
+vi.mock('@lcabrera/ui/hooks/useTheme.hook', () => ({
   useTheme: () => useThemeMock(),
 }));
 

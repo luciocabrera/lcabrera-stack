@@ -2,7 +2,7 @@ import type {
   ColumnOrderState,
   ColumnPinningState,
   DataKey,
-} from '@repo/ui/components/Table/Table.types';
+} from '@lcabrera/ui/components/Table/Table.types';
 
 type InsertAfterLeftPinnedArgs<TData> = {
   readonly columnKey: DataKey<TData>;

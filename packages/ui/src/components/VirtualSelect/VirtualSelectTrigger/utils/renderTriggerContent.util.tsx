@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import { Tag } from '@repo/ui/components/Tag';
+import { Tag } from '@lcabrera/ui/components/Tag';
 import * as stylex from '@stylexjs/stylex';
 
 import type { VirtualSelectMode } from '../../VirtualSelect.types';

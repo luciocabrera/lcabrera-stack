@@ -10,7 +10,7 @@ const { useGetNormalizedColumnMock } = vi.hoisted(() => ({
 }));
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/columns/selectors',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors',
   () => ({
     useGetNormalizedColumn: useGetNormalizedColumnMock,
   }),

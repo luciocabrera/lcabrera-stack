@@ -1,7 +1,7 @@
 type CreateAppTsConfigArgs = {
   readonly exclude?: readonly string[];
   readonly include?: readonly string[];
-  /** Extra path aliases merged on top of the default `@/*` → `./src/*` mapping — for a package's own self-referencing alias (e.g. `@repo/ui/*`) or a cross-package one. */
+  /** Extra path aliases merged on top of the default `@/*` → `./src/*` mapping — for a package's own self-referencing alias (e.g. `@lcabrera/ui/*`) or a cross-package one. */
   readonly paths?: Record<string, readonly string[]>;
   readonly rootDirs?: readonly string[];
   /** Set `false` to omit the default `@/*` → `./src/*` alias. Publishable packages pass this: `@/` resolves only through a tsconfig, so an `@/` import cannot survive publication, and dropping the alias makes tsc reject one instead of a reviewer having to spot it. */
@@ -17,7 +17,7 @@ type CreateNodeTsConfigArgs = {
   /** Path aliases for this config — node configs have none by default. */
   readonly paths?: Record<string, readonly string[]>;
   readonly tsBuildInfoFile: string;
-  /** Ambient type roots — defaults to `['node']`. Pass `[]` for a package contractually barred from Node globals (e.g. `@repo/utils`, which is pure and side-effect free), so the config cannot hand it the APIs it must not reach for. */
+  /** Ambient type roots — defaults to `['node']`. Pass `[]` for a package contractually barred from Node globals (e.g. `@lcabrera/utils`, which is pure and side-effect free), so the config cannot hand it the APIs it must not reach for. */
   readonly types?: readonly string[];
 };
 

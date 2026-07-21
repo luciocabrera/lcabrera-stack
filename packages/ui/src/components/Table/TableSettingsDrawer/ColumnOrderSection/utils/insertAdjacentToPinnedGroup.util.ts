@@ -1,7 +1,7 @@
 import type {
   ColumnPinningState,
   DataKey,
-} from '@repo/ui/components/Table/Table.types';
+} from '@lcabrera/ui/components/Table/Table.types';
 
 type InsertAdjacentToPinnedGroupArgs<TData = Record<string, unknown>> = {
   readonly columnKey: DataKey<TData>;

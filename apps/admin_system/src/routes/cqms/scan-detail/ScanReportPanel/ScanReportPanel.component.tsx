@@ -1,4 +1,4 @@
-import { MarkdownRenderer } from '@repo/ui/components/MarkdownRenderer';
+import { MarkdownRenderer } from '@lcabrera/ui/components/MarkdownRenderer';
 import { use } from 'react';
 
 import type { ScanReportPanelProps } from './ScanReportPanel.types';

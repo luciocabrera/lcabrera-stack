@@ -1,5 +1,5 @@
-import { LOAD_MORE_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
-import { getRequiredOnLoadMore } from '@repo/ui/components/Table/utils/getRequiredOnLoadMore.util';
+import { LOAD_MORE_PAGE_SIZE } from '@lcabrera/ui/components/Table/Table.constants';
+import { getRequiredOnLoadMore } from '@lcabrera/ui/components/Table/utils/getRequiredOnLoadMore.util';
 
 import type {
   FetchMoreRuntimeArgs,

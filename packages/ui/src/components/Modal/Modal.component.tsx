@@ -1,10 +1,10 @@
-import { AppBackground } from '@repo/ui/components/AppBackground';
-import { AppDotted } from '@repo/ui/components/AppDotted';
-import { Button } from '@repo/ui/components/Button';
-import { MenuCloseIcon } from '@repo/ui/components/Icons';
-import { Title } from '@repo/ui/components/Title';
-import { ICON_SIZE_MD } from '@repo/ui/design-system/constants/iconSizes.constants';
-import { surfaceStyles } from '@repo/ui/design-system/tokens/surfaces.stylex';
+import { AppBackground } from '@lcabrera/ui/components/AppBackground';
+import { AppDotted } from '@lcabrera/ui/components/AppDotted';
+import { Button } from '@lcabrera/ui/components/Button';
+import { MenuCloseIcon } from '@lcabrera/ui/components/Icons';
+import { Title } from '@lcabrera/ui/components/Title';
+import { ICON_SIZE_MD } from '@lcabrera/ui/design-system/constants/iconSizes.constants';
+import { surfaceStyles } from '@lcabrera/ui/design-system/tokens/surfaces.stylex';
 import * as stylex from '@stylexjs/stylex';
 import { useEffect, useRef } from 'react';
 

@@ -9,7 +9,7 @@ const { mockBuildAllOrderedColumns, mockDerivePinSideResolutionState } =
   }));
 
 vi.mock(
-  '@repo/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils',
+  '@lcabrera/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils',
   () => ({
     buildAllOrderedColumns: mockBuildAllOrderedColumns,
     derivePinSideResolutionState: mockDerivePinSideResolutionState,

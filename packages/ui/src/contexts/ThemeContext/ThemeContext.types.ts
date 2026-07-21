@@ -1,4 +1,4 @@
-import type { ThemeMode } from '@repo/ui/types/theme.types';
+import type { ThemeMode } from '@lcabrera/ui/types/theme.types';
 import type { ReactNode } from 'react';
 
 /**

@@ -21,7 +21,7 @@ the only scrollable main content region.
 
 A reverse proxy/CDN can inject `x-csp-nonce` request headers.
 
-1. `@repo/ui/utils/security/cspNonce.util.ts` provides the shared nonce parser (`getRequestCspNonce`).
+1. `@lcabrera/ui/utils/security/cspNonce.util.ts` provides the shared nonce parser (`getRequestCspNonce`).
 2. `root.loader.ts` reads nonce and returns `cspNonce`.
 3. `Root.layout.tsx` reads root loader data and forwards nonce to `ScrollRestoration` and `Scripts`.
 4. `entry.server.tsx` reads the same nonce and passes `nonce` to `renderToPipeableStream` so React streaming inline scripts carry the nonce.

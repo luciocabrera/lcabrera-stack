@@ -2,7 +2,7 @@
 
 Before creating anything new, check this inventory. If something here does the job — or could do it with a small enhancement to make it more generic — **prefer enhancing the existing artifact** over creating a new one.
 
-Shared components/hooks/utils/design-tokens live in `@repo/ui` — see [`packages/ui/src/INVENTORY.md`](../../../packages/ui/src/INVENTORY.md). Postgres-access utilities live in `@repo/server`; CQMS's entire read/write query layer lives in `@repo/scan-ingestion/src/queries/`. This file tracks only artifacts genuinely local to this app.
+Shared components/hooks/utils/design-tokens live in `@lcabrera/ui` — see [`packages/ui/src/INVENTORY.md`](../../../packages/ui/src/INVENTORY.md). Postgres-access utilities live in `@lcabrera/server`; CQMS's entire read/write query layer lives in `@repo/scan-ingestion/src/queries/`. This file tracks only artifacts genuinely local to this app.
 
 ---
 
@@ -12,7 +12,7 @@ Shared components/hooks/utils/design-tokens live in `@repo/ui` — see [`package
 | ---------------------------------------------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `/login`                                                   | `routes/login/`                 | Username/password sign-in (`Form` in a `SectionCard`, loader+action) — `authenticateUser` + cookie session; bounces already-authenticated visitors to the app (ADR-017)                                                                                                                        |
 | `/logout`                                                  | `routes/logout/`                | Action-only (POST) — destroys the auth session and redirects to `/login` (ADR-017)                                                                                                                                                                                                             |
-| `/settings`                                                | `routes/settings/`              | Re-export of the shared `@repo/ui/components/Settings` page, mirroring `apps/react-router`'s own route                                                                                                                                                                                         |
+| `/settings`                                                | `routes/settings/`              | Re-export of the shared `@lcabrera/ui/components/Settings` page, mirroring `apps/react-router`'s own route                                                                                                                                                                                     |
 | `/cqms`                                                    | `routes/cqms/cqmsIndex.root.ts` | Redirects to `/cqms/projects`                                                                                                                                                                                                                                                                  |
 | `/cqms/projects`                                           | `routes/cqms/root.ts`           | Project list — `TableLayout` fed `project_run_summary` rows (streamed via `projectsPromise`); "New Project" renders via `Table`'s own `actions` slot                                                                                                                                           |
 | `/cqms/projects/new`                                       | `routes/cqms/new-project/`      | Register a project's identity (`Form` in a `SectionCard`, action-only) — calls `registerProject`; code arrives afterwards via the snapshot sync panel (ADR-028)                                                                                                                                |
@@ -75,4 +75,4 @@ When you add, rename, or remove an artifact:
 
 - Add / update the row in the relevant table above
 - If enhancing an existing artifact (making it more generic), update its description row — do **not** add a new row
-- If an artifact becomes generic enough to be useful beyond this app, move it to `@repo/ui` (or `@repo/scan-ingestion` for query logic) and remove it from here
+- If an artifact becomes generic enough to be useful beyond this app, move it to `@lcabrera/ui` (or `@repo/scan-ingestion` for query logic) and remove it from here

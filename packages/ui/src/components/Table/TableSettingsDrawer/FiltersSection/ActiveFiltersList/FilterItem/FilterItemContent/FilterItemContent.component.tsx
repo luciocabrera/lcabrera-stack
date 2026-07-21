@@ -1,7 +1,7 @@
-import type { ColumnFilter } from '@repo/ui/types/filterOperators.types';
+import type { ColumnFilter } from '@lcabrera/ui/types/filterOperators.types';
 
-import { FilterInputs } from '@repo/ui/components/Table/filters/FilterInputs';
-import { LIST_MAX_HEIGHT } from '@repo/ui/components/VirtualList/VirtualList.constants';
+import { FilterInputs } from '@lcabrera/ui/components/Table/filters/FilterInputs';
+import { LIST_MAX_HEIGHT } from '@lcabrera/ui/components/VirtualList/VirtualList.constants';
 import * as stylex from '@stylexjs/stylex';
 
 import type { FilterItemContentProps } from './FilterItemContent.types';

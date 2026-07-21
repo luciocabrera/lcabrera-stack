@@ -1,12 +1,12 @@
 import type {
   TableColumnDataType,
   TableColumnFormat,
-} from '@repo/ui/components/Table/Table.types';
+} from '@lcabrera/ui/components/Table/Table.types';
 
-import { TableCheckDisplay } from '@repo/ui/components/Table/TableCheckDisplay';
-import { formatCurrency } from '@repo/utils/formatters/format-currency.util';
-import { formatDate } from '@repo/utils/formatters/format-date.util';
-import { formatNumber } from '@repo/utils/formatters/format-number.util';
+import { TableCheckDisplay } from '@lcabrera/ui/components/Table/TableCheckDisplay';
+import { formatCurrency } from '@lcabrera/utils/formatters/format-currency.util';
+import { formatDate } from '@lcabrera/utils/formatters/format-date.util';
+import { formatNumber } from '@lcabrera/utils/formatters/format-number.util';
 
 type RenderCellContentArgs = {
   readonly dataType: TableColumnDataType;

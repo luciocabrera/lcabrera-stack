@@ -1,10 +1,10 @@
 import type {
   FiltersDataState,
   TableMetaState,
-} from '@repo/ui/components/Table/Table.types';
-import type { TStore } from '@repo/ui/hooks/useStore.hook';
+} from '@lcabrera/ui/components/Table/Table.types';
+import type { TStore } from '@lcabrera/ui/hooks/useStore.hook';
 
-import { createMockStore } from '@repo/ui/utils/tests/createMockStore.util';
+import { createMockStore } from '@lcabrera/ui/utils/tests/createMockStore.util';
 import { describe, expect, it } from 'vitest';
 
 import { handleFetchMoreFilterDataError } from './handleFetchMoreFilterDataError.util';

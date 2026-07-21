@@ -1,4 +1,4 @@
-import { getErrorMessage } from '@repo/utils/errors/get-error-message.util';
+import { getErrorMessage } from '@lcabrera/utils/errors/get-error-message.util';
 import { type ActionFunctionArgs, data, redirect } from 'react-router';
 
 import { SYSTEM_ACTOR } from '@/auth/auth.constants';

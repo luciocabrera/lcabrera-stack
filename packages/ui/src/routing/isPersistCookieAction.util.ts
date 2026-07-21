@@ -1,4 +1,4 @@
-import { PERSIST_COOKIE_ACTION } from '@repo/ui/constants/globalSettings.constants';
+import { PERSIST_COOKIE_ACTION } from '@lcabrera/ui/constants/globalSettings.constants';
 
 /**
  * Returns true when the given form action targets the persist-cookie endpoint,

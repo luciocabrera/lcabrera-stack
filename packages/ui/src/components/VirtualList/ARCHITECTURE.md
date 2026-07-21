@@ -119,7 +119,7 @@ parents such as drawer filter cards.
 ## Infinite Scroll
 
 A 1px sentinel element is rendered at the end of the scroll container and
-watched with `useInfiniteScrollObserver` (`@repo/ui/hooks`). `IntersectionObserver`
+watched with `useInfiniteScrollObserver` (`@lcabrera/ui/hooks`). `IntersectionObserver`
 computes proximity off the layout pass; `SCROLL_THRESHOLD` is passed as the
 bottom `rootMargin`. The observer inputs come from selectors and the fetch is
 dispatched through the `useFetchMore` action.

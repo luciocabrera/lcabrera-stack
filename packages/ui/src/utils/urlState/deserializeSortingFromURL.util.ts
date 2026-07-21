@@ -1,6 +1,6 @@
-import type { SortingState } from '@repo/ui/components/Table';
+import type { SortingState } from '@lcabrera/ui/components/Table';
 
-import { logger } from '@repo/ui/utils/logger';
+import { logger } from '@lcabrera/ui/utils/logger';
 
 type CompactSorting = Record<string, 'asc' | 'desc'>;
 

@@ -23,7 +23,7 @@ export default defineConfig({
         replacement: `${fileURLToPath(new URL('src', import.meta.url))}/`,
       },
       {
-        find: '@repo/server',
+        find: '@lcabrera/server',
         replacement: fileURLToPath(
           new URL('../../packages/server/src', import.meta.url),
         ),
@@ -35,11 +35,11 @@ export default defineConfig({
         ),
       },
       {
-        find: /^@repo\/ui\/(.*)$/,
+        find: /^@lcabrera\/ui\/(.*)$/,
         replacement: `${fileURLToPath(new URL('../../packages/ui/src', import.meta.url))}/$1`,
       },
       {
-        find: /^@repo\/ui$/,
+        find: /^@lcabrera\/ui$/,
         replacement: fileURLToPath(
           new URL('../../packages/ui/src/public-api.ts', import.meta.url),
         ),

@@ -17,9 +17,9 @@
     "noUnusedParameters": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@repo/server/*": ["../../packages/server/src/*"],
-      "@repo/ui": ["../../packages/ui/src/public-api.ts"],
-      "@repo/ui/*": ["../../packages/ui/src/*"]
+      "@lcabrera/server/*": ["../../packages/server/src/*"],
+      "@lcabrera/ui": ["../../packages/ui/src/public-api.ts"],
+      "@lcabrera/ui/*": ["../../packages/ui/src/*"]
     },
     "resolveJsonModule": true,
     "rootDirs": [".", "./.react-router/types"],

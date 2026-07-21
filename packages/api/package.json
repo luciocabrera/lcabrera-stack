@@ -1,5 +1,5 @@
 {
-  "name": "@repo/api",
+  "name": "@lcabrera/api",
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
@@ -20,6 +20,9 @@
     "./http/build-paginated-query-params.util": "./src/http/build-paginated-query-params.util.ts",
     "./http/fetch-and-validate.util": "./src/http/fetch-and-validate.util.ts"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "format": "vp fmt .",
     "format:check": "vp fmt --check .",
@@ -30,7 +33,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
   "dependencies": {
-    "@repo/utils": "workspace:*"
+    "@lcabrera/utils": "workspace:*"
   },
   "devDependencies": {
     "@repo/vite-configs": "workspace:*",

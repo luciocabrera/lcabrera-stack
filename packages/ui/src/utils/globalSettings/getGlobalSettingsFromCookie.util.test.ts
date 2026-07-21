@@ -1,4 +1,4 @@
-import type { GlobalSettingsState } from '@repo/ui/types/globalSettings.types';
+import type { GlobalSettingsState } from '@lcabrera/ui/types/globalSettings.types';
 
 import { describe, expect, it } from 'vitest';
 

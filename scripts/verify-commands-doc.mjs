@@ -49,7 +49,7 @@ const COMMANDS_DOC = 'COMMANDS.md';
 
 /**
  * `vp run` prints `  <key>: <command>`, where the key may itself contain `:`
- * (`check:safe`) and `#` (`@repo/ui#lint:eslint:check`). The lazy inner group
+ * (`check:safe`) and `#` (`@lcabrera/ui#lint:eslint:check`). The lazy inner group
  * makes the split land on the last colon that is followed by whitespace.
  */
 const TASK_LINE = /^\s{2}([^\s:]+(?::[^\s:]+)*?):\s/;

@@ -1,4 +1,4 @@
-import { TableLayout } from '@repo/ui/components/Table/TableLayout';
+import { TableLayout } from '@lcabrera/ui/components/Table/TableLayout';
 import { useLoaderData } from 'react-router';
 
 import type { CarSale, CarSalesResponse } from '@/services';

@@ -44,14 +44,14 @@ const { batchSetColumnSettingsMock, columnStore, setColumnState } = vi.hoisted(
 );
 
 vi.mock(
-  '@repo/ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook',
+  '@lcabrera/ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook',
   () => ({
     useColumnDrawerContextValue: () => ({ columnStore }),
   }),
 );
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/columns/actions',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/actions',
   () => ({
     useBatchSetColumnSettings: () => batchSetColumnSettingsMock,
   }),

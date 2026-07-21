@@ -4,17 +4,17 @@ import type {
   ColumnSizingState,
   SortingState,
   TableColumn,
-} from '@repo/ui/components/Table';
+} from '@lcabrera/ui/components/Table';
 
 import {
   readPersistedStateFromCookie,
   readPersistedUiFlagsFromCookie,
-} from '@repo/ui/components/Table/utils';
+} from '@lcabrera/ui/components/Table/utils';
 import {
   deserializeFiltersFromURL,
   deserializeSortingFromURL,
   readTableStateFromURL,
-} from '@repo/ui/utils/urlState';
+} from '@lcabrera/ui/utils/urlState';
 
 import { sanitizeFiltersByColumns } from './sanitizeFiltersByColumns.util';
 

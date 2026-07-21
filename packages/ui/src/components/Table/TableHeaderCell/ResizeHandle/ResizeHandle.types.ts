@@ -1,4 +1,4 @@
-import type { DataKey } from '@repo/ui/components/Table/Table.types';
+import type { DataKey } from '@lcabrera/ui/components/Table/Table.types';
 
 export type ResizeHandleProps<TData> = {
   readonly columnKey: DataKey<TData>;

@@ -1,6 +1,6 @@
-import type { TableMetaState } from '@repo/ui/components/Table/Table.types';
+import type { TableMetaState } from '@lcabrera/ui/components/Table/Table.types';
 
-import { LOAD_MORE_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
+import { LOAD_MORE_PAGE_SIZE } from '@lcabrera/ui/components/Table/Table.constants';
 import { describe, expect, it, vi } from 'vitest';
 
 import { getFetchMoreRuntime } from './getFetchMoreRuntime.util';

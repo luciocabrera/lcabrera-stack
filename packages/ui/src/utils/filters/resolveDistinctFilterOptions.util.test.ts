@@ -1,4 +1,4 @@
-import { FILTER_OPTIONS_TIMEOUT_MS } from '@repo/ui/components/Table/Table.constants';
+import { FILTER_OPTIONS_TIMEOUT_MS } from '@lcabrera/ui/components/Table/Table.constants';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { resolveDistinctFilterOptions } from './resolveDistinctFilterOptions.util';
@@ -8,10 +8,10 @@ const { fetchDistinctValuesMock, getApiBaseUrlMock } = vi.hoisted(() => ({
   getApiBaseUrlMock: vi.fn(() => '/api'),
 }));
 
-vi.mock('@repo/api/distinct/fetch-distinct-values.util', () => ({
+vi.mock('@lcabrera/api/distinct/fetch-distinct-values.util', () => ({
   fetchDistinctValues: fetchDistinctValuesMock,
 }));
-vi.mock('@repo/api/config/get-api-base-url.util', () => ({
+vi.mock('@lcabrera/api/config/get-api-base-url.util', () => ({
   getApiBaseUrl: getApiBaseUrlMock,
 }));
 

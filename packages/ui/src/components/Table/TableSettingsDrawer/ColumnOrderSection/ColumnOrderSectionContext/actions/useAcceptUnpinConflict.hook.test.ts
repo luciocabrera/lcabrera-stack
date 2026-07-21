@@ -2,7 +2,7 @@
 // Dispatch behavior tests for useAcceptUnpinConflict.
 // Business logic is covered in resolveAcceptedUnpinConflictState.util.test.ts.
 
-import { createColumnOrderSectionActionMocks } from '@repo/ui/utils/tests/createColumnOrderSectionActionMocks.util';
+import { createColumnOrderSectionActionMocks } from '@lcabrera/ui/utils/tests/createColumnOrderSectionActionMocks.util';
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -52,13 +52,13 @@ const { drawerColumnsStore, modalsStore, resetMocks, tableColumnsStore } =
   });
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
   () => ({
     useTableConfigContextValue: () => ({ columnsStore: tableColumnsStore }),
   }),
 );
 vi.mock(
-  '@repo/ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook',
+  '@lcabrera/ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook',
   () => ({
     useTableDrawerContextValue: () => ({ columnsStore: drawerColumnsStore }),
   }),

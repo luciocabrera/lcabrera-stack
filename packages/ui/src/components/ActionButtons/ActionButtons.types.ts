@@ -1,4 +1,4 @@
-import type { ButtonProps } from '@repo/ui/components/Button';
+import type { ButtonProps } from '@lcabrera/ui/components/Button';
 import type { StyleXStyles } from '@stylexjs/stylex';
 import type { ComponentPropsWithoutRef } from 'react';
 

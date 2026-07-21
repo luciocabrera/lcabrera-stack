@@ -52,12 +52,15 @@ vi.mock('../../TableDrawerContext/selectors', () => ({
   useGetColumnFilters: () => columnFiltersRef.current,
 }));
 
-vi.mock('@repo/ui/components/Table/contexts/TableConfig/meta/actions', () => ({
-  useSetTableSettingsExpandedFilters: () => mockSetExpandedFilters,
-}));
+vi.mock(
+  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions',
+  () => ({
+    useSetTableSettingsExpandedFilters: () => mockSetExpandedFilters,
+  }),
+);
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/meta/selectors',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors',
   () => ({
     useGetTableSettingsExpandedFilters: () => expandedFiltersRef.current,
   }),

@@ -1,6 +1,6 @@
+import { getErrorMessage } from '@lcabrera/utils/errors/get-error-message.util';
 import { createUser } from '@repo/scan-ingestion/queries/createUser.util';
 import { replaceUserRoles } from '@repo/scan-ingestion/queries/replaceUserRoles.util';
-import { getErrorMessage } from '@repo/utils/errors/get-error-message.util';
 import { type ActionFunctionArgs, redirect } from 'react-router';
 
 import { requireUser } from '@/auth/requireUser.util';

@@ -2,7 +2,7 @@ import type {
   ColumnFilter,
   OperatorType,
   TextOperatorType,
-} from '@repo/ui/types/filterOperators.types';
+} from '@lcabrera/ui/types/filterOperators.types';
 
 import { getDraftedText } from './getDraftedText.util';
 

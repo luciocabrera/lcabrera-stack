@@ -1,6 +1,9 @@
-import { Button } from '@repo/ui/components/Button';
-import { EraserIcon, RefreshIcon } from '@repo/ui/components/Icons';
-import { ICON_SIZE_MD, ICON_SIZE_SM } from '@repo/ui/design-system/constants';
+import { Button } from '@lcabrera/ui/components/Button';
+import { EraserIcon, RefreshIcon } from '@lcabrera/ui/components/Icons';
+import {
+  ICON_SIZE_MD,
+  ICON_SIZE_SM,
+} from '@lcabrera/ui/design-system/constants';
 
 import type { ClearResetToolbarButtonsProps } from './ClearResetToolbarButtons.types';
 

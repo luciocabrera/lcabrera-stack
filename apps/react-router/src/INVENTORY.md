@@ -2,18 +2,18 @@
 
 Before creating anything new, check this inventory. If something here does the job — or could do it with a small enhancement to make it more generic — **prefer enhancing the existing artifact** over creating a new one.
 
-Shared components/hooks/utils/design-tokens live in `@repo/ui` — see [`packages/ui/src/INVENTORY.md`](../../../packages/ui/src/INVENTORY.md). The browser fetch layer lives in `@repo/api` (`packages/api/src/`), and Postgres access in `@repo/server` (`packages/server/src/`); the two split on runtime, so which one a utility belongs to is decided by whether it may run in a browser. This file tracks only artifacts genuinely local to this app.
+Shared components/hooks/utils/design-tokens live in `@lcabrera/ui` — see [`packages/ui/src/INVENTORY.md`](../../../packages/ui/src/INVENTORY.md). The browser fetch layer lives in `@lcabrera/api` (`packages/api/src/`), and Postgres access in `@lcabrera/server` (`packages/server/src/`); the two split on runtime, so which one a utility belongs to is decided by whether it may run in a browser. This file tracks only artifacts genuinely local to this app.
 
 ---
 
 ## Routes
 
-| Route                  | Location                     | Description                                                                                                                                                                         |
-| ---------------------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/login`               | `routes/login/`              | Auth login built with the `@repo/ui` Form; `clientAction` Zod-validates (no server hit on failure) then delegates to the credential-verifying server `action`; honors `?redirectTo` |
-| `/logout`              | `routes/logout/`             | Action-only route; clears the auth cookie and redirects to `/login` (POST only)                                                                                                     |
-| `/_api/filter-options` | `routes/api/filter-options/` | Resource route for `transport: 'loader'` filter-option descriptors (ADR-009); its loader calls the BFF `/api/distinct` server-side                                                  |
-| `/wide-alltypes-150`   | `routes/wide-alltypes-150/`  | Stress-test page for the `wide_alltypes_150` dataset using the shared `TableLayout` implementation                                                                                  |
+| Route                  | Location                     | Description                                                                                                                                                                             |
+| ---------------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/login`               | `routes/login/`              | Auth login built with the `@lcabrera/ui` Form; `clientAction` Zod-validates (no server hit on failure) then delegates to the credential-verifying server `action`; honors `?redirectTo` |
+| `/logout`              | `routes/logout/`             | Action-only route; clears the auth cookie and redirects to `/login` (POST only)                                                                                                         |
+| `/_api/filter-options` | `routes/api/filter-options/` | Resource route for `transport: 'loader'` filter-option descriptors (ADR-009); its loader calls the BFF `/api/distinct` server-side                                                      |
+| `/wide-alltypes-150`   | `routes/wide-alltypes-150/`  | Stress-test page for the `wide_alltypes_150` dataset using the shared `TableLayout` implementation                                                                                      |
 
 ---
 
@@ -35,9 +35,9 @@ Self-contained, server-only auth for the secured-routes showcase. See [`src/auth
 
 ## Root shell (`src/root/`)
 
-| Artifact        | Location                           | Description                                                                                                                                                                  |
-| --------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `LogoutControl` | `root/LogoutControl.component.tsx` | Session control for the `@repo/ui` `AppShell` `sessionActions` slot: a POST `<Form>` to `/logout`; icon-only + tooltip when the nav is collapsed, mirroring the theme toggle |
+| Artifact        | Location                           | Description                                                                                                                                                                      |
+| --------------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LogoutControl` | `root/LogoutControl.component.tsx` | Session control for the `@lcabrera/ui` `AppShell` `sessionActions` slot: a POST `<Form>` to `/logout`; icon-only + tooltip when the nav is collapsed, mirroring the theme toggle |
 
 ---
 

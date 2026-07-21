@@ -1,7 +1,7 @@
 import type { ScannerVersionRow } from '@repo/scan-ingestion/queries/getScannerVersions.util';
 
-import { NavLink, SectionCard, StatusBadge, TableLayout } from '@repo/ui';
-import { createEmptyColumnsState } from '@repo/ui/components/Table/utils/createEmptyColumnsState.util';
+import { NavLink, SectionCard, StatusBadge, TableLayout } from '@lcabrera/ui';
+import { createEmptyColumnsState } from '@lcabrera/ui/components/Table/utils/createEmptyColumnsState.util';
 import { useLoaderData } from 'react-router';
 
 import type { loader } from './scannerDetail.loader';

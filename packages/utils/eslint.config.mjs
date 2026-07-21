@@ -8,7 +8,7 @@ export default [
     tsconfigRootDir: import.meta.dirname,
   }),
   {
-    // @repo/utils deliberately uses kebab-case for its `.util` files — the ONE
+    // @lcabrera/utils deliberately uses kebab-case for its `.util` files — the ONE
     // documented exception to the camelCase-for-function-modules convention
     // (see .claude/rules/typescript.md). Rather than turning the rule off, pass
     // its `suffixCase` option so a camelCase `.util` here still FAILS the gate:

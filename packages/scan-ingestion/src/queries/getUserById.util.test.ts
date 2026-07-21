@@ -1,5 +1,5 @@
-import { hashSecret } from '@repo/server/crypto/hash-secret.util';
-import { closePool, getPool } from '@repo/server/db/get-pool.util';
+import { hashSecret } from '@lcabrera/server/crypto/hash-secret.util';
+import { closePool, getPool } from '@lcabrera/server/db/get-pool.util';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { getUserById } from './getUserById.util.ts';

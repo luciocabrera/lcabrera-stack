@@ -71,7 +71,7 @@ beforeEach(() => {
   dataStateMock.totalRows = 120;
 });
 
-vi.mock('@repo/ui/components/SidePanel', () => ({
+vi.mock('@lcabrera/ui/components/SidePanel', () => ({
   SidePanelSection: ({ children }: MockSectionProps) => (
     <section>{children}</section>
   ),
@@ -84,14 +84,14 @@ vi.mock('@repo/ui/components/SidePanel', () => ({
 }));
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/columns/selectors',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors',
   () => ({
     useGetColumns: () => columnsMock,
   }),
 );
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/meta/selectors',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors',
   () => ({
     useGetTableAdditionalMetadata: () => metaStateMock.additionalMetadata,
     useGetTableDensity: () => metaStateMock.density,
@@ -111,10 +111,13 @@ vi.mock(
   }),
 );
 
-vi.mock('@repo/ui/components/Table/contexts/TableData/data/selectors', () => ({
-  useGetTableTotalLoadedRows: () => dataStateMock.totalLoadedRows,
-  useGetTableTotalRows: () => dataStateMock.totalRows,
-}));
+vi.mock(
+  '@lcabrera/ui/components/Table/contexts/TableData/data/selectors',
+  () => ({
+    useGetTableTotalLoadedRows: () => dataStateMock.totalLoadedRows,
+    useGetTableTotalRows: () => dataStateMock.totalRows,
+  }),
+);
 
 import { DetailsSection } from './DetailsSection.component';
 

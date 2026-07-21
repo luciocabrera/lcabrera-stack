@@ -1,16 +1,16 @@
-import type { ColumnFilter } from '@repo/ui/types/filterOperators.types';
+import type { ColumnFilter } from '@lcabrera/ui/types/filterOperators.types';
 
-import { toQueryFilters } from '@repo/server/filters/to-query-filters.util';
+import { toQueryFilters } from '@lcabrera/server/filters/to-query-filters.util';
 import { describe, expect, it } from 'vitest';
 
 /**
- * `@repo/ui` and `@repo/server` each declare the column-filter shapes
+ * `@lcabrera/ui` and `@lcabrera/server` each declare the column-filter shapes
  * independently — neither package depends on the other, so neither can import
  * the other's definition (see the header of either `filters.types.ts`). This is
  * the guard that keeps the two in step.
  *
  * The assertion is the **call itself**, not a type-level trick: `toQueryFilters`
- * requires `@repo/server`'s shape, the values below are typed as `@repo/ui`'s,
+ * requires `@lcabrera/server`'s shape, the values below are typed as `@lcabrera/ui`'s,
  * so this file only compiles while a filter built in the UI is assignable to the
  * query layer. Add an operator or a variant on one side and `vp run typecheck`
  * fails here, naming the contract.
@@ -35,7 +35,7 @@ const uiFilters: Record<string, ColumnFilter> = {
   quantity: { operator: 'greaterThan', type: 'number', value: 2 },
 };
 
-describe('column-filter contract between @repo/ui and @repo/server', () => {
+describe('column-filter contract between @lcabrera/ui and @lcabrera/server', () => {
   it('accepts every UI filter variant and maps it to a query filter', () => {
     expect(toQueryFilters({ filters: uiFilters })).toStrictEqual([
       { column: 'customer_name', operator: 'ilike', value: '%ac%' },

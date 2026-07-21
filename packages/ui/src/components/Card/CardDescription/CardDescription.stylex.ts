@@ -1,4 +1,7 @@
-import { spacing, typography } from '@repo/ui/design-system/tokens/base.stylex';
+import {
+  spacing,
+  typography,
+} from '@lcabrera/ui/design-system/tokens/base.stylex';
 import * as stylex from '@stylexjs/stylex';
 
 export const cardDescriptionStyles = stylex.create({

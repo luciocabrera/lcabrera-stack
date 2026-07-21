@@ -1,7 +1,7 @@
-import type { DataKey } from '@repo/ui/components/Table/Table.types';
-import type { TStore } from '@repo/ui/hooks/useStore.hook';
-import type { ColumnFilter } from '@repo/ui/types/filterOperators.types';
-import type { SortDirection } from '@repo/ui/types/ui.types';
+import type { DataKey } from '@lcabrera/ui/components/Table/Table.types';
+import type { TStore } from '@lcabrera/ui/hooks/useStore.hook';
+import type { ColumnFilter } from '@lcabrera/ui/types/filterOperators.types';
+import type { SortDirection } from '@lcabrera/ui/types/ui.types';
 import type { ComponentProps } from 'react';
 
 export type ColumnDrawerContextValue<TData = Record<string, unknown>> = {

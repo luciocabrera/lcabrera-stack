@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { getFilterOptionsBaseUrl } from './getFilterOptionsBaseUrl.util';
 
-vi.mock('@repo/api/config/get-api-base-url.util', () => ({
+vi.mock('@lcabrera/api/config/get-api-base-url.util', () => ({
   getApiBaseUrl: vi.fn(() => 'http://localhost:3001/api'),
 }));
 

@@ -1,6 +1,6 @@
-import { hashSecret } from '@repo/server/crypto/hash-secret.util';
-import { getPool } from '@repo/server/db/get-pool.util';
-import { generateApiToken } from '@repo/server/tokens/generate-api-token.util';
+import { hashSecret } from '@lcabrera/server/crypto/hash-secret.util';
+import { getPool } from '@lcabrera/server/db/get-pool.util';
+import { generateApiToken } from '@lcabrera/server/tokens/generate-api-token.util';
 
 import { API_TOKEN_PREFIX } from '../auth/apiToken.constants.ts';
 

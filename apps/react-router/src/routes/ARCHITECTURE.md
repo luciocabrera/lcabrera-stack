@@ -16,7 +16,7 @@ loader, metadata, error boundary, and page component.
 
 ## Shared Loader Utilities
 
-- `@repo/ui/routing/readTableLoaderStateFromRequest.util.ts` centralizes table loader
+- `@lcabrera/ui/routing/readTableLoaderStateFromRequest.util.ts` centralizes table loader
   bootstrap state (URL + cookie merge, standalone sort/filter params) used by
   table-backed routes.
 
@@ -27,7 +27,7 @@ loader, metadata, error boundary, and page component.
 
 ## Auth Routes
 
-- `/login` (`login/`) renders the `@repo/ui` Form; a `clientAction` Zod-validates
+- `/login` (`login/`) renders the `@lcabrera/ui` Form; a `clientAction` Zod-validates
   in the browser and only delegates to the credential-verifying server `action`
   on success, which mints the signed auth cookie and redirects to the sanitized
   `?redirectTo`.

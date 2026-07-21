@@ -1,11 +1,11 @@
-import type { NavbarItemConfig } from '@repo/ui/components/Navbar/Navbar.types';
+import type { NavbarItemConfig } from '@lcabrera/ui/components/Navbar/Navbar.types';
 
 import {
   BarChartIcon,
   FileTextIcon,
   HomeIcon,
   SettingsIcon,
-} from '@repo/ui/components/Icons';
+} from '@lcabrera/ui/components/Icons';
 
 /**
  * Returns navigation items with icons scaled to the given size.

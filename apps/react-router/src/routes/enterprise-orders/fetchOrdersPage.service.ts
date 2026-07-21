@@ -1,9 +1,9 @@
 import type {
   ColumnFiltersState,
   SortingState,
-} from '@repo/ui/components/Table';
+} from '@lcabrera/ui/components/Table';
 
-import { buildPaginatedQueryParams } from '@repo/api/http/build-paginated-query-params.util';
+import { buildPaginatedQueryParams } from '@lcabrera/api/http/build-paginated-query-params.util';
 
 import type { EnterpriseOrder, EnterpriseOrdersResponse } from './config';
 
@@ -19,7 +19,7 @@ export type FetchOrdersPageArgs = {
 /**
  * Browser fetcher for the table's infinite-scroll load-more: calls the app's
  * own `_api/enterprise-orders/paginated` resource route (server-side Postgres
- * via `@repo/server`), replacing the retired api-server call.
+ * via `@lcabrera/server`), replacing the retired api-server call.
  */
 export const fetchOrdersPage = async ({
   filter,

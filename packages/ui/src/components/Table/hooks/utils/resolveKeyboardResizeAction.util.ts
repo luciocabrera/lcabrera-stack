@@ -1,7 +1,7 @@
 import {
   COLUMN_RESIZE_KEYBOARD_COARSE_STEP,
   COLUMN_RESIZE_KEYBOARD_STEP,
-} from '@repo/ui/components/Table/Table.constants';
+} from '@lcabrera/ui/components/Table/Table.constants';
 
 /**
  * What a keypress on the resize handle should do: nothing at all, restore the

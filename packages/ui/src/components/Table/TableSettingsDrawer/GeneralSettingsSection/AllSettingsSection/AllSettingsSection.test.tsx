@@ -17,7 +17,7 @@ type ButtonProps = {
   readonly onClick?: () => void;
 };
 
-vi.mock('@repo/ui/components/Button', () => ({
+vi.mock('@lcabrera/ui/components/Button', () => ({
   // Mirrors the real Button, which renders disabled={isDisabled || isBusy}.
   // A stub that drops them silently makes disabled-state assertions vacuous.
   Button: ({ children, isBusy, isDisabled, onClick }: ButtonProps) => (
@@ -27,12 +27,12 @@ vi.mock('@repo/ui/components/Button', () => ({
   ),
 }));
 
-vi.mock('@repo/ui/components/Icons', () => ({
+vi.mock('@lcabrera/ui/components/Icons', () => ({
   EraserIcon: () => <span>Eraser icon</span>,
   RefreshIcon: () => <span>Refresh icon</span>,
 }));
 
-vi.mock('@repo/ui/components/SidePanel', () => ({
+vi.mock('@lcabrera/ui/components/SidePanel', () => ({
   SidePanelSection: ({ children }: { readonly children: ReactNode }) => (
     <section>{children}</section>
   ),

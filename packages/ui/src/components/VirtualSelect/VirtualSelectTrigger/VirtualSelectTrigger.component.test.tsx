@@ -46,11 +46,11 @@ vi.mock('../contexts/meta/selectors', () => ({
   useGetPlaceholder: () => metaState.current.placeholder,
 }));
 
-vi.mock('@repo/ui/components/VirtualList/contexts/data/actions', () => ({
+vi.mock('@lcabrera/ui/components/VirtualList/contexts/data/actions', () => ({
   useToggleOption: () => toggleOptionMock,
 }));
 
-vi.mock('@repo/ui/components/VirtualList/contexts/data/selectors', () => ({
+vi.mock('@lcabrera/ui/components/VirtualList/contexts/data/selectors', () => ({
   useGetSelectedValues: useGetSelectedValuesMock,
 }));
 

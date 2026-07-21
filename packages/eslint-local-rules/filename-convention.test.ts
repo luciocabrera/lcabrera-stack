@@ -75,7 +75,7 @@ ruleTester.run('filename-convention', rule, {
       errors: [{ messageId: 'wrongCase' }],
       filename: 'packages/utils/merge-arrays.util.ts',
     },
-    // …but with `@repo/utils`'s `{ suffixCase: { util: 'kebab-case' } }` option,
+    // …but with `@lcabrera/utils`'s `{ suffixCase: { util: 'kebab-case' } }` option,
     // a camelCase `.util` is what fails — the rule stays live, not turned off.
     {
       code,
@@ -101,7 +101,7 @@ ruleTester.run('filename-convention', rule, {
     // function-modules → camelCase
     { code, filename: 'src/utils/getFilteredOptions.util.ts' },
     { code, filename: 'src/routes/x/enterpriseOrders.service.ts' },
-    // …unless the suffixCase option overrides it (kebab `.util` in @repo/utils)
+    // …unless the suffixCase option overrides it (kebab `.util` in @lcabrera/utils)
     {
       code,
       filename: 'packages/utils/src/arrays/merge-arrays.util.ts',

@@ -1,4 +1,4 @@
-import { VirtualSelect } from '@repo/ui/components/VirtualSelect';
+import { VirtualSelect } from '@lcabrera/ui/components/VirtualSelect';
 
 import type { OperatorSelectProps } from './OperatorSelect.types';
 

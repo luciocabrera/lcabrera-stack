@@ -135,22 +135,34 @@ describe('extractCandidates', () => {
 
 describe('parseWorkspaceSpecifier', () => {
   it('splits a package specifier into name and subpath', () => {
-    expect(parseWorkspaceSpecifier('@repo/ui/design-system/tokens')).toEqual({
+    expect(
+      parseWorkspaceSpecifier('@lcabrera/ui/design-system/tokens'),
+    ).toEqual({
       packageName: 'ui',
       subpath: 'design-system/tokens',
     });
   });
 
   it('leaves the subpath undefined for a bare package', () => {
-    expect(parseWorkspaceSpecifier('@repo/server')).toEqual({
+    expect(parseWorkspaceSpecifier('@lcabrera/server')).toEqual({
       packageName: 'server',
       subpath: undefined,
     });
   });
 
-  it('returns undefined for anything not a @repo specifier', () => {
+  it('returns undefined for anything not a workspace specifier', () => {
     expect(parseWorkspaceSpecifier('packages/ui/src')).toBeUndefined();
     expect(parseWorkspaceSpecifier('@stylexjs/stylex')).toBeUndefined();
     expect(parseWorkspaceSpecifier('react')).toBeUndefined();
+  });
+
+  // The repo has two scopes — @lcabrera/* ships, @repo/* is internal tooling —
+  // and the docs name both. A parser that understood only one would quietly
+  // validate half of them while still reporting a clean pass.
+  it('parses the internal @repo scope too', () => {
+    expect(parseWorkspaceSpecifier('@repo/vite-configs/eslint-base')).toEqual({
+      packageName: 'vite-configs',
+      subpath: 'eslint-base',
+    });
   });
 });

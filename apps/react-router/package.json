@@ -22,11 +22,11 @@
     "test:watch": "node node_modules/vitest/vitest.mjs"
   },
   "dependencies": {
+    "@lcabrera/api": "workspace:*",
+    "@lcabrera/server": "workspace:*",
+    "@lcabrera/ui": "workspace:*",
+    "@lcabrera/utils": "workspace:*",
     "@react-router/serve": "catalog:",
-    "@repo/api": "workspace:*",
-    "@repo/server": "workspace:*",
-    "@repo/ui": "workspace:*",
-    "@repo/utils": "workspace:*",
     "@stylexjs/stylex": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",

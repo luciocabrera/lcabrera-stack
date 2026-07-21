@@ -12,7 +12,7 @@ type MockButtonProps = {
   readonly type?: string;
 };
 
-vi.mock('@repo/ui/components/Button', () => ({
+vi.mock('@lcabrera/ui/components/Button', () => ({
   Button: ({ children, isIconOnly, tooltipContent, type }: MockButtonProps) => (
     <button
       aria-label='Log out'

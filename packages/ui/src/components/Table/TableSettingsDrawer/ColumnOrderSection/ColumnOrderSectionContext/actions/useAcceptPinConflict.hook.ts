@@ -1,12 +1,12 @@
-import type { ColumnOrderState } from '@repo/ui/components/Table/Table.types';
-import type { PinConflictResolution } from '@repo/ui/types/ui.types';
+import type { ColumnOrderState } from '@lcabrera/ui/components/Table/Table.types';
+import type { PinConflictResolution } from '@lcabrera/ui/types/ui.types';
 
-import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { useTableConfigContextValue } from '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import {
   buildAllOrderedColumns,
   resolvePinConflictState,
-} from '@repo/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
-import { useTableDrawerContextValue } from '@repo/ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
+} from '@lcabrera/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
+import { useTableDrawerContextValue } from '@lcabrera/ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
 
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
 import { readPinActionState } from './utils/readPinActionState.util';

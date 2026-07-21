@@ -1,4 +1,4 @@
-import { useColumnsStore } from '@repo/ui/components/Table/contexts/TableConfig/columns/useColumnsStore.hook';
+import { useColumnsStore } from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/useColumnsStore.hook';
 
 /** Selector for the pre-computed pinned column offset map. */
 export const useGetPinnedColumnOffsets = () =>

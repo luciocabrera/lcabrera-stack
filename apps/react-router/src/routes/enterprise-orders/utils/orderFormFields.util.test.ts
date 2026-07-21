@@ -1,4 +1,4 @@
-import type { FieldNode } from '@repo/ui/components/Form';
+import type { FieldNode } from '@lcabrera/ui/components/Form';
 
 import { expect, it } from 'vitest';
 

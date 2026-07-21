@@ -1,7 +1,7 @@
 import type {
   ColumnOrderState,
   TableColumn,
-} from '@repo/ui/components/Table/Table.types';
+} from '@lcabrera/ui/components/Table/Table.types';
 
 type BuildAllOrderedColumnsArgs<TData> = {
   readonly columns: readonly TableColumn<TData>[];

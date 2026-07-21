@@ -2,16 +2,16 @@ import {
   ColumnsOrderIcon,
   EraserIcon,
   RefreshIcon,
-} from '@repo/ui/components/Icons';
+} from '@lcabrera/ui/components/Icons';
 import {
   useClearColumnOrderSection,
   useResetColumnOrderAndVisibility,
-} from '@repo/ui/components/Table/TableSettingsDrawer/TableDrawerContext/actions';
+} from '@lcabrera/ui/components/Table/TableSettingsDrawer/TableDrawerContext/actions';
 import {
   useGetColumnPinning,
   useGetColumnsSorting,
   useGetColumnVisibility,
-} from '@repo/ui/components/Table/TableSettingsDrawer/TableDrawerContext/selectors';
+} from '@lcabrera/ui/components/Table/TableSettingsDrawer/TableDrawerContext/selectors';
 
 import type { SectionToolbarButton } from '../../SectionToolbar';
 import type { ColumnOrderSectionToolbarProps } from './ColumnOrderSectionToolbar.types';

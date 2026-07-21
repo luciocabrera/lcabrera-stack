@@ -1,5 +1,5 @@
-import { useSetTableIsTableSettingsOpen } from '@repo/ui/components/Table/contexts/TableConfig/meta/actions';
-import { useGetTableIsTableSettingsPinned } from '@repo/ui/components/Table/contexts/TableConfig/meta/selectors';
+import { useSetTableIsTableSettingsOpen } from '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions';
+import { useGetTableIsTableSettingsPinned } from '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors';
 
 /**
  * Returns a handler that closes the table settings drawer unless it is

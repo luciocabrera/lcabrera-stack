@@ -1,4 +1,4 @@
-import { isShallowEqual } from '@repo/utils/comparison/is-shallow-equal.util';
+import { isShallowEqual } from '@lcabrera/utils/comparison/is-shallow-equal.util';
 import { useRef } from 'react';
 
 /**

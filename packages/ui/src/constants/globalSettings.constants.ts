@@ -1,10 +1,10 @@
-import type { RadioOption } from '@repo/ui/components/RadioOptionGroup';
-import type { AppNotification } from '@repo/ui/contexts/NotificationContext/NotificationContext.types';
+import type { RadioOption } from '@lcabrera/ui/components/RadioOptionGroup';
+import type { AppNotification } from '@lcabrera/ui/contexts/NotificationContext/NotificationContext.types';
 import type {
   GlobalNavigationCollapsedPreference,
   GlobalNavigationPinnedPreference,
   GlobalNavigationSizePreference,
-} from '@repo/ui/types/globalSettings.types';
+} from '@lcabrera/ui/types/globalSettings.types';
 
 export const NAVIGATION_SIZE_PREFERENCE_OPTIONS: readonly RadioOption<GlobalNavigationSizePreference>[] =
   [

@@ -7,7 +7,7 @@ import type {
   ColumnSizingState,
   ColumnVisibilityState,
   SortingState,
-} from '@repo/ui/components/Table/Table.types';
+} from '@lcabrera/ui/components/Table/Table.types';
 
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -110,7 +110,7 @@ const {
 });
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
   () => ({
     useTableConfigContextValue: () => ({
       columnsStore: mockColumnsStore,
@@ -120,7 +120,7 @@ vi.mock(
 );
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook',
+  '@lcabrera/ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook',
   () => ({
     useTableDataContextValue: () => ({ dataStore: mockDataStore }),
   }),
@@ -131,7 +131,7 @@ vi.mock('./hooks/usePersistTableStateAction.hook', () => ({
 }));
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/meta/actions/usePersistTableUiFlagsAction.hook',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions/usePersistTableUiFlagsAction.hook',
   () => ({
     usePersistTableUiFlagsAction: () => mockPersistUiFlags,
   }),

@@ -1,11 +1,11 @@
-import { Button } from '@repo/ui/components/Button';
+import { Button } from '@lcabrera/ui/components/Button';
 import {
   MaximizeIcon,
   MenuCloseIcon,
   MinimizeIcon,
   PinIcon,
   PinOffIcon,
-} from '@repo/ui/components/Icons';
+} from '@lcabrera/ui/components/Icons';
 import * as stylex from '@stylexjs/stylex';
 
 import type { NavigationHeaderActionsProps } from './NavigationHeaderActions.types';

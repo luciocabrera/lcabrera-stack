@@ -1,4 +1,4 @@
-import { closePool, getPool } from '@repo/server/db/get-pool.util';
+import { closePool, getPool } from '@lcabrera/server/db/get-pool.util';
 import { randomUUID } from 'node:crypto';
 import { rmSync } from 'node:fs';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';

@@ -1,5 +1,5 @@
-import { Button } from '@repo/ui/components/Button';
-import { SettingsIcon } from '@repo/ui/components/Icons';
+import { Button } from '@lcabrera/ui/components/Button';
+import { SettingsIcon } from '@lcabrera/ui/components/Icons';
 
 import type { TableTitleActionsProps } from './TableTitleActions.types';
 

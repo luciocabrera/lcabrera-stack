@@ -1,10 +1,10 @@
-import { ActionButtons } from '@repo/ui/components/ActionButtons';
-import { EraserIcon, RefreshIcon } from '@repo/ui/components/Icons';
+import { ActionButtons } from '@lcabrera/ui/components/ActionButtons';
+import { EraserIcon, RefreshIcon } from '@lcabrera/ui/components/Icons';
 import {
   SidePanelSection,
   SidePanelSectionHeader,
-} from '@repo/ui/components/SidePanel';
-import { ICON_SIZE_MD } from '@repo/ui/design-system/constants';
+} from '@lcabrera/ui/components/SidePanel';
+import { ICON_SIZE_MD } from '@lcabrera/ui/design-system/constants';
 
 import type { AllSettingsSectionProps } from './AllSettingsSection.types';
 

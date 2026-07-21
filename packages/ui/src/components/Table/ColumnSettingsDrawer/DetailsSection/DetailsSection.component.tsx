@@ -1,4 +1,4 @@
-import { useGetNormalizedColumn } from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors';
+import { useGetNormalizedColumn } from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors';
 import * as stylex from '@stylexjs/stylex';
 
 import type { DetailItem, DetailsSectionProps } from './DetailsSection.types';

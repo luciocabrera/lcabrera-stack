@@ -1,9 +1,9 @@
-import type { TableColumn } from '@repo/ui/components/Table/Table.types';
+import type { TableColumn } from '@lcabrera/ui/components/Table/Table.types';
 
 import {
   getInitialColumnsState,
   getInitialMetaState,
-} from '@repo/ui/components/Table/contexts/TableConfig/utils';
+} from '@lcabrera/ui/components/Table/contexts/TableConfig/utils';
 
 import type {
   GenerateCellValueArgs,

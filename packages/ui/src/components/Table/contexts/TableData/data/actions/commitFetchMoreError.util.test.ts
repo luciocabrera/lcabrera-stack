@@ -1,4 +1,4 @@
-import { createMockStore } from '@repo/ui/utils/tests/createMockStore.util';
+import { createMockStore } from '@lcabrera/ui/utils/tests/createMockStore.util';
 import { describe, expect, it } from 'vitest';
 
 import type { DataState } from './fetchMoreData.types';

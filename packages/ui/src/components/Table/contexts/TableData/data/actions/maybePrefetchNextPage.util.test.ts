@@ -1,9 +1,9 @@
-import { firePrefetch } from '@repo/ui/utils/prefetch/firePrefetch.util';
+import { firePrefetch } from '@lcabrera/ui/utils/prefetch/firePrefetch.util';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { maybePrefetchNextPage } from './maybePrefetchNextPage.util';
 
-vi.mock('@repo/ui/utils/prefetch/firePrefetch.util', () => ({
+vi.mock('@lcabrera/ui/utils/prefetch/firePrefetch.util', () => ({
   firePrefetch: vi.fn(),
 }));
 

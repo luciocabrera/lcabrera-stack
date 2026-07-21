@@ -1,5 +1,5 @@
-import { borderRadius } from '@repo/ui/design-system/tokens/base.stylex';
-import { colors } from '@repo/ui/design-system/tokens/colors.stylex';
+import { borderRadius } from '@lcabrera/ui/design-system/tokens/base.stylex';
+import { colors } from '@lcabrera/ui/design-system/tokens/colors.stylex';
 import {
   baseInteractiveStyles,
   colorVariants,
@@ -7,7 +7,7 @@ import {
   rippleBase,
   sizeVariants,
   skeleton,
-} from '@repo/ui/design-system/tokens/commons.stylex';
+} from '@lcabrera/ui/design-system/tokens/commons.stylex';
 import * as stylex from '@stylexjs/stylex';
 
 const styles = stylex.create({

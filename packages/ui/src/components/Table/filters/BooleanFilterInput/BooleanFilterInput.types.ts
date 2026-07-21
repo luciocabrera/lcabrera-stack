@@ -1,4 +1,4 @@
-import type { BooleanFilter } from '@repo/ui/types/filterOperators.types';
+import type { BooleanFilter } from '@lcabrera/ui/types/filterOperators.types';
 
 export type BooleanFilterInputProps = {
   readonly filter: BooleanFilter | undefined;

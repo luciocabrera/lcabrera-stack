@@ -1,8 +1,8 @@
-import { Button } from '@repo/ui/components/Button';
-import { NoDataDescriptive } from '@repo/ui/components/Icons';
-import { useGetPinnedColumnPartition } from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors';
-import { useTableContainerRef } from '@repo/ui/components/Table/contexts/TableWrapper';
-import { useElementSize, useResizeObserver } from '@repo/ui/hooks';
+import { Button } from '@lcabrera/ui/components/Button';
+import { NoDataDescriptive } from '@lcabrera/ui/components/Icons';
+import { useGetPinnedColumnPartition } from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors';
+import { useTableContainerRef } from '@lcabrera/ui/components/Table/contexts/TableWrapper';
+import { useElementSize, useResizeObserver } from '@lcabrera/ui/hooks';
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 import { useRevalidator } from 'react-router';

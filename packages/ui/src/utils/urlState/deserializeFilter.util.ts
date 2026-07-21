@@ -1,7 +1,7 @@
 import type {
   ColumnFilter,
   NumberOperatorType,
-} from '@repo/ui/types/filterOperators.types';
+} from '@lcabrera/ui/types/filterOperators.types';
 
 import {
   DATE_OPERATOR_SHORT_CODES,
@@ -9,7 +9,7 @@ import {
   NUMBER_OPERATOR_SHORT_CODES,
   SHORT_TO_OPERATOR,
   TEXT_OPERATOR_SHORT_CODES,
-} from '@repo/ui/constants/filterOperators.constants';
+} from '@lcabrera/ui/constants/filterOperators.constants';
 
 const expandOperator = (short: string) => SHORT_TO_OPERATOR.get(short) ?? short;
 

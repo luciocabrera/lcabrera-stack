@@ -4,7 +4,7 @@ import type {
   PinnedColumnOffsetsState,
   PinnedColumnPartitionState,
   TableColumn,
-} from '@repo/ui/components/Table/Table.types';
+} from '@lcabrera/ui/components/Table/Table.types';
 
 import { describe, expect, it, vi } from 'vitest';
 

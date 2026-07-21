@@ -27,10 +27,10 @@ The file [src/routes/enterprise-orders/EnterpriseOrders.constants.tsx](src/route
   by the "reset to default pinning" flow).
 - `COLUMNS` definitions, including filter adapters. `COLUMNS` no longer
   declares an `actions` entry: since `CRUD` (passed as `metaState.crud`)
-  enables `read`/`update`/`delete`, `@repo/ui/components/Table`'s
+  enables `read`/`update`/`delete`, `@lcabrera/ui/components/Table`'s
   `getInitialColumnsState` synthesizes and right-pins the row-actions column
   automatically (see `resolveTableActionsColumn` /
-  `createActionsColumn` in `@repo/ui/components/Table/utils`).
+  `createActionsColumn` in `@lcabrera/ui/components/Table/utils`).
 
 The route loader also uses `COLUMNS` as the source of truth for standalone URL filter validation, so mismatched filter payloads are discarded before the enterprise orders API request is built.
 
@@ -52,7 +52,7 @@ column.
 
 ## Duplication Guardrail
 
-- Repeated string columns are composed through `createBasicColumn(...)` from `@repo/ui/components/Table/utils` in [src/routes/enterprise-orders/EnterpriseOrders.constants.tsx](src/routes/enterprise-orders/EnterpriseOrders.constants.tsx); their distinct filter descriptors are appended once in the loader by `appendDistinctFilterDescriptors` (ADR-009) instead of per-column wiring.
+- Repeated string columns are composed through `createBasicColumn(...)` from `@lcabrera/ui/components/Table/utils` in [src/routes/enterprise-orders/EnterpriseOrders.constants.tsx](src/routes/enterprise-orders/EnterpriseOrders.constants.tsx); their distinct filter descriptors are appended once in the loader by `appendDistinctFilterDescriptors` (ADR-009) instead of per-column wiring.
 - This keeps the descriptor params (`schemaName`/`tableName`/`columnName`) consistent across customer and shipping fields while preserving each column's label/width metadata.
 - The row-actions column is likewise never hand-declared here — it's synthesized by `TableConfigProvider` (via `getInitialColumnsState` / `resolveTableActionsColumn`) from `CRUD`, keeping store initialization explicit and side-effect free.
 
@@ -73,7 +73,7 @@ empty. `Modal.onClose` and the Form's Cancel navigate back to the list; a succes
 - `order-detail/` — read-only `view`-mode Form; serves both `view/:orderId` and the bare
   `:orderId` route (the intentional duplicate detail routes, feature plan §8 item 5).
 - `OrderFormModal/` — shared Modal+Form wrapper; `utils/orderFormFields.util.ts` builds the
-  tab → card-group → row field tree per mode from the shared `@repo/ui` Form builders
+  tab → card-group → row field tree per mode from the shared `@lcabrera/ui` Form builders
   (`createFieldBuilders<EnterpriseOrderValues>()`); `orderClientAction.ts` is the shared
   browser gate.
 
@@ -87,7 +87,7 @@ colocated test.
 
 ### `.server/enterpriseOrders.service.ts` — server-only Postgres access
 
-Wraps the generic `@repo/server` executors (`selectRows`/`insertRow`/`updateRows`/
+Wraps the generic `@lcabrera/server` executors (`selectRows`/`insertRow`/`updateRows`/
 `deleteRows`/`getMaxValue`) with the enterprise-orders `{ schema, table, allowedColumns }`
 baked in — **no entity-specific SQL**. It reaches Postgres via `getPool`, which reads `DB_*`
 env (sourced from `docker/local/.env` by the app's `dev` script). The

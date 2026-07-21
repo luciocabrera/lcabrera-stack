@@ -1,7 +1,7 @@
-import { DEFAULT_FILTER_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
-import { getRequiredOnLoadMore } from '@repo/ui/components/Table/utils/getRequiredOnLoadMore.util';
-import { logger } from '@repo/ui/utils/logger';
-import { getErrorMessage } from '@repo/utils/errors/get-error-message.util';
+import { DEFAULT_FILTER_PAGE_SIZE } from '@lcabrera/ui/components/Table/Table.constants';
+import { getRequiredOnLoadMore } from '@lcabrera/ui/components/Table/utils/getRequiredOnLoadMore.util';
+import { logger } from '@lcabrera/ui/utils/logger';
+import { getErrorMessage } from '@lcabrera/utils/errors/get-error-message.util';
 
 import type {
   FetchFilterDataActionArgs,

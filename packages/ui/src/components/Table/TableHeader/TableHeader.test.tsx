@@ -24,16 +24,19 @@ const {
 }));
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/columns/selectors',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors',
   () => ({
     useGetPinnedColumnPartition: useGetPinnedColumnPartitionMock,
   }),
 );
 
-vi.mock('@repo/ui/components/Table/contexts/TableData/data/selectors', () => ({
-  useGetTableIsLoading: useGetTableIsLoadingMock,
-  useGetTableIsLoadingMore: useGetTableIsLoadingMoreMock,
-}));
+vi.mock(
+  '@lcabrera/ui/components/Table/contexts/TableData/data/selectors',
+  () => ({
+    useGetTableIsLoading: useGetTableIsLoadingMock,
+    useGetTableIsLoadingMore: useGetTableIsLoadingMoreMock,
+  }),
+);
 
 vi.mock('../TableHeaderCell', () => ({
   TableHeaderCell: MockTableHeaderCell,

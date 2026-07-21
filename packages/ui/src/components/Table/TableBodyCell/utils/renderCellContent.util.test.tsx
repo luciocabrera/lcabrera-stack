@@ -7,13 +7,13 @@ const formatCurrencyMock = vi.hoisted(() => vi.fn());
 const formatDateMock = vi.hoisted(() => vi.fn());
 const formatNumberMock = vi.hoisted(() => vi.fn());
 
-vi.mock('@repo/utils/formatters/format-currency.util', () => ({
+vi.mock('@lcabrera/utils/formatters/format-currency.util', () => ({
   formatCurrency: formatCurrencyMock,
 }));
-vi.mock('@repo/utils/formatters/format-date.util', () => ({
+vi.mock('@lcabrera/utils/formatters/format-date.util', () => ({
   formatDate: formatDateMock,
 }));
-vi.mock('@repo/utils/formatters/format-number.util', () => ({
+vi.mock('@lcabrera/utils/formatters/format-number.util', () => ({
   formatNumber: formatNumberMock,
 }));
 

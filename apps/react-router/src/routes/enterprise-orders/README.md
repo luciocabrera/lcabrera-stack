@@ -6,7 +6,7 @@ This route displays enterprise orders data with infinite scrolling capabilities.
 
 - **Path**: `/enterprise-orders`
 - **Component**: `EnterpriseOrders`
-- **Data**: server-side Postgres via `@repo/server` (list loader +
+- **Data**: server-side Postgres via `@lcabrera/server` (list loader +
   `_api/enterprise-orders/paginated` resource route for load-more)
 
 ## Features
@@ -70,7 +70,7 @@ src/routes/enterprise-orders/
 ├── .server/enterpriseOrders.service.ts        # Server-only Postgres access (RR `.server/`: build-stripped from client)
 ├── OrderFormModal/                            # Shared Modal + Form wrapper
 ├── orderClientAction.ts                       # Shared browser Zod gate
-├── utils/                                     # Route-local utils: orderFormFields (field-tree builder via @repo/ui createFieldBuilders), parseOrderIdParam, buildEnterpriseOrdersQuery
+├── utils/                                     # Route-local utils: orderFormFields (field-tree builder via @lcabrera/ui createFieldBuilders), parseOrderIdParam, buildEnterpriseOrdersQuery
 ├── new-order/                                 # Create route (clientAction + action)
 ├── edit-order/                                # Edit route (loader + clientAction + action)
 └── order-detail/                              # Read-only view route (Form `view` mode)
@@ -78,21 +78,21 @@ src/routes/enterprise-orders/
 
 ## CRUD flow
 
-Create / view / edit render **inside `@repo/ui` Modal** overlaid on the list (route-driven
+Create / view / edit render **inside `@lcabrera/ui` Modal** overlaid on the list (route-driven
 modals — the parent renders the table + `<Outlet/>`). Submissions validate client-first via
 `clientAction` (Zod), then delegate to the server `action`, which re-validates, persists via
-the generic `@repo/server` write builders (direct Postgres — no api-server), and
+the generic `@lcabrera/server` write builders (direct Postgres — no api-server), and
 redirects. Requires local Postgres (`vp run db:up`) with the `DB_*` env the `dev` script
 sources from `docker/local/.env`.
 
 ## Data access
 
-Reads go through the generic `@repo/server` query builders/executors (no
+Reads go through the generic `@lcabrera/server` query builders/executors (no
 api-server). `.server/enterpriseOrders.service.ts` exposes `selectOrdersPage`
 (list + count), `selectOrderById`, `getNextOrderId`, `insertOrder`,
 `updateOrder`, `deleteOrder`. The table's `ColumnFiltersState`/`SortingState`
 are translated to generic `QueryFilter[]`/`QuerySort[]` by the generic
-`@repo/server/filters` `toQueryFilters` mapper (table-agnostic, shared by
+`@lcabrera/server/filters` `toQueryFilters` mapper (table-agnostic, shared by
 any table) and the app-local `config/toOrderQuerySort` util; the browser
 load-more calls `fetchOrdersPage` → the `_api/enterprise-orders/paginated`
 resource route.
@@ -195,7 +195,7 @@ mocked, so they need no database.
 A **live-DB smoke test** (`.server/enterpriseOrders.smoke.test.ts`) covers what the
 mocks can't: the demo-login credential check against the env-configured hash, and a
 real create → read → update → list/count → delete round-trip through the generic
-`@repo/server` builders. It is **gated behind `SMOKE_DB`** so the default
+`@lcabrera/server` builders. It is **gated behind `SMOKE_DB`** so the default
 `vp run test` and the DB-less CI unit job skip it. Run it against a local Postgres:
 
 ```bash

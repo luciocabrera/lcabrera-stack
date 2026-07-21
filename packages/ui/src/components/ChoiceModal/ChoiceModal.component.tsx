@@ -1,6 +1,6 @@
-import { ActionButtons } from '@repo/ui/components/ActionButtons';
-import { Modal } from '@repo/ui/components/Modal';
-import { RadioOptionGroup } from '@repo/ui/components/RadioOptionGroup';
+import { ActionButtons } from '@lcabrera/ui/components/ActionButtons';
+import { Modal } from '@lcabrera/ui/components/Modal';
+import { RadioOptionGroup } from '@lcabrera/ui/components/RadioOptionGroup';
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 

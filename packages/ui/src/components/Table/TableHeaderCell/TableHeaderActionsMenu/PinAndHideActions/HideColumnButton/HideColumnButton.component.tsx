@@ -1,7 +1,7 @@
-import { Button } from '@repo/ui/components/Button';
-import { EyeOffIcon } from '@repo/ui/components/Icons';
-import { useSetColumnVisibility } from '@repo/ui/components/Table/contexts/TableConfig/columns/actions';
-import { tableActionsPopoverStyles } from '@repo/ui/components/Table/TableActionsPopover';
+import { Button } from '@lcabrera/ui/components/Button';
+import { EyeOffIcon } from '@lcabrera/ui/components/Icons';
+import { useSetColumnVisibility } from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/actions';
+import { tableActionsPopoverStyles } from '@lcabrera/ui/components/Table/TableActionsPopover';
 import * as stylex from '@stylexjs/stylex';
 
 import type { HideColumnButtonProps } from './HideColumnButton.types';

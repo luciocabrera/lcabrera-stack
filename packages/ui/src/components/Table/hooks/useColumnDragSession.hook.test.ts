@@ -13,7 +13,7 @@ const { setColumnSizingWithoutSyncMock, syncColumnsSizingMock } = vi.hoisted(
 );
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/columns/actions',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/actions',
   () => ({
     useSetColumnSizingWithoutSync: () => setColumnSizingWithoutSyncMock,
     useSyncColumnsSizing: () => syncColumnsSizingMock,

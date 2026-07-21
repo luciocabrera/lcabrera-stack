@@ -1,7 +1,7 @@
-# Package Architecture (`@repo/utils`)
+# Package Architecture (`@lcabrera/utils`)
 
 Shared framework-agnostic utility primitives — the lowest layer of the monorepo,
-importable by any consumer (`@repo/ui`, `@repo/server`, apps).
+importable by any consumer (`@lcabrera/ui`, `@lcabrera/server`, apps).
 
 ## Design Goals
 
@@ -25,14 +25,14 @@ importable by any consumer (`@repo/ui`, `@repo/server`, apps).
 - **kebab-case `*.util.ts`** enforced via the `filename-convention` rule's
   `suffixCase: { util: 'kebab-case' }` option — asserted, not silenced.
 - **≥95% test coverage** (statements/branches/functions/lines) gated by
-  `test:coverage`; `@repo/utils` is included in the `coverage:merge` /
+  `test:coverage`; `@lcabrera/utils` is included in the `coverage:merge` /
   `coverage-report` fan-outs.
 - **Suppression-free by construction** — `eslint-suppressions.json` is gitignored
   and never committed; any real finding fails the gate.
 
 ## Config-import constraint
 
-`@repo/vite-configs` depends on `@repo/utils`, so this package's config files
+`@repo/vite-configs` depends on `@lcabrera/utils`, so this package's config files
 (`eslint.config.mjs`, `vite.config.ts`) must reference vite-configs helpers by
 **relative path or inline** them — never via a bare `@repo/vite-configs`
 specifier, which would create a workspace cycle that breaks `vp run -r`.

@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
 
-import type { TabFieldNode } from '@repo/ui/components/Form/Form.types';
+import type { TabFieldNode } from '@lcabrera/ui/components/Form/Form.types';
 
-import { FormProvider } from '@repo/ui/components/Form/contexts';
-import { FormFieldsRendererContext } from '@repo/ui/components/Form/FormFields/contexts/FormFieldsRendererContext/FormFieldsRendererContext.context';
-import { FormFieldsList } from '@repo/ui/components/Form/FormFields/FormFieldsList/FormFieldsList.component';
+import { FormProvider } from '@lcabrera/ui/components/Form/contexts';
+import { FormFieldsRendererContext } from '@lcabrera/ui/components/Form/FormFields/contexts/FormFieldsRendererContext/FormFieldsRendererContext.context';
+import { FormFieldsList } from '@lcabrera/ui/components/Form/FormFields/FormFieldsList/FormFieldsList.component';
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 

@@ -21,7 +21,7 @@ const { mockGetPinnedDerivedColumnsState } = vi.hoisted(() => ({
   })),
 }));
 
-vi.mock('@repo/ui/components/Table/utils', () => ({
+vi.mock('@lcabrera/ui/components/Table/utils', () => ({
   getPinnedDerivedColumnsState: mockGetPinnedDerivedColumnsState,
 }));
 

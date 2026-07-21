@@ -1,4 +1,4 @@
-import type { ColumnFiltersState } from '@repo/ui/components/Table/Table.types';
+import type { ColumnFiltersState } from '@lcabrera/ui/components/Table/Table.types';
 
 import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook';
 

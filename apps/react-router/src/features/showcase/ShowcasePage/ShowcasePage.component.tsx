@@ -1,5 +1,5 @@
-import { Button } from '@repo/ui/components/Button';
-import { useTheme } from '@repo/ui/hooks/useTheme.hook';
+import { Button } from '@lcabrera/ui/components/Button';
+import { useTheme } from '@lcabrera/ui/hooks/useTheme.hook';
 import * as stylex from '@stylexjs/stylex';
 
 import { ButtonsSection } from './ButtonsSection';

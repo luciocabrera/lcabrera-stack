@@ -2,14 +2,14 @@ import type { ActionFunctionArgs } from 'react-router';
 
 import { describe, expect, it, vi } from 'vitest';
 
-vi.mock('@repo/ui/utils/storage/buildCookieString.util', () => ({
+vi.mock('@lcabrera/ui/utils/storage/buildCookieString.util', () => ({
   buildCookieString: vi.fn(
     ({ key, value }: { key: string; value: string }) =>
       `${key}=${value}; Path=/; HttpOnly`,
   ),
 }));
 
-import { buildCookieString } from '@repo/ui/utils/storage/buildCookieString.util';
+import { buildCookieString } from '@lcabrera/ui/utils/storage/buildCookieString.util';
 
 import { action } from './persist-cookie.action';
 

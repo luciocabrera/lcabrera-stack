@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import type { NavbarItemConfig } from '@repo/ui/components/Navbar/Navbar.types';
+import type { NavbarItemConfig } from '@lcabrera/ui/components/Navbar/Navbar.types';
 
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -16,13 +16,13 @@ type MockNavbarProps = {
   readonly size?: string;
 };
 
-vi.mock('@repo/ui/components/SidePanel', () => ({
+vi.mock('@lcabrera/ui/components/SidePanel', () => ({
   SidePanelBody: ({ children }: { readonly children: React.ReactNode }) => (
     <div>{children}</div>
   ),
 }));
 
-vi.mock('@repo/ui/components/Navbar', () => ({
+vi.mock('@lcabrera/ui/components/Navbar', () => ({
   Navbar: ({ isCompact, items, size }: MockNavbarProps) => (
     <nav data-compact={String(isCompact)} data-size={size} data-testid='Navbar'>
       {items.map((item) => item.label).join('|')}
@@ -30,7 +30,7 @@ vi.mock('@repo/ui/components/Navbar', () => ({
   ),
 }));
 
-vi.mock('@repo/ui/contexts/GlobalSettingsContext/selectors', () => ({
+vi.mock('@lcabrera/ui/contexts/GlobalSettingsContext/selectors', () => ({
   useGetGlobalNavigationCollapsedPreference: () => collapsedPreferenceMock(),
   useGetGlobalNavigationSizePreference: () => sizePreferenceMock(),
 }));

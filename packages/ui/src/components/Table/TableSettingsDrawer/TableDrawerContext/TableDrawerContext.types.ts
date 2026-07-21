@@ -1,5 +1,5 @@
-import type { TableColumnsState } from '@repo/ui/components/Table/Table.types';
-import type { TStore } from '@repo/ui/hooks/useStore.hook';
+import type { TableColumnsState } from '@lcabrera/ui/components/Table/Table.types';
+import type { TStore } from '@lcabrera/ui/hooks/useStore.hook';
 
 export type TableDrawerColumnsState<TData> = Pick<
   TableColumnsState<TData>,

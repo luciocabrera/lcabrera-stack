@@ -1,4 +1,4 @@
-import type { ColumnFiltersState } from '@repo/ui/components/Table';
+import type { ColumnFiltersState } from '@lcabrera/ui/components/Table';
 
 import { serializeFilter } from './serializeFilter.util';
 

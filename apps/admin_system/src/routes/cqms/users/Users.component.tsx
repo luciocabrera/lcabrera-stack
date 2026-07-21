@@ -1,7 +1,7 @@
 import type { UserListViewRow } from '@repo/scan-ingestion/queries/getUserListView.util';
 
-import { TableLayout } from '@repo/ui';
-import { createEmptyColumnsState } from '@repo/ui/components/Table/utils/createEmptyColumnsState.util';
+import { TableLayout } from '@lcabrera/ui';
+import { createEmptyColumnsState } from '@lcabrera/ui/components/Table/utils/createEmptyColumnsState.util';
 import { useLoaderData } from 'react-router';
 
 import type { loader } from './users.loader';

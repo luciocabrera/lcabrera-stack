@@ -1,12 +1,12 @@
-import type { DraggableItem } from '@repo/ui/components/DraggableList';
+import type { DraggableItem } from '@lcabrera/ui/components/DraggableList';
 
-import { DraggableList } from '@repo/ui/components/DraggableList';
-import { useGetColumns } from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
+import { DraggableList } from '@lcabrera/ui/components/DraggableList';
+import { useGetColumns } from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
 import {
   useGetColumnOrder,
   useGetColumnPinning,
   useGetColumnVisibility,
-} from '@repo/ui/components/Table/TableSettingsDrawer/TableDrawerContext/selectors';
+} from '@lcabrera/ui/components/Table/TableSettingsDrawer/TableDrawerContext/selectors';
 
 import type { ColumnOrderSectionBodyProps } from './ColumnOrderSectionBody.types';
 

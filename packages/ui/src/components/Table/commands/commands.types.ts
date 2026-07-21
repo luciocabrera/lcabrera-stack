@@ -1,4 +1,4 @@
-import type { IconProps } from '@repo/ui/components/Icons';
+import type { IconProps } from '@lcabrera/ui/components/Icons';
 import type { ComponentType } from 'react';
 
 /**

@@ -1,4 +1,4 @@
-import { ActionButtons } from '@repo/ui/components/ActionButtons';
+import { ActionButtons } from '@lcabrera/ui/components/ActionButtons';
 
 import { styles } from '../Settings.stylex';
 import {

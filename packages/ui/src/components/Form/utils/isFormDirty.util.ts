@@ -1,4 +1,4 @@
-import { areArraysEqual } from '@repo/utils/comparison/are-arrays-equal.util';
+import { areArraysEqual } from '@lcabrera/utils/comparison/are-arrays-equal.util';
 
 type IsFormDirtyArgs<TValues extends Record<string, unknown>> = {
   readonly accessors: readonly (keyof TValues & string)[];

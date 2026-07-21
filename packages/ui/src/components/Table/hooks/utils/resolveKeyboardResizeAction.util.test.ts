@@ -1,7 +1,7 @@
 import {
   COLUMN_RESIZE_KEYBOARD_COARSE_STEP,
   COLUMN_RESIZE_KEYBOARD_STEP,
-} from '@repo/ui/components/Table/Table.constants';
+} from '@lcabrera/ui/components/Table/Table.constants';
 import { describe, expect, it } from 'vitest';
 
 import { resolveKeyboardResizeAction } from './resolveKeyboardResizeAction.util';

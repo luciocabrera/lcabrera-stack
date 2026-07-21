@@ -1,4 +1,4 @@
-import type { VirtualListDataState } from '@repo/ui/components/VirtualList';
+import type { VirtualListDataState } from '@lcabrera/ui/components/VirtualList';
 import type { StyleXStyles } from '@stylexjs/stylex';
 
 /**

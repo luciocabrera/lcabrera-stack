@@ -102,9 +102,18 @@ export const extractCandidates = (markdown) => {
   return [...new Set([...backticked, ...linked])];
 };
 
-/** `@repo/pkg/sub` → its parts, so the caller can check the exports map. */
+/**
+ * `@lcabrera/pkg/sub` or `@repo/pkg/sub` → its parts, so the caller can check
+ * the exports map.
+ *
+ * Two scopes on purpose: `@lcabrera/*` is the published product (ui, api,
+ * server, utils) and `@repo/*` is internal tooling that never ships. Both live
+ * at `packages/<name>`, so one pattern covers them. Matching only one scope
+ * would silently stop validating half the specifiers the docs name — which
+ * reports exactly the same clean pass as having nothing to validate.
+ */
 export const parseWorkspaceSpecifier = (token) => {
-  const match = /^@repo\/([^/]+)(?:\/(.+))?$/.exec(token);
+  const match = /^@(?:lcabrera|repo)\/([^/]+)(?:\/(.+))?$/.exec(token);
   return match === null
     ? undefined
     : { packageName: match[1], subpath: match[2] };

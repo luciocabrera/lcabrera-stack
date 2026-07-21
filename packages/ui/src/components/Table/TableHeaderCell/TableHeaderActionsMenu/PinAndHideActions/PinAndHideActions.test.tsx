@@ -4,14 +4,14 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/columns/actions',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/actions',
   () => ({
     useSetColumnPinning: () => vi.fn(),
     useSetColumnVisibility: () => vi.fn(),
   }),
 );
 
-vi.mock('@repo/ui/components/Table/TableActionsPopover', () => ({
+vi.mock('@lcabrera/ui/components/Table/TableActionsPopover', () => ({
   tableActionsPopoverStyles: {
     menuIcon: {},
     menuItem: {},

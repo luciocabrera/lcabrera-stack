@@ -1,7 +1,7 @@
+import type { TableColumn } from '@lcabrera/ui/components/Table';
 import type { CappedLlmUsageAttemptRow } from '@repo/scan-ingestion/queries/getCappedLlmUsageAttempts.util';
-import type { TableColumn } from '@repo/ui/components/Table';
 
-import { formatDate } from '@repo/utils/formatters/format-date.util';
+import { formatDate } from '@lcabrera/utils/formatters/format-date.util';
 
 export const CAPPED_LLM_USAGE_ATTEMPTS_COLUMNS: readonly TableColumn<CappedLlmUsageAttemptRow>[] =
   [

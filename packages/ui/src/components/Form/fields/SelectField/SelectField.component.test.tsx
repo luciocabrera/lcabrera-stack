@@ -3,12 +3,12 @@
 import type {
   FormMode,
   SelectFieldDef,
-} from '@repo/ui/components/Form/Form.types';
+} from '@lcabrera/ui/components/Form/Form.types';
 
 import {
   FormProvider,
   useGetFieldValue,
-} from '@repo/ui/components/Form/contexts';
+} from '@lcabrera/ui/components/Form/contexts';
 import {
   cleanup,
   fireEvent,

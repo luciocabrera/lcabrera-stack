@@ -1,4 +1,4 @@
-import { useStoreSelector } from '@repo/ui/hooks/useStoreSelector.hook';
+import { useStoreSelector } from '@lcabrera/ui/hooks/useStoreSelector.hook';
 
 import type { FormMetaState } from './FormContext.types';
 

@@ -2,7 +2,7 @@ import {
   NAVIGATION_COLLAPSED_PREFERENCE_OPTIONS,
   NAVIGATION_PINNED_PREFERENCE_OPTIONS,
   NAVIGATION_SIZE_PREFERENCE_OPTIONS,
-} from '@repo/ui/constants/globalSettings.constants';
+} from '@lcabrera/ui/constants/globalSettings.constants';
 import * as stylex from '@stylexjs/stylex';
 
 import type { SettingsDraft } from '../Settings.types';

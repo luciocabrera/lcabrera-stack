@@ -2,7 +2,7 @@
 // Dispatch behavior tests for useToggleColumnPin.
 // Business logic for each resolution kind is covered in resolveToggleColumnPinUpdate.util.test.ts.
 
-import { createColumnOrderSectionActionMocks } from '@repo/ui/utils/tests/createColumnOrderSectionActionMocks.util';
+import { createColumnOrderSectionActionMocks } from '@lcabrera/ui/utils/tests/createColumnOrderSectionActionMocks.util';
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -60,13 +60,13 @@ const mockAcceptPinSide = vi.fn();
 const mockAcceptUnpinConflict = vi.fn();
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
   () => ({
     useTableConfigContextValue: () => ({ columnsStore: tableColumnsStore }),
   }),
 );
 vi.mock(
-  '@repo/ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook',
+  '@lcabrera/ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook',
   () => ({
     useTableDrawerContextValue: () => ({ columnsStore: drawerColumnsStore }),
   }),
@@ -75,7 +75,7 @@ vi.mock('../useColumnOrderSectionContextValue.hook', () => ({
   useColumnOrderSectionContextValue: () => ({ modalsStore }),
 }));
 vi.mock(
-  '@repo/ui/contexts/GlobalSettingsContext/useGlobalSettingsContextValue.hook',
+  '@lcabrera/ui/contexts/GlobalSettingsContext/useGlobalSettingsContextValue.hook',
   () => ({
     useGlobalSettingsContextValue: () => ({
       settingsStore: globalSettingsStore,

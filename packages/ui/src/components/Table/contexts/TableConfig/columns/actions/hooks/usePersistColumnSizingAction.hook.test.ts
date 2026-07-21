@@ -11,12 +11,12 @@ const { columnsGetMock, metaGetMock } = vi.hoisted(() => ({
   metaGetMock: vi.fn(),
 }));
 
-vi.mock('@repo/ui/hooks/usePersistCookieAction.hook', () => ({
+vi.mock('@lcabrera/ui/hooks/usePersistCookieAction.hook', () => ({
   usePersistCookieAction: () => persistMock,
 }));
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
   () => ({
     useTableConfigContextValue: () => ({
       columnsStore: { get: columnsGetMock },

@@ -1,4 +1,4 @@
-import { Button, TableLayout } from '@repo/ui';
+import { Button, TableLayout } from '@lcabrera/ui';
 import * as stylex from '@stylexjs/stylex';
 
 import type { MockResponse, MockRow } from '../ShowcasePage.types';

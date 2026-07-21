@@ -1,7 +1,7 @@
-import type { TableMetaState } from '@repo/ui/components/Table/Table.types';
+import type { TableMetaState } from '@lcabrera/ui/components/Table/Table.types';
 
-import { buildUiFlagsCookieEntry } from '@repo/ui/components/Table/contexts/TableConfig/meta/actions/utils';
-import { buildSetCookieHeaders } from '@repo/ui/routing/buildSetCookieHeaders.util';
+import { buildUiFlagsCookieEntry } from '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions/utils';
+import { buildSetCookieHeaders } from '@lcabrera/ui/routing/buildSetCookieHeaders.util';
 import { describe, expect, it } from 'vitest';
 
 import type { PersistedUiState } from './persistence.types';

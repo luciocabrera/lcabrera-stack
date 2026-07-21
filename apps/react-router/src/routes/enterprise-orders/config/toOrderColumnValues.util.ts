@@ -1,4 +1,4 @@
-import { emptyToUndefined } from '@repo/utils/strings/empty-to-undefined.util';
+import { emptyToUndefined } from '@lcabrera/utils/strings/empty-to-undefined.util';
 
 import type { EnterpriseOrderInput } from './enterpriseOrders.schema';
 

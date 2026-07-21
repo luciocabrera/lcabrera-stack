@@ -1,4 +1,4 @@
-import type { SortDirection } from '@repo/ui/types/ui.types';
+import type { SortDirection } from '@lcabrera/ui/types/ui.types';
 
 import type { DataKey, SortingState } from '../Table.types';
 

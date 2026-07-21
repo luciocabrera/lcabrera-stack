@@ -43,7 +43,7 @@ variant lacked `noUncheckedIndexedAccess`, the Node-context packages were
 type-checked strictly less than the browser ones for no principled reason.
 
 `createNodeTsConfig`'s `types` accepts `[]` for a package that must stay free of
-Node globals — `@repo/utils` uses this, because it is pure and side-effect free by
+Node globals — `@lcabrera/utils` uses this, because it is pure and side-effect free by
 contract and anything touching the process belongs in `@repo/node-runtime`.
 
 ## Running the generator

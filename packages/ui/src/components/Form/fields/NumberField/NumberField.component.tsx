@@ -1,4 +1,4 @@
-import { NumericFieldControl } from '@repo/ui/components/Form/fields/NumericFieldControl/NumericFieldControl.component';
+import { NumericFieldControl } from '@lcabrera/ui/components/Form/fields/NumericFieldControl/NumericFieldControl.component';
 
 import type { NumberFieldProps } from './NumberField.types';
 

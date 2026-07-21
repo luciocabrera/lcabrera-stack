@@ -1,4 +1,4 @@
-import type { FieldClientValidation } from '@repo/ui/components/Form/Form.types';
+import type { FieldClientValidation } from '@lcabrera/ui/components/Form/Form.types';
 
 type ValidateNumberValueArgs = {
   readonly message: string;

@@ -1,10 +1,10 @@
-import { SidePanel } from '@repo/ui/components/SidePanel';
-import { useGetTableIsColumnSettingsPinned } from '@repo/ui/components/Table/contexts/TableConfig/meta/selectors';
+import { SidePanel } from '@lcabrera/ui/components/SidePanel';
+import { useGetTableIsColumnSettingsPinned } from '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors';
 import {
   useGetTableIsLoading,
   useGetTableIsLoadingMore,
-} from '@repo/ui/components/Table/contexts/TableData/data/selectors';
-import { useTableWrapperRef } from '@repo/ui/components/Table/contexts/TableWrapper';
+} from '@lcabrera/ui/components/Table/contexts/TableData/data/selectors';
+import { useTableWrapperRef } from '@lcabrera/ui/components/Table/contexts/TableWrapper';
 
 import { ColumnSettingsDrawerBody } from './ColumnSettingsDrawerBody/ColumnSettingsDrawerBody.component';
 import { ColumnSettingsDrawerFooter } from './ColumnSettingsDrawerFooter/ColumnSettingsDrawerFooter.component';

@@ -17,7 +17,7 @@ type MockButtonProps = {
   readonly tooltipContent?: string;
 };
 
-vi.mock('@repo/ui/components/Button', () => ({
+vi.mock('@lcabrera/ui/components/Button', () => ({
   Button: ({
     children,
     isIconOnly,
@@ -35,13 +35,13 @@ vi.mock('@repo/ui/components/Button', () => ({
   ),
 }));
 
-vi.mock('@repo/ui/components/SidePanel', () => ({
+vi.mock('@lcabrera/ui/components/SidePanel', () => ({
   SidePanelFooter: ({ children }: { readonly children: ReactNode }) => (
     <div>{children}</div>
   ),
 }));
 
-vi.mock('@repo/ui/contexts/GlobalSettingsContext/selectors', () => ({
+vi.mock('@lcabrera/ui/contexts/GlobalSettingsContext/selectors', () => ({
   useGetGlobalNavigationCollapsedPreference: () => collapsedPreferenceMock(),
   useGetGlobalNavigationSizePreference: () => sizePreferenceMock(),
 }));

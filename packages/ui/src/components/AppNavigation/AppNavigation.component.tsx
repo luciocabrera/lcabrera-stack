@@ -1,10 +1,10 @@
-import { SidePanel } from '@repo/ui/components/SidePanel';
+import { SidePanel } from '@lcabrera/ui/components/SidePanel';
 import {
   useGetGlobalNavigationCollapsedPreference,
   useGetGlobalNavigationPinnedPreference,
   useGetGlobalNavigationSizePreference,
-} from '@repo/ui/contexts/GlobalSettingsContext/selectors';
-import { useTheme } from '@repo/ui/hooks/useTheme.hook';
+} from '@lcabrera/ui/contexts/GlobalSettingsContext/selectors';
+import { useTheme } from '@lcabrera/ui/hooks/useTheme.hook';
 import { useState } from 'react';
 
 import type { AppNavigationProps } from './AppNavigation.types';

@@ -1,1 +1,1 @@
-export { action } from '@repo/ui/routing/persist-cookie.action';
+export { action } from '@lcabrera/ui/routing/persist-cookie.action';

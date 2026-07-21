@@ -1,4 +1,4 @@
-import { resolveFromCacheOrFetch } from '@repo/ui/utils/prefetch/resolveFromCacheOrFetch.util';
+import { resolveFromCacheOrFetch } from '@lcabrera/ui/utils/prefetch/resolveFromCacheOrFetch.util';
 
 import type { FetchMoreResponseArgs } from './fetchMoreData.types';
 

@@ -1,6 +1,6 @@
-import { ActionButtons } from '@repo/ui/components/ActionButtons';
-import { SidePanelFooter } from '@repo/ui/components/SidePanel';
-import { useNotifyAction } from '@repo/ui/contexts/NotificationContext/actions';
+import { ActionButtons } from '@lcabrera/ui/components/ActionButtons';
+import { SidePanelFooter } from '@lcabrera/ui/components/SidePanel';
+import { useNotifyAction } from '@lcabrera/ui/contexts/NotificationContext/actions';
 
 import type { TableSettingsDrawerFooterProps } from './TableSettingsDrawerFooter.types';
 

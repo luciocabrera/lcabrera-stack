@@ -1,4 +1,4 @@
-import { resolveColumnWidthBounds } from '@repo/ui/components/Table/utils';
+import { resolveColumnWidthBounds } from '@lcabrera/ui/components/Table/utils';
 
 type CreateResizeStartDataArgs = {
   readonly clientX: number;

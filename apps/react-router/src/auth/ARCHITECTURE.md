@@ -2,7 +2,7 @@
 
 Self-contained, **server-only** authentication for the secured-routes showcase
 (epic #79, Track 4). It has no CQMS / `scan-ingestion` coupling — it reuses only
-the generic primitives in `@repo/server` (`tokens/*`, `crypto/*`) and RR7's
+the generic primitives in `@lcabrera/server` (`tokens/*`, `crypto/*`) and RR7's
 own cookie/middleware/context APIs.
 
 ## What it provides
@@ -83,7 +83,7 @@ Configured via env (validated in `env.schema.ts`), all with dev-only defaults:
 No real secret is committed — the default hash is a `hashSecret()` of the
 deliberately public demo password above. Override every var in the environment
 for anything beyond local demoing; generate a replacement hash with
-`hashSecret({ secret })` from `@repo/server/crypto/hash-secret.util`.
+`hashSecret({ secret })` from `@lcabrera/server/crypto/hash-secret.util`.
 
 ## File map
 

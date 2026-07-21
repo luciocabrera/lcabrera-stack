@@ -209,18 +209,18 @@ importers:
 
   apps/admin_system:
     dependencies:
+      '@lcabrera/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      '@lcabrera/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
       '@react-router/serve':
         specifier: 'catalog:'
         version: 8.2.0(react-router@8.2.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)
       '@repo/scan-ingestion':
         specifier: workspace:*
         version: link:../../packages/scan-ingestion
-      '@repo/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
-      '@repo/utils':
-        specifier: workspace:*
-        version: link:../../packages/utils
       '@stylexjs/stylex':
         specifier: 'catalog:'
         version: 0.19.0
@@ -428,21 +428,21 @@ importers:
 
   apps/react-router:
     dependencies:
+      '@lcabrera/api':
+        specifier: workspace:*
+        version: link:../../packages/api
+      '@lcabrera/server':
+        specifier: workspace:*
+        version: link:../../packages/server
+      '@lcabrera/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      '@lcabrera/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
       '@react-router/serve':
         specifier: 'catalog:'
         version: 8.2.0(react-router@8.2.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)
-      '@repo/api':
-        specifier: workspace:*
-        version: link:../../packages/api
-      '@repo/server':
-        specifier: workspace:*
-        version: link:../../packages/server
-      '@repo/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
-      '@repo/utils':
-        specifier: workspace:*
-        version: link:../../packages/utils
       '@stylexjs/stylex':
         specifier: 'catalog:'
         version: 0.19.0
@@ -564,6 +564,9 @@ importers:
 
   apps/scan-orchestrator:
     dependencies:
+      '@lcabrera/server':
+        specifier: workspace:*
+        version: link:../../packages/server
       '@repo/agent-runner':
         specifier: workspace:*
         version: link:../../packages/agent-runner
@@ -573,9 +576,6 @@ importers:
       '@repo/scan-ingestion':
         specifier: workspace:*
         version: link:../../packages/scan-ingestion
-      '@repo/server':
-        specifier: workspace:*
-        version: link:../../packages/server
       pg:
         specifier: 'catalog:'
         version: 8.22.0
@@ -616,10 +616,10 @@ importers:
 
   apps/shared:
     dependencies:
-      '@repo/api':
+      '@lcabrera/api':
         specifier: workspace:*
         version: link:../../packages/api
-      '@repo/server':
+      '@lcabrera/server':
         specifier: workspace:*
         version: link:../../packages/server
     devDependencies:
@@ -675,7 +675,7 @@ importers:
 
   packages/api:
     dependencies:
-      '@repo/utils':
+      '@lcabrera/utils':
         specifier: workspace:*
         version: link:../utils
     devDependencies:
@@ -775,10 +775,10 @@ importers:
 
   packages/scan-ingestion:
     dependencies:
-      '@repo/server':
+      '@lcabrera/server':
         specifier: workspace:*
         version: link:../server
-      '@repo/utils':
+      '@lcabrera/utils':
         specifier: workspace:*
         version: link:../utils
       fflate:
@@ -876,10 +876,10 @@ importers:
 
   packages/ui:
     dependencies:
-      '@repo/api':
+      '@lcabrera/api':
         specifier: workspace:*
         version: link:../api
-      '@repo/utils':
+      '@lcabrera/utils':
         specifier: workspace:*
         version: link:../utils
       isbot:
@@ -1015,15 +1015,15 @@ importers:
       '@eslint/js':
         specifier: 'catalog:'
         version: 10.0.1(eslint@10.7.0(jiti@2.7.0))
+      '@lcabrera/utils':
+        specifier: workspace:*
+        version: link:../utils
       '@react-router/dev':
         specifier: 'catalog:'
         version: 8.2.0(@react-router/serve@8.2.0(react-router@8.2.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3))(react-router@8.2.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))
       '@repo/plugins':
         specifier: workspace:*
         version: link:../plugins
-      '@repo/utils':
-        specifier: workspace:*
-        version: link:../utils
       '@stylexjs/unplugin':
         specifier: 'catalog:'
         version: 0.19.0(unplugin@2.3.11)

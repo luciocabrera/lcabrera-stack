@@ -1,6 +1,6 @@
-import { Button } from '@repo/ui/components/Button';
-import { SidePanelSectionHeader } from '@repo/ui/components/SidePanel';
-import { VirtualSelect } from '@repo/ui/components/VirtualSelect';
+import { Button } from '@lcabrera/ui/components/Button';
+import { SidePanelSectionHeader } from '@lcabrera/ui/components/SidePanel';
+import { VirtualSelect } from '@lcabrera/ui/components/VirtualSelect';
 import * as stylex from '@stylexjs/stylex';
 
 import type { AddFilterSectionProps } from './AddFilterSection.types';

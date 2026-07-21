@@ -1,4 +1,4 @@
-import type { GlobalNavigationPinnedPreference } from '@repo/ui/types/globalSettings.types';
+import type { GlobalNavigationPinnedPreference } from '@lcabrera/ui/types/globalSettings.types';
 
 export type ResolvePinnedStateArgs = {
   readonly defaultIsPinned: boolean;

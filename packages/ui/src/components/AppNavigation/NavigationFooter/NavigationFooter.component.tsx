@@ -1,9 +1,9 @@
-import { Button } from '@repo/ui/components/Button';
-import { SidePanelFooter } from '@repo/ui/components/SidePanel';
+import { Button } from '@lcabrera/ui/components/Button';
+import { SidePanelFooter } from '@lcabrera/ui/components/SidePanel';
 import {
   useGetGlobalNavigationCollapsedPreference,
   useGetGlobalNavigationSizePreference,
-} from '@repo/ui/contexts/GlobalSettingsContext/selectors';
+} from '@lcabrera/ui/contexts/GlobalSettingsContext/selectors';
 import * as stylex from '@stylexjs/stylex';
 
 import type { NavigationFooterProps } from './NavigationFooter.types';

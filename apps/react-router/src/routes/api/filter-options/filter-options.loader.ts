@@ -1,9 +1,9 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
-import { getApiBaseUrl } from '@repo/api/config/get-api-base-url.util';
-import { fetchDistinctValues } from '@repo/api/distinct/fetch-distinct-values.util';
-import { parseFilterOptionsParams } from '@repo/api/distinct/parse-filter-options-params.util';
-import { DEFAULT_FILTER_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
+import { getApiBaseUrl } from '@lcabrera/api/config/get-api-base-url.util';
+import { fetchDistinctValues } from '@lcabrera/api/distinct/fetch-distinct-values.util';
+import { parseFilterOptionsParams } from '@lcabrera/api/distinct/parse-filter-options-params.util';
+import { DEFAULT_FILTER_PAGE_SIZE } from '@lcabrera/ui/components/Table/Table.constants';
 
 /**
  * Resource route serving distinct filter options for descriptors with

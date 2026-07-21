@@ -1,4 +1,4 @@
-import type { TableCrudConfig } from '@repo/ui/components/Table/Table.types';
+import type { TableCrudConfig } from '@lcabrera/ui/components/Table/Table.types';
 import type { ReactNode } from 'react';
 
 export type TableActionMenuProps = {

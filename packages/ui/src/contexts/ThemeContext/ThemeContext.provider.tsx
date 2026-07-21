@@ -1,6 +1,6 @@
-import type { ThemeMode } from '@repo/ui/types/theme.types';
+import type { ThemeMode } from '@lcabrera/ui/types/theme.types';
 
-import { setThemeCookie } from '@repo/ui/utils/theme';
+import { setThemeCookie } from '@lcabrera/ui/utils/theme';
 import { useState } from 'react';
 
 import type { ThemeProviderProps } from './ThemeContext.types';

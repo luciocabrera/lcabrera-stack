@@ -1,4 +1,4 @@
-import { Button } from '@repo/ui/components/Button';
+import { Button } from '@lcabrera/ui/components/Button';
 import {
   Card,
   CardBody,
@@ -6,13 +6,13 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@repo/ui/components/Card';
+} from '@lcabrera/ui/components/Card';
 import {
   ErrorIcon,
   InfoIcon,
   SuccessIcon,
   WarningIcon,
-} from '@repo/ui/components/Icons';
+} from '@lcabrera/ui/components/Icons';
 import * as stylex from '@stylexjs/stylex';
 
 import { styles } from '../ShowcasePage.stylex';

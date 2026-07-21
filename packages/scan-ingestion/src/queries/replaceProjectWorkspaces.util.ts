@@ -1,4 +1,4 @@
-import { getPool } from '@repo/server/db/get-pool.util';
+import { getPool } from '@lcabrera/server/db/get-pool.util';
 
 import type { DiscoveredWorkspace } from '../ingestion/workspaces/discoverProjectWorkspaces.util.ts';
 

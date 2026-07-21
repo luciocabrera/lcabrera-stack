@@ -1,4 +1,4 @@
-import { getPool } from '@repo/server/db/get-pool.util';
+import { getPool } from '@lcabrera/server/db/get-pool.util';
 import path from 'node:path';
 
 import type {
@@ -6,7 +6,7 @@ import type {
   IngestReportResult,
 } from './ingestReport.types.ts';
 
-// @repo/server (unlike this package's own self-referencing alias) is a
+// @lcabrera/server (unlike this package's own self-referencing alias) is a
 // genuine cross-package import — resolved via a real package.json `exports`
 // map + workspace node_modules symlink, which plain `node`'s ESM resolver
 // understands natively, same as any real npm dependency. That's what makes

@@ -303,15 +303,15 @@ Beyond that, tasks are per-workspace. `build` and `test` are common but come fro
 | `apps/api-server-fast`        | `car-sales-api-fast`        | `seed`, `db:seed`, `start`                                                                          |
 | `apps/scan-orchestrator`      | `@repo/scan-orchestrator`   | `start`, `test:unit`, `test:coverage`                                                               |
 | `apps/shared`                 | `api-shared`                | `build`, `test`                                                                                     |
-| `packages/ui`                 | `@repo/ui`                  | `check:public-api`, `test:coverage`                                                                 |
-| `packages/server`             | `@repo/server`              | `test:coverage`                                                                                     |
+| `packages/ui`                 | `@lcabrera/ui`              | `check:public-api`, `test:coverage`                                                                 |
+| `packages/server`             | `@lcabrera/server`          | `test:coverage`                                                                                     |
 | `packages/scan-ingestion`     | `@repo/scan-ingestion`      | `migrate`, `push`, `test:unit`, `test:coverage`                                                     |
 | `packages/node-runtime`       | `@repo/node-runtime`        | `test:coverage`                                                                                     |
 | `packages/agent-runner`       | `@repo/agent-runner`        | —                                                                                                   |
 | `packages/ts-configs`         | `@repo/ts-configs`          | `generate`                                                                                          |
 | `packages/eslint-local-rules` | `eslint-local-rules-shared` | `build`                                                                                             |
 | `packages/plugins`            | `@repo/plugins`             | —                                                                                                   |
-| `packages/utils`              | `@repo/utils`               | —                                                                                                   |
+| `packages/utils`              | `@lcabrera/utils`           | —                                                                                                   |
 | `packages/vite-configs`       | `@repo/vite-configs`        | —                                                                                                   |
 
 Notes on the non-obvious ones:

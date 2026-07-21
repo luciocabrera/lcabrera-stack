@@ -3,11 +3,11 @@ import type {
   DataKey,
   PinnedColumnInfo,
   TableColumn,
-} from '@repo/ui/components/Table/Table.types';
+} from '@lcabrera/ui/components/Table/Table.types';
 import type { ReactNode } from 'react';
 
-import { DEFAULT_MIN_COLUMN_WIDTH } from '@repo/ui/components/Table/Table.constants';
-import { TableRowActionsMenu } from '@repo/ui/components/Table/TableRowActionsMenu';
+import { DEFAULT_MIN_COLUMN_WIDTH } from '@lcabrera/ui/components/Table/Table.constants';
+import { TableRowActionsMenu } from '@lcabrera/ui/components/Table/TableRowActionsMenu';
 
 // TODO: Get from the columns types
 export type TableBodyCellDescriptor<TData extends Record<string, unknown>> =

@@ -1,5 +1,5 @@
-import type { TStore } from '@repo/ui/hooks';
-import type { GlobalSettingsState } from '@repo/ui/types/globalSettings.types';
+import type { TStore } from '@lcabrera/ui/hooks';
+import type { GlobalSettingsState } from '@lcabrera/ui/types/globalSettings.types';
 import type { ReactNode } from 'react';
 
 export type GlobalSettingsContextValue = {

@@ -1,4 +1,4 @@
-import type { GlobalNavigationCollapsedPreference } from '@repo/ui/types/globalSettings.types';
+import type { GlobalNavigationCollapsedPreference } from '@lcabrera/ui/types/globalSettings.types';
 
 import { NAVIGATION_COLLAPSED_VALUES } from './globalSettings.constants';
 

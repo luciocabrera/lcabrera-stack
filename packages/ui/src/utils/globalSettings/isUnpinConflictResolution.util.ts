@@ -1,4 +1,4 @@
-import type { UnpinConflictResolution } from '@repo/ui/types/pinningPreferences.types';
+import type { UnpinConflictResolution } from '@lcabrera/ui/types/pinningPreferences.types';
 
 import { UNPIN_CONFLICT_VALUES } from './globalSettings.constants';
 

@@ -1,6 +1,6 @@
-import type { TableMetaState } from '@repo/ui/components/Table/Table.types';
+import type { TableMetaState } from '@lcabrera/ui/components/Table/Table.types';
 
-import { usePersistCookieAction } from '@repo/ui/hooks/usePersistCookieAction.hook';
+import { usePersistCookieAction } from '@lcabrera/ui/hooks/usePersistCookieAction.hook';
 
 import { buildUiFlagsCookieEntry } from './utils';
 

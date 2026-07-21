@@ -1,16 +1,16 @@
-# Package Architecture (`@repo/api`)
+# Package Architecture (`@lcabrera/api`)
 
-The **browser-safe** half of what used to be `@repo/server`: resolving the
+The **browser-safe** half of what used to be `@lcabrera/server`: resolving the
 API base URL, fetching and validating responses, and the distinct-values
 contract behind the Table's filter dropdowns.
 
 ## Why this package exists
 
-`@repo/server` held two things at once — browser `fetch` utilities and
+`@lcabrera/server` held two things at once — browser `fetch` utilities and
 Node/Postgres access — and [ADR-008](../../docs/cqms/decisions/ADR-008-packages-api-renamed-data-access.md)
 accepted that deliberately, because nothing depended on only one half.
 
-That stopped being true. `@repo/ui` came to depend on the combined package for
+That stopped being true. `@lcabrera/ui` came to depend on the combined package for
 exactly two helpers (`getApiBaseUrl`, `fetchDistinctValues`), which meant every
 consumer of the UI component library also installed `pg`. Splitting the browser
 half out removes that edge at the package boundary rather than papering over it.
@@ -31,7 +31,7 @@ half out removes that edge at the package boundary rather than papering over it.
   `apps/shared` at all.
 - **Explicit per-file subpath exports, no barrel** (ADR-007). Consumers import
   the module they need, and tests mock that module rather than a barrel.
-- **kebab-case `.util` files**, matching `@repo/utils`. Asserted by the
+- **kebab-case `.util` files**, matching `@lcabrera/utils`. Asserted by the
   `filename-convention` rule's `suffixCase` option rather than by turning it off.
 - **95% coverage gate** — public-facing, so `test:coverage` fails below it.
 
@@ -71,7 +71,7 @@ flowchart TD
 
 ## Consumers
 
-From `@repo/ui`:
+From `@lcabrera/ui`:
 
 - `src/utils/filters/getFilterOptionsBaseUrl.util.ts` — `getApiBaseUrl`
 - `src/utils/filters/resolveDistinctFilterOptions.util.ts` — `fetchDistinctValues`

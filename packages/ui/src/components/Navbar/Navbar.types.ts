@@ -1,9 +1,9 @@
-import type { ButtonProps } from '@repo/ui/components/Button/Button.types';
-import type { NavLinkProps } from '@repo/ui/components/NavLink/NavLink.types';
+import type { ButtonProps } from '@lcabrera/ui/components/Button/Button.types';
+import type { NavLinkProps } from '@lcabrera/ui/components/NavLink/NavLink.types';
 import type {
   DesignSystemOrientation,
   DesignSystemSize,
-} from '@repo/ui/types/design-system.types';
+} from '@lcabrera/ui/types/design-system.types';
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 
 export type NavbarButtonConfig = Omit<ButtonProps, 'children' | 'width'> & {

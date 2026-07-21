@@ -1,4 +1,4 @@
-import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { useTableConfigContextValue } from '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 
 import type { ColumnSizingArgs } from './useSetColumnSizingWithoutSync.hook';
 

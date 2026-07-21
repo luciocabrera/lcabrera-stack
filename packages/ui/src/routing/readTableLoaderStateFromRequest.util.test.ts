@@ -1,16 +1,16 @@
-import type { TableColumn } from '@repo/ui/components/Table';
+import type { TableColumn } from '@lcabrera/ui/components/Table';
 
 import { describe, expect, it, vi } from 'vitest';
 
-vi.mock('@repo/ui/components/Table/utils', () => ({
+vi.mock('@lcabrera/ui/components/Table/utils', () => ({
   readPersistedStateFromCookie: vi.fn(),
   readPersistedUiFlagsFromCookie: vi.fn(() => ({})),
 }));
 
-import { readPersistedStateFromCookie } from '@repo/ui/components/Table/utils';
-import { encodeStateToURL } from '@repo/ui/utils/urlState/encodeStateToURL.util';
-import { serializeFiltersToURL } from '@repo/ui/utils/urlState/serializeFiltersToURL.util';
-import { serializeSortingToURL } from '@repo/ui/utils/urlState/serializeSortingToURL.util';
+import { readPersistedStateFromCookie } from '@lcabrera/ui/components/Table/utils';
+import { encodeStateToURL } from '@lcabrera/ui/utils/urlState/encodeStateToURL.util';
+import { serializeFiltersToURL } from '@lcabrera/ui/utils/urlState/serializeFiltersToURL.util';
+import { serializeSortingToURL } from '@lcabrera/ui/utils/urlState/serializeSortingToURL.util';
 
 import { readTableLoaderStateFromRequest } from './readTableLoaderStateFromRequest.util';
 

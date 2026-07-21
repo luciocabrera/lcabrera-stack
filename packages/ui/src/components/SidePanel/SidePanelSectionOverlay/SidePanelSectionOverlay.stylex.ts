@@ -1,4 +1,4 @@
-import { borderRadius } from '@repo/ui/design-system/tokens/base.stylex';
+import { borderRadius } from '@lcabrera/ui/design-system/tokens/base.stylex';
 import * as stylex from '@stylexjs/stylex';
 
 export const styles = stylex.create({

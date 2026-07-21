@@ -23,7 +23,7 @@ vi.mock('../useTableDrawerContextValue.hook', () => ({
 }));
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/columns/actions',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/actions',
   () => ({
     useBatchSetTableSettings: () => batchSetTableSettings,
   }),

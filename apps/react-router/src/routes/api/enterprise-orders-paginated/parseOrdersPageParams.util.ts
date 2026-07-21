@@ -1,11 +1,11 @@
-import type { SortingState } from '@repo/ui/components/Table';
-import type { ColumnFilter } from '@repo/ui/types/filterOperators.types';
+import type { SortingState } from '@lcabrera/ui/components/Table';
+import type { ColumnFilter } from '@lcabrera/ui/types/filterOperators.types';
 
-import { toQueryFilters } from '@repo/server/filters/to-query-filters.util';
-import { INITIAL_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
-import { isObject } from '@repo/utils/guards/is-object.util';
-import { safeJsonParse } from '@repo/utils/json/safe-json-parse.util';
-import { parsePositiveInteger } from '@repo/utils/numbers/parse-positive-integer.util';
+import { toQueryFilters } from '@lcabrera/server/filters/to-query-filters.util';
+import { INITIAL_PAGE_SIZE } from '@lcabrera/ui/components/Table/Table.constants';
+import { isObject } from '@lcabrera/utils/guards/is-object.util';
+import { safeJsonParse } from '@lcabrera/utils/json/safe-json-parse.util';
+import { parsePositiveInteger } from '@lcabrera/utils/numbers/parse-positive-integer.util';
 
 import type { EnterpriseOrder } from '@/routes/enterprise-orders/config';
 

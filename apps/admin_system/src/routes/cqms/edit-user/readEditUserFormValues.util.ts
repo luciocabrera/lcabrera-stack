@@ -1,4 +1,4 @@
-import { isCheckboxChecked } from '@repo/utils/forms/is-checkbox-checked.util';
+import { isCheckboxChecked } from '@lcabrera/utils/forms/is-checkbox-checked.util';
 
 type ReadEditUserFormValuesArgs = {
   readonly formData: FormData;

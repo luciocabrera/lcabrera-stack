@@ -1,9 +1,9 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
-import { INITIAL_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
-import { appendPrimaryKeySorting } from '@repo/ui/routing/appendPrimaryKeySorting.util';
-import { readTableLoaderStateFromRequest } from '@repo/ui/routing/readTableLoaderStateFromRequest.util';
-import { sanitizeSorting } from '@repo/ui/routing/sanitizeSorting.util';
+import { INITIAL_PAGE_SIZE } from '@lcabrera/ui/components/Table/Table.constants';
+import { appendPrimaryKeySorting } from '@lcabrera/ui/routing/appendPrimaryKeySorting.util';
+import { readTableLoaderStateFromRequest } from '@lcabrera/ui/routing/readTableLoaderStateFromRequest.util';
+import { sanitizeSorting } from '@lcabrera/ui/routing/sanitizeSorting.util';
 
 import type { WideAlltypes150, WideAlltypes150Response } from '@/services';
 

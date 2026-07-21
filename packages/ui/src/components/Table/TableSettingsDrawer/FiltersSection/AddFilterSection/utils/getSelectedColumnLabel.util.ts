@@ -1,7 +1,7 @@
 import type {
   ColumnFiltersState,
   TableColumn,
-} from '@repo/ui/components/Table/Table.types';
+} from '@lcabrera/ui/components/Table/Table.types';
 
 type GetSelectedColumnLabelArgs = {
   readonly filterableColumns: readonly TableColumn<Record<string, unknown>>[];

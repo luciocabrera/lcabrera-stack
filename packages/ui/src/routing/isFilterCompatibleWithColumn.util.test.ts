@@ -1,11 +1,11 @@
-import type { TableColumn } from '@repo/ui/components/Table';
+import type { TableColumn } from '@lcabrera/ui/components/Table';
 import type {
   BooleanFilter,
   DateFilter,
   NumberFilter,
   SelectFilter,
   TextFilter,
-} from '@repo/ui/types/filterOperators.types';
+} from '@lcabrera/ui/types/filterOperators.types';
 
 import { describe, expect, it } from 'vitest';
 

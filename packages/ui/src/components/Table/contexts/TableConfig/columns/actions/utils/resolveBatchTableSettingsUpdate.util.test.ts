@@ -5,7 +5,7 @@ import type {
   ColumnSizingState,
   ColumnVisibilityState,
   SortingState,
-} from '@repo/ui/components/Table/Table.types';
+} from '@lcabrera/ui/components/Table/Table.types';
 
 import { describe, expect, it, vi } from 'vitest';
 
@@ -50,7 +50,7 @@ const { mockDeriveColumnViewState } = vi.hoisted(() => ({
   })),
 }));
 
-vi.mock('@repo/ui/components/Table/utils', () => ({
+vi.mock('@lcabrera/ui/components/Table/utils', () => ({
   deriveColumnViewState: mockDeriveColumnViewState,
 }));
 

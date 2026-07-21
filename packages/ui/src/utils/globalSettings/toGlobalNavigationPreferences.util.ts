@@ -1,4 +1,4 @@
-import { isObject } from '@repo/utils/guards/is-object.util';
+import { isObject } from '@lcabrera/utils/guards/is-object.util';
 
 import { isNavigationCollapsedPreference } from './isNavigationCollapsedPreference.util';
 import { isNavigationPinnedPreference } from './isNavigationPinnedPreference.util';

@@ -1,7 +1,7 @@
 import type { CappedLlmUsageAttemptRow } from '@repo/scan-ingestion/queries/getCappedLlmUsageAttempts.util';
 
-import { TableLayout } from '@repo/ui/components/Table/TableLayout';
-import { createEmptyColumnsState } from '@repo/ui/components/Table/utils/createEmptyColumnsState.util';
+import { TableLayout } from '@lcabrera/ui/components/Table/TableLayout';
+import { createEmptyColumnsState } from '@lcabrera/ui/components/Table/utils/createEmptyColumnsState.util';
 
 import type { CappedLlmUsageAttemptsTableProps } from './CappedLlmUsageAttemptsTable.types';
 

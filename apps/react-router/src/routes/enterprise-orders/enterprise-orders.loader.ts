@@ -1,11 +1,11 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
-import { toQueryFilters } from '@repo/server/filters/to-query-filters.util';
-import { INITIAL_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
-import { appendDistinctFilterDescriptors } from '@repo/ui/routing/appendDistinctFilterDescriptors.util';
-import { appendPrimaryKeySorting } from '@repo/ui/routing/appendPrimaryKeySorting.util';
-import { readTableLoaderStateFromRequest } from '@repo/ui/routing/readTableLoaderStateFromRequest.util';
-import { sanitizeSorting } from '@repo/ui/routing/sanitizeSorting.util';
+import { toQueryFilters } from '@lcabrera/server/filters/to-query-filters.util';
+import { INITIAL_PAGE_SIZE } from '@lcabrera/ui/components/Table/Table.constants';
+import { appendDistinctFilterDescriptors } from '@lcabrera/ui/routing/appendDistinctFilterDescriptors.util';
+import { appendPrimaryKeySorting } from '@lcabrera/ui/routing/appendPrimaryKeySorting.util';
+import { readTableLoaderStateFromRequest } from '@lcabrera/ui/routing/readTableLoaderStateFromRequest.util';
+import { sanitizeSorting } from '@lcabrera/ui/routing/sanitizeSorting.util';
 
 import { APP_ID } from '@/constants/app.constants';
 

@@ -66,14 +66,14 @@ const {
 });
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
   () => ({
     useTableConfigContextValue: mockUseTableConfigContextValue,
   }),
 );
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook',
+  '@lcabrera/ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook',
   () => ({
     useTableDataContextValue: mockUseTableDataContextValue,
   }),
@@ -83,11 +83,11 @@ vi.mock('./hooks/usePersistTableStateAction.hook', () => ({
   usePersistTableStateAction: mockUsePersistTableStateAction,
 }));
 
-vi.mock('@repo/ui/components/Table/utils', () => ({
+vi.mock('@lcabrera/ui/components/Table/utils', () => ({
   getNormalizedColumns: mockGetNormalizedColumns,
 }));
 
-vi.mock('@repo/ui/utils/urlState', () => ({
+vi.mock('@lcabrera/ui/utils/urlState', () => ({
   serializeSortingToURL: mockSerializeSortingToURL,
 }));
 

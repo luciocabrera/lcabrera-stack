@@ -5,7 +5,7 @@ import type {
   ColumnVisibilityState,
   SortingState,
   TableColumn,
-} from '@repo/ui/components/Table/Table.types';
+} from '@lcabrera/ui/components/Table/Table.types';
 
 import { getNormalizedColumns } from './getNormalizedColumns.util';
 import { getPinnedDerivedColumnsState } from './getPinnedDerivedColumnsState.util';

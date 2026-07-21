@@ -1,12 +1,12 @@
-import type { TableMetaState } from '@repo/ui/components/Table/Table.types';
+import type { TableMetaState } from '@lcabrera/ui/components/Table/Table.types';
 
-import { getPersistedUiState } from '@repo/ui/components/Table/utils/getPersistedUiState.util';
-import { getStorageKey } from '@repo/ui/components/Table/utils/getStorageKey.util';
+import { getPersistedUiState } from '@lcabrera/ui/components/Table/utils/getPersistedUiState.util';
+import { getStorageKey } from '@lcabrera/ui/components/Table/utils/getStorageKey.util';
 import {
   PERSISTENCE_VERSION,
   UI_FLAGS_COOKIE_KEY_SUFFIX,
-} from '@repo/ui/components/Table/utils/persistence.constants';
-import { buildPersistCookieEntry } from '@repo/ui/routing/buildPersistCookieEntry.util';
+} from '@lcabrera/ui/components/Table/utils/persistence.constants';
+import { buildPersistCookieEntry } from '@lcabrera/ui/routing/buildPersistCookieEntry.util';
 
 type BuildUiFlagsCookieEntryArgs = {
   readonly currentState: Partial<TableMetaState> | undefined;

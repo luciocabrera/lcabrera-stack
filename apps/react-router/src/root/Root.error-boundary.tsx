@@ -1,4 +1,4 @@
-import { RootErrorBoundary } from '@repo/ui';
+import { RootErrorBoundary } from '@lcabrera/ui';
 
 import type { Route } from '../+types/root';
 

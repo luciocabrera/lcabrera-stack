@@ -1,4 +1,4 @@
-import { logger } from '@repo/ui/utils/logger';
+import { logger } from '@lcabrera/ui/utils/logger';
 
 type DecodeStateFromURLArgs = {
   readonly convertArraysToSets?: readonly string[];

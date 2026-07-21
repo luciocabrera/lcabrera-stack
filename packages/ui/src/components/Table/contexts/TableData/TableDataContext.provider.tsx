@@ -1,6 +1,6 @@
-import type { TableDataState } from '@repo/ui/components/Table/Table.types';
+import type { TableDataState } from '@lcabrera/ui/components/Table/Table.types';
 
-import { useStore } from '@repo/ui/hooks';
+import { useStore } from '@lcabrera/ui/hooks';
 import { useEffect } from 'react';
 
 import type {

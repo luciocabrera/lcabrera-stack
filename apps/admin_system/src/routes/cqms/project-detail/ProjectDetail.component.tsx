@@ -1,7 +1,7 @@
 import type { ProjectRunRow } from '@repo/scan-ingestion/queries/getProjectRuns.util';
 
-import { NavLink, StatusBadge, TableLayout } from '@repo/ui';
-import { createEmptyColumnsState } from '@repo/ui/components/Table/utils/createEmptyColumnsState.util';
+import { NavLink, StatusBadge, TableLayout } from '@lcabrera/ui';
+import { createEmptyColumnsState } from '@lcabrera/ui/components/Table/utils/createEmptyColumnsState.util';
 import { Suspense } from 'react';
 import { useLoaderData } from 'react-router';
 

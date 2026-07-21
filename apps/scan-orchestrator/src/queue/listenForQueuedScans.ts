@@ -1,4 +1,4 @@
-import { readEnvConfig } from '@repo/server/db/env.schema';
+import { readEnvConfig } from '@lcabrera/server/db/env.schema';
 import { Client } from 'pg';
 
 const NOTIFY_CHANNEL = 'cqms_scan_queued';

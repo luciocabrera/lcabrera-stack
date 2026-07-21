@@ -9,7 +9,7 @@ const { mockBuildAllOrderedColumns, mockInsertAdjacentToPinnedGroup } =
   }));
 
 vi.mock(
-  '@repo/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils',
+  '@lcabrera/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils',
   () => ({
     buildAllOrderedColumns: mockBuildAllOrderedColumns,
     insertAdjacentToPinnedGroup: mockInsertAdjacentToPinnedGroup,

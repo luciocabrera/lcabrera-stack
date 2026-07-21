@@ -1,7 +1,7 @@
-import type { FieldNode } from '@repo/ui/components/Form';
+import type { FieldNode } from '@lcabrera/ui/components/Form';
 
-import { Form } from '@repo/ui/components/Form';
-import { SectionCard } from '@repo/ui/components/SectionCard';
+import { Form } from '@lcabrera/ui/components/Form';
+import { SectionCard } from '@lcabrera/ui/components/SectionCard';
 import { useActionData } from 'react-router';
 
 import type { action } from './newScanner.action';

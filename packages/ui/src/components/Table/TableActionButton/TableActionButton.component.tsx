@@ -1,5 +1,5 @@
-import { Button } from '@repo/ui/components/Button';
-import { MoreVerticalIcon } from '@repo/ui/components/Icons';
+import { Button } from '@lcabrera/ui/components/Button';
+import { MoreVerticalIcon } from '@lcabrera/ui/components/Icons';
 
 import type { TableActionButtonProps } from './TableActionButton.types';
 

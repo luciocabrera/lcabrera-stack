@@ -1,4 +1,4 @@
-import { SidePanelSectionMain } from '@repo/ui/components/SidePanel';
+import { SidePanelSectionMain } from '@lcabrera/ui/components/SidePanel';
 
 import type { ColumnOrderSectionProps } from './ColumnOrderSection.types';
 

@@ -1,14 +1,14 @@
 import type {
   ColumnOrderState,
   ColumnPinningState,
-} from '@repo/ui/components/Table/Table.types';
-import type { OrderConflictResolution } from '@repo/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
+} from '@lcabrera/ui/components/Table/Table.types';
+import type { OrderConflictResolution } from '@lcabrera/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
 
 import {
   resolvePinOrderConflict,
   restoreStaticColumnOrder,
   restoreStaticPinnedColumns,
-} from '@repo/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
+} from '@lcabrera/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 
 type ResolveAcceptedOrderConflictStateArgs = {
   readonly currentOrder: ColumnOrderState;

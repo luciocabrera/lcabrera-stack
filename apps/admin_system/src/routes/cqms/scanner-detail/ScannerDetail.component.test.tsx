@@ -20,8 +20,9 @@ vi.mock('react-router', () => ({
   useLoaderData: () => loaderDataRef.current,
 }));
 
-vi.mock('@repo/ui', async () => {
-  const actual = await vi.importActual<typeof import('@repo/ui')>('@repo/ui');
+vi.mock('@lcabrera/ui', async () => {
+  const actual =
+    await vi.importActual<typeof import('@lcabrera/ui')>('@lcabrera/ui');
 
   return {
     ...actual,

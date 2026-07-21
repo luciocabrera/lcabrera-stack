@@ -20,7 +20,7 @@ vi.mock('react-router', () => ({
   useLoaderData: () => loaderDataRef.current,
 }));
 
-vi.mock('@repo/ui/components/NavLink', () => ({
+vi.mock('@lcabrera/ui/components/NavLink', () => ({
   NavLink: ({
     children,
     to,

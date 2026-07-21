@@ -1,5 +1,5 @@
-import { ActionButtons } from '@repo/ui/components/ActionButtons';
-import { Modal } from '@repo/ui/components/Modal';
+import { ActionButtons } from '@lcabrera/ui/components/ActionButtons';
+import { Modal } from '@lcabrera/ui/components/Modal';
 
 import type { ConfirmDialogProps } from './ConfirmDialog.types';
 

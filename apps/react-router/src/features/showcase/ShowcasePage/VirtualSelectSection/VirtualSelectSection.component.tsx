@@ -1,6 +1,6 @@
-import type { VirtualListDataState } from '@repo/ui/components/VirtualList';
+import type { VirtualListDataState } from '@lcabrera/ui/components/VirtualList';
 
-import { VirtualSelect } from '@repo/ui/components/VirtualSelect';
+import { VirtualSelect } from '@lcabrera/ui/components/VirtualSelect';
 import * as stylex from '@stylexjs/stylex';
 import { useRef, useState } from 'react';
 

@@ -1,9 +1,9 @@
-import { InfoBox } from '@repo/ui/components/InfoBox';
+import { InfoBox } from '@lcabrera/ui/components/InfoBox';
 import {
   SidePanelSection,
   SidePanelSectionHeader,
   SidePanelSectionMain,
-} from '@repo/ui/components/SidePanel';
+} from '@lcabrera/ui/components/SidePanel';
 
 import type { GeneralSettingsSectionProps } from './GeneralSettingsSection.types';
 

@@ -1,6 +1,6 @@
-import { Button } from '@repo/ui/components/Button';
-import { MenuCloseIcon } from '@repo/ui/components/Icons';
-import { ICON_SIZE_XS } from '@repo/ui/design-system/constants/iconSizes.constants';
+import { Button } from '@lcabrera/ui/components/Button';
+import { MenuCloseIcon } from '@lcabrera/ui/components/Icons';
+import { ICON_SIZE_XS } from '@lcabrera/ui/design-system/constants/iconSizes.constants';
 import * as stylex from '@stylexjs/stylex';
 
 import type { TagProps } from './Tag.types';

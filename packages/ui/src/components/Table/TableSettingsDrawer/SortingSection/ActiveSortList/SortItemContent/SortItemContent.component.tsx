@@ -1,10 +1,10 @@
-import { Button } from '@repo/ui/components/Button';
+import { Button } from '@lcabrera/ui/components/Button';
 import {
   MenuCloseIcon,
   SortAscIcon,
   SortDescIcon,
-} from '@repo/ui/components/Icons';
-import { ICON_SIZE_MD } from '@repo/ui/design-system/constants';
+} from '@lcabrera/ui/components/Icons';
+import { ICON_SIZE_MD } from '@lcabrera/ui/design-system/constants';
 import * as stylex from '@stylexjs/stylex';
 
 import type { SortItemContentProps } from './SortItemContent.types';

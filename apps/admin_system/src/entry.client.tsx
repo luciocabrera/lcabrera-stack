@@ -1,3 +1,3 @@
-import { hydrateApp } from '@repo/ui/entry/hydrateApp.util';
+import { hydrateApp } from '@lcabrera/ui/entry/hydrateApp.util';
 
 hydrateApp();

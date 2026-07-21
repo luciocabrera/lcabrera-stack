@@ -3,7 +3,7 @@
 import {
   createMockStore,
   type MockStore,
-} from '@repo/ui/utils/tests/createMockStore.util';
+} from '@lcabrera/ui/utils/tests/createMockStore.util';
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -61,7 +61,7 @@ const storesRef: {
 };
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
   () => ({
     useTableConfigContextValue: () => ({
       columnsStore: storesRef.columnsStore,

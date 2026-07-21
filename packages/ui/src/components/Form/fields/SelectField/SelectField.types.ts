@@ -1,4 +1,4 @@
-import type { SelectFieldDef } from '@repo/ui/components/Form/Form.types';
+import type { SelectFieldDef } from '@lcabrera/ui/components/Form/Form.types';
 
 export type ResolveSelectedValuesArgs = {
   readonly mode: 'multi' | 'single';

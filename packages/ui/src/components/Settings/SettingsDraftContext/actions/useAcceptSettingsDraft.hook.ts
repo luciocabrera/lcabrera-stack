@@ -1,11 +1,11 @@
 import {
   useSetGlobalNavigationPreferences,
   useSetGlobalPinningPreferences,
-} from '@repo/ui/contexts/GlobalSettingsContext/actions';
+} from '@lcabrera/ui/contexts/GlobalSettingsContext/actions';
 import {
   useGetGlobalNavigationPreferences,
   useGetGlobalPinningPreferences,
-} from '@repo/ui/contexts/GlobalSettingsContext/selectors';
+} from '@lcabrera/ui/contexts/GlobalSettingsContext/selectors';
 
 import {
   getSettingsDraftChanges,

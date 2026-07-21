@@ -1,6 +1,6 @@
-import type { JsonExplorerSection } from '@repo/ui/components/JsonExplorer';
+import type { JsonExplorerSection } from '@lcabrera/ui/components/JsonExplorer';
 
-import { inferTableColumnsFromJson } from '@repo/ui/components/Table/utils/inferTableColumnsFromJson.util';
+import { inferTableColumnsFromJson } from '@lcabrera/ui/components/Table/utils/inferTableColumnsFromJson.util';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);

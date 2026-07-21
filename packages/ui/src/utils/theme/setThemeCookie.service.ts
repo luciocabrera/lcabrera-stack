@@ -1,8 +1,8 @@
-import type { ThemeMode } from '@repo/ui/types/theme.types';
+import type { ThemeMode } from '@lcabrera/ui/types/theme.types';
 
-import { PERSIST_COOKIE_ACTION } from '@repo/ui/constants/globalSettings.constants';
-import { buildPersistCookieEntry } from '@repo/ui/routing/buildPersistCookieEntry.util';
-import { getAppScopedCookieKey } from '@repo/ui/utils/storage';
+import { PERSIST_COOKIE_ACTION } from '@lcabrera/ui/constants/globalSettings.constants';
+import { buildPersistCookieEntry } from '@lcabrera/ui/routing/buildPersistCookieEntry.util';
+import { getAppScopedCookieKey } from '@lcabrera/ui/utils/storage';
 
 import { THEME_COOKIE_NAME } from './theme.constants';
 

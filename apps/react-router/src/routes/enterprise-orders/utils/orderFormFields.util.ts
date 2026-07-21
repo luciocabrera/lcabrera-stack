@@ -1,7 +1,10 @@
-import type { FieldNode } from '@repo/ui/components/Form';
-import type { FormMode } from '@repo/ui/components/Form/Form.types';
+import type { FieldNode } from '@lcabrera/ui/components/Form';
+import type { FormMode } from '@lcabrera/ui/components/Form/Form.types';
 
-import { createFieldBuilders, toFieldOptions } from '@repo/ui/components/Form';
+import {
+  createFieldBuilders,
+  toFieldOptions,
+} from '@lcabrera/ui/components/Form';
 
 import type { EnterpriseOrderValues } from '../config';
 
@@ -44,7 +47,7 @@ export type BuildOrderFormFieldsArgs = {
  * computed money totals and audit columns are read-only and only appear in
  * edit/view (create derives them on save); `view` mode renders every field
  * read-only via the Form itself. The tree is assembled from the shared
- * `@repo/ui` Form builders (`field`/`choiceField`/`toggleField`/`fieldRow`/
+ * `@lcabrera/ui` Form builders (`field`/`choiceField`/`toggleField`/`fieldRow`/
  * `fieldGroup`), bound to `EnterpriseOrderValues` via `createFieldBuilders`, so
  * the repeated field scaffolding lives in one place.
  */

@@ -1,8 +1,8 @@
-import type { DataKey } from '@repo/ui/components/Table/Table.types';
-import type { ColumnFilter } from '@repo/ui/types/filterOperators.types';
+import type { DataKey } from '@lcabrera/ui/components/Table/Table.types';
+import type { ColumnFilter } from '@lcabrera/ui/types/filterOperators.types';
 
-import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import { useTableDataContextValue } from '@repo/ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
+import { useTableConfigContextValue } from '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { useTableDataContextValue } from '@lcabrera/ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
 
 import { usePersistTableStateAction } from './hooks/usePersistTableStateAction.hook';
 import { resolveColumnFilterUpdate } from './utils';

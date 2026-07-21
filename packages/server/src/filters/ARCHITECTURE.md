@@ -5,13 +5,13 @@ query layer, plus the pure mappers that translate one into the other. Nothing
 here touches the database — the mappers produce `QueryFilter[]` values that the
 `db/query-builder` builders (and their executors) consume.
 
-## Why it lives in `@repo/server`
+## Why it lives in `@lcabrera/server`
 
 The filter _shapes_ describe the Table's per-column filter state — a UI concept
 — but they are also the input to the SQL query layer, so they are a **contract**
-between the two. `@repo/ui` already depends on `@repo/server` (not the
+between the two. `@lcabrera/ui` already depends on `@lcabrera/server` (not the
 reverse), so the shapes and the `→ QueryFilter` mappers must sit here for the
-mappers to reach `QueryFilter` without a dependency cycle. `@repo/ui`'s
+mappers to reach `QueryFilter` without a dependency cycle. `@lcabrera/ui`'s
 `types/filterOperators.types` re-exports the shapes for the Table's own call
 sites and adds the UI-only operator/option _label_ types on top.
 

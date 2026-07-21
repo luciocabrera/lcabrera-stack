@@ -41,20 +41,20 @@ const {
 });
 
 vi.mock(
-  '@repo/ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook',
+  '@lcabrera/ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook',
   () => ({
     useColumnDrawerContextValue: () => ({ columnStore }),
   }),
 );
 
 vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
+  '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
   () => ({
     useTableConfigContextValue: () => ({ columnsStore: tableColumnsStore }),
   }),
 );
 
-vi.mock('@repo/ui/utils/logger', () => ({
+vi.mock('@lcabrera/ui/utils/logger', () => ({
   logger: { warn: loggerWarn },
 }));
 

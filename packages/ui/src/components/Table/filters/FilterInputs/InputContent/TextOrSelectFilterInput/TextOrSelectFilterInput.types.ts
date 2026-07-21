@@ -1,8 +1,8 @@
-import type { DataKey } from '@repo/ui/components/Table/Table.types';
+import type { DataKey } from '@lcabrera/ui/components/Table/Table.types';
 import type {
   ColumnFilter,
   TextOperatorType,
-} from '@repo/ui/types/filterOperators.types';
+} from '@lcabrera/ui/types/filterOperators.types';
 
 export type TextOrSelectFilterInputProps<TData> = {
   /** Column key (for stable input names) */
