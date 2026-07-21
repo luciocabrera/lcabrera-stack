@@ -14,17 +14,18 @@
 import { readFileSync } from 'node:fs';
 import { resolve, sep } from 'node:path';
 
-/** True when `candidate` is `root` itself or sits underneath it. */
-const isWithin = (candidate, root) =>
-  candidate === root || candidate.startsWith(root + sep);
-
 export const readTextWithin = (path, repoRoot, extraRoots = []) => {
   const resolved = resolve(path);
-  const roots = [repoRoot, ...extraRoots].filter(
-    (root) => typeof root === 'string' && root !== '',
-  );
-  if (!roots.some((root) => isWithin(resolved, root))) {
-    throw new Error(`refusing to read a file outside the repository: ${path}`);
+  // The read lives inside the containment branch on purpose: the resolved path
+  // comes from argv, so it must be provably validated before it reaches the
+  // filesystem — for a reader and for taint analysis alike.
+  for (const root of [repoRoot, ...extraRoots]) {
+    if (typeof root !== 'string' || root === '') {
+      continue;
+    }
+    if (resolved === root || resolved.startsWith(root + sep)) {
+      return readFileSync(resolved, 'utf8');
+    }
   }
-  return readFileSync(resolved, 'utf8');
+  throw new Error(`refusing to read a file outside the repository: ${path}`);
 };
