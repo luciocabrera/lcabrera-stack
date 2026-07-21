@@ -2,7 +2,7 @@
 id: worktree-commit-fix
 title: 'fix(tooling): let the commit-msg hook read a worktree COMMIT_EDITMSG'
 owner: agent:claude
-status: active
+status: review
 branch: fix/worktree-commit-msg
 area:
   - scripts/lib/safe-read.mjs
@@ -11,7 +11,7 @@ area:
 started: 2026-07-21
 updated: 2026-07-21
 plan: (none)
-pr: (none)
+pr: '#166'
 issue: #164
 ---
 
