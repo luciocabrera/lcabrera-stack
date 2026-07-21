@@ -1,4 +1,4 @@
-import type { QueryFilter } from '../db/queryBuilder/QueryBuilder.types.ts';
+import type { QueryFilter } from '../db/queryBuilder/queryBuilder.types.ts';
 import type { SelectFilter } from './columnFilter.types.ts';
 
 export type ToSelectQueryFiltersArgs = {

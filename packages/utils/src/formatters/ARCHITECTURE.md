@@ -9,7 +9,7 @@ Pure `Intl` wrappers with no React/DOM dependency — they live in `@repo/utils`
 ```
 formatters/
 ├── ARCHITECTURE.md
-├── format.types.ts
+├── formatters.types.ts
 ├── formatters.constants.ts
 ├── get-default-locale.util.ts
 ├── get-date-time-format-options.util.ts
@@ -37,7 +37,7 @@ graph TD
 
   Number --> Locale
 
-  Date --> Types[format.types.ts]
+  Date --> Types[formatters.types.ts]
   Currency --> Types
   Number --> Types
   DateOpts --> Types
@@ -45,7 +45,7 @@ graph TD
 
 ## Utilities
 
-### format.types.ts
+### formatters.types.ts
 
 Shared `Intl`-formatter option types (`CurrencyFormatOptions`,
 `DateFormatOptions`, `DateFormatPreset`, `NumberFormatOptions`) consumed by the
@@ -177,4 +177,4 @@ Each helper is imported directly so consumers pull in exactly one:
 - `@repo/utils/formatters/get-date-time-format-options.util`
 - `@repo/utils/formatters/get-default-locale.util`
 - `@repo/utils/formatters/formatters.constants`
-- `@repo/utils/formatters/format.types`
+- `@repo/utils/formatters/formatters.types`

@@ -1,7 +1,7 @@
 import type {
   BuiltQuery,
   DistinctQueryDescriptor,
-} from './QueryBuilder.types.ts';
+} from './queryBuilder.types.ts';
 
 import { assertColumnAllowed } from './assertColumnAllowed.util.ts';
 import { assertSafeIdentifier } from './assertSafeIdentifier.util.ts';

@@ -1,4 +1,4 @@
-import type { ComparisonOperator, QueryFilter } from './QueryBuilder.types.ts';
+import type { ComparisonOperator, QueryFilter } from './queryBuilder.types.ts';
 
 import { assertColumnAllowed } from './assertColumnAllowed.util.ts';
 import { assertSafeIdentifier } from './assertSafeIdentifier.util.ts';

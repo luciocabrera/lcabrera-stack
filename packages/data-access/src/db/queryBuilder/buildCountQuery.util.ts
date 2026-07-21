@@ -1,4 +1,4 @@
-import type { BuiltQuery, CountQueryDescriptor } from './QueryBuilder.types.ts';
+import type { BuiltQuery, CountQueryDescriptor } from './queryBuilder.types.ts';
 
 import { assertColumnAllowed } from './assertColumnAllowed.util.ts';
 import { assertSafeIdentifier } from './assertSafeIdentifier.util.ts';

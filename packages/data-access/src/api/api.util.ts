@@ -1,4 +1,4 @@
-import { API_SERVER_PORT, CONFIG } from '../api.constants';
+import { API_SERVER_PORT, CONFIG } from './api.constants';
 
 /**
  * Check if hostname is a local/private IP address

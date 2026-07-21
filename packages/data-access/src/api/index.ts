@@ -1,4 +1,4 @@
-export type { DistinctValuesResponse } from '../api.types';
+export type { DistinctValuesResponse } from './api.types';
 export { getApiBaseUrl } from './api.util';
 export { buildPaginatedQueryParams } from './buildPaginatedQueryParams.util';
 export { fakeDelay } from './fakeDelay.util';

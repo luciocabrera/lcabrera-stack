@@ -1,7 +1,7 @@
 import type {
   QueryFilter,
   QuerySort,
-} from '@repo/data-access/db/queryBuilder/QueryBuilder.types';
+} from '@repo/data-access/db/queryBuilder/queryBuilder.types';
 
 import { deleteRows } from '@repo/data-access/db/deleteRows.util';
 import { getMaxValue } from '@repo/data-access/db/getMaxValue.util';

@@ -48,7 +48,7 @@ specifier, which would create a workspace cycle that breaks `vp run -r`.
 - `./formatters/format-currency.util` — locale/currency-aware money formatting
 - `./formatters/format-date.util` — preset-based date formatting
 - `./formatters/format-number.util` — locale-aware number formatting
-- `./formatters/format.types` — shared `Intl`-formatter option types
+- `./formatters/formatters.types` — shared `Intl`-formatter option types
 - `./formatters/formatters.constants` — default locale/currency/date-preset
 - `./formatters/get-date-time-format-options.util` — preset → `Intl` date options
 - `./formatters/get-default-locale.util` — resolve the runtime default locale

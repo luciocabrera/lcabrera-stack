@@ -1,7 +1,7 @@
 import type {
   BuiltQuery,
   SelectQueryDescriptor,
-} from './QueryBuilder.types.ts';
+} from './queryBuilder.types.ts';
 
 import { assertColumnAllowed } from './assertColumnAllowed.util.ts';
 import { assertSafeIdentifier } from './assertSafeIdentifier.util.ts';
@@ -19,7 +19,7 @@ import { quoteIdentifier } from './quoteIdentifier.util.ts';
  * checked via assertSafeIdentifier unconditionally. `allowedColumns` is an
  * additional, opt-in authorization check — omit it when every column here
  * is developer-hardcoded; pass it the moment a column name is ever derived
- * from a request (see QueryBuilder.types.ts's SelectQueryDescriptor doc).
+ * from a request (see queryBuilder.types.ts's SelectQueryDescriptor doc).
  */
 export const buildSelectQuery = ({
   allowedColumns,

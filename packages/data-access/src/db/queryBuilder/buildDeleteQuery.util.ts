@@ -1,7 +1,7 @@
 import type {
   BuiltQuery,
   DeleteQueryDescriptor,
-} from './QueryBuilder.types.ts';
+} from './queryBuilder.types.ts';
 
 import { assertSafeIdentifier } from './assertSafeIdentifier.util.ts';
 import { buildReturningClause } from './buildReturningClause.util.ts';
