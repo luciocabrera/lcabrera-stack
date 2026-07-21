@@ -39,7 +39,53 @@ jobs:
         with:
           fetch-depth: 2
 
+      # A docs-only PR has nothing for Sonar to analyse, but this job still sat
+      # in `--wait` for the full timeout before giving up — five wasted minutes
+      # on every `chore(coordination)` PR, which are the most frequent here.
+      #
+      # The scoping is deliberately NOT a `paths:` filter on the trigger, and
+      # not a job-level `if:` either. A workflow skipped by `paths` reports
+      # nothing at all, and a required check that never reports leaves the PR
+      # permanently unmergeable — the exact failure this repo hit when
+      # SonarCloud stopped producing PR analyses. This job must always run and
+      # always report, so it exits early instead of never starting.
+      #
+      # It fails OPEN: only paths that provably carry no analysable code are
+      # treated as inert, and anything else — including an unrecognised path —
+      # runs the gate. Adding a pattern here narrows Sonar enforcement, so add
+      # one only when the path genuinely cannot contain code.
+      - name: Skip when the PR changes nothing Sonar analyses
+        id: scope
+        run: |
+          # HEAD^1 is the base and HEAD^2 the PR head: this is the merge ref,
+          # and fetch-depth 2 above reaches both. The two-dot diff is the PR's
+          # net change against the base, with no merge-base walk to fetch.
+          #
+          # If HEAD is not a merge commit the second parent does not resolve —
+          # GitHub omits the merge ref when the PR conflicts. Run the gate
+          # rather than letting a failed `git diff` fail this required check.
+          if ! CHANGED="$(git diff --name-only HEAD^1 HEAD^2 2>/dev/null)"; then
+            echo "::notice::Merge parents unresolvable — running the gate."
+            echo "analysable=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          ANALYSABLE="$(printf '%s\n' "$CHANGED" | grep -vE '^(docs/|reports/)|\.md$' || true)"
+          if [ -n "$ANALYSABLE" ]; then
+            echo "analysable=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "analysable=false" >> "$GITHUB_OUTPUT"
+          # Say so loudly. A green check that never consulted Sonar looks
+          # identical to one that did, so the reason belongs in the run itself.
+          {
+            printf '### Sonar issue gate skipped\n\n'
+            printf 'No analysable file changed, so there is nothing for SonarCloud to report on.\n\n'
+            printf 'Changed files:\n\n```\n%s\n```\n' "$CHANGED"
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::notice::Sonar issue gate skipped — no analysable file changed."
+
       - name: Wait for SonarCloud analysis, then fail on any new issue
+        if: steps.scope.outputs.analysable == 'true'
         env:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
