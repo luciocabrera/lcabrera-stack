@@ -1,4 +1,4 @@
-import type { DistinctValuesResponse } from '../api.types';
+import type { DistinctValuesResponse } from './api.types';
 
 /**
  * Type guard for the distinct-values endpoint response shape

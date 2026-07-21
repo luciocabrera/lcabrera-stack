@@ -1,4 +1,4 @@
-import type { QueryFilter } from './QueryBuilder.types.ts';
+import type { QueryFilter } from './queryBuilder.types.ts';
 
 import {
   appendFilterClause,

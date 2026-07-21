@@ -1,4 +1,4 @@
-import type { DateFormatOptions } from './format.types';
+import type { DateFormatOptions } from './formatters.types';
 
 import { DEFAULT_DATE_PRESET } from './formatters.constants';
 import { getDateTimeFormatOptions } from './get-date-time-format-options.util';

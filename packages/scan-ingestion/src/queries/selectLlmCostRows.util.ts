@@ -1,4 +1,4 @@
-import type { QuerySort } from '@repo/data-access/db/queryBuilder/QueryBuilder.types';
+import type { QuerySort } from '@repo/data-access/db/queryBuilder/queryBuilder.types';
 import type { QueryResultRow } from 'pg';
 
 import { selectRows } from '@repo/data-access/db/selectRows.util';

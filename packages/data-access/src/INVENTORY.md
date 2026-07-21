@@ -41,7 +41,7 @@ read **and** write shapes. Public entry points:
   `buildMaxValueQuery` (`buildMaxValueQuery.util.ts` — `COALESCE(MAX(col), 0)`
   for id assignment).
 
-plus the shared `QueryBuilder.types.ts` types. Every other file in that
+plus the shared `queryBuilder.types.ts` types. Every other file in that
 folder (`assertSafeIdentifier`, `assertColumnAllowed`, `appendFilterClause`,
 `buildWhereClause`, `buildReturningClause`, `buildOrderByClause`,
 `buildOptionalNumericClauses`, `quoteIdentifier`) is a private,

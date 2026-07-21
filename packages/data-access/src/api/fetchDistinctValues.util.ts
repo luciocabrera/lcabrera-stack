@@ -1,4 +1,4 @@
-import type { DistinctValuesResponse } from '../api.types';
+import type { DistinctValuesResponse } from './api.types';
 
 import { fetchAndValidate } from './fetchAndValidate.util';
 import { isDistinctValuesResponse } from './isDistinctValuesResponse.util';

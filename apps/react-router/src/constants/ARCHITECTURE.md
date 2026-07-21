@@ -40,7 +40,7 @@ export const CONFIG: ApiConfig = {
 | `dev`       | `/api`                      | Vite proxy rewrites the path   |
 | `prod`      | `/api`                      | Same-origin, no proxy needed   |
 
-Type: `ApiConfig` (see `src/types/ARCHITECTURE.md`).
+Type: `ApiConfig` (see `@repo/data-access/src/api/api.types.ts`).
 
 ---
 

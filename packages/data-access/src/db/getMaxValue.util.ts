@@ -1,4 +1,4 @@
-import type { MaxValueQueryDescriptor } from './queryBuilder/QueryBuilder.types.ts';
+import type { MaxValueQueryDescriptor } from './queryBuilder/queryBuilder.types.ts';
 
 import { getPool } from './getPool.util.ts';
 import { buildMaxValueQuery } from './queryBuilder/buildMaxValueQuery.util.ts';

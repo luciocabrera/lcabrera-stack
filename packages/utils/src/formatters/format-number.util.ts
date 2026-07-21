@@ -1,4 +1,4 @@
-import type { NumberFormatOptions } from './format.types';
+import type { NumberFormatOptions } from './formatters.types';
 
 import { getDefaultLocale } from './get-default-locale.util';
 

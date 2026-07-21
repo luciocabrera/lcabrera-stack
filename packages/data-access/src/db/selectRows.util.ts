@@ -1,6 +1,6 @@
 import type { QueryResultRow } from 'pg';
 
-import type { SelectQueryDescriptor } from './queryBuilder/QueryBuilder.types.ts';
+import type { SelectQueryDescriptor } from './queryBuilder/queryBuilder.types.ts';
 
 import { getPool } from './getPool.util.ts';
 import { buildSelectQuery } from './queryBuilder/buildSelectQuery.util.ts';

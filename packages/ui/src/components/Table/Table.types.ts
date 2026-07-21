@@ -4,7 +4,7 @@ import type {
   CurrencyFormatOptions,
   DateFormatOptions,
   NumberFormatOptions,
-} from '@repo/utils/formatters/format.types';
+} from '@repo/utils/formatters/formatters.types';
 import type { StyleXStyles } from '@stylexjs/stylex';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
 
