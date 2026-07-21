@@ -125,6 +125,7 @@ project-specific belongs in that project's own `package.json`.
 | `vp run test:all`          | every suite — **needs Postgres**                                                        |
 | `vp run test:ci`           | every DB-free suite — what CI runs, no Postgres needed                                  |
 | `vp run test:changed`      | only the suites a diff touched (changed workspaces + their dependents) — see below      |
+| `vp run test:scripts`      | the root `scripts/` suites — not a workspace, so the `-r` fan-out never reaches it      |
 | `vp run coverage:merge`    | merged coverage for the fallow gate (DB-free workspaces only)                           |
 | `vp run coverage:report`   | per-workspace + monorepo coverage summary for the PR comment (ui, server, react-router) |
 
@@ -132,6 +133,12 @@ project-specific belongs in that project's own `package.json`.
 `test:unit` subsets for `@repo/scan-ingestion` / `@repo/scan-orchestrator` and runs
 `vite-react-compiler` last so the PR's coverage summary is the fresh one. Run
 `test:ci` before pushing if you have no DB up.
+
+`test:scripts` is chained into both, and needs to be: root `scripts/` is **not a
+workspace**, so `vp run -r test` never reaches it. That is why the logic behind
+`commit:verify`, `coordination:verify` and `docs:verify` went untested for as
+long as it did — a gate whose decision logic silently stops matching reports
+exactly what compliant input reports, which is nothing.
 
 `test:changed` runs only the suites a diff touched, for a fast local loop. It
 diffs the working tree against the branch point (`git merge-base` with
