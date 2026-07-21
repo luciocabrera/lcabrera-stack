@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@fastify/cors": "catalog:",
+    "@repo/node-runtime": "workspace:*",
     "api-shared": "workspace:*",
     "fastify": "catalog:",
     "pg": "catalog:"

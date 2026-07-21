@@ -1,3 +1,4 @@
+import { registerShutdownSignals } from '@repo/node-runtime/registerShutdownSignals.util';
 import { runStartupDbSanityCheck } from 'api-shared';
 import { Pool } from 'pg';
 
@@ -46,8 +47,4 @@ const shutdown = async (): Promise<void> => {
   await pool.end();
 };
 
-process.on('SIGINT', () => {
-  void shutdown().catch((error: unknown) => {
-    console.error('❌ Error during SIGINT shutdown:', error);
-  });
-});
+registerShutdownSignals({ shutdown });
