@@ -359,6 +359,16 @@ syncs the label set when the manifest/workspace list changes on `main`,
 [`changelog.yml`](.github/workflows/changelog.yml) publishes release notes on a
 `v*` tag.
 
+[`secret-scan.yml`](.github/workflows/secret-scan.yml) scans repository
+**content** for credentials — the layer the two agent-boundary guards
+(`scripts/claude-secrets-guard.mjs`, `packages/agent-runner`) do not cover, since
+neither looks at what lands in a commit. Two scans: the working tree, and the
+commits this PR adds (a secret added then removed within one PR never reaches the
+tree, but the branch carrying it was pushed). Config and its single allowlist
+entry are in [`.gitleaks.toml`](.gitleaks.toml); the binary is version-pinned and
+checksum-verified rather than pulled from a third-party action, because it is a
+security control.
+
 ---
 
 ## 6b. What runs before a commit

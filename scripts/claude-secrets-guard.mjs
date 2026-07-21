@@ -60,7 +60,10 @@ const runHook = () => {
 // Split so this file is not itself a hit for its own patterns.
 const AKIA = `AKIA${'IOSFODNN7EXAMPLE'}`;
 const GHP = `ghp_${'A1b2C3d4E5f6G7h8I9j0K1l2M3n4O5p6Q7r8'}`;
-const SECRET = 'aZ3x9Kp2Qw7Lm4Rt8Nv6Bs1'; // 24 mixed chars, high entropy, no spaces
+// Split like the two above, and for the same reason: whole, this is a 24-char
+// high-entropy token and a secret scanner flags the fixture as a leak. The
+// runtime value is unchanged, so the self-test still exercises a realistic one.
+const SECRET = `aZ3x9Kp2${'Qw7Lm4Rt8Nv6Bs1'}`;
 
 // [toolName, toolInput] tuples — all PreToolUse events.
 const DENY_CASES = [

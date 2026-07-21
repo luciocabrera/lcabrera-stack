@@ -1,0 +1,43 @@
+# Secret scanning for repository CONTENT — the layer the two existing guards do
+# not cover.
+#
+# `scripts/claude-secrets-guard.mjs` and `packages/agent-runner` (ADR-020) both
+# sit at the AGENT boundary: they stop Claude reading an environment file or
+# writing a credential. Neither looks at what lands in a commit, so a human, a
+# different agent, or anyone using `--no-verify` could add one and nothing would
+# object. This repository is public, so a committed token is public the moment
+# it is pushed.
+#
+# This is the SECOND of two layers. The first is GitHub's own secret scanning
+# with push protection, which is free for public repositories, runs server-side,
+# and blocks the push before the secret reaches the remote — something no local
+# hook here can do. See issue #218; enabling it is a repository setting, not
+# code. This file catches what GitHub's provider patterns do not: repo-specific
+# shapes and bare high-entropy strings.
+#
+# Measured baseline before adopting: 2 findings on the whole tree, both false
+# positives. One was fixed in the source rather than allowlisted (the secrets
+# guard's own test fixture — see below); the other is the single allowlist entry.
+# Keep it that way: a new finding is a real one until proven otherwise, and
+# Non-Negotiable Rule 11 applies here as it does to the linters.
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = """
+Generated report snapshots. `reports/` holds machine-written output from Sonar,
+Oxlint, ESLint, Biome and fallow; the Sonar report's issue `key` fields are
+high-entropy identifiers that match the generic-api-key rule.
+
+Scanning them adds nothing: a report is a DERIVED copy of source that this scan
+already covers directly, so a real secret would be caught in the file it lives
+in. Allowlisting the copy cannot hide it from the original.
+"""
+paths = ['''^reports/''']
+
+# NOT allowlisted, deliberately: the fake credential in
+# `scripts/claude-secrets-guard.mjs`. That file already splits its AWS and GitHub
+# fixtures so it is not a hit for its own patterns; its generic high-entropy
+# fixture now does the same. Fixing the source beat exempting the file, which
+# would have blinded the scanner to a real secret added there later.
