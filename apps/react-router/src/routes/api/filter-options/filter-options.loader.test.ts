@@ -17,10 +17,14 @@ vi.mock('@repo/api/config/get-api-base-url.util', () => ({
   getApiBaseUrl: vi.fn(() => 'http://localhost:3001/api'),
 }));
 
-const invokeLoader = (search: string) =>
-  loader({
-    request: new Request(`http://localhost/_api/filter-options?${search}`),
-  } as LoaderFunctionArgs);
+const invokeLoader = (search: string) => {
+  const request = new Request(`http://localhost/_api/filter-options?${search}`);
+
+  return {
+    request,
+    response: loader({ request } as LoaderFunctionArgs),
+  };
+};
 
 describe('filter-options loader', () => {
   beforeEach(() => {
@@ -32,9 +36,10 @@ describe('filter-options loader', () => {
   });
 
   it('proxies validated params to the BFF distinct endpoint and returns JSON', async () => {
-    const response = await invokeLoader(
+    const { request, response: pending } = invokeLoader(
       'schemaName=public&tableName=car_sales&columnName=color&limit=50&offset=100',
     );
+    const response = await pending;
 
     expect(fetchDistinctValuesMock).toHaveBeenCalledWith({
       baseUrl: 'http://localhost:3001/api/distinct',
@@ -42,6 +47,9 @@ describe('filter-options loader', () => {
       limit: 50,
       offset: 100,
       schemaName: 'public',
+      // Forwarded, not fabricated: aborting the client request must cancel the
+      // BFF call rather than leave it running for a response nobody reads.
+      signal: request.signal,
       tableName: 'car_sales',
     });
     expect(response.status).toBe(200);
@@ -49,7 +57,7 @@ describe('filter-options loader', () => {
   });
 
   it('answers 400 without calling the BFF when source params are missing', async () => {
-    const response = await invokeLoader('columnName=color');
+    const response = await invokeLoader('columnName=color').response;
 
     expect(fetchDistinctValuesMock).not.toHaveBeenCalled();
     expect(response.status).toBe(400);

@@ -24,6 +24,9 @@ describe('fetchDistinctValues', () => {
 
     expect(fetchSpy).toHaveBeenCalledWith(
       '/api/distinct?columnName=customer_email&limit=50&offset=100&schemaName=public&tableName=enterprise_orders',
+      {
+        signal: undefined,
+      },
     );
     expect(result).toEqual({ hasMore: true, values: ['a'] });
   });
@@ -41,6 +44,9 @@ describe('fetchDistinctValues', () => {
 
     expect(fetchSpy).toHaveBeenCalledWith(
       '/_api/filter-options?columnName=color&limit=50&offset=0&tableName=car_sales',
+      {
+        signal: undefined,
+      },
     );
   });
 
