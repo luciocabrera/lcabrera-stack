@@ -53,8 +53,10 @@ const MockVirtualSelect = vi.hoisted(() => {
   };
 });
 
-vi.mock('@repo/data-access/api', () => ({
+vi.mock('@repo/api/distinct/fetch-distinct-values.util', () => ({
   fetchDistinctValues: fetchDistinctValuesMock,
+}));
+vi.mock('@repo/api/config/get-api-base-url.util', () => ({
   getApiBaseUrl: vi.fn(() => '/api'),
 }));
 

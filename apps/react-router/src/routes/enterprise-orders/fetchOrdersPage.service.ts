@@ -3,7 +3,7 @@ import type {
   SortingState,
 } from '@repo/ui/components/Table';
 
-import { buildPaginatedQueryParams } from '@repo/data-access/api';
+import { buildPaginatedQueryParams } from '@repo/api/http/build-paginated-query-params.util';
 
 import type { EnterpriseOrder, EnterpriseOrdersResponse } from './config';
 

@@ -67,6 +67,7 @@ const VP_BIN = join(REPO_ROOT, 'node_modules', '.bin', 'vp');
  *   suite is the largest in the repo. Add it if showcase findings ever gate.
  */
 const COVERAGE_WORKSPACES = [
+  { dir: 'packages/api', name: '@repo/api' },
   { dir: 'packages/data-access', name: '@repo/data-access' },
   { dir: 'packages/node-runtime', name: '@repo/node-runtime' },
   { dir: 'packages/scan-ingestion', name: '@repo/scan-ingestion' },

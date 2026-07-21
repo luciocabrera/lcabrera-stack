@@ -1,6 +1,6 @@
 import type { FilterOptionsTransport } from '@repo/ui/components/Table/Table.types';
 
-import { getApiBaseUrl } from '@repo/data-access/api';
+import { getApiBaseUrl } from '@repo/api/config/get-api-base-url.util';
 
 import {
   BFF_DISTINCT_PATH,

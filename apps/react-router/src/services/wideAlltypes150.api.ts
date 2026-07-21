@@ -1,10 +1,8 @@
 import type { SortingState } from '@repo/ui/components/Table';
 
-import {
-  buildPaginatedQueryParams,
-  fetchAndValidate,
-  getApiBaseUrl,
-} from '@repo/data-access/api';
+import { getApiBaseUrl } from '@repo/api/config/get-api-base-url.util';
+import { buildPaginatedQueryParams } from '@repo/api/http/build-paginated-query-params.util';
+import { fetchAndValidate } from '@repo/api/http/fetch-and-validate.util';
 import { isObject } from '@repo/utils/guards/is-object.util';
 
 /**

@@ -20,7 +20,7 @@ export type DbSanityResult = {
  * against it. Two copies of a shape that has to match across the wire is a
  * silent-drift hazard, not a convenience.
  */
-export type { DistinctValuesResponse } from '@repo/data-access/api/api.types';
+export type { DistinctValuesResponse } from '@repo/api/distinct/distinct.types';
 
 export type PaginatedResponse<TData> = {
   readonly data: readonly TData[];

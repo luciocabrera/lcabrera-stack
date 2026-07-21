@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseFilterOptionsParams } from './parseFilterOptionsParams.util';
+import { parseFilterOptionsParams } from './parse-filter-options-params.util.ts';
 
 describe('parseFilterOptionsParams', () => {
   it('parses a complete query with explicit pagination', () => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { isDistinctValuesResponse } from './isDistinctValuesResponse.util';
+import { isDistinctValuesResponse } from './is-distinct-values-response.util.ts';
 
 describe('isDistinctValuesResponse', () => {
   it('accepts a valid response', () => {

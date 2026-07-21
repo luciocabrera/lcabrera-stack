@@ -202,6 +202,21 @@ const configs = [
     ),
   },
   {
+    // @repo/api is the browser half of the old data-access package: fetch
+    // client, HTTP contracts, base-URL resolution. It needs the DOM lib and
+    // vite/client that createAppTsConfig supplies by default (Window, Location,
+    // fetch, the Vite env object) — but, unlike packages/data-access, it must
+    // NOT append 'node'. That omission is the point: a stray process/fs reach-in
+    // fails typecheck here rather than quietly making a client-safe package
+    // server-only again, which is the regression
+    // packages/ui/scripts/check-public-api-client-safe.mjs now also guards.
+    config: createAppTsConfig({
+      include: ['src', 'vite.config.ts'],
+      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
+    }),
+    filePath: resolve(workspaceRoot, 'packages/api/tsconfig.app.json'),
+  },
+  {
     // @repo/utils is pure and side-effect free by contract (AGENTS.md §1),
     // which is exactly why it gets `types: []` rather than the default
     // ['node']: denying it the Node ambient globals means a stray process/fs

@@ -1,7 +1,7 @@
-import type { DistinctValuesResponse } from './api.types';
+import type { DistinctValuesResponse } from './distinct.types.ts';
 
-import { fetchAndValidate } from './fetchAndValidate.util';
-import { isDistinctValuesResponse } from './isDistinctValuesResponse.util';
+import { fetchAndValidate } from '../http/fetch-and-validate.util.ts';
+import { isDistinctValuesResponse } from './is-distinct-values-response.util.ts';
 
 type FetchDistinctValuesArgs = {
   readonly baseUrl: string;

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { fetchDistinctValues } from './fetchDistinctValues.util';
+import { fetchDistinctValues } from './fetch-distinct-values.util.ts';
 
 const mockFetchResponse = (body: unknown) =>
   vi.spyOn(globalThis, 'fetch').mockResolvedValue(Response.json(body) as never);
