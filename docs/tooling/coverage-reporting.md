@@ -54,10 +54,10 @@ Three moving parts:
 
 They feed different consumers and must not be merged:
 
-| Script            | Feeds                     | Reporter        | Workspaces                                                      | react-router?                                           |
-| ----------------- | ------------------------- | --------------- | --------------------------------------------------------------- | ------------------------------------------------------- |
-| `coverage:merge`  | the **fallow audit gate** | `json` (detail) | the DB-free set — `COVERAGE_WORKSPACES` in `merge-coverage.mjs` | **excluded** (largest suite; fallow findings baselined) |
-| `coverage:report` | the **PR comment**        | `json-summary`  | the reported set below                                          | **included** (it is a critical surface)                 |
+| Script            | Feeds                     | Reporter        | Workspaces                                    | react-router?                                           |
+| ----------------- | ------------------------- | --------------- | --------------------------------------------- | ------------------------------------------------------- |
+| `coverage:merge`  | the **fallow audit gate** | `json` (detail) | the DB-free set — `COVERAGE_MERGE_WORKSPACES` | **excluded** (largest suite; fallow findings baselined) |
+| `coverage:report` | the **PR comment**        | `json-summary`  | the reported set below                        | **included** (it is a critical surface)                 |
 
 Coupling them would drag react-router into the fallow merge it is deliberately
 kept out of. See [`scripts/merge-coverage.mjs`](../../scripts/merge-coverage.mjs)
@@ -65,10 +65,17 @@ for the fallow side.
 
 ## Reported workspaces
 
-Defined in `COVERAGE_REPORT_WORKSPACES` in `scripts/coverage-report.mjs`, most-
-critical first. These are the public-facing / highest-value surfaces (all four
-packages heading for public release — `ui`, `api`, `server`, `utils` — are here;
-`apps/react-router` is the showcase app):
+Defined in `COVERAGE_REPORT_WORKSPACES` in
+[`scripts/lib/coverage-workspaces.mjs`](../../scripts/lib/coverage-workspaces.mjs),
+most-critical first. These are the public-facing / highest-value surfaces (all
+four packages heading for public release — `ui`, `api`, `server`, `utils` — are
+here; `apps/react-router` is the showcase app).
+
+That membership is **asserted, not just documented**: `test:scripts` resolves the
+never-baseline packages from the gitignore rule AGENTS.md §4 names as the
+authority and fails if any of them is absent from either lane. It keys on the
+directory rather than the package name, so an npm scope rename cannot defeat it.
+Adding a fifth public package extends the check with no edit here:
 
 | Workspace                 | Package                | `run` | Why                                                                                                                              |
 | ------------------------- | ---------------------- | ----- | -------------------------------------------------------------------------------------------------------------------------------- |
@@ -98,9 +105,10 @@ only once its coverage runs clean and means something.** Checklist:
    constraint that reverted the first coverage-into-CI attempt (2026-07-14).
 3. **It emits `coverage-summary.json`.** Automatic once `test:coverage` uses the
    shared `VITEST_COVERAGE_FLAGS` (all current ones do).
-4. **Append it** to `COVERAGE_REPORT_WORKSPACES` with `run: true` (or `false` if
-   its summary is already produced upstream). No other change needed — the
-   comment scales row-by-row and the total re-aggregates automatically.
+4. **Append it** to `COVERAGE_REPORT_WORKSPACES` in
+   `scripts/lib/coverage-workspaces.mjs` with `run: true` (or `false` if its
+   summary is already produced upstream). No other change needed — the comment
+   scales row-by-row and the total re-aggregates automatically.
 
 ### Phased rollout
 
