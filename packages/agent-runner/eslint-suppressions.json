@@ -24,7 +24,7 @@
   },
   "src/runSkillAgent.ts": {
     "local-rules/destructuring-for-functions": {
-      "count": 2
+      "count": 1
     },
     "security/detect-non-literal-fs-filename": {
       "count": 4
