@@ -19,6 +19,28 @@ exactly that reason (§4). This is why the column-filter shapes are **duplicated
 in `@repo/ui` and `@repo/server` rather than shared through an elegant edge that
 only resolves in-repo ([ADR-039](docs/cqms/decisions/ADR-039-duplicate-over-undeclared-edges.md)).
 
+**Publishing invariants for those four.** They are not published yet — all four
+stay `private: true` until the npm scope and a real build exist, and that flag is
+the only thing preventing an accidental publish, so do not flip it as a
+convenience. What already holds, verified by packing each package and reading the
+tarball rather than by inspection:
+
+- **Each carries its own `LICENSE`** (MIT). npm only includes a `LICENSE` sitting
+  in the package directory, so the root one does not reach a consumer — this is
+  deliberate duplication, same reasoning as ADR-039.
+- **`files` is `["src", "!src/**/*.test.*"]`.** Without it npm ships whatever is
+  in the directory: `@repo/server` was shipping 29 test files plus its tsconfigs
+  and `eslint.config.mjs`. The negated pattern is honoured by pnpm pack.
+- **Framework singletons are `peerDependencies`, not `dependencies`** — `react`,
+  `react-dom`, `react-router`, `@stylexjs/stylex` in `@repo/ui`. As ordinary
+  dependencies a consumer would resolve a second copy of React, which breaks hooks
+  outright. They are also listed in `devDependencies` so the workspace still
+  resolves them for typecheck and tests. `@react-router/node` is an **optional**
+  peer: only the `./entry/*` SSR helpers import it, so a browser-only consumer
+  should not be forced to install it.
+- `catalog:` and `workspace:*` need no special handling — pnpm rewrites both to
+  real version ranges at pack time (`"pg": "^8.22.0"`, `"@repo/utils": "0.0.0"`).
+
 The apps are the harness. `apps/react-router` is a **React 19 + TypeScript +
 StyleX + React Router 7** SSR application that puts the packages under load —
 a feature-rich data Table with store-based state management, virtualization,

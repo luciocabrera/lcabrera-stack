@@ -876,33 +876,18 @@ importers:
 
   packages/ui:
     dependencies:
-      '@react-router/node':
-        specifier: 'catalog:'
-        version: 8.2.0(react-router@8.2.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)
       '@repo/api':
         specifier: workspace:*
         version: link:../api
       '@repo/utils':
         specifier: workspace:*
         version: link:../utils
-      '@stylexjs/stylex':
-        specifier: 'catalog:'
-        version: 0.19.0
       isbot:
         specifier: 'catalog:'
         version: 5.2.1
-      react:
-        specifier: 'catalog:'
-        version: 19.2.7
-      react-dom:
-        specifier: 'catalog:'
-        version: 19.2.7(react@19.2.7)
       react-markdown:
         specifier: 'catalog:'
         version: 10.1.0(@types/react@19.2.17)(react@19.2.7)
-      react-router:
-        specifier: 'catalog:'
-        version: 8.2.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
     devDependencies:
       '@babel/preset-typescript':
         specifier: 'catalog:'
@@ -910,10 +895,16 @@ importers:
       '@eslint/js':
         specifier: 'catalog:'
         version: 10.0.1(eslint@10.7.0(jiti@2.7.0))
+      '@react-router/node':
+        specifier: 'catalog:'
+        version: 8.2.0(react-router@8.2.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)
       '@repo/vite-configs':
         specifier: workspace:*
         version: link:../vite-configs
       '@stylexjs/eslint-plugin':
+        specifier: 'catalog:'
+        version: 0.19.0
+      '@stylexjs/stylex':
         specifier: 'catalog:'
         version: 0.19.0
       '@stylexjs/unplugin':
@@ -967,6 +958,15 @@ importers:
       globals:
         specifier: 'catalog:'
         version: 17.7.0
+      react:
+        specifier: 'catalog:'
+        version: 19.2.7
+      react-dom:
+        specifier: 'catalog:'
+        version: 19.2.7(react@19.2.7)
+      react-router:
+        specifier: 'catalog:'
+        version: 8.2.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
