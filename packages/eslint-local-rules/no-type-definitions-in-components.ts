@@ -2,20 +2,17 @@ import type { TSESTree } from '@typescript-eslint/utils';
 
 import { ESLintUtils } from '@typescript-eslint/utils';
 
+import { isComponentFilename } from './component-files.js';
+
 const createRule = ESLintUtils.RuleCreator(
   (name) => `https://example.com/rule/${name}`,
 );
 
 export default createRule({
   create(context) {
-    // Only apply to .component.tsx, .layout.tsx, .errorBoundary.tsx etc - component files
-    const filename = context.filename;
-    const isComponentFile =
-      filename.endsWith('.component.tsx') ||
-      filename.endsWith('.layout.tsx') ||
-      filename.endsWith('.errorBoundary.tsx');
-
-    if (!isComponentFile) {
+    // Which suffixes count is `component-files.ts`'s call, not this rule's —
+    // it is shared with `filename-convention`, which enforces the same set.
+    if (!isComponentFilename(context.filename)) {
       return {};
     }
 

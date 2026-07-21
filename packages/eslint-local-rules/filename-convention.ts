@@ -22,6 +22,8 @@ import type { TSESTree } from '@typescript-eslint/utils';
 
 import { ESLintUtils } from '@typescript-eslint/utils';
 
+import { COMPONENT_FILE_SUFFIXES } from './component-files.js';
+
 const createRule = ESLintUtils.RuleCreator(
   (name) => `https://github.com/luciocabrera/vite-react-compiler/rules/${name}`,
 );
@@ -54,7 +56,9 @@ const isKebabCase = (value: string) =>
 // rule off there, its eslint config passes `{ suffixCase: { util: 'kebab-case' } }`
 // so a camelCase `.util` file in that package still fails the gate.
 const KEBAB_SUFFIXES = new Set(['action', 'clientAction', 'loader', 'meta']);
-const PASCAL_SUFFIXES = new Set(['component', 'error-boundary', 'layout']);
+// Shared with `no-type-definitions-in-components` so the two rules cannot
+// disagree about what a component file is — they already had.
+const PASCAL_SUFFIXES = new Set<string>(COMPONENT_FILE_SUFFIXES);
 const CAMEL_SUFFIXES = new Set(['api', 'hook', 'schema', 'service', 'util']);
 
 // Deprecated suffix spellings → their canonical replacement. A multi-word

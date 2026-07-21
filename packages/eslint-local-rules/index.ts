@@ -1,27 +1,10 @@
 /**
  * Local ESLint plugin - Custom rules
+ *
+ * The registry itself lives in `rules.ts` so tests can import it from source;
+ * see the note there.
  */
 
-import cleanImportPaths from './clean-import-paths.js';
-import destructuringForFunctions from './destructuring-for-functions.js';
-import filenameConvention from './filename-convention.js';
-import mergeDuplicateImports from './merge-duplicate-imports.js';
-import noInlineTypeImports from './no-inline-type-imports.js';
-import noTypeDefinitionsInComponents from './no-type-definitions-in-components.js';
-import readonlyProps from './readonly-props.js';
-import singleComponentExport from './single-component-export.js';
-import typeSuffixNaming from './type-suffix-naming.js';
+import { rules } from './rules.js';
 
-export default {
-  rules: {
-    'clean-import-paths': cleanImportPaths,
-    'destructuring-for-functions': destructuringForFunctions,
-    'filename-convention': filenameConvention,
-    'merge-duplicate-imports': mergeDuplicateImports,
-    'no-inline-type-imports': noInlineTypeImports,
-    'no-type-definitions-in-components': noTypeDefinitionsInComponents,
-    'readonly-props': readonlyProps,
-    'single-component-export': singleComponentExport,
-    'type-suffix-naming': typeSuffixNaming,
-  },
-};
+export default { rules };
