@@ -46,7 +46,9 @@ depended on the combined package for two fetch helpers and so pulled the Postgre
 driver into every consumer's dependency graph. `packages/ui`'s `check:public-api`
 now enforces the invariant — **a client-safe package may only depend on workspace
 packages that are themselves client-safe** — so that regression fails the gate
-instead of passing silently.
+instead of passing silently. The full topology and what each tsconfig denies is
+[ADR-038](docs/cqms/decisions/ADR-038-public-package-topology-by-runtime.md),
+which supersedes ADR-008.
 
 `utils` and `node-runtime` split on purity, and the split is deliberate:
 `@repo/utils` guarantees pure, side-effect-free helpers, so anything that must
