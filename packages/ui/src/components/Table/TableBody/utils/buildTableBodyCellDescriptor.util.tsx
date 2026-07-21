@@ -9,7 +9,6 @@ import type { ReactNode } from 'react';
 import { DEFAULT_MIN_COLUMN_WIDTH } from '@repo/ui/components/Table/Table.constants';
 import { TableRowActionsMenu } from '@repo/ui/components/Table/TableRowActionsMenu';
 
-// Declared by hand; deriving this from the column types is tracked in #243.
 export type TableBodyCellDescriptor<TData extends Record<string, unknown>> =
   | {
       readonly children: ReactNode;

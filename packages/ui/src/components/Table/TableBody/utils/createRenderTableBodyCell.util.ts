@@ -23,7 +23,7 @@ type RenderBodyCellArgs<TData extends Record<string, unknown>> = {
   readonly col: TableColumn<TData>;
   readonly row: TData;
 };
-// Splitting each branch into its own .util file is tracked in #244.
+
 const renderFromDescriptor = <TData extends Record<string, unknown>>({
   descriptor,
 }: {
