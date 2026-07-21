@@ -73,6 +73,22 @@ const SKIPPED_DIRS = new Set([
 ]);
 
 /**
+ * Repo-relative directories holding a *second copy of this repo*, matched by
+ * full path rather than by name because the name alone ("worktrees") is too
+ * generic to skip everywhere.
+ *
+ * `coordination:claim --worktree` — which AGENTS.md recommends whenever other
+ * agents are active — puts a full linked checkout under
+ * `.claude/worktrees/<id>`. Walking into one scans every document a second time
+ * and resolves its relative references against THIS root, so a doc that is
+ * correct in its own tree is reported broken here. The directory is gitignored,
+ * so CI's fresh checkout never has one: the failure appears only on the machine
+ * that ran the recommended command, and the only way past it is `--no-verify`.
+ * A gate that fires locally and nowhere else teaches people to bypass it.
+ */
+const SKIPPED_PATHS = new Set(['.claude/worktrees']);
+
+/**
  * Every markdown file under the repo, found by walking rather than by shelling
  * out to `git ls-files`: these scripts launch no subprocess, so a PATH-resolved
  * process can never be substituted underneath a gate that runs on every push.
@@ -81,7 +97,7 @@ const walkMarkdown = (dir, prefix = '') =>
   readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const relativePath = prefix === '' ? entry.name : `${prefix}/${entry.name}`;
     if (entry.isDirectory()) {
-      return SKIPPED_DIRS.has(entry.name)
+      return SKIPPED_DIRS.has(entry.name) || SKIPPED_PATHS.has(relativePath)
         ? []
         : walkMarkdown(join(dir, entry.name), relativePath);
     }
