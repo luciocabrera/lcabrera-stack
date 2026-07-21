@@ -40,6 +40,4 @@ export const validateField = <TValues extends Record<string, unknown>>({
   if (typeof value === 'number') {
     return validateNumberValue({ message, validation, value });
   }
-
-  return;
 };

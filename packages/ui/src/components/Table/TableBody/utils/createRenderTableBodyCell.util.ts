@@ -23,7 +23,7 @@ type RenderBodyCellArgs<TData extends Record<string, unknown>> = {
   readonly col: TableColumn<TData>;
   readonly row: TData;
 };
-// TODO: sPlit in different .util
+
 const renderFromDescriptor = <TData extends Record<string, unknown>>({
   descriptor,
 }: {
