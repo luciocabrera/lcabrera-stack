@@ -90,6 +90,10 @@ const parseArgs = (argv) => {
       args.wait = true;
       continue;
     }
+    if (flag === '--require-token') {
+      args.requireToken = true;
+      continue;
+    }
     if (flag === '--pr') {
       args.pr = queue.shift();
       continue;
@@ -385,7 +389,16 @@ const main = async () => {
 
   const token = process.env.SONAR_TOKEN;
   if (!token) {
-    printNoToken(args.gate);
+    printNoToken(args.gate && !args.requireToken);
+    if (args.requireToken) {
+      console.error(
+        'SONAR_TOKEN is required in this context but was not provided — ' +
+          'refusing to report a gate as passing when it never ran. ' +
+          'Pass --require-token only where the secret is available ' +
+          '(same-repo pull requests); fork PRs must omit it.',
+      );
+      process.exitCode = 1;
+    }
     return;
   }
 
