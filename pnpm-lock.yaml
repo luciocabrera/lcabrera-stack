@@ -209,6 +209,9 @@ importers:
 
   apps/admin_system:
     dependencies:
+      '@lcabrera/server':
+        specifier: workspace:*
+        version: link:../../packages/server
       '@lcabrera/ui':
         specifier: workspace:*
         version: link:../../packages/ui

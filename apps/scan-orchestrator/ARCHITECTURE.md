@@ -68,8 +68,15 @@ process.
 ## WebSocket protocol
 
 - Connect to `ws://<host>:<port>/ws/runs`.
-- Send `{ "type": "subscribe", "runId": "<uuid>" }` to start receiving that
-  run's updates (validated, no further auth — internal tool).
+- Send `{ "type": "subscribe", "runId": "<uuid>", "ticket": "<ticket>" }` to
+  start receiving that run's updates.
+- **The ticket is the authorization** ([ADR-041](../../docs/cqms/decisions/ADR-041-ws-runs-subscription-tickets.md)).
+  `apps/admin_system`'s run-detail loader mints it after its own session and
+  RBAC checks; this process only re-derives the HMAC for the run being asked
+  for, so there is no database in the WebSocket path and a ticket for one run
+  cannot be used on another. A missing, expired, forged or wrong-run ticket
+  closes the socket with **1008** (Policy Violation); a merely malformed
+  message is still ignored with the connection left open.
 - Messages: `{ type: 'scan-status', runId, scanId, scannerId, status }` on
   every status transition, `{ type: 'scan-progress', ... }` on every
   Agent SDK turn for the non-deterministic scanners.
@@ -81,6 +88,9 @@ process.
 
 - `SCAN_ORCHESTRATOR_PORT` (default `4100`)
 - `ANTHROPIC_API_KEY` — required, Zod-validated at startup; never logged.
+- `CQMS_WS_TICKET_SECRET` — required, no default. The HMAC key for `/ws/runs`
+  tickets; must match `apps/admin_system`'s value or every subscription is
+  rejected. Deliberately has no dev fallback (ADR-041 §4).
 - `DB_HOST`/`DB_NAME`/`DB_PASSWORD`/`DB_PORT`/`DB_USER` — via
   `@lcabrera/server`'s own schema, loaded the same way every other CQMS
   package loads them (`docker/local/.env` + a package-local `.env` override

@@ -53,12 +53,12 @@ These are known and recorded — not drift:
 does not match the canonical spec. Most are decisions rather than bugs to fix in
 isolation.
 
-| #   | Item                                      | State                                                          |
-| --- | ----------------------------------------- | -------------------------------------------------------------- |
-| 3.1 | §8 "no queuing" vs the LISTEN/NOTIFY code | **Resolved** — ADR-033; was a misreading, not a conflict       |
-| 3.2 | Unsandboxed host execution                | Accepted pre-hosting; Phase 2 fixes it                         |
-| 3.3 | `/ws/runs` unauthenticated                | Accepted pre-hosting; Phase 2 fixes it                         |
-| 3.4 | Snapshot replaceable under a running scan | **Built** — ADR-034, migration `0029` (pin + retain + collect) |
+| #   | Item                                      | State                                                            |
+| --- | ----------------------------------------- | ---------------------------------------------------------------- |
+| 3.1 | §8 "no queuing" vs the LISTEN/NOTIFY code | **Resolved** — ADR-033; was a misreading, not a conflict         |
+| 3.2 | Unsandboxed host execution                | Accepted pre-hosting; Phase 2 fixes it                           |
+| 3.3 | `/ws/runs` unauthenticated                | **Built** — ADR-041, short-lived run-scoped subscription tickets |
+| 3.4 | Snapshot replaceable under a running scan | **Built** — ADR-034, migration `0029` (pin + retain + collect)   |
 
 ### 3.1 The §8 "queue" contradiction — **RESOLVED 2026-07-16 (ADR-033)**
 
@@ -102,12 +102,26 @@ Defensible while this is a local internal tool. It is the blocker for PRD_V2 §2
 `scanner_command` is **remote code execution by design** — the container is what
 makes that model safe, so Phase 3 must not land before Phase 2.
 
-### 3.3 `/ws/runs` is unauthenticated — Phase 2 item
+### 3.3 `/ws/runs` is unauthenticated — **built (ADR-041)**
 
-`apps/scan-orchestrator/src/ws/attachWebSocketServer.ts` says so outright:
-"uuid, no further auth (internal tool)". PRD_V2 §12 requires auth; the review
-lists "Authenticate `/ws/runs`" under Phase 2. Same reasoning as 3.2: fine for a
-local tool, real exposure once hosted.
+Was live; **fixed by [ADR-041](./decisions/ADR-041-ws-runs-subscription-tickets.md)**
+(issue #66). The endpoint said so outright — "uuid, no further auth (internal
+tool)" — which is a capability check in name only: a run id is unguessable but
+not secret, since it sits in the page URL, in loader payloads and in logs.
+
+Subscribing now requires a **short-lived, run-scoped ticket**: an HMAC minted by
+`apps/admin_system`'s run-detail loader, which has already put the caller
+through the session gate. The orchestrator re-derives the signature for the run
+actually being requested — no database in the WebSocket path — so a ticket for
+one run cannot be replayed against another, and closes the socket with 1008 on
+any failure. Both processes need the same `CQMS_WS_TICKET_SECRET`, which has
+**no development default**: a fallback published in this repository would
+bypass the control while every check still reported success.
+
+Note what is still open: the orchestrator learns nothing about _who_ is
+connected, so there is no per-user logging or rate-limiting here, and a ticket
+cannot be revoked before its hour is up. Both are deliberate — see the ADR's
+Consequences.
 
 ### 3.4 A snapshot can be replaced under a running scan — **built (migration `0029`)**
 

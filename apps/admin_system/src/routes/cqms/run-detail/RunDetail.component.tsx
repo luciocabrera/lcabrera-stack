@@ -12,8 +12,8 @@ import { resolveRunStatusTone } from '../utils/resolveRunStatusTone.util';
 import { RUN_SCANS_COLUMNS } from './RunDetail.constants';
 
 export const RunDetail = () => {
-  const { run, scansPromise } = useLoaderData<typeof loader>();
-  useRunStatusSocket({ runId: run.id });
+  const { run, scansPromise, statusTicket } = useLoaderData<typeof loader>();
+  useRunStatusSocket({ runId: run.id, ticket: statusTicket });
 
   return (
     <div>
