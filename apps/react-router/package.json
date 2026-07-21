@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@react-router/serve": "catalog:",
+    "@repo/api": "workspace:*",
     "@repo/data-access": "workspace:*",
     "@repo/ui": "workspace:*",
     "@repo/utils": "workspace:*",

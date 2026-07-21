@@ -1,13 +1,12 @@
 import type { SortingState } from '@repo/ui/components/Table';
 
-import {
-  buildPaginatedQueryParams,
-  fakeDelay,
-  fetchAndValidate,
-  getApiBaseUrl,
-} from '@repo/data-access/api';
+import { getApiBaseUrl } from '@repo/api/config/get-api-base-url.util';
+import { buildPaginatedQueryParams } from '@repo/api/http/build-paginated-query-params.util';
+import { fetchAndValidate } from '@repo/api/http/fetch-and-validate.util';
 import { createLogger } from '@repo/ui/utils/logger';
 import { isObject } from '@repo/utils/guards/is-object.util';
+
+import { fakeDelay } from './fakeDelay.util';
 
 /**
  * Car Sales API Service

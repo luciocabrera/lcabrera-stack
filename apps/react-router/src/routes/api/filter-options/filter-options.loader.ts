@@ -1,10 +1,8 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
-import {
-  fetchDistinctValues,
-  getApiBaseUrl,
-  parseFilterOptionsParams,
-} from '@repo/data-access/api';
+import { getApiBaseUrl } from '@repo/api/config/get-api-base-url.util';
+import { fetchDistinctValues } from '@repo/api/distinct/fetch-distinct-values.util';
+import { parseFilterOptionsParams } from '@repo/api/distinct/parse-filter-options-params.util';
 import { DEFAULT_FILTER_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
 
 /**

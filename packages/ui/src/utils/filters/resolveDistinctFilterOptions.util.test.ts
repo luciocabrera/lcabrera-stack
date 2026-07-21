@@ -7,8 +7,10 @@ const { fetchDistinctValuesMock, getApiBaseUrlMock } = vi.hoisted(() => ({
   getApiBaseUrlMock: vi.fn(() => '/api'),
 }));
 
-vi.mock('@repo/data-access/api', () => ({
+vi.mock('@repo/api/distinct/fetch-distinct-values.util', () => ({
   fetchDistinctValues: fetchDistinctValuesMock,
+}));
+vi.mock('@repo/api/config/get-api-base-url.util', () => ({
   getApiBaseUrl: getApiBaseUrlMock,
 }));
 

@@ -4,7 +4,7 @@ import type {
 } from '@repo/ui/components/Table/Table.types';
 import type { Pagination } from '@repo/ui/types/ui.types';
 
-import { fetchDistinctValues } from '@repo/data-access/api';
+import { fetchDistinctValues } from '@repo/api/distinct/fetch-distinct-values.util';
 
 import { getFilterOptionsBaseUrl } from './getFilterOptionsBaseUrl.util';
 

@@ -1,4 +1,4 @@
-import type { DistinctValuesResponse } from './api.types';
+import type { DistinctValuesResponse } from './distinct.types.ts';
 
 /**
  * Type guard for the distinct-values endpoint response shape
@@ -7,7 +7,8 @@ import type { DistinctValuesResponse } from './api.types';
 export const isDistinctValuesResponse = (
   value: unknown,
 ): value is DistinctValuesResponse =>
-  value instanceof Object &&
+  typeof value === 'object' &&
+  value !== null &&
   'hasMore' in value &&
   'values' in value &&
   typeof value.hasMore === 'boolean' &&

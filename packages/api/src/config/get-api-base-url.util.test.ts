@@ -2,8 +2,8 @@
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { API_SERVER_PORT, CONFIG } from './api.constants';
-import { getApiBaseUrl } from './api.util';
+import { API_SERVER_PORT, CONFIG } from './config.constants.ts';
+import { getApiBaseUrl } from './get-api-base-url.util.ts';
 
 const originalEnvApiUrl = import.meta.env.VITE_API_URL;
 
@@ -51,6 +51,15 @@ describe('getApiBaseUrl', () => {
 
   it('falls back to the localhost API host during SSR when no request URL is provided', () => {
     vi.stubGlobal('window', undefined);
+
+    expect(getApiBaseUrl()).toBe(CONFIG.localhost.apiHost);
+  });
+
+  it('falls back to the localhost API host when `window` is absent entirely', () => {
+    // `vi.stubGlobal('window', undefined)` above still *defines* the property.
+    // Real SSR does not define it at all, so cover that shape too — the two
+    // differ under an `in` check, and only this one matches production Node.
+    Reflect.deleteProperty(globalThis, 'window');
 
     expect(getApiBaseUrl()).toBe(CONFIG.localhost.apiHost);
   });

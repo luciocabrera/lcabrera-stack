@@ -1,4 +1,13 @@
-import { API_SERVER_PORT, CONFIG } from './api.constants';
+import { API_SERVER_PORT, CONFIG } from './config.constants.ts';
+
+// Private IP ranges (10.x.x.x, 172.16-31.x.x, 192.168.x.x). Module-level so the
+// three regexes are compiled once rather than on every getApiBaseUrl call, which
+// runs on every service request.
+const PRIVATE_IP_PATTERNS = [
+  /^10\./,
+  /^172\.(1[6-9]|2\d|3[01])\./,
+  /^192\.168\./,
+];
 
 /**
  * Check if hostname is a local/private IP address
@@ -9,10 +18,7 @@ const isLocalIp = (hostname: string): boolean => {
     return true;
   }
 
-  // Check for private IP ranges (10.x.x.x, 172.16-31.x.x, 192.168.x.x)
-  const ipPatterns = [/^10\./, /^172\.(1[6-9]|2\d|3[01])\./, /^192\.168\./];
-
-  return ipPatterns.some((pattern) => pattern.test(hostname));
+  return PRIVATE_IP_PATTERNS.some((pattern) => pattern.test(hostname));
 };
 
 /**
@@ -50,9 +56,18 @@ export const getApiBaseUrl = (requestUrl?: string): string => {
     return envApiUrl;
   }
 
-  // Priority 3: Server-side rendering without request URL
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  if (globalThis.window === undefined) {
+  // Priority 3: Server-side rendering without request URL.
+  //
+  // `globalThis` is narrowed to a type where `window` is optional, because that
+  // is the truth under SSR — the DOM lib types it as always present. Comparing
+  // against the lib type directly is a dead end in both spellings: `=== undefined`
+  // reads as unnecessary to the type checker (@typescript-eslint/no-unnecessary-condition)
+  // and `typeof … === 'undefined'` trips unicorn/no-typeof-undefined. Correcting
+  // the type instead of silencing the rule keeps both live, and covers the
+  // property being absent (real Node) as well as present-but-undefined.
+  const { window: maybeWindow } = globalThis as { readonly window?: unknown };
+
+  if (maybeWindow === undefined) {
     return CONFIG.localhost.apiHost;
   }
 

@@ -8,9 +8,12 @@ const { fetchDistinctValuesMock } = vi.hoisted(() => ({
   fetchDistinctValuesMock: vi.fn(),
 }));
 
-vi.mock('@repo/data-access/api', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@repo/data-access/api')>()),
+// Only the two transport-touching modules are mocked; parseFilterOptionsParams
+// stays real so the loader's validation path is exercised, not stubbed.
+vi.mock('@repo/api/distinct/fetch-distinct-values.util', () => ({
   fetchDistinctValues: fetchDistinctValuesMock,
+}));
+vi.mock('@repo/api/config/get-api-base-url.util', () => ({
   getApiBaseUrl: vi.fn(() => 'http://localhost:3001/api'),
 }));
 

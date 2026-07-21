@@ -1,4 +1,4 @@
-import type { ApiConfig } from './api.types';
+import type { ApiConfig } from './config.types.ts';
 
 export const API_SERVER_PORT = 3001;
 

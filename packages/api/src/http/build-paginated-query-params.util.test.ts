@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildPaginatedQueryParams } from './buildPaginatedQueryParams.util.ts';
+import { buildPaginatedQueryParams } from './build-paginated-query-params.util.ts';
 
 describe('buildPaginatedQueryParams', () => {
   it('always includes limit and skip', () => {
