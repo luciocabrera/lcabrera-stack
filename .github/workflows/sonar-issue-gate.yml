@@ -62,3 +62,20 @@ jobs:
           fi
           node scripts/sonar-report.mjs --gate --fail-on-issues $REQUIRE_TOKEN \
             --pr "${{ github.event.pull_request.number }}" --wait --since "$SINCE"
+
+      # TEMPORARY (revert before merge): print the findings so the exact rule and
+      # location are visible. The gate prints counts only, and SonarCloud's issue
+      # API returns nothing anonymously for this org, so there is no other way to
+      # read them without the token.
+      - name: TEMP dump Sonar findings
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json, pathlib
+          p = pathlib.Path('reports/sonar/full-latest.json')
+          d = json.loads(p.read_text())
+          for x in d.get('issues', []):
+              print(f"[{x.get('severity')}] {x.get('type')} {x.get('rule')}")
+              print(f"  {x.get('component')}:{x.get('line')}")
+              print(f"  {x.get('message')}")
+          PY
