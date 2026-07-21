@@ -2,18 +2,18 @@
   "project": "luciocabrera_vite-react-compiler",
   "source": "https://sonarcloud.io",
   "target": {
-    "type": "pullRequest",
-    "value": "229"
+    "type": "branch",
+    "value": "main"
   },
   "qualityGate": {
-    "status": "ERROR",
+    "status": "OK",
     "conditions": [
       {
         "metric": "new_duplicated_lines_density",
         "status": "OK",
         "comparator": "GT",
         "errorThreshold": "3",
-        "actualValue": "0.0"
+        "actualValue": "0.3"
       },
       {
         "metric": "new_maintainability_rating",
@@ -24,10 +24,10 @@
       },
       {
         "metric": "new_reliability_rating",
-        "status": "ERROR",
+        "status": "OK",
         "comparator": "GT",
         "errorThreshold": "1",
-        "actualValue": "4"
+        "actualValue": "1"
       },
       {
         "metric": "new_security_hotspots_reviewed",
@@ -49,35 +49,38 @@
     "issues": 1,
     "hotspots": 0,
     "bySeverity": {
-      "CRITICAL": 1
+      "MAJOR": 1
     },
     "byType": {
-      "BUG": 1
+      "CODE_SMELL": 1
     }
   },
   "issues": [
     {
-      "key": "AZ-FTQCiNV3sao26CfT9",
-      "rule": "javascript:S2871",
-      "type": "BUG",
-      "severity": "CRITICAL",
-      "file": "scripts/lib/coverage-workspaces.mjs",
-      "line": 114,
-      "message": "Provide a compare function to avoid sorting elements alphabetically.",
-      "effort": "10min",
+      "key": "AZ8JptItxRTRgvXsOjTt",
+      "rule": "typescript:S6772",
+      "type": "CODE_SMELL",
+      "severity": "MAJOR",
+      "file": "apps/react-router/src/features/showcase/ShowcasePage/SidePanelSection/SidePanelSection.component.tsx",
+      "line": 90,
+      "message": "Ambiguous spacing after previous element span",
+      "effort": "5min",
       "tags": [
-        "bad-practice",
-        "type-dependent"
+        "react"
       ],
       "impacts": [
         {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "MEDIUM"
+        },
+        {
           "softwareQuality": "RELIABILITY",
-          "severity": "HIGH"
+          "severity": "LOW"
         }
       ],
-      "cleanCodeCategory": "INTENTIONAL",
+      "cleanCodeCategory": "CONSISTENT",
       "status": "OPEN",
-      "creationDate": "2026-07-21T15:28:56+0000"
+      "creationDate": "2026-06-26T15:53:56+0000"
     }
   ],
   "hotspots": []
