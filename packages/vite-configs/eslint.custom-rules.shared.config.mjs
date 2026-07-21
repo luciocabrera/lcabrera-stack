@@ -4,6 +4,12 @@ import { dirname, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import localRules from '../eslint-local-rules/index.js';
+import {
+  BARREL_SYNTAX_RESTRICTIONS,
+  CLIENT_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS,
+  STATE_LIBRARY_IMPORT_PATTERNS,
+  UI_PUBLIC_IMPORT_BOUNDARY_PATTERNS,
+} from './eslint.restrictions.shared.mjs';
 
 // Resolved from tsconfigRootDir (each consuming app's own directory), never
 // process.cwd() — process.cwd() is a single, fixed value for the entire
@@ -83,80 +89,6 @@ const GLOBAL_IGNORES = [
   'node_modules/**',
   'scripts/**',
   'utils/**',
-];
-
-const UI_PUBLIC_IMPORT_BOUNDARY_PATTERNS = [
-  {
-    group: ['@repo/ui/src/**'],
-    message:
-      'Do not import from @repo/ui source internals. Use @repo/ui public exports or supported subpaths.',
-  },
-  {
-    group: ['@repo/ui/**/index', '@repo/ui/**/index.*'],
-    message:
-      'Do not import @repo/ui index files directly. Use the folder path or @repo/ui root exports.',
-  },
-  {
-    group: [
-      '@repo/ui/**/*.component',
-      '!@repo/ui/components/Settings/Settings.component',
-    ],
-    message:
-      'Do not import component implementation files directly from @repo/ui. Import from @repo/ui root exports or component barrels.',
-  },
-];
-
-// Runtime database access is server-only. Match the whole `@repo/server/db`
-// import path — not individual utils, which drift as they are added and removed —
-// plus the raw `pg` driver, and cover both direct imports and barrel re-exports.
-// Type-only imports are erased at compile time, so they stay allowed (e.g. the
-// `query-builder.types` the pure `db/query-builder/*` builders share); the guard is
-// on runtime access, which is what pulls the DB connection into the bundle.
-const SERVER_ONLY_DB_MESSAGE =
-  'Direct database access is server-only (the pg driver and @repo/server/db runtime helpers). Move this import to a `.server.ts` file or a `.server/` directory — or reach it through a server-only module.';
-
-const DB_IMPORT_BOUNDARY_RESTRICTIONS = [
-  'ImportDeclaration',
-  'ExportAllDeclaration',
-  'ExportNamedDeclaration',
-].flatMap((declaration) => {
-  const kind =
-    declaration === 'ImportDeclaration' ? 'importKind' : 'exportKind';
-
-  return [
-    String.raw`${declaration}[${kind}!='type'][source.value=/^@repo\/server\/db\//]`,
-    `${declaration}[${kind}!='type'][source.value='pg']`,
-  ].map((selector) => ({ message: SERVER_ONLY_DB_MESSAGE, selector }));
-});
-
-const CLIENT_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS = [
-  {
-    message:
-      'Node built-ins are server-only. Move this import/export to server files.',
-    selector: 'ExportAllDeclaration[source.value=/^node:/]',
-  },
-  {
-    message:
-      'Node built-ins are server-only. Move this import/export to server files.',
-    selector: 'ExportNamedDeclaration[source.value=/^node:/]',
-  },
-  {
-    message:
-      'Node built-ins are server-only. Move this import/export to server files.',
-    selector: 'ImportDeclaration[source.value=/^node:/]',
-  },
-  {
-    message:
-      'Server-only UI helpers must be imported via @repo/ui/server from server entry files only.',
-    selector:
-      "ImportDeclaration[source.value='@repo/ui/entry/createHandleRequest.util']",
-  },
-  {
-    message:
-      'The @repo/ui/server entrypoint is server-only and must not be imported from client/shared files.',
-    selector: "ImportDeclaration[source.value='@repo/ui/server']",
-  },
-  ...DB_IMPORT_BOUNDARY_RESTRICTIONS,
 ];
 
 export const createCustomRulesLintConfig = async ({
@@ -300,6 +232,16 @@ export const createCustomRulesLintConfig = async ({
     {
       ignores: [...GLOBAL_IGNORES, ...ignorePatterns],
     },
+    {
+      // Always on, and deliberately BEFORE the server/client boundary block:
+      // flat config replaces a rule wholesale on a later match, so the boundary
+      // block composes these restrictions into its own value. `.server` files,
+      // which that block ignores, still land here.
+      files: ['src/**/*.ts', 'src/**/*.tsx'],
+      rules: {
+        'no-restricted-syntax': ['error', ...BARREL_SYNTAX_RESTRICTIONS],
+      },
+    },
     ...(enforceServerClientImportBoundary
       ? [
           {
@@ -318,6 +260,7 @@ export const createCustomRulesLintConfig = async ({
               'no-restricted-syntax': [
                 'error',
                 ...CLIENT_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS,
+                ...BARREL_SYNTAX_RESTRICTIONS,
               ],
             },
           },
@@ -346,14 +289,20 @@ export const createCustomRulesLintConfig = async ({
         'local-rules/merge-duplicate-imports': 'error',
         'local-rules/no-inline-type-imports': 'error',
         'local-rules/type-suffix-naming': 'error',
-        ...(enforceUiPublicImportBoundary && {
-          'no-restricted-imports': [
-            'error',
-            {
-              patterns: UI_PUBLIC_IMPORT_BOUNDARY_PATTERNS,
-            },
-          ],
-        }),
+        // One value per rule: ESLint flat config replaces a rule wholesale when
+        // a later config sets it again, so every restriction that applies to
+        // these files is composed here rather than split across blocks.
+        'no-restricted-imports': [
+          'error',
+          {
+            patterns: [
+              ...(enforceUiPublicImportBoundary
+                ? UI_PUBLIC_IMPORT_BOUNDARY_PATTERNS
+                : []),
+              ...STATE_LIBRARY_IMPORT_PATTERNS,
+            ],
+          },
+        ],
       },
     },
     {
@@ -378,7 +327,7 @@ export const createCustomRulesLintConfig = async ({
     {
       files: [
         'src/**/*.component.tsx',
-        'src/**/*.errorBoundary.tsx',
+        'src/**/*.error-boundary.tsx',
         'src/**/*.layout.tsx',
       ],
       languageOptions: createTypescriptLanguageOptions(
