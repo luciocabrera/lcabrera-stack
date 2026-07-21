@@ -1,5 +1,5 @@
 import type { QueryFilter } from '../db/queryBuilder/queryBuilder.types.ts';
-import type { NumberFilter } from './columnFilter.types.ts';
+import type { NumberFilter } from './filters.types.ts';
 
 export type ToNumberQueryFiltersArgs = {
   readonly column: string;

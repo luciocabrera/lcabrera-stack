@@ -60,7 +60,7 @@ user passwords and API-token secrets alike. Both are exported per-file in the
 | ------------------- | ---------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `hashSecret`        | `crypto/hashSecret.util.ts`        | scrypt hash of any secret for storage; `<saltHex>:<hashHex>`, fresh salt per call                   |
 | `isSecretHashValid` | `crypto/isSecretHashValid.util.ts` | Constant-time compare of a secret against a stored hash; false (never throws) if malformed          |
-| `SCRYPT_*`          | `crypto/scryptHash.constants.ts`   | scrypt salt/key sizes — private to this folder; the two halves must agree, so they share one source |
+| `SCRYPT_*`          | `crypto/crypto.constants.ts`       | scrypt salt/key sizes — private to this folder; the two halves must agree, so they share one source |
 
 These deliberately say "secret", not "password" or "token": passwords
 (`createUser`, `setUserPassword`, `authenticateUser`) and API-token secrets
@@ -89,13 +89,13 @@ consumer, because both `@repo/ui` and the apps need it.
 ## `src/filters/`
 
 The column-filter contract shared by the Table filter UI (`@repo/ui`, which
-re-exports the types from `filters/columnFilter.types`) and the generic query
+re-exports the types from `filters/filters.types`) and the generic query
 layer, plus the mappers that translate it to `QueryFilter[]` for the builders.
 Table-agnostic — any table's filter state maps through `toQueryFilters`.
 
 | Artifact               | Location                               | Description                                                                                          |
 | ---------------------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `columnFilter.types`   | `filters/columnFilter.types.ts`        | `BooleanFilter`/`ColumnFilter`/`DateFilter`/`NumberFilter`/`SelectFilter`/`TextFilter` filter shapes |
+| `filters.types`        | `filters/filters.types.ts`             | `BooleanFilter`/`ColumnFilter`/`DateFilter`/`NumberFilter`/`SelectFilter`/`TextFilter` filter shapes |
 | `toQueryFilters`       | `filters/toQueryFilters.util.ts`       | Dispatches a `Record<column, ColumnFilter>` to the per-type mappers, flattening to `QueryFilter[]`   |
 | `toDateQueryFilters`   | `filters/toDateQueryFilters.util.ts`   | Date filter → `gt`/`lt`/`eq`, or `gte`+`lte` for `between`                                           |
 | `toNumberQueryFilters` | `filters/toNumberQueryFilters.util.ts` | Number/currency filter → comparison ops; `between` → `gte`+`lte`                                     |

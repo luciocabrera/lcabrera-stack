@@ -1,4 +1,4 @@
-import { CSP_NONCE_HEADER_NAME } from './cspNonceHeaderName.constants';
+import { CSP_NONCE_HEADER_NAME } from './security.constants';
 
 /**
  * Reads the CSP nonce from the inbound request headers.

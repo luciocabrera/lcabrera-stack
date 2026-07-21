@@ -4,7 +4,7 @@ import { PERSIST_COOKIE_ACTION } from '@repo/ui/constants/globalSettings.constan
 import { buildPersistCookieEntry } from '@repo/ui/routing/buildPersistCookieEntry.util';
 import { getAppScopedCookieKey } from '@repo/ui/utils/storage';
 
-import { THEME_COOKIE_NAME } from './themeCookie.constants';
+import { THEME_COOKIE_NAME } from './theme.constants';
 
 type SetThemeCookieArgs = {
   /**

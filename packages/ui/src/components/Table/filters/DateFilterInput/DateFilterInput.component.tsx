@@ -6,7 +6,7 @@ import type {
   UpdateDateFilterArgs,
 } from './DateFilterInput.types';
 
-import { NO_AUTOFILL_INPUT_PROPS } from '../filterInput.constants';
+import { NO_AUTOFILL_INPUT_PROPS } from '../filters.constants';
 import { styles } from './DateFilterInput.stylex';
 import { computeInitialEndDate, computeInitialValue } from './utils';
 

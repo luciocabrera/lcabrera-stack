@@ -1,5 +1,5 @@
 import type { QueryFilter } from '../db/queryBuilder/queryBuilder.types.ts';
-import type { DateFilter } from './columnFilter.types.ts';
+import type { DateFilter } from './filters.types.ts';
 
 export type ToDateQueryFiltersArgs = {
   readonly column: string;

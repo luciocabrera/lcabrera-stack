@@ -19,7 +19,7 @@ sites and adds the UI-only operator/option _label_ types on top.
 
 | File                           | Role                                                                                                                                         |
 | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `columnFilter.types.ts`        | The discriminated filter shapes: `BooleanFilter`, `DateFilter`, `NumberFilter`, `SelectFilter`, `TextFilter`, and their `ColumnFilter` union |
+| `filters.types.ts`             | The discriminated filter shapes: `BooleanFilter`, `DateFilter`, `NumberFilter`, `SelectFilter`, `TextFilter`, and their `ColumnFilter` union |
 | `toQueryFilters.util.ts`       | **Entry point.** `Record<column, ColumnFilter>` → flat `QueryFilter[]`; dispatches each column to its per-type mapper                        |
 | `toDateQueryFilters.util.ts`   | Date filter → `gt`/`lt`/`eq`; `between` → `gte` + `lte` (falls back to `eq` with no upper bound)                                             |
 | `toNumberQueryFilters.util.ts` | Number/currency filter → comparison ops; `between` → `gte` + `lte`; a drafting (undefined) value → nothing                                   |

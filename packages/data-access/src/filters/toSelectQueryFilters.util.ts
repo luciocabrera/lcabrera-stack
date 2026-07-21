@@ -1,5 +1,5 @@
 import type { QueryFilter } from '../db/queryBuilder/queryBuilder.types.ts';
-import type { SelectFilter } from './columnFilter.types.ts';
+import type { SelectFilter } from './filters.types.ts';
 
 export type ToSelectQueryFiltersArgs = {
   readonly column: string;

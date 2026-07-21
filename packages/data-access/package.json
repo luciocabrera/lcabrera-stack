@@ -23,7 +23,7 @@
     "./db/queryBuilder/queryBuilder.types": "./src/db/queryBuilder/queryBuilder.types.ts",
     "./db/selectRows.util": "./src/db/selectRows.util.ts",
     "./db/updateRows.util": "./src/db/updateRows.util.ts",
-    "./filters/columnFilter.types": "./src/filters/columnFilter.types.ts",
+    "./filters/filters.types": "./src/filters/filters.types.ts",
     "./filters/toDateQueryFilters.util": "./src/filters/toDateQueryFilters.util.ts",
     "./filters/toNumberQueryFilters.util": "./src/filters/toNumberQueryFilters.util.ts",
     "./filters/toQueryFilters.util": "./src/filters/toQueryFilters.util.ts",

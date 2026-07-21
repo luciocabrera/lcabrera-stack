@@ -6,7 +6,7 @@ import type {
   UpdateFilterArgs,
 } from './NumberFilterInput.types';
 
-import { NO_AUTOFILL_INPUT_PROPS } from '../filterInput.constants';
+import { NO_AUTOFILL_INPUT_PROPS } from '../filters.constants';
 import { styles } from './NumberFilterInput.stylex';
 import { computeInitialMaxValue, computeInitialValue } from './utils';
 

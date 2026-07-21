@@ -1,9 +1,6 @@
 import { randomBytes, scryptSync } from 'node:crypto';
 
-import {
-  SCRYPT_KEY_LENGTH,
-  SCRYPT_SALT_BYTES,
-} from './scryptHash.constants.ts';
+import { SCRYPT_KEY_LENGTH, SCRYPT_SALT_BYTES } from './crypto.constants.ts';
 
 type HashSecretArgs = {
   readonly secret: string;
