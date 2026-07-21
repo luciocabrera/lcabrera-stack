@@ -1,4 +1,4 @@
-# packages/data-access is public-facing and must NEVER baseline an eslint finding
+# packages/server is public-facing and must NEVER baseline an eslint finding
 # (AGENTS.md §4, same tier as packages/ui). ESLint's bulk-suppressions tooling (an
 # editor extension, or `eslint --prune-suppressions` across every workspace) can
 # regenerate an empty `{}` here; gitignoring the path stops that from ever being
