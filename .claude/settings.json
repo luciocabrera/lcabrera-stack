@@ -46,16 +46,6 @@
           }
         ]
       }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "test -n \"$(git status --porcelain)\" || exit 0; vp fmt . && vp lint . --fix && vp check --fix && { git diff --name-only HEAD; git ls-files --others --exclude-standard; } | node scripts/run-changed.mjs test"
-          }
-        ]
-      }
     ]
   }
 }

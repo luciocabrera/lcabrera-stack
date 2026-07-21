@@ -2,7 +2,7 @@
 id: remove-stop-hook
 title: Remove the Stop hook; PreToolUse + PostToolUse supersede it
 owner: agent:claude
-status: active
+status: review
 branch: remove-stop-hook
 area:
   - .claude/settings.json
@@ -20,6 +20,8 @@ Remove the Stop hook; PreToolUse + PostToolUse supersede it
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: in review — PR open, gate green
 - Blockers: none
-- Next:
+- Note: removing the Stop hook drops the only LOCAL test run. Types are still
+  caught pre-commit and ESLint pre-push; tests now fire first in CI.
+- Next: merge; decide separately whether pre-push should run `test:ci`
