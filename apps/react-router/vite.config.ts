@@ -23,7 +23,7 @@ export default defineConfig({
         replacement: `${fileURLToPath(new URL('src', import.meta.url))}/`,
       },
       {
-        find: '@repo/server',
+        find: '@lcabrera/server',
         replacement: fileURLToPath(
           new URL('../../packages/server/src', import.meta.url),
         ),

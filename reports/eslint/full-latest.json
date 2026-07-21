@@ -218,7 +218,7 @@
         "suppressions": [
           {
             "kind": "directive",
-            "justification": ""
+            "justification": "mirrors EventTarget's addEventListener(type, listener), fixed by the API this fake stands in for"
           }
         ]
       }
@@ -275,32 +275,14 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "apps/admin_system/src/root/Root.errorBoundary.tsx",
+    "filePath": "apps/admin_system/src/root/Root.error-boundary.tsx",
     "messages": [],
-    "suppressedMessages": [
-      {
-        "ruleId": "local-rules/filename-convention",
-        "severity": 2,
-        "message": "The '.errorBoundary' suffix is deprecated — use '.error-boundary' (e.g. 'EnterpriseOrders.error-boundary.tsx'). Rename the file (git mv) and update its imports.",
-        "line": 1,
-        "column": 1,
-        "messageId": "deprecatedSuffix",
-        "endLine": 8,
-        "endColumn": 1,
-        "suppressions": [
-          {
-            "kind": "file",
-            "justification": ""
-          }
-        ]
-      }
-    ],
+    "suppressedMessages": [],
     "errorCount": 0,
     "fatalErrorCount": 0,
     "warningCount": 0,
     "fixableErrorCount": 0,
     "fixableWarningCount": 0,
-    "source": "import { RootErrorBoundary } from '@repo/ui';\n\nimport type { Route } from '../+types/root';\n\nexport const ErrorBoundary = ({ error }: Route.ErrorBoundaryProps) => (\n  <RootErrorBoundary error={error} />\n);\n",
     "usedDeprecatedRules": []
   },
   {
@@ -526,7 +508,7 @@
     "warningCount": 0,
     "fixableErrorCount": 0,
     "fixableWarningCount": 0,
-    "source": "import type { ActionFunctionArgs } from 'react-router';\n\nimport { issueApiToken } from '@repo/scan-ingestion/queries/issueApiToken.util';\nimport { revokeApiToken } from '@repo/scan-ingestion/queries/revokeApiToken.util';\nimport { getErrorMessage } from '@repo/utils/errors/get-error-message.util';\nimport { z } from 'zod';\n\nimport { requireUser } from '@/auth/requireUser.util';\n\nimport { getFirstIssueMessage } from '../utils/getFirstIssueMessage.util';\n\nconst issueSchema = z.object({\n  name: z.string().min(1, 'Name the token.').max(100),\n});\nconst revokeSchema = z.object({ tokenId: z.string().min(1) });\n\n/**\n * Self-service token issuance/revocation for the acting user (ADR-029). The\n * DB functions enforce ownership; issuance returns the plaintext exactly once\n * for the page to display. Typed failures come back as `tokenError` for inline\n * rendering.\n */\nexport const action = async ({ request }: ActionFunctionArgs) => {\n  const user = await requireUser({ request });\n  const formData = await request.formData();\n  const intent = formData.get('intent');\n\n  try {\n    if (intent === 'token-issue') {\n      const parsed = issueSchema.safeParse({ name: formData.get('name') });\n      if (!parsed.success) {\n        return {\n          tokenError: getFirstIssueMessage({\n            error: parsed.error,\n            fallback: 'Invalid token name.',\n          }),\n        };\n      }\n      const { plaintext } = await issueApiToken({\n        name: parsed.data.name,\n        userId: user.id,\n      });\n      return { plaintext };\n    }\n\n    if (intent === 'token-revoke') {\n      const parsed = revokeSchema.safeParse({\n        tokenId: formData.get('tokenId'),\n      });\n      if (!parsed.success) {\n        return { tokenError: 'Invalid token.' };\n      }\n      await revokeApiToken({ tokenId: parsed.data.tokenId, userId: user.id });\n      return { ok: true };\n    }\n\n    return { tokenError: 'Unknown intent.' };\n  } catch (error) {\n    return {\n      tokenError: getErrorMessage({\n        error,\n        fallback: 'Token operation failed.',\n      }),\n    };\n  }\n};\n",
+    "source": "import type { ActionFunctionArgs } from 'react-router';\n\nimport { getErrorMessage } from '@lcabrera/utils/errors/get-error-message.util';\nimport { issueApiToken } from '@repo/scan-ingestion/queries/issueApiToken.util';\nimport { revokeApiToken } from '@repo/scan-ingestion/queries/revokeApiToken.util';\nimport { z } from 'zod';\n\nimport { requireUser } from '@/auth/requireUser.util';\n\nimport { getFirstIssueMessage } from '../utils/getFirstIssueMessage.util';\n\nconst issueSchema = z.object({\n  name: z.string().min(1, 'Name the token.').max(100),\n});\nconst revokeSchema = z.object({ tokenId: z.string().min(1) });\n\n/**\n * Self-service token issuance/revocation for the acting user (ADR-029). The\n * DB functions enforce ownership; issuance returns the plaintext exactly once\n * for the page to display. Typed failures come back as `tokenError` for inline\n * rendering.\n */\nexport const action = async ({ request }: ActionFunctionArgs) => {\n  const user = await requireUser({ request });\n  const formData = await request.formData();\n  const intent = formData.get('intent');\n\n  try {\n    if (intent === 'token-issue') {\n      const parsed = issueSchema.safeParse({ name: formData.get('name') });\n      if (!parsed.success) {\n        return {\n          tokenError: getFirstIssueMessage({\n            error: parsed.error,\n            fallback: 'Invalid token name.',\n          }),\n        };\n      }\n      const { plaintext } = await issueApiToken({\n        name: parsed.data.name,\n        userId: user.id,\n      });\n      return { plaintext };\n    }\n\n    if (intent === 'token-revoke') {\n      const parsed = revokeSchema.safeParse({\n        tokenId: formData.get('tokenId'),\n      });\n      if (!parsed.success) {\n        return { tokenError: 'Invalid token.' };\n      }\n      await revokeApiToken({ tokenId: parsed.data.tokenId, userId: user.id });\n      return { ok: true };\n    }\n\n    return { tokenError: 'Unknown intent.' };\n  } catch (error) {\n    return {\n      tokenError: getErrorMessage({\n        error,\n        fallback: 'Token operation failed.',\n      }),\n    };\n  }\n};\n",
     "usedDeprecatedRules": []
   },
   {
@@ -654,32 +636,14 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "apps/admin_system/src/routes/cqms/cqms.errorBoundary.tsx",
+    "filePath": "apps/admin_system/src/routes/cqms/Cqms.error-boundary.tsx",
     "messages": [],
-    "suppressedMessages": [
-      {
-        "ruleId": "local-rules/filename-convention",
-        "severity": 2,
-        "message": "The '.errorBoundary' suffix is deprecated — use '.error-boundary' (e.g. 'EnterpriseOrders.error-boundary.tsx'). Rename the file (git mv) and update its imports.",
-        "line": 1,
-        "column": 1,
-        "messageId": "deprecatedSuffix",
-        "endLine": 15,
-        "endColumn": 1,
-        "suppressions": [
-          {
-            "kind": "file",
-            "justification": ""
-          }
-        ]
-      }
-    ],
+    "suppressedMessages": [],
     "errorCount": 0,
     "fatalErrorCount": 0,
     "warningCount": 0,
     "fixableErrorCount": 0,
     "fixableWarningCount": 0,
-    "source": "import { RouteErrorBoundary, useNotifyOnError } from '@repo/ui';\n\nimport type { Route } from './+types/root';\n\nexport const ErrorBoundary = ({ error }: Route.ErrorBoundaryProps) => {\n  useNotifyOnError(error);\n  return (\n    <RouteErrorBoundary\n      defaultMessage='Failed to load CQMS data. Please try again.'\n      error={error}\n      title='CQMS Error'\n    />\n  );\n};\n",
     "usedDeprecatedRules": []
   },
   {
@@ -977,7 +941,7 @@
     "warningCount": 0,
     "fixableErrorCount": 0,
     "fixableWarningCount": 0,
-    "source": "import { getRoleWithPermissions } from '@repo/scan-ingestion/queries/getRoleWithPermissions.util';\nimport { replaceRolePermissions } from '@repo/scan-ingestion/queries/replaceRolePermissions.util';\nimport { updateRole } from '@repo/scan-ingestion/queries/updateRole.util';\nimport { getErrorMessage } from '@repo/utils/errors/get-error-message.util';\nimport { type ActionFunctionArgs, data, redirect } from 'react-router';\nimport { z } from 'zod';\n\nimport { requireUser } from '@/auth/requireUser.util';\n\nimport { parseRouteParams } from '../utils/parseRouteParams.util';\nimport { editRoleSchema } from './editRole.schema';\nimport { readEditRoleFormValues } from './readEditRoleFormValues.util';\nimport { toEditRoleFieldErrors } from './toEditRoleFieldErrors.util';\n\nconst paramsSchema = z.object({\n  roleName: z.string().regex(/^[a-z0-9][a-z0-9-]{1,63}$/),\n});\n\nexport const action = async ({ params, request }: ActionFunctionArgs) => {\n  // Actions run BEFORE loaders — every cqms action authenticates itself\n  // (ADR-017); the management functions assert 'update' on 'role' and the\n  // seeded admin role stays immutable in Postgres.\n  const user = await requireUser({ request });\n\n  const { roleName } = parseRouteParams({\n    invalidMessage: 'Invalid role name.',\n    params,\n    schema: paramsSchema,\n  });\n  const role = await getRoleWithPermissions({ roleName });\n  if (!role) {\n    throw data('Role not found.', { status: 404 });\n  }\n\n  const formData = await request.formData();\n  const parsed = editRoleSchema.safeParse(readEditRoleFormValues({ formData }));\n\n  if (!parsed.success) {\n    return { errors: toEditRoleFieldErrors({ error: parsed.error }) };\n  }\n\n  try {\n    await updateRole({\n      description: parsed.data.description || undefined,\n      isEnabled: parsed.data.isEnabled,\n      roleId: role.id,\n      userId: user.id,\n    });\n    await replaceRolePermissions({\n      permissionIds: parsed.data.permissionIds,\n      roleId: role.id,\n      userId: user.id,\n    });\n\n    return redirect(`/cqms/admin/roles/view/${role.role_name}`);\n  } catch (error) {\n    return {\n      errors: {\n        description: getErrorMessage({\n          error,\n          fallback: 'Failed to update role.',\n        }),\n      },\n    };\n  }\n};\n",
+    "source": "import { getErrorMessage } from '@lcabrera/utils/errors/get-error-message.util';\nimport { getRoleWithPermissions } from '@repo/scan-ingestion/queries/getRoleWithPermissions.util';\nimport { replaceRolePermissions } from '@repo/scan-ingestion/queries/replaceRolePermissions.util';\nimport { updateRole } from '@repo/scan-ingestion/queries/updateRole.util';\nimport { type ActionFunctionArgs, data, redirect } from 'react-router';\nimport { z } from 'zod';\n\nimport { requireUser } from '@/auth/requireUser.util';\n\nimport { parseRouteParams } from '../utils/parseRouteParams.util';\nimport { editRoleSchema } from './editRole.schema';\nimport { readEditRoleFormValues } from './readEditRoleFormValues.util';\nimport { toEditRoleFieldErrors } from './toEditRoleFieldErrors.util';\n\nconst paramsSchema = z.object({\n  roleName: z.string().regex(/^[a-z0-9][a-z0-9-]{1,63}$/),\n});\n\nexport const action = async ({ params, request }: ActionFunctionArgs) => {\n  // Actions run BEFORE loaders — every cqms action authenticates itself\n  // (ADR-017); the management functions assert 'update' on 'role' and the\n  // seeded admin role stays immutable in Postgres.\n  const user = await requireUser({ request });\n\n  const { roleName } = parseRouteParams({\n    invalidMessage: 'Invalid role name.',\n    params,\n    schema: paramsSchema,\n  });\n  const role = await getRoleWithPermissions({ roleName });\n  if (!role) {\n    throw data('Role not found.', { status: 404 });\n  }\n\n  const formData = await request.formData();\n  const parsed = editRoleSchema.safeParse(readEditRoleFormValues({ formData }));\n\n  if (!parsed.success) {\n    return { errors: toEditRoleFieldErrors({ error: parsed.error }) };\n  }\n\n  try {\n    await updateRole({\n      description: parsed.data.description || undefined,\n      isEnabled: parsed.data.isEnabled,\n      roleId: role.id,\n      userId: user.id,\n    });\n    await replaceRolePermissions({\n      permissionIds: parsed.data.permissionIds,\n      roleId: role.id,\n      userId: user.id,\n    });\n\n    return redirect(`/cqms/admin/roles/view/${role.role_name}`);\n  } catch (error) {\n    return {\n      errors: {\n        description: getErrorMessage({\n          error,\n          fallback: 'Failed to update role.',\n        }),\n      },\n    };\n  }\n};\n",
     "usedDeprecatedRules": []
   },
   {
@@ -1163,7 +1127,7 @@
     "warningCount": 0,
     "fixableErrorCount": 0,
     "fixableWarningCount": 0,
-    "source": "import { createScannerDetailTable } from '@repo/scan-ingestion/queries/createScannerDetailTable.util';\nimport { updateScanner } from '@repo/scan-ingestion/queries/updateScanner.util';\nimport { writeScannerArtifacts } from '@repo/scan-ingestion/registry/writeScannerArtifacts.util';\nimport { getErrorMessage } from '@repo/utils/errors/get-error-message.util';\nimport { type ActionFunctionArgs, redirect } from 'react-router';\nimport { z } from 'zod';\n\nimport { requireUser } from '@/auth/requireUser.util';\n\nimport { parseRouteParams } from '../utils/parseRouteParams.util';\nimport { toScannerArtifactInput } from '../utils/toScannerArtifactInput.util';\nimport { toScannerWriteInput } from '../utils/toScannerWriteInput.util';\nimport { editScannerSchema } from './editScanner.schema';\nimport { readEditScannerFormValues } from './readEditScannerFormValues.util';\nimport { toEditScannerFieldErrors } from './toEditScannerFieldErrors.util';\n\nconst paramsSchema = z.object({\n  scannerId: z.string().regex(/^[a-z0-9][a-z0-9-]{0,47}$/),\n});\n\nexport const action = async ({ params, request }: ActionFunctionArgs) => {\n  // Actions run BEFORE loaders — every cqms action authenticates itself\n  // (ADR-017).\n  const user = await requireUser({ request });\n\n  const { scannerId } = parseRouteParams({\n    invalidMessage: 'Invalid scanner id.',\n    params,\n    schema: paramsSchema,\n  });\n\n  const formData = await request.formData();\n  const parsed = editScannerSchema.safeParse(\n    readEditScannerFormValues({ formData }),\n  );\n\n  if (!parsed.success) {\n    return { errors: toEditScannerFieldErrors({ error: parsed.error }) };\n  }\n\n  const values = parsed.data;\n  try {\n    await updateScanner({\n      scanner: {\n        ...toScannerWriteInput({ values }),\n        is_active: values.isActive,\n      },\n      scannerId,\n      userId: user.id,\n    });\n\n    // Same best-effort ensure as registration (ADR-023): the detail table\n    // and on-disk artifacts exist after any save; never overwrites.\n    try {\n      await createScannerDetailTable({ scannerId, userId: user.id });\n      writeScannerArtifacts(toScannerArtifactInput({ scannerId, values }));\n    } catch (ensureError) {\n      console.warn(\n        'Scanner artifact/detail-table ensure failed (non-fatal):',\n        ensureError,\n      );\n    }\n\n    return redirect(`/cqms/scanners/view/${scannerId}`);\n  } catch (error) {\n    return {\n      errors: {\n        displayName: getErrorMessage({\n          error,\n          fallback: 'Failed to update scanner.',\n        }),\n      },\n    };\n  }\n};\n",
+    "source": "import { getErrorMessage } from '@lcabrera/utils/errors/get-error-message.util';\nimport { createScannerDetailTable } from '@repo/scan-ingestion/queries/createScannerDetailTable.util';\nimport { updateScanner } from '@repo/scan-ingestion/queries/updateScanner.util';\nimport { writeScannerArtifacts } from '@repo/scan-ingestion/registry/writeScannerArtifacts.util';\nimport { type ActionFunctionArgs, redirect } from 'react-router';\nimport { z } from 'zod';\n\nimport { requireUser } from '@/auth/requireUser.util';\n\nimport { parseRouteParams } from '../utils/parseRouteParams.util';\nimport { toScannerArtifactInput } from '../utils/toScannerArtifactInput.util';\nimport { toScannerWriteInput } from '../utils/toScannerWriteInput.util';\nimport { editScannerSchema } from './editScanner.schema';\nimport { readEditScannerFormValues } from './readEditScannerFormValues.util';\nimport { toEditScannerFieldErrors } from './toEditScannerFieldErrors.util';\n\nconst paramsSchema = z.object({\n  scannerId: z.string().regex(/^[a-z0-9][a-z0-9-]{0,47}$/),\n});\n\nexport const action = async ({ params, request }: ActionFunctionArgs) => {\n  // Actions run BEFORE loaders — every cqms action authenticates itself\n  // (ADR-017).\n  const user = await requireUser({ request });\n\n  const { scannerId } = parseRouteParams({\n    invalidMessage: 'Invalid scanner id.',\n    params,\n    schema: paramsSchema,\n  });\n\n  const formData = await request.formData();\n  const parsed = editScannerSchema.safeParse(\n    readEditScannerFormValues({ formData }),\n  );\n\n  if (!parsed.success) {\n    return { errors: toEditScannerFieldErrors({ error: parsed.error }) };\n  }\n\n  const values = parsed.data;\n  try {\n    await updateScanner({\n      scanner: {\n        ...toScannerWriteInput({ values }),\n        is_active: values.isActive,\n      },\n      scannerId,\n      userId: user.id,\n    });\n\n    // Same best-effort ensure as registration (ADR-023): the detail table\n    // and on-disk artifacts exist after any save; never overwrites.\n    try {\n      await createScannerDetailTable({ scannerId, userId: user.id });\n      writeScannerArtifacts(toScannerArtifactInput({ scannerId, values }));\n    } catch (ensureError) {\n      console.warn(\n        'Scanner artifact/detail-table ensure failed (non-fatal):',\n        ensureError,\n      );\n    }\n\n    return redirect(`/cqms/scanners/view/${scannerId}`);\n  } catch (error) {\n    return {\n      errors: {\n        displayName: getErrorMessage({\n          error,\n          fallback: 'Failed to update scanner.',\n        }),\n      },\n    };\n  }\n};\n",
     "usedDeprecatedRules": []
   },
   {
@@ -1541,7 +1505,7 @@
     "warningCount": 0,
     "fixableErrorCount": 0,
     "fixableWarningCount": 0,
-    "source": "import { getUserWithRoles } from '@repo/scan-ingestion/queries/getUserWithRoles.util';\nimport { replaceUserRoles } from '@repo/scan-ingestion/queries/replaceUserRoles.util';\nimport { setUserPassword } from '@repo/scan-ingestion/queries/setUserPassword.util';\nimport { updateUser } from '@repo/scan-ingestion/queries/updateUser.util';\nimport { getErrorMessage } from '@repo/utils/errors/get-error-message.util';\nimport { type ActionFunctionArgs, data, redirect } from 'react-router';\nimport { z } from 'zod';\n\nimport { requireUser } from '@/auth/requireUser.util';\n\nimport { parseRouteParams } from '../utils/parseRouteParams.util';\nimport { editUserSchema } from './editUser.schema';\nimport { readEditUserFormValues } from './readEditUserFormValues.util';\nimport { toEditUserFieldErrors } from './toEditUserFieldErrors.util';\n\nconst paramsSchema = z.object({\n  username: z.string().regex(/^[a-z0-9][a-z0-9._-]{1,63}$/),\n});\n\nexport const action = async ({ params, request }: ActionFunctionArgs) => {\n  // Actions run BEFORE loaders — every cqms action authenticates itself\n  // (ADR-017); the management functions assert 'update' on 'user' and\n  // carry the lockout guards (own account, system account, own admin\n  // role) in Postgres.\n  const user = await requireUser({ request });\n\n  const { username } = parseRouteParams({\n    invalidMessage: 'Invalid username.',\n    params,\n    schema: paramsSchema,\n  });\n  const target = await getUserWithRoles({ username });\n  if (!target) {\n    throw data('User not found.', { status: 404 });\n  }\n\n  const formData = await request.formData();\n  const parsed = editUserSchema.safeParse(readEditUserFormValues({ formData }));\n\n  if (!parsed.success) {\n    return { errors: toEditUserFieldErrors({ error: parsed.error }) };\n  }\n\n  try {\n    await updateUser({\n      displayName: parsed.data.displayName,\n      isEnabled: parsed.data.isEnabled,\n      targetUserId: target.id,\n      userId: user.id,\n    });\n    await replaceUserRoles({\n      roleIds: parsed.data.roleIds,\n      targetUserId: target.id,\n      userId: user.id,\n    });\n    if (parsed.data.newPassword !== '') {\n      await setUserPassword({\n        password: parsed.data.newPassword,\n        targetUserId: target.id,\n        userId: user.id,\n      });\n    }\n\n    return redirect(`/cqms/admin/users/view/${target.username}`);\n  } catch (error) {\n    return {\n      errors: {\n        displayName: getErrorMessage({\n          error,\n          fallback: 'Failed to update user.',\n        }),\n      },\n    };\n  }\n};\n",
+    "source": "import { getErrorMessage } from '@lcabrera/utils/errors/get-error-message.util';\nimport { getUserWithRoles } from '@repo/scan-ingestion/queries/getUserWithRoles.util';\nimport { replaceUserRoles } from '@repo/scan-ingestion/queries/replaceUserRoles.util';\nimport { setUserPassword } from '@repo/scan-ingestion/queries/setUserPassword.util';\nimport { updateUser } from '@repo/scan-ingestion/queries/updateUser.util';\nimport { type ActionFunctionArgs, data, redirect } from 'react-router';\nimport { z } from 'zod';\n\nimport { requireUser } from '@/auth/requireUser.util';\n\nimport { parseRouteParams } from '../utils/parseRouteParams.util';\nimport { editUserSchema } from './editUser.schema';\nimport { readEditUserFormValues } from './readEditUserFormValues.util';\nimport { toEditUserFieldErrors } from './toEditUserFieldErrors.util';\n\nconst paramsSchema = z.object({\n  username: z.string().regex(/^[a-z0-9][a-z0-9._-]{1,63}$/),\n});\n\nexport const action = async ({ params, request }: ActionFunctionArgs) => {\n  // Actions run BEFORE loaders — every cqms action authenticates itself\n  // (ADR-017); the management functions assert 'update' on 'user' and\n  // carry the lockout guards (own account, system account, own admin\n  // role) in Postgres.\n  const user = await requireUser({ request });\n\n  const { username } = parseRouteParams({\n    invalidMessage: 'Invalid username.',\n    params,\n    schema: paramsSchema,\n  });\n  const target = await getUserWithRoles({ username });\n  if (!target) {\n    throw data('User not found.', { status: 404 });\n  }\n\n  const formData = await request.formData();\n  const parsed = editUserSchema.safeParse(readEditUserFormValues({ formData }));\n\n  if (!parsed.success) {\n    return { errors: toEditUserFieldErrors({ error: parsed.error }) };\n  }\n\n  try {\n    await updateUser({\n      displayName: parsed.data.displayName,\n      isEnabled: parsed.data.isEnabled,\n      targetUserId: target.id,\n      userId: user.id,\n    });\n    await replaceUserRoles({\n      roleIds: parsed.data.roleIds,\n      targetUserId: target.id,\n      userId: user.id,\n    });\n    if (parsed.data.newPassword !== '') {\n      await setUserPassword({\n        password: parsed.data.newPassword,\n        targetUserId: target.id,\n        userId: user.id,\n      });\n    }\n\n    return redirect(`/cqms/admin/users/view/${target.username}`);\n  } catch (error) {\n    return {\n      errors: {\n        displayName: getErrorMessage({\n          error,\n          fallback: 'Failed to update user.',\n        }),\n      },\n    };\n  }\n};\n",
     "usedDeprecatedRules": []
   },
   {
@@ -2085,7 +2049,7 @@
     "warningCount": 0,
     "fixableErrorCount": 0,
     "fixableWarningCount": 0,
-    "source": "import { createRole } from '@repo/scan-ingestion/queries/createRole.util';\nimport { replaceRolePermissions } from '@repo/scan-ingestion/queries/replaceRolePermissions.util';\nimport { getErrorMessage } from '@repo/utils/errors/get-error-message.util';\nimport { type ActionFunctionArgs, redirect } from 'react-router';\n\nimport { requireUser } from '@/auth/requireUser.util';\n\nimport { newRoleSchema } from './newRole.schema';\nimport { readNewRoleFormValues } from './readNewRoleFormValues.util';\nimport { toNewRoleFieldErrors } from './toNewRoleFieldErrors.util';\n\nexport const action = async ({ request }: ActionFunctionArgs) => {\n  // Actions run BEFORE loaders — every cqms action authenticates itself\n  // (ADR-017); fn_create_role asserts 'create' on 'role' in Postgres.\n  const user = await requireUser({ request });\n\n  const formData = await request.formData();\n  const parsed = newRoleSchema.safeParse(readNewRoleFormValues({ formData }));\n\n  if (!parsed.success) {\n    return { errors: toNewRoleFieldErrors({ error: parsed.error }) };\n  }\n\n  try {\n    const { roleId } = await createRole({\n      description: parsed.data.description || undefined,\n      roleName: parsed.data.roleName,\n      userId: user.id,\n    });\n    await replaceRolePermissions({\n      permissionIds: parsed.data.permissionIds,\n      roleId,\n      userId: user.id,\n    });\n\n    return redirect(`/cqms/admin/roles/view/${parsed.data.roleName}`);\n  } catch (error) {\n    return {\n      errors: {\n        roleName: getErrorMessage({\n          error,\n          fallback: 'Failed to create role.',\n        }),\n      },\n    };\n  }\n};\n",
+    "source": "import { getErrorMessage } from '@lcabrera/utils/errors/get-error-message.util';\nimport { createRole } from '@repo/scan-ingestion/queries/createRole.util';\nimport { replaceRolePermissions } from '@repo/scan-ingestion/queries/replaceRolePermissions.util';\nimport { type ActionFunctionArgs, redirect } from 'react-router';\n\nimport { requireUser } from '@/auth/requireUser.util';\n\nimport { newRoleSchema } from './newRole.schema';\nimport { readNewRoleFormValues } from './readNewRoleFormValues.util';\nimport { toNewRoleFieldErrors } from './toNewRoleFieldErrors.util';\n\nexport const action = async ({ request }: ActionFunctionArgs) => {\n  // Actions run BEFORE loaders — every cqms action authenticates itself\n  // (ADR-017); fn_create_role asserts 'create' on 'role' in Postgres.\n  const user = await requireUser({ request });\n\n  const formData = await request.formData();\n  const parsed = newRoleSchema.safeParse(readNewRoleFormValues({ formData }));\n\n  if (!parsed.success) {\n    return { errors: toNewRoleFieldErrors({ error: parsed.error }) };\n  }\n\n  try {\n    const { roleId } = await createRole({\n      description: parsed.data.description || undefined,\n      roleName: parsed.data.roleName,\n      userId: user.id,\n    });\n    await replaceRolePermissions({\n      permissionIds: parsed.data.permissionIds,\n      roleId,\n      userId: user.id,\n    });\n\n    return redirect(`/cqms/admin/roles/view/${parsed.data.roleName}`);\n  } catch (error) {\n    return {\n      errors: {\n        roleName: getErrorMessage({\n          error,\n          fallback: 'Failed to create role.',\n        }),\n      },\n    };\n  }\n};\n",
     "usedDeprecatedRules": []
   },
   {
@@ -2271,7 +2235,7 @@
     "warningCount": 0,
     "fixableErrorCount": 0,
     "fixableWarningCount": 0,
-    "source": "import { createScannerDetailTable } from '@repo/scan-ingestion/queries/createScannerDetailTable.util';\nimport { registerScanner } from '@repo/scan-ingestion/queries/registerScanner.util';\nimport { writeScannerArtifacts } from '@repo/scan-ingestion/registry/writeScannerArtifacts.util';\nimport { getErrorMessage } from '@repo/utils/errors/get-error-message.util';\nimport { type ActionFunctionArgs, redirect } from 'react-router';\n\nimport { requireUser } from '@/auth/requireUser.util';\n\nimport { toScannerArtifactInput } from '../utils/toScannerArtifactInput.util';\nimport { toScannerWriteInput } from '../utils/toScannerWriteInput.util';\nimport { newScannerSchema } from './newScanner.schema';\nimport { readNewScannerFormValues } from './readNewScannerFormValues.util';\nimport { toNewScannerFieldErrors } from './toNewScannerFieldErrors.util';\n\nexport const action = async ({ request }: ActionFunctionArgs) => {\n  // Actions run BEFORE loaders, so the layout loader's gate does not\n  // cover POSTs — every cqms action authenticates itself (ADR-017).\n  const user = await requireUser({ request });\n\n  const formData = await request.formData();\n  const parsed = newScannerSchema.safeParse(\n    readNewScannerFormValues({ formData }),\n  );\n\n  if (!parsed.success) {\n    return { errors: toNewScannerFieldErrors({ error: parsed.error }) };\n  }\n\n  const values = parsed.data;\n  try {\n    const { scannerId } = await registerScanner({\n      scanner: {\n        ...toScannerWriteInput({ values }),\n        scanner_id: values.scannerId,\n      },\n      userId: user.id,\n    });\n\n    await createScannerDetailTable({ scannerId, userId: user.id });\n\n    // Best-effort artifact scaffolding (ADR-023) — the registry row is\n    // committed; a filesystem failure must not roll registration back.\n    // Never overwrites: code on disk stays authoritative.\n    try {\n      writeScannerArtifacts(toScannerArtifactInput({ scannerId, values }));\n    } catch (artifactError) {\n      console.warn(\n        'Scanner artifact scaffolding failed (non-fatal):',\n        artifactError,\n      );\n    }\n\n    return redirect(`/cqms/scanners/view/${scannerId}`);\n  } catch (error) {\n    return {\n      errors: {\n        scannerId: getErrorMessage({\n          error,\n          fallback: 'Failed to register scanner.',\n        }),\n      },\n    };\n  }\n};\n",
+    "source": "import { getErrorMessage } from '@lcabrera/utils/errors/get-error-message.util';\nimport { createScannerDetailTable } from '@repo/scan-ingestion/queries/createScannerDetailTable.util';\nimport { registerScanner } from '@repo/scan-ingestion/queries/registerScanner.util';\nimport { writeScannerArtifacts } from '@repo/scan-ingestion/registry/writeScannerArtifacts.util';\nimport { type ActionFunctionArgs, redirect } from 'react-router';\n\nimport { requireUser } from '@/auth/requireUser.util';\n\nimport { toScannerArtifactInput } from '../utils/toScannerArtifactInput.util';\nimport { toScannerWriteInput } from '../utils/toScannerWriteInput.util';\nimport { newScannerSchema } from './newScanner.schema';\nimport { readNewScannerFormValues } from './readNewScannerFormValues.util';\nimport { toNewScannerFieldErrors } from './toNewScannerFieldErrors.util';\n\nexport const action = async ({ request }: ActionFunctionArgs) => {\n  // Actions run BEFORE loaders, so the layout loader's gate does not\n  // cover POSTs — every cqms action authenticates itself (ADR-017).\n  const user = await requireUser({ request });\n\n  const formData = await request.formData();\n  const parsed = newScannerSchema.safeParse(\n    readNewScannerFormValues({ formData }),\n  );\n\n  if (!parsed.success) {\n    return { errors: toNewScannerFieldErrors({ error: parsed.error }) };\n  }\n\n  const values = parsed.data;\n  try {\n    const { scannerId } = await registerScanner({\n      scanner: {\n        ...toScannerWriteInput({ values }),\n        scanner_id: values.scannerId,\n      },\n      userId: user.id,\n    });\n\n    await createScannerDetailTable({ scannerId, userId: user.id });\n\n    // Best-effort artifact scaffolding (ADR-023) — the registry row is\n    // committed; a filesystem failure must not roll registration back.\n    // Never overwrites: code on disk stays authoritative.\n    try {\n      writeScannerArtifacts(toScannerArtifactInput({ scannerId, values }));\n    } catch (artifactError) {\n      console.warn(\n        'Scanner artifact scaffolding failed (non-fatal):',\n        artifactError,\n      );\n    }\n\n    return redirect(`/cqms/scanners/view/${scannerId}`);\n  } catch (error) {\n    return {\n      errors: {\n        scannerId: getErrorMessage({\n          error,\n          fallback: 'Failed to register scanner.',\n        }),\n      },\n    };\n  }\n};\n",
     "usedDeprecatedRules": []
   },
   {
@@ -2406,7 +2370,7 @@
     "warningCount": 0,
     "fixableErrorCount": 0,
     "fixableWarningCount": 0,
-    "source": "import { createUser } from '@repo/scan-ingestion/queries/createUser.util';\nimport { replaceUserRoles } from '@repo/scan-ingestion/queries/replaceUserRoles.util';\nimport { getErrorMessage } from '@repo/utils/errors/get-error-message.util';\nimport { type ActionFunctionArgs, redirect } from 'react-router';\n\nimport { requireUser } from '@/auth/requireUser.util';\n\nimport { newUserSchema } from './newUser.schema';\nimport { readNewUserFormValues } from './readNewUserFormValues.util';\nimport { toNewUserFieldErrors } from './toNewUserFieldErrors.util';\n\nexport const action = async ({ request }: ActionFunctionArgs) => {\n  // Actions run BEFORE loaders — every cqms action authenticates itself\n  // (ADR-017); fn_create_user asserts 'create' on 'user' in Postgres.\n  const user = await requireUser({ request });\n\n  const formData = await request.formData();\n  const parsed = newUserSchema.safeParse(readNewUserFormValues({ formData }));\n\n  if (!parsed.success) {\n    return { errors: toNewUserFieldErrors({ error: parsed.error }) };\n  }\n\n  try {\n    const { createdUserId } = await createUser({\n      displayName: parsed.data.displayName,\n      password: parsed.data.password,\n      userId: user.id,\n      username: parsed.data.username,\n    });\n    await replaceUserRoles({\n      roleIds: parsed.data.roleIds,\n      targetUserId: createdUserId,\n      userId: user.id,\n    });\n\n    return redirect(`/cqms/admin/users/view/${parsed.data.username}`);\n  } catch (error) {\n    return {\n      errors: {\n        username: getErrorMessage({\n          error,\n          fallback: 'Failed to create user.',\n        }),\n      },\n    };\n  }\n};\n",
+    "source": "import { getErrorMessage } from '@lcabrera/utils/errors/get-error-message.util';\nimport { createUser } from '@repo/scan-ingestion/queries/createUser.util';\nimport { replaceUserRoles } from '@repo/scan-ingestion/queries/replaceUserRoles.util';\nimport { type ActionFunctionArgs, redirect } from 'react-router';\n\nimport { requireUser } from '@/auth/requireUser.util';\n\nimport { newUserSchema } from './newUser.schema';\nimport { readNewUserFormValues } from './readNewUserFormValues.util';\nimport { toNewUserFieldErrors } from './toNewUserFieldErrors.util';\n\nexport const action = async ({ request }: ActionFunctionArgs) => {\n  // Actions run BEFORE loaders — every cqms action authenticates itself\n  // (ADR-017); fn_create_user asserts 'create' on 'user' in Postgres.\n  const user = await requireUser({ request });\n\n  const formData = await request.formData();\n  const parsed = newUserSchema.safeParse(readNewUserFormValues({ formData }));\n\n  if (!parsed.success) {\n    return { errors: toNewUserFieldErrors({ error: parsed.error }) };\n  }\n\n  try {\n    const { createdUserId } = await createUser({\n      displayName: parsed.data.displayName,\n      password: parsed.data.password,\n      userId: user.id,\n      username: parsed.data.username,\n    });\n    await replaceUserRoles({\n      roleIds: parsed.data.roleIds,\n      targetUserId: createdUserId,\n      userId: user.id,\n    });\n\n    return redirect(`/cqms/admin/users/view/${parsed.data.username}`);\n  } catch (error) {\n    return {\n      errors: {\n        username: getErrorMessage({\n          error,\n          fallback: 'Failed to create user.',\n        }),\n      },\n    };\n  }\n};\n",
     "usedDeprecatedRules": []
   },
   {
@@ -2614,7 +2578,7 @@
     "warningCount": 0,
     "fixableErrorCount": 0,
     "fixableWarningCount": 0,
-    "source": "import type { ActionFunctionArgs } from 'react-router';\n\nimport { saveProjectSnapshot } from '@repo/scan-ingestion/ingestion/snapshots/saveProjectSnapshot';\nimport { discoverProjectWorkspaces } from '@repo/scan-ingestion/ingestion/workspaces/discoverProjectWorkspaces.util';\nimport { createResourceGrant } from '@repo/scan-ingestion/queries/createResourceGrant.util';\nimport { deleteResourceGrant } from '@repo/scan-ingestion/queries/deleteResourceGrant.util';\nimport { replaceProjectWorkspaces } from '@repo/scan-ingestion/queries/replaceProjectWorkspaces.util';\nimport { getErrorMessage } from '@repo/utils/errors/get-error-message.util';\nimport { z } from 'zod';\n\nimport { requireUser } from '@/auth/requireUser.util';\n\nimport { getFirstIssueMessage } from '../utils/getFirstIssueMessage.util';\nimport { parseRouteParams } from '../utils/parseRouteParams.util';\nimport { parseGrantPermission } from './parseGrantPermission.util';\nimport { validateSyncArchive } from './validateSyncArchive.util';\n\nconst paramsSchema = z.object({ projectId: z.string().uuid() });\n\nconst addGrantSchema = z.object({\n  granteeUserId: z.string().uuid('Pick a user.'),\n  // 'action:resourceType', from the curated GRANT_OPTIONS list.\n  permission: z.string().regex(/^[a-z]+:[a-z]+$/, 'Pick a permission.'),\n});\n\ntype IntentHandlerArgs = {\n  readonly formData: FormData;\n  readonly projectId: string;\n  readonly userId: string;\n};\n\nconst handleSyncUpload = async ({\n  formData,\n  projectId,\n  userId,\n}: IntentHandlerArgs) => {\n  const validated = validateSyncArchive({ archive: formData.get('archive') });\n  if (!validated.ok) {\n    return { syncError: validated.error };\n  }\n\n  try {\n    const { storagePath } = await saveProjectSnapshot({\n      archiveBytes: new Uint8Array(await validated.archive.arrayBuffer()),\n      archiveName: validated.archive.name,\n      projectId,\n      sourceLabel: 'browser-upload',\n      userId,\n    });\n\n    // Workspace discovery (ADR-021) now happens HERE — the sync step is the\n    // only moment the code on disk changes (ADR-028). Best-effort: a\n    // discovery failure must never fail the sync itself.\n    try {\n      await replaceProjectWorkspaces({\n        projectId,\n        userId,\n        workspaces: discoverProjectWorkspaces({ rootPath: storagePath }),\n      });\n    } catch (workspaceError) {\n      console.warn('Workspace discovery failed (non-fatal):', workspaceError);\n    }\n\n    return { ok: true };\n  } catch (error) {\n    return {\n      syncError: getErrorMessage({\n        error,\n        fallback: 'Snapshot upload failed.',\n      }),\n    };\n  }\n};\n\nconst handleGrantAdd = async ({\n  formData,\n  projectId,\n  userId,\n}: IntentHandlerArgs) => {\n  const parsed = addGrantSchema.safeParse({\n    granteeUserId: formData.get('granteeUserId'),\n    permission: formData.get('permission'),\n  });\n  if (!parsed.success) {\n    return {\n      grantError: getFirstIssueMessage({\n        error: parsed.error,\n        fallback: 'Invalid grant.',\n      }),\n    };\n  }\n\n  const { action, resourceType } = parseGrantPermission({\n    permission: parsed.data.permission,\n  });\n\n  try {\n    await createResourceGrant({\n      action,\n      granteeUserId: parsed.data.granteeUserId,\n      resourceId: projectId,\n      resourceType,\n      userId,\n    });\n    return { ok: true };\n  } catch (error) {\n    return {\n      grantError: getErrorMessage({ error, fallback: 'Grant change failed.' }),\n    };\n  }\n};\n\nconst handleGrantDelete = async ({ formData, userId }: IntentHandlerArgs) => {\n  const grantId = z.string().uuid().safeParse(formData.get('grantId'));\n  if (!grantId.success) {\n    return { grantError: 'Invalid grant id.' };\n  }\n\n  try {\n    await deleteResourceGrant({ grantId: grantId.data, userId });\n    return { ok: true };\n  } catch (error) {\n    return {\n      grantError: getErrorMessage({ error, fallback: 'Grant change failed.' }),\n    };\n  }\n};\n\n/**\n * The project page's fetcher endpoint: intent 'grant-add' / 'grant-delete'\n * (the grants editor, ADR-024) and 'sync-upload' (the snapshot sync panel,\n * ADR-028). The DB functions assert their own permissions in Postgres —\n * rejections come back as `grantError`/`syncError` for the panels to\n * render inline.\n *\n * Each intent owns its own error boundary rather than sharing one around the\n * dispatch, so its failures land on the key its panel reads.\n */\nexport const action = async ({ params, request }: ActionFunctionArgs) => {\n  // Actions run BEFORE loaders — every cqms action authenticates itself\n  // (ADR-017).\n  const user = await requireUser({ request });\n\n  const { projectId } = parseRouteParams({\n    invalidMessage: 'Invalid project id.',\n    params,\n    schema: paramsSchema,\n  });\n\n  const formData = await request.formData();\n  const handlerArgs = { formData, projectId, userId: user.id };\n  const intent = formData.get('intent');\n\n  if (intent === 'sync-upload') {\n    return await handleSyncUpload(handlerArgs);\n  }\n  if (intent === 'grant-add') {\n    return await handleGrantAdd(handlerArgs);\n  }\n  if (intent === 'grant-delete') {\n    return await handleGrantDelete(handlerArgs);\n  }\n\n  return { grantError: 'Unknown intent.' };\n};\n",
+    "source": "import type { ActionFunctionArgs } from 'react-router';\n\nimport { getErrorMessage } from '@lcabrera/utils/errors/get-error-message.util';\nimport { saveProjectSnapshot } from '@repo/scan-ingestion/ingestion/snapshots/saveProjectSnapshot';\nimport { discoverProjectWorkspaces } from '@repo/scan-ingestion/ingestion/workspaces/discoverProjectWorkspaces.util';\nimport { createResourceGrant } from '@repo/scan-ingestion/queries/createResourceGrant.util';\nimport { deleteResourceGrant } from '@repo/scan-ingestion/queries/deleteResourceGrant.util';\nimport { replaceProjectWorkspaces } from '@repo/scan-ingestion/queries/replaceProjectWorkspaces.util';\nimport { z } from 'zod';\n\nimport { requireUser } from '@/auth/requireUser.util';\n\nimport { getFirstIssueMessage } from '../utils/getFirstIssueMessage.util';\nimport { parseRouteParams } from '../utils/parseRouteParams.util';\nimport { parseGrantPermission } from './parseGrantPermission.util';\nimport { validateSyncArchive } from './validateSyncArchive.util';\n\nconst paramsSchema = z.object({ projectId: z.string().uuid() });\n\nconst addGrantSchema = z.object({\n  granteeUserId: z.string().uuid('Pick a user.'),\n  // 'action:resourceType', from the curated GRANT_OPTIONS list.\n  permission: z.string().regex(/^[a-z]+:[a-z]+$/, 'Pick a permission.'),\n});\n\ntype IntentHandlerArgs = {\n  readonly formData: FormData;\n  readonly projectId: string;\n  readonly userId: string;\n};\n\nconst handleSyncUpload = async ({\n  formData,\n  projectId,\n  userId,\n}: IntentHandlerArgs) => {\n  const validated = validateSyncArchive({ archive: formData.get('archive') });\n  if (!validated.ok) {\n    return { syncError: validated.error };\n  }\n\n  try {\n    const { storagePath } = await saveProjectSnapshot({\n      archiveBytes: new Uint8Array(await validated.archive.arrayBuffer()),\n      archiveName: validated.archive.name,\n      projectId,\n      sourceLabel: 'browser-upload',\n      userId,\n    });\n\n    // Workspace discovery (ADR-021) now happens HERE — the sync step is the\n    // only moment the code on disk changes (ADR-028). Best-effort: a\n    // discovery failure must never fail the sync itself.\n    try {\n      await replaceProjectWorkspaces({\n        projectId,\n        userId,\n        workspaces: discoverProjectWorkspaces({ rootPath: storagePath }),\n      });\n    } catch (workspaceError) {\n      console.warn('Workspace discovery failed (non-fatal):', workspaceError);\n    }\n\n    return { ok: true };\n  } catch (error) {\n    return {\n      syncError: getErrorMessage({\n        error,\n        fallback: 'Snapshot upload failed.',\n      }),\n    };\n  }\n};\n\nconst handleGrantAdd = async ({\n  formData,\n  projectId,\n  userId,\n}: IntentHandlerArgs) => {\n  const parsed = addGrantSchema.safeParse({\n    granteeUserId: formData.get('granteeUserId'),\n    permission: formData.get('permission'),\n  });\n  if (!parsed.success) {\n    return {\n      grantError: getFirstIssueMessage({\n        error: parsed.error,\n        fallback: 'Invalid grant.',\n      }),\n    };\n  }\n\n  const { action, resourceType } = parseGrantPermission({\n    permission: parsed.data.permission,\n  });\n\n  try {\n    await createResourceGrant({\n      action,\n      granteeUserId: parsed.data.granteeUserId,\n      resourceId: projectId,\n      resourceType,\n      userId,\n    });\n    return { ok: true };\n  } catch (error) {\n    return {\n      grantError: getErrorMessage({ error, fallback: 'Grant change failed.' }),\n    };\n  }\n};\n\nconst handleGrantDelete = async ({ formData, userId }: IntentHandlerArgs) => {\n  const grantId = z.string().uuid().safeParse(formData.get('grantId'));\n  if (!grantId.success) {\n    return { grantError: 'Invalid grant id.' };\n  }\n\n  try {\n    await deleteResourceGrant({ grantId: grantId.data, userId });\n    return { ok: true };\n  } catch (error) {\n    return {\n      grantError: getErrorMessage({ error, fallback: 'Grant change failed.' }),\n    };\n  }\n};\n\n/**\n * The project page's fetcher endpoint: intent 'grant-add' / 'grant-delete'\n * (the grants editor, ADR-024) and 'sync-upload' (the snapshot sync panel,\n * ADR-028). The DB functions assert their own permissions in Postgres —\n * rejections come back as `grantError`/`syncError` for the panels to\n * render inline.\n *\n * Each intent owns its own error boundary rather than sharing one around the\n * dispatch, so its failures land on the key its panel reads.\n */\nexport const action = async ({ params, request }: ActionFunctionArgs) => {\n  // Actions run BEFORE loaders — every cqms action authenticates itself\n  // (ADR-017).\n  const user = await requireUser({ request });\n\n  const { projectId } = parseRouteParams({\n    invalidMessage: 'Invalid project id.',\n    params,\n    schema: paramsSchema,\n  });\n\n  const formData = await request.formData();\n  const handlerArgs = { formData, projectId, userId: user.id };\n  const intent = formData.get('intent');\n\n  if (intent === 'sync-upload') {\n    return await handleSyncUpload(handlerArgs);\n  }\n  if (intent === 'grant-add') {\n    return await handleGrantAdd(handlerArgs);\n  }\n  if (intent === 'grant-delete') {\n    return await handleGrantDelete(handlerArgs);\n  }\n\n  return { grantError: 'Unknown intent.' };\n};\n",
     "usedDeprecatedRules": []
   },
   {
@@ -2989,7 +2953,7 @@
           {
             "messageId": "replace",
             "fix": {
-              "range": [1963, 1967],
+              "range": [1967, 1971],
               "text": "undefined"
             },
             "data": {},
@@ -3424,43 +3388,16 @@
         "ruleId": "unicorn/no-null",
         "severity": 2,
         "message": "Use `undefined` instead of `null`.",
-        "line": 42,
+        "line": 43,
         "column": 18,
         "messageId": "error",
-        "endLine": 42,
+        "endLine": 43,
         "endColumn": 22,
         "suggestions": [
           {
             "messageId": "replace",
             "fix": {
-              "range": [1066, 1070],
-              "text": "undefined"
-            },
-            "data": {},
-            "desc": "Replace `null` with `undefined`."
-          }
-        ],
-        "suppressions": [
-          {
-            "kind": "directive",
-            "justification": "DB registry rows use SQL NULL for nullable columns"
-          }
-        ]
-      },
-      {
-        "ruleId": "unicorn/no-null",
-        "severity": 2,
-        "message": "Use `undefined` instead of `null`.",
-        "line": 43,
-        "column": 21,
-        "messageId": "error",
-        "endLine": 43,
-        "endColumn": 25,
-        "suggestions": [
-          {
-            "messageId": "replace",
-            "fix": {
-              "range": [1092, 1096],
+              "range": [1082, 1086],
               "text": "undefined"
             },
             "data": {},
@@ -3487,7 +3424,7 @@
           {
             "messageId": "replace",
             "fix": {
-              "range": [1118, 1122],
+              "range": [1108, 1112],
               "text": "undefined"
             },
             "data": {},
@@ -3506,15 +3443,42 @@
         "severity": 2,
         "message": "Use `undefined` instead of `null`.",
         "line": 45,
-        "column": 16,
+        "column": 21,
         "messageId": "error",
         "endLine": 45,
+        "endColumn": 25,
+        "suggestions": [
+          {
+            "messageId": "replace",
+            "fix": {
+              "range": [1134, 1138],
+              "text": "undefined"
+            },
+            "data": {},
+            "desc": "Replace `null` with `undefined`."
+          }
+        ],
+        "suppressions": [
+          {
+            "kind": "directive",
+            "justification": "DB registry rows use SQL NULL for nullable columns"
+          }
+        ]
+      },
+      {
+        "ruleId": "unicorn/no-null",
+        "severity": 2,
+        "message": "Use `undefined` instead of `null`.",
+        "line": 46,
+        "column": 16,
+        "messageId": "error",
+        "endLine": 46,
         "endColumn": 20,
         "suggestions": [
           {
             "messageId": "replace",
             "fix": {
-              "range": [1139, 1143],
+              "range": [1155, 1159],
               "text": "undefined"
             },
             "data": {},
@@ -3532,16 +3496,16 @@
         "ruleId": "unicorn/no-null",
         "severity": 2,
         "message": "Use `undefined` instead of `null`.",
-        "line": 49,
+        "line": 50,
         "column": 27,
         "messageId": "error",
-        "endLine": 49,
+        "endLine": 50,
         "endColumn": 31,
         "suggestions": [
           {
             "messageId": "replace",
             "fix": {
-              "range": [1239, 1243],
+              "range": [1255, 1259],
               "text": "undefined"
             },
             "data": {},
@@ -3559,16 +3523,16 @@
         "ruleId": "unicorn/no-null",
         "severity": 2,
         "message": "Use `undefined` instead of `null`.",
-        "line": 52,
+        "line": 53,
         "column": 19,
         "messageId": "error",
-        "endLine": 52,
+        "endLine": 53,
         "endColumn": 23,
         "suggestions": [
           {
             "messageId": "replace",
             "fix": {
-              "range": [1339, 1343],
+              "range": [1355, 1359],
               "text": "undefined"
             },
             "data": {},
@@ -3901,7 +3865,7 @@
     "warningCount": 0,
     "fixableErrorCount": 0,
     "fixableWarningCount": 0,
-    "source": "import { discoverProjectWorkspaces } from '@repo/scan-ingestion/ingestion/workspaces/discoverProjectWorkspaces.util';\nimport { getProjectActiveRun } from '@repo/scan-ingestion/queries/getProjectActiveRun.util';\nimport { getProjectById } from '@repo/scan-ingestion/queries/getProjectById.util';\nimport { replaceProjectWorkspaces } from '@repo/scan-ingestion/queries/replaceProjectWorkspaces.util';\nimport { triggerScan as triggerScanMutation } from '@repo/scan-ingestion/queries/triggerScan.util';\nimport { isCheckboxChecked } from '@repo/utils/forms/is-checkbox-checked.util';\nimport { type ActionFunctionArgs, data, redirect } from 'react-router';\nimport { z } from 'zod';\n\nimport { requireUser } from '@/auth/requireUser.util';\n\nimport { parseRouteParams } from '../utils/parseRouteParams.util';\nimport { computeFanOutCount } from './computeFanOutCount.util';\nimport { formatRunElapsed } from './formatRunElapsed.util';\nimport { hasPostgresErrorCode } from './hasPostgresErrorCode.util';\nimport { FAN_OUT_CONFIRMATION_THRESHOLD } from './triggerScan.constants';\nimport { triggerScanSchema } from './triggerScan.schema';\n\nconst paramsSchema = z.object({ projectId: z.string().uuid() });\n\nexport const action = async ({ params, request }: ActionFunctionArgs) => {\n  // Actions run BEFORE loaders, so the layout loader's gate does not\n  // cover POSTs — every cqms action authenticates itself (ADR-017).\n  const user = await requireUser({ request });\n\n  const { projectId } = parseRouteParams({\n    invalidMessage: 'Invalid project id.',\n    params,\n    schema: paramsSchema,\n  });\n\n  const formData = await request.formData();\n  const parsed = triggerScanSchema.safeParse({\n    confirmFanOut: isCheckboxChecked({ formData, name: 'confirmFanOut' }),\n    scannerIds: formData.getAll('scannerIds'),\n    workspacePaths: formData.getAll('workspacePaths'),\n  });\n\n  if (!parsed.success) {\n    return {\n      errors: {\n        scannerIds: parsed.error.flatten().fieldErrors.scannerIds?.[0],\n      },\n    };\n  }\n\n  // Selected workspaces are validated against a FRESH discovery — the\n  // form's options could be stale (a new snapshot synced since the page\n  // loaded), and form values are attacker-controllable anyway (ADR-021).\n  const project = await getProjectById({\n    projectId: projectId,\n  });\n  if (!project) {\n    throw data('Project not found.', { status: 404 });\n  }\n  if (!project.snapshot_path) {\n    // fn_create_run_with_scoped_scans rejects this too (0027) — failing\n    // here first gives the precise message instead of a generic DB error.\n    return {\n      errors: {\n        scannerIds:\n          'No code snapshot has been synced for this project. Upload a snapshot before triggering a scan.',\n      },\n    };\n  }\n  const discovered = discoverProjectWorkspaces({\n    rootPath: project.snapshot_path,\n  });\n  const discoveredPaths = new Set(\n    discovered.map((workspace) => workspace.workspace_path),\n  );\n  const unknownSelection = parsed.data.workspacePaths.find(\n    (workspacePath) => !discoveredPaths.has(workspacePath),\n  );\n  if (unknownSelection !== undefined) {\n    return {\n      errors: {\n        workspacePaths: `Not a workspace of this project: ${unknownSelection}`,\n      },\n    };\n  }\n\n  // The actual multiplier behind the cost incident this guards against:\n  // scanners × workspaces fan out into that many queued scans from one\n  // submission. Past the threshold, require an explicit confirmation\n  // rather than silently queuing a large batch.\n  const fanOutCount = computeFanOutCount({\n    scannerCount: parsed.data.scannerIds.length,\n    workspaceCount: parsed.data.workspacePaths.length,\n  });\n  if (\n    fanOutCount > FAN_OUT_CONFIRMATION_THRESHOLD &&\n    !parsed.data.confirmFanOut\n  ) {\n    return {\n      errors: {\n        confirmFanOut: `This will queue ${fanOutCount} scans. Check the box below to confirm and start the scan.`,\n      },\n    };\n  }\n\n  // Best-effort snapshot refresh — discovery already happened for\n  // validation, so persist it; a failure here must not block the scan.\n  try {\n    await replaceProjectWorkspaces({\n      projectId: project.id,\n      userId: user.id,\n      workspaces: discovered,\n    });\n  } catch (error) {\n    console.warn('Workspace snapshot refresh failed (non-fatal):', error);\n  }\n\n  try {\n    const { runId } = await triggerScanMutation({\n      projectId: projectId,\n      scannerIds: parsed.data.scannerIds,\n      triggeredBy: user.username,\n      userId: user.id,\n      workspacePaths: parsed.data.workspacePaths,\n    });\n\n    return redirect(`/cqms/projects/view/${projectId}/runs/${runId}`);\n  } catch (error) {\n    // The per-project concurrency guard (migration 0021) raises ERRCODE 55000\n    // when a run started between page load and submit. Surface it as a real\n    // 409 carrying the active run's id + elapsed time (PRD_V2 §8) so the UI can\n    // link to it — not a generic field error. The snapshot check above already\n    // handled the other 55000 case (no snapshot), so a 55000 here with an active\n    // run is the concurrency conflict; if none is found, fall through.\n    if (hasPostgresErrorCode({ code: '55000', error })) {\n      const activeRun = await getProjectActiveRun({ projectId });\n      if (activeRun) {\n        return data(\n          {\n            conflict: {\n              elapsed: formatRunElapsed({\n                nowMs: Date.now(),\n                startedAtMs: Date.parse(activeRun.startedAt),\n              }),\n              runId: activeRun.runId,\n            },\n          },\n          { status: 409 },\n        );\n      }\n    }\n\n    // fn_create_run's other typed rejections (e.g. a viewer without the\n    // execute/scan grant, ADR-024) render as a field error, not a 500.\n    return {\n      errors: {\n        scannerIds:\n          error instanceof Error ? error.message : 'Failed to start the scan.',\n      },\n    };\n  }\n};\n",
+    "source": "import { isCheckboxChecked } from '@lcabrera/utils/forms/is-checkbox-checked.util';\nimport { discoverProjectWorkspaces } from '@repo/scan-ingestion/ingestion/workspaces/discoverProjectWorkspaces.util';\nimport { getProjectActiveRun } from '@repo/scan-ingestion/queries/getProjectActiveRun.util';\nimport { getProjectById } from '@repo/scan-ingestion/queries/getProjectById.util';\nimport { replaceProjectWorkspaces } from '@repo/scan-ingestion/queries/replaceProjectWorkspaces.util';\nimport { triggerScan as triggerScanMutation } from '@repo/scan-ingestion/queries/triggerScan.util';\nimport { type ActionFunctionArgs, data, redirect } from 'react-router';\nimport { z } from 'zod';\n\nimport { requireUser } from '@/auth/requireUser.util';\n\nimport { parseRouteParams } from '../utils/parseRouteParams.util';\nimport { computeFanOutCount } from './computeFanOutCount.util';\nimport { formatRunElapsed } from './formatRunElapsed.util';\nimport { hasPostgresErrorCode } from './hasPostgresErrorCode.util';\nimport { FAN_OUT_CONFIRMATION_THRESHOLD } from './triggerScan.constants';\nimport { triggerScanSchema } from './triggerScan.schema';\n\nconst paramsSchema = z.object({ projectId: z.string().uuid() });\n\nexport const action = async ({ params, request }: ActionFunctionArgs) => {\n  // Actions run BEFORE loaders, so the layout loader's gate does not\n  // cover POSTs — every cqms action authenticates itself (ADR-017).\n  const user = await requireUser({ request });\n\n  const { projectId } = parseRouteParams({\n    invalidMessage: 'Invalid project id.',\n    params,\n    schema: paramsSchema,\n  });\n\n  const formData = await request.formData();\n  const parsed = triggerScanSchema.safeParse({\n    confirmFanOut: isCheckboxChecked({ formData, name: 'confirmFanOut' }),\n    scannerIds: formData.getAll('scannerIds'),\n    workspacePaths: formData.getAll('workspacePaths'),\n  });\n\n  if (!parsed.success) {\n    return {\n      errors: {\n        scannerIds: parsed.error.flatten().fieldErrors.scannerIds?.[0],\n      },\n    };\n  }\n\n  // Selected workspaces are validated against a FRESH discovery — the\n  // form's options could be stale (a new snapshot synced since the page\n  // loaded), and form values are attacker-controllable anyway (ADR-021).\n  const project = await getProjectById({\n    projectId: projectId,\n  });\n  if (!project) {\n    throw data('Project not found.', { status: 404 });\n  }\n  if (!project.snapshot_path) {\n    // fn_create_run_with_scoped_scans rejects this too (0027) — failing\n    // here first gives the precise message instead of a generic DB error.\n    return {\n      errors: {\n        scannerIds:\n          'No code snapshot has been synced for this project. Upload a snapshot before triggering a scan.',\n      },\n    };\n  }\n  const discovered = discoverProjectWorkspaces({\n    rootPath: project.snapshot_path,\n  });\n  const discoveredPaths = new Set(\n    discovered.map((workspace) => workspace.workspace_path),\n  );\n  const unknownSelection = parsed.data.workspacePaths.find(\n    (workspacePath) => !discoveredPaths.has(workspacePath),\n  );\n  if (unknownSelection !== undefined) {\n    return {\n      errors: {\n        workspacePaths: `Not a workspace of this project: ${unknownSelection}`,\n      },\n    };\n  }\n\n  // The actual multiplier behind the cost incident this guards against:\n  // scanners × workspaces fan out into that many queued scans from one\n  // submission. Past the threshold, require an explicit confirmation\n  // rather than silently queuing a large batch.\n  const fanOutCount = computeFanOutCount({\n    scannerCount: parsed.data.scannerIds.length,\n    workspaceCount: parsed.data.workspacePaths.length,\n  });\n  if (\n    fanOutCount > FAN_OUT_CONFIRMATION_THRESHOLD &&\n    !parsed.data.confirmFanOut\n  ) {\n    return {\n      errors: {\n        confirmFanOut: `This will queue ${fanOutCount} scans. Check the box below to confirm and start the scan.`,\n      },\n    };\n  }\n\n  // Best-effort snapshot refresh — discovery already happened for\n  // validation, so persist it; a failure here must not block the scan.\n  try {\n    await replaceProjectWorkspaces({\n      projectId: project.id,\n      userId: user.id,\n      workspaces: discovered,\n    });\n  } catch (error) {\n    console.warn('Workspace snapshot refresh failed (non-fatal):', error);\n  }\n\n  try {\n    const { runId } = await triggerScanMutation({\n      projectId: projectId,\n      scannerIds: parsed.data.scannerIds,\n      triggeredBy: user.username,\n      userId: user.id,\n      workspacePaths: parsed.data.workspacePaths,\n    });\n\n    return redirect(`/cqms/projects/view/${projectId}/runs/${runId}`);\n  } catch (error) {\n    // The per-project concurrency guard (migration 0021) raises ERRCODE 55000\n    // when a run started between page load and submit. Surface it as a real\n    // 409 carrying the active run's id + elapsed time (PRD_V2 §8) so the UI can\n    // link to it — not a generic field error. The snapshot check above already\n    // handled the other 55000 case (no snapshot), so a 55000 here with an active\n    // run is the concurrency conflict; if none is found, fall through.\n    if (hasPostgresErrorCode({ code: '55000', error })) {\n      const activeRun = await getProjectActiveRun({ projectId });\n      if (activeRun) {\n        return data(\n          {\n            conflict: {\n              elapsed: formatRunElapsed({\n                nowMs: Date.now(),\n                startedAtMs: Date.parse(activeRun.startedAt),\n              }),\n              runId: activeRun.runId,\n            },\n          },\n          { status: 409 },\n        );\n      }\n    }\n\n    // fn_create_run's other typed rejections (e.g. a viewer without the\n    // execute/scan grant, ADR-024) render as a field error, not a 500.\n    return {\n      errors: {\n        scannerIds:\n          error instanceof Error ? error.message : 'Failed to start the scan.',\n      },\n    };\n  }\n};\n",
     "usedDeprecatedRules": []
   },
   {
@@ -5071,17 +5035,6 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "apps/api-server-fast/src/constants/server.constants.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
     "filePath": "apps/api-server-fast/src/features/carSales/carSales.constants.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -5116,17 +5069,6 @@
   },
   {
     "filePath": "apps/api-server-fast/src/features/carSales/carSales.schema.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "apps/api-server-fast/src/features/carSales/carSales.types.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -5462,17 +5404,6 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "apps/api-server-fast/src/types/api.types.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
     "filePath": "apps/api-server-fast/src/utils/delay.util.test.ts",
     "messages": [],
     "suppressedMessages": [
@@ -5594,7 +5525,7 @@
         "suppressions": [
           {
             "kind": "directive",
-            "justification": ""
+            "justification": "express's app.use handler signature is fixed by the framework"
           }
         ]
       },
@@ -5647,7 +5578,7 @@
     "warningCount": 0,
     "fixableErrorCount": 0,
     "fixableWarningCount": 0,
-    "source": "import type { Pool } from 'pg';\n\nimport { HttpError } from 'api-shared';\nimport cors from 'cors';\nimport express, { type Express, Router } from 'express';\n\nimport type { EnvConfig } from '../config/env.schema';\n\nimport { createCarSalesRoute } from '../features/carSales/carSales.route';\nimport { createDbSanityRoute } from '../features/dbSanity/dbSanity.route';\nimport { createDistinctRoute } from '../features/distinct/distinct.route';\nimport { createEnterpriseOrdersRoute } from '../features/enterpriseOrders/enterpriseOrders.route';\nimport { createWideAlltypes150Route } from '../features/wideAlltypes150/wideAlltypes150.route';\nimport { errorMiddleware } from '../middleware/error.middleware';\n\ntype CreateAppArgs = {\n  readonly envConfig: EnvConfig;\n  readonly pool: Pool;\n};\n\n/**\n * Create the Express application with all API routes.\n */\nexport const createApp = ({ envConfig, pool }: CreateAppArgs): Express => {\n  const app = express();\n  const apiRouter = Router();\n  const allowedCorsOrigins = new Set(\n    envConfig.CORS_ALLOWED_ORIGINS.split(',')\n      .map((origin) => origin.trim())\n      .filter((origin) => origin.length > 0),\n  );\n\n  app.use(\n    cors({\n      origin: (origin, callback) => {\n        callback(null, !origin || allowedCorsOrigins.has(origin));\n      },\n    }),\n  );\n  app.use(express.json());\n\n  apiRouter.use('/car-sales', createCarSalesRoute({ pool }));\n  apiRouter.use('/distinct', createDistinctRoute({ envConfig, pool }));\n  apiRouter.use(\n    '/enterprise-orders',\n    createEnterpriseOrdersRoute({ envConfig, pool }),\n  );\n  apiRouter.use('/wide-alltypes-150', createWideAlltypes150Route({ pool }));\n  apiRouter.use('/db-sanity', createDbSanityRoute({ pool }));\n\n  app.use('/api', apiRouter);\n  // eslint-disable-next-line local-rules/destructuring-for-functions\n  app.use((_request, _response, next) => {\n    next(new HttpError({ message: 'Route not found', statusCode: 404 }));\n  });\n  app.use(errorMiddleware);\n\n  return app;\n};\n",
+    "source": "import type { Pool } from 'pg';\n\nimport { HttpError } from 'api-shared';\nimport cors from 'cors';\nimport express, { type Express, Router } from 'express';\n\nimport type { EnvConfig } from '../config/env.schema';\n\nimport { createCarSalesRoute } from '../features/carSales/carSales.route';\nimport { createDbSanityRoute } from '../features/dbSanity/dbSanity.route';\nimport { createDistinctRoute } from '../features/distinct/distinct.route';\nimport { createEnterpriseOrdersRoute } from '../features/enterpriseOrders/enterpriseOrders.route';\nimport { createWideAlltypes150Route } from '../features/wideAlltypes150/wideAlltypes150.route';\nimport { errorMiddleware } from '../middleware/error.middleware';\n\ntype CreateAppArgs = {\n  readonly envConfig: EnvConfig;\n  readonly pool: Pool;\n};\n\n/**\n * Create the Express application with all API routes.\n */\nexport const createApp = ({ envConfig, pool }: CreateAppArgs): Express => {\n  const app = express();\n  const apiRouter = Router();\n  const allowedCorsOrigins = new Set(\n    envConfig.CORS_ALLOWED_ORIGINS.split(',')\n      .map((origin) => origin.trim())\n      .filter((origin) => origin.length > 0),\n  );\n\n  app.use(\n    cors({\n      origin: (origin, callback) => {\n        callback(null, !origin || allowedCorsOrigins.has(origin));\n      },\n    }),\n  );\n  app.use(express.json());\n\n  apiRouter.use('/car-sales', createCarSalesRoute({ pool }));\n  apiRouter.use('/distinct', createDistinctRoute({ envConfig, pool }));\n  apiRouter.use(\n    '/enterprise-orders',\n    createEnterpriseOrdersRoute({ envConfig, pool }),\n  );\n  apiRouter.use('/wide-alltypes-150', createWideAlltypes150Route({ pool }));\n  apiRouter.use('/db-sanity', createDbSanityRoute({ pool }));\n\n  app.use('/api', apiRouter);\n  // eslint-disable-next-line local-rules/destructuring-for-functions -- express's app.use handler signature is fixed by the framework\n  app.use((_request, _response, next) => {\n    next(new HttpError({ message: 'Route not found', statusCode: 404 }));\n  });\n  app.use(errorMiddleware);\n\n  return app;\n};\n",
     "usedDeprecatedRules": []
   },
   {
@@ -5759,17 +5690,6 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "apps/api-server/src/constants/server.constants.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
     "filePath": "apps/api-server/src/features/carSales/carSales.constants.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -5815,17 +5735,6 @@
   },
   {
     "filePath": "apps/api-server/src/features/carSales/carSales.schema.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "apps/api-server/src/features/carSales/carSales.types.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -6058,29 +5967,13 @@
     "messages": [],
     "suppressedMessages": [
       {
-        "ruleId": "local-rules/destructuring-for-functions",
-        "severity": 2,
-        "message": "Functions with multiple parameters should use a single object parameter with a named type.",
-        "line": 6,
-        "column": 53,
-        "messageId": "useObjectParam",
-        "endLine": 19,
-        "endColumn": 2,
-        "suppressions": [
-          {
-            "kind": "directive",
-            "justification": ""
-          }
-        ]
-      },
-      {
         "ruleId": "@typescript-eslint/no-unused-vars",
         "severity": 2,
         "message": "'_next' is defined but never used.",
-        "line": 10,
+        "line": 9,
         "column": 3,
         "messageId": "unusedVar",
-        "endLine": 10,
+        "endLine": 9,
         "endColumn": 8,
         "suppressions": [
           {
@@ -6095,39 +5988,11 @@
     "warningCount": 0,
     "fixableErrorCount": 0,
     "fixableWarningCount": 0,
-    "source": "import type { ErrorRequestHandler } from 'express';\n\nimport { HttpError } from 'api-shared';\n\n// eslint-disable-next-line local-rules/destructuring-for-functions\nexport const errorMiddleware: ErrorRequestHandler = (\n  error,\n  _request,\n  response,\n  _next,\n) => {\n  if (error instanceof HttpError) {\n    response.status(error.statusCode).json({ error: error.message });\n    return;\n  }\n\n  console.error('❌ Unhandled API error:', error);\n  response.status(500).json({ error: 'Internal server error' });\n};\n",
+    "source": "import type { ErrorRequestHandler } from 'express';\n\nimport { HttpError } from 'api-shared';\n\nexport const errorMiddleware: ErrorRequestHandler = (\n  error,\n  _request,\n  response,\n  _next,\n) => {\n  if (error instanceof HttpError) {\n    response.status(error.statusCode).json({ error: error.message });\n    return;\n  }\n\n  console.error('❌ Unhandled API error:', error);\n  response.status(500).json({ error: 'Internal server error' });\n};\n",
     "usedDeprecatedRules": []
   },
   {
     "filePath": "apps/api-server/src/server.ts",
-    "messages": [],
-    "suppressedMessages": [
-      {
-        "ruleId": "local-rules/destructuring-for-functions",
-        "severity": 2,
-        "message": "Functions with multiple parameters should use a single object parameter with a named type.",
-        "line": 35,
-        "column": 5,
-        "messageId": "useObjectParam",
-        "endLine": 44,
-        "endColumn": 6,
-        "suppressions": [
-          {
-            "kind": "directive",
-            "justification": ""
-          }
-        ]
-      }
-    ],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "apps/api-server/src/types/api.types.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -6153,29 +6018,13 @@
     "messages": [],
     "suppressedMessages": [
       {
-        "ruleId": "local-rules/destructuring-for-functions",
-        "severity": 2,
-        "message": "Functions with multiple parameters should use a single object parameter with a named type.",
-        "line": 19,
-        "column": 3,
-        "messageId": "useObjectParam",
-        "endLine": 21,
-        "endColumn": 4,
-        "suppressions": [
-          {
-            "kind": "directive",
-            "justification": ""
-          }
-        ]
-      },
-      {
         "ruleId": "unicorn/prefer-await",
         "severity": 2,
         "message": "Prefer `await` over promise chaining with `.catch()`.",
-        "line": 20,
+        "line": 19,
         "column": 59,
         "messageId": "prefer-await",
-        "endLine": 20,
+        "endLine": 19,
         "endColumn": 64,
         "suppressions": [
           {
@@ -6190,7 +6039,7 @@
     "warningCount": 0,
     "fixableErrorCount": 0,
     "fixableWarningCount": 0,
-    "source": "import type { NextFunction, Request, RequestHandler, Response } from 'express';\n\ntype CreateRequestHandlerArgs = {\n  readonly handler: (args: RequestHandlerArgs) => Promise<void> | void;\n};\n\ntype RequestHandlerArgs = {\n  readonly next: NextFunction;\n  readonly request: Request;\n  readonly response: Response;\n};\n\n/**\n * Adapt object-argument handlers to Express request handlers.\n */\nexport const createRequestHandler =\n  ({ handler }: CreateRequestHandlerArgs): RequestHandler =>\n  // eslint-disable-next-line local-rules/destructuring-for-functions\n  (request, response, next) => {\n    Promise.resolve(handler({ next, request, response })).catch(next);\n  };\n",
+    "source": "import type { NextFunction, Request, RequestHandler, Response } from 'express';\n\ntype CreateRequestHandlerArgs = {\n  readonly handler: (args: RequestHandlerArgs) => Promise<void> | void;\n};\n\ntype RequestHandlerArgs = {\n  readonly next: NextFunction;\n  readonly request: Request;\n  readonly response: Response;\n};\n\n/**\n * Adapt object-argument handlers to Express request handlers.\n */\nexport const createRequestHandler =\n  ({ handler }: CreateRequestHandlerArgs): RequestHandler =>\n  (request, response, next) => {\n    Promise.resolve(handler({ next, request, response })).catch(next);\n  };\n",
     "usedDeprecatedRules": []
   },
   {
@@ -8025,6 +7874,17 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "apps/react-router/src/routes/enterprise-orders/filterContract.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "apps/react-router/src/routes/enterprise-orders/new-order/new-order.action.test.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -9788,22 +9648,6 @@
         ]
       },
       {
-        "ruleId": "local-rules/destructuring-for-functions",
-        "severity": 2,
-        "message": "Functions with multiple parameters should use a single object parameter with a named type.",
-        "line": 108,
-        "column": 34,
-        "messageId": "useObjectParam",
-        "endLine": 121,
-        "endColumn": 4,
-        "suppressions": [
-          {
-            "kind": "file",
-            "justification": ""
-          }
-        ]
-      },
-      {
         "ruleId": "unicorn/consistent-boolean-name",
         "severity": 2,
         "message": "Boolean name `success` should start with `is`, `are`, `has`, `have`, `can`, `should`, `was`, `were`, `did`, `will`, `requires`.",
@@ -10266,7 +10110,40 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/api/src/http/fetch-and-validate.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/api/src/http/fetch-and-validate.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/api/src/http/resolve-fetch-signal.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/api/src/http/resolve-fetch-signal.util.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -10288,7 +10165,40 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/eslint-local-rules/clean-import-paths.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/eslint-local-rules/clean-import-paths.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/eslint-local-rules/component-files.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/eslint-local-rules/destructuring-for-functions.test.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -10354,6 +10264,17 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/eslint-local-rules/merge-duplicate-imports.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/eslint-local-rules/merge-duplicate-imports.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -10387,6 +10308,17 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/eslint-local-rules/no-type-definitions-in-components.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/eslint-local-rules/no-type-definitions-in-components.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -10398,7 +10330,73 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/eslint-local-rules/readonly-props.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/eslint-local-rules/readonly-props.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/eslint-local-rules/rules-have-tests.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/eslint-local-rules/rules.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/eslint-local-rules/single-component-export.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/eslint-local-rules/single-component-export.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/eslint-local-rules/type-suffix-naming.test.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -14180,10 +14178,10 @@
         "ruleId": "unicorn/no-array-callback-reference",
         "severity": 2,
         "message": "Do not pass function `writeConfigFile` directly to `.map(…)`.",
-        "line": 258,
+        "line": 269,
         "column": 31,
         "messageId": "error-with-name",
-        "endLine": 258,
+        "endLine": 269,
         "endColumn": 46,
         "suggestions": [
           {
@@ -14194,7 +14192,7 @@
               "parameters": "config"
             },
             "fix": {
-              "range": [11355, 11370],
+              "range": [12076, 12091],
               "text": "(config) => writeConfigFile(config)"
             },
             "desc": "Replace function `writeConfigFile` with `… => writeConfigFile(config)`."
@@ -14207,7 +14205,7 @@
               "parameters": "config, index"
             },
             "fix": {
-              "range": [11355, 11370],
+              "range": [12076, 12091],
               "text": "(config, index) => writeConfigFile(config, index)"
             },
             "desc": "Replace function `writeConfigFile` with `… => writeConfigFile(config, index)`."
@@ -14220,7 +14218,7 @@
               "parameters": "config, index, configs"
             },
             "fix": {
-              "range": [11355, 11370],
+              "range": [12076, 12091],
               "text": "(config, index, configs) => writeConfigFile(config, index, configs)"
             },
             "desc": "Replace function `writeConfigFile` with `… => writeConfigFile(config, index, configs)`."
@@ -14239,7 +14237,7 @@
     "warningCount": 0,
     "fixableErrorCount": 0,
     "fixableWarningCount": 0,
-    "source": "import { mkdir, writeFile } from 'node:fs/promises';\nimport { dirname, resolve } from 'node:path';\nimport { fileURLToPath } from 'node:url';\n\nimport { createAppTsConfig, createNodeTsConfig } from './tsconfig.shared.ts';\n\ntype WriteConfigArgs = {\n  readonly config: unknown;\n  readonly filePath: string;\n};\n\nconst packageDirectory = dirname(fileURLToPath(import.meta.url));\nconst workspaceRoot = resolve(packageDirectory, '..', '..');\n\nconst stringifyConfig = (config: unknown): string =>\n  `${JSON.stringify(config, null, 2)}\\n`;\n\nconst writeConfigFile = async ({\n  config,\n  filePath,\n}: WriteConfigArgs): Promise<void> => {\n  await mkdir(dirname(filePath), { recursive: true });\n  await writeFile(filePath, stringifyConfig(config), 'utf8');\n};\n\nconst configs = [\n  {\n    // This package's own source (generate.ts + tsconfig.shared.ts) is\n    // Node-only: node:fs/node:path/node:url, run via `node`, no bundler and\n    // no browser context. It previously emitted an app-config/node-config\n    // demo pair for itself, but neither one ever checked this source: the app\n    // config demanded `vite/client` types from a package that does not depend\n    // on vite (so tsc exited 2 before reading a single file), and the node\n    // config included only `vite.config.ts`, which this package does not have.\n    // A generator that defines the repo's strictness while being exempt from\n    // it is the one config here that has to be right.\n    config: createNodeTsConfig({\n      exclude: ['node_modules'],\n      include: ['**/*.ts'],\n      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',\n    }),\n    filePath: resolve(packageDirectory, 'tsconfig.app.json'),\n  },\n  {\n    // admin_system consumes @repo/server/@repo/scan-ingestion/@repo/ui\n    // directly (CQMS routes, TECH_SPEC §2.4/§2.8) — without these, this\n    // config drifts from the actual hand-verified tsconfig.app.json the\n    // moment this generator re-runs for an unrelated reason (found the\n    // hard way: re-running it for apps/scan-orchestrator's new entry\n    // silently wiped these three, breaking oxlint resolution for the\n    // entire cqms routes tree).\n    config: createAppTsConfig({\n      paths: {\n        '@repo/scan-ingestion/*': ['../../packages/scan-ingestion/src/*'],\n        '@repo/server/*': ['../../packages/server/src/*'],\n        // Bare specifier — `@repo/ui` resolves to the public-api barrel, not\n        // a subpath. Distinct from the wildcard below and NOT implied by it\n        // (`@repo/ui/*` never matches the bare form), so dropping it breaks\n        // every `from '@repo/ui'` import in this app.\n        '@repo/ui': ['../../packages/ui/src/public-api.ts'],\n        '@repo/ui/*': ['../../packages/ui/src/*'],\n      },\n      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',\n    }),\n    filePath: resolve(workspaceRoot, 'apps/admin_system/tsconfig.app.json'),\n  },\n  {\n    config: createNodeTsConfig({\n      tsBuildInfoFile: './node_modules/.tmp/tsconfig.node.tsbuildinfo',\n    }),\n    filePath: resolve(workspaceRoot, 'apps/admin_system/tsconfig.node.json'),\n  },\n  {\n    config: createAppTsConfig({\n      paths: {\n        '@repo/server/*': ['../../packages/server/src/*'],\n        // Bare specifier — see the identical entry under admin_system above.\n        '@repo/ui': ['../../packages/ui/src/public-api.ts'],\n        '@repo/ui/*': ['../../packages/ui/src/*'],\n      },\n      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',\n    }),\n    filePath: resolve(workspaceRoot, 'apps/react-router/tsconfig.app.json'),\n  },\n  {\n    config: createNodeTsConfig({\n      tsBuildInfoFile: './node_modules/.tmp/tsconfig.node.tsbuildinfo',\n    }),\n    filePath: resolve(workspaceRoot, 'apps/react-router/tsconfig.node.json'),\n  },\n  {\n    config: createAppTsConfig({\n      // packages/ui has no vite.config.ts of its own — everything lives\n      // under src/, consumed directly by whichever app's Vite/tsc instance\n      // processes it. This config exists so tools that resolve the nearest\n      // tsconfig.json from a file *inside* packages/ui (an editor's\n      // language server, or tsc/lint invoked directly against this\n      // package) can still resolve @repo/ui's own self-referencing\n      // imports and @repo/server cross-imports — without it, only a\n      // consuming app's own tsconfig knew about these aliases.\n      paths: {\n        '@repo/server/*': ['../server/src/*'],\n        '@repo/ui/*': ['./src/*'],\n      },\n      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',\n      // packages/ui's src/ mixes browser-context components with\n      // Node-context SSR entry utilities (packages/ui/src/entry/) — apps\n      // keep these in two separate tsconfig projects (app.json/node.json),\n      // but this package has no vite.config.ts to anchor a second project\n      // around, so both type roots live in the one config.\n      types: ['node'],\n    }),\n    filePath: resolve(workspaceRoot, 'packages/ui/tsconfig.app.json'),\n  },\n  {\n    // @repo/server is Node-only, and this entry is now a plain node config\n    // rather than an app config with 'node' bolted on.\n    //\n    // It used to be the latter because the package carried two runtimes at\n    // once (ADR-008): a browser src/api/ half needing DOM + vite/client\n    // alongside a Node src/db/ half. That half is gone — it is @repo/api now\n    // — so the DOM lib was left granting Window, document and fetch to a\n    // package that has no business touching any of them. Dropping to\n    // createNodeTsConfig makes a browser reach-in fail typecheck here, the\n    // exact mirror of @repo/api omitting 'node' to keep itself client-safe.\n    config: createNodeTsConfig({\n      include: ['src', 'vite.config.ts'],\n      paths: {\n        '@repo/server/*': ['./src/*'],\n      },\n      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',\n    }),\n    filePath: resolve(workspaceRoot, 'packages/server/tsconfig.app.json'),\n  },\n  {\n    // Genuinely Node-only (pg client, fs/path, git CLI via child_process,\n    // no DOM/vite.client usage anywhere). Overrides createNodeTsConfig's\n    // default include (['vite.config.ts'] only, meant for an app's\n    // Node-context sibling config) since this package has no app-context\n    // tsconfig to pair with — its own src/ needs typechecking.\n    config: createNodeTsConfig({\n      include: ['src', 'vite.config.ts'],\n      paths: {\n        '@repo/scan-ingestion/*': ['./src/*'],\n      },\n      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',\n    }),\n    filePath: resolve(\n      workspaceRoot,\n      'packages/scan-ingestion/tsconfig.app.json',\n    ),\n  },\n  {\n    // Genuinely Node-only — spawns the Claude Agent SDK's own CLI\n    // subprocess, no DOM/vite.client usage anywhere.\n    config: createNodeTsConfig({\n      include: ['src', 'vite.config.ts'],\n      paths: {\n        '@repo/agent-runner/*': ['./src/*'],\n      },\n      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',\n    }),\n    filePath: resolve(workspaceRoot, 'packages/agent-runner/tsconfig.app.json'),\n  },\n  {\n    // Genuinely Node-only — process-lifecycle primitives (SIGINT/SIGTERM\n    // handlers), the deliberate impure counterpart to @repo/utils.\n    //\n    // This was the one tsconfig.app.json the generator did not own: it was\n    // hand-written, so every tsconfig.shared.ts change silently skipped it\n    // while its name promised otherwise (the README calls these generated\n    // artifacts). It had drifted to carry esModuleInterop, resolveJsonModule\n    // and useDefineForClassFields, none of which this package uses — no\n    // default imports, no JSON imports, no classes — plus an `@/*` alias\n    // nothing imports through. Folding it in drops the dead options and\n    // makes it identical in shape to its Node-only siblings above.\n    config: createNodeTsConfig({\n      include: ['src', 'vite.config.ts'],\n      paths: {\n        '@repo/node-runtime/*': ['./src/*'],\n      },\n      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',\n    }),\n    filePath: resolve(workspaceRoot, 'packages/node-runtime/tsconfig.app.json'),\n  },\n  {\n    // Genuinely Node-only — the standalone scan-orchestrator process\n    // (Implementation Plan step 9): a dedicated Postgres LISTEN client, a\n    // plain node:http + ws server, no DOM/vite.client usage anywhere.\n    config: createNodeTsConfig({\n      include: ['src', 'vite.config.ts'],\n      paths: {\n        '@repo/scan-orchestrator/*': ['./src/*'],\n      },\n      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',\n    }),\n    filePath: resolve(\n      workspaceRoot,\n      'apps/scan-orchestrator/tsconfig.app.json',\n    ),\n  },\n  {\n    // @repo/api is the browser half of the old data-access package: fetch\n    // client, HTTP contracts, base-URL resolution. It needs the DOM lib and\n    // vite/client that createAppTsConfig supplies by default (Window, Location,\n    // fetch, the Vite env object) — but, unlike packages/server, it must\n    // NOT append 'node'. That omission is the point: a stray process/fs reach-in\n    // fails typecheck here rather than quietly making a client-safe package\n    // server-only again, which is the regression\n    // packages/ui/scripts/check-public-api-client-safe.mjs now also guards.\n    config: createAppTsConfig({\n      include: ['src', 'vite.config.ts'],\n      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',\n    }),\n    filePath: resolve(workspaceRoot, 'packages/api/tsconfig.app.json'),\n  },\n  {\n    // @repo/utils is pure and side-effect free by contract (AGENTS.md §1),\n    // which is exactly why it gets `types: []` rather than the default\n    // ['node']: denying it the Node ambient globals means a stray process/fs\n    // reach-in fails typecheck here instead of quietly eroding the guarantee\n    // that keeps this package the safe half of the utils/node-runtime split.\n    //\n    // Sources live under src/ (domain-grouped) with a root vite.config.ts, so\n    // include names both — matching the other library packages. `types: []`\n    // still denies Node ambient globals to keep the purity guarantee.\n    config: createNodeTsConfig({\n      include: ['src', 'vite.config.ts'],\n      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',\n      types: [],\n    }),\n    filePath: resolve(workspaceRoot, 'packages/utils/tsconfig.app.json'),\n  },\n  {\n    // Genuinely Node-only: a Vite build plugin reading the emitted manifest\n    // through node:fs/node:path off process.cwd(). Flat package, same\n    // include/exclude reasoning as @repo/utils above.\n    config: createNodeTsConfig({\n      exclude: ['node_modules'],\n      include: ['**/*.ts'],\n      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',\n    }),\n    filePath: resolve(workspaceRoot, 'packages/plugins/tsconfig.app.json'),\n  },\n  {\n    // Genuinely Node-only: the shared Vite/lint/fmt config factories every\n    // workspace's vite.config.ts imports. Flat package, same include/exclude\n    // reasoning as @repo/utils above.\n    config: createNodeTsConfig({\n      exclude: ['node_modules'],\n      include: ['**/*.ts'],\n      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',\n    }),\n    filePath: resolve(workspaceRoot, 'packages/vite-configs/tsconfig.app.json'),\n  },\n] as const;\n\nawait Promise.all(configs.map(writeConfigFile));\n",
+    "source": "import { mkdir, writeFile } from 'node:fs/promises';\nimport { dirname, resolve } from 'node:path';\nimport { fileURLToPath } from 'node:url';\n\nimport { createAppTsConfig, createNodeTsConfig } from './tsconfig.shared.ts';\n\ntype WriteConfigArgs = {\n  readonly config: unknown;\n  readonly filePath: string;\n};\n\nconst packageDirectory = dirname(fileURLToPath(import.meta.url));\nconst workspaceRoot = resolve(packageDirectory, '..', '..');\n\nconst stringifyConfig = (config: unknown): string =>\n  `${JSON.stringify(config, null, 2)}\\n`;\n\nconst writeConfigFile = async ({\n  config,\n  filePath,\n}: WriteConfigArgs): Promise<void> => {\n  await mkdir(dirname(filePath), { recursive: true });\n  await writeFile(filePath, stringifyConfig(config), 'utf8');\n};\n\nconst configs = [\n  {\n    // This package's own source (generate.ts + tsconfig.shared.ts) is\n    // Node-only: node:fs/node:path/node:url, run via `node`, no bundler and\n    // no browser context. It previously emitted an app-config/node-config\n    // demo pair for itself, but neither one ever checked this source: the app\n    // config demanded `vite/client` types from a package that does not depend\n    // on vite (so tsc exited 2 before reading a single file), and the node\n    // config included only `vite.config.ts`, which this package does not have.\n    // A generator that defines the repo's strictness while being exempt from\n    // it is the one config here that has to be right.\n    config: createNodeTsConfig({\n      exclude: ['node_modules'],\n      include: ['**/*.ts'],\n      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',\n    }),\n    filePath: resolve(packageDirectory, 'tsconfig.app.json'),\n  },\n  {\n    // admin_system consumes @lcabrera/server/@repo/scan-ingestion/@lcabrera/ui\n    // directly (CQMS routes, TECH_SPEC §2.4/§2.8) — without these, this\n    // config drifts from the actual hand-verified tsconfig.app.json the\n    // moment this generator re-runs for an unrelated reason (found the\n    // hard way: re-running it for apps/scan-orchestrator's new entry\n    // silently wiped these three, breaking oxlint resolution for the\n    // entire cqms routes tree).\n    config: createAppTsConfig({\n      paths: {\n        '@lcabrera/server/*': ['../../packages/server/src/*'],\n        // Bare specifier — `@lcabrera/ui` resolves to the public-api barrel, not\n        // a subpath. Distinct from the wildcard below and NOT implied by it\n        // (`@lcabrera/ui/*` never matches the bare form), so dropping it breaks\n        // every `from '@lcabrera/ui'` import in this app.\n        '@lcabrera/ui': ['../../packages/ui/src/public-api.ts'],\n        '@lcabrera/ui/*': ['../../packages/ui/src/*'],\n        '@repo/scan-ingestion/*': ['../../packages/scan-ingestion/src/*'],\n      },\n      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',\n    }),\n    filePath: resolve(workspaceRoot, 'apps/admin_system/tsconfig.app.json'),\n  },\n  {\n    config: createNodeTsConfig({\n      tsBuildInfoFile: './node_modules/.tmp/tsconfig.node.tsbuildinfo',\n    }),\n    filePath: resolve(workspaceRoot, 'apps/admin_system/tsconfig.node.json'),\n  },\n  {\n    config: createAppTsConfig({\n      paths: {\n        '@lcabrera/server/*': ['../../packages/server/src/*'],\n        // Bare specifier — see the identical entry under admin_system above.\n        '@lcabrera/ui': ['../../packages/ui/src/public-api.ts'],\n        '@lcabrera/ui/*': ['../../packages/ui/src/*'],\n      },\n      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',\n    }),\n    filePath: resolve(workspaceRoot, 'apps/react-router/tsconfig.app.json'),\n  },\n  {\n    config: createNodeTsConfig({\n      tsBuildInfoFile: './node_modules/.tmp/tsconfig.node.tsbuildinfo',\n    }),\n    filePath: resolve(workspaceRoot, 'apps/react-router/tsconfig.node.json'),\n  },\n  {\n    config: createAppTsConfig({\n      // packages/ui has no vite.config.ts of its own — everything lives\n      // under src/, consumed directly by whichever app's Vite/tsc instance\n      // processes it. This config exists so tools that resolve the nearest\n      // tsconfig.json from a file *inside* packages/ui (an editor's\n      // language server, or tsc/lint invoked directly against this\n      // package) can still resolve @lcabrera/ui's own self-referencing\n      // imports — without it, only a consuming app's own tsconfig knew\n      // about that alias.\n      //\n      // `@lcabrera/server/*` used to be here too. It is gone with the shapes it\n      // resolved (ADR-039): @lcabrera/ui is client-safe and must not reach into\n      // a Node-only package, and an alias is exactly how such an edge hides.\n      paths: {\n        '@lcabrera/ui/*': ['./src/*'],\n      },\n      // No `@/*`. It resolves only through a tsconfig, so an `@/` import\n      // inside a published package is unresolvable for a consumer — the\n      // same class of undeclared edge as the alias above. Omitting it makes\n      // tsc, not review, the thing that catches one.\n      srcAlias: false,\n      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',\n      // packages/ui's src/ mixes browser-context components with\n      // Node-context SSR entry utilities (packages/ui/src/entry/) — apps\n      // keep these in two separate tsconfig projects (app.json/node.json),\n      // but this package has no vite.config.ts to anchor a second project\n      // around, so both type roots live in the one config.\n      types: ['node'],\n    }),\n    filePath: resolve(workspaceRoot, 'packages/ui/tsconfig.app.json'),\n  },\n  {\n    // @lcabrera/server is Node-only, and this entry is now a plain node config\n    // rather than an app config with 'node' bolted on.\n    //\n    // It used to be the latter because the package carried two runtimes at\n    // once (ADR-008): a browser src/api/ half needing DOM + vite/client\n    // alongside a Node src/db/ half. That half is gone — it is @lcabrera/api now\n    // — so the DOM lib was left granting Window, document and fetch to a\n    // package that has no business touching any of them. Dropping to\n    // createNodeTsConfig makes a browser reach-in fail typecheck here, the\n    // exact mirror of @lcabrera/api omitting 'node' to keep itself client-safe.\n    config: createNodeTsConfig({\n      include: ['src', 'vite.config.ts'],\n      paths: {\n        '@lcabrera/server/*': ['./src/*'],\n      },\n      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',\n    }),\n    filePath: resolve(workspaceRoot, 'packages/server/tsconfig.app.json'),\n  },\n  {\n    // Genuinely Node-only (pg client, fs/path, git CLI via child_process,\n    // no DOM/vite.client usage anywhere). Overrides createNodeTsConfig's\n    // default include (['vite.config.ts'] only, meant for an app's\n    // Node-context sibling config) since this package has no app-context\n    // tsconfig to pair with — its own src/ needs typechecking.\n    config: createNodeTsConfig({\n      include: ['src', 'vite.config.ts'],\n      paths: {\n        '@repo/scan-ingestion/*': ['./src/*'],\n      },\n      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',\n    }),\n    filePath: resolve(\n      workspaceRoot,\n      'packages/scan-ingestion/tsconfig.app.json',\n    ),\n  },\n  {\n    // Genuinely Node-only — spawns the Claude Agent SDK's own CLI\n    // subprocess, no DOM/vite.client usage anywhere.\n    config: createNodeTsConfig({\n      include: ['src', 'vite.config.ts'],\n      paths: {\n        '@repo/agent-runner/*': ['./src/*'],\n      },\n      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',\n    }),\n    filePath: resolve(workspaceRoot, 'packages/agent-runner/tsconfig.app.json'),\n  },\n  {\n    // Genuinely Node-only — process-lifecycle primitives (SIGINT/SIGTERM\n    // handlers), the deliberate impure counterpart to @lcabrera/utils.\n    //\n    // This was the one tsconfig.app.json the generator did not own: it was\n    // hand-written, so every tsconfig.shared.ts change silently skipped it\n    // while its name promised otherwise (the README calls these generated\n    // artifacts). It had drifted to carry esModuleInterop, resolveJsonModule\n    // and useDefineForClassFields, none of which this package uses — no\n    // default imports, no JSON imports, no classes — plus an `@/*` alias\n    // nothing imports through. Folding it in drops the dead options and\n    // makes it identical in shape to its Node-only siblings above.\n    config: createNodeTsConfig({\n      include: ['src', 'vite.config.ts'],\n      paths: {\n        '@repo/node-runtime/*': ['./src/*'],\n      },\n      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',\n    }),\n    filePath: resolve(workspaceRoot, 'packages/node-runtime/tsconfig.app.json'),\n  },\n  {\n    // Genuinely Node-only — the standalone scan-orchestrator process\n    // (Implementation Plan step 9): a dedicated Postgres LISTEN client, a\n    // plain node:http + ws server, no DOM/vite.client usage anywhere.\n    config: createNodeTsConfig({\n      include: ['src', 'vite.config.ts'],\n      paths: {\n        '@repo/scan-orchestrator/*': ['./src/*'],\n      },\n      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',\n    }),\n    filePath: resolve(\n      workspaceRoot,\n      'apps/scan-orchestrator/tsconfig.app.json',\n    ),\n  },\n  {\n    // @lcabrera/api is the browser half of the old data-access package: fetch\n    // client, HTTP contracts, base-URL resolution. It needs the DOM lib and\n    // vite/client that createAppTsConfig supplies by default (Window, Location,\n    // fetch, the Vite env object) — but, unlike packages/server, it must\n    // NOT append 'node'. That omission is the point: a stray process/fs reach-in\n    // fails typecheck here rather than quietly making a client-safe package\n    // server-only again, which is the regression\n    // packages/ui/scripts/check-public-api-client-safe.mjs now also guards.\n    config: createAppTsConfig({\n      include: ['src', 'vite.config.ts'],\n      // No `@/*` — @lcabrera/api is publishable, and that alias resolves only\n      // through a tsconfig. See the packages/ui entry above.\n      srcAlias: false,\n      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',\n    }),\n    filePath: resolve(workspaceRoot, 'packages/api/tsconfig.app.json'),\n  },\n  {\n    // @lcabrera/utils is pure and side-effect free by contract (AGENTS.md §1),\n    // which is exactly why it gets `types: []` rather than the default\n    // ['node']: denying it the Node ambient globals means a stray process/fs\n    // reach-in fails typecheck here instead of quietly eroding the guarantee\n    // that keeps this package the safe half of the utils/node-runtime split.\n    //\n    // Sources live under src/ (domain-grouped) with a root vite.config.ts, so\n    // include names both — matching the other library packages. `types: []`\n    // still denies Node ambient globals to keep the purity guarantee.\n    config: createNodeTsConfig({\n      include: ['src', 'vite.config.ts'],\n      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',\n      types: [],\n    }),\n    filePath: resolve(workspaceRoot, 'packages/utils/tsconfig.app.json'),\n  },\n  {\n    // Genuinely Node-only: a Vite build plugin reading the emitted manifest\n    // through node:fs/node:path off process.cwd(). Flat package, same\n    // include/exclude reasoning as @lcabrera/utils above.\n    config: createNodeTsConfig({\n      exclude: ['node_modules'],\n      include: ['**/*.ts'],\n      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',\n    }),\n    filePath: resolve(workspaceRoot, 'packages/plugins/tsconfig.app.json'),\n  },\n  {\n    // Genuinely Node-only: the shared Vite/lint/fmt config factories every\n    // workspace's vite.config.ts imports. Flat package, same include/exclude\n    // reasoning as @lcabrera/utils above.\n    config: createNodeTsConfig({\n      exclude: ['node_modules'],\n      include: ['**/*.ts'],\n      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',\n    }),\n    filePath: resolve(workspaceRoot, 'packages/vite-configs/tsconfig.app.json'),\n  },\n] as const;\n\nawait Promise.all(configs.map(writeConfigFile));\n",
     "usedDeprecatedRules": []
   },
   {
@@ -14250,10 +14248,10 @@
         "ruleId": "local-rules/destructuring-for-functions",
         "severity": 2,
         "message": "Functions with multiple parameters should use a single object parameter with a named type.",
-        "line": 110,
+        "line": 113,
         "column": 23,
         "messageId": "useObjectParam",
-        "endLine": 122,
+        "endLine": 125,
         "endColumn": 3,
         "suppressions": [
           {
@@ -14268,7 +14266,7 @@
     "warningCount": 0,
     "fixableErrorCount": 0,
     "fixableWarningCount": 0,
-    "source": "type CreateAppTsConfigArgs = {\n  readonly exclude?: readonly string[];\n  readonly include?: readonly string[];\n  /** Extra path aliases merged on top of the default `@/*` → `./src/*` mapping — for a package's own self-referencing alias (e.g. `@repo/ui/*`) or a cross-package one. */\n  readonly paths?: Record<string, readonly string[]>;\n  readonly rootDirs?: readonly string[];\n  readonly tsBuildInfoFile: string;\n  /** Extra ambient type roots appended to the default `['vite/client']` — e.g. `'node'` for a package whose src/ mixes browser-context and Node-context (SSR entry) files. */\n  readonly types?: readonly string[];\n};\n\ntype CreateNodeTsConfigArgs = {\n  readonly exclude?: readonly string[];\n  readonly include?: readonly string[];\n  /** Path aliases for this config — node configs have none by default. */\n  readonly paths?: Record<string, readonly string[]>;\n  readonly tsBuildInfoFile: string;\n  /** Ambient type roots — defaults to `['node']`. Pass `[]` for a package contractually barred from Node globals (e.g. `@repo/utils`, which is pure and side-effect free), so the config cannot hand it the APIs it must not reach for. */\n  readonly types?: readonly string[];\n};\n\ntype TsConfig = {\n  readonly compilerOptions: Record<string, unknown>;\n  readonly exclude: readonly string[];\n  readonly include: readonly string[];\n};\n\nconst APP_TS_CONFIG: Omit<TsConfig, 'compilerOptions'> = {\n  exclude: ['vite-monorepo/apps/api-server', 'miscelanious', 'utils'],\n  include: [\n    'src',\n    '**/*',\n    '**/.server/**/*',\n    '**/.client/**/*',\n    '.react-router/types/**/*',\n  ],\n};\n\nconst NODE_TS_CONFIG: Omit<TsConfig, 'compilerOptions'> = {\n  exclude: ['utils'],\n  include: ['vite.config.ts'],\n};\n\nconst createAppCompilerOptions = ({\n  paths,\n  rootDirs = ['.', './.react-router/types'],\n  tsBuildInfoFile,\n  types = [],\n}: CreateAppTsConfigArgs): Record<string, unknown> => ({\n  allowImportingTsExtensions: true,\n  erasableSyntaxOnly: true,\n  esModuleInterop: true,\n  forceConsistentCasingInFileNames: true,\n  jsx: 'react-jsx',\n  lib: ['ES2025', 'DOM', 'DOM.Iterable'],\n  module: 'ESNext',\n  moduleDetection: 'force',\n  moduleResolution: 'bundler',\n  noEmit: true,\n  noFallthroughCasesInSwitch: true,\n  noUncheckedIndexedAccess: true,\n  noUncheckedSideEffectImports: true,\n  noUnusedLocals: true,\n  noUnusedParameters: true,\n  paths: {\n    '@/*': ['./src/*'],\n    ...paths,\n  },\n  resolveJsonModule: true,\n  rootDirs,\n  skipLibCheck: true,\n  strict: true,\n  target: 'ES2025',\n  tsBuildInfoFile,\n  types: ['vite/client', ...types],\n  useDefineForClassFields: true,\n  verbatimModuleSyntax: true,\n});\n\nconst createNodeCompilerOptions = ({\n  paths,\n  tsBuildInfoFile,\n  types = ['node'],\n}: CreateNodeTsConfigArgs): Record<string, unknown> => ({\n  allowImportingTsExtensions: true,\n  erasableSyntaxOnly: true,\n  forceConsistentCasingInFileNames: true,\n  lib: ['ES2025'],\n  module: 'ESNext',\n  moduleDetection: 'force',\n  moduleResolution: 'bundler',\n  noEmit: true,\n  noFallthroughCasesInSwitch: true,\n  // Kept in lockstep with createAppCompilerOptions: without it the Node-context\n  // packages were type-checked strictly less than the browser ones, so an\n  // unchecked arr[0] passed here and failed there for no principled reason.\n  noUncheckedIndexedAccess: true,\n  noUncheckedSideEffectImports: true,\n  noUnusedLocals: true,\n  noUnusedParameters: true,\n  ...(paths && { paths }),\n  skipLibCheck: true,\n  strict: true,\n  target: 'ES2025',\n  tsBuildInfoFile,\n  types,\n  verbatimModuleSyntax: true,\n});\n\nconst mergeTsConfig = (\n  baseConfig: TsConfig,\n  overrides: Partial<TsConfig> = {},\n): TsConfig => ({\n  ...baseConfig,\n  ...overrides,\n  compilerOptions: {\n    ...baseConfig.compilerOptions,\n    ...overrides.compilerOptions,\n  },\n  exclude: overrides.exclude ?? baseConfig.exclude,\n  include: overrides.include ?? baseConfig.include,\n});\n\nexport const createAppTsConfig = ({\n  exclude,\n  include,\n  paths,\n  rootDirs,\n  tsBuildInfoFile,\n  types,\n}: CreateAppTsConfigArgs): TsConfig =>\n  mergeTsConfig(\n    {\n      compilerOptions: createAppCompilerOptions({\n        paths,\n        rootDirs,\n        tsBuildInfoFile,\n        types,\n      }),\n      exclude: APP_TS_CONFIG.exclude,\n      include: APP_TS_CONFIG.include,\n    },\n    {\n      exclude,\n      include,\n    },\n  );\n\nexport const createNodeTsConfig = ({\n  exclude,\n  include,\n  paths,\n  tsBuildInfoFile,\n  types,\n}: CreateNodeTsConfigArgs): TsConfig =>\n  mergeTsConfig(\n    {\n      compilerOptions: createNodeCompilerOptions({\n        paths,\n        tsBuildInfoFile,\n        types,\n      }),\n      exclude: NODE_TS_CONFIG.exclude,\n      include: NODE_TS_CONFIG.include,\n    },\n    {\n      exclude,\n      include,\n    },\n  );\n",
+    "source": "type CreateAppTsConfigArgs = {\n  readonly exclude?: readonly string[];\n  readonly include?: readonly string[];\n  /** Extra path aliases merged on top of the default `@/*` → `./src/*` mapping — for a package's own self-referencing alias (e.g. `@lcabrera/ui/*`) or a cross-package one. */\n  readonly paths?: Record<string, readonly string[]>;\n  readonly rootDirs?: readonly string[];\n  /** Set `false` to omit the default `@/*` → `./src/*` alias. Publishable packages pass this: `@/` resolves only through a tsconfig, so an `@/` import cannot survive publication, and dropping the alias makes tsc reject one instead of a reviewer having to spot it. */\n  readonly srcAlias?: boolean;\n  readonly tsBuildInfoFile: string;\n  /** Extra ambient type roots appended to the default `['vite/client']` — e.g. `'node'` for a package whose src/ mixes browser-context and Node-context (SSR entry) files. */\n  readonly types?: readonly string[];\n};\n\ntype CreateNodeTsConfigArgs = {\n  readonly exclude?: readonly string[];\n  readonly include?: readonly string[];\n  /** Path aliases for this config — node configs have none by default. */\n  readonly paths?: Record<string, readonly string[]>;\n  readonly tsBuildInfoFile: string;\n  /** Ambient type roots — defaults to `['node']`. Pass `[]` for a package contractually barred from Node globals (e.g. `@lcabrera/utils`, which is pure and side-effect free), so the config cannot hand it the APIs it must not reach for. */\n  readonly types?: readonly string[];\n};\n\ntype TsConfig = {\n  readonly compilerOptions: Record<string, unknown>;\n  readonly exclude: readonly string[];\n  readonly include: readonly string[];\n};\n\nconst APP_TS_CONFIG: Omit<TsConfig, 'compilerOptions'> = {\n  exclude: ['vite-monorepo/apps/api-server', 'miscelanious', 'utils'],\n  include: [\n    'src',\n    '**/*',\n    '**/.server/**/*',\n    '**/.client/**/*',\n    '.react-router/types/**/*',\n  ],\n};\n\nconst NODE_TS_CONFIG: Omit<TsConfig, 'compilerOptions'> = {\n  exclude: ['utils'],\n  include: ['vite.config.ts'],\n};\n\nconst createAppCompilerOptions = ({\n  paths,\n  rootDirs = ['.', './.react-router/types'],\n  srcAlias = true,\n  tsBuildInfoFile,\n  types = [],\n}: CreateAppTsConfigArgs): Record<string, unknown> => ({\n  allowImportingTsExtensions: true,\n  erasableSyntaxOnly: true,\n  esModuleInterop: true,\n  forceConsistentCasingInFileNames: true,\n  jsx: 'react-jsx',\n  lib: ['ES2025', 'DOM', 'DOM.Iterable'],\n  module: 'ESNext',\n  moduleDetection: 'force',\n  moduleResolution: 'bundler',\n  noEmit: true,\n  noFallthroughCasesInSwitch: true,\n  noUncheckedIndexedAccess: true,\n  noUncheckedSideEffectImports: true,\n  noUnusedLocals: true,\n  noUnusedParameters: true,\n  paths: {\n    ...(srcAlias && { '@/*': ['./src/*'] }),\n    ...paths,\n  },\n  resolveJsonModule: true,\n  rootDirs,\n  skipLibCheck: true,\n  strict: true,\n  target: 'ES2025',\n  tsBuildInfoFile,\n  types: ['vite/client', ...types],\n  useDefineForClassFields: true,\n  verbatimModuleSyntax: true,\n});\n\nconst createNodeCompilerOptions = ({\n  paths,\n  tsBuildInfoFile,\n  types = ['node'],\n}: CreateNodeTsConfigArgs): Record<string, unknown> => ({\n  allowImportingTsExtensions: true,\n  erasableSyntaxOnly: true,\n  forceConsistentCasingInFileNames: true,\n  lib: ['ES2025'],\n  module: 'ESNext',\n  moduleDetection: 'force',\n  moduleResolution: 'bundler',\n  noEmit: true,\n  noFallthroughCasesInSwitch: true,\n  // Kept in lockstep with createAppCompilerOptions: without it the Node-context\n  // packages were type-checked strictly less than the browser ones, so an\n  // unchecked arr[0] passed here and failed there for no principled reason.\n  noUncheckedIndexedAccess: true,\n  noUncheckedSideEffectImports: true,\n  noUnusedLocals: true,\n  noUnusedParameters: true,\n  ...(paths && { paths }),\n  skipLibCheck: true,\n  strict: true,\n  target: 'ES2025',\n  tsBuildInfoFile,\n  types,\n  verbatimModuleSyntax: true,\n});\n\nconst mergeTsConfig = (\n  baseConfig: TsConfig,\n  overrides: Partial<TsConfig> = {},\n): TsConfig => ({\n  ...baseConfig,\n  ...overrides,\n  compilerOptions: {\n    ...baseConfig.compilerOptions,\n    ...overrides.compilerOptions,\n  },\n  exclude: overrides.exclude ?? baseConfig.exclude,\n  include: overrides.include ?? baseConfig.include,\n});\n\nexport const createAppTsConfig = ({\n  exclude,\n  include,\n  paths,\n  rootDirs,\n  srcAlias,\n  tsBuildInfoFile,\n  types,\n}: CreateAppTsConfigArgs): TsConfig =>\n  mergeTsConfig(\n    {\n      compilerOptions: createAppCompilerOptions({\n        paths,\n        rootDirs,\n        srcAlias,\n        tsBuildInfoFile,\n        types,\n      }),\n      exclude: APP_TS_CONFIG.exclude,\n      include: APP_TS_CONFIG.include,\n    },\n    {\n      exclude,\n      include,\n    },\n  );\n\nexport const createNodeTsConfig = ({\n  exclude,\n  include,\n  paths,\n  tsBuildInfoFile,\n  types,\n}: CreateNodeTsConfigArgs): TsConfig =>\n  mergeTsConfig(\n    {\n      compilerOptions: createNodeCompilerOptions({\n        paths,\n        tsBuildInfoFile,\n        types,\n      }),\n      exclude: NODE_TS_CONFIG.exclude,\n      include: NODE_TS_CONFIG.include,\n    },\n    {\n      exclude,\n      include,\n    },\n  );\n",
     "usedDeprecatedRules": []
   },
   {
@@ -28000,17 +27998,6 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/detectPinOrderConflict.test.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
     "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/filterSettingsColumns.util.test.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -28023,6 +28010,17 @@
   },
   {
     "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/filterSettingsColumns.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/getHasPinOrderConflict.util.test.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -31472,14 +31470,14 @@
         "ruleId": "@stylexjs/valid-styles",
         "severity": 2,
         "message": "This is not a key that is allowed by stylex",
-        "line": 18,
+        "line": 16,
         "column": 5,
-        "endLine": 18,
+        "endLine": 16,
         "endColumn": 19,
         "suppressions": [
           {
             "kind": "directive",
-            "justification": ""
+            "justification": "CSS anchor positioning; StyleX's allowlist predates the spec (ADR-002)"
           }
         ]
       },
@@ -31487,14 +31485,14 @@
         "ruleId": "@stylexjs/valid-styles",
         "severity": 2,
         "message": "justifySelf value must be one of:\nauto\nnormal\nstretch\ncenter\nstart\nend\nflex-start\nflex-end\nleft\nright\nbaseline\nfirst baseline\nlast baseline\nsafe center\nunsafe center\nself-start\nself-end\nnull\ninitial\ninherit\nunset\nrevert",
-        "line": 34,
+        "line": 33,
         "column": 18,
-        "endLine": 34,
+        "endLine": 33,
         "endColumn": 33,
         "suppressions": [
           {
             "kind": "directive",
-            "justification": ""
+            "justification": "CSS anchor positioning; StyleX's allowlist predates the spec (ADR-002)"
           }
         ]
       },
@@ -31509,7 +31507,7 @@
         "suppressions": [
           {
             "kind": "directive",
-            "justification": ""
+            "justification": "CSS anchor positioning; StyleX's allowlist predates the spec (ADR-002)"
           }
         ]
       },
@@ -31517,14 +31515,14 @@
         "ruleId": "@stylexjs/valid-styles",
         "severity": 2,
         "message": "This is not a key that is allowed by stylex",
-        "line": 87,
+        "line": 88,
         "column": 5,
-        "endLine": 87,
+        "endLine": 88,
         "endColumn": 17,
         "suppressions": [
           {
             "kind": "directive",
-            "justification": ""
+            "justification": "CSS anchor positioning; StyleX's allowlist predates the spec (ADR-002)"
           }
         ]
       },
@@ -31532,14 +31530,14 @@
         "ruleId": "@stylexjs/valid-styles",
         "severity": 2,
         "message": "This is not a key that is allowed by stylex",
-        "line": 92,
+        "line": 94,
         "column": 5,
-        "endLine": 92,
+        "endLine": 94,
         "endColumn": 17,
         "suppressions": [
           {
             "kind": "directive",
-            "justification": ""
+            "justification": "CSS anchor positioning; StyleX's allowlist predates the spec (ADR-002)"
           }
         ]
       },
@@ -31547,14 +31545,14 @@
         "ruleId": "@stylexjs/valid-styles",
         "severity": 2,
         "message": "This is not a key that is allowed by stylex",
-        "line": 97,
+        "line": 100,
         "column": 5,
-        "endLine": 97,
+        "endLine": 100,
         "endColumn": 17,
         "suppressions": [
           {
             "kind": "directive",
-            "justification": ""
+            "justification": "CSS anchor positioning; StyleX's allowlist predates the spec (ADR-002)"
           }
         ]
       }
@@ -31629,14 +31627,14 @@
         "ruleId": "@stylexjs/valid-styles",
         "severity": 2,
         "message": "This is not a key that is allowed by stylex",
-        "line": 8,
+        "line": 6,
         "column": 5,
-        "endLine": 8,
+        "endLine": 6,
         "endColumn": 15,
         "suppressions": [
           {
             "kind": "directive",
-            "justification": ""
+            "justification": "CSS anchor positioning; StyleX's allowlist predates the spec (ADR-002)"
           }
         ]
       }
@@ -34544,24 +34542,7 @@
   {
     "filePath": "packages/ui/src/entry/createHandleRequest.util.tsx",
     "messages": [],
-    "suppressedMessages": [
-      {
-        "ruleId": "local-rules/destructuring-for-functions",
-        "severity": 2,
-        "message": "Functions with multiple parameters should use a single object parameter with a named type.",
-        "line": 48,
-        "column": 40,
-        "messageId": "useObjectParam",
-        "endLine": 127,
-        "endColumn": 4,
-        "suppressions": [
-          {
-            "kind": "directive",
-            "justification": ""
-          }
-        ]
-      }
-    ],
+    "suppressedMessages": [],
     "errorCount": 0,
     "fatalErrorCount": 0,
     "warningCount": 0,
@@ -35220,6 +35201,17 @@
   },
   {
     "filePath": "packages/ui/src/server.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/stylex-module-paths.test.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -37046,9 +37038,9 @@
         "ruleId": "security/detect-non-literal-fs-filename",
         "severity": 2,
         "message": "Found readFileSync from package \"node:fs\" with non literal argument at index 0",
-        "line": 38,
+        "line": 45,
         "column": 36,
-        "endLine": 38,
+        "endLine": 45,
         "endColumn": 73,
         "suppressions": [
           {
@@ -37063,7 +37055,18 @@
     "warningCount": 0,
     "fixableErrorCount": 0,
     "fixableWarningCount": 0,
-    "source": "import { readFileSync } from 'node:fs';\nimport { createRequire } from 'node:module';\nimport { dirname, resolve } from 'node:path';\nimport { pathToFileURL } from 'node:url';\n\nimport localRules from '../eslint-local-rules/index.js';\n\n// Resolved from tsconfigRootDir (each consuming app's own directory), never\n// process.cwd() — process.cwd() is a single, fixed value for the entire\n// lifetime of whatever process imports this module. That's harmless for\n// this repo's own `eslint .` package.json scripts (each `cd`s into one\n// app's directory before running, so cwd always matches the app being\n// linted), but breaks for any single long-lived process serving multiple\n// apps — e.g. an editor's ESLint extension, which stays running for the\n// whole workspace and never re-execs per app. In that scenario\n// process.cwd() lands on the workspace root, which has none of these\n// plugins as direct dependencies (they're only installed under each app's\n// own node_modules), so resolution either fails outright or falls back to\n// an inconsistent module instance — which is what actually produces the\n// \"multiple candidate TSConfigRootDirs\" symptom, not just a missing\n// tsconfigRootDir parser option (that fix alone wasn't sufficient).\nconst resolveWorkspaceImportSpecifier = (workspaceRequire, specifier) => {\n  try {\n    return workspaceRequire.resolve(specifier);\n  } catch (error) {\n    if (\n      !error ||\n      typeof error !== 'object' ||\n      !('code' in error) ||\n      error.code !== 'ERR_PACKAGE_PATH_NOT_EXPORTED'\n    ) {\n      throw error;\n    }\n\n    const packageJsonPath = workspaceRequire.resolve(\n      `${specifier}/package.json`,\n    );\n    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));\n    const rootExport = packageJson.exports?.['.'];\n\n    let entryPoint;\n    if (typeof rootExport === 'string') {\n      entryPoint = rootExport;\n    } else if (rootExport && typeof rootExport === 'object') {\n      entryPoint =\n        rootExport.import ?? rootExport.default ?? rootExport.require;\n    }\n\n    entryPoint ??= packageJson.module ?? packageJson.main;\n\n    if (typeof entryPoint !== 'string') {\n      throw error;\n    }\n\n    return pathToFileURL(resolve(dirname(packageJsonPath), entryPoint)).href;\n  }\n};\n\nconst importFromWorkspace = async (workspaceRequire, specifier) => {\n  return await import(\n    resolveWorkspaceImportSpecifier(workspaceRequire, specifier)\n  );\n};\n\nconst createTypescriptLanguageOptions = (tseslint, tsconfigRootDir) => ({\n  ecmaVersion: 'latest',\n  parser: tseslint.parser,\n  parserOptions: {\n    ecmaFeatures: {\n      jsx: true,\n    },\n    sourceType: 'module',\n    tsconfigRootDir,\n  },\n});\n\nconst GLOBAL_IGNORES = [\n  '.react-router/**',\n  'build/**',\n  'coverage/**',\n  'dist/**',\n  'miscelanious/**',\n  'node_modules/**',\n  'scripts/**',\n  'utils/**',\n];\n\nconst UI_PUBLIC_IMPORT_BOUNDARY_PATTERNS = [\n  {\n    group: ['@repo/ui/src/**'],\n    message:\n      'Do not import from @repo/ui source internals. Use @repo/ui public exports or supported subpaths.',\n  },\n  {\n    group: ['@repo/ui/**/index', '@repo/ui/**/index.*'],\n    message:\n      'Do not import @repo/ui index files directly. Use the folder path or @repo/ui root exports.',\n  },\n  {\n    group: [\n      '@repo/ui/**/*.component',\n      '!@repo/ui/components/Settings/Settings.component',\n    ],\n    message:\n      'Do not import component implementation files directly from @repo/ui. Import from @repo/ui root exports or component barrels.',\n  },\n];\n\n// Runtime database access is server-only. Match the whole `@repo/server/db`\n// import path — not individual utils, which drift as they are added and removed —\n// plus the raw `pg` driver, and cover both direct imports and barrel re-exports.\n// Type-only imports are erased at compile time, so they stay allowed (e.g. the\n// `query-builder.types` the pure `db/query-builder/*` builders share); the guard is\n// on runtime access, which is what pulls the DB connection into the bundle.\nconst SERVER_ONLY_DB_MESSAGE =\n  'Direct database access is server-only (the pg driver and @repo/server/db runtime helpers). Move this import to a `.server.ts` file or a `.server/` directory — or reach it through a server-only module.';\n\nconst DB_IMPORT_BOUNDARY_RESTRICTIONS = [\n  'ImportDeclaration',\n  'ExportAllDeclaration',\n  'ExportNamedDeclaration',\n].flatMap((declaration) => {\n  const kind =\n    declaration === 'ImportDeclaration' ? 'importKind' : 'exportKind';\n\n  return [\n    String.raw`${declaration}[${kind}!='type'][source.value=/^@repo\\/server\\/db\\//]`,\n    `${declaration}[${kind}!='type'][source.value='pg']`,\n  ].map((selector) => ({ message: SERVER_ONLY_DB_MESSAGE, selector }));\n});\n\nconst CLIENT_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS = [\n  {\n    message:\n      'Node built-ins are server-only. Move this import/export to server files.',\n    selector: 'ExportAllDeclaration[source.value=/^node:/]',\n  },\n  {\n    message:\n      'Node built-ins are server-only. Move this import/export to server files.',\n    selector: 'ExportNamedDeclaration[source.value=/^node:/]',\n  },\n  {\n    message:\n      'Node built-ins are server-only. Move this import/export to server files.',\n    selector: 'ImportDeclaration[source.value=/^node:/]',\n  },\n  {\n    message:\n      'Server-only UI helpers must be imported via @repo/ui/server from server entry files only.',\n    selector:\n      \"ImportDeclaration[source.value='@repo/ui/entry/createHandleRequest.util']\",\n  },\n  {\n    message:\n      'The @repo/ui/server entrypoint is server-only and must not be imported from client/shared files.',\n    selector: \"ImportDeclaration[source.value='@repo/ui/server']\",\n  },\n  ...DB_IMPORT_BOUNDARY_RESTRICTIONS,\n];\n\nexport const createCustomRulesLintConfig = async ({\n  enforceServerClientImportBoundary = false,\n  enforceUiPublicImportBoundary = false,\n  ignorePatterns = [],\n  tsconfigRootDir = process.cwd(),\n} = {}) => {\n  // Scoped to tsconfigRootDir, not process.cwd() — see the comment above\n  // resolveWorkspaceImportSpecifier for why this distinction is the actual\n  // fix, not just a style preference.\n  const workspaceRequire = createRequire(`${tsconfigRootDir}/package.json`);\n  const fromWorkspace = (specifier) =>\n    importFromWorkspace(workspaceRequire, specifier);\n\n  const tseslintImport = await fromWorkspace('typescript-eslint');\n  const tseslint = tseslintImport.default ?? tseslintImport;\n\n  const perfectionistImport = await fromWorkspace(\n    'eslint-plugin-perfectionist',\n  );\n  const perfectionist = perfectionistImport.default ?? perfectionistImport;\n\n  const stylexPluginImport = await fromWorkspace('@stylexjs/eslint-plugin');\n  const stylexPlugin = stylexPluginImport.default ?? stylexPluginImport;\n\n  const eslintImport = await fromWorkspace('@eslint/js');\n  const eslint = eslintImport.default ?? eslintImport;\n\n  const eslintConfigPrettierImport = await fromWorkspace(\n    'eslint-config-prettier/flat',\n  );\n  const eslintConfigPrettier =\n    eslintConfigPrettierImport.default ?? eslintConfigPrettierImport;\n\n  const reactDomImport = await fromWorkspace('eslint-plugin-react-dom');\n  const reactDom = reactDomImport.default ?? reactDomImport;\n\n  const reactHooksImport = await fromWorkspace('eslint-plugin-react-hooks');\n  const reactHooks = reactHooksImport.default ?? reactHooksImport;\n\n  const reactRefreshImport = await fromWorkspace('eslint-plugin-react-refresh');\n  const reactRefresh = reactRefreshImport.default ?? reactRefreshImport;\n\n  const reactXImport = await fromWorkspace('eslint-plugin-react-x');\n  const reactX = reactXImport.default ?? reactXImport;\n\n  const securityImport = await fromWorkspace('eslint-plugin-security');\n  const security = securityImport.default ?? securityImport;\n\n  const unicornImport = await fromWorkspace('eslint-plugin-unicorn');\n  const unicorn = unicornImport.default ?? unicornImport;\n\n  const globalsImport = await fromWorkspace('globals');\n  const globals = globalsImport.default ?? globalsImport;\n\n  return [\n    {\n      // Oxlint consumes eslint-disable comments too — eslint must never\n      // remove directives it considers \"unused\" (they may be suppressing an\n      // oxlint rule of the same name), so unused-directive reporting is off.\n      linterOptions: {\n        reportUnusedDisableDirectives: 'off',\n      },\n    },\n    // 1. Core ESLint\n    eslint.configs.recommended,\n    // Add security recommended config here (good spot: after core but before styling/sorting)\n    security.configs.recommended,\n    unicorn.configs.recommended,\n\n    // 2. React Hooks and Refresh\n    reactHooks.configs.flat.recommended,\n    reactRefresh.configs.recommended,\n    {\n      files: ['**/root.ts', '**/root.tsx'],\n      rules: {\n        'react-refresh/only-export-components': 'off',\n      },\n    },\n    // Other configs...\n    // Enable lint rules for React\n    reactX.configs['recommended-typescript'],\n    // Enable lint rules for React DOM\n    reactDom.configs.recommended,\n\n    // 3. Sorting (Perfectionist)\n    perfectionist.configs['recommended-natural'],\n\n    // 4. Formatting (Prettier - Must be last to disable conflicts)\n    eslintConfigPrettier,\n\n    ...(Array.isArray(tseslint.configs.recommended)\n      ? tseslint.configs.recommended\n      : [tseslint.configs.recommended]),\n\n    {\n      rules: {\n        // Escalated from the plugins' default `warn` so the bulk-suppression\n        // baseline (eslint-suppressions.json) covers inherited findings and\n        // NEW occurrences fail the gate (suppressions only apply to\n        // error-severity rules).\n        'react-x/set-state-in-effect': 'error',\n        'security/detect-non-literal-fs-filename': 'error',\n        'security/detect-non-literal-regexp': 'error',\n        'security/detect-object-injection': 'off',\n        'security/detect-unsafe-regex': 'error',\n        'unicorn/consistent-boolean-name': [\n          'error',\n          {\n            prefixes: {\n              are: true,\n            },\n          },\n        ],\n        'unicorn/filename-case': 'off',\n        'unicorn/name-replacements': 'off',\n        'unicorn/no-array-reduce': 'off',\n        // Auto-fixer rewrites http:// string literals to https://, silently\n        // corrupting test fixtures and local-dev URLs — see the base factory.\n        'unicorn/prefer-https': 'off',\n        'unicorn/prefer-query-selector': 'off',\n        'unicorn/prevent-abbreviations': 'off',\n      },\n    },\n    // 5. JavaScript files configuration (for Node.js server files, etc.)\n    {\n      files: ['**/*.js', '**/*.mjs', '**/*.cjs'],\n      languageOptions: {\n        ecmaVersion: 'latest',\n        globals: {\n          ...globals.node,\n        },\n      },\n      rules: {\n        'no-console': 'off',\n        'unicorn/prefer-module': 'off',\n        'unicorn/prevent-abbreviations': 'off',\n      },\n    },\n    {\n      ignores: [...GLOBAL_IGNORES, ...ignorePatterns],\n    },\n    ...(enforceServerClientImportBoundary\n      ? [\n          {\n            files: ['src/**/*.ts', 'src/**/*.tsx'],\n            ignores: [\n              'src/entry.server.tsx',\n              'src/**/*.server.ts',\n              'src/**/*.server.tsx',\n              // A `.server/` directory is a React Router server-only module\n              // (every file inside is stripped from the client bundle), so the\n              // server-only import bans do not apply to its contents — the same\n              // exemption the `.server.ts` suffix gets.\n              'src/**/.server/**',\n            ],\n            rules: {\n              'no-restricted-syntax': [\n                'error',\n                ...CLIENT_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS,\n              ],\n            },\n          },\n        ]\n      : []),\n    {\n      files: ['src/**/*.ts', 'src/**/*.tsx'],\n      languageOptions: createTypescriptLanguageOptions(\n        tseslint,\n        tsconfigRootDir,\n      ),\n      plugins: {\n        '@stylexjs': stylexPlugin,\n        '@typescript-eslint': tseslint.plugin,\n        'local-rules': localRules,\n        'typescript-eslint': tseslint.plugin,\n      },\n      rules: {\n        '@stylexjs/sort-keys': 'warn',\n        '@stylexjs/valid-styles': 'error',\n        '@typescript-eslint/consistent-type-definitions': ['error', 'type'],\n        'func-style': ['error', 'expression'],\n        'local-rules/clean-import-paths': 'error',\n        'local-rules/destructuring-for-functions': 'error',\n        'local-rules/filename-convention': 'error',\n        'local-rules/merge-duplicate-imports': 'error',\n        'local-rules/no-inline-type-imports': 'error',\n        'local-rules/type-suffix-naming': 'error',\n        ...(enforceUiPublicImportBoundary && {\n          'no-restricted-imports': [\n            'error',\n            {\n              patterns: UI_PUBLIC_IMPORT_BOUNDARY_PATTERNS,\n            },\n          ],\n        }),\n      },\n    },\n    {\n      files: ['src/entry.server.tsx'],\n      rules: {\n        'func-style': 'off',\n        'local-rules/destructuring-for-functions': 'off',\n      },\n    },\n    {\n      files: ['src/**/*.stylex.ts'],\n      plugins: {\n        '@stylexjs': stylexPlugin,\n      },\n      rules: {\n        'local-rules/destructuring-for-functions': 'off',\n        'perfectionist/sort-object-types': 'off',\n        'perfectionist/sort-objects': 'off',\n        'unicorn/no-null': 'off',\n      },\n    },\n    {\n      files: [\n        'src/**/*.component.tsx',\n        'src/**/*.errorBoundary.tsx',\n        'src/**/*.layout.tsx',\n      ],\n      languageOptions: createTypescriptLanguageOptions(\n        tseslint,\n        tsconfigRootDir,\n      ),\n      plugins: {\n        'local-rules': localRules,\n      },\n      rules: {\n        'local-rules/no-type-definitions-in-components': 'error',\n        'local-rules/single-component-export': 'error',\n      },\n    },\n  ];\n};\n",
+    "source": "import { readFileSync } from 'node:fs';\nimport { createRequire } from 'node:module';\nimport { dirname, resolve } from 'node:path';\nimport { pathToFileURL } from 'node:url';\n\nimport localRules from '../eslint-local-rules/index.js';\nimport {\n  BARREL_SYNTAX_RESTRICTIONS,\n  CLIENT_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS,\n  REACT_TYPE_IMPORT_PATHS,\n  STATE_LIBRARY_IMPORT_PATTERNS,\n  UI_PUBLIC_IMPORT_BOUNDARY_PATTERNS,\n} from './eslint.restrictions.shared.mjs';\n\n// Resolved from tsconfigRootDir (each consuming app's own directory), never\n// process.cwd() — process.cwd() is a single, fixed value for the entire\n// lifetime of whatever process imports this module. That's harmless for\n// this repo's own `eslint .` package.json scripts (each `cd`s into one\n// app's directory before running, so cwd always matches the app being\n// linted), but breaks for any single long-lived process serving multiple\n// apps — e.g. an editor's ESLint extension, which stays running for the\n// whole workspace and never re-execs per app. In that scenario\n// process.cwd() lands on the workspace root, which has none of these\n// plugins as direct dependencies (they're only installed under each app's\n// own node_modules), so resolution either fails outright or falls back to\n// an inconsistent module instance — which is what actually produces the\n// \"multiple candidate TSConfigRootDirs\" symptom, not just a missing\n// tsconfigRootDir parser option (that fix alone wasn't sufficient).\nconst resolveWorkspaceImportSpecifier = (workspaceRequire, specifier) => {\n  try {\n    return workspaceRequire.resolve(specifier);\n  } catch (error) {\n    if (\n      !error ||\n      typeof error !== 'object' ||\n      !('code' in error) ||\n      error.code !== 'ERR_PACKAGE_PATH_NOT_EXPORTED'\n    ) {\n      throw error;\n    }\n\n    const packageJsonPath = workspaceRequire.resolve(\n      `${specifier}/package.json`,\n    );\n    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));\n    const rootExport = packageJson.exports?.['.'];\n\n    let entryPoint;\n    if (typeof rootExport === 'string') {\n      entryPoint = rootExport;\n    } else if (rootExport && typeof rootExport === 'object') {\n      entryPoint =\n        rootExport.import ?? rootExport.default ?? rootExport.require;\n    }\n\n    entryPoint ??= packageJson.module ?? packageJson.main;\n\n    if (typeof entryPoint !== 'string') {\n      throw error;\n    }\n\n    return pathToFileURL(resolve(dirname(packageJsonPath), entryPoint)).href;\n  }\n};\n\nconst importFromWorkspace = async (workspaceRequire, specifier) => {\n  return await import(\n    resolveWorkspaceImportSpecifier(workspaceRequire, specifier)\n  );\n};\n\nconst createTypescriptLanguageOptions = (tseslint, tsconfigRootDir) => ({\n  ecmaVersion: 'latest',\n  parser: tseslint.parser,\n  parserOptions: {\n    ecmaFeatures: {\n      jsx: true,\n    },\n    sourceType: 'module',\n    tsconfigRootDir,\n  },\n});\n\nconst GLOBAL_IGNORES = [\n  '.react-router/**',\n  'build/**',\n  'coverage/**',\n  'dist/**',\n  'miscelanious/**',\n  'node_modules/**',\n  'scripts/**',\n  'utils/**',\n];\n\nexport const createCustomRulesLintConfig = async ({\n  enforceServerClientImportBoundary = false,\n  enforceUiPublicImportBoundary = false,\n  ignorePatterns = [],\n  tsconfigRootDir = process.cwd(),\n} = {}) => {\n  // Scoped to tsconfigRootDir, not process.cwd() — see the comment above\n  // resolveWorkspaceImportSpecifier for why this distinction is the actual\n  // fix, not just a style preference.\n  const workspaceRequire = createRequire(`${tsconfigRootDir}/package.json`);\n  const fromWorkspace = (specifier) =>\n    importFromWorkspace(workspaceRequire, specifier);\n\n  const tseslintImport = await fromWorkspace('typescript-eslint');\n  const tseslint = tseslintImport.default ?? tseslintImport;\n\n  const perfectionistImport = await fromWorkspace(\n    'eslint-plugin-perfectionist',\n  );\n  const perfectionist = perfectionistImport.default ?? perfectionistImport;\n\n  const stylexPluginImport = await fromWorkspace('@stylexjs/eslint-plugin');\n  const stylexPlugin = stylexPluginImport.default ?? stylexPluginImport;\n\n  const eslintImport = await fromWorkspace('@eslint/js');\n  const eslint = eslintImport.default ?? eslintImport;\n\n  const eslintConfigPrettierImport = await fromWorkspace(\n    'eslint-config-prettier/flat',\n  );\n  const eslintConfigPrettier =\n    eslintConfigPrettierImport.default ?? eslintConfigPrettierImport;\n\n  const reactDomImport = await fromWorkspace('eslint-plugin-react-dom');\n  const reactDom = reactDomImport.default ?? reactDomImport;\n\n  const reactHooksImport = await fromWorkspace('eslint-plugin-react-hooks');\n  const reactHooks = reactHooksImport.default ?? reactHooksImport;\n\n  const reactRefreshImport = await fromWorkspace('eslint-plugin-react-refresh');\n  const reactRefresh = reactRefreshImport.default ?? reactRefreshImport;\n\n  const reactXImport = await fromWorkspace('eslint-plugin-react-x');\n  const reactX = reactXImport.default ?? reactXImport;\n\n  const securityImport = await fromWorkspace('eslint-plugin-security');\n  const security = securityImport.default ?? securityImport;\n\n  const unicornImport = await fromWorkspace('eslint-plugin-unicorn');\n  const unicorn = unicornImport.default ?? unicornImport;\n\n  const globalsImport = await fromWorkspace('globals');\n  const globals = globalsImport.default ?? globalsImport;\n\n  return [\n    {\n      // See the matching block in `eslint.base-custom-rules.shared.config.mjs`\n      // for why this was off and what had to change before it could be on: in\n      // short, `eslint-disable` is for ESLint findings and `oxlint-disable` for\n      // Oxlint's, so \"unused\" now means the directive is either dead or\n      // misnamed — never load-bearing.\n      linterOptions: {\n        reportUnusedDisableDirectives: 'error',\n      },\n    },\n    // 1. Core ESLint\n    eslint.configs.recommended,\n    // Add security recommended config here (good spot: after core but before styling/sorting)\n    security.configs.recommended,\n    unicorn.configs.recommended,\n\n    // 2. React Hooks and Refresh\n    reactHooks.configs.flat.recommended,\n    reactRefresh.configs.recommended,\n    {\n      files: ['**/root.ts', '**/root.tsx'],\n      rules: {\n        'react-refresh/only-export-components': 'off',\n      },\n    },\n    // Other configs...\n    // Enable lint rules for React\n    reactX.configs['recommended-typescript'],\n    // Enable lint rules for React DOM\n    reactDom.configs.recommended,\n\n    // 3. Sorting (Perfectionist)\n    perfectionist.configs['recommended-natural'],\n\n    // 4. Formatting (Prettier - Must be last to disable conflicts)\n    eslintConfigPrettier,\n\n    ...(Array.isArray(tseslint.configs.recommended)\n      ? tseslint.configs.recommended\n      : [tseslint.configs.recommended]),\n\n    {\n      rules: {\n        // Escalated from the plugins' default `warn` so the bulk-suppression\n        // baseline (eslint-suppressions.json) covers inherited findings and\n        // NEW occurrences fail the gate (suppressions only apply to\n        // error-severity rules).\n        'react-x/set-state-in-effect': 'error',\n        'security/detect-non-literal-fs-filename': 'error',\n        'security/detect-non-literal-regexp': 'error',\n        'security/detect-object-injection': 'off',\n        'security/detect-unsafe-regex': 'error',\n        'unicorn/consistent-boolean-name': [\n          'error',\n          {\n            prefixes: {\n              are: true,\n            },\n          },\n        ],\n        'unicorn/filename-case': 'off',\n        'unicorn/name-replacements': 'off',\n        'unicorn/no-array-reduce': 'off',\n        // Auto-fixer rewrites http:// string literals to https://, silently\n        // corrupting test fixtures and local-dev URLs — see the base factory.\n        'unicorn/prefer-https': 'off',\n        'unicorn/prefer-query-selector': 'off',\n        'unicorn/prevent-abbreviations': 'off',\n      },\n    },\n    // 5. JavaScript files configuration (for Node.js server files, etc.)\n    {\n      files: ['**/*.js', '**/*.mjs', '**/*.cjs'],\n      languageOptions: {\n        ecmaVersion: 'latest',\n        globals: {\n          ...globals.node,\n        },\n      },\n      rules: {\n        'no-console': 'off',\n        'unicorn/prefer-module': 'off',\n        'unicorn/prevent-abbreviations': 'off',\n      },\n    },\n    {\n      ignores: [...GLOBAL_IGNORES, ...ignorePatterns],\n    },\n    {\n      // Always on, and deliberately BEFORE the server/client boundary block:\n      // flat config replaces a rule wholesale on a later match, so the boundary\n      // block composes these restrictions into its own value. `.server` files,\n      // which that block ignores, still land here.\n      files: ['src/**/*.ts', 'src/**/*.tsx'],\n      rules: {\n        'no-restricted-syntax': ['error', ...BARREL_SYNTAX_RESTRICTIONS],\n      },\n    },\n    ...(enforceServerClientImportBoundary\n      ? [\n          {\n            files: ['src/**/*.ts', 'src/**/*.tsx'],\n            ignores: [\n              'src/entry.server.tsx',\n              'src/**/*.server.ts',\n              'src/**/*.server.tsx',\n              // A `.server/` directory is a React Router server-only module\n              // (every file inside is stripped from the client bundle), so the\n              // server-only import bans do not apply to its contents — the same\n              // exemption the `.server.ts` suffix gets.\n              'src/**/.server/**',\n            ],\n            rules: {\n              'no-restricted-syntax': [\n                'error',\n                ...CLIENT_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS,\n                ...BARREL_SYNTAX_RESTRICTIONS,\n              ],\n            },\n          },\n        ]\n      : []),\n    {\n      files: ['src/**/*.ts', 'src/**/*.tsx'],\n      languageOptions: createTypescriptLanguageOptions(\n        tseslint,\n        tsconfigRootDir,\n      ),\n      plugins: {\n        '@stylexjs': stylexPlugin,\n        '@typescript-eslint': tseslint.plugin,\n        'local-rules': localRules,\n        'typescript-eslint': tseslint.plugin,\n      },\n      rules: {\n        '@stylexjs/sort-keys': 'warn',\n        '@stylexjs/valid-styles': 'error',\n        '@typescript-eslint/consistent-type-definitions': ['error', 'type'],\n        'func-style': ['error', 'expression'],\n        'local-rules/clean-import-paths': 'error',\n        'local-rules/destructuring-for-functions': 'error',\n        'local-rules/filename-convention': 'error',\n        'local-rules/merge-duplicate-imports': 'error',\n        'local-rules/no-inline-type-imports': 'error',\n        // One value per rule: ESLint flat config replaces a rule wholesale when\n        // a later config sets it again, so every restriction that applies to\n        // these files is composed here rather than split across blocks.\n        'local-rules/readonly-props': 'error',\n        'local-rules/type-suffix-naming': 'error',\n        'no-restricted-imports': [\n          'error',\n          {\n            paths: REACT_TYPE_IMPORT_PATHS,\n            patterns: [\n              ...(enforceUiPublicImportBoundary\n                ? UI_PUBLIC_IMPORT_BOUNDARY_PATTERNS\n                : []),\n              ...STATE_LIBRARY_IMPORT_PATTERNS,\n            ],\n          },\n        ],\n      },\n    },\n    {\n      files: ['src/entry.server.tsx'],\n      rules: {\n        'func-style': 'off',\n        'local-rules/destructuring-for-functions': 'off',\n      },\n    },\n    {\n      files: ['src/**/*.stylex.ts'],\n      plugins: {\n        '@stylexjs': stylexPlugin,\n      },\n      rules: {\n        'local-rules/destructuring-for-functions': 'off',\n        'perfectionist/sort-object-types': 'off',\n        'perfectionist/sort-objects': 'off',\n        'unicorn/no-null': 'off',\n      },\n    },\n    {\n      files: [\n        'src/**/*.component.tsx',\n        'src/**/*.error-boundary.tsx',\n        'src/**/*.layout.tsx',\n      ],\n      languageOptions: createTypescriptLanguageOptions(\n        tseslint,\n        tsconfigRootDir,\n      ),\n      plugins: {\n        'local-rules': localRules,\n      },\n      rules: {\n        'local-rules/no-type-definitions-in-components': 'error',\n        'local-rules/single-component-export': 'error',\n      },\n    },\n  ];\n};\n",
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/vite-configs/eslint.restrictions.shared.mjs",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
     "usedDeprecatedRules": []
   },
   {
@@ -37250,7 +37253,7 @@
     "warningCount": 0,
     "fixableErrorCount": 0,
     "fixableWarningCount": 0,
-    "source": "import type { PluginOption } from 'vite-plus';\n\nimport { reactRouter } from '@react-router/dev/vite';\nimport { fixReactRouterAssets } from '@repo/plugins/fixReactRouterAssets';\nimport { unplugin as stylex } from '@stylexjs/unplugin';\nimport { fileURLToPath, URL } from 'node:url';\nimport babel from 'vite-plugin-babel';\n\ntype CreateReactRouterPluginsConfigArgs = {\n  readonly appRootUrl: string;\n  readonly babelConfigOverrides?: UnknownRecord;\n  readonly babelIncludePattern?: RegExp;\n  readonly isTestTaskRun?: boolean;\n  readonly pluginsAfter?: PluginOption[];\n  readonly pluginsBefore?: PluginOption[];\n  readonly stylexAliasPattern?: string;\n  readonly stylexDev?: boolean;\n  readonly stylexUseCSSLayers?: boolean;\n  readonly withBabelPlugin?: boolean;\n  readonly withFixReactRouterAssetsPlugin?: boolean;\n  readonly withReactRouterPlugin?: boolean;\n};\n\ntype UnknownRecord = Record<string, unknown>;\n\nconst isRecord = (value: unknown): value is UnknownRecord =>\n  typeof value === 'object' && value !== null;\n\nconst migrateOptimizeDepsConfig = (configResult: unknown): unknown => {\n  if (!isRecord(configResult)) {\n    return configResult;\n  }\n\n  const optimizeDeps = configResult.optimizeDeps;\n\n  if (\n    !isRecord(optimizeDeps) ||\n    !Object.hasOwn(optimizeDeps, 'esbuildOptions')\n  ) {\n    return configResult;\n  }\n\n  const { esbuildOptions, ...restOptimizeDeps } = optimizeDeps;\n\n  const nextOptimizeDeps =\n    esbuildOptions === undefined\n      ? restOptimizeDeps\n      : {\n          ...restOptimizeDeps,\n          rolldownOptions: restOptimizeDeps.rolldownOptions ?? esbuildOptions,\n        };\n\n  return {\n    ...configResult,\n    optimizeDeps: nextOptimizeDeps,\n  };\n};\n\nconst patchDeprecatedOptimizeDeps = (pluginOption: unknown): unknown => {\n  if (Array.isArray(pluginOption)) {\n    return pluginOption.map(patchDeprecatedOptimizeDeps);\n  }\n\n  if (!isRecord(pluginOption)) {\n    return pluginOption;\n  }\n\n  const configHook = pluginOption.config;\n\n  if (typeof configHook !== 'function') {\n    return pluginOption;\n  }\n\n  return {\n    ...pluginOption,\n    config: async (...args: readonly unknown[]) => {\n      const result = await configHook(...args);\n      return migrateOptimizeDepsConfig(result);\n    },\n  };\n};\n\n// The stylex unplugin's configureServer hook starts a 150ms setInterval that\n// is only cleared on `server.httpServer.close`. Vitest runs Vite in middleware\n// mode with no httpServer, so the interval is never cleared and keeps the test\n// process alive (\"close timed out after 10000ms\"). Dev-server hooks are\n// irrelevant under vitest, so strip the hook for test task runs only.\nconst stripConfigureServerHook = (pluginOption: PluginOption): PluginOption => {\n  if (Array.isArray(pluginOption)) {\n    return pluginOption.map(stripConfigureServerHook);\n  }\n\n  if (!isRecord(pluginOption) || !('configureServer' in pluginOption)) {\n    return pluginOption;\n  }\n\n  const { configureServer: _configureServer, ...rest } = pluginOption;\n  return rest as PluginOption;\n};\n\nconst isTestTaskRunFromEnv = (): boolean =>\n  process.env.REACT_ROUTER_TEST_TASK === 'true' ||\n  process.env.VITEST === 'true';\n\nexport const createReactRouterPluginsConfig = ({\n  appRootUrl,\n  babelConfigOverrides = {},\n  babelIncludePattern = /^(?!.*\\.test\\.).*\\.[jt]sx?$/,\n  isTestTaskRun = isTestTaskRunFromEnv(),\n  pluginsAfter = [],\n  pluginsBefore = [],\n  stylexAliasPattern = '../src/*',\n  stylexDev = process.env.NODE_ENV === 'development',\n  stylexUseCSSLayers = true,\n  withBabelPlugin = true,\n  withFixReactRouterAssetsPlugin = true,\n  withReactRouterPlugin = true,\n}: CreateReactRouterPluginsConfigArgs): PluginOption[] => {\n  const reactRouterPlugin =\n    isTestTaskRun || !withReactRouterPlugin ? [] : [reactRouter()];\n  const babelPlugin =\n    isTestTaskRun || !withBabelPlugin\n      ? []\n      : [\n          patchDeprecatedOptimizeDeps(\n            babel({\n              babelConfig: {\n                plugins: [['babel-plugin-react-compiler']],\n                presets: ['@babel/preset-typescript'],\n                ...babelConfigOverrides,\n              },\n              include: babelIncludePattern,\n            }),\n          ),\n        ];\n\n  const stylexPlugin = stylex.vite({\n    aliases: {\n      '@/*': [fileURLToPath(new URL(stylexAliasPattern, appRootUrl))],\n      '@repo/ui/*': [\n        fileURLToPath(new URL('../../../packages/ui/src/*', appRootUrl)),\n      ],\n    },\n    dev: stylexDev,\n    useCSSLayers: stylexUseCSSLayers,\n  });\n\n  return [\n    ...pluginsBefore,\n    isTestTaskRun ? stripConfigureServerHook(stylexPlugin) : stylexPlugin,\n    ...(withFixReactRouterAssetsPlugin ? [fixReactRouterAssets()] : []),\n    ...reactRouterPlugin,\n    ...babelPlugin,\n    ...pluginsAfter,\n  ];\n};\n",
+    "source": "import type { PluginOption } from 'vite-plus';\n\nimport { reactRouter } from '@react-router/dev/vite';\nimport { fixReactRouterAssets } from '@repo/plugins/fixReactRouterAssets';\nimport { unplugin as stylex } from '@stylexjs/unplugin';\nimport { fileURLToPath, URL } from 'node:url';\nimport babel from 'vite-plugin-babel';\n\ntype CreateReactRouterPluginsConfigArgs = {\n  readonly appRootUrl: string;\n  readonly babelConfigOverrides?: UnknownRecord;\n  readonly babelIncludePattern?: RegExp;\n  readonly isTestTaskRun?: boolean;\n  readonly pluginsAfter?: PluginOption[];\n  readonly pluginsBefore?: PluginOption[];\n  readonly stylexAliasPattern?: string;\n  readonly stylexDev?: boolean;\n  readonly stylexUseCSSLayers?: boolean;\n  readonly withBabelPlugin?: boolean;\n  readonly withFixReactRouterAssetsPlugin?: boolean;\n  readonly withReactRouterPlugin?: boolean;\n};\n\ntype UnknownRecord = Record<string, unknown>;\n\nconst isRecord = (value: unknown): value is UnknownRecord =>\n  typeof value === 'object' && value !== null;\n\nconst migrateOptimizeDepsConfig = (configResult: unknown): unknown => {\n  if (!isRecord(configResult)) {\n    return configResult;\n  }\n\n  const optimizeDeps = configResult.optimizeDeps;\n\n  if (\n    !isRecord(optimizeDeps) ||\n    !Object.hasOwn(optimizeDeps, 'esbuildOptions')\n  ) {\n    return configResult;\n  }\n\n  const { esbuildOptions, ...restOptimizeDeps } = optimizeDeps;\n\n  const nextOptimizeDeps =\n    esbuildOptions === undefined\n      ? restOptimizeDeps\n      : {\n          ...restOptimizeDeps,\n          rolldownOptions: restOptimizeDeps.rolldownOptions ?? esbuildOptions,\n        };\n\n  return {\n    ...configResult,\n    optimizeDeps: nextOptimizeDeps,\n  };\n};\n\nconst patchDeprecatedOptimizeDeps = (pluginOption: unknown): unknown => {\n  if (Array.isArray(pluginOption)) {\n    return pluginOption.map(patchDeprecatedOptimizeDeps);\n  }\n\n  if (!isRecord(pluginOption)) {\n    return pluginOption;\n  }\n\n  const configHook = pluginOption.config;\n\n  if (typeof configHook !== 'function') {\n    return pluginOption;\n  }\n\n  return {\n    ...pluginOption,\n    config: async (...args: readonly unknown[]) => {\n      const result = await configHook(...args);\n      return migrateOptimizeDepsConfig(result);\n    },\n  };\n};\n\n// The stylex unplugin's configureServer hook starts a 150ms setInterval that\n// is only cleared on `server.httpServer.close`. Vitest runs Vite in middleware\n// mode with no httpServer, so the interval is never cleared and keeps the test\n// process alive (\"close timed out after 10000ms\"). Dev-server hooks are\n// irrelevant under vitest, so strip the hook for test task runs only.\nconst stripConfigureServerHook = (pluginOption: PluginOption): PluginOption => {\n  if (Array.isArray(pluginOption)) {\n    return pluginOption.map(stripConfigureServerHook);\n  }\n\n  if (!isRecord(pluginOption) || !('configureServer' in pluginOption)) {\n    return pluginOption;\n  }\n\n  const { configureServer: _configureServer, ...rest } = pluginOption;\n  return rest as PluginOption;\n};\n\nconst isTestTaskRunFromEnv = (): boolean =>\n  process.env.REACT_ROUTER_TEST_TASK === 'true' ||\n  process.env.VITEST === 'true';\n\nexport const createReactRouterPluginsConfig = ({\n  appRootUrl,\n  babelConfigOverrides = {},\n  babelIncludePattern = /^(?!.*\\.test\\.).*\\.[jt]sx?$/,\n  isTestTaskRun = isTestTaskRunFromEnv(),\n  pluginsAfter = [],\n  pluginsBefore = [],\n  stylexAliasPattern = '../src/*',\n  stylexDev = process.env.NODE_ENV === 'development',\n  stylexUseCSSLayers = true,\n  withBabelPlugin = true,\n  withFixReactRouterAssetsPlugin = true,\n  withReactRouterPlugin = true,\n}: CreateReactRouterPluginsConfigArgs): PluginOption[] => {\n  const reactRouterPlugin =\n    isTestTaskRun || !withReactRouterPlugin ? [] : [reactRouter()];\n  const babelPlugin =\n    isTestTaskRun || !withBabelPlugin\n      ? []\n      : [\n          patchDeprecatedOptimizeDeps(\n            babel({\n              babelConfig: {\n                plugins: [['babel-plugin-react-compiler']],\n                presets: ['@babel/preset-typescript'],\n                ...babelConfigOverrides,\n              },\n              include: babelIncludePattern,\n            }),\n          ),\n        ];\n\n  const stylexPlugin = stylex.vite({\n    aliases: {\n      '@/*': [fileURLToPath(new URL(stylexAliasPattern, appRootUrl))],\n      '@lcabrera/ui/*': [\n        fileURLToPath(new URL('../../../packages/ui/src/*', appRootUrl)),\n      ],\n    },\n    dev: stylexDev,\n    useCSSLayers: stylexUseCSSLayers,\n  });\n\n  return [\n    ...pluginsBefore,\n    isTestTaskRun ? stripConfigureServerHook(stylexPlugin) : stylexPlugin,\n    ...(withFixReactRouterAssetsPlugin ? [fixReactRouterAssets()] : []),\n    ...reactRouterPlugin,\n    ...babelPlugin,\n    ...pluginsAfter,\n  ];\n};\n",
     "usedDeprecatedRules": []
   },
   {
@@ -37301,7 +37304,7 @@
     "warningCount": 0,
     "fixableErrorCount": 0,
     "fixableWarningCount": 0,
-    "source": "import type { OxlintConfig } from 'vite-plus/lint';\n\nimport { mergeArrays } from '@repo/utils/arrays/merge-arrays.util';\nimport { mergeObjects } from '@repo/utils/objects/merge-objects.util';\n\ntype MergeableKey =\n  | 'categories'\n  | 'env'\n  | 'ignorePatterns'\n  | 'jsPlugins'\n  | 'options'\n  | 'overrides'\n  | 'plugins'\n  | 'rules'\n  | 'settings';\n\ntype OxlintConfigOverrides = Partial<Pick<OxlintConfig, MergeableKey>>;\n\nexport const mergeOxlintConfig = (\n  baseConfig: OxlintConfig,\n  overrideConfig: OxlintConfigOverrides = {},\n): OxlintConfig => ({\n  ...baseConfig,\n  ...overrideConfig,\n  categories: mergeObjects({\n    baseValue: baseConfig.categories,\n    overrideValue: overrideConfig.categories,\n  }),\n  env: mergeObjects({\n    baseValue: baseConfig.env,\n    overrideValue: overrideConfig.env,\n  }),\n  ignorePatterns: mergeArrays({\n    baseValue: baseConfig.ignorePatterns,\n    overrideValue: overrideConfig.ignorePatterns,\n  }),\n  jsPlugins: mergeArrays({\n    baseValue: baseConfig.jsPlugins,\n    overrideValue: overrideConfig.jsPlugins,\n  }),\n  options: mergeObjects({\n    baseValue: baseConfig.options,\n    overrideValue: overrideConfig.options,\n  }),\n  overrides: mergeArrays({\n    baseValue: baseConfig.overrides,\n    overrideValue: overrideConfig.overrides,\n  }),\n  plugins: mergeArrays({\n    baseValue: baseConfig.plugins,\n    overrideValue: overrideConfig.plugins,\n  }),\n  rules: mergeObjects({\n    baseValue: baseConfig.rules,\n    overrideValue: overrideConfig.rules,\n  }),\n  settings: mergeObjects({\n    baseValue: baseConfig.settings,\n    overrideValue: overrideConfig.settings,\n  }),\n});\n",
+    "source": "import type { OxlintConfig } from 'vite-plus/lint';\n\nimport { mergeArrays } from '@lcabrera/utils/arrays/merge-arrays.util';\nimport { mergeObjects } from '@lcabrera/utils/objects/merge-objects.util';\n\ntype MergeableKey =\n  | 'categories'\n  | 'env'\n  | 'ignorePatterns'\n  | 'jsPlugins'\n  | 'options'\n  | 'overrides'\n  | 'plugins'\n  | 'rules'\n  | 'settings';\n\ntype OxlintConfigOverrides = Partial<Pick<OxlintConfig, MergeableKey>>;\n\nexport const mergeOxlintConfig = (\n  baseConfig: OxlintConfig,\n  overrideConfig: OxlintConfigOverrides = {},\n): OxlintConfig => ({\n  ...baseConfig,\n  ...overrideConfig,\n  categories: mergeObjects({\n    baseValue: baseConfig.categories,\n    overrideValue: overrideConfig.categories,\n  }),\n  env: mergeObjects({\n    baseValue: baseConfig.env,\n    overrideValue: overrideConfig.env,\n  }),\n  ignorePatterns: mergeArrays({\n    baseValue: baseConfig.ignorePatterns,\n    overrideValue: overrideConfig.ignorePatterns,\n  }),\n  jsPlugins: mergeArrays({\n    baseValue: baseConfig.jsPlugins,\n    overrideValue: overrideConfig.jsPlugins,\n  }),\n  options: mergeObjects({\n    baseValue: baseConfig.options,\n    overrideValue: overrideConfig.options,\n  }),\n  overrides: mergeArrays({\n    baseValue: baseConfig.overrides,\n    overrideValue: overrideConfig.overrides,\n  }),\n  plugins: mergeArrays({\n    baseValue: baseConfig.plugins,\n    overrideValue: overrideConfig.plugins,\n  }),\n  rules: mergeObjects({\n    baseValue: baseConfig.rules,\n    overrideValue: overrideConfig.rules,\n  }),\n  settings: mergeObjects({\n    baseValue: baseConfig.settings,\n    overrideValue: overrideConfig.settings,\n  }),\n});\n",
     "usedDeprecatedRules": []
   }
 ]
