@@ -108,17 +108,29 @@ run git fetch -q origin main
 if [[ "$worktree" == 1 ]]; then
   work="../vrc-${id}"
   run git worktree add -q "$work" -b "$branch" origin/main
-  # Share the primary checkout's installed deps so vp/vitest work in the worktree.
-  run ln -sfn "$REPO_ROOT/node_modules" "$work/node_modules"
-  while IFS= read -r ws; do
-    [[ -d "$REPO_ROOT/$ws/node_modules" ]] &&
-      run ln -sfn "$REPO_ROOT/$ws/node_modules" "$work/$ws/node_modules"
-  done < <(git ls-files '*/package.json' | sed 's#/package.json$##' | sort -u)
 else
   work="$REPO_ROOT"
   run git checkout -q -b "$branch" origin/main
 fi
 enter "$work"
+
+# 1b. A worktree starts empty of dependencies. This used to symlink the primary
+#     checkout's node_modules, which was faster and silently wrong: the pnpm
+#     workspace links inside it still point at the PRIMARY checkout's packages,
+#     so `@repo/vite-configs`, `@repo/ui` and friends resolved there while you
+#     edited the worktree. Tooling then read code you had not changed — a shared
+#     eslint config edit never took effect, and another agent's uncommitted work
+#     in the primary tree leaked in, which is the cross-contamination worktrees
+#     exist to prevent. It fails silently and only for changes that touch a
+#     workspace package, so it hides well. A real install measured 5.4s against a
+#     warm pnpm store — a one-off cost at claim time, paid once per worktree.
+#     Route types are generated, not committed, so a fresh worktree has none and
+#     the first commit would fail on `Cannot find module './+types/root'`.
+if [[ "$worktree" == 1 ]]; then
+  printf '  installing dependencies + generating route types in the worktree\n'
+  run vp install
+  run vp run typegen:all
+fi
 
 # 2. scaffold the task file (the frontmatter the register validates)
 if [[ "$dry" == 1 ]]; then
@@ -151,3 +163,10 @@ run gh pr create --draft --head "$branch" --base main \
   --title "chore(coordination): claim ${id}" --body "$body"
 
 printf '\nClaimed. Work in %s, push often, and flip the draft to ready when done.\n' "$work"
+
+# Env files are gitignored, so a worktree has none. Deliberately a reminder
+# rather than a copy: duplicating credentials across checkouts is the user's
+# call, not a side effect of claiming a task.
+if [[ "$worktree" == 1 ]]; then
+  printf 'Anything DB-touching also needs the local env files copied over (e.g. docker/local/.env) — they are gitignored, so the worktree starts without them.\n'
+fi
