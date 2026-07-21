@@ -2,7 +2,7 @@
 id: pre-push-changed-tests
 title: Pre-push runs tests for changed workspaces
 owner: agent:claude
-status: active
+status: review
 branch: pre-push-changed-tests
 area:
   - .vite-hooks/pre-push
@@ -21,6 +21,6 @@ Pre-push runs tests for changed workspaces
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: in review — gate green; selection probed in all three modes
 - Blockers: none
-- Next:
+- Next: merge. Also retires the merged sonar-report-freshness claim.

@@ -134,18 +134,22 @@ work.
 Know what that gave up, because the tool hooks are **not** a superset: the `Stop`
 hook was the only thing that ran **tests** locally. What still covers the rest:
 
-| Layer                          | Covers                                                           |
-| ------------------------------ | ---------------------------------------------------------------- |
-| `PostToolUse` (per file)       | Oxfmt, Oxlint `--fix`, Biome — formatting and lint, continuously |
-| pre-commit (`vp staged`)       | fmt + Oxlint + tsgolint on staged files, plus a Biome check      |
-| pre-push (`vp run check:push`) | the CI Quality Gate: fmt, Oxlint, **ESLint**, full type-check    |
-| CI                             | tests, fallow audit, Sonar, secret scan                          |
+| Layer                                    | Covers                                                                                                    |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `PostToolUse` (per file)                 | Oxfmt, Oxlint `--fix`, Biome — formatting and lint, continuously                                          |
+| pre-commit (`vp staged`)                 | fmt + Oxlint + tsgolint on staged files, plus a Biome check                                               |
+| pre-push (`check:push` + `test:changed`) | the CI Quality Gate: fmt, Oxlint, **ESLint**, full type-check — plus **tests for the changed workspaces** |
+| CI                                       | the full test suite, fallow audit, Sonar, secret scan                                                     |
 
-So **types are still caught before a commit and ESLint before a push; tests now
-fire first in CI.** If that feedback gap matters, the place to close it is the
-pre-push hook — its comment says tests stay in CI because "the test suites need a
-database, which a hook cannot assume", and that is no longer true: `test:ci` is
-the DB-free suite by construction and now spans 11 workspaces.
+So types are still caught before a commit, and ESLint plus the affected tests
+before a push. `test:changed` scopes the run to the workspaces the push touches
+and their dependents, so a docs-only push runs none. Only a change to
+`pnpm-lock.yaml`, `pnpm-workspace.yaml`, the root `vite.config.ts` or the shared
+config packages forces the whole suite — not any root file, since a real
+dependency change always moves the lockfile.
+
+The fallow audit stays CI-only on purpose: it is a new-only gate scored against
+the merge base, so it needs full history and a coverage merge.
 
 **Adding a hook:** edit the `hooks` block in `.claude/settings.json`. For automated behaviours ("always run X after Y"), hooks are the right mechanism — not memory or preferences.
 
@@ -188,7 +192,8 @@ Claude stops responding — no Stop hook; the tree is already clean
         │
         ▼
 git commit  → pre-commit: fmt + Oxlint + tsgolint on staged files, Biome check
-git push    → pre-push:   the full CI Quality Gate (adds ESLint + type-check)
+git push    → pre-push:   the full CI Quality Gate (adds ESLint + type-check),
+                          then tests for the changed workspaces only
 ```
 
 There is no `SessionStart` hook and no `Stop` hook. The two above — `PreToolUse` and `PostToolUse` — are the complete set defined in `.claude/settings.json`.
