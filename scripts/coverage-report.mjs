@@ -77,7 +77,13 @@ const METRICS = ['lines', 'statements', 'functions', 'branches'];
  */
 const COVERAGE_REPORT_WORKSPACES = [
   { dir: 'packages/ui', name: '@repo/ui', run: true },
+  // The two halves of the former `data-access`, split by runtime (ADR-038).
+  // `@repo/api` is listed explicitly because the split dropped it: #158 rewrote
+  // the single `data-access` row into `server`, which is a rename of the Node
+  // half only, so the browser half stopped being reported while still being
+  // merged for the fallow gate. Both are public packages with a 95% threshold.
   { dir: 'packages/server', name: '@repo/server', run: true },
+  { dir: 'packages/api', name: '@repo/api', run: true },
   { dir: 'apps/react-router', name: 'vite-react-compiler', run: false },
   // Phase 2 — remaining library packages with a DB-free test:coverage.
   // scan-ingestion's task measures its DB-free subset only (its real-Postgres
