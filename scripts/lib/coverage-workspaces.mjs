@@ -60,6 +60,17 @@ export const COVERAGE_REPORT_WORKSPACES = [
   { dir: 'apps/shared', name: 'api-shared', run: true },
   { dir: 'apps/api-server', name: 'car-sales-api', run: true },
   { dir: 'apps/api-server-fast', name: 'car-sales-api-fast', run: true },
+  // Phase 3, second pass. Both were written off as "config/CLI-only with
+  // nothing to cover"; that stopped being true for these two when
+  // eslint-local-rules gained a suite per rule (#205). Their tests are a lint
+  // RuleTester and a set of pure utils, so neither reaches a service.
+  // `packages/plugins` and `packages/ts-configs` genuinely still have none.
+  {
+    dir: 'packages/eslint-local-rules',
+    name: 'eslint-local-rules-shared',
+    run: true,
+  },
+  { dir: 'packages/agent-runner', name: '@repo/agent-runner', run: true },
 ];
 
 /**
