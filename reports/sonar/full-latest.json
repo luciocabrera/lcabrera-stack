@@ -5,16 +5,23 @@
     "type": "branch",
     "value": "main"
   },
-  "analysisDate": "2026-07-22T07:08:20+0000",
+  "analysisDate": "2026-07-22T09:13:47+0000",
   "qualityGate": {
     "status": "OK",
     "conditions": [
+      {
+        "metric": "new_coverage",
+        "status": "OK",
+        "comparator": "LT",
+        "errorThreshold": "80",
+        "actualValue": null
+      },
       {
         "metric": "new_duplicated_lines_density",
         "status": "OK",
         "comparator": "GT",
         "errorThreshold": "3",
-        "actualValue": "0.7"
+        "actualValue": "0.4"
       },
       {
         "metric": "new_maintainability_rating",
@@ -51,11 +58,12 @@
     "hotspots": 0,
     "bySeverity": {},
     "byType": {},
-    "accepted": 10,
+    "accepted": 13,
     "acceptedByRule": {
       "typescript:S6847": 1,
       "typescript:S6819": 3,
       "typescript:S6845": 1,
+      "typescript:S8980": 3,
       "typescript:S6852": 1,
       "typescript:S6478": 1,
       "typescript:S4036": 1,
@@ -65,13 +73,13 @@
     "analysed": {
       "byLanguage": {
         "css": 46,
-        "js": 6038,
+        "js": 6096,
         "postgres": 1547,
-        "shell": 186,
+        "shell": 310,
         "ts": 51183,
-        "yaml": 796
+        "yaml": 829
       },
-      "linesOfCode": 59796
+      "linesOfCode": 60011
     }
   },
   "issues": [],
