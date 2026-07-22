@@ -68,6 +68,8 @@ that gap by reacting to events GitHub already emits (needs the same
 | Signal                        | Status      |
 | ----------------------------- | ----------- |
 | issue **assigned**            | In Progress |
+| issue **closed**              | Done        |
+| issue **reopened**            | Todo        |
 | PR opened/reopened as a draft | In Progress |
 | PR **ready for review**       | In Review   |
 | PR converted back to draft    | In Progress |
@@ -75,8 +77,18 @@ that gap by reacting to events GitHub already emits (needs the same
 | PR closed unmerged            | Todo        |
 
 For a PR it moves the PR's card **and** every issue the PR closes
-(`closingIssuesReferences`), so the backlog issue advances with the work. The one
-transition GitHub can't infer is "I've started but there's no PR yet" — so
+(`closingIssuesReferences`), so the backlog issue advances with the work.
+
+The `issue closed` row exists because that path is not enough on its own: an
+issue closed **by hand**, or by a PR whose body never wrote `Resolves #n`, keeps
+whatever status it had — In Progress, once someone self-assigned it. That is the
+worst of the four to be wrong in, because it reads as "taken" and the next agent
+skips the work; #249 and #255 sat like that until the trigger was added.
+`scripts/lib/project-status.test.mjs` pins every row of this table, and asserts
+the workflow actually subscribes to each event the map answers — a mapped
+transition nothing listens for is dead code that looks live.
+
+The one transition GitHub can't infer is "I've started but there's no PR yet" — so
 **self-assign the issue the moment you pick it up** (`gh issue edit <n> --add-assignee @me`,
 which `vp run coordination:claim` does for you at claim time);
 that flips it to In Progress immediately. Then a draft PR keeps it there, ready
