@@ -20,6 +20,16 @@ const COVERAGE_FLAGS = [
 ].join(' ');
 
 export default defineConfig({
+  // Mirrors createPackConfig in packages/vite-configs, inlined for the same
+  // reason COVERAGE_FLAGS is: vite-configs depends on @lcabrera/utils, so importing
+  // it back would create a workspace cycle. See that file for why these packages
+  // are built at all rather than shipping source.
+  pack: {
+    dts: { tsconfig: 'tsconfig.app.json' },
+    entry: ['src/**/*.ts', '!src/**/*.test.ts'],
+    sourcemap: true,
+    unbundle: true,
+  },
   run: {
     tasks: {
       test: {

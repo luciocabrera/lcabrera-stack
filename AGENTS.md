@@ -29,17 +29,37 @@ it freely. A new package picks its scope by one question — does it ship? — a
 Do not "tidy" the two into one ([ADR-040](docs/cqms/decisions/ADR-040-npm-scope-for-the-public-packages.md)).
 
 **Publishing invariants for those four.** They are not published yet — all four
-stay `private: true` until a real build exists, and that flag is the only thing
-preventing an accidental publish, so do not flip it as a convenience. What already
-holds, verified by packing each package and reading the tarball rather than by
-inspection:
+stay `private: true` until the npm scope is claimed, and that flag is the only
+thing preventing an accidental publish, so do not flip it as a convenience. What
+already holds, verified by packing each package and reading the tarball rather
+than by inspection:
 
+- **Three of them build; `@lcabrera/ui` ships source.** A `.ts` file inside
+  `node_modules` is not loadable at all — Node refuses to strip types there
+  (`ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`) — and Vite externalizes
+  dependencies for SSR by default, so a source-shipping package fails when a
+  consumer's server _starts_, not when it typechecks. `api`, `server` and `utils`
+  therefore run `vp pack` (tsdown) to `dist` with `.d.mts` and sourcemaps. `ui`
+  cannot: StyleX derives theme identity from the source path, so a consumer's own
+  plugin has to compile it.
+- **`exports` points at `src`; `publishConfig.exports` points at `dist`.** pnpm
+  substitutes the latter at pack time, so no workspace in this repo ever has to
+  build before it can typecheck, test or run. The cost is that the repo exercises
+  the `src` map on every command and the `dist` map on none — a subpath added to
+  one and forgotten in the other is invisible until someone installs the package.
+  `vp run publish:verify` is what catches that, and CI runs `packages:build`
+  first so the check has a real `dist/` to resolve against; without one it
+  verifies only that the two maps agree and says so in its output.
 - **Each carries its own `LICENSE`** (MIT). npm only includes a `LICENSE` sitting
   in the package directory, so the root one does not reach a consumer — this is
   deliberate duplication, same reasoning as ADR-039.
-- **`files` is `["src", "!src/**/*.test.*"]`.** Without it npm ships whatever is
-  in the directory: `@lcabrera/server` was shipping 29 test files plus its tsconfigs
-  and `eslint.config.mjs`. The negated pattern is honoured by pnpm pack.
+- **`files` is `["src", "!src/**/*.test.*"]`**, with `"dist"` added for the three
+  built packages. Without it npm ships whatever is in the directory:
+  `@lcabrera/server` was shipping 29 test files plus its tsconfigs and
+  `eslint.config.mjs`. The negated pattern is honoured by pnpm pack. `src` stays
+  in the built packages only because they emit sourcemaps — it is unreachable
+  through the published `exports` map, so it exists purely to let a consumer step
+  into the original TypeScript.
 - **Framework singletons are `peerDependencies`, not `dependencies`** — `react`,
   `react-dom`, `react-router`, `@stylexjs/stylex` in `@lcabrera/ui`. As ordinary
   dependencies a consumer would resolve a second copy of React, which breaks hooks

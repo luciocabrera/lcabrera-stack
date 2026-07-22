@@ -4,6 +4,7 @@
   "private": true,
   "license": "MIT",
   "files": [
+    "dist",
     "src",
     "!src/**/*.test.*"
   ],
@@ -21,9 +22,48 @@
     "./http/fetch-and-validate.util": "./src/http/fetch-and-validate.util.ts"
   },
   "publishConfig": {
+    "exports": {
+      "./config/config.constants": {
+        "types": "./dist/config/config.constants.d.mts",
+        "default": "./dist/config/config.constants.mjs"
+      },
+      "./config/config.types": {
+        "types": "./dist/config/config.types.d.mts",
+        "default": "./dist/config/config.types.mjs"
+      },
+      "./config/get-api-base-url.util": {
+        "types": "./dist/config/get-api-base-url.util.d.mts",
+        "default": "./dist/config/get-api-base-url.util.mjs"
+      },
+      "./distinct/distinct.types": {
+        "types": "./dist/distinct/distinct.types.d.mts",
+        "default": "./dist/distinct/distinct.types.mjs"
+      },
+      "./distinct/fetch-distinct-values.util": {
+        "types": "./dist/distinct/fetch-distinct-values.util.d.mts",
+        "default": "./dist/distinct/fetch-distinct-values.util.mjs"
+      },
+      "./distinct/is-distinct-values-response.util": {
+        "types": "./dist/distinct/is-distinct-values-response.util.d.mts",
+        "default": "./dist/distinct/is-distinct-values-response.util.mjs"
+      },
+      "./distinct/parse-filter-options-params.util": {
+        "types": "./dist/distinct/parse-filter-options-params.util.d.mts",
+        "default": "./dist/distinct/parse-filter-options-params.util.mjs"
+      },
+      "./http/build-paginated-query-params.util": {
+        "types": "./dist/http/build-paginated-query-params.util.d.mts",
+        "default": "./dist/http/build-paginated-query-params.util.mjs"
+      },
+      "./http/fetch-and-validate.util": {
+        "types": "./dist/http/fetch-and-validate.util.d.mts",
+        "default": "./dist/http/fetch-and-validate.util.mjs"
+      }
+    },
     "access": "public"
   },
   "scripts": {
+    "build": "vp pack",
     "format": "vp fmt .",
     "format:check": "vp fmt --check .",
     "lint": "vp run --filter eslint-local-rules-shared build && vp lint . --fix && vp run lint:eslint",

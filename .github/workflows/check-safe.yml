@@ -151,6 +151,16 @@ jobs:
         # inherited breakage is grandfathered in scripts/docs-paths-baseline.json.
         run: vp run docs:verify
 
+      - name: Published package surface resolves
+        id: publish_gate
+        # Builds first on purpose. `exports` points at `src` so this repo never
+        # needs a build, while consumers install `dist` via publishConfig.exports
+        # — a map nothing here exercises. Without the build this step still
+        # passes, checking only that the two maps agree structurally and never
+        # that a target exists, so it would report success while the tarball was
+        # missing files. The build is what gives it something real to check.
+        run: vp run packages:build && vp run publish:verify
+
       - name: Write quality summary
         if: always()
         run: |

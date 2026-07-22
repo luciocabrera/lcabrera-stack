@@ -1,3 +1,4 @@
+import { createPackConfig } from '@repo/vite-configs/pack';
 import { VITEST_COVERAGE_FLAGS } from '@repo/vite-configs/run';
 import { defineConfig } from 'vite-plus';
 
@@ -16,6 +17,7 @@ const COVERAGE_THRESHOLD_FLAGS = [
 ].join(' ');
 
 export default defineConfig({
+  pack: createPackConfig(),
   run: {
     tasks: {
       test: {

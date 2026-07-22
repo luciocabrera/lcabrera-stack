@@ -4,6 +4,7 @@
   "private": true,
   "license": "MIT",
   "files": [
+    "dist",
     "src",
     "!src/**/*.test.*"
   ],
@@ -40,9 +41,124 @@
     "./tokens/parse-api-token.util": "./src/tokens/parse-api-token.util.ts"
   },
   "publishConfig": {
+    "exports": {
+      "./crypto/hash-secret.util": {
+        "types": "./dist/crypto/hash-secret.util.d.mts",
+        "default": "./dist/crypto/hash-secret.util.mjs"
+      },
+      "./crypto/is-secret-hash-valid.util": {
+        "types": "./dist/crypto/is-secret-hash-valid.util.d.mts",
+        "default": "./dist/crypto/is-secret-hash-valid.util.mjs"
+      },
+      "./db/delete-rows.util": {
+        "types": "./dist/db/delete-rows.util.d.mts",
+        "default": "./dist/db/delete-rows.util.mjs"
+      },
+      "./db/env.schema": {
+        "types": "./dist/db/env.schema.d.mts",
+        "default": "./dist/db/env.schema.mjs"
+      },
+      "./db/get-max-value.util": {
+        "types": "./dist/db/get-max-value.util.d.mts",
+        "default": "./dist/db/get-max-value.util.mjs"
+      },
+      "./db/get-pool.util": {
+        "types": "./dist/db/get-pool.util.d.mts",
+        "default": "./dist/db/get-pool.util.mjs"
+      },
+      "./db/insert-row.util": {
+        "types": "./dist/db/insert-row.util.d.mts",
+        "default": "./dist/db/insert-row.util.mjs"
+      },
+      "./db/query-builder/build-count-query.util": {
+        "types": "./dist/db/query-builder/build-count-query.util.d.mts",
+        "default": "./dist/db/query-builder/build-count-query.util.mjs"
+      },
+      "./db/query-builder/build-delete-query.util": {
+        "types": "./dist/db/query-builder/build-delete-query.util.d.mts",
+        "default": "./dist/db/query-builder/build-delete-query.util.mjs"
+      },
+      "./db/query-builder/build-distinct-query.util": {
+        "types": "./dist/db/query-builder/build-distinct-query.util.d.mts",
+        "default": "./dist/db/query-builder/build-distinct-query.util.mjs"
+      },
+      "./db/query-builder/build-insert-query.util": {
+        "types": "./dist/db/query-builder/build-insert-query.util.d.mts",
+        "default": "./dist/db/query-builder/build-insert-query.util.mjs"
+      },
+      "./db/query-builder/build-order-by-clause.util": {
+        "types": "./dist/db/query-builder/build-order-by-clause.util.d.mts",
+        "default": "./dist/db/query-builder/build-order-by-clause.util.mjs"
+      },
+      "./db/query-builder/build-max-value-query.util": {
+        "types": "./dist/db/query-builder/build-max-value-query.util.d.mts",
+        "default": "./dist/db/query-builder/build-max-value-query.util.mjs"
+      },
+      "./db/query-builder/build-select-query.util": {
+        "types": "./dist/db/query-builder/build-select-query.util.d.mts",
+        "default": "./dist/db/query-builder/build-select-query.util.mjs"
+      },
+      "./db/query-builder/build-update-query.util": {
+        "types": "./dist/db/query-builder/build-update-query.util.d.mts",
+        "default": "./dist/db/query-builder/build-update-query.util.mjs"
+      },
+      "./db/query-builder/query-builder.types": {
+        "types": "./dist/db/query-builder/query-builder.types.d.mts",
+        "default": "./dist/db/query-builder/query-builder.types.mjs"
+      },
+      "./db/select-rows.util": {
+        "types": "./dist/db/select-rows.util.d.mts",
+        "default": "./dist/db/select-rows.util.mjs"
+      },
+      "./db/update-rows.util": {
+        "types": "./dist/db/update-rows.util.d.mts",
+        "default": "./dist/db/update-rows.util.mjs"
+      },
+      "./filters/filters.types": {
+        "types": "./dist/filters/filters.types.d.mts",
+        "default": "./dist/filters/filters.types.mjs"
+      },
+      "./filters/to-date-query-filters.util": {
+        "types": "./dist/filters/to-date-query-filters.util.d.mts",
+        "default": "./dist/filters/to-date-query-filters.util.mjs"
+      },
+      "./filters/to-number-query-filters.util": {
+        "types": "./dist/filters/to-number-query-filters.util.d.mts",
+        "default": "./dist/filters/to-number-query-filters.util.mjs"
+      },
+      "./filters/to-query-filters.util": {
+        "types": "./dist/filters/to-query-filters.util.d.mts",
+        "default": "./dist/filters/to-query-filters.util.mjs"
+      },
+      "./filters/to-select-query-filters.util": {
+        "types": "./dist/filters/to-select-query-filters.util.d.mts",
+        "default": "./dist/filters/to-select-query-filters.util.mjs"
+      },
+      "./filters/to-text-query-filters.util": {
+        "types": "./dist/filters/to-text-query-filters.util.d.mts",
+        "default": "./dist/filters/to-text-query-filters.util.mjs"
+      },
+      "./tickets/sign-access-ticket.util": {
+        "types": "./dist/tickets/sign-access-ticket.util.d.mts",
+        "default": "./dist/tickets/sign-access-ticket.util.mjs"
+      },
+      "./tickets/is-access-ticket-valid.util": {
+        "types": "./dist/tickets/is-access-ticket-valid.util.d.mts",
+        "default": "./dist/tickets/is-access-ticket-valid.util.mjs"
+      },
+      "./tokens/generate-api-token.util": {
+        "types": "./dist/tokens/generate-api-token.util.d.mts",
+        "default": "./dist/tokens/generate-api-token.util.mjs"
+      },
+      "./tokens/parse-api-token.util": {
+        "types": "./dist/tokens/parse-api-token.util.d.mts",
+        "default": "./dist/tokens/parse-api-token.util.mjs"
+      }
+    },
     "access": "public"
   },
   "scripts": {
+    "build": "vp pack",
     "format": "vp fmt .",
     "format:check": "vp fmt --check .",
     "lint": "vp run --filter eslint-local-rules-shared build && vp lint . --fix && vp run lint:eslint",
