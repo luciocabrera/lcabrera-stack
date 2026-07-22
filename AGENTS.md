@@ -408,6 +408,14 @@ The headline rules every agent must know regardless of which files are open. Ful
 
 Non-Negotiable Rule 14, with the two ways it has actually gone wrong here.
 
+**Read the tool's own documentation before reverse-engineering it.** Vite+'s
+docs are local at `node_modules/vite-plus/docs` (and online at viteplus.dev) —
+likewise for every other dependency. The whole `#318` detour, three wrong or
+half-right conclusions and a long series of probes, was spent rediscovering
+behaviour stated plainly in `guide/monorepo.md`: lint config belongs at the root,
+per-package `vite.config.ts` is for Vite/Vitest/framework config. Experiments are
+for what the docs do **not** answer. Reach for them second, not first.
+
 **Pick a probe that discriminates.** A green run is not evidence on its own — a
 rule that is not loaded reports exactly the same clean pass as code that is
 correct. Worked failure: concluding that per-workspace Oxlint configs were
