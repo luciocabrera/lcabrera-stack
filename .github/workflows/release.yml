@@ -19,6 +19,12 @@ name: Release
 # a package is `private: true` it is skipped entirely — which is what keeps this
 # workflow inert until the deliberate decision to publish is made.
 #
+# The one case that is NOT safe is a pending changeset, so the job skips itself
+# then. changesets/action cannot be told to publish only: with a changeset
+# present it versions and opens a PR instead, which is the manual step above —
+# and it fails outright, because the commit-msg hook rejects its `Version
+# Packages` message. See the "Check for pending changesets" step.
+#
 # Authentication is npm trusted publishing (OIDC): no NPM_TOKEN, and npm attaches
 # a provenance attestation on its own, so `--provenance` must NOT be passed.
 # It requires npm >= 11.5.1 and `id-token: write` below.
@@ -52,21 +58,49 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Runs before the toolchain is even installed: with a changeset pending
+      # there is nothing to publish, so every step below is wasted work.
+      #
+      # changesets/action has no "publish only" mode. Given a pending changeset
+      # it ALWAYS versions and opens a PR, and publishes only when there are
+      # none. That version PR is the one this repo deliberately writes by hand
+      # (see the header) — and the attempt cannot even get that far, because
+      # `vp config` installs .vite-hooks and the action's `Version Packages`
+      # commit is then rejected by the Conventional-Commit commit-msg hook,
+      # failing the job.
+      #
+      # So gate on the same condition the action itself switches on. No pending
+      # changeset means every version on main is intended, which is exactly when
+      # publishing is correct.
+      - name: Check for pending changesets
+        id: pending
+        run: |
+          count="$(find .changeset -maxdepth 1 -name '*.md' ! -name 'README.md' | wc -l)"
+          echo "count=$count" >> "$GITHUB_OUTPUT"
+          if [ "$count" -gt 0 ]; then
+            echo "::notice::$count pending changeset(s) — nothing to publish yet."
+            echo "Run 'vp run release:version' and merge the version PR to release."
+          fi
+
       - name: Setup Vite+
+        if: steps.pending.outputs.count == '0'
         uses: voidzero-dev/setup-vp@8ecb39174989ce55af90f45cf55b02738599831d
         with:
           cache: false
 
       - name: Install dependencies
+        if: steps.pending.outputs.count == '0'
         run: vp install --frozen-lockfile --ignore-scripts && vp config
 
       - name: Build the publishable packages
+        if: steps.pending.outputs.count == '0'
         # Consumers install `dist`, and `publishConfig.exports` points there, so
         # publishing without building would ship a tarball whose every export
         # target is missing. publish:verify fails on exactly that.
         run: vp run packages:build && vp run publish:verify
 
       - name: Publish to npm and open GitHub Releases
+        if: steps.pending.outputs.count == '0'
         uses: changesets/action@3841a0683d3cfa6dae0f9bb335290003010fe3f0 # v1.9.0
         with:
           publish: npx changeset publish
