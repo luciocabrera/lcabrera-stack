@@ -2,7 +2,23 @@
   "name": "@lcabrera/utils",
   "version": "0.1.1",
   "private": false,
+  "description": "Pure, framework-agnostic TypeScript utilities — no side effects, no dependencies, browser or server.",
+  "keywords": [
+    "formatters",
+    "pure-functions",
+    "type-guards",
+    "typescript",
+    "utilities"
+  ],
+  "homepage": "https://github.com/luciocabrera/vite-react-compiler/tree/main/packages/utils#readme",
+  "bugs": "https://github.com/luciocabrera/vite-react-compiler/issues",
   "license": "MIT",
+  "author": "Lucio Cabrera",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luciocabrera/vite-react-compiler.git",
+    "directory": "packages/utils"
+  },
   "files": [
     "dist",
     "src",
