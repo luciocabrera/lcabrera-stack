@@ -75,7 +75,18 @@ const DENY_CASES = [
   ['Read', { file_path: '/t/certs/server.pem' }],
   ['Read', { file_path: '/home/u/.ssh/id_rsa' }],
   ['Bash', { command: 'cat .env.local' }],
+  // A quoted span is tested whole, so a quoted PATH is still caught — the
+  // relaxation below must not become "anything in quotes is fine".
+  ['Bash', { command: 'cat "my file.env"' }],
+  // An ambiguous bare word still counts once it carries a directory, which is
+  // how the real files are always spelled.
+  ['Bash', { command: 'cat ~/.aws/credentials' }],
+  ['Bash', { command: 'cat ./credentials' }],
+  // Unambiguous names are unaffected by the bare-word rule.
+  ['Bash', { command: 'cat .npmrc' }],
   ['Grep', { glob: '.env', path: '.' }],
+  // Read declares its path, so the bare spelling is still a path there.
+  ['Read', { file_path: 'credentials' }],
   ['Write', { file_path: 'src/c.ts', content: `k = "${AKIA}"` }],
   ['Write', { file_path: 'src/c.ts', content: `t = "${GHP}"` }],
   [
@@ -111,6 +122,16 @@ const ALLOW_CASES = [
   ['Read', { file_path: '/t/src/app.ts' }],
   ['Bash', { command: 'cat .env.example' }],
   ['Bash', { command: 'npm run build' }],
+  // Prose that merely mentions a credential file is not a read of one. Each of
+  // these was denied before: a quoted span used to be split into its words, so
+  // every word of a message or title became a candidate path.
+  [
+    'Bash',
+    { command: 'git commit -m "stop reading import paths as credentials"' },
+  ],
+  ['Bash', { command: 'gh pr create --title "handle credentials safely"' }],
+  ['Bash', { command: "grep -rn 'credentials' scripts/lib/guard.mjs" }],
+  ['Bash', { command: 'node -e \'console.log("credentials")\'' }],
   ['Grep', { pattern: '.env', path: 'src' }],
   ['Write', { file_path: '.env.example', content: 'API_KEY=your-key-here' }],
   [

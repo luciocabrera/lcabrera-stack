@@ -1,9 +1,9 @@
 ---
-id: secrets-guard-module-specifiers
-title: Stop the secrets guard reading import paths as secret values
+id: secrets-guard-bash-tokens
+title: Stop the Bash arm reading prose as file paths
 owner: agent:claude
 status: active
-branch: secrets-guard-module-specifiers
+branch: secrets-guard-bash-tokens
 area:
   - scripts/lib/secrets-guard.mjs
   - scripts/claude-secrets-guard.mjs
@@ -11,12 +11,12 @@ started: 2026-07-22
 updated: 2026-07-22
 plan: (none)
 pr: (none)
-issue: #276
+issue: #278
 ---
 
 ## What
 
-Stop the secrets guard reading import paths as secret values
+Stop the Bash arm reading prose as file paths
 
 ## Status / next
 
