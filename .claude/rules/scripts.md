@@ -14,9 +14,13 @@ do.** They are real code and rot the same way. The exemplar to copy is
 
 ## Structure & size
 
-- **A JSDoc header block explaining _why_ the script exists** — the problem it
-  guards against, its checks/outputs, its usage line(s), and its exit codes. Not
-  "what the code does" — _why it is here_. Every verify/report script has one.
+- **A short JSDoc header explaining _why_ the script exists** — the problem it
+  guards against, its usage line(s), and its exit codes. Not "what the code
+  does" — _why it is here_. Every verify/report script has one. **Keep it to a
+  handful of lines**: the investigation that produced the script, and any
+  measurement, belong in the PR or issue, not at the top of the file. Never put a
+  changing number in it (see the comment rules in AGENTS.md §7). Link the doc
+  that owns the detail rather than restating it.
   (Mind block-comment content: a literal `*` followed by `/` closes the comment —
   write globs as prose, e.g. "TS/TSX files", not `**/*.ts`.)
 - **Small, single-responsibility functions.** The same purity/decomposition bar

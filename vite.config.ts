@@ -20,59 +20,11 @@ const fmtConfig = createFmtConfig({
 export default defineConfig({
   fmt: fmtConfig,
   lint: {
-    // `correctness` is Oxlint's bug category — `no-debugger`, `no-dupe-keys`,
-    // `no-self-compare`. It defaults to WARN, and a warning does not fail
-    // anything: `vp lint .` and `vp check` both exit 0 while printing "Found 0
-    // errors and 1 warning". Until this line, a `debugger` statement could be
-    // committed, pass every gate, and ship.
-    //
-    // This block is a BASELINE, not the whole story. Each workspace layers its
-    // own OxlintConfig on top via `@repo/vite-configs/*-lint`, and those `rules`
-    // entries genuinely apply — verified by setting `unicorn/no-array-sort` to
-    // `error` in the shared frontend config alone and watching `vp lint` and
-    // `vp check` inside `packages/ui` both exit 1 on it.
-    //
-    // What was missing was severity, in both places at once: `correctness` sat
-    // at `warn` here (Oxlint's default, since no category was named) AND at
-    // `warn` in `baseLintSharedConfig`. A warning fails nothing — `vp lint .`
-    // and `vp check` exit 0 while printing "Found 0 errors and 1 warning" — so
-    // a `debugger` statement passed every gate. Naming it `error` here fixes it
-    // for the root run and for every workspace run.
-    //
-    // Note a category severity outranks an individual `rules` entry for a rule
-    // in that category: with `correctness: 'warn'` in force, setting
-    // `no-debugger: 'error'` still reported a warning. Set the category.
-    //
-    // Measured before landing: `correctness` at error costs ZERO findings
-    // across all 3178 files. The other categories are not free — perf 30,
-    // suspicious 742, restriction 7270, pedantic 7738, style 12760 — and each
-    // needs its own decision rather than a blanket flip.
+    // Explicit because Oxlint defaults `correctness` to `warn`, and a warning
+    // fails nothing here — `vp lint` and `vp check` both exit 0 on one.
     categories: { correctness: 'error' },
-    // A `plugins` entry behaves differently from `rules`: declaring `react`
-    // only in the workspace factory did NOT activate its rules for a run inside
-    // that workspace (a `key`-less `.map()` went unreported), while the same
-    // entry here does flag it. The repo's own `mergeOxlintConfig` merges
-    // `plugins` correctly, so the config object is right and the cause sits
-    // below it — #318 is where that gets chased. Until then, a plugin that must
-    // bite is declared here.
-    //
-    // All four measured at ZERO findings before landing. Verified they actually
-    // load rather than passing vacuously: with `react` on, a `key`-less list
-    // fails with `react(jsx-key)`.
-    //
-    // Measured but NOT enabled, each for its own reason:
-    //   vitest    968 — 884 of them one stylistic rule (require-mock-type-
-    //                   parameters). The rest includes real finds
-    //                   (expect-expect: 3 tests that assert nothing).
-    //   jsx-a11y    9 — all in packages/ui, several being the same ARIA
-    //                   patterns Biome already documents as its own false
-    //                   positives (window splitter, conditional-role trigger).
-    //                   Enabling it would force new suppressions into the
-    //                   never-suppress package, so it needs real a11y work.
-    //   jsdoc       6 — trivial, but `check-tag-names` needs a call on which
-    //                   custom tags this repo intends.
-    //   promise     1 — one Fastify/Express handler wrapper; a judgement, not
-    //                   a flip.
+    // Declared here, not in the per-workspace factories: a workspace `plugins`
+    // entry does not take effect (#318). Workspace `rules` entries do.
     plugins: ['react', 'react-perf', 'import', 'node'],
     options: { typeAware: true, typeCheck: true },
   },

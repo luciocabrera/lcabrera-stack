@@ -280,13 +280,13 @@ There is deliberately **no `start:all`/`dev:all`**: `car-sales-api` and `car-sal
 - **A category severity outranks an individual `rules` entry** for a rule inside it. With `correctness: 'warn'` in force, setting `no-debugger: 'error'` still reported a warning. Set the category, not the rule.
 - **`plugins` does not behave like `rules`.** Declaring `react` only in the workspace factory did not activate its rules for a run inside that workspace, while the same entry at root does. `mergeOxlintConfig` merges `plugins` correctly, so the config object is right and the cause is below it — [#318](https://github.com/luciocabrera/vite-react-compiler/issues/318). Until that is resolved, a plugin that must bite is declared at root.
 
-The other categories are **not** free and each needs its own decision — measured 2026-07-22: perf 30, suspicious 742, restriction 7270, pedantic 7738, style 12760. Enabled plugins were each measured at zero and then verified to actually fire. **Always confirm a lint change with a deliberate violation**: a rule that is not loaded reports exactly the same clean pass as code that is correct, which is precisely how the wrong conclusion above got written down in the first place.
+The other categories are **not** free; measure one before enabling it (`vp lint . --format=json`). **Always confirm a lint change with a deliberate violation** — a rule that is not loaded reports exactly the same clean pass as code that is correct, which is how the wrong conclusion above got written down in the first place.
 
 **Three linters run, and none of them is `vp check`.** Oxlint (`vp lint`) covers the whole tree from the root; the eslint pass (`vp run lint:eslint` / `lint:eslint:check`) exists in all 17 workspaces — React workspaces use `@repo/vite-configs/eslint-custom-rules`, node/library workspaces use `@repo/vite-configs/eslint-base-custom-rules` (same stack minus React/StyleX, and without `clean-import-paths`, which strips the import extensions node-resolution code requires). Inherited eslint violations are baselined per workspace in `eslint-suppressions.json` (ESLint bulk suppressions) — **new violations fail the gate**: CI runs `vp run -r lint:eslint:check` as its own step in `check-safe.yml`, because `vp check` covers only fmt + Oxlint + the tsgolint type pass and would let every eslint-only finding through. Burn debt down and shrink the baseline with `npx eslint . --config eslint.config.mjs --prune-suppressions`. Never add new entries by hand, and never inline-`// eslint-disable`/`oxlint-disable` a finding or switch the rule off in config — **verify, then fix the code instead** (see Non-Negotiable Rule 11). A lint finding is real until you've read the flagged code and confirmed otherwise; stylistic `unicorn/*` rules (e.g. `prefer-simple-condition-first`, `no-nested-ternary`) get fixed by restructuring, never silenced. **Exception: `packages/ui`, `packages/api`, `packages/server` and `packages/utils` are held strictest** — all four are public-facing, so every finding there gets fixed rather than baselined or disabled, and an exception has to be argued in writing before it exists. That is now **checked** (`vp run suppressions:verify`, CI step in `check-safe.yml`) rather than asserted, across every mechanism that can silence a finding in them: `eslint-disable`, `oxlint-disable`, `biome-ignore`, a Biome rule scoped `"off"` at a public-package path, `NOSONAR`, `@ts-expect-error`/`@ts-ignore`/`@ts-nocheck`, a fallow baseline key, and a rule lowered below `error` in the package's own `eslint.config.mjs`/`vite.config.ts`. Anything not carrying a justified entry in [`docs/agents/public-package-suppressions.json`](docs/agents/public-package-suppressions.json) fails the build — and so does an entry whose code has since gone, which is what stops the register becoming the baseline it replaces. The protocol for adding one is [`docs/agents/public-package-suppressions.md`](docs/agents/public-package-suppressions.md); `vp run suppressions:list` prints the current state. Do not restate the mechanism list anywhere else — that table is in the protocol doc, and a second copy is a copy nothing checks.
 
 The register has **two lists**, and the split is load-bearing. `approved` holds suppressions scoped to a public package — the rule is off _because of_ that package, and each needs an argument for why the engine is wrong about that specific code. `acknowledged` holds repo-wide policy (ADR-035 §7) that merely reaches one, because the package contains a test file, a config or a tooling script. Both are enforced: an early version gated only the first, which left a hole where a _new_ override broad enough to match a public package **and** anything else needed no entry at all. Classification is by what a glob **resolves to**, never by how it looks — `**/logger.util.ts` reads like a category pattern and is in fact a single `packages/ui` file.
 
-This paragraph used to say the four were "never silenced", full stop, and that was **false on the day it was written**: `packages/ui` carried 17 inline directives and 6 Biome rules turned off against its own files. Most are defensible — a window splitter has no native element, StyleX's allowlist predates CSS anchor positioning — but nothing distinguished a reviewed exception from one added last Tuesday, and a rule nobody can comply with gets ignored wholesale. The honest form of the rule is "no unapproved suppression", and it is only meaningful because something now counts them. Note what the check does **not** cover: repo-wide Biome category rules (`**/*.test.ts`, `**/*.mjs`) that a public package merely falls inside are ADR-035 §7's business, not a per-package exemption.
+This paragraph used to say the four were "never silenced", full stop, and that was false when written — `packages/ui` carried a good number of inline directives and targeted Biome rule-offs. Most are defensible, but nothing distinguished a reviewed exception from one added last Tuesday, and a rule nobody can comply with gets ignored wholesale. The honest form is "no _unapproved_ suppression", and it only means anything because something now counts them. The check does **not** cover repo-wide Biome category rules (`**/*.test.ts`, `**/*.mjs`) that a public package merely falls inside — those are ADR-035 §7's business.
 
 Each one's `eslint-suppressions.json` path is **gitignored** (`packages/ui/.gitignore`, `packages/api/.gitignore`, `packages/server/.gitignore`, `packages/utils/.gitignore`): ESLint's bulk-suppressions tooling — an editor extension, or `--prune-suppressions` run across every workspace — regenerates an empty `{}` for a workspace with nothing to suppress, and committing/deleting it was an endless loop. Because CI checks out no file, all four packages are suppression-free by construction and any real finding fails the gate. Never un-ignore any of them or commit a non-empty one. To check the real membership rather than trusting this list, grep the workspace `.gitignore`s for `eslint-suppressions`.
 
@@ -395,9 +395,28 @@ The headline rules every agent must know regardless of which files are open. Ful
 
 ## 7. Documentation & Workflow
 
-- JSDoc comments on all exported functions, types, and components.
 - Each feature directory should have a README.
 - Architecture docs live in `apps/react-router/docs/` and component-level `ARCHITECTURE.md` files.
+
+**Comment only what the code cannot say, and keep it short.** There is no
+"document every export" rule here — that one existed, produced volume rather than
+clarity, and was removed. A name and a signature already say what a function is;
+a comment earns its place by carrying what they cannot — a non-obvious
+constraint, a trap, a decision whose alternative looks equally reasonable. If the
+code can be made clearer instead, do that and write no comment.
+
+**Never put a changing number in a comment or a doc.** Counts, file totals,
+finding tallies and measurements are true on the day they are written and wrong
+soon after, and nothing checks them — the same silent rot that made
+`commands:verify`, `docs:verify` and `scripts:verify` necessary in the first
+place. Name the command that produces the number instead (`vp run
+suppressions:list`, `vp lint . --format=json`). A count is only allowed where a
+gate asserts it, such as `count` in the suppressions register.
+
+The durable place for measurements, investigation narrative and "why we chose
+this" is the **PR or the issue** — dated, immutable, and not something a later
+reader mistakes for current fact. Keep the file comment to what someone editing
+that line needs in order not to break it.
 
 ### Multi-Agent Coordination
 
