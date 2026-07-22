@@ -16,7 +16,7 @@
 import { globsOverlap } from './coordination-parse.mjs';
 
 /** Branch fields that name no real branch, so they cannot mean "same branch". */
-const NO_BRANCH = new Set(['(uncommitted)', '(none)', '(worktree)']);
+export const NO_BRANCH = new Set(['(uncommitted)', '(none)', '(worktree)']);
 
 const isLive = ({ data }) => data !== undefined && data.status !== 'done';
 
