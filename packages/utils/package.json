@@ -4,6 +4,7 @@
   "private": true,
   "license": "MIT",
   "files": [
+    "dist",
     "src",
     "!src/**/*.test.*"
   ],
@@ -35,9 +36,104 @@
     "./strings/empty-to-undefined.util": "./src/strings/empty-to-undefined.util.ts"
   },
   "publishConfig": {
+    "exports": {
+      "./arrays/merge-arrays.util": {
+        "types": "./dist/arrays/merge-arrays.util.d.mts",
+        "default": "./dist/arrays/merge-arrays.util.mjs"
+      },
+      "./comparison/are-arrays-equal.util": {
+        "types": "./dist/comparison/are-arrays-equal.util.d.mts",
+        "default": "./dist/comparison/are-arrays-equal.util.mjs"
+      },
+      "./comparison/are-equal-by-json.util": {
+        "types": "./dist/comparison/are-equal-by-json.util.d.mts",
+        "default": "./dist/comparison/are-equal-by-json.util.mjs"
+      },
+      "./comparison/is-shallow-equal.util": {
+        "types": "./dist/comparison/is-shallow-equal.util.d.mts",
+        "default": "./dist/comparison/is-shallow-equal.util.mjs"
+      },
+      "./errors/get-error-message.util": {
+        "types": "./dist/errors/get-error-message.util.d.mts",
+        "default": "./dist/errors/get-error-message.util.mjs"
+      },
+      "./errors/to-error.util": {
+        "types": "./dist/errors/to-error.util.d.mts",
+        "default": "./dist/errors/to-error.util.mjs"
+      },
+      "./formatters/format-currency.util": {
+        "types": "./dist/formatters/format-currency.util.d.mts",
+        "default": "./dist/formatters/format-currency.util.mjs"
+      },
+      "./formatters/format-date.util": {
+        "types": "./dist/formatters/format-date.util.d.mts",
+        "default": "./dist/formatters/format-date.util.mjs"
+      },
+      "./formatters/format-number.util": {
+        "types": "./dist/formatters/format-number.util.d.mts",
+        "default": "./dist/formatters/format-number.util.mjs"
+      },
+      "./formatters/formatters.constants": {
+        "types": "./dist/formatters/formatters.constants.d.mts",
+        "default": "./dist/formatters/formatters.constants.mjs"
+      },
+      "./formatters/formatters.types": {
+        "types": "./dist/formatters/formatters.types.d.mts",
+        "default": "./dist/formatters/formatters.types.mjs"
+      },
+      "./formatters/get-date-time-format-options.util": {
+        "types": "./dist/formatters/get-date-time-format-options.util.d.mts",
+        "default": "./dist/formatters/get-date-time-format-options.util.mjs"
+      },
+      "./formatters/get-default-locale.util": {
+        "types": "./dist/formatters/get-default-locale.util.d.mts",
+        "default": "./dist/formatters/get-default-locale.util.mjs"
+      },
+      "./formatters/parse-date.util": {
+        "types": "./dist/formatters/parse-date.util.d.mts",
+        "default": "./dist/formatters/parse-date.util.mjs"
+      },
+      "./forms/is-checkbox-checked.util": {
+        "types": "./dist/forms/is-checkbox-checked.util.d.mts",
+        "default": "./dist/forms/is-checkbox-checked.util.mjs"
+      },
+      "./forms/read-form-string.util": {
+        "types": "./dist/forms/read-form-string.util.d.mts",
+        "default": "./dist/forms/read-form-string.util.mjs"
+      },
+      "./guards/is-object.util": {
+        "types": "./dist/guards/is-object.util.d.mts",
+        "default": "./dist/guards/is-object.util.mjs"
+      },
+      "./json/safe-json-parse.util": {
+        "types": "./dist/json/safe-json-parse.util.d.mts",
+        "default": "./dist/json/safe-json-parse.util.mjs"
+      },
+      "./numbers/parse-positive-integer.util": {
+        "types": "./dist/numbers/parse-positive-integer.util.d.mts",
+        "default": "./dist/numbers/parse-positive-integer.util.mjs"
+      },
+      "./numbers/round-to-cents.util": {
+        "types": "./dist/numbers/round-to-cents.util.d.mts",
+        "default": "./dist/numbers/round-to-cents.util.mjs"
+      },
+      "./objects/drop-nullish-values.util": {
+        "types": "./dist/objects/drop-nullish-values.util.d.mts",
+        "default": "./dist/objects/drop-nullish-values.util.mjs"
+      },
+      "./objects/merge-objects.util": {
+        "types": "./dist/objects/merge-objects.util.d.mts",
+        "default": "./dist/objects/merge-objects.util.mjs"
+      },
+      "./strings/empty-to-undefined.util": {
+        "types": "./dist/strings/empty-to-undefined.util.d.mts",
+        "default": "./dist/strings/empty-to-undefined.util.mjs"
+      }
+    },
     "access": "public"
   },
   "scripts": {
+    "build": "vp pack",
     "format": "vp fmt .",
     "format:check": "vp fmt --check .",
     "lint": "vp run --filter eslint-local-rules-shared build && vp lint . --fix && vp run lint:eslint",

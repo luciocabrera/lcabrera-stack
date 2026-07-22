@@ -222,6 +222,28 @@ Always feed the audit real coverage:
 (produce it with `vp run coverage:merge`). Without it fallow _estimates_ coverage
 and reports trivially simple code as `critical`.
 
+### Publishing the public packages
+
+`@lcabrera/api`, `@lcabrera/server` and `@lcabrera/utils` build to `dist` because a
+`.ts` file inside `node_modules` is not loadable — Node refuses to strip types
+there (`ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`), and Vite externalizes
+dependencies for SSR by default, so source-shipping fails when a consumer's
+server starts rather than when it typechecks.
+
+`exports` still points at `src`, so **nothing in this repo has to build first**;
+pnpm substitutes `publishConfig.exports` (pointing at `dist`) at pack time.
+`@lcabrera/ui` is deliberately excluded — StyleX derives theme identity from the
+source path, so it ships source and the consumer's own plugin compiles it.
+
+| Command                            | Does                                                                                   |
+| ---------------------------------- | -------------------------------------------------------------------------------------- |
+| `vp run packages:build`            | build the three publishable packages (`vp pack` → `dist` with `.d.mts` and sourcemaps) |
+| `vp run publish:verify`            | check `publishConfig.exports` matches `exports` and resolves to built files            |
+| `vp run publish:verify -- --write` | regenerate `publishConfig.exports` from `exports`                                      |
+
+Run `packages:build` **before** `publish:verify` for the full check — without a
+`dist/` it verifies only the structural half, and says so in its output.
+
 ### AI config & skills tooling
 
 | Command                  | Does                                                                                                                                               |

@@ -4,7 +4,7 @@ Shared Vite+ configuration builders consumed by workspace apps.
 
 ## Scope
 
-- Provide reusable formatter, lint, and plugin configuration factories.
+- Provide reusable formatter, lint, packaging, and plugin configuration factories.
 - Keep app-level config files minimal and focused on overrides.
 - Expose stable entry points via `package.json` `exports`.
 
@@ -13,6 +13,17 @@ Shared Vite+ configuration builders consumed by workspace apps.
 1. Base builders: shared defaults (`fmt`, `base-lint`).
 2. Specializations: mode/app-type builders (`api-lint`, `frontend-lint`, `react-router-lint`, `eslint-custom-rules`, plugins).
 3. Merge helpers: reusable merge utilities for override behavior.
+4. Packaging: `pack` (`createPackConfig`) — the `vp pack`/tsdown settings for the publishable Node and browser packages.
+
+### `pack` and the cycle it cannot cross
+
+`createPackConfig` is shared by `@lcabrera/api` and `@lcabrera/server`, but
+**`@lcabrera/utils` inlines the same settings instead of importing them**. This
+package depends on `@lcabrera/utils`, so importing back — even for a plain object —
+creates a workspace cycle that breaks every recursive `vp run -r` task graph. The
+same constraint already governs `VITEST_COVERAGE_FLAGS` and that package's
+`eslint.config.mjs`. Change one, change the other; `publish:verify` checks the
+resulting `exports`, not the config that produced them.
 
 ## Design Rules
 
