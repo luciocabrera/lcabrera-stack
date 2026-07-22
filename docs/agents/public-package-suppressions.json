@@ -6,8 +6,92 @@
     "status": {
       "permanent": "The engine is wrong about correct code and no fix exists in our control. Expected to outlive us.",
       "provisional": "Accepted for now, not endorsed. Carries a `review` issue and should shrink."
+    },
+    "lists": {
+      "approved": "Suppressions scoped to a public package — the rule is off BECAUSE of that package. Highest bar: argue why the engine is wrong about this specific code.",
+      "acknowledged": "Repo-wide policy (ADR-035 §7) that happens to reach a public package, because the package contains a test file, a config, or a tooling script. These are decisions about a file CATEGORY, not about the package. Listed rather than justified per-package — but listed, so a new override cannot widen onto these packages unnoticed."
     }
   },
+  "acknowledged": [
+    {
+      "key": "biome **/*.test.ts noShadow",
+      "count": 1,
+      "reason": "Shadowing an outer binding inside a mock or fixture factory is idiomatic in test code and reads more clearly than inventing a second name. Off for every test file in the repo, not for these packages.",
+      "ref": "ADR-035 §7"
+    },
+    {
+      "key": "biome **/*.test.tsx noShadow",
+      "count": 1,
+      "reason": "The TSX half of the same test-file exemption; the two globs exist because Biome matches on the literal extension.",
+      "ref": "ADR-035 §7"
+    },
+    {
+      "key": "biome **/*.test.ts noEmptyBlockStatements",
+      "count": 1,
+      "reason": "An empty block is how a no-op stub is spelled — `vi.fn(() => {})` and empty catch blocks that assert a throw was swallowed. Repo-wide for test files.",
+      "ref": "ADR-035 §7"
+    },
+    {
+      "key": "biome **/*.test.tsx noEmptyBlockStatements",
+      "count": 1,
+      "reason": "The TSX half of the same test-file exemption for no-op stubs.",
+      "ref": "ADR-035 §7"
+    },
+    {
+      "key": "biome **/*.test.ts useUniqueElementIds",
+      "count": 1,
+      "reason": "A fixture renders a fixed id on purpose so the assertion can find it; uniqueness across a suite is neither achievable nor meaningful. Repo-wide for test files.",
+      "ref": "ADR-035 §7"
+    },
+    {
+      "key": "biome **/*.test.tsx useUniqueElementIds",
+      "count": 1,
+      "reason": "The TSX half of the same fixed-id fixture exemption, and the one that actually fires — most rendering tests are TSX.",
+      "ref": "ADR-035 §7"
+    },
+    {
+      "key": "biome **/*.test.ts useComponentExportOnlyModules",
+      "count": 1,
+      "reason": "The rule protects Fast Refresh, which never runs in a test file. A suite legitimately exports helpers and fixtures alongside a test component.",
+      "ref": "ADR-035 §7"
+    },
+    {
+      "key": "biome **/*.test.tsx useComponentExportOnlyModules",
+      "count": 1,
+      "reason": "The TSX half of the same Fast-Refresh exemption; ADR-007 barrels are unaffected because the rule stays on for source files.",
+      "ref": "ADR-035 §7"
+    },
+    {
+      "key": "biome **/*.mjs noConsole",
+      "count": 1,
+      "reason": "Console output is the product of a tooling script, not a stray debug left in shipped code. Reaches these packages only through their own build/lint config files.",
+      "ref": "ADR-035 §7"
+    },
+    {
+      "key": "biome **/scripts/** noConsole",
+      "count": 1,
+      "reason": "Same reasoning as the .mjs glob, for scripts written in TypeScript. noConsole stays on for all other source in every workspace.",
+      "ref": "ADR-035 §7"
+    },
+    {
+      "key": "biome **/*.config.ts noDefaultExport",
+      "count": 1,
+      "reason": "A config module's entire contract IS its default export — Vite and Vitest load it that way. Reaches each public package through its own vite.config.ts.",
+      "ref": "ADR-035 §7"
+    },
+    {
+      "key": "biome **/*.config.mjs noDefaultExport",
+      "count": 1,
+      "reason": "The same config-module contract for eslint.config.mjs, which every public package owns.",
+      "ref": "ADR-035 §7"
+    },
+    {
+      "key": "biome **/config/** noDefaultExport",
+      "count": 1,
+      "reason": "Config fragments kept in a config/ directory follow the same default-export contract as the top-level config files.",
+      "ref": "ADR-035 §7"
+    }
+  ],
   "approved": [
     {
       "key": "biome packages/ui/** useExhaustiveDependencies",
