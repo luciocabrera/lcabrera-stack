@@ -76,19 +76,74 @@ const TOOL_PATH_FIELDS = {
 const BASH_TOKEN_SPLIT = /[\s"'`;|&<>()=]+/;
 const GLOB_WILDCARDS = /[*?[\]]/g;
 
+// A quoted span is ONE candidate, never shredded into its words. Splitting it
+// made every word of a commit message, PR title or `node -e` script a candidate
+// path, so `git commit -m "...credentials..."` was denied as a secret-file read.
+// A quoted path is still checked — the span as a whole is what gets tested, so
+// `cat "my file.env"` still matches. Linear, no nested quantifier (S8786).
+//
+// Known gap: prose OUTSIDE quotes — a heredoc body naming `.npmrc`, say — is
+// still tokenised word-by-word and still denied. Closing that needs real shell
+// parsing to tell a heredoc body from arguments, which is not worth it: write
+// the text to a file and pass it by path (`--body-file`), as the callers that
+// hit this already do.
+const QUOTED_SPAN = /"([^"]*)"|'([^']*)'|`([^`]*)`/g;
+
+const bashCandidates = (command) => {
+  const quoted = [];
+  const unquoted = command.replace(
+    QUOTED_SPAN,
+    (_match, doubleQuoted, singleQuoted, backQuoted) => {
+      quoted.push(doubleQuoted ?? singleQuoted ?? backQuoted ?? '');
+      return ' ';
+    },
+  );
+  return [...quoted, ...unquoted.split(BASH_TOKEN_SPLIT)].filter(
+    (token) => token.length > 0,
+  );
+};
+
 const candidatePathsFor = ({ toolInput, toolName }) => {
   if (!toolInput || typeof toolInput !== 'object') {
     return [];
   }
   if (toolName === 'Bash') {
-    const command =
-      typeof toolInput.command === 'string' ? toolInput.command : '';
-    return command.split(BASH_TOKEN_SPLIT).filter((token) => token.length > 0);
+    return bashCandidates(
+      typeof toolInput.command === 'string' ? toolInput.command : '',
+    );
   }
   return (TOOL_PATH_FIELDS[toolName] ?? [])
     .map((field) => toolInput[field])
     .filter((value) => typeof value === 'string')
     .map((value) => value.replace(GLOB_WILDCARDS, ''));
+};
+
+// Taxonomy entries that are also ordinary English words. Matching one on a bare
+// token denies any command that merely MENTIONS it — a commit message, an issue
+// body, a grep pattern. Every other entry is dot-prefixed (`.npmrc`, `.netrc`)
+// or carries an extension (`credentials.json`, `*.pem`), so it cannot be
+// mistaken for prose; this list is derived rather than hand-written so a future
+// bare-word entry is covered automatically.
+const AMBIGUOUS_BASENAMES = SECRET_FILE.credentialBasenames.filter(
+  (name) => !name.startsWith('.') && !name.includes('.'),
+);
+
+const hasDirectoryComponent = (candidate) => /[/\\]/.test(String(candidate));
+
+/**
+ * Bash tokens are GUESSES at paths; Read's `file_path` is a declared one. So an
+ * ambiguous bare word only counts here when it carries a directory — which the
+ * real files always do (`~/.aws/credentials`, `./credentials`). The deliberate
+ * cost is a bare `cat credentials` naming a file in the working directory; the
+ * explicit path tools still match that spelling, and it is a poor trade to deny
+ * every sentence containing the word to catch it.
+ */
+const isSecretPathInCommand = (candidate) => {
+  const name = basename(String(candidate).trim()).toLowerCase();
+  if (AMBIGUOUS_BASENAMES.includes(name) && !hasDirectoryComponent(candidate)) {
+    return false;
+  }
+  return isSecretFilePath(candidate);
 };
 
 // ---- content secret patterns ------------------------------------------------
@@ -366,8 +421,12 @@ export const evaluatePreToolUse = ({ hookEventName, toolInput, toolName }) => {
   }
 
   // 1) Deterministic read/exfil guard — Read/Grep/Glob and Bash tokens.
+  // Bash gets the stricter reading of what counts as a path, because its
+  // candidates are inferred from a command line rather than declared in a field.
+  const isSecretCandidate =
+    toolName === 'Bash' ? isSecretPathInCommand : isSecretFilePath;
   const blockedPath = candidatePathsFor({ toolInput, toolName }).find(
-    (candidate) => isSecretFilePath(candidate),
+    (candidate) => isSecretCandidate(candidate),
   );
   if (blockedPath !== undefined) {
     return {
