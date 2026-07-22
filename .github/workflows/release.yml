@@ -99,6 +99,32 @@ jobs:
         # target is missing. publish:verify fails on exactly that.
         run: vp run packages:build && vp run publish:verify
 
+      - name: Provide pnpm for the publish step
+        if: steps.pending.outputs.count == '0'
+        # `changeset publish` picks its publish tool by DETECTING the lockfile,
+        # then shells out to `pnpm publish`. There is no option to force npm, and
+        # its `pnpm --version` probe failing is caught and ignored — so it commits
+        # to pnpm whether or not pnpm exists. vp drives pnpm through its own
+        # runtime and a fresh runner has no `pnpm` on PATH, so the first real run
+        # of this job died with `spawn pnpm ENOENT`, after it had already decided
+        # what to publish.
+        #
+        # corepack activates exactly the version pinned in the root package.json
+        # `packageManager` field, integrity hash included, so this is the same
+        # pnpm vp uses and not a second one drifting alongside it.
+        #
+        # The assertion matters: without it the next failure is another ENOENT
+        # from deep inside the publish, long after the useful context is gone.
+        run: |
+          corepack enable pnpm
+          actual="$(pnpm --version)"
+          expected="$(node -p "require('./package.json').packageManager.split('@')[1].split('+')[0]")"
+          echo "pnpm $actual (pinned $expected)"
+          if [ "$actual" != "$expected" ]; then
+            echo "::error::pnpm $actual does not match the pinned $expected"
+            exit 1
+          fi
+
       - name: Publish to npm and open GitHub Releases
         if: steps.pending.outputs.count == '0'
         uses: changesets/action@3841a0683d3cfa6dae0f9bb335290003010fe3f0 # v1.9.0
