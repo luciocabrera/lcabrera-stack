@@ -272,6 +272,20 @@ Two deliberate constraints, both explained in [AGENTS.md](AGENTS.md#releasing):
 the version PR is **not** opened by a bot, and the **first** publish of each
 package must be done by hand before trusted publishing can take over.
 
+That first publish has a script, because an npm version is permanent and the
+ways to get it wrong — stale checkout, wrong account, publishing before the
+version bump merged — are all undoable only by never making them:
+
+```bash
+npm login --auth-type=legacy                      # once
+bash scripts/publish-bootstrap.sh --dry-run       # checks everything, sends nothing
+bash scripts/publish-bootstrap.sh                 # publishes
+```
+
+It is safe to re-run: a package already on the registry at its current version is
+skipped, so a run that fails halfway can simply be repeated. Needed once per
+package, ever.
+
 ### AI config & skills tooling
 
 | Command                  | Does                                                                                                                                               |
