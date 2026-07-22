@@ -20,39 +20,46 @@
  *
  * Exit codes: 0 = valid or exempt, 1 = does not conform.
  */
-import { execFileSync } from 'node:child_process';
+import { readFileSync, statSync } from 'node:fs';
+import { dirname, isAbsolute, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { validateBranchName } from './lib/commit-convention.mjs';
 
-// GIT_DIR and friends outrank `cwd` and are exported into every hook, so a
-// child git call can silently read a different repository (see #270). Strip
-// them before asking git anything.
-const REDIRECTING_VARS = [
-  'GIT_ALTERNATE_OBJECT_DIRECTORIES',
-  'GIT_COMMON_DIR',
-  'GIT_DIR',
-  'GIT_INDEX_FILE',
-  'GIT_NAMESPACE',
-  'GIT_OBJECT_DIRECTORY',
-  'GIT_WORK_TREE',
-];
+const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
 
 const flagValue = (name) => {
   const index = process.argv.indexOf(name);
   return index === -1 ? undefined : process.argv[index + 1];
 };
 
+/** Resolves the git directory, following the `gitdir:` pointer a linked
+ *  worktree uses in place of a `.git` directory. */
+const gitDirectory = () => {
+  const dotGit = join(REPO_ROOT, '.git');
+  if (statSync(dotGit, { throwIfNoEntry: false })?.isDirectory() === true) {
+    return dotGit;
+  }
+  const pointer = readFileSync(dotGit, 'utf8').trim();
+  const target = pointer.replace(/^gitdir:\s*/, '');
+  return isAbsolute(target) ? target : resolve(dirname(dotGit), target);
+};
+
+/**
+ * Reads the checked-out branch from `.git/HEAD` rather than shelling out to
+ * `git rev-parse`. No subprocess means no PATH to trust — a `git` resolved
+ * through an inherited PATH can be shadowed by a writable directory earlier in
+ * it — and nothing to scrub: the `GIT_DIR` family redirects the git BINARY, not
+ * a file read, so the class of bug behind #270 cannot apply here either.
+ *
+ * A detached HEAD holds a raw sha; it is returned as-is and fails validation,
+ * which is correct — you cannot push a detached HEAD to a branch by accident.
+ */
 const currentBranch = () => {
-  const env = Object.fromEntries(
-    Object.entries(process.env).filter(
-      ([name]) => !REDIRECTING_VARS.includes(name),
-    ),
-  );
   try {
-    return execFileSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], {
-      encoding: 'utf8',
-      env,
-    }).trim();
+    const head = readFileSync(join(gitDirectory(), 'HEAD'), 'utf8').trim();
+    const ref = /^ref:\s*refs\/heads\/(?<branch>.+)$/.exec(head);
+    return ref?.groups.branch ?? head;
   } catch {
     return '';
   }

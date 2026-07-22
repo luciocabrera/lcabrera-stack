@@ -114,7 +114,7 @@ const REQUIRED_ISSUE_SECTIONS = [
  *  The issue number is required: it is what ties a branch to the context that
  *  justified it, which is exactly what was missing. */
 const BRANCH_RE = new RegExp(
-  `^(?:${ALLOWED_TYPES.join('|')})/\\d+-[a-z0-9]+(?:-[a-z0-9]+)*$`,
+  String.raw`^(?:${ALLOWED_TYPES.join('|')})/\d+-[a-z0-9]+(?:-[a-z0-9]+)*$`,
 );
 
 /** Not topic branches, so not subject to the rule: the trunk, and the release
