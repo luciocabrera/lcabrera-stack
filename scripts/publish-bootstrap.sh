@@ -39,18 +39,37 @@ DRY_RUN=false
 PACKAGES=(utils api server ui)
 EXPECTED_USER="${NPM_EXPECTED_USER:-lcabrera}"
 
+# Naming the positional parameters is not decoration here: `fail` reads the
+# first one, then shifts, then iterates the rest, so the meaning of `$1` changes
+# partway through the body.
 fail() {
-  echo ""
-  echo "✗ $1" >&2
+  local headline="$1"
   shift
-  for line in "$@"; do echo "  $line" >&2; done
+
+  echo ""
+  echo "✗ $headline" >&2
+  for detail in "$@"; do echo "  $detail" >&2; done
   exit 1
 }
 
-step() { echo ""; echo "▶ $1"; }
+step() {
+  local title="$1"
 
+  echo ""
+  echo "▶ $title"
+}
+
+# The package and field are passed as arguments rather than interpolated into
+# the script text, so nothing here can be read as code.
 read_manifest_field() {
-  node -p "JSON.parse(require('node:fs').readFileSync('packages/$1/package.json','utf8')).$2 ?? ''"
+  local package="$1"
+  local field="$2"
+
+  node -e 'const [dir, key] = process.argv.slice(1);
+    const manifest = JSON.parse(
+      require("node:fs").readFileSync(`packages/${dir}/package.json`, "utf8"),
+    );
+    process.stdout.write(String(manifest[key] ?? ""));' "$package" "$field"
 }
 
 # ---------------------------------------------------------------------------
