@@ -29,6 +29,22 @@
 # merge base, so it needs full history and a coverage merge.
 #
 # Bypass for a work-in-progress push: `git push --no-verify`.
+
+# Must come before anything else: git exports GIT_DIR to hooks, and it overrides
+# the working directory for every `git` a task spawns. Without this, a test that
+# builds a throwaway repo instead rewrites the real index — see the script.
+#
+# Fail closed. A missing guard is not a reason to run the suite anyway: that is
+# the configuration in which two commits were already lost.
+__scrub="$(dirname "$0")/scrub-git-env.sh"
+if [ ! -f "$__scrub" ]; then
+  echo "✗ pre-push: $__scrub is missing."
+  echo "  Refusing to run tasks while git's environment is inherited — a test"
+  echo "  that creates a temp repo would rewrite this repository's index."
+  exit 1
+fi
+. "$__scrub"
+
 if ! vp run check:push; then
   echo ""
   echo "✗ pre-push gate failed — fix the findings above (they would fail CI)."

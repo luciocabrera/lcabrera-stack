@@ -93,6 +93,14 @@ The **fallow audit** stays CI-only — it is a new-only gate scored against the 
 needing full history and a coverage merge. `vp run` caches per task, so a warm push is
 quick; bypass a WIP push with `git push --no-verify`.
 
+Before running anything the hook sources
+[`.vite-hooks/scrub-git-env.sh`](.vite-hooks/scrub-git-env.sh), and **must** keep
+doing so. Git exports `GIT_DIR` to every hook, and it outranks the working
+directory for every `git` a task spawns — so a test that builds a throwaway repo
+instead rewrites this one's index, silently, leaving `HEAD` intact until the next
+commit writes a near-empty tree. That script records the incident; the hook
+refuses to run if it is missing.
+
 Step 4 is a **root-only, repo-wide** pass (like Oxlint, unlike the per-workspace
 eslint fan-out): `biome.jsonc` at the root scopes the react domain to the three
 React workspaces via `overrides`, so there is nothing to fan out. Autofix with
