@@ -1,0 +1,123 @@
+{
+  "$schema-note": "Checked by `vp run suppressions:verify` (scripts/verify-suppressions.mjs). Read docs/agents/public-package-suppressions.md before touching this file.",
+  "policy": {
+    "packages": "Resolved at runtime from the workspaces that gitignore eslint-suppressions.json — the authority AGENTS.md names. Not listed here, so a fifth public package is covered the day it is added.",
+    "rule": "A suppression inside a public package is a defect until argued otherwise. Adding an entry here is not paperwork for a decision already made — it IS the decision, and it needs a reviewer who agrees.",
+    "status": {
+      "permanent": "The engine is wrong about correct code and no fix exists in our control. Expected to outlive us.",
+      "provisional": "Accepted for now, not endorsed. Carries a `review` issue and should shrink."
+    }
+  },
+  "approved": [
+    {
+      "key": "biome packages/ui/** useExhaustiveDependencies",
+      "count": 1,
+      "status": "permanent",
+      "reason": "React Compiler owns memoization in this repo, so hand-maintained dependency arrays are deliberately absent. Biome's rule demands the exact thing ADR-004 removed; leaving it on would flag correct code across the whole package.",
+      "ref": "apps/react-router/docs/decisions/ADR-004-react-compiler-memoization.md, ADR-035 §5"
+    },
+    {
+      "key": "biome **/logger.util.ts noConsole",
+      "count": 1,
+      "status": "permanent",
+      "reason": "Console output is this module's entire function — it is the single sanctioned wrapper every other module routes through, which is what lets noConsole stay on everywhere else. The glob resolves to exactly one file, packages/ui/src/utils/logger/logger.util.ts.",
+      "ref": "ADR-035 §7"
+    },
+    {
+      "key": "biome **/SpacerRow.component.tsx noAriaHiddenOnFocusable",
+      "count": 1,
+      "status": "permanent",
+      "reason": "A virtualization spacer row is decorative by construction: it renders one empty colSpan'd cell and no interactive descendant, so aria-hidden is correct. Biome flags aria-hidden on any table row because it cannot see that the subtree is empty.",
+      "ref": "ADR-035 §5, packages/ui/src/components/Table/ARCHITECTURE.md"
+    },
+    {
+      "key": "biome **/TabsContent.component.tsx noNoninteractiveTabindex",
+      "count": 1,
+      "status": "permanent",
+      "reason": "The APG tabs pattern requires the tabpanel itself be focusable so keyboard users reach panel content after the tab strip. tabIndex on a non-interactive element is exactly what the pattern prescribes here, not an oversight.",
+      "ref": "ADR-035 §5, https://www.w3.org/WAI/ARIA/apg/patterns/tabs/"
+    },
+    {
+      "key": "biome **/ResizeHandle.component.tsx useSemanticElements",
+      "count": 1,
+      "status": "permanent",
+      "reason": "A column resize handle is a window splitter: role=separator with keyboard resize semantics. HTML has no native element carrying that role, so Biome's suggested substitution has nothing to substitute.",
+      "ref": "ADR-035 §5, apps/react-router/docs/decisions/ADR-012-column-width.md"
+    },
+    {
+      "key": "biome **/TooltipTrigger.component.tsx noStaticElementInteractions",
+      "count": 1,
+      "status": "permanent",
+      "reason": "The trigger adds role=button and tabIndex only when its child is not already natively interactive, so the handlers always sit on something focusable at runtime. Biome evaluates the JSX statically and cannot follow the conditional role.",
+      "ref": "ADR-035 §5, apps/react-router/docs/decisions/ADR-002-tooltip.md"
+    },
+    {
+      "key": "inline packages/ui/src/components/Tooltip/TooltipContent/TooltipContent.stylex.ts @stylexjs/valid-styles",
+      "count": 6,
+      "status": "permanent",
+      "reason": "CSS anchor positioning (anchor-name, position-anchor, position-area) is a shipped browser feature that StyleX's property allowlist predates. Verified still load-bearing on 2026-07-22: deleting the directives produces 6 real eslint errors.",
+      "ref": "apps/react-router/docs/decisions/ADR-002-tooltip.md"
+    },
+    {
+      "key": "inline packages/ui/src/components/Tooltip/TooltipTrigger/TooltipTrigger.stylex.ts @stylexjs/valid-styles",
+      "count": 1,
+      "status": "permanent",
+      "reason": "Same CSS anchor positioning gap as TooltipContent — StyleX cannot validate a property its allowlist does not yet contain, and the anchor name is what binds trigger to content.",
+      "ref": "apps/react-router/docs/decisions/ADR-002-tooltip.md"
+    },
+    {
+      "key": "inline packages/ui/src/utils/tests/mockDialogElement.util.ts typescript-eslint/unbound-method",
+      "count": 3,
+      "status": "permanent",
+      "reason": "Saves HTMLDialogElement prototype methods so teardown can restore them. Binding them, as the rule wants, produces new function identities and the restore silently stops restoring. Spelled oxlint-disable because only Oxlint recognises the typescript-eslint/ prefix.",
+      "ref": "AGENTS.md §4 (directive must name its engine)"
+    },
+    {
+      "key": "inline packages/ui/src/components/Tooltip/Tooltip.test.tsx typescript-eslint/unbound-method",
+      "count": 2,
+      "status": "permanent",
+      "reason": "Same prototype save-and-restore as mockDialogElement, applied to the popover API methods this suite stubs. Binding breaks restoration for the same reason.",
+      "ref": "AGENTS.md §4 (directive must name its engine)"
+    },
+    {
+      "key": "inline packages/ui/src/components/Table/SpacerRow/SpacerRow.component.tsx NOSONAR",
+      "count": 1,
+      "status": "provisional",
+      "reason": "Mirrors the Biome noAriaHiddenOnFocusable exemption for the same decorative row, for a second engine. Provisional because a bare NOSONAR is unscoped — it silences every present and future Sonar rule on that line, which is wider than the one finding it was added for.",
+      "ref": "#311",
+      "review": "#311"
+    },
+    {
+      "key": "inline packages/ui/src/components/Tooltip/TooltipTrigger/TooltipTrigger.component.tsx NOSONAR",
+      "count": 1,
+      "status": "provisional",
+      "reason": "Mirrors the Biome noStaticElementInteractions exemption for the conditional-role trigger. Provisional for the same reason: unscoped NOSONAR grants more than was argued for.",
+      "ref": "#311",
+      "review": "#311"
+    },
+    {
+      "key": "inline packages/ui/src/components/Table/filters/NumberFilterInput/utils/computeInitialValue.util.test.ts @ts-expect-error",
+      "count": 1,
+      "status": "provisional",
+      "reason": "Asserts the runtime fallback for a number filter with no value — a state the parameter type forbids. Provisional because it is unresolved whether the type is too strict or the test is asserting an unreachable state; one of the two should change.",
+      "ref": "#311",
+      "review": "#311"
+    },
+    {
+      "key": "inline packages/ui/src/components/Table/TableSettingsDrawer/FiltersSection/utils/isFilterValid.util.test.ts @ts-expect-error",
+      "count": 1,
+      "status": "provisional",
+      "reason": "Same shape as the computeInitialValue case: a valueless number filter passed to a signature that requires a value. Grouped into the same review rather than settled piecemeal.",
+      "ref": "#311",
+      "review": "#311"
+    },
+    {
+      "key": "inline packages/ui/src/components/Table/TableHeaderCell/utils/getPinnedStyle.util.test.ts @ts-expect-error",
+      "count": 1,
+      "status": "provisional",
+      "reason": "Passes a pinned-style argument with no side to assert the undefined return. Same unresolved question as the other two: whether side should be optional in the type.",
+      "ref": "#311",
+      "review": "#311"
+    }
+  ]
+}
