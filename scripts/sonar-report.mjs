@@ -49,6 +49,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { createSonarApi, fetchJson } from './lib/sonar-api.mjs';
 import { logSafe, summaryLines } from './lib/sonar-summary.mjs';
 import { waitForAnalysis } from './lib/sonar-wait.mjs';
 
@@ -61,8 +62,6 @@ const CONFIG = {
   project: process.env.SONAR_PROJECT_KEY ?? 'luciocabrera_vite-react-compiler',
   mainBranch: process.env.SONAR_MAIN_BRANCH ?? 'main',
 };
-const PAGE_SIZE = 500;
-const MAX_PAGES = 20;
 
 // --- pure helpers ---------------------------------------------------------
 
@@ -143,11 +142,6 @@ const resolveTarget = (args) => {
   return { target: { type: 'branch', value: branch }, explicit: false };
 };
 
-const targetParam = (target) =>
-  target.type === 'pullRequest'
-    ? `pullRequest=${encodeURIComponent(target.value)}`
-    : `branch=${encodeURIComponent(target.value)}`;
-
 const relPath = (component) =>
   component.startsWith(`${CONFIG.project}:`)
     ? component.slice(CONFIG.project.length + 1)
@@ -215,7 +209,7 @@ const countBy = (items, pick) => {
   return counts;
 };
 
-const buildReport = (target, gate, issues, hotspots, analysisDate) => {
+const buildReport = (target, gate, issues, hotspots, analysisDate, scope) => {
   const normIssues = issues.map(normIssue).toSorted(byLocation);
   const normHotspots = hotspots.map(normHotspot).toSorted(byLocation);
   return {
@@ -233,6 +227,14 @@ const buildReport = (target, gate, issues, hotspots, analysisDate) => {
       hotspots: normHotspots.length,
       bySeverity: countBy(normIssues, (i) => i.severity),
       byType: countBy(normIssues, (i) => i.type),
+      // What a zero above does NOT tell you on its own. `accepted` counts
+      // findings reviewed and marked rather than fixed; `analysed` records the
+      // lines actually indexed, per language. Without these, a clean project,
+      // a project whose every finding was accepted, and a project whose files
+      // are excluded from analysis all render identically.
+      accepted: scope.accepted.length,
+      acceptedByRule: countBy(scope.accepted, (i) => i.rule),
+      analysed: scope.measures,
     },
     issues: normIssues,
     hotspots: normHotspots,
@@ -262,76 +264,6 @@ const gateProblems = (report, failOnIssues) => {
 };
 
 // --- effects (edges) ------------------------------------------------------
-
-const authHeader = (token) => {
-  const encoded = Buffer.from(`${token}:`).toString('base64');
-  return `Basic ${encoded}`;
-};
-
-const fetchJson = async (url, token) => {
-  const response = await fetch(url, {
-    headers: { Authorization: authHeader(token) },
-  });
-  if (!response.ok) {
-    throw new Error(
-      `GET ${url} → ${response.status}: ${(await response.text()).slice(0, 200)}`,
-    );
-  }
-  return response.json();
-};
-
-const fetchAllPages = async (buildUrl, token, pluck) => {
-  const collected = [];
-  let page = 1;
-  let total = Number.POSITIVE_INFINITY;
-  while (page <= MAX_PAGES && collected.length < total) {
-    const body = await fetchJson(buildUrl(page), token);
-    const items = pluck(body);
-    if (items.length === 0) break;
-    collected.push(...items);
-    total = body.paging?.total ?? body.total ?? collected.length;
-    page += 1;
-  }
-  return collected;
-};
-
-const fetchIssues = (token, target) =>
-  fetchAllPages(
-    (page) =>
-      `${CONFIG.base}/api/issues/search?componentKeys=${CONFIG.project}` +
-      `&resolved=false&${targetParam(target)}&ps=${PAGE_SIZE}&p=${page}`,
-    token,
-    (body) => body.issues ?? [],
-  );
-
-const fetchHotspots = (token, target) =>
-  fetchAllPages(
-    (page) =>
-      `${CONFIG.base}/api/hotspots/search?projectKey=${CONFIG.project}` +
-      `&${targetParam(target)}&ps=${PAGE_SIZE}&p=${page}`,
-    token,
-    (body) => body.hotspots ?? [],
-  );
-
-const fetchGate = async (token, target) => {
-  const body = await fetchJson(
-    `${CONFIG.base}/api/qualitygates/project_status?projectKey=${CONFIG.project}&${targetParam(target)}`,
-    token,
-  );
-  return body.projectStatus;
-};
-
-/**
- * When SonarCloud last analysed this target. Undefined for a target it has
- * never analysed — which the freshness helper deliberately treats as stale.
- */
-const fetchAnalysisDate = async (token, target) => {
-  const body = await fetchJson(
-    `${CONFIG.base}/api/components/show?component=${CONFIG.project}&${targetParam(target)}`,
-    token,
-  );
-  return body.component?.analysisDate;
-};
 
 const loadEnv = () => {
   const envFile = join(REPO_ROOT, '.env');
@@ -428,13 +360,24 @@ const main = async () => {
     }
   }
 
-  const [gate, issues, hotspots, analysisDate] = await Promise.all([
-    fetchGate(token, target),
-    fetchIssues(token, target),
-    fetchHotspots(token, target),
-    fetchAnalysisDate(token, target),
-  ]);
-  const report = buildReport(target, gate, issues, hotspots, analysisDate);
+  const api = createSonarApi({
+    base: CONFIG.base,
+    project: CONFIG.project,
+    token,
+  });
+  const [gate, issues, hotspots, analysisDate, accepted, measures] =
+    await Promise.all([
+      api.gate(target),
+      api.issues(target),
+      api.hotspots(target),
+      api.analysisDate(target),
+      api.acceptedIssues(target),
+      api.measures(target),
+    ]);
+  const report = buildReport(target, gate, issues, hotspots, analysisDate, {
+    accepted,
+    measures,
+  });
   writeReport(report);
   printSummary(report);
 
