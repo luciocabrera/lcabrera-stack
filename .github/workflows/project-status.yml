@@ -3,13 +3,21 @@ name: Project status sync
 # Keeps the Planning project's Status column tracking reality without anyone
 # dragging cards — the board was going stale because status was manual (an agent
 # works in its own tree and the issue sits in Todo until a PR shows up). The
-# event→status map lives in scripts/sync-project-status.mjs:
+# event→status map lives in scripts/lib/project-status.mjs:
 #   issue assigned            → In Progress   (self-assign = "I've started")
+#   issue closed              → Done
+#   issue reopened            → Todo
 #   PR opened/reopened draft  → In Progress
 #   PR ready for review       → In Review
 #   PR converted to draft     → In Progress
 #   PR merged                 → Done
 #   PR closed unmerged        → Todo
+#
+# `closed`/`reopened` are subscribed here because the PR path alone missed them:
+# a merging PR moves the issues it closes via closingIssuesReferences, so an
+# issue closed BY HAND — or by a PR that never wrote `Resolves #n` — kept the
+# status it had, which is In Progress once someone self-assigned it. That reads
+# as "taken" and hides available work; #249 and #255 sat like that.
 #
 # Needs the ADD_TO_PROJECT_PAT secret (a PAT with project + repo scopes) — the same
 # one add-to-project.yml uses. Without it (fork PRs) the script skips, so the job
@@ -17,7 +25,7 @@ name: Project status sync
 
 on:
   issues:
-    types: [assigned]
+    types: [assigned, closed, reopened]
   pull_request:
     types: [opened, reopened, ready_for_review, converted_to_draft, closed]
 
