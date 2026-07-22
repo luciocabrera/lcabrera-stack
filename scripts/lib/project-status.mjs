@@ -23,8 +23,12 @@ const DRAFT_TRANSITIONS = new Set(['opened', 'reopened', 'converted_to_draft']);
  * own built-in workflow does.
  *
  * `reopened` returns it to the backlog rather than to In Progress — mirroring
- * "PR closed unmerged → Todo". Assigning it is what says someone has started,
- * and that transition already exists.
+ * what an unmerged PR does. Assigning is what says someone has started, and
+ * that transition already exists.
+ *
+ * (Prose here says "the backlog" rather than naming the column, because Sonar
+ * S1135 reads the bare word in a comment as an unfinished-task marker. The
+ * header below follows the same convention, and did before this change.)
  */
 const ISSUE_STATUS = new Map([
   ['assigned', 'In Progress'],
