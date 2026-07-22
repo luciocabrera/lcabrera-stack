@@ -3,17 +3,19 @@
 import { NotificationProvider } from '@lcabrera/ui/contexts/NotificationContext';
 import { useGetNotifications } from '@lcabrera/ui/contexts/NotificationContext/selectors';
 import { act, cleanup, render, screen } from '@testing-library/react';
+import { useEffect, useState } from 'react';
 import { createRoutesStub } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useRunStatusSocket } from './useRunStatusSocket.hook';
 
 type DispatchArgs = {
+  readonly code?: number;
   readonly data: string;
   readonly event: string;
 };
 
-type Listener = (event: { data: string }) => void;
+type Listener = (event: { code?: number; data: string }) => void;
 
 class FakeWebSocket {
   static instances: FakeWebSocket[] = [];
@@ -44,10 +46,10 @@ class FakeWebSocket {
     this.dispatch({ data: '', event: 'close' });
   }
 
-  dispatch({ data, event }: DispatchArgs): void {
+  dispatch({ code, data, event }: DispatchArgs): void {
     const handlers = this.listeners.get(event) ?? [];
     for (const handler of handlers) {
-      handler({ data });
+      handler({ code, data });
     }
   }
 
@@ -69,17 +71,27 @@ const NotificationList = () => {
   );
 };
 
-const TestHarness = ({ runId }: { readonly runId: string }) => {
-  useRunStatusSocket({ runId });
+type TestHarnessProps = {
+  readonly runId: string;
+  readonly ticket: string;
+};
+
+const TestHarness = ({ runId, ticket }: TestHarnessProps) => {
+  useRunStatusSocket({ runId, ticket });
   return <NotificationList />;
 };
 
-const renderHarness = (runId: string) => {
+type RenderHarnessArgs = {
+  readonly runId: string;
+  readonly ticket?: string;
+};
+
+const renderHarness = ({ runId, ticket = 'ticket-1' }: RenderHarnessArgs) => {
   const Stub = createRoutesStub([
     {
       Component: () => (
         <NotificationProvider>
-          <TestHarness runId={runId} />
+          <TestHarness runId={runId} ticket={ticket} />
         </NotificationProvider>
       ),
       path: '/',
@@ -87,6 +99,46 @@ const renderHarness = (runId: string) => {
   ]);
 
   return render(<Stub initialEntries={['/']} />);
+};
+
+type TicketControlRef = {
+  current?: (ticket: string) => void;
+};
+
+/**
+ * Stands in for the loader handing down a fresh ticket on revalidation.
+ * The setter is published through an effect rather than assigned during
+ * render, so the harness itself stays a well-behaved component.
+ */
+const ReissuingHarness = ({
+  controlRef,
+}: {
+  readonly controlRef: TicketControlRef;
+}) => {
+  const [ticket, setTicket] = useState('ticket-1');
+
+  useEffect(() => {
+    controlRef.current = setTicket;
+  }, [controlRef]);
+
+  return <TestHarness runId='run-1' ticket={ticket} />;
+};
+
+const renderReissuingHarness = () => {
+  const controlRef: TicketControlRef = {};
+  const Stub = createRoutesStub([
+    {
+      Component: () => (
+        <NotificationProvider>
+          <ReissuingHarness controlRef={controlRef} />
+        </NotificationProvider>
+      ),
+      path: '/',
+    },
+  ]);
+
+  render(<Stub initialEntries={['/']} />);
+  return controlRef;
 };
 
 beforeEach(() => {
@@ -100,8 +152,8 @@ afterEach(() => {
 });
 
 describe('useRunStatusSocket', () => {
-  it('subscribes with the given runId once the socket opens', () => {
-    renderHarness('run-1');
+  it('subscribes with the given runId and ticket once the socket opens', () => {
+    renderHarness({ runId: 'run-1' });
     const socket = FakeWebSocket.instances[0];
 
     act(() => {
@@ -109,12 +161,100 @@ describe('useRunStatusSocket', () => {
     });
 
     expect(socket?.sent).toEqual([
-      JSON.stringify({ runId: 'run-1', type: 'subscribe' }),
+      JSON.stringify({ runId: 'run-1', ticket: 'ticket-1', type: 'subscribe' }),
     ]);
   });
 
+  it('does not reconnect after the orchestrator refuses the subscription', () => {
+    // Retrying a 1008 presents the same rejected ticket, so a reconnect
+    // loop would run until the tab closes without ever succeeding.
+    vi.useFakeTimers();
+    try {
+      renderHarness({ runId: 'run-1' });
+
+      act(() => {
+        FakeWebSocket.instances[0]?.dispatch({
+          code: 1008,
+          data: '',
+          event: 'close',
+        });
+      });
+      act(() => {
+        vi.advanceTimersByTime(10_000);
+      });
+
+      expect(FakeWebSocket.instances).toHaveLength(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('reconnects after an ordinary close', () => {
+    // The counterpart to the test above: without this, "does not reconnect"
+    // would still pass if reconnection were broken outright.
+    vi.useFakeTimers();
+    try {
+      renderHarness({ runId: 'run-1' });
+
+      act(() => {
+        FakeWebSocket.instances[0]?.dispatch({
+          code: 1006,
+          data: '',
+          event: 'close',
+        });
+      });
+      act(() => {
+        vi.advanceTimersByTime(10_000);
+      });
+
+      expect(FakeWebSocket.instances).toHaveLength(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('reconnects with the newest ticket, not the one it first mounted with', () => {
+    // Every status message revalidates, which re-runs the loader and issues
+    // a fresh ticket. A reconnect that replayed the mount-time ticket would
+    // be refused once the original expired.
+    vi.useFakeTimers();
+    try {
+      const controlRef = renderReissuingHarness();
+
+      act(() => {
+        controlRef.current?.('ticket-2');
+      });
+
+      act(() => {
+        FakeWebSocket.instances[0]?.dispatch({
+          code: 1006,
+          data: '',
+          event: 'close',
+        });
+      });
+      act(() => {
+        vi.advanceTimersByTime(10_000);
+      });
+
+      const reconnected = FakeWebSocket.instances[1];
+      act(() => {
+        reconnected?.dispatch({ data: '', event: 'open' });
+      });
+
+      expect(reconnected?.sent).toEqual([
+        JSON.stringify({
+          runId: 'run-1',
+          ticket: 'ticket-2',
+          type: 'subscribe',
+        }),
+      ]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('shows an error notification when a scan-status message reports failed', () => {
-    renderHarness('run-1');
+    renderHarness({ runId: 'run-1' });
     const socket = FakeWebSocket.instances[0];
 
     act(() => {
@@ -135,7 +275,7 @@ describe('useRunStatusSocket', () => {
   });
 
   it('shows a success notification when a scan-status message reports succeeded', () => {
-    renderHarness('run-1');
+    renderHarness({ runId: 'run-1' });
     const socket = FakeWebSocket.instances[0];
 
     act(() => {
@@ -155,7 +295,7 @@ describe('useRunStatusSocket', () => {
   });
 
   it('does not notify on a scan-progress message', () => {
-    renderHarness('run-1');
+    renderHarness({ runId: 'run-1' });
     const socket = FakeWebSocket.instances[0];
 
     act(() => {
@@ -175,7 +315,7 @@ describe('useRunStatusSocket', () => {
   });
 
   it('ignores a malformed message without throwing', () => {
-    renderHarness('run-1');
+    renderHarness({ runId: 'run-1' });
     const socket = FakeWebSocket.instances[0];
 
     expect(() => {

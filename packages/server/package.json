@@ -34,6 +34,8 @@
     "./filters/to-query-filters.util": "./src/filters/to-query-filters.util.ts",
     "./filters/to-select-query-filters.util": "./src/filters/to-select-query-filters.util.ts",
     "./filters/to-text-query-filters.util": "./src/filters/to-text-query-filters.util.ts",
+    "./tickets/sign-access-ticket.util": "./src/tickets/sign-access-ticket.util.ts",
+    "./tickets/is-access-ticket-valid.util": "./src/tickets/is-access-ticket-valid.util.ts",
     "./tokens/generate-api-token.util": "./src/tokens/generate-api-token.util.ts",
     "./tokens/parse-api-token.util": "./src/tokens/parse-api-token.util.ts"
   },

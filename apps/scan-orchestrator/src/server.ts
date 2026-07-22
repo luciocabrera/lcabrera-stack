@@ -23,7 +23,11 @@ const queueProcessor = createQueueProcessor({
 });
 
 const httpServer = createHttpServer();
-attachWebSocketServer({ httpServer, hub });
+attachWebSocketServer({
+  httpServer,
+  hub,
+  ticketSecret: envConfig.CQMS_WS_TICKET_SECRET,
+});
 
 httpServer.listen(envConfig.SCAN_ORCHESTRATOR_PORT, '0.0.0.0', () => {
   console.warn(

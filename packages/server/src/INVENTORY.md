@@ -93,6 +93,26 @@ See `filters/ARCHITECTURE.md`.
 
 ---
 
+## `src/tickets/`
+
+Reusable, DB-free **stateless capability** primitives (ADR-041). A ticket
+authorizes a bearer for exactly one `subject` until it expires, and is
+verified by re-deriving its HMAC rather than by a lookup — the shape to reach
+for on a channel that must authorize on connect with no database in the path
+(CodePulse's `/ws/runs`). Both are exported per-file in the `exports` map.
+
+| Artifact              | Location                                 | Description                                                                                       |
+| --------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `signAccessTicket`    | `tickets/sign-access-ticket.util.ts`     | Mints `<expiresAt>.<hmac>` over `[subject, expiresAt]`; caller supplies the expiry, so it is pure |
+| `isAccessTicketValid` | `tickets/is-access-ticket-valid.util.ts` | Re-derives the HMAC for the subject actually requested; boolean, never throws, `timingSafeEqual`  |
+
+Not to be confused with `tokens/` below: a **token** is a long-lived, revocable
+credential whose hash is stored and looked up; a **ticket** is short-lived,
+stores nothing, and is scoped to one subject. Use a token to identify _who_;
+use a ticket to grant _one thing, briefly_.
+
+---
+
 ## `src/tokens/`
 
 Reusable, DB-free bearer-token primitives (ADR-029). The CQMS-specific

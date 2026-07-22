@@ -19,8 +19,17 @@ import { z } from 'zod';
 // Not exported: `readEnvConfig` below is the only way this schema is meant to
 // be applied, so exporting the raw schema would invite a second parse path that
 // could drift from it.
+//
+// CQMS_WS_TICKET_SECRET is the HMAC key that /ws/runs subscriptions are
+// signed with (ADR-041). It is deliberately **required with no default**:
+// a dev-only fallback would let the orchestrator start with a secret the
+// whole world knows, which authenticates nothing while looking like it
+// does — the exact failure this control exists to close. The same value
+// must be set for apps/admin_system, which mints the tickets this process
+// verifies; a mismatch rejects every subscription rather than failing open.
 const envSchema = z.object({
   ANTHROPIC_API_KEY: z.string().min(1),
+  CQMS_WS_TICKET_SECRET: z.string().min(1),
   LLM_DAILY_COST_CAP_USD: z.coerce.number().positive().default(50),
   MAX_CONCURRENT_SCANS: z.coerce.number().int().positive().default(3),
   SCAN_ORCHESTRATOR_PORT: z.coerce.number().int().positive().default(4100),
