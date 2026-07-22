@@ -288,14 +288,16 @@ package, ever.
 
 ### AI config & skills tooling
 
-| Command                  | Does                                                                                                                                               |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `vp run commands:verify` | check this file still matches reality                                                                                                              |
-| `vp run scripts:verify`  | check `.mjs`/`.cjs` size ceiling (`--write` rebaselines)                                                                                           |
-| `vp run docs:verify`     | check every documented repository path resolves (`--write` prunes resolved baseline entries; `--accept <doc> <ref> --reason "…"` grandfathers one) |
-| `vp run skills:validate` | validate skill definitions                                                                                                                         |
-| `vp run skills:report`   | skills compliance report                                                                                                                           |
-| `vp run prepare`         | `vp config` — runs automatically on install                                                                                                        |
+| Command                      | Does                                                                                                                                               |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `vp run commands:verify`     | check this file still matches reality                                                                                                              |
+| `vp run scripts:verify`      | check `.mjs`/`.cjs` size ceiling (`--write` rebaselines)                                                                                           |
+| `vp run suppressions:verify` | check the four public packages carry no unapproved suppression (see [the protocol](docs/agents/public-package-suppressions.md))                    |
+| `vp run suppressions:list`   | print every suppression reaching a public package, approved or not                                                                                 |
+| `vp run docs:verify`         | check every documented repository path resolves (`--write` prunes resolved baseline entries; `--accept <doc> <ref> --reason "…"` grandfathers one) |
+| `vp run skills:validate`     | validate skill definitions                                                                                                                         |
+| `vp run skills:report`       | skills compliance report                                                                                                                           |
+| `vp run prepare`             | `vp config` — runs automatically on install                                                                                                        |
 
 ### Coordination register
 

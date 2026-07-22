@@ -140,6 +140,18 @@ jobs:
         # .claude/rules/scripts.md.
         run: vp run scripts:verify
 
+      - name: Public packages carry no unapproved suppression
+        id: suppressions_gate
+        # AGENTS.md §4 holds ui/api/server/utils to "every finding gets fixed,
+        # never baselined or disabled". That was enforced for the eslint
+        # baseline alone — gitignored, so CI checks out nothing to suppress
+        # WITH — and for none of the other five mechanisms. When they were first
+        # counted, packages/ui held 17 inline directives and 6 Biome rules
+        # turned off against its own files while the docs said it held none.
+        # Most were defensible; nothing distinguished a reviewed exception from
+        # one added last Tuesday. See docs/agents/public-package-suppressions.md.
+        run: vp run suppressions:verify
+
       - name: Documented paths resolve
         id: docs_gate
         # The largest unchecked surface in the repo: ~230 markdown files naming
