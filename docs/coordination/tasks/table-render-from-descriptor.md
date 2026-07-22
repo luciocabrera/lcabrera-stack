@@ -2,8 +2,8 @@
 id: table-render-from-descriptor
 title: Extract renderFromDescriptor to its own util
 owner: agent:claude
-status: active
-branch: table-render-from-descriptor
+status: review
+branch: refactor/244-extract-render-from-descriptor
 area:
   - packages/ui/src/components/Table/TableBody/utils/**
 started: 2026-07-22
@@ -15,10 +15,13 @@ issue: #244
 
 ## What
 
-Extract renderFromDescriptor to its own util
+`renderFromDescriptor` was a second module-level helper inside
+`createRenderTableBodyCell.util.ts`, which the one-util-per-file rule forbids
+even for private helpers. Extracted to its own `.util.ts` with a colocated test.
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: gate green — ui lint/eslint/typecheck (incl. check:public-api),
+  522 test files / 2238 tests
 - Blockers: none
-- Next:
+- Next: merge

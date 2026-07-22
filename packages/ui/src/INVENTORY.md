@@ -178,6 +178,7 @@ Ergonomic builders for the `fields` tree, exported from `@lcabrera/ui/components
 | `createRenderTableBodyCell`    | `components/Table/TableBody/utils/createRenderTableBodyCell.util.ts`     | Creates bound row-cell renderer from sizing/pinning + descriptor util                |
 | `generatePlaceholderData`      | `components/Table/TableBody/utils/generatePlaceholderData.util.ts`       | Builds empty placeholder rows keyed by visible columns                               |
 | `getTotalVisibleColumnCount`   | `components/Table/TableBody/utils/getTotalVisibleColumnCount.util.ts`    | Counts pinned, center, and spacer cells for spacer-row `colSpan`                     |
+| `renderFromDescriptor`         | `components/Table/TableBody/utils/renderFromDescriptor.util.ts`          | Renders a `TableBodyCell` element from a built cell descriptor                       |
 | `renderTableBodyPinnedGroup`   | `components/Table/TableBody/utils/renderTableBodyPinnedGroup.util.ts`    | Maps one pinning partition (left/center/right) through the shared body-cell renderer |
 
 ### `src/components/Table/utils/`
