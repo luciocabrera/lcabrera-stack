@@ -225,7 +225,7 @@ const validateSubject = (subject) => {
   // "miscellaneous" or quote a "WIP" label, but a subject built from these
   // words records nothing about what changed.
   const vague = VAGUE_SUBJECT_WORDS.filter((word) =>
-    new RegExp(`\\b${word}\\b`, 'i').test(subject),
+    new RegExp(String.raw`\b${word}\b`, 'i').test(subject),
   );
   if (vague.length > 0) {
     errors.push(
