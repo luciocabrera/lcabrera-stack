@@ -5,13 +5,8 @@ import type {
   TableColumn,
 } from '@lcabrera/ui/components/Table/Table.types';
 
-import { TableBodyCell } from '@lcabrera/ui/components/Table/TableBodyCell';
-import { createElement } from 'react';
-
-import {
-  buildTableBodyCellDescriptor,
-  type TableBodyCellDescriptor,
-} from './buildTableBodyCellDescriptor.util';
+import { buildTableBodyCellDescriptor } from './buildTableBodyCellDescriptor.util';
+import { renderFromDescriptor } from './renderFromDescriptor.util';
 
 type CreateRenderTableBodyCellArgs<TData extends Record<string, unknown>> = {
   readonly columnSizing: ColumnSizingState<TData>;
@@ -22,39 +17,6 @@ type CreateRenderTableBodyCellArgs<TData extends Record<string, unknown>> = {
 type RenderBodyCellArgs<TData extends Record<string, unknown>> = {
   readonly col: TableColumn<TData>;
   readonly row: TData;
-};
-
-const renderFromDescriptor = <TData extends Record<string, unknown>>({
-  descriptor,
-}: {
-  readonly descriptor: TableBodyCellDescriptor<TData>;
-}) => {
-  if (descriptor.kind === 'custom') {
-    return createElement(
-      TableBodyCell,
-      {
-        isLoadingState: descriptor.isLoadingState,
-        key: descriptor.key,
-        label: descriptor.label,
-        minWidth: descriptor.minWidth,
-        pinInfo: descriptor.pinInfo,
-        width: descriptor.width,
-      },
-      descriptor.children,
-    );
-  }
-
-  return createElement(TableBodyCell, {
-    dataType: descriptor.dataType,
-    format: descriptor.format,
-    isLoadingState: descriptor.isLoadingState,
-    key: descriptor.key,
-    label: descriptor.label,
-    minWidth: descriptor.minWidth,
-    pinInfo: descriptor.pinInfo,
-    value: descriptor.value,
-    width: descriptor.width,
-  });
 };
 
 /**
