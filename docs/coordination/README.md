@@ -192,14 +192,14 @@ distinguishes **errors** (fail the build) from **warnings** (surfaced, never
 blocking — a warning must not fail an unrelated PR because someone else's task
 drifted):
 
-| Check             | Level | Fails when…                                                                          |
-| ----------------- | ----- | ------------------------------------------------------------------------------------ |
-| **schema**        | error | a task or branch file is missing a field, has a bad status/owner, or a mismatched id |
-| **unique-id**     | error | two task files share an id                                                           |
-| **overlap**       | warn  | two non-done tasks on **different** branches declare intersecting `area` globs       |
-| **shared-branch** | warn  | 2+ active tasks share a branch with no descriptor, or a descriptor has no tasks      |
-| **stale**         | warn  | a non-done task's `updated:` is older than 14 days                                   |
-| **branch**        | warn  | a task's branch resolves to no local/origin ref (best effort)                        |
+| Check             | Level | Fails when…                                                                                                                                                                      |
+| ----------------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **schema**        | error | a task or branch file is missing a field, has a bad status/owner, or a mismatched id                                                                                             |
+| **unique-id**     | error | two task files share an id                                                                                                                                                       |
+| **overlap**       | warn  | two non-done tasks on **different** branches declare intersecting `area` globs — including claims read from live remote branches, and a warning for any branch it could not read |
+| **shared-branch** | warn  | 2+ active tasks share a branch with no descriptor, or a descriptor has no tasks                                                                                                  |
+| **stale**         | warn  | a non-done task's `updated:` is older than 14 days                                                                                                                               |
+| **branch**        | warn  | a task's branch resolves to no local/origin ref (best effort)                                                                                                                    |
 
 There is no board-drift check: `BOARD.md` is a gitignored local view, never
 committed, so there is nothing to keep in sync ([ADR-037](../cqms/decisions/ADR-037-coordination-board-is-a-local-view.md)).
@@ -211,10 +211,34 @@ An overlap warning looks like:
 ```
 Coordination register — 1 warning(s):
 
-  ⚠ table-ui-fixes.md and table-refresh.md claim overlapping areas
-    (e.g. `packages/ui/src/components/Table/**`) on different branches —
-    narrow a glob, serialise, or share one branch (branches/<slug>.md).
+  ⚠ table-ui-fixes.md and table-refresh.md (branch table-refresh) claim
+    overlapping areas (e.g. `packages/ui/src/components/Table/**`) on
+    different branches — narrow a glob, serialise, or share one branch
+    (branches/<slug>.md).
 ```
+
+### Overlap detection sees other branches
+
+The check reads claims from **every live branch on `origin`**, not just the
+files in your working tree. That matters because `coordination:claim` commits
+the task file onto the branch it creates, so a claim is off-`main` from the
+moment it exists: a tree-only check compared each agent's claim against nothing
+and reported a clean register to both sides of a real collision (#233).
+
+Two consequences worth knowing:
+
+- A claim is named by the branch it **declares**, not the branch it was found
+  on — every branch cut from `main` inherits a copy of whatever task files were
+  live then, so "found on" is often some unrelated branch.
+- The live branch list comes from the remote, not from your local
+  `origin/*` refs, which go stale silently (this checkout once held 109 refs
+  against 4 real branches). If a live branch has no local ref, or your ref is
+  behind it, that branch is **reported as unread** rather than skipped —
+  `git fetch --prune` clears it. Being unable to look is never presented as
+  having looked and found nothing.
+
+`--no-remote` skips the remote read for a fast or offline loop, and says so in
+the output.
 
 ---
 
