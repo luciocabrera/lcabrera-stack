@@ -47,6 +47,14 @@ future PR — including the one that introduced it. The template keeps all eight
 sections and the plain spelling for those two headings only; the other six carry
 whatever formatting you like.
 
+**This is now checked, not just written down.**
+[`scripts/lib/workflow-templates.test.mjs`](../../scripts/lib/workflow-templates.test.mjs)
+runs both shipped templates — and the issue and draft-PR bodies
+`coordination-claim.sh` generates — through the very validators CI uses, and pins
+the decorated spelling above as a case that must **fail**. A heading edited out
+of shape now breaks the build in the PR that edits it, rather than in the next
+author's PR against a description they copied verbatim from the template.
+
 The alternative — loosening the regex to accept any prefix — was rejected: it
 weakens the only mechanism enforcing that PRs state what changed and how it was
 checked, in order to accommodate decoration.
