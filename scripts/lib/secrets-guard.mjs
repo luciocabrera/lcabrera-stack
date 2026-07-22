@@ -124,8 +124,10 @@ const candidatePathsFor = ({ toolInput, toolName }) => {
 // or carries an extension (`credentials.json`, `*.pem`), so it cannot be
 // mistaken for prose; this list is derived rather than hand-written so a future
 // bare-word entry is covered automatically.
-const AMBIGUOUS_BASENAMES = SECRET_FILE.credentialBasenames.filter(
-  (name) => !name.startsWith('.') && !name.includes('.'),
+const AMBIGUOUS_BASENAMES = new Set(
+  SECRET_FILE.credentialBasenames.filter(
+    (name) => !name.startsWith('.') && !name.includes('.'),
+  ),
 );
 
 const hasDirectoryComponent = (candidate) => /[/\\]/.test(String(candidate));
@@ -140,7 +142,7 @@ const hasDirectoryComponent = (candidate) => /[/\\]/.test(String(candidate));
  */
 const isSecretPathInCommand = (candidate) => {
   const name = basename(String(candidate).trim()).toLowerCase();
-  if (AMBIGUOUS_BASENAMES.includes(name) && !hasDirectoryComponent(candidate)) {
+  if (AMBIGUOUS_BASENAMES.has(name) && !hasDirectoryComponent(candidate)) {
     return false;
   }
   return isSecretFilePath(candidate);
