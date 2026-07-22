@@ -6,6 +6,7 @@ import { z } from 'zod';
 // the @repo/scan-ingestion/* self-alias would not resolve.
 import { packProjectArchive } from '../ingestion/snapshots/packProjectArchive.util.ts';
 import { parseCliFlags } from './parseCliFlags.util.ts';
+import { stripTrailingSlashes } from './stripTrailingSlashes.util.ts';
 
 const pushResultSchema = z.object({
   fileCount: z.number(),
@@ -37,7 +38,7 @@ const run = async (): Promise<void> => {
   const { archiveBytes, fileCount } = packProjectArchive({ rootPath });
   console.warn(`📦 Packed ${fileCount} files from ${rootPath}`);
 
-  const endpoint = `${serverUrl.replace(/\/+$/, '')}/_action/push-snapshot/${projectId}`;
+  const endpoint = `${stripTrailingSlashes(serverUrl)}/_action/push-snapshot/${projectId}`;
   const response = await fetch(endpoint, {
     body: archiveBytes,
     headers: {

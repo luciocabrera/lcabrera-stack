@@ -12,15 +12,19 @@ export const parsePackageJsonWorkspaces = (
   }
 
   const { workspaces } = packageJson as { workspaces?: unknown };
-  const rawList = Array.isArray(workspaces)
-    ? workspaces
-    : workspaces !== null &&
-        typeof workspaces === 'object' &&
-        Array.isArray((workspaces as { packages?: unknown }).packages)
-      ? (workspaces as { packages: unknown[] }).packages
-      : [];
 
-  return rawList.filter(
+  const toGlobList = (): readonly unknown[] => {
+    if (Array.isArray(workspaces)) {
+      return workspaces;
+    }
+    if (workspaces === null || typeof workspaces !== 'object') {
+      return [];
+    }
+    const { packages } = workspaces as { packages?: unknown };
+    return Array.isArray(packages) ? packages : [];
+  };
+
+  return toGlobList().filter(
     (entry): entry is string => typeof entry === 'string' && entry.length > 0,
   );
 };

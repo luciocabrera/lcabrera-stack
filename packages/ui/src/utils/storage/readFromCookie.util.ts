@@ -23,6 +23,4 @@ export const readFromCookie = ({ cookieString, key }: ReadFromCookieArgs) => {
     const cookies = parseCookies(cookieString);
     return cookies[key];
   }
-
-  return;
 };

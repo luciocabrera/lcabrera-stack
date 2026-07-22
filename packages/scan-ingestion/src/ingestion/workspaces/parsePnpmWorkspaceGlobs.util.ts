@@ -35,8 +35,20 @@ export const parsePnpmWorkspaceGlobs = (
       continue;
     }
 
-    const itemMatch = /^\s+-\s+(.+)$/.exec(withoutComment);
-    const item = itemMatch?.[1]?.trim().replaceAll(/^['"]|['"]$/g, '');
+    // Split into a single-character indent test plus plain string work,
+    // rather than `/^\s+-\s+(.+)$/`. That pattern placed two greedy
+    // quantifiers over overlapping classes (`\s+` beside `.+`), which is the
+    // shape that backtracks super-linearly; this reads the same and scans
+    // each line once.
+    const trimmed = withoutComment.trim();
+    if (!/^\s/.test(withoutComment) || !trimmed.startsWith('- ')) {
+      continue;
+    }
+
+    const item = trimmed
+      .slice(2)
+      .trim()
+      .replaceAll(/^['"]|['"]$/g, '');
     if (item) {
       globs.push(item);
     }

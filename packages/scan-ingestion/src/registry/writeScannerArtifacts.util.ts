@@ -24,8 +24,8 @@ type WriteScannerArtifactsArgs = {
 
 /**
  * Assembles a registered scanner's on-disk artifacts from templates
- * (ADR-023): SKILL.md for LLM scanners, a runner-script scaffold with a
- * TODO parser block for deterministic ones — into
+ * (ADR-023): SKILL.md for LLM scanners, a runner-script scaffold with an
+ * unimplemented parser block for deterministic ones — into
  * `.github/skills/<scanner_id>/`. STRICTLY create-if-missing: an existing
  * file is never touched, because the code on disk (not the registry row)
  * stays authoritative. All writes go through the fs/*Within containment

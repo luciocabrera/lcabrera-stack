@@ -5,10 +5,17 @@
     "type": "branch",
     "value": "main"
   },
-  "analysisDate": "2026-07-21T20:22:22+0000",
+  "analysisDate": "2026-07-22T05:03:35+0000",
   "qualityGate": {
     "status": "ERROR",
     "conditions": [
+      {
+        "metric": "new_coverage",
+        "status": "OK",
+        "comparator": "LT",
+        "errorThreshold": "80",
+        "actualValue": null
+      },
       {
         "metric": "new_duplicated_lines_density",
         "status": "OK",
@@ -42,240 +49,25 @@
         "status": "ERROR",
         "comparator": "GT",
         "errorThreshold": "1",
-        "actualValue": "3"
+        "actualValue": "2"
       }
     ]
   },
   "summary": {
-    "issues": 108,
+    "issues": 84,
     "hotspots": 0,
     "bySeverity": {
-      "MAJOR": 70,
-      "MINOR": 4,
+      "MAJOR": 47,
       "CRITICAL": 32,
+      "MINOR": 3,
       "INFO": 2
     },
     "byType": {
-      "VULNERABILITY": 12,
-      "CODE_SMELL": 96
+      "CODE_SMELL": 83,
+      "VULNERABILITY": 1
     }
   },
   "issues": [
-    {
-      "key": "AZ-F2mm2lM3PEnpiSOh8",
-      "rule": "docker:S6505",
-      "type": "VULNERABILITY",
-      "severity": "MAJOR",
-      "file": "apps/admin_system/Dockerfile",
-      "line": 8,
-      "message": "Omitting \"--ignore-scripts\" allows lifecycle scripts to run during package installation.",
-      "effort": "30min",
-      "tags": [
-        "cwe",
-        "former-hotspot"
-      ],
-      "impacts": [
-        {
-          "softwareQuality": "SECURITY",
-          "severity": "MEDIUM"
-        }
-      ],
-      "cleanCodeCategory": "RESPONSIBLE",
-      "status": "OPEN",
-      "creationDate": "2026-06-13T10:18:16+0000"
-    },
-    {
-      "key": "AZ-F2mm2lM3PEnpiSOh9",
-      "rule": "docker:S8543",
-      "type": "VULNERABILITY",
-      "severity": "MAJOR",
-      "file": "apps/admin_system/Dockerfile",
-      "line": 8,
-      "message": "Using dependencies without locking resolved versions is security-sensitive.",
-      "effort": "1h",
-      "tags": [],
-      "impacts": [
-        {
-          "softwareQuality": "SECURITY",
-          "severity": "MEDIUM"
-        }
-      ],
-      "cleanCodeCategory": "INTENTIONAL",
-      "status": "OPEN",
-      "creationDate": "2026-06-13T10:18:16+0000"
-    },
-    {
-      "key": "AZ-F2mm2lM3PEnpiSOh-",
-      "rule": "docker:S6505",
-      "type": "VULNERABILITY",
-      "severity": "MAJOR",
-      "file": "apps/admin_system/Dockerfile",
-      "line": 10,
-      "message": "Omitting \"--ignore-scripts\" allows lifecycle scripts to run during package installation.",
-      "effort": "30min",
-      "tags": [
-        "cwe",
-        "former-hotspot"
-      ],
-      "impacts": [
-        {
-          "softwareQuality": "SECURITY",
-          "severity": "MEDIUM"
-        }
-      ],
-      "cleanCodeCategory": "RESPONSIBLE",
-      "status": "OPEN",
-      "creationDate": "2026-06-13T10:18:16+0000"
-    },
-    {
-      "key": "AZ-F2mm2lM3PEnpiSOh_",
-      "rule": "docker:S8543",
-      "type": "VULNERABILITY",
-      "severity": "MAJOR",
-      "file": "apps/admin_system/Dockerfile",
-      "line": 10,
-      "message": "Using dependencies without locking resolved versions is security-sensitive.",
-      "effort": "1h",
-      "tags": [],
-      "impacts": [
-        {
-          "softwareQuality": "SECURITY",
-          "severity": "MEDIUM"
-        }
-      ],
-      "cleanCodeCategory": "INTENTIONAL",
-      "status": "OPEN",
-      "creationDate": "2026-06-13T10:18:16+0000"
-    },
-    {
-      "key": "AZ-F2mm2lM3PEnpiSOiA",
-      "rule": "docker:S6505",
-      "type": "VULNERABILITY",
-      "severity": "MAJOR",
-      "file": "apps/admin_system/Dockerfile",
-      "line": 14,
-      "message": "Omitting \"--ignore-scripts\" allows lifecycle scripts to run during package installation.",
-      "effort": "30min",
-      "tags": [
-        "cwe",
-        "former-hotspot"
-      ],
-      "impacts": [
-        {
-          "softwareQuality": "SECURITY",
-          "severity": "MEDIUM"
-        }
-      ],
-      "cleanCodeCategory": "RESPONSIBLE",
-      "status": "OPEN",
-      "creationDate": "2026-06-13T10:18:16+0000"
-    },
-    {
-      "key": "AZ-F2mm2lM3PEnpiSOiB",
-      "rule": "docker:S8543",
-      "type": "VULNERABILITY",
-      "severity": "MAJOR",
-      "file": "apps/admin_system/Dockerfile",
-      "line": 14,
-      "message": "Using dependencies without locking resolved versions is security-sensitive.",
-      "effort": "1h",
-      "tags": [],
-      "impacts": [
-        {
-          "softwareQuality": "SECURITY",
-          "severity": "MEDIUM"
-        }
-      ],
-      "cleanCodeCategory": "INTENTIONAL",
-      "status": "OPEN",
-      "creationDate": "2026-06-13T10:18:16+0000"
-    },
-    {
-      "key": "AZ-F2mm2lM3PEnpiSOiC",
-      "rule": "docker:S6505",
-      "type": "VULNERABILITY",
-      "severity": "MAJOR",
-      "file": "apps/admin_system/Dockerfile",
-      "line": 36,
-      "message": "\"npx\" can install packages on-demand and run their lifecycle scripts.",
-      "effort": "30min",
-      "tags": [
-        "cwe",
-        "former-hotspot"
-      ],
-      "impacts": [
-        {
-          "softwareQuality": "SECURITY",
-          "severity": "MEDIUM"
-        }
-      ],
-      "cleanCodeCategory": "RESPONSIBLE",
-      "status": "OPEN",
-      "creationDate": "2026-06-13T10:18:16+0000"
-    },
-    {
-      "key": "AZ-F2mm2lM3PEnpiSOiD",
-      "rule": "docker:S8543",
-      "type": "VULNERABILITY",
-      "severity": "MAJOR",
-      "file": "apps/admin_system/Dockerfile",
-      "line": 36,
-      "message": "Define exact package version to avoid installing unverified releases.",
-      "effort": "1h",
-      "tags": [],
-      "impacts": [
-        {
-          "softwareQuality": "SECURITY",
-          "severity": "MEDIUM"
-        }
-      ],
-      "cleanCodeCategory": "INTENTIONAL",
-      "status": "OPEN",
-      "creationDate": "2026-06-13T10:18:16+0000"
-    },
-    {
-      "key": "AZ-F2mm2lM3PEnpiSOiE",
-      "rule": "docker:S6505",
-      "type": "VULNERABILITY",
-      "severity": "MAJOR",
-      "file": "apps/admin_system/Dockerfile",
-      "line": 51,
-      "message": "\"npx\" can install packages on-demand and run their lifecycle scripts.",
-      "effort": "30min",
-      "tags": [
-        "cwe",
-        "former-hotspot"
-      ],
-      "impacts": [
-        {
-          "softwareQuality": "SECURITY",
-          "severity": "MEDIUM"
-        }
-      ],
-      "cleanCodeCategory": "RESPONSIBLE",
-      "status": "OPEN",
-      "creationDate": "2026-06-13T10:18:16+0000"
-    },
-    {
-      "key": "AZ-F2mm2lM3PEnpiSOiF",
-      "rule": "docker:S8543",
-      "type": "VULNERABILITY",
-      "severity": "MAJOR",
-      "file": "apps/admin_system/Dockerfile",
-      "line": 51,
-      "message": "Define exact package version to avoid installing unverified releases.",
-      "effort": "1h",
-      "tags": [],
-      "impacts": [
-        {
-          "softwareQuality": "SECURITY",
-          "severity": "MEDIUM"
-        }
-      ],
-      "cleanCodeCategory": "INTENTIONAL",
-      "status": "OPEN",
-      "creationDate": "2026-06-13T10:18:16+0000"
-    },
     {
       "key": "AZ-F2mlNlM3PEnpiSOh7",
       "rule": "typescript:S8786",
@@ -300,29 +92,6 @@
       "creationDate": "2026-07-14T17:50:41+0000"
     },
     {
-      "key": "AZ-F2m34lM3PEnpiSOiG",
-      "rule": "typescript:S4036",
-      "type": "VULNERABILITY",
-      "severity": "MINOR",
-      "file": "apps/scan-orchestrator/src/queue/runQueuedScan.ts",
-      "line": 81,
-      "message": "Make sure the \"PATH\" variable only contains fixed, unwriteable directories.",
-      "effort": "15min",
-      "tags": [
-        "cwe",
-        "former-hotspot"
-      ],
-      "impacts": [
-        {
-          "softwareQuality": "SECURITY",
-          "severity": "LOW"
-        }
-      ],
-      "cleanCodeCategory": "INTENTIONAL",
-      "status": "OPEN",
-      "creationDate": "2026-07-05T20:23:10+0000"
-    },
-    {
       "key": "AZ-F2kpplM3PEnpiSOhq",
       "rule": "typescript:S8786",
       "type": "CODE_SMELL",
@@ -344,50 +113,6 @@
       "cleanCodeCategory": "INTENTIONAL",
       "status": "OPEN",
       "creationDate": "2026-07-14T17:50:41+0000"
-    },
-    {
-      "key": "AZ-F2kk1lM3PEnpiSOgf",
-      "rule": "plsql:VarcharUsageCheck",
-      "type": "CODE_SMELL",
-      "severity": "MAJOR",
-      "file": "packages/scan-ingestion/src/db/migrations/0001_init_cqms.sql",
-      "line": 24,
-      "message": "Use VARCHAR2 instead of VARCHAR.",
-      "effort": "1min",
-      "tags": [
-        "lock-in"
-      ],
-      "impacts": [
-        {
-          "softwareQuality": "MAINTAINABILITY",
-          "severity": "MEDIUM"
-        }
-      ],
-      "cleanCodeCategory": "CONSISTENT",
-      "status": "OPEN",
-      "creationDate": "2026-07-14T17:28:31+0000"
-    },
-    {
-      "key": "AZ-F2kk1lM3PEnpiSOgg",
-      "rule": "plsql:VarcharUsageCheck",
-      "type": "CODE_SMELL",
-      "severity": "MAJOR",
-      "file": "packages/scan-ingestion/src/db/migrations/0001_init_cqms.sql",
-      "line": 25,
-      "message": "Use VARCHAR2 instead of VARCHAR.",
-      "effort": "1min",
-      "tags": [
-        "lock-in"
-      ],
-      "impacts": [
-        {
-          "softwareQuality": "MAINTAINABILITY",
-          "severity": "MEDIUM"
-        }
-      ],
-      "cleanCodeCategory": "CONSISTENT",
-      "status": "OPEN",
-      "creationDate": "2026-07-14T17:28:31+0000"
     },
     {
       "key": "AZ-F2kk1lM3PEnpiSOgh",
@@ -882,138 +607,6 @@
       "creationDate": "2026-07-06T22:50:10+0000"
     },
     {
-      "key": "AZ-F2kmnlM3PEnpiSOg_",
-      "rule": "plsql:VarcharUsageCheck",
-      "type": "CODE_SMELL",
-      "severity": "MAJOR",
-      "file": "packages/scan-ingestion/src/db/migrations/0011_fallow_deterministic.sql",
-      "line": 28,
-      "message": "Use VARCHAR2 instead of VARCHAR.",
-      "effort": "1min",
-      "tags": [
-        "lock-in"
-      ],
-      "impacts": [
-        {
-          "softwareQuality": "MAINTAINABILITY",
-          "severity": "MEDIUM"
-        }
-      ],
-      "cleanCodeCategory": "CONSISTENT",
-      "status": "OPEN",
-      "creationDate": "2026-07-14T17:28:31+0000"
-    },
-    {
-      "key": "AZ-F2kmnlM3PEnpiSOhA",
-      "rule": "plsql:VarcharUsageCheck",
-      "type": "CODE_SMELL",
-      "severity": "MAJOR",
-      "file": "packages/scan-ingestion/src/db/migrations/0011_fallow_deterministic.sql",
-      "line": 29,
-      "message": "Use VARCHAR2 instead of VARCHAR.",
-      "effort": "1min",
-      "tags": [
-        "lock-in"
-      ],
-      "impacts": [
-        {
-          "softwareQuality": "MAINTAINABILITY",
-          "severity": "MEDIUM"
-        }
-      ],
-      "cleanCodeCategory": "CONSISTENT",
-      "status": "OPEN",
-      "creationDate": "2026-07-14T17:28:31+0000"
-    },
-    {
-      "key": "AZ-F2kmnlM3PEnpiSOhB",
-      "rule": "plsql:VarcharUsageCheck",
-      "type": "CODE_SMELL",
-      "severity": "MAJOR",
-      "file": "packages/scan-ingestion/src/db/migrations/0011_fallow_deterministic.sql",
-      "line": 31,
-      "message": "Use VARCHAR2 instead of VARCHAR.",
-      "effort": "1min",
-      "tags": [
-        "lock-in"
-      ],
-      "impacts": [
-        {
-          "softwareQuality": "MAINTAINABILITY",
-          "severity": "MEDIUM"
-        }
-      ],
-      "cleanCodeCategory": "CONSISTENT",
-      "status": "OPEN",
-      "creationDate": "2026-07-14T17:28:31+0000"
-    },
-    {
-      "key": "AZ-F2kmnlM3PEnpiSOhC",
-      "rule": "plsql:VarcharUsageCheck",
-      "type": "CODE_SMELL",
-      "severity": "MAJOR",
-      "file": "packages/scan-ingestion/src/db/migrations/0011_fallow_deterministic.sql",
-      "line": 36,
-      "message": "Use VARCHAR2 instead of VARCHAR.",
-      "effort": "1min",
-      "tags": [
-        "lock-in"
-      ],
-      "impacts": [
-        {
-          "softwareQuality": "MAINTAINABILITY",
-          "severity": "MEDIUM"
-        }
-      ],
-      "cleanCodeCategory": "CONSISTENT",
-      "status": "OPEN",
-      "creationDate": "2026-07-14T17:28:31+0000"
-    },
-    {
-      "key": "AZ-F2kmnlM3PEnpiSOhD",
-      "rule": "plsql:VarcharUsageCheck",
-      "type": "CODE_SMELL",
-      "severity": "MAJOR",
-      "file": "packages/scan-ingestion/src/db/migrations/0011_fallow_deterministic.sql",
-      "line": 51,
-      "message": "Use VARCHAR2 instead of VARCHAR.",
-      "effort": "1min",
-      "tags": [
-        "lock-in"
-      ],
-      "impacts": [
-        {
-          "softwareQuality": "MAINTAINABILITY",
-          "severity": "MEDIUM"
-        }
-      ],
-      "cleanCodeCategory": "CONSISTENT",
-      "status": "OPEN",
-      "creationDate": "2026-07-14T17:28:31+0000"
-    },
-    {
-      "key": "AZ-F2kmnlM3PEnpiSOhE",
-      "rule": "plsql:VarcharUsageCheck",
-      "type": "CODE_SMELL",
-      "severity": "MAJOR",
-      "file": "packages/scan-ingestion/src/db/migrations/0011_fallow_deterministic.sql",
-      "line": 52,
-      "message": "Use VARCHAR2 instead of VARCHAR.",
-      "effort": "1min",
-      "tags": [
-        "lock-in"
-      ],
-      "impacts": [
-        {
-          "softwareQuality": "MAINTAINABILITY",
-          "severity": "MEDIUM"
-        }
-      ],
-      "cleanCodeCategory": "CONSISTENT",
-      "status": "OPEN",
-      "creationDate": "2026-07-14T17:28:31+0000"
-    },
-    {
       "key": "AZ-F2kmnlM3PEnpiSOhF",
       "rule": "plsql:SelectStarCheck",
       "type": "CODE_SMELL",
@@ -1242,50 +835,6 @@
       "cleanCodeCategory": "INTENTIONAL",
       "status": "OPEN",
       "creationDate": "2026-07-06T23:04:36+0000"
-    },
-    {
-      "key": "AZ-F2kkilM3PEnpiSOgb",
-      "rule": "plsql:VarcharUsageCheck",
-      "type": "CODE_SMELL",
-      "severity": "MAJOR",
-      "file": "packages/scan-ingestion/src/db/migrations/0012_code_smell_masters.sql",
-      "line": 19,
-      "message": "Use VARCHAR2 instead of VARCHAR.",
-      "effort": "1min",
-      "tags": [
-        "lock-in"
-      ],
-      "impacts": [
-        {
-          "softwareQuality": "MAINTAINABILITY",
-          "severity": "MEDIUM"
-        }
-      ],
-      "cleanCodeCategory": "CONSISTENT",
-      "status": "OPEN",
-      "creationDate": "2026-07-14T17:28:31+0000"
-    },
-    {
-      "key": "AZ-F2kkilM3PEnpiSOgc",
-      "rule": "plsql:VarcharUsageCheck",
-      "type": "CODE_SMELL",
-      "severity": "MAJOR",
-      "file": "packages/scan-ingestion/src/db/migrations/0012_code_smell_masters.sql",
-      "line": 42,
-      "message": "Use VARCHAR2 instead of VARCHAR.",
-      "effort": "1min",
-      "tags": [
-        "lock-in"
-      ],
-      "impacts": [
-        {
-          "softwareQuality": "MAINTAINABILITY",
-          "severity": "MEDIUM"
-        }
-      ],
-      "cleanCodeCategory": "CONSISTENT",
-      "status": "OPEN",
-      "creationDate": "2026-07-14T17:28:31+0000"
     },
     {
       "key": "AZ-F2kkilM3PEnpiSOgd",
@@ -2304,83 +1853,6 @@
       "cleanCodeCategory": "INTENTIONAL",
       "status": "OPEN",
       "creationDate": "2026-07-12T13:14:32+0000"
-    },
-    {
-      "key": "AZ-F2lPglM3PEnpiSOhv",
-      "rule": "typescript:S6819",
-      "type": "CODE_SMELL",
-      "severity": "MAJOR",
-      "file": "packages/ui/src/components/Table/TableHeaderCell/ResizeHandle/ResizeHandle.component.tsx",
-      "line": 41,
-      "message": "Use <hr> instead of the \"separator\" role to ensure accessibility across all devices.",
-      "effort": "5min",
-      "tags": [
-        "accessibility",
-        "react"
-      ],
-      "impacts": [
-        {
-          "softwareQuality": "MAINTAINABILITY",
-          "severity": "MEDIUM"
-        }
-      ],
-      "cleanCodeCategory": "CONSISTENT",
-      "status": "OPEN",
-      "creationDate": "2026-07-16T19:48:19+0000"
-    },
-    {
-      "key": "AZ-F2lPglM3PEnpiSOhu",
-      "rule": "typescript:S6847",
-      "type": "CODE_SMELL",
-      "severity": "MAJOR",
-      "file": "packages/ui/src/components/Table/TableHeaderCell/ResizeHandle/ResizeHandle.component.tsx",
-      "line": 41,
-      "message": "Non-interactive elements should not be assigned mouse or keyboard event listeners.",
-      "effort": "5min",
-      "tags": [
-        "accessibility",
-        "react"
-      ],
-      "impacts": [
-        {
-          "softwareQuality": "MAINTAINABILITY",
-          "severity": "MEDIUM"
-        },
-        {
-          "softwareQuality": "RELIABILITY",
-          "severity": "LOW"
-        }
-      ],
-      "cleanCodeCategory": "CONSISTENT",
-      "status": "OPEN",
-      "creationDate": "2026-07-16T19:48:19+0000"
-    },
-    {
-      "key": "AZ-F2lPglM3PEnpiSOhw",
-      "rule": "typescript:S6845",
-      "type": "CODE_SMELL",
-      "severity": "MAJOR",
-      "file": "packages/ui/src/components/Table/TableHeaderCell/ResizeHandle/ResizeHandle.component.tsx",
-      "line": 52,
-      "message": "`tabIndex` should only be declared on interactive elements.",
-      "effort": "5min",
-      "tags": [
-        "accessibility",
-        "react"
-      ],
-      "impacts": [
-        {
-          "softwareQuality": "MAINTAINABILITY",
-          "severity": "LOW"
-        },
-        {
-          "softwareQuality": "RELIABILITY",
-          "severity": "MEDIUM"
-        }
-      ],
-      "cleanCodeCategory": "CONSISTENT",
-      "status": "OPEN",
-      "creationDate": "2026-07-16T19:48:19+0000"
     },
     {
       "key": "AZ-F2lFzlM3PEnpiSOhr",

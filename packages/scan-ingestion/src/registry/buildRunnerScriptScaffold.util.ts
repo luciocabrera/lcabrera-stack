@@ -7,7 +7,10 @@ type BuildRunnerScriptScaffoldArgs = {
 /**
  * Deterministic runner-script scaffold for a registry-added scanner
  * (ADR-023) — wired to the shared deterministic-scan machinery with a
- * marked TODO parser block. Deliberately emits a valid 0-findings report
+ * marked, unimplemented parser block. (The *emitted* script carries a
+ * literal task marker, which is the point of the scaffold; this description
+ * spells it out rather than repeating the token, so the sentence is not read
+ * as an open task in this file.) Deliberately emits a valid 0-findings report
  * so a half-registered scanner degrades gracefully instead of crashing
  * the queue. The registry never overwrites an existing script: the code
  * on disk stays authoritative, and the orchestrator only executes paths

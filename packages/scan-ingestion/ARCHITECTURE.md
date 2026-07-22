@@ -55,7 +55,10 @@ scan-ingestion/
 │   │                         SKILL.md / runner-scaffold templates, strictly create-if-missing, fs/*Within-gated repo-root writes
 │   │
 │   └── cli/
-│       └── ingest.cli.ts   → Thin argv wrapper each skill's final step invokes (relative imports — see below)
+│       ├── ingest.cli.ts   → Thin argv wrapper each skill's final step invokes (relative imports — see below)
+│       ├── push.cli.ts     → CLI snapshot push (ADR-029) — packs the tree and POSTs it with a Bearer token
+│       └── *.util.ts       → Helpers these two share (parseCliFlags, stripTrailingSlashes); local rather than
+│                             in @lcabrera/utils because a CLI run via `node` cannot resolve package aliases
 ```
 
 ## Two Execution Contexts, One Package
