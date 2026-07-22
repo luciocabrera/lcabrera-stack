@@ -89,48 +89,59 @@ const walk = (directory) => {
 };
 
 /**
- * Parses JSONC by removing `//` line comments and trailing commas.
+ * Index just past the string literal opening at `start`.
  *
- * String-aware: `biome.jsonc`'s own `$schema` value contains `//`, and a naive
- * strip would truncate the document into invalid JSON. Biome itself fails
- * silently on a config parse error (AGENTS.md §4), so this must not.
+ * Skips the character after a backslash so an escaped quote does not end the
+ * literal early — which would put the scanner back in "code" mode mid-string and
+ * let the rest of the line be read as syntax.
  */
-const parseJsonc = (text) => {
-  let out = '';
-  let inString = false;
-  let inComment = false;
-  for (let index = 0; index < text.length; index += 1) {
-    const char = text[index];
-    const next = text[index + 1];
-    if (inComment) {
-      if (char === '\n') {
-        inComment = false;
-        out += char;
-      }
-      continue;
-    }
-    if (inString) {
-      out += char;
-      if (char === '\\') {
-        out += next ?? '';
-        index += 1;
-      } else if (char === '"') inString = false;
-      continue;
-    }
-    if (char === '"') {
-      inString = true;
-      out += char;
-      continue;
-    }
-    if (char === '/' && next === '/') {
-      inComment = true;
-      index += 1;
-      continue;
-    }
-    out += char;
+const endOfString = (text, start) => {
+  for (let index = start + 1; index < text.length; index += 1) {
+    if (text[index] === '\\') index += 1;
+    else if (text[index] === '"') return index + 1;
   }
-  return JSON.parse(out.replaceAll(/,(?=\s*[}\]])/gu, ''));
+  return text.length;
 };
+
+/** Index of the newline ending the line comment at `start`, or end of text. */
+const endOfLineComment = (text, start) => {
+  const newline = text.indexOf('\n', start);
+  return newline === -1 ? text.length : newline;
+};
+
+/**
+ * Strips `//` line comments, leaving string literals untouched.
+ *
+ * String-aware by necessity: `biome.jsonc`'s own `$schema` value contains `//`,
+ * and a naive strip truncates the document into invalid JSON. Biome itself fails
+ * silently on a config parse error (AGENTS.md §4), so this must not — a config
+ * that silently reads as `{}` would report every public package clean.
+ *
+ * Written as a scan over literals rather than a per-character state machine: the
+ * flag-juggling version was correct but scored cognitive complexity 17, and
+ * "skip to the end of this construct" is what the code actually means.
+ */
+const stripJsoncComments = (text) => {
+  let out = '';
+  let index = 0;
+  while (index < text.length) {
+    if (text[index] === '"') {
+      const end = endOfString(text, index);
+      out += text.slice(index, end);
+      index = end;
+    } else if (text[index] === '/' && text[index + 1] === '/') {
+      index = endOfLineComment(text, index);
+    } else {
+      out += text[index];
+      index += 1;
+    }
+  }
+  return out;
+};
+
+/** Parses JSONC — JSON plus `//` comments and trailing commas. */
+const parseJsonc = (text) =>
+  JSON.parse(stripJsoncComments(text).replaceAll(/,(?=\s*[}\]])/gu, ''));
 
 const readJson = (path) =>
   parseJsonc(readTextWithin(join(REPO_ROOT, path), REPO_ROOT));
@@ -243,9 +254,11 @@ const main = () => {
   const provisional = register.filter(
     (entry) => entry.status === 'provisional',
   ).length;
+  // Named rather than inlined: a conditional template inside a template is
+  // unreadable at a glance and Sonar rejects the nesting (S4624).
+  const pending = provisional > 0 ? ` (${provisional} still provisional)` : '';
   process.stdout.write(
-    `${packageDirs.length} public package(s): ${held.length} gated suppression(s), all approved and documented` +
-      `${provisional > 0 ? ` (${provisional} still provisional)` : ''}. ` +
+    `${packageDirs.length} public package(s): ${held.length} gated suppression(s), all approved and documented${pending}. ` +
       `${found.length - held.length} repo-wide Biome rule(s) also reach them (ADR-035 §7).\n`,
   );
 };
