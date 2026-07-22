@@ -25,9 +25,26 @@
  * decompressing packfiles by hand otherwise.
  */
 import { execFileSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
 
 /** Fixed, non-writable system directories — never the inherited PATH. */
-const TRUSTED_PATH = '/usr/local/bin:/usr/bin:/bin';
+const TRUSTED_DIRECTORIES = ['/usr/local/bin', '/usr/bin', '/bin'];
+const TRUSTED_PATH = TRUSTED_DIRECTORIES.join(':');
+
+/**
+ * The git binary as an absolute path from a fixed directory.
+ *
+ * Spawning the bare name `git` would have the OS resolve it through PATH, and
+ * a writable directory earlier in that list could shadow the real binary
+ * (Sonar S4036). Pinning PATH for the child mitigates what git itself then
+ * spawns; naming the executable outright removes the lookup for this call
+ * altogether. `undefined` when git is not installed, which callers already
+ * handle as "no answer".
+ */
+const gitBinary = () =>
+  TRUSTED_DIRECTORIES.map((directory) => `${directory}/git`).find((path) =>
+    existsSync(path),
+  );
 
 /**
  * Every variable through which git can be told which repository to operate on.
@@ -60,8 +77,12 @@ export const buildGitEnv = (env) => ({
  * means; none of them should treat it as "nothing to report".
  */
 export const runGit = ({ args, cwd }) => {
+  const binary = gitBinary();
+  if (binary === undefined) {
+    return undefined;
+  }
   try {
-    return execFileSync('git', args, {
+    return execFileSync(binary, args, {
       cwd,
       encoding: 'utf8',
       env: buildGitEnv(process.env),

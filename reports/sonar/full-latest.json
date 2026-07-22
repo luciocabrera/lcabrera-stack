@@ -2,26 +2,19 @@
   "project": "luciocabrera_vite-react-compiler",
   "source": "https://sonarcloud.io",
   "target": {
-    "type": "branch",
-    "value": "main"
+    "type": "pullRequest",
+    "value": "283"
   },
-  "analysisDate": "2026-07-22T09:13:47+0000",
+  "analysisDate": "2026-07-22T11:02:03+0000",
   "qualityGate": {
-    "status": "OK",
+    "status": "ERROR",
     "conditions": [
-      {
-        "metric": "new_coverage",
-        "status": "OK",
-        "comparator": "LT",
-        "errorThreshold": "80",
-        "actualValue": null
-      },
       {
         "metric": "new_duplicated_lines_density",
         "status": "OK",
         "comparator": "GT",
         "errorThreshold": "3",
-        "actualValue": "0.4"
+        "actualValue": "0.0"
       },
       {
         "metric": "new_maintainability_rating",
@@ -46,42 +39,82 @@
       },
       {
         "metric": "new_security_rating",
-        "status": "OK",
+        "status": "ERROR",
         "comparator": "GT",
         "errorThreshold": "1",
-        "actualValue": "1"
+        "actualValue": "2"
       }
     ]
   },
   "summary": {
-    "issues": 0,
+    "issues": 2,
     "hotspots": 0,
-    "bySeverity": {},
-    "byType": {},
-    "accepted": 13,
-    "acceptedByRule": {
-      "typescript:S6847": 1,
-      "typescript:S6819": 3,
-      "typescript:S6845": 1,
-      "typescript:S8980": 3,
-      "typescript:S6852": 1,
-      "typescript:S6478": 1,
-      "typescript:S4036": 1,
-      "jssecurity:S5145": 1,
-      "typescript:S6825": 1
+    "bySeverity": {
+      "MAJOR": 1,
+      "MINOR": 1
     },
+    "byType": {
+      "CODE_SMELL": 1,
+      "VULNERABILITY": 1
+    },
+    "accepted": 0,
+    "acceptedByRule": {},
     "analysed": {
       "byLanguage": {
-        "css": 46,
-        "js": 6096,
-        "postgres": 1547,
-        "shell": 310,
-        "ts": 51183,
-        "yaml": 829
+        "js": 403
       },
-      "linesOfCode": 60011
+      "linesOfCode": 403
     }
   },
-  "issues": [],
+  "issues": [
+    {
+      "key": "AZ-Jfm1_I8w7yiXtGvAk",
+      "rule": "javascript:S4624",
+      "type": "CODE_SMELL",
+      "severity": "MAJOR",
+      "file": "scripts/lib/coordination-remote.mjs",
+      "line": 90,
+      "message": "Refactor this code to not use nested template literals.",
+      "effort": "10min",
+      "tags": [
+        "brain-overload",
+        "confusing",
+        "editable-source",
+        "es2015"
+      ],
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "MEDIUM"
+        }
+      ],
+      "cleanCodeCategory": "INTENTIONAL",
+      "status": "OPEN",
+      "creationDate": "2026-07-22T11:01:10+0000"
+    },
+    {
+      "key": "AZ-Jfm55I8w7yiXtGvAl",
+      "rule": "javascript:S4036",
+      "type": "VULNERABILITY",
+      "severity": "MINOR",
+      "file": "scripts/lib/git-exec.mjs",
+      "line": 64,
+      "message": "Make sure the \"PATH\" variable only contains fixed, unwriteable directories.",
+      "effort": "15min",
+      "tags": [
+        "cwe",
+        "former-hotspot"
+      ],
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "LOW"
+        }
+      ],
+      "cleanCodeCategory": "INTENTIONAL",
+      "status": "OPEN",
+      "creationDate": "2026-07-22T11:01:10+0000"
+    }
+  ],
   "hotspots": []
 }

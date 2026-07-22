@@ -84,10 +84,11 @@ const claimsOnBranch = ({ cwd, git, branch, sha }) => {
       // files were live at the time, so "found on" is frequently some
       // unrelated branch — and sending someone there to coordinate is worse
       // than not warning at all.
+      const declaredOn = data?.branch ?? branch;
       return {
         branch,
         data,
-        name: `${path.slice(TASKS_DIR.length)} (branch ${data?.branch ?? `origin/${branch}`})`,
+        name: `${path.slice(TASKS_DIR.length)} (branch ${declaredOn})`,
       };
     });
 };
