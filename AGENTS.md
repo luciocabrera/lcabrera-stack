@@ -474,6 +474,41 @@ link to the spec so they cannot drift. If the standard itself must change, chang
 `commit-convention.mjs`; the hook, CI, template, and docs all follow from it.
 (Non-Negotiable Rule 13.)
 
+### Releasing
+
+The four `@lcabrera/*` packages are versioned with **Changesets**, independently —
+each moves only when it changes, and a dependent gets a patch bump automatically
+(`updateInternalDependencies: "patch"`). A change that affects consumers carries
+a changeset in the same PR; `vp run release:version` consumes them.
+
+Three things here are deliberate, and each cost something to learn:
+
+- **The version PR is opened by a human, not a bot.** Changesets' usual flow has
+  its action open the "Version Packages" PR, and that PR **can never merge here**:
+  a pull request opened with `GITHUB_TOKEN` does not trigger `pull_request`
+  workflows, so its required checks never run. Same wall `update-changelog.yml`
+  hit for 159 commits while reporting success. A GitHub App token would fix it
+  and is not worth the moving parts for what is one command.
+- **The first publish of each package is manual.** npm's trusted publishing binds
+  a workflow to an **existing** package, so a brand-new scoped package has nothing
+  to attach the trust to — scoped first publishes fail with E404 under OIDC
+  (npm/cli#8976). Publish once by hand, configure the trusted publisher on
+  npmjs.com, and every release after that is automatic. `release.yml` carries no
+  `NPM_TOKEN` and passes no `--provenance`: under trusted publishing npm attaches
+  provenance itself and the flag is unnecessary.
+- **`private: true` is what keeps `release.yml` inert.** `changeset publish` skips
+  private packages, so the workflow does nothing until that flag comes off — which
+  is the one moment publishing becomes possible. Do not flip it as a convenience.
+  Every workspace not meant to publish must carry it: `api-server` and
+  `api-server-fast` had no `private` flag at all and were one `npm publish` from
+  going out.
+
+**Package releases and the repository release are separate tracks.** Changesets
+tags `@lcabrera/utils@0.1.0` and `release.yml` opens a GitHub Release per package.
+`changelog.yml` handles `v*` tags — the repo-level milestone — and nothing creates
+those automatically, so it fires only when someone tags by hand. That is also the
+only thing that gives CHANGELOG.md more than one section.
+
 ### Changelog & Labels
 
 Two things fall out of the enforced commit convention, both reusing the same spec

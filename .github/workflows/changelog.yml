@@ -8,6 +8,13 @@ name: Release Changelog
 # CHANGELOG.md itself is regenerated with `vp run changelog:generate` and
 # committed through an ordinary PR. A bot pushing it straight to `main` after
 # each merge was tried and removed — see AGENTS.md § Changelog & Labels.
+#
+# This is the REPOSITORY release, and nothing creates its tags automatically.
+# Package releases are a separate track: Changesets tags each package as
+# `@lcabrera/utils@0.1.0` and `release.yml` opens a GitHub Release per package, so
+# that flow never produces a `v*` tag and never triggers this workflow. Push a
+# `v*` tag by hand to mark a monorepo milestone — which is also the only thing
+# that gives CHANGELOG.md more than one section, since it splits on those tags.
 
 on:
   push:

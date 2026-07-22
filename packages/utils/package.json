@@ -6,6 +6,7 @@
   "files": [
     "dist",
     "src",
+    "CHANGELOG.md",
     "!src/**/*.test.*"
   ],
   "type": "module",

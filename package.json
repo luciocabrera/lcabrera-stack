@@ -40,6 +40,9 @@
     "prepare": "vp config",
     "publish:verify": "node scripts/verify-publish-surface.mjs",
     "ready": "vp run check:safe && vp run build:all",
+    "release:add": "changeset",
+    "release:status": "changeset status --since origin/main",
+    "release:version": "changeset version && vp install --lockfile-only && vp fmt .",
     "scripts:verify": "node scripts/verify-script-size.mjs",
     "skills:report": "node scripts/generate-skills-compliance-report.cjs",
     "skills:validate": "node scripts/validate-skills.cjs",
@@ -58,6 +61,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",
+    "@changesets/cli": "catalog:",
     "@repo/vite-configs": "workspace:*",
     "fallow": "catalog:",
     "ts-morph": "catalog:",

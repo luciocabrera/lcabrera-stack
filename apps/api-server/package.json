@@ -1,6 +1,7 @@
 {
   "name": "car-sales-api",
   "version": "1.0.0",
+  "private": true,
   "description": "Simple API server for car sales data",
   "main": "dist/server.js",
   "scripts": {

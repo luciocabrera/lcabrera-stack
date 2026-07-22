@@ -1,0 +1,74 @@
+name: Release
+
+# Publishes any public package whose version is not yet on npm, and opens a
+# GitHub Release for it. Versioning is deliberately NOT done here.
+#
+# Why the split: Changesets' usual flow has a bot open the "Version Packages"
+# PR. That PR can never merge in this repo — a pull request opened with
+# GITHUB_TOKEN does not trigger `pull_request` workflows, so its required checks
+# never run. `update-changelog.yml` hit the same `main` ruleset and reported
+# success through 159 commits without ever landing a change (AGENTS.md §
+# Changelog & Labels). Making it work needs a GitHub App token, which is not
+# worth it for a step that is one command. So a human runs
+# `vp run release:version` and opens an ordinary PR; only publishing is
+# automated, and publishing is the half that never fights the ruleset because
+# tags and releases are not branch-protected.
+#
+# `changeset publish` is a no-op when every version is already on the registry,
+# so running it on every push to `main` is safe and needs no path filter. While
+# a package is `private: true` it is skipped entirely — which is what keeps this
+# workflow inert until the deliberate decision to publish is made.
+#
+# Authentication is npm trusted publishing (OIDC): no NPM_TOKEN, and npm attaches
+# a provenance attestation on its own, so `--provenance` must NOT be passed.
+# It requires npm >= 11.5.1 and `id-token: write` below.
+#
+# FIRST PUBLISH IS MANUAL, and this workflow cannot do it. npm configures a
+# trusted publisher per package, which requires the package to already exist, so
+# a brand-new scoped package has nothing to attach the trust to (npm/cli#8976 —
+# scoped first publishes fail with E404 under OIDC). Publish each package once
+# by hand, configure its trusted publisher on npmjs.com, and every release after
+# that is automatic.
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write # git tags + GitHub Releases
+  id-token: write # OIDC token for npm trusted publishing
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish changed packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@8ecb39174989ce55af90f45cf55b02738599831d
+        with:
+          cache: false
+
+      - name: Install dependencies
+        run: vp install --frozen-lockfile --ignore-scripts && vp config
+
+      - name: Build the publishable packages
+        # Consumers install `dist`, and `publishConfig.exports` points there, so
+        # publishing without building would ship a tarball whose every export
+        # target is missing. publish:verify fails on exactly that.
+        run: vp run packages:build && vp run publish:verify
+
+      - name: Publish to npm and open GitHub Releases
+        uses: changesets/action@3841a0683d3cfa6dae0f9bb335290003010fe3f0 # v1.9.0
+        with:
+          publish: npx changeset publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

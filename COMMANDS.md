@@ -252,6 +252,26 @@ source path, so it ships source and the consumer's own plugin compiles it.
 Run `packages:build` **before** `publish:verify` for the full check — without a
 `dist/` it verifies only the structural half, and says so in its output.
 
+### Releasing a package
+
+Versions are chosen by people, bumped by one command, and published by CI.
+
+| Command                  | Does                                                                          |
+| ------------------------ | ----------------------------------------------------------------------------- |
+| `vp run release:add`     | write a changeset — pick the packages and patch/minor/major, say what changed |
+| `vp run release:status`  | show what would be released, versus `origin/main`                             |
+| `vp run release:version` | consume the changesets: bump versions, write per-package changelogs           |
+
+The loop: a change that affects consumers ships with a changeset in the same PR
+(`vp run release:add`). When you want to cut a release, run
+`vp run release:version` and open an ordinary PR with the result. Merging it
+triggers [`release.yml`](.github/workflows/release.yml), which builds, publishes
+every package whose version is not yet on npm, and opens a GitHub Release for it.
+
+Two deliberate constraints, both explained in [AGENTS.md](AGENTS.md#releasing):
+the version PR is **not** opened by a bot, and the **first** publish of each
+package must be done by hand before trusted publishing can take over.
+
 ### AI config & skills tooling
 
 | Command                  | Does                                                                                                                                               |
