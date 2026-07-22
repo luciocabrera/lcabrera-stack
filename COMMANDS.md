@@ -350,12 +350,12 @@ report so agents/CI act on them from a file, not the dashboard. Needs a read-onl
 one the script skips gracefully. Feature branches are analysed as PRs, so target
 them with `--pr <n>` (the tracked snapshot is `main`).
 
-| Command                                           | Does                                                                      |
-| ------------------------------------------------- | ------------------------------------------------------------------------- |
-| `vp run sonar:report`                             | fetch issues + hotspots + quality gate → `reports/sonar/full-latest.json` |
-| `vp run sonar:report -- --pr 31`                  | report scoped to a pull request                                           |
-| `vp run sonar:verify`                             | gate mode — exit non-zero when the SonarCloud quality gate is failing     |
-| `vp run sonar:verify -- --pr 31 --fail-on-issues` | stricter: also fail on any open issue, not just gate ERROR                |
+| Command                                           | Does                                                                                             |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `vp run sonar:report`                             | fetch issues + hotspots + quality gate → `reports/sonar/full-latest.json` (tracked; `main` only) |
+| `vp run sonar:report -- --pr 31`                  | report scoped to a PR → `reports/sonar/runs/pr-<n>.json` (gitignored)                            |
+| `vp run sonar:verify`                             | gate mode — exit non-zero when the SonarCloud quality gate is failing                            |
+| `vp run sonar:verify -- --pr 31 --fail-on-issues` | stricter: also fail on any open issue, not just gate ERROR                                       |
 
 ---
 

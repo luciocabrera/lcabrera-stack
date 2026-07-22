@@ -53,3 +53,7 @@ reports/fallow/runs/
 # generated file is what made every concurrent coordination PR collide. The
 # task files under docs/coordination/tasks/ are the source of truth.
 docs/coordination/BOARD.md
+
+# Sonar per-run artifacts — only the main snapshot is tracked (see scripts/lib/sonar-report-path.mjs)
+reports/sonar/runs/*
+!reports/sonar/runs/.gitkeep

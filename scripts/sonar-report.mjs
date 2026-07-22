@@ -27,6 +27,13 @@
  * branches, so a `branch=<feature>` query 404s. On a non-main branch with no
  * `--pr`, the script prints how to target the PR instead of erroring.
  *
+ * Only a `main` analysis writes the tracked snapshot. A `--pr <n>` or
+ * `--branch <other>` run lands in the gitignored `reports/sonar/runs/`, because
+ * sharing one path meant the routine way to read a branch's own findings
+ * overwrote `main`'s — PR #283's analysis sat committed as `main`'s for 22
+ * merges, reporting a failing gate the branch did not have. See
+ * `lib/sonar-report-path.mjs` (#304).
+ *
  * Usage (from the repo root):
  *   vp run sonar:report                    # main snapshot, or a hint on a feature branch
  *   vp run sonar:report -- --pr 31         # a specific pull request
@@ -50,12 +57,11 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { createSonarApi, fetchJson } from './lib/sonar-api.mjs';
+import { reportPathFor } from './lib/sonar-report-path.mjs';
 import { logSafe, summaryLines } from './lib/sonar-summary.mjs';
 import { waitForAnalysis } from './lib/sonar-wait.mjs';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
-const OUT_REL = 'reports/sonar/full-latest.json';
-const OUT_PATH = join(REPO_ROOT, OUT_REL);
 
 const CONFIG = {
   base: process.env.SONAR_BASE_URL ?? 'https://sonarcloud.io',
@@ -270,13 +276,16 @@ const loadEnv = () => {
   if (existsSync(envFile)) process.loadEnvFile(envFile);
 };
 
-const writeReport = (report) => {
-  mkdirSync(dirname(OUT_PATH), { recursive: true });
-  writeFileSync(OUT_PATH, `${JSON.stringify(report, null, 2)}\n`);
+/** Writes to the path the TARGET earns, not a fixed one — only a `main`-branch
+ *  analysis is the tracked snapshot (see `sonar-report-path.mjs`). */
+const writeReport = (report, outRel) => {
+  const outPath = join(REPO_ROOT, outRel);
+  mkdirSync(dirname(outPath), { recursive: true });
+  writeFileSync(outPath, `${JSON.stringify(report, null, 2)}\n`);
 };
 
-const printSummary = (report) => {
-  const parts = summaryLines(report, OUT_REL, Date.now());
+const printSummary = (report, outRel) => {
+  const parts = summaryLines(report, outRel, Date.now());
   for (const line of parts.findings) console.log(logSafe(line));
   // A stale freshness note goes to stderr so it survives a `| tail` or a grep
   // for the gate line — how a ten-day-old analysis got read as current once.
@@ -378,8 +387,9 @@ const main = async () => {
     accepted,
     measures,
   });
-  writeReport(report);
-  printSummary(report);
+  const outRel = reportPathFor(target, CONFIG.mainBranch);
+  writeReport(report, outRel);
+  printSummary(report, outRel);
 
   if (args.gate) {
     const problems = gateProblems(report, args.failOnIssues);
