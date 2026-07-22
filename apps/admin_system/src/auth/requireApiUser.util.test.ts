@@ -42,6 +42,33 @@ describe('requireApiUser', () => {
     ).rejects.toMatchObject({ init: { status: 401 } });
   });
 
+  it('accepts a lower-cased scheme, which RFC 7235 makes case-insensitive', async () => {
+    vi.mocked(verifyApiToken).mockResolvedValue({ userId: 'user-1' });
+
+    await requireApiUser({ request: makeRequest('bearer cqms_abc.def') });
+
+    expect(verifyApiToken).toHaveBeenCalledWith('cqms_abc.def');
+  });
+
+  it('tolerates surrounding whitespace around the token', async () => {
+    vi.mocked(verifyApiToken).mockResolvedValue({ userId: 'user-1' });
+
+    await requireApiUser({ request: makeRequest('Bearer   cqms_abc.def  ') });
+
+    expect(verifyApiToken).toHaveBeenCalledWith('cqms_abc.def');
+  });
+
+  it('throws 401 for a scheme with no token after it', async () => {
+    // The input class that made the old regex backtrack quadratically: a
+    // long whitespace run with nothing to capture at the end of it.
+    const schemeWithoutToken = `Bearer${' '.repeat(50)}`;
+
+    await expect(
+      requireApiUser({ request: makeRequest(schemeWithoutToken) }),
+    ).rejects.toMatchObject({ init: { status: 401 } });
+    expect(verifyApiToken).not.toHaveBeenCalled();
+  });
+
   it('throws 401 when the token is invalid', async () => {
     vi.mocked(verifyApiToken).mockResolvedValue(undefined);
 

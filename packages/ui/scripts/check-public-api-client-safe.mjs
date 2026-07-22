@@ -44,14 +44,20 @@ const publicApiFilePath = resolve(uiRootDir, 'src/public-api.ts');
 const workspacePackagesDir = resolve(uiRootDir, '..');
 const SOURCE_FILE_PATTERN = /\.(?:tsx?|mjs|js)$/;
 
-// The pre-`from` segment uses a single greedy quantifier (`[^'"\n]+`) with a
-// single `\s` separator rather than a lazy `[^'"\n]+?` next to a greedy `\s+`.
-// Because `\s` is a subset of `[^'"\n]`, the old adjacent quantifiers matched
-// overlapping input and backtracked quadratically on import/export lines with no
-// `from` before the quote (e.g. a long `export const … ` line). This form
-// matches exactly the same strings with linear scanning.
+// Every junction between two quantifiers here is over disjoint character sets,
+// which is what keeps the scan linear.
+//
+// An earlier pass fixed only half of this. It replaced a lazy `[^'"\n]+?` beside
+// a greedy `\s+` with a single greedy `[^'"\n]+` and one `\s` separator — but
+// left the keyword's own `\s+` sitting directly in front of `[^'"\n]+`, and `\s`
+// is a subset of `[^'"\n]`. So a line like `export` followed by a long run of
+// spaces still split ambiguously between the two quantifiers and backtracked
+// quadratically. Anchoring the pre-`from` segment on `\S` removes that overlap.
+//
+// The strings matched are unchanged: the preceding `\s+` is greedy, so the next
+// character can never have been whitespace anyway.
 const importExportPattern =
-  /(?:import|export)\s+(?:type\s+)?(?:[^'"\n]+\sfrom\s+)?['"]([^'"\n]+)['"]/g;
+  /(?:import|export)\s+(?:type\s+)?(?:\S[^'"\n]*\sfrom\s+)?['"]([^'"\n]+)['"]/g;
 
 // `matchAll` iterates against an internal clone of the regex, so the module-level
 // /g pattern's `lastIndex` is never advanced and needs no reset between calls.

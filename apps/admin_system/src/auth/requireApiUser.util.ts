@@ -1,6 +1,10 @@
 import { verifyApiToken } from '@repo/scan-ingestion/queries/verifyApiToken.util';
 import { data } from 'react-router';
 
+// Lower-cased: the scheme token is case-insensitive per RFC 7235, and the
+// header is compared after lower-casing rather than with an /i regex.
+const BEARER_PREFIX = 'bearer ';
+
 type RequireApiUserArgs = {
   readonly request: Request;
 };
@@ -15,10 +19,17 @@ type RequireApiUserArgs = {
  * as the interactive path.
  */
 export const requireApiUser = async ({ request }: RequireApiUserArgs) => {
-  const bearer = request.headers
-    .get('Authorization')
-    ?.match(/^Bearer\s+(.+)$/i)?.[1];
-  if (bearer === undefined) {
+  // Matched by prefix rather than by `/^Bearer\s+(.+)$/i`. That pattern put a
+  // greedy `\s+` next to a greedy `.+` over overlapping character classes, so
+  // a header of the form `Bearer ` followed by a long whitespace run made the
+  // engine backtrack quadratically — an attacker-controlled header is exactly
+  // the wrong place for super-linear matching. Prefix + slice is linear and
+  // accepts the same values.
+  const header = request.headers.get('Authorization') ?? '';
+  const bearer = header.toLowerCase().startsWith(BEARER_PREFIX)
+    ? header.slice(BEARER_PREFIX.length).trim()
+    : '';
+  if (bearer === '') {
     throw data('Unauthorized', { status: 401 });
   }
 

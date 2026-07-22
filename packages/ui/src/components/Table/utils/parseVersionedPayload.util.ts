@@ -25,6 +25,4 @@ export const parseVersionedPayload = <T>({
   } catch {
     // Invalid JSON — skip
   }
-
-  return;
 };
