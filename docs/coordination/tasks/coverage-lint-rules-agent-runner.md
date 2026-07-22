@@ -2,7 +2,7 @@
 id: coverage-lint-rules-agent-runner
 title: Report agent-runner and eslint-local-rules coverage
 owner: agent:claude
-status: active
+status: review
 branch: ci/302-coverage-lint-rules-agent-runner
 area:
   - scripts/lib/coverage-workspaces.mjs
@@ -18,10 +18,16 @@ issue: #302
 
 ## What
 
-Report agent-runner and eslint-local-rules coverage
+`packages/eslint-local-rules` (138 tests) and `packages/agent-runner` (57) run in
+CI unmeasured — both were written off in the docs as having nothing to cover,
+which stopped being true when #205 gave every rule a suite. Adds a
+`test:coverage` task to each, both report rows, and corrects the doc.
+
+Also drops `--passWithNoTests` from `eslint-local-rules`' `test` task: with ten
+files it only meant the suite vanishing would still report success.
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: gate green; report renders 13 workspaces, both new rows present
 - Blockers: none
-- Next:
+- Next: merge
