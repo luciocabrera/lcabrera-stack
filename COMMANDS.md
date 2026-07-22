@@ -320,6 +320,10 @@ runs both in CI. See the [`commit-and-pr`](.github/skills/commit-and-pr/SKILL.md
 | `vp run commit:verify -- <file \| ->`             | validate a commit message (file path, or `-` for stdin) — used by the hook      |
 | `vp run pr:verify`                                | validate a PR title (`PR_TITLE`) + description (`PR_BODY`) against the standard |
 | `vp run pr:verify -- --title <t> --body-file <p>` | simulate the PR check locally without opening a PR                              |
+| `vp run branch:verify`                            | validate the current branch name — used by the pre-push hook and CI             |
+| `vp run branch:verify -- --branch <name>`         | validate a specific branch name without checking it out                         |
+| `vp run issue:verify`                             | validate an issue description (`ISSUE_BODY`) against the issue template         |
+| `vp run issue:verify -- --body-file <p>`          | validate an issue description from a file                                       |
 
 ### Changelog & labels
 

@@ -28,11 +28,16 @@ it freely. A new package picks its scope by one question — does it ship? — a
 `@lcabrera/*` one inherits the never-baseline rule (§4) and the invariants below.
 Do not "tidy" the two into one ([ADR-040](docs/cqms/decisions/ADR-040-npm-scope-for-the-public-packages.md)).
 
-**Publishing invariants for those four.** They are not published yet — all four
-stay `private: true` until the npm scope is claimed, and that flag is the only
-thing preventing an accidental publish, so do not flip it as a convenience. What
-already holds, verified by packing each package and reading the tarball rather
-than by inspection:
+**Publishing invariants for those four.** All four are **published on npm** and
+have been since 2026-07-22, at **0.1.1**. `private` is off and each has a
+configured trusted publisher, so a merged version bump publishes on its own —
+there is no longer a flag standing between a mistake and the registry, and **an
+npm version is permanent**: it cannot be replaced, and unpublishing blocks reuse
+of the number. Two things follow, and both cost a broken release to learn: a
+package's manifest must declare `repository` or the provenance attestation is
+rejected (`E422`), and `changeset publish` shells out to `pnpm publish`, so the
+release job has to put pnpm on PATH itself. What holds, verified by packing each
+package and reading the tarball rather than by inspection:
 
 - **Three of them build; `@lcabrera/ui` ships source.** A `.ts` file inside
   `node_modules` is not loadable at all — Node refuses to strip types there
@@ -463,11 +468,29 @@ humans follows it without exception:
   commit; merge/revert/`fixup!` messages are skipped, and the `Co-Authored-By:`
   trailer is always accepted.
 - **Pull requests** need a conforming title (same format) and a description with
-  the required `## What` and `## Verification` (or `## Testing`) sections — fill in
-  [`.github/pull_request_template.md`](.github/pull_request_template.md). CI's
+  every section in
+  [`.github/pull_request_template.md`](.github/pull_request_template.md):
+  `## What`, `## Why`, `## Verification` (or `## Testing`), `## Impact Analysis`,
+  `## Test Coverage`, `## Documentation Updates`. CI's
   [`pr-standards.yml`](.github/workflows/pr-standards.yml) runs `pr:verify` on the
-  title + body and `commit:verify` over every non-merge commit in the range, so
-  nothing that skipped the local hook (`--no-verify`) reaches `main`.
+  title + body, `branch:verify` on the head ref, and `commit:verify` over every
+  non-merge commit in the range, so nothing that skipped the local hook
+  (`--no-verify`) reaches `main`.
+- **Branch names** are `<type>/<issue-number>-<kebab-description>` —
+  `feat/123-add-column-resize`. The `<type>` is the **same** list commits use, so
+  there is one vocabulary rather than two words for one idea, and the issue
+  number is what ties a branch to the context that justified it. `main` and
+  `release-*` are exempt. `.vite-hooks/pre-push` checks it first (a name cannot
+  be fixed after the push without rewriting the remote), and `vp run
+coordination:claim` produces a conforming name for you.
+- **Issues** need every section in
+  [`.github/ISSUE_TEMPLATE/standard_issue.md`](.github/ISSUE_TEMPLATE/standard_issue.md),
+  enforced by [`issue-standards.yml`](.github/workflows/issue-standards.yml) on
+  open and edit. This exists because nothing checked issue bodies and the cost
+  was issues with no reproduction, no scope and no acceptance criteria — which
+  then had to be investigated from scratch before anyone could act on them.
+  Tracking issues from `coordination:claim` are **not** exempt; the script fills
+  the template in instead.
 
 **Do not restate the type list in prose** (this section, the skill, PR template) —
 link to the spec so they cannot drift. If the standard itself must change, change
@@ -478,9 +501,10 @@ link to the spec so they cannot drift. If the standard itself must change, chang
 in [`docs/agents/workflow.md`](docs/agents/workflow.md), which is the entry point
 for how agents file, review and merge work. Every PR section is required; write
 "None" rather than deleting a heading, so a reviewer can tell a considered no
-from an omission. `## What` and `## Verification` are the two headings CI matches
-and must keep their plain spelling — numbering or emoji in _those two_ fails
-`pr:verify`. The source specification is
+from an omission. The section headings are matched as **headings** and must keep
+their plain spelling — numbering or emoji in one fails `pr:verify`, and a
+substring check would have accepted prose that answers none of them. The source
+specification is
 [`docs/agents/templates-spec.md`](docs/agents/templates-spec.md); it records the two
 deviations taken when adopting it, so nobody "restores" the spec text and breaks
 the gate.
@@ -507,12 +531,16 @@ Three things here are deliberate, and each cost something to learn:
   npmjs.com, and every release after that is automatic. `release.yml` carries no
   `NPM_TOKEN` and passes no `--provenance`: under trusted publishing npm attaches
   provenance itself and the flag is unnecessary.
-- **`private: true` is what keeps `release.yml` inert.** `changeset publish` skips
-  private packages, so the workflow does nothing until that flag comes off — which
-  is the one moment publishing becomes possible. Do not flip it as a convenience.
-  Every workspace not meant to publish must carry it: `api-server` and
-  `api-server-fast` had no `private` flag at all and were one `npm publish` from
-  going out.
+- **`private: true` is what keeps a workspace out of the registry.** `changeset
+publish` skips private packages. The four public ones no longer carry it, so
+  nothing but the version number decides whether a merge publishes. Every
+  workspace not meant to publish MUST carry the flag: `api-server` and
+  `api-server-fast` had none at all and were one `npm publish` from going out.
+- **The job skips itself while a changeset is pending.** `changesets/action` has
+  no publish-only mode: given a pending changeset it versions and opens a PR
+  instead, and that attempt dies on the commit-msg hook (`Version Packages` is
+  not a Conventional Commit). So `release.yml` gates on the same condition the
+  action switches on, before it installs anything.
 
 **Package releases and the repository release are separate tracks.** Changesets
 tags `@lcabrera/utils@0.1.0` and `release.yml` opens a GitHub Release per package.

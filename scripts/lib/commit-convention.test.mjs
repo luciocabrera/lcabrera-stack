@@ -1,11 +1,19 @@
 import { describe, expect, it } from 'vitest';
 
+import { readFileSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import {
   parseCommitHeader,
+  validateBranchName,
   validateCommitMessage,
+  validateIssueBody,
   validatePrBody,
   validatePrTitle,
 } from './commit-convention.mjs';
+
+const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
 // This module is the ONE spec behind the commit-msg hook, the PR-standards CI
 // gate, the changelog generator and the PR labeler. AGENTS.md Rule 13 forbids
@@ -129,13 +137,25 @@ describe('validatePrTitle', () => {
   });
 });
 
+// Every section the template ships, as headings. Built once so a test that
+// varies ONE section cannot accidentally pass by dropping another.
+const prSection = {
+  what: '## What\n\nDid a thing.',
+  why: '## Why\n\nIt was broken.',
+  verification: '## Verification\n\nRan the gate.',
+  impact: '## Impact Analysis\n\nNone.',
+  coverage: '## Test Coverage\n\nNone.',
+  documentation: '## Documentation Updates\n\nNone.',
+};
+const fullPrBody = (overrides = {}) =>
+  Object.entries({ ...prSection, ...overrides })
+    .filter(([, value]) => value !== undefined)
+    .map(([, value]) => value)
+    .join('\n\n');
+
 describe('validatePrBody', () => {
-  it('accepts a body with both required sections', () => {
-    expect(
-      errorsOf(
-        validatePrBody('## What\n\nDid a thing.\n\n## Verification\n\nRan it.'),
-      ),
-    ).toEqual([]);
+  it('accepts a body with every required section', () => {
+    expect(errorsOf(validatePrBody(fullPrBody()))).toEqual([]);
   });
 
   it('accepts any of the Verification aliases', () => {
@@ -147,20 +167,146 @@ describe('validatePrBody', () => {
       'Tests',
     ]) {
       expect(
-        errorsOf(validatePrBody(`## What\n\nx\n\n## ${heading}\n\ny`)),
+        errorsOf(
+          validatePrBody(fullPrBody({ verification: `## ${heading}\n\ny` })),
+        ),
       ).toEqual([]);
     }
   });
 
-  it('rejects a body missing either section', () => {
-    expect(errorsOf(validatePrBody('## What\n\nDid a thing.'))).not.toEqual([]);
-    expect(errorsOf(validatePrBody('## Verification\n\nRan it.'))).not.toEqual(
-      [],
-    );
+  it.each(Object.keys(prSection))('rejects a body missing %s', (section) => {
+    expect(
+      errorsOf(validatePrBody(fullPrBody({ [section]: undefined }))),
+    ).not.toEqual([]);
+  });
+
+  it('requires a heading, not the bare word somewhere in the prose', () => {
+    // `body.includes('What')` would pass this; a heading match must not.
+    const prose =
+      'What we did: a thing. Why: it broke. Verification: ran it. ' +
+      'Impact Analysis, Test Coverage and Documentation Updates all considered.';
+    expect(errorsOf(validatePrBody(prose))).not.toEqual([]);
   });
 
   it('rejects an empty body', () => {
     expect(errorsOf(validatePrBody(''))).not.toEqual([]);
     expect(errorsOf(validatePrBody(undefined))).not.toEqual([]);
+  });
+});
+
+describe('validateBranchName', () => {
+  it.each([
+    'feat/123-add-column-resize',
+    'fix/88-null-pointer',
+    'chore/294-agent-templates',
+    'ci/301-skip-pending-changesets',
+    'refactor/7-a',
+  ])('accepts %s', (branch) => {
+    expect(errorsOf(validateBranchName(branch))).toEqual([]);
+  });
+
+  it.each([
+    ['agent-doc-symlinks', 'no type prefix'],
+    ['feat/add-pagination', 'no issue number'],
+    ['feature/12-x', 'type is not a commit type'],
+    ['feat/123-Add-Pagination', 'not kebab-case'],
+    ['feat/123-', 'empty description'],
+    ['feat//123-x', 'empty type segment'],
+  ])('rejects %s (%s)', (branch) => {
+    expect(errorsOf(validateBranchName(branch))).not.toEqual([]);
+  });
+
+  it.each(['main', 'release-v0-1-1'])('exempts %s', (branch) => {
+    const result = validateBranchName(branch);
+    expect(result.exempt).toBe(true);
+    expect(errorsOf(result)).toEqual([]);
+  });
+
+  it('rejects an empty branch name rather than exempting it', () => {
+    expect(validateBranchName('').exempt).toBe(false);
+    expect(errorsOf(validateBranchName(''))).not.toEqual([]);
+  });
+
+  // The claim script is bash and cannot import this module, so it repeats the
+  // type list. Assert the two agree — a divergence should fail here, not show
+  // up as a rejected push after the branch already exists.
+  it('agrees with the type list coordination-claim.sh accepts', () => {
+    const script = readFileSync(
+      join(REPO_ROOT, 'scripts', 'coordination-claim.sh'),
+      'utf8',
+    );
+    const line = new RegExp(String.raw`\n\s*(feat\|[a-z|]+)\)\s*;;`).exec(
+      script,
+    );
+    expect(line, 'type case-list not found in coordination-claim.sh').not.toBe(
+      null,
+    );
+    for (const type of line[1].split('|')) {
+      expect(errorsOf(validateBranchName(`${type}/1-x`))).toEqual([]);
+    }
+  });
+});
+
+const issueSection = {
+  problem: '## 1. Problem Statement\n\nIt is broken.',
+  objective: '## 2. Objective / Desired Outcome\n\nNot broken.',
+  context: '## 3. Context & Background\n\nSince #12.',
+  scope: '## 5. Scope Definition\n\nIn: x. Out: y.',
+  acceptance: '## 6. Acceptance Criteria\n\n- [ ] Fixed',
+};
+const fullIssueBody = (overrides = {}) =>
+  Object.entries({ ...issueSection, ...overrides })
+    .filter(([, value]) => value !== undefined)
+    .map(([, value]) => value)
+    .join('\n\n');
+
+describe('validateIssueBody', () => {
+  it('accepts a body with every required section', () => {
+    expect(errorsOf(validateIssueBody(fullIssueBody()))).toEqual([]);
+  });
+
+  it('accepts the sections unnumbered', () => {
+    const unnumbered = fullIssueBody().replaceAll(/## \d+\. /g, '## ');
+    expect(errorsOf(validateIssueBody(unnumbered))).toEqual([]);
+  });
+
+  it.each(Object.keys(issueSection))('rejects a body missing %s', (section) => {
+    expect(
+      errorsOf(validateIssueBody(fullIssueBody({ [section]: undefined }))),
+    ).not.toEqual([]);
+  });
+
+  it('rejects the context-free issue this rule exists to stop', () => {
+    expect(
+      errorsOf(validateIssueBody('it is broken, please fix')),
+    ).toHaveLength(Object.keys(issueSection).length);
+  });
+
+  it('rejects an empty body', () => {
+    expect(errorsOf(validateIssueBody(''))).not.toEqual([]);
+    expect(errorsOf(validateIssueBody(undefined))).not.toEqual([]);
+  });
+});
+
+describe('vague commit subjects', () => {
+  it.each([
+    'chore: misc updates',
+    'fix: wip',
+    'docs: various things',
+    'chore(ui): update code',
+  ])('rejects %s', (message) => {
+    expect(
+      errorsOf(validateCommitMessage(message, { workspaces })),
+    ).not.toEqual([]);
+  });
+
+  it('matches whole words only', () => {
+    expect(
+      errorsOf(
+        validateCommitMessage('fix(ui): handle a miscellaneous-looking edge', {
+          workspaces,
+        }),
+      ),
+    ).toEqual([]);
   });
 });

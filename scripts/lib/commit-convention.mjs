@@ -70,13 +70,66 @@ const CROSSCUTTING_SCOPES = new Set([
 ]);
 
 /** Required PR-description sections (heading match, any level, case-insensitive).
- *  The pull-request template mirrors these labels exactly. */
+ *  The pull-request template mirrors these labels exactly.
+ *
+ *  Matched as HEADINGS, not substrings: `body.includes('What')` passes on any
+ *  prose containing the word, so it would accept a description answering none
+ *  of these. A heading is the cheapest proof the author saw the prompt. */
 const REQUIRED_PR_SECTIONS = [
   { label: 'What', re: /^#{1,6}\s+what\b/im },
+  { label: 'Why', re: /^#{1,6}\s+why\b/im },
   {
     label: 'Verification / Testing',
     re: /^#{1,6}\s+(verification|testing|test plan|how to test|qa|tests)\b/im,
   },
+  { label: 'Impact Analysis', re: /^#{1,6}\s+impact\b/im },
+  { label: 'Test Coverage', re: /^#{1,6}\s+test coverage\b/im },
+  { label: 'Documentation Updates', re: /^#{1,6}\s+documentation\b/im },
+];
+
+/** Required issue-description sections. Nothing enforced these before, and the
+ *  cost showed up as issues carrying no reproduction, no scope and no
+ *  acceptance criteria — which then had to be re-investigated from scratch
+ *  before anyone could act on them. Numbering is optional, so both
+ *  `## 1. Problem Statement` and `## Problem Statement` pass. */
+const REQUIRED_ISSUE_SECTIONS = [
+  {
+    label: 'Problem Statement',
+    re: /^#{1,6}\s+(?:\d+\.\s*)?problem statement\b/im,
+  },
+  { label: 'Objective', re: /^#{1,6}\s+(?:\d+\.\s*)?objective\b/im },
+  { label: 'Context & Background', re: /^#{1,6}\s+(?:\d+\.\s*)?context\b/im },
+  { label: 'Scope Definition', re: /^#{1,6}\s+(?:\d+\.\s*)?scope\b/im },
+  {
+    label: 'Acceptance Criteria',
+    re: /^#{1,6}\s+(?:\d+\.\s*)?acceptance criteria\b/im,
+  },
+];
+
+/** Branch names: `<type>/<issue>-<kebab-slug>`, `<type>` being the SAME
+ *  vocabulary as commits. A second set of words (feature/bugfix/hotfix) would
+ *  mean two names for one idea, which is the inconsistency this removes —
+ *  `feat` is `feat` whether it labels a branch or a commit.
+ *
+ *  The issue number is required: it is what ties a branch to the context that
+ *  justified it, which is exactly what was missing. */
+const BRANCH_RE = new RegExp(
+  String.raw`^(?:${ALLOWED_TYPES.join('|')})/\d+-[a-z0-9]+(?:-[a-z0-9]+)*$`,
+);
+
+/** Not topic branches, so not subject to the rule: the trunk, and the release
+ *  branches a version bump is cut on. */
+const EXEMPT_BRANCHES = [/^main$/, /^release-/, /^HEAD$/];
+
+/** Subject words that describe nothing. A vague subject is cheap to write and
+ *  expensive to read later, when it is the only surviving record of intent. */
+const VAGUE_SUBJECT_WORDS = [
+  'stuff',
+  'things',
+  'misc',
+  'various',
+  'update code',
+  'wip',
 ];
 
 /** Auto-generated message shapes that are NOT authored subjects — skip them. */
@@ -167,6 +220,17 @@ const validateSubject = (subject) => {
   }
   if (subject.trimEnd().endsWith('.')) {
     errors.push('subject must not end with a period.');
+  }
+  // Whole words, and only in the subject — a body may legitimately discuss
+  // "miscellaneous" or quote a "WIP" label, but a subject built from these
+  // words records nothing about what changed.
+  const vague = VAGUE_SUBJECT_WORDS.filter((word) =>
+    new RegExp(String.raw`\b${word}\b`, 'i').test(subject),
+  );
+  if (vague.length > 0) {
+    errors.push(
+      `subject is vague — it says \`${vague.join('`, `')}\`. Say what changed instead.`,
+    );
   }
   return errors;
 };
@@ -285,4 +349,49 @@ export const validatePrBody = (body) => {
     }
   }
   return { errors, warnings: [] };
+};
+
+/** Validates an issue description body — required sections must be present.
+ *  An issue is the context a future reader has; without these it has to be
+ *  investigated again before it can be worked. */
+export const validateIssueBody = (body) => {
+  const errors = [];
+  if ((body ?? '').trim() === '') {
+    errors.push(
+      'Issue description is empty — fill in the template (.github/ISSUE_TEMPLATE/standard_issue.md).',
+    );
+    return { errors, warnings: [] };
+  }
+  for (const { label, re } of REQUIRED_ISSUE_SECTIONS) {
+    if (!re.test(body)) {
+      errors.push(
+        `Issue description is missing a \`## ${label}\` section — see .github/ISSUE_TEMPLATE/standard_issue.md.`,
+      );
+    }
+  }
+  return { errors, warnings: [] };
+};
+
+/** Validates a git branch name against `<type>/<issue>-<kebab-slug>`.
+ *  `main` and `release-*` are exempt; they are not topic branches. */
+export const validateBranchName = (branch) => {
+  const name = (branch ?? '').trim();
+  if (name === '') {
+    return { errors: ['Branch name is empty.'], exempt: false, warnings: [] };
+  }
+  if (EXEMPT_BRANCHES.some((re) => re.test(name))) {
+    return { errors: [], exempt: true, warnings: [] };
+  }
+  if (BRANCH_RE.test(name)) {
+    return { errors: [], exempt: false, warnings: [] };
+  }
+  return {
+    errors: [
+      `Invalid branch name "${name}". Expected \`<type>/<issue-number>-<kebab-description>\`, ` +
+        `e.g. \`feat/123-add-column-resize\`. Types: ${ALLOWED_TYPES.join('|')}. ` +
+        `\`vp run coordination:claim\` produces a conforming name for you.`,
+    ],
+    exempt: false,
+    warnings: [],
+  };
 };

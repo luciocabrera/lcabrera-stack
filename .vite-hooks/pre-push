@@ -45,6 +45,17 @@ if [ ! -f "$__scrub" ]; then
 fi
 . "$__scrub"
 
+# Cheapest check first, and the one that is most annoying to fix late: a branch
+# name cannot be corrected after the push without rewriting the remote, so it is
+# worth failing before the suite runs rather than after. `main` and `release-*`
+# are exempt; `vp run coordination:claim` produces a conforming name for you.
+if ! vp run branch:verify; then
+  echo ""
+  echo "✗ pre-push: rename the branch, then push again."
+  echo "  To push work-in-progress anyway: git push --no-verify"
+  exit 1
+fi
+
 if ! vp run check:push; then
   echo ""
   echo "✗ pre-push gate failed — fix the findings above (they would fail CI)."
