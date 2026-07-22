@@ -31,14 +31,19 @@ export const TRACKED_REPORT_PATH = 'reports/sonar/full-latest.json';
 export const RUNS_DIRECTORY = 'reports/sonar/runs';
 
 /** A branch name is not a filename: `fix/304-x` would open a directory. Only
- *  `[a-z0-9-]` survives — a run of anything else collapses to a single `-`.
- *  `.` is excluded deliberately, so no segment can ever spell `..`; the cost is
- *  that `release-v0.1.1` reads as `release-v0-1-1`, which is no less legible. */
+ *  `[a-z0-9-]` survives — a run of anything else becomes a single `-`. `.` is
+ *  excluded deliberately, so no segment can ever spell `..`; the cost is that
+ *  `release-v0.1.1` reads as `release-v0-1-1`, which is no less legible.
+ *
+ *  Split/filter/join rather than a replace and a `/^-+|-+$/` trim: that trim is
+ *  super-linear on a long run of separators (Sonar S8786), and splitting drops
+ *  the leading and trailing ones for free. */
 const asFileSegment = (value) =>
   String(value)
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+    .split(/[^a-z0-9]+/)
+    .filter((part) => part !== '')
+    .join('-');
 
 /**
  * The repo-relative path a run targeting `target` writes to.
