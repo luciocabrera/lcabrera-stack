@@ -12,7 +12,14 @@
  * Usage: node scripts/verify-lint-plugins.mjs
  */
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { join, relative } from 'node:path';
 import process from 'node:process';
 
@@ -24,6 +31,12 @@ import {
 } from './lib/lint-plugins.mjs';
 
 const REPO_ROOT = process.cwd();
+
+/**
+ * Absolute, so the command cannot be resolved through a writeable `PATH` entry
+ * (Sonar S4036). The workspace-local binary is the same `vp` the gate runs under.
+ */
+const VP = join(REPO_ROOT, 'node_modules', '.bin', 'vp');
 
 /**
  * Probes are linted from a directory inside the repo so they resolve the root
@@ -54,7 +67,7 @@ const lintCodes = (dir) => {
   const args = ['lint', '--format=json', relative(REPO_ROOT, dir)];
   let raw = '';
   try {
-    raw = execFileSync('vp', args, options);
+    raw = execFileSync(VP, args, options);
   } catch (error) {
     raw = error.stdout ?? '';
   }
@@ -63,19 +76,28 @@ const lintCodes = (dir) => {
   return JSON.parse(raw.slice(start)).diagnostics.map(({ code }) => code);
 };
 
+/** Workspace directories under `apps/` and `packages/`. */
+const workspaceDirs = (group) => {
+  try {
+    return readdirSync(join(REPO_ROOT, group), { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => `${group}/${entry.name}`);
+  } catch {
+    return [];
+  }
+};
+
+/**
+ * Every `vite.config.ts` in the repo, root included.
+ *
+ * Walked rather than asked of `git ls-files`: shelling out to a bare `git`
+ * resolves it through `PATH` (Sonar S4036), and there is nothing here the
+ * filesystem cannot answer.
+ */
 const workspaceConfigs = () =>
-  execFileSync(
-    'git',
-    [
-      'ls-files',
-      'apps/*/vite.config.ts',
-      'packages/*/vite.config.ts',
-      'vite.config.ts',
-    ],
-    { cwd: REPO_ROOT, encoding: 'utf8' },
-  )
-    .split('\n')
-    .filter(Boolean)
+  ['vite.config.ts', ...workspaceDirs('apps'), ...workspaceDirs('packages')]
+    .map((entry) => (entry.endsWith('.ts') ? entry : `${entry}/vite.config.ts`))
+    .filter((path) => existsSync(join(REPO_ROOT, path)))
     .map((path) => ({
       path,
       text: readFileSync(join(REPO_ROOT, path), 'utf8'),
