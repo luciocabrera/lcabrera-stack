@@ -7,9 +7,7 @@ branch: agent-workflow-templates
 area:
   - .github/ISSUE_TEMPLATE/**
   - .github/pull_request_template.md
-  - docs/merge_checklist.md
-  - docs/agent_workflow.md
-  - AGENT_WORKFLOW_TEMPLATES.md
+  - docs/agents/**
 started: 2026-07-22
 updated: 2026-07-22
 plan: (none)

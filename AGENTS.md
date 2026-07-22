@@ -475,13 +475,13 @@ link to the spec so they cannot drift. If the standard itself must change, chang
 (Non-Negotiable Rule 13.)
 
 **The templates themselves** — issue, PR, and the merge checklist — are collected
-in [`docs/agent_workflow.md`](docs/agent_workflow.md), which is the entry point
+in [`docs/agents/workflow.md`](docs/agents/workflow.md), which is the entry point
 for how agents file, review and merge work. Every PR section is required; write
 "None" rather than deleting a heading, so a reviewer can tell a considered no
 from an omission. `## What` and `## Verification` are the two headings CI matches
 and must keep their plain spelling — numbering or emoji in _those two_ fails
 `pr:verify`. The source specification is
-[`AGENT_WORKFLOW_TEMPLATES.md`](AGENT_WORKFLOW_TEMPLATES.md); it records the two
+[`docs/agents/templates-spec.md`](docs/agents/templates-spec.md); it records the two
 deviations taken when adopting it, so nobody "restores" the spec text and breaks
 the gate.
 

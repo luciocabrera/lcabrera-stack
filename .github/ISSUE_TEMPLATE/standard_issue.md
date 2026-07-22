@@ -16,7 +16,7 @@ assignees: ''
 
   Tracking issues opened by `vp run coordination:claim --new-issue` are exempt:
   they are a link between a task file and the board, and the task file carries
-  the detail. See docs/agent_workflow.md.
+  the detail. See docs/agents/workflow.md.
 -->
 
 ## 1. Problem Statement

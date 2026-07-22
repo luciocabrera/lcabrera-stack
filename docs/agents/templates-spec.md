@@ -1,4 +1,4 @@
-# 📘 `AGENT_WORKFLOW_TEMPLATES.md`
+# 📘 Agent Workflow Templates — source specification
 
 ## 🔥 PURPOSE
 
@@ -16,12 +16,12 @@ the correct repository paths and update documentation automatically.
 
 Adopted. The generated files are live and are what agents actually use:
 
-| Spec section | Lives at                                                                               |
-| ------------ | -------------------------------------------------------------------------------------- |
-| Section 1    | [`.github/ISSUE_TEMPLATE/standard_issue.md`](.github/ISSUE_TEMPLATE/standard_issue.md) |
-| Section 2    | [`.github/pull_request_template.md`](.github/pull_request_template.md)                 |
-| Section 3    | [`docs/merge_checklist.md`](docs/merge_checklist.md)                                   |
-| Sections 4–5 | [`docs/agent_workflow.md`](docs/agent_workflow.md)                                     |
+| Spec section | Lives at                                                                                     |
+| ------------ | -------------------------------------------------------------------------------------------- |
+| Section 1    | [`.github/ISSUE_TEMPLATE/standard_issue.md`](../../.github/ISSUE_TEMPLATE/standard_issue.md) |
+| Section 2    | [`.github/pull_request_template.md`](../../.github/pull_request_template.md)                 |
+| Section 3    | [`docs/agents/merge-checklist.md`](merge-checklist.md)                                       |
+| Sections 4–5 | [`docs/agents/workflow.md`](workflow.md)                                                     |
 
 **Where the generated files and this spec disagree, the generated files win.**
 They are what CI reads. Two deviations were necessary; both are recorded here so
@@ -59,16 +59,37 @@ eight-section template there would put the repository's own tooling in permanent
 violation of its own rule. Human- and agent-authored issues are held to the
 template.
 
+### Deviation 3 — file placement follows this repo's conventions, and GitHub's
+
+Section 4 puts the checklist and workflow guide loose in `docs/` with
+`snake_case` names, and this spec at the repository root. Neither matches how
+this repo is organised, and one of those paths is not ours to choose:
+
+- **The two GitHub templates cannot move.** GitHub reads issue templates only
+  from `.github/ISSUE_TEMPLATE/`, and a pull-request template from the root,
+  `.github/`, or `docs/`. Gathering them under a tidier-sounding `templates`
+  folder leaves the files present and **never offered to anyone**: a broken
+  feature that looks exactly like a working one.
+- **Everything else follows the existing docs layout.** Docs live in a domain
+  folder — `docs/coordination/`, `docs/cqms/`, `docs/tooling/` — with kebab-case
+  filenames (`github-planning.md`, `coverage-reporting.md`). Nothing but
+  `README.md` sits loose in `docs/`, and the repository root is reserved for
+  repo-wide canon (`AGENTS.md`, `COMMANDS.md`, `CHANGELOG.md`).
+
+So the agent-process docs live together in `docs/agents/`, and this spec sits
+with them rather than at the root. [`docs/README.md`](../README.md) is the
+documentation map and records where everything else belongs.
+
 ### Pre-existing conventions this spec does not replace
 
 Already enforced here, and unchanged:
 
 - **Commit messages and PR titles** — Conventional Commits, one spec at
-  [`scripts/lib/commit-convention.mjs`](scripts/lib/commit-convention.mjs),
+  [`scripts/lib/commit-convention.mjs`](../../scripts/lib/commit-convention.mjs),
   enforced by the `commit-msg` hook and `pr-standards.yml`.
 - **Branch naming, CI validation, template compliance** — already in place; see
-  [`COMMANDS.md`](COMMANDS.md) and [`AGENTS.md`](AGENTS.md).
-- **Coordination** — [`docs/coordination/`](docs/coordination/README.md) is the
+  [`COMMANDS.md`](../../COMMANDS.md) and [`AGENTS.md`](../../AGENTS.md).
+- **Coordination** — [`docs/coordination/`](../coordination/README.md) is the
   in-flight register; GitHub Issues are the durable backlog (ADR-036).
 
 ---
@@ -232,7 +253,7 @@ Agents MUST verify all items before merging.
 Save this file as:
 
 ```
-docs/merge_checklist.md
+docs/agents/merge-checklist.md
 ```
 
 ## ✔️ **Pre-Merge Requirements**
@@ -269,12 +290,14 @@ Agents MUST place files exactly as follows:
 ```
 .github/
   ISSUE_TEMPLATE/
-    standard_issue.md
-  pull_request_template.md
+    standard_issue.md      # path fixed by GitHub — see Deviation 3
+  pull_request_template.md # path fixed by GitHub — see Deviation 3
 
 docs/
-  merge_checklist.md
-  agent_workflow.md
+  agents/
+    workflow.md
+    merge-checklist.md
+    templates-spec.md      # this file
 ```
 
 Agents MUST NOT create additional templates unless instructed.
@@ -305,7 +328,7 @@ _(Exempt: `coordination:claim --new-issue` tracking issues — Deviation 2.)_
 
 ## **3. When merging**
 
-- Use `docs/merge_checklist.md`
+- Use `docs/agents/merge-checklist.md`
 - Check ALL boxes
 - Abort merge if ANY item fails
 
@@ -314,16 +337,15 @@ _(Exempt: `coordination:claim --new-issue` tracking issues — Deviation 2.)_
 Agents MUST update:
 
 ```
-docs/agent_workflow.md
-docs/merge_checklist.md
-README.md (if relevant)
+docs/agents/workflow.md
+docs/agents/merge-checklist.md
 ```
 
 Documentation MUST reflect new behavior, constraints, patterns and agent rules.
 
-> Scope note: update `agent_workflow.md` when the _workflow_ changes and
-> `merge_checklist.md` when the _merge bar_ changes. Per-artifact documentation
-> follows the Documentation Update Rule in [`AGENTS.md`](AGENTS.md), which names
+> Scope note: update `workflow.md` when the _workflow_ changes and
+> `merge-checklist.md` when the _merge bar_ changes. Per-artifact documentation
+> follows the Documentation Update Rule in [`AGENTS.md`](../../AGENTS.md), which names
 > the specific homes (`ARCHITECTURE.md`, `INVENTORY.md`, `PATTERNS.md`, ADRs).
 
 ## **5. When modifying existing code**
@@ -355,7 +377,7 @@ environment. Your responsibilities include creating issues, pull requests,
 updating documentation, and merging code safely.
 
 You MUST follow the templates and rules defined in
-`AGENT_WORKFLOW_TEMPLATES.md`.
+`docs/agents/templates-spec.md`.
 
 Your mandatory obligations:
 

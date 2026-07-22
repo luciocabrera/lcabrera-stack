@@ -26,7 +26,7 @@ trust the check and look at its output.
 - [ ] **No regressions** **[auto: Unit Tests & Coverage, Quality Gate,
       Fallow Audit (new-only)]**
 - [ ] **Documentation updated** per the Documentation Update Rule in
-      [`AGENTS.md`](../AGENTS.md) **[judgement; auto for paths: `docs:verify`]**
+      [`AGENTS.md`](../../AGENTS.md) **[judgement; auto for paths: `docs:verify`]**
 - [ ] **No conflicting approaches introduced** — no second way to do something
       the repo already does one way **[judgement]**
 - [ ] **Reviewed by a supervising agent or human** **[judgement]**
@@ -45,14 +45,14 @@ trust the check and look at its output.
       contradicts `AGENTS.md`, no convention stated in two places
       **[judgement]**
 - [ ] **Aligns with the orchestration rules** in
-      [`agent_workflow.md`](agent_workflow.md) **[judgement]**
+      [`workflow.md`](workflow.md) **[judgement]**
 
 ## What the automated checks are
 
-Run locally by the [`quality-gate-workflow`](../.github/skills) skill, and in CI
-by [`check-safe.yml`](../.github/workflows/check-safe.yml) and
-[`pr-standards.yml`](../.github/workflows/pr-standards.yml). The canonical
-command list is [`COMMANDS.md`](../COMMANDS.md).
+Run locally by the [`quality-gate-workflow`](../../.github/skills) skill, and in CI
+by [`check-safe.yml`](../../.github/workflows/check-safe.yml) and
+[`pr-standards.yml`](../../.github/workflows/pr-standards.yml). The canonical
+command list is [`COMMANDS.md`](../../COMMANDS.md).
 
 A green PR means those ran — it does not mean the **[judgement]** items were
 considered. That is the gap this checklist covers.

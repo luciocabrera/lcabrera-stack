@@ -11,7 +11,7 @@
   `## What` and `## Verification` are matched by the PR Standards CI check
   (scripts/lib/commit-convention.mjs) and MUST keep those exact spellings —
   no numbering, emoji or bold in those two headings, or the gate fails.
-  See the `commit-and-pr` skill and docs/agent_workflow.md.
+  See the `commit-and-pr` skill and docs/agents/workflow.md.
 -->
 
 ## What
