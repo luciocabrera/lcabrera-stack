@@ -34,6 +34,15 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Validate the branch name
+        # The pre-push hook checks this too, but --no-verify skips it, so this
+        # is the real wall. The head ref comes from the event payload rather
+        # than git, because the checkout above is the MERGE ref — HEAD there is
+        # not the topic branch and would always read as exempt.
+        env:
+          BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
+        run: node scripts/verify-branch-name.mjs
+
       - name: Validate PR title and description
         # Title/body come in through env, never a shell interpolation, so no
         # untrusted PR text can be executed.

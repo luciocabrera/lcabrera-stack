@@ -1,0 +1,38 @@
+name: Issue Standards
+
+# Enforces the issue template on every issue, using the SAME spec as commits,
+# branches and PRs (scripts/lib/commit-convention.mjs).
+#
+# Why it exists: nothing checked issue bodies, and the cost was issues carrying
+# no reproduction, no scope and no acceptance criteria. Those had to be
+# re-investigated from scratch before anyone could act on them — repeating work
+# the issue was supposed to have recorded.
+#
+# `edited` re-runs the check, so an issue opened thin and filled in afterwards
+# goes green without anyone reopening it. The result is a failed check on the
+# issue, not a closed issue: this reports, it never edits or closes.
+#
+# Tracking issues from `vp run coordination:claim` are NOT exempt — the claim
+# script fills the template in, precisely so the exemption is unnecessary.
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  contents: read
+
+jobs:
+  issue-standards:
+    name: Issue standards
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the scripts
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Validate the issue description
+        # Body through env, never a shell interpolation — an issue body is
+        # untrusted text that anyone can author.
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: node scripts/verify-issue-body.mjs

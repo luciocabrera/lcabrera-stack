@@ -18,7 +18,8 @@
 #   --issue <n>  link an EXISTING GitHub backlog issue (ADR-036) this work picks up
 #   --new-issue  create a fresh tracking issue titled <title> and link it
 #   --area       a glob this work OWNS (repeatable; defaults to a TODO placeholder)
-#   --branch     branch name (default: the id)
+#   --type       Conventional-Commit type for the branch (default: chore)
+#   --branch     branch name (default: <type>/<issue>-<id>, the enforced shape)
 #   --worktree   work in an isolated ../vrc-<id> git worktree (recommended when
 #                other agents are active) instead of switching this checkout
 #   --dry-run    print every git/gh/file action without performing it
@@ -41,6 +42,7 @@ REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || die "not in a git repo
 cd "$REPO_ROOT"
 
 id=""; title=""; branch=""; worktree=0; dry=0; issue=""; new_issue=0; areas=()
+type="chore"
 while [[ $# -gt 0 ]]; do
   arg="$1"
   case "$arg" in
@@ -48,6 +50,7 @@ while [[ $# -gt 0 ]]; do
     --issue)     issue="${2#\#}"; shift 2 ;;
     --new-issue) new_issue=1; shift ;;
     --area)      areas+=("$2"); shift 2 ;;
+    --type)      type="$2"; shift 2 ;;
     --branch)    branch="$2"; shift 2 ;;
     --worktree)  worktree=1; shift ;;
     --dry-run)   dry=1; shift ;;
@@ -70,7 +73,14 @@ fi
 [[ -z "$issue" || "$issue" =~ ^[0-9]+$ ]] || die "--issue must be a number (got '$issue')"
 task="docs/coordination/tasks/${id}.md"
 [[ -e "$task" ]] && die "task already exists: $task"
-[[ -n "$branch" ]] || branch="$id"
+# Same vocabulary as commit messages — one word per idea. The list is duplicated
+# here because this is bash and the spec is an ES module; scripts/lib/
+# commit-convention.test.mjs asserts the two agree, so a divergence fails CI
+# rather than surfacing as a rejected push.
+case "$type" in
+  feat|fix|chore|docs|test|refactor|perf|ci|build|revert|style) ;;
+  *) die "--type must be a Conventional-Commit type (got '$type')" ;;
+esac
 [[ ${#areas[@]} -gt 0 ]] || areas=("TODO/replace-with-your-area/**")
 today=$(date +%F)
 
@@ -81,18 +91,73 @@ enter() { local dir="$1"; if [[ "$dry" == 1 ]]; then printf '  + cd %s\n' "$dir"
 
 wt_note=""
 [[ "$worktree" == 1 ]] && wt_note=" (worktree)"
-printf 'Claiming %s on branch %s%s\n' "$id" "$branch" "$wt_note"
+printf 'Claiming %s\n' "$id"
 
 # 0. resolve the backlog issue (create it when --new-issue) and self-assign it
 #    NOW — so its Projects card moves to In Progress at the START of the work,
 #    closing the window where another agent could pick up the same issue.
+
+# The body follows .github/ISSUE_TEMPLATE/standard_issue.md, which
+# `issue-standards.yml` enforces. A tracking issue used to be one sentence, and
+# that is precisely the shape that has to be re-investigated before it can be
+# worked — so it is filled in here instead of being exempted from the rule.
+issue_body() {
+  cat <<BODY
+## 1. Problem Statement
+
+${title}
+
+Claimed as coordination task \`${id}\`; the task file
+(\`docs/coordination/tasks/${id}.md\`) tracks who owns it and which areas it locks.
+
+## 2. Objective / Desired Outcome
+
+${title} — done, verified by the repo quality gate, with the coordination task
+closed and its file deleted.
+
+## 3. Context & Background
+
+Replace this with the background a reader needs six months from now: what led
+here, what was tried, which ADR or PR it follows from.
+
+## 4. Reproduction Steps
+
+Not a bug — replace this section if it is one.
+
+## 5. Scope Definition
+
+### In Scope
+
+$(printf -- '- \`%s\`\n' "${areas[@]}")
+
+### Out of Scope
+
+- Anything outside the areas above.
+
+## 6. Acceptance Criteria
+
+- [ ] ${title}
+- [ ] No regressions; the quality gate passes
+- [ ] Automated tests added or updated where behaviour changed
+- [ ] Documentation updated per the rule in AGENTS.md
+- [ ] Coordination task closed and its file deleted
+
+## 7. Implementation Notes
+
+Replace with anything the implementer should know before starting.
+
+## 8. Related Work
+
+Coordination task: \`docs/coordination/tasks/${id}.md\`
+BODY
+}
+
 if [[ "$new_issue" == 1 ]]; then
   if [[ "$dry" == 1 ]]; then
-    printf '  + gh issue create --title "%s" --body <tracking>\n' "$title"
-    issue="<new>"
+    printf '  + gh issue create --title "%s" --body <standard template>\n' "$title"
+    issue="000"
   else
-    issue=$(gh issue create --title "$title" \
-      --body "Tracked by coordination task \`${id}\` (docs/coordination/tasks/${id}.md)." \
+    issue=$(gh issue create --title "$title" --body "$(issue_body)" \
       | grep -oE '[0-9]+$')
     [[ -n "$issue" ]] || die "could not create the tracking issue"
     printf '  created issue #%s\n' "$issue"
@@ -102,6 +167,12 @@ elif [[ "$dry" == 0 ]]; then
     die "issue #$issue not found (pass --new-issue to create one)"
 fi
 run gh issue edit "$issue" --add-assignee @me
+
+# Branch name is derived HERE, not earlier: it embeds the issue number, which
+# does not exist until --new-issue has created it. `<type>/<issue>-<id>` is the
+# shape verify-branch-name.mjs enforces on push.
+[[ -n "$branch" ]] || branch="${type}/${issue}-${id}"
+printf '  branch %s%s\n' "$branch" "$wt_note"
 
 # 1. branch / worktree off the latest main
 run git fetch -q origin main
@@ -152,13 +223,42 @@ fi
 run git add "$task"
 run git commit -q -m "chore(coordination): claim ${id}"
 run git push -q -u origin "$branch"
+# Every section the PR gate requires, so the claim PR passes its own standard
+# from the moment it opens. Replace the placeholders as the work lands.
 body="## What
 
 Claims **${id}** — ${title}. Part of #${issue}.
 
+## Why
+
+Opens the claim so the work is visible to other agents via
+\`coordination:board:live\` before it starts, rather than at first push.
+
 ## Verification
 
-- Draft — work in progress; this PR opens the claim so it is visible via \`coordination:board:live\`."
+- Draft — work in progress. Replace with the quality-gate evidence before
+  flipping to ready.
+
+## Impact Analysis
+
+- Areas locked by this claim: $(printf '\`%s\` ' "${areas[@]}")
+- No code changes yet; this commit adds only the task file.
+
+## Test Coverage
+
+None yet — replace before this leaves draft.
+
+## Documentation Updates
+
+None yet — replace before this leaves draft.
+
+## Linked Issues
+
+Resolves #${issue}
+
+## Known Limitations
+
+Draft claim; the sections above are placeholders until the work is done."
 run gh pr create --draft --head "$branch" --base main \
   --title "chore(coordination): claim ${id}" --body "$body"
 
