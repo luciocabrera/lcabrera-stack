@@ -52,8 +52,14 @@ export const parseLanguageLines = (value) =>
       .map(([lang, count]) => [lang, Number(count)]),
   );
 
-const authHeader = (token) =>
-  `Basic ${Buffer.from(`${token}:`).toString('base64')}`;
+const authHeader = (token) => {
+  // The colon is Basic-auth's empty-password separator: SonarCloud takes the
+  // token as the username. Encoded in its own statement rather than nested in
+  // the returned template, which is unreadable and Sonar's S4624.
+  const encoded = Buffer.from(`${token}:`).toString('base64');
+
+  return `Basic ${encoded}`;
+};
 
 export const fetchJson = async (url, token) => {
   const response = await fetch(url, {

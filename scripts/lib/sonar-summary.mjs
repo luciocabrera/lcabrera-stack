@@ -39,9 +39,11 @@ const scopeLine = ({ accepted, analysed }) => {
     .map(([language, lines]) => `${language} ${lines}`)
     .join(', ');
 
+  const breakdown = languages ? ` (${languages})` : '';
+
   return (
-    `  scope: ${analysed?.linesOfCode ?? 0} lines` +
-    `${languages ? ` (${languages})` : ''}  accepted: ${accepted ?? 0}`
+    `  scope: ${analysed?.linesOfCode ?? 0} lines${breakdown}` +
+    `  accepted: ${accepted ?? 0}`
   );
 };
 
