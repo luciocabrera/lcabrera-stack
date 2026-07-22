@@ -45,7 +45,7 @@ scan-ingestion/
 │   │   ├── appGraph/                     → app-graph raw schema + node/summary extractors (structure inventory — ADR-022)
 │   │   ├── workspaces/                   → monorepo workspace discovery (pnpm/npm globs → dirs with package.json — ADR-021; exported for admin_system)
 │   │   ├── snapshots/                    → Snapshot ingestion (ADR-028): getSnapshotsRoot (env), extractZipArchive (zip-slip-guarded unpack), saveProjectSnapshot (unpack → fn_set_project_snapshot → delete replaced dir; exported for admin_system)
-│   │   ├── git/                          → runGit + readGitMetadata (branch/SHA stamping for ad hoc runs — the surviving remnant of the retired matchProject resolver)
+│   │   ├── git/                          → runGit + readGitMetadata (branch/SHA stamping for ad hoc runs — the surviving remnant of the retired matchProject resolver), over buildGitChildEnv (mandatory — see "every `git` call builds its own environment")
 │   │   ├── resolveScan.util.ts           → UI path (lookup) vs ad hoc path (attach to an existing projectId + create run+scan — ADR-028)
 │   │   ├── classifyFileTypeCategory.util.ts → Suffix → category (component/hook/util/...)
 │   │   ├── extractGenericDetailRows.util.ts → rows for a registry-added scanner's generic detail table (ADR-023)
@@ -186,6 +186,48 @@ canonicalizes filesystem paths anymore. What survives:
   never an identity key.
 - Ad hoc ingestion (`resolveScan.util.ts`, `ingest.cli.ts`) attaches to a
   pre-registered project via a required `--project-id`.
+
+## `ingestion/git/` — every `git` call builds its own environment
+
+**Rule: nothing in this repository spawns `git` with the ambient
+environment. Not production code, not test fixtures.** `buildGitChildEnv`
+exists for exactly this and is the only sanctioned way to build the child
+env; `runGit` and both git test fixtures go through it.
+
+The reason is that **`cwd` does not select the repository — `GIT_DIR` does.**
+Git resolves `GIT_DIR` (and its six relatives) ahead of the working
+directory, so a command scoped to one directory silently operates on
+whichever repository the variable names. **A path argument is no protection
+either**: `git init --quiet <path>` under an inherited `GIT_DIR` creates
+nothing at `<path>` and re-initialises the named repository instead.
+
+This is not a hypothetical. Git exports `GIT_DIR` to every hook and
+everything a hook spawns, and the pre-push hook runs this test suite. Two
+concrete failures came out of that, both silent:
+
+1. **The index is emptied.** `git add .` has staged deletions as well as
+   additions since Git 2.0, so a fixture pointed at the real repository
+   stages the removal of every tracked file — measured here as 3644 entries
+   to 1. `HEAD` is untouched, so `log`, `show` and `diff` all look normal;
+   the damage only appears at the next commit, which writes a near-empty
+   tree. (#270)
+2. **`core.bare` is flipped to `true`.** `git init` writes it whenever
+   `guess_repository_type()` cannot prove the layout is non-bare — including
+   when `GIT_DIR` is an absolute path **not ending in `/.git`**. A linked
+   worktree's `GIT_DIR` is `.git/worktrees/<name>`, which is exactly that
+   case, and worktrees share the **main** repository's config. Every later
+   git command in the developer's checkout then dies with `fatal: this
+operation must be run in a work tree` until someone resets it by hand.
+   (#271)
+
+The second one presents as an intermittent, causeless fault, because it
+needs a test run and a worktree at the same time and it damages a checkout
+the run never touched. If a git command ever reports "must be run in a work
+tree", check `git config --get core.bare` before debugging the command.
+
+`.vite-hooks/scrub-git-env.sh` is the second layer, unsetting the same seven
+variables before a hook runs anything — it covers tasks that have not been
+written yet. Keep the two lists in step.
 
 ## `queries/` — the read/write layer `admin_system` and `apps/scan-orchestrator` consume
 
