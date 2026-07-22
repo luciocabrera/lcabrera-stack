@@ -3,10 +3,10 @@
  * packages, so "never silenced" becomes a checked property instead of a claim.
  *
  * AGENTS.md §4 says `packages/ui`, `api`, `server` and `utils` are never
- * baselined, scoped or inline-disabled. That is enforced today for exactly ONE
- * of the six ways to silence a finding: their `eslint-suppressions.json` is
- * gitignored, so CI checks out no file and there is nothing to suppress WITH.
- * That works because it is structural — impossible, not merely checked.
+ * baselined, scoped or inline-disabled. Exactly one mechanism was ever really
+ * enforced: their `eslint-suppressions.json` is gitignored, so CI checks out no
+ * file and there is nothing to suppress WITH. That works because it is
+ * structural — impossible, not merely checked.
  *
  * Every other mechanism is a comment or a config line that nothing counts, and
  * the gap was not theoretical: `packages/ui` carried 17 inline directives and 6
@@ -300,8 +300,61 @@ export const tally = (found) => {
   );
 };
 
-/** The rows this gate holds to the register — repo-wide Biome policy is not one. */
-export const gated = (rows) => rows.filter((row) => row.scope === 'targeted');
+/** Rows scoped to the public packages themselves — the strictest bar. */
+export const targeted = (rows) =>
+  rows.filter((row) => row.scope === 'targeted');
+
+/**
+ * Rows from a repo-wide policy that happens to reach a public package.
+ *
+ * Held to a register too, just a separate one. The first version of this gate
+ * dropped them entirely, which left a real hole: a NEW override broad enough to
+ * match a public package AND anything else needed no entry and passed silently.
+ * Listing them separately keeps that shut without filing thirteen repo-wide
+ * decisions under "`packages/ui` exemptions", which would misattribute them and
+ * bury the six that genuinely are about the package.
+ */
+export const repoWide = (rows) =>
+  rows.filter((row) => row.scope === 'repo-wide');
+
+/**
+ * Lint config files a public package owns, where a rule level can be lowered
+ * without any directive appearing in the source it affects.
+ *
+ * `vite.config.ts` is here because Oxlint is configured through its `lint`
+ * block, so a rule can be switched off for a whole package there.
+ */
+const LINT_CONFIG_FILES = new Set(['eslint.config.mjs', 'vite.config.ts']);
+
+/** A rule level that stops a finding failing the build. */
+const WEAK_LEVEL = /(['"])(off|warn)\1/gu;
+
+/**
+ * Rule levels below `error` in a public package's OWN lint config.
+ *
+ * The seventh way to silence a finding, and the least visible after a Biome
+ * override: nothing in the affected source says a rule was lowered — the whole
+ * package simply stops reporting it.
+ *
+ * The distinction that makes this checkable is the same one the Biome globs
+ * need: a rule turned off in the SHARED config is repo-wide policy that every
+ * workspace gets, while one turned off in a package's own file is that package
+ * opting out. Only the latter is scanned here.
+ *
+ * Today all four are clean, and the convention is already explicit — three of
+ * them carry a local `rules` block that sets `error` with options, commented
+ * "rather than turning the rule off … so it still FAILS the gate". This asserts
+ * that practice instead of trusting it to hold.
+ */
+export const findConfigSuppressions = ({ file, text }) => {
+  const name = file.slice(file.lastIndexOf('/') + 1);
+  if (!LINT_CONFIG_FILES.has(name)) return [];
+  return [...text.matchAll(WEAK_LEVEL)].map((match) => ({
+    file,
+    kind: 'config',
+    rule: `rule level ${match[2]}`,
+  }));
+};
 
 /**
  * Diffs what is in the tree against what has been approved.

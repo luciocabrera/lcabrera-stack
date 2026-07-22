@@ -6,14 +6,22 @@
  * finding gets fixed, never baselined or disabled". That was enforced for the
  * eslint baseline alone (gitignored, so CI has nothing to check out) and for
  * nothing else — the claim was false about `packages/ui` on the day it was
- * written. This makes the other five mechanisms checkable too.
+ * written. This makes the remaining mechanisms checkable too; the table of what
+ * is detected lives in `docs/agents/public-package-suppressions.md`, not here,
+ * so there is one copy to keep true.
  *
  * The register is `docs/agents/public-package-suppressions.json`. It lives in
  * docs/, not next to this script, on purpose: it is a policy document whose
  * diff is the review, not a build artifact. It is deliberately NOT called a
  * baseline — a baseline is a thing you stop reading.
  *
- * Fails on four conditions:
+ * Two lanes, both enforced. `approved` is a suppression scoped to a public
+ * package; `acknowledged` is repo-wide policy (ADR-035 §7) that happens to reach
+ * one. An earlier version gated only the first and merely reported the second,
+ * which left a hole: an override broad enough to match a public package AND
+ * anything else needed no entry and passed silently.
+ *
+ * Each lane fails on four conditions:
  *   unapproved   a suppression with no register entry            (the main gate)
  *   grew         more occurrences of an approved key than agreed
  *   stale        a register entry matching nothing               (anti-rot)
@@ -37,10 +45,12 @@ import { readTextWithin } from './lib/safe-read.mjs';
 import {
   diffAgainstRegister,
   findBiomeSuppressions,
+  findConfigSuppressions,
   findFallowSuppressions,
   findInlineSuppressions,
-  gated,
+  repoWide,
   tally,
+  targeted,
 } from './lib/suppressions.mjs';
 
 const REPO_ROOT = process.cwd();
@@ -190,13 +200,14 @@ const main = () => {
   const publicFiles = allFiles.filter((path) => isPublicPath(path));
   const otherFiles = allFiles.filter((path) => !isPublicPath(path));
 
+  const readPublic = (file) => ({
+    file,
+    text: readTextWithin(join(REPO_ROOT, file), REPO_ROOT),
+  });
+
   const found = tally([
-    ...publicFiles.flatMap((file) =>
-      findInlineSuppressions({
-        file,
-        text: readTextWithin(join(REPO_ROOT, file), REPO_ROOT),
-      }),
-    ),
+    ...publicFiles.flatMap((file) => findInlineSuppressions(readPublic(file))),
+    ...publicFiles.flatMap((file) => findConfigSuppressions(readPublic(file))),
     ...findBiomeSuppressions({
       config: readJson('biome.jsonc'),
       otherFiles,
@@ -205,61 +216,82 @@ const main = () => {
     ...findFallowSuppressions({ baselines: readBaselines(), isPublicPath }),
   ]);
 
-  const held = gated(found);
+  const own = targeted(found);
+  const inherited = repoWide(found);
 
   if (process.argv.includes('--list')) {
     for (const row of found)
       process.stdout.write(`${row.count}\t${row.scope}\t${row.key}\n`);
     process.stdout.write(
       `\n${found.length} suppression(s) reaching ${packageDirs.length} public package(s): ` +
-        `${held.length} gated here, ${found.length - held.length} repo-wide Biome policy (ADR-035 §7).\n`,
+        `${own.length} scoped to the packages themselves, ${inherited.length} from repo-wide policy. ` +
+        `Both are held to a register.\n`,
     );
     return;
   }
 
-  const register = readJson(REGISTER_PATH).approved ?? [];
-  const { grew, stale, unapproved, undocumented } = diffAgainstRegister({
-    found: held,
-    register,
-  });
+  const register = readJson(REGISTER_PATH);
+  // Two lists, one bar. `approved` is an exemption FOR a public package;
+  // `acknowledged` is a repo-wide decision that happens to reach one. Both must
+  // be listed, so no override can widen onto these packages unnoticed — the hole
+  // the first version of this gate left open.
+  const lanes = [
+    {
+      found: own,
+      label: 'scoped to a public package',
+      list: 'approved',
+      register: register.approved ?? [],
+    },
+    {
+      found: inherited,
+      label: 'repo-wide, reaching a public package',
+      list: 'acknowledged',
+      register: register.acknowledged ?? [],
+    },
+  ];
 
-  const failures =
-    report(
-      `Unapproved suppression(s) in a public package — fix the code, or add a justified entry to ${REGISTER_PATH}:`,
-      unapproved,
-      (row) => `${row.key}  (${row.count}x)`,
-    ) +
-    report(
-      'Approved suppression(s) that grew beyond the agreed count:',
-      grew,
-      (row) =>
-        `${row.key}  approved ${row.approvedCount}x, found ${row.count}x`,
-    ) +
-    report(
-      `Stale register entr(ies) — the code is gone, so delete the approval from ${REGISTER_PATH}:`,
-      stale,
-      (row) => row.key,
-    ) +
-    report(
-      'Register entr(ies) with no real reason or no reference:',
-      undocumented,
-      (row) => row.key,
+  const failures = lanes.reduce((total, lane) => {
+    const { grew, stale, unapproved, undocumented } = diffAgainstRegister(lane);
+    return (
+      total +
+      report(
+        `Unapproved suppression(s) ${lane.label} — fix the code, or add a justified entry to ${REGISTER_PATH} → ${lane.list}:`,
+        unapproved,
+        (row) => `${row.key}  (${row.count}x)`,
+      ) +
+      report(
+        `Suppression(s) ${lane.label} that grew beyond the agreed count:`,
+        grew,
+        (row) =>
+          `${row.key}  approved ${row.approvedCount}x, found ${row.count}x`,
+      ) +
+      report(
+        `Stale entr(ies) in ${lane.list} — the code is gone, so delete the approval:`,
+        stale,
+        (row) => row.key,
+      ) +
+      report(
+        `Entr(ies) in ${lane.list} with no real reason or no reference:`,
+        undocumented,
+        (row) => row.key,
+      )
     );
+  }, 0);
 
   if (failures > 0) {
     process.stdout.write(`\n${failures} problem(s).\n`);
     process.exitCode = 1;
     return;
   }
-  const provisional = register.filter(
+  const provisional = (register.approved ?? []).filter(
     (entry) => entry.status === 'provisional',
   ).length;
   // Named rather than inlined: a conditional template inside a template is
   // unreadable at a glance and Sonar rejects the nesting (S4624).
   const pending = provisional > 0 ? ` (${provisional} still provisional)` : '';
   process.stdout.write(
-    `${packageDirs.length} public package(s): ${held.length} gated suppression(s), all approved and documented${pending}. ` +
-      `${found.length - held.length} repo-wide Biome rule(s) also reach them (ADR-035 §7).\n`,
+    `${packageDirs.length} public package(s): ${own.length} scoped suppression(s)${pending}, ` +
+      `${inherited.length} inherited from repo-wide policy. All listed and documented.\n`,
   );
 };
 

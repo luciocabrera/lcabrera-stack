@@ -3,11 +3,13 @@ import { describe, expect, it } from 'vitest';
 import {
   diffAgainstRegister,
   findBiomeSuppressions,
+  findConfigSuppressions,
   findFallowSuppressions,
   findInlineSuppressions,
-  gated,
   globMatches,
+  repoWide,
   tally,
+  targeted,
 } from './suppressions.mjs';
 
 // What these defend: the gate's whole value is that a MISSED suppression looks
@@ -126,7 +128,11 @@ describe('findBiomeSuppressions', () => {
       publicFiles: ['packages/ui/a.test.ts'],
     });
     expect(found.scope).toBe('repo-wide');
-    expect(gated([{ ...found }])).toHaveLength(0);
+    expect(targeted([{ ...found }])).toHaveLength(0);
+    // But it is NOT dropped — it goes to the acknowledged lane instead. The
+    // first version of this gate discarded these, which let a new override wide
+    // enough to catch a public package and anything else pass unlisted.
+    expect(repoWide([{ ...found }])).toHaveLength(1);
   });
 
   it('ignores a glob that reaches no public package at all', () => {
@@ -277,6 +283,64 @@ describe('diffAgainstRegister', () => {
       diffAgainstRegister({ found, register: [{ ...entry, ref: '' }] })
         .undocumented,
     ).toHaveLength(1);
+  });
+});
+
+describe('findConfigSuppressions', () => {
+  const config = (text) =>
+    findConfigSuppressions({ file: 'packages/utils/eslint.config.mjs', text });
+
+  // The seventh way to silence a finding, and one no source file reveals: the
+  // whole package simply stops reporting the rule.
+  it('flags a rule lowered to off in a package lint config', () => {
+    const [found] = config("rules: { 'no-console': 'off' }");
+    expect(found.rule).toBe('rule level off');
+    expect(found.kind).toBe('config');
+  });
+
+  it('flags warn too, since a warning does not fail the build', () => {
+    expect(config('rules: { "no-console": "warn" }')).toHaveLength(1);
+  });
+
+  // The convention already practised in three of the four packages: pass the
+  // rule an option instead of turning it off, so a violation still FAILS.
+  it('allows a rule set to error with options', () => {
+    expect(
+      config(
+        "rules: { 'local-rules/filename-convention': ['error', { suffixCase: { util: 'kebab-case' } }] }",
+      ),
+    ).toHaveLength(0);
+  });
+
+  it('only reads files that can carry a rule level', () => {
+    expect(
+      findConfigSuppressions({
+        file: 'packages/ui/src/Thing.tsx',
+        text: "const mode = 'off';",
+      }),
+    ).toHaveLength(0);
+  });
+
+  it('reads the Oxlint config too, which lives in vite.config.ts', () => {
+    expect(
+      findConfigSuppressions({
+        file: 'packages/ui/vite.config.ts',
+        text: "rules: { 'no-console': 'off' }",
+      }),
+    ).toHaveLength(1);
+  });
+});
+
+describe('targeted / repoWide', () => {
+  const rows = [
+    { key: 'a', scope: 'targeted' },
+    { key: 'b', scope: 'repo-wide' },
+  ];
+
+  it('splits the two lanes and loses nothing between them', () => {
+    expect(targeted(rows).map((row) => row.key)).toEqual(['a']);
+    expect(repoWide(rows).map((row) => row.key)).toEqual(['b']);
+    expect(targeted(rows).length + repoWide(rows).length).toBe(rows.length);
   });
 });
 
