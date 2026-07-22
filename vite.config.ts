@@ -23,8 +23,9 @@ export default defineConfig({
     // Explicit because Oxlint defaults `correctness` to `warn`, and a warning
     // fails nothing here — `vp lint` and `vp check` both exit 0 on one.
     categories: { correctness: 'error' },
-    // Declared here, not in the per-workspace factories: a workspace `plugins`
-    // entry does not take effect (#318). Workspace `rules` entries do.
+    // Everything Oxlint uses must be declared here. A per-workspace `lint`
+    // block is never loaded — an unresolvable plugin in one is not even
+    // reported, while the same thing here is a hard failure (#318).
     plugins: ['react', 'react-perf', 'import', 'node'],
     options: { typeAware: true, typeCheck: true },
   },
