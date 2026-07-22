@@ -17,7 +17,7 @@ area:
 started: 2026-07-22
 updated: 2026-07-22
 plan: (none)
-pr: (none)
+pr: #259
 issue: #256
 ---
 
@@ -40,13 +40,13 @@ from the source path, so the consumer's own plugin must compile it.
 substitutes `publishConfig.exports` at pack time. `publish:verify` keeps the two
 maps in step, because only the first is ever exercised in this repo.
 
-## Note for `ws-runs-auth` (#66)
+## Adding an export from here on
 
-That task also edits `packages/server/package.json` — it adds `./tickets/*`
-exports. Whichever of the two merges second must run
-`vp run publish:verify -- --write` and commit the result, or the gate fails with
-"is in `exports` but not `publishConfig.exports`". That is the gate doing its
-job: a new subpath that consumers would not receive is exactly what it is for.
+`ws-runs-auth` (#66) landed its `./tickets/*` exports before this branch was cut,
+so they are already covered. Any _future_ subpath added to a built package needs
+`vp run publish:verify -- --write` committed alongside it, or the gate fails with
+"is in `exports` but not `publishConfig.exports`" — which is the whole point: a
+new subpath consumers would never receive is exactly what it exists to catch.
 
 ## Status / next
 
