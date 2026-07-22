@@ -92,32 +92,25 @@ describe('TabsHeader', () => {
     );
   });
 
-  it('selects the previous tab on ArrowLeft', () => {
+  // The wrap case is the interesting one, and a table puts it directly beside
+  // the ordinary case rather than in a second block of identical scaffolding.
+  it.each([
+    { activeTab: 'b', expected: 'a', name: 'the previous tab' },
+    { activeTab: 'a', expected: 'c', name: 'the last tab, wrapping' },
+  ])('ArrowLeft from $activeTab selects $name', ({ activeTab, expected }) => {
     const onSelectTab = vi.fn();
     render(
       <TabsHeader
-        activeTab='b'
+        activeTab={activeTab}
         isBusy={false}
         onSelectTab={onSelectTab}
         tabs={tabs}
       />,
     );
-    fireEvent.keyDown(screen.getByRole('tablist'), { key: 'ArrowLeft' });
-    expect(onSelectTab).toHaveBeenCalledWith('a');
-  });
 
-  it('wraps from the first tab to the last on ArrowLeft', () => {
-    const onSelectTab = vi.fn();
-    render(
-      <TabsHeader
-        activeTab='a'
-        isBusy={false}
-        onSelectTab={onSelectTab}
-        tabs={tabs}
-      />,
-    );
     fireEvent.keyDown(screen.getByRole('tablist'), { key: 'ArrowLeft' });
-    expect(onSelectTab).toHaveBeenCalledWith('c');
+
+    expect(onSelectTab).toHaveBeenCalledWith(expected);
   });
 
   it('selects the first tab on Home and the last on End', () => {

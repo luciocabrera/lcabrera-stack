@@ -40,13 +40,16 @@ describe('useDismissNotificationAction', () => {
       });
     });
 
-    expect(result.current.notifications.length).toBe(1);
+    expect(result.current.notifications).toHaveLength(1);
 
+    // Kept despite Sonar's S8980: unlike the spy assertion below, this one
+    // reads store state through the hook, so the update has to be flushed
+    // before `result.current` reflects it.
     act(() => {
       if (id) result.current.dismiss(id);
     });
 
-    expect(result.current.notifications.length).toBe(0);
+    expect(result.current.notifications).toHaveLength(0);
   });
 
   it('cancels the auto-dismiss timer when dismissed early', () => {
@@ -71,9 +74,7 @@ describe('useDismissNotificationAction', () => {
       });
     });
 
-    act(() => {
-      if (id) result.current.dismiss(id);
-    });
+    if (id) result.current.dismiss(id);
 
     expect(clearTimeoutSpy).toHaveBeenCalled();
   });

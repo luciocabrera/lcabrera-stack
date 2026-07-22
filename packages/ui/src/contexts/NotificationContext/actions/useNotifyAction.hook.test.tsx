@@ -35,7 +35,7 @@ describe('useNotifyAction', () => {
     });
 
     expect(typeof returnedId).toBe('string');
-    expect(result.current.notifications.length).toBe(1);
+    expect(result.current.notifications).toHaveLength(1);
     expect(result.current.notifications[0]?.message).toBe('Hello');
   });
 
@@ -58,13 +58,13 @@ describe('useNotifyAction', () => {
       });
     });
 
-    expect(result.current.notifications.length).toBe(1);
+    expect(result.current.notifications).toHaveLength(1);
 
     act(() => {
       vi.advanceTimersByTime(1001);
     });
 
-    expect(result.current.notifications.length).toBe(0);
+    expect(result.current.notifications).toHaveLength(0);
   });
 
   it('does not auto-dismiss when durationMs is 0', () => {
@@ -90,6 +90,6 @@ describe('useNotifyAction', () => {
       vi.advanceTimersByTime(60_000);
     });
 
-    expect(result.current.notifications.length).toBe(1);
+    expect(result.current.notifications).toHaveLength(1);
   });
 });

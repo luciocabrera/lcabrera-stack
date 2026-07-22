@@ -39,12 +39,12 @@ describe('useDismissNotificationsAction', () => {
       });
     });
 
-    expect(result.current.notifications.length).toBe(2);
+    expect(result.current.notifications).toHaveLength(2);
 
     act(() => {
       result.current.dismissAll();
     });
 
-    expect(result.current.notifications.length).toBe(0);
+    expect(result.current.notifications).toHaveLength(0);
   });
 });

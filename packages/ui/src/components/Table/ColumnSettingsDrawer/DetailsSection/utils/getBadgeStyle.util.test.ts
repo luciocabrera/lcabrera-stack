@@ -3,19 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { getBadgeStyle } from './getBadgeStyle.util';
 
 describe('getBadgeStyle', () => {
-  it('returns badgeYes style for "Yes"', () => {
-    const result = getBadgeStyle('Yes');
-    expect(result).toBeDefined();
-  });
-
-  it('returns badgeNo style for "No"', () => {
-    const result = getBadgeStyle('No');
-    expect(result).toBeDefined();
-  });
-
-  it('returns badgeNone style for other values', () => {
-    const result = getBadgeStyle('Maybe');
-    expect(result).toBeDefined();
+  it.each(['Yes', 'No', 'Maybe'])('returns a style for %s', (value) => {
+    expect(getBadgeStyle(value)).toBeDefined();
   });
 
   it('returns different styles for Yes, No, and other', () => {

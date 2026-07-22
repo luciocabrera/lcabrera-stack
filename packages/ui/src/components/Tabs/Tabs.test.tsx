@@ -52,20 +52,20 @@ describe('Tabs', () => {
     expect(tabB.getAttribute('aria-selected')).toBe('true');
   });
 
-  it('navigates to previous tab with ArrowLeft key', () => {
-    render(<Tabs defaultSelectedTab='b' tabs={tabs} />);
-    const tablist = screen.getByRole('tablist');
-    fireEvent.keyDown(tablist, { key: 'ArrowLeft' });
-    const tabA = screen.getByRole('tab', { name: 'Tab A' });
-    expect(tabA.getAttribute('aria-selected')).toBe('true');
-  });
+  // One table rather than three near-identical bodies: each row is a starting
+  // tab, a key, and the tab that should end up selected. The differences that
+  // matter stay visible; the render/keyDown/assert scaffolding does not repeat.
+  it.each([
+    { expected: 'Tab A', from: 'b', key: 'ArrowLeft' },
+    { expected: 'Tab A', from: 'c', key: 'Home' },
+  ])('moves selection to $expected on $key', ({ expected, from, key }) => {
+    render(<Tabs defaultSelectedTab={from} tabs={tabs} />);
 
-  it('navigates to first tab with Home key', () => {
-    render(<Tabs defaultSelectedTab='c' tabs={tabs} />);
-    const tablist = screen.getByRole('tablist');
-    fireEvent.keyDown(tablist, { key: 'Home' });
-    const tabA = screen.getByRole('tab', { name: 'Tab A' });
-    expect(tabA.getAttribute('aria-selected')).toBe('true');
+    fireEvent.keyDown(screen.getByRole('tablist'), { key });
+
+    expect(
+      screen.getByRole('tab', { name: expected }).getAttribute('aria-selected'),
+    ).toBe('true');
   });
 
   it('navigates to last tab with End key', () => {
