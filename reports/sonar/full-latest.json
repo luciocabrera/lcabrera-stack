@@ -5,7 +5,7 @@
     "type": "branch",
     "value": "main"
   },
-  "analysisDate": "2026-07-22T06:35:00+0000",
+  "analysisDate": "2026-07-22T07:08:20+0000",
   "qualityGate": {
     "status": "OK",
     "conditions": [
@@ -14,7 +14,7 @@
         "status": "OK",
         "comparator": "GT",
         "errorThreshold": "3",
-        "actualValue": "0.6"
+        "actualValue": "0.7"
       },
       {
         "metric": "new_maintainability_rating",
@@ -50,7 +50,29 @@
     "issues": 0,
     "hotspots": 0,
     "bySeverity": {},
-    "byType": {}
+    "byType": {},
+    "accepted": 10,
+    "acceptedByRule": {
+      "typescript:S6847": 1,
+      "typescript:S6819": 3,
+      "typescript:S6845": 1,
+      "typescript:S6852": 1,
+      "typescript:S6478": 1,
+      "typescript:S4036": 1,
+      "jssecurity:S5145": 1,
+      "typescript:S6825": 1
+    },
+    "analysed": {
+      "byLanguage": {
+        "css": 46,
+        "js": 6038,
+        "postgres": 1547,
+        "shell": 186,
+        "ts": 51183,
+        "yaml": 796
+      },
+      "linesOfCode": 59796
+    }
   },
   "issues": [],
   "hotspots": []

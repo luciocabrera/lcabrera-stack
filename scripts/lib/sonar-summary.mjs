@@ -25,6 +25,29 @@ const severitySuffix = (bySeverity) => {
 };
 
 /**
+ * What the analysis actually covered, printed because an issue count alone
+ * cannot distinguish a clean project from one whose findings were all
+ * accepted, or from one whose files are excluded and never read.
+ *
+ * The languages are listed rather than summarised: "which analyser claimed
+ * our `.sql` files" is precisely the question that took several rounds to
+ * answer while the report could only say "0 issues".
+ */
+const scopeLine = ({ accepted, analysed }) => {
+  const languages = Object.entries(analysed?.byLanguage ?? {})
+    .toSorted(([a], [b]) => a.localeCompare(b))
+    .map(([language, lines]) => `${language} ${lines}`)
+    .join(', ');
+
+  const breakdown = languages ? ` (${languages})` : '';
+
+  return (
+    `  scope: ${analysed?.linesOfCode ?? 0} lines${breakdown}` +
+    `  accepted: ${accepted ?? 0}`
+  );
+};
+
+/**
  * The summary as `{ findings, freshness, stale }`.
  *
  * `freshness` is returned separately so the caller can send it to stderr when
@@ -39,6 +62,7 @@ export const summaryLines = (report, outRel, now) => {
       `SonarCloud — ${report.project} @ ${target.type} ${target.value}`,
       `  quality gate: ${qualityGate.status}`,
       `  issues: ${summary.issues}${severitySuffix(summary.bySeverity)}  hotspots: ${summary.hotspots}`,
+      scopeLine(summary),
     ],
     freshness: stale
       ? [

@@ -56,6 +56,71 @@ describe('summaryLines', () => {
   });
 });
 
+describe('summaryLines — analysis scope', () => {
+  const withScope = (scope) => ({
+    ...reportAt('2026-07-21T11:00:00Z'),
+    summary: {
+      bySeverity: {},
+      hotspots: 0,
+      issues: 0,
+      ...scope,
+    },
+  });
+
+  it('reports the lines analysed per language alongside the issue count', () => {
+    // The gap this closes: "0 issues" reads identically whether the files
+    // were analysed and clean or never indexed at all. Naming the languages
+    // answers "which analyser claimed our .sql files" directly.
+    const parts = summaryLines(
+      withScope({
+        accepted: 0,
+        analysed: {
+          byLanguage: { postgres: 1547, ts: 51_183 },
+          linesOfCode: 59_796,
+        },
+      }),
+      'x',
+      NOW,
+    );
+
+    expect(parts.findings[3]).toContain('59796 lines');
+    expect(parts.findings[3]).toContain('postgres 1547');
+  });
+
+  it('surfaces accepted findings, which the issue count hides entirely', () => {
+    const parts = summaryLines(
+      withScope({ accepted: 10, analysed: { byLanguage: {}, linesOfCode: 1 } }),
+      'x',
+      NOW,
+    );
+
+    expect(parts.findings[3]).toContain('accepted: 10');
+  });
+
+  it('sorts languages so two runs of the same analysis read the same', () => {
+    const parts = summaryLines(
+      withScope({
+        accepted: 0,
+        analysed: {
+          byLanguage: { ts: 2, css: 1, postgres: 3 },
+          linesOfCode: 6,
+        },
+      }),
+      'x',
+      NOW,
+    );
+
+    expect(parts.findings[3]).toContain('(css 1, postgres 3, ts 2)');
+  });
+
+  it('degrades to zeroes rather than throwing on a report with no scope', () => {
+    // Older tracked snapshots predate these fields; reading one must not crash.
+    const parts = summaryLines(reportAt('2026-07-21T11:00:00Z'), 'x', NOW);
+
+    expect(parts.findings[3]).toBe('  scope: 0 lines  accepted: 0');
+  });
+});
+
 describe('logSafe', () => {
   it('flattens line breaks so API text cannot forge a log line (CWE-117)', () => {
     expect(logSafe('a\nb\rc')).toBe('a b c');
