@@ -71,6 +71,7 @@ catalog:
   fflate: ^0.8.3
   '@biomejs/biome': ^2.5.4
   '@typescript-eslint/rule-tester': ^8.64.0
+  '@changesets/cli': ^2.31.1
 
 catalogMode: prefer
 # minimumReleaseAge: 1440
