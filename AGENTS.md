@@ -383,6 +383,7 @@ The headline rules every agent must know regardless of which files are open. Ful
 11. **Never ignore, suppress, or omit a lint finding — verify, then fix.** Oxlint/eslint violations (including stylistic `unicorn/*` rules like `prefer-simple-condition-first` / `no-nested-ternary`) are real until you have read the flagged code and confirmed otherwise. Do **not** dismiss one as a false positive without checking, and do **not** silence a new one — no inline `// eslint-disable`/`oxlint-disable`, no rule-off in config, no hand-added `eslint-suppressions.json` entry. Fix the code (reorder operands, restructure logic, wire up/delete the export). If it is a genuine false positive, explain why rather than disabling. `packages/ui`, `packages/api`, `packages/server` and `packages/utils` are held strictest — each one's `eslint-suppressions.json` is gitignored, so none is ever committed and none of them baselines (§4).
 12. **Claim shared work before you touch it.** Multiple agents and humans work this repo in parallel. Before non-trivial work, register it in [`docs/coordination/`](docs/coordination/README.md): check for an area overlap, then create a task file (`tasks/_TEMPLATE.md`) with the `area` globs you own, branch, and keep `status`/`updated` current until it merges. Never edit files inside another active task's `area` without coordinating. The register — not `~/.claude/plans/` scratch, which is invisible to everyone else — is the shared record. `vp run coordination:verify` (CI) keeps it honest. (See "Multi-Agent Coordination" in §7.)
 13. **Commits and PRs follow the enforced format.** Every commit message is a Conventional Commit (`type(scope): subject`) and every PR has a conforming title plus the required `## What` / `## Verification` sections — checked by the `commit-msg` git hook locally and the `pr-standards.yml` gate in CI. The one spec is `scripts/lib/commit-convention.mjs`; don't restate its type list elsewhere, and (Rule 11) fix a failing message/description rather than weakening the check. (See "Commit & PR Standards" in §7 and the `commit-and-pr` skill.)
+14. **A claim needs evidence that could have disproved it, and steps someone else can re-run.** Before writing a finding into a doc, comment, issue or PR, ask **what else would produce the same observation** — if anything would, the probe is not evidence, so change the probe. Then state the **preconditions** the steps depend on (config state, branch, whether a fix has landed); if the same change alters those preconditions, say so explicitly, or the steps stop reproducing the moment they merge. A written claim is load-bearing: someone will act on it without re-deriving it. (See "Verifying a claim" in §7.)
 
 ## 6. Security
 
@@ -397,6 +398,30 @@ The headline rules every agent must know regardless of which files are open. Ful
 
 - Each feature directory should have a README.
 - Architecture docs live in `apps/react-router/docs/` and component-level `ARCHITECTURE.md` files.
+
+### Verifying a claim
+
+Non-Negotiable Rule 14, with the two ways it has actually gone wrong here.
+
+**Pick a probe that discriminates.** A green run is not evidence on its own — a
+rule that is not loaded reports exactly the same clean pass as code that is
+correct. Worked failure: concluding that per-workspace Oxlint configs were
+ignored, from a probe using `no-debugger`. That is a `correctness` rule, and a
+category severity outranks an individual rule entry, so "the config is ignored"
+and "the category masked my rule" produce identical output. The probe could not
+tell the two apart, so it proved nothing. A rule _outside_ the category showed
+the config applies fine.
+
+**Write repro steps with their preconditions.** Worked failure: an issue whose
+steps depended on the root lint config having no `plugins` entry — while the same
+PR added one. Anyone following the steps afterwards got the opposite result and
+reasonably concluded the issue was false. State the tree/config state the steps
+assume, and if your change alters it, say so in the steps.
+
+Two habits that follow: **re-run a repro after your own fix lands** to see what a
+reader will actually get, and when someone reports that a claim does not
+reproduce, **look for the confound before defending or retracting** — both of
+those are conclusions, and each needs its own discriminating evidence.
 
 **Comment only what the code cannot say, and keep it short.** There is no
 "document every export" rule here — that one existed, produced volume rather than
