@@ -5,17 +5,10 @@
     "type": "branch",
     "value": "main"
   },
-  "analysisDate": "2026-07-22T05:55:06+0000",
+  "analysisDate": "2026-07-22T06:35:00+0000",
   "qualityGate": {
     "status": "OK",
     "conditions": [
-      {
-        "metric": "new_coverage",
-        "status": "OK",
-        "comparator": "LT",
-        "errorThreshold": "80",
-        "actualValue": null
-      },
       {
         "metric": "new_duplicated_lines_density",
         "status": "OK",
