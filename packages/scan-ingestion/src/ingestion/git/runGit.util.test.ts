@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 
+import { buildGitChildEnv } from './buildGitChildEnv.util.ts';
 import { runGit } from './runGit.util.ts';
 
 /**
@@ -19,7 +20,14 @@ import { runGit } from './runGit.util.ts';
  */
 const createAmbientRepo = () => {
   const repoPath = mkdtempSync(path.join(tmpdir(), 'rungit-ambient-'));
-  execFileSync('git', ['init', '--quiet', repoPath], { stdio: 'ignore' });
+  // Scoped the same way `runGit` is, and for a sharper reason: naming the
+  // target as an argument does *not* protect `git init` from an inherited
+  // GIT_DIR. Git resolves the variable first, so it re-initialises whichever
+  // repository GIT_DIR names and creates nothing here at all.
+  execFileSync('git', ['init', '--quiet', repoPath], {
+    env: buildGitChildEnv({ env: process.env }),
+    stdio: 'ignore',
+  });
   onTestFinished(() => rmSync(repoPath, { force: true, recursive: true }));
 
   return repoPath;
@@ -90,5 +98,32 @@ describe('runGit', () => {
     }).trim();
 
     expect(leaked).toContain('rungit-ambient-');
+  });
+
+  it('builds its fixture repository even when GIT_DIR is already set', () => {
+    // Guards the fixture itself. `git init <path>` under an inherited GIT_DIR
+    // silently creates nothing at <path>, which would leave every test above
+    // asserting against a directory that is not a repository — and the test
+    // that guards them cannot catch it, because it runs in the same condition.
+    //
+    // The damage is not confined to this suite. When the inherited GIT_DIR is
+    // a linked worktree's — `.git/worktrees/<name>`, which does not end in
+    // `/.git` — git cannot tell the layout is non-bare and writes
+    // `core.bare = true`. Worktrees share the main repository's config, so
+    // every later git command in the developer's checkout dies with "this
+    // operation must be run in a work tree". This repo has five worktrees.
+    vi.stubEnv('GIT_DIR', path.join(createAmbientRepo(), '.git'));
+
+    const underAmbientGitDir = createAmbientRepo();
+
+    // Asked of git rather than the filesystem: a `.git` directory can exist
+    // and still not be a repository git will accept, and this has to fail for
+    // the same reason a real caller would.
+    const resolved = runGit({
+      cwd: underAmbientGitDir,
+      gitArgs: ['rev-parse', '--absolute-git-dir'],
+    });
+
+    expect(resolved).toContain('rungit-ambient-');
   });
 });
