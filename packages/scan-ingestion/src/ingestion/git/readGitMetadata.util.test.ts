@@ -4,25 +4,39 @@ import { execFileSync } from 'node:child_process';
 import { rmSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { buildGitChildEnv } from './buildGitChildEnv.util.ts';
 import { readGitMetadata } from './readGitMetadata.util.ts';
+
+// The fixture's own git calls must be scoped the same way readGitMetadata's
+// are. Inheriting the ambient environment makes `cwd` advisory: run under a git
+// hook — which always exports GIT_DIR — `git init` re-initialises the real
+// repository and `git add .` stages the deletion of every file tracked there,
+// because it has staged deletions as well as additions since Git 2.0. The
+// fixture stops building a throwaway repo and starts rewriting the developer's.
+const gitInTempRepo = ({ args, cwd }: { args: string[]; cwd: string }) =>
+  execFileSync('git', args, {
+    cwd,
+    env: buildGitChildEnv({ env: process.env }),
+  });
 
 describe('readGitMetadata', () => {
   let repoPath: string;
 
   beforeEach(() => {
     repoPath = makeTempDirectory('scan-ingestion-git-');
-    execFileSync('git', ['init', '--initial-branch=main'], { cwd: repoPath });
-    execFileSync('git', ['config', 'user.email', 'test@example.com'], {
+    gitInTempRepo({ args: ['init', '--initial-branch=main'], cwd: repoPath });
+    gitInTempRepo({
+      args: ['config', 'user.email', 'test@example.com'],
       cwd: repoPath,
     });
-    execFileSync('git', ['config', 'user.name', 'Test'], { cwd: repoPath });
+    gitInTempRepo({ args: ['config', 'user.name', 'Test'], cwd: repoPath });
     writeTextFileWithin({
       baseDirectory: repoPath,
       content: '# test\n',
       targetPath: 'README.md',
     });
-    execFileSync('git', ['add', '.'], { cwd: repoPath });
-    execFileSync('git', ['commit', '-m', 'init'], { cwd: repoPath });
+    gitInTempRepo({ args: ['add', '.'], cwd: repoPath });
+    gitInTempRepo({ args: ['commit', '-m', 'init'], cwd: repoPath });
   });
 
   afterEach(() => {
