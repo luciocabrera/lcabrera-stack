@@ -229,7 +229,10 @@ Two consequences worth knowing:
 
 - A claim is named by the branch it **declares**, not the branch it was found
   on — every branch cut from `main` inherits a copy of whatever task files were
-  live then, so "found on" is often some unrelated branch.
+  live then, so "found on" is often some unrelated branch. For the same reason,
+  a claim whose declared branch no longer exists on `origin` is treated as
+  finished and ignored — branches are deleted when their PR merges, but the
+  inherited copies of the task file outlive them.
 - The live branch list comes from the remote, not from your local
   `origin/*` refs, which go stale silently (this checkout once held 109 refs
   against 4 real branches). If a live branch has no local ref, or your ref is

@@ -5,6 +5,7 @@ import {
   parseLsRemoteHeads,
   readRemoteClaims,
   withoutLocalDuplicates,
+  withoutMergedBranches,
 } from './coordination-remote.mjs';
 
 const SHA = 'a'.repeat(40);
@@ -129,6 +130,47 @@ describe('readRemoteClaims', () => {
     });
 
     expect(claims).toEqual([]);
+  });
+});
+
+describe('withoutMergedBranches', () => {
+  const claimOn = (branch) => ({ branch: 'inherited', data: { branch } });
+
+  it('drops a claim whose branch was deleted when its PR merged', () => {
+    // Found by running the check on `main` immediately after shipping it: the
+    // task file outlives its branch on every branch cut from `main` while the
+    // claim was live, so a merged claim kept colliding with live work and
+    // deleting it from `main` did not stop it.
+    expect(
+      withoutMergedBranches({
+        claims: [claimOn('merged-and-gone')],
+        liveBranches: ['still-open'],
+      }),
+    ).toEqual([]);
+  });
+
+  it('keeps a claim whose branch is still live', () => {
+    const live = claimOn('still-open');
+
+    expect(
+      withoutMergedBranches({ claims: [live], liveBranches: ['still-open'] }),
+    ).toEqual([live]);
+  });
+
+  it('keeps a claim on main, which ls-remote output excludes', () => {
+    const onMain = claimOn('main');
+
+    expect(
+      withoutMergedBranches({ claims: [onMain], liveBranches: [] }),
+    ).toEqual([onMain]);
+  });
+
+  it('keeps placeholder branches, which say nothing about being done', () => {
+    const placeholder = claimOn('(uncommitted)');
+
+    expect(
+      withoutMergedBranches({ claims: [placeholder], liveBranches: [] }),
+    ).toEqual([placeholder]);
   });
 });
 

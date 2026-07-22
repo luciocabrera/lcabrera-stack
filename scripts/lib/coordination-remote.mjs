@@ -28,6 +28,7 @@
  *    branch is a blind spot; silently dropping it is the bug this module
  *    exists to fix.
  */
+import { NO_BRANCH } from './coordination-overlap.mjs';
 import { parseFrontmatter } from './coordination-parse.mjs';
 import { runGit } from './git-exec.mjs';
 
@@ -111,9 +112,10 @@ export const readRemoteClaims = ({ cwd, git = runGit }) => {
     };
   }
 
+  const liveBranches = parseLsRemoteHeads(heads);
   const readBranches = [];
   const unreadBranches = [];
-  const claims = parseLsRemoteHeads(heads).flatMap(({ branch, sha }) => {
+  const claims = liveBranches.flatMap(({ branch, sha }) => {
     const found = claimsOnBranch({ branch, cwd, git, sha });
     if (found === undefined) {
       unreadBranches.push(branch);
@@ -124,11 +126,39 @@ export const readRemoteClaims = ({ cwd, git = runGit }) => {
   });
 
   return {
-    claims: dedupeById(claims),
+    claims: dedupeById(
+      withoutMergedBranches({
+        claims,
+        liveBranches: liveBranches.map(({ branch }) => branch),
+      }),
+    ),
     readBranches,
     unavailable: false,
     unreadBranches,
   };
+};
+
+/**
+ * Drops claims whose declared branch no longer exists on the remote.
+ *
+ * This repo deletes a branch when its PR merges, so a claim naming a branch
+ * that is gone is finished work. The file nevertheless survives on every
+ * branch that was cut from `main` while the claim was live, and those copies
+ * outlive the branch itself — without this, a merged claim keeps colliding
+ * with live work forever, and deleting the task file from `main` does not stop
+ * it. Found by running the check on `main` right after shipping it.
+ *
+ * Placeholder branches are kept: they name no branch to look up, so absence
+ * says nothing about whether the work is done.
+ */
+export const withoutMergedBranches = ({ claims, liveBranches }) => {
+  const live = new Set([...liveBranches, DEFAULT_BRANCH]);
+  return claims.filter(({ data }) => {
+    const declared = data?.branch;
+    return (
+      declared === undefined || NO_BRANCH.has(declared) || live.has(declared)
+    );
+  });
 };
 
 /**
