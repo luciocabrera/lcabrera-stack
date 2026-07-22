@@ -66,7 +66,11 @@ describe('the repository-variable list', () => {
       (match) => match.groups.name,
     );
 
-    expect([...listed].sort()).toEqual([...GIT_REPOSITORY_VARIABLES].sort());
+    const byName = (a, b) => a.localeCompare(b);
+
+    expect(listed.toSorted(byName)).toEqual(
+      GIT_REPOSITORY_VARIABLES.toSorted(byName),
+    );
   });
 });
 

@@ -15,7 +15,7 @@
  * shared module: the CLI hook is bare-node `.mjs` and the SDK guard is TS, so
  * sharing one module would couple a security control to another package's
  * internals or to the experimental TS loader. Each runtime is instead locked to
- * the shared spec by its own tests (here: the entry's `--selftest`, mirroring
+ * the shared spec by its own tests (here: `secrets-guard.test.mjs`, mirroring
  * secretFileGuardHook.util.test.ts). Keep the taxonomy VALUES in sync.
  *
  * Governed by .claude/rules/scripts.md.

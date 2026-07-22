@@ -18,9 +18,10 @@
  * PreToolUse call). An allow is a silent `exit 0`, so normal permission flow
  * continues untouched.
  *
- * `node scripts/claude-secrets-guard.mjs --selftest` runs the built-in
- * assertion matrix (mirrors the ADR-020 tests) and exits non-zero on any
- * regression — the gate runs it so the policy can never silently rot.
+ * The assertion matrix lives in `lib/secrets-guard.test.mjs`, so `test:scripts`
+ * runs it and `test:ci` runs that. It used to sit here behind a `--selftest`
+ * flag that nothing invoked, while this header claimed the gate ran it — a
+ * guard for the guard that only ever fired when a human typed the command.
  *
  * Governed by .claude/rules/scripts.md.
  */
@@ -55,166 +56,9 @@ const runHook = () => {
   );
 };
 
-// ---- self-test matrix -------------------------------------------------------
-
-// Split so this file is not itself a hit for its own patterns.
-const AKIA = `AKIA${'IOSFODNN7EXAMPLE'}`;
-const GHP = `ghp_${'A1b2C3d4E5f6G7h8I9j0K1l2M3n4O5p6Q7r8'}`;
-// Named for what it IS — a fixture — rather than what it imitates. A constant
-// called SECRET holding a literal is a hard-coded-credential finding in its own
-// right, and the name was never accurate: nothing here is a real secret.
-//
-// Split like the two above, and for the same reason: whole, this is a 24-char
-// high-entropy token that a secret scanner reports as a leak. The runtime value
-// is unchanged, so the self-test still exercises a realistic one.
-const ENTROPY_FIXTURE = `aZ3x9Kp2${'Qw7Lm4Rt8Nv6Bs1'}`;
-
-// [toolName, toolInput] tuples — all PreToolUse events.
-const DENY_CASES = [
-  ['Read', { file_path: '/t/docker/local/.env' }],
-  ['Read', { file_path: '/t/certs/server.pem' }],
-  ['Read', { file_path: '/home/u/.ssh/id_rsa' }],
-  ['Bash', { command: 'cat .env.local' }],
-  // A quoted span is tested whole, so a quoted PATH is still caught — the
-  // relaxation below must not become "anything in quotes is fine".
-  ['Bash', { command: 'cat "my file.env"' }],
-  // An ambiguous bare word still counts once it carries a directory, which is
-  // how the real files are always spelled.
-  ['Bash', { command: 'cat ~/.aws/credentials' }],
-  ['Bash', { command: 'cat ./credentials' }],
-  // Unambiguous names are unaffected by the bare-word rule.
-  ['Bash', { command: 'cat .npmrc' }],
-  ['Grep', { glob: '.env', path: '.' }],
-  // Read declares its path, so the bare spelling is still a path there.
-  ['Read', { file_path: 'credentials' }],
-  ['Write', { file_path: 'src/c.ts', content: `k = "${AKIA}"` }],
-  ['Write', { file_path: 'src/c.ts', content: `t = "${GHP}"` }],
-  [
-    'Write',
-    { file_path: 'src/x.ts', content: '-----BEGIN RSA PRIVATE KEY-----' },
-  ],
-  [
-    'Edit',
-    {
-      file_path: 'src/x.ts',
-      new_string: `const token = "${ENTROPY_FIXTURE}";`,
-    },
-  ],
-  [
-    'MultiEdit',
-    {
-      file_path: 'src/x.ts',
-      edits: [{ new_string: 'const ok = 1;' }, { new_string: `k = "${AKIA}"` }],
-    },
-  ],
-  // The module-specifier carve-out below must not blind the rest of its line:
-  // an import and a real assignment can share one line.
-  [
-    'Write',
-    {
-      file_path: 'src/x.ts',
-      content: `import { a } from './secret-store.util'; const t = "${ENTROPY_FIXTURE}";`,
-    },
-  ],
-];
-const ALLOW_CASES = [
-  ['Read', { file_path: '/t/.env.example' }],
-  ['Read', { file_path: '/t/src/app.ts' }],
-  ['Bash', { command: 'cat .env.example' }],
-  ['Bash', { command: 'npm run build' }],
-  // Prose that merely mentions a credential file is not a read of one. Each of
-  // these was denied before: a quoted span used to be split into its words, so
-  // every word of a message or title became a candidate path.
-  [
-    'Bash',
-    { command: 'git commit -m "stop reading import paths as credentials"' },
-  ],
-  ['Bash', { command: 'gh pr create --title "handle credentials safely"' }],
-  ['Bash', { command: "grep -rn 'credentials' scripts/lib/guard.mjs" }],
-  ['Bash', { command: 'node -e \'console.log("credentials")\'' }],
-  ['Grep', { pattern: '.env', path: 'src' }],
-  ['Write', { file_path: '.env.example', content: 'API_KEY=your-key-here' }],
-  [
-    'Edit',
-    {
-      file_path: 'src/x.test.ts',
-      new_string: `const token = "${ENTROPY_FIXTURE}";`,
-    },
-  ],
-  [
-    'Write',
-    {
-      file_path: 'src/x.ts',
-      content: `const token = "${ENTROPY_FIXTURE}"; // gitleaks:allow`,
-    },
-  ],
-  // Importing a secret-related module is not a leak. These are the real
-  // specifiers from four committed source files, which the generic rule read
-  // as high-entropy values because their line also contains "secret"/"token".
-  [
-    'Write',
-    {
-      file_path: 'src/auth/verifyCredentials.util.ts',
-      content:
-        "import { isSecretHashValid } from '@lcabrera/server/crypto/is-secret-hash-valid.util';",
-    },
-  ],
-  [
-    'Write',
-    {
-      file_path: 'src/routes/login/login.action.ts',
-      content:
-        "import { generateApiToken } from '@lcabrera/server/tokens/generate-api-token.util';",
-    },
-  ],
-  [
-    'Write',
-    {
-      file_path: 'src/x.ts',
-      content:
-        "const { hashSecret } = await import('@lcabrera/server/crypto/hash-secret.util');",
-    },
-  ],
-];
-
-const decisionFor = ({ event = 'PreToolUse', toolInput, toolName }) =>
-  evaluatePreToolUse({ hookEventName: event, toolInput, toolName }).decision;
-
-const runCases = (cases, want) =>
-  cases.map(([toolName, toolInput]) => ({
-    label: `${want} ${toolName} ${JSON.stringify(toolInput).slice(0, 44)}`,
-    ok: decisionFor({ toolInput, toolName }) === want,
-  }));
-
-const runSelftest = () => {
-  const results = [
-    ...runCases(DENY_CASES, 'deny'),
-    ...runCases(ALLOW_CASES, 'allow'),
-    {
-      label: 'non-PreToolUse event passthrough',
-      ok:
-        decisionFor({
-          event: 'PostToolUse',
-          toolInput: { file_path: '/t/.env' },
-          toolName: 'Read',
-        }) === 'allow',
-    },
-  ];
-  for (const result of results) {
-    console.log(`${result.ok ? 'PASS' : 'FAIL'}  ${result.label}`);
-  }
-  const passed = results.filter((result) => result.ok).length;
-  console.log(`\n${passed}/${results.length} self-test cases passed`);
-  return passed === results.length ? 0 : 1;
-};
-
-if (process.argv.includes('--selftest')) {
-  process.exitCode = runSelftest();
-} else {
-  try {
-    runHook();
-  } catch {
-    // A malformed payload or unreadable stdin must never break the tool flow.
-  }
-  process.exitCode = 0;
+try {
+  runHook();
+} catch {
+  // A malformed payload or unreadable stdin must never break the tool flow.
 }
+process.exitCode = 0;
