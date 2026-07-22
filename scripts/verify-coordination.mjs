@@ -31,6 +31,12 @@
  *   WARN   overlap       — two non-done tasks on DIFFERENT branches claim
  *                          intersecting areas (a real collision). Same-branch
  *                          overlap is intended collaboration and is not warned.
+ *                          Reads claims from every live remote branch too, not
+ *                          just the working tree (#233) — a claim lives on its
+ *                          own branch from the moment it is made, so a
+ *                          tree-only check compared each agent's claim against
+ *                          nothing and called it clean. Anything it could not
+ *                          read is warned about rather than skipped.
  *   WARN   shared-branch — 2+ active tasks share a branch with no descriptor
  *                          (declare it or split), or a descriptor has no tasks.
  *   WARN   stale         — a non-done task's `updated:` is older than STALE_DAYS.
@@ -38,11 +44,20 @@
  *                          mean it merged and was deleted → close the task).
  *   WARN   ghost         — a live task older than GHOST_DAYS records neither a
  *                          branch nor a PR, so its work is invisible (or already
- *                          merged). Precise "is it merged?" detection would need a
- *                          git/gh subprocess, which this script avoids (S4036).
+ *                          merged). Precise "is it merged?" detection is still
+ *                          not attempted: squash merges leave no ancestry, so
+ *                          the answer would have to come from the PR API.
+ *
+ * Local checks read the working tree only and never shell out (`git-dir.mjs`
+ * reads `.git` directly). The overlap check is the one exception — reading a
+ * blob out of another branch needs git's object store — and it goes through
+ * `git-exec.mjs`, which pins PATH to system directories (S4036) and strips the
+ * repository-selecting variables.
  *
  * Modes:
  *   node scripts/verify-coordination.mjs                 → verify (default)
+ *   node scripts/verify-coordination.mjs --no-remote     → skip the remote read
+ *                                                          (offline / fast loop)
  *   node scripts/verify-coordination.mjs --write-board   → write the local,
  *                                                          gitignored BOARD.md view
  *
@@ -53,8 +68,13 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { renderBoard } from './lib/coordination-board.mjs';
-import { branchSlug, globsOverlap } from './lib/coordination-parse.mjs';
+import { branchSlug } from './lib/coordination-parse.mjs';
+import { overlapWarnings } from './lib/coordination-overlap.mjs';
 import { readEntries } from './lib/coordination-read.mjs';
+import {
+  readRemoteClaims,
+  withoutLocalDuplicates,
+} from './lib/coordination-remote.mjs';
 import {
   branchErrors,
   ISO_DATE,
@@ -102,28 +122,6 @@ const checkBranchSchema = (branches, problems) => {
     }
     for (const message of branchErrors(branch)) {
       problems.push(`${branch.name}: ${message}.`);
-    }
-  }
-};
-
-/** Overlap only warns ACROSS branches — same-branch overlap is collaboration. */
-const checkOverlap = (tasks, warnings) => {
-  const live = tasks.filter(isLive);
-  for (let i = 0; i < live.length; i += 1) {
-    for (let j = i + 1; j < live.length; j += 1) {
-      const a = live[i].data;
-      const b = live[j].data;
-      if (a.branch === b.branch && !NO_BRANCH.has(a.branch)) {
-        continue;
-      }
-      const clash = a.area.find((x) => b.area.some((y) => globsOverlap(x, y)));
-      if (clash !== undefined) {
-        warnings.push(
-          `${live[i].name} and ${live[j].name} claim overlapping areas ` +
-            `(e.g. \`${clash}\`) on different branches — narrow a glob, serialise, ` +
-            'or share one branch (branches/<slug>.md).',
-        );
-      }
     }
   }
 };
@@ -271,6 +269,45 @@ const checkTaskBranches = (tasks, warnings) => {
   }
 };
 
+/**
+ * Claims living on other branches, plus a line saying what was actually read.
+ *
+ * The line is not decoration. Overlap detection used to be silently local-only
+ * (#233), so "0 warnings" and "I could not look" printed identically. Anything
+ * this could not read becomes a warning rather than an omission.
+ */
+const gatherRemoteClaims = (tasks, warnings) => {
+  if (process.argv.includes('--no-remote')) {
+    return {
+      claims: [],
+      coverage: 'remote branches: not checked (--no-remote)',
+    };
+  }
+
+  const { claims, readBranches, unavailable, unreadBranches } =
+    readRemoteClaims({ cwd: REPO_ROOT });
+
+  if (unavailable) {
+    warnings.push(
+      'could not reach `origin`, so claims on other branches were not read — ' +
+        'overlap detection is local-only for this run.',
+    );
+    return { claims: [], coverage: 'remote branches: unreachable' };
+  }
+
+  if (unreadBranches.length > 0) {
+    warnings.push(
+      `no local ref for ${unreadBranches.length} live branch(es) (${unreadBranches.join(', ')}) — ` +
+        'their claims were not read. Run `git fetch --prune` to see them.',
+    );
+  }
+
+  return {
+    claims: withoutLocalDuplicates({ localTasks: tasks, remoteClaims: claims }),
+    coverage: `remote branches: ${readBranches.length} read, ${unreadBranches.length} unread`,
+  };
+};
+
 const report = (warnings) => {
   const underActions = process.env.GITHUB_ACTIONS === 'true';
   for (const warning of warnings) {
@@ -293,9 +330,13 @@ const main = () => {
 
   const problems = [];
   const warnings = [];
+  // Remote claims feed overlap detection ONLY. Schema and unique-id stay local:
+  // another branch's malformed task is their problem to fix, and must not fail
+  // an unrelated PR.
+  const remote = gatherRemoteClaims(tasks, warnings);
   checkTaskSchema(tasks, problems);
   checkBranchSchema(branches, problems);
-  checkOverlap(tasks, warnings);
+  warnings.push(...overlapWarnings([...tasks, ...remote.claims]));
   checkSharedBranches(tasks, branches, warnings);
   checkStale(tasks, warnings);
   checkTaskBranches(tasks, warnings);
@@ -322,7 +363,8 @@ const main = () => {
 
   console.log(
     `Coordination register is consistent: ${tasks.length} task(s), ` +
-      `${branches.length} shared branch(es), ${warnings.length} warning(s).`,
+      `${branches.length} shared branch(es), ${warnings.length} warning(s). ` +
+      `${remote.coverage}, ${remote.claims.length} claim(s) read from them.`,
   );
 };
 
