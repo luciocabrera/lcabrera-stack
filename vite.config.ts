@@ -20,24 +20,12 @@ const fmtConfig = createFmtConfig({
 export default defineConfig({
   fmt: fmtConfig,
   lint: {
-    // `correctness` is Oxlint's bug category — `no-debugger`, `no-dupe-keys`,
-    // `no-self-compare`. It defaults to WARN, and a warning does not fail
-    // anything: `vp lint .` and `vp check` both exit 0 while printing "Found 0
-    // errors and 1 warning". Until this line, a `debugger` statement could be
-    // committed, pass every gate, and ship.
-    //
-    // Oxlint reads THIS block and only this one. The per-workspace `lint:`
-    // entries pointing at `@repo/vite-configs/*-lint` do not reach it — proven
-    // by setting a rule to `error` in the shared config a workspace consumes
-    // and watching the violation still report as a warning, from the workspace
-    // and from the root, under `vp lint` and under `vp check` alike. So any
-    // severity that is meant to bite has to be set here. See #318.
-    //
-    // Measured before landing: enabling `correctness` at error costs ZERO
-    // findings across all 3178 files. The other categories are not free —
-    // perf 30, suspicious 742, restriction 7270, pedantic 7738, style 12760 —
-    // and each needs its own decision rather than a blanket flip.
+    // Explicit because Oxlint defaults `correctness` to `warn`, and a warning
+    // fails nothing here — `vp lint` and `vp check` both exit 0 on one.
     categories: { correctness: 'error' },
+    // Declared here, not in the per-workspace factories: a workspace `plugins`
+    // entry does not take effect (#318). Workspace `rules` entries do.
+    plugins: ['react', 'react-perf', 'import', 'node'],
     options: { typeAware: true, typeCheck: true },
   },
   run: {

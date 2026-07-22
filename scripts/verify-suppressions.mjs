@@ -1,37 +1,19 @@
 /**
  * Gate: the four public packages carry no suppression that has not been argued
- * for in writing.
+ * for in writing (AGENTS.md §4).
  *
- * AGENTS.md §4 holds `packages/ui`, `api`, `server` and `utils` to "every
- * finding gets fixed, never baselined or disabled". That was enforced for the
- * eslint baseline alone (gitignored, so CI has nothing to check out) and for
- * nothing else — the claim was false about `packages/ui` on the day it was
- * written. This makes the remaining mechanisms checkable too; the table of what
- * is detected lives in `docs/agents/public-package-suppressions.md`, not here,
- * so there is one copy to keep true.
+ * Findings are diffed against `docs/agents/public-package-suppressions.json` in
+ * two lanes — `approved` (scoped to a public package) and `acknowledged`
+ * (repo-wide policy that reaches one). Both are enforced; gating only the first
+ * let a broad override reach a public package unlisted.
  *
- * The register is `docs/agents/public-package-suppressions.json`. It lives in
- * docs/, not next to this script, on purpose: it is a policy document whose
- * diff is the review, not a build artifact. It is deliberately NOT called a
- * baseline — a baseline is a thing you stop reading.
+ * Each lane fails on: a suppression with no entry, an entry that grew, an entry
+ * matching nothing (anti-rot), or one with no reason or reference.
  *
- * Two lanes, both enforced. `approved` is a suppression scoped to a public
- * package; `acknowledged` is repo-wide policy (ADR-035 §7) that happens to reach
- * one. An earlier version gated only the first and merely reported the second,
- * which left a hole: an override broad enough to match a public package AND
- * anything else needed no entry and passed silently.
+ * What is detected, and how to add an exception:
+ * `docs/agents/public-package-suppressions.md` — the one copy of that table.
  *
- * Each lane fails on four conditions:
- *   unapproved   a suppression with no register entry            (the main gate)
- *   grew         more occurrences of an approved key than agreed
- *   stale        a register entry matching nothing               (anti-rot)
- *   undocumented an entry with no real reason or no reference
- *
- * `stale` is what stops this becoming the baselines it replaces: an approval
- * that outlives its code silently re-permits whatever reoccupies that key.
- *
- * Effects (fs, argv, exit) live here; the rules are pure in
- * `./lib/suppressions.mjs` so they can be tested without a repo on disk.
+ * Effects live here; the rules are pure in `./lib/suppressions.mjs`.
  *
  * Usage: node scripts/verify-suppressions.mjs [--list]
  *   --list  print every suppression found, approved or not, and exit 0

@@ -18,9 +18,11 @@ not a check that has to run. That is why it has never failed.
 Nothing covered the rest. A `// NOSONAR`, an `@ts-expect-error`, an
 `oxlint-disable-next-line`, a fallow baseline key, a `biome.jsonc` override, or a
 rule lowered in the package's own lint config were all just text nobody counted.
-When #308 first counted them, `packages/ui` held **17 inline directives and 6
-Biome rules turned off against its own files** — while §4 said, in as many words,
-that it held none.
+When #308 first counted them, `packages/ui` held a substantial number of inline
+directives and targeted Biome rule-offs — while §4 said, in as many words, that
+it held none. For the current figures, run `vp run suppressions:list`; they are
+deliberately not written down here, because a number in prose is a number
+nothing keeps true.
 
 Most of those are defensible. That was never the problem. The problem was that
 nothing distinguished a reviewed exception from one added last Tuesday, and a

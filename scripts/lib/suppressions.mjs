@@ -1,27 +1,13 @@
 /**
  * Finds every mechanism that can silence a finding inside the four public
- * packages, so "never silenced" becomes a checked property instead of a claim.
+ * packages, so AGENTS.md §4's "never silenced" is checked rather than claimed.
  *
- * AGENTS.md §4 says `packages/ui`, `api`, `server` and `utils` are never
- * baselined, scoped or inline-disabled. Exactly one mechanism was ever really
- * enforced: their `eslint-suppressions.json` is gitignored, so CI checks out no
- * file and there is nothing to suppress WITH. That works because it is
- * structural — impossible, not merely checked.
+ * Pure functions; `verify-suppressions.mjs` owns the filesystem and diffs these
+ * findings against the register. Rationale and protocol:
+ * `docs/agents/public-package-suppressions.md`.
  *
- * Every other mechanism is a comment or a config line that nothing counts, and
- * the gap was not theoretical: `packages/ui` carried 17 inline directives and 6
- * Biome rules scoped off against its own files while the docs said it carried
- * none. Not one of those is necessarily WRONG — several are ADR-backed cases of
- * a linter mismodelling correct code — but nothing distinguished a reviewed
- * exception from one added last Tuesday.
- *
- * So this module enumerates them and `verify-suppressions.mjs` diffs the result
- * against a register that must justify each one. Pure functions only; the
- * filesystem lives in the runner.
- *
- * Deliberately NOT derived from a hardcoded package list — `publicPackageDirs`
- * resolves the same authority AGENTS.md names (which workspaces gitignore their
- * suppressions file), so a fifth public package is covered the day it is added.
+ * The package list is resolved by `publicPackageDirs`, not hardcoded, so a fifth
+ * public package is covered the day it is added.
  */
 
 /**
