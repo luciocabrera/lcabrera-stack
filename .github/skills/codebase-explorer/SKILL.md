@@ -59,8 +59,29 @@ Before spawning any further subagents:
 Repeat Step 2's synthesis-and-inject pattern between every subsequent
 phase. Update `manifest.json` after each phase completes.
 
-## Step 4 — Final report
+## Step 4 — Test each conclusion before reporting it
+
+For every conclusion you are about to write down, ask: **what else would
+produce the same observation?** If anything would, the evidence does not
+support the conclusion — find a probe that separates them and re-run.
+
+Absence of output is the trap. A rule that is not loaded, a test that
+never ran, a config that was ignored, and code that is simply correct
+all look identical from a clean pass. Prove the mechanism is live
+(deliberate violation, planted failure) before reading silence as a
+result.
+
+Then check the conclusion survives contact with a reader: state the
+preconditions any repro depends on — branch, config state, whether a
+related fix has landed — and re-run it after your own change to see what
+someone else will actually get.
+
+## Step 5 — Final report
 
 Once investigation is complete, summarise `findings.md` for the user in
 the main thread. Do not dump raw subagent output — only the distilled
 conclusions and the file paths that matter.
+
+Mark each conclusion as **verified** (you ran something that could have
+disproved it) or **inferred** (it fits the evidence but was not tested).
+Never present the second as the first.
