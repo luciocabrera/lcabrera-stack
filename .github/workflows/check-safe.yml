@@ -140,6 +140,15 @@ jobs:
         # .claude/rules/scripts.md.
         run: vp run scripts:verify
 
+      - name: Oxlint plugin families are loaded
+        id: lint_plugins_gate
+        # Naming `lint.plugins` REPLACES Oxlint's default set, so dropping an
+        # entry disables that whole family and reports nothing — the same clean
+        # pass as correct code. This lints a deliberate violation per family
+        # instead of reading config, and rejects a `lint` block in a workspace
+        # config, which Vite+ never loads. See ADR-042.
+        run: vp run lint:plugins:verify
+
       - name: Public packages carry no unapproved suppression
         id: suppressions_gate
         # AGENTS.md §4 holds ui/api/server/utils to "every finding gets fixed,

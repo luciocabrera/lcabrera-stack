@@ -5,13 +5,10 @@
   "type": "module",
   "exports": {
     "./fmt": "./vite.fmt.shared.config.ts",
-    "./base-lint": "./vite.base-lint.shared.config.ts",
     "./eslint-custom-rules": "./eslint.custom-rules.shared.config.mjs",
     "./eslint-base-custom-rules": "./eslint.base-custom-rules.shared.config.mjs",
-    "./frontend-lint": "./vite.frontend-lint.shared.config.ts",
-    "./api-lint": "./vite.api-lint.shared.config.ts",
+    "./lint": "./vite.lint.shared.config.ts",
     "./pack": "./vite.pack.shared.config.ts",
-    "./react-router-lint": "./vite.react-router-lint.shared.config.ts",
     "./plugins": "./vite.plugins.shared.config.ts",
     "./run": "./vite.run.shared.config.ts"
   },

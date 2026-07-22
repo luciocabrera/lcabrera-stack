@@ -1,11 +1,9 @@
-import { createApiLintConfig } from '@repo/vite-configs/api-lint';
 import { createFmtConfig } from '@repo/vite-configs/fmt';
 import { VITEST_COVERAGE_FLAGS } from '@repo/vite-configs/run';
 import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vite-plus';
 
 const fmtConfig = createFmtConfig();
-const lintConfig = createApiLintConfig();
 
 const VITEST = 'node_modules/vitest/vitest.mjs';
 
@@ -40,7 +38,6 @@ const UNIT_ONLY = [
 
 export default defineConfig({
   fmt: fmtConfig,
-  lint: lintConfig,
   resolve: {
     alias: {
       '@repo/scan-ingestion': fileURLToPath(new URL('src', import.meta.url)),

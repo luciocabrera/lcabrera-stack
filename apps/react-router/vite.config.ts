@@ -2,7 +2,6 @@ import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vite-plus';
 
 import { fmtConfig } from './config/vite.fmt.config.ts';
-import { lintConfig } from './config/vite.lint.config.ts';
 import { pluginsConfig } from './config/vite.plugins.config.ts';
 import { runConfig } from './config/vite.run.config.ts';
 
@@ -14,7 +13,6 @@ export default defineConfig({
     sourcemap: false,
   },
   fmt: fmtConfig,
-  lint: lintConfig,
   plugins: pluginsConfig,
   resolve: {
     alias: [

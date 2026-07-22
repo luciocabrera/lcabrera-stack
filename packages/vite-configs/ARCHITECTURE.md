@@ -10,9 +10,9 @@ Shared Vite+ configuration builders consumed by workspace apps.
 
 ## Layers
 
-1. Base builders: shared defaults (`fmt`, `base-lint`).
-2. Specializations: mode/app-type builders (`api-lint`, `frontend-lint`, `react-router-lint`, `eslint-custom-rules`, plugins).
-3. Merge helpers: reusable merge utilities for override behavior.
+1. Base builders: shared defaults (`fmt`).
+2. Specializations: mode/app-type builders (`eslint-custom-rules`, plugins).
+3. Lint: one `lint` object for the whole repo, imported by the ROOT config — per-workspace differences are `overrides` inside it (ADR-042).
 4. Packaging: `pack` (`createPackConfig`) — the `vp pack`/tsdown settings for the publishable Node and browser packages.
 
 ### `pack` and the cycle it cannot cross

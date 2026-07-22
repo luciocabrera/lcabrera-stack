@@ -1,10 +1,8 @@
-import { createApiLintConfig } from '@repo/vite-configs/api-lint';
 import { createFmtConfig } from '@repo/vite-configs/fmt';
 import { VITEST_COVERAGE_FLAGS } from '@repo/vite-configs/run';
 import { defineConfig } from 'vite-plus';
 
 const fmtConfig = createFmtConfig();
-const lintConfig = createApiLintConfig();
 
 const VITEST = 'node_modules/vitest/vitest.mjs';
 
@@ -34,7 +32,6 @@ const UNIT_ONLY = [
 
 export default defineConfig({
   fmt: fmtConfig,
-  lint: lintConfig,
   run: {
     tasks: {
       // The full suite — needs Postgres. Kept as `test` so `vp run test:all`

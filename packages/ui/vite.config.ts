@@ -3,12 +3,10 @@ import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vite-plus';
 
 import { fmtConfig } from './config/vite.fmt.config.ts';
-import { lintConfig } from './config/vite.lint.config.ts';
 import { pluginsConfig } from './config/vite.plugins.config.ts';
 
 export default defineConfig({
   fmt: fmtConfig,
-  lint: lintConfig,
   plugins: pluginsConfig,
   resolve: {
     alias: {
