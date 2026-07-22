@@ -2,7 +2,7 @@
 id: hook-selftests-in-ci
 title: Run the hook self-test matrices in CI
 owner: agent:claude
-status: active
+status: review
 branch: hook-selftests-in-ci
 area:
   - scripts/claude-secrets-guard.mjs
@@ -12,16 +12,22 @@ area:
 started: 2026-07-22
 updated: 2026-07-22
 plan: (none)
-pr: (none)
+pr: '#290'
 issue: #130
 ---
 
 ## What
 
-Run the hook self-test matrices in CI
+Both Claude Code hook scripts carried a `--selftest` assertion matrix that
+nothing ever invoked. The secrets guard is the hook that DENIES tool calls, and
+its cases include two false positives that blocked real work this week — both
+regressions in a guard whose tests never ran.
+
+Matrices moved to vitest files, so `test:scripts` runs them and `test:ci` runs
+that. Adds containment coverage for `safe-read.mjs`, which had none.
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: gate green, 200 script tests (was 156)
 - Blockers: none
-- Next:
+- Next: merge #290
