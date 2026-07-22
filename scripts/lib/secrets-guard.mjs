@@ -165,6 +165,19 @@ const QUOTED_VALUE = /["']([^"'\s]{16,})["']/g;
 const ENV_ASSIGNMENT =
   /^\s*[A-Z][A-Z0-9_]{2,}\s*=\s*([A-Za-z0-9+/=._-]{20,})\s*$/;
 
+// A module specifier is never a credential — but one naming a secret-related
+// module is exactly the generic rule's shape: a long, high-entropy quoted
+// string on a line containing "secret"/"token"/"password". Four committed
+// source files match (`from '@lcabrera/server/crypto/is-secret-hash-valid.util'`
+// and friends), so without this carve-out the guard blocks writing real code.
+//
+// Keyed on the syntactic POSITION — a `from` clause, `require(…)`, dynamic
+// `import(…)` — rather than on the value looking path-like, because a base64
+// credential also contains slashes and dots. Nothing can be smuggled through:
+// an import specifier is resolved as a module, never read as a value.
+const MODULE_SPECIFIER =
+  /(?:\bfrom\s*|\b(?:require|import)\s*\(\s*)["']([^"'\s]+)["']/g;
+
 // Key names (normalized: lowercased, separators stripped) that mark a value as
 // credential-bearing when it is also high-entropy.
 const SECRET_KEY_HINTS = [
@@ -263,9 +276,12 @@ const genericSecretValue = (line) => {
   if (!SECRET_KEY_HINTS.some((hint) => lower.includes(hint))) {
     return undefined;
   }
+  const specifiers = new Set(
+    [...line.matchAll(MODULE_SPECIFIER)].map((match) => match[1]),
+  );
   return [...line.matchAll(QUOTED_VALUE)]
     .map((match) => match[1])
-    .find((value) => looksLikeRealSecret(value));
+    .find((value) => !specifiers.has(value) && looksLikeRealSecret(value));
 };
 
 // Paths where the entropy-based generic rules do more harm than good: test
