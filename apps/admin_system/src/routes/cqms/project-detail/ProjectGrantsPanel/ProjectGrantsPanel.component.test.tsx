@@ -57,6 +57,10 @@ const renderPanel = async ({
   grants = [grant()],
   users = [user()],
 }: RenderPanelArgs = {}) => {
+  // Sonar reads this act() as redundant (S8980). It is not, and removing it
+  // fails all four tests with the Suspense fallback still on screen: RTL's
+  // render() calls act() *un-awaited*, so a tree suspended on use() never gets
+  // the chance to resolve. Awaiting an async act around render is what lets it.
   await act(async () => {
     render(
       <Suspense fallback='loading'>
