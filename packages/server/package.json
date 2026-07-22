@@ -2,7 +2,23 @@
   "name": "@lcabrera/server",
   "version": "0.1.1",
   "private": false,
+  "description": "Node-only Postgres primitives: an injection-safe SQL builder, a column-filter contract, and secret/token/ticket helpers.",
+  "keywords": [
+    "node",
+    "postgres",
+    "query-builder",
+    "sql-builder",
+    "typescript"
+  ],
+  "homepage": "https://github.com/luciocabrera/vite-react-compiler/tree/main/packages/server#readme",
+  "bugs": "https://github.com/luciocabrera/vite-react-compiler/issues",
   "license": "MIT",
+  "author": "Lucio Cabrera",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luciocabrera/vite-react-compiler.git",
+    "directory": "packages/server"
+  },
   "files": [
     "dist",
     "src",
