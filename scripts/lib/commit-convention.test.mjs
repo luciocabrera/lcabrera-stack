@@ -235,7 +235,9 @@ describe('validateBranchName', () => {
       join(REPO_ROOT, 'scripts', 'coordination-claim.sh'),
       'utf8',
     );
-    const line = /\n\s*(feat\|[a-z|]+)\)\s*;;/.exec(script);
+    const line = new RegExp(String.raw`\n\s*(feat\|[a-z|]+)\)\s*;;`).exec(
+      script,
+    );
     expect(line, 'type case-list not found in coordination-claim.sh').not.toBe(
       null,
     );
