@@ -2,7 +2,7 @@
 id: package-readmes
 title: Give every published package a real npm README
 owner: agent:claude
-status: active
+status: review
 branch: package-readmes
 area:
   - packages/api/README.md
@@ -12,7 +12,7 @@ area:
 started: 2026-07-22
 updated: 2026-07-22
 plan: (none)
-pr: (none)
+pr: #275
 issue: #274
 ---
 
