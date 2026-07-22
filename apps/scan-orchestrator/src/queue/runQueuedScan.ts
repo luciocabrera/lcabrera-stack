@@ -78,7 +78,11 @@ const runDeterministicScan = async ({
 
   try {
     execFileSync(
-      'node',
+      // The interpreter already running this orchestrator, by absolute path.
+      // A bare `node` is resolved through the inherited PATH, so a writable
+      // directory earlier in it can shadow the real binary (Sonar S4036) — and
+      // it can also pick a different Node version than the one running here.
+      process.execPath,
       [
         path.join(cqmsRepoRoot, config.scriptPath),
         `--target=${scan.snapshot_path}`,
