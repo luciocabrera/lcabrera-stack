@@ -5,6 +5,8 @@ import {
   PLUGIN_PROBES,
   probeCode,
   silentProbes,
+  staleRuntimeGlobs,
+  unclassifiedWorkspaces,
 } from './lint-plugins.mjs';
 
 describe('probeCode', () => {
@@ -97,6 +99,55 @@ describe('configsDeclaringLint', () => {
       { path: 'apps/shared/vite.config.ts', text: '  fmt: fmtConfig,' },
     ];
     expect(configsDeclaringLint(files)).toEqual([]);
+  });
+});
+
+describe('unclassifiedWorkspaces', () => {
+  const runtimes = {
+    agnostic: ['packages/utils/**'],
+    browser: ['packages/ui/**'],
+    node: ['packages/server/**'],
+  };
+
+  it('accepts a fully classified tree', () => {
+    const workspaces = ['packages/ui', 'packages/server', 'packages/utils'];
+    expect(unclassifiedWorkspaces({ runtimes, workspaces })).toEqual([]);
+  });
+
+  // The real gap: the lists were derived from which workspaces had a `lint`
+  // block, so several never appeared in any of them.
+  it('reports a workspace named in no list', () => {
+    const workspaces = ['packages/ui', 'packages/server', 'packages/api'];
+    expect(unclassifiedWorkspaces({ runtimes, workspaces })).toEqual([
+      'packages/api',
+    ]);
+  });
+
+  it('counts the agnostic list as classification, not as an omission', () => {
+    expect(
+      unclassifiedWorkspaces({ runtimes, workspaces: ['packages/utils'] }),
+    ).toEqual([]);
+  });
+
+  it('reports every unclassified workspace, not just the first', () => {
+    const workspaces = ['packages/api', 'packages/plugins'];
+    expect(unclassifiedWorkspaces({ runtimes, workspaces })).toHaveLength(2);
+  });
+});
+
+describe('staleRuntimeGlobs', () => {
+  it('reports a glob whose workspace is gone', () => {
+    const runtimes = { agnostic: [], browser: [], node: ['packages/old/**'] };
+    expect(
+      staleRuntimeGlobs({ runtimes, workspaces: ['packages/ui'] }),
+    ).toEqual(['packages/old/**']);
+  });
+
+  it('stays quiet when every glob resolves', () => {
+    const runtimes = { agnostic: [], browser: ['packages/ui/**'], node: [] };
+    expect(
+      staleRuntimeGlobs({ runtimes, workspaces: ['packages/ui'] }),
+    ).toEqual([]);
   });
 });
 

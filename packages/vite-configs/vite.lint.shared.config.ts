@@ -13,14 +13,28 @@ import type { OxlintConfig } from 'vite-plus/lint';
  * eslint pass already runs all of them.
  */
 
+/**
+ * Every workspace is classified by runtime, and `lint:plugins:verify` fails if
+ * one is missing from all three lists. The lists started out derived from which
+ * workspaces happened to carry a `lint` block — the old, never-loaded setup —
+ * which left six unclassified and nothing to say so.
+ *
+ * `env` only supplies globals to the `no-undef` family, which is not enabled
+ * today, so these are inert as rules and exact as documentation. They become
+ * load-bearing the moment a category containing `no-undef` is turned on, which
+ * is why they are kept correct rather than deleted.
+ */
+
 /** Workspaces whose code runs in a browser. */
 const BROWSER_WORKSPACES = [
   'apps/react-router/**',
   'apps/admin_system/**',
   'packages/ui/**',
+  // Browser-safe by construction — its tsconfig omits node types (ADR-038).
+  'packages/api/**',
 ];
 
-/** Workspaces whose code runs in Node. */
+/** Workspaces whose code runs in Node — services and build tooling alike. */
 const NODE_WORKSPACES = [
   'apps/api-server/**',
   'apps/api-server-fast/**',
@@ -30,7 +44,28 @@ const NODE_WORKSPACES = [
   'packages/node-runtime/**',
   'packages/scan-ingestion/**',
   'packages/server/**',
+  'packages/eslint-local-rules/**',
+  'packages/plugins/**',
+  'packages/ts-configs/**',
+  'packages/vite-configs/**',
 ];
+
+/**
+ * Workspaces that target neither runtime, and so get neither set of globals.
+ *
+ * `@lcabrera/utils` guarantees pure, side-effect-free helpers: its tsconfig gives
+ * it no DOM lib and no node types, and anything that must touch the process
+ * belongs in `@repo/node-runtime` instead. Handing it `process` here would
+ * contradict the boundary the tsconfig exists to enforce.
+ */
+const RUNTIME_AGNOSTIC_WORKSPACES = ['packages/utils/**'];
+
+/** Read by `scripts/verify-lint-plugins.mjs` to prove no workspace is missing. */
+export const WORKSPACE_RUNTIMES = {
+  agnostic: RUNTIME_AGNOSTIC_WORKSPACES,
+  browser: BROWSER_WORKSPACES,
+  node: NODE_WORKSPACES,
+};
 
 /**
  * Every plugin Oxlint should load.

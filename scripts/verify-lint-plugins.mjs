@@ -28,6 +28,8 @@ import {
   PLUGIN_PROBES,
   probeCode,
   silentProbes,
+  staleRuntimeGlobs,
+  unclassifiedWorkspaces,
 } from './lib/lint-plugins.mjs';
 
 const REPO_ROOT = process.cwd();
@@ -81,10 +83,21 @@ const workspaceDirs = (group) => {
   try {
     return readdirSync(join(REPO_ROOT, group), { withFileTypes: true })
       .filter((entry) => entry.isDirectory())
+      .filter((entry) =>
+        existsSync(join(REPO_ROOT, group, entry.name, 'package.json')),
+      )
       .map((entry) => `${group}/${entry.name}`);
   } catch {
     return [];
   }
+};
+
+/** The classification the root Oxlint config declares, read from the config itself. */
+const runtimeLists = async () => {
+  const module = await import(
+    join(REPO_ROOT, 'packages/vite-configs/vite.lint.shared.config.ts')
+  );
+  return module.WORKSPACE_RUNTIMES;
 };
 
 /**
@@ -103,7 +116,12 @@ const workspaceConfigs = () =>
       text: readFileSync(join(REPO_ROOT, path), 'utf8'),
     }));
 
-const main = () => {
+const main = async () => {
+  const workspaces = [...workspaceDirs('apps'), ...workspaceDirs('packages')];
+  const runtimes = await runtimeLists();
+  const unclassified = unclassifiedWorkspaces({ runtimes, workspaces });
+  const stale = staleRuntimeGlobs({ runtimes, workspaces });
+
   const stray = configsDeclaringLint(workspaceConfigs());
   const silent = withProbeDir((dir) => {
     for (const probe of PLUGIN_PROBES)
@@ -125,15 +143,29 @@ const main = () => {
         `  The \`${probe.plugin}\` family is not loaded — add it to PLUGINS in\n` +
         '  packages/vite-configs/vite.lint.shared.config.ts.\n',
     );
+  for (const workspace of unclassified)
+    process.stdout.write(
+      `${workspace} is in no runtime list in the root Oxlint config.\n` +
+        '  Add it to BROWSER_WORKSPACES, NODE_WORKSPACES or\n' +
+        '  RUNTIME_AGNOSTIC_WORKSPACES in\n' +
+        '  packages/vite-configs/vite.lint.shared.config.ts.\n',
+    );
+  for (const glob of stale)
+    process.stdout.write(
+      `${glob} is in a runtime list but matches no workspace — remove it.\n`,
+    );
 
-  if (stray.length + silent.length > 0) {
+  const failures =
+    stray.length + silent.length + unclassified.length + stale.length;
+  if (failures > 0) {
     process.exitCode = 1;
     return;
   }
   process.stdout.write(
     `Oxlint config: ${PLUGIN_PROBES.length} plugin families proven live, ` +
+      `${workspaces.length} workspaces classified by runtime, ` +
       'no workspace config shadows the root.\n',
   );
 };
 
-main();
+await main();

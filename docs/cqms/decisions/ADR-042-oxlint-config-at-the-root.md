@@ -59,6 +59,24 @@ one engine is shelling out to the other's plugin.
 **A plugin is listed only if it contributes rules under an enabled category.**
 Listing one that cannot fire is the same failure this ADR is about, in miniature.
 
+**Every workspace is classified by runtime, and that is checked.** The overrides
+carry a `browser`, a `node` and a `runtime-agnostic` list, and the gate fails if
+a workspace appears in none of them or if a glob names a workspace that no longer
+exists. This is not decoration by the rule above: `env` supplies globals to the
+`no-undef` family, which is not enabled today, so the lists are currently inert
+as rules and exact as documentation. They are kept correct rather than deleted
+because they become load-bearing the moment that category is enabled — and
+because a hand-maintained list that nothing checks is precisely how this went
+wrong the first time. The lists were initially written from whichever workspaces
+happened to carry a `lint` block, which is the shape of the setup that never
+loaded; six workspaces were silently missing, `packages/utils` and `packages/api`
+among them.
+
+`packages/utils` is deliberately in neither runtime list. Its tsconfig gives it
+no DOM lib and no node types, it imports nothing from `node:`, and anything that
+must touch the process belongs in `@repo/node-runtime` instead. Handing it
+`process` here would contradict the boundary that tsconfig exists to enforce.
+
 ## Consequences
 
 The live rule count roughly doubles, and the previously-dark `typescript`,
@@ -85,7 +103,10 @@ a silent enable:
 `check-safe.yml`) is the guard, and it **lints a deliberate violation per plugin
 family** rather than reading the config — because reading the config is exactly
 what cannot distinguish a loaded family from a missing one. It also fails on a
-`lint` key in any workspace config.
+`lint` key in any workspace config, on a workspace missing from every runtime
+list, and on a runtime glob that resolves to nothing. It imports the config
+module directly rather than scanning its text, so the classification it checks is
+the one Oxlint actually receives.
 
 Its own negative tests matter as much as its passing run: dropping a plugin from
 the list must make it fail, naming that family. A gate that has never been seen

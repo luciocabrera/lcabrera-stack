@@ -70,3 +70,26 @@ export const configsDeclaringLint = (files) =>
 /** Removes `//` and block comments so a commented-out `lint:` is not counted. */
 const stripComments = (text) =>
   text.replaceAll(/\/\*[\s\S]*?\*\//gu, '').replaceAll(/\/\/[^\n]*/gu, '');
+
+/** `packages/ui/**` → `packages/ui`. */
+const globWorkspace = (glob) => glob.replace(/\/\*\*$/u, '');
+
+/**
+ * Workspaces named in no runtime list.
+ *
+ * The lists were first written from whichever workspaces happened to carry a
+ * `lint` block — the setup that was never loaded — which silently left six out.
+ * Nothing derives them, so nothing but this would notice a new workspace.
+ */
+export const unclassifiedWorkspaces = ({ runtimes, workspaces }) => {
+  const classified = new Set(Object.values(runtimes).flat().map(globWorkspace));
+  return workspaces.filter((workspace) => !classified.has(workspace));
+};
+
+/** Runtime globs naming a workspace that no longer exists. */
+export const staleRuntimeGlobs = ({ runtimes, workspaces }) => {
+  const present = new Set(workspaces);
+  return Object.values(runtimes)
+    .flat()
+    .filter((glob) => !present.has(globWorkspace(glob)));
+};
