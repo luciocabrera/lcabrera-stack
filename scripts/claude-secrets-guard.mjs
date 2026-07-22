@@ -96,6 +96,15 @@ const DENY_CASES = [
       edits: [{ new_string: 'const ok = 1;' }, { new_string: `k = "${AKIA}"` }],
     },
   ],
+  // The module-specifier carve-out below must not blind the rest of its line:
+  // an import and a real assignment can share one line.
+  [
+    'Write',
+    {
+      file_path: 'src/x.ts',
+      content: `import { a } from './secret-store.util'; const t = "${ENTROPY_FIXTURE}";`,
+    },
+  ],
 ];
 const ALLOW_CASES = [
   ['Read', { file_path: '/t/.env.example' }],
@@ -116,6 +125,33 @@ const ALLOW_CASES = [
     {
       file_path: 'src/x.ts',
       content: `const token = "${ENTROPY_FIXTURE}"; // gitleaks:allow`,
+    },
+  ],
+  // Importing a secret-related module is not a leak. These are the real
+  // specifiers from four committed source files, which the generic rule read
+  // as high-entropy values because their line also contains "secret"/"token".
+  [
+    'Write',
+    {
+      file_path: 'src/auth/verifyCredentials.util.ts',
+      content:
+        "import { isSecretHashValid } from '@lcabrera/server/crypto/is-secret-hash-valid.util';",
+    },
+  ],
+  [
+    'Write',
+    {
+      file_path: 'src/routes/login/login.action.ts',
+      content:
+        "import { generateApiToken } from '@lcabrera/server/tokens/generate-api-token.util';",
+    },
+  ],
+  [
+    'Write',
+    {
+      file_path: 'src/x.ts',
+      content:
+        "const { hashSecret } = await import('@lcabrera/server/crypto/hash-secret.util');",
     },
   ],
 ];
