@@ -1,13 +1,9 @@
-import { createApiLintConfig } from '@repo/vite-configs/api-lint';
 import { VITEST_COVERAGE_FLAGS } from '@repo/vite-configs/run';
 import { defineConfig } from 'vite-plus';
-
-const lintConfig = createApiLintConfig();
 
 const VITEST = 'node node_modules/vitest/vitest.mjs';
 
 export default defineConfig({
-  lint: lintConfig,
   run: {
     tasks: {
       build: {

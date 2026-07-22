@@ -1,15 +1,12 @@
-import { createApiLintConfig } from '@repo/vite-configs/api-lint';
 import { createFmtConfig } from '@repo/vite-configs/fmt';
 import { createPackConfig } from '@repo/vite-configs/pack';
 import { VITEST_COVERAGE_FLAGS } from '@repo/vite-configs/run';
 import { defineConfig } from 'vite-plus';
 
 const fmtConfig = createFmtConfig();
-const lintConfig = createApiLintConfig();
 
 export default defineConfig({
   fmt: fmtConfig,
-  lint: lintConfig,
   pack: createPackConfig(),
   run: {
     tasks: {

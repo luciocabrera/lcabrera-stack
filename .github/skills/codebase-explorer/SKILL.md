@@ -61,6 +61,11 @@ phase. Update `manifest.json` after each phase completes.
 
 ## Step 4 — Test each conclusion before reporting it
 
+**First check whether a tool's own docs already answer it.** Dependency docs ship
+in `node_modules/<pkg>/docs` for many packages (Vite+ among them). Rediscovering
+documented behaviour by experiment is slow and reaches wrong conclusions —
+experiments are for what the docs do not cover.
+
 For every conclusion you are about to write down, ask: **what else would
 produce the same observation?** If anything would, the evidence does not
 support the conclusion — find a probe that separates them and re-run.
