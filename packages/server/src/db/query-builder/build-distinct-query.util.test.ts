@@ -3,39 +3,30 @@ import { describe, expect, it } from 'vite-plus/test';
 import { buildDistinctQuery } from './build-distinct-query.util.ts';
 
 describe('buildDistinctQuery', () => {
-  it('builds a paginated distinct query with NULL/empty exclusion and stable ordering', () => {
+  it('is buildSelectQuery + DISTINCT: multi-column projection, filters, sort, pagination', () => {
     const result = buildDistinctQuery({
-      column: 'customer_email',
+      fields: ['shipping_country', 'shipping_state'],
+      filters: [{ column: 'shipping_country', operator: 'isNotNull' }],
       limit: 50,
       offset: 100,
       schema: 'public',
+      sort: [{ column: 'shipping_country', direction: 'asc' }],
       table: 'enterprise_orders',
     });
 
     expect(result).toEqual({
-      text: 'SELECT DISTINCT "customer_email" AS value FROM "public"."enterprise_orders" WHERE "customer_email" IS NOT NULL AND "customer_email"::text != \'\' ORDER BY "customer_email" LIMIT $1 OFFSET $2',
+      text:
+        'SELECT DISTINCT "shipping_country", "shipping_state" FROM "public"."enterprise_orders" ' +
+        'WHERE "shipping_country" IS NOT NULL ORDER BY "shipping_country" ASC LIMIT $1 OFFSET $2',
       values: [50, 100],
     });
   });
 
-  it('omits pagination clauses when limit/offset are undefined', () => {
-    const result = buildDistinctQuery({
-      column: 'color',
-      schema: 'public',
-      table: 'car_sales',
-    });
-
-    expect(result).toEqual({
-      text: 'SELECT DISTINCT "color" AS value FROM "public"."car_sales" WHERE "color" IS NOT NULL AND "color"::text != \'\' ORDER BY "color"',
-      values: [],
-    });
-  });
-
-  it('enforces the allowedColumns authorization check', () => {
+  it('carries the allowedColumns authorization check through to buildSelectQuery', () => {
     expect(() =>
       buildDistinctQuery({
         allowedColumns: ['color', 'model'],
-        column: 'vin',
+        fields: ['vin'],
         schema: 'public',
         table: 'car_sales',
       }),
@@ -45,15 +36,7 @@ describe('buildDistinctQuery', () => {
   it('rejects unsafe identifiers', () => {
     expect(() =>
       buildDistinctQuery({
-        column: 'value; DROP TABLE users',
-        schema: 'public',
-        table: 'car_sales',
-      }),
-    ).toThrow('Unsafe identifier');
-
-    expect(() =>
-      buildDistinctQuery({
-        column: 'color',
+        fields: ['color'],
         schema: 'public',
         table: 'car_sales; --',
       }),

@@ -11,6 +11,9 @@
  * dependency of this app (see the feature plan §1).
  */
 
+// Type-only (erased at build) — carries no `pg`/SQL runtime into this file.
+import type { ColumnType } from '@lcabrera/server/db/query-builder/query-builder.types';
+
 export const ENTERPRISE_ORDERS_SCHEMA = 'public';
 export const ENTERPRISE_ORDERS_TABLE = 'enterprise_orders';
 
@@ -87,6 +90,34 @@ export const ENTERPRISE_ORDER_COLUMNS = [
  */
 export const ENTERPRISE_ORDER_ALLOWED_COLUMNS: readonly string[] =
   ENTERPRISE_ORDER_COLUMNS;
+
+/**
+ * Columns offered as distinct-value filter dropdowns, each mapped to its
+ * `ColumnType` (consumed by `@lcabrera/server`'s `selectFilterOptions`, where
+ * only `text` columns also exclude the empty string). This is the single source
+ * the same-origin `/_api/filter-options` service derives from: its keys are the
+ * distinct allow-list (a column absent here is rejected before any SQL runs).
+ * Every one is a free-text / convention-enum `varchar`, so `text` is correct.
+ */
+export const ENTERPRISE_ORDER_DISTINCT_FILTER_COLUMNS: Readonly<
+  Record<string, ColumnType>
+> = {
+  carrier: 'text',
+  customer_email: 'text',
+  customer_name: 'text',
+  customer_type: 'text',
+  order_number: 'text',
+  order_status: 'text',
+  payment_method: 'text',
+  payment_status: 'text',
+  priority: 'text',
+  product_category: 'text',
+  product_subcategory: 'text',
+  shipping_city: 'text',
+  shipping_country: 'text',
+  shipping_state: 'text',
+  warehouse_location: 'text',
+};
 
 // ---------------------------------------------------------------------------
 // Enum value sets (convention-only in the DB — no CHECK constraints). Used for

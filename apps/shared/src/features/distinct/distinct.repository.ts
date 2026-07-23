@@ -44,12 +44,21 @@ export const createDistinctRepository = ({
   }) => {
     const source = parseDistinctSource({ columnName, schemaName, tableName });
 
+    // Mirrors @lcabrera/server's selectFilterOptions, but composed onto this
+    // app's injected pool rather than the getPool singleton (unifying the two is
+    // #352). Every distinct source here is a text column, so a bare empty-string
+    // `neq` is safe (no cast needed).
     const query = buildDistinctQuery({
       allowedColumns: source.allowedColumns,
-      column: source.columnName,
+      fields: [source.columnName],
+      filters: [
+        { column: source.columnName, operator: 'isNotNull' },
+        { column: source.columnName, operator: 'neq', value: '' },
+      ],
       limit,
       offset,
       schema: source.schemaName,
+      sort: [{ column: source.columnName, direction: 'asc' }],
       table: source.tableName,
     });
     const params = query.values as readonly QueryValue[];
@@ -59,11 +68,10 @@ export const createDistinctRepository = ({
       formatPgAdminQuery(query.text, params),
     );
 
-    const result = await pool.query<{ readonly value: string }>(
-      query.text,
-      params,
-    );
-    const values = result.rows.map(({ value }) => value);
+    const result = await pool.query<Record<string, string>>(query.text, params);
+    const values = result.rows
+      .map((row) => row[source.columnName])
+      .filter((value): value is string => value !== undefined);
 
     return {
       hasMore: values.length === limit,

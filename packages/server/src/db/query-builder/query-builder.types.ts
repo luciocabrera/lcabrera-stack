@@ -1,9 +1,5 @@
-export type BuiltQuery = {
-  readonly text: string;
-  readonly values: readonly unknown[];
-};
-
-export type ComparisonOperator =
+/** Operators that compare a column against a parameterized value. */
+export type BinaryOperator =
   | 'eq'
   | 'gt'
   | 'gte'
@@ -13,6 +9,20 @@ export type ComparisonOperator =
   | 'lte'
   | 'neq'
   | 'notIlike';
+
+export type BuiltQuery = {
+  readonly text: string;
+  readonly values: readonly unknown[];
+};
+
+/**
+ * The value class of a column, used by `selectFilterOptions` to decide which
+ * distinct filter values are "meaningful": only `text` columns exclude the empty
+ * string (the rest have no empty-string notion, so just NULL is excluded).
+ */
+export type ColumnType = 'boolean' | 'date' | 'enum' | 'number' | 'text';
+
+export type ComparisonOperator = BinaryOperator | UnaryOperator;
 
 export type CountQueryDescriptor = {
   readonly allowedColumns?: readonly string[];
@@ -38,16 +48,6 @@ export type DeleteQueryDescriptor = {
   readonly table: string;
 };
 
-export type DistinctQueryDescriptor = {
-  /** Same opt-in authorization semantics as SelectQueryDescriptor. */
-  readonly allowedColumns?: readonly string[];
-  readonly column: string;
-  readonly limit?: number;
-  readonly offset?: number;
-  readonly schema: string;
-  readonly table: string;
-};
-
 export type InsertQueryDescriptor = {
   /** Same opt-in authorization semantics as SelectQueryDescriptor. */
   readonly allowedColumns?: readonly string[];
@@ -67,11 +67,20 @@ export type MaxValueQueryDescriptor = {
   readonly table: string;
 };
 
-export type QueryFilter = {
-  readonly column: string;
-  readonly operator: ComparisonOperator;
-  readonly value: unknown;
-};
+/**
+ * A single WHERE condition. A `BinaryOperator` carries the value it compares
+ * against; a `UnaryOperator` (`isNotNull`) stands alone and takes no value.
+ */
+export type QueryFilter =
+  | {
+      readonly column: string;
+      readonly operator: BinaryOperator;
+      readonly value: unknown;
+    }
+  | {
+      readonly column: string;
+      readonly operator: UnaryOperator;
+    };
 
 export type QuerySort = {
   readonly column: string;
@@ -86,6 +95,8 @@ export type SelectQueryDescriptor = {
    * never derived from a request.
    */
   readonly allowedColumns?: readonly string[];
+  /** Emit `SELECT DISTINCT` over `fields` rather than a plain `SELECT`. */
+  readonly distinct?: boolean;
   readonly fields: readonly string[];
   readonly filters?: readonly QueryFilter[];
   readonly limit?: number;
@@ -94,6 +105,9 @@ export type SelectQueryDescriptor = {
   readonly sort?: readonly QuerySort[];
   readonly table: string;
 };
+
+/** Operators that stand alone — no value, no bound parameter. */
+export type UnaryOperator = 'isNotNull';
 
 export type UpdateQueryDescriptor = {
   /** Same opt-in authorization semantics as SelectQueryDescriptor. */

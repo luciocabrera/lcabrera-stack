@@ -44,6 +44,8 @@
     "./db/query-builder/build-select-query.util": "./src/db/query-builder/build-select-query.util.ts",
     "./db/query-builder/build-update-query.util": "./src/db/query-builder/build-update-query.util.ts",
     "./db/query-builder/query-builder.types": "./src/db/query-builder/query-builder.types.ts",
+    "./db/select-distinct-rows.util": "./src/db/select-distinct-rows.util.ts",
+    "./db/select-filter-options.util": "./src/db/select-filter-options.util.ts",
     "./db/select-rows.util": "./src/db/select-rows.util.ts",
     "./db/update-rows.util": "./src/db/update-rows.util.ts",
     "./filters/filters.types": "./src/filters/filters.types.ts",
@@ -122,6 +124,14 @@
       "./db/query-builder/query-builder.types": {
         "types": "./dist/db/query-builder/query-builder.types.d.mts",
         "default": "./dist/db/query-builder/query-builder.types.mjs"
+      },
+      "./db/select-distinct-rows.util": {
+        "types": "./dist/db/select-distinct-rows.util.d.mts",
+        "default": "./dist/db/select-distinct-rows.util.mjs"
+      },
+      "./db/select-filter-options.util": {
+        "types": "./dist/db/select-filter-options.util.d.mts",
+        "default": "./dist/db/select-filter-options.util.mjs"
       },
       "./db/select-rows.util": {
         "types": "./dist/db/select-rows.util.d.mts",

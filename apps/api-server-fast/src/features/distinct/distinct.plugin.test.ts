@@ -23,7 +23,7 @@ describe('distinct fastify plugin', () => {
   it('serves allow-listed distinct values with pagination', async () => {
     const pool = {
       query: vi.fn().mockResolvedValue({
-        rows: [{ value: 'Delivered' }, { value: 'Pending' }],
+        rows: [{ order_status: 'Delivered' }, { order_status: 'Pending' }],
       }),
     };
 
@@ -40,8 +40,10 @@ describe('distinct fastify plugin', () => {
       values: ['Delivered', 'Pending'],
     });
     expect(pool.query).toHaveBeenCalledWith(
-      expect.stringContaining('SELECT DISTINCT "order_status" AS value'),
-      [2, 4],
+      expect.stringContaining(
+        'SELECT DISTINCT "order_status" FROM "public"."enterprise_orders"',
+      ),
+      ['', 2, 4],
     );
 
     await app.close();
