@@ -48,8 +48,9 @@ const GLOBAL_PACKAGES = new Set(['@repo/vite-configs', '@repo/ts-configs']);
  * the root Vite+ config (which owns the shared run/test tasks). This stays small
  * on purpose — a real dependency change always updates `pnpm-lock.yaml`, so every
  * OTHER out-of-workspace file (root package.json scripts, lint/tsconfig configs,
- * docs, root tooling under `scripts/`) affects no workspace suite and is simply
- * ignored. The shared config packages force a full run too, via GLOBAL_PACKAGES.
+ * docs) affects no workspace suite. The shared config packages force a full run
+ * too, via GLOBAL_PACKAGES; `scripts/` runs its own `test:scripts` (see
+ * `SCRIPTS_TEST_PATTERN`), not the workspace suites.
  */
 const FORCE_FULL_PATTERNS = [
   /^pnpm-lock\.yaml$/,
@@ -82,6 +83,21 @@ const LINT_ONLY_PATTERNS = [
 
 const isLintOnly = (file) =>
   LINT_ONLY_PATTERNS.some((pattern) => pattern.test(file));
+
+/** The root task (`vitest run --root scripts`) covering the `scripts/` tests. */
+export const SCRIPTS_TEST_TASK = 'test:scripts';
+
+/**
+ * Scripts under `scripts/` are tooling in no workspace, so the workspace
+ * selection never covers them — yet they carry real tests (the `scripts/` test
+ * files, run by `test:scripts`). A diff touching a script runs that suite; the
+ * workspace `test:changed` never would. Code files only — a docs or JSON change
+ * under `scripts/` needs no test.
+ */
+const SCRIPTS_TEST_PATTERN = /^scripts\/.+\.(mjs|cjs|js)$/;
+
+const touchesScripts = (files) =>
+  files.some((file) => SCRIPTS_TEST_PATTERN.test(file));
 
 /** The workspace package names declared as `workspace:*` deps of a manifest. */
 const workspaceDeps = (manifest, packageNames) => {
@@ -181,8 +197,12 @@ export const resolveAffected = ({ files, graph }) => {
   // to the shared `vite-configs` package from forcing the full suite via
   // GLOBAL_PACKAGES below.
   const relevant = files.filter((file) => !isLintOnly(file));
+  // `scripts/` is tooling in no workspace, so it never lands in `packages`; carry
+  // it as its own flag so the test runner can add the root `test:scripts` group
+  // (the workspace-oriented mode/packages stay about workspaces).
+  const scripts = touchesScripts(relevant);
   if (relevant.length === 0) {
-    return { mode: 'none', packages: [], changed: [] };
+    return { mode: 'none', packages: [], changed: [], scripts };
   }
   const changedWorkspaces = workspacesForFiles(relevant, graph);
   const changed = changedWorkspaces.map((workspace) => workspace.pkgName);
@@ -196,23 +216,36 @@ export const resolveAffected = ({ files, graph }) => {
       mode: 'full',
       packages: graph.map((workspace) => workspace.pkgName),
       changed,
+      scripts,
     };
   }
   if (changed.length === 0) {
-    return { mode: 'none', packages: [], changed: [] };
+    return { mode: 'none', packages: [], changed: [], scripts };
   }
   const affected = withDependents(changed, buildDependents(graph));
-  return { mode: 'scoped', packages: [...affected], changed };
+  return { mode: 'scoped', packages: [...affected], changed, scripts };
 };
 
 /**
- * The plan for a diff: `{ mode, groups, packages, changed }` — `resolveAffected`
- * split into the ordered `vp run` groups (see `partitionTasks`), plus the raw
- * affected/changed package sets so the caller can report per-workspace.
+ * The plan for a diff: `{ mode, groups, packages, changed, scripts }` —
+ * `resolveAffected` split into the ordered `vp run` groups (see `partitionTasks`),
+ * plus the raw affected/changed package sets so the caller can report
+ * per-workspace. When the diff touched `scripts/`, the root `test:scripts` group
+ * is appended (empty `packages` → `vpArgsFor` runs it filter-less) so those
+ * suites run on PRs, not only in the full `test:ci` on `main`. It goes last so a
+ * coverage `test:ci` group still writes the summary before it; `test:scripts`
+ * emits no coverage of its own.
  */
 export const resolveTestGroups = ({ files, graph, ci = false }) => {
-  const { mode, packages, changed } = resolveAffected({ files, graph });
-  return { mode, packages, changed, groups: partitionTasks(packages, { ci }) };
+  const { mode, packages, changed, scripts } = resolveAffected({
+    files,
+    graph,
+  });
+  const groups = partitionTasks(packages, { ci });
+  if (scripts) {
+    groups.push({ task: SCRIPTS_TEST_TASK, packages: [] });
+  }
+  return { mode, packages, changed, scripts, groups };
 };
 
 /** The reason a workspace is (not) running, for the human summary. */
@@ -255,7 +288,7 @@ export const workspaceDispositions = ({ graph, affected, changed, groups }) => {
 export const renderSelectionMarkdown = (
   mode,
   dispositions,
-  { title = '🧪 Test Selection' } = {},
+  { title = '🧪 Test Selection', scripts = false } = {},
 ) => {
   const running = dispositions.filter((disposition) => disposition.running);
   const skipped = dispositions.filter((disposition) => !disposition.running);
@@ -264,6 +297,11 @@ export const renderSelectionMarkdown = (
     mode === 'full'
       ? `**Full run** — a shared or root file changed, so all ${total} workspaces run.`
       : `**${running.length} of ${total} workspaces** affected by this change; the rest are skipped (no changes detected).`;
+  // The `scripts/` suites are a root task in no workspace, so they never appear
+  // in the per-workspace table — call them out explicitly when they run.
+  const scriptsNote = scripts
+    ? ['> Plus `test:scripts` — a `scripts/` file changed.', '']
+    : [];
   const runningBlock =
     running.length === 0
       ? []
@@ -292,6 +330,7 @@ export const renderSelectionMarkdown = (
     '',
     headline,
     '',
+    ...scriptsNote,
     ...runningBlock,
     ...skippedBlock,
   ].join('\n');
