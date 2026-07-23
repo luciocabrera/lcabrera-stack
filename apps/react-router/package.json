@@ -45,7 +45,6 @@
     "@types/react": "catalog:types",
     "@types/react-dom": "catalog:types",
     "@typescript-eslint/utils": "catalog:lint",
-    "@vitest/coverage-v8": "catalog:test",
     "babel-plugin-react-compiler": "catalog:react",
     "eslint": "catalog:lint",
     "eslint-config-prettier": "catalog:lint",

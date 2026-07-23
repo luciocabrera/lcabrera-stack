@@ -202,7 +202,6 @@
     "@repo/vite-configs": "workspace:*",
     "@types/node": "catalog:types",
     "@types/pg": "catalog:types",
-    "@vitest/coverage-v8": "catalog:test",
     "eslint": "catalog:lint",
     "typescript": "catalog:build",
     "vite": "catalog:build",

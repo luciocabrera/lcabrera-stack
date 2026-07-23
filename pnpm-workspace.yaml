@@ -83,9 +83,14 @@ catalogs:
 
   test:
     '@testing-library/react': ^16.3.2
-    '@vitest/coverage-v8': 4.1.10 # pinned in lockstep with `vitest` below
     jsdom: ^29.1.1
     playwright: ^1.61.1
+    # `vitest` stays cataloged because every workspace invokes its binary by path
+    # (`node node_modules/vitest/vitest.mjs`, via vite.run.shared.config.ts), which
+    # needs a resolvable direct dep. `@vitest/coverage-v8` is deliberately NOT here:
+    # vitest resolves the v8 provider from vite-plus's own tree at runtime, so a
+    # per-workspace/catalog pin is redundant (a workspace can run coverage without
+    # declaring it). Do not re-add it. See #357.
     vitest: 4.1.10
 
   tooling:
@@ -151,4 +156,5 @@ peerDependencyRules:
   allowedVersions:
     vite: '*'
     vitest: '*'
+
 # trustPolicy: no-downgrade
