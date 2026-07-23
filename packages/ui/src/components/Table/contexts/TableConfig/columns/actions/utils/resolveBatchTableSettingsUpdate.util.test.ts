@@ -7,7 +7,7 @@ import type {
   SortingState,
 } from '@lcabrera/ui/components/Table/Table.types';
 
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 import { resolveBatchTableSettingsUpdate } from './resolveBatchTableSettingsUpdate.util';
 

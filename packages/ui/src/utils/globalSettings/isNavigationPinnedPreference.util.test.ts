@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { NAVIGATION_PINNED_VALUES } from './globalSettings.constants';
 import { isNavigationPinnedPreference } from './isNavigationPinnedPreference.util';

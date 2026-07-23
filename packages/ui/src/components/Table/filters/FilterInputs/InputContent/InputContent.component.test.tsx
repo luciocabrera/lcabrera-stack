@@ -6,7 +6,7 @@ import type {
 } from '@lcabrera/ui/types/filterOperators.types';
 
 import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { InputContent } from './InputContent.component';
 

@@ -1,6 +1,6 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { authCookie } from '@/auth/authCookie';
 import { readAuthEnvConfig } from '@/auth/env.schema';

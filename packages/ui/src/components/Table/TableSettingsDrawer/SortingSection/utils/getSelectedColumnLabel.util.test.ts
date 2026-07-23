@@ -1,6 +1,6 @@
 import type { TableColumn } from '@lcabrera/ui/components/Table/Table.types';
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { getSelectedColumnLabel } from './getSelectedColumnLabel.util';
 

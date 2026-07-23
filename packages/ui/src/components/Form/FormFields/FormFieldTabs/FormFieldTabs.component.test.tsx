@@ -6,7 +6,7 @@ import { FormProvider } from '@lcabrera/ui/components/Form/contexts';
 import { FormFieldsRendererContext } from '@lcabrera/ui/components/Form/FormFields/contexts/FormFieldsRendererContext/FormFieldsRendererContext.context';
 import { FormFieldsList } from '@lcabrera/ui/components/Form/FormFields/FormFieldsList/FormFieldsList.component';
 import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import { FormFieldTabs } from './FormFieldTabs.component';
 

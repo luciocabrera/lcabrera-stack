@@ -1,7 +1,7 @@
 import { closePool, getPool } from '@lcabrera/server/db/get-pool.util';
 import { getUserByUsername } from '@repo/scan-ingestion/queries/getUserByUsername.util';
 import { randomUUID } from 'node:crypto';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
 
 /**
  * DB-layer proof of migration 0029 (ADR-034 / STATUS §3.4): a run must analyze

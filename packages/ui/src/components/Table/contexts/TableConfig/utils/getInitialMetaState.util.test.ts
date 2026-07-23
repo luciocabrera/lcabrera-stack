@@ -8,7 +8,7 @@ import {
   IS_PREFETCH_ENABLED,
   LOAD_MORE_PAGE_SIZE,
 } from '@lcabrera/ui/components/Table/Table.constants';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { getInitialMetaState } from './getInitialMetaState.util';
 

@@ -2,7 +2,7 @@ import type { ActionFunctionArgs } from 'react-router';
 
 import { issueApiToken } from '@repo/scan-ingestion/queries/issueApiToken.util';
 import { revokeApiToken } from '@repo/scan-ingestion/queries/revokeApiToken.util';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { requireUser } from '@/auth/requireUser.util';
 

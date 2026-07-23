@@ -14,7 +14,7 @@ import { useGetIsFormDirty } from '@lcabrera/ui/components/Form/contexts/FormCon
 import { formInputStyles } from '@lcabrera/ui/components/Form/fields/formInput.stylex';
 import * as stylex from '@stylexjs/stylex';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import { NumberField } from './NumberField.component';
 

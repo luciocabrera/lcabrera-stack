@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { isAccessTicketValid } from './is-access-ticket-valid.util.ts';
 import { signAccessTicket } from './sign-access-ticket.util.ts';

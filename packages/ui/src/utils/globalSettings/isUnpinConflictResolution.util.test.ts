@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { UNPIN_CONFLICT_VALUES } from './globalSettings.constants';
 import { isUnpinConflictResolution } from './isUnpinConflictResolution.util';

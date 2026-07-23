@@ -5,7 +5,7 @@ import type {
 import type { TStore } from '@lcabrera/ui/hooks/useStore.hook';
 
 import { createMockStore } from '@lcabrera/ui/utils/tests/createMockStore.util';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { handleFetchMoreFilterDataError } from './handleFetchMoreFilterDataError.util';
 

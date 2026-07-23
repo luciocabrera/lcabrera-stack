@@ -1,6 +1,6 @@
 import { hashSecret } from '@lcabrera/server/crypto/hash-secret.util';
 import { closePool, getPool } from '@lcabrera/server/db/get-pool.util';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
 
 import { checkUserPermission } from './checkUserPermission.util.ts';
 import { getUserByUsername } from './getUserByUsername.util.ts';

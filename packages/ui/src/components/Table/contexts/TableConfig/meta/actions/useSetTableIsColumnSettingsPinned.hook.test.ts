@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { act, renderHook } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 const { metaStoreGetMock, metaStoreSetMock } = vi.hoisted(() => ({
   metaStoreGetMock: vi.fn(() => ({ persistenceKey: '' })),

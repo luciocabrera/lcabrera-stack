@@ -3,7 +3,7 @@
 import { LOAD_MORE_PAGE_SIZE } from '@lcabrera/ui/components/Table/Table.constants';
 import { createPaginatedFetchActionMocks } from '@lcabrera/ui/utils/tests/createPaginatedFetchActionMocks.util';
 import { act, renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { useFetchMoreData } from './useFetchMoreData.hook';
 

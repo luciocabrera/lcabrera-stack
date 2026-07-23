@@ -5,7 +5,7 @@ import type { ReactNode } from 'react';
 import { createMockStore } from '@lcabrera/ui/utils/tests/createMockStore.util';
 import { act, renderHook } from '@testing-library/react';
 import { createElement } from 'react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import type { ColumnDrawerContextValue } from './ColumnDrawerContext.types';
 

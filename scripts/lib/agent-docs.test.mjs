@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 // AGENTS.md is the single source of the repo's instructions; CLAUDE.md,
 // GEMINI.md and .github/copilot-instructions.md are symlinks to it so every

@@ -1,6 +1,6 @@
 import type { Pool } from 'pg';
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { deleteRows } from './delete-rows.util.ts';
 import { getPool } from './get-pool.util.ts';

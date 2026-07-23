@@ -1,6 +1,6 @@
 import { makeTempDirectory } from '@repo/scan-ingestion/testing/makeTempDirectory.util.ts';
 import { rmSync } from 'node:fs';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test';
 
 import { isExistingPathWithin } from './isExistingPathWithin.util.ts';
 import { writeTextFileWithin } from './writeTextFileWithin.util.ts';

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { NAVIGATION_COLLAPSED_VALUES } from './globalSettings.constants';
 import { isNavigationCollapsedPreference } from './isNavigationCollapsedPreference.util';

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { newUserSchema } from './newUser.schema';
 import { toNewUserFieldErrors } from './toNewUserFieldErrors.util';

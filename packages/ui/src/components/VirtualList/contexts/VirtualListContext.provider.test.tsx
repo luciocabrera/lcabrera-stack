@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { act } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 import type { VirtualListDataState } from '../VirtualList.types';
 import type { VirtualListStateProps } from './VirtualListContext.types';

@@ -1,6 +1,6 @@
 import type { FieldNode } from '@lcabrera/ui/components/Form';
 
-import { expect, it } from 'vitest';
+import { expect, it } from 'vite-plus/test';
 
 import type { EnterpriseOrderValues } from '../config';
 

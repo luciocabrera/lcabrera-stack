@@ -3,7 +3,7 @@
 import type { ColumnSizingState } from '@lcabrera/ui/components/Table/Table.types';
 
 import { act, renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { useSetColumnsSizing } from './useSetColumnsSizing.hook';
 

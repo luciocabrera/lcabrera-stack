@@ -1,6 +1,6 @@
 import type { ShouldRevalidateFunctionArgs } from 'react-router';
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { shouldRevalidatePersistCookieAction } from './shouldRevalidatePersistCookieAction.util';
 

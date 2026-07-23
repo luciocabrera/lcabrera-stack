@@ -1,6 +1,6 @@
 import type { ActionFunctionArgs } from 'react-router';
 
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 vi.mock('@lcabrera/ui/utils/storage/buildCookieString.util', () => ({
   buildCookieString: vi.fn(

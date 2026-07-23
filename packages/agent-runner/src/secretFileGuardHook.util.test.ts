@@ -1,6 +1,6 @@
 import type { HookInput } from '@anthropic-ai/claude-agent-sdk';
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { secretFileGuardHook } from './secretFileGuardHook.util.ts';
 

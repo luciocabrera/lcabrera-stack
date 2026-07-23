@@ -7,7 +7,7 @@ import type {
 
 import * as stylex from '@stylexjs/stylex';
 import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 const { mockRouterNavLink } = vi.hoisted(() => {
   const mockRenderProps: NavLinkRenderProps = {

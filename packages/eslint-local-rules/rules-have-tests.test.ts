@@ -1,5 +1,5 @@
 import { readdirSync } from 'node:fs';
-import { expect, it } from 'vitest';
+import { expect, it } from 'vite-plus/test';
 
 import { rules } from './rules.js';
 

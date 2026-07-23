@@ -1,6 +1,6 @@
 import type { ClientActionFunctionArgs } from 'react-router';
 
-import { expect, it, vi } from 'vitest';
+import { expect, it, vi } from 'vite-plus/test';
 
 import { buildValidOrderFormFields } from './config/enterpriseOrders.fixtures';
 import { orderClientAction } from './orderClientAction';

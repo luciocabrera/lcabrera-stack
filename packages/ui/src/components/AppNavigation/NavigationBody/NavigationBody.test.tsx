@@ -3,7 +3,14 @@
 import type { NavbarItemConfig } from '@lcabrera/ui/components/Navbar/Navbar.types';
 
 import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vite-plus/test';
 
 const { collapsedPreferenceMock, sizePreferenceMock } = vi.hoisted(() => ({
   collapsedPreferenceMock: vi.fn<() => string | undefined>(() => {}),

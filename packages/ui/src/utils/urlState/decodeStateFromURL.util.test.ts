@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { decodeStateFromURL } from './decodeStateFromURL.util';
 import { encodeStateToURL } from './encodeStateToURL.util';

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { buildDistinctQuery } from './build-distinct-query.util.ts';
 

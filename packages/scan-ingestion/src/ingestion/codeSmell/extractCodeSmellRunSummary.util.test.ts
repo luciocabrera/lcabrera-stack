@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { reportSchema } from '../report.schema.ts';
 import { extractCodeSmellRunSummary } from './extractCodeSmellRunSummary.util.ts';

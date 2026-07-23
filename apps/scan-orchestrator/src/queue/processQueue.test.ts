@@ -2,7 +2,7 @@ import type { QueuedScanRow } from '@repo/scan-ingestion/queries/getQueuedScans.
 
 import { getQueuedScans } from '@repo/scan-ingestion/queries/getQueuedScans.util';
 import { getUserByUsername } from '@repo/scan-ingestion/queries/getUserByUsername.util';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import type { RunStatusHub } from '../ws/runStatusHub.ts';
 

@@ -1,6 +1,6 @@
 import type { PassThrough } from 'node:stream';
 
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 import { buildShellStreamResponse } from './buildShellStreamResponse.util';
 

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { GLOBAL_SETTINGS_COOKIE_VERSION } from './globalSettings.constants';
 import { serializeGlobalSettingsForCookie } from './serializeGlobalSettingsForCookie.util';

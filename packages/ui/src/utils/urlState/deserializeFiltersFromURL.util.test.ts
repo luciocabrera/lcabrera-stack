@@ -1,6 +1,6 @@
 import type { ColumnFiltersState } from '@lcabrera/ui/components/Table';
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { deserializeFiltersFromURL } from './deserializeFiltersFromURL.util';
 

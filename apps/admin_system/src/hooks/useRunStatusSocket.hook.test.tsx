@@ -5,7 +5,14 @@ import { useGetNotifications } from '@lcabrera/ui/contexts/NotificationContext/s
 import { act, cleanup, render, screen } from '@testing-library/react';
 import { useEffect, useState } from 'react';
 import { createRoutesStub } from 'react-router';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vite-plus/test';
 
 import { useRunStatusSocket } from './useRunStatusSocket.hook';
 

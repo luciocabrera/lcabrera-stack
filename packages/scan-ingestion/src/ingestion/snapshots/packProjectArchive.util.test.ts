@@ -4,7 +4,7 @@ import { makeTempDirectory } from '@repo/scan-ingestion/testing/makeTempDirector
 import { writeTempTree } from '@repo/scan-ingestion/testing/writeTempTree.util.ts';
 import { rmSync } from 'node:fs';
 import path from 'node:path';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test';
 
 import { extractZipArchive } from './extractZipArchive.util.ts';
 import { packProjectArchive } from './packProjectArchive.util.ts';

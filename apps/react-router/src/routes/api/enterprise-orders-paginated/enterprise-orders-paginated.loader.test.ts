@@ -1,6 +1,6 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
-import { expect, it, vi } from 'vitest';
+import { expect, it, vi } from 'vite-plus/test';
 
 import { selectOrdersPage } from '@/routes/enterprise-orders/.server/enterpriseOrders.service';
 

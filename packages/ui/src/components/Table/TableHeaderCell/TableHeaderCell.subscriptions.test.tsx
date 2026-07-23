@@ -6,7 +6,7 @@ import {
 } from '@lcabrera/ui/utils/tests/createMockStore.util';
 import { act, cleanup, render } from '@testing-library/react';
 import { Profiler } from 'react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 const COLUMN_KEYS = ['col0', 'col1', 'col2', 'col3'] as const;
 

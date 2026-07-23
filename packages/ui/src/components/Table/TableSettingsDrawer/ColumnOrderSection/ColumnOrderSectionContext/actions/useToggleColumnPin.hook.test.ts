@@ -4,7 +4,7 @@
 
 import { createColumnOrderSectionActionMocks } from '@lcabrera/ui/utils/tests/createColumnOrderSectionActionMocks.util';
 import { act, renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { useToggleColumnPin } from './useToggleColumnPin.hook';
 

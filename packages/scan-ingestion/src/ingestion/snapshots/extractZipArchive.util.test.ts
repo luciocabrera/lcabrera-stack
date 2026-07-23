@@ -4,7 +4,7 @@ import { makeTempDirectory } from '@repo/scan-ingestion/testing/makeTempDirector
 import { strToU8, zipSync } from 'fflate';
 import { rmSync } from 'node:fs';
 import path from 'node:path';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test';
 
 import { extractZipArchive } from './extractZipArchive.util.ts';
 

@@ -4,7 +4,7 @@ import type { TablePersistenceConfig } from '@lcabrera/ui/components/Table/Table
 
 import { MAX_COOKIE_ENTRY_VALUE_LENGTH } from '@lcabrera/ui/constants/globalSettings.constants';
 import { act, renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { usePersistTableStateAction } from './usePersistTableStateAction.hook';
 

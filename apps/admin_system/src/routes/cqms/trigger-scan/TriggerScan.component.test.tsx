@@ -3,7 +3,14 @@
 import type { ReactNode } from 'react';
 
 import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vite-plus/test';
 
 const { actionDataRef, loaderDataRef } = vi.hoisted(() => ({
   actionDataRef: { current: undefined as unknown },

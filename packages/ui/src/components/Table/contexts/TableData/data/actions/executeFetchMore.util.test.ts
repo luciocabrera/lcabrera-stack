@@ -1,6 +1,6 @@
 import { resolveFromCacheOrFetch } from '@lcabrera/ui/utils/prefetch/resolveFromCacheOrFetch.util';
 import { createMockStore } from '@lcabrera/ui/utils/tests/createMockStore.util';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import type { DataState } from './fetchMoreData.types';
 

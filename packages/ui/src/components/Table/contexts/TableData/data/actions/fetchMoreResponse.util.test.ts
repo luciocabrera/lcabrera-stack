@@ -1,5 +1,5 @@
 import { resolveFromCacheOrFetch } from '@lcabrera/ui/utils/prefetch/resolveFromCacheOrFetch.util';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 import { fetchMoreResponse } from './fetchMoreResponse.util';
 

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { eslintRawSchema } from './eslintRaw.schema.ts';
 import { extractEslintRunSummary } from './extractEslintRunSummary.util.ts';

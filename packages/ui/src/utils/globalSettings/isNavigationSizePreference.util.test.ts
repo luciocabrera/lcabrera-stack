@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { NAVIGATION_SIZE_VALUES } from './globalSettings.constants';
 import { isNavigationSizePreference } from './isNavigationSizePreference.util';

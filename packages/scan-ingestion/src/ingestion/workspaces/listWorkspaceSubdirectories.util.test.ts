@@ -1,7 +1,7 @@
 import { makeDirectoryWithin } from '@repo/scan-ingestion/fs/makeDirectoryWithin.util.ts';
 import { makeTempDirectory } from '@repo/scan-ingestion/testing/makeTempDirectory.util.ts';
 import { rmSync } from 'node:fs';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test';
 
 import { listWorkspaceSubdirectories } from './listWorkspaceSubdirectories.util.ts';
 

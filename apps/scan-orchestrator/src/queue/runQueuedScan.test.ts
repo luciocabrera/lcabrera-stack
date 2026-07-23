@@ -3,7 +3,7 @@ import { getUserByUsername } from '@repo/scan-ingestion/queries/getUserByUsernam
 import { mkdtempSync, realpathSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
 
 import { createRunStatusHub } from '../ws/runStatusHub.ts';
 import { runQueuedScan } from './runQueuedScan.ts';

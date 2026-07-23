@@ -1,6 +1,6 @@
 import type { GlobalSettingsState } from '@lcabrera/ui/types/globalSettings.types';
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { getGlobalSettingsFromCookie } from './getGlobalSettingsFromCookie.util';
 import {

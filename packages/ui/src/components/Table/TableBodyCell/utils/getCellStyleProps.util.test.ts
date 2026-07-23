@@ -1,6 +1,6 @@
 import type { StyleXStyles } from '@stylexjs/stylex';
 
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 const { baseMock, pinnedLeftMock, pinnedRightMock, propsMock } = vi.hoisted(
   () => ({

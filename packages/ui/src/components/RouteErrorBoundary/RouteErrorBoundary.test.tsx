@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 const { navigateMock, revalidateMock } = vi.hoisted(() => ({
   navigateMock: vi.fn(),

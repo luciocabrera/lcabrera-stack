@@ -1,6 +1,6 @@
 import type { Pool } from 'pg';
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { getPool } from './get-pool.util.ts';
 import { insertRow } from './insert-row.util.ts';

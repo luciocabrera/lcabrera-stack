@@ -19,7 +19,7 @@
 import { readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { expect, it } from 'vitest';
+import { expect, it } from 'vite-plus/test';
 
 import frozenPaths from './stylex-module-paths.test.json' with { type: 'json' };
 

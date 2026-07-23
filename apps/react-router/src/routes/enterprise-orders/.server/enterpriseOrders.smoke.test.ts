@@ -1,7 +1,7 @@
 // @vitest-environment node
 
 import { closePool } from '@lcabrera/server/db/get-pool.util';
-import { afterAll, describe, expect, it } from 'vitest';
+import { afterAll, describe, expect, it } from 'vite-plus/test';
 
 import { getDemoCredential } from '@/auth/getDemoCredential.util';
 import { verifyCredentials } from '@/auth/verifyCredentials.util';

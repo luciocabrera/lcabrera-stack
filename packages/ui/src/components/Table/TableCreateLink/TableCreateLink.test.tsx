@@ -2,7 +2,7 @@
 
 import { cleanup, render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import { TableCreateLink } from './TableCreateLink.component';
 
