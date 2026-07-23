@@ -9,7 +9,7 @@ area:
 started: 2026-07-23
 updated: 2026-07-23
 plan: (none)
-pr: (none)
+pr: 341
 issue: #340
 ---
 
@@ -25,6 +25,6 @@ transport.
 
 ## Status / next
 
-- Current step: fix + docs + test done and green; live-verifying prod build
+- Current step: PR #341 open, live-verified; ready for review
 - Blockers: none
-- Next: open PR against #340; file a follow-up for the unauth'd endpoints
+- Next: merge; auth-guard follow-up filed as #342
