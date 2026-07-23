@@ -7,6 +7,10 @@ allowBuilds:
 # Supply chain security (https://pnpm.io/supply-chain-security)
 blockExoticSubdeps: true
 
+# A workspace dependency cycle is an architecture error (ADR-038); make it fail
+# the install rather than the default warning that scrolls past unnoticed.
+disallowWorkspaceCycles: true
+
 catalog:
   '@anthropic-ai/claude-agent-sdk': ^0.3.218
   '@babel/preset-typescript': ^8.0.1
@@ -74,6 +78,9 @@ catalog:
   '@changesets/cli': ^2.31.1
 
 catalogMode: prefer
+# Prune catalog entries that no package.json references, so the catalog cannot
+# accumulate dead pins (default is `false`).
+cleanupUnusedCatalogs: true
 # minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
   - '@types/*' # type-only packages have zero runtime attack surface
