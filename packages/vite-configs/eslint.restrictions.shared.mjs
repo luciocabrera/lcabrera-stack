@@ -87,6 +87,19 @@ export const REACT_TYPE_IMPORT_PATHS = [
   },
 ];
 
+// Tests import test utilities from `vite-plus/test`, not `vitest` directly — it
+// re-exports the vite-plus-bundled Vitest, so the test runtime always matches
+// the toolchain and there is no self-managed `vitest` to drift (ADR-045). This
+// is what enforces that convention; the earlier `vitest`-direct rule drifted
+// precisely because nothing gated it. Ban the bare specifier and any subpath.
+export const TEST_RUNNER_IMPORT_PATTERNS = [
+  {
+    group: ['vitest', 'vitest/*'],
+    message:
+      'Import test utilities from `vite-plus/test`, not `vitest` — it re-exports the vite-plus-bundled Vitest so the test runtime matches the toolchain (ADR-045).',
+  },
+];
+
 export const STATE_LIBRARY_IMPORT_PATTERNS = [
   {
     group: [

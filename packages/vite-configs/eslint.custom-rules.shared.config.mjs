@@ -9,6 +9,7 @@ import {
   CLIENT_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS,
   REACT_TYPE_IMPORT_PATHS,
   STATE_LIBRARY_IMPORT_PATTERNS,
+  TEST_RUNNER_IMPORT_PATTERNS,
   UI_PUBLIC_IMPORT_BOUNDARY_PATTERNS,
 } from './eslint.restrictions.shared.mjs';
 
@@ -305,6 +306,7 @@ export const createCustomRulesLintConfig = async ({
                 ? UI_PUBLIC_IMPORT_BOUNDARY_PATTERNS
                 : []),
               ...STATE_LIBRARY_IMPORT_PATTERNS,
+              ...TEST_RUNNER_IMPORT_PATTERNS,
             ],
           },
         ],
