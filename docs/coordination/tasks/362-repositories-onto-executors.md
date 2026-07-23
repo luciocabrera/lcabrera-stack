@@ -45,11 +45,13 @@ executors, so no hand-rolled `pool.query` survives in the api-servers.
   dead plumbing deleted (`Queryable`, `QueryValue`, `CountRow`,
   `formatPgAdminQuery`, `buildOrderByClause`, `buildEnterpriseOrdersWhereClause`).
 
-**Stacked on #361** (`refactor/352-distinct-onto-getpool`) — it depends on the
-`getPool()` pool-source foundation from #352. Rebase onto `main` once #361 merges.
+Builds on the `getPool()` pool-source foundation from #352 (#361), now merged to
+`main`; this branch is rebased onto `main` and targets it directly.
 
 ## Status / next
 
-- Current step: full gate + PR.
-- Blockers: merges after #361.
-- Next: open PR.
+- Current step: PR open against `main` (the earlier stacked PR #367 merged into
+  its base branch, not `main`, so its changes never reached `main` — re-opened
+  here).
+- Blockers: none.
+- Next: merge.
