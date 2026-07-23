@@ -2,7 +2,7 @@
 id: 352-distinct-onto-getpool
 title: Migrate api-server distinct repositories onto selectFilterOptions via getPool()
 owner: agent:claude
-status: active
+status: review
 branch: refactor/352-distinct-onto-getpool
 area:
   - apps/shared/src/features/distinct/**
@@ -15,7 +15,7 @@ area:
 started: 2026-07-23
 updated: 2026-07-23
 plan: (none)
-pr: (none)
+pr: 361
 issue: #352
 ---
 
@@ -39,6 +39,7 @@ Out of scope (follow-up): migrating the remaining api-shared repositories
 
 ## Status / next
 
-- Current step: implementing the api-shared repository migration.
-- Blockers: none (#351 merged; `selectFilterOptions` is on main).
-- Next: server.ts pool source + wiring ripple + tests + gate.
+- Current step: PR #361 open, full gate green, awaiting review.
+- Blockers: none.
+- Next: merge; then the follow-up #362 (remaining api-shared repositories onto
+  package executors via `getPool()`).
