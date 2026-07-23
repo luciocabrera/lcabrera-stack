@@ -52,9 +52,9 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-die() { echo "deps-refresh: $1" >&2; exit 1; }
-log() { printf '\n\033[1m==> %s\033[0m\n' "$1"; }
-have() { command -v "$1" >/dev/null 2>&1; }
+die() { local msg="$1"; echo "deps-refresh: $msg" >&2; exit 1; }
+log() { local msg="$1"; printf '\n\033[1m==> %s\033[0m\n' "$msg"; }
+have() { local cmd="$1"; command -v "$cmd" >/dev/null 2>&1; }
 
 # taze's exclude flag takes one -x per package.
 taze_exclude=()
