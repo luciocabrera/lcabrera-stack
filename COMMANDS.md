@@ -180,6 +180,20 @@ falling back to the full run on the same shared/root triggers and on pushes to
 repo-wide tsgolint pass still type-checks every PR as a net. CI's Quality Gate uses
 it on pull requests and posts the per-workspace selection to the job summary.
 
+### Dependencies
+
+| Command               | Runs                                                                                              |
+| --------------------- | ------------------------------------------------------------------------------------------------- |
+| `vp run deps:refresh` | one-command dependency refresh — pnpm clean → taze (catalog) → vp install → open a build(deps) PR |
+
+`deps:refresh` (`scripts/deps-refresh.sh`) bumps the pnpm catalog and every
+`package.json` to their latest in-range versions (TypeScript is held for a known
+compatibility issue), then opens the issue, branch and PR. It reaches for `pnpm
+clean` and `taze` directly — commands vp does not wrap — and it stops rather than
+auto-merging: a failing quality gate leaves the branch for a human. `-- --dry-run`
+previews what would move without changing anything. The pnpm-direct policy nuance
+is tracked in issue #334.
+
 ### Dev & prod servers
 
 | Command             | Runs                                  |
