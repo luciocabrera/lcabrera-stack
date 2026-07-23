@@ -244,7 +244,7 @@ grandfathered in `scripts/script-size-baseline.json` and may not grow (rebaselin
 with `--write`, reviewed via the JSON diff). Correctness still comes from Oxlint +
 Biome (repo-wide) and fallow (per-function complexity/dead-code).
 
-**Never use pnpm/npm/yarn directly.** All operations go through `vp`:
+**Never use pnpm/npm/yarn directly for anything `vp` wraps.** All the daily operations go through `vp`:
 
 | Task                 | Command                                                                                |
 | -------------------- | -------------------------------------------------------------------------------------- |
@@ -260,6 +260,17 @@ Biome (repo-wide) and fallow (per-function complexity/dead-code).
 | Full validation      | The canonical quality gate — see [Post-Change Quality Gate](#post-change-quality-gate) |
 | Add a package        | `vp add <package>`                                                                     |
 | Remove a package     | `vp remove <package>`                                                                  |
+
+**The exception is a command `vp` does not wrap** — then reaching for pnpm (or
+`npx`) directly is correct, not a workaround, because there is nothing to route
+through `vp`. Two such cases exist today: `pnpm clean --lockfile` (there is no
+`vp clean`) and catalog updating via `taze`; both live in
+`scripts/deps-refresh.sh` (`vp run deps:refresh`). The test is mechanical — if
+`vp` exposes the command, use `vp`; if it genuinely does not, pnpm-direct is
+fine. This is deliberately narrow: it does **not** license `pnpm install` /
+`pnpm add` / `pnpm dlx` where `vp install` / `vp add` / `vp dlx` exist. The
+release commands are a related case decided in
+[ADR-043](docs/cqms/decisions/ADR-043-release-tooling-changesets-over-pnpm-native.md).
 
 ### Monorepo-Wide Commands (run from repo root)
 
