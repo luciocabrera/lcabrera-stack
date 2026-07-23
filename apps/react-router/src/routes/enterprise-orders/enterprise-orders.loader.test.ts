@@ -47,7 +47,7 @@ describe('enterprise-orders loader', () => {
     expect(collectFunctionPaths({ value: result.metaState })).toEqual([]);
   });
 
-  it('bakes distinct descriptors with bff transport onto filterable string columns', () => {
+  it('bakes distinct descriptors with loader transport onto filterable string columns', () => {
     const { columns } = invokeLoader().columnsState;
 
     const orderNumber = columns.find((column) => column.key === 'order_number');
@@ -58,7 +58,7 @@ describe('enterprise-orders loader', () => {
         schemaName: 'public',
         tableName: 'enterprise_orders',
       },
-      transport: 'bff',
+      transport: 'loader',
     });
 
     const customerName = columns.find(
