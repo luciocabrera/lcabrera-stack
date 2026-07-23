@@ -210,6 +210,26 @@ Column filter-option fetching is described by **data, never functions** (ADR-009
 
 ---
 
+## Table Route Loader Pattern
+
+A table-backed route defines its `loader` by calling **`createTableRouteLoader`** (`src/routing/loaders/`) with config plus a `fetchPage` callback — it is the loader-side counterpart to the generic `persist-cookie.action`. The factory owns the boilerplate every such route repeated: read persisted state from URL + cookies, sanitize sorting, append the primary-key tiebreaker (ADR-008), optionally bake distinct filter descriptors onto the columns (`filterOptions`, ADR-009), and assemble the serializable `columnsState` / `metaState` / remount `key`.
+
+```ts
+export const loader = createTableRouteLoader<Row, RowResponse>({
+  appId: APP_ID, columns: COLUMNS, persistenceKey: PERSISTENCE_KEY,
+  schemaName: SCHEMA_NAME, tableName: TABLE_NAME, title: TITLE,
+  filterOptions: { transport: 'loader' },       // omit to leave columns undecorated
+  meta: { crud: CRUD, deleteActionPath: PATH },  // optional metaState extras
+  fetchPage: ({ effectiveSorting, filters, request }) => api.fetchPage({ ... }),
+});
+```
+
+- **The route owns only the fetch.** `fetchPage` receives the sanitized `filters` and the `effectiveSorting` (tiebreaker appended) and returns its promise **unawaited** — the factory hands it back as `dataPromise` for Suspense streaming.
+- **The returned data-promise key is always `dataPromise`** — the route component reads `{ columnsState, dataPromise, metaState }` and forwards them to `TableLayout`. Do not rename it per route.
+- The route component's `onLoadMore` reuses `sanitizeSorting` + `appendPrimaryKeySorting` (`src/routing/shared/`) directly — the same helpers the factory composes.
+
+---
+
 ## Context + Store Pattern
 
 State shared across a component tree is provided via React context backed by `useStore`:

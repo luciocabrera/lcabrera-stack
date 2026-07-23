@@ -10,7 +10,7 @@ import { fetchOrdersPage } from './fetchOrdersPage.service';
 import { buildEnterpriseOrdersQuery } from './utils/buildEnterpriseOrdersQuery.util';
 
 export const EnterpriseOrders = () => {
-  const { columnsState, enterpriseOrdersPromise, metaState } =
+  const { columnsState, dataPromise, metaState } =
     useLoaderData<typeof loader>();
 
   const handleLoadMore = async ({ limit, skip }: Pagination) =>
@@ -19,7 +19,7 @@ export const EnterpriseOrders = () => {
   return (
     <TableLayout<EnterpriseOrder, EnterpriseOrdersResponse>
       columnsState={columnsState}
-      dataPromise={enterpriseOrdersPromise}
+      dataPromise={dataPromise}
       dataSelector={(response) => response.data}
       dataTotalSelector={(response) => response.total}
       metaState={metaState}

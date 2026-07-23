@@ -4,8 +4,8 @@ import type {
   TableColumn,
 } from '@lcabrera/ui/components/Table';
 
-import { appendPrimaryKeySorting } from '@lcabrera/ui/routing/appendPrimaryKeySorting.util';
-import { sanitizeSorting } from '@lcabrera/ui/routing/sanitizeSorting.util';
+import { appendPrimaryKeySorting } from '@lcabrera/ui/routing/shared/appendPrimaryKeySorting.util';
+import { sanitizeSorting } from '@lcabrera/ui/routing/shared/sanitizeSorting.util';
 
 import type { EnterpriseOrder } from '../config';
 

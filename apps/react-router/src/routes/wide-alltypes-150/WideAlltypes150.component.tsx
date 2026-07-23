@@ -1,6 +1,6 @@
 import { TableLayout } from '@lcabrera/ui/components/Table/TableLayout';
-import { appendPrimaryKeySorting } from '@lcabrera/ui/routing/appendPrimaryKeySorting.util';
-import { sanitizeSorting } from '@lcabrera/ui/routing/sanitizeSorting.util';
+import { appendPrimaryKeySorting } from '@lcabrera/ui/routing/shared/appendPrimaryKeySorting.util';
+import { sanitizeSorting } from '@lcabrera/ui/routing/shared/sanitizeSorting.util';
 import { useLoaderData } from 'react-router';
 
 import type { WideAlltypes150, WideAlltypes150Response } from '@/services';

@@ -1,7 +1,7 @@
 import type { ThemeMode } from '@lcabrera/ui/types/theme.types';
 
 import { PERSIST_COOKIE_ACTION } from '@lcabrera/ui/constants/globalSettings.constants';
-import { buildPersistCookieEntry } from '@lcabrera/ui/routing/buildPersistCookieEntry.util';
+import { buildPersistCookieEntry } from '@lcabrera/ui/routing/actions/buildPersistCookieEntry.util';
 import { getAppScopedCookieKey } from '@lcabrera/ui/utils/storage';
 
 import { THEME_COOKIE_NAME } from './theme.constants';

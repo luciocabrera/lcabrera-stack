@@ -6,7 +6,7 @@ import {
   PERSISTENCE_VERSION,
   UI_FLAGS_COOKIE_KEY_SUFFIX,
 } from '@lcabrera/ui/components/Table/utils/persistence.constants';
-import { buildPersistCookieEntry } from '@lcabrera/ui/routing/buildPersistCookieEntry.util';
+import { buildPersistCookieEntry } from '@lcabrera/ui/routing/actions/buildPersistCookieEntry.util';
 
 type BuildUiFlagsCookieEntryArgs = {
   readonly currentState: Partial<TableMetaState> | undefined;

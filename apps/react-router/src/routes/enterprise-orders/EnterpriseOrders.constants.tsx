@@ -1,5 +1,4 @@
 import type {
-  ColumnPinningState,
   TableColumn,
   TableCrudConfig,
 } from '@lcabrera/ui/components/Table/Table.types';
@@ -25,11 +24,6 @@ export const CRUD: TableCrudConfig = {
   delete: true,
   read: true,
   update: true,
-};
-
-export const DEFAULT_COLUMN_PINNING: ColumnPinningState<EnterpriseOrder> = {
-  left: [],
-  right: ['actions'],
 };
 
 export const COLUMNS: TableColumn<EnterpriseOrder>[] = [

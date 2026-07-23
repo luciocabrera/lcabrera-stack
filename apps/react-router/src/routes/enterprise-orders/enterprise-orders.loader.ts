@@ -1,22 +1,16 @@
-import type { LoaderFunctionArgs } from 'react-router';
-
 import { toQueryFilters } from '@lcabrera/server/filters/to-query-filters.util';
 import { INITIAL_PAGE_SIZE } from '@lcabrera/ui/components/Table/Table.constants';
-import { appendDistinctFilterDescriptors } from '@lcabrera/ui/routing/appendDistinctFilterDescriptors.util';
-import { appendPrimaryKeySorting } from '@lcabrera/ui/routing/appendPrimaryKeySorting.util';
-import { readTableLoaderStateFromRequest } from '@lcabrera/ui/routing/readTableLoaderStateFromRequest.util';
-import { sanitizeSorting } from '@lcabrera/ui/routing/sanitizeSorting.util';
+import { createTableRouteLoader } from '@lcabrera/ui/routing/loaders/createTableRouteLoader.util';
 
 import { APP_ID } from '@/constants/app.constants';
 
-import type { EnterpriseOrder } from './config';
+import type { EnterpriseOrder, EnterpriseOrdersResponse } from './config';
 
 import { selectOrdersPage } from './.server/enterpriseOrders.service';
 import { toOrderQuerySort } from './config';
 import {
   COLUMNS,
   CRUD,
-  DEFAULT_COLUMN_PINNING,
   DELETE_ACTION_PATH,
   PERSISTENCE_KEY,
   SCHEMA_NAME,
@@ -25,84 +19,35 @@ import {
 } from './EnterpriseOrders.constants';
 
 /**
- * Loader for enterprise orders route
+ * Loader for the enterprise orders route.
  *
- * Returns a promise that can be used with Suspense for streaming.
- * The route will render immediately with the skeleton while data loads.
+ * `filterOptions.transport` is `loader` (not `bff`): filter options fetch
+ * same-origin through the `/_api/filter-options` resource route, which calls
+ * the distinct endpoint server-side — the same same-origin model the rows use.
+ * `bff` fetches the API host directly from the browser, which only works behind
+ * a proxy and fails CORS under a bare `react-router-serve` prod build (#340).
+ *
+ * The fetch reads Postgres server-side via the `.server` executor — no
+ * api-server round-trip — and returns the promise unawaited for Suspense
+ * streaming.
  */
-export const loader = ({ request }: LoaderFunctionArgs) => {
-  // Columns are serializable (descriptors, never functions — see
-  // .claude/rules/routes-data.md), so the loader can return them directly.
-  //
-  // `loader` transport (not `bff`): filter options fetch same-origin through the
-  // `/_api/filter-options` resource route, which calls the distinct endpoint
-  // server-side — the same same-origin model the rows already use. `bff` fetches
-  // the API host directly from the browser, which only works behind a proxy
-  // (dev Vite proxy, or a prod reverse proxy) and fails CORS under a bare
-  // `react-router-serve` prod build (#340).
-  const columns = appendDistinctFilterDescriptors({
-    columns: COLUMNS,
-    schemaName: SCHEMA_NAME,
-    tableName: TABLE_NAME,
-    transport: 'loader',
-  });
-
-  const {
-    columnOrder,
-    columnPinning,
-    columnSizing,
-    columnVisibility,
-    filters,
-    metaUiFlags,
-    sorting,
-    standaloneFiltersParam,
-    standaloneSortParam,
-  } = readTableLoaderStateFromRequest<EnterpriseOrder>({
-    appId: APP_ID,
-    columns: COLUMNS,
-    includeFilters: true,
-    persistenceKey: PERSISTENCE_KEY,
-    request,
-  });
-  const sanitizedSorting = sanitizeSorting<EnterpriseOrder>(sorting);
-  // Always append the primary-key column(s) so server pagination has a stable
-  // ordering. The store keeps only the user's sorting (sanitizedSorting).
-  const effectiveSorting = appendPrimaryKeySorting<EnterpriseOrder>({
-    columns: COLUMNS,
-    sorting: sanitizedSorting,
-  });
-
-  // Return the promise directly (not awaited) for Suspense streaming. The
-  // generic executors read Postgres server-side — no api-server round-trip.
-  const enterpriseOrdersPromise = selectOrdersPage({
-    filters: toQueryFilters({ filters }),
-    limit: INITIAL_PAGE_SIZE,
-    offset: 0,
-    sort: toOrderQuerySort({ sorting: effectiveSorting }),
-  });
-
-  return {
-    columnsState: {
-      columnFilters: filters,
-      columnOrder,
-      columnPinning,
-      columns,
-      columnSizing,
-      columnVisibility,
-      sorting: sanitizedSorting,
-    },
-    defaultColumnPinning: DEFAULT_COLUMN_PINNING,
-    enterpriseOrdersPromise,
-    key: `${standaloneSortParam ?? ''}${standaloneFiltersParam ?? ''}`,
-    metaState: {
-      ...metaUiFlags,
-      appId: APP_ID,
-      crud: CRUD,
-      deleteActionPath: DELETE_ACTION_PATH,
-      persistenceKey: PERSISTENCE_KEY,
-      schemaName: SCHEMA_NAME,
-      tableName: TABLE_NAME,
-      title: TITLE,
-    },
-  };
-};
+export const loader = createTableRouteLoader<
+  EnterpriseOrder,
+  EnterpriseOrdersResponse
+>({
+  appId: APP_ID,
+  columns: COLUMNS,
+  fetchPage: ({ effectiveSorting, filters }) =>
+    selectOrdersPage({
+      filters: toQueryFilters({ filters }),
+      limit: INITIAL_PAGE_SIZE,
+      offset: 0,
+      sort: toOrderQuerySort({ sorting: effectiveSorting }),
+    }),
+  filterOptions: { transport: 'loader' },
+  meta: { crud: CRUD, deleteActionPath: DELETE_ACTION_PATH },
+  persistenceKey: PERSISTENCE_KEY,
+  schemaName: SCHEMA_NAME,
+  tableName: TABLE_NAME,
+  title: TITLE,
+});
