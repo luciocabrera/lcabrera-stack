@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { generateApiToken } from './generate-api-token.util.ts';
 import { parseApiToken } from './parse-api-token.util.ts';

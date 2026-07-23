@@ -3,7 +3,7 @@ import { getMaxValue } from '@lcabrera/server/db/get-max-value.util';
 import { insertRow } from '@lcabrera/server/db/insert-row.util';
 import { selectRows } from '@lcabrera/server/db/select-rows.util';
 import { updateRows } from '@lcabrera/server/db/update-rows.util';
-import { expect, it, vi } from 'vitest';
+import { expect, it, vi } from 'vite-plus/test';
 
 import {
   deleteOrder,

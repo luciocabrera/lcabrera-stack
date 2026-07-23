@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { PIN_SIDE_VALUES } from './globalSettings.constants';
 import { isPinSide } from './isPinSide.util';

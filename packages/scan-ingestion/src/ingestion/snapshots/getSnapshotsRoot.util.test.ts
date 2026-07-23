@@ -1,6 +1,6 @@
 import os from 'node:os';
 import path from 'node:path';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { getSnapshotsRoot } from './getSnapshotsRoot.util.ts';
 

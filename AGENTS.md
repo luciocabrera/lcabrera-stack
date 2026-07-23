@@ -375,7 +375,7 @@ local Postgres; seeding goes through `vp run --filter car-sales-api seed`, becau
 
 The API server (`apps/api-server/`) reads env from `docker/local/.env`. The frontend proxies `/api` to `http://localhost:3001`.
 
-**Critical:** Import Vite config from `vite-plus`, not `vite`, for tooling integration. Example: `import { defineConfig } from 'vite-plus'`. For tests, import test utilities from `vitest` directly (e.g. `import { expect, test, vi } from 'vitest'`).
+**Critical:** Import Vite config from `vite-plus`, not `vite`, for tooling integration. Example: `import { defineConfig } from 'vite-plus'`. For tests, import test utilities from `vite-plus/test`, not `vitest` directly (e.g. `import { expect, test, vi } from 'vite-plus/test'`) — it re-exports the vite-plus-bundled Vitest, so the test runtime always matches the toolchain and there is no self-managed `vitest` to drift. This convention was re-evaluated and changed once vite-plus became the runner ([ADR-045](docs/cqms/decisions/ADR-045-vite-plus-test-imports.md)); the earlier `vitest`-direct rule predated it.
 
 ### Agent Checklist
 

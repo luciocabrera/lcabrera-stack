@@ -1,5 +1,5 @@
 import { HttpError } from 'api-shared';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { parseJsonQueryParam } from './parseJsonQueryParam.util';
 

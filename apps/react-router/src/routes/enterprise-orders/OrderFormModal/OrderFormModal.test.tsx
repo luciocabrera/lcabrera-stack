@@ -4,7 +4,7 @@ import { ThemeProvider } from '@lcabrera/ui/contexts/ThemeContext';
 import { mockDialogElement } from '@lcabrera/ui/utils/tests/mockDialogElement.util';
 import { cleanup, render, screen } from '@testing-library/react';
 import { createRoutesStub } from 'react-router';
-import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vite-plus/test';
 
 import type { EnterpriseOrderValues } from '../config';
 

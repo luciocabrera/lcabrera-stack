@@ -3,7 +3,7 @@ import type { ActionFunctionArgs } from 'react-router';
 import { getRoleWithPermissions } from '@repo/scan-ingestion/queries/getRoleWithPermissions.util';
 import { replaceRolePermissions } from '@repo/scan-ingestion/queries/replaceRolePermissions.util';
 import { updateRole } from '@repo/scan-ingestion/queries/updateRole.util';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { requireUser } from '@/auth/requireUser.util';
 

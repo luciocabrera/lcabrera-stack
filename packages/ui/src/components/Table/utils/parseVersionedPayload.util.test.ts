@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { parseVersionedPayload } from './parseVersionedPayload.util';
 import { PERSISTENCE_VERSION } from './persistence.constants';

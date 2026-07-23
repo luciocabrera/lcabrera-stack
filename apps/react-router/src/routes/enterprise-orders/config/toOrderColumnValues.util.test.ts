@@ -1,4 +1,4 @@
-import { expect, it } from 'vitest';
+import { expect, it } from 'vite-plus/test';
 
 import { buildValidOrderInput } from './enterpriseOrders.fixtures';
 import { toOrderColumnValues } from './toOrderColumnValues.util';

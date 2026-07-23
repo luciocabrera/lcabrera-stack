@@ -1,5 +1,5 @@
 import { firePrefetch } from '@lcabrera/ui/utils/prefetch/firePrefetch.util';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { maybePrefetchNextPage } from './maybePrefetchNextPage.util';
 

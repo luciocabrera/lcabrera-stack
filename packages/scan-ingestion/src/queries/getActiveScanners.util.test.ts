@@ -1,5 +1,5 @@
 import { closePool, getPool } from '@lcabrera/server/db/get-pool.util';
-import { afterAll, describe, expect, it } from 'vitest';
+import { afterAll, describe, expect, it } from 'vite-plus/test';
 
 import { getActiveScanners } from './getActiveScanners.util.ts';
 

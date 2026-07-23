@@ -7,7 +7,7 @@ import type {
   TextFilter,
 } from '@lcabrera/ui/types/filterOperators.types';
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { isFilterCompatibleWithColumn } from './isFilterCompatibleWithColumn.util';
 

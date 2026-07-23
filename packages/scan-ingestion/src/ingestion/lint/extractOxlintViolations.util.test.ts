@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { extractOxlintViolations } from './extractOxlintViolations.util.ts';
 import { oxlintRawSchema } from './oxlintRaw.schema.ts';

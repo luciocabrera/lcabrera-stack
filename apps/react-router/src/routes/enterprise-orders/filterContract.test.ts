@@ -1,7 +1,7 @@
 import type { ColumnFilter } from '@lcabrera/ui/types/filterOperators.types';
 
 import { toQueryFilters } from '@lcabrera/server/filters/to-query-filters.util';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 /**
  * `@lcabrera/ui` and `@lcabrera/server` each declare the column-filter shapes

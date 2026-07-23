@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { useGetTableData } from './data/selectors/useGetTableData.hook';
 import { useGetTableHasMore } from './data/selectors/useGetTableHasMore.hook';

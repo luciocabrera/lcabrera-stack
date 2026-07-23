@@ -1,5 +1,5 @@
 import { rmSync } from 'node:fs';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test';
 
 import { makeTempDirectory } from '../testing/makeTempDirectory.util.ts';
 import { writeTempTree } from '../testing/writeTempTree.util.ts';

@@ -6,7 +6,7 @@ import type {
 } from '@lcabrera/ui/components/Table/Table.types';
 
 import { DEFAULT_MIN_COLUMN_WIDTH } from '@lcabrera/ui/components/Table/Table.constants';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { buildTableBodyCellDescriptor } from './buildTableBodyCellDescriptor.util';
 

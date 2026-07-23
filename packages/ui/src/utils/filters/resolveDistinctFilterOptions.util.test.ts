@@ -1,5 +1,5 @@
 import { FILTER_OPTIONS_TIMEOUT_MS } from '@lcabrera/ui/components/Table/Table.constants';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { resolveDistinctFilterOptions } from './resolveDistinctFilterOptions.util';
 

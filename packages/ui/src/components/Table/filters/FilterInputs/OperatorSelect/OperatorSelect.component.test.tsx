@@ -3,7 +3,7 @@ import type { TableColumnDataType } from '@lcabrera/ui/components/Table/Table.ty
 import type { ColumnFilter } from '@lcabrera/ui/types/filterOperators.types';
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { OperatorSelect } from './OperatorSelect.component';
 

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { hashSecret } from './hash-secret.util.ts';
 import { isSecretHashValid } from './is-secret-hash-valid.util.ts';

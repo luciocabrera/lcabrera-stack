@@ -9,7 +9,14 @@ import {
   waitFor,
 } from '@testing-library/react';
 import { createRoutesStub } from 'react-router';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vite-plus/test';
 
 import type { FieldNode, FormMode } from './Form.types';
 

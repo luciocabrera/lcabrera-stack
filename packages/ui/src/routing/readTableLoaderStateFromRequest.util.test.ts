@@ -1,6 +1,6 @@
 import type { TableColumn } from '@lcabrera/ui/components/Table';
 
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 vi.mock('@lcabrera/ui/components/Table/utils', () => ({
   readPersistedStateFromCookie: vi.fn(),

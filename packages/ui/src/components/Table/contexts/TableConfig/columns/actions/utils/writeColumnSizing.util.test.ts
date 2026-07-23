@@ -2,7 +2,7 @@ import type { TableColumnsState } from '@lcabrera/ui/components/Table/Table.type
 import type { TStore } from '@lcabrera/ui/hooks/useStore.hook';
 
 import { createTableConfigColumnsActionMocks } from '@lcabrera/ui/utils/tests/createTableConfigColumnsActionMocks.util';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vite-plus/test';
 
 import { writeColumnSizing } from './writeColumnSizing.util';
 

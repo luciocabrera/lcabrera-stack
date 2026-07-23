@@ -4,7 +4,7 @@ import { saveProjectSnapshot } from '@repo/scan-ingestion/ingestion/snapshots/sa
 import { discoverProjectWorkspaces } from '@repo/scan-ingestion/ingestion/workspaces/discoverProjectWorkspaces.util';
 import { checkUserPermission } from '@repo/scan-ingestion/queries/checkUserPermission.util';
 import { replaceProjectWorkspaces } from '@repo/scan-ingestion/queries/replaceProjectWorkspaces.util';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { requireApiUser } from '@/auth/requireApiUser.util';
 

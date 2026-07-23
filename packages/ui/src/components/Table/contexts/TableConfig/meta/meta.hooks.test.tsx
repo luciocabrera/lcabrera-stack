@@ -6,7 +6,7 @@ import {
 } from '@lcabrera/ui/utils/tests/createMockStore.util';
 // @vitest-environment jsdom
 import { act, renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 const createInitialMetaState = (): TableMetaState => {
   return {

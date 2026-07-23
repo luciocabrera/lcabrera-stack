@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { HttpError } from '../../errors/httpError.js';
 import { parseDistinctSource } from './parseDistinctSource.util.js';

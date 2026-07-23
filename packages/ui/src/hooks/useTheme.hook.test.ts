@@ -5,7 +5,7 @@ import type { ReactNode } from 'react';
 
 import { renderHook } from '@testing-library/react';
 import { createElement } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 vi.unmock('@lcabrera/ui/hooks/useTheme.hook');
 

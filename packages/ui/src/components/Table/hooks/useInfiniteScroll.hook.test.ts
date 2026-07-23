@@ -3,7 +3,14 @@
 import type { RefObject } from 'react';
 
 import { renderHook } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vite-plus/test';
 
 import { useInfiniteScroll } from './useInfiniteScroll.hook';
 

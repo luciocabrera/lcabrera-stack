@@ -1,5 +1,5 @@
 import { selectRows } from '@lcabrera/server/db/select-rows.util';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { selectLlmCostRows } from './selectLlmCostRows.util.ts';
 

@@ -1,7 +1,7 @@
 /* eslint-disable unicorn/no-null -- DB registry rows use SQL NULL for nullable columns */
 import type { ScannerRegistryRow } from '@repo/scan-ingestion/queries/getScannerById.util';
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { toEditScannerInitialValues } from './toEditScannerInitialValues.util';
 

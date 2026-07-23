@@ -1,5 +1,5 @@
 /* eslint-disable unicorn/no-null -- fixtures mirror ProjectScannerTrendRow's real Postgres-nullable columns */
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { groupTrendByScanner } from './groupTrendByScanner.util';
 

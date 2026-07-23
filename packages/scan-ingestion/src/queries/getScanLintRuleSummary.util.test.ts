@@ -1,7 +1,7 @@
 import { closePool, getPool } from '@lcabrera/server/db/get-pool.util';
 import { makeTempDirectory } from '@repo/scan-ingestion/testing/makeTempDirectory.util.ts';
 import { rmSync } from 'node:fs';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
 
 import { getScanLintRuleSummary } from './getScanLintRuleSummary.util.ts';
 import { getUserByUsername } from './getUserByUsername.util.ts';

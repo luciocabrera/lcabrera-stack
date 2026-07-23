@@ -1,6 +1,6 @@
 import type { ClientActionFunctionArgs } from 'react-router';
 
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 import { clientAction } from './login.clientAction';
 

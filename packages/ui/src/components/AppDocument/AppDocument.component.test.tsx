@@ -1,5 +1,5 @@
 import { renderToStaticMarkup } from 'react-dom/server';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 vi.mock('@lcabrera/ui/components/DevStyleXInject', () => ({
   DevStyleXInject: ({ cssHref }: { readonly cssHref: string }) => (

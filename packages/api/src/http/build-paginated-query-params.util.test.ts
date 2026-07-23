@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { buildPaginatedQueryParams } from './build-paginated-query-params.util.ts';
 

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { appGraphRawSchema } from './appGraphRaw.schema.ts';
 import { extractAppGraphNodes } from './extractAppGraphNodes.util.ts';

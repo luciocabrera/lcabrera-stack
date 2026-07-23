@@ -3,7 +3,7 @@ import type { RefObject } from 'react';
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { createRef } from 'react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { useElementSize } from './useElementSize.hook';
 

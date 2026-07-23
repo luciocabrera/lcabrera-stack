@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { linkItemStyles } from '../NavLink.stylex';
 import { getClassName } from './getClassName.util';

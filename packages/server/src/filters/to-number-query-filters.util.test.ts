@@ -1,4 +1,4 @@
-import { expect, it } from 'vitest';
+import { expect, it } from 'vite-plus/test';
 
 import { toNumberQueryFilters } from './to-number-query-filters.util.ts';
 

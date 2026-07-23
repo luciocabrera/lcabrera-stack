@@ -3,7 +3,7 @@ import {
   NUMBER_OPERATORS,
   TEXT_OPERATORS,
 } from '@lcabrera/ui/constants/filterOperators.constants';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { getOperatorOptions } from './getOperatorOptions.util';
 

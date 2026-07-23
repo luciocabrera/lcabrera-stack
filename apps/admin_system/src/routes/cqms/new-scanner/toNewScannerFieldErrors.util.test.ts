@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { newScannerSchema } from './newScanner.schema';
 import { toNewScannerFieldErrors } from './toNewScannerFieldErrors.util';

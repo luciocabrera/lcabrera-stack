@@ -1,7 +1,7 @@
 import type { AddressInfo } from 'node:net';
 
 import { signAccessTicket } from '@lcabrera/server/tickets/sign-access-ticket.util';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test';
 import WebSocket from 'ws';
 
 import { attachWebSocketServer } from './attachWebSocketServer.ts';

@@ -4,7 +4,7 @@ import { getUserWithRoles } from '@repo/scan-ingestion/queries/getUserWithRoles.
 import { replaceUserRoles } from '@repo/scan-ingestion/queries/replaceUserRoles.util';
 import { setUserPassword } from '@repo/scan-ingestion/queries/setUserPassword.util';
 import { updateUser } from '@repo/scan-ingestion/queries/updateUser.util';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { requireUser } from '@/auth/requireUser.util';
 

@@ -2,7 +2,7 @@ import { closePool, getPool } from '@lcabrera/server/db/get-pool.util';
 import { acquireAdvisoryTestLock } from '@repo/scan-ingestion/testing/acquireAdvisoryTestLock.util.ts';
 import { makeTempDirectory } from '@repo/scan-ingestion/testing/makeTempDirectory.util.ts';
 import { rmSync } from 'node:fs';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
 
 import { claimQueuedScan } from './claimQueuedScan.util.ts';
 import { failStaleRunningScans } from './failStaleRunningScans.util.ts';

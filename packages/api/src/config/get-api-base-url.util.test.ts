@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { API_SERVER_PORT, CONFIG } from './config.constants.ts';
 import { getApiBaseUrl } from './get-api-base-url.util.ts';

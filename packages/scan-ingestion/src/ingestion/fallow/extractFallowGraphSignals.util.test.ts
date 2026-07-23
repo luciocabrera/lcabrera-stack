@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { extractFallowGraphSignals } from './extractFallowGraphSignals.util.ts';
 import { fallowRawSchema } from './fallowRaw.schema.ts';

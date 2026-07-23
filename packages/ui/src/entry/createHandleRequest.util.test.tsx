@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import type { RenderToPipeableStreamOptions } from 'react-dom/server';
 import type { EntryContext } from 'react-router';
 
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 // Capture what `renderToPipeableStream` is called with so the tests can drive
 // the streaming callbacks directly — the real streaming render needs a fully

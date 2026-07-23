@@ -1,6 +1,6 @@
 import type { FieldNode } from '@lcabrera/ui/components/Form/Form.types';
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { fieldRow } from './fieldRow.util';
 

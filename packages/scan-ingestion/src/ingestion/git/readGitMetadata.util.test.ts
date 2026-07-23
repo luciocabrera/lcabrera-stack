@@ -2,7 +2,7 @@ import { writeTextFileWithin } from '@repo/scan-ingestion/fs/writeTextFileWithin
 import { makeTempDirectory } from '@repo/scan-ingestion/testing/makeTempDirectory.util.ts';
 import { execFileSync } from 'node:child_process';
 import { rmSync } from 'node:fs';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test';
 
 import { buildGitChildEnv } from './buildGitChildEnv.util.ts';
 import { readGitMetadata } from './readGitMetadata.util.ts';

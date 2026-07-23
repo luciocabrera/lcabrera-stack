@@ -5,7 +5,7 @@ import type { ReactNode } from 'react';
 import { createMockStore } from '@lcabrera/ui/utils/tests/createMockStore.util';
 import { renderHook } from '@testing-library/react';
 import { createElement } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 import type { VirtualSelectMetaState } from '../../VirtualSelect.types';
 import type { VirtualSelectContextValue } from '../VirtualSelectContext.types';

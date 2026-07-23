@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 
 import { renderHook } from '@testing-library/react';
 import { createElement, createRef } from 'react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import type { TableWrapperContextValue } from './TableWrapperContext.types';
 

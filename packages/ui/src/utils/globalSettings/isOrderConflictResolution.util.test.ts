@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { ORDER_CONFLICT_VALUES } from './globalSettings.constants';
 import { isOrderConflictResolution } from './isOrderConflictResolution.util';

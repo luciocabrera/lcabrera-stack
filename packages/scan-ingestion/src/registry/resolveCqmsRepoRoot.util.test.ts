@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { isExistingPathWithin } from '../fs/isExistingPathWithin.util.ts';
 import { resolveCqmsRepoRoot } from './resolveCqmsRepoRoot.util.ts';

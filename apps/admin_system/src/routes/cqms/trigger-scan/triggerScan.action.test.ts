@@ -4,7 +4,7 @@ import { discoverProjectWorkspaces } from '@repo/scan-ingestion/ingestion/worksp
 import { getProjectById } from '@repo/scan-ingestion/queries/getProjectById.util';
 import { replaceProjectWorkspaces } from '@repo/scan-ingestion/queries/replaceProjectWorkspaces.util';
 import { triggerScan as triggerScanMutation } from '@repo/scan-ingestion/queries/triggerScan.util';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { requireUser } from '@/auth/requireUser.util';
 

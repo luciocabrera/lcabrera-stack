@@ -2,7 +2,14 @@ import { execFileSync } from 'node:child_process';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest';
+import {
+  afterEach,
+  describe,
+  expect,
+  it,
+  onTestFinished,
+  vi,
+} from 'vite-plus/test';
 
 import { buildGitChildEnv } from './buildGitChildEnv.util.ts';
 import { runGit } from './runGit.util.ts';

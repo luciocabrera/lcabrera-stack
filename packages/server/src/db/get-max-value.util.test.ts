@@ -1,6 +1,6 @@
 import type { Pool } from 'pg';
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { getMaxValue } from './get-max-value.util.ts';
 import { getPool } from './get-pool.util.ts';

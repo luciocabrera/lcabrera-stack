@@ -1,4 +1,4 @@
-import { expect, it } from 'vitest';
+import { expect, it } from 'vite-plus/test';
 
 import { ORDER_NUMBER_PATTERN } from './enterpriseOrders.schema';
 import { formatOrderNumber } from './formatOrderNumber.util';

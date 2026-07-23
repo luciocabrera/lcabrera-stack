@@ -3,7 +3,7 @@ import { writeTextFileWithin } from '@repo/scan-ingestion/fs/writeTextFileWithin
 import { makeTempDirectory } from '@repo/scan-ingestion/testing/makeTempDirectory.util.ts';
 import { rmSync } from 'node:fs';
 import path from 'node:path';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test';
 
 import { buildFileInventory } from './buildFileInventory.util.ts';
 

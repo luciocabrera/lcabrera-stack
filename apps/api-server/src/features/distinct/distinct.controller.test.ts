@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 
 import { HttpError } from 'api-shared';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 import type { DistinctRepository } from './distinct.repository';
 

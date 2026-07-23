@@ -1,6 +1,6 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 import { loader } from './car-sales.loader';
 import { CLIENT_PAGINATION_ROW_LIMIT } from './CarSales.constants';

@@ -1,4 +1,4 @@
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 type ColumnsStore<TState extends Record<string, unknown>> = {
   readonly get: () => TState;
