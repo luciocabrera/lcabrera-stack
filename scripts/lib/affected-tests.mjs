@@ -5,9 +5,13 @@
  * break `apps/react-router`), so this walks the workspace dependency graph
  * (built from each package.json's `workspace:*` deps) to add transitive
  * dependents. Only the few files that change how every workspace resolves its
- * tests — the lockfile, the workspace manifest, the root Vite+ config, the shared
- * `vite-configs`/`ts-configs` — force the FULL suite; every other out-of-workspace
- * file (root package.json scripts, docs, tooling) affects no suite and is ignored.
+ * tests — the lockfile, the workspace manifest, the root Vite+ config, and the
+ * shared `vite-configs`/`ts-configs` build machinery — force the FULL suite;
+ * every other out-of-workspace file (root package.json scripts, docs, tooling)
+ * affects no suite and is ignored. Lint/format-only configs (the `vite-configs`
+ * eslint/oxlint/oxfmt factories, any `eslint.config.mjs`) are dropped before
+ * selection and force nothing — the linters gate them on every PR regardless
+ * (see `LINT_ONLY_PATTERNS`).
  *
  * The per-workspace task substitution mirrors `test:ci` exactly so the two never
  * diverge: the DB-bound scan packages run their DB-free `test:unit`, and (in CI
@@ -57,6 +61,27 @@ const forcesFullRun = (files) =>
   files.some((file) =>
     FORCE_FULL_PATTERNS.some((pattern) => pattern.test(file)),
   );
+
+/**
+ * Files that only affect linting/formatting and never how a test builds or runs,
+ * so they drop out of the diff before selection: a change touching only these
+ * runs no test and no typecheck. This is safe because the eslint/oxlint/oxfmt
+ * passes are NOT change-gated — they run on every PR unconditionally — so such a
+ * change is always validated by the linters, and lint config cannot affect a
+ * test. Deliberately tight: the shared `vite-configs` eslint.* factories (nothing
+ * but a workspace's own `eslint.config.mjs` imports them) and the Oxlint/Oxfmt
+ * config factories `vite.lint`/`vite.fmt` — NOT `vite.run`/`vite.pack`/
+ * `vite.plugins`, which do drive the test/build. A diff mixing one of these with
+ * a real source edit still selects on that edit.
+ */
+const LINT_ONLY_PATTERNS = [
+  /^packages\/vite-configs\/eslint\./,
+  /^packages\/vite-configs\/vite\.(lint|fmt)\.shared\.config\.ts$/,
+  /(^|\/)eslint\.config\.mjs$/,
+];
+
+const isLintOnly = (file) =>
+  LINT_ONLY_PATTERNS.some((pattern) => pattern.test(file));
 
 /** The workspace package names declared as `workspace:*` deps of a manifest. */
 const workspaceDeps = (manifest, packageNames) => {
@@ -150,13 +175,19 @@ export const partitionTasks = (affectedPackages, { ci = false } = {}) => {
  * core both the test runner and the coverage report scope themselves by.
  */
 export const resolveAffected = ({ files, graph }) => {
-  if (files.length === 0) {
+  // Lint/format-only configs never change how a test builds or runs, so drop
+  // them before selection — a diff of only these selects nothing (the linters
+  // gate them on every PR regardless). This is also what stops an eslint change
+  // to the shared `vite-configs` package from forcing the full suite via
+  // GLOBAL_PACKAGES below.
+  const relevant = files.filter((file) => !isLintOnly(file));
+  if (relevant.length === 0) {
     return { mode: 'none', packages: [], changed: [] };
   }
-  const changedWorkspaces = workspacesForFiles(files, graph);
+  const changedWorkspaces = workspacesForFiles(relevant, graph);
   const changed = changedWorkspaces.map((workspace) => workspace.pkgName);
   const forceFull =
-    forcesFullRun(files) ||
+    forcesFullRun(relevant) ||
     changedWorkspaces.some((workspace) =>
       GLOBAL_PACKAGES.has(workspace.pkgName),
     );
