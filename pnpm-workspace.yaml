@@ -7,6 +7,12 @@ allowBuilds:
 # Supply chain security (https://pnpm.io/supply-chain-security)
 blockExoticSubdeps: true
 
+# Do NOT enable `enableGlobalVirtualStore` here. It was spiked and DECLINED
+# (docs/cqms/decisions/ADR-044): the experimental global virtual store does not
+# link rolldown's platform-specific native binding as a sibling of
+# @voidzero-dev/vite-plus-core, so no `vp` command can load its task graph.
+# Re-check that gap before reconsidering.
+
 # A workspace dependency cycle is an architecture error (ADR-038); make it fail
 # the install rather than the default warning that scrolls past unnoticed.
 disallowWorkspaceCycles: true
