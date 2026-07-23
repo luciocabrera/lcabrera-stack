@@ -50,8 +50,15 @@ implementations.
 - **Transports** — `bff` targets the API server's generic
   `GET /api/distinct?schemaName&tableName&columnName&limit&offset`; `loader`
   targets the same-origin resource route `GET /_api/filter-options` whose
-  loader calls the BFF server-side. enterprise-orders exercises `bff`;
-  car-sales and car-sales-infinite exercise `loader`.
+  loader calls the BFF server-side. All three demo routes now use `loader`
+  (enterprise-orders moved off `bff` in #340): `bff` fetches the API host
+  directly from the browser, which only works behind a proxy (dev Vite, or a
+  prod reverse proxy) and fails CORS under a bare `react-router-serve` prod
+  build — whereas `loader` is same-origin in every environment, matching how the
+  rows are already fetched. `bff` remains a supported transport, still
+  unit-covered in `packages/ui` (`getFilterOptionsBaseUrl`,
+  `resolveDistinctFilterOptions`, `appendDistinctFilterDescriptors`), for
+  genuinely cross-origin API deployments that configure CORS.
 - **Layering** — generic mechanisms live in `@repo/data-access`
   (`buildDistinctQuery` in the query builder; `fetchDistinctValues` +
   response guard on the api side); domain config lives in api-shared

@@ -33,11 +33,18 @@ import {
 export const loader = ({ request }: LoaderFunctionArgs) => {
   // Columns are serializable (descriptors, never functions — see
   // .claude/rules/routes-data.md), so the loader can return them directly.
+  //
+  // `loader` transport (not `bff`): filter options fetch same-origin through the
+  // `/_api/filter-options` resource route, which calls the distinct endpoint
+  // server-side — the same same-origin model the rows already use. `bff` fetches
+  // the API host directly from the browser, which only works behind a proxy
+  // (dev Vite proxy, or a prod reverse proxy) and fails CORS under a bare
+  // `react-router-serve` prod build (#340).
   const columns = appendDistinctFilterDescriptors({
     columns: COLUMNS,
     schemaName: SCHEMA_NAME,
     tableName: TABLE_NAME,
-    transport: 'bff',
+    transport: 'loader',
   });
 
   const {

@@ -35,12 +35,17 @@ The file [src/routes/enterprise-orders/EnterpriseOrders.constants.tsx](src/route
 The route loader also uses `COLUMNS` as the source of truth for standalone URL filter validation, so mismatched filter payloads are discarded before the enterprise orders API request is built.
 
 Columns are fully serializable (ADR-009): the loader decorates `COLUMNS`
-with `appendDistinctFilterDescriptors({ transport: 'bff', schemaName,
+with `appendDistinctFilterDescriptors({ transport: 'loader', schemaName,
 tableName })` and returns them **inside** `columnsState` — no client-side
 re-attach step. Static enum columns carry `kind: 'static'` descriptors from
 `createStaticFilterOptions`; filterable string columns get baked
-`kind: 'distinct'` descriptors that the client tool executes against
-`GET /api/distinct` (allow-listed in api-shared's `DISTINCT_SOURCES`).
+`kind: 'distinct'` descriptors that the client tool executes against the
+same-origin `GET /_api/filter-options` resource route, whose loader calls the
+distinct endpoint (`GET /api/distinct`, allow-listed in api-shared's
+`DISTINCT_SOURCES`) server-side. The `loader` transport keeps filter options on
+the same same-origin path as the rows, so they load under a bare
+`react-router-serve` prod build with no proxy or CORS config (#340); the earlier
+`bff` transport fetched `:3001` cross-origin and failed CORS there.
 `enterprise-orders.loader.test.ts` guards the no-functions contract and the
 descriptor wiring. The synthesized actions column is static, non-resizable,
 and non-filterable by default, which prevents unpinning and width changes
