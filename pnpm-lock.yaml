@@ -5,82 +5,57 @@ settings:
   excludeLinksFromLockfile: false
 
 catalogs:
-  default:
-    '@anthropic-ai/claude-agent-sdk':
-      specifier: ^0.3.218
-      version: 0.3.218
-    '@babel/preset-typescript':
-      specifier: ^8.0.1
-      version: 8.0.1
-    '@biomejs/biome':
-      specifier: ^2.5.5
-      version: 2.5.5
-    '@changesets/cli':
-      specifier: ^2.31.1
-      version: 2.31.1
-    '@eslint/js':
-      specifier: ^10.0.1
-      version: 10.0.1
+  backend:
     '@fastify/cors':
       specifier: ^11.3.0
       version: 11.3.0
-    '@react-router/dev':
-      specifier: ^8.3.0
-      version: 8.3.0
-    '@react-router/node':
-      specifier: ^8.3.0
-      version: 8.3.0
-    '@react-router/serve':
-      specifier: ^8.3.0
-      version: 8.3.0
-    '@stylexjs/eslint-plugin':
-      specifier: ^0.19.0
-      version: 0.19.0
-    '@stylexjs/stylex':
-      specifier: ^0.19.0
-      version: 0.19.0
-    '@stylexjs/unplugin':
-      specifier: ^0.19.0
-      version: 0.19.0
-    '@testing-library/react':
-      specifier: ^16.3.2
-      version: 16.3.2
-    '@types/cors':
-      specifier: ^2.8.19
-      version: 2.8.19
-    '@types/express':
-      specifier: ^5.0.6
-      version: 5.0.6
-    '@types/node':
-      specifier: ^26.1.1
-      version: 26.1.1
-    '@types/pg':
-      specifier: ^8.20.0
-      version: 8.20.0
-    '@types/react':
-      specifier: ^19.2.17
-      version: 19.2.17
-    '@types/react-dom':
-      specifier: ^19.2.3
-      version: 19.2.3
-    '@types/ws':
-      specifier: ^8.18.1
-      version: 8.18.1
+    cors:
+      specifier: ^2.8.6
+      version: 2.8.6
+    express:
+      specifier: ^5.2.1
+      version: 5.2.1
+    fastify:
+      specifier: ^5.10.0
+      version: 5.10.0
+    nodemon:
+      specifier: ^3.1.14
+      version: 3.1.14
+    pg:
+      specifier: ^8.22.0
+      version: 8.22.0
+    ws:
+      specifier: ^8.21.1
+      version: 8.21.1
+  build:
+    '@babel/preset-typescript':
+      specifier: ^8.0.1
+      version: 8.0.1
+    typescript:
+      specifier: ^6.0.3
+      version: 6.0.3
+    vite:
+      specifier: 8.1.5
+      version: 8.1.5
+    vite-plugin-babel:
+      specifier: ^1.7.3
+      version: 1.7.3
+    vite-plus:
+      specifier: ^0.2.6
+      version: 0.2.6
+  lint:
+    '@biomejs/biome':
+      specifier: ^2.5.5
+      version: 2.5.5
+    '@eslint/js':
+      specifier: ^10.0.1
+      version: 10.0.1
     '@typescript-eslint/rule-tester':
       specifier: ^8.65.0
       version: 8.65.0
     '@typescript-eslint/utils':
       specifier: ^8.65.0
       version: 8.65.0
-    '@vitest/coverage-v8':
-      specifier: ^4.1.10
-      version: 4.1.10
-    babel-plugin-react-compiler:
-      specifier: ^1.0.0
-      version: 1.0.0
-    cors:
-      specifier: ^2.8.6
-      version: 2.8.6
     eslint:
       specifier: ^10.7.0
       version: 10.7.0
@@ -111,42 +86,37 @@ catalogs:
     eslint-plugin-unicorn:
       specifier: ^72.0.0
       version: 72.0.0
-    express:
-      specifier: ^5.2.1
-      version: 5.2.1
-    fallow:
-      specifier: ^3.8.0
-      version: 3.8.0
-    fastify:
-      specifier: ^5.10.0
-      version: 5.10.0
-    fflate:
-      specifier: ^0.8.3
-      version: 0.8.3
     globals:
       specifier: ^17.7.0
       version: 17.7.0
+    typescript-eslint:
+      specifier: ^8.65.0
+      version: 8.65.0
+  react:
+    '@react-router/dev':
+      specifier: ^8.3.0
+      version: 8.3.0
+    '@react-router/node':
+      specifier: ^8.3.0
+      version: 8.3.0
+    '@react-router/serve':
+      specifier: ^8.3.0
+      version: 8.3.0
+    '@stylexjs/eslint-plugin':
+      specifier: ^0.19.0
+      version: 0.19.0
+    '@stylexjs/stylex':
+      specifier: ^0.19.0
+      version: 0.19.0
+    '@stylexjs/unplugin':
+      specifier: ^0.19.0
+      version: 0.19.0
+    babel-plugin-react-compiler:
+      specifier: ^1.0.0
+      version: 1.0.0
     isbot:
       specifier: 5.2.1
       version: 5.2.1
-    jsdom:
-      specifier: ^29.1.1
-      version: 29.1.1
-    knip:
-      specifier: ^6.29.0
-      version: 6.29.0
-    lighthouse:
-      specifier: ^13.4.1
-      version: 13.4.1
-    nodemon:
-      specifier: ^3.1.14
-      version: 3.1.14
-    pg:
-      specifier: ^8.22.0
-      version: 8.22.0
-    playwright:
-      specifier: ^1.61.1
-      version: 1.61.1
     react:
       specifier: ^19.2.8
       version: 19.2.8
@@ -159,58 +129,95 @@ catalogs:
     react-router:
       specifier: ^8.3.0
       version: 8.3.0
-    ts-morph:
-      specifier: ^28.0.0
-      version: 28.0.0
-    typescript:
-      specifier: ^6.0.3
-      version: 6.0.3
-    typescript-eslint:
-      specifier: ^8.65.0
-      version: 8.65.0
-    vite:
-      specifier: 8.1.5
-      version: 8.1.5
-    vite-plugin-babel:
-      specifier: ^1.7.3
-      version: 1.7.3
-    vite-plus:
-      specifier: ^0.2.6
-      version: 0.2.6
-    vitest:
-      specifier: 4.1.10
-      version: 4.1.10
-    ws:
-      specifier: ^8.21.1
-      version: 8.21.1
+  runtime:
+    '@anthropic-ai/claude-agent-sdk':
+      specifier: ^0.3.218
+      version: 0.3.218
+    fflate:
+      specifier: ^0.8.3
+      version: 0.8.3
     zod:
       specifier: ^4.4.3
       version: 4.4.3
+  test:
+    '@testing-library/react':
+      specifier: ^16.3.2
+      version: 16.3.2
+    '@vitest/coverage-v8':
+      specifier: ^4.1.10
+      version: 4.1.10
+    jsdom:
+      specifier: ^29.1.1
+      version: 29.1.1
+    playwright:
+      specifier: ^1.61.1
+      version: 1.61.1
+    vitest:
+      specifier: 4.1.10
+      version: 4.1.10
+  tooling:
+    '@changesets/cli':
+      specifier: ^2.31.1
+      version: 2.31.1
+    fallow:
+      specifier: ^3.8.0
+      version: 3.8.0
+    knip:
+      specifier: ^6.29.0
+      version: 6.29.0
+    lighthouse:
+      specifier: ^13.4.1
+      version: 13.4.1
+    ts-morph:
+      specifier: ^28.0.0
+      version: 28.0.0
+  types:
+    '@types/cors':
+      specifier: ^2.8.19
+      version: 2.8.19
+    '@types/express':
+      specifier: ^5.0.6
+      version: 5.0.6
+    '@types/node':
+      specifier: ^26.1.1
+      version: 26.1.1
+    '@types/pg':
+      specifier: ^8.20.0
+      version: 8.20.0
+    '@types/react':
+      specifier: ^19.2.17
+      version: 19.2.17
+    '@types/react-dom':
+      specifier: ^19.2.3
+      version: 19.2.3
+    '@types/ws':
+      specifier: ^8.18.1
+      version: 8.18.1
 
 importers:
 
   .:
     devDependencies:
       '@biomejs/biome':
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 2.5.5
       '@changesets/cli':
-        specifier: 'catalog:'
+        specifier: catalog:tooling
         version: 2.31.1(@types/node@26.1.1)
       '@repo/vite-configs':
         specifier: workspace:*
         version: link:packages/vite-configs
       fallow:
-        specifier: 'catalog:'
+        specifier: catalog:tooling
         version: 3.8.0
       ts-morph:
-        specifier: 'catalog:'
+        specifier: catalog:tooling
         version: 28.0.0
       vite-plus:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 0.2.6(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(jiti@2.7.0)(jsdom@29.1.1)(typescript@6.0.3)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))(yaml@2.9.0)
       vitest:
-        specifier: 'catalog:'
+        specifier: catalog:test
         version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/browser-preview@4.1.10)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))
 
   apps/admin_system:
@@ -225,119 +232,119 @@ importers:
         specifier: workspace:*
         version: link:../../packages/utils
       '@react-router/serve':
-        specifier: 'catalog:'
+        specifier: catalog:react
         version: 8.3.0(react-router@8.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(supports-color@7.2.0)(typescript@6.0.3)
       '@repo/scan-ingestion':
         specifier: workspace:*
         version: link:../../packages/scan-ingestion
       '@stylexjs/stylex':
-        specifier: 'catalog:'
+        specifier: catalog:react
         version: 0.19.0
       fflate:
-        specifier: 'catalog:'
+        specifier: catalog:runtime
         version: 0.8.3
       react:
-        specifier: 'catalog:'
+        specifier: catalog:react
         version: 19.2.8
       react-dom:
-        specifier: 'catalog:'
+        specifier: catalog:react
         version: 19.2.8(react@19.2.8)
       react-router:
-        specifier: 'catalog:'
+        specifier: catalog:react
         version: 8.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       zod:
-        specifier: 'catalog:'
+        specifier: catalog:runtime
         version: 4.4.3
     devDependencies:
       '@eslint/js':
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 10.0.1(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))
       '@react-router/dev':
-        specifier: 'catalog:'
+        specifier: catalog:react
         version: 8.3.0(@react-router/serve@8.3.0(react-router@8.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(supports-color@7.2.0)(typescript@6.0.3))(react-router@8.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(supports-color@7.2.0)(typescript@6.0.3)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))
       '@repo/vite-configs':
         specifier: workspace:*
         version: link:../../packages/vite-configs
       '@stylexjs/eslint-plugin':
-        specifier: 'catalog:'
+        specifier: catalog:react
         version: 0.19.0
       '@stylexjs/unplugin':
-        specifier: 'catalog:'
+        specifier: catalog:react
         version: 0.19.0(supports-color@7.2.0)(unplugin@2.3.11)
       '@testing-library/react':
-        specifier: 'catalog:'
+        specifier: catalog:test
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@types/node':
-        specifier: 'catalog:'
+        specifier: catalog:types
         version: 26.1.1
       '@types/react':
-        specifier: 'catalog:'
+        specifier: catalog:types
         version: 19.2.17
       '@types/react-dom':
-        specifier: 'catalog:'
+        specifier: catalog:types
         version: 19.2.3(@types/react@19.2.17)
       '@typescript-eslint/utils':
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 8.65.0(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
       '@vitest/coverage-v8':
-        specifier: 'catalog:'
+        specifier: catalog:test
         version: 4.1.10(@vitest/browser@4.1.10)(vitest@4.1.10)
       babel-plugin-react-compiler:
-        specifier: 'catalog:'
+        specifier: catalog:react
         version: 1.0.0
       eslint:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 10.7.0(jiti@2.7.0)(supports-color@7.2.0)
       eslint-config-prettier:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 10.1.8(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))
       eslint-plugin-local-rules:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 3.0.2
       eslint-plugin-perfectionist:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 5.10.0(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
       eslint-plugin-react-dom:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 5.18.0(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
       eslint-plugin-react-hooks:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 7.1.1(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)
       eslint-plugin-react-refresh:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 0.5.3(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))
       eslint-plugin-react-x:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 5.18.0(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
       eslint-plugin-security:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 4.0.1
       eslint-plugin-unicorn:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 72.0.0(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))
       globals:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 17.7.0
       jsdom:
-        specifier: 'catalog:'
+        specifier: catalog:test
         version: 29.1.1
       typescript:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 6.0.3
       typescript-eslint:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 8.65.0(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
       vite:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0)
       vite-plugin-babel:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 1.7.3(@babel/core@7.29.7(supports-color@7.2.0))(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))
       vite-plus:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 0.2.6(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(jiti@2.7.0)(jsdom@29.1.1)(typescript@6.0.3)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))(yaml@2.9.0)
       vitest:
-        specifier: 'catalog:'
+        specifier: catalog:test
         version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/browser-preview@4.1.10)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))
 
   apps/api-server:
@@ -349,53 +356,53 @@ importers:
         specifier: workspace:*
         version: link:../shared
       cors:
-        specifier: 'catalog:'
+        specifier: catalog:backend
         version: 2.8.6
       express:
-        specifier: 'catalog:'
+        specifier: catalog:backend
         version: 5.2.1(supports-color@5.5.0)
       pg:
-        specifier: 'catalog:'
+        specifier: catalog:backend
         version: 8.22.0
       zod:
-        specifier: 'catalog:'
+        specifier: catalog:runtime
         version: 4.4.3
     devDependencies:
       '@repo/vite-configs':
         specifier: workspace:*
         version: link:../../packages/vite-configs
       '@types/cors':
-        specifier: 'catalog:'
+        specifier: catalog:types
         version: 2.8.19
       '@types/express':
-        specifier: 'catalog:'
+        specifier: catalog:types
         version: 5.0.6
       '@types/node':
-        specifier: 'catalog:'
+        specifier: catalog:types
         version: 26.1.1
       '@types/pg':
-        specifier: 'catalog:'
+        specifier: catalog:types
         version: 8.20.0
       eslint:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 10.7.0(jiti@2.7.0)(supports-color@5.5.0)
       nodemon:
-        specifier: 'catalog:'
+        specifier: catalog:backend
         version: 3.1.14
       typescript:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 6.0.3
       vite-plus:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 0.2.6(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(jiti@2.7.0)(jsdom@29.1.1)(typescript@6.0.3)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))(yaml@2.9.0)
       vitest:
-        specifier: 'catalog:'
+        specifier: catalog:test
         version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/browser-preview@4.1.10)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))
 
   apps/api-server-fast:
     dependencies:
       '@fastify/cors':
-        specifier: 'catalog:'
+        specifier: catalog:backend
         version: 11.3.0
       '@repo/node-runtime':
         specifier: workspace:*
@@ -404,35 +411,35 @@ importers:
         specifier: workspace:*
         version: link:../shared
       fastify:
-        specifier: 'catalog:'
+        specifier: catalog:backend
         version: 5.10.0
       pg:
-        specifier: 'catalog:'
+        specifier: catalog:backend
         version: 8.22.0
     devDependencies:
       '@repo/vite-configs':
         specifier: workspace:*
         version: link:../../packages/vite-configs
       '@types/node':
-        specifier: 'catalog:'
+        specifier: catalog:types
         version: 26.1.1
       '@types/pg':
-        specifier: 'catalog:'
+        specifier: catalog:types
         version: 8.20.0
       eslint:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 10.7.0(jiti@2.7.0)(supports-color@7.2.0)
       nodemon:
-        specifier: 'catalog:'
+        specifier: catalog:backend
         version: 3.1.14
       typescript:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 6.0.3
       vite-plus:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 0.2.6(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(jiti@2.7.0)(jsdom@29.1.1)(typescript@6.0.3)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))(yaml@2.9.0)
       vitest:
-        specifier: 'catalog:'
+        specifier: catalog:test
         version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/browser-preview@4.1.10)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))
 
   apps/react-router:
@@ -450,125 +457,125 @@ importers:
         specifier: workspace:*
         version: link:../../packages/utils
       '@react-router/serve':
-        specifier: 'catalog:'
+        specifier: catalog:react
         version: 8.3.0(react-router@8.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(supports-color@7.2.0)(typescript@6.0.3)
       '@stylexjs/stylex':
-        specifier: 'catalog:'
+        specifier: catalog:react
         version: 0.19.0
       react:
-        specifier: 'catalog:'
+        specifier: catalog:react
         version: 19.2.8
       react-dom:
-        specifier: 'catalog:'
+        specifier: catalog:react
         version: 19.2.8(react@19.2.8)
       react-router:
-        specifier: 'catalog:'
+        specifier: catalog:react
         version: 8.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       zod:
-        specifier: 'catalog:'
+        specifier: catalog:runtime
         version: 4.4.3
     devDependencies:
       '@babel/preset-typescript':
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 8.0.1
       '@eslint/js':
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 10.0.1(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))
       '@react-router/dev':
-        specifier: 'catalog:'
+        specifier: catalog:react
         version: 8.3.0(@react-router/serve@8.3.0(react-router@8.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(supports-color@7.2.0)(typescript@6.0.3))(react-router@8.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(supports-color@7.2.0)(typescript@6.0.3)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))
       '@repo/vite-configs':
         specifier: workspace:*
         version: link:../../packages/vite-configs
       '@stylexjs/eslint-plugin':
-        specifier: 'catalog:'
+        specifier: catalog:react
         version: 0.19.0
       '@stylexjs/unplugin':
-        specifier: 'catalog:'
+        specifier: catalog:react
         version: 0.19.0(supports-color@7.2.0)(unplugin@2.3.11)
       '@testing-library/react':
-        specifier: 'catalog:'
+        specifier: catalog:test
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@types/node':
-        specifier: 'catalog:'
+        specifier: catalog:types
         version: 26.1.1
       '@types/react':
-        specifier: 'catalog:'
+        specifier: catalog:types
         version: 19.2.17
       '@types/react-dom':
-        specifier: 'catalog:'
+        specifier: catalog:types
         version: 19.2.3(@types/react@19.2.17)
       '@typescript-eslint/utils':
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 8.65.0(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
       '@vitest/coverage-v8':
-        specifier: 'catalog:'
+        specifier: catalog:test
         version: 4.1.10(@vitest/browser@4.1.10)(vitest@4.1.10)
       babel-plugin-react-compiler:
-        specifier: 'catalog:'
+        specifier: catalog:react
         version: 1.0.0
       eslint:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 10.7.0(jiti@2.7.0)(supports-color@7.2.0)
       eslint-config-prettier:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 10.1.8(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))
       eslint-plugin-local-rules:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 3.0.2
       eslint-plugin-perfectionist:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 5.10.0(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
       eslint-plugin-react-dom:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 5.18.0(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
       eslint-plugin-react-hooks:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 7.1.1(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)
       eslint-plugin-react-refresh:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 0.5.3(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))
       eslint-plugin-react-x:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 5.18.0(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
       eslint-plugin-security:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 4.0.1
       eslint-plugin-unicorn:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 72.0.0(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))
       globals:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 17.7.0
       jsdom:
-        specifier: 'catalog:'
+        specifier: catalog:test
         version: 29.1.1
       knip:
-        specifier: 'catalog:'
+        specifier: catalog:tooling
         version: 6.29.0
       lighthouse:
-        specifier: 'catalog:'
+        specifier: catalog:tooling
         version: 13.4.1(@opentelemetry/core@2.10.0(@opentelemetry/api@1.9.1))(supports-color@7.2.0)
       playwright:
-        specifier: 'catalog:'
+        specifier: catalog:test
         version: 1.61.1
       typescript:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 6.0.3
       typescript-eslint:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 8.65.0(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
       vite:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0)
       vite-plugin-babel:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 1.7.3(@babel/core@7.29.7(supports-color@7.2.0))(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))
       vite-plus:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 0.2.6(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(jiti@2.7.0)(jsdom@29.1.1)(typescript@6.0.3)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))(yaml@2.9.0)
       vitest:
-        specifier: 'catalog:'
+        specifier: catalog:test
         version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/browser-preview@4.1.10)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))
 
   apps/scan-orchestrator:
@@ -586,41 +593,41 @@ importers:
         specifier: workspace:*
         version: link:../../packages/scan-ingestion
       pg:
-        specifier: 'catalog:'
+        specifier: catalog:backend
         version: 8.22.0
       ws:
-        specifier: 'catalog:'
+        specifier: catalog:backend
         version: 8.21.1
       zod:
-        specifier: 'catalog:'
+        specifier: catalog:runtime
         version: 4.4.3
     devDependencies:
       '@repo/vite-configs':
         specifier: workspace:*
         version: link:../../packages/vite-configs
       '@types/node':
-        specifier: 'catalog:'
+        specifier: catalog:types
         version: 26.1.1
       '@types/pg':
-        specifier: 'catalog:'
+        specifier: catalog:types
         version: 8.20.0
       '@types/ws':
-        specifier: 'catalog:'
+        specifier: catalog:types
         version: 8.18.1
       eslint:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 10.7.0(jiti@2.7.0)(supports-color@7.2.0)
       typescript:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 6.0.3
       vite:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0)
       vite-plus:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 0.2.6(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(jiti@2.7.0)(jsdom@29.1.1)(typescript@6.0.3)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))(yaml@2.9.0)
       vitest:
-        specifier: 'catalog:'
+        specifier: catalog:test
         version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/browser-preview@4.1.10)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))
 
   apps/shared:
@@ -636,50 +643,50 @@ importers:
         specifier: workspace:*
         version: link:../../packages/vite-configs
       '@types/node':
-        specifier: 'catalog:'
+        specifier: catalog:types
         version: 26.1.1
       eslint:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 10.7.0(jiti@2.7.0)(supports-color@7.2.0)
       typescript:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 6.0.3
       vite-plus:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 0.2.6(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(jiti@2.7.0)(jsdom@29.1.1)(typescript@6.0.3)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))(yaml@2.9.0)
       vitest:
-        specifier: 'catalog:'
+        specifier: catalog:test
         version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/browser-preview@4.1.10)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))
 
   packages/agent-runner:
     dependencies:
       '@anthropic-ai/claude-agent-sdk':
-        specifier: 'catalog:'
+        specifier: catalog:runtime
         version: 0.3.218(@anthropic-ai/sdk@0.112.5(zod@4.4.3))(@modelcontextprotocol/sdk@1.29.0(supports-color@7.2.0)(zod@4.4.3))(zod@4.4.3)
       zod:
-        specifier: 'catalog:'
+        specifier: catalog:runtime
         version: 4.4.3
     devDependencies:
       '@repo/vite-configs':
         specifier: workspace:*
         version: link:../vite-configs
       '@types/node':
-        specifier: 'catalog:'
+        specifier: catalog:types
         version: 26.1.1
       eslint:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 10.7.0(jiti@2.7.0)(supports-color@7.2.0)
       typescript:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 6.0.3
       vite:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0)
       vite-plus:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 0.2.6(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(jiti@2.7.0)(jsdom@29.1.1)(typescript@6.0.3)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))(yaml@2.9.0)
       vitest:
-        specifier: 'catalog:'
+        specifier: catalog:test
         version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/browser-preview@4.1.10)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))
 
   packages/api:
@@ -692,22 +699,22 @@ importers:
         specifier: workspace:*
         version: link:../vite-configs
       '@vitest/coverage-v8':
-        specifier: 'catalog:'
+        specifier: catalog:test
         version: 4.1.10(@vitest/browser@4.1.10)(vitest@4.1.10)
       eslint:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 10.7.0(jiti@2.7.0)(supports-color@7.2.0)
       typescript:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 6.0.3
       vite:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0)
       vite-plus:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 0.2.6(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(jiti@2.7.0)(jsdom@29.1.1)(typescript@6.0.3)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))(yaml@2.9.0)
       vitest:
-        specifier: 'catalog:'
+        specifier: catalog:test
         version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/browser-preview@4.1.10)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))
 
   packages/eslint-local-rules:
@@ -716,25 +723,25 @@ importers:
         specifier: workspace:*
         version: link:../vite-configs
       '@typescript-eslint/rule-tester':
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 8.65.0(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
       '@typescript-eslint/utils':
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 8.65.0(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
       eslint:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 10.7.0(jiti@2.7.0)(supports-color@7.2.0)
       typescript:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 6.0.3
       typescript-eslint:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 8.65.0(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
       vite-plus:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 0.2.6(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(jiti@2.7.0)(jsdom@29.1.1)(typescript@6.0.3)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))(yaml@2.9.0)
       vitest:
-        specifier: 'catalog:'
+        specifier: catalog:test
         version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/browser-preview@4.1.10)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))
 
   packages/node-runtime:
@@ -743,43 +750,43 @@ importers:
         specifier: workspace:*
         version: link:../vite-configs
       '@types/node':
-        specifier: 'catalog:'
+        specifier: catalog:types
         version: 26.1.1
       '@vitest/coverage-v8':
-        specifier: 'catalog:'
+        specifier: catalog:test
         version: 4.1.10(@vitest/browser@4.1.10)(vitest@4.1.10)
       eslint:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 10.7.0(jiti@2.7.0)(supports-color@7.2.0)
       typescript:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 6.0.3
       vite:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0)
       vite-plus:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 0.2.6(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(jiti@2.7.0)(jsdom@29.1.1)(typescript@6.0.3)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))(yaml@2.9.0)
       vitest:
-        specifier: 'catalog:'
+        specifier: catalog:test
         version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/browser-preview@4.1.10)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))
 
   packages/plugins:
     devDependencies:
       '@types/node':
-        specifier: 'catalog:'
+        specifier: catalog:types
         version: 26.1.1
       eslint:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 10.7.0(jiti@2.7.0)(supports-color@7.2.0)
       typescript:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 6.0.3
       vite-plus:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 0.2.6(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(jiti@2.7.0)(jsdom@29.1.1)(typescript@6.0.3)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))(yaml@2.9.0)
       vitest:
-        specifier: 'catalog:'
+        specifier: catalog:test
         version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/browser-preview@4.1.10)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))
 
   packages/scan-ingestion:
@@ -791,78 +798,78 @@ importers:
         specifier: workspace:*
         version: link:../utils
       fflate:
-        specifier: 'catalog:'
+        specifier: catalog:runtime
         version: 0.8.3
       pg:
-        specifier: 'catalog:'
+        specifier: catalog:backend
         version: 8.22.0
       zod:
-        specifier: 'catalog:'
+        specifier: catalog:runtime
         version: 4.4.3
     devDependencies:
       '@repo/vite-configs':
         specifier: workspace:*
         version: link:../vite-configs
       '@types/node':
-        specifier: 'catalog:'
+        specifier: catalog:types
         version: 26.1.1
       '@types/pg':
-        specifier: 'catalog:'
+        specifier: catalog:types
         version: 8.20.0
       '@vitest/coverage-v8':
-        specifier: 'catalog:'
+        specifier: catalog:test
         version: 4.1.10(@vitest/browser@4.1.10)(vitest@4.1.10)
       eslint:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 10.7.0(jiti@2.7.0)(supports-color@7.2.0)
       typescript:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 6.0.3
       vite:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0)
       vite-plus:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 0.2.6(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(jiti@2.7.0)(jsdom@29.1.1)(typescript@6.0.3)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))(yaml@2.9.0)
       vitest:
-        specifier: 'catalog:'
+        specifier: catalog:test
         version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/browser-preview@4.1.10)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))
 
   packages/server:
     dependencies:
       pg:
-        specifier: 'catalog:'
+        specifier: catalog:backend
         version: 8.22.0
       zod:
-        specifier: 'catalog:'
+        specifier: catalog:runtime
         version: 4.4.3
     devDependencies:
       '@repo/vite-configs':
         specifier: workspace:*
         version: link:../vite-configs
       '@types/node':
-        specifier: 'catalog:'
+        specifier: catalog:types
         version: 26.1.1
       '@types/pg':
-        specifier: 'catalog:'
+        specifier: catalog:types
         version: 8.20.0
       '@vitest/coverage-v8':
-        specifier: 'catalog:'
+        specifier: catalog:test
         version: 4.1.10(@vitest/browser@4.1.10)(vitest@4.1.10)
       eslint:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 10.7.0(jiti@2.7.0)(supports-color@7.2.0)
       typescript:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 6.0.3
       vite:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0)
       vite-plus:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 0.2.6(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(jiti@2.7.0)(jsdom@29.1.1)(typescript@6.0.3)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))(yaml@2.9.0)
       vitest:
-        specifier: 'catalog:'
+        specifier: catalog:test
         version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/browser-preview@4.1.10)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))
 
   packages/ts-configs:
@@ -871,16 +878,16 @@ importers:
         specifier: workspace:*
         version: link:../vite-configs
       '@types/node':
-        specifier: 'catalog:'
+        specifier: catalog:types
         version: 26.1.1
       eslint:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 10.7.0(jiti@2.7.0)(supports-color@7.2.0)
       typescript:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 6.0.3
       vitest:
-        specifier: 'catalog:'
+        specifier: catalog:test
         version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/browser-preview@4.1.10)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))
 
   packages/ui:
@@ -892,188 +899,188 @@ importers:
         specifier: workspace:*
         version: link:../utils
       isbot:
-        specifier: 'catalog:'
+        specifier: catalog:react
         version: 5.2.1
       react-markdown:
-        specifier: 'catalog:'
+        specifier: catalog:react
         version: 10.1.0(@types/react@19.2.17)(react@19.2.8)(supports-color@7.2.0)
     devDependencies:
       '@babel/preset-typescript':
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 8.0.1
       '@eslint/js':
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 10.0.1(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))
       '@react-router/node':
-        specifier: 'catalog:'
+        specifier: catalog:react
         version: 8.3.0(react-router@8.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(typescript@6.0.3)
       '@repo/vite-configs':
         specifier: workspace:*
         version: link:../vite-configs
       '@stylexjs/eslint-plugin':
-        specifier: 'catalog:'
+        specifier: catalog:react
         version: 0.19.0
       '@stylexjs/stylex':
-        specifier: 'catalog:'
+        specifier: catalog:react
         version: 0.19.0
       '@stylexjs/unplugin':
-        specifier: 'catalog:'
+        specifier: catalog:react
         version: 0.19.0(supports-color@7.2.0)(unplugin@2.3.11)
       '@testing-library/react':
-        specifier: 'catalog:'
+        specifier: catalog:test
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@types/node':
-        specifier: 'catalog:'
+        specifier: catalog:types
         version: 26.1.1
       '@types/react':
-        specifier: 'catalog:'
+        specifier: catalog:types
         version: 19.2.17
       '@types/react-dom':
-        specifier: 'catalog:'
+        specifier: catalog:types
         version: 19.2.3(@types/react@19.2.17)
       babel-plugin-react-compiler:
-        specifier: 'catalog:'
+        specifier: catalog:react
         version: 1.0.0
       eslint:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 10.7.0(jiti@2.7.0)(supports-color@7.2.0)
       eslint-config-prettier:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 10.1.8(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))
       eslint-plugin-local-rules:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 3.0.2
       eslint-plugin-perfectionist:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 5.10.0(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
       eslint-plugin-react-dom:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 5.18.0(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
       eslint-plugin-react-hooks:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 7.1.1(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)
       eslint-plugin-react-refresh:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 0.5.3(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))
       eslint-plugin-react-x:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 5.18.0(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
       eslint-plugin-security:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 4.0.1
       eslint-plugin-unicorn:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 72.0.0(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))
       globals:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 17.7.0
       react:
-        specifier: 'catalog:'
+        specifier: catalog:react
         version: 19.2.8
       react-dom:
-        specifier: 'catalog:'
+        specifier: catalog:react
         version: 19.2.8(react@19.2.8)
       react-router:
-        specifier: 'catalog:'
+        specifier: catalog:react
         version: 8.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       typescript:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 6.0.3
       typescript-eslint:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 8.65.0(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
       vite:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0)
       vite-plugin-babel:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 1.7.3(@babel/core@7.29.7(supports-color@7.2.0))(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))
       vite-plus:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 0.2.6(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(jiti@2.7.0)(jsdom@29.1.1)(typescript@6.0.3)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))(yaml@2.9.0)
       vitest:
-        specifier: 'catalog:'
+        specifier: catalog:test
         version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/browser-preview@4.1.10)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))
 
   packages/utils:
     devDependencies:
       '@vitest/coverage-v8':
-        specifier: 'catalog:'
+        specifier: catalog:test
         version: 4.1.10(@vitest/browser@4.1.10)(vitest@4.1.10)
       eslint:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 10.7.0(jiti@2.7.0)(supports-color@7.2.0)
       typescript:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 6.0.3
       vite:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0)
       vite-plus:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 0.2.6(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(jiti@2.7.0)(jsdom@29.1.1)(typescript@6.0.3)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))(yaml@2.9.0)
       vitest:
-        specifier: 'catalog:'
+        specifier: catalog:test
         version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/browser-preview@4.1.10)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))
 
   packages/vite-configs:
     devDependencies:
       '@babel/preset-typescript':
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 8.0.1
       '@eslint/js':
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 10.0.1(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))
       '@lcabrera/utils':
         specifier: workspace:*
         version: link:../utils
       '@react-router/dev':
-        specifier: 'catalog:'
+        specifier: catalog:react
         version: 8.3.0(@react-router/serve@8.3.0(react-router@8.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(supports-color@7.2.0)(typescript@6.0.3))(react-router@8.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(supports-color@7.2.0)(typescript@6.0.3)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))
       '@repo/plugins':
         specifier: workspace:*
         version: link:../plugins
       '@stylexjs/unplugin':
-        specifier: 'catalog:'
+        specifier: catalog:react
         version: 0.19.0(supports-color@7.2.0)(unplugin@2.3.11)
       '@types/node':
-        specifier: 'catalog:'
+        specifier: catalog:types
         version: 26.1.1
       babel-plugin-react-compiler:
-        specifier: 'catalog:'
+        specifier: catalog:react
         version: 1.0.0
       eslint:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 10.7.0(jiti@2.7.0)(supports-color@7.2.0)
       eslint-config-prettier:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 10.1.8(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))
       eslint-plugin-perfectionist:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 5.10.0(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
       eslint-plugin-security:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 4.0.1
       eslint-plugin-unicorn:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 72.0.0(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))
       globals:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 17.7.0
       typescript:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 6.0.3
       typescript-eslint:
-        specifier: 'catalog:'
+        specifier: catalog:lint
         version: 8.65.0(eslint@10.7.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
       vite-plugin-babel:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 1.7.3(@babel/core@7.29.7(supports-color@7.2.0))(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))
       vite-plus:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 0.2.6(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(jiti@2.7.0)(jsdom@29.1.1)(typescript@6.0.3)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))(yaml@2.9.0)
       vitest:
-        specifier: 'catalog:'
+        specifier: catalog:test
         version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/browser-preview@4.1.10)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))
 
 packages:

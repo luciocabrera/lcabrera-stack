@@ -20,19 +20,19 @@
     "@repo/agent-runner": "workspace:*",
     "@repo/node-runtime": "workspace:*",
     "@repo/scan-ingestion": "workspace:*",
-    "pg": "catalog:",
-    "ws": "catalog:",
-    "zod": "catalog:"
+    "pg": "catalog:backend",
+    "ws": "catalog:backend",
+    "zod": "catalog:runtime"
   },
   "devDependencies": {
     "@repo/vite-configs": "workspace:*",
-    "@types/node": "catalog:",
-    "@types/pg": "catalog:",
-    "@types/ws": "catalog:",
-    "eslint": "catalog:",
-    "typescript": "catalog:",
-    "vite": "catalog:",
-    "vite-plus": "catalog:",
-    "vitest": "catalog:"
+    "@types/node": "catalog:types",
+    "@types/pg": "catalog:types",
+    "@types/ws": "catalog:types",
+    "eslint": "catalog:lint",
+    "typescript": "catalog:build",
+    "vite": "catalog:build",
+    "vite-plus": "catalog:build",
+    "vitest": "catalog:test"
   }
 }

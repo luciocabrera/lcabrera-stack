@@ -66,13 +66,13 @@
     "typegen:all": "vp run -r typegen"
   },
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
-    "@changesets/cli": "catalog:",
+    "@biomejs/biome": "catalog:lint",
+    "@changesets/cli": "catalog:tooling",
     "@repo/vite-configs": "workspace:*",
-    "fallow": "catalog:",
-    "ts-morph": "catalog:",
-    "vite-plus": "catalog:",
-    "vitest": "catalog:"
+    "fallow": "catalog:tooling",
+    "ts-morph": "catalog:tooling",
+    "vite-plus": "catalog:build",
+    "vitest": "catalog:test"
   },
   "engines": {
     "node": ">=25"
