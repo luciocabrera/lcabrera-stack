@@ -160,7 +160,6 @@
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
   "devDependencies": {
-    "@vitest/coverage-v8": "catalog:test",
     "eslint": "catalog:lint",
     "typescript": "catalog:build",
     "vite": "catalog:build",
