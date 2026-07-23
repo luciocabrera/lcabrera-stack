@@ -1,6 +1,6 @@
+import { closePool, getPool } from '@lcabrera/server/db/get-pool.util';
 import { registerShutdownSignals } from '@repo/node-runtime/registerShutdownSignals.util';
 import { runStartupDbSanityCheck } from 'api-shared';
-import { Pool } from 'pg';
 
 import { createApp } from './app/app';
 import { readEnvConfig } from './config/env.util';
@@ -8,13 +8,11 @@ import { createDbSanityRepository } from './features/dbSanity/dbSanity.repositor
 
 const envConfig = readEnvConfig({ env: process.env });
 
-const pool = new Pool({
-  database: envConfig.DB_NAME,
-  host: envConfig.DB_HOST,
-  password: envConfig.DB_PASSWORD,
-  port: envConfig.DB_PORT,
-  user: envConfig.DB_USER,
-});
+// Source the pool from @lcabrera/server's singleton — the same one
+// selectFilterOptions (behind /api/distinct) uses — so the process holds one
+// pool, not two. getPool() reads DB_* from process.env, which envConfig above
+// has already validated.
+const pool = getPool();
 
 const app = createApp({ envConfig, pool });
 
@@ -44,7 +42,7 @@ void runStartupDbSanityCheck({
 const shutdown = async (): Promise<void> => {
   console.warn('🛑 Shutting down API server');
   await app.close();
-  await pool.end();
+  await closePool();
 };
 
 registerShutdownSignals({ shutdown });

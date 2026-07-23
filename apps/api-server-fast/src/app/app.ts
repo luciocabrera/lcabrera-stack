@@ -122,7 +122,7 @@ export const createApp = ({
   app.register(createCarSalesPlugin({ pool }), {
     prefix: '/api/car-sales',
   });
-  app.register(createDistinctPlugin({ envConfig, pool }), {
+  app.register(createDistinctPlugin({ envConfig }), {
     prefix: '/api/distinct',
   });
   app.register(createEnterpriseOrdersPlugin({ envConfig, pool }), {

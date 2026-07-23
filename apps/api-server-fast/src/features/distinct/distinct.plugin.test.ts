@@ -1,8 +1,15 @@
-import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
+import { selectFilterOptions } from '@lcabrera/server/db/select-filter-options.util';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import type { EnvConfig } from '../../config/env.schema';
 
 import { createApp } from '../../app/app';
+
+vi.mock('@lcabrera/server/db/select-filter-options.util', () => ({
+  selectFilterOptions: vi.fn(),
+}));
+
+const mockedSelectFilterOptions = vi.mocked(selectFilterOptions);
 
 const envConfig: EnvConfig = {
   API_PORT: 3001,
@@ -15,19 +22,22 @@ const envConfig: EnvConfig = {
   ENTERPRISE_ORDERS_DELAY_MS: 0,
 };
 
+// createApp still wires a pool for the non-distinct features; the distinct path
+// no longer touches it (it reads through selectFilterOptions), so a stub is fine.
+const stubPool = { query: vi.fn() } as never;
+
 describe('distinct fastify plugin', () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
 
-  it('serves allow-listed distinct values with pagination', async () => {
-    const pool = {
-      query: vi.fn().mockResolvedValue({
-        rows: [{ order_status: 'Delivered' }, { order_status: 'Pending' }],
-      }),
-    };
+  it('serves allow-listed distinct values via selectFilterOptions', async () => {
+    mockedSelectFilterOptions.mockResolvedValue({
+      hasMore: true,
+      values: ['Delivered', 'Pending'],
+    });
 
-    const app = createApp({ envConfig, pool: pool as never });
+    const app = createApp({ envConfig, pool: stubPool });
 
     const response = await app.inject({
       method: 'GET',
@@ -39,20 +49,21 @@ describe('distinct fastify plugin', () => {
       hasMore: true,
       values: ['Delivered', 'Pending'],
     });
-    expect(pool.query).toHaveBeenCalledWith(
-      expect.stringContaining(
-        'SELECT DISTINCT "order_status" FROM "public"."enterprise_orders"',
-      ),
-      ['', 2, 4],
-    );
+    expect(mockedSelectFilterOptions).toHaveBeenCalledWith({
+      allowedColumns: expect.arrayContaining(['order_status']),
+      column: 'order_status',
+      columnType: 'text',
+      limit: 2,
+      offset: 4,
+      schema: 'public',
+      table: 'enterprise_orders',
+    });
 
     await app.close();
   });
 
   it('rejects a source outside the allow-list with 400', async () => {
-    const pool = { query: vi.fn() };
-
-    const app = createApp({ envConfig, pool: pool as never });
+    const app = createApp({ envConfig, pool: stubPool });
 
     const response = await app.inject({
       method: 'GET',
@@ -60,15 +71,13 @@ describe('distinct fastify plugin', () => {
     });
 
     expect(response.statusCode).toBe(400);
-    expect(pool.query).not.toHaveBeenCalled();
+    expect(mockedSelectFilterOptions).not.toHaveBeenCalled();
 
     await app.close();
   });
 
   it('rejects requests missing required source params with 400', async () => {
-    const pool = { query: vi.fn() };
-
-    const app = createApp({ envConfig, pool: pool as never });
+    const app = createApp({ envConfig, pool: stubPool });
 
     const response = await app.inject({
       method: 'GET',
@@ -76,7 +85,7 @@ describe('distinct fastify plugin', () => {
     });
 
     expect(response.statusCode).toBe(400);
-    expect(pool.query).not.toHaveBeenCalled();
+    expect(mockedSelectFilterOptions).not.toHaveBeenCalled();
 
     await app.close();
   });

@@ -1,5 +1,3 @@
-import type { Pool } from 'pg';
-
 import { Router } from 'express';
 
 import type { EnvConfig } from '../../config/env.schema';
@@ -9,7 +7,6 @@ import { createDistinctRepository } from './distinct.repository';
 
 type CreateDistinctRouteArgs = {
   readonly envConfig: EnvConfig;
-  readonly pool: Pool;
 };
 
 /**
@@ -17,10 +14,9 @@ type CreateDistinctRouteArgs = {
  */
 export const createDistinctRoute = ({
   envConfig,
-  pool,
 }: CreateDistinctRouteArgs): Router => {
   const router = Router();
-  const repository = createDistinctRepository({ pool });
+  const repository = createDistinctRepository();
   const controller = createDistinctController({
     distinctValuesDelayMs: envConfig.DISTINCT_VALUES_DELAY_MS,
     repository,
