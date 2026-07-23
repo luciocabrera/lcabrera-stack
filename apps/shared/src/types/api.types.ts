@@ -2,10 +2,6 @@ export type ApiSuccessResponse<TData> = {
   readonly data: TData;
 };
 
-export type CountRow = {
-  readonly count: string;
-};
-
 export type DbRow = Readonly<Record<string, unknown>>;
 
 export type DbSanityResult = {
@@ -32,20 +28,6 @@ export type PaginationArgs = {
   readonly limit: number;
   readonly skip: number;
 };
-
-export type Queryable = {
-  readonly query: <TRow extends DbRow = DbRow>(
-    query: string,
-    params?: readonly QueryValue[],
-  ) => Promise<QueryResult<TRow>>;
-};
-
-export type QueryResult<TRow extends DbRow = DbRow> = {
-  readonly rowCount: null | number;
-  readonly rows: readonly TRow[];
-};
-
-export type QueryValue = boolean | Date | null | number | string;
 
 export type SortDirection = 'asc' | 'desc';
 

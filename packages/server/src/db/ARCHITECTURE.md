@@ -7,11 +7,11 @@ construction, and query execution.
 
 This folder is split deliberately, and the split is the thing to preserve:
 
-| Layer                  | Files                                                                                                                                                                                                   | Touches the DB?                                      |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| Query **construction** | `query-builder/` (see its own `ARCHITECTURE.md`)                                                                                                                                                        | **No** — pure functions returning `{ text, values }` |
-| Query **execution**    | `get-pool.util.ts`, `select-rows.util.ts`, `select-distinct-rows.util.ts`, `select-filter-options.util.ts`, `insert-row.util.ts`, `update-rows.util.ts`, `delete-rows.util.ts`, `get-max-value.util.ts` | **Yes**                                              |
-| Configuration          | `env.schema.ts`                                                                                                                                                                                         | Reads env only                                       |
+| Layer                  | Files                                                                                                                                                                                                                             | Touches the DB?                                      |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| Query **construction** | `query-builder/` (see its own `ARCHITECTURE.md`)                                                                                                                                                                                  | **No** — pure functions returning `{ text, values }` |
+| Query **execution**    | `get-pool.util.ts`, `select-rows.util.ts`, `select-distinct-rows.util.ts`, `select-filter-options.util.ts`, `insert-row.util.ts`, `update-rows.util.ts`, `delete-rows.util.ts`, `get-max-value.util.ts`, `get-rows-count.util.ts` | **Yes**                                              |
+| Configuration          | `env.schema.ts`                                                                                                                                                                                                                   | Reads env only                                       |
 
 `query-builder/` is pure so that every SQL string in the repo is testable
 without a database — that is why its suite runs in the DB-free coverage job
@@ -31,22 +31,26 @@ dropdowns; the dropdown shaping lives only in `selectFilterOptions`.
 
 ## Files
 
-| File                            | Role                                                                                                                                                       |
-| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `env.schema.ts`                 | Zod schema + `readEnvConfig` for `DB_HOST`/`DB_NAME`/`DB_PASSWORD`/`DB_PORT`/`DB_USER`                                                                     |
-| `get-pool.util.ts`              | Lazily-initialized `pg.Pool` singleton (one per Node process) + `closePool` for teardown                                                                   |
-| `select-rows.util.ts`           | **Public entry point.** Builds a `SelectQueryDescriptor` and executes it on the pool, returning its rows                                                   |
-| `select-distinct-rows.util.ts`  | **Public entry point.** `selectRows` + `distinct: true` — deduplicated rows over the same descriptor                                                       |
-| `select-filter-options.util.ts` | **Public entry point.** Filter-dropdown specialization over `selectDistinctRows`: one column's distinct, non-empty, ordered values → `{ values, hasMore }` |
-| `insert-row.util.ts`            | **Public entry point.** Builds + runs an `InsertQueryDescriptor`; defaults `RETURNING *`, returns rows                                                     |
-| `update-rows.util.ts`           | **Public entry point.** Builds + runs an `UpdateQueryDescriptor`; defaults `RETURNING *`, returns rows                                                     |
-| `delete-rows.util.ts`           | **Public entry point.** Builds + runs a `DeleteQueryDescriptor`; defaults `RETURNING *`, returns rows                                                      |
-| `get-max-value.util.ts`         | **Public entry point.** Runs `buildMaxValueQuery` and returns the numeric `MAX(col)` (0 if empty)                                                          |
-| `query-builder/`                | Pure SELECT/count/distinct/insert/update/delete/max construction — see `query-builder/ARCHITECTURE.md`                                                     |
+| File                            | Role                                                                                                                                                             |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env.schema.ts`                 | Zod schema + `readEnvConfig` for `DB_HOST`/`DB_NAME`/`DB_PASSWORD`/`DB_PORT`/`DB_USER`                                                                           |
+| `get-pool.util.ts`              | Lazily-initialized `pg.Pool` singleton (one per Node process) + `closePool` for teardown                                                                         |
+| `select-rows.util.ts`           | **Public entry point.** Builds a `SelectQueryDescriptor` and executes it on the pool, returning its rows                                                         |
+| `select-distinct-rows.util.ts`  | **Public entry point.** `selectRows` + `distinct: true` — deduplicated rows over the same descriptor                                                             |
+| `select-filter-options.util.ts` | **Public entry point.** Filter-dropdown specialization over `selectDistinctRows`: one column's distinct, non-empty, ordered values → `{ values, hasMore }`       |
+| `insert-row.util.ts`            | **Public entry point.** Builds + runs an `InsertQueryDescriptor`; defaults `RETURNING *`, returns rows                                                           |
+| `update-rows.util.ts`           | **Public entry point.** Builds + runs an `UpdateQueryDescriptor`; defaults `RETURNING *`, returns rows                                                           |
+| `delete-rows.util.ts`           | **Public entry point.** Builds + runs a `DeleteQueryDescriptor`; defaults `RETURNING *`, returns rows                                                            |
+| `get-max-value.util.ts`         | **Public entry point.** Runs `buildMaxValueQuery` and returns the numeric `MAX(col)` (0 if empty)                                                                |
+| `get-rows-count.util.ts`        | **Public entry point.** Runs `buildCountQuery` and returns the row count; requires an explicit `column` (never `count(*)`) so a page and its total share filters |
+| `query-builder/`                | Pure SELECT/count/distinct/insert/update/delete/max construction — see `query-builder/ARCHITECTURE.md`                                                           |
 
 ## Choosing an entry point
 
 - **Reading a flat list/rollup?** Use `selectRows` — it is the whole path.
+- **Counting rows for that same read** (pagination totals)? Use `getRowsCount`
+  with the data query's `filters`/`allowedColumns` and an explicit primary-key
+  `column`, so the page and its total can never drift.
 - **Reading _distinct_ rows** over a list of columns? Use `selectDistinctRows`
   (or `selectRows`/`buildSelectQuery` with `distinct: true`) — same descriptor,
   deduplicated.

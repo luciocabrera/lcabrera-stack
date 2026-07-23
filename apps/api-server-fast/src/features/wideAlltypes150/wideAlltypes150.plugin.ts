@@ -1,5 +1,4 @@
 import type { FastifyPluginAsync } from 'fastify';
-import type { Pool } from 'pg';
 
 import { createJsonFieldsParser } from '../../utils/parseJsonQueryFields.util';
 import { createWideAlltypes150Repository } from './wideAlltypes150.repository';
@@ -8,18 +7,13 @@ import {
   paginatedWideAlltypesQuerySchema,
 } from './wideAlltypes150.schema';
 
-type CreateWideAlltypes150PluginArgs = {
-  readonly pool: Pool;
-};
-
 /**
  * Fastify plugin for wide-alltypes endpoints.
  */
-export const createWideAlltypes150Plugin =
-  ({ pool }: CreateWideAlltypes150PluginArgs): FastifyPluginAsync =>
-  async (fastify) => {
-    const repository = createWideAlltypes150Repository({ pool });
+export const createWideAlltypes150Plugin = (): FastifyPluginAsync => {
+  const repository = createWideAlltypes150Repository();
 
+  return async (fastify) => {
     fastify.addHook('preValidation', createJsonFieldsParser(['sort']));
 
     fastify.get<{ Querystring: PaginatedWideAlltypesQuery }>(
@@ -31,3 +25,4 @@ export const createWideAlltypes150Plugin =
       },
     );
   };
+};

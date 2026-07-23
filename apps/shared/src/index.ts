@@ -21,7 +21,6 @@ export { DISTINCT_SOURCES } from './features/distinct/distinct.constants.js';
 export { createDistinctRepository } from './features/distinct/distinct.repository.js';
 export type { DistinctRepository } from './features/distinct/distinct.repository.js';
 export { parseDistinctSource } from './features/distinct/parseDistinctSource.util.js';
-export { buildEnterpriseOrdersWhereClause } from './features/enterpriseOrders/buildEnterpriseOrdersWhereClause.util.js';
 export {
   DEFAULT_ENTERPRISE_ORDER_SORTING,
   ENTERPRISE_ORDER_ALLOWED_COLUMNS,
@@ -47,17 +46,13 @@ export { createWideAlltypes150Repository } from './features/wideAlltypes150/wide
 export type { WideAlltypes150Repository } from './features/wideAlltypes150/wideAlltypes150.repository.js';
 export type {
   ApiSuccessResponse,
-  CountRow,
   DbRow,
   DbSanityResult,
   DistinctValuesResponse,
   PaginatedResponse,
   PaginationArgs,
-  QueryValue,
   SortDirection,
   SortRule,
 } from './types/api.types.js';
-export { buildOrderByClause } from './utils/buildOrderByClause.util.js';
-export { formatPgAdminQuery } from './utils/formatPgAdminQuery.util.js';
 export { runStartupDbSanityCheck } from './utils/runStartupDbSanityCheck.util.js';
 export { serializeDatabaseValue } from './utils/serializeDatabaseValue.util.js';

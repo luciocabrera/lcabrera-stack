@@ -1,5 +1,3 @@
-import type { Pool } from 'pg';
-
 import cors from '@fastify/cors';
 import { HttpError } from 'api-shared';
 import Fastify, {
@@ -18,7 +16,6 @@ import { createWideAlltypes150Plugin } from '../features/wideAlltypes150/wideAll
 
 type CreateAppArgs = {
   readonly envConfig: EnvConfig;
-  readonly pool: Pool;
 };
 
 type RequestWithStartNs = FastifyRequest & {
@@ -66,10 +63,7 @@ const logApiRequest = ({
 /**
  * Create the Fastify application with all API routes.
  */
-export const createApp = ({
-  envConfig,
-  pool,
-}: CreateAppArgs): FastifyInstance => {
+export const createApp = ({ envConfig }: CreateAppArgs): FastifyInstance => {
   const app = Fastify({ logger: false });
 
   app.addHook('onRequest', (request, _reply, done) => {
@@ -119,19 +113,19 @@ export const createApp = ({
 
   // --- Route plugins ----------------------------------------------------
 
-  app.register(createCarSalesPlugin({ pool }), {
+  app.register(createCarSalesPlugin(), {
     prefix: '/api/car-sales',
   });
   app.register(createDistinctPlugin({ envConfig }), {
     prefix: '/api/distinct',
   });
-  app.register(createEnterpriseOrdersPlugin({ envConfig, pool }), {
+  app.register(createEnterpriseOrdersPlugin({ envConfig }), {
     prefix: '/api/enterprise-orders',
   });
-  app.register(createWideAlltypes150Plugin({ pool }), {
+  app.register(createWideAlltypes150Plugin(), {
     prefix: '/api/wide-alltypes-150',
   });
-  app.register(createDbSanityPlugin({ pool }), {
+  app.register(createDbSanityPlugin(), {
     prefix: '/api/db-sanity',
   });
 
