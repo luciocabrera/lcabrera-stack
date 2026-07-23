@@ -2,7 +2,7 @@
 id: 366-table-route-loader-factory
 title: Generic createTableRouteLoader factory + concern-split routing utils
 owner: agent:claude
-status: active
+status: review
 branch: chore/366-366-table-route-loader-factory
 area:
   - packages/ui/src/routing/**
@@ -13,7 +13,7 @@ area:
 started: 2026-07-23
 updated: 2026-07-23
 plan: (none)
-pr: (none)
+pr: '#368'
 issue: #366
 ---
 
