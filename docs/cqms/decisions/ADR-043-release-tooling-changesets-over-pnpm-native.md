@@ -1,6 +1,6 @@
 # ADR-043 — Release tooling: keep Changesets over pnpm-native releases
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-07-23
 - **Issue:** [#334](https://github.com/luciocabrera/vite-react-compiler/issues/334)
 - **Relates to:** [#266](https://github.com/luciocabrera/vite-react-compiler/pull/266) — the Changesets adoption, which recorded the wiring but not the alternatives.
@@ -47,9 +47,13 @@ patch intent, fully reverted) established:
   intent file the way `changeset version` does, so the CI "Version PR" flow would
   need rebuilding rather than reusing `changesets/action`.
 
-## Decision (proposed)
+## Decision
 
-**Keep Changesets. Do not migrate to pnpm-native now.**
+**Keep Changesets. Do not migrate to pnpm-native now.** This is a decision made
+_after_ evaluating the alternative (the PoC above), not a default carried over
+from #266 — so the record is unambiguous that pnpm-native was assessed and set
+aside for concrete reasons, and can be reassessed against the same checklist when
+they change.
 
 The migration's cost is real and its benefit is marginal:
 
