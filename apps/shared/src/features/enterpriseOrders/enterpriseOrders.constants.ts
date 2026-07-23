@@ -1,6 +1,10 @@
 import type { SortRule } from '../../types/api.types.js';
 
-const ENTERPRISE_ORDER_COLUMNS = [
+export const ENTERPRISE_ORDERS_SCHEMA = 'public';
+export const ENTERPRISE_ORDERS_TABLE = 'enterprise_orders';
+export const ENTERPRISE_ORDER_PRIMARY_KEY = 'order_id';
+
+export const ENTERPRISE_ORDER_COLUMNS = [
   'balance_due',
   'billing_address_line1',
   'billing_city',

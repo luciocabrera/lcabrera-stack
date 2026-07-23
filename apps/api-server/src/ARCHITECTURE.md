@@ -48,12 +48,12 @@ src/
 
 ## Request Flow
 
-1. `server.ts` reads env, sources the `pg` pool from `@lcabrera/server`'s `getPool()` singleton (the same one the distinct read's `selectFilterOptions` uses), builds the Express app, and starts listening.
+1. `server.ts` reads env, builds the Express app, and starts listening. It holds no pool: every repository reads through `@lcabrera/server` executors, which reach the `getPool()` singleton lazily (created on the first query); shutdown closes it via `closePool()`.
 2. `app/app.ts` mounts feature routers and shared middleware.
 3. `*.route.ts` files bind URL paths to controller handlers.
 4. `*.controller.ts` files parse query params, validate input, and shape HTTP responses.
-5. `*.repository.ts` files execute SQL using typed/allowlisted inputs only.
-6. Shared `*.util.ts` helpers provide pure query parsing, serialization, and SQL formatting support.
+5. `*.repository.ts` files compose `@lcabrera/server` executors (`selectRows`, `getRowsCount`, `selectFilterOptions`) and its `toQueryFilters` filter mapper from allow-listed inputs — no hand-rolled SQL.
+6. Shared `*.util.ts` helpers provide pure query parsing and serialization support.
 
 ## Guardrails
 

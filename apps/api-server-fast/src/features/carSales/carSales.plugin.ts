@@ -1,5 +1,4 @@
 import type { FastifyPluginAsync } from 'fastify';
-import type { Pool } from 'pg';
 
 import { createJsonFieldsParser } from '../../utils/parseJsonQueryFields.util';
 import { createCarSalesRepository } from './carSales.repository';
@@ -8,18 +7,13 @@ import {
   paginatedCarSalesQuerySchema,
 } from './carSales.schema';
 
-type CreateCarSalesPluginArgs = {
-  readonly pool: Pool;
-};
-
 /**
  * Fastify plugin for car sales endpoints.
  */
-export const createCarSalesPlugin =
-  ({ pool }: CreateCarSalesPluginArgs): FastifyPluginAsync =>
-  async (fastify) => {
-    const repository = createCarSalesRepository({ pool });
+export const createCarSalesPlugin = (): FastifyPluginAsync => {
+  const repository = createCarSalesRepository();
 
+  return async (fastify) => {
     fastify.addHook('preValidation', createJsonFieldsParser(['sort']));
 
     fastify.get('/', async () => {
@@ -43,3 +37,4 @@ export const createCarSalesPlugin =
       },
     );
   };
+};

@@ -1,5 +1,3 @@
-import type { Pool } from 'pg';
-
 import { HttpError } from 'api-shared';
 import cors from 'cors';
 import express, { type Express, Router } from 'express';
@@ -15,13 +13,12 @@ import { errorMiddleware } from '../middleware/error.middleware';
 
 type CreateAppArgs = {
   readonly envConfig: EnvConfig;
-  readonly pool: Pool;
 };
 
 /**
  * Create the Express application with all API routes.
  */
-export const createApp = ({ envConfig, pool }: CreateAppArgs): Express => {
+export const createApp = ({ envConfig }: CreateAppArgs): Express => {
   const app = express();
   const apiRouter = Router();
   const allowedCorsOrigins = new Set(
@@ -39,14 +36,14 @@ export const createApp = ({ envConfig, pool }: CreateAppArgs): Express => {
   );
   app.use(express.json());
 
-  apiRouter.use('/car-sales', createCarSalesRoute({ pool }));
+  apiRouter.use('/car-sales', createCarSalesRoute());
   apiRouter.use('/distinct', createDistinctRoute({ envConfig }));
   apiRouter.use(
     '/enterprise-orders',
-    createEnterpriseOrdersRoute({ envConfig, pool }),
+    createEnterpriseOrdersRoute({ envConfig }),
   );
-  apiRouter.use('/wide-alltypes-150', createWideAlltypes150Route({ pool }));
-  apiRouter.use('/db-sanity', createDbSanityRoute({ pool }));
+  apiRouter.use('/wide-alltypes-150', createWideAlltypes150Route());
+  apiRouter.use('/db-sanity', createDbSanityRoute());
 
   app.use('/api', apiRouter);
   // eslint-disable-next-line local-rules/destructuring-for-functions -- express's app.use handler signature is fixed by the framework

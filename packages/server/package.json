@@ -34,6 +34,7 @@
     "./db/env.schema": "./src/db/env.schema.ts",
     "./db/get-max-value.util": "./src/db/get-max-value.util.ts",
     "./db/get-pool.util": "./src/db/get-pool.util.ts",
+    "./db/get-rows-count.util": "./src/db/get-rows-count.util.ts",
     "./db/insert-row.util": "./src/db/insert-row.util.ts",
     "./db/query-builder/build-count-query.util": "./src/db/query-builder/build-count-query.util.ts",
     "./db/query-builder/build-delete-query.util": "./src/db/query-builder/build-delete-query.util.ts",
@@ -84,6 +85,10 @@
       "./db/get-pool.util": {
         "types": "./dist/db/get-pool.util.d.mts",
         "default": "./dist/db/get-pool.util.mjs"
+      },
+      "./db/get-rows-count.util": {
+        "types": "./dist/db/get-rows-count.util.d.mts",
+        "default": "./dist/db/get-rows-count.util.mjs"
       },
       "./db/insert-row.util": {
         "types": "./dist/db/insert-row.util.d.mts",

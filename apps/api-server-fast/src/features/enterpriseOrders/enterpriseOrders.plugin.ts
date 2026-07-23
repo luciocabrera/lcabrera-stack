@@ -1,5 +1,4 @@
 import type { FastifyPluginAsync } from 'fastify';
-import type { Pool } from 'pg';
 
 import { HttpError } from 'api-shared';
 
@@ -17,16 +16,15 @@ import {
 
 type CreateEnterpriseOrdersPluginArgs = {
   readonly envConfig: EnvConfig;
-  readonly pool: Pool;
 };
 
 /**
  * Fastify plugin for enterprise-order endpoints.
  */
 export const createEnterpriseOrdersPlugin =
-  ({ envConfig, pool }: CreateEnterpriseOrdersPluginArgs): FastifyPluginAsync =>
+  ({ envConfig }: CreateEnterpriseOrdersPluginArgs): FastifyPluginAsync =>
   async (fastify) => {
-    const repository = createEnterpriseOrdersRepository({ pool });
+    const repository = createEnterpriseOrdersRepository();
 
     fastify.addHook(
       'preValidation',

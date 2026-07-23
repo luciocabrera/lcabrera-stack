@@ -22,13 +22,11 @@
     "@lcabrera/server": "workspace:*",
     "@repo/node-runtime": "workspace:*",
     "api-shared": "workspace:*",
-    "fastify": "catalog:backend",
-    "pg": "catalog:backend"
+    "fastify": "catalog:backend"
   },
   "devDependencies": {
     "@repo/vite-configs": "workspace:*",
     "@types/node": "catalog:types",
-    "@types/pg": "catalog:types",
     "eslint": "catalog:lint",
     "nodemon": "catalog:backend",
     "typescript": "catalog:build",
