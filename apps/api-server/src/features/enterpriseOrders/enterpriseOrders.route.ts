@@ -1,5 +1,3 @@
-import type { Pool } from 'pg';
-
 import { Router } from 'express';
 
 import type { EnvConfig } from '../../config/env.schema';
@@ -9,7 +7,6 @@ import { createEnterpriseOrdersRepository } from './enterpriseOrders.repository'
 
 type CreateEnterpriseOrdersRouteArgs = {
   readonly envConfig: EnvConfig;
-  readonly pool: Pool;
 };
 
 /**
@@ -17,10 +14,9 @@ type CreateEnterpriseOrdersRouteArgs = {
  */
 export const createEnterpriseOrdersRoute = ({
   envConfig,
-  pool,
 }: CreateEnterpriseOrdersRouteArgs): Router => {
   const router = Router();
-  const repository = createEnterpriseOrdersRepository({ pool });
+  const repository = createEnterpriseOrdersRepository();
   const controller = createEnterpriseOrdersController({
     enterpriseOrdersDelayMs: envConfig.ENTERPRISE_ORDERS_DELAY_MS,
     repository,

@@ -22,10 +22,6 @@ const envConfig: EnvConfig = {
   ENTERPRISE_ORDERS_DELAY_MS: 0,
 };
 
-// createApp still wires a pool for the non-distinct features; the distinct path
-// no longer touches it (it reads through selectFilterOptions), so a stub is fine.
-const stubPool = { query: vi.fn() } as never;
-
 describe('distinct fastify plugin', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -37,7 +33,7 @@ describe('distinct fastify plugin', () => {
       values: ['Delivered', 'Pending'],
     });
 
-    const app = createApp({ envConfig, pool: stubPool });
+    const app = createApp({ envConfig });
 
     const response = await app.inject({
       method: 'GET',
@@ -63,7 +59,7 @@ describe('distinct fastify plugin', () => {
   });
 
   it('rejects a source outside the allow-list with 400', async () => {
-    const app = createApp({ envConfig, pool: stubPool });
+    const app = createApp({ envConfig });
 
     const response = await app.inject({
       method: 'GET',
@@ -77,7 +73,7 @@ describe('distinct fastify plugin', () => {
   });
 
   it('rejects requests missing required source params with 400', async () => {
-    const app = createApp({ envConfig, pool: stubPool });
+    const app = createApp({ envConfig });
 
     const response = await app.inject({
       method: 'GET',

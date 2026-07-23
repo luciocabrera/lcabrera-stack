@@ -1,8 +1,20 @@
-import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
+import { getRowsCount } from '@lcabrera/server/db/get-rows-count.util';
+import { selectRows } from '@lcabrera/server/db/select-rows.util';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import type { EnvConfig } from '../../config/env.schema';
 
 import { createApp } from '../../app/app';
+
+vi.mock('@lcabrera/server/db/select-rows.util', () => ({
+  selectRows: vi.fn(),
+}));
+vi.mock('@lcabrera/server/db/get-rows-count.util', () => ({
+  getRowsCount: vi.fn(),
+}));
+
+const mockedSelectRows = vi.mocked(selectRows);
+const mockedGetRowsCount = vi.mocked(getRowsCount);
 
 const envConfig: EnvConfig = {
   API_PORT: 3001,
@@ -16,22 +28,15 @@ const envConfig: EnvConfig = {
 };
 
 describe('enterpriseOrders fastify plugin', () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
 
-  it('accepts number filters for currency-backed columns', async () => {
-    const pool = {
-      query: vi
-        .fn()
-        .mockResolvedValueOnce({ rows: [] })
-        .mockResolvedValueOnce({ rows: [{ count: '0' }] }),
-    };
+  it('maps a number filter to a generic QueryFilter shared by the page and its count', async () => {
+    mockedSelectRows.mockResolvedValue([]);
+    mockedGetRowsCount.mockResolvedValue(0);
 
-    const app = createApp({
-      envConfig,
-      pool: pool as never,
-    });
+    const app = createApp({ envConfig });
 
     const response = await app.inject({
       method: 'GET',
@@ -39,15 +44,22 @@ describe('enterpriseOrders fastify plugin', () => {
     });
 
     expect(response.statusCode).toBe(200);
-    expect(pool.query).toHaveBeenNthCalledWith(
-      1,
-      expect.stringContaining('total_amount < $1'),
-      [20, 10, 0],
+    expect(mockedSelectRows).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filters: [{ column: 'total_amount', operator: 'lt', value: 20 }],
+        limit: 10,
+        offset: 0,
+        schema: 'public',
+        table: 'enterprise_orders',
+      }),
     );
-    expect(pool.query).toHaveBeenNthCalledWith(
-      2,
-      expect.stringContaining('COUNT(*)'),
-      [20],
+    expect(mockedGetRowsCount).toHaveBeenCalledWith(
+      expect.objectContaining({
+        column: 'order_id',
+        filters: [{ column: 'total_amount', operator: 'lt', value: 20 }],
+        schema: 'public',
+        table: 'enterprise_orders',
+      }),
     );
 
     await app.close();

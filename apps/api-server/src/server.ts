@@ -1,4 +1,4 @@
-import { closePool, getPool } from '@lcabrera/server/db/get-pool.util';
+import { closePool } from '@lcabrera/server/db/get-pool.util';
 import { registerShutdownSignals } from '@repo/node-runtime/registerShutdownSignals.util';
 import { runStartupDbSanityCheck } from 'api-shared';
 
@@ -8,13 +8,10 @@ import { createDbSanityRepository } from './features/dbSanity/dbSanity.repositor
 
 const envConfig = readEnvConfig({ env: process.env });
 
-// Source the pool from @lcabrera/server's singleton — the same one
-// selectFilterOptions (behind /api/distinct) uses — so the process holds one
-// pool, not two. getPool() reads DB_* from process.env, which envConfig above
-// has already validated.
-const pool = getPool();
-
-const app = createApp({ envConfig, pool });
+// Every repository now reads through @lcabrera/server executors, which reach the
+// getPool() singleton lazily (created on the first query, e.g. the startup
+// sanity check). Nothing here holds a pool; shutdown closes the singleton.
+const app = createApp({ envConfig });
 
 const server = app.listen(envConfig.API_PORT, '0.0.0.0', () => {
   console.warn(
@@ -25,7 +22,7 @@ const server = app.listen(envConfig.API_PORT, '0.0.0.0', () => {
   );
 });
 
-const dbSanityRepository = createDbSanityRepository({ pool });
+const dbSanityRepository = createDbSanityRepository();
 
 const closeServer = (): Promise<void> =>
   new Promise((resolve, reject) => {
