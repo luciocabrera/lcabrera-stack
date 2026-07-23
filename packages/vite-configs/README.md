@@ -110,4 +110,4 @@ export const pluginsConfig = createReactRouterPluginsConfig({
 | `eslint.custom-rules.shared.config.mjs`      | Shared ESLint flat-config factory for local custom rules                     |
 | `vite.plugins.shared.config.ts`              | React Router-style plugins config factory (`createReactRouterPluginsConfig`) |
 | `eslint.base-custom-rules.shared.config.mjs` | ESLint flat-config factory for node/library workspaces (no React/StyleX)     |
-| `vite.run.shared.config.ts`                  | `createReactRouterRunConfig` + `VITEST_COVERAGE_FLAGS`                       |
+| `vite.run.shared.config.ts`                  | `createReactRouterRunConfig` + `VITEST_COVERAGE_FLAGS` + `LOAD_LOCAL_ENV`    |

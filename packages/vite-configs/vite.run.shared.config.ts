@@ -16,6 +16,18 @@
 export const VITEST_COVERAGE_FLAGS =
   '--coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reportsDirectory=coverage';
 
+/**
+ * react-router-serve serves the production build in-process, and these SSR apps'
+ * loaders read DB_* from `process.env` at runtime (`getPool` → `readEnvConfig`).
+ * A bare `react-router-serve` inherits none of those, so the first DB-backed
+ * request throws a ZodError — while `vp dev` works because each app's `dev`
+ * script loads the same two files into the shell before serving. The prod `start`
+ * task must do the same. Load-if-exists (`[ -f ]`) mirrors api-server's
+ * `--env-file-if-exists`, so a missing file is skipped rather than fatal; the
+ * `tr -d "\r"` strips CRs from Windows/WSL-authored .env files.
+ */
+export const LOAD_LOCAL_ENV = String.raw`set -a; [ -f ../../docker/local/.env ] && eval "$(tr -d "\r" < ../../docker/local/.env)"; [ -f ./.env ] && eval "$(tr -d "\r" < ./.env)"; set +a;`;
+
 export const createReactRouterRunConfig = () => ({
   tasks: {
     build: {
@@ -34,8 +46,7 @@ export const createReactRouterRunConfig = () => ({
       ],
     },
     start: {
-      command:
-        'if [ ! -f ./build/server/index.js ]; then react-router build; fi && react-router-serve ./build/server/index.js',
+      command: `${LOAD_LOCAL_ENV} if [ ! -f ./build/server/index.js ]; then react-router build; fi && exec react-router-serve ./build/server/index.js`,
     },
     test: {
       cache: false,
