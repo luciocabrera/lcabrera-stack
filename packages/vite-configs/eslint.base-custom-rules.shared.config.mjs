@@ -7,6 +7,7 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 import localRules from '../eslint-local-rules/index.js';
+import { TEST_RUNNER_IMPORT_PATTERNS } from './eslint.restrictions.shared.mjs';
 
 // Generic (non-React) variant of eslint.custom-rules.shared.config.mjs for
 // API servers, node services, and library packages: same core stack and
@@ -145,6 +146,12 @@ export const createBaseCustomRulesLintConfig = ({
         'local-rules/merge-duplicate-imports': 'error',
         'local-rules/no-inline-type-imports': 'error',
         'local-rules/type-suffix-naming': 'error',
+        // Node/library workspaces have no React block, so this is the only place
+        // the vite-plus/test convention (ADR-045) is gated for their test files.
+        'no-restricted-imports': [
+          'error',
+          { patterns: [...TEST_RUNNER_IMPORT_PATTERNS] },
+        ],
       },
     },
   ];
