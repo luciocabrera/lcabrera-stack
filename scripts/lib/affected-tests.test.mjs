@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { resolveAffected } from './affected-tests.mjs';
+import { resolveAffected, resolveTestGroups } from './affected-tests.mjs';
 
 // The selector is safety-critical: a wrong answer skips a test that a diff
 // actually affected, and the job stays green while shipping the break. These are
@@ -110,5 +110,62 @@ describe('resolveAffected — ordinary scoping is unchanged', () => {
 
   it('selects nothing for an empty diff', () => {
     expect(affected([]).mode).toBe('none');
+  });
+});
+
+describe('resolveTestGroups — scripts/ runs the root test:scripts suite', () => {
+  const groupsFor = (files) => resolveTestGroups({ files, graph: GRAPH });
+  const scriptsGroup = (groups) =>
+    groups.find(
+      (group) => group.task === 'test:scripts' && group.packages.length === 0,
+    );
+
+  it('adds only the root test:scripts group for a scripts-only change', () => {
+    const result = groupsFor(['scripts/lib/foo.mjs']);
+    expect(result.scripts).toBe(true);
+    // No workspace holds `scripts/`, so the workspace selection is empty…
+    expect(result.mode).toBe('none');
+    // …but the filter-less test:scripts group runs (empty packages ->
+    // `vp run test:scripts`), and it is the ONLY group.
+    expect(result.groups).toHaveLength(1);
+    expect(scriptsGroup(result.groups)).toBeDefined();
+  });
+
+  it('runs test:scripts alongside an affected workspace', () => {
+    const { groups } = groupsFor([
+      'scripts/lib/foo.mjs',
+      'packages/utils/src/foo.ts',
+    ]);
+    expect(scriptsGroup(groups)).toBeDefined();
+    expect(
+      groups.some(
+        (group) => group.task === 'test' && group.packages.length > 0,
+      ),
+    ).toBe(true);
+  });
+
+  it('detects a scripts test file, not just a source script', () => {
+    expect(
+      resolveAffected({ files: ['scripts/lib/foo.test.mjs'], graph: GRAPH })
+        .scripts,
+    ).toBe(true);
+  });
+
+  it('adds no test:scripts group when scripts/ is untouched', () => {
+    expect(scriptsGroup(groupsFor(['packages/utils/src/foo.ts']).groups)).toBe(
+      undefined,
+    );
+  });
+
+  it('ignores a non-code file under scripts/ (docs, JSON data)', () => {
+    expect(
+      resolveAffected({ files: ['scripts/README.md'], graph: GRAPH }).scripts,
+    ).toBe(false);
+    expect(
+      resolveAffected({
+        files: ['scripts/script-size-baseline.json'],
+        graph: GRAPH,
+      }).scripts,
+    ).toBe(false);
   });
 });

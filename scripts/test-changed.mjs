@@ -4,7 +4,8 @@
  * the monorepo is untouched. It reads the changed file paths on STDIN (the
  * caller runs git, matching `pr-labels.mjs`), asks `affected-tests.mjs` which
  * `vp run` groups cover them, and runs each group. A root/shared change falls
- * back to the full suite; a docs/tooling-only change runs nothing.
+ * back to the full suite; a change under `scripts/` adds the root `test:scripts`
+ * group (those suites are in no workspace); a docs-only change runs nothing.
  *
  * Usage (from the repo root):
  *   git diff --name-only "$(git merge-base origin/main HEAD)" | node scripts/test-changed.mjs
@@ -38,7 +39,7 @@ const main = async () => {
 
   const files = readChangedFiles();
   const graph = readWorkspaceGraph(REPO_ROOT);
-  const { mode, groups, packages, changed } = resolveTestGroups({
+  const { mode, groups, packages, changed, scripts } = resolveTestGroups({
     files,
     graph,
     ci,
@@ -53,7 +54,9 @@ const main = async () => {
   // Report-only: emit the markdown selection summary for CI (job summary + PR
   // comment) and run nothing.
   if (markdown) {
-    process.stdout.write(`${renderSelectionMarkdown(mode, dispositions)}\n`);
+    process.stdout.write(
+      `${renderSelectionMarkdown(mode, dispositions, { scripts })}\n`,
+    );
     return;
   }
 
