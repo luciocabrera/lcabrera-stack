@@ -24,7 +24,7 @@ VirtualList/
 │
 ├── VirtualListHeader/               → Self-connected search input and clear button (zero props)
 │
-├── VirtualListBody/                 → Scroll container + infinite-scroll sentinel (zero props — layout via list selectors)
+├── VirtualListBody/                 → Scroll container + infinite-scroll sentinel (zero props — layout via list selectors; suppresses fill-fetch while a client filter is active)
 │   ├── VirtualListBodyChildren/     → useVirtualization + content-mode dispatch (prop: scrollContainerRef)
 │   └── VirtualListBodyOptions/      → Virtual window renderer (props: startIndex, endIndex, offsetY, totalHeight)
 │
@@ -37,11 +37,12 @@ VirtualList/
 │   └── ListFilterModeButton/        → Store-connected wrapper per filter mode (props: count, icon, mode, tooltip)
 │
 └── utils/                           → Pure derivations behind the store writers
-    ├── resolveListDerivedState.util.ts  → Composes the four below into the derived store slice
+    ├── resolveListDerivedState.util.ts  → Composes the filtering/mode/loading utils below into the derived store slice
     ├── getFilteredOptions.util.ts       → Search + filter-mode filtering
     ├── getIsAllSelected.util.ts         → All-visible-selected check
     ├── resolveContentMode.util.ts       → loading | empty | list dispatch
-    └── resolveIsInitialLoading.util.ts  → Initial-load/bootstrap window detection
+    ├── resolveIsInitialLoading.util.ts  → Initial-load/bootstrap window detection
+    └── isClientFilterActive.util.ts     → Search/filter-mode active? (VirtualListBody gates infinite-scroll fill on it)
 ```
 
 ## Component Hierarchy

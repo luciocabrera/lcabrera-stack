@@ -58,6 +58,21 @@ const createRef = (): RefObject<HTMLElement | null> => ({
   current: document.createElement('div'),
 });
 
+const createSizedRef = ({
+  clientHeight,
+  scrollHeight,
+}: {
+  readonly clientHeight: number;
+  readonly scrollHeight: number;
+}): RefObject<HTMLElement | null> => {
+  const element = document.createElement('div');
+  Object.defineProperties(element, {
+    clientHeight: { value: clientHeight },
+    scrollHeight: { value: scrollHeight },
+  });
+  return { current: element };
+};
+
 beforeEach(() => {
   observerRef.current = undefined;
   disconnectSpy.mockClear();
@@ -198,6 +213,61 @@ describe('useInfiniteScrollObserver', () => {
     // The latest callback is invoked through the ref.
     triggerIntersection(true);
     expect(latestOnReachEnd).toHaveBeenCalledOnce();
+  });
+
+  it('fetches to fill an under-filled container by default (shouldFetchToFill omitted)', () => {
+    const onReachEnd = vi.fn();
+
+    renderHook(() => {
+      useInfiniteScrollObserver({
+        isEnabled: true,
+        onReachEnd,
+        rootRef: createSizedRef({ clientHeight: 300, scrollHeight: 32 }),
+        sentinelRef: createRef(),
+        threshold: 50,
+      });
+    });
+
+    triggerIntersection(true);
+    expect(onReachEnd).toHaveBeenCalledOnce();
+  });
+
+  it('does not fetch to fill an under-filled container when shouldFetchToFill is false', () => {
+    const onReachEnd = vi.fn();
+
+    renderHook(() => {
+      useInfiniteScrollObserver({
+        isEnabled: true,
+        onReachEnd,
+        // A short/empty client-filtered view: sentinel visible, no overflow.
+        rootRef: createSizedRef({ clientHeight: 300, scrollHeight: 32 }),
+        sentinelRef: createRef(),
+        shouldFetchToFill: false,
+        threshold: 50,
+      });
+    });
+
+    triggerIntersection(true);
+    expect(onReachEnd).not.toHaveBeenCalled();
+  });
+
+  it('fetches on a real overflow bottom even when shouldFetchToFill is false', () => {
+    const onReachEnd = vi.fn();
+
+    renderHook(() => {
+      useInfiniteScrollObserver({
+        isEnabled: true,
+        onReachEnd,
+        // Matches overflow the container: reaching the sentinel is a real bottom.
+        rootRef: createSizedRef({ clientHeight: 300, scrollHeight: 1600 }),
+        sentinelRef: createRef(),
+        shouldFetchToFill: false,
+        threshold: 50,
+      });
+    });
+
+    triggerIntersection(true);
+    expect(onReachEnd).toHaveBeenCalledOnce();
   });
 
   it('does nothing when IntersectionObserver is unavailable', () => {
