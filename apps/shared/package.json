@@ -26,10 +26,10 @@
   },
   "devDependencies": {
     "@repo/vite-configs": "workspace:*",
-    "@types/node": "catalog:",
-    "eslint": "catalog:",
-    "typescript": "catalog:",
-    "vite-plus": "catalog:",
-    "vitest": "catalog:"
+    "@types/node": "catalog:types",
+    "eslint": "catalog:lint",
+    "typescript": "catalog:build",
+    "vite-plus": "catalog:build",
+    "vitest": "catalog:test"
   }
 }

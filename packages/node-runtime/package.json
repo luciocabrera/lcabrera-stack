@@ -18,12 +18,12 @@
   },
   "devDependencies": {
     "@repo/vite-configs": "workspace:*",
-    "@types/node": "catalog:",
-    "@vitest/coverage-v8": "catalog:",
-    "eslint": "catalog:",
-    "typescript": "catalog:",
-    "vite": "catalog:",
-    "vite-plus": "catalog:",
-    "vitest": "catalog:"
+    "@types/node": "catalog:types",
+    "@vitest/coverage-v8": "catalog:test",
+    "eslint": "catalog:lint",
+    "typescript": "catalog:build",
+    "vite": "catalog:build",
+    "vite-plus": "catalog:build",
+    "vitest": "catalog:test"
   }
 }

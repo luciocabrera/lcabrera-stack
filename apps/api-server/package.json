@@ -20,21 +20,21 @@
   "dependencies": {
     "@repo/node-runtime": "workspace:*",
     "api-shared": "workspace:*",
-    "cors": "catalog:",
-    "express": "catalog:",
-    "pg": "catalog:",
-    "zod": "catalog:"
+    "cors": "catalog:backend",
+    "express": "catalog:backend",
+    "pg": "catalog:backend",
+    "zod": "catalog:runtime"
   },
   "devDependencies": {
     "@repo/vite-configs": "workspace:*",
-    "@types/cors": "catalog:",
-    "@types/express": "catalog:",
-    "@types/node": "catalog:",
-    "@types/pg": "catalog:",
-    "eslint": "catalog:",
-    "nodemon": "catalog:",
-    "typescript": "catalog:",
-    "vite-plus": "catalog:",
-    "vitest": "catalog:"
+    "@types/cors": "catalog:types",
+    "@types/express": "catalog:types",
+    "@types/node": "catalog:types",
+    "@types/pg": "catalog:types",
+    "eslint": "catalog:lint",
+    "nodemon": "catalog:backend",
+    "typescript": "catalog:build",
+    "vite-plus": "catalog:build",
+    "vitest": "catalog:test"
   }
 }

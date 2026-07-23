@@ -15,12 +15,12 @@
   },
   "devDependencies": {
     "@repo/vite-configs": "workspace:*",
-    "@typescript-eslint/rule-tester": "catalog:",
-    "@typescript-eslint/utils": "catalog:",
-    "eslint": "catalog:",
-    "typescript": "catalog:",
-    "typescript-eslint": "catalog:",
-    "vite-plus": "catalog:",
-    "vitest": "catalog:"
+    "@typescript-eslint/rule-tester": "catalog:lint",
+    "@typescript-eslint/utils": "catalog:lint",
+    "eslint": "catalog:lint",
+    "typescript": "catalog:build",
+    "typescript-eslint": "catalog:lint",
+    "vite-plus": "catalog:build",
+    "vitest": "catalog:test"
   }
 }

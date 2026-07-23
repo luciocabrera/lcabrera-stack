@@ -18,20 +18,20 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@fastify/cors": "catalog:",
+    "@fastify/cors": "catalog:backend",
     "@repo/node-runtime": "workspace:*",
     "api-shared": "workspace:*",
-    "fastify": "catalog:",
-    "pg": "catalog:"
+    "fastify": "catalog:backend",
+    "pg": "catalog:backend"
   },
   "devDependencies": {
     "@repo/vite-configs": "workspace:*",
-    "@types/node": "catalog:",
-    "@types/pg": "catalog:",
-    "eslint": "catalog:",
-    "nodemon": "catalog:",
-    "typescript": "catalog:",
-    "vite-plus": "catalog:",
-    "vitest": "catalog:"
+    "@types/node": "catalog:types",
+    "@types/pg": "catalog:types",
+    "eslint": "catalog:lint",
+    "nodemon": "catalog:backend",
+    "typescript": "catalog:build",
+    "vite-plus": "catalog:build",
+    "vitest": "catalog:test"
   }
 }
