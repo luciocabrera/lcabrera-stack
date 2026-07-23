@@ -23,8 +23,6 @@ Enterprise table route for large-order operational data with a dedicated constan
 The file [src/routes/enterprise-orders/EnterpriseOrders.constants.tsx](src/routes/enterprise-orders/EnterpriseOrders.constants.tsx) owns:
 
 - `PERSISTENCE_KEY` used by the table persistence layer.
-- `DEFAULT_COLUMN_PINNING` route default pinning (`actions` pinned right, used
-  by the "reset to default pinning" flow).
 - `COLUMNS` definitions, including filter adapters. `COLUMNS` no longer
   declares an `actions` entry: since `CRUD` (passed as `metaState.crud`)
   enables `read`/`update`/`delete`, `@lcabrera/ui/components/Table`'s

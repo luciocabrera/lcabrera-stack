@@ -2,7 +2,7 @@ export { loader } from './enterprise-orders.loader';
 export { meta } from './enterprise-orders.meta';
 export { ErrorBoundary } from './EnterpriseOrders.error-boundary';
 export { EnterpriseOrdersLayout as default } from './EnterpriseOrders.layout';
-export { shouldRevalidatePersistCookieAction as shouldRevalidate } from '@lcabrera/ui/routing/shouldRevalidatePersistCookieAction.util';
+export { shouldRevalidatePersistCookieAction as shouldRevalidate } from '@lcabrera/ui/routing/actions/shouldRevalidatePersistCookieAction.util';
 
 // NOTE: the auth guard (`export const middleware = [authMiddleware]`) is
 // intentionally disabled for now — it broke client-side navigation into the

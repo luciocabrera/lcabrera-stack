@@ -1,11 +1,11 @@
-export type SearchParamUpdate = {
-  readonly key: string;
-  readonly value: string;
-};
-
 type ApplySearchParamUpdatesArgs = {
   readonly searchParams: URLSearchParams;
   readonly updates: readonly SearchParamUpdate[];
+};
+
+type SearchParamUpdate = {
+  readonly key: string;
+  readonly value: string;
 };
 
 /**

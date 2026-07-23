@@ -1,7 +1,7 @@
 import type { TableMetaState } from '@lcabrera/ui/components/Table/Table.types';
 
 import { buildUiFlagsCookieEntry } from '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions/utils';
-import { buildSetCookieHeaders } from '@lcabrera/ui/routing/buildSetCookieHeaders.util';
+import { buildSetCookieHeaders } from '@lcabrera/ui/routing/actions/buildSetCookieHeaders.util';
 import { describe, expect, it } from 'vite-plus/test';
 
 import type { PersistedUiState } from './persistence.types';

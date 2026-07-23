@@ -16,7 +16,7 @@ import {
   readTableStateFromURL,
 } from '@lcabrera/ui/utils/urlState';
 
-import { sanitizeFiltersByColumns } from './sanitizeFiltersByColumns.util';
+import { sanitizeFiltersByColumns } from '../shared/sanitizeFiltersByColumns.util';
 
 type ReadTableLoaderStateFromRequestArgs<
   TData extends Record<string, unknown>,

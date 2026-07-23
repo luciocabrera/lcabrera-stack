@@ -1,6 +1,6 @@
 import { TableLayout } from '@lcabrera/ui/components/Table/TableLayout';
-import { appendPrimaryKeySorting } from '@lcabrera/ui/routing/appendPrimaryKeySorting.util';
-import { sanitizeSorting } from '@lcabrera/ui/routing/sanitizeSorting.util';
+import { appendPrimaryKeySorting } from '@lcabrera/ui/routing/shared/appendPrimaryKeySorting.util';
+import { sanitizeSorting } from '@lcabrera/ui/routing/shared/sanitizeSorting.util';
 import { useLoaderData } from 'react-router';
 
 import type { CarSale } from '@/services';
@@ -11,13 +11,13 @@ import type { CarSalesPaginatedResponse } from './CarSales.types';
 import type { loader } from './root';
 
 export const CarSales = () => {
-  const { carSalesPromise, columnsState, metaState } =
+  const { columnsState, dataPromise, metaState } =
     useLoaderData<typeof loader>();
 
   return (
     <TableLayout<CarSale, CarSalesPaginatedResponse>
       columnsState={columnsState}
-      dataPromise={carSalesPromise}
+      dataPromise={dataPromise}
       dataSelector={(response) => response.data}
       dataTotalSelector={(response) => response.total}
       metaState={metaState}
