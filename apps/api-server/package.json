@@ -34,6 +34,7 @@
     "eslint": "catalog:lint",
     "nodemon": "catalog:backend",
     "typescript": "catalog:build",
+    "vite": "catalog:build",
     "vite-plus": "catalog:build",
     "vitest": "catalog:test"
   }

@@ -20,6 +20,7 @@
     "eslint": "catalog:lint",
     "typescript": "catalog:build",
     "typescript-eslint": "catalog:lint",
+    "vite": "catalog:build",
     "vite-plus": "catalog:build",
     "vitest": "catalog:test"
   }

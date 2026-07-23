@@ -71,6 +71,7 @@
     "@repo/vite-configs": "workspace:*",
     "fallow": "catalog:tooling",
     "ts-morph": "catalog:tooling",
+    "vite": "catalog:build",
     "vite-plus": "catalog:build",
     "vitest": "catalog:test"
   },
