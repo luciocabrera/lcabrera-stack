@@ -150,7 +150,13 @@ resolves _there_ while you edit here. Tooling then reads code you did not change
 the worktree was for. It fails silently, and only for changes that touch a
 workspace package. `coordination:claim --worktree` installs for you (and
 generates the route types, which are not committed); anything DB-touching also
-needs the gitignored local env files copied across.
+needs the gitignored local env files copied across. A **live prod-build check is
+the case that bites**: `vp run start` for an SSR app loads `docker/local/.env`
+via `../../docker/local/.env` from the app dir, so a worktree missing that file
+silently skips the env load and fails as though the DB env were unset — which
+reads as a bug in the code under test rather than a missing fixture. Symlink or
+copy the primary checkout's `docker/local/.env` into the worktree before such a
+run.
 
 **2. The claim lives on `main`, landed early — not on your feature branch.** A
 task file is a shared lock only once it's on `main`, where every other agent
