@@ -1,17 +1,17 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
-import { getApiBaseUrl } from '@lcabrera/api/config/get-api-base-url.util';
-import { fetchDistinctValues } from '@lcabrera/api/distinct/fetch-distinct-values.util';
 import { parseFilterOptionsParams } from '@lcabrera/api/distinct/parse-filter-options-params.util';
 import { DEFAULT_FILTER_PAGE_SIZE } from '@lcabrera/ui/components/Table/Table.constants';
 
+import { selectDistinctFilterOptions } from './.server/distinct.service';
+
 /**
- * Resource route serving distinct filter options for descriptors with
- * `transport: 'loader'`: validates the search params, then calls the BFF's
- * generic /api/distinct endpoint server-side (allow-list authorization
- * lives there). Returns the `{ hasMore, values }` page as a raw JSON
- * Response — the client tool consumes it with plain fetch, not the
- * single-fetch protocol.
+ * Resource route serving distinct filter options for `transport: 'loader'`
+ * descriptors: validates the search params, then reads the column's distinct
+ * values straight from Postgres **server-side** via the app's own distinct
+ * service — no api-server round-trip, the same self-sufficient model the row
+ * loaders use. Returns the `{ hasMore, values }` page as a raw JSON Response —
+ * the client tool consumes it with plain fetch, not the single-fetch protocol.
  */
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
@@ -27,14 +27,14 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     );
   }
 
-  const result = await fetchDistinctValues({
-    ...params,
-    baseUrl: `${getApiBaseUrl(request.url)}/distinct`,
-    // React Router aborts this request when the client navigates away or the
-    // fetch is superseded. Forwarding it means the BFF call is cancelled too,
-    // instead of running to completion for a response nobody will read.
-    signal: request.signal,
-  });
+  const page = await selectDistinctFilterOptions(params);
 
-  return Response.json(result);
+  if (!page) {
+    return Response.json(
+      { error: 'Unsupported distinct source or column' },
+      { status: 400 },
+    );
+  }
+
+  return Response.json(page);
 };

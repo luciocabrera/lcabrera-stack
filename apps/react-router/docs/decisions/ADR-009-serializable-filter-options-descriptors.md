@@ -49,16 +49,32 @@ implementations.
   scroll time; loader row-streaming is untouched.
 - **Transports** — `bff` targets the API server's generic
   `GET /api/distinct?schemaName&tableName&columnName&limit&offset`; `loader`
-  targets the same-origin resource route `GET /_api/filter-options` whose
-  loader calls the BFF server-side. All three demo routes now use `loader`
-  (enterprise-orders moved off `bff` in #340): `bff` fetches the API host
-  directly from the browser, which only works behind a proxy (dev Vite, or a
-  prod reverse proxy) and fails CORS under a bare `react-router-serve` prod
-  build — whereas `loader` is same-origin in every environment, matching how the
-  rows are already fetched. `bff` remains a supported transport, still
-  unit-covered in `packages/ui` (`getFilterOptionsBaseUrl`,
+  targets the same-origin resource route `GET /_api/filter-options` whose loader
+  reads Postgres **directly, server-side** via `@lcabrera/server`'s
+  `selectFilterOptions` helper (an app-owned `.server` distinct service — no
+  api-server round-trip, the same self-sufficient model the row loaders use).
+  All three demo routes use `loader` (enterprise-orders moved off `bff` in #340):
+  `bff` fetches the API host directly from the browser, which only works behind a
+  proxy (dev Vite, or a prod reverse proxy) **and** needs the api-server running,
+  so it fails under a bare `react-router-serve` prod build — whereas `loader`
+  works in every environment with the app alone. `bff` remains a supported
+  transport, still unit-covered in `packages/ui` (`getFilterOptionsBaseUrl`,
   `resolveDistinctFilterOptions`, `appendDistinctFilterDescriptors`), for
-  genuinely cross-origin API deployments that configure CORS.
+  genuinely cross-origin API deployments that configure CORS. The `.server`
+  service holds **no allow-list of its own**: it derives both the allow-list and
+  each column's `ColumnType` from the per-entity `config/*DISTINCT_FILTER_COLUMNS`
+  maps (declared once per entity, alongside its schema/table), rather than
+  importing api-shared — an undeclared cross-app edge (ADR-039).
+  `selectFilterOptions` is deliberately **thin over the generic** query layer:
+  the builders/executors (`buildSelectQuery`/`selectRows` with `distinct: true`,
+  exposed as `buildDistinctQuery`/`selectDistinctRows`) stay generic over a list
+  of columns, and the dropdown specialization — one column, `IS NOT NULL`, empty
+  dropped only for `text` (`ColumnType`), ordered + paginated, mapped to
+  `{ values, hasMore }` — lives only in the helper, composed from generic
+  `filters` (a new `isNotNull` operator) rather than a bespoke predicate. A
+  **unified per-entity column-metadata source** — one declaration driving UI
+  columns, filter style, allow-list, and column type, plus value+label
+  projection — is the tracked next step.
 - **Layering** — generic mechanisms live in `@repo/data-access`
   (`buildDistinctQuery` in the query builder; `fetchDistinctValues` +
   response guard on the api side); domain config lives in api-shared

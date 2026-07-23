@@ -40,12 +40,18 @@ tableName })` and returns them **inside** `columnsState` — no client-side
 re-attach step. Static enum columns carry `kind: 'static'` descriptors from
 `createStaticFilterOptions`; filterable string columns get baked
 `kind: 'distinct'` descriptors that the client tool executes against the
-same-origin `GET /_api/filter-options` resource route, whose loader calls the
-distinct endpoint (`GET /api/distinct`, allow-listed in api-shared's
-`DISTINCT_SOURCES`) server-side. The `loader` transport keeps filter options on
-the same same-origin path as the rows, so they load under a bare
-`react-router-serve` prod build with no proxy or CORS config (#340); the earlier
-`bff` transport fetched `:3001` cross-origin and failed CORS there.
+same-origin `GET /_api/filter-options` resource route, whose loader reads
+Postgres **directly, server-side** via `@lcabrera/server`'s
+`selectFilterOptions` helper (`filter-options/.server/distinct.service.ts`).
+That service holds no allow-list of its own: it derives both the allow-list and
+each column's `ColumnType` from the per-entity `config/*DISTINCT_FILTER_COLUMNS`
+maps (this route's lives in `config/enterpriseOrders.constants.ts`), so the
+column set is declared once.
+The `loader` transport keeps filter options on the same self-sufficient,
+same-origin/direct-DB path as the rows, so they load under a bare
+`react-router-serve` prod build with **no api-server, proxy, or CORS config**
+(#340); the earlier `bff` transport fetched `:3001` cross-origin from the
+browser and failed CORS there.
 `enterprise-orders.loader.test.ts` guards the no-functions contract and the
 descriptor wiring. The synthesized actions column is static, non-resizable,
 and non-filterable by default, which prevents unpinning and width changes

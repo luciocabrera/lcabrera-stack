@@ -23,6 +23,7 @@ import { quoteIdentifier } from './quote-identifier.util.ts';
  */
 export const buildSelectQuery = ({
   allowedColumns,
+  distinct,
   fields,
   filters,
   limit,
@@ -53,7 +54,7 @@ export const buildSelectQuery = ({
   });
 
   const text = [
-    `SELECT ${quotedFields} FROM ${quotedFrom}`,
+    `SELECT ${distinct ? 'DISTINCT ' : ''}${quotedFields} FROM ${quotedFrom}`,
     whereClause.text,
     orderByClause,
     paginationClause.text,

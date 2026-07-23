@@ -5,7 +5,7 @@ import type { Queryable } from '../../types/api.types.js';
 import { HttpError } from '../../errors/httpError.js';
 import { createDistinctRepository } from './distinct.repository.js';
 
-const createPoolMock = (rows: readonly { readonly value: string }[]) => {
+const createPoolMock = (rows: readonly Record<string, string>[]) => {
   const query = vi.fn().mockResolvedValue({ rowCount: rows.length, rows });
   return { pool: { query } as unknown as Queryable, query };
 };
@@ -13,8 +13,8 @@ const createPoolMock = (rows: readonly { readonly value: string }[]) => {
 describe('createDistinctRepository', () => {
   it('runs an allow-listed parameterized SELECT DISTINCT and maps rows to values', async () => {
     const { pool, query } = createPoolMock([
-      { value: 'Delivered' },
-      { value: 'Pending' },
+      { order_status: 'Delivered' },
+      { order_status: 'Pending' },
     ]);
     const repository = createDistinctRepository({ pool });
 
@@ -27,8 +27,10 @@ describe('createDistinctRepository', () => {
     });
 
     expect(query).toHaveBeenCalledWith(
-      'SELECT DISTINCT "order_status" AS value FROM "public"."enterprise_orders" WHERE "order_status" IS NOT NULL AND "order_status"::text != \'\' ORDER BY "order_status" LIMIT $1 OFFSET $2',
-      [2, 4],
+      'SELECT DISTINCT "order_status" FROM "public"."enterprise_orders" ' +
+        'WHERE "order_status" IS NOT NULL AND "order_status" <> $1 ' +
+        'ORDER BY "order_status" ASC LIMIT $2 OFFSET $3',
+      ['', 2, 4],
     );
     expect(result).toEqual({
       hasMore: true,
@@ -37,7 +39,7 @@ describe('createDistinctRepository', () => {
   });
 
   it('reports hasMore false when the page is short', async () => {
-    const { pool } = createPoolMock([{ value: 'Blue' }]);
+    const { pool } = createPoolMock([{ color: 'Blue' }]);
     const repository = createDistinctRepository({ pool });
 
     const result = await repository.getDistinctValues({

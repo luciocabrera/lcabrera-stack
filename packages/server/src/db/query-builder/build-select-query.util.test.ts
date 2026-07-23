@@ -16,6 +16,20 @@ describe('buildSelectQuery', () => {
     });
   });
 
+  it('emits SELECT DISTINCT when distinct is set', () => {
+    const result = buildSelectQuery({
+      distinct: true,
+      fields: ['color'],
+      schema: 'public',
+      table: 'car_sales',
+    });
+
+    expect(result).toEqual({
+      text: 'SELECT DISTINCT "color" FROM "public"."car_sales"',
+      values: [],
+    });
+  });
+
   it('composes WHERE, ORDER BY, LIMIT, and OFFSET with correctly incrementing placeholders', () => {
     const result = buildSelectQuery({
       fields: ['scanner_id', 'total_cost_usd'],

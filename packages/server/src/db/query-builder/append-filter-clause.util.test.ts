@@ -72,6 +72,19 @@ describe('appendFilterClause', () => {
     });
   });
 
+  it('appends a unary IS NOT NULL clause with no parameter', () => {
+    const result = appendFilterClause({
+      accumulator: { clauses: [], paramIndex: 1, values: [] },
+      filter: { column: 'customer_name', operator: 'isNotNull' },
+    });
+
+    expect(result).toEqual({
+      clauses: ['"customer_name" IS NOT NULL'],
+      paramIndex: 1,
+      values: [],
+    });
+  });
+
   it('rejects an unsafe column name', () => {
     expect(() =>
       appendFilterClause({

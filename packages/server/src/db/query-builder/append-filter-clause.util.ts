@@ -1,4 +1,4 @@
-import type { ComparisonOperator, QueryFilter } from './query-builder.types.ts';
+import type { BinaryOperator, QueryFilter } from './query-builder.types.ts';
 
 import { assertColumnAllowed } from './assert-column-allowed.util.ts';
 import { assertSafeIdentifier } from './assert-safe-identifier.util.ts';
@@ -10,7 +10,7 @@ export type ClauseAccumulator = {
   readonly values: readonly unknown[];
 };
 
-const OPERATOR_SQL: Record<ComparisonOperator, string> = {
+const OPERATOR_SQL: Record<BinaryOperator, string> = {
   eq: '=',
   gt: '>',
   gte: '>=',
@@ -38,6 +38,14 @@ export const appendFilterClause = ({
   assertColumnAllowed({ allowedColumns, column: filter.column });
 
   const quotedColumn = quoteIdentifier(filter.column);
+
+  if (filter.operator === 'isNotNull') {
+    return {
+      clauses: [...accumulator.clauses, `${quotedColumn} IS NOT NULL`],
+      paramIndex: accumulator.paramIndex,
+      values: accumulator.values,
+    };
+  }
 
   if (filter.operator === 'in') {
     const inValues = Array.isArray(filter.value)
