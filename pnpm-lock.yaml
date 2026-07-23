@@ -344,6 +344,9 @@ importers:
 
   apps/api-server:
     dependencies:
+      '@lcabrera/server':
+        specifier: workspace:*
+        version: link:../../packages/server
       '@repo/node-runtime':
         specifier: workspace:*
         version: link:../../packages/node-runtime
@@ -402,6 +405,9 @@ importers:
       '@fastify/cors':
         specifier: catalog:backend
         version: 11.3.0
+      '@lcabrera/server':
+        specifier: workspace:*
+        version: link:../../packages/server
       '@repo/node-runtime':
         specifier: workspace:*
         version: link:../../packages/node-runtime

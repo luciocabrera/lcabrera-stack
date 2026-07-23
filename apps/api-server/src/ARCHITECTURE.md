@@ -48,7 +48,7 @@ src/
 
 ## Request Flow
 
-1. `server.ts` reads env, creates the `pg` pool, builds the Express app, and starts listening.
+1. `server.ts` reads env, sources the `pg` pool from `@lcabrera/server`'s `getPool()` singleton (the same one the distinct read's `selectFilterOptions` uses), builds the Express app, and starts listening.
 2. `app/app.ts` mounts feature routers and shared middleware.
 3. `*.route.ts` files bind URL paths to controller handlers.
 4. `*.controller.ts` files parse query params, validate input, and shape HTTP responses.

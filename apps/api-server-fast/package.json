@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@fastify/cors": "catalog:backend",
+    "@lcabrera/server": "workspace:*",
     "@repo/node-runtime": "workspace:*",
     "api-shared": "workspace:*",
     "fastify": "catalog:backend",

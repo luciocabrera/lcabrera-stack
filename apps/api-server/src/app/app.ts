@@ -40,7 +40,7 @@ export const createApp = ({ envConfig, pool }: CreateAppArgs): Express => {
   app.use(express.json());
 
   apiRouter.use('/car-sales', createCarSalesRoute({ pool }));
-  apiRouter.use('/distinct', createDistinctRoute({ envConfig, pool }));
+  apiRouter.use('/distinct', createDistinctRoute({ envConfig }));
   apiRouter.use(
     '/enterprise-orders',
     createEnterpriseOrdersRoute({ envConfig, pool }),

@@ -1,22 +1,13 @@
-import { buildDistinctQuery } from '@lcabrera/server/db/query-builder/build-distinct-query.util';
+import { selectFilterOptions } from '@lcabrera/server/db/select-filter-options.util';
 
-import type {
-  DistinctValuesResponse,
-  Queryable,
-  QueryValue,
-} from '../../types/api.types.js';
+import type { DistinctValuesResponse } from '../../types/api.types.js';
 
-import { formatPgAdminQuery } from '../../utils/formatPgAdminQuery.util.js';
 import { parseDistinctSource } from './parseDistinctSource.util.js';
 
 export type DistinctRepository = {
   readonly getDistinctValues: (
     args: GetDistinctValuesArgs,
   ) => Promise<DistinctValuesResponse>;
-};
-
-type CreateDistinctRepositoryArgs = {
-  readonly pool: Queryable;
 };
 
 type GetDistinctValuesArgs = {
@@ -28,13 +19,15 @@ type GetDistinctValuesArgs = {
 };
 
 /**
- * Generic distinct-values access behind /api/distinct: allow-list
- * validation via parseDistinctSource, then a parameterized SELECT DISTINCT
- * composed by @lcabrera/server's buildDistinctQuery.
+ * Distinct-values access behind /api/distinct. Authorization stays here —
+ * parseDistinctSource enforces the schema/table + column allow-list, which the
+ * package helper does not (it only allow-lists the column) — then the distinct
+ * read itself is @lcabrera/server's selectFilterOptions, sharing the getPool()
+ * singleton both api-servers now source their pool from. No injected pool: with
+ * one shared singleton there is nothing to inject. Every allow-listed source is
+ * a text column, so columnType is 'text' (which also drops the empty string).
  */
-export const createDistinctRepository = ({
-  pool,
-}: CreateDistinctRepositoryArgs): DistinctRepository => ({
+export const createDistinctRepository = (): DistinctRepository => ({
   getDistinctValues: async ({
     columnName,
     limit,
@@ -44,38 +37,14 @@ export const createDistinctRepository = ({
   }) => {
     const source = parseDistinctSource({ columnName, schemaName, tableName });
 
-    // Mirrors @lcabrera/server's selectFilterOptions, but composed onto this
-    // app's injected pool rather than the getPool singleton (unifying the two is
-    // #352). Every distinct source here is a text column, so a bare empty-string
-    // `neq` is safe (no cast needed).
-    const query = buildDistinctQuery({
+    return selectFilterOptions({
       allowedColumns: source.allowedColumns,
-      fields: [source.columnName],
-      filters: [
-        { column: source.columnName, operator: 'isNotNull' },
-        { column: source.columnName, operator: 'neq', value: '' },
-      ],
+      column: source.columnName,
+      columnType: 'text',
       limit,
       offset,
       schema: source.schemaName,
-      sort: [{ column: source.columnName, direction: 'asc' }],
       table: source.tableName,
     });
-    const params = query.values as readonly QueryValue[];
-
-    console.warn(
-      '🎯 [Distinct] Query:',
-      formatPgAdminQuery(query.text, params),
-    );
-
-    const result = await pool.query<Record<string, string>>(query.text, params);
-    const values = result.rows
-      .map((row) => row[source.columnName])
-      .filter((value): value is string => value !== undefined);
-
-    return {
-      hasMore: values.length === limit,
-      values,
-    };
   },
 });

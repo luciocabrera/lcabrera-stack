@@ -1,5 +1,4 @@
 import type { FastifyPluginAsync } from 'fastify';
-import type { Pool } from 'pg';
 
 import type { EnvConfig } from '../../config/env.schema';
 
@@ -9,7 +8,6 @@ import { type DistinctQuery, distinctQuerySchema } from './distinct.schema';
 
 type CreateDistinctPluginArgs = {
   readonly envConfig: EnvConfig;
-  readonly pool: Pool;
 };
 
 /**
@@ -19,9 +17,9 @@ type CreateDistinctPluginArgs = {
  * (allow-list, 400 on unknown source/column).
  */
 export const createDistinctPlugin =
-  ({ envConfig, pool }: CreateDistinctPluginArgs): FastifyPluginAsync =>
+  ({ envConfig }: CreateDistinctPluginArgs): FastifyPluginAsync =>
   async (fastify) => {
-    const repository = createDistinctRepository({ pool });
+    const repository = createDistinctRepository();
 
     fastify.get<{ Querystring: DistinctQuery }>(
       '/',
