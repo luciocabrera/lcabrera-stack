@@ -2,8 +2,8 @@
 id: 359-public-api-surface-gate
 title: Detect breaking changes to the public package API surface (attw + surface snapshot gate)
 owner: agent:claude
-status: active
-branch: claude/issue-359-orchestration-024ed0
+status: review
+branch: feat/359-public-api-surface-gate
 area:
   - scripts/verify-api-surface.mjs
   - scripts/verify-attw.mjs
@@ -13,7 +13,7 @@ area:
 started: 2026-07-24
 updated: 2026-07-24
 plan: (none)
-pr: (none)
+pr: 376
 issue: #359
 ---
 
