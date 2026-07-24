@@ -2,11 +2,20 @@
 #
 # deps-refresh.sh — refresh every dependency and open a build(deps) PR, in one command.
 #
-# Wraps the daily update chore (clean → update the pnpm catalog → reinstall) and
-# the ceremony around it (issue, branch, commit, push, PR) so the whole thing is
-# one command instead of a remembered sequence. Superseded scripts/update-deps.sh,
-# which only touched apps/* and left the catalog — where nearly every version
-# actually lives — to be edited by hand.
+# Wraps the daily update chore and the ceremony around it (issue, branch, commit,
+# push, PR) so the whole thing is one command instead of a remembered sequence.
+# "Everything updatable" is the intent, in one pass:
+#   - vp itself (the global CLI) via `vp upgrade`
+#   - pnpm (the pinned `packageManager`) via `corepack use pnpm@latest`
+#   - the pnpm catalog + every workspace package.json via taze — which also bumps
+#     the `vite-plus` dep, and with it vite/rolldown/vitest/oxlint/oxfmt/tsdown
+# then clean + reinstall so the tree resolves against all of it. Superseded
+# scripts/update-deps.sh, which only touched apps/* and left the catalog — where
+# nearly every version actually lives — to be edited by hand.
+#
+# Node is NOT bumped here: this repo pins no Node version (it floats on
+# engines.node), so a runtime change would not appear in the PR diff and would
+# alter the machine's global default. Manage it deliberately with `vp env`.
 #
 # Two things here are deliberate and worth knowing before editing:
 #   - It reaches for pnpm and taze DIRECTLY. The repo rule is "use vp, not pnpm",
@@ -60,6 +69,21 @@ have() { local cmd="$1"; command -v "$cmd" >/dev/null 2>&1; }
 taze_exclude=()
 for pkg in "${EXCLUDE[@]}"; do taze_exclude+=(--exclude "$pkg"); done
 
+# `vp run` prepends node_modules/.bin to PATH, so a bare `vp` inside this script
+# resolves to the LOCAL vite-plus shim — which has no `upgrade` subcommand (a
+# global-only self-update) and, worse, is deleted by `pnpm clean` below, which
+# breaks the reinstall with a stale hashed path. Resolve the global CLI once; it
+# lives under $VP_HOME, outside the repo, so it survives the clean.
+vp_global="${VP_HOME:-$HOME/.vite-plus}/bin/vp"
+[[ -x "$vp_global" ]] || vp_global="$(command -v vp)" || die "cannot locate the vp CLI"
+
+# pnpm is pinned by the `packageManager` field (version + sha512). `corepack use
+# pnpm@latest` is the only thing that rewrites BOTH correctly — hand-editing the
+# hash is what we avoid. corepack routes through vp as well, so resolve it the same
+# durable way (it runs after `pnpm clean`, when node_modules/.bin is already gone).
+corepack_global="${VP_HOME:-$HOME/.vite-plus}/bin/corepack"
+[[ -x "$corepack_global" ]] || corepack_global="$(command -v corepack)" || die "cannot locate corepack"
+
 # --- preconditions: a clean, current tree so the diff we open a PR from is only
 #     the dependency change, nothing a dirty checkout dragged along ---------------
 have gh || die "the GitHub CLI (gh) is required"
@@ -77,13 +101,16 @@ if [[ "$dry" == 1 ]]; then
   log "Dry run — previewing catalog + package.json updates (no changes written)"
   npx --yes taze@latest -r "${taze_exclude[@]}"
   echo ""
+  pnpm_current="$(grep -oE 'pnpm@[0-9][0-9.]*' package.json | head -1 || true)"
+  pnpm_latest="$(npm view pnpm version 2>/dev/null || echo '?')"
+  echo "pnpm (packageManager): ${pnpm_current:-?}  →  latest pnpm@${pnpm_latest}"
   echo "Held back: ${EXCLUDE[*]}"
   exit 0
 fi
 
 # --- the update pipeline ------------------------------------------------------
 log "Updating vp itself (global CLI; not part of the repo diff)"
-vp upgrade || echo "deps-refresh: 'vp upgrade' failed — continuing with the current vp"
+"$vp_global" upgrade || echo "deps-refresh: 'vp upgrade' failed — continuing with the current vp"
 
 log "Removing node_modules + lockfile (pnpm clean) for a clean resolution"
 pnpm clean --lockfile
@@ -93,8 +120,17 @@ taze_log="$(mktemp)"
 trap 'rm -f "$taze_log"' EXIT
 npx --yes taze@latest -r --write "${taze_exclude[@]}" | tee "$taze_log"
 
+# taze does not touch the `packageManager` field, so pnpm itself would never move.
+# corepack rewrites it (with hash) and installs with the new pnpm — that install IS
+# the reinstall; the `vp install` below then reconciles. A soft failure (offline)
+# leaves the old pin in place rather than aborting the whole refresh.
+pnpm_before="$(grep -oE 'pnpm@[0-9][0-9.]*' package.json | head -1 || true)"
+log "Updating pnpm itself (the pinned packageManager) to the latest release"
+"$corepack_global" use pnpm@latest || echo "deps-refresh: 'corepack use pnpm@latest' failed — continuing with the current pnpm"
+pnpm_after="$(grep -oE 'pnpm@[0-9][0-9.]*' package.json | head -1 || true)"
+
 log "Reinstalling with the refreshed versions (vp install)"
-vp install
+"$vp_global" install
 
 # --- did anything actually change? A no-op day makes no issue/branch/PR --------
 # Decide on the manifests, not the lockfile: pnpm can reformat pnpm-lock.yaml with
@@ -117,6 +153,9 @@ fi
 # --- the ceremony: issue → branch → commit → push → PR ------------------------
 # The catalog changes taze made, as a compact list for the commit + PR body.
 moved="$(grep -E '·|→|->' "$taze_log" | sed -E 's/^[[:space:]]+//' | sed -E 's/\x1b\[[0-9;]*m//g' || true)"
+if [[ -n "$pnpm_after" && "$pnpm_before" != "$pnpm_after" ]]; then
+  moved="${pnpm_before} → ${pnpm_after} (packageManager)"$'\n'"${moved}"
+fi
 [[ -n "$moved" ]] || moved="(see the pnpm-workspace.yaml / package.json diff)"
 
 log "Opening the tracking issue"
@@ -131,7 +170,7 @@ Refresh all dependencies to their latest in-range versions (TypeScript held for 
 
 ## 3. Context & Background
 
-Opened by `vp run deps:refresh` (scripts/deps-refresh.sh): pnpm clean → taze → vp install, then this issue + branch + PR. Catalog + lockfile only; no source change expected.
+Opened by `vp run deps:refresh` (scripts/deps-refresh.sh): vp upgrade → pnpm clean → taze → corepack use pnpm@latest → vp install, then this issue + branch + PR. Manifests + lockfile only; no source change expected.
 
 ## 4. Reproduction Steps
 
@@ -164,16 +203,18 @@ log "Branching $branch and committing"
 git checkout -q -b "$branch"
 git add -A
 git commit -q -F - <<COMMIT
-build(deps): refresh the catalog
+build(deps): refresh the toolchain and dependencies
 
-Refresh the pnpm catalog and package.json versions to their latest
-in-range releases via \`vp run deps:refresh\` (taze). TypeScript is held
-at its pinned version for a known compatibility issue.
+Refresh everything updatable via \`vp run deps:refresh\`: the vp CLI, pnpm
+(the pinned \`packageManager\`), and the pnpm catalog + workspace
+package.json versions to their latest in-range releases (taze, which also
+bumps the \`vite-plus\` dep and its bundled vite/rolldown/vitest/oxlint).
+TypeScript is held at its pinned version for a known compatibility issue.
 
 Moved:
 ${moved}
 
-Catalog + lockfile only; verified by the pre-push quality gate.
+Manifests + lockfile only; verified by the pre-push quality gate.
 COMMIT
 
 log "Pushing (the pre-push hook runs the full quality gate; a failure stops here)"
@@ -184,7 +225,7 @@ log "Opening the PR"
 pr_body="$(cat <<BODY
 ## What
 
-Refresh the pnpm catalog + package.json versions to their latest in-range releases (TypeScript held). Automated by \`vp run deps:refresh\`.
+Refresh everything updatable — the vp CLI, pnpm (the pinned \`packageManager\`), and the pnpm catalog + package.json versions to their latest in-range releases, TypeScript held. Automated by \`vp run deps:refresh\`.
 
 Moved:
 
@@ -202,7 +243,7 @@ Full pre-push quality gate ran against the bumped tree (\`vp check\`, typecheck 
 
 ## Impact Analysis
 
-Catalog + lockfile only — no source change. No changeset: a catalog refresh carries no consumer-facing package change (consistent with prior refreshes). TypeScript held at its pin for a known compatibility issue.
+Manifests + lockfile only — the catalog, workspace package.json versions, and the pinned \`packageManager\` (pnpm); no source change. No changeset: a dependency/toolchain refresh carries no consumer-facing package change (consistent with prior refreshes). TypeScript held at its pin for a known compatibility issue.
 
 ## Test Coverage
 
