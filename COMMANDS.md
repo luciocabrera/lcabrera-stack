@@ -257,14 +257,21 @@ pnpm substitutes `publishConfig.exports` (pointing at `dist`) at pack time.
 `@lcabrera/ui` is deliberately excluded — StyleX derives theme identity from the
 source path, so it ships source and the consumer's own plugin compiles it.
 
-| Command                            | Does                                                                                   |
-| ---------------------------------- | -------------------------------------------------------------------------------------- |
-| `vp run packages:build`            | build the three publishable packages (`vp pack` → `dist` with `.d.mts` and sourcemaps) |
-| `vp run publish:verify`            | check `publishConfig.exports` matches `exports` and resolves to built files            |
-| `vp run publish:verify -- --write` | regenerate `publishConfig.exports` from `exports`                                      |
+| Command                                | Does                                                                                                                     |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `vp run packages:build`                | build the three publishable packages (`vp pack` → `dist` with `.d.mts` and sourcemaps)                                   |
+| `vp run publish:verify`                | check `publishConfig.exports` matches `exports` and resolves to built files                                              |
+| `vp run publish:verify -- --write`     | regenerate `publishConfig.exports` from `exports`                                                                        |
+| `vp run api-surface:verify`            | diff each public package's exported type surface against its tracked snapshot; require a changeset for a breaking change |
+| `vp run api-surface:verify -- --write` | regenerate the surface snapshots under `reports/api-surface/`                                                            |
+| `vp run attw:verify`                   | run Are The Types Wrong? over the three built packages — do the published types resolve for a consumer?                  |
 
-Run `packages:build` **before** `publish:verify` for the full check — without a
-`dist/` it verifies only the structural half, and says so in its output.
+Run `packages:build` **before** `publish:verify`, `api-surface:verify` and
+`attw:verify` for the full check — the first verifies only the structural half
+without a `dist/`, and the latter two snapshot the built `dist` a consumer
+installs (`ui` ships source, so its surface is always checked). The API-surface
+snapshot and its `ui`-vs-built split are
+[ADR-046](docs/cqms/decisions/ADR-046-public-api-surface-snapshot.md).
 
 ### Releasing a package
 

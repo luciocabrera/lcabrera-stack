@@ -4,11 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "api-surface:verify": "node scripts/verify-api-surface.mjs",
+    "attw:verify": "node scripts/verify-attw.mjs",
     "branch:verify": "node scripts/verify-branch-name.mjs",
     "build:all": "vp run -r build",
     "changelog:generate": "git log --no-merges --format=%H%x1f%D%x1f%cI%x1f%s%x1f%b%x1e -- ':!CHANGELOG.md' | node scripts/generate-changelog.mjs",
     "check:push": "vp run typegen:all && vp run --filter eslint-local-rules-shared build && vp check && vp run typecheck:changed && vp run -r lint:eslint:check && vp run lint:biome:check && vp run commands:verify && vp run coordination:verify && vp run scripts:verify && vp run lint:plugins:verify && vp run suppressions:verify && vp run docs:verify",
-    "check:safe": "vp run typegen:all && vp run --filter eslint-local-rules-shared build && vp check && vp run typecheck:all && vp run -r lint:eslint:check && vp run lint:biome:check && vp run commands:verify && vp run coordination:verify && vp run scripts:verify && vp run lint:plugins:verify && vp run suppressions:verify && vp run docs:verify && vp run packages:build && vp run publish:verify && vp run test:all",
+    "check:safe": "vp run typegen:all && vp run --filter eslint-local-rules-shared build && vp check && vp run typecheck:all && vp run -r lint:eslint:check && vp run lint:biome:check && vp run commands:verify && vp run coordination:verify && vp run scripts:verify && vp run lint:plugins:verify && vp run suppressions:verify && vp run docs:verify && vp run packages:build && vp run publish:verify && vp run api-surface:verify && vp run attw:verify && vp run test:all",
     "commands:verify": "node scripts/verify-commands-doc.mjs",
     "commit:verify": "node scripts/verify-commit-msg.mjs",
     "coordination:board": "node scripts/verify-coordination.mjs --write-board",
@@ -67,6 +69,7 @@
     "typegen:all": "vp run -r typegen"
   },
   "devDependencies": {
+    "@arethetypeswrong/core": "catalog:tooling",
     "@biomejs/biome": "catalog:lint",
     "@changesets/cli": "catalog:tooling",
     "@repo/vite-configs": "workspace:*",

@@ -94,6 +94,7 @@ catalogs:
     vitest: 4.1.10
 
   tooling:
+    '@arethetypeswrong/core': ^0.18.1
     '@changesets/cli': ^2.31.1
     fallow: ^3.8.0
     knip: ^6.29.0

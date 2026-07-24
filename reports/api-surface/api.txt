@@ -1,0 +1,31 @@
+# @lcabrera/api — public API surface
+# Generated. Regenerate with: vp run api-surface:verify -- --write
+# One line per export: <name> <signature>. Do not edit by hand.
+
+## ./config/config.constants
+API_SERVER_PORT [const] 3001
+CONFIG [const] ApiConfig
+
+## ./config/config.types
+ApiConfig [type] { readonly dev: { readonly apiHost: string; }; readonly localhost: { readonly apiHost: string; }; readonly prod: { readonly apiHost: string; }; }
+
+## ./config/get-api-base-url.util
+getApiBaseUrl [const] (requestUrl?: string) => string
+
+## ./distinct/distinct.types
+DistinctValuesResponse [type] { readonly hasMore: boolean; readonly values: readonly string[]; }
+
+## ./distinct/fetch-distinct-values.util
+fetchDistinctValues [const] ({ baseUrl, columnName, limit, offset, schemaName, signal, tableName, timeoutMs }: FetchDistinctValuesArgs) => Promise<DistinctValuesResponse>
+
+## ./distinct/is-distinct-values-response.util
+isDistinctValuesResponse [const] (value: unknown) => value is DistinctValuesResponse
+
+## ./distinct/parse-filter-options-params.util
+parseFilterOptionsParams [const] ({ defaultPageSize, searchParams }: ParseFilterOptionsParamsArgs) => FilterOptionsParams | undefined
+
+## ./http/build-paginated-query-params.util
+buildPaginatedQueryParams [const] ({ filter, limit, skip, sorting }: BuildPaginatedQueryParamsArgs) => URLSearchParams
+
+## ./http/fetch-and-validate.util
+fetchAndValidate [const] <T>({ isValid, shapeErrorMessage, signal, timeoutMs, url }: FetchAndValidateArgs<T>) => Promise<T>

@@ -1,0 +1,123 @@
+# @lcabrera/server — public API surface
+# Generated. Regenerate with: vp run api-surface:verify -- --write
+# One line per export: <name> <signature>. Do not edit by hand.
+
+## ./crypto/hash-secret.util
+hashSecret [const] ({ secret }: HashSecretArgs) => string
+
+## ./crypto/is-secret-hash-valid.util
+isSecretHashValid [const] ({ secret, secretHash }: IsSecretHashValidArgs) => boolean
+
+## ./db/delete-rows.util
+deleteRows [const] <TRow extends QueryResultRow>(descriptor: DeleteQueryDescriptor) => Promise<readonly TRow[]>
+
+## ./db/env.schema
+EnvConfig [type] z.infer<typeof envSchema>
+envSchema [const] z.ZodObject<{ DB_HOST: z.ZodString; DB_NAME: z.ZodString; DB_PASSWORD: z.ZodString; DB_PORT: z.ZodCoercedNumber<unknown>; DB_USER: z.ZodString; }, z.core.$strip>
+readEnvConfig [const] ({ env }: ReadEnvConfigArgs) => EnvConfig
+
+## ./db/get-max-value.util
+getMaxValue [const] (descriptor: MaxValueQueryDescriptor) => Promise<number>
+
+## ./db/get-pool.util
+closePool [const] () => Promise<void>
+getPool [const] () => Pool
+
+## ./db/get-rows-count.util
+getRowsCount [const] (descriptor: CountQueryDescriptor & { readonly column: string; }) => Promise<number>
+
+## ./db/insert-row.util
+insertRow [const] <TRow extends QueryResultRow>(descriptor: InsertQueryDescriptor) => Promise<readonly TRow[]>
+
+## ./db/query-builder/build-count-query.util
+buildCountQuery [const] ({ allowedColumns, column, filters, schema, table }: CountQueryDescriptor) => BuiltQuery
+
+## ./db/query-builder/build-delete-query.util
+buildDeleteQuery [const] ({ allowedColumns, filters, returning, schema, table }: DeleteQueryDescriptor) => BuiltQuery
+
+## ./db/query-builder/build-distinct-query.util
+buildDistinctQuery [const] (descriptor: SelectQueryDescriptor) => BuiltQuery
+
+## ./db/query-builder/build-insert-query.util
+buildInsertQuery [const] ({ allowedColumns, returning, schema, table, values }: InsertQueryDescriptor) => BuiltQuery
+
+## ./db/query-builder/build-max-value-query.util
+buildMaxValueQuery [const] ({ allowedColumns, column, schema, table }: MaxValueQueryDescriptor) => BuiltQuery
+
+## ./db/query-builder/build-order-by-clause.util
+buildOrderByClause [const] ({ allowedColumns, sort }: BuildOrderByClauseArgs) => string
+
+## ./db/query-builder/build-select-query.util
+buildSelectQuery [const] ({ allowedColumns, distinct, fields, filters, limit, offset, schema, sort, table }: SelectQueryDescriptor) => BuiltQuery
+
+## ./db/query-builder/build-update-query.util
+buildUpdateQuery [const] ({ allowedColumns, filters, returning, schema, table, values }: UpdateQueryDescriptor) => BuiltQuery
+
+## ./db/query-builder/query-builder.types
+BinaryOperator [type] 'eq' | 'gt' | 'gte' | 'ilike' | 'in' | 'lt' | 'lte' | 'neq' | 'notIlike'
+BuiltQuery [type] { readonly text: string; readonly values: readonly unknown[]; }
+ColumnType [type] 'boolean' | 'date' | 'enum' | 'number' | 'text'
+ComparisonOperator [type] BinaryOperator | UnaryOperator
+CountQueryDescriptor [type] { readonly allowedColumns?: readonly string[]; /** * Column passed to `count()`; defaults to `*` (count every matching row). * Pass a specific column — typically the primary key — for a table with no * `id` column, or when NULLs in that column should not be counted. */ readonly column?: string; readonly filters?: readonly QueryFilter[]; readonly schema: string; readonly table: string; }
+DeleteQueryDescriptor [type] { /** Same opt-in authorization semantics as SelectQueryDescriptor. */ readonly allowedColumns?: readonly string[]; /** At least one filter is required — an unfiltered DELETE is refused. */ readonly filters: readonly QueryFilter[]; /** Columns to return from the deleted row(s); `['*']` returns the whole row. */ readonly returning?: readonly string[]; readonly schema: string; readonly table: string; }
+InsertQueryDescriptor [type] { /** Same opt-in authorization semantics as SelectQueryDescriptor. */ readonly allowedColumns?: readonly string[]; /** Columns to return from the inserted row(s); `['*']` returns the whole row. */ readonly returning?: readonly string[]; readonly schema: string; readonly table: string; /** Column→value map; keys become quoted identifiers, values become `$n` params. */ readonly values: Readonly<Record<string, unknown>>; }
+MaxValueQueryDescriptor [type] { /** Same opt-in authorization semantics as SelectQueryDescriptor. */ readonly allowedColumns?: readonly string[]; readonly column: string; readonly schema: string; readonly table: string; }
+QueryFilter [type] { readonly column: string; readonly operator: BinaryOperator; readonly value: unknown; } | { readonly column: string; readonly operator: UnaryOperator; }
+QuerySort [type] { readonly column: string; readonly direction: 'asc' | 'desc'; }
+SelectQueryDescriptor [type] { /** * Opt-in authorization check: when provided, every fields/filter/sort * column must be a member (in addition to the always-on syntax check via * assertSafeIdentifier). Omit when every column is developer-hardcoded, * never derived from a request. */ readonly allowedColumns?: readonly string[]; /** Emit `SELECT DISTINCT` over `fields` rather than a plain `SELECT`. */ readonly distinct?: boolean; readonly fields: readonly string[]; readonly filters?: readonly QueryFilter[]; readonly limit?: number; readonly offset?: number; readonly schema: string; readonly sort?: readonly QuerySort[]; readonly table: string; }
+UnaryOperator [type] 'isNotNull'
+UpdateQueryDescriptor [type] { /** Same opt-in authorization semantics as SelectQueryDescriptor. */ readonly allowedColumns?: readonly string[]; /** At least one filter is required — an unfiltered UPDATE is refused. */ readonly filters: readonly QueryFilter[]; /** Columns to return from the updated row(s); `['*']` returns the whole row. */ readonly returning?: readonly string[]; readonly schema: string; readonly table: string; /** Column→value map for the SET clause; values become `$n` params. */ readonly values: Readonly<Record<string, unknown>>; }
+
+## ./db/select-distinct-rows.util
+selectDistinctRows [const] <TRow extends QueryResultRow>(descriptor: SelectQueryDescriptor) => Promise<readonly TRow[]>
+
+## ./db/select-filter-options.util
+selectFilterOptions [const] ({ allowedColumns, column, columnType, limit, offset, schema, table }: SelectFilterOptionsArgs) => Promise<FilterOptionsPage>
+
+## ./db/select-rows.util
+selectRows [const] <TRow extends QueryResultRow>(descriptor: SelectQueryDescriptor) => Promise<readonly TRow[]>
+
+## ./db/update-rows.util
+updateRows [const] <TRow extends QueryResultRow>(descriptor: UpdateQueryDescriptor) => Promise<readonly TRow[]>
+
+## ./filters/filters.types
+BooleanFilter [type] { readonly type: 'boolean'; readonly value: boolean; }
+ColumnFilter [type] BooleanFilter | DateFilter | NumberFilter | SelectFilter | TextFilter
+DateFilter [type] { readonly operator: 'after' | 'before' | 'between' | 'equals'; readonly type: 'date'; /** ISO date string */ readonly value: string; /** Second date for 'between' operator (ISO string) */ readonly value2?: string; }
+NumberFilter [type] { readonly operator: 'between' | 'equals' | 'greaterThan' | 'greaterThanOrEqual' | 'lessThan' | 'lessThanOrEqual' | 'notEquals'; readonly type: 'number'; /** Undefined while the user is drafting the filter (empty input) */ readonly value: number | undefined; /** Second value for 'between' operator */ readonly value2?: number; }
+SelectFilter [type] { /** Operator for select filter (defaults to 'equals' if not specified) */ readonly operator?: 'equals' | 'notEquals'; readonly type: 'multiSelect' | 'select'; /** Single value for 'select' type */ readonly value?: string; /** Multiple values for 'multiSelect' type */ readonly values?: readonly string[]; }
+TextFilter [type] { readonly operator: 'contains' | 'endsWith' | 'equals' | 'notContains' | 'notEquals' | 'startsWith'; readonly type: 'text'; readonly value: string; }
+
+## ./filters/to-date-query-filters.util
+toDateQueryFilters [const] ({ column, filter }: ToDateQueryFiltersArgs) => readonly QueryFilter[]
+ToDateQueryFiltersArgs [type] { readonly column: string; readonly filter: DateFilter; }
+
+## ./filters/to-number-query-filters.util
+toNumberQueryFilters [const] ({ column, filter }: ToNumberQueryFiltersArgs) => readonly QueryFilter[]
+ToNumberQueryFiltersArgs [type] { readonly column: string; readonly filter: NumberFilter; }
+
+## ./filters/to-query-filters.util
+toQueryFilters [const] ({ filters }: ToQueryFiltersArgs) => readonly QueryFilter[]
+ToQueryFiltersArgs [type] { readonly filters: Readonly<Record<string, ColumnFilter>>; }
+
+## ./filters/to-select-query-filters.util
+toSelectQueryFilters [const] ({ column, filter }: ToSelectQueryFiltersArgs) => readonly QueryFilter[]
+ToSelectQueryFiltersArgs [type] { readonly column: string; readonly filter: SelectFilter; }
+
+## ./filters/to-text-query-filters.util
+toTextQueryFilters [const] ({ column, filter }: ToTextQueryFiltersArgs) => readonly QueryFilter[]
+ToTextQueryFiltersArgs [type] { readonly column: string; readonly filter: TextFilter; }
+
+## ./tickets/is-access-ticket-valid.util
+isAccessTicketValid [const] ({ now, secret, subject, ticket }: VerifyAccessTicketArgs) => boolean
+
+## ./tickets/sign-access-ticket.util
+signAccessTicket [const] ({ expiresAt, secret, subject }: SignAccessTicketArgs) => string
+
+## ./tokens/generate-api-token.util
+generateApiToken [const] ({ prefix }?: GenerateApiTokenArgs) => GenerateApiTokenResult
+GenerateApiTokenResult [type] { readonly plaintext: string; readonly secret: string; readonly tokenId: string; }
+
+## ./tokens/parse-api-token.util
+parseApiToken [const] ({ plaintext, prefix }: ParseApiTokenArgs) => ParsedApiToken | undefined
+ParsedApiToken [type] { readonly secret: string; readonly tokenId: string; }
