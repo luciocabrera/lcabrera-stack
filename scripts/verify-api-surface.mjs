@@ -178,10 +178,10 @@ const runVerify = (packages) => {
     process.exitCode = 1;
     return;
   }
+  const skippedNote =
+    skipped.length > 0 ? ` (${skipped.length} skipped, unbuilt)` : '';
   console.log(
-    `Public API surface is accurate for ${active.length} package(s)${
-      skipped.length > 0 ? ` (${skipped.length} skipped, unbuilt)` : ''
-    }.`,
+    `Public API surface is accurate for ${active.length} package(s)${skippedNote}.`,
   );
 };
 

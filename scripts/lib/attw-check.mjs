@@ -64,10 +64,13 @@ export const relevantProblems = (problems) =>
   );
 
 /** One human-readable line per problem, for the failure report. */
-export const formatProblem = (problem) =>
-  `  ${problem.kind}${
-    problem.entrypoint === undefined ? '' : ` at ${problem.entrypoint}`
-  }${problem.resolutionKind === undefined ? '' : ` (${problem.resolutionKind})`}`;
+export const formatProblem = (problem) => {
+  const at =
+    problem.entrypoint === undefined ? '' : ` at ${problem.entrypoint}`;
+  const mode =
+    problem.resolutionKind === undefined ? '' : ` (${problem.resolutionKind})`;
+  return `  ${problem.kind}${at}${mode}`;
+};
 
 /** Checks one built package; returns its name and the problems that matter. */
 export const checkPackageTypes = async (packageDirectory) => {

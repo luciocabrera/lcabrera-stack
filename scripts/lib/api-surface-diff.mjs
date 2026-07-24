@@ -28,7 +28,7 @@ const diffSubpath = ({ base, next, subpath }) => {
   const after = exportsOf(next, subpath);
   const names = [
     ...new Set([...Object.keys(before), ...Object.keys(after)]),
-  ].sort();
+  ].sort((left, right) => left.localeCompare(right));
 
   return names.flatMap((name) => {
     const had = Object.hasOwn(before, name);
@@ -62,7 +62,7 @@ const diffSubpath = ({ base, next, subpath }) => {
 export const diffSurfaces = ({ base, next }) => {
   const subpaths = [
     ...new Set([...subpathsOf(base), ...subpathsOf(next)]),
-  ].sort();
+  ].sort((left, right) => left.localeCompare(right));
   return subpaths.flatMap((subpath) => diffSubpath({ base, next, subpath }));
 };
 
