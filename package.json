@@ -32,6 +32,7 @@
     "fallow:health": "fallow health --file-scores --hotspots --targets --score",
     "fallow:refresh-report": "node scripts/refresh-fallow-complexity-report.cjs",
     "format:all": "vp fmt .",
+    "housekeeping:prune": "gh pr list --state all --json number,headRefName,state --limit 400 | node scripts/housekeeping-prune.mjs",
     "issue:verify": "node scripts/verify-issue-body.mjs",
     "labels:sync": "node scripts/sync-labels.mjs",
     "lint:all": "vp run --filter eslint-local-rules-shared build && vp lint . --fix && vp run -r lint:eslint && vp run lint:biome",

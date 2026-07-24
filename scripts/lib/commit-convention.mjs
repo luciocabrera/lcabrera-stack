@@ -372,6 +372,38 @@ export const validateIssueBody = (body) => {
   return { errors, warnings: [] };
 };
 
+/** Validates a PR's BASE branch. A PR must target `main` (or a release branch,
+ *  or a declared shared branch) — never another feature branch. Merging a
+ *  stacked PR into its base instead of `main` orphans the work: PR #367 was
+ *  squash-merged into an already-merged base branch and its changes never
+ *  reached `main`, until they were recovered by hand. `allowedBases` are the
+ *  shared branches declared under docs/coordination/branches/; an empty base
+ *  (a local simulation with no PR context) is not checked. */
+export const validatePrBase = (base, { allowedBases = [] } = {}) => {
+  const name = (base ?? '').trim();
+  if (name === '' || EXEMPT_BRANCHES.some((re) => re.test(name))) {
+    return { errors: [], warnings: [] };
+  }
+  if (allowedBases.includes(name)) {
+    return {
+      errors: [],
+      warnings: [
+        `PR base is the shared branch \`${name}\` — allowed while it is a declared, ` +
+          'active shared branch (docs/coordination/branches/), which must itself merge to `main`.',
+      ],
+    };
+  }
+  return {
+    errors: [
+      `PR base is \`${name}\`, a feature branch — retarget to \`main\`. Merging a stacked PR ` +
+        'into its base rather than `main` orphans the work (issue #367): the base merges first ' +
+        'and the stacked changes never reach `main`. Fix: rebase onto `main`, then ' +
+        `\`gh pr edit <n> --base main\` — or declare \`${name}\` a shared branch (docs/coordination/branches/).`,
+    ],
+    warnings: [],
+  };
+};
+
 /** Validates a git branch name against `<type>/<issue>-<kebab-slug>`.
  *  `main` and `release-*` are exempt; they are not topic branches. */
 export const validateBranchName = (branch) => {

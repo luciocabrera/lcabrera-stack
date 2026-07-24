@@ -142,6 +142,20 @@ their uncommitted files, staged changes, and branch switches clobber each other
 worktree — `git worktree add ../vrc-<task> -b <branch>` — or a separate clone.
 "Different branches" only helps if they're in _different working trees_.
 
+**The primary checkout stays on `main`.** Treat the shared clone every agent
+starts in as a read-only anchor: it stays on `main`, and you `git worktree add`
+your own tree off it instead of `git checkout <feature>` inside it. A feature
+branch checked out in the shared clone is the exact failure this rule exists to
+stop — it moves `HEAD` under every other agent working there, and the person who
+next runs a command in that clone is silently on someone else's branch. An audit
+once found the shared checkout parked on an already-merged feature branch behind
+a pile of stale local branches, none of it anyone's active work. `vp run
+housekeeping:prune` (below) is the periodic broom; keeping the primary checkout
+on `main` is how the mess is not made in the first place. If you find the shared
+clone on a feature branch, `git checkout main` is always safe — the real work is
+in a worktree or already merged, never uncommitted in the shared tree (if it is,
+that is itself the bug).
+
 A hand-made worktree needs its **own** `vp install`. Symlinking the primary
 checkout's `node_modules` looks like a shortcut and is a trap: the pnpm workspace
 links inside it still point at the primary checkout's packages, so `@repo/*`

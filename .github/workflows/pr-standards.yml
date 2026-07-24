@@ -43,12 +43,14 @@ jobs:
           BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
         run: node scripts/verify-branch-name.mjs
 
-      - name: Validate PR title and description
-        # Title/body come in through env, never a shell interpolation, so no
-        # untrusted PR text can be executed.
+      - name: Validate PR title, description and base branch
+        # Title/body/base come in through env, never a shell interpolation, so no
+        # untrusted PR text can be executed. PR_BASE guards against a stacked PR
+        # targeting a feature branch instead of `main` (the #367 orphaning).
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_BODY: ${{ github.event.pull_request.body }}
+          PR_BASE: ${{ github.event.pull_request.base.ref }}
         run: node scripts/verify-pr.mjs
 
       - name: Validate every commit message in the PR

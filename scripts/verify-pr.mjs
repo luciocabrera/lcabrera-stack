@@ -6,26 +6,32 @@
  * contain the required sections that `.github/pull_request_template.md` lays out.
  * The `🤖` footer and `Co-Authored-By:` trailer are neither required nor rejected.
  *
- * Runs in `.github/workflows/pr-standards.yml`, which passes the PR title and
- * body through the environment (`PR_TITLE` / `PR_BODY`) so no untrusted PR text
- * ever reaches a shell. Locally, pass `--title "<t>"` and `--body-file <path>` to
- * simulate a PR without opening one.
+ * Runs in `.github/workflows/pr-standards.yml`, which passes the PR title, body
+ * and base branch through the environment (`PR_TITLE` / `PR_BODY` / `PR_BASE`) so
+ * no untrusted PR text ever reaches a shell. Locally, pass `--title "<t>"`,
+ * `--body-file <path>` and `--base <branch>` to simulate a PR without opening one.
  *
  * Usage:
- *   PR_TITLE=… PR_BODY=… node scripts/verify-pr.mjs
- *   node scripts/verify-pr.mjs --title "feat(ci): x" --body-file body.md
+ *   PR_TITLE=… PR_BODY=… PR_BASE=main node scripts/verify-pr.mjs
+ *   node scripts/verify-pr.mjs --title "feat(ci): x" --body-file body.md --base main
  *
  * Exit codes: 0 = valid (warnings allowed), 1 = a rule was broken.
  */
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { validatePrBody, validatePrTitle } from './lib/commit-convention.mjs';
+import {
+  validatePrBase,
+  validatePrBody,
+  validatePrTitle,
+} from './lib/commit-convention.mjs';
+import { readEntries } from './lib/coordination-read.mjs';
 import { reportWarnings } from './lib/report-warnings.mjs';
 import { readTextWithin } from './lib/safe-read.mjs';
 import { deriveWorkspaceScopes } from './lib/workspace-scopes.mjs';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
+const BRANCHES_DIR = resolve(REPO_ROOT, 'docs/coordination/branches');
 
 const flagValue = (name) => {
   const index = process.argv.indexOf(name);
@@ -34,22 +40,40 @@ const flagValue = (name) => {
 
 const readInputs = () => {
   const title = flagValue('--title') ?? process.env.PR_TITLE ?? '';
+  const base = flagValue('--base') ?? process.env.PR_BASE ?? '';
   const bodyFile = flagValue('--body-file');
   const body =
     bodyFile === undefined
       ? (process.env.PR_BODY ?? '')
       : readTextWithin(bodyFile, REPO_ROOT);
-  return { title, body };
+  return { base, body, title };
 };
 
+/** Shared branches declared under docs/coordination/branches/ are legitimate PR bases. */
+const declaredSharedBranches = () =>
+  readEntries(BRANCHES_DIR)
+    .map(({ data }) => data?.branch)
+    .filter(Boolean);
+
 const main = () => {
-  const { title, body } = readInputs();
+  const { base, body, title } = readInputs();
   const workspaces = deriveWorkspaceScopes(REPO_ROOT);
 
   const titleResult = validatePrTitle(title, { workspaces });
   const bodyResult = validatePrBody(body);
-  const errors = [...titleResult.errors, ...bodyResult.errors];
-  const warnings = [...titleResult.warnings, ...bodyResult.warnings];
+  const baseResult = validatePrBase(base, {
+    allowedBases: declaredSharedBranches(),
+  });
+  const errors = [
+    ...titleResult.errors,
+    ...bodyResult.errors,
+    ...baseResult.errors,
+  ];
+  const warnings = [
+    ...titleResult.warnings,
+    ...bodyResult.warnings,
+    ...baseResult.warnings,
+  ];
 
   if (warnings.length > 0) {
     reportWarnings(warnings);

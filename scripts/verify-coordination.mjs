@@ -47,6 +47,10 @@
  *                          merged). Precise "is it merged?" detection is still
  *                          not attempted: squash merges leave no ancestry, so
  *                          the answer would have to come from the PR API.
+ *   WARN   reconcile     — a live task records a real PR but its branch is gone
+ *                          from the LIVE origin list while a stale local
+ *                          `origin/*` ref still "resolves" it (so `branch` above
+ *                          stays quiet): the PR landed, delete the task file.
  *
  * Local checks read the working tree only and never shell out (`git-dir.mjs`
  * reads `.git` directly). The overlap check is the one exception — reading a
@@ -69,6 +73,7 @@ import { fileURLToPath } from 'node:url';
 
 import { renderBoard } from './lib/coordination-board.mjs';
 import { branchSlug } from './lib/coordination-parse.mjs';
+import { mergedTaskDriftWarnings } from './lib/coordination-reconcile.mjs';
 import { overlapWarnings } from './lib/coordination-overlap.mjs';
 import { readEntries } from './lib/coordination-read.mjs';
 import {
@@ -281,6 +286,7 @@ const gatherRemoteClaims = (tasks, warnings) => {
     return {
       claims: [],
       coverage: 'remote branches: not checked (--no-remote)',
+      liveBranches: undefined,
     };
   }
 
@@ -292,7 +298,11 @@ const gatherRemoteClaims = (tasks, warnings) => {
       'could not reach `origin`, so claims on other branches were not read — ' +
         'overlap detection is local-only for this run.',
     );
-    return { claims: [], coverage: 'remote branches: unreachable' };
+    return {
+      claims: [],
+      coverage: 'remote branches: unreachable',
+      liveBranches: undefined,
+    };
   }
 
   if (unreadBranches.length > 0) {
@@ -305,6 +315,8 @@ const gatherRemoteClaims = (tasks, warnings) => {
   return {
     claims: withoutLocalDuplicates({ localTasks: tasks, remoteClaims: claims }),
     coverage: `remote branches: ${readBranches.length} read, ${unreadBranches.length} unread`,
+    // Every live origin branch (read + unread), for the merged-task reconciliation.
+    liveBranches: [...readBranches, ...unreadBranches],
   };
 };
 
@@ -341,6 +353,15 @@ const main = () => {
   checkStale(tasks, warnings);
   checkTaskBranches(tasks, warnings);
   checkGhostTasks(tasks, warnings);
+  warnings.push(
+    ...mergedTaskDriftWarnings({
+      liveBranches: remote.liveBranches,
+      noBranch: NO_BRANCH,
+      noPr: NO_PR,
+      refExists: gitRefExists,
+      tasks,
+    }),
+  );
 
   if (warnings.length > 0) {
     console.error(`Coordination register — ${warnings.length} warning(s):\n`);

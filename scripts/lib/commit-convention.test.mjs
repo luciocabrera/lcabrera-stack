@@ -9,6 +9,7 @@ import {
   validateBranchName,
   validateCommitMessage,
   validateIssueBody,
+  validatePrBase,
   validatePrBody,
   validatePrTitle,
 } from './commit-convention.mjs';
@@ -242,6 +243,38 @@ describe('validateBranchName', () => {
     for (const type of line[1].split('|')) {
       expect(errorsOf(validateBranchName(`${type}/1-x`))).toEqual([]);
     }
+  });
+});
+
+describe('validatePrBase — the #367 stacked-merge guard', () => {
+  it('accepts `main` and release branches', () => {
+    expect(errorsOf(validatePrBase('main'))).toEqual([]);
+    expect(errorsOf(validatePrBase('release-1.2'))).toEqual([]);
+  });
+
+  it('rejects a feature branch as a PR base', () => {
+    const result = validatePrBase('refactor/352-distinct-onto-getpool');
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]).toContain('retarget to `main`');
+  });
+
+  it('does not check an empty base (local simulation with no PR context)', () => {
+    expect(errorsOf(validatePrBase(''))).toEqual([]);
+    expect(errorsOf(validatePrBase(undefined))).toEqual([]);
+  });
+
+  it('allows a declared shared branch, but warns it must merge to main', () => {
+    const result = validatePrBase('shared/epic-x', {
+      allowedBases: ['shared/epic-x'],
+    });
+    expect(result.errors).toEqual([]);
+    expect(result.warnings).toHaveLength(1);
+  });
+
+  it('still rejects a feature branch that is not among the declared shared branches', () => {
+    expect(
+      errorsOf(validatePrBase('feat/x', { allowedBases: ['shared/epic-x'] })),
+    ).toHaveLength(1);
   });
 });
 

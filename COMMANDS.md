@@ -318,12 +318,14 @@ package, ever.
 
 The in-git "who is working on what" register under [`docs/coordination/`](docs/coordination/README.md).
 
-| Command                                       | Does                                                                                                               |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `vp run coordination:verify`                  | check the task register (schema, unique ids, `area` overlap across live branches; `--no-remote` to skip) — CI gate |
-| `vp run coordination:board`                   | write the local, gitignored `docs/coordination/BOARD.md` table view (never committed — ADR-037)                    |
-| `vp run coordination:board:live`              | live view: claims joined with open-PR state (draft/checks) + unregistered PRs (needs `gh`; prints, never writes)   |
-| `vp run coordination:claim -- <id> "<title>"` | scaffold a task + branch (or `--worktree`) + draft PR in one step (`--dry-run` to preview)                         |
+| Command                                       | Does                                                                                                                                                               |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `vp run coordination:verify`                  | check the task register (schema, unique ids, `area` overlap across live branches; `--no-remote` to skip) — CI gate                                                 |
+| `vp run coordination:board`                   | write the local, gitignored `docs/coordination/BOARD.md` table view (never committed — ADR-037)                                                                    |
+| `vp run coordination:board:live`              | live view: claims joined with open-PR state (draft/checks) + unregistered PRs (needs `gh`; prints, never writes)                                                   |
+| `vp run coordination:claim -- <id> "<title>"` | scaffold a task + branch (or `--worktree`) + draft PR in one step (`--dry-run` to preview)                                                                         |
+| `vp run housekeeping:prune`                   | dry-run the shared-checkout broom: list branches/worktrees safe to delete (merged/closed PR or cruft) and what is kept (un-PR'd commits, dirty worktrees, stashes) |
+| `vp run housekeeping:prune -- --apply`        | perform those deletions; never touches anything with unique un-PR'd commits, an uncommitted worktree, or a stash (needs `gh`; falls back to commit-count-only)     |
 
 ### Commit & PR standards
 
