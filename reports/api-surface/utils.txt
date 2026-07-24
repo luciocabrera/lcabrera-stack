@@ -1,0 +1,77 @@
+# @lcabrera/utils — public API surface
+# Generated. Regenerate with: vp run api-surface:verify -- --write
+# One line per export: <name> <signature>. Do not edit by hand.
+
+## ./arrays/merge-arrays.util
+mergeArrays [const] <T>({ baseValue, overrideValue }: MergeArraysArgs<T>) => T[] | undefined
+
+## ./comparison/are-arrays-equal.util
+areArraysEqual [const] <T>({ left, right }: AreArraysEqualArgs<T>) => boolean
+
+## ./comparison/are-equal-by-json.util
+areEqualByJson [const] <T>({ left, right }: AreEqualByJsonArgs<T>) => boolean
+
+## ./comparison/is-shallow-equal.util
+isShallowEqual [const] <T extends Record<string, unknown>>({ objA, objB }: IsShallowEqualArgs<T>) => boolean
+
+## ./errors/get-error-message.util
+getErrorMessage [const] ({ error, fallback }: GetErrorMessageArgs) => string
+
+## ./errors/to-error.util
+toError [const] (error: unknown) => Error
+
+## ./formatters/format-currency.util
+formatCurrency [const] ({ currency: currencyCode, locale, value }: FormatCurrencyArgs) => string
+
+## ./formatters/format-date.util
+formatDate [const] ({ locale, preset: presetOption, value }: FormatDateArgs) => string
+
+## ./formatters/format-number.util
+formatNumber [const] ({ locale, maximumFractionDigits, minimumFractionDigits, value }: FormatNumberArgs) => string
+
+## ./formatters/formatters.constants
+DEFAULT_CURRENCY [const] "USD"
+DEFAULT_DATE_PRESET [const] "medium"
+DEFAULT_LOCALE [const] "en-US"
+
+## ./formatters/formatters.types
+CurrencyFormatOptions [type] { /** Currency code (e.g., 'USD', 'EUR', 'GBP') */ readonly currency?: string; /** Locale override (e.g., 'en-US', 'de-DE') */ readonly locale?: string; }
+DateFormatOptions [type] { /** Locale override (e.g., 'en-US', 'de-DE') */ readonly locale?: string; /** Date format preset */ readonly preset?: DateFormatPreset; }
+DateFormatPreset [type] 'full' | 'long' | 'medium' | 'short'
+NumberFormatOptions [type] { /** Locale override (e.g., 'en-US', 'de-DE') */ readonly locale?: string; /** Maximum fraction digits */ readonly maximumFractionDigits?: number; /** Minimum fraction digits */ readonly minimumFractionDigits?: number; }
+
+## ./formatters/get-date-time-format-options.util
+getDateTimeFormatOptions [const] (preset: DateFormatPreset) => Intl.DateTimeFormatOptions
+
+## ./formatters/get-default-locale.util
+getDefaultLocale [const] () => string
+
+## ./formatters/parse-date.util
+parseDate [const] (value: unknown) => Date | undefined
+
+## ./forms/is-checkbox-checked.util
+isCheckboxChecked [const] ({ formData, name }: IsCheckboxCheckedArgs) => boolean
+
+## ./forms/read-form-string.util
+readFormString [const] ({ formData, name }: ReadFormStringArgs) => string
+
+## ./guards/is-object.util
+isObject [const] (value: unknown) => value is Record<string, unknown>
+
+## ./json/safe-json-parse.util
+safeJsonParse [const] (raw: null | string) => unknown
+
+## ./numbers/parse-positive-integer.util
+parsePositiveInteger [const] ({ fallback, value }: ParsePositiveIntegerArgs) => number
+
+## ./numbers/round-to-cents.util
+roundToCents [const] (amount: number) => number
+
+## ./objects/drop-nullish-values.util
+dropNullishValues [const] <T extends object>(record: T) => WithoutNullishValues<T>
+
+## ./objects/merge-objects.util
+mergeObjects [const] <T extends object>({ baseValue, overrideValue }: MergeObjectsArgs<T>) => T | undefined
+
+## ./strings/empty-to-undefined.util
+emptyToUndefined [const] (value: string) => string | undefined

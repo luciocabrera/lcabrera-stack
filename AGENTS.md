@@ -55,6 +55,18 @@ package and reading the tarball rather than by inspection:
   `vp run publish:verify` is what catches that, and CI runs `packages:build`
   first so the check has a real `dist/` to resolve against; without one it
   verifies only that the two maps agree and says so in its output.
+- **A breaking change to the published _type surface_ is a gate, not a review
+  call.** `publish:verify` checks subpath parity but never reads the types, so a
+  removed export, a changed signature or a reshaped union inside a surviving
+  subpath ships silently — the harness only ever compiles _in-repo_ consumers,
+  and these four packages' consumers are external. `vp run api-surface:verify`
+  diffs each package's exported surface against a tracked snapshot under
+  `reports/api-surface/` (built `dist` for the three, `src` for `ui`) and, against
+  the base ref, requires a changeset for a breaking change; `vp run attw:verify`
+  confirms the published types actually resolve for a consumer. Both run after
+  `packages:build` in `check-safe.yml`. The snapshot convention, the `ui`-vs-built
+  split and the boundaries are
+  [ADR-046](docs/cqms/decisions/ADR-046-public-api-surface-snapshot.md).
 - **Each carries its own `LICENSE`** (MIT). npm only includes a `LICENSE` sitting
   in the package directory, so the root one does not reach a consumer — this is
   deliberate duplication, same reasoning as ADR-039.

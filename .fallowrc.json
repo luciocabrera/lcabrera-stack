@@ -19,6 +19,7 @@
     "reports/**"
   ],
   "ignoreDependencies": [
+    "@arethetypeswrong/core",
     "@babel/preset-typescript",
     "@eslint/js",
     "@stylexjs/eslint-plugin",
