@@ -3,6 +3,7 @@
 import type { NavbarItemConfig } from '@lcabrera/ui/components/Navbar/Navbar.types';
 import type { GlobalSettingsState } from '@lcabrera/ui/types/globalSettings.types';
 
+import { AppConfigProvider } from '@lcabrera/ui/contexts/AppConfigContext';
 import { GlobalSettingsProvider } from '@lcabrera/ui/contexts/GlobalSettingsContext';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
@@ -26,8 +27,8 @@ vi.mock('@lcabrera/ui/hooks/useTheme.hook', () => ({
   useTheme: () => useThemeMock(),
 }));
 
-// Fixture only — real route items are supplied by each consuming app (see
-// AppNavigationProps.getNavigationItems' own doc), not owned by this package.
+// Fixture only — real route items are supplied by each consuming app through
+// AppConfigContext (see `GetNavigationItems`), not owned by this package.
 const getFixtureNavigationItems = (): readonly NavbarItemConfig[] => [
   { end: true, label: 'Home', to: '/', type: 'link' },
   { label: 'Enterprise Orders', to: '/enterprise-orders', type: 'link' },
@@ -44,9 +45,11 @@ const renderWithGlobalSettings = ({
     [
       {
         element: (
-          <GlobalSettingsProvider initialSettings={initialSettings}>
-            <AppNavigation getNavigationItems={getFixtureNavigationItems} />
-          </GlobalSettingsProvider>
+          <AppConfigProvider getNavigationItems={getFixtureNavigationItems}>
+            <GlobalSettingsProvider initialSettings={initialSettings}>
+              <AppNavigation />
+            </GlobalSettingsProvider>
+          </AppConfigProvider>
         ),
         path: '/',
       },

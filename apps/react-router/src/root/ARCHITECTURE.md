@@ -4,18 +4,31 @@ Root route composition for app-wide document layout, SSR hydration scripts, and 
 
 ## Files
 
-| File                 | Responsibility                                                                         |
-| -------------------- | -------------------------------------------------------------------------------------- |
-| `Root.layout.tsx`    | Defines `<html>` shell and appends `Links`, `Meta`, `ScrollRestoration`, and `Scripts` |
-| `root.links.ts`      | Registers favicon and global reset stylesheet links                                    |
-| `root.loader.ts`     | Reads request cookies and CSP nonce for SSR                                            |
-| `Root.component.tsx` | Mounts app providers, `AppNavigation`, route outlet, and notifications                 |
+| File                          | Responsibility                                                                                      |
+| ----------------------------- | --------------------------------------------------------------------------------------------------- |
+| `Root.layout.tsx`             | Defines `<html>` shell and appends `Links`, `Meta`, `ScrollRestoration`, and `Scripts`              |
+| `root.links.ts`               | Registers favicon and global reset stylesheet links                                                 |
+| `root.loader.ts`              | Reads request cookies and CSP nonce for SSR (delegates to `getRootLoaderData`)                      |
+| `Root.component.tsx`          | Configures `@lcabrera/ui`'s `RootComponent` with this app's id, route links, theme and logout route |
+| `getNavigationItems.util.tsx` | This app's own sidebar route links                                                                  |
 
 ## App Shell
 
-`Root.component.tsx` renders a flex app shell. `AppNavigation` owns the left sidebar — permanently docked — plus its
-compact/full mode, route link registry, and theme toggle placement. The route outlet remains
-the only scrollable main content region.
+The shell itself is package-owned ([ADR-053](../../../../docs/decisions/ADR-053-package-owned-app-root-and-app-config-context.md)):
+`RootComponent` reads the root loader's data, mounts the app-wide providers and
+renders `AppShell`, so this app declares only what depends on this app. That is
+also why there is no `LogoutControl` here any more — the navigation footer
+renders its own session controls when an app passes `isAuthEnabled`, and this
+app passes `LOGOUT_ROUTE` as the route they POST to.
+
+`AppNavigation` owns the left sidebar — permanently docked — plus its
+compact/full mode. The route outlet remains the only scrollable main content
+region.
+
+`Root.layout.tsx` stays app-owned: it reads `cspNonce` via
+`useRouteLoaderData('root')` from outside the router's component tree, and it
+passes this app's compiled StyleX stylesheet URL, which is a per-app build
+artifact the package cannot source.
 
 ## CSP Nonce Flow
 

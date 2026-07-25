@@ -5,7 +5,7 @@
 ## .
 AppDocument [const] ({ children, rootData, stylexCssHref, }: AppDocumentProps) => JSX.Element
 AppProviders [const] ({ appId, children, defaultTheme, globalSettings, initialTheme, }: AppProvidersProps) => JSX.Element
-AppShell [const] ({ getNavigationItems, sessionActions, }: AppShellProps) => JSX.Element
+AppShell [const] () => JSX.Element
 Button [const] ({ tooltipContent, tooltipPlacement, ...rest }: ButtonProps) => JSX.Element
 FieldNode [type] | GroupFieldNode<TValues> | LeafFieldDef<TValues> | RowFieldNode<TValues> | TabFieldNode<TValues>
 Form [const] <TValues extends Record<string, unknown>>({ action, children, method, ...providerProps }: FormProps<TValues>) => JSX.Element
@@ -14,6 +14,8 @@ JsonExplorer [const] ({ sections }: JsonExplorerProps) => JSX.Element
 LayoutProps [type] { readonly children: ReactNode; }
 NavLink [const] ({ children, customStylex, icon, isBusy, isIconOnly, orientation, prefetch, size, tooltipContent, tooltipPlacement, variant, ...props }: NavLinkProps) => JSX.Element
 Pagination [type] { /** * The last row loaded so far, when there is one — the anchor a keyset * ("seek") data source resumes from. `skip` cannot express "resume after this * row", and only the consumer knows which of the row's fields make up its * sort key, so the Table hands the row over and stays out of it. Offset-based * sources ignore it. */ readonly lastRow?: TData; readonly limit: number; readonly skip: number; }
+RootComponent [const] ({ appId, defaultTheme, getNavigationItems, isAuthEnabled, logoutRoute, }: RootComponentProps) => JSX.Element
+RootComponentProps [type] { /** Per-app id scoping the theme / global-settings cookies across same-host apps. */ readonly appId?: string; /** Theme to use when the request carries no theme cookie. */ readonly defaultTheme?: ThemeMode; /** This app's own route links — see `GetNavigationItems`. */ readonly getNavigationItems: GetNavigationItems; /** Whether this app has a session, i.e. whether the navigation shows session controls. */ readonly isAuthEnabled?: boolean; /** Path the session controls POST to; defaults to `DEFAULT_LOGOUT_ROUTE`. */ readonly logoutRoute?: string; }
 RootErrorBoundary [const] ({ error }: RootErrorBoundaryProps) => JSX.Element
 RouteErrorBoundary [const] ({ defaultMessage, error, icon, title, }: RouteErrorBoundaryProps) => JSX.Element
 SectionCard [const] ({ children, customStylex, description, title, }: SectionCardProps) => JSX.Element
@@ -26,7 +28,7 @@ useNotifyOnError [const] (error: unknown) => void
 AppDocument [const] ({ children, rootData, stylexCssHref, }: AppDocumentProps) => JSX.Element
 
 ## ./components/AppShell
-AppShell [const] ({ getNavigationItems, sessionActions, }: AppShellProps) => JSX.Element
+AppShell [const] () => JSX.Element
 
 ## ./components/Card
 Card [const] ({ children, color, customStylex, elevation, interactive, padding, ...props }: CardProps) => JSX.Element

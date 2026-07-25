@@ -1,12 +1,11 @@
 import { Navbar } from '@lcabrera/ui/components/Navbar';
 import { SidePanelBody } from '@lcabrera/ui/components/SidePanel';
+import { useGetAppNavigationItems } from '@lcabrera/ui/contexts/AppConfigContext/selectors';
 import {
   useGetGlobalNavigationCollapsedPreference,
   useGetGlobalNavigationSizePreference,
 } from '@lcabrera/ui/contexts/GlobalSettingsContext/selectors';
 import * as stylex from '@stylexjs/stylex';
-
-import type { NavigationBodyProps } from './NavigationBody.types';
 
 import { NAV_DENSITY } from '../AppNavigation.constants';
 import { styles } from '../AppNavigation.stylex';
@@ -17,7 +16,8 @@ import { getBodyDensityStyle } from '../utils';
  * links, compacted to icons when the navigation is collapsed and sized by
  * the global density preference.
  */
-export const NavigationBody = ({ getNavigationItems }: NavigationBodyProps) => {
+export const NavigationBody = () => {
+  const getNavigationItems = useGetAppNavigationItems();
   const navigationCollapsedPreference =
     useGetGlobalNavigationCollapsedPreference();
   const navigationSizePreference = useGetGlobalNavigationSizePreference();

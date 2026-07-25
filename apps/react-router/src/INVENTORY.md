@@ -35,9 +35,10 @@ Self-contained, server-only auth for the secured-routes showcase. See [`src/auth
 
 ## Root shell (`src/root/`)
 
-| Artifact        | Location                           | Description                                                                                                                                                                      |
-| --------------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `LogoutControl` | `root/LogoutControl.component.tsx` | Session control for the `@lcabrera/ui` `AppShell` `sessionActions` slot: a POST `<Form>` to `/logout`; icon-only + tooltip when the nav is collapsed, mirroring the theme toggle |
+| Artifact             | Location                           | Description                                                                                                                                                         |
+| -------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Root`               | `root/Root.component.tsx`          | This app's root route: `@lcabrera/ui`'s `RootComponent` with this app's id, route links and logout route (ADR-053) — the shell assembly itself lives in the package |
+| `getNavigationItems` | `root/getNavigationItems.util.tsx` | This app's own sidebar route links, sized to the navigation density it is called with                                                                               |
 
 ---
 

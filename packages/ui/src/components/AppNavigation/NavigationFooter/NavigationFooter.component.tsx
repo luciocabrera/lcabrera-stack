@@ -1,54 +1,24 @@
-import { Button } from '@lcabrera/ui/components/Button';
 import { SidePanelFooter } from '@lcabrera/ui/components/SidePanel';
-import {
-  useGetGlobalNavigationCollapsedPreference,
-  useGetGlobalNavigationSizePreference,
-} from '@lcabrera/ui/contexts/GlobalSettingsContext/selectors';
+import { useGetIsAuthEnabled } from '@lcabrera/ui/contexts/AppConfigContext/selectors';
 import * as stylex from '@stylexjs/stylex';
 
-import type { NavigationFooterProps } from './NavigationFooter.types';
-
-import { NAV_DENSITY } from '../AppNavigation.constants';
 import { styles } from '../AppNavigation.stylex';
-import { resolveThemeLabel } from '../utils';
+import { NavigationSessionActions } from './NavigationSessionActions/NavigationSessionActions.component';
+import { NavigationThemeControl } from './NavigationThemeControl/NavigationThemeControl.component';
 
 /**
- * Footer of the navigation sidebar: the theme toggle button, icon-only with
- * a tooltip when the navigation is collapsed and sized by the global density
- * preference.
+ * Footer of the navigation sidebar: the theme toggle, plus the session controls
+ * when the app declared it has a session. Composition only — each control reads
+ * the collapsed/density preferences it renders with for itself.
  */
-export const NavigationFooter = ({
-  isDarkMode,
-  onToggleTheme,
-  sessionActions,
-}: NavigationFooterProps) => {
-  const navigationCollapsedPreference =
-    useGetGlobalNavigationCollapsedPreference();
-  const navigationSizePreference = useGetGlobalNavigationSizePreference();
-
-  const isExpanded = navigationCollapsedPreference !== 'collapsed';
-  const isCollapsed = !isExpanded;
-
-  const density = NAV_DENSITY[navigationSizePreference ?? 'medium'];
-  const themeLabel = resolveThemeLabel(isDarkMode);
-  const themeTooltipContent = isCollapsed ? themeLabel : undefined;
+export const NavigationFooter = () => {
+  const isAuthEnabled = useGetIsAuthEnabled();
 
   return (
     <SidePanelFooter>
       <div {...stylex.props(styles.footer)}>
-        <Button
-          aria-label={themeLabel}
-          icon={isDarkMode ? '☀️' : '🌙'}
-          isIconOnly={!isExpanded}
-          onClick={onToggleTheme}
-          size={density.controlButtonSize}
-          tooltipContent={themeTooltipContent}
-          tooltipPlacement='right'
-          variant='ghost'
-        >
-          {themeLabel}
-        </Button>
-        {sessionActions?.({ isCollapsed })}
+        <NavigationThemeControl />
+        {isAuthEnabled && <NavigationSessionActions />}
       </div>
     </SidePanelFooter>
   );

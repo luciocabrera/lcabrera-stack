@@ -1,71 +1,47 @@
 // @vitest-environment jsdom
 
-import type { GlobalSettingsState } from '@lcabrera/ui/types/globalSettings.types';
-import type { ThemeMode } from '@lcabrera/ui/types/theme.types';
-import type { ReactNode } from 'react';
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
-import { render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
-
-const { useLoaderDataMock } = vi.hoisted(() => ({
-  useLoaderDataMock: vi.fn(),
-}));
-
-type MockAppProvidersProps = {
-  readonly children: ReactNode;
-  readonly defaultTheme?: ThemeMode;
-  readonly globalSettings?: GlobalSettingsState;
-  readonly initialTheme?: ThemeMode;
+type MockRootComponentProps = {
+  readonly appId?: string;
+  readonly getNavigationItems: (iconSize: number) => readonly unknown[];
+  readonly isAuthEnabled?: boolean;
+  readonly logoutRoute?: string;
 };
 
-vi.mock('react-router', async () => {
-  const actual =
-    await vi.importActual<typeof import('react-router')>('react-router');
-
-  return {
-    ...actual,
-    useLoaderData: useLoaderDataMock,
-  };
-});
-
 vi.mock('@lcabrera/ui', () => ({
-  AppProviders: ({
-    children,
-    defaultTheme,
-    globalSettings,
-    initialTheme,
-  }: MockAppProvidersProps) => (
+  RootComponent: ({
+    appId,
+    getNavigationItems,
+    isAuthEnabled,
+    logoutRoute,
+  }: MockRootComponentProps) => (
     <div
-      data-default-theme={defaultTheme}
-      data-global-settings={JSON.stringify(globalSettings)}
-      data-initial-theme={initialTheme}
-      data-testid='app-providers'
-    >
-      {children}
-    </div>
+      data-app-id={appId}
+      data-auth={String(isAuthEnabled)}
+      data-item-count={String(getNavigationItems(24).length)}
+      data-logout={logoutRoute}
+      data-testid='root-component'
+    />
   ),
-  AppShell: () => <div data-testid='app-shell'>AppShell</div>,
 }));
 
 import { Root } from './Root.component';
 
-describe('Root', () => {
-  beforeEach(() => {
-    useLoaderDataMock.mockReturnValue({
-      globalSettings: { navigation: {}, pinning: {} },
-      theme: 'dark',
-    });
-  });
+afterEach(() => {
+  cleanup();
+});
 
-  it('passes loader-derived theme/globalSettings to AppProviders and renders AppShell inside it', () => {
+describe('Root', () => {
+  it('hands the shell this app id, its route links and its session config', () => {
     render(<Root />);
 
-    const appProviders = screen.getByTestId('app-providers');
-    expect(appProviders.dataset.defaultTheme).toBe('light');
-    expect(appProviders.dataset.initialTheme).toBe('dark');
-    expect(appProviders.dataset.globalSettings).toBe(
-      JSON.stringify({ navigation: {}, pinning: {} }),
-    );
-    expect(appProviders.contains(screen.getByTestId('app-shell'))).toBe(true);
+    const root = screen.getByTestId('root-component');
+
+    expect(root.dataset.appId).toBe('react-router');
+    expect(root.dataset.auth).toBe('true');
+    expect(root.dataset.logout).toBe('/logout');
+    expect(Number(root.dataset.itemCount)).toBeGreaterThan(0);
   });
 });

@@ -3,28 +3,24 @@ import { NotificationCenter } from '@lcabrera/ui/components/NotificationCenter';
 import * as stylex from '@stylexjs/stylex';
 import { Outlet } from 'react-router';
 
-import type { AppShellProps } from './AppShell.types';
-
 import { AppBackground } from '../AppBackground';
 import { AppDotted } from '../AppDotted';
 import { styles } from './AppShell.stylex';
 
-export const AppShell = ({
-  getNavigationItems,
-  sessionActions,
-}: AppShellProps) => {
-  return (
-    <AppBackground>
-      <AppNavigation
-        getNavigationItems={getNavigationItems}
-        sessionActions={sessionActions}
-      />
-      <AppDotted>
-        <main {...stylex.props(styles.main)}>
-          <Outlet />
-        </main>
-      </AppDotted>
-      <NotificationCenter />
-    </AppBackground>
-  );
-};
+/**
+ * The app frame rendered inside `AppProviders`: themed background, navigation,
+ * the routed `<Outlet />` inside the `<main>` landmark, and the notification
+ * centre. Pure composition — everything app-specific reaches the delegate that
+ * renders it through `AppConfigContext`, so nothing is threaded through here.
+ */
+export const AppShell = () => (
+  <AppBackground>
+    <AppNavigation />
+    <AppDotted>
+      <main {...stylex.props(styles.main)}>
+        <Outlet />
+      </main>
+    </AppDotted>
+    <NotificationCenter />
+  </AppBackground>
+);
