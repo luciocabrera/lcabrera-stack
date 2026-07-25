@@ -13,8 +13,8 @@ Root route composition for app-wide document layout, SSR hydration scripts, and 
 
 ## App Shell
 
-`Root.component.tsx` renders a flex app shell. `AppNavigation` owns the left sidebar, pin/unpin state, compact/full
-mode, route link registry, and theme toggle placement. The route outlet remains
+`Root.component.tsx` renders a flex app shell. `AppNavigation` owns the left sidebar — permanently docked — plus its
+compact/full mode, route link registry, and theme toggle placement. The route outlet remains
 the only scrollable main content region.
 
 ## CSP Nonce Flow

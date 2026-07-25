@@ -1,22 +1,16 @@
 import { Button } from '@lcabrera/ui/components/Button';
-import {
-  MaximizeIcon,
-  MenuCloseIcon,
-  MinimizeIcon,
-  PinIcon,
-  PinOffIcon,
-} from '@lcabrera/ui/components/Icons';
+import { MaximizeIcon, MinimizeIcon } from '@lcabrera/ui/components/Icons';
 import * as stylex from '@stylexjs/stylex';
 
 import type { NavigationHeaderActionsProps } from './NavigationHeaderActions.types';
 
-import { resolveExpandButtonLabel, resolvePinButtonLabel } from '../utils';
+import { resolveExpandButtonLabel } from '../utils';
 import { headerActionsStyles } from './NavigationHeaderActions.stylex';
 
 /**
- * The expand/collapse, pin/unpin, and close control buttons rendered inside the
- * navigation panel header. Displayed vertically when the panel is collapsed,
- * horizontally when expanded.
+ * The expand/collapse control button rendered inside the navigation panel
+ * header. Displayed vertically when the panel is collapsed, horizontally when
+ * expanded.
  */
 export const NavigationHeaderActions = ({
   controlButtonSize,
@@ -24,13 +18,9 @@ export const NavigationHeaderActions = ({
   controlTooltipPlacement,
   isCollapsed,
   isExpanded,
-  isPinned,
-  onClose,
   onToggleExpanded,
-  onTogglePinned,
 }: NavigationHeaderActionsProps) => {
   const expandButtonLabel = resolveExpandButtonLabel(isExpanded);
-  const pinButtonLabel = resolvePinButtonLabel(isPinned);
 
   return (
     <div
@@ -56,36 +46,6 @@ export const NavigationHeaderActions = ({
         tooltipPlacement={controlTooltipPlacement}
         variant='ghost'
       />
-      <Button
-        aria-label={pinButtonLabel}
-        icon={
-          isPinned ? (
-            <PinIcon size={controlIconSize} />
-          ) : (
-            <PinOffIcon size={controlIconSize} />
-          )
-        }
-        isIconOnly
-        onClick={onTogglePinned}
-        size={controlButtonSize}
-        title={pinButtonLabel}
-        tooltipContent={pinButtonLabel}
-        tooltipPlacement={controlTooltipPlacement}
-        variant='ghost'
-      />
-      {isPinned ? undefined : (
-        <Button
-          aria-label='Close navigation'
-          icon={<MenuCloseIcon size={controlIconSize} />}
-          isIconOnly
-          onClick={onClose}
-          size={controlButtonSize}
-          title='Close navigation'
-          tooltipContent='Close navigation'
-          tooltipPlacement={controlTooltipPlacement}
-          variant='ghost'
-        />
-      )}
     </div>
   );
 };

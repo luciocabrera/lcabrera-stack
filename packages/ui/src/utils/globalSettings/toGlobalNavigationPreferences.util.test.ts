@@ -13,26 +13,29 @@ describe('toGlobalNavigationPreferences', () => {
     expect(
       toGlobalNavigationPreferences({
         collapsed: 'collapsed',
-        pinned: 'pinned',
         size: 'compact',
       }),
-    ).toEqual({ collapsed: 'collapsed', pinned: 'pinned', size: 'compact' });
+    ).toEqual({ collapsed: 'collapsed', size: 'compact' });
   });
 
   it('drops invalid fields independently', () => {
     expect(
       toGlobalNavigationPreferences({
-        collapsed: 'open',
-        pinned: 'pinned',
+        collapsed: 'collapsed',
         size: 7,
       }),
-    ).toEqual({ collapsed: undefined, pinned: 'pinned', size: undefined });
+    ).toEqual({ collapsed: 'collapsed', size: undefined });
+  });
+
+  it('ignores a retired pinned slice left in an older cookie', () => {
+    expect(
+      toGlobalNavigationPreferences({ pinned: 'unpinned', size: 'compact' }),
+    ).toEqual({ collapsed: undefined, size: 'compact' });
   });
 
   it('returns all-undefined preferences for an empty object', () => {
     expect(toGlobalNavigationPreferences({})).toEqual({
       collapsed: undefined,
-      pinned: undefined,
       size: undefined,
     });
   });

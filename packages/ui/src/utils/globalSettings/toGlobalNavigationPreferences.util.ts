@@ -1,7 +1,6 @@
 import { isObject } from '@lcabrera/utils/guards/is-object.util';
 
 import { isNavigationCollapsedPreference } from './isNavigationCollapsedPreference.util';
-import { isNavigationPinnedPreference } from './isNavigationPinnedPreference.util';
 import { isNavigationSizePreference } from './isNavigationSizePreference.util';
 
 /**
@@ -20,10 +19,7 @@ export const toGlobalNavigationPreferences = (value: unknown) => {
   const collapsed = isNavigationCollapsedPreference(value.collapsed)
     ? value.collapsed
     : undefined;
-  const pinned = isNavigationPinnedPreference(value.pinned)
-    ? value.pinned
-    : undefined;
   const size = isNavigationSizePreference(value.size) ? value.size : undefined;
 
-  return { collapsed, pinned, size };
+  return { collapsed, size };
 };

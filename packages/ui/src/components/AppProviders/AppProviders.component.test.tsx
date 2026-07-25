@@ -99,7 +99,6 @@ describe('AppProviders', () => {
     const globalSettings: GlobalSettingsState = {
       navigation: {
         collapsed: 'expanded',
-        pinned: 'pinned',
         size: 'medium',
       },
       pinning: {},

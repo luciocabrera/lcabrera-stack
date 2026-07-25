@@ -6,8 +6,6 @@ import {
 } from '@lcabrera/ui/contexts/GlobalSettingsContext/selectors';
 import * as stylex from '@stylexjs/stylex';
 
-import type { NavigationHeaderProps } from './NavigationHeader.types';
-
 import { NAV_DENSITY } from '../AppNavigation.constants';
 import { styles } from '../AppNavigation.stylex';
 import { NavigationHeaderActions } from '../NavigationHeaderActions';
@@ -15,15 +13,10 @@ import { getBrandIconSizeStyle, getHeaderDensityStyle } from '../utils';
 
 /**
  * Header of the navigation sidebar: brand icon + title plus the
- * expand/collapse, pin, and close actions. The actions sit inline with the
- * brand when expanded and drop below it when collapsed. Owns the
- * collapse/pin preference writes; closing is delegated to the parent, which
- * owns the off-canvas open state.
+ * expand/collapse action. The action sits inline with the brand when expanded
+ * and drops below it when collapsed. Owns the collapse preference write.
  */
-export const NavigationHeader = ({
-  isPinned,
-  onClose,
-}: NavigationHeaderProps) => {
+export const NavigationHeader = () => {
   const navigationCollapsedPreference =
     useGetGlobalNavigationCollapsedPreference();
   const navigationSizePreference = useGetGlobalNavigationSizePreference();
@@ -45,12 +38,6 @@ export const NavigationHeader = ({
     });
   };
 
-  const handleTogglePinned = () => {
-    setGlobalNavigationPreferences({
-      pinned: isPinned ? 'unpinned' : 'pinned',
-    });
-  };
-
   const headerActions = (
     <NavigationHeaderActions
       controlButtonSize={density.controlButtonSize}
@@ -58,10 +45,7 @@ export const NavigationHeader = ({
       controlTooltipPlacement={controlTooltipPlacement}
       isCollapsed={isCollapsed}
       isExpanded={isExpanded}
-      isPinned={isPinned}
-      onClose={onClose}
       onToggleExpanded={handleToggleExpanded}
-      onTogglePinned={handleTogglePinned}
     />
   );
 

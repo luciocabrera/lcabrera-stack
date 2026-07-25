@@ -17,7 +17,6 @@ export const getSettingsDraftChanges = ({
 }: GetSettingsDraftChangesArgs): SettingsDraftChanges => {
   const hasNavigationChanges =
     draft.navigationCollapsed !== baseline.navigationCollapsed ||
-    draft.navigationPinned !== baseline.navigationPinned ||
     draft.navigationSize !== baseline.navigationSize;
 
   const hasPinningChanges =

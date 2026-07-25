@@ -2,7 +2,6 @@ import type { NavbarItemConfig } from '@lcabrera/ui/components/Navbar/Navbar.typ
 import type { ReactNode } from 'react';
 
 export type AppNavigationProps = {
-  readonly defaultIsPinned?: boolean;
   readonly getNavigationItems: (
     iconSize: number,
   ) => readonly NavbarItemConfig[];

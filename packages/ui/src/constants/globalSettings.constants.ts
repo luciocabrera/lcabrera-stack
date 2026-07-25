@@ -2,7 +2,6 @@ import type { RadioOption } from '@lcabrera/ui/components/RadioOptionGroup';
 import type { AppNotification } from '@lcabrera/ui/contexts/NotificationContext/NotificationContext.types';
 import type {
   GlobalNavigationCollapsedPreference,
-  GlobalNavigationPinnedPreference,
   GlobalNavigationSizePreference,
 } from '@lcabrera/ui/types/globalSettings.types';
 
@@ -41,20 +40,6 @@ export const NAVIGATION_COLLAPSED_PREFERENCE_OPTIONS: readonly RadioOption<Globa
       description: 'Navigation bar starts collapsed on page load',
       label: 'Start Collapsed',
       value: 'collapsed',
-    },
-  ];
-
-export const NAVIGATION_PINNED_PREFERENCE_OPTIONS: readonly RadioOption<GlobalNavigationPinnedPreference>[] =
-  [
-    {
-      description: 'Navigation bar stays fixed to the left side',
-      label: 'Pin to Left',
-      value: 'pinned',
-    },
-    {
-      description: 'Navigation bar floats and can be hidden on scroll',
-      label: 'Unpin (Float)',
-      value: 'unpinned',
     },
   ];
 

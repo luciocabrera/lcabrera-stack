@@ -1,7 +1,6 @@
 import type { useGetGlobalNavigationPreferences } from '@lcabrera/ui/contexts/GlobalSettingsContext/selectors';
 import type {
   GlobalNavigationCollapsedPreference,
-  GlobalNavigationPinnedPreference,
   GlobalNavigationSizePreference,
 } from '@lcabrera/ui/types/globalSettings.types';
 import type {
@@ -20,7 +19,6 @@ export type BuildNavigationUpdateArgs = {
 
 export type SettingsDraft = {
   readonly navigationCollapsed: GlobalNavigationCollapsedPreference;
-  readonly navigationPinned: GlobalNavigationPinnedPreference;
   readonly navigationSize: GlobalNavigationSizePreference;
   readonly orderConflictResolution: OrderConflictResolutionPreferenceOption;
   readonly pinConflictResolution: PinConflictResolutionPreferenceOption;
