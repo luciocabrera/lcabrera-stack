@@ -22,7 +22,7 @@ block in a workspace config is never loaded. Per-workspace differences are
 
 There used to be a `base-lint` → `api-lint` / `frontend-lint` →
 `react-router-lint` chain wired into all eleven workspace configs. None of it
-ever ran. [ADR-042](../../docs/cqms/decisions/ADR-042-oxlint-config-at-the-root.md)
+ever ran. [ADR-042](../../docs/decisions/ADR-042-oxlint-config-at-the-root.md)
 is the account; `vp run lint:plugins:verify` is what keeps it from coming back.
 
 ```

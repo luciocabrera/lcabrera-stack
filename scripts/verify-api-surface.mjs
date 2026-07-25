@@ -8,7 +8,7 @@
  * gate (`publish:verify` checks subpath parity, never the type surface). This is
  * that missing net: a tracked snapshot of each package's exported surface, taken
  * against what a consumer installs (`dist` `.d.mts`; `src` for source-shipped
- * `ui`), plus a changeset cross-check. See docs/cqms/decisions/ADR-046 and #359.
+ * `ui`), plus a changeset cross-check. See docs/decisions/ADR-046 and #359.
  *
  * Usage (from the repo root, AFTER `vp run packages:build`):
  *   vp run api-surface:verify            # check; lists every drift

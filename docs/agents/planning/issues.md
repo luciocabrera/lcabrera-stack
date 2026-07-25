@@ -67,10 +67,10 @@ a hard-coded field (`new-order.action.ts`, `edit-order.action.ts`). The
 decision to translate at the persistence layer and map to a plain serializable DU at
 the edge needs to be an enforced ADR before code lands.
 
-**2. Objective.** ADR-047 promoted into `docs/cqms/decisions/` and added to the
+**2. Objective.** the `server-error-translation` draft promoted into `docs/decisions/` and added to the
 CLAUDE.md ADR map; `architecture-improvement-plan.md` §(c) marked promoted.
 
-**3. Context.** Draft at `docs/agents/planning/adrs/ADR-047-*.md`. Topology ADR-038,
+**3. Context.** Draft at `docs/agents/planning/adr-drafts/server-error-translation-result-contract.md`. Topology ADR-038,
 duplication policy ADR-039, api-surface gate ADR-046.
 
 **4. Reproduction.** Not a bug.
@@ -79,7 +79,7 @@ duplication policy ADR-039, api-surface gate ADR-046.
 
 **6. Acceptance Criteria.**
 
-- [ ] ADR-047 in `docs/cqms/decisions/` with Context/Problem/Options/Decision/Consequences
+- [ ] the `server-error-translation` draft in `docs/decisions/` with Context/Problem/Options/Decision/Consequences
 - [ ] Added to CLAUDE.md ADR map
 - [ ] `docs:verify` passes
 - [ ] Next-free ADR number confirmed (≥047)
@@ -87,7 +87,7 @@ duplication policy ADR-039, api-surface gate ADR-046.
 **7. Implementation Notes.** Generalize `admin_system/.../hasPostgresErrorCode.util.ts`
 rather than inventing a parallel narrowing.
 
-**8. Related Work.** ADR-047 draft; E-1.
+**8. Related Work.** the `server-error-translation` draft draft; E-1.
 
 **Planning metadata**
 
@@ -111,7 +111,7 @@ SQLSTATE detection (`hasPostgresErrorCode.util.ts`).
 `PersistenceError`), one `*.error.ts` per typed error, a barrel, colocated tests.
 
 **3. Context.** New public surface — dual `exports`/`publishConfig.exports`,
-`reports/api-surface/server.*` regen, changeset, `INVENTORY.md`. ADR-047.
+`reports/api-surface/server.*` regen, changeset, `INVENTORY.md`. the `server-error-translation` draft.
 
 **4. Reproduction.** Not a bug.
 
@@ -128,7 +128,7 @@ mapping (P-06).
 
 **7. Implementation Notes.** One-util-per-file; each error its own file + test.
 
-**8. Related Work.** ADR-047; P-01, P-03, P-06.
+**8. Related Work.** the `server-error-translation` draft; P-01, P-03, P-06.
 
 **Planning metadata**
 
@@ -151,7 +151,7 @@ propagate untranslated.
 **2. Objective.** Wrap `pool.query` with `mapDbError` so every consumer inherits
 typed errors. **No signature change.**
 
-**3. Context.** ADR-047; depends on P-02's `errors/` subpath.
+**3. Context.** the `server-error-translation` draft; depends on P-02's `errors/` subpath.
 
 **4. Reproduction.** Not a bug (enables the fix in P-06).
 
@@ -167,7 +167,7 @@ mapping (P-06).
 **7. Implementation Notes.** Keep the wrap in a small helper; don't duplicate the
 try/catch across four files.
 
-**8. Related Work.** ADR-047; P-02, P-06.
+**8. Related Work.** the `server-error-translation` draft; P-02, P-06.
 
 **Planning metadata**
 
@@ -186,9 +186,9 @@ dependencies:
 **1. Problem Statement.** No transaction seam exists; the atomic-create fix needs a
 sanctioned pattern and a documented locking/retry strategy first.
 
-**2. Objective.** ADR-048 promoted + added to the ADR map.
+**2. Objective.** the `with-transaction` draft promoted + added to the ADR map.
 
-**3. Context.** Draft at `docs/agents/planning/adrs/ADR-048-*.md`. Note the
+**3. Context.** Draft at `docs/agents/planning/adr-drafts/with-transaction-and-tx-param.md`. Note the
 READ-COMMITTED subtlety: transaction alone does not close the race.
 
 **4. Reproduction.** Not a bug.
@@ -197,13 +197,13 @@ READ-COMMITTED subtlety: transaction alone does not close the race.
 
 **6. Acceptance Criteria.**
 
-- [ ] ADR-048 in `docs/cqms/decisions/` + ADR map
+- [ ] the `with-transaction` draft in `docs/decisions/` + ADR map
 - [ ] Documents the chosen atomicity strategy (`FOR UPDATE`/advisory lock /
       retry-on-`23505` / sequence) as the decision P-07 must follow
 
 **7. Implementation Notes.** Recommend a real sequence as the long-term follow-up.
 
-**8. Related Work.** ADR-048; E-1, P-05, P-07.
+**8. Related Work.** the `with-transaction` draft; E-1, P-05, P-07.
 
 **Planning metadata**
 
@@ -226,7 +226,7 @@ dependencies:
 `PoolClient`) + optional `tx?: PoolClient` threaded through `insert-row`,
 `update-rows`, `get-max-value`, `select-rows` (fallback to `getPool()`).
 
-**3. Context.** ADR-048. Additive signature change = api-surface event. Removes the
+**3. Context.** the `with-transaction` draft. Additive signature change = api-surface event. Removes the
 hand-rolled `runMigrations.ts` BEGIN/ROLLBACK duplication.
 
 **4. Reproduction.** Not a bug (unblocks P-07).
@@ -243,7 +243,7 @@ changeset, api-surface snapshot, tests. _Out:_ the enterprise-orders use-case (P
 **7. Implementation Notes.** `tx?` on the descriptor types
 (`query-builder.types.ts`), not a positional arg.
 
-**8. Related Work.** ADR-048; P-03 (shared executor edits), P-07.
+**8. Related Work.** the `with-transaction` draft; P-03 (shared executor edits), P-07.
 
 **Planning metadata**
 
@@ -267,7 +267,7 @@ hard-coded `customer_name` field (`new-order.action.ts`,
 `{ ok: false; fieldErrors }` routed to the correct field (e.g. `order_number` for a
 unique collision). Extract the shared mapping (the two catch blocks are duplicates).
 
-**3. Context.** ADR-047. `config/toOrderFieldErrors.util.ts` today maps only
+**3. Context.** the `server-error-translation` draft. `config/toOrderFieldErrors.util.ts` today maps only
 `ZodError`. DU must be plain data (single-fetch drops functions).
 
 **4. Reproduction.**
@@ -289,7 +289,7 @@ residual collision a clean typed conflict.
 
 **7. Implementation Notes.** Keep error classes server-side; convert to DU at the edge.
 
-**8. Related Work.** ADR-047; P-02, P-03, P-07.
+**8. Related Work.** the `server-error-translation` draft; P-02, P-03, P-07.
 
 **Planning metadata**
 
@@ -312,8 +312,8 @@ collide on the PK → unhandled `23505`. **Live High-severity correctness bug.**
 **2. Objective.** `.server/createOrder.usecase.ts` runs `getMaxOrderId → insertOrder`
 on one `tx`; service functions accept `tx`; `new-order.action.ts` delegates.
 
-**3. Context.** ADR-048. **Transaction alone is insufficient under READ COMMITTED** —
-implement the locking/retry strategy chosen in ADR-048 (`FOR UPDATE`/advisory lock,
+**3. Context.** the `with-transaction` draft. **Transaction alone is insufficient under READ COMMITTED** —
+implement the locking/retry strategy chosen in the `with-transaction` draft (`FOR UPDATE`/advisory lock,
 or retry on the typed `23505` from P-06, or migrate to a sequence).
 
 **4. Reproduction.**
@@ -329,12 +329,12 @@ or retry on the typed `23505` from P-06, or migrate to a sequence).
 
 - [ ] Concurrent creates cannot produce a duplicate `order_id` (test / documented lock)
 - [ ] A residual conflict surfaces as a typed conflict, not a crash
-- [ ] Chosen atomicity strategy documented per ADR-048
+- [ ] Chosen atomicity strategy documented per the `with-transaction` draft
 - [ ] Use-case introduced only for this transactional path
 
 **7. Implementation Notes.** Highest-risk item — pick locking vs retry deliberately.
 
-**8. Related Work.** ADR-048; P-05, P-06.
+**8. Related Work.** the `with-transaction` draft; P-05, P-06.
 
 **Planning metadata**
 
@@ -425,9 +425,9 @@ dependencies: { blocking: [], blockedBy: [P-08], parent: E-3, children: [] }
 **1. Problem Statement.** `OFFSET k` load-more is O(offset); a keyset cursor over the
 ADR-008 total order is O(limit) but needs a sanctioned decision.
 
-**2. Objective.** ADR-049 promoted + ADR map entry.
+**2. Objective.** the `keyset-pagination` draft promoted + ADR map entry.
 
-**3. Context.** Draft at `docs/agents/planning/adrs/ADR-049-*.md`; cursor = ADR-008
+**3. Context.** Draft at `docs/agents/planning/adr-drafts/keyset-pagination-infinite-scroll.md`; cursor = ADR-008
 `(sort…, order_id)`.
 
 **4. Reproduction.** Not a bug.
@@ -436,12 +436,12 @@ ADR-008 total order is O(limit) but needs a sanctioned decision.
 
 **6. Acceptance Criteria.**
 
-- [ ] ADR-049 in `docs/cqms/decisions/` + ADR map
+- [ ] the `keyset-pagination` draft in `docs/decisions/` + ADR map
 - [ ] Keeps offset for jump-to-page; keyset for infinite scroll
 
 **7. Implementation Notes.** Builder must reject keyset without a total order.
 
-**8. Related Work.** ADR-049 draft; ADR-008; P-11.
+**8. Related Work.** the `keyset-pagination` draft draft; ADR-008; P-11.
 
 **Planning metadata**
 
@@ -462,7 +462,7 @@ dependencies: { blocking: [P-11], blockedBy: [], parent: E-3, children: [] }
 `build-select-query.util.ts`, `build-where-clause.util.ts`, `query-builder.types.ts`;
 wire into the paginated route.
 
-**3. Context.** ADR-049. New capability = api-surface event (dual exports, snapshot,
+**3. Context.** the `keyset-pagination` draft. New capability = api-surface event (dual exports, snapshot,
 changeset).
 
 **4. Reproduction.** Not a bug (latency).
@@ -478,7 +478,7 @@ jump-to-page grids (stay on offset).
 
 **7. Implementation Notes.** Larger change; land behind ADR-008's guarantee.
 
-**8. Related Work.** ADR-049; P-10.
+**8. Related Work.** the `keyset-pagination` draft; P-10.
 
 **Planning metadata**
 
@@ -537,7 +537,7 @@ stalls silently under load.
 `DB_IDLE_TIMEOUT_MS`, `DB_STATEMENT_TIMEOUT_MS` (Zod, optional + defaults) to
 `env.schema.ts`; wire into `new Pool`.
 
-**3. Context.** ADR-050. Single shared `getPool` → every Node consumer benefits.
+**3. Context.** the `pool-tuning` draft. Single shared `getPool` → every Node consumer benefits.
 
 **4. Reproduction.** Not a bug (resilience).
 
@@ -552,7 +552,7 @@ changeset. _Out:_ per-app overrides.
 
 **7. Implementation Notes.** Additive → not breaking.
 
-**8. Related Work.** ADR-050; E-1.
+**8. Related Work.** the `pool-tuning` draft; E-1.
 
 **Planning metadata**
 
@@ -663,10 +663,10 @@ the convention to match), and decide whether `coordination:verify` should check 
 
 ### G-02 — `docs(cqms): add ADR _TEMPLATE.md + scaffold`
 
-**Problem.** `docs/cqms/decisions/` holds no `_TEMPLATE.md` (confirmed absent); ADRs are
+**Problem.** `docs/decisions/` holds no `_TEMPLATE.md` (confirmed absent); ADRs are
 authored freehand, and the dual ADR-001..012 numbering caveat (CLAUDE.md) is easy to
 trip.
-**Objective.** Create an ADR `_TEMPLATE.md` under `docs/cqms/decisions/`
+**Objective.** Create an ADR `_TEMPLATE.md` under `docs/decisions/`
 (Context/Problem/Options/Decision/Consequences/References) noting the dual-sequence
 caveat and "cite low ADR numbers by path".
 **Acceptance.** Template exists; the four promoted ADRs (047–050) use it.

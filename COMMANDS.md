@@ -79,7 +79,7 @@ Steps 3, 4 and 6 are the ones that get skipped, and none is redundant — see
 chains the whole thing the way CI does.
 
 The **`pre-push` git hook** (`.vite-hooks/pre-push`) runs `vp run check:push` — the
-**DB-free CI Quality Gate** (steps 3–6 plus `commands`/`coordination`/`scripts`/`docs:verify`,
+**DB-free CI Quality Gate** (steps 3–6 plus `commands`/`coordination`/`scripts`/`docs`/`adr:verify`,
 mirroring the "Quality Gate (Format · Lint · Types)" job in `check-safe.yml`) — and then
 `vp run test:changed`. This closes the gap the pre-commit hook leaves: `vp staged` covers
 only fmt + Oxlint + tsgolint + Biome on staged files, so the ESLint pass and a full
@@ -271,7 +271,7 @@ Run `packages:build` **before** `publish:verify`, `api-surface:verify` and
 without a `dist/`, and the latter two snapshot the built `dist` a consumer
 installs (`ui` ships source, so its surface is always checked). The API-surface
 snapshot and its `ui`-vs-built split are
-[ADR-046](docs/cqms/decisions/ADR-046-public-api-surface-snapshot.md).
+[ADR-046](docs/decisions/ADR-046-public-api-surface-snapshot.md).
 
 ### Releasing a package
 
@@ -313,10 +313,11 @@ package, ever.
 | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `vp run commands:verify`     | check this file still matches reality                                                                                                                           |
 | `vp run scripts:verify`      | check `.mjs`/`.cjs` size ceiling (`--write` rebaselines)                                                                                                        |
-| `vp run lint:plugins:verify` | prove every Oxlint plugin family is loaded, and that no workspace config shadows the root ([ADR-042](docs/cqms/decisions/ADR-042-oxlint-config-at-the-root.md)) |
+| `vp run lint:plugins:verify` | prove every Oxlint plugin family is loaded, and that no workspace config shadows the root ([ADR-042](docs/decisions/ADR-042-oxlint-config-at-the-root.md))      |
 | `vp run suppressions:verify` | check the four public packages carry no unapproved suppression (see [the protocol](docs/agents/public-package-suppressions.md))                                 |
 | `vp run suppressions:list`   | print every suppression reaching a public package, approved or not                                                                                              |
 | `vp run docs:verify`         | check every documented repository path resolves (`--write` prunes resolved baseline entries; `--accept <doc> <ref> --reason "…"` grandfathers one)              |
+| `vp run adr:verify`          | check ADR home, filename, heading and number uniqueness, and that each home's index is current; prints the next free number (`--write` regenerates the indexes) |
 | `vp run skills:validate`     | validate skill definitions                                                                                                                                      |
 | `vp run skills:report`       | skills compliance report                                                                                                                                        |
 | `vp run prepare`             | `vp config` — runs automatically on install                                                                                                                     |

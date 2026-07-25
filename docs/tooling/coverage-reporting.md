@@ -81,7 +81,7 @@ Adding a fifth public package extends the check with no edit here:
 | ----------------------------- | --------------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | `packages/ui`                 | `@lcabrera/ui`              | true  | Runs `test:coverage` here (plain `test` in `test:ci`, no coverage)                                                                   |
 | `packages/server`             | `@lcabrera/server`          | true  | Same                                                                                                                                 |
-| `packages/api`                | `@lcabrera/api`             | true  | Same — the browser half of the former `data-access` ([ADR-038](../cqms/decisions/ADR-038-public-package-topology-by-runtime.md))     |
+| `packages/api`                | `@lcabrera/api`             | true  | Same — the browser half of the former `data-access` ([ADR-038](../decisions/ADR-038-public-package-topology-by-runtime.md))          |
 | `apps/react-router`           | `vite-react-compiler`       | false | Its `test:ci` already emits the summary; re-running the repo's largest suite would be wasteful                                       |
 | `packages/node-runtime`       | `@repo/node-runtime`        | true  | Phase 2 — DB-free `test:coverage`                                                                                                    |
 | `packages/scan-ingestion`     | `@repo/scan-ingestion`      | true  | Phase 2 — DB-free `test:coverage` **subset** (its real-Postgres `queries/*` stay out, so the number is the DB-free portion only)     |
@@ -163,7 +163,7 @@ only once its coverage runs clean and means something.** Checklist:
   Tracked as GitHub epic
   [#50](https://github.com/luciocabrera/vite-react-compiler/issues/50)
   (children #51–#55, milestone _Coverage rollout — Phase 3_) — the durable-backlog
-  layer from [ADR-036](../cqms/decisions/ADR-036-github-planning-layer.md).
+  layer from [ADR-036](../decisions/ADR-036-github-planning-layer.md).
 
 Each phase is its own PR, kept reviewable and green before the next.
 

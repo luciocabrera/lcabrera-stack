@@ -80,7 +80,7 @@ wearing a generic costume.
 - **repo-wide** → the `acknowledged` list. The glob also matches files outside
   them (`**/*.test.ts`, `**/*.mjs`), so it is a whole-category decision a public
   package merely falls inside, governed by
-  [ADR-035 §7](../cqms/decisions/ADR-035-biome-third-linter.md). Listed, not
+  [ADR-035 §7](../decisions/ADR-035-biome-third-linter.md). Listed, not
   justified per-package.
 
 **Both lists are enforced.** The first version of this gate reported the

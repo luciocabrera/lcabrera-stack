@@ -17,7 +17,7 @@ outside this repo, where none of this monorepo's wiring exists. `packages/ui`,
 `packages/api`, `packages/server` and `packages/utils` are held strictest for
 exactly that reason (§4). This is why the column-filter shapes are **duplicated**
 in `@lcabrera/ui` and `@lcabrera/server` rather than shared through an elegant edge that
-only resolves in-repo ([ADR-039](docs/cqms/decisions/ADR-039-duplicate-over-undeclared-edges.md)).
+only resolves in-repo ([ADR-039](docs/decisions/ADR-039-duplicate-over-undeclared-edges.md)).
 
 **Two scopes, and the split carries meaning.** The four publishable packages are
 **`@lcabrera/*`**; the six internal ones (`vite-configs`, `ts-configs`, `plugins`,
@@ -26,7 +26,7 @@ import line tells you which side of the product boundary you are on: `@lcabrera/
 means it ships and has consumers outside this repo, `@repo/` means internal, change
 it freely. A new package picks its scope by one question — does it ship? — and a
 `@lcabrera/*` one inherits the never-baseline rule (§4) and the invariants below.
-Do not "tidy" the two into one ([ADR-040](docs/cqms/decisions/ADR-040-npm-scope-for-the-public-packages.md)).
+Do not "tidy" the two into one ([ADR-040](docs/decisions/ADR-040-npm-scope-for-the-public-packages.md)).
 
 **Publishing invariants for those four.** All four are **published on npm** and
 have been since 2026-07-22, at **0.1.1**. `private` is off and each has a
@@ -66,7 +66,7 @@ package and reading the tarball rather than by inspection:
   confirms the published types actually resolve for a consumer. Both run after
   `packages:build` in `check-safe.yml`. The snapshot convention, the `ui`-vs-built
   split and the boundaries are
-  [ADR-046](docs/cqms/decisions/ADR-046-public-api-surface-snapshot.md).
+  [ADR-046](docs/decisions/ADR-046-public-api-surface-snapshot.md).
 - **Each carries its own `LICENSE`** (MIT). npm only includes a `LICENSE` sitting
   in the package directory, so the root one does not reach a consumer — this is
   deliberate duplication, same reasoning as ADR-039.
@@ -144,7 +144,7 @@ driver into every consumer's dependency graph. `packages/ui`'s `check:public-api
 now enforces the invariant — **a client-safe package may only depend on workspace
 packages that are themselves client-safe** — so that regression fails the gate
 instead of passing silently. The full topology and what each tsconfig denies is
-[ADR-038](docs/cqms/decisions/ADR-038-public-package-topology-by-runtime.md),
+[ADR-038](docs/decisions/ADR-038-public-package-topology-by-runtime.md),
 which supersedes ADR-008.
 
 `utils` and `node-runtime` split on purity, and the split is deliberate:
@@ -298,7 +298,7 @@ through `vp`. Two such cases exist today: `pnpm clean --lockfile` (there is no
 fine. This is deliberately narrow: it does **not** license `pnpm install` /
 `pnpm add` / `pnpm dlx` where `vp install` / `vp add` / `vp dlx` exist. The
 release commands are a related case decided in
-[ADR-043](docs/cqms/decisions/ADR-043-release-tooling-changesets-over-pnpm-native.md).
+[ADR-043](docs/decisions/ADR-043-release-tooling-changesets-over-pnpm-native.md).
 
 ### Monorepo-Wide Commands (run from repo root)
 
@@ -315,7 +315,7 @@ There is deliberately **no `start:all`/`dev:all`**: `car-sales-api` and `car-sal
 
 **All Oxlint config lives in the root `vite.config.ts`; a per-workspace `lint` block does nothing.** This is Vite+'s documented monorepo model, not a defect — the root config holds the defaults and `lint.overrides` carries per-package differences, with globs resolved from the root (`packages/ui/**`). A package's own `vite.config.ts` is for its Vite/Vitest/framework config. See `node_modules/vite-plus/docs/guide/monorepo.md`, including its "Composing Configuration Files" section, which is the supported way to keep the rule sets in separate files and merge them into overrides.
 
-The config object is `@repo/vite-configs/lint`, imported by the root config — the factory pattern kept, moved to where Vite+ reads it ([ADR-042](docs/cqms/decisions/ADR-042-oxlint-config-at-the-root.md), #318). The repo ran the other way round for a long time, with a `lint` block in every workspace built from a `*-lint` factory and **none of it loaded**; that layer is gone. `vp run lint:plugins:verify` now fails on a `lint` key in any workspace config, so it cannot come back.
+The config object is `@repo/vite-configs/lint`, imported by the root config — the factory pattern kept, moved to where Vite+ reads it ([ADR-042](docs/decisions/ADR-042-oxlint-config-at-the-root.md), #318). The repo ran the other way round for a long time, with a `lint` block in every workspace built from a `*-lint` factory and **none of it loaded**; that layer is gone. `vp run lint:plugins:verify` now fails on a `lint` key in any workspace config, so it cannot come back.
 
 **Oxlint runs no ESLint-plugin rules.** The `jsPlugins` bridge is gone: the eslint pass already loads `react-x`, `react-dom`, `@stylexjs`, `local-rules`, `perfectionist` and `security` and enforces the same rules, so bridging them into Oxlint resolved the same plugin twice to report the same finding twice. This does not soften the overlapping-linter policy — overlap earns its keep where the engines **independently** agree, not where one shells out to the other's plugin.
 
@@ -340,7 +340,7 @@ Each one's `eslint-suppressions.json` path is **gitignored** (`packages/ui/.giti
 
 **A directive must name the engine that reads it — `eslint-disable` for ESLint, `oxlint-disable` for Oxlint.** Oxlint honours `eslint-disable` comments too, and that overlap used to hide real rot: `reportUnusedDisableDirectives` was off precisely because eslint would call an Oxlint-only directive "unused" and `--fix` would delete it. With the option off, though, a directive suppressing _nothing_ looked exactly like compliant code — zero findings either way — and 13 accumulated repo-wide, four of them claiming to hold back `no-console` in a logger no rule was flagging. The five real Oxlint-only cases were spelled `typescript-eslint/unbound-method` (no `@`, which Oxlint accepts and eslint does not recognise); they now say `oxlint-disable-next-line`, so **`reportUnusedDisableDirectives` is `'error'`** in both shared configs. "Unused" now means the directive is dead (delete it) or misnamed (respell it) — never load-bearing. This does not soften Rule 11: a _new_ suppression of either kind still needs the finding fixed instead, and the four public packages take none at all.
 
-**Biome is the third linter** (`vp run lint:biome:check`, CI step in `check-safe.yml` after the eslint pass, and a pre-commit `staged` entry in the root `vite.config.ts`). It is configured **once at the root** in `biome.jsonc` and runs one repo-wide pass — like Oxlint, unlike the per-workspace eslint fan-out. Do not add per-workspace `biome.jsonc` files or `lint:biome` scripts; `overrides` already scope per project. Full rationale — including why it is lint-only and why it is not a CQMS scanner — is in [ADR-035](docs/cqms/decisions/ADR-035-biome-third-linter.md). The rule set goes **beyond `recommended`**: a curated set of opt-in rules is enabled on top of the preset, added in approval-gated phases and measured per rule before landing — see [ADR-035 §7](docs/cqms/decisions/ADR-035-biome-third-linter.md). Overlap with Oxlint/eslint is kept as a deliberate safety net where the engines **agree**; only genuinely conflicting or noisy rules are dropped. Four constraints hold it in place:
+**Biome is the third linter** (`vp run lint:biome:check`, CI step in `check-safe.yml` after the eslint pass, and a pre-commit `staged` entry in the root `vite.config.ts`). It is configured **once at the root** in `biome.jsonc` and runs one repo-wide pass — like Oxlint, unlike the per-workspace eslint fan-out. Do not add per-workspace `biome.jsonc` files or `lint:biome` scripts; `overrides` already scope per project. Full rationale — including why it is lint-only and why it is not a CQMS scanner — is in [ADR-035](docs/decisions/ADR-035-biome-third-linter.md). The rule set goes **beyond `recommended`**: a curated set of opt-in rules is enabled on top of the preset, added in approval-gated phases and measured per rule before landing — see [ADR-035 §7](docs/decisions/ADR-035-biome-third-linter.md). Overlap with Oxlint/eslint is kept as a deliberate safety net where the engines **agree**; only genuinely conflicting or noisy rules are dropped. Four constraints hold it in place:
 
 - **Formatter and assist are OFF** (`formatter.enabled: false`, `assist.enabled: false`). Oxfmt owns formatting and eslint-perfectionist owns import order. Turning either on restarts the formatter/linter fight that the `eslint-suppressions.json` ignore rule already had to settle once.
 - **Domains are scoped per project, not global.** The `react` domain is enabled in an `overrides` entry covering only the three React workspaces (`apps/react-router`, `apps/admin_system`, `packages/ui`) — enabling it globally would apply React rules to the Express/Fastify/node workspaces. `test` is scoped to test files; `project` runs repo-wide. Both add zero findings today and exist to guard future code.
@@ -348,7 +348,7 @@ Each one's `eslint-suppressions.json` path is **gitignored** (`packages/ui/.giti
 - **Do not adopt `domains: { react: "all" }`.** It adds ~180 findings that contradict this repo's own ADRs — e.g. `noJsxPropsBind`/`noLeakedRender` vs ADR-004 (React Compiler owns memoization). (Individual react rules worth having are pinned by name instead: `useComponentExportOnlyModules` is enabled explicitly at `error` — off for test files — and is clean on every source file, ADR-007 barrels included.)
 - **The config is `biome.jsonc`, not `biome.json`, and that is load-bearing.** Biome's config parser rejects `//` comments in a `.json` file — and it does not fail loudly: it **discards the entire config and silently falls back to defaults**, which lints `node_modules` and reports tens of thousands of findings (or, on a single file, a plausible-looking count with your `overrides` quietly not applied). Every rule scoped off here needs its reason next to it, so the file must stay `.jsonc`. If Biome ever starts reporting absurd counts or ignoring an override, suspect a config parse error first: `biome lint <file> 2>&1 | grep parse`.
 
-Seven rules are scoped off in `overrides`, each with its reason inline — all seven are cases where Biome is wrong, not where the code is (`noThenProperty`, `useExhaustiveDependencies`, `noAriaHiddenOnFocusable`, `noNoninteractiveTabindex`, `useSemanticElements`, `noStaticElementInteractions`, `useComponentExportOnlyModules`). **ADR-035 §5 is the table** listing each with its justification; read it before adding an eighth, and match that bar. Four of the seven are Biome mismodelling an ARIA pattern the code implements correctly (window splitter, APG tabs panel, non-grid table row, conditional tooltip role); `useComponentExportOnlyModules` is off only for test files, where Fast Refresh never runs. Those seven are §5's "Biome is wrong for _this code_" cases and stay at seven; the phased hardening ([ADR-035 §7](docs/cqms/decisions/ADR-035-biome-third-linter.md)) adds a **separate** class of scope-off — whole rules turned off for a file _category_ where they don't apply, not for a mistaken finding: test-file exemptions (`noShadow`, `noEmptyBlockStatements`, `useUniqueElementIds` — idiomatic mock/fixture patterns) and framework/tooling exemptions (`noConsole` for scripts/CLIs/logger, `noDefaultExport` for routes/configs/entry/eslint-rules). Those are catalogued in §7, not counted among the seven.
+Seven rules are scoped off in `overrides`, each with its reason inline — all seven are cases where Biome is wrong, not where the code is (`noThenProperty`, `useExhaustiveDependencies`, `noAriaHiddenOnFocusable`, `noNoninteractiveTabindex`, `useSemanticElements`, `noStaticElementInteractions`, `useComponentExportOnlyModules`). **ADR-035 §5 is the table** listing each with its justification; read it before adding an eighth, and match that bar. Four of the seven are Biome mismodelling an ARIA pattern the code implements correctly (window splitter, APG tabs panel, non-grid table row, conditional tooltip role); `useComponentExportOnlyModules` is off only for test files, where Fast Refresh never runs. Those seven are §5's "Biome is wrong for _this code_" cases and stay at seven; the phased hardening ([ADR-035 §7](docs/decisions/ADR-035-biome-third-linter.md)) adds a **separate** class of scope-off — whole rules turned off for a file _category_ where they don't apply, not for a mistaken finding: test-file exemptions (`noShadow`, `noEmptyBlockStatements`, `useUniqueElementIds` — idiomatic mock/fixture patterns) and framework/tooling exemptions (`noConsole` for scripts/CLIs/logger, `noDefaultExport` for routes/configs/entry/eslint-rules). Those are catalogued in §7, not counted among the seven.
 
 **Prefer a rule option over a scope-off.** An option keeps the rule live everywhere else; a scope-off blinds it for a whole file. `noLabelWithoutControl` is the worked example: a `<label>` wrapping the `Checkbox` _component_ is correct HTML — Biome just cannot see through the component boundary — so `inputComponents: ["Checkbox"]` teaches it the name instead of disabling it, and a bare `<label>` with no control still fails. Add future input-rendering components to that list.
 
@@ -395,7 +395,7 @@ CI runs `fallow audit --gate new-only` on every PR (`check-safe.yml`) — it fai
 
 `vp run coverage:merge` (`scripts/merge-coverage.mjs`) runs `test:coverage` in the **DB-free** workspaces only and merges their reports — the membership is `COVERAGE_MERGE_WORKSPACES` in `scripts/lib/coverage-workspaces.mjs`, not a list here, because a copy in prose is a copy nothing checks (this one had gone two workspaces stale). That module also holds the PR comment's `COVERAGE_REPORT_WORKSPACES`, so `test:scripts` can assert both — dropping a public package from either lane fails the suite rather than quietly shrinking a report. Coverage must never require Postgres: the first attempt at this lever was reverted (2026-07-14) because it ran scan-ingestion's `queries/*` suites in CI, where `getPool()` → `readEnvConfig()` throws on the missing `DB_*`. That is why `@repo/scan-ingestion` splits `test` (full, needs a DB) from `test:unit` / `test:coverage` (DB-free subset).
 
-**The whole coverage lane hangs off one declaration.** `@vitest/coverage-v8` is an _optional peer_ of vitest, and pnpm installs an optional peer only while some manifest declares it. The root manifest does, and that is what makes the provider resolvable in the workspaces that declare nothing. It reads as an unused dependency and is not — removing it takes every `--coverage` run down, and the failure surfaces in the Fallow Audit's coverage step, a long way from its cause. [ADR-047](docs/cqms/decisions/ADR-047-declare-optional-peer-dependencies.md) records the mechanism and the from-scratch-lockfile proof any such removal now requires.
+**The whole coverage lane hangs off one declaration.** `@vitest/coverage-v8` is an _optional peer_ of vitest, and pnpm installs an optional peer only while some manifest declares it. The root manifest does, and that is what makes the provider resolvable in the workspaces that declare nothing. It reads as an unused dependency and is not — removing it takes every `--coverage` run down, and the failure surfaces in the Fallow Audit's coverage step, a long way from its cause. [ADR-047](docs/decisions/ADR-047-declare-optional-peer-dependencies.md) records the mechanism and the from-scratch-lockfile proof any such removal now requires.
 
 ### Local Database Workflow (run from repo root)
 
@@ -405,7 +405,7 @@ local Postgres; seeding goes through `vp run --filter car-sales-api seed`, becau
 
 The API server (`apps/api-server/`) reads env from `docker/local/.env`. The frontend proxies `/api` to `http://localhost:3001`.
 
-**Critical:** Import Vite config from `vite-plus`, not `vite`, for tooling integration. Example: `import { defineConfig } from 'vite-plus'`. For tests, import test utilities from `vite-plus/test`, not `vitest` directly (e.g. `import { expect, test, vi } from 'vite-plus/test'`) — it re-exports the vite-plus-bundled Vitest, so the test runtime always matches the toolchain and there is no self-managed `vitest` to drift. This convention was re-evaluated and changed once vite-plus became the runner ([ADR-045](docs/cqms/decisions/ADR-045-vite-plus-test-imports.md)); the earlier `vitest`-direct rule predated it.
+**Critical:** Import Vite config from `vite-plus`, not `vite`, for tooling integration. Example: `import { defineConfig } from 'vite-plus'`. For tests, import test utilities from `vite-plus/test`, not `vitest` directly (e.g. `import { expect, test, vi } from 'vite-plus/test'`) — it re-exports the vite-plus-bundled Vitest, so the test runtime always matches the toolchain and there is no self-managed `vitest` to drift. This convention was re-evaluated and changed once vite-plus became the runner ([ADR-045](docs/decisions/ADR-045-vite-plus-test-imports.md)); the earlier `vitest`-direct rule predated it.
 
 ### Agent Checklist
 
@@ -511,7 +511,7 @@ per-agent scratch (`~/.claude/plans/`) or auto-memory, which no one else can see
 This register is **in-flight** work only (who is touching what, right now). The
 **durable backlog** — what should happen next, epics, milestones — lives in
 **GitHub Issues / sub-issues / Milestones / Projects**; the boundary is
-[ADR-036](docs/cqms/decisions/ADR-036-github-planning-layer.md) and the runbook is
+[ADR-036](docs/decisions/ADR-036-github-planning-layer.md) and the runbook is
 [`docs/tooling/github-planning.md`](docs/tooling/github-planning.md). A task that
 picks up a backlog item links it with the **required** `issue:` field —
 `coordination:verify` fails a live task without a real issue reference, and
@@ -521,7 +521,7 @@ branch and gated by `coordination:verify`; GitHub Issues are not.
 
 **Before non-trivial work** (anything beyond a one-file fix you commit immediately):
 
-1. **Check for collisions** — run `vp run coordination:verify`; it warns when your intended `area` overlaps an active task. Resolve overlaps (coordinate, or narrow scope) before starting. (`vp run coordination:board` writes a local, gitignored `BOARD.md` table view — never committed, [ADR-037](docs/cqms/decisions/ADR-037-coordination-board-is-a-local-view.md).)
+1. **Check for collisions** — run `vp run coordination:verify`; it warns when your intended `area` overlaps an active task. Resolve overlaps (coordinate, or narrow scope) before starting. (`vp run coordination:board` writes a local, gitignored `BOARD.md` table view — never committed, [ADR-037](docs/decisions/ADR-037-coordination-board-is-a-local-view.md).)
 2. **Claim it** — the one-step path is `vp run coordination:claim -- <id> "<title>" (--issue <n> | --new-issue) [--area <glob> ...]`, which links/creates the backlog issue, self-assigns it, scaffolds the task, branches, and opens a draft PR. (By hand: copy [`tasks/_TEMPLATE.md`](docs/coordination/tasks/_TEMPLATE.md) to `tasks/<id>.md` and fill in the frontmatter — especially the `area` globs (the soft lock) and the **required** `issue:`.) That file **is** the claim — there is no board to regenerate or commit, so concurrent claims never collide (each is a distinct file).
 3. **Pick a branch strategy** — an independent branch (default), or a **shared
    branch** when several agents need each other's WIP (declare it with a
@@ -553,7 +553,7 @@ Before making **any** code change, read every `ARCHITECTURE.md` that covers the 
 - The component/hook/util directory being modified (e.g. `packages/ui/src/components/Table/ARCHITECTURE.md`)
 - Parent directories if the change crosses boundaries (e.g. `packages/ui/src/hooks/ARCHITECTURE.md`)
 - `packages/ui/src/PATTERNS.md` — always read this before creating or modifying any component; it defines naming conventions, StyleX composition order, the drawer-section pattern, filter contract, context+store pattern, and props-forwarding rules
-- `apps/react-router/docs/decisions/` — read the relevant ADR(s) before working in an area they cover: Modal → ADR-001, Tooltip → ADR-002, store → ADR-003, memoization/React Compiler → ADR-004, styling → ADR-005, infinite-scroll prefetch → ADR-006, barrel-export boundaries → ADR-007, primary-key sort tiebreaker / columns-derived id → ADR-008, filter-options fetch descriptors → ADR-009, cookie persistence via `/_action/persist-cookie` → ADR-010, grid interaction architecture (capability/command/surface) → ADR-011, column width → ADR-012
+- **The ADRs covering the area** — each home has a generated index, so start there rather than with a filename: [`docs/decisions/`](docs/decisions/README.md) (repo, packages, toolchain), [`docs/cqms/decisions/`](docs/cqms/decisions/README.md) (CQMS/CodePulse), [`apps/react-router/docs/decisions/`](apps/react-router/docs/decisions/README.md) (showcase app). In the app home: Modal → ADR-001, Tooltip → ADR-002, store → ADR-003, memoization/React Compiler → ADR-004, styling → ADR-005, infinite-scroll prefetch → ADR-006, barrel-export boundaries → ADR-007, primary-key sort tiebreaker / columns-derived id → ADR-008, filter-options fetch descriptors → ADR-009, cookie persistence via `/_action/persist-cookie` → ADR-010, grid interaction architecture (capability/command/surface) → ADR-011, column width → ADR-012
 
 If no `ARCHITECTURE.md` exists yet for the area you are changing, create one **before** implementing.
 
@@ -744,7 +744,7 @@ After the quality gate passes, update every doc affected by the change:
 - **Type added/changed** → update the `ARCHITECTURE.md` of the directory that owns the type.
 - **New dependency added** → update the Dependencies diagram in the affected `ARCHITECTURE.md`.
 - **New naming/structural convention established** → update `packages/ui/src/PATTERNS.md` and the matching `.claude/rules/` file.
-- **New architectural decision made** → add a new ADR following the ADR-NNN naming scheme, and add it to the ADR map in this file. Two homes, chosen by subject: decisions about a **component or route inside the app** go in `apps/react-router/docs/decisions/`, decisions about the **repo, its packages or its tooling** go in [`docs/cqms/decisions/`](docs/cqms/decisions/) (package topology, for instance, is ADR-038/ADR-039/ADR-040 there). **The two sequences both start at ADR-001 and overlap through ADR-012, so a bare number in that range is ambiguous** — there are two ADR-008s, one about the primary-key sort tiebreaker and one about the `@repo/api` → `@repo/data-access` rename (both under their names at the time, which is how ADRs are cited here). Always cite a low-numbered ADR with its path or link, never the number alone. The overlap is not renumbered on purpose: an ADR is a dated record, and rewriting old ones to tidy the sequence would break every existing cross-reference.
+- **New architectural decision made** → add a new ADR. **Three homes, one number sequence, and the home is chosen by one question: when CQMS moves to its own repository, does this decision go with it?** ([ADR-048](docs/decisions/ADR-048-adr-taxonomy-and-one-sequence.md).) `docs/decisions/` — the repo, the published packages, the toolchain (package topology is ADR-038/039/040 there). `docs/cqms/decisions/` — CQMS/CodePulse; schema, scanners, ingestion, orchestration. `apps/react-router/docs/decisions/` — a component or route inside the showcase app. A decision spanning two tiers is written where its durable half lives and cross-referenced from the other. **The number is global**: take the one `vp run adr:verify` reports as free, whichever home you are writing in, and add it to that home's generated index with `vp run adr:verify -- --write`. `vp run adr:verify` fails a stray, a reused number, a malformed name and a stale index. **Numbers 001–012 predate the single sequence and each mean two things** (there are two ADR-008s — the primary-key sort tiebreaker, and the `@repo/api` → `@repo/data-access` rename); always cite one of those with its path. They are not renumbered on purpose: an ADR is a dated record, and rewriting old ones would break every existing cross-reference.
 - **New artifact created or existing artifact enhanced/renamed** → update the relevant row in the owning workspace's `INVENTORY.md` (`packages/ui/src/`, `packages/server/src/`, `apps/react-router/src/`, …).
 
 Documentation updates must be part of the **same commit** as the code change.
