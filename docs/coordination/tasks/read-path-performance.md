@@ -2,7 +2,7 @@
 id: read-path-performance
 title: Read-path performance — parallel count, count-once, keyset pagination, list projection
 owner: agent:claude
-status: active
+status: review
 branch: perf/391-read-path-performance
 area:
   - packages/server/src/db/query-builder/**
@@ -12,7 +12,7 @@ area:
 started: 2026-07-25
 updated: 2026-07-25
 plan: (none)
-pr: (none)
+pr: 429
 issue: 391
 ---
 
@@ -33,6 +33,6 @@ Epic #391 (E-3) in one PR — every child of the read-path performance epic:
 
 ## Status / next
 
-- Current step: implementation
+- Current step: in review (PR #429)
 - Blockers: none
-- Next: quality gate, then open the PR against #391
+- Next: address review, then merge and delete this file
