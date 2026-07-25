@@ -93,12 +93,25 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
 
     const page = await selectOrdersPage({
       filters: [{ column: 'order_id', operator: 'eq', value: orderId }],
+      includeTotal: true,
       limit: 10,
       offset: 0,
       sort: [{ column: 'order_id', direction: 'asc' }],
     });
     expect(page.total).toBe(1);
     expect(page.data[0]?.order_id).toBe(orderId);
+
+    // Real-Postgres check that the keyset predicate is valid SQL and seeks:
+    // resuming after this order's own id must return nothing.
+    const afterCursor = await selectOrdersPage({
+      cursor: [orderId],
+      filters: [{ column: 'order_id', operator: 'eq', value: orderId }],
+      includeTotal: false,
+      limit: 10,
+      offset: 0,
+      sort: [{ column: 'order_id', direction: 'asc' }],
+    });
+    expect(afterCursor.data).toStrictEqual([]);
 
     await deleteOrder(orderId);
     expect(await selectOrderById(orderId)).toBeUndefined();

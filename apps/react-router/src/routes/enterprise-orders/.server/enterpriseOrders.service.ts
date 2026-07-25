@@ -5,19 +5,25 @@ import type {
 
 import { deleteRows } from '@lcabrera/server/db/delete-rows.util';
 import { getMaxValue } from '@lcabrera/server/db/get-max-value.util';
-import { getPool } from '@lcabrera/server/db/get-pool.util';
+import { getRowsCount } from '@lcabrera/server/db/get-rows-count.util';
 import { insertRow } from '@lcabrera/server/db/insert-row.util';
-import { buildCountQuery } from '@lcabrera/server/db/query-builder/build-count-query.util';
 import { selectRows } from '@lcabrera/server/db/select-rows.util';
 import { updateRows } from '@lcabrera/server/db/update-rows.util';
 
-import type { EnterpriseOrder, EnterpriseOrdersResponse } from '../config';
+import type {
+  EnterpriseOrder,
+  EnterpriseOrderListRow,
+  EnterpriseOrdersResponse,
+} from '../config';
 
 import {
   ENTERPRISE_ORDER_ALLOWED_COLUMNS,
   ENTERPRISE_ORDER_COLUMNS,
+  ENTERPRISE_ORDER_LIST_COLUMNS,
+  ENTERPRISE_ORDER_PRIMARY_KEY,
   ENTERPRISE_ORDERS_SCHEMA,
   ENTERPRISE_ORDERS_TABLE,
+  toOrderKeysetCursor,
 } from '../config';
 
 /**
@@ -39,44 +45,78 @@ const TARGET = {
 } as const;
 
 export type SelectOrdersPageArgs = {
+  /**
+   * Keyset cursor: the sort-key tuple of the last row of the previous page, one
+   * value per `sort` entry. Present, the page seeks straight to it and `offset`
+   * is ignored — the two are alternative ways to say the same thing, and
+   * applying both would skip a page's worth of rows past the cursor (ADR-052).
+   */
+  readonly cursor?: readonly unknown[];
   readonly filters: readonly QueryFilter[];
+  /**
+   * Count the filtered set and return the total. Only the first page of a
+   * scroll session asks for it: the total cannot change while the session runs,
+   * so counting per page is work with a known answer (#402).
+   */
+  readonly includeTotal: boolean;
   readonly limit: number;
   readonly offset: number;
   readonly sort: readonly QuerySort[];
 };
 
 /**
- * Read a page of orders plus the total row count for the same filters. The
- * count reuses the data query's WHERE clause via the generic `buildCountQuery`,
- * counting the `order_id` primary key so the page and its total can never drift.
+ * Read a page of orders for the list view, and — on the first page of a scroll
+ * session — the total row count for the same filters.
+ *
+ * Three things make this cheaper than the obvious spelling:
+ *
+ * - The page and the count are **independent queries**, so they run
+ *   concurrently rather than end to end (#401). `getRowsCount` takes the data
+ *   query's own `filters`/`allowedColumns`, so the two still cannot drift.
+ * - The count runs only when `includeTotal` says so (#402).
+ * - The projection is the list read model, not every column (#405).
  */
 export const selectOrdersPage = async ({
+  cursor,
   filters,
+  includeTotal,
   limit,
   offset,
   sort,
 }: SelectOrdersPageArgs): Promise<EnterpriseOrdersResponse> => {
-  const data = await selectRows<EnterpriseOrder>({
-    ...TARGET,
-    fields: ENTERPRISE_ORDER_COLUMNS,
-    filters,
-    limit,
-    offset,
-    sort,
-  });
+  const keysetCursor = toOrderKeysetCursor({ cursor, sort });
 
-  const countQuery = buildCountQuery({
-    ...TARGET,
-    column: 'order_id',
-    filters,
-  });
-  const countResult = await getPool().query<{ readonly count: number }>(
-    countQuery.text,
-    [...countQuery.values],
-  );
-  const total = Number(countResult.rows[0]?.count ?? 0);
+  const [data, total] = await Promise.all([
+    selectRows<EnterpriseOrderListRow>({
+      ...TARGET,
+      fields: ENTERPRISE_ORDER_LIST_COLUMNS,
+      filters,
+      limit,
+      sort,
+      // One or the other, never both: `OFFSET` on top of a cursor would skip a
+      // further `offset` rows past the row we asked to resume after.
+      ...(keysetCursor === undefined ? { offset } : { cursor: keysetCursor }),
+    }),
+    includeTotal
+      ? getRowsCount({
+          ...TARGET,
+          column: ENTERPRISE_ORDER_PRIMARY_KEY,
+          filters,
+        })
+      : undefined,
+  ]);
 
-  return { data, hasMore: offset + data.length < total, total };
+  return {
+    data,
+    // `offset` is the count of rows the client already holds, which the keyset
+    // path sends too — so this reads the same either way. Without a total to
+    // compare against, a page shorter than asked for is the end of the set.
+    hasMore:
+      total === undefined
+        ? data.length === limit
+        : offset + data.length < total,
+    ...(total !== undefined && { total }),
+  };
 };
 
 /** Read a single order by primary key, or `undefined` when it does not exist. */

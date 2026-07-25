@@ -2,6 +2,7 @@ import type { TableMetaState } from '@lcabrera/ui/components/Table/Table.types';
 import type { TStore } from '@lcabrera/ui/hooks/useStore.hook';
 import type {
   InfiniteScroll,
+  Pagination,
   PrefetchCache,
 } from '@lcabrera/ui/types/ui.types';
 import type { RefObject } from 'react';
@@ -11,14 +12,11 @@ export type CommitFetchMoreSuccessArgs<TData, TResponse> = {
   readonly currentTotalRows?: number;
   readonly dataSelector?: (response: TResponse) => readonly TData[];
   readonly dataStore: TStore<DataState<TData>>;
-  readonly dataTotalSelector?: (response: TResponse) => number;
+  readonly dataTotalSelector?: (response: TResponse) => number | undefined;
   readonly enablePrefetch: boolean;
   readonly pageSize: number;
   readonly prefetchRef: RefObject<PrefetchCache<TResponse>>;
-  readonly requiredOnLoadMore: (args: {
-    readonly limit: number;
-    readonly skip: number;
-  }) => Promise<TResponse>;
+  readonly requiredOnLoadMore: OnLoadMore<TData, TResponse>;
   readonly response: TResponse;
 };
 
@@ -44,14 +42,12 @@ export type FetchMoreDataArgs<TData, TResponse> = Omit<
   'hasMore' | 'isLoadingMore'
 >;
 
-export type FetchMoreResponseArgs<TResponse> = {
+export type FetchMoreResponseArgs<TData, TResponse> = {
   readonly currentDataLength: number;
+  readonly lastRow?: TData;
   readonly pageSize: number;
   readonly prefetchRef: RefObject<PrefetchCache<TResponse>>;
-  readonly requiredOnLoadMore: (args: {
-    readonly limit: number;
-    readonly skip: number;
-  }) => Promise<TResponse>;
+  readonly requiredOnLoadMore: OnLoadMore<TData, TResponse>;
 };
 
 export type FetchMoreRuntimeArgs<TData, TResponse> = {
@@ -64,20 +60,20 @@ export type FetchMoreRuntimeResult<TData, TResponse> = {
   readonly currentData: readonly TData[];
   readonly enablePrefetch: boolean;
   readonly pageSize: number;
-  readonly requiredOnLoadMore: (args: {
-    readonly limit: number;
-    readonly skip: number;
-  }) => Promise<TResponse>;
+  readonly requiredOnLoadMore: OnLoadMore<TData, TResponse>;
 };
 
-export type MaybePrefetchNextPageArgs<TResponse> = {
+export type MaybePrefetchNextPageArgs<TData, TResponse> = {
   readonly enablePrefetch: boolean;
   readonly hasMore: boolean;
+  readonly lastRow?: TData;
   readonly nextSkip: number;
-  readonly onLoadMore: (args: {
-    readonly limit: number;
-    readonly skip: number;
-  }) => Promise<TResponse>;
+  readonly onLoadMore: OnLoadMore<TData, TResponse>;
   readonly pageSize: number;
   readonly prefetchRef: RefObject<PrefetchCache<TResponse>>;
 };
+
+/** The load-more callback once `getRequiredOnLoadMore` has proven it exists. */
+type OnLoadMore<TData, TResponse> = (
+  params: Pagination<TData>,
+) => Promise<TResponse>;

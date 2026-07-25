@@ -10,6 +10,7 @@ describe('buildPaginatedQueryParams', () => {
     expect(params.get('skip')).toBe('50');
     expect(params.has('sort')).toBe(false);
     expect(params.has('filter')).toBe(false);
+    expect(params.has('cursor')).toBe(false);
   });
 
   it('appends the sorting payload when sorting is non-empty', () => {
@@ -36,6 +37,25 @@ describe('buildPaginatedQueryParams', () => {
     const params = buildPaginatedQueryParams({ filter, limit: 10, skip: 0 });
 
     expect(params.get('filter')).toBe(JSON.stringify(filter));
+  });
+
+  it('appends the keyset cursor alongside skip, not instead of it', () => {
+    const params = buildPaginatedQueryParams({
+      cursor: ['2026-01-04', 4821],
+      limit: 50,
+      skip: 200,
+    });
+
+    expect(params.get('cursor')).toBe(JSON.stringify(['2026-01-04', 4821]));
+    expect(params.get('skip')).toBe('200');
+  });
+
+  it('omits cursor for an empty tuple', () => {
+    expect(
+      buildPaginatedQueryParams({ cursor: [], limit: 10, skip: 0 }).has(
+        'cursor',
+      ),
+    ).toBe(false);
   });
 
   it('omits filter for empty objects and non-object values', () => {

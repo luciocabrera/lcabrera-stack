@@ -25,7 +25,7 @@ isDistinctValuesResponse [const] (value: unknown) => value is DistinctValuesResp
 parseFilterOptionsParams [const] ({ defaultPageSize, searchParams }: ParseFilterOptionsParamsArgs) => FilterOptionsParams | undefined
 
 ## ./http/build-paginated-query-params.util
-buildPaginatedQueryParams [const] ({ filter, limit, skip, sorting }: BuildPaginatedQueryParamsArgs) => URLSearchParams
+buildPaginatedQueryParams [const] ({ cursor, filter, limit, skip, sorting }: BuildPaginatedQueryParamsArgs) => URLSearchParams
 
 ## ./http/fetch-and-validate.util
 fetchAndValidate [const] <T>({ isValid, shapeErrorMessage, signal, timeoutMs, url }: FetchAndValidateArgs<T>) => Promise<T>

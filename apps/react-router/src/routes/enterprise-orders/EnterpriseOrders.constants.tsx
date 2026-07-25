@@ -6,7 +6,7 @@ import type {
 import { createBasicColumn } from '@lcabrera/ui/components/Table/utils';
 import { createStaticFilterOptions } from '@lcabrera/ui/utils/filters';
 
-import type { EnterpriseOrder } from './config';
+import type { EnterpriseOrderListRow } from './config';
 
 export const TITLE = {
   plural: 'Enterprise Orders',
@@ -26,7 +26,12 @@ export const CRUD: TableCrudConfig = {
   update: true,
 };
 
-export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
+/**
+ * The list view's columns. Typed on `EnterpriseOrderListRow`, not the whole
+ * row: the list query projects only those columns (#405), so naming one it does
+ * not select is a compile error here rather than a blank cell in production.
+ */
+export const COLUMNS: TableColumn<EnterpriseOrderListRow>[] = [
   createBasicColumn({
     dataType: 'number',
     isPrimaryKey: true,
@@ -51,7 +56,7 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   }),
   {
     dataType: 'string',
-    ...createStaticFilterOptions<EnterpriseOrder>([
+    ...createStaticFilterOptions<EnterpriseOrderListRow>([
       'Cancelled',
       'Delivered',
       'On Hold',
@@ -68,7 +73,7 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    ...createStaticFilterOptions<EnterpriseOrder>([
+    ...createStaticFilterOptions<EnterpriseOrderListRow>([
       'Critical',
       'High',
       'Low',
@@ -152,7 +157,7 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   }),
   {
     dataType: 'string',
-    ...createStaticFilterOptions<EnterpriseOrder>([
+    ...createStaticFilterOptions<EnterpriseOrderListRow>([
       'Cancelled',
       'Failed',
       'Paid',
@@ -167,7 +172,7 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    ...createStaticFilterOptions<EnterpriseOrder>([
+    ...createStaticFilterOptions<EnterpriseOrderListRow>([
       'Bank Transfer',
       'Cash',
       'Check',

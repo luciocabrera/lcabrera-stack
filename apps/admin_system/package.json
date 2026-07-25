@@ -11,7 +11,7 @@
     "format:check": "vp fmt --check .",
     "dev": "sh -c 'set -a; eval \"$(tr -d \"\\r\" < ../../docker/local/.env)\"; eval \"$(tr -d \"\\r\" < ./.env 2>/dev/null)\"; set +a; exec react-router dev'",
     "typegen": "react-router typegen",
-    "typecheck": "react-router typegen && tsc"
+    "typecheck": "react-router typegen && tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.node.json"
   },
   "dependencies": {
     "@lcabrera/server": "workspace:*",

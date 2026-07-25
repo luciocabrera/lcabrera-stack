@@ -100,4 +100,56 @@ describe('buildSelectQuery', () => {
       }),
     ).not.toThrow();
   });
+
+  it('seeks past a keyset cursor instead of counting rows, keeping LIMIT last', () => {
+    const result = buildSelectQuery({
+      cursor: { uniqueColumn: 'order_id', values: ['2026-01-04', 4821] },
+      fields: ['order_id', 'order_date'],
+      filters: [{ column: 'order_status', operator: 'eq', value: 'Shipped' }],
+      limit: 50,
+      schema: 'public',
+      sort: [
+        { column: 'order_date', direction: 'desc' },
+        { column: 'order_id', direction: 'asc' },
+      ],
+      table: 'enterprise_orders',
+    });
+
+    expect(result).toEqual({
+      text:
+        'SELECT "order_id", "order_date" FROM "public"."enterprise_orders" ' +
+        'WHERE "order_status" = $1 AND ' +
+        '(("order_date" < $2) OR ' +
+        '("order_date" IS NOT DISTINCT FROM $2 AND ("order_id" > $3 OR "order_id" IS NULL))) ' +
+        'ORDER BY "order_date" DESC, "order_id" ASC LIMIT $4',
+      values: ['Shipped', '2026-01-04', 4821, 50],
+    });
+  });
+
+  it('leaves an offset query byte-identical when no cursor is passed', () => {
+    const descriptor = {
+      fields: ['order_id'],
+      limit: 50,
+      offset: 100,
+      schema: 'public',
+      sort: [{ column: 'order_id', direction: 'asc' }],
+      table: 'enterprise_orders',
+    } as const;
+
+    expect(buildSelectQuery(descriptor)).toEqual({
+      text: 'SELECT "order_id" FROM "public"."enterprise_orders" ORDER BY "order_id" ASC LIMIT $1 OFFSET $2',
+      values: [50, 100],
+    });
+  });
+
+  it('refuses a cursor without a total order to seek along', () => {
+    expect(() =>
+      buildSelectQuery({
+        cursor: { uniqueColumn: 'order_id', values: [4821] },
+        fields: ['order_id'],
+        schema: 'public',
+        table: 'enterprise_orders',
+      }),
+    ).toThrow(/requires a sort/);
+  });
 });

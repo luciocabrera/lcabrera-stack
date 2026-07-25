@@ -3,10 +3,11 @@ import type { RefObject } from 'react';
 
 import { prefetchNextPage } from './prefetchNextPage.util';
 
-type FirePrefetchArgs<TResponse> = {
+type FirePrefetchArgs<TResponse, TData = unknown> = {
+  readonly lastRow?: TData;
   readonly limit: number;
   readonly nextSkip: number;
-  readonly onLoadMore: (params: Pagination) => Promise<TResponse>;
+  readonly onLoadMore: (params: Pagination<TData>) => Promise<TResponse>;
   readonly prefetchRef: RefObject<PrefetchCache<TResponse>>;
 };
 
@@ -15,13 +16,15 @@ type FirePrefetchArgs<TResponse> = {
  * to the given ref with a staleness check. If the ref's skip has
  * changed by the time the prefetch resolves, the result is discarded.
  */
-export const firePrefetch = <TResponse>({
+export const firePrefetch = <TResponse, TData = unknown>({
+  lastRow,
   limit,
   nextSkip,
   onLoadMore,
   prefetchRef,
-}: FirePrefetchArgs<TResponse>) => {
+}: FirePrefetchArgs<TResponse, TData>) => {
   const { initialCache, resolution } = prefetchNextPage({
+    lastRow,
     limit,
     nextSkip,
     onLoadMore,

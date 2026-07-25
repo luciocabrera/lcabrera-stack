@@ -38,3 +38,4 @@ or run `vp run adr:new`, which takes the next free number for you.
 | [ADR-049](./ADR-049-findings-reports-are-produced-on-demand.md)      | Findings reports are produced on demand; only gate baselines are tracked                                                 |
 | [ADR-050](./ADR-050-server-error-translation-and-result-contract.md) | Translate pg errors at the persistence layer; cross the loader boundary as plain data                                    |
 | [ADR-051](./ADR-051-with-transaction-and-tx-executor-option.md)      | `withTransaction` + an optional `tx` executor option, and how id allocation is made safe                                 |
+| [ADR-052](./ADR-052-keyset-pagination-for-infinite-scroll.md)        | Keyset pagination for infinite scroll; `OFFSET` stays for jump-to-page                                                   |

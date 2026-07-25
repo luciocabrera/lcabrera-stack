@@ -17,6 +17,12 @@ import type { ColumnType } from '@lcabrera/server/db/query-builder/query-builder
 export const ENTERPRISE_ORDERS_SCHEMA = 'public';
 export const ENTERPRISE_ORDERS_TABLE = 'enterprise_orders';
 
+/**
+ * The primary key — and so the column that makes any order sort a total order
+ * (ADR-008), which is what a keyset cursor needs to resume from (ADR-052).
+ */
+export const ENTERPRISE_ORDER_PRIMARY_KEY = 'order_id';
+
 /** The list route the create/edit/view modals overlay and return to. */
 export const ENTERPRISE_ORDERS_PATH = '/enterprise-orders';
 
@@ -81,6 +87,56 @@ export const ENTERPRISE_ORDER_COLUMNS = [
   'volume_m3',
   'warehouse_location',
   'weight_kg',
+] as const;
+
+/**
+ * The read model for the list view: the columns the table actually renders,
+ * and nothing else.
+ *
+ * The list query projects these instead of `ENTERPRISE_ORDER_COLUMNS`, so a
+ * page stops carrying the free-text and audit columns no cell reads —
+ * `internal_notes`, `order_notes`, `payment_reference`, the second address
+ * line, the postal codes, the weights and volumes, the timestamps. Every row
+ * of every page paid for those over the wire and through the SSR payload.
+ *
+ * It must stay in step with `COLUMNS` in `EnterpriseOrders.constants.tsx` —
+ * a column rendered but not projected renders blank, with nothing in the type
+ * system to catch it. The colocated test asserts the two agree, so the drift
+ * fails the build rather than the page. The detail and edit views keep the
+ * full column set; they read one row and can afford it.
+ */
+export const ENTERPRISE_ORDER_LIST_COLUMNS = [
+  'carrier',
+  'customer_email',
+  'customer_name',
+  'customer_rating',
+  'customer_type',
+  'delivery_date',
+  'discount_amount',
+  'is_gift',
+  'is_rush_order',
+  'is_vip_customer',
+  'loyalty_points',
+  'order_date',
+  'order_id',
+  'order_number',
+  'order_status',
+  'payment_method',
+  'payment_status',
+  'priority',
+  'product_category',
+  'product_subcategory',
+  'quantity',
+  'shipped_date',
+  'shipping_city',
+  'shipping_cost',
+  'shipping_country',
+  'shipping_state',
+  'subtotal',
+  'tax_amount',
+  'total_amount',
+  'unit_price',
+  'warehouse_location',
 ] as const;
 
 /**

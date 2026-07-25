@@ -34,3 +34,19 @@ it('falls back for missing/invalid params and malformed JSON', () => {
   expect(result.sort).toStrictEqual([]);
   expect(result.limit).toBeGreaterThan(0);
 });
+
+it('parses a keyset cursor tuple, and ignores one that is not an array', () => {
+  const withCursor = parseOrdersPageParams(
+    new URLSearchParams({ cursor: JSON.stringify(['2026-01-04', 4821]) }),
+  );
+
+  expect(withCursor.cursor).toStrictEqual(['2026-01-04', 4821]);
+
+  expect(
+    parseOrdersPageParams(new URLSearchParams({ cursor: '{bad' })).cursor,
+  ).toBeUndefined();
+  expect(
+    parseOrdersPageParams(new URLSearchParams({ cursor: '"nope"' })).cursor,
+  ).toBeUndefined();
+  expect(parseOrdersPageParams(new URLSearchParams()).cursor).toBeUndefined();
+});

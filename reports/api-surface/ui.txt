@@ -13,7 +13,7 @@ hydrateApp [const] () => void
 JsonExplorer [const] ({ sections }: JsonExplorerProps) => JSX.Element
 LayoutProps [type] { readonly children: ReactNode; }
 NavLink [const] ({ children, customStylex, icon, isBusy, isIconOnly, orientation, prefetch, size, tooltipContent, tooltipPlacement, variant, ...props }: NavLinkProps) => JSX.Element
-Pagination [type] { readonly limit: number; readonly skip: number; }
+Pagination [type] { /** * The last row loaded so far, when there is one — the anchor a keyset * ("seek") data source resumes from. `skip` cannot express "resume after this * row", and only the consumer knows which of the row's fields make up its * sort key, so the Table hands the row over and stays out of it. Offset-based * sources ignore it. */ readonly lastRow?: TData; readonly limit: number; readonly skip: number; }
 RootErrorBoundary [const] ({ error }: RootErrorBoundaryProps) => JSX.Element
 RouteErrorBoundary [const] ({ defaultMessage, error, icon, title, }: RouteErrorBoundaryProps) => JSX.Element
 SectionCard [const] ({ children, customStylex, description, title, }: SectionCardProps) => JSX.Element

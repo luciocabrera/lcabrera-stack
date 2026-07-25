@@ -3,7 +3,10 @@ import type { Pagination } from '@lcabrera/ui';
 import { TableLayout } from '@lcabrera/ui';
 import { useLoaderData } from 'react-router';
 
-import type { EnterpriseOrder, EnterpriseOrdersResponse } from './config';
+import type {
+  EnterpriseOrderListRow,
+  EnterpriseOrdersResponse,
+} from './config';
 import type { loader } from './enterprise-orders.loader';
 
 import { fetchOrdersPage } from './fetchOrdersPage.service';
@@ -13,11 +16,19 @@ export const EnterpriseOrders = () => {
   const { columnsState, dataPromise, metaState } =
     useLoaderData<typeof loader>();
 
-  const handleLoadMore = async ({ limit, skip }: Pagination) =>
-    fetchOrdersPage(buildEnterpriseOrdersQuery({ columnsState, limit, skip }));
+  // `lastRow` is the table's own last loaded row: it turns the ADR-008 total
+  // order into a keyset cursor, so a deep page seeks instead of counting.
+  const handleLoadMore = async ({
+    lastRow,
+    limit,
+    skip,
+  }: Pagination<EnterpriseOrderListRow>) =>
+    fetchOrdersPage(
+      buildEnterpriseOrdersQuery({ columnsState, lastRow, limit, skip }),
+    );
 
   return (
-    <TableLayout<EnterpriseOrder, EnterpriseOrdersResponse>
+    <TableLayout<EnterpriseOrderListRow, EnterpriseOrdersResponse>
       columnsState={columnsState}
       dataPromise={dataPromise}
       dataSelector={(response) => response.data}

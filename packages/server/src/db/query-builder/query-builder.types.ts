@@ -68,6 +68,29 @@ export type MaxValueQueryDescriptor = {
 };
 
 /**
+ * A keyset ("seek") cursor: the sort-key tuple of the last row of the previous
+ * page. Passed to `buildSelectQuery` instead of `offset`, it resumes strictly
+ * after that row in O(limit) rather than walking and discarding `offset` rows
+ * (ADR-052).
+ *
+ * A cursor is only well-defined over a **total order** — without one, rows
+ * tying on every sort column have no position relative to the cursor and a page
+ * boundary inside a tie group silently drops or repeats them. Nothing in the
+ * descriptor says which column is unique, so `uniqueColumn` declares it and the
+ * builder refuses a cursor that does not end on it. That it really is unique is
+ * the caller's to guarantee, exactly as `allowedColumns` membership is.
+ */
+export type QueryCursor = {
+  /**
+   * The column making `sort` a total order — typically the primary key. It must
+   * be the **last** `sort` entry.
+   */
+  readonly uniqueColumn: string;
+  /** One value per `sort` entry, in `sort` order. */
+  readonly values: readonly unknown[];
+};
+
+/**
  * A single WHERE condition. A `BinaryOperator` carries the value it compares
  * against; a `UnaryOperator` (`isNotNull`) stands alone and takes no value.
  */
@@ -95,6 +118,13 @@ export type SelectQueryDescriptor = {
    * never derived from a request.
    */
   readonly allowedColumns?: readonly string[];
+  /**
+   * Keyset pagination: resume strictly after the row this cursor describes,
+   * instead of counting past `offset` rows. Requires `sort` to be a total order
+   * ending on `cursor.uniqueColumn`; see `QueryCursor` and ADR-052. Omit it and
+   * nothing changes — `offset` stays the default for jump-to-page reads.
+   */
+  readonly cursor?: QueryCursor;
   /** Emit `SELECT DISTINCT` over `fields` rather than a plain `SELECT`. */
   readonly distinct?: boolean;
   readonly fields: readonly string[];

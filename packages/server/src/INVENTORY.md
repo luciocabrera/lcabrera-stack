@@ -38,7 +38,8 @@ Generic, schema/table-agnostic SQL builder for the common single-table
 read **and** write shapes. Public entry points:
 
 - **Reads:** `buildSelectQuery` (`build-select-query.util.ts` — pass
-  `distinct: true` for `SELECT DISTINCT`), `buildCountQuery`
+  `distinct: true` for `SELECT DISTINCT`, or `cursor` for keyset pagination
+  instead of `offset`, ADR-052), `buildCountQuery`
   (`build-count-query.util.ts`), and `buildDistinctQuery`
   (`build-distinct-query.util.ts` — the `SELECT DISTINCT` sibling of
   `buildSelectQuery`; a thin wrapper, generic over a list of columns).
@@ -49,9 +50,10 @@ read **and** write shapes. Public entry points:
   for id assignment).
 
 plus the shared `query-builder.types.ts` types. Every other file in that
-folder (`assertSafeIdentifier`, `assertColumnAllowed`, `appendFilterClause`,
-`buildWhereClause`, `buildReturningClause`, `buildOrderByClause`,
-`buildOptionalNumericClauses`, `quoteIdentifier`) is a private,
+folder (`assertSafeIdentifier`, `assertColumnAllowed`, `assertKeysetCursor`,
+`appendFilterClause`, `buildWhereClause`, `buildKeysetClause`,
+`buildKeysetBranch`, `buildKeysetComparison`, `buildReturningClause`,
+`buildOrderByClause`, `buildOptionalNumericClauses`, `quoteIdentifier`) is a private,
 individually-tested implementation detail composed by those entry points —
 import them directly only from within `query-builder/`.
 
