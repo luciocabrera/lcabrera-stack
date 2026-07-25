@@ -28,7 +28,7 @@ type TsConfig = {
 };
 
 const APP_TS_CONFIG: Omit<TsConfig, 'compilerOptions'> = {
-  exclude: ['vite-monorepo/apps/api-server', 'miscelanious', 'utils'],
+  exclude: [],
   include: [
     'src',
     '**/*',
@@ -39,7 +39,7 @@ const APP_TS_CONFIG: Omit<TsConfig, 'compilerOptions'> = {
 };
 
 const NODE_TS_CONFIG: Omit<TsConfig, 'compilerOptions'> = {
-  exclude: ['utils'],
+  exclude: [],
   include: ['vite.config.ts'],
 };
 

@@ -10,12 +10,7 @@ const fmtConfig = createFmtConfig({
   // `tags`) that Oxfmt collapses onto one line, so the generator and formatter
   // would fight and churn the file on every run. Keep Oxfmt out of it; the
   // generator's output is the canonical, deterministic format.
-  ignorePatterns: [
-    '.react-router/',
-    'build/',
-    'miscelanious/',
-    'reports/sonar/',
-  ],
+  ignorePatterns: ['.react-router/', 'build/', 'reports/sonar/'],
 });
 
 export default defineConfig({

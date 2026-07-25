@@ -19,7 +19,6 @@ const GLOBAL_IGNORES = [
   'build/**',
   'coverage/**',
   'dist/**',
-  'miscelanious/**',
   'node_modules/**',
   'scripts/**',
 ];

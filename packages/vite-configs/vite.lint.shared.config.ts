@@ -99,14 +99,7 @@ export const lintSharedConfig: OxlintConfig = {
   // `vp lint` and `vp check` both exit 0 on one.
   categories: { correctness: 'error' },
   env: { builtin: true, es2026: true },
-  ignorePatterns: [
-    '.react-router/',
-    'build/',
-    'dist/',
-    'out/',
-    'coverage/',
-    'miscelanious/',
-  ],
+  ignorePatterns: ['.react-router/', 'build/', 'dist/', 'out/', 'coverage/'],
   options: { typeAware: true, typeCheck: true },
   overrides: [
     { env: { browser: true }, files: BROWSER_WORKSPACES },

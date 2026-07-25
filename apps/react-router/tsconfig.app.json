@@ -31,7 +31,7 @@
     "useDefineForClassFields": true,
     "verbatimModuleSyntax": true
   },
-  "exclude": ["vite-monorepo/apps/api-server", "miscelanious", "utils"],
+  "exclude": [],
   "include": [
     "src",
     "**/*",
