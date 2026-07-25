@@ -27,6 +27,22 @@ utils/
 | `getTotalVisibleColumnCount`   | Counts pinned, center, and spacer cells to produce the spacer-row span     |
 | `renderTableBodyPinnedGroup`   | Maps columns to rendered cells while preserving order and shared row data  |
 
+## TableBodyCellDescriptor
+
+Every field of `TableBodyCellDescriptor` exists to be spread into
+`TableBodyCell`, so each one is read back off `TableBodyCellProps`
+(`readonly minWidth: NonNullable<TableBodyCellProps<TData>['minWidth']>`)
+rather than declared independently. Keep it that way when adding a field: a
+hand-declared one can be renamed or retyped on the props without anything here
+failing, and the mismatch then surfaces as a missing prop at the
+`createElement` call in `renderFromDescriptor` instead of at the definition.
+
+`key` and `kind` are the two exceptions, because neither is a prop — `key` is
+React's element key, and `kind` is a rendering decision (`custom` for the
+actions column and for any column supplying `render()`, `default` otherwise).
+The column's own type travels as `dataType` on the default branch, so adding a
+`dataType` never grows the union.
+
 ## Consumers
 
 - `src/components/Table/TableBody/TableBody.component.tsx` — body cell descriptor and spacer-row geometry

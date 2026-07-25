@@ -28,7 +28,7 @@ TableBodyCell/
 | `label`    | `string?`              | Column label for accessibility            |
 | `pinInfo`  | `PinnedColumnInfo?`    | Pin side, offset, shadow flags            |
 | `minWidth` | `number?`              | Minimum cell width                        |
-| `width`    | `number \| string?`    | Current cell width                        |
+| `width`    | `number?`              | Current cell width, in pixels             |
 | `children` | `ReactNode?`           | Custom content (overrides default)        |
 | `locale`   | `string?`              | Locale for formatting                     |
 
