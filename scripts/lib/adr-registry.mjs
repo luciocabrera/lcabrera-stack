@@ -182,10 +182,14 @@ export const nextFreeNumber = (homes) => {
   return numbers.length === 0 ? 1 : Math.max(...numbers) + 1;
 };
 
+/** A pipe inside a title would end the cell, so it is escaped. */
+const ESCAPED_PIPE = String.raw`\|`;
+
 const indexRow = (entry) => {
   const parsed = parseAdrFilename(entry.filename);
   const number = parsed === undefined ? '?' : pad(parsed.number);
-  return `| [ADR-${number}](./${entry.filename}) | ${entry.title.replaceAll('|', '\\|')} |`;
+  const title = entry.title.replaceAll('|', ESCAPED_PIPE);
+  return `| [ADR-${number}](./${entry.filename}) | ${title} |`;
 };
 
 const TAXONOMY_ADR_HOME = 'docs/decisions';

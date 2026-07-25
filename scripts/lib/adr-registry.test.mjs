@@ -217,6 +217,6 @@ describe('renderIndex', () => {
       { filename: 'ADR-001-a.md', title: 'A | B' },
     ]);
 
-    expect(rendered).toContain('| A \\| B |');
+    expect(rendered).toContain(String.raw`| A \| B |`);
   });
 });
