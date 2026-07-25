@@ -1,58 +1,31 @@
-import { useInfiniteScrollObserver } from '@lcabrera/ui/hooks';
 import * as stylex from '@stylexjs/stylex';
 import { useRef } from 'react';
 
-import { useFetchMore } from '../contexts/data/actions';
 import {
-  useGetHasMore,
-  useGetIsLoadingOptions,
-} from '../contexts/data/selectors';
-import {
-  useGetHasFetchMore,
-  useGetListFilterMode,
   useGetListMaxHeight,
-  useGetSearchTerm,
   useGetShouldFillHeight,
 } from '../contexts/list/selectors';
-import { isClientFilterActive } from '../utils/isClientFilterActive.util';
-import { SCROLL_THRESHOLD } from '../VirtualList.constants';
+import { useVirtualListInfiniteScroll } from './hooks/useVirtualListInfiniteScroll.hook';
 import { styles } from './VirtualListBody.stylex';
 import { VirtualListBodyChildren } from './VirtualListBodyChildren/VirtualListBodyChildren.component';
 
 /**
  * Owns the scroll container and the infinite-scroll sentinel (Table analog:
  * TableContent). Fully self-connected (zero props) — layout config comes
- * from the config store. Content-mode dispatch and virtualization live one
- * level down in VirtualListBodyChildren.
+ * from the config store, the observer wiring from
+ * `useVirtualListInfiniteScroll`. Content-mode dispatch and virtualization
+ * live one level down in VirtualListBodyChildren.
  */
 export const VirtualListBody = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
-  const hasFetchMore = useGetHasFetchMore();
-  const hasMore = useGetHasMore();
-  const isLoadingOptions = useGetIsLoadingOptions();
-  const listFilterMode = useGetListFilterMode();
   const listMaxHeight = useGetListMaxHeight();
-  const searchTerm = useGetSearchTerm();
   const shouldFillHeight = useGetShouldFillHeight();
-  const fetchMore = useFetchMore();
 
-  // While a client-side filter narrows the loaded options, the visible list is
-  // a subset — so only fetch when the user reaches a real overflow bottom, never
-  // to fill a short/empty filtered view (which would scan the whole dataset).
-  const shouldFetchToFill = !isClientFilterActive({
-    listFilterMode,
-    searchTerm,
-  });
-
-  useInfiniteScrollObserver({
-    isEnabled: hasMore && !isLoadingOptions && hasFetchMore,
-    onReachEnd: fetchMore,
+  const hasListEnd = useVirtualListInfiniteScroll({
     rootRef: scrollContainerRef,
     sentinelRef,
-    shouldFetchToFill,
-    threshold: SCROLL_THRESHOLD,
   });
 
   return (
@@ -72,7 +45,14 @@ export const VirtualListBody = () => {
       >
         <VirtualListBodyChildren scrollContainerRef={scrollContainerRef} />
 
-        <div aria-hidden ref={sentinelRef} {...stylex.props(styles.sentinel)} />
+        {hasListEnd && (
+          <div
+            aria-hidden
+            data-testid='virtual-list-sentinel'
+            ref={sentinelRef}
+            {...stylex.props(styles.sentinel)}
+          />
+        )}
       </div>
     </div>
   );

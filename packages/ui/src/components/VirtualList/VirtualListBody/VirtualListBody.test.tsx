@@ -76,6 +76,55 @@ describe('VirtualListBody', () => {
     expect(screen.getByText('No options found')).toBeTruthy();
   });
 
+  // The sentinel is an in-flow sibling of the content inside the scroll
+  // container, so in the empty and loading modes it would be the only thing
+  // giving that container a scrollHeight — a phantom overflow that paints a
+  // scrollbar and reads as a real scrolled-to-bottom to the observer.
+  it('renders no infinite-scroll sentinel in the empty state', () => {
+    render(
+      <ProviderShell
+        dataState={{
+          data: [],
+          hasMore: true,
+          isLoading: false,
+          isLoadingMore: false,
+        }}
+      >
+        <VirtualListBody />
+      </ProviderShell>,
+    );
+
+    expect(screen.queryByTestId('virtual-list-sentinel')).toBeNull();
+  });
+
+  it('renders no infinite-scroll sentinel during the initial loading bootstrap', () => {
+    render(
+      <ProviderShell
+        dataState={{
+          data: [],
+          hasMore: true,
+          isLoading: false,
+          isLoadingMore: false,
+        }}
+        onFetchInitial={vi.fn()}
+      >
+        <VirtualListBody />
+      </ProviderShell>,
+    );
+
+    expect(screen.queryByTestId('virtual-list-sentinel')).toBeNull();
+  });
+
+  it('renders the infinite-scroll sentinel once options are listed', () => {
+    render(
+      <ProviderShell>
+        <VirtualListBody />
+      </ProviderShell>,
+    );
+
+    expect(screen.getByTestId('virtual-list-sentinel')).toBeTruthy();
+  });
+
   it('renders the virtualized options when data exists', () => {
     render(
       <ProviderShell>

@@ -24,7 +24,9 @@ VirtualList/
 │
 ├── VirtualListHeader/               → Self-connected search input and clear button (zero props)
 │
-├── VirtualListBody/                 → Scroll container + infinite-scroll sentinel (zero props — layout via list selectors; suppresses fill-fetch while a client filter is active)
+├── VirtualListBody/                 → Scroll container + infinite-scroll sentinel (zero props — layout via list selectors)
+│   ├── hooks/useVirtualListInfiniteScroll.hook.ts
+│   │                                → Observer wiring: sentinel only in the `list` content mode; suppresses fill-fetch while a client filter is active
 │   ├── VirtualListBodyChildren/     → useVirtualization + content-mode dispatch (prop: scrollContainerRef)
 │   └── VirtualListBodyOptions/      → Virtual window renderer (props: startIndex, endIndex, offsetY, totalHeight)
 │
@@ -125,9 +127,18 @@ computes proximity off the layout pass; `SCROLL_THRESHOLD` is passed as the
 bottom `rootMargin`. The observer inputs come from selectors and the fetch is
 dispatched through the `useFetchMore` action.
 
+The sentinel exists **only in the `list` content mode**, because it marks the end
+of the rendered options and the other modes render none. It is an in-flow sibling
+of the body content, so in the `empty`/`loading` modes it would be the only child
+giving the scroll container a `scrollHeight` — a phantom overflow that both paints
+a scrollbar over "No options found" and reads to the observer as a real
+scrolled-to-bottom, defeating the `shouldFetchToFill` guard and fetching every
+remaining page (#432). Bootstrapping the first page is `onFetchInitial`'s job, not
+the sentinel's.
+
 ```mermaid
 graph TD
-  Sentinel["sentinel intersects root + rootMargin(SCROLL_THRESHOLD)"] --> HasMore{"hasMore && !isLoadingOptions && hasFetchMore?"}
+  Sentinel["sentinel intersects root + rootMargin(SCROLL_THRESHOLD)"] --> HasMore{"contentMode === 'list' && hasMore && !isLoadingOptions && hasFetchMore?"}
   HasMore -->|yes| Fetch["useFetchMore() → onFetchMore()"]
   HasMore -->|no| Skip["(observer not attached)"]
 ```
