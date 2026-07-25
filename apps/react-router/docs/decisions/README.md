@@ -9,6 +9,9 @@ Decisions internal to the `apps/react-router` showcase app — its components, r
 Numbers are unique across every ADR home in this repo — see [ADR-048](../../../../docs/decisions/ADR-048-adr-taxonomy-and-one-sequence.md)
 for why, and for what to do with a decision that spans two tiers.
 
+Writing one: start from [`_TEMPLATE.md`](../../../../docs/decisions/_TEMPLATE.md)
+or run `vp run adr:new`, which takes the next free number for you.
+
 | ADR                                                             | Decision                                                                |
 | --------------------------------------------------------------- | ----------------------------------------------------------------------- |
 | [ADR-001](./ADR-001-native-dialog-modal.md)                     | Native `<dialog>` for Modal                                             |

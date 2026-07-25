@@ -22,6 +22,7 @@ import { fileURLToPath } from 'node:url';
 import {
   ADR_HOMES,
   DRAFT_DIR,
+  NON_ADR_FILES,
   adrFindings,
   headingNumber,
   headingTitle,
@@ -65,7 +66,7 @@ const readHomes = () =>
   ADR_HOMES.map((home) => ({
     ...home,
     entries: listMarkdown(home.dir)
-      .filter((filename) => filename !== INDEX_FILE)
+      .filter((filename) => !NON_ADR_FILES.has(filename))
       .map((filename) => entryFor(home.dir, filename)),
   }));
 

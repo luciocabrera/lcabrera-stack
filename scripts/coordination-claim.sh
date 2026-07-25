@@ -156,6 +156,19 @@ Replace with anything the implementer should know before starting.
 ## 8. Related Work
 
 Coordination task: \`docs/coordination/tasks/${id}.md\`
+
+## 9. Planning Metadata
+
+A tracking issue stands alone until someone links it — fill these in if this work
+turns out to sit under an epic. See docs/agents/dependency-conventions.md.
+
+\`\`\`yaml
+dependencies:
+  blocking: []
+  blockedBy: []
+  parent: null
+  children: []
+\`\`\`
 BODY
 }
 

@@ -43,6 +43,24 @@ export const ADR_HOMES = [
 /** Where an unadopted proposal waits. A draft holds no number — see below. */
 export const DRAFT_DIR = 'docs/agents/planning/adr-drafts';
 
+/** The section shape a new ADR starts from. Named with a leading underscore so
+ *  it sorts above the ADRs and cannot be mistaken for one. */
+export const TEMPLATE_FILE = '_TEMPLATE.md';
+
+/** The single home that holds the template; the other indexes link to it. */
+export const TEMPLATE_HOME = 'docs/decisions';
+
+/**
+ * Markdown that lives in a home without being an ADR: the generated index, and
+ * the template a new ADR is copied from. Both would otherwise be read as
+ * entries and reported as malformed filenames.
+ *
+ * The template is kept in ONE home (`docs/decisions`) and linked from the other
+ * two indexes rather than copied into each — three copies is three things to
+ * keep in step, and `docs/README.md`'s rule is one canonical home per fact.
+ */
+export const NON_ADR_FILES = new Set(['README.md', TEMPLATE_FILE]);
+
 /**
  * Numbers that already meant two things before the one-sequence rule existed:
  * the showcase app and the then-single `docs/cqms/decisions` sequence both
@@ -192,17 +210,17 @@ const indexRow = (entry) => {
   return `| [ADR-${number}](./${entry.filename}) | ${title} |`;
 };
 
-const TAXONOMY_ADR_HOME = 'docs/decisions';
 const TAXONOMY_ADR_FILE = 'ADR-048-adr-taxonomy-and-one-sequence.md';
 
-/** The path from one home back up to `docs/decisions`, where ADR-048 lives. */
-const taxonomyAdrFrom = (dir) => {
+/** The path from one home back up to `docs/decisions`, which holds both ADR-048
+ *  and the template. `docs/decisions` links to its own files directly. */
+const fileInTemplateHome = (dir, filename) => {
   const up = dir
     .split('/')
     .map(() => '..')
     .join('/');
-  const prefix = dir === TAXONOMY_ADR_HOME ? '.' : `${up}/${TAXONOMY_ADR_HOME}`;
-  return `${prefix}/${TAXONOMY_ADR_FILE}`;
+  const prefix = dir === TEMPLATE_HOME ? '.' : `${up}/${TEMPLATE_HOME}`;
+  return `${prefix}/${filename}`;
 };
 
 /**
@@ -245,8 +263,11 @@ export const renderIndex = (home, entries) =>
       ? '**Survives the CQMS extraction.**'
       : '**Moves with CQMS when it is extracted.**',
     '',
-    `Numbers are unique across every ADR home in this repo — see [ADR-048](${taxonomyAdrFrom(home.dir)})`,
+    `Numbers are unique across every ADR home in this repo — see [ADR-048](${fileInTemplateHome(home.dir, TAXONOMY_ADR_FILE)})`,
     'for why, and for what to do with a decision that spans two tiers.',
+    '',
+    `Writing one: start from [\`_TEMPLATE.md\`](${fileInTemplateHome(home.dir, TEMPLATE_FILE)})`,
+    'or run `vp run adr:new`, which takes the next free number for you.',
     '',
     '| ADR | Decision |',
     '| --- | --- |',
