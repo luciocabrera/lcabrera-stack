@@ -2,7 +2,7 @@
 id: governance-docs-gaps
 title: Close the governance docs gaps: issue-template dependencies, ADR template, cross-app abstraction
 owner: agent:claude
-status: active
+status: review
 branch: docs/392-governance-docs-gaps
 area:
   - .github/ISSUE_TEMPLATE/**
@@ -12,7 +12,7 @@ area:
 started: 2026-07-25
 updated: 2026-07-25
 plan: (none)
-pr: (none)
+pr: #426
 issue: #392
 ---
 
@@ -22,6 +22,6 @@ Close the governance docs gaps: issue-template dependencies, ADR template, cross
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: in review — PR #426 open, quality gate green
 - Blockers: none
-- Next:
+- Next: merge, then close #409 / #410 / #412 and delete this file
