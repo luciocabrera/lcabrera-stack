@@ -15,9 +15,6 @@ export const NAVIGATION_SIZE_VALUES = [
 /** Valid values for the navigation collapsed preference cookie slice */
 export const NAVIGATION_COLLAPSED_VALUES = ['collapsed', 'expanded'] as const;
 
-/** Valid values for the navigation pinned preference cookie slice */
-export const NAVIGATION_PINNED_VALUES = ['pinned', 'unpinned'] as const;
-
 /** Valid values for the pin-conflict resolution preference cookie slice */
 export const PIN_CONFLICT_VALUES = [
   'move-column',

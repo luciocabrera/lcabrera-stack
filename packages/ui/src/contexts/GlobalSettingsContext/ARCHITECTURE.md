@@ -17,7 +17,6 @@ App-level store-backed context for global user preferences persisted in cookies 
   - preferred unpin-conflict resolution
 - Global navigation preferences:
   - preferred initial expansion (`expanded`, `collapsed`)
-  - preferred initial pin mode (`pinned`, `unpinned`)
   - preferred navigation size (`compact`, `small`, `medium`, `large`)
 
 ## Design

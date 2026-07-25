@@ -1,6 +1,5 @@
 import {
   NAVIGATION_COLLAPSED_PREFERENCE_OPTIONS,
-  NAVIGATION_PINNED_PREFERENCE_OPTIONS,
   NAVIGATION_SIZE_PREFERENCE_OPTIONS,
 } from '@lcabrera/ui/constants/globalSettings.constants';
 import * as stylex from '@stylexjs/stylex';
@@ -32,12 +31,6 @@ export const NavigationSettingsTab = () => {
     setSettingsDraftField({ key: 'navigationCollapsed', value });
   };
 
-  const handleNavigationPinnedChange = (
-    value: SettingsDraft['navigationPinned'],
-  ) => {
-    setSettingsDraftField({ key: 'navigationPinned', value });
-  };
-
   return (
     <div {...stylex.props(styles.tabSections)}>
       <SettingsOptionSection
@@ -56,15 +49,6 @@ export const NavigationSettingsTab = () => {
         options={NAVIGATION_COLLAPSED_PREFERENCE_OPTIONS}
         title='Collapsed/Expanded'
         value={draft.navigationCollapsed}
-      />
-
-      <SettingsOptionSection
-        description='Determines if the navigation bar is fixed to the left or floats on scroll.'
-        name='settings-navigation-pinned-preference'
-        onChange={handleNavigationPinnedChange}
-        options={NAVIGATION_PINNED_PREFERENCE_OPTIONS}
-        title='Pinned/Unpinned'
-        value={draft.navigationPinned}
       />
     </div>
   );

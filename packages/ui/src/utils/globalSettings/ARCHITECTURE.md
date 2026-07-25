@@ -24,7 +24,6 @@ Utilities for serializing/deserializing global settings to a single cookie key w
 | `isUnpinConflictResolution.util.ts`        | Guard: unpin-conflict resolution preference                                  |
 | `isNavigationSizePreference.util.ts`       | Guard: navigation size preference                                            |
 | `isNavigationCollapsedPreference.util.ts`  | Guard: navigation collapsed/expanded preference                              |
-| `isNavigationPinnedPreference.util.ts`     | Guard: navigation pinned/unpinned preference                                 |
 | `globalSettings.constants.ts`              | Cookie key/version + the `*_VALUES` arrays backing every preference guard    |
 
 Each guard's valid-value list lives in `globalSettings.constants.ts`; guards use

@@ -244,7 +244,7 @@ graph TD
 Used heavily in Table settings drawers:
 
 - `App.tsx` — demo usage with Header/Body/Footer/Title
-- `AppNavigation` — left sidebar navigation with compact/full and pin/unpin
+- `AppNavigation` — left sidebar navigation, always pinned, with compact/full
   states
 - `ColumnSettingsDrawer` — FilterSection, PinningSection, GeneralSection, SortingSection
 - `TableSettingsDrawer` — SortingSection, GeneralSettingsSection, AddSortSection, ActiveSortList, ColumnOrderSection

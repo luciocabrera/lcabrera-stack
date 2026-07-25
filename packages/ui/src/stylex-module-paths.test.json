@@ -4,7 +4,6 @@
   "src/components/AppDotted/AppDotted.stylex.ts",
   "src/components/AppNavigation/AppNavigation.stylex.ts",
   "src/components/AppNavigation/NavigationHeaderActions/NavigationHeaderActions.stylex.ts",
-  "src/components/AppNavigation/NavigationLauncher/NavigationLauncher.stylex.ts",
   "src/components/AppShell/AppShell.stylex.ts",
   "src/components/Button/Button.stylex.ts",
   "src/components/Card/Card.stylex.ts",

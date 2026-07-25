@@ -6,7 +6,6 @@ import { getSettingsDraftChanges } from './getSettingsDraftChanges.util';
 
 const baseline: SettingsDraft = {
   navigationCollapsed: 'expanded',
-  navigationPinned: 'pinned',
   navigationSize: 'small',
   orderConflictResolution: 'always-ask',
   pinConflictResolution: 'always-ask',
@@ -46,7 +45,7 @@ describe('getSettingsDraftChanges', () => {
   it('flags both domains at once', () => {
     const draft: SettingsDraft = {
       ...baseline,
-      navigationPinned: 'unpinned',
+      navigationCollapsed: 'collapsed',
       unpinConflictResolution: 'unpin-beyond',
     };
 

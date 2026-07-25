@@ -177,7 +177,6 @@ describe('Settings', () => {
   it('persists both navigation and pinning updates in one Accept flow', () => {
     useGetGlobalNavigationPreferencesMock.mockReturnValue({
       collapsed: 'expanded',
-      pinned: 'pinned',
       size: 'small',
     });
     useGetGlobalPinningPreferencesMock.mockReturnValue({
