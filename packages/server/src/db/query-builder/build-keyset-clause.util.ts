@@ -64,11 +64,12 @@ export const buildKeysetClause = ({
 
   const branches = entries
     .map((_, index) => buildKeysetBranch({ entries, index }))
-    .filter((branch) => branch !== undefined);
+    .filter((branch) => branch !== undefined)
+    .map((branch) => `(${branch})`);
 
   return {
     nextParamIndex: startParamIndex + entries.length,
-    text: `(${branches.map((branch) => `(${branch})`).join(' OR ')})`,
+    text: `(${branches.join(' OR ')})`,
     values: cursor.values,
   };
 };

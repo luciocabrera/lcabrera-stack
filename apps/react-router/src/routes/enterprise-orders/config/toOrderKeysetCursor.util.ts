@@ -1,7 +1,4 @@
-import type {
-  QueryCursor,
-  QuerySort,
-} from '@lcabrera/server/db/query-builder/query-builder.types';
+import type { QuerySort } from '@lcabrera/server/db/query-builder/query-builder.types';
 
 import { ENTERPRISE_ORDER_PRIMARY_KEY } from './enterpriseOrders.constants';
 
@@ -11,7 +8,8 @@ export type ToOrderKeysetCursorArgs = {
 };
 
 /**
- * The `QueryCursor` to seek with, or `undefined` to fall back to `OFFSET`.
+ * The `QueryCursor` to seek with, or `undefined` to fall back to `OFFSET`. The
+ * shape is checked where it is used — `selectRows` takes a `QueryCursor`.
  *
  * The cursor values arrive from the browser, and the sort is whatever the user
  * built in the table — neither is guaranteed to describe a total order. The
@@ -27,19 +25,23 @@ export type ToOrderKeysetCursorArgs = {
 export const toOrderKeysetCursor = ({
   cursor,
   sort,
-}: ToOrderKeysetCursorArgs): QueryCursor | undefined => {
-  if (cursor === undefined || cursor.length !== sort.length) {
-    return undefined;
+}: ToOrderKeysetCursorArgs) => {
+  if (cursor === undefined) {
+    return;
+  }
+
+  if (cursor.length !== sort.length) {
+    return;
   }
 
   if (sort.at(-1)?.column !== ENTERPRISE_ORDER_PRIMARY_KEY) {
-    return undefined;
+    return;
   }
 
   const orderId = cursor.at(-1);
 
   if (orderId === null || orderId === undefined) {
-    return undefined;
+    return;
   }
 
   return { uniqueColumn: ENTERPRISE_ORDER_PRIMARY_KEY, values: cursor };
