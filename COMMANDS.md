@@ -133,7 +133,7 @@ project-specific belongs in that project's own `package.json`.
 | `vp run lint:all`          | Oxlint + eslint + Biome **with autofix**, every workspace                                         |
 | `vp run lint:biome`        | Biome repo-wide **with autofix** (`--write`, safe fixes only)                                     |
 | `vp run lint:biome:check`  | Biome repo-wide, check only — what CI runs                                                        |
-| `vp run lint:report`       | regenerate `reports/{oxlint,eslint,biome}/full-latest.json`                                       |
+| `vp run lint:report`       | write `reports/{oxlint,eslint,biome}/full-latest.json` (gitignored — produced on demand)          |
 | `vp run format:all`        | `vp fmt .` across the tree                                                                        |
 | `vp run build:all`         | build every workspace                                                                             |
 | `vp run test:all`          | every suite — **needs Postgres**                                                                  |
@@ -404,14 +404,15 @@ server-side — no scanner in this repo). These pull its findings into a tracked
 report so agents/CI act on them from a file, not the dashboard. Needs a read-only
 `SONAR_TOKEN` (gitignored root `.env` or a CI secret — see `.env.example`); without
 one the script skips gracefully. Feature branches are analysed as PRs, so target
-them with `--pr <n>` (the tracked snapshot is `main`).
+them with `--pr <n>`. Nothing is committed — every run writes its own gitignored
+file under `reports/sonar/runs/` ([ADR-049](docs/decisions/ADR-049-findings-reports-are-produced-on-demand.md)).
 
-| Command                                           | Does                                                                                             |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `vp run sonar:report`                             | fetch issues + hotspots + quality gate → `reports/sonar/full-latest.json` (tracked; `main` only) |
-| `vp run sonar:report -- --pr 31`                  | report scoped to a PR → `reports/sonar/runs/pr-<n>.json` (gitignored)                            |
-| `vp run sonar:verify`                             | gate mode — exit non-zero when the SonarCloud quality gate is failing                            |
-| `vp run sonar:verify -- --pr 31 --fail-on-issues` | stricter: also fail on any open issue, not just gate ERROR                                       |
+| Command                                           | Does                                                                           |
+| ------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `vp run sonar:report`                             | fetch issues + hotspots + quality gate → `reports/sonar/runs/branch-main.json` |
+| `vp run sonar:report -- --pr 31`                  | report scoped to a PR → `reports/sonar/runs/pr-<n>.json`                       |
+| `vp run sonar:verify`                             | gate mode — exit non-zero when the SonarCloud quality gate is failing          |
+| `vp run sonar:verify -- --pr 31 --fail-on-issues` | stricter: also fail on any open issue, not just gate ERROR                     |
 
 ---
 

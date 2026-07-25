@@ -1,15 +1,15 @@
 /**
- * Pulls SonarCloud findings for this project into a tracked JSON report, so
- * agents and CI act on Sonar the way they already act on the fallow/lint
- * reports — from a file in `reports/`, not by reading the dashboard.
+ * Pulls SonarCloud findings for this project into a JSON report, so agents and CI
+ * act on Sonar the way they act on the fallow/lint reports — from a file they
+ * produce on demand, not by reading the dashboard.
  *
  * Why this exists: SonarCloud runs in Automatic Analysis mode (there is no
  * scanner in this repo — the GitHub App analyses each push server-side). So
  * there is nothing local to run and no findings on disk; the only programmatic
  * access is the SonarCloud Web API. This script is that bridge:
  *   - `sonar:report`         fetch issues + hotspots + quality gate, write
- *                            `reports/sonar/full-latest.json` (deterministic,
- *                            tracked — no timestamps, stable sort → no churn).
+ *                            `reports/sonar/runs/<target>.json` (gitignored, and
+ *                            deterministic — no timestamps, stable sort).
  *   - `sonar:verify` (`--gate`) same fetch, but exit non-zero when the SonarCloud
  *                            quality gate is failing — a local mirror of the gate
  *                            you can run or wire into CI.
@@ -27,12 +27,10 @@
  * branches, so a `branch=<feature>` query 404s. On a non-main branch with no
  * `--pr`, the script prints how to target the PR instead of erroring.
  *
- * Only a `main` analysis writes the tracked snapshot. A `--pr <n>` or
- * `--branch <other>` run lands in the gitignored `reports/sonar/runs/`, because
- * sharing one path meant the routine way to read a branch's own findings
- * overwrote `main`'s — PR #283's analysis sat committed as `main`'s for 22
- * merges, reporting a failing gate the branch did not have. See
- * `lib/sonar-report-path.mjs` (#304).
+ * Every run — `main` included — writes its own file under the gitignored
+ * `reports/sonar/runs/`. Nothing is committed: a findings snapshot in git is
+ * stale from the next commit onward with nothing to say so, and this one was,
+ * for 22 merges (#304). See `lib/sonar-report-path.mjs`.
  *
  * Usage (from the repo root):
  *   vp run sonar:report                    # main snapshot, or a hint on a feature branch
@@ -276,8 +274,8 @@ const loadEnv = () => {
   if (existsSync(envFile)) process.loadEnvFile(envFile);
 };
 
-/** Writes to the path the TARGET earns, not a fixed one — only a `main`-branch
- *  analysis is the tracked snapshot (see `sonar-report-path.mjs`). */
+/** Writes to the path the TARGET earns, so concurrent runs on different targets
+ *  cannot overwrite each other (see `sonar-report-path.mjs`). */
 const writeReport = (report, outRel) => {
   const outPath = join(REPO_ROOT, outRel);
   mkdirSync(dirname(outPath), { recursive: true });
@@ -387,7 +385,7 @@ const main = async () => {
     accepted,
     measures,
   });
-  const outRel = reportPathFor(target, CONFIG.mainBranch);
+  const outRel = reportPathFor(target);
   writeReport(report, outRel);
   printSummary(report, outRel);
 

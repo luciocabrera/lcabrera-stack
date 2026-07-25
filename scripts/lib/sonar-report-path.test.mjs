@@ -1,37 +1,36 @@
-import { readFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-
+/**
+ * What is left to test once no snapshot is tracked: that every target gets its
+ * own file, so no run can overwrite another's, and that a branch name can never
+ * escape the runs directory.
+ *
+ * The tests this file used to carry — "a main analysis earns the tracked path",
+ * "the committed snapshot describes branch main" — are gone with the tracked
+ * path itself. They guarded a pull request's analysis being read as `main`'s,
+ * which is now impossible rather than checked.
+ */
 import { describe, expect, it } from 'vite-plus/test';
 
-import {
-  isMainSnapshot,
-  RUNS_DIRECTORY,
-  reportPathFor,
-  TRACKED_REPORT_PATH,
-} from './sonar-report-path.mjs';
-
-const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
-
-const trackedSnapshot = () =>
-  JSON.parse(readFileSync(join(REPO_ROOT, TRACKED_REPORT_PATH), 'utf8'));
+import { RUNS_DIRECTORY, reportPathFor } from './sonar-report-path.mjs';
 
 describe('reportPathFor', () => {
-  it('gives a main-branch analysis the tracked path', () => {
-    expect(reportPathFor({ type: 'branch', value: 'main' })).toBe(
-      TRACKED_REPORT_PATH,
-    );
-  });
+  it('gives every target its own file, so no run overwrites another', () => {
+    const paths = [
+      reportPathFor({ type: 'branch', value: 'main' }),
+      reportPathFor({ type: 'pullRequest', value: '283' }),
+      reportPathFor({ type: 'branch', value: 'release-v0-1-1' }),
+    ];
 
-  it('keeps a pull request out of the tracked path', () => {
-    const path = reportPathFor({ type: 'pullRequest', value: '283' });
-    expect(path).toBe(`${RUNS_DIRECTORY}/pr-283.json`);
-    expect(path).not.toBe(TRACKED_REPORT_PATH);
-  });
-
-  it('keeps a non-main branch out of the tracked path', () => {
-    expect(reportPathFor({ type: 'branch', value: 'release-v0-1-1' })).toBe(
+    expect(paths).toEqual([
+      `${RUNS_DIRECTORY}/branch-main.json`,
+      `${RUNS_DIRECTORY}/pr-283.json`,
       `${RUNS_DIRECTORY}/branch-release-v0-1-1.json`,
+    ]);
+    expect(new Set(paths).size).toBe(paths.length);
+  });
+
+  it('distinguishes a pull request from a branch of the same name', () => {
+    expect(reportPathFor({ type: 'pullRequest', value: '283' })).not.toBe(
+      reportPathFor({ type: 'branch', value: '283' }),
     );
   });
 
@@ -52,43 +51,18 @@ describe('reportPathFor', () => {
     }
   });
 
-  it('honours a configured main branch rather than the literal "main"', () => {
-    expect(reportPathFor({ type: 'branch', value: 'trunk' }, 'trunk')).toBe(
-      TRACKED_REPORT_PATH,
-    );
-    expect(reportPathFor({ type: 'branch', value: 'main' }, 'trunk')).toBe(
+  it('still lands inside the runs directory for a malformed target', () => {
+    // A missing value becomes `unknown`; a value with no type takes the default
+    // `branch` prefix. Neither can escape the runs directory, which is the only
+    // property that matters now that nothing is tracked — under the old tracked
+    // path a malformed target had to be kept away from `main`'s snapshot.
+    for (const target of [undefined, {}, { type: 'branch' }]) {
+      expect(reportPathFor(target)).toBe(
+        `${RUNS_DIRECTORY}/branch-unknown.json`,
+      );
+    }
+    expect(reportPathFor({ value: 'main' })).toBe(
       `${RUNS_DIRECTORY}/branch-main.json`,
     );
-  });
-
-  it('never returns the tracked path for a malformed target', () => {
-    for (const target of [undefined, {}, { type: 'branch' }, { value: 'main' }])
-      expect(reportPathFor(target)).not.toBe(TRACKED_REPORT_PATH);
-  });
-});
-
-describe('the committed snapshot', () => {
-  // The guard this file exists for. PR #283's analysis was committed here and
-  // read as `main`'s for 22 merges — it reported `gate: ERROR` and two findings
-  // `main` did not have, and an agent started work on code that was correct.
-  // Nothing objected: not the hook, not check:safe, not CI.
-  //
-  // Asserts the snapshot's own `target`, never the filename. Trusting the
-  // filename is precisely what failed.
-  it('describes branch main, not a pull request', () => {
-    const snapshot = trackedSnapshot();
-    expect(
-      snapshot.target,
-      `${TRACKED_REPORT_PATH} must be a \`main\` analysis — re-run \`vp run sonar:report -- --branch main\`. A --pr run belongs in ${RUNS_DIRECTORY}/.`,
-    ).toEqual({ type: 'branch', value: 'main' });
-    expect(isMainSnapshot(snapshot)).toBe(true);
-  });
-
-  it('rejects the pull-request snapshot that caused this', () => {
-    // The exact shape that was committed. Pinning the negative proves the
-    // assertion above discriminates, rather than passing on anything.
-    expect(
-      isMainSnapshot({ target: { type: 'pullRequest', value: '283' } }),
-    ).toBe(false);
   });
 });

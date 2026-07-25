@@ -32,3 +32,4 @@ for why, and for what to do with a decision that spans two tiers.
 | [ADR-046](./ADR-046-public-api-surface-snapshot.md)                 | Detect breaking changes to the public package API surface                                                                |
 | [ADR-047](./ADR-047-declare-optional-peer-dependencies.md)          | Declare optional peer dependencies, and prove vestigial ones by regenerating the lockfile                                |
 | [ADR-048](./ADR-048-adr-taxonomy-and-one-sequence.md)               | One ADR home per tier, split on the extraction boundary; one global number sequence                                      |
+| [ADR-049](./ADR-049-findings-reports-are-produced-on-demand.md)     | Findings reports are produced on demand; only gate baselines are tracked                                                 |

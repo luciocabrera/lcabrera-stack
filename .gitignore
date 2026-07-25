@@ -45,6 +45,18 @@ docker/local/pgpass
 
 packages/eslint-local-rules/build/
 
+# Findings reports are PRODUCED ON DEMAND and never committed (ADR-049). A
+# measurement in git is stale from the next commit onward with nothing to say so,
+# and one of these was for 22 merges (#304). Name the command instead:
+# `vp run lint:report`, `vp run fallow:full`, `vp run sonar:report`.
+#
+# Gate BASELINES are the exception and stay tracked, because a gate diffs against
+# them rather than merely reporting them: reports/api-surface/ (api-surface:verify)
+# and reports/fallow/baselines/ (fallow audit --gate new-only).
+reports/*/*-latest.json
+reports/fallow/complexity-threshold-analysis.md
+reports/skills/*.md
+
 # Fallow per-run artifacts (canonical root: reports/fallow/ — see AGENTS.md)
 reports/fallow/runs/
 
@@ -54,6 +66,6 @@ reports/fallow/runs/
 # task files under docs/coordination/tasks/ are the source of truth.
 docs/coordination/BOARD.md
 
-# Sonar per-run artifacts — only the main snapshot is tracked (see scripts/lib/sonar-report-path.mjs)
+# Sonar per-run artifacts — every target, main included (scripts/lib/sonar-report-path.mjs)
 reports/sonar/runs/*
 !reports/sonar/runs/.gitkeep

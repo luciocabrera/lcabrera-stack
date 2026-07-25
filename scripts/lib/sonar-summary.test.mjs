@@ -16,7 +16,7 @@ describe('summaryLines', () => {
   it('reports findings and a fresh analysis without flagging it', () => {
     const parts = summaryLines(
       reportAt('2026-07-21T11:00:00Z'),
-      'reports/sonar/full-latest.json',
+      'reports/sonar/runs/branch-main.json',
       NOW,
     );
     expect(parts.stale).toBe(false);
