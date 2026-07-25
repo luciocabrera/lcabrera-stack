@@ -1,7 +1,11 @@
-# ADR-049 (DRAFT) — Keyset pagination for infinite scroll
+# Draft — Keyset pagination for infinite scroll
 
-> **DRAFT — not yet in the enforced sequence.** Promote to
-> `docs/cqms/decisions/` and add to the CLAUDE.md ADR map when adopted.
+> **Draft — it holds no ADR number.** A number is assigned when the decision is
+> adopted, not when it is proposed: a draft that reserves one goes stale as the
+> sequence moves on, which is how two ADR-047s came to exist. On adoption, move
+> this file into the home its tier calls for and take the number
+> `vp run adr:verify` reports as free. See
+> [ADR-048](../../../decisions/ADR-048-adr-taxonomy-and-one-sequence.md).
 
 ## Context
 

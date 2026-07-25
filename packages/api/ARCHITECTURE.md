@@ -7,7 +7,7 @@ contract behind the Table's filter dropdowns.
 ## Why this package exists
 
 `@lcabrera/server` held two things at once — browser `fetch` utilities and
-Node/Postgres access — and [ADR-008](../../docs/cqms/decisions/ADR-008-packages-api-renamed-data-access.md)
+Node/Postgres access — and [ADR-008](../../docs/decisions/ADR-008-packages-api-renamed-data-access.md)
 accepted that deliberately, because nothing depended on only one half.
 
 That stopped being true. `@lcabrera/ui` came to depend on the combined package for

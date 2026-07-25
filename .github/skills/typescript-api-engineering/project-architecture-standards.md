@@ -8,7 +8,7 @@
 > the blueprint disagree, **this edition wins for code in this repo** — the
 > blueprint targets a standalone Express API this app's primary data path does not
 > have. Companion document:
-> [`architecture-improvement-plan.md`](../../../docs/agents/decisions/architecture-improvement-plan.md).
+> [`architecture-improvement-plan.md`](../../../docs/agents/planning/architecture-improvement-plan.md).
 
 ## Introduction
 

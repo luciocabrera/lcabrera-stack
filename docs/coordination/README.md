@@ -27,7 +27,7 @@ immediately):
 1. **Check for collisions.** Run `vp run coordination:verify` — it warns when an
    area you're about to claim overlaps an existing active task. (For a table view
    of the register, `vp run coordination:board` writes a local, gitignored
-   `BOARD.md`; it is never committed — see [ADR-037](../cqms/decisions/ADR-037-coordination-board-is-a-local-view.md).)
+   `BOARD.md`; it is never committed — see [ADR-037](../decisions/ADR-037-coordination-board-is-a-local-view.md).)
    If there's an overlap, coordinate with that owner or narrow your scope first.
 2. **Claim it.** Copy [`tasks/_TEMPLATE.md`](./tasks/_TEMPLATE.md) to
    `tasks/<id>.md`, fill in the frontmatter — crucially the `area` globs, which
@@ -190,7 +190,7 @@ claims sit only on feature branches, no one sees them until merge and the regist
 fragments.
 
 **`BOARD.md` never conflicts, by construction.** It is a **gitignored, local-only
-view** ([ADR-037](../cqms/decisions/ADR-037-coordination-board-is-a-local-view.md)):
+view** ([ADR-037](../decisions/ADR-037-coordination-board-is-a-local-view.md)):
 `vp run coordination:board` rebuilds it from the task files whenever you want to
 read the register as a table, but it is never committed. Because no PR ever
 contains `BOARD.md`, two concurrent claims/closes can never collide on it — the
@@ -232,7 +232,7 @@ drifted):
 | **branch**        | warn  | a task's branch resolves to no local/origin ref (best effort)                                                                                                                    |
 
 There is no board-drift check: `BOARD.md` is a gitignored local view, never
-committed, so there is nothing to keep in sync ([ADR-037](../cqms/decisions/ADR-037-coordination-board-is-a-local-view.md)).
+committed, so there is nothing to keep in sync ([ADR-037](../decisions/ADR-037-coordination-board-is-a-local-view.md)).
 `vp run coordination:board` rewrites the local view from the task + branch files
 whenever you want to read the register as a table.
 
@@ -280,7 +280,7 @@ the output.
 - **GitHub Issues / sub-issues / Milestones / Projects** — the **durable backlog**
   (_what should happen, eventually, and why_), the complement to this register's
   _in-flight_ view (_who is touching what, right now_). Adopted in
-  [ADR-036](../cqms/decisions/ADR-036-github-planning-layer.md); runbook in
+  [ADR-036](../decisions/ADR-036-github-planning-layer.md); runbook in
   [`docs/tooling/github-planning.md`](../tooling/github-planning.md). The two link
   one-way: a task that picks up a backlog item points to it with its optional
   `issue:` field, and PRs close issues (`Closes #N`). The register is **not** moved

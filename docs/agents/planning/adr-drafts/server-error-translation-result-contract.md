@@ -1,9 +1,11 @@
-# ADR-047 (DRAFT) — Server error translation + serializable Result contract
+# Draft — Server error translation + serializable Result contract
 
-> **DRAFT — not yet in the enforced sequence.** Produced by the `lcabrera-planner`
-> multi-agent session. Promote to `docs/cqms/decisions/ADR-047-*.md` and add to the
-> CLAUDE.md ADR map when adopted. Confirm the next free number at promotion time —
-> `docs/cqms/decisions/` currently ends at ADR-046.
+> **Draft — it holds no ADR number.** A number is assigned when the decision is
+> adopted, not when it is proposed: a draft that reserves one goes stale as the
+> sequence moves on, which is how two ADR-047s came to exist. On adoption, move
+> this file into the home its tier calls for and take the number
+> `vp run adr:verify` reports as free. See
+> [ADR-048](../../../decisions/ADR-048-adr-taxonomy-and-one-sequence.md).
 
 ## Context
 
@@ -67,7 +69,7 @@ which is evidence the abstraction is missing and being duplicated per-app.
 
 ## References
 
-- Plan: `docs/agents/decisions/architecture-improvement-plan.md` §(c)
+- Plan: `docs/agents/planning/architecture-improvement-plan.md` §(c)
 - Package topology: ADR-038; duplicate-over-undeclared-edges: ADR-039;
   API-surface snapshot gate: ADR-046
 - Planner issues: P-01 (this ADR), P-02, P-03, P-06

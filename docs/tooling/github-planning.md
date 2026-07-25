@@ -2,7 +2,7 @@
 
 How this repo uses GitHub's native planning features as the **durable backlog**,
 and how that layer relates to the in-git coordination register. The decision and
-its rationale are [ADR-036](../cqms/decisions/ADR-036-github-planning-layer.md);
+its rationale are [ADR-036](../decisions/ADR-036-github-planning-layer.md);
 this page is the operational runbook.
 
 ## The two layers (don't confuse them)

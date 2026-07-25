@@ -1,8 +1,14 @@
-# ADR-050 (DRAFT) — Connection-pool tuning via the shared env schema
+# Draft — Connection-pool tuning via the shared env schema
 
-> **DRAFT — not yet in the enforced sequence.** May instead land as a
-> `PATTERNS.md`/config note if the team judges it too small for an ADR. Promote to
-> `docs/cqms/decisions/` when adopted.
+> **Draft — it holds no ADR number.** A number is assigned when the decision is
+> adopted, not when it is proposed: a draft that reserves one goes stale as the
+> sequence moves on, which is how two ADR-047s came to exist. On adoption, move
+> this file into the home its tier calls for and take the number
+> `vp run adr:verify` reports as free. See
+> [ADR-048](../../../decisions/ADR-048-adr-taxonomy-and-one-sequence.md).
+>
+> This one may not warrant an ADR at all — it could land as a `PATTERNS.md` or
+> config note instead, if the team judges it too small.
 
 ## Context
 

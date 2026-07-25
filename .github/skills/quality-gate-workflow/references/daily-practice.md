@@ -51,7 +51,7 @@ rule sets will contradict each other, and **the form that silences both is not
 automatically correct — check it against the types first.**
 
 Worked example (`@lcabrera/utils`'s `mergeArrays`, see
-[ADR-035](../../../../docs/cqms/decisions/ADR-035-biome-third-linter.md)): Biome's
+[ADR-035](../../../../docs/decisions/ADR-035-biome-third-linter.md)): Biome's
 `noDoubleEquals` rejects `x == undefined`, eslint's `unicorn/no-null` rejects
 `x == null`. `x === undefined` passes both — and is wrong, because the type
 admits `null`, so strict equality silently stops matching it. The real fix came

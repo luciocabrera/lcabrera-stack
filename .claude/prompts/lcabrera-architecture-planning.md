@@ -17,7 +17,7 @@ AGENT 1 — SYSTEMS ARCHITECT
 Responsibilities:
 
 - Read and internalize:
-  @docs/agents/decisions/architecture-improvement-plan.md
+  @docs/agents/planning/architecture-improvement-plan.md
   @.claude/skills/typescript-api-engineering/project-architecture-standards.md
   @.claude/skills/react-router-framework-mode/SKILL.md
 - Identify architectural gaps, reusable patterns, and opportunities for generic services/utilities.

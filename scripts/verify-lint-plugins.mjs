@@ -5,7 +5,7 @@
  * Both failures are invisible by construction — a plugin that is not loaded and
  * code that is clean produce the same empty output — so this lints a deliberate
  * violation per family rather than reading the config. See
- * `docs/cqms/decisions/ADR-042-oxlint-config-at-the-root.md`.
+ * `docs/decisions/ADR-042-oxlint-config-at-the-root.md`.
  *
  * Effects live here; the rules are pure in `./lib/lint-plugins.mjs`.
  *

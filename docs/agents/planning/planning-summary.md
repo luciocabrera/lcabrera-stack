@@ -1,9 +1,9 @@
 # Planning Session Summary (lcabrera-planner)
 
 > Orchestrator synthesis of a two-agent planning session (Systems Architect +
-> Implementation Engineer) over `docs/agents/decisions/architecture-improvement-plan.md`.
+> Implementation Engineer) over `docs/agents/planning/architecture-improvement-plan.md`.
 > **Draft — nothing created on GitHub.** Deliverables: [`issues.md`](./issues.md)
-> (19 issues + 5 epics) and [`adrs/`](./adrs/) (ADR-047–050 drafts). Creating
+> (19 issues + 5 epics) and [`adr-drafts/`](./adr-drafts/) (the `server-error-translation` draft–050 drafts). Creating
 > them is `vp run plan:issues`, which checks the backlog against the issue gate
 > and the label taxonomy before it calls `gh`.
 
@@ -30,7 +30,7 @@ cited location is real and the two "High/correctness" claims are **live defects*
 **Atomic create is not "just a transaction."** `SELECT MAX(order_id)+1` on one
 connection still races under READ COMMITTED without `FOR UPDATE`/advisory-lock or
 retry-on-`23505` (or migrating to a real Postgres sequence — the `scan-ingestion`
-house style). ADR-048 must pick the strategy; P-07 implements it. This is the
+house style). the `with-transaction` draft must pick the strategy; P-07 implements it. This is the
 highest-risk item and is sequenced late (Wave 3) behind the error layer that turns a
 residual collision into a clean typed conflict.
 
@@ -57,9 +57,9 @@ residual collision into a clean typed conflict.
 ```mermaid
 graph LR
   subgraph Wave1[Wave 1 · ADRs + Governance]
-    P01[P-01 ADR-047 errors]
-    P04[P-04 ADR-048 tx]
-    P10[P-10 ADR-049 keyset]
+    P01[P-01 the `server-error-translation` draft errors]
+    P04[P-04 the `with-transaction` draft tx]
+    P10[P-10 the `keyset-pagination` draft keyset]
     G03[G-03 register milestones]
   end
   subgraph Wave2[Wave 2 · @lcabrera/server]
@@ -101,19 +101,19 @@ the whole server foundation). P-08/P-12/P-13/P-14 are independent and paralleliz
 
 ## Risks & mitigations
 
-| Risk                                                      | Severity        | Mitigation                                                                                                |
-| --------------------------------------------------------- | --------------- | --------------------------------------------------------------------------------------------------------- |
-| `order_id` race → unhandled `23505`                       | High (live)     | P-07 after P-05/P-06; ADR-048 locks the strategy; error layer makes residual collisions clean             |
-| Raw pg detail leaks / wrong field                         | High (live)     | P-02/P-03 translate at persistence, P-06 maps to field-routed DU                                          |
-| Auth guard off on 3 entry points                          | High (security) | P-14 — but blocked on the RR fetcher→`/login` navigation bug; must return 401 JSON for `_api`             |
-| Every `@lcabrera/server` change is a publish event        | Medium          | dual exports parity + `api-surface:verify` + changeset baked into P-02/P-05/P-11/P-13 acceptance criteria |
-| Result DU-across-single-fetch enforced by convention only | Medium (silent) | keep classes server-side; review + serialization check (no gate)                                          |
-| Planning IDs ≠ issue numbers                              | Low             | `plan:issues` captures real numbers as it creates, then wires sub-issues from them                        |
+| Risk                                                      | Severity        | Mitigation                                                                                                         |
+| --------------------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `order_id` race → unhandled `23505`                       | High (live)     | P-07 after P-05/P-06; the `with-transaction` draft locks the strategy; error layer makes residual collisions clean |
+| Raw pg detail leaks / wrong field                         | High (live)     | P-02/P-03 translate at persistence, P-06 maps to field-routed DU                                                   |
+| Auth guard off on 3 entry points                          | High (security) | P-14 — but blocked on the RR fetcher→`/login` navigation bug; must return 401 JSON for `_api`                      |
+| Every `@lcabrera/server` change is a publish event        | Medium          | dual exports parity + `api-surface:verify` + changeset baked into P-02/P-05/P-11/P-13 acceptance criteria          |
+| Result DU-across-single-fetch enforced by convention only | Medium (silent) | keep classes server-side; review + serialization check (no gate)                                                   |
+| Planning IDs ≠ issue numbers                              | Low             | `plan:issues` captures real numbers as it creates, then wires sub-issues from them                                 |
 
 ## Governance gaps found
 
 1. **G-01** issue template lacks the `dependencies` block the convention mandates.
-2. **G-02** no ADR `_TEMPLATE.md` under `docs/cqms/decisions/` (ADRs authored freehand).
+2. **G-02** no ADR `_TEMPLATE.md` under `docs/decisions/` (ADRs authored freehand).
 3. **G-03** M1–M5 GitHub Milestones not confirmed registered.
 4. **G-04** no single cross-app-abstraction guideline (extract vs duplicate/ADR-039).
 
@@ -129,5 +129,5 @@ folder dialect.
 2. Preview with `vp run plan:issues -- --create --dry-run`, then run
    `vp run plan:issues -- --create` to create the Milestones and issues and
    attach each epic's children as real sub-issues.
-3. Promote ADR-047–050 out of `adrs/` into `docs/cqms/decisions/` (P-01/P-04/P-10 +
+3. Promote the `server-error-translation` draft–050 out of `adrs/` into `docs/decisions/` (P-01/P-04/P-10 +
    G-02), confirming the next-free number.
