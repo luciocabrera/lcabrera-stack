@@ -23,12 +23,17 @@ export const isBuiltPublicPackage = (manifest) =>
  *
  * tsdown emits ESM as `.mjs` with declarations beside it as `.d.mts`, and
  * `unbundle` keeps the `src` tree shape, so this is a pure path rewrite.
+ *
+ * Key order matters on the way out: Node matches export conditions in the order
+ * they are written, so `types` must come first or a resolver can take `default`
+ * and never look for the declarations. `--write` serialises this object straight
+ * into the manifest, so the order here is the order that ships.
  */
 export const toBuiltPaths = (sourceTarget) => {
   const built = sourceTarget
     .replace(/^\.\/src\//, './dist/')
     .replace(/\.tsx?$/, '');
-  return { default: `${built}.mjs`, types: `${built}.d.mts` };
+  return { types: `${built}.d.mts`, default: `${built}.mjs` };
 };
 
 /** Subpaths in one map but not the other, in both directions. */

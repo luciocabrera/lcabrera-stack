@@ -6,9 +6,15 @@
 > [`.github/skills/typescript-api-engineering/generic-architecture-standards.md`](../../../.github/skills/typescript-api-engineering/generic-architecture-standards.md)
 > and the reference feature `apps/react-router/src/routes/enterprise-orders/`.
 > When a recommendation here graduates into an enforced decision, promote it to a
-> real ADR under `docs/cqms/decisions/` (repo/package/tooling) and cite it by
-> number. This document is deliberately kept out of the ADR sequence to avoid
-> claiming authority it does not yet have.
+> real ADR in the home its tier calls for — `docs/decisions/` for the repo, the
+> published packages and the toolchain — and cite it by number ([ADR-048](../../decisions/ADR-048-adr-taxonomy-and-one-sequence.md)).
+> This document is deliberately kept out of the ADR sequence to avoid claiming
+> authority it does not yet have.
+>
+> **Promoted so far:** (c) error translation → [ADR-050](../../decisions/ADR-050-server-error-translation-and-result-contract.md);
+> the `tx` executor seam from (a)/(b) → [ADR-051](../../decisions/ADR-051-with-transaction-and-tx-executor-option.md);
+> P5 pool tuning → landed in `env.schema.ts` + `get-pool.util.ts` with no ADR (it
+> is configuration, not a decision anything else has to follow).
 
 ## Vision
 
@@ -116,7 +122,7 @@ Result DU crosses single-fetch → MUST be a plain serializable union, never a c
 Ranked by the combined score (see Scoring Summary). Only **(c)** is an
 unconditional adopt.
 
-### (c) Shared error-translation + serializable Result contract — ADOPT
+### (c) Shared error-translation + serializable Result contract — ADOPT (promoted → [ADR-050](../../decisions/ADR-050-server-error-translation-and-result-contract.md))
 
 - A node-only `mapDbError` in `@lcabrera/server` maps `pg` `DatabaseError` codes to
   typed domain errors (`UniqueConstraintViolationError`, `ForeignKeyViolationError`,
@@ -142,8 +148,10 @@ unconditional adopt.
   a stronger seam than a structural TS interface. A `type OrderRepository` adds a
   nominal contract but no new enforcement and one implementation. It also fights
   ADR-039 if shared cross-package.
-- The one part worth taking is threading an optional `tx?: PoolClient` through the
-  executors — but that belongs to the transaction work in (a), not to an interface.
+- The one part worth taking is threading an optional `tx` through the executors —
+  but that belongs to the transaction work in (a), not to an interface. Promoted →
+  [ADR-051](../../decisions/ADR-051-with-transaction-and-tx-executor-option.md),
+  which types it `ClientBase` rather than `PoolClient`.
 
 ### Performance workstream (separate from a/b/c — the actual latency wins)
 
@@ -162,10 +170,11 @@ measurable wins none of them address:
 - **P4 — Read-model projection.** Define a table-view column set distinct from the
   full detail set; keep large free-text columns out of the list query to shrink the
   serialized payload.
-- **P5 — Explicit pool tuning.** `getPool` sets only credentials, so pg defaults
-  apply (`max: 10`, no acquisition/statement timeouts). Make `max`,
-  `connectionTimeoutMillis`, `idleTimeoutMillis`, `statement_timeout` env-driven via
-  the Zod schema so the process degrades gracefully instead of stalling silently.
+- **P5 — Explicit pool tuning. LANDED.** `getPool` set only credentials, so pg
+  defaults applied (`max: 10`, no acquisition/statement timeouts). `max`,
+  `connectionTimeoutMillis`, `idleTimeoutMillis` and `statement_timeout` are now
+  env-driven through the shared Zod schema, so the process degrades gracefully
+  instead of stalling silently.
 - **P6 — Optional OpenTelemetry** on the use-case + repository boundaries, **only**
   with head-sampling + a batch/async exporter (a sync, unsampled exporter is itself
   a tail-latency bottleneck).

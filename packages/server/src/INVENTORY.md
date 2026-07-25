@@ -17,9 +17,12 @@ split this folder is built around.
 
 | Artifact              | Location                           | Description                                                                                                                                                           |
 | --------------------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `readEnvConfig`       | `db/env.schema.ts`                 | Zod schema + parser for `DB_HOST`/`DB_NAME`/`DB_PASSWORD`/`DB_PORT`/`DB_USER`                                                                                         |
-| `getPool`             | `db/get-pool.util.ts`              | Lazily-initialized `pg.Pool` singleton, one per Node process                                                                                                          |
+| `readEnvConfig`       | `db/env.schema.ts`                 | Zod schema + parser for the five `DB_*` credentials plus four optional pool-tuning keys (max, connection/idle/statement timeouts)                                     |
+| `getPool`             | `db/get-pool.util.ts`              | Lazily-initialized `pg.Pool` singleton, one per Node process, built from those tuning keys                                                                            |
 | `closePool`           | `db/get-pool.util.ts`              | Tears down the pool singleton (test teardown)                                                                                                                         |
+| `withTransaction`     | `db/with-transaction.util.ts`      | Borrows a pooled connection and runs a callback inside BEGIN/COMMIT/ROLLBACK, always releasing it — thread its `tx` through every executor in the sequence (ADR-051)  |
+| `runInTransaction`    | `db/run-in-transaction.util.ts`    | The same BEGIN/COMMIT/ROLLBACK over a connection the **caller** owns; opens and closes nothing (the migration runner's case)                                          |
+| `ExecutorOptions`     | `db/db.types.ts`                   | The optional `tx` seam every executor accepts, plus `TransactionClient` (pg's `ClientBase`) — kept off the pure `query-builder/` descriptors on purpose               |
 | `selectRows`          | `db/select-rows.util.ts`           | Builds a `SelectQueryDescriptor` and runs it on the pool — the one place `buildSelectQuery` meets `getPool`                                                           |
 | `selectDistinctRows`  | `db/select-distinct-rows.util.ts`  | `selectRows` + `distinct: true` — deduplicated rows over the same descriptor                                                                                          |
 | `selectFilterOptions` | `db/select-filter-options.util.ts` | Filter-dropdown read over `selectDistinctRows`: one column's distinct, non-empty (empty dropped only for `text`), ordered values → `{ values, hasMore }`              |
@@ -51,6 +54,31 @@ folder (`assertSafeIdentifier`, `assertColumnAllowed`, `appendFilterClause`,
 `buildOptionalNumericClauses`, `quoteIdentifier`) is a private,
 individually-tested implementation detail composed by those entry points —
 import them directly only from within `query-builder/`.
+
+---
+
+## `src/errors/`
+
+Typed translation of `pg` rejections, so no consumer ever sees a raw driver
+message and none has to hand-roll SQLSTATE detection ([ADR-050](../../../docs/decisions/ADR-050-server-error-translation-and-result-contract.md)).
+The executors apply `mapDbError` for you — reach for it directly only when you run
+SQL through `getPool` yourself.
+
+| Artifact                         | Location                                      | Description                                                                                                                                |
+| -------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `mapDbError`                     | `errors/map-db-error.util.ts`                 | `23505` → `UniqueConstraintViolationError`, `23503` → `ForeignKeyViolationError`, else `PersistenceError`; passes a translated one through |
+| `PersistenceError`               | `errors/persistence.error.ts`                 | Base translated failure: a safe message of ours, the driver rejection on `cause`, pg's routing fields on `fields`                          |
+| `UniqueConstraintViolationError` | `errors/unique-constraint-violation.error.ts` | `23505` — `fields.constraint` names the index, which is the consumer's key for routing to a form field                                     |
+| `ForeignKeyViolationError`       | `errors/foreign-key-violation.error.ts`       | `23503` — insert/update and delete directions share the code; `fields.constraint` tells them apart                                         |
+| `hasPostgresErrorCode`           | `errors/has-postgres-error-code.util.ts`      | Narrows `unknown` to a pg rejection with a given SQLSTATE (e.g. `55000`), structurally so two copies of `pg` cannot defeat it              |
+| `PgErrorFields`                  | `errors/errors.types.ts`                      | The `code`/`column`/`constraint` a translated error carries. `detail` is excluded on purpose — it quotes the offending values              |
+
+`readPgErrorFields` (`errors/read-pg-error-fields.util.ts`) and the two SQLSTATE
+constants (`errors/errors.constants.ts`) are private to this folder.
+
+**These are classes, and server-only.** React Router single fetch strips
+functions, so map one to a plain discriminated union at the action edge rather
+than returning it from a loader or action.
 
 ---
 

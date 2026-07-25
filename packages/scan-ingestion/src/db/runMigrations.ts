@@ -1,4 +1,5 @@
 import { readEnvConfig } from '@lcabrera/server/db/env.schema';
+import { runInTransaction } from '@lcabrera/server/db/run-in-transaction.util';
 import { readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -38,6 +39,13 @@ type ApplyMigrationArgs = {
   readonly file: string;
 };
 
+/**
+ * A migration and its bookkeeping row commit together or not at all, through
+ * `@lcabrera/server`'s shared transaction helper rather than a hand-rolled
+ * BEGIN/COMMIT/ROLLBACK. The helper takes the connection this runner already
+ * owns — the pool is no use here, since the runner talks to a database it may
+ * have just created.
+ */
 const applyMigration = async ({
   client,
   file,
@@ -47,19 +55,17 @@ const applyMigration = async ({
     targetPath: file,
   });
 
-  await client.query('BEGIN');
-  try {
-    await client.query(sql);
-    await client.query(
-      'INSERT INTO cqms.schema_migrations (filename) VALUES ($1)',
-      [file],
-    );
-    await client.query('COMMIT');
-    console.warn(`✅ Applied: ${file}`);
-  } catch (error) {
-    await client.query('ROLLBACK');
-    throw error;
-  }
+  await runInTransaction({
+    client,
+    run: async (tx) => {
+      await tx.query(sql);
+      await tx.query(
+        'INSERT INTO cqms.schema_migrations (filename) VALUES ($1)',
+        [file],
+      );
+    },
+  });
+  console.warn(`✅ Applied: ${file}`);
 };
 
 const initDatabase = async (): Promise<boolean> => {

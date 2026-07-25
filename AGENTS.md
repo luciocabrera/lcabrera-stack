@@ -95,6 +95,18 @@ package and reading the tarball rather than by inspection:
   and breaks a consumer's `createTheme`. `packages/ui/src/stylex-module-paths.test.ts`
   guards the paths; nothing guards the package name but this sentence.
 
+**`@lcabrera/server` never lets a raw `pg` error out, and every executor takes an
+optional `tx`.** A driver message names tables, columns and indexes and its
+`detail` line quotes the offending values, so the executors translate it into
+typed errors ([ADR-050](docs/decisions/ADR-050-server-error-translation-and-result-contract.md))
+— error **classes** stay server-only, and what crosses a loader/action boundary is
+a plain serializable union, because React Router single fetch drops functions
+silently. `withTransaction` is the seam for a multi-step write
+([ADR-051](docs/decisions/ADR-051-with-transaction-and-tx-executor-option.md)),
+with one trap worth knowing before you use it: an executor called _without_ `tx`
+inside the block runs on a different connection, outside the transaction, and
+nothing detects that.
+
 The apps are the harness. `apps/react-router` is a **React 19 + TypeScript +
 StyleX + React Router 7** SSR application that puts the packages under load —
 a feature-rich data Table with store-based state management, virtualization,

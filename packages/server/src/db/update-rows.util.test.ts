@@ -2,6 +2,9 @@ import type { Pool } from 'pg';
 
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
+import type { TransactionClient } from './db.types.ts';
+
+import { UniqueConstraintViolationError } from '../errors/unique-constraint-violation.error.ts';
 import { getPool } from './get-pool.util.ts';
 import { updateRows } from './update-rows.util.ts';
 
@@ -49,5 +52,43 @@ describe('updateRows', () => {
     ).rejects.toThrow();
 
     expect(query).not.toHaveBeenCalled();
+  });
+
+  it('runs on the transaction client when tx is passed, not the pool', async () => {
+    const txQuery = vi.fn().mockResolvedValue({ rows: [] });
+
+    await updateRows({
+      filters: [{ column: 'widget_id', operator: 'eq', value: 42 }],
+      schema: 'inventory',
+      table: 'widgets',
+      tx: { query: txQuery } as unknown as TransactionClient,
+      values: { sku: 'W-9' },
+    });
+
+    expect(txQuery).toHaveBeenCalledWith(
+      'UPDATE "inventory"."widgets" SET "sku" = $1 WHERE "widget_id" = $2 RETURNING *',
+      ['W-9', 42],
+    );
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  it('translates a 23505 collision instead of leaking the driver message', async () => {
+    query.mockRejectedValue(
+      Object.assign(
+        new Error(
+          'duplicate key value violates unique constraint "widgets_sku_key"',
+        ),
+        { code: '23505', constraint: 'widgets_sku_key' },
+      ),
+    );
+
+    await expect(
+      updateRows({
+        filters: [{ column: 'widget_id', operator: 'eq', value: 42 }],
+        schema: 'inventory',
+        table: 'widgets',
+        values: { sku: 'W-9' },
+      }),
+    ).rejects.toThrow(UniqueConstraintViolationError);
   });
 });

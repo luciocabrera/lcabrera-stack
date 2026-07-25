@@ -2,6 +2,9 @@ import type { Pool } from 'pg';
 
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
+import type { TransactionClient } from './db.types.ts';
+
+import { ForeignKeyViolationError } from '../errors/foreign-key-violation.error.ts';
 import { deleteRows } from './delete-rows.util.ts';
 import { getPool } from './get-pool.util.ts';
 
@@ -43,5 +46,49 @@ describe('deleteRows', () => {
     ).rejects.toThrow();
 
     expect(query).not.toHaveBeenCalled();
+  });
+
+  it('runs on the transaction client when tx is passed, not the pool', async () => {
+    const txQuery = vi.fn().mockResolvedValue({ rows: [] });
+
+    await deleteRows({
+      filters: [{ column: 'widget_id', operator: 'eq', value: 7 }],
+      schema: 'inventory',
+      table: 'widgets',
+      tx: { query: txQuery } as unknown as TransactionClient,
+    });
+
+    expect(txQuery).toHaveBeenCalledWith(
+      'DELETE FROM "inventory"."widgets" WHERE "widget_id" = $1 RETURNING *',
+      [7],
+    );
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  it('translates a 23503 rejection from a child row still referencing the target', async () => {
+    query.mockRejectedValue(
+      Object.assign(
+        new Error(
+          'update or delete on table "widgets" violates foreign key constraint "parts_widget_id_fkey" on table "parts"',
+        ),
+        { code: '23503', constraint: 'parts_widget_id_fkey' },
+      ),
+    );
+
+    const rejects = expect(
+      deleteRows({
+        filters: [{ column: 'widget_id', operator: 'eq', value: 7 }],
+        schema: 'inventory',
+        table: 'widgets',
+      }),
+    ).rejects;
+
+    await rejects.toThrow(ForeignKeyViolationError);
+    // The safe message, not the driver's — asserting the exact string is what
+    // proves the pg text did not survive the translation.
+    await rejects.toThrow('A referenced record does not exist.');
+    await rejects.toMatchObject({
+      fields: { constraint: 'parts_widget_id_fkey' },
+    });
   });
 });

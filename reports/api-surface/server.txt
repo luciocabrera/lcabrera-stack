@@ -8,26 +8,30 @@ hashSecret [const] ({ secret }: HashSecretArgs) => string
 ## ./crypto/is-secret-hash-valid.util
 isSecretHashValid [const] ({ secret, secretHash }: IsSecretHashValidArgs) => boolean
 
+## ./db/db.types
+ExecutorOptions [type] { readonly tx?: TransactionClient; }
+TransactionClient [type] ClientBase
+
 ## ./db/delete-rows.util
-deleteRows [const] <TRow extends QueryResultRow>(descriptor: DeleteQueryDescriptor) => Promise<readonly TRow[]>
+deleteRows [const] <TRow extends QueryResultRow>({ tx, ...descriptor }: DeleteQueryDescriptor & ExecutorOptions) => Promise<readonly TRow[]>
 
 ## ./db/env.schema
 EnvConfig [type] z.infer<typeof envSchema>
-envSchema [const] z.ZodObject<{ DB_HOST: z.ZodString; DB_NAME: z.ZodString; DB_PASSWORD: z.ZodString; DB_PORT: z.ZodCoercedNumber<unknown>; DB_USER: z.ZodString; }, z.core.$strip>
+envSchema [const] z.ZodObject<{ DB_CONNECTION_TIMEOUT_MS: z.ZodDefault<z.ZodCoercedNumber<unknown>>; DB_HOST: z.ZodString; DB_IDLE_TIMEOUT_MS: z.ZodDefault<z.ZodCoercedNumber<unknown>>; DB_NAME: z.ZodString; DB_PASSWORD: z.ZodString; DB_POOL_MAX: z.ZodDefault<z.ZodCoercedNumber<unknown>>; DB_PORT: z.ZodCoercedNumber<unknown>; DB_STATEMENT_TIMEOUT_MS: z.ZodDefault<z.ZodCoercedNumber<unknown>>; DB_USER: z.ZodString; }, z.core.$strip>
 readEnvConfig [const] ({ env }: ReadEnvConfigArgs) => EnvConfig
 
 ## ./db/get-max-value.util
-getMaxValue [const] (descriptor: MaxValueQueryDescriptor) => Promise<number>
+getMaxValue [const] ({ tx, ...descriptor }: ExecutorOptions & MaxValueQueryDescriptor) => Promise<number>
 
 ## ./db/get-pool.util
 closePool [const] () => Promise<void>
 getPool [const] () => Pool
 
 ## ./db/get-rows-count.util
-getRowsCount [const] (descriptor: CountQueryDescriptor & { readonly column: string; }) => Promise<number>
+getRowsCount [const] ({ tx, ...descriptor }: CountQueryDescriptor & ExecutorOptions & { readonly column: string; }) => Promise<number>
 
 ## ./db/insert-row.util
-insertRow [const] <TRow extends QueryResultRow>(descriptor: InsertQueryDescriptor) => Promise<readonly TRow[]>
+insertRow [const] <TRow extends QueryResultRow>({ tx, ...descriptor }: ExecutorOptions & InsertQueryDescriptor) => Promise<readonly TRow[]>
 
 ## ./db/query-builder/build-count-query.util
 buildCountQuery [const] ({ allowedColumns, column, filters, schema, table }: CountQueryDescriptor) => BuiltQuery
@@ -68,17 +72,41 @@ SelectQueryDescriptor [type] { /** * Opt-in authorization check: when provided, 
 UnaryOperator [type] 'isNotNull'
 UpdateQueryDescriptor [type] { /** Same opt-in authorization semantics as SelectQueryDescriptor. */ readonly allowedColumns?: readonly string[]; /** At least one filter is required — an unfiltered UPDATE is refused. */ readonly filters: readonly QueryFilter[]; /** Columns to return from the updated row(s); `['*']` returns the whole row. */ readonly returning?: readonly string[]; readonly schema: string; readonly table: string; /** Column→value map for the SET clause; values become `$n` params. */ readonly values: Readonly<Record<string, unknown>>; }
 
+## ./db/run-in-transaction.util
+runInTransaction [const] <TResult>({ client, run }: RunInTransactionArgs<TResult>) => Promise<TResult>
+
 ## ./db/select-distinct-rows.util
-selectDistinctRows [const] <TRow extends QueryResultRow>(descriptor: SelectQueryDescriptor) => Promise<readonly TRow[]>
+selectDistinctRows [const] <TRow extends QueryResultRow>(descriptor: ExecutorOptions & SelectQueryDescriptor) => Promise<readonly TRow[]>
 
 ## ./db/select-filter-options.util
-selectFilterOptions [const] ({ allowedColumns, column, columnType, limit, offset, schema, table }: SelectFilterOptionsArgs) => Promise<FilterOptionsPage>
+selectFilterOptions [const] ({ allowedColumns, column, columnType, limit, offset, schema, table, tx }: SelectFilterOptionsArgs) => Promise<FilterOptionsPage>
 
 ## ./db/select-rows.util
-selectRows [const] <TRow extends QueryResultRow>(descriptor: SelectQueryDescriptor) => Promise<readonly TRow[]>
+selectRows [const] <TRow extends QueryResultRow>({ tx, ...descriptor }: ExecutorOptions & SelectQueryDescriptor) => Promise<readonly TRow[]>
 
 ## ./db/update-rows.util
-updateRows [const] <TRow extends QueryResultRow>(descriptor: UpdateQueryDescriptor) => Promise<readonly TRow[]>
+updateRows [const] <TRow extends QueryResultRow>({ tx, ...descriptor }: ExecutorOptions & UpdateQueryDescriptor) => Promise<readonly TRow[]>
+
+## ./db/with-transaction.util
+withTransaction [const] <TResult>({ run }: WithTransactionArgs<TResult>) => Promise<TResult>
+
+## ./errors/errors.types
+PgErrorFields [type] { readonly code?: string; readonly column?: string; readonly constraint?: string; }
+
+## ./errors/foreign-key-violation.error
+ForeignKeyViolationError [class] ForeignKeyViolationError
+
+## ./errors/has-postgres-error-code.util
+hasPostgresErrorCode [const] ({ code, error }: HasPostgresErrorCodeArgs) => boolean
+
+## ./errors/map-db-error.util
+mapDbError [const] (error: unknown) => PersistenceError
+
+## ./errors/persistence.error
+PersistenceError [class] PersistenceError
+
+## ./errors/unique-constraint-violation.error
+UniqueConstraintViolationError [class] UniqueConstraintViolationError
 
 ## ./filters/filters.types
 BooleanFilter [type] { readonly type: 'boolean'; readonly value: boolean; }

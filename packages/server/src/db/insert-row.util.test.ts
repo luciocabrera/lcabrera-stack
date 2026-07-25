@@ -2,6 +2,10 @@ import type { Pool } from 'pg';
 
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
+import type { TransactionClient } from './db.types.ts';
+
+import { ForeignKeyViolationError } from '../errors/foreign-key-violation.error.ts';
+import { UniqueConstraintViolationError } from '../errors/unique-constraint-violation.error.ts';
 import { getPool } from './get-pool.util.ts';
 import { insertRow } from './insert-row.util.ts';
 
@@ -59,5 +63,63 @@ describe('insertRow', () => {
     ).rejects.toThrow();
 
     expect(query).not.toHaveBeenCalled();
+  });
+
+  it('runs on the transaction client when tx is passed, not the pool', async () => {
+    const txQuery = vi.fn().mockResolvedValue({ rows: [] });
+
+    await insertRow({
+      schema: 'inventory',
+      table: 'widgets',
+      tx: { query: txQuery } as unknown as TransactionClient,
+      values: { sku: 'W-3' },
+    });
+
+    expect(txQuery).toHaveBeenCalledWith(
+      'INSERT INTO "inventory"."widgets" ("sku") VALUES ($1) RETURNING *',
+      ['W-3'],
+    );
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  it('translates a 23505 collision instead of leaking the driver message', async () => {
+    query.mockRejectedValue(
+      Object.assign(
+        new Error(
+          'duplicate key value violates unique constraint "widgets_sku_key"',
+        ),
+        { code: '23505', constraint: 'widgets_sku_key' },
+      ),
+    );
+
+    const rejects = expect(
+      insertRow({
+        schema: 'inventory',
+        table: 'widgets',
+        values: { sku: 'W-1' },
+      }),
+    ).rejects;
+
+    await rejects.toThrow(UniqueConstraintViolationError);
+    // The safe message, not the driver's — asserting the exact string is what
+    // proves the pg text did not survive the translation.
+    await rejects.toThrow('A record with these values already exists.');
+    await rejects.toMatchObject({ fields: { constraint: 'widgets_sku_key' } });
+  });
+
+  it('translates a 23503 foreign-key rejection', async () => {
+    query.mockRejectedValue(
+      Object.assign(new Error('violates foreign key constraint'), {
+        code: '23503',
+      }),
+    );
+
+    await expect(
+      insertRow({
+        schema: 'inventory',
+        table: 'widgets',
+        values: { sku: 'W-1' },
+      }),
+    ).rejects.toThrow(ForeignKeyViolationError);
   });
 });

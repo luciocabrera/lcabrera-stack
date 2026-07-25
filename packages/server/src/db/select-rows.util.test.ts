@@ -2,6 +2,9 @@ import type { Pool } from 'pg';
 
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
+import type { TransactionClient } from './db.types.ts';
+
+import { PersistenceError } from '../errors/persistence.error.ts';
 import { getPool } from './get-pool.util.ts';
 import { selectRows } from './select-rows.util.ts';
 
@@ -61,5 +64,43 @@ describe('selectRows', () => {
     ).rejects.toThrow();
 
     expect(query).not.toHaveBeenCalled();
+  });
+
+  it('reads on the transaction client when tx is passed, so it sees uncommitted writes', async () => {
+    const txQuery = vi.fn().mockResolvedValue({ rows: [] });
+
+    await selectRows({
+      fields: ['id'],
+      schema: 'llm_usage',
+      table: 'v_daily_llm_cost',
+      tx: { query: txQuery } as unknown as TransactionClient,
+    });
+
+    expect(txQuery).toHaveBeenCalledWith(
+      'SELECT "id" FROM "llm_usage"."v_daily_llm_cost"',
+      [],
+    );
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  it('translates a driver rejection, so a read cannot leak schema detail either', async () => {
+    query.mockRejectedValue(
+      Object.assign(new Error('column "secret_internal_col" does not exist'), {
+        code: '42703',
+      }),
+    );
+
+    const rejects = expect(
+      selectRows({
+        fields: ['id'],
+        schema: 'llm_usage',
+        table: 'v_daily_llm_cost',
+      }),
+    ).rejects;
+
+    await rejects.toThrow(PersistenceError);
+    // The safe message, not the driver's — asserting the exact string is what
+    // proves the column name did not survive the translation.
+    await rejects.toThrow('The database rejected the operation.');
   });
 });

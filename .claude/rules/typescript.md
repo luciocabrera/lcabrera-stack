@@ -75,6 +75,36 @@ type UserId = string & { readonly __brand: 'UserId' };
 | Test      | `*.test.tsx`                 | `Card.test.tsx`             |
 | Constant  | `*.constants.ts`             | `api.constants.ts`          |
 | Schema    | `*.schema.ts`                | `user.schema.ts`            |
+| Error     | `*.error.ts`                 | `persistence.error.ts`      |
+
+**In a domain folder, `*.types.ts` / `*.constants.ts` is named after the folder**
+— `filters/filters.types.ts`, `crypto/crypto.constants.ts`, `db/db.types.ts`,
+`errors/errors.constants.ts`. A domain folder is one whose name _is_ the subject:
+everything inside belongs to it, so the shared types and constants carry the
+domain's name rather than a description of their contents, and there is exactly
+one of each. A sub-domain gets its own folder and repeats the pattern
+(`db/query-builder/query-builder.types.ts`). `packages/server`, `packages/api` and
+`packages/utils` are built this way throughout, so a new file there follows it
+without exception.
+
+Two folder shapes are **not** domain folders and do not take the rule — check
+which one you are in before renaming anything:
+
+- **An artifact folder** — one holding a component, context or route module — names
+  the file after the artifact, because the folder is a container for that one
+  thing: `TableConfig/TableConfigContext.types.ts`,
+  `project-detail/ProjectDetail.types.ts`, `trigger-scan/triggerScan.constants.ts`.
+  `packages/ui/src/PATTERNS.md` owns that spelling.
+- **A catch-all folder** — `types/`, `constants/`, `utils/` — names the file after
+  its subject, because the folder names a _kind_, not a domain, and holds many:
+  `types/theme.types.ts`, `constants/app.constants.ts`. `types/types.types.ts` is
+  the reductio.
+
+None of this is gate-enforced yet — `local-rules/filename-convention` checks the
+base-name case, not the folder pairing (#422).
+
+**One error class per `*.error.ts` file**, same rule as `*.util.ts` — the class,
+its `Args` type, and a colocated `*.error.test.ts`.
 
 **The base-name CASE is gate-enforced** by the `local-rules/filename-convention`
 ESLint rule (part of the `lint:eslint` pass) — a wrong-cased file fails the
