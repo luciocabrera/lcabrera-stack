@@ -46,7 +46,6 @@ const IGNORED_SEGMENTS = new Set([
   'coverage',
   '.react-router',
   'reports',
-  'miscelanious',
 ]);
 
 /** Extension -> which fixers apply. Mirrors each tool's own file scoping. */

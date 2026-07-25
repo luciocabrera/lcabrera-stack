@@ -15,7 +15,6 @@
     "**/.react-router/**",
     "**/.tmp/**",
     "**/coverage/**",
-    "miscelanious/**",
     "reports/**"
   ],
   "ignoreDependencies": [

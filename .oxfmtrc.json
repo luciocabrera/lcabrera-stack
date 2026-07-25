@@ -2,13 +2,7 @@
   "arrowParens": "always",
   "bracketSpacing": true,
   "endOfLine": "lf",
-  "ignorePatterns": [
-    ".react-router/",
-    "build/",
-    "dist/",
-    "miscelanious/",
-    "node_modules/"
-  ],
+  "ignorePatterns": [".react-router/", "build/", "dist/", "node_modules/"],
   "jsxSingleQuote": true,
   "printWidth": 80,
   "semi": true,

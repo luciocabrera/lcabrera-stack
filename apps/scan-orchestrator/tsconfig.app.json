@@ -23,6 +23,6 @@
     "types": ["node"],
     "verbatimModuleSyntax": true
   },
-  "exclude": ["utils"],
+  "exclude": [],
   "include": ["src", "vite.config.ts"]
 }

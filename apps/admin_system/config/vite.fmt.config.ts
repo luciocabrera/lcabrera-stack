@@ -4,7 +4,6 @@ export const fmtConfig = createFmtConfig({
   ignorePatterns: [
     '.react-router/',
     'build/',
-    'miscelanious/',
     '../../packages/eslint-local-rules/',
   ],
 });
