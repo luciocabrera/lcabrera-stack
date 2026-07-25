@@ -60,7 +60,7 @@
 
 ## Implementation issues
 
-### P-01 — `docs(cqms): ADR — DB error-translation + serializable Result contract`
+### P-01 — `docs(server): ADR — DB error-translation + serializable Result contract`
 
 **1. Problem Statement.** Raw `pg` error detail leaks to the client and mis-routes to
 a hard-coded field (`new-order.action.ts`, `edit-order.action.ts`). The
@@ -181,7 +181,7 @@ dependencies:
 
 ---
 
-### P-04 — `docs(cqms): ADR — withTransaction + tx?: PoolClient executor param`
+### P-04 — `docs(server): ADR — withTransaction + tx?: PoolClient executor param`
 
 **1. Problem Statement.** No transaction seam exists; the atomic-create fix needs a
 sanctioned pattern and a documented locking/retry strategy first.
@@ -420,7 +420,7 @@ dependencies: { blocking: [], blockedBy: [P-08], parent: E-3, children: [] }
 
 ---
 
-### P-10 — `docs(cqms): ADR — keyset pagination for infinite scroll`
+### P-10 — `docs(server): ADR — keyset pagination for infinite scroll`
 
 **1. Problem Statement.** `OFFSET k` load-more is O(offset); a keyset cursor over the
 ADR-008 total order is O(limit) but needs a sanctioned decision.
@@ -661,14 +661,15 @@ the convention to match), and decide whether `coordination:verify` should check 
 **Acceptance.** Template and convention agree; a new issue prompts for dependencies.
 **Metadata.** `labels: [type: docs]`; M1; Wave 1; `parent: E-4`.
 
-### G-02 — `docs(cqms): add ADR _TEMPLATE.md + scaffold`
+### G-02 — `docs(tooling): add ADR _TEMPLATE.md + scaffold`
 
 **Problem.** `docs/decisions/` holds no `_TEMPLATE.md` (confirmed absent); ADRs are
-authored freehand, and the dual ADR-001..012 numbering caveat (CLAUDE.md) is easy to
-trip.
+authored freehand. ADR-048 settled the taxonomy and `vp run adr:verify` now checks
+placement, naming and numbering — a template would carry the section shape the gate
+does not check.
 **Objective.** Create an ADR `_TEMPLATE.md` under `docs/decisions/`
-(Context/Problem/Options/Decision/Consequences/References) noting the dual-sequence
-caveat and "cite low ADR numbers by path".
+(Context/Problem/Options/Decision/Consequences/References), pointing at ADR-048 for
+placement and at the grandfathered ADR-001..012 range.
 **Acceptance.** Template exists; the four promoted ADRs (047–050) use it.
 **Metadata.** `labels: [type: docs]`; M1; Wave 1; `parent: E-4`.
 
