@@ -1,3 +1,4 @@
+import { hasPostgresErrorCode } from '@lcabrera/server/errors/has-postgres-error-code.util';
 import { isCheckboxChecked } from '@lcabrera/utils/forms/is-checkbox-checked.util';
 import { discoverProjectWorkspaces } from '@repo/scan-ingestion/ingestion/workspaces/discoverProjectWorkspaces.util';
 import { getProjectActiveRun } from '@repo/scan-ingestion/queries/getProjectActiveRun.util';
@@ -12,7 +13,6 @@ import { requireUser } from '@/auth/requireUser.util';
 import { parseRouteParams } from '../utils/parseRouteParams.util';
 import { computeFanOutCount } from './computeFanOutCount.util';
 import { formatRunElapsed } from './formatRunElapsed.util';
-import { hasPostgresErrorCode } from './hasPostgresErrorCode.util';
 import { FAN_OUT_CONFIRMATION_THRESHOLD } from './triggerScan.constants';
 import { triggerScanSchema } from './triggerScan.schema';
 

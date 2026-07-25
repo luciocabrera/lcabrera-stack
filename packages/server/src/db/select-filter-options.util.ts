@@ -1,3 +1,4 @@
+import type { ExecutorOptions } from './db.types.ts';
 import type {
   ColumnType,
   QueryFilter,
@@ -10,7 +11,7 @@ type FilterOptionsPage = {
   readonly values: readonly string[];
 };
 
-type SelectFilterOptionsArgs = {
+type SelectFilterOptionsArgs = ExecutorOptions & {
   readonly allowedColumns?: readonly string[];
   readonly column: string;
   readonly columnType?: ColumnType;
@@ -39,6 +40,7 @@ export const selectFilterOptions = async ({
   offset,
   schema,
   table,
+  tx,
 }: SelectFilterOptionsArgs): Promise<FilterOptionsPage> => {
   const emptyStringExclusion: readonly QueryFilter[] =
     columnType === 'text' ? [{ column, operator: 'neq', value: '' }] : [];
@@ -56,6 +58,7 @@ export const selectFilterOptions = async ({
     schema,
     sort: [{ column, direction: 'asc' }],
     table,
+    tx,
   });
   const values = rows
     .map((row) => row[column])

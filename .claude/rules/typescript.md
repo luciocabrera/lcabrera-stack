@@ -75,6 +75,17 @@ type UserId = string & { readonly __brand: 'UserId' };
 | Test      | `*.test.tsx`                 | `Card.test.tsx`             |
 | Constant  | `*.constants.ts`             | `api.constants.ts`          |
 | Schema    | `*.schema.ts`                | `user.schema.ts`            |
+| Error     | `*.error.ts`                 | `persistence.error.ts`      |
+
+**A `*.types.ts` / `*.constants.ts` file is named after the folder that owns it**
+— `filters/filters.types.ts`, `crypto/crypto.constants.ts`,
+`db/db.types.ts`, `errors/errors.constants.ts`. Everything in that folder belongs
+to one domain, so its shared types and constants carry the domain's name, not a
+description of their contents. A sub-domain gets its own folder and repeats the
+pattern (`db/query-builder/query-builder.types.ts`).
+
+**One error class per `*.error.ts` file**, same rule as `*.util.ts` — the class,
+its `Args` type, and a colocated `*.error.test.ts`.
 
 **The base-name CASE is gate-enforced** by the `local-rules/filename-convention`
 ESLint rule (part of the `lint:eslint` pass) — a wrong-cased file fails the

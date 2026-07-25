@@ -2,6 +2,9 @@ import type { Pool } from 'pg';
 
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
+import type { TransactionClient } from './db.types.ts';
+
+import { PersistenceError } from '../errors/persistence.error.ts';
 import { getMaxValue } from './get-max-value.util.ts';
 import { getPool } from './get-pool.util.ts';
 
@@ -55,5 +58,35 @@ describe('getMaxValue', () => {
     ).rejects.toThrow();
 
     expect(query).not.toHaveBeenCalled();
+  });
+
+  it('reads on the transaction client when tx is passed — the atomic-allocation path', async () => {
+    const txQuery = vi.fn().mockResolvedValue({ rows: [{ max: 7 }] });
+
+    const result = await getMaxValue({
+      column: 'order_id',
+      schema: 'public',
+      table: 'enterprise_orders',
+      tx: { query: txQuery } as unknown as TransactionClient,
+    });
+
+    expect(result).toBe(7);
+    expect(txQuery).toHaveBeenCalledWith(
+      'SELECT COALESCE(MAX("order_id"), 0) AS max FROM "public"."enterprise_orders"',
+      [],
+    );
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  it('translates a driver rejection', async () => {
+    query.mockRejectedValue(new Error('connection terminated unexpectedly'));
+
+    await expect(
+      getMaxValue({
+        column: 'order_id',
+        schema: 'public',
+        table: 'enterprise_orders',
+      }),
+    ).rejects.toThrow(PersistenceError);
   });
 });

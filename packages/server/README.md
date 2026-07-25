@@ -43,17 +43,32 @@ without a database.
 
 ### Executing — `@lcabrera/server/db/*`
 
-The one place the pure builders meet a connection pool.
+The one place the pure builders meet a connection. Every executor takes an
+optional `tx` and translates driver rejections (see the two sections below).
 
-| Import               | What it does                                                                          |
-| -------------------- | ------------------------------------------------------------------------------------- |
-| `get-pool.util`      | `getPool` / `closePool` — a lazily-initialised `pg.Pool` singleton                    |
-| `env.schema`         | `readEnvConfig` — Zod-validated `DB_HOST`/`DB_NAME`/`DB_PASSWORD`/`DB_PORT`/`DB_USER` |
-| `select-rows.util`   | Builds a select descriptor and runs it                                                |
-| `insert-row.util`    | Builds an insert and runs it; defaults to `RETURNING *`                               |
-| `update-rows.util`   | Builds an update and runs it; defaults to `RETURNING *`                               |
-| `delete-rows.util`   | Builds a delete and runs it; defaults to `RETURNING *`                                |
-| `get-max-value.util` | Returns the numeric `MAX(col)`, or 0 for an empty table                               |
+| Import                    | What it does                                                                        |
+| ------------------------- | ----------------------------------------------------------------------------------- |
+| `get-pool.util`           | `getPool` / `closePool` — a lazily-initialised `pg.Pool` singleton                  |
+| `env.schema`              | `readEnvConfig` — Zod-validated `DB_*` credentials plus optional pool tuning        |
+| `db.types`                | `ExecutorOptions` (the optional `tx`) and `TransactionClient`                       |
+| `select-rows.util`        | Builds a select descriptor and runs it                                              |
+| `insert-row.util`         | Builds an insert and runs it; defaults to `RETURNING *`                             |
+| `update-rows.util`        | Builds an update and runs it; defaults to `RETURNING *`                             |
+| `delete-rows.util`        | Builds a delete and runs it; defaults to `RETURNING *`                              |
+| `get-max-value.util`      | Returns the numeric `MAX(col)`, or 0 for an empty table                             |
+| `with-transaction.util`   | Runs a callback on one pooled connection in BEGIN/COMMIT/ROLLBACK, always releasing |
+| `run-in-transaction.util` | The same, over a connection you opened yourself; opens and closes nothing           |
+
+### Typed errors — `@lcabrera/server/errors/*`
+
+| Import                              | What it does                                                                  |
+| ----------------------------------- | ----------------------------------------------------------------------------- |
+| `map-db-error.util`                 | SQLSTATE → a typed error; returns an already-translated one unchanged         |
+| `persistence.error`                 | `PersistenceError` — the base class and the fallback                          |
+| `unique-constraint-violation.error` | `23505`; `fields.constraint` names the index                                  |
+| `foreign-key-violation.error`       | `23503`; `fields.constraint` tells the insert and delete directions apart     |
+| `has-postgres-error-code.util`      | Narrows `unknown` to a pg rejection with any SQLSTATE you name                |
+| `errors.types`                      | `PgErrorFields` — the `code`/`column`/`constraint` a translated error carries |
 
 ### Column filters — `@lcabrera/server/filters/*`
 
@@ -126,6 +141,69 @@ const rows = await selectRows<Order>({
 ```
 
 An identifier outside the list throws before any SQL is built.
+
+### Handle a constraint violation without leaking your schema
+
+A `pg` error message names your tables, columns and indexes, and its `detail` line
+quotes the values that collided. Every executor translates one before it reaches
+you, so what you catch is typed and safe to act on:
+
+```ts
+import { insertRow } from '@lcabrera/server/db/insert-row.util';
+import { UniqueConstraintViolationError } from '@lcabrera/server/errors/unique-constraint-violation.error';
+
+try {
+  await insertRow({ schema: 'sales', table: 'orders', values });
+} catch (error) {
+  if (error instanceof UniqueConstraintViolationError) {
+    // `constraint` is the index Postgres refused — map it to the field that owns it.
+    return { field: fieldForConstraint(error.fields.constraint), ok: false };
+  }
+  throw error;
+}
+```
+
+The message on a translated error is ours, not the driver's; the original stays on
+`error.cause` for your server logs. `PersistenceError` is the base class, so one
+`instanceof PersistenceError` catches every translated failure.
+
+These are **classes**, so they are server-side only. If you are on a framework
+that serialises loader/action results — React Router single fetch, for one —
+convert to plain data before returning; class instances lose their methods
+silently.
+
+### Make a read-then-write atomic
+
+```ts
+import { getMaxValue } from '@lcabrera/server/db/get-max-value.util';
+import { insertRow } from '@lcabrera/server/db/insert-row.util';
+import { withTransaction } from '@lcabrera/server/db/with-transaction.util';
+
+const order = await withTransaction({
+  run: async (tx) => {
+    const maxId = await getMaxValue({
+      column: 'id',
+      schema: 'sales',
+      table: 'orders',
+      tx,
+    });
+
+    return insertRow({
+      schema: 'sales',
+      table: 'orders',
+      tx,
+      values: { ...values, id: maxId + 1 },
+    });
+  },
+});
+```
+
+Two things to know. **Pass `tx` to every step** — an executor called without it
+uses the pool singleton, so it runs on a different connection, outside your
+transaction, and commits on its own. And **a transaction alone does not close a
+read-then-write race**: under READ COMMITTED two sessions can still read the same
+`MAX`. Take a lock (`pg_advisory_xact_lock`) or retry on the typed `23505`; better
+still, give the column a sequence.
 
 ### Map a table's filter state into a query
 
@@ -211,8 +289,14 @@ expiry trivially testable.
   typecheck.
 - **No unfiltered mutations** — `buildUpdateQuery` and `buildDeleteQuery` require
   at least one filter and throw without one.
+- **No raw driver errors escape** — every executor translates a `pg` rejection
+  into a typed error carrying a message of ours; the driver's stays on `cause`.
 - **Identifiers validated, values parameterised** — always, with an opt-in
   allow-list for request-derived column names.
+- **A bounded pool** — `DB_POOL_MAX`, `DB_CONNECTION_TIMEOUT_MS`,
+  `DB_IDLE_TIMEOUT_MS` and `DB_STATEMENT_TIMEOUT_MS` are optional and defaulted, so
+  connection acquisition and statement duration are bounded out of the box rather
+  than waiting forever.
 - **Pure builders, isolated execution** — `query-builder/` never touches a
   connection.
 - **Published as compiled ESM** (`.mjs` + `.d.mts`) with source maps and

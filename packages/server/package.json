@@ -30,6 +30,7 @@
   "exports": {
     "./crypto/hash-secret.util": "./src/crypto/hash-secret.util.ts",
     "./crypto/is-secret-hash-valid.util": "./src/crypto/is-secret-hash-valid.util.ts",
+    "./db/db.types": "./src/db/db.types.ts",
     "./db/delete-rows.util": "./src/db/delete-rows.util.ts",
     "./db/env.schema": "./src/db/env.schema.ts",
     "./db/get-max-value.util": "./src/db/get-max-value.util.ts",
@@ -45,10 +46,18 @@
     "./db/query-builder/build-select-query.util": "./src/db/query-builder/build-select-query.util.ts",
     "./db/query-builder/build-update-query.util": "./src/db/query-builder/build-update-query.util.ts",
     "./db/query-builder/query-builder.types": "./src/db/query-builder/query-builder.types.ts",
+    "./db/run-in-transaction.util": "./src/db/run-in-transaction.util.ts",
     "./db/select-distinct-rows.util": "./src/db/select-distinct-rows.util.ts",
     "./db/select-filter-options.util": "./src/db/select-filter-options.util.ts",
     "./db/select-rows.util": "./src/db/select-rows.util.ts",
     "./db/update-rows.util": "./src/db/update-rows.util.ts",
+    "./db/with-transaction.util": "./src/db/with-transaction.util.ts",
+    "./errors/errors.types": "./src/errors/errors.types.ts",
+    "./errors/foreign-key-violation.error": "./src/errors/foreign-key-violation.error.ts",
+    "./errors/has-postgres-error-code.util": "./src/errors/has-postgres-error-code.util.ts",
+    "./errors/map-db-error.util": "./src/errors/map-db-error.util.ts",
+    "./errors/persistence.error": "./src/errors/persistence.error.ts",
+    "./errors/unique-constraint-violation.error": "./src/errors/unique-constraint-violation.error.ts",
     "./filters/filters.types": "./src/filters/filters.types.ts",
     "./filters/to-date-query-filters.util": "./src/filters/to-date-query-filters.util.ts",
     "./filters/to-number-query-filters.util": "./src/filters/to-number-query-filters.util.ts",
@@ -69,6 +78,10 @@
       "./crypto/is-secret-hash-valid.util": {
         "types": "./dist/crypto/is-secret-hash-valid.util.d.mts",
         "default": "./dist/crypto/is-secret-hash-valid.util.mjs"
+      },
+      "./db/db.types": {
+        "types": "./dist/db/db.types.d.mts",
+        "default": "./dist/db/db.types.mjs"
       },
       "./db/delete-rows.util": {
         "types": "./dist/db/delete-rows.util.d.mts",
@@ -130,6 +143,10 @@
         "types": "./dist/db/query-builder/query-builder.types.d.mts",
         "default": "./dist/db/query-builder/query-builder.types.mjs"
       },
+      "./db/run-in-transaction.util": {
+        "types": "./dist/db/run-in-transaction.util.d.mts",
+        "default": "./dist/db/run-in-transaction.util.mjs"
+      },
       "./db/select-distinct-rows.util": {
         "types": "./dist/db/select-distinct-rows.util.d.mts",
         "default": "./dist/db/select-distinct-rows.util.mjs"
@@ -145,6 +162,34 @@
       "./db/update-rows.util": {
         "types": "./dist/db/update-rows.util.d.mts",
         "default": "./dist/db/update-rows.util.mjs"
+      },
+      "./db/with-transaction.util": {
+        "types": "./dist/db/with-transaction.util.d.mts",
+        "default": "./dist/db/with-transaction.util.mjs"
+      },
+      "./errors/errors.types": {
+        "types": "./dist/errors/errors.types.d.mts",
+        "default": "./dist/errors/errors.types.mjs"
+      },
+      "./errors/foreign-key-violation.error": {
+        "types": "./dist/errors/foreign-key-violation.error.d.mts",
+        "default": "./dist/errors/foreign-key-violation.error.mjs"
+      },
+      "./errors/has-postgres-error-code.util": {
+        "types": "./dist/errors/has-postgres-error-code.util.d.mts",
+        "default": "./dist/errors/has-postgres-error-code.util.mjs"
+      },
+      "./errors/map-db-error.util": {
+        "types": "./dist/errors/map-db-error.util.d.mts",
+        "default": "./dist/errors/map-db-error.util.mjs"
+      },
+      "./errors/persistence.error": {
+        "types": "./dist/errors/persistence.error.d.mts",
+        "default": "./dist/errors/persistence.error.mjs"
+      },
+      "./errors/unique-constraint-violation.error": {
+        "types": "./dist/errors/unique-constraint-violation.error.d.mts",
+        "default": "./dist/errors/unique-constraint-violation.error.mjs"
       },
       "./filters/filters.types": {
         "types": "./dist/filters/filters.types.d.mts",
