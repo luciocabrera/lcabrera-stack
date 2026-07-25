@@ -16,7 +16,7 @@ const LEADING_COMMENT = /^\s*<!--[\s\S]*?-->\s*/;
 /** `ADR-NNN` wherever it appears in the heading line, and the placeholder title
  *  after it. Kept as two substitutions so a template edit that rewords the
  *  placeholder still produces a correct heading number. */
-const HEADING_LINE = /^#\s*ADR-NNN\s*—.*$/m;
+const HEADING_LINE = /^#[ \t]*ADR-NNN[ \t]*—.*$/m;
 
 export const pad = (number) => String(number).padStart(3, '0');
 
@@ -33,7 +33,9 @@ export const slugify = (title) =>
   title
     .toLowerCase()
     .replaceAll(/[^a-z0-9]+/g, '-')
-    .replaceAll(/^-+|-+$/g, '');
+    // Single `-`, not `-+`: the collapse above cannot leave two in a row, and an
+    // anchored `-+$` backtracks across a run of dashes for no gain (S8786).
+    .replaceAll(/^-|-$/g, '');
 
 export const adrFilename = (number, title) =>
   `ADR-${pad(number)}-${slugify(title)}.md`;

@@ -122,7 +122,10 @@ const REQUIRED_ISSUE_SECTIONS = [
  *  `parent: null` are valid — so the cost of compliance is copying the block. */
 const DEPENDENCY_KEYS = ['blocking', 'blockedBy', 'parent', 'children'];
 
-const DEPENDENCIES_BLOCK = /^\s*dependencies:/im;
+/** `[ \t]`, never `\s`: under `m`, `\s` matches the newline the anchor just
+ *  matched, so `^\s*` rescans the following lines and backtracks (S8786). Indent
+ *  is spaces or tabs anyway. */
+const DEPENDENCIES_BLOCK = /^[ \t]*dependencies:/im;
 
 const dependencyErrors = (body) => {
   if (!DEPENDENCIES_BLOCK.test(body)) {
@@ -131,7 +134,7 @@ const dependencyErrors = (body) => {
     ];
   }
   return DEPENDENCY_KEYS.filter(
-    (key) => !new RegExp(String.raw`^\s*${key}:`, 'im').test(body),
+    (key) => !new RegExp(String.raw`^[ \t]*${key}:`, 'im').test(body),
   ).map(
     (key) =>
       `Issue description's \`dependencies:\` block is missing \`${key}:\` — all four keys are required, empty is a valid value.`,
