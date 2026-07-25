@@ -395,6 +395,8 @@ CI runs `fallow audit --gate new-only` on every PR (`check-safe.yml`) — it fai
 
 `vp run coverage:merge` (`scripts/merge-coverage.mjs`) runs `test:coverage` in the **DB-free** workspaces only and merges their reports — the membership is `COVERAGE_MERGE_WORKSPACES` in `scripts/lib/coverage-workspaces.mjs`, not a list here, because a copy in prose is a copy nothing checks (this one had gone two workspaces stale). That module also holds the PR comment's `COVERAGE_REPORT_WORKSPACES`, so `test:scripts` can assert both — dropping a public package from either lane fails the suite rather than quietly shrinking a report. Coverage must never require Postgres: the first attempt at this lever was reverted (2026-07-14) because it ran scan-ingestion's `queries/*` suites in CI, where `getPool()` → `readEnvConfig()` throws on the missing `DB_*`. That is why `@repo/scan-ingestion` splits `test` (full, needs a DB) from `test:unit` / `test:coverage` (DB-free subset).
 
+**The whole coverage lane hangs off one declaration.** `@vitest/coverage-v8` is an _optional peer_ of vitest, and pnpm installs an optional peer only while some manifest declares it. The root manifest does, and that is what makes the provider resolvable in the workspaces that declare nothing. It reads as an unused dependency and is not — removing it takes every `--coverage` run down, and the failure surfaces in the Fallow Audit's coverage step, a long way from its cause. [ADR-047](docs/cqms/decisions/ADR-047-declare-optional-peer-dependencies.md) records the mechanism and the from-scratch-lockfile proof any such removal now requires.
+
 ### Local Database Workflow (run from repo root)
 
 Commands: [COMMANDS.md §4 → Database](COMMANDS.md#database). `vp run db:up` starts

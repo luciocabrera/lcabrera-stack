@@ -85,18 +85,25 @@ catalogs:
     '@testing-library/react': ^16.3.2
     jsdom: ^29.1.1
     playwright: ^1.61.1
-    # `vitest` stays cataloged because every workspace invokes its binary by path
-    # (`node node_modules/vitest/vitest.mjs`, via vite.run.shared.config.ts), which
-    # needs a resolvable direct dep. `@vitest/coverage-v8` is deliberately NOT here:
-    # vitest resolves the v8 provider from vite-plus's own tree at runtime, so a
-    # per-workspace/catalog pin is redundant (a workspace can run coverage without
-    # declaring it). Do not re-add it. See #357.
+    # Both must be DECLARED to resolve, for different reasons, and neither is
+    # safe to drop because "nothing imports it".
+    #
+    # `vitest`: every workspace invokes its binary by path (`node
+    # node_modules/vitest/vitest.mjs`, via vite.run.shared.config.ts), and pnpm
+    # only materialises `node_modules/vitest` for a direct dep.
+    #
+    # `@vitest/coverage-v8`: an OPTIONAL PEER of vitest, which pnpm installs only
+    # while some manifest declares it. The single root declaration is what holds
+    # it for every workspace. Removing it needs a from-scratch lockfile and a
+    # coverage run to justify — see
+    # docs/cqms/decisions/ADR-047-declare-optional-peer-dependencies.md.
+    '@vitest/coverage-v8': 4.1.10
     vitest: 4.1.10
 
   tooling:
-    '@arethetypeswrong/core': ^0.18.1
+    '@arethetypeswrong/core': ^0.18.5
     '@changesets/cli': ^2.31.1
-    fallow: ^3.8.0
+    fallow: ^3.9.1
     knip: ^6.29.0
     lighthouse: ^13.4.1
     ts-morph: ^28.0.0
