@@ -131,6 +131,30 @@ describe('parsePlan', () => {
   });
 });
 
+describe('malformed input', () => {
+  // The bracket and fence readers were rewritten from regex to index
+  // arithmetic to kill quadratic backtracking; these pin the unterminated
+  // cases, which are exactly what the old patterns rescanned the input for.
+  const parseOne = (block) =>
+    parsePlan(`### P-99 — \`docs: x\`\n\n${block}\n`)[0];
+
+  it('yields no labels when the bracket list is never closed', () => {
+    expect(parseOne('**Metadata.** `labels: [type: docs').labels).toEqual([]);
+  });
+
+  it('yields no metadata when the yaml fence is never closed', () => {
+    const record = parseOne('```yaml\nlabels: [type: docs]\nmilestone: M1');
+    expect(record.labels).toEqual([]);
+    expect(record.dependencies.children).toEqual([]);
+  });
+
+  it('still reads a closed yaml block that has no trailing newline', () => {
+    expect(parseOne('```yaml\nlabels: [type: docs]\n```').labels).toEqual([
+      'type: docs',
+    ]);
+  });
+});
+
 describe('parseMilestoneNames', () => {
   it('normalises en dashes so one milestone does not become two', () => {
     const scheme = '### M1 – Foundation\n\ntext\n\n### M3 – Cross‑App\n';

@@ -18,9 +18,14 @@
  * suffix after the title (`_(optional)_`). Anchoring the pattern at the closing
  * backtick instead silently drops that whole issue from the run, which is a
  * failure mode with no symptom — the backlog just comes out one issue short.
+ *
+ * `note` is captured greedily and trimmed in JS rather than fenced by
+ * `\s*(?<note>.*?)\s*$`: two whitespace runs around a lazy group give the
+ * engine many equivalent ways to split the same trailing spaces, which is
+ * super-linear backtracking (Sonar S8786).
  */
 const HEADING_RE =
-  /^###\s+(?<id>[EPG]-\d+)\s+—\s+`(?<title>[^`]+)`\s*(?<note>.*?)\s*$/;
+  /^###\s+(?<id>[EPG]-\d+)\s+—\s+`(?<title>[^`]+)`(?<note>.*)$/;
 
 /** Splits the document into `{ id, title, lines }` blocks, in document order. */
 export const splitIssueBlocks = (markdown) => {
@@ -28,7 +33,8 @@ export const splitIssueBlocks = (markdown) => {
   for (const line of markdown.split('\n')) {
     const heading = HEADING_RE.exec(line);
     if (heading !== null) {
-      blocks.push({ ...heading.groups, lines: [] });
+      const { id, title, note } = heading.groups;
+      blocks.push({ id, title, note: note.trim(), lines: [] });
     } else if (blocks.length > 0 && !/^#{1,2}\s/.test(line)) {
       blocks.at(-1).lines.push(line);
     }
@@ -36,9 +42,24 @@ export const splitIssueBlocks = (markdown) => {
   return blocks.map((block) => ({ ...block, body: block.lines.join('\n') }));
 };
 
-/** Content of the first fenced ```yaml block, or '' when there is none. */
-const yamlBlock = (body) =>
-  /```yaml\n(?<yaml>[\s\S]*?)```/.exec(body)?.groups.yaml ?? '';
+const YAML_FENCE = '```yaml\n';
+
+/**
+ * Content of the first fenced yaml block, or '' when there is none.
+ *
+ * Index arithmetic for the same reason as `bracketList`: a lazy `[\s\S]*?`
+ * hunting a closing fence rescans from every candidate opening when there
+ * isn't one.
+ */
+const yamlBlock = (body) => {
+  const open = body.indexOf(YAML_FENCE);
+  if (open === -1) {
+    return '';
+  }
+  const start = open + YAML_FENCE.length;
+  const close = body.indexOf('```', start);
+  return close === -1 ? '' : body.slice(start, close);
+};
 
 /** `key: value` from a yaml block, untyped and untrimmed of list syntax. */
 const yamlValue = (yaml, key) =>
@@ -52,9 +73,20 @@ const commaList = (value) =>
     .map((part) => part.trim())
     .filter((part) => part !== '');
 
-/** `[a, b]` → `['a','b']`; anything else → []. */
-const bracketList = (value) =>
-  commaList(/\[(?<items>[^\]]*)\]/.exec(value)?.groups.items ?? '');
+/**
+ * `[a, b]` → `['a','b']`; anything else → [].
+ *
+ * Index arithmetic rather than `/\[([^\]]*)\]/`: on a value with many `[` and
+ * no closing bracket, that regex rescans to the end from every one of them —
+ * quadratic (Sonar S8786). Finding the two delimiters is a single pass.
+ */
+const bracketList = (value) => {
+  const open = value.indexOf('[');
+  const close = value.indexOf(']', open + 1);
+  return open === -1 || close === -1
+    ? []
+    : commaList(value.slice(open + 1, close));
+};
 
 /**
  * Labels come from the yaml `labels:` list, or from a `Metadata` line's
@@ -65,7 +97,9 @@ const parseLabels = (body) => {
   if (fromYaml.length > 0) {
     return fromYaml;
   }
-  const metadata = /^\s*[-*]?\s*\*\*Metadata[.:]\*\*(?<rest>.*)$/m.exec(body);
+  const metadata = /^\s*(?:[-*]\s*)?\*\*Metadata[.:]\*\*(?<rest>.*)$/m.exec(
+    body,
+  );
   return bracketList(metadata?.groups.rest ?? '');
 };
 
@@ -107,9 +141,19 @@ const parseParentFromProse = (body) =>
 /** Epics list `- **Children:** P-01, P-02` rather than a yaml `children`. */
 const parseChildrenFromProse = (body) =>
   commaList(
-    /^\s*[-*]?\s*\*\*Children[.:]\*\*(?<rest>.*)$/m.exec(body)?.groups.rest ??
-      '',
+    /^\s*(?:[-*]\s*)?\*\*Children[.:]\*\*(?<rest>.*)$/m.exec(body)?.groups
+      .rest ?? '',
   ).filter((item) => /^[EPG]-\d+$/.test(item));
+
+/**
+ * Optional list bullet before a bold lead-in.
+ *
+ * Written `\s*(?:[-*]\s*)?` and never `\s*[-*]?\s*`: two whitespace runs with
+ * only an OPTIONAL character between them can split the same spaces countless
+ * ways, which is the super-linear backtracking Sonar S8786 reports. Requiring
+ * the bullet inside the optional group leaves exactly one parse.
+ */
+const LIST_LEAD_IN = String.raw`\s*(?:[-*]\s*)?`;
 
 /**
  * Pulls one narrative section out of a block. The document writes them three
@@ -118,12 +162,12 @@ const parseChildrenFromProse = (body) =>
  */
 export const sectionText = (body, labels) => {
   const alternatives = labels.join('|');
-  // The terminator spells end-of-input as `(?![\s\S])`, not `$`. Under the `m`
-  // flag `^` needs for the lead-in, `$` also matches at every line break, so a
-  // lazy body would stop at the end of its FIRST line — silently truncating
-  // every multi-line section to one line.
+  // The terminator spells end-of-input as `(?![\s\S])`, not `$`. The `m` flag
+  // the lead-in needs also makes `$` match at every line break, so a lazy body
+  // would stop at the end of its FIRST line — truncating every multi-line
+  // section to one line.
   const pattern = new RegExp(
-    String.raw`^\s*[-*]?\s*\*\*(?:\d+\.\s*)?(?:${alternatives})[.:]?\*\*[.:]?\s*(?<text>[\s\S]*?)(?=\n\s*[-*]?\s*\*\*|\n### |\n## |\n\`\`\`|(?![\s\S]))`,
+    String.raw`^${LIST_LEAD_IN}\*\*(?:\d+\.\s*)?(?:${alternatives})[.:]?\*\*[.:]?\s*(?<text>[\s\S]*?)(?=\n${LIST_LEAD_IN}\*\*|\n### |\n## |\n\`\`\`|(?![\s\S]))`,
     'm',
   );
   return dedent((pattern.exec(body)?.groups.text ?? '').trim());
@@ -181,6 +225,11 @@ export const parsePlan = (markdown, { milestoneNames = [] } = {}) =>
  * scheme document the single source and the ASCII form canonical.
  */
 export const parseMilestoneNames = (markdown) =>
-  [...markdown.matchAll(/^###\s+(?<title>M\d\s+.+?)\s*$/gm)].map(({ groups }) =>
-    groups.title.replaceAll(/[‐-―]/g, '-').replaceAll(/\s+/g, ' '),
+  // Greedy `.*` with the trim in JS, not `.+?\s*$` — a lazy group followed by
+  // optional trailing whitespace backtracks super-linearly (Sonar S8786).
+  [...markdown.matchAll(/^###\s+(?<title>M\d\s.*)$/gm)].map(({ groups }) =>
+    groups.title
+      .replaceAll(/[‐-―]/g, '-')
+      .replaceAll(/\s+/g, ' ')
+      .trim(),
   );

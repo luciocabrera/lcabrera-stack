@@ -61,12 +61,15 @@ const contextOf = (record) => {
 };
 
 /** Only a `type: bug` issue owes real steps; everything else says so explicitly. */
-const reproductionOf = (record) =>
-  record.sections.reproduction !== ''
-    ? record.sections.reproduction
-    : record.labels.includes('type: bug')
-      ? `See the Problem Statement — steps were not recorded in the plan.\n\n${DERIVED_NOTE}`
-      : 'Not a bug.';
+const reproductionOf = (record) => {
+  if (record.sections.reproduction !== '') {
+    return record.sections.reproduction;
+  }
+  if (record.labels.includes('type: bug')) {
+    return `See the Problem Statement — steps were not recorded in the plan.\n\n${DERIVED_NOTE}`;
+  }
+  return 'Not a bug.';
+};
 
 /** An epic tracks; it never implements. That is the document's own rule. */
 const epicScope = (record) =>
@@ -86,12 +89,15 @@ const scopeOf = (record) => {
   );
 };
 
-const acceptanceOf = (record) =>
-  record.sections.acceptance !== ''
-    ? record.sections.acceptance
-    : record.kind === 'epic'
-      ? `- [ ] Every child issue is closed\n\n${DERIVED_NOTE}`
-      : `- [ ] The objective above is met\n- [ ] No regressions\n\n${DERIVED_NOTE}`;
+const acceptanceOf = (record) => {
+  if (record.sections.acceptance !== '') {
+    return record.sections.acceptance;
+  }
+  if (record.kind === 'epic') {
+    return `- [ ] Every child issue is closed\n\n${DERIVED_NOTE}`;
+  }
+  return `- [ ] The objective above is met\n- [ ] No regressions\n\n${DERIVED_NOTE}`;
+};
 
 /** The dependency block `docs/agents/dependency-conventions.md` requires. */
 const dependencyBlock = ({ blocking, blockedBy, parent, children }) =>
