@@ -4,6 +4,7 @@ import { useRef } from 'react';
 
 import { useFetchMore } from '../contexts/data/actions';
 import {
+  useGetContentMode,
   useGetHasMore,
   useGetIsLoadingOptions,
 } from '../contexts/data/selectors';
@@ -29,6 +30,7 @@ export const VirtualListBody = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
+  const contentMode = useGetContentMode();
   const hasFetchMore = useGetHasFetchMore();
   const hasMore = useGetHasMore();
   const isLoadingOptions = useGetIsLoadingOptions();
@@ -46,8 +48,18 @@ export const VirtualListBody = () => {
     searchTerm,
   });
 
+  // The sentinel marks the end of the rendered options, so it exists only once
+  // there are options to reach the end of. In the 'empty' and 'loading' modes it
+  // would be the sole in-flow child of the scroll container, contributing its own
+  // height to `scrollHeight` — a phantom overflow that paints a scrollbar over
+  // "No options found" and satisfies the observer's overflow test as a genuine
+  // scrolled-to-bottom, fetching page after page for a filter that can never
+  // match one. Bootstrapping the first page is `onFetchInitial`'s job, not the
+  // sentinel's.
+  const hasListEnd = contentMode === 'list';
+
   useInfiniteScrollObserver({
-    isEnabled: hasMore && !isLoadingOptions && hasFetchMore,
+    isEnabled: hasListEnd && hasMore && !isLoadingOptions && hasFetchMore,
     onReachEnd: fetchMore,
     rootRef: scrollContainerRef,
     sentinelRef,
@@ -72,7 +84,14 @@ export const VirtualListBody = () => {
       >
         <VirtualListBodyChildren scrollContainerRef={scrollContainerRef} />
 
-        <div aria-hidden ref={sentinelRef} {...stylex.props(styles.sentinel)} />
+        {hasListEnd && (
+          <div
+            aria-hidden
+            data-testid='virtual-list-sentinel'
+            ref={sentinelRef}
+            {...stylex.props(styles.sentinel)}
+          />
+        )}
       </div>
     </div>
   );

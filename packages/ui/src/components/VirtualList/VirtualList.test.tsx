@@ -7,7 +7,14 @@ import {
   screen,
   within,
 } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vite-plus/test';
 
 import type { VirtualListDataState } from './VirtualList.types';
 
@@ -21,6 +28,39 @@ const baseDataState: VirtualListDataState = {
   isLoading: false,
   isLoadingMore: false,
 };
+
+/** Same shape as `baseDataState`, wired for infinite scroll (`onFetchMore`). */
+const pagedDataState: VirtualListDataState = {
+  ...baseDataState,
+  hasMore: true,
+};
+
+const observeSpy = vi.fn();
+
+class MockIntersectionObserver {
+  observe = observeSpy;
+
+  disconnect() {
+    // no-op
+  }
+
+  takeRecords(): readonly IntersectionObserverEntry[] {
+    return [];
+  }
+
+  unobserve() {
+    // no-op
+  }
+}
+
+beforeEach(() => {
+  observeSpy.mockClear();
+  vi.stubGlobal('IntersectionObserver', MockIntersectionObserver);
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 const getFooterModeButtons = () => {
   const footer = screen.getByText(/Loaded:/).parentElement;
@@ -68,6 +108,80 @@ describe('VirtualList', () => {
     });
 
     expect(screen.getByText('No options found')).toBeTruthy();
+  });
+
+  it('arms the infinite-scroll sentinel while options are rendered', () => {
+    render(
+      <VirtualList
+        dataState={pagedDataState}
+        onChange={vi.fn()}
+        onFetchMore={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByTestId('virtual-list-sentinel')).toBeTruthy();
+    expect(observeSpy).toHaveBeenCalled();
+  });
+
+  it('disarms the infinite-scroll sentinel when the search term matches nothing', () => {
+    render(
+      <VirtualList
+        dataState={pagedDataState}
+        onChange={vi.fn()}
+        onFetchMore={vi.fn()}
+      />,
+    );
+
+    observeSpy.mockClear();
+
+    fireEvent.change(screen.getByPlaceholderText('Search options...'), {
+      target: { value: 'aaa' },
+    });
+
+    expect(screen.getByText('No options found')).toBeTruthy();
+    expect(screen.queryByTestId('virtual-list-sentinel')).toBeNull();
+    expect(observeSpy).not.toHaveBeenCalled();
+  });
+
+  it('disarms the infinite-scroll sentinel when the selected filter mode is empty', () => {
+    render(
+      <VirtualList
+        dataState={pagedDataState}
+        onChange={vi.fn()}
+        onFetchMore={vi.fn()}
+      />,
+    );
+
+    observeSpy.mockClear();
+
+    const selectedModeButton = getFooterModeButtons()[1];
+    if (!selectedModeButton) {
+      throw new Error('Expected the selected-mode button');
+    }
+    fireEvent.click(selectedModeButton);
+
+    expect(screen.getByText('No options found')).toBeTruthy();
+    expect(screen.queryByTestId('virtual-list-sentinel')).toBeNull();
+    expect(observeSpy).not.toHaveBeenCalled();
+  });
+
+  it('re-arms the infinite-scroll sentinel once the search is cleared', () => {
+    render(
+      <VirtualList
+        dataState={pagedDataState}
+        onChange={vi.fn()}
+        onFetchMore={vi.fn()}
+      />,
+    );
+
+    fireEvent.change(screen.getByPlaceholderText('Search options...'), {
+      target: { value: 'aaa' },
+    });
+    observeSpy.mockClear();
+    fireEvent.click(screen.getByRole('button', { name: 'Clear search' }));
+
+    expect(screen.getByTestId('virtual-list-sentinel')).toBeTruthy();
+    expect(observeSpy).toHaveBeenCalled();
   });
 
   it('emits onChange with the toggled option', () => {

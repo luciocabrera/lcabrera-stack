@@ -5,10 +5,31 @@ Scroll-container owner (Table analog: `TableContent`): renders the scrollable vi
 ## Responsibilities
 
 - Own `scrollContainerRef` (viewport) and `sentinelRef` (1px sentinel) and the container styling (`listMaxHeight` / `shouldFillHeight` variants)
-- Wire `useInfiniteScrollObserver`: `isEnabled` from `useGetHasMore` + `useGetIsLoadingOptions` + `useGetHasFetchMore`, `onReachEnd` from the `useFetchMore` action
+- Render and arm the sentinel **only in the `list` content mode** — see [Sentinel lifetime](#sentinel-lifetime)
+- Wire `useInfiniteScrollObserver`: `isEnabled` from `useGetContentMode` + `useGetHasMore` + `useGetIsLoadingOptions` + `useGetHasFetchMore`, `onReachEnd` from the `useFetchMore` action
 - Delegate virtualization and content-mode dispatch to `VirtualListBodyChildren` (receives only `scrollContainerRef`, producer→direct-child)
 
 The initial fetch effect lives in `VirtualListProvider`; the toggle/select-all handlers moved to the `useToggleOption`/`useToggleSelectAll` actions.
+
+## Sentinel lifetime
+
+The sentinel is an in-flow sibling of `VirtualListBodyChildren` inside the scroll
+container, so it contributes its own height to `scrollHeight`. In the `empty` and
+`loading` modes the children render no rows, which makes the sentinel the only
+source of overflow — enough to paint a scrollbar over "No options found" and to
+pass `useInfiniteScrollObserver`'s `root.scrollHeight <= root.clientHeight` test as
+a genuine scrolled-to-bottom. That defeated the `shouldFetchToFill` guard and walked
+the entire dataset one page at a time whenever a search term or filter mode left
+nothing to show (#432).
+
+So `hasListEnd = contentMode === 'list'` gates both the conditional render and
+`isEnabled`. Gating `isEnabled` is what makes the pair work: the observer effect
+re-runs on an `isEnabled` change, which is what re-attaches the observer to the
+freshly mounted sentinel when the filter is cleared.
+
+One behaviour follows from this and is intended: a consumer that wires only
+`onFetchMore` no longer bootstraps its first page from an under-filled empty
+container. `onFetchInitial` is the entry point for that.
 
 ## Props
 
@@ -19,10 +40,10 @@ The initial fetch effect lives in `VirtualListProvider`; the toggle/select-all h
 
 ## Store Wiring
 
-| Kind      | Hooks                                                                           |
-| --------- | ------------------------------------------------------------------------------- |
-| Selectors | `useGetHasMore`, `useGetIsLoadingOptions` (data), `useGetHasFetchMore` (config) |
-| Actions   | `useFetchMore` (data)                                                           |
+| Kind      | Hooks                                                                                                |
+| --------- | ---------------------------------------------------------------------------------------------------- |
+| Selectors | `useGetContentMode`, `useGetHasMore`, `useGetIsLoadingOptions` (data), `useGetHasFetchMore` (config) |
+| Actions   | `useFetchMore` (data)                                                                                |
 
 ## Sub-components
 
