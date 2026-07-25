@@ -141,11 +141,16 @@ log "Reinstalling with the refreshed versions (vp install)"
 "$vp_global" install
 
 # --- did anything actually change? A no-op day makes no issue/branch/PR --------
-# Decide on the manifests, not the lockfile: pnpm can reformat pnpm-lock.yaml with
-# no version delta, and that churn must not open an empty PR.
-if git diff --quiet -- pnpm-workspace.yaml '**/package.json'; then
-  log "Dependencies already current — reverting any incidental lockfile churn and exiting"
-  git checkout -q -- pnpm-lock.yaml 2>/dev/null || true
+# The lockfile counts here, not only the manifests. `pnpm clean --lockfile` above
+# regenerates from nothing, which drops resolutions no manifest reaches any more —
+# the stale-dependency cleanup that step exists for. This used to revert the
+# lockfile whenever no version moved, on the theory that pnpm reformats it with no
+# version delta and that churn would open an empty PR. It does not: regeneration
+# is idempotent, so a clean lockfile regenerates byte-identical and a diff here is
+# always a real resolution change. Reverting discarded the cleanup on every
+# already-current day, which is how 127 orphaned peer-suffix entries survived.
+if git diff --quiet -- pnpm-workspace.yaml pnpm-lock.yaml '**/package.json'; then
+  log "Dependencies already current and the lockfile regenerated identically — nothing to do"
   exit 0
 fi
 
@@ -164,7 +169,16 @@ moved="$(grep -E '·|→|->' "$taze_log" | sed -E 's/^[[:space:]]+//' | sed -E '
 if [[ -n "$pnpm_after" && "$pnpm_before" != "$pnpm_after" ]]; then
   moved="${pnpm_before} → ${pnpm_after} (packageManager)"$'\n'"${moved}"
 fi
-[[ -n "$moved" ]] || moved="(see the pnpm-workspace.yaml / package.json diff)"
+# A run can now land with no version moved at all — the lockfile alone changed,
+# because regenerating it from nothing dropped resolutions nothing reaches. Say so
+# rather than pointing at a manifest diff that is empty.
+if [[ -z "$moved" ]]; then
+  if git diff --quiet -- pnpm-workspace.yaml '**/package.json'; then
+    moved="(no version moved — the regenerated lockfile dropped resolutions no manifest reaches)"
+  else
+    moved="(see the pnpm-workspace.yaml / package.json diff)"
+  fi
+fi
 
 log "Opening the tracking issue"
 issue_body="$(cat <<'BODY'
