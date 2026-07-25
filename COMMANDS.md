@@ -194,6 +194,12 @@ auto-merging: a failing quality gate leaves the branch for a human. `-- --dry-ru
 previews what would move without changing anything. The pnpm-direct policy nuance
 is tracked in issue #334.
 
+**A run can land with no version moved at all.** `pnpm clean --lockfile`
+regenerates the lockfile from nothing, so it drops resolutions no manifest reaches
+any more — a real change worth committing, not formatting churn. Regeneration is
+idempotent, so a lockfile with nothing stale in it regenerates byte-identical and
+the script exits without opening anything.
+
 ### Dev & prod servers
 
 | Command             | Runs                                  |
