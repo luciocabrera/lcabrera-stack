@@ -85,12 +85,23 @@ catalogs:
     '@testing-library/react': ^16.3.2
     jsdom: ^29.1.1
     playwright: ^1.61.1
-    # `vitest` stays cataloged because every workspace invokes its binary by path
-    # (`node node_modules/vitest/vitest.mjs`, via vite.run.shared.config.ts), which
-    # needs a resolvable direct dep. `@vitest/coverage-v8` is deliberately NOT here:
-    # vitest resolves the v8 provider from vite-plus's own tree at runtime, so a
-    # per-workspace/catalog pin is redundant (a workspace can run coverage without
-    # declaring it). Do not re-add it. See #357.
+    # Both are cataloged because both must be **declared** to resolve, for two
+    # different reasons.
+    #
+    # `vitest`: every workspace invokes its binary by path (`node
+    # node_modules/vitest/vitest.mjs`, via vite.run.shared.config.ts), and pnpm
+    # only materialises `node_modules/vitest` for a direct dep.
+    #
+    # `@vitest/coverage-v8`: it is an **optional peer** of vitest, and pnpm
+    # installs an optional peer only while something in the tree declares it.
+    # #357 dropped all seven declarations after observing that workspaces which
+    # declared nothing still ran coverage green — true only because the seven
+    # that did declare it kept the peer edge alive, and no one regenerated the
+    # lockfile. The first `pnpm clean --lockfile` resolved the tree honestly,
+    # dropped the peer, and every `--coverage` run died with `MISSING
+    # DEPENDENCY`. Do not remove it again without regenerating the lockfile from
+    # scratch AND running a coverage task.
+    '@vitest/coverage-v8': 4.1.10
     vitest: 4.1.10
 
   tooling:

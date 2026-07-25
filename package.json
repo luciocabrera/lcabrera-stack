@@ -73,6 +73,7 @@
     "@biomejs/biome": "catalog:lint",
     "@changesets/cli": "catalog:tooling",
     "@repo/vite-configs": "workspace:*",
+    "@vitest/coverage-v8": "catalog:test",
     "fallow": "catalog:tooling",
     "ts-morph": "catalog:tooling",
     "vite": "catalog:build",
