@@ -85,9 +85,17 @@ describe('renderIssueBody', () => {
     expect(body).toContain('P-01, P-02');
   });
 
-  it('always carries provenance back to the planning document', () => {
+  it('names the planning document it was actually given', () => {
+    // Hardcoding a path here would cite a file that no longer exists on every
+    // issue the tool ever files — a plan is retired once its issues are open.
+    expect(
+      renderIssueBody(record(), '.tmp/planning/2026-07-server.md'),
+    ).toContain('Planned as `P-01` in `.tmp/planning/2026-07-server.md`.');
+  });
+
+  it('falls back to a description rather than a path when given none', () => {
     expect(renderIssueBody(record())).toContain(
-      'Planned as `P-01` in `docs/agents/planning/issues.md`.',
+      'Planned as `P-01` in `the planning document`.',
     );
   });
 
