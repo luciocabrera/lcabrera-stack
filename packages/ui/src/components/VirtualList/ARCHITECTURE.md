@@ -24,7 +24,9 @@ VirtualList/
 │
 ├── VirtualListHeader/               → Self-connected search input and clear button (zero props)
 │
-├── VirtualListBody/                 → Scroll container + infinite-scroll sentinel (zero props — layout via list selectors; sentinel only in the `list` content mode; suppresses fill-fetch while a client filter is active)
+├── VirtualListBody/                 → Scroll container + infinite-scroll sentinel (zero props — layout via list selectors)
+│   ├── hooks/useVirtualListInfiniteScroll.hook.ts
+│   │                                → Observer wiring: sentinel only in the `list` content mode; suppresses fill-fetch while a client filter is active
 │   ├── VirtualListBodyChildren/     → useVirtualization + content-mode dispatch (prop: scrollContainerRef)
 │   └── VirtualListBodyOptions/      → Virtual window renderer (props: startIndex, endIndex, offsetY, totalHeight)
 │

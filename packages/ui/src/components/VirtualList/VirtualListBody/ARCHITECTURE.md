@@ -5,8 +5,8 @@ Scroll-container owner (Table analog: `TableContent`): renders the scrollable vi
 ## Responsibilities
 
 - Own `scrollContainerRef` (viewport) and `sentinelRef` (1px sentinel) and the container styling (`listMaxHeight` / `shouldFillHeight` variants)
-- Render and arm the sentinel **only in the `list` content mode** — see [Sentinel lifetime](#sentinel-lifetime)
-- Wire `useInfiniteScrollObserver`: `isEnabled` from `useGetContentMode` + `useGetHasMore` + `useGetIsLoadingOptions` + `useGetHasFetchMore`, `onReachEnd` from the `useFetchMore` action
+- Render the sentinel **only in the `list` content mode**, on the `hasListEnd` flag the hook returns — see [Sentinel lifetime](#sentinel-lifetime)
+- Delegate the whole observer wiring to `hooks/useVirtualListInfiniteScroll` (every observer input, the `shouldFetchToFill` guard, the `useFetchMore` dispatch), keeping this component about layout
 - Delegate virtualization and content-mode dispatch to `VirtualListBodyChildren` (receives only `scrollContainerRef`, producer→direct-child)
 
 The initial fetch effect lives in `VirtualListProvider`; the toggle/select-all handlers moved to the `useToggleOption`/`useToggleSelectAll` actions.
@@ -40,10 +40,16 @@ container. `onFetchInitial` is the entry point for that.
 
 ## Store Wiring
 
-| Kind      | Hooks                                                                                                |
-| --------- | ---------------------------------------------------------------------------------------------------- |
-| Selectors | `useGetContentMode`, `useGetHasMore`, `useGetIsLoadingOptions` (data), `useGetHasFetchMore` (config) |
-| Actions   | `useFetchMore` (data)                                                                                |
+| Kind      | Hooks                                                                                                                                                                                                                        |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Selectors | `useGetListMaxHeight`, `useGetShouldFillHeight` (config) here; `useGetContentMode`, `useGetHasMore`, `useGetIsLoadingOptions` (data) + `useGetHasFetchMore`, `useGetListFilterMode`, `useGetSearchTerm` (config) in the hook |
+| Actions   | `useFetchMore` (data), in the hook                                                                                                                                                                                           |
+
+## Hooks
+
+| Hook                           | Args                       | Returns                  | Responsibility                                                                                                                        |
+| ------------------------------ | -------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `useVirtualListInfiniteScroll` | `{ rootRef, sentinelRef }` | `hasListEnd` (`boolean`) | Reads every observer input from the stores, applies the `shouldFetchToFill` and content-mode gates, calls `useInfiniteScrollObserver` |
 
 ## Sub-components
 
