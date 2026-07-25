@@ -13,9 +13,11 @@
 # scripts/update-deps.sh, which only touched apps/* and left the catalog — where
 # nearly every version actually lives — to be edited by hand.
 #
-# Node is NOT bumped here: this repo pins no Node version (it floats on
-# engines.node), so a runtime change would not appear in the PR diff and would
-# alter the machine's global default. Manage it deliberately with `vp env`.
+# Node is NOT bumped here. The repo does pin one — `.node-version` plus the
+# `engines.node` band, enforced by `engineStrict` (#378) — but bumping it is a
+# machine-level change: it alters the global default of whoever runs this, and
+# taze cannot move a runtime. Change it deliberately with `vp env` and a PR that
+# moves both declarations together.
 #
 # Two things here are deliberate and worth knowing before editing:
 #   - It reaches for pnpm and taze DIRECTLY. The repo rule is "use vp, not pnpm",
@@ -92,6 +94,12 @@ git diff --quiet && git diff --cached --quiet || die "working tree is dirty — 
 
 current_branch="$(git branch --show-current)"
 [[ "$current_branch" == "$base" ]] || die "run from '$base' (on '$current_branch'). Dependency refreshes branch off $base."
+
+# This script branches wherever it is invoked, so running it in the shared clone
+# moves HEAD under every other agent there — the failure docs/coordination
+# exists to stop (#385). A linked worktree has `.git` as a FILE; the primary
+# checkout has it as a directory.
+[[ -d "$REPO_ROOT/.git" ]] && die "run this from a worktree, not the shared clone — it branches in place and would move HEAD for every other agent here. Make one with: git worktree add ../vrc-deps $base"
 git fetch -q origin "$base"
 [[ "$(git rev-parse "$base")" == "$(git rev-parse "origin/$base")" ]] ||
   die "local $base is not in sync with origin/$base — pull first"

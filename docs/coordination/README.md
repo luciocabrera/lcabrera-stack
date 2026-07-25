@@ -57,9 +57,19 @@ the backlog issue and self-assigns it right away** (so its board card moves to I
 Progress at the START, before any PR — closing the window where another agent
 picks up the same issue), writes the required `issue:` field, scaffolds the task,
 branches off `main`, commits, and opens a draft PR so the claim is visible
-immediately (via `coordination:board:live`). Add `--worktree` to work in an
-isolated worktree (recommended when other agents are active), or `--dry-run` to
-preview every action first. Exactly one of `--issue` / `--new-issue` is required.
+immediately (via `coordination:board:live`). It works in an **isolated
+`../vrc-<id>` worktree by default** — installing dependencies and generating
+route types there — because branching in the shared clone moves `HEAD` under
+every other agent in it. `--in-place` opts out when you are certain you are alone
+in this clone; `--dry-run` previews every action first. Exactly one of `--issue` /
+`--new-issue` is required.
+
+`coordination:verify` reports a primary checkout parked on a feature branch: a
+failure when the tree is clean (so `git checkout main` is a safe fix), a warning
+when it is dirty (so it can never strand uncommitted work — it runs inside
+`check:push`, which the pre-push hook runs). It is silent under CI, where
+`actions/checkout` legitimately produces a primary checkout on a branch and there
+is no second agent to disturb.
 
 ---
 
