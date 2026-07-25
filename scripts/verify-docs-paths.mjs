@@ -148,8 +148,38 @@ const GENERATED_OR_LOCAL = new Set([
   'reports/fallow/coverage/coverage-final.json',
 ]);
 
+/** Report directories whose contents are produced on demand (ADR-049). */
+const ON_DEMAND_REPORT_DIRS = new Set([
+  'biome',
+  'eslint',
+  'fallow',
+  'oxlint',
+  'skills',
+  'sonar',
+]);
+
+/**
+ * A findings report produced on demand. Documenting the path is correct — that is
+ * where the command writes — but a fresh checkout has none of them, so resolving
+ * one would fail everywhere except a machine that has just run the tool.
+ *
+ * Matched at exactly one level below the tool directory, which is what keeps the
+ * tracked gate BASELINES out of the exemption: `reports/fallow/baselines/…` is a
+ * level deeper, so a doc naming a missing baseline is still a real broken link.
+ */
+const isOnDemandReport = (token) => {
+  const parts = token.split('/');
+  return (
+    (parts.length === 3 &&
+      parts[0] === 'reports' &&
+      ON_DEMAND_REPORT_DIRS.has(parts[1])) ||
+    token.startsWith('reports/sonar/runs/')
+  );
+};
+
 const isExpectedAbsent = (token) =>
   GENERATED_OR_LOCAL.has(token) ||
+  isOnDemandReport(token) ||
   token.startsWith('docker/local/') ||
   token.startsWith('reports/fallow/runs/');
 

@@ -1,31 +1,27 @@
 /**
- * Where a SonarCloud run's snapshot is written.
+ * Where a SonarCloud run's snapshot is written: always under `runs/`, one file
+ * per target, never tracked.
  *
- * Why this is not one constant: `reports/sonar/full-latest.json` is TRACKED, and
- * AGENTS.md points agents at it as `main`'s state — they are told to act on
- * Sonar from this file rather than the dashboard. Every run used to write there,
- * including `--pr <n>`, which is not an occasional flag: SonarCloud runs here in
- * Automatic Analysis mode, feature branches are analysed as pull requests, and a
- * `branch=<feature>` query 404s. So the routine way to read a branch's own
- * findings silently replaced `main`'s snapshot with a pull request's.
+ * This module used to be a two-way decision, because
+ * `reports/sonar/full-latest.json` was tracked and AGENTS.md pointed agents at it
+ * as `main`'s state. Every run wrote there, including `--pr <n>` — which is not an
+ * occasional flag, since SonarCloud runs here in Automatic Analysis mode and a
+ * feature branch is analysed as a pull request. So the routine way to read a
+ * branch's findings replaced `main`'s snapshot with a pull request's, and PR
+ * #283's analysis sat committed as `main`'s for 22 merges, reporting a failing
+ * gate and two findings `main` did not have (#304).
  *
- * It happened. PR #283's analysis sat committed as `main`'s for 22 merges,
- * reporting `gate: ERROR` and two findings that `main` did not have — one of
- * them already reviewed and accepted in SonarCloud. An agent read it, reported a
- * failing gate, and started work on code that was correct (#304).
+ * Restricting the tracked path to a `main` analysis fixed that instance. It did
+ * not fix the class: a committed snapshot is a measurement, and a measurement in
+ * git is stale from the moment the next commit lands, with nothing to say so.
+ * Nothing regenerated it either — it moved only when someone remembered.
  *
- * The freshness check (`sonar-freshness.mjs`) cannot catch this: it asks whether
- * the analysis is OLD. A pull request's analysis one minute old is perfectly
- * fresh and entirely wrong for this file.
- *
- * So only a `main`-branch analysis is the tracked snapshot; everything else is a
- * per-run artifact under `runs/`, gitignored exactly like `reports/fallow/runs/`.
+ * So there is no tracked snapshot. A report is produced on demand and read where
+ * it lands; `main` is just another target. The failure above is now impossible
+ * rather than guarded against, which is why the guard is gone.
  *
  * Pure by design — the caller owns the filesystem.
  */
-
-/** The tracked snapshot. `sonar-report-path.test.mjs` pins its scope to `main`. */
-export const TRACKED_REPORT_PATH = 'reports/sonar/full-latest.json';
 
 /** Per-run artifacts, gitignored. Sibling of the fallow convention. */
 export const RUNS_DIRECTORY = 'reports/sonar/runs';
@@ -46,22 +42,12 @@ const asFileSegment = (value) =>
     .join('-');
 
 /**
- * The repo-relative path a run targeting `target` writes to.
- *
- * Only `{ type: 'branch', value: <mainBranch> }` earns the tracked path. A
- * pull request, or any other branch, gets its own file — so reading one can
- * never be mistaken for reading `main`, and writing one cannot destroy it.
+ * The repo-relative path a run targeting `target` writes to. Every target gets
+ * its own file, so no run can overwrite another's — the property that used to
+ * need a special case for `main`.
  */
-export const reportPathFor = (target, mainBranch = 'main') => {
-  if (target?.type === 'branch' && target.value === mainBranch) {
-    return TRACKED_REPORT_PATH;
-  }
+export const reportPathFor = (target) => {
   const prefix = target?.type === 'pullRequest' ? 'pr' : 'branch';
   const segment = asFileSegment(target?.value ?? 'unknown') || 'unknown';
   return `${RUNS_DIRECTORY}/${prefix}-${segment}.json`;
 };
-
-/** Whether a parsed snapshot describes the tracked scope. The guard reads this
- *  rather than trusting the filename, which is what went wrong. */
-export const isMainSnapshot = (report, mainBranch = 'main') =>
-  report?.target?.type === 'branch' && report.target.value === mainBranch;
