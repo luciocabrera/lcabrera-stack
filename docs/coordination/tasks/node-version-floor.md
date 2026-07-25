@@ -12,7 +12,7 @@ started: 2026-07-25
 updated: 2026-07-25
 plan: (none)
 issue: #378
-pr: (none)
+pr: #379
 ---
 
 ## What
@@ -35,6 +35,6 @@ the file.
 
 ## Status / next
 
-- Current step: changes made in a worktree off `origin/main`; running the gate.
+- Current step: PR #379 open, all gates green; awaiting review.
 - Blockers: none.
-- Next: open the PR, then close this file when it merges.
+- Next: delete this file when #379 merges.
