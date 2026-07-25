@@ -97,9 +97,8 @@ const parseLabels = (body) => {
   if (fromYaml.length > 0) {
     return fromYaml;
   }
-  const metadata = /^\s*(?:[-*]\s*)?\*\*Metadata[.:]\*\*(?<rest>.*)$/m.exec(
-    body,
-  );
+  const metadata =
+    /^[ \t]*(?:[-*][ \t]*)?\*\*Metadata[.:]\*\*(?<rest>.*)$/m.exec(body);
   return bracketList(metadata?.groups.rest ?? '');
 };
 
@@ -141,19 +140,28 @@ const parseParentFromProse = (body) =>
 /** Epics list `- **Children:** P-01, P-02` rather than a yaml `children`. */
 const parseChildrenFromProse = (body) =>
   commaList(
-    /^\s*(?:[-*]\s*)?\*\*Children[.:]\*\*(?<rest>.*)$/m.exec(body)?.groups
+    /^[ \t]*(?:[-*][ \t]*)?\*\*Children[.:]\*\*(?<rest>.*)$/m.exec(body)?.groups
       .rest ?? '',
   ).filter((item) => /^[EPG]-\d+$/.test(item));
 
 /**
  * Optional list bullet before a bold lead-in.
  *
- * Written `\s*(?:[-*]\s*)?` and never `\s*[-*]?\s*`: two whitespace runs with
- * only an OPTIONAL character between them can split the same spaces countless
- * ways, which is the super-linear backtracking Sonar S8786 reports. Requiring
- * the bullet inside the optional group leaves exactly one parse.
+ * Two rules keep this linear, and both are Sonar S8786 in practice:
+ *
+ * - The bullet lives INSIDE the optional group (`(?:[-*][ \t]*)?`, never
+ *   `[-*]?[ \t]*`). Two whitespace runs separated by an merely optional
+ *   character can split the same spaces countless equivalent ways.
+ * - The whitespace is `[ \t]`, never `\s`. `\s` matches a newline, so under the
+ *   `m` flag every earlier line start could reach the same lead-in by having
+ *   `\s*` swallow the lines between — many paths to one position, which is the
+ *   definition of the backtracking being avoided. Indentation before a bullet
+ *   is spaces and tabs anyway.
  */
-const LIST_LEAD_IN = String.raw`\s*(?:[-*]\s*)?`;
+const LIST_LEAD_IN = String.raw`[ \t]*(?:[-*][ \t]*)?`;
+
+/** The next section: a line break, any blank lines, then a bold lead-in. */
+const NEXT_SECTION = String.raw`\n(?:[ \t]*\n)*${LIST_LEAD_IN}\*\*`;
 
 /**
  * Pulls one narrative section out of a block. The document writes them three
@@ -162,12 +170,15 @@ const LIST_LEAD_IN = String.raw`\s*(?:[-*]\s*)?`;
  */
 export const sectionText = (body, labels) => {
   const alternatives = labels.join('|');
-  // The terminator spells end-of-input as `(?![\s\S])`, not `$`. The `m` flag
-  // the lead-in needs also makes `$` match at every line break, so a lazy body
-  // would stop at the end of its FIRST line — truncating every multi-line
-  // section to one line.
+  // Two details, each of which cost a wrong result:
+  //   - the terminator spells end-of-input as `(?![\s\S])`, not `$`. The `m`
+  //     flag the lead-in needs also makes `$` match at every line break, so a
+  //     lazy body would stop at the end of its FIRST line.
+  //   - no `\s*` sits before `(?<text>…)`. A whitespace run in front of a lazy
+  //     group is ambiguous — both can match the same spaces — and the text is
+  //     trimmed afterwards regardless.
   const pattern = new RegExp(
-    String.raw`^${LIST_LEAD_IN}\*\*(?:\d+\.\s*)?(?:${alternatives})[.:]?\*\*[.:]?\s*(?<text>[\s\S]*?)(?=\n${LIST_LEAD_IN}\*\*|\n### |\n## |\n\`\`\`|(?![\s\S]))`,
+    String.raw`^${LIST_LEAD_IN}\*\*(?:\d+\.[ \t]*)?(?:${alternatives})[.:]?\*\*[.:]?(?<text>[\s\S]*?)(?=${NEXT_SECTION}|\n### |\n## |\n\`\`\`|(?![\s\S]))`,
     'm',
   );
   return dedent((pattern.exec(body)?.groups.text ?? '').trim());
