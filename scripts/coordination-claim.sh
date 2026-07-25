@@ -11,7 +11,7 @@
 # Usage:
 #   vp run coordination:claim -- <id> "<title>" (--issue <n> | --new-issue)
 #                                [--area <glob> ...] [--branch <name>]
-#                                [--worktree] [--dry-run]
+#                                [--in-place] [--dry-run]
 #
 #   <id>         kebab-case task id (== the task filename slug)
 #   <title>      one-line human-readable description
@@ -20,8 +20,11 @@
 #   --area       a glob this work OWNS (repeatable; defaults to a TODO placeholder)
 #   --type       Conventional-Commit type for the branch (default: chore)
 #   --branch     branch name (default: <type>/<issue>-<id>, the enforced shape)
-#   --worktree   work in an isolated ../vrc-<id> git worktree (recommended when
-#                other agents are active) instead of switching this checkout
+#   --in-place   branch in THIS checkout instead of an isolated worktree. Only
+#                safe when nobody else is working in this clone — it moves HEAD
+#                for everyone in it, which is the failure the coordination README
+#                exists to stop. Default is an isolated ../vrc-<id> worktree;
+#                `--worktree` is still accepted and is now a no-op.
 #   --dry-run    print every git/gh/file action without performing it
 #
 # Exactly one of --issue / --new-issue is REQUIRED: every claim links a backlog
@@ -41,7 +44,10 @@ die() { local msg="$1"; printf 'coordination-claim: %s\n' "$msg" >&2; exit 1; }
 REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || die "not in a git repo"
 cd "$REPO_ROOT"
 
-id=""; title=""; branch=""; worktree=0; dry=0; issue=""; new_issue=0; areas=()
+# Isolation is the DEFAULT: branching in the shared clone moves HEAD under every
+# other agent working there, so it must be the thing you ask for, not the thing
+# you get by omission (#385).
+id=""; title=""; branch=""; worktree=1; dry=0; issue=""; new_issue=0; areas=()
 type="chore"
 while [[ $# -gt 0 ]]; do
   arg="$1"
@@ -52,7 +58,8 @@ while [[ $# -gt 0 ]]; do
     --area)      areas+=("$2"); shift 2 ;;
     --type)      type="$2"; shift 2 ;;
     --branch)    branch="$2"; shift 2 ;;
-    --worktree)  worktree=1; shift ;;
+    --worktree)  worktree=1; shift ;; # now the default; kept so old commands work
+    --in-place)  worktree=0; shift ;;
     --dry-run)   dry=1; shift ;;
     -h|--help)   grep '^#' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     --*)         die "unknown flag: $arg" ;;

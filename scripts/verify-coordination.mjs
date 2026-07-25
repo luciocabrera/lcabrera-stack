@@ -71,6 +71,10 @@ import { existsSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import {
+  checkoutIsolationFinding,
+  readCheckoutFacts,
+} from './lib/checkout-isolation.mjs';
 import { renderBoard } from './lib/coordination-board.mjs';
 import { branchSlug } from './lib/coordination-parse.mjs';
 import { mergedTaskDriftWarnings } from './lib/coordination-reconcile.mjs';
@@ -353,6 +357,12 @@ const main = () => {
   checkStale(tasks, warnings);
   checkTaskBranches(tasks, warnings);
   checkGhostTasks(tasks, warnings);
+  const isolation = checkoutIsolationFinding(readCheckoutFacts(REPO_ROOT));
+  if (isolation !== undefined) {
+    (isolation.severity === 'problem' ? problems : warnings).push(
+      isolation.message,
+    );
+  }
   warnings.push(
     ...mergedTaskDriftWarnings({
       liveBranches: remote.liveBranches,
