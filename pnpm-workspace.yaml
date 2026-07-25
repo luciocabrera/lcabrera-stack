@@ -113,6 +113,12 @@ catalogMode: prefer
 # Prune catalog entries that no package.json references, so the catalog cannot
 # accumulate dead pins (default is `false`).
 cleanupUnusedCatalogs: true
+# Refuse to install on a Node outside the root `engines.node` band. Without this
+# the field is advisory — pnpm ignores it, and nothing else reads it, so the
+# declared floor held only while Vite+ managed the runtime and resolved `node`
+# FROM that field. Under any other manager (nvm, fnm, a distro package) an
+# install on an unsupported Node proceeded silently.
+engineStrict: true
 # minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
   - '@types/*' # type-only packages have zero runtime attack surface

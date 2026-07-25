@@ -256,6 +256,22 @@ grandfathered in `scripts/script-size-baseline.json` and may not grow (rebaselin
 with `--write`, reviewed via the JSON diff). Correctness still comes from Oxlint +
 Biome (repo-wide) and fallow (per-function complexity/dead-code).
 
+**The Node version is enforced, not suggested.** `.node-version` holds the exact
+version to be on; root `engines.node` holds the band an install may proceed in;
+`engineStrict: true` in `pnpm-workspace.yaml` makes pnpm **refuse** to install
+outside it, naming the version it got. The band is deliberately wider than the
+pin, so a Node patch release does not hard-fail every install before someone
+updates the file. Do not make them identical, and do not relax `engineStrict` to
+get past a failure — install the Node version the repo asks for.
+
+This is enforcement the repo previously got by accident. Vite+'s default managed
+mode resolves the `node` shim **from** `engines.node`, so it could not hand you a
+version outside the range; on a machine where Node comes from anywhere else
+(nvm, fnm, a distro package) the floor silently disappeared, and both `vp
+install` and `vp run` proceeded on an unsupported runtime without a warning.
+`engineStrict` gates **installs** — a bare `node script.js` is still whatever is
+on PATH.
+
 **Never use pnpm/npm/yarn directly for anything `vp` wraps.** All the daily operations go through `vp`:
 
 | Task                 | Command                                                                                |
