@@ -3,8 +3,9 @@
 > Orchestrator synthesis of a two-agent planning session (Systems Architect +
 > Implementation Engineer) over `docs/agents/decisions/architecture-improvement-plan.md`.
 > **Draft — nothing created on GitHub.** Deliverables: [`issues.md`](./issues.md)
-> (19 issues + 5 epics), [`adrs/`](./adrs/) (ADR-047–050 drafts),
-> [`create-issues.sh`](./create-issues.sh) (ready-to-run `gh`).
+> (19 issues + 5 epics) and [`adrs/`](./adrs/) (ADR-047–050 drafts). Creating
+> them is `vp run plan:issues`, which checks the backlog against the issue gate
+> and the label taxonomy before it calls `gh`.
 
 ## High-level direction
 
@@ -107,7 +108,7 @@ the whole server foundation). P-08/P-12/P-13/P-14 are independent and paralleliz
 | Auth guard off on 3 entry points                          | High (security) | P-14 — but blocked on the RR fetcher→`/login` navigation bug; must return 401 JSON for `_api`             |
 | Every `@lcabrera/server` change is a publish event        | Medium          | dual exports parity + `api-surface:verify` + changeset baked into P-02/P-05/P-11/P-13 acceptance criteria |
 | Result DU-across-single-fetch enforced by convention only | Medium (silent) | keep classes server-side; review + serialization check (no gate)                                          |
-| Planning IDs ≠ issue numbers                              | Low             | `create-issues.sh` captures real numbers, then a second pass wires dependencies                           |
+| Planning IDs ≠ issue numbers                              | Low             | `plan:issues` captures real numbers as it creates, then wires sub-issues from them                        |
 
 ## Governance gaps found
 
@@ -124,8 +125,9 @@ folder dialect.
 
 ## Next step (requires your approval — outward-facing)
 
-1. Install/authenticate `gh` (not present in this environment).
-2. Run [`create-issues.sh`](./create-issues.sh) to create Milestones + issues, then
-   its second pass to wire cross-issue dependencies with real numbers.
+1. Install/authenticate `gh` (`gh auth status`).
+2. Preview with `vp run plan:issues -- --create --dry-run`, then run
+   `vp run plan:issues -- --create` to create the Milestones and issues and
+   attach each epic's children as real sub-issues.
 3. Promote ADR-047–050 out of `adrs/` into `docs/cqms/decisions/` (P-01/P-04/P-10 +
    G-02), confirming the next-free number.

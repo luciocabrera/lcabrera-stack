@@ -3,8 +3,8 @@
 > **DRAFT — nothing has been created on GitHub.** Produced by the
 > `lcabrera-planner` multi-agent session (Systems Architect + Implementation
 > Engineer, orchestrated). IDs `E-*`/`P-*`/`G-*` are **logical planning IDs**, not
-> issue numbers — real numbers are assigned at creation (see
-> `create-issues.sh`). Every issue follows `.github/ISSUE_TEMPLATE/standard_issue.md`
+> issue numbers — real numbers are assigned at creation by
+> `vp run plan:issues`. Every issue follows `.github/ISSUE_TEMPLATE/standard_issue.md`
 > (sections 1–8) plus a mandatory **Planning metadata** block per
 > `docs/agents/dependency-conventions.md`, `execution-waves.md`,
 > `milestone-naming-scheme.md`.
@@ -12,7 +12,7 @@
 > **Label note:** `type:` labels are canonical (`scripts/lib/labels.mjs`). `app:` /
 > `pkg:` scope labels are auto-applied to the _PR_ by `labeler.yml` from changed
 > workspaces — listed here for planning only. Workspace names:
-> `pkg: @lcabrera/server`, `pkg: @lcabrera/ui`, `app: vite-react-compiler`.
+> `pkg: server`, `pkg: ui`, `app: react-router`.
 > No `wave:`/`milestone:` labels exist — waves live in this doc, milestones in
 > GitHub Milestones (G-03).
 
@@ -25,7 +25,7 @@
 - **Problem:** the persistence layer leaks raw pg detail, has no transaction seam,
   and runs an untuned pool. Children deliver the flagship-package foundation.
 - **Children:** P-01, P-02, P-03, P-04, P-05, P-13
-- **Metadata:** `type: feature`; `pkg: @lcabrera/server`; Milestone **M1→M2**;
+- **Metadata:** `type: feature`; `pkg: server`; Milestone **M1→M2**;
   Waves **1–2**. `parent: null`.
 
 ### E-2 — `fix(react-router): epic — enterprise-orders correctness & security`
@@ -33,7 +33,7 @@
 - **Problem:** mis-routed persistence errors, a live `order_id` race, and an
   unguarded mutating subtree. Children consume E-1's abstractions at the app edge.
 - **Children:** P-06, P-07, P-14
-- **Metadata:** `type: bug`; `app: vite-react-compiler`; Milestone **M3–M4**;
+- **Metadata:** `type: bug`; `app: react-router`; Milestone **M3–M4**;
   Waves **3–4**. `parent: null`.
 
 ### E-3 — `perf: epic — read-path performance`
@@ -41,7 +41,7 @@
 - **Problem:** sequential data+count, count recomputed per page, O(offset) load-more,
   full-column over-fetch.
 - **Children:** P-08, P-09, P-10, P-11, P-12
-- **Metadata:** `type: perf`; `pkg: @lcabrera/server` + `app: vite-react-compiler`;
+- **Metadata:** `type: perf`; `pkg: server` + `app: react-router`;
   Milestone **M4**; Wave **4** (ADR in Wave 1). `parent: null`.
 
 ### E-4 — `chore: epic — self-healing governance`
@@ -53,7 +53,7 @@
 ### E-5 — `perf(server): epic — observability (optional)`
 
 - **Children:** P-15
-- **Metadata:** `type: perf`; `pkg: @lcabrera/server`; Milestone **M5**; Wave **5**.
+- **Metadata:** `type: perf`; `pkg: server`; Milestone **M5**; Wave **5**.
   `parent: null`.
 
 ---
@@ -92,10 +92,11 @@ rather than inventing a parallel narrowing.
 **Planning metadata**
 
 ```yaml
-labels: [type: docs, pkg: @lcabrera/server]
+labels: [type: docs, pkg: server]
 milestone: M1 - Foundation
 executionWave: Wave 1 - Exploration & ADRs
-dependencies: { blocking: [P-02, P-06], blockedBy: [], parent: E-1, children: [] }
+dependencies:
+  { blocking: [P-02, P-06], blockedBy: [], parent: E-1, children: [] }
 ```
 
 ---
@@ -132,10 +133,11 @@ mapping (P-06).
 **Planning metadata**
 
 ```yaml
-labels: [type: feature, pkg: @lcabrera/server]
+labels: [type: feature, pkg: server]
 milestone: M2 - Abstractions
 executionWave: Wave 2 - Foundational Refactors
-dependencies: { blocking: [P-03, P-06], blockedBy: [P-01], parent: E-1, children: [] }
+dependencies:
+  { blocking: [P-03, P-06], blockedBy: [P-01], parent: E-1, children: [] }
 ```
 
 ---
@@ -170,10 +172,11 @@ try/catch across four files.
 **Planning metadata**
 
 ```yaml
-labels: [type: feature, pkg: @lcabrera/server]
+labels: [type: feature, pkg: server]
 milestone: M2 - Abstractions
 executionWave: Wave 2 - Foundational Refactors
-dependencies: { blocking: [P-05, P-06], blockedBy: [P-02], parent: E-1, children: [] }
+dependencies:
+  { blocking: [P-05, P-06], blockedBy: [P-02], parent: E-1, children: [] }
 ```
 
 ---
@@ -205,10 +208,11 @@ READ-COMMITTED subtlety: transaction alone does not close the race.
 **Planning metadata**
 
 ```yaml
-labels: [type: docs, pkg: @lcabrera/server]
+labels: [type: docs, pkg: server]
 milestone: M1 - Foundation
 executionWave: Wave 1 - Exploration & ADRs
-dependencies: { blocking: [P-05, P-07], blockedBy: [], parent: E-1, children: [] }
+dependencies:
+  { blocking: [P-05, P-07], blockedBy: [], parent: E-1, children: [] }
 ```
 
 ---
@@ -244,10 +248,11 @@ changeset, api-surface snapshot, tests. _Out:_ the enterprise-orders use-case (P
 **Planning metadata**
 
 ```yaml
-labels: [type: feature, pkg: @lcabrera/server]
+labels: [type: feature, pkg: server]
 milestone: M2 - Abstractions
 executionWave: Wave 2 - Foundational Refactors
-dependencies: { blocking: [P-07], blockedBy: [P-04, P-03], parent: E-1, children: [] }
+dependencies:
+  { blocking: [P-07], blockedBy: [P-04, P-03], parent: E-1, children: [] }
 ```
 
 ---
@@ -289,7 +294,7 @@ residual collision a clean typed conflict.
 **Planning metadata**
 
 ```yaml
-labels: [type: feature, app: vite-react-compiler]
+labels: [type: feature, app: react-router]
 milestone: M3 - Cross-App Integration
 executionWave: Wave 3 - Cross-App Improvements
 dependencies:
@@ -334,7 +339,7 @@ or retry on the typed `23505` from P-06, or migrate to a sequence).
 **Planning metadata**
 
 ```yaml
-labels: [type: bug, app: vite-react-compiler]
+labels: [type: bug, app: react-router]
 milestone: M3 - Cross-App Integration
 executionWave: Wave 3 - Cross-App Improvements
 dependencies:
@@ -369,7 +374,7 @@ latency on count-dominated filters.
 **Planning metadata**
 
 ```yaml
-labels: [type: perf, app: vite-react-compiler]
+labels: [type: perf, app: react-router]
 milestone: M4 - Hardening & QA
 executionWave: Wave 4 - Hardening & QA
 dependencies: { blocking: [], blockedBy: [], parent: E-3, children: [] }
@@ -407,7 +412,7 @@ optional on the response type.
 **Planning metadata**
 
 ```yaml
-labels: [type: perf, app: vite-react-compiler]
+labels: [type: perf, app: react-router]
 milestone: M4 - Hardening & QA
 executionWave: Wave 4 - Hardening & QA
 dependencies: { blocking: [], blockedBy: [P-08], parent: E-3, children: [] }
@@ -441,7 +446,7 @@ ADR-008 total order is O(limit) but needs a sanctioned decision.
 **Planning metadata**
 
 ```yaml
-labels: [type: docs, pkg: @lcabrera/server]
+labels: [type: docs, pkg: server]
 milestone: M1 - Foundation
 executionWave: Wave 1 - Exploration & ADRs
 dependencies: { blocking: [P-11], blockedBy: [], parent: E-3, children: [] }
@@ -478,7 +483,7 @@ jump-to-page grids (stay on offset).
 **Planning metadata**
 
 ```yaml
-labels: [type: perf, pkg: @lcabrera/server]
+labels: [type: perf, pkg: server]
 milestone: M4 - Hardening & QA
 executionWave: Wave 4 - Hardening & QA
 dependencies: { blocking: [], blockedBy: [P-10], parent: E-3, children: [] }
@@ -514,7 +519,7 @@ shrinking the serialized payload.
 **Planning metadata**
 
 ```yaml
-labels: [type: perf, app: vite-react-compiler]
+labels: [type: perf, app: react-router]
 milestone: M4 - Hardening & QA
 executionWave: Wave 4 - Hardening & QA
 dependencies: { blocking: [], blockedBy: [], parent: E-3, children: [] }
@@ -552,7 +557,7 @@ changeset. _Out:_ per-app overrides.
 **Planning metadata**
 
 ```yaml
-labels: [type: feature, pkg: @lcabrera/server]
+labels: [type: feature, pkg: server]
 milestone: M2 - Abstractions
 executionWave: Wave 2 - Foundational Refactors
 dependencies: { blocking: [], blockedBy: [], parent: E-1, children: [] }
@@ -598,7 +603,7 @@ navigation break — that reintroduces the original regression.
 **Planning metadata**
 
 ```yaml
-labels: [type: bug, app: vite-react-compiler]
+labels: [type: bug, app: react-router]
 milestone: M4 - Hardening & QA
 executionWave: Wave 4 - Hardening & QA
 dependencies: { blocking: [], blockedBy: [], parent: E-2, children: [] }
@@ -634,10 +639,11 @@ full app-wide tracing.
 **Planning metadata**
 
 ```yaml
-labels: [type: perf, pkg: @lcabrera/server]
+labels: [type: perf, pkg: server]
 milestone: M5 - Release Prep
 executionWave: Wave 5 - Final Integration
-dependencies: { blocking: [], blockedBy: [P-05, P-07], parent: E-5, children: [] }
+dependencies:
+  { blocking: [], blockedBy: [P-05, P-07], parent: E-5, children: [] }
 ```
 
 ---

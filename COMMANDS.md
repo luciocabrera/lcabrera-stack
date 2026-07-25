@@ -351,6 +351,29 @@ runs both in CI. See the [`commit-and-pr`](.github/skills/commit-and-pr/SKILL.md
 | `vp run issue:verify`                             | validate an issue description (`ISSUE_BODY`) against the issue template         |
 | `vp run issue:verify -- --body-file <p>`          | validate an issue description from a file                                       |
 
+### Planning backlog → GitHub
+
+`vp run plan:issues` turns a planning document
+(`docs/agents/planning/issues.md` by default) into Milestones, issues and real
+sub-issue links. It checks first and calls `gh` second: every rendered body must
+pass the same `validateIssueBody` that `issue-standards.yml` runs on open, every
+label must exist in the taxonomy (`scripts/lib/labels.mjs`), and every milestone
+must be one the naming scheme defines. Nothing is created if anything would be
+rejected.
+
+| Command                                    | Does                                                               |
+| ------------------------------------------ | ------------------------------------------------------------------ |
+| `vp run plan:issues`                       | verify the backlog would be accepted; create nothing               |
+| `vp run plan:issues -- --plan <file>`      | verify a different planning document                               |
+| `vp run plan:issues -- --emit <dir>`       | write the rendered bodies + `manifest.json` for review             |
+| `vp run plan:issues -- --create --dry-run` | print every `gh` call it would make                                |
+| `vp run plan:issues -- --create`           | create the milestones, the issues, and each epic's sub-issue links |
+
+Epics are created before their children so a sub-issue link always has a target.
+Re-running is safe for milestones (existing titles are skipped) but **not** for
+issues — `gh issue create` has no idempotency, so a second `--create` opens a
+second set. Use `--dry-run` first.
+
 ### Changelog & labels
 
 Both derive from the same commit convention: the changelog groups
