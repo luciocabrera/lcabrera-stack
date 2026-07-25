@@ -4,6 +4,8 @@ export {
   ENTERPRISE_ORDER_ALLOWED_COLUMNS,
   ENTERPRISE_ORDER_COLUMNS,
   ENTERPRISE_ORDER_DISTINCT_FILTER_COLUMNS,
+  ENTERPRISE_ORDER_LIST_COLUMNS,
+  ENTERPRISE_ORDER_PRIMARY_KEY,
   ENTERPRISE_ORDERS_PATH,
   ENTERPRISE_ORDERS_SCHEMA,
   ENTERPRISE_ORDERS_TABLE,
@@ -21,6 +23,7 @@ export {
 } from './enterpriseOrders.schema';
 export type {
   EnterpriseOrder,
+  EnterpriseOrderListRow,
   EnterpriseOrdersResponse,
   EnterpriseOrderValues,
 } from './enterpriseOrders.types';
@@ -28,5 +31,6 @@ export { parseOrderFormData } from './parseOrderFormData.util';
 export { toOrderFieldErrors } from './toOrderFieldErrors.util';
 export { toOrderFormValues } from './toOrderFormValues.util';
 export { toOrderInsertValues } from './toOrderInsertValues.util';
+export { toOrderKeysetCursor } from './toOrderKeysetCursor.util';
 export { toOrderQuerySort } from './toOrderQuerySort.util';
 export { toOrderUpdateValues } from './toOrderUpdateValues.util';

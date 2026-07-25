@@ -35,6 +35,7 @@ export const executeFetchMore = async <TData, TResponse>({
 
     const response = await fetchMoreResponse({
       currentDataLength: currentData.length,
+      lastRow: currentData.at(-1),
       pageSize,
       prefetchRef,
       requiredOnLoadMore,

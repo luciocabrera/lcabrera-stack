@@ -17,9 +17,9 @@ export const Table = <TData extends Record<string, unknown>, TResponse>({
   response,
 }: TableProps<TData, TResponse>) => {
   const data = dataSelector ? dataSelector(response) : [];
-  const totalRows = dataTotalSelector
-    ? dataTotalSelector(response)
-    : data.length;
+  // The first response of a session always carries its total; `data.length`
+  // covers a table wired without a selector, and a server that omitted one.
+  const totalRows = dataTotalSelector?.(response) ?? data.length;
 
   const tableContent = (
     <TableDataProvider<TData>

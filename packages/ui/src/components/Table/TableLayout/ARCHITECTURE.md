@@ -38,14 +38,14 @@ graph TD
 
 ## Props
 
-| Prop                | Type                            | Required | Description                                                                                        |
-| ------------------- | ------------------------------- | -------- | -------------------------------------------------------------------------------------------------- |
-| `columnsState`      | `TableColumnsStateInput<TData>` | Yes      | Loader-seeded initial column state                                                                 |
-| `dataPromise`       | `Promise<TResponse>`            | Yes      | Async data source                                                                                  |
-| `dataSelector`      | `(r: TResponse) => TData[]`     | Yes      | Extract rows from response                                                                         |
-| `dataTotalSelector` | `(r: TResponse) => number`      | No       | Extract total row count                                                                            |
-| `metaState`         | `Partial<TableMetaState>`       | Yes      | Loader-seeded initial meta state (include `crud` + `deleteActionPath` here for row/create actions) |
-| `onLoadMore`        | Infinite scroll callback        | No       | Fetch next page                                                                                    |
+| Prop                | Type                                    | Required | Description                                                                                              |
+| ------------------- | --------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------- |
+| `columnsState`      | `TableColumnsStateInput<TData>`         | Yes      | Loader-seeded initial column state                                                                       |
+| `dataPromise`       | `Promise<TResponse>`                    | Yes      | Async data source                                                                                        |
+| `dataSelector`      | `(r: TResponse) => TData[]`             | Yes      | Extract rows from response                                                                               |
+| `dataTotalSelector` | `(r: TResponse) => number \| undefined` | No       | Extract total row count; `undefined` on a load-more page keeps the stored total (count once per session) |
+| `metaState`         | `Partial<TableMetaState>`               | Yes      | Loader-seeded initial meta state (include `crud` + `deleteActionPath` here for row/create actions)       |
+| `onLoadMore`        | Infinite scroll callback                | No       | Fetch next page                                                                                          |
 
 ## suspenseKey Behavior
 

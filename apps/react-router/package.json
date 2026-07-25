@@ -14,7 +14,7 @@
     "format": "vp fmt .",
     "format:check": "vp fmt --check .",
     "typegen": "react-router typegen",
-    "typecheck": "react-router typegen && tsc --noEmit",
+    "typecheck": "react-router typegen && tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.node.json",
     "test:ci": "vp test --coverage --coverage.reporter=text --coverage.reporter=html --coverage.reporter=json-summary",
     "test:smoke": "sh -c 'set -a; eval \"$(tr -d \"\\r\" < ../../docker/local/.env)\"; set +a; SMOKE_DB=1 node node_modules/vitest/vitest.mjs run enterpriseOrders.smoke'",
     "preview": "vp preview",

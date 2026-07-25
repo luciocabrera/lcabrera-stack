@@ -1,9 +1,10 @@
 import type { Pagination, PrefetchCache } from '@lcabrera/ui/types/ui.types';
 
-type PrefetchNextPageArgs<TResponse> = {
+type PrefetchNextPageArgs<TResponse, TData = unknown> = {
+  readonly lastRow?: TData;
   readonly limit: number;
   readonly nextSkip: number;
-  readonly onLoadMore: (params: Pagination) => Promise<TResponse>;
+  readonly onLoadMore: (params: Pagination<TData>) => Promise<TResponse>;
 };
 
 /**
@@ -12,12 +13,14 @@ type PrefetchNextPageArgs<TResponse> = {
  * final cache state (success or failure). The consumer is responsible
  * for applying these values to the ref with a staleness check.
  */
-export const prefetchNextPage = <TResponse>({
+export const prefetchNextPage = <TResponse, TData = unknown>({
+  lastRow,
   limit,
   nextSkip,
   onLoadMore,
-}: PrefetchNextPageArgs<TResponse>) => {
+}: PrefetchNextPageArgs<TResponse, TData>) => {
   const prefetchPromise = onLoadMore({
+    lastRow,
     limit,
     skip: nextSkip,
   });

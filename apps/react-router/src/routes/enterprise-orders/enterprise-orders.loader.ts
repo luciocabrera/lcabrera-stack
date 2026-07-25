@@ -4,7 +4,10 @@ import { createTableRouteLoader } from '@lcabrera/ui/routing/loaders/createTable
 
 import { APP_ID } from '@/constants/app.constants';
 
-import type { EnterpriseOrder, EnterpriseOrdersResponse } from './config';
+import type {
+  EnterpriseOrderListRow,
+  EnterpriseOrdersResponse,
+} from './config';
 
 import { selectOrdersPage } from './.server/enterpriseOrders.service';
 import { toOrderQuerySort } from './config';
@@ -32,7 +35,7 @@ import {
  * streaming.
  */
 export const loader = createTableRouteLoader<
-  EnterpriseOrder,
+  EnterpriseOrderListRow,
   EnterpriseOrdersResponse
 >({
   appId: APP_ID,
@@ -40,6 +43,9 @@ export const loader = createTableRouteLoader<
   fetchPage: ({ effectiveSorting, filters }) =>
     selectOrdersPage({
       filters: toQueryFilters({ filters }),
+      // The first page of a scroll session, so this is the one read that counts
+      // the filtered set; every load-more after it reuses this total (#402).
+      includeTotal: true,
       limit: INITIAL_PAGE_SIZE,
       offset: 0,
       sort: toOrderQuerySort({ sorting: effectiveSorting }),

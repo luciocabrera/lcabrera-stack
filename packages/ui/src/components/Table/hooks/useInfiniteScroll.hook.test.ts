@@ -91,8 +91,11 @@ describe('useInfiniteScroll', () => {
           onLoadMore,
         }: {
           readonly dataSelector?: (response: Response) => readonly Row[];
-          readonly dataTotalSelector?: (response: Response) => number;
+          readonly dataTotalSelector?: (
+            response: Response,
+          ) => number | undefined;
           readonly onLoadMore?: (params: {
+            lastRow?: Row;
             limit: number;
             skip: number;
           }) => Promise<Response>;

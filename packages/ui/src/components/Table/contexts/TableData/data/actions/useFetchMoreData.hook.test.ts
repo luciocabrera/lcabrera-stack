@@ -128,6 +128,7 @@ describe('useFetchMoreData', () => {
 
     expect(onLoadMore).toHaveBeenCalledTimes(1);
     expect(onLoadMore).toHaveBeenCalledWith({
+      lastRow: { id: 1 },
       limit: LOAD_MORE_PAGE_SIZE,
       skip: 1,
     });
@@ -166,7 +167,11 @@ describe('useFetchMoreData', () => {
       await result.current({ ...defaultSelectors, onLoadMore });
     });
 
-    expect(onLoadMore).toHaveBeenCalledWith({ limit: 25, skip: 1 });
+    expect(onLoadMore).toHaveBeenCalledWith({
+      lastRow: { id: 1 },
+      limit: 25,
+      skip: 1,
+    });
   });
 
   it('returns early when hasMore is false', async () => {
@@ -244,8 +249,18 @@ describe('useFetchMoreData', () => {
       });
 
       expect(onLoadMore).toHaveBeenCalledTimes(2);
-      expect(onLoadMore).toHaveBeenNthCalledWith(1, { limit: 50, skip: 1 });
-      expect(onLoadMore).toHaveBeenNthCalledWith(2, { limit: 50, skip: 2 });
+      // The prefetch anchors on the row the just-committed page ended with, so
+      // a keyset source resumes from the right place rather than re-seeking.
+      expect(onLoadMore).toHaveBeenNthCalledWith(1, {
+        lastRow: { id: 1 },
+        limit: 50,
+        skip: 1,
+      });
+      expect(onLoadMore).toHaveBeenNthCalledWith(2, {
+        lastRow: { id: 2 },
+        limit: 50,
+        skip: 2,
+      });
     });
 
     it('does not prefetch when hasMore becomes false', async () => {
@@ -338,7 +353,11 @@ describe('useFetchMoreData', () => {
       });
 
       expect(onLoadMore).toHaveBeenCalledTimes(4);
-      expect(onLoadMore).toHaveBeenNthCalledWith(3, { limit: 50, skip: 2 });
+      expect(onLoadMore).toHaveBeenNthCalledWith(3, {
+        lastRow: { id: 2 },
+        limit: 50,
+        skip: 2,
+      });
     });
   });
 });

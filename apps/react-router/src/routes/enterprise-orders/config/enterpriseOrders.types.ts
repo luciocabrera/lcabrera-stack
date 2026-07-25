@@ -1,3 +1,5 @@
+import type { ENTERPRISE_ORDER_LIST_COLUMNS } from './enterpriseOrders.constants';
+
 /**
  * Client-safe types for the `enterprise_orders` entity.
  *
@@ -71,10 +73,27 @@ export type EnterpriseOrder = {
   readonly weight_kg: string;
 };
 
+/**
+ * A row as the **list** query returns it — the read model of
+ * `ENTERPRISE_ORDER_LIST_COLUMNS`, not the whole table row (#405). Typing it as
+ * a `Pick` is what stops a cell reading a column the query no longer selects:
+ * that becomes a compile error rather than a blank cell.
+ */
+export type EnterpriseOrderListRow = Pick<
+  EnterpriseOrder,
+  (typeof ENTERPRISE_ORDER_LIST_COLUMNS)[number]
+>;
+
 export type EnterpriseOrdersResponse = {
-  readonly data: readonly EnterpriseOrder[];
+  readonly data: readonly EnterpriseOrderListRow[];
   readonly hasMore: boolean;
-  readonly total: number;
+  /**
+   * Rows matching the current filters — present only on the **first** page of a
+   * scroll session (#402). The total cannot change while the session runs, so
+   * later pages omit it and the table keeps the one it has rather than making
+   * the database re-count the filtered set per page.
+   */
+  readonly total?: number;
 };
 
 /**

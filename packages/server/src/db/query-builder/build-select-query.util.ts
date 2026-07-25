@@ -20,9 +20,14 @@ import { quoteIdentifier } from './quote-identifier.util.ts';
  * additional, opt-in authorization check — omit it when every column here
  * is developer-hardcoded; pass it the moment a column name is ever derived
  * from a request (see query-builder.types.ts's SelectQueryDescriptor doc).
+ *
+ * Pagination is `offset` by default. Pass `cursor` instead for keyset ("seek")
+ * pagination over a total order — O(limit) rather than O(offset), for
+ * infinite scroll (ADR-052).
  */
 export const buildSelectQuery = ({
   allowedColumns,
+  cursor,
   distinct,
   fields,
   filters,
@@ -43,7 +48,12 @@ export const buildSelectQuery = ({
   const quotedFields = fields.map((field) => quoteIdentifier(field)).join(', ');
   const quotedFrom = `${quoteIdentifier(schema)}.${quoteIdentifier(table)}`;
 
-  const whereClause = buildWhereClause({ allowedColumns, filters });
+  const whereClause = buildWhereClause({
+    allowedColumns,
+    cursor,
+    filters,
+    sort,
+  });
   const orderByClause = buildOrderByClause({ allowedColumns, sort });
   const paginationClause = buildOptionalNumericClauses({
     clauses: [

@@ -38,9 +38,11 @@ type CreatePaginatedFetchActionMocksResult<TDataState, TResponse> = {
 };
 
 type FirePrefetchArgs<TResponse> = {
+  readonly lastRow?: unknown;
   readonly limit: number;
   readonly nextSkip: number;
   readonly onLoadMore: (params: {
+    readonly lastRow?: unknown;
     readonly limit: number;
     readonly skip: number;
   }) => Promise<TResponse>;
@@ -88,12 +90,13 @@ export const createPaginatedFetchActionMocks = <TDataState, TResponse>({
 
   const firePrefetchMock = vi.fn(
     ({
+      lastRow,
       limit,
       nextSkip,
       onLoadMore,
       prefetchRef,
     }: FirePrefetchArgs<TResponse>) => {
-      void onLoadMore({ limit, skip: nextSkip })
+      void onLoadMore({ lastRow, limit, skip: nextSkip })
         .then((response: TResponse) => {
           prefetchRef.current = {
             data: response,

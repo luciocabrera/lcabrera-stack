@@ -19,12 +19,16 @@ the `../*.util.ts` executors that pair each builder with `getPool`).
 
 | File                                     | Role                                                                                                                                                                                                                  |
 | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `query-builder.types.ts`                 | `ComparisonOperator`, `QueryFilter`, `QuerySort`, `BuiltQuery`, and the `Select`/`Count`/`Distinct`/`Insert`/`Update`/`Delete`/`MaxValue` `…QueryDescriptor` types                                                    |
+| `query-builder.types.ts`                 | `ComparisonOperator`, `QueryFilter`, `QuerySort`, `QueryCursor`, `BuiltQuery`, and the `Select`/`Count`/`Distinct`/`Insert`/`Update`/`Delete`/`MaxValue` `…QueryDescriptor` types                                     |
 | `quote-identifier.util.ts`               | Safe double-quote identifier escaping                                                                                                                                                                                 |
 | `assert-safe-identifier.util.ts`         | **Mandatory**, always called — syntax check (see Security model)                                                                                                                                                      |
 | `assert-column-allowed.util.ts`          | **Optional**, opt-in — membership check (see Security model)                                                                                                                                                          |
 | `append-filter-clause.util.ts`           | Reducer step used by `buildWhereClause`: one filter → one SQL clause + values                                                                                                                                         |
-| `build-where-clause.util.ts`             | `QueryFilter[]` → `{ text, values }`, correctly incrementing `$n` placeholders                                                                                                                                        |
+| `build-where-clause.util.ts`             | `QueryFilter[]` (plus an optional keyset `cursor`) → `{ text, values }`, correctly incrementing `$n` placeholders                                                                                                     |
+| `assert-keyset-cursor.util.ts`           | Refuses a keyset cursor the builder cannot resume correctly — no sort, a tuple that does not match it, or one not ending on a non-null unique column (ADR-052)                                                        |
+| `build-keyset-comparison.util.ts`        | The "sorts strictly after this value" half of one keyset branch, for one column, honouring Postgres's default null placement                                                                                          |
+| `build-keyset-branch.util.ts`            | One OR-branch: earlier sort columns pinned with `IS NOT DISTINCT FROM`, the column at that position advanced past the cursor                                                                                          |
+| `build-keyset-clause.util.ts`            | Composes the branches into the seek predicate `buildWhereClause` ANDs in                                                                                                                                              |
 | `build-returning-clause.util.ts`         | Shared `RETURNING` builder for the write builders: `''`, `RETURNING *` (the `['*']` wildcard), or a quoted column projection                                                                                          |
 | `build-order-by-clause.util.ts`          | `QuerySort[]` → `ORDER BY ...`                                                                                                                                                                                        |
 | `build-optional-numeric-clauses.util.ts` | `LIMIT`/`OFFSET` fragment builder, skips `undefined` values without gapping `$n`                                                                                                                                      |
@@ -65,6 +69,26 @@ for that day to come, only remembered at the new call site.
 
 Filter **values** are always parameterized, never string-interpolated,
 regardless of `allowedColumns`.
+
+## Pagination: `offset` by default, `cursor` to seek
+
+`buildSelectQuery` paginates with `OFFSET` unless the descriptor carries a
+`cursor`, in which case it emits a keyset ("seek") predicate and resumes strictly
+after the row that cursor describes — O(limit) rather than O(offset). The
+decision, the shape of the predicate and why it is not the compact
+`(a, b) > ($1, $2)` row comparison are
+[ADR-052](../../../../../docs/decisions/ADR-052-keyset-pagination-for-infinite-scroll.md).
+
+Two things to know before reaching for it:
+
+- **It refuses what it cannot resume.** A cursor needs a total order, so the
+  sort must be non-empty, match the tuple one for one, and end on a **non-null**
+  unique column — Postgres permits many NULLs in a unique index, so a null there
+  is not a total order. Each failure throws at construction time; that the column
+  really is unique stays the caller's to guarantee, like `allowedColumns`.
+- **Pass one or the other.** A `cursor` and an `offset` together are accepted and
+  mean what they say — skip `n` rows _after_ the cursor — which is almost never
+  what a caller wants.
 
 ## Mutation safety
 

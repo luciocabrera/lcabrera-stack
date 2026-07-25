@@ -75,4 +75,36 @@ describe('buildWhereClause', () => {
       }),
     ).toThrow();
   });
+
+  it('adds a keyset cursor as one more conjunct, numbered after the filters', () => {
+    const result = buildWhereClause({
+      cursor: { uniqueColumn: 'order_id', values: [4821] },
+      filters: [{ column: 'order_status', operator: 'eq', value: 'Shipped' }],
+      sort: [{ column: 'order_id', direction: 'asc' }],
+    });
+
+    expect(result).toEqual({
+      nextParamIndex: 3,
+      text: 'WHERE "order_status" = $1 AND ((("order_id" > $2 OR "order_id" IS NULL)))',
+      values: ['Shipped', 4821],
+    });
+  });
+
+  it('builds a WHERE from a cursor alone when there are no filters', () => {
+    const result = buildWhereClause({
+      cursor: { uniqueColumn: 'order_id', values: [4821] },
+      sort: [{ column: 'order_id', direction: 'asc' }],
+    });
+
+    expect(result.text).toBe(
+      'WHERE ((("order_id" > $1 OR "order_id" IS NULL)))',
+    );
+    expect(result.values).toEqual([4821]);
+  });
+
+  it('ignores a sort when no cursor asks for one', () => {
+    expect(
+      buildWhereClause({ sort: [{ column: 'order_id', direction: 'asc' }] }),
+    ).toEqual({ nextParamIndex: 1, text: '', values: [] });
+  });
 });

@@ -21,7 +21,7 @@ type ExecuteFetchMoreFilterDataArgs<TData, TResponse> = {
   readonly currentData: readonly string[];
   readonly currentFilter: FilterData;
   readonly dataSelector?: (response: TResponse) => readonly string[];
-  readonly dataTotalSelector?: (response: TResponse) => number;
+  readonly dataTotalSelector?: (response: TResponse) => number | undefined;
   readonly filtersDataStore: TStore<FiltersDataState<TData>>;
   readonly metaStore: TStore<TableMetaState>;
   readonly prefetchRef?: FetchFilterDataActionArgs<

@@ -40,6 +40,7 @@ export const commitFetchMoreSuccess = <TData, TResponse>({
   maybePrefetchNextPage({
     enablePrefetch,
     hasMore,
+    lastRow: combinedData.at(-1),
     nextSkip: combinedData.length,
     onLoadMore: requiredOnLoadMore,
     pageSize,

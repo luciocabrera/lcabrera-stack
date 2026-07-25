@@ -88,17 +88,46 @@ empty. `Modal.onClose` and the Form's Cancel navigate back to the list; a succes
 
 ### `config/` — entity data + pure rules (no SQL, no `pg`)
 
-Client-safe types (`EnterpriseOrder`, `EnterpriseOrderValues`), the `{ schema, table }` +
-column/`allowedColumns`/enum sets, the shared create/update **Zod schema**, and pure
-derivation/mapping utils (`deriveOrderTotals`, `toOrderInsertValues`/`toOrderUpdateValues`,
-`readOrderFormValues`, `toOrderFieldErrors`, `toOrderFormValues`). Each util is pure with a
-colocated test.
+Client-safe types (`EnterpriseOrder`, `EnterpriseOrderListRow`,
+`EnterpriseOrderValues`), the `{ schema, table }` +
+column/`allowedColumns`/`listColumns`/enum sets, the shared create/update **Zod schema**,
+and pure derivation/mapping utils (`deriveOrderTotals`, `toOrderInsertValues`/
+`toOrderUpdateValues`, `readOrderFormValues`, `toOrderFieldErrors`, `toOrderFormValues`,
+`toOrderQuerySort`, `toOrderKeysetCursor`). Each util is pure with a colocated test.
+
+### The read path — how a page of orders is paid for
+
+Four things about `selectOrdersPage` are deliberate, and each one used to be the
+obvious-but-slower spelling (epic #391):
+
+- **The page and the count run concurrently**, not one after the other — they are
+  independent queries, so the floor latency is the slower of the two rather than
+  their sum. `getRowsCount` takes the data query's own `filters`/`allowedColumns`,
+  so a page and its total still cannot drift apart.
+- **The count runs on the first page of a scroll session only.** The total of a
+  filtered set cannot change while the session runs, so `includeTotal` is true for
+  the SSR loader and for `skip === 0`, and `total` is simply absent from every
+  later page. The table keeps the total it holds when a page omits one
+  (`resolveFetchMoreState`), so nothing downstream notices.
+- **Load-more seeks rather than counts.** The table hands `onLoadMore` its last
+  loaded row; `buildEnterpriseOrdersQuery` turns that into the sort-key tuple the
+  server resumes after, so a deep page is O(limit) instead of O(offset)
+  ([ADR-052](../../../../../docs/decisions/ADR-052-keyset-pagination-for-infinite-scroll.md)).
+  `skip` is still sent, and `toOrderKeysetCursor` falls back to it whenever the
+  cursor cannot be trusted — most concretely when the user's sort leaves
+  `order_id` mid-list, so the sort is not a total order. Keyset is the
+  optimization; `OFFSET` is the ground truth.
+- **The list query projects `ENTERPRISE_ORDER_LIST_COLUMNS`, not the whole row.**
+  Rows carry only what the table renders; the free-text, audit and address-detail
+  columns no cell reads are no longer fetched, serialized and shipped per row per
+  page. `EnterpriseOrderListRow` is that projection as a type, and `COLUMNS` is
+  typed on it. The detail and edit views still read the full row — they read one.
 
 ### `.server/enterpriseOrders.service.ts` — server-only Postgres access
 
-Wraps the generic `@lcabrera/server` executors (`selectRows`/`insertRow`/`updateRows`/
-`deleteRows`/`getMaxValue`) with the enterprise-orders `{ schema, table, allowedColumns }`
-baked in — **no entity-specific SQL**. It reaches Postgres via `getPool`, which reads `DB_*`
+Wraps the generic `@lcabrera/server` executors (`selectRows`/`getRowsCount`/`insertRow`/
+`updateRows`/`deleteRows`/`getMaxValue`) with the enterprise-orders
+`{ schema, table, allowedColumns }` baked in — **no entity-specific SQL**. It reaches Postgres via `getPool`, which reads `DB_*`
 env (sourced from `docker/local/.env` by the app's `dev` script). The
 `/_action/enterprise-orders/delete` action calls `deleteOrder` here, fixing the prior
 api-server 404 (feature plan §8 bug 1).

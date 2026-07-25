@@ -2,17 +2,19 @@ import { resolveFromCacheOrFetch } from '@lcabrera/ui/utils/prefetch/resolveFrom
 
 import type { FetchMoreResponseArgs } from './fetchMoreData.types';
 
-export const fetchMoreResponse = async <TResponse>({
+export const fetchMoreResponse = async <TData, TResponse>({
   currentDataLength,
+  lastRow,
   pageSize,
   prefetchRef,
   requiredOnLoadMore,
-}: FetchMoreResponseArgs<TResponse>) => {
+}: FetchMoreResponseArgs<TData, TResponse>) => {
   return resolveFromCacheOrFetch({
     cache: prefetchRef.current,
     expectedSkip: currentDataLength,
     fetchFn: () =>
       requiredOnLoadMore({
+        lastRow,
         limit: pageSize,
         skip: currentDataLength,
       }),
