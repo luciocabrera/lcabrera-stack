@@ -6,7 +6,7 @@
  * governance entries) all have to become bodies that pass the issue gate. That
  * mapping is the part worth testing, so it lives here with no `gh` and no fs.
  *
- * The document contract is documented in `docs/agents/planning/issues.md`:
+ * The document contract, which a plan file must follow:
  * an issue is an h3 whose text is `<ID> — \`<conventional title>\``, and its
  * planning metadata is either a fenced yaml block or a `Metadata` line.
  */

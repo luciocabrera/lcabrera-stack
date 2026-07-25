@@ -39,7 +39,16 @@ import {
 import { deriveWorkspaces } from './lib/workspace-scopes.mjs';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
-const DEFAULT_PLAN = 'docs/agents/planning/issues.md';
+/**
+ * There is no default planning document, and that is deliberate: ADR-036 makes
+ * GitHub Issues the durable backlog, so a tracked file that always holds "the
+ * backlog" would be a second one. A plan is authored for one session, consumed
+ * by `--create`, and retired. Keep the working copy under `.tmp/planning/`.
+ */
+const PLAN_REQUIRED =
+  'no planning document given. Pass --plan <file>; there is no tracked default, ' +
+  'because GitHub Issues are the durable backlog (ADR-036) and a plan is a ' +
+  'one-shot input. Keep the working copy under .tmp/planning/.';
 const MILESTONE_SCHEME = 'docs/agents/milestone-naming-scheme.md';
 /** Gitignored, per the repo's scratch convention. */
 const STAGING_DIR = '.tmp/plan-issues';
@@ -60,8 +69,8 @@ const allowedLabelNames = () =>
  * The checks a record must survive. Each returns a list of problems, so one
  * issue reports everything wrong with it rather than only the first thing.
  */
-const auditRecord = (record, { allowed, milestones }) => {
-  const body = renderIssueBody(record);
+const auditRecord = (record, { allowed, milestones, source }) => {
+  const body = renderIssueBody(record, source);
   const strays = unknownLabels(record.labels, allowed);
   return {
     record,
@@ -157,7 +166,10 @@ const report = (audits) => {
 };
 
 const main = () => {
-  const planPath = flagValue('--plan') ?? DEFAULT_PLAN;
+  const planPath = flagValue('--plan');
+  if (planPath === undefined) {
+    throw new Error(PLAN_REQUIRED);
+  }
   const milestones = parseMilestoneNames(readRepoFile(MILESTONE_SCHEME));
   const records = parsePlan(readRepoFile(planPath), {
     milestoneNames: milestones,
@@ -169,7 +181,11 @@ const main = () => {
     return;
   }
 
-  const context = { allowed: allowedLabelNames(), milestones };
+  const context = {
+    allowed: allowedLabelNames(),
+    milestones,
+    source: planPath,
+  };
   const audits = creationOrder(
     records.map((record) => auditRecord(record, context)),
   );

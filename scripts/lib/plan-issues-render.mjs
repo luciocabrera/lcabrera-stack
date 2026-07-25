@@ -25,8 +25,13 @@ export const unknownLabels = (labels, allowed) =>
  * Provenance is a plain path, not a markdown link: a relative link in an ISSUE
  * body does not resolve the way it does in a repository file, so linking here
  * produces a dead link on every issue rather than a useful one.
+ *
+ * It names the document actually read, passed in rather than hardcoded. A
+ * planning document is a one-shot input that is retired once its issues exist
+ * (ADR-036 makes GitHub the durable backlog), so a fixed path here would cite a
+ * file that no longer exists — on every issue, permanently.
  */
-const SOURCE_DOCUMENT = 'docs/agents/planning/issues.md';
+const DEFAULT_SOURCE = 'the planning document';
 
 /** An epic's objective is to land its children; that is what an epic is here. */
 const epicObjective = (record) =>
@@ -40,7 +45,7 @@ const objectiveOf = (record) =>
     : epicObjective(record);
 
 /** Context always carries provenance; the planning fields are added when present. */
-const contextOf = (record) => {
+const contextOf = (record, source = DEFAULT_SOURCE) => {
   const facts = [
     (record.note ?? '') === '' ? '' : `**Note:** ${record.note}`,
     record.milestone === '' ? '' : `**Milestone:** ${record.milestone}`,
@@ -54,7 +59,7 @@ const contextOf = (record) => {
       ? ''
       : `**Blocks:** ${record.dependencies.blocking.join(', ')}`,
   ].filter((fact) => fact !== '');
-  const provenance = `Planned as \`${record.id}\` in \`${SOURCE_DOCUMENT}\`.`;
+  const provenance = `Planned as \`${record.id}\` in \`${source}\`.`;
   return [record.sections.context, facts.join(' · '), provenance]
     .filter((part) => part !== '')
     .join('\n\n');
@@ -112,11 +117,11 @@ const dependencyBlock = ({ blocking, blockedBy, parent, children }) =>
  * Renders the eight-section body. Headings keep the plain numbered spelling the
  * gate matches — see `REQUIRED_ISSUE_SECTIONS` in `commit-convention.mjs`.
  */
-export const renderIssueBody = (record) =>
+export const renderIssueBody = (record, source = DEFAULT_SOURCE) =>
   [
     `## 1. Problem Statement\n\n${record.sections.problem || 'Not recorded in the plan.'}`,
     `## 2. Objective\n\n${objectiveOf(record)}`,
-    `## 3. Context & Background\n\n${contextOf(record)}`,
+    `## 3. Context & Background\n\n${contextOf(record, source)}`,
     `## 4. Reproduction Steps\n\n${reproductionOf(record)}`,
     `## 5. Scope Definition\n\n${scopeOf(record)}`,
     `## 6. Acceptance Criteria\n\n${acceptanceOf(record)}`,
