@@ -11,7 +11,6 @@ AppNavigation/
 ├── AppNavigation.component.tsx      → Shell: always-pinned SidePanel composing header/body/footer
 ├── AppNavigation.constants.ts       → NAV_DENSITY size-preference map
 ├── AppNavigation.stylex.ts          → Shared layout StyleX styles (consumed by subcomponents + utils)
-├── AppNavigation.types.ts           → Props and local variant types
 ├── AppNavigation.test.tsx           → Integration tests (real GlobalSettingsProvider)
 │
 ├── NavigationHeader/                → Brand + expand/collapse action placement
@@ -20,13 +19,13 @@ AppNavigation/
 │
 ├── NavigationBody/                  → Vertical toolbar of app-supplied route links
 │   ├── NavigationBody.component.tsx
-│   ├── NavigationBody.types.ts
 │   └── NavigationBody.test.tsx
 │
-├── NavigationFooter/                → Theme toggle + optional session-actions slot
+├── NavigationFooter/                → Thin shell: theme control + session controls
 │   ├── NavigationFooter.component.tsx
-│   ├── NavigationFooter.types.ts
-│   └── NavigationFooter.test.tsx
+│   ├── NavigationFooter.test.tsx
+│   ├── NavigationThemeControl/      → Theme toggle (self-connected)
+│   └── NavigationSessionActions/    → Logout form, rendered when isAuthEnabled
 │
 ├── NavigationHeaderActions/         → Expand/collapse control button
 ├── utils/                           → Density styles, labels (individually tested)
@@ -50,17 +49,27 @@ graph LR
 
   NavBody --> Toolbar
   NavBody --> GlobalSettingsSelectors
+  NavBody --> AppConfigSelectors
 
-  NavFooter --> Button
-  NavFooter --> GlobalSettingsSelectors
+  NavFooter --> AppConfigSelectors
+  NavFooter --> NavTheme["NavigationThemeControl"]
+  NavFooter --> NavSession["NavigationSessionActions"]
 
-  ConsumingApp -. "getNavigationItems prop" .-> AppNavigation
+  NavTheme --> Button
+  NavTheme --> GlobalSettingsSelectors
+  NavTheme --> useTheme
+
+  NavSession --> Button
+  NavSession --> GlobalSettingsSelectors
+  NavSession --> AppConfigSelectors
+
+  ConsumingApp -. "AppConfigProvider" .-> AppConfigSelectors
 ```
 
-Each subcomponent reads the collapsed/size preferences it needs directly from
-`GlobalSettingsContext` selectors. `NavigationHeader` takes no props at all;
-the shell only forwards the pass-through consumer props (`getNavigationItems`,
-`sessionActions`) and the theme state it reads from `useTheme`.
+Every subcomponent reads what it renders for itself — the collapsed/size
+preferences from `GlobalSettingsContext`, and the app's route links / session
+configuration from `AppConfigContext`. Nothing is passed down: the shell holds
+only the panel's own geometry, and every delegate is zero-prop.
 
 ## The Panel Is Permanent
 
@@ -69,6 +78,17 @@ part of the layout, never a dismissible dialog. There is no pin/unpin control,
 no floating launcher, and no open/closed state to hold: navigation to any route
 is always one click away. Density still varies (see below), and the panel still
 collapses to an icon rail, but collapsing narrows it rather than removing it.
+
+## State Ownership Rule
+
+| Delegate                   | Reads                                                                |
+| -------------------------- | -------------------------------------------------------------------- |
+| `AppNavigation`            | `collapsed`, `size` preferences — for the panel's own geometry       |
+| `NavigationHeader`         | `collapsed`, `size` preferences (+ the preference actions it writes) |
+| `NavigationBody`           | `getNavigationItems`; `collapsed`, `size` preferences                |
+| `NavigationFooter`         | `isAuthEnabled` — composition only                                   |
+| `NavigationThemeControl`   | `useTheme()`; `collapsed`, `size` preferences                        |
+| `NavigationSessionActions` | `logoutRoute`; `collapsed`, `size` preferences                       |
 
 ## Render Flow
 
@@ -89,22 +109,31 @@ graph TD
 
 ## Props
 
-| Prop                 | Type                                                 | Default | Description                                              |
-| -------------------- | ---------------------------------------------------- | ------- | -------------------------------------------------------- |
-| `getNavigationItems` | `(iconSize: number) => readonly ToolbarItemConfig[]` | —       | Returns this app's own route links, sized to `iconSize`  |
-| `sessionActions`     | `NavigationSessionActions`                           | —       | Optional footer slot for a session control (e.g. logout) |
+None. `AppNavigation` takes no props at all, so it has no `.types.ts` — the
+panel's geometry comes from `GlobalSettingsContext` and everything app-specific
+from `AppConfigContext`.
 
 ## Route Items
 
 `AppNavigation` is app-agnostic — it has no opinion on what routes exist.
 Each consuming app supplies its own `getNavigationItems` function (e.g.
-`apps/react-router/src/root/getNavigationItems.util.tsx`), passed down
-through `AppShell`'s own `getNavigationItems` prop. Every returned item is
+`apps/react-router/src/root/getNavigationItems.util.tsx`) through
+`AppConfigProvider`, and `NavigationBody` reads it there. Every returned item is
 typed `ToolbarItemConfig` and rendered through the existing `Toolbar`/
 `NavLink` contracts. This function previously lived inside this package
 (`utils/getNavigationItems.util.tsx`) with `apps/react-router`'s routes
 hardcoded into it — moved out because a shared package should not encode
-one specific consuming app's route list.
+one specific consuming app's route list. It then spent a while being drilled
+through `AppShell` and `AppNavigation`, neither of which read it; the context is
+what removed that ([ADR-053](../../../../../docs/decisions/ADR-053-package-owned-app-root-and-app-config-context.md)).
+
+## Session Controls
+
+The footer renders `NavigationSessionActions` — a POST `<Form>` to the app's
+`logoutRoute` — only when the app declared `isAuthEnabled` through
+`AppConfigProvider`. An app with no session concept sets nothing and the footer
+shows the theme control alone. Logging out mutates session state, so it is a
+POST rather than a link: a GET is something a prefetch can fire on its own.
 
 ## Compact Mode
 

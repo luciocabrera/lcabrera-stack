@@ -1,37 +1,16 @@
-import { AppProviders, AppShell } from '@lcabrera/ui';
-import { useLoaderData } from 'react-router';
+import { RootComponent } from '@lcabrera/ui';
 
+import { LOGOUT_ROUTE } from '@/auth/auth.constants';
 import { APP_ID } from '@/constants/app.constants';
 
-import type { LogoutControlProps } from './LogoutControl.types';
-import type { loader as rootLoader } from './root.loader';
-
 import { getNavigationItems } from './getNavigationItems.util';
-import { LogoutControl } from './LogoutControl.component';
 
-/**
- * Renders the logout control for `AppShell`'s `sessionActions` slot. Defined at
- * module scope (not inline in `Root`) so it's a stable reference and not a
- * component nested inside another — the arg shape is exactly `LogoutControlProps`.
- */
-const renderSessionActions = ({ isCollapsed }: LogoutControlProps) => (
-  <LogoutControl isCollapsed={isCollapsed} />
+export const Root = () => (
+  <RootComponent
+    appId={APP_ID}
+    defaultTheme='light'
+    getNavigationItems={getNavigationItems}
+    isAuthEnabled
+    logoutRoute={LOGOUT_ROUTE}
+  />
 );
-
-export const Root = () => {
-  const { globalSettings, theme } = useLoaderData<typeof rootLoader>();
-
-  return (
-    <AppProviders
-      appId={APP_ID}
-      defaultTheme='light'
-      globalSettings={globalSettings}
-      initialTheme={theme}
-    >
-      <AppShell
-        getNavigationItems={getNavigationItems}
-        sessionActions={renderSessionActions}
-      />
-    </AppProviders>
-  );
-};

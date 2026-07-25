@@ -1,22 +1,7 @@
 // @vitest-environment jsdom
 
-import type { ReactNode } from 'react';
-
 import { cleanup, render, screen } from '@testing-library/react';
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from 'vite-plus/test';
-
-import type { NavbarItemConfig } from '../Navbar/Navbar.types';
-
-const getNavigationItemsMock = vi.hoisted(() =>
-  vi.fn<(iconSize: number) => readonly NavbarItemConfig[]>(() => []),
-);
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 vi.mock('react-router', async () => {
   const actual =
@@ -29,20 +14,7 @@ vi.mock('react-router', async () => {
 });
 
 vi.mock('@lcabrera/ui/components/AppNavigation', () => ({
-  AppNavigation: ({
-    getNavigationItems,
-    sessionActions,
-  }: {
-    readonly getNavigationItems: () => readonly unknown[];
-    readonly sessionActions?: (args: {
-      readonly isCollapsed: boolean;
-    }) => ReactNode;
-  }) => (
-    <div data-testid='app-navigation'>
-      {getNavigationItems().length}
-      {sessionActions?.({ isCollapsed: false })}
-    </div>
-  ),
+  AppNavigation: () => <div data-testid='app-navigation'>AppNavigation</div>,
 }));
 
 vi.mock('@lcabrera/ui/components/NotificationCenter', () => ({
@@ -54,55 +26,28 @@ vi.mock('@lcabrera/ui/components/NotificationCenter', () => ({
 import { AppShell } from './AppShell.component';
 
 describe('AppShell', () => {
-  beforeEach(() => {
-    getNavigationItemsMock.mockReset();
-    getNavigationItemsMock.mockReturnValue([]);
-  });
-
   afterEach(() => {
     cleanup();
   });
 
-  it('renders the routed outlet and notification center', () => {
-    render(<AppShell getNavigationItems={getNavigationItemsMock} />);
+  it('renders the navigation, the routed outlet and the notification center', () => {
+    render(<AppShell />);
 
+    expect(screen.getByTestId('app-navigation').textContent).toBe(
+      'AppNavigation',
+    );
     expect(screen.getByTestId('outlet').textContent).toBe('Outlet');
     expect(screen.getByTestId('notification-center').textContent).toBe(
       'Notifications',
     );
-    expect(screen.getByTestId('app-navigation').textContent).toBe('0');
   });
 
   it('exposes routed content as the one main landmark', () => {
-    render(<AppShell getNavigationItems={getNavigationItemsMock} />);
+    render(<AppShell />);
 
     const main = screen.getByRole('main');
 
     expect(main.contains(screen.getByTestId('outlet'))).toBe(true);
     expect(document.querySelectorAll('main')).toHaveLength(1);
-  });
-
-  it('passes getNavigationItems into AppNavigation', () => {
-    getNavigationItemsMock.mockReturnValue([{ label: 'Home', type: 'button' }]);
-
-    render(<AppShell getNavigationItems={getNavigationItemsMock} />);
-
-    expect(screen.getByTestId('app-navigation').textContent).toBe('1');
-    expect(getNavigationItemsMock).toHaveBeenCalledTimes(1);
-  });
-
-  it('forwards the sessionActions slot to AppNavigation', () => {
-    render(
-      <AppShell
-        getNavigationItems={getNavigationItemsMock}
-        sessionActions={({ isCollapsed }) => (
-          <span data-testid='session'>
-            {isCollapsed ? 'collapsed' : 'expanded'}
-          </span>
-        )}
-      />,
-    );
-
-    expect(screen.getByTestId('session').textContent).toBe('expanded');
   });
 });

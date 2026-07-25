@@ -12,10 +12,13 @@ import {
   vi,
 } from 'vite-plus/test';
 
-const { collapsedPreferenceMock, sizePreferenceMock } = vi.hoisted(() => ({
-  collapsedPreferenceMock: vi.fn<() => string | undefined>(() => {}),
-  sizePreferenceMock: vi.fn<() => string | undefined>(() => {}),
-}));
+const { collapsedPreferenceMock, navigationItemsMock, sizePreferenceMock } =
+  vi.hoisted(() => ({
+    collapsedPreferenceMock: vi.fn<() => string | undefined>(() => {}),
+    navigationItemsMock:
+      vi.fn<() => (iconSize: number) => readonly NavbarItemConfig[]>(),
+    sizePreferenceMock: vi.fn<() => string | undefined>(() => {}),
+  }));
 
 type MockNavbarProps = {
   readonly isCompact?: boolean;
@@ -37,6 +40,10 @@ vi.mock('@lcabrera/ui/components/Navbar', () => ({
   ),
 }));
 
+vi.mock('@lcabrera/ui/contexts/AppConfigContext/selectors', () => ({
+  useGetAppNavigationItems: () => navigationItemsMock(),
+}));
+
 vi.mock('@lcabrera/ui/contexts/GlobalSettingsContext/selectors', () => ({
   useGetGlobalNavigationCollapsedPreference: () => collapsedPreferenceMock(),
   useGetGlobalNavigationSizePreference: () => sizePreferenceMock(),
@@ -51,6 +58,8 @@ afterEach(() => {
 beforeEach(() => {
   collapsedPreferenceMock.mockReset();
   collapsedPreferenceMock.mockReturnValue(undefined);
+  navigationItemsMock.mockReset();
+  navigationItemsMock.mockReturnValue(() => []);
   sizePreferenceMock.mockReset();
   sizePreferenceMock.mockReturnValue(undefined);
 });
@@ -62,8 +71,9 @@ describe('NavigationBody', () => {
         { end: true, label: `Home ${iconSize}`, to: '/', type: 'link' },
       ],
     );
+    navigationItemsMock.mockReturnValue(getNavigationItems);
 
-    render(<NavigationBody getNavigationItems={getNavigationItems} />);
+    render(<NavigationBody />);
 
     expect(getNavigationItems).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId('Navbar').textContent).toContain('Home');
@@ -73,7 +83,7 @@ describe('NavigationBody', () => {
   it('compacts the Navbar when the navigation is collapsed', () => {
     collapsedPreferenceMock.mockReturnValue('collapsed');
 
-    render(<NavigationBody getNavigationItems={() => []} />);
+    render(<NavigationBody />);
 
     expect(screen.getByTestId('Navbar').dataset.compact).toBe('true');
   });
@@ -81,7 +91,7 @@ describe('NavigationBody', () => {
   it('sizes Navbar buttons from the density preference', () => {
     sizePreferenceMock.mockReturnValue('compact');
 
-    render(<NavigationBody getNavigationItems={() => []} />);
+    render(<NavigationBody />);
 
     expect(screen.getByTestId('Navbar').dataset.size).toBe('mini');
   });

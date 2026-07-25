@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import {
   afterEach,
   beforeEach,
@@ -12,34 +12,8 @@ import {
   vi,
 } from 'vite-plus/test';
 
-const { collapsedPreferenceMock, sizePreferenceMock } = vi.hoisted(() => ({
-  collapsedPreferenceMock: vi.fn<() => string | undefined>(() => {}),
-  sizePreferenceMock: vi.fn<() => string | undefined>(() => {}),
-}));
-
-type MockButtonProps = {
-  readonly children: ReactNode;
-  readonly isIconOnly?: boolean;
-  readonly onClick?: () => void;
-  readonly tooltipContent?: string;
-};
-
-vi.mock('@lcabrera/ui/components/Button', () => ({
-  Button: ({
-    children,
-    isIconOnly,
-    onClick,
-    tooltipContent,
-  }: MockButtonProps) => (
-    <button
-      data-icon-only={String(isIconOnly)}
-      data-tooltip={tooltipContent ?? 'none'}
-      onClick={onClick}
-      type='button'
-    >
-      {children}
-    </button>
-  ),
+const { isAuthEnabledMock } = vi.hoisted(() => ({
+  isAuthEnabledMock: vi.fn<() => boolean>(() => false),
 }));
 
 vi.mock('@lcabrera/ui/components/SidePanel', () => ({
@@ -48,10 +22,22 @@ vi.mock('@lcabrera/ui/components/SidePanel', () => ({
   ),
 }));
 
-vi.mock('@lcabrera/ui/contexts/GlobalSettingsContext/selectors', () => ({
-  useGetGlobalNavigationCollapsedPreference: () => collapsedPreferenceMock(),
-  useGetGlobalNavigationSizePreference: () => sizePreferenceMock(),
+vi.mock('@lcabrera/ui/contexts/AppConfigContext/selectors', () => ({
+  useGetIsAuthEnabled: () => isAuthEnabledMock(),
 }));
+
+vi.mock('./NavigationThemeControl/NavigationThemeControl.component', () => ({
+  NavigationThemeControl: () => <div data-testid='theme-control'>theme</div>,
+}));
+
+vi.mock(
+  './NavigationSessionActions/NavigationSessionActions.component',
+  () => ({
+    NavigationSessionActions: () => (
+      <div data-testid='session-actions'>session</div>
+    ),
+  }),
+);
 
 import { NavigationFooter } from './NavigationFooter.component';
 
@@ -60,82 +46,28 @@ afterEach(() => {
 });
 
 beforeEach(() => {
-  collapsedPreferenceMock.mockReset();
-  collapsedPreferenceMock.mockReturnValue(undefined);
-  sizePreferenceMock.mockReset();
-  sizePreferenceMock.mockReturnValue(undefined);
+  isAuthEnabledMock.mockReset();
+  isAuthEnabledMock.mockReturnValue(false);
 });
 
 describe('NavigationFooter', () => {
-  it('offers Dark Mode in light theme and toggles on click', () => {
-    const handleToggleTheme = vi.fn();
+  it('always renders the theme control', () => {
+    render(<NavigationFooter />);
 
-    render(
-      <NavigationFooter isDarkMode={false} onToggleTheme={handleToggleTheme} />,
-    );
-
-    fireEvent.click(screen.getByRole('button', { name: /Dark Mode/ }));
-
-    expect(handleToggleTheme).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('theme-control').textContent).toBe('theme');
   });
 
-  it('offers Light Mode in dark theme', () => {
-    render(<NavigationFooter isDarkMode onToggleTheme={vi.fn()} />);
+  it('omits the session actions when the app has no session', () => {
+    render(<NavigationFooter />);
 
-    expect(screen.getByRole('button', { name: /Light Mode/ })).not.toBeNull();
+    expect(screen.queryByTestId('session-actions')).toBeNull();
   });
 
-  it('shows a full-width labelled button when expanded', () => {
-    render(<NavigationFooter isDarkMode={false} onToggleTheme={vi.fn()} />);
+  it('renders the session actions when the app declared auth is enabled', () => {
+    isAuthEnabledMock.mockReturnValue(true);
 
-    const button = screen.getByRole('button', { name: /Dark Mode/ });
+    render(<NavigationFooter />);
 
-    expect(button.dataset.iconOnly).toBe('false');
-    expect(button.dataset.tooltip).toBe('none');
-  });
-
-  it('collapses to an icon-only button with a tooltip when collapsed', () => {
-    collapsedPreferenceMock.mockReturnValue('collapsed');
-
-    render(<NavigationFooter isDarkMode={false} onToggleTheme={vi.fn()} />);
-
-    const button = screen.getByRole('button', { name: /Dark Mode/ });
-
-    expect(button.dataset.iconOnly).toBe('true');
-    expect(button.dataset.tooltip).toBe('Dark Mode');
-  });
-
-  it('renders the session-actions slot with the expanded collapsed state', () => {
-    const sessionActions = vi.fn(
-      ({ isCollapsed }: { readonly isCollapsed: boolean }) => (
-        <span data-testid='session'>{String(isCollapsed)}</span>
-      ),
-    );
-
-    render(
-      <NavigationFooter
-        isDarkMode={false}
-        onToggleTheme={vi.fn()}
-        sessionActions={sessionActions}
-      />,
-    );
-
-    expect(sessionActions).toHaveBeenCalledWith({ isCollapsed: false });
-    expect(screen.getByTestId('session').textContent).toBe('false');
-  });
-
-  it('passes isCollapsed=true to the session-actions slot when collapsed', () => {
-    collapsedPreferenceMock.mockReturnValue('collapsed');
-    const sessionActions = vi.fn(() => <span data-testid='session'>x</span>);
-
-    render(
-      <NavigationFooter
-        isDarkMode={false}
-        onToggleTheme={vi.fn()}
-        sessionActions={sessionActions}
-      />,
-    );
-
-    expect(sessionActions).toHaveBeenCalledWith({ isCollapsed: true });
+    expect(screen.getByTestId('session-actions').textContent).toBe('session');
   });
 });

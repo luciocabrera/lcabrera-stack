@@ -12,30 +12,31 @@ for why, and for what to do with a decision that spans two tiers.
 Writing one: start from [`_TEMPLATE.md`](./_TEMPLATE.md)
 or run `vp run adr:new`, which takes the next free number for you.
 
-| ADR                                                                  | Decision                                                                                                                 |
-| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| [ADR-001](./ADR-001-packages-ui-extraction.md)                       | Extract `packages/ui` from `apps/react-router`                                                                           |
-| [ADR-002](./ADR-002-packages-ui-scope-widening-and-packages-api.md)  | Widen `packages/ui` scope to whole compositions; add `packages/api`                                                      |
-| [ADR-003](./ADR-003-package-standalone-tsconfigs.md)                 | Give `packages/ui`/`packages/api` their own tsconfig                                                                     |
-| [ADR-004](./ADR-004-package-standalone-quality-gate.md)              | Give `packages/ui`/`packages/api` their own full quality gate                                                            |
-| [ADR-005](./ADR-005-form-component.md)                               | Generic `Form` component in `packages/ui`                                                                                |
-| [ADR-008](./ADR-008-packages-api-renamed-data-access.md)             | `packages/api` renamed to `packages/data-access`; Postgres pool/env utilities moved there from `packages/scan-ingestion` |
-| [ADR-014](./ADR-014-path-field-and-form-cancel-ux.md)                | Browsable `path` Form field + built-in Form Cancel/discard-changes flow                                                  |
-| [ADR-032](./ADR-032-real-coverage-for-the-fallow-gate.md)            | Feed real coverage to the fallow audit gate (DB-free suites only)                                                        |
-| [ADR-035](./ADR-035-biome-third-linter.md)                           | Biome as the third linter (root-only, lint-only)                                                                         |
-| [ADR-036](./ADR-036-github-planning-layer.md)                        | GitHub Issues, sub-issues, Milestones & Projects as the durable planning layer                                           |
-| [ADR-037](./ADR-037-coordination-board-is-a-local-view.md)           | The coordination `BOARD.md` is a gitignored local view, not a committed artifact                                         |
-| [ADR-038](./ADR-038-public-package-topology-by-runtime.md)           | The shared packages are split by runtime — `@repo/api`, `@repo/server`, `@repo/utils`                                    |
-| [ADR-039](./ADR-039-duplicate-over-undeclared-edges.md)              | The packages are the product — duplicate a contract rather than share it through an undeclared edge                      |
-| [ADR-040](./ADR-040-npm-scope-for-the-public-packages.md)            | The public packages publish under `@lcabrera`, internal ones stay `@repo`                                                |
-| [ADR-042](./ADR-042-oxlint-config-at-the-root.md)                    | Oxlint is configured once, at the root                                                                                   |
-| [ADR-043](./ADR-043-release-tooling-changesets-over-pnpm-native.md)  | Release tooling: keep Changesets over pnpm-native releases                                                               |
-| [ADR-044](./ADR-044-decline-pnpm-global-virtual-store.md)            | Decline pnpm `enableGlobalVirtualStore` (breaks the rolldown native binding)                                             |
-| [ADR-045](./ADR-045-vite-plus-test-imports.md)                       | Adopt `vite-plus/test` imports; retire the `vitest`-direct convention                                                    |
-| [ADR-046](./ADR-046-public-api-surface-snapshot.md)                  | Detect breaking changes to the public package API surface                                                                |
-| [ADR-047](./ADR-047-declare-optional-peer-dependencies.md)           | Declare optional peer dependencies, and prove vestigial ones by regenerating the lockfile                                |
-| [ADR-048](./ADR-048-adr-taxonomy-and-one-sequence.md)                | One ADR home per tier, split on the extraction boundary; one global number sequence                                      |
-| [ADR-049](./ADR-049-findings-reports-are-produced-on-demand.md)      | Findings reports are produced on demand; only gate baselines are tracked                                                 |
-| [ADR-050](./ADR-050-server-error-translation-and-result-contract.md) | Translate pg errors at the persistence layer; cross the loader boundary as plain data                                    |
-| [ADR-051](./ADR-051-with-transaction-and-tx-executor-option.md)      | `withTransaction` + an optional `tx` executor option, and how id allocation is made safe                                 |
-| [ADR-052](./ADR-052-keyset-pagination-for-infinite-scroll.md)        | Keyset pagination for infinite scroll; `OFFSET` stays for jump-to-page                                                   |
+| ADR                                                                   | Decision                                                                                                                 |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| [ADR-001](./ADR-001-packages-ui-extraction.md)                        | Extract `packages/ui` from `apps/react-router`                                                                           |
+| [ADR-002](./ADR-002-packages-ui-scope-widening-and-packages-api.md)   | Widen `packages/ui` scope to whole compositions; add `packages/api`                                                      |
+| [ADR-003](./ADR-003-package-standalone-tsconfigs.md)                  | Give `packages/ui`/`packages/api` their own tsconfig                                                                     |
+| [ADR-004](./ADR-004-package-standalone-quality-gate.md)               | Give `packages/ui`/`packages/api` their own full quality gate                                                            |
+| [ADR-005](./ADR-005-form-component.md)                                | Generic `Form` component in `packages/ui`                                                                                |
+| [ADR-008](./ADR-008-packages-api-renamed-data-access.md)              | `packages/api` renamed to `packages/data-access`; Postgres pool/env utilities moved there from `packages/scan-ingestion` |
+| [ADR-014](./ADR-014-path-field-and-form-cancel-ux.md)                 | Browsable `path` Form field + built-in Form Cancel/discard-changes flow                                                  |
+| [ADR-032](./ADR-032-real-coverage-for-the-fallow-gate.md)             | Feed real coverage to the fallow audit gate (DB-free suites only)                                                        |
+| [ADR-035](./ADR-035-biome-third-linter.md)                            | Biome as the third linter (root-only, lint-only)                                                                         |
+| [ADR-036](./ADR-036-github-planning-layer.md)                         | GitHub Issues, sub-issues, Milestones & Projects as the durable planning layer                                           |
+| [ADR-037](./ADR-037-coordination-board-is-a-local-view.md)            | The coordination `BOARD.md` is a gitignored local view, not a committed artifact                                         |
+| [ADR-038](./ADR-038-public-package-topology-by-runtime.md)            | The shared packages are split by runtime — `@repo/api`, `@repo/server`, `@repo/utils`                                    |
+| [ADR-039](./ADR-039-duplicate-over-undeclared-edges.md)               | The packages are the product — duplicate a contract rather than share it through an undeclared edge                      |
+| [ADR-040](./ADR-040-npm-scope-for-the-public-packages.md)             | The public packages publish under `@lcabrera`, internal ones stay `@repo`                                                |
+| [ADR-042](./ADR-042-oxlint-config-at-the-root.md)                     | Oxlint is configured once, at the root                                                                                   |
+| [ADR-043](./ADR-043-release-tooling-changesets-over-pnpm-native.md)   | Release tooling: keep Changesets over pnpm-native releases                                                               |
+| [ADR-044](./ADR-044-decline-pnpm-global-virtual-store.md)             | Decline pnpm `enableGlobalVirtualStore` (breaks the rolldown native binding)                                             |
+| [ADR-045](./ADR-045-vite-plus-test-imports.md)                        | Adopt `vite-plus/test` imports; retire the `vitest`-direct convention                                                    |
+| [ADR-046](./ADR-046-public-api-surface-snapshot.md)                   | Detect breaking changes to the public package API surface                                                                |
+| [ADR-047](./ADR-047-declare-optional-peer-dependencies.md)            | Declare optional peer dependencies, and prove vestigial ones by regenerating the lockfile                                |
+| [ADR-048](./ADR-048-adr-taxonomy-and-one-sequence.md)                 | One ADR home per tier, split on the extraction boundary; one global number sequence                                      |
+| [ADR-049](./ADR-049-findings-reports-are-produced-on-demand.md)       | Findings reports are produced on demand; only gate baselines are tracked                                                 |
+| [ADR-050](./ADR-050-server-error-translation-and-result-contract.md)  | Translate pg errors at the persistence layer; cross the loader boundary as plain data                                    |
+| [ADR-051](./ADR-051-with-transaction-and-tx-executor-option.md)       | `withTransaction` + an optional `tx` executor option, and how id allocation is made safe                                 |
+| [ADR-052](./ADR-052-keyset-pagination-for-infinite-scroll.md)         | Keyset pagination for infinite scroll; `OFFSET` stays for jump-to-page                                                   |
+| [ADR-053](./ADR-053-package-owned-app-root-and-app-config-context.md) | The app root is package-owned, and consumer configuration travels by context                                             |
