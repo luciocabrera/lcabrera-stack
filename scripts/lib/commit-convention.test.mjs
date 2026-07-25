@@ -278,12 +278,23 @@ describe('validatePrBase — the #367 stacked-merge guard', () => {
   });
 });
 
+const DEPENDENCIES_BLOCK = [
+  '```yaml',
+  'dependencies:',
+  '  blocking: []',
+  '  blockedBy: []',
+  '  parent: null',
+  '  children: []',
+  '```',
+].join('\n');
+
 const issueSection = {
   problem: '## 1. Problem Statement\n\nIt is broken.',
   objective: '## 2. Objective / Desired Outcome\n\nNot broken.',
   context: '## 3. Context & Background\n\nSince #12.',
   scope: '## 5. Scope Definition\n\nIn: x. Out: y.',
   acceptance: '## 6. Acceptance Criteria\n\n- [ ] Fixed',
+  planning: `## 9. Planning Metadata\n\n${DEPENDENCIES_BLOCK}`,
 };
 const fullIssueBody = (overrides = {}) =>
   Object.entries({ ...issueSection, ...overrides })
@@ -308,9 +319,52 @@ describe('validateIssueBody', () => {
   });
 
   it('rejects the context-free issue this rule exists to stop', () => {
+    // One per missing section, plus one for the absent `dependencies:` block.
     expect(
       errorsOf(validateIssueBody('it is broken, please fix')),
-    ).toHaveLength(Object.keys(issueSection).length);
+    ).toHaveLength(Object.keys(issueSection).length + 1);
+  });
+
+  it('rejects a Planning Metadata heading with no dependencies block under it', () => {
+    // The heading alone is what a shape-only check would accept, and it carries
+    // none of the information the convention exists for.
+    const empty = fullIssueBody({
+      planning: '## 9. Planning Metadata\n\nNone.',
+    });
+    expect(errorsOf(validateIssueBody(empty))).toEqual([
+      expect.stringContaining('`dependencies:` block'),
+    ]);
+  });
+
+  it.each(['blocking', 'blockedBy', 'parent', 'children'])(
+    'rejects a dependencies block missing %s',
+    (key) => {
+      const partial = fullIssueBody({
+        planning: `## 9. Planning Metadata\n\n${DEPENDENCIES_BLOCK.split('\n')
+          .filter((line) => !line.trim().startsWith(`${key}:`))
+          .join('\n')}`,
+      });
+      expect(errorsOf(validateIssueBody(partial))).toEqual([
+        expect.stringContaining(`\`${key}:\``),
+      ]);
+    },
+  );
+
+  it('accepts a block that declares real relationships', () => {
+    const linked = fullIssueBody({
+      planning: [
+        '## 9. Planning Metadata',
+        '',
+        '```yaml',
+        'dependencies:',
+        '  blocking: [#410]',
+        '  blockedBy: []',
+        '  parent: #392',
+        '  children: []',
+        '```',
+      ].join('\n'),
+    });
+    expect(errorsOf(validateIssueBody(linked))).toEqual([]);
   });
 
   it('rejects an empty body', () => {

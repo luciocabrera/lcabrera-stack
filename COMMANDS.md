@@ -324,6 +324,7 @@ package, ever.
 | `vp run suppressions:list`   | print every suppression reaching a public package, approved or not                                                                                              |
 | `vp run docs:verify`         | check every documented repository path resolves (`--write` prunes resolved baseline entries; `--accept <doc> <ref> --reason "…"` grandfathers one)              |
 | `vp run adr:verify`          | check ADR home, filename, heading and number uniqueness, and that each home's index is current; prints the next free number (`--write` regenerates the indexes) |
+| `vp run adr:new`             | scaffold an ADR from [`_TEMPLATE.md`](docs/decisions/_TEMPLATE.md) with the next free number — `-- "<title>" [--home repo\|cqms\|app] [--slug <s>] [--dry-run]` |
 | `vp run skills:validate`     | validate skill definitions                                                                                                                                      |
 | `vp run skills:report`       | skills compliance report                                                                                                                                        |
 | `vp run prepare`             | `vp config` — runs automatically on install                                                                                                                     |

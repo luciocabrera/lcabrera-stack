@@ -9,6 +9,9 @@ The repository, its published `@lcabrera/*` packages, and the toolchain. Stays h
 Numbers are unique across every ADR home in this repo — see [ADR-048](./ADR-048-adr-taxonomy-and-one-sequence.md)
 for why, and for what to do with a decision that spans two tiers.
 
+Writing one: start from [`_TEMPLATE.md`](./_TEMPLATE.md)
+or run `vp run adr:new`, which takes the next free number for you.
+
 | ADR                                                                  | Decision                                                                                                                 |
 | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | [ADR-001](./ADR-001-packages-ui-extraction.md)                       | Extract `packages/ui` from `apps/react-router`                                                                           |

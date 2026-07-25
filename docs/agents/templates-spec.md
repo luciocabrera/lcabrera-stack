@@ -24,7 +24,7 @@ Adopted. The generated files are live and are what agents actually use:
 | Sections 4–5 | [`docs/agents/workflow.md`](workflow.md)                                                     |
 
 **Where the generated files and this spec disagree, the generated files win.**
-They are what CI reads. Two deviations were necessary; both are recorded here so
+They are what CI reads. Every deviation that was necessary is recorded here, so
 no future agent "restores" the spec text and breaks the build.
 
 ### Deviation 1 — the PR template's `## What` and `## Verification` headings stay plain
@@ -87,6 +87,23 @@ this repo is organised, and one of those paths is not ours to choose:
 So the agent-process docs live together in `docs/agents/`, and this spec sits
 with them rather than at the root. [`docs/README.md`](../README.md) is the
 documentation map and records where everything else belongs.
+
+### Deviation 4 — the issue template carries a ninth section, `Planning Metadata`
+
+Section 1 below stops at eight sections. This repo also has
+[`dependency-conventions.md`](dependency-conventions.md), which requires every
+issue to declare `blocking` / `blockedBy` / `parent` / `children` — a rule that
+predates this spec and that the eight-section template had nowhere to put. The
+result was a convention that could not be complied with: no template offered the
+block, and nothing read one (#409).
+
+The template therefore adds `## 9. Planning Metadata`, and `validateIssueBody`
+requires both the heading and the four keys. Adopting Section 1 verbatim would
+delete the section and silently re-open the gap.
+
+This is the one place issue **content** is checked rather than heading shape. It
+is deliberate and narrow: the heading alone is satisfied by `None.`, which
+carries none of the information the convention exists for.
 
 ### Pre-existing conventions this spec does not replace
 

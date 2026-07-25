@@ -69,3 +69,18 @@ assignees: ''
 ## 8. Related Work
 
 <!-- Issues, PRs, ADRs, docs. -->
+
+## 9. Planning Metadata
+
+<!-- The relationships this issue has, per docs/agents/dependency-conventions.md.
+     Keep the block even when nothing relates: empty lists and `parent: null` are
+     the answer for a standalone issue, and they say "considered" where a deleted
+     block says nothing. Use issue numbers (`#123`). -->
+
+```yaml
+dependencies:
+  blocking: []
+  blockedBy: []
+  parent: null
+  children: []
+```

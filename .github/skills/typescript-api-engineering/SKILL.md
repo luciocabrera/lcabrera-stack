@@ -17,6 +17,12 @@ paths: ['**/routes/api/**']
 
 # Core Philosophy
 
+> **Deciding where shared code goes?** Read
+> [`docs/agents/cross-app-abstraction.md`](../../../docs/agents/cross-app-abstraction.md)
+> first — extract into a package vs duplicate, in order, with the ADR-039
+> tie-breaker. This skill covers how to build the thing; that page decides where
+> it lives.
+
 Every API is a contract.
 
 The contract is more important than the implementation.

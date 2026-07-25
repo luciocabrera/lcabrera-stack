@@ -18,6 +18,9 @@ outside this repo, where none of this monorepo's wiring exists. `packages/ui`,
 exactly that reason (§4). This is why the column-filter shapes are **duplicated**
 in `@lcabrera/ui` and `@lcabrera/server` rather than shared through an elegant edge that
 only resolves in-repo ([ADR-039](docs/decisions/ADR-039-duplicate-over-undeclared-edges.md)).
+Facing that call — promote it into a package, or write it twice?
+[`docs/agents/cross-app-abstraction.md`](docs/agents/cross-app-abstraction.md)
+walks the decision in order and links the ADR that owns each step.
 
 **Two scopes, and the split carries meaning.** The four publishable packages are
 **`@lcabrera/*`**; the six internal ones (`vite-configs`, `ts-configs`, `plugins`,

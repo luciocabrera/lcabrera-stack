@@ -104,7 +104,39 @@ const REQUIRED_ISSUE_SECTIONS = [
     label: 'Acceptance Criteria',
     re: /^#{1,6}\s+(?:\d+\.\s*)?acceptance criteria\b/im,
   },
+  {
+    label: 'Planning Metadata',
+    re: /^#{1,6}\s+(?:\d+\.\s*)?planning metadata\b/im,
+  },
 ];
+
+/** The relationship keys `docs/agents/dependency-conventions.md` requires of
+ *  every issue. Checked in ADDITION to the `Planning Metadata` heading above,
+ *  because a heading on its own accepts a section with nothing under it — and
+ *  the block, not the heading, is what a reader and the planning layer act on.
+ *
+ *  This is the one place an issue's CONTENT is checked rather than its shape.
+ *  It earns that: the convention said "every issue must include" this block
+ *  while no template offered it and nothing read it, so it was unfilled in
+ *  practice (#409). An empty answer still passes — `blocking: []` and
+ *  `parent: null` are valid — so the cost of compliance is copying the block. */
+const DEPENDENCY_KEYS = ['blocking', 'blockedBy', 'parent', 'children'];
+
+const DEPENDENCIES_BLOCK = /^\s*dependencies:/im;
+
+const dependencyErrors = (body) => {
+  if (!DEPENDENCIES_BLOCK.test(body)) {
+    return [
+      'Issue description is missing the `dependencies:` block required under `## Planning Metadata` — see docs/agents/dependency-conventions.md.',
+    ];
+  }
+  return DEPENDENCY_KEYS.filter(
+    (key) => !new RegExp(String.raw`^\s*${key}:`, 'im').test(body),
+  ).map(
+    (key) =>
+      `Issue description's \`dependencies:\` block is missing \`${key}:\` — all four keys are required, empty is a valid value.`,
+  );
+};
 
 /** Branch names: `<type>/<issue>-<kebab-slug>`, `<type>` being the SAME
  *  vocabulary as commits. A second set of words (feature/bugfix/hotfix) would
@@ -369,6 +401,7 @@ export const validateIssueBody = (body) => {
       );
     }
   }
+  errors.push(...dependencyErrors(body));
   return { errors, warnings: [] };
 };
 

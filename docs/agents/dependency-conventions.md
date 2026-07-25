@@ -46,7 +46,7 @@ A concrete, actionable issue that contributes to a parent.
 
 ## Required Fields in Every Issue
 
-Every GitHub issue **must** include:
+Every GitHub issue **must** include, under its `## 9. Planning Metadata` heading:
 
 ```yaml
 dependencies:
@@ -55,6 +55,21 @@ dependencies:
   parent: issue-id | null
   children: [issue-ids]
 ```
+
+**This is enforced, not advisory.** `validateIssueBody` in
+[`scripts/lib/commit-convention.mjs`](../../scripts/lib/commit-convention.mjs)
+checks for the heading, the `dependencies:` block and all four keys;
+[`issue-standards.yml`](../../.github/workflows/issue-standards.yml) runs it when
+an issue is opened or edited. It was unenforceable and unfilled before that
+(#409): the rule said "must" while
+[the template](../../.github/ISSUE_TEMPLATE/standard_issue.md) offered no such
+section and nothing read one.
+
+**All four keys are required; empty is a valid value.** A standalone issue writes
+`blocking: []`, `blockedBy: []`, `parent: null`, `children: []` — that is the
+answer, not an omission, and it distinguishes "considered, none" from "never
+looked". Only the keys are checked, so the values stay a convention: use issue
+numbers (`#123`).
 
 ```yaml
 dependencies:
