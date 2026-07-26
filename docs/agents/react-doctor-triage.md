@@ -9,6 +9,11 @@ inline comment. So every finding it reports is reported again on every future ru
 forever. This file is the substitute: a triage record so the next agent spends one read
 instead of re-deriving the same judgements.
 
+Tool-level facts — the rule-family map, which families conflict with our own ADRs, the
+verified false positives, and what integrating react-doctor into the gate would require —
+are in [`react-doctor-facts.json`](react-doctor-facts.json). Read that before wiring the
+tool into anything; this file stays the authority on per-finding reasoning.
+
 ## How to use this file
 
 1. Run the tool, from the workspace you care about:

@@ -1,0 +1,298 @@
+{
+  "$comment": "Machine-readable companion to docs/agents/react-doctor-triage.md, for anyone working with react-doctor in this repo. THAT FILE IS THE AUTHORITY on per-finding reasoning; this one holds the tool-level facts it does not cover. CORRECTIONS: two claims in the first version of this file were disproven by the gate-adoption work in PR #457 (ADR-055) and are marked `corrected` below — left in place with the reason rather than deleted, so the next reader knows why they changed. Counts are a DATED SNAPSHOT; re-run the tool rather than trusting them.",
+  "snapshot": {
+    "date": "2026-07-26",
+    "main_sha": "d4b3d4d9",
+    "tool": "npx react-doctor@latest --verbose",
+    "run_from": "packages/ui",
+    "score": "86/100",
+    "note": "Report paths are relative to the workspace you run from. Full diagnostics are written to a /tmp/react-doctor-<uuid>/ dir, one .txt per rule family plus diagnostics.json.",
+    "superseded_by": "PR #457 / ADR-055 adopted react-doctor as an enforced gate after this snapshot was taken. Its `doctor.config.jsonc` and the report it produces are now the current state; this snapshot is the pre-adoption picture and is kept for the triage history only."
+  },
+  "verified_facts": {
+    "not_installed_in_repo": {
+      "status": "SUPERSEDED — react-doctor is now an enforced gate",
+      "current": "Adopted in PR #457 (ADR-055): standalone CLI pinned at `catalog:lint`, full scope, failing on ERROR severity, wired into `check:push` (so the pre-push hook catches it) and its own check-safe.yml step. Config is `doctor.config.jsonc`. Warnings stay advisory and land in a gitignored report (ADR-049).",
+      "why_cli_not_oxlint_plugin": "The documented Oxlint path is the `jsPlugins` bridge — the exact bridge ADR-042 removed for double-reporting — and the plugin builds silently drop the project-level rules, which would have locked in a partial picture."
+    },
+    "no_suppression_mechanism": {
+      "claim": "The rule documentation pages document NO way to suppress a single finding — no inline comment, no per-site config entry.",
+      "verified": true,
+      "how": "Fetched https://react.doctor/docs/rules/react-doctor/js-combine-iterations and read its fix + false-positive recipe.",
+      "caveat": "The CLI banner mentions 'configuring rules with a config file'. We did NOT establish what that config can do (rule on/off? severity? path ignores?). THIS IS THE KEY UNKNOWN FOR GATE DESIGN — resolve it first."
+    },
+    "warnings_do_not_fail": {
+      "claim": "Every rule family we saw reports Severity: warning.",
+      "implication": "Mirrors the Oxlint lesson in AGENTS.md §4: a warning fails nothing. If react-doctor exits 0 on warnings, adding it to CI gates nothing while looking like protection. Verify the exit code on a dirty tree before believing the gate works."
+    },
+    "line_numbers_rot": {
+      "claim": "Findings are reported as file:line and shift on unrelated edits.",
+      "verified": true,
+      "how": "Our 6-line fix in resolveAcceptedUnpinConflictState.util.ts moved another finding in the same file from :79 to :73, confirmed by re-running the tool.",
+      "implication": "Key any triage record by FILE + CODE SHAPE, never by line. docs/agents/react-doctor-triage.md already does this."
+    },
+    "suppression_mechanism": {
+      "status": "CORRECTED — the original claim here was wrong",
+      "original_claim": "The rule docs document NO way to suppress a finding, so a blocking gate is unpassable under Rule 11.",
+      "why_it_was_wrong": "The probe only read a RULE documentation page, which describes fixes and false-positive criteria, not tool configuration. It could not have discovered a config file, so it was never evidence about one — a probe that cannot disprove the claim it is used to support (AGENTS.md Rule 14). The hedge was recorded in the same file as an open question, but the claim was still marked verified. Do not repeat that shape.",
+      "what_is_true": "`doctor.config.jsonc` configures rules at RULE level (off / severity / scope). There is still no PER-FINDING suppression and no suppression-baseline file — which is why ADR-055 uses SEVERITY as the dial separating inherited debt from new, rather than a baseline. A blocking gate is therefore entirely achievable, and is now in place.",
+      "repo_consequence": "Turning a rule off repo-wide in a root config was an UNPOLICED way to silence a finding — the per-package eslint-suppressions gitignore does not reach a root config. PR #457 extended `suppressions:verify` to detect it, so a rule-off now needs a justified entry in the register like any other suppression."
+    }
+  },
+  "rule_families_snapshot": [
+    {
+      "rule": "react-doctor/no-barrel-import",
+      "count": 94,
+      "category": "Performance",
+      "status": "RESOLVED in PR #457 — rule off repo-wide, argued in the register",
+      "conflict": "Originally recorded as a head-on conflict with ADR-007. The sharper framing from #457: the rule's OWN docs name Vite tree-shaking as its false-positive case, so it is INAPPLICABLE to a Vite repo rather than in conflict with our architecture. Turned off at rule level for that reason, not because we dislike it.",
+      "guidance": "Do not re-open. #457 verified the false-positive claim by building an entry that imports one symbol from a flagged barrel and confirming the siblings were dropped — a probe that could have failed. ADR-007 still governs barrel design here.",
+      "count_note": "94 at this snapshot; #457 reports 103. Re-run rather than trusting either."
+    },
+    {
+      "rule": "react-doctor/js-set-map-lookups",
+      "count": 34,
+      "category": "Performance",
+      "status": "UNTRIAGED — likely the best value in the report",
+      "guidance": "This is the rule family whose advice our own measurements INDEPENDENTLY support: replacing a repeated Array.includes/find scan with a Set/Map is where we found the only large real win (see triaged_findings → unpin-beyond, 3.8x at 150 cols and ~43x at 1000). Triage this one first; it is far more likely to contain true positives than the combine-iterations family. Still apply the absolute-cost test below."
+    },
+    {
+      "rule": "react-doctor/js-combine-iterations",
+      "count": 8,
+      "category": "Performance",
+      "status": "FULLY TRIAGED — DO NOT RE-OPEN without new evidence",
+      "records": [
+        "docs/agents/react-doctor-triage.md — the authority on per-finding reasoning",
+        "the measured-findings companion, landing with PR #455 (referenced by PR number, not path: it is not on main yet)"
+      ],
+      "history": "Started at 11 findings. 3 were real and fixed in PR #450 (merged). The remaining 8 are accepted, 7 of them confirmed by benchmark against the real functions."
+    },
+    {
+      "rule": "deslop/unused-dev-dependency",
+      "count": 3,
+      "category": "Maintainability",
+      "status": "RESOLVED in PR #457 — rule off repo-wide, argued in the register",
+      "flags": ["@stylexjs/eslint-plugin", "globals", "typescript-eslint"],
+      "verified": true,
+      "how": "Verified twice, independently: grepping the shared eslint configs, and #457 identifying the mechanism — the configs resolve these plugins via `fromWorkspace(name)`, a DYNAMIC import, which no static import graph can follow. That is why the rule cannot be right here.",
+      "guidance": "NEVER act on this rule here. Removing typescript-eslint breaks the eslint pass repo-wide. This is the exact trap class ADR-047 exists for: @vitest/coverage-v8 is an OPTIONAL PEER declared only in the root manifest, reads as unused, and removing it takes down every --coverage run. If this rule ever flags @vitest/coverage-v8, read ADR-047 before touching it. Treat the whole family as advisory-only, or turn it off.",
+      "count_note": "3 at this snapshot; #457 reports 8."
+    },
+    {
+      "rule": "react-doctor/js-hoist-intl",
+      "count": 1,
+      "status": "UNTRIAGED",
+      "guidance": "Small. Likely legitimate (hoisting an Intl formatter out of a render path is real), but check it is not inside a function that needs a locale argument."
+    },
+    {
+      "rule": "react-doctor/js-index-maps",
+      "count": 1,
+      "status": "UNTRIAGED"
+    },
+    {
+      "rule": "react-doctor/no-many-boolean-props",
+      "count": 1,
+      "status": "UNTRIAGED",
+      "conflict": "Check against .claude/rules/react-components.md, which already prescribes composition over props-driven configuration and warns at ~6-8 props. May agree; may target a component whose boolean props are the documented API."
+    },
+    {
+      "rule": "react-doctor/no-pass-live-state-to-parent",
+      "count": 1,
+      "status": "UNTRIAGED",
+      "conflict": "Overlaps the store-pattern (Rule 5 / ADR-003). Invoke the store-pattern skill before changing anything it flags."
+    },
+    {
+      "rule": "react-doctor/no-unknown-property",
+      "count": 1,
+      "status": "UNTRIAGED",
+      "guidance": "Most likely a genuine bug or a false positive on a valid-but-new DOM attribute (this repo uses `popover`, which is recent). Check the property against MDN before removing it."
+    },
+    {
+      "rule": "react-doctor/prefer-module-scope-static-value",
+      "count": 2,
+      "status": "UNTRIAGED"
+    },
+    {
+      "rule": "react-doctor/rendering-svg-precision",
+      "count": 2,
+      "status": "UNTRIAGED"
+    }
+  ],
+  "traps": [
+    {
+      "id": "flatmap-is-not-the-fix",
+      "severity": "high",
+      "trap": "react-doctor's js-combine-iterations docs prescribe `flatMap(x => cond ? [y] : [])` and describe it as eliminating 'both the intermediate allocation and the second full traversal'. That is FALSE for the wrapping idiom.",
+      "reality": "It allocates one throwaway array PER ELEMENT, where the .filter().map() chain it replaces allocates two in total.",
+      "measured": "~2x slower than the chain on a synthetic 50%-keep benchmark; ~7x slower against the real resolvePrimaryKeyColumnKeys, because that predicate keeps 1 column of 150 — low selectivity is the idiom's worst case, and low selectivity is what this repo's filters do.",
+      "reversal": "It does overtake the chain at ~1,000,000 elements with a HIGH keep rate. No UI path here reaches that (grid virtualizes; column ceiling 150). Stating the bound matters — 'flatMap is always slower' would be false.",
+      "action": "Never adopt the wrapping idiom as an optimization. Use flatMap only for genuine 1-to-many / flattening. Governed by ADR-054 (PR #453, draft)."
+    },
+    {
+      "id": "ratio-without-absolute",
+      "severity": "high",
+      "trap": "Judging a Performance finding by its speedup ratio.",
+      "reality": "A 3x ratio on 40 nanoseconds is not a finding. Our reorder-to-fill site shows a 1.51x ratio that is 300 ns on a modal-click path. Conversely buildPresetColumnSizing shows ~3.7x that IS a real ~2 microseconds.",
+      "action": "Every Performance verdict must quote ABSOLUTE per-call cost, then the call frequency (per-render? per-row? per-click? per-mount?). Reject any finding argued on ratio alone — including your own."
+    },
+    {
+      "id": "never-touch-notificationcenter",
+      "severity": "high",
+      "trap": "NotificationCenter.component.tsx's map().filter() looks like a textbook combine-iterations fix.",
+      "reality": "That shape is LOAD-BEARING. It is the documented resolution of a three-linter conflict: Biome's useIterableCallbackReturn demands a returned value from a map callback, while unicorn/no-null and unicorn/no-useless-undefined ban both spellings of 'nothing'. Filtering first is what lets the callback always return an element. AGENTS.md §4 names this file as the canonical example, and the file carries an inline comment saying so. N is a hard-coded 4.",
+      "action": "Permanently exclude. Fixing it re-opens a settled linter conflict to save 4 iterations."
+    },
+    {
+      "id": "rule-11-vs-no-suppression",
+      "severity": "resolved",
+      "trap": "Making react-doctor a BLOCKING gate while the repo forbids suppressions.",
+      "reality": "Non-Negotiable Rule 11 forbids suppressing a finding — and for packages/ui, api, server, utils, suppressions are checked and rejected (suppressions:verify). react-doctor offers no per-site suppression. So a blocking gate on a rule family with accepted false positives is UNPASSABLE without either fixing code that should not be fixed, or turning the whole rule off.",
+      "action": "Follow ADR-055. Do not add a per-finding suppression or baseline mechanism.",
+      "status": "CORRECTED — the conclusion was wrong",
+      "what_i_got_wrong": "I concluded a blocking gate was unpassable because no per-site suppression exists. PR #457 built exactly that gate. The missing piece was rule-level config, which my probe could not see.",
+      "what_actually_works": "Severity is the dial: gate on ERROR, leave warnings advisory in a gitignored report. A whole rule may be turned off when it is inapplicable, but only with a justified entry in docs/agents/public-package-suppressions.json — `suppressions:verify` now polices root-config rule-offs too."
+    },
+    {
+      "id": "green-run-is-not-evidence",
+      "severity": "medium",
+      "trap": "Concluding the gate works because CI passed.",
+      "reality": "AGENTS.md Rule 14 / §7: a rule that is not loaded reports exactly the same clean pass as code that is correct. This repo has been burned by it (issue #318, and lint:plugins:verify exists specifically because reading config cannot distinguish a loaded rule family from a missing one).",
+      "action": "Plant a deliberate violation per rule family you intend to gate, confirm it FAILS, then remove it. Follow the lint:plugins:verify precedent — encode the probe as a check rather than doing it once by hand."
+    },
+    {
+      "id": "reports-are-not-committed",
+      "severity": "medium",
+      "trap": "Committing a react-doctor findings snapshot.",
+      "reality": "ADR-049: findings reports are produced on demand, never committed. A committed Sonar snapshot was wrong for 22 merges. reports/ is gitignored except fallow baselines.",
+      "action": "If you add a report script, write under reports/react-doctor/ and gitignore it. Only a GATE BASELINE may be tracked, and only if a gate actually compares against it."
+    },
+    {
+      "id": "overlap-policy",
+      "severity": "medium",
+      "trap": "Adding a 4th linter's rules that duplicate or contradict Oxlint/ESLint/Biome.",
+      "reality": "ADR-035's policy: overlap is KEPT as a safety net where engines independently AGREE, and dropped only where they CONFLICT or are noisy. Several react-doctor rules will contradict this repo's ADRs (no-barrel-import vs ADR-007 is the clearest), and contradiction is the case to drop.",
+      "action": "Measure per rule before enabling, in approval-gated phases, the way ADR-035 §7 did for Biome. Do not enable the whole tool at once."
+    },
+    {
+      "id": "silent-pass-modes",
+      "severity": "high",
+      "source": "PR #457 — found and guarded, not assumed",
+      "trap": "Three ways react-doctor reports success while checking nothing.",
+      "modes": [
+        "The CLI exits 0 with a setup nag when there is no `doctor` package script — so an unconfigured gate passes.",
+        "It DISCARDS a malformed config, scans with defaults, and still reports ok: true. This is precisely the Biome `.jsonc` failure mode in AGENTS.md §4 — a config parse error looks like a clean run.",
+        "`--base` rejects `HEAD~1`, exiting 1 having scanned nothing — a failure that looks like a finding."
+      ],
+      "action": "All three are guarded in #457. If you change the invocation, re-verify each — and plant a deliberate violation to confirm the gate still fails, since a rule that is not loaded reports the same clean pass as correct code."
+    }
+  ],
+  "gate_integration_requirements": {
+    "$comment": "Each of these is an EXISTING enforced gate that `react-doctor install` or a hand-rolled integration will trip. All are CI steps in check-safe.yml.",
+    "commands_verify": "A new root package.json script (the installer adds `doctor`) MUST be documented in COMMANDS.md in the SAME commit, or `vp run commands:verify` fails. Add it to COMMANDS.md §4.",
+    "scripts_verify": "Any new .mjs/.cjs under scripts/ is governed by .claude/rules/scripts.md — JSDoc 'why' header, small pure functions, effects at the edges, node:-prefixed builtins, 350 code-line ceiling (`vp run scripts:verify`).",
+    "docs_verify": "Every file path referenced in any doc must resolve, or `vp run docs:verify` fails. It caught a forward reference for us. Do not reference a path that only exists on an unmerged branch.",
+    "fallow_entry": "scripts/**/*.{cjs,mjs,js} is already a fallow entry glob, so a script there is not reported as dead code. A script elsewhere needs an entry in .fallowrc.json.",
+    "dependency_conventions": "A new devDependency follows docs/agents/dependency-conventions.md and the pnpm catalog. Note the root manifest is where optional peers get declared (ADR-047).",
+    "skill_index": "A new skill under .github/skills/ should be added to the Quick Skill Index in AGENTS.md §3. NOTE: CLAUDE.md is a SYMLINK to AGENTS.md — edit AGENTS.md.",
+    "adr_required": "Adding a 4th linter to the gate is an architectural decision → needs an ADR in docs/decisions/. Take the number `vp run adr:verify` reports as free and register the index with `vp run adr:verify -- --write`. Precedent to follow closely: ADR-035 (Biome as third linter), which is the template for phased, measured rule adoption.",
+    "coordination": "Claim the work first: `vp run coordination:claim -- <id> \"<title>\" --issue <n>`. It creates the branch, an isolated worktree, and a draft PR, and self-assigns the issue. Rule 12."
+  },
+  "triaged_findings_js_combine_iterations": {
+    "$comment": "Keyed by file + code shape, never by line. 8 accepted; do not re-open without evidence that overturns the reasoning AND the measurement.",
+    "accepted": [
+      {
+        "file": "packages/ui/src/components/NotificationCenter/NotificationCenter.component.tsx",
+        "shape": "NOTIFICATION_CENTER_PLACEMENTS.map(…).filter(…)",
+        "reason": "N=4 constant; shape resolves a documented three-linter conflict",
+        "verdict": "NEVER FIX — see traps.never-touch-notificationcenter"
+      },
+      {
+        "file": "packages/ui/src/routing/shared/appendPrimaryKeySorting.util.ts",
+        "shape": "resolvePrimaryKeyColumnKeys(…).filter(…).map(…)",
+        "reason": "Operates on the primary-key list (N=1), not the column list",
+        "verdict": "accepted, confirmed"
+      },
+      {
+        "file": "packages/ui/src/components/Table/utils/getStaticColumnKeys.util.ts",
+        "shape": "columns.filter(…).map(…) into new Set()",
+        "reason": "Fusing saves ~50 ns at 150 cols; mount and drawer-Apply only",
+        "verdict": "accepted, measured"
+      },
+      {
+        "file": "packages/ui/src/components/Table/utils/resolvePrimaryKeyColumnKeys.util.ts",
+        "shape": "columns.filter(isPrimaryKey === true && key !== 'actions').map(…)",
+        "reason": "Fusing saves ~26 ns at 150 cols. Chain is filter-then-map, so the map runs over the already-filtered 1-2 element array — the rule's 'loops twice' premise is false here.",
+        "verdict": "accepted, measured — but the SITE has a real defect the rule missed: a row-invariant derivation recomputed PER TABLE ROW. Tracked as issue #451 (hoist into the columns store). Do not 'fix' it by fusing."
+      },
+      {
+        "file": "packages/ui/src/components/Table/TableSettingsDrawer/FiltersSection/AddFilterSection/useAddFilterSection.hook.ts",
+        "shape": "columns.filter((col) => col.isFilterable !== false).map(…)",
+        "reason": "Fusing is 1.14x SLOWER. Also React-Compiler-memoized on [columns, filters].",
+        "verdict": "accepted, measured — fusing would be a regression",
+        "semantic_trap": "isFilterable !== false means undefined ⇒ filterable. Rewriting to `if (col.isFilterable)` silently drops every column omitting the flag, which is most of them."
+      },
+      {
+        "file": "packages/ui/src/components/Table/TableSettingsDrawer/SortingSection/AddSortSection/AddSortSection.component.tsx",
+        "shape": "columns.filter((col) => … && sorting.every(…)).map(…)",
+        "reason": "The nested .every already makes the filter O(columns × sorting) and dominates the map. Fusing saves ~0.5 µs on a drawer-open path; a Set-of-sorted-keys variant measures LEVEL with the fused reduce, not ahead.",
+        "verdict": "accepted, measured",
+        "semantic_trap": "isSortable !== false — same undefined-is-true trap."
+      },
+      {
+        "file": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveAcceptedUnpinConflictState.util.ts",
+        "shape": "reorder-to-fill branch: allOrderedColumns.filter(…).map(…)",
+        "reason": "Fusing saves ~300 ns (1.51x ratio — the trap). No precomputed key array exists in that function, so fusing needs an accumulator.",
+        "verdict": "accepted, measured"
+      },
+      {
+        "file": "packages/ui/src/components/Table/TableSettingsDrawer/GeneralSettingsSection/utils/buildPresetColumnSizing.util.ts",
+        "shape": "columns.map(… as const).filter(([, width]) => width) into Object.fromEntries",
+        "reason": "PARTLY OVERTURNED BY MEASUREMENT. Originally recorded as 'zero measurable gain'; a reduce writing straight into an object is ~3.7-4x faster, ~2 µs per call at 150 cols. The cost is Object.fromEntries over per-element `as const` tuples, NOT the double pass the rule flagged.",
+        "verdict": "OPEN — accepted only because it is one click on a width-preset button. A decision is pending in PR #455.",
+        "semantic_traps": [
+          "the `as const` tuple is what makes Object.fromEntries typecheck",
+          "the result feeds Object.fromEntries",
+          "the filter is a TRUTHINESS test — it drops width === 0 as well as undefined; rewriting to `width !== undefined` is a behaviour change"
+        ]
+      }
+    ],
+    "fixed_in_pr_450": [
+      {
+        "file": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveAcceptedUnpinConflictState.util.ts",
+        "shape": "both unpin-beyond branches",
+        "what_was_wrong": "The trailing .filter((key) => left.includes(key)) was a provable NO-OP and carried an O(window × pinned) Array.includes scan. keysToUnpin = {k : k ∈ window ∧ k ∈ left}, consumed only by left.filter(k => !keysToUnpin.has(k)), where k ∈ left holds by construction.",
+        "measured_gain": "3.8x at 150 columns, ~43x at 1000 — the removed O(n·m) scan. At n=30 the pre-fix version measures AHEAD (noise floor)."
+      },
+      {
+        "file": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/resolvePinConflictState.util.ts",
+        "shape": "move-column branch",
+        "what_was_wrong": "allOrderedKeys — the identical projection — was already computed unconditionally at the top of the function and went unused in this branch.",
+        "measured_gain": "1.20-1.40x at 150 columns"
+      }
+    ]
+  },
+  "method_that_worked": {
+    "$comment": "Reusable for the untriaged families. 7 of 8 bounds-and-coldness judgements survived measurement; the one that failed did so because nobody measured.",
+    "pipeline": "Three stages with separate contexts: (1) validate each finding real vs false-positive with a confidence score; (2) author a fix only for the reals; (3) adversarially audit the fix, trying to prove it WRONG. Stage 3 rejected a fix that typechecked, kept the API surface identical, and passed all 2260 tests — on measurement, not taste.",
+    "read_the_tool_docs_first": "Each rule page carries a 'canonical fix and false positive check recipe'. For js-combine-iterations its own documented exceptions are: (a) the intermediate array is genuinely used elsewhere, (b) N is 'tiny enough that the extra pass is negligible'. Criterion (b) did most of the work. Fetch the page for every family you triage — it is faster than reverse-engineering and it is what AGENTS.md §7 asks for.",
+    "trace_the_real_bound": "This repo's column ceiling is 150 (the deliberate apps/react-router/src/routes/wide-alltypes-150 stress route) and the grid virtualizes to a few dozen visible rows. Establish the bound and the call frequency before judging any Performance finding.",
+    "benchmark_the_real_function": "Synthetic shape benchmarks mislead: they hold predicate cost and result-consumer cost fixed. `bench` is exported from vite-plus/test (ADR-045 — never import from vitest directly), so benchmarks live as .bench.ts in the workspace and import the real functions. Vitest's default benchmark.include matches *.bench.ts while its test include matches only *.{test,spec}.* , so `vp run test` does not collect them — confirm with an unchanged suite count.",
+    "consume_results": "In any benchmark, accumulate the result (e.g. into a holder object's property). Without it V8 deletes the allocation under test and every shape converges to 'no difference' — the benchmark then 'proves' the finding is not real.",
+    "existing_benchmarks": "packages/ui/src/benchmarks/ (PR #455, draft) — `vp run --filter @lcabrera/ui bench`, ~2 min, 43 suites. Root synthetic: `vp run bench:array-ops` (PR #453, draft)."
+  },
+  "open_questions_for_you": [
+    "RESOLVED by #457: what the config can do (rule level, via doctor.config.jsonc), whether warnings fail a build (they do not — severity is the dial), and whether `--scope changed` works (it does; note `--base` rejects HEAD~1).",
+    "STILL OPEN: js-set-map-lookups (34 here / part of the 75 advisory warnings in #457) is untriaged and is the family our own measurements most support — the only large real win we found was exactly this shape (3.8x at 150 cols, ~43x at 1000).",
+    "STILL OPEN: should buildPresetColumnSizing be fixed? ~2 microseconds, one click, three semantic traps. Decision pending in PR #455."
+  ],
+  "do_not": [
+    "Do not re-open no-barrel-import or deslop/unused-dev-dependency — both are argued off in the register by #457, each with a verified probe.",
+    "Do not touch NotificationCenter.component.tsx's map().filter().",
+    "Do not re-open the 8 triaged js-combine-iterations findings without new evidence.",
+    "Do not adopt flatMap(x => cond ? [y] : []) as a performance fix anywhere.",
+    "Do not add a per-finding suppression or baseline mechanism — ADR-055 uses severity as the dial deliberately.",
+    "Do not silence a finding by turning a rule off in a root config without a register entry — suppressions:verify now catches it.",
+    "Do not commit a findings snapshot (ADR-049).",
+    "Do not trust a green run as proof a rule is loaded — plant a violation; see traps.silent-pass-modes."
+  ]
+}
