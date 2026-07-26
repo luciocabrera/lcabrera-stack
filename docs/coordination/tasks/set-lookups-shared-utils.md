@@ -2,7 +2,7 @@
 id: set-lookups-shared-utils
 title: Replace array-scan lookups with Sets in the shared Table/VirtualList/VirtualSelect utils
 owner: agent:claude
-status: active
+status: review
 branch: chore/460-set-lookups-shared-utils
 area:
   - packages/ui/src/components/Table/utils/**
@@ -31,10 +31,9 @@ so the flip has to come after the last fix, in that PR.
 
 ## Status / next
 
-- Current step: claimed; auditing the nine files for the shared shape before
-  editing any of them
+- Current step: all fifteen findings fixed, full gate green — in review
 - Blockers: none
-- Next: land the shared helper + these nine, so ColumnOrderSection can consume it
+- Next: land, so `colorder-set-lookups` (#462) can rebase onto the helper
 
 ## Coordination
 
@@ -53,14 +52,78 @@ whole point of Rule 14.
 **Deliberate duplication risk, and why this lands first.** Both halves are the
 same two shapes — "key array → Set for O(1) membership", and "partition/reorder a
 column list by a key list". Fixed independently we would each invent the same
-helper. This PR puts the shared helper in one place and the other half consumes
-it, which is why the ordering matters rather than being a preference.
+helper. This PR settles which helper exists, which is why the ordering matters
+rather than being a preference.
+
+**Resolved: the partition helper already existed, and neither of us had found
+it.** `Table/utils/splitColumnsByPinning.util.ts` does exactly the three-way
+left/center/right split, is already `Set`-based, and predates both claims. So
+`getEffectiveColumns` now _calls_ it instead of re-filtering three times, and no
+new abstraction was invented for that shape. Its return keys
+(`centerCols`/`leftPinnedCols`/`rightPinnedCols`) are **not** renameable — they
+are part of `Table.types.ts` and reach roughly thirty consumers — which is also
+why a generic `getKey`-parameterised version was rejected: the payoff would be
+one call site, against a public type change.
+
+Only the **ordering** shape needed extracting: `orderColumnsByKeys.util.ts`,
+alongside `splitColumnsByPinning` at the same granularity.
+
+**The two ordering sites do not share semantics — check before reusing.**
+`orderColumnsByKeys` drops an order entry with no matching column (it inherits
+`columnOrder.map(find).filter(Boolean)`). `buildOrderBySorting` in
+ColumnOrderSection does not: `[...sortedKeys, ...columnOrder.filter(...)]` emits
+a sorted key that is absent from `columnOrder`.
+
+What that key then does depends on whether it is static, which is the part worth
+knowing before reusing anything. Established by #462's owner by running the real
+function, not by reading it:
+
+| sorted key absent from `columnOrder` | today            |
+| ------------------------------------ | ---------------- |
+| not static                           | survives         |
+| not static, another column is static | survives         |
+| static                               | silently dropped |
+
+`restoreStaticColumnOrder` filters every static key out of `newOrder` and
+re-inserts only those with an index in `currentOrder`; a static key with no such
+index has nowhere to return to. So the current behaviour is not "keeps unknown
+keys" — it keeps non-static ones and drops static ones, a split nobody chose and
+no test covers either side of.
+
+That inverts the framing this file carried first. Adopting `orderColumnsByKeys`
+there would drop all unknown keys uniformly, which removes the inconsistency
+rather than introducing a change — so the question is "keep an inconsistency or
+remove it", not "keep or change". Still #462's call, and still needs a test
+whichever way it goes.
+
+**Measured, because a helper can eat the win it exists to deliver.** Method: a
+standalone script replicating all three variants verbatim and timing each over
+`process.hrtime.bigint()` with a warmup pass — not the real imports, because at
+the time of measuring, the benchmark harness #455 adds was not yet on `main` and
+the directory it lives in is #454's claim. Single run, one machine, so treat the
+ratios rather than the absolute times as the result:
+
+- `getEffectiveColumns` at 1000 columns — old 1.559 ms, new via the two helpers
+  0.130 ms, new fully inlined 0.118 ms. The indirection costs ~9% of the
+  improved time against ~1.43 ms saved, so the extraction is not what to
+  optimise. At 150 columns it is 2.6×; at 50, 1.7×.
+- `getIsAllSelected` at 5000 options with Select All active — 12.88 ms → 0.148 ms
+  (**87×**), and that is per keystroke. At 500 options, 17×.
+
+All three `getEffectiveColumns` variants were asserted to produce identical
+output in the same script.
 
 **Overlap with `real-array-bench-poc` (#454)** is real but narrow: its area is
 `packages/ui/src/**/*.bench.ts`, which intersects these directories only on bench
-files. Nothing here edits a `*.bench.ts`. Worth knowing in the other direction
-though — changing `getEffectiveColumns` changes what any bench over it measures,
-so #455 may need a re-run after this lands.
+files. Nothing here edits a `*.bench.ts`.
+
+An earlier revision of this file guessed that #455 would need a re-run once this
+landed. It does not, and the guess is recorded here only because it was acted on:
+its bench files import nothing from these utils — a type-only import plus `bench`
+and `describe` from `vite-plus/test` — and they measure #450's before/after
+through inlined replications. Both halves of this work independently arrived at
+self-contained replication rather than importing the real functions, for the same
+reason: neither branch can import from the other before it merges.
 
 **Correction to the shared "not a frame-time win" line — it holds for the Table
 half only.** That claim was made from the Table trace and over-generalised to all 15. The nine files split into two very different paths:

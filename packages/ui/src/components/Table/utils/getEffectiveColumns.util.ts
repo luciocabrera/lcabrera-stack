@@ -5,6 +5,9 @@ import type {
   TableColumn,
 } from '@lcabrera/ui/components/Table/Table.types';
 
+import { orderColumnsByKeys } from './orderColumnsByKeys.util';
+import { splitColumnsByPinning } from './splitColumnsByPinning.util';
+
 type GetEffectiveColumnsArgs<TData> = {
   readonly columnOrder?: ColumnOrderState<TData>;
   readonly columnPinning?: ColumnPinningState<TData>;
@@ -26,12 +29,7 @@ export const getEffectiveColumns = <TData>({
   // Apply column order
   const orderedColumns =
     columnOrder && columnOrder.length > 0
-      ? [
-          ...columnOrder
-            .map((key) => visibleColumns.find((col) => col.key === key))
-            .filter((col): col is NonNullable<typeof col> => col !== undefined),
-          ...visibleColumns.filter((col) => !columnOrder.includes(col.key)),
-        ]
+      ? orderColumnsByKeys<TData>({ columnOrder, columns: visibleColumns })
       : visibleColumns;
 
   // Apply pinning order: left pinned → unpinned → right pinned
@@ -43,17 +41,11 @@ export const getEffectiveColumns = <TData>({
   if (leftPinned.length === 0 && rightPinned.length === 0)
     return orderedColumns;
 
-  const pinnedLeftCols = orderedColumns.filter((col) =>
-    leftPinned.includes(col.key),
-  );
+  const { centerCols, leftPinnedCols, rightPinnedCols } =
+    splitColumnsByPinning<TData>({
+      columnPinning: { left: leftPinned, right: rightPinned },
+      effectiveColumns: orderedColumns,
+    });
 
-  const pinnedRightCols = orderedColumns.filter((col) =>
-    rightPinned.includes(col.key),
-  );
-
-  const unpinnedCols = orderedColumns.filter(
-    (col) => !leftPinned.includes(col.key) && !rightPinned.includes(col.key),
-  );
-
-  return [...pinnedLeftCols, ...unpinnedCols, ...pinnedRightCols];
+  return [...leftPinnedCols, ...centerCols, ...rightPinnedCols];
 };

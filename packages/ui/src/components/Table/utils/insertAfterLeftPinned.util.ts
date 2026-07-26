@@ -15,12 +15,10 @@ export const insertAfterLeftPinned = <TData>({
   newPinning,
   orderWithoutColumn,
 }: InsertAfterLeftPinnedArgs<TData>) => {
-  let lastLeftPinnedIndex = -1;
-  for (const [index, key] of orderWithoutColumn.entries()) {
-    if (newPinning.left.includes(key)) {
-      lastLeftPinnedIndex = index;
-    }
-  }
+  const leftPinned = new Set<string>(newPinning.left);
+  const lastLeftPinnedIndex = orderWithoutColumn.findLastIndex((key) =>
+    leftPinned.has(key),
+  );
 
   return [
     ...orderWithoutColumn.slice(0, lastLeftPinnedIndex + 1),

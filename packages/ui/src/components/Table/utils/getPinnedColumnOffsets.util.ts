@@ -30,10 +30,16 @@ export const getPinnedColumnOffsets = <TData = Record<string, unknown>>({
     >;
   }
 
+  // Set<string> rather than .includes() on the raw arrays, for the reason
+  // splitColumnsByPinning documents: DataKey<unknown> narrows to the literal
+  // 'actions' and stops accepting the broader keys the columns carry.
+  const leftPinnedSet = new Set<string>(leftPinned);
+  const rightPinnedSet = new Set<string>(rightPinned);
+
   // Compute left offsets (cumulative from left)
   let leftOffset = 0;
   const leftPinnedInEffectiveOrder = effectiveColumns.filter((c) =>
-    leftPinned.includes(c.key),
+    leftPinnedSet.has(c.key),
   );
   for (const col of leftPinnedInEffectiveOrder) {
     const sized = columnSizing[col.key] as number | undefined;
@@ -61,9 +67,9 @@ export const getPinnedColumnOffsets = <TData = Record<string, unknown>>({
 
   // Compute right offsets (cumulative from right)
   let rightOffset = 0;
-  const rightPinnedInReverseEffectiveOrder = [...effectiveColumns]
+  const rightPinnedInReverseEffectiveOrder = effectiveColumns
     .toReversed()
-    .filter((c) => rightPinned.includes(c.key));
+    .filter((c) => rightPinnedSet.has(c.key));
   for (const col of rightPinnedInReverseEffectiveOrder) {
     const sized = columnSizing[col.key] as number | undefined;
     const width = sized ?? col.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;

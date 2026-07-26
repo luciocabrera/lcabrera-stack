@@ -7,6 +7,8 @@ export const resolveSingleModeChange = ({
   selected,
   selectedValues,
 }: ResolveSingleModeChangeArgs) => {
-  const newValue = selectedValues.find((value) => !selected.includes(value));
+  const selectedSet = new Set(selected);
+  const newValue = selectedValues.find((value) => !selectedSet.has(value));
+
   return newValue ? [newValue] : [];
 };
