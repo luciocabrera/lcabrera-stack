@@ -25,16 +25,16 @@ export const insertAdjacentToPinnedGroup = <TData = Record<string, unknown>>({
   const nextOrder = [...order];
 
   if (side === 'left') {
-    let lastLeftPinnedIndex = -1;
-    for (const [i, key] of nextOrder.entries()) {
-      if (columnPinning.left.includes(key)) {
-        lastLeftPinnedIndex = i;
-      }
-    }
+    const leftPinned = new Set<string>(columnPinning.left);
+    const lastLeftPinnedIndex = nextOrder.findLastIndex((key) =>
+      leftPinned.has(key),
+    );
+
     nextOrder.splice(lastLeftPinnedIndex + 1, 0, columnKey);
   } else {
+    const rightPinned = new Set<string>(columnPinning.right);
     const firstRightPinnedIndex = nextOrder.findIndex((key) =>
-      columnPinning.right.includes(key),
+      rightPinned.has(key),
     );
     const insertAt =
       firstRightPinnedIndex === -1 ? nextOrder.length : firstRightPinnedIndex;

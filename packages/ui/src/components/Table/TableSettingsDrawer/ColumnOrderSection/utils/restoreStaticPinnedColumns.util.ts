@@ -18,31 +18,31 @@ export const restoreStaticPinnedColumns = <TData>({
     return finalPinning;
   }
 
-  let nextPinning = finalPinning;
+  const defaultLeft = new Set<string>(defaultPinning.left);
+  const defaultRight = new Set<string>(defaultPinning.right);
+  const finalLeft = new Set<string>(finalPinning.left);
+  const finalRight = new Set<string>(finalPinning.right);
 
-  for (const key of staticKeys) {
-    const columnKey = key as DataKey<TData>;
+  // `staticKeys` is a Set, so every key is distinct and a membership test taken
+  // up front cannot be invalidated by a later restore — which is what lets the
+  // loop's evolving `nextPinning` reduce to two independent selections.
+  const staticKeyList = [...staticKeys];
+  const leftToRestore = staticKeyList.filter(
+    (key) => defaultLeft.has(key) && !finalLeft.has(key),
+  ) as DataKey<TData>[];
+  const rightToRestore = staticKeyList.filter(
+    (key) => defaultRight.has(key) && !finalRight.has(key),
+  ) as DataKey<TData>[];
 
-    if (
-      defaultPinning.left.includes(columnKey) &&
-      !nextPinning.left.includes(columnKey)
-    ) {
-      nextPinning = {
-        ...nextPinning,
-        left: [...nextPinning.left, columnKey],
-      };
-    }
-
-    if (
-      defaultPinning.right.includes(columnKey) &&
-      !nextPinning.right.includes(columnKey)
-    ) {
-      nextPinning = {
-        ...nextPinning,
-        right: [...nextPinning.right, columnKey],
-      };
-    }
+  // Returning the input unchanged keeps its identity, which the previous
+  // implementation did by never reassigning when nothing was restored.
+  if (leftToRestore.length === 0 && rightToRestore.length === 0) {
+    return finalPinning;
   }
 
-  return nextPinning;
+  return {
+    ...finalPinning,
+    left: [...finalPinning.left, ...leftToRestore],
+    right: [...finalPinning.right, ...rightToRestore],
+  };
 };

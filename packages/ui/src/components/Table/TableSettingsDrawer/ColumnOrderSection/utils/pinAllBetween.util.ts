@@ -16,32 +16,38 @@ export const pinAllBetween = <TKey extends string>({
   index,
   side,
 }: PinAllBetweenArgs<TKey>) => {
-  const next = {
-    left: [...columnPinning.left],
-    right: [...columnPinning.right],
-  };
+  const left = [...columnPinning.left];
+  const right = [...columnPinning.right];
+
+  // Membership mirrors, updated in step with the arrays above. The guard reads
+  // state this loop is still writing, so a Set built once from `columnPinning`
+  // would answer for the input rather than for the partially-built result.
+  const leftKeys = new Set<TKey>(left);
+  const rightKeys = new Set<TKey>(right);
 
   if (side === 'left') {
     const keysBeforeOrAtIndex = allOrderedKeys.slice(0, index + 1);
 
     for (const key of keysBeforeOrAtIndex) {
-      if (next.left.includes(key)) continue;
+      if (leftKeys.has(key)) continue;
 
-      next.right = next.right.filter((pinnedKey) => pinnedKey !== key);
-      next.left.push(key);
+      leftKeys.add(key);
+      rightKeys.delete(key);
+      left.push(key);
     }
 
-    return next;
+    return { left, right: right.filter((key) => rightKeys.has(key)) };
   }
 
   const keysFromIndex = allOrderedKeys.slice(index);
 
   for (const key of keysFromIndex) {
-    if (next.right.includes(key)) continue;
+    if (rightKeys.has(key)) continue;
 
-    next.left = next.left.filter((pinnedKey) => pinnedKey !== key);
-    next.right.push(key);
+    rightKeys.add(key);
+    leftKeys.delete(key);
+    right.push(key);
   }
 
-  return next;
+  return { left: left.filter((key) => leftKeys.has(key)), right };
 };
