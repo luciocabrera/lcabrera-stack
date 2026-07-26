@@ -1,23 +1,11 @@
 // @vitest-environment jsdom
 
 import type { NavbarItemConfig } from '@lcabrera/ui/components/Navbar/Navbar.types';
-import type { GlobalSettingsState } from '@lcabrera/ui/types/globalSettings.types';
 import type { ThemeMode } from '@lcabrera/ui/types/theme.types';
 import type { ReactNode } from 'react';
 
 import { cleanup, render, screen } from '@testing-library/react';
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from 'vite-plus/test';
-
-const { useLoaderDataMock } = vi.hoisted(() => ({
-  useLoaderDataMock: vi.fn(),
-}));
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 type MockAppConfigProviderProps = {
   readonly children: ReactNode;
@@ -30,19 +18,7 @@ type MockAppProvidersProps = {
   readonly appId?: string;
   readonly children: ReactNode;
   readonly defaultTheme?: ThemeMode;
-  readonly globalSettings?: GlobalSettingsState;
-  readonly initialTheme?: ThemeMode;
 };
-
-vi.mock('react-router', async () => {
-  const actual =
-    await vi.importActual<typeof import('react-router')>('react-router');
-
-  return {
-    ...actual,
-    useLoaderData: useLoaderDataMock,
-  };
-});
 
 vi.mock('@lcabrera/ui/contexts/AppConfigContext', () => ({
   AppConfigProvider: ({
@@ -63,18 +39,10 @@ vi.mock('@lcabrera/ui/contexts/AppConfigContext', () => ({
 }));
 
 vi.mock('@lcabrera/ui/components/AppProviders', () => ({
-  AppProviders: ({
-    appId,
-    children,
-    defaultTheme,
-    globalSettings,
-    initialTheme,
-  }: MockAppProvidersProps) => (
+  AppProviders: ({ appId, children, defaultTheme }: MockAppProvidersProps) => (
     <div
       data-app-id={appId ?? 'none'}
       data-default-theme={defaultTheme}
-      data-global-settings={JSON.stringify(globalSettings)}
-      data-initial-theme={initialTheme ?? 'none'}
       data-testid='app-providers'
     >
       {children}
@@ -96,19 +64,12 @@ afterEach(() => {
   cleanup();
 });
 
-beforeEach(() => {
-  useLoaderDataMock.mockReset();
-  useLoaderDataMock.mockReturnValue({
-    globalSettings: { navigation: {}, pinning: {} },
-    theme: 'dark',
-  });
-});
-
 describe('RootComponent', () => {
-  it('feeds the root loader data into the app-wide providers', () => {
+  it('forwards the app id and default theme to the app-wide providers', () => {
     render(
       <RootComponent
         appId='showcase'
+        defaultTheme='dark'
         getNavigationItems={getFixtureNavigationItems}
       />,
     );
@@ -116,10 +77,7 @@ describe('RootComponent', () => {
     const appProviders = screen.getByTestId('app-providers');
 
     expect(appProviders.dataset.appId).toBe('showcase');
-    expect(appProviders.dataset.initialTheme).toBe('dark');
-    expect(appProviders.dataset.globalSettings).toBe(
-      JSON.stringify({ navigation: {}, pinning: {} }),
-    );
+    expect(appProviders.dataset.defaultTheme).toBe('dark');
   });
 
   it('renders the shell inside both providers', () => {
@@ -157,14 +115,11 @@ describe('RootComponent', () => {
     expect(appConfig.dataset.logout).toBe('/auth/sign-out');
   });
 
-  it('defaults the theme to light and survives a root route with no loader data', () => {
-    useLoaderDataMock.mockReturnValue(undefined);
-
+  it('defaults the theme to light', () => {
     render(<RootComponent getNavigationItems={getFixtureNavigationItems} />);
 
-    const appProviders = screen.getByTestId('app-providers');
-
-    expect(appProviders.dataset.defaultTheme).toBe('light');
-    expect(appProviders.dataset.initialTheme).toBe('none');
+    expect(screen.getByTestId('app-providers').dataset.defaultTheme).toBe(
+      'light',
+    );
   });
 });

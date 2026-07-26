@@ -25,11 +25,7 @@ Migrating a hand-composed root — either adopt `RootComponent`, or wrap the she
   isAuthEnabled
   logoutRoute='/logout'
 >
-  <AppProviders
-    appId={APP_ID}
-    globalSettings={globalSettings}
-    initialTheme={theme}
-  >
+  <AppProviders appId={APP_ID}>
     <AppShell />
   </AppProviders>
 </AppConfigProvider>
