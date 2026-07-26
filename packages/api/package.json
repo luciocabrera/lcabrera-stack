@@ -1,6 +1,6 @@
 {
   "name": "@lcabrera/api",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "private": false,
   "description": "Browser-safe HTTP building blocks: API base-URL resolution, validated fetch, and paginated distinct-value queries.",
   "keywords": [

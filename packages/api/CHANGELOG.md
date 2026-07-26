@@ -1,5 +1,15 @@
 # @lcabrera/api
 
+## 0.2.0
+
+### Minor Changes
+
+- fbf9d05: `buildPaginatedQueryParams` accepts an optional `cursor` — the sort-key tuple of
+  the last row already loaded — and serializes it as a `cursor` search param for
+  endpoints that can seek past it instead of counting `skip` rows. `skip` is still
+  sent alongside, so an endpoint that does not read cursors behaves exactly as
+  before.
+
 ## 0.1.1
 
 ### Patch Changes
