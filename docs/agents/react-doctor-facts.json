@@ -1,19 +1,19 @@
 {
-  "$comment": "Machine-readable companion to docs/agents/react-doctor-triage.md, for anyone integrating react-doctor into this repo's gate. THAT FILE IS THE AUTHORITY on per-finding reasoning; this one holds the tool-level facts it does not cover — the rule-family map, ADR conflicts, verified traps, and gate-integration requirements. Every 'verified' item was measured or executed, not inferred. Counts are a DATED SNAPSHOT (see snapshot.*) — per AGENTS.md §7 they rot, so re-run the tool rather than trusting them.",
+  "$comment": "Machine-readable companion to docs/agents/react-doctor-triage.md, for anyone working with react-doctor in this repo. THAT FILE IS THE AUTHORITY on per-finding reasoning; this one holds the tool-level facts it does not cover. CORRECTIONS: two claims in the first version of this file were disproven by the gate-adoption work in PR #457 (ADR-055) and are marked `corrected` below — left in place with the reason rather than deleted, so the next reader knows why they changed. Counts are a DATED SNAPSHOT; re-run the tool rather than trusting them.",
   "snapshot": {
     "date": "2026-07-26",
     "main_sha": "d4b3d4d9",
     "tool": "npx react-doctor@latest --verbose",
     "run_from": "packages/ui",
     "score": "86/100",
-    "note": "Report paths are relative to the workspace you run from. Full diagnostics are written to a /tmp/react-doctor-<uuid>/ dir, one .txt per rule family plus diagnostics.json."
+    "note": "Report paths are relative to the workspace you run from. Full diagnostics are written to a /tmp/react-doctor-<uuid>/ dir, one .txt per rule family plus diagnostics.json.",
+    "superseded_by": "PR #457 / ADR-055 adopted react-doctor as an enforced gate after this snapshot was taken. Its `doctor.config.jsonc` and the report it produces are now the current state; this snapshot is the pre-adoption picture and is kept for the triage history only."
   },
-
   "verified_facts": {
     "not_installed_in_repo": {
-      "state": "react-doctor is NOT a dependency and NOT in any gate as of main_sha",
-      "installer_side_effects": "`npx react-doctor install --yes` adds agent skill files, a `doctor` package script, and react-doctor as a devDependency. Each of those three touches an enforced gate in this repo — see gate_integration_requirements.",
-      "already_present_untracked": ".github/skills/react-doctor/ appeared untracked in the working tree during our session (SKILL.md + references/explain.md). Decide whether to track it before committing anything else."
+      "status": "SUPERSEDED — react-doctor is now an enforced gate",
+      "current": "Adopted in PR #457 (ADR-055): standalone CLI pinned at `catalog:lint`, full scope, failing on ERROR severity, wired into `check:push` (so the pre-push hook catches it) and its own check-safe.yml step. Config is `doctor.config.jsonc`. Warnings stay advisory and land in a gitignored report (ADR-049).",
+      "why_cli_not_oxlint_plugin": "The documented Oxlint path is the `jsPlugins` bridge — the exact bridge ADR-042 removed for double-reporting — and the plugin builds silently drop the project-level rules, which would have locked in a partial picture."
     },
     "no_suppression_mechanism": {
       "claim": "The rule documentation pages document NO way to suppress a single finding — no inline comment, no per-site config entry.",
@@ -30,17 +30,24 @@
       "verified": true,
       "how": "Our 6-line fix in resolveAcceptedUnpinConflictState.util.ts moved another finding in the same file from :79 to :73, confirmed by re-running the tool.",
       "implication": "Key any triage record by FILE + CODE SHAPE, never by line. docs/agents/react-doctor-triage.md already does this."
+    },
+    "suppression_mechanism": {
+      "status": "CORRECTED — the original claim here was wrong",
+      "original_claim": "The rule docs document NO way to suppress a finding, so a blocking gate is unpassable under Rule 11.",
+      "why_it_was_wrong": "The probe only read a RULE documentation page, which describes fixes and false-positive criteria, not tool configuration. It could not have discovered a config file, so it was never evidence about one — a probe that cannot disprove the claim it is used to support (AGENTS.md Rule 14). The hedge was recorded in the same file as an open question, but the claim was still marked verified. Do not repeat that shape.",
+      "what_is_true": "`doctor.config.jsonc` configures rules at RULE level (off / severity / scope). There is still no PER-FINDING suppression and no suppression-baseline file — which is why ADR-055 uses SEVERITY as the dial separating inherited debt from new, rather than a baseline. A blocking gate is therefore entirely achievable, and is now in place.",
+      "repo_consequence": "Turning a rule off repo-wide in a root config was an UNPOLICED way to silence a finding — the per-package eslint-suppressions gitignore does not reach a root config. PR #457 extended `suppressions:verify` to detect it, so a rule-off now needs a justified entry in the register like any other suppression."
     }
   },
-
   "rule_families_snapshot": [
     {
       "rule": "react-doctor/no-barrel-import",
       "count": 94,
       "category": "Performance",
-      "status": "UNTRIAGED — HIGHEST RISK",
-      "conflict": "Head-on with ADR-007 (barrel-export boundaries), which mandates that every PUBLIC directory expose a controlled API via index.ts with explicit named exports. react-doctor wants direct-path imports instead.",
-      "guidance": "Do NOT mass-fix. This is an architectural decision already made and documented. Note the partial alignment: ADR-007 also BANS deep implementation barrels nobody imports through, and says private delegates get no index.ts — so a subset of these 94 may be genuine ADR-007 violations. Triage against ADR-007, do not treat the rule as authoritative. Also note the rule has a real point for a PUBLISHED package (barrels do cost consumers tree-shaking), so if it is ever revisited it belongs in an ADR amendment, not a lint sweep."
+      "status": "RESOLVED in PR #457 — rule off repo-wide, argued in the register",
+      "conflict": "Originally recorded as a head-on conflict with ADR-007. The sharper framing from #457: the rule's OWN docs name Vite tree-shaking as its false-positive case, so it is INAPPLICABLE to a Vite repo rather than in conflict with our architecture. Turned off at rule level for that reason, not because we dislike it.",
+      "guidance": "Do not re-open. #457 verified the false-positive claim by building an entry that imports one symbol from a flagged barrel and confirming the siblings were dropped — a probe that could have failed. ADR-007 still governs barrel design here.",
+      "count_note": "94 at this snapshot; #457 reports 103. Re-run rather than trusting either."
     },
     {
       "rule": "react-doctor/js-set-map-lookups",
@@ -64,11 +71,12 @@
       "rule": "deslop/unused-dev-dependency",
       "count": 3,
       "category": "Maintainability",
-      "status": "TRIAGED — ALL THREE ARE FALSE POSITIVES",
+      "status": "RESOLVED in PR #457 — rule off repo-wide, argued in the register",
       "flags": ["@stylexjs/eslint-plugin", "globals", "typescript-eslint"],
       "verified": true,
-      "how": "grepped packages/vite-configs/*.mjs — all three are imported by the shared eslint configs (eslint.custom-rules.shared.config.mjs / eslint.base-custom-rules.shared.config.mjs), which react-doctor's import graph does not traverse.",
-      "guidance": "NEVER act on this rule here. Removing typescript-eslint breaks the eslint pass repo-wide. This is the exact trap class ADR-047 exists for: @vitest/coverage-v8 is an OPTIONAL PEER declared only in the root manifest, reads as unused, and removing it takes down every --coverage run. If this rule ever flags @vitest/coverage-v8, read ADR-047 before touching it. Treat the whole family as advisory-only, or turn it off."
+      "how": "Verified twice, independently: grepping the shared eslint configs, and #457 identifying the mechanism — the configs resolve these plugins via `fromWorkspace(name)`, a DYNAMIC import, which no static import graph can follow. That is why the rule cannot be right here.",
+      "guidance": "NEVER act on this rule here. Removing typescript-eslint breaks the eslint pass repo-wide. This is the exact trap class ADR-047 exists for: @vitest/coverage-v8 is an OPTIONAL PEER declared only in the root manifest, reads as unused, and removing it takes down every --coverage run. If this rule ever flags @vitest/coverage-v8, read ADR-047 before touching it. Treat the whole family as advisory-only, or turn it off.",
+      "count_note": "3 at this snapshot; #457 reports 8."
     },
     {
       "rule": "react-doctor/js-hoist-intl",
@@ -110,7 +118,6 @@
       "status": "UNTRIAGED"
     }
   ],
-
   "traps": [
     {
       "id": "flatmap-is-not-the-fix",
@@ -137,10 +144,13 @@
     },
     {
       "id": "rule-11-vs-no-suppression",
-      "severity": "critical",
+      "severity": "resolved",
       "trap": "Making react-doctor a BLOCKING gate while the repo forbids suppressions.",
       "reality": "Non-Negotiable Rule 11 forbids suppressing a finding — and for packages/ui, api, server, utils, suppressions are checked and rejected (suppressions:verify). react-doctor offers no per-site suppression. So a blocking gate on a rule family with accepted false positives is UNPASSABLE without either fixing code that should not be fixed, or turning the whole rule off.",
-      "action": "Resolve this BEFORE wiring anything. Viable shapes: (a) gate only on rule families with zero accepted false positives; (b) gate on a per-rule ALLOW-LIST rather than the whole tool; (c) run it advisory (report-only, non-blocking) and keep the triage record as the memory. Do NOT add a repo-wide suppression mechanism to make a blocking gate pass — that recreates the eslint-suppressions baseline the four public packages deliberately do not have."
+      "action": "Follow ADR-055. Do not add a per-finding suppression or baseline mechanism.",
+      "status": "CORRECTED — the conclusion was wrong",
+      "what_i_got_wrong": "I concluded a blocking gate was unpassable because no per-site suppression exists. PR #457 built exactly that gate. The missing piece was rule-level config, which my probe could not see.",
+      "what_actually_works": "Severity is the dial: gate on ERROR, leave warnings advisory in a gitignored report. A whole rule may be turned off when it is inapplicable, but only with a justified entry in docs/agents/public-package-suppressions.json — `suppressions:verify` now polices root-config rule-offs too."
     },
     {
       "id": "green-run-is-not-evidence",
@@ -162,9 +172,20 @@
       "trap": "Adding a 4th linter's rules that duplicate or contradict Oxlint/ESLint/Biome.",
       "reality": "ADR-035's policy: overlap is KEPT as a safety net where engines independently AGREE, and dropped only where they CONFLICT or are noisy. Several react-doctor rules will contradict this repo's ADRs (no-barrel-import vs ADR-007 is the clearest), and contradiction is the case to drop.",
       "action": "Measure per rule before enabling, in approval-gated phases, the way ADR-035 §7 did for Biome. Do not enable the whole tool at once."
+    },
+    {
+      "id": "silent-pass-modes",
+      "severity": "high",
+      "source": "PR #457 — found and guarded, not assumed",
+      "trap": "Three ways react-doctor reports success while checking nothing.",
+      "modes": [
+        "The CLI exits 0 with a setup nag when there is no `doctor` package script — so an unconfigured gate passes.",
+        "It DISCARDS a malformed config, scans with defaults, and still reports ok: true. This is precisely the Biome `.jsonc` failure mode in AGENTS.md §4 — a config parse error looks like a clean run.",
+        "`--base` rejects `HEAD~1`, exiting 1 having scanned nothing — a failure that looks like a finding."
+      ],
+      "action": "All three are guarded in #457. If you change the invocation, re-verify each — and plant a deliberate violation to confirm the gate still fails, since a rule that is not loaded reports the same clean pass as correct code."
     }
   ],
-
   "gate_integration_requirements": {
     "$comment": "Each of these is an EXISTING enforced gate that `react-doctor install` or a hand-rolled integration will trip. All are CI steps in check-safe.yml.",
     "commands_verify": "A new root package.json script (the installer adds `doctor`) MUST be documented in COMMANDS.md in the SAME commit, or `vp run commands:verify` fails. Add it to COMMANDS.md §4.",
@@ -176,7 +197,6 @@
     "adr_required": "Adding a 4th linter to the gate is an architectural decision → needs an ADR in docs/decisions/. Take the number `vp run adr:verify` reports as free and register the index with `vp run adr:verify -- --write`. Precedent to follow closely: ADR-035 (Biome as third linter), which is the template for phased, measured rule adoption.",
     "coordination": "Claim the work first: `vp run coordination:claim -- <id> \"<title>\" --issue <n>`. It creates the branch, an isolated worktree, and a draft PR, and self-assigns the issue. Rule 12."
   },
-
   "triaged_findings_js_combine_iterations": {
     "$comment": "Keyed by file + code shape, never by line. 8 accepted; do not re-open without evidence that overturns the reasoning AND the measurement.",
     "accepted": [
@@ -251,7 +271,6 @@
       }
     ]
   },
-
   "method_that_worked": {
     "$comment": "Reusable for the untriaged families. 7 of 8 bounds-and-coldness judgements survived measurement; the one that failed did so because nobody measured.",
     "pipeline": "Three stages with separate contexts: (1) validate each finding real vs false-positive with a confidence score; (2) author a fix only for the reals; (3) adversarially audit the fix, trying to prove it WRONG. Stage 3 rejected a fix that typechecked, kept the API surface identical, and passed all 2260 tests — on measurement, not taste.",
@@ -261,24 +280,19 @@
     "consume_results": "In any benchmark, accumulate the result (e.g. into a holder object's property). Without it V8 deletes the allocation under test and every shape converges to 'no difference' — the benchmark then 'proves' the finding is not real.",
     "existing_benchmarks": "packages/ui/src/benchmarks/ (PR #455, draft) — `vp run --filter @lcabrera/ui bench`, ~2 min, 43 suites. Root synthetic: `vp run bench:array-ops` (PR #453, draft)."
   },
-
   "open_questions_for_you": [
-    "What can react-doctor's config file actually do? Rule on/off, severity, path ignores? This determines whether a blocking gate is even possible given Rule 11. RESOLVE FIRST — we did not.",
-    "Does the CLI exit non-zero on warning-severity findings? If not, a CI step gates nothing. Test on a dirty tree.",
-    "Is there a --scope changed mode suitable for PR-only gating? The tool's own agent guidance mentions `--verbose --scope changed`, which we never exercised.",
-    "no-barrel-import at 94 findings vs ADR-007: is any subset a genuine ADR-007 violation (deep implementation barrels nobody imports through)? Needs its own triage pass.",
-    "Should buildPresetColumnSizing be fixed? ~2 µs, one click, three semantic traps. Decision pending in PR #455."
+    "RESOLVED by #457: what the config can do (rule level, via doctor.config.jsonc), whether warnings fail a build (they do not — severity is the dial), and whether `--scope changed` works (it does; note `--base` rejects HEAD~1).",
+    "STILL OPEN: js-set-map-lookups (34 here / part of the 75 advisory warnings in #457) is untriaged and is the family our own measurements most support — the only large real win we found was exactly this shape (3.8x at 150 cols, ~43x at 1000).",
+    "STILL OPEN: should buildPresetColumnSizing be fixed? ~2 microseconds, one click, three semantic traps. Decision pending in PR #455."
   ],
-
   "do_not": [
-    "Do not mass-fix no-barrel-import — it contradicts ADR-007.",
-    "Do not act on deslop/unused-dev-dependency — all 3 current flags are verified false positives, and ADR-047 exists for exactly this class.",
+    "Do not re-open no-barrel-import or deslop/unused-dev-dependency — both are argued off in the register by #457, each with a verified probe.",
     "Do not touch NotificationCenter.component.tsx's map().filter().",
     "Do not re-open the 8 triaged js-combine-iterations findings without new evidence.",
     "Do not adopt flatMap(x => cond ? [y] : []) as a performance fix anywhere.",
-    "Do not add an inline-suppression or baseline mechanism to make a blocking gate pass.",
+    "Do not add a per-finding suppression or baseline mechanism — ADR-055 uses severity as the dial deliberately.",
+    "Do not silence a finding by turning a rule off in a root config without a register entry — suppressions:verify now catches it.",
     "Do not commit a findings snapshot (ADR-049).",
-    "Do not enable the whole tool at once — phase it, measure per rule, like ADR-035 §7 did for Biome.",
-    "Do not trust a green run as proof a rule is loaded — plant a violation."
+    "Do not trust a green run as proof a rule is loaded — plant a violation; see traps.silent-pass-modes."
   ]
 }
