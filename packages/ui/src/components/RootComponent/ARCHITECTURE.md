@@ -2,8 +2,8 @@
 
 ## Purpose
 
-The whole root route of a consuming app, in one component. It reads the root
-loader's data, composes the app-wide providers and renders the shell, so an app
+The whole root route of a consuming app, in one component. It publishes the
+app's configuration and composes the providers and shell that read it, so an app
 supplies only what genuinely depends on the app rather than reproducing the
 assembly. Same reasoning as `hydrateApp` and `createHandleRequest` one layer
 down — see [ADR-053](../../../../../docs/decisions/ADR-053-package-owned-app-root-and-app-config-context.md).
@@ -20,20 +20,17 @@ down — see [ADR-053](../../../../../docs/decisions/ADR-053-package-owned-app-r
 | `isAuthEnabled`      | `boolean`            | `false`   | Whether the app has a session, i.e. whether the navigation shows session controls   |
 | `logoutRoute`        | `string`             | `/logout` | Where those session controls POST                                                   |
 
-`RootComponentLoaderData` is the minimal subset of the root loader's data this
-component reads (`globalSettings`, `theme`). It is declared here rather than
-imported from an app's generated loader type, because that type is app-specific
-and this component is not — the same call `AppDocument` makes for `rootData`.
-`getRootLoaderData` (`@lcabrera/ui/routing/shared`) returns a superset of it, so
-an app whose root loader delegates to that helper satisfies it by construction.
+This component reads no loader data. The root loader's `theme` and
+`globalSettings` are read by `AppProviders`, their only consumer — see
+`AppProvidersLoaderData` in its `ARCHITECTURE.md`.
 
 ## Composition
 
 ```mermaid
 graph TD
-  Root[RootComponent] --> Loader[useLoaderData → globalSettings, theme]
-  Root --> Config[AppConfigProvider]
+  Root[RootComponent] --> Config[AppConfigProvider]
   Config --> Providers[AppProviders]
+  Providers --> Loader[useLoaderData → globalSettings, theme]
   Providers --> Shell[AppShell]
   Shell --> Nav[AppNavigation]
   Shell --> Outlet["main → Outlet"]
@@ -49,8 +46,8 @@ Nothing is threaded past `AppShell`: `getNavigationItems`, `isAuthEnabled` and
 
 ## File Structure
 
-- `RootComponent.component.tsx` — the loader read and the provider composition
-- `RootComponent.types.ts` — props and the loader-data subset
+- `RootComponent.component.tsx` — the provider composition
+- `RootComponent.types.ts` — props
 - `RootComponent.component.test.tsx` — tests
 
 There is no `index.ts`: the component is published from `public-api.ts` (i.e.

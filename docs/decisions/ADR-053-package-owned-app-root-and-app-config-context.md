@@ -42,6 +42,15 @@ than importing an app's generated loader type, the same way `AppDocument` types
 loader delegates to that helper satisfies it by construction, and an app with no
 root loader at all degrades to the declared defaults instead of crashing.
 
+> **Amended by [#440](https://github.com/luciocabrera/vite-react-compiler/issues/440).**
+> The loader read moved down to `AppProviders`, the only component that consumed
+> `theme`/`globalSettings`, and the type moved and was renamed with it
+> (`AppProvidersLoaderData`). `RootComponent` is still the whole root route and
+> an app still supplies the same five inputs; what changed is that the two
+> SSR-derived values are no longer drilled one level, which is rule 2 of
+> `PATTERNS.md` §"Thin Shell + Self-Connected Delegates" applied to the same
+> chain this ADR shortened.
+
 **2. Consumer configuration reaches its reader through `AppConfigContext`, not
 through props.** The context carries `getNavigationItems`, `isAuthEnabled` and
 `logoutRoute`. `AppShell` and `AppNavigation` take no navigation or session

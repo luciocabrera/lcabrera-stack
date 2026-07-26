@@ -4,7 +4,7 @@
 
 ## .
 AppDocument [const] ({ children, rootData, stylexCssHref, }: AppDocumentProps) => JSX.Element
-AppProviders [const] ({ appId, children, defaultTheme, globalSettings, initialTheme, }: AppProvidersProps) => JSX.Element
+AppProviders [const] ({ appId, children, defaultTheme, }: AppProvidersProps) => JSX.Element
 AppShell [const] () => JSX.Element
 Button [const] ({ tooltipContent, tooltipPlacement, ...rest }: ButtonProps) => JSX.Element
 FieldNode [type] | GroupFieldNode<TValues> | LeafFieldDef<TValues> | RowFieldNode<TValues> | TabFieldNode<TValues>
