@@ -101,6 +101,23 @@ jobs:
         # catches a violation that arrives via an unhooked push or --no-verify.
         run: vp run lint:biome:check
 
+      - name: React Doctor gate
+        id: react_doctor_gate
+        # A React-specific analyser the other three do not replicate: effect
+        # cleanup, server/client boundaries, render-path costs. Run as the
+        # standalone CLI rather than through its documented `jsPlugins` bridge
+        # into Oxlint — that bridge is the one this repo removed for
+        # double-reporting, and the plugin build silently drops the
+        # project-level rules. ADR-055.
+        #
+        # Full scope, failing on error severity only; warnings are advisory and
+        # land in the (gitignored) report the same run writes. Two silent-pass
+        # modes are guarded in the script rather than trusted: the CLI exits 0
+        # with a setup nag when no `doctor` package script exists, and it
+        # discards a malformed config and scans with defaults while still
+        # reporting success.
+        run: vp run react-doctor:verify
+
       - name: COMMANDS.md is still true
         id: commands_gate
         # Every other claim this repo makes has a machine behind it — types,
@@ -246,6 +263,12 @@ jobs:
             COMMANDS_STATUS="❌ Failed"
           fi
 
+          if [[ "${{ steps.react_doctor_gate.outcome }}" == "success" ]]; then
+            REACT_DOCTOR_STATUS="✅ Passed"
+          else
+            REACT_DOCTOR_STATUS="❌ Failed"
+          fi
+
           if [[ "${{ steps.preflight.outcome }}" == "success" ]]; then
             PREFLIGHT_STATUS="✅ Passed"
           else
@@ -261,6 +284,7 @@ jobs:
           echo "| Lint (Oxlint) | $CHECK_STATUS |" >> "$GITHUB_STEP_SUMMARY"
           echo "| Lint (ESLint custom rules) | $ESLINT_STATUS |" >> "$GITHUB_STEP_SUMMARY"
           echo "| Lint (Biome · react domain) | $BIOME_STATUS |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| React Doctor (errors block) | $REACT_DOCTOR_STATUS |" >> "$GITHUB_STEP_SUMMARY"
           echo "| TypeScript (tsgolint via vp check) | $CHECK_STATUS |" >> "$GITHUB_STEP_SUMMARY"
           echo "| TypeScript (tsc · every workspace) | $TYPECHECK_STATUS |" >> "$GITHUB_STEP_SUMMARY"
           echo "| COMMANDS.md accuracy | $COMMANDS_STATUS |" >> "$GITHUB_STEP_SUMMARY"

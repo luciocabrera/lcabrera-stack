@@ -40,3 +40,4 @@ or run `vp run adr:new`, which takes the next free number for you.
 | [ADR-051](./ADR-051-with-transaction-and-tx-executor-option.md)       | `withTransaction` + an optional `tx` executor option, and how id allocation is made safe                                 |
 | [ADR-052](./ADR-052-keyset-pagination-for-infinite-scroll.md)         | Keyset pagination for infinite scroll; `OFFSET` stays for jump-to-page                                                   |
 | [ADR-053](./ADR-053-package-owned-app-root-and-app-config-context.md) | The app root is package-owned, and consumer configuration travels by context                                             |
+| [ADR-055](./ADR-055-react-doctor-as-a-gate.md)                        | React Doctor as a gate, via the CLI                                                                                      |
