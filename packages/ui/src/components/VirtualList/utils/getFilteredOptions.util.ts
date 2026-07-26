@@ -20,11 +20,13 @@ export const getFilteredOptions = ({
     result = result.filter((option) => option.toLowerCase().includes(term));
   }
 
-  if (listFilterMode === 'selected') {
-    result = result.filter((option) => selectedValues.includes(option));
-  } else if (listFilterMode === 'unselected') {
-    result = result.filter((option) => !selectedValues.includes(option));
-  }
+  if (listFilterMode === 'all') return result;
 
-  return result;
+  // Built once per call, not once per option: this runs from useSetSearchTerm
+  // on every keystroke, over a list large enough to be virtualized.
+  const selected = new Set(selectedValues);
+
+  return listFilterMode === 'selected'
+    ? result.filter((option) => selected.has(option))
+    : result.filter((option) => !selected.has(option));
 };

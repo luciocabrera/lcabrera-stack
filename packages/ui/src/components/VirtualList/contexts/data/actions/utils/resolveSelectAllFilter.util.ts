@@ -15,9 +15,10 @@ export const resolveSelectAllFilter = ({
   isAllSelected,
   selectedValues,
 }: ResolveSelectAllFilterArgs) => {
+  const visible = new Set(filteredOptions);
   const values = isAllSelected
-    ? selectedValues.filter((value) => !filteredOptions.includes(value))
-    : [...new Set([...selectedValues, ...filteredOptions])];
+    ? selectedValues.filter((value) => !visible.has(value))
+    : [...new Set([...selectedValues, ...visible])];
 
   const filter: SelectFilter = { type: 'select', values };
 

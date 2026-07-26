@@ -11,6 +11,10 @@ type AreAllFiltersExpandedArgs = {
 export const areAllFiltersExpanded = ({
   expandedFilters,
   filterKeys,
-}: AreAllFiltersExpandedArgs) =>
-  filterKeys.length > 0 &&
-  filterKeys.every((key) => expandedFilters.includes(key));
+}: AreAllFiltersExpandedArgs) => {
+  if (filterKeys.length === 0) return false;
+
+  const expanded = new Set(expandedFilters);
+
+  return filterKeys.every((key) => expanded.has(key));
+};

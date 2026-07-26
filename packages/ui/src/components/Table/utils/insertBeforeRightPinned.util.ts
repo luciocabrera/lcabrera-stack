@@ -15,8 +15,9 @@ export const insertBeforeRightPinned = <TData>({
   newPinning,
   orderWithoutColumn,
 }: InsertBeforeRightPinnedArgs<TData>) => {
+  const rightPinned = new Set<string>(newPinning.right);
   const firstRightPinnedIndex = orderWithoutColumn.findIndex((key) =>
-    newPinning.right.includes(key),
+    rightPinned.has(key),
   );
   const insertAt =
     firstRightPinnedIndex === -1
