@@ -1,0 +1,102 @@
+# react-doctor triage record
+
+`npx react-doctor@latest --verbose` is **advisory tooling**, not one of this repo's
+three enforced linters (Oxlint, ESLint, Biome — see [AGENTS.md](../../AGENTS.md) §4).
+Nothing in CI runs it, and it is not a dev dependency here.
+
+It also documents **no suppression mechanism** — no config entry for a single site, no
+inline comment. So every finding it reports is reported again on every future run,
+forever. This file is the substitute: a triage record so the next agent spends one read
+instead of re-deriving the same judgements.
+
+## How to use this file
+
+1. Run the tool, from the workspace you care about:
+   `cd packages/ui && npx react-doctor@latest --verbose`
+2. For each finding, look for its **file + code shape** below.
+3. If it is listed as accepted, it has already been argued — do not "fix" it without
+   new evidence that overturns the reasoning recorded here.
+4. If it is not listed, triage it and add a row.
+
+**Entries are keyed by file and code shape, never by line number.** Line numbers rot on
+the first unrelated edit: fixing the two sites in
+`resolveAcceptedUnpinConflictState.util.ts` shortened the file by 6 lines and moved a
+third finding in that same file from line 79 to line 73. Cite the shape, and re-run the
+tool for current positions.
+
+## Rule: `react-doctor/js-combine-iterations`
+
+**What it flags.** `.map().filter()` / `.filter().map()` adjacency. Category
+Performance, severity warning. Prescribed fix: one pass via `.flatMap()`, `.reduce()`,
+or `for...of`.
+
+**Its own documented exceptions**, from
+<https://react.doctor/docs/rules/react-doctor/js-combine-iterations>:
+
+1. the intermediate array is genuinely used elsewhere, and
+2. N is "tiny enough that the extra pass is negligible".
+
+Criterion 2 does most of the work in this package. The collection ceiling here is the
+**column list**, and its deliberate stress case is the 150-column route
+[`apps/react-router/src/routes/wide-alltypes-150`](../../apps/react-router/src/routes/wide-alltypes-150).
+Every flagged site but one runs on a click, drawer-open, loader or mount path.
+
+**Two repo constraints make the prescribed fix costly**, which is why "just apply it"
+is the wrong default here:
+
+- Biome `noAccumulatingSpread` is ON, so `[...acc, item]` inside a `.reduce()` is a
+  build error. A reduce must mutate a local accumulator.
+- [`.claude/rules/typescript.md`](../../.claude/rules/typescript.md): "Never mutate
+  data. Use functional array operations exclusively. No imperative `for` loops for data
+  transformations." That makes `for...of` the least acceptable of the three suggested
+  shapes and `reduce`+push a real policy cost — not a free win.
+
+Also note the rule fires on **adjacency**, so deleting a redundant link in the chain
+clears it; the surviving `.slice().map()` is not a matched pattern.
+
+### Fixed (do not expect these to reappear)
+
+| File                                                                                                                                                                                                                                          | What was actually wrong                                                                                                                                                                                                                                                                                                                        |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`resolveAcceptedUnpinConflictState.util.ts`](../../packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveAcceptedUnpinConflictState.util.ts) (both `unpin-beyond` branches) | The trailing `.filter((key) => left.includes(key))` was a **no-op**, and an `O(n·m)` one. `keysToUnpin = {k : k ∈ window ∧ k ∈ left}` was consumed only by `left.filter(k => !keysToUnpin.has(k))`, where `k ∈ left` holds by construction — so the conjunct was a tautology. Deleting it removed a full pass _and_ the `Array.includes` scan. |
+| [`resolvePinConflictState.util.ts`](../../packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/resolvePinConflictState.util.ts) (`move-column` branch)                                                               | `allOrderedKeys` — the identical projection — was already computed unconditionally at the top of the function and then went **unused** in this branch. The chain was a third pass duplicating existing work. Now reuses it.                                                                                                                    |
+
+Neither fix needed `reduce`, `for...of`, or a mutation; both stayed declarative. That is
+the bar to aim for: if a "fix" for this rule requires an accumulator, re-read the
+exception criteria before writing it.
+
+### Accepted — negligible N (criterion 2)
+
+| File                                                                                                                                                                                                                                                                            | Shape                                                        | Why accepted                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`NotificationCenter.component.tsx`](../../packages/ui/src/components/NotificationCenter/NotificationCenter.component.tsx)                                                                                                                                                      | `NOTIFICATION_CENTER_PLACEMENTS.map(…).filter(…)`            | **N = 4**, a hard-coded constant in [`NotificationCenter.constants.ts`](../../packages/ui/src/components/NotificationCenter/NotificationCenter.constants.ts). More importantly this shape is **load-bearing**: AGENTS.md §4 names this file as the canonical resolution of the Biome `useIterableCallbackReturn` vs `unicorn/no-null` / `no-useless-undefined` conflict — filtering first is what lets the `map` callback always return an element. An inline comment says so. Fusing it re-opens a documented three-linter conflict to save 4 iterations. **Never fix this one.** |
+| [`appendPrimaryKeySorting.util.ts`](../../packages/ui/src/routing/shared/appendPrimaryKeySorting.util.ts)                                                                                                                                                                       | `resolvePrimaryKeyColumnKeys(…).filter(…).map(…)`            | The collection is the **primary-key** list, not the column list — every table in the repo declares exactly one `isPrimaryKey` column, so **N = 1**. Runs once per loader/query build. `existingKeys` is already a `Set`.                                                                                                                                                                                                                                                                                                                                                           |
+| [`getStaticColumnKeys.util.ts`](../../packages/ui/src/components/Table/utils/getStaticColumnKeys.util.ts)                                                                                                                                                                       | `columns.filter(…).map(…)` into `new Set()`                  | Mount and drawer-Apply only. Because the result is a `Set`, any single-pass form must mutate the Set mid-iteration — the least declarative option available. A 2-line pure expression would become 5 to halve a ≤150 scan.                                                                                                                                                                                                                                                                                                                                                         |
+| [`buildPresetColumnSizing.util.ts`](../../packages/ui/src/components/Table/TableSettingsDrawer/GeneralSettingsSection/utils/buildPresetColumnSizing.util.ts)                                                                                                                    | `columns.map(… as const).filter(([, width]) => width)`       | Coldest site in the set — one click on a width preset, with an early return for `default`. **Three stacked traps** for any rewrite: the `as const` tuple is what makes `Object.fromEntries` typecheck; the result feeds `Object.fromEntries`; and the filter is a **truthiness** test, so it drops `width === 0` as well as `undefined` — rewriting to `width !== undefined` is a behaviour change.                                                                                                                                                                                |
+| [`useAddFilterSection.hook.ts`](../../packages/ui/src/components/Table/TableSettingsDrawer/FiltersSection/AddFilterSection/useAddFilterSection.hook.ts)                                                                                                                         | `columns.filter((col) => col.isFilterable !== false).map(…)` | Drawer-open only, and memoized by the React Compiler on `[columns, filters]` per [ADR-004 (app home)](../../apps/react-router/docs/decisions/ADR-004-react-compiler.md), so unrelated state changes do not re-run it. Trap: `isFilterable !== false` means **undefined ⇒ filterable**; a rewrite to `if (col.isFilterable)` silently drops every column that omits the flag, which is most of them.                                                                                                                                                                                |
+| [`AddSortSection.component.tsx`](../../packages/ui/src/components/Table/TableSettingsDrawer/SortingSection/AddSortSection/AddSortSection.component.tsx)                                                                                                                         | `columns.filter((col) => … && sorting.every(…)).map(…)`      | Same `isSortable !== false` trap. Decisively, **the rule targets the wrong cost**: the filter is already `O(columns × sorting)` because of the nested `.every`, which dominates the `.map` entirely. Fusing saves one allocation and leaves the quadratic scan untouched — performance theatre. The real optimization would be a `Set` of sorted keys, which the rule does not propose and which this scale does not warrant.                                                                                                                                                      |
+| [`resolveAcceptedUnpinConflictState.util.ts`](../../packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveAcceptedUnpinConflictState.util.ts) (`reorder-to-fill` branch: `allOrderedColumns.filter(…).map(…)`) | —                                                            | Unlike the two fixed branches in the same file, **no precomputed key array exists in this function**, so there is no zero-cost rewrite. Fusing needs `reduce`+push: a 3-line declarative expression becomes ~10 imperative lines, against `typescript.md`, for ≤150 elements on a modal-accept click.                                                                                                                                                                                                                                                                              |
+
+### Accepted — real defect, but the rule's fix is the wrong one
+
+| File                                                                                                                      | Shape                                                                  | Why the fix was rejected                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`resolvePrimaryKeyColumnKeys.util.ts`](../../packages/ui/src/components/Table/utils/resolvePrimaryKeyColumnKeys.util.ts) | `columns.filter((column) => column.isPrimaryKey === true && …).map(…)` | This is the one genuinely warm site — reached per **table row** via [`resolveCrudRowId.util.ts`](../../packages/ui/src/components/Table/utils/resolveCrudRowId.util.ts) → [`TableRowActionsMenu.component.tsx`](../../packages/ui/src/components/Table/TableRowActionsMenu/TableRowActionsMenu.component.tsx). But the rule's premise is false here: the chain is `filter`-then-`map`, so the `.map()` runs over the already-filtered **1–2 element** array, not the column list. Measured: the per-call delta is **flat** across N = 10/30/150 (~20 ns), which localises the entire gain to one array allocation — if a second full traversal were being eliminated the N=150 delta would be ~15× the N=10 delta. The genuine defect is that a **row-invariant** derivation recomputes per row; the fix is hoisting it into the columns store (mirroring the existing `staticKeys` handling), which is ADR-003 / `store-pattern` territory and is tracked as issue #451. Fusing the passes would add a mutating accumulator while leaving the actual `O(m)`-per-row cost in place. |
+
+## Method note
+
+The triage above came from a three-stage pass — classify, author a fix, then
+adversarially audit it — and the audit is what changed two conclusions: it rejected an
+authored fix that typechecked and passed every gate, on measurement rather than taste.
+Worth repeating for the other rule families in the same report, none of which are
+triaged yet.
+
+Two habits that paid off, both instances of
+[AGENTS.md](../../AGENTS.md) Rule 14:
+
+- **Read the tool's own docs before fixing.** Both accepted-criteria columns above come
+  straight from the rule's documentation page. Guessing at "is this a false positive"
+  would have been slower and less defensible.
+- **Verify the new tests against the pre-fix code.** A test written alongside a fix that
+  only passes after it proves nothing about the refactor being behaviour-preserving. The
+  two tests added here were confirmed green on the original source first.

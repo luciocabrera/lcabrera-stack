@@ -2,7 +2,7 @@
 id: react-doctor-combine-iterations
 title: Collapse redundant iteration passes flagged by react-doctor js-combine-iterations
 owner: agent:claude
-status: active
+status: review
 branch: perf/449-react-doctor-combine-iterations
 area:
   - packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/**
@@ -10,7 +10,7 @@ area:
 started: 2026-07-26
 updated: 2026-07-26
 plan: (none)
-pr: (none)
+pr: #450
 issue: #449
 ---
 

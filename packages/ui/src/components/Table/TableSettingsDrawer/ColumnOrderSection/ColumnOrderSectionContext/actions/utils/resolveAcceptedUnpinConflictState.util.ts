@@ -45,21 +45,15 @@ export const resolveAcceptedUnpinConflictState = <
     let right = [...columnPinning.right];
 
     if (side === 'left') {
-      const keysToUnpin = new Set(
-        allOrderedColumns
-          .slice(index)
-          .map((column) => column.key)
-          .filter((key) => left.includes(key)),
+      const keysFromIndex = new Set(
+        allOrderedColumns.slice(index).map((column) => column.key),
       );
-      left = left.filter((key) => !keysToUnpin.has(key));
+      left = left.filter((key) => !keysFromIndex.has(key));
     } else {
-      const keysToUnpin = new Set(
-        allOrderedColumns
-          .slice(0, index + 1)
-          .map((column) => column.key)
-          .filter((key) => right.includes(key)),
+      const keysBeforeOrAtIndex = new Set(
+        allOrderedColumns.slice(0, index + 1).map((column) => column.key),
       );
-      right = right.filter((key) => !keysToUnpin.has(key));
+      right = right.filter((key) => !keysBeforeOrAtIndex.has(key));
     }
 
     return {
