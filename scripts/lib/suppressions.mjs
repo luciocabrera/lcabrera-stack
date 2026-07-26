@@ -28,6 +28,13 @@ const INLINE_DIRECTIVES = [
   'oxlint-disable',
   'biome-ignore-all',
   'biome-ignore',
+  // React Doctor's three spellings, taken from the published package rather
+  // than its docs, which only show the `-next-line` form. The bare
+  // `react-doctor-disable` is a prefix of the other two, so it must stay last
+  // or it would swallow them (see the ordering note above).
+  'react-doctor-disable-next-line',
+  'react-doctor-disable-line',
+  'react-doctor-disable',
   '@ts-expect-error',
   '@ts-nocheck',
   '@ts-ignore',
@@ -58,6 +65,9 @@ const RULE_BEARING = new Set([
   'oxlint-disable',
   'biome-ignore-all',
   'biome-ignore',
+  'react-doctor-disable-next-line',
+  'react-doctor-disable-line',
+  'react-doctor-disable',
 ]);
 
 /**

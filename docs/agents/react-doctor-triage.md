@@ -1,18 +1,35 @@
 # react-doctor triage record
 
-`npx react-doctor@latest --verbose` is **advisory tooling**, not one of this repo's
-three enforced linters (Oxlint, ESLint, Biome — see [AGENTS.md](../../AGENTS.md) §4).
-Nothing in CI runs it, and it is not a dev dependency here.
+React Doctor is **enforced**, as of [ADR-055](../decisions/ADR-055-react-doctor-as-a-gate.md):
+`vp run react-doctor:verify` runs in `check:push` and in `check-safe.yml`, the tool is
+pinned at `catalog:lint`, and `doctor.config.jsonc` at the root holds its config. It is
+still not one of the three linters in [AGENTS.md](../../AGENTS.md) §4 — it is a separate
+CLI with its own config and report.
 
-It also documents **no suppression mechanism** — no config entry for a single site, no
-inline comment. So every finding it reports is reported again on every future run,
-forever. This file is the substitute: a triage record so the next agent spends one read
-instead of re-deriving the same judgements.
+**Only error severity blocks.** Everything triaged below is a warning, so this file is
+not a list of things failing the build; it is the record of what has already been argued,
+so the next agent spends one read instead of re-deriving the same judgements. Warnings
+are visible via `vp run react-doctor:report`.
+
+> **Two claims in the previous version of this file were wrong**, and both are corrected
+> above. It said React Doctor "documents **no suppression mechanism** — no config entry
+> for a single site, no inline comment": it documents both — `ignore.overrides` in the
+> config and `react-doctor-disable{,-line,-next-line}` comments. It also said nothing in
+> CI runs it and it is not a dev dependency, which ADR-055 changed. Neither was true when
+> re-checked against v0.9.1.
+
+**A suppression is not a triage row.** Because those mechanisms exist, they are now
+policed: `suppressions:verify` detects every one of them, and inside the four public
+packages each needs an argued entry in
+[`public-package-suppressions.json`](public-package-suppressions.json). Non-Negotiable
+Rule 11 applies unchanged — prefer fixing the code, and record an accepted finding here
+rather than silencing it.
 
 ## How to use this file
 
-1. Run the tool, from the workspace you care about:
-   `cd packages/ui && npx react-doctor@latest --verbose`
+1. Run the tool from the repo root: `vp run react-doctor:report`, then read
+   `reports/react-doctor/full-latest.json` (gitignored, ADR-049). For one workspace's
+   human-readable view: `cd packages/ui && npx react-doctor@latest --verbose`.
 2. For each finding, look for its **file + code shape** below.
 3. If it is listed as accepted, it has already been argued — do not "fix" it without
    new evidence that overturns the reasoning recorded here.
@@ -23,6 +40,43 @@ the first unrelated edit: fixing the two sites in
 `resolveAcceptedUnpinConflictState.util.ts` shortened the file by 6 lines and moved a
 third finding in that same file from line 79 to line 73. Cite the shape, and re-run the
 tool for current positions.
+
+## Rule: `react-doctor/no-barrel-import` — OFF repo-wide
+
+**Do not re-litigate this one, and do not "fix" the sites it used to flag.** It is
+switched off in `doctor.config.jsonc`, with the reasoning inline there and an
+`acknowledged` entry in the suppression register.
+
+**What it flagged.** Importing from a relative `index.*` that contains only re-exports —
+by far the largest group in the report, and once counted, `packages/ui` was most of it.
+It reports at most once per importing file, so its count is a file count, not an
+occurrence count.
+
+**Why it does not apply here**, in the order the evidence was gathered:
+
+1. **The rule's own documentation names this exact case a false positive**: "bundlers
+   like Vite or Next.js with optimizePackageImports already tree-shake barrels well in
+   production." It also self-tags `test-noise`. `optimizePackageImports` is a **Next.js**
+   option — it is not a Vite option and there is no Next.js here, so only the Vite half
+   of that clause is relevant, and it is the half that applies.
+2. **`packages/ui` declares `"sideEffects": false`**, which is what lets a bundler drop
+   an unreferenced re-export, and every flagged barrel is a curated list of named
+   re-exports with no module-level code.
+3. **Measured, not inferred.** Building an entry that imports one symbol from a flagged
+   barrel emits that symbol alone: the sibling exports are gone and the barrel module is
+   elided entirely, in both a plain-util barrel and a React selector barrel. Had
+   tree-shaking not worked, the siblings would have been in the output — the probe could
+   have disproved the claim, which is why it is worth citing.
+4. **Acting on it would contradict ADR-007.** Rule 2 of
+   [ADR-007 (app home)](../../apps/react-router/docs/decisions/ADR-007-barrel-export-boundaries.md)
+   _requires_ importing through a curated barrel across a module boundary. Rewriting
+   those imports to direct paths would invert the repo's own decision.
+
+**What is still worth doing, separately.** ADR-007 rule 1 says that _inside_ a module,
+imports should be direct-file — so an intra-module barrel hop (a file importing `./utils`
+from within the same folder) is worth tidying for **cycle risk and import direction**,
+which is ADR-007's actual concern. That is a small subset, it is not a bundle-size
+matter, and React Doctor cannot identify it: the rule does not model module boundaries.
 
 ## Rule: `react-doctor/js-combine-iterations`
 

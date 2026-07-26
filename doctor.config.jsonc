@@ -1,0 +1,100 @@
+{
+  // React Doctor runs as a gate here, alongside Oxlint, ESLint and Biome.
+  // ADR-055 records why it is the standalone CLI rather than the documented
+  // `jsPlugins` bridge into Oxlint, and why it gates at full scope.
+  //
+  // `.jsonc`, not `.json`, for the same reason as `biome.jsonc`: every entry
+  // below needs its reason next to it. React Doctor parses JSON config as
+  // JSON5, so comments are accepted in either extension — the suffix is here to
+  // say "this file has comments in it" to a human, not to satisfy the parser.
+  //
+  // Run `vp run react-doctor:report` for the current findings; nothing is
+  // committed (ADR-049).
+  "$schema": "https://react.doctor/schema/config.json",
+
+  // The gate fails on error-severity findings. Warnings stay visible in the
+  // report and in local runs without blocking a push — the same new-debt
+  // posture the fallow audit takes, arrived at differently: React Doctor has no
+  // suppression-baseline file (the way ESLint bulk suppressions and fallow do),
+  // so severity is the only dial that separates inherited from new. Its
+  // `baseline*` internals are the git base ref used by `--scope changed`, which
+  // is a different thing entirely.
+  "blocking": "error",
+
+  // Scan everything, every run. React Doctor detects the three React
+  // workspaces on its own; the Node-only workspaces have no React to analyse.
+  "scope": "full",
+
+  // Both of these reach the network, which a pre-push gate must not do: a push
+  // would fail on a flaky connection, and the results would stop being
+  // reproducible offline.
+  //
+  // `noScore` covers the score API, the share URL AND crash reporting — it is
+  // the telemetry switch, despite the name. `supplyChain` posts the dependency
+  // list to Socket.dev; `vp run fallow:full` and Dependabot already cover that
+  // ground without sending the manifest anywhere.
+  "noScore": true,
+  "supplyChain": { "enabled": false },
+
+  // Nothing here is adoptable and the search is not free: Oxlint's config lives
+  // in the root `vite.config.ts` and ESLint's is a flat `.mjs`, neither of which
+  // is the JSON shape this option looks for. Explicit beats an empty search
+  // that silently starts finding something the day a `.oxlintrc.json` appears.
+  "adoptExistingLintConfig": false,
+
+  "rules": {
+    // Does not apply to this repo, so it is off at the rule level rather than
+    // suppressed per site.
+    //
+    // The rule's own documentation names the exception: "bundlers like Vite or
+    // Next.js with optimizePackageImports already tree-shake barrels well in
+    // production". This is a Vite/Rolldown repo, `packages/ui` declares
+    // `"sideEffects": false`, and every barrel it flags is a curated list of
+    // named re-exports with no module-level code. Verified by building an entry
+    // that imports one symbol from a flagged barrel: the siblings are dropped
+    // and the barrel module is elided entirely (PR #457).
+    //
+    // Acting on it would also contradict ADR-007, which *requires* importing
+    // through a curated barrel across a module boundary.
+    "react-doctor/no-barrel-import": "off",
+  },
+
+  "ignore": {
+    "rules": [
+      // Cannot be right in this monorepo. The shared ESLint config resolves its
+      // plugins from the *consuming* workspace — see the `fromWorkspace(...)`
+      // calls in `packages/vite-configs/eslint.custom-rules.shared.config.mjs`
+      // — so each React workspace must declare `typescript-eslint`,
+      // `@stylexjs/eslint-plugin` and `globals` even though nothing in its own
+      // source imports them. They are load-bearing; removing one breaks the
+      // ESLint pass. No static analyser can see a dynamic import by string.
+      //
+      // Same class of declared-but-not-statically-imported dependency as
+      // ADR-047. Genuine unused dependencies are still caught by fallow.
+      //
+      // `ignore.rules` rather than a `rules` entry because this is a `deslop`
+      // diagnostic, which the `rules` registry does not expose.
+      "deslop/unused-dev-dependency",
+    ],
+
+    "overrides": [
+      {
+        // False positive, confirmed by reading the effect. The rule cannot see
+        // through the `connect()` closure that reassigns `socket`, so it misses
+        // the cleanup that is there: the returned function sets `isUnmounted`,
+        // clears the pending reconnect timeout and closes the live socket.
+        //
+        // Scoped to this one file so the rule keeps protecting every other
+        // effect. Registered in docs/agents/public-package-suppressions.json.
+        //
+        // The glob is matched against the path React Doctor reports, which is
+        // relative to the *project* it detected (here `apps/admin_system`), not
+        // to the repo root. A repo-relative path here matches nothing and fails
+        // silently — the finding simply stays, which reads identically to the
+        // override not being there at all.
+        "files": ["src/hooks/useRunStatusSocket.hook.ts"],
+        "rules": ["react-doctor/effect-needs-cleanup"],
+      },
+    ],
+  },
+}
