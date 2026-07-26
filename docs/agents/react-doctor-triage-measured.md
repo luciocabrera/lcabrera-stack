@@ -97,9 +97,9 @@ family. Per-path, not one adjective for all of it.
 
 ## What this changes
 
-1. **ADR-054's flatMap finding is confirmed and understated.** Its findings section should
-   note the real-function figure alongside the synthetic one. Gated on #453, which still holds
-   ADR-054.
+1. **ADR-054's flatMap finding is confirmed and understated.** Its findings section carries
+   that confirmation — stated as an ordering, since a figure in an ADR rots. #453 holds
+   ADR-054 and lands it there.
 2. **The triage record's `buildPresetColumnSizing` row is corrected** in this change.
 3. **A follow-up should cover `buildPresetColumnSizing`** — the only overturned verdict.
 4. **Method note for future triage:** every verdict here that survived did so on _absolute_
