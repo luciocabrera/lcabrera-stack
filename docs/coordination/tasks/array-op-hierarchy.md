@@ -2,7 +2,7 @@
 id: array-op-hierarchy
 title: Give the array-operation rule a measured hierarchy including flatMap
 owner: agent:claude
-status: active
+status: review
 branch: docs/452-array-op-hierarchy
 area:
   - .claude/rules/typescript.md
@@ -10,7 +10,7 @@ area:
 started: 2026-07-26
 updated: 2026-07-26
 plan: (none)
-pr: (none)
+pr: #453
 issue: #452
 ---
 

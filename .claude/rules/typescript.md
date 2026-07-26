@@ -143,10 +143,58 @@ rather than turning the rule off.
   - test setup/teardown
 - **A function that needs a side effect must live in (or be called from) one of those homes.** Never bury a store write, a `fetch`, `Date.now()`/`Math.random()`, DOM access, or logging inside an otherwise-pure helper. Impure logic hiding in a helper gets split: the pure computation stays in the helper; the effect moves to the designated caller.
 - **All `*.util.ts` functions must be pure, no exceptions** — a "util" that needs side effects is not a util; move it to an action hook or service and keep the pure computation behind it testable.
-- **Never mutate data.** Use spread syntax, `.map()`, `.filter()`, `.reduce()`.
-- **Use functional array operations exclusively.** No imperative `for` loops for data transformations.
+- **Never mutate anything you did not create in the current function** — arguments, props, captured/outer state, store state, or a value you already returned. Use spread syntax and the non-mutating array methods. This is what immutability is actually protecting; it is **not** a ban on writing to a local you just allocated (see [Choosing an array operation](#choosing-an-array-operation)).
 - **Never mutate props.** Use `array.toSorted()` instead of `array.sort()`.
 - **`as const` for literal objects/arrays** where applicable.
+
+### Choosing an array operation
+
+Pick by **what the code is doing**, not by which method sounds most functional. Every
+option below is non-mutating from the caller's perspective.
+
+| Intent                                                      | Use                                                          | Notes                                                                                                                   |
+| ----------------------------------------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| 1-to-1 transform                                            | `.map()`                                                     | Never `reduce` for this.                                                                                                |
+| Selection only                                              | `.filter()`                                                  |                                                                                                                         |
+| 1-to-many, or flattening a nested structure                 | `.flatMap()`                                                 | Its real purpose — see `flattenFields.util.ts`, `collectAccessors.util.ts`.                                             |
+| Select **and** transform                                    | `.filter().map()`                                            | The readable default. Two passes, two allocations, and that is fine at this repo's sizes.                               |
+| Same, on a **measured** hot path                            | `.reduce()` into a local accumulator                         | `acc.push(x); return acc` — **not** `[...acc, x]`, which Biome's `noAccumulatingSpread` rejects and which is quadratic. |
+| Fold to a single scalar or object                           | `.reduce()`                                                  |                                                                                                                         |
+| Early exit / short-circuit                                  | `.find()`, `.some()`, `.every()`, or `for...of` with `break` | Do not scan a whole array to answer a yes/no question.                                                                  |
+| Several outputs in one traversal, or building a `Map`/`Set` | `for...of`                                                   | Clearer than a `reduce` threading a tuple or object accumulator.                                                        |
+| Side effects over a collection                              | `for...of`                                                   | Never `.map()`/`.filter()` for effects, and never `.forEach()`.                                                         |
+
+**A `reduce` accumulator you allocated yourself is not shared state.** Mutating it breaks
+no caller, and it is the only shape `noAccumulatingSpread` leaves available. Keep the
+mutation local: never `push` into an array that arrived as an argument or came from a
+store.
+
+**`for...of` is permitted for the rows above and is not a fallback to apologise for.**
+What stays banned is a manual index loop re-implementing a plain `.map()`/`.filter()`, and
+using any iteration construct to mutate data you do not own.
+
+**Do not rewrite `.filter().map()` as `flatMap(x => cond ? [y] : [])` for speed.** It
+reads as the single-pass optimization and is the opposite across the range this repo
+actually handles: it allocates a throwaway array **per element** where the chain allocates
+two in total, and it measured roughly **two times slower** than the chain up to the
+hundred-thousand-element mark. It only pulls ahead at around a million elements with a
+high keep rate, where the chain's two large intermediates finally cost more than the
+per-element garbage — a size no UI path here reaches. Use `flatMap` when the mapping
+genuinely yields zero-or-many elements, not as a fused `filter`+`map`.
+
+**Prefer `.filter().map()` over `.map().filter()`** when both orders are correct — the
+map then runs over the already-narrowed input. The gap grows as the filter gets more
+selective, which is the common case.
+
+**Reach for a single-pass shape on evidence, not instinct.** `.filter().map()` is the
+default; fusing it buys a constant factor that is dwarfed by an unnecessary render or a
+per-row recomputation. Every measured win in this codebase has come from deleting
+redundant work or hoisting an invariant derivation, never from fusing two passes.
+
+Run `node scripts/bench-array-operations.mjs` for the current numbers on your machine, and
+read [ADR-054](../../docs/decisions/ADR-054-array-operation-hierarchy.md) for what the
+ordering does and does not license. Do not quote a figure from either into new prose — the
+ordering is the durable part.
 
 ## Import Standards
 
