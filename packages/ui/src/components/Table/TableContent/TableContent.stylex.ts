@@ -32,7 +32,6 @@ export const styles = stylex.create({
   },
   outerContainer: {
     borderColor: colors.borderPrimary,
-    borderRadius: borderRadius.lg,
     borderStyle: 'solid',
     borderWidth: '1px',
     flex: '1',
@@ -43,6 +42,11 @@ export const styles = stylex.create({
     flexDirection: 'column',
     height: '100%',
     minWidth: 0,
+  },
+  // Composed onto `outerContainer`, which owns the border and the
+  // `overflow: hidden` that clips the scroll area to the rounded corners.
+  rounded: {
+    borderRadius: borderRadius.lg,
   },
   wrapper: {
     gap: 0,

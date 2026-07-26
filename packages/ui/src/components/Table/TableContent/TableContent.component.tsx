@@ -3,7 +3,10 @@ import { useRef } from 'react';
 
 import type { TableContentProps } from './TableContent.types';
 
-import { useGetTableThreshold } from '../contexts/TableConfig/meta/selectors';
+import {
+  useGetTableIsRounded,
+  useGetTableThreshold,
+} from '../contexts/TableConfig/meta/selectors';
 import { useFetchMoreData } from '../contexts/TableData/data/actions';
 import {
   useGetTableHasMore,
@@ -36,6 +39,7 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   const threshold = useGetTableThreshold();
   const isLoading = useGetTableIsLoading();
   const isLoadingMore = useGetTableIsLoadingMore();
+  const isRounded = useGetTableIsRounded();
   const hasMore = useGetTableHasMore();
 
   const fetchMoreData = useFetchMoreData<TData, TResponse>();
@@ -62,7 +66,10 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   return (
     <TableWrapperContext value={wrapperContextValue}>
       <div ref={wrapperRef} {...stylex.props(styles.wrapper)}>
-        <div {...stylex.props(styles.outerContainer)}>
+        <div
+          data-rounded={String(isRounded)}
+          {...stylex.props(styles.outerContainer, isRounded && styles.rounded)}
+        >
           <TableTitle
             actions={<TableTitleActions actions={actions} />}
             icon={icon}

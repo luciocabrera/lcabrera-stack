@@ -18,6 +18,7 @@ describe('getPersistedUiState', () => {
       isBordered: true,
       isColumnSettingsOpen: true,
       isColumnSettingsPinned: false,
+      isRounded: true,
       isStriped: true,
       isTableSettingsOpen: false,
       isTableSettingsPinned: true,
