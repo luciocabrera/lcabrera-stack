@@ -253,6 +253,18 @@ Always feed the audit real coverage:
 (produce it with `vp run coverage:merge`). Without it fallow _estimates_ coverage
 and reports trivially simple code as `critical`.
 
+### Micro-benchmarks
+
+| Command                  | Does                                                                                 |
+| ------------------------ | ------------------------------------------------------------------------------------ |
+| `vp run bench:array-ops` | time the five array-operation shapes ADR-054 chooses between (`--json` for raw data) |
+
+Not part of any gate — it exists so the performance claims in
+[ADR-054](docs/decisions/ADR-054-array-operation-hierarchy.md) and the array-operation
+table in [`.claude/rules/typescript.md`](.claude/rules/typescript.md) can be re-derived
+instead of trusted. Prefer re-running it over quoting a remembered figure; the **ordering**
+is what the guidance rests on, not the absolute timings.
+
 ### Publishing the public packages
 
 `@lcabrera/api`, `@lcabrera/server` and `@lcabrera/utils` build to `dist` because a
