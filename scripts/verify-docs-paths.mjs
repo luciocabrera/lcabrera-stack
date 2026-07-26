@@ -154,6 +154,7 @@ const ON_DEMAND_REPORT_DIRS = new Set([
   'eslint',
   'fallow',
   'oxlint',
+  'react-doctor',
   'skills',
   'sonar',
 ]);
