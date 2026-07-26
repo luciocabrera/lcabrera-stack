@@ -23,7 +23,8 @@
   "files": [
     "src",
     "CHANGELOG.md",
-    "!src/**/*.test.*"
+    "!src/**/*.test.*",
+    "!src/benchmarks"
   ],
   "type": "module",
   "sideEffects": false,
