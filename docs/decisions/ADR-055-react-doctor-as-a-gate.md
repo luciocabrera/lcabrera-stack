@@ -116,6 +116,20 @@ the Biome detector uses.
      `verify-react-doctor.mjs` parses the config itself before scanning.
   3. `--base` rejects `HEAD~1` (`~` fails its ref-name validation) and exits 1
      having scanned nothing, which a naive gate reads as "findings".
+- **That class is not closed, and care is not the mitigation.** Four more
+  instances surfaced after adoption, none of them a guarded mode: `docs:verify`
+  passing only because it happened to run after the step that generates the
+  report; three ways to query the report JSON that return a well-formed wrong
+  answer (the diagnostics array appearing twice, the `rule` field carrying no
+  plugin prefix, `filePath` being project-relative and `file` not existing at
+  all); and a hand-written planted violation that did not fire, making a
+  deliberately-broken probe look like a passing one. Two agents hit these in a
+  single session, on one JSON file, each already alert to the pattern. The
+  common shape is what defeats care: **the failure produces a plausible,
+  well-formed answer rather than an error**, so nothing about the output invites
+  a second look. `docs/agents/react-doctor-triage.md` carries the read-the-report
+  recipe; the durable rule is that a green result from this tool is evidence only
+  when something was made to fail first.
 - The tool is pinned (`catalog:lint`), not `npx …@latest`: a gate whose rule set
   can change without a commit is not reproducible.
 - Its licence is a **Modified MIT** — MIT plus a ban on using it as AI-training

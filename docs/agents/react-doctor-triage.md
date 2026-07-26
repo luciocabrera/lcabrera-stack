@@ -143,11 +143,98 @@ exception criteria before writing it.
 | [`AddSortSection.component.tsx`](../../packages/ui/src/components/Table/TableSettingsDrawer/SortingSection/AddSortSection/AddSortSection.component.tsx)                                                                                                                         | `columns.filter((col) => … && sorting.every(…)).map(…)`      | Same `isSortable !== false` trap. Decisively, **the rule targets the wrong cost**: the filter is already `O(columns × sorting)` because of the nested `.every`, which dominates the `.map` entirely. Fusing saves one allocation and leaves the quadratic scan untouched. Measured, that reasoning is right about where the cost is but **wrong that a `Set` of sorted keys is the bigger lever** — the `Set` variant lands level with the fused reduce, both ~0.5 µs at 150 columns on a drawer-open path ([POC findings](react-doctor-triage-measured.md)). Acceptance holds on absolute cost; neither alternative earns the churn.                                                                                                                              |
 | [`resolveAcceptedUnpinConflictState.util.ts`](../../packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveAcceptedUnpinConflictState.util.ts) (`reorder-to-fill` branch: `allOrderedColumns.filter(…).map(…)`) | —                                                            | Unlike the two fixed branches in the same file, **no precomputed key array exists in this function**, so there is no zero-cost rewrite. Fusing needs `reduce`+push: a 3-line declarative expression becomes ~10 imperative lines, against `typescript.md`, for ≤150 elements on a modal-accept click.                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 
+| [`buildOrderBySorting.util.ts`](../../packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/buildOrderBySorting.util.ts) | `sorting.filter(…).map((sort) => sort.columnKey)` | **Introduced deliberately in #462**, and accepted under the same criterion rather than worked around. The collection is `sorting` — the active sorts, a handful of entries — not the column list. The chain was added to drop sorts naming a column `columnOrder` does not contain; the first draft wrote it `.map().filter()`, which `typescript.md` explicitly inverts so the map runs on the narrowed input. Both orders fire this rule, so inverting it was correct and did not silence anything. Splitting the chain across two statements would clear the finding without changing the work done — a workaround, banned by Rule 10 — and the single-pass forms are `reduce`+push or `for...of`, which ADR-054 says to reach for on evidence rather than instinct. There is no evidence here: this is a drawer click over a handful of sorts. |
+
 ### Accepted — real defect, but the rule's fix is the wrong one
 
 | File                                                                                                                      | Shape                                                                  | Why the fix was rejected                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | ------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`resolvePrimaryKeyColumnKeys.util.ts`](../../packages/ui/src/components/Table/utils/resolvePrimaryKeyColumnKeys.util.ts) | `columns.filter((column) => column.isPrimaryKey === true && …).map(…)` | This is the one genuinely warm site — reached per **table row** via [`resolveCrudRowId.util.ts`](../../packages/ui/src/components/Table/utils/resolveCrudRowId.util.ts) → [`TableRowActionsMenu.component.tsx`](../../packages/ui/src/components/Table/TableRowActionsMenu/TableRowActionsMenu.component.tsx). But the rule's premise is false here: the chain is `filter`-then-`map`, so the `.map()` runs over the already-filtered **1–2 element** array, not the column list. Measured: the per-call delta is **flat** across N = 10/30/150 (~20 ns), which localises the entire gain to one array allocation — if a second full traversal were being eliminated the N=150 delta would be ~15× the N=10 delta. The genuine defect is that a **row-invariant** derivation recomputes per row; the fix is hoisting it into the columns store (mirroring the existing `staticKeys` handling), which is ADR-003 / `store-pattern` territory and is tracked as issue #451. Fusing the passes would add a mutating accumulator while leaving the actual `O(m)`-per-row cost in place. |
+
+## Rule: `react-doctor/js-set-map-lookups` — promoted to `error`
+
+**What it flags.** `array.includes()` evaluated inside a loop or an iteration
+callback, so the membership test rescans the whole list per element. Category
+Performance, originally severity warning.
+
+**Verdict: fixed everywhere and promoted to `error`** in `doctor.config.jsonc`
+(#460 for the shared table/list utils, #462 for `ColumnOrderSection`). Nothing is
+accepted under this rule — unlike its sibling above, the rule is reliably right
+here. A membership scan inside a loop is quadratic whatever the constant factor,
+and every fix was a local `new Set(...)` that left the surrounding expression
+declarative. That difference is the whole reason one rule blocks and the other
+does not: `js-combine-iterations` asks you to trade readability for a constant
+factor that measurement says is usually not there, while this one removes a real
+asymptotic term.
+
+**Promotion is what makes it stick.** React Doctor has no baseline file, so
+severity is the only mechanism separating inherited debt from new — with the rule
+left at `warn`, every one of these could come straight back and the gate would
+still exit 0.
+
+**Two shapes needed care rather than a hoisted `Set`**, and both are the same
+trap: the array being searched is _rewritten by the loop doing the searching_.
+
+- [`pinAllBetween.util.ts`](../../packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/pinAllBetween.util.ts)
+  guards on `next.left`/`next.right` while pushing to them, so a `Set` built once
+  from `columnPinning` answers for the input rather than the partially-built
+  result. It keeps membership mirrors updated in step with the arrays. This also
+  deleted a per-iteration `.filter()` over the opposite side — an `O(n·m)` the
+  rule did not flag.
+- [`restoreStaticPinnedColumns.util.ts`](../../packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/restoreStaticPinnedColumns.util.ts)
+  reassigned `nextPinning` inside the loop. Here the evolving read turned out to
+  be unnecessary — `staticKeys` is a `Set`, so every key is distinct and a
+  membership test taken up front cannot be invalidated by a later restore — which
+  collapsed the loop into two independent selections.
+
+Anything else in this family: hoist a `Set` from the value read _at that point_,
+and check whether the loop writes to it before assuming you can.
+
+**`getIsContiguousPin` keeps its manual index loops on purpose.** They look like
+`slice().every()`, and are not: when the column is absent `index` is `-1`, and
+`slice(0, -1)` means "all but the last" rather than the empty range the loop
+walks.
+
+## Reading the report without getting a wrong answer
+
+`reports/react-doctor/full-latest.json` has four independent ways to produce a
+confident, well-formed, wrong answer. Two agents hit three of them in one session,
+each while being careful. Use this shape:
+
+```js
+const report = JSON.parse(
+  readFileSync('reports/react-doctor/full-latest.json', 'utf8'),
+);
+const found = report.diagnostics.filter((d) => d.rule === 'js-set-map-lookups');
+const repoRelativePath = (d) => d.id.split('::')[0];
+```
+
+- **Read `report.diagnostics` once.** The same diagnostics appear again under
+  `report.projects[*].diagnostics`. The projects partition cleanly, so this is not
+  duplication to dedupe — a recursive walk simply collects both arrays and doubles
+  every count. `report.summary` is computed over the correct set, which is why the
+  gate itself is unaffected.
+- **Filter on the bare rule name.** `d.rule` is `"js-set-map-lookups"`; the
+  `"react-doctor"` prefix lives in `d.plugin`, and the slash form appears only
+  inside `d.id`. Filtering on the prefixed form matches nothing and reports zero
+  findings.
+- **There is no `d.file`.** It is `d.filePath`, and reading the missing one yields
+  `undefined`, so every path test silently fails.
+- **`d.filePath` is project-relative, not repo-relative.** A `startsWith('packages/ui/')`
+  test matches nothing; more importantly the field cannot identify a workspace at
+  all, so two projects sharing a relative path are indistinguishable by it. Use
+  `d.id.split('::')[0]`. Note the same project-relative convention governs
+  `ignore.overrides[].files` globs in `doctor.config.jsonc`, where a repo-relative
+  glob matches nothing and reads exactly like the override not being there.
+
+**Plant a violation by reverting a real finding, not by writing one.** Confirming
+the `error` promotion, a hand-written `needles.filter((n) => haystack.includes(n))`
+— both arrays destructured parameters — did not fire, and the resulting clean run
+is indistinguishable from the rule being switched off. Reverting one of the fixes
+above failed the gate immediately, naming both findings. Variants using a property
+access, a `const` bound from one, `.map()` and `.filter()` all fire; the exact
+boundary was not isolated, so treat a hand-written plant as needing its own proof
+that it fires before it can serve as evidence for anything else.
 
 ## Method note
 
