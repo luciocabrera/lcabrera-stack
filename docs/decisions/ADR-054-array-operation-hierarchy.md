@@ -94,6 +94,16 @@ for figures):
   about to be discarded. It is faster only in the smallest, least selective case measured.
   Prefer filtering first.
 
+**Confirmed against this repo's own functions, and the synthetic figure is the
+conservative end.** Issue #454 re-ran the flatMap comparison against
+`resolvePrimaryKeyColumnKeys` instead of a synthetic projection, and the ordering held
+with a **wider** margin at every size tried. The reason is selectivity: that predicate
+keeps one column of 150, and the wrapping idiom allocates a throwaway array per element
+whether or not the element survives, so a low keep rate is its worst case — and a low keep
+rate is what this repo's filters actually do. Reproduce with
+`vp run --filter @lcabrera/ui bench`; the per-site verdicts live in the measured-triage
+record under `docs/agents/`.
+
 The second finding is what changes the rule's shape. The case for relaxing the `for...of`
 ban is **clarity** — partitioning, early exit, `Map` building — and explicitly _not_
 speed. Stating that matters, because "use a loop, it's faster" would otherwise become
