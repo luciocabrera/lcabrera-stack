@@ -326,6 +326,8 @@ export type TableMetaState = {
   readonly isBordered: boolean;
   readonly isColumnSettingsOpen: boolean;
   readonly isColumnSettingsPinned: boolean;
+  /** Round the table card's corners. Off by default — the table is square. */
+  readonly isRounded: boolean;
   readonly isStriped: boolean;
   readonly isTableSettingsOpen: boolean;
   readonly isTableSettingsPinned: boolean;

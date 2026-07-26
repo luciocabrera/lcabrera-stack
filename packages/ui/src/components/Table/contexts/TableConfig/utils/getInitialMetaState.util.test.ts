@@ -22,6 +22,7 @@ describe('getInitialMetaState', () => {
     expect(result.isStriped).toBe(true);
     expect(result.isColumnSettingsOpen).toBe(false);
     expect(result.isColumnSettingsPinned).toBe(false);
+    expect(result.isRounded).toBe(false);
     expect(result.isTableSettingsPinned).toBe(false);
     expect(result.isTableSettingsOpen).toBe(false);
     expect(result.initialPageSize).toBe(INITIAL_PAGE_SIZE);
@@ -42,11 +43,13 @@ describe('getInitialMetaState', () => {
       density: 'comfortable',
       enablePrefetch: true,
       isBordered: false,
+      isRounded: true,
     });
     expect(result.columnOverscan).toBe(4);
     expect(result.density).toBe('comfortable');
     expect(result.enablePrefetch).toBe(true);
     expect(result.isBordered).toBe(false);
+    expect(result.isRounded).toBe(true);
   });
 
   it('passes through extra fields', () => {

@@ -77,6 +77,7 @@ TableConfig/
 │       ├── useGetTableInitialPageSize.hook.ts            → Initial page size value
 │       ├── useGetTableIsBordered.hook.ts                 → Border toggle
 │       ├── useGetTableIsColumnSettingsOpen.hook.ts       → Column settings open state
+│       ├── useGetTableIsRounded.hook.ts                  → Rounded-corners toggle
 │       ├── useGetTableIsStriped.hook.ts                  → Striped rows toggle
 │       ├── useGetTableIsTableSettingsOpen.hook.ts        → Table settings open state
 │       ├── useGetTableOverscan.hook.ts                   → Virtual scroll overscan
@@ -150,6 +151,7 @@ TableMetaState = {
   initialPageSize: number;           // First page row count
   isBordered: boolean;               // Show borders
   isColumnSettingsOpen: boolean;     // Column settings drawer open
+  isRounded: boolean;                // Round the table card's corners (default false)
   isStriped: boolean;                // Striped rows
   isTableSettingsPinned: boolean;    // Table settings pinned as side panel
   isTableSettingsOpen: boolean;      // Table settings drawer open
@@ -389,6 +391,7 @@ a subscription effect in the provider.
 | `useGetTableIsBordered`              | `boolean`                                                              | Whether borders are shown           |
 | `useGetTableIsColumnSettingsOpen`    | `boolean`                                                              | Column settings drawer state        |
 | `useGetTableIsTableSettingsPinned`   | `boolean`                                                              | Table settings pinned state         |
+| `useGetTableIsRounded`               | `boolean`                                                              | Whether the table card is rounded   |
 | `useGetTableIsStriped`               | `boolean`                                                              | Whether rows are striped            |
 | `useGetTableIsTableSettingsOpen`     | `boolean`                                                              | Table settings drawer state         |
 | `useGetTableLoadMorePageSize`        | `number`                                                               | Subsequent page row count           |

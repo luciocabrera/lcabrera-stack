@@ -20,6 +20,7 @@ const createInitialMetaState = (): TableMetaState => {
     isBordered: true,
     isColumnSettingsOpen: false,
     isColumnSettingsPinned: false,
+    isRounded: false,
     isStriped: true,
     isTableSettingsOpen: false,
     isTableSettingsPinned: false,
@@ -83,6 +84,7 @@ import { useGetTableDensity } from './selectors/useGetTableDensity.hook';
 import { useGetTableEnablePrefetch } from './selectors/useGetTableEnablePrefetch.hook';
 import { useGetTableIsBordered } from './selectors/useGetTableIsBordered.hook';
 import { useGetTableIsColumnSettingsOpen } from './selectors/useGetTableIsColumnSettingsOpen.hook';
+import { useGetTableIsRounded } from './selectors/useGetTableIsRounded.hook';
 import { useGetTableIsStriped } from './selectors/useGetTableIsStriped.hook';
 import { useGetTableIsTableSettingsOpen } from './selectors/useGetTableIsTableSettingsOpen.hook';
 import { useGetTableIsTableSettingsPinned } from './selectors/useGetTableIsTableSettingsPinned.hook';
@@ -135,6 +137,7 @@ describe('TableConfig meta hooks', () => {
     expect(
       renderHook(() => useGetTableIsTableSettingsPinned()).result.current,
     ).toBe(false);
+    expect(renderHook(() => useGetTableIsRounded()).result.current).toBe(false);
     expect(renderHook(() => useGetTableIsStriped()).result.current).toBe(true);
     expect(
       renderHook(() => useGetTableIsTableSettingsOpen()).result.current,

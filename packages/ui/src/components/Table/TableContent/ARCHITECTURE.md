@@ -25,7 +25,7 @@ graph TD
   TC["TableContent"] --> TWC["TableWrapperContext.Provider"]
   TWC --> Wrapper["div (wrapperRef)"]
 
-  Wrapper --> Outer["div (outerContainer)"]
+  Wrapper --> Outer["div (outerContainer · border + optional radius)"]
   Wrapper --> Drawers["TableDrawersSection"]
 
   Outer --> Title["TableTitle"]
@@ -54,6 +54,7 @@ graph LR
     TC --> isLoading["useGetTableIsLoading()"]
     TC --> isLoadingMore["useGetTableIsLoadingMore()"]
     TC --> hasMore["useGetTableHasMore()"]
+    TC --> isRounded["useGetTableIsRounded()"]
     TC --> titleSingular["useGetTableTitleSingular()"]
     TC --> crud["useGetTableCrud()"]
   end
@@ -99,6 +100,17 @@ The `useInfiniteScroll` hook monitors `containerRef` scroll position.
 When the user scrolls within `threshold` pixels of the bottom and
 `hasMore` is true, it calls `fetchMoreData()` which appends the next
 page to `dataStore`.
+
+## Rounded Corners
+
+The table card renders **square by default**. `metaState.isRounded` opts into
+`borderRadius.lg`, composed onto `outerContainer` — the element that owns the
+border, the shadow and the `overflow: hidden` that clips the scroll area to the
+corner curve. Putting the radius on the inner scroll `div` instead looks
+equivalent in the style file and is not: the visible card edge is the outer
+border, so the corners would stay square while the radius only clipped content
+nobody sees. The rendered flag is mirrored as `data-rounded` so it is
+assertable without depending on generated StyleX class names.
 
 ## Scroll Lock
 

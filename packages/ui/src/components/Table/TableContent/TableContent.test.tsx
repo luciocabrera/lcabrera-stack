@@ -21,6 +21,7 @@ const {
   useGetTableHasMoreMock,
   useGetTableIsLoadingMock,
   useGetTableIsLoadingMoreMock,
+  useGetTableIsRoundedMock,
   useGetTableThresholdMock,
   useGetTableTitleSingularMock,
   useInfiniteScrollMock,
@@ -33,6 +34,7 @@ const {
   useGetTableHasMoreMock: vi.fn(),
   useGetTableIsLoadingMock: vi.fn(),
   useGetTableIsLoadingMoreMock: vi.fn(),
+  useGetTableIsRoundedMock: vi.fn(),
   useGetTableThresholdMock: vi.fn(),
   useGetTableTitleSingularMock: vi.fn(),
   useInfiniteScrollMock: vi.fn(),
@@ -88,6 +90,7 @@ vi.mock('../contexts/TableConfig/columns/selectors', () => ({
 vi.mock('../contexts/TableConfig/meta/selectors', () => ({
   useGetTableCrud: useGetTableCrudMock,
   useGetTableDeleteActionPath: useGetTableDeleteActionPathMock,
+  useGetTableIsRounded: useGetTableIsRoundedMock,
   useGetTableThreshold: useGetTableThresholdMock,
   useGetTableTitleSingular: useGetTableTitleSingularMock,
 }));
@@ -134,6 +137,7 @@ describe('TableContent', () => {
     useGetTableHasMoreMock.mockReturnValue(true);
     useGetTableIsLoadingMock.mockReturnValue(false);
     useGetTableIsLoadingMoreMock.mockReturnValue(false);
+    useGetTableIsRoundedMock.mockReturnValue(false);
   });
 
   afterEach(cleanup);
@@ -166,6 +170,40 @@ describe('TableContent', () => {
     }
 
     expect(scrollContainer.dataset.scrollLocked).toBe('false');
+  });
+
+  it('renders square corners by default', () => {
+    render(<TableContent />);
+
+    const outerContainer = screen
+      .getByTestId('table-body')
+      .closest('[data-rounded]');
+    expect(outerContainer).toBeInstanceOf(HTMLElement);
+    if (!(outerContainer instanceof HTMLElement)) {
+      throw new TypeError('Expected outer container to be an HTMLElement');
+    }
+
+    expect(outerContainer.dataset.rounded).toBe('false');
+  });
+
+  it('rounds the table card when isRounded is enabled', () => {
+    useGetTableIsRoundedMock.mockReturnValue(true);
+
+    render(<TableContent />);
+
+    const outerContainer = screen
+      .getByTestId('table-body')
+      .closest('[data-rounded]');
+    expect(outerContainer).toBeInstanceOf(HTMLElement);
+    if (!(outerContainer instanceof HTMLElement)) {
+      throw new TypeError('Expected outer container to be an HTMLElement');
+    }
+
+    expect(outerContainer.dataset.rounded).toBe('true');
+    // The radius belongs to the bordered card, not the inner scroll area.
+    expect(
+      screen.getByTestId('table-body').closest('[data-scroll-locked]'),
+    ).not.toBe(outerContainer);
   });
 
   it('scrolls to top when query loading completes', () => {
