@@ -82,6 +82,19 @@ exactly where predicted — flat gain at small sizes, then divergence. At n=30 t
 version measures _ahead_ by 1.28×, which is the small-N noise floor and worth recording rather
 than hiding: the win only becomes real from about 150 upward.
 
+**What kind of win this is — state it per path, not per family.** Both sites here are reached
+from `useAcceptPinConflict` / `useAcceptUnpinConflict`, i.e. a modal-accept **click**. So these
+figures are a **scaling-correctness and click-cost** win, not a frame-time one: 42.8× multiplies
+a sub-millisecond operation that runs once per user action. Do not quote them as a rendering fix.
+
+That characterisation does **not** generalise to the whole `js-set-map-lookups` family, and
+saying "not a frame-time win" as a blanket statement would be wrong. `resolveListDerivedState`
+calls both `getFilteredOptions` and `getIsAllSelected` from `useSetSearchTerm` on **every
+keystroke**, over a list that is virtualized precisely because it is large — and
+`getIsAllSelected` is `filteredOptions.every((o) => selectedValues.includes(o))`, `O(n·m)` with
+`m` growing to `n` after a Select All. That is typing latency, and it is the hottest site in the
+family. Per-path, not one adjective for all of it.
+
 ## What this changes
 
 1. **ADR-054's flatMap finding is confirmed and understated.** Its findings section should
