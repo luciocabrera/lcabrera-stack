@@ -26,10 +26,11 @@ export const createDraggableItems = <TContent>({
   columnVisibility,
   renderItemContent,
 }: CreateDraggableItemsArgs<TContent>) => {
+  const leftPinned = new Set<string>(columnPinning.left);
+  const rightPinned = new Set<string>(columnPinning.right);
+
   return allOrderedColumns.map((col) => {
-    const isPinned =
-      columnPinning.left.includes(col.key) ||
-      columnPinning.right.includes(col.key);
+    const isPinned = leftPinned.has(col.key) || rightPinned.has(col.key);
     const isStatic = col.isStatic === true;
     const isVisible = !columnVisibility.has(col.key);
 

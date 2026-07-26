@@ -43,6 +43,24 @@
   "adoptExistingLintConfig": false,
 
   "rules": {
+    // Promoted from warning once the repo reached zero findings (#462, after
+    // #460 cleared the other half). Every `array.includes()` inside a loop from
+    // here on is new debt, and severity is the only dial that can say so —
+    // there is no baseline file, per the `blocking` note above.
+    //
+    // Promoted rather than just fixed because this is a family React Doctor is
+    // reliably right about: a membership scan inside a loop is quadratic
+    // whatever the constant factor. Its sibling `js-combine-iterations` is
+    // deliberately NOT promoted — measurement showed fusing a two-pass chain is
+    // usually not worth acting on at this repo's sizes, and sometimes a
+    // regression (ADR-054, and the accepted findings in
+    // docs/agents/react-doctor-triage.md).
+    //
+    // Verified by planting a violation and confirming the gate fails. A clean
+    // run proves nothing on its own: a rule that is not loaded reports exactly
+    // the same pass as compliant code.
+    "react-doctor/js-set-map-lookups": "error",
+
     // Does not apply to this repo, so it is off at the rule level rather than
     // suppressed per site.
     //

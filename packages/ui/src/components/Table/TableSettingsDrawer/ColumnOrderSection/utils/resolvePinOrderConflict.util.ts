@@ -42,9 +42,12 @@ const removeConflictingPins = ({
   columnPinning,
   newOrder,
 }: Omit<ResolvePinOrderConflictArgs, 'resolution'>) => {
+  const leftPinned = new Set<string>(columnPinning.left);
+  const rightPinned = new Set<string>(columnPinning.right);
+
   const validLeft: string[] = [];
   for (const key of newOrder) {
-    if (columnPinning.left.includes(key)) {
+    if (leftPinned.has(key)) {
       validLeft.push(key);
     } else {
       break;
@@ -53,7 +56,7 @@ const removeConflictingPins = ({
 
   const validRight: string[] = [];
   for (const key of newOrder.toReversed()) {
-    if (columnPinning.right.includes(key)) {
+    if (rightPinned.has(key)) {
       validRight.unshift(key);
     } else {
       break;
@@ -74,13 +77,16 @@ const pinToMatchOrder = ({
   columnPinning,
   newOrder,
 }: Omit<ResolvePinOrderConflictArgs, 'resolution'>) => {
-  const leftPinned = newOrder.filter((key) => columnPinning.left.includes(key));
-  const rightPinned = newOrder.filter((key) =>
-    columnPinning.right.includes(key),
-  );
+  // Local Sets rather than `splitColumnsByPinning`: that helper partitions
+  // `TableColumn[]`, and this partitions the key list itself. Reaching for it
+  // would mean widening its published return shape to serve one caller.
+  const leftPinnedKeys = new Set<string>(columnPinning.left);
+  const rightPinnedKeys = new Set<string>(columnPinning.right);
+
+  const leftPinned = newOrder.filter((key) => leftPinnedKeys.has(key));
+  const rightPinned = newOrder.filter((key) => rightPinnedKeys.has(key));
   const middle = newOrder.filter(
-    (key) =>
-      !columnPinning.left.includes(key) && !columnPinning.right.includes(key),
+    (key) => !leftPinnedKeys.has(key) && !rightPinnedKeys.has(key),
   );
 
   return {
