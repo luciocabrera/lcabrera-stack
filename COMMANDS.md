@@ -440,7 +440,7 @@ Beyond that, tasks are per-workspace. `build` and `test` are common but come fro
 | `apps/api-server-fast`        | `car-sales-api-fast`        | `seed`, `db:seed`, `start`                                                                          |
 | `apps/scan-orchestrator`      | `@repo/scan-orchestrator`   | `start`, `test:unit`, `test:coverage`                                                               |
 | `apps/shared`                 | `api-shared`                | `build`, `test`                                                                                     |
-| `packages/ui`                 | `@lcabrera/ui`              | `check:public-api`, `test:coverage`                                                                 |
+| `packages/ui`                 | `@lcabrera/ui`              | `check:public-api`, `test:coverage`, `bench`                                                        |
 | `packages/server`             | `@lcabrera/server`          | `test:coverage`                                                                                     |
 | `packages/scan-ingestion`     | `@repo/scan-ingestion`      | `migrate`, `push`, `test:unit`, `test:coverage`                                                     |
 | `packages/node-runtime`       | `@repo/node-runtime`        | `test:coverage`                                                                                     |

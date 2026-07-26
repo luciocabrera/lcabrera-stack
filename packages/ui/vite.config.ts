@@ -20,6 +20,15 @@ export default defineConfig({
   },
   run: {
     tasks: {
+      // Deliberately NOT in any gate: benchmark timings are noisy on shared CI
+      // runners, so this is a decision-making tool run on demand. Vitest's
+      // default `benchmark.include` matches `*.bench.ts` while its test
+      // `include` matches only `*.{test,spec}.*`, so `test` below never picks
+      // these up — see src/benchmarks/ARCHITECTURE.md.
+      bench: {
+        cache: false,
+        command: 'node node_modules/vitest/vitest.mjs bench --run',
+      },
       test: {
         cache: false,
         command: 'node node_modules/vitest/vitest.mjs run',

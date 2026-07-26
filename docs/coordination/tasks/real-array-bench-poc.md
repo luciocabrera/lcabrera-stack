@@ -2,7 +2,7 @@
 id: real-array-bench-poc
 title: POC: benchmark the real flagged functions at real column counts
 owner: agent:claude
-status: active
+status: review
 branch: perf/454-real-array-bench-poc
 area:
   - packages/ui/src/**/*.bench.ts
@@ -10,7 +10,7 @@ area:
 started: 2026-07-26
 updated: 2026-07-26
 plan: (none)
-pr: (none)
+pr: #455
 issue: #454
 ---
 
