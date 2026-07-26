@@ -46,10 +46,11 @@ is the wrong default here:
 
 - Biome `noAccumulatingSpread` is ON, so `[...acc, item]` inside a `.reduce()` is a
   build error. A reduce must mutate a local accumulator.
-- [`.claude/rules/typescript.md`](../../.claude/rules/typescript.md): "Never mutate
-  data. Use functional array operations exclusively. No imperative `for` loops for data
-  transformations." That makes `for...of` the least acceptable of the three suggested
-  shapes and `reduce`+push a real policy cost — not a free win.
+- [`.claude/rules/typescript.md`](../../.claude/rules/typescript.md) constrains which of
+  the three suggested shapes are idiomatic here — read its array-operation guidance
+  before applying any of them. In particular, **`flatMap` is not the performance answer**
+  the rule's own docs imply: wrapping each kept element in a throwaway array measures
+  _slower_ than the `.filter().map()` chain it would replace.
 
 Also note the rule fires on **adjacency**, so deleting a redundant link in the chain
 clears it; the surviving `.slice().map()` is not a matched pattern.
