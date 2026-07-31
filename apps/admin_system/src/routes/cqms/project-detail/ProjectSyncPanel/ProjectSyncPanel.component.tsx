@@ -1,5 +1,7 @@
+import type { ChangeEvent, SubmitEvent } from 'react';
+
 import { Button } from '@lcabrera/ui/components/Button';
-import { type ChangeEvent, type SubmitEvent, useState } from 'react';
+import { useState } from 'react';
 import { useFetcher } from 'react-router';
 
 import type {
