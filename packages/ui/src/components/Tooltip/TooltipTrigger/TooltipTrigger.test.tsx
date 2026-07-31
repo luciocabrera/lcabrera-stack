@@ -34,7 +34,15 @@ describe('TooltipTrigger', () => {
 
     expect(trigger.textContent).toBe('Open tooltip');
     expect(trigger.getAttribute('aria-describedby')).toBe('tooltip-test');
-    expect(trigger.getAttribute('popovertarget')).toBe('tooltip-test');
+  });
+
+  it('does not carry popovertarget, which is inert on a span', () => {
+    const { trigger } = renderTrigger();
+
+    // Only `button` and `input` can be popover invokers, so the attribute did
+    // nothing here — `Tooltip` drives the popover with `showPopover()` /
+    // `hidePopover()` on a ref instead.
+    expect(trigger.hasAttribute('popovertarget')).toBe(false);
   });
 
   it('forwards the ref to the trigger span', () => {

@@ -116,8 +116,9 @@ describe('VirtualSelect', () => {
 
     expect(screen.getByRole('listbox')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Alpha' })).toBeTruthy();
-    expect(onOpenChange).toHaveBeenNthCalledWith(1, false);
-    expect(onOpenChange).toHaveBeenNthCalledWith(2, true);
+    // The first notification is the open itself: the dropdown no longer
+    // reports its initial closed state through a mount effect.
+    expect(onOpenChange).toHaveBeenNthCalledWith(1, true);
     const firstUseClickOutsideCallArgs = mockUseClickOutside.mock.calls[0]?.[0];
     expect(firstUseClickOutsideCallArgs).toBeDefined();
     expect(firstUseClickOutsideCallArgs?.ref.current).not.toBeNull();
@@ -129,6 +130,22 @@ describe('VirtualSelect', () => {
       expect(screen.queryByRole('listbox')).toBeNull();
     });
     expect(onOpenChange).toHaveBeenLastCalledWith(false);
+  });
+
+  it('does not notify onOpenChange on mount', () => {
+    const onOpenChange = vi.fn();
+
+    render(
+      <VirtualSelect
+        mode='single'
+        onChange={() => void 0}
+        onOpenChange={onOpenChange}
+        options={['Alpha']}
+        selected={[]}
+      />,
+    );
+
+    expect(onOpenChange).not.toHaveBeenCalled();
   });
 
   it('does not open when busy and renders a disabled trigger', () => {
