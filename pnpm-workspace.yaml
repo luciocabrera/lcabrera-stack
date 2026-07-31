@@ -172,4 +172,34 @@ peerDependencyRules:
     vite: '*'
     vitest: '*'
 
+# `eslint-plugin-perfectionist` reaches for the TypeScript compiler API with a
+# bare `createRequire(import.meta.url)('typescript')` while declaring no
+# `typescript` dependency or peer of its own. pnpm therefore links none into its
+# isolated `node_modules`, Node's resolution walks up to the hidden hoist store
+# (`node_modules/.pnpm/node_modules/typescript`), and lands on whichever build is
+# hoisted there.
+#
+# That is `typescript@7.0.2` — the native Go port pulled in by vite-plus, whose
+# `"."` export is `lib/version.cjs` and exposes only `{version,
+# versionMajorMinor}`. So `isExternalModuleNameRelative` is `undefined` and the
+# ENTIRE eslint pass dies with a TypeError on the first import it sorts, in every
+# workspace, exiting 2 rather than reporting findings (#472).
+#
+# Declaring the peer here makes pnpm link the catalog's `typescript` instead.
+# Optional, because the plugin degrades gracefully when TypeScript is genuinely
+# absent — it falls back to a `startsWith('.')` heuristic — and a hard peer would
+# turn that into an install error. `vp run lint:eslint:verify` is the guard:
+# it plants a misordered import and fails if the rule does not report it, because
+# a crashing pass and a clean pass are indistinguishable from the exit code alone.
+#
+# Do not "fix" this by pinning typescript back — 7.0.2 is legitimately vite-plus's
+# (tsgolint). Upstream should declare the peer itself.
+packageExtensions:
+  eslint-plugin-perfectionist:
+    peerDependencies:
+      typescript: '*'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
 # trustPolicy: no-downgrade
