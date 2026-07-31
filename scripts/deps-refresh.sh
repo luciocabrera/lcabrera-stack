@@ -31,10 +31,13 @@
 # It STOPS and hands off rather than papering over trouble: a failing quality gate
 # (run by the pre-push hook) aborts the push, leaving the branch for a human; it
 # never auto-merges. On a day with nothing to update it makes no issue/branch/PR.
+# A stop is resumable — see --open-pr, which finishes a run whose push failed
+# without opening a duplicate issue.
 #
 # Usage:
 #   vp run deps:refresh              # full run: update, gate (via pre-push), open PR
 #   vp run deps:refresh -- --dry-run # preview which deps would move; change nothing
+#   vp run deps:refresh -- --open-pr # resume: push the fixed branch and open its PR
 #   vp run deps:refresh -- --base <branch>   # branch/PR against <branch> (default main)
 #
 # Exit codes: 0 = PR opened or nothing to update; non-zero = a step failed (the
@@ -53,10 +56,12 @@ cd "$REPO_ROOT"
 
 base="main"
 dry=0
+open_pr=0
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --) shift ;;
     --dry-run) dry=1; shift ;;
+    --open-pr) open_pr=1; shift ;;
     --base) base="$2"; shift 2 ;;
     -h | --help) grep '^#' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "deps-refresh: unknown argument: $1" >&2; exit 1 ;;
@@ -66,6 +71,72 @@ done
 die() { local msg="$1"; echo "deps-refresh: $msg" >&2; exit 1; }
 log() { local msg="$1"; printf '\n\033[1m==> %s\033[0m\n' "$msg"; }
 have() { local cmd="$1"; command -v "$cmd" >/dev/null 2>&1; }
+
+# Opens the PR for a refresh branch. Shared by the straight-through run and by
+# --open-pr, so a resumed run gets the identical description rather than a
+# hand-written one that drifts from it.
+#
+# The Impact Analysis is computed, not asserted: it used to hardcode "no source
+# change", which is wrong exactly when it matters. A bump can force one — a new
+# lint rule reaching existing code is the common case — and the run that hits
+# it is the run whose PR needs to say so.
+open_the_pr() {
+  local issue="$1" branch="$2" moved="$3"
+  local deps_commit extra impact pr_body
+  deps_commit="$(git log --format=%H --grep='^build(deps): refresh the toolchain' -1)"
+  extra=""
+  [[ -n "$deps_commit" ]] && extra="$(git log --format='- %s' "${deps_commit}..HEAD")"
+  if [[ -z "$extra" ]]; then
+    impact="Manifests + lockfile only — the catalog, workspace package.json versions, and the pinned \`packageManager\` (pnpm); no source change."
+  else
+    impact="Manifests + lockfile, **plus the source commits the gate required** to land the bump:
+
+${extra}
+
+Review those separately from the version bumps — they are code, not versions."
+  fi
+  pr_body="$(cat <<BODY
+## What
+
+Refresh everything updatable — the vp CLI, pnpm (the pinned \`packageManager\`), and the pnpm catalog + package.json versions to their latest in-range releases, TypeScript held. Automated by \`vp run deps:refresh\`.
+
+Moved:
+
+\`\`\`
+${moved}
+\`\`\`
+
+## Why
+
+Routine dependency hygiene in small, verified steps, so upgrades stay boring and no large risky jump accumulates.
+
+## Verification
+
+Full pre-push quality gate ran against the bumped tree (\`vp check\`, typecheck ×17 workspaces, eslint, Biome, React Doctor, tests). The push only succeeds if it is green.
+
+## Impact Analysis
+
+${impact} No changeset: a dependency/toolchain refresh carries no consumer-facing package change (consistent with prior refreshes). TypeScript held at its pin for a known compatibility issue.
+
+## Test Coverage
+
+None added — a version-only change; existing suites exercise the bumped toolchain.
+
+## Documentation Updates
+
+None — no public API, prop, type, or convention changed.
+
+## Linked Issues
+
+Resolves #${issue}
+
+## Known Limitations
+
+Auto-generated; review the moved versions above. Merge is intentionally left to a human.
+BODY
+  )"
+  gh pr create --title "build(deps): refresh the catalog" --body "$pr_body" --base "$base" --head "$branch"
+}
 
 # taze's exclude flag takes one -x per package.
 taze_exclude=()
@@ -93,13 +164,47 @@ gh auth status >/dev/null 2>&1 || die "gh is not authenticated (run: gh auth log
 git diff --quiet && git diff --cached --quiet || die "working tree is dirty — commit or stash first"
 
 current_branch="$(git branch --show-current)"
+
+# --- resume: finish a run whose push failed the gate --------------------------
+# Without this there is no way back in. A gate failure leaves the issue, branch
+# and commit in place but no PR, and every re-entry is refused: the run is not
+# on $base any more, so the check below rejects it, and there is nothing else
+# to invoke. The PR then has to be written by hand, which is how a refresh ends
+# up with a description that does not match what the script would have said.
+if [[ "$open_pr" == 1 ]]; then
+  [[ "$current_branch" =~ ^build/([0-9]+)-deps-refresh$ ]] ||
+    die "--open-pr must run from a build/<issue>-deps-refresh branch (on '$current_branch')."
+  resume_issue="${BASH_REMATCH[1]}"
+  deps_commit="$(git log --format=%H --grep='^build(deps): refresh the toolchain' -1)"
+  [[ -n "$deps_commit" ]] || die "no build(deps) commit on '$current_branch' — nothing to open a PR for."
+  # The moved list is recovered from the commit the first run already wrote, so
+  # the resumed PR quotes the same versions rather than a re-derived guess.
+  resume_moved="$(git log -1 --format=%B "$deps_commit" | sed -n '/^Moved:$/,/^$/p' | sed '1d;$d')"
+  [[ -n "$resume_moved" ]] || resume_moved="(see the pnpm-workspace.yaml / package.json diff)"
+  if [[ -n "$(gh pr list --head "$current_branch" --json number --jq '.[].number')" ]]; then
+    die "a PR already exists for '$current_branch' — nothing to open."
+  fi
+  log "Pushing '$current_branch' (the pre-push gate runs again)"
+  git push -q -u origin "$current_branch" ||
+    die "push still failing — fix the gate findings on '$current_branch', then re-run with --open-pr."
+  log "Opening the PR"
+  open_the_pr "$resume_issue" "$current_branch" "$resume_moved"
+  log "Done. Review the PR above and merge when the checks are green."
+  exit 0
+fi
+
 [[ "$current_branch" == "$base" ]] || die "run from '$base' (on '$current_branch'). Dependency refreshes branch off $base."
 
 # This script branches wherever it is invoked, so running it in the shared clone
 # moves HEAD under every other agent there — the failure docs/coordination
 # exists to stop (#385). A linked worktree has `.git` as a FILE; the primary
 # checkout has it as a directory.
-[[ -d "$REPO_ROOT/.git" ]] && die "run this from a worktree, not the shared clone — it branches in place and would move HEAD for every other agent here. Make one with: git worktree add ../vrc-deps $base"
+# `--force` is required, not optional: the shared clone normally HAS $base
+# checked out, and git refuses a second worktree on a checked-out branch
+# ("fatal: '$base' is already used by worktree at ..."). Forcing is safe here
+# because the very next thing this script does is branch off it, so the two
+# checkouts never diverge on $base itself.
+[[ -d "$REPO_ROOT/.git" ]] && die "run this from a worktree, not the shared clone — it branches in place and would move HEAD for every other agent here. Make one with: git worktree add --force ../vrc-deps $base"
 git fetch -q origin "$base"
 [[ "$(git rev-parse "$base")" == "$(git rev-parse "origin/$base")" ]] ||
   die "local $base is not in sync with origin/$base — pull first"
@@ -241,49 +346,12 @@ COMMIT
 
 log "Pushing (the pre-push hook runs the full quality gate; a failure stops here)"
 git push -q -u origin "$branch" ||
-  die "push failed — most likely the quality gate. The branch '$branch' holds the change; inspect, fix, and re-push."
+  die "push failed — most likely the quality gate. The branch '$branch' holds the change and issue #${issue} is open.
+  Fix the findings, commit them on '$branch', then finish the run with:
+    vp run deps:refresh -- --open-pr
+  (Do NOT re-run the full refresh: it would open a second issue and branch.)"
 
 log "Opening the PR"
-pr_body="$(cat <<BODY
-## What
-
-Refresh everything updatable — the vp CLI, pnpm (the pinned \`packageManager\`), and the pnpm catalog + package.json versions to their latest in-range releases, TypeScript held. Automated by \`vp run deps:refresh\`.
-
-Moved:
-
-\`\`\`
-${moved}
-\`\`\`
-
-## Why
-
-Routine dependency hygiene in small, verified steps, so upgrades stay boring and no large risky jump accumulates.
-
-## Verification
-
-Full pre-push quality gate ran against the bumped tree (\`vp check\`, typecheck ×17 workspaces, eslint, Biome, tests). The push only succeeds if it is green.
-
-## Impact Analysis
-
-Manifests + lockfile only — the catalog, workspace package.json versions, and the pinned \`packageManager\` (pnpm); no source change. No changeset: a dependency/toolchain refresh carries no consumer-facing package change (consistent with prior refreshes). TypeScript held at its pin for a known compatibility issue.
-
-## Test Coverage
-
-None added — a version-only change; existing suites exercise the bumped toolchain.
-
-## Documentation Updates
-
-None — no public API, prop, type, or convention changed.
-
-## Linked Issues
-
-Resolves #${issue}
-
-## Known Limitations
-
-Auto-generated; review the moved versions above. Merge is intentionally left to a human.
-BODY
-)"
-gh pr create --title "build(deps): refresh the catalog" --body "$pr_body" --base "$base" --head "$branch"
+open_the_pr "$issue" "$branch" "$moved"
 
 log "Done. Review the PR above and merge when the checks are green."
