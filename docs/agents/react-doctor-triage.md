@@ -317,30 +317,39 @@ Beyond the array chains above, and all fixed:
   `Promise.all`. Both stay awaited rather than deferred, which the surrounding
   comment explains is deliberate.
 
-### Open — needs a product decision, not a code decision
+### `no-locale-format-in-render` — fixed, and the decision behind it
 
-**`no-locale-format-in-render`** in
-[`RunLink.component.tsx`](../../apps/admin_system/src/routes/cqms/project-detail/RunLink/RunLink.component.tsx):
-`new Date(run.created_at).toLocaleString()` during render. This is a genuine SSR
-hydration mismatch — the server formats in its locale and timezone, the browser in
-the user's — and it is the only **Bugs**-category finding left.
+[`RunLink.component.tsx`](../../apps/admin_system/src/routes/cqms/project-detail/RunLink/RunLink.component.tsx)
+rendered `new Date(run.created_at).toLocaleString()`, a genuine SSR hydration
+mismatch: the server formats in its locale and zone, the browser in the user's.
+Recorded here because the fix was a **product** choice, not a code one — every
+option changes what a reader sees, so a later reader should not have to re-derive
+why this one was taken (#473).
 
-It is unfixed because every fix changes what users see, and the choice is not the
-fixer's to make:
+**Chosen: an explicit locale and `timeZone: 'UTC'`, labelled `UTC` in the link
+text.** An absolute, labelled instant is what a shared operations surface wants —
+two people comparing the same run from different zones read the same string — and
+it is the only option that is both deterministic and keeps the time of day.
 
-- `formatDate({ preset: 'medium', … })` from `@lcabrera/utils` is the convention the
-  sibling `CappedLlmUsageAttemptsTable` already follows, and it pins the locale —
-  but every preset is `dateStyle`-only, so **the time of day disappears**, and
-  several runs on one day become indistinguishable links.
-- Pinning locale **and** an explicit `timeZone` keeps date + time and is
-  hydration-stable, but shifts every displayed timestamp for anyone not in that
-  zone.
-- Formatting after mount in an effect keeps local time at the cost of a flash and
-  an effect.
+Rejected, with the reason each was rejected:
 
-Adding `timeZone` (and a date-time preset) to `@lcabrera/utils` would serve the
-second option, but that is a published-package surface change — changeset plus an
-`api-surface:verify` snapshot — so it wants its own issue.
+- **`formatDate({ preset: 'medium' })` alone**, the convention the sibling
+  `CappedLlmUsageAttemptsTable` follows. It pins the locale, but every preset is
+  `dateStyle`-only, so **the time of day disappears** and several runs on one day
+  collapse into indistinguishable links. It also does not fully fix the bug: with
+  no `timeZone` the _date_ still flips across midnight.
+- **Formatting after mount in an effect.** Keeps each reader's local time, at the
+  cost of a flash of fallback content and an effect on a render path.
+
+The cost of the chosen option is that timestamps shift for readers outside UTC,
+which is why the zone is shown rather than implied. Per-user zone preference is a
+possible follow-up, deliberately not done here.
+
+This needed `timeStyle` and `timeZone` on `@lcabrera/utils`'s `formatDate` — a
+published-surface change, so it carries a changeset and a regenerated
+`reports/api-surface/utils.txt`. Both options are additive: omitting them gives
+byte-identical output, asserted by a test that passes on the pre-change
+implementation.
 
 ## Reading the report without getting a wrong answer
 

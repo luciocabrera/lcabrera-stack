@@ -17,6 +17,8 @@ type FormatDateArgs = DateFormatOptions & {
 export const formatDate = ({
   locale,
   preset: presetOption,
+  timeStyle,
+  timeZone,
   value,
 }: FormatDateArgs) => {
   const date = parseDate(value);
@@ -29,10 +31,23 @@ export const formatDate = ({
   const preset = presetOption ?? DEFAULT_DATE_PRESET;
 
   try {
-    const formatOptions = getDateTimeFormatOptions(preset);
+    // `Intl` reads an `undefined` option as "not provided", so passing these
+    // through unconditionally is identical to omitting them — no conditional
+    // spread needed, and a caller supplying neither gets the previous output.
+    const formatOptions = {
+      ...getDateTimeFormatOptions(preset),
+      timeStyle,
+      timeZone,
+    };
+
     return new Intl.DateTimeFormat(resolvedLocale, formatOptions).format(date);
   } catch {
-    // Fallback to ISO string if Intl fails
-    return date.toLocaleDateString();
+    // `toLocaleDateString` reads the runtime's zone, so it would reintroduce the
+    // very nondeterminism a caller passing `timeZone` is trying to remove — those
+    // callers get the ISO instant instead. Callers that pass none keep the
+    // previous fallback unchanged.
+    return timeZone === undefined
+      ? date.toLocaleDateString()
+      : date.toISOString();
   }
 };

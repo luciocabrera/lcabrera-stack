@@ -42,4 +42,51 @@ describe('formatDate', () => {
     expect(typeof result).toBe('string');
     expect(result.length).toBeGreaterThan(0);
   });
+
+  it('is date-only and unchanged when timeStyle is omitted', () => {
+    expect(
+      formatDate({ locale: 'en-US', preset: 'medium', value: '2024-01-15' }),
+    ).toBe('Jan 15, 2024');
+  });
+
+  it('appends the time of day when timeStyle is given', () => {
+    expect(
+      formatDate({
+        locale: 'en-US',
+        preset: 'medium',
+        timeStyle: 'short',
+        timeZone: 'UTC',
+        value: '2024-01-15T18:30:00Z',
+      }),
+    ).toBe('Jan 15, 2024, 6:30 PM');
+  });
+
+  // The exact string is the point: it pins the output to the requested zone, so
+  // this fails on any machine whose own zone differs if `timeZone` stops being
+  // applied — which is the hydration bug in miniature.
+  it('pins the output to the requested time zone', () => {
+    const value = '2024-01-15T23:30:00Z';
+    const options = {
+      locale: 'en-US',
+      preset: 'medium',
+      timeStyle: 'short',
+      value,
+    } as const;
+
+    expect(formatDate({ ...options, timeZone: 'UTC' })).toBe(
+      'Jan 15, 2024, 11:30 PM',
+    );
+    expect(formatDate({ ...options, timeZone: 'America/New_York' })).toBe(
+      'Jan 15, 2024, 6:30 PM',
+    );
+    expect(formatDate({ ...options, timeZone: 'Asia/Tokyo' })).toBe(
+      'Jan 16, 2024, 8:30 AM',
+    );
+  });
+
+  it('falls back to the ISO instant when a requested zone is invalid', () => {
+    expect(
+      formatDate({ timeZone: 'Not/AZone', value: '2024-01-15T23:30:00Z' }),
+    ).toBe('2024-01-15T23:30:00.000Z');
+  });
 });
