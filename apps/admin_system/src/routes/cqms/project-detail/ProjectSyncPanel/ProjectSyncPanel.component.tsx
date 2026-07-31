@@ -1,5 +1,7 @@
+import type { ChangeEvent, SubmitEvent } from 'react';
+
 import { Button } from '@lcabrera/ui/components/Button';
-import { type ChangeEvent, type FormEvent, useState } from 'react';
+import { useState } from 'react';
 import { useFetcher } from 'react-router';
 
 import type {
@@ -41,7 +43,7 @@ export const ProjectSyncPanel = ({ project }: ProjectSyncPanelProps) => {
     setIncludeNodeModules(event.target.checked);
   };
 
-  const handleFolderSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleFolderSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     void folderUpload.submitFolder({ files: folderFiles, includeNodeModules });
   };
