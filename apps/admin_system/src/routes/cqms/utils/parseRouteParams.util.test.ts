@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 import { parseRouteParams } from './parseRouteParams.util';
 
-const schema = z.object({ projectId: z.string().uuid() });
+const schema = z.object({ projectId: z.uuid() });
 
 describe('parseRouteParams', () => {
   it('returns the validated params when they match the schema', () => {

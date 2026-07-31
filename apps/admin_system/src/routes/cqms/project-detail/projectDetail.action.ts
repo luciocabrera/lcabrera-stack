@@ -15,10 +15,10 @@ import { parseRouteParams } from '../utils/parseRouteParams.util';
 import { parseGrantPermission } from './parseGrantPermission.util';
 import { validateSyncArchive } from './validateSyncArchive.util';
 
-const paramsSchema = z.object({ projectId: z.string().uuid() });
+const paramsSchema = z.object({ projectId: z.uuid() });
 
 const addGrantSchema = z.object({
-  granteeUserId: z.string().uuid('Pick a user.'),
+  granteeUserId: z.uuid('Pick a user.'),
   // 'action:resourceType', from the curated GRANT_OPTIONS list.
   permission: z.string().regex(/^[a-z]+:[a-z]+$/, 'Pick a permission.'),
 });
@@ -111,7 +111,7 @@ const handleGrantAdd = async ({
 };
 
 const handleGrantDelete = async ({ formData, userId }: IntentHandlerArgs) => {
-  const grantId = z.string().uuid().safeParse(formData.get('grantId'));
+  const grantId = z.uuid().safeParse(formData.get('grantId'));
   if (!grantId.success) {
     return { grantError: 'Invalid grant id.' };
   }

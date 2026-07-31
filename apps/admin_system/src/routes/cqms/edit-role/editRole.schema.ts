@@ -4,7 +4,7 @@ import { z } from 'zod';
 export const editRoleSchema = z.object({
   description: z.string().trim(),
   isEnabled: z.boolean(),
-  permissionIds: z.array(z.string().uuid()).default([]),
+  permissionIds: z.array(z.uuid()).default([]),
 });
 
 export type EditRoleValues = z.infer<typeof editRoleSchema>;

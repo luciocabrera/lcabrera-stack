@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { buildJsonExplorerSections } from '../utils/buildJsonExplorerSections.util';
 import { parseRouteParams } from '../utils/parseRouteParams.util';
 
-const paramsSchema = z.object({ scanId: z.string().uuid() });
+const paramsSchema = z.object({ scanId: z.uuid() });
 
 /**
  * `scan` is awaited directly — needed for the 404 check and to compute
