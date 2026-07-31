@@ -1,7 +1,9 @@
+import type { LoaderFunctionArgs } from 'react-router';
+
 import { getScanById } from '@repo/scan-ingestion/queries/getScanById.util';
 import { getScanFindings } from '@repo/scan-ingestion/queries/getScanFindings.util';
 import { getScanReport } from '@repo/scan-ingestion/queries/getScanReport.util';
-import { data, type LoaderFunctionArgs } from 'react-router';
+import { data } from 'react-router';
 import { z } from 'zod';
 
 import { buildJsonExplorerSections } from '../utils/buildJsonExplorerSections.util';

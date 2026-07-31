@@ -1,5 +1,7 @@
+import type { ActionFunctionArgs } from 'react-router';
+
 import { generateApiToken } from '@lcabrera/server/tokens/generate-api-token.util';
-import { type ActionFunctionArgs, redirect } from 'react-router';
+import { redirect } from 'react-router';
 
 import { AUTH_TOKEN_TTL_SECONDS } from '@/auth/auth.constants';
 import { authCookie } from '@/auth/authCookie';

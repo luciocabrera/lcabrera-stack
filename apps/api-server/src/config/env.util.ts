@@ -1,6 +1,8 @@
 import { HttpError } from 'api-shared';
 
-import { createEnvSchema, type EnvConfig } from './env.schema';
+import type { EnvConfig } from './env.schema';
+
+import { createEnvSchema } from './env.schema';
 
 type ReadEnvConfigArgs = {
   readonly env: NodeJS.ProcessEnv;

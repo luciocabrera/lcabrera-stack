@@ -1,9 +1,8 @@
 // @vitest-environment jsdom
 
-import {
-  createMockStore,
-  type MockStore,
-} from '@lcabrera/ui/utils/tests/createMockStore.util';
+import type { MockStore } from '@lcabrera/ui/utils/tests/createMockStore.util';
+
+import { createMockStore } from '@lcabrera/ui/utils/tests/createMockStore.util';
 import { act, cleanup, render } from '@testing-library/react';
 import { Profiler } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';

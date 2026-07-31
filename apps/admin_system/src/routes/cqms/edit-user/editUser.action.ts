@@ -1,9 +1,11 @@
+import type { ActionFunctionArgs } from 'react-router';
+
 import { getErrorMessage } from '@lcabrera/utils/errors/get-error-message.util';
 import { getUserWithRoles } from '@repo/scan-ingestion/queries/getUserWithRoles.util';
 import { replaceUserRoles } from '@repo/scan-ingestion/queries/replaceUserRoles.util';
 import { setUserPassword } from '@repo/scan-ingestion/queries/setUserPassword.util';
 import { updateUser } from '@repo/scan-ingestion/queries/updateUser.util';
-import { type ActionFunctionArgs, data, redirect } from 'react-router';
+import { data, redirect } from 'react-router';
 import { z } from 'zod';
 
 import { requireUser } from '@/auth/requireUser.util';

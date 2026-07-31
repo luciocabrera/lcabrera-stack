@@ -1,4 +1,6 @@
-import { createServer, type Server } from 'node:http';
+import type { Server } from 'node:http';
+
+import { createServer } from 'node:http';
 
 /**
  * Plain node:http server — no Express, no @react-router/express adapter

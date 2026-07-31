@@ -1,9 +1,7 @@
 import type { TableMetaState } from '@lcabrera/ui/components/Table/Table.types';
+import type { MockStore } from '@lcabrera/ui/utils/tests/createMockStore.util';
 
-import {
-  createMockStore,
-  type MockStore,
-} from '@lcabrera/ui/utils/tests/createMockStore.util';
+import { createMockStore } from '@lcabrera/ui/utils/tests/createMockStore.util';
 // @vitest-environment jsdom
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';

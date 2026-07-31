@@ -1,13 +1,11 @@
+import type { ClauseAccumulator } from './append-filter-clause.util.ts';
 import type {
   QueryCursor,
   QueryFilter,
   QuerySort,
 } from './query-builder.types.ts';
 
-import {
-  appendFilterClause,
-  type ClauseAccumulator,
-} from './append-filter-clause.util.ts';
+import { appendFilterClause } from './append-filter-clause.util.ts';
 import { buildKeysetClause } from './build-keyset-clause.util.ts';
 
 type BuildWhereClauseArgs = {

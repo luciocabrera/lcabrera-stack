@@ -1,6 +1,8 @@
+import type { Express } from 'express';
+
 import { HttpError } from 'api-shared';
 import cors from 'cors';
-import express, { type Express, Router } from 'express';
+import express, { Router } from 'express';
 
 import type { EnvConfig } from '../config/env.schema';
 

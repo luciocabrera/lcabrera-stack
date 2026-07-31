@@ -1,4 +1,6 @@
-import { type MiddlewareFunction, redirect } from 'react-router';
+import type { MiddlewareFunction } from 'react-router';
+
+import { redirect } from 'react-router';
 
 import { authContext } from './authContext';
 import { buildLoginRedirectUrl } from './buildLoginRedirectUrl.util';

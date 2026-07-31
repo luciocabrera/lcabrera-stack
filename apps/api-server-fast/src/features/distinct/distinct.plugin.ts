@@ -1,10 +1,11 @@
 import type { FastifyPluginAsync } from 'fastify';
 
 import type { EnvConfig } from '../../config/env.schema';
+import type { DistinctQuery } from './distinct.schema';
 
 import { delay } from '../../utils/delay.util';
 import { createDistinctRepository } from './distinct.repository';
-import { type DistinctQuery, distinctQuerySchema } from './distinct.schema';
+import { distinctQuerySchema } from './distinct.schema';
 
 type CreateDistinctPluginArgs = {
   readonly envConfig: EnvConfig;

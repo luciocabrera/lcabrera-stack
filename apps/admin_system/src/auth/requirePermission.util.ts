@@ -1,8 +1,9 @@
-import {
-  checkUserPermission,
-  type PermissionAction,
-  type PermissionResourceType,
+import type {
+  PermissionAction,
+  PermissionResourceType,
 } from '@repo/scan-ingestion/queries/checkUserPermission.util';
+
+import { checkUserPermission } from '@repo/scan-ingestion/queries/checkUserPermission.util';
 import { data } from 'react-router';
 
 import { requireUser } from './requireUser.util';

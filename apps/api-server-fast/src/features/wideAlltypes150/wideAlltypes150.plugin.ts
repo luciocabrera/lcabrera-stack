@@ -1,11 +1,10 @@
 import type { FastifyPluginAsync } from 'fastify';
 
+import type { PaginatedWideAlltypesQuery } from './wideAlltypes150.schema';
+
 import { createJsonFieldsParser } from '../../utils/parseJsonQueryFields.util';
 import { createWideAlltypes150Repository } from './wideAlltypes150.repository';
-import {
-  type PaginatedWideAlltypesQuery,
-  paginatedWideAlltypesQuerySchema,
-} from './wideAlltypes150.schema';
+import { paginatedWideAlltypesQuerySchema } from './wideAlltypes150.schema';
 
 /**
  * Fastify plugin for wide-alltypes endpoints.

@@ -61,6 +61,17 @@
           "level": "error",
           "options": { "syntax": "shorthand" },
         },
+        // Type imports go on their own `import type { … }` line, never inline
+        // alongside values. The rule ships in `recommended`, but at its default
+        // `warn` (which fails nothing) and default `style: "auto"`, which
+        // EXPLICITLY permits `import { type T, V }` when values are imported
+        // too — so the mixed form passed every gate by design, not oversight.
+        // Both halves are needed: the level to make it block, the option to
+        // make it disagree with the mixed form at all.
+        "useImportType": {
+          "level": "error",
+          "options": { "style": "separatedType" },
+        },
         "noInferrableTypes": "error", // redundant annotations — let TS infer (Rule 9)
         "noYodaExpression": "error",
         "useCollapsedElseIf": "error",

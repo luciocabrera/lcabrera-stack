@@ -1,5 +1,7 @@
+import type { ActionFunctionArgs } from 'react-router';
+
 import { getErrorMessage } from '@lcabrera/utils/errors/get-error-message.util';
-import { type ActionFunctionArgs, data, redirect } from 'react-router';
+import { data, redirect } from 'react-router';
 
 import { SYSTEM_ACTOR } from '@/auth/auth.constants';
 import { authContext } from '@/auth/authContext';

@@ -1,8 +1,10 @@
+import type { ActionFunctionArgs } from 'react-router';
+
 import { getErrorMessage } from '@lcabrera/utils/errors/get-error-message.util';
 import { createScannerDetailTable } from '@repo/scan-ingestion/queries/createScannerDetailTable.util';
 import { updateScanner } from '@repo/scan-ingestion/queries/updateScanner.util';
 import { writeScannerArtifacts } from '@repo/scan-ingestion/registry/writeScannerArtifacts.util';
-import { type ActionFunctionArgs, redirect } from 'react-router';
+import { redirect } from 'react-router';
 import { z } from 'zod';
 
 import { requireUser } from '@/auth/requireUser.util';

@@ -1,4 +1,6 @@
-import { data, type LoaderFunctionArgs } from 'react-router';
+import type { LoaderFunctionArgs } from 'react-router';
+
+import { data } from 'react-router';
 
 import { selectOrderById } from '../.server/enterpriseOrders.service';
 import { parseOrderIdParam } from '../utils/parseOrderIdParam.util';

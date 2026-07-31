@@ -2,7 +2,7 @@
 id: separated-type-imports
 title: Enforce separated type imports repo-wide
 owner: agent:claude
-status: blocked
+status: review
 branch: refactor/474-separated-type-imports
 area:
   - biome.jsonc
@@ -26,15 +26,12 @@ why the mixed form passes every gate.
 
 ## Status / next
 
-- Current step: **blocked on #468 (react-doctor-sweep)** — deliberately not started.
-- Blockers: the sweep is repo-wide by nature, and 32 of the 50 mixed imports fall
-  inside `react-doctor-sweep`'s claimed area (`packages/ui/**`,
-  `apps/admin_system/**`). That task has commits in flight touching several of the
-  same files, so landing a mechanical import rewrite now would hand it an
-  import-block conflict across most of its diff.
-- Why not narrow instead: a partial sweep cannot enable the rule at `error` — the
-  unfixed files would fail it — so it would be churn with no enforcement. Scope
-  reduction does not work here; sequencing does.
-- Next: once #468 merges, rebase onto main, set the rule, run
-  `biome lint . --write`, then the eslint pass (perfectionist owns import order,
-  so it may reposition the inserted statements), then the full gate.
+- Current step: in review — the sweep is applied and the gate is green.
+- Was blocked on #468 (react-doctor-sweep) until PR #469 merged; serialising was
+  the resolution, since narrowing could not work (a partial sweep cannot enable
+  the rule at `error` without the unfixed files failing it).
+- One thing to know before touching this again: Biome's autofix mishandles a
+  **default** import sharing a statement with a named type — it made
+  `import express, { type Express, Router }` into `import type express`, which is
+  a runtime binding. One occurrence, fixed by hand; see the PR.
+- Next: merge, then delete this file.
