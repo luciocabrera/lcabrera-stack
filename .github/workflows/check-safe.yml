@@ -166,6 +166,15 @@ jobs:
         # config, which Vite+ never loads. See ADR-042.
         run: vp run lint:plugins:verify
 
+      - name: The eslint pass still runs its rules
+        id: lint_eslint_gate
+        # The step above covers Oxlint only, and exited 0 while the entire eslint
+        # pass was dying on a TypeError. eslint exits non-zero both for findings
+        # and for a throwing rule, so the exit code cannot tell "checked
+        # everything" from "checked nothing". This plants a misordered import and
+        # requires the rule to report it. See #472.
+        run: vp run lint:eslint:verify
+
       - name: Public packages carry no unapproved suppression
         id: suppressions_gate
         # AGENTS.md §4 holds ui/api/server/utils to "every finding gets fixed,

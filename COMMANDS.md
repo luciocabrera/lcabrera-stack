@@ -343,6 +343,7 @@ package, ever.
 | `vp run commands:verify`     | check this file still matches reality                                                                                                                           |
 | `vp run scripts:verify`      | check `.mjs`/`.cjs` size ceiling (`--write` rebaselines)                                                                                                        |
 | `vp run lint:plugins:verify` | prove every Oxlint plugin family is loaded, and that no workspace config shadows the root ([ADR-042](docs/decisions/ADR-042-oxlint-config-at-the-root.md))      |
+| `vp run lint:eslint:verify`  | prove the **eslint** pass still runs its rules — plants a misordered import and requires `perfectionist/sort-imports` to report it (#472)                       |
 | `vp run suppressions:verify` | check the four public packages carry no unapproved suppression (see [the protocol](docs/agents/public-package-suppressions.md))                                 |
 | `vp run suppressions:list`   | print every suppression reaching a public package, approved or not                                                                                              |
 | `vp run docs:verify`         | check every documented repository path resolves (`--write` prunes resolved baseline entries; `--accept <doc> <ref> --reason "…"` grandfathers one)              |
