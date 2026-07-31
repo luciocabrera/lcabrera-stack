@@ -1,4 +1,4 @@
-import type { SortingState, TableColumn } from '../Table.types';
+import type { DataKey, SortingState, TableColumn } from '../Table.types';
 
 type GetNormalizedColumnsArgs<TData> = {
   readonly columns: readonly TableColumn<TData>[];
@@ -16,11 +16,27 @@ export const getNormalizedColumns = <TData>({
       sortIndex?: number;
     }
   >;
+  // Index the active sorts once. The previous shape ran both `sorting.find`
+  // and `sorting.indexOf` per column, so a wide table rescanned the sort list
+  // twice for every column. First entry wins, which is what `find` did when a
+  // key appears more than once.
+  const sortByColumnKey = new Map<
+    DataKey<TData>,
+    { direction: SortingState<TData>[number]['direction']; index: number }
+  >();
+  for (const [index, sort] of sorting.entries()) {
+    if (!sortByColumnKey.has(sort.columnKey)) {
+      sortByColumnKey.set(sort.columnKey, { direction: sort.direction, index });
+    }
+  }
+
   for (const col of columns) {
-    const currentSort = sorting.find((s) => s.columnKey === col.key);
-    const sortDirection = currentSort?.direction;
-    const sortIndex = currentSort ? sorting.indexOf(currentSort) : undefined;
-    cols[col.key] = { ...col, sortDirection, sortIndex };
+    const currentSort = sortByColumnKey.get(col.key);
+    cols[col.key] = {
+      ...col,
+      sortDirection: currentSort?.direction,
+      sortIndex: currentSort?.index,
+    };
   }
   return cols;
 };

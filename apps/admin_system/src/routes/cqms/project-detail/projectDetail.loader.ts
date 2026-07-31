@@ -12,7 +12,7 @@ import { requireUser } from '@/auth/requireUser.util';
 
 import { parseRouteParams } from '../utils/parseRouteParams.util';
 
-const paramsSchema = z.object({ projectId: z.string().uuid() });
+const paramsSchema = z.object({ projectId: z.uuid() });
 
 /**
  * `project` is awaited directly — the page can't render (or 404) without
@@ -36,16 +36,19 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
     throw data('Project not found.', { status: 404 });
   }
 
-  // Cheap boolean, awaited directly like `project`/`canManageGrants` — the
-  // "Trigger Scan" link needs it to decide whether to render at all.
-  const hasActiveRun = await getProjectHasActiveRun({ projectId });
-
-  const grantPermission = await checkUserPermission({
-    action: 'update',
-    resourceId: projectId,
-    resourceType: 'project',
-    userId: user.id,
-  });
+  // Both are awaited rather than deferred — the "Trigger Scan" link needs
+  // `hasActiveRun` to decide whether to render at all, and `canManageGrants`
+  // gates the two queries below. They read different tables and neither uses
+  // the other's result, so they race instead of waterfalling.
+  const [hasActiveRun, grantPermission] = await Promise.all([
+    getProjectHasActiveRun({ projectId }),
+    checkUserPermission({
+      action: 'update',
+      resourceId: projectId,
+      resourceType: 'project',
+      userId: user.id,
+    }),
+  ]);
   const canManageGrants = grantPermission.allowed;
 
   const runsPromise = getProjectRuns({ limit: 50, projectId, skip: 0 });

@@ -7,7 +7,7 @@ import { requireUser } from '@/auth/requireUser.util';
 import { parseRouteParams } from '../utils/parseRouteParams.util';
 import { editProjectSchema } from './editProject.schema';
 
-const paramsSchema = z.object({ projectId: z.string().uuid() });
+const paramsSchema = z.object({ projectId: z.uuid() });
 
 /**
  * Editing covers display fields only since ADR-028 — the project's code

@@ -7,7 +7,7 @@ import { z } from 'zod';
 
 import { formatRunElapsed } from './formatRunElapsed.util';
 
-const paramsSchema = z.object({ projectId: z.string().uuid() });
+const paramsSchema = z.object({ projectId: z.uuid() });
 
 const loadWorkspaces = async (projectId: string) => {
   const project = await getProjectById({ projectId });

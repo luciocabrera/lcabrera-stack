@@ -10,7 +10,7 @@ import { requireApiUser } from '@/auth/requireApiUser.util';
 import { resolvePushSourceLabel } from './resolvePushSourceLabel.util';
 import { validatePushArchive } from './validatePushArchive.util';
 
-const paramsSchema = z.object({ projectId: z.string().uuid() });
+const paramsSchema = z.object({ projectId: z.uuid() });
 
 // The CLI push channel (PRD_V2 §3, ADR-029): a token-authenticated upload of a
 // whole-repo zip as the raw request body. Buffered in memory (like the browser

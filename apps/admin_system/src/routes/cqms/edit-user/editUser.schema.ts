@@ -10,7 +10,7 @@ export const editUserSchema = z.object({
       (value) => value === '' || value.length >= 8,
       'Password must be at least 8 characters (leave empty to keep the current one).',
     ),
-  roleIds: z.array(z.string().uuid()).default([]),
+  roleIds: z.array(z.uuid()).default([]),
 });
 
 export type EditUserValues = z.infer<typeof editUserSchema>;

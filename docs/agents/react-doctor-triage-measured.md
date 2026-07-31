@@ -67,8 +67,8 @@ faulty reasoning, and the triage rebutted the reasoning without checking for the
 It is still 2 µs on a single click of a width-preset button, so this is a **candidate, not an
 urgency** — and the three semantic traps the record documents (the `as const` tuple, the
 `Object.fromEntries` consumer, and the truthiness filter that must keep dropping `width === 0`)
-all still apply to any rewrite. Tracked as a follow-up rather than fixed here, because #454 is
-scoped to measuring.
+all still apply to any rewrite. **Now fixed** — the rewrite drops `Object.fromEntries` and the
+tuple entirely rather than working around them, and keeps the truthiness test verbatim.
 
 ### The #450 fixes were real, and better than argued
 
@@ -101,7 +101,9 @@ family. Per-path, not one adjective for all of it.
    that confirmation — stated as an ordering, since a figure in an ADR rots. #453 holds
    ADR-054 and lands it there.
 2. **The triage record's `buildPresetColumnSizing` row is corrected** in this change.
-3. **A follow-up should cover `buildPresetColumnSizing`** — the only overturned verdict.
+3. **The `buildPresetColumnSizing` follow-up has landed** — the only overturned verdict,
+   now a `reduce` assigning keys directly. See the Fixed table in
+   [`react-doctor-triage.md`](react-doctor-triage.md).
 4. **Method note for future triage:** every verdict here that survived did so on _absolute_
    cost, and the one that failed did so because nobody measured. Bounds-and-coldness reasoning
    was right 7 times out of 8 — good, but not a substitute for a number when the claim being

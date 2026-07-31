@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { getFirstIssueMessage } from './getFirstIssueMessage.util';
 
 const schema = z.object({
-  granteeUserId: z.string().uuid('Pick a user.'),
+  granteeUserId: z.uuid('Pick a user.'),
 });
 
 describe('getFirstIssueMessage', () => {
@@ -19,7 +19,10 @@ describe('getFirstIssueMessage', () => {
 
   it('returns the first message when several fields fail', () => {
     const parsed = z
-      .object({ a: z.string('A required.'), b: z.string('B required.') })
+      .object({
+        a: z.string({ error: 'A required.' }),
+        b: z.string({ error: 'B required.' }),
+      })
       .safeParse({});
 
     expect(

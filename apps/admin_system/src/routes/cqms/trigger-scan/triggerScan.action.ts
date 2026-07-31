@@ -16,7 +16,7 @@ import { formatRunElapsed } from './formatRunElapsed.util';
 import { FAN_OUT_CONFIRMATION_THRESHOLD } from './triggerScan.constants';
 import { triggerScanSchema } from './triggerScan.schema';
 
-const paramsSchema = z.object({ projectId: z.string().uuid() });
+const paramsSchema = z.object({ projectId: z.uuid() });
 
 export const action = async ({ params, request }: ActionFunctionArgs) => {
   // Actions run BEFORE loaders, so the layout loader's gate does not

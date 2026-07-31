@@ -22,15 +22,18 @@ export const buildPresetColumnSizing = <TData = Record<string, unknown>>({
     return {} as ColumnSizingState<TData>;
   }
 
-  const sizedEntries = columns
-    .map(
-      (column) =>
-        [
-          column.key,
-          preset === 'max' ? column.maxWidth : column.minWidth,
-        ] as const,
-    )
-    .filter(([, width]) => width);
+  return columns.reduce((sizing, column) => {
+    const width = preset === 'max' ? column.maxWidth : column.minWidth;
 
-  return Object.fromEntries(sizedEntries) as ColumnSizingState<TData>;
+    // Truthiness, not `width !== undefined`: a configured width of `0` is
+    // dropped here exactly as the previous `.filter(([, width]) => width)`
+    // dropped it. Assigning the key directly is what makes this worth doing —
+    // the cost this replaces was `Object.fromEntries` over per-element `as
+    // const` tuples, not the second pass react-doctor flagged.
+    if (width) {
+      sizing[column.key] = width;
+    }
+
+    return sizing;
+  }, {} as ColumnSizingState<TData>);
 };

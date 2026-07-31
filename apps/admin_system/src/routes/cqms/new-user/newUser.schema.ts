@@ -4,7 +4,7 @@ import { z } from 'zod';
 export const newUserSchema = z.object({
   displayName: z.string().trim().min(1, 'Display name is required.'),
   password: z.string().min(8, 'Password must be at least 8 characters.'),
-  roleIds: z.array(z.string().uuid()).default([]),
+  roleIds: z.array(z.uuid()).default([]),
   username: z
     .string()
     .trim()

@@ -7,7 +7,7 @@ import { createRunStatusTicket } from '@/auth/createRunStatusTicket.service';
 
 import { parseRouteParams } from '../utils/parseRouteParams.util';
 
-const paramsSchema = z.object({ runId: z.string().uuid() });
+const paramsSchema = z.object({ runId: z.uuid() });
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   const { runId } = parseRouteParams({

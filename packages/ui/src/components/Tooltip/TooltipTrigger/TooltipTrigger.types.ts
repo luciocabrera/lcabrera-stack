@@ -5,7 +5,7 @@ export type TooltipTriggerProps = {
   readonly anchorName: string;
   /** The element that triggers the tooltip on hover/focus */
   readonly children: ReactNode;
-  /** Popover id linking the trigger (`aria-describedby`, `popoverTarget`) to the tooltip */
+  /** Popover id linking the trigger to the tooltip via `aria-describedby` */
   readonly id: string;
   /** Called when the tooltip should hide */
   readonly onHide: () => void;

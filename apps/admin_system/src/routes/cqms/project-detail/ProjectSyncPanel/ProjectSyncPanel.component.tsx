@@ -65,6 +65,7 @@ export const ProjectSyncPanel = ({ project }: ProjectSyncPanelProps) => {
       <form onSubmit={handleFolderSubmit}>
         <input
           accept='*/*'
+          aria-label='Project folder to pack and upload'
           name='folder'
           onChange={handleFolderChange}
           ref={applyWebkitDirectory}
@@ -92,7 +93,13 @@ export const ProjectSyncPanel = ({ project }: ProjectSyncPanelProps) => {
 
       <zipFetcher.Form encType='multipart/form-data' method='post'>
         <input name='intent' type='hidden' value='sync-upload' />
-        <input accept='.zip' name='archive' required type='file' />
+        <input
+          accept='.zip'
+          aria-label='Code snapshot .zip archive to upload'
+          name='archive'
+          required
+          type='file'
+        />
         <Button isDisabled={isZipUploading} size='mini' type='submit'>
           {isZipUploading ? 'Uploading…' : 'Upload .zip'}
         </Button>

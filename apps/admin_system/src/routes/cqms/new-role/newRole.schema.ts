@@ -3,7 +3,7 @@ import { z } from 'zod';
 /** Mirrors fn_create_role's own validation (ADR-024) for early field errors. */
 export const newRoleSchema = z.object({
   description: z.string().trim(),
-  permissionIds: z.array(z.string().uuid()).default([]),
+  permissionIds: z.array(z.uuid()).default([]),
   roleName: z
     .string()
     .trim()

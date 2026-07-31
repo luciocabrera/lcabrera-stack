@@ -45,7 +45,6 @@ export const TooltipTrigger = ({
       onMouseLeave={onHide}
       onTouchEnd={onHide}
       onTouchStart={onShow}
-      popoverTarget={id}
       ref={ref}
       role={shouldUseInteractiveTrigger ? 'button' : undefined}
       // For non-native triggers we intentionally provide keyboard focus + role.
