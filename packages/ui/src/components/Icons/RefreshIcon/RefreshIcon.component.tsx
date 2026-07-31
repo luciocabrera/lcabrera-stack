@@ -11,21 +11,21 @@ export const RefreshIcon = ({ size = 16, ...props }: IconProps) => (
     {...props}
   >
     <path
-      d='M2 8C2 4.68629 4.68629 2 8 2C10.2091 2 12.1046 3.26429 13.0834 5.08333M14 8C14 11.3137 11.3137 14 8 14C5.79086 14 3.89543 12.7357 2.91667 10.9167'
+      d='M2 8C2 4.69 4.69 2 8 2C10.21 2 12.1 3.26 13.08 5.08M14 8C14 11.31 11.31 14 8 14C5.79 14 3.9 12.74 2.92 10.92'
       stroke='currentColor'
       strokeLinecap='round'
       strokeLinejoin='round'
       strokeWidth='1.5'
     />
     <path
-      d='M13 2V5.08333H9.91667'
+      d='M13 2V5.08H9.92'
       stroke='currentColor'
       strokeLinecap='round'
       strokeLinejoin='round'
       strokeWidth='1.5'
     />
     <path
-      d='M3 14V10.9167H6.08333'
+      d='M3 14V10.92H6.08'
       stroke='currentColor'
       strokeLinecap='round'
       strokeLinejoin='round'

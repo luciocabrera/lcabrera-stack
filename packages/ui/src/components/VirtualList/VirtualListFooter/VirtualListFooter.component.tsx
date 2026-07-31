@@ -17,6 +17,8 @@ import { useGetHasCheckboxes } from '../contexts/list/selectors';
 import { ListFilterModeButton } from './ListFilterModeButton';
 import { styles } from './VirtualListFooter.stylex';
 
+const MODES = ['all', 'selected', 'unselected'] as const;
+
 /** Self-connected footer: loaded/total counts plus the filter-mode buttons. */
 export const VirtualListFooter = () => {
   const hasCheckboxes = useGetHasCheckboxes();
@@ -27,7 +29,6 @@ export const VirtualListFooter = () => {
   const totalCount = useGetTotalCount();
 
   if (loadedCount === 0) return;
-  const modes = ['all', 'selected', 'unselected'] as const;
   const modeConfig = {
     all: {
       count: loadedCount,
@@ -55,7 +56,7 @@ export const VirtualListFooter = () => {
       </p>
       {hasCheckboxes && (
         <div {...stylex.props(styles.listFilterGroup)}>
-          {modes.map((mode) => {
+          {MODES.map((mode) => {
             const { count, icon, tooltip } = modeConfig[mode];
             return (
               <ListFilterModeButton
