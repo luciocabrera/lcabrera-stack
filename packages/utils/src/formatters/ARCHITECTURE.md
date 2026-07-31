@@ -51,6 +51,14 @@ Shared `Intl`-formatter option types (`CurrencyFormatOptions`,
 `DateFormatOptions`, `DateFormatPreset`, `NumberFormatOptions`) consumed by the
 formatters and by `@lcabrera/ui`'s `Table.types`.
 
+`DateFormatOptions` carries two options beyond `locale`/`preset`, both optional
+and both defaulting to the previous behaviour: `timeStyle` pairs a time of day
+with the date `preset` (which is `dateStyle`-only on its own), and `timeZone`
+pins the output to an IANA zone. **Pass `timeZone` for anything rendered during
+SSR** — the default is the runtime's own zone, so the server and the browser
+produce different strings for the same instant and React reports a hydration
+mismatch. `RunLink` in `admin_system` is the worked example.
+
 ### formatters.constants.ts
 
 Defines module defaults:
