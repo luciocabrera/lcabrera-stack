@@ -1,4 +1,4 @@
-import type { FormEvent } from 'react';
+import type { SubmitEvent } from 'react';
 
 import { useSubmitForm } from '@lcabrera/ui/components/Form/contexts/FormContext/actions';
 import {
@@ -32,7 +32,7 @@ export const FormBody = ({
 
   const FormComponent = submission === 'fetcher' ? fetcher.Form : RouterForm;
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     if (!submitForm()) {
       event.preventDefault();
     }
