@@ -1,11 +1,10 @@
 import type { FastifyPluginAsync } from 'fastify';
 
+import type { PaginatedCarSalesQuery } from './carSales.schema';
+
 import { createJsonFieldsParser } from '../../utils/parseJsonQueryFields.util';
 import { createCarSalesRepository } from './carSales.repository';
-import {
-  type PaginatedCarSalesQuery,
-  paginatedCarSalesQuerySchema,
-} from './carSales.schema';
+import { paginatedCarSalesQuerySchema } from './carSales.schema';
 
 /**
  * Fastify plugin for car sales endpoints.

@@ -1,5 +1,7 @@
+import type { LoaderFunctionArgs } from 'react-router';
+
 import { getUserWithRoles } from '@repo/scan-ingestion/queries/getUserWithRoles.util';
-import { data, type LoaderFunctionArgs } from 'react-router';
+import { data } from 'react-router';
 import { z } from 'zod';
 
 import { requirePermission } from '@/auth/requirePermission.util';

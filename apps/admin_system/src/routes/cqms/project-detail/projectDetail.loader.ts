@@ -1,3 +1,5 @@
+import type { LoaderFunctionArgs } from 'react-router';
+
 import { checkUserPermission } from '@repo/scan-ingestion/queries/checkUserPermission.util';
 import { getProjectById } from '@repo/scan-ingestion/queries/getProjectById.util';
 import { getProjectGrants } from '@repo/scan-ingestion/queries/getProjectGrants.util';
@@ -5,7 +7,7 @@ import { getProjectHasActiveRun } from '@repo/scan-ingestion/queries/getProjectH
 import { getProjectRuns } from '@repo/scan-ingestion/queries/getProjectRuns.util';
 import { getProjectScannerTrend } from '@repo/scan-ingestion/queries/getProjectScannerTrend.util';
 import { getUserListView } from '@repo/scan-ingestion/queries/getUserListView.util';
-import { data, type LoaderFunctionArgs } from 'react-router';
+import { data } from 'react-router';
 import { z } from 'zod';
 
 import { requireUser } from '@/auth/requireUser.util';

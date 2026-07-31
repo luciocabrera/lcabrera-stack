@@ -1,8 +1,10 @@
+import type { ActionFunctionArgs } from 'react-router';
+
 import { saveProjectSnapshot } from '@repo/scan-ingestion/ingestion/snapshots/saveProjectSnapshot';
 import { discoverProjectWorkspaces } from '@repo/scan-ingestion/ingestion/workspaces/discoverProjectWorkspaces.util';
 import { checkUserPermission } from '@repo/scan-ingestion/queries/checkUserPermission.util';
 import { replaceProjectWorkspaces } from '@repo/scan-ingestion/queries/replaceProjectWorkspaces.util';
-import { type ActionFunctionArgs, data } from 'react-router';
+import { data } from 'react-router';
 import { z } from 'zod';
 
 import { requireApiUser } from '@/auth/requireApiUser.util';

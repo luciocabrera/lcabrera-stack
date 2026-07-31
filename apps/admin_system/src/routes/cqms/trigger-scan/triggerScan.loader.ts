@@ -1,8 +1,10 @@
+import type { LoaderFunctionArgs } from 'react-router';
+
 import { discoverProjectWorkspaces } from '@repo/scan-ingestion/ingestion/workspaces/discoverProjectWorkspaces.util';
 import { getActiveScanners } from '@repo/scan-ingestion/queries/getActiveScanners.util';
 import { getProjectActiveRun } from '@repo/scan-ingestion/queries/getProjectActiveRun.util';
 import { getProjectById } from '@repo/scan-ingestion/queries/getProjectById.util';
-import { data, type LoaderFunctionArgs } from 'react-router';
+import { data } from 'react-router';
 import { z } from 'zod';
 
 import { formatRunElapsed } from './formatRunElapsed.util';

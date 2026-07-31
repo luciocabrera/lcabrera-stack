@@ -1,4 +1,6 @@
-import { type ActionFunctionArgs, redirect } from 'react-router';
+import type { ActionFunctionArgs } from 'react-router';
+
+import { redirect } from 'react-router';
 
 import { getSessionStorage } from '@/auth/getSessionStorage.util';
 

@@ -1,5 +1,7 @@
+import type { LoaderFunctionArgs } from 'react-router';
+
 import { getUserById } from '@repo/scan-ingestion/queries/getUserById.util';
-import { type LoaderFunctionArgs, redirect } from 'react-router';
+import { redirect } from 'react-router';
 
 import { getSessionStorage } from '@/auth/getSessionStorage.util';
 

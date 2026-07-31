@@ -1,4 +1,6 @@
-import { type ActionFunctionArgs, data } from 'react-router';
+import type { ActionFunctionArgs } from 'react-router';
+
+import { data } from 'react-router';
 
 import { deleteOrder } from '@/routes/enterprise-orders/.server/enterpriseOrders.service';
 

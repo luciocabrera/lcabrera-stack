@@ -1,3 +1,5 @@
+import type { ActionFunctionArgs } from 'react-router';
+
 import { hasPostgresErrorCode } from '@lcabrera/server/errors/has-postgres-error-code.util';
 import { isCheckboxChecked } from '@lcabrera/utils/forms/is-checkbox-checked.util';
 import { discoverProjectWorkspaces } from '@repo/scan-ingestion/ingestion/workspaces/discoverProjectWorkspaces.util';
@@ -5,7 +7,7 @@ import { getProjectActiveRun } from '@repo/scan-ingestion/queries/getProjectActi
 import { getProjectById } from '@repo/scan-ingestion/queries/getProjectById.util';
 import { replaceProjectWorkspaces } from '@repo/scan-ingestion/queries/replaceProjectWorkspaces.util';
 import { triggerScan as triggerScanMutation } from '@repo/scan-ingestion/queries/triggerScan.util';
-import { type ActionFunctionArgs, data, redirect } from 'react-router';
+import { data, redirect } from 'react-router';
 import { z } from 'zod';
 
 import { requireUser } from '@/auth/requireUser.util';

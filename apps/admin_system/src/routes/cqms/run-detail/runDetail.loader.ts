@@ -1,6 +1,8 @@
+import type { LoaderFunctionArgs } from 'react-router';
+
 import { getRunById } from '@repo/scan-ingestion/queries/getRunById.util';
 import { getRunScans } from '@repo/scan-ingestion/queries/getRunScans.util';
-import { data, type LoaderFunctionArgs } from 'react-router';
+import { data } from 'react-router';
 import { z } from 'zod';
 
 import { createRunStatusTicket } from '@/auth/createRunStatusTicket.service';

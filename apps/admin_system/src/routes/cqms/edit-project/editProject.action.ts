@@ -1,5 +1,7 @@
+import type { ActionFunctionArgs } from 'react-router';
+
 import { updateProject } from '@repo/scan-ingestion/queries/updateProject.util';
-import { type ActionFunctionArgs, redirect } from 'react-router';
+import { redirect } from 'react-router';
 import { z } from 'zod';
 
 import { requireUser } from '@/auth/requireUser.util';

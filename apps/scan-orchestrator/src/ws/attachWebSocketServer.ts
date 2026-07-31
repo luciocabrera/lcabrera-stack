@@ -1,7 +1,8 @@
 import type { Server } from 'node:http';
+import type { RawData } from 'ws';
 
 import { isAccessTicketValid } from '@lcabrera/server/tickets/is-access-ticket-valid.util';
-import { type RawData, WebSocketServer } from 'ws';
+import { WebSocketServer } from 'ws';
 import { z } from 'zod';
 
 import type { RunStatusHub } from './runStatusHub.ts';

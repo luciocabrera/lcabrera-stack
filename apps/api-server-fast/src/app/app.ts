@@ -1,10 +1,8 @@
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+
 import cors from '@fastify/cors';
 import { HttpError } from 'api-shared';
-import Fastify, {
-  type FastifyInstance,
-  type FastifyReply,
-  type FastifyRequest,
-} from 'fastify';
+import Fastify from 'fastify';
 
 import type { EnvConfig } from '../config/env.schema';
 

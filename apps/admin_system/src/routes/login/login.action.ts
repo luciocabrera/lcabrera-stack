@@ -1,5 +1,7 @@
+import type { ActionFunctionArgs } from 'react-router';
+
 import { authenticateUser } from '@repo/scan-ingestion/queries/authenticateUser.util';
-import { type ActionFunctionArgs, redirect } from 'react-router';
+import { redirect } from 'react-router';
 
 import { getSessionStorage } from '@/auth/getSessionStorage.util';
 

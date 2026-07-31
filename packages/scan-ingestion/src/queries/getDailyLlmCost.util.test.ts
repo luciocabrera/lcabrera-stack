@@ -2,12 +2,11 @@ import { closePool, getPool } from '@lcabrera/server/db/get-pool.util';
 import { rmSync } from 'node:fs';
 import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
 
+import type { DailyLlmCostRow } from './getDailyLlmCost.util.ts';
+
 import { acquireAdvisoryTestLock } from '../testing/acquireAdvisoryTestLock.util.ts';
 import { makeTempDirectory } from '../testing/makeTempDirectory.util.ts';
-import {
-  type DailyLlmCostRow,
-  getDailyLlmCost,
-} from './getDailyLlmCost.util.ts';
+import { getDailyLlmCost } from './getDailyLlmCost.util.ts';
 import { getUserByUsername } from './getUserByUsername.util.ts';
 import { recordScanLlmUsage } from './recordScanLlmUsage.util.ts';
 import { triggerScan } from './triggerScan.util.ts';
