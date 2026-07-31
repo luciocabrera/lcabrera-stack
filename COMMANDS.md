@@ -197,6 +197,14 @@ auto-merging: a failing quality gate leaves the branch for a human. `-- --dry-ru
 previews what would move without changing anything. The pnpm-direct policy nuance
 is tracked in issue #334.
 
+**A gate failure is resumable — do not re-run the full refresh.** The stop leaves
+the issue, branch and commit in place but no PR, and a second full run would open
+a duplicate issue and branch. Fix the findings, commit them on the same branch,
+then finish with `-- --open-pr`: it pushes (the gate runs again) and opens the PR
+with the same generated description, recovering the moved-versions list from the
+commit the first run wrote. Its Impact Analysis reports any source commits the
+gate forced, rather than claiming the diff is manifests-only.
+
 **A run can land with no version moved at all.** `pnpm clean --lockfile`
 regenerates the lockfile from nothing, so it drops resolutions no manifest reaches
 any more — a real change worth committing, not formatting churn. Regeneration is
