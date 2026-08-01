@@ -105,10 +105,12 @@ describe('RadioOptionGroup', () => {
       />,
     );
 
-    const surfaceClasses = (
-      stylex.props(surfaceStyles.interactiveCard).className ?? ''
-    ).split(' ');
-    expect(surfaceClasses.length).toBeGreaterThan(0);
+    // Guard the string, not the split array: `''.split(' ')` is `['']`, so a
+    // length check after splitting would pass even if the recipe compiled to
+    // nothing — and this assertion exists precisely to rule that out.
+    const surfaceClassName =
+      stylex.props(surfaceStyles.interactiveCard).className ?? '';
+    expect(surfaceClassName.length).toBeGreaterThan(0);
 
     // Asserted on an UNSELECTED card on purpose: `optionSelected` legitimately
     // replaces the recipe's `borderColor` and `backgroundColor` keys — the
@@ -118,7 +120,9 @@ describe('RadioOptionGroup', () => {
       .closest('label') as HTMLLabelElement;
     const cardClasses = new Set(unselectedCard.className.split(' '));
 
-    expect(surfaceClasses.every((cls) => cardClasses.has(cls))).toBe(true);
+    expect(
+      surfaceClassName.split(' ').every((cls) => cardClasses.has(cls)),
+    ).toBe(true);
   });
 
   it('renders description text when provided', () => {
