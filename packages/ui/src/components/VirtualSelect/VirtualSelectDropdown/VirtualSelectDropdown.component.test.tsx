@@ -46,6 +46,19 @@ vi.mock('../contexts/meta/selectors', () => ({
   useGetListboxId: () => metaState.current.listboxId,
 }));
 
+// The dropdown anchors to the shell container; these cases mount it without a
+// provider, so stand in a detached element. Built once in the factory, not per
+// render, or the position effect's dependency would change every render.
+vi.mock('../contexts/useVirtualSelectAnchorRef.hook', () => {
+  const anchorRef = { current: document.createElement('div') };
+
+  return { useVirtualSelectAnchorRef: () => anchorRef };
+});
+
+vi.mock('../contexts/meta/actions', () => ({
+  useToggleDropdown: () => vi.fn(),
+}));
+
 import { VirtualSelectDropdown } from './VirtualSelectDropdown.component';
 
 beforeEach(() => {

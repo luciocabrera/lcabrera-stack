@@ -1,0 +1,37 @@
+import type {
+  AnchorRect,
+  DropdownPlacement,
+} from '../VirtualSelectDropdown.types';
+
+type ResolveDropdownPlacementArgs = {
+  readonly anchorRect: AnchorRect;
+  readonly dropdownHeight: number;
+  readonly gap: number;
+  readonly viewportHeight: number;
+};
+
+/**
+ * Viewport coordinates for a dropdown rendered in the top layer: below the
+ * anchor by default, flipped above it when the list would not fit below and
+ * there is more room above. Flipping needs the measured height, so callers
+ * must read it after the popover is shown — a hidden popover measures zero,
+ * which resolves to "fits below" and never flips.
+ */
+export const resolveDropdownPlacement = ({
+  anchorRect,
+  dropdownHeight,
+  gap,
+  viewportHeight,
+}: ResolveDropdownPlacementArgs): DropdownPlacement => {
+  const spaceBelow = viewportHeight - anchorRect.bottom - gap;
+  const spaceAbove = anchorRect.top - gap;
+  const shouldFlip = dropdownHeight > spaceBelow && spaceAbove > spaceBelow;
+
+  return {
+    left: anchorRect.left,
+    top: shouldFlip
+      ? Math.max(gap, anchorRect.top - gap - dropdownHeight)
+      : anchorRect.bottom + gap,
+    width: anchorRect.width,
+  };
+};

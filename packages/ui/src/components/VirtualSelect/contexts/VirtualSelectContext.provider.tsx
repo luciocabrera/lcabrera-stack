@@ -20,6 +20,7 @@ import { VirtualSelectContext } from './VirtualSelectContext.context';
  * without any provider nesting in the shell.
  */
 export const VirtualSelectProvider = ({
+  anchorRef,
   children,
   dataState,
   filter,
@@ -35,6 +36,7 @@ export const VirtualSelectProvider = ({
   }, [metaState, metaStore]);
 
   const value: VirtualSelectContextValue = {
+    anchorRef,
     metaStore,
     onToggleDropdown: metaState.onToggleDropdown,
   };

@@ -17,6 +17,8 @@ import {
 } from './meta/selectors';
 import { VirtualSelectProvider } from './VirtualSelectContext.provider';
 
+const ANCHOR_REF = { current: document.createElement('div') };
+
 type WrapperArgs = {
   readonly metaState: VirtualSelectMetaStateProps;
 };
@@ -36,6 +38,7 @@ const createWrapper =
   ({ metaState }: WrapperArgs) =>
   ({ children }: WrapperProps) => (
     <VirtualSelectProvider
+      anchorRef={ANCHOR_REF}
       dataState={DATA_STATE}
       filter={{ type: 'select', values: [] }}
       listState={{ hasCheckboxes: true, onChange: vi.fn() }}
@@ -105,6 +108,7 @@ describe('VirtualSelectProvider', () => {
     let isCurrentlyOpen = false;
     const wrapper = ({ children }: WrapperProps) => (
       <VirtualSelectProvider
+        anchorRef={ANCHOR_REF}
         dataState={DATA_STATE}
         filter={{ type: 'select', values: [] }}
         listState={{ hasCheckboxes: true, onChange: vi.fn() }}
