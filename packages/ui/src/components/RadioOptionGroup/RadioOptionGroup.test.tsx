@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { surfaceStyles } from '@lcabrera/ui/design-system/tokens/surfaces.stylex';
 import * as stylex from '@stylexjs/stylex';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
@@ -92,6 +93,32 @@ describe('RadioOptionGroup', () => {
 
     expect(selectedHasAccent).toBe(true);
     expect(unselectedHasAccent).toBe(false);
+  });
+
+  it('applies the shared interactive-card surface to unselected option cards', () => {
+    render(
+      <RadioOptionGroup
+        name='group'
+        onChange={vi.fn()}
+        options={[...options]}
+        value='b'
+      />,
+    );
+
+    const surfaceClasses = (
+      stylex.props(surfaceStyles.interactiveCard).className ?? ''
+    ).split(' ');
+    expect(surfaceClasses.length).toBeGreaterThan(0);
+
+    // Asserted on an UNSELECTED card on purpose: `optionSelected` legitimately
+    // replaces the recipe's `borderColor` and `backgroundColor` keys — the
+    // hover included — on the chosen one.
+    const unselectedCard = screen
+      .getByRole<HTMLInputElement>('radio', { name: /Option A/i })
+      .closest('label') as HTMLLabelElement;
+    const cardClasses = new Set(unselectedCard.className.split(' '));
+
+    expect(surfaceClasses.every((cls) => cardClasses.has(cls))).toBe(true);
   });
 
   it('renders description text when provided', () => {

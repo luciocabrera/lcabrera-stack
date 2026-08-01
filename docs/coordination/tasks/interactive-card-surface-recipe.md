@@ -18,10 +18,27 @@ issue: #484
 
 ## What
 
-Shared interactiveCard surface recipe for radio option cards
+Give the radio option cards (Pin Column modal and every other `RadioOptionGroup`
+site) the same surface as the settings drawer's draggable rows — translucent
+fill, hover lift, border — and add the keyboard focus ring the radio input lost
+to `appearance: none`.
+
+That surface already existed verbatim in `DraggableListItem` and `FilterItem`, so
+it is extracted to a shared `surfaceStyles.interactiveCard` recipe in the
+existing `surfaces.stylex.ts` and adopted by all three, rather than copied a
+third time.
+
+## Known overlap
+
+`packages/ui/src/design-system/tokens/surfaces.stylex.ts` is also claimed by
+**table-actions-menu-surface-dividers** (#482), which is adding a `glassPanel`
+recipe to the same file. Accepted rather than serialized: both changes append a
+distinct key to one `stylex.create` call, touch no shared line, and carry no
+shared semantics. Whoever merges second resolves a few lines. Neither task
+touches the other's components.
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implemented; quality gate
 - Blockers: none
-- Next:
+- Next: gate → PR ready for review

@@ -62,6 +62,42 @@ className={`button ${isActive ? 'active' : ''}`}
 
 **Consumer overrides:** When a component accepts a `customStylex?: StyleXStyles` prop, it must always be the **last** argument to `stylex.props()` so it wins over all defaults.
 
+**Overriding a property that already has pseudo-states — the trap.** StyleX merges
+by **property key**, and a value-level conditional compiles to a _single_ key
+holding every one of its class names. So a later flat value replaces the whole
+thing, pseudo-states included:
+
+```ts
+// recipe
+backgroundColor: { default: fill, ':hover': lift }
+
+// consumer, applied after — this removes the hover too, not just the resting fill
+backgroundColor: accent
+```
+
+That is often exactly what you want (a selected card should stop reacting to
+hover). When it is not, restate the base value alongside the new state — there is
+no way to add one state in isolation, because StyleX 0.19 removed selector
+nesting:
+
+```ts
+// ✅ keeps the resting border AND adds the focus accent
+borderColor: { default: colors.borderPrimary, ':focus-visible': colors.brandPrimary }
+
+// ❌ silently drops the resting border
+borderColor: { ':focus-visible': colors.brandPrimary }
+```
+
+**Composing a shared surface recipe:** merge it inside the `*.stylex.ts`, not at
+the call site, so component files stay free of design-system imports:
+
+```ts
+export const styles = {
+  ...localStyles,
+  item: { ...surfaceStyles.interactiveCard, ...localStyles.item },
+};
+```
+
 **Known exception — React Router `NavLink`:** React Router's `NavLink` requires a `className` render-function to expose `isActive`. Use `stylex.props(...).className` inside it — never pass raw class strings:
 
 ```tsx

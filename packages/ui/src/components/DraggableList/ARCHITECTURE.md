@@ -7,10 +7,11 @@ DraggableList/
 ├── index.ts                       → Barrel export: DraggableList + types
 ├── DraggableList.component.tsx    → ul shell; maps items to DraggableListItem
 ├── DraggableList.types.ts         → DraggableItem, DraggableListProps, UseDraggableListProps
-├── DraggableList.stylex.ts        → All styles (local, no shared variants)
+├── DraggableList.stylex.ts        → The ul shell only (`list`)
 │
 ├── DraggableListItem/             → Private delegate (no barrel): li + drag state/wiring per item
 │   ├── DraggableListItem.component.tsx
+│   ├── DraggableListItem.stylex.ts → Row layout + drag/focus states; card surface from surfaces.stylex
 │   ├── DraggableListItem.test.tsx
 │   └── DraggableListItem.types.ts → { dragItemId, isBusy, item, onDragEnd, onDragEnter, onDragStart }
 │
@@ -32,14 +33,27 @@ graph LR
   DraggableList --> useDraggableList
   DraggableList --> DraggableListItem
 
-  DraggableListItem --> DraggableList.stylex
+  DraggableListItem --> DraggableListItem.stylex
   DraggableListItem --> handleDragOver
 
   useDraggableList --> DraggableList.types
 
   DraggableList.stylex --> base.stylex
   DraggableList.stylex --> colors.stylex
+
+  DraggableListItem.stylex --> base.stylex
+  DraggableListItem.stylex --> colors.stylex
+  DraggableListItem.stylex --> commons.stylex
+  DraggableListItem.stylex --> surfaces["surfaces.stylex (interactiveCard)"]
 ```
+
+The row's card surface — fill, hover, border, radius — comes from
+`surfaceStyles.interactiveCard`, shared with `FilterItem` and `RadioOptionGroup`
+(`design-system/ARCHITECTURE.md` → Shared Surface Recipes). `DraggableListItem.stylex`
+keeps only layout and the drag/focus states. Its `borderColor` restates the
+recipe's default next to the `:focus-visible` accent on purpose: a value-level
+conditional replaces the whole property key, so omitting the default would drop
+the resting border.
 
 ## Render Flow
 

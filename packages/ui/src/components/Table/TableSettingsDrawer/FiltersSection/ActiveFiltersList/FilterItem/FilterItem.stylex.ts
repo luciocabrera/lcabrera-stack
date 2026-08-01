@@ -5,19 +5,15 @@ import {
 } from '@lcabrera/ui/design-system/tokens/base.stylex';
 import { colors } from '@lcabrera/ui/design-system/tokens/colors.stylex';
 import { skeleton } from '@lcabrera/ui/design-system/tokens/commons.stylex';
+import { surfaceStyles } from '@lcabrera/ui/design-system/tokens/surfaces.stylex';
 import * as stylex from '@stylexjs/stylex';
 
 const localStyles = stylex.create({
+  // Layout only — the fill, border and hover come from
+  // `surfaceStyles.interactiveCard` in the export below. `overflow: visible`
+  // stays local: the filter's popovers escape this box.
   filterItem: {
-    borderColor: colors.borderPrimary,
-    borderRadius: borderRadius.md,
-    borderStyle: 'solid',
-    borderWidth: '1px',
     overflow: 'visible',
-    backgroundColor: {
-      default: colors.glassBackgroundColorSecondary,
-      ':hover': colors.surfaceElevated,
-    },
     position: 'relative',
   },
   filterItemHeader: {
@@ -77,7 +73,7 @@ const localStyles = stylex.create({
 export const styles = {
   busyOverlay: [skeleton.loadingOverlay, localStyles.busyOverlay],
   busyWave: skeleton.shimmerWave,
-  filterItem: localStyles.filterItem,
+  filterItem: { ...surfaceStyles.interactiveCard, ...localStyles.filterItem },
   filterItemContent: localStyles.filterItemContent,
   filterItemHeader: localStyles.filterItemHeader,
   filterItemLabel: localStyles.filterItemLabel,
