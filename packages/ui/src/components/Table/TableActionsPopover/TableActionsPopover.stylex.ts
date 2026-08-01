@@ -8,16 +8,16 @@ import { colors } from '@lcabrera/ui/design-system/tokens/colors.stylex';
 import * as stylex from '@stylexjs/stylex';
 
 export const styles = stylex.create({
+  // The translucent surface is `surfaceStyles.glassPanel`, composed ahead of
+  // this by the component — the same recipe SidePanel uses, so a menu floating
+  // over the grid reads as the same material as the settings drawer beside it.
   menu: {
     padding: spacing.xs,
-    borderColor: colors.borderSecondary,
+    borderColor: colors.borderPrimary,
     borderRadius: borderRadius.sm,
     borderStyle: 'solid',
     borderWidth: '1px',
-    backdropFilter: 'none',
-    backgroundColor: '#0f172a',
     boxShadow: shadows.md,
-    opacity: 1,
     zIndex: zIndex.popover,
     minWidth: '12rem',
   },
@@ -43,11 +43,17 @@ export const styles = stylex.create({
     textAlign: 'left',
     width: '100%',
   },
-  menuSectionDivider: {
-    borderTopColor: colors.borderSecondary,
-    borderTopStyle: 'solid',
-    borderTopWidth: '1px',
-    marginTop: spacing.xxs,
+  // Rendered as its own flex child of `menuActions` (see
+  // TableActionsPopoverSeparator), so the container's gap already applies on
+  // both sides of the rule and this margin only adds to both equally. The
+  // border/margin resets are the `<hr>` user-agent defaults.
+  menuSeparator: {
+    borderStyle: 'none',
+    marginBlock: spacing.xxs,
+    marginInline: 0,
+    backgroundColor: colors.borderPrimary,
+    flexShrink: 0,
+    height: '1px',
   },
   menuPosition: (left: number, top: number) => ({
     margin: 0,

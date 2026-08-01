@@ -20,7 +20,7 @@ TableRowActionsMenu/
 │   ├── TableActionMenu.types.ts                   → Local props contract
 │   └── index.ts                                   → Local barrel
 ├── TableRowActionsMenu.component.tsx      → CRUD/delete wiring, composed into TableActionsPopover's children
-├── TableRowActionsMenu.stylex.ts          → customActions separator style (row-specific)
+├── TableRowActionsMenu.stylex.ts          → customActions group layout (row-specific)
 ├── TableRowActionsMenu.types.ts           → Props contract
 ├── ARCHITECTURE.md                     → This file
 └── index.ts                            → Barrel export
@@ -34,9 +34,17 @@ graph TD
   Popover --> Children["children({ closeMenu })"]
   Children --> ActionMenu["TableActionMenu"]
   ActionMenu --> BuiltIn["view/edit/delete (enabled only)"]
+  ActionMenu --> Sep["TableActionsPopoverSeparator (only when customActions exist)"]
   ActionMenu --> Custom["customActions (optional, appended)"]
   BuiltIn --> Delete["confirm() -> fetcher.submit(intent=delete,id) -> closeMenu()"]
 ```
+
+The rule above `customActions` is the shared `TableActionsPopoverSeparator`, the
+same element the column-header menu uses, so both menus space their sections
+identically. `TableRowActionsMenu.stylex.ts`'s `customActions` is layout only:
+consumer-supplied nodes arrive as an opaque `ReactNode`, so the group stacks them
+the way the built-in items are stacked rather than inheriting whatever display
+the caller's markup happens to have.
 
 ## Delete Contract
 

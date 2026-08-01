@@ -5,7 +5,10 @@ import {
   FileTextIcon,
 } from '@lcabrera/ui/components/Icons';
 import { NavLink } from '@lcabrera/ui/components/NavLink';
-import { tableActionsPopoverStyles } from '@lcabrera/ui/components/Table/TableActionsPopover';
+import {
+  TableActionsPopoverSeparator,
+  tableActionsPopoverStyles,
+} from '@lcabrera/ui/components/Table/TableActionsPopover';
 import * as stylex from '@stylexjs/stylex';
 
 import type { TableActionMenuProps } from './TableActionMenu.types';
@@ -70,7 +73,10 @@ export const TableActionMenu = ({
         </Button>
       )}
       {Boolean(customActions) && (
-        <div {...stylex.props(styles.customActions)}>{customActions}</div>
+        <>
+          <TableActionsPopoverSeparator />
+          <div {...stylex.props(styles.customActions)}>{customActions}</div>
+        </>
       )}
     </div>
   );

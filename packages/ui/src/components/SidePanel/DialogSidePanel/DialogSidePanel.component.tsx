@@ -1,3 +1,4 @@
+import { surfaceStyles } from '@lcabrera/ui/design-system/tokens/surfaces.stylex';
 import * as stylex from '@stylexjs/stylex';
 import { useEffect, useRef } from 'react';
 
@@ -29,6 +30,7 @@ export const DialogSidePanel = ({
   const closedStyle =
     position === 'left' ? ('leftClosed' as const) : ('rightClosed' as const);
   const panelStyles = stylex.props(
+    surfaceStyles.glassPanel,
     sidePanelStyles.base,
     sidePanelStyles.size[size],
     sidePanelStyles.position[position],

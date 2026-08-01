@@ -21,7 +21,6 @@ vi.mock('@lcabrera/ui/components/Table/TableActionsPopover', () => ({
   tableActionsPopoverStyles: {
     menuIcon: {},
     menuItem: {},
-    menuSectionDivider: {},
   },
 }));
 

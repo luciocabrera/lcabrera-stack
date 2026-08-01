@@ -166,7 +166,14 @@ from the document closes it natively, so no cross-mode guard effects exist.
 
 ## Style Composition
 
-All root styles are local in `SidePanel.stylex.ts`. No shared variant objects.
+Layout, position and size styles are local to `SidePanel.stylex.ts`. The one
+shared piece is the **surface**: both delegates compose
+`surfaceStyles.glassPanel` (blur + translucent fill) ahead of
+`sidePanelStyles.base`, the same recipe `TableActionsPopover` uses — so a menu
+floating over the grid and the drawer beside it cannot drift into different
+materials. `base` therefore declares no `backdropFilter`/`backgroundColor` of its
+own; the recipe must stay first in the `stylex.props` call so the panel's own
+styles can still override it.
 
 ```mermaid
 graph LR
@@ -201,6 +208,7 @@ graph LR
 
 **Key behaviors**:
 
+- **Glass surface** from the shared `surfaceStyles.glassPanel` recipe
 - **Fixed positioning** with `height: 100vh`, slides in/out via `translateX`
 - **Pinned mode** switches to `position: relative` with `flexShrink: 0`
 - **Native `::backdrop`** styled with overlay color or transparent

@@ -1,5 +1,6 @@
 import {
   TableActionsPopover,
+  TableActionsPopoverSeparator,
   tableActionsPopoverStyles,
 } from '@lcabrera/ui/components/Table/TableActionsPopover';
 import * as stylex from '@stylexjs/stylex';
@@ -25,9 +26,15 @@ export const TableHeaderActionsMenu = <TData,>({
   pinSide,
   sortDirection,
 }: TableHeaderActionsMenuProps<TData>) => {
-  const hasAnyAction = isSortable || !isStatic || hasSettings;
+  const hasSorting = Boolean(isSortable);
+  const hasPinAndHide = !isStatic;
+  const hasManage = Boolean(hasSettings);
 
-  if (!hasAnyAction) return;
+  if (!hasSorting && !hasPinAndHide && !hasManage) return;
+
+  // A column that is neither sortable nor movable puts "Manage Column" alone in
+  // the menu, with nothing above it to separate from.
+  const isManageTheOnlySection = isStatic && !isSortable;
 
   return (
     <TableActionsPopover
@@ -37,27 +44,31 @@ export const TableHeaderActionsMenu = <TData,>({
     >
       {({ closeMenu }) => (
         <div {...stylex.props(tableActionsPopoverStyles.menuActions)}>
-          {Boolean(isSortable) && (
+          {hasSorting && (
             <SortActions<TData>
               columnKey={columnKey}
               onClose={closeMenu}
               sortDirection={sortDirection}
             />
           )}
-          {!isStatic && (
-            <PinAndHideActions<TData>
-              columnKey={columnKey}
-              hasSectionAbove={isSortable}
-              onClose={closeMenu}
-              pinSide={pinSide}
-            />
+          {hasPinAndHide && (
+            <>
+              {hasSorting && <TableActionsPopoverSeparator />}
+              <PinAndHideActions<TData>
+                columnKey={columnKey}
+                onClose={closeMenu}
+                pinSide={pinSide}
+              />
+            </>
           )}
-          {Boolean(hasSettings) && (
-            <ManageColumnAction<TData>
-              columnKey={columnKey}
-              hasSectionAbove={isSortable || !isStatic}
-              onClose={closeMenu}
-            />
+          {hasManage && (
+            <>
+              {!isManageTheOnlySection && <TableActionsPopoverSeparator />}
+              <ManageColumnAction<TData>
+                columnKey={columnKey}
+                onClose={closeMenu}
+              />
+            </>
           )}
         </div>
       )}
