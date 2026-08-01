@@ -16,8 +16,9 @@ const baseStyles = stylex.create({
     borderWidth: 0,
     overflow: 'hidden',
     transition: `transform ${transitions.normal} ${easing.easeInOut}`,
-    backdropFilter: colors.glassBackdropFilterPrimary,
-    backgroundColor: colors.glassBackgroundColorPrimary, // '#0000002b', // '#00000047', // '#00000029', // colors.surfacePrimary,
+    // The glass surface itself is `surfaceStyles.glassPanel`, composed ahead of
+    // these styles by both delegates rather than inlined here — so the panel
+    // and the table actions popover cannot drift apart.
     boxShadow: shadows.xl,
     containerName: 'side-panel',
     containerType: 'inline-size',

@@ -22,19 +22,19 @@ TableHeaderCell/
 │   └── index.ts
 │
 ├── TableHeaderActionsMenu/
-│   ├── TableHeaderActionsMenu.component.tsx → Popover menu shell: gates sections, passes hasSectionAbove + forwards closeMenu
+│   ├── TableHeaderActionsMenu.component.tsx → Popover menu shell: gates sections, renders the separators between them, forwards closeMenu
 │   ├── TableHeaderActionsMenu.types.ts      → Props (isSortable, isStatic, hasSettings, pinSide, sortDirection)
 │   ├── SortActions/                         → Thin shell composing the sort delegates (forwards columnKey/onClose/sortDirection)
 │   │   ├── SortActions.component.tsx
 │   │   ├── SortAscendingButton/             → Toggles asc + highlights when applied; owns useSetColumnSorting
 │   │   ├── SortDescendingButton/            → Toggles desc + highlights when applied; owns useSetColumnSorting
 │   │   └── ClearSortingButton/             → Always shown, disabled until sorted; owns useSetColumnSorting
-│   ├── PinAndHideActions/                   → Thin shell composing the pin/hide delegates (forwards columnKey/onClose/pinSide/hasSectionAbove)
+│   ├── PinAndHideActions/                   → Thin shell composing the pin/hide delegates (forwards columnKey/onClose/pinSide)
 │   │   ├── PinAndHideActions.component.tsx
-│   │   ├── PinLeftButton/                   → Toggles left pin + highlights; carries divider when hasSectionAbove; owns useSetColumnPinning
+│   │   ├── PinLeftButton/                   → Toggles left pin + highlights; owns useSetColumnPinning
 │   │   ├── PinRightButton/                  → Toggles right pin + highlights; owns useSetColumnPinning
 │   │   ├── ClearPinningButton/             → Always shown, disabled until pinned; owns useSetColumnPinning
-│   │   └── HideColumnButton/                → Hides the column, always carries the divider; owns useSetColumnVisibility
+│   │   └── HideColumnButton/                → Hides the column, below a separator; owns useSetColumnVisibility
 │   ├── ManageColumnAction/                  → Manage Column item (single self-connected button); owns the drawer-open meta actions
 │   └── index.ts
 │
@@ -102,14 +102,21 @@ isTableSettingsOpen: false })`).
 
 **Stable layout & section dividers.** Every option always renders (the "Clear"
 items disable rather than disappear) so the menu never changes height as state
-changes. Section boundaries are drawn with `tableActionsPopoverStyles.menuSectionDivider`
-— a `border-top` composed onto the **first item of each following section**
-rather than a standalone `role="separator"` element or a `border-bottom` on a
-last item (whose identity would shift as options toggle). "Hide Column" always
-carries the divider (pin options always precede it within the section); "Pin
-Left" and "Manage Column" carry it only when a section renders above them,
-which the shell passes down via `hasSectionAbove` (`isSortable` for
-`PinAndHideActions`, `isSortable || !isStatic` for `ManageColumnAction`).
+changes. Section boundaries are `TableActionsPopoverSeparator` elements rendered
+between the groups — a flex child of `menuActions`, so the container's `gap`
+gives the rule equal space on both sides. Whoever knows a boundary exists renders
+it: the shell puts one before `PinAndHideActions` and before `ManageColumnAction`
+whenever a section precedes them, and `PinAndHideActions` puts one before "Hide
+Column", which is not a pinning choice.
+
+This replaced a `border-top` composed onto the first item of each following
+section. That form could not be made symmetric — the rule sat on the item's box
+edge, leaving 8px above it and nothing below, and adding `paddingTop` to
+compensate would have let the ghost-button hover background paint up to the rule.
+A `border-bottom` on each section's _last_ item is worse still: its identity
+shifts as options toggle. A separate element sidesteps both, and it also let the
+`hasSectionAbove` prop that threaded the old conditional through `PinLeftButton`,
+`ManageColumnAction` and the `PinAndHideActions` shell disappear entirely.
 
 The tree is two levels of private delegates (direct file imports, no barrels —
 ADR-007). `SortActions` and `PinAndHideActions` are **thin shells** that only

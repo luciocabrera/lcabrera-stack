@@ -12,14 +12,12 @@ import type { PinLeftButtonProps } from './PinLeftButton.types';
 /**
  * "Pin Left" item of the pin/hide section: toggles left pinning on/off and
  * highlights itself (via the `primary` variant + `aria-pressed`) while pinned
- * left. Carries the section divider above it when `hasSectionAbove` is set.
- * Closes the menu via `onClose`. Identity and active-state come from the shared
- * `PIN_LEFT_COMMAND` (ADR-011); this surface owns only its live commit-context
- * and menu presentation.
+ * left. Closes the menu via `onClose`. Identity and active-state come from the
+ * shared `PIN_LEFT_COMMAND` (ADR-011); this surface owns only its live
+ * commit-context and menu presentation.
  */
 export const PinLeftButton = <TData,>({
   columnKey,
-  hasSectionAbove = false,
   onClose,
   pinSide,
 }: PinLeftButtonProps<TData>) => {
@@ -39,10 +37,7 @@ export const PinLeftButton = <TData,>({
   return (
     <Button
       aria-pressed={isActive}
-      customStylex={[
-        tableActionsPopoverStyles.menuItem,
-        hasSectionAbove && tableActionsPopoverStyles.menuSectionDivider,
-      ]}
+      customStylex={tableActionsPopoverStyles.menuItem}
       icon={
         <span {...stylex.props(tableActionsPopoverStyles.menuIcon)}>
           <PinLeftCommandIcon size={16} />

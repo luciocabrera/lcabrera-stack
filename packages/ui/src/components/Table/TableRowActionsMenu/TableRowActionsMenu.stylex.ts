@@ -1,13 +1,14 @@
 import { spacing } from '@lcabrera/ui/design-system/tokens/base.stylex';
-import { colors } from '@lcabrera/ui/design-system/tokens/colors.stylex';
 import * as stylex from '@stylexjs/stylex';
 
 export const styles = stylex.create({
+  // Layout only — the rule above this group is a TableActionsPopoverSeparator.
+  // Consumer-supplied nodes arrive as an opaque ReactNode, so this group stacks
+  // them the way the built-in items are stacked rather than leaving them to
+  // whatever display the caller's markup happens to have.
   customActions: {
-    borderTopColor: colors.borderSecondary,
-    borderTopStyle: 'solid',
-    borderTopWidth: '1px',
-    marginTop: spacing.xs,
-    paddingTop: spacing.xs,
+    gap: spacing.xxs,
+    display: 'flex',
+    flexDirection: 'column',
   },
 });

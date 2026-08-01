@@ -38,11 +38,11 @@ vi.mock(
 
 vi.mock('@lcabrera/ui/components/Table/TableActionsPopover', () => ({
   TableActionsPopover: MockTableActionsPopover,
+  TableActionsPopoverSeparator: () => <hr />,
   tableActionsPopoverStyles: {
     menuActions: {},
     menuIcon: {},
     menuItem: {},
-    menuSectionDivider: {},
   },
 }));
 
@@ -111,6 +111,50 @@ describe('TableHeaderActionsMenu', () => {
     ]) {
       expect(screen.getByText(label)).not.toBeNull();
     }
+  });
+
+  it('separates each rendered section from the one above it', () => {
+    render(
+      <TableHeaderActionsMenu
+        columnKey='name'
+        columnLabel='Name'
+        hasSettings
+        isSortable
+        isStatic={false}
+      />,
+    );
+
+    // sort │ pin │ hide │ manage — three boundaries between four groups.
+    expect(screen.getAllByRole('separator')).toHaveLength(3);
+  });
+
+  it('renders no leading separator when the sort section is absent', () => {
+    render(
+      <TableHeaderActionsMenu
+        columnKey='name'
+        columnLabel='Name'
+        hasSettings={false}
+        isSortable={false}
+        isStatic={false}
+      />,
+    );
+
+    // Only the pin │ hide boundary — nothing renders above "Pin Left".
+    expect(screen.getAllByRole('separator')).toHaveLength(1);
+  });
+
+  it('renders no separator when a single section renders alone', () => {
+    render(
+      <TableHeaderActionsMenu
+        columnKey='id'
+        columnLabel='ID'
+        hasSettings
+        isSortable={false}
+        isStatic
+      />,
+    );
+
+    expect(screen.queryByRole('separator')).toBeNull();
   });
 
   it('renders only the pin/hide section for a movable non-sortable column', () => {

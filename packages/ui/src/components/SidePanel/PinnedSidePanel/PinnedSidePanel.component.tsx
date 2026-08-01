@@ -1,3 +1,4 @@
+import { surfaceStyles } from '@lcabrera/ui/design-system/tokens/surfaces.stylex';
 import * as stylex from '@stylexjs/stylex';
 import { createPortal } from 'react-dom';
 
@@ -21,6 +22,7 @@ export const PinnedSidePanel = ({
   const openStyle =
     position === 'left' ? ('leftOpen' as const) : ('rightOpen' as const);
   const panelStyles = stylex.props(
+    surfaceStyles.glassPanel,
     sidePanelStyles.base,
     sidePanelStyles.size[size],
     sidePanelStyles.position[position],

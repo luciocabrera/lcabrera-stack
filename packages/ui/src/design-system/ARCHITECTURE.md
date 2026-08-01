@@ -24,7 +24,7 @@ src/design-system/
     ├── commons.stylex.ts        # Reusable style recipes: interactive elements, ripple, variants, skeleton
     ├── drawerSection.stylex.ts  # Shared layout styles for Table Settings Drawer sections
     ├── filters.stylex.ts        # Shared input styles for filter components
-    └── surfaces.stylex.ts       # Shared surface recipes: `glass` (blur + translucent fill + gradient tint)
+    └── surfaces.stylex.ts       # Shared surface recipes: `glass` (blur + fill + gradient tint), `glassPanel` (blur + fill)
 ```
 
 ---
@@ -239,17 +239,29 @@ Domain-scoped styles for filter input components in the Table. Provides consiste
 ### `tokens/surfaces.stylex.ts` — Shared Surface Recipes
 
 Reusable surface `stylex.create` recipes composed ahead of a component's own
-layout styles. The `glass` recipe is the single source for the blurred,
-gradient-lit translucent surface (previously inlined in `Modal.stylex.ts`).
+layout styles. Together they are the single source for every translucent surface
+in the system — both were previously inlined in the components that needed them.
 
-| Export                | Composed from                                                                            |
-| --------------------- | ---------------------------------------------------------------------------------------- |
-| `surfaceStyles.glass` | `glassBackdropFilterPrimary` + `glassBackgroundColorPrimary` + `glassGradientBackground` |
+| Export                     | Composed from                                                                            |
+| -------------------------- | ---------------------------------------------------------------------------------------- |
+| `surfaceStyles.glass`      | `glassBackdropFilterPrimary` + `glassBackgroundColorPrimary` + `glassGradientBackground` |
+| `surfaceStyles.glassPanel` | `glassBackdropFilterPrimary` + `glassBackgroundColorPrimary`                             |
+
+The two differ only in the radial tint, and the choice is by role: `glass` is for
+a surface that is the focus of the screen (`Modal`), `glassPanel` for chrome that
+frames or floats over content, where the tint would compete with what is behind
+it (`SidePanel`, `TableActionsPopover`).
 
 `Modal` consumes it as `stylex.props(surfaceStyles.glass, modalStyles.dialog)`;
 the `glassGradientBackground`/`glassGradientBackdrop` tokens are theme-invariant
 (identical light/dark) so the Modal renders pixel-identically to the former
 hardcoded gradient.
+
+`glassPanel` exists because the drawer and the table actions menu have to keep
+matching: the popover previously carried a hardcoded opaque `#0f172a` and an
+explicit `backdropFilter: 'none'`, so it read as a different material from the
+settings drawer open beside it. Both now compose the same recipe, which is what
+makes the match survive a change to either.
 
 ---
 

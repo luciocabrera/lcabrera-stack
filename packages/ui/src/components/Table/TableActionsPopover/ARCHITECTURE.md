@@ -17,6 +17,8 @@ mechanics instead of duplicating them.
   action (e.g. after a row delete or a header sort/pin/hide action).
 - Stay content-agnostic: it knows nothing about CRUD, sorting, or pinning —
   callers compose their own menu-item list as `children`.
+- Own the menu chrome both callers share: the panel surface, the item/icon
+  styles, and `TableActionsPopoverSeparator` for the rule between groups.
 - The trigger wrapper defaults to `width: 100%` (fills a dedicated actions-column
   cell, as `TableRowActionsMenu` needs). Callers that render the trigger
   alongside sibling content in a flex row — like `TableHeaderActionsMenu` next
@@ -31,7 +33,10 @@ TableActionsPopover/
 ├── TableActionsPopover.component.tsx      → Trigger + popover panel + render-prop children
 ├── TableActionsPopover.types.ts           → Props, BoundsRect, MenuPosition, render-prop context type
 ├── TableActionsPopover.constants.ts       → MENU_* layout constants (gap, nudge, frames, padding)
-├── TableActionsPopover.stylex.ts          → trigger/menu/menuItem/menuIcon/menuActions/menuSectionDivider styles (shared)
+├── TableActionsPopover.stylex.ts          → trigger/menu/menuItem/menuIcon/menuActions/menuSeparator styles (shared)
+├── TableActionsPopoverSeparator/
+│   ├── TableActionsPopoverSeparator.component.tsx → Section rule between two groups of items
+│   └── TableActionsPopoverSeparator.test.tsx
 ├── useTableActionsPopoverPosition.hook.ts → State + observers + environment reads (trigger lookup,
 │                                            viewport size) injected into the handler-core utils
 ├── utils/
@@ -75,3 +80,24 @@ graph TD
   Panel --> OpenCheck{"isMenuOpen?"}
   OpenCheck -->|yes| Children["children({ closeMenu })"]
 ```
+
+## Menu Chrome
+
+**Surface.** The panel composes the shared `surfaceStyles.glassPanel` recipe
+ahead of its own frame styles — `stylex.props(surfaceStyles.glassPanel,
+styles.menu, …)` — so a menu floating over the grid is the same translucent
+material as the settings drawer, which composes the same recipe. `styles.menu`
+declares only the frame (border, radius, elevation, padding, `minWidth`) and no
+colour of its own; it previously hardcoded an opaque `#0f172a` with an explicit
+`backdropFilter: 'none'`, which is what made the menu read as a foreign surface.
+
+**Section rules.** `TableActionsPopoverSeparator` is a standalone flex child of
+`menuActions`, not a `border-top` on the first item of the next section. The
+container's `gap` then applies equally above and below the rule, so its spacing
+is symmetric by construction rather than by two numbers that have to be kept in
+agreement — the border-on-item form left 8px above the rule and nothing below
+it. It also keeps the rule off the items, whose ghost-button hover background
+would otherwise paint right up to it. Callers decide where the boundaries are:
+`TableHeaderActionsMenu` renders one between each pair of rendered sections,
+`PinAndHideActions` one before "Hide Column", and `TableActionMenu` one before
+consumer-supplied `customActions`.

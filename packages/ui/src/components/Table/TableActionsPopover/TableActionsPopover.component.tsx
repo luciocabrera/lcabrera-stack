@@ -1,5 +1,6 @@
 import { useTableContainerRef } from '@lcabrera/ui/components/Table/contexts/TableWrapper';
 import { TableActionButton } from '@lcabrera/ui/components/Table/TableActionButton';
+import { surfaceStyles } from '@lcabrera/ui/design-system/tokens/surfaces.stylex';
 import * as stylex from '@stylexjs/stylex';
 import { useId } from 'react';
 
@@ -49,6 +50,7 @@ export const TableActionsPopover = ({
         popover='auto'
         ref={menuRef}
         {...stylex.props(
+          surfaceStyles.glassPanel,
           styles.menu,
           menuPosition
             ? styles.menuPosition(menuPosition.left, menuPosition.top)

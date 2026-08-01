@@ -8,8 +8,7 @@ import type { HideColumnButtonProps } from './HideColumnButton.types';
 
 /**
  * "Hide Column" item of the pin/hide section: hides the column at table level
- * via `useSetColumnVisibility`. Always carries the section divider above it
- * (the pin options always precede it). Closes the menu via `onClose`.
+ * via `useSetColumnVisibility`. Closes the menu via `onClose`.
  */
 export const HideColumnButton = <TData,>({
   columnKey,
@@ -24,10 +23,7 @@ export const HideColumnButton = <TData,>({
 
   return (
     <Button
-      customStylex={[
-        tableActionsPopoverStyles.menuItem,
-        tableActionsPopoverStyles.menuSectionDivider,
-      ]}
+      customStylex={tableActionsPopoverStyles.menuItem}
       icon={
         <span {...stylex.props(tableActionsPopoverStyles.menuIcon)}>
           <EyeOffIcon size={16} />

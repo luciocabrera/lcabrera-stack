@@ -12,10 +12,10 @@ vi.mock(
 );
 
 vi.mock('@lcabrera/ui/components/Table/TableActionsPopover', () => ({
+  TableActionsPopoverSeparator: () => <hr />,
   tableActionsPopoverStyles: {
     menuIcon: {},
     menuItem: {},
-    menuSectionDivider: {},
   },
 }));
 
@@ -42,6 +42,12 @@ describe('PinAndHideActions', () => {
     expect(screen.getByText('Pin Right')).not.toBeNull();
     expect(screen.getByText('Clear Pinning')).not.toBeNull();
     expect(screen.getByText('Hide Column')).not.toBeNull();
+  });
+
+  it('separates Hide Column from the pinning choices', () => {
+    render(<PinAndHideActions columnKey='name' onClose={mockOnClose} />);
+
+    expect(screen.getAllByRole('separator')).toHaveLength(1);
   });
 
   it('threads the current pinSide into each delegate', () => {
