@@ -24,7 +24,7 @@ src/design-system/
     ├── commons.stylex.ts        # Reusable style recipes: interactive elements, ripple, variants, skeleton
     ├── drawerSection.stylex.ts  # Shared layout styles for Table Settings Drawer sections
     ├── filters.stylex.ts        # Shared input styles for filter components
-    └── surfaces.stylex.ts       # Shared surface recipes: `glass` (blur + fill + gradient tint), `glassPanel` (blur + fill)
+    └── surfaces.stylex.ts       # Shared surface recipes: `glass`, `glassPanel`, `interactiveCard`
 ```
 
 ---
@@ -239,20 +239,25 @@ Domain-scoped styles for filter input components in the Table. Provides consiste
 ### `tokens/surfaces.stylex.ts` — Shared Surface Recipes
 
 Reusable surface `stylex.create` recipes composed ahead of a component's own
-layout styles. Together they are the single source for every translucent surface
-in the system — both were previously inlined in the components that needed them.
+layout styles. Each carries a surface and nothing that positions or sizes it —
+fill, border and radius, never padding, gap or display — because the consumers
+disagree on every one of those, and a recipe overridden three different ways
+stops being a recipe.
 
-| Export                     | Composed from                                                                            |
-| -------------------------- | ---------------------------------------------------------------------------------------- |
-| `surfaceStyles.glass`      | `glassBackdropFilterPrimary` + `glassBackgroundColorPrimary` + `glassGradientBackground` |
-| `surfaceStyles.glassPanel` | `glassBackdropFilterPrimary` + `glassBackgroundColorPrimary`                             |
+| Export                          | Composed from                                                                                                                              | Consumers                                             |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------- |
+| `surfaceStyles.glass`           | `glassBackdropFilterPrimary` + `glassBackgroundColorPrimary` + `glassGradientBackground`                                                   | `Modal`                                               |
+| `surfaceStyles.glassPanel`      | `glassBackdropFilterPrimary` + `glassBackgroundColorPrimary`                                                                               | `SidePanel`, `TableActionsPopover`                    |
+| `surfaceStyles.interactiveCard` | `borderPrimary` 1px + `borderRadius.md` + `glassBackgroundColorSecondary` → `:hover surfaceElevated`, transitioned over `transitions.fast` | `DraggableListItem`, `FilterItem`, `RadioOptionGroup` |
 
-The two differ only in the radial tint, and the choice is by role: `glass` is for
-a surface that is the focus of the screen (`Modal`), `glassPanel` for chrome that
-frames or floats over content, where the tint would compete with what is behind
-it (`SidePanel`, `TableActionsPopover`).
+`glass` and `glassPanel` are the translucent **chrome** surfaces and differ only
+in the radial tint; the choice is by role. `glass` is for a surface that is the
+focus of the screen; `glassPanel` for chrome that frames or floats over content,
+where the tint would compete with what is behind it. `interactiveCard` is not
+chrome but **content** — the resting card for rows and option cards that answer
+the pointer.
 
-`Modal` consumes it as `stylex.props(surfaceStyles.glass, modalStyles.dialog)`;
+`Modal` consumes `glass` as `stylex.props(surfaceStyles.glass, modalStyles.dialog)`;
 the `glassGradientBackground`/`glassGradientBackdrop` tokens are theme-invariant
 (identical light/dark) so the Modal renders pixel-identically to the former
 hardcoded gradient.
@@ -262,6 +267,27 @@ matching: the popover previously carried a hardcoded opaque `#0f172a` and an
 explicit `backdropFilter: 'none'`, so it read as a different material from the
 settings drawer open beside it. Both now compose the same recipe, which is what
 makes the match survive a change to either.
+
+`interactiveCard` is the resting card for rows and option cards that answer the
+pointer. Its three consumers compose it inside their own `*.stylex.ts` rather
+than at the call site, so the component files stay free of design-system
+imports: `item: { ...surfaceStyles.interactiveCard, ...localStyles.item }`.
+
+Two traps, both consequences of StyleX merging by property key:
+
+- **Never compose two recipes from this file onto one element.** All three
+  declare `backgroundColor`, so the later wipes the earlier's fill instead of
+  layering.
+- **A consumer that needs an extra state on a recipe-owned property must restate
+  the recipe's default.** A value-level conditional compiles to a single property
+  key, so `borderColor: { ':focus-visible': x }` replaces the whole key and
+  silently drops the resting border. StyleX 0.19 removed selector nesting, so
+  there is no way to add one state in isolation. `DraggableListItem.item` is the
+  worked example.
+
+Not to be confused with `Card`'s `interactiveVariants.hoverable`, which is a
+different, shadow-based lift over an opaque `surfacePrimary` fill at
+`borderRadius.lg`.
 
 ---
 

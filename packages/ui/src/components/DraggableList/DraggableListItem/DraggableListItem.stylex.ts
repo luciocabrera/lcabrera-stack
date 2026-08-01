@@ -1,21 +1,24 @@
 import {
   borderRadius,
   spacing,
-  transitions,
 } from '@lcabrera/ui/design-system/tokens/base.stylex';
 import { colors } from '@lcabrera/ui/design-system/tokens/colors.stylex';
 import { skeleton } from '@lcabrera/ui/design-system/tokens/commons.stylex';
+import { surfaceStyles } from '@lcabrera/ui/design-system/tokens/surfaces.stylex';
 import * as stylex from '@stylexjs/stylex';
 
-export const styles = stylex.create({
+const localStyles = stylex.create({
+  // Layout and interaction only — the fill, border and hover come from
+  // `surfaceStyles.interactiveCard` in the export below.
   item: {
+    // `default` restates the recipe's border colour deliberately. A value-level
+    // conditional compiles to one `borderColor` key, so this object replaces the
+    // recipe's outright; drop the `default` entry and the resting border
+    // disappears while the focus ring goes on working.
     borderColor: {
       default: colors.borderPrimary,
       ':focus-visible': colors.brandPrimary,
     },
-    borderRadius: borderRadius.md,
-    borderStyle: 'solid',
-    borderWidth: '1px',
     gap: spacing.sm,
     outline: {
       default: 'none',
@@ -23,12 +26,7 @@ export const styles = stylex.create({
     },
     paddingBlock: spacing.xxs,
     paddingInline: spacing.md,
-    transition: `background-color ${transitions.fast}, border-color ${transitions.fast}`,
     alignItems: 'center',
-    backgroundColor: {
-      default: colors.glassBackgroundColorSecondary, // colors.surfaceSecondary,
-      ':hover': colors.surfaceElevated,
-    },
     cursor: {
       default: 'grab',
       ':active': 'grabbing',
@@ -75,7 +73,12 @@ export const styles = stylex.create({
   },
 });
 
+export const styles = {
+  ...localStyles,
+  item: { ...surfaceStyles.interactiveCard, ...localStyles.item },
+};
+
 export const busyStyles = {
-  overlay: [skeleton.loadingOverlay, styles.busyOverlay],
+  overlay: [skeleton.loadingOverlay, localStyles.busyOverlay],
   wave: skeleton.shimmerWave,
 };

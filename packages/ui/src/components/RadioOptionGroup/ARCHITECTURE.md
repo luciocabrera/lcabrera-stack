@@ -17,9 +17,17 @@ RadioOptionGroup/
 ```mermaid
 graph LR
   ROG["RadioOptionGroup"] --> ROG_stylex["RadioOptionGroup.stylex"]
-  ROG_stylex --> base_tokens["design-system/tokens/base.stylex (borderRadius, spacing, typography)"]
+  ROG_stylex --> base_tokens["design-system/tokens/base.stylex (spacing, typography)"]
   ROG_stylex --> colors["design-system/tokens/colors.stylex"]
+  ROG_stylex --> surfaces["design-system/tokens/surfaces.stylex (interactiveCard)"]
 ```
+
+The option card's surface — fill, hover, border, radius — is the shared
+`surfaceStyles.interactiveCard` recipe, the same one the settings drawer's
+draggable rows and filter items use, so an option card reads as the same kind of
+object as those (`design-system/ARCHITECTURE.md` → Shared Surface Recipes).
+`RadioOptionGroup.stylex` keeps only layout and composes the two in its export:
+`option: { ...surfaceStyles.interactiveCard, ...localStyles.option }`.
 
 ## Render Structure
 
@@ -50,11 +58,18 @@ The component is **fully controlled** — `value` is always the source of truth.
 
 ## Visual States
 
-| State     | Trigger                  | Style change                                                                             |
-| --------- | ------------------------ | ---------------------------------------------------------------------------------------- |
-| Default   | `value !== option.value` | `borderColor: borderSecondary`, `surfacePrimary` radio fill, transparent card            |
-| Selected  | `value === option.value` | `borderColor: brandSecondary` (accent), `backgroundColor: brandPrimaryBackground`        |
-| Radio dot | checked                  | `brandSecondary` fill + border, inner ring via `box-shadow inset brandPrimaryBackground` |
+| State       | Trigger                         | Style change                                                                             |
+| ----------- | ------------------------------- | ---------------------------------------------------------------------------------------- |
+| Default     | `value !== option.value`        | `interactiveCard` surface: `glassBackgroundColorSecondary` fill, `borderPrimary` border  |
+| Hover       | pointer over an unselected card | fill lifts to `surfaceElevated` over `transitions.fast` (from the recipe)                |
+| Selected    | `value === option.value`        | `borderColor: brandSecondary` (accent), `backgroundColor: brandPrimaryBackground`        |
+| Radio dot   | checked                         | `brandSecondary` fill + border, inner ring via `box-shadow inset brandPrimaryBackground` |
+| Radio focus | keyboard focus on the `<input>` | `2px solid brandPrimary` outline at `2px` offset                                         |
+
+A **selected** card does not lift on hover. `optionSelected` sets a flat
+`backgroundColor`, which replaces the recipe's whole `backgroundColor` key —
+`:hover` included — and that is the wanted behaviour: a chosen card holds its
+accent rather than reacting like an unchosen one.
 
 ## Types
 
@@ -80,4 +95,5 @@ The component is **fully controlled** — `value` is always the source of truth.
 - The custom radio dot uses `appearance: none` + a tokenized `box-shadow: inset 0 0 0 3px brandPrimaryBackground` over a `brandSecondary` fill to create the inner circle — no SVG or pseudo-elements needed. Selected option cards also gain a tokenized `brandSecondary` accent border.
 - Each `<label>` wraps the `<input>` so the entire card is clickable without `htmlFor`.
 - The radio's accessible name comes from the label text only; optional description text is attached separately via `aria-describedby`.
-- Transition (`background-color 0.15s, border-color 0.15s`) is applied directly in StyleX for smooth selection feedback.
+- The focus ring sits on the `<input>`, not the card. `appearance: none` strips the native one, and the `<label>` never takes focus — so `:focus-visible` on the card would match nothing, and `:has(:focus-visible)` has no precedent in this package.
+- The fill/border transition comes from the shared recipe and is tokenized (`transitions.fast`); it is no longer declared here.

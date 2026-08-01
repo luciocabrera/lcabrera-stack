@@ -1,12 +1,12 @@
 import {
-  borderRadius,
   spacing,
   typography,
 } from '@lcabrera/ui/design-system/tokens/base.stylex';
 import { colors } from '@lcabrera/ui/design-system/tokens/colors.stylex';
+import { surfaceStyles } from '@lcabrera/ui/design-system/tokens/surfaces.stylex';
 import * as stylex from '@stylexjs/stylex';
 
-export const styles = stylex.create({
+const localStyles = stylex.create({
   container: {
     gap: spacing.sm,
     display: 'flex',
@@ -23,33 +23,45 @@ export const styles = stylex.create({
     fontSize: typography.fontSizeSm,
     fontWeight: typography.fontWeightMedium,
   },
+  // Layout only — the card surface arrives from `surfaceStyles.interactiveCard`
+  // in the export below, so these cards read as the same object as the
+  // draggable rows in the settings drawer.
   option: {
     padding: spacing.md,
-    borderColor: colors.borderPrimary,
-    borderRadius: borderRadius.md,
-    borderStyle: 'solid',
-    borderWidth: '1px',
     gap: spacing.sm,
-    transition: 'background-color 0.15s, border-color 0.15s',
     alignItems: 'flex-start',
-    backgroundColor: 'transparent',
     cursor: 'pointer',
     display: 'flex',
   },
+  // Flat values, so they replace the recipe's `borderColor` and
+  // `backgroundColor` keys outright — the recipe's `:hover` fill included.
+  // Intended: a chosen card holds its accent rather than lifting under the
+  // pointer, which would read as "not yet selected".
   optionSelected: {
     borderColor: colors.brandSecondary,
     backgroundColor: colors.brandPrimaryBackground,
   },
+  // The focus ring lives on the input rather than the card because the input is
+  // what actually takes focus; `<label>` never does, so `:focus-visible` on the
+  // card would never match.
   radio: {
     margin: 0,
     borderColor: colors.borderSecondary,
     borderRadius: '50%',
     borderStyle: 'solid',
     borderWidth: '1px',
+    outline: {
+      default: 'none',
+      ':focus-visible': `2px solid ${colors.brandPrimary}`,
+    },
     appearance: 'none',
     backgroundColor: colors.surfacePrimary,
     cursor: 'pointer',
     flexShrink: 0,
+    outlineOffset: {
+      default: '0px',
+      ':focus-visible': '2px',
+    },
     height: '16px',
     width: '16px',
   },
@@ -59,3 +71,8 @@ export const styles = stylex.create({
     boxShadow: `inset 0 0 0 3px ${colors.brandPrimaryBackground}`,
   },
 });
+
+export const styles = {
+  ...localStyles,
+  option: { ...surfaceStyles.interactiveCard, ...localStyles.option },
+};
