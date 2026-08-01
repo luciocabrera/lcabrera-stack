@@ -19,6 +19,9 @@ import { styles } from './FormBody.stylex';
  * from the meta store and gates submit through the validation action. The
  * fetcher is keyed by formId so FormBodyFooter observes the same submission
  * state without prop drilling.
+ *
+ * Also the layout owner: a flex column of scrollable fields + a pinned
+ * footer, so the actions stay reachable in a height-capped host.
  */
 export const FormBody = ({
   action,

@@ -63,7 +63,7 @@ Form/
 │   ├── FormFieldsList/           → Recursive walker: computes stable key, dispatches each node type to its subcomponent
 │   │   ├── FormFieldsList.component.tsx
 │   │   ├── FormFieldsList.types.ts
-│   │   └── FormFieldsList.stylex.ts → `stack` layout only
+│   │   └── FormFieldsList.stylex.ts → `stack` layout + `region`/`scroll` (root list only, see Layout)
 │   ├── contexts/
 │   │   └── FormFieldsRendererContext/ → Supplies `FormFieldsList` to Group/Row/Tabs (see below — breaks an import cycle)
 │   │       ├── FormFieldsRendererContext.context.ts → createContext (undefined default)
@@ -73,8 +73,9 @@ Form/
 │   ├── FormFieldRow/             → `row` node: horizontal cells of nested fields; equal-width by default, optional positional `spans` widen individual cells (per-cell grow factor via dynamic StyleX) (.component + .types + .stylex + .test)
 │   ├── FormFieldTabs/            → `tab` node: one Tabs panel per tab (.component + .types + .test)
 │   └── utils/
-│       ├── collectAccessors.util.ts → Node → flattened leaf accessors (recursive, + .test)
-│       └── getFieldKey.util.ts      → Node → stable `type:accessor|accessor` React key (+ .test)
+│       ├── collectAccessors.util.ts     → Node → flattened leaf accessors (recursive, + .test)
+│       ├── getFieldKey.util.ts          → Node → stable `type:accessor|accessor` React key (+ .test)
+│       └── hasScrollOwningChild.util.ts → Root fields → does a lone tab child already scroll? (+ .test)
 ├── FormField/
 │   ├── FormField.component.tsx   → Registry dispatch by field.type
 │   ├── FormField.types.ts
@@ -87,9 +88,9 @@ Form/
 │   ├── useFormField.hook.ts → Shared per-leaf-field wiring: useId + value/error/mode selectors + isDisabled + accessor-bound setValue (every leaf field consumes it)
 │   ├── formInput.stylex.ts → The Form's own leaf-input styles (tokenized radius + focus-accent ring), deliberately separate from the Table's filters.stylex; consumed by Text/Number/Date/CurrencyField
 │   ├── TextField/     → text | email | password | textarea (new bare input)
-│   ├── NumericFieldControl/ → shared number-input control (FormFieldChrome + type=number wired via useFormField, optional adornment); NumberField & CurrencyField render it so the wiring is not duplicated
+│   ├── NumericFieldControl/ → shared number-input control (FormFieldChrome + type=number wired via useFormField, optional adornment, right-aligned value); NumberField & CurrencyField render it so the wiring is not duplicated
 │   ├── NumberField/   → number (renders NumericFieldControl)
-│   ├── CurrencyField/ → currency (NumericFieldControl + currency-symbol adornment; view/read formats as currency). utils/getCurrencySymbol.util
+│   ├── CurrencyField/ → currency (NumericFieldControl + trailing currency-symbol adornment, which follows the right-aligned value; view/read formats as currency). utils/getCurrencySymbol.util
 │   ├── DateField/     → date | datetime (new bare input)
 │   ├── BooleanField/  → wraps Checkbox or ToggleSwitch
 │   ├── SelectField/   → wraps VirtualSelect + hidden inputs for FormData
@@ -198,6 +199,68 @@ selectors and dispatches the actions it needs itself:
 `formId` (`useFetcher({ key: formId })` in both `FormBody` and the action row
 observes the same fetcher instance), and the navigation flavour matches the
 hidden `formId` input against `navigation.formData`.
+
+## Layout
+
+`FormBody` owns the form's vertical layout, because the footer is a child of
+the `<form>` element (it has to be — the submit button participates in native
+form submission) and therefore cannot be hoisted into a host's own footer slot.
+
+```mermaid
+graph TD
+  form["&lt;form&gt; — flex column, flex: 1 1 auto, minHeight: 0"]
+  form --> fields["FormFields → FormFieldsList root stack<br/>styles.region (flex: 1 1 auto, minHeight: 0)<br/>+ styles.scroll unless a lone tab child already scrolls"]
+  form --> footer["FormFooter → FormFooterActions<br/>flexShrink: 0, padding + border-top"]
+```
+
+The scroll boundary is the **fields region**, never the form itself, so the
+action row stays pinned to the bottom edge no matter how tall the field tree
+gets. This only binds when a host constrains the form's height — `Modal`'s body
+is a flex column that hands its full height to a `flex: 1 1 auto` child (see
+`Modal/ARCHITECTURE.md`), which is what makes the pinning take effect there. On
+an unconstrained page the form hugs its content and nothing scrolls, so the same
+markup serves both.
+
+There is **no wrapper element and no prop**: `FormFieldsList`'s existing root
+stack _is_ the scroll container, and it owns that style itself
+(`FormFieldsList.stylex` → `region`). Since the walker is recursive, it has to
+apply `region` at the root and nowhere else — it reads
+`FormFieldsRendererContext` for that. Every list renders inside its parent's
+provider, so the one that reads `undefined` is by construction the outermost.
+A nested list picking up `region` would become a scroll container of its own,
+clipping `VirtualSelect` dropdowns inside every group/row/tab for no benefit.
+
+Two more consequences worth knowing before changing it:
+
+- **The host must not be the scroller too.** Two nested `overflow: auto`
+  containers put the footer back inside the outer one, which is exactly the bug
+  this replaced.
+- **`overflow-y: auto` computes `overflow-x` to `auto`**, so the fields region
+  clips horizontally. It carries `spacing.xxs` of padding for that reason — a
+  focused field's outline ring (`2px` + `2px` offset) would otherwise be cut off
+  at the edges. `VirtualSelect`'s dropdown is absolutely positioned rather than
+  portalled, so it is clipped by this region near the bottom of a tall form.
+- **The footer carries its own chrome**, matching `SidePanelFooter` (the table
+  settings drawer's): `spacing.sm` padding and a `borderPrimary` rule on top,
+  which is what separates a pinned action row from the content scrolling behind
+  it. The form therefore sets **no `gap`** — the rule belongs directly under the
+  content it cuts off, not floating in dead space above it. A host that wants
+  the footer flush against its own edge drops its block-end padding, as
+  `OrderFormModal` does.
+- **A scroll container reserves its gutter on both edges**
+  (`scrollbarGutter: stable both-edges`) so no field resizes the moment content
+  grows past the cap. Reserving a single edge would trade the reflow for
+  permanently off-centre content.
+- **Exactly one container in the chain should scroll**, because a reservation
+  costs its inline space whether or not the bar ever appears — and they stack.
+  A tabbed form scrolls at `TabsContent`; an untabbed one at the fields region.
+  Two mechanisms keep it to one:
+  - `hasScrollOwningChild.util` — the root list drops `styles.scroll` (keeping
+    `styles.region`, the height a tab panel's `height: 100%` needs) when its
+    only child is a `tab` node, which already scrolls.
+  - `bodyStylex` on `Modal` — `OrderFormModal` zeroes the body's inline padding
+    _and_ its gutter, since a Form takes the body's full height and can never
+    scroll it (see `Modal/ARCHITECTURE.md` → Layout Sections).
 
 ## Submission Flow
 

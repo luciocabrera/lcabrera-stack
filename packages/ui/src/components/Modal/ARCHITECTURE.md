@@ -75,11 +75,34 @@ Two separate `useEffect`s are used:
 
 ## Layout Sections
 
-| Section | Condition        | Styles                             | Contents                        |
-| ------- | ---------------- | ---------------------------------- | ------------------------------- |
-| Header  | `title` present  | `Title` component                  | title text + ghost close Button |
-| Body    | always           | `padding.lg`, `overflowY: auto`    | `children`                      |
-| Footer  | `footer` present | `padding.lg`, border-top, flex-end | `footer` slot (ReactNode)       |
+| Section | Condition        | Styles                                       | Contents                        |
+| ------- | ---------------- | -------------------------------------------- | ------------------------------- |
+| Header  | `title` present  | `Title` component                            | title text + ghost close Button |
+| Body    | always           | `padding.lg`, flex column, `overflowY: auto` | `children`                      |
+| Footer  | `footer` present | `padding.lg`, border-top, flex-end           | `footer` slot (ReactNode)       |
+
+The body is a **flex column**, not a wrapping row. Plain content stacks and the
+body scrolls when it overflows; a single child that asks for `flex: 1 1 auto`
+instead receives the whole body height and may run its own scroll region. That
+second mode is what `Form` uses (`Form/ARCHITECTURE.md` → Layout): a form's
+footer lives inside its `<form>` element, so it can only stay pinned if the
+scrolling happens _below_ the modal body rather than at it.
+
+Its scrollbar gutter is reserved on **both** edges
+(`scrollbarGutter: stable both-edges`), so content keeps its width whether or
+not the bar is showing _and_ stays centred — reserving one edge only trades a
+reflow for permanently off-centre content.
+
+`padding.lg` is tuned for plain content. A child that carries its own
+edge-to-edge chrome — a `Tabs` strip, which brings its own inline padding and
+gutter — should zero the inline half via `bodyStylex` rather than stack two
+insets; `OrderFormModal` is the worked example. Keep the block padding, or the
+strip collides with the title rule and the footer sits on the bottom edge.
+
+Such a child should zero the **gutter** through the same prop
+(`scrollbarGutter: 'auto'`). A reservation costs its inline space whether or not
+a bar ever appears, so a body that can never scroll — because its child took the
+full height — is otherwise paying for one twice over.
 
 ## Sizing
 
@@ -94,13 +117,15 @@ The interior is a flex column (via `AppDotted`): the body has `flex: 1 1 auto` +
 
 ## Props
 
-| Prop       | Type         | Required | Description                                           |
-| ---------- | ------------ | -------- | ----------------------------------------------------- |
-| `children` | `ReactNode`  | ✓        | Scrollable body content                               |
-| `isOpen`   | `boolean`    | ✓        | Controls `showModal()` / `close()`                    |
-| `onClose`  | `() => void` | ✓        | Called when close button clicked or Esc pressed       |
-| `title`    | `string`     | —        | Renders the header section with title + close button  |
-| `footer`   | `ReactNode`  | —        | Renders the footer section (typically action buttons) |
+| Prop           | Type           | Required | Description                                                                                                                           |
+| -------------- | -------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `children`     | `ReactNode`    | ✓        | Scrollable body content                                                                                                               |
+| `isOpen`       | `boolean`      | ✓        | Controls `showModal()` / `close()`                                                                                                    |
+| `onClose`      | `() => void`   | ✓        | Called when close button clicked or Esc pressed                                                                                       |
+| `customStylex` | `StyleXStyles` | —        | Consumer override on the `<dialog>` frame — composed last, so it wins over `modalStyles.dialog` (see Sizing)                          |
+| `bodyStylex`   | `StyleXStyles` | —        | Consumer override on the body region — composed last. Use it to drop the default inset for self-padding content (see Layout Sections) |
+| `title`        | `string`       | —        | Renders the header section with title + close button                                                                                  |
+| `footer`       | `ReactNode`    | —        | Renders the footer section (typically action buttons)                                                                                 |
 
 ## Accessibility
 
