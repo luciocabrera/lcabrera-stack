@@ -57,6 +57,7 @@ export const NumericFieldControl = <TValues extends Record<string, unknown>>({
           value={stringValue}
           {...stylex.props(
             formInputStyles.input,
+            styles.input,
             adornment !== undefined && styles.inputWithAdornment,
           )}
         />
