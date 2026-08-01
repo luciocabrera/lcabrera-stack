@@ -41,6 +41,7 @@ const setup = (metaState: Partial<VirtualSelectMetaState> = {}) => {
   });
   const onToggleDropdown = vi.fn();
   const contextValue: VirtualSelectContextValue = {
+    anchorRef: { current: document.createElement('div') },
     metaStore: metaStore as never,
     onToggleDropdown,
   };

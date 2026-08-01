@@ -9,6 +9,6 @@ export const getDropdownStyle = ({
   isAlwaysOpen,
   shouldFillHeight,
 }: GetDropdownStyleArgs) => {
-  if (!isAlwaysOpen) return styles.dropdownAbsolute;
+  if (!isAlwaysOpen) return styles.dropdownFloating;
   return shouldFillHeight ? styles.dropdownStaticFill : styles.dropdownStatic;
 };

@@ -1,14 +1,19 @@
 import { VirtualListContent } from '@lcabrera/ui/components/VirtualList';
 import { useGetShouldFillHeight } from '@lcabrera/ui/components/VirtualList/contexts/list/selectors';
 import * as stylex from '@stylexjs/stylex';
+import { useRef } from 'react';
 
+import { useToggleDropdown } from '../contexts/meta/actions';
 import {
   useGetCustomStylex,
   useGetIsAlwaysOpen,
   useGetIsListVisible,
   useGetListboxId,
 } from '../contexts/meta/selectors';
+import { useVirtualSelectAnchorRef } from '../contexts/useVirtualSelectAnchorRef.hook';
+import { useVirtualSelectDropdownPosition } from './useVirtualSelectDropdownPosition.hook';
 import { getDropdownStyle } from './utils/getDropdownStyle.util';
+import { HAS_POPOVER_SUPPORT } from './VirtualSelectDropdown.constants';
 import { styles } from './VirtualSelectDropdown.stylex';
 
 /**
@@ -17,23 +22,48 @@ import { styles } from './VirtualSelectDropdown.stylex';
  * positioning/visibility come from the select meta selectors and the
  * fill-height flag from the list config store; the list providers and the
  * selection-change mapping are owned by the shell.
+ *
+ * A trigger-opened dropdown renders in the top layer (`popover`) rather than
+ * absolutely, so a scrolling ancestor cannot clip it. `isAlwaysOpen` is the
+ * inline variant (Table filter panels) — it stays in normal flow, where there
+ * is nothing to escape.
  */
 export const VirtualSelectDropdown = () => {
+  const anchorRef = useVirtualSelectAnchorRef();
   const customStylex = useGetCustomStylex();
   const isAlwaysOpen = useGetIsAlwaysOpen();
   const isListVisible = useGetIsListVisible();
   const listboxId = useGetListboxId();
   const shouldFillHeight = useGetShouldFillHeight();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const toggleDropdown = useToggleDropdown();
+
+  const isFloating = !isAlwaysOpen;
+  const placement = useVirtualSelectDropdownPosition({
+    anchorRef,
+    dropdownRef,
+    isEnabled: isFloating && isListVisible,
+    // Only ever reached while the dropdown is rendered, i.e. open — so the
+    // toggle here can only mean close.
+    onScrollAway: toggleDropdown,
+  });
 
   if (!isListVisible) return;
 
   return (
     <div
       id={listboxId}
+      popover={isFloating && HAS_POPOVER_SUPPORT ? 'manual' : undefined}
+      ref={dropdownRef}
       role='listbox'
       {...stylex.props(
         styles.dropdownBase,
         getDropdownStyle({ isAlwaysOpen, shouldFillHeight }),
+        isFloating && placement === undefined && styles.dropdownUnplaced,
+        isFloating &&
+          placement !== undefined &&
+          styles.dropdownAt(placement.left, placement.top, placement.width),
         customStylex,
       )}
     >

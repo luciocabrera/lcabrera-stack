@@ -7,11 +7,16 @@ Dropdown slice of `VirtualSelect`: the positioned listbox shell around the provi
 ```
 VirtualSelectDropdown/
 ├── VirtualSelectDropdown.component.tsx   → Listbox shell + VirtualListContent, meta-selector-connected
-├── VirtualSelectDropdown.stylex.ts       → dropdownBase / dropdownAbsolute / dropdownStatic / dropdownStaticFill
+├── VirtualSelectDropdown.constants.ts    → DROPDOWN_GAP_PX + HAS_POPOVER_SUPPORT (feature detection)
+├── VirtualSelectDropdown.stylex.ts       → dropdownBase / dropdownFloating / dropdownAt / dropdownUnplaced / dropdownStatic / dropdownStaticFill
+├── VirtualSelectDropdown.types.ts        → AnchorRect, DropdownPlacement
+├── useVirtualSelectDropdownPosition.hook.ts → Top-layer promotion + viewport coordinates (bundle-local hook, mirrors useTableActionsPopoverPosition)
 ├── VirtualSelectDropdown.component.test.tsx
 └── utils/
     ├── getDropdownStyle.util.ts          → Pick the dropdown position style
-    └── getDropdownStyle.util.test.ts
+    ├── getDropdownStyle.util.test.ts
+    ├── resolveDropdownPlacement.util.ts  → Pure below/flip-above placement maths
+    └── resolveDropdownPlacement.util.test.ts
 ```
 
 `getDropdownStyle` is imported via direct file path (single consumer — no `utils/index.ts`, ADR-007 rule 3).
@@ -37,15 +42,47 @@ graph LR
 
 Controlled by `utils/getDropdownStyle({ isAlwaysOpen, shouldFillHeight })`, composed after `dropdownBase` and before the consumer's `customStylex` override (read from the meta store, always last in `stylex.props`):
 
-| `isAlwaysOpen` | `shouldFillHeight` | Style applied        | Behaviour                           |
-| -------------- | ------------------ | -------------------- | ----------------------------------- |
-| `false`        | any                | `dropdownAbsolute`   | Floats below trigger, z-elevated    |
-| `true`         | `false`            | `dropdownStatic`     | Inline block (e.g. filter panel)    |
-| `true`         | `true`             | `dropdownStaticFill` | Flex-fill (e.g. full-height drawer) |
+| `isAlwaysOpen` | `shouldFillHeight` | Style applied        | Behaviour                                              |
+| -------------- | ------------------ | -------------------- | ------------------------------------------------------ |
+| `false`        | any                | `dropdownFloating`   | Top layer, fixed to the trigger's viewport coordinates |
+| `true`         | `false`            | `dropdownStatic`     | Inline block (e.g. filter panel)                       |
+| `true`         | `true`             | `dropdownStaticFill` | Flex-fill (e.g. full-height drawer)                    |
+
+### Why the floating variant lives in the top layer
+
+It used to be `position: absolute` inside the shell's `position: relative`
+container, so **any** ancestor establishing a clipping context cut it off — a Form
+group card (`overflow: hidden`), the form's own scroll region, a settings drawer.
+No z-index resolves that; clipping is not a stacking question. The same select
+looks correct on the showcase page only because that page has no such ancestor.
+
+`useVirtualSelectDropdownPosition` promotes the element with the native Popover
+API (`popover="manual"` + `showPopover()`) and positions it `fixed` from the
+anchor's measured rect. Three consequences worth knowing:
+
+- **The DOM tree is unchanged** — unlike a React portal, only painting moves. The
+  shell's `useClickOutside` uses `contains()`, so a click inside the list still
+  counts as inside the select. That is why a portal was not used.
+- **Support is feature-detected** (`HAS_POPOVER_SUPPORT`). jsdom applies the
+  `[popover]` UA rule — `display: none` until open — but ships no `showPopover`,
+  so an unconditional attribute would make the list permanently invisible. Without
+  the attribute the dropdown still positions correctly; it is just clippable again.
+- **Scrolling an ancestor dismisses the dropdown** rather than re-anchoring it. A
+  fixed-position list cannot follow its trigger without reading layout on every
+  scroll frame, and one lagging its trigger reads worse than one that closes. Size
+  changes (viewport, trigger, list) _do_ re-anchor, via a `ResizeObserver` that
+  also takes the first measurement — which is why nothing sets state synchronously
+  in the effect.
+
+The `[popover]` UA stylesheet is aggressive — `inset: 0`, `margin: auto`,
+`padding: .25em`, a solid border, system colors, `overflow: auto` — so most of
+`dropdownFloating` exists to undo it. Author styles beat the UA origin regardless
+of specificity, so plain longhands suffice.
 
 ## State Ownership
 
-| Source            | Read                                                         | Dispatched |
-| ----------------- | ------------------------------------------------------------ | ---------- |
-| Select meta store | `customStylex`, `isAlwaysOpen`, `isListVisible`, `listboxId` | —          |
-| List store        | `shouldFillHeight` (positioning input)                       | —          |
+| Source            | Read                                                         | Dispatched                                      |
+| ----------------- | ------------------------------------------------------------ | ----------------------------------------------- |
+| Select meta store | `customStylex`, `isAlwaysOpen`, `isListVisible`, `listboxId` | `onToggleDropdown` (dismiss on ancestor scroll) |
+| Select context    | `anchorRef` — the shell container placement measures against | —                                               |
+| List store        | `shouldFillHeight` (positioning input)                       | —                                               |

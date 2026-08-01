@@ -56,6 +56,7 @@ export const VirtualSelect = ({
 
   return (
     <VirtualSelectProvider
+      anchorRef={containerRef}
       dataState={effectiveDataState}
       filter={{ type: 'select', values: selectedLabels }}
       listState={{

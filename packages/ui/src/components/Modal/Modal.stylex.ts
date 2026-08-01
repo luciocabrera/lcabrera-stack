@@ -8,19 +8,21 @@ import { colors } from '@lcabrera/ui/design-system/tokens/colors.stylex';
 import * as stylex from '@stylexjs/stylex';
 
 export const modalStyles = stylex.create({
+  // A column, so a single child asking for `flex: 1 1 auto` receives the whole
+  // body height and can run its own scroll region (see Form/FormBody) instead
+  // of scrolling here — which is what pushes a form's footer out of view.
+  // `overflowY` stays for plain content that does not manage its own height;
+  // `scrollbarGutter: stable both-edges` holds that bar's space open either
+  // way, so content never reflows the moment it grows past the height cap —
+  // `both-edges` rather than the default single edge because an inset applied
+  // to one side only reads as off-centre content.
   body: {
+    scrollbarGutter: 'stable both-edges',
     padding: spacing.lg,
     flex: '1 1 auto',
     gap: spacing.md,
     display: 'flex',
-    flexWrap: 'wrap',
-    //     transition: `transform ${transitions.normal} ${easing.easeInOut}`,
-    // backdropFilter: colors.glassBackdropFilterPrimary,
-    // backgroundColor: colors.glassBackgroundColorPrimary,
-    // backdropFilter: 'blur(30px)',
-    // backgroundColor: 'rgba(15, 23, 42, 0.45)',
-    // display: 'flex',
-    // flexDirection: 'column',
+    flexDirection: 'column',
     minHeight: 0,
     overflowY: 'auto',
   },
@@ -49,8 +51,6 @@ export const modalStyles = stylex.create({
   footer: {
     padding: spacing.lg,
     gap: spacing.sm,
-    // backdropFilter: 'blur(30px)',
-    // backgroundColor: 'rgba(15, 23, 42, 0.45)',
     display: 'flex',
     flexShrink: 0,
     justifyContent: 'flex-end',
@@ -58,17 +58,4 @@ export const modalStyles = stylex.create({
     borderTopStyle: 'solid',
     borderTopWidth: '1px',
   },
-  // header: {
-  //   padding: spacing.lg,
-  //   gap: spacing.sm,
-  //   alignItems: 'flex-start',
-  //   backdropFilter: 'blur(30px)',
-  //   backgroundColor: 'rgba(15, 23, 42, 0.45)',
-  //   display: 'flex',
-  //   flexShrink: 0,
-  //   justifyContent: 'space-between',
-  //   borderBottomColor: colors.borderSecondary,
-  //   borderBottomStyle: 'solid',
-  //   borderBottomWidth: '1px',
-  // },
 });

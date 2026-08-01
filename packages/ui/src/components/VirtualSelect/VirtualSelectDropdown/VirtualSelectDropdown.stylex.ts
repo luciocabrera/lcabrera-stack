@@ -23,14 +23,40 @@ export const styles = stylex.create({
     minWidth: 0,
     width: '100%',
   },
-  dropdownAbsolute: {
+  /**
+   * Floating (trigger-opened) dropdown. `position: fixed` plus the top layer,
+   * because an absolutely positioned list is clipped by any scrolling ancestor
+   * — see `useVirtualSelectDropdownPosition`, which supplies the coordinates.
+   * Most of this block is undoing the `[popover]` UA stylesheet, which sets
+   * `inset: 0`, `margin: auto`, `padding: .25em`, a solid border, system
+   * colors and `overflow: auto`.
+   */
+  dropdownFloating: {
+    inset: 'auto',
+    borderStyle: 'none',
+    overflow: 'visible',
     boxShadow: shadows.lg,
-    position: 'absolute',
+    color: 'inherit',
+    position: 'fixed',
     zIndex: zIndex.dropdown,
-    left: 0,
-    marginTop: spacing.sm,
-    right: 0,
-    top: '100%',
+    marginBottom: 0,
+    marginLeft: 0,
+    marginRight: 0,
+    marginTop: 0,
+    paddingBottom: 0,
+    paddingLeft: 0,
+    paddingRight: 0,
+    paddingTop: 0,
+  },
+  /** Viewport coordinates; the gap to the trigger is baked into `top`. */
+  dropdownAt: (left: number, top: number, width: number) => ({
+    left,
+    top,
+    width,
+  }),
+  /** Held back for the one frame between mount and the first measurement. */
+  dropdownUnplaced: {
+    visibility: 'hidden',
   },
   dropdownStatic: {
     position: 'relative',

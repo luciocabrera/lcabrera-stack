@@ -13,7 +13,9 @@ import type { ModalProps } from './Modal.types';
 import { modalStyles } from './Modal.stylex';
 
 export const Modal = ({
+  bodyStylex,
   children,
+  customStylex,
   footer,
   isOpen,
   onClose,
@@ -49,7 +51,7 @@ export const Modal = ({
   return (
     <dialog
       ref={dialogRef}
-      {...stylex.props(surfaceStyles.glass, modalStyles.dialog)}
+      {...stylex.props(surfaceStyles.glass, modalStyles.dialog, customStylex)}
     >
       <AppBackground shouldFillViewport={false}>
         <AppDotted>
@@ -68,7 +70,7 @@ export const Modal = ({
               {title}
             </Title>
           )}
-          <div {...stylex.props(modalStyles.body)}>{children}</div>
+          <div {...stylex.props(modalStyles.body, bodyStylex)}>{children}</div>
           {Boolean(footer) && (
             <div {...stylex.props(modalStyles.footer)}>{footer}</div>
           )}

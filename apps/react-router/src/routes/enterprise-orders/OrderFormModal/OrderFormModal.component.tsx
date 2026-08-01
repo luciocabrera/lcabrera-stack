@@ -7,6 +7,7 @@ import type { OrderFormModalProps } from './OrderFormModal.types';
 
 import { ENTERPRISE_ORDERS_PATH } from '../config';
 import { buildOrderFormFields } from '../utils/orderFormFields.util';
+import { styles } from './OrderFormModal.stylex';
 
 /**
  * Renders the enterprise-order Form inside a `@lcabrera/ui` Modal, overlaid on the
@@ -29,7 +30,13 @@ export const OrderFormModal = ({
   };
 
   return (
-    <Modal isOpen onClose={handleClose} title={title}>
+    <Modal
+      bodyStylex={styles.flushBody}
+      customStylex={styles.dialog}
+      isOpen
+      onClose={handleClose}
+      title={title}
+    >
       <Form<EnterpriseOrderValues>
         cancelTo={ENTERPRISE_ORDERS_PATH}
         fields={buildOrderFormFields({ mode })}

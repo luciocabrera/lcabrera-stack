@@ -1,9 +1,12 @@
 import type { VirtualListProviderProps } from '@lcabrera/ui/components/VirtualList/contexts/VirtualListContext.types';
 import type { TStore } from '@lcabrera/ui/hooks/useStore.hook';
+import type { RefObject } from 'react';
 
 import type { VirtualSelectMetaState } from '../VirtualSelect.types';
 
 export type VirtualSelectContextValue = {
+  /** The shell's outer container — the rect a floating dropdown anchors to. A ref, not store state: it never triggers a render. */
+  readonly anchorRef: RefObject<HTMLDivElement | null>;
   /** Store managing the select-level presentation metadata */
   readonly metaStore: TStore<VirtualSelectMetaState>;
   /** Toggles the dropdown open state — owned by the shell (actions only) */
@@ -27,5 +30,6 @@ export type VirtualSelectMetaStateProps = Omit<
  * mirrored into the meta store.
  */
 export type VirtualSelectProviderProps = VirtualListProviderProps & {
+  readonly anchorRef: VirtualSelectContextValue['anchorRef'];
   readonly metaState: VirtualSelectMetaStateProps;
 };
