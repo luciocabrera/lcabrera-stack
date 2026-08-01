@@ -52,13 +52,17 @@ Three findings worth not rediscovering:
   `showPopover` to open with. Hence the `HAS_POPOVER_SUPPORT` feature detection
   — without it the list is permanently invisible under test.
 
-Two things in this area are deliberately NOT in the commit, both flagged to the
-integrator:
+Two changes outside the field/select work ride along on this branch, each in
+its own commit so they can be reviewed or dropped independently:
 
-- `AppDotted.stylex.ts` — an uncommitted `containerName`/`containerType` pair
-  this task did not author. Nothing queries `app-dotted`, and `container-type:
-inline-size` makes the element a containing block for fixed-position
-  descendants, which touches this task's fallback path. Needs its author.
-- `pnpm-workspace.yaml` / `pnpm-lock.yaml` — a real, gated dependency-catalog
-  refresh (see the branch thread), not pre-existing dirt. Belongs in its own
-  `build(deps)` commit, not in a UI change.
+- `AppDotted.stylex.ts` — authored by human:lucio, committed here at their
+  request. It makes the dotted surface a query container. Nothing queries
+  `app-dotted` yet, and `container-type: inline-size` implies layout
+  containment, so the element becomes a containing block for fixed-position
+  descendants. Top-layer content is unaffected, so the dropdown above still
+  resolves against the viewport; only its no-popover fallback would offset.
+- `pnpm-workspace.yaml` / `pnpm-lock.yaml` — a dependency-catalog refresh
+  (5 packages, TypeScript held). The content half of `vp run deps:refresh`;
+  that command's own ceremony would have forked a second issue and branch.
+  `vp upgrade` and `pnpm clean --lockfile` were skipped, so the
+  stale-resolution sweep is still outstanding.
