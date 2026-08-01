@@ -15,10 +15,17 @@ issue: #486
 
 ## What
 
-Tooltip arrow is missing the surface border
+The tooltip arrow renders as a bare filled square: the surface's 1px
+`borderPrimary` outline stops at the tooltip box, so the tip below it reads as a
+detached triangle. Border the two edges of the rotated square that end up
+outside the body, per placement.
+
+Also clears the two task files whose work has already merged
+(`interactive-card-surface-recipe` #485, `table-actions-menu-surface-dividers`
+#483) — `coordination:verify` was warning on both.
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implemented; quality gate
 - Blockers: none
-- Next:
+- Next: gate → PR ready for review
