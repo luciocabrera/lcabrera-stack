@@ -247,7 +247,7 @@ stops being a recipe.
 | Export                          | Composed from                                                                                                                              | Consumers                                             |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------- |
 | `surfaceStyles.glass`           | `glassBackdropFilterPrimary` + `glassBackgroundColorPrimary` + `glassGradientBackground`                                                   | `Modal`                                               |
-| `surfaceStyles.glassPanel`      | `glassBackdropFilterPrimary` + `glassBackgroundColorPrimary`                                                                              | `SidePanel`, `TableActionsPopover`                    |
+| `surfaceStyles.glassPanel`      | `glassBackdropFilterPrimary` + `glassBackgroundColorPrimary`                                                                               | `SidePanel`, `TableActionsPopover`                    |
 | `surfaceStyles.interactiveCard` | `borderPrimary` 1px + `borderRadius.md` + `glassBackgroundColorSecondary` → `:hover surfaceElevated`, transitioned over `transitions.fast` | `DraggableListItem`, `FilterItem`, `RadioOptionGroup` |
 
 `glass` and `glassPanel` are the translucent **chrome** surfaces and differ only
