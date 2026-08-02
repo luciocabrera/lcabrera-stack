@@ -2,7 +2,7 @@
 id: generic-table-route-data-path
 title: Generic table-route data path — fetcher, page query, view
 owner: agent:claude
-status: active
+status: review
 branch: refactor/490-generic-table-route-data-path
 area:
   - packages/api/src/http/**
@@ -16,7 +16,7 @@ area:
 started: 2026-08-02
 updated: 2026-08-02
 plan: (none)
-pr: (none)
+pr: https://github.com/luciocabrera/vite-react-compiler/pull/491
 issue: https://github.com/luciocabrera/vite-react-compiler/issues/490
 ---
 
@@ -38,6 +38,6 @@ keep byte-identical request shapes.
 
 ## Status / next
 
-- Current step: implementing the `@lcabrera/api` fetcher
+- Current step: PR #491 open, full quality gate green
 - Blockers: none
-- Next: ui query utils → hook + view → migrate three routes → docs/ADR → gate
+- Next: review → merge → delete this file
