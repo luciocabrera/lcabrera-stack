@@ -23,8 +23,12 @@ type CreatePaginatedFetcherArgs<TResponse> = {
  * and *what shape* once, instead of re-assembling the same URL and the same
  * `!ok` check per entity.
  *
- * Transport-agnostic in the same way as `fetchDistinctValues`: pass `baseUrl`
- * per call for a BFF host, or omit it for a same-origin resource route.
+ * Transport-agnostic, but the seam differs from `fetchDistinctValues`'s plain
+ * `baseUrl`: the origin is a **strategy** fixed per fetcher (`resolveBaseUrl`),
+ * not a value passed per call, because it is a property of the endpoint. Pass
+ * `getApiBaseUrl` for an endpoint on the API host, or omit it entirely for a
+ * same-origin resource route. What a call site supplies is `requestUrl` — the
+ * SSR request's URL, which the strategy needs and only a loader has.
  *
  * The guard is **required**. An unvalidated page is a cast, and a cast that is
  * wrong surfaces as a render crash three layers away from the response that

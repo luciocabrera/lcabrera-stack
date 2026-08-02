@@ -92,6 +92,29 @@ export const loader = async ({ request }: { request: Request }) => {
 };
 ```
 
+### Fetch a page of table rows
+
+Declare the endpoint once; the fetcher takes the query. The origin is a
+per-fetcher strategy, not a per-call value — omit `resolveBaseUrl` for a
+same-origin resource route, and pass `getApiBaseUrl` for one on the API host.
+Only a loader supplies `requestUrl`, because only a loader has the SSR request.
+
+```ts
+import { createPaginatedFetcher } from '@lcabrera/api/http/create-paginated-fetcher.util';
+
+export const fetchOrdersPage = createPaginatedFetcher<OrdersResponse>({
+  isValid: isOrdersResponse, // required — an unvalidated page is a cast
+  path: '/car-sales/paginated',
+  resolveBaseUrl: getApiBaseUrl, // omit for a same-origin resource route
+});
+
+// In a loader — `requestUrl` is what the strategy resolves against:
+await fetchOrdersPage({ limit: 50, requestUrl: request.url, skip: 0 });
+
+// In the browser:
+await fetchOrdersPage({ cursor, filter, limit: 50, skip: 50, sorting });
+```
+
 ### Page a filter dropdown
 
 ```ts
