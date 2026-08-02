@@ -13,7 +13,7 @@ import {
 
 const { contentRenderCount, metaState, setMetaState } = vi.hoisted(() => {
   const initialMetaState = {
-    customStylex: undefined as stylex.StyleXStyles,
+    customStylex: undefined as stylex.StyleXStyles | undefined,
     isAlwaysOpen: false,
     isListVisible: true,
     listboxId: 'listbox-id',
@@ -72,6 +72,7 @@ import { VirtualSelectDropdown } from './VirtualSelectDropdown.component';
  */
 const consumerStyles = stylex.create({
   positionReset: { position: 'relative' },
+  surfaceTweak: { boxShadow: 'none' },
 });
 
 beforeEach(() => {
@@ -130,5 +131,22 @@ describe('VirtualSelectDropdown', () => {
       .filter((className) => resetClassName.split(' ').includes(className));
 
     expect(survivors).toEqual(positionedClassName.split(' '));
+  });
+
+  it('still lets a consumer style override the floating surface', () => {
+    render(<VirtualSelectDropdown />);
+    const baseClassName = screen.getByRole('listbox').className;
+
+    cleanup();
+    setMetaState({ customStylex: consumerStyles.surfaceTweak });
+    render(<VirtualSelectDropdown />);
+
+    // The counterpart of the case above: elevation is surface, not placement,
+    // so `dropdownFloatingSurface` sits BEFORE `customStylex` and the consumer
+    // wins. Composing the whole floating style after `customStylex` would take
+    // this away while looking like it only protected positioning.
+    const tweakedClassName = screen.getByRole('listbox').className;
+
+    expect(tweakedClassName).not.toBe(baseClassName);
   });
 });

@@ -12,9 +12,8 @@ import {
 } from '../contexts/meta/selectors';
 import { useVirtualSelectAnchorRef } from '../contexts/useVirtualSelectAnchorRef.hook';
 import { useVirtualSelectDropdownPosition } from './useVirtualSelectDropdownPosition.hook';
-import { getDropdownStyle } from './utils/getDropdownStyle.util';
+import { resolveDropdownStyles } from './utils/resolveDropdownStyles.util';
 import { HAS_POPOVER_SUPPORT } from './VirtualSelectDropdown.constants';
-import { styles } from './VirtualSelectDropdown.stylex';
 
 /**
  * Dropdown slice of VirtualSelect: the positioned listbox shell around the
@@ -56,20 +55,13 @@ export const VirtualSelectDropdown = () => {
       ref={dropdownRef}
       role='listbox'
       {...stylex.props(
-        styles.dropdownBase,
-        // Ahead of the positioning styles, and that order is load-bearing:
-        // last-wins, so a consumer style placed after them can null out
-        // `position: fixed` or the computed coordinates. A popover that is not
-        // absolutely positioned still sits in the top layer, where it lays out
-        // against the initial containing block — i.e. the viewport's top-left
-        // corner, detached from its trigger. `customStylex` tunes the surface;
-        // the component owns where it goes.
-        customStylex,
-        getDropdownStyle({ isAlwaysOpen, shouldFillHeight }),
-        isFloating && placement === undefined && styles.dropdownUnplaced,
-        isFloating &&
-          placement !== undefined &&
-          styles.dropdownAt(placement.left, placement.top, placement.width),
+        ...resolveDropdownStyles({
+          customStylex,
+          isAlwaysOpen,
+          isFloating,
+          placement,
+          shouldFillHeight,
+        }),
       )}
     >
       <VirtualListContent />

@@ -110,15 +110,16 @@ The provider lives for the **select's lifetime**, not per dropdown open:
 
 ## Dropdown Positioning
 
-Owned by `VirtualSelectDropdown` (see its `ARCHITECTURE.md`): `getDropdownStyle({ isAlwaysOpen, shouldFillHeight })` picks between floating (`dropdownFloating` — promoted to the top layer so no scrolling ancestor can clip it), inline (`dropdownStatic`), and fill-height (`dropdownStaticFill`) positioning. The shell supplies the anchor: its `containerRef` is passed to the provider as `anchorRef`, and the dropdown measures against it.
+Owned by `VirtualSelectDropdown` (see its `ARCHITECTURE.md`): `getDropdownStyle({ isAlwaysOpen, shouldFillHeight })` picks between floating (`dropdownFloatingPosition` — promoted to the top layer so no scrolling ancestor can clip it), inline (`dropdownStatic`), and fill-height (`dropdownStaticFill`) positioning. The shell supplies the anchor: its `containerRef` is passed to the provider as `anchorRef`, and the dropdown measures against it.
 
 The container and dropdown use explicit `border-box`, `min-width: 0`, and
 `max-width: 100%` sizing so both floating and always-open variants remain
 contained by drawer/card parents.
 
-`customStylex` styles the dropdown **surface** only — it is composed before the
-positioning styles, so it cannot move the list. Reaching for it to reposition a
-dropdown is a sign the variant is wrong, not the styling.
+`customStylex` styles the dropdown **surface** only. It is composed after the
+surface styles (so a consumer can change the elevation, borders or padding) and
+before the positioning styles (so it cannot move the list). Reaching for it to
+reposition a dropdown is a sign the variant is wrong, not the styling.
 
 ## Static vs. Async Data
 
