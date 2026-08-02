@@ -4,7 +4,7 @@ import { createTableRouteLoader } from '@lcabrera/ui/routing/loaders/createTable
 import type { CarSale, CarSalesResponse } from '@/services';
 
 import { APP_ID } from '@/constants/app.constants';
-import { carSalesApi } from '@/services';
+import { fetchCarSalesPage } from '@/services';
 
 import { COLUMNS } from '../car-sales/CarSales.constants';
 import {
@@ -26,7 +26,7 @@ export const loader = createTableRouteLoader<
   appId: APP_ID,
   columns: COLUMNS,
   fetchPage: ({ effectiveSorting, request }) =>
-    carSalesApi.fetchCarSalesPaginated({
+    fetchCarSalesPage({
       limit: INITIAL_PAGE_SIZE,
       requestUrl: request.url,
       skip: 0,

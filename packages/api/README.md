@@ -40,6 +40,8 @@ use and tests mock a module rather than a barrel.
 | --------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | `@lcabrera/api/http/fetch-and-validate.util`              | Fetch → assert OK → parse JSON → validate through a type guard, with a timeout  |
 | `@lcabrera/api/http/build-paginated-query-params.util`    | Builds the shared `limit`/`skip`/`sort`/`filter` query string                   |
+| `@lcabrera/api/http/create-paginated-fetcher.util`        | Factory: endpoint declaration in, validated page fetcher out                    |
+| `@lcabrera/api/http/http.types`                           | `PaginatedSort`, `PaginatedQuery`, `PaginatedFetchArgs`                         |
 | `@lcabrera/api/config/get-api-base-url.util`              | Resolves the API base URL across SSR, dev-proxy, private-IP and production      |
 | `@lcabrera/api/config/config.constants`                   | `API_SERVER_PORT` and the `CONFIG` per-environment host map                     |
 | `@lcabrera/api/config/config.types`                       | `ApiConfig` — the shape of `CONFIG`                                             |
@@ -88,6 +90,29 @@ export const loader = async ({ request }: { request: Request }) => {
   const baseUrl = getApiBaseUrl(request.url);
   // → dev proxy, localhost, same-host:3001, or the production host
 };
+```
+
+### Fetch a page of table rows
+
+Declare the endpoint once; the fetcher takes the query. The origin is a
+per-fetcher strategy, not a per-call value — omit `resolveBaseUrl` for a
+same-origin resource route, and pass `getApiBaseUrl` for one on the API host.
+Only a loader supplies `requestUrl`, because only a loader has the SSR request.
+
+```ts
+import { createPaginatedFetcher } from '@lcabrera/api/http/create-paginated-fetcher.util';
+
+export const fetchOrdersPage = createPaginatedFetcher<OrdersResponse>({
+  isValid: isOrdersResponse, // required — an unvalidated page is a cast
+  path: '/car-sales/paginated',
+  resolveBaseUrl: getApiBaseUrl, // omit for a same-origin resource route
+});
+
+// In a loader — `requestUrl` is what the strategy resolves against:
+await fetchOrdersPage({ limit: 50, requestUrl: request.url, skip: 0 });
+
+// In the browser:
+await fetchOrdersPage({ cursor, filter, limit: 50, skip: 50, sorting });
 ```
 
 ### Page a filter dropdown

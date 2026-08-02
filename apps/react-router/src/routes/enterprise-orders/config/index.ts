@@ -27,6 +27,7 @@ export type {
   EnterpriseOrdersResponse,
   EnterpriseOrderValues,
 } from './enterpriseOrders.types';
+export { isEnterpriseOrdersResponse } from './isEnterpriseOrdersResponse.util';
 export { parseOrderFormData } from './parseOrderFormData.util';
 export { toOrderFieldErrors } from './toOrderFieldErrors.util';
 export { toOrderFormValues } from './toOrderFormValues.util';

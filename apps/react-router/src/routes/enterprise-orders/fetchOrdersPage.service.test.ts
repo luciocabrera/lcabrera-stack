@@ -1,62 +1,81 @@
-import type { ColumnFiltersState } from '@lcabrera/ui/components/Table';
-
-import { afterEach, expect, it, vi } from 'vite-plus/test';
-
-import type { EnterpriseOrderListRow } from './config';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { fetchOrdersPage } from './fetchOrdersPage.service';
 
+/**
+ * The generic fetch behaviour lives in `createPaginatedFetcher`'s own tests.
+ * What is route-specific — and what a wrong edit here would break — is the
+ * endpoint it targets and the guard it validates against.
+ */
+const stubFetch = (body: unknown) => {
+  const fetchMock = vi.fn<typeof fetch>(
+    async () =>
+      ({
+        json: async () => body,
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+      }) as Response,
+  );
+
+  vi.stubGlobal('fetch', fetchMock);
+  return fetchMock;
+};
+
+/**
+ * The URL the single fetch call received. Narrowing rather than stringifying:
+ * the fetcher is supposed to hand `fetch` a string, so anything else is a
+ * failure to surface, not a value to coerce.
+ */
+const requestedUrl = (fetchMock: ReturnType<typeof stubFetch>) => {
+  const input = fetchMock.mock.calls[0]?.[0];
+
+  if (typeof input !== 'string') {
+    throw new TypeError('fetch was not called with a string URL');
+  }
+
+  return input;
+};
+
 afterEach(() => {
+  vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
 
-const noFilter = {} as ColumnFiltersState<EnterpriseOrderListRow>;
+describe('fetchOrdersPage', () => {
+  it('reads the app resource route same-origin', async () => {
+    const fetchMock = stubFetch({ data: [], hasMore: false, total: 0 });
 
-it('fetches the paginated resource route and returns the parsed page', async () => {
-  const page = { data: [], hasMore: false, total: 0 };
-  const fetchMock = vi
-    .spyOn(globalThis, 'fetch')
-    .mockResolvedValue(Response.json(page));
+    await fetchOrdersPage({ limit: 50, skip: 0 });
 
-  const result = await fetchOrdersPage({
-    filter: noFilter,
-    limit: 50,
-    skip: 0,
-    sorting: [{ columnKey: 'order_id', direction: 'asc' }],
+    expect(requestedUrl(fetchMock)).toMatch(
+      /^\/_api\/enterprise-orders\/paginated\?/,
+    );
   });
 
-  expect(result).toStrictEqual(page);
-  expect(fetchMock).toHaveBeenCalledWith(
-    expect.stringContaining('/_api/enterprise-orders/paginated?'),
-  );
-  expect(fetchMock).toHaveBeenCalledWith(expect.stringContaining('limit=50'));
-});
+  it('forwards the keyset cursor and filter this endpoint supports', async () => {
+    const fetchMock = stubFetch({ data: [], hasMore: false });
 
-it('throws when the response is not ok', async () => {
-  vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-    new Response('nope', { status: 500, statusText: 'Server Error' }),
-  );
+    await fetchOrdersPage({
+      cursor: [42],
+      filter: { order_status: { operator: 'equals', value: 'shipped' } },
+      limit: 50,
+      skip: 50,
+    });
 
-  await expect(
-    fetchOrdersPage({ filter: noFilter, limit: 50, skip: 0, sorting: [] }),
-  ).rejects.toThrow('Failed to load orders');
-});
-
-it('sends the keyset cursor alongside skip', async () => {
-  const fetchMock = vi
-    .spyOn(globalThis, 'fetch')
-    .mockResolvedValue(Response.json({ data: [], hasMore: false }));
-
-  await fetchOrdersPage({
-    cursor: [4821],
-    filter: noFilter,
-    limit: 50,
-    skip: 200,
-    sorting: [{ columnKey: 'order_id', direction: 'asc' }],
+    const { searchParams } = new URL(
+      requestedUrl(fetchMock),
+      'https://app.test',
+    );
+    expect(searchParams.get('cursor')).toBe('[42]');
+    expect(searchParams.get('filter')).toContain('order_status');
   });
 
-  expect(fetchMock).toHaveBeenCalledWith(
-    expect.stringContaining(`cursor=${encodeURIComponent('[4821]')}`),
-  );
-  expect(fetchMock).toHaveBeenCalledWith(expect.stringContaining('skip=200'));
+  it('rejects a payload that is not an orders page', async () => {
+    stubFetch({ rows: [] });
+
+    await expect(fetchOrdersPage({ limit: 50, skip: 0 })).rejects.toThrow(
+      'Unexpected response shape',
+    );
+  });
 });

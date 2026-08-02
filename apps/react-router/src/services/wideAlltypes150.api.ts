@@ -1,8 +1,5 @@
-import type { SortingState } from '@lcabrera/ui/components/Table';
-
 import { getApiBaseUrl } from '@lcabrera/api/config/get-api-base-url.util';
-import { buildPaginatedQueryParams } from '@lcabrera/api/http/build-paginated-query-params.util';
-import { fetchAndValidate } from '@lcabrera/api/http/fetch-and-validate.util';
+import { createPaginatedFetcher } from '@lcabrera/api/http/create-paginated-fetcher.util';
 import { isObject } from '@lcabrera/utils/guards/is-object.util';
 
 /**
@@ -189,39 +186,17 @@ const isWideAlltypes150Response = (
   typeof value.hasMore === 'boolean' &&
   typeof value.total === 'number';
 
-type FetchWideAlltypes150Params = {
-  readonly limit: number;
-  readonly requestUrl?: string;
-  readonly skip: number;
-  readonly sorting?: SortingState<WideAlltypes150>;
-};
-
 // ─── Service ──────────────────────────────────────────────────────────────────
 
 /**
- * Wide All-Types 150 API client
+ * Fetch a page of rows from wide_alltypes_150.
+ * Supports offset pagination and multi-column sorting.
+ * No filter support (varied column types make generic filtering impractical),
+ * and no keyset support — so the route sends neither.
  */
-export const wideAlltypes150Api = {
-  /**
-   * Fetch a page of rows from wide_alltypes_150.
-   * Supports offset pagination and multi-column sorting.
-   * No filter support (varied column types make generic filtering impractical).
-   */
-  fetchPaginated: async ({
-    limit,
-    requestUrl,
-    skip,
-    sorting,
-  }: FetchWideAlltypes150Params) => {
-    const params = buildPaginatedQueryParams({ limit, skip, sorting });
-
-    const url = `${getApiBaseUrl(requestUrl)}/wide-alltypes-150/paginated?${params.toString()}`;
-
-    return fetchAndValidate({
-      isValid: isWideAlltypes150Response,
-      shapeErrorMessage:
-        'Unexpected response shape from /wide-alltypes-150/paginated',
-      url,
-    });
-  },
-};
+export const fetchWideAlltypes150Page =
+  createPaginatedFetcher<WideAlltypes150Response>({
+    isValid: isWideAlltypes150Response,
+    path: '/wide-alltypes-150/paginated',
+    resolveBaseUrl: getApiBaseUrl,
+  });

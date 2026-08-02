@@ -1,36 +1,18 @@
-import { TableLayout } from '@lcabrera/ui/components/Table/TableLayout';
-import { appendPrimaryKeySorting } from '@lcabrera/ui/routing/shared/appendPrimaryKeySorting.util';
-import { sanitizeSorting } from '@lcabrera/ui/routing/shared/sanitizeSorting.util';
-import { useLoaderData } from 'react-router';
+import { TableRouteView } from '@lcabrera/ui';
 
 import type { CarSale } from '@/services';
 
-import { carSalesApi } from '@/services';
+import { fetchCarSalesPage } from '@/services';
 
 import type { CarSalesPaginatedResponse } from './CarSales.types';
-import type { loader } from './root';
 
-export const CarSales = () => {
-  const { columnsState, dataPromise, metaState } =
-    useLoaderData<typeof loader>();
-
-  return (
-    <TableLayout<CarSale, CarSalesPaginatedResponse>
-      columnsState={columnsState}
-      dataPromise={dataPromise}
-      dataSelector={(response) => response.data}
-      dataTotalSelector={(response) => response.total}
-      metaState={metaState}
-      onLoadMore={async ({ limit, skip }) =>
-        carSalesApi.fetchCarSalesPaginated({
-          limit,
-          skip,
-          sorting: appendPrimaryKeySorting<CarSale>({
-            columns: columnsState.columns,
-            sorting: sanitizeSorting<CarSale>(columnsState?.sorting ?? []),
-          }),
-        })
-      }
-    />
-  );
-};
+/**
+ * The car-sales endpoint pages by offset and sorts only — it understands
+ * neither a keyset cursor nor a server-side filter — so this route opts into
+ * neither and its load-more carries `limit`, `skip` and `sort`.
+ */
+export const CarSales = () => (
+  <TableRouteView<CarSale, CarSalesPaginatedResponse>
+    fetchPage={fetchCarSalesPage}
+  />
+);

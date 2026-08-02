@@ -14,6 +14,16 @@ import { sanitizeSorting } from '../shared/sanitizeSorting.util';
 import { appendDistinctFilterDescriptors } from './appendDistinctFilterDescriptors.util';
 import { readTableLoaderStateFromRequest } from './readTableLoaderStateFromRequest.util';
 
+/**
+ * What a `createTableRouteLoader` loader hands the route component. Derived
+ * from the factory rather than restated, so the view side cannot drift from
+ * what the loader actually returns — `useTableRoutePage` reads exactly this.
+ */
+export type TableRouteLoaderData<
+  TData extends Record<string, unknown>,
+  TResponse,
+> = ReturnType<ReturnType<typeof createTableRouteLoader<TData, TResponse>>>;
+
 type CreateTableRouteLoaderArgs<
   TData extends Record<string, unknown>,
   TResponse,

@@ -1,19 +1,4 @@
-type BuildPaginatedQueryParamsArgs = {
-  /**
-   * Keyset cursor — the sort-key tuple of the last row already loaded, in
-   * `sorting` order — for an endpoint that can seek past it rather than count
-   * `skip` rows. `skip` is still sent alongside: it remains the rows-loaded
-   * count, and an endpoint that does not understand cursors keeps working.
-   */
-  readonly cursor?: readonly unknown[];
-  readonly filter?: unknown;
-  readonly limit: number;
-  readonly skip: number;
-  readonly sorting?: readonly {
-    readonly columnKey: PropertyKey;
-    readonly direction?: 'asc' | 'desc';
-  }[];
-};
+import type { PaginatedQuery } from './http.types.ts';
 
 /**
  * Build pagination query params (`limit`, `skip`, optional `sort`, `filter` and
@@ -27,7 +12,7 @@ export const buildPaginatedQueryParams = ({
   limit,
   skip,
   sorting,
-}: BuildPaginatedQueryParamsArgs) => {
+}: PaginatedQuery) => {
   const params = new URLSearchParams({
     limit: limit.toString(),
     skip: skip.toString(),

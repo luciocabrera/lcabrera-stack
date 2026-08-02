@@ -36,6 +36,8 @@
     "./distinct/is-distinct-values-response.util": "./src/distinct/is-distinct-values-response.util.ts",
     "./distinct/parse-filter-options-params.util": "./src/distinct/parse-filter-options-params.util.ts",
     "./http/build-paginated-query-params.util": "./src/http/build-paginated-query-params.util.ts",
+    "./http/create-paginated-fetcher.util": "./src/http/create-paginated-fetcher.util.ts",
+    "./http/http.types": "./src/http/http.types.ts",
     "./http/fetch-and-validate.util": "./src/http/fetch-and-validate.util.ts"
   },
   "publishConfig": {
@@ -71,6 +73,14 @@
       "./http/build-paginated-query-params.util": {
         "types": "./dist/http/build-paginated-query-params.util.d.mts",
         "default": "./dist/http/build-paginated-query-params.util.mjs"
+      },
+      "./http/create-paginated-fetcher.util": {
+        "types": "./dist/http/create-paginated-fetcher.util.d.mts",
+        "default": "./dist/http/create-paginated-fetcher.util.mjs"
+      },
+      "./http/http.types": {
+        "types": "./dist/http/http.types.d.mts",
+        "default": "./dist/http/http.types.mjs"
       },
       "./http/fetch-and-validate.util": {
         "types": "./dist/http/fetch-and-validate.util.d.mts",

@@ -1,37 +1,16 @@
-import { TableLayout } from '@lcabrera/ui/components/Table/TableLayout';
-import { appendPrimaryKeySorting } from '@lcabrera/ui/routing/shared/appendPrimaryKeySorting.util';
-import { sanitizeSorting } from '@lcabrera/ui/routing/shared/sanitizeSorting.util';
-import { useLoaderData } from 'react-router';
+import { TableRouteView } from '@lcabrera/ui';
 
 import type { WideAlltypes150, WideAlltypes150Response } from '@/services';
 
-import { wideAlltypes150Api } from '@/services';
+import { fetchWideAlltypes150Page } from '@/services';
 
-import type { loader } from './wide-alltypes-150.loader';
-
-export const WideAlltypes150Page = () => {
-  const { columnsState, dataPromise, metaState } =
-    useLoaderData<typeof loader>();
-
-  return (
-    <TableLayout<WideAlltypes150, WideAlltypes150Response>
-      columnsState={columnsState}
-      dataPromise={dataPromise}
-      dataSelector={(response) => response.data}
-      dataTotalSelector={(response) => response.total}
-      metaState={metaState}
-      onLoadMore={async ({ limit, skip }) =>
-        wideAlltypes150Api.fetchPaginated({
-          limit,
-          skip,
-          sorting: appendPrimaryKeySorting<WideAlltypes150>({
-            columns: columnsState.columns,
-            sorting: sanitizeSorting<WideAlltypes150>(
-              columnsState?.sorting ?? [],
-            ),
-          }),
-        })
-      }
-    />
-  );
-};
+/**
+ * Offset-and-sort only, like car-sales: the varied column types make generic
+ * server-side filtering impractical here, and the endpoint cannot seek — so
+ * this route opts into neither capability.
+ */
+export const WideAlltypes150Page = () => (
+  <TableRouteView<WideAlltypes150, WideAlltypes150Response>
+    fetchPage={fetchWideAlltypes150Page}
+  />
+);

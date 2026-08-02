@@ -261,8 +261,26 @@ export const loader = createTableRouteLoader<Row, RowResponse>({
 ```
 
 - **The route owns only the fetch.** `fetchPage` receives the sanitized `filters` and the `effectiveSorting` (tiebreaker appended) and returns its promise **unawaited** — the factory hands it back as `dataPromise` for Suspense streaming.
-- **The returned data-promise key is always `dataPromise`** — the route component reads `{ columnsState, dataPromise, metaState }` and forwards them to `TableLayout`. Do not rename it per route.
-- The route component's `onLoadMore` reuses `sanitizeSorting` + `appendPrimaryKeySorting` (`src/routing/shared/`) directly — the same helpers the factory composes.
+- **The returned data-promise key is always `dataPromise`** — `TableRouteLoaderData<TData, TResponse>` (exported from the same file, derived from the factory) is the shape the view side reads. Do not rename it per route.
+
+### The view side
+
+The route component is **`TableRouteView`** (`src/components/TableRouteView/`) — the counterpart to the loader factory. It reads the loader data, wires load-more, defaults both selectors, and renders `TableLayout`:
+
+```tsx
+export const Orders = () => (
+  <TableRouteView<Row, RowResponse>
+    fetchPage={fetchOrdersPage} // a createPaginatedFetcher result
+    isKeysetEnabled // opt-in: this endpoint can seek (ADR-052)
+    isServerFilterEnabled // opt-in: this endpoint filters server-side
+  />
+);
+```
+
+- **Never re-derive the sort composition by hand.** The loader deliberately stores only the _user's_ sorting and appends the primary-key tiebreaker for the server query alone, so every load-more must reproduce it. `buildTablePageQuery` (`src/routing/shared/`) is that composition; `TableRouteView` calls it for you. A route that hand-rolls `sanitizeSorting` + `appendPrimaryKeySorting` in `onLoadMore` is one edit away from paginating incoherently.
+- **`isKeysetEnabled` / `isServerFilterEnabled` describe the endpoint, and default to off.** Sending a `cursor` an endpoint ignores is noise; sending a `filter` it ignores appends unfiltered rows to a filtered table. Opt in only once the server implements the capability (ADR-056).
+- **Escape hatch:** a route whose response is not `{ data, hasMore?, total? }`, or that needs its own JSX around the table, calls **`useTableRoutePage`** and renders `TableLayout` itself. The hook returns exactly the four props `TableLayout` needs.
+- **The fetcher is a declaration, not a function you write.** `createPaginatedFetcher` (`@lcabrera/api/http`) takes the path, a response type guard and an optional base-URL strategy; the guard is required, because an unvalidated page is a cast that fails three layers away.
 
 ---
 

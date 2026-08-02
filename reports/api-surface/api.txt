@@ -25,7 +25,15 @@ isDistinctValuesResponse [const] (value: unknown) => value is DistinctValuesResp
 parseFilterOptionsParams [const] ({ defaultPageSize, searchParams }: ParseFilterOptionsParamsArgs) => FilterOptionsParams | undefined
 
 ## ./http/build-paginated-query-params.util
-buildPaginatedQueryParams [const] ({ cursor, filter, limit, skip, sorting }: BuildPaginatedQueryParamsArgs) => URLSearchParams
+buildPaginatedQueryParams [const] ({ cursor, filter, limit, skip, sorting }: PaginatedQuery) => URLSearchParams
+
+## ./http/create-paginated-fetcher.util
+createPaginatedFetcher [const] <TResponse>({ isValid, path, resolveBaseUrl, shapeErrorMessage }: CreatePaginatedFetcherArgs<TResponse>) => ({ cursor, filter, limit, requestUrl, signal, skip, sorting, timeoutMs }: PaginatedFetchArgs) => Promise<TResponse>
 
 ## ./http/fetch-and-validate.util
 fetchAndValidate [const] <T>({ isValid, shapeErrorMessage, signal, timeoutMs, url }: FetchAndValidateArgs<T>) => Promise<T>
+
+## ./http/http.types
+PaginatedFetchArgs [type] PaginatedQuery & { readonly requestUrl?: string; readonly signal?: AbortSignal; readonly timeoutMs?: number; }
+PaginatedQuery [type] { /** * Keyset cursor — the sort-key tuple of the last row already loaded, in * `sorting` order — for an endpoint that can seek past it rather than count * `skip` rows. `skip` is still sent alongside: it remains the rows-loaded * count, and an endpoint that does not understand cursors keeps working. */ readonly cursor?: readonly unknown[]; readonly filter?: unknown; readonly limit: number; readonly skip: number; readonly sorting?: readonly PaginatedSort[]; }
+PaginatedSort [type] { readonly columnKey: PropertyKey; readonly direction?: 'asc' | 'desc'; }

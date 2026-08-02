@@ -13,7 +13,13 @@ export { RouteErrorBoundary } from './components/RouteErrorBoundary/RouteErrorBo
 export { SectionCard } from './components/SectionCard/SectionCard.component';
 export { StatusBadge } from './components/StatusBadge/StatusBadge.component';
 export { TableLayout } from './components/Table/TableLayout/TableLayout.component';
+export { TableRouteView } from './components/TableRouteView/TableRouteView.component';
 export { Tabs } from './components/Tabs/Tabs.component';
 export { hydrateApp } from './entry/hydrateApp.util';
 export { useNotifyOnError } from './hooks/useNotifyOnError.hook';
-export type { LayoutProps, Pagination } from './types/ui.types';
+export { useTableRoutePage } from './hooks/useTableRoutePage.hook';
+export type {
+  LayoutProps,
+  Pagination,
+  TablePageResponse,
+} from './types/ui.types';

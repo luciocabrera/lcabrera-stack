@@ -1,7 +1,9 @@
 import type {
   ColumnFiltersState,
+  ColumnOrderState,
   ColumnPinningState,
   ColumnSizingState,
+  ColumnVisibilityState,
   SortingState,
   TableColumn,
 } from '@lcabrera/ui/components/Table';
@@ -66,11 +68,11 @@ export const readTableLoaderStateFromRequest = <
 
   const columnOrder = (urlState?.columnOrder ??
     cookieState.columnOrder ??
-    []) as (keyof TData)[];
+    []) as ColumnOrderState<TData>;
 
   const columnVisibility = (urlState?.columnVisibility ??
     cookieState.columnVisibility ??
-    new Set()) as Set<keyof TData>;
+    new Set()) as ColumnVisibilityState<TData>;
 
   const columnSizing = (cookieState.columnSizing ??
     {}) as ColumnSizingState<TData>;
