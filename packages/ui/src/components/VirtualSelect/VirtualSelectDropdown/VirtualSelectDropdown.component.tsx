@@ -3,7 +3,7 @@ import { useGetShouldFillHeight } from '@lcabrera/ui/components/VirtualList/cont
 import * as stylex from '@stylexjs/stylex';
 import { useRef } from 'react';
 
-import { useToggleDropdown } from '../contexts/meta/actions';
+import { useCloseDropdown } from '../contexts/meta/actions';
 import {
   useGetCustomStylex,
   useGetIsAlwaysOpen,
@@ -37,16 +37,14 @@ export const VirtualSelectDropdown = () => {
   const shouldFillHeight = useGetShouldFillHeight();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const toggleDropdown = useToggleDropdown();
+  const closeDropdown = useCloseDropdown();
 
   const isFloating = !isAlwaysOpen;
   const placement = useVirtualSelectDropdownPosition({
     anchorRef,
     dropdownRef,
     isEnabled: isFloating && isListVisible,
-    // Only ever reached while the dropdown is rendered, i.e. open — so the
-    // toggle here can only mean close.
-    onScrollAway: toggleDropdown,
+    onScrollAway: closeDropdown,
   });
 
   if (!isListVisible) return;
@@ -59,12 +57,19 @@ export const VirtualSelectDropdown = () => {
       role='listbox'
       {...stylex.props(
         styles.dropdownBase,
+        // Ahead of the positioning styles, and that order is load-bearing:
+        // last-wins, so a consumer style placed after them can null out
+        // `position: fixed` or the computed coordinates. A popover that is not
+        // absolutely positioned still sits in the top layer, where it lays out
+        // against the initial containing block — i.e. the viewport's top-left
+        // corner, detached from its trigger. `customStylex` tunes the surface;
+        // the component owns where it goes.
+        customStylex,
         getDropdownStyle({ isAlwaysOpen, shouldFillHeight }),
         isFloating && placement === undefined && styles.dropdownUnplaced,
         isFloating &&
           placement !== undefined &&
           styles.dropdownAt(placement.left, placement.top, placement.width),
-        customStylex,
       )}
     >
       <VirtualListContent />

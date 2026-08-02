@@ -34,6 +34,7 @@ export const VirtualSelect = ({
   shouldFillHeight = false,
 }: VirtualSelectProps) => {
   const {
+    closeDropdown,
     containerRef,
     effectiveDataState,
     handleListChange,
@@ -75,6 +76,7 @@ export const VirtualSelect = ({
         isOpen,
         listboxId: resolvedListboxId,
         mode,
+        onCloseDropdown: closeDropdown,
         onToggleDropdown: toggleDropdown,
         placeholder,
       }}

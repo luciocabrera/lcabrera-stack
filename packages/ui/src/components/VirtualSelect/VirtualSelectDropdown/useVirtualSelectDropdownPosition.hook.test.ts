@@ -95,6 +95,9 @@ beforeEach(() => {
 afterEach(() => {
   vi.unstubAllGlobals();
   cleanup();
+  // The scroll tests append their own nodes; `cleanup` only unmounts what RTL
+  // rendered.
+  document.body.replaceChildren();
 });
 
 describe('useVirtualSelectDropdownPosition', () => {
@@ -158,6 +161,32 @@ describe('useVirtualSelectDropdownPosition', () => {
     globalThis.dispatchEvent(new Event('scroll'));
 
     expect(onScrollAway).toHaveBeenCalledTimes(1);
+  });
+
+  it('dismisses when a scroll container outside the dropdown scrolls', () => {
+    const { dropdown, onScrollAway } = setup();
+
+    // Connected, because a window-level capture listener is only on the path
+    // of an event dispatched from inside the document.
+    document.body.append(dropdown);
+    const drawerBody = document.createElement('div');
+    document.body.append(drawerBody);
+
+    drawerBody.dispatchEvent(new Event('scroll'));
+
+    expect(onScrollAway).toHaveBeenCalledTimes(1);
+  });
+
+  it('stays open when the option list inside the dropdown scrolls', () => {
+    const { dropdown, onScrollAway } = setup();
+
+    document.body.append(dropdown);
+    const optionList = document.createElement('div');
+    dropdown.append(optionList);
+
+    optionList.dispatchEvent(new Event('scroll'));
+
+    expect(onScrollAway).not.toHaveBeenCalled();
   });
 
   it('disconnects the observer on unmount', () => {

@@ -40,13 +40,23 @@ graph LR
 
 ## Dropdown Positioning
 
-Controlled by `utils/getDropdownStyle({ isAlwaysOpen, shouldFillHeight })`, composed after `dropdownBase` and before the consumer's `customStylex` override (read from the meta store, always last in `stylex.props`):
+Controlled by `utils/getDropdownStyle({ isAlwaysOpen, shouldFillHeight })`, composed after `dropdownBase` and the consumer's `customStylex` override (read from the meta store) — so the positioning styles are **always last in `stylex.props`**:
 
 | `isAlwaysOpen` | `shouldFillHeight` | Style applied        | Behaviour                                              |
 | -------------- | ------------------ | -------------------- | ------------------------------------------------------ |
 | `false`        | any                | `dropdownFloating`   | Top layer, fixed to the trigger's viewport coordinates |
 | `true`         | `false`            | `dropdownStatic`     | Inline block (e.g. filter panel)                       |
 | `true`         | `true`             | `dropdownStaticFill` | Flex-fill (e.g. full-height drawer)                    |
+
+**The order is load-bearing, not cosmetic.** StyleX is last-wins, so a
+`customStylex` composed after the positioning styles can null out
+`position: fixed` or the computed coordinates — and a popover that is not
+absolutely positioned still sits in the top layer, where it lays out against the
+initial containing block, i.e. the viewport's top-left corner. `OperatorSelect`
+passed exactly such an override and the operator list rendered in the screen
+corner in the Column Settings drawer, and only there, because that drawer is the
+only caller that triggered it. `customStylex` tunes the surface; the component
+owns where it goes.
 
 ### Why the floating variant lives in the top layer
 
@@ -73,6 +83,17 @@ anchor's measured rect. Three consequences worth knowing:
   changes (viewport, trigger, list) _do_ re-anchor, via a `ResizeObserver` that
   also takes the first measurement — which is why nothing sets state synchronously
   in the effect.
+- **Scrolling the option list does not**, and the listener needs an explicit
+  guard to tell the two apart. The dismissal listener is on `window` in the
+  capture phase, and non-bubbling removes only the _bubble_ phase — a capture
+  listener there is on the path of a scroll from **every** element, and the
+  option list is itself a scroll container. Without the `contains(target)` guard
+  the dropdown closed on the first wheel tick over its own list. `VirtualListBody`
+  also sets `overscroll-behavior: contain`, so a scroll that reaches either end
+  of the list does not chain to the drawer behind it and dismiss it that way.
+- **Dismissal dispatches a close, not a toggle.** A toggle is suppressed while
+  the list is busy, so an ancestor scroll over a loading list left the dropdown
+  open.
 
 The `[popover]` UA stylesheet is aggressive — `inset: 0`, `margin: auto`,
 `padding: .25em`, a solid border, system colors, `overflow: auto` — so most of
@@ -81,8 +102,8 @@ of specificity, so plain longhands suffice.
 
 ## State Ownership
 
-| Source            | Read                                                         | Dispatched                                      |
-| ----------------- | ------------------------------------------------------------ | ----------------------------------------------- |
-| Select meta store | `customStylex`, `isAlwaysOpen`, `isListVisible`, `listboxId` | `onToggleDropdown` (dismiss on ancestor scroll) |
-| Select context    | `anchorRef` — the shell container placement measures against | —                                               |
-| List store        | `shouldFillHeight` (positioning input)                       | —                                               |
+| Source            | Read                                                         | Dispatched                                     |
+| ----------------- | ------------------------------------------------------------ | ---------------------------------------------- |
+| Select meta store | `customStylex`, `isAlwaysOpen`, `isListVisible`, `listboxId` | `onCloseDropdown` (dismiss on ancestor scroll) |
+| Select context    | `anchorRef` — the shell container placement measures against | —                                              |
+| List store        | `shouldFillHeight` (positioning input)                       | —                                              |

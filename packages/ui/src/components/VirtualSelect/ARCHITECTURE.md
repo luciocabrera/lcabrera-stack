@@ -75,7 +75,7 @@ Every store slice is read — and every action dispatched — inside the compone
 graph TD
   Parent -->|"selected[], onChange, options/dataState"| VS["VirtualSelect (shell)"]
 
-  VS -->|"metaState (metadata + onToggleDropdown)"| SP["VirtualSelectProvider → metaStore"]
+  VS -->|"metaState (metadata + onClose/onToggleDropdown)"| SP["VirtualSelectProvider → metaStore"]
   VS -->|"listState.onChange = handleListChange"| LP["VirtualListProvider (composed)"]
   VS -->|"dataState ?? fallback, filter = selectedLabels"| LP
 
@@ -115,6 +115,10 @@ Owned by `VirtualSelectDropdown` (see its `ARCHITECTURE.md`): `getDropdownStyle(
 The container and dropdown use explicit `border-box`, `min-width: 0`, and
 `max-width: 100%` sizing so both floating and always-open variants remain
 contained by drawer/card parents.
+
+`customStylex` styles the dropdown **surface** only — it is composed before the
+positioning styles, so it cannot move the list. Reaching for it to reposition a
+dropdown is a sign the variant is wrong, not the styling.
 
 ## Static vs. Async Data
 

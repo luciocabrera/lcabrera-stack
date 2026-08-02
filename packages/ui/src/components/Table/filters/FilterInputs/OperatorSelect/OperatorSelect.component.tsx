@@ -8,7 +8,6 @@ import {
   getSelectedOperatorLabel,
   resolveOperatorChange,
 } from '../utils';
-import { styles } from './OperatorSelect.stylex';
 
 /**
  * Operator dropdown for a non-boolean filter: derives the operator options
@@ -21,7 +20,6 @@ export const OperatorSelect = ({
   filter,
   onChange,
   onOpenChange,
-  shouldFillHeight = false,
 }: OperatorSelectProps) => {
   const operator = getOperatorFromFilter({ dataType, filter });
   const operatorOptions = getOperatorOptions({ dataType });
@@ -47,7 +45,6 @@ export const OperatorSelect = ({
 
   return (
     <VirtualSelect
-      customStylex={shouldFillHeight ? styles.operatorOverride : undefined}
       mode='single'
       onChange={handleOperatorChange}
       onOpenChange={onOpenChange}

@@ -77,6 +77,7 @@ export const useVirtualSelect = ({
   };
 
   return {
+    closeDropdown,
     containerRef,
     effectiveDataState,
     handleListChange,
