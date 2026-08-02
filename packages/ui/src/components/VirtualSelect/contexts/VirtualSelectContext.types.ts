@@ -9,18 +9,21 @@ export type VirtualSelectContextValue = {
   readonly anchorRef: RefObject<HTMLDivElement | null>;
   /** Store managing the select-level presentation metadata */
   readonly metaStore: TStore<VirtualSelectMetaState>;
+  /** Closes the dropdown — owned by the shell (actions only). Not a toggle: a toggle is suppressed while the list is busy. */
+  readonly onCloseDropdown: () => void;
   /** Toggles the dropdown open state — owned by the shell (actions only) */
   readonly onToggleDropdown: () => void;
 };
 
 /**
  * The select metadata (minus the pre-computed `isListVisible`) plus the
- * shell-owned toggle callback, grouped as the provider's `metaState` prop.
+ * shell-owned open-state callbacks, grouped as the provider's `metaState` prop.
  */
 export type VirtualSelectMetaStateProps = Omit<
   VirtualSelectMetaState,
   'isListVisible'
 > & {
+  readonly onCloseDropdown: () => void;
   readonly onToggleDropdown: () => void;
 };
 

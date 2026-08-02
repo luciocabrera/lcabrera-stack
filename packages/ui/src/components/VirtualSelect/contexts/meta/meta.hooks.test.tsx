@@ -12,6 +12,7 @@ import type { VirtualSelectContextValue } from '../VirtualSelectContext.types';
 
 import { useVirtualSelectContextValue } from '../useVirtualSelectContextValue.hook';
 import { VirtualSelectContext } from '../VirtualSelectContext.context';
+import { useCloseDropdown } from './actions/useCloseDropdown.hook';
 import { useToggleDropdown } from './actions/useToggleDropdown.hook';
 import {
   useGetCustomStylex,
@@ -39,16 +40,24 @@ const setup = (metaState: Partial<VirtualSelectMetaState> = {}) => {
     placeholder: 'Pick a fruit...',
     ...metaState,
   });
+  const onCloseDropdown = vi.fn();
   const onToggleDropdown = vi.fn();
   const contextValue: VirtualSelectContextValue = {
     anchorRef: { current: document.createElement('div') },
     metaStore: metaStore as never,
+    onCloseDropdown,
     onToggleDropdown,
   };
   const wrapper = ({ children }: WrapperProps) =>
     createElement(VirtualSelectContext, { value: contextValue }, children);
 
-  return { contextValue, metaStore, onToggleDropdown, wrapper };
+  return {
+    contextValue,
+    metaStore,
+    onCloseDropdown,
+    onToggleDropdown,
+    wrapper,
+  };
 };
 
 describe('VirtualSelect meta hooks', () => {
@@ -108,5 +117,18 @@ describe('VirtualSelect meta hooks', () => {
     toggleDropdown();
 
     expect(onToggleDropdown).toHaveBeenCalledTimes(1);
+  });
+
+  it('dispatches the shell close callback through the action', () => {
+    const { onCloseDropdown, onToggleDropdown, wrapper } = setup();
+
+    const closeDropdown = renderHook(() => useCloseDropdown(), { wrapper })
+      .result.current;
+    closeDropdown();
+
+    // Not routed through the toggle: a toggle no-ops while the list is busy,
+    // so a dismissal expressed as one would silently do nothing.
+    expect(onCloseDropdown).toHaveBeenCalledTimes(1);
+    expect(onToggleDropdown).not.toHaveBeenCalled();
   });
 });

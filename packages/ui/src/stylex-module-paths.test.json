@@ -100,7 +100,6 @@
   "src/components/Table/filters/BooleanFilterInput/BooleanFilterInput.stylex.ts",
   "src/components/Table/filters/DateFilterInput/DateFilterInput.stylex.ts",
   "src/components/Table/filters/FilterInputs/FilterInputs.stylex.ts",
-  "src/components/Table/filters/FilterInputs/OperatorSelect/OperatorSelect.stylex.ts",
   "src/components/Table/filters/NumberFilterInput/NumberFilterInput.stylex.ts",
   "src/components/Table/filters/SelectFilterInput/SelectFilterInput.stylex.ts",
   "src/components/Table/filters/TextFilterInput/TextFilterInput.stylex.ts",

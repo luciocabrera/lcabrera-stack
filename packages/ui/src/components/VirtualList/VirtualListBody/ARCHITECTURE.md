@@ -11,6 +11,15 @@ Scroll-container owner (Table analog: `TableContent`): renders the scrollable vi
 
 The initial fetch effect lives in `VirtualListProvider`; the toggle/select-all handlers moved to the `useToggleOption`/`useToggleSelectAll` actions.
 
+## Scroll containment
+
+Both container variants set `overscroll-behavior: contain`. Scroll chaining is
+the default, so a wheel gesture that reaches either end of the list continues
+into whatever scrolls behind it — and behind a `VirtualSelect` dropdown that is
+the drawer or form body, whose scroll **dismisses the dropdown**. Reaching the
+last option therefore closed the list. Containment is also the right default on
+its own terms: a list is a self-contained scroll region.
+
 ## Sentinel lifetime
 
 The sentinel is an in-flow sibling of `VirtualListBodyChildren` inside the scroll

@@ -32,7 +32,14 @@ export const styles = stylex.create({
     height: '1px',
     width: '1px',
   },
+  /**
+   * `overscrollBehavior: contain` stops a scroll that has reached either end of
+   * the list from chaining to whatever scrolls behind it. Behind a floating
+   * dropdown that is the drawer or form body, and an ancestor scroll dismisses
+   * the dropdown — so without this, reaching the last option closes the list.
+   */
   virtualContainer: (height: string) => ({
+    overscrollBehavior: 'contain',
     position: 'relative',
     height,
     overflowX: 'hidden',
@@ -40,6 +47,7 @@ export const styles = stylex.create({
   }),
   virtualContainerFill: {
     flex: '1',
+    overscrollBehavior: 'contain',
     position: 'relative',
     overflowX: 'hidden',
     overflowY: 'auto',

@@ -29,10 +29,11 @@ type UseVirtualSelectDropdownPositionArgs = {
  *
  * A ResizeObserver drives placement, including the first measurement — its
  * initial callback lands after the effect, so nothing sets state synchronously
- * during it. Scrolling an ancestor **dismisses** the dropdown rather than
+ * during it. Scrolling an **ancestor** dismisses the dropdown rather than
  * chasing it: a fixed-position list cannot be re-anchored from a passive
  * listener without reading layout on every frame, and one that lags its
- * trigger reads worse than one that closes.
+ * trigger reads worse than one that closes. Scrolling the option list itself
+ * must not — see the guard on the listener.
  */
 export const useVirtualSelectDropdownPosition = ({
   anchorRef,
@@ -77,9 +78,21 @@ export const useVirtualSelectDropdownPosition = ({
       );
     };
 
+    const handleScrollAway = (event: Event) => {
+      // Non-bubbling removes the bubble phase only: a capture listener on
+      // `window` is still on the path of a scroll from EVERY element, and the
+      // option list is itself a scroll container. Without this guard, scrolling
+      // the list closes the dropdown on the first wheel tick, which is what
+      // made an option below the fold unreachable.
+      const { target } = event;
+      if (target instanceof Node && dropdownElement.contains(target)) return;
+
+      onScrollAway();
+    };
+
     // Capture phase: the element that scrolls is an ancestor, and a scroll
     // event does not bubble up from it.
-    globalThis.addEventListener('scroll', onScrollAway, {
+    globalThis.addEventListener('scroll', handleScrollAway, {
       capture: true,
       passive: true,
     });
@@ -96,7 +109,9 @@ export const useVirtualSelectDropdownPosition = ({
     resizeObserver?.observe(dropdownElement);
 
     return () => {
-      globalThis.removeEventListener('scroll', onScrollAway, { capture: true });
+      globalThis.removeEventListener('scroll', handleScrollAway, {
+        capture: true,
+      });
       resizeObserver?.disconnect();
     };
   }, [anchorRef, dropdownRef, isEnabled, onScrollAway]);

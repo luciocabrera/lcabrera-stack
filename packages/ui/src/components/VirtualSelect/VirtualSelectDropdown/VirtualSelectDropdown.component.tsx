@@ -3,7 +3,7 @@ import { useGetShouldFillHeight } from '@lcabrera/ui/components/VirtualList/cont
 import * as stylex from '@stylexjs/stylex';
 import { useRef } from 'react';
 
-import { useToggleDropdown } from '../contexts/meta/actions';
+import { useCloseDropdown } from '../contexts/meta/actions';
 import {
   useGetCustomStylex,
   useGetIsAlwaysOpen,
@@ -12,9 +12,8 @@ import {
 } from '../contexts/meta/selectors';
 import { useVirtualSelectAnchorRef } from '../contexts/useVirtualSelectAnchorRef.hook';
 import { useVirtualSelectDropdownPosition } from './useVirtualSelectDropdownPosition.hook';
-import { getDropdownStyle } from './utils/getDropdownStyle.util';
+import { resolveDropdownStyles } from './utils/resolveDropdownStyles.util';
 import { HAS_POPOVER_SUPPORT } from './VirtualSelectDropdown.constants';
-import { styles } from './VirtualSelectDropdown.stylex';
 
 /**
  * Dropdown slice of VirtualSelect: the positioned listbox shell around the
@@ -37,16 +36,14 @@ export const VirtualSelectDropdown = () => {
   const shouldFillHeight = useGetShouldFillHeight();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const toggleDropdown = useToggleDropdown();
+  const closeDropdown = useCloseDropdown();
 
   const isFloating = !isAlwaysOpen;
   const placement = useVirtualSelectDropdownPosition({
     anchorRef,
     dropdownRef,
     isEnabled: isFloating && isListVisible,
-    // Only ever reached while the dropdown is rendered, i.e. open — so the
-    // toggle here can only mean close.
-    onScrollAway: toggleDropdown,
+    onScrollAway: closeDropdown,
   });
 
   if (!isListVisible) return;
@@ -58,13 +55,13 @@ export const VirtualSelectDropdown = () => {
       ref={dropdownRef}
       role='listbox'
       {...stylex.props(
-        styles.dropdownBase,
-        getDropdownStyle({ isAlwaysOpen, shouldFillHeight }),
-        isFloating && placement === undefined && styles.dropdownUnplaced,
-        isFloating &&
-          placement !== undefined &&
-          styles.dropdownAt(placement.left, placement.top, placement.width),
-        customStylex,
+        ...resolveDropdownStyles({
+          customStylex,
+          isAlwaysOpen,
+          isFloating,
+          placement,
+          shouldFillHeight,
+        }),
       )}
     >
       <VirtualListContent />

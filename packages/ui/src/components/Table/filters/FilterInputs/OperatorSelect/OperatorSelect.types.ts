@@ -6,5 +6,4 @@ export type OperatorSelectProps = {
   readonly filter?: ColumnFilter;
   readonly onChange: (filter: ColumnFilter) => void;
   readonly onOpenChange: (isOpen: boolean) => void;
-  readonly shouldFillHeight?: boolean;
 };

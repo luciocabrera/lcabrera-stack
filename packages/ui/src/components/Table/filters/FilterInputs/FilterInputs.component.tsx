@@ -62,7 +62,6 @@ export const FilterInputs = <TData = Record<string, unknown>,>({
         filter={filter}
         onChange={onChange}
         onOpenChange={setIsOperatorOpen}
-        shouldFillHeight={shouldFillHeight}
       />
       {shouldFillHeight ? (
         <Activity mode={isOperatorOpen || !filter ? 'hidden' : 'visible'}>

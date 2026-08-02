@@ -38,6 +38,7 @@ export const VirtualSelectProvider = ({
   const value: VirtualSelectContextValue = {
     anchorRef,
     metaStore,
+    onCloseDropdown: metaState.onCloseDropdown,
     onToggleDropdown: metaState.onToggleDropdown,
   };
 

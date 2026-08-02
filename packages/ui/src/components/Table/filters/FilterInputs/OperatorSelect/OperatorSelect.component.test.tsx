@@ -84,13 +84,11 @@ const renderOperatorSelect = ({
   filter,
   onChange = vi.fn(),
   onOpenChange = vi.fn(),
-  shouldFillHeight,
 }: {
   readonly dataType?: TableColumnDataType;
   readonly filter?: ColumnFilter;
   readonly onChange?: (filter: ColumnFilter) => void;
   readonly onOpenChange?: (isOpen: boolean) => void;
-  readonly shouldFillHeight?: boolean;
 } = {}) =>
   render(
     <OperatorSelect
@@ -98,7 +96,6 @@ const renderOperatorSelect = ({
       filter={filter}
       onChange={onChange}
       onOpenChange={onOpenChange}
-      shouldFillHeight={shouldFillHeight}
     />,
   );
 
@@ -276,18 +273,13 @@ describe('OperatorSelect', () => {
     });
   });
 
-  describe('fill height styling', () => {
-    it('applies the operator style override when filling height', () => {
-      renderOperatorSelect({ dataType: 'string', shouldFillHeight: true });
+  it('passes no style override to the select', () => {
+    renderOperatorSelect({ dataType: 'string' });
 
-      expect(screen.getByTestId('has-custom-stylex').textContent).toBe('true');
-    });
-
-    it('applies no style override by default', () => {
-      renderOperatorSelect({ dataType: 'string' });
-
-      expect(screen.getByTestId('has-custom-stylex').textContent).toBe('false');
-    });
+    // The override it used to pass reset `position`/`left`/`top`, which beat
+    // the dropdown's computed placement and parked the list in the viewport's
+    // top-left corner. Nothing here may style the dropdown's position.
+    expect(screen.getByTestId('has-custom-stylex').textContent).toBe('false');
   });
 
   it('forwards the dropdown open state to onOpenChange', () => {

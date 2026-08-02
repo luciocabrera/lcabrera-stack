@@ -126,7 +126,7 @@ VirtualListContent [const] () => JSX.Element
 VirtualListDataState [type] { readonly data: readonly string[]; readonly hasMore: boolean; readonly isLoading: boolean; readonly isLoadingMore: boolean; /** Total number of items available (used for "Loaded: x / total" display) */ readonly totalCount?: number; }
 
 ## ./components/VirtualSelect/hooks
-useVirtualSelect [const] ({ dataState, isAlwaysOpen, isBusy, listboxId, mode, onChange, onOpenChange, options, selected, }: UseVirtualSelectArgs) => { containerRef: RefObject<HTMLDivElement | null>; effectiveDataState: VirtualListDataState | { data: string[]; hasMore: boolean; isLoading: boolean; isLoadingMore: boolean; }; handleListChange: (filter?: SelectFilter) => void; isMulti: boolean; isOpen: boolean; resolvedListboxId: string; selectedLabels: string[]; toggleDropdown: () => void; }
+useVirtualSelect [const] ({ dataState, isAlwaysOpen, isBusy, listboxId, mode, onChange, onOpenChange, options, selected, }: UseVirtualSelectArgs) => { closeDropdown: () => void; containerRef: RefObject<HTMLDivElement | null>; effectiveDataState: VirtualListDataState | { data: string[]; hasMore: boolean; isLoading: boolean; isLoadingMore: boolean; }; handleListChange: (filter?: SelectFilter) => void; isMulti: boolean; isOpen: boolean; resolvedListboxId: string; selectedLabels: string[]; toggleDropdown: () => void; }
 useVirtualSelectDropdown [const] ({ isAlwaysOpen, isBusy, onOpenChange, }: UseVirtualSelectDropdownArgs) => { closeDropdown: () => void; isListVisible: boolean; isOpen: boolean; toggleDropdown: () => void; }
 useVirtualSelectTagOverflow [const] ({ mode, selected, triggerRef, }: UseVirtualSelectTagOverflowArgs) => number
 

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vite-plus/test';
 import { getDropdownStyle } from './getDropdownStyle.util';
 
 describe('getDropdownStyle', () => {
-  it('returns dropdownFloating when isAlwaysOpen is false', () => {
+  it('returns dropdownFloatingPosition when isAlwaysOpen is false', () => {
     const result = getDropdownStyle({
       isAlwaysOpen: false,
       shouldFillHeight: false,
@@ -11,7 +11,7 @@ describe('getDropdownStyle', () => {
     expect(result).toBeDefined();
   });
 
-  it('returns dropdownFloating when isAlwaysOpen is undefined', () => {
+  it('returns dropdownFloatingPosition when isAlwaysOpen is undefined', () => {
     const result = getDropdownStyle({
       isAlwaysOpen: undefined,
       shouldFillHeight: false,

@@ -24,21 +24,20 @@ export const styles = stylex.create({
     width: '100%',
   },
   /**
-   * Floating (trigger-opened) dropdown. `position: fixed` plus the top layer,
-   * because an absolutely positioned list is clipped by any scrolling ancestor
-   * — see `useVirtualSelectDropdownPosition`, which supplies the coordinates.
-   * Most of this block is undoing the `[popover]` UA stylesheet, which sets
-   * `inset: 0`, `margin: auto`, `padding: .25em`, a solid border, system
-   * colors and `overflow: auto`.
+   * Surface half of the floating (trigger-opened) dropdown: the elevation, plus
+   * everything undoing the `[popover]` UA stylesheet, which sets `margin: auto`,
+   * `padding: .25em`, a solid border, system colors and `overflow: auto`.
+   *
+   * Split from `dropdownFloatingPosition` so the two can sit on opposite sides
+   * of the consumer's `customStylex` in the style chain — this half is meant to
+   * be overridable (a consumer may want a different elevation), the other half
+   * is not. Merging them back would silently take that away.
    */
-  dropdownFloating: {
-    inset: 'auto',
+  dropdownFloatingSurface: {
     borderStyle: 'none',
     overflow: 'visible',
     boxShadow: shadows.lg,
     color: 'inherit',
-    position: 'fixed',
-    zIndex: zIndex.dropdown,
     marginBottom: 0,
     marginLeft: 0,
     marginRight: 0,
@@ -47,6 +46,18 @@ export const styles = stylex.create({
     paddingLeft: 0,
     paddingRight: 0,
     paddingTop: 0,
+  },
+  /**
+   * Positioning half: `position: fixed` plus the top layer, because an
+   * absolutely positioned list is clipped by any scrolling ancestor — see
+   * `useVirtualSelectDropdownPosition`, which supplies the coordinates. `inset`
+   * is the UA stylesheet's `inset: 0`, which belongs here rather than with the
+   * surface: left alone it pins the list to all four viewport edges.
+   */
+  dropdownFloatingPosition: {
+    inset: 'auto',
+    position: 'fixed',
+    zIndex: zIndex.dropdown,
   },
   /** Viewport coordinates; the gap to the trigger is baked into `top`. */
   dropdownAt: (left: number, top: number, width: number) => ({

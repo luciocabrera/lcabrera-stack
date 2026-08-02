@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import * as stylex from '@stylexjs/stylex';
 import { cleanup, render, screen } from '@testing-library/react';
 import {
   afterEach,
@@ -12,6 +13,7 @@ import {
 
 const { contentRenderCount, metaState, setMetaState } = vi.hoisted(() => {
   const initialMetaState = {
+    customStylex: undefined as stylex.StyleXStyles | undefined,
     isAlwaysOpen: false,
     isListVisible: true,
     listboxId: 'listbox-id',
@@ -40,7 +42,7 @@ vi.mock('@lcabrera/ui/components/VirtualList/contexts/list/selectors', () => ({
 }));
 
 vi.mock('../contexts/meta/selectors', () => ({
-  useGetCustomStylex: vi.fn(),
+  useGetCustomStylex: () => metaState.current.customStylex,
   useGetIsAlwaysOpen: () => metaState.current.isAlwaysOpen,
   useGetIsListVisible: () => metaState.current.isListVisible,
   useGetListboxId: () => metaState.current.listboxId,
@@ -56,10 +58,22 @@ vi.mock('../contexts/useVirtualSelectAnchorRef.hook', () => {
 });
 
 vi.mock('../contexts/meta/actions', () => ({
-  useToggleDropdown: () => vi.fn(),
+  useCloseDropdown: () => vi.fn(),
 }));
 
 import { VirtualSelectDropdown } from './VirtualSelectDropdown.component';
+
+/**
+ * A consumer style that contradicts the dropdown's own positioning.
+ * `OperatorSelect` used to pass one of these, and because `customStylex` came
+ * last in the style chain it won — a popover that is not absolutely positioned
+ * still sits in the top layer, so the list rendered against the initial
+ * containing block, in the viewport's top-left corner.
+ */
+const consumerStyles = stylex.create({
+  positionReset: { position: 'relative' },
+  surfaceTweak: { boxShadow: 'none' },
+});
 
 beforeEach(() => {
   setMetaState({});
@@ -98,5 +112,41 @@ describe('VirtualSelectDropdown', () => {
 
     expect(screen.getByRole('listbox')).toBeTruthy();
     expect(contentRenderCount.current).toBe(1);
+  });
+
+  it('does not let a consumer style override its own positioning', () => {
+    render(<VirtualSelectDropdown />);
+    const positionedClassName = screen.getByRole('listbox').className;
+
+    cleanup();
+    setMetaState({ customStylex: consumerStyles.positionReset });
+    render(<VirtualSelectDropdown />);
+
+    // StyleX resolves a conflicting property by argument order and drops the
+    // loser's class, so the floating classes surviving intact is the evidence
+    // that `customStylex` is applied ahead of the positioning styles.
+    const resetClassName = screen.getByRole('listbox').className;
+    const survivors = positionedClassName
+      .split(' ')
+      .filter((className) => resetClassName.split(' ').includes(className));
+
+    expect(survivors).toEqual(positionedClassName.split(' '));
+  });
+
+  it('still lets a consumer style override the floating surface', () => {
+    render(<VirtualSelectDropdown />);
+    const baseClassName = screen.getByRole('listbox').className;
+
+    cleanup();
+    setMetaState({ customStylex: consumerStyles.surfaceTweak });
+    render(<VirtualSelectDropdown />);
+
+    // The counterpart of the case above: elevation is surface, not placement,
+    // so `dropdownFloatingSurface` sits BEFORE `customStylex` and the consumer
+    // wins. Composing the whole floating style after `customStylex` would take
+    // this away while looking like it only protected positioning.
+    const tweakedClassName = screen.getByRole('listbox').className;
+
+    expect(tweakedClassName).not.toBe(baseClassName);
   });
 });

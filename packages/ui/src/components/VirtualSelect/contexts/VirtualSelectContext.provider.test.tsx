@@ -57,6 +57,7 @@ describe('VirtualSelectProvider', () => {
         isOpen: false,
         listboxId: 'listbox-id',
         mode: 'multi',
+        onCloseDropdown: vi.fn(),
         onToggleDropdown: vi.fn(),
         placeholder: 'Pick...',
       },
@@ -88,6 +89,7 @@ describe('VirtualSelectProvider', () => {
         isOpen: false,
         listboxId: 'listbox-id',
         mode: 'single',
+        onCloseDropdown: vi.fn(),
         onToggleDropdown: vi.fn(),
         placeholder: 'Pick...',
       },
@@ -118,6 +120,7 @@ describe('VirtualSelectProvider', () => {
           isOpen: isCurrentlyOpen,
           listboxId: 'listbox-id',
           mode: 'single',
+          onCloseDropdown: vi.fn(),
           onToggleDropdown: vi.fn(),
           placeholder: 'Pick...',
         }}
