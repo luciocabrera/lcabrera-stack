@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import * as stylex from '@stylexjs/stylex';
 import { cleanup, render, screen } from '@testing-library/react';
 import { createRef } from 'react';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
@@ -7,8 +8,13 @@ import { afterEach, describe, expect, it } from 'vite-plus/test';
 import type { TooltipContentProps } from './TooltipContent.types';
 
 import { TooltipContent } from './TooltipContent.component';
+import { ARROW_STYLES } from './TooltipContent.constants';
+import { styles } from './TooltipContent.stylex';
 
 afterEach(cleanup);
+
+const classesOf = (className: string) =>
+  new Set(className.split(' ').filter(Boolean));
 
 const renderContent = (overrides?: Partial<TooltipContentProps>) => {
   const props = {
@@ -66,5 +72,36 @@ describe('TooltipContent', () => {
     const arrow = popover.querySelector('span');
 
     expect(arrow?.getAttribute('style') ?? '').not.toContain('px');
+  });
+
+  // The arrow's four border widths start at zero and each placement raises the
+  // two edges that end up outside the tooltip, so the outline carries on around
+  // the tip. Counting *replaced* classes is what gives this teeth: StyleX keys
+  // atomic classes by property, so opting a side in swaps its zero-width class
+  // for a 1px one. Drop the widths and nothing is replaced; add them to the
+  // wrong number of sides and the count moves.
+  it.each(['top', 'bottom', 'left', 'right'] as const)(
+    'borders exactly two arrow edges for the %s placement',
+    (placement) => {
+      const unbordered = classesOf(stylex.props(styles.arrow).className ?? '');
+      const placed = classesOf(
+        stylex.props(styles.arrow, ARROW_STYLES[placement]).className ?? '',
+      );
+      const replaced = [...unbordered].filter((cls) => !placed.has(cls));
+
+      expect(replaced).toHaveLength(2);
+    },
+  );
+
+  it('renders the arrow with its placement styles applied', () => {
+    const { popover } = renderContent({ placement: 'bottom' });
+    const arrow = popover.querySelector('span');
+    const rendered = classesOf(arrow?.className ?? '');
+
+    const expected = (
+      stylex.props(styles.arrow, ARROW_STYLES.bottom).className ?? ''
+    ).split(' ');
+
+    expect(expected.every((cls) => rendered.has(cls))).toBe(true);
   });
 });

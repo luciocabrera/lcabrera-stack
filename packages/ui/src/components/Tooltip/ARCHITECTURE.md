@@ -199,6 +199,35 @@ Tooltip styling is fully StyleX-driven and tokenized, split per delegate
 - Placement styles provide `positionArea` and axis-specific slide transforms.
 - Arrow is a rotated square (`45deg`) with per-placement base offsets.
 
+### Arrow border
+
+The arrow carries the surface's own `borderPrimary` outline, so the border runs
+around the tip instead of stopping at the tooltip box. Only the **two edges that
+end up outside** are bordered — the other two are buried under the body, where a
+line would show through as a seam. `rotate(45deg)` turns clockwise, so:
+
+| Placement | Arrow points | Outward corner | Bordered edges |
+| --------- | ------------ | -------------- | -------------- |
+| `top`     | down         | bottom-right   | bottom, right  |
+| `bottom`  | up           | top-left       | top, left      |
+| `left`    | right        | top-right      | top, right     |
+| `right`   | left         | bottom-left    | bottom, left   |
+
+Two things here are load-bearing, and both are silent when broken:
+
+- The widths are **physical**, not logical. The rotation is physical and does not
+  flip under RTL, so `borderInline*` would move the border to the wrong edges
+  while the arrow kept its shape.
+- The base style zeroes the four widths **individually** rather than with the
+  `borderWidth` shorthand. StyleX expands that shorthand to the _logical_
+  longhands, which are different property keys — so a placement's
+  `borderRightWidth` would not override it, both declarations would ship, and
+  the winner would come down to stylesheet order.
+
+`TooltipContent.test.tsx` pins this by counting how many of the base zero-width
+classes a placement _replaces_: it must be exactly two. Both mistakes above move
+that count.
+
 Important constants:
 
 - `TRANSITION_DURATION_MS = 150`.
