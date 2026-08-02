@@ -6,7 +6,7 @@ the app and acts as the reference implementation for the same dataset.
 
 ## Goals
 
-- Reuse the existing `wideAlltypes150Api` backend contract.
+- Reuse the existing `/wide-alltypes-150/paginated` backend contract.
 - Preserve the shared table feature set: persistence, URL state, sorting, and
   infinite loading.
 - Keep the established `/wide-alltypes-150` route stable while sibling
@@ -36,10 +36,13 @@ wide-alltypes-150/
    is fully serializable (no functions — ADR-009), so the loader returns it
    directly inside `columnsState`; no distinct filter descriptors are
    appended here yet (this route's filter support is deliberately minimal).
-2. The loader fetches the first page from `wideAlltypes150Api`.
-3. `WideAlltypes150.component.tsx` passes the dataset contract and
-   loader-seeded state straight into `TableLayout`.
-4. `TableLayout` owns rendering, persistence, sorting, and incremental loading.
+2. The loader fetches the first page through `fetchWideAlltypes150Page`.
+3. `WideAlltypes150.component.tsx` renders `TableRouteView`, which reads the
+   loader-seeded state and wires load-more to the same fetcher. It opts into
+   neither `isKeysetEnabled` nor `isServerFilterEnabled` — this endpoint
+   supports neither (ADR-056).
+4. `TableLayout`, beneath it, owns rendering, persistence, sorting, and
+   incremental loading.
 
 ## Guardrails
 

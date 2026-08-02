@@ -5,16 +5,14 @@ import { describe, expect, it, vi } from 'vite-plus/test';
 import { loader } from './car-sales.loader';
 import { CLIENT_PAGINATION_ROW_LIMIT } from './CarSales.constants';
 
-const { fetchCarSalesPaginatedMock } = vi.hoisted(() => ({
-  fetchCarSalesPaginatedMock: vi.fn(() =>
+const { fetchCarSalesPageMock } = vi.hoisted(() => ({
+  fetchCarSalesPageMock: vi.fn(() =>
     Promise.resolve({ data: [], hasMore: false, total: 0 }),
   ),
 }));
 
 vi.mock('@/services', () => ({
-  carSalesApi: {
-    fetchCarSalesPaginated: fetchCarSalesPaginatedMock,
-  },
+  fetchCarSalesPage: fetchCarSalesPageMock,
 }));
 
 type CollectFunctionPathsArgs = {
@@ -75,12 +73,12 @@ describe('car-sales loader', () => {
     // car_sales holds 500k rows. Fetching it unbounded produced a ~421MB body
     // and killed SSR with a V8 zone allocation failure, so this route must
     // always ask for a limit.
-    fetchCarSalesPaginatedMock.mockClear();
+    fetchCarSalesPageMock.mockClear();
 
     invokeLoader();
 
-    expect(fetchCarSalesPaginatedMock).toHaveBeenCalledTimes(1);
-    expect(fetchCarSalesPaginatedMock).toHaveBeenCalledWith(
+    expect(fetchCarSalesPageMock).toHaveBeenCalledTimes(1);
+    expect(fetchCarSalesPageMock).toHaveBeenCalledWith(
       expect.objectContaining({
         limit: CLIENT_PAGINATION_ROW_LIMIT,
         skip: 0,

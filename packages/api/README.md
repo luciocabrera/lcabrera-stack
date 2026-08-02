@@ -40,6 +40,8 @@ use and tests mock a module rather than a barrel.
 | --------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | `@lcabrera/api/http/fetch-and-validate.util`              | Fetch → assert OK → parse JSON → validate through a type guard, with a timeout  |
 | `@lcabrera/api/http/build-paginated-query-params.util`    | Builds the shared `limit`/`skip`/`sort`/`filter` query string                   |
+| `@lcabrera/api/http/create-paginated-fetcher.util`        | Factory: endpoint declaration in, validated page fetcher out                    |
+| `@lcabrera/api/http/http.types`                           | `PaginatedSort`, `PaginatedQuery`, `PaginatedFetchArgs`                         |
 | `@lcabrera/api/config/get-api-base-url.util`              | Resolves the API base URL across SSR, dev-proxy, private-IP and production      |
 | `@lcabrera/api/config/config.constants`                   | `API_SERVER_PORT` and the `CONFIG` per-environment host map                     |
 | `@lcabrera/api/config/config.types`                       | `ApiConfig` — the shape of `CONFIG`                                             |

@@ -52,3 +52,19 @@ export type Sorting<TData = Record<string, unknown>> = {
   /** Sort direction */
   readonly direction?: SortDirection;
 };
+
+/**
+ * The response shape a paginated table endpoint returns. `TableRouteView`
+ * constrains its response to this so `dataSelector` / `dataTotalSelector` have
+ * working defaults; a response that names its fields differently uses
+ * `TableLayout` with explicit selectors instead.
+ *
+ * `total` is optional because a server need only count once per scroll session
+ * (see `dataTotalSelector`), and `hasMore` because an endpoint can also signal
+ * exhaustion by returning fewer rows than `limit`.
+ */
+export type TablePageResponse<TData> = {
+  readonly data: readonly TData[];
+  readonly hasMore?: boolean;
+  readonly total?: number;
+};

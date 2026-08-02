@@ -4,7 +4,7 @@ import { createTableRouteLoader } from '@lcabrera/ui/routing/loaders/createTable
 import type { WideAlltypes150, WideAlltypes150Response } from '@/services';
 
 import { APP_ID } from '@/constants/app.constants';
-import { wideAlltypes150Api } from '@/services';
+import { fetchWideAlltypes150Page } from '@/services';
 
 import {
   COLUMNS,
@@ -27,7 +27,7 @@ export const loader = createTableRouteLoader<
   appId: APP_ID,
   columns: COLUMNS,
   fetchPage: ({ effectiveSorting, request }) =>
-    wideAlltypes150Api.fetchPaginated({
+    fetchWideAlltypes150Page({
       limit: INITIAL_PAGE_SIZE,
       requestUrl: request.url,
       skip: 0,

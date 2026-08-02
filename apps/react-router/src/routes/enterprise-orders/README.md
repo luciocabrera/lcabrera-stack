@@ -65,12 +65,12 @@ src/routes/enterprise-orders/
 ├── EnterpriseOrders.constants.tsx             # Table column definitions
 ├── enterprise-orders.loader.ts               # List loader (Suspense streaming)
 ├── enterprise-orders.meta.ts                 # Page metadata
-├── enterprise-orders.errorBoundary.tsx       # Error handling
+├── EnterpriseOrders.error-boundary.tsx        # Error handling
 ├── config/                                    # Entity data + pure rules (types, Zod, derivation)
 ├── .server/enterpriseOrders.service.ts        # Server-only Postgres access (RR `.server/`: build-stripped from client)
 ├── OrderFormModal/                            # Shared Modal + Form wrapper
 ├── orderClientAction.ts                       # Shared browser Zod gate
-├── utils/                                     # Route-local utils: orderFormFields (field-tree builder via @lcabrera/ui createFieldBuilders), parseOrderIdParam, buildEnterpriseOrdersQuery
+├── utils/                                     # Route-local utils: orderFormFields (field-tree builder via @lcabrera/ui createFieldBuilders), parseOrderIdParam, buildAddressLocalityRows
 ├── new-order/                                 # Create route (clientAction + action)
 ├── edit-order/                                # Edit route (loader + clientAction + action)
 └── order-detail/                              # Read-only view route (Form `view` mode)

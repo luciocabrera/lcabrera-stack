@@ -44,6 +44,8 @@ half out removes that edge at the package boundary rather than papering over it.
 | `config/`   | `get-api-base-url.util.ts`             | Resolves the API base URL across SSR, dev-proxy, private-IP and production cases                |
 | `http/`     | `fetch-and-validate.util.ts`           | Fetches, asserts OK, parses JSON, validates the body through a type guard                       |
 | `http/`     | `build-paginated-query-params.util.ts` | Builds the `limit`/`skip`/`sort`/`filter` query params shared by paginated fetchers             |
+| `http/`     | `create-paginated-fetcher.util.ts`     | Factory: endpoint declaration (path, guard, base-URL strategy) in, validated page fetcher out   |
+| `http/`     | `http.types.ts`                        | `PaginatedSort`, `PaginatedQuery`, `PaginatedFetchArgs` — the shared paginated-read contract    |
 | `distinct/` | `distinct.types.ts`                    | `DistinctValuesResponse` — the wire contract, also re-exported by `api-shared`                  |
 | `distinct/` | `fetch-distinct-values.util.ts`        | Pages a distinct-values endpoint — the HTTP half of the ADR-009 descriptors                     |
 | `distinct/` | `is-distinct-values-response.util.ts`  | Type guard for `DistinctValuesResponse`                                                         |
@@ -75,11 +77,15 @@ From `@lcabrera/ui`:
 
 - `src/utils/filters/getFilterOptionsBaseUrl.util.ts` — `getApiBaseUrl`
 - `src/utils/filters/resolveDistinctFilterOptions.util.ts` — `fetchDistinctValues`
+- `src/hooks/useTableRoutePage.hook.ts` and
+  `src/components/TableRouteView/TableRouteView.types.ts` — `PaginatedQuery`
 
 From `apps/react-router`:
 
-- `src/services/carSales.api.ts`, `src/services/wideAlltypes150.api.ts`
-- `src/routes/enterprise-orders/fetchOrdersPage.service.ts`
+- `src/services/carSales.api.ts`, `src/services/wideAlltypes150.api.ts` —
+  `createPaginatedFetcher` + `getApiBaseUrl`
+- `src/routes/enterprise-orders/fetchOrdersPage.service.ts` —
+  `createPaginatedFetcher` (same-origin, no base URL)
 - `src/routes/api/filter-options/filter-options.loader.ts`
 
 From `apps/shared`:

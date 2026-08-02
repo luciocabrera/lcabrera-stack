@@ -110,7 +110,8 @@ obvious-but-slower spelling (epic #391):
   later page. The table keeps the total it holds when a page omits one
   (`resolveFetchMoreState`), so nothing downstream notices.
 - **Load-more seeks rather than counts.** The table hands `onLoadMore` its last
-  loaded row; `buildEnterpriseOrdersQuery` turns that into the sort-key tuple the
+  loaded row; `buildTablePageQuery` (`@lcabrera/ui/routing/shared`, reached through
+  `TableRouteView`'s `isKeysetEnabled`) turns that into the sort-key tuple the
   server resumes after, so a deep page is O(limit) instead of O(offset)
   ([ADR-052](../../../../../docs/decisions/ADR-052-keyset-pagination-for-infinite-scroll.md)).
   `skip` is still sent, and `toOrderKeysetCursor` falls back to it whenever the
