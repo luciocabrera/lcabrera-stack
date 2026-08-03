@@ -149,14 +149,22 @@ exception criteria before writing it.
 
 The gate scans all three React workspaces, so a `packages/ui`-only run (the
 `cd packages/ui && npx react-doctor@latest` recipe above) does not show these.
-All three are criterion 2, and none has the precomputed-array escape hatch the two
+Each is criterion 2, and none has the precomputed-array escape hatch the two
 fixed sites had.
 
 | File                                                                                                                                         | Shape                                            | Why accepted                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [`toOrderQuerySort.util.ts`](../../apps/react-router/src/routes/enterprise-orders/config/toOrderQuerySort.util.ts)                           | `sorting.filter(…).map(…)`                       | The collection is `sorting` — the active sorts, a handful — on a loader/query-build path. Same shape and same reasoning as `buildOrderBySorting`.                                                                                                                                                                                                                                                                                                                                                |
 | [`RoleDetail.component.tsx`](../../apps/admin_system/src/routes/cqms/role-detail/RoleDetail.component.tsx)                                   | `permissions.filter(assignedIds.has).map(…)`     | N is the permission catalogue (tens). Already uses a `Set` for the membership test, so the part that could have been quadratic is not.                                                                                                                                                                                                                                                                                                                                                           |
 | [`useFolderSnapshotUpload.hook.ts`](../../apps/admin_system/src/routes/cqms/project-detail/ProjectSyncPanel/useFolderSnapshotUpload.hook.ts) | `files.map(→ {file, key}).filter(!ignored(key))` | **The largest N in the report** — a picked project folder, thousands of files — and the one place the `.map().filter()` order is _not_ invertible: the predicate tests `key`, which the map computes. So `resolveArchiveEntryKey` does run for files about to be dropped. Accepted anyway on absolute cost: this is the prelude to reading and zipping every one of those files, which is orders of magnitude more work than the projection. Re-open it with a profile, not by reading the code. |
+
+The enterprise-orders `toOrderQuerySort` util was a fourth entry here, on the same
+reasoning as `buildOrderBySorting`. It stopped firing when the util was promoted
+to the generic [`toQuerySort`](../../packages/ui/src/routing/shared/toQuerySort.util.ts),
+whose filtering half is the pre-existing `sanitizeSorting` — so the chain now spans
+a module boundary and the rule, which fires on adjacency, no longer matches. **That
+is not a fix**: both passes still run, exactly as before. The acceptance above is
+what still justifies them; do not read the clean report as the finding having been
+addressed, and do not split a chain across modules to clear this rule (Rule 10).
 
 ### Accepted — real defect, but the rule's fix is the wrong one
 

@@ -93,7 +93,9 @@ Client-safe types (`EnterpriseOrder`, `EnterpriseOrderListRow`,
 column/`allowedColumns`/`listColumns`/enum sets, the shared create/update **Zod schema**,
 and pure derivation/mapping utils (`deriveOrderTotals`, `toOrderInsertValues`/
 `toOrderUpdateValues`, `readOrderFormValues`, `toOrderFieldErrors`, `toOrderFormValues`,
-`toOrderQuerySort`, `toOrderKeysetCursor`). Each util is pure with a colocated test.
+`toOrderKeysetCursor`). Each util is pure with a colocated test. Sorting is **not**
+translated here — `@lcabrera/ui/routing/shared`'s `toQuerySort` is table-agnostic
+and does it for every route.
 
 ### The read path — how a page of orders is paid for
 

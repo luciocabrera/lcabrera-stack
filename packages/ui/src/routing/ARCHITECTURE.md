@@ -41,13 +41,16 @@ The folder is split by concern:
 
 ## `shared/`
 
-| File                                   | Description                                                                       |
-| -------------------------------------- | --------------------------------------------------------------------------------- |
-| `sanitizeSorting.util.ts`              | Drops invalid/actions-column sort entries                                         |
-| `appendPrimaryKeySorting.util.ts`      | Appends the primary-key tiebreaker to a sort list for stable pagination (ADR-008) |
-| `sanitizeFiltersByColumns.util.ts`     | Drops URL filters that don't match a known column                                 |
-| `isFilterCompatibleWithColumn.util.ts` | Guard used when sanitizing URL filters against column definitions                 |
-| `getRootLoaderData.util.ts`            | Typed access to the root route's loader data                                      |
+| File                                   | Description                                                                                                     |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `sanitizeSorting.util.ts`              | Drops invalid/actions-column sort entries                                                                       |
+| `appendPrimaryKeySorting.util.ts`      | Appends the primary-key tiebreaker to a sort list for stable pagination (ADR-008)                               |
+| `toQuerySort.util.ts`                  | Renames a sanitized sorting to the `{ column, direction }` shape an endpoint's ORDER BY takes                   |
+| `toKeysetCursorValues.util.ts`         | Reads the sort-key tuple out of the last loaded row, in sorting order — the keyset cursor (ADR-052)             |
+| `buildTablePageQuery.util.ts`          | Turns the table's columns state into the next page's query — the client-side mirror of `createTableRouteLoader` |
+| `sanitizeFiltersByColumns.util.ts`     | Drops URL filters that don't match a known column                                                               |
+| `isFilterCompatibleWithColumn.util.ts` | Guard used when sanitizing URL filters against column definitions                                               |
+| `getRootLoaderData.util.ts`            | Typed access to the root route's loader data                                                                    |
 
 ## Serialization Contract (ADR-009)
 

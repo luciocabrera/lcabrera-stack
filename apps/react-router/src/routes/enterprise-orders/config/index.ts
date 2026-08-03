@@ -33,5 +33,4 @@ export { toOrderFieldErrors } from './toOrderFieldErrors.util';
 export { toOrderFormValues } from './toOrderFormValues.util';
 export { toOrderInsertValues } from './toOrderInsertValues.util';
 export { toOrderKeysetCursor } from './toOrderKeysetCursor.util';
-export { toOrderQuerySort } from './toOrderQuerySort.util';
 export { toOrderUpdateValues } from './toOrderUpdateValues.util';
