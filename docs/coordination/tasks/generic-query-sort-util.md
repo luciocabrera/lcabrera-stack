@@ -11,16 +11,20 @@ area:
 started: 2026-08-03
 updated: 2026-08-03
 plan: (none)
-pr: (none)
+pr: '#494'
 issue: #493
 ---
 
 ## What
 
-Promote toOrderQuerySort to a shared @lcabrera/ui generic
+`apps/react-router`'s `config/toOrderQuerySort` util was table-agnostic: it skipped
+the synthetic `actions` column and renamed `columnKey` → `column`. Promote it to
+`@lcabrera/ui/routing/shared/toQuerySort`, composing the `sanitizeSorting` that
+already lives beside it, and delete the app-local copy plus a second hand-rolled
+copy's worth of duplication.
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implemented; gate green in both workspaces
 - Blockers: none
-- Next:
+- Next: flip PR #494 out of draft

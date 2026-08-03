@@ -1,22 +1,22 @@
+import type { QuerySort } from '@lcabrera/server/db/query-builder/query-builder.types';
 import type { SortingState } from '@lcabrera/ui/components/Table';
 import type { ColumnFilter } from '@lcabrera/ui/types/filterOperators.types';
 
 import { toQueryFilters } from '@lcabrera/server/filters/to-query-filters.util';
 import { INITIAL_PAGE_SIZE } from '@lcabrera/ui/components/Table/Table.constants';
+import { toQuerySort } from '@lcabrera/ui/routing/shared/toQuerySort.util';
 import { isObject } from '@lcabrera/utils/guards/is-object.util';
 import { safeJsonParse } from '@lcabrera/utils/json/safe-json-parse.util';
 import { parsePositiveInteger } from '@lcabrera/utils/numbers/parse-positive-integer.util';
 
 import type { EnterpriseOrderListRow } from '@/routes/enterprise-orders/config';
 
-import { toOrderQuerySort } from '@/routes/enterprise-orders/config';
-
 export type ParsedOrdersPageParams = {
   readonly cursor?: readonly unknown[];
   readonly filters: ReturnType<typeof toQueryFilters>;
   readonly limit: number;
   readonly skip: number;
-  readonly sort: ReturnType<typeof toOrderQuerySort>;
+  readonly sort: readonly QuerySort[];
 };
 
 /**
@@ -51,7 +51,7 @@ export const parseOrdersPageParams = (
       fallback: 0,
       value: params.get('skip') ?? undefined,
     }),
-    sort: toOrderQuerySort({
+    sort: toQuerySort({
       sorting: Array.isArray(rawSort)
         ? (rawSort as SortingState<EnterpriseOrderListRow>)
         : [],

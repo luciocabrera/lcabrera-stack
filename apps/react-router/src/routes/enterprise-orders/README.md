@@ -91,11 +91,10 @@ Reads go through the generic `@lcabrera/server` query builders/executors (no
 api-server). `.server/enterpriseOrders.service.ts` exposes `selectOrdersPage`
 (list + count), `selectOrderById`, `getNextOrderId`, `insertOrder`,
 `updateOrder`, `deleteOrder`. The table's `ColumnFiltersState`/`SortingState`
-are translated to generic `QueryFilter[]`/`QuerySort[]` by the generic
-`@lcabrera/server/filters` `toQueryFilters` mapper (table-agnostic, shared by
-any table) and the app-local `config/toOrderQuerySort` util; the browser
-load-more calls `fetchOrdersPage` → the `_api/enterprise-orders/paginated`
-resource route.
+are translated to generic `QueryFilter[]`/`QuerySort[]` by two table-agnostic
+mappers shared by any table — `@lcabrera/server/filters`' `toQueryFilters` and
+`@lcabrera/ui/routing/shared`'s `toQuerySort`; the browser load-more calls
+`fetchOrdersPage` → the `_api/enterprise-orders/paginated` resource route.
 
 > Filter translation note: every table filter operator maps to SQL — range
 > (`between`), multi-select NOT-IN, and text **notContains** (now `NOT ILIKE`,

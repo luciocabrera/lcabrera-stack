@@ -1,6 +1,7 @@
 import { toQueryFilters } from '@lcabrera/server/filters/to-query-filters.util';
 import { INITIAL_PAGE_SIZE } from '@lcabrera/ui/components/Table/Table.constants';
 import { createTableRouteLoader } from '@lcabrera/ui/routing/loaders/createTableRouteLoader.util';
+import { toQuerySort } from '@lcabrera/ui/routing/shared/toQuerySort.util';
 
 import { APP_ID } from '@/constants/app.constants';
 
@@ -10,7 +11,6 @@ import type {
 } from './config';
 
 import { selectOrdersPage } from './.server/enterpriseOrders.service';
-import { toOrderQuerySort } from './config';
 import {
   COLUMNS,
   CRUD,
@@ -48,7 +48,7 @@ export const loader = createTableRouteLoader<
       includeTotal: true,
       limit: INITIAL_PAGE_SIZE,
       offset: 0,
-      sort: toOrderQuerySort({ sorting: effectiveSorting }),
+      sort: toQuerySort({ sorting: effectiveSorting }),
     }),
   filterOptions: { transport: 'loader' },
   meta: { crud: CRUD, deleteActionPath: DELETE_ACTION_PATH },
