@@ -112,10 +112,9 @@ const MODULE_SPECIFIER =
 // that forced this: the guard blocked edits to its own wiring, and JSON has no
 // comment syntax to carry the `gitleaks:allow` escape.
 //
-// Keyed on the EXTENSION, not on the value looking path-like — the module
-// carve-out above explains why "has slashes and dots" is not safe (base64 has
-// both). Base64 never ends in `.mjs`. Key material (`.pem`, `.key`, …) is
-// deliberately absent: the test pairs one high-entropy path spelled `.mjs`
+// Keyed on the EXTENSION plus a per-segment check (see `isSourceFilePathValue`),
+// never on the value merely looking path-like. Key material (`.pem`, `.key`, …)
+// is deliberately absent: the test pairs one high-entropy path spelled `.mjs`
 // against the same path spelled `.pem` to prove the extension is what decides.
 const SOURCE_FILE_EXTENSIONS = new Set([
   '.cjs',
@@ -145,12 +144,28 @@ const withoutTrailingBackslashes = (value) => {
   return value.slice(0, end);
 };
 
+// Both separators, matching `hasDirectoryComponent` in the entry module — a
+// Windows-spelled path is no more a credential than a POSIX one.
+const PATH_SEPARATOR = /[/\\]/;
+
+// The extension alone is not enough: appending `/x.ts` to a credential would
+// otherwise buy an exemption, since the generic rule reads the whole quoted
+// string as one value. So every SEGMENT must also fail the secret test — a real
+// path is a run of readable names, while a smuggled credential keeps one long
+// high-entropy segment wherever the extension is bolted on.
+//
+// This is the shape check the module-specifier carve-out above deliberately
+// avoids ("a base64 credential also contains slashes and dots"); it is sound
+// here only because the per-segment test is what carries the weight, not the
+// slashes. Provider patterns are unaffected either way — they run independently
+// of this exemption, so a known-format key is still caught with any suffix.
 const isSourceFilePathValue = (value) => {
   const unescaped = withoutTrailingBackslashes(value);
-  return (
-    unescaped.includes('/') &&
-    SOURCE_FILE_EXTENSIONS.has(fileExtension(unescaped))
-  );
+  if (!SOURCE_FILE_EXTENSIONS.has(fileExtension(unescaped))) {
+    return false;
+  }
+  const segments = unescaped.split(PATH_SEPARATOR).filter(Boolean);
+  return segments.length >= 2 && !segments.some(looksLikeRealSecret);
 };
 
 // Key names (normalized: lowercased, separators stripped) that mark a value as

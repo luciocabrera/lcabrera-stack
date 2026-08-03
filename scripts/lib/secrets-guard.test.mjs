@@ -154,19 +154,28 @@ describe('evaluatePreToolUse — allows', () => {
 });
 
 // A path to a source file is not a credential — but one naming a secret-related
-// script has the generic rule's exact shape. The carve-out is keyed on the file
-// EXTENSION, so these two groups pin both directions of it.
+// script has the generic rule's exact shape. The carve-out needs BOTH a source
+// extension and every path segment failing the secret test, so these two groups
+// pin each half of it.
+//
+// The hook-command path is the fixture to reason from: 4.78 bits/char over the
+// whole string (so the generic rule does fire on it) with no single segment
+// secret-shaped (so the carve-out is what lets it through).
+const HOOK_PATH = '$CLAUDE_PROJECT_DIR/scripts/claude-secrets-guard';
+
 describe('source-file paths are not credentials', () => {
   const allowed = [
     // The case that forced the carve-out: the guard blocked edits to its own
     // hook wiring, and JSON has no comment syntax to carry `gitleaks:allow`.
-    '"command": "node \\"$CLAUDE_PROJECT_DIR/scripts/claude-secrets-guard.mjs\\""',
+    `"command": "node \\"${HOOK_PATH}.mjs\\""`,
     'const secretGuard = "./scripts/lib/secrets-guard.mjs";',
     'password_helper: "packages/server/src/crypto/hash-password.util.ts"',
     '"token_fixture": "apps/react-router/src/routes/api/token-refresh.util.ts"',
-    // Paired with the `.pem` deny below: same high-entropy path, source
-    // extension, so the extension list is provably what decides — not entropy.
-    `const secretKeyPath = "/etc/ssl/${ENTROPY_FIXTURE}/server.mjs";`,
+    // Windows spelling of the same path. `hasDirectoryComponent` in the entry
+    // module already accepts both separators; this one must too.
+    String.raw`const secretPath = "C:\scripts\claude-secrets-guard.mjs";`,
+    // Paired with the `.pem` deny below — same path, source extension.
+    `const secretKeyPath = "${HOOK_PATH}.mjs";`,
   ];
 
   it.each(allowed)('allows %s', (line) => {
@@ -178,19 +187,26 @@ describe('source-file paths are not credentials', () => {
     ).toBe('allow');
   });
 
-  // The carve-out must not become a smuggling route. Key material extensions are
-  // deliberately absent from the list, a bare high-entropy value has no
-  // extension at all, and a real assignment sharing the line still trips.
+  // The carve-out must not become a smuggling route.
   //
-  // The `.pem` case is paired with the `.mjs` allow above it deliberately: both
-  // are the SAME high-entropy path (4.6 bits/char) and differ only in
-  // extension, so the pair proves the extension list is what decides. A
-  // readable path like `/etc/ssl/private/server.pem` (3.45) would prove
-  // nothing — the entropy floor allows it either way.
+  // The `.pem` case is paired with the `.mjs` allow above it deliberately: the
+  // SAME path, differing only in extension, so the pair proves the extension
+  // list is what decides. A readable path like `/etc/ssl/private/server.pem`
+  // (3.45 bits/char) would prove nothing — the entropy floor allows it either
+  // way, whether or not `.pem` is exempt.
+  //
+  // The two append cases are the bypass a reviewer raised on #497: bolting a
+  // source extension onto a credential must not buy an exemption. The
+  // provider-pattern case would be caught regardless — those run independently
+  // of this carve-out — but it pins that independence.
   const denied = [
-    `const secretKeyPath = "/etc/ssl/${ENTROPY_FIXTURE}/server.pem";`,
+    `const secretKeyPath = "${HOOK_PATH}.pem";`,
     `const secret = "${ENTROPY_FIXTURE}";`,
     `const p = "./scripts/x.mjs"; const secret = "${ENTROPY_FIXTURE}";`,
+    `const secret = "${ENTROPY_FIXTURE}/x.ts";`,
+    `const secret = "${AKIA}/x.ts";`,
+    // A bare filename is not a path: no directory component, no exemption.
+    `const secret = "${ENTROPY_FIXTURE}.ts";`,
   ];
 
   it.each(denied)('still denies %s', (line) => {
