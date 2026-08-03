@@ -10,7 +10,7 @@ area:
 started: 2026-08-03
 updated: 2026-08-03
 plan: (none)
-pr: (none)
+pr: #502
 issue: #501
 ---
 
@@ -32,6 +32,6 @@ rules files.
 
 ## Status / next
 
-- Current step: cuts applied and verified, opening PR
+- Current step: PR #502 open, awaiting review
 - Blockers: none
 - Next: delete this file when the PR merges
