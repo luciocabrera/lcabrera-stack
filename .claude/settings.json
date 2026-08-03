@@ -31,7 +31,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node scripts/claude-secrets-guard.mjs"
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/claude-secrets-guard.mjs\""
           }
         ]
       }
@@ -42,7 +42,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node scripts/claude-autofix.mjs"
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/claude-autofix.mjs\""
           }
         ]
       }

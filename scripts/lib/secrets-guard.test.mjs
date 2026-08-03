@@ -153,6 +153,56 @@ describe('evaluatePreToolUse — allows', () => {
   );
 });
 
+// A path to a source file is not a credential — but one naming a secret-related
+// script has the generic rule's exact shape. The carve-out is keyed on the file
+// EXTENSION, so these two groups pin both directions of it.
+describe('source-file paths are not credentials', () => {
+  const allowed = [
+    // The case that forced the carve-out: the guard blocked edits to its own
+    // hook wiring, and JSON has no comment syntax to carry `gitleaks:allow`.
+    '"command": "node \\"$CLAUDE_PROJECT_DIR/scripts/claude-secrets-guard.mjs\\""',
+    'const secretGuard = "./scripts/lib/secrets-guard.mjs";',
+    'password_helper: "packages/server/src/crypto/hash-password.util.ts"',
+    '"token_fixture": "apps/react-router/src/routes/api/token-refresh.util.ts"',
+    // Paired with the `.pem` deny below: same high-entropy path, source
+    // extension, so the extension list is provably what decides — not entropy.
+    `const secretKeyPath = "/etc/ssl/${ENTROPY_FIXTURE}/server.mjs";`,
+  ];
+
+  it.each(allowed)('allows %s', (line) => {
+    expect(
+      decisionFor({
+        toolInput: { content: line, file_path: 'src/x.ts' },
+        toolName: 'Write',
+      }),
+    ).toBe('allow');
+  });
+
+  // The carve-out must not become a smuggling route. Key material extensions are
+  // deliberately absent from the list, a bare high-entropy value has no
+  // extension at all, and a real assignment sharing the line still trips.
+  //
+  // The `.pem` case is paired with the `.mjs` allow above it deliberately: both
+  // are the SAME high-entropy path (4.6 bits/char) and differ only in
+  // extension, so the pair proves the extension list is what decides. A
+  // readable path like `/etc/ssl/private/server.pem` (3.45) would prove
+  // nothing — the entropy floor allows it either way.
+  const denied = [
+    `const secretKeyPath = "/etc/ssl/${ENTROPY_FIXTURE}/server.pem";`,
+    `const secret = "${ENTROPY_FIXTURE}";`,
+    `const p = "./scripts/x.mjs"; const secret = "${ENTROPY_FIXTURE}";`,
+  ];
+
+  it.each(denied)('still denies %s', (line) => {
+    expect(
+      decisionFor({
+        toolInput: { content: line, file_path: 'src/x.ts' },
+        toolName: 'Write',
+      }),
+    ).toBe('deny');
+  });
+});
+
 describe('evaluatePreToolUse — event scope', () => {
   it('passes through any event that is not PreToolUse', () => {
     // The hook is registered for PreToolUse only, but a payload for another
