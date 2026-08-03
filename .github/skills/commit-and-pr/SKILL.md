@@ -78,9 +78,61 @@ PR_TITLE='feat(ci): add pr standards gate' \
 | Layer     | What runs                                                                    |
 | --------- | ---------------------------------------------------------------------------- |
 | Local     | `.vite-hooks/commit-msg` → `commit:verify` on every `git commit`             |
+| Local     | `.vite-hooks/pre-push` → `branch:verify` on the head ref                     |
 | CI (gate) | `pr-standards.yml` → `pr:verify` (title + body) + `commit:verify` per commit |
 
 Per **Rule 11**, do not work around a failure by weakening the check — fix the
 message or the description. The spec (`scripts/lib/commit-convention.mjs`) is the
 one place the rules live; change it there if the standard itself must change, and
 the hook, CI, and this skill stay in sync.
+
+## Details
+
+Two layers, so a mixed crew of agents and humans follows it without exception.
+
+**Commit messages** are Conventional Commits — `type(scope): subject`. The `type`
+is one of the spec's `ALLOWED_TYPES`; the `scope` is preferably the workspace you
+touched (`ui`, `admin_system`, `api-server`, … — derived from
+`pnpm-workspace.yaml`, so it self-updates) or a cross-cutting area (`ci`, `docs`,
+`tooling`, …). An unrecognised scope only **warns**; a malformed header **fails**.
+Merge/revert/`fixup!` messages are skipped, and the `Co-Authored-By:` trailer is
+always accepted.
+
+**Pull requests** need a conforming title (same format) and a description with
+every section in
+[`.github/pull_request_template.md`](../../pull_request_template.md): `## What`,
+`## Why`, `## Verification` (or `## Testing`), `## Impact Analysis`,
+`## Test Coverage`, `## Documentation Updates`. CI's
+[`pr-standards.yml`](../../workflows/pr-standards.yml) runs `pr:verify` on the
+title + body, `branch:verify` on the head ref, and `commit:verify` over every
+non-merge commit in the range, so nothing that skipped the local hook
+(`--no-verify`) reaches `main`.
+
+**Branch names** are `<type>/<issue-number>-<kebab-description>` —
+`feat/123-add-column-resize`. The `<type>` is the **same** list commits use, so
+there is one vocabulary rather than two words for one idea, and the issue number
+is what ties a branch to the context that justified it. `main` and `release-*`
+are exempt. `.vite-hooks/pre-push` checks it first (a name cannot be fixed after
+the push without rewriting the remote), and `vp run coordination:claim` produces
+a conforming name for you.
+
+**Issues** need every section in
+[`.github/ISSUE_TEMPLATE/standard_issue.md`](../../ISSUE_TEMPLATE/standard_issue.md),
+enforced by [`issue-standards.yml`](../../workflows/issue-standards.yml) on open
+and edit. This exists because nothing checked issue bodies and the cost was
+issues with no reproduction, no scope and no acceptance criteria — which then had
+to be investigated from scratch before anyone could act on them. Tracking issues
+from `coordination:claim` are **not** exempt; the script fills the template in
+instead.
+
+**The templates themselves** — issue, PR, and the merge checklist — are collected
+in [`docs/agents/workflow.md`](../../../docs/agents/workflow.md), the entry point
+for how agents file, review and merge work. Every PR section is required; write
+"None" rather than deleting a heading, so a reviewer can tell a considered no
+from an omission. The section headings are matched as **headings** and must keep
+their plain spelling — numbering or emoji in one fails `pr:verify`, and a
+substring check would have accepted prose that answers none of them. The source
+specification is
+[`docs/agents/templates-spec.md`](../../../docs/agents/templates-spec.md); it
+records the two deviations taken when adopting it, so nobody "restores" the spec
+text and breaks the gate.

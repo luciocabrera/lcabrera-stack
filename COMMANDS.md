@@ -318,7 +318,9 @@ The loop: a change that affects consumers ships with a changeset in the same PR
 triggers [`release.yml`](.github/workflows/release.yml), which builds, publishes
 every package whose version is not yet on npm, and opens a GitHub Release for it.
 
-Two deliberate constraints, both explained in [AGENTS.md](AGENTS.md#releasing):
+Two deliberate constraints, both explained in
+[AGENTS.md](AGENTS.md#releasing-changelog--labels) and in full in the `releasing`
+skill:
 the version PR is **not** opened by a bot, and the **first** publish of each
 package must be done by hand before trusted publishing can take over.
 
@@ -515,7 +517,8 @@ syncs the label set when the manifest/workspace list changes on `main`, and
 [`changelog.yml`](.github/workflows/changelog.yml) publishes release notes on a
 `v*` tag. `CHANGELOG.md` itself is regenerated with `vp run changelog:generate`
 and committed through an ordinary PR — see
-[AGENTS.md § Changelog & Labels](AGENTS.md#changelog--labels) for why no bot
+[AGENTS.md § Releasing, Changelog & Labels](AGENTS.md#releasing-changelog--labels)
+and the `releasing` skill for why no bot
 pushes it to `main`.
 
 [`secret-scan.yml`](.github/workflows/secret-scan.yml) scans repository
