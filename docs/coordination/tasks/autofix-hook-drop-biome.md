@@ -2,14 +2,14 @@
 id: autofix-hook-drop-biome
 title: Drop the Biome pass from the Claude autofix hook to cut per-edit latency
 owner: agent:claude
-status: active
+status: review
 branch: perf/499-drop-biome-from-autofix-hook
 area:
   - scripts/claude-autofix.mjs
 started: 2026-08-03
 updated: 2026-08-03
 plan: (none)
-pr: (none)
+pr: #500
 issue: #499
 ---
 
@@ -27,6 +27,6 @@ pre-push, and the Biome step in `check-safe.yml`.
 
 ## Status / next
 
-- Current step: edit the script, verify the pre-commit Biome gate still blocks
+- Current step: PR #500 open, awaiting review; measured 1,552 ms → 944 ms
 - Blockers: none
-- Next: open PR against `main`, then delete this file when it merges
+- Next: delete this file when #500 merges
