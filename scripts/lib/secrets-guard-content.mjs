@@ -115,8 +115,9 @@ const MODULE_SPECIFIER =
 // Keyed on the EXTENSION, not on the value looking path-like — the module
 // carve-out above explains why "has slashes and dots" is not safe (base64 has
 // both). Base64 never ends in `.mjs`. Key material (`.pem`, `.key`, …) is
-// deliberately absent, so `KEY = "/etc/ssl/private/server.pem"` still trips.
-const SOURCE_FILE_EXTENSIONS = [
+// deliberately absent: the test pairs one high-entropy path spelled `.mjs`
+// against the same path spelled `.pem` to prove the extension is what decides.
+const SOURCE_FILE_EXTENSIONS = new Set([
   '.cjs',
   '.js',
   '.json',
@@ -128,17 +129,27 @@ const SOURCE_FILE_EXTENSIONS = [
   '.sh',
   '.ts',
   '.tsx',
-];
+]);
 
 // The capture keeps a trailing escape backslash when the value sits inside an
 // escaped string (`"node \"…/x.mjs\""` in JSON, the same in a shell command),
 // which is exactly the context this carve-out exists for — so strip it before
-// reading the extension.
+// reading the extension. Done by index rather than a `/\\+$/` replace: a
+// quantifier anchored at the end backtracks super-linearly on a long run of
+// backslashes (Sonar S8786), and this is linear.
+const withoutTrailingBackslashes = (value) => {
+  let end = value.length;
+  while (end > 0 && value[end - 1] === '\\') {
+    end -= 1;
+  }
+  return value.slice(0, end);
+};
+
 const isSourceFilePathValue = (value) => {
-  const unescaped = value.replace(/\\+$/, '');
+  const unescaped = withoutTrailingBackslashes(value);
   return (
     unescaped.includes('/') &&
-    SOURCE_FILE_EXTENSIONS.includes(fileExtension(unescaped))
+    SOURCE_FILE_EXTENSIONS.has(fileExtension(unescaped))
   );
 };
 
