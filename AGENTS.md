@@ -31,84 +31,13 @@ it freely. A new package picks its scope by one question — does it ship? — a
 `@lcabrera/*` one inherits the never-baseline rule (§4) and the invariants below.
 Do not "tidy" the two into one ([ADR-040](docs/decisions/ADR-040-npm-scope-for-the-public-packages.md)).
 
-**Publishing invariants for those four.** All four are **published on npm** and
-have been since 2026-07-22, at **0.1.1**. `private` is off and each has a
-configured trusted publisher, so a merged version bump publishes on its own —
-there is no longer a flag standing between a mistake and the registry, and **an
-npm version is permanent**: it cannot be replaced, and unpublishing blocks reuse
-of the number. Two things follow, and both cost a broken release to learn: a
-package's manifest must declare `repository` or the provenance attestation is
-rejected (`E422`), and `changeset publish` shells out to `pnpm publish`, so the
-release job has to put pnpm on PATH itself. What holds, verified by packing each
-package and reading the tarball rather than by inspection:
-
-- **Three of them build; `@lcabrera/ui` ships source.** A `.ts` file inside
-  `node_modules` is not loadable at all — Node refuses to strip types there
-  (`ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`) — and Vite externalizes
-  dependencies for SSR by default, so a source-shipping package fails when a
-  consumer's server _starts_, not when it typechecks. `api`, `server` and `utils`
-  therefore run `vp pack` (tsdown) to `dist` with `.d.mts` and sourcemaps. `ui`
-  cannot: StyleX derives theme identity from the source path, so a consumer's own
-  plugin has to compile it.
-- **`exports` points at `src`; `publishConfig.exports` points at `dist`.** pnpm
-  substitutes the latter at pack time, so no workspace in this repo ever has to
-  build before it can typecheck, test or run. The cost is that the repo exercises
-  the `src` map on every command and the `dist` map on none — a subpath added to
-  one and forgotten in the other is invisible until someone installs the package.
-  `vp run publish:verify` is what catches that, and CI runs `packages:build`
-  first so the check has a real `dist/` to resolve against; without one it
-  verifies only that the two maps agree and says so in its output.
-- **A breaking change to the published _type surface_ is a gate, not a review
-  call.** `publish:verify` checks subpath parity but never reads the types, so a
-  removed export, a changed signature or a reshaped union inside a surviving
-  subpath ships silently — the harness only ever compiles _in-repo_ consumers,
-  and these four packages' consumers are external. `vp run api-surface:verify`
-  diffs each package's exported surface against a tracked snapshot under
-  `reports/api-surface/` (built `dist` for the three, `src` for `ui`) and, against
-  the base ref, requires a changeset for a breaking change; `vp run attw:verify`
-  confirms the published types actually resolve for a consumer. Both run after
-  `packages:build` in `check-safe.yml`. The snapshot convention, the `ui`-vs-built
-  split and the boundaries are
-  [ADR-046](docs/decisions/ADR-046-public-api-surface-snapshot.md).
-- **Each carries its own `LICENSE`** (MIT). npm only includes a `LICENSE` sitting
-  in the package directory, so the root one does not reach a consumer — this is
-  deliberate duplication, same reasoning as ADR-039.
-- **`files` is `["src", "!src/**/*.test.*"]`**, with `"dist"` added for the three
-  built packages. Without it npm ships whatever is in the directory:
-  `@lcabrera/server` was shipping 29 test files plus its tsconfigs and
-  `eslint.config.mjs`. The negated pattern is honoured by pnpm pack. `src` stays
-  in the built packages only because they emit sourcemaps — it is unreachable
-  through the published `exports` map, so it exists purely to let a consumer step
-  into the original TypeScript.
-- **Framework singletons are `peerDependencies`, not `dependencies`** — `react`,
-  `react-dom`, `react-router`, `@stylexjs/stylex` in `@lcabrera/ui`. As ordinary
-  dependencies a consumer would resolve a second copy of React, which breaks hooks
-  outright. They are also listed in `devDependencies` so the workspace still
-  resolves them for typecheck and tests. `@react-router/node` is an **optional**
-  peer: only the `./entry/*` SSR helpers import it, so a browser-only consumer
-  should not be forced to install it.
-- `catalog:` and `workspace:*` need no special handling — pnpm rewrites both to
-  real version ranges at pack time (`"pg": "^8.22.0"`, `"@lcabrera/utils": "0.0.0"`).
-- **`publishConfig.access: "public"`** on each. npm defaults a scoped package to
-  restricted and a free org cannot host private packages, so without it the first
-  publish fails on permissions without naming the missing field.
-- **Never rename a published package, and never move a `*.stylex.ts`.** StyleX
-  derives every custom-property name from `packageName:pathRelativeToPackageRoot`,
-  computed without reading the file, so either one silently renames the variables
-  and breaks a consumer's `createTheme`. `packages/ui/src/stylex-module-paths.test.ts`
-  guards the paths; nothing guards the package name but this sentence.
-
-**`@lcabrera/server` never lets a raw `pg` error out, and every executor takes an
-optional `tx`.** A driver message names tables, columns and indexes and its
-`detail` line quotes the offending values, so the executors translate it into
-typed errors ([ADR-050](docs/decisions/ADR-050-server-error-translation-and-result-contract.md))
-— error **classes** stay server-only, and what crosses a loader/action boundary is
-a plain serializable union, because React Router single fetch drops functions
-silently. `withTransaction` is the seam for a multi-step write
-([ADR-051](docs/decisions/ADR-051-with-transaction-and-tx-executor-option.md)),
-with one trap worth knowing before you use it: an executor called _without_ `tx`
-inside the block runs on a different connection, outside the transaction, and
-nothing detects that.
+**All four are published on npm, and nothing but the version number stands between
+a mistake and the registry** — `private` is off and each has a trusted publisher,
+so a merged version bump publishes on its own, and **an npm version is permanent**.
+The full publishing contract — the `exports`/`publishConfig` split, `files`, peer
+dependencies, the API-surface gate, and the two rename traps that silently break a
+consumer — lives in [`packages/CLAUDE.md`](packages/CLAUDE.md), which loads
+whenever you work under `packages/`. Read it before editing any manifest there.
 
 The apps are the harness. `apps/react-router` is a **React 19 + TypeScript +
 StyleX + React Router 7** SSR application that puts the packages under load —
@@ -120,29 +49,10 @@ _package_ relies on into an app.
 
 ### Monorepo Layout
 
-```
-apps/
-├── react-router/     # Main SSR frontend app (React 19 + StyleX + React Router 7)
-├── admin_system/     # Separate React Router SSR admin app (CQMS routes)
-├── api-server/       # Express + PostgreSQL REST API (port 3001)
-├── api-server-fast/  # Fastify alternative API server
-├── scan-orchestrator/# Standalone CQMS scan runner (Postgres LISTEN + ws server)
-└── shared/           # Shared code between apps
-packages/
-├── agent-runner/        # Spawns the Claude Agent SDK CLI subprocess
-├── api/                 # Browser-safe API client — fetch, HTTP contracts, base-URL resolution
-├── eslint-local-rules/  # Custom lint rules for this repo
-├── node-runtime/        # Process-lifecycle primitives for long-running services (signals)
-├── plugins/             # Shared Vite plugins
-├── scan-ingestion/      # CQMS scan ingestion core + migrations
-├── server/              # Node-only server code — Postgres (src/db), filters, crypto, tokens
-├── ts-configs/          # Shared TypeScript configurations (generated — see its README)
-├── ui/                  # Shared UI component library
-├── utils/               # Shared utilities — pure and side-effect free (see its ARCHITECTURE.md)
-└── vite-configs/        # Shared Vite config factories
-```
+`ls apps/ packages/` is the layout; `pnpm-workspace.yaml` is the authority. What
+the listing cannot tell you is below.
 
-That is **17 workspaces** — the count several rules below depend on. `packages/ui`,
+`packages/ui`,
 `packages/api`, `packages/server` and `packages/utils` are becoming public
 packages and are held strictest: never baseline, scope, or inline-disable a
 finding in any of them. The authority on that list is not this sentence — it is
@@ -169,31 +79,7 @@ instead of eroding that guarantee.
 
 All source paths below (e.g. `src/components/`) are relative to `apps/react-router/` unless otherwise noted.
 
-### Tech Stack
-
-- **Runtime:** React 19 (with React Compiler via `babel-plugin-react-compiler`)
-- **Routing:** React Router 7 (with SSR, loaders, actions)
-- **Styling:** StyleX (`@stylexjs/stylex`) — exclusive, no CSS modules, no styled-components
-- **Toolchain:** Vite+ (`vp` CLI) wrapping Vite, Rolldown, Vitest, Oxlint, Oxfmt
-- **Language:** TypeScript (strict mode)
-- **Package Manager:** pnpm (managed through `vp`)
-
 ### Source Structure (apps/react-router/src/)
-
-```
-src/
-├── auth/                # Route auth helpers (token/credential verification)
-├── constants/           # App-level constants (APP_ID — see its ARCHITECTURE.md)
-├── features/            # Route-isolated feature modules (e.g. showcase/)
-├── root/                # App shell — layout, error boundary, navigation
-├── routes/              # React Router route modules (loaders, actions, components)
-├── services/            # External API integrations (*.api.ts)
-├── INVENTORY.md         # Artifact catalog — consult before creating anything new
-├── App.tsx              # App component
-├── root.tsx             # App root with providers
-├── routes.ts            # Route configuration
-└── entry.server.tsx     # SSR entry point
-```
 
 **This app is deliberately thin.** Components, hooks, contexts, design tokens,
 shared utils and the Table live in `@lcabrera/ui`; pure helpers in `@lcabrera/utils`.
@@ -220,20 +106,10 @@ Detailed conventions are split into rule files under `.claude/rules/`, each scop
 
 ## 3. Quick Skill Index
 
-Skills are on-demand task workflows in `.github/skills/`. Use them as the first stop for implementation patterns:
-
-| Skill                         | Use For                                                                                                     |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `store-pattern`               | Table-style split-context external store architecture with selector/action boundaries                       |
-| `quality-gate-workflow`       | **Canonical** post-change validation sequence — the single source of truth for the gate                     |
-| `react-19`                    | React 19 component and compiler-safe patterns                                                               |
-| `react-router-framework-mode` | React Router framework mode data, actions, forms, navigation, error handling                                |
-| `codebase-explorer`           | Multi-phase codebase investigation with context isolation and crash-safe scratchpads                        |
-| `code-smell-checker`          | Baseline maintainability audits and tech-debt triage                                                        |
-| `code-smell-zen`              | Diff-based smell review against target branch                                                               |
-| `fallow-code-checker`         | Full fallow monorepo hygiene scan with prioritized report (`vp run fallow:full` from root; scope with `-w`) |
-| `linter-checker`              | Deterministic oxlint + eslint sweep of one workspace, persisted as a schema-aligned report                  |
-| `commit-and-pr`               | Write commit messages + PR descriptions that pass the enforced standard (hook + CI gate)                    |
+Skills are on-demand task workflows in `.github/skills/`. Each one's own
+`description:` frontmatter says what it covers, and agents that support skills
+already have that listing — so it is not repeated here. Use them as the first
+stop for implementation patterns.
 
 Selection guideline:
 
@@ -243,6 +119,8 @@ Selection guideline:
 - **Routing/data mutations?** Use `react-router-framework-mode`.
 - **React component implementation?** Use `react-19`.
 - **Understanding unfamiliar code before changing it?** Use `codebase-explorer`.
+- **Configuring or debugging a linter (Oxlint/eslint/Biome/Sonar)?** Use `lint-toolchain`.
+- **Cutting a release, or touching the changelog/label automation?** Use `releasing`.
 
 ---
 
@@ -328,54 +206,22 @@ There is deliberately **no `start:all`/`dev:all`**: `car-sales-api` and `car-sal
 
 **tsconfigs are generated — never hand-edit them.** `packages/ts-configs/generate.ts` + `tsconfig.shared.ts` are the source of truth for every `tsconfig.app.json`/`tsconfig.node.json`; run `vp run --filter @repo/ts-configs generate` after changing either. A hand-edit survives exactly until the next unrelated regeneration silently reverts it — the `@lcabrera/ui` bare-specifier alias in both apps was lost this way and had to be folded back into the generator. If a config needs something bespoke, add it to the generator entry, not to the JSON.
 
-**All Oxlint config lives in the root `vite.config.ts`; a per-workspace `lint` block does nothing.** This is Vite+'s documented monorepo model, not a defect — the root config holds the defaults and `lint.overrides` carries per-package differences, with globs resolved from the root (`packages/ui/**`). A package's own `vite.config.ts` is for its Vite/Vitest/framework config. See `node_modules/vite-plus/docs/guide/monorepo.md`, including its "Composing Configuration Files" section, which is the supported way to keep the rule sets in separate files and merge them into overrides.
+**Four analysers run, and `vp check` is not one of them.** Oxlint (`vp lint`,
+configured once in the root `vite.config.ts`), the per-workspace eslint
+custom-rules pass (`vp run lint:eslint:check`), Biome (`vp run lint:biome:check`,
+root-only), and React Doctor (`vp run react-doctor:verify`). `vp check` covers
+only fmt + Oxlint + the tsgolint type pass, so it would let every eslint-only,
+Biome-only and React Doctor finding through — run the full gate (§7).
 
-The config object is `@repo/vite-configs/lint`, imported by the root config — the factory pattern kept, moved to where Vite+ reads it ([ADR-042](docs/decisions/ADR-042-oxlint-config-at-the-root.md), #318). The repo ran the other way round for a long time, with a `lint` block in every workspace built from a `*-lint` factory and **none of it loaded**; that layer is gone. `vp run lint:plugins:verify` now fails on a `lint` key in any workspace config, so it cannot come back.
-
-**Oxlint runs no ESLint-plugin rules.** The `jsPlugins` bridge is gone: the eslint pass already loads `react-x`, `react-dom`, `@stylexjs`, `local-rules`, `perfectionist` and `security` and enforces the same rules, so bridging them into Oxlint resolved the same plugin twice to report the same finding twice. This does not soften the overlapping-linter policy — overlap earns its keep where the engines **independently** agree, not where one shells out to the other's plugin.
-
-Four behaviours mask a broken setup as a clean one:
-
-- **Naming `plugins` REPLACES Oxlint's default set** rather than adding to it, so the defaults (`eslint`, `oxc`, `typescript`, `unicorn`) must be repeated. Omitting one switches that whole family off repo-wide and reports nothing. This is not hypothetical: the first attempt to fix #318 added a four-entry `plugins` list to the root and silently disabled `typescript`, `unicorn` and `oxc` — the repo stayed green the entire time.
-- **A plugin without its category is decorative.** A plugin contributes only rules whose category is enabled, so listing one whose rules all sit in a disabled category reads as protection that is not there. Measure before adding: drop it and compare `number_of_rules` from `vp lint . --format=json`.
-- **A warning fails nothing.** `vp lint .` and `vp check` both exit 0 while printing "Found 0 errors and 1 warning", so a category left at Oxlint's default `warn` is advisory. `correctness` was at `warn`, which meant a `debugger` statement passed every gate; the root block now pins `categories: { correctness: 'error' }`.
-- **A category severity outranks an individual `rules` entry** for a rule inside it. With `correctness: 'warn'` in force, setting `no-debugger: 'error'` still reported a warning. Set the category, not the rule. This is also what produced two wrong diagnoses of #318 — probing with `no-debugger` cannot distinguish "config ignored" from "category masked my rule". Probe with a rule outside the category (Rule 14).
-
-One override semantic to know before writing one: **an override's `plugins` list replaces the base list** for matched files, so it must name every plugin that group needs.
-
-The other categories are **not** free; measure one before enabling it (`vp lint . --format=json`). **Always confirm a lint change with a deliberate violation** — a rule that is not loaded reports exactly the same clean pass as code that is correct, which is how the wrong conclusion above got written down in the first place. `vp run lint:plugins:verify` (CI step in `check-safe.yml`) encodes that discipline as a gate: it lints a planted violation per plugin family rather than reading the config, because reading the config is exactly what cannot tell a loaded family from a missing one.
-
-**Three linters run, and none of them is `vp check`.** (A fourth analyser, React Doctor, gates alongside them but is deliberately not one of the three: it is a standalone CLI with its own root config and its own report, not an engine in the lint fan-out, and its rule set is nearly disjoint from theirs — [ADR-055](docs/decisions/ADR-055-react-doctor-as-a-gate.md).) Oxlint (`vp lint`) covers the whole tree from the root; the eslint pass (`vp run lint:eslint` / `lint:eslint:check`) exists in all 17 workspaces — React workspaces use `@repo/vite-configs/eslint-custom-rules`, node/library workspaces use `@repo/vite-configs/eslint-base-custom-rules` (same stack minus React/StyleX, and without `clean-import-paths`, which strips the import extensions node-resolution code requires). Inherited eslint violations are baselined per workspace in `eslint-suppressions.json` (ESLint bulk suppressions) — **new violations fail the gate**: CI runs `vp run -r lint:eslint:check` as its own step in `check-safe.yml`, because `vp check` covers only fmt + Oxlint + the tsgolint type pass and would let every eslint-only finding through. Burn debt down and shrink the baseline with `npx eslint . --config eslint.config.mjs --prune-suppressions`. Never add new entries by hand, and never inline-`// eslint-disable`/`oxlint-disable` a finding or switch the rule off in config — **verify, then fix the code instead** (see Non-Negotiable Rule 11). A lint finding is real until you've read the flagged code and confirmed otherwise; stylistic `unicorn/*` rules (e.g. `prefer-simple-condition-first`, `no-nested-ternary`) get fixed by restructuring, never silenced. **Exception: `packages/ui`, `packages/api`, `packages/server` and `packages/utils` are held strictest** — all four are public-facing, so every finding there gets fixed rather than baselined or disabled, and an exception has to be argued in writing before it exists. That is now **checked** (`vp run suppressions:verify`, CI step in `check-safe.yml`) rather than asserted, across every mechanism that can silence a finding in them: `eslint-disable`, `oxlint-disable`, `biome-ignore`, a Biome rule scoped `"off"` at a public-package path, `NOSONAR`, `@ts-expect-error`/`@ts-ignore`/`@ts-nocheck`, a fallow baseline key, and a rule lowered below `error` in the package's own `eslint.config.mjs`/`vite.config.ts`. Anything not carrying a justified entry in [`docs/agents/public-package-suppressions.json`](docs/agents/public-package-suppressions.json) fails the build — and so does an entry whose code has since gone, which is what stops the register becoming the baseline it replaces. The protocol for adding one is [`docs/agents/public-package-suppressions.md`](docs/agents/public-package-suppressions.md); `vp run suppressions:list` prints the current state. Do not restate the mechanism list anywhere else — that table is in the protocol doc, and a second copy is a copy nothing checks.
-
-The register has **two lists**, and the split is load-bearing. `approved` holds suppressions scoped to a public package — the rule is off _because of_ that package, and each needs an argument for why the engine is wrong about that specific code. `acknowledged` holds repo-wide policy (ADR-035 §7) that merely reaches one, because the package contains a test file, a config or a tooling script. Both are enforced: an early version gated only the first, which left a hole where a _new_ override broad enough to match a public package **and** anything else needed no entry at all. Classification is by what a glob **resolves to**, never by how it looks — `**/logger.util.ts` reads like a category pattern and is in fact a single `packages/ui` file.
-
-This paragraph used to say the four were "never silenced", full stop, and that was false when written — `packages/ui` carried a good number of inline directives and targeted Biome rule-offs. Most are defensible, but nothing distinguished a reviewed exception from one added last Tuesday, and a rule nobody can comply with gets ignored wholesale. The honest form is "no _unapproved_ suppression", and it only means anything because something now counts them. The check does **not** cover repo-wide Biome category rules (`**/*.test.ts`, `**/*.mjs`) that a public package merely falls inside — those are ADR-035 §7's business.
-
-Each one's `eslint-suppressions.json` path is **gitignored** (`packages/ui/.gitignore`, `packages/api/.gitignore`, `packages/server/.gitignore`, `packages/utils/.gitignore`): ESLint's bulk-suppressions tooling — an editor extension, or `--prune-suppressions` run across every workspace — regenerates an empty `{}` for a workspace with nothing to suppress, and committing/deleting it was an endless loop. Because CI checks out no file, all four packages are suppression-free by construction and any real finding fails the gate. Never un-ignore any of them or commit a non-empty one. To check the real membership rather than trusting this list, grep the workspace `.gitignore`s for `eslint-suppressions`.
-
-**A directive must name the engine that reads it — `eslint-disable` for ESLint, `oxlint-disable` for Oxlint.** Oxlint honours `eslint-disable` comments too, and that overlap used to hide real rot: `reportUnusedDisableDirectives` was off precisely because eslint would call an Oxlint-only directive "unused" and `--fix` would delete it. With the option off, though, a directive suppressing _nothing_ looked exactly like compliant code — zero findings either way — and 13 accumulated repo-wide, four of them claiming to hold back `no-console` in a logger no rule was flagging. The five real Oxlint-only cases were spelled `typescript-eslint/unbound-method` (no `@`, which Oxlint accepts and eslint does not recognise); they now say `oxlint-disable-next-line`, so **`reportUnusedDisableDirectives` is `'error'`** in both shared configs. "Unused" now means the directive is dead (delete it) or misnamed (respell it) — never load-bearing. This does not soften Rule 11: a _new_ suppression of either kind still needs the finding fixed instead, and the four public packages take none at all.
-
-**Biome is the third linter** (`vp run lint:biome:check`, CI step in `check-safe.yml` after the eslint pass, and a pre-commit `staged` entry in the root `vite.config.ts`). It is configured **once at the root** in `biome.jsonc` and runs one repo-wide pass — like Oxlint, unlike the per-workspace eslint fan-out. Do not add per-workspace `biome.jsonc` files or `lint:biome` scripts; `overrides` already scope per project. Full rationale — including why it is lint-only and why it is not a CQMS scanner — is in [ADR-035](docs/decisions/ADR-035-biome-third-linter.md). The rule set goes **beyond `recommended`**: a curated set of opt-in rules is enabled on top of the preset, added in approval-gated phases and measured per rule before landing — see [ADR-035 §7](docs/decisions/ADR-035-biome-third-linter.md). Overlap with Oxlint/eslint is kept as a deliberate safety net where the engines **agree**; only genuinely conflicting or noisy rules are dropped. Four constraints hold it in place:
-
-- **Formatter and assist are OFF** (`formatter.enabled: false`, `assist.enabled: false`). Oxfmt owns formatting and eslint-perfectionist owns import order. Turning either on restarts the formatter/linter fight that the `eslint-suppressions.json` ignore rule already had to settle once.
-- **Domains are scoped per project, not global.** The `react` domain is enabled in an `overrides` entry covering only the three React workspaces (`apps/react-router`, `apps/admin_system`, `packages/ui`) — enabling it globally would apply React rules to the Express/Fastify/node workspaces. `test` is scoped to test files; `project` runs repo-wide. Both add zero findings today and exist to guard future code.
-- **`domains: { react: "recommended" }` does NOT enable every react rule** — this is the trap. `noNestedComponentDefinitions` and `noDuplicatedSpreadProps` are react-domain rules that fire only under `"all"` or when listed explicitly, so they are pinned by name at `error` in the same override (`noDuplicatedSpreadProps` also defaults to `warn`, which would not fail the gate). Verify any new rule with a deliberate violation before trusting a green run: a rule that is off reports the same clean pass as code that is correct.
-- **Do not adopt `domains: { react: "all" }`.** It adds ~180 findings that contradict this repo's own ADRs — e.g. `noJsxPropsBind`/`noLeakedRender` vs ADR-004 (React Compiler owns memoization). (Individual react rules worth having are pinned by name instead: `useComponentExportOnlyModules` is enabled explicitly at `error` — off for test files — and is clean on every source file, ADR-007 barrels included.)
-- **The config is `biome.jsonc`, not `biome.json`, and that is load-bearing.** Biome's config parser rejects `//` comments in a `.json` file — and it does not fail loudly: it **discards the entire config and silently falls back to defaults**, which lints `node_modules` and reports tens of thousands of findings (or, on a single file, a plausible-looking count with your `overrides` quietly not applied). Every rule scoped off here needs its reason next to it, so the file must stay `.jsonc`. If Biome ever starts reporting absurd counts or ignoring an override, suspect a config parse error first: `biome lint <file> 2>&1 | grep parse`.
-
-Seven rules are scoped off in `overrides`, each with its reason inline — all seven are cases where Biome is wrong, not where the code is (`noThenProperty`, `useExhaustiveDependencies`, `noAriaHiddenOnFocusable`, `noNoninteractiveTabindex`, `useSemanticElements`, `noStaticElementInteractions`, `useComponentExportOnlyModules`). **ADR-035 §5 is the table** listing each with its justification; read it before adding an eighth, and match that bar. Four of the seven are Biome mismodelling an ARIA pattern the code implements correctly (window splitter, APG tabs panel, non-grid table row, conditional tooltip role); `useComponentExportOnlyModules` is off only for test files, where Fast Refresh never runs. Those seven are §5's "Biome is wrong for _this code_" cases and stay at seven; the phased hardening ([ADR-035 §7](docs/decisions/ADR-035-biome-third-linter.md)) adds a **separate** class of scope-off — whole rules turned off for a file _category_ where they don't apply, not for a mistaken finding: test-file exemptions (`noShadow`, `noEmptyBlockStatements`, `useUniqueElementIds` — idiomatic mock/fixture patterns) and framework/tooling exemptions (`noConsole` for scripts/CLIs/logger, `noDefaultExport` for routes/configs/entry/eslint-rules). Those are catalogued in §7, not counted among the seven.
-
-**Prefer a rule option over a scope-off.** An option keeps the rule live everywhere else; a scope-off blinds it for a whole file. `noLabelWithoutControl` is the worked example: a `<label>` wrapping the `Checkbox` _component_ is correct HTML — Biome just cannot see through the component boundary — so `inputComponents: ["Checkbox"]` teaches it the name instead of disabling it, and a bare `<label>` with no control still fails. Add future input-rendering components to that list.
-
-**Biome conflicts with eslint on how to return "nothing" from a `map` callback.** `useIterableCallbackReturn` demands a returned value, while `unicorn/no-null` bans `null` and `unicorn/no-useless-undefined` bans `undefined` — all three spellings fail one linter or the other. Restructure instead: `filter` the empty cases out before the `map`, so the callback always returns an element (`NotificationCenter.component.tsx` is the worked example). The same pairing bites nullish checks: `== undefined` trips Biome's `noDoubleEquals` and `== null` trips `unicorn/no-null`, so lean on arrays/objects always being truthy (`merge-arrays.util.ts`).
-
-Rule 11 applies to Biome exactly as it does to the other two: no `// biome-ignore`, no rule-off to dodge a real finding, and nothing baselined in `packages/ui`.
-
-**Lint JSON reports** follow the fallow output convention: `vp run lint:report` (script: `scripts/generate-lint-reports.mjs`, supports `--only=biome|eslint|oxlint`) regenerates `reports/oxlint/full-latest.json` (one repo-wide `vp lint . --format=json` run), `reports/eslint/full-latest.json` (the standard eslint `--format json` result array merged across all 17 workspaces, repo-relative paths), and `reports/biome/full-latest.json` (one repo-wide `biome lint . --reporter=json` run — root-only, mirroring the gate, since `biome.jsonc`'s `overrides` already scope the react domain and there is nothing to fan out). **All three are gitignored — run the command rather than reading a committed snapshot** (ADR-049). ESLint runs in check mode — regenerating a report never mutates sources — and the baselined debt is visible per file in each entry's `suppressedMessages`, so the report is the place to inspect what the suppressions actually cover.
-
-**SonarCloud findings** (`vp run sonar:report`, script `scripts/sonar-report.mjs`) follow the same convention: it pulls the project's open issues + security hotspots + quality-gate status from the SonarCloud **Web API** and writes `reports/sonar/runs/<target>.json`, so agents act on Sonar from a file they produce like they do the lint/fallow reports — not the dashboard. This is necessary because SonarCloud runs here in **Automatic Analysis** mode: the GitHub App analyses each push server-side, there is no scanner step in the repo to read, and feature branches are analysed as **pull requests** (a `branch=<feature>` query 404s — pass `--pr <n>`). **Nothing is committed** — every target, `main` included, writes its own file under the gitignored `reports/sonar/runs/` (ADR-049). It used to commit a `main` snapshot, and every run wrote that one path: the routine way to read a branch's own findings overwrote `main`'s, and PR #283's analysis then sat committed as `main`'s for 22 merges, reporting a failing gate and two findings `main` did not have, one already accepted in SonarCloud. Restricting the tracked path to a `main` analysis fixed that instance and not the class — the file still moved only when someone remembered. With nothing tracked, reading a pull request's analysis as `main`'s is impossible rather than guarded. Auth is a read-only `SONAR_TOKEN` loaded from a gitignored root `.env` or a CI secret — **never committed** (see `.env.example`); the script uses no `child_process` (an `execFile('git'|'gh', …)` would trip Sonar's own S4036 PATH hotspot). `vp run sonar:verify` (`--gate`) is the enforcement half: it exits non-zero when the quality gate is failing, a local mirror of the SonarCloud gate, and `--fail-on-issues` also fails on any open issue. **Two-layer enforcement is wired:** (1) SonarCloud's own **"SonarCloud Code Analysis" required check** (branch ruleset on `main`) gates on the "Sonar way" gate — rating-based, so it catches new bugs/vulns/hotspots/coverage/duplication but **not** new code smells (assigning a stricter custom gate is a paid SonarCloud feature). (2) The **`.github/workflows/sonar-issue-gate.yml`** job closes that gap for free — it runs `sonar-report.mjs --gate --fail-on-issues --wait` on every PR and fails on **any** open issue (the code smells layer 1 misses). `--wait` polls the Compute Engine (`api/ce/activity`) until the PR head commit's analysis has finished — Automatic Analysis is async and runs in parallel with CI, so a bare read races it; `--since` (the head commit time) is the freshness guard, and on timeout the job **skips** rather than blocks. Without a token (fork PRs) the script skips and the job stays green. To make layer 2 blocking, add the **"Strict Sonar issue gate"** check to the `main` ruleset's required checks after it has run once.
-
-**Sonar's own analysis settings live in `.sonarcloud.properties`** — not `sonar-project.properties`, which Automatic Analysis ignores outright, and which is therefore the file to avoid creating. Two consequences worth knowing before editing it: it is read from the **default branch only**, so a change has no effect until it merges to `main` (a PR cannot demonstrate it working), and **wildcard patterns are not supported**, which rules out path globs like `…/migrations/**` and pushes fixes towards language settings instead. Today it holds **no settings at all**, and that is the lesson: it tried to unclaim `.sql` from the Oracle PL/SQL analyser (`sonar.plsql.file.suffixes`) and the property was simply never applied. **Language settings belong in the SonarCloud UI** (Administration → Languages), not here — `.sql` comes out of PL/SQL's suffixes and goes into PostgreSQL's. SonarQube Cloud _does_ ship a PostgreSQL analyser (a Deterministic Rule Engine, `sonar.dre.postgres.activate`, on by default, suffixes `pgsql,psql`); assuming it did not is what made "rename the migrations so nothing analyses them" look like the only way out. The file's own comment carries the full account, including the worked contradiction from #73 — read it before adding any language property here.
+Configuring or debugging any of them — plugin/category semantics, the
+`biome.jsonc` parse trap, the public-package suppressions register, SonarCloud
+reporting — is the **`lint-toolchain` skill**. One rule from it belongs here
+because it governs every engine: **a rule that is not loaded reports exactly the
+same clean pass as code that is correct**, so confirm any lint change with a
+deliberate violation (Rule 14). Handling a _finding_ is Non-Negotiable Rule 11 —
+verify, then fix; never suppress. `packages/ui`, `packages/api`,
+`packages/server` and `packages/utils` take no suppressions at all, enforced by
+`vp run suppressions:verify`.
 
 Known constraint: `scan-orchestrator`'s queue integration test shares the local CQMS Postgres queue — while `vp run dev:cqms` is running, the live orchestrator races the test for queued scans and `vp run test:all` can flake on `runQueuedScan.test.ts` (duplicate `reports_scan_id_key`). Stop the CQMS dev session before a full test run, or treat that single failure as environmental.
 
@@ -387,38 +233,15 @@ Known constraint: `scan-orchestrator`'s queue integration test shares the local 
 
 Fallow is configured once at the repo root (`.fallowrc.json`) and auto-detects every pnpm workspace — never add per-app fallow configs or dependencies. Scope any command's output with `-w`, e.g. `vp run fallow:dead-code -w 'apps/react-router'`.
 
-**Entry policy**: `entry` in `.fallowrc.json` is only for files invoked outside the import graph (root/app scripts, skill runner scripts, vite config fragments in `config/` dirs, CLIs run via `node`). Package/framework entry points are auto-detected — do not enumerate workspaces. Caution: fallow's `*` glob crosses `/`, so a pattern like `apps/*/config/**` also swallows `src/config/` files and silently masks real findings — keep config-dir entries as explicit paths and verify with `vp run fallow:dead-code` that the issue count doesn't drop unexpectedly after editing entries.
+`reports/fallow/` is the **single canonical location** for every fallow artifact; only `reports/fallow/baselines/` is tracked. The split is a rule, not a habit: a gate compares against it → tracked; it reports what a tool found → produced on demand ([ADR-049](docs/decisions/ADR-049-findings-reports-are-produced-on-demand.md)). **So there is no snapshot to read — run the command and read what it writes.**
 
-**Output convention** — `reports/fallow/` is the **single canonical location** for every fallow artifact. Scripts, skills, agents, docs, and developers all write to and read from it; never invent another output path.
+Before a PR, run `vp run fallow:audit --base main`. CI runs `fallow audit --gate new-only` on every PR (`check-safe.yml`) — it fails only on newly-introduced dead code, complexity, or duplication.
 
-| Path                                              | Tracked?    | Contents                                                                            |
-| ------------------------------------------------- | ----------- | ----------------------------------------------------------------------------------- |
-| `reports/fallow/baselines/`                       | **tracked** | Audit baselines — `fallow audit --gate new-only` scores against them                |
-| `reports/fallow/*-latest.json`                    | gitignored  | Scan snapshots — run `vp run fallow:full` (or `fallow:dead-code`, …)                |
-| `reports/fallow/complexity-threshold-analysis.md` | gitignored  | Human summary — run `vp run fallow:refresh-report`                                  |
-| `reports/fallow/coverage/coverage-final.json`     | gitignored  | Merged Istanbul coverage fed to `fallow audit --coverage` (`vp run coverage:merge`) |
-| `reports/fallow/runs/<timestamp>/`                | gitignored  | Per-run skill/agent artifacts (`fallow.raw.json`, `report.md`, `report.json`)       |
+**Always feed the audit real coverage** (`--coverage reports/fallow/coverage/coverage-final.json`, from `vp run coverage:merge`). Without it fallow _estimates_ coverage from whether a colocated test file exists, and at an estimated 0% every function with cyclomatic ≥ 5 breaches the CRAP threshold — an unfed audit reports trivially simple code as `critical`. Read a finding's **`exceeded`** field, not `severity`.
 
-**Only the baselines are tracked, and the split is a rule, not a habit: a gate
-compares against it → tracked; it reports what a tool found → produced on demand
-([ADR-049](docs/decisions/ADR-049-findings-reports-are-produced-on-demand.md)).** So
-there is no snapshot to read — run the command and read what it writes. A committed
-findings snapshot is a measurement in git, accurate when written and wrong from the
-next commit onward with nothing to say which; the Sonar one was wrong for 22 merges.
-Same reasoning as the no-changing-numbers rule in §7, at file scale.
+**`@vitest/coverage-v8` in the root manifest looks unused and is load-bearing** — it is an optional peer of vitest, which pnpm resolves only while some manifest declares it. Removing it takes every `--coverage` run down ([ADR-047](docs/decisions/ADR-047-declare-optional-peer-dependencies.md)).
 
-Sole exception: CQMS UI-triggered scans run by `apps/scan-orchestrator` use their own `.tmp/scan-orchestrator/<scan_id>/` workspace — their results land in the CQMS database, not the filesystem.
-
-The commands live in [COMMANDS.md §4 → Fallow](COMMANDS.md#fallow-static-analysis).
-Before a PR, run `vp run fallow:audit --base main`. The policy:
-
-CI runs `fallow audit --gate new-only` on every PR (`check-safe.yml`) — it fails only on newly-introduced dead code, complexity, or duplication; inherited debt is covered by baselines in `reports/fallow/baselines/`.
-
-**Always feed the audit real coverage** (`--coverage reports/fallow/coverage/coverage-final.json`, produced by `vp run coverage:merge`; the CI job does this for you). Fallow scores CRAP as `cyclomatic² × (1 − coverage)³ + cyclomatic` against a threshold of **30**, and with no coverage data it _estimates_ coverage from whether a colocated test file merely exists (`none` → 0%, `partial` → 40%, `high` → 85%). At an estimated 0%, **every function with cyclomatic ≥ 5 breaches the threshold** — so an unfed audit reports trivially simple code (`login.action.ts`, cyclomatic 5 / cognitive 2) as `critical`. When triaging a complexity finding, read its **`exceeded`** field, not `severity`: `crap` alone means "untested", while `all`/`cognitive` means genuinely complex. `coverage_source: "mixed"` is expected — files with no tests at all have nothing to measure and still fall back to the estimate.
-
-`vp run coverage:merge` (`scripts/merge-coverage.mjs`) runs `test:coverage` in the **DB-free** workspaces only and merges their reports — the membership is `COVERAGE_MERGE_WORKSPACES` in `scripts/lib/coverage-workspaces.mjs`, not a list here, because a copy in prose is a copy nothing checks (this one had gone two workspaces stale). That module also holds the PR comment's `COVERAGE_REPORT_WORKSPACES`, so `test:scripts` can assert both — dropping a public package from either lane fails the suite rather than quietly shrinking a report. Coverage must never require Postgres: the first attempt at this lever was reverted (2026-07-14) because it ran scan-ingestion's `queries/*` suites in CI, where `getPool()` → `readEnvConfig()` throws on the missing `DB_*`. That is why `@repo/scan-ingestion` splits `test` (full, needs a DB) from `test:unit` / `test:coverage` (DB-free subset).
-
-**The whole coverage lane hangs off one declaration.** `@vitest/coverage-v8` is an _optional peer_ of vitest, and pnpm installs an optional peer only while some manifest declares it. The root manifest does, and that is what makes the provider resolvable in the workspaces that declare nothing. It reads as an unused dependency and is not — removing it takes every `--coverage` run down, and the failure surfaces in the Fallow Audit's coverage step, a long way from its cause. [ADR-047](docs/decisions/ADR-047-declare-optional-peer-dependencies.md) records the mechanism and the from-scratch-lockfile proof any such removal now requires.
+Entry policy, the full output table, the glob-crosses-`/` trap and the coverage-lane details are in the **`fallow-code-checker` skill** ([CONFIGURATION.md](.github/skills/fallow-code-checker/CONFIGURATION.md)).
 
 ### Local Database Workflow (run from repo root)
 
@@ -595,145 +418,41 @@ When in doubt: a codebase with 18 components and 25 utilities that each do one t
 Commit messages and PR descriptions in this repo are **enforced**, not just
 conventional — the same way `commands:verify` keeps COMMANDS.md honest. The one
 spec is [`scripts/lib/commit-convention.mjs`](scripts/lib/commit-convention.mjs);
-the `commit-and-pr` skill is the how-to. Two layers, so a mixed crew of agents and
-humans follows it without exception:
+the **`commit-and-pr` skill** is the how-to and carries the full detail.
 
-- **Commit messages** are Conventional Commits — `type(scope): subject`. The
-  `type` is one of the spec's `ALLOWED_TYPES`; the `scope` is preferably the
-  workspace you touched (`ui`, `admin_system`, `api-server`, … — derived from
-  `pnpm-workspace.yaml`, so it self-updates) or a cross-cutting area (`ci`,
-  `docs`, `tooling`, …). An unrecognised scope only warns; a malformed header
-  fails. The `.vite-hooks/commit-msg` hook (`commit:verify`) checks this on every
-  commit; merge/revert/`fixup!` messages are skipped, and the `Co-Authored-By:`
-  trailer is always accepted.
-- **Pull requests** need a conforming title (same format) and a description with
-  every section in
-  [`.github/pull_request_template.md`](.github/pull_request_template.md):
-  `## What`, `## Why`, `## Verification` (or `## Testing`), `## Impact Analysis`,
-  `## Test Coverage`, `## Documentation Updates`. CI's
-  [`pr-standards.yml`](.github/workflows/pr-standards.yml) runs `pr:verify` on the
-  title + body, `branch:verify` on the head ref, and `commit:verify` over every
-  non-merge commit in the range, so nothing that skipped the local hook
-  (`--no-verify`) reaches `main`.
-- **Branch names** are `<type>/<issue-number>-<kebab-description>` —
-  `feat/123-add-column-resize`. The `<type>` is the **same** list commits use, so
-  there is one vocabulary rather than two words for one idea, and the issue
-  number is what ties a branch to the context that justified it. `main` and
-  `release-*` are exempt. `.vite-hooks/pre-push` checks it first (a name cannot
-  be fixed after the push without rewriting the remote), and `vp run
-coordination:claim` produces a conforming name for you.
-- **Issues** need every section in
-  [`.github/ISSUE_TEMPLATE/standard_issue.md`](.github/ISSUE_TEMPLATE/standard_issue.md),
-  enforced by [`issue-standards.yml`](.github/workflows/issue-standards.yml) on
-  open and edit. This exists because nothing checked issue bodies and the cost
-  was issues with no reproduction, no scope and no acceptance criteria — which
-  then had to be investigated from scratch before anyone could act on them.
-  Tracking issues from `coordination:claim` are **not** exempt; the script fills
-  the template in instead.
+The shapes you must get right, checked by the `commit-msg`/`pre-push` hooks locally
+and [`pr-standards.yml`](.github/workflows/pr-standards.yml) in CI:
 
-**Do not restate the type list in prose** (this section, the skill, PR template) —
-link to the spec so they cannot drift. If the standard itself must change, change
+- **Commit** — `type(scope): subject`, a Conventional Commit.
+- **Branch** — `<type>/<issue-number>-<kebab-description>`, same `type` vocabulary
+  (`main` and `release-*` exempt).
+- **PR** — conforming title, plus every section of
+  [`.github/pull_request_template.md`](.github/pull_request_template.md). Write
+  "None" rather than deleting a heading, and keep the headings' plain spelling —
+  numbering or emoji fails `pr:verify`.
+- **Issue** — every section of
+  [`.github/ISSUE_TEMPLATE/standard_issue.md`](.github/ISSUE_TEMPLATE/standard_issue.md).
+
+**Do not restate the type list in prose** (here, the skill, the PR template) — link
+to the spec so they cannot drift. If the standard itself must change, change
 `commit-convention.mjs`; the hook, CI, template, and docs all follow from it.
 (Non-Negotiable Rule 13.)
 
-**The templates themselves** — issue, PR, and the merge checklist — are collected
-in [`docs/agents/workflow.md`](docs/agents/workflow.md), which is the entry point
-for how agents file, review and merge work. Every PR section is required; write
-"None" rather than deleting a heading, so a reviewer can tell a considered no
-from an omission. The section headings are matched as **headings** and must keep
-their plain spelling — numbering or emoji in one fails `pr:verify`, and a
-substring check would have accepted prose that answers none of them. The source
-specification is
-[`docs/agents/templates-spec.md`](docs/agents/templates-spec.md); it records the two
-deviations taken when adopting it, so nobody "restores" the spec text and breaks
-the gate.
+### Releasing, Changelog & Labels
 
-### Releasing
+The four `@lcabrera/*` packages are versioned with **Changesets**, independently. A
+change that affects consumers **carries a changeset in the same PR** — that is the
+part you must not forget; `vp run release:version` consumes them.
 
-The four `@lcabrera/*` packages are versioned with **Changesets**, independently —
-each moves only when it changes, and a dependent gets a patch bump automatically
-(`updateInternalDependencies: "patch"`). A change that affects consumers carries
-a changeset in the same PR; `vp run release:version` consumes them.
+Two invariants worth knowing before you touch a manifest: **`private: true` is the
+only thing keeping a workspace out of the registry** (the four public ones no
+longer carry it, so nothing but the version number decides whether a merge
+publishes — every workspace not meant to publish MUST have the flag), and
+**`CHANGELOG.md` is generated** (`vp run changelog:generate`) — never hand-edit it.
 
-Three things here are deliberate, and each cost something to learn:
-
-- **The version PR is opened by a human, not a bot.** Changesets' usual flow has
-  its action open the "Version Packages" PR, and that PR **can never merge here**:
-  a pull request opened with `GITHUB_TOKEN` does not trigger `pull_request`
-  workflows, so its required checks never run. Same wall `update-changelog.yml`
-  hit for 159 commits while reporting success. A GitHub App token would fix it
-  and is not worth the moving parts for what is one command.
-- **The first publish of each package is manual.** npm's trusted publishing binds
-  a workflow to an **existing** package, so a brand-new scoped package has nothing
-  to attach the trust to — scoped first publishes fail with E404 under OIDC
-  (npm/cli#8976). Publish once by hand, configure the trusted publisher on
-  npmjs.com, and every release after that is automatic. `release.yml` carries no
-  `NPM_TOKEN` and passes no `--provenance`: under trusted publishing npm attaches
-  provenance itself and the flag is unnecessary.
-- **`private: true` is what keeps a workspace out of the registry.** `changeset
-publish` skips private packages. The four public ones no longer carry it, so
-  nothing but the version number decides whether a merge publishes. Every
-  workspace not meant to publish MUST carry the flag: `api-server` and
-  `api-server-fast` had none at all and were one `npm publish` from going out.
-- **The job skips itself while a changeset is pending.** `changesets/action` has
-  no publish-only mode: given a pending changeset it versions and opens a PR
-  instead, and that attempt dies on the commit-msg hook (`Version Packages` is
-  not a Conventional Commit). So `release.yml` gates on the same condition the
-  action switches on, before it installs anything.
-
-**Package releases and the repository release are separate tracks.** Changesets
-tags `@lcabrera/utils@0.1.0` and `release.yml` opens a GitHub Release per package.
-`changelog.yml` handles `v*` tags — the repo-level milestone — and nothing creates
-those automatically, so it fires only when someone tags by hand. That is also the
-only thing that gives CHANGELOG.md more than one section.
-
-### Changelog & Labels
-
-Two things fall out of the enforced commit convention, both reusing the same spec
-so they never diverge from what the gate accepts:
-
-- **Changelog** — [`CHANGELOG.md`](CHANGELOG.md) is **generated** (`vp run
-changelog:generate`, `scripts/generate-changelog.mjs`): Conventional-Commit
-  history grouped by version (git tags) then by type, each entry scope-labelled and
-  linked, with breaking changes called out. Never hand-edit it — regenerate and
-  commit it through an ordinary PR (the bot's own changelog commits are excluded
-  from the changelog via the `':!CHANGELOG.md'` pathspec). It is a **release
-  artifact**: with no tags every entry falls into one `Unreleased` section, and
-  the file only becomes useful once `v*` tags split it per release. On a `v*` tag,
-  [`changelog.yml`](.github/workflows/changelog.yml) publishes that release's
-  section as the GitHub Release notes — reading `git log` directly, never
-  `CHANGELOG.md`, so release notes are unaffected by the file's freshness.
-
-  **A bot pushing this file to `main` after each merge was tried and removed.**
-  `update-changelog.yml` did exactly that and never once succeeded: the push is
-  rejected by the `main` ruleset's `required_status_checks` rule (`GH013 … 6 of 6
-required status checks are expected`), and the failure was converted to a
-  `::warning::`, so the job reported success through 159 commits while the file
-  stood still. Making it work needs either the GitHub Actions app added to the
-  ruleset's `bypass_actors` — which exempts **every** workflow with
-  `contents: write` from the whole ruleset — or a long-lived PAT any workflow on a
-  branch can read. Neither is worth it for a file that is only meaningful per
-  release. Generating it inside a PR instead does not work either: entries link
-  `/commit/<sha>` and this repo squash-merges, so PR-branch SHAs never exist on
-  `main`. If this is ever automated again, note that a PR opened with
-  `GITHUB_TOKEN` does not trigger `pull_request` workflows, so it can never
-  satisfy the required checks and can never be merged.
-
-- **Labels** — a canonical `app:`/`pkg:`/`type:` + `breaking-change` taxonomy
-  (`scripts/lib/labels.mjs`; the `app:`/`pkg:` set is derived from the workspaces,
-  so it self-updates). [`sync-labels.yml`](.github/workflows/sync-labels.yml)
-  creates/updates them on GitHub whenever `labels.mjs` or the workspace list changes
-  on `main` (or on demand via `vp run labels:sync`), and
-  [`labeler.yml`](.github/workflows/labeler.yml) applies them to every PR — scope
-  from the changed workspaces (`scripts/pr-labels.mjs`), type from the PR title.
-  Adding a workspace needs no manual step: the labeler **syncs the taxonomy from
-  the PR's merged tree before applying**, so the new label exists on the PR that
-  introduces it, not only after the merge. Do not remove that step — labels are
-  created via the Issues API, which is also why that job needs `issues: write`.
-  Note the sync workflow watches `apps/*/package.json` and
-  `packages/*/package.json`, **not** just `pnpm-workspace.yaml`: that file holds
-  only the globs, which a new workspace never edits, so watching it alone meant
-  the workflow never fired for one.
+The release mechanics (why the version PR is opened by a human, why each package's
+first publish is manual, the `changesets/action` skip condition), the changelog's
+history and the PR label taxonomy are in the **`releasing` skill**.
 
 ### Post-Change Quality Gate
 
@@ -780,15 +499,13 @@ For multi-step exploration or investigation tasks, use the **`codebase-explorer`
 
 <!--VITE PLUS START-->
 
-## Using Vite+, the Unified Toolchain for the Web
+<!-- Deliberately empty. Vite+ injects a "Using Vite+" blurb and a Review
+     Checklist between these markers; both are already covered here — the
+     toolchain description by §4 and `node_modules/vite-plus/docs`, the
+     checklist by §7's Post-Change Quality Gate. Keep the markers PAIRED: the
+     END marker went missing once, leaving the managed region unterminated.
+     If a `vp` run refills this block, delete the content again rather than
+     editing it in place — the upstream template tells agents to run `vp test`,
+     which this repo forbids (§4). -->
 
-This project is using Vite+, a unified toolchain built on top of Vite, Rolldown, Vitest, tsdown, Oxlint, Oxfmt, and Vite Task. Vite+ wraps runtime management, package management, and frontend tooling in a single global CLI called `vp`. Vite+ is distinct from Vite, and it invokes Vite through `vp dev` and `vp build`. Run `vp help` to print a list of commands and `vp <command> --help` for information about a specific command.
-
-Docs are local at `node_modules/vite-plus/docs` or online at https://viteplus.dev/guide/.
-
-## Review Checklist
-
-- [ ] Run `vp install` after pulling remote changes and before getting started.
-- [ ] Run the quality gate (`vp fmt .`, `vp lint .`, `vp run lint:eslint:check`, `vp run lint:biome:check` from the root, `vp check`, `vp run typecheck`, `vp run test`) to format, lint, type check and test changes.
-- [ ] Check if there are `vite.config.ts` tasks or `package.json` scripts necessary for validation, run via `vp run <script>`.
-- [ ] If setup, runtime, or package-manager behavior looks wrong, run `vp env doctor` and include its output when asking for help.
+<!--VITE PLUS END-->
