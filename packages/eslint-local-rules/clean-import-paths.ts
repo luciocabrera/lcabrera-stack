@@ -17,19 +17,17 @@ const RELATIVE_PREFIXES = ['./', '../'] as const;
 const DEFAULT_ALIAS_PREFIXES = ['@/'];
 
 type IsInternalPathArgs = {
-  readonly aliasPrefixes: readonly string[];
+  readonly prefixes: readonly string[];
   readonly source: string;
 };
 
 type Options = readonly [{ readonly aliasPrefixes?: readonly string[] }?];
 
-const isInternalPath = ({
-  aliasPrefixes,
-  source,
-}: IsInternalPathArgs): boolean =>
-  [...RELATIVE_PREFIXES, ...aliasPrefixes].some((prefix) =>
-    source.startsWith(prefix),
-  );
+// `prefixes` is the already-concatenated relative + alias list, built once per
+// file in `create` rather than per node: this runs on every import and export
+// in the file, and the list cannot change between them.
+const isInternalPath = ({ prefixes, source }: IsInternalPathArgs): boolean =>
+  prefixes.some((prefix) => source.startsWith(prefix));
 
 const normalizeImportPath = (source: string): string => {
   let normalized = source;
@@ -52,16 +50,16 @@ const getQuoteCharacter = (rawSourceText: string): "'" | '"' =>
   rawSourceText.startsWith('"') ? '"' : "'";
 
 const reportIfPathNeedsCleanup = ({
-  aliasPrefixes,
   context,
   node,
+  prefixes,
 }: {
-  readonly aliasPrefixes: readonly string[];
   readonly context: TSESLint.RuleContext<'cleanImportPath', Options>;
   readonly node:
     | TSESTree.ExportAllDeclaration
     | TSESTree.ExportNamedDeclaration
     | TSESTree.ImportDeclaration;
+  readonly prefixes: readonly string[];
 }): void => {
   const sourceNode = node.source;
 
@@ -70,7 +68,7 @@ const reportIfPathNeedsCleanup = ({
   }
 
   const sourceValue = sourceNode.value;
-  if (!isInternalPath({ aliasPrefixes, source: sourceValue })) {
+  if (!isInternalPath({ prefixes, source: sourceValue })) {
     return;
   }
 
@@ -98,28 +96,31 @@ const reportIfPathNeedsCleanup = ({
 export default createRule<Options, 'cleanImportPath'>({
   create(context) {
     const [options] = context.options;
-    const aliasPrefixes = options?.aliasPrefixes ?? DEFAULT_ALIAS_PREFIXES;
+    const prefixes = [
+      ...RELATIVE_PREFIXES,
+      ...(options?.aliasPrefixes ?? DEFAULT_ALIAS_PREFIXES),
+    ];
 
     return {
       ExportAllDeclaration(node: TSESTree.ExportAllDeclaration) {
         reportIfPathNeedsCleanup({
-          aliasPrefixes,
           context,
           node,
+          prefixes,
         });
       },
       ExportNamedDeclaration(node: TSESTree.ExportNamedDeclaration) {
         reportIfPathNeedsCleanup({
-          aliasPrefixes,
           context,
           node,
+          prefixes,
         });
       },
       ImportDeclaration(node: TSESTree.ImportDeclaration) {
         reportIfPathNeedsCleanup({
-          aliasPrefixes,
           context,
           node,
+          prefixes,
         });
       },
     };
