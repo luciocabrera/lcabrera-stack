@@ -29,9 +29,13 @@ it from PRD_V2. PRD_V2 itself has no phases — it is 14 requirement sections.
 | **1 — Ingestion foundation**                | **Done**        | Migrations `0027_project_snapshots.sql`, `0028_api_tokens.sql`; ADR-028/029/031. All three sync channels live: CLI push (`packages/scan-ingestion/src/cli/push.cli.ts`), raw zip upload, browser folder-picker. `PathField`/`PathBrowserModal`/`browseDirectory` deleted. |
 | **2 — Containerized, queue-free execution** | **Not started** | No Docker code in `apps/scan-orchestrator/src`. See §3 — the queue PRD_V2 §8 forbids is still the live backbone.                                                                                                                                                          |
 | **3 — Scanner platform**                    | **Not started** | No `cqms.files` table (Files epic, §6). `command_template` is still annotated `-- documentation only` in `0015_scanner_registry.sql`; the executable `scanner_command` authority flip (§5) is unmade.                                                                     |
-| **4 — Progress & polish**                   | **Not started** | WS payload has no `event_type`/`scanner_type`/`percentage_complete` (§10); no completion webhooks; no 409 banner.                                                                                                                                                         |
+| **4 — Progress & polish**                   | **Not started** | WS payload has no `event_type`/`scanner_type`/`percentage_complete` (§10); no completion webhooks. The 409 conflict banner IS built — `ActiveRunNotice` (§8, below).                                                                                                      |
 
-Heads: **ADR-032**, migration **`0028_api_tokens.sql`**.
+Heads: `vp run adr:verify` prints the ADR head and the next free number; the
+migration head is the highest-numbered file under
+`packages/scan-ingestion/src/db/migrations/`. Both were hardcoded here and both
+had rotted — a number in a doc that nothing checks is wrong soon after it is
+written (AGENTS.md §7).
 
 ---
 
@@ -176,7 +180,7 @@ lost in a point-in-time document:
 | Workspace                 | Needs Postgres?                                     | Notes                                                                                                                                                                                 |
 | ------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `packages/scan-ingestion` | `test` **yes** / `test:unit`+`test:coverage` **no** | The split is deliberate (ADR-032): the DB-free subset excludes `src/queries/**` and `ingestion/ingestReport.test.ts` so the fallow gate gets real coverage without provisioning a DB. |
-| `apps/scan-orchestrator`  | DB-env coupled                                      | Loads `docker/local/.env`; no unit/coverage split.                                                                                                                                    |
+| `apps/scan-orchestrator`  | DB-env coupled                                      | Loads `docker/local/.env`; full `test` needs Postgres, but `test:unit` and `test:coverage` expose the DB-free subset so `test:ci` can run it.                                         |
 | `apps/admin_system`       | **No**                                              | Mock-based, incl. route-action tests.                                                                                                                                                 |
 | `packages/server`         | **No**                                              | Pure; `test` + `test:coverage`.                                                                                                                                                       |
 | `packages/node-runtime`   | **No**                                              | Pure.                                                                                                                                                                                 |
