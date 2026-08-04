@@ -121,6 +121,11 @@ Selection guideline:
 - **Understanding unfamiliar code before changing it?** Use `codebase-explorer`.
 - **Configuring or debugging a linter (Oxlint/eslint/Biome/Sonar)?** Use `lint-toolchain`.
 - **Cutting a release, or touching the changelog/label automation?** Use `releasing`.
+- **Implementing a backlog issue that has real acceptance criteria?** Use
+  `refactor-verified` — a builder subagent implements it, and a **separate**
+  verifier subagent certifies it from the diff and the criteria alone, never the
+  builder's reasoning. The standard it enforces is
+  [`docs/agents/refactor-verified-contract.md`](docs/agents/refactor-verified-contract.md).
 
 ---
 
