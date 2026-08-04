@@ -54,12 +54,14 @@ still FAILS the gate"_. Passing a rule an option keeps it live; lowering its
 level does not.
 
 Each finding is diffed against `public-package-suppressions.json`. The gate
-fails on five conditions:
+fails on:
 
 - **unapproved** — a suppression with no register entry. The main gate.
 - **grew** — more occurrences of an approved key than were agreed.
 - **stale** — a register entry matching nothing in the tree.
 - **undocumented** — an entry with no real reason or no reference.
+- **undeclared** — an `approved` entry with no `"status"`, or one holding a value
+  outside `permanent` / `provisional`.
 - **provisional** — an entry still carrying `"status": "provisional"`.
 
 `stale` is the half that keeps this from becoming the baselines it replaces. An
@@ -69,6 +71,11 @@ next occupies that key, and nothing would ever say so.
 `provisional` is the half that keeps it from growing a second one — see
 [permanent vs provisional](#permanent-vs-provisional) for what the status means
 and how to discharge it.
+
+`undeclared` is what makes `provisional` mean anything at all, and it is scoped
+to `approved`. `acknowledged` entries carry no status by design — the package
+never chose that policy, so it has no per-package deferral to declare — and are
+never asked for one.
 
 `vp run suppressions:list` prints everything found, approved or not.
 
@@ -138,14 +145,21 @@ Only then add an entry:
 ```
 
 Get the `key` from `vp run suppressions:list` rather than composing it by hand.
-A reason under 20 characters, or a missing `ref`, fails the gate — a suppression
-nobody explained cannot have been evaluated.
+A reason under 20 characters, a missing `ref`, or a missing `status` fails the
+gate — a suppression nobody explained cannot have been evaluated.
 
 ### permanent vs provisional
 
 - **permanent** — the engine is wrong and no fix exists in our control. Expected
   to outlive us.
 - **provisional** — accepted for now, not endorsed. **Fails the gate.**
+
+Every `approved` entry declares one of the two. **Declaring neither also fails**
+— a missing `"status"`, or a value outside those two, is its own gate condition
+(`undeclared`), which is what stops "say nothing" from being the cheapest exit.
+`acknowledged` is deliberately outside this: those entries record repo-wide
+policy the package never chose, so they carry no status and are not asked for
+one.
 
 `provisional` is still valid vocabulary, and it earns its place inside a single
 PR: park an entry while you decide, then settle it before you push. What it
@@ -164,6 +178,13 @@ code. A state CI cannot distinguish is a state that lasts forever, which is
 exactly the second baseline this register exists to avoid. The strict rule cost
 nothing to adopt because **#311** had already emptied the lane.
 
+**#514** closed the third exit that sentence used to have. Deleting the `status`
+line silenced an entry exactly as well as discharging it: the provisional lane
+keyed on the field's _value_, so an entry with no field matched nothing and
+passed as an ordinary scoped suppression, and `"status": "pending"` did the same
+while looking like a declaration. "There is no third way" is now a property of
+the gate rather than a claim in this file.
+
 The trade is deliberate and worth stating: a new gate can no longer be landed
 against a tree that still violates it, and a finding cannot be parked across
 PRs. For these four packages that is what AGENTS.md §4 already demands — fix it,
@@ -176,14 +197,18 @@ count, and in almost every case the fix is in the code, not in this file. Reach
 for a register entry only after the three questions above have all been answered
 "no" — and expect to defend it in review.
 
-Three failures mean something other than "you added a suppression":
+These failures mean something other than "you added a suppression":
 
 - **stale** — you removed one, or a glob's resolution changed under it. Delete
   the entry; that is the register catching up, not an obstacle.
 - **unapproved in `acknowledged`** — you widened a repo-wide Biome rule so it now
   reaches a public package. Decide whether that is what you meant, then list it.
 - **provisional** — you parked a decision and pushed before making it. Finish it
-  one of the two ways above; there is no third.
+  one of the two ways above; there is no third — the gate enforces that, so
+  deleting the field is not the third either.
+- **undeclared** — an `approved` entry lost its `"status"`, or gained a value the
+  gate does not recognise. Put back one of the two; there is nothing else to say
+  here that is not one of them.
 
 ## Known limits
 

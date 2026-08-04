@@ -353,6 +353,16 @@ export const findConfigSuppressions = ({ file, text }) => {
 };
 
 /**
+ * The vocabulary an entry that must declare a status may draw from.
+ *
+ * Exported so the gate's message quotes the list instead of restating it, and
+ * so a future third status is added in one place.
+ */
+export const DECLARABLE_STATUSES = ['permanent', 'provisional'];
+
+const DECLARABLE = new Set(DECLARABLE_STATUSES);
+
+/**
  * Diffs what is in the tree against what has been approved.
  *
  * `stale` is the lane that keeps the register honest: an approval outliving the
@@ -366,8 +376,23 @@ export const findConfigSuppressions = ({ file, text }) => {
  * Counting it into a message suffix, as this gate first did, left "one deferred
  * decision" and "none" reporting the same exit code — the state a reader has no
  * way to distinguish is the state that lasts forever.
+ *
+ * `undeclared` is what makes that lane mean anything. Keying `provisional` off
+ * the field's VALUE left saying nothing cheaper than saying `provisional`:
+ * delete the line — or write `"pending"` — and the entry passed as an ordinary
+ * scoped suppression.
+ *
+ * `requireStatus` defaults ON, and only the `acknowledged` lane opts out —
+ * that lane records repo-wide policy (ADR-035 §7) no public package chose, so
+ * its entries carry no status and must keep passing without one. The default
+ * points this way round deliberately: a caller who forgets the flag gets a loud
+ * failure rather than the silent pass this lane exists to remove.
  */
-export const diffAgainstRegister = ({ found, register }) => {
+export const diffAgainstRegister = ({
+  found,
+  register,
+  requireStatus = true,
+}) => {
   const approved = new Map(register.map((entry) => [entry.key, entry]));
   const present = new Map(found.map((entry) => [entry.key, entry]));
 
@@ -390,6 +415,9 @@ export const diffAgainstRegister = ({ found, register }) => {
   const provisional = register.filter(
     (entry) => entry.status === 'provisional',
   );
+  const undeclared = requireStatus
+    ? register.filter((entry) => !DECLARABLE.has(entry.status))
+    : [];
 
-  return { grew, provisional, stale, unapproved, undocumented };
+  return { grew, provisional, stale, unapproved, undeclared, undocumented };
 };

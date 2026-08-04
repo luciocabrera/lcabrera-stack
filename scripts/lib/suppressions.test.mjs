@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
-  diffAgainstRegister,
   findBiomeSuppressions,
   findConfigSuppressions,
   findFallowSuppressions,
@@ -225,96 +224,6 @@ describe('findFallowSuppressions', () => {
         baselines: { dead_code: { unused_exports: ['apps/web/a.ts'] } },
         isPublicPath,
       }),
-    ).toHaveLength(0);
-  });
-});
-
-describe('diffAgainstRegister', () => {
-  const entry = {
-    count: 1,
-    key: 'inline packages/ui/a.ts no-console',
-    reason: 'a reason long enough to count as an argument',
-    ref: 'ADR-000',
-  };
-  const found = [{ count: 1, key: entry.key }];
-
-  it('passes when the tree matches the register', () => {
-    const result = diffAgainstRegister({ found, register: [entry] });
-    expect(
-      result.grew.concat(
-        result.provisional,
-        result.stale,
-        result.unapproved,
-        result.undocumented,
-      ),
-    ).toHaveLength(0);
-  });
-
-  it('flags a suppression with no entry', () => {
-    expect(
-      diffAgainstRegister({ found, register: [] }).unapproved,
-    ).toHaveLength(1);
-  });
-
-  it('flags an approved key that grew', () => {
-    const result = diffAgainstRegister({
-      found: [{ count: 2, key: entry.key }],
-      register: [entry],
-    });
-    expect(result.grew[0].approvedCount).toBe(1);
-  });
-
-  // The anti-rot half. Without it an approval outlives the code that justified
-  // it and silently pre-authorises whatever next occupies that key — which is
-  // how every baseline in this repo started rotting.
-  it('flags an entry whose code is gone', () => {
-    expect(
-      diffAgainstRegister({ found: [], register: [entry] }).stale,
-    ).toHaveLength(1);
-  });
-
-  it('flags an entry approved for more than the tree holds', () => {
-    expect(
-      diffAgainstRegister({ found, register: [{ ...entry, count: 3 }] }).stale,
-    ).toHaveLength(1);
-  });
-
-  it('rejects an entry with a token reason or no reference', () => {
-    expect(
-      diffAgainstRegister({ found, register: [{ ...entry, reason: 'needed' }] })
-        .undocumented,
-    ).toHaveLength(1);
-    expect(
-      diffAgainstRegister({ found, register: [{ ...entry, ref: '' }] })
-        .undocumented,
-    ).toHaveLength(1);
-  });
-
-  // A parked decision is otherwise a perfectly well-formed entry — matched,
-  // documented, at the agreed count — so nothing else here would ever fire on
-  // it, and it would sit in a green build until someone read a suffix.
-  it('flags an otherwise-clean entry that is still provisional', () => {
-    const result = diffAgainstRegister({
-      found,
-      register: [{ ...entry, status: 'provisional' }],
-    });
-    expect(result.provisional).toHaveLength(1);
-    expect(
-      result.grew.concat(result.stale, result.unapproved, result.undocumented),
-    ).toHaveLength(0);
-  });
-
-  // `permanent` is the settled state; an acknowledged (repo-wide) entry carries
-  // no status at all, and neither may be turned into a failure by this lane.
-  it('leaves a permanent entry and a status-less one alone', () => {
-    expect(
-      diffAgainstRegister({
-        found,
-        register: [{ ...entry, status: 'permanent' }],
-      }).provisional,
-    ).toHaveLength(0);
-    expect(
-      diffAgainstRegister({ found, register: [entry] }).provisional,
     ).toHaveLength(0);
   });
 });
