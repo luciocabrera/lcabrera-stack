@@ -2,7 +2,7 @@
 id: viteplus-block-guard
 title: Gate the Vite+ managed block in AGENTS.md so a vp run cannot reintroduce upstream guidance
 owner: agent:claude
-status: active
+status: review
 branch: chore/505-viteplus-block-guard
 area:
   - scripts/verify-viteplus-block.mjs
@@ -10,7 +10,7 @@ area:
 started: 2026-08-04
 updated: 2026-08-04
 plan: (none)
-pr: (none)
+pr: #506
 issue: #505
 ---
 
