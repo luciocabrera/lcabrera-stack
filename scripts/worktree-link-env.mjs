@@ -21,7 +21,6 @@
  * Decisions worth testing live in lib/worktree-env.mjs.
  * Governed by .claude/rules/scripts.md.
  */
-import { execFileSync } from 'node:child_process';
 import {
   existsSync,
   lstatSync,
@@ -31,6 +30,7 @@ import {
 } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 
+import { runGit, runGitStatus } from './lib/git-exec.mjs';
 import {
   isEnvFileName,
   linkTextFor,
@@ -39,8 +39,14 @@ import {
   summarize,
 } from './lib/worktree-env.mjs';
 
-const git = (args, cwd) =>
-  execFileSync('git', args, { cwd, encoding: 'utf8' }).trim();
+/** git, or a clear failure — an unanswerable path question must not link anything. */
+const git = (args, cwd) => {
+  const out = runGit({ args, cwd });
+  if (out === undefined) {
+    throw new Error(`git ${args.join(' ')} failed in ${cwd}`);
+  }
+  return out;
+};
 
 /** A nested checkout (linked worktree or submodule) — its env files are not ours. */
 const isNestedCheckout = (dir) => existsSync(join(dir, '.git'));
@@ -60,19 +66,23 @@ const findEnvFiles = (root, current = root, found = []) => {
   return found;
 };
 
-/** Keep only the paths git actually ignores — a tracked one must never be linked over. */
+/**
+ * Keep only the paths git actually ignores — a tracked one must never be linked
+ * over. `check-ignore` answers with its exit code: 0 some matched, 1 none did,
+ * anything else is a real fault. Only 1 is "none"; treating a fault as "none"
+ * would report a reassuring empty result while git is broken.
+ */
 const keepIgnored = (root, relPaths) => {
   if (relPaths.length === 0) return [];
-  try {
-    const out = execFileSync('git', ['check-ignore', '--stdin'], {
-      cwd: root,
-      input: `${relPaths.join('\n')}\n`,
-      encoding: 'utf8',
-    });
-    return out.split('\n').filter(Boolean);
-  } catch {
-    return []; // exit 1 from check-ignore means "none ignored", not a failure
-  }
+  const { status, stdout } = runGitStatus({
+    args: ['check-ignore', '--', ...relPaths],
+    cwd: root,
+  });
+  if (status === 0) return stdout.split('\n').filter(Boolean);
+  if (status === 1) return [];
+  throw new Error(
+    `git check-ignore failed in ${root} (exit ${status ?? 'not spawned'})`,
+  );
 };
 
 /** Link one path; returns its outcome so the caller reports without branching. */

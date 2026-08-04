@@ -41,11 +41,19 @@ export const isEnvFileName = (name) =>
 export const linkTextFor = (sourceAbs, destinationAbs) =>
   relative(dirname(destinationAbs), sourceAbs);
 
-/** `{target, dryRun}` from argv, defaulting the target to the current directory. */
+/**
+ * `{target, dryRun}` from argv, defaulting the target to the current directory.
+ *
+ * A value that looks like a flag is treated as absent, not as a path: bare
+ * `--target` or `--target --dry-run` would otherwise resolve `"--dry-run"`
+ * against the cwd and fail somewhere further in with a path nobody typed.
+ */
 export const parseArgs = (argv, cwd) => {
   const flag = argv.indexOf('--target');
-  const raw = flag === -1 ? cwd : (argv[flag + 1] ?? cwd);
-  return { target: resolve(raw), dryRun: argv.includes('--dry-run') };
+  const candidate = flag === -1 ? undefined : argv[flag + 1];
+  const usable =
+    candidate !== undefined && !candidate.startsWith('-') ? candidate : cwd;
+  return { target: resolve(usable), dryRun: argv.includes('--dry-run') };
 };
 
 /** One-line summary; `linked` counts everything that was not already present. */

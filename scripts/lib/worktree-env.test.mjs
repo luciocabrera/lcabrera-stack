@@ -30,7 +30,12 @@ describe('isEnvFileName', () => {
     expect(isEnvFileName('env')).toBe(false);
     expect(isEnvFileName('.environment')).toBe(false);
     expect(isEnvFileName('docker.env')).toBe(false);
-    expect(isEnvFileName('.env.example.bak')).toBe(true); // not a template suffix
+  });
+
+  // Only a TRAILING template suffix marks a template. `.env.example.bak` is a
+  // stray backup of one, not a tracked template, so it is a real env file here.
+  it('accepts a name whose template suffix is not the last one', () => {
+    expect(isEnvFileName('.env.example.bak')).toBe(true);
   });
 });
 
@@ -70,6 +75,15 @@ describe('parseArgs', () => {
 
   it('falls back to the cwd when --target has no value', () => {
     expect(parseArgs(['--target'], '/repo/wt').target).toBe('/repo/wt');
+  });
+
+  // `--target --dry-run` must not resolve "--dry-run" as a path — that fails
+  // later with a directory nobody typed, which is hard to read back to a typo.
+  it('treats a flag-like value as no target at all', () => {
+    expect(parseArgs(['--target', '--dry-run'], '/repo/wt')).toEqual({
+      target: '/repo/wt',
+      dryRun: true,
+    });
   });
 });
 
