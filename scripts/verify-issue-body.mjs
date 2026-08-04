@@ -21,15 +21,11 @@
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { flagValue } from './lib/cli-input.mjs';
 import { validateIssueBody } from './lib/commit-convention.mjs';
 import { readTextWithin } from './lib/safe-read.mjs';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
-
-const flagValue = (name) => {
-  const index = process.argv.indexOf(name);
-  return index === -1 ? undefined : process.argv[index + 1];
-};
 
 const main = () => {
   const bodyFile = flagValue('--body-file');

@@ -24,14 +24,10 @@ import { readFileSync, statSync } from 'node:fs';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { flagValue } from './lib/cli-input.mjs';
 import { validateBranchName } from './lib/commit-convention.mjs';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
-
-const flagValue = (name) => {
-  const index = process.argv.indexOf(name);
-  return index === -1 ? undefined : process.argv[index + 1];
-};
 
 /** Resolves the git directory, following the `gitdir:` pointer a linked
  *  worktree uses in place of a `.git` directory. */

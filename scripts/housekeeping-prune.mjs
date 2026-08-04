@@ -26,6 +26,7 @@
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { readStdin } from './lib/cli-input.mjs';
 import { runGit } from './lib/git-exec.mjs';
 import {
   buildPlan,
@@ -35,17 +36,6 @@ import {
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
 const KEEP = new Set([]);
-
-const readStdin = async () => {
-  if (process.stdin.isTTY) {
-    return '';
-  }
-  const chunks = [];
-  for await (const chunk of process.stdin) {
-    chunks.push(chunk);
-  }
-  return Buffer.concat(chunks).toString('utf8');
-};
 
 const parsePullRequests = (raw) => {
   if (!raw.trim()) {

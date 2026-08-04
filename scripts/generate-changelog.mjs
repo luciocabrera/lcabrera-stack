@@ -21,6 +21,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { flagValue } from './lib/cli-input.mjs';
 import { parseCommitHeader } from './lib/commit-convention.mjs';
 import { readRepoSlug } from './lib/git-remote.mjs';
 
@@ -53,11 +54,6 @@ const HEADER = `# Changelog
 All notable changes to this project, grouped by [Conventional Commit](https://www.conventionalcommits.org)
 type. This file is generated — run \`vp run changelog:generate\`. Do not edit by hand.
 `;
-
-const flagValue = (name) => {
-  const index = process.argv.indexOf(name);
-  return index === -1 ? undefined : process.argv[index + 1];
-};
 
 const parseRecords = (raw) =>
   raw
