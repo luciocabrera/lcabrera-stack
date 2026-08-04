@@ -15,9 +15,13 @@ ADR numbering and command resolution — never whether prose matches behaviour.
 Your value is in that gap. State explicitly which findings a gate could have
 caught and did not.
 
-Known gap: `IGNORED_DOCS` in `scripts/verify-docs-paths.mjs` matches the bare
-fragment `/decisions/` by substring, exempting every ADR in all three homes from
-the documented-path gate. That is #515 Finding 0, still open.
+Closed gap, worth knowing because it shapes what is left to find: ADRs used to
+be exempted from the documented-path gate wholesale by an `IGNORED_DOCS`
+substring. They are now filtered per **token** — a path an ADR _names_ stays
+exempt (it is a dated record: the ADR documenting a package rename necessarily
+names the path it renamed away from, and that stays true after the path is
+gone), while a relative link it asks you to _follow_ is enforced. So a dead ADR
+link is now a gate failure rather than something for a scout to find.
 
 ## Targets
 
@@ -45,15 +49,19 @@ on the `AGENTS.md`/`CLAUDE.md` symlink.
 
 ## Prior findings
 
-Handled: four ADR cross-refs re-based after the tier split. The probe that
-sorted 4 real from 23 correct-by-design is in `evidence-standard.md` §1 — reuse
-it.
+Handled: the ADR cross-refs re-based after the tier split, and the gate change
+above that stops the next move doing it again. The probe that sorted the real
+breakage from the correct-by-design historical paths is in
+`evidence-standard.md` §1 — reuse it. Also corrected: the
+`packages/ui/.gitignore` comment, `docs/README.md`'s "two namespaces" versus
+"three homes" plus a hardcoded count, `PATTERNS.md` examples that could not
+compile, UI `INVENTORY.md`'s absent artifacts, and `Form/ARCHITECTURE.md`
+citing a field type whose code was deleted.
 
-Still open (#515): the `/decisions/` gate exemption (Finding 0, JUDGMENT); the
-`packages/ui/.gitignore` comment; `docs/README.md`'s "two namespaces" versus
-"three homes" plus a hardcoded count; `scan-ingestion/ARCHITECTURE.md`'s deleted
-flow; `PATTERNS.md` examples that cannot compile; UI `INVENTORY.md` listing
-absent artifacts; CQMS `STATUS.md` self-contradiction; `Form/ARCHITECTURE.md`
-citing a deleted field type; and two UNCLEAR ones — `eslint-local-rules-shared`
-being in neither documented scope, and three `PATTERNS.md` rules violated at
-scale.
+Still open (#515), all needing a decision rather than an edit:
+`scan-ingestion/ARCHITECTURE.md` contradicts itself about the ad-hoc project
+path while the symbol it calls deleted still exists in the source; CQMS
+`STATUS.md`'s "no 409 banner" may describe UI the built "409 surface" does not
+cover; `eslint-local-rules-shared` is in neither documented scope; and three
+`PATTERNS.md` rules are violated at scale, which usually means the rule is what
+is wrong.

@@ -103,6 +103,42 @@ export const extractCandidates = (markdown) => {
 };
 
 /**
+ * A document that records a decision as of a date — an ADR, in any of the three
+ * homes (ADR-048).
+ */
+export const isDatedRecord = (docPath) => docPath.includes('/decisions/');
+
+/**
+ * The tokens a document is still accountable for.
+ *
+ * Everywhere except a dated record, that is all of them. An ADR is different,
+ * and the difference is what this gate previously got wrong in BOTH directions:
+ * the whole corpus was exempted by an `IGNORED_DOCS` substring, so genuinely
+ * dead links in ADRs went unreported — while simply un-exempting it would have
+ * reported ~22 paths that are correct precisely because they are historical.
+ * ADR-008 IS the record of the `@repo/api` → `@repo/data-access` rename, so
+ * naming `packages/data-access` is its content, not a broken reference.
+ *
+ * The split is structural rather than a heuristic, and it follows the two
+ * shapes `extractCandidates` already recognises:
+ *
+ *   - A **root-anchored token** is descriptive prose. An ADR naming a path is
+ *     saying "this is what existed when the decision was made", which stays
+ *     true after the path is deleted. Not enforced here.
+ *   - A **relative markdown link** is navigational — a pointer the reader is
+ *     invited to follow. It either resolves or it is dead, and a dated record
+ *     has no more licence to ship a dead link than any other document. Enforced.
+ *
+ * A file move breaks the second kind and leaves the first untouched, which is
+ * exactly the failure that motivated this: 20 ADRs moved up one directory level
+ * and took four now-unresolvable relative links with them.
+ */
+export const enforcedTokens = (tokens, docPath) =>
+  isDatedRecord(docPath)
+    ? tokens.filter((token) => !isRootAnchored(token))
+    : tokens;
+
+/**
  * `@lcabrera/pkg/sub` or `@repo/pkg/sub` → its parts, so the caller can check
  * the exports map.
  *
