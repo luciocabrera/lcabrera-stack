@@ -26,7 +26,9 @@ import process from 'node:process';
 import {
   configsDeclaringLint,
   PLUGIN_PROBES,
+  pluginsWithoutCoverage,
   probeCode,
+  probeFilename,
   silentProbes,
   staleRuntimeGlobs,
   unclassifiedWorkspaces,
@@ -92,13 +94,16 @@ const workspaceDirs = (group) => {
   }
 };
 
+/** The root Oxlint config module — the source of truth both readers below use. */
+const lintConfigModule = () =>
+  import(join(REPO_ROOT, 'packages/vite-configs/vite.lint.shared.config.ts'));
+
 /** The classification the root Oxlint config declares, read from the config itself. */
-const runtimeLists = async () => {
-  const module = await import(
-    join(REPO_ROOT, 'packages/vite-configs/vite.lint.shared.config.ts')
-  );
-  return module.WORKSPACE_RUNTIMES;
-};
+const runtimeLists = async () => (await lintConfigModule()).WORKSPACE_RUNTIMES;
+
+/** The plugin families the root config actually names. */
+const configuredPlugins = async () =>
+  (await lintConfigModule()).lintSharedConfig.plugins;
 
 /**
  * Every `vite.config.ts` in the repo, root included.
@@ -121,11 +126,13 @@ const main = async () => {
   const runtimes = await runtimeLists();
   const unclassified = unclassifiedWorkspaces({ runtimes, workspaces });
   const stale = staleRuntimeGlobs({ runtimes, workspaces });
+  const plugins = await configuredPlugins();
+  const uncovered = pluginsWithoutCoverage(plugins);
 
   const stray = configsDeclaringLint(workspaceConfigs());
   const silent = withProbeDir((dir) => {
     for (const probe of PLUGIN_PROBES)
-      writeFileSync(join(dir, `${probe.plugin}.probe.ts`), probe.code);
+      writeFileSync(join(dir, probeFilename(probe)), probe.code);
     return silentProbes({
       probes: PLUGIN_PROBES,
       reportedCodes: lintCodes(dir),
@@ -154,15 +161,27 @@ const main = async () => {
     process.stdout.write(
       `${glob} is in a runtime list but matches no workspace — remove it.\n`,
     );
+  for (const plugin of uncovered)
+    process.stdout.write(
+      `The \`${plugin}\` family is in PLUGINS but neither probed nor exempt.\n` +
+        '  A configured family with no probe is one this gate cannot prove live,\n' +
+        '  which is the exact failure it exists to catch. Add a PLUGIN_PROBES\n' +
+        '  entry, or an UNPROBED_PLUGINS reason, in scripts/lib/lint-plugins.mjs.\n',
+    );
 
   const failures =
-    stray.length + silent.length + unclassified.length + stale.length;
+    stray.length +
+    silent.length +
+    unclassified.length +
+    stale.length +
+    uncovered.length;
   if (failures > 0) {
     process.exitCode = 1;
     return;
   }
   process.stdout.write(
-    `Oxlint config: ${PLUGIN_PROBES.length} plugin families proven live, ` +
+    `Oxlint config: ${PLUGIN_PROBES.length} of ${plugins.length} plugin families ` +
+      `proven live by a planted violation (the rest documented as unprobeable), ` +
       `${workspaces.length} workspaces classified by runtime, ` +
       'no workspace config shadows the root.\n',
   );
