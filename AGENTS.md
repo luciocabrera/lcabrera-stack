@@ -165,22 +165,18 @@ install` and `vp run` proceeded on an unsupported runtime without a warning.
 `engineStrict` gates **installs** — a bare `node script.js` is still whatever is
 on PATH.
 
-**Never use pnpm/npm/yarn directly for anything `vp` wraps.** All the daily operations go through `vp`:
+**Never use pnpm/npm/yarn directly for anything `vp` wraps.** Every daily operation
+goes through `vp` and each one is spelled out in
+[COMMANDS.md §2](COMMANDS.md#2-daily-commands) — `install`, `dev`, `add` and
+`remove` are the bare `vp` equivalents you would guess. The four worth stating here
+are the ones you would guess **wrong**:
 
 | Task                 | Command                                                                                |
 | -------------------- | -------------------------------------------------------------------------------------- |
-| Install dependencies | `vp install`                                                                           |
-| Dev server           | `vp dev`                                                                               |
 | Build for production | `vp run build` (runs `react-router build` and emits `build/server/index.js`)           |
-| Lint (with fix)      | `vp lint . --fix`                                                                      |
-| Lint (check only)    | `vp lint .`                                                                            |
-| Format               | `vp fmt .`                                                                             |
-| Format check         | `vp fmt --check .`                                                                     |
 | Type check           | `vp run typecheck` (real tsc) — `vp check` runs tsgolint, which is a different pass    |
 | Run tests            | `vp run test` (never `vp test` — see the `quality-gate-workflow` skill)                |
 | Full validation      | The canonical quality gate — see [Post-Change Quality Gate](#post-change-quality-gate) |
-| Add a package        | `vp add <package>`                                                                     |
-| Remove a package     | `vp remove <package>`                                                                  |
 
 **The exception is a command `vp` does not wrap** — then reaching for pnpm (or
 `npx`) directly is correct, not a workaround, because there is nothing to route
