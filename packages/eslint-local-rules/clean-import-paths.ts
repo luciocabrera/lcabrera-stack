@@ -6,10 +6,30 @@ const createRule = ESLintUtils.RuleCreator(
   (name) => `https://example.com/rule/${name}`,
 );
 
-const INTERNAL_PATH_PREFIXES = ['./', '../', '@/'] as const;
+// Relative prefixes are universal — every project has them, and they are what
+// makes a path internal in the first place. An ALIAS is per-project (`@/` here,
+// `~/` and `#app/` elsewhere), so it is an option rather than a constant: this
+// rule ships, and a consumer whose alias is not listed would get silence rather
+// than a configurable answer.
+const RELATIVE_PREFIXES = ['./', '../'] as const;
 
-const isInternalPath = (source: string): boolean =>
-  INTERNAL_PATH_PREFIXES.some((prefix) => source.startsWith(prefix));
+/** This repo's alias. As the default, in-repo behaviour is unchanged. */
+const DEFAULT_ALIAS_PREFIXES = ['@/'];
+
+type IsInternalPathArgs = {
+  readonly aliasPrefixes: readonly string[];
+  readonly source: string;
+};
+
+type Options = readonly [{ readonly aliasPrefixes?: readonly string[] }?];
+
+const isInternalPath = ({
+  aliasPrefixes,
+  source,
+}: IsInternalPathArgs): boolean =>
+  [...RELATIVE_PREFIXES, ...aliasPrefixes].some((prefix) =>
+    source.startsWith(prefix),
+  );
 
 const normalizeImportPath = (source: string): string => {
   let normalized = source;
@@ -32,10 +52,12 @@ const getQuoteCharacter = (rawSourceText: string): "'" | '"' =>
   rawSourceText.startsWith('"') ? '"' : "'";
 
 const reportIfPathNeedsCleanup = ({
+  aliasPrefixes,
   context,
   node,
 }: {
-  readonly context: TSESLint.RuleContext<'cleanImportPath', []>;
+  readonly aliasPrefixes: readonly string[];
+  readonly context: TSESLint.RuleContext<'cleanImportPath', Options>;
   readonly node:
     | TSESTree.ExportAllDeclaration
     | TSESTree.ExportNamedDeclaration
@@ -48,7 +70,7 @@ const reportIfPathNeedsCleanup = ({
   }
 
   const sourceValue = sourceNode.value;
-  if (!isInternalPath(sourceValue)) {
+  if (!isInternalPath({ aliasPrefixes, source: sourceValue })) {
     return;
   }
 
@@ -73,30 +95,36 @@ const reportIfPathNeedsCleanup = ({
   });
 };
 
-export default createRule({
+export default createRule<Options, 'cleanImportPath'>({
   create(context) {
+    const [options] = context.options;
+    const aliasPrefixes = options?.aliasPrefixes ?? DEFAULT_ALIAS_PREFIXES;
+
     return {
       ExportAllDeclaration(node: TSESTree.ExportAllDeclaration) {
         reportIfPathNeedsCleanup({
+          aliasPrefixes,
           context,
           node,
         });
       },
       ExportNamedDeclaration(node: TSESTree.ExportNamedDeclaration) {
         reportIfPathNeedsCleanup({
+          aliasPrefixes,
           context,
           node,
         });
       },
       ImportDeclaration(node: TSESTree.ImportDeclaration) {
         reportIfPathNeedsCleanup({
+          aliasPrefixes,
           context,
           node,
         });
       },
     };
   },
-  defaultOptions: [],
+  defaultOptions: [{}],
   meta: {
     docs: {
       description:
@@ -107,7 +135,18 @@ export default createRule({
       cleanImportPath:
         'Use clean path "{{cleanedPath}}" instead of "{{sourceValue}}".',
     },
-    schema: [],
+    schema: [
+      {
+        additionalProperties: false,
+        properties: {
+          aliasPrefixes: {
+            items: { type: 'string' },
+            type: 'array',
+          },
+        },
+        type: 'object',
+      },
+    ],
     type: 'suggestion',
   },
   name: 'clean-import-paths',

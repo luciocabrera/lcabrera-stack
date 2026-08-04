@@ -30,11 +30,22 @@ const createRule = ESLintUtils.RuleCreator(
 
 type MessageIds = 'deprecatedSuffix' | 'hookPrefix' | 'wrongCase';
 
-// A single optional options object. `suffixCase` overrides the expected case
-// for a given suffix (e.g. `{ util: 'kebab-case' }` in `@lcabrera/utils`), so the
-// rule stays live there instead of being turned off.
+// A single optional options object.
+//
+// `suffixCase` overrides the expected case for a given suffix (e.g.
+// `{ util: 'kebab-case' }` in `@lcabrera/utils`), so the rule stays live there
+// instead of being turned off. An unrecognised suffix falls through
+// `expectedCaseFor` and is skipped rather than reported, so a consumer with
+// suffixes this repo has never heard of gets no false positives.
+//
+// `deprecatedSuffixes` maps a retired spelling to its replacement. The default
+// is THIS repo's own migration history, which is exactly the kind of thing a
+// published rule must not force on anyone else — pass `{}` to drop it.
 type Options = readonly [
-  { readonly suffixCase?: Readonly<Record<string, SuffixCase>> }?,
+  {
+    readonly deprecatedSuffixes?: Readonly<Record<string, string>>;
+    readonly suffixCase?: Readonly<Record<string, SuffixCase>>;
+  }?,
 ];
 
 type SuffixCase = 'camelCase' | 'kebab-case' | 'PascalCase';
@@ -63,8 +74,11 @@ const CAMEL_SUFFIXES = new Set(['api', 'hook', 'schema', 'service', 'util']);
 
 // Deprecated suffix spellings → their canonical replacement. A multi-word
 // suffix is hyphenated (`error-boundary`), so the old camelCase form is
-// rejected with a rename hint.
-const DEPRECATED_SUFFIXES = new Map([['errorBoundary', 'error-boundary']]);
+// rejected with a rename hint. This is the DEFAULT only — it is this repo's
+// migration history, and `deprecatedSuffixes` replaces it wholesale.
+const DEFAULT_DEPRECATED_SUFFIXES: Readonly<Record<string, string>> = {
+  errorBoundary: 'error-boundary',
+};
 
 /**
  * Split a filename into its `{ name, suffix }`, or `undefined` when the file
@@ -133,6 +147,11 @@ export default createRule<Options, MessageIds>({
     const overrides = new Map<string, SuffixCase>(
       Object.entries(options?.suffixCase ?? {}),
     );
+    const deprecatedSuffixes = new Map<string, string>(
+      Object.entries(
+        options?.deprecatedSuffixes ?? DEFAULT_DEPRECATED_SUFFIXES,
+      ),
+    );
 
     return {
       Program(node: TSESTree.Program) {
@@ -141,7 +160,7 @@ export default createRule<Options, MessageIds>({
           return;
         }
 
-        const canonicalSuffix = DEPRECATED_SUFFIXES.get(parsed.suffix);
+        const canonicalSuffix = deprecatedSuffixes.get(parsed.suffix);
         if (canonicalSuffix !== undefined) {
           context.report({
             data: { canonical: canonicalSuffix, suffix: parsed.suffix },
@@ -193,6 +212,10 @@ export default createRule<Options, MessageIds>({
       {
         additionalProperties: false,
         properties: {
+          deprecatedSuffixes: {
+            additionalProperties: { type: 'string' },
+            type: 'object',
+          },
           suffixCase: {
             additionalProperties: {
               enum: ['PascalCase', 'camelCase', 'kebab-case'],
