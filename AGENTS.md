@@ -119,6 +119,10 @@ Selection guideline:
 - **Routing/data mutations?** Use `react-router-framework-mode`.
 - **React component implementation?** Use `react-19`.
 - **Understanding unfamiliar code before changing it?** Use `codebase-explorer`.
+- **Auditing what has rotted repo-wide?** Use `health-swarm` — six read-mostly
+  scouts in parallel (duplication, dead code, perf, deps, doc drift, lint
+  coherence), each held to a probe that could have disproved its own finding.
+  Prefer a subset (`/health-swarm perf deps`) unless a full sweep is warranted.
 - **Configuring or debugging a linter (Oxlint/eslint/Biome/Sonar)?** Use `lint-toolchain`.
 - **Cutting a release, or touching the changelog/label automation?** Use `releasing`.
 - **Implementing a backlog issue that has real acceptance criteria?** Use
