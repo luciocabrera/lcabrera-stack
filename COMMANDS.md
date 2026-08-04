@@ -405,6 +405,26 @@ runs both in CI. See the [`commit-and-pr`](.github/skills/commit-and-pr/SKILL.md
 | `vp run issue:verify`                             | validate an issue description (`ISSUE_BODY`) against the issue template         |
 | `vp run issue:verify -- --body-file <p>`          | validate an issue description from a file                                       |
 
+### Autonomous PR queue
+
+`vp run pr:queue` reads every open PR, derives the merge order, and decides each
+one against [`.claude/pr-queue-policy.md`](.claude/pr-queue-policy.md) — the
+policy is the operator's only authority, and every verdict in the log cites the
+rule ids behind it. It runs headless Claude twice per PR: a read-only decide pass
+that produces the verdict, then (only with `--apply`) an execute pass bounded to
+the actions that verdict authorised. The decision log is written between them, so
+what ran can be checked against what was approved.
+
+| Command                          | Does                                                                                            |
+| -------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `vp run pr:queue`                | dry run: decide every open PR, write the decision log, change nothing                           |
+| `vp run pr:queue -- --apply`     | execute each decision in merge order — rebase, fix, address review threads, squash-merge, close |
+| `vp run pr:queue -- --pr <n>`    | decide one PR, still judged in the context of the whole queue's ordering                        |
+| `vp run pr:queue -- --model <m>` | pick the model for both passes                                                                  |
+
+Logs land in `reports/pr-queue/runs/<timestamp>/` (`decision-log.md` to read,
+`decisions.json` to diff) — produced on demand, never committed ([ADR-049](docs/decisions/ADR-049-findings-reports-are-produced-on-demand.md)).
+
 ### Planning backlog → GitHub
 
 `vp run plan:issues` turns a planning document into Milestones, issues and real

@@ -50,6 +50,7 @@
     "lint:report": "vp run --filter eslint-local-rules-shared build && node scripts/generate-lint-reports.mjs",
     "packages:build": "vp run --filter '@lcabrera/*' build",
     "plan:issues": "node scripts/plan-issues.mjs",
+    "pr:queue": "node scripts/pr-queue-operator.mjs",
     "pr:verify": "node scripts/verify-pr.mjs",
     "prepare": "vp config",
     "publish:verify": "node scripts/verify-publish-surface.mjs",

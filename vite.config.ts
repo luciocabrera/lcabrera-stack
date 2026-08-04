@@ -10,7 +10,15 @@ const fmtConfig = createFmtConfig({
   // `tags`) that Oxfmt collapses onto one line, so the generator and formatter
   // would fight and churn the file on every run. Keep Oxfmt out of it; the
   // generator's output is the canonical, deterministic format.
-  ignorePatterns: ['.react-router/', 'build/', 'reports/sonar/'],
+  // `reports/pr-queue/` is the same case: `scripts/pr-queue-operator.mjs` writes
+  // each pass's decision log with the same stable `JSON.stringify(…, null, 2)`
+  // convention, and the markdown alongside it is generated too.
+  ignorePatterns: [
+    '.react-router/',
+    'build/',
+    'reports/pr-queue/',
+    'reports/sonar/',
+  ],
 });
 
 export default defineConfig({

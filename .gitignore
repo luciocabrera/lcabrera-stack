@@ -60,6 +60,10 @@ reports/skills/*.md
 # Fallow per-run artifacts (canonical root: reports/fallow/ — see AGENTS.md)
 reports/fallow/runs/
 
+# PR queue operator decision logs — one directory per pass, produced on demand
+# by `vp run pr:queue` (ADR-049).
+reports/pr-queue/runs/
+
 # The coordination board is a local-only VIEW, regenerated on demand with
 # `vp run coordination:board` (ADR-037). It is never committed: a committed
 # generated file is what made every concurrent coordination PR collide. The
