@@ -217,6 +217,15 @@ jobs:
         # viteplus:verify -- --write`.
         run: vp run viteplus:verify
 
+      - name: No config file that no engine reads
+        id: stray_configs_gate
+        # Formatting and linting are configured once, in the root vite.config.ts
+        # (ADR-042). Eight decoy configs had accumulated beside it — the root
+        # `.oxfmtrc.json` declared `sortPackageJson: false` where the live config
+        # declares `true`, so the file a reader would open to learn the policy
+        # stated the opposite, and editing it changed nothing.
+        run: vp run configs:verify
+
       - name: Published package surface resolves
         id: publish_gate
         # Builds first on purpose. `exports` points at `src` so this repo never

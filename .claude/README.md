@@ -115,10 +115,10 @@ Agents are sub-agents spawned explicitly by Claude (or by you) for isolated, hea
 
 Hooks are shell commands the harness runs automatically on lifecycle events. They live in the **committed** `.claude/settings.json` (the standard location — not a separate hooks file) so the whole team shares them.
 
-| Event                                                   | Command                                 | Purpose                                                                                                                                                                           |
-| ------------------------------------------------------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `PreToolUse` (`Read\|Bash\|Grep\|Glob\|Write\|Edit\|…`) | `node scripts/claude-secrets-guard.mjs` | **Security guard** — denies reading a `.env`/secret file (Read/Bash/Grep/Glob) and writing a credential (Write/Edit); `.env.example`/`.sample`/`.template` are the only exception |
-| `PostToolUse` (`Write\|Edit\|MultiEdit`)                | `node scripts/claude-autofix.mjs`       | Per-file autofix after each Write/Edit — Oxlint `--fix` → Biome `--write` → Oxfmt (the "fast trio"); non-blocking                                                                 |
+| Event                                                   | Command                                 | Purpose                                                                                                                                                                                                                             |
+| ------------------------------------------------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PreToolUse` (`Read\|Bash\|Grep\|Glob\|Write\|Edit\|…`) | `node scripts/claude-secrets-guard.mjs` | **Security guard** — denies reading a `.env`/secret file (Read/Bash/Grep/Glob) and writing a credential (Write/Edit); `.env.example`/`.sample`/`.template` are the only exception                                                   |
+| `PostToolUse` (`Write\|Edit\|MultiEdit`)                | `node scripts/claude-autofix.mjs`       | Per-file autofix after each Write/Edit — Oxlint `--fix` → Oxfmt; non-blocking. Biome and the ESLint pass are deliberately absent (a process launch per file, and this hook gates nothing), so quality-gate step 4 is still required |
 
 The `PreToolUse` **secrets guard** ([`scripts/claude-secrets-guard.mjs`](../scripts/claude-secrets-guard.mjs)) runs _before_ a tool executes and emits a `permissionDecision: "deny"` when a call would read a secret file (`.env`, `*.pem/.key/.p12`, `id_rsa`, `.npmrc`, `credentials`…) or write a credential (provider-format tokens + high-entropy assignments). It reuses the ADR-020 secret-file taxonomy (`packages/agent-runner/src/isSecretFilePath.util.ts`) so the CLI and the agent-runner SDK guard agree; the pure core is `scripts/lib/secrets-guard.mjs`, covered by [`scripts/lib/secrets-guard.test.mjs`](../scripts/lib/secrets-guard.test.mjs) — 31 deny/allow cases that `vp run test:scripts` runs, and CI runs via `test:ci`. False positives are handled by `.example` files, placeholder values, and inline `gitleaks:allow` markers.
 
@@ -136,7 +136,7 @@ hook was the only thing that ran **tests** locally. What still covers the rest:
 
 | Layer                                    | Covers                                                                                                    |
 | ---------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `PostToolUse` (per file)                 | Oxfmt, Oxlint `--fix`, Biome — formatting and lint, continuously                                          |
+| `PostToolUse` (per file)                 | Oxfmt, Oxlint `--fix` — formatting and lint, continuously (no Biome; see the hook table above)            |
 | pre-commit (`vp staged`)                 | fmt + Oxlint + tsgolint on staged files, plus a Biome check                                               |
 | pre-push (`check:push` + `test:changed`) | the CI Quality Gate: fmt, Oxlint, **ESLint**, full type-check — plus **tests for the changed workspaces** |
 | CI                                       | the full test suite, fallow audit, Sonar, secret scan                                                     |
@@ -182,7 +182,7 @@ Claude works — reads files, edits code
         │       (secrets guard: reading a secret file, writing a credential)
         │
         ├─ After each Write/Edit → PostToolUse hook autofixes that one file
-        │       (Oxlint --fix, Biome --write, Oxfmt)
+        │       (Oxlint --fix, Oxfmt)
         │
         ├─ Needs heavy/isolated work? → spawns an Agent
         │       (or a skill with context: fork runs in its own sub-agent)

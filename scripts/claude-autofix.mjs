@@ -22,7 +22,8 @@
  *
  * Binaries are launched by absolute node_modules/.bin path (never a bare command,
  * so no PATH-based launch) and via `vp` (not bare oxfmt/oxlint) so they read the
- * vite.config.ts config instead of the stray oxfmtrc/oxlintrc decoys.
+ * root vite.config.ts config. The oxfmtrc/oxlintrc decoys that used to sit
+ * beside it are gone, and `vp run configs:verify` fails if one returns.
  *
  * Input : PostToolUse hook JSON on stdin (reads tool_input.file_path).
  * Output: a one-line summary on stdout (transcript-mode only).
