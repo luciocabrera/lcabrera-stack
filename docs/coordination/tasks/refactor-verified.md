@@ -2,7 +2,7 @@
 id: refactor-verified
 title: Independent builder/verifier refactor loop (/refactor-verified)
 owner: agent:claude
-status: active
+status: review
 branch: chore/507-refactor-verified
 area:
   - .github/skills/refactor-verified/**
@@ -12,7 +12,7 @@ area:
 started: 2026-08-04
 updated: 2026-08-04
 plan: (none)
-pr: (none)
+pr: '#508'
 issue: #507
 ---
 
@@ -30,6 +30,6 @@ evidence standard.
 
 ## Status / next
 
-- Current step: skill, agents and contract written; index entries next
+- Current step: demonstrated end to end on #311 (PR #509); PR #508 ready for review
 - Blockers: none
-- Next: quality gate, then demonstrate the loop end to end on #311
+- Next: review
