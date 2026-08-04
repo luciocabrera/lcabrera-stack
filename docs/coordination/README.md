@@ -44,15 +44,16 @@ immediately):
    that moves its Planning-board card to In Progress before any PR exists (the rest
    of the Status column is automated; see
    [github-planning.md → Status automation](../tooling/github-planning.md#status-automation)).
-5. **Close it.** When the work merges, **delete the task file** (its history lives
-   in the PR and commits). Open a PR early — a draft PR is the human-visible
+5. **Closing is automatic.** When the PR merges into `main`, the task file is
+   deleted for you — see [Close on merge](#close-on-merge) for what that covers
+   and what still needs a hand. Open a PR early — a draft PR is the human-visible
    progress surface that pairs with this register.
 
 That's it. The ceremony is one file; the payoff is that no one collides blind.
 
 **Shortcut (the recommended path):**
 `vp run coordination:claim -- <id> "<title>" (--issue <n> | --new-issue) [--area <glob> ...]`
-does steps 2–5 in one command — it **creates (`--new-issue`) or links (`--issue <n>`)
+does steps 2–4 in one command (step 5 is automatic) — it **creates (`--new-issue`) or links (`--issue <n>`)
 the backlog issue and self-assigns it right away** (so its board card moves to In
 Progress at the START, before any PR — closing the window where another agent
 picks up the same issue), writes the required `issue:` field, scaffolds the task,
@@ -205,11 +206,45 @@ terminal view that joins the claims with real PR state (draft, checks, and any o
 PR with _no_ task), run `vp run coordination:board:live` (needs `gh`; it prints,
 never writes a file). Open the PR early; that is the human-visible progress surface.
 
-**Close on merge.** When your PR merges (with `--delete-branch`), delete the task
-file. If a PR can't delete the task that tracks itself, do it in a tiny follow-up.
-A merged task left `active` is drift — `coordination:verify` nudges on the
-tell-tales (a branch that no longer resolves; a task active for days with no
-branch or PR recorded).
+### Close on merge
+
+**Merging deletes the task file — you do not.**
+[`coordination-close.yml`](../../.github/workflows/coordination-close.yml) runs on
+every PR merged into `main`, resolves the claims that PR closes (by its number in
+`pr:`, or by its head ref in `branch:`), deletes them and commits. `vp run
+coordination:close -- --pr <n> --dry-run` is the same resolver by hand, listing
+what it would delete without touching anything.
+
+It was automated rather than enforced: the step lands after the satisfying part of
+the work, on a branch that no longer exists, and nothing blocks on it, so it was
+forgotten reliably enough that the register needed sweeping three times in one
+session. A blocking gate would have failed the _next_ PR for the _previous_
+author's omission — the wrong person pays, and the lesson taught is "sweep", not
+"close" (#529).
+
+**What still needs a hand.** The automation only sees a PR merged into `main`
+from a branch in this repository, and only matches on the two fields above. So
+these stay manual:
+
+- a PR merged **from a fork**, or into a branch other than `main`;
+- a task whose file records **neither** the PR number nor the head ref (a claim
+  left at `pr: (none)` _and_ `branch: (worktree)`);
+- work **abandoned** rather than merged — a PR closed unmerged leaves its claim,
+  deliberately, because the area may still be owned;
+- the shared-branch descriptor (`branches/<slug>.md`), which the integrator
+  deletes when the branch merges;
+- the branch and worktree themselves — that is `vp run housekeeping:prune`.
+
+`coordination:verify` keeps warning on the tell-tales (a branch that no longer
+resolves; a live task with no branch or PR recorded; a PR whose branch is gone
+from origin), so anything the automation misses still surfaces. Those warnings
+never fail a build — a stale claim must not fail someone else's PR.
+
+The commit goes straight to `main`, which the branch ruleset guards; the workflow
+header records which token that needs and why. A rejected push **fails the job**
+rather than being downgraded to a warning — the mistake the removed
+`update-changelog.yml` made, which let it report success while the file it
+maintained stood still.
 
 ---
 

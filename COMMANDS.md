@@ -368,6 +368,7 @@ The in-git "who is working on what" register under [`docs/coordination/`](docs/c
 | `vp run coordination:board`                   | write the local, gitignored `docs/coordination/BOARD.md` table view (never committed — ADR-037)                                                                    |
 | `vp run coordination:board:live`              | live view: claims joined with open-PR state (draft/checks) + unregistered PRs (needs `gh`; prints, never writes)                                                   |
 | `vp run coordination:claim -- <id> "<title>"` | scaffold a task + branch (or `--worktree`) + draft PR in one step (`--dry-run` to preview)                                                                         |
+| `vp run coordination:close -- --pr <n>`       | delete the task file(s) that PR claimed — `--branch <head-ref>` also matches a claim that never recorded its PR, `--dry-run` reports and deletes nothing           |
 | `vp run worktree:env`                         | symlink the primary checkout's gitignored env files into the worktree you run it from (`--dry-run` to preview, `--target <dir>` for another) — see below           |
 | `vp run housekeeping:prune`                   | dry-run the shared-checkout broom: list branches/worktrees safe to delete (merged/closed PR or cruft) and what is kept (un-PR'd commits, dirty worktrees, stashes) |
 | `vp run housekeeping:prune -- --apply`        | perform those deletions; never touches anything with unique un-PR'd commits, an uncommitted worktree, or a stash (needs `gh`; falls back to commit-count-only)     |
@@ -380,6 +381,12 @@ that closes that, and it **symlinks rather than copies**, so no second credentia
 exists on disk and none outlives the worktree. It is idempotent (an existing path is
 reported and left alone) and skips nested checkouts, whose env files belong to
 another tree.
+
+`coordination:close` is normally not run by hand: `.github/workflows/coordination-close.yml`
+runs it on every PR merged into `main` and commits the deletion when there is one.
+Run it yourself to preview (`--dry-run`) or to sweep a claim the automation could
+not — a PR merged from a fork, or one whose task file records neither its number
+nor its head ref.
 
 ### Commit & PR standards
 

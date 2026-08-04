@@ -1,0 +1,81 @@
+name: Close coordination claim
+
+# Deletes the coordination task file a merged PR claimed, so Rule 12's last step
+# ("delete the task file when the work merges") stops depending on memory. It is
+# forgotten structurally, not carelessly: the step lands after the satisfying
+# part of the work, on a branch that no longer exists, and nothing blocks on it —
+# `coordination:verify` warns rather than fails, on purpose. A claim nobody holds
+# still reads as a live soft lock and fences the next agent off finished work.
+#
+# Matching is scripts/lib/coordination-close.mjs (pure, unit-tested); the
+# deletion is `vp run coordination:close`; this file only commits the result.
+# `coordination:verify`'s stale/branch/reconcile warnings stay as the backstop
+# for anything that slips past (issue #529 §5).
+#
+# It cannot retrigger itself: the only trigger is `pull_request: closed`, and the
+# push below is a push event, which nothing here subscribes to. The push DOES
+# trigger check-safe.yml (`push: main`) — intended: an automated commit is held
+# to the same gate as a human one.
+#
+# PRECONDITION — the push needs a token whose actor may bypass the `main
+# protection` ruleset. That ruleset carries `required_status_checks`, which
+# rejects a direct push with `GH013 … N of N required status checks are
+# expected`; the removed `update-changelog.yml` hit exactly that and reported
+# success anyway because it converted the rejection to a `::warning::` (see the
+# `releasing` skill). So this job pushes with ADD_TO_PROJECT_PAT — the
+# repo-admin PAT already configured for the project workflows, and admins are the
+# ruleset's bypass actor — and it never swallows a rejection: if the push fails,
+# the job fails, and the register is swept by hand that once.
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+
+# Two PRs merging close together produce two runs, both pushing to `main`.
+# Serialise them (and never cancel — a cancelled run leaves the claim behind).
+concurrency:
+  group: coordination-close
+  cancel-in-progress: false
+
+jobs:
+  close:
+    name: Delete the merged PR's task file
+    runs-on: ubuntu-latest
+    if: >-
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.base.ref == 'main' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          # Full history: the commit below is rebased onto `main` before pushing,
+          # and a rebase inside a depth-1 clone has no common ancestor to work on.
+          fetch-depth: 0
+          ref: main
+          token: ${{ secrets.ADD_TO_PROJECT_PAT || github.token }}
+
+      - name: Resolve and delete the task file(s) this PR closed
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: node scripts/close-coordination-claim.mjs --pr "$PR_NUMBER" --branch "$HEAD_REF"
+
+      - name: Commit the deletion, only when there was one
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          if [ -z "$(git status --porcelain docs/coordination/tasks)" ]; then
+            echo "No task file matched PR #$PR_NUMBER — nothing to commit."
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A docs/coordination/tasks
+          git commit -m "chore(coordination): close the claim merged by #$PR_NUMBER"
+          # Rebase first: a run for another PR may have pushed since checkout.
+          git pull --rebase origin main
+          git push origin HEAD:main
