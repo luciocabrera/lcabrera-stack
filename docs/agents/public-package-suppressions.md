@@ -144,7 +144,9 @@ nobody explained cannot have been evaluated.
 
 `provisional` exists to be emptied. It is not a second baseline, and a
 provisional entry that sits untouched for a release is a bug report about this
-process. The five open today are tracked in **#311**.
+process. The register holds none today — the set the gate landed with was
+settled in **#311** — so a new one arriving means a decision was deferred, and
+it needs a `review` issue saying who will make it.
 
 ## If the gate fails on your branch
 
@@ -174,3 +176,16 @@ Stated so nobody mistakes this for more than it is:
   four are strict today; nothing yet fails if one stops being.
 - **Only the file extensions the scanner walks** (`.ts`, `.tsx`, `.mjs`, `.cjs`,
   `.js`, `.jsx`) are read for inline directives.
+- **A finding silenced in the SonarCloud UI is invisible here.** Marking an issue
+  _Accepted_ or _False positive_ on sonarcloud.io silences it as effectively as a
+  `NOSONAR`, and leaves nothing in the tree for the scanner to find. It is not an
+  oversight that this gate misses them — they live in SonarCloud, not in git —
+  but do not read a clean run as "no Sonar finding was ever waived".
+  `vp run sonar:report` counts them separately, and
+  `/api/issues/search?resolved=true&resolutions=FALSE-POSITIVE,WONTFIX` lists
+  them with file and line. That listing is also how you tell a live `NOSONAR`
+  from a dead one: a directive that really suppressed an issue keeps it out of
+  the store entirely, so an issue recorded on the annotated line proves the
+  directive did nothing. Both of the ones settled in #311 failed exactly that
+  test — and Sonar's own docs say why, since `//NOSONAR` only covers the line it
+  sits at the end of, and both sat on a comment line of their own.

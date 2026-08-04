@@ -76,9 +76,10 @@ describe('isFilterValid', () => {
     ).toBe(false);
   });
 
-  it('returns false for number filter without value', () => {
-    // @ts-expect-error testing edge case
-    expect(isFilterValid({ operator: 'equals', type: 'number' })).toBe(false);
+  it('returns false for a number filter left undefined mid-edit', () => {
+    expect(
+      isFilterValid({ operator: 'equals', type: 'number', value: undefined }),
+    ).toBe(false);
   });
 
   it('returns true for number filter with value', () => {
