@@ -241,7 +241,12 @@ describe('diffAgainstRegister', () => {
   it('passes when the tree matches the register', () => {
     const result = diffAgainstRegister({ found, register: [entry] });
     expect(
-      result.grew.concat(result.stale, result.unapproved, result.undocumented),
+      result.grew.concat(
+        result.provisional,
+        result.stale,
+        result.unapproved,
+        result.undocumented,
+      ),
     ).toHaveLength(0);
   });
 
@@ -283,6 +288,34 @@ describe('diffAgainstRegister', () => {
       diffAgainstRegister({ found, register: [{ ...entry, ref: '' }] })
         .undocumented,
     ).toHaveLength(1);
+  });
+
+  // A parked decision is otherwise a perfectly well-formed entry — matched,
+  // documented, at the agreed count — so nothing else here would ever fire on
+  // it, and it would sit in a green build until someone read a suffix.
+  it('flags an otherwise-clean entry that is still provisional', () => {
+    const result = diffAgainstRegister({
+      found,
+      register: [{ ...entry, status: 'provisional' }],
+    });
+    expect(result.provisional).toHaveLength(1);
+    expect(
+      result.grew.concat(result.stale, result.unapproved, result.undocumented),
+    ).toHaveLength(0);
+  });
+
+  // `permanent` is the settled state; an acknowledged (repo-wide) entry carries
+  // no status at all, and neither may be turned into a failure by this lane.
+  it('leaves a permanent entry and a status-less one alone', () => {
+    expect(
+      diffAgainstRegister({
+        found,
+        register: [{ ...entry, status: 'permanent' }],
+      }).provisional,
+    ).toHaveLength(0);
+    expect(
+      diffAgainstRegister({ found, register: [entry] }).provisional,
+    ).toHaveLength(0);
   });
 });
 

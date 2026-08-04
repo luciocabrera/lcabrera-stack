@@ -8,7 +8,9 @@
  * let a broad override reach a public package unlisted.
  *
  * Each lane fails on: a suppression with no entry, an entry that grew, an entry
- * matching nothing (anti-rot), or one with no reason or reference.
+ * matching nothing (anti-rot), one with no reason or reference, or one still
+ * marked `provisional` — a deferred decision may live inside a PR, never in a
+ * build.
  *
  * What is detected, and how to add an exception:
  * `docs/agents/public-package-suppressions.md` — the one copy of that table.
@@ -203,7 +205,8 @@ const main = () => {
   ];
 
   const failures = lanes.reduce((total, lane) => {
-    const { grew, stale, unapproved, undocumented } = diffAgainstRegister(lane);
+    const { grew, provisional, stale, unapproved, undocumented } =
+      diffAgainstRegister(lane);
     return (
       total +
       report(
@@ -226,6 +229,13 @@ const main = () => {
         `Entr(ies) in ${lane.list} with no real reason or no reference:`,
         undocumented,
         (row) => row.key,
+      ) +
+      report(
+        `Provisional entr(ies) in ${lane.list} — a deferred decision cannot survive a build. ` +
+          `Discharge each one: fix the finding and delete the entry, or restate it as ` +
+          `"status": "permanent" with a reason naming why no fix exists in our control:`,
+        provisional,
+        (row) => row.key,
       )
     );
   }, 0);
@@ -235,15 +245,9 @@ const main = () => {
     process.exitCode = 1;
     return;
   }
-  const provisional = (register.approved ?? []).filter(
-    (entry) => entry.status === 'provisional',
-  ).length;
-  // Named rather than inlined: a conditional template inside a template is
-  // unreadable at a glance and Sonar rejects the nesting (S4624).
-  const pending = provisional > 0 ? ` (${provisional} still provisional)` : '';
   process.stdout.write(
-    `${packageDirs.length} public package(s): ${own.length} scoped suppression(s)${pending}, ` +
-      `${inherited.length} inherited from repo-wide policy. All listed and documented.\n`,
+    `${packageDirs.length} public package(s): ${own.length} scoped suppression(s), ` +
+      `${inherited.length} inherited from repo-wide policy. All listed, documented and settled.\n`,
   );
 };
 

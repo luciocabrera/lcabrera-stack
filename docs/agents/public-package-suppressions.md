@@ -54,16 +54,21 @@ still FAILS the gate"_. Passing a rule an option keeps it live; lowering its
 level does not.
 
 Each finding is diffed against `public-package-suppressions.json`. The gate
-fails on four conditions:
+fails on five conditions:
 
 - **unapproved** — a suppression with no register entry. The main gate.
 - **grew** — more occurrences of an approved key than were agreed.
 - **stale** — a register entry matching nothing in the tree.
 - **undocumented** — an entry with no real reason or no reference.
+- **provisional** — an entry still carrying `"status": "provisional"`.
 
 `stale` is the half that keeps this from becoming the baselines it replaces. An
 approval that outlives the code it justified silently pre-authorises whatever
 next occupies that key, and nothing would ever say so.
+
+`provisional` is the half that keeps it from growing a second one — see
+[permanent vs provisional](#permanent-vs-provisional) for what the status means
+and how to discharge it.
 
 `vp run suppressions:list` prints everything found, approved or not.
 
@@ -140,13 +145,29 @@ nobody explained cannot have been evaluated.
 
 - **permanent** — the engine is wrong and no fix exists in our control. Expected
   to outlive us.
-- **provisional** — accepted for now, not endorsed. Must carry a `review` issue.
+- **provisional** — accepted for now, not endorsed. **Fails the gate.**
 
-`provisional` exists to be emptied. It is not a second baseline, and a
-provisional entry that sits untouched for a release is a bug report about this
-process. The register holds none today — the set the gate landed with was
-settled in **#311** — so a new one arriving means a decision was deferred, and
-it needs a `review` issue saying who will make it.
+`provisional` is still valid vocabulary, and it earns its place inside a single
+PR: park an entry while you decide, then settle it before you push. What it
+cannot do is survive a build. The gate names every provisional entry and exits
+non-zero, so there are exactly two ways to finish:
+
+- **fix the finding** and delete the entry, or
+- **restate it as `"status": "permanent"`**, with a reason naming why no fix
+  exists in our control — which is the same bar as any other entry, argued in
+  review.
+
+That is the decision recorded in **#510**, and it replaces a softer rule that
+nothing enforced: the count of provisional entries used to be appended to the
+success line, so a parked suppression and none at all produced the same exit
+code. A state CI cannot distinguish is a state that lasts forever, which is
+exactly the second baseline this register exists to avoid. The strict rule cost
+nothing to adopt because **#311** had already emptied the lane.
+
+The trade is deliberate and worth stating: a new gate can no longer be landed
+against a tree that still violates it, and a finding cannot be parked across
+PRs. For these four packages that is what AGENTS.md §4 already demands — fix it,
+or argue it `permanent`.
 
 ## If the gate fails on your branch
 
@@ -155,12 +176,14 @@ count, and in almost every case the fix is in the code, not in this file. Reach
 for a register entry only after the three questions above have all been answered
 "no" — and expect to defend it in review.
 
-Two failures mean something other than "you added a suppression":
+Three failures mean something other than "you added a suppression":
 
 - **stale** — you removed one, or a glob's resolution changed under it. Delete
   the entry; that is the register catching up, not an obstacle.
 - **unapproved in `acknowledged`** — you widened a repo-wide Biome rule so it now
   reaches a public package. Decide whether that is what you meant, then list it.
+- **provisional** — you parked a decision and pushed before making it. Finish it
+  one of the two ways above; there is no third.
 
 ## Known limits
 

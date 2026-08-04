@@ -5,7 +5,7 @@
     "rule": "A suppression inside a public package is a defect until argued otherwise. Adding an entry here is not paperwork for a decision already made — it IS the decision, and it needs a reviewer who agrees.",
     "status": {
       "permanent": "The engine is wrong about correct code and no fix exists in our control. Expected to outlive us.",
-      "provisional": "Accepted for now, not endorsed. Carries a `review` issue and should shrink."
+      "provisional": "Accepted for now, not endorsed — and it FAILS the gate (#510). Valid vocabulary inside one PR while a decision is open; discharge it before pushing, either by fixing the finding and deleting the entry or by restating it as permanent with a reason. It can never survive a build."
     },
     "lists": {
       "approved": "Suppressions scoped to a public package — the rule is off BECAUSE of that package. Highest bar: argue why the engine is wrong about this specific code.",
