@@ -11,11 +11,14 @@
  * What it runs, in fix-then-format order, each guarded so a missing binary or a
  * tool failure never blocks Claude:
  *   1. Oxlint  `vp lint  <file> --fix`             (root config, Rust)
- *   2. Biome   `biome lint <file> --write`         (safe lint fixes; ts/tsx/mjs/cjs)
- *   3. Oxfmt   `vp fmt   <file>`                    (formatter; runs last)
- * The per-workspace ESLint pass is deliberately NOT here (it cold-starts a Node
- * process per file); it stays in the Stop hook + pre-push, mirroring the repo's
- * pre-commit staged config, which also excludes ESLint.
+ *   2. Oxfmt   `vp fmt   <file>`                    (formatter; runs last)
+ * Neither the ESLint pass nor Biome is here, for the same reason: each is another
+ * process launch per file, and the launch — not the analysis — is the cost. This
+ * hook cannot gate anything anyway (it swallows failures and always exits 0), so
+ * a fixer omitted here loses no enforcement. Biome runs check-only in the
+ * `staged` block of the root vite.config.ts (the same ts/tsx/mjs/cjs glob this
+ * hook used), in `check:push`, and repo-wide in check-safe.yml; ESLint stays in
+ * the Stop hook + pre-push.
  *
  * Binaries are launched by absolute node_modules/.bin path (never a bare command,
  * so no PATH-based launch) and via `vp` (not bare oxfmt/oxlint) so they read the
@@ -33,7 +36,6 @@ import { extname, join, relative, resolve, sep } from 'node:path';
 
 const REPO_ROOT = resolve(import.meta.dirname, '..');
 const VP_BIN = join(REPO_ROOT, 'node_modules', '.bin', 'vp');
-const BIOME_BIN = join(REPO_ROOT, 'node_modules', '.bin', 'biome');
 const STDIN_FD = 0;
 
 /** Directory segments we never touch (generated, vendored, or scratch). */
@@ -76,7 +78,6 @@ const OXLINT_EXTS = new Set([
   '.mts',
   '.cts',
 ]);
-const BIOME_EXTS = new Set(['.ts', '.tsx', '.mjs', '.cjs']);
 
 // ---- pure core --------------------------------------------------------------
 
@@ -103,11 +104,6 @@ const fixersFor = (absPath) => {
       name: 'oxlint',
       bin: VP_BIN,
       args: ['lint', absPath, '--fix'],
-    },
-    BIOME_EXTS.has(ext) && {
-      name: 'biome',
-      bin: BIOME_BIN,
-      args: ['lint', absPath, '--write', '--no-errors-on-unmatched'],
     },
     OXFMT_EXTS.has(ext) && {
       name: 'oxfmt',
