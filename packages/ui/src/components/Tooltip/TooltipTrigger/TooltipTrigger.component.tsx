@@ -47,8 +47,6 @@ export const TooltipTrigger = ({
       onTouchStart={onShow}
       ref={ref}
       role={shouldUseInteractiveTrigger ? 'button' : undefined}
-      // For non-native triggers we intentionally provide keyboard focus + role.
-      // NOSONAR
       tabIndex={shouldUseInteractiveTrigger ? 0 : undefined}
       {...stylex.props(styles.trigger(anchorName))}
     >

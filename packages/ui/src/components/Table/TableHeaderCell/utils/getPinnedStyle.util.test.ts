@@ -3,7 +3,12 @@ import { describe, expect, it } from 'vite-plus/test';
 import { getPinnedStyle } from './getPinnedStyle.util';
 
 describe('getPinnedStyle', () => {
-  it('returns undefined when pinInfo is undefined', () => {
+  // How an unpinned column arrives here: getPinnedColumnOffsets returns a
+  // Partial<Record<…>> and only ever writes entries carrying a side, so an
+  // unpinned key is absent from the map rather than present without a side.
+  // That makes `undefined` the only shape the no-style branch can be reached
+  // with — there is no valueless PinnedColumnInfo to test.
+  it('returns undefined when the column is not pinned', () => {
     expect(getPinnedStyle(undefined)).toBeUndefined();
   });
 
@@ -25,15 +30,5 @@ describe('getPinnedStyle', () => {
       side: 'right',
     });
     expect(result).toBeDefined();
-  });
-
-  it('returns undefined for unpinned column (no side)', () => {
-    // @ts-expect-error testing no side
-    const result = getPinnedStyle({
-      isFirstPinnedRight: false,
-      isLastPinnedLeft: false,
-      offset: 0,
-    });
-    expect(result).toBeUndefined();
   });
 });

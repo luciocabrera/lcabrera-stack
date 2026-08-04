@@ -174,46 +174,6 @@
       "status": "permanent",
       "reason": "Same prototype save-and-restore as mockDialogElement, applied to the popover API methods this suite stubs. Binding breaks restoration for the same reason.",
       "ref": "AGENTS.md §4 (directive must name its engine)"
-    },
-    {
-      "key": "inline packages/ui/src/components/Table/SpacerRow/SpacerRow.component.tsx NOSONAR",
-      "count": 1,
-      "status": "provisional",
-      "reason": "Mirrors the Biome noAriaHiddenOnFocusable exemption for the same decorative row, for a second engine. Provisional because a bare NOSONAR is unscoped — it silences every present and future Sonar rule on that line, which is wider than the one finding it was added for.",
-      "ref": "#311",
-      "review": "#311"
-    },
-    {
-      "key": "inline packages/ui/src/components/Tooltip/TooltipTrigger/TooltipTrigger.component.tsx NOSONAR",
-      "count": 1,
-      "status": "provisional",
-      "reason": "Mirrors the Biome noStaticElementInteractions exemption for the conditional-role trigger. Provisional for the same reason: unscoped NOSONAR grants more than was argued for.",
-      "ref": "#311",
-      "review": "#311"
-    },
-    {
-      "key": "inline packages/ui/src/components/Table/filters/NumberFilterInput/utils/computeInitialValue.util.test.ts @ts-expect-error",
-      "count": 1,
-      "status": "provisional",
-      "reason": "Asserts the runtime fallback for a number filter with no value — a state the parameter type forbids. Provisional because it is unresolved whether the type is too strict or the test is asserting an unreachable state; one of the two should change.",
-      "ref": "#311",
-      "review": "#311"
-    },
-    {
-      "key": "inline packages/ui/src/components/Table/TableSettingsDrawer/FiltersSection/utils/isFilterValid.util.test.ts @ts-expect-error",
-      "count": 1,
-      "status": "provisional",
-      "reason": "Same shape as the computeInitialValue case: a valueless number filter passed to a signature that requires a value. Grouped into the same review rather than settled piecemeal.",
-      "ref": "#311",
-      "review": "#311"
-    },
-    {
-      "key": "inline packages/ui/src/components/Table/TableHeaderCell/utils/getPinnedStyle.util.test.ts @ts-expect-error",
-      "count": 1,
-      "status": "provisional",
-      "reason": "Passes a pinned-style argument with no side to assert the undefined return. Same unresolved question as the other two: whether side should be optional in the type.",
-      "ref": "#311",
-      "review": "#311"
     }
   ]
 }
