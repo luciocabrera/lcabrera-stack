@@ -3,7 +3,7 @@
 - **Status:** Accepted
 - **Date:** 2026-07-23
 - **Issue:** [#331](https://github.com/luciocabrera/vite-react-compiler/issues/331)
-- **Relates to:** [#328](https://github.com/luciocabrera/vite-react-compiler/pull/328) — the pnpm 11.16 bump that made the feature available; the multi-worktree agent workflow ([coordination README](../../coordination/README.md)) that motivated it.
+- **Relates to:** [#328](https://github.com/luciocabrera/vite-react-compiler/pull/328) — the pnpm 11.16 bump that made the feature available; the multi-worktree agent workflow ([coordination README](../coordination/README.md)) that motivated it.
 
 ## Context
 
