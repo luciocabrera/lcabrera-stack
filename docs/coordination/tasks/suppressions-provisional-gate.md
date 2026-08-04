@@ -2,7 +2,7 @@
 id: suppressions-provisional-gate
 title: Make suppressions:verify fail on a provisional entry
 owner: agent:claude
-status: active
+status: review
 branch: chore/510-suppressions-provisional-gate
 area:
   - scripts/verify-suppressions.mjs
