@@ -22,7 +22,7 @@ import type { TSESTree } from '@typescript-eslint/utils';
 
 import { ESLintUtils } from '@typescript-eslint/utils';
 
-import { COMPONENT_FILE_SUFFIXES } from './component-files.js';
+import { COMPONENT_FILE_SUFFIXES } from './component-files.ts';
 
 const createRule = ESLintUtils.RuleCreator(
   (name) => `https://github.com/luciocabrera/vite-react-compiler/rules/${name}`,

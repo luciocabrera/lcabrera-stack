@@ -2,21 +2,31 @@
  * Which packages the public-API surface gate watches, and where each one's
  * shipped types live (scripts/verify-api-surface.mjs).
  *
- * Only the four `@lcabrera/*` packages ship outside this repo, so only they have
- * an external contract to protect — `@repo/*` may change freely (ADR-040). The
+ * Only the `@lcabrera/*` packages ship outside this repo, so only they have an
+ * external contract to protect — `@repo/*` may change freely (ADR-040). The
  * snapshot must be taken against what a consumer actually installs: the built
- * `dist` `.d.mts` for the three built packages, and the `src` entry for `ui`,
- * which ships source because StyleX derives theme identity from the source path
+ * `dist` `.d.mts` for the built packages, and the `src` entry for `ui`, which
+ * ships source because StyleX derives theme identity from the source path
  * (ADR-038). Running one path over both would repeat the exact hazard
  * `publish:verify` exists for.
+ *
+ * The list is spelled out rather than derived from `publishConfig.access`, so
+ * that publishing a package is a deliberate two-part act: a manifest that says
+ * it ships, and an entry here that puts its surface under the ratchet.
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { toBuiltPaths } from './publish-surface.mjs';
 
-/** The four public packages, by directory name under `packages/`. */
-const PUBLIC_PACKAGE_DIRS = ['api', 'server', 'ui', 'utils'];
+/** The public packages, by directory name under `packages/`. */
+const PUBLIC_PACKAGE_DIRS = [
+  'api',
+  'eslint-local-rules',
+  'server',
+  'ui',
+  'utils',
+];
 
 /**
  * A subpath is part of the versioned contract only when it names a concrete

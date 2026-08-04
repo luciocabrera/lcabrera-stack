@@ -93,8 +93,8 @@
     "build": "vp pack",
     "format": "vp fmt .",
     "format:check": "vp fmt --check .",
-    "lint": "vp run --filter eslint-local-rules-shared build && vp lint . --fix && vp run lint:eslint",
-    "lint:check": "vp run --filter eslint-local-rules-shared build && vp lint . && vp run lint:eslint:check",
+    "lint": "vp lint . --fix && vp run lint:eslint",
+    "lint:check": "vp lint . && vp run lint:eslint:check",
     "lint:eslint": "eslint . --config eslint.config.mjs --fix --max-warnings 0",
     "lint:eslint:check": "eslint . --config eslint.config.mjs --max-warnings 0",
     "typecheck": "tsc --noEmit -p tsconfig.app.json"

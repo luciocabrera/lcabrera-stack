@@ -1,4 +1,5 @@
 import eslint from '@eslint/js';
+import localRules from '@lcabrera/eslint-plugin';
 import eslintConfigPrettier from 'eslint-config-prettier/flat';
 import perfectionist from 'eslint-plugin-perfectionist';
 import security from 'eslint-plugin-security';
@@ -6,7 +7,6 @@ import unicorn from 'eslint-plugin-unicorn';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
-import localRules from '../eslint-local-rules/index.js';
 import { TEST_RUNNER_IMPORT_PATTERNS } from './eslint.restrictions.shared.mjs';
 
 // Generic (non-React) variant of eslint.custom-rules.shared.config.mjs for

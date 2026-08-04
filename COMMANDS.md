@@ -127,7 +127,7 @@ project-specific belongs in that project's own `package.json`.
 | Command                      | Does                                                                                              |
 | ---------------------------- | ------------------------------------------------------------------------------------------------- |
 | `vp run ready`               | `check:safe` + `build:all` — the full "is it shippable" check                                     |
-| `vp run check:safe`          | typegen → eslint-rules build → `vp check` → typecheck → eslint → biome → tests                    |
+| `vp run check:safe`          | typegen → `vp check` → typecheck → eslint → biome → tests                                         |
 | `vp run check:push`          | the DB-free CI Quality Gate (no tests/fallow) — the `pre-push` hook runs this then `test:changed` |
 | `vp run typecheck:all`       | real tsc in all 17 workspaces, dependency order                                                   |
 | `vp run typecheck:changed`   | real tsc for the changed workspaces + dependents only — see below                                 |
@@ -495,24 +495,24 @@ file under `reports/sonar/runs/` ([ADR-049](docs/decisions/ADR-049-findings-repo
 Beyond that, tasks are per-workspace. `build` and `test` are common but come from
 `vite.config.ts` rather than `scripts` in most workspaces (see §1).
 
-| Workspace                     | Package name                | Notable extra tasks                                                                                 |
-| ----------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------- |
-| `apps/react-router`           | `vite-react-compiler`       | `typegen`, `test:ci`, `test:watch`, `preview`, `knip`, `audit:lighthouse`, `audit:lighthouse:check` |
-| `apps/admin_system`           | `admin-system`              | `typegen`                                                                                           |
-| `apps/api-server`             | `car-sales-api`             | `seed`, `db:seed`, `start`                                                                          |
-| `apps/api-server-fast`        | `car-sales-api-fast`        | `seed`, `db:seed`, `start`                                                                          |
-| `apps/scan-orchestrator`      | `@repo/scan-orchestrator`   | `start`, `test:unit`, `test:coverage`                                                               |
-| `apps/shared`                 | `api-shared`                | `build`, `test`                                                                                     |
-| `packages/ui`                 | `@lcabrera/ui`              | `check:public-api`, `test:coverage`, `bench`                                                        |
-| `packages/server`             | `@lcabrera/server`          | `test:coverage`                                                                                     |
-| `packages/scan-ingestion`     | `@repo/scan-ingestion`      | `migrate`, `push`, `test:unit`, `test:coverage`                                                     |
-| `packages/node-runtime`       | `@repo/node-runtime`        | `test:coverage`                                                                                     |
-| `packages/agent-runner`       | `@repo/agent-runner`        | —                                                                                                   |
-| `packages/ts-configs`         | `@repo/ts-configs`          | `generate`                                                                                          |
-| `packages/eslint-local-rules` | `eslint-local-rules-shared` | `build`                                                                                             |
-| `packages/plugins`            | `@repo/plugins`             | —                                                                                                   |
-| `packages/utils`              | `@lcabrera/utils`           | —                                                                                                   |
-| `packages/vite-configs`       | `@repo/vite-configs`        | —                                                                                                   |
+| Workspace                     | Package name              | Notable extra tasks                                                                                 |
+| ----------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------- |
+| `apps/react-router`           | `vite-react-compiler`     | `typegen`, `test:ci`, `test:watch`, `preview`, `knip`, `audit:lighthouse`, `audit:lighthouse:check` |
+| `apps/admin_system`           | `admin-system`            | `typegen`                                                                                           |
+| `apps/api-server`             | `car-sales-api`           | `seed`, `db:seed`, `start`                                                                          |
+| `apps/api-server-fast`        | `car-sales-api-fast`      | `seed`, `db:seed`, `start`                                                                          |
+| `apps/scan-orchestrator`      | `@repo/scan-orchestrator` | `start`, `test:unit`, `test:coverage`                                                               |
+| `apps/shared`                 | `api-shared`              | `build`, `test`                                                                                     |
+| `packages/ui`                 | `@lcabrera/ui`            | `check:public-api`, `test:coverage`, `bench`                                                        |
+| `packages/server`             | `@lcabrera/server`        | `test:coverage`                                                                                     |
+| `packages/scan-ingestion`     | `@repo/scan-ingestion`    | `migrate`, `push`, `test:unit`, `test:coverage`                                                     |
+| `packages/node-runtime`       | `@repo/node-runtime`      | `test:coverage`                                                                                     |
+| `packages/agent-runner`       | `@repo/agent-runner`      | —                                                                                                   |
+| `packages/ts-configs`         | `@repo/ts-configs`        | `generate`                                                                                          |
+| `packages/eslint-local-rules` | `@lcabrera/eslint-plugin` | —                                                                                                   |
+| `packages/plugins`            | `@repo/plugins`           | —                                                                                                   |
+| `packages/utils`              | `@lcabrera/utils`         | —                                                                                                   |
+| `packages/vite-configs`       | `@repo/vite-configs`      | —                                                                                                   |
 
 Notes on the non-obvious ones:
 
@@ -534,11 +534,11 @@ Notes on the non-obvious ones:
 
 [`.github/workflows/check-safe.yml`](.github/workflows/check-safe.yml) — three jobs:
 
-| Job              | Steps                                                                                                                                |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| **Quality Gate** | `typegen:all` + eslint-rules build → `vp check` → `vp run typecheck:all` → `vp run -r lint:eslint:check` → `vp run lint:biome:check` |
-| **Fallow Audit** | `typegen:all` → `coverage:merge` → `fallow:audit --base <PR base> --coverage …` (PRs only)                                           |
-| **Unit Tests**   | `vp run test:ci` → `vp run coverage:report` → per-workspace + monorepo coverage matrix comment on the PR                             |
+| Job              | Steps                                                                                                           |
+| ---------------- | --------------------------------------------------------------------------------------------------------------- |
+| **Quality Gate** | `typegen:all` → `vp check` → `vp run typecheck:all` → `vp run -r lint:eslint:check` → `vp run lint:biome:check` |
+| **Fallow Audit** | `typegen:all` → `coverage:merge` → `fallow:audit --base <PR base> --coverage …` (PRs only)                      |
+| **Unit Tests**   | `vp run test:ci` → `vp run coverage:report` → per-workspace + monorepo coverage matrix comment on the PR        |
 
 Each pass is a **separate step on purpose** so a failure names itself instead of
 hiding behind a neighbour. `vp check` does not run the eslint pass, it does not run

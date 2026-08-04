@@ -43,8 +43,6 @@ docker/local/pgpass
 .env.*
 !.env.example
 
-packages/eslint-local-rules/build/
-
 # Findings reports are PRODUCED ON DEMAND and never committed (ADR-049). A
 # measurement in git is stale from the next commit onward with nothing to say so,
 # and one of these was for 22 merges (#304). Name the command instead:

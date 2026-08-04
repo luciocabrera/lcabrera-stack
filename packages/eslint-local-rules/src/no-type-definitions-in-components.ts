@@ -2,7 +2,7 @@ import type { TSESTree } from '@typescript-eslint/utils';
 
 import { ESLintUtils } from '@typescript-eslint/utils';
 
-import { isComponentFilename } from './component-files.js';
+import { isComponentFilename } from './component-files.ts';
 
 const createRule = ESLintUtils.RuleCreator(
   (name) => `https://example.com/rule/${name}`,

@@ -100,6 +100,35 @@ const ruleFrom = ({ directive, rest }) => {
 };
 
 /**
+ * True when the text before a match puts the directive where an engine would
+ * actually honour it: at the START of a comment's content.
+ *
+ * Every engine here requires that. ESLint reads `comment.value.trim()` and
+ * checks it begins with the directive; Biome and Sonar do the equivalent. So
+ * `// NOSONAR` after code counts, and a directive named mid-sentence does not.
+ *
+ * Without this the scan matched the token anywhere on the line, which made
+ * every sentence ABOUT suppressions look like one. That is not a hypothetical:
+ * it fired on a comment in `destructuring-for-functions.ts` explaining that the
+ * rule carries its own exemptions so authors are not taught to reach for an
+ * inline disable. A gate that reports a suppression where none exists gets
+ * read as noise, and then a real one does too.
+ *
+ * Written as string checks rather than a lookbehind because the alternation of
+ * optional whitespace runs needed to express it in one pattern is exactly the
+ * ambiguous shape Sonar S8786 flags for backtracking.
+ */
+const isDirectivePosition = (before) => {
+  const trimmed = before.trimEnd();
+  // Immediately after an opener: `// eslint-disable-next-line`, `/* NOSONAR`.
+  if (trimmed.endsWith('//') || trimmed.endsWith('/*')) return true;
+  // First content on the line — a block comment continued across lines, whose
+  // value still trims to start with the directive.
+  const leading = before.trim();
+  return leading === '' || leading === '*';
+};
+
+/**
  * Every inline suppression in one file's text.
  *
  * Keyed by file+directive+rule rather than by line: line numbers churn on any
@@ -109,16 +138,18 @@ const ruleFrom = ({ directive, rest }) => {
  */
 export const findInlineSuppressions = ({ file, text }) =>
   text.split('\n').flatMap((line, index) =>
-    [...line.matchAll(DIRECTIVE_PATTERN)].map((match) => ({
-      directive: match[0],
-      file,
-      kind: 'inline',
-      line: index + 1,
-      rule: ruleFrom({
+    [...line.matchAll(DIRECTIVE_PATTERN)]
+      .filter((match) => isDirectivePosition(line.slice(0, match.index)))
+      .map((match) => ({
         directive: match[0],
-        rest: line.slice(match.index + match[0].length),
-      }),
-    })),
+        file,
+        kind: 'inline',
+        line: index + 1,
+        rule: ruleFrom({
+          directive: match[0],
+          rest: line.slice(match.index + match[0].length),
+        }),
+      })),
   );
 
 /**

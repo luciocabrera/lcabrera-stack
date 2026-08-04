@@ -1,9 +1,9 @@
+import localRules from '@lcabrera/eslint-plugin';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-import localRules from '../eslint-local-rules/index.js';
 import {
   BARREL_SYNTAX_RESTRICTIONS,
   CLIENT_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS,

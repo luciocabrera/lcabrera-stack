@@ -14,24 +14,27 @@ in opposite directions, the package wins. A package must stand on its own —
 declared dependencies, a resolvable public surface, no reliance on a consumer's
 tsconfig `paths` to make an import work — because it is meant to be consumed from
 outside this repo, where none of this monorepo's wiring exists. `packages/ui`,
-`packages/api`, `packages/server` and `packages/utils` are held strictest for
-exactly that reason (§4). This is why the column-filter shapes are **duplicated**
+`packages/api`, `packages/server`, `packages/utils` and
+`packages/eslint-local-rules` are held strictest for exactly that reason (§4). This is why the column-filter shapes are **duplicated**
 in `@lcabrera/ui` and `@lcabrera/server` rather than shared through an elegant edge that
 only resolves in-repo ([ADR-039](docs/decisions/ADR-039-duplicate-over-undeclared-edges.md)).
 Facing that call — promote it into a package, or write it twice?
 [`docs/agents/cross-app-abstraction.md`](docs/agents/cross-app-abstraction.md)
 walks the decision in order and links the ADR that owns each step.
 
-**Two scopes, and the split carries meaning.** The four publishable packages are
-**`@lcabrera/*`**; the six internal ones (`vite-configs`, `ts-configs`, `plugins`,
+**Two scopes, and the split carries meaning.** The publishable packages are
+**`@lcabrera/*`**; the internal ones (`vite-configs`, `ts-configs`, `plugins`,
 `agent-runner`, `node-runtime`, `scan-ingestion`) stay **`@repo/*`**. So the
 import line tells you which side of the product boundary you are on: `@lcabrera/`
 means it ships and has consumers outside this repo, `@repo/` means internal, change
 it freely. A new package picks its scope by one question — does it ship? — and a
 `@lcabrera/*` one inherits the never-baseline rule (§4) and the invariants below.
 Do not "tidy" the two into one ([ADR-040](docs/decisions/ADR-040-npm-scope-for-the-public-packages.md)).
+A package in **neither** scope means that question was never asked — that is how
+the custom lint rules sat unscoped until they became `@lcabrera/eslint-plugin`
+([ADR-057](docs/decisions/ADR-057-publish-the-custom-lint-rules.md)).
 
-**All four are published on npm, and nothing but the version number stands between
+**They are published on npm, and nothing but the version number stands between
 a mistake and the registry** — `private` is off and each has a trusted publisher,
 so a merged version bump publishes on its own, and **an npm version is permanent**.
 The full publishing contract — the `exports`/`publishConfig` split, `files`, peer
@@ -53,10 +56,12 @@ _package_ relies on into an app.
 the listing cannot tell you is below.
 
 `packages/ui`,
-`packages/api`, `packages/server` and `packages/utils` are becoming public
-packages and are held strictest: never baseline, scope, or inline-disable a
-finding in any of them. The authority on that list is not this sentence — it is
-which workspaces gitignore `eslint-suppressions.json`; keep the two in step.
+`packages/api`, `packages/server`, `packages/utils` and
+`packages/eslint-local-rules` are public packages and are held strictest: never
+baseline, scope, or inline-disable a finding in any of them. The authority on
+that list is not this sentence — it is which workspaces gitignore
+`eslint-suppressions.json`, which `vp run suppressions:verify` reads at runtime,
+so a new public package is covered the day it is added; keep the prose in step.
 
 `api` and `server` split on **runtime**, and the split is load-bearing, not
 cosmetic — the two names say which runtime each one is for, and the tsconfigs
@@ -224,9 +229,8 @@ reporting — is the **`lint-toolchain` skill**. One rule from it belongs here
 because it governs every engine: **a rule that is not loaded reports exactly the
 same clean pass as code that is correct**, so confirm any lint change with a
 deliberate violation (Rule 14). Handling a _finding_ is Non-Negotiable Rule 11 —
-verify, then fix; never suppress. `packages/ui`, `packages/api`,
-`packages/server` and `packages/utils` take no suppressions at all, enforced by
-`vp run suppressions:verify`.
+verify, then fix; never suppress. The public packages (§1) take no
+suppressions at all, enforced by `vp run suppressions:verify`.
 
 Known constraint: `scan-orchestrator`'s queue integration test shares the local CQMS Postgres queue — while `vp run dev:cqms` is running, the live orchestrator races the test for queued scans and `vp run test:all` can flake on `runQueuedScan.test.ts` (duplicate `reports_scan_id_key`). Stop the CQMS dev session before a full test run, or treat that single failure as environmental.
 
@@ -281,7 +285,7 @@ The headline rules every agent must know regardless of which files are open. Ful
 8. **Use `@/` alias for `src/`** — relative imports only within the same directory.
 9. **No explicit return types on functions/hooks/components — let TypeScript infer** — annotate only when inference genuinely fails (recursion, overloads, complex conditional types) or must be widened. (`.claude/rules/typescript.md`)
 10. **Never use workaround-only fixes** — always address and solve the underlying issue. If there is any doubt about intent, trade-offs, or risk, ask the user before applying a workaround or partial fix.
-11. **Never ignore, suppress, or omit a lint finding — verify, then fix.** Oxlint/eslint violations (including stylistic `unicorn/*` rules like `prefer-simple-condition-first` / `no-nested-ternary`) are real until you have read the flagged code and confirmed otherwise. Do **not** dismiss one as a false positive without checking, and do **not** silence a new one — no inline `// eslint-disable`/`oxlint-disable`, no rule-off in config, no hand-added `eslint-suppressions.json` entry. Fix the code (reorder operands, restructure logic, wire up/delete the export). If it is a genuine false positive, explain why rather than disabling. `packages/ui`, `packages/api`, `packages/server` and `packages/utils` are held strictest — each one's `eslint-suppressions.json` is gitignored, so none is ever committed and none of them baselines (§4).
+11. **Never ignore, suppress, or omit a lint finding — verify, then fix.** Oxlint/eslint violations (including stylistic `unicorn/*` rules like `prefer-simple-condition-first` / `no-nested-ternary`) are real until you have read the flagged code and confirmed otherwise. Do **not** dismiss one as a false positive without checking, and do **not** silence a new one — no inline `// eslint-disable`/`oxlint-disable`, no rule-off in config, no hand-added `eslint-suppressions.json` entry. Fix the code (reorder operands, restructure logic, wire up/delete the export). If it is a genuine false positive, explain why rather than disabling. The public packages (§1) are held strictest — each one's `eslint-suppressions.json` is gitignored, so none is ever committed and none of them baselines (§4).
 12. **Claim shared work before you touch it.** Multiple agents and humans work this repo in parallel. Before non-trivial work, register it in [`docs/coordination/`](docs/coordination/README.md): check for an area overlap, then create a task file (`tasks/_TEMPLATE.md`) with the `area` globs you own, branch, and keep `status`/`updated` current until it merges. Never edit files inside another active task's `area` without coordinating. The register — not `~/.claude/plans/` scratch, which is invisible to everyone else — is the shared record. `vp run coordination:verify` (CI) keeps it honest. (See "Multi-Agent Coordination" in §7.)
 13. **Commits and PRs follow the enforced format.** Every commit message is a Conventional Commit (`type(scope): subject`) and every PR has a conforming title plus the required `## What` / `## Verification` sections — checked by the `commit-msg` git hook locally and the `pr-standards.yml` gate in CI. The one spec is `scripts/lib/commit-convention.mjs`; don't restate its type list elsewhere, and (Rule 11) fix a failing message/description rather than weakening the check. (See "Commit & PR Standards" in §7 and the `commit-and-pr` skill.)
 14. **A claim needs evidence that could have disproved it, and steps someone else can re-run.** Before writing a finding into a doc, comment, issue or PR, ask **what else would produce the same observation** — if anything would, the probe is not evidence, so change the probe. Then state the **preconditions** the steps depend on (config state, branch, whether a fix has landed); if the same change alters those preconditions, say so explicitly, or the steps stop reproducing the moment they merge. A written claim is load-bearing: someone will act on it without re-deriving it. (See "Verifying a claim" in §7.)
@@ -445,12 +449,12 @@ to the spec so they cannot drift. If the standard itself must change, change
 
 ### Releasing, Changelog & Labels
 
-The four `@lcabrera/*` packages are versioned with **Changesets**, independently. A
+The `@lcabrera/*` packages are versioned with **Changesets**, independently. A
 change that affects consumers **carries a changeset in the same PR** — that is the
 part you must not forget; `vp run release:version` consumes them.
 
 Two invariants worth knowing before you touch a manifest: **`private: true` is the
-only thing keeping a workspace out of the registry** (the four public ones no
+only thing keeping a workspace out of the registry** (the public ones no
 longer carry it, so nothing but the version number decides whether a merge
 publishes — every workspace not meant to publish MUST have the flag), and
 **`CHANGELOG.md` is generated** (`vp run changelog:generate`) — never hand-edit it.

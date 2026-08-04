@@ -264,6 +264,21 @@ const configs = [
     }),
     filePath: resolve(workspaceRoot, 'packages/vite-configs/tsconfig.app.json'),
   },
+  {
+    // Genuinely Node-only: ESLint rules, which run in the linter's process.
+    // Until it became publishable this package carried a hand-written
+    // tsconfig.json — the last one in the repo outside this generator — so it
+    // silently missed every option the others tightened. Sources under src/
+    // with a root vite.config.ts, so include names both, matching @lcabrera/utils.
+    config: createNodeTsConfig({
+      include: ['src', 'vite.config.ts'],
+      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
+    }),
+    filePath: resolve(
+      workspaceRoot,
+      'packages/eslint-local-rules/tsconfig.app.json',
+    ),
+  },
 ] as const;
 
 await Promise.all(configs.map(writeConfigFile));

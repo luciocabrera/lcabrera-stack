@@ -1,10 +1,164 @@
-# Custom ESLint Rules
+# @lcabrera/eslint-plugin
 
-This directory contains custom ESLint rules written in **TypeScript** for enforcing project-specific code patterns.
+Custom ESLint rules for TypeScript and React codebases — filename conventions,
+clean import paths, readonly props, and single-component modules.
+
+These rules exist because each one enforces a convention that no other linter
+checks, and that a code review otherwise has to catch by eye every time.
+
+## Install
+
+```bash
+npm install --save-dev @lcabrera/eslint-plugin
+```
+
+`eslint` (v9+) is a peer dependency. The plugin ships flat-config only.
+
+## Usage
+
+```js
+// eslint.config.mjs
+import localRules from '@lcabrera/eslint-plugin';
+
+export default [
+  {
+    files: ['**/*.ts', '**/*.tsx'],
+    plugins: { 'local-rules': localRules },
+    rules: {
+      'local-rules/clean-import-paths': 'error',
+      'local-rules/filename-convention': 'error',
+      'local-rules/readonly-props': 'error',
+    },
+  },
+];
+```
+
+The plugin key is yours to choose — `local-rules` above is just what this
+repository uses, and the rule names are prefixed with whatever you pick.
+
+Rules are opt-in individually; there is no `recommended` preset. Several of
+these encode a house style rather than a correctness property, and a preset
+would imply the whole set travels together when it does not: enabling
+`clean-import-paths` in a project that compiles with `tsc` under NodeNext, where
+explicit extensions are **required**, would be actively wrong.
 
 ## Rules
 
-### 1. `no-inline-type-imports`
+| Rule                                | Fixable | What it enforces                                            |
+| ----------------------------------- | ------- | ----------------------------------------------------------- |
+| `clean-import-paths`                | ✅      | No file extensions or trailing `/index` on internal imports |
+| `destructuring-for-functions`       |         | An object parameter once a function takes 2+ arguments      |
+| `filename-convention`               |         | Base-name case follows the file's type suffix               |
+| `merge-duplicate-imports`           | ✅      | One import statement per source module                      |
+| `no-inline-type-imports`            | ✅      | `import type { X }` over `import { type X }`                |
+| `no-type-definitions-in-components` |         | Types live in `*.types.ts`, not in component files          |
+| `readonly-props`                    | ✅      | Every member of a `*Props` type is `readonly`               |
+| `single-component-export`           |         | One component per `*.component.tsx`                         |
+| `type-suffix-naming`                | ✅      | `Args`/`Props` suffixes over `Arguments`/`Properties`       |
+
+Two rules take options; the rest take none.
+
+### `clean-import-paths`
+
+Disallows file extensions and trailing `/index` segments on internal
+import/export paths.
+
+**❌ Disallowed:**
+
+```typescript
+import { Button } from './components/Button/index.ts';
+import type { Props } from './Thing.types.ts';
+export { utils } from '@/utils/index';
+```
+
+**✅ Enforced:**
+
+```typescript
+import { Button } from './components/Button';
+import type { Props } from './Thing.types';
+export { utils } from '@/utils';
+```
+
+**Auto-fix:** removes `.ts`/`.tsx` suffixes and trailing `/index`.
+
+**Options.** `aliasPrefixes` (default `['@/']`) names the path aliases that mark
+an import as internal. Relative prefixes (`./`, `../`) are always internal and
+are not configurable — they are what makes a path internal in any project.
+
+```js
+'local-rules/clean-import-paths': ['error', { aliasPrefixes: ['~/', '#app/'] }],
+```
+
+An alias you do not list is treated as an external package and left alone.
+
+**Do not enable this rule** where explicit extensions are required — a project
+compiling with `tsc` under `module: nodenext` needs them, and this rule would
+fight the compiler.
+
+### `filename-convention`
+
+Enforces the base-name case that goes with each file suffix. Only files matching
+`<base>.<suffix>.<ext>` are checked, so `index.ts` and `root.tsx` are untouched,
+and an unrecognised suffix is skipped rather than guessed at.
+
+| Suffix                                       | Base-name case          | Example                       |
+| -------------------------------------------- | ----------------------- | ----------------------------- |
+| `.component` / `.layout` / `.error-boundary` | PascalCase              | `CarSales.error-boundary.tsx` |
+| `.hook`                                      | camelCase, `use` prefix | `useVirtualization.hook.ts`   |
+| `.loader` / `.action` / `.meta`              | kebab-case              | `enterprise-orders.loader.ts` |
+| `.api` / `.schema` / `.service` / `.util`    | camelCase               | `fetchOrdersPage.util.ts`     |
+
+If you use `unicorn/filename-case`, turn it off — this rule owns filename casing,
+and the suffix is what drives the convention.
+
+**Options.**
+
+`suffixCase` overrides the expected case for a suffix, so a package with a
+different convention keeps the rule live instead of switching it off:
+
+```js
+// this package's own `.util` files are kebab-case, and a camelCase one still fails
+'local-rules/filename-convention': ['error', { suffixCase: { util: 'kebab-case' } }],
+```
+
+`deprecatedSuffixes` maps a retired spelling to its replacement, so a rename
+migration is enforced rather than remembered. It defaults to
+`{ errorBoundary: 'error-boundary' }` — this repository's own migration history.
+Pass `{}` to drop it, or your own map to enforce yours:
+
+```js
+'local-rules/filename-convention': ['error', { deprecatedSuffixes: { helpers: 'util' } }],
+```
+
+### `readonly-props`
+
+Requires every member a `*Props` type declares to be `readonly`. Autofixable.
+
+Members inherited through an intersection with a React type belong to React, not
+to you, and are not checked.
+
+**❌ Disallowed:**
+
+```typescript
+type AppProvidersProps = {
+  children: ReactNode; // props are never mutated
+};
+```
+
+**✅ Enforced:**
+
+```typescript
+type AppProvidersProps = {
+  readonly children: ReactNode;
+};
+
+// inherited members are React's — only the declared extras are checked
+type CardProps = ComponentPropsWithoutRef<'div'> & {
+  readonly padding?: CardPadding;
+};
+```
+
+### `no-inline-type-imports`
 
 Enforces separate `import type` syntax instead of inline type imports.
 
@@ -12,7 +166,7 @@ Enforces separate `import type` syntax instead of inline type imports.
 
 ```typescript
 import { type User, type Post } from './types';
-import type { type User } from './types'; // Redundant
+import type { type User } from './types'; // redundant
 ```
 
 **✅ Enforced:**
@@ -21,7 +175,7 @@ import type { type User } from './types'; // Redundant
 import type { User, Post } from './types';
 ```
 
-### 2. `merge-duplicate-imports`
+### `merge-duplicate-imports`
 
 Merges multiple import statements from the same source into a single import.
 
@@ -47,9 +201,10 @@ import * as ns from './module';
 import { B } from './module';
 ```
 
-### 3. `destructuring-for-functions`
+### `destructuring-for-functions`
 
-Enforces object parameter pattern for functions with 2+ parameters.
+Enforces the object-parameter pattern for functions taking 2+ parameters, so
+call sites name their arguments and argument order stops being load-bearing.
 
 **❌ Disallowed:**
 
@@ -73,15 +228,15 @@ function buildComponent({ name, props, config }: BuildComponentArgs) {
 }
 ```
 
-### 4. `type-suffix-naming`
+### `type-suffix-naming`
 
-Enforces proper type suffix naming conventions (Standard 002).
+Enforces `Args`/`Props` type suffixes over the spelled-out forms.
 
 **❌ Disallowed:**
 
 ```typescript
-type ProcessDataArguments = { data: string }; // Should use 'Args'
-type ButtonProperties = { label: string }; // Should use 'Props'
+type ProcessDataArguments = { data: string }; // should use 'Args'
+type ButtonProperties = { label: string }; // should use 'Props'
 ```
 
 **✅ Enforced:**
@@ -91,19 +246,24 @@ type ProcessDataArgs = { data: string };
 type ButtonProps = { label: string };
 ```
 
-**Auto-fix:** Renames type declarations from `Arguments` -> `Args` globally. Renames `Properties` -> `Props` in React files (`.tsx`/`.jsx`).
+**Auto-fix:** renames `Arguments` → `Args` globally, and `Properties` → `Props`
+in React files (`.tsx`/`.jsx`).
 
-### 5. `no-type-definitions-in-components`
+### `no-type-definitions-in-components`
 
-Enforces that type definitions live in separate `*.types.ts` files rather than inside component files.
+Enforces that type definitions live in separate `*.types.ts` files rather than
+inside component files.
 
 A component file is one whose suffix is `.component.tsx`, `.layout.tsx` or
-`.error-boundary.tsx` — the set is declared once in `component-files.ts` and
-shared with `filename-convention`, so the two rules cannot disagree about it.
+`.error-boundary.tsx` — the set is declared once and shared with
+`filename-convention`, so the two rules cannot disagree about what a component
+file is. (They did, once: `no-type-definitions-in-components` sat dead on every
+error boundary in this repo because it still matched a suffix spelling
+`filename-convention` had already replaced.)
 
 **❌ Disallowed:**
 
-```typescript
+```tsx
 // Button.component.tsx
 type ButtonProps = { label: string }; // move this to Button.types.ts
 
@@ -112,189 +272,85 @@ export const Button = ({ label }: ButtonProps) => <button>{label}</button>;
 
 **✅ Enforced:**
 
-```typescript
+```tsx
 // Button.types.ts
-export type ButtonProps = { label: string };
+export type ButtonProps = { readonly label: string };
 
 // Button.component.tsx
 import type { ButtonProps } from './Button.types';
+
 export const Button = ({ label }: ButtonProps) => <button>{label}</button>;
 ```
 
-### 6. `readonly-props`
+### `single-component-export`
 
-Requires every member a `*Props` type declares to be `readonly` — the clause of
-Non-Negotiable Rule 1 that no other linter enforces. Autofixable.
-
-Members inherited through an intersection with a React type belong to React, not
-to us, and are not checked.
+Enforces that `*.component.tsx` files export exactly one component.
 
 **❌ Disallowed:**
 
-```typescript
-type AppProvidersProps = {
-  children: ReactNode; // props are never mutated
-};
-```
-
-**✅ Enforced:**
-
-```typescript
-type AppProvidersProps = {
-  readonly children: ReactNode;
-};
-
-// inherited members are React's — only the declared extras are checked
-type CardProps = ComponentPropsWithoutRef<'div'> & {
-  readonly padding?: CardPadding;
-};
-```
-
-### 7. `single-component-export`
-
-Enforces that `*.component.tsx` files export exactly one component — no multi-component files.
-
-**❌ Disallowed:**
-
-```typescript
+```tsx
 // Forms.component.tsx
-export const LoginForm = () => { ... };
-export const RegisterForm = () => { ... }; // second export not allowed
+export const LoginForm = () => <form />;
+export const RegisterForm = () => <form />; // second component not allowed
 ```
 
 **✅ Enforced:**
 
-```typescript
+```tsx
 // LoginForm.component.tsx
-export const LoginForm = () => { ... };
+export const LoginForm = () => <form />;
 
 // RegisterForm.component.tsx
-export const RegisterForm = () => { ... };
+export const RegisterForm = () => <form />;
 ```
-
-### 8. `filename-convention`
-
-Enforces the base-name case that goes with each file suffix. Only files matching
-`<base>.<suffix>.<ext>` are checked, so `index.ts` and `root.tsx` are untouched.
-
-| Suffix                                       | Base-name case                                                                                                                     | Example                                                  |
-| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| `.component` / `.layout` / `.error-boundary` | PascalCase                                                                                                                         | `CarSales.error-boundary.tsx`                            |
-| `.hook`                                      | camelCase, `use` prefix                                                                                                            | `useVirtualization.hook.ts`                              |
-| `.loader` / `.action` / `.meta`              | kebab-case                                                                                                                         | `enterprise-orders.loader.ts`                            |
-| `.util`                                      | camelCase — kebab-case in the public packages (`@lcabrera/api`, `@lcabrera/server`, `@lcabrera/utils`) via the `suffixCase` option | `fetchOrdersPage.util.ts` / `build-where-clause.util.ts` |
-
-`unicorn/filename-case` is deliberately **off**; this rule owns filename casing so
-the suffix drives the convention.
-
-### 9. `clean-import-paths`
-
-Enforces clean internal import/export paths by disallowing file extensions and trailing `/index` segments.
-
-**❌ Disallowed:**
-
-```typescript
-import { Button } from './components/Button/index.ts';
-import type { Props } from './Thing.types.ts';
-export { utils } from '@/utils/index';
-```
-
-**✅ Enforced:**
-
-```typescript
-import { Button } from './components/Button';
-import type { Props } from './Thing.types';
-export { utils } from '@/utils';
-```
-
-**Auto-fix:** Removes `.ts`/`.tsx` suffixes and trailing `/index` from internal `./`, `../`, and `@/` import/export specifiers.
-
-## Monorepo integration
-
-The rules are compiled to JavaScript in the `build/` directory. ESLint loads them through the shared custom-rules flat config exported by `@repo/vite-configs/eslint-custom-rules`:
-
-```js
-import { createCustomRulesLintConfig } from '@repo/vite-configs/eslint-custom-rules';
-
-export default createCustomRulesLintConfig();
-```
-
-**Important:** run `vp run build` after any change to the TypeScript source — ESLint loads the compiled `.js` files, not the TypeScript source directly.
 
 ## Development
 
-All rules are written in TypeScript and compiled to JavaScript before being loaded by ESLint.
+Rules are TypeScript sources under `src/`, built to `dist/` with `vp pack`.
+Inside this monorepo nothing needs building first: `exports` points at `src`, and
+ESLint loads the rules through Node's type stripping. `publishConfig.exports`
+swaps to `dist` at pack time, because a `.ts` file inside a consumer's
+`node_modules` is not loadable at all.
 
-### Building
+### Adding a rule
 
-Build the rules:
+1. Create `src/<rule-name>.ts` and default-export a rule built with
+   `ESLintUtils.RuleCreator`:
 
-```bash
-vp run build
-```
+   ```typescript
+   import { ESLintUtils } from '@typescript-eslint/utils';
 
-This compiles TypeScript files to JavaScript in the `build/` directory.
+   const createRule = ESLintUtils.RuleCreator(
+     (name) =>
+       `https://github.com/luciocabrera/vite-react-compiler/rules/${name}`,
+   );
 
-### Creating a New Rule
+   export default createRule({
+     create(context) {
+       return {
+         // AST visitors
+       };
+     },
+     defaultOptions: [],
+     meta: {
+       docs: { description: 'What it enforces' },
+       messages: { myMessage: 'Message template {{variable}}' },
+       schema: [],
+       type: 'suggestion',
+     },
+     name: 'my-rule',
+   });
+   ```
 
-1. Create a new TypeScript file in this directory (e.g., `my-rule.ts`)
-2. Export a `Rule.RuleModule` as the default export:
+2. Register it in `src/index.ts`.
+3. Add `src/<rule-name>.test.ts`. This is not optional — `rules-have-tests.test.ts`
+   fails the build for a registered rule with no suite. A rule that stops
+   matching anything reports exactly the same clean pass as code that is
+   correct, so the test is the only thing that can tell the two apart.
+4. Anything a consumer would have to match to use the rule — an alias, a
+   filename suffix, a naming migration — belongs in `meta.schema` as an option
+   with a default, not hardcoded.
 
-```typescript
-import type { Rule } from 'eslint';
+## License
 
-const rule: Rule.RuleModule = {
-  meta: {
-    docs: {
-      category: 'Best Practices',
-      description: 'My custom rule description',
-      recommended: false,
-    },
-    fixable: 'code', // or undefined if no auto-fix
-    messages: {
-      myMessage: 'Error message template {{variable}}',
-    },
-    schema: [],
-    type: 'suggestion',
-  },
-  create(context) {
-    return {
-      // AST visitor methods
-    };
-  },
-};
-
-export default rule;
-```
-
-3. Add the rule to [index.ts](index.ts):
-
-```typescript
-import myRule from './my-rule.js';
-
-export default {
-  rules: {
-    'my-rule': myRule,
-    // ... other rules
-  },
-};
-```
-
-4. Build the rules: `vp run build`
-
-5. Use in `eslint.config.mjs`:
-
-```javascript
-rules: {
-  'local-rules/my-rule': 'error',
-}
-```
-
-## Architecture
-
-- **Source files**: TypeScript files (`.ts`) in this directory
-- **Build output**: JavaScript files (`.js`) in `build/` directory
-- **ESLint config**: Loads from `build/index.js` (compiled output)
-- **Type safety**: Full TypeScript support with ESLint API types
-
-The build process uses a separate `tsconfig.json` to compile only the custom rules, keeping them isolated from the main project build.
+MIT

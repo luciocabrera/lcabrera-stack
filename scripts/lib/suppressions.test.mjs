@@ -55,6 +55,35 @@ describe('findInlineSuppressions', () => {
     expect(inline('// @ts-nocheck')).toHaveLength(1);
   });
 
+  // Regression: the scan matched the token anywhere on the line, so a sentence
+  // ABOUT suppressions counted as one. It fired on a comment explaining that a
+  // rule carries its own exemptions precisely so authors are not taught to
+  // reach for an inline disable — and blocked a package for a suppression that
+  // did not exist. Engines honour a directive only at the start of a comment's
+  // content, which is now what the scan requires.
+  it('ignores a directive named in prose rather than issued', () => {
+    expect(
+      inline('// people to reach for `eslint-disable`. That is the habit'),
+    ).toHaveLength(0);
+    expect(
+      inline(' * the `@ts-expect-error` escape hatch is banned'),
+    ).toHaveLength(0);
+    expect(inline('const message = "use eslint-disable here";')).toHaveLength(
+      0,
+    );
+  });
+
+  // The other half of that gate: narrowing the match must not lose a real
+  // directive. A trailing NOSONAR sits after code, and a block comment can
+  // carry its directive on a continuation line, where the value still trims to
+  // start with it.
+  it('still finds a directive issued after code or on a continuation line', () => {
+    expect(inline('const x = compute(); // NOSONAR')).toHaveLength(1);
+    expect(inline('/* eslint-disable no-console */')).toHaveLength(1);
+    expect(inline(' * eslint-disable no-console')).toHaveLength(1);
+    expect(inline('  eslint-disable no-console')).toHaveLength(1);
+  });
+
   it('counts each occurrence, so a second copy cannot hide behind the first', () => {
     const rows = inline('// @ts-expect-error one\n// @ts-expect-error two');
     expect(rows).toHaveLength(2);
