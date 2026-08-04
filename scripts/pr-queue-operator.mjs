@@ -92,8 +92,11 @@ const forcedDecision = ({ reason, ruleIds }) => ({
 /** One PR: mechanical ceiling, then the model, then the ceiling enforced again. */
 const decide = ({ binary, gate, model, policy, position, pr }) => {
   if (gate.stops.length > 0) {
+    const triggers = gate.stops
+      .map((stop) => `${stop.id} (${stop.detail})`)
+      .join('; ');
     return forcedDecision({
-      reason: `Mechanically certain §5 trigger — the model is not consulted: ${gate.stops.map((stop) => `${stop.id} (${stop.detail})`).join('; ')}`,
+      reason: `Mechanically certain §5 trigger — the model is not consulted: ${triggers}`,
       ruleIds: gate.stops.map((stop) => stop.id),
     });
   }
@@ -210,8 +213,9 @@ const main = () => {
       (pr) => options.only === undefined || pr.number === Number(options.only),
     );
 
+  const mergeOrder = sequence.map((pr) => `#${pr.number}`).join(' → ');
   process.stdout.write(
-    `Queue: ${queue.length} open PR(s). Merge order: ${sequence.map((pr) => `#${pr.number}`).join(' → ')}\n`,
+    `Queue: ${queue.length} open PR(s). Merge order: ${mergeOrder}\n`,
   );
 
   const decided = sequence.map((pr, index) => {
@@ -225,9 +229,10 @@ const main = () => {
     process.stdout.write(
       `  · deciding #${pr.number} (ceiling ${gate.verdict})…\n`,
     );
+    const cycleMembers = cycle.map((number) => `#${number}`).join(', ');
     const decision = cycle.includes(pr.number)
       ? forcedDecision({
-          reason: `#${pr.number} is in a dependency cycle (${cycle.map((n) => `#${n}`).join(', ')}) — policy §3 escalates every PR in one.`,
+          reason: `#${pr.number} is in a dependency cycle (${cycleMembers}) — policy §3 escalates every PR in one.`,
           ruleIds: ['O1', 'S10'],
         })
       : decide({ binary, gate, model: options.model, policy, position, pr });

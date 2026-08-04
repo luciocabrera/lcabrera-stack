@@ -107,10 +107,12 @@ const renderThreads = (threads) =>
   threads.unresolved.length === 0
     ? '  (none)'
     : threads.unresolved
-        .map(
-          (thread, index) =>
-            `  [${index + 1}] ${thread.author}${thread.path === '' ? '' : ` on ${thread.path}`}${thread.isOutdated ? ' (outdated)' : ''}\n      ${thread.body.replaceAll('\n', '\n      ').slice(0, 700)}`,
-        )
+        .map((thread, index) => {
+          const where = thread.path === '' ? '' : ` on ${thread.path}`;
+          const outdated = thread.isOutdated ? ' (outdated)' : '';
+          const body = thread.body.replaceAll('\n', '\n      ').slice(0, 700);
+          return `  [${index + 1}] ${thread.author}${where}${outdated}\n      ${body}`;
+        })
         .join('\n');
 
 const renderFindings = (label, findings) =>
