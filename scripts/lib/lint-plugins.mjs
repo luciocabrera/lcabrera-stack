@@ -11,9 +11,14 @@
  * indistinguishable from clean code. Only a planted violation tells the two
  * apart, which is why this gate lints code instead of reading config.
  *
- * `import` is absent on purpose: its correctness rules overlap tsgolint, which
- * reports the same defect as a TypeScript error first, so a probe for it would
- * pass whether or not the plugin loaded.
+ * Every family in `PLUGINS` is either probed here or listed in
+ * `UNPROBED_PLUGINS` with a reason, and `pluginsWithoutCoverage` fails the gate
+ * when that stops being true — so a family cannot be added and left unproven.
+ *
+ * `ext` is the probe file's extension, per-probe rather than a constant because
+ * a react rule needs `.tsx`: the same source saved as `.ts` reports only
+ * TypeScript parse errors and no `react(…)` code at all, so one hardcoded
+ * extension would make a probe pass for the wrong reason.
  */
 export const PLUGIN_PROBES = [
   {
@@ -41,7 +46,49 @@ export const PLUGIN_PROBES = [
     plugin: 'promise',
     rule: 'no-callback-in-promise',
   },
+  {
+    // `no-children-prop`, not `jsx-key`: the eslint pass loads
+    // eslint-plugin-react-x, whose `no-missing-key` agrees with `jsx-key`, so
+    // that rule surviving would not prove THIS family loaded. `no-children-prop`
+    // has no counterpart in react-x or react-dom's recommended sets and no
+    // TypeScript-error equivalent — `jsx-no-duplicate-props` is shadowed by
+    // typescript(TS17001) and would pass for the wrong reason.
+    code: 'export const a = () => <div children="x" />;\n',
+    ext: 'tsx',
+    plugin: 'react',
+    rule: 'no-children-prop',
+  },
 ];
+
+/**
+ * Families in `PLUGINS` deliberately left unprobed, and why.
+ *
+ * A family belongs here only when a planted violation cannot tell "loaded" from
+ * "not loaded" — never because writing a probe is merely awkward.
+ */
+export const UNPROBED_PLUGINS = {
+  import:
+    'its correctness rules overlap tsgolint, which reports the same defect as a ' +
+    'TypeScript error first, so a probe passes whether or not the plugin loaded',
+};
+
+/** A probe's filename, e.g. `react.probe.tsx`. (pure) */
+export const probeFilename = ({ plugin, ext }) =>
+  `${plugin}.probe.${ext ?? 'ts'}`;
+
+/**
+ * Configured families that are neither probed nor documented as exempt.
+ *
+ * A set-membership fact about the gate's own data, so unlike the probes it
+ * cannot be confounded and needs no violation planted. (pure)
+ */
+export const pluginsWithoutCoverage = (plugins) => {
+  const covered = new Set([
+    ...PLUGIN_PROBES.map((probe) => probe.plugin),
+    ...Object.keys(UNPROBED_PLUGINS),
+  ]);
+  return plugins.filter((plugin) => !covered.has(plugin));
+};
 
 /** The diagnostic code Oxlint prints for a probe, e.g. `unicorn(no-null)`. */
 export const probeCode = ({ plugin, rule }) => `${plugin}(${rule})`;

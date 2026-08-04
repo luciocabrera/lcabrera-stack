@@ -3,10 +3,13 @@ import { describe, expect, it } from 'vite-plus/test';
 import {
   configsDeclaringLint,
   PLUGIN_PROBES,
+  pluginsWithoutCoverage,
   probeCode,
+  probeFilename,
   silentProbes,
   staleRuntimeGlobs,
   unclassifiedWorkspaces,
+  UNPROBED_PLUGINS,
 } from './lint-plugins.mjs';
 
 describe('probeCode', () => {
@@ -160,5 +163,60 @@ describe('PLUGIN_PROBES', () => {
   it('gives every probe code to violate', () => {
     for (const probe of PLUGIN_PROBES)
       expect(probe.code.length).toBeGreaterThan(0);
+  });
+});
+
+describe('the react probe', () => {
+  it('exists — its rules reach the published @lcabrera/ui package', () => {
+    const react = PLUGIN_PROBES.find(({ plugin }) => plugin === 'react');
+    expect(react).toBeDefined();
+  });
+
+  it('is a .tsx probe, which is load-bearing', () => {
+    // The same source saved as `.ts` reports only TypeScript parse errors and
+    // no `react(…)` code at all, so a `.ts` probe would pass for the wrong
+    // reason — it would go silent whether or not the family were loaded.
+    const react = PLUGIN_PROBES.find(({ plugin }) => plugin === 'react');
+    expect(react.ext).toBe('tsx');
+  });
+});
+
+describe('probeFilename', () => {
+  it('defaults to .ts when a probe declares no extension', () => {
+    expect(probeFilename({ plugin: 'eslint' })).toBe('eslint.probe.ts');
+  });
+
+  it('honours an explicit extension', () => {
+    expect(probeFilename({ plugin: 'react', ext: 'tsx' })).toBe(
+      'react.probe.tsx',
+    );
+  });
+});
+
+describe('pluginsWithoutCoverage', () => {
+  it('is empty when every configured family is probed or exempt', () => {
+    const configured = [
+      ...PLUGIN_PROBES.map(({ plugin }) => plugin),
+      ...Object.keys(UNPROBED_PLUGINS),
+    ];
+    expect(pluginsWithoutCoverage(configured)).toEqual([]);
+  });
+
+  // The regression this exists for: a family added to PLUGINS and left
+  // unproven ships green, because a dark family and clean code look identical.
+  it('reports a family that is configured but neither probed nor exempt', () => {
+    expect(pluginsWithoutCoverage(['eslint', 'jsx_a11y'])).toEqual([
+      'jsx_a11y',
+    ]);
+  });
+
+  it('treats a documented exemption as covered, not as a failure', () => {
+    expect(pluginsWithoutCoverage(['import'])).toEqual([]);
+  });
+
+  it('gives every exemption a stated reason', () => {
+    // An exemption with no reason is indistinguishable from an oversight.
+    for (const reason of Object.values(UNPROBED_PLUGINS))
+      expect(reason.length).toBeGreaterThan(0);
   });
 });
