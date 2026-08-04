@@ -2,7 +2,7 @@
 id: worktree-env-provisioning
 title: Provision gitignored env files into a worktree via an opt-in symlink command
 owner: agent:claude
-status: active
+status: review
 branch: chore/503-worktree-env-provisioning
 area:
   - scripts/worktree-env-link.sh
@@ -11,7 +11,7 @@ area:
 started: 2026-08-04
 updated: 2026-08-04
 plan: (none)
-pr: (none)
+pr: #504
 issue: #503
 ---
 
