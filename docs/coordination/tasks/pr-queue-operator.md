@@ -8,6 +8,7 @@ area:
   - .claude/pr-queue-policy.md
   - scripts/pr-queue-operator.mjs
   - scripts/lib/pr-queue-*.mjs
+  - vite.config.ts
 started: 2026-08-04
 updated: 2026-08-04
 plan: (none)
@@ -21,6 +22,7 @@ Autonomous PR queue operator driven by a written merge policy
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implemented, gated, dry-run against the live queue
 - Blockers: none
-- Next:
+- Next: review. The operator refuses to merge its own PR (policy S9), so this one
+  needs a human on the merge button.
