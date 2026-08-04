@@ -2,7 +2,7 @@
 id: ui-provisional-suppressions
 title: Settle the five provisional suppressions in packages/ui
 owner: agent:claude
-status: active
+status: review
 branch: refactor/311-ui-provisional-suppressions
 area:
   - packages/ui/src/components/Table/SpacerRow/**
@@ -24,7 +24,7 @@ Settle the five provisional suppressions in packages/ui
 
 ## Status / next
 
-- Current step: implemented; full quality gate green, awaiting review
+- Current step: PASSED independent verification (#507 contract); PR #509 ready for review
 - Blockers: none
 - Next: review, then delete this file when #509 merges
 
