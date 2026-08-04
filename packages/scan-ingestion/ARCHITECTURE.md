@@ -132,9 +132,11 @@ genuinely thin wrapper.
    `(run_id, scanner_id, scope_type, scope_value)` scan row (already
    created by the trigger-scan action before the job started) via
    `v_runs`/`v_scans` — scope-qualified since ADR-021's scanners×scopes
-   fan-out made `(run_id, scanner_id)` alone ambiguous. **Ad hoc path** (no `runId`): `resolveProjectPath`
-   (git-root + realpath), `fn_upsert_project`, `fn_create_run`, then
-   `fn_create_ad_hoc_scan` (ADR-018 — no direct INSERT).
+   fan-out made `(run_id, scanner_id)` alone ambiguous. **Ad hoc path** (no `runId`):
+   look the project up by its `projectId` — identity, not a filesystem path, per
+   "Project identity is an id, not a path" below — read branch and commit sha via
+   `readGitMetadata`, then `fn_create_run` and `fn_create_ad_hoc_scan` (ADR-018 —
+   no direct INSERT).
 4. If `rawJson`/`health_metrics` present, `fn_set_scan_raw_artifacts`
    (these aren't `sp_ingest_scan_result` parameters — set separately).
 5. `buildFileInventory` only for whole-project scopes (`repo`/`folder`) —
