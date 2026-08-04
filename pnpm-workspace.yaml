@@ -97,7 +97,7 @@ catalogs:
     # while some manifest declares it. The single root declaration is what holds
     # it for every workspace. Removing it needs a from-scratch lockfile and a
     # coverage run to justify — see
-    # docs/cqms/decisions/ADR-047-declare-optional-peer-dependencies.md.
+    # docs/decisions/ADR-047-declare-optional-peer-dependencies.md.
     '@vitest/coverage-v8': 4.1.10
     vitest: 4.1.10
 
