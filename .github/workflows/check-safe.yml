@@ -207,6 +207,16 @@ jobs:
         # docs/decisions/ADR-048-adr-taxonomy-and-one-sequence.md.
         run: vp run adr:verify
 
+      - name: Vite+ managed block stays empty
+        id: viteplus_block_gate
+        # Vite+ rewrites the region between its markers in AGENTS.md whenever it
+        # syncs agent instructions, and `vp install` triggers that — so every
+        # fresh worktree gets the upstream template back, whose Review Checklist
+        # tells agents to run `vp test`, forbidden by §4. Nothing caught it; the
+        # block's comment asked a human to notice. Repair: `vp run
+        # viteplus:verify -- --write`.
+        run: vp run viteplus:verify
+
       - name: Published package surface resolves
         id: publish_gate
         # Builds first on purpose. `exports` points at `src` so this repo never
