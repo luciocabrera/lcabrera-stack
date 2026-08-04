@@ -46,6 +46,7 @@ import {
   withAccepted,
 } from './lib/docs-paths-baseline.mjs';
 import {
+  enforcedTokens,
   extractCandidates,
   isRootAnchored,
   parseWorkspaceSpecifier,
@@ -58,12 +59,16 @@ const BASELINE_PATH = join(REPO_ROOT, 'scripts', 'docs-paths-baseline.json');
 const IGNORED_DOCS = [
   'CHANGELOG.md',
   'reports/',
-  '/decisions/', // ADRs record a decision at a point in time
+  // NOT `/decisions/`. ADRs used to be exempted wholesale by that fragment,
+  // which hid every dead link in the corpus; they are now filtered per TOKEN by
+  // `enforcedTokens` instead — the paths an ADR *names* stay exempt as dated
+  // record, the links it asks you to *follow* do not. See lib/docs-paths.mjs.
   'docs/cqms/PRD',
   'docs/cqms/TECH_SPEC',
   'docs/cqms/IMPLEMENTATION_PLAN',
   'docs/coordination/PLAN_TRIAGE.md',
   '_PLAN.md', // approved-but-unbuilt specs name files that do not exist yet
+  '_TEMPLATE.md', // a template's paths are placeholders to be replaced
   '.github/skills/react-router-framework-mode/', // upstream framework docs
   // Architecture *templates* — they describe a shape to copy, so their paths
   // are illustrative by construction.
@@ -239,7 +244,7 @@ const resolvesSomewhere = (token, docPath) => {
 const findingsFor = (docPath) => {
   const markdown = readFileSync(join(REPO_ROOT, docPath), 'utf8');
   const unique = [...new Set(extractCandidates(markdown))];
-  return unique
+  return enforcedTokens(unique, docPath)
     .filter((token) => !resolvesSomewhere(token, docPath))
     .map((token) => ({ doc: docPath, token }));
 };

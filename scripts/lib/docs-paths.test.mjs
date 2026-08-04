@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
+  enforcedTokens,
   extractCandidates,
+  isDatedRecord,
   isRootAnchored,
   parseWorkspaceSpecifier,
 } from './docs-paths.mjs';
@@ -164,5 +166,62 @@ describe('parseWorkspaceSpecifier', () => {
       packageName: 'vite-configs',
       subpath: 'eslint-base',
     });
+  });
+});
+
+describe('isDatedRecord', () => {
+  it('recognises an ADR in each of the three homes', () => {
+    expect(isDatedRecord('docs/decisions/ADR-044-x.md')).toBe(true);
+    expect(isDatedRecord('docs/cqms/decisions/ADR-016-x.md')).toBe(true);
+    expect(isDatedRecord('apps/react-router/docs/decisions/ADR-003-x.md')).toBe(
+      true,
+    );
+  });
+
+  it('does not treat an ordinary document as a dated record', () => {
+    expect(isDatedRecord('docs/README.md')).toBe(false);
+    expect(isDatedRecord('packages/ui/src/PATTERNS.md')).toBe(false);
+    // Guards the substring match: a path merely CONTAINING "decision".
+    expect(isDatedRecord('docs/agents/decision-making.md')).toBe(false);
+  });
+});
+
+describe('enforcedTokens', () => {
+  const adr = 'docs/decisions/ADR-044-x.md';
+  const ordinary = 'docs/README.md';
+
+  it('enforces every token in an ordinary document', () => {
+    const tokens = ['packages/ui/src/gone.ts', '../sibling.md'];
+    expect(enforcedTokens(tokens, ordinary)).toEqual(tokens);
+  });
+
+  it('still enforces a relative link inside an ADR', () => {
+    // Navigational: the reader is invited to follow it, so it resolves or it
+    // is dead. This is the case the old blanket exemption hid — four links
+    // broke when 20 ADRs moved up a directory level and nothing reported it.
+    expect(enforcedTokens(['../coordination/README.md'], adr)).toEqual([
+      '../coordination/README.md',
+    ]);
+  });
+
+  it('exempts a root-anchored path named inside an ADR', () => {
+    // Descriptive: ADR-008 IS the record of the @repo/api -> data-access
+    // rename, so naming the old path is its content, not a dead reference.
+    expect(enforcedTokens(['packages/data-access'], adr)).toEqual([]);
+  });
+
+  it('splits a mixed ADR, keeping only the navigational half', () => {
+    expect(
+      enforcedTokens(
+        ['packages/data-access', '../cqms/STATUS.md', 'docs/agents/gone/'],
+        adr,
+      ),
+    ).toEqual(['../cqms/STATUS.md']);
+  });
+
+  it('is empty for an ADR that only names historical paths', () => {
+    expect(enforcedTokens(['packages/gone/', 'apps/also-gone/'], adr)).toEqual(
+      [],
+    );
   });
 });
