@@ -4,12 +4,13 @@
     "packages": "Resolved at runtime from the workspaces that gitignore eslint-suppressions.json — the authority AGENTS.md names. Not listed here, so a fifth public package is covered the day it is added.",
     "rule": "A suppression inside a public package is a defect until argued otherwise. Adding an entry here is not paperwork for a decision already made — it IS the decision, and it needs a reviewer who agrees.",
     "status": {
+      "required-on": "Every entry in `approved`, and only those. A missing status, or one outside the two values below, fails the gate naming the entry (#514) — otherwise deleting the line silenced a suppression more cheaply than discharging it. Entries in `acknowledged` carry no status by design; see `lists.acknowledged`.",
       "permanent": "The engine is wrong about correct code and no fix exists in our control. Expected to outlive us.",
       "provisional": "Accepted for now, not endorsed — and it FAILS the gate (#510). Valid vocabulary inside one PR while a decision is open; discharge it before pushing, either by fixing the finding and deleting the entry or by restating it as permanent with a reason. It can never survive a build."
     },
     "lists": {
-      "approved": "Suppressions scoped to a public package — the rule is off BECAUSE of that package. Highest bar: argue why the engine is wrong about this specific code.",
-      "acknowledged": "Repo-wide policy (ADR-035 §7) that happens to reach a public package, because the package contains a test file, a config, or a tooling script. These are decisions about a file CATEGORY, not about the package. Listed rather than justified per-package — but listed, so a new override cannot widen onto these packages unnoticed."
+      "approved": "Suppressions scoped to a public package — the rule is off BECAUSE of that package. Highest bar: argue why the engine is wrong about this specific code, and declare a `status`.",
+      "acknowledged": "Repo-wide policy (ADR-035 §7) that happens to reach a public package, because the package contains a test file, a config, or a tooling script. These are decisions about a file CATEGORY, not about the package. Listed rather than justified per-package — but listed, so a new override cannot widen onto these packages unnoticed. No `status`: the package never chose these, so there is no per-package deferral to declare."
     }
   },
   "acknowledged": [

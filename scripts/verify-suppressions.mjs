@@ -10,7 +10,9 @@
  * Each lane fails on: a suppression with no entry, an entry that grew, an entry
  * matching nothing (anti-rot), one with no reason or reference, or one still
  * marked `provisional` — a deferred decision may live inside a PR, never in a
- * build.
+ * build. An `approved` entry fails on one more: declaring no status at all, so
+ * saying nothing is not cheaper than the deferral the previous condition
+ * rejects. `acknowledged` is exempt, and carries no status by design.
  *
  * What is detected, and how to add an exception:
  * `docs/agents/public-package-suppressions.md` — the one copy of that table.
@@ -29,6 +31,7 @@ import { parseJsonc } from './lib/jsonc.mjs';
 import { readTextWithin } from './lib/safe-read.mjs';
 import { findReactDoctorSuppressions } from './lib/suppressions-react-doctor.mjs';
 import {
+  DECLARABLE_STATUSES,
   diffAgainstRegister,
   findBiomeSuppressions,
   findConfigSuppressions,
@@ -112,6 +115,50 @@ const report = (label, rows, render) => {
   return rows.length;
 };
 
+/** Prints every failing condition for one lane and returns how many rows failed. */
+const reportLane = (lane) => {
+  const { grew, provisional, stale, unapproved, undeclared, undocumented } =
+    diffAgainstRegister(lane);
+  return (
+    report(
+      `Unapproved suppression(s) ${lane.label} — fix the code, or add a justified entry to ${REGISTER_PATH} → ${lane.list}:`,
+      unapproved,
+      (row) => `${row.key}  (${row.count}x)`,
+    ) +
+    report(
+      `Suppression(s) ${lane.label} that grew beyond the agreed count:`,
+      grew,
+      (row) =>
+        `${row.key}  approved ${row.approvedCount}x, found ${row.count}x`,
+    ) +
+    report(
+      `Stale entr(ies) in ${lane.list} — the code is gone, so delete the approval:`,
+      stale,
+      (row) => row.key,
+    ) +
+    report(
+      `Entr(ies) in ${lane.list} with no real reason or no reference:`,
+      undocumented,
+      (row) => row.key,
+    ) +
+    report(
+      `Entr(ies) in ${lane.list} with no recognised "status" — declare one: ` +
+        `"permanent" with a reason naming why no fix exists in our control, or ` +
+        `"provisional" and discharge it before you push. Removing the field is ` +
+        `not a quieter way past this gate. Recognised: ${DECLARABLE_STATUSES.join(', ')}:`,
+      undeclared,
+      (row) => `${row.key}  status: ${row.status ?? '(absent)'}`,
+    ) +
+    report(
+      `Provisional entr(ies) in ${lane.list} — a deferred decision cannot survive a build. ` +
+        `Discharge each one: fix the finding and delete the entry, or restate it as ` +
+        `"status": "permanent" with a reason naming why no fix exists in our control:`,
+      provisional,
+      (row) => row.key,
+    )
+  );
+};
+
 const main = () => {
   const packageDirs = publicPackageDirs(REPO_ROOT);
   if (packageDirs.length === 0) {
@@ -189,56 +236,30 @@ const main = () => {
   // `acknowledged` is a repo-wide decision that happens to reach one. Both must
   // be listed, so no override can widen onto these packages unnoticed — the hole
   // the first version of this gate left open.
+  //
+  // `requireStatus` is where the two lanes genuinely differ: an exemption a
+  // package chose has to say whether it is permanent or provisional, while a
+  // repo-wide policy it merely falls inside is nobody's per-package decision to
+  // state (ADR-035 §7), so those entries carry no status and must not be failed
+  // for it.
   const lanes = [
     {
       found: own,
       label: 'scoped to a public package',
       list: 'approved',
       register: register.approved ?? [],
+      requireStatus: true,
     },
     {
       found: inherited,
       label: 'repo-wide, reaching a public package',
       list: 'acknowledged',
       register: register.acknowledged ?? [],
+      requireStatus: false,
     },
   ];
 
-  const failures = lanes.reduce((total, lane) => {
-    const { grew, provisional, stale, unapproved, undocumented } =
-      diffAgainstRegister(lane);
-    return (
-      total +
-      report(
-        `Unapproved suppression(s) ${lane.label} — fix the code, or add a justified entry to ${REGISTER_PATH} → ${lane.list}:`,
-        unapproved,
-        (row) => `${row.key}  (${row.count}x)`,
-      ) +
-      report(
-        `Suppression(s) ${lane.label} that grew beyond the agreed count:`,
-        grew,
-        (row) =>
-          `${row.key}  approved ${row.approvedCount}x, found ${row.count}x`,
-      ) +
-      report(
-        `Stale entr(ies) in ${lane.list} — the code is gone, so delete the approval:`,
-        stale,
-        (row) => row.key,
-      ) +
-      report(
-        `Entr(ies) in ${lane.list} with no real reason or no reference:`,
-        undocumented,
-        (row) => row.key,
-      ) +
-      report(
-        `Provisional entr(ies) in ${lane.list} — a deferred decision cannot survive a build. ` +
-          `Discharge each one: fix the finding and delete the entry, or restate it as ` +
-          `"status": "permanent" with a reason naming why no fix exists in our control:`,
-        provisional,
-        (row) => row.key,
-      )
-    );
-  }, 0);
+  const failures = lanes.reduce((total, lane) => total + reportLane(lane), 0);
 
   if (failures > 0) {
     process.stdout.write(`\n${failures} problem(s).\n`);
