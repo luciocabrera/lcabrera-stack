@@ -30,8 +30,8 @@ much of the tree is marked reachable by definition.
 
 ## Prior findings
 
-Handled: the eight dead lint/format configs, now gated by `vp run
-configs:verify`, which fails if any returns.
+Handled: the eight dead lint/format configs, now gated by the `configs:verify`
+task, which fails if any of them returns.
 
 Still open as JUDGMENT (#518): knip installed with nothing running it;
 `packages/vite-configs`' unused `@lcabrera/utils` declaration (cited cause of

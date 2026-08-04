@@ -23,8 +23,9 @@ this, and `packages/ui`'s `check:public-api` enforces it.
 - **`@vitest/coverage-v8`** in the root manifest — an optional peer of vitest,
   which pnpm resolves only while some manifest declares it. Removing it takes
   every `--coverage` run down (ADR-047).
-- **Workspace `vitest` deps** — tests run via `node node_modules/vitest/vitest.mjs
-run`, not through a `vp test` shim.
+- **Workspace `vitest` deps** — the `test` tasks ultimately invoke Vitest's own
+  entry point from `node_modules` by path, so the dependency is load-bearing
+  even where no import references it.
 - **`react-doctor`** — `scripts/verify-react-doctor.mjs` spawns its binary by
   explicit path, invisible to an import-graph scanner, so fallow reports it
   unused on every run.
@@ -86,8 +87,10 @@ from a fresh checkout by design (ADR-049, ADR-037) and are correctly documented.
 - A fresh worktree has **no generated route types**, so `vp lint .` reports
   `TS2307: Cannot find module '../+types/root'` until `vp run typegen:all` runs.
   Environmental, not a finding.
-- A worktree also has no gitignored env files, and needs `vp install` (≈2s — pnpm
-  hard-links from a warm store).
+- A worktree also has no gitignored env files, and needs `vp install`. That is
+  cheaper than it looks — pnpm hard-links from a warm content-addressable store
+  rather than copying, so worktree isolation is not the expensive option it
+  appears to be.
 - The **primary checkout must stay on `main`**; `coordination:verify` fails when
   it sits on a feature branch, because HEAD moves under every other agent
   sharing the clone. Work in a worktree.

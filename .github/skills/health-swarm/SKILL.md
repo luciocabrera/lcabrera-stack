@@ -24,10 +24,15 @@ re-deriving it. Optimize for that, not for volume.
 1. **Read `references/evidence-standard.md` and `references/known-traps.md`.**
    Every scout is held to the first; the second is what stops a scout
    confidently "fixing" something deliberate.
-2. **Fetch the open issues** — `gh issue list --state open --limit 100 --json
-number,title,body`. Pass the list into every charter. Without this the sweep
-   refiles what is already tracked, which is the fastest way to make it
-   unwelcome.
+2. **Fetch the open issues** and pass the list into every charter:
+
+   ```bash
+   gh issue list --state open --limit 100 --json number,title,body
+   ```
+
+   Without this the sweep refiles what is already tracked, which is the fastest
+   way to make it unwelcome.
+
 3. **Check the register** — `vp run coordination:verify`. Do not sweep an area
    another agent is actively changing.
 4. **Confirm the primary checkout is on `main`** and clean.
@@ -65,17 +70,22 @@ into re-deriving the same ruled-out hypotheses each charter already records.
 claim yourself. This is the step that earns the sweep its credibility, and it
 has already paid: in the first sweep the DOC DRIFT scout attributed four dead
 links to a subtle filter bug, and checking it directly showed the real cause was
-a blanket `/decisions/` substring exemption hiding 72 files — a much larger
-finding, and a different fix.
+a blanket `/decisions/` substring exemption hiding every ADR in all three homes
+— a much larger finding, and a different fix.
 
 Then:
 
 - **Dedupe** against the open issues, including partial overlap.
 - **Downgrade** anything whose probe does not discriminate. An unmeasured perf
   hypothesis is not a JUDGMENT finding; it is not a finding.
-- **Validate every issue body** — `node scripts/verify-issue-body.mjs
---body-file <path>`. It refuses paths outside the repo, so stage drafts in
-  `.tmp/` rather than a system temp dir.
+- **Validate every issue body** against the repo standard:
+
+  ```bash
+  node scripts/verify-issue-body.mjs --body-file <path>
+  ```
+
+  It refuses paths outside the repo, so stage drafts in `.tmp/` rather than a
+  system temp dir.
 
 File **one issue per scout**, enumerating that category's findings. One issue
 per finding floods the tracker; one issue per category matches the repo's
