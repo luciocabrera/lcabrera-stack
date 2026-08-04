@@ -496,14 +496,3 @@ Documentation updates must be part of the **same commit** as the code change.
 ### Exploration Scratchpads
 
 For multi-step exploration or investigation tasks, use the **`codebase-explorer` skill** — it owns the scratchpad (`findings.md`) and crash-recovery (`manifest.json`) procedure. Scratch files belong under `.tmp/exploration/` (gitignored), never at the repo root.
-
-<!--VITE PLUS START-->
-
-<!-- Deliberately empty, and gated by `vp run viteplus:verify`. Vite+ rewrites
-     this region whenever it syncs agent instructions (`vp install` does), and the
-     upstream template it writes tells agents to run `vp test`, which §4 forbids.
-     Both markers must stay, and PAIRED — the END marker went missing once,
-     leaving the region unterminated. To repair a refill: `vp run viteplus:verify
-     -- --write`. -->
-
-<!--VITE PLUS END-->

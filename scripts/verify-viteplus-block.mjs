@@ -3,18 +3,22 @@
  * Gate: the Vite+ managed block in AGENTS.md must render to nothing.
  *
  * Why this exists: Vite+ rewrites the region between its markers whenever it
- * syncs agent instructions, and `vp install` does that — so every fresh worktree
- * silently gets the upstream template back. That template's Review Checklist
- * instructs agents to run `vp test`, which AGENTS.md §4 forbids, so the refill
- * lands guidance that contradicts the file around it. Nothing caught it; the
- * block's own comment asked a human to notice and delete it again, every time.
+ * syncs agent instructions, and `vp install` does that — so every fresh worktree,
+ * and every CI run, silently got the upstream template back. That template's
+ * Review Checklist instructs agents to run `vp test`, which AGENTS.md §4 forbids,
+ * so the refill landed guidance contradicting the file around it. Nothing caught
+ * it; the block's comment asked a human to notice and delete it again each time.
  *
- * Deleting the markers is also a valid end state and passes: without them the
- * sync is a documented no-op, so a repo that removed them cannot regress.
+ * The markers are now **removed** from AGENTS.md, which is what actually stops
+ * the refill: Vite+'s `updateExistingAgentInstructions` documents "No Vite+
+ * markers → no writes", and that was confirmed here by deleting them and running
+ * both `vp install` and `vp config` without them returning. So the absent case is
+ * the expected pass, and this gate exists to catch the region coming BACK — by an
+ * explicit `vp` agent-setup run, or by hand — and being filled again.
  *
  * Usage: node scripts/verify-viteplus-block.mjs [--write]
- *        --write re-empties the region instead of failing — the repair the
- *        block's comment used to ask for by hand.
+ *        --write empties a refilled region in place, for a tree that still has
+ *        the markers (a stale branch, or one that re-added them deliberately).
  * Exit  : 0 clean (or repaired), 1 when the region renders content or its
  *         markers are unpaired.
  *
@@ -22,6 +26,7 @@
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import {
   END_MARKER,
@@ -31,7 +36,7 @@ import {
   withEmptiedRegion,
 } from './lib/viteplus-block.mjs';
 
-const REPO_ROOT = resolve(dirname(new URL(import.meta.url).pathname), '..');
+const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const TARGET = join(REPO_ROOT, 'AGENTS.md');
 
 /** The deliberate body: markers kept, nothing rendered, and the why recorded. */

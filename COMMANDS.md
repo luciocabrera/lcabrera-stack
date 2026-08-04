@@ -80,8 +80,8 @@ Steps 3, 4, 5 and 7 are the ones that get skipped, and none is redundant — see
 chains the whole thing the way CI does.
 
 The **`pre-push` git hook** (`.vite-hooks/pre-push`) runs `vp run check:push` — the
-**DB-free CI Quality Gate** (steps 3–6 plus
-`commands`/`coordination`/`scripts`/`docs`/`adr`/`viteplus:verify`,
+**DB-free CI Quality Gate** (steps 3–6 plus `commands:verify`, `coordination:verify`,
+`scripts:verify`, `docs:verify`, `adr:verify` and `viteplus:verify`,
 mirroring the "Quality Gate (Format · Lint · Types)" job in `check-safe.yml`) — and then
 `vp run test:changed`. This closes the gap the pre-commit hook leaves: `vp staged` covers
 only fmt + Oxlint + tsgolint + Biome on staged files, so the ESLint pass and a full
@@ -341,21 +341,21 @@ package, ever.
 
 ### AI config & skills tooling
 
-| Command                      | Does                                                                                                                                                            |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `vp run commands:verify`     | check this file still matches reality                                                                                                                           |
-| `vp run scripts:verify`      | check `.mjs`/`.cjs` size ceiling (`--write` rebaselines)                                                                                                        |
-| `vp run lint:plugins:verify` | prove every Oxlint plugin family is loaded, and that no workspace config shadows the root ([ADR-042](docs/decisions/ADR-042-oxlint-config-at-the-root.md))      |
-| `vp run lint:eslint:verify`  | prove the **eslint** pass still runs its rules — plants a misordered import and requires `perfectionist/sort-imports` to report it (#472)                       |
-| `vp run suppressions:verify` | check the four public packages carry no unapproved suppression (see [the protocol](docs/agents/public-package-suppressions.md))                                 |
-| `vp run suppressions:list`   | print every suppression reaching a public package, approved or not                                                                                              |
-| `vp run docs:verify`         | check every documented repository path resolves (`--write` prunes resolved baseline entries; `--accept <doc> <ref> --reason "…"` grandfathers one)              |
-| `vp run adr:verify`          | check ADR home, filename, heading and number uniqueness, and that each home's index is current; prints the next free number (`--write` regenerates the indexes) |
-| `vp run adr:new`             | scaffold an ADR from [`_TEMPLATE.md`](docs/decisions/_TEMPLATE.md) with the next free number — `-- "<title>" [--home repo\|cqms\|app] [--slug <s>] [--dry-run]` |
-| `vp run viteplus:verify`     | check the Vite+ managed block in AGENTS.md still renders nothing — a `vp install` refills it with upstream guidance (`--write` re-empties it)                   |
-| `vp run skills:validate`     | validate skill definitions                                                                                                                                      |
-| `vp run skills:report`       | skills compliance report                                                                                                                                        |
-| `vp run prepare`             | `vp config` — runs automatically on install                                                                                                                     |
+| Command                      | Does                                                                                                                                                                                           |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `vp run commands:verify`     | check this file still matches reality                                                                                                                                                          |
+| `vp run scripts:verify`      | check `.mjs`/`.cjs` size ceiling (`--write` rebaselines)                                                                                                                                       |
+| `vp run lint:plugins:verify` | prove every Oxlint plugin family is loaded, and that no workspace config shadows the root ([ADR-042](docs/decisions/ADR-042-oxlint-config-at-the-root.md))                                     |
+| `vp run lint:eslint:verify`  | prove the **eslint** pass still runs its rules — plants a misordered import and requires `perfectionist/sort-imports` to report it (#472)                                                      |
+| `vp run suppressions:verify` | check the four public packages carry no unapproved suppression (see [the protocol](docs/agents/public-package-suppressions.md))                                                                |
+| `vp run suppressions:list`   | print every suppression reaching a public package, approved or not                                                                                                                             |
+| `vp run docs:verify`         | check every documented repository path resolves (`--write` prunes resolved baseline entries; `--accept <doc> <ref> --reason "…"` grandfathers one)                                             |
+| `vp run adr:verify`          | check ADR home, filename, heading and number uniqueness, and that each home's index is current; prints the next free number (`--write` regenerates the indexes)                                |
+| `vp run adr:new`             | scaffold an ADR from [`_TEMPLATE.md`](docs/decisions/_TEMPLATE.md) with the next free number — `-- "<title>" [--home repo\|cqms\|app] [--slug <s>] [--dry-run]`                                |
+| `vp run viteplus:verify`     | check AGENTS.md has no Vite+ managed block rendering content — the markers are removed so `vp install` cannot refill them; this catches them coming back (`--write` re-empties a refilled one) |
+| `vp run skills:validate`     | validate skill definitions                                                                                                                                                                     |
+| `vp run skills:report`       | skills compliance report                                                                                                                                                                       |
+| `vp run prepare`             | `vp config` — runs automatically on install                                                                                                                                                    |
 
 ### Coordination register
 

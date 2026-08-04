@@ -10,9 +10,12 @@ import {
 } from './viteplus-block.mjs';
 
 // The gate's whole job is telling "a comment nobody renders" apart from "content
-// Vite+ injected". Both look like text between two markers, so the comment-
-// stripping is the part that must not drift — a regex that stopped matching
-// multi-line comments would make the gate pass on everything, silently.
+// Vite+ injected". Both look like text between two markers, so comment-stripping
+// is the part that must not drift, and it fails in two opposite directions:
+// under-matching (a multi-line comment read as content) makes the gate fail
+// noisily on a clean tree, while over-matching (injected content swallowed as a
+// comment) makes it pass on everything — the silent, dangerous direction. Both
+// are asserted below.
 
 const wrap = (inner) => `# Doc\n\n${START_MARKER}${inner}${END_MARKER}\n`;
 
@@ -58,6 +61,25 @@ describe('renderedContent', () => {
 
   it('sees content that FOLLOWS a comment on the same line', () => {
     expect(renderedContent('<!-- a --> trailing')).toBe('trailing');
+  });
+
+  // Stripping runs to a fixpoint. Removing an inner comment can splice its
+  // neighbours into a NEW valid comment, which one `replace` pass would leave
+  // behind — the residue CodeQL flags as incomplete sanitization. Here `<!` and
+  // `-- y -->` become `<!-- y -->` only after the inner match is removed, so a
+  // single-pass implementation returns that instead of ''.
+  it('strips a comment spliced together by removing an inner one', () => {
+    expect(renderedContent('<!<!-- x -->-- y -->')).toBe('');
+  });
+
+  // Residue that is NOT a comment stays, and is reported as content. The gate
+  // fails closed: malformed markup is something nobody reviewed either.
+  it('keeps a dangling close marker as content', () => {
+    expect(renderedContent('<!--<!-- inner -->-->')).toBe('-->');
+  });
+
+  it('keeps an unterminated open marker as content', () => {
+    expect(renderedContent('<!-- ok -->\n<!--')).toBe('<!--');
   });
 });
 
