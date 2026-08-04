@@ -5,6 +5,15 @@
  * same input, same output, no I/O. See `.claude/rules/scripts.md`.
  */
 
+/** `branch:` values that name no branch. Lives here, not in a caller, because
+ *  three consumers now read the same vocabulary (the verifier, the merged-drift
+ *  reconciliation, and the close-on-merge resolver) and a private copy in any
+ *  one of them would drift silently. */
+export const NO_BRANCH = new Set(['(uncommitted)', '(none)', '(worktree)']);
+
+/** `pr:` values that name no PR. */
+export const NO_PR = new Set(['(none)', '']);
+
 /** An indented `- item` line → its text, or undefined. */
 const readListItem = (raw) => {
   const trimmed = raw.trimStart();

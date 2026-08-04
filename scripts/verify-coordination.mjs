@@ -76,7 +76,7 @@ import {
   readCheckoutFacts,
 } from './lib/checkout-isolation.mjs';
 import { renderBoard } from './lib/coordination-board.mjs';
-import { branchSlug } from './lib/coordination-parse.mjs';
+import { branchSlug, NO_BRANCH, NO_PR } from './lib/coordination-parse.mjs';
 import { mergedTaskDriftWarnings } from './lib/coordination-reconcile.mjs';
 import { overlapWarnings } from './lib/coordination-overlap.mjs';
 import { readEntries } from './lib/coordination-read.mjs';
@@ -98,8 +98,6 @@ const BOARD_DOC = join(COORD_DIR, 'BOARD.md');
 
 const STALE_DAYS = 14;
 const GHOST_DAYS = 3;
-const NO_BRANCH = new Set(['(uncommitted)', '(none)', '(worktree)']);
-const NO_PR = new Set(['(none)', '']);
 
 const isLive = ({ data }) => data !== undefined && data.status !== 'done';
 

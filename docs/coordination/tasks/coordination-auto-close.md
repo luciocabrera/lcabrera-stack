@@ -2,7 +2,7 @@
 id: coordination-auto-close
 title: Delete the task file automatically when its PR merges
 owner: agent:claude
-status: active
+status: review
 branch: chore/529-coordination-auto-close
 area:
   - scripts/close-coordination-claim.mjs
@@ -15,7 +15,7 @@ area:
 started: 2026-08-04
 updated: 2026-08-04
 plan: (none)
-pr: (none)
+pr: '#533'
 issue: #529
 ---
 
@@ -25,6 +25,6 @@ Delete the task file automatically when its PR merges
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implemented; full gate green; awaiting verification
 - Blockers: none
-- Next:
+- Next: merge — the workflow deletes this file on its own merge
