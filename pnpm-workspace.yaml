@@ -164,6 +164,17 @@ minimumReleaseAgeExclude:
 overrides:
   vite: catalog:build
   vitest: catalog:test
+  # GHSA-8j4g-w8fx-2239 — ReDoS in hono's CORS middleware, fixed in 4.12.34.
+  # `hono` sits four levels down (@repo/agent-runner -> claude-agent-sdk ->
+  # @modelcontextprotocol/sdk -> @hono/node-server), so no workspace declares it
+  # and `vp update hono` is a no-op — an override is the only lever this repo has
+  # until the SDK raises its own floor. The SDK asks for `^4.11.4`, so this lifts
+  # the floor inside a range it already accepts rather than forcing a major.
+  #
+  # Kept as a RANGE, not a pin: a pin has to be hand-bumped for the next
+  # advisory, which is the failure mode that let this one sit unnoticed. Drop
+  # this entry once @modelcontextprotocol/sdk's own floor is >= 4.12.34.
+  hono: ^4.12.34
 peerDependencyRules:
   allowAny:
     - vite
