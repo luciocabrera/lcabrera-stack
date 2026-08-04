@@ -355,10 +355,17 @@ export const findConfigSuppressions = ({ file, text }) => {
 /**
  * Diffs what is in the tree against what has been approved.
  *
- * Three failure modes, and `stale` is the one that keeps the register honest:
- * an approval outliving the code it justified is how every baseline in this repo
- * started rotting. `undocumented` exists because an exception with no stated
- * reason cannot have been "really evaluated" — that is the whole bar.
+ * `stale` is the lane that keeps the register honest: an approval outliving the
+ * code it justified is how every baseline in this repo started rotting.
+ * `undocumented` exists because an exception with no stated reason cannot have
+ * been "really evaluated" — that is the whole bar.
+ *
+ * `provisional` is the lane that keeps the register from growing a second
+ * baseline. A deferred decision is legitimate inside one PR and cannot outlive
+ * it, so the status is still valid vocabulary and simply never survives a build.
+ * Counting it into a message suffix, as this gate first did, left "one deferred
+ * decision" and "none" reporting the same exit code — the state a reader has no
+ * way to distinguish is the state that lasts forever.
  */
 export const diffAgainstRegister = ({ found, register }) => {
   const approved = new Map(register.map((entry) => [entry.key, entry]));
@@ -380,6 +387,9 @@ export const diffAgainstRegister = ({ found, register }) => {
       (entry.reason ?? '').trim().length < 20 ||
       (entry.ref ?? '').trim() === '',
   );
+  const provisional = register.filter(
+    (entry) => entry.status === 'provisional',
+  );
 
-  return { grew, stale, unapproved, undocumented };
+  return { grew, provisional, stale, unapproved, undocumented };
 };
