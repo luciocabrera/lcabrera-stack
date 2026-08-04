@@ -28,6 +28,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { errorMessage } from './lib/error-message.mjs';
 import {
   END_MARKER,
   findRegion,
@@ -103,6 +104,6 @@ const main = () => {
 try {
   main();
 } catch (error) {
-  process.stderr.write(`verify-viteplus-block: ${error.message}\n`);
+  process.stderr.write(`verify-viteplus-block: ${errorMessage(error)}\n`);
   process.exitCode = 1;
 }
