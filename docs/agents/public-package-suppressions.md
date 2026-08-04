@@ -1,8 +1,9 @@
 # Suppressions in the public packages
 
-`packages/ui`, `packages/api`, `packages/server` and `packages/utils` ship to
-consumers outside this repo. AGENTS.md §4 holds them to a single rule: **every
-finding gets fixed — never baselined, never scoped off, never inline-disabled.**
+`packages/ui`, `packages/api`, `packages/server`, `packages/utils` and
+`packages/eslint-local-rules` ship to consumers outside this repo. AGENTS.md §4
+holds them to a single rule: **every finding gets fixed — never baselined, never
+scoped off, never inline-disabled.**
 
 This page is how that rule is checked, and what to do when you think you have
 found the exception it allows.

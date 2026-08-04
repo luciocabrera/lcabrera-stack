@@ -1,0 +1,11 @@
+{
+  "$schema-note": "Checked by `vp run deps:audit` (scripts/verify-deps-audit.mjs). Read docs/agents/dependency-advisories.md before touching this file.",
+  "policy": {
+    "rule": "An advisory in the tree is a defect until argued otherwise. An entry here is not paperwork for a decision already made — it IS the decision, and it needs a reviewer who agrees.",
+    "key": "`ghsa` is the GitHub advisory identifier (GHSA-xxxx-xxxx-xxxx), never the numeric id `pnpm audit` prints. That number is assigned by whichever registry answered and is not stable across them, so an entry keyed by it would quietly stop matching and the advisory would be carried by accident rather than by decision.",
+    "expires": "REQUIRED, `YYYY-MM-DD`. An allowance is a deferral, not a pardon: every advisory eventually gets a patch, so there is no such thing as a permanent one. Past its date the entry stops covering the advisory and the gate fails — either bump the dependency or re-argue the deferral with a new date. There is deliberately no way to say `forever`.",
+    "removal": "The gate also fails on an entry matching NO advisory in the tree. `minimumReleaseAgeExclude` in pnpm-workspace.yaml rotted exactly that way — 13 of 15 entries pinned to versions that no longer resolved, recording a supply-chain posture the repo was not running (#516 Finding 3). A list that does not clean itself is how that happens.",
+    "reason": "Say why the advisory cannot simply be fixed, and what makes carrying it acceptable meanwhile — which declared range blocks the bump, or which code path makes it unreachable. `pnpm audit` marks a finding `dev: false` when it reaches the tree through a runtime path; the gate surfaces that as `[production path]`, and a reason that ignores it is not a reason."
+  },
+  "allowed": []
+}

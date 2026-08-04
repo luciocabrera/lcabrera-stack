@@ -188,7 +188,19 @@ it on pull requests and posts the per-workspace selection to the job summary.
 
 | Command               | Runs                                                                                              |
 | --------------------- | ------------------------------------------------------------------------------------------------- |
+| `vp run deps:audit`   | the advisory gate — `vp pm audit --json` piped into `scripts/verify-deps-audit.mjs`               |
 | `vp run deps:refresh` | one-command dependency refresh — pnpm clean → taze (catalog) → vp install → open a build(deps) PR |
+
+`deps:audit` fails on a known vulnerability at `moderate` or above that has no
+live allowance in `docs/agents/dependency-advisories.json`, and also on an
+allowance that has expired or that matches nothing in the tree. It **needs the
+registry**, and refuses a report that walked no dependencies — an unreachable
+registry produces the same empty advisory list as a healthy tree, so the gate
+fails rather than reporting clean. Raise the floor for one run with
+`vp pm audit --json | node scripts/verify-deps-audit.mjs --minimum high`.
+It runs in CI's Quality Gate and daily in `deps-audit.yml`, but deliberately not
+in the `pre-push` hook, which must work offline. What to do when it fires is
+[`docs/agents/dependency-advisories.md`](docs/agents/dependency-advisories.md).
 
 `deps:refresh` (`scripts/deps-refresh.sh`) bumps the pnpm catalog and every
 `package.json` to their latest in-range versions (TypeScript is held for a known
@@ -546,6 +558,12 @@ Biome, and it does not run `tsc`.
 
 The three jobs run in **parallel** — "Biome runs before Fallow" holds within the
 Quality Gate job's step order, not across jobs.
+
+[`deps-audit.yml`](.github/workflows/deps-audit.yml) is the repo's only
+**scheduled** workflow: it runs `deps:audit` daily and opens (or comments on) a
+single tracking issue when it finds something. The per-PR gate catches what a
+change introduces; only the schedule catches an advisory published overnight
+against a tree nobody touched.
 
 Other workflows: `lighthouse.yml`, `validate-skills.yml`, and
 [`pr-standards.yml`](.github/workflows/pr-standards.yml) — on every pull request

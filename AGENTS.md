@@ -297,6 +297,23 @@ The headline rules every agent must know regardless of which files are open. Ful
 - Never commit sensitive data in logs or error messages.
 - Never commit .env files or credentials.
 
+**The dependency tree is gated too.** `vp run deps:audit` fails on a known
+advisory at `moderate` or above, in CI and daily on a schedule. Fix the
+dependency — the advisory that prompted this gate had a patched version already
+in range of everything that declared it, and sat there anyway because nobody was
+looking (#516). Where a bump genuinely is blocked, an allowance goes in
+`docs/agents/dependency-advisories.json` with a reason and an **expiry date**;
+there is deliberately no permanent form, and an allowance matching nothing in
+the tree fails the gate too. `minimumReleaseAgeExclude` in
+`pnpm-workspace.yaml` rotted exactly that way. The full protocol is
+[`docs/agents/dependency-advisories.md`](docs/agents/dependency-advisories.md).
+
+The property that makes it worth trusting: **it refuses a report that walked no
+dependencies.** An unreachable registry produces the same empty advisory list as
+a healthy tree, and a supply-chain check that goes green when it could not run
+is worse than none, because it is believed. Same principle as Rule 14 — a clean
+pass is only evidence if something else would have produced a different one.
+
 ---
 
 ## 7. Documentation & Workflow
