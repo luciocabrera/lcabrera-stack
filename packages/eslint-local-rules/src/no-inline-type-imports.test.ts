@@ -1,7 +1,7 @@
 import { RuleTester } from '@typescript-eslint/rule-tester';
 import { afterAll, describe, it } from 'vite-plus/test';
 
-import rule from './no-inline-type-imports.js';
+import rule from './no-inline-type-imports.ts';
 
 // RuleTester drives a test framework through these static hooks; wire them to
 // vitest's so each case surfaces as a normal test rather than a bare throw.

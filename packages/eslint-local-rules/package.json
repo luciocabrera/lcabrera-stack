@@ -1,27 +1,68 @@
 {
-  "name": "eslint-local-rules-shared",
-  "version": "0.0.0",
-  "private": true,
+  "name": "@lcabrera/eslint-plugin",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Custom ESLint rules for TypeScript and React codebases: filename conventions, clean import paths, readonly props, and single-component modules.",
+  "keywords": [
+    "eslint",
+    "eslint-plugin",
+    "eslintplugin",
+    "react",
+    "typescript"
+  ],
+  "homepage": "https://github.com/luciocabrera/vite-react-compiler/tree/main/packages/eslint-local-rules#readme",
+  "bugs": "https://github.com/luciocabrera/vite-react-compiler/issues",
+  "license": "MIT",
+  "author": "Lucio Cabrera",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luciocabrera/vite-react-compiler.git",
+    "directory": "packages/eslint-local-rules"
+  },
+  "files": [
+    "dist",
+    "src",
+    "CHANGELOG.md",
+    "!src/**/*.test.*"
+  ],
   "type": "module",
-  "main": "./index.js",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      }
+    },
+    "access": "public"
+  },
   "scripts": {
+    "build": "vp pack",
     "format": "vp fmt .",
     "format:check": "vp fmt --check .",
-    "lint": "vp run --filter eslint-local-rules-shared build && vp lint . --fix && vp run lint:eslint",
-    "lint:check": "vp run --filter eslint-local-rules-shared build && vp lint . && vp run lint:eslint:check",
+    "lint": "vp lint . --fix && vp run lint:eslint",
+    "lint:check": "vp lint . && vp run lint:eslint:check",
     "lint:eslint": "eslint . --config eslint.config.mjs --fix --max-warnings 0",
     "lint:eslint:check": "eslint . --config eslint.config.mjs --max-warnings 0",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.app.json"
+  },
+  "dependencies": {
+    "@typescript-eslint/utils": "catalog:lint"
   },
   "devDependencies": {
-    "@repo/vite-configs": "workspace:*",
+    "@types/node": "catalog:types",
     "@typescript-eslint/rule-tester": "catalog:lint",
-    "@typescript-eslint/utils": "catalog:lint",
     "eslint": "catalog:lint",
     "typescript": "catalog:build",
     "typescript-eslint": "catalog:lint",
     "vite": "catalog:build",
     "vite-plus": "catalog:build",
     "vitest": "catalog:test"
+  },
+  "peerDependencies": {
+    "eslint": ">=9.0.0"
   }
 }

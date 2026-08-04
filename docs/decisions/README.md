@@ -43,3 +43,4 @@ or run `vp run adr:new`, which takes the next free number for you.
 | [ADR-054](./ADR-054-array-operation-hierarchy.md)                     | An array-operation hierarchy chosen by intent, and measured                                                              |
 | [ADR-055](./ADR-055-react-doctor-as-a-gate.md)                        | React Doctor as a gate, via the CLI                                                                                      |
 | [ADR-056](./ADR-056-generic-table-route-data-path.md)                 | One generic data path for a paginated table route                                                                        |
+| [ADR-057](./ADR-057-publish-the-custom-lint-rules.md)                 | The custom lint rules publish as `@lcabrera/eslint-plugin`                                                               |

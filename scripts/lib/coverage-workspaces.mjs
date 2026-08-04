@@ -67,7 +67,7 @@ export const COVERAGE_REPORT_WORKSPACES = [
   // `packages/plugins` and `packages/ts-configs` genuinely still have none.
   {
     dir: 'packages/eslint-local-rules',
-    name: 'eslint-local-rules-shared',
+    name: '@lcabrera/eslint-plugin',
     run: true,
   },
   { dir: 'packages/agent-runner', name: '@repo/agent-runner', run: true },
@@ -87,6 +87,7 @@ export const COVERAGE_REPORT_WORKSPACES = [
  */
 export const COVERAGE_MERGE_WORKSPACES = [
   { dir: 'packages/api', name: '@lcabrera/api' },
+  { dir: 'packages/eslint-local-rules', name: '@lcabrera/eslint-plugin' },
   { dir: 'packages/node-runtime', name: '@repo/node-runtime' },
   { dir: 'packages/scan-ingestion', name: '@repo/scan-ingestion' },
   { dir: 'packages/server', name: '@lcabrera/server' },

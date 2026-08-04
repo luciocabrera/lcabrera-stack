@@ -107,6 +107,13 @@
   ],
   "approved": [
     {
+      "key": "biome **/eslint-local-rules/src/** noDefaultExport",
+      "count": 1,
+      "status": "permanent",
+      "reason": "A default export IS the ESLint rule API — `ESLintUtils.RuleCreator` returns the rule module and the plugin registry imports each one as default, so every rule file must have one. This is the same contract already acknowledged repo-wide for config modules, scoped to a package rather than an extension because that is where rule modules live. Narrowed from the whole package to `src/` when @lcabrera/eslint-plugin became public.",
+      "ref": "ADR-035 §7, ADR-057"
+    },
+    {
       "key": "biome packages/ui/** useExhaustiveDependencies",
       "count": 1,
       "status": "permanent",

@@ -62,6 +62,11 @@ Still open (#515), all needing a decision rather than an edit:
 `scan-ingestion/ARCHITECTURE.md` contradicts itself about the ad-hoc project
 path while the symbol it calls deleted still exists in the source; CQMS
 `STATUS.md`'s "no 409 banner" may describe UI the built "409 surface" does not
-cover; `eslint-local-rules-shared` is in neither documented scope; and three
-`PATTERNS.md` rules are violated at scale, which usually means the rule is what
-is wrong.
+cover; and three `PATTERNS.md` rules are violated at scale, which usually means
+the rule is what is wrong.
+
+The scope finding from the same sweep — a package in neither documented scope —
+shows what "needs a decision" buys you. The answer was not a doc edit: the
+package was genuinely publishable, so it became `@lcabrera/eslint-plugin` and the
+naming rule it appeared to break turned out to be describing it correctly all
+along.

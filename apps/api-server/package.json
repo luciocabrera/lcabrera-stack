@@ -5,8 +5,8 @@
   "description": "Simple API server for car sales data",
   "main": "dist/server.js",
   "scripts": {
-    "lint": "vp run --filter eslint-local-rules-shared build && vp lint . --fix && vp run lint:eslint",
-    "lint:check": "vp run --filter eslint-local-rules-shared build && vp lint . && vp run lint:eslint:check",
+    "lint": "vp lint . --fix && vp run lint:eslint",
+    "lint:check": "vp lint . && vp run lint:eslint:check",
     "lint:eslint": "eslint . --config eslint.config.mjs --fix --max-warnings 0",
     "lint:eslint:check": "eslint . --config eslint.config.mjs --max-warnings 0",
     "format": "vp fmt .",

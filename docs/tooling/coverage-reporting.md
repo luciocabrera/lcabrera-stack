@@ -77,21 +77,21 @@ authority and fails if any of them is absent from either lane. It keys on the
 directory rather than the package name, so an npm scope rename cannot defeat it.
 Adding a fifth public package extends the check with no edit here:
 
-| Workspace                     | Package                     | `run` | Why                                                                                                                                  |
-| ----------------------------- | --------------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `packages/ui`                 | `@lcabrera/ui`              | true  | Runs `test:coverage` here (plain `test` in `test:ci`, no coverage)                                                                   |
-| `packages/server`             | `@lcabrera/server`          | true  | Same                                                                                                                                 |
-| `packages/api`                | `@lcabrera/api`             | true  | Same — the browser half of the former `data-access` ([ADR-038](../decisions/ADR-038-public-package-topology-by-runtime.md))          |
-| `apps/react-router`           | `vite-react-compiler`       | false | Its `test:ci` already emits the summary; re-running the repo's largest suite would be wasteful                                       |
-| `packages/node-runtime`       | `@repo/node-runtime`        | true  | Phase 2 — DB-free `test:coverage`                                                                                                    |
-| `packages/scan-ingestion`     | `@repo/scan-ingestion`      | true  | Phase 2 — DB-free `test:coverage` **subset** (its real-Postgres `queries/*` stay out, so the number is the DB-free portion only)     |
-| `packages/utils`              | `@lcabrera/utils`           | true  | Phase 2 — pure helpers, own 95% threshold ([#124](https://github.com/luciocabrera/vite-react-compiler/issues/124))                   |
-| `apps/scan-orchestrator`      | `@repo/scan-orchestrator`   | true  | Phase 3 — DB-free **subset** (`runQueuedScan` drives the real scan queue and stays out)                                              |
-| `apps/shared`                 | `api-shared`                | true  | Phase 3 — whole suite is DB-free (every test injects its dependencies)                                                               |
-| `apps/api-server`             | `car-sales-api`             | true  | Phase 3 — same; its `test:coverage` deliberately loads no environment file                                                           |
-| `apps/api-server-fast`        | `car-sales-api-fast`        | true  | Phase 3 — same                                                                                                                       |
-| `packages/eslint-local-rules` | `eslint-local-rules-shared` | true  | Phase 3 — a `RuleTester` suite per rule ([#205](https://github.com/luciocabrera/vite-react-compiler/issues/205)); reaches no service |
-| `packages/agent-runner`       | `@repo/agent-runner`        | true  | Phase 3 — its tested surface is pure utils; the CLI-spawning half has no tests (see the caveat below)                                |
+| Workspace                     | Package                   | `run` | Why                                                                                                                                  |
+| ----------------------------- | ------------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `packages/ui`                 | `@lcabrera/ui`            | true  | Runs `test:coverage` here (plain `test` in `test:ci`, no coverage)                                                                   |
+| `packages/server`             | `@lcabrera/server`        | true  | Same                                                                                                                                 |
+| `packages/api`                | `@lcabrera/api`           | true  | Same — the browser half of the former `data-access` ([ADR-038](../decisions/ADR-038-public-package-topology-by-runtime.md))          |
+| `apps/react-router`           | `vite-react-compiler`     | false | Its `test:ci` already emits the summary; re-running the repo's largest suite would be wasteful                                       |
+| `packages/node-runtime`       | `@repo/node-runtime`      | true  | Phase 2 — DB-free `test:coverage`                                                                                                    |
+| `packages/scan-ingestion`     | `@repo/scan-ingestion`    | true  | Phase 2 — DB-free `test:coverage` **subset** (its real-Postgres `queries/*` stay out, so the number is the DB-free portion only)     |
+| `packages/utils`              | `@lcabrera/utils`         | true  | Phase 2 — pure helpers, own 95% threshold ([#124](https://github.com/luciocabrera/vite-react-compiler/issues/124))                   |
+| `apps/scan-orchestrator`      | `@repo/scan-orchestrator` | true  | Phase 3 — DB-free **subset** (`runQueuedScan` drives the real scan queue and stays out)                                              |
+| `apps/shared`                 | `api-shared`              | true  | Phase 3 — whole suite is DB-free (every test injects its dependencies)                                                               |
+| `apps/api-server`             | `car-sales-api`           | true  | Phase 3 — same; its `test:coverage` deliberately loads no environment file                                                           |
+| `apps/api-server-fast`        | `car-sales-api-fast`      | true  | Phase 3 — same                                                                                                                       |
+| `packages/eslint-local-rules` | `@lcabrera/eslint-plugin` | true  | Phase 3 — a `RuleTester` suite per rule ([#205](https://github.com/luciocabrera/vite-react-compiler/issues/205)); reaches no service |
+| `packages/agent-runner`       | `@repo/agent-runner`      | true  | Phase 3 — its tested surface is pure utils; the CLI-spawning half has no tests (see the caveat below)                                |
 
 `run: false` reuses a summary produced upstream; `--all` forces every workspace
 to run (standalone local use, where `test:ci` has not run first).

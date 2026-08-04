@@ -1,13 +1,14 @@
 import { readdirSync } from 'node:fs';
 import { expect, it } from 'vite-plus/test';
 
-import { rules } from './rules.js';
+import { rules } from './index.ts';
 
-// Read with the literal `'.'` rather than a path built from `import.meta.dirname`:
-// a computed argument trips security/detect-non-literal-fs-filename, and there is
-// nothing to compute here. Vitest runs with its project root as the cwd, and this
-// package's vite.config.ts sits beside these rules, so `'.'` is this directory.
-const entries = readdirSync('.');
+// Read with the literal `'src'` rather than a path built from
+// `import.meta.dirname`: a computed argument trips
+// security/detect-non-literal-fs-filename, and there is nothing to compute here.
+// Vitest runs with its project root as the cwd — the package root, where
+// vite.config.ts sits — so the rules are one level down, in `src`.
+const entries = readdirSync('src');
 
 const TEST_FILE_SUFFIX = '.test.ts';
 const testedRules = new Set(
@@ -16,10 +17,11 @@ const testedRules = new Set(
     .map((entry) => entry.slice(0, -TEST_FILE_SUFFIX.length)),
 );
 
-// Guards the assumption above. If the cwd ever moves, the listing goes empty or
-// wrong and every rule would look untested — a confusing failure. This one names
-// the real cause instead.
-it('resolves the cwd to the rule directory', () => {
+// Guards the assumption above. If the cwd or the layout ever moves, the listing
+// goes empty or wrong and every rule would look untested — a confusing failure.
+// This one names the real cause instead. It earned its keep in the move to
+// `src/`: it was the first thing to fail.
+it('resolves the listing to the rule directory', () => {
   expect(entries).toContain('index.ts');
 });
 

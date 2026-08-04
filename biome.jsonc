@@ -272,7 +272,9 @@
         "**/config/**",
         "**/entry.*.tsx",
         "**/root.tsx",
-        "**/eslint-local-rules/**",
+        // Only the rule sources, not the whole package: @lcabrera/eslint-plugin is
+        // public, so its exemptions are held to the narrowest glob that works.
+        "**/eslint-local-rules/src/**",
       ],
       "linter": {
         "rules": { "style": { "noDefaultExport": "off" } },

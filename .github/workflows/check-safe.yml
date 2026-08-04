@@ -32,9 +32,9 @@ jobs:
       - name: Install dependencies
         run: vp install --frozen-lockfile --ignore-scripts && vp config
 
-      - name: Generate route types & build ESLint rules
+      - name: Generate route types
         id: preflight
-        run: vp run typegen:all && vp run --filter eslint-local-rules-shared build
+        run: vp run typegen:all
 
       - name: Format · Lint · Type-check
         id: quality_gate

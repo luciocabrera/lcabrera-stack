@@ -3,12 +3,13 @@
 Loads when you touch anything under `packages/`. The always-on framing — packages
 are the product, the `@lcabrera/` vs `@repo/` scope split, the never-baseline rule
 — is in the root [AGENTS.md](../AGENTS.md) §1 and §4. This file is the
-**publishing contract** for the four public packages: `@lcabrera/ui`,
-`@lcabrera/api`, `@lcabrera/server`, `@lcabrera/utils`.
+**publishing contract** for the public packages: `@lcabrera/ui`,
+`@lcabrera/api`, `@lcabrera/server`, `@lcabrera/utils`,
+`@lcabrera/eslint-plugin`.
 
 ## Publishing invariants
 
-All four are **published on npm**. `private` is off and each has a configured
+All of them are **published on npm**. `private` is off and each has a configured
 trusted publisher, so a merged version bump publishes on its own — there is no
 longer a flag standing between a mistake and the registry, and **an npm version
 is permanent**: it cannot be replaced, and unpublishing blocks reuse of the
@@ -43,9 +44,9 @@ by inspection:
   call.** `publish:verify` checks subpath parity but never reads the types, so a
   removed export, a changed signature or a reshaped union inside a surviving
   subpath ships silently — the harness only ever compiles _in-repo_ consumers,
-  and these four packages' consumers are external. `vp run api-surface:verify`
+  and these packages' consumers are external. `vp run api-surface:verify`
   diffs each package's exported surface against a tracked snapshot under
-  `reports/api-surface/` (built `dist` for the three, `src` for `ui`) and,
+  `reports/api-surface/` (built `dist` for all but `ui`, which ships `src`) and,
   against the base ref, requires a changeset for a breaking change;
   `vp run attw:verify` confirms the published types actually resolve for a
   consumer. Both run after `packages:build` in `check-safe.yml`. The snapshot
@@ -55,8 +56,9 @@ by inspection:
   in the package directory, so the root one does not reach a consumer — this is
   deliberate duplication, same reasoning as
   [ADR-039](../docs/decisions/ADR-039-duplicate-over-undeclared-edges.md).
-- **`files` is `["src", "!src/**/*.test.*"]`**, with `"dist"` added for the three
-  built packages. Without it npm ships whatever is in the directory:
+- **`files` is `["src", "!src/**/*.test.*"]`**, with `"dist"` added for every
+  built package (all but `ui`, which ships source). Without it npm ships
+  whatever is in the directory:
   `@lcabrera/server` was shipping its whole test suite plus its tsconfigs and
   `eslint.config.mjs`. The negated pattern is honoured by pnpm pack. `src` stays
   in the built packages only because they emit sourcemaps — it is unreachable
