@@ -1,0 +1,180 @@
+# Watches the dependency tree for newly published advisories.
+#
+# The per-PR gate in check-safe.yml catches what a change introduces. It cannot
+# catch what nobody introduced: an advisory published overnight against a tree
+# that has not moved is invisible until somebody happens to open a PR. On a
+# quiet week that is the whole week. This is the run that finds it.
+#
+# It opens or updates a single tracking issue rather than failing silently into
+# a workflow log nobody reads — a scheduled red X is exactly the kind of signal
+# that becomes wallpaper.
+name: Dependency Audit
+
+on:
+  schedule:
+    # 06:00 UTC daily. Advisories are published continuously; a daily read is
+    # frequent enough to matter and infrequent enough not to become noise.
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: Dependency advisories
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@8ecb39174989ce55af90f45cf55b02738599831d
+        with:
+          cache: false
+          run-install: false
+
+      - name: Install dependencies
+        run: vp install --frozen-lockfile --ignore-scripts && vp config
+
+      - name: Audit dependencies
+        id: audit
+        # `continue-on-error` so a finding becomes an issue rather than only a
+        # red X on a schedule nobody is watching. The step's own conclusion is
+        # still recorded, and the report below is what carries the detail.
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          vp run deps:audit 2>&1 | tee audit-output.txt
+
+      - name: File or update the tracking issue
+        if: steps.audit.outcome == 'failure'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        with:
+          script: |
+            const fs = require('node:fs');
+            const output = fs.readFileSync('audit-output.txt', 'utf8').trim();
+            const title =
+              'chore(deps): dependency advisory found by the scheduled audit';
+
+            // Fills the standard issue template. issue-standards.yml checks
+            // every issue and grants automation no exemption — the coordination
+            // claim script fills it in for the same reason, so an auto-filed
+            // issue that skipped it would open already failing its own gate.
+            const body = [
+              '## 1. Problem Statement',
+              '',
+              'The scheduled dependency audit found an advisory in the dependency tree',
+              'with no live allowance. Left alone it ships, and the per-PR gate will now',
+              'fail every open PR until it is resolved.',
+              '',
+              '```',
+              output,
+              '```',
+              '',
+              `Run: ${process.env.RUN_URL}`,
+              '',
+              '## 2. Objective / Desired Outcome',
+              '',
+              '`vp run deps:audit` exits 0 — either because the dependency was updated,',
+              'or because a dated, justified allowance records why it cannot be.',
+              '',
+              '## 3. Context & Background',
+              '',
+              'Fix the dependency where nothing declared blocks the patched version —',
+              'that is usually the case, and was for the `hono` advisory that prompted',
+              'this gate (#516). Where it genuinely is blocked, add an entry to',
+              '`docs/agents/dependency-advisories.json`; `docs/agents/dependency-advisories.md`',
+              'explains what a reason has to establish.',
+              '',
+              '`[production path]` in the output means the advisory reaches the tree',
+              'through a runtime dependency rather than only a build-time one.',
+              '',
+              '## 4. Reproduction Steps',
+              '',
+              '1. `vp install`',
+              '2. `vp run deps:audit`',
+              '3. Expected: exit 0. Actual: the advisory above, exit 1.',
+              '',
+              'Preconditions: network access to the registry. The gate fails rather than',
+              'reporting clean when it cannot reach it, so a failure here is a real',
+              'finding and not an offline artefact.',
+              '',
+              '## 5. Scope Definition',
+              '',
+              '### In Scope',
+              '',
+              '- Resolving the advisory above, by upgrade, override, or a dated allowance.',
+              '',
+              '### Out of Scope',
+              '',
+              '- Unrelated dependency currency work.',
+              '',
+              '## 6. Acceptance Criteria',
+              '',
+              '- [ ] `vp run deps:audit` exits 0',
+              '- [ ] The fix is an upgrade/override, or an allowance with a reason and a date',
+              '- [ ] No regressions',
+              '- [ ] Documentation updated (only if the allowance policy changed)',
+              '- [ ] Approach consistent with repository conventions',
+              '',
+              '## 7. Implementation Notes',
+              '',
+              'Opened automatically by `.github/workflows/deps-audit.yml`. Later runs',
+              'comment on this issue rather than opening another, so it stays one thread.',
+              '',
+              '## 8. Related Work',
+              '',
+              '- #516 — the sweep that found the repo gated no dependency vulnerabilities',
+              '',
+              '## 9. Planning Metadata',
+              '',
+              '```yaml',
+              'dependencies:',
+              '  blocking: []',
+              '  blockedBy: []',
+              '  parent: null',
+              '  children: []',
+              '```',
+            ].join('\n');
+
+            // `type: build` is the canonical label for dependency work
+            // (scripts/lib/labels.mjs). A label outside that taxonomy would be
+            // pruned by sync-labels and take the lookup below with it.
+            const label = 'type: build';
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: label,
+            });
+            const match = existing.data.find((issue) => issue.title === title);
+
+            if (match) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: match.number,
+                body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: [label],
+              });
+            }
+
+      - name: Fail the run when the audit did
+        if: steps.audit.outcome == 'failure'
+        run: exit 1

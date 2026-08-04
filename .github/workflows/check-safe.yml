@@ -226,6 +226,15 @@ jobs:
         # stated the opposite, and editing it changed nothing.
         run: vp run configs:verify
 
+      - name: No unaddressed dependency advisory
+        id: deps_audit_gate
+        # The repo gated its docs, its ADR numbering and four linters, but not
+        # its supply chain: a ReDoS advisory against a pinned `hono` was found
+        # only because someone went looking, and nothing declared blocked the
+        # fix (#516). The gate refuses a report that walked no dependencies, so
+        # an unreachable registry fails here instead of reporting a clean tree.
+        run: vp run deps:audit
+
       - name: Published package surface resolves
         id: publish_gate
         # Builds first on purpose. `exports` points at `src` so this repo never
