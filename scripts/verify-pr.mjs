@@ -25,6 +25,7 @@ import {
   validatePrBody,
   validatePrTitle,
 } from './lib/commit-convention.mjs';
+import { flagValue } from './lib/cli-input.mjs';
 import { readEntries } from './lib/coordination-read.mjs';
 import { reportWarnings } from './lib/report-warnings.mjs';
 import { readTextWithin } from './lib/safe-read.mjs';
@@ -32,11 +33,6 @@ import { deriveWorkspaceScopes } from './lib/workspace-scopes.mjs';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
 const BRANCHES_DIR = resolve(REPO_ROOT, 'docs/coordination/branches');
-
-const flagValue = (name) => {
-  const index = process.argv.indexOf(name);
-  return index === -1 ? undefined : process.argv[index + 1];
-};
 
 const readInputs = () => {
   const title = flagValue('--title') ?? process.env.PR_TITLE ?? '';

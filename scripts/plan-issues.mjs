@@ -23,6 +23,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { flagValue } from './lib/cli-input.mjs';
 import { validateIssueBody } from './lib/commit-convention.mjs';
 import { buildLabelDefinitions } from './lib/labels.mjs';
 import {
@@ -52,11 +53,6 @@ const PLAN_REQUIRED =
 const MILESTONE_SCHEME = 'docs/agents/milestone-naming-scheme.md';
 /** Gitignored, per the repo's scratch convention. */
 const STAGING_DIR = '.tmp/plan-issues';
-
-const flagValue = (name) => {
-  const index = process.argv.indexOf(name);
-  return index === -1 ? undefined : process.argv[index + 1];
-};
 
 const readRepoFile = (relativePath) =>
   readFileSync(join(REPO_ROOT, relativePath), 'utf8');
