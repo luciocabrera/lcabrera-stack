@@ -71,5 +71,46 @@ ruleTester.run('clean-import-paths', rule, {
     "import { x } from '@scope/pkg/index.js';",
     // A local module that genuinely ends in `index` without being a barrel.
     "import { reindex } from './reindex';",
+    // Default options: an alias this project does not use is an EXTERNAL
+    // specifier, so it must be left alone rather than normalized.
+    "import { x } from '~/components/Button/index';",
+  ],
+});
+
+// The rule ships as part of a published plugin, so its one project-specific
+// constant — the path alias — is configurable. Without these cases a consumer
+// using `~/` or `#app/` would get silence and no way to change it.
+ruleTester.run('clean-import-paths (configured aliases)', rule, {
+  invalid: [
+    {
+      code: "import { Button } from '~/components/Button/index';",
+      errors: [{ messageId: 'cleanImportPath' }],
+      options: [{ aliasPrefixes: ['~/'] }],
+      output: "import { Button } from '~/components/Button';",
+    },
+    {
+      code: "import { Card } from '#app/ui/Card.tsx';",
+      errors: [{ messageId: 'cleanImportPath' }],
+      options: [{ aliasPrefixes: ['#app/', '~/'] }],
+      output: "import { Card } from '#app/ui/Card';",
+    },
+  ],
+  valid: [
+    // Relative prefixes are universal and stay live whatever the alias list is
+    // — configuring an alias must not switch off the rest of the rule.
+    {
+      code: "import { helper } from '../helper';",
+      options: [{ aliasPrefixes: ['~/'] }],
+    },
+    // An empty list disables alias handling without disabling the rule.
+    {
+      code: "import { Button } from '@/components/Button/index';",
+      options: [{ aliasPrefixes: [] }],
+    },
+    // The repo default is still `@/` when nothing is configured.
+    {
+      code: "import { x } from '~/thing/index';",
+      options: [{}],
+    },
   ],
 });

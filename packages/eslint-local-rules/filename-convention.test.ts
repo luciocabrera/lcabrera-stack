@@ -114,3 +114,31 @@ ruleTester.run('filename-convention', rule, {
     { code, filename: 'src/routes/x/orderClientAction.ts' },
   ],
 });
+
+// The deprecation map is this repo's own migration history. Because the rule
+// ships, a consumer must be able to replace or drop it — otherwise they inherit
+// a rename they never made.
+ruleTester.run('filename-convention (configured deprecations)', rule, {
+  invalid: [
+    {
+      code: 'export const A = 1;',
+      errors: [{ messageId: 'deprecatedSuffix' }],
+      filename: 'Widget.oldThing.ts',
+      options: [{ deprecatedSuffixes: { oldThing: 'new-thing' } }],
+    },
+  ],
+  valid: [
+    // An empty map drops this repo's deprecations entirely.
+    {
+      code: 'export const A = 1;',
+      filename: 'Thing.errorBoundary.tsx',
+      options: [{ deprecatedSuffixes: {} }],
+    },
+    // A consumer's own map does not inherit ours.
+    {
+      code: 'export const A = 1;',
+      filename: 'Thing.errorBoundary.tsx',
+      options: [{ deprecatedSuffixes: { legacy: 'modern' } }],
+    },
+  ],
+});
