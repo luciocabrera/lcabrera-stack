@@ -284,9 +284,12 @@ run gh pr create --draft --head "$branch" --base main \
 
 printf '\nClaimed. Work in %s, push often, and flip the draft to ready when done.\n' "$work"
 
-# Env files are gitignored, so a worktree has none. Deliberately a reminder
-# rather than a copy: duplicating credentials across checkouts is the user's
-# call, not a side effect of claiming a task.
+# Env files are gitignored, so a worktree has none. Still deliberately a prompt
+# rather than an automatic step: provisioning credentials into a new checkout is
+# the user's call, not a side effect of claiming a task. What changed is that the
+# call is now one command instead of a manual copy, and it symlinks rather than
+# copies, so no second credential lands on disk.
 if [[ "$worktree" == 1 ]]; then
-  printf 'Anything DB-touching also needs the local env files copied over (e.g. docker/local/.env) — they are gitignored, so the worktree starts without them.\n'
+  printf 'Anything DB-touching also needs the local env files — they are gitignored, so the worktree starts without them:\n'
+  printf '  cd %s && vp run worktree:env\n' "$work"
 fi
