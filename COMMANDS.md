@@ -80,7 +80,8 @@ Steps 3, 4, 5 and 7 are the ones that get skipped, and none is redundant — see
 chains the whole thing the way CI does.
 
 The **`pre-push` git hook** (`.vite-hooks/pre-push`) runs `vp run check:push` — the
-**DB-free CI Quality Gate** (steps 3–6 plus `commands`/`coordination`/`scripts`/`docs`/`adr:verify`,
+**DB-free CI Quality Gate** (steps 3–6 plus
+`commands`/`coordination`/`scripts`/`docs`/`adr`/`viteplus:verify`,
 mirroring the "Quality Gate (Format · Lint · Types)" job in `check-safe.yml`) — and then
 `vp run test:changed`. This closes the gap the pre-commit hook leaves: `vp staged` covers
 only fmt + Oxlint + tsgolint + Biome on staged files, so the ESLint pass and a full
@@ -351,6 +352,7 @@ package, ever.
 | `vp run docs:verify`         | check every documented repository path resolves (`--write` prunes resolved baseline entries; `--accept <doc> <ref> --reason "…"` grandfathers one)              |
 | `vp run adr:verify`          | check ADR home, filename, heading and number uniqueness, and that each home's index is current; prints the next free number (`--write` regenerates the indexes) |
 | `vp run adr:new`             | scaffold an ADR from [`_TEMPLATE.md`](docs/decisions/_TEMPLATE.md) with the next free number — `-- "<title>" [--home repo\|cqms\|app] [--slug <s>] [--dry-run]` |
+| `vp run viteplus:verify`     | check the Vite+ managed block in AGENTS.md still renders nothing — a `vp install` refills it with upstream guidance (`--write` re-empties it)                   |
 | `vp run skills:validate`     | validate skill definitions                                                                                                                                      |
 | `vp run skills:report`       | skills compliance report                                                                                                                                        |
 | `vp run prepare`             | `vp config` — runs automatically on install                                                                                                                     |

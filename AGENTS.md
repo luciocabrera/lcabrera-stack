@@ -499,13 +499,11 @@ For multi-step exploration or investigation tasks, use the **`codebase-explorer`
 
 <!--VITE PLUS START-->
 
-<!-- Deliberately empty. Vite+ injects a "Using Vite+" blurb and a Review
-     Checklist between these markers; both are already covered here — the
-     toolchain description by §4 and `node_modules/vite-plus/docs`, the
-     checklist by §7's Post-Change Quality Gate. Keep the markers PAIRED: the
-     END marker went missing once, leaving the managed region unterminated.
-     If a `vp` run refills this block, delete the content again rather than
-     editing it in place — the upstream template tells agents to run `vp test`,
-     which this repo forbids (§4). -->
+<!-- Deliberately empty, and gated by `vp run viteplus:verify`. Vite+ rewrites
+     this region whenever it syncs agent instructions (`vp install` does), and the
+     upstream template it writes tells agents to run `vp test`, which §4 forbids.
+     Both markers must stay, and PAIRED — the END marker went missing once,
+     leaving the region unterminated. To repair a refill: `vp run viteplus:verify
+     -- --write`. -->
 
 <!--VITE PLUS END-->
