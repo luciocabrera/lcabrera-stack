@@ -47,6 +47,11 @@ do.** They are real code and rot the same way. The exemplar to copy is
 ## Node conventions
 
 - **`node:`-prefix every builtin** (`node:fs`, `node:path`, `node:child_process`).
+- **Never shell out to `jq` from a local script — it is not installed here.** A
+  local script that pipes through it fails on a developer machine while passing in
+  CI, where the runner image has it. Parse JSON in node instead. Two things that
+  are **not** this rule: `gh --jq` (gh embeds its own JSON filter, no system binary
+  involved) and `.github/workflows/**`, which only ever runs on a runner.
 - **Match the module system to the extension** — `.mjs`/`import`, `.cjs`/`require`.
 - **Top-level `try/catch`, and set `process.exitCode` — never `process.exit()`
   mid-stream** (it truncates output). A verify script **lists every discrepancy,

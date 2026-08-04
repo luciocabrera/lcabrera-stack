@@ -365,8 +365,18 @@ The in-git "who is working on what" register under [`docs/coordination/`](docs/c
 | `vp run coordination:board`                   | write the local, gitignored `docs/coordination/BOARD.md` table view (never committed — ADR-037)                                                                    |
 | `vp run coordination:board:live`              | live view: claims joined with open-PR state (draft/checks) + unregistered PRs (needs `gh`; prints, never writes)                                                   |
 | `vp run coordination:claim -- <id> "<title>"` | scaffold a task + branch (or `--worktree`) + draft PR in one step (`--dry-run` to preview)                                                                         |
+| `vp run worktree:env`                         | symlink the primary checkout's gitignored env files into the worktree you run it from (`--dry-run` to preview, `--target <dir>` for another) — see below           |
 | `vp run housekeeping:prune`                   | dry-run the shared-checkout broom: list branches/worktrees safe to delete (merged/closed PR or cruft) and what is kept (un-PR'd commits, dirty worktrees, stashes) |
 | `vp run housekeeping:prune -- --apply`        | perform those deletions; never touches anything with unique un-PR'd commits, an uncommitted worktree, or a stash (needs `gh`; falls back to commit-count-only)     |
+
+`coordination:claim` already installs dependencies and generates route types in a
+new worktree, but **not** the env files: they are gitignored, so a worktree starts
+without them, and a DB-touching command there does not fail — it runs with the env
+unloaded, which reads as a code bug. `worktree:env` is the deliberate, opt-in step
+that closes that, and it **symlinks rather than copies**, so no second credential
+exists on disk and none outlives the worktree. It is idempotent (an existing path is
+reported and left alone) and skips nested checkouts, whose env files belong to
+another tree.
 
 ### Commit & PR standards
 

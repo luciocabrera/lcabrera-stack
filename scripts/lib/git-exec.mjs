@@ -93,3 +93,35 @@ export const runGit = ({ args, cwd }) => {
     return undefined;
   }
 };
+
+/**
+ * `{ status, stdout }` under the same environment discipline as `runGit`.
+ *
+ * Some git commands answer with their exit code rather than their output, and
+ * for those `runGit`'s collapse of every failure to `undefined` loses the
+ * answer: `check-ignore` exits 1 for "nothing matched" and 128 for a real
+ * fault, and a caller that reads both as "nothing" reports an empty result
+ * while git is actually broken. `status` is `null` only when git could not be
+ * spawned at all, which no exit code can mean.
+ */
+export const runGitStatus = ({ args, cwd }) => {
+  const binary = gitBinary();
+  if (binary === undefined) {
+    return { status: null, stdout: '' };
+  }
+  try {
+    const stdout = execFileSync(binary, args, {
+      cwd,
+      encoding: 'utf8',
+      env: buildGitEnv(process.env),
+      maxBuffer: 8 * 1024 * 1024,
+      stdio: ['ignore', 'pipe', 'ignore'],
+    });
+    return { status: 0, stdout: stdout.trim() };
+  } catch (error) {
+    return {
+      status: typeof error.status === 'number' ? error.status : null,
+      stdout: String(error.stdout ?? '').trim(),
+    };
+  }
+};

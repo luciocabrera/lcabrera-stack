@@ -73,7 +73,8 @@
     "test:scripts": "node node_modules/vitest/vitest.mjs run --root scripts",
     "typecheck:all": "vp run -r typecheck",
     "typecheck:changed": "bash scripts/changed-files.sh node scripts/run-changed.mjs typecheck",
-    "typegen:all": "vp run -r typegen"
+    "typegen:all": "vp run -r typegen",
+    "worktree:env": "node scripts/worktree-link-env.mjs"
   },
   "devDependencies": {
     "@arethetypeswrong/core": "catalog:tooling",
