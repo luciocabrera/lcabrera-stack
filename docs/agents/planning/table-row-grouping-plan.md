@@ -280,11 +280,34 @@ loader `meta`** — nothing else. The server derives its type map from the same
 first. This is strictly _less_ work than a per-entity grouping catalog and is what
 "generic like filtering and sorting" requires.
 
-`TableColumnDataType` is coarser than `pgType`, and that is sufficient: it never
-lets an illegal aggregate be emitted (§4.2). The one thing it cannot distinguish —
-`integer` vs `numeric` — is moot, because `sum`/`avg`/`count` all arrive from `pg`
-as **strings** either way (the `int8`/`numeric` trap `get-rows-count.util.ts`
-already works around with `Number(...)`).
+> **Correction — this premise was falsified after the design was written, and the
+> row above it ("Which aggregates are legal? → `TableColumn.dataType`") does not
+> hold.** Kept rather than rewritten, per this document's rule of showing both
+> sides of a corrected conclusion. `dataType` is a **UI hint that seeds the menu**;
+> the **Postgres catalogue is authoritative** for both group-key eligibility and
+> aggregate legality. See
+> [`adr-drafts/grouping-legality-from-the-catalog.md`](./adr-drafts/grouping-legality-from-the-catalog.md)
+> and issues #550 (the probe) and #563 (the implementation).
+>
+> What the original claim said: _"`TableColumnDataType` is coarser than `pgType`,
+> and that is sufficient: it never lets an illegal aggregate be emitted (§4.2)."_
+>
+> Why it is wrong, probed against `wide_alltypes_150`, whose columns are generated
+> by collapsing 20 Postgres types into the five-member vocabulary: `c_018` is a
+> `point` and maps to `string` — the type §4.2 calls the best key — and `GROUP BY`
+> on it raises `could not identify an equality operator for type point`.
+> `min(jsonb)` does not exist, while `GROUP BY jsonb` succeeds, so the failure is
+> per-type rather than per-family and no coarsening captures it. In the other
+> direction `c_003` is `numeric` mapped to `string`, so `sum`/`avg` are never
+> offered on a column that supports them — the vocabulary forbids legal aggregates
+> as well as permitting illegal ones. §2.8's guard then routes the failure into
+> execution, because `n_distinct` for such a column is `0`, which §2.8 maps to
+> UNKNOWN and therefore to "warn and proceed".
+
+The one thing the vocabulary cannot distinguish — `integer` vs `numeric` — is
+genuinely moot, because `sum`/`avg`/`count` all arrive from `pg` as **strings**
+either way (the `int8`/`numeric` trap `get-rows-count.util.ts` already works
+around with `Number(...)`). That part of the original reasoning survives.
 
 ### 2.3 `GROUPING SETS` is the internal primitive
 
@@ -389,8 +412,24 @@ default expansion level. The shared thing is the analysis, not the scroll positi
 
 **Streaming:** unchanged. The loader keeps returning an unawaited `dataPromise`
 consumed by `use()`; a slow grouped query shows `TableSkeleton`. Do **not**
-introduce `<Await>`/`defer`. The remount `key` in `createTableRouteLoader` gains the
-grouping param so a grouping change remounts the boundary like a sort change.
+introduce `<Await>`/`defer`.
+
+> **Correction — the mechanism this paragraph originally proposed to extend does
+> not exist.** The original text read: _"The remount `key` in
+> `createTableRouteLoader` gains the grouping param so a grouping change remounts
+> the boundary like a sort change."_ That `key` is produced at
+> [`createTableRouteLoader.util.ts:147`](../../../packages/ui/src/routing/loaders/createTableRouteLoader.util.ts)
+> and **read by nothing** — `useTableRoutePage`, `TableRouteView` and every app
+> route component destructure a fixed set that excludes it, and no JSX `key` is
+> written from it. The probe that could have disproved this is enumerating every
+> consumer of table loader data across `packages/ui/src` and
+> `apps/react-router/src`; the competing explanation, React Router applying the
+> field itself, fails because it does not read a loader field named `key` and a
+> JSX key must be written explicitly. Remounting works today only because
+> `use(dataPromise)` re-suspends on a new promise reference, which a grouping
+> change produces for free. The field is separately defective — it concatenates
+> two params with no delimiter, so distinct states collide. It is wired or deleted
+> by issue #557 before grouping depends on it either way.
 
 ### 2.7 Row identity and capability interaction
 
@@ -441,12 +480,25 @@ SELECT s.attname, s.n_distinct, c.reltuples
 permission-filtered, so an invisible column falls into UNKNOWN naturally.
 
 ```text
-resolvedDistinct = missing row | n_distinct = 0  → UNKNOWN
+resolvedDistinct = missing row                   → UNKNOWN
+                 | n_distinct = 0                → NOT GROUPABLE (see correction)
                  | n_distinct > 0                → n_distinct
                  | n_distinct < 0                → ceil(-n_distinct * max(reltuples, 0))
 reltuples <= 0                                   → UNKNOWN
 bounds: flat ∏dₖ · rollup 1 + Σᵢ ∏_{j≤i} dⱼ · cube ∏(dₖ+1)
 ```
+
+> **Correction — `n_distinct = 0` originally mapped to UNKNOWN here, and that is
+> the branch that turns this guard from a safety valve into a trap.** UNKNOWN
+> means "warn and proceed", so a column Postgres cannot group at all would be
+> waved through to fail at execution. The obvious reading of `0` is "never
+> `ANALYZE`d" — but §1.7(e) already established that a never-analyzed table has
+> **no `pg_stats` row at all**, and the discriminating probe closes it: run
+> `ANALYZE public.wide_alltypes_150` and re-read `pg_stats`; the row for `c_018`
+> exists and `n_distinct` stays `0`, while `c_014` reads `-1` and `c_019` reads
+> `1000`. `0` is Postgres saying the type has no equality operator, so
+> distinctness is undefined — such a column is not groupable, and the catalogue
+> check of §2.10(4) refuses it by type before this estimator is ever consulted.
 
 **Thresholds** — anchored to the render path. §1.7(g) shows realistic groupings of
 a 500k-row table land near 1 400 rows, so these guard the pathological case, not
@@ -520,10 +572,26 @@ estimate is the displayed total.
 3. **The grid focus model** (`role="grid"` + roving tabindex) — ADR-011's deferred
    "Step 0", load-bearing for row selection and nested headers too, so it deserves
    its own number rather than arriving inside grouping.
+4. **Group-key and aggregate legality comes from the Postgres catalogue**, not from
+   `TableColumnDataType` — added after the review falsified §2.2's premise (see the
+   correction there).
+5. **A table capability is declared once, on the loader `meta`** — added after the
+   review found two live mechanisms for the same decision: ADR-056 declares
+   endpoint capabilities as view props defaulting off, while `crud` is declared on
+   the loader `meta`. Grouping would have entrenched the split.
 
-Number with `vp run adr:verify` (global sequence); (1) in `docs/decisions/`,
-(2)–(3) in `apps/react-router/docs/decisions/` alongside ADR-011; register with
-`--write`. Drafts belong in [`adr-drafts/`](./adr-drafts/). Also required: a
+> **Correction — all five go in `docs/decisions/`.** The original text sent
+> (2)–(3) to `apps/react-router/docs/decisions/` "alongside ADR-011". ADR-048's
+> test is whether a decision leaves when CQMS moves out; both candidate homes
+> stay, so the tie-break is package-versus-app — and every line of grouping code
+> lives in `packages/ui` and `packages/server`. ADR-011 and ADR-012 sit in the app
+> home because they predate the Table's extraction into the package; they are
+> grandfathered, not precedent.
+
+Number with `vp run adr:verify` (global sequence) — all five in `docs/decisions/`;
+register with `--write`. Drafts belong in [`adr-drafts/`](./adr-drafts/), by slug
+with no number: `adr-registry.mjs` hard-fails a numbered draft, and a reserved
+number goes stale as the sequence moves. Also required: a
 **changeset** for `@lcabrera/ui` and `@lcabrera/server` (`api-surface:verify` gates
 the public type surface), and new subpaths in **both** `exports` and
 `publishConfig.exports` in `packages/server/package.json`
@@ -964,7 +1032,7 @@ User toggles group-by (header menu or drawer)
                            └─ sanitizeGroupingByColumns({ columns, grouping })
                       └─ createTableRouteLoader
                            ├─ grouping.keys.length > 0 ? fetchGroupedPage : fetchPage
-                           ├─ key: `${sort}${filters}${grouping}`   // extended remount key
+                           ├─ (no remount key — see §2.6; #557 decides its fate)
                            └─ dataPromise (unawaited — streaming unchanged)
                                 └─ Suspense → use() → TableDataProvider
                                      └─ mapGroupedRows (group_mask → GroupedRow[])
