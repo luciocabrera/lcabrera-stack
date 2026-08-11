@@ -20,6 +20,9 @@ EnvConfig [type] z.infer<typeof envSchema>
 envSchema [const] z.ZodObject<{ DB_CONNECTION_TIMEOUT_MS: z.ZodDefault<z.ZodCoercedNumber<unknown>>; DB_HOST: z.ZodString; DB_IDLE_TIMEOUT_MS: z.ZodDefault<z.ZodCoercedNumber<unknown>>; DB_NAME: z.ZodString; DB_PASSWORD: z.ZodString; DB_POOL_MAX: z.ZodDefault<z.ZodCoercedNumber<unknown>>; DB_PORT: z.ZodCoercedNumber<unknown>; DB_STATEMENT_TIMEOUT_MS: z.ZodDefault<z.ZodCoercedNumber<unknown>>; DB_USER: z.ZodString; }, z.core.$strip>
 readEnvConfig [const] ({ env }: ReadEnvConfigArgs) => EnvConfig
 
+## ./db/get-column-grouping-capabilities.util
+getColumnGroupingCapabilities [const] ({ tx, ...descriptor }: ColumnCapabilitiesQueryDescriptor & ExecutorOptions) => Promise<Readonly<Record<string, ColumnGroupingCapability>>>
+
 ## ./db/get-max-value.util
 getMaxValue [const] ({ tx, ...descriptor }: ExecutorOptions & MaxValueQueryDescriptor) => Promise<number>
 
@@ -29,6 +32,16 @@ getPool [const] () => Pool
 
 ## ./db/get-rows-count.util
 getRowsCount [const] ({ tx, ...descriptor }: CountQueryDescriptor & ExecutorOptions & { readonly column: string; }) => Promise<number>
+
+## ./db/group-query-builder/group-query-builder.types
+AggregateFn [type] 'avg' | 'boolAnd' | 'boolOr' | 'count' | 'countDistinct' | 'max' | 'min' | 'sum'
+AggregateSpec [type] { readonly distinct: boolean; readonly sql: string; }
+ColumnAnalyticalRole [type] 'dimension' | 'fact' | 'unsupported'
+ColumnCapabilitiesQueryDescriptor [type] { readonly columns: readonly string[]; readonly schema: string; readonly table: string; }
+ColumnCapabilityRow [type] { /** SQL aggregate names that exist for this column's type. */ readonly aggregates: readonly string[]; readonly column: string; /** Whether the type resolves a default btree/hash equality operator. */ readonly hasEquality: boolean; /** * Whether `pg_stats` holds a row for this column at all — and the only thing * that makes `nDistinct` meaningful, since the query coalesces the absent * case to a zero that would otherwise be indistinguishable from Postgres * reporting undefined distinctness. */ readonly hasStats: boolean; readonly nDistinct: number; readonly relTuples: number; readonly typeCategory: string; readonly typeName: string; }
+ColumnGroupingCapability [type] { readonly aggregates: readonly AggregateFn[]; readonly canGroup: boolean; readonly column: string; /** Resolved distinct-value estimate; absent when statistics are unavailable. */ readonly distinctEstimate?: number; readonly refusal?: GroupKeyRefusalReason; readonly role: ColumnAnalyticalRole; readonly typeName: string; }
+DistinctEstimate [type] { readonly kind: 'known'; readonly value: number; } | { readonly kind: 'undefinedDistinctness'; } | { readonly kind: 'unknown'; }
+GroupKeyRefusalReason [type] 'no-equality-operator' | 'not-a-dimension' | 'stats-unavailable' | 'too-many-distinct' | 'unique-ish'
 
 ## ./db/insert-row.util
 insertRow [const] <TRow extends QueryResultRow>({ tx, ...descriptor }: ExecutorOptions & InsertQueryDescriptor) => Promise<readonly TRow[]>

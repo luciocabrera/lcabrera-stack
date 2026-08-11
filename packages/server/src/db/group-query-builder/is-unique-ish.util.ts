@@ -1,0 +1,23 @@
+import type { DistinctEstimate } from './group-query-builder.types.ts';
+
+import { UNIQUE_ISH_DISTINCT_RATIO } from './group-key-bounds.constants.ts';
+
+type IsUniqueIshArgs = {
+  readonly estimate: DistinctEstimate;
+  readonly relTuples: number;
+};
+
+/**
+ * Whether a column has about as many distinct values as the table has rows —
+ * a primary key, an order number, a timestamp. Grouping by one produces a
+ * "group" per row, which is the likeliest user mistake and the one worth its
+ * own refusal message.
+ *
+ * An unknown estimate is **not** unique-ish. Refusing on absent statistics
+ * would make grouping dead on a freshly restored database; the fact-column rule
+ * handles the case where that guess is genuinely unaffordable.
+ */
+export const isUniqueIsh = ({ estimate, relTuples }: IsUniqueIshArgs) =>
+  estimate.kind === 'known' &&
+  relTuples > 0 &&
+  estimate.value >= relTuples * UNIQUE_ISH_DISTINCT_RATIO;
