@@ -284,9 +284,9 @@ first. This is strictly _less_ work than a per-entity grouping catalog and is wh
 > row above it ("Which aggregates are legal? → `TableColumn.dataType`") does not
 > hold.** Kept rather than rewritten, per this document's rule of showing both
 > sides of a corrected conclusion. `dataType` is a **UI hint that seeds the menu**;
-> the **Postgres catalogue is authoritative** for both group-key eligibility and
-> aggregate legality. See
-> [`adr-drafts/grouping-legality-from-the-catalog.md`](./adr-drafts/grouping-legality-from-the-catalog.md)
+> legality is decided by **two gates** — the column's analytical role (dimension,
+> fact, or unsupported) as the bar, and the Postgres catalogue as the floor. See
+> [ADR-058](../../decisions/ADR-058-grouping-legality-by-analytical-role.md)
 > and issues #550 (the probe) and #563 (the implementation).
 >
 > What the original claim said: _"`TableColumnDataType` is coarser than `pgType`,
@@ -303,6 +303,15 @@ first. This is strictly _less_ work than a per-entity grouping catalog and is wh
 > creates and drops its own three-column fixture. §2.8's guard then routes the failure into
 > execution, because `n_distinct` for such a column is `0`, which §2.8 maps to
 > UNKNOWN and therefore to "warn and proceed".
+>
+> **Nor is the catalogue on its own the answer** — that was the first replacement
+> for this row, and it is also wrong. `jsonb` has an equality operator, so a
+> catalogue-only rule offers it as a group key, and the Table cannot render a JSON
+> document as a cell value in the first place. The catalogue answers what Postgres
+> _can_ do, never what is worth offering. ADR-058 therefore gates on the column's
+> **analytical role** first — dimensions are grouped, facts are aggregated, and
+> `jsonb`/`point`/arrays and the rest are out of both — and keeps the catalogue
+> underneath as a floor for types the role table has no opinion about.
 
 The one thing the vocabulary cannot distinguish — `integer` vs `numeric` — is
 genuinely moot, because `sum`/`avg`/`count` all arrive from `pg` as **strings**

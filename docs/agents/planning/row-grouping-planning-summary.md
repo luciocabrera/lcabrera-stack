@@ -38,8 +38,10 @@ retired, so **this table is what resolves an old reference to one**:
 | G-02 | #582  | G-05 | #585  | G-08 | #588  |      |       |
 | G-03 | #583  | G-06 | #586  | G-09 | #589  |      |       |
 
-The five proposed decisions are in [`adr-drafts/`](./adr-drafts/) and hold no ADR
-number until adoption ([ADR-048](../../decisions/ADR-048-adr-taxonomy-and-one-sequence.md)).
+The session proposed five decisions. The grouping-legality one is adopted as
+[ADR-058](../../decisions/ADR-058-grouping-legality-by-analytical-role.md); the
+rest are still in [`adr-drafts/`](./adr-drafts/) and hold no ADR number until
+adoption ([ADR-048](../../decisions/ADR-048-adr-taxonomy-and-one-sequence.md)).
 
 ## High-level direction
 
@@ -54,8 +56,12 @@ order.
 an equality operator`. `min(jsonb)` does not exist while `GROUP BY` on jsonb
    succeeds, so the failure is per-type, not per-family; and a `numeric` column
    mapped to `string` is never offered `sum`. The probe owns a fixture carrying
-   those types. The catalogue decides legality instead (#552, #563),
-   merged into the catalog query the cardinality guard already issues.
+   those types. Legality now comes from two gates — the column's analytical role
+   (dimension / fact / unsupported) as the bar, the Postgres catalogue as the
+   floor — adopted as
+   [ADR-058](../../decisions/ADR-058-grouping-legality-by-analytical-role.md)
+   (#552) and implemented in #563, merged into the catalog query the cardinality
+   guard already issues.
 
 2. **The prerequisite work is real, independently valuable, and was folded into
    grouping where it should stand alone.** The capability-availability predicate,
