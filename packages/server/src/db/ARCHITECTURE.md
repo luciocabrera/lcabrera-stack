@@ -7,17 +7,17 @@ construction, and query execution.
 
 This folder is split deliberately, and the split is the thing to preserve:
 
-| Layer                  | Files                                                                                                                                                                                                                                                  | Touches the DB?                                      |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------- |
-| Query **construction** | `query-builder/` (see its own `ARCHITECTURE.md`)                                                                                                                                                                                                       | **No** — pure functions returning `{ text, values }` |
-| Query **execution**    | `get-pool.util.ts`, `run-query.util.ts`, `select-rows.util.ts`, `select-distinct-rows.util.ts`, `select-filter-options.util.ts`, `insert-row.util.ts`, `update-rows.util.ts`, `delete-rows.util.ts`, `get-max-value.util.ts`, `get-rows-count.util.ts` | **Yes**                                              |
-| **Transactions**       | `with-transaction.util.ts`, `run-in-transaction.util.ts`, `rollback-transaction.util.ts`                                                                                                                                                               | **Yes**                                              |
-| Configuration          | `env.schema.ts`, `db.types.ts`                                                                                                                                                                                                                         | Reads env only                                       |
+| Layer                  | Files                                                                                                                                                                                                                                                                                              | Touches the DB?                                      |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| Query **construction** | `query-builder/` and `group-query-builder/` (each has its own `ARCHITECTURE.md`)                                                                                                                                                                                                                   | **No** — pure functions returning `{ text, values }` |
+| Query **execution**    | `get-pool.util.ts`, `run-query.util.ts`, `select-rows.util.ts`, `select-distinct-rows.util.ts`, `select-filter-options.util.ts`, `insert-row.util.ts`, `update-rows.util.ts`, `delete-rows.util.ts`, `get-max-value.util.ts`, `get-rows-count.util.ts`, `get-column-grouping-capabilities.util.ts` | **Yes**                                              |
+| **Transactions**       | `with-transaction.util.ts`, `run-in-transaction.util.ts`, `rollback-transaction.util.ts`                                                                                                                                                                                                           | **Yes**                                              |
+| Configuration          | `env.schema.ts`, `db.types.ts`                                                                                                                                                                                                                                                                     | Reads env only                                       |
 
-`query-builder/` is pure so that every SQL string in the repo is testable
-without a database — that is why its suite runs in the DB-free coverage job
-(ADR-032). Keep it that way: **never import `getPool` from inside
-`query-builder/`.**
+`query-builder/` and `group-query-builder/` are pure so that every SQL string in
+the repo is testable without a database — that is why its suite runs in the DB-free coverage job
+(ADR-032). Keep it that way: **never import `getPool` from inside either
+builder folder.**
 
 `selectRows` is the sanctioned join between the two halves. Before it existed,
 every caller imported `buildSelectQuery` _and_ `getPool` and re-wired the same
@@ -49,24 +49,26 @@ own. Nothing detects it — thread `tx` through every step that must be atomic.
 
 ## Files
 
-| File                            | Role                                                                                                                                                             |
-| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `env.schema.ts`                 | Zod schema + `readEnvConfig` for the `DB_*` credentials and the four optional pool-tuning keys                                                                   |
-| `db.types.ts`                   | `ExecutorOptions` (the optional `tx`) + `TransactionClient` — kept out of `query-builder/`, which must not know about connections                                |
-| `get-pool.util.ts`              | Lazily-initialized `pg.Pool` singleton (one per Node process) + `closePool` for teardown                                                                         |
-| `run-query.util.ts`             | Private. The one place a built query meets a connection: resolves `tx`-or-pool and translates the rejection                                                      |
-| `with-transaction.util.ts`      | **Public entry point.** Borrows a pooled connection, runs a callback in BEGIN/COMMIT/ROLLBACK, always releases                                                   |
-| `run-in-transaction.util.ts`    | **Public entry point.** The same, over a connection the caller owns; opens and closes nothing                                                                    |
-| `rollback-transaction.util.ts`  | Private. ROLLBACK that swallows its own failure so it cannot mask the error being unwound                                                                        |
-| `select-rows.util.ts`           | **Public entry point.** Builds a `SelectQueryDescriptor` and executes it on the pool, returning its rows                                                         |
-| `select-distinct-rows.util.ts`  | **Public entry point.** `selectRows` + `distinct: true` — deduplicated rows over the same descriptor                                                             |
-| `select-filter-options.util.ts` | **Public entry point.** Filter-dropdown specialization over `selectDistinctRows`: one column's distinct, non-empty, ordered values → `{ values, hasMore }`       |
-| `insert-row.util.ts`            | **Public entry point.** Builds + runs an `InsertQueryDescriptor`; defaults `RETURNING *`, returns rows                                                           |
-| `update-rows.util.ts`           | **Public entry point.** Builds + runs an `UpdateQueryDescriptor`; defaults `RETURNING *`, returns rows                                                           |
-| `delete-rows.util.ts`           | **Public entry point.** Builds + runs a `DeleteQueryDescriptor`; defaults `RETURNING *`, returns rows                                                            |
-| `get-max-value.util.ts`         | **Public entry point.** Runs `buildMaxValueQuery` and returns the numeric `MAX(col)` (0 if empty)                                                                |
-| `get-rows-count.util.ts`        | **Public entry point.** Runs `buildCountQuery` and returns the row count; requires an explicit `column` (never `count(*)`) so a page and its total share filters |
-| `query-builder/`                | Pure SELECT/count/distinct/insert/update/delete/max construction — see `query-builder/ARCHITECTURE.md`                                                           |
+| File                                       | Role                                                                                                                                                             |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env.schema.ts`                            | Zod schema + `readEnvConfig` for the `DB_*` credentials and the four optional pool-tuning keys                                                                   |
+| `db.types.ts`                              | `ExecutorOptions` (the optional `tx`) + `TransactionClient` — kept out of `query-builder/`, which must not know about connections                                |
+| `get-pool.util.ts`                         | Lazily-initialized `pg.Pool` singleton (one per Node process) + `closePool` for teardown                                                                         |
+| `run-query.util.ts`                        | Private. The one place a built query meets a connection: resolves `tx`-or-pool and translates the rejection                                                      |
+| `with-transaction.util.ts`                 | **Public entry point.** Borrows a pooled connection, runs a callback in BEGIN/COMMIT/ROLLBACK, always releases                                                   |
+| `run-in-transaction.util.ts`               | **Public entry point.** The same, over a connection the caller owns; opens and closes nothing                                                                    |
+| `rollback-transaction.util.ts`             | Private. ROLLBACK that swallows its own failure so it cannot mask the error being unwound                                                                        |
+| `select-rows.util.ts`                      | **Public entry point.** Builds a `SelectQueryDescriptor` and executes it on the pool, returning its rows                                                         |
+| `select-distinct-rows.util.ts`             | **Public entry point.** `selectRows` + `distinct: true` — deduplicated rows over the same descriptor                                                             |
+| `select-filter-options.util.ts`            | **Public entry point.** Filter-dropdown specialization over `selectDistinctRows`: one column's distinct, non-empty, ordered values → `{ values, hasMore }`       |
+| `insert-row.util.ts`                       | **Public entry point.** Builds + runs an `InsertQueryDescriptor`; defaults `RETURNING *`, returns rows                                                           |
+| `update-rows.util.ts`                      | **Public entry point.** Builds + runs an `UpdateQueryDescriptor`; defaults `RETURNING *`, returns rows                                                           |
+| `delete-rows.util.ts`                      | **Public entry point.** Builds + runs a `DeleteQueryDescriptor`; defaults `RETURNING *`, returns rows                                                            |
+| `get-max-value.util.ts`                    | **Public entry point.** Runs `buildMaxValueQuery` and returns the numeric `MAX(col)` (0 if empty)                                                                |
+| `get-column-grouping-capabilities.util.ts` | **Public entry point.** One catalogue round trip resolving, per column, whether it may be a group key (and why not) and which aggregates are legal               |
+| `get-rows-count.util.ts`                   | **Public entry point.** Runs `buildCountQuery` and returns the row count; requires an explicit `column` (never `count(*)`) so a page and its total share filters |
+| `query-builder/`                           | Pure SELECT/count/distinct/insert/update/delete/max construction — see `query-builder/ARCHITECTURE.md`                                                           |
+| `group-query-builder/`                     | Pure grouped-read construction and the ADR-058 legality gates — see `group-query-builder/ARCHITECTURE.md`                                                        |
 
 ## Choosing an entry point
 

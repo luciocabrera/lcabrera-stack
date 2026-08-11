@@ -15,22 +15,23 @@ individually but imported only within its own folder.
 See `db/ARCHITECTURE.md` for the pure (`query-builder/`) vs impure (execution)
 split this folder is built around.
 
-| Artifact              | Location                           | Description                                                                                                                                                           |
-| --------------------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `readEnvConfig`       | `db/env.schema.ts`                 | Zod schema + parser for the five `DB_*` credentials plus four optional pool-tuning keys (max, connection/idle/statement timeouts)                                     |
-| `getPool`             | `db/get-pool.util.ts`              | Lazily-initialized `pg.Pool` singleton, one per Node process, built from those tuning keys                                                                            |
-| `closePool`           | `db/get-pool.util.ts`              | Tears down the pool singleton (test teardown)                                                                                                                         |
-| `withTransaction`     | `db/with-transaction.util.ts`      | Borrows a pooled connection and runs a callback inside BEGIN/COMMIT/ROLLBACK, always releasing it — thread its `tx` through every executor in the sequence (ADR-051)  |
-| `runInTransaction`    | `db/run-in-transaction.util.ts`    | The same BEGIN/COMMIT/ROLLBACK over a connection the **caller** owns; opens and closes nothing (the migration runner's case)                                          |
-| `ExecutorOptions`     | `db/db.types.ts`                   | The optional `tx` seam every executor accepts, plus `TransactionClient` (pg's `ClientBase`) — kept off the pure `query-builder/` descriptors on purpose               |
-| `selectRows`          | `db/select-rows.util.ts`           | Builds a `SelectQueryDescriptor` and runs it on the pool — the one place `buildSelectQuery` meets `getPool`                                                           |
-| `selectDistinctRows`  | `db/select-distinct-rows.util.ts`  | `selectRows` + `distinct: true` — deduplicated rows over the same descriptor                                                                                          |
-| `selectFilterOptions` | `db/select-filter-options.util.ts` | Filter-dropdown read over `selectDistinctRows`: one column's distinct, non-empty (empty dropped only for `text`), ordered values → `{ values, hasMore }`              |
-| `insertRow`           | `db/insert-row.util.ts`            | Builds + runs an `InsertQueryDescriptor`; defaults `RETURNING *`, returns the inserted row(s)                                                                         |
-| `updateRows`          | `db/update-rows.util.ts`           | Builds + runs an `UpdateQueryDescriptor`; defaults `RETURNING *`, returns the updated row(s)                                                                          |
-| `deleteRows`          | `db/delete-rows.util.ts`           | Builds + runs a `DeleteQueryDescriptor`; defaults `RETURNING *`, returns the deleted row(s)                                                                           |
-| `getMaxValue`         | `db/get-max-value.util.ts`         | Runs `buildMaxValueQuery` and returns the numeric `MAX(col)` (0 if empty) — generic "next id" for id assignment                                                       |
-| `getRowsCount`        | `db/get-rows-count.util.ts`        | Runs `buildCountQuery` and returns the row count; requires an explicit `column` (never `count(*)`) — pass the data query's filters so a page and its total share them |
+| Artifact                        | Location                                      | Description                                                                                                                                                           |
+| ------------------------------- | --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `readEnvConfig`                 | `db/env.schema.ts`                            | Zod schema + parser for the five `DB_*` credentials plus four optional pool-tuning keys (max, connection/idle/statement timeouts)                                     |
+| `getPool`                       | `db/get-pool.util.ts`                         | Lazily-initialized `pg.Pool` singleton, one per Node process, built from those tuning keys                                                                            |
+| `closePool`                     | `db/get-pool.util.ts`                         | Tears down the pool singleton (test teardown)                                                                                                                         |
+| `withTransaction`               | `db/with-transaction.util.ts`                 | Borrows a pooled connection and runs a callback inside BEGIN/COMMIT/ROLLBACK, always releasing it — thread its `tx` through every executor in the sequence (ADR-051)  |
+| `runInTransaction`              | `db/run-in-transaction.util.ts`               | The same BEGIN/COMMIT/ROLLBACK over a connection the **caller** owns; opens and closes nothing (the migration runner's case)                                          |
+| `ExecutorOptions`               | `db/db.types.ts`                              | The optional `tx` seam every executor accepts, plus `TransactionClient` (pg's `ClientBase`) — kept off the pure `query-builder/` descriptors on purpose               |
+| `selectRows`                    | `db/select-rows.util.ts`                      | Builds a `SelectQueryDescriptor` and runs it on the pool — the one place `buildSelectQuery` meets `getPool`                                                           |
+| `selectDistinctRows`            | `db/select-distinct-rows.util.ts`             | `selectRows` + `distinct: true` — deduplicated rows over the same descriptor                                                                                          |
+| `selectFilterOptions`           | `db/select-filter-options.util.ts`            | Filter-dropdown read over `selectDistinctRows`: one column's distinct, non-empty (empty dropped only for `text`), ordered values → `{ values, hasMore }`              |
+| `insertRow`                     | `db/insert-row.util.ts`                       | Builds + runs an `InsertQueryDescriptor`; defaults `RETURNING *`, returns the inserted row(s)                                                                         |
+| `updateRows`                    | `db/update-rows.util.ts`                      | Builds + runs an `UpdateQueryDescriptor`; defaults `RETURNING *`, returns the updated row(s)                                                                          |
+| `deleteRows`                    | `db/delete-rows.util.ts`                      | Builds + runs a `DeleteQueryDescriptor`; defaults `RETURNING *`, returns the deleted row(s)                                                                           |
+| `getMaxValue`                   | `db/get-max-value.util.ts`                    | Runs `buildMaxValueQuery` and returns the numeric `MAX(col)` (0 if empty) — generic "next id" for id assignment                                                       |
+| `getRowsCount`                  | `db/get-rows-count.util.ts`                   | Runs `buildCountQuery` and returns the row count; requires an explicit `column` (never `count(*)`) — pass the data query's filters so a page and its total share them |
+| `getColumnGroupingCapabilities` | `db/get-column-grouping-capabilities.util.ts` | Per column: may it be a group key (and if not, which of five reasons), and which aggregates are legal for its real Postgres type — one catalogue round trip, ADR-058  |
 
 ### `src/db/query-builder/` — see its own `ARCHITECTURE.md`
 
@@ -56,6 +57,18 @@ folder (`assertSafeIdentifier`, `assertColumnAllowed`, `assertKeysetCursor`,
 `buildOrderByClause`, `buildOptionalNumericClauses`, `quoteIdentifier`) is a private,
 individually-tested implementation detail composed by those entry points —
 import them directly only from within `query-builder/`.
+
+### `src/db/group-query-builder/` — see its own `ARCHITECTURE.md`
+
+The pure half of grouped reads, sibling to `query-builder/` and equally
+DB-free. Today it holds the ADR-058 legality gates: `resolveColumnCapability`
+(`resolve-column-capability.util.ts`) is the entry point, composing
+`resolveAnalyticalRole` (Gate 1, from `pg_type.typcategory`),
+`buildColumnCapabilitiesQuery` (Gate 2, one bound-parameter catalogue query),
+`resolveDistinctEstimate` and `toRoleAggregates`. `AGGREGATE_SQL`
+(`aggregate-sql.constants.ts`) is the closed `AggregateFn` → SQL map, and
+`group-query-builder.types.ts` holds the shared types. Run it through
+`getColumnGroupingCapabilities` above rather than by hand.
 
 ---
 

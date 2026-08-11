@@ -1,0 +1,95 @@
+import { describe, expect, it } from 'vite-plus/test';
+
+import type {
+  ColumnAnalyticalRole,
+  DistinctEstimate,
+} from './group-query-builder.types.ts';
+
+import { refuseGroupKey } from './refuse-group-key.util.ts';
+
+type ArgsOverrides = {
+  readonly estimate?: DistinctEstimate;
+  readonly hasEquality?: boolean;
+  readonly relTuples?: number;
+  readonly role?: ColumnAnalyticalRole;
+};
+
+const args = (overrides: ArgsOverrides) => ({
+  estimate: { kind: 'known', value: 24 } as DistinctEstimate,
+  hasEquality: true,
+  relTuples: 2000,
+  role: 'dimension' as ColumnAnalyticalRole,
+  ...overrides,
+});
+
+describe('refuseGroupKey', () => {
+  it('accepts a low-cardinality dimension', () => {
+    expect(refuseGroupKey(args({}))).toBeUndefined();
+  });
+
+  // The priority that decides which message a user sees. A `point` column trips
+  // both rules, and only one of the two reads as an explanation.
+  it('reports the role before the missing operator when both apply', () => {
+    expect(
+      refuseGroupKey(
+        args({
+          estimate: { kind: 'undefinedDistinctness' },
+          hasEquality: false,
+          role: 'unsupported',
+        }),
+      ),
+    ).toBe('not-a-dimension');
+  });
+
+  it('reports a missing operator for a dimension-categorised type', () => {
+    expect(refuseGroupKey(args({ hasEquality: false }))).toBe(
+      'no-equality-operator',
+    );
+  });
+
+  it('treats undefined distinctness as the missing operator it is', () => {
+    expect(
+      refuseGroupKey(args({ estimate: { kind: 'undefinedDistinctness' } })),
+    ).toBe('no-equality-operator');
+  });
+
+  it('reports a unique-ish column before a too-large one', () => {
+    // Both would refuse a primary key. Only one tells the user what they did.
+    expect(
+      refuseGroupKey(
+        args({ estimate: { kind: 'known', value: 2000 }, relTuples: 2000 }),
+      ),
+    ).toBe('unique-ish');
+  });
+
+  it('refuses a fact whose low cardinality cannot be demonstrated', () => {
+    expect(
+      refuseGroupKey(args({ estimate: { kind: 'unknown' }, role: 'fact' })),
+    ).toBe('stats-unavailable');
+  });
+
+  it('accepts a dimension with no statistics, warning rather than refusing', () => {
+    expect(
+      refuseGroupKey(args({ estimate: { kind: 'unknown' } })),
+    ).toBeUndefined();
+  });
+
+  it('refuses a column with more distinct values than a key may have', () => {
+    expect(
+      refuseGroupKey(
+        args({
+          estimate: { kind: 'known', value: 5000 },
+          relTuples: 1_000_000,
+        }),
+      ),
+    ).toBe('too-many-distinct');
+  });
+
+  it('accepts a fact whose statistics show it behaving like a dimension', () => {
+    expect(
+      refuseGroupKey(
+        args({ estimate: { kind: 'known', value: 13 }, role: 'fact' }),
+      ),
+    ).toBeUndefined();
+  });
+});

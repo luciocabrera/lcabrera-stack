@@ -33,9 +33,11 @@
     "./db/db.types": "./src/db/db.types.ts",
     "./db/delete-rows.util": "./src/db/delete-rows.util.ts",
     "./db/env.schema": "./src/db/env.schema.ts",
+    "./db/get-column-grouping-capabilities.util": "./src/db/get-column-grouping-capabilities.util.ts",
     "./db/get-max-value.util": "./src/db/get-max-value.util.ts",
     "./db/get-pool.util": "./src/db/get-pool.util.ts",
     "./db/get-rows-count.util": "./src/db/get-rows-count.util.ts",
+    "./db/group-query-builder/group-query-builder.types": "./src/db/group-query-builder/group-query-builder.types.ts",
     "./db/insert-row.util": "./src/db/insert-row.util.ts",
     "./db/query-builder/build-count-query.util": "./src/db/query-builder/build-count-query.util.ts",
     "./db/query-builder/build-delete-query.util": "./src/db/query-builder/build-delete-query.util.ts",
@@ -91,6 +93,10 @@
         "types": "./dist/db/env.schema.d.mts",
         "default": "./dist/db/env.schema.mjs"
       },
+      "./db/get-column-grouping-capabilities.util": {
+        "types": "./dist/db/get-column-grouping-capabilities.util.d.mts",
+        "default": "./dist/db/get-column-grouping-capabilities.util.mjs"
+      },
       "./db/get-max-value.util": {
         "types": "./dist/db/get-max-value.util.d.mts",
         "default": "./dist/db/get-max-value.util.mjs"
@@ -102,6 +108,10 @@
       "./db/get-rows-count.util": {
         "types": "./dist/db/get-rows-count.util.d.mts",
         "default": "./dist/db/get-rows-count.util.mjs"
+      },
+      "./db/group-query-builder/group-query-builder.types": {
+        "types": "./dist/db/group-query-builder/group-query-builder.types.d.mts",
+        "default": "./dist/db/group-query-builder/group-query-builder.types.mjs"
       },
       "./db/insert-row.util": {
         "types": "./dist/db/insert-row.util.d.mts",
