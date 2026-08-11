@@ -175,6 +175,22 @@ overrides:
   # advisory, which is the failure mode that let this one sit unnoticed. Drop
   # this entry once @modelcontextprotocol/sdk's own floor is >= 4.12.34.
   hono: ^4.12.34
+  # GHSA-2v37-7h3g-55p8 — nanoid's custom generators loop forever at size zero,
+  # fixed in 3.3.17. Reached only through `postcss`, which asks for `^3.3.16` —
+  # so the patch is already inside the range it accepts and this only lifts the
+  # floor. Keyed `nanoid@3` rather than bare `nanoid`: the advisory is scoped to
+  # the 3.x line, and an unscoped override would force a future 5.x consumer back
+  # onto the 3.x line. Drop once postcss's own floor is >= 3.3.17.
+  nanoid@3: ^3.3.17
+  # GHSA-5p4m-2wfm-xmqj — quadratic CPU consumption resolving `!!omap`, present
+  # in BOTH live major lines and not backported, so it needs two entries: 3.x
+  # arrives via `read-yaml-file` (asks `^3.6.1`), 4.x via `@changesets/parse`
+  # (asks `^4.1.1`). Both patches sit inside the range their parent already
+  # declares. Neither is declared by any workspace, so `vp update js-yaml` is a
+  # no-op and an override is the only lever. Drop each once its parent's floor
+  # clears the patched version.
+  js-yaml@3: ^3.15.1
+  js-yaml@4: ^4.3.1
 peerDependencyRules:
   allowAny:
     - vite
