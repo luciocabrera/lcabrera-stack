@@ -32,31 +32,35 @@ undeclared type as `string`.
 
 The premise is false in both directions, and the failure is silent.
 
-`apps/react-router/src/routes/wide-alltypes-150/WideAlltypes150.constants.ts`
-generates its columns, collapsing 20 real Postgres types into the five-member
-vocabulary. Probed against the live table:
+Any table carrying a `point`, `jsonb` or `numeric` column shows it, because the
+five-member vocabulary reports all three as `string`. Probed against a
+purpose-built fixture (`apps/react-router/src/.server/groupingLegality.smoke.test.ts`,
+which creates and drops its own three-column table):
 
-- `c_018` is `point`, mapped to `string` — the type the design calls "the best
-  key". `GROUP BY c_018` raises `could not identify an equality operator for type
+- a `point` column maps to `string` — the type the design calls "the best key".
+  `GROUP BY` on it raises `could not identify an equality operator for type
 point`.
-- `c_014` is `jsonb`, also mapped to `string`. `min(jsonb)` does not exist. But
-  `GROUP BY c_014` **succeeds** — jsonb has equality. So the failure is per-type,
+- a `jsonb` column also maps to `string`. `min(jsonb)` does not exist. But
+  `GROUP BY` on it **succeeds** — jsonb has equality. So the failure is per-type,
   not per-family, and no coarsening of the vocabulary can capture it.
-- `c_003` is `numeric`, mapped to `string`. So `sum` and `avg` are never offered
+- a `numeric` column also maps to `string`. So `sum` and `avg` are never offered
   on a column that supports them. The vocabulary **forbids legal aggregates** as
   well as permitting illegal ones.
 
 The guard rail then routes the failure into execution rather than catching it.
-`pg_stats.n_distinct` for `c_018` is `0`, and the design's resolution table maps
-`n_distinct = 0` to UNKNOWN, and UNKNOWN to "warn and proceed, never refuse" —
-so the safety valve points at exactly the unsafe branch.
+`pg_stats.n_distinct` for the `point` column is `0`, and the design's resolution
+table maps `n_distinct = 0` to UNKNOWN, and UNKNOWN to "warn and proceed, never
+refuse" — so the safety valve points at exactly the unsafe branch.
 
 The obvious confound is a never-`ANALYZE`d table, which also produces no usable
-statistic. The discriminating probe is to run `ANALYZE` and look again: the
-`pg_stats` row **exists** and `n_distinct` is **still `0`**, while `c_014` reads
-`-1` and `c_019` reads `1000`. `0` is not "unknown" — it is Postgres stating that
-the type has no equality operator, so distinctness is undefined. The design
-conflates two meanings of one value.
+statistic. The fixture rules it out twice. `ANALYZE` runs before the assertions,
+and the `pg_stats` row then **exists** with `n_distinct` **still `0`**, while the
+`jsonb` and `numeric` columns report their real counts. And the `point` column is
+seeded with exactly 35 distinct values — counted through a `::text` cast, the only
+way to distinguish them without an equality operator — so `0` cannot be read as
+"too few to matter" either. `0` is not "unknown": it is Postgres stating that the
+type has no equality operator, so distinctness is undefined. The design conflates
+two meanings of one value.
 
 Because `dataType` is optional and defaults to the most permissive member, the
 same table also makes **every column with no declared type** "the best key".
@@ -124,9 +128,9 @@ tests assert the refusal _reason_ rather than only the boolean so the case is
 visible when it bites.
 
 **What this buys.** The genericity claim becomes true rather than aspirational,
-and `wide-alltypes-150` becomes the test that proves it instead of the route that
-breaks it. No second catalogue can drift from the first, because there is no
-second catalogue.
+and it is provable against a fixture the probe owns rather than against whichever
+route happens to carry an awkward type today. No second catalogue can drift from
+the first, because there is no second catalogue.
 
 ## Alternatives considered
 

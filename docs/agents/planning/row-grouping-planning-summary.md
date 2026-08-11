@@ -48,13 +48,13 @@ order.
 
 1. **The genericity premise does not hold, and its own guard rail hides that.**
    The design derives group-key and aggregate legality from
-   `TableColumnDataType`. That vocabulary has five members and
-   `wide-alltypes-150` generates its columns by collapsing 20 Postgres types into
-   them, so a `point` column arrives as `string` — the type the design calls "the
-   best key" — and fails `GROUP BY` with `could not identify an equality
-operator`. `min(jsonb)` does not exist while `GROUP BY jsonb` succeeds, so the
-   failure is per-type, not per-family; and a `numeric` column mapped to `string`
-   is never offered `sum`. The catalogue decides legality instead (#552, #563),
+   `TableColumnDataType`. That vocabulary has five members and reports `point`,
+   `jsonb` and `numeric` all as `string`, so a `point` column arrives as the type
+   the design calls "the best key" — and fails `GROUP BY` with `could not identify
+an equality operator`. `min(jsonb)` does not exist while `GROUP BY` on jsonb
+   succeeds, so the failure is per-type, not per-family; and a `numeric` column
+   mapped to `string` is never offered `sum`. The probe owns a fixture carrying
+   those types. The catalogue decides legality instead (#552, #563),
    merged into the catalog query the cardinality guard already issues.
 
 2. **The prerequisite work is real, independently valuable, and was folded into
@@ -69,10 +69,11 @@ split, unpaginated grouped reads, and the `GROUPING`-led ordering.
 
 ## Load-bearing nuance (from the feasibility pass)
 
-**Schedule the falsifier first.** Only `wide-alltypes-150` has the type variety
-that can disprove the genericity claim, and the design scheduled it **last** — as
-a rollout, after the builder, the guard rails and cube were all built on the
-premise. It is now #550, in Wave 1, before anything depends on it.
+**Schedule the falsifier first.** No domain route carries a type that disproves
+the genericity claim, so the design deferred the question to the final rollout
+slice — after the builder, the guard rails and cube were all built on the premise.
+It is now #550, in Wave 1, as a probe owning a fixture with the awkward types,
+before anything depends on it.
 
 **Two mechanisms the design reasons about do not exist as described.** The loader
 remount key it proposes to extend is produced and read by nothing (#557), so its
@@ -86,8 +87,9 @@ HTTP from the api-server rather than reading Postgres in process, so grouping
 them means an endpoint in `apps/shared`, an Express route, a Fastify plugin and
 new fetchers — plus three more unguarded copies of the grouping shape, which is
 the mechanism the design's own Risk 7 forbids. #575 proves the same genericity
-claim by pointing `wide-alltypes-150` at a `.server/` service instead; crossing
-the api-server boundary is deferred.
+claim with a type probe that owns its fixture instead; crossing the api-server
+boundary is deferred, and `wide-alltypes-150` is not a rollout target at all — it
+is a rendering playground for very wide grids, not a domain schema.
 
 **Risk 7 is confirmed and already user-visible.** The two review agents reached
 opposite conclusions here, and the disagreement was a probe artifact: searching

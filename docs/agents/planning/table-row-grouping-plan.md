@@ -292,15 +292,15 @@ first. This is strictly _less_ work than a per-entity grouping catalog and is wh
 > What the original claim said: _"`TableColumnDataType` is coarser than `pgType`,
 > and that is sufficient: it never lets an illegal aggregate be emitted (§4.2)."_
 >
-> Why it is wrong, probed against `wide_alltypes_150`, whose columns are generated
-> by collapsing 20 Postgres types into the five-member vocabulary: `c_018` is a
-> `point` and maps to `string` — the type §4.2 calls the best key — and `GROUP BY`
+> Why it is wrong: the vocabulary reports `point`, `jsonb` and `numeric` all as
+> `string`. A `point` column is therefore "the best key" per §4.2, and `GROUP BY`
 > on it raises `could not identify an equality operator for type point`.
-> `min(jsonb)` does not exist, while `GROUP BY jsonb` succeeds, so the failure is
-> per-type rather than per-family and no coarsening captures it. In the other
-> direction `c_003` is `numeric` mapped to `string`, so `sum`/`avg` are never
-> offered on a column that supports them — the vocabulary forbids legal aggregates
-> as well as permitting illegal ones. §2.8's guard then routes the failure into
+> `min(jsonb)` does not exist, while `GROUP BY` on jsonb succeeds, so the failure
+> is per-type rather than per-family and no coarsening captures it. In the other
+> direction a `numeric` column mapped to `string` is never offered `sum`/`avg` —
+> the vocabulary forbids legal aggregates as well as permitting illegal ones.
+> Probed by `apps/react-router/src/.server/groupingLegality.smoke.test.ts`, which
+> creates and drops its own three-column fixture. §2.8's guard then routes the failure into
 > execution, because `n_distinct` for such a column is `0`, which §2.8 maps to
 > UNKNOWN and therefore to "warn and proceed".
 
@@ -494,9 +494,11 @@ bounds: flat ∏dₖ · rollup 1 + Σᵢ ∏_{j≤i} dⱼ · cube ∏(dₖ+1)
 > waved through to fail at execution. The obvious reading of `0` is "never
 > `ANALYZE`d" — but §1.7(e) already established that a never-analyzed table has
 > **no `pg_stats` row at all**, and the discriminating probe closes it: run
-> `ANALYZE public.wide_alltypes_150` and re-read `pg_stats`; the row for `c_018`
-> exists and `n_distinct` stays `0`, while `c_014` reads `-1` and `c_019` reads
-> `1000`. `0` is Postgres saying the type has no equality operator, so
+> `ANALYZE` on the fixture and re-read `pg_stats`; the row for the `point` column
+> exists and `n_distinct` stays `0`, while the `jsonb` and `numeric` columns
+> report their real counts — and the `point` column holds 35 genuinely distinct
+> values, so `0` is not "too few to matter" either. `0` is Postgres saying the
+> type has no equality operator, so
 > distinctness is undefined — such a column is not groupable, and the catalogue
 > check of §2.10(4) refuses it by type before this estimator is ever consulted.
 
@@ -1103,11 +1105,21 @@ timeout, `QueryCanceledError`, and the warn / refuse / timeout UI surfaces.
 
 ### Slice 7 — Roll out to every table route
 
-`car-sales`, `car-sales-infinite`, `wide-alltypes-150` each add
-`grouping: { enabled: true }` to their loader `meta`. §2.2 means this is
-configuration, not new machinery — the slice is mostly verifying the generic
-derivation holds against `wide-alltypes-150`'s type variety, which is precisely the
-value of doing it.
+`car-sales` and `car-sales-infinite` add `grouping: { enabled: true }` to their
+loader `meta`.
+
+> **Correction — `wide-alltypes-150` is not a rollout target.** It is a rendering
+> playground for very wide grids (150 columns x 1M rows), not a domain schema, so
+> shipping a data feature into it would be fitting the feature to a test harness.
+> It is excluded from this slice. Its type variety was only ever wanted as
+> _evidence_ for §2.2, and that evidence now comes from a fixture the probe owns
+> and drops (`apps/react-router/src/.server/groupingLegality.smoke.test.ts`), so
+> nothing is lost by leaving the playground alone.
+>
+> Note also that these two routes fetch over HTTP from the api-server rather than
+> reading Postgres in process, so this slice is **not** configuration-only for
+> them either — it needs a grouped endpoint in `apps/shared`, an Express route, a
+> Fastify plugin and new fetchers. Sized accordingly, and deliberately deferred.
 
 ### Slice 8 — Mode 1 presets + totals placement setting
 
@@ -1201,7 +1213,7 @@ does not cover (`lint:eslint:check`, `lint:biome:check`, `react-doctor:verify`).
 | 3   | **The cardinality bound over-refuses on sparse data** — §1.7(g) measured it conservative ~2.5× (predicted 3 564, actual 1 422)                                                            | Why WARN-plus-`LIMIT`-backstop beats pure pre-flight refusal: the warn path still returns data. Revisit the bound with a sparsity factor if it bites                                  |
 | 4   | **Estimates are wrong on a stale-statistics table**, so a "safe" query returns 200k rows                                                                                                  | Two independent backstops: the `LIMIT` at WARN+1 truncates, and the 10 s timeout bounds time. Never trust the estimate alone                                                          |
 | 5   | **Expansion resetting on revalidation reads as a bug**                                                                                                                                    | Path-keyed re-application survives sort changes (the common case) and most filter changes. Document it; the escape hatch is `sessionStorage`, already used for tab-scoped table state |
-| 6   | **Rolling out to all four routes surfaces type gaps** — `wide-alltypes-150` has variety `enterprise-orders` lacks                                                                         | That is exactly why Slice 7 exists as its own slice rather than being assumed. The §4.2 table is the contract it tests                                                                |
+| 6   | **Rolling out surfaces type gaps** that `enterprise-orders` alone does not exercise                                                                                                       | Proven up front by the §2.2 type probe, which owns a fixture carrying the awkward types, rather than by rolling the feature into the wide-column rendering playground                 |
 | 7   | **The third `GroupingState` copy drifts** the way copies 3–5 of `ColumnFilter` already have (`apps/shared`, both api-servers — none guarded)                                              | `groupingContract.test.ts` with the annotation form. Do **not** extend grouping to the api-server routes in v1 — that is what created the unguarded copies                            |
 | 8   | **`@lcabrera/server`'s public surface grows**; `api-surface:verify` requires a changeset and new subpaths must land in **both** export maps                                               | Slice 1's checklist. Only 8 of 18 existing `query-builder` files are exported — export deliberately, not wholesale                                                                    |
 | 9   | **Doc drift.** `packages/server/src/filters/ARCHITECTURE.md` and `packages/server/src/INVENTORY.md` still claim `@lcabrera/ui` re-exports the server's filter types — false since ADR-039 | Fix in Slice 1 rather than writing grouping docs by analogy and inheriting the error                                                                                                  |
@@ -1226,7 +1238,7 @@ changed the design rather than just filling a blank.
 | Question                                                                                                                                                                                                                                                     | Decider                                   |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------- |
 | Are the 5 000 / 50 000 thresholds right for production volumes? §1.7(g) shows realistic groupings of a 500k-row table land near 1 400, so they currently guard only the pathological case — which may mean they are too loose to be useful, or exactly right | Lucio, after Slice 5 ships with telemetry |
-| Should `wide-alltypes-150` cap grouping depth lower than 4? With 150 columns the picker UX, not the SQL, may be the binding constraint                                                                                                                       | Lucio / design, at Slice 7                |
+| At what column count does the group-by picker UX, rather than the SQL, become the binding constraint on depth?                                                                                                                                               | Lucio / design, at Slice 7                |
 
 ---
 
@@ -1265,8 +1277,10 @@ the app and only fails there), `vp run test:ci` before pushing without a databas
    expand/collapse, and confirm focus lands on the ancestor when a collapse removes
    the focused row. Verify with a screen reader that level and expansion state are
    announced.
-7. From Slice 7: repeat 1–4 on `wide-alltypes-150` with no code change beyond its
-   `grouping` flag — that is the test of §2.2's genericity.
+7. From Slice 7: repeat 1–4 on a second SQL-backed route with no code change
+   beyond its `grouping` flag — that is the test of §2.2's genericity. Not
+   `wide-alltypes-150`, which is a rendering playground rather than a domain
+   schema; §2.2's genericity is proven by the type probe instead.
 
 **Coordination:** claim before starting — `vp run coordination:verify` for overlap,
 then `vp run coordination:claim -- <id> "<title>" --new-issue
