@@ -1,4 +1,4 @@
-# Group-key and aggregate legality comes from the Postgres catalog, not from `TableColumnDataType`
+# Grouping legality is decided by analytical role, with the Postgres catalogue as the floor
 
 **Status:** Proposed
 
@@ -32,31 +32,35 @@ undeclared type as `string`.
 
 The premise is false in both directions, and the failure is silent.
 
-`apps/react-router/src/routes/wide-alltypes-150/WideAlltypes150.constants.ts`
-generates its columns, collapsing 20 real Postgres types into the five-member
-vocabulary. Probed against the live table:
+Any table carrying a `point`, `jsonb` or `numeric` column shows it, because the
+five-member vocabulary reports all three as `string`. Probed against a
+purpose-built fixture (`apps/react-router/src/.server/groupingLegality.smoke.test.ts`,
+which creates and drops its own three-column table):
 
-- `c_018` is `point`, mapped to `string` — the type the design calls "the best
-  key". `GROUP BY c_018` raises `could not identify an equality operator for type
+- a `point` column maps to `string` — the type the design calls "the best key".
+  `GROUP BY` on it raises `could not identify an equality operator for type
 point`.
-- `c_014` is `jsonb`, also mapped to `string`. `min(jsonb)` does not exist. But
-  `GROUP BY c_014` **succeeds** — jsonb has equality. So the failure is per-type,
+- a `jsonb` column also maps to `string`. `min(jsonb)` does not exist. But
+  `GROUP BY` on it **succeeds** — jsonb has equality. So the failure is per-type,
   not per-family, and no coarsening of the vocabulary can capture it.
-- `c_003` is `numeric`, mapped to `string`. So `sum` and `avg` are never offered
+- a `numeric` column also maps to `string`. So `sum` and `avg` are never offered
   on a column that supports them. The vocabulary **forbids legal aggregates** as
   well as permitting illegal ones.
 
 The guard rail then routes the failure into execution rather than catching it.
-`pg_stats.n_distinct` for `c_018` is `0`, and the design's resolution table maps
-`n_distinct = 0` to UNKNOWN, and UNKNOWN to "warn and proceed, never refuse" —
-so the safety valve points at exactly the unsafe branch.
+`pg_stats.n_distinct` for the `point` column is `0`, and the design's resolution
+table maps `n_distinct = 0` to UNKNOWN, and UNKNOWN to "warn and proceed, never
+refuse" — so the safety valve points at exactly the unsafe branch.
 
 The obvious confound is a never-`ANALYZE`d table, which also produces no usable
-statistic. The discriminating probe is to run `ANALYZE` and look again: the
-`pg_stats` row **exists** and `n_distinct` is **still `0`**, while `c_014` reads
-`-1` and `c_019` reads `1000`. `0` is not "unknown" — it is Postgres stating that
-the type has no equality operator, so distinctness is undefined. The design
-conflates two meanings of one value.
+statistic. The fixture rules it out twice. `ANALYZE` runs before the assertions,
+and the `pg_stats` row then **exists** with `n_distinct` **still `0`**, while the
+`jsonb` and `numeric` columns report their real counts. And the `point` column is
+seeded with exactly 35 distinct values — counted through a `::text` cast, the only
+way to distinguish them without an equality operator — so `0` cannot be read as
+"too few to matter" either. `0` is not "unknown": it is Postgres stating that the
+type has no equality operator, so distinctness is undefined. The design conflates
+two meanings of one value.
 
 Because `dataType` is optional and defaults to the most permissive member, the
 same table also makes **every column with no declared type** "the best key".
@@ -73,23 +77,68 @@ same table also makes **every column with no declared type** "the best key".
    widening it to 20+ members changes every consumer, and a published package's
    type union is not a free thing to grow. It also still would not answer which
    aggregates exist for a type — that is a catalogue lookup either way.
-3. **Ask the catalogue at request time. `Chosen.`** `dataType` seeds the menu as a
-   hint; `pg_type`, `pg_operator` and `pg_aggregate` decide legality.
-4. **Introspect once at build time and generate a type map.** Rejected: it
+3. **Ask the catalogue at request time, and treat its answer as final.** Rejected
+   on the probe's own evidence: `jsonb` has an equality operator, so a
+   catalogue-only rule offers it as a group key — a column the Table cannot even
+   render. The catalogue answers what Postgres _can_ do, never what is worth
+   offering.
+4. **Classify by analytical role, with the catalogue as a floor. `Chosen.`**
+   Dimensions are grouped, facts are aggregated, and everything else is out.
+   `dataType` seeds the menu as a hint; the role table decides what is offered; the
+   catalogue backstops anything the role table has no opinion about.
+5. **Introspect once at build time and generate a type map.** Rejected: it
    re-introduces the codegen step the design explicitly avoided, and it goes stale
    against a migrated database in the direction that fails open.
 
 ## Decision
 
-`TableColumnDataType` **seeds the aggregate menu**. The **Postgres catalogue
-decides** what is legal.
+Legality is decided by **two gates, and a column must clear both**. The catalogue
+is the floor — it rules out what Postgres cannot do. The **analytical role** is the
+bar — it rules out what makes no sense to offer.
 
-A single bound-parameter query resolves, per column: whether the column's type has
-an equality operator (so it can appear in `GROUP BY`), and which of the supported
-aggregate functions exist for that type. It joins `pg_attribute` to `pg_type`, to
-`pg_operator` for equality, and to `pg_aggregate`/`pg_proc` for per-function
-existence. Schema, table and the column list are all bound parameters, so the
-query has no identifier-interpolation surface.
+### Gate 1 — the analytical role, derived from the real Postgres type
+
+Every column resolves to exactly one of three roles:
+
+| Role            | Real types                                                                | May be a group key                     | May be aggregated                      |
+| --------------- | ------------------------------------------------------------------------- | -------------------------------------- | -------------------------------------- |
+| **Dimension**   | `text`, `varchar`, `char`, enum, `boolean`, date/timestamp                | **yes** — this is what grouping is for | `count`, `countDistinct`, `min`, `max` |
+| **Fact**        | `numeric`, `int2/4/8`, `float4/8`, money                                  | only when demonstrably low-cardinality | `sum`, `avg`, `min`, `max`, `count`    |
+| **Unsupported** | `jsonb`, `json`, `point` and the geometric family, arrays, `bytea`, `xml` | **no**                                 | **no**                                 |
+
+This is the dimension/fact split analytics has always had: you group by a country,
+a city or a category, and you aggregate an amount, a quantity, a price or a cost.
+A column that is neither is not an analytical column at all.
+
+**`Unsupported` is the part the catalogue alone gets wrong**, and the reason this
+gate exists rather than deferring everything to Postgres. `jsonb` _has_ an equality
+operator, so `GROUP BY` on it parses and runs — the probe in
+`apps/react-router/src/.server/groupingLegality.smoke.test.ts` asserts exactly
+that. A catalogue-only rule would therefore offer it. But grouping by a JSON
+document is analytically meaningless, its equality is structural rather than
+semantic, and the Table cannot render it as a cell value in the first place, so a
+group header built from one would be unreadable. The same holds for `point` and the
+rest of the family.
+
+The rule that follows: **a type the Table cannot display is not a type it can group,
+filter or sort by.** Renderability is the outer boundary, and grouping sits inside
+it. Supporting these types at all is a separate piece of work (a display strategy
+first, then extraction expressions such as `jsonb` path keys or `point` components)
+and is explicitly not in scope here.
+
+### Gate 2 — the catalogue, as defence in depth
+
+For a column that clears Gate 1, a single bound-parameter query resolves whether
+its type has an equality operator (so it can appear in `GROUP BY`) and which of the
+supported aggregate functions exist for it. It joins `pg_attribute` to `pg_type`,
+to `pg_operator` for equality, and to `pg_aggregate`/`pg_proc` for per-function
+existence. Schema, table and the column list are all bound parameters, so the query
+has no identifier-interpolation surface.
+
+Gate 2 is not redundant. It catches a domain type, an extension type or a future
+addition that the role table has no opinion about, and it is what keeps the
+`Unsupported` list from having to be exhaustive to be safe — an unknown type fails
+Gate 1 by default and would fail Gate 2 anyway if it lacked the operator.
 
 This costs **no extra round trip**: the cardinality guard already issues one
 catalogue query per grouped request, and this merges into it.
@@ -124,9 +173,20 @@ tests assert the refusal _reason_ rather than only the boolean so the case is
 visible when it bites.
 
 **What this buys.** The genericity claim becomes true rather than aspirational,
-and `wide-alltypes-150` becomes the test that proves it instead of the route that
-breaks it. No second catalogue can drift from the first, because there is no
-second catalogue.
+and it is provable against a fixture the probe owns rather than against whichever
+route happens to carry an awkward type today. No second catalogue can drift from
+the first, because there is no second catalogue.
+
+The role table also gives the UI something the catalogue never could: a reason a
+column is absent from the picker. "Not a dimension" is a sentence a user
+understands; "no equality operator for type point" is not.
+
+**What this costs, beyond the menu-versus-truth gap.** The `Unsupported` list is a
+judgement, not a derivation — someone has to decide that `jsonb` is out, and a
+future consumer with a genuine need (grouping by a `jsonb` path key, or by
+`point`'s x component) will read that decision as a limitation rather than a
+definition. That is the right default and the wrong permanent answer; the way out
+is expression keys, which §7 already names as v2, not loosening the list.
 
 ## Alternatives considered
 
