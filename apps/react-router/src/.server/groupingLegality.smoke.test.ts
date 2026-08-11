@@ -101,11 +101,18 @@ describe.skipIf(!IS_SMOKE_ENABLED)(
       expect(message).toMatch(/function min\(jsonb\) does not exist/i);
     });
 
-    it('still groups by that same jsonb column, so legality is per-type not per-family', async () => {
+    it('still groups by that same jsonb column, which is why the catalogue cannot be the only gate', async () => {
       // The discriminator between "jsonb is unsupported" and "each operator has
       // to be checked against the concrete type": jsonb HAS equality, so it
       // groups fine while min() does not exist for it. No coarsening of a
       // five-member vocabulary can express that split.
+      //
+      // Read this as a fact about Postgres, NOT as a recommendation. That
+      // `GROUP BY jsonb` runs is precisely why legality cannot be delegated to
+      // the catalogue alone: it would offer a column the Table cannot render,
+      // whose equality is structural rather than semantic, and which is neither
+      // a dimension nor a fact. jsonb is excluded by analytical role, upstream
+      // of this check — see the grouping-legality ADR draft.
       const { rows } = await getPool().query<{ readonly n: string }>(
         `SELECT count(*) AS n
            FROM (SELECT ${COLUMN.doc} FROM ${FIXTURE} GROUP BY ${COLUMN.doc}) grouped`,
