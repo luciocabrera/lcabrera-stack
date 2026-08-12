@@ -2,7 +2,7 @@
 id: capability-loader-meta-adr
 title: docs(adr): a table capability is declared once, on the loader meta
 owner: agent:claude
-status: active
+status: review
 branch: docs/555-capability-loader-meta-adr
 area:
   - docs/decisions/ADR-063-*
@@ -10,7 +10,7 @@ area:
 started: 2026-08-12
 updated: 2026-08-12
 plan: (none)
-pr: (none)
+pr: '#626'
 issue: #555
 ---
 
@@ -20,6 +20,8 @@ docs(adr): a table capability is declared once, on the loader meta
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: ADR-063 written, index regenerated, draft removed; gates green
+  (`vp fmt .`, `vp run adr:verify`, `vp run docs:verify`, `vp check`).
 - Blockers: none
-- Next:
+- Next: orchestrator resolves the ADR index against the sibling ADRs on other
+  branches, then reviews and merges #626.
