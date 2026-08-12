@@ -46,26 +46,19 @@ That means your bundler must:
 
 1. **Compile TypeScript/JSX from `node_modules/@lcabrera/ui`** — most setups
    exclude `node_modules` from transpilation by default.
-2. **Run the StyleX plugin over the package source**, with an alias so StyleX can
-   resolve the package's internal imports.
+2. **Run the StyleX plugin over the package source.** No alias is needed for the
+   package's internal imports: they use a `#ui/*` specifier declared in this
+   package's own `imports` field, which every Node-compatible resolver handles.
 
 With Vite:
 
 ```ts
 import { unplugin as stylex } from '@stylexjs/unplugin';
-import { fileURLToPath } from 'node:url';
 import babel from 'vite-plugin-babel';
-
-const uiSrc = fileURLToPath(
-  new URL('node_modules/@lcabrera/ui/src/', import.meta.url),
-);
 
 export default {
   plugins: [
-    stylex.vite({
-      aliases: { '@lcabrera/ui/*': [`${uiSrc}*`] },
-      useCSSLayers: true,
-    }),
+    stylex.vite({ useCSSLayers: true }),
     babel({
       babelConfig: {
         parserOpts: { plugins: ['jsx'] },
@@ -105,16 +98,20 @@ section above.
 `StatusBadge`, `TableLayout`, `Tabs`, `hydrateApp`, `useNotifyOnError`, plus the
 `FieldNode`, `LayoutProps` and `Pagination` types.
 
-### Components — `@lcabrera/ui/components/*`
+### Subpaths
 
-| Area           | Components                                                                                                           |
-| -------------- | -------------------------------------------------------------------------------------------------------------------- |
-| **Data**       | `Table`, `StaticTable`, `VirtualList`, `VirtualSelect`, `TrendSparkline`, `JsonExplorer`                             |
-| **Forms**      | `Form`, `Checkbox`, `RadioOptionGroup`, `ToggleSwitch`, `DraggableList`                                              |
-| **Overlays**   | `Modal`, `ChoiceModal`, `ConfirmDialog`, `SidePanel`, `PinSideModal`, `Tooltip`, `NotificationCenter`                |
-| **Layout**     | `AppShell`, `AppDocument`, `AppProviders`, `AppBackground`, `AppNavigation`, `Navbar`, `Card`, `Tabs`                |
-| **Primitives** | `Button`, `ActionButtons`, `CopyButton`, `Icons`, `InfoBox`, `NavLink`, `SectionCard`, `StatusBadge`, `Tag`, `Title` |
-| **Feedback**   | `RootErrorBoundary`, `RouteErrorBoundary`, `MarkdownRenderer`, `Settings`                                            |
+**`package.json`'s `exports` is the list** — every public subpath is named there
+explicitly, mapped to a concrete file. It carries no wildcard, so a path that is
+not listed does not resolve: the internals really are internal, rather than
+internal by convention.
+
+Broadly: component barrels under `./components/*` (`Table`, `Form`, `Modal`,
+`SidePanel`, `VirtualList`, `VirtualSelect`, `Icons`, `Card` and its parts, and
+the rest), the Table's public types and utils, `./contexts/*` store providers,
+`./design-system/*` tokens and the CSS reset, `./routing/*` loader and action
+helpers, and `./entry/hydrateApp.util`.
+
+Anything reachable from the root barrel needs no subpath at all.
 
 ### Hooks — `@lcabrera/ui/hooks`
 

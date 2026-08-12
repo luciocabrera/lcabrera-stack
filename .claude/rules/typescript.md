@@ -224,14 +224,33 @@ import { styles } from './Card.stylex';
 import { Button } from '../../../../components/Button';
 ```
 
-**In a publishable package** (`packages/ui`, `api`, `server`, `utils`) use the
-package's **own name** instead — `@lcabrera/ui/components/Button`. `@/` resolves only
-through a tsconfig `paths` entry, so it cannot survive publication: a consumer
-compiling our source has no such alias and the import fails to resolve. The
-package's own name resolves via Node's self-reference through `exports`, which
-works identically inside and outside this repo.
+**In a publishable package, never `@/`.** It resolves only through a tsconfig
+`paths` entry, so it cannot survive publication: a consumer compiling our source
+has no such alias and the import fails to resolve. All four are generated with
+`srcAlias: false` (`packages/ts-configs/generate.ts`), so they have no `@/*`
+mapping and tsc rejects such an import outright. Do not add the alias back to
+make one compile — rewrite the import.
 
-You do not have to remember which is which. The four publishable packages are
-generated with `srcAlias: false` (`packages/ts-configs/generate.ts`), so they
-have no `@/*` mapping at all and tsc rejects such an import outright. Do not add
-the alias back to make one compile — rewrite the import.
+What to use instead **depends on whether the package ships source**, and the two
+answers are not interchangeable:
+
+| Package                            | Self-import form                                        | Why                                                                                                       |
+| ---------------------------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `@lcabrera/api`, `server`, `utils` | the package's own name — `@lcabrera/server/db/db.types` | They ship `dist`; tsdown resolves internals at build time, so the specifier never reaches a consumer      |
+| `@lcabrera/ui`                     | **`#ui/…`** — `#ui/components/Button`                   | It ships **source**, so a consumer compiles our files and every self-reference hits our own `exports` map |
+
+That second row is a correction, not a preference. `@lcabrera/ui` used the
+package-name form, and because a wildcard `exports` target is a directory or an
+extensionless path rather than a file, **none of those self-references resolved
+for a consumer** — the published package could not be imported at all. In-repo
+it looked fine only because a tsconfig alias short-circuited the map.
+[ADR-060](../../docs/decisions/ADR-060-source-shipping-package-module-resolution.md)
+has the probe and the fix; `#ui/*` is declared in `packages/ui`'s `imports`
+field and is package-internal by specification, so no consumer can reach it.
+
+Two rules follow from that, and both are easy to break by accident:
+
+- **Never add a wildcard to `packages/ui`'s `exports`.** Every entry names a
+  concrete file. A wildcard resolves in this repo and fails on npm.
+- **Never restore an `@lcabrera/ui/*` tsconfig alias.** Its absence is what makes
+  `vp run typecheck` check deep imports against the real export map.

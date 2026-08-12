@@ -15,9 +15,6 @@
     "noUncheckedSideEffectImports": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "paths": {
-      "@lcabrera/ui/*": ["./src/*"]
-    },
     "resolveJsonModule": true,
     "rootDirs": [".", "./.react-router/types"],
     "skipLibCheck": true,

@@ -32,6 +32,18 @@ by inspection:
   therefore run `vp pack` (tsdown) to `dist` with `.d.mts` and sourcemaps. `ui`
   cannot: StyleX derives theme identity from the source path, so a consumer's own
   plugin has to compile it.
+- **Shipping source changes how `@lcabrera/ui` may import itself, and the rule is
+  not cosmetic.** A consumer compiles _our_ files, so every self-reference in
+  them resolves through our own `exports` map. A wildcard target is a directory
+  or an extensionless path, neither of which `exports` resolution will complete —
+  so the package-name form (`@lcabrera/ui/components/Button`) resolved for
+  nobody, and the published package could not be imported at all. `packages/ui`
+  now self-imports through `#ui/*`, declared in its `imports` field and
+  unreachable from outside the package, and its `exports` names concrete files
+  with no wildcard. **There is deliberately no `@lcabrera/ui/*` tsconfig alias**
+  anywhere — its absence is what makes `vp run typecheck` check deep imports
+  against the real map instead of short-circuiting it
+  ([ADR-060](../docs/decisions/ADR-060-source-shipping-package-module-resolution.md)).
 - **`exports` points at `src`; `publishConfig.exports` points at `dist`.** pnpm
   substitutes the latter at pack time, so no workspace in this repo ever has to
   build before it can typecheck, test or run. The cost is that the repo exercises

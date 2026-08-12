@@ -33,6 +33,10 @@ AppDocument [const] ({ children, rootData, stylexCssHref, }: AppDocumentProps) =
 ## ./components/AppShell
 AppShell [const] () => JSX.Element
 
+## ./components/Button
+Button [const] ({ tooltipContent, tooltipPlacement, ...rest }: ButtonProps) => JSX.Element
+ButtonProps [type] Omit< ComponentPropsWithoutRef<'button'>, 'color' | 'onClick' > & { readonly customStylex?: StyleXStyles; readonly icon?: ReactNode; readonly isBusy?: boolean; readonly isDisabled?: boolean; readonly isIconOnly?: boolean; readonly onClick?: (() => void) | MouseEventHandler<HTMLButtonElement>; readonly orientation?: DesignSystemOrientation; readonly size?: DesignSystemSize; readonly tooltipContent?: ReactNode; readonly tooltipPlacement?: 'bottom' | 'left' | 'right' | 'top'; readonly variant?: DesignSystemColor; }
+
 ## ./components/Card
 Card [const] ({ children, color, customStylex, elevation, interactive, padding, ...props }: CardProps) => JSX.Element
 CardBody [const] ({ children, ...props }: CardBodyProps) => JSX.Element
@@ -56,6 +60,35 @@ CardHeader [const] ({ children, ...props }: CardHeaderProps) => JSX.Element
 
 ## ./components/Card/CardTitle
 CardTitle [const] ({ children, icon, ...props }: CardTitleProps) => JSX.Element
+
+## ./components/Form
+createFieldBuilders [const] <TValues extends Record<string, unknown>>() => { choiceField: <T extends ChoiceFieldType>(args: ChoiceFieldArgs<TValues, T>) => { description?: string | undefined; clientValidation?: FieldClientValidation; accessor: keyof TValues & string; label: string; options: readonly FieldOption[]; type: T; }; field: <T extends BaseFieldType>(args: FieldArgs<TValues, T>) => { disabled?: boolean | undefined; description?: string | undefined; clientValidation?: FieldClientValidation; accessor: keyof TValues & string; label: string; type: T; }; fieldGroup: (args: FieldGroupArgs<TValues>) => { defaultCollapsed?: boolean | undefined; collapsible?: boolean | undefined; fields: readonly FieldNode<TValues>[]; label: string; type: "group"; }; fieldRow: (args: FieldRowArgs<TValues>) => { fields: readonly FieldNode<TValues>[]; type: "row"; spans?: undefined; } | { fields: readonly FieldNode<TValues>[]; spans: readonly number[]; type: "row"; }; toggleField: (args: ToggleFieldArgs<TValues>) => { accessor: keyof TValues & string; label: string; type: "boolean"; variant: "toggle"; }; }
+FieldErrors [type] Partial< Record<keyof TValues & string, string> >
+FieldNode [type] | GroupFieldNode<TValues> | LeafFieldDef<TValues> | RowFieldNode<TValues> | TabFieldNode<TValues>
+Form [const] <TValues extends Record<string, unknown>>({ action, children, method, ...providerProps }: FormProps<TValues>) => JSX.Element
+toFieldOptions [const] (values: readonly string[]) => { label: string; value: string; }[]
+
+## ./components/Form/Form.types
+BooleanFieldDef [type] BaseFieldDef<TValues> & { readonly type: 'boolean'; readonly variant?: 'checkbox' | 'toggle'; }
+CurrencyFieldDef [type] BaseFieldDef<TValues> & { /** ISO currency code used for display/read formatting (defaults to USD). */ readonly currency?: string; readonly type: 'currency'; }
+CustomFieldDef [type] BaseFieldDef<TValues> & { readonly renderField: (args: RenderFieldArgs) => ReactNode; readonly type: 'custom'; }
+DateFieldDef [type] BaseFieldDef<TValues> & { readonly type: 'date' | 'datetime'; }
+FieldClientValidation [type] { readonly max?: number; readonly maxLength?: number; readonly message?: string; readonly min?: number; readonly minLength?: number; readonly pattern?: RegExp; readonly required?: boolean; }
+FieldErrors [type] Partial< Record<keyof TValues & string, string> >
+FieldNode [type] | GroupFieldNode<TValues> | LeafFieldDef<TValues> | RowFieldNode<TValues> | TabFieldNode<TValues>
+FieldOption [type] { readonly label: string; readonly value: string; }
+FormMode [type] 'create' | 'edit' | 'view'
+FormProps [type] { readonly action?: string; readonly cancelLabel?: string; /** Fallback route Cancel navigates to when there's no valid in-app history entry to return to — typically this entity's list route. */ readonly cancelTo: string; readonly children?: ReactNode; readonly fields: readonly FieldNode<TValues>[]; readonly initialValues?: Partial<TValues>; readonly method?: 'delete' | 'patch' | 'post' | 'put'; readonly mode: FormMode; readonly serverErrors?: FieldErrors<TValues>; readonly submission?: FormSubmission; readonly submitLabel?: string; }
+FormSubmission [type] 'fetcher' | 'navigation'
+GroupFieldNode [type] { /** When true, the group renders a clickable header that collapses/expands its fields. */ readonly collapsible?: boolean; /** Initial collapsed state for a `collapsible` group (ignored otherwise). */ readonly defaultCollapsed?: boolean; readonly fields: readonly FieldNode<TValues>[]; readonly label?: string; readonly type: 'group'; }
+LeafFieldDef [type] | BooleanFieldDef<TValues> | CurrencyFieldDef<TValues> | CustomFieldDef<TValues> | DateFieldDef<TValues> | NumberFieldDef<TValues> | RadioFieldDef<TValues> | SelectFieldDef<TValues> | TextFieldDef<TValues>
+NumberFieldDef [type] BaseFieldDef<TValues> & { readonly type: 'number'; }
+RadioFieldDef [type] BaseFieldDef<TValues> & { readonly options: readonly FieldOption[]; readonly type: 'radio'; }
+RenderFieldArgs [type] { readonly error?: string; readonly isDisabled: boolean; readonly onChange: (value: unknown) => void; readonly value: unknown; }
+RowFieldNode [type] { readonly fields: readonly FieldNode<TValues>[]; /** * Optional per-cell grow factor, positional to `fields`. A cell with span `2` * is twice as wide as a span-`1` cell; omitted or missing entries default to * `1` (equal-width, the previous behaviour). Use a larger span for a * full-width or emphasised field within a multi-column row. */ readonly spans?: readonly number[]; readonly type: 'row'; }
+SelectFieldDef [type] BaseFieldDef<TValues> & { readonly mode?: 'multi' | 'single'; readonly options: readonly FieldOption[]; readonly type: 'select'; }
+TabFieldNode [type] { readonly tabs: readonly { readonly fields: readonly FieldNode<TValues>[]; readonly label: string; }[]; readonly type: 'tab'; }
+TextFieldDef [type] BaseFieldDef<TValues> & { readonly type: 'email' | 'password' | 'text' | 'textarea'; }
 
 ## ./components/Icons
 BarChartIcon [const] ({ size, ...props }: IconProps) => JSX.Element
@@ -102,8 +135,125 @@ WarningIcon [const] ({ size, ...props }: IconProps) => JSX.Element
 JsonExplorer [const] ({ sections }: JsonExplorerProps) => JSX.Element
 JsonExplorerSection [type] { readonly columns: readonly TableColumn<Record<string, unknown>>[]; readonly label: string; readonly rows: readonly Record<string, unknown>[]; }
 
+## ./components/MarkdownRenderer
+MarkdownRenderer [const] ({ content }: MarkdownRendererProps) => JSX.Element
+
+## ./components/Modal
+Modal [const] ({ bodyStylex, children, customStylex, footer, isOpen, onClose, title, }: ModalProps) => JSX.Element
+
+## ./components/Navbar/Navbar.types
+NavbarButtonConfig [type] Omit<ButtonProps, 'children' | 'width'> & { readonly icon?: ReactNode; readonly label: string; readonly type: 'button'; }
+NavbarItemConfig [type] NavbarButtonConfig | NavbarLinkConfig
+NavbarLinkConfig [type] Omit<NavLinkProps, 'children' | 'className'> & { readonly icon?: ReactNode; readonly label: string; readonly type: 'link'; readonly variant?: Pick<ButtonProps, 'variant'>['variant']; }
+NavbarProps [type] ComponentPropsWithoutRef<'nav'> & { readonly isCompact?: boolean; readonly items: readonly NavbarItemConfig[]; readonly orientation?: DesignSystemOrientation; readonly size?: DesignSystemSize; }
+
+## ./components/NavLink
+NavLink [const] ({ children, customStylex, icon, isBusy, isIconOnly, orientation, prefetch, size, tooltipContent, tooltipPlacement, variant, ...props }: NavLinkProps) => JSX.Element
+
 ## ./components/RootErrorBoundary
 RootErrorBoundary [const] ({ error }: RootErrorBoundaryProps) => JSX.Element
+
+## ./components/RouteErrorBoundary
+RouteErrorBoundary [const] ({ defaultMessage, error, icon, title, }: RouteErrorBoundaryProps) => JSX.Element
+
+## ./components/SectionCard
+SectionCard [const] ({ children, customStylex, description, title, }: SectionCardProps) => JSX.Element
+
+## ./components/Settings/Settings.component
+Settings [const] () => JSX.Element
+
+## ./components/Settings/settings.meta
+meta [const] () => ({ title: string; content?: undefined; name?: undefined; } | { content: string; name: string; title?: undefined; })[]
+
+## ./components/SidePanel
+SidePanel [const] ({ children, isOpen, isPinned, onClose, portalContainer, position, shouldShowOverlay, size, ...props }: SidePanelProps) => JSX.Element
+SidePanelBody [const] ({ children, ...props }: SidePanelBodyProps) => JSX.Element
+SidePanelFooter [const] ({ children, ...props }: SidePanelFooterProps) => JSX.Element
+SidePanelHeader [const] ({ actions, children, ...props }: SidePanelHeaderProps) => JSX.Element
+SidePanelHeaderToolbar [const] ({ isBusy, isPinned, onClose, onTogglePin, }: SidePanelHeaderToolbarProps) => JSX.Element
+SidePanelSection [const] ({ children, ...props }: SidePanelSectionProps) => JSX.Element
+SidePanelSectionHeader [const] ({ title, toolbar, ...props }: SidePanelSectionHeaderProps) => JSX.Element
+SidePanelSectionMain [const] ({ children, ...props }: SidePanelSectionMainProps) => JSX.Element
+SidePanelSectionOverlay [const] ({ children, isOpen, }: SidePanelSectionOverlayProps) => JSX.Element
+SidePanelSize [type] 'lg' | 'md' | 'rail' | 'sm' | 'xs' | 'xxs'
+SidePanelTitle [const] ({ children, icon, ...props }: SidePanelTitleProps) => JSX.Element
+
+## ./components/StatusBadge
+StatusBadge [const] ({ label, tone }: StatusBadgeProps) => JSX.Element
+
+## ./components/Table
+ColumnFiltersState [type] Record< DataKey<TData>, ColumnFilter >
+ColumnOrderState [type] readonly DataKey<TData>[]
+ColumnPinningState [type] { /** Columns pinned to the left */ readonly left: readonly DataKey<TData>[]; /** Columns pinned to the right */ readonly right: readonly DataKey<TData>[]; }
+ColumnSizingState [type] Record< DataKey<TData>, number >
+ColumnVisibilityState [type] Set< DataKey<TData> >
+SortingState [type] Sorting<TData>[]
+Table [const] <TData extends Record<string, unknown>, TResponse>({ actions, dataSelector, dataTotalSelector, icon, isFlexWrapperEnabled, isLoading, onLoadMore, response, }: TableProps<TData, TResponse>) => JSX.Element
+TableColumn [type] { readonly dataType?: TableColumnDataType; /** * Serializable descriptor for the column's filter-option list (distinct * fetch or static values). Interpreted client-side by * `resolveFilterOptionsDescriptor` — never a function, so columns can * cross the loader serialization boundary intact. */ readonly filterOptionsDescriptor?: FilterOptionsDescriptor; /** Format options for the column based on data type */ readonly format?: TableColumnFormat; /** Whether this column can be filtered (default: true) */ readonly isFilterable?: boolean; /** Whether to hide the header content (label, controls, resize handle) */ readonly isHeaderHidden?: boolean; /** * Whether this column is part of the table's primary key. The primary-key * column(s) identify a row for CRUD links/actions and are always appended * to the query sort (in declaration order) to guarantee a stable ordering * for pagination. */ readonly isPrimaryKey?: boolean; /** Whether this column can be resized by the user (default: true) */ readonly isResizable?: boolean; /** Whether this column is sortable (default: true) */ readonly isSortable?: boolean; /** * Whether this column is fully locked from user modifications. * When true, the column cannot be reordered, pinned/unpinned, resized, or hidden. * This is a read-only configuration — it cannot be changed at runtime. */ readonly isStatic?: boolean; readonly key: DataKey<TData>; readonly label: string; readonly maxWidth?: number; readonly minWidth?: number; /** Custom render function for body cells. Receives the row data. */ readonly render?: (row: TData) => ReactNode; }
+TableColumnsStateInput [type] Omit< TableColumnsState<TData>, | 'effectiveColumns' | 'normalizedColumns' | 'pinnedColumnOffsets' | 'pinnedColumnPartition' | 'staticKeys' >
+TableMetaState [type] { readonly additionalMetadata?: Readonly< Record<string, null | TableMetadataValue | undefined> >; /** * Per-application identifier used to namespace persisted cookie / storage * keys so tables in different apps that share a `persistenceKey` do not clash. */ readonly appId?: string; readonly columnOverscan: number; readonly columnSelectedKey?: string; readonly columnSettingsSelectedTab: string; readonly crud?: TableCrudConfig; /** Action route the row delete submit posts to (required when crud.delete) */ readonly deleteActionPath?: string; readonly density: TableDensity; readonly drawersSyncNonce?: number; /** Whether to prefetch the next page after each load-more completes */ readonly enablePrefetch: boolean; /** Error message if data fetch failed */ readonly error?: string; /** Initial page size for first load */ readonly initialPageSize: number; readonly isBordered: boolean; readonly isColumnSettingsOpen: boolean; readonly isColumnSettingsPinned: boolean; /** Round the table card's corners. Off by default — the table is square. */ readonly isRounded: boolean; readonly isStriped: boolean; readonly isTableSettingsOpen: boolean; readonly isTableSettingsPinned: boolean; /** Page size for subsequent loads */ readonly loadMorePageSize: number; /** Locale for formatting (defaults to navigator.language) */ readonly locale?: string; readonly overscan: number; readonly persistenceKey: string; readonly placeholderRowCount: number; readonly rowHeight: number; readonly schemaName?: string; readonly tableName?: string; readonly tableSettingsExpandedFilters: readonly string[]; readonly tableSettingsSelectedTab: string; readonly threshold: number; readonly title?: TableTitle; readonly wasTableSettingsOpenBeforeColumnSettings?: boolean; }
+TableProps [type] BaseProps & InfiniteScroll<TData, TResponse> & { readonly isFlexWrapperEnabled?: boolean; readonly isLoading?: boolean; readonly response: TResponse; }
+
+## ./components/Table/contexts/TableConfig/utils
+getInitialColumnsState [const] <TData extends Record<string, unknown>>({ columnFilters, columnOrder, columnPinning, columns, columnSizing, columnVisibility, crud, sorting, }: GetInitialTableStateArgs<TData>) => { columnFilters: ColumnFiltersState<TData>; columnOrder: ColumnOrderState<TData>; columnPinning: ColumnPinningState<TData>; columns: TableColumn<TData>[]; columnSizing: ColumnSizingState<TData>; columnVisibility: ColumnVisibilityState<TData>; effectiveColumns: TableColumn<TData>[]; normalizedColumns: Record<string | keyof TData, TableColumn<TData> & { sortDirection?: "asc" | "desc"; sortIndex?: number; }>; pinnedColumnOffsets: Partial<Record<DataKey<TData>, PinnedColumnInfo>>; pinnedColumnPartition: { centerCols: TableColumn<TData>[]; leftPinnedCols: TableColumn<TData>[]; rightPinnedCols: TableColumn<TData>[]; }; sorting: SortingState<TData>; staticKeys: Set<string>; }
+getInitialMetaState [const] ({ appId, columnOverscan, columnSettingsSelectedTab, density, drawersSyncNonce, enablePrefetch, error, initialPageSize, isBordered, isColumnSettingsOpen, isColumnSettingsPinned, isRounded, isStriped, isTableSettingsOpen, isTableSettingsPinned, loadMorePageSize, overscan, persistenceKey, placeholderRowCount, rowHeight, tableSettingsExpandedFilters, tableSettingsSelectedTab, threshold, wasTableSettingsOpenBeforeColumnSettings, ...rest }: GetInitialMetaStateArgs) => { additionalMetadata?: Readonly<Record<string, null | TableMetadataValue | undefined>>; columnSelectedKey?: string; crud?: TableCrudConfig; deleteActionPath?: string; locale?: string; schemaName?: string; tableName?: string; title?: TableTitle; appId: string | undefined; columnOverscan: number; columnSettingsSelectedTab: string; density: TableDensity; drawersSyncNonce: number; enablePrefetch: boolean; error: string | undefined; initialPageSize: number; isBordered: boolean; isColumnSettingsOpen: boolean; isColumnSettingsPinned: boolean; isRounded: boolean; isStriped: boolean; isTableSettingsOpen: boolean; isTableSettingsPinned: boolean; loadMorePageSize: number; overscan: number; persistenceKey: string; placeholderRowCount: number; rowHeight: number; tableSettingsExpandedFilters: readonly string[]; tableSettingsSelectedTab: string; threshold: number; wasTableSettingsOpenBeforeColumnSettings: boolean; }
+
+## ./components/Table/Table.constants
+ACTIONS_COLUMN_KEY [const] "actions"
+COLUMN_RESIZE_KEYBOARD_COARSE_STEP [const] 40
+COLUMN_RESIZE_KEYBOARD_STEP [const] 8
+DEFAULT_COLUMN_OVERSCAN [const] 2
+DEFAULT_FILTER_PAGE_SIZE [const] 50
+DEFAULT_MAX_COLUMN_WIDTH [const] 600
+DEFAULT_MIN_COLUMN_WIDTH [const] 60
+DEFAULT_OVERSCAN [const] 20
+DEFAULT_PLACEHOLDER_ROW_COUNT [const] 50
+DEFAULT_ROW_HEIGHT [const] 32
+FILTER_OPTIONS_TIMEOUT_MS [const] 30000
+INFINITE_SCROLL_THRESHOLD [const] 200
+INITIAL_PAGE_SIZE [const] 50
+IS_PREFETCH_ENABLED [const] true
+LOAD_MORE_PAGE_SIZE [const] 150
+PRIMARY_KEY_ID_DELIMITER [const] "_"
+
+## ./components/Table/Table.types
+ColumnFiltersState [type] Record< DataKey<TData>, ColumnFilter >
+ColumnOrderState [type] readonly DataKey<TData>[]
+ColumnPinningState [type] { /** Columns pinned to the left */ readonly left: readonly DataKey<TData>[]; /** Columns pinned to the right */ readonly right: readonly DataKey<TData>[]; }
+ColumnSizingState [type] Record< DataKey<TData>, number >
+ColumnVisibilityState [type] Set< DataKey<TData> >
+DataKey [type] 'actions' | (keyof TData & string)
+DistinctFilterOptionsDescriptor [type] { readonly kind: 'distinct'; readonly params: { readonly columnName: string; readonly schemaName?: string; readonly tableName: string; }; readonly transport: FilterOptionsTransport; }
+FilterData [type] { readonly data: string[]; readonly hasMore: boolean; readonly isLoading: boolean; readonly isLoadingMore: boolean; readonly totalLoadedRows: number; readonly totalRows: number; }
+FilterOptionsDescriptor [type] | DistinctFilterOptionsDescriptor | StaticFilterOptionsDescriptor
+FilterOptionsResponse [type] { readonly hasMore: boolean; readonly values: string[]; }
+FilterOptionsTransport [type] 'bff' | 'loader'
+FiltersDataState [type] Record< DataKey<TData>, FilterData >
+NormalizedColumnsState [type] Record< DataKey<TData>, TableColumn<TData> & { readonly sortDirection?: 'asc' | 'desc'; readonly sortIndex?: number; } >
+PinnedColumnInfo [type] { readonly isFirstPinnedRight: boolean; readonly isLastPinnedLeft: boolean; readonly offset: number; readonly side: 'left' | 'right'; }
+PinnedColumnOffsetsState [type] Partial< Record<DataKey<TData>, PinnedColumnInfo> >
+PinnedColumnPartitionState [type] { readonly centerCols: readonly TableColumn<TData>[]; readonly leftPinnedCols: readonly TableColumn<TData>[]; readonly rightPinnedCols: readonly TableColumn<TData>[]; }
+SortingState [type] Sorting<TData>[]
+StaticFilterOptionsDescriptor [type] { readonly kind: 'static'; readonly values: readonly string[]; }
+StorageType [type] 'cookie' | 'localStorage'
+TableColumn [type] { readonly dataType?: TableColumnDataType; /** * Serializable descriptor for the column's filter-option list (distinct * fetch or static values). Interpreted client-side by * `resolveFilterOptionsDescriptor` — never a function, so columns can * cross the loader serialization boundary intact. */ readonly filterOptionsDescriptor?: FilterOptionsDescriptor; /** Format options for the column based on data type */ readonly format?: TableColumnFormat; /** Whether this column can be filtered (default: true) */ readonly isFilterable?: boolean; /** Whether to hide the header content (label, controls, resize handle) */ readonly isHeaderHidden?: boolean; /** * Whether this column is part of the table's primary key. The primary-key * column(s) identify a row for CRUD links/actions and are always appended * to the query sort (in declaration order) to guarantee a stable ordering * for pagination. */ readonly isPrimaryKey?: boolean; /** Whether this column can be resized by the user (default: true) */ readonly isResizable?: boolean; /** Whether this column is sortable (default: true) */ readonly isSortable?: boolean; /** * Whether this column is fully locked from user modifications. * When true, the column cannot be reordered, pinned/unpinned, resized, or hidden. * This is a read-only configuration — it cannot be changed at runtime. */ readonly isStatic?: boolean; readonly key: DataKey<TData>; readonly label: string; readonly maxWidth?: number; readonly minWidth?: number; /** Custom render function for body cells. Receives the row data. */ readonly render?: (row: TData) => ReactNode; }
+TableColumnDataType [type] | 'boolean' | 'currency' | 'date' | 'number' | 'string'
+TableColumnFormat [type] { /** Currency formatting options (for dataType: 'currency') */ readonly currency?: CurrencyFormatOptions; /** Date formatting options (for dataType: 'date') */ readonly date?: DateFormatOptions; /** Number formatting options (for dataType: 'number') */ readonly number?: NumberFormatOptions; }
+TableColumnsState [type] { /** Column filters state */ readonly columnFilters: ColumnFiltersState<TData>; /** Column order state */ readonly columnOrder: ColumnOrderState<TData>; /** Column pinning state */ readonly columnPinning: ColumnPinningState<TData>; readonly columns: TableColumn<TData>[]; /** Column sizing state (custom widths) */ readonly columnSizing: ColumnSizingState<TData>; /** Column visibility state */ readonly columnVisibility: ColumnVisibilityState<TData>; readonly effectiveColumns: TableColumn<TData>[]; readonly normalizedColumns: NormalizedColumnsState<TData>; /** Pre-computed pinned column offset map */ readonly pinnedColumnOffsets: PinnedColumnOffsetsState<TData>; /** Pre-computed pinned column partition (columns split by pinning side) */ readonly pinnedColumnPartition: PinnedColumnPartitionState<TData>; /** Sorting state */ readonly sorting: SortingState<TData>; /** Keys of columns marked as static (computed once from columns) */ readonly staticKeys: Set<string>; }
+TableColumnsStateInput [type] Omit< TableColumnsState<TData>, | 'effectiveColumns' | 'normalizedColumns' | 'pinnedColumnOffsets' | 'pinnedColumnPartition' | 'staticKeys' >
+TableCrudConfig [type] { readonly create?: boolean; readonly delete?: boolean; readonly read?: boolean; readonly update?: boolean; }
+TableDataState [type] { /** Table data array */ readonly data: readonly TData[] /** Pagination state */; /** Whether there are more rows to load (infinite scroll) */ readonly hasMore: boolean; /** Initial loading state */ readonly isLoading: boolean; /** Loading more rows (infinite scroll) */ readonly isLoadingMore: boolean; // pagination: PaginationState; readonly totalLoadedRows: number; /** Total number of rows (for progress indication) */ readonly totalRows: number; }
+TableDensity [type] 'comfortable' | 'compact'
+TableMetadataValue [type] boolean | number | string
+TableMetaState [type] { readonly additionalMetadata?: Readonly< Record<string, null | TableMetadataValue | undefined> >; /** * Per-application identifier used to namespace persisted cookie / storage * keys so tables in different apps that share a `persistenceKey` do not clash. */ readonly appId?: string; readonly columnOverscan: number; readonly columnSelectedKey?: string; readonly columnSettingsSelectedTab: string; readonly crud?: TableCrudConfig; /** Action route the row delete submit posts to (required when crud.delete) */ readonly deleteActionPath?: string; readonly density: TableDensity; readonly drawersSyncNonce?: number; /** Whether to prefetch the next page after each load-more completes */ readonly enablePrefetch: boolean; /** Error message if data fetch failed */ readonly error?: string; /** Initial page size for first load */ readonly initialPageSize: number; readonly isBordered: boolean; readonly isColumnSettingsOpen: boolean; readonly isColumnSettingsPinned: boolean; /** Round the table card's corners. Off by default — the table is square. */ readonly isRounded: boolean; readonly isStriped: boolean; readonly isTableSettingsOpen: boolean; readonly isTableSettingsPinned: boolean; /** Page size for subsequent loads */ readonly loadMorePageSize: number; /** Locale for formatting (defaults to navigator.language) */ readonly locale?: string; readonly overscan: number; readonly persistenceKey: string; readonly placeholderRowCount: number; readonly rowHeight: number; readonly schemaName?: string; readonly tableName?: string; readonly tableSettingsExpandedFilters: readonly string[]; readonly tableSettingsSelectedTab: string; readonly threshold: number; readonly title?: TableTitle; readonly wasTableSettingsOpenBeforeColumnSettings?: boolean; }
+TablePersistenceConfig [type] { /** Persist column filters */ readonly columnFilters?: StorageType; /** Persist column order */ readonly columnOrder?: StorageType; /** Persist column pinning */ readonly columnPinning?: StorageType; /** Persist column sizing (custom widths) */ readonly columnSizing?: StorageType; /** Persist column visibility */ readonly columnVisibility?: StorageType; /** Persist sorting */ readonly sorting?: StorageType; }
+TablePersistenceEntry [type] { readonly persistenceKey?: string; readonly searchParamKey?: string; readonly searchParamValue?: string; readonly slice?: TSlice; readonly valueSlice?: unknown; }
+TablePersistenceSliceEntry [type] Required< Pick<TablePersistenceEntry<TSlice>, 'persistenceKey' | 'slice' | 'valueSlice'> >
+TableProps [type] BaseProps & InfiniteScroll<TData, TResponse> & { readonly isFlexWrapperEnabled?: boolean; readonly isLoading?: boolean; readonly response: TResponse; }
+TableTitle [type] { readonly plural: string; readonly singular: string; }
+
+## ./components/Table/TableLayout
+TableLayout [const] <TData extends Record<string, unknown>, TResponse = Record<string, unknown>>({ actions, columnsState, dataPromise, dataSelector, dataTotalSelector, metaState, onLoadMore, }: TableLayoutProps<TData, TResponse>) => JSX.Element
 
 ## ./components/Table/utils
 createBasicColumn [const] <TData extends Record<string, unknown>>({ dataType, isPrimaryKey, key, label, maxWidth, minWidth, }: CreateBasicColumnArgs<TData>) => TableColumn<TData>
@@ -123,10 +273,22 @@ resolveTableActionsColumn [const] <TData extends Record<string, unknown>>({ colu
 serializeStateSlice [const] ({ appId, persistenceKey, slice, value, }: SerializeStateSliceArgs) => { key: string; value: string; }
 syncColumnOrderWithPinning [const] <TData>({ columnKey, columnPinning, columns, currentOrder, newPinning, previousPinning, }: SyncColumnOrderWithPinningArgs<TData>) => ColumnOrderState<TData>
 
+## ./components/Table/utils/createEmptyColumnsState.util
+createEmptyColumnsState [const] <TData extends Record<string, unknown>>({ columns, }: CreateEmptyColumnsStateArgs<TData>) => EmptyColumnsState<TData>
+
+## ./components/Table/utils/inferTableColumnsFromJson.util
+inferTableColumnsFromJson [const] ({ rows, }: InferTableColumnsFromJsonArgs) => readonly TableColumn<Record<string, unknown>>[]
+
+## ./components/TrendSparkline
+TrendSparkline [const] ({ height, label, tone, values, width, }: TrendSparklineProps) => JSX.Element
+
 ## ./components/VirtualList
 VirtualList [const] ({ dataState, filter, ...listState }: VirtualListProps) => JSX.Element
 VirtualListContent [const] () => JSX.Element
 VirtualListDataState [type] { readonly data: readonly string[]; readonly hasMore: boolean; readonly isLoading: boolean; readonly isLoadingMore: boolean; /** Total number of items available (used for "Loaded: x / total" display) */ readonly totalCount?: number; }
+
+## ./components/VirtualSelect
+VirtualSelect [const] ({ customStylex, dataState, isAlwaysOpen, isBusy, listboxId, listMaxHeight, mode, onChange, onFetchInitial, onFetchMore, onOpenChange, options, placeholder, selected, shouldFillHeight, }: VirtualSelectProps) => JSX.Element
 
 ## ./components/VirtualSelect/hooks
 useVirtualSelect [const] ({ dataState, isAlwaysOpen, isBusy, listboxId, mode, onChange, onOpenChange, options, selected, }: UseVirtualSelectArgs) => { closeDropdown: () => void; containerRef: RefObject<HTMLDivElement | null>; effectiveDataState: VirtualListDataState | { data: string[]; hasMore: boolean; isLoading: boolean; isLoadingMore: boolean; }; handleListChange: (filter?: SelectFilter) => void; isMulti: boolean; isOpen: boolean; resolvedListboxId: string; selectedLabels: string[]; toggleDropdown: () => void; }
@@ -135,6 +297,57 @@ useVirtualSelectTagOverflow [const] ({ mode, selected, triggerRef, }: UseVirtual
 
 ## ./components/VirtualSelect/VirtualSelectTrigger/hooks
 useVirtualSelectTrigger [const] () => { chevron: JSX.Element | undefined; content: ReactNode; isBusy: boolean; isOpen: boolean; listboxId: string; mode: VirtualSelectMode; shouldUseDivTrigger: boolean; toggleDropdown: () => void; triggerRef: RefObject<HTMLButtonElement | HTMLDivElement | undefined>; }
+
+## ./contexts/NotificationContext
+AppNotification [type] { readonly durationMs: number; readonly id: string; readonly message: string; readonly placement: NotificationPlacement; readonly title?: string; readonly variant: CardColor; }
+NotificationPlacement [type] | 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right'
+NotificationProvider [const] ({ children, defaultDurationMs, defaultPlacement, }: NotificationProviderProps) => JSX.Element
+
+## ./contexts/NotificationContext/actions
+useDismissNotificationAction [const] () => (id: string) => void
+useDismissNotificationsAction [const] () => () => void
+useNotifyAction [const] () => ({ durationMs, message, placement, title, variant, }: NotifyArgs) => string
+
+## ./contexts/NotificationContext/selectors
+useGetNotifications [const] () => readonly AppNotification[]
+
+## ./contexts/ThemeContext
+ThemeContext [const] Context<ThemeContextValue | undefined>
+ThemeProvider [const] ({ appId, children, defaultTheme, initialTheme, }: ThemeProviderProps) => JSX.Element
+
+## ./design-system/constants
+ICON_SIZE_LG [const] 20
+ICON_SIZE_MD [const] 16
+ICON_SIZE_SM [const] 14
+ICON_SIZE_XS [const] 12
+ICON_SIZE_XXS [const] 10
+
+## ./design-system/reset.css
+
+## ./design-system/tokens/base.stylex
+borderRadius [const] stylex.VarGroup<Readonly<{ full: string; lg: string; md: string; none: string; sm: string; xl: string; }>, symbol>
+easing [const] stylex.VarGroup<Readonly<{ easeIn: string; easeInOut: string; easeOut: string; linear: string; }>, symbol>
+shadows [const] stylex.VarGroup<Readonly<{ lg: string; md: string; none: string; sm: string; xl: string; }>, symbol>
+spacing [const] stylex.VarGroup<Readonly<{ lg: string; md: string; sm: string; xl: string; xs: string; xxl: string; xxs: string; xxxl: string; }>, symbol>
+tooltip [const] stylex.VarGroup<Readonly<{ arrowOffset: string; arrowSize: string; slideDistance: string; }>, symbol>
+transitions [const] stylex.VarGroup<Readonly<{ fast: string; normal: string; slow: string; slower: string; }>, symbol>
+typography [const] stylex.VarGroup<Readonly<{ fontFamily: string; fontFamilyMono: string; fontSize2xl: string; fontSize3xl: string; fontSizeLg: string; fontSizeMd: string; fontSizeSm: string; fontSizeXl: string; fontSizeXs: string; fontWeightBold: string; fontWeightMedium: string; fontWeightNormal: string; fontWeightSemibold: string; lineHeightNormal: string; lineHeightRelaxed: string; lineHeightTight: string; }>, symbol>
+zIndex [const] stylex.VarGroup<Readonly<{ base: string; dropdown: string; modal: string; popover: string; sticky: string; tooltip: string; }>, symbol>
+
+## ./design-system/tokens/colors.stylex
+colors [const] stylex.VarGroup<Readonly<{ active: string; backgroundPrimary: string; backgroundSecondary: string; backgroundTertiary: string; borderFocus: string; glassBackgroundColorPrimary: string; glassBackgroundColorSecondary: string; glassBackgroundColorTertiary: string; glassBackdropFilterPrimary: string; glassBackdropFilterSecondary: string; glassGradientBackground: string; glassGradientBackdrop: string; gradientLinearBackground: string; gradientRadialBackground: string; gradientOpacityPrimary: string; gradientOpacitySecondary: string; borderPrimary: string; borderSecondary: string; brandPrimary: string; brandPrimaryActive: string; brandPrimaryBackground: string; brandPrimaryCardText: string; brandPrimaryHover: string; brandPrimaryText: string; brandPrimaryTextActive: string; brandSecondary: string; brandSecondaryActive: string; brandSecondaryHover: string; brandSecondaryText: string; disabled: string; disabledText: string; error: string; errorBackground: string; errorCardText: string; errorHover: string; errorText: string; hover: string; notificationGradientBase: string; overlay: string; patternDot: string; shadowHover: string; info: string; infoBackground: string; infoHover: string; infoText: string; success: string; successBackground: string; successCardText: string; successHover: string; successText: string; surfaceElevated: string; surfacePrimary: string; surfaceSecondary: string; surfaceStripe: string; textInverse: string; textPrimary: string; textSecondary: string; textTertiary: string; textGradient: string; warning: string; warningBackground: string; warningCardText: string; warningHover: string; warningText: string; }>, symbol>
+
+## ./design-system/tokens/commons.stylex
+baseInteractiveStyles [const] Readonly<{ readonly element: Readonly<{ readonly borderColor: stylex.StyleXClassNameFor<"borderColor", "transparent">; readonly borderStyle: stylex.StyleXClassNameFor<"borderStyle", "solid">; readonly borderWidth: stylex.StyleXClassNameFor<"borderWidth", "1px">; readonly gap: stylex.StyleXClassNameFor<"gap", string>; readonly outline: stylex.StyleXClassNameFor<"outline", { readonly ':focus-visible': `2px solid ${stylex.StyleXVar<string>}`; }>; readonly overflow: stylex.StyleXClassNameFor<"overflow", "hidden">; readonly textDecoration: stylex.StyleXClassNameFor<"textDecoration", "none">; readonly transition: stylex.StyleXClassNameFor<"transition", `opacity ${stylex.StyleXVar<string>} ${stylex.StyleXVar<string>}`>; readonly alignItems: stylex.StyleXClassNameFor<"alignItems", "center">; readonly appearance: stylex.StyleXClassNameFor<"appearance", "none">; readonly boxSizing: stylex.StyleXClassNameFor<"boxSizing", "border-box">; readonly containerType: stylex.StyleXClassNameFor<"containerType", "inline-size">; readonly cursor: stylex.StyleXClassNameFor<"cursor", "pointer">; readonly display: stylex.StyleXClassNameFor<"display", "inline-flex">; readonly fontFamily: stylex.StyleXClassNameFor<"fontFamily", string>; readonly fontWeight: stylex.StyleXClassNameFor<"fontWeight", string>; readonly justifyContent: stylex.StyleXClassNameFor<"justifyContent", "center">; readonly opacity: stylex.StyleXClassNameFor<"opacity", 1 | 0.85>; readonly outlineOffset: stylex.StyleXClassNameFor<"outlineOffset", { readonly ':focus-visible': "2px"; }>; readonly position: stylex.StyleXClassNameFor<"position", "relative">; readonly userSelect: stylex.StyleXClassNameFor<"userSelect", "none">; readonly width: stylex.StyleXClassNameFor<"width", "100%">; }>; readonly label: Readonly<{ readonly flex: stylex.StyleXClassNameFor<"flex", "1 1 auto">; readonly overflow: stylex.StyleXClassNameFor<"overflow", "hidden">; readonly display: stylex.StyleXClassNameFor<"display", "none" | "block">; readonly textOverflow: stylex.StyleXClassNameFor<"textOverflow", "ellipsis">; readonly whiteSpace: stylex.StyleXClassNameFor<"whiteSpace", "nowrap">; }>; readonly icon: Readonly<{ readonly alignItems: stylex.StyleXClassNameFor<"alignItems", "center">; readonly display: stylex.StyleXClassNameFor<"display", "flex">; readonly flexShrink: stylex.StyleXClassNameFor<"flexShrink", 0>; readonly justifyContent: stylex.StyleXClassNameFor<"justifyContent", "center">; readonly height: stylex.StyleXClassNameFor<"height", 20>; readonly width: stylex.StyleXClassNameFor<"width", 20>; }>; }>
+colorVariants [const] Readonly<{ readonly 'danger-ghost': Readonly<{ readonly borderColor: stylex.StyleXClassNameFor<"borderColor", "transparent">; readonly backgroundColor: stylex.StyleXClassNameFor<"backgroundColor", string>; readonly backgroundImage: stylex.StyleXClassNameFor<"backgroundImage", "none">; readonly color: stylex.StyleXClassNameFor<"color", string>; }>; readonly error: Readonly<{ readonly borderColor: stylex.StyleXClassNameFor<"borderColor", string>; readonly backgroundColor: stylex.StyleXClassNameFor<"backgroundColor", string>; readonly backgroundImage: stylex.StyleXClassNameFor<"backgroundImage", "none" | "radial-gradient(circle, oklch(100% 0 0 / 0.2) 1%, transparent 1%)">; readonly color: stylex.StyleXClassNameFor<"color", string>; }>; readonly ghost: Readonly<{ readonly borderColor: stylex.StyleXClassNameFor<"borderColor", "transparent">; readonly backgroundColor: stylex.StyleXClassNameFor<"backgroundColor", string>; readonly backgroundImage: stylex.StyleXClassNameFor<"backgroundImage", "none" | `radial-gradient(circle, transparent 1%, ${stylex.StyleXVar<string>} 1%)`>; readonly color: stylex.StyleXClassNameFor<"color", string>; }>; readonly outline: Readonly<{ readonly borderColor: stylex.StyleXClassNameFor<"borderColor", string>; readonly backgroundColor: stylex.StyleXClassNameFor<"backgroundColor", string>; readonly backgroundImage: stylex.StyleXClassNameFor<"backgroundImage", "none" | `radial-gradient(circle, transparent 1%, ${stylex.StyleXVar<string>} 1%)`>; readonly color: stylex.StyleXClassNameFor<"color", string>; }>; readonly primary: Readonly<{ readonly borderColor: stylex.StyleXClassNameFor<"borderColor", string>; readonly backgroundColor: stylex.StyleXClassNameFor<"backgroundColor", string>; readonly backgroundImage: stylex.StyleXClassNameFor<"backgroundImage", "none" | `radial-gradient(circle, ${stylex.StyleXVar<string>} 1%, transparent 1%)`>; readonly color: stylex.StyleXClassNameFor<"color", string>; }>; readonly secondary: Readonly<{ readonly borderColor: stylex.StyleXClassNameFor<"borderColor", string>; readonly backgroundColor: stylex.StyleXClassNameFor<"backgroundColor", string>; readonly backgroundImage: stylex.StyleXClassNameFor<"backgroundImage", "none" | "radial-gradient(circle, oklch(100% 0 0 / 0.2) 1%, transparent 1%)">; readonly color: stylex.StyleXClassNameFor<"color", string>; }>; readonly success: Readonly<{ readonly borderColor: stylex.StyleXClassNameFor<"borderColor", string>; readonly backgroundColor: stylex.StyleXClassNameFor<"backgroundColor", string>; readonly backgroundImage: stylex.StyleXClassNameFor<"backgroundImage", "none" | "radial-gradient(circle, oklch(100% 0 0 / 0.2) 1%, transparent 1%)">; readonly color: stylex.StyleXClassNameFor<"color", string>; }>; readonly warning: Readonly<{ readonly borderColor: stylex.StyleXClassNameFor<"borderColor", string>; readonly backgroundColor: stylex.StyleXClassNameFor<"backgroundColor", string>; readonly backgroundImage: stylex.StyleXClassNameFor<"backgroundImage", "none" | "radial-gradient(circle, oklch(0% 0 0 / 0.1) 1%, transparent 1%)">; readonly color: stylex.StyleXClassNameFor<"color", string>; }>; }>
+orientationVariants [const] Readonly<{ readonly horizontal: Readonly<{ readonly justifyContent: stylex.StyleXClassNameFor<"justifyContent", "center">; }>; readonly vertical: Readonly<{ readonly justifyContent: stylex.StyleXClassNameFor<"justifyContent", "flex-start">; }>; }>
+overlayStyles [const] Readonly<{ readonly linear: Readonly<{ readonly backgroundImage: stylex.StyleXClassNameFor<"backgroundImage", string>; }>; readonly radial: Readonly<{ readonly backgroundImage: stylex.StyleXClassNameFor<"backgroundImage", string>; }>; readonly overlay: Readonly<{ readonly inset: stylex.StyleXClassNameFor<"inset", 0>; readonly backgroundColor: stylex.StyleXClassNameFor<"backgroundColor", string>; readonly filter: stylex.StyleXClassNameFor<"filter", string>; readonly mixBlendMode: stylex.StyleXClassNameFor<"mixBlendMode", "screen">; readonly opacity: stylex.StyleXClassNameFor<"opacity", string>; readonly pointerEvents: stylex.StyleXClassNameFor<"pointerEvents", "none">; readonly position: stylex.StyleXClassNameFor<"position", "absolute">; readonly height: stylex.StyleXClassNameFor<"height", "100%">; readonly width: stylex.StyleXClassNameFor<"width", "100%">; }>; readonly overlayParent: Readonly<{ readonly backgroundColor: stylex.StyleXClassNameFor<"backgroundColor", "transparent">; readonly isolation: stylex.StyleXClassNameFor<"isolation", "isolate">; }>; }>
+rippleBase [const] Readonly<{ readonly ripple: Readonly<{ readonly backgroundPosition: stylex.StyleXClassNameFor<"backgroundPosition", "center">; readonly transition: stylex.StyleXClassNameFor<"transition", "background-size 0.8s, background-image 0.8s" | "background-size 0s, background-image 0s">; readonly backgroundSize: stylex.StyleXClassNameFor<"backgroundSize", "100%" | "0%" | "15000%">; }>; }>
+sizeVariants [const] Readonly<{ readonly embedded: Readonly<{ readonly borderRadius: stylex.StyleXClassNameFor<"borderRadius", string>; readonly paddingBlock: stylex.StyleXClassNameFor<"paddingBlock", string>; readonly paddingInline: stylex.StyleXClassNameFor<"paddingInline", string>; readonly alignItems: stylex.StyleXClassNameFor<"alignItems", "center">; readonly fontSize: stylex.StyleXClassNameFor<"fontSize", string>; readonly justifyContent: stylex.StyleXClassNameFor<"justifyContent", "center">; readonly height: stylex.StyleXClassNameFor<"height", string>; readonly minHeight: stylex.StyleXClassNameFor<"minHeight", string>; readonly minWidth: stylex.StyleXClassNameFor<"minWidth", string>; readonly width: stylex.StyleXClassNameFor<"width", string>; }>; readonly lg: Readonly<{ readonly borderRadius: stylex.StyleXClassNameFor<"borderRadius", string>; readonly paddingBlock: stylex.StyleXClassNameFor<"paddingBlock", string>; readonly paddingInline: stylex.StyleXClassNameFor<"paddingInline", string>; readonly fontSize: stylex.StyleXClassNameFor<"fontSize", string>; readonly height: stylex.StyleXClassNameFor<"height", string>; readonly minHeight: stylex.StyleXClassNameFor<"minHeight", string>; }>; readonly md: Readonly<{ readonly borderRadius: stylex.StyleXClassNameFor<"borderRadius", string>; readonly paddingBlock: stylex.StyleXClassNameFor<"paddingBlock", string>; readonly paddingInline: stylex.StyleXClassNameFor<"paddingInline", string>; readonly fontSize: stylex.StyleXClassNameFor<"fontSize", string>; readonly height: stylex.StyleXClassNameFor<"height", "2.5rem">; readonly minHeight: stylex.StyleXClassNameFor<"minHeight", "2.5rem">; }>; readonly sm: Readonly<{ readonly borderRadius: stylex.StyleXClassNameFor<"borderRadius", string>; readonly paddingBlock: stylex.StyleXClassNameFor<"paddingBlock", string>; readonly paddingInline: stylex.StyleXClassNameFor<"paddingInline", string>; readonly fontSize: stylex.StyleXClassNameFor<"fontSize", string>; readonly height: stylex.StyleXClassNameFor<"height", string>; readonly minHeight: stylex.StyleXClassNameFor<"minHeight", string>; }>; readonly mini: Readonly<{ readonly borderRadius: stylex.StyleXClassNameFor<"borderRadius", string>; readonly paddingBlock: stylex.StyleXClassNameFor<"paddingBlock", string>; readonly paddingInline: stylex.StyleXClassNameFor<"paddingInline", string>; readonly alignItems: stylex.StyleXClassNameFor<"alignItems", "center">; readonly fontSize: stylex.StyleXClassNameFor<"fontSize", string>; readonly justifyContent: stylex.StyleXClassNameFor<"justifyContent", "center">; readonly height: stylex.StyleXClassNameFor<"height", "1.75rem">; readonly minHeight: stylex.StyleXClassNameFor<"minHeight", "1.75rem">; readonly minWidth: stylex.StyleXClassNameFor<"minWidth", "1.75rem">; readonly width: stylex.StyleXClassNameFor<"width", "1.75rem">; }>; }>
+skeleton [const] Readonly<{ readonly loadingOverlay: Readonly<{ readonly borderRadius: stylex.StyleXClassNameFor<"borderRadius", string>; readonly insetBlock: stylex.StyleXClassNameFor<"insetBlock", string>; readonly insetInline: stylex.StyleXClassNameFor<"insetInline", 0>; readonly overflow: stylex.StyleXClassNameFor<"overflow", "hidden">; readonly backgroundColor: stylex.StyleXClassNameFor<"backgroundColor", `${stylex.StyleXVar<string>}80`>; readonly position: stylex.StyleXClassNameFor<"position", "absolute">; readonly zIndex: stylex.StyleXClassNameFor<"zIndex", 1>; }>; readonly placeholderBar: Readonly<{ readonly borderRadius: stylex.StyleXClassNameFor<"borderRadius", string>; readonly flex: stylex.StyleXClassNameFor<"flex", "1">; readonly overflow: stylex.StyleXClassNameFor<"overflow", "hidden">; readonly backgroundColor: stylex.StyleXClassNameFor<"backgroundColor", `${stylex.StyleXVar<string>}80`>; readonly pointerEvents: stylex.StyleXClassNameFor<"pointerEvents", "none">; readonly position: stylex.StyleXClassNameFor<"position", "relative">; readonly height: stylex.StyleXClassNameFor<"height", `calc(2rem - ${stylex.StyleXVar<string>} * 2)`>; }>; readonly shimmerWave: Readonly<{ readonly animationDuration: stylex.StyleXClassNameFor<"animationDuration", "1.5s">; readonly animationIterationCount: stylex.StyleXClassNameFor<"animationIterationCount", "infinite">; readonly animationName: stylex.StyleXClassNameFor<"animationName", string>; readonly animationTimingFunction: stylex.StyleXClassNameFor<"animationTimingFunction", "ease-in-out">; readonly backgroundImage: stylex.StyleXClassNameFor<"backgroundImage", `linear-gradient(90deg, transparent 0%, ${stylex.StyleXVar<string>} 50%, transparent 100%)`>; readonly display: stylex.StyleXClassNameFor<"display", "block">; readonly pointerEvents: stylex.StyleXClassNameFor<"pointerEvents", "none">; readonly height: stylex.StyleXClassNameFor<"height", "100%">; readonly width: stylex.StyleXClassNameFor<"width", "100%">; }>; }>
+
+## ./entry/hydrateApp.util
+hydrateApp [const] () => void
 
 ## ./hooks
 TStore [type] { /** Get current state */ get: () => TData; /** Get server snapshot for SSR hydration */ getServerSnapshot: () => TData; /** Reset state to initial value */ reset: () => void; /** Merge partial state update (only notifies if changed) */ set: (value: Partial<TData>) => void; /** Subscribe to state changes */ subscribe: (callback: () => void) => () => void; }
@@ -149,9 +362,50 @@ useStore [const] <TData extends Record<string, unknown>>(initialState: TData) =>
 useTableRoutePage [const] <TData extends Record<string, unknown>, TResponse>({ fetchPage, isKeysetEnabled, isServerFilterEnabled, }: UseTableRoutePageArgs<TResponse>) => { columnsState: { columnFilters: ColumnFiltersState<TData>; columnOrder: ColumnOrderState<TData>; columnPinning: ColumnPinningState<TData>; columns: TableColumn<TData>[]; columnSizing: ColumnSizingState<TData>; columnVisibility: ColumnVisibilityState<TData>; sorting: { columnKey: keyof TData & string; direction: "asc" | "desc"; }[]; }; dataPromise: Promise<TResponse>; metaState: { additionalMetadata?: Readonly<Record<string, null | TableMetadataValue | undefined>>; appId: string; columnOverscan?: number | undefined; columnSelectedKey?: string; columnSettingsSelectedTab?: string; crud?: TableCrudConfig; deleteActionPath?: string; density?: TableDensity | undefined; drawersSyncNonce?: number; enablePrefetch?: boolean | undefined; error?: string; initialPageSize?: number | undefined; isBordered?: boolean | undefined; isColumnSettingsOpen?: boolean; isColumnSettingsPinned?: boolean; isRounded?: boolean | undefined; isStriped?: boolean | undefined; isTableSettingsOpen?: boolean; isTableSettingsPinned?: boolean; loadMorePageSize?: number | undefined; locale?: string; overscan?: number | undefined; persistenceKey: string; placeholderRowCount?: number | undefined; rowHeight?: number | undefined; schemaName?: string; tableName: string; tableSettingsExpandedFilters?: readonly string[]; tableSettingsSelectedTab?: string; threshold?: number | undefined; title: TableTitle; wasTableSettingsOpenBeforeColumnSettings?: boolean; }; onLoadMore: ({ lastRow, limit, skip }: Pagination<TData>) => Promise<TResponse>; }
 useVirtualization [const] ({ containerRef, defaultContainerHeight, itemHeight, overscan, totalItems, }: UseVirtualizationArgs) => { bottomSpacerHeight: number; containerHeight: number; endIndex: number; offsetY: number; startIndex: number; totalHeight: number; visibleCount: number; }
 
+## ./hooks/useTheme.hook
+useTheme [const] () => ThemeContextValue
+
+## ./routing/actions/persist-cookie.action
+action [const] ({ request }: ActionFunctionArgs) => Promise<Response>
+
+## ./routing/actions/shouldRevalidatePersistCookieAction.util
+shouldRevalidatePersistCookieAction [const] ({ actionStatus, defaultShouldRevalidate, formAction, }: ShouldRevalidateFunctionArgs) => boolean
+
+## ./routing/loaders/createTableRouteLoader.util
+createTableRouteLoader [const] <TData extends Record<string, unknown>, TResponse>({ appId, columns, fetchPage, filterOptions, includeFilters, meta, persistenceKey, schemaName, tableName, title, }: CreateTableRouteLoaderArgs<TData, TResponse>) => ({ request }: LoaderFunctionArgs) => { columnsState: { columnFilters: ColumnFiltersState<TData>; columnOrder: ColumnOrderState<TData>; columnPinning: ColumnPinningState<TData>; columns: TableColumn<TData>[]; columnSizing: ColumnSizingState<TData>; columnVisibility: ColumnVisibilityState<TData>; sorting: { columnKey: keyof TData & string; direction: "asc" | "desc"; }[]; }; dataPromise: Promise<TResponse>; key: string; metaState: { additionalMetadata?: Readonly<Record<string, null | TableMetadataValue | undefined>>; appId: string; columnOverscan?: number | undefined; columnSelectedKey?: string; columnSettingsSelectedTab?: string; crud?: TableCrudConfig; deleteActionPath?: string; density?: TableDensity | undefined; drawersSyncNonce?: number; enablePrefetch?: boolean | undefined; error?: string; initialPageSize?: number | undefined; isBordered?: boolean | undefined; isColumnSettingsOpen?: boolean; isColumnSettingsPinned?: boolean; isRounded?: boolean | undefined; isStriped?: boolean | undefined; isTableSettingsOpen?: boolean; isTableSettingsPinned?: boolean; loadMorePageSize?: number | undefined; locale?: string; overscan?: number | undefined; persistenceKey: string; placeholderRowCount?: number | undefined; rowHeight?: number | undefined; schemaName?: string; tableName: string; tableSettingsExpandedFilters?: readonly string[]; tableSettingsSelectedTab?: string; threshold?: number | undefined; title: TableTitle; wasTableSettingsOpenBeforeColumnSettings?: boolean; }; }
+TableRouteLoaderData [type] ReturnType<ReturnType<typeof createTableRouteLoader<TData, TResponse>>>
+
+## ./routing/shared/getRootLoaderData.util
+getRootLoaderData [const] ({ appId, request, }: GetRootLoaderDataArgs) => { cspNonce: string | undefined; globalSettings: GlobalSettingsState; theme: ThemeMode | undefined; }
+
+## ./routing/shared/sanitizeSorting.util
+sanitizeSorting [const] <TData extends Record<string, unknown>>(sorting: SortingState<TData>) => { columnKey: keyof TData & string; direction: "asc" | "desc"; }[]
+
+## ./routing/shared/toQuerySort.util
+toQuerySort [const] <TData extends Record<string, unknown>>({ sorting, }: ToQuerySortArgs<TData>) => { column: keyof TData & string; direction: "desc" | "asc"; }[]
+
 ## ./server
 createHandleRequest [const] ({ stylexCssHref, }: CreateHandleRequestArgs) => { handleRequest: HandleRequest; streamTimeout: number; }
+
+## ./types/filterOperators.types
+BooleanFilter [type] { readonly type: 'boolean'; readonly value: boolean; }
+ColumnFilter [type] | BooleanFilter | DateFilter | NumberFilter | SelectFilter | TextFilter
+DateFilter [type] { readonly operator: 'after' | 'before' | 'between' | 'equals'; readonly type: 'date'; /** ISO date string */ readonly value: string; /** Second date for 'between' operator (ISO string) */ readonly value2?: string; }
+DateOperatorType [type] DateFilter['operator']
+NumberFilter [type] { readonly operator: | 'between' | 'equals' | 'greaterThan' | 'greaterThanOrEqual' | 'lessThan' | 'lessThanOrEqual' | 'notEquals'; readonly type: 'number'; /** Undefined while the user is drafting the filter (empty input) */ readonly value: number | undefined; /** Second value for 'between' operator */ readonly value2?: number; }
+NumberOperatorType [type] NumberFilter['operator']
+OperatorOption [type] { readonly label: string; readonly value: T; }
+OperatorType [type] | DateOperatorType | NumberOperatorType | TextOperatorType
+SelectFilter [type] { /** Operator for select filter (defaults to 'equals' if not specified) */ readonly operator?: 'equals' | 'notEquals'; readonly type: 'multiSelect' | 'select'; /** Single value for 'select' type */ readonly value?: string; /** Multiple values for 'multiSelect' type */ readonly values?: readonly string[]; }
+TextFilter [type] { readonly operator: | 'contains' | 'endsWith' | 'equals' | 'notContains' | 'notEquals' | 'startsWith'; readonly type: 'text'; readonly value: string; }
+TextOperatorType [type] TextFilter['operator']
+
+## ./utils/filters
+createStaticFilterOptions [const] <TData>(values: readonly string[]) => StaticFilterOptions<TData>
 
 ## ./utils/logger
 createLogger [const] ({ level, prefix }?: CreateLoggerArgs) => { debug: (...args: readonly unknown[]) => void; error: (...args: readonly unknown[]) => void; info: (...args: readonly unknown[]) => void; warn: (...args: readonly unknown[]) => void; }
 logger [const] { debug: (...args: readonly unknown[]) => void; error: (...args: readonly unknown[]) => void; info: (...args: readonly unknown[]) => void; warn: (...args: readonly unknown[]) => void; }
+
+## ./utils/tests/mockDialogElement.util
+mockDialogElement [const] (shouldSetOpenOnShow?: boolean) => { closeMock: Mock<() => void>; restore: () => void; showMock: Mock<() => void>; showModalMock: Mock<() => void>; }

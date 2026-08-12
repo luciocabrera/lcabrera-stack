@@ -52,12 +52,14 @@ const configs = [
     config: createAppTsConfig({
       paths: {
         '@lcabrera/server/*': ['../../packages/server/src/*'],
-        // Bare specifier — `@lcabrera/ui` resolves to the public-api barrel, not
-        // a subpath. Distinct from the wildcard below and NOT implied by it
-        // (`@lcabrera/ui/*` never matches the bare form), so dropping it breaks
-        // every `from '@lcabrera/ui'` import in this app.
+        // Bare specifier only. There is deliberately NO `@lcabrera/ui/*`
+        // wildcard here: an alias for the subpaths resolves them straight to
+        // `src/`, which is how a broken `exports` map stayed invisible in this
+        // repo while the published package could not be imported at all
+        // (ADR-060). Without it, every deep import is checked against the real
+        // export map by `tsc`, so an unexported subpath fails typecheck here
+        // rather than on a consumer's machine.
         '@lcabrera/ui': ['../../packages/ui/src/public-api.ts'],
-        '@lcabrera/ui/*': ['../../packages/ui/src/*'],
         '@repo/scan-ingestion/*': ['../../packages/scan-ingestion/src/*'],
       },
       tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
@@ -74,9 +76,8 @@ const configs = [
     config: createAppTsConfig({
       paths: {
         '@lcabrera/server/*': ['../../packages/server/src/*'],
-        // Bare specifier — see the identical entry under admin_system above.
+        // Bare specifier only — see the identical entry under admin_system.
         '@lcabrera/ui': ['../../packages/ui/src/public-api.ts'],
-        '@lcabrera/ui/*': ['../../packages/ui/src/*'],
       },
       tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
     }),
@@ -102,9 +103,6 @@ const configs = [
       // `@lcabrera/server/*` used to be here too. It is gone with the shapes it
       // resolved (ADR-039): @lcabrera/ui is client-safe and must not reach into
       // a Node-only package, and an alias is exactly how such an edge hides.
-      paths: {
-        '@lcabrera/ui/*': ['./src/*'],
-      },
       // No `@/*`. It resolves only through a tsconfig, so an `@/` import
       // inside a published package is unresolvable for a consumer — the
       // same class of undeclared edge as the alias above. Omitting it makes

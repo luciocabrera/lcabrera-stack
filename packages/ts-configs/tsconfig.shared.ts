@@ -65,10 +65,17 @@ const createAppCompilerOptions = ({
   noUncheckedSideEffectImports: true,
   noUnusedLocals: true,
   noUnusedParameters: true,
-  paths: {
-    ...(srcAlias && { '@/*': ['./src/*'] }),
-    ...paths,
-  },
+  // Omitted entirely when it would be empty. `packages/ui` is that case: it has
+  // no `@/*` alias and no self-alias, because resolving its own subpaths
+  // through an alias is what let a broken `exports` map go unnoticed
+  // (ADR-060). An empty `paths` reads like an oversight; absent says there is
+  // nothing to alias.
+  ...((srcAlias || Object.keys(paths ?? {}).length > 0) && {
+    paths: {
+      ...(srcAlias && { '@/*': ['./src/*'] }),
+      ...paths,
+    },
+  }),
   resolveJsonModule: true,
   rootDirs,
   skipLibCheck: true,
