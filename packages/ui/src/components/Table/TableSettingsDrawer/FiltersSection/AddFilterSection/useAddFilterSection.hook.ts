@@ -6,6 +6,7 @@ import {
 } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
 import { useSetTableSettingsExpandedFilters } from '#ui/components/Table/contexts/TableConfig/meta/actions';
 import { useGetTableSettingsExpandedFilters } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
+import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
 
 import { useSetColumnFilters } from '../../TableDrawerContext/actions';
 import { useGetColumnFilters } from '../../TableDrawerContext/selectors';
@@ -37,7 +38,7 @@ export const useAddFilterSection = ({
 
   // Filter to only filterable columns and build { label, value } options
   const filterableColumnOptions = columns
-    .filter((col) => col.isFilterable !== false)
+    .filter((col) => resolveColumnCapabilities(col).isFilterable)
     .map((col) => {
       const hasActiveFilter = Object.hasOwn(filters, col.key);
       return {

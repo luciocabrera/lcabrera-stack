@@ -1,6 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 
 import { DEFAULT_MIN_COLUMN_WIDTH } from '#ui/components/Table/Table.constants';
+import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
 
 import type { TableHeaderCellProps } from './TableHeaderCell.types';
 
@@ -32,8 +33,8 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   const effectiveMinWidth = minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
   const currentWidth = width ?? effectiveMinWidth;
   const sortDirection = column.sortDirection;
-  const isSortable = column.isSortable !== false;
-  const isStatic = column.isStatic === true;
+  const { isResizable, isSortable, isStatic } =
+    resolveColumnCapabilities(column);
 
   const pinnedStylex = getPinnedStyle(pinInfo);
   const shadowStylex = getShadowStyle(pinInfo);
@@ -56,7 +57,7 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
       {!isHeaderHidden && (
         <>
           <span {...stylex.props(tableHeaderCellStyles.content)}>{label}</span>
-          {column.isResizable !== false && !column.isStatic && (
+          {Boolean(isResizable) && (
             <ResizeHandle columnKey={columnKey} columnLabel={label} />
           )}
           <TableHeaderActionsMenu

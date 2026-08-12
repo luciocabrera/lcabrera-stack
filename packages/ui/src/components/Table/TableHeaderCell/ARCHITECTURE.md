@@ -72,6 +72,16 @@ pinned-offset entry), so a width change to one column re-renders only that
 column's cell — not the whole header row. `ResizeHandle` self-connects the same
 way, so `TableHeaderCell` drills nothing into it (see below).
 
+## Column Capabilities
+
+`TableHeaderCell` resolves the column's capabilities once through
+`resolveColumnCapabilities` (`Table/utils/`) and renders from the result: the
+`ResizeHandle` appears when `isResizable` — which already accounts for `isStatic`
+locking a column against resizing — and `isSortable`/`isStatic` are forwarded to
+`TableHeaderActionsMenu` to gate its sections. Each menu delegate then resolves
+the same capability for itself and passes it to `deriveToggleCommandState`, so a
+command is disabled, not merely un-rendered, when the column does not offer it.
+
 ## Actions Menu
 
 A single `MoreVerticalIcon` trigger (`TableActionsPopover`, shared with

@@ -8,12 +8,12 @@ once.
 
 ## What lives here
 
-| Artifact                           | Kind      | Role                                                                                 |
-| ---------------------------------- | --------- | ------------------------------------------------------------------------------------ |
-| `CommandDescriptor` / `CommandId`  | type      | Presentation-neutral identity `{ id, label, icon }`. No handler, no enablement.      |
-| `deriveToggleCommandState.util.ts` | pure util | Capability-agnostic `{ isActive, isEnabled }` from `{ current, target, isDisabled }` |
-| `pinning/pinningCommands.ts`       | constants | `PIN_LEFT_COMMAND`, `PIN_RIGHT_COMMAND`, `CLEAR_PINNING_COMMAND`                     |
-| `sorting/sortingCommands.ts`       | constants | `SORT_ASCENDING_COMMAND`, `SORT_DESCENDING_COMMAND`, `CLEAR_SORTING_COMMAND`         |
+| Artifact                           | Kind      | Role                                                                                                                                      |
+| ---------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `CommandDescriptor` / `CommandId`  | type      | Presentation-neutral identity `{ id, label, icon }`. No handler, no enablement.                                                           |
+| `deriveToggleCommandState.util.ts` | pure util | Capability-agnostic `{ isActive, isEnabled }` from `{ current, target, isDisabled }`; `isDisabled` comes from `resolveColumnCapabilities` |
+| `pinning/pinningCommands.ts`       | constants | `PIN_LEFT_COMMAND`, `PIN_RIGHT_COMMAND`, `CLEAR_PINNING_COMMAND`                                                                          |
+| `sorting/sortingCommands.ts`       | constants | `SORT_ASCENDING_COMMAND`, `SORT_DESCENDING_COMMAND`, `CLEAR_SORTING_COMMAND`                                                              |
 
 ## What deliberately does **not** live here
 
@@ -37,6 +37,13 @@ once.
   (SortAscending/SortDescending/ClearSorting).
 - Settings drawer (draft commit-context): `ColumnSettingsDrawer/PinningSection/`
   and `ColumnSettingsDrawer/SortingSection/`.
+
+Every consumer resolves its own capability from the column
+(`useGetNormalizedColumn` + `resolveColumnCapabilities`, `Table/utils/`) and passes
+it as `isDisabled`: sorting commands are unavailable on a non-sortable column,
+pinning commands on a static one. So each surface's rendering gate and each
+command's own enabled-state come from the same resolver rather than from a
+hand-spelled predicate per site.
 
 Each renders from the shared descriptor + predicate and keeps only its own
 presentation and commit-context. The descriptor is an **overridable default** — a

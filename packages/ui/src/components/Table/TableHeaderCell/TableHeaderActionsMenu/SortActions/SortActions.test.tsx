@@ -7,6 +7,10 @@ vi.mock('#ui/components/Table/contexts/TableConfig/columns/actions', () => ({
   useSetColumnSorting: () => vi.fn(),
 }));
 
+vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
+  useGetNormalizedColumn: () => ({ key: 'name', label: 'Name' }),
+}));
+
 vi.mock('#ui/components/Table/TableActionsPopover', () => ({
   tableActionsPopoverStyles: {
     menuIcon: {},

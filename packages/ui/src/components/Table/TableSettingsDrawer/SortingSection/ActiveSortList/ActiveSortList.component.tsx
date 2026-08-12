@@ -9,6 +9,7 @@ import {
   SidePanelSectionHeader,
 } from '#ui/components/SidePanel';
 import { useGetColumns } from '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
+import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
 
 import type { SortItem } from '../SortingSection.types';
 import type { ActiveSortListProps } from './ActiveSortList.types';
@@ -25,7 +26,9 @@ export const ActiveSortList = ({ isBusy = false }: ActiveSortListProps) => {
   const onSortChange = useSetColumnsSortings();
 
   // Filter to only sortable columns
-  const sortableColumns = columns.filter((col) => col.isSortable !== false);
+  const sortableColumns = columns.filter(
+    (col) => resolveColumnCapabilities(col).isSortable,
+  );
 
   // Convert sorting state to sort items with labels
   const sortItems: SortItem[] = sorting.map((sort) => ({

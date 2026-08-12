@@ -6,7 +6,9 @@ import {
   PIN_RIGHT_COMMAND,
 } from '#ui/components/Table/commands';
 import { useSetColumnPinning } from '#ui/components/Table/contexts/TableConfig/columns/actions';
+import { useGetNormalizedColumn } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
 import { tableActionsPopoverStyles } from '#ui/components/Table/TableActionsPopover';
+import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
 
 import type { PinRightButtonProps } from './PinRightButton.types';
 
@@ -23,10 +25,12 @@ export const PinRightButton = <TData,>({
   pinSide,
 }: PinRightButtonProps<TData>) => {
   const setColumnPinning = useSetColumnPinning<TData>();
+  const column = useGetNormalizedColumn<TData>(columnKey);
+  const { isStatic } = resolveColumnCapabilities(column);
   const { icon: PinRightCommandIcon, label } = PIN_RIGHT_COMMAND;
-  const { isActive } = deriveToggleCommandState({
+  const { isActive, isEnabled } = deriveToggleCommandState({
     current: pinSide,
-    isDisabled: false,
+    isDisabled: isStatic,
     target: 'right',
   });
 
@@ -44,6 +48,7 @@ export const PinRightButton = <TData,>({
           <PinRightCommandIcon size={16} />
         </span>
       }
+      isDisabled={!isEnabled}
       onClick={handlePinRight}
       orientation='horizontal'
       size='mini'

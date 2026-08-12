@@ -1,3 +1,5 @@
+import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
+
 type CreateDraggableItemsArgs<TContent> = {
   readonly allOrderedColumns: readonly OrderedColumnItem[];
   readonly columnPinning: {
@@ -31,7 +33,7 @@ export const createDraggableItems = <TContent>({
 
   return allOrderedColumns.map((col) => {
     const isPinned = leftPinned.has(col.key) || rightPinned.has(col.key);
-    const isStatic = col.isStatic === true;
+    const { isStatic } = resolveColumnCapabilities(col);
     const isVisible = !columnVisibility.has(col.key);
 
     return {

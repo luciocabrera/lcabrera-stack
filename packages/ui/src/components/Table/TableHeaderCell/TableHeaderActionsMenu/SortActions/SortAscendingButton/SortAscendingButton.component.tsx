@@ -6,7 +6,9 @@ import {
   SORT_ASCENDING_COMMAND,
 } from '#ui/components/Table/commands';
 import { useSetColumnSorting } from '#ui/components/Table/contexts/TableConfig/columns/actions';
+import { useGetNormalizedColumn } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
 import { tableActionsPopoverStyles } from '#ui/components/Table/TableActionsPopover';
+import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
 
 import type { SortAscendingButtonProps } from './SortAscendingButton.types';
 
@@ -23,10 +25,12 @@ export const SortAscendingButton = <TData,>({
   sortDirection,
 }: SortAscendingButtonProps<TData>) => {
   const setSorting = useSetColumnSorting<TData>();
+  const column = useGetNormalizedColumn<TData>(columnKey);
+  const { isSortable } = resolveColumnCapabilities(column);
   const { icon: SortAscendingCommandIcon, label } = SORT_ASCENDING_COMMAND;
-  const { isActive } = deriveToggleCommandState({
+  const { isActive, isEnabled } = deriveToggleCommandState({
     current: sortDirection,
-    isDisabled: false,
+    isDisabled: !isSortable,
     target: 'asc',
   });
 
@@ -44,6 +48,7 @@ export const SortAscendingButton = <TData,>({
           <SortAscendingCommandIcon size={16} />
         </span>
       }
+      isDisabled={!isEnabled}
       onClick={handleAscending}
       orientation='horizontal'
       size='mini'

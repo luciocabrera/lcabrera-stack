@@ -125,6 +125,36 @@ describe('useToggleColumnPin', () => {
     expect(modalsStore.set).not.toHaveBeenCalled();
   });
 
+  it('reports the column as static when its normalized entry says so', () => {
+    tableColumnsStore._state = {
+      ...tableColumnsStore._state,
+      normalizedColumns: { id: { isStatic: true, key: 'id', label: 'ID' } },
+    };
+    mockResolve.mockReturnValue({ kind: 'ignored-static' });
+    const { result } = renderHook(() => useToggleColumnPin());
+
+    act(() => {
+      result.current({ columnKey: 'id', isPinning: true });
+    });
+
+    expect(mockResolve).toHaveBeenCalledWith(
+      expect.objectContaining({ isColumnStatic: true }),
+    );
+  });
+
+  it('reports a column missing from the normalized map as non-static', () => {
+    mockResolve.mockReturnValue({ kind: 'ignored-static' });
+    const { result } = renderHook(() => useToggleColumnPin());
+
+    act(() => {
+      result.current({ columnKey: 'id', isPinning: true });
+    });
+
+    expect(mockResolve).toHaveBeenCalledWith(
+      expect.objectContaining({ isColumnStatic: false }),
+    );
+  });
+
   it('sets pinning directly for apply-pinning-direct', () => {
     const nextPinning = { left: ['id' as const], right: [] };
     mockResolve.mockReturnValue({ kind: 'apply-pinning-direct', nextPinning });

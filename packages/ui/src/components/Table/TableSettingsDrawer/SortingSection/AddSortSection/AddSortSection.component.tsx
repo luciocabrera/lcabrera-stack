@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from '#ui/components/Button';
 import { SidePanelSectionHeader } from '#ui/components/SidePanel';
 import { useGetColumns } from '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
+import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
 import { VirtualSelect } from '#ui/components/VirtualSelect';
 
 import type { AddSortSectionProps } from './AddSortSection.types';
@@ -32,7 +33,7 @@ export const AddSortSection = ({
   const availableColumnOptions = columns
     .filter(
       (col) =>
-        col.isSortable !== false &&
+        resolveColumnCapabilities(col).isSortable &&
         sorting.every((s) => s.columnKey !== col.key),
     )
     .map((col) => ({ label: col.label, value: col.key }));

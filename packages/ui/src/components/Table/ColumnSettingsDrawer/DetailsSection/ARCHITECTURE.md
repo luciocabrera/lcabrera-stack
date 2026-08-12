@@ -46,16 +46,19 @@ graph TD
 
 ## Detail Items Rendered
 
-| Label          | Value Source           | Display Mode |
-| -------------- | ---------------------- | ------------ |
-| Label          | `column.label`         | Text         |
-| Key            | `column.key`           | Mono font    |
-| Data Type      | `column.dataType`      | Text (or —)  |
-| Sortable       | `column.isSortable`    | Badge        |
-| Filterable     | `column.isFilterable`  | Badge        |
-| Sort Direction | `column.sortDirection` | Badge        |
-| Min Width      | `column.minWidth`      | Text (or —)  |
-| Max Width      | `column.maxWidth`      | Text (or —)  |
+| Label          | Value Source            | Display Mode |
+| -------------- | ----------------------- | ------------ |
+| Label          | `column.label`          | Text         |
+| Key            | `column.key`            | Mono font    |
+| Data Type      | `column.dataType`       | Text (or —)  |
+| Sortable       | resolved `isSortable`   | Badge        |
+| Filterable     | resolved `isFilterable` | Badge        |
+| Sort Direction | `column.sortDirection`  | Badge        |
+| Min Width      | `column.minWidth`       | Text (or —)  |
+| Max Width      | `column.maxWidth`       | Text (or —)  |
+
+The two capability badges read `resolveColumnCapabilities(column)` rather than the
+optional flag, so the badge shows the value the rest of the table acts on.
 
 ## Badge Color Mapping
 

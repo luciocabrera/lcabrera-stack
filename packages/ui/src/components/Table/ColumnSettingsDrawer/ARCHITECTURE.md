@@ -139,7 +139,8 @@ graph TD
   T2 -- Yes --> U
 
   P --> B[Read column config from TableConfigContext]
-  B --> C[Determine conditional tabs]
+  B --> RC["resolveColumnCapabilities(column)"]
+  RC --> C[Determine conditional tabs]
   C --> D{isFilterable + dataType?}
   D -- Yes --> E[Include Filter tab]
   D -- No --> F[Skip Filter tab]
@@ -189,6 +190,13 @@ See [ColumnDrawerContext/ARCHITECTURE.md](ColumnDrawerContext/ARCHITECTURE.md) f
 All sections follow a consistent pattern: they use SidePanel sub-components for layout,
 read/write state through ColumnDrawerContext actions and selectors, and use shared
 `drawerSection.stylex` tokens for styling.
+
+Every tab condition below is a capability read through `resolveColumnCapabilities`
+(`Table/utils/`), never a direct test of the optional flag. `SortingSection` and
+`PinningSection` resolve the same capability again for themselves, and pass it to
+`deriveToggleCommandState` as the command's availability — so a section that is
+somehow rendered for a column lacking the capability disables its commands rather
+than offering an edit the table will refuse.
 
 | Section          | Tab Condition              | Features                                                  | Details                                           |
 | ---------------- | -------------------------- | --------------------------------------------------------- | ------------------------------------------------- |

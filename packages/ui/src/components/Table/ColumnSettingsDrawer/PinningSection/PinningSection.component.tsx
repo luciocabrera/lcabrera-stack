@@ -11,6 +11,9 @@ import {
   PIN_LEFT_COMMAND,
   PIN_RIGHT_COMMAND,
 } from '#ui/components/Table/commands';
+import { useGetNormalizedColumn } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
+import { useGetTableColumnSelectedKey } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
+import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
 import { ICON_SIZE_MD } from '#ui/design-system/constants';
 
 import type { PinningSectionProps } from './PinningSection.types';
@@ -30,19 +33,24 @@ import { PinningSectionToolbar } from './PinningSectionToolbar';
 export const PinningSection = ({ isBusy = false }: PinningSectionProps) => {
   const columnPinning = useGetColumnPinning();
   const setColumnPinning = useSetColumnPinning();
+  const columnKey = useGetTableColumnSelectedKey();
+  const column = useGetNormalizedColumn<Record<string, unknown>>(columnKey);
+  const { isStatic } = resolveColumnCapabilities(column);
 
   const { icon: PinLeftCommandIcon, label: pinLeftLabel } = PIN_LEFT_COMMAND;
   const { icon: PinRightCommandIcon, label: pinRightLabel } = PIN_RIGHT_COMMAND;
-  const { isActive: isPinnedLeft } = deriveToggleCommandState({
-    current: columnPinning,
-    isDisabled: false,
-    target: 'left',
-  });
-  const { isActive: isPinnedRight } = deriveToggleCommandState({
-    current: columnPinning,
-    isDisabled: false,
-    target: 'right',
-  });
+  const { isActive: isPinnedLeft, isEnabled: isPinLeftEnabled } =
+    deriveToggleCommandState({
+      current: columnPinning,
+      isDisabled: isStatic,
+      target: 'left',
+    });
+  const { isActive: isPinnedRight, isEnabled: isPinRightEnabled } =
+    deriveToggleCommandState({
+      current: columnPinning,
+      isDisabled: isStatic,
+      target: 'right',
+    });
 
   const handlePinLeft = () =>
     setColumnPinning(isPinnedLeft ? undefined : 'left');
@@ -60,6 +68,7 @@ export const PinningSection = ({ isBusy = false }: PinningSectionProps) => {
           <Button
             icon={<PinLeftCommandIcon size={ICON_SIZE_MD} />}
             isBusy={isBusy}
+            isDisabled={!isPinLeftEnabled}
             onClick={handlePinLeft}
             size='sm'
             variant={isPinnedLeft ? 'primary' : 'outline'}
@@ -69,6 +78,7 @@ export const PinningSection = ({ isBusy = false }: PinningSectionProps) => {
           <Button
             icon={<PinRightCommandIcon size={ICON_SIZE_MD} />}
             isBusy={isBusy}
+            isDisabled={!isPinRightEnabled}
             onClick={handlePinRight}
             size='sm'
             variant={isPinnedRight ? 'primary' : 'outline'}

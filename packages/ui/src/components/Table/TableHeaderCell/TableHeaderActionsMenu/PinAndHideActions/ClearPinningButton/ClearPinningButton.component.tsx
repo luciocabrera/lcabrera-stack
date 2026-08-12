@@ -6,7 +6,9 @@ import {
   deriveToggleCommandState,
 } from '#ui/components/Table/commands';
 import { useSetColumnPinning } from '#ui/components/Table/contexts/TableConfig/columns/actions';
+import { useGetNormalizedColumn } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
 import { tableActionsPopoverStyles } from '#ui/components/Table/TableActionsPopover';
+import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
 
 import type { ClearPinningButtonProps } from './ClearPinningButton.types';
 
@@ -23,10 +25,12 @@ export const ClearPinningButton = <TData,>({
   pinSide,
 }: ClearPinningButtonProps<TData>) => {
   const setColumnPinning = useSetColumnPinning<TData>();
+  const column = useGetNormalizedColumn<TData>(columnKey);
+  const { isStatic } = resolveColumnCapabilities(column);
   const { icon: ClearPinningCommandIcon, label } = CLEAR_PINNING_COMMAND;
   const { isEnabled } = deriveToggleCommandState({
     current: pinSide,
-    isDisabled: false,
+    isDisabled: isStatic,
     target: undefined,
   });
 

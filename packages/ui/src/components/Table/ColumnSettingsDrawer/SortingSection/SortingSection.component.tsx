@@ -11,6 +11,9 @@ import {
   SORT_ASCENDING_COMMAND,
   SORT_DESCENDING_COMMAND,
 } from '#ui/components/Table/commands';
+import { useGetNormalizedColumn } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
+import { useGetTableColumnSelectedKey } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
+import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
 import { ICON_SIZE_MD } from '#ui/design-system/constants';
 
 import type { SortingSectionProps } from './SortingSection.types';
@@ -31,21 +34,26 @@ import { SortingSectionToolbar } from './SortingSectionToolbar';
 export const SortingSection = ({ isBusy = false }: SortingSectionProps) => {
   const sortDirection = useGetColumnSorting();
   const setColumnSorting = useSetColumnSorting();
+  const columnKey = useGetTableColumnSelectedKey();
+  const column = useGetNormalizedColumn<Record<string, unknown>>(columnKey);
+  const { isSortable } = resolveColumnCapabilities(column);
 
   const { icon: SortAscendingCommandIcon, label: ascendingLabel } =
     SORT_ASCENDING_COMMAND;
   const { icon: SortDescendingCommandIcon, label: descendingLabel } =
     SORT_DESCENDING_COMMAND;
-  const { isActive: isAscending } = deriveToggleCommandState({
-    current: sortDirection,
-    isDisabled: false,
-    target: 'asc',
-  });
-  const { isActive: isDescending } = deriveToggleCommandState({
-    current: sortDirection,
-    isDisabled: false,
-    target: 'desc',
-  });
+  const { isActive: isAscending, isEnabled: isAscendingEnabled } =
+    deriveToggleCommandState({
+      current: sortDirection,
+      isDisabled: !isSortable,
+      target: 'asc',
+    });
+  const { isActive: isDescending, isEnabled: isDescendingEnabled } =
+    deriveToggleCommandState({
+      current: sortDirection,
+      isDisabled: !isSortable,
+      target: 'desc',
+    });
 
   const handleAsc = () => {
     setColumnSorting(isAscending ? undefined : 'asc');
@@ -66,6 +74,7 @@ export const SortingSection = ({ isBusy = false }: SortingSectionProps) => {
           <Button
             icon={<SortAscendingCommandIcon size={ICON_SIZE_MD} />}
             isBusy={isBusy}
+            isDisabled={!isAscendingEnabled}
             onClick={handleAsc}
             size='sm'
             variant={isAscending ? 'primary' : 'outline'}
@@ -75,6 +84,7 @@ export const SortingSection = ({ isBusy = false }: SortingSectionProps) => {
           <Button
             icon={<SortDescendingCommandIcon size={ICON_SIZE_MD} />}
             isBusy={isBusy}
+            isDisabled={!isDescendingEnabled}
             onClick={handleDesc}
             size='sm'
             variant={isDescending ? 'primary' : 'outline'}

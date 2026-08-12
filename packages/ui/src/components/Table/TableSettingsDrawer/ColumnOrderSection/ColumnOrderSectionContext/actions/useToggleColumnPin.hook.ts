@@ -2,6 +2,7 @@ import type { DataKey } from '#ui/components/Table/Table.types';
 
 import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useTableDrawerContextValue } from '#ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
+import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
 import { useGlobalSettingsContextValue } from '#ui/contexts/GlobalSettingsContext/useGlobalSettingsContextValue.hook';
 
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
@@ -34,8 +35,9 @@ export const useToggleColumnPin = () => {
         drawerState: drawerColumnsStore.get(),
         tableState: tableColumnsState,
       });
-    const isColumnStatic =
-      tableColumnsState?.normalizedColumns[columnKey]?.isStatic ?? false;
+    const { isStatic: isColumnStatic } = resolveColumnCapabilities(
+      tableColumnsState?.normalizedColumns[columnKey],
+    );
 
     const globalSettingsState = settingsStore.get();
     const globalPinSidePreference = globalSettingsState?.pinning.pinSide;

@@ -3,6 +3,8 @@ import type {
   TableColumn,
 } from '#ui/components/Table/Table.types';
 
+import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
+
 type AppendDistinctFilterDescriptorsArgs<TData> = {
   readonly columns: readonly TableColumn<TData>[];
   readonly schemaName?: string;
@@ -27,8 +29,8 @@ export const appendDistinctFilterDescriptors = <TData>({
   columns.map((column) => {
     const isDistinctCandidate =
       column.dataType === 'string' &&
-      column.isFilterable !== false &&
-      column.filterOptionsDescriptor === undefined;
+      column.filterOptionsDescriptor === undefined &&
+      resolveColumnCapabilities(column).isFilterable;
 
     if (!isDistinctCandidate) {
       return column;

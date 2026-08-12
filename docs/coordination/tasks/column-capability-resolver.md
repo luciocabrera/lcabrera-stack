@@ -2,7 +2,7 @@
 id: column-capability-resolver
 title: refactor(ui): one resolver for column capability defaults
 owner: agent:claude
-status: active
+status: review
 branch: refactor/558-column-capability-resolver
 area:
   - packages/ui/src/components/Table/commands/**
@@ -15,7 +15,7 @@ area:
 started: 2026-08-12
 updated: 2026-08-12
 plan: (none)
-pr: (none)
+pr: #628
 issue: #558
 ---
 
@@ -25,6 +25,6 @@ refactor(ui): one resolver for column capability defaults
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implemented and pushed; awaiting independent review on PR #628
 - Blockers: none
-- Next:
+- Next: address review feedback
