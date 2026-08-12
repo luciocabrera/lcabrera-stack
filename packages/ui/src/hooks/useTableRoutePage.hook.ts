@@ -25,9 +25,10 @@ type UseTableRoutePageArgs<TResponse> = {
  * `TableRouteView`, which is this hook plus the default selectors.
  *
  * The two request-shaping capabilities are read from the loader's `metaState`,
- * never passed in: a capability describes the endpoint, and the loader is the
- * only place that both knows the endpoint and can act on the flag for the first
- * page (ADR-063).
+ * never passed in: a capability describes the endpoint, and the route's loader
+ * is where the endpoint is declared (ADR-063). That puts the flag where both
+ * halves of the route can reach it — though the loader does not itself act on
+ * it today, so what the first page sends is still up to its own `fetchPage`.
  */
 export const useTableRoutePage = <
   TData extends Record<string, unknown>,

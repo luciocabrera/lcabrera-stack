@@ -65,6 +65,14 @@ require loader data of this shape, so every affected consumer has a loader to
 move the flag to. The removed props are a compile error naming the prop, so the
 failure mode at upgrade is a build break, not a silent change of behaviour.
 
+**One type narrowing comes with that.** `createTableRouteLoader` now resolves
+both capabilities itself, so `metaState.isKeysetEnabled` and
+`metaState.isServerFilterEnabled` are always present and typed `boolean` rather
+than `boolean | undefined`. A consumer only reading `metaState` gains a
+non-optional field and needs no change. A consumer annotating a hand-written
+loader as `TableRouteLoaderData<…>` must declare both keys — which is exactly
+what the migration above already asks that consumer to do.
+
 **Absent still means off.** A route that declares no capability meta sends
 exactly what one declaring both `false` sends. That was ADR-056's safety
 property — the flags default off so that adopting the generic view cannot change
