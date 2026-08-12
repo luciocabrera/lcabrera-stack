@@ -48,6 +48,21 @@ element with the attribute deleted and could not fail for the reason it reports;
 the implicit role it is resolving is precisely the one the `display` override
 destroys in a real browser.
 
+### Rejected: `role="presentation"` on the body
+
+ARIA would accept it. A grid's required owned elements are `row`, **or** `row`
+via `rowgroup` — so making the `<tbody>` transparent re-parents the rows onto the
+grid and satisfies row ownership by a second, equally valid route. It also
+happens to trip neither of the linters that object to `rowgroup`.
+
+It is rejected because it is not true. A `<tbody>` in a data grid _is_ a row
+group, and `<thead>` still has its implicit one — `TableHeader.stylex.ts` sets no
+`display`, so nothing took it away. Declaring only the body presentational would
+describe this table as one group of header rows plus a set of unowned body rows:
+a worse account of the structure than either consistent choice, adopted for no
+reason but linter silence. The role stays `rowgroup`, and the linters are
+answered where linters are answered.
+
 ## Design Decision — Empty State
 
 When `totalLoadedRows === 0` **and** the table is not loading
