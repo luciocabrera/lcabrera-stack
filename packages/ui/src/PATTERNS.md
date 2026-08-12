@@ -245,12 +245,14 @@ const { isResizable, isSortable, isStatic } = resolveColumnCapabilities(column);
 // ❌ each of these re-derives a default at the point of use
 column.isSortable !== false;
 column.isStatic === true;
-column.isFilterable ?? false;
+column.isStatic ?? false;
+column.isFilterable && hasSomethingElse;
 ```
 
-Reading the flag directly is how the same question ended up asked in four
-mutually-inconsistent spellings, with the defaults recorded only in JSDoc. Two
-consequences worth knowing:
+Reading the flag directly is how the same question ended up asked in several
+spellings that did not agree with one another, with the defaults recorded only
+in JSDoc — `git log` on `resolveColumnCapabilities.util.ts` reaches the PR that
+retired them. Two consequences worth knowing:
 
 - The resolver returns **effective** capabilities, so `isResizable` is already
   false for a static column — `isStatic` locks a column against every user

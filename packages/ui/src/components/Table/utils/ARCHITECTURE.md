@@ -123,7 +123,7 @@ graph TD
 | orderColumnsByKeys              | columns, columnOrder                          | TableColumn[]                                                                       | Columns reordered to follow `columnOrder`; unmentioned columns keep their relative order and are appended, order entries with no matching column are dropped                                                      |
 | getPinnedColumnOffsets          | pinning, sizing, columns                      | Record<key, PinnedColumnInfo>                                                       | Sticky positions for pinned columns                                                                                                                                                                               |
 | getColumnPinSide                | columnKey, pinning                            | PinSide or undefined                                                                | Which side a column is pinned to                                                                                                                                                                                  |
-| resolveColumnCapabilities       | column (or undefined)                         | { isFilterable, isResizable, isSortable, isStatic }                                 | Materialize a column's capability defaults in one place; the only reader of the optional flags                                                                                                                    |
+| resolveColumnCapabilities       | column (or undefined)                         | { isFilterable, isResizable, isSortable, isStatic }                                 | Materialize a column's capability defaults in one place; the only reader of the optional flags in the component tree                                                                                              |
 | resolveCrudRowId                | row, columns                                  | string                                                                              | Build a CRUD row id from the primary-key column(s) (single = raw value, composite = encoded values joined by `_`)                                                                                                 |
 | resolvePrimaryKeyColumnKeys     | columns                                       | DataKey[]                                                                           | Keys of `isPrimaryKey` columns in declaration order (excludes `actions`)                                                                                                                                          |
 | resolveTableActionsColumn       | columns, crud                                 | { columns, hasActionsColumn }                                                       | Adds/merges the synthetic `actions` column when `crud.read/update/delete` is enabled or the consumer declared one                                                                                                 |
@@ -134,10 +134,17 @@ graph TD
 `resolveColumnCapabilities` is the single home for the capability defaults. The
 flags on `TableColumn` are optional, and an omitted one is not a missing value —
 reading `column.isSortable` directly re-derives a default at the point of use,
-which is what the four hand-spelled variants of the predicate used to do. It also
-folds `isStatic` into `isResizable`, because a static column is locked against
-every user modification, resizing included. `deriveToggleCommandState` takes its
-availability argument from it (`commands/ARCHITECTURE.md`).
+which is what the hand-spelled predicates it replaced each did, in spellings that
+did not agree with one another. It also folds `isStatic` into `isResizable`,
+because a static column is locked against every user modification, resizing
+included. `deriveToggleCommandState` takes its availability argument from it
+(`commands/ARCHITECTURE.md`).
+
+The one code that still reads the flags directly is `src/benchmarks/`, which
+re-implements the predicate on purpose to measure array shapes and is excluded
+from the published package. Anywhere in the component tree, go through the
+resolver — `vp lint`/`vp check` will not catch a direct read, so this is the
+convention that has to hold by review (`src/PATTERNS.md`).
 
 getPinnedColumnOffsets computes offsets and boundary markers (isLastPinnedLeft, isFirstPinnedRight) from effective column order so shadow boundaries stay aligned with rendered sticky positions even if pinning arrays are out of order.
 

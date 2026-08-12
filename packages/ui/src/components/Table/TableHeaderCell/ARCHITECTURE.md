@@ -78,9 +78,16 @@ way, so `TableHeaderCell` drills nothing into it (see below).
 `resolveColumnCapabilities` (`Table/utils/`) and renders from the result: the
 `ResizeHandle` appears when `isResizable` — which already accounts for `isStatic`
 locking a column against resizing — and `isSortable`/`isStatic` are forwarded to
-`TableHeaderActionsMenu` to gate its sections. Each menu delegate then resolves
-the same capability for itself and passes it to `deriveToggleCommandState`, so a
-command is disabled, not merely un-rendered, when the column does not offer it.
+`TableHeaderActionsMenu` to gate its sections.
+
+Each menu delegate then resolves the same capability for itself and passes it to
+`deriveToggleCommandState` as the command's availability. In production that
+value never disagrees with the gate above it: `TableHeaderActionsMenu` renders
+`SortActions` only for a sortable column and `PinAndHideActions` only for a
+movable one, so a command the column does not offer is **un-rendered**, and the
+disabled branch is not reached from the header. What the delegate's own
+resolution buys is that a button somehow mounted outside that gate disables
+itself rather than offering an edit the table would refuse.
 
 ## Actions Menu
 
