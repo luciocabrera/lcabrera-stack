@@ -4,7 +4,7 @@ import path from 'node:path';
 import type {
   IngestReportArgs,
   IngestReportOrigin,
-} from '../ingestion/ingestReport.types.ts';
+} from '../ingestion/ingestion.types.ts';
 
 // Relative imports for same-package modules, deliberately: this file runs
 // directly via `node --experimental-strip-types` (see package.json),

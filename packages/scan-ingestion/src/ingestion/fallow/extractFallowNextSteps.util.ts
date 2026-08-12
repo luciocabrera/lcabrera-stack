@@ -1,4 +1,4 @@
-import type { FallowNextStepInput } from './fallowDetail.types.ts';
+import type { FallowNextStepInput } from './fallow.types.ts';
 import type { FallowRaw } from './fallowRaw.schema.ts';
 
 type ExtractFallowNextStepsArgs = {

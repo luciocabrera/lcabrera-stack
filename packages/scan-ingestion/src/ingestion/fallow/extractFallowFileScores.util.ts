@@ -1,4 +1,4 @@
-import type { FallowFileScoreInput } from './fallowDetail.types.ts';
+import type { FallowFileScoreInput } from './fallow.types.ts';
 import type { FallowRaw } from './fallowRaw.schema.ts';
 
 type ExtractFallowFileScoresArgs = {

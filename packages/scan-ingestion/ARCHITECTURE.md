@@ -20,7 +20,7 @@ scan-ingestion/
 │
 ├── src/
 │   ├── auth/
-│   │   └── apiToken.constants.ts     → API_TOKEN_PREFIX ('cqms_'), the CQMS tag on token plaintexts (ADR-029)
+│   │   └── auth.constants.ts     → API_TOKEN_PREFIX ('cqms_'), the CQMS tag on token plaintexts (ADR-029)
 │   │       (hashing lives in @lcabrera/server/crypto — hashSecret/isSecretHashValid, shared by
 │   │        passwords and token secrets alike; hashes still never leave this package)
 │   │
@@ -37,7 +37,7 @@ scan-ingestion/
 │   ├── ingestion/
 │   │   ├── report.schema.ts             → The report.json contract (Zod) — ScanFinding, RunFileInput, Report
 │   │   ├── ingestReport.ts               → The core function
-│   │   ├── ingestReport.types.ts         → IngestReportArgs/Result
+│   │   ├── ingestion.types.ts            → IngestReportArgs/Result
 │   │   ├── ingestScanDetail.ts           → Master/detail extraction dispatcher (ADR-019) — internal, NOT exported
 │   │   ├── lint/                         → eslint/oxlint raw schemas + pure extractors (violations + run summaries)
 │   │   ├── fallow/                       → fallow raw schema + pure extractors (master + 8 detail tables — ADR-019 addendum)
@@ -293,7 +293,7 @@ this package showed up (`apps/scan-orchestrator`, ADR-015) — Node's real
 ESM resolver only understands `package.json`'s `exports` field, not
 Vite/tsconfig aliasing. `exports` is scoped to `"./ingestion/ingestReport"`
 
-- `"./ingestion/ingestReport.types"` (the only two `ingestion/` files
+- `"./ingestion/ingestion.types"` (the only two `ingestion/` files
   anything outside this package imports — the rest are `ingestReport`'s own
   internal helpers) and a wildcard `"./queries/*.util": "./src/queries/*.util.ts"`
   (every file in `queries/` is already meant to be publicly importable, by

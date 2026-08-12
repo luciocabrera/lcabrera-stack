@@ -1,4 +1,4 @@
-import type { FallowTargetInput } from './fallowDetail.types.ts';
+import type { FallowTargetInput } from './fallow.types.ts';
 import type { FallowRaw } from './fallowRaw.schema.ts';
 
 type ExtractFallowTargetsArgs = {

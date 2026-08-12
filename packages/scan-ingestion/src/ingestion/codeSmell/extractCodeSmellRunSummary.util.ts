@@ -1,5 +1,5 @@
 import type { Report } from '../report.schema.ts';
-import type { CodeSmellRunSummaryInput } from './codeSmellRunSummary.types.ts';
+import type { CodeSmellRunSummaryInput } from './codeSmell.types.ts';
 
 type ExtractCodeSmellRunSummaryArgs = {
   readonly report: Report;

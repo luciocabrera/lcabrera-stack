@@ -75,7 +75,7 @@ the raw artifact stays classification-free.
 defaulted/nullish; `node_id` nullish so ONE drifted node is dropped by
 the extractor instead of failing the scan), `extractAppGraphNodes`
 (coerces unknown `node_type`s onto the CHECK constraint's folder|file,
-omits nullable keys — the lintViolation.types.ts convention), and
+omits nullable keys — the lint.types.ts convention), and
 `extractAppGraphRunSummary`, which derives every aggregate **from the
 nodes array**, ignoring the runner's own `stats` block — master and
 detail can never disagree (the code-smell-masters precedent: the

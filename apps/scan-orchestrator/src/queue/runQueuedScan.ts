@@ -12,13 +12,13 @@ import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 
 import type { RunStatusHub } from '../ws/runStatusHub.ts';
-import type { DeterministicScannerId } from './deterministicScannerConfigs.constants.ts';
+import type { DeterministicScannerId } from './queue.constants.ts';
 
 import { cqmsRepoRoot } from '../cqmsRepoRoot.util.ts';
 import {
   DETERMINISTIC_SCANNER_CONFIGS,
   isDeterministicScannerId,
-} from './deterministicScannerConfigs.constants.ts';
+} from './queue.constants.ts';
 import {
   createScanOutputDirectory,
   getScanOutputPathIfExists,

@@ -104,8 +104,17 @@ which one you are in before renaming anything:
   `types/theme.types.ts`, `constants/app.constants.ts`. `types/types.types.ts` is
   the reductio.
 
-None of this is gate-enforced yet — `local-rules/filename-convention` checks the
-base-name case, not the folder pairing (#422).
+**The folder pairing is gate-enforced** by the
+`local-rules/domain-folder-filename` ESLint rule (part of the `lint:eslint`
+pass, live in every workspace). It tells the three shapes apart from the path
+alone — a PascalCase folder is an artifact folder, everything under a `routes/`
+tree is a route container, and the folder names in the rule's
+`catchAllFolders` option are catch-alls — so a misnamed file in a domain folder
+fails the build and "exactly one of each" follows from the naming, because two
+files in one folder cannot both be `<folder>.constants.ts`. A route tree is
+exempt outright, which is the rule's one blind spot: it cannot see that
+`routes/car-sales-infinite/` holds a `CarSales` component without reading the
+directory, and an ESLint rule in a public package may not do that.
 
 **One error class per `*.error.ts` file**, same rule as `*.util.ts` — the class,
 its `Args` type, and a colocated `*.error.test.ts`.

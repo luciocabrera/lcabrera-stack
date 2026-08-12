@@ -1,4 +1,4 @@
-import type { AppGraphRunSummary } from './appGraphDetail.types.ts';
+import type { AppGraphRunSummary } from './appGraph.types.ts';
 import type { AppGraphRaw } from './appGraphRaw.schema.ts';
 
 type ExtractAppGraphRunSummaryArgs = {

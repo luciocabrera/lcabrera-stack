@@ -2,7 +2,7 @@ import { isSecretHashValid } from '@lcabrera/server/crypto/is-secret-hash-valid.
 import { getPool } from '@lcabrera/server/db/get-pool.util';
 import { parseApiToken } from '@lcabrera/server/tokens/parse-api-token.util';
 
-import { API_TOKEN_PREFIX } from '../auth/apiToken.constants.ts';
+import { API_TOKEN_PREFIX } from '../auth/auth.constants.ts';
 
 export type VerifiedApiToken = {
   readonly userId: string;

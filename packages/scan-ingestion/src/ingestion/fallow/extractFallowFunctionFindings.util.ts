@@ -1,4 +1,4 @@
-import type { FallowFunctionFindingInput } from './fallowDetail.types.ts';
+import type { FallowFunctionFindingInput } from './fallow.types.ts';
 import type { FallowRaw } from './fallowRaw.schema.ts';
 
 import { makeFindingId } from '../../../../../.github/skills/code-smell-shared/scripts/deterministic-scan-shared.mjs';

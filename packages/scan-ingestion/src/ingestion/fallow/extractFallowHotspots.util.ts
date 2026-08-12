@@ -1,4 +1,4 @@
-import type { FallowHotspotInput } from './fallowDetail.types.ts';
+import type { FallowHotspotInput } from './fallow.types.ts';
 import type { FallowRaw } from './fallowRaw.schema.ts';
 
 type ExtractFallowHotspotsArgs = {

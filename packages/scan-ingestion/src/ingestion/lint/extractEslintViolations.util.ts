@@ -1,7 +1,7 @@
 import path from 'node:path';
 
 import type { EslintMessage, EslintRaw } from './eslintRaw.schema.ts';
-import type { LintViolationInput } from './lintViolation.types.ts';
+import type { LintViolationInput } from './lint.types.ts';
 
 import { makeFindingId } from '../../../../../.github/skills/code-smell-shared/scripts/deterministic-scan-shared.mjs';
 import { buildEslintFixText } from '../../../../../.github/skills/code-smell-shared/scripts/finding-templates.mjs';

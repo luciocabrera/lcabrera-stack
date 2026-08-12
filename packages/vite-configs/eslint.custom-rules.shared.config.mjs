@@ -288,6 +288,7 @@ export const createCustomRulesLintConfig = async ({
         'func-style': ['error', 'expression'],
         'local-rules/clean-import-paths': 'error',
         'local-rules/destructuring-for-functions': 'error',
+        'local-rules/domain-folder-filename': 'error',
         'local-rules/filename-convention': 'error',
         'local-rules/merge-duplicate-imports': 'error',
         'local-rules/no-inline-type-imports': 'error',

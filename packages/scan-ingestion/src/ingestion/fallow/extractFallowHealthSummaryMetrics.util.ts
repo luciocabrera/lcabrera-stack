@@ -1,4 +1,4 @@
-import type { FallowRunSummaryInput } from './fallowDetail.types.ts';
+import type { FallowRunSummaryInput } from './fallow.types.ts';
 import type { FallowRaw } from './fallowRaw.schema.ts';
 
 type ExtractFallowHealthSummaryMetricsArgs = {

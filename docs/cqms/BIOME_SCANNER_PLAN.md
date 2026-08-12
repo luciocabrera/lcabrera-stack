@@ -132,7 +132,7 @@ start,end}}] }`, everything `.default()`ed so version drift degrades to partial
 - `extractBiomeRunSummary.util.ts` ← `extractOxlintRunSummary.util.ts`. Pull
   counts from `summary` (`errors`/`warnings`/`infos`), count distinct `category`
   for `rules_violated_count`.
-- **Widen `lintViolation.types.ts`**: `source` union → add `'biome'`; `severity`
+- **Widen `lint.types.ts`**: `source` union → add `'biome'`; `severity`
   union → add `'LOW'`.
 - Colocated `.util.test.ts` for each extractor (the oxlint ones are the pattern —
   a fixture raw object in, asserted rows out).

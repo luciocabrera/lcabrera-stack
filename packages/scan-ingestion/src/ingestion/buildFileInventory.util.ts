@@ -5,7 +5,7 @@ import type { RunFileInput } from './report.schema.ts';
 import { listDirectoryWithin } from '../fs/listDirectoryWithin.util.ts';
 import { readTextFileWithin } from '../fs/readTextFileWithin.util.ts';
 import { classifyFileTypeCategory } from './classifyFileTypeCategory.util.ts';
-import { IGNORED_DIRECTORIES } from './ignoredDirectories.constants.ts';
+import { IGNORED_DIRECTORIES } from './ingestion.constants.ts';
 
 const getExtension = (fileName: string): string => {
   const dotIndex = fileName.lastIndexOf('.');
