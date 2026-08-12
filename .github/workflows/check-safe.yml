@@ -198,6 +198,22 @@ jobs:
         # inherited breakage is grandfathered in scripts/docs-paths-baseline.json.
         run: vp run docs:verify
 
+      - name: No document names a file this PR renamed away
+        id: renames_gate
+        # docs:verify only resolves ROOT-ANCHORED tokens, so a backticked bare
+        # filename is unchecked in every document and a rename invalidates each
+        # one silently — #604 renamed a batch of modules and the ADR naming one
+        # of them was found by hand afterwards (#611). Widening docs:verify to
+        # every bare filename would report mostly suffix conventions and
+        # teaching examples, so this is scoped to the names the diff actually
+        # renamed away. Pull requests only: a push to main has no base ref to
+        # diff against, and the gate refuses to run rather than report a pass it
+        # did not earn.
+        if: github.event_name == 'pull_request'
+        env:
+          TEST_CHANGED_BASE: origin/${{ github.base_ref }}
+        run: vp run renames:verify
+
       - name: ADR homes, numbering and indexes
         id: adr_gate
         # docs:verify deliberately skips every `decisions` directory — an ADR

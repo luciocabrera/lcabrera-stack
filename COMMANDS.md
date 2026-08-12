@@ -81,8 +81,9 @@ chains the whole thing the way CI does.
 
 The **`pre-push` git hook** (`.vite-hooks/pre-push`) runs `vp run check:push` — the
 **DB-free CI Quality Gate** (steps 3–6 plus `commands:verify`, `coordination:verify`,
-`scripts:verify`, `docs:verify`, `adr:verify`, `viteplus:verify` and `configs:verify`,
-mirroring the "Quality Gate (Format · Lint · Types)" job in `check-safe.yml`) — and then
+`scripts:verify`, `docs:verify`, `renames:verify`, `adr:verify`, `viteplus:verify` and
+`configs:verify`, mirroring the "Quality Gate (Format · Lint · Types)" job in
+`check-safe.yml`) — and then
 `vp run test:changed`. This closes the gap the pre-commit hook leaves: `vp staged` covers
 only fmt + Oxlint + tsgolint + Biome on staged files, so the ESLint pass and a full
 type-check first turn red in CI otherwise. **Tests are scoped, not the full suite**:
@@ -362,6 +363,7 @@ package, ever.
 | `vp run suppressions:verify` | check the four public packages carry no unapproved suppression (see [the protocol](docs/agents/public-package-suppressions.md))                                                                      |
 | `vp run suppressions:list`   | print every suppression reaching a public package, approved or not                                                                                                                                   |
 | `vp run docs:verify`         | check every documented repository path resolves (`--write` prunes resolved baseline entries; `--accept <doc> <ref> --reason "…"` grandfathers one)                                                   |
+| `vp run renames:verify`      | check no document still names a file this change renamed away — scoped to the diff, which is what lets it check bare filenames at all (`--base <ref>`, default `origin/main`)                        |
 | `vp run adr:verify`          | check ADR home, filename, heading and number uniqueness, and that each home's index is current; prints the next free number (`--write` regenerates the indexes)                                      |
 | `vp run adr:new`             | scaffold an ADR from [`_TEMPLATE.md`](docs/decisions/_TEMPLATE.md) with the next free number — `-- "<title>" [--home repo\|cqms\|app] [--slug <s>] [--dry-run]`                                      |
 | `vp run viteplus:verify`     | check AGENTS.md has no Vite+ managed block rendering content — the markers are removed so `vp install` cannot refill them; this catches them coming back (`--write` re-empties a refilled one)       |
