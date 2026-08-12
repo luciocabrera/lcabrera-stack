@@ -133,8 +133,59 @@ obvious-but-slower spelling (epic #391):
 - **The list query projects `ENTERPRISE_ORDER_LIST_COLUMNS`, not the whole row.**
   Rows carry only what the table renders; the free-text, audit and address-detail
   columns no cell reads are no longer fetched, serialized and shipped per row per
-  page. `EnterpriseOrderListRow` is that projection as a type, and `COLUMNS` is
-  typed on it. The detail and edit views still read the full row — they read one.
+  page. `EnterpriseOrderListRow` is that projection as a type. The detail and edit
+  views still read the full row — they read one.
+
+`COLUMNS` and the table are typed on `EnterpriseOrderTableRow`, a **discriminated
+union**: either a data row carrying every projected column, or one group summary
+carrying none of them. `EnterpriseOrderListRow` keeps its exact shape and is
+still what the ungrouped query returns, so the `Pick` behind it still turns a
+cell reading an unprojected column into a compile error.
+
+A union rather than an intersection of partials, because the partial shape says
+"any field may be missing from any row" where the data says "one row kind has
+all of them, the other has none" — and no runtime check could recover the type
+from the weaker claim. `TABLE_GROUP_ROW_FIELD` is the type-level discriminant
+and `getTableGroupRowSummary` the runtime one, so the check `TableBodyRows`
+already makes now also narrows. `config/enterpriseOrders.types.test.ts` pins
+that: its body only compiles while narrowing works.
+
+The residual cost is small and named: a discriminant must exist on both arms and
+`DataKey<TData>` is `keyof TData`, so `tableGroup` type-checks where a column key
+is expected on this route. It is inert — no such column is declared, and the
+constants test pins `COLUMNS` to the projected list — and removing it would mean
+changing `TableColumn`'s key/render typing in `@lcabrera/ui`, which is a package
+decision rather than this route's.
+
+### Grouping — one key, server-side (ADR-061 / ADR-063)
+
+**The route's entire opt-in is `isGroupingEnabled: true` on its loader `meta`.**
+From that one flag: `createTableRouteLoader` reads the `grouping` search param,
+sanitizes the keys against `COLUMNS`, seeds the table's grouping store, and hands
+the keys to `fetchPage` — which forwards them to `selectOrdersPage` the same way
+it already forwards `filters` and the effective sort. Remove the flag and the
+param is ignored end to end, whatever the URL or the persisted UI-flags cookie
+carries.
+
+**Grouped rows travel in the same response.** `selectGroupedOrders` returns
+`EnterpriseOrdersResponse` — the identical shape, with `hasMore: false`, because a
+grouped read is not paginated
+([ADR-059](../../../../../docs/decisions/ADR-059-aggregation-is-builder-generated.md)):
+there is no stable cursor over a result the server aggregated. That invariance is
+the point rather than a convenience — the loader's data type is inferred
+structurally, so a response that branched on grouping would change the loader
+type of all four table routes at once.
+
+Each row carries a `TableGroupRowSummary` and nothing else, built by
+`toOrderGroupRow`. It formats there rather than in the renderer because only this
+side knows `count(*)` arrives as a **string** and that a NULL key is a real group.
+`@lcabrera/ui`'s `TableGroupHeaderRow` renders the finished label and count.
+
+**A hand-edited `grouping` param yields a flat table, never a partial one.** The
+codec refuses any payload outside `{ keys: string[] }`, and
+`sanitizeGroupingByColumns` refuses the whole list if one key is not a groupable
+column of this route — key order is the query's nesting order, so dropping one
+would answer a different question from the one the URL describes.
 
 **Every page is ordered, and the route guarantees that itself.**
 `parseOrdersPageParams` resolves the request's sort through `resolveQuerySort`
@@ -151,9 +202,12 @@ as an extra tiebreaker on one the caller supplied.
 
 ### `.server/enterpriseOrders.service.ts` — server-only Postgres access
 
-Wraps the generic `@lcabrera/server` executors (`selectRows`/`getRowsCount`/`insertRow`/
-`updateRows`/`deleteRows`/`getMaxValue`) with the enterprise-orders
-`{ schema, table, allowedColumns }` baked in — **no entity-specific SQL**. It reaches Postgres via `getPool`, which reads `DB_*`
+Wraps the generic `@lcabrera/server` executors (`selectRows`/`selectGroupedRows`/
+`getRowsCount`/`insertRow`/`updateRows`/`deleteRows`/`getMaxValue`) with the
+enterprise-orders `{ schema, table, allowedColumns }` baked in — **no
+entity-specific SQL**, grouped reads included: `selectGroupedRows` resolves each
+column's grouping legality from the catalogue and emits the `GROUPING SETS` query
+itself. It reaches Postgres via `getPool`, which reads `DB_*`
 env (sourced from `docker/local/.env` by the app's `dev` script). The
 `/_action/enterprise-orders/delete` action calls `deleteOrder` here, fixing the prior
 api-server 404 (feature plan §8 bug 1).

@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import type { TableColumn } from '#ui/components/Table/Table.types';
 
+import { TABLE_GROUP_ROW_FIELD } from '#ui/components/Table/Table.constants';
+
 import { resolveRowKey } from './resolveRowKey.util';
 
 type Row = {
@@ -20,6 +22,11 @@ const col = ({
   key,
   label: key,
 });
+
+const groupRow = (label: string) =>
+  ({
+    [TABLE_GROUP_ROW_FIELD]: { columnKey: 'order_number', count: 2, label },
+  }) as unknown as Row;
 
 const singleKeyColumns = [
   col({ isPrimaryKey: true, key: 'order_id' }),
@@ -206,5 +213,66 @@ describe('resolveRowKey', () => {
     expect(valueDerived.startsWith('pk:')).toBe(true);
     expect(indexDerived.startsWith('idx:')).toBe(true);
     expect(valueDerived).not.toBe(indexDerived);
+  });
+
+  describe('group rows', () => {
+    it('derives a group row key from its own values, not from its index', () => {
+      // A grouped read projects the group key and its aggregates, so the
+      // primary-key branch would find nothing and fall through to the index —
+      // giving every group in the result the identity of its position.
+      expect(
+        resolveRowKey<Row>({
+          columns: singleKeyColumns,
+          index: 0,
+          row: groupRow('ORD-1'),
+        }),
+      ).toBe(
+        resolveRowKey<Row>({
+          columns: singleKeyColumns,
+          index: 7,
+          row: groupRow('ORD-1'),
+        }),
+      );
+    });
+
+    it('gives different groups different keys', () => {
+      expect(
+        resolveRowKey<Row>({
+          columns: singleKeyColumns,
+          index: 0,
+          row: groupRow('ORD-1'),
+        }),
+      ).not.toBe(
+        resolveRowKey<Row>({
+          columns: singleKeyColumns,
+          index: 0,
+          row: groupRow('ORD-2'),
+        }),
+      );
+    });
+
+    it('keeps group keys in a namespace disjoint from both others', () => {
+      const groupDerived = resolveRowKey<Row>({
+        columns: singleKeyColumns,
+        index: 0,
+        row: groupRow('3'),
+      });
+
+      expect(groupDerived.startsWith('grp:')).toBe(true);
+      expect(groupDerived.startsWith('pk:')).toBe(false);
+      expect(groupDerived.startsWith('idx:')).toBe(false);
+    });
+
+    it('ignores a malformed summary and falls back to the ordinary derivation', () => {
+      const row = {
+        order_id: 5,
+        order_number: 'ORD-1',
+        [TABLE_GROUP_ROW_FIELD]: { label: 'ORD-1' },
+      } as unknown as Row;
+
+      expect(
+        resolveRowKey<Row>({ columns: singleKeyColumns, index: 0, row }),
+      ).toBe('pk:[5]');
+    });
   });
 });

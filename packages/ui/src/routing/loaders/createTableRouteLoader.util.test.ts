@@ -36,6 +36,13 @@ const baseConfig = {
 
 const response = { data: [], total: 0 };
 
+type FetchPageArgs = {
+  readonly grouping: readonly string[];
+};
+
+const groupingUrl = (param: string) =>
+  `http://localhost/rows?grouping=${encodeURIComponent(param)}`;
+
 const invoke = ({
   config = {},
   cookie,
@@ -47,7 +54,12 @@ const invoke = ({
   readonly cookie?: string;
   readonly url?: string;
 } = {}) => {
-  const fetchPage = vi.fn(async () => response);
+  // Typed through the generic rather than by an unread parameter, so the
+  // argument object the factory passes is typed at the assertion sites below
+  // instead of collapsing to `never`.
+  const fetchPage = vi.fn<(args: FetchPageArgs) => Promise<typeof response>>(
+    async () => response,
+  );
   const loader = createTableRouteLoader<Row, typeof response>({
     ...baseConfig,
     fetchPage,
@@ -267,11 +279,147 @@ describe('createTableRouteLoader', () => {
       expect(result.metaState.isServerFilterEnabled).toBe(false);
     });
 
-    it('defaults both capabilities off when the route declares no meta', () => {
+    it('defaults every capability off when the route declares no meta', () => {
       const { result } = invoke();
 
+      expect(result.metaState.isGroupingEnabled).toBe(false);
       expect(result.metaState.isKeysetEnabled).toBe(false);
       expect(result.metaState.isServerFilterEnabled).toBe(false);
+    });
+  });
+
+  // Grouping is the one capability the factory itself acts on: it changes the
+  // *first* query, so the flag is what makes the loader read the `grouping`
+  // param at all. That is what makes "a route enables grouping by adding a flag
+  // to its loader meta" true — everything below is the same loader, the same
+  // URL, and only the flag moving.
+  describe('grouping', () => {
+    it('reads the grouping param and hands the keys to fetchPage', () => {
+      const { fetchPage, result } = invoke({
+        config: { meta: { isGroupingEnabled: true } },
+        url: groupingUrl('{"keys":["status"]}'),
+      });
+
+      expect(fetchPage).toHaveBeenCalledWith(
+        expect.objectContaining({ grouping: ['status'] }),
+      );
+      expect(result.metaState.groupingKeys).toEqual(['status']);
+    });
+
+    it('ignores the same param entirely when the route declares no flag', () => {
+      // Same URL, same columns, same everything but the one flag — so this
+      // isolates the flag rather than merely observing an ungrouped default.
+      const { fetchPage, result } = invoke({
+        url: groupingUrl('{"keys":["status"]}'),
+      });
+
+      expect(fetchPage).toHaveBeenCalledWith(
+        expect.objectContaining({ grouping: [] }),
+      );
+      expect(result.metaState.groupingKeys).toEqual([]);
+      expect(result.metaState.isGroupingEnabled).toBe(false);
+    });
+
+    it('cannot be switched on by the UI-flags cookie', () => {
+      const { fetchPage, result } = invoke({
+        cookie: uiFlagsCookie({ isGroupingEnabled: true }),
+        url: groupingUrl('{"keys":["status"]}'),
+      });
+
+      expect(result.metaState.isGroupingEnabled).toBe(false);
+      expect(fetchPage).toHaveBeenCalledWith(
+        expect.objectContaining({ grouping: [] }),
+      );
+    });
+
+    it('cannot have its applied keys forged through the UI-flags cookie', () => {
+      // `groupingKeys` is request-derived, so it is spread unconditionally for
+      // the same reason the capability flags are: the cookie is client-written
+      // and validated nowhere.
+      const { result } = invoke({
+        config: { meta: { isGroupingEnabled: true } },
+        cookie: uiFlagsCookie({ groupingKeys: ['status'] }),
+      });
+
+      expect(result.metaState.groupingKeys).toEqual([]);
+    });
+
+    it('degrades a malformed grouping param to grouping off', () => {
+      for (const param of [
+        '{not-json',
+        '{"keys":[7]}',
+        '{"keys":"status"}',
+        '["status"]',
+        '{"keys":["status"],"mode":"rollup"}',
+      ]) {
+        const { fetchPage, result } = invoke({
+          config: { meta: { isGroupingEnabled: true } },
+          url: groupingUrl(param),
+        });
+
+        expect(result.metaState.groupingKeys).toEqual([]);
+        expect(fetchPage).toHaveBeenCalledWith(
+          expect.objectContaining({ grouping: [] }),
+        );
+      }
+    });
+
+    it('degrades a hand-edited key that names no column to grouping off', () => {
+      const { fetchPage, result } = invoke({
+        config: { meta: { isGroupingEnabled: true } },
+        url: groupingUrl('{"keys":["status; DROP TABLE rows"]}'),
+      });
+
+      expect(result.metaState.groupingKeys).toEqual([]);
+      expect(fetchPage).toHaveBeenCalledWith(
+        expect.objectContaining({ grouping: [] }),
+      );
+    });
+
+    it('refuses the whole key list when one key is unusable', () => {
+      const { result } = invoke({
+        config: { meta: { isGroupingEnabled: true } },
+        url: groupingUrl('{"keys":["status","nope"]}'),
+      });
+
+      expect(result.metaState.groupingKeys).toEqual([]);
+    });
+
+    it('leaves the returned key set unchanged for a grouped route', () => {
+      // The loader data type is inferred structurally, so a field appearing
+      // only when a route groups would change it for every table route at once.
+      const { result } = invoke({
+        config: { meta: { isGroupingEnabled: true } },
+        url: groupingUrl('{"keys":["status"]}'),
+      });
+      const returnedKeys = Object.keys(result);
+
+      expect(returnedKeys.toSorted((a, b) => a.localeCompare(b))).toEqual([
+        'columnsState',
+        'dataPromise',
+        'metaState',
+      ]);
+    });
+
+    it('hands ungrouped routes the same fetchPage argument keys as grouped ones', () => {
+      const { fetchPage: ungrouped } = invoke();
+      const { fetchPage: grouped } = invoke({
+        config: { meta: { isGroupingEnabled: true } },
+        url: groupingUrl('{"keys":["status"]}'),
+      });
+
+      const keysOf = (mock: typeof ungrouped) =>
+        Object.keys(mock.mock.calls[0]?.[0] ?? {}).toSorted((a, b) =>
+          a.localeCompare(b),
+        );
+
+      expect(keysOf(ungrouped)).toEqual([
+        'effectiveSorting',
+        'filters',
+        'grouping',
+        'request',
+      ]);
+      expect(keysOf(grouped)).toEqual(keysOf(ungrouped));
     });
   });
 });

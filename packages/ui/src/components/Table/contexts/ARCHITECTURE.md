@@ -13,11 +13,12 @@ contexts/
 │   ├── FiltersDataContext.*     → Context, Provider, Types
 │   └── filters/                → 1 store, 2 actions, 1 selector, 1 util
 │
-├── TableConfig/                → Column settings + UI meta (dual-store)
+├── TableConfig/                → Column settings + UI meta + row grouping (multi-store)
 │   ├── TableConfigContext.*     → Context, Provider, Types
-│   ├── columns/                → 1 store, 10 actions, 12 selectors
-│   ├── meta/                   → 1 store, 3 actions, 11 selectors
-│   └── utils/                  → getInitialColumnsState, getInitialMetaState
+│   ├── columns/                → Column store, actions, selectors
+│   ├── grouping/               → Grouping store, actions, selectors (ADR-061)
+│   ├── meta/                   → Meta store, actions, selectors
+│   └── utils/                  → getInitialColumnsState, getInitialGroupingState, getInitialMetaState
 │
 ├── TableData/                  → Row data + loading + pagination
 │   ├── TableDataContext.*       → Context, Provider, Types
@@ -47,8 +48,10 @@ graph TD
 
 **Why this order matters:**
 
-- **TableConfigProvider** is outermost — column definitions and meta config
-  are stable across data fetches
+- **TableConfigProvider** is outermost — column definitions, meta config and
+  grouping state are stable across data fetches. Grouping lives here for exactly
+  that reason: a grouping change causes a navigation, and state on the data
+  context would not survive it (ADR-061)
 - **FiltersDataProvider** sits above Suspense — filter dropdown options survive
   when the Suspense key changes during sort/filter navigations
 - **TableDataProvider** sits inside Suspense — row data is re-created on
@@ -61,6 +64,7 @@ graph TD
 graph LR
   subgraph TableConfigProvider
     CS["columnsStore"]
+    GS["groupingStore"]
     MS["metaStore"]
   end
 
@@ -79,12 +83,15 @@ graph LR
 
 ## Context → Store Summary
 
-| Context        | Store(s)                     | State Pattern                            | Hook Count               |
-| -------------- | ---------------------------- | ---------------------------------------- | ------------------------ |
-| `TableConfig`  | `columnsStore` + `metaStore` | Dual `TStore` + `useSyncExternalStore`   | 10 + 12 col, 3 + 11 meta |
-| `FiltersData`  | `filtersDataStore`           | Single `TStore` + `useSyncExternalStore` | 2 actions, 1 selector    |
-| `TableData`    | `dataStore`                  | Single `TStore` + `useSyncExternalStore` | 1 action, 4 selectors    |
-| `TableWrapper` | — (ref only)                 | `RefObject<HTMLDivElement>`              | 1 hook                   |
+The per-slice hook lists live in each context's own `ARCHITECTURE.md` and its
+`INVENTORY.md` rows, which is where they stay in step with the code.
+
+| Context        | Store(s)                                       | State Pattern                            |
+| -------------- | ---------------------------------------------- | ---------------------------------------- |
+| `TableConfig`  | `columnsStore` + `groupingStore` + `metaStore` | `TStore` + `useSyncExternalStore`        |
+| `FiltersData`  | `filtersDataStore`                             | Single `TStore` + `useSyncExternalStore` |
+| `TableData`    | `dataStore`                                    | Single `TStore` + `useSyncExternalStore` |
+| `TableWrapper` | — (ref only)                                   | `RefObject<HTMLDivElement>`              |
 
 ## Cross-Context Data Flow
 
@@ -92,7 +99,8 @@ graph LR
 graph TD
   subgraph "Configuration Layer"
     CS["columnsStore<br/>(columns, filters, sorting, pinning, sizing, visibility)"]
-    MS["metaStore<br/>(density, title, drawer toggles, row height)"]
+    GS["groupingStore<br/>(applied group keys)"]
+    MS["metaStore<br/>(density, title, drawer toggles, row height, capabilities)"]
   end
 
   subgraph "Filter Lookup Layer"

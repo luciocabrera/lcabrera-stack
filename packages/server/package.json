@@ -51,6 +51,7 @@
     "./db/query-builder/query-builder.types": "./src/db/query-builder/query-builder.types.ts",
     "./db/run-in-transaction.util": "./src/db/run-in-transaction.util.ts",
     "./db/select-distinct-rows.util": "./src/db/select-distinct-rows.util.ts",
+    "./db/select-grouped-rows.util": "./src/db/select-grouped-rows.util.ts",
     "./db/select-filter-options.util": "./src/db/select-filter-options.util.ts",
     "./db/select-rows.util": "./src/db/select-rows.util.ts",
     "./db/update-rows.util": "./src/db/update-rows.util.ts",
@@ -167,6 +168,10 @@
       "./db/select-distinct-rows.util": {
         "types": "./dist/db/select-distinct-rows.util.d.mts",
         "default": "./dist/db/select-distinct-rows.util.mjs"
+      },
+      "./db/select-grouped-rows.util": {
+        "types": "./dist/db/select-grouped-rows.util.d.mts",
+        "default": "./dist/db/select-grouped-rows.util.mjs"
       },
       "./db/select-filter-options.util": {
         "types": "./dist/db/select-filter-options.util.d.mts",

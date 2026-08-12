@@ -19,10 +19,26 @@ const { MockTableActionsPopover } = vi.hoisted(() => ({
 
 const mockCloseMenu = vi.fn();
 
+const { isGroupingEnabledRef } = vi.hoisted(() => ({
+  isGroupingEnabledRef: { current: false },
+}));
+
 vi.mock('#ui/components/Table/contexts/TableConfig/columns/actions', () => ({
   useSetColumnPinning: () => vi.fn(),
   useSetColumnSorting: () => vi.fn(),
   useSetColumnVisibility: () => vi.fn(),
+}));
+
+vi.mock('#ui/components/Table/contexts/TableConfig/grouping/actions', () => ({
+  useSetTableGrouping: () => vi.fn(),
+}));
+
+vi.mock('#ui/components/Table/contexts/TableConfig/grouping/selectors', () => ({
+  useGetTableGroupingKeys: () => [],
+}));
+
+vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
+  useGetTableIsGroupingEnabled: () => isGroupingEnabledRef.current,
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
@@ -49,6 +65,7 @@ import { TableHeaderActionsMenu } from './TableHeaderActionsMenu.component';
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
+  isGroupingEnabledRef.current = false;
 });
 
 describe('TableHeaderActionsMenu', () => {
@@ -221,5 +238,77 @@ describe('TableHeaderActionsMenu', () => {
       }),
       undefined,
     );
+  });
+
+  // Grouping is a *route* capability, so the menu reads it from the meta store
+  // rather than taking it as a prop. Absent means off, which is why the menu a
+  // non-grouping route renders is unchanged by this feature.
+  describe('grouping section', () => {
+    it('offers no grouping commands when the route did not declare the capability', () => {
+      render(
+        <TableHeaderActionsMenu
+          columnKey='name'
+          columnLabel='Name'
+          hasSettings
+          isSortable
+          isStatic={false}
+        />,
+      );
+
+      expect(screen.queryByText('Group by This')).toBeNull();
+      expect(screen.queryByText('Clear Grouping')).toBeNull();
+    });
+
+    it('offers them when the route declared it', () => {
+      isGroupingEnabledRef.current = true;
+
+      render(
+        <TableHeaderActionsMenu
+          columnKey='name'
+          columnLabel='Name'
+          hasSettings
+          isSortable
+          isStatic={false}
+        />,
+      );
+
+      expect(screen.getByText('Group by This')).not.toBeNull();
+      expect(screen.getByText('Clear Grouping')).not.toBeNull();
+    });
+
+    it('separates the grouping section from the ones around it', () => {
+      isGroupingEnabledRef.current = true;
+
+      render(
+        <TableHeaderActionsMenu
+          columnKey='name'
+          columnLabel='Name'
+          hasSettings
+          isSortable
+          isStatic={false}
+        />,
+      );
+
+      // sort │ group │ pin │ hide │ manage — four boundaries, one more than the
+      // same column renders with grouping off.
+      expect(screen.getAllByRole('separator')).toHaveLength(4);
+    });
+
+    it('renders a trigger for a locked column that has nothing else to offer', () => {
+      isGroupingEnabledRef.current = true;
+
+      render(
+        <TableHeaderActionsMenu
+          columnKey='id'
+          columnLabel='ID'
+          hasSettings={false}
+          isSortable={false}
+          isStatic
+        />,
+      );
+
+      expect(screen.getByText('Group by This')).not.toBeNull();
+      expect(screen.queryByRole('separator')).toBeNull();
+    });
   });
 });

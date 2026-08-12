@@ -160,9 +160,9 @@ export type StaticFilterOptionsDescriptor = {
 export type StorageType = 'cookie' | 'localStorage';
 
 /**
- * A column definition. The capability flags (`isFilterable`, `isResizable`,
- * `isSortable`, `isStatic`) are optional and an omitted one is NOT a missing
- * value — every surface resolves them through `resolveColumnCapabilities`,
+ * A column definition. The capability flags (`isFilterable`, `isGroupable`,
+ * `isResizable`, `isSortable`, `isStatic`) are optional and an omitted one is
+ * NOT a missing value — every surface resolves them through `resolveColumnCapabilities`,
  * which holds the defaults, so read them there rather than testing a flag
  * directly.
  */
@@ -179,6 +179,13 @@ export type TableColumn<TData> = {
   readonly format?: TableColumnFormat;
   /** Whether this column can be filtered. */
   readonly isFilterable?: boolean;
+  /**
+   * Whether this column may be offered as a group key. It is the consumer's
+   * half of the answer only: the route's endpoint decides what is actually
+   * legal from the catalogue (ADR-058), so a column allowed here can still be
+   * refused there.
+   */
+  readonly isGroupable?: boolean;
   /** Whether to hide the header content (label, controls, resize handle) */
   readonly isHeaderHidden?: boolean;
   /**
@@ -306,6 +313,50 @@ export type TableDataState<TData> = {
 
 export type TableDensity = 'comfortable' | 'compact';
 
+/**
+ * The grouping store's state — the config context's third store (ADR-061).
+ *
+ * Only the applied keys today. It is a store rather than a field on the columns
+ * store because expansion joins it here next, and expansion must survive the
+ * data context being re-created on every navigation.
+ */
+export type TableGroupingState = {
+  readonly keys: readonly string[];
+};
+
+/**
+ * A row carrying a group summary — what a grouped read returns for each group.
+ *
+ * The field name lives here, in a type, and `TABLE_GROUP_ROW_FIELD` is declared
+ * `keyof` it, so the constant the writer uses and the member the reader's type
+ * declares cannot be renamed apart.
+ *
+ * A route intersects `Partial<TableGroupRow>` into its own row type: the summary
+ * is present only on grouped rows, and its absence is what a detail row is.
+ */
+export type TableGroupRow = Record<'tableGroup', TableGroupRowSummary>;
+
+/**
+ * The group summary a grouped read attaches to every row it returns, under
+ * `TABLE_GROUP_ROW_FIELD`.
+ *
+ * It is the whole contract between a route's grouped service and the
+ * group-header row. The table never infers "this row is a group" from the
+ * grouping configuration, so a grouped row and a detail row can sit in the same
+ * result — which is what the nested rows in a later slice need.
+ *
+ * `label` is already formatted, because formatting a key value needs the
+ * column's `dataType` and locale, both of which the row does not carry.
+ */
+export type TableGroupRowSummary = {
+  /** The column the rows are grouped by. */
+  readonly columnKey: string;
+  /** How many rows the group aggregates. */
+  readonly count: number;
+  /** The group's key value, formatted for display. */
+  readonly label: string;
+};
+
 export type TableMetadataValue = boolean | number | string;
 
 export type TableMetaState = {
@@ -328,11 +379,28 @@ export type TableMetaState = {
   readonly enablePrefetch: boolean;
   /** Error message if data fetch failed */
   readonly error?: string;
+  /**
+   * The group keys the loader actually applied, read from the `grouping` search
+   * param and sanitized against this route's columns (ADR-061). It seeds the
+   * grouping store; the store is the live value from then on, exactly as
+   * `columnsState.sorting` seeds the columns store.
+   *
+   * Empty whenever grouping is off, refused, or unsupported by the route — so
+   * "is this table grouped" is one question with one answer.
+   */
+  readonly groupingKeys?: readonly string[];
   /** Initial page size for first load */
   readonly initialPageSize: number;
   readonly isBordered: boolean;
   readonly isColumnSettingsOpen: boolean;
   readonly isColumnSettingsPinned: boolean;
+  /**
+   * Endpoint capability (ADR-063): the route's read can group rows server-side,
+   * so the header menu offers group keys and the loader forwards them. Absent
+   * means off — an endpoint that cannot group would be asked for a shape it
+   * does not produce.
+   */
+  readonly isGroupingEnabled?: boolean;
   /**
    * Endpoint capability (ADR-063): the load-more sends the last loaded row as a
    * keyset cursor (ADR-052). Absent means off — an endpoint that cannot seek

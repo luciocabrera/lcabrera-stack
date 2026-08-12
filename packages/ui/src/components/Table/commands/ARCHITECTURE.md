@@ -14,6 +14,7 @@ once.
 | `deriveToggleCommandState.util.ts` | pure util | Capability-agnostic `{ isActive, isEnabled }` from `{ current, target, isDisabled }`; `isDisabled` comes from `resolveColumnCapabilities` |
 | `pinning/pinningCommands.ts`       | constants | `PIN_LEFT_COMMAND`, `PIN_RIGHT_COMMAND`, `CLEAR_PINNING_COMMAND`                                                                          |
 | `sorting/sortingCommands.ts`       | constants | `SORT_ASCENDING_COMMAND`, `SORT_DESCENDING_COMMAND`, `CLEAR_SORTING_COMMAND`                                                              |
+| `grouping/groupingCommands.ts`     | constants | `GROUP_BY_COLUMN_COMMAND`, `CLEAR_GROUPING_COMMAND`                                                                                       |
 
 ## What deliberately does **not** live here
 
@@ -33,15 +34,27 @@ once.
 ## Consumers
 
 - Header menu (live commit-context): `TableHeaderCell/TableHeaderActionsMenu/` —
-  `PinAndHideActions` (PinLeft/PinRight/ClearPinning) and `SortActions`
-  (SortAscending/SortDescending/ClearSorting).
+  `PinAndHideActions` (PinLeft/PinRight/ClearPinning), `SortActions`
+  (SortAscending/SortDescending/ClearSorting) and `GroupActions`
+  (GroupByColumn/ClearGrouping).
 - Settings drawer (draft commit-context): `ColumnSettingsDrawer/PinningSection/`
   and `ColumnSettingsDrawer/SortingSection/`.
 
-Every consumer resolves its own capability from the column
-(`useGetNormalizedColumn` + `resolveColumnCapabilities`, `Table/utils/`) and passes
-it as `isDisabled`: sorting commands are unavailable on a non-sortable column,
-pinning commands on a static one. So each surface's rendering gate and each
+Every consumer resolves its own capability and passes it as `isDisabled`, and
+**the capability is the one that governs that command, not the one its neighbour
+uses**. Most are per-column, resolved from the column
+(`useGetNormalizedColumn` + `resolveColumnCapabilities`, `Table/utils/`): sorting
+commands are unavailable on a non-sortable column, pinning commands on a static
+one, and "Group by This" on a column declared `isGroupable: false` (which is how
+the row-actions column is excluded, rather than by a `key === 'actions'` test).
+
+"Clear Grouping" is the exception, and the reason this paragraph now spells the
+rule out. Grouping is one **whole-table** state, so clearing it depends on
+nothing about the column whose menu is open — it reads the route capability
+instead, and takes no `columnKey` at all so there is nothing to gate on by
+mistake. A command whose scope is the table cannot borrow a column's predicate
+just because it sits beside commands that do; that pairing looks symmetric and
+is not, which is exactly where a copy-paste survives review. So each surface's rendering gate and each
 command's own enabled-state come from the same resolver rather than from a
 hand-spelled predicate per site.
 
@@ -51,13 +64,19 @@ surface may substitute its own icon without forking the identity.
 
 ## Generalization — validated (ADR-011 cross-capability check)
 
-Pinning and sorting reuse `CommandDescriptor` **and** `deriveToggleCommandState`
-**unchanged**: the enablement derivation is capability-agnostic — "is the column's
-current value the command's target, and is the command clickable" — so pinning
-passes sides (`'left' | 'right'`) and sorting passes directions
-(`'asc' | 'desc'`). That the shared shape absorbed a second, structurally
-different-looking capability without modification is the evidence the foundation
-is not fitted to pinning.
+Pinning, sorting and grouping reuse `CommandDescriptor` **and**
+`deriveToggleCommandState` **unchanged**: the enablement derivation is
+capability-agnostic — "is the column's current value the command's target, and is
+the command clickable" — so pinning passes sides (`'left' | 'right'`), sorting
+passes directions (`'asc' | 'desc'`), and grouping passes column keys with the
+_applied_ key as `current`. That the shared shape absorbed two further,
+structurally different-looking capabilities without modification is the evidence
+the foundation is not fitted to pinning.
+
+Grouping stretches it in a direction the first two did not: it is a whole-table
+state expressed through a per-column command, so `current` is the same value for
+every column's menu while `target` differs. The predicate answers that correctly
+without a change, which is the point.
 
 A new capability adds a sibling `*Commands.ts`. If it cannot reuse
 `deriveToggleCommandState` or `CommandDescriptor` unchanged, revise the shared

@@ -79,6 +79,7 @@
   "src/components/Table/TableBodyCell/TableBodyCell.stylex.ts",
   "src/components/Table/TableContent/TableContent.stylex.ts",
   "src/components/Table/TableEmptyState/TableEmptyState.stylex.ts",
+  "src/components/Table/TableGroupHeaderRow/TableGroupHeaderRow.stylex.ts",
   "src/components/Table/TableHeader/TableHeader.stylex.ts",
   "src/components/Table/TableHeaderCell/ResizeHandle/ResizeHandle.stylex.ts",
   "src/components/Table/TableHeaderCell/TableHeaderActionsMenu/TableHeaderActionsMenu.stylex.ts",

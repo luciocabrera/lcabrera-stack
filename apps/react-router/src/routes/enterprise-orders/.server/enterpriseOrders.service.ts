@@ -7,6 +7,7 @@ import { deleteRows } from '@lcabrera/server/db/delete-rows.util';
 import { getMaxValue } from '@lcabrera/server/db/get-max-value.util';
 import { getRowsCount } from '@lcabrera/server/db/get-rows-count.util';
 import { insertRow } from '@lcabrera/server/db/insert-row.util';
+import { selectGroupedRows } from '@lcabrera/server/db/select-grouped-rows.util';
 import { selectRows } from '@lcabrera/server/db/select-rows.util';
 import { updateRows } from '@lcabrera/server/db/update-rows.util';
 
@@ -19,10 +20,12 @@ import type {
 import {
   ENTERPRISE_ORDER_ALLOWED_COLUMNS,
   ENTERPRISE_ORDER_COLUMNS,
+  ENTERPRISE_ORDER_GROUP_MAX_ROWS,
   ENTERPRISE_ORDER_LIST_COLUMNS,
   ENTERPRISE_ORDER_PRIMARY_KEY,
   ENTERPRISE_ORDERS_SCHEMA,
   ENTERPRISE_ORDERS_TABLE,
+  toOrderGroupRow,
   toOrderKeysetCursor,
 } from '../config';
 
@@ -44,6 +47,47 @@ const TARGET = {
   table: ENTERPRISE_ORDERS_TABLE,
 } as const;
 
+export type SelectGroupedOrdersArgs = {
+  readonly filters: readonly QueryFilter[];
+  /** The single column the rows are grouped by. */
+  readonly groupKey: string;
+};
+
+/**
+ * Read one row per distinct value of `groupKey`, each carrying how many orders
+ * it aggregates.
+ *
+ * The whole result is returned at once and `hasMore` is `false`, because a
+ * grouped read is not paginated (ADR-059): there is no stable cursor over a
+ * result the server aggregated, and the row count is bounded by the number of
+ * distinct key values rather than by the table.
+ *
+ * The count's alias comes back from `selectGroupedRows` rather than being
+ * spelled here, so the name the SQL projected and the name this decodes by are
+ * one string.
+ */
+export const selectGroupedOrders = async ({
+  filters,
+  groupKey,
+}: SelectGroupedOrdersArgs): Promise<EnterpriseOrdersResponse> => {
+  const { aggregates, rows } = await selectGroupedRows({
+    ...TARGET,
+    aggregates: [{ fn: 'count' }],
+    filters,
+    grouping: 'flat',
+    keys: [groupKey],
+    maxRows: ENTERPRISE_ORDER_GROUP_MAX_ROWS,
+    sort: [{ direction: 'asc', key: groupKey }],
+  });
+
+  const countAlias = aggregates[0]?.alias ?? '';
+  const data = rows.map((row) =>
+    toOrderGroupRow({ columnKey: groupKey, countAlias, row }),
+  );
+
+  return { data, hasMore: false, total: data.length };
+};
+
 export type SelectOrdersPageArgs = {
   /**
    * Keyset cursor: the sort-key tuple of the last row of the previous page, one
@@ -53,6 +97,13 @@ export type SelectOrdersPageArgs = {
    */
   readonly cursor?: readonly unknown[];
   readonly filters: readonly QueryFilter[];
+  /**
+   * The group keys the loader sanitized out of the URL. Non-empty switches this
+   * read to the grouped one — sanitized to the route's own columns and empty
+   * unless the route declared `isGroupingEnabled`, so an ungrouped route cannot
+   * reach that branch however the URL is edited.
+   */
+  readonly grouping?: readonly string[];
   /**
    * Count the filtered set and return the total. Only the first page of a
    * scroll session asks for it: the total cannot change while the session runs,
@@ -66,9 +117,15 @@ export type SelectOrdersPageArgs = {
 
 /**
  * Read a page of orders for the list view, and — on the first page of a scroll
- * session — the total row count for the same filters.
+ * session — the total row count for the same filters. With a group key applied,
+ * read one row per group instead.
  *
- * Three things make this cheaper than the obvious spelling:
+ * The grouped branch lives behind the same entry point rather than beside it so
+ * the response shape is one shape: `EnterpriseOrdersResponse` either way, which
+ * is what keeps the loader's inferred data type identical for grouped and
+ * ungrouped routes alike.
+ *
+ * Three things make the ungrouped read cheaper than the obvious spelling:
  *
  * - The page and the count are **independent queries**, so they run
  *   concurrently rather than end to end (#401). `getRowsCount` takes the data
@@ -79,11 +136,18 @@ export type SelectOrdersPageArgs = {
 export const selectOrdersPage = async ({
   cursor,
   filters,
+  grouping = [],
   includeTotal,
   limit,
   offset,
   sort,
 }: SelectOrdersPageArgs): Promise<EnterpriseOrdersResponse> => {
+  const [groupKey] = grouping;
+
+  if (groupKey !== undefined) {
+    return selectGroupedOrders({ filters, groupKey });
+  }
+
   const keysetCursor = toOrderKeysetCursor({ cursor, sort });
 
   const [data, total] = await Promise.all([

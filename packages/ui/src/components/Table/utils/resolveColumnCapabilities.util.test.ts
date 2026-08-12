@@ -10,6 +10,7 @@ describe('resolveColumnCapabilities', () => {
   it('materializes the defaults for a column that declares no flag', () => {
     expect(resolveColumnCapabilities({})).toStrictEqual({
       isFilterable: true,
+      isGroupable: true,
       isResizable: true,
       isSortable: true,
       isStatic: false,
@@ -26,12 +27,14 @@ describe('resolveColumnCapabilities', () => {
     expect(
       resolveColumnCapabilities({
         isFilterable: false,
+        isGroupable: false,
         isResizable: false,
         isSortable: false,
         isStatic: true,
       }),
     ).toStrictEqual({
       isFilterable: false,
+      isGroupable: false,
       isResizable: false,
       isSortable: false,
       isStatic: true,
@@ -42,6 +45,7 @@ describe('resolveColumnCapabilities', () => {
     expect(
       resolveColumnCapabilities({
         isFilterable: true,
+        isGroupable: true,
         isResizable: true,
         isSortable: true,
       }),
@@ -55,13 +59,23 @@ describe('resolveColumnCapabilities', () => {
     ).toBe(false);
   });
 
-  it('leaves sorting and filtering available on a static column', () => {
+  it('leaves sorting, filtering and grouping available on a static column', () => {
     expect(resolveColumnCapabilities({ isStatic: true })).toStrictEqual({
       isFilterable: true,
+      isGroupable: true,
       isResizable: false,
       isSortable: true,
       isStatic: true,
     });
+  });
+
+  it('refuses grouping only when the column declares isGroupable: false', () => {
+    expect(resolveColumnCapabilities({ isGroupable: false }).isGroupable).toBe(
+      false,
+    );
+    expect(resolveColumnCapabilities({ isStatic: true }).isGroupable).toBe(
+      true,
+    );
   });
 
   it('accepts a TableColumn and ignores its non-capability members', () => {

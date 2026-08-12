@@ -105,6 +105,9 @@ selectDistinctRows [const] <TRow extends QueryResultRow>(descriptor: ExecutorOpt
 ## ./db/select-filter-options.util
 selectFilterOptions [const] ({ allowedColumns, column, columnType, limit, offset, schema, table, tx }: SelectFilterOptionsArgs) => Promise<FilterOptionsPage>
 
+## ./db/select-grouped-rows.util
+selectGroupedRows [const] <TRow extends QueryResultRow>({ tx, ...descriptor }: ExecutorOptions & SelectGroupedRowsArgs) => Promise<{ aggregates: readonly BuiltGroupAggregate[]; groupingSetMasks: readonly number[]; keys: readonly string[]; maskAlias: "group_mask"; rows: readonly TRow[]; }>
+
 ## ./db/select-rows.util
 selectRows [const] <TRow extends QueryResultRow>({ tx, ...descriptor }: ExecutorOptions & SelectQueryDescriptor) => Promise<readonly TRow[]>
 

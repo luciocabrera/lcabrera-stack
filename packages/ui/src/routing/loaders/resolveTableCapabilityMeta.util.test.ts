@@ -5,19 +5,21 @@ import type { TableMetaState } from '#ui/components/Table/Table.types';
 import { resolveTableCapabilityMeta } from './resolveTableCapabilityMeta.util';
 
 describe('resolveTableCapabilityMeta', () => {
-  it('resolves both capabilities off when no meta is given', () => {
+  it('resolves every capability off when no meta is given', () => {
     expect(resolveTableCapabilityMeta({})).toStrictEqual({
+      isGroupingEnabled: false,
       isKeysetEnabled: false,
       isServerFilterEnabled: false,
     });
   });
 
-  it('resolves both capabilities off when the meta declares neither', () => {
+  it('resolves every capability off when the meta declares none', () => {
     expect(
       resolveTableCapabilityMeta({
         meta: { title: { plural: '', singular: '' } },
       }),
     ).toStrictEqual({
+      isGroupingEnabled: false,
       isKeysetEnabled: false,
       isServerFilterEnabled: false,
     });
@@ -26,15 +28,37 @@ describe('resolveTableCapabilityMeta', () => {
   it('carries each declared capability through', () => {
     expect(
       resolveTableCapabilityMeta({
-        meta: { isKeysetEnabled: true, isServerFilterEnabled: true },
+        meta: {
+          isGroupingEnabled: true,
+          isKeysetEnabled: true,
+          isServerFilterEnabled: true,
+        },
       }),
-    ).toStrictEqual({ isKeysetEnabled: true, isServerFilterEnabled: true });
+    ).toStrictEqual({
+      isGroupingEnabled: true,
+      isKeysetEnabled: true,
+      isServerFilterEnabled: true,
+    });
   });
 
   it('resolves each capability independently', () => {
     expect(
       resolveTableCapabilityMeta({ meta: { isServerFilterEnabled: true } }),
-    ).toStrictEqual({ isKeysetEnabled: false, isServerFilterEnabled: true });
+    ).toStrictEqual({
+      isGroupingEnabled: false,
+      isKeysetEnabled: false,
+      isServerFilterEnabled: true,
+    });
+  });
+
+  it('resolves grouping on from the flag alone', () => {
+    expect(
+      resolveTableCapabilityMeta({ meta: { isGroupingEnabled: true } }),
+    ).toStrictEqual({
+      isGroupingEnabled: true,
+      isKeysetEnabled: false,
+      isServerFilterEnabled: false,
+    });
   });
 
   it('returns every capability key even when the meta is empty', () => {
@@ -44,7 +68,11 @@ describe('resolveTableCapabilityMeta', () => {
       Object.keys(resolveTableCapabilityMeta({})).toSorted((a, b) =>
         a.localeCompare(b),
       ),
-    ).toEqual(['isKeysetEnabled', 'isServerFilterEnabled']);
+    ).toEqual([
+      'isGroupingEnabled',
+      'isKeysetEnabled',
+      'isServerFilterEnabled',
+    ]);
   });
 
   it('treats a non-boolean cookie-shaped value as off', () => {
@@ -52,11 +80,15 @@ describe('resolveTableCapabilityMeta', () => {
     // actually arrives: the persisted payload is cast, not validated, so a
     // capability key can reach here holding anything at all.
     const cookieShapedMeta = JSON.parse(
-      '{"isKeysetEnabled":"yes"}',
+      '{"isKeysetEnabled":"yes","isGroupingEnabled":1}',
     ) as Partial<TableMetaState>;
 
     expect(
-      resolveTableCapabilityMeta({ meta: cookieShapedMeta }).isKeysetEnabled,
-    ).toBe(false);
+      resolveTableCapabilityMeta({ meta: cookieShapedMeta }),
+    ).toStrictEqual({
+      isGroupingEnabled: false,
+      isKeysetEnabled: false,
+      isServerFilterEnabled: false,
+    });
   });
 });

@@ -5,6 +5,13 @@
 type ColumnCapabilities = {
   readonly isFilterable: boolean;
   /**
+   * Whether the column may be offered as a group key. Not vetoed by `isStatic`:
+   * static locks a column's *layout* against the user, while grouping restates
+   * the query — a pinned, unmovable column is still a perfectly good dimension.
+   * The route's endpoint has the final say either way (ADR-058).
+   */
+  readonly isGroupable: boolean;
+  /**
    * Effective resizability. `isStatic` locks a column against every user
    * modification, resizing included, so it overrides an explicit
    * `isResizable: true`.
@@ -32,6 +39,7 @@ type ColumnCapabilityFlags = Partial<ColumnCapabilities>;
  */
 const COLUMN_CAPABILITY_DEFAULTS: ColumnCapabilities = {
   isFilterable: true,
+  isGroupable: true,
   isResizable: true,
   isSortable: true,
   isStatic: false,
@@ -54,6 +62,7 @@ export const resolveColumnCapabilities = (
   return {
     isFilterable:
       column?.isFilterable ?? COLUMN_CAPABILITY_DEFAULTS.isFilterable,
+    isGroupable: column?.isGroupable ?? COLUMN_CAPABILITY_DEFAULTS.isGroupable,
     isResizable:
       !isStatic &&
       (column?.isResizable ?? COLUMN_CAPABILITY_DEFAULTS.isResizable),

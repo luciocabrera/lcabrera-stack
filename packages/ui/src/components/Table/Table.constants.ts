@@ -1,3 +1,5 @@
+import type { TableGroupRow } from './Table.types';
+
 /**
  * Default minimum column width when not specified
  */
@@ -55,3 +57,17 @@ export const IS_PREFETCH_ENABLED = true;
 export const PRIMARY_KEY_ID_DELIMITER = '_';
 
 export const ACTIONS_COLUMN_KEY = 'actions';
+
+/**
+ * The row field a grouped read attaches its `TableGroupRowSummary` to.
+ *
+ * Deliberately not a column key and not derived from one: a grouped row carries
+ * its summary beside the group key's own value, so the renderer asks the row
+ * what it is instead of asking the grouping configuration what every row must
+ * be. It is exported because the route's server-side read is what writes it.
+ *
+ * Typed `keyof TableGroupRow` rather than left to infer, so renaming the field
+ * in one place and not the other is a compile error rather than a group header
+ * that silently stops rendering.
+ */
+export const TABLE_GROUP_ROW_FIELD: keyof TableGroupRow = 'tableGroup';

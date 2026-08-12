@@ -85,8 +85,11 @@ urlState/
 ├── createUrlStateCodec.util.ts
 ├── sortingCodec.util.ts
 ├── filtersCodec.util.ts
+├── groupingCodec.util.ts
 ├── serializeSortingToURL.util.ts
 ├── deserializeSortingFromURL.util.ts
+├── serializeGroupingToURL.util.ts
+├── deserializeGroupingFromURL.util.ts
 ├── serializeFiltersToURL.util.ts
 ├── serializeFilter.util.ts
 ├── serializeBooleanFilter.util.ts
@@ -105,16 +108,21 @@ urlState/
 graph TD
   Index[URL state index] --> DSF[Deserialize filters utility]
   Index --> DSS[Deserialize sorting utility]
+  Index --> DSG[Deserialize grouping utility]
   Index --> SFU[Serialize filters utility]
   Index --> SSU[Serialize sorting utility]
+  Index --> SGU[Serialize grouping utility]
 
   DSS --> SortingCodec[sortingCodec]
   SSU --> SortingCodec
   DSF --> FiltersCodec[filtersCodec]
   SFU --> FiltersCodec
+  DSG --> GroupingCodec[groupingCodec]
+  SGU --> GroupingCodec
 
   SortingCodec --> Factory[createUrlStateCodec]
   FiltersCodec --> Factory
+  GroupingCodec --> Factory
   Factory --> Logger[logger]
 
   FiltersCodec --> DF[Deserialize single filter utility]
@@ -162,6 +170,10 @@ caller's decision, which is why `serializeSortingToURL` and
 the `sorting` param. `sortingCodec` is its consumer: it is the vocabulary that
 codec's narrowing checks a URL-supplied token against.
 
+`CompactGrouping` — names the `{ keys: string[] }` wire form of the `grouping`
+param. Plain compact JSON with no transport layer, the same style as `sorting`
+and `filters` (ADR-061).
+
 ### sortingCodec.util.ts
 
 Codec for the `sorting` param. Its narrowing checks every entry's direction
@@ -172,6 +184,23 @@ then rebuilds the record with `Object.fromEntries`.
 
 Codec for the `filters` param. Its narrowing checks the envelope, then routes
 each value through `deserializeFilter`.
+
+### groupingCodec.util.ts
+
+Codec for the `grouping` param. Its narrowing admits **one** member, named
+`keys`, holding an array of strings — a second member, a misspelling, or one
+non-string element refuses the whole payload.
+
+The single-member check is also what makes `__proto__` a non-issue without
+`Object.fromEntries`: `JSON.parse` hands it back as an own property, so a payload
+carrying one has two entries and is refused, and one carrying only it is refused
+for not being named `keys`.
+
+**Its reach stops at the envelope.** The keys stay arbitrary strings here — which
+columns are legal group keys is a question about a route, not about a URL, and it
+is answered by `sanitizeGroupingByColumns` in the loader path, then by
+`assertGroupKeys` in `@lcabrera/server`. Both of those refuse whole too, so the
+contract is the same at every step: a flat table, never a half-applied query.
 
 ### serializeSortingToURL.util.ts
 
@@ -304,11 +333,12 @@ flowchart TD
 `index.ts` exports:
 
 - `deserializeFiltersFromURL`
+- `deserializeGroupingFromURL`
 - `deserializeSortingFromURL`
 - `serializeFiltersToURL`
+- `serializeGroupingToURL`
 - `serializeSortingToURL`
 
 The codecs and the factory are **not** barrelled. Nothing outside this folder
 consumes them, and per ADR-007 a barrel exports what is actually imported
-through it; a new codec (the `grouping` param) imports `createUrlStateCodec` by
-file path.
+through it; each codec imports `createUrlStateCodec` by file path.

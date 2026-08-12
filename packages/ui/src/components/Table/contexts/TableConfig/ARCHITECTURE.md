@@ -1,16 +1,17 @@
 # TableConfig Context Architecture
 
-Central configuration context that manages **column settings** and **UI meta state**
-through two independent stores. This is the primary source of truth for how
-columns are displayed, filtered, sorted, pinned, and sized.
+Central configuration context that manages **column settings**, **UI meta state**
+and **row grouping** through three independent stores. This is the primary source
+of truth for how columns are displayed, filtered, sorted, grouped, pinned, and
+sized.
 
 ## File Structure
 
 ```
 TableConfig/
 ├── TableConfigContext.context.ts            → createContext (undefined default)
-├── TableConfigContext.provider.tsx           → Provider: creates both stores from initial state props
-├── TableConfigContext.types.ts              → ContextValue (columnsStore + metaStore)
+├── TableConfigContext.provider.tsx           → Provider: creates all three stores from initial state props
+├── TableConfigContext.types.ts              → ContextValue (columnsStore + groupingStore + metaStore)
 ├── useTableConfigContextValue.hook.ts       → use(TableConfigContext) with guard
 ├── index.ts                                 → Barrel: TableConfigProvider, hooks
 │
@@ -87,32 +88,55 @@ TableConfig/
 │       ├── useGetTableTitlePlural.hook.ts                → Plural table title string
 │       └── useGetTableTitleSingular.hook.ts              → Singular table title string
 │
+├── grouping/                                → Row grouping store, actions, selectors (ADR-061)
+│   ├── useGroupingStore.hook.ts             → Resolves the config groupingStore, delegates to useStoreSelector
+│   │
+│   ├── actions/
+│   │   ├── utils/resolveTableGroupingUpdate.util.ts → Pure: one interaction's grouping change as data (updated / unchanged)
+│   │   └── useSetTableGrouping.hook.ts      → Apply a group key, or clear grouping with `undefined`
+│   │
+│   └── selectors/
+│       └── useGetTableGroupingKeys.hook.ts  → The applied group keys
+│
 ├── utils/
   ├── getInitialColumnsState.util.ts       → Build initial columns state from props; synthesizes the `actions` column via `resolveTableActionsColumn` when `crud.read/update/delete` is enabled (or a consumer `actions` column is declared), and only force-pins it right when it actually exists
+  ├── getInitialGroupingState.util.ts      → Build initial grouping state from the keys the loader applied (`metaState.groupingKeys`)
   ├── getInitialMetaState.util.ts          → Build initial meta state from props
   └── index.ts                             → Barrel: utils
 ```
 
-## Dual-Store Pattern
+## Multi-Store Pattern
 
 ```mermaid
 graph LR
   subgraph "TableConfigContext"
     Provider["TableConfigProvider"]
     Provider -->|"getInitialColumnsState()"| CS["columnsStore (TStore)"]
+    Provider -->|"getInitialGroupingState()"| GS["groupingStore (TStore)"]
     Provider -->|"getInitialMetaState()"| MS["metaStore (TStore)"]
 
     CS -->|"get / set / subscribe"| ColState["TableColumnsState"]
+    GS -->|"get / set / subscribe"| GrpState["TableGroupingState"]
     MS -->|"get / set / subscribe"| MetState["TableMetaState"]
   end
 
   useColumnsStore["useColumnsStore(selector)"] -->|"useSyncExternalStore"| CS
+  useGroupingStore["useGroupingStore(selector)"] -->|"useSyncExternalStore"| GS
   useMetaStore["useMetaStore(selector)"] -->|"useSyncExternalStore"| MS
 ```
 
-Two stores are kept separate so column-heavy updates (filters, sorting, reorder)
+The stores are kept separate so column-heavy updates (filters, sorting, reorder)
 do not trigger re-renders in components that only read meta state (density, title),
 and vice versa.
+
+**Why grouping is here and not on the data context.** `TableConfigProvider` sits
+outside the Suspense boundary and stays mounted across navigations, while
+`TableDataProvider` sits inside it and is re-created from each navigation's
+resolved promise. A grouping change _causes_ a navigation, so grouping state on
+the data context would be wiped by its own effect — and expansion, which joins
+this store next, is re-applied by group path after exactly that refetch
+(ADR-061). `TableConfigContext.provider.test.tsx` pins this with mount counts on
+both halves rather than by assuming it.
 
 ## Columns State Shape
 
@@ -133,6 +157,14 @@ TableColumnsState<TData> = {
 };
 ```
 
+## Grouping State Shape
+
+```typescript
+TableGroupingState = {
+  keys: readonly string[];           // Applied group keys, in the query's nesting order
+};
+```
+
 ## Meta State Shape
 
 ```typescript
@@ -145,9 +177,11 @@ TableMetaState = {
   drawersSyncNonce?: number;          // Monotonic nonce used to force drawer provider re-seed
   enablePrefetch: boolean;           // Prefetch next page after load-more (ADR-006)
   error: Error | null;               // Table-level error
+  groupingKeys?: readonly string[];  // Group keys the loader applied, read from the `grouping` param and sanitized (ADR-061); seeds the grouping store
   initialPageSize: number;           // First page row count
   isBordered: boolean;               // Show borders
   isColumnSettingsOpen: boolean;     // Column settings drawer open
+  isGroupingEnabled?: boolean;       // Endpoint capability: the route's read can group server-side (ADR-063); absent = off
   isKeysetEnabled?: boolean;         // Endpoint capability: load-more sends a keyset cursor (ADR-052/ADR-063); absent = off
   isRounded: boolean;                // Round the table card's corners (default false)
   isServerFilterEnabled?: boolean;   // Endpoint capability: load-more sends the column filters (ADR-063); absent = off
@@ -174,11 +208,14 @@ graph TD
   A["TableConfigProvider receives columns + config props"]
   A --> B["getInitialColumnsState(columnsState, crud)"]
   A --> C["getInitialMetaState(metaState)"]
+  A --> G["getInitialGroupingState(metaState.groupingKeys)"]
   B --> B1["resolveTableActionsColumn(columns, crud)"]
   B1 --> D["useStore(columnsInitial) → columnsStore"]
   C --> E["useStore(metaInitial) → metaStore"]
-  D --> F["Provide { columnsStore, metaStore } via TableConfigContext"]
+  G --> H["useStore(groupingInitial) → groupingStore"]
+  D --> F["Provide { columnsStore, groupingStore, metaStore } via TableConfigContext"]
   E --> F
+  H --> F
 ```
 
 Consumers no longer need to declare an `actions` column by hand: `crud` is
@@ -193,7 +230,7 @@ so SSR and the initial client render already agree on the seeded state.
 
 ## Testing Pattern
 
-- `columns.hooks.test.tsx` and `meta.hooks.test.tsx` share a common store scaffold through [src/utils/tests/createMockStore.util.ts](src/utils/tests/createMockStore.util.ts).
+- `columns.hooks.test.tsx`, `meta.hooks.test.tsx` and `grouping.hooks.test.tsx` share a common store scaffold through [src/utils/tests/createMockStore.util.ts](src/utils/tests/createMockStore.util.ts).
 - Columns action-hook tests share a dedicated mock wiring utility via [src/utils/tests/createTableConfigColumnsActionMocks.util.ts](src/utils/tests/createTableConfigColumnsActionMocks.util.ts).
 - Tests keep `vi.mock(...)` stable while reassigning local store instances in `beforeEach`, which avoids `vi.hoisted` initialization-order pitfalls.
 

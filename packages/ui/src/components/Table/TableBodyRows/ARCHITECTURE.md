@@ -4,14 +4,19 @@ Row-rendering delegate for `TableBody`. Owns the `visibleRows.map()` loop
 and cell creation, isolating data-dependent re-renders from the
 virtualisation layout in `TableBody`.
 
+Which component a row gets is asked of the **row**: one carrying a group summary
+renders as a `TableGroupHeaderRow`, everything else renders its cells. The
+grouping configuration is never consulted here, so a group row and a detail row
+can arrive in the same result.
+
 ## File Structure
 
 ```
 TableBodyRows/
-├── TableBodyRows.component.tsx   → Visible-row loop with column-group cell rendering
+├── TableBodyRows.component.tsx   → Visible-row loop: group header or column-group cell rendering, per row
 ├── TableBodyRows.types.ts        → TableBodyRowsProps (startIndex, endIndex, isLoadingState)
 ├── utils/
-│   └── resolveRowKey.util.ts     → Row identity key from the primary-key column(s)
+│   └── resolveRowKey.util.ts     → Row identity key from a group summary, else from the primary-key column(s)
 ├── ARCHITECTURE.md               → This file
 └── index.ts                      → Barrel export
 ```
@@ -55,8 +60,11 @@ graph TD
   slice --> map["visibleRows.map(row => ...)"]
   COL --> key["resolveRowKey({ columns, index: rowIndex, row })"]
   map --> key
-  key --> TR["TableRow key"]
-  map --> TR
+  map --> summary["getTableGroupRowSummary(row)"]
+  summary -->|"summary present"| GH["TableGroupHeaderRow"]
+  summary -->|"otherwise"| TR["TableRow"]
+  key --> GH
+  key --> TR
   TR --> left["renderTableBodyPinnedGroup(leftPinnedCols)"]
   TR --> center["renderTableBodyPinnedGroup(centerCols)"]
   TR --> right["renderTableBodyPinnedGroup(rightPinnedCols)"]
@@ -64,6 +72,21 @@ graph TD
   renderer --> center
   renderer --> right
 ```
+
+## Grouped Rows
+
+A grouped read returns one row per group, each carrying a `TableGroupRowSummary`
+under `TABLE_GROUP_ROW_FIELD` ([ADR-061](../../../../../../docs/decisions/ADR-061-grouping-config-in-url-expansion-in-store.md)).
+`getTableGroupRowSummary` validates the whole summary or answers `undefined`, so
+a half-written one renders as a data row rather than putting `undefined` on
+screen.
+
+**One data row still produces exactly one `<tr>`.** `TableBody` sizes `<tbody>`
+as `totalLoadedRows × rowHeight` and derives both spacers from the same number,
+so emitting a header _plus_ a detail row per entry would desynchronize the body
+from its contents. `TableGroupHeaderRow` composes `TableRow`, which is where
+`rowHeight` is read, so the group row paints at the same height as every other
+row by construction rather than by a matching literal.
 
 ## Row Identity
 
@@ -80,11 +103,18 @@ not reach a route. `resolveRowKey` **never throws**, because a key is needed for
 every row on every render and a throw here would take the whole table to an error
 boundary.
 
-| Case                                                                 | Key shape                  |
-| -------------------------------------------------------------------- | -------------------------- |
-| Single primary key                                                   | `pk:[123]`                 |
-| Composite primary key, declaration order                             | `pk:[123,"ORD 9"]`         |
-| No `isPrimaryKey` column, a non-scalar value, or a non-finite number | `idx:<absolute row index>` |
+| Case                                                                 | Key shape                        |
+| -------------------------------------------------------------------- | -------------------------------- |
+| Group row (checked first)                                            | `grp:["order_status","Shipped"]` |
+| Single primary key                                                   | `pk:[123]`                       |
+| Composite primary key, declaration order                             | `pk:[123,"ORD 9"]`               |
+| No `isPrimaryKey` column, a non-scalar value, or a non-finite number | `idx:<absolute row index>`       |
+
+A group row is identified **first**, and from its own values. A grouped read
+projects the group key and its aggregates only, so the primary-key branch would
+find nothing there and drop every group in the result to its index — giving the
+whole grouped view the identity of position, which is what ADR-062 exists to
+retire.
 
 **The value part is `JSON.stringify` over the resolved tuple, and each of its
 three properties is load-bearing.** A delimiter-joined `encodeURIComponent`
@@ -113,7 +143,7 @@ instead, which is what that fallback is for: a non-finite id is a failed parse.
 (`0` and `-0` do share a key. They are `===`-equal, so treating them as one value
 is the language's own answer.)
 
-**The prefixes keep the two namespaces disjoint.** Under the tuple encoding they
+**The prefixes keep the three namespaces disjoint.** Under the tuple encoding they
 are belt-and-braces — a value key always starts `[` and an index key is always
 decimal digits, so no cross-namespace collision is constructible today even
 without them. They are kept because ADR-062 requires the separation to hold
