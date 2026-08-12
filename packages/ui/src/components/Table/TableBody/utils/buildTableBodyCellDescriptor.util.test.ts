@@ -18,6 +18,9 @@ type Row = {
 
 type RowKey = DataKey<Row>;
 
+const ROW_INDEX = 3;
+const ROW_KEY = 'pk:[3]';
+
 describe('buildTableBodyCellDescriptor', () => {
   it('builds a default descriptor with column value', () => {
     const col: TableColumn<Row> = {
@@ -32,9 +35,12 @@ describe('buildTableBodyCellDescriptor', () => {
       isLoadingState: false,
       pinnedOffsets: {} as Record<RowKey, PinnedColumnInfo>,
       row: { amount: 42 },
+      rowIndex: ROW_INDEX,
+      rowKey: ROW_KEY,
     });
 
     expect(descriptor).toEqual({
+      columnKey: 'amount',
       dataType: 'number',
       format: undefined,
       isLoadingState: false,
@@ -43,6 +49,8 @@ describe('buildTableBodyCellDescriptor', () => {
       label: 'Amount',
       minWidth: 120,
       pinInfo: undefined,
+      rowIndex: ROW_INDEX,
+      rowKey: ROW_KEY,
       value: 42,
       width: 120,
     });
@@ -60,16 +68,21 @@ describe('buildTableBodyCellDescriptor', () => {
       isLoadingState: false,
       pinnedOffsets: {} as Record<RowKey, PinnedColumnInfo>,
       row: { name: 'A' },
+      rowIndex: ROW_INDEX,
+      rowKey: ROW_KEY,
     });
 
     expect(descriptor).toEqual({
       children: 'custom',
+      columnKey: 'name',
       isLoadingState: false,
       key: 'name',
       kind: 'custom',
       label: '',
       minWidth: DEFAULT_MIN_COLUMN_WIDTH,
       pinInfo: undefined,
+      rowIndex: ROW_INDEX,
+      rowKey: ROW_KEY,
       width: 180,
     });
   });
@@ -94,9 +107,12 @@ describe('buildTableBodyCellDescriptor', () => {
         name: pinInfo,
       } as Record<RowKey, PinnedColumnInfo>,
       row: {},
+      rowIndex: ROW_INDEX,
+      rowKey: ROW_KEY,
     });
 
     expect(descriptor).toEqual({
+      columnKey: 'name',
       dataType: undefined,
       format: undefined,
       isLoadingState: false,
@@ -105,6 +121,8 @@ describe('buildTableBodyCellDescriptor', () => {
       label: 'Name',
       minWidth: 90,
       pinInfo,
+      rowIndex: ROW_INDEX,
+      rowKey: ROW_KEY,
       value: '',
       width: 90,
     });

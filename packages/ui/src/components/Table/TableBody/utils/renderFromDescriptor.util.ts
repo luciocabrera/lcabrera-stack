@@ -26,11 +26,14 @@ export const renderFromDescriptor = <TData extends Record<string, unknown>>({
     return createElement(
       TableBodyCell,
       {
+        columnKey: descriptor.columnKey,
         isLoadingState: descriptor.isLoadingState,
         key: descriptor.key,
         label: descriptor.label,
         minWidth: descriptor.minWidth,
         pinInfo: descriptor.pinInfo,
+        rowIndex: descriptor.rowIndex,
+        rowKey: descriptor.rowKey,
         width: descriptor.width,
       },
       descriptor.children,
@@ -38,6 +41,7 @@ export const renderFromDescriptor = <TData extends Record<string, unknown>>({
   }
 
   return createElement(TableBodyCell, {
+    columnKey: descriptor.columnKey,
     dataType: descriptor.dataType,
     format: descriptor.format,
     isLoadingState: descriptor.isLoadingState,
@@ -45,6 +49,8 @@ export const renderFromDescriptor = <TData extends Record<string, unknown>>({
     label: descriptor.label,
     minWidth: descriptor.minWidth,
     pinInfo: descriptor.pinInfo,
+    rowIndex: descriptor.rowIndex,
+    rowKey: descriptor.rowKey,
     value: descriptor.value,
     width: descriptor.width,
   });

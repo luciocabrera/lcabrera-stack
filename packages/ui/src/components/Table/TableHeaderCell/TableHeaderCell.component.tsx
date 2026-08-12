@@ -16,7 +16,7 @@ import {
   skeletonStyles,
   tableHeaderCellStyles,
 } from './TableHeaderCell.stylex';
-import { getPinnedStyle, getShadowStyle } from './utils';
+import { getPinnedStyle, getShadowStyle, resolveAriaSort } from './utils';
 
 export const TableHeaderCell = <TData extends Record<string, unknown>>({
   columnKey,
@@ -40,8 +40,17 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   const shadowStylex = getShadowStyle(pinInfo);
 
   return (
+    // role and aria-sort are declared, not inherited: `tableHeaderCellStyles`
+    // `base()` sets `display: flex` on this `<th>` itself, which costs it its
+    // implicit `columnheader` role in the accessibility tree (ADR-062). The
+    // cause is this cell's own override, not the row's — restoring a table
+    // `display` on `TableRow` would not make the attribute redundant.
+    // All three are set after `{...rest}` so a caller cannot replace them.
     <th
       {...rest}
+      aria-sort={resolveAriaSort({ isSortable, sortDirection })}
+      role='columnheader'
+      scope='col'
       {...stylex.props(
         tableHeaderCellStyles.base(effectiveMinWidth, currentWidth),
         pinnedStylex,

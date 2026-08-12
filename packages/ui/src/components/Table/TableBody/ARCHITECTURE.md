@@ -29,6 +29,40 @@ for virtualisation, and delegates row rendering to `TableBodyRows` via props
 `{ startIndex, endIndex, isLoadingState }`. Data-dependent re-renders are
 scoped to `TableBodyRows`.
 
+## The populated body declares role="rowgroup"; the empty one does not
+
+`styles.body` sets `display: grid`, and a browser drops an element's implicit
+table role along with its table `display` — so the populated `<tbody>` loses its
+`rowgroup` role and has to declare one. A grid's rows must be owned by a
+rowgroup; without it the accessibility tree reads `grid > generic > row`
+([ADR-062](../../../../../../docs/decisions/ADR-062-grid-semantics-roving-focus-and-row-identity.md)).
+
+`styles.bodyEmpty` keeps `display: table-row-group`, so the empty branch's
+implicit role survives and declaring one there would be the redundancy the
+populated branch only resembles. The asymmetry is deliberate and both halves are
+pinned in `TableBody.test.tsx`.
+
+Those tests assert the `role` **attribute**, never `getByRole('rowgroup')`.
+Testing Library resolves implicit roles, so a role query returns the same
+element with the attribute deleted and could not fail for the reason it reports;
+the implicit role it is resolving is precisely the one the `display` override
+destroys in a real browser.
+
+### Rejected: `role="presentation"` on the body
+
+ARIA would accept it. A grid's required owned elements are `row`, **or** `row`
+via `rowgroup` — so making the `<tbody>` transparent re-parents the rows onto the
+grid and satisfies row ownership by a second, equally valid route. It also
+happens to trip neither of the linters that object to `rowgroup`.
+
+It is rejected because it is not true. A `<tbody>` in a data grid _is_ a row
+group, and `<thead>` still has its implicit one — `TableHeader.stylex.ts` sets no
+`display`, so nothing took it away. Declaring only the body presentational would
+describe this table as one group of header rows plus a set of unowned body rows:
+a worse account of the structure than either consistent choice, adopted for no
+reason but linter silence. The role stays `rowgroup`, and the linters are
+answered where linters are answered.
+
 ## Design Decision — Empty State
 
 When `totalLoadedRows === 0` **and** the table is not loading

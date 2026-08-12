@@ -168,4 +168,84 @@ describe('TableHeaderCell', () => {
     expect(MockResizeHandle).not.toHaveBeenCalled();
     expect(MockTableHeaderActionsMenu).not.toHaveBeenCalled();
   });
+  it('declares role=columnheader, because the display overrides removed the implicit one', () => {
+    // The `role` ATTRIBUTE, not a `getByRole('columnheader')` query. Testing
+    // Library resolves implicit roles and `<th scope='col'>` implicitly maps to
+    // `columnheader`, so a role query returns this same element with the
+    // attribute deleted — a test written that way cannot fail for the reason it
+    // reports. In a real browser the implicit role is gone, because
+    // `tableHeaderCellStyles.base()` sets `display: flex` on this `<th>`
+    // itself (ADR-062), which is why the attribute is the thing worth pinning.
+    useGetColumnWidthMock.mockReturnValue(undefined);
+    useGetPinnedColumnInfoMock.mockReturnValue(undefined);
+    useGetNormalizedColumnMock.mockReturnValue(createColumn());
+
+    const { container } = renderCell();
+    const headerCell = container.querySelector('th');
+
+    expect(headerCell?.tagName).toBe('TH');
+    expect(headerCell?.getAttribute('role')).toBe('columnheader');
+    expect(headerCell?.getAttribute('scope')).toBe('col');
+  });
+
+  it('announces the applied sort direction through aria-sort', () => {
+    useGetColumnWidthMock.mockReturnValue(undefined);
+    useGetPinnedColumnInfoMock.mockReturnValue(undefined);
+    useGetNormalizedColumnMock.mockReturnValue(
+      createColumn({ sortDirection: 'desc' }),
+    );
+
+    renderCell();
+
+    expect(screen.getByRole('columnheader').getAttribute('aria-sort')).toBe(
+      'descending',
+    );
+  });
+
+  it('announces a sortable but unsorted column as aria-sort=none', () => {
+    useGetColumnWidthMock.mockReturnValue(undefined);
+    useGetPinnedColumnInfoMock.mockReturnValue(undefined);
+    useGetNormalizedColumnMock.mockReturnValue(createColumn());
+
+    renderCell();
+
+    expect(screen.getByRole('columnheader').getAttribute('aria-sort')).toBe(
+      'none',
+    );
+  });
+
+  it('omits aria-sort entirely on a column that cannot be sorted', () => {
+    useGetColumnWidthMock.mockReturnValue(undefined);
+    useGetPinnedColumnInfoMock.mockReturnValue(undefined);
+    useGetNormalizedColumnMock.mockReturnValue(
+      createColumn({ isSortable: false }),
+    );
+
+    renderCell();
+
+    expect(
+      screen.getByRole('columnheader').getAttribute('aria-sort'),
+    ).toBeNull();
+  });
+  it('keeps its ARIA contract when a caller passes conflicting props', () => {
+    // role, scope and aria-sort are the header's only source of those
+    // semantics, so `{...rest}` must not win. Revert the spread order in
+    // TableHeaderCell.component.tsx and this is what fails.
+    useGetColumnWidthMock.mockReturnValue(undefined);
+    useGetPinnedColumnInfoMock.mockReturnValue(undefined);
+    useGetNormalizedColumnMock.mockReturnValue(
+      createColumn({ sortDirection: 'asc' }),
+    );
+
+    const { container } = renderCell({
+      'aria-sort': 'descending',
+      role: 'cell',
+      scope: 'row',
+    });
+    const headerCell = container.querySelector('th');
+
+    expect(headerCell?.getAttribute('role')).toBe('columnheader');
+    expect(headerCell?.getAttribute('scope')).toBe('col');
+    expect(headerCell?.getAttribute('aria-sort')).toBe('ascending');
+  });
 });

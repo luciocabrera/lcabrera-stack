@@ -272,4 +272,56 @@ describe('TableBody', () => {
     expect(screen.queryByTestId('table-empty-state')).toBeNull();
     expect(screen.getByTestId('table-body-rows')).not.toBeNull();
   });
+  it('declares role=rowgroup on the populated body, whose display: grid removed it', () => {
+    // The `role` ATTRIBUTE, not a `getByRole('rowgroup')` query: `<tbody>`
+    // implicitly maps to `rowgroup`, so a role query resolves identically with
+    // the attribute deleted and could never catch its removal. In a real
+    // browser the implicit role is gone — `TableBody.stylex.ts` makes this
+    // element a CSS grid — which is exactly why the attribute is there
+    // (ADR-062).
+    setupDefaultMocks();
+
+    const tableContainerRef = {
+      current: document.createElement('div'),
+    } as RefObject<HTMLDivElement | null>;
+
+    render(
+      <table>
+        <TableBody tableContainerRef={tableContainerRef} />
+      </table>,
+    );
+
+    expect(screen.getByTestId('table-body').getAttribute('role')).toBe(
+      'rowgroup',
+    );
+  });
+
+  it('leaves the empty body its implicit rowgroup instead of restating it', () => {
+    // The empty branch keeps `display: table-row-group`, so the implicit role
+    // survives there and an explicit one would be the redundancy the populated
+    // branch only resembles. Pinning the absence stops the two branches from
+    // being "made consistent" without checking which one needs the attribute.
+    setupDefaultMocks();
+    useGetTableTotalLoadedRowsMock.mockReturnValue(0);
+    useVirtualizationMock.mockReturnValue({
+      bottomSpacerHeight: 0,
+      endIndex: 0,
+      offsetY: 0,
+      startIndex: 0,
+      totalHeight: 0,
+    });
+
+    const tableContainerRef = {
+      current: document.createElement('div'),
+    } as RefObject<HTMLDivElement | null>;
+
+    render(
+      <table>
+        <TableBody tableContainerRef={tableContainerRef} />
+      </table>,
+    );
+
+    expect(screen.getByTestId('table-empty-state')).not.toBeNull();
+    expect(screen.getByTestId('table-body').getAttribute('role')).toBeNull();
+  });
 });

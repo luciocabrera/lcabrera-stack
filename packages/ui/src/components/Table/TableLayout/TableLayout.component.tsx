@@ -4,6 +4,7 @@ import { Table } from '#ui/components/Table';
 import {
   FiltersDataProvider,
   TableConfigProvider,
+  TableFocusProvider,
 } from '#ui/components/Table/contexts';
 import { TableSuspenseBoundary } from '#ui/components/Table/TableSuspenseBoundary';
 
@@ -29,22 +30,24 @@ export const TableLayout = <
         columnsState={columnsState}
         metaState={metaState}
       >
-        <FiltersDataProvider<TData> columns={columnsState.columns}>
-          <TableSuspenseBoundary<TData, TResponse>
-            actions={actions}
-            dataPromise={dataPromise}
-          >
-            {(response) => (
-              <Table<TData, TResponse>
-                actions={actions}
-                dataSelector={dataSelector}
-                dataTotalSelector={dataTotalSelector}
-                onLoadMore={onLoadMore}
-                response={response}
-              />
-            )}
-          </TableSuspenseBoundary>
-        </FiltersDataProvider>
+        <TableFocusProvider>
+          <FiltersDataProvider<TData> columns={columnsState.columns}>
+            <TableSuspenseBoundary<TData, TResponse>
+              actions={actions}
+              dataPromise={dataPromise}
+            >
+              {(response) => (
+                <Table<TData, TResponse>
+                  actions={actions}
+                  dataSelector={dataSelector}
+                  dataTotalSelector={dataTotalSelector}
+                  onLoadMore={onLoadMore}
+                  response={response}
+                />
+              )}
+            </TableSuspenseBoundary>
+          </FiltersDataProvider>
+        </TableFocusProvider>
       </TableConfigProvider>
     </div>
   );

@@ -5,6 +5,7 @@ import {
   useGetTableIsLoading,
   useGetTableIsLoadingMore,
 } from '#ui/components/Table/contexts/TableData/data/selectors';
+import { HEADER_ARIA_ROW_INDEX } from '#ui/components/Table/utils/resolveGridRowIndexing.util';
 
 import type { TableHeaderProps } from './TableHeader.types';
 
@@ -28,7 +29,7 @@ export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
       {...rest}
       {...stylex.props(tableHeaderStyles.container, customStylex)}
     >
-      <TableRow isHeader>
+      <TableRow aria-rowindex={HEADER_ARIA_ROW_INDEX} isHeader>
         {leftPinnedCols.map((col) => (
           <TableHeaderCell
             columnKey={col.key}

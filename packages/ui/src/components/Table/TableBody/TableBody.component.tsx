@@ -36,6 +36,9 @@ export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
       totalItems: totalLoadedRows,
     });
 
+  // The empty body keeps `display: table-row-group`, so its implicit
+  // `rowgroup` role survives and declaring one here would be the redundancy the
+  // populated branch below only looks like.
   if (isEmpty)
     return (
       <tbody data-testid='table-body' {...stylex.props(styles.bodyEmpty)}>
@@ -44,7 +47,16 @@ export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
     );
 
   return (
-    <tbody data-testid='table-body' {...stylex.props(styles.body(totalHeight))}>
+    // `role='rowgroup'` is declared because `styles.body` makes this element a
+    // CSS grid, and a browser drops an element's implicit table role along with
+    // its table `display` (ADR-062). Without it the accessibility tree reads
+    // `grid > generic > row`, and a grid's rows must be owned by a rowgroup —
+    // the same reason every row and cell below declares its own role.
+    <tbody
+      data-testid='table-body'
+      role='rowgroup'
+      {...stylex.props(styles.body(totalHeight))}
+    >
       {offsetY > 0 && <SpacerRow height={offsetY} />}
       <TableBodyRows
         endIndex={endIndex}

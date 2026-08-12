@@ -15,7 +15,8 @@ filtering, infinite scroll, settings drawers, and cookie-based persistence.
 ```mermaid
 graph TD
   TL["TableLayout<br/><small>Entry · providers · Suspense</small>"]
-  TCP["TableConfigProvider<br/><small>columnsStore + metaStore</small>"]
+  TCP["TableConfigProvider<br/><small>columnsStore + groupingStore + metaStore</small>"]
+  TFP["TableFocusProvider<br/><small>focusStore · roving focus</small>"]
   FDP["FiltersDataProvider<br/><small>filtersDataStore</small>"]
   TSB["TableSuspenseBoundary<br/><small>Suspense + TableSkeleton</small>"]
   TDR["TableDataResolver<br/><small>use(dataPromise)</small>"]
@@ -29,7 +30,7 @@ graph TD
   TBody["TableBody<br/><small>virtualized rows</small>"]
   TDS["TableDrawersSection"]
 
-  TL --> TCP --> FDP --> TSB
+  TL --> TCP --> TFP --> FDP --> TSB
   TSB -->|pending| SK["TableSkeleton"]
   TSB -->|resolved| TDR --> T --> TDP --> TC --> TWC
   TWC --> TTitle
@@ -72,7 +73,7 @@ Table/
 ├── TableDataResolver/             → use(dataPromise) → children(response)
 ├── TableDrawersSection/           → Conditional drawer rendering
 │
-├── contexts/                      → 4 context providers (config, data, filters, wrapper)
+├── contexts/                      → Context providers (config, focus, data, filters, wrapper)
 ├── ColumnSettingsDrawer/          → Per-column settings panel
 ├── TableSettingsDrawer/           → Table-wide settings panel (filters, sort, columns)
 ├── filters/                       → Filter input components (boolean, text, number, date, select)
@@ -83,13 +84,18 @@ Table/
 
 ## State Management
 
-Four context providers with five external stores:
+Context providers over external stores, one graph per provider:
 
 ```mermaid
 graph LR
   subgraph "TableConfigProvider"
     CS["columnsStore<br/><small>columns, filters, sorting,<br/>pinning, sizing, visibility</small>"]
+    GS["groupingStore<br/><small>applied group keys</small>"]
     MS["metaStore<br/><small>density, title, drawer toggles,<br/>row height, overscan</small>"]
+  end
+
+  subgraph "TableFocusProvider"
+    FoS["focusStore<br/><small>roving tab stop:<br/>row key + column key</small>"]
   end
 
   subgraph "FiltersDataProvider"
@@ -147,6 +153,36 @@ graph TD
   end
 ```
 
+## Accessibility
+
+The Table is a **grid**, and its roles are declared rather than inherited: the
+`display` overrides that make virtualization work take every structural element
+out of the table formatting context, and a browser drops an element's implicit
+table role along with its table `display`
+([ADR-062](../../../../../docs/decisions/ADR-062-grid-semantics-roving-focus-and-row-identity.md)).
+
+The `<table>` is the exception and keeps `display: table`, so `role='grid'` there
+upgrades an implicit role rather than replacing a missing one. `<thead>` and the
+empty-state `<tbody>` set no overriding `display` either, so neither declares a
+role — where the implicit one survives, none is added.
+
+| Element                  | Carries                                             |
+| ------------------------ | --------------------------------------------------- |
+| `TableBase` `<table>`    | `role='grid'`, `aria-rowcount`, the roving tab stop |
+| `TableBody` `<tbody>`    | `role='rowgroup'` — on the populated branch only    |
+| `TableRow` `<tr>`        | `role='row'`, `aria-rowindex`                       |
+| `TableHeaderCell` `<th>` | `role='columnheader'`, `scope='col'`, `aria-sort`   |
+| `TableBodyCell` `<td>`   | `role='gridcell'`, `tabIndex` 0 on exactly one cell |
+| `SpacerRow` `<tr>`       | `aria-hidden='true'`, and no role at all            |
+
+Exactly one element carries `tabIndex={0}` at any time — the focused cell while
+the grid holds focus and that row is rendered, the grid container otherwise.
+Arrow, `Home`, `End`, `PageUp` and `PageDown` move it; the focus target is held
+in the store as a data-derived row key so it survives the row being unmounted by
+a scroll. The model is
+[contexts/TableFocus/ARCHITECTURE.md](contexts/TableFocus/ARCHITECTURE.md); the
+end-to-end behaviour is pinned by `Table.gridFocus.test.tsx`.
+
 ## Persistence
 
 Table state uses two write paths with a shared hydration model:
@@ -193,6 +229,7 @@ See [hooks/ARCHITECTURE.md](hooks/ARCHITECTURE.md) and
 | Area                  | Details                                                                        |
 | --------------------- | ------------------------------------------------------------------------------ |
 | Contexts              | [contexts/ARCHITECTURE.md](contexts/ARCHITECTURE.md)                           |
+| TableFocus context    | [contexts/TableFocus/ARCHITECTURE.md](contexts/TableFocus/ARCHITECTURE.md)     |
 | TableLayout           | [TableLayout/ARCHITECTURE.md](TableLayout/ARCHITECTURE.md)                     |
 | TableContent          | [TableContent/ARCHITECTURE.md](TableContent/ARCHITECTURE.md)                   |
 | TableBase             | [TableBase/ARCHITECTURE.md](TableBase/ARCHITECTURE.md)                         |

@@ -108,4 +108,27 @@ describe('TableHeader', () => {
     expect(screen.getByText('Col:id').textContent).toBe('Col:id');
     expect(screen.getAllByText('Col:name')[0]?.textContent).toBe('Col:name');
   });
+  it('gives the header row aria-rowindex 1, the first row of the sequence', () => {
+    // The grid's row indices are 1-based and continuous, and `aria-rowcount`
+    // counts the header — so the header has to occupy index 1 or the body's
+    // indices and the count end up on different bases.
+    useGetTableIsLoadingMock.mockReturnValue(false);
+    useGetTableIsLoadingMoreMock.mockReturnValue(false);
+    useGetPinnedColumnPartitionMock.mockReturnValue({
+      centerCols: [{ key: 'name', label: 'Name' }],
+      leftPinnedCols: [],
+      rightPinnedCols: [],
+    });
+
+    render(
+      <table>
+        <TableHeader />
+      </table>,
+    );
+
+    expect(MockTableRow).toHaveBeenCalledWith(
+      expect.objectContaining({ 'aria-rowindex': 1, isHeader: true }),
+      undefined,
+    );
+  });
 });

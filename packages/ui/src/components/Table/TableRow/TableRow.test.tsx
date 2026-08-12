@@ -109,4 +109,53 @@ describe('TableRow', () => {
 
     expect(getInlineStyle(screen.getByTitle('header-row'))).toContain('48px');
   });
+  it('declares role=row, because the flex display removed the implicit one', () => {
+    // The `role` ATTRIBUTE, not a `getByRole('row')` query. Testing Library
+    // resolves implicit roles and `<tr>` implicitly maps to `row`, so a role
+    // query returns this same element with the attribute deleted — the test
+    // would pass for a reason that has nothing to do with what it claims. In a
+    // real browser the implicit role is gone, because `TableRow.stylex.ts` sets
+    // `display: flex` (ADR-062).
+    const { container } = renderInTable({
+      children: (
+        <TableRow>
+          <td>Revenue</td>
+        </TableRow>
+      ),
+    });
+    const row = container.querySelector('tr');
+
+    expect(row?.tagName).toBe('TR');
+    expect(row?.getAttribute('role')).toBe('row');
+  });
+
+  it('forwards a caller-supplied position in the grid', () => {
+    // `aria-rowindex` is deliberately not defaulted here: it belongs to the row's
+    // place in the dataset, not to being a row.
+    const { container } = renderInTable({
+      children: (
+        <TableRow aria-rowindex={42}>
+          <td>Revenue</td>
+        </TableRow>
+      ),
+    });
+
+    expect(container.querySelector('tr')?.getAttribute('aria-rowindex')).toBe(
+      '42',
+    );
+  });
+  it('keeps role=row when a caller passes a conflicting role', () => {
+    // The role is the row's only source of semantics once CSS has stripped the
+    // implicit one, so `{...rest}` must not be able to replace it. Revert the
+    // spread order in TableRow.component.tsx and this is what fails.
+    const { container } = renderInTable({
+      children: (
+        <TableRow role='presentation'>
+          <td>Revenue</td>
+        </TableRow>
+      ),
+    });
+
+    expect(container.querySelector('tr')?.getAttribute('role')).toBe('row');
+  });
 });

@@ -40,8 +40,36 @@ TableHeaderCell/
 │
 └── utils/
     ├── getPinnedStyle.util.ts           → Returns left/right pinned StyleX
-    └── getShadowStyle.util.ts           → Returns shadow separator StyleX
+    ├── getShadowStyle.util.ts           → Returns shadow separator StyleX
+    └── resolveAriaSort.util.ts          → Sort state → aria-sort, or nothing on an unsortable column
 ```
+
+## Grid semantics
+
+The `<th>` declares `role='columnheader'` and `scope='col'`. The role is not a
+duplicate of a native one: `tableHeaderCellStyles.base()` — applied on every
+render — sets `display: flex` on the `<th>` itself, and a browser drops an
+element's implicit table role along with its table `display`
+([ADR-062](../../../../../../docs/decisions/ADR-062-grid-semantics-roving-focus-and-row-identity.md)).
+
+The cause is this cell's own stylesheet, not `TableRow`'s. The row is flex too,
+but that is a second, independent break in the chain — so restoring a table
+`display` on the row would leave this attribute exactly as load-bearing as it is
+now.
+
+`aria-sort` comes from `resolveAriaSort`, which distinguishes three states and
+not two: `ascending`/`descending` for an applied sort, `none` for a sortable but
+unsorted column — which is what tells a screen reader the action is available —
+and **nothing at all** for a column that cannot be sorted, where `none` would
+advertise something that is not there.
+
+The header row is not part of the roving tab stop. `role="grid"` roves over the
+body's cells; the header's own controls stay in the page tab order, reachable
+where they are. `ResizeHandle` is the exception and is now `tabIndex={-1}`: it
+was the grid's only tab stop before this model existed, and one splitter per
+column is precisely what a single roving stop replaces. Keyboard access to width
+comes from the actions menu instead — the choice ADR-011 recorded when it made
+the splitter's focusability a progressive enhancement.
 
 ## Props
 

@@ -314,6 +314,36 @@ export type TableDataState<TData> = {
 export type TableDensity = 'comfortable' | 'compact';
 
 /**
+ * The focus store's state — where the grid's single tab stop points (ADR-062).
+ *
+ * Focus is held here rather than read back from `document.activeElement`,
+ * because the focused row is unmounted the moment it leaves the virtualization
+ * window: the DOM cannot be the source of truth for something it stops
+ * containing.
+ */
+export type TableFocusState = {
+  /** Key of the focused column; absent while the grid holds no cell focus. */
+  readonly columnKey: string | undefined;
+  /**
+   * Bumped whenever focus must be applied to the DOM node representing the
+   * focused cell. A cell watches this id rather than a boolean, so asking again
+   * for the cell that already holds focus is still a change — which is what
+   * re-entering the grid does.
+   */
+  readonly focusRequestId: number;
+  /**
+   * Whether DOM focus currently sits inside the grid. It decides which of the
+   * grid container and the focused cell carries the tab stop, and it is written
+   * from the container's own focus/blur events rather than inferred.
+   */
+  readonly isGridFocused: boolean;
+  /** Absolute index of the focused row among the loaded rows. */
+  readonly rowIndex: number | undefined;
+  /** Data-derived identity of the focused row (ADR-062), never its position. */
+  readonly rowKey: string | undefined;
+};
+
+/**
  * The grouping store's state — the config context's third store (ADR-061).
  *
  * Only the applied keys today. It is a store rather than a field on the columns

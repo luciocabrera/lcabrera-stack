@@ -5,6 +5,8 @@ import type { ReactNode } from 'react';
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
+import { TableFocusProvider } from '#ui/components/Table/contexts/TableFocus';
+
 import type { TableBodyCellDescriptor } from './buildTableBodyCellDescriptor.util';
 
 import { renderFromDescriptor } from './renderFromDescriptor.util';
@@ -12,10 +14,13 @@ import { renderFromDescriptor } from './renderFromDescriptor.util';
 type Row = Record<string, unknown>;
 
 const shared = {
+  columnKey: 'name',
   isLoadingState: false,
   key: 'name' as const,
   minWidth: 80,
   pinInfo: undefined,
+  rowIndex: 0,
+  rowKey: 'pk:[1]',
   width: 120,
 };
 
@@ -32,14 +37,19 @@ const defaultDescriptor = (value: unknown): TableBodyCellDescriptor<Row> =>
     value,
   }) as const;
 
-/** A cell renders a `td`, which is only valid inside a row. */
+/**
+ * A cell renders a `td`, which is only valid inside a row — and a grid cell,
+ * which reads the grid's focus store.
+ */
 const renderCell = (descriptor: TableBodyCellDescriptor<Row>) =>
   render(
-    <table>
-      <tbody>
-        <tr>{renderFromDescriptor({ descriptor })}</tr>
-      </tbody>
-    </table>,
+    <TableFocusProvider>
+      <table>
+        <tbody>
+          <tr>{renderFromDescriptor({ descriptor })}</tr>
+        </tbody>
+      </table>
+    </TableFocusProvider>,
   );
 
 afterEach(cleanup);
@@ -54,7 +64,7 @@ describe('renderFromDescriptor', () => {
   it('renders a default descriptor’s value', () => {
     renderCell(defaultDescriptor('Ada Lovelace'));
 
-    expect(screen.getByRole('cell').textContent).toBe('Ada Lovelace');
+    expect(screen.getByRole('gridcell').textContent).toBe('Ada Lovelace');
   });
 
   it('renders each branch as a single td', () => {
@@ -62,7 +72,7 @@ describe('renderFromDescriptor', () => {
     // other — so the cell must not end up rendering both.
     renderCell(customDescriptor(<span>custom</span>));
 
-    expect(screen.getByRole('cell').textContent).toBe('custom');
+    expect(screen.getByRole('gridcell').textContent).toBe('custom');
   });
 
   it('forwards the descriptor’s sizing to the cell', () => {
@@ -70,7 +80,7 @@ describe('renderFromDescriptor', () => {
     // invisible in the text content but changes the rendered cell.
     renderCell(defaultDescriptor('x'));
 
-    expect(screen.getByRole('cell').getAttribute('style')).toContain(
+    expect(screen.getByRole('gridcell').getAttribute('style')).toContain(
       '--x-width: 120px',
     );
   });
@@ -78,6 +88,6 @@ describe('renderFromDescriptor', () => {
   it('renders an empty default value without throwing', () => {
     renderCell(defaultDescriptor(''));
 
-    expect(screen.getByRole('cell').tagName).toBe('TD');
+    expect(screen.getByRole('gridcell').tagName).toBe('TD');
   });
 });

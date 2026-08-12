@@ -1,6 +1,7 @@
 # hooks/ Architecture
 
-Table-specific hooks for column resizing, infinite scroll, and scroll reset.
+Table-specific hooks for column resizing, infinite scroll, scroll reset and the
+grid's roving focus.
 
 These are **UI mechanics** — pointer gestures, observers, scroll position. They
 may call actions (that direction is fine), but nothing in `contexts/` imports
@@ -16,13 +17,31 @@ hooks/
 ├── useColumnDragSession.hook.ts         → Private to useColumnResize: pointer state around a drag session
 ├── useInfiniteScroll.hook.ts            → Sentinel intersection detection (wraps shared useInfiniteScrollObserver)
 ├── useScrollResetAfterLoad.hook.ts      → Self-connected scroll-to-origin after full (non-load-more) loads
+├── useTableGridFocus.hook.ts            → The grid element's tabIndex + focus/blur/keydown handlers
+├── useTableCellFocus.hook.ts            → One cell's tabIndex, focus ref and pointer-focus handler
 ├── utils/
 │   ├── createResizeStartData.util.ts    → Drag-start snapshot: origin + effective width/bounds (+ .test)
+│   ├── getIsGridNavigationTarget.util.ts → Is this key event the grid's to interpret (+ .test)
+│   ├── getShouldApplyCellFocus.util.ts  → May an outstanding focus request move DOM focus (+ .test)
 │   ├── resolveKeyboardResizeAction.util.ts → Key → step/jump/reset/ignore policy (+ .test)
 │   ├── resolveResizeWidth.util.ts       → Pointer delta → clamped column width (+ .test)
 │   └── startColumnResizeSession.service.ts → Opens a drag session: listeners, RAF, body styles (+ .test)
 └── index.ts                             → Barrel export
 ```
+
+## useTableGridFocus / useTableCellFocus
+
+The two halves of the grid's roving tab stop, and the only surface `TableBase`
+and `TableBodyCell` see of the focus store — neither component reads a selector
+or dispatches an action of its own. The model they implement, and why focus has
+to be data rather than `document.activeElement`, is
+[contexts/TableFocus/ARCHITECTURE.md](../contexts/TableFocus/ARCHITECTURE.md)
+([ADR-062](../../../../../../docs/decisions/ADR-062-grid-semantics-roving-focus-and-row-identity.md)).
+
+`useTableGridFocus` reads `event.relatedTarget` on blur to tell leaving the grid
+from moving between two cells inside it, and `getIsGridNavigationTarget` to leave
+a key pressed inside a cell's own control — a row-actions menu, a filter input —
+to that control rather than swallowing it from the bubbling phase.
 
 ## useColumnResize
 

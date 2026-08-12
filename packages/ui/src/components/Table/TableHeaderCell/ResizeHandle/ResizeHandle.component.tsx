@@ -20,6 +20,12 @@ import { resizeHandleStyles } from './ResizeHandle.stylex';
  * component self-connects its own width and bounds from the store (columnKey +
  * columnLabel are all it takes) and only spreads what the hook returns onto the
  * host element.
+ *
+ * It is `tabIndex={-1}`, not `0`: a grid has exactly one tab stop, and it is the
+ * grid's own roving one (ADR-062). One splitter per column, each its own tab
+ * stop, is precisely what that model replaces. Keyboard access to width does not
+ * depend on this element — ADR-011 assigns it to the header command instead, and
+ * settled that the splitter's own focusability is a progressive enhancement.
  */
 export const ResizeHandle = <TData,>({
   columnKey,
@@ -50,7 +56,7 @@ export const ResizeHandle = <TData,>({
       onKeyDown={onKeyDown}
       onMouseDown={onMouseDown}
       role='separator'
-      tabIndex={0}
+      tabIndex={-1}
       {...stylex.props(
         resizeHandleStyles.resizeHandle,
         isResizing && resizeHandleStyles.resizeHandleActive,
