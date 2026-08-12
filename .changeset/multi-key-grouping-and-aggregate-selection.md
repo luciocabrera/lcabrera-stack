@@ -23,6 +23,25 @@ declared `dataType`.
   unconditionally, so a client-controlled cookie cannot seed it (ADR-063).
 - `@lcabrera/server` exports `db/group-query-builder/group-query-builder.constants`.
 
+**What this deliberately does not do**
+
+- **Filtered aggregates are deferred.** The compact `grouping` search param
+  carries a column-to-function map with no slot for a per-aggregate filter or
+  alias, so a filtered aggregate cannot round-trip through the transport the
+  whole grouping configuration travels in. Every path `@lcabrera/ui` owns is
+  closed to one — no menu entry, no command, and no state the grouping store can
+  hold describes it. `GroupAggregate.filters` still exists on
+  `@lcabrera/server`, so a consumer calling `selectGroupedRows` directly can
+  still build a filtered aggregate: what is closed is reaching one through the
+  table, not the capability itself. Lifting the deferral means extending the
+  param first.
+- **A group key or aggregate the database catalogue refuses still raises.** Both
+  menus are built from the resolved capabilities, so the table cannot offer one;
+  a request assembled by hand reaches `assertGroupKeys` /
+  `assertGroupAggregates` and throws. Rendering that refusal instead is tracked
+  separately, and `groupingCapabilities` carries `canGroup` and the refusal
+  reason for it.
+
 **Breaking, for a consumer of `@lcabrera/ui`**
 
 - `TableGroupRowSummary` replaces `columnKey`/`label` with `path`, an ordered

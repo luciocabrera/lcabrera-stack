@@ -315,7 +315,8 @@ it('requests the selected aggregates beside the row count, and never a filtered 
 
   // `count(*)` first, then the selection. No `filters` on any of them: a
   // filtered aggregate has no slot in the URL param this configuration arrives
-  // through, so it is unconstructible rather than merely unrequested (#569).
+  // through, and `UnfilteredOrderAggregate` removes the slot from what this
+  // service builds — so it is unrequestable here, not merely unrequested (#569).
   const [descriptor] = vi.mocked(selectGroupedRows).mock.calls.at(-1) ?? [];
 
   expect(descriptor?.aggregates).toStrictEqual([

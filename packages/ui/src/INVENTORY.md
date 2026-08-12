@@ -280,6 +280,16 @@ Per-capability command **identity** + **enablement derivation**, defined once an
 | `usePersistTableUiFlagsAction`       | `components/Table/contexts/TableConfig/meta/actions/usePersistTableUiFlagsAction.hook.ts`       | Submits the drawer UI-flags entry (open/pinned/tab/expanded filters) via `usePersistCookieAction` (replaces the old client-side `document.cookie` UI-flags write)     |
 | `buildUiFlagsCookieEntry`            | `components/Table/contexts/TableConfig/meta/actions/utils/buildUiFlagsCookieEntry.util.ts`      | Pure builder for the `uiFlags` cookie entry — merges the meta patch and serializes the whole `PersistedUiState`; returns `undefined` when there is no persistence key |
 
+### `src/components/Table/contexts/TableConfig/meta/selectors/`
+
+Only the grouping-capability selectors are listed — the rest of this folder
+predates the inventory and is not backfilled here.
+
+| Artifact                              | Location                                                                                           | Description                                                                                                                                                                                              |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `useGetTableGroupingCapabilities`     | `components/Table/contexts/TableConfig/meta/selectors/useGetTableGroupingCapabilities.hook.ts`     | Every column's grouping capability as the catalogue answered it (ADR-058) and the loader shipped it (ADR-063). The empty answer is a module-level constant, because the snapshot is compared by identity |
+| `useGetTableColumnGroupingCapability` | `components/Table/contexts/TableConfig/meta/selectors/useGetTableColumnGroupingCapability.hook.ts` | One column's capability, or `undefined` when the route resolved none — which the menus read as "no aggregate is legal here", never as "all of them are"                                                  |
+
 ### `src/components/Table/contexts/TableConfig/grouping/`
 
 The config context's third store (ADR-061). It is on the config context, not the
@@ -483,7 +493,7 @@ data context is re-created on every navigation.
 | --------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------- | ---------------- |
 | `createUrlStateCodec` | `utils/urlState/createUrlStateCodec.util.ts` | Builds a `serialize`/`deserialize` pair from a caller-supplied narrowing; an unrecognised token refuses the whole param and yields the declared fallback |
 | `sortingCodec` | `utils/urlState/sortingCodec.util.ts` | Codec for the `sorting` param — accepts only `asc`/`desc` directions |
-| `groupingCodec` | `utils/urlState/groupingCodec.util.ts` | Codec for the `grouping` param — accepts only a `{ keys: string[], agg?: Record<string, TableAggregateFn> }` envelope, refusing the whole payload for anything else (ADR-061). `agg` has no slot for a filter or an alias, which is what makes filtered aggregates unreachable rather than unbuilt (#569) |
+| `groupingCodec` | `utils/urlState/groupingCodec.util.ts` | Codec for the `grouping` param — accepts only a `{ keys: string[], agg?: Record<string, TableAggregateFn> }` envelope, refusing the whole payload for anything else (ADR-061). `agg` has no slot for a filter or an alias, so no shareable grouping can describe a filtered aggregate — the shape of the #569 deferral (#569) |
 | `filtersCodec` | `utils/urlState/filtersCodec.util.ts` | Codec for the `filters` param — column-keyed envelope, `deserializeFilter` per value |
 | `serializeFiltersToURL` | `utils/urlState/serializeFiltersToURL.util.ts` | `ColumnFiltersState` → compact JSON using operator short-codes |
 | `serializeFilter` | `utils/urlState/serializeFilter.util.ts` | Dispatches a single `ColumnFilter` to the matching leaf serializer |

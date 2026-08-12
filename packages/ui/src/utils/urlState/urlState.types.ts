@@ -15,7 +15,7 @@ import type { TableAggregateFn } from '#ui/components/Table/Table.types';
  *
  * `agg` is a column-to-function map with no room for a filter or an alias, and
  * that is the shape of the deferral in #569: a *filtered* aggregate has nowhere
- * to travel, so it is unreachable rather than merely unbuilt.
+ * to travel in this param, so no shareable grouping can describe one.
  */
 export type CompactGrouping = {
   readonly agg?: Readonly<Record<string, TableAggregateFn>>;

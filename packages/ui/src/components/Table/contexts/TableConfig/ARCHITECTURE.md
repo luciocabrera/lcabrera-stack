@@ -169,7 +169,7 @@ TableColumnsState<TData> = {
 
 ```typescript
 TableGroupingState = {
-  aggregates: Readonly<Record<string, TableAggregateFn>>; // At most one aggregate per column — the whole shape the compact URL param can carry, and why a *filtered* aggregate is unconstructible (#569)
+  aggregates: Readonly<Record<string, TableAggregateFn>>; // At most one aggregate per column — the whole shape the compact URL param can carry, and the shape of the #569 deferral: no state here describes a *filtered* aggregate
   keys: readonly string[];           // Applied group keys, in the query's nesting order
 };
 ```

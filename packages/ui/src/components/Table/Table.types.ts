@@ -410,9 +410,12 @@ export type TableFocusState = {
  *
  * `aggregates` is a **column-to-function** map, at most one aggregate per
  * column, which is what makes it expressible in the compact URL param the whole
- * configuration has to round-trip through. It is also why a *filtered* aggregate
- * is unreachable rather than merely unimplemented: there is no slot here to put
- * a filter in, so no interaction can construct one.
+ * configuration has to round-trip through. It is also the shape of the #569
+ * deferral: there is no slot here for a filter, so no state this package can
+ * hold describes a *filtered* aggregate and no interaction can produce one.
+ * `@lcabrera/server`'s `GroupAggregate` still has the slot, so a consumer
+ * calling its grouped read directly can build one — what is closed is every
+ * path through this package, not the capability itself.
  *
  * It is a store rather than a field on the columns store because expansion joins
  * it here next, and expansion must survive the data context being re-created on

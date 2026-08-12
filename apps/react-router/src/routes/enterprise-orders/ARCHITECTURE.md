@@ -185,12 +185,14 @@ That is one extra catalogue query per page load on this route, issued **before**
 the loader awaits it and therefore concurrent with the data query; the measured
 cost is recorded in the PR for #569 rather than here, where it would rot.
 
-**Filtered aggregates are deferred and unreachable, not merely unoffered**
+**Filtered aggregates are deferred, and closed on every path this route has**
 (#569). The compact `grouping` param carries a column-to-function map with no
 slot for a filter or an alias, so a filtered aggregate cannot round-trip through
 the only transport this configuration has. `selectGroupedOrders` builds
 `UnfilteredOrderAggregate` — `GroupAggregate` with the `filters` and `alias`
-slots removed — so the type refuses one as well as the UI never offering one.
+slots removed — so this route's type refuses one as well as its UI never
+offering one. The slot still exists on `@lcabrera/server`'s `GroupAggregate`,
+which is what a later slice will widen; nothing here reaches it.
 
 **Grouped rows travel in the same response.** `selectGroupedOrders` returns
 `EnterpriseOrdersResponse` — the identical shape, with `hasMore: false`, because a

@@ -129,8 +129,11 @@ the two would be one action under two names.
 
 **A filter input beside an aggregate.** A filtered aggregate has no slot in the
 compact `grouping` param the whole configuration round-trips through, so
-offering one would build a state a shared link silently loses. Deferred by #569
-and unreachable by construction, not merely unbuilt.
+offering one would build a state a shared link silently loses. Deferred by #569,
+and closed on every path this package owns — the menus, the commands, the store
+and the param — rather than merely left unbuilt. The capability itself still
+exists on `@lcabrera/server`'s `GroupAggregate`; what is unreachable is reaching
+it from here.
 
 **Group-key refusal UX.** A key the catalogue refuses (a primary key, a `jsonb`
 column) still produces an error page. `groupingCapabilities` carries `canGroup`
