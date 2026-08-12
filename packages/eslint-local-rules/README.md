@@ -126,6 +126,19 @@ hermetic nor cheap, and it needs a non-literal `fs` call — which
 `*.constants.ts` in the repository this rule was written for, the path-only
 classification matches the directory-reading one exactly.
 
+**What the `artifactFolders` exemption means for you.** Nothing under one is
+checked — not the folder pairing, and not the artifact naming either. That is
+the price of staying hermetic, and it is a real gap rather than a claim that
+route modules need no convention. If you want route folders covered, the
+discriminator that works is a marker file: a folder is an artifact folder when it
+holds a `*.component.tsx`, `*.layout.tsx`, `*.error-boundary.tsx`,
+`*.context.ts(x)`, `*.loader.ts`, `*.action.ts`, `*.clientAction.ts` or
+`*.meta.ts`, and the `*.types` / `*.constants` base must name one of them. That
+needs a directory listing, so it belongs in a repo-level script rather than in
+this rule; the repository this plugin comes from runs exactly that check as
+`route-names:verify` (`scripts/verify-route-artifacts.mjs`), and keeps its copy
+of the option defaults above in step with this rule through a test.
+
 **❌ Disallowed:**
 
 ```

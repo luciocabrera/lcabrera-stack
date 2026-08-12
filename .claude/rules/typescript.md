@@ -111,10 +111,25 @@ alone — a PascalCase folder is an artifact folder, everything under a `routes/
 tree is a route container, and the folder names in the rule's
 `catchAllFolders` option are catch-alls — so a misnamed file in a domain folder
 fails the build and "exactly one of each" follows from the naming, because two
-files in one folder cannot both be `<folder>.constants.ts`. A route tree is
-exempt outright, which is the rule's one blind spot: it cannot see that
-`routes/car-sales-infinite/` holds a `CarSales` component without reading the
-directory, and an ESLint rule in a public package may not do that.
+files in one folder cannot both be `<folder>.constants.ts`.
+
+**A route tree is exempt from that rule and covered by a second gate** — `vp run
+route-names:verify`, chained into `check:push` / `check:safe` and CI. The split
+is forced, not preferred: the rule cannot see that `routes/car-sales-infinite/`
+holds a `CarSales` component without reading the directory, its eslint pass is
+not type-aware, and a non-literal `fs` call is what
+`security/detect-non-literal-fs-filename` forbids in a package that publishes as
+`@lcabrera/eslint-plugin` and may not suppress a finding. A root script has
+neither constraint, so it applies the discriminator the rule cannot: **a route
+folder's shared module is named after an artifact that folder actually holds** —
+a component, layout, error boundary, context, loader, action, client action or
+meta module. `routes/car-sales-infinite/CarSales.types.ts` passes because the
+component sits beside it; `routes/car-sales/zzz-nope.constants.ts` fails.
+
+One convention with two homes, so keep them in step: the shared lists live in
+`scripts/lib/route-artifacts.mjs`, and its test asserts they still match the
+rule's own defaults — a change made to one and not the other fails the build
+rather than silently narrowing what is checked.
 
 **One error class per `*.error.ts` file**, same rule as `*.util.ts` — the class,
 its `Args` type, and a colocated `*.error.test.ts`.

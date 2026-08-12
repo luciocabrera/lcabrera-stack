@@ -81,8 +81,9 @@ chains the whole thing the way CI does.
 
 The **`pre-push` git hook** (`.vite-hooks/pre-push`) runs `vp run check:push` — the
 **DB-free CI Quality Gate** (steps 3–6 plus `commands:verify`, `coordination:verify`,
-`scripts:verify`, `docs:verify`, `renames:verify`, `adr:verify`, `viteplus:verify` and
-`configs:verify`, mirroring the "Quality Gate (Format · Lint · Types)" job in
+`scripts:verify`, `docs:verify`, `renames:verify`, `route-names:verify`,
+`adr:verify`, `viteplus:verify` and `configs:verify`, mirroring the
+"Quality Gate (Format · Lint · Types)" job in
 `check-safe.yml`) — and then
 `vp run test:changed`. This closes the gap the pre-commit hook leaves: `vp staged` covers
 only fmt + Oxlint + tsgolint + Biome on staged files, so the ESLint pass and a full
@@ -364,6 +365,7 @@ package, ever.
 | `vp run suppressions:list`   | print every suppression reaching a public package, approved or not                                                                                                                                   |
 | `vp run docs:verify`         | check every documented repository path resolves (`--write` prunes resolved baseline entries; `--accept <doc> <ref> --reason "…"` grandfathers one)                                                   |
 | `vp run renames:verify`      | check no document still names a file this change renamed away — scoped to the diff, which is what lets it check bare filenames at all (`--base <ref>`, default `origin/main`)                        |
+| `vp run route-names:verify`  | check every `*.types`/`*.constants` file in a route folder names an artifact that folder holds — the half of `local-rules/domain-folder-filename` an ESLint rule cannot reach (#613)                 |
 | `vp run adr:verify`          | check ADR home, filename, heading and number uniqueness, and that each home's index is current; prints the next free number (`--write` regenerates the indexes)                                      |
 | `vp run adr:new`             | scaffold an ADR from [`_TEMPLATE.md`](docs/decisions/_TEMPLATE.md) with the next free number — `-- "<title>" [--home repo\|cqms\|app] [--slug <s>] [--dry-run]`                                      |
 | `vp run viteplus:verify`     | check AGENTS.md has no Vite+ managed block rendering content — the markers are removed so `vp install` cannot refill them; this catches them coming back (`--write` re-empties a refilled one)       |
