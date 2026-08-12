@@ -4,6 +4,8 @@ import type { ReactNode } from 'react';
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
+import { TABLE_GROUP_ROW_FIELD } from '#ui/components/Table/Table.constants';
+
 import { TableBodyRows } from './TableBodyRows.component';
 
 type MockTableBodyCellProps = {
@@ -68,6 +70,20 @@ const MockTableRow = vi.hoisted(() => {
   };
 });
 
+const MockTableGroupHeaderRow = vi.hoisted(() => {
+  return function MockTableGroupHeaderRow({
+    summary,
+  }: {
+    readonly summary: { readonly count: number; readonly label: string };
+  }) {
+    return (
+      <tr>
+        <td>{`group:${summary.label}:${summary.count}`}</td>
+      </tr>
+    );
+  };
+});
+
 vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
   useGetColumns: useGetColumnsMock,
   useGetColumnSizing: useGetColumnSizingMock,
@@ -81,6 +97,10 @@ vi.mock('#ui/components/Table/TableBodyCell', () => ({
 
 vi.mock('#ui/components/Table/TableRow', () => ({
   TableRow: MockTableRow,
+}));
+
+vi.mock('#ui/components/Table/TableGroupHeaderRow', () => ({
+  TableGroupHeaderRow: MockTableGroupHeaderRow,
 }));
 
 vi.mock('../contexts/TableData/data/selectors', () => ({
@@ -235,5 +255,115 @@ describe('TableBodyRows', () => {
     expect(reorderedRowNodes).toHaveLength(2);
     expect(reorderedRowNodes[1]?.textContent).toBe('Name:A');
     expect(reorderedRowNodes[1]).toBe(rowNodeForA);
+  });
+
+  it('renders a row carrying a group summary as a group header, not as cells', () => {
+    setupDefaultMocks();
+    useGetTableDataMock.mockReturnValue([
+      {
+        [TABLE_GROUP_ROW_FIELD]: {
+          columnKey: 'name',
+          count: 3,
+          label: 'A',
+        },
+      },
+    ]);
+
+    render(
+      <table>
+        <tbody>
+          <TableBodyRows endIndex={1} isLoadingState={false} startIndex={0} />
+        </tbody>
+      </table>,
+    );
+
+    expect(screen.getByText('group:A:3')).toBeTruthy();
+    // The cell path is what it would have taken without the summary, and the
+    // group row projects no columns — so a group rendered through it would show
+    // the empty cells this asserts are absent.
+    expect(screen.queryByText('Name:')).toBeNull();
+  });
+
+  it('renders group and detail rows from one result, by row rather than by mode', () => {
+    setupDefaultMocks();
+    useGetTableDataMock.mockReturnValue([
+      {
+        [TABLE_GROUP_ROW_FIELD]: { columnKey: 'name', count: 1, label: 'A' },
+      },
+      { amount: 10, name: 'A' },
+    ]);
+
+    const { container } = render(
+      <table>
+        <tbody>
+          <TableBodyRows endIndex={2} isLoadingState={false} startIndex={0} />
+        </tbody>
+      </table>,
+    );
+
+    expect(container.querySelectorAll('tr')).toHaveLength(2);
+    expect(screen.getByText('group:A:1')).toBeTruthy();
+    expect(screen.getByText('Name:A')).toBeTruthy();
+  });
+
+  it('emits exactly one row per data row under grouping, which is what the window math counts', () => {
+    // `TableBody` sizes <tbody> as totalLoadedRows x rowHeight and derives both
+    // spacers from the same number, so a grouped result that emitted a header
+    // *plus* a detail row per entry would desynchronize the body from its
+    // contents. One row in, one <tr> out, whatever kind of row it is.
+    setupDefaultMocks();
+    useGetTableDataMock.mockReturnValue([
+      { [TABLE_GROUP_ROW_FIELD]: { columnKey: 'name', count: 2, label: 'A' } },
+      { [TABLE_GROUP_ROW_FIELD]: { columnKey: 'name', count: 5, label: 'B' } },
+      { [TABLE_GROUP_ROW_FIELD]: { columnKey: 'name', count: 1, label: 'C' } },
+    ]);
+
+    const { container } = render(
+      <table>
+        <tbody>
+          <TableBodyRows endIndex={3} isLoadingState={false} startIndex={0} />
+        </tbody>
+      </table>,
+    );
+
+    expect(container.querySelectorAll('tr')).toHaveLength(3);
+  });
+
+  it('keys group rows by their own values, so a reorder moves the group node', () => {
+    setupDefaultMocks();
+    useGetTableDataMock.mockReturnValue([
+      { [TABLE_GROUP_ROW_FIELD]: { columnKey: 'name', count: 2, label: 'A' } },
+      { [TABLE_GROUP_ROW_FIELD]: { columnKey: 'name', count: 5, label: 'B' } },
+    ]);
+
+    const { container, rerender } = render(
+      <table>
+        <tbody>
+          <TableBodyRows endIndex={2} isLoadingState={false} startIndex={0} />
+        </tbody>
+      </table>,
+    );
+
+    const groupNodeForA = container.querySelector('tr');
+
+    expect(groupNodeForA?.textContent).toBe('group:A:2');
+
+    useGetTableDataMock.mockReturnValue([
+      { [TABLE_GROUP_ROW_FIELD]: { columnKey: 'name', count: 5, label: 'B' } },
+      { [TABLE_GROUP_ROW_FIELD]: { columnKey: 'name', count: 2, label: 'A' } },
+    ]);
+
+    rerender(
+      <table>
+        <tbody>
+          <TableBodyRows endIndex={2} isLoadingState={false} startIndex={0} />
+        </tbody>
+      </table>,
+    );
+
+    const reordered = container.querySelectorAll('tr');
+
+    expect(reordered[1]?.textContent).toBe('group:A:2');
+    expect(reordered[1]).toBe(groupNodeForA);
   });
 });

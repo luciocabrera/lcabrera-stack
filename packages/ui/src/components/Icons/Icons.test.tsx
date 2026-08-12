@@ -12,6 +12,7 @@ import { EyeIcon } from './EyeIcon';
 import { EyeOffIcon } from './EyeOffIcon';
 import { FileTextIcon } from './FileTextIcon';
 import { FilterIcon } from './FilterIcon';
+import { GroupRowsIcon } from './GroupRowsIcon';
 import { HomeIcon } from './HomeIcon';
 import { InfoIcon } from './InfoIcon';
 import { ListAllIcon } from './ListAllIcon';
@@ -35,6 +36,7 @@ import { SortClearIcon } from './SortClearIcon';
 import { SortDescIcon } from './SortDescIcon';
 import { SortNeutralIcon } from './SortNeutralIcon';
 import { SuccessIcon } from './SuccessIcon';
+import { UngroupRowsIcon } from './UngroupRowsIcon';
 import { UserIcon } from './UserIcon';
 import { WarningIcon } from './WarningIcon';
 
@@ -48,6 +50,7 @@ const iconComponents = [
   { Component: EyeOffIcon, defaultSize: 24, name: 'EyeOffIcon' },
   { Component: FileTextIcon, defaultSize: 24, name: 'FileTextIcon' },
   { Component: FilterIcon, defaultSize: 16, name: 'FilterIcon' },
+  { Component: GroupRowsIcon, defaultSize: 16, name: 'GroupRowsIcon' },
   { Component: HomeIcon, defaultSize: 24, name: 'HomeIcon' },
   { Component: InfoIcon, defaultSize: 24, name: 'InfoIcon' },
   { Component: ListAllIcon, defaultSize: 16, name: 'ListAllIcon' },
@@ -71,6 +74,7 @@ const iconComponents = [
   { Component: SortDescIcon, defaultSize: 12, name: 'SortDescIcon' },
   { Component: SortNeutralIcon, defaultSize: 12, name: 'SortNeutralIcon' },
   { Component: SuccessIcon, defaultSize: 24, name: 'SuccessIcon' },
+  { Component: UngroupRowsIcon, defaultSize: 16, name: 'UngroupRowsIcon' },
   { Component: UserIcon, defaultSize: 24, name: 'UserIcon' },
   { Component: WarningIcon, defaultSize: 24, name: 'WarningIcon' },
 ] as const;

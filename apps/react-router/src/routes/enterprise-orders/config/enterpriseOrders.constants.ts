@@ -42,6 +42,15 @@ export const ENTERPRISE_ORDER_FALLBACK_SORT = [
 /** The list route the create/edit/view modals overlay and return to. */
 export const ENTERPRISE_ORDERS_PATH = '/enterprise-orders';
 
+/**
+ * The row ceiling a grouped read is built with — a safety belt, not a page: a
+ * grouped result is returned whole because there is nothing to scroll into
+ * (ADR-059). It sits well above the distinct-value ceiling `@lcabrera/server`
+ * already enforces on a group key, so it bounds a pathological result rather
+ * than truncating an ordinary one.
+ */
+export const ENTERPRISE_ORDER_GROUP_MAX_ROWS = 5000;
+
 /** Every column of `enterprise_orders`, in alphabetical order. */
 export const ENTERPRISE_ORDER_COLUMNS = [
   'balance_due',

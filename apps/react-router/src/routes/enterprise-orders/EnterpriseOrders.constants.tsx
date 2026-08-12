@@ -6,7 +6,7 @@ import type {
 import { createBasicColumn } from '@lcabrera/ui/components/Table/utils';
 import { createStaticFilterOptions } from '@lcabrera/ui/utils/filters';
 
-import type { EnterpriseOrderListRow } from './config';
+import type { EnterpriseOrderTableRow } from './config';
 
 export const TITLE = {
   plural: 'Enterprise Orders',
@@ -27,11 +27,13 @@ export const CRUD: TableCrudConfig = {
 };
 
 /**
- * The list view's columns. Typed on `EnterpriseOrderListRow`, not the whole
- * row: the list query projects only those columns (#405), so naming one it does
- * not select is a compile error here rather than a blank cell in production.
+ * The list view's columns. Typed on `EnterpriseOrderTableRow`, not the whole
+ * row: the list query projects only the read-model columns (#405), so naming
+ * one it does not select is a compile error here rather than a blank cell in
+ * production. The table row is that read model with optional members, because a
+ * grouped read returns one summary row per group and projects nothing else.
  */
-export const COLUMNS: TableColumn<EnterpriseOrderListRow>[] = [
+export const COLUMNS: TableColumn<EnterpriseOrderTableRow>[] = [
   createBasicColumn({
     dataType: 'number',
     isPrimaryKey: true,
@@ -56,7 +58,7 @@ export const COLUMNS: TableColumn<EnterpriseOrderListRow>[] = [
   }),
   {
     dataType: 'string',
-    ...createStaticFilterOptions<EnterpriseOrderListRow>([
+    ...createStaticFilterOptions<EnterpriseOrderTableRow>([
       'Cancelled',
       'Delivered',
       'On Hold',
@@ -73,7 +75,7 @@ export const COLUMNS: TableColumn<EnterpriseOrderListRow>[] = [
   },
   {
     dataType: 'string',
-    ...createStaticFilterOptions<EnterpriseOrderListRow>([
+    ...createStaticFilterOptions<EnterpriseOrderTableRow>([
       'Critical',
       'High',
       'Low',
@@ -157,7 +159,7 @@ export const COLUMNS: TableColumn<EnterpriseOrderListRow>[] = [
   }),
   {
     dataType: 'string',
-    ...createStaticFilterOptions<EnterpriseOrderListRow>([
+    ...createStaticFilterOptions<EnterpriseOrderTableRow>([
       'Cancelled',
       'Failed',
       'Paid',
@@ -172,7 +174,7 @@ export const COLUMNS: TableColumn<EnterpriseOrderListRow>[] = [
   },
   {
     dataType: 'string',
-    ...createStaticFilterOptions<EnterpriseOrderListRow>([
+    ...createStaticFilterOptions<EnterpriseOrderTableRow>([
       'Bank Transfer',
       'Cash',
       'Check',

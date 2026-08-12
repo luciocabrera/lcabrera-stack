@@ -10,6 +10,7 @@ export { useGetTableInitialPageSize } from './useGetTableInitialPageSize.hook';
 export { useGetTableIsBordered } from './useGetTableIsBordered.hook';
 export { useGetTableIsColumnSettingsOpen } from './useGetTableIsColumnSettingsOpen.hook';
 export { useGetTableIsColumnSettingsPinned } from './useGetTableIsColumnSettingsPinned.hook';
+export { useGetTableIsGroupingEnabled } from './useGetTableIsGroupingEnabled.hook';
 export { useGetTableIsRounded } from './useGetTableIsRounded.hook';
 export { useGetTableIsStriped } from './useGetTableIsStriped.hook';
 export { useGetTableIsTableSettingsOpen } from './useGetTableIsTableSettingsOpen.hook';

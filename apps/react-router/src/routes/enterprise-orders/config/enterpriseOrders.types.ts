@@ -1,3 +1,5 @@
+import type { TableGroupRow } from '@lcabrera/ui/components/Table/Table.types';
+
 import type { ENTERPRISE_ORDER_LIST_COLUMNS } from './enterpriseOrders.constants';
 
 /**
@@ -85,7 +87,7 @@ export type EnterpriseOrderListRow = Pick<
 >;
 
 export type EnterpriseOrdersResponse = {
-  readonly data: readonly EnterpriseOrderListRow[];
+  readonly data: readonly EnterpriseOrderTableRow[];
   readonly hasMore: boolean;
   /**
    * Rows matching the current filters — present only on the **first** page of a
@@ -95,6 +97,20 @@ export type EnterpriseOrdersResponse = {
    */
   readonly total?: number;
 };
+
+/**
+ * A row as the list **table** renders it, which is not the same as a row the
+ * list query returns.
+ *
+ * A grouped read projects the group key and its aggregates and nothing else, so
+ * every other column is genuinely absent from those rows — the members are
+ * optional here because that is the truth, not to relax the read model.
+ * `EnterpriseOrderListRow` keeps its exact shape and is still what the
+ * ungrouped query returns; the `Pick` behind it still turns a cell reading an
+ * unprojected column into a compile error.
+ */
+export type EnterpriseOrderTableRow = Partial<EnterpriseOrderListRow> &
+  Partial<TableGroupRow>;
 
 /**
  * Form value shape for create/edit/view. Money and quantity are numbers,

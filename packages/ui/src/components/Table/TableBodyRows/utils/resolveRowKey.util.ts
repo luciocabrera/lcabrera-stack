@@ -1,5 +1,6 @@
 import type { TableColumn } from '#ui/components/Table/Table.types';
 
+import { getTableGroupRowSummary } from '#ui/components/Table/utils/getTableGroupRowSummary.util';
 import { resolvePrimaryKeyColumnKeys } from '#ui/components/Table/utils/resolvePrimaryKeyColumnKeys.util';
 
 type ResolveRowKeyArgs<TData extends Record<string, unknown>> = {
@@ -9,11 +10,12 @@ type ResolveRowKeyArgs<TData extends Record<string, unknown>> = {
 };
 
 /**
- * Neither prefix may be a prefix of the other, so the two kinds of key occupy
- * disjoint namespaces whatever either one encodes. The tuple encoding below
- * already makes a cross-namespace collision unconstructible on its own — these
- * prefixes are what keeps that true if the encoding ever changes.
+ * No prefix may be a prefix of another, so the three kinds of key occupy
+ * disjoint namespaces whatever any one of them encodes. The tuple encoding
+ * below already makes a cross-namespace collision unconstructible on its own —
+ * these prefixes are what keeps that true if the encoding ever changes.
  */
+const GROUP_KEY_PREFIX = 'grp:';
 const INDEX_KEY_PREFIX = 'idx:';
 const VALUE_KEY_PREFIX = 'pk:';
 
@@ -43,6 +45,11 @@ const isScalarKeyValue = (value: unknown): value is number | string =>
  * The same encoding is why the tuple stays unambiguous across element
  * boundaries — a delimiter-joined form collides as soon as a value contains the
  * delimiter — and why `7` stays distinct from `'7'`, which `String` cannot do.
+ *
+ * A group row is identified first and by its own values, not by the primary key
+ * it does not have — a grouped read projects the group key and its aggregates,
+ * so the primary-key branch below would drop every group row to its index and
+ * hand the whole grouped result unstable identity.
  */
 export const resolveRowKey = <TData extends Record<string, unknown>>({
   columns,
@@ -50,6 +57,12 @@ export const resolveRowKey = <TData extends Record<string, unknown>>({
   row,
 }: ResolveRowKeyArgs<TData>) => {
   const indexKey = `${INDEX_KEY_PREFIX}${index}`;
+  const groupSummary = getTableGroupRowSummary(row);
+
+  if (groupSummary !== undefined) {
+    return `${GROUP_KEY_PREFIX}${JSON.stringify([groupSummary.columnKey, groupSummary.label])}`;
+  }
+
   const primaryKeyKeys = resolvePrimaryKeyColumnKeys({ columns });
 
   if (primaryKeyKeys.length === 0) {

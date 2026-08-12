@@ -14,10 +14,12 @@ import {
 } from '#ui/components/Table/utils';
 import {
   deserializeFiltersFromURL,
+  deserializeGroupingFromURL,
   deserializeSortingFromURL,
 } from '#ui/utils/urlState';
 
 import { sanitizeFiltersByColumns } from '../shared/sanitizeFiltersByColumns.util';
+import { sanitizeGroupingByColumns } from '../shared/sanitizeGroupingByColumns.util';
 
 type ReadTableLoaderStateFromRequestArgs<
   TData extends Record<string, unknown>,
@@ -29,6 +31,13 @@ type ReadTableLoaderStateFromRequestArgs<
   readonly appId?: string;
   readonly columns?: readonly TableColumn<TData>[];
   readonly includeFilters?: boolean;
+  /**
+   * Whether this route may be grouped at all. Off leaves `grouping` empty
+   * whatever the URL says — the capability is the route's to declare, and a
+   * `grouping` param on a route that cannot group is a request for a shape its
+   * endpoint does not produce (ADR-063).
+   */
+  readonly includeGrouping?: boolean;
   readonly persistenceKey: string;
   readonly request: Request;
 };
@@ -36,9 +45,10 @@ type ReadTableLoaderStateFromRequestArgs<
 /**
  * Read shared table loader state from URL and cookies.
  *
- * `sorting` and `filters` come from the URL because the persist-cookie flow
- * writes them there (ADR-010, ADR-061). Order, visibility, sizing and pinning
- * are cookie-only on that same flow, so they are read only from the cookie.
+ * `sorting`, `filters` and `grouping` come from the URL because the
+ * persist-cookie flow writes them there (ADR-010, ADR-061). Order, visibility,
+ * sizing and pinning are cookie-only on that same flow, so they are read only
+ * from the cookie.
  */
 export const readTableLoaderStateFromRequest = <
   TData extends Record<string, unknown>,
@@ -46,6 +56,7 @@ export const readTableLoaderStateFromRequest = <
   appId,
   columns,
   includeFilters = false,
+  includeGrouping = false,
   persistenceKey,
   request,
 }: ReadTableLoaderStateFromRequestArgs<TData>) => {
@@ -97,22 +108,41 @@ export const readTableLoaderStateFromRequest = <
       })
     : parsedFilters;
 
+  const standaloneGroupingParam = includeGrouping
+    ? url.searchParams.get('grouping')
+    : undefined;
+
+  // Sanitized here rather than by the caller, because an unsanitized key list
+  // has no safe consumer: it reaches SQL as an identifier. A route with no
+  // declared columns therefore gets no grouping at all, which is the opposite
+  // of the filters branch above — filters are values, keys are identifiers.
+  const grouping =
+    standaloneGroupingParam && columns
+      ? sanitizeGroupingByColumns({
+          columns,
+          grouping: deserializeGroupingFromURL(standaloneGroupingParam),
+        })
+      : [];
+
   return {
     columnOrder,
     columnPinning,
     columnSizing,
     columnVisibility,
     filters,
+    grouping,
     metaUiFlags,
     sorting,
     // The raw params, not a duplicate of the parsed state above. Each carries a
     // distinction the parsed value cannot: `null` is "the URL had no such
     // param", where a string is "a param that happened to deserialize to
     // nothing" — `sorting: []` and `filters: {}` look identical either way.
-    // `standaloneFiltersParam` has a third state, `undefined`, meaning this
-    // route opted out of URL filters entirely (`includeFilters: false`), which
-    // is not the same as a route that allows them and received none.
+    // `standaloneFiltersParam` and `standaloneGroupingParam` each have a third
+    // state, `undefined`, meaning this route opted out of that param entirely
+    // (`includeFilters` / `includeGrouping` off), which is not the same as a
+    // route that allows it and received none.
     standaloneFiltersParam,
+    standaloneGroupingParam,
     standaloneSortParam,
   };
 };

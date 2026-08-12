@@ -2,11 +2,15 @@ import { deleteRows } from '@lcabrera/server/db/delete-rows.util';
 import { getMaxValue } from '@lcabrera/server/db/get-max-value.util';
 import { getRowsCount } from '@lcabrera/server/db/get-rows-count.util';
 import { insertRow } from '@lcabrera/server/db/insert-row.util';
+import { selectGroupedRows } from '@lcabrera/server/db/select-grouped-rows.util';
 import { selectRows } from '@lcabrera/server/db/select-rows.util';
 import { updateRows } from '@lcabrera/server/db/update-rows.util';
 import { beforeEach, expect, it, vi } from 'vite-plus/test';
 
-import { ENTERPRISE_ORDER_LIST_COLUMNS } from '../config';
+import {
+  ENTERPRISE_ORDER_GROUP_MAX_ROWS,
+  ENTERPRISE_ORDER_LIST_COLUMNS,
+} from '../config';
 import {
   deleteOrder,
   getNextOrderId,
@@ -31,13 +35,31 @@ vi.mock('@lcabrera/server/db/insert-row.util', () => ({
 vi.mock('@lcabrera/server/db/select-rows.util', () => ({
   selectRows: vi.fn(async () => [{ order_id: 7 }]),
 }));
+vi.mock('@lcabrera/server/db/select-grouped-rows.util', () => ({
+  selectGroupedRows: vi.fn(async () => ({
+    aggregates: [{ alias: 'count_rows', fn: 'count' }],
+    groupingSetMasks: [0],
+    keys: ['order_status'],
+    maskAlias: 'group_mask',
+    // Parsed rather than written as literals: a NULL group key and a bigint
+    // count arriving as a string are what `pg` actually hands back, and the
+    // second group exists to exercise exactly that.
+    rows: JSON.parse(
+      '[{"count_rows":"12","group_mask":0,"order_status":"Shipped"},{"count_rows":"3","group_mask":0,"order_status":null}]',
+    ) as readonly Record<string, unknown>[],
+  })),
+}));
 vi.mock('@lcabrera/server/db/update-rows.util', () => ({
   updateRows: vi.fn(async () => [{ order_id: 7 }]),
 }));
 
+const sortKeys = (value: object) =>
+  Object.keys(value).toSorted((a, b) => a.localeCompare(b));
+
 beforeEach(() => {
   vi.mocked(selectRows).mockClear();
   vi.mocked(getRowsCount).mockClear();
+  vi.mocked(selectGroupedRows).mockClear();
 });
 
 it('selects one order by its primary key', async () => {
@@ -185,4 +207,85 @@ it('deletes by primary key', async () => {
       filters: [{ column: 'order_id', operator: 'eq', value: 7 }],
     }),
   );
+});
+
+it('runs the ungrouped read when the loader applied no group keys', async () => {
+  await selectOrdersPage({
+    filters: [],
+    grouping: [],
+    includeTotal: true,
+    limit: 10,
+    offset: 0,
+    sort: [],
+  });
+
+  expect(selectRows).toHaveBeenCalledTimes(1);
+  expect(selectGroupedRows).not.toHaveBeenCalled();
+});
+
+it('runs the grouped read when the loader applied a group key', async () => {
+  const page = await selectOrdersPage({
+    filters: [{ column: 'priority', operator: 'eq', value: 'High' }],
+    grouping: ['order_status'],
+    includeTotal: true,
+    limit: 10,
+    offset: 0,
+    sort: [],
+  });
+
+  expect(selectRows).not.toHaveBeenCalled();
+  expect(selectGroupedRows).toHaveBeenCalledWith(
+    expect.objectContaining({
+      aggregates: [{ fn: 'count' }],
+      allowedColumns: expect.arrayContaining(['order_status']),
+      filters: [{ column: 'priority', operator: 'eq', value: 'High' }],
+      grouping: 'flat',
+      keys: ['order_status'],
+      maxRows: ENTERPRISE_ORDER_GROUP_MAX_ROWS,
+      schema: 'public',
+      sort: [{ direction: 'asc', key: 'order_status' }],
+      table: 'enterprise_orders',
+    }),
+  );
+  expect(page.data).toStrictEqual([
+    { tableGroup: { columnKey: 'order_status', count: 12, label: 'Shipped' } },
+    { tableGroup: { columnKey: 'order_status', count: 3, label: '(empty)' } },
+  ]);
+});
+
+it('returns the whole grouped result at once, because it is not paginated', async () => {
+  const page = await selectOrdersPage({
+    filters: [],
+    grouping: ['order_status'],
+    includeTotal: true,
+    limit: 1,
+    offset: 0,
+    sort: [],
+  });
+
+  // `limit: 1` is deliberately smaller than the result: a grouped read has no
+  // cursor to resume from, so it must not report more to come.
+  expect(page.hasMore).toBe(false);
+  expect(page.total).toBe(2);
+  expect(page.data).toHaveLength(2);
+});
+
+it('keeps the response shape identical whether or not the read is grouped', async () => {
+  const ungrouped = await selectOrdersPage({
+    filters: [],
+    includeTotal: true,
+    limit: 10,
+    offset: 0,
+    sort: [],
+  });
+  const grouped = await selectOrdersPage({
+    filters: [],
+    grouping: ['order_status'],
+    includeTotal: true,
+    limit: 10,
+    offset: 0,
+    sort: [],
+  });
+
+  expect(sortKeys(grouped)).toStrictEqual(sortKeys(ungrouped));
 });

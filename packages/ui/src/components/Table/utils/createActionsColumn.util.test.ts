@@ -13,6 +13,7 @@ describe('createActionsColumn', () => {
 
     expect(result).toStrictEqual({
       isFilterable: false,
+      isGroupable: false,
       isHeaderHidden: true,
       isResizable: false,
       isSortable: false,

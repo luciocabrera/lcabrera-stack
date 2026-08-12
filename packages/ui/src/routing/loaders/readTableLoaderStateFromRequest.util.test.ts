@@ -32,6 +32,11 @@ const testColumns: readonly TableColumn<TestRow>[] = [
   },
 ];
 
+const groupingRequest = () =>
+  new Request(
+    `https://example.com/orders?grouping=${encodeURIComponent('{"keys":["status"]}')}`,
+  );
+
 describe('readTableLoaderStateFromRequest', () => {
   it('merges the URL sorting and filter params with persisted cookie state', () => {
     vi.mocked(readPersistedStateFromCookie).mockReturnValue({
@@ -239,5 +244,63 @@ describe('readTableLoaderStateFromRequest', () => {
 
     expect(result.filters).toEqual({});
     expect(result.standaloneFiltersParam).toBeNull();
+  });
+
+  describe('grouping', () => {
+    it('reads and sanitizes the grouping param when the route allows it', () => {
+      vi.mocked(readPersistedStateFromCookie).mockReturnValue({});
+
+      const result = readTableLoaderStateFromRequest<TestRow>({
+        columns: testColumns,
+        includeGrouping: true,
+        persistenceKey: 'orders',
+        request: groupingRequest(),
+      });
+
+      expect(result.grouping).toEqual(['status']);
+      expect(result.standaloneGroupingParam).not.toBeNull();
+    });
+
+    it('ignores the param entirely when the route did not opt in', () => {
+      vi.mocked(readPersistedStateFromCookie).mockReturnValue({});
+
+      const result = readTableLoaderStateFromRequest<TestRow>({
+        columns: testColumns,
+        persistenceKey: 'orders',
+        request: groupingRequest(),
+      });
+
+      expect(result.grouping).toEqual([]);
+      expect(result.standaloneGroupingParam).toBeUndefined();
+    });
+
+    it('answers no grouping when the caller passed no columns to check against', () => {
+      // Unsanitized keys have no safe consumer — they reach SQL as identifiers
+      // — so this is the opposite of the filters branch, which passes values
+      // through when it cannot check them.
+      vi.mocked(readPersistedStateFromCookie).mockReturnValue({});
+
+      const result = readTableLoaderStateFromRequest<TestRow>({
+        includeGrouping: true,
+        persistenceKey: 'orders',
+        request: groupingRequest(),
+      });
+
+      expect(result.grouping).toEqual([]);
+    });
+
+    it('answers no grouping for a URL that carries no param', () => {
+      vi.mocked(readPersistedStateFromCookie).mockReturnValue({});
+
+      const result = readTableLoaderStateFromRequest<TestRow>({
+        columns: testColumns,
+        includeGrouping: true,
+        persistenceKey: 'orders',
+        request: new Request('https://example.com/orders'),
+      });
+
+      expect(result.grouping).toEqual([]);
+      expect(result.standaloneGroupingParam).toBeNull();
+    });
   });
 });

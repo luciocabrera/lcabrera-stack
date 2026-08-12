@@ -52,10 +52,17 @@ type CreateTableRouteLoaderArgs<
    * This is also where a request-shaping capability is declared, and omitting
    * one leaves it off (ADR-063).
    *
-   * The declaration is carried out in `metaState` for the view's load-more to
-   * read. This factory does not itself act on it: what the *first* page sends
-   * is decided by the route's own `fetchPage`, which receives `filters`
+   * Every declaration is carried out in `metaState` for the view's load-more to
+   * read. Two of them the factory does not act on — `isKeysetEnabled` and
+   * `isServerFilterEnabled` shape later pages only, so what the *first* page
+   * sends stays the route's own `fetchPage`, which receives `filters`
    * regardless of any flag.
+   *
+   * `isGroupingEnabled` is the exception, and has to be: grouping changes the
+   * **first** query, so the flag is what makes this factory read the `grouping`
+   * param at all. Off, the keys it hands `fetchPage` are empty whatever the URL
+   * carries — which is what makes the flag the single enablement point rather
+   * than one of two.
    */
   readonly meta?: Partial<TableMetaState>;
   readonly persistenceKey: string;
@@ -70,10 +77,16 @@ type CreateTableRouteLoaderArgs<
  * paginated query. `effectiveSorting` carries the primary-key tiebreaker for
  * stable server pagination (ADR-008); `filters` is sanitized against the
  * route's columns.
+ *
+ * `grouping` is the sanitized group keys, and it is **empty unless the route
+ * declared `isGroupingEnabled`** — so a route that never opted in reads an
+ * empty list here however the URL is hand-edited, and forwarding it
+ * unconditionally is safe.
  */
 type TableRouteFetchPageArgs<TData extends Record<string, unknown>> = {
   readonly effectiveSorting: SortingState<TData>;
   readonly filters: ColumnFiltersState<TData>;
+  readonly grouping: readonly string[];
   readonly request: Request;
 };
 
@@ -113,6 +126,11 @@ export const createTableRouteLoader = <
       })
     : columns;
 
+  // Resolved once, outside the loader body: it depends only on the route's own
+  // declaration, and both the gate below and the meta spread must read the same
+  // answer.
+  const capabilityMeta = resolveTableCapabilityMeta({ meta });
+
   return ({ request }: LoaderFunctionArgs) => {
     const {
       columnOrder,
@@ -120,12 +138,14 @@ export const createTableRouteLoader = <
       columnSizing,
       columnVisibility,
       filters,
+      grouping,
       metaUiFlags,
       sorting,
     } = readTableLoaderStateFromRequest<TData>({
       appId,
       columns,
       includeFilters,
+      includeGrouping: capabilityMeta.isGroupingEnabled,
       persistenceKey,
       request,
     });
@@ -151,7 +171,7 @@ export const createTableRouteLoader = <
       // Return the promise unawaited for Suspense streaming. A navigation
       // re-runs the loader, so `TableDataResolver`'s `use()` receives a new
       // promise and re-suspends — nothing has to key the boundary by hand.
-      dataPromise: fetchPage({ effectiveSorting, filters, request }),
+      dataPromise: fetchPage({ effectiveSorting, filters, grouping, request }),
       metaState: {
         ...metaUiFlags,
         appId,
@@ -160,11 +180,14 @@ export const createTableRouteLoader = <
         title,
         ...(schemaName !== undefined && { schemaName }),
         ...meta,
-        // Last, and unconditional. `metaUiFlags` above is read from the
-        // client-controlled UI-flags cookie and validated nowhere, so a route
-        // that declares no capability would otherwise inherit one from it —
-        // and start sending a `filter` or `cursor` its endpoint ignores.
-        ...resolveTableCapabilityMeta({ meta }),
+        // Last, and unconditional — both of them. `metaUiFlags` above is read
+        // from the client-controlled UI-flags cookie and validated nowhere, so
+        // a route that declares no capability would otherwise inherit one from
+        // it and start sending a `filter` or `cursor` its endpoint ignores.
+        // `groupingKeys` rides the same rule: it is request-derived, so a
+        // conditional spread would let a stale cookie entry stand in for it.
+        groupingKeys: grouping,
+        ...capabilityMeta,
       },
     };
   };

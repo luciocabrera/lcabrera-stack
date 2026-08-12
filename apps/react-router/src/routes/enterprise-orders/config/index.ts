@@ -5,6 +5,7 @@ export {
   ENTERPRISE_ORDER_COLUMNS,
   ENTERPRISE_ORDER_DISTINCT_FILTER_COLUMNS,
   ENTERPRISE_ORDER_FALLBACK_SORT,
+  ENTERPRISE_ORDER_GROUP_MAX_ROWS,
   ENTERPRISE_ORDER_LIST_COLUMNS,
   ENTERPRISE_ORDER_PRIMARY_KEY,
   ENTERPRISE_ORDERS_PATH,
@@ -26,12 +27,15 @@ export type {
   EnterpriseOrder,
   EnterpriseOrderListRow,
   EnterpriseOrdersResponse,
+  EnterpriseOrderTableRow,
   EnterpriseOrderValues,
 } from './enterpriseOrders.types';
 export { isEnterpriseOrdersResponse } from './isEnterpriseOrdersResponse.util';
 export { parseOrderFormData } from './parseOrderFormData.util';
 export { toOrderFieldErrors } from './toOrderFieldErrors.util';
 export { toOrderFormValues } from './toOrderFormValues.util';
+export { toOrderGroupLabel } from './toOrderGroupLabel.util';
+export { toOrderGroupRow } from './toOrderGroupRow.util';
 export { toOrderInsertValues } from './toOrderInsertValues.util';
 export { toOrderKeysetCursor } from './toOrderKeysetCursor.util';
 export { toOrderUpdateValues } from './toOrderUpdateValues.util';

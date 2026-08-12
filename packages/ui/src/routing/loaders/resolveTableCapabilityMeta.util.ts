@@ -11,7 +11,10 @@ type ResolveTableCapabilityMetaArgs = {
  * resolved from `meta`, so a new flag cannot silently inherit the behaviour
  * this util exists to prevent.
  */
-type TableCapabilityKey = 'isKeysetEnabled' | 'isServerFilterEnabled';
+type TableCapabilityKey =
+  | 'isGroupingEnabled'
+  | 'isKeysetEnabled'
+  | 'isServerFilterEnabled';
 
 /**
  * Resolve a route's request-shaping capabilities from its loader `meta` alone.
@@ -33,6 +36,7 @@ export const resolveTableCapabilityMeta = ({
   meta,
 }: ResolveTableCapabilityMetaArgs) =>
   ({
+    isGroupingEnabled: meta?.isGroupingEnabled === true,
     isKeysetEnabled: meta?.isKeysetEnabled === true,
     isServerFilterEnabled: meta?.isServerFilterEnabled === true,
   }) satisfies Record<TableCapabilityKey, boolean>;
