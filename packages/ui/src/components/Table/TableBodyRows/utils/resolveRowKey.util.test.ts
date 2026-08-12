@@ -114,6 +114,13 @@ describe('resolveRowKey', () => {
         row: { order_id: Infinity, order_number: 'ORD-9' },
       }),
     ).toBe('idx:9');
+    expect(
+      resolveRowKey<Row>({
+        columns,
+        index: 10,
+        row: { order_id: -Infinity, order_number: 'ORD-9' },
+      }),
+    ).toBe('idx:10');
   });
 
   it('escapes an unpaired surrogate instead of throwing', () => {
