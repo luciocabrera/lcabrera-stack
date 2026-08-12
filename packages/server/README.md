@@ -167,9 +167,9 @@ const rows = await selectRows<Order>({
   allowedColumns: ['id', 'country', 'total'],
   fields: ['id', 'country'],
   limit: 50,
-  offset: skip,
+  offset: 0,
   schema: 'sales',
-  sort: resolveQuerySort({ fallback: DEFAULT_SORT, sorting }), // ← from the request
+  sort: resolveQuerySort({ fallback: DEFAULT_SORT, sorting }), // ← sorting: from the request
   table: 'orders',
 });
 ```
