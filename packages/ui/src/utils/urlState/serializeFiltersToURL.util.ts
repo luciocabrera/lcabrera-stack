@@ -1,6 +1,6 @@
 import type { ColumnFiltersState } from '#ui/components/Table';
 
-import { serializeFilter } from './serializeFilter.util';
+import { filtersCodec } from './filtersCodec.util';
 
 /**
  * Serialize ColumnFiltersState to a compact URL-friendly string.
@@ -9,15 +9,7 @@ import { serializeFilter } from './serializeFilter.util';
  * Returns undefined when there are no filters.
  */
 export const serializeFiltersToURL = (filters: ColumnFiltersState) => {
-  const entries = Object.entries(filters);
-  if (entries.length === 0) return;
+  if (Object.keys(filters).length === 0) return;
 
-  const compact = Object.fromEntries(
-    entries.map(([columnKey, filter]) => [
-      columnKey,
-      serializeFilter({ filter }),
-    ]),
-  );
-
-  return JSON.stringify(compact);
+  return filtersCodec.serialize(filters);
 };

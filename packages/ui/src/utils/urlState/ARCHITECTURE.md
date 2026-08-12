@@ -3,12 +3,58 @@
 Compact serialization/deserialization helpers for table state in URL query params.
 Designed for shareable links, SSR hydration, and resilient decoding.
 
+## The codec layer
+
+Every param in this folder is read back through a **codec** built by
+`createUrlStateCodec`. A codec pairs one `serialize` with one `deserialize` and
+takes its entire validation story from a single caller-supplied `narrow`
+function. There is no schema type, no combinator and no error object, because
+`@lcabrera/ui` ships to browsers without a validation dependency and this is how
+a helper grows into a schema library by accident.
+
+**The contract is refusal, not repair.** `narrow` answers `undefined` for any
+token outside its vocabulary, and `deserialize` then answers the codec's declared
+`fallback` — for the _whole_ payload, never one field of it. A hand-edited param
+therefore yields no state at all rather than a partly applied one, so a token
+that a downstream lookup would resolve to `undefined` never reaches that lookup
+while typed as valid.
+([ADR-061](../../../../../docs/decisions/ADR-061-grouping-config-in-url-expansion-in-store.md)
+states why: a malformed param must yield a flat table, not a half-applied query.)
+
+Anything thrown along the way — undecodable Base64, malformed JSON, a narrowing
+that throws — is a refusal too, so a URL a user edited by hand degrades instead
+of failing a loader.
+
+`decodeParam` / `encodeParam` are the optional text layer between the raw param
+and the JSON: the state param is Base64, the sorting and filter params are plain
+JSON and leave both off.
+
+Each codec's `narrow` chooses what "unrecognised" means for its param:
+
+| Codec          | Vocabulary it checks                                                      | Fallback    |
+| -------------- | ------------------------------------------------------------------------- | ----------- |
+| `sortingCodec` | every value is `asc` or `desc`; one bad direction refuses the lot         | `{}`        |
+| `filtersCodec` | the envelope is a column-keyed object; each value via `deserializeFilter` | `{}`        |
+| `stateCodec`   | the envelope is a plain object; values stay `unknown`                     | `undefined` |
+
+`filtersCodec` keeps the pre-existing per-entry drop inside a recognised object:
+an unknown operator code yields no filter for that column rather than one typed
+as valid, and `sanitizeFiltersByColumns` drops per column downstream anyway.
+`stateCodec` deliberately asserts only the envelope, because every value in that
+param is re-read by a slice-specific reader that narrows for itself — claiming
+more here would be claiming something unchecked.
+
 ## File Structure
 
 ```
 urlState/
 ├── ARCHITECTURE.md
 ├── index.ts
+├── urlState.types.ts
+├── createUrlStateCodec.util.ts
+├── sortingCodec.util.ts
+├── filtersCodec.util.ts
+├── stateCodec.util.ts
 ├── encodeStateToURL.util.ts
 ├── decodeStateFromURL.util.ts
 ├── readStateFromURL.util.ts
@@ -39,11 +85,22 @@ graph TD
 
   RTS --> RS[Read state utility]
   RS --> Decode[Decode state utility]
+  Decode --> StateCodec[stateCodec]
+  Encode[Encode state utility] --> StateCodec
 
-  DSF --> DF[Deserialize single filter utility]
-  SFU --> FilterConstants[Filter operator constants]
-  DF --> FilterConstants
-  SFU --> SF[serializeFilter dispatcher]
+  DSS --> SortingCodec[sortingCodec]
+  SSU --> SortingCodec
+  DSF --> FiltersCodec[filtersCodec]
+  SFU --> FiltersCodec
+
+  StateCodec --> Factory[createUrlStateCodec]
+  SortingCodec --> Factory
+  FiltersCodec --> Factory
+  Factory --> Logger[logger]
+
+  FiltersCodec --> DF[Deserialize single filter utility]
+  FiltersCodec --> SF[serializeFilter dispatcher]
+  DF --> FilterConstants[Filter operator constants]
   SF --> SBF[serializeBooleanFilter]
   SF --> SDF[serializeDateFilter]
   SF --> SSF[serializeSelectFilter]
@@ -56,16 +113,61 @@ graph TD
 
 ## Utilities
 
-### encodeStateToURL.util.ts
+### createUrlStateCodec.util.ts
 
-Encodes plain object state into Base64 URL-safe string.
+Builds a codec from `compact`, `narrow`, `fallback`, a `label` for the debug log,
+and the optional `decodeParam`/`encodeParam` transport.
 
 ```mermaid
 flowchart TD
-  A[Encode state to URL value] --> B[Convert set values to arrays]
-  B --> C[JSON.stringify]
-  C --> D[Base64 encode]
-  D --> E[Make URL safe and trim padding]
+  A[deserialize param] --> B[decodeParam, default identity]
+  B --> C[JSON.parse]
+  C --> D[narrow]
+  D -- state --> E[Return state]
+  D -- undefined --> F[Log refusal]
+  F --> G[Return fallback]
+  B -- throws --> H[Log parse failure]
+  C -- throws --> H
+  D -- throws --> H
+  H --> G
+```
+
+`serialize` is the mirror: `compact` then `JSON.stringify` then `encodeParam`. It
+always produces a string — whether the param belongs in the URL at all is the
+caller's decision, which is why `serializeSortingToURL` and
+`serializeFiltersToURL` return early on empty state before reaching the codec.
+
+### urlState.types.ts
+
+`CompactSorting` — the closed `{ columnKey: 'asc' | 'desc' }` wire form shared by
+the sorting codec and its serializer.
+
+### sortingCodec.util.ts
+
+Codec for the `sorting` param. Its narrowing rebuilds the record token by token
+and bails on the first direction that is not `asc` or `desc`.
+
+### filtersCodec.util.ts
+
+Codec for the `filters` param. Its narrowing checks the envelope, then routes
+each value through `deserializeFilter`.
+
+### stateCodec.util.ts
+
+Codec for the Base64 `<persistenceKey>-tableState` param. Supplies both transport
+halves and converts `Set` values to arrays on the way out.
+
+### encodeStateToURL.util.ts
+
+Encodes plain object state into Base64 URL-safe string — `stateCodec.serialize`
+under a name, so the Set conversion and the Base64 transport live in the codec.
+
+```mermaid
+flowchart TD
+  A[Encode state to URL value] --> B[stateCodec.serialize]
+  B --> C[compact: set values to arrays]
+  C --> D[JSON.stringify]
+  D --> E[encodeParam: Base64, URL-safe, padding trimmed]
   E --> F[Return encoded token]
 ```
 
@@ -76,18 +178,19 @@ Key behavior:
 
 ### decodeStateFromURL.util.ts
 
-Decodes URL-safe Base64 state and optionally rehydrates arrays into sets.
+Decodes URL-safe Base64 state via `stateCodec` and optionally rehydrates arrays
+into sets. The rehydration copies rather than mutating the decoded object, and
+is applied here rather than in the codec because the key list is a per-call
+argument.
 
 ```mermaid
 flowchart TD
-  A[Decode state from URL value] --> B[Restore Base64 chars and padding]
-  B --> C[Decode Base64 and parse JSON]
-  C --> D{Convert arrays to sets provided}
-  D -- no --> E[Return parsed object]
-  D -- yes --> F[For each key: Array -> Set]
+  A[Decode state from URL value] --> B[stateCodec.deserialize]
+  B -- refused or unparseable --> C[Return undefined]
+  B -- state --> D{Convert arrays to sets provided}
+  D -- no --> E[Return state]
+  D -- yes --> F[Copy, named Array keys -> Set]
   F --> E
-  B --> G{Any error}
-  G -- yes --> H[Return undefined]
 ```
 
 ### readStateFromURL.util.ts
@@ -128,13 +231,10 @@ Compacts sorting array into object map for shorter query payload.
 
 ```mermaid
 flowchart TD
-  A[Serialize sorting to URL] --> B{Sorting empty}
-  B -- yes --> C[undefined]
-  B -- no --> D[Filter entries with direction]
-  D --> E[Map to key direction pairs]
-  E --> F{Entries empty}
-  F -- yes --> G[undefined]
-  F -- no --> H[Build object and stringify]
+  A[Serialize sorting to URL] --> B[Reduce to key direction record, skipping undefined]
+  B --> C{Record empty}
+  C -- yes --> D[undefined, param left off the URL]
+  C -- no --> E[sortingCodec.serialize]
 ```
 
 Example transform:
@@ -148,13 +248,15 @@ Rebuilds sorting array from compact object representation.
 
 ```mermaid
 flowchart TD
-  A[Deserialize sorting from URL] --> B[JSON.parse]
-  B --> C[Object.entries(parsed)]
-  C --> D[Map entries to sorting items]
-  D --> E[Return SortingState]
-  B --> F{Parse error}
-  F -- yes --> G[Return empty array]
+  A[Deserialize sorting from URL] --> B[sortingCodec.deserialize]
+  B -- refused, unparseable, or empty --> C[Return empty array]
+  B -- compact record --> D[Object.entries]
+  D --> E[Map entries to sorting items]
+  E --> F[Return SortingState]
 ```
+
+Column keys stay bare strings here; `sanitizeSorting` checks them against the
+real columns in the loader path, which the codec cannot do.
 
 ### serializeFiltersToURL.util.ts
 
@@ -163,9 +265,9 @@ Compacts column filters into JSON string using short operator codes and reduced 
 ```mermaid
 flowchart TD
   A[Serialize filters to URL] --> B{No filters}
-  B -- yes --> C[undefined]
-  B -- no --> D[Serialize each column filter]
-  D --> E[Object.fromEntries compact object]
+  B -- yes --> C[undefined, param left off the URL]
+  B -- no --> D[filtersCodec.serialize]
+  D --> E[compact: serializeFilter per column]
   E --> F[JSON.stringify]
 ```
 
@@ -240,13 +342,11 @@ Deserializes complete filters payload by applying `deserializeFilter` per entry.
 
 ```mermaid
 flowchart TD
-  A[Deserialize filters from URL] --> B[Parse JSON object]
-  B --> C[Map entries through single filter parser]
-  C --> D[Filter out undefined]
-  D --> E[Object.fromEntries]
+  A[Deserialize filters from URL] --> B[filtersCodec.deserialize]
+  B -- not a column-keyed object, or unparseable --> C[Return empty filters object]
+  B -- envelope recognised --> D[Map entries through single filter parser]
+  D --> E[Drop entries the parser refused]
   E --> F[Return ColumnFiltersState]
-  B --> G{Parse error}
-  G -- yes --> H[Return empty filters object]
 ```
 
 ## Public API
@@ -258,3 +358,8 @@ flowchart TD
 - `readTableStateFromURL`
 - `serializeFiltersToURL`
 - `serializeSortingToURL`
+
+The codecs and the factory are **not** barrelled. Nothing outside this folder
+consumes them yet, and per ADR-007 a barrel exports what is actually imported
+through it; a new codec (the `grouping` param) imports `createUrlStateCodec` by
+file path, the way `encodeStateToURL.util` is already imported elsewhere.

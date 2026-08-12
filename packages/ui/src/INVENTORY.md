@@ -407,8 +407,12 @@ Per-capability command **identity** + **enablement derivation**, defined once an
 
 | Function | Location | Description |
 | --------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------- | ---------------- |
+| `createUrlStateCodec` | `utils/urlState/createUrlStateCodec.util.ts` | Builds a `serialize`/`deserialize` pair from a caller-supplied narrowing; an unrecognised token refuses the whole param and yields the declared fallback |
+| `sortingCodec` | `utils/urlState/sortingCodec.util.ts` | Codec for the `sorting` param — accepts only `asc`/`desc` directions |
+| `filtersCodec` | `utils/urlState/filtersCodec.util.ts` | Codec for the `filters` param — column-keyed envelope, `deserializeFilter` per value |
+| `stateCodec` | `utils/urlState/stateCodec.util.ts` | Codec for the Base64 `tableState` param — envelope-only narrowing, `Set` → `Array` on the way out |
 | `encodeStateToURL` | `utils/urlState/encodeStateToURL.util.ts` | Serialises a state object to a Base64 URL-safe string (converts `Set` → `Array`) |
-| `decodeStateFromURL` | `utils/urlState/decodeStateFromURL.util.ts` | Deserialises a Base64 URL-safe string back to a state object |
+| `decodeStateFromURL` | `utils/urlState/decodeStateFromURL.util.ts` | Deserialises a Base64 URL-safe string back to a state object, optionally rehydrating named array keys as `Set`s |
 | `readStateFromURL` | `utils/urlState/readStateFromURL.util.ts` | Reads + decodes a single key from `URLSearchParams` |
 | `readTableStateFromURL` | `utils/urlState/readTableStateFromURL.util.ts` | Convenience wrapper: reads sorting, filters, and column-visibility state from the URL |
 | `serializeFiltersToURL` | `utils/urlState/serializeFiltersToURL.util.ts` | `ColumnFiltersState` → compact JSON using operator short-codes |

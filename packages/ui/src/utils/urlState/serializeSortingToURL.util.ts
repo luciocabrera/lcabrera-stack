@@ -1,23 +1,30 @@
 import type { SortingState } from '#ui/components/Table';
 
-type CompactSorting = Record<string, 'asc' | 'desc'>;
+import type { CompactSorting } from './urlState.types';
+
+import { sortingCodec } from './sortingCodec.util';
 
 /**
  * Serialize SortingState to a compact URL-friendly string.
  *
  * Converts `[{ columnKey: "name", direction: "asc" }]`
  * into `{"name":"asc"}` — much shorter than the verbose array format.
+ * Returns undefined when nothing carries a direction, so the caller leaves the
+ * param off the URL entirely.
  */
 export const serializeSortingToURL = <TData>(sorting: SortingState<TData>) => {
-  if (sorting.length === 0) return;
+  const compact = sorting.reduce<CompactSorting>(
+    (accumulator, { columnKey, direction }) => {
+      if (direction !== undefined) {
+        accumulator[columnKey] = direction;
+      }
 
-  const entries = sorting
-    .filter(({ direction }) => direction !== undefined)
-    .map(({ columnKey, direction }) => [columnKey, direction] as const);
+      return accumulator;
+    },
+    {},
+  );
 
-  if (entries.length === 0) return;
+  if (Object.keys(compact).length === 0) return;
 
-  const compact = Object.fromEntries(entries) as CompactSorting;
-
-  return JSON.stringify(compact);
+  return sortingCodec.serialize(compact);
 };
