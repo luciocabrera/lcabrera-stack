@@ -3,13 +3,17 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
-const { groupingKeysRef, mockSetGrouping, normalizedColumnRef } = vi.hoisted(
-  () => ({
-    groupingKeysRef: { current: [] as readonly string[] },
-    mockSetGrouping: vi.fn(),
-    normalizedColumnRef: { current: {} as Record<string, unknown> },
-  }),
-);
+const {
+  groupingKeysRef,
+  isGroupingEnabledRef,
+  mockSetGrouping,
+  normalizedColumnRef,
+} = vi.hoisted(() => ({
+  groupingKeysRef: { current: [] as readonly string[] },
+  isGroupingEnabledRef: { current: true },
+  mockSetGrouping: vi.fn(),
+  normalizedColumnRef: { current: {} as Record<string, unknown> },
+}));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/grouping/actions', () => ({
   useSetTableGrouping: () => mockSetGrouping,
@@ -21,6 +25,10 @@ vi.mock('#ui/components/Table/contexts/TableConfig/grouping/selectors', () => ({
 
 vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
   useGetNormalizedColumn: () => normalizedColumnRef.current,
+}));
+
+vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
+  useGetTableIsGroupingEnabled: () => isGroupingEnabledRef.current,
 }));
 
 vi.mock('#ui/components/Table/TableActionsPopover', () => ({
@@ -43,6 +51,7 @@ afterEach(() => {
   cleanup();
   vi.clearAllMocks();
   groupingKeysRef.current = [];
+  isGroupingEnabledRef.current = true;
   normalizedColumnRef.current = {};
 });
 
@@ -106,13 +115,39 @@ describe('GroupActions', () => {
     expect(mockSetGrouping).toHaveBeenCalledWith(undefined);
   });
 
-  it('disables both commands for a column the table declares ungroupable', () => {
+  it('disables only Group by This for a column the table declares ungroupable', () => {
+    // The two buttons ask different questions and must not share a predicate.
+    // Grouping *by* this column depends on this column; clearing whole-table
+    // grouping does not, so a menu opened on an ungroupable column is still a
+    // way out of a grouped view. Sharing the gate here strands the user with no
+    // route to clearing except finding a groupable column's menu.
     normalizedColumnRef.current = { isGroupable: false };
     groupingKeysRef.current = ['priority'];
 
-    render(<GroupActions columnKey='actions' onClose={mockOnClose} />);
+    render(<GroupActions columnKey='notes' onClose={mockOnClose} />);
 
     expect(getButton('Group by This').disabled).toBe(true);
+    expect(getButton('Clear Grouping').disabled).toBe(false);
+  });
+
+  it('clears grouping from an ungroupable column\u{2019}s menu', () => {
+    normalizedColumnRef.current = { isGroupable: false };
+    groupingKeysRef.current = ['priority'];
+
+    render(<GroupActions columnKey='notes' onClose={mockOnClose} />);
+    fireEvent.click(getButton('Clear Grouping'));
+
+    expect(mockSetGrouping).toHaveBeenCalledWith(undefined);
+  });
+
+  it('still disables clearing when the route cannot group at all', () => {
+    // The one capability that legitimately disables it — and the reason
+    // `isDisabled` reads a real value rather than a hardcoded `false`.
+    isGroupingEnabledRef.current = false;
+    groupingKeysRef.current = ['priority'];
+
+    render(<GroupActions columnKey='order_status' onClose={mockOnClose} />);
+
     expect(getButton('Clear Grouping').disabled).toBe(true);
   });
 

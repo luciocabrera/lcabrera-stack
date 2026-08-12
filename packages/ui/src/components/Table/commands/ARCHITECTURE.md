@@ -40,12 +40,21 @@ once.
 - Settings drawer (draft commit-context): `ColumnSettingsDrawer/PinningSection/`
   and `ColumnSettingsDrawer/SortingSection/`.
 
-Every consumer resolves its own capability from the column
-(`useGetNormalizedColumn` + `resolveColumnCapabilities`, `Table/utils/`) and passes
-it as `isDisabled`: sorting commands are unavailable on a non-sortable column,
-pinning commands on a static one, grouping commands on a column the consumer
-declared `isGroupable: false` (which is how the row-actions column is excluded,
-rather than by a `key === 'actions'` test). So each surface's rendering gate and each
+Every consumer resolves its own capability and passes it as `isDisabled`, and
+**the capability is the one that governs that command, not the one its neighbour
+uses**. Most are per-column, resolved from the column
+(`useGetNormalizedColumn` + `resolveColumnCapabilities`, `Table/utils/`): sorting
+commands are unavailable on a non-sortable column, pinning commands on a static
+one, and "Group by This" on a column declared `isGroupable: false` (which is how
+the row-actions column is excluded, rather than by a `key === 'actions'` test).
+
+"Clear Grouping" is the exception, and the reason this paragraph now spells the
+rule out. Grouping is one **whole-table** state, so clearing it depends on
+nothing about the column whose menu is open — it reads the route capability
+instead, and takes no `columnKey` at all so there is nothing to gate on by
+mistake. A command whose scope is the table cannot borrow a column's predicate
+just because it sits beside commands that do; that pairing looks symmetric and
+is not, which is exactly where a copy-paste survives review. So each surface's rendering gate and each
 command's own enabled-state come from the same resolver rather than from a
 hand-spelled predicate per site.
 
