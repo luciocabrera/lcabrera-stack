@@ -39,8 +39,12 @@ const identity = (text: string) => text;
  * The contract it buys is refusal, not repair: a narrowing that does not
  * recognise a token returns `undefined`, and `deserialize` then answers
  * `fallback`. So a hand-edited param yields *no* state rather than a partly
- * applied one, and a token that a downstream lookup would resolve to
- * `undefined` never reaches that lookup while typed as valid.
+ * applied one, and a token *the narrowing rejects* never reaches a downstream
+ * lookup typed as valid.
+ *
+ * That guarantee is exactly as wide as the narrowing each codec supplies and no
+ * wider — one that asserts only an envelope buys nothing about the values
+ * inside it. Each codec documents its own reach.
  */
 export const createUrlStateCodec = <TState, TFallback = TState>({
   compact,

@@ -15,11 +15,17 @@ const fromUrlSafeBase64 = (param: string) =>
 /**
  * Codec for the Base64 `<persistenceKey>-tableState` param.
  *
- * Its narrowing only asserts the envelope — a plain object whose values stay
- * `unknown`. That is the whole vocabulary this param has: every value is read
- * back through a slice-specific reader that narrows for itself, so claiming
- * more here would be claiming something unchecked. An array or a scalar payload
- * is still refused, because no reader downstream can make sense of one.
+ * Its narrowing asserts the envelope only — a plain object whose values stay
+ * `unknown`. A non-object payload is still refused, because an array or a
+ * scalar is not a `tableState` value in any shape this param defines.
+ *
+ * Be clear about what that leaves open, because the values are **not** narrowed
+ * downstream either. `readTableLoaderStateFromRequest` casts them —
+ * `urlState?.columnOrder` to `ColumnOrderState`, `urlState?.columnVisibility` to
+ * `ColumnVisibilityState` — so a hand-edited payload can put a number behind an
+ * array type. That is pre-existing and unchanged by this codec; hardening those
+ * slices is separate work, tracked on its own. What this codec closes is the
+ * envelope, and it claims nothing about the values inside it.
  */
 export const stateCodec = createUrlStateCodec<
   Record<string, unknown>,

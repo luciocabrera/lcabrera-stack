@@ -16,8 +16,11 @@ a helper grows into a schema library by accident.
 token outside its vocabulary, and `deserialize` then answers the codec's declared
 `fallback` — for the _whole_ payload, never one field of it. A hand-edited param
 therefore yields no state at all rather than a partly applied one, so a token
-that a downstream lookup would resolve to `undefined` never reaches that lookup
-while typed as valid.
+_the narrowing rejects_ never reaches a downstream lookup typed as valid.
+
+That guarantee is exactly as wide as the narrowing each codec supplies and no
+wider — one that asserts only an envelope buys nothing about the values inside
+it. The per-codec reach is spelled out below, and it is not uniform.
 ([ADR-061](../../../../../docs/decisions/ADR-061-grouping-config-in-url-expansion-in-store.md)
 states why: a malformed param must yield a flat table, not a half-applied query.)
 
@@ -44,17 +47,28 @@ all-strings array as a select-equals filter, so `["ZZ","x"]` produces a select
 filter over the values `ZZ` and `x`. The pass that rejects a filter a column
 cannot carry is `sanitizeFiltersByColumns` in the loader path: it drops unknown
 column keys and runs `isFilterCompatibleWithColumn` against each column's
-declared `dataType`. The codec closes the envelope; that pass closes the rest.
+declared `dataType`. Note it runs **only when the loader passes `columns`**,
+which is optional on `readTableLoaderStateFromRequest` — a loader that omits
+them gets the filters unchecked. The codec closes the envelope; that pass closes
+the rest when it runs.
 
-`stateCodec` deliberately asserts only the envelope, because every value in that
-param is re-read by a slice-specific reader that narrows for itself — claiming
-more here would be claiming something unchecked.
+`stateCodec` asserts the envelope only, and that is the honest description of it:
+the values inside are **not** narrowed here and are **not** narrowed downstream
+either. `readTableLoaderStateFromRequest` casts them — `urlState?.columnOrder` to
+`ColumnOrderState`, `urlState?.columnVisibility` to `ColumnVisibilityState` — so a
+hand-edited payload can put a number behind an array type. (`readPersistedStateFromCookie`
+and `collectPersistedStateSlices` serve the _cookie_ path, not this param, and are
+not a guard on it.) That is pre-existing and unchanged by this codec; hardening
+those slices is separate work, tracked on its own. A non-object payload is still
+refused, because an array or a scalar is not a `tableState` value in any shape
+this param defines.
 
 **No codec here validates a column key.** The vocabularies above are _value_
 vocabularies; a key is any string. Sorting keys are checked server-side in
 `buildOrderByClause` — `assertSafeIdentifier` on every column with no caller
 opt-out, and `assertColumnAllowed` only for queries that pass `allowedColumns`.
-Filter keys are checked in the loader by `sanitizeFiltersByColumns`.
+Filter keys are checked in the loader by `sanitizeFiltersByColumns`, when the
+loader passes it `columns`.
 
 A narrowing rebuilds its state with `Object.fromEntries`, never by assigning
 into `{}`. Plain assignment routes a `__proto__` key to the prototype setter and

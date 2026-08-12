@@ -21,8 +21,9 @@ import { serializeFilter } from './serializeFilter.util';
  * values `ZZ` and `x` rather than nothing. What rejects a filter a column
  * cannot carry is `sanitizeFiltersByColumns` in the loader path, which drops
  * unknown column keys and runs `isFilterCompatibleWithColumn` against each
- * column's declared `dataType`. This codec closes the envelope; that pass
- * closes the rest.
+ * column's declared `dataType` — though only when the loader passes it
+ * `columns`, which is optional. This codec closes the envelope; that pass
+ * closes the rest when it runs.
  */
 const narrowCompactFilters = (parsed: unknown) => {
   if (!isObject(parsed) || Array.isArray(parsed)) {
