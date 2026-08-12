@@ -30,6 +30,16 @@ produces — only params that never round-tripped through it are affected.
 Undecodable Base64, malformed JSON and unrecognised tokens all degrade to the
 declared fallback instead of throwing, so a hand-edited URL never fails a loader.
 
+**A debug-log leak is closed at the same time, deliberately.** These readers each
+used to pass the caught error to `logger.debug`, and V8 embeds the input in a
+`JSON.parse` SyntaxError message — so a malformed param echoed its leading
+characters into the log, and `filters` carries user-entered text. The log now
+records the failure _kind_ (`SyntaxError`, `InvalidCharacterError`) beside the
+codec name, and never the value. This is fixed here rather than separately
+because consolidating three readers into one codec put all three call sites on a
+single line. It was only ever reachable in a debug-enabled non-production build,
+since `logger.debug` compiles to a no-op under `import.meta.env.PROD`.
+
 Consumers using the exported helpers unchanged need do nothing. Anyone
 constructing these params by hand should make sure the values match the
 documented compact shapes, since a near-miss is now dropped instead of partly

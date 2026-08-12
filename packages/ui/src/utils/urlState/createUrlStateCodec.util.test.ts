@@ -1,30 +1,36 @@
-import { describe, expect, it } from 'vite-plus/test';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 import { createUrlStateCodec } from './createUrlStateCodec.util';
 
+const { debugSpy } = vi.hoisted(() => ({ debugSpy: vi.fn() }));
+
+vi.mock('#ui/utils/logger', () => ({ logger: { debug: debugSpy } }));
+
 type Vocabulary = Record<string, 'off' | 'on'>;
 
+const isVocabularyEntry = (
+  entry: [string, unknown],
+): entry is [string, 'off' | 'on'] => entry[1] === 'on' || entry[1] === 'off';
+
 /**
- * A narrowing in the shape every migrated codec uses: it rebuilds the state
- * from recognised tokens only, and answers `undefined` the moment it meets one
- * it does not know.
+ * A narrowing in the shape every migrated codec uses: it answers `undefined`
+ * the moment it meets a token it does not know, and rebuilds the state with
+ * `Object.fromEntries` rather than by assigning into `{}` — assignment would
+ * route a `__proto__` key to the prototype setter and drop it. This example is
+ * copied, so it follows the rule the codec documents.
  */
 const narrowVocabulary = (parsed: unknown) => {
   if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
     return;
   }
 
-  const state: Vocabulary = {};
+  const entries = Object.entries(parsed);
 
-  for (const [key, token] of Object.entries(parsed)) {
-    if (token !== 'on' && token !== 'off') {
-      return;
-    }
-
-    state[key] = token;
+  if (!entries.every(isVocabularyEntry)) {
+    return;
   }
 
-  return state;
+  return Object.fromEntries(entries);
 };
 
 const codec = createUrlStateCodec<Vocabulary>({
@@ -113,5 +119,26 @@ describe('createUrlStateCodec', () => {
 
     expect(() => explodingCodec.deserialize('{"a":"on"}')).not.toThrow();
     expect(explodingCodec.deserialize('{"a":"on"}')).toStrictEqual({});
+  });
+
+  it('logs the failure kind without echoing the param', () => {
+    // V8 puts the input in a JSON.parse SyntaxError message, so logging the
+    // error object would leak the param's leading characters. `filters` carries
+    // user-entered text, so the log gets a discriminator and nothing else.
+    debugSpy.mockClear();
+    codec.deserialize('SESSIONTOKEN_abc123XYZ');
+
+    const logged = debugSpy.mock.calls.flat().join(' ');
+
+    expect(logged).toContain('vocabulary');
+    expect(logged).toContain('SyntaxError');
+    expect(logged).not.toContain('SESSIONTOK');
+  });
+
+  it('keeps a __proto__ key out of the prototype in the example narrowing', () => {
+    const result = codec.deserialize('{"__proto__":"on","a":"off"}');
+
+    expect(Object.keys(result)).toStrictEqual(['__proto__', 'a']);
+    expect(Object.getPrototypeOf({})).toBe(Object.prototype);
   });
 });

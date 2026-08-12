@@ -45,6 +45,11 @@ const identity = (text: string) => text;
  * That guarantee is exactly as wide as the narrowing each codec supplies and no
  * wider — one that asserts only an envelope buys nothing about the values
  * inside it. Each codec documents its own reach.
+ *
+ * A narrowing must rebuild its state with `Object.fromEntries`, never by
+ * assigning into `{}`: assignment routes a `__proto__` key to the prototype
+ * setter and silently drops it, which is the per-field drop this contract
+ * exists to rule out.
  */
 export const createUrlStateCodec = <TState, TFallback = TState>({
   compact,
@@ -64,7 +69,14 @@ export const createUrlStateCodec = <TState, TFallback = TState>({
 
       logger.debug(`[urlState] Refused ${label} param: unrecognised value`);
     } catch (error) {
-      logger.debug(`[urlState] Failed to parse ${label} param:`, error);
+      // The failure *kind* only — never the error itself. V8 embeds the input
+      // in a `JSON.parse` SyntaxError message, so passing the error through
+      // would echo the param's leading characters into the log, and `filters`
+      // carries user-entered text. The name still separates malformed JSON
+      // (`SyntaxError`) from undecodable Base64 (`InvalidCharacterError`).
+      const failure = error instanceof Error ? error.name : typeof error;
+
+      logger.debug(`[urlState] Failed to parse ${label} param: ${failure}`);
     }
 
     return fallback;
