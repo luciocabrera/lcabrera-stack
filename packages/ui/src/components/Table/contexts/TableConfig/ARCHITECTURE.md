@@ -52,13 +52,10 @@ TableConfig/
 │       ├── useGetColumnVisibility.hook.ts       → Hidden columns set
 │       ├── useGetColumns.hook.ts                → Raw column definitions
 │       ├── useGetColumnsSorting.hook.ts         → Sorting state array
-│       ├── useGetEffectiveColumns.hook.ts       → Columns with applied settings
 │       ├── useGetNormalizedColumn.hook.ts       → Single normalized column by key
-│       ├── useGetNormalizedColumnFilters.hook.ts → Filters with column metadata
 │       ├── useGetNormalizedColumns.hook.ts      → All normalized columns
 │       ├── useGetPinnedColumnInfo.hook.ts       → Single column's pinned-offset entry by key (granular)
-│       ├── useGetPinnedColumnOffsets.hook.ts    → Pre-computed pinned offsets, whole map (derived)
-│       └── useGetStaticColumnKeys.hook.ts       → Non-reorderable column keys
+│       └── useGetPinnedColumnOffsets.hook.ts    → Pre-computed pinned offsets, whole map (derived)
 │
 ├── meta/                                    → UI meta store, actions, selectors
 │   ├── useMetaStore.hook.ts                 → useSyncExternalStore + selector
@@ -340,24 +337,21 @@ Supports both single entries and batch submissions. Each entry specifies:
 
 ## Columns Selectors
 
-| Hook                            | Returns                         | Description                                 |
-| ------------------------------- | ------------------------------- | ------------------------------------------- |
-| `useGetColumns`                 | `ColumnDef[]`                   | Raw column definitions                      |
-| `useGetColumnFilters`           | `ColumnFilters`                 | All active column filters                   |
-| `useGetColumnOrder`             | `ColumnOrderState`              | Column order array                          |
-| `useGetColumnPinning`           | `ColumnPinningState`            | Pinning state `{ left, right }`             |
-| `useGetColumnSizing`            | `ColumnSizingState`             | Column width map (whole map)                |
-| `useGetColumnWidth`             | `number \| undefined`           | One column's width by key (granular)        |
-| `useGetColumnVisibility`        | `Set<string>`                   | Set of hidden column keys                   |
-| `useGetColumnsSorting`          | `SortingState[]`                | Active sorting entries                      |
-| `useGetEffectiveColumns`        | `EffectiveColumn[]`             | Columns with all settings applied           |
-| `useGetNormalizedColumn`        | `NormalizedColumn`              | Single enriched column by key               |
-| `useGetNormalizedColumns`       | `NormalizedColumn[]`            | All enriched column descriptors             |
-| `useGetNormalizedColumnFilters` | `NormalizedFilter[]`            | Filters enriched with column metadata       |
-| `useGetPinnedColumnPartition`   | `PinnedColumnPartitionState`    | Pre-split left/center/right columns         |
-| `useGetPinnedColumnOffsets`     | `PinnedColumnOffsetsState`      | Sticky offsets, whole map                   |
-| `useGetPinnedColumnInfo`        | `PinnedColumnInfo \| undefined` | One column's pinned entry by key (granular) |
-| `useGetStaticColumnKeys`        | `Set<string>`                   | Non-reorderable column keys                 |
+| Hook                          | Returns                         | Description                                 |
+| ----------------------------- | ------------------------------- | ------------------------------------------- |
+| `useGetColumns`               | `ColumnDef[]`                   | Raw column definitions                      |
+| `useGetColumnFilters`         | `ColumnFilters`                 | All active column filters                   |
+| `useGetColumnOrder`           | `ColumnOrderState`              | Column order array                          |
+| `useGetColumnPinning`         | `ColumnPinningState`            | Pinning state `{ left, right }`             |
+| `useGetColumnSizing`          | `ColumnSizingState`             | Column width map (whole map)                |
+| `useGetColumnWidth`           | `number \| undefined`           | One column's width by key (granular)        |
+| `useGetColumnVisibility`      | `Set<string>`                   | Set of hidden column keys                   |
+| `useGetColumnsSorting`        | `SortingState[]`                | Active sorting entries                      |
+| `useGetNormalizedColumn`      | `NormalizedColumn`              | Single enriched column by key               |
+| `useGetNormalizedColumns`     | `NormalizedColumn[]`            | All enriched column descriptors             |
+| `useGetPinnedColumnPartition` | `PinnedColumnPartitionState`    | Pre-split left/center/right columns         |
+| `useGetPinnedColumnOffsets`   | `PinnedColumnOffsetsState`      | Sticky offsets, whole map                   |
+| `useGetPinnedColumnInfo`      | `PinnedColumnInfo \| undefined` | One column's pinned entry by key (granular) |
 
 ## Meta Actions
 

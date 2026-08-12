@@ -174,7 +174,6 @@ Ergonomic builders for the `fields` tree, exported from `@lcabrera/ui/components
 | `buildTableBodyCellDescriptor` | `components/Table/TableBody/utils/buildTableBodyCellDescriptor.util.tsx` | Derives render-ready body-cell descriptor data from column + row                     |
 | `createRenderTableBodyCell`    | `components/Table/TableBody/utils/createRenderTableBodyCell.util.ts`     | Creates bound row-cell renderer from sizing/pinning + descriptor util                |
 | `generatePlaceholderData`      | `components/Table/TableBody/utils/generatePlaceholderData.util.ts`       | Builds empty placeholder rows keyed by visible columns                               |
-| `getTotalVisibleColumnCount`   | `components/Table/TableBody/utils/getTotalVisibleColumnCount.util.ts`    | Counts pinned, center, and spacer cells for spacer-row `colSpan`                     |
 | `renderFromDescriptor`         | `components/Table/TableBody/utils/renderFromDescriptor.util.ts`          | Renders a `TableBodyCell` element from a built cell descriptor                       |
 | `renderTableBodyPinnedGroup`   | `components/Table/TableBody/utils/renderTableBodyPinnedGroup.util.ts`    | Maps one pinning partition (left/center/right) through the shared body-cell renderer |
 
@@ -417,11 +416,6 @@ Per-capability command **identity** + **enablement derivation**, defined once an
 | `createUrlStateCodec` | `utils/urlState/createUrlStateCodec.util.ts` | Builds a `serialize`/`deserialize` pair from a caller-supplied narrowing; an unrecognised token refuses the whole param and yields the declared fallback |
 | `sortingCodec` | `utils/urlState/sortingCodec.util.ts` | Codec for the `sorting` param — accepts only `asc`/`desc` directions |
 | `filtersCodec` | `utils/urlState/filtersCodec.util.ts` | Codec for the `filters` param — column-keyed envelope, `deserializeFilter` per value |
-| `stateCodec` | `utils/urlState/stateCodec.util.ts` | Codec for the Base64 `tableState` param — envelope-only narrowing, `Set` → `Array` on the way out |
-| `encodeStateToURL` | `utils/urlState/encodeStateToURL.util.ts` | Serialises a state object to a Base64 URL-safe string (converts `Set` → `Array`) |
-| `decodeStateFromURL` | `utils/urlState/decodeStateFromURL.util.ts` | Deserialises a Base64 URL-safe string back to a state object, optionally rehydrating named array keys as `Set`s |
-| `readStateFromURL` | `utils/urlState/readStateFromURL.util.ts` | Reads + decodes a single key from `URLSearchParams` |
-| `readTableStateFromURL` | `utils/urlState/readTableStateFromURL.util.ts` | Convenience wrapper: reads sorting, filters, and column-visibility state from the URL |
 | `serializeFiltersToURL` | `utils/urlState/serializeFiltersToURL.util.ts` | `ColumnFiltersState` → compact JSON using operator short-codes |
 | `serializeFilter` | `utils/urlState/serializeFilter.util.ts` | Dispatches a single `ColumnFilter` to the matching leaf serializer |
 | `serializeBooleanFilter` | `utils/urlState/serializeBooleanFilter.util.ts` | Serializes boolean filters as bare booleans |

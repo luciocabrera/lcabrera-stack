@@ -8,7 +8,6 @@ vi.mock('#ui/components/Table/utils', () => ({
 }));
 
 import { readPersistedStateFromCookie } from '#ui/components/Table/utils';
-import { encodeStateToURL } from '#ui/utils/urlState/encodeStateToURL.util';
 import { serializeFiltersToURL } from '#ui/utils/urlState/serializeFiltersToURL.util';
 import { serializeSortingToURL } from '#ui/utils/urlState/serializeSortingToURL.util';
 
@@ -34,17 +33,13 @@ const testColumns: readonly TableColumn<TestRow>[] = [
 ];
 
 describe('readTableLoaderStateFromRequest', () => {
-  it('merges URL state with persisted cookie state', () => {
+  it('merges the URL sorting and filter params with persisted cookie state', () => {
     vi.mocked(readPersistedStateFromCookie).mockReturnValue({
-      columnOrder: ['cookieOnly'],
-      columnSizing: { amount: 180 },
-      columnVisibility: new Set(['cookieOnly']),
-    });
-
-    const encodedState = encodeStateToURL({
       columnOrder: ['id', 'status'],
+      columnSizing: { amount: 180 },
       columnVisibility: new Set(['id']),
     });
+
     const sorting = serializeSortingToURL([
       { columnKey: 'status', direction: 'desc' },
     ]);
@@ -56,7 +51,7 @@ describe('readTableLoaderStateFromRequest', () => {
       },
     });
     const request = new Request(
-      `https://example.com/orders?orders-tableState=${encodedState}&sorting=${encodeURIComponent(
+      `https://example.com/orders?sorting=${encodeURIComponent(
         sorting ?? '',
       )}&filters=${encodeURIComponent(filters ?? '')}`,
       {
@@ -91,6 +86,31 @@ describe('readTableLoaderStateFromRequest', () => {
         values: ['paid'],
       },
     });
+  });
+
+  it('ignores a hand-written tableState param', () => {
+    vi.mocked(readPersistedStateFromCookie).mockReturnValue({
+      columnOrder: ['cookieOnly'],
+      columnVisibility: new Set(['cookieOnly']),
+    });
+
+    const handWrittenState = btoa(
+      JSON.stringify({
+        columnOrder: ['id', 'status'],
+        columnVisibility: ['id'],
+      }),
+    );
+    const request = new Request(
+      `https://example.com/orders?orders-tableState=${handWrittenState}`,
+    );
+
+    const result = readTableLoaderStateFromRequest<TestRow>({
+      persistenceKey: 'orders',
+      request,
+    });
+
+    expect(result.columnOrder).toEqual(['cookieOnly']);
+    expect(result.columnVisibility).toEqual(new Set(['cookieOnly']));
   });
 
   it('skips standalone filters when includeFilters is false', () => {

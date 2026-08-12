@@ -17,7 +17,7 @@ graph TB
 
     subgraph SELECTORS["Selectors (Read)"]
         direction TB
-        gEC["useGetEffectiveColumns"]
+        gPP["useGetPinnedColumnPartition"]
         gNC["useGetNormalizedColumns"]
         gCS["useGetColumnsSorting"]
         gCF["useGetColumnFilters"]
@@ -76,7 +76,7 @@ graph TB
 
     class dataPromise,colDefs,config props
     class TCP,FDP,TDP provider
-    class gEC,gNC,gCS,gCF,gCV,gCSz selector
+    class gPP,gNC,gCS,gCF,gCV,gCSz selector
     class setSorting,setFilter,setSizing,batchSet,persist action
     class THC2,TBC2,TBody2,FI comp
     class colResize,infScroll,virtHook hook

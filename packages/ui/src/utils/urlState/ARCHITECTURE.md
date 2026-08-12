@@ -24,21 +24,22 @@ it. The per-codec reach is spelled out below, and it is not uniform.
 ([ADR-061](../../../../../docs/decisions/ADR-061-grouping-config-in-url-expansion-in-store.md)
 states why: a malformed param must yield a flat table, not a half-applied query.)
 
-Anything thrown along the way — undecodable Base64, malformed JSON, a narrowing
-that throws — is a refusal too, so a URL a user edited by hand degrades instead
-of failing a loader.
+Anything thrown along the way — malformed JSON, a transport that cannot decode,
+a narrowing that throws — is a refusal too, so a URL a user edited by hand
+degrades instead of failing a loader.
 
-`decodeParam` / `encodeParam` are the optional text layer between the raw param
-and the JSON: the state param is Base64, the sorting and filter params are plain
-JSON and leave both off.
+`decodeParam` / `encodeParam` are the factory's optional text layer between the
+raw param and the JSON, for a param that carries a transport such as Base64. No
+codec here supplies one: every param this folder owns is plain JSON, and
+[ADR-061](../../../../../docs/decisions/ADR-061-grouping-config-in-url-expansion-in-store.md)
+puts the `grouping` param in that same compact-JSON style.
 
 Each codec's `narrow` chooses what "unrecognised" means for its param:
 
-| Codec          | Vocabulary it checks                                                      | Fallback    |
-| -------------- | ------------------------------------------------------------------------- | ----------- |
-| `sortingCodec` | every value is `asc` or `desc`; one bad direction refuses the lot         | `{}`        |
-| `filtersCodec` | the envelope is a column-keyed object; each value via `deserializeFilter` | `{}`        |
-| `stateCodec`   | the envelope is a plain object; values stay `unknown`                     | `undefined` |
+| Codec          | Vocabulary it checks                                                      | Fallback |
+| -------------- | ------------------------------------------------------------------------- | -------- |
+| `sortingCodec` | every value is `asc` or `desc`; one bad direction refuses the lot         | `{}`     |
+| `filtersCodec` | the envelope is a column-keyed object; each value via `deserializeFilter` | `{}`     |
 
 `filtersCodec` keeps the pre-existing per-entry drop inside a recognised object,
 and it is worth being exact about what that drop covers. `deserializeFilter`
@@ -52,17 +53,14 @@ which is optional on `readTableLoaderStateFromRequest` — a loader that omits
 them gets the filters unchecked. The codec closes the envelope; that pass closes
 the rest when it runs.
 
-`stateCodec` asserts the envelope only, and that is the honest description of it:
-the values inside are **not** narrowed here and are **not** narrowed downstream
-either. `readTableLoaderStateFromRequest` casts them — `urlState?.columnOrder` to
-`ColumnOrderState`, `urlState?.columnVisibility` to `ColumnVisibilityState` — so a
-hand-edited payload can put a number behind an array type. (`readPersistedStateFromCookie`
-and `collectPersistedStateSlices` serve the _cookie_ path, not this param, and are
-not a guard on it.) That is pre-existing and unchanged by this codec; hardening
-those slices is separate work, tracked in
-[#631](https://github.com/luciocabrera/vite-react-compiler/issues/631). A
-non-object payload is still refused, because an array or a scalar is not a
-`tableState` value in any shape this param defines.
+**There is no `tableState` param.** A Base64 `<persistenceKey>-tableState`
+envelope carrying `columnOrder` / `columnVisibility` used to be read here, and
+nothing ever wrote it — the persist-cookie flow (ADR-010) writes those two slices
+to the cookie and gives them no `searchParamKey`. Its encoder, reader chain and
+state type were retired in #566 rather than left as a plausible-looking home for
+new state. Order and visibility reach a loader through
+`readPersistedStateFromCookie`; `sorting` and `filters` are the URL-borne slices,
+and they have the two codecs above.
 
 **No codec here validates a column key.** The vocabularies above are _value_
 vocabularies; a key is any string. Sorting keys are checked server-side in
@@ -87,11 +85,6 @@ urlState/
 ├── createUrlStateCodec.util.ts
 ├── sortingCodec.util.ts
 ├── filtersCodec.util.ts
-├── stateCodec.util.ts
-├── encodeStateToURL.util.ts
-├── decodeStateFromURL.util.ts
-├── readStateFromURL.util.ts
-├── readTableStateFromURL.util.ts
 ├── serializeSortingToURL.util.ts
 ├── deserializeSortingFromURL.util.ts
 ├── serializeFiltersToURL.util.ts
@@ -112,22 +105,15 @@ urlState/
 graph TD
   Index[URL state index] --> DSF[Deserialize filters utility]
   Index --> DSS[Deserialize sorting utility]
-  Index --> RTS[Read table state utility]
   Index --> SFU[Serialize filters utility]
   Index --> SSU[Serialize sorting utility]
-
-  RTS --> RS[Read state utility]
-  RS --> Decode[Decode state utility]
-  Decode --> StateCodec[stateCodec]
-  Encode[Encode state utility] --> StateCodec
 
   DSS --> SortingCodec[sortingCodec]
   SSU --> SortingCodec
   DSF --> FiltersCodec[filtersCodec]
   SFU --> FiltersCodec
 
-  StateCodec --> Factory[createUrlStateCodec]
-  SortingCodec --> Factory
+  SortingCodec --> Factory[createUrlStateCodec]
   FiltersCodec --> Factory
   Factory --> Logger[logger]
 
@@ -186,79 +172,6 @@ then rebuilds the record with `Object.fromEntries`.
 
 Codec for the `filters` param. Its narrowing checks the envelope, then routes
 each value through `deserializeFilter`.
-
-### stateCodec.util.ts
-
-Codec for the Base64 `<persistenceKey>-tableState` param. Supplies both transport
-halves and converts `Set` values to arrays on the way out.
-
-### encodeStateToURL.util.ts
-
-Encodes plain object state into Base64 URL-safe string — `stateCodec.serialize`
-under a name, so the Set conversion and the Base64 transport live in the codec.
-
-```mermaid
-flowchart TD
-  A[Encode state to URL value] --> B[stateCodec.serialize]
-  B --> C[compact: set values to arrays]
-  C --> D[JSON.stringify]
-  D --> E[encodeParam: Base64, URL-safe, padding trimmed]
-  E --> F[Return encoded token]
-```
-
-Key behavior:
-
-- Ensures `Set` values are serializable.
-- Produces compact URL-safe payload.
-
-### decodeStateFromURL.util.ts
-
-Decodes URL-safe Base64 state via `stateCodec` and optionally rehydrates arrays
-into sets. The rehydration copies rather than mutating the decoded object, and
-is applied here rather than in the codec because the key list is a per-call
-argument.
-
-```mermaid
-flowchart TD
-  A[Decode state from URL value] --> B[stateCodec.deserialize]
-  B -- refused or unparseable --> C[Return undefined]
-  B -- state --> D{Convert arrays to sets provided}
-  D -- no --> E[Return state]
-  D -- yes --> F[Copy, named Array keys -> Set]
-  F --> E
-```
-
-### readStateFromURL.util.ts
-
-Reads named query param and decodes via `decodeStateFromURL`.
-
-```mermaid
-flowchart TD
-  A[Read state from URL params] --> B[Read query param by key]
-  B --> C{Value exists}
-  C -- no --> D[Return undefined]
-  C -- yes --> E[Decode param value]
-  E --> F[Return decoded object or undefined]
-```
-
-### readTableStateFromURL.util.ts
-
-Table-specific wrapper around `readStateFromURL`.
-
-```mermaid
-flowchart TD
-  A[Read table state from URL] --> B[Build key from persistence key and tableState suffix]
-  B --> C[readStateFromURL with convertArraysToSets: columnVisibility]
-  C --> D[Cast to Partial<TableSearchParamsState>]
-  D --> E[Return state or undefined]
-```
-
-Typed state envelope:
-
-- `columnOrder?`
-- `columnVisibility?`
-- `filters?`
-- `sorting?`
 
 ### serializeSortingToURL.util.ts
 
@@ -392,11 +305,10 @@ flowchart TD
 
 - `deserializeFiltersFromURL`
 - `deserializeSortingFromURL`
-- `readTableStateFromURL`
 - `serializeFiltersToURL`
 - `serializeSortingToURL`
 
 The codecs and the factory are **not** barrelled. Nothing outside this folder
-consumes them yet, and per ADR-007 a barrel exports what is actually imported
+consumes them, and per ADR-007 a barrel exports what is actually imported
 through it; a new codec (the `grouping` param) imports `createUrlStateCodec` by
-file path, the way `encodeStateToURL.util` is already imported elsewhere.
+file path.

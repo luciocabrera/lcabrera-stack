@@ -7,7 +7,6 @@ import { getPersistedUiState } from './getPersistedUiState.util';
 describe('getPersistedUiState', () => {
   it('extracts only the persisted UI fields from table meta state', () => {
     const state = {
-      columnOverscan: 2,
       columnSelectedKey: 'status',
       columnSettingsSelectedTab: 'general',
       density: 'compact',

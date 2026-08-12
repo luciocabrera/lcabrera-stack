@@ -1,7 +1,6 @@
 import type { TableMetaState } from '#ui/components/Table/Table.types';
 
 import {
-  DEFAULT_COLUMN_OVERSCAN,
   DEFAULT_OVERSCAN,
   DEFAULT_ROW_HEIGHT,
   INFINITE_SCROLL_THRESHOLD,
@@ -20,7 +19,6 @@ type GetInitialMetaStateArgs = Partial<TableMetaState>;
  */
 export const getInitialMetaState = ({
   appId,
-  columnOverscan = DEFAULT_COLUMN_OVERSCAN,
   columnSettingsSelectedTab = 'general',
   density = 'compact',
   drawersSyncNonce = 0,
@@ -47,7 +45,6 @@ export const getInitialMetaState = ({
 }: GetInitialMetaStateArgs) => {
   return {
     appId,
-    columnOverscan,
     columnSettingsSelectedTab,
     density,
     drawersSyncNonce,
