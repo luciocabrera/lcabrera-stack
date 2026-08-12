@@ -1,22 +1,27 @@
-# Aggregation is builder-generated in a sibling module, over `GROUPING SETS`
+# ADR-059 — Generate aggregation in a sibling builder that always emits GROUPING SETS
 
-**Status:** Proposed
-
-<!-- Draft — no number until adoption (see README.md). Home at adoption:
-     docs/decisions/ — it governs a published package's public surface. -->
+- **Status:** Accepted
+- **Date:** 2026-08-12
+- **Scope:** `@lcabrera/server` (`db/group-query-builder/`), the grouped-read path in `apps/react-router`
+- **Issue:** #551 — implemented by #562
+- **Related:** ADR-058 (grouping legality by analytical role), ADR-050 (error translation and the Result contract), ADR-051 (`withTransaction` and the `tx` executor option), ADR-052 (keyset pagination)
 
 ## Context
 
-`packages/server/src/db/query-builder/` is a set of pure functions that assemble
-parameterized SQL over raw `pg`, with no ORM. Its `ARCHITECTURE.md` states the
-module's non-goals: **no joins, no subqueries, no raw SQL fragments**. Separately,
-`docs/cqms/PRD.md` states that rollup belongs in Postgres **views**.
+[`packages/server/src/db/query-builder/`](../../packages/server/src/db/query-builder/)
+is a set of pure functions that assemble parameterized SQL over raw `pg`, with no
+ORM. Its `ARCHITECTURE.md` states the module's non-goals: **no joins, no
+subqueries, no raw SQL fragments**. Separately,
+[`docs/cqms/PRD.md`](../cqms/PRD.md) states that rollup belongs in Postgres
+**views**.
 
 Row grouping needs `GROUP BY`, aggregates, and — for a count of groups — a
-subquery. Today the tree has none of it: no `GROUP BY`, `ROLLUP`, `CUBE`,
-`GROUPING` or `HAVING` generation exists anywhere in the builder. The only
-aggregates are two hardcoded strings in `buildCountQuery` and
-`buildMaxValueQuery`.
+subquery. At the time of this decision the repo generated none of them: nothing
+under `packages/server/src/db/` emitted `GROUP BY`, `ROLLUP`, `CUBE`, `GROUPING`
+or `HAVING`, and the only aggregates were the hardcoded strings in
+`buildCountQuery` and `buildMaxValueQuery`. This decision is what changes that,
+so the sentence is a statement about the starting point and not something a
+later reader should expect to still hold.
 
 One correction to how the constraint is usually stated: the sibling's
 `ARCHITECTURE.md` does **not** contain a blanket prohibition on aggregates — it
@@ -58,8 +63,10 @@ TypeScript into explicit `GROUPING SETS`.
 
 ## Decision
 
-Aggregation is **builder-generated**, in a new module named `group-query-builder`
-created as a sibling of `packages/server/src/db/query-builder/`, which:
+Aggregation is **builder-generated**, in
+[`packages/server/src/db/group-query-builder/`](../../packages/server/src/db/group-query-builder/) —
+a sibling of `query-builder/`, whose capability half already landed under
+ADR-058 and whose emission half this decision authorises. The module:
 
 - **inherits the sibling's discipline** — pure functions, one export per file with
   a colocated test, never imports `getPool`, so its whole suite runs DB-free and
@@ -69,13 +76,24 @@ created as a sibling of `packages/server/src/db/query-builder/`, which:
   forbidden here too;
 - **always emits `GROUP BY GROUPING SETS (…)`**, expanding rollup to n+1 sets and
   cube to 2ⁿ in TypeScript, in Postgres's canonical order;
-- **reuses the identifier defences unchanged** — the safe-identifier pattern, the
-  allowlist assertion and `quoteIdentifier` — and threads every value through the
-  same immutable clause accumulator, so values remain `$n` without exception.
+- **reuses the identifier defences unchanged** — `assertSafeIdentifier`,
+  `assertColumnAllowed` and `quoteIdentifier` — and threads every value through
+  `buildWhereClause`, so values remain `$n` without exception.
 
 `allowedColumns` is **required** on the grouped descriptor, unlike the flat one
 where it is opt-in: every group key is request-derived by construction, so opt-in
 semantics would be a silent hole.
+
+**Legality is passed in, not re-derived.** The builder takes the
+`ColumnGroupingCapability` map that
+[`getColumnGroupingCapabilities`](../../packages/server/src/db/get-column-grouping-capabilities.util.ts)
+resolves from the catalogue, and refuses a group key whose `canGroup` is false or
+an aggregate absent from that column's list. This is what keeps the builder pure
+while still enforcing ADR-058: the impure half answers "what is legal here", the
+pure half enforces it. The planning document's earlier design — deriving
+legality from `TableColumnDataType` inside the builder — is superseded by
+ADR-058 and must not be reintroduced, because that vocabulary collapses `point`
+and `jsonb` onto `string`.
 
 ## Consequences
 
@@ -95,19 +113,28 @@ they diverge — the sibling relationship is a convention, not a mechanism. The
 mitigation is that the shared primitives are _imported_, not copied; only the
 assembly differs.
 
-Two traps the module must handle that the flat builder never faces. Postgres
-**truncates identifiers at 63 bytes with only a `NOTICE`**, after which the driver
-returns one row object where the second of two colliding aliases silently
-overwrites the first — so alias uniqueness must be asserted on the _truncated_
-form, and the repo's safe-identifier pattern has no length bound to lean on. And
-because an aggregate may carry `FILTER (WHERE …)`, the `SELECT` list claims the
-leading parameter positions and `WHERE` starts later — a departure from the flat
-builder, though **not** unprecedented: `build-update-query.util.ts` already does
-exactly this, which is why `buildWhereClause` takes a start index at all.
+Two traps the module must handle that the flat builder never faces.
+
+**Identifiers truncate silently, and the driver then loses a column.** Postgres
+truncates at 63 bytes with only a `NOTICE`, and `pg` returns one row object in
+which the _second_ of two colliding aliases overwrites the first. Probed against
+the live instance: two aliases sharing their first 63 characters produced two
+`NOTICE` lines and no error, `result.fields` reported both names as the same
+63-character string, and `Object.keys(result.rows[0])` had **length 1** holding
+the second value. A driver that disambiguated would have returned two keys; it
+returned one. So an over-long alias is refused at construction rather than
+truncated, and uniqueness is asserted across aliases and group keys together —
+the repo's safe-identifier pattern has no length bound to lean on.
+
+**The `SELECT` list can claim the leading parameters.** An aggregate may carry
+`FILTER (WHERE …)`, so `WHERE` no longer starts at `$1` — a departure from every
+other builder here, though **not** unprecedented: `build-update-query.util.ts`
+already does exactly this, which is why `buildWhereClause` takes a start index at
+all.
 
 `packages/server`'s public surface grows. New subpaths must land in **both**
 `exports` and `publishConfig.exports`, and the API-surface gate requires a
-changeset. Export deliberately — only 9 of the sibling's 20 files are exported.
+changeset. Export deliberately — most of the sibling's files are internal.
 
 ## Alternatives considered
 
@@ -126,7 +153,8 @@ while leaving orphaned detail rows: a hierarchy with holes.
 
 ## References
 
-- `docs/agents/planning/table-row-grouping-plan.md` §1.4, §2.3, §4
-- `packages/server/src/db/query-builder/ARCHITECTURE.md` — the non-goals this qualifies
-- `docs/cqms/PRD.md` — the "rollup belongs in views" statement this qualifies
-- Backlog entries P-02 (this ADR), P-13 (the builder), P-23 (the guard rails)
+- [`docs/agents/planning/table-row-grouping-plan.md`](../agents/planning/table-row-grouping-plan.md) §1.4, §2.3, §4 — the design session, and the probe output quoted above
+- [`packages/server/src/db/query-builder/ARCHITECTURE.md`](../../packages/server/src/db/query-builder/ARCHITECTURE.md) — the non-goals this qualifies
+- [`docs/cqms/PRD.md`](../cqms/PRD.md) — the "rollup belongs in views" statement this qualifies
+- [ADR-058](./ADR-058-grouping-legality-by-analytical-role.md) — where legality comes from, and why the builder does not re-derive it
+- Issues #551 (this decision), #562 (the emission half), #573 (the guard rails)

@@ -45,3 +45,4 @@ or run `vp run adr:new`, which takes the next free number for you.
 | [ADR-056](./ADR-056-generic-table-route-data-path.md)                 | One generic data path for a paginated table route                                                                        |
 | [ADR-057](./ADR-057-publish-the-custom-lint-rules.md)                 | The custom lint rules publish as `@lcabrera/eslint-plugin`                                                               |
 | [ADR-058](./ADR-058-grouping-legality-by-analytical-role.md)          | Gate grouping legality on analytical role, with the Postgres catalogue as the floor                                      |
+| [ADR-059](./ADR-059-aggregation-is-builder-generated.md)              | Generate aggregation in a sibling builder that always emits GROUPING SETS                                                |
