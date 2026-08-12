@@ -14,13 +14,21 @@ type ColumnCapabilities = {
   readonly isStatic: boolean;
 };
 
-/** Anything column-shaped: the flags exactly as `TableColumn` declares them. */
+/**
+ * Anything column-shaped: the flags exactly as `TableColumn` declares them.
+ * Reusing the resolved type as the input shape holds only while the two agree
+ * member-for-member — `isResizable` already differs in meaning (raw here,
+ * effective there), so a second vetoed capability is the point to split them.
+ */
 type ColumnCapabilityFlags = Partial<ColumnCapabilities>;
 
 /**
- * What an omitted flag resolves to. The single home for the defaults — the
- * flags on `TableColumn` are optional and their JSDoc no longer restates a
- * value, so changing a default is a one-line change here.
+ * What an **omitted** flag falls back to. The single home for the defaults —
+ * the flags on `TableColumn` are optional and their JSDoc no longer restates a
+ * value, so changing a fallback is a one-line change here.
+ *
+ * It is the whole answer for every flag but `isResizable`, which `isStatic`
+ * then vetoes: a static column resolves to `false` however this constant reads.
  */
 const COLUMN_CAPABILITY_DEFAULTS: ColumnCapabilities = {
   isFilterable: true,
