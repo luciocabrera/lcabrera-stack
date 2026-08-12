@@ -142,6 +142,13 @@ const readFocusedCell = () => {
  * not. Every scroll the grid performs on its own therefore needs this to reach
  * the virtualization window, which is exactly what a real browser would do for
  * it one frame later.
+ *
+ * The **awaited async** `act` is load-bearing and is the only one in this file
+ * that is: the scroll listener defers its state update through
+ * `requestAnimationFrame`, so nothing but an act that drains microtasks flushes
+ * the re-render. Every other helper here ends by awaiting this one, which is
+ * why none of them needs an `act` of its own — `fireEvent` and a plain
+ * `.focus()` both settle before this returns.
  */
 const flushScroll = async () => {
   await act(async () => {
@@ -160,20 +167,16 @@ type PressKeyArgs = {
 };
 
 const pressKey = async ({ isRangeModifier = false, key }: PressKeyArgs) => {
-  await act(async () => {
-    fireEvent.keyDown(document.activeElement ?? getGrid(), {
-      ctrlKey: isRangeModifier,
-      key,
-    });
+  fireEvent.keyDown(document.activeElement ?? getGrid(), {
+    ctrlKey: isRangeModifier,
+    key,
   });
   await flushScroll();
 };
 
 /** Tab into the grid: focus lands on the container, which delegates onwards. */
 const enterGrid = async () => {
-  await act(async () => {
-    getGrid().focus();
-  });
+  getGrid().focus();
   await flushScroll();
 };
 
@@ -430,6 +433,10 @@ describe('grid focus model', () => {
     render(<Harness />);
 
     const cell = screen.getAllByRole('gridcell')[4];
+    // The one `act` outside `flushScroll` that is needed, and needed precisely
+    // because this is the only interaction here that does not scroll: nothing
+    // awaits `flushScroll` afterwards, so the focus effects have nothing else
+    // to be flushed by.
     await act(async () => {
       (cell as HTMLElement).focus();
     });
