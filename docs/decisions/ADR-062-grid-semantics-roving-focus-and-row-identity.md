@@ -127,18 +127,23 @@ of the Table already uses.
 truthful here at all. Without them a screen reader perceives only the rendered
 window and announces it as the whole dataset.
 
-- `aria-rowcount` on the grid reports the full dataset — `totalRows`, never
-  `totalLoadedRows`, which would shrink and grow as pages arrive and describe the
-  fetch rather than the data. When no total is known (the consumer supplied none,
-  so `totalRows` sits at its `0` default), `aria-rowcount` is `-1`, the value ARIA
-  reserves for an unknown total. `0` would assert an empty grid.
+- `aria-rowcount` on the grid reports the full dataset **plus the header row** —
+  `totalRows + 1`, never `totalLoadedRows`, which would shrink and grow as pages
+  arrive and describe the fetch rather than the data. The `+ 1` is not incidental:
+  the count and the indices below must share one base, and the header occupies
+  index 1. When no total is known (the consumer supplied none, so `totalRows` sits
+  at its `0` default), `aria-rowcount` is `-1`, the value ARIA reserves for an
+  unknown total — not `0 + 1`, which would assert a grid holding nothing but its
+  header.
 - `aria-rowindex` on each row is its absolute position in that dataset, not its
   offset in the rendered window.
 - Indices are 1-based and continuous across the whole sequence, and the header row
-  participates in it as row 1 — so a body row at loaded index `i` carries `i + 2`,
-  and `aria-rowcount` counts the header row too. The invariant worth checking is
-  that the largest index the grid can emit equals the count it advertises; if the
-  two are computed from different bases, one of them is wrong.
+  participates in it as row 1 — so a body row at loaded index `i` carries `i + 2`.
+  The invariant worth checking is that the largest index the grid can emit equals
+  the count it advertises: the last body row is `totalRows + 1`, which is exactly
+  the `aria-rowcount` above. If the two are computed from different bases, one of
+  them is wrong — and that is the check to write as a test, because reading either
+  rule alone will not catch it.
 - Spacer rows stay `aria-hidden='true'` (they already are), so the filler that
   makes the scroll height work is never announced as a row.
 
