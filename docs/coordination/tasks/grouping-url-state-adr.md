@@ -10,7 +10,7 @@ area:
 started: 2026-08-12
 updated: 2026-08-12
 plan: (none)
-pr: (none)
+pr: '#623'
 issue: #553
 ---
 
@@ -20,6 +20,7 @@ docs(adr): grouping config is URL state, expansion is client state
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: ADR-061 written, draft removed, index regenerated, gates run
 - Blockers: none
-- Next:
+- Next: orchestrator resolves the ADR index against the sibling ADRs, then
+  readies and merges the PR
