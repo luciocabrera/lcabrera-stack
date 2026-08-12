@@ -180,9 +180,9 @@ Ergonomic builders for the `fields` tree, exported from `@lcabrera/ui/components
 
 ### `src/components/Table/TableBodyRows/utils/` _(private delegates)_
 
-| Function        | Location                                                     | Description                                                                                                                                     |
-| --------------- | ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `resolveRowKey` | `components/Table/TableBodyRows/utils/resolveRowKey.util.ts` | Total row identity key from the primary-key column(s) (`pk:` prefix), degrading to a distinctly prefixed index key (`idx:`) instead of throwing |
+| Function        | Location                                                     | Description                                                                                                                                                                                                                           |
+| --------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `resolveRowKey` | `components/Table/TableBodyRows/utils/resolveRowKey.util.ts` | Row identity key for React reconciliation: a `JSON.stringify` tuple of the primary-key column value(s) (`pk:` prefix), degrading to a distinctly prefixed index key (`idx:`) — never throws, and never collides two rows onto one key |
 
 ### `src/components/Table/utils/`
 

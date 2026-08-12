@@ -21,33 +21,40 @@ const col = ({
   label: key,
 });
 
+const singleKeyColumns = [
+  col({ isPrimaryKey: true, key: 'order_id' }),
+  col({ key: 'order_number' }),
+];
+
+const compositeKeyColumns = [
+  col({ isPrimaryKey: true, key: 'order_id' }),
+  col({ isPrimaryKey: true, key: 'order_number' }),
+];
+
 const UNRESOLVABLE_VALUE = undefined as unknown as Row['order_id'];
+
+/** Half of a surrogate pair — `encodeURIComponent` raises `URIError` on it. */
+const LONE_SURROGATE = '\u{D800}';
 
 describe('resolveRowKey', () => {
   it('derives the key from a single primary-key column', () => {
     const result = resolveRowKey<Row>({
-      columns: [
-        col({ isPrimaryKey: true, key: 'order_id' }),
-        col({ key: 'order_number' }),
-      ],
+      columns: singleKeyColumns,
       index: 7,
       row: { order_id: 123, order_number: 'ORD-9' },
     });
 
-    expect(result).toBe('pk:123');
+    expect(result).toBe('pk:[123]');
   });
 
-  it('joins encoded composite key values in declaration order', () => {
+  it('encodes composite key values in declaration order', () => {
     const result = resolveRowKey<Row>({
-      columns: [
-        col({ isPrimaryKey: true, key: 'order_id' }),
-        col({ isPrimaryKey: true, key: 'order_number' }),
-      ],
+      columns: compositeKeyColumns,
       index: 0,
       row: { order_id: 123, order_number: 'ORD 9' },
     });
 
-    expect(result).toBe('pk:123_ORD%209');
+    expect(result).toBe('pk:[123,"ORD 9"]');
   });
 
   it('ignores a primary-key flag on the synthetic actions column', () => {
@@ -82,15 +89,88 @@ describe('resolveRowKey', () => {
 
   it('falls back to the index when only part of a composite key resolves', () => {
     const result = resolveRowKey<Row>({
-      columns: [
-        col({ isPrimaryKey: true, key: 'order_id' }),
-        col({ isPrimaryKey: true, key: 'order_number' }),
-      ],
+      columns: compositeKeyColumns,
       index: 6,
       row: { order_id: 123, order_number: UNRESOLVABLE_VALUE as string },
     });
 
     expect(result).toBe('idx:6');
+  });
+
+  it('falls back to the index for a non-finite numeric id', () => {
+    const columns = [col({ isPrimaryKey: true, key: 'order_id' })];
+
+    expect(
+      resolveRowKey<Row>({
+        columns,
+        index: 8,
+        row: { order_id: NaN, order_number: 'ORD-9' },
+      }),
+    ).toBe('idx:8');
+    expect(
+      resolveRowKey<Row>({
+        columns,
+        index: 9,
+        row: { order_id: Infinity, order_number: 'ORD-9' },
+      }),
+    ).toBe('idx:9');
+  });
+
+  it('escapes an unpaired surrogate instead of throwing', () => {
+    const args = {
+      columns: [col({ isPrimaryKey: true, key: 'order_id' })],
+      index: 0,
+      row: { order_id: LONE_SURROGATE, order_number: 'ORD-9' },
+    };
+
+    expect(() => resolveRowKey<Row>(args)).not.toThrow();
+    expect(resolveRowKey<Row>(args)).toBe(String.raw`pk:["\ud800"]`);
+  });
+
+  it('keeps a composite key unambiguous across element boundaries', () => {
+    const splitEarly = resolveRowKey<Row>({
+      columns: compositeKeyColumns,
+      index: 0,
+      row: { order_id: 'a_b', order_number: 'c' },
+    });
+    const splitLate = resolveRowKey<Row>({
+      columns: compositeKeyColumns,
+      index: 1,
+      row: { order_id: 'a', order_number: 'b_c' },
+    });
+
+    expect(splitEarly).not.toBe(splitLate);
+
+    const quotedEarly = resolveRowKey<Row>({
+      columns: compositeKeyColumns,
+      index: 2,
+      row: { order_id: 'a"', order_number: 'b' },
+    });
+    const quotedLate = resolveRowKey<Row>({
+      columns: compositeKeyColumns,
+      index: 3,
+      row: { order_id: 'a', order_number: '"b' },
+    });
+
+    expect(quotedEarly).not.toBe(quotedLate);
+  });
+
+  it('distinguishes a numeric id from the same id as text', () => {
+    const columns = [col({ isPrimaryKey: true, key: 'order_id' })];
+
+    expect(
+      resolveRowKey<Row>({
+        columns,
+        index: 0,
+        row: { order_id: 7, order_number: 'ORD-1' },
+      }),
+    ).not.toBe(
+      resolveRowKey<Row>({
+        columns,
+        index: 1,
+        row: { order_id: '7', order_number: 'ORD-2' },
+      }),
+    );
   });
 
   it('gives each unresolvable row a distinct key', () => {
@@ -102,25 +182,22 @@ describe('resolveRowKey', () => {
     );
   });
 
-  it('cannot collide a value-derived key with the index-derived key of the same text', () => {
-    const columns = [
-      col({ isPrimaryKey: true, key: 'order_id' }),
-      col({ key: 'order_number' }),
-    ];
-
+  it('keeps value-derived and index-derived keys in disjoint namespaces', () => {
     const valueDerived = resolveRowKey<Row>({
-      columns,
+      columns: singleKeyColumns,
       index: 0,
       row: { order_id: '3', order_number: 'ORD-1' },
     });
     const indexDerived = resolveRowKey<Row>({
-      columns,
+      columns: singleKeyColumns,
       index: 3,
       row: { order_id: UNRESOLVABLE_VALUE, order_number: 'ORD-2' },
     });
 
-    expect(valueDerived).toBe('pk:3');
+    expect(valueDerived).toBe('pk:["3"]');
     expect(indexDerived).toBe('idx:3');
+    expect(valueDerived.startsWith('pk:')).toBe(true);
+    expect(indexDerived.startsWith('idx:')).toBe(true);
     expect(valueDerived).not.toBe(indexDerived);
   });
 });

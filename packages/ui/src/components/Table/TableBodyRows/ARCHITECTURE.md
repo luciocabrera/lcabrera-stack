@@ -72,24 +72,55 @@ Rows are keyed by data, not by position ([ADR-062](../../../../../../docs/decisi
 derivation `resolveCrudRowId` uses for a CRUD id, via the shared
 `resolvePrimaryKeyColumnKeys`.
 
-The two helpers deliberately differ in their failure handling. `resolveCrudRowId`
-throws a `TypeError` when no column is marked `isPrimaryKey`, and again when a
-primary-key value is neither string nor number — correct for a CRUD link, where a
-bad id must not reach a route. `resolveRowKey` is **total**: a key is needed for
-every row on every render, so the same conditions yield an index-derived key
-instead of a throw that would take the whole table to an error boundary.
+The two helpers share which columns they read and nothing else — not the
+encoding, and not the failure handling. `resolveCrudRowId` throws a `TypeError`
+when no column is marked `isPrimaryKey`, and again when a primary-key value is
+neither string nor number; that is correct for a CRUD link, where a bad id must
+not reach a route. `resolveRowKey` **never throws**, because a key is needed for
+every row on every render and a throw here would take the whole table to an error
+boundary.
 
-| Case                                            | Key shape                  |
-| ----------------------------------------------- | -------------------------- |
-| Single primary key                              | `pk:<encoded value>`       |
-| Composite primary key, declaration order        | `pk:<v1>_<v2>`             |
-| No `isPrimaryKey` column, or a non-scalar value | `idx:<absolute row index>` |
+| Case                                                                 | Key shape                  |
+| -------------------------------------------------------------------- | -------------------------- |
+| Single primary key                                                   | `pk:[123]`                 |
+| Composite primary key, declaration order                             | `pk:[123,"ORD 9"]`         |
+| No `isPrimaryKey` column, a non-scalar value, or a non-finite number | `idx:<absolute row index>` |
 
-**The prefixes are load-bearing.** Value-derived and index-derived keys occupy
-disjoint namespaces, so a row whose primary key is literally the text of some
-row's index stays distinguishable from that row. Removing either prefix
-reintroduces that collision, and `resolveRowKey.util.test.ts` asserts the
-inequality directly.
+**The value part is `JSON.stringify` over the resolved tuple, and each of its
+three properties is load-bearing.** A delimiter-joined `encodeURIComponent`
+form — the shape `resolveCrudRowId` uses, and the obvious thing to copy — fails
+all three:
+
+- **It is well-formed by spec (ES2019), so it cannot throw on string input.**
+  `encodeURIComponent` raises `URIError: URI malformed` on an unpaired surrogate,
+  which is an ordinary `string` and passes any `typeof` guard. That value reaches
+  a row from `JSON.parse('{"id":"\ud800"}')` or from any string sliced through a
+  surrogate pair — so the delimiter-joined form is not total, and "never throws"
+  would be false.
+- **It is unambiguous across element boundaries.** `PRIMARY_KEY_ID_DELIMITER` is
+  `_`, which is unreserved and therefore survives `encodeURIComponent` untouched,
+  so `['a_b','c']` and `['a','b_c']` both join to `a_b_c` — two rows, one key.
+  A JSON array delimits its elements structurally and escapes its own `"`, so no
+  value can forge a boundary.
+- **It distinguishes `7` from `'7'`.** `String` is not injective over the scalar
+  domain. An id column that arrives as numbers on one page and strings on another
+  would otherwise give two rows one key.
+
+**A non-finite number is not an id.** `NaN` is not equal to itself, and `NaN`,
+`Infinity` and `-Infinity` all serialize to `null` — so accepting them would hand
+three different rows the key `pk:[null]`. They route to the index fallback
+instead, which is what that fallback is for: a non-finite id is a failed parse.
+(`0` and `-0` do share a key. They are `===`-equal, so treating them as one value
+is the language's own answer.)
+
+**The prefixes keep the two namespaces disjoint.** Under the tuple encoding they
+are belt-and-braces — a value key always starts `[` and an index key is always
+decimal digits, so no cross-namespace collision is constructible today even
+without them. They are kept because ADR-062 requires the separation to hold
+whatever the value part encodes: the moment someone "simplifies" a single-column
+key to `pk:7`, the prefix is the only thing standing between it and the row at
+index 7. `resolveRowKey.util.test.ts` pins the prefixes by literal shape, not by
+the bare inequality, which the tuple encoding alone would now satisfy.
 
 The index-derived fallback is exactly as unstable as keying by array index — the
 behaviour it replaces. A consumer whose columns declare no primary key therefore
