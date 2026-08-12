@@ -1,5 +1,7 @@
 // @vitest-environment jsdom
 
+import type { PaginatedQuery } from '@lcabrera/api/http/http.types';
+
 import { cleanup, render } from '@testing-library/react';
 import {
   afterEach,
@@ -66,7 +68,10 @@ const loaderData = {
 const lastProps = () =>
   tableLayoutMock.mock.calls.at(-1)?.[0] as TableLayoutProps<Row, Response>;
 
-const fetchPage = vi.fn(async () => ({ data: [], hasMore: false }));
+/** Typed with the real fetcher signature so assertions can read the built query. */
+const fetchPage = vi.fn<(query: PaginatedQuery) => Promise<Response>>(
+  async () => ({ data: [], hasMore: false }),
+);
 
 beforeEach(() => {
   tableLayoutMock.mockClear();
@@ -140,5 +145,31 @@ describe('TableRouteView', () => {
     );
 
     expect(lastProps().actions).toBeDefined();
+  });
+
+  // The view takes no capability prop at all (ADR-063), so the only way a
+  // filter can reach the query is the loader meta — which is what this asserts.
+  it('shapes the request from the loader meta rather than from a prop', async () => {
+    useLoaderDataMock.mockReturnValue({
+      ...loaderData,
+      metaState: { ...metaState, isServerFilterEnabled: true },
+    });
+    render(<TableRouteView<Row, Response> fetchPage={fetchPage} />);
+
+    await lastProps().onLoadMore?.({ limit: 50, skip: 50 });
+
+    expect(fetchPage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filter: loaderData.columnsState.columnFilters,
+      }),
+    );
+  });
+
+  it('sends no filter when the loader meta declares no capability', async () => {
+    render(<TableRouteView<Row, Response> fetchPage={fetchPage} />);
+
+    await lastProps().onLoadMore?.({ limit: 50, skip: 50 });
+
+    expect(fetchPage.mock.calls[0]?.[0]?.filter).toBeUndefined();
   });
 });

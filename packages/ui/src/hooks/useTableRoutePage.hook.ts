@@ -14,17 +14,6 @@ type UseTableRoutePageArgs<TResponse> = {
    * against each other rather than agreeing by convention.
    */
   readonly fetchPage: (query: PaginatedQuery) => Promise<TResponse>;
-  /**
-   * Send the last loaded row as a keyset cursor (ADR-052). Off by default:
-   * an endpoint that cannot seek would receive a parameter it ignores.
-   */
-  readonly isKeysetEnabled?: boolean;
-  /**
-   * Send the table's column filters with each page. Off by default: an endpoint
-   * that does not filter server-side would append unfiltered rows to a filtered
-   * table.
-   */
-  readonly isServerFilterEnabled?: boolean;
 };
 
 /**
@@ -34,17 +23,25 @@ type UseTableRoutePageArgs<TResponse> = {
  * Returns the four props `TableLayout` needs, so a route that wants custom JSX
  * around the table can spread them; a route that does not should render
  * `TableRouteView`, which is this hook plus the default selectors.
+ *
+ * The two request-shaping capabilities are read from the loader's `metaState`,
+ * never passed in: a capability describes the endpoint, and the loader is the
+ * only place that both knows the endpoint and can act on the flag for the first
+ * page (ADR-063).
  */
 export const useTableRoutePage = <
   TData extends Record<string, unknown>,
   TResponse,
 >({
   fetchPage,
-  isKeysetEnabled = false,
-  isServerFilterEnabled = false,
 }: UseTableRoutePageArgs<TResponse>) => {
   const { columnsState, dataPromise, metaState } =
     useLoaderData<TableRouteLoaderData<TData, TResponse>>();
+
+  // Absent means off, so a route that declares no capability meta sends exactly
+  // what one declaring both `false` sends — adopting this hook cannot change a
+  // route's request shape by accident (ADR-056 §4, carried over by ADR-063).
+  const { isKeysetEnabled = false, isServerFilterEnabled = false } = metaState;
 
   const onLoadMore = async ({ lastRow, limit, skip }: Pagination<TData>) =>
     fetchPage(

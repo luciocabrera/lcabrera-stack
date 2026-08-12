@@ -38,9 +38,10 @@ wide-alltypes-150/
    appended here yet (this route's filter support is deliberately minimal).
 2. The loader fetches the first page through `fetchWideAlltypes150Page`.
 3. `WideAlltypes150.component.tsx` renders `TableRouteView`, which reads the
-   loader-seeded state and wires load-more to the same fetcher. It opts into
-   neither `isKeysetEnabled` nor `isServerFilterEnabled` — this endpoint
-   supports neither (ADR-056).
+   loader-seeded state and wires load-more to the same fetcher. The loader
+   declares neither `isKeysetEnabled` nor `isServerFilterEnabled` on its `meta`
+   — this endpoint supports neither, and absent means off (ADR-063), so the
+   load-more carries `limit`, `skip` and `sort` only.
 4. `TableLayout`, beneath it, owns rendering, persistence, sorting, and
    incremental loading.
 

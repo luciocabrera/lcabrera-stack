@@ -27,11 +27,11 @@ crash several layers from the response that caused it.
 - `TableRouteLoaderData` (from `createTableRouteLoader.util`) and
   `TablePageResponse` (from the root barrel).
 
-`filter` and keyset `cursor` are **opt-in** on both the view and the hook
-(`isServerFilterEnabled`, `isKeysetEnabled`), defaulting to off, because they
+`filter` and keyset `cursor` are **opt-in**, defaulting to off, because they
 describe what the endpoint understands. Sending a `cursor` an endpoint ignores
 is noise; sending a `filter` it ignores appends unfiltered rows to a filtered
-table.
+table. Both are declared on the loader `meta` as `isServerFilterEnabled` and
+`isKeysetEnabled` (ADR-063) — see the entry for that change in this release.
 
 Additive only — every existing export keeps its signature. One internal
 correctness fix rides along: `readTableLoaderStateFromRequest` was casting

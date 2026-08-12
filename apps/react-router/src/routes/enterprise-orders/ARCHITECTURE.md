@@ -123,8 +123,8 @@ obvious-but-slower spelling (epic #391):
   (`resolveFetchMoreState`), so nothing downstream notices.
 - **Load-more seeks rather than counts.** The table hands `onLoadMore` its last
   loaded row; `buildTablePageQuery` (`@lcabrera/ui/routing/shared`, reached through
-  `TableRouteView`'s `isKeysetEnabled`) turns that into the sort-key tuple the
-  server resumes after, so a deep page is O(limit) instead of O(offset)
+  the loader meta's `isKeysetEnabled` — ADR-063) turns that into the sort-key tuple
+  the server resumes after, so a deep page is O(limit) instead of O(offset)
   ([ADR-052](../../../../../docs/decisions/ADR-052-keyset-pagination-for-infinite-scroll.md)).
   `skip` is still sent, and `toOrderKeysetCursor` falls back to it whenever the
   cursor cannot be trusted — most concretely when the user's sort leaves

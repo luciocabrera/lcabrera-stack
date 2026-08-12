@@ -46,7 +46,12 @@ type CreateTableRouteLoaderArgs<
    */
   readonly filterOptions?: { readonly transport: FilterOptionsTransport };
   readonly includeFilters?: boolean;
-  /** Route-specific meta merged over the base (e.g. `crud`, `deleteActionPath`). */
+  /**
+   * Route-specific meta merged over the base (e.g. `crud`, `deleteActionPath`).
+   * This is also where a request-shaping capability is declared — omitting one
+   * leaves it off (ADR-063), so the loader and the view's load-more read the
+   * same single declaration of what the endpoint understands.
+   */
   readonly meta?: Partial<TableMetaState>;
   readonly persistenceKey: string;
   readonly schemaName?: string;

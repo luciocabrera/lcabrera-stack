@@ -334,8 +334,20 @@ export type TableMetaState = {
   readonly isBordered: boolean;
   readonly isColumnSettingsOpen: boolean;
   readonly isColumnSettingsPinned: boolean;
+  /**
+   * Endpoint capability (ADR-063): the load-more sends the last loaded row as a
+   * keyset cursor (ADR-052). Absent means off — an endpoint that cannot seek
+   * would receive a parameter it ignores.
+   */
+  readonly isKeysetEnabled?: boolean;
   /** Round the table card's corners. Off by default — the table is square. */
   readonly isRounded: boolean;
+  /**
+   * Endpoint capability (ADR-063): the load-more sends the table's column
+   * filters with each page. Absent means off — an endpoint that does not filter
+   * server-side would append unfiltered rows to a filtered table.
+   */
+  readonly isServerFilterEnabled?: boolean;
   readonly isStriped: boolean;
   readonly isTableSettingsOpen: boolean;
   readonly isTableSettingsPinned: boolean;

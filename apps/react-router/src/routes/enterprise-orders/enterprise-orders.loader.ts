@@ -51,7 +51,16 @@ export const loader = createTableRouteLoader<
       sort: toQuerySort({ sorting: effectiveSorting }),
     }),
   filterOptions: { transport: 'loader' },
-  meta: { crud: CRUD, deleteActionPath: DELETE_ACTION_PATH },
+  // This route's endpoint is the only one that both filters server-side and
+  // seeks, so it is the only one declaring either capability (ADR-063). The
+  // flags travel with the loader data, so the `filters` forwarded above and the
+  // load-more query the table builds read one declaration rather than two.
+  meta: {
+    crud: CRUD,
+    deleteActionPath: DELETE_ACTION_PATH,
+    isKeysetEnabled: true,
+    isServerFilterEnabled: true,
+  },
   persistenceKey: PERSISTENCE_KEY,
   schemaName: SCHEMA_NAME,
   tableName: TABLE_NAME,

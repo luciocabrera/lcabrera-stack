@@ -6,6 +6,7 @@ import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import type { TableColumn } from '#ui/components/Table';
+import type { TableMetaState } from '#ui/components/Table/Table.types';
 
 import { useTableRoutePage } from './useTableRoutePage.hook';
 
@@ -58,18 +59,23 @@ const lastRow: Row = { order_id: 42, order_status: 'shipped' };
  * Renders the hook with a fetcher spy and returns both. The spy is typed with
  * the real fetcher signature so the assertions below read the query the hook
  * actually built, rather than `never`.
+ *
+ * Capabilities arrive on the loader's `metaState` (ADR-063), so this is where a
+ * test declares them. Passing nothing leaves the base meta identical, which is
+ * what the absent-means-off assertions rely on.
  */
-const setup = (
-  args: Omit<
-    Parameters<typeof useTableRoutePage<Row, Response>>[0],
-    'fetchPage'
-  > = {},
-) => {
+const setup = (metaOverrides?: Partial<TableMetaState>) => {
+  useLoaderDataMock.mockReturnValue(
+    metaOverrides
+      ? { ...loaderData, metaState: { ...metaState, ...metaOverrides } }
+      : loaderData,
+  );
+
   const fetchPage = vi.fn<(query: PaginatedQuery) => Promise<Response>>(
     async () => ({ data: [], hasMore: false }),
   );
   const { result } = renderHook(() =>
-    useTableRoutePage<Row, Response>({ fetchPage, ...args }),
+    useTableRoutePage<Row, Response>({ fetchPage }),
   );
 
   return { fetchPage, result };
@@ -116,7 +122,7 @@ describe('useTableRoutePage', () => {
     expect(query?.filter).toBeUndefined();
   });
 
-  it('sends the column filters when server filtering is enabled', async () => {
+  it('sends the column filters when the meta declares server filtering', async () => {
     const { fetchPage, result } = setup({ isServerFilterEnabled: true });
 
     await result.current.onLoadMore({ limit: 50, skip: 50 });
@@ -124,12 +130,38 @@ describe('useTableRoutePage', () => {
     expect(fetchPage.mock.calls[0]?.[0]?.filter).toBe(columnFilters);
   });
 
-  it('sends the keyset cursor when keyset is enabled and a row is given', async () => {
+  it('sends the keyset cursor when the meta declares keyset and a row is given', async () => {
     const { fetchPage, result } = setup({ isKeysetEnabled: true });
 
     await result.current.onLoadMore({ lastRow, limit: 50, skip: 50 });
 
     expect(fetchPage.mock.calls[0]?.[0]?.cursor).toStrictEqual(['shipped', 42]);
+  });
+
+  // ADR-063's safety property, carried over from ADR-056 §4: moving the two
+  // capabilities onto the meta must not let a route that declares nothing start
+  // sending a filter or a cursor. Comparing the two queries — rather than
+  // asserting each key is undefined — is what makes "behaves exactly as" the
+  // claim, and it fails if absence ever stops meaning off.
+  it('builds the same query from absent capability meta as from meta declaring both off', async () => {
+    const absent = setup();
+    await absent.result.current.onLoadMore({ lastRow, limit: 50, skip: 50 });
+
+    const declaredOff = setup({
+      isKeysetEnabled: false,
+      isServerFilterEnabled: false,
+    });
+    await declaredOff.result.current.onLoadMore({
+      lastRow,
+      limit: 50,
+      skip: 50,
+    });
+
+    const absentQuery = absent.fetchPage.mock.calls[0]?.[0];
+
+    expect(absentQuery).toStrictEqual(declaredOff.fetchPage.mock.calls[0]?.[0]);
+    expect(absentQuery?.cursor).toBeUndefined();
+    expect(absentQuery?.filter).toBeUndefined();
   });
 
   it('omits the cursor on the first page even with keyset enabled', async () => {

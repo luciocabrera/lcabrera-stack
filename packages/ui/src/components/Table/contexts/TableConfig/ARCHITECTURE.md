@@ -151,6 +151,8 @@ TableMetaState = {
   initialPageSize: number;           // First page row count
   isBordered: boolean;               // Show borders
   isColumnSettingsOpen: boolean;     // Column settings drawer open
+  isKeysetEnabled?: boolean;         // Endpoint capability: load-more sends a keyset cursor (ADR-052/ADR-063); absent = off
+  isServerFilterEnabled?: boolean;   // Endpoint capability: load-more sends the column filters (ADR-063); absent = off
   isRounded: boolean;                // Round the table card's corners (default false)
   isStriped: boolean;                // Striped rows
   isTableSettingsPinned: boolean;    // Table settings pinned as side panel

@@ -52,23 +52,47 @@ graph TD
 
 ## Props
 
-| Prop                    | Type                                       | Required | Description                                                               |
-| ----------------------- | ------------------------------------------ | -------- | ------------------------------------------------------------------------- |
-| `actions`               | `ReactNode`                                | No       | Toolbar content, forwarded to `TableLayout`                               |
-| `dataSelector`          | `(r: TResponse) => readonly TData[]`       | No       | Defaults to `response.data`                                               |
-| `dataTotalSelector`     | `(r: TResponse) => number \| undefined`    | No       | Defaults to `response.total`                                              |
-| `fetchPage`             | `(query: PaginatedQuery) => Promise<TRes>` | Yes      | The route's paginated read — typically a `createPaginatedFetcher` result  |
-| `isKeysetEnabled`       | `boolean`                                  | No       | Send the last loaded row as a keyset cursor (ADR-052). **Off by default** |
-| `isServerFilterEnabled` | `boolean`                                  | No       | Send the table's column filters with each page. **Off by default**        |
+| Prop                | Type                                       | Required | Description                                                              |
+| ------------------- | ------------------------------------------ | -------- | ------------------------------------------------------------------------ |
+| `actions`           | `ReactNode`                                | No       | Toolbar content, forwarded to `TableLayout`                              |
+| `dataSelector`      | `(r: TResponse) => readonly TData[]`       | No       | Defaults to `response.data`                                              |
+| `dataTotalSelector` | `(r: TResponse) => number \| undefined`    | No       | Defaults to `response.total`                                             |
+| `fetchPage`         | `(query: PaginatedQuery) => Promise<TRes>` | Yes      | The route's paginated read — typically a `createPaginatedFetcher` result |
 
-## Why the two capability flags default to off
+Every prop here is something only the component can supply — a function or a
+node. What the _endpoint_ can do is not a prop; see below.
+
+## Where the capability flags live
+
+`isKeysetEnabled` and `isServerFilterEnabled` are **not props**. They are
+declared on the loader `meta` and read back from the loader's `metaState`
+(ADR-063):
+
+```ts
+export const loader = createTableRouteLoader<Row, RowResponse>({
+  /* … */
+  meta: { isKeysetEnabled: true, isServerFilterEnabled: true },
+});
+```
 
 They describe what the _endpoint_ understands, and endpoints differ. Sending a
 `cursor` to an offset-only endpoint is merely noise, but sending a `filter` to
 an endpoint that ignores it is a correctness bug: the table appends unfiltered
-rows to a filtered view. Defaulting both off means adopting `TableRouteView`
-cannot change a route's request shape by accident — a route opts into each
-capability once it has a server that implements it.
+rows to a filtered view.
+
+Two properties follow, and both are load-bearing:
+
+- **Absent means off.** A route that declares no capability meta sends exactly
+  what one declaring both `false` sends, so adopting `TableRouteView` cannot
+  change a route's request shape by accident. This is ADR-056 §4's safety
+  property, carried over intact when the mechanism moved.
+- **One declaration, both halves.** The loader builds the first page; the view
+  builds every page after it. A prop is invisible to the loader by construction,
+  so a capability declared there had to be restated in the loader body, with
+  nothing checking that the two agreed.
+
+The test for whether something belongs on `meta` is mechanical: if the loader or
+the load-more query would have to read it, it is a capability and goes on `meta`.
 
 ## Response constraint
 
@@ -88,4 +112,5 @@ for exactly that case.
 
 - `createTableRouteLoader` (`@lcabrera/ui/routing/loaders`) — the loader half
 - `createPaginatedFetcher` (`@lcabrera/api/http`) — the fetch half
-- ADR-008 (primary-key tiebreaker), ADR-052 (keyset cursor), ADR-056 (this extraction)
+- ADR-008 (primary-key tiebreaker), ADR-052 (keyset cursor), ADR-056 (this
+  extraction), ADR-063 (capabilities declared on the loader `meta`)
