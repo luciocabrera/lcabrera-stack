@@ -46,13 +46,25 @@ describe('decodeStateFromURL', () => {
     expect(result?.columnVisibility).toBe('not-an-array');
   });
 
-  it('leaves the decoded state alone when rehydrating Sets', () => {
+  it('rehydrates only the named keys, passing the rest through', () => {
     const state = { columnOrder: ['id'], columnVisibility: ['id', 'name'] };
     const result = decodeStateFromURL({
       convertArraysToSets: ['columnVisibility'],
       encoded: encodeStateToURL(state),
     });
+
+    expect(result?.columnVisibility).toBeInstanceOf(Set);
     expect(result?.columnOrder).toEqual(['id']);
+    expect(result?.columnOrder).not.toBeInstanceOf(Set);
+  });
+
+  it('does not invent a key named in convertArraysToSets but absent', () => {
+    const result = decodeStateFromURL({
+      convertArraysToSets: ['columnVisibility'],
+      encoded: encodeStateToURL({ columnOrder: ['id'] }),
+    });
+
+    expect(Object.keys(result ?? {})).toStrictEqual(['columnOrder']);
   });
 
   it('drops the whole state for a payload that is not an object', () => {

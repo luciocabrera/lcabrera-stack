@@ -37,12 +37,30 @@ Each codec's `narrow` chooses what "unrecognised" means for its param:
 | `filtersCodec` | the envelope is a column-keyed object; each value via `deserializeFilter` | `{}`        |
 | `stateCodec`   | the envelope is a plain object; values stay `unknown`                     | `undefined` |
 
-`filtersCodec` keeps the pre-existing per-entry drop inside a recognised object:
-an unknown operator code yields no filter for that column rather than one typed
-as valid, and `sanitizeFiltersByColumns` drops per column downstream anyway.
+`filtersCodec` keeps the pre-existing per-entry drop inside a recognised object,
+and it is worth being exact about what that drop covers. `deserializeFilter`
+does **not** reject an unknown operator code — its last branch reads any
+all-strings array as a select-equals filter, so `["ZZ","x"]` produces a select
+filter over the values `ZZ` and `x`. The pass that rejects a filter a column
+cannot carry is `sanitizeFiltersByColumns` in the loader path: it drops unknown
+column keys and runs `isFilterCompatibleWithColumn` against each column's
+declared `dataType`. The codec closes the envelope; that pass closes the rest.
+
 `stateCodec` deliberately asserts only the envelope, because every value in that
 param is re-read by a slice-specific reader that narrows for itself — claiming
 more here would be claiming something unchecked.
+
+**No codec here validates a column key.** The vocabularies above are _value_
+vocabularies; a key is any string. Sorting keys are checked server-side in
+`buildOrderByClause` — `assertSafeIdentifier` on every column with no caller
+opt-out, and `assertColumnAllowed` only for queries that pass `allowedColumns`.
+Filter keys are checked in the loader by `sanitizeFiltersByColumns`.
+
+A narrowing rebuilds its state with `Object.fromEntries`, never by assigning
+into `{}`. Plain assignment routes a `__proto__` key to the prototype setter and
+silently drops it — a per-field drop, which is the outcome this contract exists
+to rule out. `Object.fromEntries` defines an own property instead, so the key
+survives and `Object.prototype` is untouched.
 
 ## File Structure
 
@@ -139,13 +157,15 @@ caller's decision, which is why `serializeSortingToURL` and
 
 ### urlState.types.ts
 
-`CompactSorting` — the closed `{ columnKey: 'asc' | 'desc' }` wire form shared by
-the sorting codec and its serializer.
+`CompactSorting` — names the closed `{ columnKey: 'asc' | 'desc' }` wire form of
+the `sorting` param. `sortingCodec` is its consumer: it is the vocabulary that
+codec's narrowing checks a URL-supplied token against.
 
 ### sortingCodec.util.ts
 
-Codec for the `sorting` param. Its narrowing rebuilds the record token by token
-and bails on the first direction that is not `asc` or `desc`.
+Codec for the `sorting` param. Its narrowing checks every entry's direction
+first, short-circuiting on the first one that is not `asc` or `desc`, and only
+then rebuilds the record with `Object.fromEntries`.
 
 ### filtersCodec.util.ts
 
@@ -255,8 +275,10 @@ flowchart TD
   E --> F[Return SortingState]
 ```
 
-Column keys stay bare strings here; `sanitizeSorting` checks them against the
-real columns in the loader path, which the codec cannot do.
+Column keys stay bare strings here, and the loader path does not check them
+against a table's real columns — `sanitizeSorting` drops only undirected entries
+and the UI-only `actions` key. The column guard is server-side, in
+`buildOrderByClause`.
 
 ### serializeFiltersToURL.util.ts
 

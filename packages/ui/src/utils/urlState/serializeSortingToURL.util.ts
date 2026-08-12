@@ -1,7 +1,5 @@
 import type { SortingState } from '#ui/components/Table';
 
-import type { CompactSorting } from './urlState.types';
-
 import { sortingCodec } from './sortingCodec.util';
 
 /**
@@ -11,20 +9,23 @@ import { sortingCodec } from './sortingCodec.util';
  * into `{"name":"asc"}` — much shorter than the verbose array format.
  * Returns undefined when nothing carries a direction, so the caller leaves the
  * param off the URL entirely.
+ *
+ * Built with `Object.fromEntries` rather than by assigning into `{}`, so a
+ * `__proto__` column key becomes an own property instead of hitting the
+ * prototype setter and vanishing from the serialized param.
  */
 export const serializeSortingToURL = <TData>(sorting: SortingState<TData>) => {
-  const compact = sorting.reduce<CompactSorting>(
-    (accumulator, { columnKey, direction }) => {
-      if (direction !== undefined) {
-        accumulator[columnKey] = direction;
-      }
+  const entries = sorting
+    .filter(
+      (
+        entry,
+      ): entry is SortingState<TData>[number] & {
+        readonly direction: 'asc' | 'desc';
+      } => entry.direction !== undefined,
+    )
+    .map(({ columnKey, direction }) => [columnKey, direction] as const);
 
-      return accumulator;
-    },
-    {},
-  );
+  if (entries.length === 0) return;
 
-  if (Object.keys(compact).length === 0) return;
-
-  return sortingCodec.serialize(compact);
+  return sortingCodec.serialize(Object.fromEntries(entries));
 };

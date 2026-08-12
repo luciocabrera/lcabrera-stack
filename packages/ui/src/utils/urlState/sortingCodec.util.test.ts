@@ -46,4 +46,24 @@ describe('sortingCodec', () => {
   it('accepts an empty object', () => {
     expect(sortingCodec.deserialize('{}')).toStrictEqual({});
   });
+
+  it('keeps a __proto__ key rather than dropping that one field', () => {
+    // Assigning into `{}` routes this to the prototype setter and loses it,
+    // which is the per-field drop the refusal contract rules out.
+    const result = sortingCodec.deserialize(
+      '{"__proto__":"asc","name":"desc"}',
+    );
+
+    expect(Object.keys(result)).toStrictEqual(['__proto__', 'name']);
+    expect(Object.getOwnPropertyDescriptor(result, '__proto__')?.value).toBe(
+      'asc',
+    );
+  });
+
+  it('leaves Object.prototype untouched by a __proto__ key', () => {
+    sortingCodec.deserialize('{"__proto__":"asc"}');
+
+    expect(Object.getPrototypeOf({})).toBe(Object.prototype);
+    expect(Object.prototype).not.toHaveProperty('asc');
+  });
 });
