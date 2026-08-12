@@ -38,10 +38,13 @@ export const useTableRoutePage = <
   const { columnsState, dataPromise, metaState } =
     useLoaderData<TableRouteLoaderData<TData, TResponse>>();
 
-  // Absent means off, so a route that declares no capability meta sends exactly
-  // what one declaring both `false` sends — adopting this hook cannot change a
+  // Absent means off: a falsy capability contributes no key to the query below,
+  // so a route that declares no capability meta sends exactly what one
+  // declaring both `false` sends, and adopting this hook cannot change a
   // route's request shape by accident (ADR-056 §4, carried over by ADR-063).
-  const { isKeysetEnabled = false, isServerFilterEnabled = false } = metaState;
+  // `createTableRouteLoader` resolves both from the route's `meta` alone, so
+  // neither can be switched on by the persisted UI-flags cookie.
+  const { isKeysetEnabled, isServerFilterEnabled } = metaState;
 
   const onLoadMore = async ({ lastRow, limit, skip }: Pagination<TData>) =>
     fetchPage(

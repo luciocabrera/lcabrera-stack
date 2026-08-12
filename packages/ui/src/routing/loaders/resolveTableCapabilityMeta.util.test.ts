@@ -1,0 +1,62 @@
+import { describe, expect, it } from 'vite-plus/test';
+
+import type { TableMetaState } from '#ui/components/Table/Table.types';
+
+import { resolveTableCapabilityMeta } from './resolveTableCapabilityMeta.util';
+
+describe('resolveTableCapabilityMeta', () => {
+  it('resolves both capabilities off when no meta is given', () => {
+    expect(resolveTableCapabilityMeta({})).toStrictEqual({
+      isKeysetEnabled: false,
+      isServerFilterEnabled: false,
+    });
+  });
+
+  it('resolves both capabilities off when the meta declares neither', () => {
+    expect(
+      resolveTableCapabilityMeta({
+        meta: { title: { plural: '', singular: '' } },
+      }),
+    ).toStrictEqual({
+      isKeysetEnabled: false,
+      isServerFilterEnabled: false,
+    });
+  });
+
+  it('carries each declared capability through', () => {
+    expect(
+      resolveTableCapabilityMeta({
+        meta: { isKeysetEnabled: true, isServerFilterEnabled: true },
+      }),
+    ).toStrictEqual({ isKeysetEnabled: true, isServerFilterEnabled: true });
+  });
+
+  it('resolves each capability independently', () => {
+    expect(
+      resolveTableCapabilityMeta({ meta: { isServerFilterEnabled: true } }),
+    ).toStrictEqual({ isKeysetEnabled: false, isServerFilterEnabled: true });
+  });
+
+  it('returns every capability key even when the meta is empty', () => {
+    // The result is spread over cookie-derived meta, so a missing key would
+    // leave whatever the cookie put there rather than overriding it off.
+    expect(
+      Object.keys(resolveTableCapabilityMeta({})).toSorted((a, b) =>
+        a.localeCompare(b),
+      ),
+    ).toEqual(['isKeysetEnabled', 'isServerFilterEnabled']);
+  });
+
+  it('treats a non-boolean cookie-shaped value as off', () => {
+    // Parsed rather than written as a literal, because that is how such a value
+    // actually arrives: the persisted payload is cast, not validated, so a
+    // capability key can reach here holding anything at all.
+    const cookieShapedMeta = JSON.parse(
+      '{"isKeysetEnabled":"yes"}',
+    ) as Partial<TableMetaState>;
+
+    expect(
+      resolveTableCapabilityMeta({ meta: cookieShapedMeta }).isKeysetEnabled,
+    ).toBe(false);
+  });
+});

@@ -14,6 +14,7 @@ import { appendPrimaryKeySorting } from '../shared/appendPrimaryKeySorting.util'
 import { sanitizeSorting } from '../shared/sanitizeSorting.util';
 import { appendDistinctFilterDescriptors } from './appendDistinctFilterDescriptors.util';
 import { readTableLoaderStateFromRequest } from './readTableLoaderStateFromRequest.util';
+import { resolveTableCapabilityMeta } from './resolveTableCapabilityMeta.util';
 
 /**
  * What a `createTableRouteLoader` loader hands the route component. Derived
@@ -48,9 +49,13 @@ type CreateTableRouteLoaderArgs<
   readonly includeFilters?: boolean;
   /**
    * Route-specific meta merged over the base (e.g. `crud`, `deleteActionPath`).
-   * This is also where a request-shaping capability is declared — omitting one
-   * leaves it off (ADR-063), so the loader and the view's load-more read the
-   * same single declaration of what the endpoint understands.
+   * This is also where a request-shaping capability is declared, and omitting
+   * one leaves it off (ADR-063).
+   *
+   * The declaration is carried out in `metaState` for the view's load-more to
+   * read. This factory does not itself act on it: what the *first* page sends
+   * is decided by the route's own `fetchPage`, which receives `filters`
+   * regardless of any flag.
    */
   readonly meta?: Partial<TableMetaState>;
   readonly persistenceKey: string;
@@ -155,6 +160,11 @@ export const createTableRouteLoader = <
         title,
         ...(schemaName !== undefined && { schemaName }),
         ...meta,
+        // Last, and unconditional. `metaUiFlags` above is read from the
+        // client-controlled UI-flags cookie and validated nowhere, so a route
+        // that declares no capability would otherwise inherit one from it —
+        // and start sending a `filter` or `cursor` its endpoint ignores.
+        ...resolveTableCapabilityMeta({ meta }),
       },
     };
   };

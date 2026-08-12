@@ -38,11 +38,13 @@ const response = { data: [], total: 0 };
 
 const invoke = ({
   config = {},
+  cookie,
   url = 'http://localhost/rows',
 }: {
   readonly config?: Partial<
     Parameters<typeof createTableRouteLoader<Row, typeof response>>[0]
   >;
+  readonly cookie?: string;
   readonly url?: string;
 } = {}) => {
   const fetchPage = vi.fn(async () => response);
@@ -51,9 +53,22 @@ const invoke = ({
     fetchPage,
     ...config,
   });
-  const result = loader({ request: new Request(url) } as LoaderFunctionArgs);
+  const request = new Request(url, {
+    headers: cookie === undefined ? undefined : { cookie },
+  });
+  const result = loader({ request } as LoaderFunctionArgs);
   return { fetchPage, result };
 };
+
+/**
+ * A `-uiFlags` cookie carrying `state`, in the versioned envelope the table's
+ * persistence writes. `parseVersionedPayload` casts rather than validates, so
+ * whatever is put here reaches the loader's `metaUiFlags`.
+ */
+const uiFlagsCookie = (state: Record<string, unknown>) =>
+  `table-state-${baseConfig.appId}-${baseConfig.persistenceKey}-uiFlags=${encodeURIComponent(
+    JSON.stringify({ value: state, version: 1 }),
+  )}`;
 
 type CollectFunctionPathsArgs = {
   readonly path?: string;
@@ -207,5 +222,56 @@ describe('createTableRouteLoader', () => {
     expect(
       Object.keys(invoke().result).toSorted((a, b) => a.localeCompare(b)),
     ).toEqual(['columnsState', 'dataPromise', 'metaState']);
+  });
+
+  // The UI-flags cookie is client-controlled and is not validated on the way in
+  // — `parseVersionedPayload` casts, and the persist-cookie action writes what
+  // it is handed. It seeds `metaUiFlags`, which is spread into `metaState`
+  // before the route's own `meta`, so without an explicit resolve a route that
+  // declares no capability would inherit one from the cookie. A capability
+  // decides what the server is asked for, so the cookie must not be able to
+  // reach it: absent must mean off whatever the cookie carries (ADR-063).
+  describe('capability meta', () => {
+    it('ignores capabilities injected through the UI-flags cookie', () => {
+      const { result } = invoke({
+        cookie: uiFlagsCookie({
+          isKeysetEnabled: true,
+          isServerFilterEnabled: true,
+        }),
+      });
+
+      expect(result.metaState.isKeysetEnabled).toBe(false);
+      expect(result.metaState.isServerFilterEnabled).toBe(false);
+    });
+
+    it('still reads the UI flags the cookie legitimately carries', () => {
+      const { result } = invoke({
+        cookie: uiFlagsCookie({
+          isKeysetEnabled: true,
+          isTableSettingsOpen: true,
+        }),
+      });
+
+      // The guard is capability-scoped, not a wholesale rejection of the cookie.
+      expect(result.metaState.isTableSettingsOpen).toBe(true);
+      expect(result.metaState.isKeysetEnabled).toBe(false);
+    });
+
+    it('takes each capability from the route meta, over any cookie value', () => {
+      const { result } = invoke({
+        config: { meta: { isKeysetEnabled: true } },
+        cookie: uiFlagsCookie({ isServerFilterEnabled: true }),
+      });
+
+      expect(result.metaState.isKeysetEnabled).toBe(true);
+      expect(result.metaState.isServerFilterEnabled).toBe(false);
+    });
+
+    it('defaults both capabilities off when the route declares no meta', () => {
+      const { result } = invoke();
+
+      expect(result.metaState.isKeysetEnabled).toBe(false);
+      expect(result.metaState.isServerFilterEnabled).toBe(false);
+    });
   });
 });

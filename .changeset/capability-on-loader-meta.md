@@ -12,9 +12,17 @@ from the loader data.
 
 **Why.** A capability that shapes the request is needed on both sides of the
 loader boundary: the loader builds the first page, the view builds every page
-after it. A view prop is invisible to the loader by construction, so server-side
-filtering was declared twice — once in the loader body that forwards `filters`,
-once as a prop — with nothing checking that the two agreed.
+after it. A view prop is invisible to the loader by construction —
+`createTableRouteLoader` runs before any component renders — so a capability
+declared as a prop could never be read by the half that builds the first page.
+Declaring it on `meta` puts it where both halves can reach it.
+
+**What this does not do.** It relocates the declaration; it does not wire the
+loader to consume it. A route's `fetchPage` still decides for itself what the
+first page sends, so a loader that forwards `filters` unconditionally keeps
+doing so whatever the flag says. Making the loader read its own capability is
+follow-up work, and until it lands the two halves of a route must still be kept
+consistent by hand.
 
 **Migration.** A consumer that passed neither prop does nothing: absent meta
 reproduces the previous `false` default exactly, so the request shape is

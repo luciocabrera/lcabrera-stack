@@ -85,11 +85,18 @@ Two properties follow, and both are load-bearing:
 - **Absent means off.** A route that declares no capability meta sends exactly
   what one declaring both `false` sends, so adopting `TableRouteView` cannot
   change a route's request shape by accident. This is ADR-056 §4's safety
-  property, carried over intact when the mechanism moved.
-- **One declaration, both halves.** The loader builds the first page; the view
+  property, carried over intact when the mechanism moved. The loader enforces it
+  rather than leaving it to merge order: `metaState` also draws on the persisted
+  UI-flags cookie, which is client-controlled and validated nowhere on the way
+  in, so `createTableRouteLoader` resolves both capabilities from `meta` alone
+  (`resolveTableCapabilityMeta`) and spreads that result last. Without it a
+  cookie could switch on a capability for a route that declares none.
+- **Reachable by both halves.** The loader builds the first page; the view
   builds every page after it. A prop is invisible to the loader by construction,
-  so a capability declared there had to be restated in the loader body, with
-  nothing checking that the two agreed.
+  so a capability declared there could never be read by the half that builds the
+  first page. Note this makes the declaration reachable, not yet consumed: the
+  loader does not read it today, and a route's own `fetchPage` still decides
+  what the first page sends.
 
 The test for whether something belongs on `meta` is mechanical: if the loader or
 the load-more query would have to read it, it is a capability and goes on `meta`.

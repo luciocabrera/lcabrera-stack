@@ -51,10 +51,12 @@ export const loader = createTableRouteLoader<
       sort: toQuerySort({ sorting: effectiveSorting }),
     }),
   filterOptions: { transport: 'loader' },
-  // This route's endpoint is the only one that both filters server-side and
-  // seeks, so it is the only one declaring either capability (ADR-063). The
-  // flags travel with the loader data, so the `filters` forwarded above and the
-  // load-more query the table builds read one declaration rather than two.
+  // This endpoint both filters server-side and seeks, so it declares both
+  // capabilities (ADR-063); they travel with the loader data for the table's
+  // load-more to read. The `filters` forwarded above is separate and
+  // unconditional — nothing gates the first page on the flag, so setting
+  // `isServerFilterEnabled: false` here would stop later pages filtering while
+  // the first page still did.
   meta: {
     crud: CRUD,
     deleteActionPath: DELETE_ACTION_PATH,
