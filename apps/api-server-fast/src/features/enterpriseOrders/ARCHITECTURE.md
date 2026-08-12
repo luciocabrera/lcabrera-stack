@@ -29,4 +29,5 @@ Fastify route module for `/api/enterprise-orders`.
 
 - Number and currency-backed columns are represented as `type: 'number'` filters at the API boundary.
 - Regression coverage should stay at the Fastify injection seam so schema failures are caught before the repository or database layer is involved.
-- This JSON Schema is one of the two copies of the filter contract that cannot be a type, so it is guarded behaviourally: `enterpriseOrders.plugin.test.ts` drives every case in `api-shared`'s `ENTERPRISE_ORDER_FILTER_CONTRACT_CASES` through the injection seam and asserts the repository receives exactly the clauses the React Router route would have built from the identical JSON.
+- This JSON Schema is one of the two copies of the filter contract that cannot be a type, so it is guarded behaviourally: `enterpriseOrders.plugin.test.ts` drives every case in `api-shared/filter-contract` through the injection seam and asserts the repository receives exactly the clauses the React Router route would have built from the identical JSON.
+- It also asserts the drafting states directly, as its own named regression. The shared set's `drafting` group has no compile-time anchor, so a case removed from it would otherwise stop being checked here with nothing failing — see [ADR-064](../../../../../docs/decisions/ADR-064-converge-app-copies-of-a-declared-contract.md).

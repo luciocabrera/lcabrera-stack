@@ -3,7 +3,7 @@ import type { EnterpriseOrdersFilters } from 'api-shared';
 import { getRowsCount } from '@lcabrera/server/db/get-rows-count.util';
 import { selectRows } from '@lcabrera/server/db/select-rows.util';
 import { toQueryFilters } from '@lcabrera/server/filters/to-query-filters.util';
-import { ENTERPRISE_ORDER_FILTER_CONTRACT_CASES } from 'api-shared';
+import { ENTERPRISE_ORDER_FILTER_CONTRACT_CASES } from 'api-shared/filter-contract';
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import type { EnvConfig } from '../../config/env.schema';
@@ -19,6 +19,53 @@ vi.mock('@lcabrera/server/db/get-rows-count.util', () => ({
 
 const mockedSelectRows = vi.mocked(selectRows);
 const mockedGetRowsCount = vi.mocked(getRowsCount);
+
+/**
+ * The mid-edit states #567 was filed for, written out here rather than read
+ * from the shared contract cases.
+ *
+ * That set anchors each filter variant's keys to the variant's own operator
+ * union, so an operator cannot go unchecked. Its `drafting` group has no such
+ * anchor — "a value the mappers drop" spans an absent key, an empty string and
+ * an empty array, which share no closed vocabulary — so a case deleted from it
+ * stops being checked and nothing fails. This is the copy that makes such a
+ * deletion visible on this server: a named regression someone has to delete
+ * deliberately.
+ */
+const DRAFTING_FILTERS = [
+  {
+    filters: { total_amount: { operator: 'equals', type: 'number' } },
+    name: 'a number filter the user has not finished typing',
+  },
+  {
+    filters: {
+      total_amount: { operator: 'between', type: 'number', value: 10 },
+    },
+    name: 'a number range with no second bound yet',
+  },
+  {
+    filters: {
+      customer_name: { operator: 'contains', type: 'text', value: '' },
+    },
+    name: 'a text filter whose box has been cleared',
+  },
+  {
+    filters: { order_date: { operator: 'after', type: 'date', value: '' } },
+    name: 'a date filter with no date picked',
+  },
+  {
+    filters: {
+      payment_status: { operator: 'equals', type: 'select', value: '' },
+    },
+    name: 'a select filter with nothing chosen',
+  },
+  {
+    filters: {
+      order_status: { operator: 'equals', type: 'multiSelect', values: [] },
+    },
+    name: 'a multi-select filter with every option deselected',
+  },
+] as const;
 
 const envConfig: EnvConfig = {
   API_PORT: 3001,
@@ -101,6 +148,28 @@ describe('enterpriseOrders fastify plugin', () => {
         expect.objectContaining({
           filters: toQueryFilters({ filters: routeFilters }),
         }),
+      );
+
+      await app.close();
+    },
+  );
+
+  it.each(DRAFTING_FILTERS)(
+    'accepts $name and builds no clause for it',
+    async ({ filters }) => {
+      mockedSelectRows.mockResolvedValue([]);
+      mockedGetRowsCount.mockResolvedValue(0);
+
+      const app = createApp({ envConfig });
+
+      const response = await app.inject({
+        method: 'GET',
+        url: `/api/enterprise-orders/paginated?filter=${encodeURIComponent(JSON.stringify(filters))}`,
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(mockedSelectRows).toHaveBeenCalledWith(
+        expect.objectContaining({ filters: [] }),
       );
 
       await app.close();

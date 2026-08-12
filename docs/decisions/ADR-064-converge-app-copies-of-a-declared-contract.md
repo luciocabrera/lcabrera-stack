@@ -45,18 +45,38 @@ The copy that could drift is gone rather than guarded.
 
 **A copy that cannot be a type is guarded behaviourally, from a single
 statement of the contract.** The two request validators are not types and cannot
-be aliased. `ENTERPRISE_ORDER_FILTER_CONTRACT_CASES` in `api-shared` is one
-statement of every filter state the endpoints must accept, and each API server
-asserts against it that the state is accepted **and** reaches the query layer
-with exactly the clauses the React Router route builds from the same JSON. A
-validator that is stricter than the contract shows up as a rejection; one that is
-looser shows up as a different clause set.
+be aliased. `ENTERPRISE_ORDER_FILTER_CONTRACT_CASES` is one statement of every
+filter state the endpoints must accept, and each API server asserts against it
+that the state is accepted **and** reaches the query layer with exactly the
+clauses the React Router route builds from the same JSON. A validator that is
+stricter than the contract shows up as a rejection; one that is looser shows up
+as a different clause set. It is reached through a dedicated
+`api-shared/filter-contract` subpath rather than the package barrel, so it stays
+out of both servers' startup path.
 
-**The contract's closed vocabularies are what the guard is anchored to.** The
-case set is keyed by each variant's own operator union, so adding an operator to
-`@lcabrera/server`'s contract — or removing one — stops `api-shared` compiling
-until a case exists for it, and the new case then fails both API-server suites
-until their schemas accept it. The guard cannot go quiet by being out of date.
+**Where the contract has a closed vocabulary, the guard is anchored to it —
+and where it has none, the guard is not.** This split is the honest statement of
+how much the case set is worth, and it is worth stating because the first draft
+of this ADR claimed the stronger half for the whole.
+
+Anchored: each filter variant's cases are keyed by that variant's own operator
+union, so adding an operator to `@lcabrera/server`'s contract — or removing one
+— stops `api-shared` compiling until a case exists for it, and the new case then
+fails both API-server suites until their schemas accept it. An operator cannot go
+unchecked.
+
+Not anchored: the `drafting` group. "A value the mappers drop" spans an absent
+key, an empty string and an empty array — three unrelated shapes with no closed
+vocabulary in the type system to key on, and inventing one would only move the
+hand-maintenance somewhere less visible. Its keys are therefore free-form, and a
+case deleted from it is silently no longer checked. **So the states this issue
+was filed for are also written into each API server's own suite as a named
+regression**, independent of the shared set: deleting the coverage there means
+deleting a test that says what it protects, not a key in a large object literal.
+
+**The validators validate the vocabulary, not the value.** `type` and `operator`
+are closed sets and are checked strictly. Values are not: what becomes SQL is
+`toQueryFilters`'s decision, made once, in the package both servers already use.
 
 **The validators validate the vocabulary, not the value.** `type` and `operator`
 are closed sets and are checked strictly. Values are not: what becomes SQL is
@@ -67,10 +87,21 @@ are closed sets and are checked strictly. Values are not: what becomes SQL is
 - The register of copies now has a mechanism behind it. What used to be five
   hand-maintained copies is one aliased type and two validators that fail a test
   the moment they disagree with the contract.
-- `api-shared` ships a test-support export. It is a private workspace package, so
-  this reaches no registry, but it is a production barrel carrying a fixture and
-  that is a real cost — the alternative was the same fixture written twice, in
-  two suites that would then drift from each other unnoticed.
+- `api-shared` gains a second export subpath. Three options were open, and the
+  cheapest was not the first one considered: exporting the cases from the package
+  barrel (one line, but both servers import that barrel from `server.ts`, build
+  with plain `tsc` and run `node dist/server.js` with no bundler and no
+  tree-shaking, so the object would be constructed at every server start);
+  writing the cases out separately in each suite (no production cost, two sets
+  that drift); or a `./filter-contract` subpath — one manifest entry, one
+  specifier, one shared statement, and nothing added to either server's startup
+  path. The subpath wins on every axis, and the barrel's cost is small enough
+  that it would have gone unnoticed had it not been checked.
+- The `drafting` group is coverage breadth, not a gate. It cannot be
+  compile-time anchored (see Decision), so both API servers carry the same
+  states as named regressions of their own. That is deliberate duplication
+  between two servers that are already deliberate duplicates of each other, and
+  it is the price of the coverage not resting on one unanchored object.
 - The API servers now accept filter payloads they used to reject, including ones
   that produce no `WHERE` clause at all. That is the point: the React Router
   route has always served them. It does mean a caller can send a filter that
@@ -104,6 +135,12 @@ are closed sets and are checked strictly. Values are not: what becomes SQL is
 - **Keep the app types duplicated and add a conformance test for them.** A test
   that asserts two type aliases are the same type is strictly worse than one
   alias: same guarantee, one more file to keep in step.
+- **Key the `drafting` group on a synthesised vocabulary** — the contract fields
+  whose type admits `undefined`, say. Rejected: it covers an absent key but not
+  an empty string or an empty array, so it would have anchored part of the group
+  while reading as though it anchored all of it, and it would have demanded
+  degenerate cases for fields that have no drafting state. A guard that looks
+  stronger than it is was the defect this issue exists to fix.
 
 ## References
 

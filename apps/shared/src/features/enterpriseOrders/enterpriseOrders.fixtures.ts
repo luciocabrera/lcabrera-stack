@@ -8,11 +8,18 @@ import type {
 } from '@lcabrera/server/filters/filters.types';
 
 /**
- * The key sets are what make the contract below a drift guard rather than a
- * sample: each is the filter variant's own operator union, so adding an
+ * The variant key sets are what make the contract below a drift guard rather
+ * than a sample: each is the filter variant's own operator union, so adding an
  * operator to `@lcabrera/server`'s contract (or removing one) stops this file
  * compiling until a case is written for it — and the case then fails the
  * api-server suites until both request schemas accept it too.
+ *
+ * `drafting` has no such anchor, and there is no honest one to give it: "a
+ * value the mappers drop" spans an absent key, an empty string and an empty
+ * array, which share no closed vocabulary in the type system. Its keys are
+ * therefore free-form and a case deleted from it is a case silently no longer
+ * checked — so each API server also carries the drafting states of #567 as a
+ * named regression of its own, independent of this set.
  */
 type EnterpriseOrderFilterContract = Readonly<
   Record<'drafting' | ColumnFilter['type'], FilterCases<string, ColumnFilter>>
@@ -173,6 +180,12 @@ const CONTRACT = {
 /**
  * Every column-filter state the enterprise-order endpoints must accept, as the
  * `filter` query payloads a client actually sends.
+ *
+ * Reached through the `api-shared/filter-contract` subpath and deliberately not
+ * the package barrel: both API servers import that barrel from `server.ts` and
+ * run `node dist/server.js` with no bundler between them, so a barrel export
+ * would build this object at every server start for the benefit of two test
+ * suites.
  *
  * The filter shape is declared once as a type (`@lcabrera/ui` and
  * `@lcabrera/server`, held in step by ADR-039's conformance test, and aliased
