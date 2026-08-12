@@ -64,18 +64,26 @@ const trimTrailingPunctuation = (value) =>
     : value;
 
 /** Strip a heading anchor and trailing sentence punctuation. */
-const normalise = (token) =>
+export const normaliseToken = (token) =>
   trimTrailingPunctuation(token.split('#')[0].trim());
+
+/**
+ * The contents of every inline code span in a run of text — odd-indexed
+ * segments of a split on the delimiter are the code.
+ *
+ * Splitting rather than matching across the delimiters is what keeps this
+ * linear: the obvious regex for an inline span scans with unbounded
+ * backtracking, a real cost on the largest documents here and flagged as
+ * super-linear. Exported so the rename gate splits identically instead of
+ * growing a second, subtly different notion of "inside backticks".
+ */
+export const inlineCodeTokens = (text) =>
+  text.split('`').filter((_, index) => index % 2 === 1);
 
 /**
  * Backticked tokens that are root-anchored paths, plus the targets of relative
  * markdown links. Fenced code blocks are skipped — they are examples, and the
  * paths inside them are illustrative far more often than not.
- *
- * Splitting on the delimiters rather than matching across them keeps this
- * linear. The obvious regexes for a fenced block and an inline span both scan
- * with unbounded backtracking, which is a real cost on the largest documents
- * here and is flagged as super-linear.
  */
 export const extractCandidates = (markdown) => {
   // Odd-indexed segments sit between a pair of fences; keep the even ones.
@@ -84,15 +92,12 @@ export const extractCandidates = (markdown) => {
     .filter((_, index) => index % 2 === 0)
     .join('\n');
 
-  // Likewise for inline spans: odd-indexed segments are the code.
-  const backticked = prose
-    .split('`')
-    .filter((_, index) => index % 2 === 1)
-    .map((token) => normalise(token))
+  const backticked = inlineCodeTokens(prose)
+    .map((token) => normaliseToken(token))
     .filter((token) => isRootAnchored(token));
 
   const linked = [...prose.matchAll(/\]\(([^)\s]{1,512})\)/g)]
-    .map((match) => normalise(match[1]))
+    .map((match) => normaliseToken(match[1]))
     .filter(
       (token) =>
         !isDisqualified(token) &&
