@@ -170,16 +170,40 @@ describe('createTableRouteLoader', () => {
     expect(result.dataPromise).toBe(fetchPage.mock.results[0]?.value);
   });
 
-  it('derives the remount key from the sort and filter URL params', () => {
-    const empty = invoke();
-    expect(empty.result.key).toBe('');
-
+  it('gives one loader a fresh dataPromise per navigation, which is what re-suspends', () => {
+    // The remount nothing keys by hand: a navigation re-runs *the same* loader,
+    // so `TableDataResolver`'s `use()` gets a promise it has not seen and
+    // suspends again. Building two loaders would prove nothing — their promises
+    // differ whatever this function does — so one loader is invoked twice.
     const sortingParam = serializeSortingToURL<Row>([
       { columnKey: 'name', direction: 'asc' },
     ]);
-    const withSort = invoke({
-      url: `http://localhost/rows?sorting=${encodeURIComponent(sortingParam ?? '')}`,
+    const fetchPage = vi.fn(async () => response);
+    const loader = createTableRouteLoader<Row, typeof response>({
+      ...baseConfig,
+      fetchPage,
     });
-    expect(withSort.result.key).toBe(sortingParam);
+
+    const first = loader({
+      request: new Request('http://localhost/rows'),
+    } as LoaderFunctionArgs);
+    const second = loader({
+      request: new Request(
+        `http://localhost/rows?sorting=${encodeURIComponent(sortingParam ?? '')}`,
+      ),
+    } as LoaderFunctionArgs);
+
+    expect(fetchPage).toHaveBeenCalledTimes(2);
+    expect(first.dataPromise).not.toBe(second.dataPromise);
+  });
+
+  it('returns only the fields its consumers read', () => {
+    // `key` used to be returned here with a comment claiming React Router
+    // remounted the boundary from it. Nothing read it, and React Router reads
+    // no loader field by that name — so the exact set is pinned rather than
+    // left to grow another unconsumed member.
+    expect(
+      Object.keys(invoke().result).toSorted((a, b) => a.localeCompare(b)),
+    ).toEqual(['columnsState', 'dataPromise', 'metaState']);
   });
 });

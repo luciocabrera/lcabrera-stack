@@ -72,8 +72,7 @@ type TableRouteFetchPageArgs<TData extends Record<string, unknown>> = {
  * the boilerplate every table route repeated: read persisted state from URL +
  * cookies, sanitize sorting, append the primary-key tiebreaker, optionally bake
  * distinct filter descriptors onto the columns, and assemble the serializable
- * `columnsState` / `metaState` / remount `key`. Only the data fetch stays with
- * the route.
+ * `columnsState` / `metaState`. Only the data fetch stays with the route.
  *
  * The returned loader is synchronous and returns `fetchPage`'s promise
  * unawaited, preserving Suspense streaming. Everything it returns is
@@ -112,8 +111,6 @@ export const createTableRouteLoader = <
       filters,
       metaUiFlags,
       sorting,
-      standaloneFiltersParam,
-      standaloneSortParam,
     } = readTableLoaderStateFromRequest<TData>({
       appId,
       columns,
@@ -140,11 +137,10 @@ export const createTableRouteLoader = <
         columnVisibility,
         sorting: sanitizedSorting,
       },
-      // Return the promise unawaited for Suspense streaming.
+      // Return the promise unawaited for Suspense streaming. A navigation
+      // re-runs the loader, so `TableDataResolver`'s `use()` receives a new
+      // promise and re-suspends — nothing has to key the boundary by hand.
       dataPromise: fetchPage({ effectiveSorting, filters, request }),
-      // Remount key: the sort + filter URL params. A change to either yields a
-      // new key, so React Router remounts the Suspense boundary for the new page.
-      key: `${standaloneSortParam ?? ''}${standaloneFiltersParam ?? ''}`,
       metaState: {
         ...metaUiFlags,
         appId,

@@ -248,7 +248,7 @@ Column filter-option fetching is described by **data, never functions** (ADR-009
 
 ## Table Route Loader Pattern
 
-A table-backed route defines its `loader` by calling **`createTableRouteLoader`** (`src/routing/loaders/`) with config plus a `fetchPage` callback — it is the loader-side counterpart to the generic `persist-cookie.action`. The factory owns the boilerplate every such route repeated: read persisted state from URL + cookies, sanitize sorting, append the primary-key tiebreaker (ADR-008), optionally bake distinct filter descriptors onto the columns (`filterOptions`, ADR-009), and assemble the serializable `columnsState` / `metaState` / remount `key`.
+A table-backed route defines its `loader` by calling **`createTableRouteLoader`** (`src/routing/loaders/`) with config plus a `fetchPage` callback — it is the loader-side counterpart to the generic `persist-cookie.action`. The factory owns the boilerplate every such route repeated: read persisted state from URL + cookies, sanitize sorting, append the primary-key tiebreaker (ADR-008), optionally bake distinct filter descriptors onto the columns (`filterOptions`, ADR-009), and assemble the serializable `columnsState` / `metaState`.
 
 ```ts
 export const loader = createTableRouteLoader<Row, RowResponse>({
