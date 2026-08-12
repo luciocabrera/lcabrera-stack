@@ -31,6 +31,7 @@
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { errorMessage } from './lib/error-message.mjs';
 import { runGit } from './lib/git-exec.mjs';
 import {
   describeFinding,
@@ -93,6 +94,9 @@ const main = () => {
 try {
   main();
 } catch (error) {
-  console.error(error.message);
+  // `throw` accepts any value, so `error.message` renders `undefined` for a
+  // thrown string or object — destroying the output exactly when something
+  // unexpected went wrong.
+  console.error(errorMessage(error));
   process.exitCode = 1;
 }

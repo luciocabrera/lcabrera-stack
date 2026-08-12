@@ -108,6 +108,18 @@ describe('groupByDirectory', () => {
       ]),
     );
   });
+
+  it('files a repo-root path under the root, not under a truncated name', () => {
+    // `git ls-files` lists plenty of root-level files, and `lastIndexOf('/')`
+    // is -1 for each. Taking `slice(0, -1)` there would bucket `README.md`
+    // under a directory called `README.m`.
+    expect(groupByDirectory(['README.md', 'package.json', 'a/b.ts'])).toEqual(
+      new Map([
+        ['', ['README.md', 'package.json']],
+        ['a', ['a/b.ts']],
+      ]),
+    );
+  });
 });
 
 describe('candidatesIn', () => {

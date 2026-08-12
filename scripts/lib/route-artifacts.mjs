@@ -95,7 +95,16 @@ export const parseFileName = (filePath) => {
 export const normalizeSubject = (value) =>
   value.toLowerCase().replaceAll(NON_ALPHANUMERIC, '');
 
-const directoryOf = (filePath) => filePath.slice(0, filePath.lastIndexOf('/'));
+/**
+ * The directory part, or `''` for a file at the repo root — and the root case
+ * needs saying, because `git ls-files` lists plenty of them. A bare
+ * `slice(0, lastIndexOf('/'))` returns `slice(0, -1)` there, silently dropping
+ * the last character and inventing a directory named `README.m`.
+ */
+const directoryOf = (filePath) => {
+  const lastSlash = filePath.lastIndexOf('/');
+  return lastSlash === -1 ? '' : filePath.slice(0, lastSlash);
+};
 
 /** Tracked paths grouped by their directory — the folder listing, without `fs`. */
 export const groupByDirectory = (paths) => {
