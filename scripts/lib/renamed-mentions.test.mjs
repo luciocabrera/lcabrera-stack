@@ -77,6 +77,37 @@ describe('vanishedNames', () => {
     ).toEqual([]);
   });
 
+  it('ignores an index entry the rename set already removed', () => {
+    // The caller diffs the working tree but lists the index, and those disagree
+    // while a rename is half-staged: the new path is added, the old one is not
+    // yet removed from the index. Reading the index alone left the old basename
+    // looking live, so the rename was skipped and the gate passed on a doc that
+    // had genuinely gone stale.
+    expect(
+      vanishedNames({
+        renames: [
+          { from: 'packages/a/old.types.ts', to: 'packages/a/new.types.ts' },
+        ],
+        trackedPaths: ['packages/a/old.types.ts', 'packages/a/new.types.ts'],
+      }),
+    ).toEqual([
+      { name: 'old.types.ts', replacedBy: 'packages/a/new.types.ts' },
+    ]);
+  });
+
+  it('counts the rename target as live even when the index lacks it', () => {
+    // The mirror case: the new path exists only in the working tree. Its
+    // basename must still count as live, or a directory-only move would report.
+    expect(
+      vanishedNames({
+        renames: [
+          { from: 'packages/a/thing.util.ts', to: 'packages/b/thing.util.ts' },
+        ],
+        trackedPaths: ['packages/a/thing.util.ts'],
+      }),
+    ).toEqual([]);
+  });
+
   it('reports one entry per name when a rename set repeats a basename', () => {
     expect(
       vanishedNames({
