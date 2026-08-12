@@ -578,14 +578,19 @@ estimate is the displayed total.
    `query-builder/ARCHITECTURE.md` and `docs/cqms/PRD.md`. Must state why Mode 2
    makes views impossible (runtime-chosen keys) and why a _sibling_ module
    preserves the flat builder's non-goals. Fold in the grouping-set primitive with
-   the identical-plan evidence.
+   the identical-plan evidence. → adopted as
+   [ADR-059](../../decisions/ADR-059-aggregation-is-builder-generated.md).
 2. **Grouping config is URL state; expansion is client state** — §2.6 and its cost.
 3. **The grid focus model** (`role="grid"` + roving tabindex) — ADR-011's deferred
    "Step 0", load-bearing for row selection and nested headers too, so it deserves
    its own number rather than arriving inside grouping.
 4. **Group-key and aggregate legality comes from the Postgres catalogue**, not from
    `TableColumnDataType` — added after the review falsified §2.2's premise (see the
-   correction there).
+   correction there). → adopted as
+   [ADR-058](../../decisions/ADR-058-grouping-legality-by-analytical-role.md).
+   **It supersedes §3.6's `columnTypes` field and §4.2's per-`dataType` table**:
+   the builder is handed the resolved capability map rather than re-deriving
+   legality from a vocabulary that maps `point` and `jsonb` onto `string`.
 5. **A table capability is declared once, on the loader `meta`** — added after the
    review found two live mechanisms for the same decision: ADR-056 declares
    endpoint capabilities as view props defaulting off, while `crud` is declared on
