@@ -7,9 +7,13 @@ import { filtersCodec } from './filtersCodec.util';
  *
  * Infers filter types from value shapes and expands short operator codes. A
  * param that is not a `{ columnKey: filter }` object is refused whole; within
- * one that is, an unrecognised filter value yields no filter for that column.
- * The column keys stay bare strings — `sanitizeFiltersByColumns` checks them
- * against the real columns downstream.
+ * one that is, a value no filter shape matches yields no filter for that
+ * column. Note that an unknown *operator code* is not such a value — see
+ * `filtersCodec` for what that per-entry drop does and does not cover.
+ *
+ * The column keys stay bare strings. `sanitizeFiltersByColumns` checks them
+ * against the real columns downstream, and also drops filters whose type the
+ * column cannot carry.
  */
 export const deserializeFiltersFromURL = <TData>(param: string) =>
   filtersCodec.deserialize(param) as ColumnFiltersState<TData>;
