@@ -9,7 +9,7 @@ area:
 started: 2026-08-12
 updated: 2026-08-12
 plan: (none)
-pr: (none)
+pr: '#629'
 issue: #559
 ---
 
@@ -19,6 +19,7 @@ feat(ui): data-derived row identity for grid body rows
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implemented — `resolveRowKey` + tests + the single call site,
+  docs updated, quality gate run
 - Blockers: none
-- Next:
+- Next: independent review on PR #629

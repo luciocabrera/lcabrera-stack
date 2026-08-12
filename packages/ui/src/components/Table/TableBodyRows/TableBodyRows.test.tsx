@@ -35,11 +35,13 @@ const formatMockCellValue = (value: unknown): string => {
 
 const {
   useGetColumnSizingMock,
+  useGetColumnsMock,
   useGetPinnedColumnOffsetsMock,
   useGetPinnedColumnPartitionMock,
   useGetTableDataMock,
 } = vi.hoisted(() => ({
   useGetColumnSizingMock: vi.fn(),
+  useGetColumnsMock: vi.fn(),
   useGetPinnedColumnOffsetsMock: vi.fn(),
   useGetPinnedColumnPartitionMock: vi.fn(),
   useGetTableDataMock: vi.fn(),
@@ -67,6 +69,7 @@ const MockTableRow = vi.hoisted(() => {
 });
 
 vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
+  useGetColumns: useGetColumnsMock,
   useGetColumnSizing: useGetColumnSizingMock,
   useGetPinnedColumnOffsets: useGetPinnedColumnOffsetsMock,
   useGetPinnedColumnPartition: useGetPinnedColumnPartitionMock,
@@ -93,6 +96,10 @@ const setupDefaultMocks = () => {
     leftPinnedCols: [],
     rightPinnedCols: [],
   });
+  useGetColumnsMock.mockReturnValue([
+    { key: 'name', label: 'Name' },
+    { key: 'amount', label: 'Amount' },
+  ]);
   useGetColumnSizingMock.mockReturnValue({});
   useGetPinnedColumnOffsetsMock.mockReturnValue({});
   useGetTableDataMock.mockReturnValue([
@@ -135,6 +142,7 @@ describe('TableBodyRows', () => {
       leftPinnedCols: [],
       rightPinnedCols: [],
     });
+    useGetColumnsMock.mockReturnValue([{ key: 'name', label: 'Name' }]);
     useGetColumnSizingMock.mockReturnValue({});
     useGetPinnedColumnOffsetsMock.mockReturnValue({});
     useGetTableDataMock.mockReturnValue([{ name: 'Z' }]);
@@ -156,6 +164,11 @@ describe('TableBodyRows', () => {
       leftPinnedCols: [{ key: 'id', label: 'ID' }],
       rightPinnedCols: [{ key: 'status', label: 'Status' }],
     });
+    useGetColumnsMock.mockReturnValue([
+      { isPrimaryKey: true, key: 'id', label: 'ID' },
+      { key: 'name', label: 'Name' },
+      { key: 'status', label: 'Status' },
+    ]);
     useGetColumnSizingMock.mockReturnValue({});
     useGetPinnedColumnOffsetsMock.mockReturnValue({});
     useGetTableDataMock.mockReturnValue([
@@ -173,5 +186,54 @@ describe('TableBodyRows', () => {
     expect(screen.getByText('ID:1')).toBeTruthy();
     expect(screen.getByText('Name:A')).toBeTruthy();
     expect(screen.getByText('Status:active')).toBeTruthy();
+  });
+
+  it('keys rows by primary-key identity, so a reorder moves the row node', () => {
+    useGetPinnedColumnPartitionMock.mockReturnValue({
+      centerCols: [{ key: 'name', label: 'Name' }],
+      leftPinnedCols: [],
+      rightPinnedCols: [],
+    });
+    useGetColumnsMock.mockReturnValue([
+      { isPrimaryKey: true, key: 'id', label: 'ID' },
+      { key: 'name', label: 'Name' },
+    ]);
+    useGetColumnSizingMock.mockReturnValue({});
+    useGetPinnedColumnOffsetsMock.mockReturnValue({});
+    useGetTableDataMock.mockReturnValue([
+      { id: 1, name: 'A' },
+      { id: 2, name: 'B' },
+    ]);
+
+    const { container, rerender } = render(
+      <table>
+        <tbody>
+          <TableBodyRows endIndex={2} isLoadingState={false} startIndex={0} />
+        </tbody>
+      </table>,
+    );
+
+    const rowNodeForA = container.querySelector('tr');
+
+    expect(rowNodeForA?.textContent).toBe('Name:A');
+
+    useGetTableDataMock.mockReturnValue([
+      { id: 2, name: 'B' },
+      { id: 1, name: 'A' },
+    ]);
+
+    rerender(
+      <table>
+        <tbody>
+          <TableBodyRows endIndex={2} isLoadingState={false} startIndex={0} />
+        </tbody>
+      </table>,
+    );
+
+    const reorderedRowNodes = container.querySelectorAll('tr');
+
+    expect(reorderedRowNodes).toHaveLength(2);
+    expect(reorderedRowNodes[1]?.textContent).toBe('Name:A');
+    expect(reorderedRowNodes[1]).toBe(rowNodeForA);
   });
 });

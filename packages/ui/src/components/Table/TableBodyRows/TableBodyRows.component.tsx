@@ -1,4 +1,5 @@
 import {
+  useGetColumns,
   useGetColumnSizing,
   useGetPinnedColumnOffsets,
   useGetPinnedColumnPartition,
@@ -10,6 +11,7 @@ import { TableRow } from '#ui/components/Table/TableRow';
 import type { TableBodyRowsProps } from './TableBodyRows.types';
 
 import { useGetTableData } from '../contexts/TableData/data/selectors';
+import { resolveRowKey } from './utils/resolveRowKey.util';
 
 export const TableBodyRows = <TData extends Record<string, unknown>>({
   endIndex,
@@ -17,6 +19,7 @@ export const TableBodyRows = <TData extends Record<string, unknown>>({
   startIndex,
 }: TableBodyRowsProps) => {
   const data = useGetTableData<TData>();
+  const columns = useGetColumns<TData>();
   const { centerCols, leftPinnedCols, rightPinnedCols } =
     useGetPinnedColumnPartition();
   const columnSizing = useGetColumnSizing<TData>();
@@ -36,7 +39,7 @@ export const TableBodyRows = <TData extends Record<string, unknown>>({
         const rowIndex = startIndex + index;
 
         return (
-          <TableRow key={rowIndex}>
+          <TableRow key={resolveRowKey({ columns, index: rowIndex, row })}>
             {renderTableBodyPinnedGroup({
               columns: leftPinnedCols,
               renderCell: renderBodyCell,
