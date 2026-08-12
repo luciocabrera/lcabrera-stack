@@ -34,6 +34,23 @@ all resolve without anyone adding an entry. Anything unrecognised falls through
 to `unsupported`, which is what lets the excluded set stay non-exhaustive and
 still be safe.
 
+**Where that property runs out — read this before adding a category.** A category
+may be admitted only when every type in it is one we want, because the mapping
+cannot say "this member but not that one". `I` (`inet`, `cidr`) and `T`
+(`interval`) qualify: each holds nothing else. `U` does not — it holds `uuid`
+alongside `jsonb`, `xml`, `bytea` and `tsvector`, and a `uuid` column is
+identical to a `jsonb` one on **every** field the capability query returns: same
+category, same equality answer, same `{count}` aggregate set. So `uuid` stays
+refused, and admitting it is a decision about giving up the derivation property
+rather than a gap to close (#599). `resolve-analytical-role.util.test.ts` asserts
+`U → unsupported` for exactly this reason.
+
+`interval` is the one type whose **role** the catalogue decides rather than
+intuition: it looks date-like, and it is a fact, because Postgres defines `sum`
+and `avg` for it and for no other non-numeric type. Its group keys normalise —
+`'1 mon'`, `'30 days'` and `'720 hours'` are one group — which is legal,
+documented in ADR-058, and something the UI has to surface rather than hide.
+
 ## Files
 
 | File                                      | Role                                                                                                                                                |
@@ -41,7 +58,7 @@ still be safe.
 | `group-query-builder.types.ts`            | `AggregateFn`, `ColumnAnalyticalRole`, `GroupKeyRefusalReason`, `DistinctEstimate`, and the capability row/result types                             |
 | `aggregate-sql.constants.ts`              | `AGGREGATE_SQL` — the closed `Record<AggregateFn, AggregateSpec>` map — plus the distinct SQL names the catalogue is probed with                    |
 | `group-key-bounds.constants.ts`           | The distinct-value ceiling for a group key and the unique-ish ratio                                                                                 |
-| `resolve-analytical-role.util.ts`         | **Gate 1.** `pg_type.typcategory` → dimension / fact / unsupported                                                                                  |
+| `resolve-analytical-role.util.ts`         | **Gate 1.** `pg_type.typcategory` → dimension / fact / unsupported. Admit a category only when every member belongs (see above)                     |
 | `build-column-capabilities-query.util.ts` | **Gate 2.** One bound-parameter catalogue query: equality operator, per-aggregate existence, and `pg_stats`/`reltuples`, for every requested column |
 | `resolve-distinct-estimate.util.ts`       | `n_distinct` → a known count, genuinely unknown, or undefined distinctness — three outcomes on purpose                                              |
 | `to-role-aggregates.util.ts`              | Both gates applied to the aggregate menu: the role sets the ceiling, the catalogue removes what does not exist                                      |

@@ -35,10 +35,14 @@ const ENUM_TYPE = `${SCHEMA}.grouping_capability_mood`;
 const COLUMN = {
   /** `numeric`, low-cardinality — a fact that is demonstrably usable as a key. */
   amount: 'amount',
+  /** `inet` — a dimension whose whole type category is admitted. */
+  clientIp: 'client_ip',
   /** `varchar` — borrows `text`'s operator class rather than owning one. */
   code: 'code',
   /** `jsonb` — has equality, so only the role gate keeps it out. */
   doc: 'doc',
+  /** `interval` — the fact that looks like a date and is not one. */
+  dur: 'dur',
   /** `bool` — a dimension Postgres has no `min`/`max` aggregate for. */
   flag: 'flag',
   /** `int4` primary key — the likeliest user mistake. */
@@ -51,8 +55,12 @@ const COLUMN = {
   mood: 'mood',
   /** `text` — the uncomplicated dimension. */
   name: 'name',
+  /** `cidr` — reaches `min`/`max` only through its binary cast to `inet`. */
+  net: 'net',
   /** `text[]` — has equality via `anyarray`, and is still not renderable. */
   tags: 'tags',
+  /** `uuid`, low-cardinality — refused despite being displayable (see ADR-058). */
+  tenant: 'tenant',
 } as const;
 
 const resolveCapabilities = async () =>
@@ -82,7 +90,11 @@ describe.skipIf(!IS_SMOKE_ENABLED)(
            ${COLUMN.doc} jsonb,
            ${COLUMN.loc} point,
            ${COLUMN.tags} text[],
-           ${COLUMN.mood} ${ENUM_TYPE}
+           ${COLUMN.mood} ${ENUM_TYPE},
+           ${COLUMN.tenant} uuid,
+           ${COLUMN.clientIp} inet,
+           ${COLUMN.net} cidr,
+           ${COLUMN.dur} interval
          )`,
       );
       await getPool().query(
@@ -96,7 +108,11 @@ describe.skipIf(!IS_SMOKE_ENABLED)(
                   jsonb_build_object('k', g % 11),
                   point(g % 7, g % 5),
                   ARRAY['a', 'b'],
-                  (ARRAY['low', 'mid', 'high']::${ENUM_TYPE}[])[1 + (g % 3)]
+                  (ARRAY['low', 'mid', 'high']::${ENUM_TYPE}[])[1 + (g % 3)],
+                  ('00000000-0000-0000-0000-00000000000' || (g % 4))::uuid,
+                  ('10.0.' || (g % 8) || '.' || (g % 250))::inet,
+                  ('10.0.' || (g % 8) || '.0/24')::cidr,
+                  ((g % 5) || ' days')::interval
              FROM generate_series(1, 2000) g`,
       );
       await getPool().query(`ANALYZE ${FIXTURE}`);
@@ -198,6 +214,89 @@ describe.skipIf(!IS_SMOKE_ENABLED)(
         'max',
         'min',
       ]);
+    });
+
+    it('reads an interval as a fact and offers it sum and avg', async () => {
+      const capabilities = await resolveCapabilities();
+      const dur = capabilities[COLUMN.dur];
+
+      // The catalogue is what settles this: `interval` is the only non-numeric
+      // type Postgres defines `sum` and `avg` for, which is why the role gate
+      // calls it a fact rather than grouping it with the date-like dimensions.
+      expect(dur?.role).toBe('fact');
+      expect(dur?.canGroup).toBe(true);
+      expect(dur?.aggregates).toEqual([
+        'avg',
+        'count',
+        'countDistinct',
+        'max',
+        'min',
+        'sum',
+      ]);
+    });
+
+    it('records that an interval group key normalises its values', async () => {
+      // Not a capability assertion — a recorded consequence of admitting
+      // `interval` as a key. Its comparison semantics flatten 30 days to the
+      // month and 24 hours to the day, so three values a cell would render
+      // differently are one group, labelled with only one of them. Legal and
+      // documented, but a grouped read answers a subtly different question than
+      // the column displays, and the UI has to say so.
+      const { rows } = await getPool().query<{
+        readonly group_key: string;
+        readonly rows_in_group: string;
+      }>(
+        `SELECT i::text AS group_key, count(*)::text AS rows_in_group
+           FROM (VALUES ('1 mon'::interval), ('30 days'::interval),
+                        ('720 hours'::interval), ('5 days'::interval)) v(i)
+          GROUP BY i ORDER BY i`,
+      );
+
+      expect(rows).toEqual([
+        { group_key: '5 days', rows_in_group: '1' },
+        { group_key: '1 mon', rows_in_group: '3' },
+      ]);
+    });
+
+    it('accepts inet and cidr as dimensions', async () => {
+      const capabilities = await resolveCapabilities();
+
+      // `cidr` owns neither aggregate: it reaches `min`/`max` through the binary
+      // cast to `inet`, the same mechanism `varchar` uses to borrow `text`'s.
+      expect(capabilities[COLUMN.net]?.role).toBe('dimension');
+      expect(capabilities[COLUMN.net]?.canGroup).toBe(true);
+      expect(capabilities[COLUMN.net]?.aggregates).toEqual([
+        'count',
+        'countDistinct',
+        'max',
+        'min',
+      ]);
+      expect(capabilities[COLUMN.clientIp]?.role).toBe('dimension');
+    });
+
+    it('refuses a uuid the catalogue reports as groupable', async () => {
+      const capabilities = await resolveCapabilities();
+      const tenant = capabilities[COLUMN.tenant];
+      const doc = capabilities[COLUMN.doc];
+
+      // Low-cardinality, so no statistics rule keeps it out — and Postgres has
+      // both an operator class and `count` for it. The refusal is the role gate
+      // declining a category it cannot read `uuid` out of without also reading
+      // `jsonb` out, which the next two assertions are here to show.
+      expect(tenant?.canGroup).toBe(false);
+      expect(tenant?.refusal).toBe('not-a-dimension');
+      expect(tenant?.typeName).toBe('uuid');
+      expect(doc?.typeName).toBe('jsonb');
+      expect(tenant?.aggregates).toEqual(doc?.aggregates);
+    });
+
+    it('offers a uuid no min or max, which Postgres does not define', async () => {
+      const capabilities = await resolveCapabilities();
+
+      // A uuid sorts fine — it has a default btree operator class — so this is
+      // the case where "sortable" and "has min/max" come apart.
+      expect(capabilities[COLUMN.tenant]?.aggregates).not.toContain('min');
+      expect(capabilities[COLUMN.tenant]?.aggregates).not.toContain('max');
     });
 
     it('omits a column the table does not have', async () => {

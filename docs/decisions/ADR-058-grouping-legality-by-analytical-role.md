@@ -107,11 +107,11 @@ the bar — it rules out what makes no sense to offer.
 
 Every column resolves to exactly one of three roles:
 
-| Role            | Real types                                                                | May be a group key                     | May be aggregated                      |
-| --------------- | ------------------------------------------------------------------------- | -------------------------------------- | -------------------------------------- |
-| **Dimension**   | `text`, `varchar`, `char`, enum, `boolean`, date/timestamp                | **yes** — this is what grouping is for | `count`, `countDistinct`, `min`, `max` |
-| **Fact**        | `numeric`, `int2/4/8`, `float4/8`, money                                  | only when demonstrably low-cardinality | `sum`, `avg`, `min`, `max`, `count`    |
-| **Unsupported** | `jsonb`, `json`, `point` and the geometric family, arrays, `bytea`, `xml` | **no**                                 | **no**                                 |
+| Role            | Real types                                                                                    | May be a group key                     | May be aggregated                      |
+| --------------- | --------------------------------------------------------------------------------------------- | -------------------------------------- | -------------------------------------- |
+| **Dimension**   | `text`, `varchar`, `char`, enum, `boolean`, date/timestamp, `inet`/`cidr`                     | **yes** — this is what grouping is for | `count`, `countDistinct`, `min`, `max` |
+| **Fact**        | `numeric`, `int2/4/8`, `float4/8`, money, `interval`                                          | only when demonstrably low-cardinality | `sum`, `avg`, `min`, `max`, `count`    |
+| **Unsupported** | `jsonb`, `json`, `point` and the geometric family, arrays, `bytea`, `xml`, `uuid`, `tsvector` | **no**                                 | **no**                                 |
 
 This is the dimension/fact split analytics has always had: you group by a
 country, a city or a category, and you aggregate an amount, a quantity, a price
@@ -209,6 +209,45 @@ suitability. Every type the Table cannot render would pass it, `jsonb` first.
 **Rejected: costed `EXPLAIN` as the legality gate.** It answers cost, not
 legality — an illegal aggregate fails to parse, so `EXPLAIN` returns the same
 error the query would, one round trip earlier and with no better message.
+
+## Amendments
+
+**2026-08-12 — `inet`/`cidr` admitted as dimensions, `interval` as a fact
+(#598).** The original role table was sized for the types the showcase schemas
+carry and left three real ones unaddressed, each refused by Gate 1's default
+deny. A live probe (PostgreSQL 18.4) settled two of them without weakening the
+gate: `interval` is the sole member of type category `T`, and `inet`/`cidr` are
+the only members of category `I`, so admitting each category admits nothing else,
+now or later. `interval` is a **fact** rather than a date-like dimension because
+Postgres defines `sum` and `avg` for it and for no other non-numeric type — the
+one place the catalogue decides which role a type takes.
+
+Two consequences worth stating rather than rediscovering:
+
+- **An `interval` group key normalises its values.** `interval` comparison
+  flattens 30 days to the month and 24 hours to the day, so `'1 mon'`,
+  `'30 days'` and `'720 hours'` are one group, rendered with one of the three as
+  its label. The decision is to accept this and have the UI say the key is
+  normalised; a grouped read on a duration answers a coarser question than the
+  cell displays.
+- **Grouping a raw `inet` is legal but rarely what is wanted.** The useful key is
+  `network()` or `masklen()`, an expression the builder has no concept of. That
+  remains out of scope and belongs to #562, not to this gate.
+
+**`uuid` was considered and deliberately left refused.** It is displayable and
+has a default btree operator class, so the refusal is not about capability. It is
+that no derivable property separates it from `jsonb`: both are type category `U`,
+both report an equality operator, and both offer the aggregate set `{count}` and
+nothing more. Admitting `uuid` therefore means naming the type — the first
+hand-maintained entry in a gate whose stated design property is that it is a
+derivation — and that trade is a decision in its own right rather than an
+implementation detail of this amendment. Tracked as #599; the code carries the
+same note so nobody "fixes" it by admitting category `U` wholesale.
+
+One incidental correction the probe produced: PostgreSQL 18.4 defines **no
+`min(uuid)`/`max(uuid)`** even though `uuid` sorts. Gate 2 already reports this
+correctly, and it is the clearest example of why the role table's aggregate
+column is a ceiling and not a promise.
 
 ## References
 
