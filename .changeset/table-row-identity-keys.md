@@ -21,7 +21,8 @@ Keys are built with `JSON.stringify` rather than by joining encoded values, whic
 matters for three kinds of id: one containing an unpaired surrogate (which
 `encodeURIComponent` rejects outright), a composite id whose values contain the
 delimiter, and an id column that arrives as numbers on one page and strings on
-another. All three previously produced either a crash or two rows sharing a key.
+another. Any of the three would otherwise produce a crash or two rows sharing a
+key.
 
 A table whose columns declare no primary key is unchanged: its rows keep exactly
 the positional identity they had.
