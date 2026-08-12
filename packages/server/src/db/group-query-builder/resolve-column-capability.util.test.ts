@@ -163,6 +163,64 @@ describe('resolveColumnCapability', () => {
     ).toBe('too-many-distinct');
   });
 
+  it('treats an interval as a fact and offers it sum and avg', () => {
+    const capability = resolveColumnCapability(
+      row({
+        aggregates: ['avg', 'count', 'max', 'min', 'sum'],
+        column: 'dur',
+        nDistinct: 5,
+        typeCategory: 'T',
+        typeName: 'interval',
+      }),
+    );
+
+    expect(capability.role).toBe('fact');
+    expect(capability.canGroup).toBe(true);
+    expect(capability.aggregates).toContain('sum');
+    expect(capability.aggregates).toContain('avg');
+  });
+
+  it('treats inet and cidr as dimensions', () => {
+    // Both are category `I`, and `cidr` reaches `min`/`max` through the binary
+    // cast to `inet` rather than owning aggregates of its own.
+    const capability = resolveColumnCapability(
+      row({
+        aggregates: ['count', 'max', 'min'],
+        column: 'net',
+        nDistinct: 8,
+        typeCategory: 'I',
+        typeName: 'cidr',
+      }),
+    );
+
+    expect(capability.role).toBe('dimension');
+    expect(capability.canGroup).toBe(true);
+    expect(capability.aggregates).toEqual([
+      'count',
+      'countDistinct',
+      'max',
+      'min',
+    ]);
+  });
+
+  it('refuses a uuid, which the catalogue cannot tell apart from a jsonb', () => {
+    // These two rows differ in `typeName` alone — same category, same equality
+    // answer, same aggregate set. Nothing derivable separates them, which is why
+    // uuid stays refused rather than being admitted with the rest of `U`.
+    const uuidRow = row({
+      aggregates: ['count'],
+      column: 'tenant',
+      nDistinct: 4,
+      typeCategory: 'U',
+      typeName: 'uuid',
+    });
+
+    expect(resolveColumnCapability(uuidRow).refusal).toBe('not-a-dimension');
+    expect(
+      resolveColumnCapability({ ...uuidRow, typeName: 'jsonb' }).refusal,
+    ).toBe('not-a-dimension');
+  });
+
   it('offers a boolean the pair Postgres actually has', () => {
     const capability = resolveColumnCapability(
       row({
