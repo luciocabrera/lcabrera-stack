@@ -1,4 +1,4 @@
-import { IDENTIFIER_TYPE_NAMES } from './identifier-types.constants.ts';
+import { IDENTIFIER_TYPE_NAMES } from './group-query-builder.constants.ts';
 
 type IsIdentifierTypeArgs = {
   readonly typeName: string;

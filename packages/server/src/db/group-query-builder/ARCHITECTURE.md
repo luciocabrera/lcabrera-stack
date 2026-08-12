@@ -42,7 +42,7 @@ alongside `jsonb`, `xml`, `bytea` and `tsvector`, and a `uuid` column is
 identical to a `jsonb` one on **every** field the capability query returns: same
 category, same equality answer, same `{count}` aggregate set.
 
-So `uuid` is admitted **by name**, in `identifier-types.constants.ts`, checked
+So `uuid` is admitted **by name**, in `group-query-builder.constants.ts`, checked
 ahead of the category lookup — the one place Gate 1 is not a derivation. `U`
 itself stays refused, and both the unit and smoke suites assert that a `jsonb`
 column is still turned away, so widening the category to reach a future
@@ -71,18 +71,16 @@ documented in ADR-058, and something the UI has to surface rather than hide.
 
 ## Files
 
-| File                                      | Role                                                                                                                                                |
-| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `group-query-builder.types.ts`            | `AggregateFn`, `ColumnAnalyticalRole`, `GroupKeyRefusalReason`, `DistinctEstimate`, and the capability row/result types                             |
-| `aggregate-sql.constants.ts`              | `AGGREGATE_SQL` — the closed `Record<AggregateFn, AggregateSpec>` map — plus the distinct SQL names the catalogue is probed with                    |
-| `group-key-bounds.constants.ts`           | The distinct-value ceiling for a group key and the unique-ish ratio                                                                                 |
-| `identifier-types.constants.ts`           | The named exceptions to the category derivation — schema-qualified, because a type name alone is not unique                                         |
-| `is-identifier-type.util.ts`              | The one place that comparison happens; both the role gate and the refusal rules consult it so they cannot drift                                     |
-| `resolve-analytical-role.util.ts`         | **Gate 1.** `pg_type.typcategory` → dimension / fact / unsupported. Admit a category only when every member belongs (see above)                     |
-| `build-column-capabilities-query.util.ts` | **Gate 2.** One bound-parameter catalogue query: equality operator, per-aggregate existence, and `pg_stats`/`reltuples`, for every requested column |
-| `resolve-distinct-estimate.util.ts`       | `n_distinct` → a known count, genuinely unknown, or undefined distinctness — three outcomes on purpose                                              |
-| `to-role-aggregates.util.ts`              | Both gates applied to the aggregate menu: the role sets the ceiling, the catalogue removes what does not exist                                      |
-| `resolve-column-capability.util.ts`       | **Public entry point.** One catalogue row → one `ColumnGroupingCapability`, refusal reason included                                                 |
+| File                                      | Role                                                                                                                                                                                   |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `group-query-builder.types.ts`            | `AggregateFn`, `ColumnAnalyticalRole`, `GroupKeyRefusalReason`, `DistinctEstimate`, and the capability row/result types                                                                |
+| `group-query-builder.constants.ts`        | Every constant this folder owns, in one file per the domain-folder rule: the `AGGREGATE_SQL` map and probe names, the group-key bounds, and the schema-qualified identifier exceptions |
+| `is-identifier-type.util.ts`              | The one place that comparison happens; both the role gate and the refusal rules consult it so they cannot drift                                                                        |
+| `resolve-analytical-role.util.ts`         | **Gate 1.** `pg_type.typcategory` → dimension / fact / unsupported. Admit a category only when every member belongs (see above)                                                        |
+| `build-column-capabilities-query.util.ts` | **Gate 2.** One bound-parameter catalogue query: equality operator, per-aggregate existence, and `pg_stats`/`reltuples`, for every requested column                                    |
+| `resolve-distinct-estimate.util.ts`       | `n_distinct` → a known count, genuinely unknown, or undefined distinctness — three outcomes on purpose                                                                                 |
+| `to-role-aggregates.util.ts`              | Both gates applied to the aggregate menu: the role sets the ceiling, the catalogue removes what does not exist                                                                         |
+| `resolve-column-capability.util.ts`       | **Public entry point.** One catalogue row → one `ColumnGroupingCapability`, refusal reason included                                                                                    |
 
 ## Three traps this folder already pays for
 

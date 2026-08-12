@@ -4,7 +4,7 @@ import type {
   GroupKeyRefusalReason,
 } from './group-query-builder.types.ts';
 
-import { MAX_GROUP_KEY_DISTINCT } from './group-key-bounds.constants.ts';
+import { MAX_GROUP_KEY_DISTINCT } from './group-query-builder.constants.ts';
 import { isIdentifierType } from './is-identifier-type.util.ts';
 import { isUniqueIsh } from './is-unique-ish.util.ts';
 

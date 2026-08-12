@@ -65,8 +65,9 @@ DB-free. Today it holds the ADR-058 legality gates: `resolveColumnCapability`
 (`resolve-column-capability.util.ts`) is the entry point, composing
 `resolveAnalyticalRole` (Gate 1, from `pg_type.typcategory`),
 `buildColumnCapabilitiesQuery` (Gate 2, one bound-parameter catalogue query),
-`resolveDistinctEstimate` and `toRoleAggregates`. `AGGREGATE_SQL`
-(`aggregate-sql.constants.ts`) is the closed `AggregateFn` → SQL map, and
+`resolveDistinctEstimate` and `toRoleAggregates`.
+`group-query-builder.constants.ts` holds every constant the folder owns —
+including the closed `AggregateFn` → SQL map — and
 `group-query-builder.types.ts` holds the shared types. Run it through
 `getColumnGroupingCapabilities` above rather than by hand.
 

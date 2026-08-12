@@ -1,7 +1,7 @@
 import type { BuiltQuery } from '../query-builder/query-builder.types.ts';
 import type { ColumnCapabilitiesQueryDescriptor } from './group-query-builder.types.ts';
 
-import { AGGREGATE_SQL_NAMES } from './aggregate-sql.constants.ts';
+import { AGGREGATE_SQL_NAMES } from './group-query-builder.constants.ts';
 
 /**
  * Gate 2 of ADR-058, plus the statistics the group-key rules need, in one
