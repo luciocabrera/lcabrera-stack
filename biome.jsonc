@@ -334,18 +334,25 @@
       },
     },
     {
-      // ARIA's own grid mapping: `<table role="grid">` and `<td role="gridcell">`
-      // are the markup the WAI-ARIA APG uses for an interactive data grid, and
-      // the roles here are not an upgrade of the implicit ones — they are the
-      // ONLY source of them. `TableBody.stylex.ts` makes `<tbody>` a CSS grid
-      // and `TableBodyCell.stylex.ts` makes each cell flex, and a browser drops
-      // an element's implicit table role along with its table `display`
-      // (ADR-062, which also records why those overrides cannot be reverted).
-      // Biome flags the role→element pair without modelling that; its upstream,
-      // jsx-a11y, ships `table: ['grid']` and `td: ['gridcell']` as default
-      // allowances on the same rule. Removing the roles — Biome's own fix —
-      // leaves the grid exposed as generic containers, which is the bug this
-      // work exists to close.
+      // `<table role="grid">` and `<td role="gridcell">` are the markup the
+      // WAI-ARIA APG uses for an interactive data grid, and ARIA's taxonomy
+      // makes `grid` a subclass of `table` — so this is the spec's own
+      // refinement of a table, not the "non-interactive element handed an
+      // interactive role" the rule guards against.
+      // The two elements differ in WHY they need the attribute, and only one is
+      // a sole source: `TableBase.stylex.ts` keeps `display: table`, so the
+      // `<table>` retains its implicit `table` role and `role="grid"` upgrades
+      // it; `TableBodyCell.stylex.ts` sets every cell to `display: flex`, which
+      // DOES remove the implicit `cell` role, leaving the attribute as the only
+      // source (ADR-062).
+      // Biome's rule takes no options — its schema is
+      // `additionalProperties: false` — so it cannot be told about the
+      // `table: ['grid']` / `td: ['gridcell']` allowances jsx-a11y ships by
+      // default on the same rule. A fix does exist and is rejected on merit,
+      // not for lack of one: rendering `<div>`s instead, Biome's first
+      // suggestion, discards the native table fallback for anything that does
+      // not read ARIA, and simply dropping the roles re-exposes the grid as
+      // generic containers.
       "includes": [
         "**/TableBase.component.tsx",
         "**/TableBodyCell.component.tsx",
@@ -357,15 +364,22 @@
       },
     },
     {
-      // Same premise, opposite complaint: Biome reads `<tr>` as implicitly
-      // `row` and `<th scope="col">` as implicitly `columnheader`, so it calls
-      // the explicit roles redundant. They are not — `TableRow.stylex.ts` sets
-      // every row to `display: flex`, which is exactly what costs both the row
-      // and the header cell inside it their implicit roles (ADR-062). The rule
-      // reads JSX; the fact that makes these attributes load-bearing is in the
-      // stylesheet. Deleting them, as the rule suggests, breaks the row/cell
-      // ownership `role="grid"` depends on.
+      // The mirror complaint: Biome reads `<tbody>` as implicitly `rowgroup`,
+      // `<tr>` as `row` and `<th scope="col">` as `columnheader`, and calls the
+      // explicit roles redundant. They are not. `TableBody.stylex.ts` makes the
+      // populated `<tbody>` a CSS grid and `TableRow.stylex.ts` sets every row
+      // to `display: flex`, and a browser drops an element's implicit table role
+      // along with its table `display` — costing the body group, the row, and
+      // the header cell inside that row all three of theirs (ADR-062). The rule
+      // reads JSX; the fact that makes these attributes load-bearing lives in a
+      // `.stylex.ts` file it does not read, which is also why no test written as
+      // a role QUERY can catch their deletion — jsdom resolves the implicit
+      // roles these overrides destroy. Deleting them breaks the
+      // rowgroup/row/cell ownership `role="grid"` requires.
+      // The empty-state `<tbody>` keeps `display: table-row-group` and declares
+      // no role: where the implicit one survives, none is added.
       "includes": [
+        "**/TableBody.component.tsx",
         "**/TableHeaderCell.component.tsx",
         "**/TableRow.component.tsx",
       ],

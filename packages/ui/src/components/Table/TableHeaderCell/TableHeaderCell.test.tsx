@@ -169,13 +169,23 @@ describe('TableHeaderCell', () => {
     expect(MockTableHeaderActionsMenu).not.toHaveBeenCalled();
   });
   it('declares role=columnheader, because the display overrides removed the implicit one', () => {
+    // The `role` ATTRIBUTE, not a `getByRole('columnheader')` query. Testing
+    // Library resolves implicit roles and `<th scope='col'>` implicitly maps to
+    // `columnheader`, so a role query returns this same element with the
+    // attribute deleted — a test written that way cannot fail for the reason it
+    // reports. In a real browser the implicit role is gone, because this cell
+    // sits in a `display: flex` row (ADR-062), which is why the attribute is
+    // the thing worth pinning.
     useGetColumnWidthMock.mockReturnValue(undefined);
     useGetPinnedColumnInfoMock.mockReturnValue(undefined);
     useGetNormalizedColumnMock.mockReturnValue(createColumn());
 
-    renderCell();
+    const { container } = renderCell();
+    const headerCell = container.querySelector('th');
 
-    expect(screen.getByRole('columnheader').tagName).toBe('TH');
+    expect(headerCell?.tagName).toBe('TH');
+    expect(headerCell?.getAttribute('role')).toBe('columnheader');
+    expect(headerCell?.getAttribute('scope')).toBe('col');
   });
 
   it('announces the applied sort direction through aria-sort', () => {

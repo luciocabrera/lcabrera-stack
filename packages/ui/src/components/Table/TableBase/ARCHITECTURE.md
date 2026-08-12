@@ -6,12 +6,14 @@ grid's ARIA semantics, and carries the grid's keyboard surface.
 
 ## Grid semantics are declared, not inherited
 
-`role="grid"` is not belt-and-braces over the implicit `table` role — it is the
-only source of the grid's semantics. `TableBody.stylex.ts` makes the populated
-`<tbody>` a CSS grid and `TableRow`/`TableBodyCell` make rows and cells flex, and
-a browser drops an element's implicit table role along with its table `display`
-([ADR-062](../../../../../../docs/decisions/ADR-062-grid-semantics-roving-focus-and-row-identity.md)).
-Anyone restoring native `display` values must remove the roles in the same
+`role="grid"` here is an **upgrade**, and it is the one element in the grid for
+which that is true: `TableBase.stylex.ts` keeps `display: table`, so the
+`<table>` retains its implicit `table` role and the attribute refines it to the
+interactive subclass. Everything below it is a different case — `TableBody`,
+`TableRow`, `TableHeaderCell` and `TableBodyCell` all sit under a `display`
+override that _removes_ the implicit role, so their attributes are its only
+source ([ADR-062](../../../../../../docs/decisions/ADR-062-grid-semantics-roving-focus-and-row-identity.md)).
+Anyone restoring native `display` values must remove those roles in the same
 change, or the grid ends up with duplicated semantics.
 
 `aria-rowcount` is the whole dataset plus its header row (`resolveAriaRowCount`),

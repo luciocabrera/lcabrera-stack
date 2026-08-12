@@ -161,9 +161,15 @@ out of the table formatting context, and a browser drops an element's implicit
 table role along with its table `display`
 ([ADR-062](../../../../../docs/decisions/ADR-062-grid-semantics-roving-focus-and-row-identity.md)).
 
+The `<table>` is the exception and keeps `display: table`, so `role='grid'` there
+upgrades an implicit role rather than replacing a missing one. `<thead>` and the
+empty-state `<tbody>` set no overriding `display` either, so neither declares a
+role — where the implicit one survives, none is added.
+
 | Element                  | Carries                                             |
 | ------------------------ | --------------------------------------------------- |
 | `TableBase` `<table>`    | `role='grid'`, `aria-rowcount`, the roving tab stop |
+| `TableBody` `<tbody>`    | `role='rowgroup'` — on the populated branch only    |
 | `TableRow` `<tr>`        | `role='row'`, `aria-rowindex`                       |
 | `TableHeaderCell` `<th>` | `role='columnheader'`, `scope='col'`, `aria-sort`   |
 | `TableBodyCell` `<td>`   | `role='gridcell'`, `tabIndex` 0 on exactly one cell |

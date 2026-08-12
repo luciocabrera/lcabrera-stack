@@ -199,18 +199,41 @@ describe('grid focus model', () => {
     vi.unstubAllGlobals();
   });
 
-  it('declares grid, row and gridcell roles on the elements that carry them', () => {
+  it('declares grid, rowgroup, row and gridcell roles on the elements that carry them', () => {
+    // Every assertion here reads the `role` ATTRIBUTE, not a role query.
+    // Testing Library resolves implicit roles, and `<tr>` implicitly maps to
+    // `row` and `<tbody>` to `rowgroup` — so `getAllByRole('row')` returns the
+    // same elements whether or not the attribute is present, and a test written
+    // that way passes with the attribute deleted. In a real browser those
+    // implicit roles are gone, because `display: flex`/`grid` removes them
+    // (ADR-062), which is the whole reason the attributes exist. The attribute
+    // is therefore the only thing worth asserting, and the only thing whose
+    // deletion this suite can catch.
     render(<Harness />);
 
     const grid = getGrid();
     expect(grid.tagName).toBe('TABLE');
+    expect(grid.getAttribute('role')).toBe('grid');
 
-    const firstRow = screen.getAllByRole('row')[0];
-    expect(firstRow?.tagName).toBe('TR');
+    const body = screen.getByTestId('table-body');
+    expect(body.tagName).toBe('TBODY');
+    expect(body.getAttribute('role')).toBe('rowgroup');
 
-    const cells = screen.getAllByRole('gridcell');
-    expect(cells.length).toBe(screen.getAllByRole('row').length * 3);
-    expect(cells[0]?.tagName).toBe('TD');
+    const rows = [...body.querySelectorAll('tr:not([aria-hidden="true"])')];
+    expect(rows.length).toBeGreaterThan(0);
+
+    for (const row of rows) {
+      expect(row.getAttribute('role')).toBe('row');
+    }
+
+    const cells = [...body.querySelectorAll('td')].filter(
+      (cell) => cell.closest('tr')?.getAttribute('aria-hidden') !== 'true',
+    );
+    expect(cells.length).toBe(rows.length * 3);
+
+    for (const cell of cells) {
+      expect(cell.getAttribute('role')).toBe('gridcell');
+    }
   });
 
   it('hides the virtualization spacer rows from the accessibility tree', async () => {

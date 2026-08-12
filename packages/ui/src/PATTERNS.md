@@ -399,9 +399,9 @@ Canonical examples: `Table/TableSettingsDrawer/` (shell), `Table/TableSettingsDr
 
 ## ARIA Roles Are Declared, Never Inherited (the Table grid)
 
-Inside `components/Table/`, every structural element writes its role
-explicitly — `grid`, `row`, `columnheader`, `gridcell` — and none of those
-attributes is redundant.
+Inside `components/Table/`, the structural elements write their roles
+explicitly — `grid`, `rowgroup`, `row`, `columnheader`, `gridcell` — and none of
+those attributes is redundant.
 
 ```tsx
 const GridRowExample = () => (
@@ -414,24 +414,49 @@ const GridRowExample = () => (
 ```
 
 **Why, and why it looks wrong:** the Table's styling takes every structural
-element out of the table formatting context — `<tbody>` is `display: grid`,
-rows and cells are `display: flex` — because the virtualization arithmetic
-depends on it. A browser drops an element's implicit table role along with its
-table `display`, so these roles are the _only_ source of the grid's semantics,
-not a duplicate of native ones
+element out of the table formatting context — the populated `<tbody>` is
+`display: grid`, rows and cells are `display: flex` — because the virtualization
+arithmetic depends on it. A browser drops an element's implicit table role along
+with its table `display`, so for those elements the attribute is the _only_
+source of the semantics, not a duplicate of a native one
 ([ADR-062](../../../docs/decisions/ADR-062-grid-semantics-roving-focus-and-row-identity.md)).
 
-The fact that makes them load-bearing lives in the `.stylex.ts` file, which no
+**Add a role only where the implicit one is actually gone.** `<table>` keeps
+`display: table`, and `<thead>` and the empty-state `<tbody>` set no `display` of
+their own, so none of them needs one — the single exception is `role='grid'` on
+the `<table>`, which is a deliberate _upgrade_ of `table` to its interactive
+subclass. Declaring a role an element still has is the redundancy this pattern
+is otherwise wrongly accused of.
+
+The fact that makes the rest load-bearing lives in a `.stylex.ts` file, which no
 static analyser reads — so Biome reports several of them as redundant or
-misapplied and its suggested fix (delete the role) silently returns the grid to
+misapplied, and its suggested fix (delete the role) silently returns the grid to
 being a pile of generic containers. Those findings are argued and registered in
 `docs/agents/public-package-suppressions.json`; do not "tidy" the roles away,
 and if you ever restore native `display` values, remove the roles in the same
 change.
 
-The DOM is not the evidence here — a snapshot of the markup looks correct either
-way. The probe is the accessibility tree, or a `getByRole` query, which is what
-`Table.gridFocus.test.tsx` uses.
+### Test the role attribute, not the role query
+
+```tsx
+// ✅ fails when the attribute is deleted
+expect(row.getAttribute('role')).toBe('row');
+
+// ❌ passes with or without it — jsdom resolves <tr>'s IMPLICIT role
+expect(screen.getAllByRole('row')[0]?.tagName).toBe('TR');
+```
+
+Testing Library resolves implicit roles, and the implicit roles it resolves are
+exactly the ones the `display` overrides destroy in a real browser. A `getByRole`
+query therefore returns the same element whether or not the attribute is there,
+so a test written that way cannot fail for the reason it reports: the attribute
+could be deleted and the whole suite would stay green.
+
+The trap is per-element, which is what makes it easy to miss. `role='grid'` on
+`<table>` and `role='gridcell'` on `<td>` **are** caught by a role query, because
+neither is that element's implicit role; `role='rowgroup'`, `role='row'` and
+`role='columnheader'` are not. Whenever you add a role, delete it again and
+confirm a test fails before believing the test.
 
 ---
 

@@ -124,28 +124,35 @@
       "key": "biome **/TableBase.component.tsx noNoninteractiveElementToInteractiveRole",
       "count": 1,
       "status": "permanent",
-      "reason": "`<table role=\"grid\">` is the WAI-ARIA APG's own markup for an interactive data grid, and here the role is not an upgrade of an implicit one: TableBody.stylex.ts makes the populated <tbody> a CSS grid, so the browser drops the implicit table roles and this attribute is their only source. Biome's rule maps role to element without modelling that; jsx-a11y, the upstream it ports, ships `table: ['grid']` as a default allowance on the same rule. Its suggested fix (drop the role, or use a div) restores the bug ADR-062 exists to close.",
+      "reason": "`<table role=\"grid\">` is the WAI-ARIA APG's own markup for an interactive data grid, and ARIA's taxonomy makes `grid` a subclass of `table` — so this is the spec's refinement of a table, not the \"non-interactive element handed an interactive role\" the rule guards against. To be precise about THIS element: `TableBase.stylex.ts` keeps `display: table`, so the `<table>` retains its implicit `table` role and the attribute upgrades it rather than being its only source (unlike the row, cell and body-group roles, which their own `display` overrides do destroy). Biome's rule takes no options — its schema is `additionalProperties: false` — so it cannot be told about the `table: ['grid']` allowance jsx-a11y ships by default on the same rule. A fix exists and is rejected on merit, not for lack of one: Biome's first suggestion is to render a `<div>`, which discards the native table fallback for anything that does not read ARIA, and its second is to drop the role, which re-exposes the grid as generic containers.",
       "ref": "ADR-062, packages/ui/src/components/Table/TableBase/ARCHITECTURE.md"
+    },
+    {
+      "key": "biome **/TableBody.component.tsx noRedundantRoles",
+      "count": 1,
+      "status": "permanent",
+      "reason": "`TableBody.stylex.ts` makes the POPULATED `<tbody>` a CSS grid, which removes its implicit `rowgroup` role — and a grid's rows must be owned by a rowgroup, so without the explicit role the accessibility tree reads `grid > generic > row`. Biome resolves `<tbody>` to `rowgroup` statically and cannot see the override. The empty-state branch keeps `display: table-row-group` and deliberately declares no role, so the exemption covers a file in which exactly one of the two `<tbody>` elements carries the attribute; `TableBody.test.tsx` pins both, by attribute rather than by role query.",
+      "ref": "ADR-062, packages/ui/src/components/Table/TableBody/ARCHITECTURE.md"
     },
     {
       "key": "biome **/TableBodyCell.component.tsx noNoninteractiveElementToInteractiveRole",
       "count": 1,
       "status": "permanent",
-      "reason": "Same mapping, one level down: `<td role=\"gridcell\">` is the APG's cell markup, and TableBodyCell.stylex.ts sets every body cell to `display: flex`, which is what removes the implicit `cell` role. jsx-a11y ships `td: ['gridcell']` as a default allowance on this rule; Biome's port carries no options at all, so the file is the only available scope.",
+      "reason": "The same rule, one level down, and here the attribute IS the only source: `<td role=\"gridcell\">` is the APG's cell markup, and `TableBodyCell.stylex.ts` sets every body cell to `display: flex`, which removes the implicit `cell` role in a real browser. jsx-a11y ships `td: ['gridcell']` as a default allowance on this rule; Biome's port carries no options at all, so the file is the only available scope.",
       "ref": "ADR-062, packages/ui/src/components/Table/TableBodyCell/ARCHITECTURE.md"
     },
     {
       "key": "biome **/TableHeaderCell.component.tsx noRedundantRoles",
       "count": 1,
       "status": "permanent",
-      "reason": "Identical to the TableRow case, for the header cell: a <th> inside a `display: flex` row loses its implicit `columnheader` role, so the explicit one is the only source of it and of the `aria-sort` announcement that hangs off it. `scope=\"col\"` is declared alongside because it is correct markup, and is what narrows Biome's complaint from useSemanticElements to this rule.",
+      "reason": "Identical to the TableRow case, for the header cell: a `<th>` inside a `display: flex` row loses its implicit `columnheader` role, so the explicit one is the only source of it and of the `aria-sort` announcement that hangs off it. `scope=\"col\"` is declared alongside because it is correct markup, and is what narrows Biome's complaint from useSemanticElements to this rule. `TableHeaderCell.test.tsx` asserts the attribute rather than querying the role, which jsdom would resolve implicitly either way.",
       "ref": "ADR-062, packages/ui/src/components/Table/TableHeaderCell/ARCHITECTURE.md"
     },
     {
       "key": "biome **/TableRow.component.tsx noRedundantRoles",
       "count": 1,
       "status": "permanent",
-      "reason": "The role is redundant only if the element still has its implicit one. TableRow.stylex.ts sets every <tr> to `display: flex`, and a browser drops an element's implicit table role along with its table `display` — so `role=\"row\"` is the grid's only row semantics, not a duplicate. The rule reads JSX; the fact that makes the attribute load-bearing is in the stylesheet. Deleting it, as the rule suggests, breaks the row/cell ownership `role=\"grid\"` requires.",
+      "reason": "The role is redundant only if the element still has its implicit one. `TableRow.stylex.ts` sets every `<tr>` to `display: flex`, and a browser drops an element's implicit table role along with its table `display` — so `role=\"row\"` is the grid's only row semantics, not a duplicate. The rule reads JSX; the fact that makes the attribute load-bearing is in the stylesheet. That is also why no role QUERY can guard it — jsdom resolves the implicit role the override destroys — so `TableRow.test.tsx` asserts the attribute itself. Deleting it, as the rule suggests, breaks the row/cell ownership `role=\"grid\"` requires.",
       "ref": "ADR-062, packages/ui/src/components/Table/TableRow/ARCHITECTURE.md"
     },
     {
