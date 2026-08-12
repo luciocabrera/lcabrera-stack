@@ -31,7 +31,10 @@ export const toAggregateItems = <TData extends Record<string, unknown>>({
   const columnByKey = new Map(
     columns.map((column) => [String(column.key), column]),
   );
-  const columnOrder = columnByKey.keys().toArray();
+  // Straight off `columns`, which is already declaration order — reading the
+  // keys back out of the Map would be a round trip through a structure built
+  // only for the lookups below.
+  const columnOrder = columns.map((column) => String(column.key));
 
   return Object.entries(aggregates)
     .filter(([columnKey]) => columnByKey.has(columnKey))
