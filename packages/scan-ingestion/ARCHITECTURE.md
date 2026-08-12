@@ -291,13 +291,12 @@ via its own `vite.config.ts` `resolve.alias`, independent of this package's
 `package.json`. That changed the moment a **plain-Node** consumer outside
 this package showed up (`apps/scan-orchestrator`, ADR-015) — Node's real
 ESM resolver only understands `package.json`'s `exports` field, not
-Vite/tsconfig aliasing. `exports` is scoped to `"./ingestion/ingestReport"`
-
-- `"./ingestion/ingestion.types"` (the only two `ingestion/` files
-  anything outside this package imports — the rest are `ingestReport`'s own
-  internal helpers) and a wildcard `"./queries/*.util": "./src/queries/*.util.ts"`
-  (every file in `queries/` is already meant to be publicly importable, by
-  directory convention).
+Vite/tsconfig aliasing. `exports` is scoped to the individual `ingestion/`
+subpaths anything outside this package imports — `package.json` is the
+authority on which, and the rest of `ingestion/` is `ingestReport`'s own
+internal helpers — plus a wildcard
+`"./queries/*.util": "./src/queries/*.util.ts"` (every file in `queries/` is
+already meant to be publicly importable, by directory convention).
 
 **Important footgun, hit once already**: `exports`, once present, is
 _exclusive_ — any subpath not listed becomes unresolvable via real Node/

@@ -205,8 +205,12 @@ export default createRule<Options, MessageIds>({
     messages: {
       artifactNamed:
         "'{{folder}}/' holds one artifact, so its '.{{suffix}}' file is named after that artifact — '{{name}}.{{suffix}}' does not name '{{folder}}'. Rename the file (git mv) and update its imports.",
+      // States the convention, never the folder's contents: the rule sees one
+      // file at a time and has not counted anything, so "there is exactly one"
+      // would be a claim it cannot make — and would read as false in the very
+      // case it exists for, a folder holding several misnamed files.
       folderNamed:
-        "In the domain folder '{{folder}}/' there is exactly one '.{{suffix}}' file and it is named after the folder — rename '{{name}}.{{suffix}}' to '{{folder}}.{{suffix}}' (git mv), merging it into that file if it already exists.",
+        "A domain folder takes one '.{{suffix}}' file, named after the folder — rename '{{name}}.{{suffix}}' to '{{folder}}.{{suffix}}' (git mv), merging it into that file if one is already there.",
     },
     schema: [
       {
