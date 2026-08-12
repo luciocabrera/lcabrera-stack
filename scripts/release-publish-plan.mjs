@@ -74,9 +74,14 @@ const REGISTRY =
  * *other* failure (an outage, a proxy) rethrows: an unreachable registry must
  * not read as "nothing is published", or every package would look publishable
  * and the job would walk into a publish it cannot complete.
+ *
+ * `encodeURIComponent` rather than replacing the scope separator: a name is a
+ * whole path segment, and escaping one character by hand leaves every other one
+ * — including a second `/` — to fall through into the URL. Both forms resolve
+ * against the registry, so completeness costs nothing.
  */
 const fetchPackument = async (name) => {
-  const response = await fetch(`${REGISTRY}/${name.replace('/', '%2f')}`, {
+  const response = await fetch(`${REGISTRY}/${encodeURIComponent(name)}`, {
     headers: { accept: 'application/vnd.npm.install-v1+json' },
   });
 
