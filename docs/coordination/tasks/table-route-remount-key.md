@@ -12,7 +12,7 @@ area:
 started: 2026-08-12
 updated: 2026-08-12
 plan: (none)
-pr: (none)
+pr: https://github.com/luciocabrera/vite-react-compiler/pull/612
 issue: #557
 ---
 
