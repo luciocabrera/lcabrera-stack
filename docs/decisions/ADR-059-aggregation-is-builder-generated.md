@@ -16,9 +16,12 @@ subqueries, no raw SQL fragments**. Separately,
 **views**.
 
 Row grouping needs `GROUP BY`, aggregates, and — for a count of groups — a
-subquery. A repo-wide search for `GROUP BY`, `ROLLUP`, `CUBE`, `GROUPING` and
-`HAVING` generation returns nothing; the only aggregates are the hardcoded
-strings in `buildCountQuery` and `buildMaxValueQuery`.
+subquery. At the time of this decision the repo generated none of them: nothing
+under `packages/server/src/db/` emitted `GROUP BY`, `ROLLUP`, `CUBE`, `GROUPING`
+or `HAVING`, and the only aggregates were the hardcoded strings in
+`buildCountQuery` and `buildMaxValueQuery`. This decision is what changes that,
+so the sentence is a statement about the starting point and not something a
+later reader should expect to still hold.
 
 One correction to how the constraint is usually stated: the sibling's
 `ARCHITECTURE.md` does **not** contain a blanket prohibition on aggregates — it
