@@ -137,10 +137,22 @@ replaced were themselves a duplication finding.
 
 ## `src/filters/`
 
-The column-filter contract shared by the Table filter UI (`@lcabrera/ui`, which
-re-exports the types from `filters/filters.types`) and the generic query
+The column-filter contract between the Table filter UI and the generic query
 layer, plus the mappers that translate it to `QueryFilter[]` for the builders.
 Table-agnostic — any table's filter state maps through `toQueryFilters`.
+
+`@lcabrera/ui` declares its own copy of these shapes
+(`packages/ui/src/types/filterOperators.types.ts`) rather than importing or
+re-exporting `filters/filters.types`: it is browser-safe and may not depend on
+this package
+([ADR-038](../../../docs/decisions/ADR-038-public-package-topology-by-runtime.md)),
+so the contract is duplicated rather than shared through an edge that only
+resolves in-repo
+([ADR-039](../../../docs/decisions/ADR-039-duplicate-over-undeclared-edges.md)).
+What holds the two copies in step is the conformance test
+`apps/react-router/src/routes/enterprise-orders/filterContract.test.ts`, which
+feeds `@lcabrera/ui`-typed filters to `toQueryFilters` — drift there fails
+`typecheck`, not just the assertions.
 
 | Artifact               | Location                                  | Description                                                                                          |
 | ---------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------- |

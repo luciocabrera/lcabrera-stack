@@ -1,6 +1,6 @@
 # Filters Architecture
 
-The **column-filter contract** shared by the Table filter UI and the generic
+The **column-filter contract** between the Table filter UI and the generic
 query layer, plus the pure mappers that translate one into the other. Nothing
 here touches the database — the mappers produce `QueryFilter[]` values that the
 `db/query-builder` builders (and their executors) consume.
@@ -9,11 +9,55 @@ here touches the database — the mappers produce `QueryFilter[]` values that th
 
 The filter _shapes_ describe the Table's per-column filter state — a UI concept
 — but they are also the input to the SQL query layer, so they are a **contract**
-between the two. `@lcabrera/ui` already depends on `@lcabrera/server` (not the
-reverse), so the shapes and the `→ QueryFilter` mappers must sit here for the
-mappers to reach `QueryFilter` without a dependency cycle. `@lcabrera/ui`'s
-`types/filterOperators.types` re-exports the shapes for the Table's own call
-sites and adds the UI-only operator/option _label_ types on top.
+between the two. Only this side can reach `QueryFilter`, and the dependency may
+not run the other way: `@lcabrera/ui` is browser-safe and this package's graph
+includes the Postgres driver and `node:crypto`
+([ADR-038](../../../../docs/decisions/ADR-038-public-package-topology-by-runtime.md)).
+
+So the shapes are **restated** on each side rather than shared, exactly as
+`sort/` restates the request-sort shape
+([ADR-039](../../../../docs/decisions/ADR-039-duplicate-over-undeclared-edges.md)):
+`filters.types.ts` here declares what `toQueryFilters` accepts, and
+`packages/ui/src/types/filterOperators.types.ts` declares the Table's own set,
+plus the operator aliases and the `{ label, value }` option type that only the
+filter UI has any use for. Neither file imports or re-exports the other, and
+`@lcabrera/ui` does not list this package as a dependency. Structural typing is
+what makes that affordable — a filter built in the Table is assignable here with
+no adapter or conversion step.
+
+The two are also not quite the same contract, which is the deeper reason to keep
+them apart: the UI's models a filter the user is still _editing_, and this one
+models what can be turned into SQL. Two fields here are laxer than a SQL-facing
+contract would choose on its own — `NumberFilter.value` admits `undefined` and
+`SelectFilter.operator` is optional — because they were authored for a drafting
+filter. They stay as they are so the UI's shape remains assignable; tightening
+either is a behaviour change for the mappers, not a type-only edit.
+
+## How the two copies stay in step
+
+`apps/react-router/src/routes/enterprise-orders/filterContract.test.ts` is the
+guard. It lives in the app because the app is the only thing that legitimately
+depends on both packages — integrating them is precisely what the harness is
+for.
+
+- **The compile-time half is the call itself.** The fixture is annotated
+  `Record<string, ColumnFilter>` using `@lcabrera/ui`'s union and passed to
+  `toQueryFilters`, which demands this package's — so the file only compiles
+  while the UI's shapes are assignable to these. The annotation is deliberately
+  not `satisfies`: `satisfies` would keep each value's narrow literal type and
+  check only the filters written down, while the annotation widens them to the
+  union, so the whole union is checked. Add an operator to the UI's union and
+  leave this one alone, and `vp run typecheck` in `apps/react-router` exits
+  non-zero naming that test — and `parseOrdersPageParams`, which puts the same
+  assignability on the production path.
+- **The runtime half** asserts the `QueryFilter[]` that one filter of each
+  variant of the union maps to — variants, not every operator — and that a
+  number filter left `undefined` mid-edit maps to no clause at all.
+
+The direction checked is UI → query layer, which is the direction filters
+travel. Nothing asserts the reverse, so a variant added _here_ and unused by the
+Table is not caught — widen this package's shapes only when the mappers can
+honour them.
 
 ## Files
 
