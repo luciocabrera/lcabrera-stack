@@ -173,9 +173,9 @@ describe('TableHeaderCell', () => {
     // Library resolves implicit roles and `<th scope='col'>` implicitly maps to
     // `columnheader`, so a role query returns this same element with the
     // attribute deleted — a test written that way cannot fail for the reason it
-    // reports. In a real browser the implicit role is gone, because this cell
-    // sits in a `display: flex` row (ADR-062), which is why the attribute is
-    // the thing worth pinning.
+    // reports. In a real browser the implicit role is gone, because
+    // `tableHeaderCellStyles.base()` sets `display: flex` on this `<th>`
+    // itself (ADR-062), which is why the attribute is the thing worth pinning.
     useGetColumnWidthMock.mockReturnValue(undefined);
     useGetPinnedColumnInfoMock.mockReturnValue(undefined);
     useGetNormalizedColumnMock.mockReturnValue(createColumn());

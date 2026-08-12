@@ -47,9 +47,15 @@ TableHeaderCell/
 ## Grid semantics
 
 The `<th>` declares `role='columnheader'` and `scope='col'`. The role is not a
-duplicate of a native one: this cell sits inside a `display: flex` row, and a
-browser drops an element's implicit table role along with its table `display`
+duplicate of a native one: `tableHeaderCellStyles.base()` — applied on every
+render — sets `display: flex` on the `<th>` itself, and a browser drops an
+element's implicit table role along with its table `display`
 ([ADR-062](../../../../../../docs/decisions/ADR-062-grid-semantics-roving-focus-and-row-identity.md)).
+
+The cause is this cell's own stylesheet, not `TableRow`'s. The row is flex too,
+but that is a second, independent break in the chain — so restoring a table
+`display` on the row would leave this attribute exactly as load-bearing as it is
+now.
 
 `aria-sort` comes from `resolveAriaSort`, which distinguishes three states and
 not two: `ascending`/`descending` for an applied sort, `none` for a sortable but

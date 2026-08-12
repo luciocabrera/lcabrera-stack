@@ -366,16 +366,21 @@
     {
       // The mirror complaint: Biome reads `<tbody>` as implicitly `rowgroup`,
       // `<tr>` as `row` and `<th scope="col">` as `columnheader`, and calls the
-      // explicit roles redundant. They are not. `TableBody.stylex.ts` makes the
-      // populated `<tbody>` a CSS grid and `TableRow.stylex.ts` sets every row
-      // to `display: flex`, and a browser drops an element's implicit table role
-      // along with its table `display` — costing the body group, the row, and
-      // the header cell inside that row all three of theirs (ADR-062). The rule
-      // reads JSX; the fact that makes these attributes load-bearing lives in a
-      // `.stylex.ts` file it does not read, which is also why no test written as
-      // a role QUERY can catch their deletion — jsdom resolves the implicit
-      // roles these overrides destroy. Deleting them breaks the
-      // rowgroup/row/cell ownership `role="grid"` requires.
+      // explicit roles redundant. They are not — and each of the three loses
+      // its implicit role to its OWN stylesheet, which is what makes them
+      // independent of one another:
+      //   `<tbody>` — `TableBody.stylex.ts` `body()` sets `display: grid`
+      //   `<tr>`    — `TableRow.stylex.ts` `base` sets `display: flex`
+      //   `<th>`    — `TableHeaderCell.stylex.ts` `base()` sets `display: flex`
+      // A browser drops an element's implicit table role along with its table
+      // `display` (ADR-062). Reverting any one of those files therefore
+      // discharges only its own role; the header cell in particular stays flex
+      // whatever the row does.
+      // The rule reads JSX, and the fact that makes these attributes
+      // load-bearing lives in a `.stylex.ts` file it does not read — which is
+      // also why no test written as a role QUERY can catch their deletion, since
+      // jsdom resolves the very implicit roles these overrides destroy. Deleting
+      // them breaks the rowgroup/row/cell ownership `role="grid"` requires.
       // The empty-state `<tbody>` keeps `display: table-row-group` and declares
       // no role: where the implicit one survives, none is added.
       "includes": [

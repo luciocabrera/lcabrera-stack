@@ -40,9 +40,11 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   const shadowStylex = getShadowStyle(pinInfo);
 
   return (
-    // role and aria-sort are declared, not inherited: this cell sits in a
-    // `display: flex` row, which costs it its implicit `columnheader` role in
-    // the accessibility tree (ADR-062).
+    // role and aria-sort are declared, not inherited: `tableHeaderCellStyles`
+    // `base()` sets `display: flex` on this `<th>` itself, which costs it its
+    // implicit `columnheader` role in the accessibility tree (ADR-062). The
+    // cause is this cell's own override, not the row's — restoring a table
+    // `display` on `TableRow` would not make the attribute redundant.
     <th
       aria-sort={resolveAriaSort({ isSortable, sortDirection })}
       role='columnheader'

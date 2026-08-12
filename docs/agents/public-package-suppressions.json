@@ -145,7 +145,7 @@
       "key": "biome **/TableHeaderCell.component.tsx noRedundantRoles",
       "count": 1,
       "status": "permanent",
-      "reason": "Identical to the TableRow case, for the header cell: a `<th>` inside a `display: flex` row loses its implicit `columnheader` role, so the explicit one is the only source of it and of the `aria-sort` announcement that hangs off it. `scope=\"col\"` is declared alongside because it is correct markup, and is what narrows Biome's complaint from useSemanticElements to this rule. `TableHeaderCell.test.tsx` asserts the attribute rather than querying the role, which jsdom would resolve implicitly either way.",
+      "reason": "Same class as the TableRow case, but the cause is this cell's OWN override, not its parent's: `TableHeaderCell.stylex.ts`'s `base()` — applied unconditionally — sets `display: flex` on the `<th>` itself, which is directly and sufficiently what removes its implicit `columnheader` role. That matters for anyone auditing this later: reverting `TableRow.stylex.ts` to a table `display` would NOT make this attribute redundant, because the `<th>` is still flex. The explicit role is therefore the only source of the header semantics and of the `aria-sort` announcement that hangs off it. `scope=\"col\"` is declared alongside because it is correct markup, and is what narrows Biome's complaint from useSemanticElements to this rule. `TableHeaderCell.test.tsx` asserts the attribute rather than querying the role, which jsdom would resolve implicitly either way.",
       "ref": "ADR-062, packages/ui/src/components/Table/TableHeaderCell/ARCHITECTURE.md"
     },
     {
