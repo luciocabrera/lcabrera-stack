@@ -24,7 +24,7 @@ const fromUrlSafeBase64 = (param: string) =>
  * `urlState?.columnOrder` to `ColumnOrderState`, `urlState?.columnVisibility` to
  * `ColumnVisibilityState` — so a hand-edited payload can put a number behind an
  * array type. That is pre-existing and unchanged by this codec; hardening those
- * slices is separate work, tracked on its own. What this codec closes is the
+ * slices is separate work, tracked in #631. What this codec closes is the
  * envelope, and it claims nothing about the values inside it.
  */
 export const stateCodec = createUrlStateCodec<

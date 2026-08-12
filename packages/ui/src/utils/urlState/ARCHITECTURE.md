@@ -59,9 +59,10 @@ either. `readTableLoaderStateFromRequest` casts them — `urlState?.columnOrder`
 hand-edited payload can put a number behind an array type. (`readPersistedStateFromCookie`
 and `collectPersistedStateSlices` serve the _cookie_ path, not this param, and are
 not a guard on it.) That is pre-existing and unchanged by this codec; hardening
-those slices is separate work, tracked on its own. A non-object payload is still
-refused, because an array or a scalar is not a `tableState` value in any shape
-this param defines.
+those slices is separate work, tracked in
+[#631](https://github.com/luciocabrera/vite-react-compiler/issues/631). A
+non-object payload is still refused, because an array or a scalar is not a
+`tableState` value in any shape this param defines.
 
 **No codec here validates a column key.** The vocabularies above are _value_
 vocabularies; a key is any string. Sorting keys are checked server-side in
