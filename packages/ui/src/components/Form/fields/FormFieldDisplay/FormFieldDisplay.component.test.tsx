@@ -1,13 +1,11 @@
 // @vitest-environment jsdom
 
-import type {
-  FieldNode,
-  LeafFieldDef,
-} from '@lcabrera/ui/components/Form/Form.types';
-
-import { FormProvider } from '@lcabrera/ui/components/Form/contexts';
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
+
+import type { FieldNode, LeafFieldDef } from '#ui/components/Form/Form.types';
+
+import { FormProvider } from '#ui/components/Form/contexts';
 
 import { FormFieldDisplay } from './FormFieldDisplay.component';
 

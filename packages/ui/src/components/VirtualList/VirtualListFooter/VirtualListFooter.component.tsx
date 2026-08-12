@@ -1,10 +1,11 @@
+import * as stylex from '@stylexjs/stylex';
+
 import {
   ListAllIcon,
   ListCheckedIcon,
   ListUncheckedIcon,
-} from '@lcabrera/ui/components/Icons';
-import { ICON_SIZE_MD } from '@lcabrera/ui/design-system/constants';
-import * as stylex from '@stylexjs/stylex';
+} from '#ui/components/Icons';
+import { ICON_SIZE_MD } from '#ui/design-system/constants';
 
 import {
   useGetIsLoading,

@@ -1,12 +1,13 @@
-import type { FilterOptionsResponse } from '@lcabrera/ui/components/Table/Table.types';
-import type { PrefetchCache } from '@lcabrera/ui/types/ui.types';
-
-import { useFetchFilterData } from '@lcabrera/ui/components/Table/contexts/FiltersData/filters/actions';
-import { useGetFilterData } from '@lcabrera/ui/components/Table/contexts/FiltersData/filters/selectors';
-import { useGetNormalizedColumn } from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors';
-import { VirtualSelect } from '@lcabrera/ui/components/VirtualSelect';
-import { resolveFilterOptionsDescriptor } from '@lcabrera/ui/utils/filters/resolveFilterOptionsDescriptor.util';
 import { useRef } from 'react';
+
+import type { FilterOptionsResponse } from '#ui/components/Table/Table.types';
+import type { PrefetchCache } from '#ui/types/ui.types';
+
+import { useFetchFilterData } from '#ui/components/Table/contexts/FiltersData/filters/actions';
+import { useGetFilterData } from '#ui/components/Table/contexts/FiltersData/filters/selectors';
+import { useGetNormalizedColumn } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
+import { VirtualSelect } from '#ui/components/VirtualSelect';
+import { resolveFilterOptionsDescriptor } from '#ui/utils/filters/resolveFilterOptionsDescriptor.util';
 
 import type { SelectFilterInputProps } from './SelectFilterInput.types';
 

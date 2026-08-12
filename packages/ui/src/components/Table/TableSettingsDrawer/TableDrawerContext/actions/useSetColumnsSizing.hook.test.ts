@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 
-import type { ColumnSizingState } from '@lcabrera/ui/components/Table/Table.types';
-
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+
+import type { ColumnSizingState } from '#ui/components/Table/Table.types';
 
 import { useSetColumnsSizing } from './useSetColumnsSizing.hook';
 

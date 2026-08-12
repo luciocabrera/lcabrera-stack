@@ -1,5 +1,6 @@
-import { ClearResetToolbarButtons } from '@lcabrera/ui/components/Table/ColumnSettingsDrawer/ClearResetToolbarButtons/ClearResetToolbarButtons.component';
 import * as stylex from '@stylexjs/stylex';
+
+import { ClearResetToolbarButtons } from '#ui/components/Table/ColumnSettingsDrawer/ClearResetToolbarButtons/ClearResetToolbarButtons.component';
 
 import type { SortingSectionToolbarProps } from './SortingSectionToolbar.types';
 

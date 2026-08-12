@@ -1,7 +1,7 @@
 import type {
   ColumnSizingState,
   TableColumn,
-} from '@lcabrera/ui/components/Table/Table.types';
+} from '#ui/components/Table/Table.types';
 
 /** Args for {@link buildPresetColumnSizing}. */
 type BuildPresetColumnSizingArgs<TData> = {

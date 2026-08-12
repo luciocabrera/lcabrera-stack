@@ -1,6 +1,6 @@
-import type { TableColumnsState } from '@lcabrera/ui/components/Table/Table.types';
-
 import { describe, expect, it } from 'vite-plus/test';
+
+import type { TableColumnsState } from '#ui/components/Table/Table.types';
 
 import { getHasQueryChanged } from './getHasQueryChanged.util';
 

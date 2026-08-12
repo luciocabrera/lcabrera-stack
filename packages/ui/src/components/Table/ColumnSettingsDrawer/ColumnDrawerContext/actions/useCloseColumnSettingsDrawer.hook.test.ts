@@ -16,14 +16,14 @@ const { metaStore, persistUiFlagsMock } = vi.hoisted(() => ({
 }));
 
 vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions/usePersistTableUiFlagsAction.hook',
+  '#ui/components/Table/contexts/TableConfig/meta/actions/usePersistTableUiFlagsAction.hook',
   () => ({
     usePersistTableUiFlagsAction: () => persistUiFlagsMock,
   }),
 );
 
 vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
+  '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
   () => ({
     useTableConfigContextValue: () => ({
       metaStore,

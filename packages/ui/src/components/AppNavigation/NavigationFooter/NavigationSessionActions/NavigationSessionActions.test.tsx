@@ -27,7 +27,7 @@ type MockButtonProps = {
   readonly type?: string;
 };
 
-vi.mock('@lcabrera/ui/components/Button', () => ({
+vi.mock('#ui/components/Button', () => ({
   Button: ({
     children,
     isIconOnly,
@@ -47,11 +47,11 @@ vi.mock('@lcabrera/ui/components/Button', () => ({
   ),
 }));
 
-vi.mock('@lcabrera/ui/contexts/AppConfigContext/selectors', () => ({
+vi.mock('#ui/contexts/AppConfigContext/selectors', () => ({
   useGetAppLogoutRoute: () => logoutRouteMock(),
 }));
 
-vi.mock('@lcabrera/ui/contexts/GlobalSettingsContext/selectors', () => ({
+vi.mock('#ui/contexts/GlobalSettingsContext/selectors', () => ({
   useGetGlobalNavigationCollapsedPreference: () => collapsedPreferenceMock(),
   useGetGlobalNavigationSizePreference: () => sizePreferenceMock(),
 }));

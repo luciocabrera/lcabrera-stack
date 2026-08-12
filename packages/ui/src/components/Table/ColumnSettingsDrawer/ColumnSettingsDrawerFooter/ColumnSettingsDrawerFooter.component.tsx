@@ -1,5 +1,5 @@
-import { ActionButtons } from '@lcabrera/ui/components/ActionButtons';
-import { SidePanelFooter } from '@lcabrera/ui/components/SidePanel';
+import { ActionButtons } from '#ui/components/ActionButtons';
+import { SidePanelFooter } from '#ui/components/SidePanel';
 
 import {
   useGetTableIsLoading,

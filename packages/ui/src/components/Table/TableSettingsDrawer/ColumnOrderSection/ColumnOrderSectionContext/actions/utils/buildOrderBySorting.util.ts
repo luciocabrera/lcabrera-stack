@@ -1,9 +1,9 @@
 import type {
   ColumnOrderState,
   SortingState,
-} from '@lcabrera/ui/components/Table/Table.types';
+} from '#ui/components/Table/Table.types';
 
-import { restoreStaticColumnOrder } from '@lcabrera/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
+import { restoreStaticColumnOrder } from '#ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 
 type BuildOrderBySortingArgs<TData extends Record<string, unknown>> = {
   readonly columnOrder: ColumnOrderState<TData>;

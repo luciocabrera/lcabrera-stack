@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
-import { DEFAULT_FILTER_PAGE_SIZE } from '@lcabrera/ui/components/Table/Table.constants';
-import { createPaginatedFetchActionMocks } from '@lcabrera/ui/utils/tests/createPaginatedFetchActionMocks.util';
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+
+import { DEFAULT_FILTER_PAGE_SIZE } from '#ui/components/Table/Table.constants';
+import { createPaginatedFetchActionMocks } from '#ui/utils/tests/createPaginatedFetchActionMocks.util';
 
 import { useFetchFilterData } from './useFetchFilterData.hook';
 
@@ -62,7 +63,7 @@ const getHarness = (): Harness => {
 const loggerMock = vi.hoisted(() => ({ error: vi.fn() }));
 
 vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
+  '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
   () => ({
     useTableConfigContextValue: () => ({ metaStore: getHarness().metaStore }),
   }),
@@ -74,18 +75,18 @@ vi.mock('../../useFiltersDataContextValue.hook', () => ({
   }),
 }));
 
-vi.mock('@lcabrera/ui/utils/logger', () => ({
+vi.mock('#ui/utils/logger', () => ({
   logger: {
     error: loggerMock.error,
   },
 }));
 
-vi.mock('@lcabrera/ui/utils/prefetch/firePrefetch.util', () => ({
+vi.mock('#ui/utils/prefetch/firePrefetch.util', () => ({
   firePrefetch: (...args: Parameters<Harness['firePrefetchMock']>) =>
     getHarness().firePrefetchMock(...args),
 }));
 
-vi.mock('@lcabrera/ui/utils/prefetch/resolveFromCacheOrFetch.util', () => ({
+vi.mock('#ui/utils/prefetch/resolveFromCacheOrFetch.util', () => ({
   resolveFromCacheOrFetch: (
     ...args: Parameters<Harness['resolveFromCacheOrFetchMock']>
   ) => getHarness().resolveFromCacheOrFetchMock(...args),

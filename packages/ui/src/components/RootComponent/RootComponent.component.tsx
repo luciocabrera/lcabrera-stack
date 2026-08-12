@@ -1,6 +1,6 @@
-import { AppProviders } from '@lcabrera/ui/components/AppProviders';
-import { AppShell } from '@lcabrera/ui/components/AppShell';
-import { AppConfigProvider } from '@lcabrera/ui/contexts/AppConfigContext';
+import { AppProviders } from '#ui/components/AppProviders';
+import { AppShell } from '#ui/components/AppShell';
+import { AppConfigProvider } from '#ui/contexts/AppConfigContext';
 
 import type { RootComponentProps } from './RootComponent.types';
 

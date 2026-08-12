@@ -1,11 +1,12 @@
+import type { StyleXStyles } from '@stylexjs/stylex';
+import type { ReactNode } from 'react';
+import type { NavLinkProps as RouterNavLinkProps } from 'react-router';
+
 import type {
   DesignSystemColor,
   DesignSystemOrientation,
   DesignSystemSize,
-} from '@lcabrera/ui/types/design-system.types';
-import type { StyleXStyles } from '@stylexjs/stylex';
-import type { ReactNode } from 'react';
-import type { NavLinkProps as RouterNavLinkProps } from 'react-router';
+} from '#ui/types/design-system.types';
 
 export type NavLinkProps = Omit<RouterNavLinkProps, 'children' | 'color'> & {
   readonly children: ReactNode;

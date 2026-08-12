@@ -1,4 +1,4 @@
-import type { PinSide } from '@lcabrera/ui/types/ui.types';
+import type { PinSide } from '#ui/types/ui.types';
 
 export type PinSideModalProps = {
   readonly columnLabel: string;

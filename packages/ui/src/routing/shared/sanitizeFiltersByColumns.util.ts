@@ -1,8 +1,5 @@
-import type {
-  ColumnFiltersState,
-  TableColumn,
-} from '@lcabrera/ui/components/Table';
-import type { ColumnFilter } from '@lcabrera/ui/types/filterOperators.types';
+import type { ColumnFiltersState, TableColumn } from '#ui/components/Table';
+import type { ColumnFilter } from '#ui/types/filterOperators.types';
 
 import { isFilterCompatibleWithColumn } from './isFilterCompatibleWithColumn.util';
 

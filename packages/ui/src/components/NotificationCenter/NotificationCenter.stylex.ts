@@ -1,5 +1,6 @@
-import { spacing } from '@lcabrera/ui/design-system/tokens/base.stylex';
 import * as stylex from '@stylexjs/stylex';
+
+import { spacing } from '#ui/design-system/tokens/base.stylex';
 
 export const styles = stylex.create({
   stack: {

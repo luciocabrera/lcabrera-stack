@@ -28,19 +28,13 @@ const { MockTable, useGetColumnsMock, useGetTablePlaceholderRowCountMock } =
     useGetTablePlaceholderRowCountMock: vi.fn(),
   }));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors',
-  () => ({
-    useGetColumns: useGetColumnsMock,
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
+  useGetColumns: useGetColumnsMock,
+}));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors',
-  () => ({
-    useGetTablePlaceholderRowCount: useGetTablePlaceholderRowCountMock,
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
+  useGetTablePlaceholderRowCount: useGetTablePlaceholderRowCountMock,
+}));
 
 vi.mock('../Table.component', () => ({
   Table: MockTable,

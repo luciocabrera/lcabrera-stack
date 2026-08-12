@@ -1,10 +1,11 @@
-import type { TableMetaState } from '@lcabrera/ui/components/Table/Table.types';
-import type { MockStore } from '@lcabrera/ui/utils/tests/createMockStore.util';
-
-import { createMockStore } from '@lcabrera/ui/utils/tests/createMockStore.util';
 // @vitest-environment jsdom
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+
+import type { TableMetaState } from '#ui/components/Table/Table.types';
+import type { MockStore } from '#ui/utils/tests/createMockStore.util';
+
+import { createMockStore } from '#ui/utils/tests/createMockStore.util';
 
 const createInitialMetaState = (): TableMetaState => {
   return {
@@ -58,13 +59,13 @@ const getTableConfigContextValue = vi.hoisted(() => {
 });
 
 vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
+  '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
   () => ({
     useTableConfigContextValue: getTableConfigContextValue,
   }),
 );
 
-vi.mock('@lcabrera/ui/hooks/usePersistCookieAction.hook', () => ({
+vi.mock('#ui/hooks/usePersistCookieAction.hook', () => ({
   usePersistCookieAction: () => vi.fn(),
 }));
 

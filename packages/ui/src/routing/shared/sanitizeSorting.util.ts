@@ -1,4 +1,4 @@
-import type { SortingState } from '@lcabrera/ui/components/Table';
+import type { SortingState } from '#ui/components/Table';
 
 /**
  * Removes sorting entries with no direction or the UI-only 'actions' column key.

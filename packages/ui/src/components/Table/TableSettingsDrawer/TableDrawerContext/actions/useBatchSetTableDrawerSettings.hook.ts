@@ -1,4 +1,4 @@
-import { useBatchSetTableSettings } from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/actions';
+import { useBatchSetTableSettings } from '#ui/components/Table/contexts/TableConfig/columns/actions';
 
 import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook';
 import { buildBatchTableSettingsUpdate } from './buildBatchTableSettingsUpdate.util';

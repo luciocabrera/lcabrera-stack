@@ -3,7 +3,7 @@ import type {
   ColumnPinningState,
   ColumnVisibilityState,
   TableColumn,
-} from '@lcabrera/ui/components/Table/Table.types';
+} from '#ui/components/Table/Table.types';
 
 import { orderColumnsByKeys } from './orderColumnsByKeys.util';
 import { splitColumnsByPinning } from './splitColumnsByPinning.util';

@@ -1,6 +1,6 @@
-import type { ColumnVisibilityState } from '@lcabrera/ui/components/Table/Table.types';
+import type { ColumnVisibilityState } from '#ui/components/Table/Table.types';
 
-import { getPinnedDerivedColumnsState } from '@lcabrera/ui/components/Table/utils';
+import { getPinnedDerivedColumnsState } from '#ui/components/Table/utils';
 
 import type { CommitResolvedColumnStateArgs } from './commitResolvedColumnState.types';
 

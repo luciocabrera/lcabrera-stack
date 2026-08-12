@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vite-plus/test';
+
 import type {
   ColumnFiltersState,
   ColumnOrderState,
@@ -5,9 +7,7 @@ import type {
   ColumnSizingState,
   ColumnVisibilityState,
   SortingState,
-} from '@lcabrera/ui/components/Table/Table.types';
-
-import { describe, expect, it, vi } from 'vite-plus/test';
+} from '#ui/components/Table/Table.types';
 
 import { resolveBatchTableSettingsUpdate } from './resolveBatchTableSettingsUpdate.util';
 
@@ -50,7 +50,7 @@ const { mockDeriveColumnViewState } = vi.hoisted(() => ({
   })),
 }));
 
-vi.mock('@lcabrera/ui/components/Table/utils', () => ({
+vi.mock('#ui/components/Table/utils', () => ({
   deriveColumnViewState: mockDeriveColumnViewState,
 }));
 

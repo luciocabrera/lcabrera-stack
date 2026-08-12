@@ -1,5 +1,6 @@
-import { Checkbox } from '@lcabrera/ui/components/Checkbox';
 import * as stylex from '@stylexjs/stylex';
+
+import { Checkbox } from '#ui/components/Checkbox';
 
 import type { SelectOptionProps } from './SelectOption.types';
 

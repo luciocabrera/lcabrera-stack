@@ -1,5 +1,6 @@
-import { useNotifyAction } from '@lcabrera/ui/contexts/NotificationContext/actions';
 import { useEffect } from 'react';
+
+import { useNotifyAction } from '#ui/contexts/NotificationContext/actions';
 
 const NOTIFY_ON_ERROR_DURATION_MS = 10_000;
 

@@ -1,6 +1,6 @@
-import type { FilterOptionsTransport } from '@lcabrera/ui/components/Table/Table.types';
-
 import { getApiBaseUrl } from '@lcabrera/api/config/get-api-base-url.util';
+
+import type { FilterOptionsTransport } from '#ui/components/Table/Table.types';
 
 import {
   BFF_DISTINCT_PATH,

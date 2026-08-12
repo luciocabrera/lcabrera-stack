@@ -1,6 +1,7 @@
-import { useGetFormCancelTo } from '@lcabrera/ui/components/Form/contexts/FormContext/selectors';
-import { useBackNavigate } from '@lcabrera/ui/hooks';
 import { useState } from 'react';
+
+import { useGetFormCancelTo } from '#ui/components/Form/contexts/FormContext/selectors';
+import { useBackNavigate } from '#ui/hooks';
 
 /**
  * Owns the form's discard-changes confirmation flow: tracks whether the confirm

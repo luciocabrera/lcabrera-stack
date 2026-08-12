@@ -1,4 +1,4 @@
-import { useFieldsStore } from '@lcabrera/ui/components/Form/contexts/FormContext/useFieldsStore.hook';
+import { useFieldsStore } from '#ui/components/Form/contexts/FormContext/useFieldsStore.hook';
 
 export const useGetFieldError = <TValues extends Record<string, unknown>>(
   accessor: keyof TValues & string,

@@ -1,10 +1,11 @@
+import * as stylex from '@stylexjs/stylex';
+
 import {
   ORDER_CONFLICT_PREFERENCE_OPTIONS,
   PIN_CONFLICT_PREFERENCE_OPTIONS,
   PIN_SIDE_PREFERENCE_OPTIONS,
   UNPIN_CONFLICT_PREFERENCE_OPTIONS,
-} from '@lcabrera/ui/constants/pinningPreferences.constants';
-import * as stylex from '@stylexjs/stylex';
+} from '#ui/constants/pinningPreferences.constants';
 
 import type { SettingsDraft } from '../Settings.types';
 

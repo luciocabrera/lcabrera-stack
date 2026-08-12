@@ -1,4 +1,4 @@
-import { clearPrefetchCache } from '@lcabrera/ui/utils/prefetch/clearPrefetchCache.util';
+import { clearPrefetchCache } from '#ui/utils/prefetch/clearPrefetchCache.util';
 
 import type { FetchFilterDataActionArgs } from './useFetchFilterData.types';
 

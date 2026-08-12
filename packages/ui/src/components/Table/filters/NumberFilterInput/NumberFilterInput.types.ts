@@ -1,5 +1,5 @@
-import type { DataKey } from '@lcabrera/ui/components/Table/Table.types';
-import type { NumberFilter } from '@lcabrera/ui/types/filterOperators.types';
+import type { DataKey } from '#ui/components/Table/Table.types';
+import type { NumberFilter } from '#ui/types/filterOperators.types';
 
 export type NumberFilterInputProps<TData> = {
   readonly columnKey: DataKey<TData>;

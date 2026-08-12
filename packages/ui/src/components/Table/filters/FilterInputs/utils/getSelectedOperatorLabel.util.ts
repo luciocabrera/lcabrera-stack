@@ -2,7 +2,7 @@ import type {
   ColumnFilter,
   OperatorOption,
   OperatorType,
-} from '@lcabrera/ui/types/filterOperators.types';
+} from '#ui/types/filterOperators.types';
 
 type GetSelectedOperatorLabelArgs = {
   readonly filter?: ColumnFilter;

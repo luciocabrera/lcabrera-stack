@@ -1,8 +1,9 @@
+import * as stylex from '@stylexjs/stylex';
+
 import {
   SidePanelSectionHeader,
   SidePanelSectionMain,
-} from '@lcabrera/ui/components/SidePanel';
-import * as stylex from '@stylexjs/stylex';
+} from '#ui/components/SidePanel';
 
 import type { FilterSectionProps } from './FilterSection.types';
 

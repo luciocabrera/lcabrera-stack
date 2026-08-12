@@ -1,6 +1,7 @@
-import { useToggleOption } from '@lcabrera/ui/components/VirtualList/contexts/data/actions';
-import { useGetSelectedValues } from '@lcabrera/ui/components/VirtualList/contexts/data/selectors';
 import { useRef } from 'react';
+
+import { useToggleOption } from '#ui/components/VirtualList/contexts/data/actions';
+import { useGetSelectedValues } from '#ui/components/VirtualList/contexts/data/selectors';
 
 import { useToggleDropdown } from '../../contexts/meta/actions';
 import {

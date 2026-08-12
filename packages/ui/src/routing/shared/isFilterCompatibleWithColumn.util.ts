@@ -1,5 +1,5 @@
-import type { TableColumn } from '@lcabrera/ui/components/Table';
-import type { ColumnFilter } from '@lcabrera/ui/types/filterOperators.types';
+import type { TableColumn } from '#ui/components/Table';
+import type { ColumnFilter } from '#ui/types/filterOperators.types';
 
 type IsFilterCompatibleWithColumnArgs<TData extends Record<string, unknown>> = {
   readonly column: TableColumn<TData>;

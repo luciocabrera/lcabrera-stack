@@ -1,4 +1,4 @@
-import type { TableMetaState } from '@lcabrera/ui/components/Table/Table.types';
+import type { TableMetaState } from '#ui/components/Table/Table.types';
 
 import {
   DEFAULT_COLUMN_OVERSCAN,
@@ -8,7 +8,7 @@ import {
   INITIAL_PAGE_SIZE,
   IS_PREFETCH_ENABLED,
   LOAD_MORE_PAGE_SIZE,
-} from '@lcabrera/ui/components/Table/Table.constants';
+} from '#ui/components/Table/Table.constants';
 
 type GetInitialMetaStateArgs = Partial<TableMetaState>;
 

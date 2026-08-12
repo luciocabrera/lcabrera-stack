@@ -1,7 +1,7 @@
-import type { ColumnSizingState } from '@lcabrera/ui/components/Table/Table.types';
+import type { ColumnSizingState } from '#ui/components/Table/Table.types';
 
-import { serializeStateSlice } from '@lcabrera/ui/components/Table/utils';
-import { buildPersistCookieEntry } from '@lcabrera/ui/routing/actions/buildPersistCookieEntry.util';
+import { serializeStateSlice } from '#ui/components/Table/utils';
+import { buildPersistCookieEntry } from '#ui/routing/actions/buildPersistCookieEntry.util';
 
 type BuildColumnSizingCookieEntryArgs<TData> = {
   readonly appId?: string;

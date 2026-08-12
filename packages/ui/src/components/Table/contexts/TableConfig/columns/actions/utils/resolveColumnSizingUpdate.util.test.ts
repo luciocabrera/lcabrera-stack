@@ -1,6 +1,6 @@
-import type { ColumnSizingState } from '@lcabrera/ui/components/Table/Table.types';
-
 import { describe, expect, it } from 'vite-plus/test';
+
+import type { ColumnSizingState } from '#ui/components/Table/Table.types';
 
 import { resolveColumnSizingUpdate } from './resolveColumnSizingUpdate.util';
 

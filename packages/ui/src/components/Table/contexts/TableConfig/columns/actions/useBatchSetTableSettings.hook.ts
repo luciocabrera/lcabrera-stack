@@ -1,7 +1,7 @@
-import { usePersistTableUiFlagsAction } from '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions/usePersistTableUiFlagsAction.hook';
-import { useTableConfigContextValue } from '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import { useTableDataContextValue } from '@lcabrera/ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
-import { getHasQueryChanged } from '@lcabrera/ui/components/Table/utils';
+import { usePersistTableUiFlagsAction } from '#ui/components/Table/contexts/TableConfig/meta/actions/usePersistTableUiFlagsAction.hook';
+import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { useTableDataContextValue } from '#ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
+import { getHasQueryChanged } from '#ui/components/Table/utils';
 
 import type { BatchTableSettingsUpdate } from './utils/resolveBatchTableSettingsUpdate.util';
 

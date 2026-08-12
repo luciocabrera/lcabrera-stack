@@ -1,17 +1,15 @@
 // @vitest-environment jsdom
 
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it } from 'vite-plus/test';
+
 import type {
   DateFieldDef,
   FieldErrors,
   FormMode,
-} from '@lcabrera/ui/components/Form/Form.types';
+} from '#ui/components/Form/Form.types';
 
-import {
-  FormProvider,
-  useGetFieldValue,
-} from '@lcabrera/ui/components/Form/contexts';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vite-plus/test';
+import { FormProvider, useGetFieldValue } from '#ui/components/Form/contexts';
 
 import { DateField } from './DateField.component';
 

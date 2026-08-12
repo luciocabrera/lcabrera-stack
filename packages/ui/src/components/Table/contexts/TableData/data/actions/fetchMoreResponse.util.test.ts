@@ -1,9 +1,10 @@
-import { resolveFromCacheOrFetch } from '@lcabrera/ui/utils/prefetch/resolveFromCacheOrFetch.util';
 import { describe, expect, it, vi } from 'vite-plus/test';
+
+import { resolveFromCacheOrFetch } from '#ui/utils/prefetch/resolveFromCacheOrFetch.util';
 
 import { fetchMoreResponse } from './fetchMoreResponse.util';
 
-vi.mock('@lcabrera/ui/utils/prefetch/resolveFromCacheOrFetch.util', () => ({
+vi.mock('#ui/utils/prefetch/resolveFromCacheOrFetch.util', () => ({
   resolveFromCacheOrFetch: vi.fn(),
 }));
 

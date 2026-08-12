@@ -1,4 +1,4 @@
-import type { DataKey } from '@lcabrera/ui/components/Table/Table.types';
+import type { DataKey } from '#ui/components/Table/Table.types';
 
 export type DetailItem = {
   readonly isBadge?: boolean;

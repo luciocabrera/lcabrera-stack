@@ -1,10 +1,7 @@
-import type {
-  ColumnFiltersState,
-  TableColumn,
-} from '@lcabrera/ui/components/Table';
-import type { ColumnFilter } from '@lcabrera/ui/types/filterOperators.types';
-
 import { describe, expect, it } from 'vite-plus/test';
+
+import type { ColumnFiltersState, TableColumn } from '#ui/components/Table';
+import type { ColumnFilter } from '#ui/types/filterOperators.types';
 
 import { sanitizeFiltersByColumns } from './sanitizeFiltersByColumns.util';
 

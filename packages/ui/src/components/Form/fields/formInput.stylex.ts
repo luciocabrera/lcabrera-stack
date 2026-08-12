@@ -1,12 +1,13 @@
+import * as stylex from '@stylexjs/stylex';
+
 import {
   borderRadius,
   easing,
   spacing,
   transitions,
   typography,
-} from '@lcabrera/ui/design-system/tokens/base.stylex';
-import { colors } from '@lcabrera/ui/design-system/tokens/colors.stylex';
-import * as stylex from '@stylexjs/stylex';
+} from '#ui/design-system/tokens/base.stylex';
+import { colors } from '#ui/design-system/tokens/colors.stylex';
 
 /**
  * The Form's own leaf-input styles — deliberately separate from the Table's

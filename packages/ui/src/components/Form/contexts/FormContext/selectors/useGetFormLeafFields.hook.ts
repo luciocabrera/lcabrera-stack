@@ -1,6 +1,6 @@
-import type { LeafFieldDef } from '@lcabrera/ui/components/Form/Form.types';
+import type { LeafFieldDef } from '#ui/components/Form/Form.types';
 
-import { useMetaStore } from '@lcabrera/ui/components/Form/contexts/FormContext/useMetaStore.hook';
+import { useMetaStore } from '#ui/components/Form/contexts/FormContext/useMetaStore.hook';
 
 /** Flattened leaf field definitions — accessor-bearing nodes only. */
 export const useGetFormLeafFields = <

@@ -1,6 +1,7 @@
-import { surfaceStyles } from '@lcabrera/ui/design-system/tokens/surfaces.stylex';
 import * as stylex from '@stylexjs/stylex';
 import { useEffect, useRef } from 'react';
+
+import { surfaceStyles } from '#ui/design-system/tokens/surfaces.stylex';
 
 import type { DialogSidePanelProps } from './DialogSidePanel.types';
 

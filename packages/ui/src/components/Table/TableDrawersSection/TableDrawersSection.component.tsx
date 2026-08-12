@@ -1,5 +1,5 @@
-import { TableSettingsDrawer } from '@lcabrera/ui/components/Table/TableSettingsDrawer';
-import { TableDrawerProvider } from '@lcabrera/ui/components/Table/TableSettingsDrawer/TableDrawerContext/TableDrawerContext.provider';
+import { TableSettingsDrawer } from '#ui/components/Table/TableSettingsDrawer';
+import { TableDrawerProvider } from '#ui/components/Table/TableSettingsDrawer/TableDrawerContext/TableDrawerContext.provider';
 
 import { ColumnSettingsDrawer } from '../ColumnSettingsDrawer';
 import { ColumnDrawerProvider } from '../ColumnSettingsDrawer/ColumnDrawerContext/ColumnDrawerContext.provider';

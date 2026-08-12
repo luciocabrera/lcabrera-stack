@@ -1,6 +1,7 @@
-import { zIndex } from '@lcabrera/ui/design-system/tokens/base.stylex';
-import { colors } from '@lcabrera/ui/design-system/tokens/colors.stylex';
 import * as stylex from '@stylexjs/stylex';
+
+import { zIndex } from '#ui/design-system/tokens/base.stylex';
+import { colors } from '#ui/design-system/tokens/colors.stylex';
 
 /**
  * The splitter is a transparent 8px grab zone straddling the header cell's

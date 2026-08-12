@@ -1,7 +1,7 @@
-import type { Sorting } from '@lcabrera/ui/types/ui.types';
+import type { Sorting } from '#ui/types/ui.types';
 
-import { useTableConfigContextValue } from '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import { useTableDataContextValue } from '@lcabrera/ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
+import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { useTableDataContextValue } from '#ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
 
 import { usePersistTableStateAction } from './hooks/usePersistTableStateAction.hook';
 import { resolveColumnSortingUpdate } from './utils';

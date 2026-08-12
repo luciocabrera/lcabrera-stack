@@ -1,5 +1,6 @@
-import { TableBodyCell } from '@lcabrera/ui/components/Table/TableBodyCell';
 import { createElement } from 'react';
+
+import { TableBodyCell } from '#ui/components/Table/TableBodyCell';
 
 import type { TableBodyCellDescriptor } from './buildTableBodyCellDescriptor.util';
 

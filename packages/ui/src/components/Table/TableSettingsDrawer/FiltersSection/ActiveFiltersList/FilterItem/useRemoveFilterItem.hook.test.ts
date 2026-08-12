@@ -19,19 +19,13 @@ vi.mock('../../../TableDrawerContext/selectors', () => ({
   }),
 }));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions',
-  () => ({
-    useSetTableSettingsExpandedFilters: () => mockSetExpandedFilters,
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/meta/actions', () => ({
+  useSetTableSettingsExpandedFilters: () => mockSetExpandedFilters,
+}));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors',
-  () => ({
-    useGetTableSettingsExpandedFilters: () => ['price', 'status'],
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
+  useGetTableSettingsExpandedFilters: () => ['price', 'status'],
+}));
 
 import { useRemoveFilterItem } from './useRemoveFilterItem.hook';
 

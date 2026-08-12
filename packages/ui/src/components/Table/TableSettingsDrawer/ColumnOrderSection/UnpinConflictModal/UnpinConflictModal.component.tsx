@@ -1,5 +1,5 @@
-import { ChoiceModal } from '@lcabrera/ui/components/ChoiceModal';
-import { UNPIN_CONFLICT_OPTIONS } from '@lcabrera/ui/constants/pinningPreferences.constants';
+import { ChoiceModal } from '#ui/components/ChoiceModal';
+import { UNPIN_CONFLICT_OPTIONS } from '#ui/constants/pinningPreferences.constants';
 
 import {
   useAcceptUnpinConflict,

@@ -62,11 +62,11 @@ afterEach(() => {
   Reflect.deleteProperty(HTMLDivElement.prototype, 'showPopover');
 });
 
-vi.mock('@lcabrera/ui/contexts/NotificationContext/actions', () => ({
+vi.mock('#ui/contexts/NotificationContext/actions', () => ({
   useDismissNotificationAction: () => dismissNotificationMock,
 }));
 
-vi.mock('@lcabrera/ui/contexts/NotificationContext/selectors', () => ({
+vi.mock('#ui/contexts/NotificationContext/selectors', () => ({
   useGetNotifications: () => notificationsMock,
 }));
 

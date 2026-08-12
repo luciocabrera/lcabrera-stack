@@ -1,9 +1,7 @@
-import {
-  borderRadius,
-  zIndex,
-} from '@lcabrera/ui/design-system/tokens/base.stylex';
-import { colors } from '@lcabrera/ui/design-system/tokens/colors.stylex';
 import * as stylex from '@stylexjs/stylex';
+
+import { borderRadius, zIndex } from '#ui/design-system/tokens/base.stylex';
+import { colors } from '#ui/design-system/tokens/colors.stylex';
 
 export const tableHeaderStyles = stylex.create({
   container: {

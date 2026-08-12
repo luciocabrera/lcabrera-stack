@@ -1,7 +1,7 @@
 import type {
   ColumnVisibilityState,
   DataKey,
-} from '@lcabrera/ui/components/Table/Table.types';
+} from '#ui/components/Table/Table.types';
 
 type ResolveColumnVisibilityUpdateArgs<TData> = {
   readonly columnKey: DataKey<TData>;

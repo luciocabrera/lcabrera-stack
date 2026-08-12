@@ -2,7 +2,7 @@ import type {
   ColumnOrderState,
   ColumnPinningState,
   DataKey,
-} from '@lcabrera/ui/components/Table/Table.types';
+} from '#ui/components/Table/Table.types';
 
 import { insertAfterLeftPinned } from './insertAfterLeftPinned.util';
 import { insertBeforeRightPinned } from './insertBeforeRightPinned.util';

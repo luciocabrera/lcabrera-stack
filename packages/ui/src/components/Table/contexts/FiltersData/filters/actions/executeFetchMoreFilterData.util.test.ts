@@ -1,12 +1,13 @@
+import { describe, expect, it, vi } from 'vite-plus/test';
+
 import type {
   FiltersDataState,
   TableMetaState,
-} from '@lcabrera/ui/components/Table/Table.types';
-import type { TStore } from '@lcabrera/ui/hooks/useStore.hook';
+} from '#ui/components/Table/Table.types';
+import type { TStore } from '#ui/hooks/useStore.hook';
 
-import { DEFAULT_FILTER_PAGE_SIZE } from '@lcabrera/ui/components/Table/Table.constants';
-import { createMockStore } from '@lcabrera/ui/utils/tests/createMockStore.util';
-import { describe, expect, it, vi } from 'vite-plus/test';
+import { DEFAULT_FILTER_PAGE_SIZE } from '#ui/components/Table/Table.constants';
+import { createMockStore } from '#ui/utils/tests/createMockStore.util';
 
 import { executeFetchMoreFilterData } from './executeFetchMoreFilterData.util';
 

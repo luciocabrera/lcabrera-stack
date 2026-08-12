@@ -1,5 +1,6 @@
-import type { VirtualListDataState } from '@lcabrera/ui/components/VirtualList';
 import type { StyleXStyles } from '@stylexjs/stylex';
+
+import type { VirtualListDataState } from '#ui/components/VirtualList';
 
 /**
  * Select-level presentation metadata mirrored into the meta store by

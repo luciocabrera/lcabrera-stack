@@ -2,10 +2,10 @@ import {
   useGetColumnSizing,
   useGetPinnedColumnOffsets,
   useGetPinnedColumnPartition,
-} from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors';
-import { createRenderTableBodyCell } from '@lcabrera/ui/components/Table/TableBody/utils/createRenderTableBodyCell.util';
-import { renderTableBodyPinnedGroup } from '@lcabrera/ui/components/Table/TableBody/utils/renderTableBodyPinnedGroup.util';
-import { TableRow } from '@lcabrera/ui/components/Table/TableRow';
+} from '#ui/components/Table/contexts/TableConfig/columns/selectors';
+import { createRenderTableBodyCell } from '#ui/components/Table/TableBody/utils/createRenderTableBodyCell.util';
+import { renderTableBodyPinnedGroup } from '#ui/components/Table/TableBody/utils/renderTableBodyPinnedGroup.util';
+import { TableRow } from '#ui/components/Table/TableRow';
 
 import type { TableBodyRowsProps } from './TableBodyRows.types';
 

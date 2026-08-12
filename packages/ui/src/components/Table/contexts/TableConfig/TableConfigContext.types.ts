@@ -1,8 +1,8 @@
 import type {
   TableColumnsState,
   TableMetaState,
-} from '@lcabrera/ui/components/Table/Table.types';
-import type { TStore } from '@lcabrera/ui/hooks/useStore.hook';
+} from '#ui/components/Table/Table.types';
+import type { TStore } from '#ui/hooks/useStore.hook';
 
 export type TableConfigContextValue<TData = Record<string, unknown>> = {
   /** Store managing column-related state */

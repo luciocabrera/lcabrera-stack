@@ -1,10 +1,7 @@
-import type { FormFieldsState } from '@lcabrera/ui/components/Form/contexts/FormContext/FormContext.types';
-import type {
-  FieldErrors,
-  LeafFieldDef,
-} from '@lcabrera/ui/components/Form/Form.types';
+import type { FormFieldsState } from '#ui/components/Form/contexts/FormContext/FormContext.types';
+import type { FieldErrors, LeafFieldDef } from '#ui/components/Form/Form.types';
 
-import { getInitialValues } from '@lcabrera/ui/components/Form/utils/getInitialValues.util';
+import { getInitialValues } from '#ui/components/Form/utils/getInitialValues.util';
 
 type GetInitialFieldsStateArgs<TValues extends Record<string, unknown>> = {
   readonly initialValues?: Partial<TValues>;

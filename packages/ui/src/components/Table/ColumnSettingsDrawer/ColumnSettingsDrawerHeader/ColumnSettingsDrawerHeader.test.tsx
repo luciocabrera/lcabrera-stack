@@ -39,11 +39,11 @@ type MockSidePanelHeaderToolbarProps = {
   readonly onTogglePin: () => void;
 };
 
-vi.mock('@lcabrera/ui/components/Icons', () => ({
+vi.mock('#ui/components/Icons', () => ({
   SettingsIcon: () => <span>Settings icon</span>,
 }));
 
-vi.mock('@lcabrera/ui/components/SidePanel', () => ({
+vi.mock('#ui/components/SidePanel', () => ({
   SidePanelHeader: ({ actions, children }: MockSidePanelHeaderProps) => (
     <div>
       {children}
@@ -78,35 +78,23 @@ vi.mock('@lcabrera/ui/components/SidePanel', () => ({
   ),
 }));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors',
-  () => ({
-    useGetNormalizedColumn: useGetNormalizedColumnMock,
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
+  useGetNormalizedColumn: useGetNormalizedColumnMock,
+}));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions',
-  () => ({
-    useSetTableIsColumnSettingsPinned: () => setIsColumnSettingsPinnedMock,
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/meta/actions', () => ({
+  useSetTableIsColumnSettingsPinned: () => setIsColumnSettingsPinnedMock,
+}));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors',
-  () => ({
-    useGetTableColumnSelectedKey: () => 'revenue',
-    useGetTableIsColumnSettingsPinned: () => isColumnSettingsPinnedMock(),
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
+  useGetTableColumnSelectedKey: () => 'revenue',
+  useGetTableIsColumnSettingsPinned: () => isColumnSettingsPinnedMock(),
+}));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableData/data/selectors',
-  () => ({
-    useGetTableIsLoading: () => useGetTableIsLoadingMock(),
-    useGetTableIsLoadingMore: () => useGetTableIsLoadingMoreMock(),
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableData/data/selectors', () => ({
+  useGetTableIsLoading: () => useGetTableIsLoadingMock(),
+  useGetTableIsLoadingMore: () => useGetTableIsLoadingMoreMock(),
+}));
 
 vi.mock('../ColumnDrawerContext/actions', () => ({
   useResetAllColumnDrawerSettings: () => resetAllColumnDrawerSettingsMock,

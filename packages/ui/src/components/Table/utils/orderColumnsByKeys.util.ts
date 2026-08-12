@@ -1,7 +1,7 @@
 import type {
   ColumnOrderState,
   TableColumn,
-} from '@lcabrera/ui/components/Table/Table.types';
+} from '#ui/components/Table/Table.types';
 
 type OrderColumnsByKeysArgs<TData> = {
   readonly columnOrder: ColumnOrderState<TData>;

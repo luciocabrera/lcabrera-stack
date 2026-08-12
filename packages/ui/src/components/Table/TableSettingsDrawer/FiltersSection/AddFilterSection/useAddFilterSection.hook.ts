@@ -1,10 +1,11 @@
+import { useState } from 'react';
+
 import {
   useGetColumns,
   useGetNormalizedColumns,
-} from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors';
-import { useSetTableSettingsExpandedFilters } from '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions';
-import { useGetTableSettingsExpandedFilters } from '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors';
-import { useState } from 'react';
+} from '#ui/components/Table/contexts/TableConfig/columns/selectors';
+import { useSetTableSettingsExpandedFilters } from '#ui/components/Table/contexts/TableConfig/meta/actions';
+import { useGetTableSettingsExpandedFilters } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 
 import { useSetColumnFilters } from '../../TableDrawerContext/actions';
 import { useGetColumnFilters } from '../../TableDrawerContext/selectors';

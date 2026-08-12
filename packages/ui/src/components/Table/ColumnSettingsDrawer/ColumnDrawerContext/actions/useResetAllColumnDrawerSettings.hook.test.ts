@@ -36,14 +36,14 @@ const {
 }));
 
 vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions/usePersistTableUiFlagsAction.hook',
+  '#ui/components/Table/contexts/TableConfig/meta/actions/usePersistTableUiFlagsAction.hook',
   () => ({
     usePersistTableUiFlagsAction: () => persistUiFlagsMock,
   }),
 );
 
 vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
+  '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
   () => ({
     useTableConfigContextValue: () => ({
       columnsStore,
@@ -53,7 +53,7 @@ vi.mock(
 );
 
 vi.mock(
-  '@lcabrera/ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook',
+  '#ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook',
   () => ({
     useColumnDrawerContextValue: () => ({
       columnStore,
@@ -62,11 +62,11 @@ vi.mock(
 );
 
 vi.mock(
-  '@lcabrera/ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils',
+  '#ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils',
   async (importOriginal) => {
     const actual =
       await importOriginal<
-        typeof import('@lcabrera/ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils')
+        typeof import('#ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils')
       >();
 
     return {

@@ -1,4 +1,4 @@
-import type { PinSide } from '@lcabrera/ui/types/ui.types';
+import type { PinSide } from '#ui/types/ui.types';
 
 import { PIN_SIDE_VALUES } from './globalSettings.constants';
 

@@ -1,7 +1,7 @@
-import type { DataKey } from '@lcabrera/ui/components/Table/Table.types';
+import type { DataKey } from '#ui/components/Table/Table.types';
 
-import { useSetColumnSizing } from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/actions';
-import { resolveColumnWidthBounds } from '@lcabrera/ui/components/Table/utils';
+import { useSetColumnSizing } from '#ui/components/Table/contexts/TableConfig/columns/actions';
+import { resolveColumnWidthBounds } from '#ui/components/Table/utils';
 
 import { useColumnDragSession } from './useColumnDragSession.hook';
 import { resolveKeyboardResizeAction } from './utils/resolveKeyboardResizeAction.util';

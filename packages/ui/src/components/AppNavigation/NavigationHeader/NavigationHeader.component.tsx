@@ -1,10 +1,11 @@
-import { MenuIcon } from '@lcabrera/ui/components/Icons';
-import { useSetGlobalNavigationPreferences } from '@lcabrera/ui/contexts/GlobalSettingsContext/actions';
+import * as stylex from '@stylexjs/stylex';
+
+import { MenuIcon } from '#ui/components/Icons';
+import { useSetGlobalNavigationPreferences } from '#ui/contexts/GlobalSettingsContext/actions';
 import {
   useGetGlobalNavigationCollapsedPreference,
   useGetGlobalNavigationSizePreference,
-} from '@lcabrera/ui/contexts/GlobalSettingsContext/selectors';
-import * as stylex from '@stylexjs/stylex';
+} from '#ui/contexts/GlobalSettingsContext/selectors';
 
 import { NAV_DENSITY } from '../AppNavigation.constants';
 import { styles } from '../AppNavigation.stylex';

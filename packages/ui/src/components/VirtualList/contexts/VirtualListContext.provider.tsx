@@ -1,5 +1,6 @@
-import { useStore } from '@lcabrera/ui/hooks';
 import { useEffect } from 'react';
+
+import { useStore } from '#ui/hooks';
 
 import type {
   VirtualListDataStoreState,

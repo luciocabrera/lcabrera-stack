@@ -1,10 +1,11 @@
+import * as stylex from '@stylexjs/stylex';
+
 import {
   useGetColumnWidth,
   useGetNormalizedColumn,
-} from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors';
-import { useColumnResize } from '@lcabrera/ui/components/Table/hooks';
-import { DEFAULT_MIN_COLUMN_WIDTH } from '@lcabrera/ui/components/Table/Table.constants';
-import * as stylex from '@stylexjs/stylex';
+} from '#ui/components/Table/contexts/TableConfig/columns/selectors';
+import { useColumnResize } from '#ui/components/Table/hooks';
+import { DEFAULT_MIN_COLUMN_WIDTH } from '#ui/components/Table/Table.constants';
 
 import type { ResizeHandleProps } from './ResizeHandle.types';
 

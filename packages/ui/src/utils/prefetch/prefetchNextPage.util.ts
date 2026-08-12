@@ -1,4 +1,4 @@
-import type { Pagination, PrefetchCache } from '@lcabrera/ui/types/ui.types';
+import type { Pagination, PrefetchCache } from '#ui/types/ui.types';
 
 type PrefetchNextPageArgs<TResponse, TData = unknown> = {
   readonly lastRow?: TData;

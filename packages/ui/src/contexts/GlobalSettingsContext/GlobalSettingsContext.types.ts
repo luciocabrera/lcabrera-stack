@@ -1,6 +1,7 @@
-import type { TStore } from '@lcabrera/ui/hooks';
-import type { GlobalSettingsState } from '@lcabrera/ui/types/globalSettings.types';
 import type { ReactNode } from 'react';
+
+import type { TStore } from '#ui/hooks';
+import type { GlobalSettingsState } from '#ui/types/globalSettings.types';
 
 export type GlobalSettingsContextValue = {
   /** Per-app id used to scope the persisted global-settings cookie key. */

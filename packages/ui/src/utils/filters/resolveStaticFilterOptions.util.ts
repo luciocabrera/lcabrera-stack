@@ -1,8 +1,8 @@
 import type {
   FilterOptionsResponse,
   StaticFilterOptionsDescriptor,
-} from '@lcabrera/ui/components/Table/Table.types';
-import type { Pagination } from '@lcabrera/ui/types/ui.types';
+} from '#ui/components/Table/Table.types';
+import type { Pagination } from '#ui/types/ui.types';
 
 /**
  * Executor for `kind: 'static'` descriptors: serves pages by slicing the

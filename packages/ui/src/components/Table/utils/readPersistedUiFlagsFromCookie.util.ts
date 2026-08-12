@@ -1,4 +1,4 @@
-import { readFromCookie } from '@lcabrera/ui/utils/storage';
+import { readFromCookie } from '#ui/utils/storage';
 
 import type { PersistedUiState } from './persistence.types';
 

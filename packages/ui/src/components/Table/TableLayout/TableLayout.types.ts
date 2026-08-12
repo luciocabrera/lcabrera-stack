@@ -2,7 +2,7 @@ import type {
   TableColumnsStateInput,
   TableMetaState,
   TableProps,
-} from '@lcabrera/ui/components/Table';
+} from '#ui/components/Table';
 
 export type TableLayoutProps<
   TData extends Record<string, unknown>,

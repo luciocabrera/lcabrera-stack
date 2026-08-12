@@ -1,14 +1,14 @@
-import type { useGetGlobalNavigationPreferences } from '@lcabrera/ui/contexts/GlobalSettingsContext/selectors';
+import type { useGetGlobalNavigationPreferences } from '#ui/contexts/GlobalSettingsContext/selectors';
 import type {
   GlobalNavigationCollapsedPreference,
   GlobalNavigationSizePreference,
-} from '@lcabrera/ui/types/globalSettings.types';
+} from '#ui/types/globalSettings.types';
 import type {
   OrderConflictResolutionPreferenceOption,
   PinConflictResolutionPreferenceOption,
   PinSidePreferenceOption,
   UnpinConflictResolutionPreferenceOption,
-} from '@lcabrera/ui/types/pinningPreferences.types';
+} from '#ui/types/pinningPreferences.types';
 
 export type BuildNavigationUpdateArgs = {
   readonly draft: SettingsDraft;

@@ -2,7 +2,7 @@ import type {
   ColumnFiltersState,
   SortingState,
   TableColumn,
-} from '@lcabrera/ui/components/Table';
+} from '#ui/components/Table';
 
 import { appendPrimaryKeySorting } from './appendPrimaryKeySorting.util';
 import { sanitizeSorting } from './sanitizeSorting.util';

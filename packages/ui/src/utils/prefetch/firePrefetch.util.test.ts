@@ -1,7 +1,8 @@
-import type { PrefetchCache } from '@lcabrera/ui/types/ui.types';
 import type { RefObject } from 'react';
 
 import { describe, expect, it, vi } from 'vite-plus/test';
+
+import type { PrefetchCache } from '#ui/types/ui.types';
 
 import { firePrefetch } from './firePrefetch.util';
 

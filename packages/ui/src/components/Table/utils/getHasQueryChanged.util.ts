@@ -1,6 +1,6 @@
-import type { TableColumnsState } from '@lcabrera/ui/components/Table/Table.types';
-
 import { areEqualByJson } from '@lcabrera/utils/comparison/are-equal-by-json.util';
+
+import type { TableColumnsState } from '#ui/components/Table/Table.types';
 
 type GetHasQueryChangedArgs<TData> = {
   readonly columnsState?: Partial<TableColumnsState<TData>>;

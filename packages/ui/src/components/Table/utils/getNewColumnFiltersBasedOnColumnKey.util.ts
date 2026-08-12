@@ -1,6 +1,6 @@
-import type { ColumnFilter } from '@lcabrera/ui/types/filterOperators.types';
-
 import { isShallowEqual } from '@lcabrera/utils/comparison/is-shallow-equal.util';
+
+import type { ColumnFilter } from '#ui/types/filterOperators.types';
 
 import type { ColumnFiltersState, DataKey } from '../Table.types';
 

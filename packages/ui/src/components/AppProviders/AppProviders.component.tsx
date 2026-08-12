@@ -1,7 +1,8 @@
-import { GlobalSettingsProvider } from '@lcabrera/ui/contexts/GlobalSettingsContext';
-import { NotificationProvider } from '@lcabrera/ui/contexts/NotificationContext';
-import { ThemeProvider } from '@lcabrera/ui/contexts/ThemeContext';
 import { useLoaderData } from 'react-router';
+
+import { GlobalSettingsProvider } from '#ui/contexts/GlobalSettingsContext';
+import { NotificationProvider } from '#ui/contexts/NotificationContext';
+import { ThemeProvider } from '#ui/contexts/ThemeContext';
 
 import type {
   AppProvidersLoaderData,

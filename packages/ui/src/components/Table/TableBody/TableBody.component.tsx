@@ -1,12 +1,13 @@
+import * as stylex from '@stylexjs/stylex';
+
 import {
   useGetTableOverscan,
   useGetTableRowHeight,
-} from '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors';
-import { SpacerRow } from '@lcabrera/ui/components/Table/SpacerRow';
-import { TableBodyRows } from '@lcabrera/ui/components/Table/TableBodyRows';
-import { TableEmptyState } from '@lcabrera/ui/components/Table/TableEmptyState';
-import { useVirtualization } from '@lcabrera/ui/hooks';
-import * as stylex from '@stylexjs/stylex';
+} from '#ui/components/Table/contexts/TableConfig/meta/selectors';
+import { SpacerRow } from '#ui/components/Table/SpacerRow';
+import { TableBodyRows } from '#ui/components/Table/TableBodyRows';
+import { TableEmptyState } from '#ui/components/Table/TableEmptyState';
+import { useVirtualization } from '#ui/hooks';
 
 import type { TableBodyProps } from './TableBody.types';
 

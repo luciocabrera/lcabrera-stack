@@ -1,4 +1,4 @@
-import type { TableMetadataValue } from '@lcabrera/ui/components/Table/Table.types';
+import type { TableMetadataValue } from '#ui/components/Table/Table.types';
 
 import type { DetailsRow } from '../DetailsSection.types';
 

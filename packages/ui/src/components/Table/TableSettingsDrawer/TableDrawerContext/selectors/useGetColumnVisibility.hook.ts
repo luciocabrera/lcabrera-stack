@@ -1,4 +1,4 @@
-import type { ColumnVisibilityState } from '@lcabrera/ui/components/Table/Table.types';
+import type { ColumnVisibilityState } from '#ui/components/Table/Table.types';
 
 import { useColumnsStore } from '../useColumnsStore.hook';
 

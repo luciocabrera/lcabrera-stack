@@ -1,7 +1,7 @@
 import {
   useGetGlobalNavigationPreferences,
   useGetGlobalPinningPreferences,
-} from '@lcabrera/ui/contexts/GlobalSettingsContext/selectors';
+} from '#ui/contexts/GlobalSettingsContext/selectors';
 
 import { toDraft } from '../../utils';
 import { useSettingsDraftContextValue } from '../useSettingsDraftContextValue.hook';

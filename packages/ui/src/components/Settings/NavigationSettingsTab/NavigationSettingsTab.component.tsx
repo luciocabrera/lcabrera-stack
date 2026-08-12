@@ -1,8 +1,9 @@
+import * as stylex from '@stylexjs/stylex';
+
 import {
   NAVIGATION_COLLAPSED_PREFERENCE_OPTIONS,
   NAVIGATION_SIZE_PREFERENCE_OPTIONS,
-} from '@lcabrera/ui/constants/globalSettings.constants';
-import * as stylex from '@stylexjs/stylex';
+} from '#ui/constants/globalSettings.constants';
 
 import type { SettingsDraft } from '../Settings.types';
 

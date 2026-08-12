@@ -1,8 +1,5 @@
 // @vitest-environment jsdom
 
-import type { TableColumn } from '@lcabrera/ui/components/Table';
-import type { TableLayoutProps } from '@lcabrera/ui/components/Table/TableLayout/TableLayout.types';
-
 import { cleanup, render } from '@testing-library/react';
 import {
   afterEach,
@@ -12,6 +9,9 @@ import {
   it,
   vi,
 } from 'vite-plus/test';
+
+import type { TableColumn } from '#ui/components/Table';
+import type { TableLayoutProps } from '#ui/components/Table/TableLayout/TableLayout.types';
 
 import { TableRouteView } from './TableRouteView.component';
 
@@ -33,7 +33,7 @@ const { tableLayoutMock, useLoaderDataMock } = vi.hoisted(() => ({
 
 vi.mock('react-router', () => ({ useLoaderData: useLoaderDataMock }));
 
-vi.mock('@lcabrera/ui/components/Table/TableLayout', () => ({
+vi.mock('#ui/components/Table/TableLayout', () => ({
   TableLayout: (props: TableLayoutProps<Row, Response>) => {
     tableLayoutMock(props);
     return <div data-testid='table-layout' />;

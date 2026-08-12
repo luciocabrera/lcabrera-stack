@@ -1,8 +1,8 @@
 import type {
   DataKey,
   TableColumnsState,
-} from '@lcabrera/ui/components/Table/Table.types';
-import type { TStore } from '@lcabrera/ui/hooks/useStore.hook';
+} from '#ui/components/Table/Table.types';
+import type { TStore } from '#ui/hooks/useStore.hook';
 
 import { resolveColumnSizingUpdate } from './resolveColumnSizingUpdate.util';
 

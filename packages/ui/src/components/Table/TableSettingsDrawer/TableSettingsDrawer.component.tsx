@@ -1,4 +1,4 @@
-import { SidePanel } from '@lcabrera/ui/components/SidePanel';
+import { SidePanel } from '#ui/components/SidePanel';
 
 import { useGetTableIsTableSettingsPinned } from '../contexts/TableConfig/meta/selectors';
 import {

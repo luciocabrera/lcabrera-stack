@@ -40,11 +40,8 @@ const { countVisibleTagsMock, mockUseClickOutside, triggerOutsideClick } =
     };
   });
 
-vi.mock('@lcabrera/ui/hooks', async () => {
-  const actual =
-    await vi.importActual<typeof import('@lcabrera/ui/hooks')>(
-      '@lcabrera/ui/hooks',
-    );
+vi.mock('#ui/hooks', async () => {
+  const actual = await vi.importActual<typeof import('#ui/hooks')>('#ui/hooks');
 
   return {
     ...actual,

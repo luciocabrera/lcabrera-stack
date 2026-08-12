@@ -189,15 +189,15 @@ const MockUseResetAllColumnDrawerSettings = vi.hoisted(() => {
   };
 });
 
-vi.mock('@lcabrera/ui/components/Button', () => ({
+vi.mock('#ui/components/Button', () => ({
   Button: MockButton,
 }));
 
-vi.mock('@lcabrera/ui/components/Icons', () => ({
+vi.mock('#ui/components/Icons', () => ({
   SettingsIcon: MockSettingsIcon,
 }));
 
-vi.mock('@lcabrera/ui/components/SidePanel', () => ({
+vi.mock('#ui/components/SidePanel', () => ({
   SidePanel: MockSidePanel,
   SidePanelBody: MockSidePanelBody,
   SidePanelFooter: MockSidePanelFooter,
@@ -206,44 +206,32 @@ vi.mock('@lcabrera/ui/components/SidePanel', () => ({
   SidePanelTitle: MockSidePanelTitle,
 }));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors',
-  () => ({
-    useGetNormalizedColumn: useGetNormalizedColumnMock,
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
+  useGetNormalizedColumn: useGetNormalizedColumnMock,
+}));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions',
-  () => ({
-    useSetTableColumnSettingsSelectedTab: () =>
-      setTableColumnSettingsSelectedTabMock,
-    useSetTableIsColumnSettingsPinned: () => setTableIsColumnSettingsPinnedMock,
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/meta/actions', () => ({
+  useSetTableColumnSettingsSelectedTab: () =>
+    setTableColumnSettingsSelectedTabMock,
+  useSetTableIsColumnSettingsPinned: () => setTableIsColumnSettingsPinnedMock,
+}));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors',
-  () => ({
-    useGetTableColumnSelectedKey: () => 'customer',
-    useGetTableColumnSettingsSelectedTab: () => 'general',
-    useGetTableIsColumnSettingsPinned: () => false,
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
+  useGetTableColumnSelectedKey: () => 'customer',
+  useGetTableColumnSettingsSelectedTab: () => 'general',
+  useGetTableIsColumnSettingsPinned: () => false,
+}));
 
-vi.mock('@lcabrera/ui/components/Table/contexts/TableWrapper', () => ({
+vi.mock('#ui/components/Table/contexts/TableWrapper', () => ({
   useTableWrapperRef: useTableWrapperRefMock,
 }));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableData/data/selectors',
-  () => ({
-    useGetTableIsLoading: () => useGetTableIsLoadingMock(),
-    useGetTableIsLoadingMore: () => useGetTableIsLoadingMoreMock(),
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableData/data/selectors', () => ({
+  useGetTableIsLoading: () => useGetTableIsLoadingMock(),
+  useGetTableIsLoadingMore: () => useGetTableIsLoadingMoreMock(),
+}));
 
-vi.mock('@lcabrera/ui/components/Tabs', () => ({
+vi.mock('#ui/components/Tabs', () => ({
   Tabs: MockTabs,
 }));
 

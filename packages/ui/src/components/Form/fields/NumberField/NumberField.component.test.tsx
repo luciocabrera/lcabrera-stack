@@ -1,20 +1,18 @@
 // @vitest-environment jsdom
 
+import * as stylex from '@stylexjs/stylex';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it } from 'vite-plus/test';
+
 import type {
   FieldErrors,
   FormMode,
   NumberFieldDef,
-} from '@lcabrera/ui/components/Form/Form.types';
+} from '#ui/components/Form/Form.types';
 
-import {
-  FormProvider,
-  useGetFieldValue,
-} from '@lcabrera/ui/components/Form/contexts';
-import { useGetIsFormDirty } from '@lcabrera/ui/components/Form/contexts/FormContext/selectors/useGetIsFormDirty.hook';
-import { formInputStyles } from '@lcabrera/ui/components/Form/fields/formInput.stylex';
-import * as stylex from '@stylexjs/stylex';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vite-plus/test';
+import { FormProvider, useGetFieldValue } from '#ui/components/Form/contexts';
+import { useGetIsFormDirty } from '#ui/components/Form/contexts/FormContext/selectors/useGetIsFormDirty.hook';
+import { formInputStyles } from '#ui/components/Form/fields/formInput.stylex';
 
 import { NumberField } from './NumberField.component';
 

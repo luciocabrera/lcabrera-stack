@@ -3,15 +3,12 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/actions',
-  () => ({
-    useSetColumnPinning: () => vi.fn(),
-    useSetColumnVisibility: () => vi.fn(),
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/columns/actions', () => ({
+  useSetColumnPinning: () => vi.fn(),
+  useSetColumnVisibility: () => vi.fn(),
+}));
 
-vi.mock('@lcabrera/ui/components/Table/TableActionsPopover', () => ({
+vi.mock('#ui/components/Table/TableActionsPopover', () => ({
   TableActionsPopoverSeparator: () => <hr />,
   tableActionsPopoverStyles: {
     menuIcon: {},

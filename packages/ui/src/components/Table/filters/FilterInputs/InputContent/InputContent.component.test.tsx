@@ -1,12 +1,12 @@
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
+
 // @vitest-environment jsdom
-import type { TableColumnDataType } from '@lcabrera/ui/components/Table/Table.types';
+import type { TableColumnDataType } from '#ui/components/Table/Table.types';
 import type {
   ColumnFilter,
   OperatorType,
-} from '@lcabrera/ui/types/filterOperators.types';
-
-import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
+} from '#ui/types/filterOperators.types';
 
 import { InputContent } from './InputContent.component';
 

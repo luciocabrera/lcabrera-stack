@@ -1,7 +1,7 @@
 import type {
   AppNotification,
   NotificationPlacement,
-} from '@lcabrera/ui/contexts/NotificationContext';
+} from '#ui/contexts/NotificationContext';
 
 export type NotificationsByPlacement = Record<
   NotificationPlacement,

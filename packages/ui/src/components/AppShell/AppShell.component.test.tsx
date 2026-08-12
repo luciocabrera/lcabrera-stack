@@ -13,11 +13,11 @@ vi.mock('react-router', async () => {
   };
 });
 
-vi.mock('@lcabrera/ui/components/AppNavigation', () => ({
+vi.mock('#ui/components/AppNavigation', () => ({
   AppNavigation: () => <div data-testid='app-navigation'>AppNavigation</div>,
 }));
 
-vi.mock('@lcabrera/ui/components/NotificationCenter', () => ({
+vi.mock('#ui/components/NotificationCenter', () => ({
   NotificationCenter: () => (
     <div data-testid='notification-center'>Notifications</div>
   ),

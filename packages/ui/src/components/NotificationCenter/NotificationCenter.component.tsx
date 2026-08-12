@@ -1,9 +1,10 @@
-import type { NotificationPlacement } from '@lcabrera/ui/contexts/NotificationContext';
-
-import { useDismissNotificationAction } from '@lcabrera/ui/contexts/NotificationContext/actions';
-import { useGetNotifications } from '@lcabrera/ui/contexts/NotificationContext/selectors';
 import * as stylex from '@stylexjs/stylex';
 import { useEffect, useRef } from 'react';
+
+import type { NotificationPlacement } from '#ui/contexts/NotificationContext';
+
+import { useDismissNotificationAction } from '#ui/contexts/NotificationContext/actions';
+import { useGetNotifications } from '#ui/contexts/NotificationContext/selectors';
 
 import { NOTIFICATION_CENTER_PLACEMENTS } from './NotificationCenter.constants';
 import { styles } from './NotificationCenter.stylex';

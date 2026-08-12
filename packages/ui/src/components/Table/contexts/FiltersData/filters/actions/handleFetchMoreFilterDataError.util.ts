@@ -1,12 +1,12 @@
+import { getErrorMessage } from '@lcabrera/utils/errors/get-error-message.util';
+
 import type {
   DataKey,
   FilterData,
   FiltersDataState,
   TableMetaState,
-} from '@lcabrera/ui/components/Table/Table.types';
-import type { TStore } from '@lcabrera/ui/hooks/useStore.hook';
-
-import { getErrorMessage } from '@lcabrera/utils/errors/get-error-message.util';
+} from '#ui/components/Table/Table.types';
+import type { TStore } from '#ui/hooks/useStore.hook';
 
 import { setFilterSlice } from './setFilterSlice.util';
 

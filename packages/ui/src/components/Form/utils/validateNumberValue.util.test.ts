@@ -1,6 +1,6 @@
-import type { FieldClientValidation } from '@lcabrera/ui/components/Form/Form.types';
-
 import { describe, expect, it } from 'vite-plus/test';
+
+import type { FieldClientValidation } from '#ui/components/Form/Form.types';
 
 import { validateNumberValue } from './validateNumberValue.util';
 

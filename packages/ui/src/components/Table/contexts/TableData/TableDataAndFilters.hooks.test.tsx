@@ -2,10 +2,11 @@
 
 import type { ReactNode } from 'react';
 
-import { createMockStore } from '@lcabrera/ui/utils/tests/createMockStore.util';
 import { act, renderHook } from '@testing-library/react';
 import { createElement } from 'react';
 import { describe, expect, it } from 'vite-plus/test';
+
+import { createMockStore } from '#ui/utils/tests/createMockStore.util';
 
 import type { FiltersDataContextValue } from '../FiltersData/FiltersDataContext.types';
 import type { TableDataContextValue } from './TableDataContext.types';

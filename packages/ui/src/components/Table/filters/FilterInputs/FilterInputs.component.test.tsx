@@ -1,9 +1,9 @@
-// @vitest-environment jsdom
-import type { TableColumn } from '@lcabrera/ui/components/Table/Table.types';
-import type { ColumnFilter } from '@lcabrera/ui/types/filterOperators.types';
-
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
+
+// @vitest-environment jsdom
+import type { TableColumn } from '#ui/components/Table/Table.types';
+import type { ColumnFilter } from '#ui/types/filterOperators.types';
 
 import { FilterInputs } from './FilterInputs.component';
 
@@ -77,7 +77,7 @@ const { useGetNormalizedColumnMock } = vi.hoisted(() => ({
 }));
 
 vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors/useGetNormalizedColumn.hook',
+  '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetNormalizedColumn.hook',
   () => ({
     useGetNormalizedColumn: useGetNormalizedColumnMock,
   }),

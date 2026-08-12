@@ -1,6 +1,7 @@
-import { Button } from '@lcabrera/ui/components/Button';
-import { ICON_SIZE_SM } from '@lcabrera/ui/design-system/constants';
 import * as stylex from '@stylexjs/stylex';
+
+import { Button } from '#ui/components/Button';
+import { ICON_SIZE_SM } from '#ui/design-system/constants';
 
 import type { SectionToolbarProps } from './SectionToolbar.types';
 

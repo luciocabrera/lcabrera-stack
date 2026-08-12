@@ -1,10 +1,11 @@
-import type { ButtonProps } from '@lcabrera/ui/components/Button/Button.types';
-import type { NavLinkProps } from '@lcabrera/ui/components/NavLink/NavLink.types';
+import type { ComponentPropsWithoutRef, ReactNode } from 'react';
+
+import type { ButtonProps } from '#ui/components/Button/Button.types';
+import type { NavLinkProps } from '#ui/components/NavLink/NavLink.types';
 import type {
   DesignSystemOrientation,
   DesignSystemSize,
-} from '@lcabrera/ui/types/design-system.types';
-import type { ComponentPropsWithoutRef, ReactNode } from 'react';
+} from '#ui/types/design-system.types';
 
 export type NavbarButtonConfig = Omit<ButtonProps, 'children' | 'width'> & {
   readonly icon?: ReactNode;

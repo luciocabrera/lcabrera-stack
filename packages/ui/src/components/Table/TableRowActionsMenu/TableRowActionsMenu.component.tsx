@@ -1,5 +1,6 @@
-import { TableActionsPopover } from '@lcabrera/ui/components/Table/TableActionsPopover';
 import { useFetcher } from 'react-router';
+
+import { TableActionsPopover } from '#ui/components/Table/TableActionsPopover';
 
 import type { TableRowActionsMenuProps } from './TableRowActionsMenu.types';
 

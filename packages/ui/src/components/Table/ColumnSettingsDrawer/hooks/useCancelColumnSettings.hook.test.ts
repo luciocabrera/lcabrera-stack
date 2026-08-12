@@ -9,12 +9,9 @@ const { isColumnSettingsPinnedMock, resetAllColumnDrawerSettingsMock } =
     resetAllColumnDrawerSettingsMock: vi.fn(),
   }));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors',
-  () => ({
-    useGetTableIsColumnSettingsPinned: () => isColumnSettingsPinnedMock(),
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
+  useGetTableIsColumnSettingsPinned: () => isColumnSettingsPinnedMock(),
+}));
 
 vi.mock('../ColumnDrawerContext/actions', () => ({
   useResetAllColumnDrawerSettings: () => resetAllColumnDrawerSettingsMock,

@@ -1,4 +1,4 @@
-import type { RadioOption } from '@lcabrera/ui/components/RadioOptionGroup';
+import type { RadioOption } from '#ui/components/RadioOptionGroup';
 import type {
   OrderConflictResolution,
   OrderConflictResolutionPreferenceOption,
@@ -6,11 +6,8 @@ import type {
   PinSidePreferenceOption,
   UnpinConflictResolution,
   UnpinConflictResolutionPreferenceOption,
-} from '@lcabrera/ui/types/pinningPreferences.types';
-import type {
-  PinConflictResolution,
-  PinSide,
-} from '@lcabrera/ui/types/ui.types';
+} from '#ui/types/pinningPreferences.types';
+import type { PinConflictResolution, PinSide } from '#ui/types/ui.types';
 
 export const ORDER_CONFLICT_OPTIONS: readonly RadioOption<OrderConflictResolution>[] =
   [

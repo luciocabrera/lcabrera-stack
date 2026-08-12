@@ -1,4 +1,4 @@
-import type { TableMetaState } from '@lcabrera/ui/components/Table/Table.types';
+import type { TableMetaState } from '#ui/components/Table/Table.types';
 
 type GetNextStatePatchArgs = {
   readonly isColumnSettingsOpen: boolean;

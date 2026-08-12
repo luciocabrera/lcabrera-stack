@@ -1,7 +1,5 @@
 // @vitest-environment jsdom
 
-import { surfaceStyles } from '@lcabrera/ui/design-system/tokens/surfaces.stylex';
-import { mockDialogElement } from '@lcabrera/ui/utils/tests/mockDialogElement.util';
 import * as stylex from '@stylexjs/stylex';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import {
@@ -12,6 +10,9 @@ import {
   it,
   vi,
 } from 'vite-plus/test';
+
+import { surfaceStyles } from '#ui/design-system/tokens/surfaces.stylex';
+import { mockDialogElement } from '#ui/utils/tests/mockDialogElement.util';
 
 import { Modal } from './Modal.component';
 

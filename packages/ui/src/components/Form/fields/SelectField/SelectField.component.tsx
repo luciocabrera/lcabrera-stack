@@ -1,6 +1,6 @@
-import { useFormField } from '@lcabrera/ui/components/Form/fields/useFormField.hook';
-import { FormFieldChrome } from '@lcabrera/ui/components/Form/FormFieldChrome/FormFieldChrome.component';
-import { VirtualSelect } from '@lcabrera/ui/components/VirtualSelect';
+import { useFormField } from '#ui/components/Form/fields/useFormField.hook';
+import { FormFieldChrome } from '#ui/components/Form/FormFieldChrome/FormFieldChrome.component';
+import { VirtualSelect } from '#ui/components/VirtualSelect';
 
 import type {
   ResolveSelectedValuesArgs,

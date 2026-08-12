@@ -66,20 +66,17 @@ const MockTableRow = vi.hoisted(() => {
   };
 });
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors',
-  () => ({
-    useGetColumnSizing: useGetColumnSizingMock,
-    useGetPinnedColumnOffsets: useGetPinnedColumnOffsetsMock,
-    useGetPinnedColumnPartition: useGetPinnedColumnPartitionMock,
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
+  useGetColumnSizing: useGetColumnSizingMock,
+  useGetPinnedColumnOffsets: useGetPinnedColumnOffsetsMock,
+  useGetPinnedColumnPartition: useGetPinnedColumnPartitionMock,
+}));
 
-vi.mock('@lcabrera/ui/components/Table/TableBodyCell', () => ({
+vi.mock('#ui/components/Table/TableBodyCell', () => ({
   TableBodyCell: MockTableBodyCell,
 }));
 
-vi.mock('@lcabrera/ui/components/Table/TableRow', () => ({
+vi.mock('#ui/components/Table/TableRow', () => ({
   TableRow: MockTableRow,
 }));
 

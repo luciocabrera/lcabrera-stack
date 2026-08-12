@@ -9,7 +9,7 @@ const { mockBuildAllOrderedColumns, mockResolveToggleColumnPinIntent } =
   }));
 
 vi.mock(
-  '@lcabrera/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils',
+  '#ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils',
   () => ({
     buildAllOrderedColumns: mockBuildAllOrderedColumns,
     resolveToggleColumnPinIntent: mockResolveToggleColumnPinIntent,

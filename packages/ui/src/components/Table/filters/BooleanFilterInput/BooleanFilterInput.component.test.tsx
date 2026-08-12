@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 
-import type { BooleanFilter } from '@lcabrera/ui/types/filterOperators.types';
-
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
+
+import type { BooleanFilter } from '#ui/types/filterOperators.types';
 
 import { BooleanFilterInput } from './BooleanFilterInput.component';
 

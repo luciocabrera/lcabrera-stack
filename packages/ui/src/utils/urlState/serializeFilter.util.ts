@@ -1,4 +1,4 @@
-import type { ColumnFilter } from '@lcabrera/ui/types/filterOperators.types';
+import type { ColumnFilter } from '#ui/types/filterOperators.types';
 
 import { serializeBooleanFilter } from './serializeBooleanFilter.util';
 import { serializeDateFilter } from './serializeDateFilter.util';

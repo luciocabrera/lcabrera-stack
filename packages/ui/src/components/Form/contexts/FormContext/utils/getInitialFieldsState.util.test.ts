@@ -1,6 +1,6 @@
-import type { LeafFieldDef } from '@lcabrera/ui/components/Form/Form.types';
-
 import { describe, expect, it } from 'vite-plus/test';
+
+import type { LeafFieldDef } from '#ui/components/Form/Form.types';
 
 import { getInitialFieldsState } from './getInitialFieldsState.util';
 

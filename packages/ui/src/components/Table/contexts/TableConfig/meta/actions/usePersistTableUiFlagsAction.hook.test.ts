@@ -1,15 +1,15 @@
 // @vitest-environment jsdom
 
-import type { TableMetaState } from '@lcabrera/ui/components/Table/Table.types';
-
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+
+import type { TableMetaState } from '#ui/components/Table/Table.types';
 
 import { usePersistTableUiFlagsAction } from './usePersistTableUiFlagsAction.hook';
 
 const { persistMock } = vi.hoisted(() => ({ persistMock: vi.fn() }));
 
-vi.mock('@lcabrera/ui/hooks/usePersistCookieAction.hook', () => ({
+vi.mock('#ui/hooks/usePersistCookieAction.hook', () => ({
   usePersistCookieAction: () => persistMock,
 }));
 

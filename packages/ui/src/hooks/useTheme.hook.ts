@@ -1,5 +1,6 @@
-import { ThemeContext } from '@lcabrera/ui/contexts/ThemeContext';
 import { use } from 'react';
+
+import { ThemeContext } from '#ui/contexts/ThemeContext';
 
 /**
  * Custom hook to access theme context

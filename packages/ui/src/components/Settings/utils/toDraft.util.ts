@@ -1,7 +1,7 @@
 import type {
   useGetGlobalNavigationPreferences,
   useGetGlobalPinningPreferences,
-} from '@lcabrera/ui/contexts/GlobalSettingsContext/selectors';
+} from '#ui/contexts/GlobalSettingsContext/selectors';
 
 import type { SettingsDraft } from '../Settings.types';
 

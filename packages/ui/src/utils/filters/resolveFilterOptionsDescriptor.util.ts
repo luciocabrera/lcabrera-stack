@@ -1,4 +1,4 @@
-import type { FilterOptionsDescriptor } from '@lcabrera/ui/components/Table/Table.types';
+import type { FilterOptionsDescriptor } from '#ui/components/Table/Table.types';
 
 import { resolveDistinctFilterOptions } from './resolveDistinctFilterOptions.util';
 import { resolveStaticFilterOptions } from './resolveStaticFilterOptions.util';

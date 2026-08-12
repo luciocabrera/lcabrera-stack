@@ -6,7 +6,7 @@ import type {
   DataKey,
   SortingState,
   TableColumnsState,
-} from '@lcabrera/ui/components/Table/Table.types';
+} from '#ui/components/Table/Table.types';
 
 export const buildBatchTableSettingsUpdate = <TData>(
   columnsState?: Partial<TableColumnsState<TData>>,

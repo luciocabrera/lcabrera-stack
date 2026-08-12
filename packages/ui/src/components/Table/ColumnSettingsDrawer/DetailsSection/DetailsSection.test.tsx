@@ -9,12 +9,9 @@ const { useGetNormalizedColumnMock } = vi.hoisted(() => ({
   useGetNormalizedColumnMock: vi.fn(),
 }));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors',
-  () => ({
-    useGetNormalizedColumn: useGetNormalizedColumnMock,
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
+  useGetNormalizedColumn: useGetNormalizedColumnMock,
+}));
 
 afterEach(() => {
   cleanup();

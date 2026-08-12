@@ -2,10 +2,11 @@
 
 import type { ReactNode } from 'react';
 
-import { AppProviders } from '@lcabrera/ui/components/AppProviders';
 import { cleanup, render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
+
+import { AppProviders } from '#ui/components/AppProviders';
 
 import { StaticTable } from './StaticTable.component';
 

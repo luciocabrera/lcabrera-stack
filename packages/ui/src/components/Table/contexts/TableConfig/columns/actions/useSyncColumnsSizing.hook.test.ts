@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 
-import { createTableConfigColumnsActionMocks } from '@lcabrera/ui/utils/tests/createTableConfigColumnsActionMocks.util';
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+
+import { createTableConfigColumnsActionMocks } from '#ui/utils/tests/createTableConfigColumnsActionMocks.util';
 
 const createInitialColumnsState = () => ({
   columnSizing: { name: 220 },
@@ -23,7 +24,7 @@ const { mockPersistColumnSizing } = vi.hoisted(() => ({
 }));
 
 vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
+  '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
   () => ({
     useTableConfigContextValue: () => mockUseTableConfigContextValue(),
   }),

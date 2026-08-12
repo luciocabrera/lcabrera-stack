@@ -1,8 +1,4 @@
-import {
-  EraserIcon,
-  ListOrderedIcon,
-  RefreshIcon,
-} from '@lcabrera/ui/components/Icons';
+import { EraserIcon, ListOrderedIcon, RefreshIcon } from '#ui/components/Icons';
 
 import type { SectionToolbarButton } from '../../SectionToolbar';
 import type { SortingSectionToolbarProps } from './SortingSectionToolbar.types';

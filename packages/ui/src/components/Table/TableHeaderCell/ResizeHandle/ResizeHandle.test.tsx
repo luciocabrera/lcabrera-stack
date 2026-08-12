@@ -26,17 +26,14 @@ const {
   mockUseGetNormalizedColumn: vi.fn(),
 }));
 
-vi.mock('@lcabrera/ui/components/Table/hooks', () => ({
+vi.mock('#ui/components/Table/hooks', () => ({
   useColumnResize: mockUseColumnResize,
 }));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors',
-  () => ({
-    useGetColumnWidth: mockUseGetColumnWidth,
-    useGetNormalizedColumn: mockUseGetNormalizedColumn,
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
+  useGetColumnWidth: mockUseGetColumnWidth,
+  useGetNormalizedColumn: mockUseGetNormalizedColumn,
+}));
 
 import { ResizeHandle } from './ResizeHandle.component';
 

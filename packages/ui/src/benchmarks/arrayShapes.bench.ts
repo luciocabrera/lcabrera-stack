@@ -8,15 +8,16 @@
  * Read absolute per-call cost first, ratios second — see ./ARCHITECTURE.md.
  */
 
+import { bench, describe } from 'vite-plus/test';
+
 import type {
   ColumnSizingState,
   DataKey,
   SortingState,
   TableColumn,
-} from '@lcabrera/ui/components/Table/Table.types';
+} from '#ui/components/Table/Table.types';
 
-import { appendPrimaryKeySorting } from '@lcabrera/ui/routing/shared/appendPrimaryKeySorting.util';
-import { bench, describe } from 'vite-plus/test';
+import { appendPrimaryKeySorting } from '#ui/routing/shared/appendPrimaryKeySorting.util';
 
 import { buildPresetColumnSizing } from '../components/Table/TableSettingsDrawer/GeneralSettingsSection/utils/buildPresetColumnSizing.util';
 import { getStaticColumnKeys } from '../components/Table/utils/getStaticColumnKeys.util';

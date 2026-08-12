@@ -1,7 +1,4 @@
-import type {
-  FieldNode,
-  LeafFieldDef,
-} from '@lcabrera/ui/components/Form/Form.types';
+import type { FieldNode, LeafFieldDef } from '#ui/components/Form/Form.types';
 
 /**
  * Single recursive walker for the group/row/tab field tree. Reused by

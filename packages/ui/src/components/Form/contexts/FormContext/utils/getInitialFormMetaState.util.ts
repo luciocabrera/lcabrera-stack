@@ -3,7 +3,7 @@ import type {
   FormMode,
   FormSubmission,
   LeafFieldDef,
-} from '@lcabrera/ui/components/Form/Form.types';
+} from '#ui/components/Form/Form.types';
 
 type GetInitialFormMetaStateArgs<TValues extends Record<string, unknown>> = {
   readonly cancelLabel?: string;

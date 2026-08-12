@@ -1,7 +1,4 @@
-import type {
-  SelectFilter,
-  TextFilter,
-} from '@lcabrera/ui/types/filterOperators.types';
+import type { SelectFilter, TextFilter } from '#ui/types/filterOperators.types';
 
 import type { TextOrSelectFilterInputProps } from './TextOrSelectFilterInput.types';
 

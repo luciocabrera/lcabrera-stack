@@ -1,6 +1,9 @@
-import type { ActionButtonDescriptor } from '@lcabrera/ui/components/ActionButtons';
+import * as stylex from '@stylexjs/stylex';
+import { useFetcher, useNavigation } from 'react-router';
 
-import { ActionButtons } from '@lcabrera/ui/components/ActionButtons';
+import type { ActionButtonDescriptor } from '#ui/components/ActionButtons';
+
+import { ActionButtons } from '#ui/components/ActionButtons';
 import {
   useGetFormCancelLabel,
   useGetFormId,
@@ -9,9 +12,7 @@ import {
   useGetFormSubmission,
   useGetFormSubmitLabel,
   useGetIsFormDirty,
-} from '@lcabrera/ui/components/Form/contexts/FormContext/selectors';
-import * as stylex from '@stylexjs/stylex';
-import { useFetcher, useNavigation } from 'react-router';
+} from '#ui/components/Form/contexts/FormContext/selectors';
 
 import type { FormFooterActionsProps } from './FormFooterActions.types';
 

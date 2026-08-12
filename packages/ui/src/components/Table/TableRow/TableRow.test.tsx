@@ -2,10 +2,11 @@
 
 import type { ReactNode } from 'react';
 
-import { TableConfigProvider } from '@lcabrera/ui/components/Table/contexts';
-import { DEFAULT_ROW_HEIGHT } from '@lcabrera/ui/components/Table/Table.constants';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vite-plus/test';
+
+import { TableConfigProvider } from '#ui/components/Table/contexts';
+import { DEFAULT_ROW_HEIGHT } from '#ui/components/Table/Table.constants';
 
 import { TableRow } from './TableRow.component';
 

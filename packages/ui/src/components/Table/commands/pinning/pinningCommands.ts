@@ -1,8 +1,4 @@
-import {
-  PinLeftIcon,
-  PinOffIcon,
-  PinRightIcon,
-} from '@lcabrera/ui/components/Icons';
+import { PinLeftIcon, PinOffIcon, PinRightIcon } from '#ui/components/Icons';
 
 import type { CommandDescriptor, CommandId } from '../commands.types';
 

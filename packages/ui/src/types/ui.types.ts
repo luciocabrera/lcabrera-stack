@@ -1,5 +1,6 @@
-import type { DataKey } from '@lcabrera/ui/components/Table/Table.types';
 import type { ReactNode } from 'react';
+
+import type { DataKey } from '#ui/components/Table/Table.types';
 
 export type InfiniteScroll<TData, TResponse> = {
   readonly dataSelector?: (response: TResponse) => readonly TData[];

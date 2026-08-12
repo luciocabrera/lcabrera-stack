@@ -1,8 +1,8 @@
-import type { DataKey } from '@lcabrera/ui/components/Table/Table.types';
+import type { DataKey } from '#ui/components/Table/Table.types';
 
-import { useTableConfigContextValue } from '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import { useTableDrawerContextValue } from '@lcabrera/ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
-import { useGlobalSettingsContextValue } from '@lcabrera/ui/contexts/GlobalSettingsContext/useGlobalSettingsContextValue.hook';
+import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { useTableDrawerContextValue } from '#ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
+import { useGlobalSettingsContextValue } from '#ui/contexts/GlobalSettingsContext/useGlobalSettingsContextValue.hook';
 
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
 import { useAcceptPinSide } from './useAcceptPinSide.hook';

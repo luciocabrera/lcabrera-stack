@@ -13,6 +13,18 @@
  * second block would silently drop the first one's restrictions.
  */
 
+/**
+ * These are a courtesy, not the boundary. The boundary is `packages/ui`'s
+ * `exports` map, which names every public subpath and no longer carries a
+ * wildcard — an unlisted path does not resolve for a consumer at all. What
+ * these patterns buy is a message at the import site instead of a resolution
+ * error, and they still cover the in-repo case, where a tsconfig `paths` alias
+ * resolves `@lcabrera/ui/*` straight to `src/` and would otherwise hide the
+ * breakage until publish.
+ *
+ * `#ui/*` is deliberately absent: it is package-internal, so nothing outside
+ * `packages/ui` can resolve it and there is nothing to restrict.
+ */
 export const UI_PUBLIC_IMPORT_BOUNDARY_PATTERNS = [
   {
     group: ['@lcabrera/ui/src/**'],
@@ -137,10 +149,12 @@ export const CLIENT_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS = [
     selector: 'ImportDeclaration[source.value=/^node:/]',
   },
   {
+    // Both spellings: `#ui/…` is how `packages/ui` reaches its own file, and
+    // `@lcabrera/ui/…` is what an app would have to write. The latter no longer
+    // resolves for a consumer either, since the subpath is not exported.
     message:
       'Server-only UI helpers must be imported via @lcabrera/ui/server from server entry files only.',
-    selector:
-      "ImportDeclaration[source.value='@lcabrera/ui/entry/createHandleRequest.util']",
+    selector: String.raw`ImportDeclaration[source.value=/^(?:@lcabrera\/ui|#ui)\/entry\/createHandleRequest\.util$/]`,
   },
   {
     message:

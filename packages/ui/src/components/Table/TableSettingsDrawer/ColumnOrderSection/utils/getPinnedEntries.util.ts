@@ -1,4 +1,4 @@
-import type { ColumnPinningState } from '@lcabrera/ui/components/Table/Table.types';
+import type { ColumnPinningState } from '#ui/components/Table/Table.types';
 
 export type PinnedEntry = {
   readonly key: string;

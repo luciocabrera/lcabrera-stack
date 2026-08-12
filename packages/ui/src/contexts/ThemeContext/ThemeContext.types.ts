@@ -1,5 +1,6 @@
-import type { ThemeMode } from '@lcabrera/ui/types/theme.types';
 import type { ReactNode } from 'react';
+
+import type { ThemeMode } from '#ui/types/theme.types';
 
 /**
  * Props for ThemeProvider component

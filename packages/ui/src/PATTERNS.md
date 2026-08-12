@@ -135,7 +135,7 @@ import {
   colorVariants,
   rippleBase,
   sizeVariants,
-} from '@lcabrera/ui/design-system/tokens/commons.stylex';
+} from '#ui/design-system/tokens/commons.stylex';
 
 export const componentStyles = {
   base: {
@@ -180,7 +180,7 @@ And the section's own stylex file delegates to `drawerSectionStyles`:
 
 ```ts
 // SomeSection.stylex.ts
-import { drawerSectionStyles } from '@lcabrera/ui/design-system/tokens/drawerSection.stylex';
+import { drawerSectionStyles } from '#ui/design-system/tokens/drawerSection.stylex';
 
 export const styles = {
   container: drawerSectionStyles.container,
@@ -219,7 +219,7 @@ type FilterProps = {
 Filter UI inputs use `filterBaseStyles` from `filters.stylex.ts`:
 
 ```ts
-import { filterBaseStyles } from '@lcabrera/ui/design-system/tokens/filters.stylex';
+import { filterBaseStyles } from '#ui/design-system/tokens/filters.stylex';
 
 export const styles = {
   container: filterBaseStyles.container,

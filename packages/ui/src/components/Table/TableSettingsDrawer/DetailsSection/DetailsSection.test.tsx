@@ -78,7 +78,7 @@ beforeEach(() => {
   dataStateMock.totalRows = 120;
 });
 
-vi.mock('@lcabrera/ui/components/SidePanel', () => ({
+vi.mock('#ui/components/SidePanel', () => ({
   SidePanelSection: ({ children }: MockSectionProps) => (
     <section>{children}</section>
   ),
@@ -90,41 +90,32 @@ vi.mock('@lcabrera/ui/components/SidePanel', () => ({
   ),
 }));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors',
-  () => ({
-    useGetColumns: () => columnsMock,
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
+  useGetColumns: () => columnsMock,
+}));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors',
-  () => ({
-    useGetTableAdditionalMetadata: () => metaStateMock.additionalMetadata,
-    useGetTableDensity: () => metaStateMock.density,
-    useGetTableEnablePrefetch: () => metaStateMock.enablePrefetch,
-    useGetTableInitialPageSize: () => metaStateMock.initialPageSize,
-    useGetTableIsBordered: () => metaStateMock.isBordered,
-    useGetTableIsStriped: () => metaStateMock.isStriped,
-    useGetTableLoadMorePageSize: () => metaStateMock.loadMorePageSize,
-    useGetTableLocale: () => metaStateMock.locale,
-    useGetTableOverscan: () => metaStateMock.overscan,
-    useGetTablePersistenceKey: () => metaStateMock.persistenceKey,
-    useGetTableRowHeight: () => metaStateMock.rowHeight,
-    useGetTableSchemaName: () => metaStateMock.schemaName,
-    useGetTableTableName: () => metaStateMock.tableName,
-    useGetTableThreshold: () => metaStateMock.threshold,
-    useGetTableTitlePlural: () => metaStateMock.title,
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
+  useGetTableAdditionalMetadata: () => metaStateMock.additionalMetadata,
+  useGetTableDensity: () => metaStateMock.density,
+  useGetTableEnablePrefetch: () => metaStateMock.enablePrefetch,
+  useGetTableInitialPageSize: () => metaStateMock.initialPageSize,
+  useGetTableIsBordered: () => metaStateMock.isBordered,
+  useGetTableIsStriped: () => metaStateMock.isStriped,
+  useGetTableLoadMorePageSize: () => metaStateMock.loadMorePageSize,
+  useGetTableLocale: () => metaStateMock.locale,
+  useGetTableOverscan: () => metaStateMock.overscan,
+  useGetTablePersistenceKey: () => metaStateMock.persistenceKey,
+  useGetTableRowHeight: () => metaStateMock.rowHeight,
+  useGetTableSchemaName: () => metaStateMock.schemaName,
+  useGetTableTableName: () => metaStateMock.tableName,
+  useGetTableThreshold: () => metaStateMock.threshold,
+  useGetTableTitlePlural: () => metaStateMock.title,
+}));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableData/data/selectors',
-  () => ({
-    useGetTableTotalLoadedRows: () => dataStateMock.totalLoadedRows,
-    useGetTableTotalRows: () => dataStateMock.totalRows,
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableData/data/selectors', () => ({
+  useGetTableTotalLoadedRows: () => dataStateMock.totalLoadedRows,
+  useGetTableTotalRows: () => dataStateMock.totalRows,
+}));
 
 import { DetailsSection } from './DetailsSection.component';
 

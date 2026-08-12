@@ -1,6 +1,6 @@
 import type { RefObject } from 'react';
 
-import { useInfiniteScrollObserver } from '@lcabrera/ui/hooks';
+import { useInfiniteScrollObserver } from '#ui/hooks';
 
 import { useFetchMore } from '../../contexts/data/actions';
 import {

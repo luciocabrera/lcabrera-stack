@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vite-plus/test';
+
 import {
   DEFAULT_COLUMN_OVERSCAN,
   DEFAULT_OVERSCAN,
@@ -7,8 +9,7 @@ import {
   INITIAL_PAGE_SIZE,
   IS_PREFETCH_ENABLED,
   LOAD_MORE_PAGE_SIZE,
-} from '@lcabrera/ui/components/Table/Table.constants';
-import { describe, expect, it } from 'vite-plus/test';
+} from '#ui/components/Table/Table.constants';
 
 import { getInitialMetaState } from './getInitialMetaState.util';
 

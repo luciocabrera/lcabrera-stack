@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
 
-import type { NavbarItemConfig } from '@lcabrera/ui/components/Navbar/Navbar.types';
-import type { ThemeMode } from '@lcabrera/ui/types/theme.types';
 import type { ReactNode } from 'react';
 
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
+
+import type { NavbarItemConfig } from '#ui/components/Navbar/Navbar.types';
+import type { ThemeMode } from '#ui/types/theme.types';
 
 type MockAppConfigProviderProps = {
   readonly children: ReactNode;
@@ -20,7 +21,7 @@ type MockAppProvidersProps = {
   readonly defaultTheme?: ThemeMode;
 };
 
-vi.mock('@lcabrera/ui/contexts/AppConfigContext', () => ({
+vi.mock('#ui/contexts/AppConfigContext', () => ({
   AppConfigProvider: ({
     children,
     getNavigationItems,
@@ -38,7 +39,7 @@ vi.mock('@lcabrera/ui/contexts/AppConfigContext', () => ({
   ),
 }));
 
-vi.mock('@lcabrera/ui/components/AppProviders', () => ({
+vi.mock('#ui/components/AppProviders', () => ({
   AppProviders: ({ appId, children, defaultTheme }: MockAppProvidersProps) => (
     <div
       data-app-id={appId ?? 'none'}
@@ -50,7 +51,7 @@ vi.mock('@lcabrera/ui/components/AppProviders', () => ({
   ),
 }));
 
-vi.mock('@lcabrera/ui/components/AppShell', () => ({
+vi.mock('#ui/components/AppShell', () => ({
   AppShell: () => <div data-testid='app-shell'>AppShell</div>,
 }));
 

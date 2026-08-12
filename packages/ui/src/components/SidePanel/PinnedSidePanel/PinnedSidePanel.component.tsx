@@ -1,6 +1,7 @@
-import { surfaceStyles } from '@lcabrera/ui/design-system/tokens/surfaces.stylex';
 import * as stylex from '@stylexjs/stylex';
 import { createPortal } from 'react-dom';
+
+import { surfaceStyles } from '#ui/design-system/tokens/surfaces.stylex';
 
 import type { PinnedSidePanelProps } from './PinnedSidePanel.types';
 

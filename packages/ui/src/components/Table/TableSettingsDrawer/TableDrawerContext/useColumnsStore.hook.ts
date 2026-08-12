@@ -1,4 +1,4 @@
-import { useStoreSelector } from '@lcabrera/ui/hooks/useStoreSelector.hook';
+import { useStoreSelector } from '#ui/hooks/useStoreSelector.hook';
 
 import type { TableDrawerColumnsState } from './TableDrawerContext.types';
 

@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
 
-import type { MockStore } from '@lcabrera/ui/utils/tests/createMockStore.util';
-
-import { createMockStore } from '@lcabrera/ui/utils/tests/createMockStore.util';
 import { act, cleanup, render } from '@testing-library/react';
 import { Profiler } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
+
+import type { MockStore } from '#ui/utils/tests/createMockStore.util';
+
+import { createMockStore } from '#ui/utils/tests/createMockStore.util';
 
 const COLUMN_KEYS = ['col0', 'col1', 'col2', 'col3'] as const;
 
@@ -39,7 +40,7 @@ const storesRef: {
 };
 
 vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
+  '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
   () => ({
     useTableConfigContextValue: () => ({
       columnsStore: storesRef.columnsStore,

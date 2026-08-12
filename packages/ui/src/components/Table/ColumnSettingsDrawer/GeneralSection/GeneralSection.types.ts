@@ -1,5 +1,6 @@
-import type { DataKey } from '@lcabrera/ui/components/Table/Table.types';
 import type { ComponentPropsWithoutRef } from 'react';
+
+import type { DataKey } from '#ui/components/Table/Table.types';
 
 export type GeneralSectionProps<TData> = ComponentPropsWithoutRef<'div'> & {
   readonly columnKey: DataKey<TData>;

@@ -1,11 +1,12 @@
+import { fetchDistinctValues } from '@lcabrera/api/distinct/fetch-distinct-values.util';
+
 import type {
   DistinctFilterOptionsDescriptor,
   FilterOptionsResponse,
-} from '@lcabrera/ui/components/Table/Table.types';
-import type { Pagination } from '@lcabrera/ui/types/ui.types';
+} from '#ui/components/Table/Table.types';
+import type { Pagination } from '#ui/types/ui.types';
 
-import { fetchDistinctValues } from '@lcabrera/api/distinct/fetch-distinct-values.util';
-import { FILTER_OPTIONS_TIMEOUT_MS } from '@lcabrera/ui/components/Table/Table.constants';
+import { FILTER_OPTIONS_TIMEOUT_MS } from '#ui/components/Table/Table.constants';
 
 import { getFilterOptionsBaseUrl } from './getFilterOptionsBaseUrl.util';
 

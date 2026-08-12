@@ -9,19 +9,13 @@ const { isTableSettingsPinnedMock, setTableIsTableSettingsOpenMock } =
     setTableIsTableSettingsOpenMock: vi.fn(),
   }));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions',
-  () => ({
-    useSetTableIsTableSettingsOpen: () => setTableIsTableSettingsOpenMock,
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/meta/actions', () => ({
+  useSetTableIsTableSettingsOpen: () => setTableIsTableSettingsOpenMock,
+}));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors',
-  () => ({
-    useGetTableIsTableSettingsPinned: () => isTableSettingsPinnedMock(),
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
+  useGetTableIsTableSettingsPinned: () => isTableSettingsPinnedMock(),
+}));
 
 import { useCloseTableSettingsIfUnpinned } from './useCloseTableSettingsIfUnpinned.hook';
 

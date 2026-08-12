@@ -1,4 +1,4 @@
-import { PinSideModal } from '@lcabrera/ui/components/PinSideModal';
+import { PinSideModal } from '#ui/components/PinSideModal';
 
 import {
   useAcceptPinSide,

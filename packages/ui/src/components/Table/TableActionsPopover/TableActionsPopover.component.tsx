@@ -1,8 +1,9 @@
-import { useTableContainerRef } from '@lcabrera/ui/components/Table/contexts/TableWrapper';
-import { TableActionButton } from '@lcabrera/ui/components/Table/TableActionButton';
-import { surfaceStyles } from '@lcabrera/ui/design-system/tokens/surfaces.stylex';
 import * as stylex from '@stylexjs/stylex';
 import { useId } from 'react';
+
+import { useTableContainerRef } from '#ui/components/Table/contexts/TableWrapper';
+import { TableActionButton } from '#ui/components/Table/TableActionButton';
+import { surfaceStyles } from '#ui/design-system/tokens/surfaces.stylex';
 
 import type { TableActionsPopoverProps } from './TableActionsPopover.types';
 

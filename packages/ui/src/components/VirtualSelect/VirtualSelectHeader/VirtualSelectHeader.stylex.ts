@@ -1,6 +1,7 @@
-import { zIndex } from '@lcabrera/ui/design-system/tokens/base.stylex';
-import { skeleton } from '@lcabrera/ui/design-system/tokens/commons.stylex';
 import * as stylex from '@stylexjs/stylex';
+
+import { zIndex } from '#ui/design-system/tokens/base.stylex';
+import { skeleton } from '#ui/design-system/tokens/commons.stylex';
 
 const styles = stylex.create({
   busyOverlay: {

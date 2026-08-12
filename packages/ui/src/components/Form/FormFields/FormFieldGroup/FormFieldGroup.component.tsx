@@ -1,8 +1,9 @@
-import type { FieldNode } from '@lcabrera/ui/components/Form/Form.types';
-
-import { useFormFieldsRendererContext } from '@lcabrera/ui/components/Form/FormFields/contexts/FormFieldsRendererContext/useFormFieldsRendererContext.hook';
 import * as stylex from '@stylexjs/stylex';
 import { useId, useState } from 'react';
+
+import type { FieldNode } from '#ui/components/Form/Form.types';
+
+import { useFormFieldsRendererContext } from '#ui/components/Form/FormFields/contexts/FormFieldsRendererContext/useFormFieldsRendererContext.hook';
 
 import type { FormFieldGroupProps } from './FormFieldGroup.types';
 

@@ -1,6 +1,7 @@
-import { LockIcon } from '@lcabrera/ui/components/Icons';
-import { ToggleSwitch } from '@lcabrera/ui/components/ToggleSwitch';
 import * as stylex from '@stylexjs/stylex';
+
+import { LockIcon } from '#ui/components/Icons';
+import { ToggleSwitch } from '#ui/components/ToggleSwitch';
 
 import type { ColumnOrderItemContentProps } from './ColumnOrderItemContent.types';
 

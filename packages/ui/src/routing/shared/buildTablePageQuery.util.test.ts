@@ -1,10 +1,10 @@
+import { describe, expect, it } from 'vite-plus/test';
+
 import type {
   ColumnFiltersState,
   SortingState,
   TableColumn,
-} from '@lcabrera/ui/components/Table';
-
-import { describe, expect, it } from 'vite-plus/test';
+} from '#ui/components/Table';
 
 import { buildTablePageQuery } from './buildTablePageQuery.util';
 

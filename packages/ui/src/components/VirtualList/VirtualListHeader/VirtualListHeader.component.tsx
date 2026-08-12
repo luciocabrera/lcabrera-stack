@@ -1,9 +1,10 @@
 import type { ChangeEvent } from 'react';
 
-import { Button } from '@lcabrera/ui/components/Button';
-import { MenuCloseIcon } from '@lcabrera/ui/components/Icons';
-import { ICON_SIZE_MD } from '@lcabrera/ui/design-system/constants';
 import * as stylex from '@stylexjs/stylex';
+
+import { Button } from '#ui/components/Button';
+import { MenuCloseIcon } from '#ui/components/Icons';
+import { ICON_SIZE_MD } from '#ui/design-system/constants';
 
 import { useClearSearch, useSetSearchTerm } from '../contexts/list/actions';
 import {

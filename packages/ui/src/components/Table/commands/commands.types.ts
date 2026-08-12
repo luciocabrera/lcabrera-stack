@@ -1,5 +1,6 @@
-import type { IconProps } from '@lcabrera/ui/components/Icons';
 import type { ComponentType } from 'react';
+
+import type { IconProps } from '#ui/components/Icons';
 
 /**
  * Presentation-neutral identity for a capability command: what it is, not how a

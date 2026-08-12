@@ -1,5 +1,5 @@
-import type { GetNavigationItems } from '@lcabrera/ui/contexts/AppConfigContext/AppConfigContext.types';
-import type { ThemeMode } from '@lcabrera/ui/types/theme.types';
+import type { GetNavigationItems } from '#ui/contexts/AppConfigContext/AppConfigContext.types';
+import type { ThemeMode } from '#ui/types/theme.types';
 
 export type RootComponentProps = {
   /** Per-app id scoping the theme / global-settings cookies across same-host apps. */

@@ -1,4 +1,4 @@
-import type { DesignSystemSize } from '@lcabrera/ui/types/design-system.types';
+import type { DesignSystemSize } from '#ui/types/design-system.types';
 
 import { styles } from '../Navbar.stylex';
 

@@ -1,8 +1,9 @@
+import { describe, expect, it } from 'vite-plus/test';
+
 import {
   DEFAULT_MAX_COLUMN_WIDTH,
   DEFAULT_MIN_COLUMN_WIDTH,
-} from '@lcabrera/ui/components/Table/Table.constants';
-import { describe, expect, it } from 'vite-plus/test';
+} from '#ui/components/Table/Table.constants';
 
 import { createResizeStartData } from './createResizeStartData.util';
 

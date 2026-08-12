@@ -1,9 +1,9 @@
+import { describe, expect, it } from 'vite-plus/test';
+
 import type {
   ColumnSizingState,
   TableColumnsState,
-} from '@lcabrera/ui/components/Table/Table.types';
-
-import { describe, expect, it } from 'vite-plus/test';
+} from '#ui/components/Table/Table.types';
 
 import { getPinningActionContext } from './getPinningActionContext.util';
 

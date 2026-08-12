@@ -1,9 +1,9 @@
-import { Button } from '@lcabrera/ui/components/Button';
+import { Button } from '#ui/components/Button';
 import {
   useGetGlobalNavigationCollapsedPreference,
   useGetGlobalNavigationSizePreference,
-} from '@lcabrera/ui/contexts/GlobalSettingsContext/selectors';
-import { useTheme } from '@lcabrera/ui/hooks/useTheme.hook';
+} from '#ui/contexts/GlobalSettingsContext/selectors';
+import { useTheme } from '#ui/hooks/useTheme.hook';
 
 import { NAV_DENSITY } from '../../AppNavigation.constants';
 import { resolveThemeLabel } from '../../utils';

@@ -16,13 +16,13 @@ const { isAuthEnabledMock } = vi.hoisted(() => ({
   isAuthEnabledMock: vi.fn<() => boolean>(() => false),
 }));
 
-vi.mock('@lcabrera/ui/components/SidePanel', () => ({
+vi.mock('#ui/components/SidePanel', () => ({
   SidePanelFooter: ({ children }: { readonly children: ReactNode }) => (
     <div>{children}</div>
   ),
 }));
 
-vi.mock('@lcabrera/ui/contexts/AppConfigContext/selectors', () => ({
+vi.mock('#ui/contexts/AppConfigContext/selectors', () => ({
   useGetIsAuthEnabled: () => isAuthEnabledMock(),
 }));
 

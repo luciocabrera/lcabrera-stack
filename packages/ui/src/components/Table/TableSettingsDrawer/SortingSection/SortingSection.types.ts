@@ -1,5 +1,6 @@
-import type { SortDirection } from '@lcabrera/ui/types/ui.types';
 import type { ComponentPropsWithoutRef } from 'react';
+
+import type { SortDirection } from '#ui/types/ui.types';
 
 export type SortingSectionProps = ComponentPropsWithoutRef<'div'> & {
   readonly isBusy?: boolean;

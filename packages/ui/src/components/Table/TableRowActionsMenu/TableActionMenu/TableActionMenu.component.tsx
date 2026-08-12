@@ -1,15 +1,12 @@
-import { Button } from '@lcabrera/ui/components/Button';
-import {
-  EraserIcon,
-  EyeIcon,
-  FileTextIcon,
-} from '@lcabrera/ui/components/Icons';
-import { NavLink } from '@lcabrera/ui/components/NavLink';
+import * as stylex from '@stylexjs/stylex';
+
+import { Button } from '#ui/components/Button';
+import { EraserIcon, EyeIcon, FileTextIcon } from '#ui/components/Icons';
+import { NavLink } from '#ui/components/NavLink';
 import {
   TableActionsPopoverSeparator,
   tableActionsPopoverStyles,
-} from '@lcabrera/ui/components/Table/TableActionsPopover';
-import * as stylex from '@stylexjs/stylex';
+} from '#ui/components/Table/TableActionsPopover';
 
 import type { TableActionMenuProps } from './TableActionMenu.types';
 

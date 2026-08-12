@@ -1,11 +1,12 @@
-import type { TableMetaState } from '@lcabrera/ui/components/Table/Table.types';
-import type { TStore } from '@lcabrera/ui/hooks/useStore.hook';
+import type { RefObject } from 'react';
+
+import type { TableMetaState } from '#ui/components/Table/Table.types';
+import type { TStore } from '#ui/hooks/useStore.hook';
 import type {
   InfiniteScroll,
   Pagination,
   PrefetchCache,
-} from '@lcabrera/ui/types/ui.types';
-import type { RefObject } from 'react';
+} from '#ui/types/ui.types';
 
 export type CommitFetchMoreSuccessArgs<TData, TResponse> = {
   readonly currentData: readonly TData[];

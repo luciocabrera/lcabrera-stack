@@ -1,7 +1,8 @@
-import { VirtualListContent } from '@lcabrera/ui/components/VirtualList';
-import { useGetShouldFillHeight } from '@lcabrera/ui/components/VirtualList/contexts/list/selectors';
 import * as stylex from '@stylexjs/stylex';
 import { useRef } from 'react';
+
+import { VirtualListContent } from '#ui/components/VirtualList';
+import { useGetShouldFillHeight } from '#ui/components/VirtualList/contexts/list/selectors';
 
 import { useCloseDropdown } from '../contexts/meta/actions';
 import {

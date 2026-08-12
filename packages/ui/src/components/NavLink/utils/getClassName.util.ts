@@ -1,11 +1,12 @@
+import type { StyleXStyles } from '@stylexjs/stylex';
+
+import * as stylex from '@stylexjs/stylex';
+
 import type {
   DesignSystemColor,
   DesignSystemOrientation,
   DesignSystemSize,
-} from '@lcabrera/ui/types/design-system.types';
-import type { StyleXStyles } from '@stylexjs/stylex';
-
-import * as stylex from '@stylexjs/stylex';
+} from '#ui/types/design-system.types';
 
 import type { linkItemStyles } from '../NavLink.stylex';
 

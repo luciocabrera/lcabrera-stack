@@ -1,5 +1,5 @@
-import { RadioOptionGroup } from '@lcabrera/ui/components/RadioOptionGroup';
-import { SectionCard } from '@lcabrera/ui/components/SectionCard';
+import { RadioOptionGroup } from '#ui/components/RadioOptionGroup';
+import { SectionCard } from '#ui/components/SectionCard';
 
 import type { SettingsOptionSectionProps } from './SettingsOptionSection.types';
 

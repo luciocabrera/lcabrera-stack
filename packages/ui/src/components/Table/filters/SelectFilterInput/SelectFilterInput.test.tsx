@@ -68,38 +68,29 @@ vi.mock('@lcabrera/api/config/get-api-base-url.util', () => ({
   getApiBaseUrl: vi.fn(() => '/api'),
 }));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors',
-  () => ({
-    useGetNormalizedColumn: normalizedColumnMock,
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
+  useGetNormalizedColumn: normalizedColumnMock,
+}));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/FiltersData/filters/selectors',
-  () => ({
-    useGetFilterData: vi.fn(() => ({
-      data: [],
-      hasMore: false,
-      isLoading: false,
-      isLoadingMore: false,
-      totalLoadedRows: 0,
-      totalRows: 0,
-    })),
-  }),
-);
+vi.mock('#ui/components/Table/contexts/FiltersData/filters/selectors', () => ({
+  useGetFilterData: vi.fn(() => ({
+    data: [],
+    hasMore: false,
+    isLoading: false,
+    isLoadingMore: false,
+    totalLoadedRows: 0,
+    totalRows: 0,
+  })),
+}));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/FiltersData/filters/actions',
-  () => ({
-    useFetchFilterData: vi.fn(() => ({
-      fetchInitial: fetchInitialMock,
-      fetchMore: fetchMoreMock,
-    })),
-  }),
-);
+vi.mock('#ui/components/Table/contexts/FiltersData/filters/actions', () => ({
+  useFetchFilterData: vi.fn(() => ({
+    fetchInitial: fetchInitialMock,
+    fetchMore: fetchMoreMock,
+  })),
+}));
 
-vi.mock('@lcabrera/ui/components/VirtualSelect', () => ({
+vi.mock('#ui/components/VirtualSelect', () => ({
   VirtualSelect: MockVirtualSelect,
 }));
 

@@ -1,8 +1,9 @@
-import type { FieldNode } from '@lcabrera/ui/components/Form/Form.types';
-
-import { useFormFieldsRendererContext } from '@lcabrera/ui/components/Form/FormFields/contexts/FormFieldsRendererContext/useFormFieldsRendererContext.hook';
-import { getFieldKey } from '@lcabrera/ui/components/Form/FormFields/utils/getFieldKey.util';
 import * as stylex from '@stylexjs/stylex';
+
+import type { FieldNode } from '#ui/components/Form/Form.types';
+
+import { useFormFieldsRendererContext } from '#ui/components/Form/FormFields/contexts/FormFieldsRendererContext/useFormFieldsRendererContext.hook';
+import { getFieldKey } from '#ui/components/Form/FormFields/utils/getFieldKey.util';
 
 import type { FormFieldRowProps } from './FormFieldRow.types';
 

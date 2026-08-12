@@ -1,6 +1,6 @@
-import type { TableColumn } from '@lcabrera/ui/components/Table/Table.types';
-
 import { describe, expect, it } from 'vite-plus/test';
+
+import type { TableColumn } from '#ui/components/Table/Table.types';
 
 import { getInitialColumnsState } from './getInitialColumnsState.util';
 

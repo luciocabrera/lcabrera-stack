@@ -1,7 +1,7 @@
 import type {
   FilterOptionsTransport,
   TableColumn,
-} from '@lcabrera/ui/components/Table/Table.types';
+} from '#ui/components/Table/Table.types';
 
 type AppendDistinctFilterDescriptorsArgs<TData> = {
   readonly columns: readonly TableColumn<TData>[];

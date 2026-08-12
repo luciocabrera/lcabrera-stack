@@ -1,13 +1,13 @@
-import type { TablePersistenceEntry } from '@lcabrera/ui/components/Table/Table.types';
+import type { TablePersistenceEntry } from '#ui/components/Table/Table.types';
 
-import { useTableConfigContextValue } from '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import { serializeStateSlice } from '@lcabrera/ui/components/Table/utils';
+import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { serializeStateSlice } from '#ui/components/Table/utils';
 import {
   MAX_COOKIE_ENTRY_VALUE_LENGTH,
   PERSISTENCE_SIZE_WARNING,
-} from '@lcabrera/ui/constants/globalSettings.constants';
-import { useNotifyAction } from '@lcabrera/ui/contexts/NotificationContext/actions';
-import { usePersistCookieAction } from '@lcabrera/ui/hooks/usePersistCookieAction.hook';
+} from '#ui/constants/globalSettings.constants';
+import { useNotifyAction } from '#ui/contexts/NotificationContext/actions';
+import { usePersistCookieAction } from '#ui/hooks/usePersistCookieAction.hook';
 
 /**
  * Shared persistence hook for the column actions — internal to `actions/`, not

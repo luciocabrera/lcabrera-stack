@@ -6,17 +6,17 @@ import type {
   ColumnVisibilityState,
   SortingState,
   TableColumn,
-} from '@lcabrera/ui/components/Table';
+} from '#ui/components/Table';
 
 import {
   readPersistedStateFromCookie,
   readPersistedUiFlagsFromCookie,
-} from '@lcabrera/ui/components/Table/utils';
+} from '#ui/components/Table/utils';
 import {
   deserializeFiltersFromURL,
   deserializeSortingFromURL,
   readTableStateFromURL,
-} from '@lcabrera/ui/utils/urlState';
+} from '#ui/utils/urlState';
 
 import { sanitizeFiltersByColumns } from '../shared/sanitizeFiltersByColumns.util';
 

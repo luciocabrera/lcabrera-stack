@@ -1,6 +1,7 @@
-import type { CardColor } from '@lcabrera/ui/components/Card';
-import type { TStore } from '@lcabrera/ui/hooks';
 import type { ReactNode } from 'react';
+
+import type { CardColor } from '#ui/components/Card';
+import type { TStore } from '#ui/hooks';
 
 export type AppNotification = {
   readonly durationMs: number;

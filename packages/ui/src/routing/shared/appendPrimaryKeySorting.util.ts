@@ -1,6 +1,6 @@
-import type { SortingState, TableColumn } from '@lcabrera/ui/components/Table';
+import type { SortingState, TableColumn } from '#ui/components/Table';
 
-import { resolvePrimaryKeyColumnKeys } from '@lcabrera/ui/components/Table/utils';
+import { resolvePrimaryKeyColumnKeys } from '#ui/components/Table/utils';
 
 type AppendPrimaryKeySortingArgs<TData> = {
   readonly columns: readonly TableColumn<TData>[];

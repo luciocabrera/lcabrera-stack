@@ -27,7 +27,7 @@ type MockButtonProps = {
   readonly tooltipContent?: string;
 };
 
-vi.mock('@lcabrera/ui/components/Button', () => ({
+vi.mock('#ui/components/Button', () => ({
   Button: ({
     children,
     isIconOnly,
@@ -47,12 +47,12 @@ vi.mock('@lcabrera/ui/components/Button', () => ({
   ),
 }));
 
-vi.mock('@lcabrera/ui/contexts/GlobalSettingsContext/selectors', () => ({
+vi.mock('#ui/contexts/GlobalSettingsContext/selectors', () => ({
   useGetGlobalNavigationCollapsedPreference: () => collapsedPreferenceMock(),
   useGetGlobalNavigationSizePreference: () => sizePreferenceMock(),
 }));
 
-vi.mock('@lcabrera/ui/hooks/useTheme.hook', () => ({
+vi.mock('#ui/hooks/useTheme.hook', () => ({
   useTheme: () => useThemeMock(),
 }));
 

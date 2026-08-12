@@ -1,5 +1,6 @@
-import type { FieldNode } from '@lcabrera/ui/components/Form/Form.types';
 import type { ReactNode } from 'react';
+
+import type { FieldNode } from '#ui/components/Form/Form.types';
 
 /**
  * Erased at the context boundary the same way `AnyFieldComponent` erases

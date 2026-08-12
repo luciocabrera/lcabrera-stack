@@ -3,10 +3,10 @@ import type {
   ColumnSizingState,
   DataKey,
   TableColumn,
-} from '@lcabrera/ui/components/Table/Table.types';
+} from '#ui/components/Table/Table.types';
 
-import { getPinnedColumnOffsets } from '@lcabrera/ui/components/Table/utils';
-import { getNewColumnSizingBasedOnColumnKey } from '@lcabrera/ui/components/Table/utils/getNewColumnSizingBasedOnColumnKey.util';
+import { getPinnedColumnOffsets } from '#ui/components/Table/utils';
+import { getNewColumnSizingBasedOnColumnKey } from '#ui/components/Table/utils/getNewColumnSizingBasedOnColumnKey.util';
 
 type ResolveColumnSizingUpdateArgs<TData> = {
   readonly columnKey: DataKey<TData>;

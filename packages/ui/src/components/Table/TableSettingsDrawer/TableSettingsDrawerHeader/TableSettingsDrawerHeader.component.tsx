@@ -1,12 +1,12 @@
-import { SettingsIcon } from '@lcabrera/ui/components/Icons';
+import { SettingsIcon } from '#ui/components/Icons';
 import {
   SidePanelHeader,
   SidePanelHeaderToolbar,
   SidePanelTitle,
-} from '@lcabrera/ui/components/SidePanel';
-import { useSetTableIsTableSettingsPinned } from '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions';
-import { useGetTableIsTableSettingsPinned } from '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors';
-import { ICON_SIZE_LG } from '@lcabrera/ui/design-system/constants';
+} from '#ui/components/SidePanel';
+import { useSetTableIsTableSettingsPinned } from '#ui/components/Table/contexts/TableConfig/meta/actions';
+import { useGetTableIsTableSettingsPinned } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
+import { ICON_SIZE_LG } from '#ui/design-system/constants';
 
 import type { TableSettingsDrawerHeaderProps } from './TableSettingsDrawerHeader.types';
 

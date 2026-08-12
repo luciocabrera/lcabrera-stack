@@ -1,14 +1,5 @@
 // @vitest-environment jsdom
 
-import type {
-  FormMode,
-  SelectFieldDef,
-} from '@lcabrera/ui/components/Form/Form.types';
-
-import {
-  FormProvider,
-  useGetFieldValue,
-} from '@lcabrera/ui/components/Form/contexts';
 import {
   cleanup,
   fireEvent,
@@ -24,6 +15,10 @@ import {
   it,
   vi,
 } from 'vite-plus/test';
+
+import type { FormMode, SelectFieldDef } from '#ui/components/Form/Form.types';
+
+import { FormProvider, useGetFieldValue } from '#ui/components/Form/contexts';
 
 import { SelectField } from './SelectField.component';
 

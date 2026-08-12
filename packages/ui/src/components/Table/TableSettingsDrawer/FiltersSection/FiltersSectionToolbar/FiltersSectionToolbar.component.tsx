@@ -3,9 +3,9 @@ import {
   EraserIcon,
   ExpandAllIcon,
   RefreshIcon,
-} from '@lcabrera/ui/components/Icons';
-import { useSetTableSettingsExpandedFilters } from '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions';
-import { useGetTableSettingsExpandedFilters } from '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors';
+} from '#ui/components/Icons';
+import { useSetTableSettingsExpandedFilters } from '#ui/components/Table/contexts/TableConfig/meta/actions';
+import { useGetTableSettingsExpandedFilters } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 
 import type { SectionToolbarButton } from '../../SectionToolbar';
 import type { FiltersSectionToolbarProps } from './FiltersSectionToolbar.types';

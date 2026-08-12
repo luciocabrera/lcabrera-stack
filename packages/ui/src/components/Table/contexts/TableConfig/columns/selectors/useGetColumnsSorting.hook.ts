@@ -1,4 +1,4 @@
-import type { SortingState } from '@lcabrera/ui/components/Table/Table.types';
+import type { SortingState } from '#ui/components/Table/Table.types';
 
 import { useColumnsStore } from '../useColumnsStore.hook';
 

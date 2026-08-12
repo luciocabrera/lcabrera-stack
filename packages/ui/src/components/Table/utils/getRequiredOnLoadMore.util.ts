@@ -1,4 +1,4 @@
-import type { Pagination } from '@lcabrera/ui/types/ui.types';
+import type { Pagination } from '#ui/types/ui.types';
 
 type OnLoadMore<TResponse, TData = unknown> = (
   params: Pagination<TData>,

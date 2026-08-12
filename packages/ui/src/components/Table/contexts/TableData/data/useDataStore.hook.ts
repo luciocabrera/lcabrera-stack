@@ -1,6 +1,6 @@
-import type { TableDataState } from '@lcabrera/ui/components/Table/Table.types';
+import type { TableDataState } from '#ui/components/Table/Table.types';
 
-import { useStoreSelector } from '@lcabrera/ui/hooks/useStoreSelector.hook';
+import { useStoreSelector } from '#ui/hooks/useStoreSelector.hook';
 
 import { useTableDataContextValue } from './useTableDataContextValue.hook';
 

@@ -33,43 +33,31 @@ type MockTabsProps = {
   readonly tabs: readonly { readonly header: string }[];
 };
 
-vi.mock('@lcabrera/ui/components/SidePanel', () => ({
+vi.mock('#ui/components/SidePanel', () => ({
   SidePanelBody: ({ children }: { readonly children: ReactNode }) => (
     <div>{children}</div>
   ),
 }));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors',
-  () => ({
-    useGetNormalizedColumn: useGetNormalizedColumnMock,
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
+  useGetNormalizedColumn: useGetNormalizedColumnMock,
+}));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions',
-  () => ({
-    useSetTableColumnSettingsSelectedTab: () => setSelectedTabMock,
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/meta/actions', () => ({
+  useSetTableColumnSettingsSelectedTab: () => setSelectedTabMock,
+}));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors',
-  () => ({
-    useGetTableColumnSelectedKey: () => 'revenue',
-    useGetTableColumnSettingsSelectedTab: () => selectedTabMock(),
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
+  useGetTableColumnSelectedKey: () => 'revenue',
+  useGetTableColumnSettingsSelectedTab: () => selectedTabMock(),
+}));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableData/data/selectors',
-  () => ({
-    useGetTableIsLoading: () => useGetTableIsLoadingMock(),
-    useGetTableIsLoadingMore: () => useGetTableIsLoadingMoreMock(),
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableData/data/selectors', () => ({
+  useGetTableIsLoading: () => useGetTableIsLoadingMock(),
+  useGetTableIsLoadingMore: () => useGetTableIsLoadingMoreMock(),
+}));
 
-vi.mock('@lcabrera/ui/components/Tabs', () => ({
+vi.mock('#ui/components/Tabs', () => ({
   Tabs: ({ isBusy, onSelectTab, selectedTab, tabs }: MockTabsProps) => (
     <div
       data-busy={String(isBusy)}

@@ -19,7 +19,6 @@
       "@/*": ["./src/*"],
       "@lcabrera/server/*": ["../../packages/server/src/*"],
       "@lcabrera/ui": ["../../packages/ui/src/public-api.ts"],
-      "@lcabrera/ui/*": ["../../packages/ui/src/*"],
       "@repo/scan-ingestion/*": ["../../packages/scan-ingestion/src/*"]
     },
     "resolveJsonModule": true,

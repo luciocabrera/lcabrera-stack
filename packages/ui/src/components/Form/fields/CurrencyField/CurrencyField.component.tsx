@@ -1,5 +1,6 @@
-import { NumericFieldControl } from '@lcabrera/ui/components/Form/fields/NumericFieldControl/NumericFieldControl.component';
 import * as stylex from '@stylexjs/stylex';
+
+import { NumericFieldControl } from '#ui/components/Form/fields/NumericFieldControl/NumericFieldControl.component';
 
 import type { CurrencyFieldProps } from './CurrencyField.types';
 

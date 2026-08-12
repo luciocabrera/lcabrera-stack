@@ -2,9 +2,10 @@
 // Dispatch behavior tests for useOrderBySorting.
 // Business logic is covered in resolveOrderConflictUpdate.util.test.ts.
 
-import { createColumnOrderSectionActionMocks } from '@lcabrera/ui/utils/tests/createColumnOrderSectionActionMocks.util';
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+
+import { createColumnOrderSectionActionMocks } from '#ui/utils/tests/createColumnOrderSectionActionMocks.util';
 
 import { useOrderBySorting } from './useOrderBySorting.hook';
 
@@ -51,13 +52,13 @@ const { drawerColumnsStore, modalsStore, resetMocks, tableColumnsStore } =
   });
 
 vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
+  '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
   () => ({
     useTableConfigContextValue: () => ({ columnsStore: tableColumnsStore }),
   }),
 );
 vi.mock(
-  '@lcabrera/ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook',
+  '#ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook',
   () => ({
     useTableDrawerContextValue: () => ({ columnsStore: drawerColumnsStore }),
   }),
@@ -65,11 +66,9 @@ vi.mock(
 vi.mock('../useColumnOrderSectionContextValue.hook', () => ({
   useColumnOrderSectionContextValue: () => ({ modalsStore }),
 }));
-vi.mock(
-  '@lcabrera/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils',
-);
+vi.mock('#ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils');
 
-import { restoreStaticColumnOrder } from '@lcabrera/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
+import { restoreStaticColumnOrder } from '#ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 
 import { resolveOrderConflictUpdate } from './utils/resolveOrderConflictUpdate.util';
 

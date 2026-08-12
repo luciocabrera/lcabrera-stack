@@ -1,6 +1,6 @@
-import type { PrefetchCache } from '@lcabrera/ui/types/ui.types';
-
 import { vi } from 'vite-plus/test';
+
+import type { PrefetchCache } from '#ui/types/ui.types';
 
 import { createMockStore } from './createMockStore.util';
 

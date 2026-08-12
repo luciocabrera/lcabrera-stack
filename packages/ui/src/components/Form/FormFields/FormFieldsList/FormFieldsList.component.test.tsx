@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
 
-import type { FieldNode } from '@lcabrera/ui/components/Form/Form.types';
-
-import { FormProvider } from '@lcabrera/ui/components/Form/contexts';
 import * as stylex from '@stylexjs/stylex';
 import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
+
+import type { FieldNode } from '#ui/components/Form/Form.types';
+
+import { FormProvider } from '#ui/components/Form/contexts';
 
 import { FormFieldsList } from './FormFieldsList.component';
 import { styles } from './FormFieldsList.stylex';

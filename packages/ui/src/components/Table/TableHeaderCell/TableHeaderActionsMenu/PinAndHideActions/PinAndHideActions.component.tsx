@@ -1,4 +1,4 @@
-import { TableActionsPopoverSeparator } from '@lcabrera/ui/components/Table/TableActionsPopover';
+import { TableActionsPopoverSeparator } from '#ui/components/Table/TableActionsPopover';
 
 import type { PinAndHideActionsProps } from './PinAndHideActions.types';
 

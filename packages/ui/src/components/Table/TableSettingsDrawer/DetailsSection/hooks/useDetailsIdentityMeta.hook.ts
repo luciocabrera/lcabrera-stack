@@ -4,7 +4,7 @@ import {
   useGetTableSchemaName,
   useGetTableTableName,
   useGetTableTitlePlural,
-} from '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors';
+} from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 
 /**
  * Read the identity and locale/metadata meta values for the details panel.

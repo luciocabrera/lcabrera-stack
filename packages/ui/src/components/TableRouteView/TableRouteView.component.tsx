@@ -1,7 +1,7 @@
-import type { TablePageResponse } from '@lcabrera/ui/types/ui.types';
+import type { TablePageResponse } from '#ui/types/ui.types';
 
-import { TableLayout } from '@lcabrera/ui/components/Table/TableLayout';
-import { useTableRoutePage } from '@lcabrera/ui/hooks/useTableRoutePage.hook';
+import { TableLayout } from '#ui/components/Table/TableLayout';
+import { useTableRoutePage } from '#ui/hooks/useTableRoutePage.hook';
 
 import type { TableRouteViewProps } from './TableRouteView.types';
 

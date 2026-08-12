@@ -1,6 +1,7 @@
-import { useGetNormalizedColumn } from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors/useGetNormalizedColumn.hook';
 import * as stylex from '@stylexjs/stylex';
 import { Activity, useState } from 'react';
+
+import { useGetNormalizedColumn } from '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetNormalizedColumn.hook';
 
 import type { FilterInputsProps } from './FilterInputs.types';
 

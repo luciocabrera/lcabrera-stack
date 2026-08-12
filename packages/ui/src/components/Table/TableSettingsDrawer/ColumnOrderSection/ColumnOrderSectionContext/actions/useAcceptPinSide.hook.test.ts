@@ -2,9 +2,10 @@
 // Dispatch behavior tests for useAcceptPinSide.
 // Business logic for each resolution kind is covered in resolveAcceptedPinSideUpdate.util.test.ts.
 
-import { createColumnOrderSectionActionMocks } from '@lcabrera/ui/utils/tests/createColumnOrderSectionActionMocks.util';
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+
+import { createColumnOrderSectionActionMocks } from '#ui/utils/tests/createColumnOrderSectionActionMocks.util';
 
 import { useAcceptPinSide } from './useAcceptPinSide.hook';
 
@@ -58,13 +59,13 @@ const { drawerColumnsStore, modalsStore, resetMocks, tableColumnsStore } =
 const mockAcceptPinConflict = vi.fn();
 
 vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
+  '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
   () => ({
     useTableConfigContextValue: () => ({ columnsStore: tableColumnsStore }),
   }),
 );
 vi.mock(
-  '@lcabrera/ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook',
+  '#ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook',
   () => ({
     useTableDrawerContextValue: () => ({ columnsStore: drawerColumnsStore }),
   }),
@@ -72,7 +73,7 @@ vi.mock(
 vi.mock('../useColumnOrderSectionContextValue.hook', () => ({
   useColumnOrderSectionContextValue: () => ({ modalsStore }),
 }));
-vi.mock('@lcabrera/ui/contexts/GlobalSettingsContext/selectors', () => ({
+vi.mock('#ui/contexts/GlobalSettingsContext/selectors', () => ({
   useGetGlobalPinConflictResolutionPreference: () => {},
 }));
 vi.mock('./useAcceptPinConflict.hook', () => ({

@@ -1,4 +1,4 @@
-import type { SelectFilter } from '@lcabrera/ui/types/filterOperators.types';
+import type { SelectFilter } from '#ui/types/filterOperators.types';
 
 type ResolveToggleOptionFilterArgs = {
   readonly option: string;

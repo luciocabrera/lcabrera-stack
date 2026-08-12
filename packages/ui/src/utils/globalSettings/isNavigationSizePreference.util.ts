@@ -1,4 +1,4 @@
-import type { GlobalNavigationSizePreference } from '@lcabrera/ui/types/globalSettings.types';
+import type { GlobalNavigationSizePreference } from '#ui/types/globalSettings.types';
 
 import { NAVIGATION_SIZE_VALUES } from './globalSettings.constants';
 

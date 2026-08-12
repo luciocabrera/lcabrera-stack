@@ -1,7 +1,5 @@
 // @vitest-environment jsdom
 
-import type { GlobalSettingsState } from '@lcabrera/ui/types/globalSettings.types';
-import type { ThemeMode } from '@lcabrera/ui/types/theme.types';
 import type { ReactNode } from 'react';
 
 import { cleanup, render, screen } from '@testing-library/react';
@@ -13,6 +11,9 @@ import {
   it,
   vi,
 } from 'vite-plus/test';
+
+import type { GlobalSettingsState } from '#ui/types/globalSettings.types';
+import type { ThemeMode } from '#ui/types/theme.types';
 
 const { useLoaderDataMock } = vi.hoisted(() => ({
   useLoaderDataMock: vi.fn(),
@@ -45,7 +46,7 @@ vi.mock('react-router', async () => {
   };
 });
 
-vi.mock('@lcabrera/ui/contexts/ThemeContext', () => ({
+vi.mock('#ui/contexts/ThemeContext', () => ({
   ThemeProvider: ({
     appId,
     children,
@@ -63,7 +64,7 @@ vi.mock('@lcabrera/ui/contexts/ThemeContext', () => ({
   ),
 }));
 
-vi.mock('@lcabrera/ui/contexts/GlobalSettingsContext', () => ({
+vi.mock('#ui/contexts/GlobalSettingsContext', () => ({
   GlobalSettingsProvider: ({
     appId,
     children,
@@ -79,7 +80,7 @@ vi.mock('@lcabrera/ui/contexts/GlobalSettingsContext', () => ({
   ),
 }));
 
-vi.mock('@lcabrera/ui/contexts/NotificationContext', () => ({
+vi.mock('#ui/contexts/NotificationContext', () => ({
   NotificationProvider: ({ children }: MockNotificationProviderProps) => (
     <div data-testid='notification-provider'>{children}</div>
   ),

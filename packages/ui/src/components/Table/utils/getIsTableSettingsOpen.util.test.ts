@@ -1,6 +1,6 @@
-import type { TableMetaState } from '@lcabrera/ui/components/Table/Table.types';
-
 import { describe, expect, it } from 'vite-plus/test';
+
+import type { TableMetaState } from '#ui/components/Table/Table.types';
 
 import { getIsTableSettingsOpen } from './getIsTableSettingsOpen.util';
 

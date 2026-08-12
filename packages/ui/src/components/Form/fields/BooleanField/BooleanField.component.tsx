@@ -1,7 +1,7 @@
-import { Checkbox } from '@lcabrera/ui/components/Checkbox';
-import { useFormField } from '@lcabrera/ui/components/Form/fields/useFormField.hook';
-import { FormFieldChrome } from '@lcabrera/ui/components/Form/FormFieldChrome/FormFieldChrome.component';
-import { ToggleSwitch } from '@lcabrera/ui/components/ToggleSwitch';
+import { Checkbox } from '#ui/components/Checkbox';
+import { useFormField } from '#ui/components/Form/fields/useFormField.hook';
+import { FormFieldChrome } from '#ui/components/Form/FormFieldChrome/FormFieldChrome.component';
+import { ToggleSwitch } from '#ui/components/ToggleSwitch';
 
 import type { BooleanFieldProps } from './BooleanField.types';
 
