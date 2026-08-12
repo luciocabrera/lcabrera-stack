@@ -11,6 +11,8 @@
  * mix them.
  */
 
+import { fetchWithRetry } from './fetch-retry.mjs';
+
 const PAGE_SIZE = 500;
 const MAX_PAGES = 20;
 
@@ -61,10 +63,12 @@ const authHeader = (token) => {
   return `Basic ${encoded}`;
 };
 
+// Every call here is a GET, and the report polls SonarCloud while an analysis is
+// still settling — the one place a transient 5xx is most likely.
 export const fetchJson = async (url, token) => {
-  const response = await fetch(url, {
-    headers: { Authorization: authHeader(token) },
-  });
+  const response = await fetchWithRetry(() =>
+    fetch(url, { headers: { Authorization: authHeader(token) } }),
+  );
   if (!response.ok) {
     throw new Error(
       `GET ${url} → ${response.status}: ${(await response.text()).slice(0, 200)}`,
