@@ -11,6 +11,18 @@ import type {
 import { parseJsonQueryParam } from '../../utils/parseJsonQueryParam.util';
 import { parseSortingRules } from '../../utils/parseSortingRules.util';
 
+/**
+ * The closed vocabularies — `type` and `operator` — are validated strictly, and
+ * the values are not.
+ *
+ * A filter arrives from a table the user is still editing, so its value may not
+ * exist yet: a number input mid-keystroke has no number, a cleared text box has
+ * an empty string. `@lcabrera/server`'s mappers define those as drafting states
+ * and emit no SQL clause for them, so requiring a value here rejected requests
+ * the React Router route serves (#567). Every state the shared `ColumnFilter`
+ * contract admits is accepted; what becomes SQL is `toQueryFilters`'s call, not
+ * this schema's. `ENTERPRISE_ORDER_FILTER_CONTRACT_CASES` is the guard.
+ */
 const booleanFilterSchema = z.object({
   type: z.literal('boolean'),
   value: z.boolean(),
@@ -19,8 +31,8 @@ const booleanFilterSchema = z.object({
 const dateFilterSchema = z.object({
   operator: z.enum(['after', 'before', 'between', 'equals']),
   type: z.literal('date'),
-  value: z.string().min(1),
-  value2: z.string().min(1).optional(),
+  value: z.string(),
+  value2: z.string().optional(),
 });
 
 const numberFilterSchema = z.object({
@@ -34,15 +46,15 @@ const numberFilterSchema = z.object({
     'notEquals',
   ]),
   type: z.literal('number'),
-  value: z.coerce.number(),
+  value: z.coerce.number().optional(),
   value2: z.coerce.number().optional(),
 });
 
 const selectFilterSchema = z.object({
   operator: z.enum(['equals', 'notEquals']).optional(),
   type: z.enum(['multiSelect', 'select']),
-  value: z.string().min(1).optional(),
-  values: z.array(z.string().min(1)).optional(),
+  value: z.string().optional(),
+  values: z.array(z.string()).optional(),
 });
 
 const textFilterSchema = z.object({
@@ -55,16 +67,27 @@ const textFilterSchema = z.object({
     'startsWith',
   ]),
   type: z.literal('text'),
-  value: z.string().min(1),
+  value: z.string(),
 });
 
-const filterSchema = z.discriminatedUnion('type', [
-  booleanFilterSchema,
-  dateFilterSchema,
-  numberFilterSchema,
-  selectFilterSchema,
-  textFilterSchema,
-]);
+/**
+ * JSON cannot spell `value: undefined`, so a drafting number filter reaches us
+ * with the key absent while the shared contract declares it present and
+ * undefined. The transform restores it — the annotation is what checks that
+ * the parsed result really is the contract's shape and not merely close to it.
+ */
+const filterSchema = z
+  .discriminatedUnion('type', [
+    booleanFilterSchema,
+    dateFilterSchema,
+    numberFilterSchema,
+    selectFilterSchema,
+    textFilterSchema,
+  ])
+  .transform(
+    (filter): EnterpriseOrdersFilter =>
+      filter.type === 'number' ? { ...filter, value: filter.value } : filter,
+  );
 
 type ParseFiltersArgs = {
   readonly allowedColumns: ReadonlySet<string>;

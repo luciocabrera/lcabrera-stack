@@ -9,6 +9,10 @@
     ".": {
       "types": "./src/index.ts",
       "default": "./dist/index.js"
+    },
+    "./filter-contract": {
+      "types": "./src/features/enterpriseOrders/enterpriseOrders.fixtures.ts",
+      "default": "./dist/features/enterpriseOrders/enterpriseOrders.fixtures.js"
     }
   },
   "scripts": {
