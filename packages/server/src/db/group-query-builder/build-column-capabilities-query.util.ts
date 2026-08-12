@@ -1,7 +1,7 @@
 import type { BuiltQuery } from '../query-builder/query-builder.types.ts';
 import type { ColumnCapabilitiesQueryDescriptor } from './group-query-builder.types.ts';
 
-import { AGGREGATE_SQL_NAMES } from './aggregate-sql.constants.ts';
+import { AGGREGATE_SQL_NAMES } from './group-query-builder.constants.ts';
 
 /**
  * Gate 2 of ADR-058, plus the statistics the group-key rules need, in one
@@ -14,6 +14,9 @@ import { AGGREGATE_SQL_NAMES } from './aggregate-sql.constants.ts';
  *
  * - `bt` resolves a domain to its base type, so a domain over `text` is a
  *   string rather than an unknown.
+ * - `tn` carries the **type's** schema, which the named identifier exception
+ *   needs: type names are per-schema, so a user-defined `app.uuid` reports
+ *   `typname = 'uuid'` exactly like the built-in does.
  * - the equality check follows `GetDefaultOpClass`: an exact `opcintype` match
  *   **or** a binary-coercible one. Without the second arm every `varchar`
  *   column is refused, because `varchar` has no opclass of its own and borrows
@@ -34,6 +37,7 @@ export const buildColumnCapabilitiesQuery = ({
 }: ColumnCapabilitiesQueryDescriptor): BuiltQuery => ({
   text: `SELECT a.attname AS "column",
        bt.typname AS "typeName",
+       tn.nspname AS "typeNamespace",
        bt.typcategory AS "typeCategory",
        EXISTS (
          SELECT 1 FROM pg_opclass o
@@ -72,6 +76,7 @@ export const buildColumnCapabilitiesQuery = ({
   JOIN pg_namespace n ON n.oid = c.relnamespace
   JOIN pg_type t ON t.oid = a.atttypid
   JOIN pg_type bt ON bt.oid = coalesce(nullif(t.typbasetype, 0), t.oid)
+  JOIN pg_namespace tn ON tn.oid = bt.typnamespace
   LEFT JOIN pg_stats s ON s.schemaname = n.nspname
                       AND s.tablename = c.relname
                       AND s.inherited = false

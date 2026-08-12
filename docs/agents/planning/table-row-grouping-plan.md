@@ -848,7 +848,7 @@ sibling's granularity:
 
 `group-query-builder.types.ts` · `ARCHITECTURE.md` · `expand-grouping-sets.util.ts` ·
 `assert-group-keys.util.ts` · `assert-group-aggregates.util.ts` ·
-`aggregate-sql.constants.ts` · `resolve-aggregate-output-type.util.ts` ·
+`group-query-builder.constants.ts` · `resolve-aggregate-output-type.util.ts` ·
 `build-aggregate-projection.util.ts` · `build-grouping-sets-clause.util.ts` ·
 `build-group-order-by-clause.util.ts` · **`build-group-query.util.ts`** ·
 **`build-group-count-query.util.ts`** · `build-group-stats-query.util.ts` ·

@@ -39,19 +39,24 @@
  */
 import { readFileSync } from 'node:fs';
 
+import { fetchWithRetry } from './lib/fetch-retry.mjs';
 import { targetStatus } from './lib/project-status.mjs';
 
 const GRAPHQL_URL = 'https://api.github.com/graphql';
 
+// Safe to retry despite being a POST: the only mutation here sets a board field
+// to a given value, so applying it twice lands the same state.
 const graphql = async ({ query, token, variables }) => {
-  const response = await fetch(GRAPHQL_URL, {
-    body: JSON.stringify({ query, variables }),
-    headers: {
-      authorization: `bearer ${token}`,
-      'content-type': 'application/json',
-    },
-    method: 'POST',
-  });
+  const response = await fetchWithRetry(() =>
+    fetch(GRAPHQL_URL, {
+      body: JSON.stringify({ query, variables }),
+      headers: {
+        authorization: `bearer ${token}`,
+        'content-type': 'application/json',
+      },
+      method: 'POST',
+    }),
+  );
   const body = await response.json();
   if (body.errors) {
     const error = new Error(

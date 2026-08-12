@@ -14,6 +14,7 @@
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { fetchWithRetry } from './lib/fetch-retry.mjs';
 import { readRepoSlug } from './lib/git-remote.mjs';
 import { buildLabelDefinitions } from './lib/labels.mjs';
 import { deriveWorkspaces } from './lib/workspace-scopes.mjs';
@@ -30,18 +31,27 @@ const repoSlug = () => {
   return readRepoSlug(REPO_ROOT);
 };
 
+// Retried: a bare `fetch failed` from a reset connection took this job down on
+// two unrelated PRs, and a label sync has nothing to lose by trying again.
 const ghFetch = (token, path, init = {}) =>
-  fetch(`${API}${path}`, {
-    ...init,
-    headers: {
-      authorization: `Bearer ${token}`,
-      accept: 'application/vnd.github+json',
-      'x-github-api-version': '2022-11-28',
-      ...(init.body === undefined
-        ? {}
-        : { 'content-type': 'application/json' }),
+  fetchWithRetry(
+    () =>
+      fetch(`${API}${path}`, {
+        ...init,
+        headers: {
+          authorization: `Bearer ${token}`,
+          accept: 'application/vnd.github+json',
+          'x-github-api-version': '2022-11-28',
+          ...(init.body === undefined
+            ? {}
+            : { 'content-type': 'application/json' }),
+        },
+      }),
+    {
+      onRetry: ({ attempt, reason }) =>
+        console.warn(`  retrying ${path} (attempt ${attempt}): ${reason}`),
     },
-  });
+  );
 
 // The repo has well under 100 labels, so a single page covers every existing one.
 const listLabelNames = async (token, owner, repo) => {

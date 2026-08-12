@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { AGGREGATE_SQL_NAMES } from './aggregate-sql.constants.ts';
 import { buildColumnCapabilitiesQuery } from './build-column-capabilities-query.util.ts';
+import { AGGREGATE_SQL_NAMES } from './group-query-builder.constants.ts';
 
 const DESCRIPTOR = {
   columns: ['order_status', 'total_amount'],

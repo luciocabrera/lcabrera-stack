@@ -3,7 +3,7 @@ import type {
   ColumnAnalyticalRole,
 } from './group-query-builder.types.ts';
 
-import { AGGREGATE_SQL } from './aggregate-sql.constants.ts';
+import { AGGREGATE_SQL } from './group-query-builder.constants.ts';
 
 /**
  * What each role permits (ADR-058 Gate 1). `boolAnd`/`boolOr` sit under
