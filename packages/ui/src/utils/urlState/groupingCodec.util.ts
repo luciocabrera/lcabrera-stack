@@ -64,7 +64,11 @@ const narrowAggregates = (value: unknown) => {
  * per-aggregate filter or alias needs a slot this map has none of, so deferring
  * filtered aggregates is not an unimplemented option: the transport every piece
  * of grouping configuration must round-trip through cannot carry one, and no
- * interaction can construct what it cannot serialize.
+ * interaction can produce what it cannot serialize.
+ * `@lcabrera/server`'s `GroupAggregate` still has the slot, so a consumer
+ * calling its grouped read directly can build one — what is closed is every
+ * path through this package, not the capability itself. Lifting the deferral
+ * starts here, by giving this param somewhere to put a filter.
  *
  * The member check is what makes `__proto__` a non-issue without special
  * handling: `JSON.parse` gives it as an own property, so a payload carrying one
