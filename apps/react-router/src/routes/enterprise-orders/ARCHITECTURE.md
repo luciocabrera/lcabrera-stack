@@ -136,13 +136,26 @@ obvious-but-slower spelling (epic #391):
   page. `EnterpriseOrderListRow` is that projection as a type. The detail and edit
   views still read the full row — they read one.
 
-`COLUMNS` and the table are typed on `EnterpriseOrderTableRow`, which is
-`EnterpriseOrderListRow` with optional members plus an optional group summary.
-That is not a relaxation of the read model: a grouped read genuinely projects
-only the group key and its aggregates, so on those rows every other column is
-absent. `EnterpriseOrderListRow` keeps its exact shape and is still what the
-ungrouped query returns, so the `Pick` behind it still turns a cell reading an
-unprojected column into a compile error.
+`COLUMNS` and the table are typed on `EnterpriseOrderTableRow`, a **discriminated
+union**: either a data row carrying every projected column, or one group summary
+carrying none of them. `EnterpriseOrderListRow` keeps its exact shape and is
+still what the ungrouped query returns, so the `Pick` behind it still turns a
+cell reading an unprojected column into a compile error.
+
+A union rather than an intersection of partials, because the partial shape says
+"any field may be missing from any row" where the data says "one row kind has
+all of them, the other has none" — and no runtime check could recover the type
+from the weaker claim. `TABLE_GROUP_ROW_FIELD` is the type-level discriminant
+and `getTableGroupRowSummary` the runtime one, so the check `TableBodyRows`
+already makes now also narrows. `config/enterpriseOrders.types.test.ts` pins
+that: its body only compiles while narrowing works.
+
+The residual cost is small and named: a discriminant must exist on both arms and
+`DataKey<TData>` is `keyof TData`, so `tableGroup` type-checks where a column key
+is expected on this route. It is inert — no such column is declared, and the
+constants test pins `COLUMNS` to the projected list — and removing it would mean
+changing `TableColumn`'s key/render typing in `@lcabrera/ui`, which is a package
+decision rather than this route's.
 
 ### Grouping — one key, server-side (ADR-061 / ADR-063)
 

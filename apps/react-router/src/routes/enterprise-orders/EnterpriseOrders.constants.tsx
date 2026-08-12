@@ -30,8 +30,9 @@ export const CRUD: TableCrudConfig = {
  * The list view's columns. Typed on `EnterpriseOrderTableRow`, not the whole
  * row: the list query projects only the read-model columns (#405), so naming
  * one it does not select is a compile error here rather than a blank cell in
- * production. The table row is that read model with optional members, because a
- * grouped read returns one summary row per group and projects nothing else.
+ * production. The table row is the union of that read model and a group summary
+ * row, because a grouped read returns one summary per group and projects none
+ * of the columns.
  */
 export const COLUMNS: TableColumn<EnterpriseOrderTableRow>[] = [
   createBasicColumn({
