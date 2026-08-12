@@ -292,7 +292,10 @@ export const loader = createTableRouteLoader<Row, RowResponse>({
   appId: APP_ID, columns: COLUMNS, persistenceKey: PERSISTENCE_KEY,
   schemaName: SCHEMA_NAME, tableName: TABLE_NAME, title: TITLE,
   filterOptions: { transport: 'loader' },       // omit to leave columns undecorated
-  meta: { crud: CRUD, deleteActionPath: PATH },  // optional metaState extras
+  meta: {                                       // metaState extras + capabilities
+    crud: CRUD, deleteActionPath: PATH,
+    isKeysetEnabled: true, isServerFilterEnabled: true,  // ADR-063; absent = off
+  },
   fetchPage: ({ effectiveSorting, filters, request }) => api.fetchPage({ ... }),
 });
 ```
@@ -308,14 +311,12 @@ The route component is **`TableRouteView`** (`src/components/TableRouteView/`) �
 export const Orders = () => (
   <TableRouteView<Row, RowResponse>
     fetchPage={fetchOrdersPage} // a createPaginatedFetcher result
-    isKeysetEnabled // opt-in: this endpoint can seek (ADR-052)
-    isServerFilterEnabled // opt-in: this endpoint filters server-side
   />
 );
 ```
 
 - **Never re-derive the sort composition by hand.** The loader deliberately stores only the _user's_ sorting and appends the primary-key tiebreaker for the server query alone, so every load-more must reproduce it. `buildTablePageQuery` (`src/routing/shared/`) is that composition; `TableRouteView` calls it for you. A route that hand-rolls `sanitizeSorting` + `appendPrimaryKeySorting` in `onLoadMore` is one edit away from paginating incoherently.
-- **`isKeysetEnabled` / `isServerFilterEnabled` describe the endpoint, and default to off.** Sending a `cursor` an endpoint ignores is noise; sending a `filter` it ignores appends unfiltered rows to a filtered table. Opt in only once the server implements the capability (ADR-056).
+- **A request-shaping capability is declared once, on the loader `meta` — never as a prop (ADR-063).** `isKeysetEnabled` / `isServerFilterEnabled` describe the endpoint, and **absent means off**: sending a `cursor` an endpoint ignores is noise; sending a `filter` it ignores appends unfiltered rows to a filtered table. The loader builds the first page and the view builds every page after it, so a flag either half must act on has to be somewhere both can read — a prop is invisible to the loader by construction. The test is mechanical: **if the loader or the load-more query would have to read it, it goes on `meta`.** A prop carries only what the component alone can supply (`fetchPage`, `actions`, the two selectors).
 - **Escape hatch:** a route whose response is not `{ data, hasMore?, total? }`, or that needs its own JSX around the table, calls **`useTableRoutePage`** and renders `TableLayout` itself. The hook returns exactly the four props `TableLayout` needs.
 - **The fetcher is a declaration, not a function you write.** `createPaginatedFetcher` (`@lcabrera/api/http`) takes the path, a response type guard and an optional base-URL strategy; the guard is required, because an unvalidated page is a cast that fails three layers away.
 

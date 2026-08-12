@@ -12,8 +12,4 @@ export type TableRouteViewProps<
 > & {
   /** The route's paginated read — typically a `createPaginatedFetcher` result. */
   readonly fetchPage: (query: PaginatedQuery) => Promise<TResponse>;
-  /** Send the last loaded row as a keyset cursor (ADR-052). Off by default. */
-  readonly isKeysetEnabled?: boolean;
-  /** Send the table's column filters with each page. Off by default. */
-  readonly isServerFilterEnabled?: boolean;
 };

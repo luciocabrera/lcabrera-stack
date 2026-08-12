@@ -14,17 +14,6 @@ type UseTableRoutePageArgs<TResponse> = {
    * against each other rather than agreeing by convention.
    */
   readonly fetchPage: (query: PaginatedQuery) => Promise<TResponse>;
-  /**
-   * Send the last loaded row as a keyset cursor (ADR-052). Off by default:
-   * an endpoint that cannot seek would receive a parameter it ignores.
-   */
-  readonly isKeysetEnabled?: boolean;
-  /**
-   * Send the table's column filters with each page. Off by default: an endpoint
-   * that does not filter server-side would append unfiltered rows to a filtered
-   * table.
-   */
-  readonly isServerFilterEnabled?: boolean;
 };
 
 /**
@@ -34,17 +23,29 @@ type UseTableRoutePageArgs<TResponse> = {
  * Returns the four props `TableLayout` needs, so a route that wants custom JSX
  * around the table can spread them; a route that does not should render
  * `TableRouteView`, which is this hook plus the default selectors.
+ *
+ * The two request-shaping capabilities are read from the loader's `metaState`,
+ * never passed in: a capability describes the endpoint, and the route's loader
+ * is where the endpoint is declared (ADR-063). That puts the flag where both
+ * halves of the route can reach it — though the loader does not itself act on
+ * it today, so what the first page sends is still up to its own `fetchPage`.
  */
 export const useTableRoutePage = <
   TData extends Record<string, unknown>,
   TResponse,
 >({
   fetchPage,
-  isKeysetEnabled = false,
-  isServerFilterEnabled = false,
 }: UseTableRoutePageArgs<TResponse>) => {
   const { columnsState, dataPromise, metaState } =
     useLoaderData<TableRouteLoaderData<TData, TResponse>>();
+
+  // Absent means off: a falsy capability contributes no key to the query below,
+  // so a route that declares no capability meta sends exactly what one
+  // declaring both `false` sends, and adopting this hook cannot change a
+  // route's request shape by accident (ADR-056 §4, carried over by ADR-063).
+  // `createTableRouteLoader` resolves both from the route's `meta` alone, so
+  // neither can be switched on by the persisted UI-flags cookie.
+  const { isKeysetEnabled, isServerFilterEnabled } = metaState;
 
   const onLoadMore = async ({ lastRow, limit, skip }: Pagination<TData>) =>
     fetchPage(

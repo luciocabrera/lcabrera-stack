@@ -15,6 +15,11 @@ import type { TableRouteViewProps } from './TableRouteView.types';
  * A route whose response is not `{ data, hasMore?, total? }`, or that needs its
  * own JSX around the table, composes `useTableRoutePage` with `TableLayout`
  * directly instead.
+ *
+ * What the endpoint can do — seek by cursor, filter server-side — is declared on
+ * the loader `meta`, not here, so the loader and the load-more read one
+ * declaration (ADR-063). The props this component does take are the pieces only
+ * the component can supply: a fetcher, a toolbar node and two selectors.
  */
 export const TableRouteView = <
   TData extends Record<string, unknown>,
@@ -24,15 +29,9 @@ export const TableRouteView = <
   dataSelector = (response) => response.data,
   dataTotalSelector = (response) => response.total,
   fetchPage,
-  isKeysetEnabled,
-  isServerFilterEnabled,
 }: TableRouteViewProps<TData, TResponse>) => {
   const { columnsState, dataPromise, metaState, onLoadMore } =
-    useTableRoutePage<TData, TResponse>({
-      fetchPage,
-      isKeysetEnabled,
-      isServerFilterEnabled,
-    });
+    useTableRoutePage<TData, TResponse>({ fetchPage });
 
   return (
     <TableLayout<TData, TResponse>

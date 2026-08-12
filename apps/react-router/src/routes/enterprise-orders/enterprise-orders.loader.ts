@@ -51,7 +51,18 @@ export const loader = createTableRouteLoader<
       sort: toQuerySort({ sorting: effectiveSorting }),
     }),
   filterOptions: { transport: 'loader' },
-  meta: { crud: CRUD, deleteActionPath: DELETE_ACTION_PATH },
+  // This endpoint both filters server-side and seeks, so it declares both
+  // capabilities (ADR-063); they travel with the loader data for the table's
+  // load-more to read. The `filters` forwarded above is separate and
+  // unconditional — nothing gates the first page on the flag, so setting
+  // `isServerFilterEnabled: false` here would stop later pages filtering while
+  // the first page still did.
+  meta: {
+    crud: CRUD,
+    deleteActionPath: DELETE_ACTION_PATH,
+    isKeysetEnabled: true,
+    isServerFilterEnabled: true,
+  },
   persistenceKey: PERSISTENCE_KEY,
   schemaName: SCHEMA_NAME,
   tableName: TABLE_NAME,
