@@ -21,7 +21,6 @@
  *   node scripts/release-publish-plan.mjs --github   # + GITHUB_OUTPUT/SUMMARY
  */
 
-import { execFileSync } from 'node:child_process';
 import { appendFileSync, existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -57,46 +56,53 @@ const readPublishableManifests = () =>
     .filter((manifest) => manifest.private !== true && manifest.name)
     .map(({ name, version }) => ({ name, version }));
 
+const REGISTRY =
+  process.env.npm_config_registry ?? 'https://registry.npmjs.org';
+
 /**
- * `npm view <spec> version`, or `undefined` when the spec does not exist.
+ * The registry's abbreviated packument for `name`, or `undefined` when the
+ * package does not exist.
  *
- * A 404 is the answer, not an error — it is how "never published" and "this
- * version is not published" both present. Any *other* failure (a registry
- * outage, a proxy) must not read as "not published", or an unreachable npm
- * would make every package look publishable and send the job into a publish it
- * cannot complete. Those rethrow.
+ * Queried over HTTPS rather than by shelling out to `npm view`. Spawning `npm`
+ * resolves a bare command name through `PATH`, which is a real concern in a job
+ * that holds an OIDC token with publish rights (Sonar S4036) — and this is one
+ * request per package instead of two, with no dependency on the CLI's output
+ * format. The `install-v1` accept header asks for the small document: it carries
+ * the `versions` map, which is both questions at once.
+ *
+ * A 404 is an answer, not an error — it is how "never published" presents. Any
+ * *other* failure (an outage, a proxy) rethrows: an unreachable registry must
+ * not read as "nothing is published", or every package would look publishable
+ * and the job would walk into a publish it cannot complete.
  */
-const viewVersion = (spec) => {
-  try {
-    return (
-      execFileSync('npm', ['view', spec, 'version'], {
-        encoding: 'utf8',
-        stdio: ['ignore', 'pipe', 'pipe'],
-      }).trim() || undefined
-    );
-  } catch (error) {
-    const stderr = String(error.stderr ?? '');
+const fetchPackument = async (name) => {
+  const response = await fetch(`${REGISTRY}/${name.replace('/', '%2f')}`, {
+    headers: { accept: 'application/vnd.npm.install-v1+json' },
+  });
 
-    if (stderr.includes('E404') || stderr.includes('404 Not Found')) {
-      return undefined;
-    }
+  if (response.status === 404) {
+    return undefined;
+  }
 
+  if (!response.ok) {
     throw new Error(
-      `npm view ${spec} failed: ${stderr.trim() || error.message}`,
+      `registry lookup for ${name} failed: ${response.status} ${response.statusText}`,
     );
   }
+
+  return response.json();
 };
 
-const classifyPackage = ({ name, version }) => {
-  const publishedVersion = viewVersion(name);
+const classifyPackage = async ({ name, version }) => {
+  const packument = await fetchPackument(name);
 
   return {
     localVersion: version,
     name,
-    publishedVersion,
+    publishedVersion: packument?.['dist-tags']?.latest,
     state: classifyRelease({
-      packageExists: publishedVersion !== undefined,
-      versionExists: viewVersion(`${name}@${version}`) !== undefined,
+      packageExists: packument !== undefined,
+      versionExists: packument?.versions?.[version] !== undefined,
     }),
   };
 };
@@ -123,8 +129,10 @@ const writeGithub = (classified, publishable, firstPublish) => {
   }
 };
 
-const main = () => {
-  const classified = readPublishableManifests().map(classifyPackage);
+const main = async () => {
+  const classified = await Promise.all(
+    readPublishableManifests().map(classifyPackage),
+  );
   const publishable = selectPublishable(classified);
   const firstPublish = selectFirstPublish(classified);
 
@@ -135,4 +143,4 @@ const main = () => {
   }
 };
 
-main();
+await main();

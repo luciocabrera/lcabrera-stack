@@ -136,8 +136,12 @@ jobs:
           # Piped through `sort` explicitly: `comm` silently produces nonsense
           # on unsorted input, and `git tag` honours a `tag.sort` config that
           # this workflow does not control.
+          # `pnpm exec`, never `npx`: npx installs on demand and runs the
+          # fetched package's lifecycle scripts, which is not something to do in
+          # the one job holding an OIDC token with publish rights. `pnpm exec`
+          # runs the binary already in node_modules, at the lockfile's version.
           git tag | sort > /tmp/tags-before
-          npx changeset publish
+          pnpm exec changeset publish
           git tag | sort > /tmp/tags-after
           comm -13 /tmp/tags-before /tmp/tags-after > /tmp/tags-new
           echo "Newly published tags:"; cat /tmp/tags-new
