@@ -7,6 +7,19 @@ import {
 
 import type { EnterpriseOrdersFilters } from './enterpriseOrders.types';
 
+/**
+ * The closed vocabularies — `type` and `operator` — are validated strictly, and
+ * the values are not.
+ *
+ * A filter arrives from a table the user is still editing, so its value may not
+ * exist yet: a number input mid-keystroke sends no `value` at all, a cleared
+ * text box sends an empty string. `@lcabrera/server`'s mappers define those as
+ * drafting states and emit no SQL clause for them, so requiring a value here
+ * rejected requests the React Router route serves (#567). Every state the
+ * shared `ColumnFilter` contract admits is accepted; what becomes SQL is
+ * `toQueryFilters`'s call, not this schema's.
+ * `ENTERPRISE_ORDER_FILTER_CONTRACT_CASES` is the guard.
+ */
 const filterValueSchema = {
   additionalProperties: false,
   allOf: [
@@ -39,8 +52,8 @@ const filterValueSchema = {
             enum: ['after', 'before', 'between', 'equals'],
             type: 'string',
           },
-          value: { minLength: 1, type: 'string' },
-          value2: { minLength: 1, type: 'string' },
+          value: { type: 'string' },
+          value2: { type: 'string' },
         },
         required: ['type', 'operator', 'value'],
       },
@@ -70,7 +83,7 @@ const filterValueSchema = {
           value: { type: 'number' },
           value2: { type: 'number' },
         },
-        required: ['type', 'operator', 'value'],
+        required: ['type', 'operator'],
       },
     },
     {
@@ -84,9 +97,9 @@ const filterValueSchema = {
       then: {
         properties: {
           operator: { enum: ['equals', 'notEquals'], type: 'string' },
-          value: { minLength: 1, type: 'string' },
+          value: { type: 'string' },
           values: {
-            items: { minLength: 1, type: 'string' },
+            items: { type: 'string' },
             type: 'array',
           },
         },
@@ -113,7 +126,7 @@ const filterValueSchema = {
             ],
             type: 'string',
           },
-          value: { minLength: 1, type: 'string' },
+          value: { type: 'string' },
         },
         required: ['type', 'operator', 'value'],
       },
@@ -128,7 +141,7 @@ const filterValueSchema = {
     value: {},
     value2: {},
     values: {
-      items: { minLength: 1, type: 'string' },
+      items: { type: 'string' },
       type: 'array',
     },
   },

@@ -62,6 +62,7 @@ src/
 - Dynamic SQL identifiers are always allowlisted before interpolation.
 - Query/value parsing happens before repository calls.
 - Errors are normalized through `HttpError` + `error.middleware.ts`.
+- **A column filter's vocabulary is validated; its value is not.** `type` and `operator` are closed sets and `enterpriseOrders.schema.ts` checks them strictly. A value is not, because the filter arrives from a table the user is still editing and `@lcabrera/server`'s mappers drop a value that is not there yet rather than rejecting it — a schema stricter than the shared contract rejects requests the React Router route serves (#567). The Zod schema is one of two copies of that contract that cannot be a type, so `enterpriseOrders.schema.test.ts` drives every case in `api-shared`'s `ENTERPRISE_ORDER_FILTER_CONTRACT_CASES` through it and asserts the parsed filters produce the clauses that route would have built. See [ADR-064](../../../docs/decisions/ADR-064-converge-app-copies-of-a-declared-contract.md).
 
 ## Shared Utilities
 

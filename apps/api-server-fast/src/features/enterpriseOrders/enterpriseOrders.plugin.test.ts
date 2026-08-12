@@ -1,5 +1,9 @@
+import type { EnterpriseOrdersFilters } from 'api-shared';
+
 import { getRowsCount } from '@lcabrera/server/db/get-rows-count.util';
 import { selectRows } from '@lcabrera/server/db/select-rows.util';
+import { toQueryFilters } from '@lcabrera/server/filters/to-query-filters.util';
+import { ENTERPRISE_ORDER_FILTER_CONTRACT_CASES } from 'api-shared';
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import type { EnvConfig } from '../../config/env.schema';
@@ -61,6 +65,61 @@ describe('enterpriseOrders fastify plugin', () => {
         table: 'enterprise_orders',
       }),
     );
+
+    await app.close();
+  });
+
+  /**
+   * The `filter` payload this route's JSON Schema validates is also served,
+   * unvalidated, by the React Router route (`_api/enterprise-orders/paginated`),
+   * which hands the parsed JSON straight to `toQueryFilters`. The schema is a
+   * third statement of a shape no type can check, so it is held in step
+   * behaviourally: every state in the shared contract must reach the query
+   * layer here with exactly the clauses that route would have built. A stricter
+   * rule surfaces as a 400, a looser one as a different clause set.
+   */
+  it.each(ENTERPRISE_ORDER_FILTER_CONTRACT_CASES)(
+    'accepts $name and builds the same clauses as the React Router route',
+    async ({ filters }) => {
+      mockedSelectRows.mockResolvedValue([]);
+      mockedGetRowsCount.mockResolvedValue(0);
+
+      const app = createApp({ envConfig });
+      // The wire form, not the fixture object: JSON has no way to carry
+      // `value: undefined`, so a drafting filter loses the key in transit and
+      // that is the shape both routes actually receive.
+      const wireFilters = JSON.stringify(filters);
+      const routeFilters = JSON.parse(wireFilters) as EnterpriseOrdersFilters;
+
+      const response = await app.inject({
+        method: 'GET',
+        url: `/api/enterprise-orders/paginated?filter=${encodeURIComponent(wireFilters)}`,
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(mockedSelectRows).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filters: toQueryFilters({ filters: routeFilters }),
+        }),
+      );
+
+      await app.close();
+    },
+  );
+
+  it('still rejects an operator outside the contract', async () => {
+    const app = createApp({ envConfig });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/api/enterprise-orders/paginated?filter=${encodeURIComponent(
+        JSON.stringify({
+          total_amount: { operator: 'divides', type: 'number' },
+        }),
+      )}`,
+    });
+
+    expect(response.statusCode).toBe(400);
 
     await app.close();
   });

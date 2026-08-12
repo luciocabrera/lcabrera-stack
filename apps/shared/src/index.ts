@@ -25,6 +25,7 @@ export {
   DEFAULT_ENTERPRISE_ORDER_SORTING,
   ENTERPRISE_ORDER_ALLOWED_COLUMNS,
 } from './features/enterpriseOrders/enterpriseOrders.constants.js';
+export { ENTERPRISE_ORDER_FILTER_CONTRACT_CASES } from './features/enterpriseOrders/enterpriseOrders.fixtures.js';
 export { createEnterpriseOrdersRepository } from './features/enterpriseOrders/enterpriseOrders.repository.js';
 export type { EnterpriseOrdersRepository } from './features/enterpriseOrders/enterpriseOrders.repository.js';
 export type {

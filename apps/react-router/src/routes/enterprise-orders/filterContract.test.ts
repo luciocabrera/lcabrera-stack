@@ -1,3 +1,4 @@
+import type { ColumnFilter as QueryColumnFilter } from '@lcabrera/server/filters/filters.types';
 import type { ColumnFilter } from '@lcabrera/ui/types/filterOperators.types';
 
 import { toQueryFilters } from '@lcabrera/server/filters/to-query-filters.util';
@@ -13,7 +14,8 @@ import { describe, expect, it } from 'vite-plus/test';
  * requires `@lcabrera/server`'s shape, the values below are typed as `@lcabrera/ui`'s,
  * so this file only compiles while a filter built in the UI is assignable to the
  * query layer. Add an operator or a variant on one side and `vp run typecheck`
- * fails here, naming the contract.
+ * fails here, naming the contract. That call checks one direction only, so the
+ * last case adds the other — see the comment there.
  *
  * It lives in the app because the app is the only thing that legitimately
  * depends on both packages — integrating them is precisely what it is for.
@@ -55,5 +57,17 @@ describe('column-filter contract between @lcabrera/ui and @lcabrera/server', () 
     };
 
     expect(toQueryFilters({ filters: drafting })).toStrictEqual([]);
+  });
+
+  it('accepts every query-layer filter variant as a UI filter', () => {
+    // The `toQueryFilters` call above only proves UI ⊆ query layer, so on its
+    // own it is a one-way guard: an operator added to the *query layer's* union
+    // and not the UI's would sail through it. The round trip below closes that
+    // direction — the second assignment needs query layer ⊆ UI — so a variant
+    // or operator added to either package alone fails to compile here.
+    const queryLayerFilters: Record<string, QueryColumnFilter> = uiFilters;
+    const backToUiFilters: Record<string, ColumnFilter> = queryLayerFilters;
+
+    expect(backToUiFilters).toStrictEqual(uiFilters);
   });
 });
