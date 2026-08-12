@@ -55,11 +55,19 @@ Four things here are deliberate, and each cost something to learn:
   nothing, and independent per-package releases were impossible (#620).
 
   That count existed to keep `changesets/action` away from its version path,
-  which has no publish-only mode and dies on the commit-msg hook (`Version
-Packages` is not a Conventional Commit). `release.yml` now calls
-  `npx changeset publish` directly, so there is no version path to avoid. The
-  action's one irreplaceable contribution — the GitHub Release body — is rebuilt
-  from the same `CHANGELOG.md` by `scripts/release-notes.mjs`.
+  which has no publish-only mode and dies on the commit-msg hook, since
+  `Version Packages` is not a Conventional Commit. `release.yml` now calls
+  `pnpm exec changeset publish` directly, so there is no version path to avoid —
+  and `pnpm exec` rather than `npx`, which would install on demand and run the
+  fetched package's lifecycle scripts in the one job holding a publish token.
+  The action's one irreplaceable contribution — the GitHub Release body — is
+  rebuilt from the same `CHANGELOG.md` by `scripts/release-notes.mjs`.
+
+  One thing the CLI does **not** do is take a package filter: it publishes every
+  non-private workspace whose version is missing, and `config.ignore` does not
+  apply. So a package that has never been published would fail the whole run
+  after the ones before it had already reached npm. `release:plan` refuses to
+  open the gate in that case, naming the manual publish that unblocks it.
 
 **Package releases and the repository release are separate tracks.** Changesets
 tags `@lcabrera/utils@0.1.0` and `release.yml` opens a GitHub Release per

@@ -27,6 +27,7 @@ import { fileURLToPath } from 'node:url';
 
 import {
   classifyRelease,
+  findBlockingFirstPublish,
   renderSummary,
   selectFirstPublish,
   selectPublishable,
@@ -140,11 +141,21 @@ const main = async () => {
   );
   const publishable = selectPublishable(classified);
   const firstPublish = selectFirstPublish(classified);
+  const blocking = findBlockingFirstPublish({ firstPublish, publishable });
 
   console.log(renderSummary(classified));
 
   if (process.argv.includes('--github')) {
     writeGithub(classified, publishable, firstPublish);
+  }
+
+  if (blocking.length > 0) {
+    const names = blocking.map(({ name }) => name).join(', ');
+
+    console.error(
+      `::error::Cannot release: ${names} has never been published, and \`changeset publish\` takes no package filter — it would try, fail with E404 under OIDC, and leave the packages published before it untagged. Publish it once by hand (or set \`private: true\` until then), then re-run.`,
+    );
+    process.exitCode = 1;
   }
 };
 

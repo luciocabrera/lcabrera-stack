@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vite-plus/test';
 import {
   classifyRelease,
   extractChangelogSection,
+  findBlockingFirstPublish,
   renderSummary,
   selectFirstPublish,
   selectPublishable,
@@ -74,6 +75,41 @@ describe('selectPublishable', () => {
         { name: '@lcabrera/ui', state: 'up-to-date' },
         { name: '@lcabrera/api', state: 'up-to-date' },
       ]),
+    ).toStrictEqual([]);
+  });
+});
+
+describe('findBlockingFirstPublish', () => {
+  // `changeset publish` takes no package filter, so a never-published package
+  // sinks the whole run *after* earlier ones have reached npm. Catching it
+  // before anything publishes is the difference between a clear stop and a
+  // half-released state.
+  it('blocks when a never-published package coexists with a due release', () => {
+    expect(
+      findBlockingFirstPublish({
+        firstPublish: [{ name: '@lcabrera/eslint-plugin' }],
+        publishable: [{ name: '@lcabrera/utils' }],
+      }).map(({ name }) => name),
+    ).toStrictEqual(['@lcabrera/eslint-plugin']);
+  });
+
+  it('stays quiet when nothing is due to publish', () => {
+    // The common case: a never-published package sits there for weeks and must
+    // not turn `main` red on every push.
+    expect(
+      findBlockingFirstPublish({
+        firstPublish: [{ name: '@lcabrera/eslint-plugin' }],
+        publishable: [],
+      }),
+    ).toStrictEqual([]);
+  });
+
+  it('stays quiet when every package has been published before', () => {
+    expect(
+      findBlockingFirstPublish({
+        firstPublish: [],
+        publishable: [{ name: '@lcabrera/utils' }],
+      }),
     ).toStrictEqual([]);
   });
 });

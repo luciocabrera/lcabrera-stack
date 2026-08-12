@@ -6,9 +6,10 @@
  * changeset (#620). That gate existed because `changesets/action` versions and
  * opens a PR when a changeset is pending; `changeset publish` — the CLI the
  * workflow actually wants — decides purely from `npm info` against the local
- * manifest version and never reads `.changeset/`. So the correct question is
- * about the registry, not the changeset folder, and it is answerable per
- * package.
+ * manifest version. It reads `.changeset/config.json` (for `access`,
+ * `privatePackages`) but never the pending changeset *files*, so the correct
+ * question is about the registry, not about what is queued, and it is
+ * answerable per package.
  *
  * A package with its own pending changeset needs no special case: it has not
  * been versioned, so its manifest version is the one already on npm and it
@@ -43,6 +44,28 @@ export const selectPublishable = (classified) =>
 /** The packages waiting on a manual first publish. */
 export const selectFirstPublish = (classified) =>
   classified.filter(({ state }) => state === 'first-publish');
+
+/**
+ * The never-published packages that would sink a batch publish, if one is due.
+ *
+ * `changeset publish` takes no package filter: it publishes **every**
+ * non-private workspace whose version is missing from the registry, and
+ * `config.ignore` does not apply — `publishPackages` filters on
+ * `!packageJson.private` alone. So one never-published package fails the whole
+ * run (`throw new ExitError(1)`), *after* the ones before it have already
+ * reached npm and been tagged, and with the tag-push step skipped because the
+ * publish step failed. That is a half-released state, recoverable only by hand.
+ *
+ * Refusing before anything is published turns that into an actionable stop. It
+ * is deliberately not a silent skip: the release genuinely cannot proceed, and
+ * the fix — one manual `npm publish`, or `private: true` until then — is a
+ * decision for a person.
+ *
+ * Empty when nothing is due, so a never-published package sitting there
+ * indefinitely costs nothing until someone actually cuts a release.
+ */
+export const findBlockingFirstPublish = ({ firstPublish, publishable }) =>
+  publishable.length > 0 ? firstPublish : [];
 
 const STATE_LABEL = {
   'first-publish': '⏸ first publish — needs a manual `npm publish`',
