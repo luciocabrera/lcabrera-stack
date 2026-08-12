@@ -6,30 +6,32 @@ import { assertGroupKeys } from './assert-group-keys.util.ts';
 
 const ALLOWED = ['order_status', 'shipping_country', 'city', 'priority', 'doc'];
 
-const capability = (
-  overrides: Partial<ColumnGroupingCapability>,
-): ColumnGroupingCapability => ({
+/**
+ * Only the groupable arm is worth a factory. The refused one has to name its
+ * reason — the type will not let it do otherwise — so writing it out is the
+ * shorter of the two.
+ */
+const groupable = (column: string): ColumnGroupingCapability => ({
   aggregates: ['count', 'countDistinct', 'max', 'min'],
   canGroup: true,
-  column: 'c',
+  column,
   role: 'dimension',
   typeName: 'text',
-  ...overrides,
 });
 
 const CAPABILITIES: Readonly<Record<string, ColumnGroupingCapability>> = {
-  city: capability({ column: 'city' }),
-  doc: capability({
+  city: groupable('city'),
+  doc: {
     aggregates: ['count'],
     canGroup: false,
     column: 'doc',
     refusal: 'not-a-dimension',
     role: 'unsupported',
     typeName: 'jsonb',
-  }),
-  order_status: capability({ column: 'order_status' }),
-  priority: capability({ column: 'priority' }),
-  shipping_country: capability({ column: 'shipping_country' }),
+  },
+  order_status: groupable('order_status'),
+  priority: groupable('priority'),
+  shipping_country: groupable('shipping_country'),
 };
 
 const assert = (keys: readonly string[]) =>
@@ -74,7 +76,7 @@ describe('assertGroupKeys', () => {
         allowedColumns: ALLOWED,
         capabilities: {
           ...CAPABILITIES,
-          secret: capability({ column: 'secret' }),
+          secret: groupable('secret'),
         },
         keys: ['secret'],
       }),

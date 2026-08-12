@@ -96,19 +96,23 @@ export type ColumnCapabilityRow = {
 };
 
 /**
- * What a column may do in a grouped read. `refusal` is present exactly when
- * `canGroup` is false, so the UI can say why rather than hiding the column.
+ * What a column may do in a grouped read.
+ *
+ * Discriminated on `canGroup` so that a refusal **must** carry its reason: the
+ * UI says why rather than hiding the column, and a builder can put the reason
+ * straight into an error without a fallback for a state that cannot occur.
+ * `refusal?: never` on the groupable arm keeps `capability.refusal` readable
+ * without narrowing first, which is what most consumers want.
  */
-export type ColumnGroupingCapability = {
-  readonly aggregates: readonly AggregateFn[];
-  readonly canGroup: boolean;
-  readonly column: string;
-  /** Resolved distinct-value estimate; absent when statistics are unavailable. */
-  readonly distinctEstimate?: number;
-  readonly refusal?: GroupKeyRefusalReason;
-  readonly role: ColumnAnalyticalRole;
-  readonly typeName: string;
-};
+export type ColumnGroupingCapability =
+  | (ColumnCapabilityShared & {
+      readonly canGroup: false;
+      readonly refusal: GroupKeyRefusalReason;
+    })
+  | (ColumnCapabilityShared & {
+      readonly canGroup: true;
+      readonly refusal?: never;
+    });
 
 /**
  * `undefinedDistinctness` is `n_distinct = 0` — Postgres stating the type has no
@@ -191,3 +195,13 @@ export type GroupQueryDescriptor = {
 export type GroupSort =
   | { readonly aggregateAlias: string; readonly direction: 'asc' | 'desc' }
   | { readonly direction: 'asc' | 'desc'; readonly key: string };
+
+/** The half of a capability that does not depend on whether the column is groupable. */
+type ColumnCapabilityShared = {
+  readonly aggregates: readonly AggregateFn[];
+  readonly column: string;
+  /** Resolved distinct-value estimate; absent when statistics are unavailable. */
+  readonly distinctEstimate?: number;
+  readonly role: ColumnAnalyticalRole;
+  readonly typeName: string;
+};

@@ -115,6 +115,7 @@ describe('assertGroupAggregates', () => {
             aggregates: ['sum'],
             canGroup: false,
             column: 'salary',
+            refusal: 'unique-ish',
             role: 'fact',
             typeName: 'numeric',
           },

@@ -32,6 +32,26 @@ the first column with no error anywhere; pass a shorter explicit `alias`. And a
 projected alias may not collide with a real column of the table, which is what
 would otherwise happen to `group_mask` or `count_rows`.
 
-Additive: no existing export changed, and `GroupingMode` is `'flat' | 'rollup'`
-today. Grouping guard rails, the per-query timeout and cube expansion are not
-part of this.
+`GroupingMode` is `'flat' | 'rollup'` today. Grouping guard rails, the per-query
+timeout and cube expansion are not part of this.
+
+**Breaking for one published type.** `ColumnGroupingCapability` (from the
+`./db/group-query-builder/group-query-builder.types` subpath) is now
+discriminated on `canGroup`, so a refusal must carry its reason:
+
+```ts
+| { canGroup: false; refusal: GroupKeyRefusalReason; … }
+| { canGroup: true;  refusal?: never; … }
+```
+
+Reading is unaffected — `capability.refusal` still resolves without narrowing
+first, and `getColumnGroupingCapabilities` returns the same values it always
+did. What no longer compiles is _constructing_ one — a test double, or a
+hand-built capability map — with `canGroup: false` and no `refusal`, or with a
+`canGroup` computed as a `boolean` expression rather than a literal.
+
+That pairing was already the documented contract; it just was not enforced, and
+the gap was reachable: a capability map built by hand could make the builder
+report `not a legal group key: undefined`. Widening the type back would restore
+a state that has no meaning — a column refused for no reason — so the flag and
+its reason move together instead.

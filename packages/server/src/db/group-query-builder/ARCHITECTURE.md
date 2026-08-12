@@ -140,6 +140,15 @@ the contract — the most useful message wins. The role check runs first, so a
 `point` column is refused as `not-a-dimension` rather than
 `no-equality-operator`: the first is a sentence a user understands.
 
+**The pairing is the type, not a convention.** `ColumnGroupingCapability` is
+discriminated on `canGroup`, so the refused arm _requires_ `refusal`. That began
+as a doc comment and a habit, which was enough right up until a hand-built
+capability map could make the builder report `not a legal group key: undefined`.
+A column refused for no reason is not a state worth being able to write down, so
+the flag and its reason move together. `refusal?: never` on the groupable arm
+keeps `capability.refusal` readable without narrowing, which is what a consumer
+rendering the reason actually wants.
+
 | Reason                 | Fires when                                                                                    |
 | ---------------------- | --------------------------------------------------------------------------------------------- |
 | `not-a-dimension`      | Gate 1 resolved `unsupported`                                                                 |
