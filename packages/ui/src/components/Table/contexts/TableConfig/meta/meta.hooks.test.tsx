@@ -9,7 +9,6 @@ import { createMockStore } from '#ui/utils/tests/createMockStore.util';
 
 const createInitialMetaState = (): TableMetaState => {
   return {
-    columnOverscan: 2,
     columnSelectedKey: 'id',
     columnSettingsSelectedTab: 'general',
     density: 'compact',
@@ -77,7 +76,6 @@ import { useSetTableSettingsExpandedFilters } from './actions/useSetTableSetting
 import { useSetTableSettingsSelectedTab } from './actions/useSetTableSettingsSelectedTab.hook';
 import { useToogleTableIsColumnSettingsOpen } from './actions/useToogleTableIsColumnSettingsOpen.hook';
 import { useToogleTableIsTableSettingsOpen } from './actions/useToogleTableIsTableSettingsOpen.hook';
-import { useGetTableColumnOverscan } from './selectors/useGetTableColumnOverscan.hook';
 import { useGetTableColumnSelectedKey } from './selectors/useGetTableColumnSelectedKey.hook';
 import { useGetTableDensity } from './selectors/useGetTableDensity.hook';
 import { useGetTableEnablePrefetch } from './selectors/useGetTableEnablePrefetch.hook';
@@ -117,9 +115,6 @@ describe('TableConfig meta hooks', () => {
   });
 
   it('exposes the meta selector hooks', () => {
-    expect(renderHook(() => useGetTableColumnOverscan()).result.current).toBe(
-      2,
-    );
     expect(
       renderHook(() => useGetTableColumnSelectedKey()).result.current,
     ).toBe('id');

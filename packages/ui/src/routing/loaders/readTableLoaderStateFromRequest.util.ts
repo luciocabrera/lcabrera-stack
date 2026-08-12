@@ -15,7 +15,6 @@ import {
 import {
   deserializeFiltersFromURL,
   deserializeSortingFromURL,
-  readTableStateFromURL,
 } from '#ui/utils/urlState';
 
 import { sanitizeFiltersByColumns } from '../shared/sanitizeFiltersByColumns.util';
@@ -36,6 +35,10 @@ type ReadTableLoaderStateFromRequestArgs<
 
 /**
  * Read shared table loader state from URL and cookies.
+ *
+ * `sorting` and `filters` come from the URL because the persist-cookie flow
+ * writes them there (ADR-010, ADR-061). Order, visibility, sizing and pinning
+ * are cookie-only on that same flow, so they are read only from the cookie.
  */
 export const readTableLoaderStateFromRequest = <
   TData extends Record<string, unknown>,
@@ -47,11 +50,6 @@ export const readTableLoaderStateFromRequest = <
   request,
 }: ReadTableLoaderStateFromRequestArgs<TData>) => {
   const url = new URL(request.url);
-
-  const urlState = readTableStateFromURL({
-    persistenceKey,
-    searchParams: url.searchParams,
-  });
 
   const cookieHeader = request.headers.get('Cookie');
   const cookieState = readPersistedStateFromCookie({
@@ -66,12 +64,10 @@ export const readTableLoaderStateFromRequest = <
     persistenceKey,
   });
 
-  const columnOrder = (urlState?.columnOrder ??
-    cookieState.columnOrder ??
+  const columnOrder = (cookieState.columnOrder ??
     []) as ColumnOrderState<TData>;
 
-  const columnVisibility = (urlState?.columnVisibility ??
-    cookieState.columnVisibility ??
+  const columnVisibility = (cookieState.columnVisibility ??
     new Set()) as ColumnVisibilityState<TData>;
 
   const columnSizing = (cookieState.columnSizing ??

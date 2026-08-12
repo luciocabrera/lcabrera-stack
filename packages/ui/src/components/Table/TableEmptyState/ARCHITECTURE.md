@@ -9,8 +9,9 @@ the table is not loading. Mirrors the visual language of `RouteErrorBoundary`
 
 - Render a theme-adaptive, animated `NoDataDescriptive` illustration
   (`currentColor` + `prefers-reduced-motion` aware).
-- Show a configurable `title` (default `"No data found"`) and `message`
-  (default standard copy), both overridable via `TableProps.emptyState`.
+- Show the table's singular title from `useGetTableTitleSingular` above a fixed
+  default message. Neither is a prop — there is no `TableProps.emptyState`
+  override, so the title is store-driven and the message is a constant.
 - Offer a single **Retry** button that re-runs the route loader through React
   Router 7's `useRevalidator()` — because filters and sorting live in the URL,
   revalidation re-fetches with the current query state.

@@ -317,7 +317,6 @@ export type TableMetaState = {
    * keys so tables in different apps that share a `persistenceKey` do not clash.
    */
   readonly appId?: string;
-  readonly columnOverscan: number;
   readonly columnSelectedKey?: string;
   readonly columnSettingsSelectedTab: string;
   readonly crud?: TableCrudConfig;

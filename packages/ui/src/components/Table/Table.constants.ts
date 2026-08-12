@@ -45,8 +45,6 @@ export const FILTER_OPTIONS_TIMEOUT_MS = 30_000;
 
 export const DEFAULT_OVERSCAN = 20;
 
-export const DEFAULT_COLUMN_OVERSCAN = 2;
-
 export const IS_PREFETCH_ENABLED = true;
 
 /**

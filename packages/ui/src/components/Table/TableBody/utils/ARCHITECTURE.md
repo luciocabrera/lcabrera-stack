@@ -11,7 +11,6 @@ utils/
 ├── createRenderTableBodyCell.util.ts      -> Binds sizing/pinning, then delegates to renderFromDescriptor
 ├── renderFromDescriptor.util.ts           -> Turns one cell descriptor into a TableBodyCell element
 ├── generatePlaceholderData.util.ts        -> Creates placeholder row objects for skeletons
-├── getTotalVisibleColumnCount.util.ts     -> Computes rendered-column count for spacer row colSpan
 ├── renderTableBodyPinnedGroup.util.ts     -> Maps one pinning partition (left/center/right) through the shared cell renderer
 └── index.ts                               -> Barrel exports
 ```
@@ -24,7 +23,6 @@ utils/
 | `createRenderTableBodyCell`    | Creates a row-cell renderer bound to sizing/pinning, delegating the render |
 | `renderFromDescriptor`         | Renders a `TableBodyCell` from a built descriptor (custom vs default)      |
 | `generatePlaceholderData`      | Creates empty row objects keyed by visible columns                         |
-| `getTotalVisibleColumnCount`   | Counts pinned, center, and spacer cells to produce the spacer-row span     |
 | `renderTableBodyPinnedGroup`   | Maps columns to rendered cells while preserving order and shared row data  |
 
 ## TableBodyCellDescriptor
@@ -45,4 +43,7 @@ The column's own type travels as `dataType` on the default branch, so adding a
 
 ## Consumers
 
-- `src/components/Table/TableBody/TableBody.component.tsx` — body cell descriptor and spacer-row geometry
+- `src/components/Table/TableBody/TableBody.component.tsx` — body cell descriptor and placeholder rows
+
+The spacer row's `colSpan` is **not** computed here. `SpacerRow` derives it
+itself from `useGetPinnedColumnPartition`, the same way `TableEmptyState` does.

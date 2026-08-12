@@ -36,9 +36,9 @@ When `totalLoadedRows === 0` **and** the table is not loading
 `TableEmptyState` row inside a non-grid `tbody` (`styles.bodyEmpty` uses
 `display: table-row-group` so the empty cell can size naturally and its sticky
 content can center). During loading with zero rows the skeleton path still
-renders — the empty state never flashes before data resolves. Optional
-`emptyState.{title,message}` overrides are threaded from `TableProps` through
-`TableContent`.
+renders — the empty state never flashes before data resolves. `TableBody`
+passes the empty state no props: `TableEmptyState` reads its own title from
+`useGetTableTitleSingular` and holds a fixed default message.
 
 ## File Structure
 
@@ -46,7 +46,7 @@ renders — the empty state never flashes before data resolves. Optional
 TableBody/
 ├── TableBody.component.tsx   → <tbody> with SpacerRow-based row virtualisation (+ empty-state branch)
 ├── TableBody.test.tsx        → Unit tests for virtualisation window, cell rendering, spacers, empty state
-├── TableBody.types.ts        → TableBodyProps (emptyState, tableContainerRef)
+├── TableBody.types.ts        → TableBodyProps (tableContainerRef)
 ├── TableBody.stylex.ts       → body(height) grid style + bodyEmpty (table-row-group) for the empty state
 ├── index.ts                  → Barrel export
 │
@@ -55,7 +55,6 @@ TableBody/
   ├── buildTableBodyCellDescriptor.util.tsx → Derives pure cell descriptor data (with isLoadingState)
   ├── createRenderTableBodyCell.util.ts    → Creates stable cell renderer bound to sizing/offsets/loading
   ├── generatePlaceholderData.util.ts → Creates skeleton row objects
-  ├── getTotalVisibleColumnCount.util.ts → Computes spacer-row colSpan
   ├── renderTableBodyPinnedGroup.util.ts → Maps one pinning partition to rendered cells
   └── index.ts                        → Utility barrel exports
 ```
