@@ -144,4 +144,18 @@ describe('TableRow', () => {
       '42',
     );
   });
+  it('keeps role=row when a caller passes a conflicting role', () => {
+    // The role is the row's only source of semantics once CSS has stripped the
+    // implicit one, so `{...rest}` must not be able to replace it. Revert the
+    // spread order in TableRow.component.tsx and this is what fails.
+    const { container } = renderInTable({
+      children: (
+        <TableRow role='presentation'>
+          <td>Revenue</td>
+        </TableRow>
+      ),
+    });
+
+    expect(container.querySelector('tr')?.getAttribute('role')).toBe('row');
+  });
 });

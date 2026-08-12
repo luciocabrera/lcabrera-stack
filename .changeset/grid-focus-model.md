@@ -28,6 +28,11 @@ read back from `document.activeElement`, so a focused row that scrolls out of
 the virtualization window and back keeps its focus instead of dropping it to the
 document body and silently killing navigation.
 
+The grid's ARIA attributes are applied after forwarded props, so a consumer
+cannot replace `role`, `scope`, `aria-sort` or `aria-rowcount` by passing one —
+they are the only source of semantics the Table's CSS has stripped, so they are
+a contract rather than a default.
+
 **Behaviour change for consumers:** the column resize splitter is no longer its
 own tab stop (`tabIndex` is now `-1`). A grid has one roving tab stop, and one
 splitter per column is what that replaces; keyboard access to column width is

@@ -227,4 +227,25 @@ describe('TableHeaderCell', () => {
       screen.getByRole('columnheader').getAttribute('aria-sort'),
     ).toBeNull();
   });
+  it('keeps its ARIA contract when a caller passes conflicting props', () => {
+    // role, scope and aria-sort are the header's only source of those
+    // semantics, so `{...rest}` must not win. Revert the spread order in
+    // TableHeaderCell.component.tsx and this is what fails.
+    useGetColumnWidthMock.mockReturnValue(undefined);
+    useGetPinnedColumnInfoMock.mockReturnValue(undefined);
+    useGetNormalizedColumnMock.mockReturnValue(
+      createColumn({ sortDirection: 'asc' }),
+    );
+
+    const { container } = renderCell({
+      'aria-sort': 'descending',
+      role: 'cell',
+      scope: 'row',
+    });
+    const headerCell = container.querySelector('th');
+
+    expect(headerCell?.getAttribute('role')).toBe('columnheader');
+    expect(headerCell?.getAttribute('scope')).toBe('col');
+    expect(headerCell?.getAttribute('aria-sort')).toBe('ascending');
+  });
 });

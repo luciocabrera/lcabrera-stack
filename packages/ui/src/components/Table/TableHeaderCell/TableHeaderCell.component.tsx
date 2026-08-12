@@ -45,11 +45,12 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
     // implicit `columnheader` role in the accessibility tree (ADR-062). The
     // cause is this cell's own override, not the row's — restoring a table
     // `display` on `TableRow` would not make the attribute redundant.
+    // All three are set after `{...rest}` so a caller cannot replace them.
     <th
+      {...rest}
       aria-sort={resolveAriaSort({ isSortable, sortDirection })}
       role='columnheader'
       scope='col'
-      {...rest}
       {...stylex.props(
         tableHeaderCellStyles.base(effectiveMinWidth, currentWidth),
         pinnedStylex,

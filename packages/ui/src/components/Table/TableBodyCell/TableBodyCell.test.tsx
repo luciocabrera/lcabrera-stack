@@ -105,4 +105,21 @@ describe('TableBodyCell', () => {
     expect(cell.tagName).toBe('TD');
     expect(cell.getAttribute('tabindex')).toBe('-1');
   });
+  it('keeps role=gridcell when a caller passes a conflicting role', () => {
+    // The role is the cell's only source of semantics once CSS has stripped the
+    // implicit one, so `{...rest}` must not be able to replace it. Revert the
+    // spread order in TableBodyCell.component.tsx and this is what fails.
+    renderCell(
+      <TableBodyCell
+        columnKey='amount'
+        label='Amount'
+        role='cell'
+        rowIndex={0}
+        rowKey='pk:[1]'
+        value={42}
+      />,
+    );
+
+    expect(screen.getByRole('gridcell').getAttribute('role')).toBe('gridcell');
+  });
 });

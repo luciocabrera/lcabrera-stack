@@ -553,6 +553,15 @@ export const MyComponent = ({ myProp, ...rest }: MyProps) => (
 
 > Note: `stylex.props()` spread must always come **after** `{...rest}` to prevent consumers from overriding StyleX-managed styles with a raw `style` or `className`.
 
+**An attribute a component's correctness depends on goes after `{...rest}` too.**
+The default is to spread `...rest` first so consumers can override anything —
+that is the point of forwarding. But the Table grid's `role`, `scope`,
+`aria-sort` and `aria-rowcount` are the _only_ source of semantics the CSS has
+stripped (see "ARIA Roles Are Declared, Never Inherited"), and an attribute any
+caller can replace by accident is a default, not a contract. Those are written
+after the spread, and each has a test asserting a conflicting prop does not win —
+without one, the spread order is a convention that nothing enforces.
+
 ---
 
 ## Architecture Documentation Rule
