@@ -7,6 +7,8 @@ Shared TypeScript configuration generator for all apps in this monorepo. Instead
 ```
 tsconfig.shared.ts          ← edit this to change any compiler option
         │
+tsconfig.entries.ts         ← edit this to add or retune one workspace
+        │
         ▼  node --experimental-strip-types generate.ts
         │
         ├── packages/ts-configs/tsconfig.app.json   ← this package's own (Node)
@@ -84,7 +86,7 @@ a real change but is pure whitespace.
 
 ## Adding a new app
 
-Open `generate.ts` and add two entries to the `configs` array — one for `tsconfig.app.json` and one for `tsconfig.node.json`:
+Open `tsconfig.entries.ts` and add two entries to the `configs` array — one for `tsconfig.app.json` and one for `tsconfig.node.json`:
 
 ```ts
 {
@@ -118,11 +120,20 @@ createAppTsConfig({
 
 ## Files
 
-| File                 | Purpose                                                                                 |
-| -------------------- | --------------------------------------------------------------------------------------- |
-| `tsconfig.shared.ts` | Source of truth — all compiler options and factory functions                            |
-| `generate.ts`        | Script that writes JSON files into every app                                            |
-| `tsconfig.app.json`  | Generated — this package's own config, and a **Node** one: its source runs under `node` |
+| File                      | Purpose                                                                                 |
+| ------------------------- | --------------------------------------------------------------------------------------- |
+| `tsconfig.shared.ts`      | Source of truth — all compiler options and factory functions                            |
+| `tsconfig.entries.ts`     | The per-workspace entries, as data — what each one overrides, and why                   |
+| `generate.ts`             | Script that writes JSON files into every app                                            |
+| `tsconfig.shared.test.ts` | Covers both of the above                                                                |
+| `tsconfig.app.json`       | Generated — this package's own config, and a **Node** one: its source runs under `node` |
+
+The entries live apart from the writer so the whole set can be asserted without
+running the generator — importing `generate.ts` rewrites all 17 configs as a
+side effect, which no test can do. That is what lets `tsconfig.shared.test.ts`
+gate the invariant [ADR-060](../../docs/decisions/ADR-060-source-shipping-package-module-resolution.md)
+rests on: `packages/ui` gets **no** path aliases, so `vp run typecheck` resolves
+its deep imports against the real `exports` map rather than short-circuiting it.
 
 > This package used to also generate a `tsconfig.node.json` for itself. Both of
 > its self-configs were dead: the app one required `vite/client` types that this

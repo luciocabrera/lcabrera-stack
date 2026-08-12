@@ -102,7 +102,17 @@ the package actually imports.
 config and from both consuming apps. This is the load-bearing half: without the
 alias, `vp run typecheck` resolves every deep import against the real `exports`
 map, so an unexported subpath fails here rather than on a consumer's machine.
-No new gate was written; deleting the thing that hid the problem was enough.
+No detection gate was needed; deleting the thing that hid the problem was enough.
+
+What the alias's **absence** needed was a gate of its own, because nothing else
+would notice it coming back — and re-adding it is a one-line, well-meaning fix
+for an editor complaint. `packages/ts-configs/tsconfig.shared.test.ts` asserts
+that the generated `packages/ui` config carries no `paths` at all, and that no
+workspace aliases `@lcabrera/ui/*` by wildcard. Proved by reintroducing the
+alias in the generator, regenerating, and watching both tests fail. This is why
+the per-workspace entries now live in `tsconfig.entries.ts` apart from the
+writer: importing `generate.ts` rewrites all 17 configs as a side effect, so
+the set was previously unassertable.
 
 ## Consequences
 

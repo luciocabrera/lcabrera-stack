@@ -23,6 +23,7 @@
     "@types/node": "catalog:types",
     "eslint": "catalog:lint",
     "typescript": "catalog:build",
+    "vite-plus": "catalog:build",
     "vitest": "catalog:test"
   }
 }
