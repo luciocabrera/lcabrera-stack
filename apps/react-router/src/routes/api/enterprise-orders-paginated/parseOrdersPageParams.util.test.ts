@@ -31,8 +31,58 @@ it('falls back for missing/invalid params and malformed JSON', () => {
 
   expect(result.skip).toBe(0);
   expect(result.filters).toStrictEqual([]);
-  expect(result.sort).toStrictEqual([]);
   expect(result.limit).toBeGreaterThan(0);
+});
+
+// A paginated read with no ORDER BY repeats and skips rows as the planner
+// changes plans between requests, so every path below must still name a column.
+// The Table client always sends a sort; these are the callers that do not.
+it.each([
+  { label: 'no sort param at all', params: new URLSearchParams() },
+  {
+    label: 'malformed sort JSON',
+    params: new URLSearchParams({ sort: '{bad' }),
+  },
+  {
+    label: 'a sort param that is not an array',
+    params: new URLSearchParams({ sort: '"nope"' }),
+  },
+  { label: 'an empty sort array', params: new URLSearchParams({ sort: '[]' }) },
+])('orders by the primary key given $label', ({ params }) => {
+  expect(parseOrdersPageParams(params).sort).toStrictEqual([
+    { column: 'order_id', direction: 'asc' },
+  ]);
+});
+
+it('orders by the primary key when every rule sanitizes away', () => {
+  const params = new URLSearchParams({
+    sort: JSON.stringify([
+      // The synthetic UI-only column, which is not a real database column.
+      { columnKey: 'actions', direction: 'asc' },
+      // A column the user cycled back to unsorted.
+      { columnKey: 'order_number' },
+    ]),
+  });
+
+  expect(parseOrdersPageParams(params).sort).toStrictEqual([
+    { column: 'order_id', direction: 'asc' },
+  ]);
+});
+
+it('leaves a request that did send a sort untouched', () => {
+  const params = new URLSearchParams({
+    sort: JSON.stringify([
+      { columnKey: 'order_date', direction: 'desc' },
+      { columnKey: 'order_id', direction: 'asc' },
+    ]),
+  });
+
+  // No fallback appended, no reordering — the fallback applies only to an
+  // empty sort, never as an extra tiebreaker on one the caller supplied.
+  expect(parseOrdersPageParams(params).sort).toStrictEqual([
+    { column: 'order_date', direction: 'desc' },
+    { column: 'order_id', direction: 'asc' },
+  ]);
 });
 
 it('parses a keyset cursor tuple, and ignores one that is not an array', () => {
