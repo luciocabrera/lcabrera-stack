@@ -31,6 +31,14 @@ const TABLE = 'grouping_capability_probe';
 const FIXTURE = `${SCHEMA}.${TABLE}`;
 const ENUM_TYPE = `${SCHEMA}.grouping_capability_mood`;
 
+/**
+ * A schema holding a composite type deliberately named `uuid`. Type names are
+ * per-schema, so this one reports `typname = 'uuid'` exactly like the built-in —
+ * the case a bare-name identifier exception would wrongly admit.
+ */
+const SHADOW_SCHEMA = 'grouping_capability_shadow';
+const SHADOW_UUID_TYPE = `${SHADOW_SCHEMA}.uuid`;
+
 /** One column per case the two gates have to tell apart. */
 const COLUMN = {
   /** `numeric`, low-cardinality — a fact that is demonstrably usable as a key. */
@@ -43,6 +51,8 @@ const COLUMN = {
   doc: 'doc',
   /** `interval` — the fact that looks like a date and is not one. */
   dur: 'dur',
+  /** A composite named `uuid` in another schema — the shadowing case. */
+  fakeId: 'fake_id',
   /** `bool` — a dimension Postgres has no `min`/`max` aggregate for. */
   flag: 'flag',
   /** `int4` primary key — the likeliest user mistake. */
@@ -76,6 +86,11 @@ describe.skipIf(!IS_SMOKE_ENABLED)(
     beforeAll(async () => {
       await getPool().query(`DROP TABLE IF EXISTS ${FIXTURE}`);
       await getPool().query(`DROP TYPE IF EXISTS ${ENUM_TYPE}`);
+      await getPool().query(`DROP SCHEMA IF EXISTS ${SHADOW_SCHEMA} CASCADE`);
+      await getPool().query(`CREATE SCHEMA ${SHADOW_SCHEMA}`);
+      await getPool().query(
+        `CREATE TYPE ${SHADOW_UUID_TYPE} AS (a int, b int)`,
+      );
       await getPool().query(
         `CREATE TYPE ${ENUM_TYPE} AS ENUM ('low', 'mid', 'high')`,
       );
@@ -94,7 +109,8 @@ describe.skipIf(!IS_SMOKE_ENABLED)(
            ${COLUMN.tenant} uuid,
            ${COLUMN.clientIp} inet,
            ${COLUMN.net} cidr,
-           ${COLUMN.dur} interval
+           ${COLUMN.dur} interval,
+           ${COLUMN.fakeId} ${SHADOW_UUID_TYPE}
          )`,
       );
       await getPool().query(
@@ -112,7 +128,8 @@ describe.skipIf(!IS_SMOKE_ENABLED)(
                   ('00000000-0000-0000-0000-00000000000' || (g % 4))::uuid,
                   ('10.0.' || (g % 8) || '.' || (g % 250))::inet,
                   ('10.0.' || (g % 8) || '.0/24')::cidr,
-                  ((g % 5) || ' days')::interval
+                  ((g % 5) || ' days')::interval,
+                  (g % 4, g % 4)::${SHADOW_UUID_TYPE}
              FROM generate_series(1, 2000) g`,
       );
       await getPool().query(`ANALYZE ${FIXTURE}`);
@@ -121,6 +138,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)(
     afterAll(async () => {
       await getPool().query(`DROP TABLE IF EXISTS ${FIXTURE}`);
       await getPool().query(`DROP TYPE IF EXISTS ${ENUM_TYPE}`);
+      await getPool().query(`DROP SCHEMA IF EXISTS ${SHADOW_SCHEMA} CASCADE`);
       await closePool();
     });
 
@@ -284,7 +302,10 @@ describe.skipIf(!IS_SMOKE_ENABLED)(
       // capability has already applied the rule under test and so cannot be
       // evidence for the premise behind it.
       const { rows } = await getPool().query<{ readonly typcategory: string }>(
-        `SELECT typcategory FROM pg_type WHERE typname IN ('uuid', 'jsonb')`,
+        `SELECT t.typcategory
+           FROM pg_type t
+           JOIN pg_namespace n ON n.oid = t.typnamespace
+          WHERE n.nspname = 'pg_catalog' AND t.typname IN ('uuid', 'jsonb')`,
       );
 
       expect(rows).toHaveLength(2);
@@ -297,6 +318,21 @@ describe.skipIf(!IS_SMOKE_ENABLED)(
       expect(doc?.typeName).toBe('jsonb');
       expect(doc?.canGroup).toBe(false);
       expect(doc?.refusal).toBe('not-a-dimension');
+    });
+
+    it('refuses a composite type that merely shares the uuid name', async () => {
+      const capabilities = await resolveCapabilities();
+      const fake = capabilities[COLUMN.fakeId];
+      const real = capabilities[COLUMN.tenant];
+
+      // The live proof that the exception is schema-qualified. Postgres reports
+      // both columns with `typname = 'uuid'`, so a bare-name match would admit a
+      // composite the Table cannot render. Only the namespace separates them.
+      expect(fake?.typeName).toBe('uuid');
+      expect(real?.typeName).toBe('uuid');
+      expect(fake?.canGroup).toBe(false);
+      expect(fake?.refusal).toBe('not-a-dimension');
+      expect(real?.canGroup).toBe(true);
     });
 
     it('refuses the primary key even though int4 is a groupable category', async () => {

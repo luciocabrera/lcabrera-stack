@@ -17,6 +17,7 @@ const row = (overrides: Partial<ColumnCapabilityRow>): ColumnCapabilityRow => ({
   relTuples: 2000,
   typeCategory: 'S',
   typeName: 'text',
+  typeNamespace: 'pg_catalog',
   ...overrides,
 });
 
@@ -244,6 +245,26 @@ describe('resolveColumnCapability', () => {
         }),
       ).refusal,
     ).toBe('stats-unavailable');
+  });
+
+  it('refuses a composite type that merely shares the uuid name', () => {
+    // The whole capability path, not just Gate 1: a `CREATE TYPE app.uuid`
+    // composite must come back refused, or a bare-name exception would have let
+    // an unrenderable type through as a group key.
+    const capability = resolveColumnCapability(
+      row({
+        aggregates: [],
+        column: 'fake_id',
+        nDistinct: 4,
+        typeCategory: 'C',
+        typeName: 'uuid',
+        typeNamespace: 'app',
+      }),
+    );
+
+    expect(capability.canGroup).toBe(false);
+    expect(capability.refusal).toBe('not-a-dimension');
+    expect(capability.aggregates).toEqual([]);
   });
 
   it('refuses a primary-key uuid as unique-ish', () => {

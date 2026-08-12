@@ -19,6 +19,7 @@ export const resolveColumnCapability = (
   const role = resolveAnalyticalRole({
     typeCategory: row.typeCategory,
     typeName: row.typeName,
+    typeNamespace: row.typeNamespace,
   });
   const estimate = resolveDistinctEstimate(row);
   const refusal = refuseGroupKey({
@@ -27,6 +28,7 @@ export const resolveColumnCapability = (
     relTuples: row.relTuples,
     role,
     typeName: row.typeName,
+    typeNamespace: row.typeNamespace,
   });
 
   return {

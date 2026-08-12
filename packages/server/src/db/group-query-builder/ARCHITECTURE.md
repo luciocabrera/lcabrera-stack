@@ -48,6 +48,14 @@ itself stays refused, and both the unit and smoke suites assert that a `jsonb`
 column is still turned away, so widening the category to reach a future
 identifier type fails loudly instead of quietly admitting a document.
 
+**The name is schema-qualified, and that is load-bearing.** Type names are
+per-schema, so `CREATE TYPE app.uuid AS (a int, b int)` is a composite reporting
+`typname = 'uuid'`. Matching the bare name would admit it — an unrenderable type
+sailing through the gate built to stop exactly that. The capability query carries
+the type's namespace for this reason alone, `is-identifier-type.util.ts` is the
+one place the comparison happens, and the smoke fixture creates a shadowing type
+so the distinction is proved against a live catalogue.
+
 An identifier also clears the **fact's** cardinality bar rather than the
 dimension's: `refuse-group-key.util.ts` reads the same constant and refuses a
 `uuid` with no statistics as `stats-unavailable`. The ordinary dimension rule is
@@ -68,7 +76,8 @@ documented in ADR-058, and something the UI has to surface rather than hide.
 | `group-query-builder.types.ts`            | `AggregateFn`, `ColumnAnalyticalRole`, `GroupKeyRefusalReason`, `DistinctEstimate`, and the capability row/result types                             |
 | `aggregate-sql.constants.ts`              | `AGGREGATE_SQL` — the closed `Record<AggregateFn, AggregateSpec>` map — plus the distinct SQL names the catalogue is probed with                    |
 | `group-key-bounds.constants.ts`           | The distinct-value ceiling for a group key and the unique-ish ratio                                                                                 |
-| `identifier-types.constants.ts`           | The named exceptions to the category derivation — types admitted by `typname` because their category holds types the Table cannot render            |
+| `identifier-types.constants.ts`           | The named exceptions to the category derivation — schema-qualified, because a type name alone is not unique                                         |
+| `is-identifier-type.util.ts`              | The one place that comparison happens; both the role gate and the refusal rules consult it so they cannot drift                                     |
 | `resolve-analytical-role.util.ts`         | **Gate 1.** `pg_type.typcategory` → dimension / fact / unsupported. Admit a category only when every member belongs (see above)                     |
 | `build-column-capabilities-query.util.ts` | **Gate 2.** One bound-parameter catalogue query: equality operator, per-aggregate existence, and `pg_stats`/`reltuples`, for every requested column |
 | `resolve-distinct-estimate.util.ts`       | `n_distinct` → a known count, genuinely unknown, or undefined distinctness — three outcomes on purpose                                              |

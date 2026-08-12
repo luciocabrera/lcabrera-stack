@@ -13,6 +13,7 @@ type ArgsOverrides = {
   readonly relTuples?: number;
   readonly role?: ColumnAnalyticalRole;
   readonly typeName?: string;
+  readonly typeNamespace?: string;
 };
 
 const args = (overrides: ArgsOverrides) => ({
@@ -21,6 +22,7 @@ const args = (overrides: ArgsOverrides) => ({
   relTuples: 2000,
   role: 'dimension' as ColumnAnalyticalRole,
   typeName: 'text',
+  typeNamespace: 'pg_catalog',
   ...overrides,
 });
 
@@ -115,6 +117,21 @@ describe('refuseGroupKey', () => {
     );
     expect(
       refuseGroupKey(args({ ...noStats, typeName: 'text' })),
+    ).toBeUndefined();
+  });
+
+  it('does not apply the identifier rule to a uuid from another schema', () => {
+    // `app.uuid` never reaches the identifier rule because Gate 1 already made
+    // it `unsupported`. Pinned anyway: the two utils consult the same predicate,
+    // and a bare-name match here would be just as wrong as one there.
+    expect(
+      refuseGroupKey(
+        args({
+          estimate: { kind: 'unknown' },
+          typeName: 'uuid',
+          typeNamespace: 'app',
+        }),
+      ),
     ).toBeUndefined();
   });
 

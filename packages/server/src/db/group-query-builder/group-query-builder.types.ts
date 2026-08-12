@@ -51,6 +51,13 @@ export type ColumnCapabilityRow = {
   readonly relTuples: number;
   readonly typeCategory: string;
   readonly typeName: string;
+  /**
+   * The schema the *type* lives in, not the table. Load-bearing for the named
+   * identifier exception: type names are per-schema, so a user-defined
+   * `app.uuid` reports `typname = 'uuid'` exactly like `pg_catalog.uuid` does,
+   * and only the namespace tells them apart.
+   */
+  readonly typeNamespace: string;
 };
 
 /**

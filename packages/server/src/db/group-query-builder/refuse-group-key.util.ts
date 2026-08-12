@@ -5,7 +5,7 @@ import type {
 } from './group-query-builder.types.ts';
 
 import { MAX_GROUP_KEY_DISTINCT } from './group-key-bounds.constants.ts';
-import { IDENTIFIER_TYPE_NAMES } from './identifier-types.constants.ts';
+import { isIdentifierType } from './is-identifier-type.util.ts';
 import { isUniqueIsh } from './is-unique-ish.util.ts';
 
 type RefuseGroupKeyArgs = {
@@ -14,6 +14,7 @@ type RefuseGroupKeyArgs = {
   readonly relTuples: number;
   readonly role: ColumnAnalyticalRole;
   readonly typeName: string;
+  readonly typeNamespace: string;
 };
 
 /**
@@ -34,6 +35,7 @@ export const refuseGroupKey = ({
   relTuples,
   role,
   typeName,
+  typeNamespace,
 }: RefuseGroupKeyArgs): GroupKeyRefusalReason | undefined => {
   if (role === 'unsupported') {
     return 'not-a-dimension';
@@ -57,7 +59,7 @@ export const refuseGroupKey = ({
   // which is far more often a key than a label.
   if (
     estimate.kind === 'unknown' &&
-    (role === 'fact' || IDENTIFIER_TYPE_NAMES.has(typeName))
+    (role === 'fact' || isIdentifierType({ typeName, typeNamespace }))
   ) {
     return 'stats-unavailable';
   }

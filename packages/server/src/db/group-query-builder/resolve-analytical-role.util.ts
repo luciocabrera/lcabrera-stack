@@ -1,6 +1,6 @@
 import type { ColumnAnalyticalRole } from './group-query-builder.types.ts';
 
-import { IDENTIFIER_TYPE_NAMES } from './identifier-types.constants.ts';
+import { isIdentifierType } from './is-identifier-type.util.ts';
 
 /**
  * `pg_type.typcategory` codes that carry an analytical role. The mapping is a
@@ -22,6 +22,7 @@ const ROLE_BY_TYPE_CATEGORY: Readonly<Record<string, ColumnAnalyticalRole>> = {
 type ResolveAnalyticalRoleArgs = {
   readonly typeCategory: string;
   readonly typeName: string;
+  readonly typeNamespace: string;
 };
 
 /**
@@ -29,16 +30,17 @@ type ResolveAnalyticalRoleArgs = {
  * `point` (`G`) and arrays (`A`) are deliberately absent — the Table cannot
  * render them, and a type it cannot display is not one it can group.
  *
- * The name is checked **before** the category, and only for the identifier types
- * (#599). Category `U` cannot be admitted: it holds `uuid` alongside `jsonb`,
- * `xml` and `bytea`, and a `uuid` row is identical to a `jsonb` one on every
- * structural field a catalogue row carries. So `uuid` is named, `U` stays out,
- * and adding the category here to reach a uuid is the mistake the tests guard.
+ * The identifier check runs **before** the category (#599). Category `U` cannot
+ * be admitted: it holds `uuid` alongside `jsonb`, `xml` and `bytea`, and a
+ * `uuid` row is identical to a `jsonb` one on every structural field a catalogue
+ * row carries. So `uuid` is named, `U` stays out, and adding the category here
+ * to reach a uuid is the mistake the tests guard.
  */
 export const resolveAnalyticalRole = ({
   typeCategory,
   typeName,
+  typeNamespace,
 }: ResolveAnalyticalRoleArgs): ColumnAnalyticalRole =>
-  IDENTIFIER_TYPE_NAMES.has(typeName)
+  isIdentifierType({ typeName, typeNamespace })
     ? 'dimension'
     : (ROLE_BY_TYPE_CATEGORY[typeCategory] ?? 'unsupported');

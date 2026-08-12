@@ -8,13 +8,21 @@
  * and a `jsonb` row report the same category, the same equality answer and the
  * same `{count}` aggregate set; only the name differs.
  *
+ * Entries are **schema-qualified**, and that is not decoration: type names are
+ * per-schema, so `CREATE TYPE app.uuid AS (…)` yields a composite whose
+ * `typname` is `uuid`. Matching on the bare name would admit it as a dimension —
+ * a type the Table cannot render, which is the exact failure this gate exists to
+ * prevent.
+ *
  * Being an identifier also carries a second rule: these types must demonstrate
  * low cardinality before they are a legal group key, the same bar a fact clears,
  * because a `uuid` column is far more often a key than a label. That is why
- * `refuse-group-key.util.ts` reads this set too rather than treating them as
- * ordinary dimensions.
+ * `refuse-group-key.util.ts` consults `isIdentifierType` too rather than
+ * treating them as ordinary dimensions.
  *
  * Keep it small. Every entry is a type someone has to maintain by hand, which is
  * the cost the category derivation exists to avoid.
  */
-export const IDENTIFIER_TYPE_NAMES: ReadonlySet<string> = new Set(['uuid']);
+export const IDENTIFIER_TYPE_NAMES: ReadonlySet<string> = new Set([
+  'pg_catalog.uuid',
+]);

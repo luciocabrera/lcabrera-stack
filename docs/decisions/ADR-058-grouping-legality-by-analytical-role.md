@@ -260,6 +260,13 @@ Two rules keep the exception honest:
   the category lookup, and the unit and smoke suites both assert that a `jsonb`
   column is still refused — so reaching a future identifier type by widening `U`
   fails loudly rather than passing.
+- **The name is schema-qualified** (`pg_catalog.uuid`), because type names are
+  per-schema. `CREATE TYPE app.uuid AS (a int, b int)` yields a **composite**
+  whose `typname` is `uuid`, so a bare-name match would admit an unrenderable
+  type as a dimension — the precise failure this gate exists to prevent. The
+  capability query therefore carries the type's namespace alongside its name, and
+  the smoke fixture creates such a shadowing type so the distinction is proved
+  against a real catalogue rather than asserted.
 - **An identifier clears the fact's cardinality bar, not the dimension's.** An
   ordinary dimension with no statistics is grouped anyway, because refusing would
   make grouping dead on a freshly restored database. That is benign for `text`
