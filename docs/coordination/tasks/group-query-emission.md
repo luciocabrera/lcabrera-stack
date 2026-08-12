@@ -2,7 +2,7 @@
 id: group-query-emission
 title: feat(server): group-query-builder with GROUPING SETS emission and alias safety
 owner: agent:claude
-status: active
+status: review
 branch: chore/562-group-query-emission
 area:
   - packages/server/src/db/group-query-builder/**
@@ -21,6 +21,6 @@ feat(server): group-query-builder with GROUPING SETS emission and alias safety
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: builder + suites landed, full gate green; PR open
 - Blockers: none
-- Next:
+- Next: land the PR; #568 and #573 stay blocked on their own dependencies

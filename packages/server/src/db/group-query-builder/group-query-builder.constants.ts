@@ -1,6 +1,7 @@
 import type {
   AggregateFn,
   AggregateSpec,
+  BuiltGroupQuery,
 } from './group-query-builder.types.ts';
 
 /**
@@ -57,12 +58,44 @@ export const IDENTIFIER_TYPE_NAMES: ReadonlySet<string> = new Set([
   'pg_catalog.uuid',
 ]);
 
+/** The alias `count(*)` is projected under; `count_rows` has no column to name it after. */
+export const COUNT_ROWS_ALIAS = 'count_rows';
+
+/**
+ * The alias of the variadic `GROUPING(k₁, …, kₙ)` projection. Typed off
+ * `BuiltGroupQuery` so the literal the result advertises and the literal the
+ * SQL emits cannot drift apart.
+ */
+export const GROUP_MASK_ALIAS: BuiltGroupQuery['maskAlias'] = 'group_mask';
+
+/**
+ * `count(DISTINCT …)` costs a per-group tuplesort that is redone for every
+ * grouping set, so a second one multiplies the most expensive part of the
+ * query. One is a budget, not a limitation of the SQL.
+ */
+export const MAX_COUNT_DISTINCT_AGGREGATES = 1;
+
 /**
  * A group key above this many distinct values produces a tree nobody reads and
  * a payload nobody wants. It bounds the **key**, which is why it lives here
  * rather than with the result-size guard rails.
  */
 export const MAX_GROUP_KEY_DISTINCT = 1000;
+
+/**
+ * Depth cap, checked before any round trip. Four is where an indented tree stops
+ * being legible, and it is also what bounds the result: a rollup at depth 4 is
+ * five grouping sets and roughly one sort, where a cube at the same depth is
+ * sixteen sets whose product blows past any sane row budget.
+ */
+export const MAX_GROUP_KEYS = 4;
+
+/**
+ * `NAMEDATALEN - 1`. Past it Postgres truncates with only a `NOTICE`, and `pg`
+ * then folds two truncation-equal aliases into one row key holding the second
+ * value — losing the first column with no error anywhere. Probed; see ADR-059.
+ */
+export const MAX_IDENTIFIER_LENGTH = 63;
 
 /**
  * At or above this share of the row count a column is treated as unique-ish and

@@ -6,10 +6,22 @@ whole suite runs without a database (ADR-032). The one impure partner is
 `../get-column-grouping-capabilities.util.ts`, which pairs the query this folder
 builds with `runQuery`.
 
-What exists today is the **capability half**: which columns may be a group key,
-which aggregates are legal for each, and why a column was refused. The emission
-half — `GROUPING SETS`, the variadic mask, aggregate projection and ordering —
-lands beside it.
+The folder has two halves and one entry point each.
+
+- **Capability** — which columns may be a group key, which aggregates are legal
+  for each, and why a column was refused. `resolveColumnCapability`, decided by
+  [ADR-058](../../../../../docs/decisions/ADR-058-grouping-legality-by-analytical-role.md).
+- **Emission** — `GROUPING SETS`, the variadic mask, aggregate projection and
+  ordering. `buildGroupQuery`, decided by
+  [ADR-059](../../../../../docs/decisions/ADR-059-aggregation-is-builder-generated.md).
+
+They are joined by a **descriptor field, not an import**: `buildGroupQuery`
+takes the capability map the other half resolved and refuses anything the
+catalogue turned down. That is what lets a pure function enforce ADR-058 —
+the impure half answers "what is legal here", this one refuses everything else.
+Re-deriving legality inside the builder is the design ADR-058 supersedes, and
+the reason is in its Context: the type vocabulary available to a pure function
+maps `point` and `jsonb` onto the same value it maps `text` onto.
 
 ## The two gates
 
@@ -81,8 +93,18 @@ documented in ADR-058, and something the UI has to surface rather than hide.
 | `resolve-distinct-estimate.util.ts`       | `n_distinct` → a known count, genuinely unknown, or undefined distinctness — three outcomes on purpose                                                                                 |
 | `to-role-aggregates.util.ts`              | Both gates applied to the aggregate menu: the role sets the ceiling, the catalogue removes what does not exist                                                                         |
 | `resolve-column-capability.util.ts`       | **Public entry point.** One catalogue row → one `ColumnGroupingCapability`, refusal reason included                                                                                    |
+| `expand-grouping-sets.util.ts`            | Grouping mode → the ordered sets, over key names rather than SQL, so its suite is array equality                                                                                       |
+| `to-grouping-set-mask.util.ts`            | One set → the `GROUPING()` integer, the only thing separating a structural NULL from a real one                                                                                        |
+| `assert-group-keys.util.ts`               | Depth cap, distinctness, the allowlist, and the catalogue's own refusal — all before any round trip                                                                                    |
+| `assert-group-aggregates.util.ts`         | Every requested `{column, fn}` against the catalogue's menu, plus the one-`countDistinct` budget                                                                                       |
+| `resolve-aggregate-alias.util.ts`         | `count(*)` → `count_rows`, otherwise `${fn}_${column}` with `distinct` folded into the prefix                                                                                          |
+| `assert-group-aliases.util.ts`            | The identifier-length refusal and the collision rules — see the fourth trap below                                                                                                      |
+| `build-aggregate-projection.util.ts`      | The aggregate half of the SELECT list, and where `FILTER (WHERE …)` claims the leading `$n`                                                                                            |
+| `build-grouping-sets-clause.util.ts`      | `GROUP BY GROUPING SETS (…)`, the one grouping construct emitted                                                                                                                       |
+| `build-group-order-by-clause.util.ts`     | `GROUPING(key) <placement>, key <user>` per key, then aggregates — and why no `NULLS` keyword appears                                                                                  |
+| `build-group-query.util.ts`               | **Public entry point.** One `GroupQueryDescriptor` → the SQL, its values, and the keys and masks needed to decode the result                                                           |
 
-## Three traps this folder already pays for
+## Four traps this folder already pays for
 
 Each was found by running the query against a live fixture, and each returns a
 clean, plausible, wrong answer if you drop it.
@@ -99,10 +121,17 @@ clean, plausible, wrong answer if you drop it.
    `pg_stats` row at all; the zero survives an explicit `ANALYZE` and means the
    type has no equality operator. Reading it as unknown points the guard rail's
    warn-and-proceed branch at exactly the unsafe case.
+4. **An over-long alias loses a column, and nothing raises.** Postgres truncates
+   an identifier past 63 bytes with only a `NOTICE`, and `pg` then returns one
+   row object in which the second of two truncation-equal aliases has
+   overwritten the first — the first column is not mangled, it is gone. Probed
+   in ADR-059: two aliases sharing 63 characters gave two notices, no error, and
+   `Object.keys(row)` of length one. So an over-long alias is refused at
+   construction, with an explicit shorter `alias` as the escape hatch.
 
 `../../../../../apps/react-router/src/.server/groupingCapability.smoke.test.ts`
-is the live-Postgres proof for all three, since a mocked row cannot show any of
-them. It is gated behind `SMOKE_DB`.
+is the live-Postgres proof for the first three, since a mocked row cannot show
+any of them. It is gated behind `SMOKE_DB`.
 
 ## Refusal reasons
 
@@ -125,3 +154,48 @@ covers the risk. A **fact** is not, because a fact is a measure and guessing
 "yes" on an amount column is the expensive direction. An **identifier** type
 (`uuid`) is treated as a fact here despite being a dimension — a column of
 opaque ids is usually a key, so it has to prove otherwise.
+
+## What the emitted query carries, and why
+
+`BuiltGroupQuery` is not just `{ text, values }`, and the extra fields are not
+convenience. A grouped row is ambiguous on its own: under a rollup, a row whose
+`shipping_country` is NULL is either a real NULL in the data or the subtotal
+across every country, and the two are **textually identical**. Only
+`GROUPING()` separates them.
+
+So the builder ships the decoder with the data:
+
+- `maskAlias` — the column holding `GROUPING(k₁, …, kₙ)`. **One variadic mask,
+  not a flag per key**: fixed arity whatever the depth, one alias to defend
+  instead of n, and the mask _is_ the grouping-set identity rather than
+  something reassembled from flags.
+- `keys` — ordered. Bit `n-1-i` belongs to `keys[i]`, so the mask cannot be
+  decoded without them.
+- `groupingSetMasks` — the mask of each emitted set, in emission order, for
+  reconstructing the hierarchy without inferring it from the data.
+
+Decoding, for key _i_ of _n_: bit set → the row is an aggregate over that key;
+bit clear and the value NULL → a real NULL; otherwise a value.
+
+## Ordering, and the `NULLS` keyword that must not appear
+
+`GROUPING(key) <placement>, key <user>` per key in descriptor order, then any
+aggregate sort. Two properties are worth stating because both are easy to break.
+
+**The `GROUPING` term is emitted only when that key is rolled up in at least one
+set.** One rule that degenerates correctly: a flat grouping never rolls anything
+up, so its `ORDER BY` is byte-identical to `buildOrderByClause`'s.
+
+**No `NULLS FIRST`/`NULLS LAST`, ever.** The `GROUPING` term partitions first:
+where it is 1 the key is NULL on every row in the partition, so the term after
+it orders nothing; where it is 0 the key is real data and a genuine NULL takes
+Postgres's default placement, exactly as the ungrouped list view gives it. The
+two kinds of NULL are never adjacent, so there is no placement to state — and
+emitting one would break `../query-builder/build-keyset-comparison.util.ts`,
+which deliberately depends on the default.
+
+**Key terms always precede aggregate terms.** That is what makes "rank the
+parents by their own totals" inexpressible rather than merely discouraged: an
+aggregate sort can order leaves within a parent, never reorder the tree. Doing
+it properly needs the parent's aggregate on the child row
+(`sum(…) OVER (PARTITION BY k₁)`), which is a named v2.
