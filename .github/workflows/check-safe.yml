@@ -214,6 +214,18 @@ jobs:
           TEST_CHANGED_BASE: origin/${{ github.base_ref }}
         run: vp run renames:verify
 
+      - name: Route-folder types/constants name a real artifact
+        id: route_names_gate
+        # The other half of local-rules/domain-folder-filename. That rule
+        # classifies a folder from its path alone, which cannot say that
+        # routes/car-sales-infinite/ holds a component called CarSales, so it
+        # exempts the whole route tree and nothing under one was checked. It
+        # cannot close that itself: the eslint pass is not type-aware, and a
+        # non-literal fs call is what security/detect-non-literal-fs-filename
+        # forbids in a package that publishes as @lcabrera/eslint-plugin and may
+        # not suppress a finding. A root script has neither constraint.
+        run: vp run route-names:verify
+
       - name: ADR homes, numbering and indexes
         id: adr_gate
         # docs:verify deliberately skips every `decisions` directory — an ADR
