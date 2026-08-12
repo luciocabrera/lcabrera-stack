@@ -95,9 +95,14 @@ and pure derivation/mapping utils (`deriveOrderTotals`, `toOrderInsertValues`/
 `toOrderUpdateValues`, `readOrderFormValues`, `toOrderFieldErrors`, `toOrderFormValues`,
 `toOrderKeysetCursor`). Each util is pure with a colocated test.
 
-Sort **translation** is not here — `@lcabrera/ui/routing/shared`'s `sanitizeSorting`
-and `@lcabrera/server`'s `resolveQuerySort` are table-agnostic and do it for every
-route. The one sort value that is table-specific lives here:
+Sort **translation** is not here, and the two read paths reach it differently.
+The loader translates its already-tiebroken sorting with `toQuerySort`
+(`@lcabrera/ui/routing/shared`); the paginated resource route composes
+`sanitizeSorting` (same package) with `resolveQuerySort` (`@lcabrera/server/sort`),
+because it also has to supply a fallback. All three are table-agnostic package
+utils — none of them knows about orders, which is why none of them lives here.
+
+The one sort value that _is_ table-specific does live here:
 `ENTERPRISE_ORDER_FALLBACK_SORT`, the ordering the paginated read falls back to
 when a request carries no sort at all. See the read path below for why it exists
 at all, given the client always sends one.
@@ -137,7 +142,7 @@ obvious-but-slower spelling (epic #391):
 result is impossible. That looks redundant against the client — `buildTablePageQuery`
 appends `order_id` via `appendPrimaryKeySorting`, so a scrolled page always arrives
 sorted, and page 1 and page 2+ already agreed. It is not, because
-`_api/enterprise-orders/paginated` is a **public URL** and that guarantee lived
+`/_api/enterprise-orders/paginated` is a **public URL** and that guarantee lived
 entirely in another package's client-side code: a direct request, a non-Table
 consumer, or a column config that loses `isPrimaryKey` would otherwise produce a
 paginated read with no `ORDER BY`, which repeats and skips rows as the planner
