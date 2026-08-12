@@ -30,7 +30,7 @@ Decisions locked with the owner (2026-07-14): both slices ship in one increment;
 
 ### 4. The CLI + packer (extends `scan-ingestion`)
 
-- `packProjectArchive.util.ts`: an in-memory fflate zip of the project tree, honoring the shared `IGNORED_DIRECTORIES` (extracted from `buildFileInventory` into `ignoredDirectories.constants.ts` so packer and inventory can't drift; a push never uploads `node_modules`/`.git`/build output). Zip keys are **POSIX-normalized** so the linux server's `extractZipArchive` zip-slip guard matches regardless of the developer's OS separator. Non-files (symlinks) are skipped.
+- `packProjectArchive.util.ts`: an in-memory fflate zip of the project tree, honoring the shared `IGNORED_DIRECTORIES` (extracted from `buildFileInventory` into `ingestion.constants.ts` so packer and inventory can't drift; a push never uploads `node_modules`/`.git`/build output). Zip keys are **POSIX-normalized** so the linux server's `extractZipArchive` zip-slip guard matches regardless of the developer's OS separator. Non-files (symlinks) are skipped.
 - `push.cli.ts`: packs `--root` (default cwd) and POSTs to `--url`/`CODEPULSE_URL` with `Authorization: Bearer` from `CODEPULSE_TOKEN` (or `--token`, discouraged). Runs via a `push` package script (`node --experimental-strip-types`); **no `bin`** yet — distribution is a later increment. `readBinaryFileWithin.util.ts` (containment-guarded byte read) and `parseCliFlags.util.ts` (shared by the ingest + push CLIs) support it.
 
 ### 5. Profile UI
