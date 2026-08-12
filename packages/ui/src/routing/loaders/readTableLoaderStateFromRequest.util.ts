@@ -109,9 +109,13 @@ export const readTableLoaderStateFromRequest = <
     filters,
     metaUiFlags,
     sorting,
-    // The raw params, not a duplicate of the parsed state above: they are the
-    // only way to tell "no `sorting` param" from "a param that deserialized to
-    // an empty sort", which `sorting: []` alone cannot express.
+    // The raw params, not a duplicate of the parsed state above. Each carries a
+    // distinction the parsed value cannot: `null` is "the URL had no such
+    // param", where a string is "a param that happened to deserialize to
+    // nothing" — `sorting: []` and `filters: {}` look identical either way.
+    // `standaloneFiltersParam` has a third state, `undefined`, meaning this
+    // route opted out of URL filters entirely (`includeFilters: false`), which
+    // is not the same as a route that allows them and received none.
     standaloneFiltersParam,
     standaloneSortParam,
   };
