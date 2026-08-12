@@ -1,8 +1,27 @@
-import { logger } from '#ui/utils/logger';
+import { stateCodec } from './stateCodec.util';
 
 type DecodeStateFromURLArgs = {
   readonly convertArraysToSets?: readonly string[];
   readonly encoded: string;
+};
+
+type WithArraysAsSetsArgs = {
+  readonly keys: readonly string[];
+  readonly state: Record<string, unknown>;
+};
+
+/** Rehydrates the named array-valued keys into Sets, copying rather than mutating. */
+const withArraysAsSets = ({ keys, state }: WithArraysAsSetsArgs) => {
+  const wanted = new Set(keys);
+
+  return Object.fromEntries(
+    Object.entries(state).map(([key, value]) => [
+      key,
+      wanted.has(key) && Array.isArray(value)
+        ? new Set(value as unknown[])
+        : value,
+    ]),
+  );
 };
 
 /**
@@ -11,7 +30,7 @@ type DecodeStateFromURLArgs = {
  * @param params - Configuration object
  * @param params.encoded - Base64 URL-safe encoded string
  * @param params.convertArraysToSets - Optional array of keys that should be converted from arrays to Sets
- * @returns Decoded state object or undefined if decoding fails
+ * @returns Decoded state object, or undefined when the param is not decodable Base64, not JSON, or not an object
  *
  * @example
  * ```ts
@@ -23,29 +42,12 @@ type DecodeStateFromURLArgs = {
 export const decodeStateFromURL = ({
   convertArraysToSets,
   encoded,
-}: DecodeStateFromURLArgs): Record<string, unknown> | undefined => {
-  try {
-    // Restore Base64 padding and standard characters
-    const base64 = encoded
-      .replaceAll('-', '+')
-      .replaceAll('_', '/')
-      .padEnd(encoded.length + ((4 - (encoded.length % 4)) % 4), '=');
+}: DecodeStateFromURLArgs) => {
+  const state = stateCodec.deserialize(encoded);
 
-    const json = atob(base64);
-    const parsed = JSON.parse(json) as Record<string, unknown>;
-
-    // Convert specified arrays back to Sets if requested
-    if (convertArraysToSets) {
-      for (const key of convertArraysToSets) {
-        if (Array.isArray(parsed[key])) {
-          parsed[key] = new Set(parsed[key] as unknown[]);
-        }
-      }
-    }
-
-    return parsed;
-  } catch (error) {
-    logger.debug('[urlState] Failed to decode state param:', error);
-    return undefined;
+  if (state === undefined || convertArraysToSets === undefined) {
+    return state;
   }
+
+  return withArraysAsSets({ keys: convertArraysToSets, state });
 };

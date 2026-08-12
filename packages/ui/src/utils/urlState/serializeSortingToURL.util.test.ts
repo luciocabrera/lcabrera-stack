@@ -42,4 +42,15 @@ describe('serializeSortingToURL', () => {
     ]);
     expect(result).toBeUndefined();
   });
+
+  it('keeps a __proto__ column key rather than dropping that one entry', () => {
+    // Building the record by assignment would route this to the prototype
+    // setter and drop it from the serialized param.
+    const result = serializeSortingToURL([
+      { columnKey: '__proto__', direction: 'asc' },
+      { columnKey: 'name', direction: 'desc' },
+    ]);
+
+    expect(result).toBe('{"__proto__":"asc","name":"desc"}');
+  });
 });

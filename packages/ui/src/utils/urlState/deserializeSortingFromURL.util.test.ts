@@ -21,4 +21,30 @@ describe('deserializeSortingFromURL', () => {
     const result = deserializeSortingFromURL('{}');
     expect(result).toEqual([]);
   });
+
+  it('drops the whole sort when a direction is hand-edited', () => {
+    // `name` is a valid entry and goes with the rest: a half-applied sort
+    // reorders a shared link's rows while still looking like the linked sort.
+    expect(
+      deserializeSortingFromURL('{"name":"asc","age":"; DROP TABLE"}'),
+    ).toEqual([]);
+  });
+
+  it('drops the whole sort for a direction outside the vocabulary', () => {
+    expect(deserializeSortingFromURL('{"name":"ASC"}')).toEqual([]);
+    expect(deserializeSortingFromURL('{"name":"descending"}')).toEqual([]);
+    expect(deserializeSortingFromURL('{"name":1}')).toEqual([]);
+  });
+
+  it('drops the whole sort for a param that is not an object', () => {
+    expect(deserializeSortingFromURL('["name","asc"]')).toEqual([]);
+    expect(deserializeSortingFromURL('"asc"')).toEqual([]);
+  });
+
+  it('degrades rather than throwing on any of the above', () => {
+    expect(() =>
+      deserializeSortingFromURL('{"name":"sideways"}'),
+    ).not.toThrow();
+    expect(() => deserializeSortingFromURL('not-json')).not.toThrow();
+  });
 });

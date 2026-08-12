@@ -53,4 +53,18 @@ describe('deserializeFiltersFromURL', () => {
     expect('bad' in result).toBe(false);
     expect(result.name).toBeDefined();
   });
+
+  it('drops the whole state for a param that is not a column-keyed object', () => {
+    // A JSON array of otherwise-valid filters is not a filters payload — none
+    // of it is applied, rather than an index being read as a column key.
+    expect(deserializeFiltersFromURL('[["ct","hello"]]')).toEqual({});
+    expect(deserializeFiltersFromURL('"hello"')).toEqual({});
+    expect(deserializeFiltersFromURL('42')).toEqual({});
+    expect(deserializeFiltersFromURL('null')).toEqual({});
+  });
+
+  it('degrades rather than throwing on a hand-edited param', () => {
+    expect(() => deserializeFiltersFromURL('{not json')).not.toThrow();
+    expect(() => deserializeFiltersFromURL('[["ct","hello"]]')).not.toThrow();
+  });
 });
