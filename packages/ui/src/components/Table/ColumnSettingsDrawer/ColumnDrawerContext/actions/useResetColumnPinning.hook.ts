@@ -1,7 +1,7 @@
-import { useColumnDrawerContextValue } from '@lcabrera/ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook';
-import { useTableConfigContextValue } from '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import { getColumnPinSide } from '@lcabrera/ui/components/Table/utils';
-import { logger } from '@lcabrera/ui/utils/logger';
+import { useColumnDrawerContextValue } from '#ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook';
+import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { getColumnPinSide } from '#ui/components/Table/utils';
+import { logger } from '#ui/utils/logger';
 
 /**
  * Resets the column pinning in the drawer to match the current table state.

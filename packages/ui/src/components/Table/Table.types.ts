@@ -1,5 +1,3 @@
-import type { ColumnFilter } from '@lcabrera/ui/types/filterOperators.types';
-import type { InfiniteScroll, Sorting } from '@lcabrera/ui/types/ui.types';
 import type {
   CurrencyFormatOptions,
   DateFormatOptions,
@@ -7,6 +5,9 @@ import type {
 } from '@lcabrera/utils/formatters/formatters.types';
 import type { StyleXStyles } from '@stylexjs/stylex';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
+
+import type { ColumnFilter } from '#ui/types/filterOperators.types';
+import type { InfiniteScroll, Sorting } from '#ui/types/ui.types';
 
 /**
  * Column filters state - maps column key to filter configuration

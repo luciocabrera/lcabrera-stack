@@ -1,5 +1,5 @@
-import { resolveFetchMoreState } from '@lcabrera/ui/components/Table/utils/resolveFetchMoreState.util';
-import { clearPrefetchCache } from '@lcabrera/ui/utils/prefetch/clearPrefetchCache.util';
+import { resolveFetchMoreState } from '#ui/components/Table/utils/resolveFetchMoreState.util';
+import { clearPrefetchCache } from '#ui/utils/prefetch/clearPrefetchCache.util';
 
 import type { CommitFetchMoreSuccessArgs } from './fetchMoreData.types';
 

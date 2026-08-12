@@ -1,8 +1,8 @@
-import type { TableColumnDataType } from '@lcabrera/ui/components/Table/Table.types';
+import type { TableColumnDataType } from '#ui/components/Table/Table.types';
 import type {
   ColumnFilter,
   OperatorType,
-} from '@lcabrera/ui/types/filterOperators.types';
+} from '#ui/types/filterOperators.types';
 
 import { resolveDateOperatorChange } from './resolveDateOperatorChange.util';
 import { resolveNumberOperatorChange } from './resolveNumberOperatorChange.util';

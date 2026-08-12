@@ -7,7 +7,7 @@ const { mockGetHasPinOrderConflict } = vi.hoisted(() => ({
 }));
 
 vi.mock(
-  '@lcabrera/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils',
+  '#ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils',
   () => ({
     getHasPinOrderConflict: mockGetHasPinOrderConflict,
   }),

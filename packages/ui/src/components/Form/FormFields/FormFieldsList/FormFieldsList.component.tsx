@@ -1,6 +1,7 @@
-import { FormField } from '@lcabrera/ui/components/Form/FormField/FormField.component';
 import * as stylex from '@stylexjs/stylex';
 import { use } from 'react';
+
+import { FormField } from '#ui/components/Form/FormField/FormField.component';
 
 import type { FormFieldsListProps } from './FormFieldsList.types';
 

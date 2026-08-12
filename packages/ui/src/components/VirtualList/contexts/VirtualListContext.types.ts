@@ -1,5 +1,5 @@
-import type { TStore } from '@lcabrera/ui/hooks/useStore.hook';
-import type { SelectFilter } from '@lcabrera/ui/types/filterOperators.types';
+import type { TStore } from '#ui/hooks/useStore.hook';
+import type { SelectFilter } from '#ui/types/filterOperators.types';
 
 import type {
   VirtualListDataState,

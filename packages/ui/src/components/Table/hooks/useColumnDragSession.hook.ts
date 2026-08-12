@@ -1,10 +1,11 @@
-import type { DataKey } from '@lcabrera/ui/components/Table/Table.types';
+import { useEffect, useRef, useState } from 'react';
+
+import type { DataKey } from '#ui/components/Table/Table.types';
 
 import {
   useSetColumnSizingWithoutSync,
   useSyncColumnsSizing,
-} from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/actions';
-import { useEffect, useRef, useState } from 'react';
+} from '#ui/components/Table/contexts/TableConfig/columns/actions';
 
 import { startColumnResizeSession } from './utils/startColumnResizeSession.service';
 

@@ -81,7 +81,7 @@ export const createLogger = ({ level, prefix }: CreateLoggerArgs = {}) => {
  *
  * @example
  * ```ts
- * import { logger } from '@lcabrera/ui/utils/logger';
+ * import { logger } from '#ui/utils/logger';
  * logger.warn('Something happened');
  * ```
  */

@@ -1,8 +1,8 @@
 import {
   useGetGlobalNavigationPreferences,
   useGetGlobalPinningPreferences,
-} from '@lcabrera/ui/contexts/GlobalSettingsContext/selectors';
-import { useStore } from '@lcabrera/ui/hooks';
+} from '#ui/contexts/GlobalSettingsContext/selectors';
+import { useStore } from '#ui/hooks';
 
 import type { SettingsDraft } from '../Settings.types';
 import type { SettingsDraftProviderProps } from './SettingsDraftContext.types';

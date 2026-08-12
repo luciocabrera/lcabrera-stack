@@ -1,7 +1,8 @@
-import type { PersistCookieEntry } from '@lcabrera/ui/routing/actions/routing.types';
-
-import { PERSIST_COOKIE_ACTION } from '@lcabrera/ui/constants/globalSettings.constants';
 import { useFetcher, useLocation } from 'react-router';
+
+import type { PersistCookieEntry } from '#ui/routing/actions/routing.types';
+
+import { PERSIST_COOKIE_ACTION } from '#ui/constants/globalSettings.constants';
 
 type UsePersistCookieActionArgs = {
   /**

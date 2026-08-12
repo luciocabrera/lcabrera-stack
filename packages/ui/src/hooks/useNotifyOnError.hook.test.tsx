@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 const notifyMock = vi.hoisted(() => vi.fn());
 
-vi.mock('@lcabrera/ui/contexts/NotificationContext/actions', () => ({
+vi.mock('#ui/contexts/NotificationContext/actions', () => ({
   useNotifyAction: () => notifyMock,
 }));
 

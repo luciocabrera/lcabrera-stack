@@ -1,14 +1,15 @@
 import type { RefObject } from 'react';
 
+import { useEffect, useState } from 'react';
+
 import {
   DEFAULT_CONTAINER_HEIGHT,
   DEFAULT_ROW_OVERSCAN,
-} from '@lcabrera/ui/constants/virtualization.constants';
+} from '#ui/constants/virtualization.constants';
 import {
   getVerticalVirtualizationWindow,
   setupObservedContainer,
-} from '@lcabrera/ui/hooks/utils';
-import { useEffect, useState } from 'react';
+} from '#ui/hooks/utils';
 
 export type UseVirtualizationArgs = {
   readonly containerRef: RefObject<HTMLElement | null | undefined>;

@@ -59,19 +59,13 @@ vi.mock('../../TableDrawerContext/selectors', () => ({
   useGetColumnFilters: () => columnFiltersRef.current,
 }));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions',
-  () => ({
-    useSetTableSettingsExpandedFilters: () => mockSetExpandedFilters,
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/meta/actions', () => ({
+  useSetTableSettingsExpandedFilters: () => mockSetExpandedFilters,
+}));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors',
-  () => ({
-    useGetTableSettingsExpandedFilters: () => expandedFiltersRef.current,
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
+  useGetTableSettingsExpandedFilters: () => expandedFiltersRef.current,
+}));
 
 import { FiltersSectionToolbar } from './FiltersSectionToolbar.component';
 

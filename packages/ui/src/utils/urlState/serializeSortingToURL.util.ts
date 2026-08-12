@@ -1,4 +1,4 @@
-import type { SortingState } from '@lcabrera/ui/components/Table';
+import type { SortingState } from '#ui/components/Table';
 
 type CompactSorting = Record<string, 'asc' | 'desc'>;
 

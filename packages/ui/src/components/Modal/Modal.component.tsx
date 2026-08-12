@@ -1,12 +1,13 @@
-import { AppBackground } from '@lcabrera/ui/components/AppBackground';
-import { AppDotted } from '@lcabrera/ui/components/AppDotted';
-import { Button } from '@lcabrera/ui/components/Button';
-import { MenuCloseIcon } from '@lcabrera/ui/components/Icons';
-import { Title } from '@lcabrera/ui/components/Title';
-import { ICON_SIZE_MD } from '@lcabrera/ui/design-system/constants/iconSizes.constants';
-import { surfaceStyles } from '@lcabrera/ui/design-system/tokens/surfaces.stylex';
 import * as stylex from '@stylexjs/stylex';
 import { useEffect, useRef } from 'react';
+
+import { AppBackground } from '#ui/components/AppBackground';
+import { AppDotted } from '#ui/components/AppDotted';
+import { Button } from '#ui/components/Button';
+import { MenuCloseIcon } from '#ui/components/Icons';
+import { Title } from '#ui/components/Title';
+import { ICON_SIZE_MD } from '#ui/design-system/constants/iconSizes.constants';
+import { surfaceStyles } from '#ui/design-system/tokens/surfaces.stylex';
 
 import type { ModalProps } from './Modal.types';
 

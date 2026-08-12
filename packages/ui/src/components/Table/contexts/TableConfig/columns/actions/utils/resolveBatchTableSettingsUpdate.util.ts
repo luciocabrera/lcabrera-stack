@@ -6,9 +6,9 @@ import type {
   ColumnVisibilityState,
   SortingState,
   TableColumn,
-} from '@lcabrera/ui/components/Table/Table.types';
+} from '#ui/components/Table/Table.types';
 
-import { deriveColumnViewState } from '@lcabrera/ui/components/Table/utils';
+import { deriveColumnViewState } from '#ui/components/Table/utils';
 
 export type BatchTableSettingsUpdate<TData> = {
   readonly columnFilters: ColumnFiltersState<TData>;

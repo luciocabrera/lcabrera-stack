@@ -3,14 +3,11 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/actions',
-  () => ({
-    useSetColumnSorting: () => vi.fn(),
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/columns/actions', () => ({
+  useSetColumnSorting: () => vi.fn(),
+}));
 
-vi.mock('@lcabrera/ui/components/Table/TableActionsPopover', () => ({
+vi.mock('#ui/components/Table/TableActionsPopover', () => ({
   tableActionsPopoverStyles: {
     menuIcon: {},
     menuItem: {},

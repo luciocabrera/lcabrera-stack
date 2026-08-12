@@ -8,8 +8,8 @@ import type {
   TableMetaState,
   TablePersistenceConfig,
   TablePersistenceSliceEntry,
-} from '@lcabrera/ui/components/Table/Table.types';
-import type { TStore } from '@lcabrera/ui/hooks/useStore.hook';
+} from '#ui/components/Table/Table.types';
+import type { TStore } from '#ui/hooks/useStore.hook';
 
 /**
  * Shared argument shape of the `commitResolved*State` utils: the resolved

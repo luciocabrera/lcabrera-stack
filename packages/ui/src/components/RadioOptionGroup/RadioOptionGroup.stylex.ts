@@ -1,10 +1,8 @@
-import {
-  spacing,
-  typography,
-} from '@lcabrera/ui/design-system/tokens/base.stylex';
-import { colors } from '@lcabrera/ui/design-system/tokens/colors.stylex';
-import { surfaceStyles } from '@lcabrera/ui/design-system/tokens/surfaces.stylex';
 import * as stylex from '@stylexjs/stylex';
+
+import { spacing, typography } from '#ui/design-system/tokens/base.stylex';
+import { colors } from '#ui/design-system/tokens/colors.stylex';
+import { surfaceStyles } from '#ui/design-system/tokens/surfaces.stylex';
 
 const localStyles = stylex.create({
   container: {

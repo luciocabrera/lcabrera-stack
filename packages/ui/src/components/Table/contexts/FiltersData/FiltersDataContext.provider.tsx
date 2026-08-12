@@ -1,6 +1,6 @@
-import type { FiltersDataState } from '@lcabrera/ui/components/Table/Table.types';
+import type { FiltersDataState } from '#ui/components/Table/Table.types';
 
-import { useStore } from '@lcabrera/ui/hooks';
+import { useStore } from '#ui/hooks';
 
 import type {
   FiltersDataContextValue,

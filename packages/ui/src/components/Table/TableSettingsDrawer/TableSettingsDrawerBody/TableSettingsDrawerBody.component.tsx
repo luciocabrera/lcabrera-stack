@@ -1,9 +1,9 @@
-import type { TabItem } from '@lcabrera/ui/components/Tabs';
+import type { TabItem } from '#ui/components/Tabs';
 
-import { SidePanelBody } from '@lcabrera/ui/components/SidePanel';
-import { useSetTableSettingsSelectedTab } from '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions';
-import { useGetTableSettingsSelectedTab } from '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors';
-import { Tabs } from '@lcabrera/ui/components/Tabs';
+import { SidePanelBody } from '#ui/components/SidePanel';
+import { useSetTableSettingsSelectedTab } from '#ui/components/Table/contexts/TableConfig/meta/actions';
+import { useGetTableSettingsSelectedTab } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
+import { Tabs } from '#ui/components/Tabs';
 
 import type { TableSettingsDrawerBodyProps } from './TableSettingsDrawerBody.types';
 

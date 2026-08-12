@@ -1,10 +1,8 @@
-import {
-  typography,
-  zIndex,
-} from '@lcabrera/ui/design-system/tokens/base.stylex';
-import { colors } from '@lcabrera/ui/design-system/tokens/colors.stylex';
-import { skeleton } from '@lcabrera/ui/design-system/tokens/commons.stylex';
 import * as stylex from '@stylexjs/stylex';
+
+import { typography, zIndex } from '#ui/design-system/tokens/base.stylex';
+import { colors } from '#ui/design-system/tokens/colors.stylex';
+import { skeleton } from '#ui/design-system/tokens/commons.stylex';
 
 export const tableHeaderCellStyles = stylex.create({
   base: (minWidth?: number | string, width?: number | string) => ({

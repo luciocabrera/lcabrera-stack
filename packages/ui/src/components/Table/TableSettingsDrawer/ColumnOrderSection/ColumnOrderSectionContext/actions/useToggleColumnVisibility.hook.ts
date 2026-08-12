@@ -1,7 +1,7 @@
-import type { ColumnVisibilityState } from '@lcabrera/ui/components/Table/Table.types';
+import type { ColumnVisibilityState } from '#ui/components/Table/Table.types';
 
-import { useTableConfigContextValue } from '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import { useTableDrawerContextValue } from '@lcabrera/ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
+import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { useTableDrawerContextValue } from '#ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
 
 type UseToggleColumnVisibilityArgs = {
   readonly columnKey: string;

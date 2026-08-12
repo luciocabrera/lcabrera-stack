@@ -1,7 +1,7 @@
 import type {
   StaticFilterOptionsDescriptor,
   TableColumn,
-} from '@lcabrera/ui/components/Table/Table.types';
+} from '#ui/components/Table/Table.types';
 
 type StaticFilterOptions<TData> = Pick<
   TableColumn<TData>,

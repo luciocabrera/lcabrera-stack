@@ -1,6 +1,7 @@
-import type { ButtonProps } from '@lcabrera/ui/components/Button';
 import type { StyleXStyles } from '@stylexjs/stylex';
 import type { ComponentPropsWithoutRef } from 'react';
+
+import type { ButtonProps } from '#ui/components/Button';
 
 /**
  * Declarative description of one button in an `ActionButtons` group: a

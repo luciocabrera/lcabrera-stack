@@ -1,5 +1,6 @@
-import type { RadioOption } from '@lcabrera/ui/components/RadioOptionGroup';
 import type { ReactNode } from 'react';
+
+import type { RadioOption } from '#ui/components/RadioOptionGroup';
 
 /**
  * Props for {@link ChoiceModal}, the shared "pick one option, then accept or

@@ -1,9 +1,10 @@
+import { describe, expect, it } from 'vite-plus/test';
+
 import {
   DATE_OPERATORS,
   NUMBER_OPERATORS,
   TEXT_OPERATORS,
-} from '@lcabrera/ui/constants/filterOperators.constants';
-import { describe, expect, it } from 'vite-plus/test';
+} from '#ui/constants/filterOperators.constants';
 
 import { getOperatorOptions } from './getOperatorOptions.util';
 

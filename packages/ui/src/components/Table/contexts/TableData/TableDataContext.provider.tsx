@@ -1,7 +1,8 @@
-import type { TableDataState } from '@lcabrera/ui/components/Table/Table.types';
-
-import { useStore } from '@lcabrera/ui/hooks';
 import { useEffect } from 'react';
+
+import type { TableDataState } from '#ui/components/Table/Table.types';
+
+import { useStore } from '#ui/hooks';
 
 import type {
   TableDataContextValue,

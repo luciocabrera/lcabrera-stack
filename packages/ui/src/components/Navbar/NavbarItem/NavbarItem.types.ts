@@ -1,7 +1,7 @@
 import type {
   DesignSystemOrientation,
   DesignSystemSize,
-} from '@lcabrera/ui/types/design-system.types';
+} from '#ui/types/design-system.types';
 
 import type { NavbarItemConfig } from '../Navbar.types';
 

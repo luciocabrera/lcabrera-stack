@@ -1,6 +1,6 @@
-import type { FormSubmission } from '@lcabrera/ui/components/Form/Form.types';
+import type { FormSubmission } from '#ui/components/Form/Form.types';
 
-import { useMetaStore } from '@lcabrera/ui/components/Form/contexts/FormContext/useMetaStore.hook';
+import { useMetaStore } from '#ui/components/Form/contexts/FormContext/useMetaStore.hook';
 
 /** Submission flavour: RR7 navigation `<Form>` vs `fetcher.Form`. */
 export const useGetFormSubmission = () =>

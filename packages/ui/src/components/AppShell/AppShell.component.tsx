@@ -1,7 +1,8 @@
-import { AppNavigation } from '@lcabrera/ui/components/AppNavigation';
-import { NotificationCenter } from '@lcabrera/ui/components/NotificationCenter';
 import * as stylex from '@stylexjs/stylex';
 import { Outlet } from 'react-router';
+
+import { AppNavigation } from '#ui/components/AppNavigation';
+import { NotificationCenter } from '#ui/components/NotificationCenter';
 
 import { AppBackground } from '../AppBackground';
 import { AppDotted } from '../AppDotted';

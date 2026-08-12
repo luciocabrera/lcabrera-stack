@@ -1,9 +1,9 @@
 import type {
   TableColumnsState,
   TableMetaState,
-} from '@lcabrera/ui/components/Table/Table.types';
+} from '#ui/components/Table/Table.types';
 
-import { useStore } from '@lcabrera/ui/hooks';
+import { useStore } from '#ui/hooks';
 
 import type {
   TableConfigContextValue,

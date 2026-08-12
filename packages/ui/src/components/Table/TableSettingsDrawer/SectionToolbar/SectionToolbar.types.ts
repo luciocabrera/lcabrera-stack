@@ -1,5 +1,6 @@
-import type { IconProps } from '@lcabrera/ui/components/Icons';
 import type { ComponentType } from 'react';
+
+import type { IconProps } from '#ui/components/Icons';
 
 export type SectionToolbarButton = {
   /** Icon component rendered at the variant-resolved icon size */

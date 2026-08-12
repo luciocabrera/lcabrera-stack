@@ -1,8 +1,9 @@
+import { describe, expect, it } from 'vite-plus/test';
+
 import {
   COLUMN_RESIZE_KEYBOARD_COARSE_STEP,
   COLUMN_RESIZE_KEYBOARD_STEP,
-} from '@lcabrera/ui/components/Table/Table.constants';
-import { describe, expect, it } from 'vite-plus/test';
+} from '#ui/components/Table/Table.constants';
 
 import { resolveKeyboardResizeAction } from './resolveKeyboardResizeAction.util';
 

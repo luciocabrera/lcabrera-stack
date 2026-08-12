@@ -1,12 +1,12 @@
+import { describe, expect, it, vi } from 'vite-plus/test';
+
 import type {
   ColumnOrderState,
   ColumnPinningState,
   PinnedColumnOffsetsState,
   PinnedColumnPartitionState,
   TableColumn,
-} from '@lcabrera/ui/components/Table/Table.types';
-
-import { describe, expect, it, vi } from 'vite-plus/test';
+} from '#ui/components/Table/Table.types';
 
 import { commitPinningAndOrderUpdate } from './commitPinningAndOrderUpdate.util';
 

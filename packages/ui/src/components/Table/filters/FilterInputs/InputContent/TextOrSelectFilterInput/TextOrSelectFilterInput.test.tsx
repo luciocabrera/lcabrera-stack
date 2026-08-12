@@ -1,8 +1,8 @@
-// @vitest-environment jsdom
-import type { ColumnFilter } from '@lcabrera/ui/types/filterOperators.types';
-
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
+
+// @vitest-environment jsdom
+import type { ColumnFilter } from '#ui/types/filterOperators.types';
 
 import { TextOrSelectFilterInput } from './TextOrSelectFilterInput.component';
 

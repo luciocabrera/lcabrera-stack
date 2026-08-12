@@ -1,8 +1,9 @@
-import { ActionButtons } from '@lcabrera/ui/components/ActionButtons';
-import { Modal } from '@lcabrera/ui/components/Modal';
-import { RadioOptionGroup } from '@lcabrera/ui/components/RadioOptionGroup';
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
+
+import { ActionButtons } from '#ui/components/ActionButtons';
+import { Modal } from '#ui/components/Modal';
+import { RadioOptionGroup } from '#ui/components/RadioOptionGroup';
 
 import type { ChoiceModalProps } from './ChoiceModal.types';
 

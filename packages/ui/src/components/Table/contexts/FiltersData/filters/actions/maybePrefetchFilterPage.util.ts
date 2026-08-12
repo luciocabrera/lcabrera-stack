@@ -1,5 +1,5 @@
-import { DEFAULT_FILTER_PAGE_SIZE } from '@lcabrera/ui/components/Table/Table.constants';
-import { firePrefetch } from '@lcabrera/ui/utils/prefetch/firePrefetch.util';
+import { DEFAULT_FILTER_PAGE_SIZE } from '#ui/components/Table/Table.constants';
+import { firePrefetch } from '#ui/utils/prefetch/firePrefetch.util';
 
 import type { MaybePrefetchArgs } from './useFetchFilterData.types';
 

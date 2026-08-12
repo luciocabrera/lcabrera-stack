@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
-import { surfaceStyles } from '@lcabrera/ui/design-system/tokens/surfaces.stylex';
 import * as stylex from '@stylexjs/stylex';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
+
+import { surfaceStyles } from '#ui/design-system/tokens/surfaces.stylex';
 
 import { RadioOptionGroup } from './RadioOptionGroup.component';
 import { styles } from './RadioOptionGroup.stylex';

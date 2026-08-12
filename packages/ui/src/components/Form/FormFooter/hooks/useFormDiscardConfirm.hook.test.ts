@@ -5,11 +5,11 @@ import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 const { goBackMock } = vi.hoisted(() => ({ goBackMock: vi.fn() }));
 
-vi.mock('@lcabrera/ui/components/Form/contexts/FormContext/selectors', () => ({
+vi.mock('#ui/components/Form/contexts/FormContext/selectors', () => ({
   useGetFormCancelTo: () => '/orders',
 }));
 
-vi.mock('@lcabrera/ui/hooks', () => ({
+vi.mock('#ui/hooks', () => ({
   useBackNavigate: () => goBackMock,
 }));
 

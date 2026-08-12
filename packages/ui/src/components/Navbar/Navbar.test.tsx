@@ -36,11 +36,11 @@ const MockNavLink = vi.hoisted(() => {
   };
 });
 
-vi.mock('@lcabrera/ui/components/Button', () => ({
+vi.mock('#ui/components/Button', () => ({
   Button: MockButton,
 }));
 
-vi.mock('@lcabrera/ui/components/NavLink', () => ({
+vi.mock('#ui/components/NavLink', () => ({
   NavLink: MockNavLink,
 }));
 

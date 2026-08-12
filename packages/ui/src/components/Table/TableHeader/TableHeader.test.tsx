@@ -23,20 +23,14 @@ const {
   useGetTableIsLoadingMoreMock: vi.fn(),
 }));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors',
-  () => ({
-    useGetPinnedColumnPartition: useGetPinnedColumnPartitionMock,
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
+  useGetPinnedColumnPartition: useGetPinnedColumnPartitionMock,
+}));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableData/data/selectors',
-  () => ({
-    useGetTableIsLoading: useGetTableIsLoadingMock,
-    useGetTableIsLoadingMore: useGetTableIsLoadingMoreMock,
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableData/data/selectors', () => ({
+  useGetTableIsLoading: useGetTableIsLoadingMock,
+  useGetTableIsLoadingMore: useGetTableIsLoadingMoreMock,
+}));
 
 vi.mock('../TableHeaderCell', () => ({
   TableHeaderCell: MockTableHeaderCell,

@@ -22,12 +22,9 @@ vi.mock('../useTableDrawerContextValue.hook', () => ({
   useTableDrawerContextValue: () => ({ columnsStore: drawerColumnsStore }),
 }));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/actions',
-  () => ({
-    useBatchSetTableSettings: () => batchSetTableSettings,
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/columns/actions', () => ({
+  useBatchSetTableSettings: () => batchSetTableSettings,
+}));
 
 beforeEach(() => {
   batchSetTableSettings.mockClear();

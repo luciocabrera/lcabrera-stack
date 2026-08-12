@@ -1,10 +1,6 @@
-import { Button } from '@lcabrera/ui/components/Button';
-import {
-  MenuCloseIcon,
-  PinIcon,
-  PinOffIcon,
-} from '@lcabrera/ui/components/Icons';
-import { ICON_SIZE_MD } from '@lcabrera/ui/design-system/constants';
+import { Button } from '#ui/components/Button';
+import { MenuCloseIcon, PinIcon, PinOffIcon } from '#ui/components/Icons';
+import { ICON_SIZE_MD } from '#ui/design-system/constants';
 
 import type { SidePanelHeaderToolbarProps } from './SidePanelHeaderToolbar.types';
 

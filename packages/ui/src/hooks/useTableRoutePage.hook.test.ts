@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 
 import type { PaginatedQuery } from '@lcabrera/api/http/http.types';
-import type { TableColumn } from '@lcabrera/ui/components/Table';
 
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+
+import type { TableColumn } from '#ui/components/Table';
 
 import { useTableRoutePage } from './useTableRoutePage.hook';
 

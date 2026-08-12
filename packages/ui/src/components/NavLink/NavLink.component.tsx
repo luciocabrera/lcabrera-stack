@@ -1,6 +1,7 @@
-import { Tooltip } from '@lcabrera/ui/components/Tooltip';
 import * as stylex from '@stylexjs/stylex';
 import { NavLink as RouterNavLink } from 'react-router';
+
+import { Tooltip } from '#ui/components/Tooltip';
 
 import type { NavLinkProps } from './NavLink.types';
 

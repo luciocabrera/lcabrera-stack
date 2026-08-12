@@ -1,4 +1,4 @@
-import { useGetFormFields } from '@lcabrera/ui/components/Form/contexts/FormContext/selectors';
+import { useGetFormFields } from '#ui/components/Form/contexts/FormContext/selectors';
 
 import { FormFieldsList } from './FormFieldsList/FormFieldsList.component';
 

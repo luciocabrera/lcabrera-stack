@@ -9,15 +9,12 @@ const { mockSetTableColumnSelectedKey, mockSetTableDrawersOpenState } =
     mockSetTableDrawersOpenState: vi.fn(),
   }));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions',
-  () => ({
-    useSetTableColumnSelectedKey: () => mockSetTableColumnSelectedKey,
-    useSetTableDrawersOpenState: () => mockSetTableDrawersOpenState,
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/meta/actions', () => ({
+  useSetTableColumnSelectedKey: () => mockSetTableColumnSelectedKey,
+  useSetTableDrawersOpenState: () => mockSetTableDrawersOpenState,
+}));
 
-vi.mock('@lcabrera/ui/components/Table/TableActionsPopover', () => ({
+vi.mock('#ui/components/Table/TableActionsPopover', () => ({
   tableActionsPopoverStyles: {
     menuIcon: {},
     menuItem: {},

@@ -1,6 +1,6 @@
-import { SidePanelSectionHeader } from '@lcabrera/ui/components/SidePanel';
-import { useGetColumns } from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
-import { useGetColumnVisibility } from '@lcabrera/ui/components/Table/TableSettingsDrawer/TableDrawerContext/selectors';
+import { SidePanelSectionHeader } from '#ui/components/SidePanel';
+import { useGetColumns } from '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
+import { useGetColumnVisibility } from '#ui/components/Table/TableSettingsDrawer/TableDrawerContext/selectors';
 
 import type { ColumnOrderSectionHeaderProps } from './ColumnOrderSectionHeader.types';
 

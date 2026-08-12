@@ -3,8 +3,8 @@ import type {
   ColumnPinningState,
   TableColumn,
   TableColumnsState,
-} from '@lcabrera/ui/components/Table/Table.types';
-import type { TableDrawerColumnsState } from '@lcabrera/ui/components/Table/TableSettingsDrawer/TableDrawerContext/TableDrawerContext.types';
+} from '#ui/components/Table/Table.types';
+import type { TableDrawerColumnsState } from '#ui/components/Table/TableSettingsDrawer/TableDrawerContext/TableDrawerContext.types';
 
 type ReadPinActionStateArgs<TData extends Record<string, unknown>> = {
   readonly drawerState: TableDrawerColumnsState<TData> | undefined;

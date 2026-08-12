@@ -1,6 +1,7 @@
-import { VirtualListProvider } from '@lcabrera/ui/components/VirtualList/contexts';
-import { useStore } from '@lcabrera/ui/hooks';
 import { useEffect } from 'react';
+
+import { VirtualListProvider } from '#ui/components/VirtualList/contexts';
+import { useStore } from '#ui/hooks';
 
 import type { VirtualSelectMetaState } from '../VirtualSelect.types';
 import type {

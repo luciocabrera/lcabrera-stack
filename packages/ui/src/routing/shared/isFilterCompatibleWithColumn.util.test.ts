@@ -1,13 +1,13 @@
-import type { TableColumn } from '@lcabrera/ui/components/Table';
+import { describe, expect, it } from 'vite-plus/test';
+
+import type { TableColumn } from '#ui/components/Table';
 import type {
   BooleanFilter,
   DateFilter,
   NumberFilter,
   SelectFilter,
   TextFilter,
-} from '@lcabrera/ui/types/filterOperators.types';
-
-import { describe, expect, it } from 'vite-plus/test';
+} from '#ui/types/filterOperators.types';
 
 import { isFilterCompatibleWithColumn } from './isFilterCompatibleWithColumn.util';
 

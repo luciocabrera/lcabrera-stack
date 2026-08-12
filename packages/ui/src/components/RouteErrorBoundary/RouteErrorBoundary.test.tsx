@@ -15,7 +15,7 @@ vi.mock('react-router', () => ({
   useRevalidator: () => ({ revalidate: revalidateMock }),
 }));
 
-vi.mock('@lcabrera/ui/components/Button', () => ({
+vi.mock('#ui/components/Button', () => ({
   Button: ({
     children,
     onClick,
@@ -29,11 +29,11 @@ vi.mock('@lcabrera/ui/components/Button', () => ({
   ),
 }));
 
-vi.mock('@lcabrera/ui/components/Icons', () => ({
+vi.mock('#ui/components/Icons', () => ({
   ErrorDescriptive: () => <svg data-testid='error-icon' />,
 }));
 
-vi.mock('@lcabrera/ui/components/Title', () => ({
+vi.mock('#ui/components/Title', () => ({
   Title: ({ children }: { readonly children: ReactNode }) => (
     <h1>{children}</h1>
   ),

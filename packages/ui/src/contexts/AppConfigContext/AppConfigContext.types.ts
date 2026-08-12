@@ -1,5 +1,6 @@
-import type { NavbarItemConfig } from '@lcabrera/ui/components/Navbar/Navbar.types';
 import type { ReactNode } from 'react';
+
+import type { NavbarItemConfig } from '#ui/components/Navbar/Navbar.types';
 
 export type AppConfigContextValue = {
   readonly getNavigationItems: GetNavigationItems;

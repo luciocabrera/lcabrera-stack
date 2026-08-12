@@ -1,5 +1,5 @@
-import type { ColumnSizingArgs } from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/actions/useSetColumnSizingWithoutSync.hook';
-import type { DataKey } from '@lcabrera/ui/components/Table/Table.types';
+import type { ColumnSizingArgs } from '#ui/components/Table/contexts/TableConfig/columns/actions/useSetColumnSizingWithoutSync.hook';
+import type { DataKey } from '#ui/components/Table/Table.types';
 
 import { createResizeStartData } from './createResizeStartData.util';
 import { resolveResizeWidth } from './resolveResizeWidth.util';

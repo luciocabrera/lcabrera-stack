@@ -2,7 +2,7 @@ import type {
   ColumnPinningState,
   DataKey,
   TableColumn,
-} from '@lcabrera/ui/components/Table/Table.types';
+} from '#ui/components/Table/Table.types';
 
 type GetIsContiguousPinArgs<TData> = {
   readonly allOrderedColumns: readonly TableColumn<TData>[];

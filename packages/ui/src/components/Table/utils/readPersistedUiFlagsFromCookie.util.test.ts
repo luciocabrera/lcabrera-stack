@@ -2,11 +2,11 @@ import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { readPersistedUiFlagsFromCookie } from './readPersistedUiFlagsFromCookie.util';
 
-vi.mock('@lcabrera/ui/utils/storage', () => ({
+vi.mock('#ui/utils/storage', () => ({
   readFromCookie: vi.fn(),
 }));
 
-import { readFromCookie } from '@lcabrera/ui/utils/storage';
+import { readFromCookie } from '#ui/utils/storage';
 
 describe('readPersistedUiFlagsFromCookie', () => {
   afterEach(() => {

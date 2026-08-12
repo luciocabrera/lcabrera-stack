@@ -1,6 +1,7 @@
-import { spacing } from '@lcabrera/ui/design-system/tokens/base.stylex';
-import { drawerSectionStyles } from '@lcabrera/ui/design-system/tokens/drawerSection.stylex';
 import * as stylex from '@stylexjs/stylex';
+
+import { spacing } from '#ui/design-system/tokens/base.stylex';
+import { drawerSectionStyles } from '#ui/design-system/tokens/drawerSection.stylex';
 
 const localStyles = stylex.create({
   container: {

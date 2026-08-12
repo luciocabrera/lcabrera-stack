@@ -1,11 +1,12 @@
-import { Button } from '@lcabrera/ui/components/Button';
-import { NoDataDescriptive } from '@lcabrera/ui/components/Icons';
-import { useGetPinnedColumnPartition } from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors';
-import { useTableContainerRef } from '@lcabrera/ui/components/Table/contexts/TableWrapper';
-import { useElementSize, useResizeObserver } from '@lcabrera/ui/hooks';
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 import { useRevalidator } from 'react-router';
+
+import { Button } from '#ui/components/Button';
+import { NoDataDescriptive } from '#ui/components/Icons';
+import { useGetPinnedColumnPartition } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
+import { useTableContainerRef } from '#ui/components/Table/contexts/TableWrapper';
+import { useElementSize, useResizeObserver } from '#ui/hooks';
 
 import { useGetTableTitleSingular } from '../contexts/TableConfig/meta/selectors';
 import { styles } from './TableEmptyState.stylex';

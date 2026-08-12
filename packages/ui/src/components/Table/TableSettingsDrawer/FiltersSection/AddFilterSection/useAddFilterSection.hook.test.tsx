@@ -1,12 +1,12 @@
 // @vitest-environment jsdom
 
+import { act, renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+
 import type {
   ColumnFiltersState,
   TableColumn,
-} from '@lcabrera/ui/components/Table/Table.types';
-
-import { act, renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+} from '#ui/components/Table/Table.types';
 
 type Row = Record<string, unknown>;
 
@@ -26,27 +26,18 @@ const {
   normalizedColumnsRef: { current: {} as Record<string, unknown> },
 }));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors',
-  () => ({
-    useGetColumns: () => columnsRef.current,
-    useGetNormalizedColumns: () => normalizedColumnsRef.current,
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
+  useGetColumns: () => columnsRef.current,
+  useGetNormalizedColumns: () => normalizedColumnsRef.current,
+}));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions',
-  () => ({
-    useSetTableSettingsExpandedFilters: () => mockSetExpandedFilters,
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/meta/actions', () => ({
+  useSetTableSettingsExpandedFilters: () => mockSetExpandedFilters,
+}));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors',
-  () => ({
-    useGetTableSettingsExpandedFilters: () => expandedFiltersRef.current,
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
+  useGetTableSettingsExpandedFilters: () => expandedFiltersRef.current,
+}));
 
 vi.mock('../../TableDrawerContext/actions', () => ({
   useSetColumnFilters: () => mockSetColumnFilters,

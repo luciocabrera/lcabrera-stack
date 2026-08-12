@@ -1,5 +1,5 @@
-import { useFieldsStore } from '@lcabrera/ui/components/Form/contexts/FormContext/useFieldsStore.hook';
-import { isFormDirty } from '@lcabrera/ui/components/Form/utils/isFormDirty.util';
+import { useFieldsStore } from '#ui/components/Form/contexts/FormContext/useFieldsStore.hook';
+import { isFormDirty } from '#ui/components/Form/utils/isFormDirty.util';
 
 export const useGetIsFormDirty = <TValues extends Record<string, unknown>>(
   accessors: readonly (keyof TValues & string)[],

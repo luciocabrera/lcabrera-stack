@@ -1,8 +1,9 @@
-import { Button } from '@lcabrera/ui/components/Button';
-import { ErrorDescriptive } from '@lcabrera/ui/components/Icons';
-import { Title } from '@lcabrera/ui/components/Title';
 import * as stylex from '@stylexjs/stylex';
 import { useNavigate, useRevalidator } from 'react-router';
+
+import { Button } from '#ui/components/Button';
+import { ErrorDescriptive } from '#ui/components/Icons';
+import { Title } from '#ui/components/Title';
 
 import type { RouteErrorBoundaryProps } from './RouteErrorBoundary.types';
 

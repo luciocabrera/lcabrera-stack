@@ -1,6 +1,6 @@
-import type { FieldNode } from '@lcabrera/ui/components/Form/Form.types';
+import type { FieldNode } from '#ui/components/Form/Form.types';
 
-import { useMetaStore } from '@lcabrera/ui/components/Form/contexts/FormContext/useMetaStore.hook';
+import { useMetaStore } from '#ui/components/Form/contexts/FormContext/useMetaStore.hook';
 
 /** Field definitions tree — the form's column-config analogue. */
 export const useGetFormFields = <

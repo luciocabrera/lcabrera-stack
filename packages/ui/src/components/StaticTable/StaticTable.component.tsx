@@ -1,9 +1,9 @@
-import { Table } from '@lcabrera/ui/components/Table';
+import { Table } from '#ui/components/Table';
 import {
   FiltersDataProvider,
   TableConfigProvider,
-} from '@lcabrera/ui/components/Table/contexts';
-import { createEmptyColumnsState } from '@lcabrera/ui/components/Table/utils/createEmptyColumnsState.util';
+} from '#ui/components/Table/contexts';
+import { createEmptyColumnsState } from '#ui/components/Table/utils/createEmptyColumnsState.util';
 
 import type { StaticTableProps } from './StaticTable.types';
 

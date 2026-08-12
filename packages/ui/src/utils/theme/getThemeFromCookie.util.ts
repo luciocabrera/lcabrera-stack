@@ -1,7 +1,7 @@
-import type { ThemeMode } from '@lcabrera/ui/types/theme.types';
+import type { ThemeMode } from '#ui/types/theme.types';
 
-import { getAppScopedCookieKey } from '@lcabrera/ui/utils/storage';
-import { readFromCookie } from '@lcabrera/ui/utils/storage/readFromCookie.util';
+import { getAppScopedCookieKey } from '#ui/utils/storage';
+import { readFromCookie } from '#ui/utils/storage/readFromCookie.util';
 
 import { THEME_COOKIE_NAME } from './theme.constants';
 

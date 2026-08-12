@@ -1,14 +1,15 @@
 import type { SubmitEvent } from 'react';
 
-import { useSubmitForm } from '@lcabrera/ui/components/Form/contexts/FormContext/actions';
+import * as stylex from '@stylexjs/stylex';
+import { Form as RouterForm, useFetcher } from 'react-router';
+
+import { useSubmitForm } from '#ui/components/Form/contexts/FormContext/actions';
 import {
   useGetFormId,
   useGetFormSubmission,
-} from '@lcabrera/ui/components/Form/contexts/FormContext/selectors';
-import { FormFields } from '@lcabrera/ui/components/Form/FormFields/FormFields.component';
-import { FormFooter } from '@lcabrera/ui/components/Form/FormFooter';
-import * as stylex from '@stylexjs/stylex';
-import { Form as RouterForm, useFetcher } from 'react-router';
+} from '#ui/components/Form/contexts/FormContext/selectors';
+import { FormFields } from '#ui/components/Form/FormFields/FormFields.component';
+import { FormFooter } from '#ui/components/Form/FormFooter';
 
 import type { FormBodyProps } from './FormBody.types';
 

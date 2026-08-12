@@ -1,6 +1,7 @@
-import { Button } from '@lcabrera/ui/components/Button';
-import { NavLink } from '@lcabrera/ui/components/NavLink';
 import * as stylex from '@stylexjs/stylex';
+
+import { Button } from '#ui/components/Button';
+import { NavLink } from '#ui/components/NavLink';
 
 import type { NavbarItemProps } from './NavbarItem.types';
 

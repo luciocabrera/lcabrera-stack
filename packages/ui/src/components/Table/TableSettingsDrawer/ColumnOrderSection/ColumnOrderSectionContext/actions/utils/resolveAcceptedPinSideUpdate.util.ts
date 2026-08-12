@@ -3,16 +3,16 @@ import type {
   ColumnPinningState,
   DataKey,
   TableColumn,
-} from '@lcabrera/ui/components/Table/Table.types';
+} from '#ui/components/Table/Table.types';
 import type {
   PinConflictResolution,
   PinSide,
-} from '@lcabrera/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
+} from '#ui/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
 
 import {
   buildAllOrderedColumns,
   derivePinSideResolutionState,
-} from '@lcabrera/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
+} from '#ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 
 type ResolveAcceptedPinSideUpdateArgs = {
   readonly columnKey: DataKey<Record<string, unknown>>;

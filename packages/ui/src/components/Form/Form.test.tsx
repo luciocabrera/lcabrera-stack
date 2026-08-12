@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
 
-import { mockDialogElement } from '@lcabrera/ui/utils/tests/mockDialogElement.util';
 import {
   cleanup,
   fireEvent,
@@ -17,6 +16,8 @@ import {
   it,
   vi,
 } from 'vite-plus/test';
+
+import { mockDialogElement } from '#ui/utils/tests/mockDialogElement.util';
 
 import type { FieldNode, FormMode } from './Form.types';
 

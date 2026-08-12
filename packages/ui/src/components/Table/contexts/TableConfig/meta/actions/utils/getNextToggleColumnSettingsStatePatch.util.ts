@@ -1,6 +1,6 @@
-import type { TableMetaState } from '@lcabrera/ui/components/Table/Table.types';
+import type { TableMetaState } from '#ui/components/Table/Table.types';
 
-import { getIsTableSettingsOpen } from '@lcabrera/ui/components/Table/utils';
+import { getIsTableSettingsOpen } from '#ui/components/Table/utils';
 
 type GetNextToggleColumnSettingsStatePatchArgs = {
   readonly metaState?: Partial<TableMetaState>;

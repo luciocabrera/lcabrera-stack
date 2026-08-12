@@ -1,6 +1,6 @@
-import type { TableMetadataValue } from '@lcabrera/ui/components/Table/Table.types';
-
 import { formatNumber } from '@lcabrera/utils/formatters/format-number.util';
+
+import type { TableMetadataValue } from '#ui/components/Table/Table.types';
 
 /**
  * Convert a metadata value into a display string.

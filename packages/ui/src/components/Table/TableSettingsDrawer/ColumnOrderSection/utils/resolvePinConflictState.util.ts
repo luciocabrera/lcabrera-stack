@@ -3,10 +3,10 @@ import type {
   ColumnPinningState,
   DataKey,
   TableColumn,
-} from '@lcabrera/ui/components/Table/Table.types';
-import type { PinConflictResolution } from '@lcabrera/ui/types/ui.types';
+} from '#ui/components/Table/Table.types';
+import type { PinConflictResolution } from '#ui/types/ui.types';
 
-import { syncColumnOrderWithPinning } from '@lcabrera/ui/components/Table/utils';
+import { syncColumnOrderWithPinning } from '#ui/components/Table/utils';
 
 import { applyPin } from './applyPin.util';
 import { insertAdjacentToPinnedGroup } from './insertAdjacentToPinnedGroup.util';

@@ -1,8 +1,4 @@
-import {
-  EraserIcon,
-  SortAscIcon,
-  SortDescIcon,
-} from '@lcabrera/ui/components/Icons';
+import { EraserIcon, SortAscIcon, SortDescIcon } from '#ui/components/Icons';
 
 import type { CommandDescriptor, CommandId } from '../commands.types';
 

@@ -1,11 +1,12 @@
-import { Button } from '@lcabrera/ui/components/Button';
+import * as stylex from '@stylexjs/stylex';
+
+import { Button } from '#ui/components/Button';
 import {
   deriveToggleCommandState,
   PIN_RIGHT_COMMAND,
-} from '@lcabrera/ui/components/Table/commands';
-import { useSetColumnPinning } from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/actions';
-import { tableActionsPopoverStyles } from '@lcabrera/ui/components/Table/TableActionsPopover';
-import * as stylex from '@stylexjs/stylex';
+} from '#ui/components/Table/commands';
+import { useSetColumnPinning } from '#ui/components/Table/contexts/TableConfig/columns/actions';
+import { tableActionsPopoverStyles } from '#ui/components/Table/TableActionsPopover';
 
 import type { PinRightButtonProps } from './PinRightButton.types';
 

@@ -1,6 +1,6 @@
-import type { ThemeContextValue } from '@lcabrera/ui/types/theme.types';
-
 import { createContext } from 'react';
+
+import type { ThemeContextValue } from '#ui/types/theme.types';
 
 /**
  * Theme context for managing application theme state

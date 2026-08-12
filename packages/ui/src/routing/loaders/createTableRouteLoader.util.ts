@@ -1,13 +1,14 @@
+import type { LoaderFunctionArgs } from 'react-router';
+
 import type {
   ColumnFiltersState,
   SortingState,
   TableColumn,
-} from '@lcabrera/ui/components/Table';
+} from '#ui/components/Table';
 import type {
   FilterOptionsTransport,
   TableMetaState,
-} from '@lcabrera/ui/components/Table/Table.types';
-import type { LoaderFunctionArgs } from 'react-router';
+} from '#ui/components/Table/Table.types';
 
 import { appendPrimaryKeySorting } from '../shared/appendPrimaryKeySorting.util';
 import { sanitizeSorting } from '../shared/sanitizeSorting.util';

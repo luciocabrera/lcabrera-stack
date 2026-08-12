@@ -1,6 +1,6 @@
-import type { DataKey } from '@lcabrera/ui/components/Table/Table.types';
-
 import { describe, expect, it } from 'vite-plus/test';
+
+import type { DataKey } from '#ui/components/Table/Table.types';
 
 import { insertAdjacentToPinnedGroup } from './insertAdjacentToPinnedGroup.util';
 

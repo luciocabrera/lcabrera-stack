@@ -28,13 +28,13 @@ type MockTabsProps = {
   }[];
 };
 
-vi.mock('@lcabrera/ui/components/SidePanel', () => ({
+vi.mock('#ui/components/SidePanel', () => ({
   SidePanelBody: ({ children }: { readonly children: ReactNode }) => (
     <div>{children}</div>
   ),
 }));
 
-vi.mock('@lcabrera/ui/components/Tabs', () => ({
+vi.mock('#ui/components/Tabs', () => ({
   Tabs: ({ isBusy, onSelectTab, selectedTab, tabs }: MockTabsProps) => (
     <div data-busy={String(isBusy)} data-selected-tab={selectedTab}>
       <button
@@ -55,19 +55,13 @@ vi.mock('@lcabrera/ui/components/Tabs', () => ({
   ),
 }));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions',
-  () => ({
-    useSetTableSettingsSelectedTab: () => setSelectedTabMock,
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/meta/actions', () => ({
+  useSetTableSettingsSelectedTab: () => setSelectedTabMock,
+}));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors',
-  () => ({
-    useGetTableSettingsSelectedTab: () => selectedTabMock(),
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
+  useGetTableSettingsSelectedTab: () => selectedTabMock(),
+}));
 
 vi.mock('../ColumnOrderSection', () => ({
   ColumnOrderSection: () => <div>Column order section</div>,

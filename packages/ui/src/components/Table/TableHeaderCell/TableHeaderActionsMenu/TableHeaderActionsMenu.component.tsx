@@ -1,9 +1,10 @@
+import * as stylex from '@stylexjs/stylex';
+
 import {
   TableActionsPopover,
   TableActionsPopoverSeparator,
   tableActionsPopoverStyles,
-} from '@lcabrera/ui/components/Table/TableActionsPopover';
-import * as stylex from '@stylexjs/stylex';
+} from '#ui/components/Table/TableActionsPopover';
 
 import type { TableHeaderActionsMenuProps } from './TableHeaderActionsMenu.types';
 

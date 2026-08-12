@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 
-import type { MockStore } from '@lcabrera/ui/utils/tests/createMockStore.util';
-
-import { createMockStore } from '@lcabrera/ui/utils/tests/createMockStore.util';
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+
+import type { MockStore } from '#ui/utils/tests/createMockStore.util';
+
+import { createMockStore } from '#ui/utils/tests/createMockStore.util';
 
 const createInitialColumnsState = () => {
   return {
@@ -60,7 +61,7 @@ const storesRef: {
 };
 
 vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
+  '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
   () => ({
     useTableConfigContextValue: () => ({
       columnsStore: storesRef.columnsStore,

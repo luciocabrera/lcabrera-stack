@@ -1,11 +1,12 @@
-import { Navbar } from '@lcabrera/ui/components/Navbar';
-import { SidePanelBody } from '@lcabrera/ui/components/SidePanel';
-import { useGetAppNavigationItems } from '@lcabrera/ui/contexts/AppConfigContext/selectors';
+import * as stylex from '@stylexjs/stylex';
+
+import { Navbar } from '#ui/components/Navbar';
+import { SidePanelBody } from '#ui/components/SidePanel';
+import { useGetAppNavigationItems } from '#ui/contexts/AppConfigContext/selectors';
 import {
   useGetGlobalNavigationCollapsedPreference,
   useGetGlobalNavigationSizePreference,
-} from '@lcabrera/ui/contexts/GlobalSettingsContext/selectors';
-import * as stylex from '@stylexjs/stylex';
+} from '#ui/contexts/GlobalSettingsContext/selectors';
 
 import { NAV_DENSITY } from '../AppNavigation.constants';
 import { styles } from '../AppNavigation.stylex';

@@ -1,10 +1,5 @@
 // @vitest-environment jsdom
 
-import type { NavbarItemConfig } from '@lcabrera/ui/components/Navbar/Navbar.types';
-import type { GlobalSettingsState } from '@lcabrera/ui/types/globalSettings.types';
-
-import { AppConfigProvider } from '@lcabrera/ui/contexts/AppConfigContext';
-import { GlobalSettingsProvider } from '@lcabrera/ui/contexts/GlobalSettingsContext';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import {
@@ -16,6 +11,12 @@ import {
   vi,
 } from 'vite-plus/test';
 
+import type { NavbarItemConfig } from '#ui/components/Navbar/Navbar.types';
+import type { GlobalSettingsState } from '#ui/types/globalSettings.types';
+
+import { AppConfigProvider } from '#ui/contexts/AppConfigContext';
+import { GlobalSettingsProvider } from '#ui/contexts/GlobalSettingsContext';
+
 import { AppNavigation } from './AppNavigation.component';
 
 const { toggleThemeMock, useThemeMock } = vi.hoisted(() => ({
@@ -23,7 +24,7 @@ const { toggleThemeMock, useThemeMock } = vi.hoisted(() => ({
   useThemeMock: vi.fn(),
 }));
 
-vi.mock('@lcabrera/ui/hooks/useTheme.hook', () => ({
+vi.mock('#ui/hooks/useTheme.hook', () => ({
   useTheme: () => useThemeMock(),
 }));
 

@@ -1,4 +1,4 @@
-import type { FieldNode } from '@lcabrera/ui/components/Form/Form.types';
+import type { FieldNode } from '#ui/components/Form/Form.types';
 
 /**
  * True when the root field list hands its whole height to a single child that

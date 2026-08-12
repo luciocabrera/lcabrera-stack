@@ -1,4 +1,4 @@
-import type { FieldOption } from '@lcabrera/ui/components/Form/Form.types';
+import type { FieldOption } from '#ui/components/Form/Form.types';
 
 import { stringifyLeafValue } from './stringifyLeafValue.util';
 

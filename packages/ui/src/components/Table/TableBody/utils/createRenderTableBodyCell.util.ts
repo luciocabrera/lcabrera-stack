@@ -3,7 +3,7 @@ import type {
   DataKey,
   PinnedColumnInfo,
   TableColumn,
-} from '@lcabrera/ui/components/Table/Table.types';
+} from '#ui/components/Table/Table.types';
 
 import { buildTableBodyCellDescriptor } from './buildTableBodyCellDescriptor.util';
 import { renderFromDescriptor } from './renderFromDescriptor.util';

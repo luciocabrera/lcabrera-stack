@@ -1,6 +1,6 @@
-import type { ColumnOrderSectionModalsState } from '@lcabrera/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/ColumnOrderSectionContext.types';
-
 import { vi } from 'vite-plus/test';
+
+import type { ColumnOrderSectionModalsState } from '#ui/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/ColumnOrderSectionContext.types';
 
 type CreateColumnOrderSectionActionMocksArgs = {
   readonly initialDrawerState: LooseDrawerState;

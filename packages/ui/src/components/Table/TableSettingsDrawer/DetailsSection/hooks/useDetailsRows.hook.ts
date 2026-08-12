@@ -1,9 +1,10 @@
-import { useGetColumns } from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors';
+import { formatNumber } from '@lcabrera/utils/formatters/format-number.util';
+
+import { useGetColumns } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
 import {
   useGetTableTotalLoadedRows,
   useGetTableTotalRows,
-} from '@lcabrera/ui/components/Table/contexts/TableData/data/selectors';
-import { formatNumber } from '@lcabrera/utils/formatters/format-number.util';
+} from '#ui/components/Table/contexts/TableData/data/selectors';
 
 import type { DetailsRow } from '../DetailsSection.types';
 

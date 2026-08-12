@@ -1,6 +1,6 @@
-import type { SortDirection } from '@lcabrera/ui/types/ui.types';
+import type { SortDirection } from '#ui/types/ui.types';
 
-import { useColumnDrawerContextValue } from '@lcabrera/ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook';
+import { useColumnDrawerContextValue } from '#ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook';
 
 /**
  * Hook to update the sort direction for this column

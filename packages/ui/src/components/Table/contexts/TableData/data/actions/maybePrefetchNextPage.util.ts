@@ -1,4 +1,4 @@
-import { firePrefetch } from '@lcabrera/ui/utils/prefetch/firePrefetch.util';
+import { firePrefetch } from '#ui/utils/prefetch/firePrefetch.util';
 
 import type { MaybePrefetchNextPageArgs } from './fetchMoreData.types';
 

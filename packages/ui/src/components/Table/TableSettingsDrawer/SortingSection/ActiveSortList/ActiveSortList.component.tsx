@@ -1,13 +1,14 @@
-import type { DraggableItem } from '@lcabrera/ui/components/DraggableList';
+import * as stylex from '@stylexjs/stylex';
 
-import { DraggableList } from '@lcabrera/ui/components/DraggableList';
-import { InfoBox } from '@lcabrera/ui/components/InfoBox';
+import type { DraggableItem } from '#ui/components/DraggableList';
+
+import { DraggableList } from '#ui/components/DraggableList';
+import { InfoBox } from '#ui/components/InfoBox';
 import {
   SidePanelSection,
   SidePanelSectionHeader,
-} from '@lcabrera/ui/components/SidePanel';
-import { useGetColumns } from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
-import * as stylex from '@stylexjs/stylex';
+} from '#ui/components/SidePanel';
+import { useGetColumns } from '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
 
 import type { SortItem } from '../SortingSection.types';
 import type { ActiveSortListProps } from './ActiveSortList.types';

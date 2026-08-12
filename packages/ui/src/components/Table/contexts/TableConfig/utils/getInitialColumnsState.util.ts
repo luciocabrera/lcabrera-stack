@@ -5,13 +5,13 @@ import type {
   DataKey,
   TableColumnsState,
   TableCrudConfig,
-} from '@lcabrera/ui/components/Table/Table.types';
+} from '#ui/components/Table/Table.types';
 
-import { ACTIONS_COLUMN_KEY } from '@lcabrera/ui/components/Table/Table.constants';
+import { ACTIONS_COLUMN_KEY } from '#ui/components/Table/Table.constants';
 import {
   deriveColumnViewState,
   resolveTableActionsColumn,
-} from '@lcabrera/ui/components/Table/utils';
+} from '#ui/components/Table/utils';
 
 type GetInitialTableStateArgs<TData extends Record<string, unknown>> = Partial<
   TableColumnsState<TData>

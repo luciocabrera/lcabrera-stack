@@ -1,8 +1,9 @@
-import { formInputStyles } from '@lcabrera/ui/components/Form/fields/formInput.stylex';
-import { useFormField } from '@lcabrera/ui/components/Form/fields/useFormField.hook';
-import { FormFieldChrome } from '@lcabrera/ui/components/Form/FormFieldChrome/FormFieldChrome.component';
-import { NO_AUTOFILL_INPUT_PROPS } from '@lcabrera/ui/components/Table/filters/filters.constants';
 import * as stylex from '@stylexjs/stylex';
+
+import { formInputStyles } from '#ui/components/Form/fields/formInput.stylex';
+import { useFormField } from '#ui/components/Form/fields/useFormField.hook';
+import { FormFieldChrome } from '#ui/components/Form/FormFieldChrome/FormFieldChrome.component';
+import { NO_AUTOFILL_INPUT_PROPS } from '#ui/components/Table/filters/filters.constants';
 
 import type { NumericFieldControlProps } from './NumericFieldControl.types';
 

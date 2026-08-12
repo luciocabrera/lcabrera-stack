@@ -1,6 +1,7 @@
-import { InfoBox } from '@lcabrera/ui/components/InfoBox';
-import { useVirtualization } from '@lcabrera/ui/hooks';
 import * as stylex from '@stylexjs/stylex';
+
+import { InfoBox } from '#ui/components/InfoBox';
+import { useVirtualization } from '#ui/hooks';
 
 import type { VirtualListBodyChildrenProps } from './VirtualListBodyChildren.types';
 

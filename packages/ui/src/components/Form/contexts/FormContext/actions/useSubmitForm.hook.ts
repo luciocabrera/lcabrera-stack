@@ -1,6 +1,6 @@
-import { useFormContextValue } from '@lcabrera/ui/components/Form/contexts/FormContext/useFormContextValue.hook';
-import { isFormDirty } from '@lcabrera/ui/components/Form/utils/isFormDirty.util';
-import { validateFields } from '@lcabrera/ui/components/Form/utils/validateFields.util';
+import { useFormContextValue } from '#ui/components/Form/contexts/FormContext/useFormContextValue.hook';
+import { isFormDirty } from '#ui/components/Form/utils/isFormDirty.util';
+import { validateFields } from '#ui/components/Form/utils/validateFields.util';
 
 /**
  * Client-side pre-submit gate — progressive enhancement only, the action's

@@ -1,10 +1,11 @@
-import { Button } from '@lcabrera/ui/components/Button';
-import { MenuCloseIcon } from '@lcabrera/ui/components/Icons';
-import { useGetNormalizedColumns } from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors';
-import { useSetTableSettingsExpandedFilters } from '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions';
-import { useGetTableSettingsExpandedFilters } from '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors';
-import { ICON_SIZE_MD } from '@lcabrera/ui/design-system/constants';
 import * as stylex from '@stylexjs/stylex';
+
+import { Button } from '#ui/components/Button';
+import { MenuCloseIcon } from '#ui/components/Icons';
+import { useGetNormalizedColumns } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
+import { useSetTableSettingsExpandedFilters } from '#ui/components/Table/contexts/TableConfig/meta/actions';
+import { useGetTableSettingsExpandedFilters } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
+import { ICON_SIZE_MD } from '#ui/design-system/constants';
 
 import type { FilterItemHeaderProps } from './FilterItemHeader.types';
 

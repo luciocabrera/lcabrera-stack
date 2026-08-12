@@ -2,7 +2,7 @@ import type {
   ColumnFilter,
   NumberOperatorType,
   OperatorType,
-} from '@lcabrera/ui/types/filterOperators.types';
+} from '#ui/types/filterOperators.types';
 
 type ResolveNumberOperatorChangeArgs = {
   readonly filter?: ColumnFilter;

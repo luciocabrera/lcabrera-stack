@@ -1,13 +1,14 @@
+import * as stylex from '@stylexjs/stylex';
+
 import {
   SidePanelSection,
   SidePanelSectionHeader,
-} from '@lcabrera/ui/components/SidePanel';
-import { useGetColumns } from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
+} from '#ui/components/SidePanel';
+import { useGetColumns } from '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
 import {
   ColumnWidthPresetButtons,
   useColumnWidthPresetToggle,
-} from '@lcabrera/ui/components/Table/shared/ColumnWidthPresetButtons';
-import * as stylex from '@stylexjs/stylex';
+} from '#ui/components/Table/shared/ColumnWidthPresetButtons';
 
 import type { ColumnWidthsSectionProps } from './ColumnWidthsSection.types';
 

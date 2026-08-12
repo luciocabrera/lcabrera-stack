@@ -1,11 +1,12 @@
-import { Button } from '@lcabrera/ui/components/Button';
-import { SettingsIcon } from '@lcabrera/ui/components/Icons';
+import * as stylex from '@stylexjs/stylex';
+
+import { Button } from '#ui/components/Button';
+import { SettingsIcon } from '#ui/components/Icons';
 import {
   useSetTableColumnSelectedKey,
   useSetTableDrawersOpenState,
-} from '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions';
-import { tableActionsPopoverStyles } from '@lcabrera/ui/components/Table/TableActionsPopover';
-import * as stylex from '@stylexjs/stylex';
+} from '#ui/components/Table/contexts/TableConfig/meta/actions';
+import { tableActionsPopoverStyles } from '#ui/components/Table/TableActionsPopover';
 
 import type { ManageColumnActionProps } from './ManageColumnAction.types';
 

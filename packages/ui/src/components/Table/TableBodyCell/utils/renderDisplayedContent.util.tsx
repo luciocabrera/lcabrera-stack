@@ -1,7 +1,8 @@
-import type { TableColumnDataType } from '@lcabrera/ui/components/Table/Table.types';
 import type { ReactNode } from 'react';
 
 import * as stylex from '@stylexjs/stylex';
+
+import type { TableColumnDataType } from '#ui/components/Table/Table.types';
 
 import { tableBodyCellStyles } from '../TableBodyCell.stylex';
 

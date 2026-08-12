@@ -1,7 +1,7 @@
 import type {
   FiltersDataState,
   TableColumn,
-} from '@lcabrera/ui/components/Table/Table.types';
+} from '#ui/components/Table/Table.types';
 
 type GetInitialFiltersDataStateArgs<TData> = {
   readonly columns: readonly TableColumn<TData>[];

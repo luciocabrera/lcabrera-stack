@@ -1,4 +1,4 @@
-import { useColumnDrawerContextValue } from '@lcabrera/ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook';
+import { useColumnDrawerContextValue } from '#ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook';
 
 import { useCloseColumnSettingsDrawer } from './useCloseColumnSettingsDrawer.hook';
 

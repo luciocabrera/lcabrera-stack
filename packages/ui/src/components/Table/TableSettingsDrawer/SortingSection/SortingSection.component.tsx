@@ -1,8 +1,9 @@
+import { useState } from 'react';
+
 import {
   SidePanelSectionMain,
   SidePanelSectionOverlay,
-} from '@lcabrera/ui/components/SidePanel';
-import { useState } from 'react';
+} from '#ui/components/SidePanel';
 
 import type { SortingSectionProps } from './SortingSection.types';
 

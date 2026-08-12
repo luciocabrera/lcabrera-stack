@@ -1,6 +1,7 @@
-import { CheckIcon } from '@lcabrera/ui/components/Icons';
-import { ICON_SIZE_XXS } from '@lcabrera/ui/design-system/constants';
 import * as stylex from '@stylexjs/stylex';
+
+import { CheckIcon } from '#ui/components/Icons';
+import { ICON_SIZE_XXS } from '#ui/design-system/constants';
 
 import type { CheckboxProps } from './Checkbox.types';
 

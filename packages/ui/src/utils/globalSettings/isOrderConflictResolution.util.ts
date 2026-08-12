@@ -1,4 +1,4 @@
-import type { OrderConflictResolution } from '@lcabrera/ui/types/pinningPreferences.types';
+import type { OrderConflictResolution } from '#ui/types/pinningPreferences.types';
 
 import { ORDER_CONFLICT_VALUES } from './globalSettings.constants';
 

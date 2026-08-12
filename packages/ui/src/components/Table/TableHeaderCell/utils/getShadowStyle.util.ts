@@ -1,4 +1,4 @@
-import type { PinnedColumnInfo } from '@lcabrera/ui/components/Table/Table.types';
+import type { PinnedColumnInfo } from '#ui/components/Table/Table.types';
 
 import { tableHeaderCellStyles } from '../TableHeaderCell.stylex';
 

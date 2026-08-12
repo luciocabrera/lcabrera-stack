@@ -11,21 +11,21 @@ const {
 }));
 
 vi.mock(
-  '@lcabrera/ui/contexts/GlobalSettingsContext/GlobalSettingsContext.constants',
+  '#ui/contexts/GlobalSettingsContext/GlobalSettingsContext.constants',
   () => ({
     INITIAL_GLOBAL_SETTINGS: { navigation: {}, pinning: {} },
   }),
 );
 
-vi.mock('@lcabrera/ui/utils/globalSettings', () => ({
+vi.mock('#ui/utils/globalSettings', () => ({
   getGlobalSettingsFromCookie: getGlobalSettingsFromCookieMock,
 }));
 
-vi.mock('@lcabrera/ui/utils/security', () => ({
+vi.mock('#ui/utils/security', () => ({
   getRequestCspNonce: getRequestCspNonceMock,
 }));
 
-vi.mock('@lcabrera/ui/utils/theme', () => ({
+vi.mock('#ui/utils/theme', () => ({
   getThemeFromCookie: getThemeFromCookieMock,
 }));
 

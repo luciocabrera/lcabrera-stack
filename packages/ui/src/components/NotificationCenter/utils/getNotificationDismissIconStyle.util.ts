@@ -1,4 +1,4 @@
-import type { AppNotification } from '@lcabrera/ui/contexts/NotificationContext';
+import type { AppNotification } from '#ui/contexts/NotificationContext';
 
 import { styles } from '../NotificationItem/NotificationItem.stylex';
 

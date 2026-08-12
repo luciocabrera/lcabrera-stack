@@ -1,4 +1,4 @@
-import { useStore } from '@lcabrera/ui/hooks';
+import { useStore } from '#ui/hooks';
 
 import type {
   ColumnOrderSectionModalsState,

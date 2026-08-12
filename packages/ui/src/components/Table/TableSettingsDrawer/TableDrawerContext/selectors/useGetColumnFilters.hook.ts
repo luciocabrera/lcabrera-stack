@@ -1,4 +1,4 @@
-import type { ColumnFiltersState } from '@lcabrera/ui/components/Table/Table.types';
+import type { ColumnFiltersState } from '#ui/components/Table/Table.types';
 
 import { useColumnsStore } from '../useColumnsStore.hook';
 

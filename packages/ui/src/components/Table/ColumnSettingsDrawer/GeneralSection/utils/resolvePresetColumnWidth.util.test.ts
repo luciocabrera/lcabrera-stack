@@ -1,5 +1,6 @@
-import { DEFAULT_MIN_COLUMN_WIDTH } from '@lcabrera/ui/components/Table/Table.constants';
 import { describe, expect, it } from 'vite-plus/test';
+
+import { DEFAULT_MIN_COLUMN_WIDTH } from '#ui/components/Table/Table.constants';
 
 import { resolvePresetColumnWidth } from './resolvePresetColumnWidth.util';
 

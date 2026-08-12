@@ -1,6 +1,6 @@
-import type { TableColumnDataType } from '@lcabrera/ui/components/Table/Table.types';
-
 import * as stylex from '@stylexjs/stylex';
+
+import type { TableColumnDataType } from '#ui/components/Table/Table.types';
 
 import type { TableBodyCellProps } from '../TableBodyCell.types';
 

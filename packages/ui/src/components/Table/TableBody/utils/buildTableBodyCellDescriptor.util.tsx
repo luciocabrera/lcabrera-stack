@@ -3,11 +3,11 @@ import type {
   DataKey,
   PinnedColumnInfo,
   TableColumn,
-} from '@lcabrera/ui/components/Table/Table.types';
-import type { TableBodyCellProps } from '@lcabrera/ui/components/Table/TableBodyCell/TableBodyCell.types';
+} from '#ui/components/Table/Table.types';
+import type { TableBodyCellProps } from '#ui/components/Table/TableBodyCell/TableBodyCell.types';
 
-import { DEFAULT_MIN_COLUMN_WIDTH } from '@lcabrera/ui/components/Table/Table.constants';
-import { TableRowActionsMenu } from '@lcabrera/ui/components/Table/TableRowActionsMenu';
+import { DEFAULT_MIN_COLUMN_WIDTH } from '#ui/components/Table/Table.constants';
+import { TableRowActionsMenu } from '#ui/components/Table/TableRowActionsMenu';
 
 /**
  * `kind` is a rendering decision, not a column type: `custom` for the actions

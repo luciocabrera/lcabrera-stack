@@ -1,12 +1,13 @@
+import { describe, expect, it } from 'vite-plus/test';
+
 import type {
   ColumnSizingState,
   DataKey,
   PinnedColumnInfo,
   TableColumn,
-} from '@lcabrera/ui/components/Table/Table.types';
+} from '#ui/components/Table/Table.types';
 
-import { DEFAULT_MIN_COLUMN_WIDTH } from '@lcabrera/ui/components/Table/Table.constants';
-import { describe, expect, it } from 'vite-plus/test';
+import { DEFAULT_MIN_COLUMN_WIDTH } from '#ui/components/Table/Table.constants';
 
 import { buildTableBodyCellDescriptor } from './buildTableBodyCellDescriptor.util';
 

@@ -1,4 +1,4 @@
-import { SidePanelSectionMain } from '@lcabrera/ui/components/SidePanel';
+import { SidePanelSectionMain } from '#ui/components/SidePanel';
 
 import type { GeneralSectionProps } from './GeneralSection.types';
 

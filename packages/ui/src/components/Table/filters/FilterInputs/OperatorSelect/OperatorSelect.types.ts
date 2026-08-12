@@ -1,5 +1,5 @@
-import type { TableColumnDataType } from '@lcabrera/ui/components/Table/Table.types';
-import type { ColumnFilter } from '@lcabrera/ui/types/filterOperators.types';
+import type { TableColumnDataType } from '#ui/components/Table/Table.types';
+import type { ColumnFilter } from '#ui/types/filterOperators.types';
 
 export type OperatorSelectProps = {
   readonly dataType?: TableColumnDataType;

@@ -1,5 +1,6 @@
-import { Card } from '@lcabrera/ui/components/Card';
 import * as stylex from '@stylexjs/stylex';
+
+import { Card } from '#ui/components/Card';
 
 import type { SectionCardProps } from './SectionCard.types';
 

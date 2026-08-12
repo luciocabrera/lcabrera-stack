@@ -1,7 +1,8 @@
-import type { PrefetchCache } from '@lcabrera/ui/types/ui.types';
-
-import { useTableConfigContextValue } from '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useRef } from 'react';
+
+import type { PrefetchCache } from '#ui/types/ui.types';
+
+import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 
 import type { FetchMoreDataArgs } from './fetchMoreData.types';
 

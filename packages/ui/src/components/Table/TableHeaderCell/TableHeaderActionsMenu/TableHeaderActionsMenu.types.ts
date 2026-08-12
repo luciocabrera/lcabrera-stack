@@ -1,5 +1,5 @@
-import type { DataKey } from '@lcabrera/ui/components/Table/Table.types';
-import type { SortDirection } from '@lcabrera/ui/types/ui.types';
+import type { DataKey } from '#ui/components/Table/Table.types';
+import type { SortDirection } from '#ui/types/ui.types';
 
 export type TableHeaderActionsMenuProps<TData> = {
   readonly columnKey: DataKey<TData>;

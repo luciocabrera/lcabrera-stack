@@ -1,4 +1,4 @@
-import type { DateFilter } from '@lcabrera/ui/types/filterOperators.types';
+import type { DateFilter } from '#ui/types/filterOperators.types';
 
 export type DateFilterInputProps = {
   readonly columnKey: string;

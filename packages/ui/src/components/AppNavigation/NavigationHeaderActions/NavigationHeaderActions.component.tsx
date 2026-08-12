@@ -1,6 +1,7 @@
-import { Button } from '@lcabrera/ui/components/Button';
-import { MaximizeIcon, MinimizeIcon } from '@lcabrera/ui/components/Icons';
 import * as stylex from '@stylexjs/stylex';
+
+import { Button } from '#ui/components/Button';
+import { MaximizeIcon, MinimizeIcon } from '#ui/components/Icons';
 
 import type { NavigationHeaderActionsProps } from './NavigationHeaderActions.types';
 

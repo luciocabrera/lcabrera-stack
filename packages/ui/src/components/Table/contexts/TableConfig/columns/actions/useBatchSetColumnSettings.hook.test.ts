@@ -96,7 +96,7 @@ const {
 });
 
 vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
+  '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
   () => ({
     useTableConfigContextValue: () => ({
       columnsStore: mockColumnsStore,
@@ -106,7 +106,7 @@ vi.mock(
 );
 
 vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook',
+  '#ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook',
   () => ({
     useTableDataContextValue: () => ({ dataStore: mockDataStore }),
   }),
@@ -117,7 +117,7 @@ vi.mock('./hooks/usePersistTableStateAction.hook', () => ({
 }));
 
 vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions/usePersistTableUiFlagsAction.hook',
+  '#ui/components/Table/contexts/TableConfig/meta/actions/usePersistTableUiFlagsAction.hook',
   () => ({
     usePersistTableUiFlagsAction: () => mockPersistUiFlags,
   }),

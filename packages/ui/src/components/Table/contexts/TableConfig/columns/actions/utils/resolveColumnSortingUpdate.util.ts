@@ -1,12 +1,12 @@
 import type {
   SortingState,
   TableColumn,
-} from '@lcabrera/ui/components/Table/Table.types';
-import type { Sorting } from '@lcabrera/ui/types/ui.types';
+} from '#ui/components/Table/Table.types';
+import type { Sorting } from '#ui/types/ui.types';
 
-import { getNormalizedColumns } from '@lcabrera/ui/components/Table/utils';
-import { getNewSortingBasedOnColumnKey } from '@lcabrera/ui/components/Table/utils/getNewSortingBasedOnColumnKey.util';
-import { serializeSortingToURL } from '@lcabrera/ui/utils/urlState';
+import { getNormalizedColumns } from '#ui/components/Table/utils';
+import { getNewSortingBasedOnColumnKey } from '#ui/components/Table/utils/getNewSortingBasedOnColumnKey.util';
+import { serializeSortingToURL } from '#ui/utils/urlState';
 
 type ResolveColumnSortingUpdateArgs<TData> = {
   readonly columns: readonly TableColumn<TData>[];

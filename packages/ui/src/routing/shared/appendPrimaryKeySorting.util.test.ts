@@ -1,6 +1,6 @@
-import type { SortingState, TableColumn } from '@lcabrera/ui/components/Table';
-
 import { describe, expect, it } from 'vite-plus/test';
+
+import type { SortingState, TableColumn } from '#ui/components/Table';
 
 import { appendPrimaryKeySorting } from './appendPrimaryKeySorting.util';
 

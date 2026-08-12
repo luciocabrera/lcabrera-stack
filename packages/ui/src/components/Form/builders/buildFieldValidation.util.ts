@@ -1,4 +1,4 @@
-import type { FieldClientValidation } from '@lcabrera/ui/components/Form/Form.types';
+import type { FieldClientValidation } from '#ui/components/Form/Form.types';
 
 export type FieldValidationOpts = {
   readonly max?: number;

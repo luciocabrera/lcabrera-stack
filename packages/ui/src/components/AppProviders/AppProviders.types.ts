@@ -1,6 +1,7 @@
-import type { GlobalSettingsState } from '@lcabrera/ui/types/globalSettings.types';
-import type { ThemeMode } from '@lcabrera/ui/types/theme.types';
 import type { ReactNode } from 'react';
+
+import type { GlobalSettingsState } from '#ui/types/globalSettings.types';
+import type { ThemeMode } from '#ui/types/theme.types';
 
 /**
  * The subset of the root-route loader's data this component reads — kept

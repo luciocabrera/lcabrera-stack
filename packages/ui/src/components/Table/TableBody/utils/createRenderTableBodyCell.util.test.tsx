@@ -1,15 +1,16 @@
 // @vitest-environment jsdom
 
+import type { ReactNode } from 'react';
+
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
+
 import type {
   ColumnSizingState,
   DataKey,
   PinnedColumnInfo,
   TableColumn,
-} from '@lcabrera/ui/components/Table/Table.types';
-import type { ReactNode } from 'react';
-
-import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
+} from '#ui/components/Table/Table.types';
 
 type MockTableBodyCellProps = {
   readonly children?: ReactNode;
@@ -25,7 +26,7 @@ const { MockTableBodyCell } = vi.hoisted(() => ({
   ),
 }));
 
-vi.mock('@lcabrera/ui/components/Table/TableBodyCell', () => ({
+vi.mock('#ui/components/Table/TableBodyCell', () => ({
   TableBodyCell: MockTableBodyCell,
 }));
 

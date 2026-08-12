@@ -1,11 +1,9 @@
-import {
-  borderRadius,
-  spacing,
-} from '@lcabrera/ui/design-system/tokens/base.stylex';
-import { colors } from '@lcabrera/ui/design-system/tokens/colors.stylex';
-import { skeleton } from '@lcabrera/ui/design-system/tokens/commons.stylex';
-import { surfaceStyles } from '@lcabrera/ui/design-system/tokens/surfaces.stylex';
 import * as stylex from '@stylexjs/stylex';
+
+import { borderRadius, spacing } from '#ui/design-system/tokens/base.stylex';
+import { colors } from '#ui/design-system/tokens/colors.stylex';
+import { skeleton } from '#ui/design-system/tokens/commons.stylex';
+import { surfaceStyles } from '#ui/design-system/tokens/surfaces.stylex';
 
 const localStyles = stylex.create({
   // Layout and interaction only — the fill, border and hover come from

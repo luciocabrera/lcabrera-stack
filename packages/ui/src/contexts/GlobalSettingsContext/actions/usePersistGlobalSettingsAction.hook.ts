@@ -1,12 +1,12 @@
-import type { GlobalSettingsState } from '@lcabrera/ui/types/globalSettings.types';
+import type { GlobalSettingsState } from '#ui/types/globalSettings.types';
 
-import { usePersistCookieAction } from '@lcabrera/ui/hooks/usePersistCookieAction.hook';
-import { buildPersistCookieEntry } from '@lcabrera/ui/routing/actions/buildPersistCookieEntry.util';
+import { usePersistCookieAction } from '#ui/hooks/usePersistCookieAction.hook';
+import { buildPersistCookieEntry } from '#ui/routing/actions/buildPersistCookieEntry.util';
 import {
   GLOBAL_SETTINGS_COOKIE_KEY,
   serializeGlobalSettingsForCookie,
-} from '@lcabrera/ui/utils/globalSettings';
-import { getAppScopedCookieKey } from '@lcabrera/ui/utils/storage';
+} from '#ui/utils/globalSettings';
+import { getAppScopedCookieKey } from '#ui/utils/storage';
 
 import { useGlobalSettingsContextValue } from '../useGlobalSettingsContextValue.hook';
 

@@ -1,7 +1,7 @@
 import type {
   ColumnPinningState,
   TableColumn,
-} from '@lcabrera/ui/components/Table/Table.types';
+} from '#ui/components/Table/Table.types';
 
 type SplitColumnsByPinningArgs<TData> = {
   readonly columnPinning: ColumnPinningState<TData>;

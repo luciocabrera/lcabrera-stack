@@ -1,9 +1,10 @@
-import { Button } from '@lcabrera/ui/components/Button';
-import { SidePanelSectionHeader } from '@lcabrera/ui/components/SidePanel';
-import { useGetColumns } from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
-import { VirtualSelect } from '@lcabrera/ui/components/VirtualSelect';
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
+
+import { Button } from '#ui/components/Button';
+import { SidePanelSectionHeader } from '#ui/components/SidePanel';
+import { useGetColumns } from '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
+import { VirtualSelect } from '#ui/components/VirtualSelect';
 
 import type { AddSortSectionProps } from './AddSortSection.types';
 

@@ -1,12 +1,13 @@
 // @vitest-environment jsdom
 
-import type { RowFieldNode } from '@lcabrera/ui/components/Form/Form.types';
-
-import { FormProvider } from '@lcabrera/ui/components/Form/contexts';
-import { FormFieldsRendererContext } from '@lcabrera/ui/components/Form/FormFields/contexts/FormFieldsRendererContext/FormFieldsRendererContext.context';
-import { FormFieldsList } from '@lcabrera/ui/components/Form/FormFields/FormFieldsList/FormFieldsList.component';
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
+
+import type { RowFieldNode } from '#ui/components/Form/Form.types';
+
+import { FormProvider } from '#ui/components/Form/contexts';
+import { FormFieldsRendererContext } from '#ui/components/Form/FormFields/contexts/FormFieldsRendererContext/FormFieldsRendererContext.context';
+import { FormFieldsList } from '#ui/components/Form/FormFields/FormFieldsList/FormFieldsList.component';
 
 import { FormFieldRow } from './FormFieldRow.component';
 

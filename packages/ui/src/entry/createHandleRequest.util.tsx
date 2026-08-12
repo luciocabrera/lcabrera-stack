@@ -1,11 +1,12 @@
 import type { RenderToPipeableStreamOptions } from 'react-dom/server';
 import type { EntryContext } from 'react-router';
 
-import { getRequestCspNonce } from '@lcabrera/ui/utils/security';
 import { toError } from '@lcabrera/utils/errors/to-error.util';
 import { isbot } from 'isbot';
 import { renderToPipeableStream } from 'react-dom/server';
 import { ServerRouter } from 'react-router';
+
+import { getRequestCspNonce } from '#ui/utils/security';
 
 import { addPreloadHeaders } from './addPreloadHeaders.util';
 import { buildShellStreamResponse } from './buildShellStreamResponse.util';

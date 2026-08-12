@@ -1,9 +1,10 @@
-import type { GlobalSettingsState } from '@lcabrera/ui/types/globalSettings.types';
-
-import { logger } from '@lcabrera/ui/utils/logger';
-import { getAppScopedCookieKey } from '@lcabrera/ui/utils/storage';
-import { readFromCookie } from '@lcabrera/ui/utils/storage/readFromCookie.util';
 import { isObject } from '@lcabrera/utils/guards/is-object.util';
+
+import type { GlobalSettingsState } from '#ui/types/globalSettings.types';
+
+import { logger } from '#ui/utils/logger';
+import { getAppScopedCookieKey } from '#ui/utils/storage';
+import { readFromCookie } from '#ui/utils/storage/readFromCookie.util';
 
 import {
   GLOBAL_SETTINGS_COOKIE_KEY,

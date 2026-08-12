@@ -1,10 +1,11 @@
+import * as stylex from '@stylexjs/stylex';
+
 import {
   borderRadius,
   spacing,
   typography,
-} from '@lcabrera/ui/design-system/tokens/base.stylex';
-import { colors } from '@lcabrera/ui/design-system/tokens/colors.stylex';
-import * as stylex from '@stylexjs/stylex';
+} from '#ui/design-system/tokens/base.stylex';
+import { colors } from '#ui/design-system/tokens/colors.stylex';
 
 /** Maximum visible height (px) for the trigger area before tags overflow */
 export const TRIGGER_MAX_HEIGHT = 88;

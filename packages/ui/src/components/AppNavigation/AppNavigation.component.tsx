@@ -1,8 +1,8 @@
-import { SidePanel } from '@lcabrera/ui/components/SidePanel';
+import { SidePanel } from '#ui/components/SidePanel';
 import {
   useGetGlobalNavigationCollapsedPreference,
   useGetGlobalNavigationSizePreference,
-} from '@lcabrera/ui/contexts/GlobalSettingsContext/selectors';
+} from '#ui/contexts/GlobalSettingsContext/selectors';
 
 import { NAV_DENSITY } from './AppNavigation.constants';
 import { NavigationBody } from './NavigationBody/NavigationBody.component';

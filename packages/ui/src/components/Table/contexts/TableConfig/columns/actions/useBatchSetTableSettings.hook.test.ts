@@ -1,5 +1,8 @@
 // @vitest-environment jsdom
 
+import { act, renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+
 import type {
   ColumnFiltersState,
   ColumnOrderState,
@@ -7,10 +10,7 @@ import type {
   ColumnSizingState,
   ColumnVisibilityState,
   SortingState,
-} from '@lcabrera/ui/components/Table/Table.types';
-
-import { act, renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+} from '#ui/components/Table/Table.types';
 
 import { useBatchSetTableSettings } from './useBatchSetTableSettings.hook';
 
@@ -110,7 +110,7 @@ const {
 });
 
 vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
+  '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
   () => ({
     useTableConfigContextValue: () => ({
       columnsStore: mockColumnsStore,
@@ -120,7 +120,7 @@ vi.mock(
 );
 
 vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook',
+  '#ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook',
   () => ({
     useTableDataContextValue: () => ({ dataStore: mockDataStore }),
   }),
@@ -131,7 +131,7 @@ vi.mock('./hooks/usePersistTableStateAction.hook', () => ({
 }));
 
 vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/actions/usePersistTableUiFlagsAction.hook',
+  '#ui/components/Table/contexts/TableConfig/meta/actions/usePersistTableUiFlagsAction.hook',
   () => ({
     usePersistTableUiFlagsAction: () => mockPersistUiFlags,
   }),

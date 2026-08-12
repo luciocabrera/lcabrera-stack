@@ -9,13 +9,13 @@ type MockToolbarProps = {
   readonly isBusy?: boolean;
 };
 
-vi.mock('@lcabrera/ui/components/InfoBox', () => ({
+vi.mock('#ui/components/InfoBox', () => ({
   InfoBox: ({ children }: { readonly children: ReactNode }) => (
     <aside>{children}</aside>
   ),
 }));
 
-vi.mock('@lcabrera/ui/components/SidePanel', () => ({
+vi.mock('#ui/components/SidePanel', () => ({
   SidePanelSection: ({ children }: { readonly children: ReactNode }) => (
     <section>{children}</section>
   ),

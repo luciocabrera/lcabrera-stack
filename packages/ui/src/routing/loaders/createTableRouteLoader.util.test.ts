@@ -1,8 +1,10 @@
-import type { TableColumn } from '@lcabrera/ui/components/Table';
 import type { LoaderFunctionArgs } from 'react-router';
 
-import { serializeSortingToURL } from '@lcabrera/ui/utils/urlState';
 import { describe, expect, it, vi } from 'vite-plus/test';
+
+import type { TableColumn } from '#ui/components/Table';
+
+import { serializeSortingToURL } from '#ui/utils/urlState';
 
 import { createTableRouteLoader } from './createTableRouteLoader.util';
 

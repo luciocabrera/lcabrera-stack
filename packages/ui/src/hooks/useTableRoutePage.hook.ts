@@ -1,9 +1,11 @@
 import type { PaginatedQuery } from '@lcabrera/api/http/http.types';
-import type { TableRouteLoaderData } from '@lcabrera/ui/routing/loaders/createTableRouteLoader.util';
-import type { Pagination } from '@lcabrera/ui/types/ui.types';
 
-import { buildTablePageQuery } from '@lcabrera/ui/routing/shared/buildTablePageQuery.util';
 import { useLoaderData } from 'react-router';
+
+import type { TableRouteLoaderData } from '#ui/routing/loaders/createTableRouteLoader.util';
+import type { Pagination } from '#ui/types/ui.types';
+
+import { buildTablePageQuery } from '#ui/routing/shared/buildTablePageQuery.util';
 
 type UseTableRoutePageArgs<TResponse> = {
   /**

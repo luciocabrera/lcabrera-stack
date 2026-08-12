@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 
-import type { NavbarItemConfig } from '@lcabrera/ui/components/Navbar/Navbar.types';
-
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
+
+import type { NavbarItemConfig } from '#ui/components/Navbar/Navbar.types';
 
 import { AppConfigProvider } from './AppConfigContext.provider';
 import { useGetAppLogoutRoute } from './selectors/useGetAppLogoutRoute.hook';

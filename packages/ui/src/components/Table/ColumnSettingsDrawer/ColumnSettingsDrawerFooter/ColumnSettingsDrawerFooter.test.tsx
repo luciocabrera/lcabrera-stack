@@ -33,7 +33,7 @@ type ButtonProps = {
   readonly onClick?: () => void;
 };
 
-vi.mock('@lcabrera/ui/components/Button', () => ({
+vi.mock('#ui/components/Button', () => ({
   // Mirrors the real Button, which renders disabled={isDisabled || isBusy}.
   // A stub that drops them silently makes disabled-state assertions vacuous.
   Button: ({ children, isBusy, isDisabled, onClick }: ButtonProps) => (
@@ -43,26 +43,20 @@ vi.mock('@lcabrera/ui/components/Button', () => ({
   ),
 }));
 
-vi.mock('@lcabrera/ui/components/SidePanel', () => ({
+vi.mock('#ui/components/SidePanel', () => ({
   SidePanelFooter: ({ children }: { readonly children: ReactNode }) => (
     <div>{children}</div>
   ),
 }));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/meta/selectors',
-  () => ({
-    useGetTableIsColumnSettingsPinned: () => isColumnSettingsPinnedMock(),
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
+  useGetTableIsColumnSettingsPinned: () => isColumnSettingsPinnedMock(),
+}));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableData/data/selectors',
-  () => ({
-    useGetTableIsLoading: () => useGetTableIsLoadingMock(),
-    useGetTableIsLoadingMore: () => useGetTableIsLoadingMoreMock(),
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableData/data/selectors', () => ({
+  useGetTableIsLoading: () => useGetTableIsLoadingMock(),
+  useGetTableIsLoadingMore: () => useGetTableIsLoadingMoreMock(),
+}));
 
 vi.mock('../ColumnDrawerContext/actions', () => ({
   useBatchSetColumnDrawerSettings: () => batchSetColumnDrawerSettingsMock,

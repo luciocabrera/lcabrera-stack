@@ -2,19 +2,19 @@ import type {
   DataKey,
   TableColumn,
   TableColumnsState,
-} from '@lcabrera/ui/components/Table/Table.types';
-import type { ColumnFilter } from '@lcabrera/ui/types/filterOperators.types';
-import type { SortDirection } from '@lcabrera/ui/types/ui.types';
+} from '#ui/components/Table/Table.types';
+import type { ColumnFilter } from '#ui/types/filterOperators.types';
+import type { SortDirection } from '#ui/types/ui.types';
 
 import {
   deriveColumnViewState,
   getColumnPinSide,
   syncColumnOrderWithPinning,
-} from '@lcabrera/ui/components/Table/utils';
-import { getNewColumnFiltersBasedOnColumnKey } from '@lcabrera/ui/components/Table/utils/getNewColumnFiltersBasedOnColumnKey.util';
-import { getNewColumnSizingBasedOnColumnKey } from '@lcabrera/ui/components/Table/utils/getNewColumnSizingBasedOnColumnKey.util';
-import { getNewPinningBasedOnColumnKey } from '@lcabrera/ui/components/Table/utils/getNewPinningBasedOnColumnKey.util';
-import { getNewSortingBasedOnColumnKey } from '@lcabrera/ui/components/Table/utils/getNewSortingBasedOnColumnKey.util';
+} from '#ui/components/Table/utils';
+import { getNewColumnFiltersBasedOnColumnKey } from '#ui/components/Table/utils/getNewColumnFiltersBasedOnColumnKey.util';
+import { getNewColumnSizingBasedOnColumnKey } from '#ui/components/Table/utils/getNewColumnSizingBasedOnColumnKey.util';
+import { getNewPinningBasedOnColumnKey } from '#ui/components/Table/utils/getNewPinningBasedOnColumnKey.util';
+import { getNewSortingBasedOnColumnKey } from '#ui/components/Table/utils/getNewSortingBasedOnColumnKey.util';
 
 export type BatchColumnSettingsUpdate<TData> = {
   readonly columnFilter?: ColumnFilter;

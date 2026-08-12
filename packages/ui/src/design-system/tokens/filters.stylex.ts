@@ -1,9 +1,7 @@
-import {
-  spacing,
-  typography,
-} from '@lcabrera/ui/design-system/tokens/base.stylex';
-import { colors } from '@lcabrera/ui/design-system/tokens/colors.stylex';
 import * as stylex from '@stylexjs/stylex';
+
+import { spacing, typography } from '#ui/design-system/tokens/base.stylex';
+import { colors } from '#ui/design-system/tokens/colors.stylex';
 
 /**
  * Shared filter styles reused across filter input components.

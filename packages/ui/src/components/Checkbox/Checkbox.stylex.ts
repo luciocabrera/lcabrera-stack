@@ -1,6 +1,7 @@
-import { borderRadius } from '@lcabrera/ui/design-system/tokens/base.stylex';
-import { colors } from '@lcabrera/ui/design-system/tokens/colors.stylex';
 import * as stylex from '@stylexjs/stylex';
+
+import { borderRadius } from '#ui/design-system/tokens/base.stylex';
+import { colors } from '#ui/design-system/tokens/colors.stylex';
 
 export const styles = stylex.create({
   container: {

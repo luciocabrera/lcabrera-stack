@@ -3,13 +3,13 @@ import type {
   ColumnPinningState,
   DataKey,
   TableColumn,
-} from '@lcabrera/ui/components/Table/Table.types';
-import type { UnpinConflictResolution } from '@lcabrera/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
+} from '#ui/components/Table/Table.types';
+import type { UnpinConflictResolution } from '#ui/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
 
 import {
   buildAllOrderedColumns,
   insertAdjacentToPinnedGroup,
-} from '@lcabrera/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
+} from '#ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 
 type ResolveAcceptedUnpinConflictStateArgs<
   TData extends Record<string, unknown>,

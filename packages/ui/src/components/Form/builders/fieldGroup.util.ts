@@ -1,4 +1,4 @@
-import type { FieldNode } from '@lcabrera/ui/components/Form/Form.types';
+import type { FieldNode } from '#ui/components/Form/Form.types';
 
 export type FieldGroupArgs<TValues extends Record<string, unknown>> = {
   readonly collapsible?: boolean;

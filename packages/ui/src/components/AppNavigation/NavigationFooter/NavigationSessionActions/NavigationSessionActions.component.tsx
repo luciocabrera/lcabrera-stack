@@ -1,10 +1,11 @@
-import { Button } from '@lcabrera/ui/components/Button';
-import { useGetAppLogoutRoute } from '@lcabrera/ui/contexts/AppConfigContext/selectors';
+import { Form } from 'react-router';
+
+import { Button } from '#ui/components/Button';
+import { useGetAppLogoutRoute } from '#ui/contexts/AppConfigContext/selectors';
 import {
   useGetGlobalNavigationCollapsedPreference,
   useGetGlobalNavigationSizePreference,
-} from '@lcabrera/ui/contexts/GlobalSettingsContext/selectors';
-import { Form } from 'react-router';
+} from '#ui/contexts/GlobalSettingsContext/selectors';
 
 import { NAV_DENSITY } from '../../AppNavigation.constants';
 

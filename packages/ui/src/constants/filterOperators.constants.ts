@@ -3,7 +3,7 @@ import type {
   NumberOperatorType,
   OperatorOption,
   TextOperatorType,
-} from '@lcabrera/ui/types/filterOperators.types';
+} from '#ui/types/filterOperators.types';
 
 /** Full operator name → short code for compact URL serialization */
 export const OPERATOR_TO_SHORT: Record<string, string> = {

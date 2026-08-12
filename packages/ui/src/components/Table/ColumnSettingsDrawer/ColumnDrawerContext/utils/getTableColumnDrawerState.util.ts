@@ -1,9 +1,9 @@
 import type {
   DataKey,
   TableColumnsState,
-} from '@lcabrera/ui/components/Table/Table.types';
+} from '#ui/components/Table/Table.types';
 
-import { getColumnPinSide } from '@lcabrera/ui/components/Table/utils';
+import { getColumnPinSide } from '#ui/components/Table/utils';
 
 type GetTableColumnDrawerStateArgs<TData> = {
   readonly columnKey: DataKey<TData>;

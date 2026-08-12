@@ -1,9 +1,10 @@
+import type { StyleXStyles } from '@stylexjs/stylex';
+import type { ComponentPropsWithoutRef, ReactNode } from 'react';
+
 import type {
   PinnedColumnInfo,
   TableColumn,
-} from '@lcabrera/ui/components/Table/Table.types';
-import type { StyleXStyles } from '@stylexjs/stylex';
-import type { ComponentPropsWithoutRef, ReactNode } from 'react';
+} from '#ui/components/Table/Table.types';
 
 /**
  * `width` is omitted from the native `td` attributes and re-declared: the

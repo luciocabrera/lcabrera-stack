@@ -1,7 +1,8 @@
-import { typography } from '@lcabrera/ui/design-system/tokens/base.stylex';
-import { colors } from '@lcabrera/ui/design-system/tokens/colors.stylex';
-import { overlayStyles } from '@lcabrera/ui/design-system/tokens/commons.stylex';
 import * as stylex from '@stylexjs/stylex';
+
+import { typography } from '#ui/design-system/tokens/base.stylex';
+import { colors } from '#ui/design-system/tokens/colors.stylex';
+import { overlayStyles } from '#ui/design-system/tokens/commons.stylex';
 
 const specific = stylex.create({
   backgroundShell: {

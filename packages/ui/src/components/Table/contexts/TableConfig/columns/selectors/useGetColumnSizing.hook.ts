@@ -1,4 +1,4 @@
-import type { ColumnSizingState } from '@lcabrera/ui/components/Table/Table.types';
+import type { ColumnSizingState } from '#ui/components/Table/Table.types';
 
 import { useColumnsStore } from '../useColumnsStore.hook';
 

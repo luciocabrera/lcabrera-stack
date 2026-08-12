@@ -1,5 +1,6 @@
-import type { TStore } from '@lcabrera/ui/hooks/useStore.hook';
 import type { ReactNode } from 'react';
+
+import type { TStore } from '#ui/hooks/useStore.hook';
 
 import type { SettingsDraft } from '../Settings.types';
 

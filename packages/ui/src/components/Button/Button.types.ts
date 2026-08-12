@@ -1,14 +1,15 @@
-import type {
-  DesignSystemColor,
-  DesignSystemOrientation,
-  DesignSystemSize,
-} from '@lcabrera/ui/types/design-system.types';
 import type { StyleXStyles } from '@stylexjs/stylex';
 import type {
   ComponentPropsWithoutRef,
   MouseEventHandler,
   ReactNode,
 } from 'react';
+
+import type {
+  DesignSystemColor,
+  DesignSystemOrientation,
+  DesignSystemSize,
+} from '#ui/types/design-system.types';
 
 export type ButtonProps = Omit<
   ComponentPropsWithoutRef<'button'>,

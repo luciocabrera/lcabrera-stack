@@ -1,5 +1,6 @@
-import type { Pagination, PrefetchCache } from '@lcabrera/ui/types/ui.types';
 import type { RefObject } from 'react';
+
+import type { Pagination, PrefetchCache } from '#ui/types/ui.types';
 
 import { prefetchNextPage } from './prefetchNextPage.util';
 

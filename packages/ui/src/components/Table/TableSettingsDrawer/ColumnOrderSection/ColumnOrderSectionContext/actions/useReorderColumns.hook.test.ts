@@ -3,10 +3,10 @@
 // The order/pinning utils are exercised for real here (not mocked) so the pin-side
 // recalculation and conflict-detection branches this hook feeds are covered end to end.
 
-import type { OrderConflictResolution } from '@lcabrera/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
-
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+
+import type { OrderConflictResolution } from '#ui/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
 
 import { useReorderColumns } from './useReorderColumns.hook';
 
@@ -66,14 +66,14 @@ const {
 });
 
 vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
+  '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
   () => ({
     useTableConfigContextValue: () => ({ columnsStore: tableColumnsStore }),
   }),
 );
 
 vi.mock(
-  '@lcabrera/ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook',
+  '#ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook',
   () => ({
     useTableDrawerContextValue: () => ({ columnsStore: drawerColumnsStore }),
   }),
@@ -83,7 +83,7 @@ vi.mock('../useColumnOrderSectionContextValue.hook', () => ({
   useColumnOrderSectionContextValue: () => ({ modalsStore }),
 }));
 
-vi.mock('@lcabrera/ui/contexts/GlobalSettingsContext/selectors', () => ({
+vi.mock('#ui/contexts/GlobalSettingsContext/selectors', () => ({
   useGetGlobalOrderConflictResolutionPreference: () => getPreference(),
 }));
 

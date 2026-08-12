@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 import type {
   FieldErrors,
   FieldNode,
@@ -5,9 +7,8 @@ import type {
   FormProps,
   FormSubmission,
   LeafFieldDef,
-} from '@lcabrera/ui/components/Form/Form.types';
-import type { TStore } from '@lcabrera/ui/hooks/useStore.hook';
-import type { ReactNode } from 'react';
+} from '#ui/components/Form/Form.types';
+import type { TStore } from '#ui/hooks/useStore.hook';
 
 export type FormContextValue<
   TValues extends Record<string, unknown> = Record<string, unknown>,

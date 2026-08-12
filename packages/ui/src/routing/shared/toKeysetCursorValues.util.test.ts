@@ -1,6 +1,6 @@
-import type { SortingState } from '@lcabrera/ui/components/Table';
-
 import { describe, expect, it } from 'vite-plus/test';
+
+import type { SortingState } from '#ui/components/Table';
 
 import { toKeysetCursorValues } from './toKeysetCursorValues.util';
 

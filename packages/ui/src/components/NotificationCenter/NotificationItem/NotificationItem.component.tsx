@@ -1,5 +1,6 @@
-import { MenuCloseIcon } from '@lcabrera/ui/components/Icons';
 import * as stylex from '@stylexjs/stylex';
+
+import { MenuCloseIcon } from '#ui/components/Icons';
 
 import type { NotificationItemProps } from './NotificationItem.types';
 

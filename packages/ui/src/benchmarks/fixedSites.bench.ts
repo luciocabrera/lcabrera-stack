@@ -12,13 +12,13 @@
  * Read absolute per-call cost first — see ./ARCHITECTURE.md.
  */
 
+import { bench, describe } from 'vite-plus/test';
+
 import type {
   ColumnOrderState,
   ColumnPinningState,
   TableColumn,
-} from '@lcabrera/ui/components/Table/Table.types';
-
-import { bench, describe } from 'vite-plus/test';
+} from '#ui/components/Table/Table.types';
 
 type Row = Record<string, unknown>;
 

@@ -1,4 +1,4 @@
-import type { ColumnFilter } from '@lcabrera/ui/types/filterOperators.types';
+import type { ColumnFilter } from '#ui/types/filterOperators.types';
 
 export const isDateFilterValid = (
   filter: Extract<ColumnFilter, { type: 'date' }>,

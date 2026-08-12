@@ -19,13 +19,10 @@ const { setColumnSizingWithoutSyncMock, syncColumnsSizingMock } = vi.hoisted(
   }),
 );
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/actions',
-  () => ({
-    useSetColumnSizingWithoutSync: () => setColumnSizingWithoutSyncMock,
-    useSyncColumnsSizing: () => syncColumnsSizingMock,
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/columns/actions', () => ({
+  useSetColumnSizingWithoutSync: () => setColumnSizingWithoutSyncMock,
+  useSyncColumnsSizing: () => syncColumnsSizingMock,
+}));
 
 import { useColumnDragSession } from './useColumnDragSession.hook';
 

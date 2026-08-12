@@ -1,5 +1,6 @@
-import { DEFAULT_MIN_COLUMN_WIDTH } from '@lcabrera/ui/components/Table/Table.constants';
 import * as stylex from '@stylexjs/stylex';
+
+import { DEFAULT_MIN_COLUMN_WIDTH } from '#ui/components/Table/Table.constants';
 
 import type { TableHeaderCellProps } from './TableHeaderCell.types';
 

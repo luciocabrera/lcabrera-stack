@@ -1,8 +1,8 @@
-import type { PinSide } from '@lcabrera/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
+import type { PinSide } from '#ui/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
 
-import { useTableConfigContextValue } from '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import { useTableDrawerContextValue } from '@lcabrera/ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
-import { useGetGlobalPinConflictResolutionPreference } from '@lcabrera/ui/contexts/GlobalSettingsContext/selectors';
+import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { useTableDrawerContextValue } from '#ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
+import { useGetGlobalPinConflictResolutionPreference } from '#ui/contexts/GlobalSettingsContext/selectors';
 
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
 import { useAcceptPinConflict } from './useAcceptPinConflict.hook';

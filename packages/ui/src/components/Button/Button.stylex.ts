@@ -1,4 +1,6 @@
-import { borderRadius } from '@lcabrera/ui/design-system/tokens/base.stylex';
+import * as stylex from '@stylexjs/stylex';
+
+import { borderRadius } from '#ui/design-system/tokens/base.stylex';
 import {
   baseInteractiveStyles,
   colorVariants,
@@ -7,8 +9,7 @@ import {
   rippleBase,
   sizeVariants,
   skeleton,
-} from '@lcabrera/ui/design-system/tokens/commons.stylex';
-import * as stylex from '@stylexjs/stylex';
+} from '#ui/design-system/tokens/commons.stylex';
 
 const buttonSpecificStyles = stylex.create({
   button: {

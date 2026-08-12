@@ -1,11 +1,12 @@
-import { Button } from '@lcabrera/ui/components/Button';
+import * as stylex from '@stylexjs/stylex';
+
+import { Button } from '#ui/components/Button';
 import {
   CLEAR_SORTING_COMMAND,
   deriveToggleCommandState,
-} from '@lcabrera/ui/components/Table/commands';
-import { useSetColumnSorting } from '@lcabrera/ui/components/Table/contexts/TableConfig/columns/actions';
-import { tableActionsPopoverStyles } from '@lcabrera/ui/components/Table/TableActionsPopover';
-import * as stylex from '@stylexjs/stylex';
+} from '#ui/components/Table/commands';
+import { useSetColumnSorting } from '#ui/components/Table/contexts/TableConfig/columns/actions';
+import { tableActionsPopoverStyles } from '#ui/components/Table/TableActionsPopover';
 
 import type { ClearSortingButtonProps } from './ClearSortingButton.types';
 

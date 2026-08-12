@@ -7,14 +7,11 @@ const { mockSetColumnVisibility } = vi.hoisted(() => ({
   mockSetColumnVisibility: vi.fn(),
 }));
 
-vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/actions',
-  () => ({
-    useSetColumnVisibility: () => mockSetColumnVisibility,
-  }),
-);
+vi.mock('#ui/components/Table/contexts/TableConfig/columns/actions', () => ({
+  useSetColumnVisibility: () => mockSetColumnVisibility,
+}));
 
-vi.mock('@lcabrera/ui/components/Table/TableActionsPopover', () => ({
+vi.mock('#ui/components/Table/TableActionsPopover', () => ({
   tableActionsPopoverStyles: {
     menuIcon: {},
     menuItem: {},

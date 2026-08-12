@@ -36,7 +36,7 @@ const {
   mockToggleColumnVisibility: vi.fn(),
 }));
 
-vi.mock('@lcabrera/ui/components/DraggableList', () => ({
+vi.mock('#ui/components/DraggableList', () => ({
   DraggableList: ({
     items,
     onOrderChange,
@@ -70,19 +70,19 @@ vi.mock('@lcabrera/ui/components/DraggableList', () => ({
   ),
 }));
 
-vi.mock('@lcabrera/ui/components/Icons', () => ({
+vi.mock('#ui/components/Icons', () => ({
   LockIcon: () => <span data-testid='lock-icon'>lock</span>,
 }));
 
 vi.mock(
-  '@lcabrera/ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook',
+  '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook',
   () => ({
     useGetColumns: () => mockColumns,
   }),
 );
 
 vi.mock(
-  '@lcabrera/ui/components/Table/TableSettingsDrawer/TableDrawerContext/selectors',
+  '#ui/components/Table/TableSettingsDrawer/TableDrawerContext/selectors',
   () => ({
     useGetColumnOrder: () => ['name', 'id'],
     useGetColumnPinning: () => ({ left: ['id'], right: [] }),
@@ -90,7 +90,7 @@ vi.mock(
   }),
 );
 
-vi.mock('@lcabrera/ui/components/ToggleSwitch', () => ({
+vi.mock('#ui/components/ToggleSwitch', () => ({
   ToggleSwitch: ({
     isChecked,
     isDisabled,

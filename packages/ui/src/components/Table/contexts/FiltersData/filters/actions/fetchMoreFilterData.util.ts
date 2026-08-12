@@ -1,4 +1,4 @@
-import { getRequiredOnLoadMore } from '@lcabrera/ui/components/Table/utils/getRequiredOnLoadMore.util';
+import { getRequiredOnLoadMore } from '#ui/components/Table/utils/getRequiredOnLoadMore.util';
 
 import type {
   FetchFilterDataActionArgs,

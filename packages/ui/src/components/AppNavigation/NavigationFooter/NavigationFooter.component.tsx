@@ -1,6 +1,7 @@
-import { SidePanelFooter } from '@lcabrera/ui/components/SidePanel';
-import { useGetIsAuthEnabled } from '@lcabrera/ui/contexts/AppConfigContext/selectors';
 import * as stylex from '@stylexjs/stylex';
+
+import { SidePanelFooter } from '#ui/components/SidePanel';
+import { useGetIsAuthEnabled } from '#ui/contexts/AppConfigContext/selectors';
 
 import { styles } from '../AppNavigation.stylex';
 import { NavigationSessionActions } from './NavigationSessionActions/NavigationSessionActions.component';

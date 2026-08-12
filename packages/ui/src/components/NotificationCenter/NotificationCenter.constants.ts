@@ -1,4 +1,4 @@
-import type { NotificationPlacement } from '@lcabrera/ui/contexts/NotificationContext';
+import type { NotificationPlacement } from '#ui/contexts/NotificationContext';
 
 /** Ordered placements used to render NotificationCenter viewports. */
 export const NOTIFICATION_CENTER_PLACEMENTS: readonly NotificationPlacement[] =

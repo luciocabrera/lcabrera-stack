@@ -1,4 +1,4 @@
-import type { LeafFieldDef } from '@lcabrera/ui/components/Form/Form.types';
+import type { LeafFieldDef } from '#ui/components/Form/Form.types';
 
 import { validateNumberValue } from './validateNumberValue.util';
 import { validateStringValue } from './validateStringValue.util';

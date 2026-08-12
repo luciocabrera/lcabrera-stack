@@ -1,4 +1,4 @@
-import type { GlobalSettingsState } from '@lcabrera/ui/types/globalSettings.types';
+import type { GlobalSettingsState } from '#ui/types/globalSettings.types';
 
 export const INITIAL_GLOBAL_SETTINGS: GlobalSettingsState = {
   navigation: {},

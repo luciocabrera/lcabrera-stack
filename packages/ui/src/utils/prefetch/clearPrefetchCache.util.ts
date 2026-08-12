@@ -1,5 +1,6 @@
-import type { PrefetchCache } from '@lcabrera/ui/types/ui.types';
 import type { RefObject } from 'react';
+
+import type { PrefetchCache } from '#ui/types/ui.types';
 
 type ClearPrefetchCacheArgs<TResponse> = {
   readonly prefetchRef:

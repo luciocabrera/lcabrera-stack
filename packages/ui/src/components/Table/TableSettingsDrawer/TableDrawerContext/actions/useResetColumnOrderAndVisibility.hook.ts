@@ -1,9 +1,9 @@
 import type {
   ColumnOrderState,
   ColumnPinningState,
-} from '@lcabrera/ui/components/Table/Table.types';
+} from '#ui/components/Table/Table.types';
 
-import { useTableConfigContextValue } from '@lcabrera/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 
 import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook';
 
