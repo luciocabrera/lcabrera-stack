@@ -2,6 +2,7 @@ import type { ColumnVisibilityState } from '#ui/components/Table/Table.types';
 
 import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useTableDrawerContextValue } from '#ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
+import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
 
 type UseToggleColumnVisibilityArgs = {
   readonly columnKey: string;
@@ -19,7 +20,7 @@ export const useToggleColumnVisibility = () => {
     const tableColumnsState = tableColumnsStore.get();
     const column = tableColumnsState?.normalizedColumns[columnKey];
 
-    if (column?.isStatic) return;
+    if (resolveColumnCapabilities(column).isStatic) return;
 
     const columnVisibility =
       drawerColumnsStore.get()?.columnVisibility ??

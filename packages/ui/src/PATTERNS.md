@@ -230,6 +230,43 @@ export const styles = {
 
 ---
 
+## Column Capability Defaults
+
+`TableColumn`'s capability flags — `isFilterable`, `isResizable`, `isSortable`,
+`isStatic` — are **optional, and an omitted one is not a missing value**. Every
+surface reads them through **`resolveColumnCapabilities`**
+(`components/Table/utils/`), which materializes the defaults, and never tests the
+flag directly:
+
+```ts
+// ✅ one resolver, defaults in one place
+const { isResizable, isSortable, isStatic } = resolveColumnCapabilities(column);
+
+// ❌ each of these re-derives a default at the point of use
+column.isSortable !== false;
+column.isStatic === true;
+column.isStatic ?? false;
+column.isFilterable && hasSomethingElse;
+```
+
+Reading the flag directly is how the same question ended up asked in several
+spellings that did not agree with one another, with the defaults recorded only
+in JSDoc — `git log` on `resolveColumnCapabilities.util.ts` reaches the PR that
+retired them. Two consequences worth knowing:
+
+- The resolver returns **effective** capabilities, so `isResizable` is already
+  false for a static column — `isStatic` locks a column against every user
+  modification, resizing included.
+- A capability that is genuinely compounded with something that is _not_ a
+  capability keeps its compound (`filterSettingsColumns` pairs `isStatic` with
+  "has a custom `render`"); only the capability half goes through the resolver.
+
+The resolver is also what feeds `deriveToggleCommandState`'s `isDisabled`, so a
+command's availability and the gate that decides whether to render it come from
+one derivation (`components/Table/commands/ARCHITECTURE.md`).
+
+---
+
 ## Serializable Fetch Descriptors (Tool-Call Pattern)
 
 Column filter-option fetching is described by **data, never functions** (ADR-009): functions silently die at the React Router loader boundary, and future pgAdmin-style columns are built at runtime from the DB. A `TableColumn` carries an optional `filterOptionsDescriptor`:

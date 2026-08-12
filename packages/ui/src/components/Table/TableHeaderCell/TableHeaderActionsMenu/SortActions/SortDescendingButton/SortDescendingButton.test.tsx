@@ -1,14 +1,26 @@
 // @vitest-environment jsdom
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vite-plus/test';
 
-const { mockSetSorting } = vi.hoisted(() => ({
+const { mockSetSorting, normalizedColumnRef } = vi.hoisted(() => ({
   mockSetSorting: vi.fn(),
+  normalizedColumnRef: { current: {} as Record<string, unknown> },
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/columns/actions', () => ({
   useSetColumnSorting: () => mockSetSorting,
+}));
+
+vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
+  useGetNormalizedColumn: () => normalizedColumnRef.current,
 }));
 
 vi.mock('#ui/components/Table/TableActionsPopover', () => ({
@@ -27,6 +39,10 @@ const getButton = () => {
   if (button === null) throw new Error('No Descending button');
   return button;
 };
+
+beforeEach(() => {
+  normalizedColumnRef.current = { key: 'name', label: 'Name' };
+});
 
 afterEach(() => {
   cleanup();
@@ -77,5 +93,17 @@ describe('SortDescendingButton', () => {
       />,
     );
     expect(getButton().getAttribute('aria-pressed')).toBe('true');
+  });
+
+  it('is disabled when the column has no sorting capability', () => {
+    normalizedColumnRef.current = {
+      isSortable: false,
+      key: 'name',
+      label: 'Name',
+    };
+
+    render(<SortDescendingButton columnKey='name' onClose={mockOnClose} />);
+
+    expect(getButton().disabled).toBe(true);
   });
 });

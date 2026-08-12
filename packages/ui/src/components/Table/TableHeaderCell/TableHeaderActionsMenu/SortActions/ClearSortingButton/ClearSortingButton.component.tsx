@@ -6,7 +6,9 @@ import {
   deriveToggleCommandState,
 } from '#ui/components/Table/commands';
 import { useSetColumnSorting } from '#ui/components/Table/contexts/TableConfig/columns/actions';
+import { useGetNormalizedColumn } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
 import { tableActionsPopoverStyles } from '#ui/components/Table/TableActionsPopover';
+import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
 
 import type { ClearSortingButtonProps } from './ClearSortingButton.types';
 
@@ -23,10 +25,12 @@ export const ClearSortingButton = <TData,>({
   sortDirection,
 }: ClearSortingButtonProps<TData>) => {
   const setSorting = useSetColumnSorting<TData>();
+  const column = useGetNormalizedColumn<TData>(columnKey);
+  const { isSortable } = resolveColumnCapabilities(column);
   const { icon: ClearSortingCommandIcon, label } = CLEAR_SORTING_COMMAND;
   const { isEnabled } = deriveToggleCommandState({
     current: sortDirection,
-    isDisabled: false,
+    isDisabled: !isSortable,
     target: undefined,
   });
 

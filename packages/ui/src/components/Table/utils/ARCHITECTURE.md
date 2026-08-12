@@ -27,6 +27,7 @@ utils/
 ├── orderColumnsByKeys.util.ts                    → Order columns to follow a key list, appending unmentioned ones
 ├── readPersistedStateFromCookie.util.ts          → SSR-safe cookie state read
 ├── readPersistedUiFlagsFromCookie.util.ts        → SSR-safe read of drawer open/pinned flags from cookie
+├── resolveColumnCapabilities.util.ts              → Resolve a column's capability flags against the defaults
 ├── resolveCrudRowId.util.ts                       → Resolve CRUD row id from the primary-key column(s)
 ├── resolveFetchMoreState.util.ts                 → Shared append/hasMore/total resolution for paginated fetch actions
 ├── resolvePrimaryKeyColumnKeys.util.ts            → Keys of isPrimaryKey columns (declaration order, excludes 'actions')
@@ -90,6 +91,9 @@ graph TD
 
     Cols --> SK["getStaticColumnKeys()"]
     SK --> Static["staticKeys (Set)"]
+
+    Col["one column"] --> RC["resolveColumnCapabilities()"]
+    RC --> Caps["{ isFilterable, isResizable, isSortable, isStatic }"]
   end
 
   subgraph "Pin Utilities"
@@ -119,12 +123,28 @@ graph TD
 | orderColumnsByKeys              | columns, columnOrder                          | TableColumn[]                                                                       | Columns reordered to follow `columnOrder`; unmentioned columns keep their relative order and are appended, order entries with no matching column are dropped                                                      |
 | getPinnedColumnOffsets          | pinning, sizing, columns                      | Record<key, PinnedColumnInfo>                                                       | Sticky positions for pinned columns                                                                                                                                                                               |
 | getColumnPinSide                | columnKey, pinning                            | PinSide or undefined                                                                | Which side a column is pinned to                                                                                                                                                                                  |
+| resolveColumnCapabilities       | column (or undefined)                         | { isFilterable, isResizable, isSortable, isStatic }                                 | Materialize a column's capability defaults in one place; the only reader of the optional flags in the component tree                                                                                              |
 | resolveCrudRowId                | row, columns                                  | string                                                                              | Build a CRUD row id from the primary-key column(s) (single = raw value, composite = encoded values joined by `_`)                                                                                                 |
 | resolvePrimaryKeyColumnKeys     | columns                                       | DataKey[]                                                                           | Keys of `isPrimaryKey` columns in declaration order (excludes `actions`)                                                                                                                                          |
 | resolveTableActionsColumn       | columns, crud                                 | { columns, hasActionsColumn }                                                       | Adds/merges the synthetic `actions` column when `crud.read/update/delete` is enabled or the consumer declared one                                                                                                 |
 | resolveFetchMoreState           | currentData, selectors, response, totals      | { combinedData, hasMore, totalLoadedRows, totalRows }                               | Shared pagination merge logic used by table rows and filter-options load-more                                                                                                                                     |
 | splitColumnsByPinning           | pinning, effectiveColumns                     | PinnedColumnPartitionState                                                          | Split columns into left/center/right                                                                                                                                                                              |
 | syncColumnOrderWithPinning      | order, previous/new pinning                   | string[]                                                                            | Reorder to keep pinned columns grouped; unpin columns move adjacent to remaining pinned group                                                                                                                     |
+
+`resolveColumnCapabilities` is the single home for the capability defaults. The
+flags on `TableColumn` are optional, and an omitted one is not a missing value —
+reading `column.isSortable` directly re-derives a default at the point of use,
+which is what the hand-spelled predicates it replaced each did, in spellings that
+did not agree with one another. It also folds `isStatic` into `isResizable`,
+because a static column is locked against every user modification, resizing
+included. `deriveToggleCommandState` takes its availability argument from it
+(`commands/ARCHITECTURE.md`).
+
+The one code that still reads the flags directly is `src/benchmarks/`, which
+re-implements the predicate on purpose to measure array shapes and is excluded
+from the published package. Anywhere in the component tree, go through the
+resolver — `vp lint`/`vp check` will not catch a direct read, so this is the
+convention that has to hold by review (`src/PATTERNS.md`).
 
 getPinnedColumnOffsets computes offsets and boundary markers (isLastPinnedLeft, isFirstPinnedRight) from effective column order so shadow boundaries stay aligned with rendered sticky positions even if pinning arrays are out of order.
 

@@ -1,4 +1,5 @@
 import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
 
 import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook';
 
@@ -18,7 +19,8 @@ export const useSortByColumnOrder = () => {
 
     const sortableColumns =
       columnsState?.columns.filter(
-        (col) => col.isSortable !== false && col.key !== 'actions',
+        (col) =>
+          col.key !== 'actions' && resolveColumnCapabilities(col).isSortable,
       ) ?? [];
 
     const orderedSortable =

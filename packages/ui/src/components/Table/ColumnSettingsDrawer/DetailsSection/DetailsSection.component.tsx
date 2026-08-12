@@ -1,6 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 
 import { useGetNormalizedColumn } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
+import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
 
 import type { DetailItem, DetailsSectionProps } from './DetailsSection.types';
 
@@ -12,16 +13,8 @@ export const DetailsSection = <TData,>({
 }: DetailsSectionProps<TData>) => {
   const column = useGetNormalizedColumn<TData>(columnKey);
 
-  const {
-    dataType,
-    isFilterable,
-    isSortable,
-    key,
-    label,
-    maxWidth,
-    minWidth,
-    sortDirection,
-  } = column;
+  const { dataType, key, label, maxWidth, minWidth, sortDirection } = column;
+  const { isFilterable, isSortable } = resolveColumnCapabilities(column);
 
   const details: DetailItem[] = [
     { label: 'Label', value: label },
@@ -30,12 +23,12 @@ export const DetailsSection = <TData,>({
     {
       isBadge: true,
       label: 'Sortable',
-      value: isSortable === false ? 'No' : 'Yes',
+      value: isSortable ? 'Yes' : 'No',
     },
     {
       isBadge: true,
       label: 'Filterable',
-      value: isFilterable === false ? 'No' : 'Yes',
+      value: isFilterable ? 'Yes' : 'No',
     },
     {
       isBadge: true,

@@ -11,6 +11,7 @@ import {
   useGetTableIsLoading,
   useGetTableIsLoadingMore,
 } from '#ui/components/Table/contexts/TableData/data/selectors';
+import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
 import { Tabs } from '#ui/components/Tabs';
 
 import { DetailsSection } from '../DetailsSection';
@@ -37,9 +38,8 @@ export const ColumnSettingsDrawerBody = <
   const selectedTab = useGetTableColumnSettingsSelectedTab();
   const setSelectedTab = useSetTableColumnSettingsSelectedTab();
 
-  const isFilterable = column.isFilterable !== false;
-  const isSortable = column.isSortable !== false;
-  const isStatic = column.isStatic === true;
+  const { isFilterable, isSortable, isStatic } =
+    resolveColumnCapabilities(column);
 
   const tabs: TabItem[] = [
     {

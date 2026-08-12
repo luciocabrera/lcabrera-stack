@@ -25,6 +25,10 @@ vi.mock('#ui/components/Table/contexts/TableConfig/columns/actions', () => ({
   useSetColumnVisibility: () => vi.fn(),
 }));
 
+vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
+  useGetNormalizedColumn: () => ({ key: 'name', label: 'Name' }),
+}));
+
 vi.mock('#ui/components/Table/contexts/TableConfig/meta/actions', () => ({
   useSetTableColumnSelectedKey: () => vi.fn(),
   useSetTableDrawersOpenState: () => vi.fn(),

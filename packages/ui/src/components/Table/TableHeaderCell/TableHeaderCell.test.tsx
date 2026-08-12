@@ -103,6 +103,18 @@ describe('TableHeaderCell', () => {
     expect(MockResizeHandle).not.toHaveBeenCalled();
   });
 
+  it('omits ResizeHandle for a static column even when isResizable is true', () => {
+    useGetColumnWidthMock.mockReturnValue(undefined);
+    useGetPinnedColumnInfoMock.mockReturnValue(undefined);
+    useGetNormalizedColumnMock.mockReturnValue(
+      createColumn({ isResizable: true, isStatic: true }),
+    );
+
+    renderCell();
+
+    expect(MockResizeHandle).not.toHaveBeenCalled();
+  });
+
   it('forwards sort/pin/settings state to TableHeaderActionsMenu', () => {
     useGetColumnWidthMock.mockReturnValue(undefined);
     useGetPinnedColumnInfoMock.mockReturnValue({

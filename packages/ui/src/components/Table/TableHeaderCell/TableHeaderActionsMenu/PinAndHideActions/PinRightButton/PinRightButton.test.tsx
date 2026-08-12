@@ -1,14 +1,26 @@
 // @vitest-environment jsdom
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vite-plus/test';
 
-const { mockSetColumnPinning } = vi.hoisted(() => ({
+const { mockSetColumnPinning, normalizedColumnRef } = vi.hoisted(() => ({
   mockSetColumnPinning: vi.fn(),
+  normalizedColumnRef: { current: {} as Record<string, unknown> },
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/columns/actions', () => ({
   useSetColumnPinning: () => mockSetColumnPinning,
+}));
+
+vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
+  useGetNormalizedColumn: () => normalizedColumnRef.current,
 }));
 
 vi.mock('#ui/components/Table/TableActionsPopover', () => ({
@@ -27,6 +39,10 @@ const getButton = () => {
   if (button === null) throw new Error('No Pin Right button');
   return button;
 };
+
+beforeEach(() => {
+  normalizedColumnRef.current = { key: 'name', label: 'Name' };
+});
 
 afterEach(() => {
   cleanup();
@@ -69,5 +85,17 @@ describe('PinRightButton', () => {
       <PinRightButton columnKey='name' onClose={mockOnClose} pinSide='right' />,
     );
     expect(getButton().getAttribute('aria-pressed')).toBe('true');
+  });
+
+  it('is disabled when the column has no pinning capability', () => {
+    normalizedColumnRef.current = {
+      isStatic: true,
+      key: 'name',
+      label: 'Name',
+    };
+
+    render(<PinRightButton columnKey='name' onClose={mockOnClose} />);
+
+    expect(getButton().disabled).toBe(true);
   });
 });

@@ -159,6 +159,13 @@ export type StaticFilterOptionsDescriptor = {
  */
 export type StorageType = 'cookie' | 'localStorage';
 
+/**
+ * A column definition. The capability flags (`isFilterable`, `isResizable`,
+ * `isSortable`, `isStatic`) are optional and an omitted one is NOT a missing
+ * value — every surface resolves them through `resolveColumnCapabilities`,
+ * which holds the defaults, so read them there rather than testing a flag
+ * directly.
+ */
 export type TableColumn<TData> = {
   readonly dataType?: TableColumnDataType;
   /**
@@ -170,7 +177,7 @@ export type TableColumn<TData> = {
   readonly filterOptionsDescriptor?: FilterOptionsDescriptor;
   /** Format options for the column based on data type */
   readonly format?: TableColumnFormat;
-  /** Whether this column can be filtered (default: true) */
+  /** Whether this column can be filtered. */
   readonly isFilterable?: boolean;
   /** Whether to hide the header content (label, controls, resize handle) */
   readonly isHeaderHidden?: boolean;
@@ -181,9 +188,9 @@ export type TableColumn<TData> = {
    * for pagination.
    */
   readonly isPrimaryKey?: boolean;
-  /** Whether this column can be resized by the user (default: true) */
+  /** Whether this column can be resized by the user. */
   readonly isResizable?: boolean;
-  /** Whether this column is sortable (default: true) */
+  /** Whether this column is sortable. */
   readonly isSortable?: boolean;
   /**
    * Whether this column is fully locked from user modifications.

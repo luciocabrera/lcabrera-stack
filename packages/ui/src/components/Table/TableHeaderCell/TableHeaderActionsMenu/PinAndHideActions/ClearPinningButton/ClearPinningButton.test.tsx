@@ -1,14 +1,26 @@
 // @vitest-environment jsdom
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vite-plus/test';
 
-const { mockSetColumnPinning } = vi.hoisted(() => ({
+const { mockSetColumnPinning, normalizedColumnRef } = vi.hoisted(() => ({
   mockSetColumnPinning: vi.fn(),
+  normalizedColumnRef: { current: {} as Record<string, unknown> },
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/columns/actions', () => ({
   useSetColumnPinning: () => mockSetColumnPinning,
+}));
+
+vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
+  useGetNormalizedColumn: () => normalizedColumnRef.current,
 }));
 
 vi.mock('#ui/components/Table/TableActionsPopover', () => ({
@@ -27,6 +39,10 @@ const getButton = () => {
   if (button === null) throw new Error('No Clear Pinning button');
   return button;
 };
+
+beforeEach(() => {
+  normalizedColumnRef.current = { key: 'name', label: 'Name' };
+});
 
 afterEach(() => {
   cleanup();
@@ -58,5 +74,23 @@ describe('ClearPinningButton', () => {
       side: undefined,
     });
     expect(mockOnClose).toHaveBeenCalled();
+  });
+
+  it('is disabled when the column has no pinning capability', () => {
+    normalizedColumnRef.current = {
+      isStatic: true,
+      key: 'name',
+      label: 'Name',
+    };
+
+    render(
+      <ClearPinningButton
+        columnKey='name'
+        onClose={mockOnClose}
+        pinSide='left'
+      />,
+    );
+
+    expect(getButton().disabled).toBe(true);
   });
 });
