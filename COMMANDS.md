@@ -323,6 +323,7 @@ Versions are chosen by people, bumped by one command, and published by CI.
 | Command                  | Does                                                                          |
 | ------------------------ | ----------------------------------------------------------------------------- |
 | `vp run release:add`     | write a changeset — pick the packages and patch/minor/major, say what changed |
+| `vp run release:plan`    | per package: local version vs npm, and what CI would publish right now        |
 | `vp run release:status`  | show what would be released, versus `origin/main`                             |
 | `vp run release:version` | consume the changesets: bump versions, write per-package changelogs           |
 
@@ -331,6 +332,12 @@ The loop: a change that affects consumers ships with a changeset in the same PR
 `vp run release:version` and open an ordinary PR with the result. Merging it
 triggers [`release.yml`](.github/workflows/release.yml), which builds, publishes
 every package whose version is not yet on npm, and opens a GitHub Release for it.
+
+`release:plan` is that workflow's own gate, runnable locally: it asks the
+registry package by package, so an unrelated package's pending changeset no
+longer suppresses the whole release (#620). `release:status` answers a different
+question — what the _changesets_ would do at the next `release:version` — so the
+two disagreeing is normal, and the gap between them is the release cycle.
 
 Two deliberate constraints, both explained in
 [AGENTS.md](AGENTS.md#releasing-changelog--labels) and in full in the `releasing`

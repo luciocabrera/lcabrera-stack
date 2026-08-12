@@ -41,11 +41,25 @@ Four things here are deliberate, and each cost something to learn:
   carry it, so nothing but the version number decides whether a merge publishes.
   Every workspace not meant to publish MUST carry the flag: `api-server` and
   `api-server-fast` had none at all and were one `npm publish` from going out.
-- **The job skips itself while a changeset is pending.** `changesets/action` has
-  no publish-only mode: given a pending changeset it versions and opens a PR
-  instead, and that attempt dies on the commit-msg hook (`Version Packages` is
-  not a Conventional Commit). So `release.yml` gates on the same condition the
-  action switches on, before it installs anything.
+- **The job asks the registry, per package, what to publish.**
+  `vp run release:plan` is that gate and runs locally: for each non-private
+  workspace it compares the manifest version against npm and reports
+  `will publish` / `already on npm` / `first publish`. A package with its own
+  pending changeset needs no special case — it has not been versioned, so its
+  version is the one already published.
+
+  It replaced a repo-wide "is any changeset pending?" count, which suppressed
+  publishing for **every** package whenever any one of them had an unconsumed
+  changeset. In a repo several agents merge into, that count is essentially
+  never zero, so the job reported success through every push while publishing
+  nothing, and independent per-package releases were impossible (#620).
+
+  That count existed to keep `changesets/action` away from its version path,
+  which has no publish-only mode and dies on the commit-msg hook (`Version
+Packages` is not a Conventional Commit). `release.yml` now calls
+  `npx changeset publish` directly, so there is no version path to avoid. The
+  action's one irreplaceable contribution — the GitHub Release body — is rebuilt
+  from the same `CHANGELOG.md` by `scripts/release-notes.mjs`.
 
 **Package releases and the repository release are separate tracks.** Changesets
 tags `@lcabrera/utils@0.1.0` and `release.yml` opens a GitHub Release per

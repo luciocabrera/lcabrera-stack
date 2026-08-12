@@ -60,6 +60,7 @@
     "ready": "vp run check:safe && vp run build:all",
     "renames:verify": "node scripts/verify-renamed-mentions.mjs",
     "release:add": "changeset",
+    "release:plan": "node scripts/release-publish-plan.mjs",
     "release:status": "changeset status --since origin/main",
     "release:version": "changeset version && vp install --lockfile-only && vp fmt .",
     "scripts:verify": "node scripts/verify-script-size.mjs",
