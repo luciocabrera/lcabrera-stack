@@ -85,10 +85,15 @@ React Router does not read a loader field named `key`, and a JSX key must be
 written explicitly. Remounting works today because `use(dataPromise)` re-suspends
 on a new promise reference.
 
-The key is therefore **not extended**. It is wired to a real remount or deleted
-(backlog P-08), and this decision does not depend on it either way. It also
-concatenates two params without a delimiter, so distinct states collide — a defect
-that would have been inherited and widened by adding a third param.
+The key is therefore **not extended**. It was **deleted** in #557 rather than
+wired, since the remount it claimed to cause already happens without it; this
+decision never depended on which way that went. It also concatenated two params
+without a delimiter, so distinct states collided — a defect that would have been
+inherited and widened by adding a third param.
+
+What replaces it in the tree is a test, not a field: `createTableRouteLoader`'s
+suite now pins that one loader invoked twice yields two distinct `dataPromise`
+references, which is the mechanism that actually re-suspends.
 
 ## Consequences
 

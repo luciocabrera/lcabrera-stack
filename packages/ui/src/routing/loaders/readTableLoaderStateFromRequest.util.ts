@@ -109,6 +109,9 @@ export const readTableLoaderStateFromRequest = <
     filters,
     metaUiFlags,
     sorting,
+    // The raw params, not a duplicate of the parsed state above: they are the
+    // only way to tell "no `sorting` param" from "a param that deserialized to
+    // an empty sort", which `sorting: []` alone cannot express.
     standaloneFiltersParam,
     standaloneSortParam,
   };
