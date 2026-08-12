@@ -59,7 +59,7 @@ const COLUMN = {
   net: 'net',
   /** `text[]` — has equality via `anyarray`, and is still not renderable. */
   tags: 'tags',
-  /** `uuid`, low-cardinality — refused despite being displayable (see ADR-058). */
+  /** `uuid`, low-cardinality — the identifier admitted by name, not category. */
   tenant: 'tenant',
 } as const;
 
@@ -274,29 +274,49 @@ describe.skipIf(!IS_SMOKE_ENABLED)(
       expect(capabilities[COLUMN.clientIp]?.role).toBe('dimension');
     });
 
-    it('refuses a uuid the catalogue reports as groupable', async () => {
+    it('groups a foreign-key uuid while refusing the jsonb beside it', async () => {
       const capabilities = await resolveCapabilities();
       const tenant = capabilities[COLUMN.tenant];
       const doc = capabilities[COLUMN.doc];
 
-      // Low-cardinality, so no statistics rule keeps it out — and Postgres has
-      // both an operator class and `count` for it. The refusal is the role gate
-      // declining a category it cannot read `uuid` out of without also reading
-      // `jsonb` out, which the next two assertions are here to show.
-      expect(tenant?.canGroup).toBe(false);
-      expect(tenant?.refusal).toBe('not-a-dimension');
+      // Postgres files both under the same category, which is why the exception
+      // has to be by name — asked of the catalogue directly, since the resolved
+      // capability has already applied the rule under test and so cannot be
+      // evidence for the premise behind it.
+      const { rows } = await getPool().query<{ readonly typcategory: string }>(
+        `SELECT typcategory FROM pg_type WHERE typname IN ('uuid', 'jsonb')`,
+      );
+
+      expect(rows).toHaveLength(2);
+      expect(new Set(rows.map((r) => r.typcategory)).size).toBe(1);
+
+      // Same category, opposite answers: the name is doing the work.
       expect(tenant?.typeName).toBe('uuid');
+      expect(tenant?.canGroup).toBe(true);
+      expect(tenant?.role).toBe('dimension');
       expect(doc?.typeName).toBe('jsonb');
-      expect(tenant?.aggregates).toEqual(doc?.aggregates);
+      expect(doc?.canGroup).toBe(false);
+      expect(doc?.refusal).toBe('not-a-dimension');
+    });
+
+    it('refuses the primary key even though int4 is a groupable category', async () => {
+      const capabilities = await resolveCapabilities();
+
+      // The guard that makes admitting an identifier type safe: cardinality, not
+      // the type, is what refuses a key column.
+      expect(capabilities[COLUMN.id]?.refusal).toBe('unique-ish');
     });
 
     it('offers a uuid no min or max, which Postgres does not define', async () => {
       const capabilities = await resolveCapabilities();
 
       // A uuid sorts fine — it has a default btree operator class — so this is
-      // the case where "sortable" and "has min/max" come apart.
-      expect(capabilities[COLUMN.tenant]?.aggregates).not.toContain('min');
-      expect(capabilities[COLUMN.tenant]?.aggregates).not.toContain('max');
+      // the case where "sortable" and "has min/max" come apart. Gate 2 drops
+      // both without the role table having to know.
+      expect(capabilities[COLUMN.tenant]?.aggregates).toEqual([
+        'count',
+        'countDistinct',
+      ]);
     });
 
     it('omits a column the table does not have', async () => {

@@ -203,10 +203,11 @@ describe('resolveColumnCapability', () => {
     ]);
   });
 
-  it('refuses a uuid, which the catalogue cannot tell apart from a jsonb', () => {
+  it('groups a low-cardinality uuid while still refusing the jsonb beside it', () => {
     // These two rows differ in `typeName` alone — same category, same equality
-    // answer, same aggregate set. Nothing derivable separates them, which is why
-    // uuid stays refused rather than being admitted with the rest of `U`.
+    // answer, same aggregate set — so the name is the only thing that can
+    // separate them, and this pair is what proves the exception is named rather
+    // than a widened category (#599).
     const uuidRow = row({
       aggregates: ['count'],
       column: 'tenant',
@@ -215,10 +216,48 @@ describe('resolveColumnCapability', () => {
       typeName: 'uuid',
     });
 
-    expect(resolveColumnCapability(uuidRow).refusal).toBe('not-a-dimension');
+    expect(resolveColumnCapability(uuidRow)).toEqual({
+      aggregates: ['count', 'countDistinct'],
+      canGroup: true,
+      column: 'tenant',
+      distinctEstimate: 4,
+      role: 'dimension',
+      typeName: 'uuid',
+    });
     expect(
       resolveColumnCapability({ ...uuidRow, typeName: 'jsonb' }).refusal,
     ).toBe('not-a-dimension');
+  });
+
+  it('refuses a uuid whose low cardinality cannot be demonstrated', () => {
+    // An identifier clears the fact's bar, not the dimension's: a `text` column
+    // with no statistics is grouped anyway, a `uuid` is not.
+    expect(
+      resolveColumnCapability(
+        row({
+          aggregates: ['count'],
+          column: 'tenant',
+          hasStats: false,
+          nDistinct: 0,
+          typeCategory: 'U',
+          typeName: 'uuid',
+        }),
+      ).refusal,
+    ).toBe('stats-unavailable');
+  });
+
+  it('refuses a primary-key uuid as unique-ish', () => {
+    expect(
+      resolveColumnCapability(
+        row({
+          aggregates: ['count'],
+          column: 'id',
+          nDistinct: -1,
+          typeCategory: 'U',
+          typeName: 'uuid',
+        }),
+      ).refusal,
+    ).toBe('unique-ish');
   });
 
   it('offers a boolean the pair Postgres actually has', () => {

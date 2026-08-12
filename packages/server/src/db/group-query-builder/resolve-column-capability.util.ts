@@ -16,13 +16,17 @@ import { toRoleAggregates } from './to-role-aggregates.util.ts';
 export const resolveColumnCapability = (
   row: ColumnCapabilityRow,
 ): ColumnGroupingCapability => {
-  const role = resolveAnalyticalRole(row.typeCategory);
+  const role = resolveAnalyticalRole({
+    typeCategory: row.typeCategory,
+    typeName: row.typeName,
+  });
   const estimate = resolveDistinctEstimate(row);
   const refusal = refuseGroupKey({
     estimate,
     hasEquality: row.hasEquality,
     relTuples: row.relTuples,
     role,
+    typeName: row.typeName,
   });
 
   return {

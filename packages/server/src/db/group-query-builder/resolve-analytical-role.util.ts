@@ -1,5 +1,7 @@
 import type { ColumnAnalyticalRole } from './group-query-builder.types.ts';
 
+import { IDENTIFIER_TYPE_NAMES } from './identifier-types.constants.ts';
+
 /**
  * `pg_type.typcategory` codes that carry an analytical role. The mapping is a
  * derivation rather than a hand-kept type list, which is the point: `citext`,
@@ -17,18 +19,26 @@ const ROLE_BY_TYPE_CATEGORY: Readonly<Record<string, ColumnAnalyticalRole>> = {
   T: 'fact', // interval — sole member; `sum`/`avg` are what a duration wants
 };
 
+type ResolveAnalyticalRoleArgs = {
+  readonly typeCategory: string;
+  readonly typeName: string;
+};
+
 /**
- * Gate 1 of ADR-058, from the column's real Postgres type category. `jsonb`
- * (`U`), `point` (`G`) and arrays (`A`) are deliberately absent — the Table
- * cannot render them, and a type it cannot display is not one it can group.
+ * Gate 1 of ADR-058, from the column's real Postgres type. `jsonb` (`U`),
+ * `point` (`G`) and arrays (`A`) are deliberately absent — the Table cannot
+ * render them, and a type it cannot display is not one it can group.
  *
- * `U` stays absent even though `uuid` lives there and is perfectly displayable:
- * the category also holds `jsonb`, `xml`, `bytea` and `tsvector`, and a `uuid`
- * column is indistinguishable from a `jsonb` one on every field the capability
- * query returns — same category, same equality answer, same `{count}` aggregate
- * set. Admitting it means naming the type, which is a decision rather than a
- * derivation — tracked as #599, not an oversight to fix by adding `U` here.
+ * The name is checked **before** the category, and only for the identifier types
+ * (#599). Category `U` cannot be admitted: it holds `uuid` alongside `jsonb`,
+ * `xml` and `bytea`, and a `uuid` row is identical to a `jsonb` one on every
+ * structural field a catalogue row carries. So `uuid` is named, `U` stays out,
+ * and adding the category here to reach a uuid is the mistake the tests guard.
  */
-export const resolveAnalyticalRole = (
-  typeCategory: string,
-): ColumnAnalyticalRole => ROLE_BY_TYPE_CATEGORY[typeCategory] ?? 'unsupported';
+export const resolveAnalyticalRole = ({
+  typeCategory,
+  typeName,
+}: ResolveAnalyticalRoleArgs): ColumnAnalyticalRole =>
+  IDENTIFIER_TYPE_NAMES.has(typeName)
+    ? 'dimension'
+    : (ROLE_BY_TYPE_CATEGORY[typeCategory] ?? 'unsupported');

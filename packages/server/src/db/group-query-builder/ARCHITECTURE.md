@@ -40,10 +40,20 @@ cannot say "this member but not that one". `I` (`inet`, `cidr`) and `T`
 (`interval`) qualify: each holds nothing else. `U` does not — it holds `uuid`
 alongside `jsonb`, `xml`, `bytea` and `tsvector`, and a `uuid` column is
 identical to a `jsonb` one on **every** field the capability query returns: same
-category, same equality answer, same `{count}` aggregate set. So `uuid` stays
-refused, and admitting it is a decision about giving up the derivation property
-rather than a gap to close (#599). `resolve-analytical-role.util.test.ts` asserts
-`U → unsupported` for exactly this reason.
+category, same equality answer, same `{count}` aggregate set.
+
+So `uuid` is admitted **by name**, in `identifier-types.constants.ts`, checked
+ahead of the category lookup — the one place Gate 1 is not a derivation. `U`
+itself stays refused, and both the unit and smoke suites assert that a `jsonb`
+column is still turned away, so widening the category to reach a future
+identifier type fails loudly instead of quietly admitting a document.
+
+An identifier also clears the **fact's** cardinality bar rather than the
+dimension's: `refuse-group-key.util.ts` reads the same constant and refuses a
+`uuid` with no statistics as `stats-unavailable`. The ordinary dimension rule is
+warn-and-proceed so grouping survives a fresh restore, which is benign for `text`
+and too generous for a type that is usually a key. Keep that set small — every
+entry is maintained by hand, which is the cost the category derivation avoids.
 
 `interval` is the one type whose **role** the catalogue decides rather than
 intuition: it looks date-like, and it is a fact, because Postgres defines `sum`
@@ -58,6 +68,7 @@ documented in ADR-058, and something the UI has to surface rather than hide.
 | `group-query-builder.types.ts`            | `AggregateFn`, `ColumnAnalyticalRole`, `GroupKeyRefusalReason`, `DistinctEstimate`, and the capability row/result types                             |
 | `aggregate-sql.constants.ts`              | `AGGREGATE_SQL` — the closed `Record<AggregateFn, AggregateSpec>` map — plus the distinct SQL names the catalogue is probed with                    |
 | `group-key-bounds.constants.ts`           | The distinct-value ceiling for a group key and the unique-ish ratio                                                                                 |
+| `identifier-types.constants.ts`           | The named exceptions to the category derivation — types admitted by `typname` because their category holds types the Table cannot render            |
 | `resolve-analytical-role.util.ts`         | **Gate 1.** `pg_type.typcategory` → dimension / fact / unsupported. Admit a category only when every member belongs (see above)                     |
 | `build-column-capabilities-query.util.ts` | **Gate 2.** One bound-parameter catalogue query: equality operator, per-aggregate existence, and `pg_stats`/`reltuples`, for every requested column |
 | `resolve-distinct-estimate.util.ts`       | `n_distinct` → a known count, genuinely unknown, or undefined distinctness — three outcomes on purpose                                              |
@@ -93,15 +104,17 @@ the contract — the most useful message wins. The role check runs first, so a
 `point` column is refused as `not-a-dimension` rather than
 `no-equality-operator`: the first is a sentence a user understands.
 
-| Reason                 | Fires when                                                                  |
-| ---------------------- | --------------------------------------------------------------------------- |
-| `not-a-dimension`      | Gate 1 resolved `unsupported`                                               |
-| `no-equality-operator` | the type resolves no default btree/hash operator class, or `n_distinct = 0` |
-| `unique-ish`           | the distinct estimate is at or near the row count — the primary-key mistake |
-| `stats-unavailable`    | a **fact** with no statistics, so low cardinality cannot be demonstrated    |
-| `too-many-distinct`    | a known estimate above the group-key ceiling                                |
+| Reason                 | Fires when                                                                                    |
+| ---------------------- | --------------------------------------------------------------------------------------------- |
+| `not-a-dimension`      | Gate 1 resolved `unsupported`                                                                 |
+| `no-equality-operator` | the type resolves no default btree/hash operator class, or `n_distinct = 0`                   |
+| `unique-ish`           | the distinct estimate is at or near the row count — the primary-key mistake                   |
+| `stats-unavailable`    | a **fact** or an **identifier** with no statistics, so low cardinality cannot be demonstrated |
+| `too-many-distinct`    | a known estimate above the group-key ceiling                                                  |
 
 A **dimension** with unavailable statistics is still groupable: refusing would
 make grouping dead on a freshly restored database, and the result-size backstop
 covers the risk. A **fact** is not, because a fact is a measure and guessing
-"yes" on an amount column is the expensive direction.
+"yes" on an amount column is the expensive direction. An **identifier** type
+(`uuid`) is treated as a fact here despite being a dimension — a column of
+opaque ids is usually a key, so it has to prove otherwise.

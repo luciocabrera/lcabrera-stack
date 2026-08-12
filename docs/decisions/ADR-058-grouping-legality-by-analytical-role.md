@@ -107,11 +107,12 @@ the bar — it rules out what makes no sense to offer.
 
 Every column resolves to exactly one of three roles:
 
-| Role            | Real types                                                                                    | May be a group key                     | May be aggregated                      |
-| --------------- | --------------------------------------------------------------------------------------------- | -------------------------------------- | -------------------------------------- |
-| **Dimension**   | `text`, `varchar`, `char`, enum, `boolean`, date/timestamp, `inet`/`cidr`                     | **yes** — this is what grouping is for | `count`, `countDistinct`, `min`, `max` |
-| **Fact**        | `numeric`, `int2/4/8`, `float4/8`, money, `interval`                                          | only when demonstrably low-cardinality | `sum`, `avg`, `min`, `max`, `count`    |
-| **Unsupported** | `jsonb`, `json`, `point` and the geometric family, arrays, `bytea`, `xml`, `uuid`, `tsvector` | **no**                                 | **no**                                 |
+| Role                       | Real types                                                                            | May be a group key                     | May be aggregated                      |
+| -------------------------- | ------------------------------------------------------------------------------------- | -------------------------------------- | -------------------------------------- |
+| **Dimension**              | `text`, `varchar`, `char`, enum, `boolean`, date/timestamp, `inet`/`cidr`             | **yes** — this is what grouping is for | `count`, `countDistinct`, `min`, `max` |
+| **Dimension** (identifier) | `uuid`                                                                                | only when demonstrably low-cardinality | `count`, `countDistinct`               |
+| **Fact**                   | `numeric`, `int2/4/8`, `float4/8`, money, `interval`                                  | only when demonstrably low-cardinality | `sum`, `avg`, `min`, `max`, `count`    |
+| **Unsupported**            | `jsonb`, `json`, `point` and the geometric family, arrays, `bytea`, `xml`, `tsvector` | **no**                                 | **no**                                 |
 
 This is the dimension/fact split analytics has always had: you group by a
 country, a city or a category, and you aggregate an amount, a quantity, a price
@@ -234,20 +235,40 @@ Two consequences worth stating rather than rediscovering:
   `network()` or `masklen()`, an expression the builder has no concept of. That
   remains out of scope and belongs to #562, not to this gate.
 
-**`uuid` was considered and deliberately left refused.** It is displayable and
-has a default btree operator class, so the refusal is not about capability. It is
-that no derivable property separates it from `jsonb`: both are type category `U`,
-both report an equality operator, and both offer the aggregate set `{count}` and
-nothing more. Admitting `uuid` therefore means naming the type — the first
-hand-maintained entry in a gate whose stated design property is that it is a
-derivation — and that trade is a decision in its own right rather than an
-implementation detail of this amendment. Tracked as #599; the code carries the
-same note so nobody "fixes" it by admitting category `U` wholesale.
-
 One incidental correction the probe produced: PostgreSQL 18.4 defines **no
 `min(uuid)`/`max(uuid)`** even though `uuid` sorts. Gate 2 already reports this
 correctly, and it is the clearest example of why the role table's aggregate
 column is a ceiling and not a promise.
+
+**2026-08-12 — `uuid` admitted as a dimension, by name, with statistics required
+(#599).** This is the one place Gate 1 is not a derivation, and the reason is
+specific: Postgres files `uuid` under type category `U` beside `jsonb`, `xml`,
+`bytea` and `tsvector`, so no structural property of a catalogue row separates
+it from them. A `uuid` row and a `jsonb` row report the same category, the same
+equality answer and the same `{count}` aggregate set; only `typname` differs.
+The category therefore cannot admit `uuid` alone, and the type is named instead.
+
+The trade was made because the practical case is strong and the risk was already
+covered. Grouping by `tenant_id` or `region_id` is exactly what grouping is for,
+and the pre-existing `unique-ish` guard refuses a primary-key `uuid` on
+statistics alone, so admitting the type does not admit the mistake.
+
+Two rules keep the exception honest:
+
+- **It is a name check, not a category entry.** `IDENTIFIER_TYPE_NAMES` in
+  `packages/server/src/db/group-query-builder/` holds it, the check runs ahead of
+  the category lookup, and the unit and smoke suites both assert that a `jsonb`
+  column is still refused — so reaching a future identifier type by widening `U`
+  fails loudly rather than passing.
+- **An identifier clears the fact's cardinality bar, not the dimension's.** An
+  ordinary dimension with no statistics is grouped anyway, because refusing would
+  make grouping dead on a freshly restored database. That is benign for `text`
+  and too generous for `uuid`, which is far more often a key than a label, so a
+  `uuid` with no statistics is refused `stats-unavailable` until `ANALYZE` has
+  run.
+
+`IDENTIFIER_TYPE_NAMES` should stay small. Every entry is a type someone
+maintains by hand, which is the cost the category derivation exists to avoid.
 
 ## References
 
