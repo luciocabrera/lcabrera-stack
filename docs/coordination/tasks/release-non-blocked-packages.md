@@ -2,7 +2,7 @@
 id: release-non-blocked-packages
 title: Release @lcabrera/utils and the first @lcabrera/eslint-plugin
 owner: agent:claude
-status: active
+status: review
 branch: chore/617-release-non-blocked-packages
 area:
   - packages/utils/package.json
@@ -12,7 +12,7 @@ area:
 started: 2026-08-12
 updated: 2026-08-12
 plan: (none)
-pr: (none)
+pr: 618
 issue: #617
 ---
 
@@ -22,6 +22,6 @@ Release @lcabrera/utils and the first @lcabrera/eslint-plugin
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: PR #618 ready; awaiting the human merge, which is the publish
 - Blockers: none
-- Next:
+- Next: Lucio merges to publish. Then ui+api once #565 lands, server once grouping does.
