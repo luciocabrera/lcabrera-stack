@@ -13,6 +13,7 @@
 
 import cleanImportPaths from './clean-import-paths.ts';
 import destructuringForFunctions from './destructuring-for-functions.ts';
+import domainFolderFilename from './domain-folder-filename.ts';
 import filenameConvention from './filename-convention.ts';
 import mergeDuplicateImports from './merge-duplicate-imports.ts';
 import noInlineTypeImports from './no-inline-type-imports.ts';
@@ -24,6 +25,7 @@ import typeSuffixNaming from './type-suffix-naming.ts';
 export const rules = {
   'clean-import-paths': cleanImportPaths,
   'destructuring-for-functions': destructuringForFunctions,
+  'domain-folder-filename': domainFolderFilename,
   'filename-convention': filenameConvention,
   'merge-duplicate-imports': mergeDuplicateImports,
   'no-inline-type-imports': noInlineTypeImports,

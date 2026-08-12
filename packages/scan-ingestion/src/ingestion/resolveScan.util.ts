@@ -1,6 +1,6 @@
 import type { Pool } from 'pg';
 
-import type { IngestReportArgs } from './ingestReport.types.ts';
+import type { IngestReportArgs } from './ingestion.types.ts';
 
 import { readGitMetadata } from './git/readGitMetadata.util.ts';
 

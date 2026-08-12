@@ -1,4 +1,4 @@
-import type { FallowCircularDependencyInput } from './fallowDetail.types.ts';
+import type { FallowCircularDependencyInput } from './fallow.types.ts';
 import type { FallowRaw } from './fallowRaw.schema.ts';
 
 import { makeFindingId } from '../../../../../.github/skills/code-smell-shared/scripts/deterministic-scan-shared.mjs';

@@ -4,7 +4,7 @@ import path from 'node:path';
 import type {
   IngestReportArgs,
   IngestReportResult,
-} from './ingestReport.types.ts';
+} from './ingestion.types.ts';
 
 // @lcabrera/server (unlike this package's own self-referencing alias) is a
 // genuine cross-package import — resolved via a real package.json `exports`

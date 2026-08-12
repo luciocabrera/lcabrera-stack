@@ -2,7 +2,7 @@ import { hashSecret } from '@lcabrera/server/crypto/hash-secret.util';
 import { getPool } from '@lcabrera/server/db/get-pool.util';
 import { generateApiToken } from '@lcabrera/server/tokens/generate-api-token.util';
 
-import { API_TOKEN_PREFIX } from '../auth/apiToken.constants.ts';
+import { API_TOKEN_PREFIX } from '../auth/auth.constants.ts';
 
 export type IssueApiTokenResult = {
   readonly plaintext: string;

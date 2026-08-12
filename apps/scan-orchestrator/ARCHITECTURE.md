@@ -49,7 +49,7 @@ does, and the only one that ever needs `ANTHROPIC_API_KEY`.
 - **Deterministic scanners** (eslint, oxlint — ADR-019's split of the
   retired `linter` — fallow since the ADR-019 addendum, and app-graph
   since ADR-022): looked up in
-  `deterministicScannerConfigs.constants.ts` (`scanner_id →
+  `queue.constants.ts` (`scanner_id →
 {scriptPath, rawArtifactFileName}` — a TS map, not a DB column;
   executing DB-stored paths would widen the attack surface) and spawned
   as `node <scriptPath> --target=<local_path> --scope=<scope_value>

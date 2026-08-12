@@ -1,4 +1,4 @@
-import { IGNORED_DIRECTORIES } from '@repo/scan-ingestion/ingestion/ignoredDirectories.constants';
+import { IGNORED_DIRECTORIES } from '@repo/scan-ingestion/ingestion/ingestion.constants';
 import { zipSync } from 'fflate';
 import { useState } from 'react';
 import { useFetcher } from 'react-router';

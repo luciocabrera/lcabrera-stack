@@ -3,7 +3,7 @@ import { closePool, getPool } from '@lcabrera/server/db/get-pool.util';
 import { generateApiToken } from '@lcabrera/server/tokens/generate-api-token.util';
 import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
 
-import { API_TOKEN_PREFIX } from '../auth/apiToken.constants.ts';
+import { API_TOKEN_PREFIX } from '../auth/auth.constants.ts';
 import { issueApiToken } from './issueApiToken.util.ts';
 import { verifyApiToken } from './verifyApiToken.util.ts';
 

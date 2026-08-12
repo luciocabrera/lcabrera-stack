@@ -23,6 +23,7 @@ import type { TSESTree } from '@typescript-eslint/utils';
 import { ESLintUtils } from '@typescript-eslint/utils';
 
 import { COMPONENT_FILE_SUFFIXES } from './component-files.ts';
+import { parseFileName } from './file-names.ts';
 
 const createRule = ESLintUtils.RuleCreator(
   (name) => `https://github.com/luciocabrera/vite-react-compiler/rules/${name}`,
@@ -78,26 +79,6 @@ const CAMEL_SUFFIXES = new Set(['api', 'hook', 'schema', 'service', 'util']);
 // migration history, and `deprecatedSuffixes` replaces it wholesale.
 const DEFAULT_DEPRECATED_SUFFIXES: Readonly<Record<string, string>> = {
   errorBoundary: 'error-boundary',
-};
-
-/**
- * Split a filename into its `{ name, suffix }`, or `undefined` when the file
- * has no recognised `<name>.<suffix>.<ext>` shape. A trailing `.test`/`.spec`
- * segment is stripped first so a test file is checked against the subject it
- * covers (`editOrder.action.test.ts` → name `editOrder`, suffix `action`).
- */
-const parseFileName = (filename: string) => {
-  const base = filename.split(/[/\\]/).pop() ?? filename;
-  const withoutExt = base.replace(/\.(?:tsx?|jsx?|mjs|cjs)$/, '');
-  const withoutTest = withoutExt.replace(/\.(?:test|spec)$/, '');
-  const lastDot = withoutTest.lastIndexOf('.');
-  if (lastDot <= 0) {
-    return;
-  }
-  return {
-    name: withoutTest.slice(0, lastDot),
-    suffix: withoutTest.slice(lastDot + 1),
-  };
 };
 
 /**

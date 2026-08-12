@@ -17,7 +17,7 @@ describe('buildRunnerScriptScaffold', () => {
     expect(script).toContain("parseRunContext('.')");
     expect(script).toContain("rawFileName: 'cycles.raw.json'");
     expect(script).toContain("scannerId: 'cycle-finder'");
-    expect(script).toContain('deterministicScannerConfigs.constants.ts');
+    expect(script).toContain('queue.constants.ts');
     // No unresolved generation-time interpolations may leak into the output.
     // Matched as regexes so the `${...}` needle is not itself a string that
     // reads as a template placeholder (Biome's noTemplateCurlyInString).

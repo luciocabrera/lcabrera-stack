@@ -29,7 +29,7 @@ export const buildRunnerScriptScaffold = ({
 // contract (--target/--scope/--output-dir/--skip-ingest). Replace the TODO
 // parser block below; everything else is already wired. To let the
 // orchestrator execute this scanner, also register it in
-// apps/scan-orchestrator/src/queue/deterministicScannerConfigs.constants.ts
+// apps/scan-orchestrator/src/queue/queue.constants.ts
 // (a deliberate code change — DB rows never name executables).
 
 import {

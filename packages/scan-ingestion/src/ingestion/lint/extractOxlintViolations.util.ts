@@ -1,6 +1,6 @@
 import path from 'node:path';
 
-import type { LintViolationInput } from './lintViolation.types.ts';
+import type { LintViolationInput } from './lint.types.ts';
 import type { OxlintRaw } from './oxlintRaw.schema.ts';
 
 import { makeFindingId } from '../../../../../.github/skills/code-smell-shared/scripts/deterministic-scan-shared.mjs';

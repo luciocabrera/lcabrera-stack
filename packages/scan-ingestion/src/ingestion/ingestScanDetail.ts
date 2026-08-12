@@ -1,6 +1,6 @@
 import { getPool } from '@lcabrera/server/db/get-pool.util';
 
-import type { FallowDetailInput } from './fallow/fallowDetail.types.ts';
+import type { FallowDetailInput } from './fallow/fallow.types.ts';
 import type { Report } from './report.schema.ts';
 
 import { appGraphRawSchema } from './appGraph/appGraphRaw.schema.ts';

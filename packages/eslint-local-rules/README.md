@@ -48,6 +48,7 @@ explicit extensions are **required**, would be actively wrong.
 | ----------------------------------- | ------- | ----------------------------------------------------------- |
 | `clean-import-paths`                | ✅      | No file extensions or trailing `/index` on internal imports |
 | `destructuring-for-functions`       |         | An object parameter once a function takes 2+ arguments      |
+| `domain-folder-filename`            |         | A folder's shared `*.types`/`*.constants` is named after it |
 | `filename-convention`               |         | Base-name case follows the file's type suffix               |
 | `merge-duplicate-imports`           | ✅      | One import statement per source module                      |
 | `no-inline-type-imports`            | ✅      | `import type { X }` over `import { type X }`                |
@@ -56,7 +57,7 @@ explicit extensions are **required**, would be actively wrong.
 | `single-component-export`           |         | One component per `*.component.tsx`                         |
 | `type-suffix-naming`                | ✅      | `Args`/`Props` suffixes over `Arguments`/`Properties`       |
 
-Two rules take options; the rest take none.
+Three rules take options; the rest take none.
 
 ### `clean-import-paths`
 
@@ -94,6 +95,72 @@ An alias you do not list is treated as an external package and left alone.
 **Do not enable this rule** where explicit extensions are required — a project
 compiling with `tsc` under `module: nodenext` needs them, and this rule would
 fight the compiler.
+
+### `domain-folder-filename`
+
+Enforces **where** a shared `*.types.ts` / `*.constants.ts` may live and what it
+must be called. Three folder shapes exist and only one takes the rule:
+
+| Folder shape  | The folder…                           | The file is named after… | Example                                   |
+| ------------- | ------------------------------------- | ------------------------ | ----------------------------------------- |
+| **Domain**    | _is_ the subject                      | the folder               | `filters/filters.types.ts`                |
+| **Artifact**  | holds one component, context or route | the artifact             | `TableConfig/TableConfigContext.types.ts` |
+| **Catch-all** | names a _kind_, not a subject         | its own subject          | `types/theme.types.ts`                    |
+
+"Exactly one `*.constants.ts` per domain folder" follows from the naming rather
+than being counted: two files in one folder cannot both be
+`<folder>.constants.ts`.
+
+The hard part is telling the shapes apart from the path, and the rule is
+deliberate about how it does it, because the obvious answer is wrong.
+PascalCase separates a _component_ folder from a domain folder but not a
+_route_ one — `trigger-scan/` and `group-query-builder/` are both kebab-case and
+only the first may name a file after its contents. So the rule treats a
+PascalCase folder as an artifact folder, and exempts everything under an
+`artifactFolders` tree outright.
+
+It does not read the directory to look for a marker file. That would classify
+route folders precisely, but a lint rule that stats the filesystem is neither
+hermetic nor cheap, and it needs a non-literal `fs` call — which
+`eslint-plugin-security` flags. Measured against every `*.types.ts` and
+`*.constants.ts` in the repository this rule was written for, the path-only
+classification matches the directory-reading one exactly.
+
+**❌ Disallowed:**
+
+```
+db/group-query-builder/aggregate-sql.constants.ts   # → group-query-builder.constants.ts
+errors/pg-error-fields.types.ts                     # → errors.types.ts
+components/Table/persistence.constants.ts           # names no artifact in Table/
+```
+
+**✅ Enforced:**
+
+```
+db/group-query-builder/group-query-builder.constants.ts
+routes/cqms/trigger-scan/triggerScan.constants.ts   # artifact folder
+constants/virtualization.constants.ts               # catch-all folder
+```
+
+**Options.**
+
+Each option **replaces** its default wholesale rather than extending it.
+
+`artifactFolders` (default `['routes']`) names the directories whose entire
+subtree holds route modules. A route folder is a URL segment and its modules are
+named for the route, which is not always the same word.
+
+`catchAllFolders` (default `actions`, `config`, `constants`, `contexts`,
+`helpers`, `hooks`, `queries`, `schemas`, `selectors`, `services`, `src`,
+`types`, `utils`) names the directories that name a kind.
+
+`pairedSuffixes` (default `['constants', 'types']`) names the suffixes the
+pairing applies to. `.schema` / `.service` / `.api` are deliberately absent —
+they have no settled convention here, and enforcing one would be a guess.
+
+```js
+'local-rules/domain-folder-filename': ['error', { artifactFolders: ['routes', 'pages'] }],
+```
 
 ### `filename-convention`
 

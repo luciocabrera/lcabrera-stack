@@ -3,7 +3,7 @@ import path from 'node:path';
 
 import { listDirectoryWithin } from '../../fs/listDirectoryWithin.util.ts';
 import { readBinaryFileWithin } from '../../fs/readBinaryFileWithin.util.ts';
-import { IGNORED_DIRECTORIES } from '../ignoredDirectories.constants.ts';
+import { IGNORED_DIRECTORIES } from '../ingestion.constants.ts';
 
 export type PackProjectArchiveResult = {
   readonly archiveBytes: Uint8Array;
