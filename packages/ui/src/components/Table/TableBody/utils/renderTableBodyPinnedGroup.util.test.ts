@@ -2,6 +2,9 @@ import { describe, expect, it, vi } from 'vite-plus/test';
 
 import { renderTableBodyPinnedGroup } from './renderTableBodyPinnedGroup.util';
 
+const ROW_INDEX = 7;
+const ROW_KEY = 'pk:[7]';
+
 describe('renderTableBodyPinnedGroup', () => {
   it('maps each column in order using shared row data', () => {
     const row = { amount: 10, name: 'A' };
@@ -13,11 +16,23 @@ describe('renderTableBodyPinnedGroup', () => {
       columns: ['name', 'amount'],
       renderCell,
       row,
+      rowIndex: ROW_INDEX,
+      rowKey: ROW_KEY,
     });
 
     expect(result).toEqual(['cell:name', 'cell:amount']);
-    expect(renderCell).toHaveBeenNthCalledWith(1, { col: 'name', row });
-    expect(renderCell).toHaveBeenNthCalledWith(2, { col: 'amount', row });
+    expect(renderCell).toHaveBeenNthCalledWith(1, {
+      col: 'name',
+      row,
+      rowIndex: ROW_INDEX,
+      rowKey: ROW_KEY,
+    });
+    expect(renderCell).toHaveBeenNthCalledWith(2, {
+      col: 'amount',
+      row,
+      rowIndex: ROW_INDEX,
+      rowKey: ROW_KEY,
+    });
   });
 
   it('returns an empty array for an empty column group', () => {
@@ -25,6 +40,8 @@ describe('renderTableBodyPinnedGroup', () => {
       columns: [],
       renderCell: vi.fn(),
       row: {},
+      rowIndex: ROW_INDEX,
+      rowKey: ROW_KEY,
     });
 
     expect(result).toEqual([]);
@@ -41,10 +58,22 @@ describe('renderTableBodyPinnedGroup', () => {
       columns,
       renderCell,
       row,
+      rowIndex: ROW_INDEX,
+      rowKey: ROW_KEY,
     });
 
     expect(result).toEqual(['id', 'name']);
-    expect(renderCell).toHaveBeenCalledWith({ col: columns[0], row });
-    expect(renderCell).toHaveBeenCalledWith({ col: columns[1], row });
+    expect(renderCell).toHaveBeenCalledWith({
+      col: columns[0],
+      row,
+      rowIndex: ROW_INDEX,
+      rowKey: ROW_KEY,
+    });
+    expect(renderCell).toHaveBeenCalledWith({
+      col: columns[1],
+      row,
+      rowIndex: ROW_INDEX,
+      rowKey: ROW_KEY,
+    });
   });
 });

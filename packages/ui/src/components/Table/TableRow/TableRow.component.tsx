@@ -6,6 +6,14 @@ import type { TableRowProps } from './TableRow.types';
 
 import { tableRowStyles } from './TableRow.stylex';
 
+/**
+ * Every row of the grid, header and body alike.
+ *
+ * `role='row'` is declared here because the implicit one is gone: this `<tr>`
+ * is `display: flex` (see below), and a browser drops an element's implicit
+ * table role along with its table `display`. It is written once here rather
+ * than at each call site so no row can be added without it (ADR-062).
+ */
 export const TableRow = ({
   children,
   customStylex,
@@ -17,6 +25,7 @@ export const TableRow = ({
 
   return (
     <tr
+      role='row'
       {...rest}
       {...stylex.props(
         tableRowStyles.base,

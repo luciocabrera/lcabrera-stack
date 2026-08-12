@@ -78,10 +78,18 @@ describe('ResizeHandle', () => {
     expect(splitter.getAttribute('aria-valuemin')).toBe('80');
     expect(splitter.getAttribute('aria-valuemax')).toBe('400');
     expect(splitter.getAttribute('aria-valuetext')).toBe('120 pixels');
-    expect(splitter.tabIndex).toBe(0);
   });
 
-  it('is reachable by keyboard as a focusable splitter', () => {
+  it('is not a tab stop, because the grid owns the only one', () => {
+    // A grid has exactly one tab stop and it roves over cells (ADR-062). One
+    // splitter per column, each its own stop, is what that model replaces —
+    // keyboard access to width comes from the header command instead (ADR-011).
+    renderHandle();
+
+    expect(getSplitter().tabIndex).toBe(-1);
+  });
+
+  it('still accepts focus when something moves it here programmatically', () => {
     renderHandle();
 
     const splitter = getSplitter();

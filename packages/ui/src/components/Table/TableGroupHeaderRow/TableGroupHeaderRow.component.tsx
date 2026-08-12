@@ -24,7 +24,10 @@ import { tableGroupHeaderRowStyles } from './TableGroupHeaderRow.stylex';
  * because a group summary carries the column *key*: the label is a property of
  * the table's configuration, not of the data.
  */
-export const TableGroupHeaderRow = ({ summary }: TableGroupHeaderRowProps) => {
+export const TableGroupHeaderRow = ({
+  summary,
+  ...rest
+}: TableGroupHeaderRowProps) => {
   const { centerCols, leftPinnedCols, rightPinnedCols } =
     useGetPinnedColumnPartition();
   const column = useGetNormalizedColumn<Record<string, unknown>>(
@@ -35,6 +38,7 @@ export const TableGroupHeaderRow = ({ summary }: TableGroupHeaderRowProps) => {
 
   return (
     <TableRow
+      {...rest}
       customStylex={tableGroupHeaderRowStyles.row}
       data-testid='table-group-header-row'
       isStriped={false}

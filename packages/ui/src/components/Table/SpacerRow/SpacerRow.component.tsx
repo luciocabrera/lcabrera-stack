@@ -13,9 +13,11 @@ export const SpacerRow = ({ height }: SpacerRowProps) => {
 
   return (
     // Decorative: one empty colSpan'd cell, no focusable descendant, so
-    // aria-hidden is correct. a11y engines flag it anyway because they cannot
-    // see the subtree is empty — the Biome exemption is argued in
-    // docs/agents/public-package-suppressions.json.
+    // aria-hidden is correct. It deliberately does NOT compose TableRow and
+    // declares no role, so the filler that makes the scroll height work never
+    // joins the grid's row sequence (ADR-062). a11y engines flag it anyway
+    // because they cannot see the subtree is empty — the Biome exemption is
+    // argued in docs/agents/public-package-suppressions.json.
     <tr aria-hidden='true' {...stylex.props(styles.row(height))}>
       <td colSpan={colSpan} {...stylex.props(styles.cell(height))} />
     </tr>

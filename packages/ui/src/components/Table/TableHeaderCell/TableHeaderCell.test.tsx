@@ -168,4 +168,53 @@ describe('TableHeaderCell', () => {
     expect(MockResizeHandle).not.toHaveBeenCalled();
     expect(MockTableHeaderActionsMenu).not.toHaveBeenCalled();
   });
+  it('declares role=columnheader, because the display overrides removed the implicit one', () => {
+    useGetColumnWidthMock.mockReturnValue(undefined);
+    useGetPinnedColumnInfoMock.mockReturnValue(undefined);
+    useGetNormalizedColumnMock.mockReturnValue(createColumn());
+
+    renderCell();
+
+    expect(screen.getByRole('columnheader').tagName).toBe('TH');
+  });
+
+  it('announces the applied sort direction through aria-sort', () => {
+    useGetColumnWidthMock.mockReturnValue(undefined);
+    useGetPinnedColumnInfoMock.mockReturnValue(undefined);
+    useGetNormalizedColumnMock.mockReturnValue(
+      createColumn({ sortDirection: 'desc' }),
+    );
+
+    renderCell();
+
+    expect(screen.getByRole('columnheader').getAttribute('aria-sort')).toBe(
+      'descending',
+    );
+  });
+
+  it('announces a sortable but unsorted column as aria-sort=none', () => {
+    useGetColumnWidthMock.mockReturnValue(undefined);
+    useGetPinnedColumnInfoMock.mockReturnValue(undefined);
+    useGetNormalizedColumnMock.mockReturnValue(createColumn());
+
+    renderCell();
+
+    expect(screen.getByRole('columnheader').getAttribute('aria-sort')).toBe(
+      'none',
+    );
+  });
+
+  it('omits aria-sort entirely on a column that cannot be sorted', () => {
+    useGetColumnWidthMock.mockReturnValue(undefined);
+    useGetPinnedColumnInfoMock.mockReturnValue(undefined);
+    useGetNormalizedColumnMock.mockReturnValue(
+      createColumn({ isSortable: false }),
+    );
+
+    renderCell();
+
+    expect(
+      screen.getByRole('columnheader').getAttribute('aria-sort'),
+    ).toBeNull();
+  });
 });

@@ -16,7 +16,7 @@ import {
   skeletonStyles,
   tableHeaderCellStyles,
 } from './TableHeaderCell.stylex';
-import { getPinnedStyle, getShadowStyle } from './utils';
+import { getPinnedStyle, getShadowStyle, resolveAriaSort } from './utils';
 
 export const TableHeaderCell = <TData extends Record<string, unknown>>({
   columnKey,
@@ -40,7 +40,13 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   const shadowStylex = getShadowStyle(pinInfo);
 
   return (
+    // role and aria-sort are declared, not inherited: this cell sits in a
+    // `display: flex` row, which costs it its implicit `columnheader` role in
+    // the accessibility tree (ADR-062).
     <th
+      aria-sort={resolveAriaSort({ isSortable, sortDirection })}
+      role='columnheader'
+      scope='col'
       {...rest}
       {...stylex.props(
         tableHeaderCellStyles.base(effectiveMinWidth, currentWidth),

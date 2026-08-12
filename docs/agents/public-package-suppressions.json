@@ -107,32 +107,46 @@
   ],
   "approved": [
     {
-      "key": "biome **/eslint-local-rules/src/** noDefaultExport",
+      "key": "biome **/ResizeHandle.component.tsx useSemanticElements",
       "count": 1,
       "status": "permanent",
-      "reason": "A default export IS the ESLint rule API — `ESLintUtils.RuleCreator` returns the rule module and the plugin registry imports each one as default, so every rule file must have one. This is the same contract already acknowledged repo-wide for config modules, scoped to a package rather than an extension because that is where rule modules live. Narrowed from the whole package to `src/` when @lcabrera/eslint-plugin became public.",
-      "ref": "ADR-035 §7, ADR-057"
-    },
-    {
-      "key": "biome packages/ui/** useExhaustiveDependencies",
-      "count": 1,
-      "status": "permanent",
-      "reason": "React Compiler owns memoization in this repo, so hand-maintained dependency arrays are deliberately absent. Biome's rule demands the exact thing ADR-004 removed; leaving it on would flag correct code across the whole package.",
-      "ref": "apps/react-router/docs/decisions/ADR-004-react-compiler-memoization.md, ADR-035 §5"
-    },
-    {
-      "key": "biome **/logger.util.ts noConsole",
-      "count": 1,
-      "status": "permanent",
-      "reason": "Console output is this module's entire function — it is the single sanctioned wrapper every other module routes through, which is what lets noConsole stay on everywhere else. The glob resolves to exactly one file, packages/ui/src/utils/logger/logger.util.ts.",
-      "ref": "ADR-035 §7"
+      "reason": "A column resize handle is a window splitter: role=separator with keyboard resize semantics. HTML has no native element carrying that role, so Biome's suggested substitution has nothing to substitute.",
+      "ref": "ADR-035 §5, apps/react-router/docs/decisions/ADR-012-column-width.md"
     },
     {
       "key": "biome **/SpacerRow.component.tsx noAriaHiddenOnFocusable",
       "count": 1,
       "status": "permanent",
-      "reason": "A virtualization spacer row is decorative by construction: it renders one empty colSpan'd cell and no interactive descendant, so aria-hidden is correct. Biome flags aria-hidden on any table row because it cannot see that the subtree is empty.",
-      "ref": "ADR-035 §5, packages/ui/src/components/Table/ARCHITECTURE.md"
+      "reason": "A virtualization spacer row is decorative by construction: it renders one empty colSpan'd cell, declares no role and carries no tabIndex, so no focusable descendant exists and aria-hidden is correct. Biome flags aria-hidden on any table row because inside a role=grid a row IS focusable — which the Table now is (ADR-062) — and it cannot see that this particular row opts out of the grid's row sequence entirely.",
+      "ref": "ADR-035 §5, ADR-062, packages/ui/src/components/Table/SpacerRow/ARCHITECTURE.md"
+    },
+    {
+      "key": "biome **/TableBase.component.tsx noNoninteractiveElementToInteractiveRole",
+      "count": 1,
+      "status": "permanent",
+      "reason": "`<table role=\"grid\">` is the WAI-ARIA APG's own markup for an interactive data grid, and here the role is not an upgrade of an implicit one: TableBody.stylex.ts makes the populated <tbody> a CSS grid, so the browser drops the implicit table roles and this attribute is their only source. Biome's rule maps role to element without modelling that; jsx-a11y, the upstream it ports, ships `table: ['grid']` as a default allowance on the same rule. Its suggested fix (drop the role, or use a div) restores the bug ADR-062 exists to close.",
+      "ref": "ADR-062, packages/ui/src/components/Table/TableBase/ARCHITECTURE.md"
+    },
+    {
+      "key": "biome **/TableBodyCell.component.tsx noNoninteractiveElementToInteractiveRole",
+      "count": 1,
+      "status": "permanent",
+      "reason": "Same mapping, one level down: `<td role=\"gridcell\">` is the APG's cell markup, and TableBodyCell.stylex.ts sets every body cell to `display: flex`, which is what removes the implicit `cell` role. jsx-a11y ships `td: ['gridcell']` as a default allowance on this rule; Biome's port carries no options at all, so the file is the only available scope.",
+      "ref": "ADR-062, packages/ui/src/components/Table/TableBodyCell/ARCHITECTURE.md"
+    },
+    {
+      "key": "biome **/TableHeaderCell.component.tsx noRedundantRoles",
+      "count": 1,
+      "status": "permanent",
+      "reason": "Identical to the TableRow case, for the header cell: a <th> inside a `display: flex` row loses its implicit `columnheader` role, so the explicit one is the only source of it and of the `aria-sort` announcement that hangs off it. `scope=\"col\"` is declared alongside because it is correct markup, and is what narrows Biome's complaint from useSemanticElements to this rule.",
+      "ref": "ADR-062, packages/ui/src/components/Table/TableHeaderCell/ARCHITECTURE.md"
+    },
+    {
+      "key": "biome **/TableRow.component.tsx noRedundantRoles",
+      "count": 1,
+      "status": "permanent",
+      "reason": "The role is redundant only if the element still has its implicit one. TableRow.stylex.ts sets every <tr> to `display: flex`, and a browser drops an element's implicit table role along with its table `display` — so `role=\"row\"` is the grid's only row semantics, not a duplicate. The rule reads JSX; the fact that makes the attribute load-bearing is in the stylesheet. Deleting it, as the rule suggests, breaks the row/cell ownership `role=\"grid\"` requires.",
+      "ref": "ADR-062, packages/ui/src/components/Table/TableRow/ARCHITECTURE.md"
     },
     {
       "key": "biome **/TabsContent.component.tsx noNoninteractiveTabindex",
@@ -142,18 +156,39 @@
       "ref": "ADR-035 §5, https://www.w3.org/WAI/ARIA/apg/patterns/tabs/"
     },
     {
-      "key": "biome **/ResizeHandle.component.tsx useSemanticElements",
-      "count": 1,
-      "status": "permanent",
-      "reason": "A column resize handle is a window splitter: role=separator with keyboard resize semantics. HTML has no native element carrying that role, so Biome's suggested substitution has nothing to substitute.",
-      "ref": "ADR-035 §5, apps/react-router/docs/decisions/ADR-012-column-width.md"
-    },
-    {
       "key": "biome **/TooltipTrigger.component.tsx noStaticElementInteractions",
       "count": 1,
       "status": "permanent",
       "reason": "The trigger adds role=button and tabIndex only when its child is not already natively interactive, so the handlers always sit on something focusable at runtime. Biome evaluates the JSX statically and cannot follow the conditional role.",
       "ref": "ADR-035 §5, apps/react-router/docs/decisions/ADR-002-tooltip.md"
+    },
+    {
+      "key": "biome **/eslint-local-rules/src/** noDefaultExport",
+      "count": 1,
+      "status": "permanent",
+      "reason": "A default export IS the ESLint rule API — `ESLintUtils.RuleCreator` returns the rule module and the plugin registry imports each one as default, so every rule file must have one. This is the same contract already acknowledged repo-wide for config modules, scoped to a package rather than an extension because that is where rule modules live. Narrowed from the whole package to `src/` when @lcabrera/eslint-plugin became public.",
+      "ref": "ADR-035 §7, ADR-057"
+    },
+    {
+      "key": "biome **/logger.util.ts noConsole",
+      "count": 1,
+      "status": "permanent",
+      "reason": "Console output is this module's entire function — it is the single sanctioned wrapper every other module routes through, which is what lets noConsole stay on everywhere else. The glob resolves to exactly one file, packages/ui/src/utils/logger/logger.util.ts.",
+      "ref": "ADR-035 §7"
+    },
+    {
+      "key": "biome packages/ui/** useExhaustiveDependencies",
+      "count": 1,
+      "status": "permanent",
+      "reason": "React Compiler owns memoization in this repo, so hand-maintained dependency arrays are deliberately absent. Biome's rule demands the exact thing ADR-004 removed; leaving it on would flag correct code across the whole package.",
+      "ref": "apps/react-router/docs/decisions/ADR-004-react-compiler-memoization.md, ADR-035 §5"
+    },
+    {
+      "key": "inline packages/ui/src/components/Tooltip/Tooltip.test.tsx typescript-eslint/unbound-method",
+      "count": 2,
+      "status": "permanent",
+      "reason": "Same prototype save-and-restore as mockDialogElement, applied to the popover API methods this suite stubs. Binding breaks restoration for the same reason.",
+      "ref": "AGENTS.md §4 (directive must name its engine)"
     },
     {
       "key": "inline packages/ui/src/components/Tooltip/TooltipContent/TooltipContent.stylex.ts @stylexjs/valid-styles",
@@ -174,13 +209,6 @@
       "count": 3,
       "status": "permanent",
       "reason": "Saves HTMLDialogElement prototype methods so teardown can restore them. Binding them, as the rule wants, produces new function identities and the restore silently stops restoring. Spelled oxlint-disable because only Oxlint recognises the typescript-eslint/ prefix.",
-      "ref": "AGENTS.md §4 (directive must name its engine)"
-    },
-    {
-      "key": "inline packages/ui/src/components/Tooltip/Tooltip.test.tsx typescript-eslint/unbound-method",
-      "count": 2,
-      "status": "permanent",
-      "reason": "Same prototype save-and-restore as mockDialogElement, applied to the popover API methods this suite stubs. Binding breaks restoration for the same reason.",
       "ref": "AGENTS.md §4 (directive must name its engine)"
     }
   ]

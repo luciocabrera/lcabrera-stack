@@ -9,6 +9,7 @@ import { renderTableBodyPinnedGroup } from '#ui/components/Table/TableBody/utils
 import { TableGroupHeaderRow } from '#ui/components/Table/TableGroupHeaderRow';
 import { TableRow } from '#ui/components/Table/TableRow';
 import { getTableGroupRowSummary } from '#ui/components/Table/utils';
+import { resolveBodyAriaRowIndex } from '#ui/components/Table/utils/resolveGridRowIndexing.util';
 
 import type { TableBodyRowsProps } from './TableBodyRows.types';
 
@@ -48,33 +49,43 @@ export const TableBodyRows = <TData extends Record<string, unknown>>({
   return (
     <>
       {visibleRows.map((row, index) => {
-        const rowKey = resolveRowKey({
-          columns,
-          index: startIndex + index,
-          row,
-        });
+        const rowIndex = startIndex + index;
+        const rowKey = resolveRowKey({ columns, index: rowIndex, row });
+        const ariaRowIndex = resolveBodyAriaRowIndex({ rowIndex });
         const groupSummary = getTableGroupRowSummary(row);
 
         if (groupSummary !== undefined) {
-          return <TableGroupHeaderRow key={rowKey} summary={groupSummary} />;
+          return (
+            <TableGroupHeaderRow
+              aria-rowindex={ariaRowIndex}
+              key={rowKey}
+              summary={groupSummary}
+            />
+          );
         }
 
         return (
-          <TableRow key={rowKey}>
+          <TableRow aria-rowindex={ariaRowIndex} key={rowKey}>
             {renderTableBodyPinnedGroup({
               columns: leftPinnedCols,
               renderCell: renderBodyCell,
               row,
+              rowIndex,
+              rowKey,
             })}
             {renderTableBodyPinnedGroup({
               columns: centerCols,
               renderCell: renderBodyCell,
               row,
+              rowIndex,
+              rowKey,
             })}
             {renderTableBodyPinnedGroup({
               columns: rightPinnedCols,
               renderCell: renderBodyCell,
               row,
+              rowIndex,
+              rowKey,
             })}
           </TableRow>
         );

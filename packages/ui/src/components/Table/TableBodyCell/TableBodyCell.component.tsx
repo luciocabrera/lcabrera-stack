@@ -1,5 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 
+import { useTableCellFocus } from '#ui/components/Table/hooks';
+
 import type { TableBodyCellProps } from './TableBodyCell.types';
 
 import { skeletonStyles } from './TableBodyCell.stylex';
@@ -10,8 +12,18 @@ import {
   renderDisplayedContent,
 } from './utils';
 
+/**
+ * One `gridcell`.
+ *
+ * The role is declared rather than inherited: this cell is `display: flex`, and
+ * a browser drops an element's implicit table role along with its table
+ * `display` (ADR-062). Its `tabIndex` is the grid's roving tab stop — `0` on
+ * exactly one cell and `-1` on every other — and the ref is how a focus request
+ * made while this row was unmounted reaches the node once it exists.
+ */
 export const TableBodyCell = <TData extends Record<string, unknown>>({
   children,
+  columnKey,
   customStylex,
   dataType: dataTypeProp,
   format,
@@ -20,12 +32,19 @@ export const TableBodyCell = <TData extends Record<string, unknown>>({
   locale,
   minWidth,
   pinInfo,
+  rowIndex,
+  rowKey,
   value,
   width,
   ...rest
 }: TableBodyCellProps<TData>) => {
   const hasCustomContent = children !== undefined;
   const dataType = dataTypeProp ?? detectDataType(value);
+  const { cellRef, onFocus, tabIndex } = useTableCellFocus({
+    columnKey,
+    rowIndex,
+    rowKey,
+  });
 
   const content = hasCustomContent
     ? children
@@ -39,7 +58,11 @@ export const TableBodyCell = <TData extends Record<string, unknown>>({
 
   return (
     <td
+      role='gridcell'
       {...rest}
+      onFocus={onFocus}
+      ref={cellRef}
+      tabIndex={tabIndex}
       {...getCellStyleProps({
         customStylex,
         dataType,

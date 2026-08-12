@@ -1,13 +1,14 @@
 # Table Contexts Architecture
 
-Four context providers that together manage all table state. Each context
-owns one or more external stores (except TableWrapper which holds a ref).
+The context providers that together manage all table state — one per row of the
+Context → Store Summary below. Each owns one or more external stores (except
+TableWrapper, which holds a ref).
 
 ## File Structure
 
 ```
 contexts/
-├── index.ts                    → Barrel: FiltersDataProvider, TableConfigProvider, TableDataProvider
+├── index.ts                    → Barrel: FiltersDataProvider, TableConfigProvider, TableDataProvider, TableFocusProvider
 │
 ├── FiltersData/                → Filter lookup data per column (survives Suspense)
 │   ├── FiltersDataContext.*     → Context, Provider, Types
@@ -25,6 +26,10 @@ contexts/
 │   ├── data/                   → 1 store, 1 action, 4 selectors
 │   └── utils/                  → getInitialDataState
 │
+├── TableFocus/                 → The grid's roving focus target (ADR-062)
+│   ├── TableFocusContext.*      → Context, Provider, Types
+│   └── focus/                  → focusStore, its actions, selectors and utils
+│
 └── TableWrapper/               → Ref-based context for wrapper DOM access
     ├── TableWrapperContext.*    → Context, Types
     └── useTableWrapperRef      → Hook to consume the ref
@@ -35,7 +40,8 @@ contexts/
 ```mermaid
 graph TD
   TL["TableLayout"] --> TCP["TableConfigProvider"]
-  TCP --> FDP["FiltersDataProvider"]
+  TCP --> TFP["TableFocusProvider"]
+  TFP --> FDP["FiltersDataProvider"]
   FDP --> TSB["TableSuspenseBoundary (Suspense)"]
   TSB --> T["Table"]
   T --> TDP["TableDataProvider"]
@@ -52,6 +58,10 @@ graph TD
   grouping state are stable across data fetches. Grouping lives here for exactly
   that reason: a grouping change causes a navigation, and state on the data
   context would not survive it (ADR-061)
+- **TableFocusProvider** sits beside the config, above Suspense, for the same
+  reason grouping does: the data context is re-created on every navigation, so
+  focus held there would be discarded by a revalidation the user did not ask for
+  (ADR-062)
 - **FiltersDataProvider** sits above Suspense — filter dropdown options survive
   when the Suspense key changes during sort/filter navigations
 - **TableDataProvider** sits inside Suspense — row data is re-created on
@@ -76,6 +86,10 @@ graph LR
     DS["dataStore"]
   end
 
+  subgraph TableFocusProvider
+    FoS["focusStore"]
+  end
+
   subgraph TableWrapperContext
     WR["wrapperRef (RefObject)"]
   end
@@ -91,6 +105,7 @@ The per-slice hook lists live in each context's own `ARCHITECTURE.md` and its
 | `TableConfig`  | `columnsStore` + `groupingStore` + `metaStore` | `TStore` + `useSyncExternalStore`        |
 | `FiltersData`  | `filtersDataStore`                             | Single `TStore` + `useSyncExternalStore` |
 | `TableData`    | `dataStore`                                    | Single `TStore` + `useSyncExternalStore` |
+| `TableFocus`   | `focusStore`                                   | Single `TStore` + `useSyncExternalStore` |
 | `TableWrapper` | — (ref only)                                   | `RefObject<HTMLDivElement>`              |
 
 ## Cross-Context Data Flow
@@ -111,11 +126,17 @@ graph TD
     DS["dataStore<br/>(rows, loading, pagination)"]
   end
 
+  subgraph "Focus Layer"
+    FoS["focusStore<br/>(row key + column key of the tab stop)"]
+  end
+
   subgraph "DOM Layer"
     WR["wrapperRef<br/>(scroll container)"]
   end
 
   CS -->|"effectiveColumns drive"| DS
+  DS -->|"identifies the focused row"| FoS
+  FoS -->|"scrolls an off-window target in"| WR
   CS -->|"column defs init"| FS
   DS -->|"infinite scroll reads"| WR
   MS -->|"drawer toggles open"| DrawerContexts["TableDrawerContext<br/>ColumnDrawerContext"]
@@ -130,4 +151,5 @@ graph TD
 | FiltersData  | [ARCHITECTURE.md](FiltersData/ARCHITECTURE.md)  |
 | TableConfig  | [ARCHITECTURE.md](TableConfig/ARCHITECTURE.md)  |
 | TableData    | [ARCHITECTURE.md](TableData/ARCHITECTURE.md)    |
+| TableFocus   | [ARCHITECTURE.md](TableFocus/ARCHITECTURE.md)   |
 | TableWrapper | [ARCHITECTURE.md](TableWrapper/ARCHITECTURE.md) |

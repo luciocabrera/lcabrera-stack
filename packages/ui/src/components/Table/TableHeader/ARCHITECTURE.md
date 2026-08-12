@@ -30,9 +30,19 @@ graph TD
   groups --> center["centerCols.map → TableHeaderCell[]"]
   groups --> right["rightPinnedCols.map → TableHeaderCell[]"]
 
-  TH --> Row["TableRow (isHeader)"]
+  TH --> Row["TableRow (isHeader, aria-rowindex=1)"]
   Row --> cells["[leftPinned] | [center] | [rightPinned]"]
 ```
+
+## The header is row 1 of the grid
+
+ARIA row indices are 1-based and continuous across the whole grid, and
+`aria-rowcount` counts the header — so the header row carries
+`HEADER_ARIA_ROW_INDEX` and body rows start at 2
+([ADR-062](../../../../../../docs/decisions/ADR-062-grid-semantics-roving-focus-and-row-identity.md)).
+The constant is shared with the count and the body indices in
+`Table/utils/resolveGridRowIndexing.util.ts`; if the header's index and the
+count are ever computed from different bases, one of them is wrong.
 
 The pinned column partition is derived state stored in `columnsStore`,
 recomputed by store actions whenever `effectiveColumns`, `columnPinning`, or

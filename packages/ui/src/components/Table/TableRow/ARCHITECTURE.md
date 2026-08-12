@@ -1,7 +1,23 @@
 # TableRow Architecture
 
-Styled `<tr>` wrapper that applies the configured row height plus striped and
-header row variants via StyleX.
+Every row of the grid, header and body alike: a `<tr>` that declares
+`role='row'` and applies the configured row height plus striped and header
+variants via StyleX.
+
+## The role is declared, not inherited
+
+`base` sets `display: flex` (see below), and a browser drops an element's
+implicit table role along with its table `display` — so `role='row'` is the
+grid's only row semantics, not a duplicate of a native one
+([ADR-062](../../../../../../docs/decisions/ADR-062-grid-semantics-roving-focus-and-row-identity.md)).
+It is written here rather than at each call site so no row can be added without
+it. Static analysers read the JSX and call it redundant; the fact that makes it
+load-bearing is in `TableRow.stylex.ts`, which they do not read.
+
+`aria-rowindex` is **not** defaulted here, because it is a property of the row's
+position in the dataset rather than of being a row: `TableHeader` passes 1 and
+`TableBodyRows` passes the absolute index (`resolveBodyAriaRowIndex`). Native
+`<tr>` attributes are forwarded, which is how both arrive.
 
 ## File Structure
 
@@ -53,6 +69,10 @@ the default row height and now follow `rowHeight` with every other row.
 
 ## Usage
 
-Used by `TableHeader` (with `isHeader`) and `TableBodyRows` (with default
-striping). Both render inside `TableConfigProvider`, which supplies the meta
-store the row height is read from.
+Used by `TableHeader` (with `isHeader`), `TableBodyRows` (with default striping)
+and `TableGroupHeaderRow`. All render inside `TableConfigProvider`, which
+supplies the meta store the row height is read from.
+
+`SpacerRow` deliberately does **not** compose this component: the virtualization
+filler declares no role and stays `aria-hidden`, so it never joins the grid's
+row sequence.

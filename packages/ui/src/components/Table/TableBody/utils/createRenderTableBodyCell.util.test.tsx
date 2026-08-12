@@ -39,6 +39,9 @@ type Row = {
 
 type RowKey = DataKey<Row>;
 
+const ROW_INDEX = 3;
+const ROW_KEY = 'pk:[3]';
+
 afterEach(cleanup);
 
 describe('createRenderTableBodyCell', () => {
@@ -57,7 +60,14 @@ describe('createRenderTableBodyCell', () => {
     render(
       <table>
         <tbody>
-          <tr>{renderBodyCell({ col, row: { amount: 12 } })}</tr>
+          <tr>
+            {renderBodyCell({
+              col,
+              row: { amount: 12 },
+              rowIndex: ROW_INDEX,
+              rowKey: ROW_KEY,
+            })}
+          </tr>
         </tbody>
       </table>,
     );
@@ -80,7 +90,14 @@ describe('createRenderTableBodyCell', () => {
     render(
       <table>
         <tbody>
-          <tr>{renderBodyCell({ col, row: { name: 'Z' } })}</tr>
+          <tr>
+            {renderBodyCell({
+              col,
+              row: { name: 'Z' },
+              rowIndex: ROW_INDEX,
+              rowKey: ROW_KEY,
+            })}
+          </tr>
         </tbody>
       </table>,
     );
@@ -110,7 +127,14 @@ describe('createRenderTableBodyCell', () => {
     render(
       <table>
         <tbody>
-          <tr>{renderBodyCell({ col, row: { name: 'A' } })}</tr>
+          <tr>
+            {renderBodyCell({
+              col,
+              row: { name: 'A' },
+              rowIndex: ROW_INDEX,
+              rowKey: ROW_KEY,
+            })}
+          </tr>
         </tbody>
       </table>,
     );

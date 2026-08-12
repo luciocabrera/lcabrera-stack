@@ -19,11 +19,20 @@ export type TableBodyCellProps<TData extends Record<string, unknown>> = Omit<
   Pick<TableColumn<TData>, 'dataType' | 'format' | 'label' | 'minWidth'> & {
     /** Custom content that overrides the default cell rendering */
     readonly children?: ReactNode;
+    /**
+     * The cell's column. Together with `rowKey` it is the cell's address in the
+     * grid, which is what the roving focus points at (ADR-062).
+     */
+    readonly columnKey: string;
     readonly customStylex?: StyleXStyles;
     readonly isLoadingState?: boolean;
     /** Locale for formatting */
     readonly locale?: string;
     readonly pinInfo?: PinnedColumnInfo;
+    /** Absolute index of the cell's row among the loaded rows. */
+    readonly rowIndex: number;
+    /** Data-derived identity of the cell's row (ADR-062), never its position. */
+    readonly rowKey: string;
     readonly value?: unknown;
     readonly width?: number;
   };

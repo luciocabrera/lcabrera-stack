@@ -22,8 +22,10 @@ loaders don't have a separate paginated API to call — they query Postgres
 directly in the loader and already have every row before the component
 ever renders. Forcing that through a `dataPromise`/Suspense boundary would
 add a layer with nothing to suspend on. `StaticTable` is the same
-`TableConfigProvider` + `FiltersDataProvider` + `Table` composition
-`TableLayout` uses, just without `TableSuspenseBoundary`.
+`TableConfigProvider` + `TableFocusProvider` + `FiltersDataProvider` + `Table`
+composition `TableLayout` uses, just without `TableSuspenseBoundary`. It is the
+Table's second mount site, so a provider added to `TableLayout` has to be added
+here too or the grid it wraps loses that state entirely.
 
 ## Column-sort/filter state is not persisted
 

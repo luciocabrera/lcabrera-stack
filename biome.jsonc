@@ -319,17 +319,58 @@
       },
     },
     {
-      // Biome models `<tr>` as role=row and treats row as focusable, because a
-      // row IS focusable inside a role=grid. This Table is not a grid: it sets
-      // no role=grid and no tabIndex, so its rows are not focusable and the
-      // decorative virtualization spacer is correctly hidden from the a11y tree.
-      // There is no code fix — `aria-hidden` trips this rule, `role=presentation`
-      // trips noInteractiveElementToNoninteractiveRole, and dropping the
-      // attribute (Biome's own suggested fix) would announce a blank spacer row
-      // to screen readers. Revisit if the Table ever adopts grid semantics.
+      // Biome models `<tr>` as role=row and treats a row as focusable, because
+      // a row IS focusable inside a role=grid — which this Table now is
+      // (ADR-062). The spacer is still not: it declares no role, carries no
+      // tabIndex and renders one empty colSpan'd cell with no focusable
+      // descendant, so the filler that makes the scroll height work is
+      // correctly hidden. There is no code fix — `aria-hidden` trips this rule,
+      // `role=presentation` trips noInteractiveElementToNoninteractiveRole, and
+      // dropping the attribute (Biome's own suggested fix) would announce a
+      // blank spacer row to screen readers.
       "includes": ["**/SpacerRow.component.tsx"],
       "linter": {
         "rules": { "a11y": { "noAriaHiddenOnFocusable": "off" } },
+      },
+    },
+    {
+      // ARIA's own grid mapping: `<table role="grid">` and `<td role="gridcell">`
+      // are the markup the WAI-ARIA APG uses for an interactive data grid, and
+      // the roles here are not an upgrade of the implicit ones — they are the
+      // ONLY source of them. `TableBody.stylex.ts` makes `<tbody>` a CSS grid
+      // and `TableBodyCell.stylex.ts` makes each cell flex, and a browser drops
+      // an element's implicit table role along with its table `display`
+      // (ADR-062, which also records why those overrides cannot be reverted).
+      // Biome flags the role→element pair without modelling that; its upstream,
+      // jsx-a11y, ships `table: ['grid']` and `td: ['gridcell']` as default
+      // allowances on the same rule. Removing the roles — Biome's own fix —
+      // leaves the grid exposed as generic containers, which is the bug this
+      // work exists to close.
+      "includes": [
+        "**/TableBase.component.tsx",
+        "**/TableBodyCell.component.tsx",
+      ],
+      "linter": {
+        "rules": {
+          "a11y": { "noNoninteractiveElementToInteractiveRole": "off" },
+        },
+      },
+    },
+    {
+      // Same premise, opposite complaint: Biome reads `<tr>` as implicitly
+      // `row` and `<th scope="col">` as implicitly `columnheader`, so it calls
+      // the explicit roles redundant. They are not — `TableRow.stylex.ts` sets
+      // every row to `display: flex`, which is exactly what costs both the row
+      // and the header cell inside it their implicit roles (ADR-062). The rule
+      // reads JSX; the fact that makes these attributes load-bearing is in the
+      // stylesheet. Deleting them, as the rule suggests, breaks the row/cell
+      // ownership `role="grid"` depends on.
+      "includes": [
+        "**/TableHeaderCell.component.tsx",
+        "**/TableRow.component.tsx",
+      ],
+      "linter": {
+        "rules": { "a11y": { "noRedundantRoles": "off" } },
       },
     },
     {

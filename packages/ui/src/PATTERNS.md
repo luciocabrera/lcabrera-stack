@@ -397,6 +397,44 @@ Canonical examples: `Table/TableSettingsDrawer/` (shell), `Table/TableSettingsDr
 
 ---
 
+## ARIA Roles Are Declared, Never Inherited (the Table grid)
+
+Inside `components/Table/`, every structural element writes its role
+explicitly — `grid`, `row`, `columnheader`, `gridcell` — and none of those
+attributes is redundant.
+
+```tsx
+const GridRowExample = () => (
+  <tr aria-rowindex={2} role='row'>
+    <td role='gridcell' tabIndex={-1}>
+      value
+    </td>
+  </tr>
+);
+```
+
+**Why, and why it looks wrong:** the Table's styling takes every structural
+element out of the table formatting context — `<tbody>` is `display: grid`,
+rows and cells are `display: flex` — because the virtualization arithmetic
+depends on it. A browser drops an element's implicit table role along with its
+table `display`, so these roles are the _only_ source of the grid's semantics,
+not a duplicate of native ones
+([ADR-062](../../../docs/decisions/ADR-062-grid-semantics-roving-focus-and-row-identity.md)).
+
+The fact that makes them load-bearing lives in the `.stylex.ts` file, which no
+static analyser reads — so Biome reports several of them as redundant or
+misapplied and its suggested fix (delete the role) silently returns the grid to
+being a pile of generic containers. Those findings are argued and registered in
+`docs/agents/public-package-suppressions.json`; do not "tidy" the roles away,
+and if you ever restore native `display` values, remove the roles in the same
+change.
+
+The DOM is not the evidence here — a snapshot of the markup looks correct either
+way. The probe is the accessibility tree, or a `getByRole` query, which is what
+`Table.gridFocus.test.tsx` uses.
+
+---
+
 ## Controlled Component Contract
 
 All form-like components are **fully controlled** — no internal state for the value:

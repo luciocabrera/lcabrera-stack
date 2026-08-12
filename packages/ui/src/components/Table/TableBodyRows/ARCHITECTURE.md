@@ -88,6 +88,36 @@ from its contents. `TableGroupHeaderRow` composes `TableRow`, which is where
 `rowHeight` is read, so the group row paints at the same height as every other
 row by construction rather than by a matching literal.
 
+## ARIA Row Indexing
+
+Each rendered row carries `aria-rowindex` — its **absolute** position in the
+dataset, `resolveBodyAriaRowIndex({ rowIndex })`, never its offset in the
+rendered window. Deriving it from the window is the cheaper implementation and
+is wrong: a screen reader would announce "row 3 of 50" for a row far down a
+large dataset, because the window index is an implementation detail of scrolling
+with no meaning to a user
+([ADR-062](../../../../../../docs/decisions/ADR-062-grid-semantics-roving-focus-and-row-identity.md)).
+
+The rule shares a module with `aria-rowcount`
+(`Table/utils/resolveGridRowIndexing.util.ts`) because the two are only
+meaningful against one another: the last body row's index must equal the count
+the grid advertises, and if they are computed from different bases one of them
+is wrong.
+
+Group rows take the same attribute — a group is one row of the sequence, not an
+annotation beside it — which is why `TableGroupHeaderRow` forwards native `<tr>`
+attributes.
+
+## Cell Addressing
+
+`rowIndex` and `rowKey` travel with the row into every cell, through
+`renderTableBodyPinnedGroup` → `createRenderTableBodyCell` →
+`buildTableBodyCellDescriptor`. Sizing and pinning bind once for the whole
+window; these two change per row, and together with the column key they are what
+addresses a cell in the grid's focus model. Threading them through the existing
+descriptor pipeline makes a gap a type error rather than a silently unfocusable
+column.
+
 ## Row Identity
 
 Rows are keyed by data, not by position ([ADR-062](../../../../../../docs/decisions/ADR-062-grid-semantics-roving-focus-and-row-identity.md)).

@@ -25,6 +25,8 @@ type BuildTableBodyCellDescriptorArgs<TData extends Record<string, unknown>> = {
   readonly isLoadingState: boolean;
   readonly pinnedOffsets: Partial<Record<DataKey<TData>, PinnedColumnInfo>>;
   readonly row: TData;
+  readonly rowIndex: number;
+  readonly rowKey: string;
 };
 
 /** Fields only a `custom` cell carries. */
@@ -58,6 +60,7 @@ type TableBodyCellDefaultFields<TData extends Record<string, unknown>> = {
  * lets a caller omit them.
  */
 type TableBodyCellDescriptorBase<TData extends Record<string, unknown>> = {
+  readonly columnKey: TableBodyCellProps<TData>['columnKey'];
   readonly isLoadingState: NonNullable<
     TableBodyCellProps<TData>['isLoadingState']
   >;
@@ -65,6 +68,8 @@ type TableBodyCellDescriptorBase<TData extends Record<string, unknown>> = {
   readonly key: DataKey<TData>;
   readonly minWidth: NonNullable<TableBodyCellProps<TData>['minWidth']>;
   readonly pinInfo: TableBodyCellProps<TData>['pinInfo'];
+  readonly rowIndex: TableBodyCellProps<TData>['rowIndex'];
+  readonly rowKey: TableBodyCellProps<TData>['rowKey'];
   readonly width: NonNullable<TableBodyCellProps<TData>['width']>;
 };
 
@@ -79,10 +84,13 @@ export const buildTableBodyCellDescriptor = <
   isLoadingState,
   pinnedOffsets,
   row,
+  rowIndex,
+  rowKey,
 }: BuildTableBodyCellDescriptorArgs<TData>): TableBodyCellDescriptor<TData> => {
   const minWidth = col.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
   const width = columnSizing[col.key] ?? minWidth;
   const pinInfo = pinnedOffsets[col.key];
+  const columnKey = col.key as string;
 
   const customActions = col.render?.(row);
 
@@ -95,12 +103,15 @@ export const buildTableBodyCellDescriptor = <
           row={row}
         />
       ),
+      columnKey,
       isLoadingState,
       key: col.key,
       kind: 'custom',
       label: '',
       minWidth,
       pinInfo,
+      rowIndex,
+      rowKey,
       width,
     };
   }
@@ -108,17 +119,21 @@ export const buildTableBodyCellDescriptor = <
   if (customActions) {
     return {
       children: customActions,
+      columnKey,
       isLoadingState,
       key: col.key,
       kind: 'custom',
       label: '',
       minWidth,
       pinInfo,
+      rowIndex,
+      rowKey,
       width,
     };
   }
 
   return {
+    columnKey,
     dataType: col.dataType,
     format: col.format,
     isLoadingState,
@@ -127,6 +142,8 @@ export const buildTableBodyCellDescriptor = <
     label: col.label,
     minWidth,
     pinInfo,
+    rowIndex,
+    rowKey,
     value: Object.hasOwn(row, col.key) ? row[col.key] : '',
     width,
   };
