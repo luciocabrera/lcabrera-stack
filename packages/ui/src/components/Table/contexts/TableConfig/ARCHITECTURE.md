@@ -91,8 +91,10 @@ TableConfig/
 ├── grouping/                                → Row grouping store, actions, selectors (ADR-061)
 │   ├── useGroupingStore.hook.ts             → Resolves the config groupingStore, delegates to useStoreSelector
 │   │
+│   ├── utils/areGroupKeysLegal.util.ts      → Pure predicate shared by both write paths: within the depth cap, and no key repeated
+│   │
 │   ├── actions/
-│   │   ├── utils/resolveTableGroupingUpdate.util.ts → Pure: one interaction's grouping change as data (updated / unchanged); the one place the depth cap is enforced on the write path
+│   │   ├── utils/resolveTableGroupingUpdate.util.ts → Pure: one interaction's grouping change as data (updated / unchanged); refuses an illegal key list whole
 │   │   ├── utils/toggleTableGroupKey.util.ts        → Pure: append a key at the tail, or remove it
 │   │   ├── utils/setTableColumnAggregate.util.ts    → Pure: set or clear one column's aggregate
 │   │   ├── useSetTableGrouping.hook.ts      → **Internal**: the single write path, taking a reducer so the store is read once

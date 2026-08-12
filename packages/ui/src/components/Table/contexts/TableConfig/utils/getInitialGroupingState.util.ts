@@ -3,7 +3,7 @@ import type {
   TableGroupingState,
 } from '#ui/components/Table/Table.types';
 
-import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
+import { areGroupKeysLegal } from '../grouping/utils';
 
 type GetInitialGroupingStateArgs = {
   readonly groupingAggregates?: Readonly<Record<string, TableAggregateFn>>;
@@ -23,24 +23,23 @@ const NO_GROUPING: TableGroupingState = { aggregates: {}, keys: [] };
  * the rest of the loader's serializable state (ADR-009) at no cost to that
  * shape.
  *
- * **This is a write path, and it enforces the depth cap itself.** A route built
- * on `createTableRouteLoader` cannot reach it over-cap — `sanitizeGroupingByColumns`
- * already refused — but `@lcabrera/ui` is published, and a consumer writing
- * their own loader is the intended use rather than an edge case. Without this
- * guard such a route seeds a store the package then renders as grouped, and the
- * query throws at `assertGroupKeys`: a 500 out of a state the package itself
- * accepted.
+ * **This is a write path, and it checks the same key-list invariants the update
+ * path does** — `areGroupKeysLegal`: within the depth cap, and no key repeated.
+ * A route built on `createTableRouteLoader` cannot reach it with an illegal
+ * list, because `sanitizeGroupingByColumns` already refused — but
+ * `@lcabrera/ui` is published, and a consumer writing their own loader is the
+ * intended use rather than an edge case. Without this guard such a route seeds a
+ * store the package then renders as grouped, and the query throws at
+ * `assertGroupKeys`: a 500 out of a state the package itself accepted.
  *
- * The refusal is **whole**, never a truncation to the cap. Keys are ordered and
- * the order is the query's nesting order, so a truncated list answers a
- * different question from the one asked — the same reasoning
+ * The refusal is **whole** — never truncated to the cap, never de-duplicated.
+ * Keys are ordered and the order is the query's nesting order, so either repair
+ * answers a different question from the one asked. That is the same reasoning
  * `resolveTableGroupingUpdate` and `sanitizeGroupingByColumns` refuse whole for.
  *
- * It reads `MAX_TABLE_GROUP_KEYS` directly rather than sharing a helper with
- * `resolveTableGroupingUpdate`, because the two refusals are not the same
- * answer: an *update* past the cap is `unchanged`, leaving the applied grouping
- * alone, while a *seed* past the cap has no prior state to leave alone, so no
- * grouping is the only whole refusal available.
+ * The *question* is shared and the *answer* is not: an update on an illegal list
+ * is `unchanged`, leaving the applied grouping alone, while a seed has no prior
+ * state to leave alone and can only answer no grouping.
  *
  * Aggregates go with the keys. An aggregate is computed per group, so with no
  * key there is nothing for it to describe — the same normalisation
@@ -50,7 +49,7 @@ export const getInitialGroupingState = ({
   groupingAggregates = {},
   groupingKeys = [],
 }: GetInitialGroupingStateArgs): TableGroupingState => {
-  if (groupingKeys.length === 0 || groupingKeys.length > MAX_TABLE_GROUP_KEYS) {
+  if (groupingKeys.length === 0 || !areGroupKeysLegal(groupingKeys)) {
     return NO_GROUPING;
   }
 

@@ -150,6 +150,46 @@ describe('resolveTableGroupingUpdate', () => {
     ).toBe('updated');
   });
 
+  it('refuses a repeated key rather than de-duplicating it', () => {
+    // The invariant `sanitizeGroupingByColumns` and the server's
+    // `assertGroupKeys` already hold; the store used to be the odd one out.
+    // De-duplicating would group by fewer levels than were asked for.
+    expect(
+      resolveTableGroupingUpdate({
+        existingGrouping: NO_GROUPING,
+        nextGrouping: {
+          aggregates: {},
+          keys: ['order_status', 'order_status'],
+        },
+      }),
+    ).toStrictEqual({ kind: 'unchanged' });
+  });
+
+  it('leaves an applied grouping alone when the requested list repeats a key', () => {
+    // The refusal an *update* can make: the previous grouping stands, which is
+    // what distinguishes it from the seed path's "no grouping".
+    const applied: TableGroupingState = {
+      aggregates: {},
+      keys: ['order_status'],
+    };
+
+    expect(
+      resolveTableGroupingUpdate({
+        existingGrouping: applied,
+        nextGrouping: { aggregates: {}, keys: ['priority', 'priority'] },
+      }),
+    ).toStrictEqual({ kind: 'unchanged' });
+  });
+
+  it('still accepts a list whose keys are all distinct', () => {
+    expect(
+      resolveTableGroupingUpdate({
+        existingGrouping: NO_GROUPING,
+        nextGrouping: { aggregates: {}, keys: ['order_status', 'priority'] },
+      }).kind,
+    ).toBe('updated');
+  });
+
   it('answers unchanged when nothing was grouped and nothing is asked for', () => {
     expect(
       resolveTableGroupingUpdate({

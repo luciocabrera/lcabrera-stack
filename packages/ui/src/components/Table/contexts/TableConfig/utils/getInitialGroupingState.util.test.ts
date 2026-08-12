@@ -93,4 +93,44 @@ describe('getInitialGroupingState', () => {
       ).toStrictEqual(NO_GROUPING);
     });
   });
+
+  // The same invariant `sanitizeGroupingByColumns` and the server's
+  // `assertGroupKeys` already enforce. The store was the odd one out, and it is
+  // the boundary a hand-written loader reaches.
+  describe('duplicate keys', () => {
+    it('refuses a repeated key, whole rather than de-duplicated', () => {
+      // De-duplicating would group by fewer levels than were asked for, which
+      // is a different question — the same reason the cap refuses whole.
+      expect(
+        getInitialGroupingState({
+          groupingKeys: ['order_status', 'order_status'],
+        }),
+      ).toStrictEqual(NO_GROUPING);
+    });
+
+    it('refuses a repeat buried among distinct keys', () => {
+      expect(
+        getInitialGroupingState({
+          groupingKeys: ['order_status', 'priority', 'order_status'],
+        }),
+      ).toStrictEqual(NO_GROUPING);
+    });
+
+    it('drops the aggregates with the refused keys', () => {
+      expect(
+        getInitialGroupingState({
+          groupingAggregates: { total_amount: 'sum' },
+          groupingKeys: ['order_status', 'order_status'],
+        }),
+      ).toStrictEqual(NO_GROUPING);
+    });
+
+    it('still seeds a list whose keys are all distinct', () => {
+      const groupingKeys = ['order_status', 'priority'];
+
+      expect(getInitialGroupingState({ groupingKeys }).keys).toStrictEqual(
+        groupingKeys,
+      );
+    });
+  });
 });

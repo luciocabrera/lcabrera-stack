@@ -1,7 +1,8 @@
 import type { TableGroupingState } from '#ui/components/Table/Table.types';
 
-import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
 import { serializeGroupingToURL } from '#ui/utils/urlState';
+
+import { areGroupKeysLegal } from '../../utils';
 
 type ResolveTableGroupingUpdateArgs = {
   readonly existingGrouping: TableGroupingState;
@@ -47,13 +48,17 @@ const isSameGrouping = ({
  * a fetcher. `unchanged` is what stops a repeat click re-issuing a navigation
  * for state the table is already in.
  *
- * **This is the one place the depth cap is enforced on the write path.** A
- * request past `MAX_TABLE_GROUP_KEYS` is refused whole rather than truncated —
- * truncating would group by a prefix of what was asked for and answer a
- * different question in silence. The header and drawer surfaces disable the
- * affordance at the cap so this branch is unreachable through the UI, and
- * `sanitizeGroupingByColumns` refuses the same list arriving through the URL;
- * all three read the one constant.
+ * **An illegal key list is refused whole**, never repaired — not truncated to
+ * the cap, and not de-duplicated. Either repair would group by something other
+ * than what was asked for and answer a different question in silence, because
+ * keys are ordered and the order is the query's nesting order.
+ * `areGroupKeysLegal` is the shared question; this and `getInitialGroupingState`
+ * answer it differently, which is why it is a predicate rather than a refusal.
+ *
+ * The header and drawer surfaces disable the affordance at the cap and never
+ * offer an applied key twice, so neither branch is reachable through the UI;
+ * `sanitizeGroupingByColumns` refuses the same lists arriving through the URL,
+ * and the server's `assertGroupKeys` refuses them again before emitting SQL.
  *
  * Clearing the last key clears the aggregates with it: an aggregate is computed
  * per group, so with no key there is nothing for it to describe, and leaving it
@@ -63,7 +68,7 @@ export const resolveTableGroupingUpdate = ({
   existingGrouping,
   nextGrouping,
 }: ResolveTableGroupingUpdateArgs): ResolveTableGroupingUpdateResult => {
-  if (nextGrouping.keys.length > MAX_TABLE_GROUP_KEYS) {
+  if (!areGroupKeysLegal(nextGrouping.keys)) {
     return { kind: 'unchanged' };
   }
 

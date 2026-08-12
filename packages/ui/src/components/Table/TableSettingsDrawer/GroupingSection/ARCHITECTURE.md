@@ -101,6 +101,12 @@ settled; the aggregate lists here read the catalogue's per-column answer instead
   truncated — truncating would group by a prefix of what was asked for and
   answer a different question in silence.
 
+The cap is one of two key-list invariants, both checked by `areGroupKeysLegal`
+and both refused whole: the other is that no key repeats. `getInitialGroupingState`
+checks the same predicate, because seeding the store is a write path too — and
+the one a consumer's hand-written loader reaches directly, where an unchecked
+list renders as grouped and then raises at `assertGroupKeys`.
+
 It is a duplicate of `@lcabrera/server`'s `MAX_GROUP_KEYS`
 ([ADR-039](../../../../../../../docs/decisions/ADR-039-duplicate-over-undeclared-edges.md)),
 pinned to it by `groupingContract.test.ts` in `apps/react-router`.
