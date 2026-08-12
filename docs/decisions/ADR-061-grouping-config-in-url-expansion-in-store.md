@@ -3,7 +3,7 @@
 - **Status:** Accepted
 - **Date:** 2026-08-12
 - **Scope:** `@lcabrera/ui` (the Table store and the routing/persistence path), the grouped-read routes in `apps/react-router`
-- **Issue:** #553 — blocks #557 (settled, see below) and #561
+- **Issue:** #553 — blocks #561. It also blocked #557, which was resolved by #612 while this ADR was in draft; the outcome is recorded below rather than left open.
 - **Related:** ADR-010 (the persist-cookie flow this rides), ADR-056 (the generic table route data path), ADR-058 (grouping legality), ADR-059 (the grouped SQL this config drives), ADR-009 (loader-crossing data is plain and serializable)
 
 ## Context
