@@ -12,10 +12,12 @@ import {
   vi,
 } from 'vite-plus/test';
 
-const { selectedTabMock, setSelectedTabMock } = vi.hoisted(() => ({
-  selectedTabMock: vi.fn(() => 'general'),
-  setSelectedTabMock: vi.fn(),
-}));
+const { isGroupingEnabledRef, selectedTabMock, setSelectedTabMock } =
+  vi.hoisted(() => ({
+    isGroupingEnabledRef: { current: false },
+    selectedTabMock: vi.fn(() => 'general'),
+    setSelectedTabMock: vi.fn(),
+  }));
 
 type MockTabsProps = {
   readonly isBusy?: boolean;
@@ -60,6 +62,7 @@ vi.mock('#ui/components/Table/contexts/TableConfig/meta/actions', () => ({
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
+  useGetTableIsGroupingEnabled: () => isGroupingEnabledRef.current,
   useGetTableSettingsSelectedTab: () => selectedTabMock(),
 }));
 
@@ -90,6 +93,10 @@ vi.mock('../GeneralSettingsSection', () => ({
   GeneralSettingsSection: () => <div>General settings section</div>,
 }));
 
+vi.mock('../GroupingSection', () => ({
+  GroupingSection: () => <div>Grouping section</div>,
+}));
+
 vi.mock('../SortingSection', () => ({
   SortingSection: () => <div>Sorting section</div>,
 }));
@@ -101,6 +108,7 @@ afterEach(() => {
 });
 
 beforeEach(() => {
+  isGroupingEnabledRef.current = false;
   selectedTabMock.mockReset();
   selectedTabMock.mockReturnValue('general');
   setSelectedTabMock.mockReset();
@@ -117,6 +125,48 @@ describe('TableSettingsDrawerBody', () => {
     );
     expect(screen.getByText('Columns').textContent).toBe('Columns');
     expect(screen.getByText('Details').textContent).toBe('Details');
+  });
+
+  it('offers no Grouping tab for a route that cannot group', () => {
+    // Absent means off (ADR-063): a table whose endpoint cannot group would
+    // otherwise offer a control whose every use is refused.
+    render(<TableSettingsDrawerBody />);
+
+    expect(screen.queryByText('Grouping')).toBeNull();
+    expect(screen.queryByText('Grouping section')).toBeNull();
+  });
+
+  it('adds the Grouping tab where the route declared the capability', () => {
+    isGroupingEnabledRef.current = true;
+
+    render(<TableSettingsDrawerBody />);
+
+    expect(screen.getByRole('heading', { name: 'Grouping' }).textContent).toBe(
+      'Grouping',
+    );
+    expect(screen.getByText('Grouping section')).not.toBeNull();
+  });
+
+  it('puts Grouping after Sorting and before Columns', () => {
+    // The tab order is the order a user reads the query in: filter, sort, then
+    // group. Appending it at the end would separate it from the two it belongs
+    // beside.
+    isGroupingEnabledRef.current = true;
+
+    render(<TableSettingsDrawerBody />);
+
+    const headers = screen
+      .getAllByRole('heading')
+      .map((heading) => heading.textContent);
+
+    expect(headers).toEqual([
+      'General',
+      'Filters',
+      'Sorting',
+      'Grouping',
+      'Columns',
+      'Details',
+    ]);
   });
 
   it('restores and persists the selected table settings tab', () => {

@@ -7,6 +7,7 @@ import type {
   SortingState,
   TableColumn,
 } from '#ui/components/Table';
+import type { TableGroupingState } from '#ui/components/Table/Table.types';
 
 import {
   readPersistedStateFromCookie,
@@ -20,6 +21,8 @@ import {
 
 import { sanitizeFiltersByColumns } from '../shared/sanitizeFiltersByColumns.util';
 import { sanitizeGroupingByColumns } from '../shared/sanitizeGroupingByColumns.util';
+
+const NO_GROUPING: TableGroupingState = { aggregates: {}, keys: [] };
 
 type ReadTableLoaderStateFromRequestArgs<
   TData extends Record<string, unknown>,
@@ -122,7 +125,7 @@ export const readTableLoaderStateFromRequest = <
           columns,
           grouping: deserializeGroupingFromURL(standaloneGroupingParam),
         })
-      : [];
+      : NO_GROUPING;
 
   return {
     columnOrder,

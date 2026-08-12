@@ -38,21 +38,22 @@ const collectFunctionPaths = ({
   return [];
 };
 
-const invokeLoader = () =>
+const invokeLoader = async () =>
   loader({
     request: new Request('http://localhost/car-sales'),
   } as LoaderFunctionArgs);
 
 describe('car-sales loader', () => {
-  it('returns fully serializable columnsState (columns included) and metaState', () => {
-    const result = invokeLoader();
+  it('returns fully serializable columnsState (columns included) and metaState', async () => {
+    const result = await invokeLoader();
 
     expect(collectFunctionPaths({ value: result.columnsState })).toEqual([]);
     expect(collectFunctionPaths({ value: result.metaState })).toEqual([]);
   });
 
-  it('bakes distinct descriptors with the loader transport onto string columns', () => {
-    const { columns } = invokeLoader().columnsState;
+  it('bakes distinct descriptors with the loader transport onto string columns', async () => {
+    const { columnsState } = await invokeLoader();
+    const { columns } = columnsState;
 
     const model = columns.find((column) => column.key === 'model');
     expect(model?.filterOptionsDescriptor).toEqual({
@@ -69,13 +70,13 @@ describe('car-sales loader', () => {
     expect(year?.filterOptionsDescriptor).toBeUndefined();
   });
 
-  it('requests a bounded slice rather than the whole table', () => {
+  it('requests a bounded slice rather than the whole table', async () => {
     // car_sales holds 500k rows. Fetching it unbounded produced a ~421MB body
     // and killed SSR with a V8 zone allocation failure, so this route must
     // always ask for a limit.
     fetchCarSalesPageMock.mockClear();
 
-    invokeLoader();
+    await invokeLoader();
 
     expect(fetchCarSalesPageMock).toHaveBeenCalledTimes(1);
     expect(fetchCarSalesPageMock).toHaveBeenCalledWith(

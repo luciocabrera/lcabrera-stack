@@ -1,4 +1,5 @@
 export { useGetTableAdditionalMetadata } from './useGetTableAdditionalMetadata.hook';
+export { useGetTableColumnGroupingCapability } from './useGetTableColumnGroupingCapability.hook';
 export { useGetTableColumnSelectedKey } from './useGetTableColumnSelectedKey.hook';
 export { useGetTableColumnSettingsSelectedTab } from './useGetTableColumnSettingsSelectedTab.hook';
 export { useGetTableCrud } from './useGetTableCrud.hook';
@@ -6,6 +7,7 @@ export { useGetTableDeleteActionPath } from './useGetTableDeleteActionPath.hook'
 export { useGetTableDensity } from './useGetTableDensity.hook';
 export { useGetTableDrawersSyncNonce } from './useGetTableDrawersSyncNonce.hook';
 export { useGetTableEnablePrefetch } from './useGetTableEnablePrefetch.hook';
+export { useGetTableGroupingCapabilities } from './useGetTableGroupingCapabilities.hook';
 export { useGetTableInitialPageSize } from './useGetTableInitialPageSize.hook';
 export { useGetTableIsBordered } from './useGetTableIsBordered.hook';
 export { useGetTableIsColumnSettingsOpen } from './useGetTableIsColumnSettingsOpen.hook';

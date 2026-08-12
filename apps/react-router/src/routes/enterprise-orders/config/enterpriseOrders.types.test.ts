@@ -20,9 +20,9 @@ import type {
  */
 const groupRow: EnterpriseOrderTableRow = {
   [TABLE_GROUP_ROW_FIELD]: {
-    columnKey: 'order_status',
+    aggregates: [],
     count: 12,
-    label: 'Shipped',
+    path: [{ columnKey: 'order_status', label: 'Shipped' }],
   },
 };
 
@@ -33,7 +33,7 @@ const groupRow: EnterpriseOrderTableRow = {
  */
 const readOrderId = (row: EnterpriseOrderTableRow) => {
   if (row[TABLE_GROUP_ROW_FIELD] !== undefined) {
-    return row[TABLE_GROUP_ROW_FIELD].label;
+    return row[TABLE_GROUP_ROW_FIELD].path[0]?.label ?? '';
   }
 
   return row.order_id.toFixed(0);
@@ -61,9 +61,9 @@ describe('EnterpriseOrderTableRow', () => {
     // The type-level discriminant and `getTableGroupRowSummary` must answer the
     // same question, or a row could narrow one way and render the other.
     expect(getTableGroupRowSummary(groupRow)).toStrictEqual({
-      columnKey: 'order_status',
+      aggregates: [],
       count: 12,
-      label: 'Shipped',
+      path: [{ columnKey: 'order_status', label: 'Shipped' }],
     });
     expect(groupRow[TABLE_GROUP_ROW_FIELD]).toBeDefined();
   });

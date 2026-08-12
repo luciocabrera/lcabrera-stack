@@ -89,7 +89,12 @@ runs. Reach for it rather than for `buildGroupQuery` directly.
 
 `group-query-builder.constants.ts` holds every constant the folder owns —
 including the closed `AggregateFn` → SQL map, the depth cap and the identifier
-limit — and `group-query-builder.types.ts` holds the shared types.
+limit — and `group-query-builder.types.ts` holds the shared types. Both are
+reachable through the package's `exports`, because `@lcabrera/ui` duplicates the
+depth cap and the aggregate vocabulary rather than depending on this Node-only
+package ([ADR-039](../../../docs/decisions/ADR-039-duplicate-over-undeclared-edges.md)),
+and the app that depends on both pins the two together in
+`groupingContract.test.ts`.
 
 ---
 

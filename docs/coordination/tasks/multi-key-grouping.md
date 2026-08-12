@@ -13,10 +13,12 @@ area:
   - packages/ui/src/utils/urlState/**
   - packages/ui/src/routing/**
   - packages/server/src/db/group-query-builder/**
+  - packages/ui/src/components/Table/utils/**
+  - apps/react-router/src/routes/enterprise-orders/**
 started: 2026-08-12
-updated: 2026-08-12
+updated: 2026-08-13
 plan: (none)
-pr: (none)
+pr: '#646'
 issue: #569
 ---
 
@@ -26,6 +28,7 @@ Multi-key grouping, aggregate selection and the grouping drawer section
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implemented; full gate green and the live-Postgres smoke suite
+  passes. Awaiting independent verification.
 - Blockers: none
 - Next:

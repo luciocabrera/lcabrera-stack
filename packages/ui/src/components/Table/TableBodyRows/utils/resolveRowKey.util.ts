@@ -47,9 +47,13 @@ const isScalarKeyValue = (value: unknown): value is number | string =>
  * delimiter — and why `7` stays distinct from `'7'`, which `String` cannot do.
  *
  * A group row is identified first and by its own values, not by the primary key
- * it does not have — a grouped read projects the group key and its aggregates,
- * so the primary-key branch below would drop every group row to its index and
- * hand the whole grouped result unstable identity.
+ * it does not have — a grouped read projects the group keys and their
+ * aggregates, so the primary-key branch below would drop every group row to its
+ * index and hand the whole grouped result unstable identity.
+ *
+ * The identity is the group's **whole** path. Under multi-key grouping the
+ * outermost key repeats across every group beneath it, so keying on one level
+ * would hand every sibling the same key.
  */
 export const resolveRowKey = <TData extends Record<string, unknown>>({
   columns,
@@ -60,7 +64,9 @@ export const resolveRowKey = <TData extends Record<string, unknown>>({
   const groupSummary = getTableGroupRowSummary(row);
 
   if (groupSummary !== undefined) {
-    return `${GROUP_KEY_PREFIX}${JSON.stringify([groupSummary.columnKey, groupSummary.label])}`;
+    return `${GROUP_KEY_PREFIX}${JSON.stringify(
+      groupSummary.path.map(({ columnKey, label }) => [columnKey, label]),
+    )}`;
   }
 
   const primaryKeyKeys = resolvePrimaryKeyColumnKeys({ columns });

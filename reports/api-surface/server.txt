@@ -36,6 +36,18 @@ getRowsCount [const] ({ tx, ...descriptor }: CountQueryDescriptor & ExecutorOpti
 ## ./db/group-query-builder/build-group-query.util
 buildGroupQuery [const] ({ aggregates, allowedColumns, capabilities, filters, grouping, keys, maxRows, schema, sort, subtotalPlacement, table }: GroupQueryDescriptor) => BuiltGroupQuery
 
+## ./db/group-query-builder/group-query-builder.constants
+AGGREGATE_SQL [const] Record<AggregateFn, AggregateSpec>
+AGGREGATE_SQL_NAMES [const] readonly string[]
+COUNT_ROWS_ALIAS [const] "count_rows"
+GROUP_MASK_ALIAS [const] "group_mask"
+IDENTIFIER_TYPE_NAMES [const] ReadonlySet<string>
+MAX_COUNT_DISTINCT_AGGREGATES [const] 1
+MAX_GROUP_KEY_DISTINCT [const] 1000
+MAX_GROUP_KEYS [const] 4
+MAX_IDENTIFIER_LENGTH [const] 63
+UNIQUE_ISH_DISTINCT_RATIO [const] 0.95
+
 ## ./db/group-query-builder/group-query-builder.types
 AggregateFn [type] 'avg' | 'boolAnd' | 'boolOr' | 'count' | 'countDistinct' | 'max' | 'min' | 'sum'
 AggregateSpec [type] { readonly distinct: boolean; readonly sql: string; }

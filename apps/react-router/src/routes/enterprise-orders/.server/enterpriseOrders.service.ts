@@ -1,9 +1,15 @@
+import type { GroupAggregate } from '@lcabrera/server/db/group-query-builder/group-query-builder.types';
 import type {
   QueryFilter,
   QuerySort,
 } from '@lcabrera/server/db/query-builder/query-builder.types';
+import type {
+  TableAggregateFn,
+  TableGroupingState,
+} from '@lcabrera/ui/components/Table/Table.types';
 
 import { deleteRows } from '@lcabrera/server/db/delete-rows.util';
+import { getColumnGroupingCapabilities } from '@lcabrera/server/db/get-column-grouping-capabilities.util';
 import { getMaxValue } from '@lcabrera/server/db/get-max-value.util';
 import { getRowsCount } from '@lcabrera/server/db/get-rows-count.util';
 import { insertRow } from '@lcabrera/server/db/insert-row.util';
@@ -47,46 +53,92 @@ const TARGET = {
   table: ENTERPRISE_ORDERS_TABLE,
 } as const;
 
+const NO_GROUPING: TableGroupingState = { aggregates: {}, keys: [] };
+
 export type SelectGroupedOrdersArgs = {
+  /** The aggregate applied to each column, at most one per column. */
+  readonly aggregates: Readonly<Record<string, TableAggregateFn>>;
   readonly filters: readonly QueryFilter[];
-  /** The single column the rows are grouped by. */
-  readonly groupKey: string;
+  /** The columns the rows are grouped by, in nesting order. */
+  readonly groupKeys: readonly string[];
 };
 
 /**
- * Read one row per distinct value of `groupKey`, each carrying how many orders
- * it aggregates.
+ * Read one row per distinct combination of the group keys, each carrying how
+ * many orders it covers and the selected aggregates.
  *
  * The whole result is returned at once and `hasMore` is `false`, because a
  * grouped read is not paginated (ADR-059): there is no stable cursor over a
  * result the server aggregated, and the row count is bounded by the number of
- * distinct key values rather than by the table.
+ * distinct key combinations rather than by the table.
  *
- * The count's alias comes back from `selectGroupedRows` rather than being
- * spelled here, so the name the SQL projected and the name this decodes by are
- * one string.
+ * Every alias comes back from `selectGroupedRows` rather than being spelled
+ * here, so the name the SQL projected and the name this decodes by are one
+ * string.
  */
 export const selectGroupedOrders = async ({
+  aggregates: selectedAggregates,
   filters,
-  groupKey,
+  groupKeys,
 }: SelectGroupedOrdersArgs): Promise<EnterpriseOrdersResponse> => {
+  // `satisfies` rather than an annotation: the narrow type keeps `column`
+  // required for the decode below, while the check still proves the literal
+  // carries no filter or alias slot.
+  const requested: readonly OrderColumnAggregate[] = Object.entries(
+    selectedAggregates,
+  ).map(([column, fn]) => ({ column, fn }) satisfies UnfilteredOrderAggregate);
+
   const { aggregates, rows } = await selectGroupedRows({
     ...TARGET,
-    aggregates: [{ fn: 'count' }],
+    aggregates: [{ fn: 'count' }, ...requested],
     filters,
     grouping: 'flat',
-    keys: [groupKey],
+    keys: groupKeys,
     maxRows: ENTERPRISE_ORDER_GROUP_MAX_ROWS,
-    sort: [{ direction: 'asc', key: groupKey }],
+    sort: groupKeys.map((key) => ({ direction: 'asc' as const, key })),
   });
 
+  // `count(*)` is requested first, so the emitted aliases line up with
+  // `requested` one place along.
   const countAlias = aggregates[0]?.alias ?? '';
+  const decodedAggregates = requested.map((aggregate, index) => ({
+    alias: aggregates[index + 1]?.alias ?? '',
+    columnKey: aggregate.column,
+    fn: aggregate.fn,
+  }));
+
   const data = rows.map((row) =>
-    toOrderGroupRow({ columnKey: groupKey, countAlias, row }),
+    toOrderGroupRow({
+      aggregates: decodedAggregates,
+      columnKeys: groupKeys,
+      countAlias,
+      row,
+    }),
   );
 
   return { data, hasMore: false, total: data.length };
 };
+
+/**
+ * What each of this route's columns may do in a grouped read, from the pg
+ * catalogue (ADR-058).
+ *
+ * The loader ships it to the client so the aggregate menu offers only functions
+ * legal for a column's **real** Postgres type — a question the browser cannot
+ * answer, because `TableColumn.dataType` reports `numeric`, `jsonb` and `point`
+ * alike as `string` (#550).
+ *
+ * It resolves every allowed column rather than only the grouped ones, since the
+ * menu has to be right for a column before it is picked. That is one catalogue
+ * round trip per grouping-enabled page load, which the loader runs concurrently
+ * with the data query.
+ */
+export const selectOrderGroupingCapabilities = async () =>
+  getColumnGroupingCapabilities({
+    columns: ENTERPRISE_ORDER_ALLOWED_COLUMNS,
+    schema: ENTERPRISE_ORDERS_SCHEMA,
+    table: ENTERPRISE_ORDERS_TABLE,
+  });
 
 export type SelectOrdersPageArgs = {
   /**
@@ -98,12 +150,13 @@ export type SelectOrdersPageArgs = {
   readonly cursor?: readonly unknown[];
   readonly filters: readonly QueryFilter[];
   /**
-   * The group keys the loader sanitized out of the URL. Non-empty switches this
-   * read to the grouped one — sanitized to the route's own columns and empty
-   * unless the route declared `isGroupingEnabled`, so an ungrouped route cannot
-   * reach that branch however the URL is edited.
+   * The grouping configuration the loader sanitized out of the URL — the
+   * ordered keys plus the per-column aggregate map. A non-empty key list
+   * switches this read to the grouped one; it is sanitized to the route's own
+   * columns and empty unless the route declared `isGroupingEnabled`, so an
+   * ungrouped route cannot reach that branch however the URL is edited.
    */
-  readonly grouping?: readonly string[];
+  readonly grouping?: TableGroupingState;
   /**
    * Count the filtered set and return the total. Only the first page of a
    * scroll session asks for it: the total cannot change while the session runs,
@@ -114,6 +167,25 @@ export type SelectOrdersPageArgs = {
   readonly offset: number;
   readonly sort: readonly QuerySort[];
 };
+
+/**
+ * The shape this route actually builds: a column and a function, both required.
+ * `UnfilteredOrderAggregate` leaves `column` optional because `count(*)` takes
+ * none, and every aggregate the *user* selects has one.
+ */
+type OrderColumnAggregate = {
+  readonly column: string;
+  readonly fn: TableAggregateFn;
+};
+
+/**
+ * A `GroupAggregate` with the filter and alias slots **removed**, which is what
+ * makes the #569 deferral structural rather than a matter of discipline: this
+ * is the only shape the grouped read builds, so no code path here can construct
+ * a filtered aggregate. The compact `grouping` URL param the configuration
+ * arrives through has nowhere to carry one either.
+ */
+type UnfilteredOrderAggregate = Omit<GroupAggregate, 'alias' | 'filters'>;
 
 /**
  * Read a page of orders for the list view, and — on the first page of a scroll
@@ -136,16 +208,18 @@ export type SelectOrdersPageArgs = {
 export const selectOrdersPage = async ({
   cursor,
   filters,
-  grouping = [],
+  grouping = NO_GROUPING,
   includeTotal,
   limit,
   offset,
   sort,
 }: SelectOrdersPageArgs): Promise<EnterpriseOrdersResponse> => {
-  const [groupKey] = grouping;
-
-  if (groupKey !== undefined) {
-    return selectGroupedOrders({ filters, groupKey });
+  if (grouping.keys.length > 0) {
+    return selectGroupedOrders({
+      aggregates: grouping.aggregates,
+      filters,
+      groupKeys: grouping.keys,
+    });
   }
 
   const keysetCursor = toOrderKeysetCursor({ cursor, sort });

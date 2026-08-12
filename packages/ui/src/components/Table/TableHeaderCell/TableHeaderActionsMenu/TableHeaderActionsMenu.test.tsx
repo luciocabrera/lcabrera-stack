@@ -30,14 +30,20 @@ vi.mock('#ui/components/Table/contexts/TableConfig/columns/actions', () => ({
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/grouping/actions', () => ({
-  useSetTableGrouping: () => vi.fn(),
+  useClearTableGrouping: () => vi.fn(),
+  useSetTableColumnAggregate: () => vi.fn(),
+  useToggleTableGroupKey: () => vi.fn(),
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/grouping/selectors', () => ({
+  useGetTableColumnAggregate: () => {},
   useGetTableGroupingKeys: () => [],
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
+  // No capability resolved for this column, so the aggregation-mode block
+  // renders nothing and the separator count below stays about grouping alone.
+  useGetTableColumnGroupingCapability: () => {},
   useGetTableIsGroupingEnabled: () => isGroupingEnabledRef.current,
 }));
 

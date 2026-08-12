@@ -6,41 +6,52 @@ import {
   GROUP_BY_COLUMN_COMMAND,
 } from '#ui/components/Table/commands';
 import { useGetNormalizedColumn } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
-import { useSetTableGrouping } from '#ui/components/Table/contexts/TableConfig/grouping/actions';
+import { useToggleTableGroupKey } from '#ui/components/Table/contexts/TableConfig/grouping/actions';
 import { useGetTableGroupingKeys } from '#ui/components/Table/contexts/TableConfig/grouping/selectors';
+import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
 import { tableActionsPopoverStyles } from '#ui/components/Table/TableActionsPopover';
 import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
 
 import type { GroupByColumnButtonProps } from './GroupByColumnButton.types';
 
 /**
- * "Group by This" item of the grouping section: applies this column as the
- * group key and highlights itself while it is the applied one, clicking again
- * to clear. A self-connected delegate — it reads the applied key from the
- * grouping store itself rather than being handed it, so no parent drills
- * grouping state through the menu.
+ * "Group by This" item of the grouping section: adds this column to the group
+ * keys and highlights itself while it is one of them, clicking again to remove
+ * it. A self-connected delegate — it reads the applied keys from the grouping
+ * store itself rather than being handed them, so no parent drills grouping
+ * state through the menu.
  *
- * The applied key is `current` and this column is `target`, which is the same
- * shape sorting passes `deriveToggleCommandState`: one key at a time, so
- * "active" means the table is grouped by exactly this column.
+ * `current` is **this column when it is a key**, not the first key, and that is
+ * what makes `deriveToggleCommandState` say the right thing under multi-key
+ * grouping: "active" means the table is grouped by this column, whatever else
+ * it is also grouped by. Reading `keys[0]` would light up only the outermost
+ * level and leave every deeper one looking unapplied.
+ *
+ * At the depth cap the item is disabled unless removing this key is what a
+ * click would do. Refusing past the cap is `resolveTableGroupingUpdate`'s job
+ * and happens whatever this button says; disabling here is so a user is not
+ * offered an action that would be ignored.
  */
 export const GroupByColumnButton = <TData,>({
   columnKey,
   onClose,
 }: GroupByColumnButtonProps<TData>) => {
-  const setGrouping = useSetTableGrouping();
+  const toggleGroupKey = useToggleTableGroupKey();
   const groupingKeys = useGetTableGroupingKeys();
   const column = useGetNormalizedColumn<TData>(columnKey);
   const { isGroupable } = resolveColumnCapabilities(column);
   const { icon: GroupByColumnCommandIcon, label } = GROUP_BY_COLUMN_COMMAND;
+
+  const isApplied = groupingKeys.includes(String(columnKey));
+  const isAtDepthCap = groupingKeys.length >= MAX_TABLE_GROUP_KEYS;
   const { isActive, isEnabled } = deriveToggleCommandState({
-    current: groupingKeys[0],
-    isDisabled: !isGroupable,
+    current: isApplied ? String(columnKey) : undefined,
+    isDisabled: !isGroupable || (isAtDepthCap && !isApplied),
     target: String(columnKey),
   });
 
   const handleGroupByColumn = () => {
-    setGrouping(isActive ? undefined : String(columnKey));
+    toggleGroupKey(String(columnKey));
     onClose();
   };
 

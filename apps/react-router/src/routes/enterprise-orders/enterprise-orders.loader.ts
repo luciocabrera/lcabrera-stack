@@ -10,7 +10,10 @@ import type {
   EnterpriseOrderTableRow,
 } from './config';
 
-import { selectOrdersPage } from './.server/enterpriseOrders.service';
+import {
+  selectOrderGroupingCapabilities,
+  selectOrdersPage,
+} from './.server/enterpriseOrders.service';
 import {
   COLUMNS,
   CRUD,
@@ -70,6 +73,11 @@ export const loader = createTableRouteLoader<
     isServerFilterEnabled: true,
   },
   persistenceKey: PERSISTENCE_KEY,
+  // What each column may do in a grouped read, from the pg catalogue (ADR-058),
+  // shipped to the client so the aggregate menu is built from the column's real
+  // Postgres type rather than from its declared `dataType` (#550). One extra
+  // catalogue query per page load here, run concurrently with the data query.
+  resolveGroupingCapabilities: selectOrderGroupingCapabilities,
   schemaName: SCHEMA_NAME,
   tableName: TABLE_NAME,
   title: TITLE,

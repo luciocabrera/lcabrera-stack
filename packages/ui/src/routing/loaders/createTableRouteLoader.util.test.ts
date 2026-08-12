@@ -3,6 +3,7 @@ import type { LoaderFunctionArgs } from 'react-router';
 import { describe, expect, it, vi } from 'vite-plus/test';
 
 import type { TableColumn } from '#ui/components/Table';
+import type { TableGroupingState } from '#ui/components/Table/Table.types';
 
 import { serializeSortingToURL } from '#ui/utils/urlState';
 
@@ -37,13 +38,15 @@ const baseConfig = {
 const response = { data: [], total: 0 };
 
 type FetchPageArgs = {
-  readonly grouping: readonly string[];
+  readonly grouping: TableGroupingState;
 };
+
+const NO_GROUPING: TableGroupingState = { aggregates: {}, keys: [] };
 
 const groupingUrl = (param: string) =>
   `http://localhost/rows?grouping=${encodeURIComponent(param)}`;
 
-const invoke = ({
+const invoke = async ({
   config = {},
   cookie,
   url = 'http://localhost/rows',
@@ -68,7 +71,7 @@ const invoke = ({
   const request = new Request(url, {
     headers: cookie === undefined ? undefined : { cookie },
   });
-  const result = loader({ request } as LoaderFunctionArgs);
+  const result = await loader({ request } as LoaderFunctionArgs);
   return { fetchPage, result };
 };
 
@@ -106,8 +109,8 @@ const collectFunctionPaths = ({
 };
 
 describe('createTableRouteLoader', () => {
-  it('returns fully serializable columnsState and metaState (no functions cross the loader boundary)', () => {
-    const { result } = invoke({
+  it('returns fully serializable columnsState and metaState (no functions cross the loader boundary)', async () => {
+    const { result } = await invoke({
       config: { filterOptions: { transport: 'loader' } },
     });
 
@@ -115,8 +118,8 @@ describe('createTableRouteLoader', () => {
     expect(collectFunctionPaths({ value: result.metaState })).toEqual([]);
   });
 
-  it('bakes distinct descriptors onto filterable string columns when filterOptions is set', () => {
-    const { result } = invoke({
+  it('bakes distinct descriptors onto filterable string columns when filterOptions is set', async () => {
+    const { result } = await invoke({
       config: { filterOptions: { transport: 'loader' } },
     });
 
@@ -138,14 +141,14 @@ describe('createTableRouteLoader', () => {
     });
   });
 
-  it('leaves columns untouched when filterOptions is omitted', () => {
-    const { result } = invoke();
+  it('leaves columns untouched when filterOptions is omitted', async () => {
+    const { result } = await invoke();
 
     expect(result.columnsState.columns).toBe(columns);
   });
 
-  it('merges base meta, conditional schemaName, and route meta extras', () => {
-    const { result } = invoke({
+  it('merges base meta, conditional schemaName, and route meta extras', async () => {
+    const { result } = await invoke({
       config: {
         meta: {
           crud: { create: true, delete: true, read: true, update: true },
@@ -163,17 +166,17 @@ describe('createTableRouteLoader', () => {
     });
   });
 
-  it('omits schemaName from metaState when not provided', () => {
-    const { result } = invoke({ config: { schemaName: undefined } });
+  it('omits schemaName from metaState when not provided', async () => {
+    const { result } = await invoke({ config: { schemaName: undefined } });
 
     expect('schemaName' in result.metaState).toBe(false);
   });
 
-  it('appends the primary-key tiebreaker to the sort passed to fetchPage, but keeps columnsState.sorting user-only', () => {
+  it('appends the primary-key tiebreaker to the sort passed to fetchPage, but keeps columnsState.sorting user-only', async () => {
     const sortingParam = serializeSortingToURL<Row>([
       { columnKey: 'name', direction: 'desc' },
     ]);
-    const { fetchPage, result } = invoke({
+    const { fetchPage, result } = await invoke({
       url: `http://localhost/rows?sorting=${encodeURIComponent(sortingParam ?? '')}`,
     });
 
@@ -192,14 +195,14 @@ describe('createTableRouteLoader', () => {
     );
   });
 
-  it('passes fetchPage its promise straight through as dataPromise (unawaited)', () => {
-    const { fetchPage, result } = invoke();
+  it('passes fetchPage its promise straight through as dataPromise (unawaited)', async () => {
+    const { fetchPage, result } = await invoke();
 
     expect(fetchPage).toHaveBeenCalledTimes(1);
     expect(result.dataPromise).toBe(fetchPage.mock.results[0]?.value);
   });
 
-  it('gives one loader a fresh dataPromise per navigation, which is what re-suspends', () => {
+  it('gives one loader a fresh dataPromise per navigation, which is what re-suspends', async () => {
     // The remount nothing keys by hand: a navigation re-runs *the same* loader,
     // so `TableDataResolver`'s `use()` gets a promise it has not seen and
     // suspends again. Building two loaders would prove nothing — their promises
@@ -213,10 +216,10 @@ describe('createTableRouteLoader', () => {
       fetchPage,
     });
 
-    const first = loader({
+    const first = await loader({
       request: new Request('http://localhost/rows'),
     } as LoaderFunctionArgs);
-    const second = loader({
+    const second = await loader({
       request: new Request(
         `http://localhost/rows?sorting=${encodeURIComponent(sortingParam ?? '')}`,
       ),
@@ -226,14 +229,18 @@ describe('createTableRouteLoader', () => {
     expect(first.dataPromise).not.toBe(second.dataPromise);
   });
 
-  it('returns only the fields its consumers read', () => {
+  it('returns only the fields its consumers read', async () => {
     // `key` used to be returned here with a comment claiming React Router
     // remounted the boundary from it. Nothing read it, and React Router reads
     // no loader field by that name — so the exact set is pinned rather than
     // left to grow another unconsumed member.
-    expect(
-      Object.keys(invoke().result).toSorted((a, b) => a.localeCompare(b)),
-    ).toEqual(['columnsState', 'dataPromise', 'metaState']);
+    const { result } = await invoke();
+
+    expect(Object.keys(result).toSorted((a, b) => a.localeCompare(b))).toEqual([
+      'columnsState',
+      'dataPromise',
+      'metaState',
+    ]);
   });
 
   // The UI-flags cookie is client-controlled and is not validated on the way in
@@ -244,8 +251,8 @@ describe('createTableRouteLoader', () => {
   // decides what the server is asked for, so the cookie must not be able to
   // reach it: absent must mean off whatever the cookie carries (ADR-063).
   describe('capability meta', () => {
-    it('ignores capabilities injected through the UI-flags cookie', () => {
-      const { result } = invoke({
+    it('ignores capabilities injected through the UI-flags cookie', async () => {
+      const { result } = await invoke({
         cookie: uiFlagsCookie({
           isKeysetEnabled: true,
           isServerFilterEnabled: true,
@@ -256,8 +263,8 @@ describe('createTableRouteLoader', () => {
       expect(result.metaState.isServerFilterEnabled).toBe(false);
     });
 
-    it('still reads the UI flags the cookie legitimately carries', () => {
-      const { result } = invoke({
+    it('still reads the UI flags the cookie legitimately carries', async () => {
+      const { result } = await invoke({
         cookie: uiFlagsCookie({
           isKeysetEnabled: true,
           isTableSettingsOpen: true,
@@ -269,8 +276,8 @@ describe('createTableRouteLoader', () => {
       expect(result.metaState.isKeysetEnabled).toBe(false);
     });
 
-    it('takes each capability from the route meta, over any cookie value', () => {
-      const { result } = invoke({
+    it('takes each capability from the route meta, over any cookie value', async () => {
+      const { result } = await invoke({
         config: { meta: { isKeysetEnabled: true } },
         cookie: uiFlagsCookie({ isServerFilterEnabled: true }),
       });
@@ -279,8 +286,8 @@ describe('createTableRouteLoader', () => {
       expect(result.metaState.isServerFilterEnabled).toBe(false);
     });
 
-    it('defaults every capability off when the route declares no meta', () => {
-      const { result } = invoke();
+    it('defaults every capability off when the route declares no meta', async () => {
+      const { result } = await invoke();
 
       expect(result.metaState.isGroupingEnabled).toBe(false);
       expect(result.metaState.isKeysetEnabled).toBe(false);
@@ -294,49 +301,51 @@ describe('createTableRouteLoader', () => {
   // to its loader meta" true — everything below is the same loader, the same
   // URL, and only the flag moving.
   describe('grouping', () => {
-    it('reads the grouping param and hands the keys to fetchPage', () => {
-      const { fetchPage, result } = invoke({
+    it('reads the grouping param and hands the keys to fetchPage', async () => {
+      const { fetchPage, result } = await invoke({
         config: { meta: { isGroupingEnabled: true } },
         url: groupingUrl('{"keys":["status"]}'),
       });
 
       expect(fetchPage).toHaveBeenCalledWith(
-        expect.objectContaining({ grouping: ['status'] }),
+        expect.objectContaining({
+          grouping: { aggregates: {}, keys: ['status'] },
+        }),
       );
       expect(result.metaState.groupingKeys).toEqual(['status']);
     });
 
-    it('ignores the same param entirely when the route declares no flag', () => {
+    it('ignores the same param entirely when the route declares no flag', async () => {
       // Same URL, same columns, same everything but the one flag — so this
       // isolates the flag rather than merely observing an ungrouped default.
-      const { fetchPage, result } = invoke({
+      const { fetchPage, result } = await invoke({
         url: groupingUrl('{"keys":["status"]}'),
       });
 
       expect(fetchPage).toHaveBeenCalledWith(
-        expect.objectContaining({ grouping: [] }),
+        expect.objectContaining({ grouping: NO_GROUPING }),
       );
       expect(result.metaState.groupingKeys).toEqual([]);
       expect(result.metaState.isGroupingEnabled).toBe(false);
     });
 
-    it('cannot be switched on by the UI-flags cookie', () => {
-      const { fetchPage, result } = invoke({
+    it('cannot be switched on by the UI-flags cookie', async () => {
+      const { fetchPage, result } = await invoke({
         cookie: uiFlagsCookie({ isGroupingEnabled: true }),
         url: groupingUrl('{"keys":["status"]}'),
       });
 
       expect(result.metaState.isGroupingEnabled).toBe(false);
       expect(fetchPage).toHaveBeenCalledWith(
-        expect.objectContaining({ grouping: [] }),
+        expect.objectContaining({ grouping: NO_GROUPING }),
       );
     });
 
-    it('cannot have its applied keys forged through the UI-flags cookie', () => {
+    it('cannot have its applied keys forged through the UI-flags cookie', async () => {
       // `groupingKeys` is request-derived, so it is spread unconditionally for
       // the same reason the capability flags are: the cookie is client-written
       // and validated nowhere.
-      const { result } = invoke({
+      const { result } = await invoke({
         config: { meta: { isGroupingEnabled: true } },
         cookie: uiFlagsCookie({ groupingKeys: ['status'] }),
       });
@@ -344,7 +353,7 @@ describe('createTableRouteLoader', () => {
       expect(result.metaState.groupingKeys).toEqual([]);
     });
 
-    it('degrades a malformed grouping param to grouping off', () => {
+    it('degrades a malformed grouping param to grouping off', async () => {
       for (const param of [
         '{not-json',
         '{"keys":[7]}',
@@ -352,32 +361,32 @@ describe('createTableRouteLoader', () => {
         '["status"]',
         '{"keys":["status"],"mode":"rollup"}',
       ]) {
-        const { fetchPage, result } = invoke({
+        const { fetchPage, result } = await invoke({
           config: { meta: { isGroupingEnabled: true } },
           url: groupingUrl(param),
         });
 
         expect(result.metaState.groupingKeys).toEqual([]);
         expect(fetchPage).toHaveBeenCalledWith(
-          expect.objectContaining({ grouping: [] }),
+          expect.objectContaining({ grouping: NO_GROUPING }),
         );
       }
     });
 
-    it('degrades a hand-edited key that names no column to grouping off', () => {
-      const { fetchPage, result } = invoke({
+    it('degrades a hand-edited key that names no column to grouping off', async () => {
+      const { fetchPage, result } = await invoke({
         config: { meta: { isGroupingEnabled: true } },
         url: groupingUrl('{"keys":["status; DROP TABLE rows"]}'),
       });
 
       expect(result.metaState.groupingKeys).toEqual([]);
       expect(fetchPage).toHaveBeenCalledWith(
-        expect.objectContaining({ grouping: [] }),
+        expect.objectContaining({ grouping: NO_GROUPING }),
       );
     });
 
-    it('refuses the whole key list when one key is unusable', () => {
-      const { result } = invoke({
+    it('refuses the whole key list when one key is unusable', async () => {
+      const { result } = await invoke({
         config: { meta: { isGroupingEnabled: true } },
         url: groupingUrl('{"keys":["status","nope"]}'),
       });
@@ -385,10 +394,10 @@ describe('createTableRouteLoader', () => {
       expect(result.metaState.groupingKeys).toEqual([]);
     });
 
-    it('leaves the returned key set unchanged for a grouped route', () => {
+    it('leaves the returned key set unchanged for a grouped route', async () => {
       // The loader data type is inferred structurally, so a field appearing
       // only when a route groups would change it for every table route at once.
-      const { result } = invoke({
+      const { result } = await invoke({
         config: { meta: { isGroupingEnabled: true } },
         url: groupingUrl('{"keys":["status"]}'),
       });
@@ -401,9 +410,9 @@ describe('createTableRouteLoader', () => {
       ]);
     });
 
-    it('hands ungrouped routes the same fetchPage argument keys as grouped ones', () => {
-      const { fetchPage: ungrouped } = invoke();
-      const { fetchPage: grouped } = invoke({
+    it('hands ungrouped routes the same fetchPage argument keys as grouped ones', async () => {
+      const { fetchPage: ungrouped } = await invoke();
+      const { fetchPage: grouped } = await invoke({
         config: { meta: { isGroupingEnabled: true } },
         url: groupingUrl('{"keys":["status"]}'),
       });
@@ -420,6 +429,134 @@ describe('createTableRouteLoader', () => {
         'request',
       ]);
       expect(keysOf(grouped)).toEqual(keysOf(ungrouped));
+    });
+
+    it('applies several keys to the configured depth, in the order the URL gave them', async () => {
+      const { fetchPage, result } = await invoke({
+        config: { meta: { isGroupingEnabled: true } },
+        url: groupingUrl('{"keys":["status","name"]}'),
+      });
+
+      expect(result.metaState.groupingKeys).toEqual(['status', 'name']);
+      expect(fetchPage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          grouping: { aggregates: {}, keys: ['status', 'name'] },
+        }),
+      );
+    });
+
+    it('carries the selected aggregates alongside the keys', async () => {
+      const { fetchPage, result } = await invoke({
+        config: { meta: { isGroupingEnabled: true } },
+        url: groupingUrl('{"agg":{"id":"sum"},"keys":["status"]}'),
+      });
+
+      expect(result.metaState.groupingAggregates).toEqual({ id: 'sum' });
+      expect(fetchPage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          grouping: { aggregates: { id: 'sum' }, keys: ['status'] },
+        }),
+      );
+    });
+
+    it('degrades an unrecognised aggregate token to grouping off, keys included', async () => {
+      const { result } = await invoke({
+        config: { meta: { isGroupingEnabled: true } },
+        url: groupingUrl('{"agg":{"id":"median"},"keys":["status"]}'),
+      });
+
+      expect(result.metaState.groupingKeys).toEqual([]);
+      expect(result.metaState.groupingAggregates).toEqual({});
+    });
+
+    it('cannot have its applied aggregates forged through the UI-flags cookie', async () => {
+      const { result } = await invoke({
+        config: { meta: { isGroupingEnabled: true } },
+        cookie: uiFlagsCookie({ groupingAggregates: { id: 'sum' } }),
+      });
+
+      expect(result.metaState.groupingAggregates).toEqual({});
+    });
+  });
+
+  // The catalogue's answer about what each column may do cannot be derived in
+  // the browser (ADR-058), so it travels on the loader meta (ADR-063). It is
+  // spread last and unconditionally for the same reason every capability is.
+  describe('grouping capabilities', () => {
+    const capability = {
+      quantity: {
+        aggregates: ['avg', 'sum'],
+        canGroup: false,
+        column: 'quantity',
+        refusal: 'too-many-distinct',
+        role: 'fact',
+        typeName: 'numeric',
+      },
+    } as const;
+
+    it('ships the resolved capabilities on the meta state', async () => {
+      const { result } = await invoke({
+        config: {
+          meta: { isGroupingEnabled: true },
+          resolveGroupingCapabilities: async () => capability,
+        },
+      });
+
+      expect(result.metaState.groupingCapabilities).toEqual(capability);
+    });
+
+    it('never resolves them for a route that declared no grouping', async () => {
+      // Same resolver, same everything, only the flag moving — so this isolates
+      // the flag rather than observing a route that happens not to group.
+      const resolveGroupingCapabilities = vi.fn(async () => capability);
+      const { result } = await invoke({
+        config: { resolveGroupingCapabilities },
+      });
+
+      expect(resolveGroupingCapabilities).not.toHaveBeenCalled();
+      expect(result.metaState.groupingCapabilities).toEqual({});
+    });
+
+    it('answers an empty map when a grouped route supplies no resolver', async () => {
+      const { result } = await invoke({
+        config: { meta: { isGroupingEnabled: true } },
+      });
+
+      expect(result.metaState.groupingCapabilities).toEqual({});
+    });
+
+    it('cannot have capabilities injected through the UI-flags cookie', async () => {
+      // A cookie able to seed this would be a cookie able to widen the
+      // aggregate menu, and so what the client asks the server for.
+      const { result } = await invoke({
+        config: { meta: { isGroupingEnabled: true } },
+        cookie: uiFlagsCookie({ groupingCapabilities: capability }),
+      });
+
+      expect(result.metaState.groupingCapabilities).toEqual({});
+    });
+
+    it('starts the data fetch before awaiting the catalogue answer', async () => {
+      // The overlap is the whole cost argument: resolved serially, a grouped
+      // route would pay both round trips end to end.
+      const order: string[] = [];
+      const { result } = await invoke({
+        config: {
+          fetchPage: async () => {
+            order.push('fetchPage');
+            return response;
+          },
+          meta: { isGroupingEnabled: true },
+          resolveGroupingCapabilities: async () => {
+            order.push('capabilities');
+            return capability;
+          },
+        },
+      });
+
+      await result.dataPromise;
+
+      expect(order).toEqual(['fetchPage', 'capabilities']);
     });
   });
 });

@@ -8,14 +8,17 @@ import type {
 } from '#ui/components/Table/Table.types';
 import type { MockStore } from '#ui/utils/tests/createMockStore.util';
 
+import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
 import { createMockStore } from '#ui/utils/tests/createMockStore.util';
+
+const NO_GROUPING: TableGroupingState = { aggregates: {}, keys: [] };
 
 const storesRef: {
   dataStore: MockStore<Partial<TableDataState<Record<string, unknown>>>>;
   groupingStore: MockStore<TableGroupingState>;
 } = {
   dataStore: createMockStore({}),
-  groupingStore: createMockStore<TableGroupingState>({ keys: [] }),
+  groupingStore: createMockStore<TableGroupingState>(NO_GROUPING),
 };
 
 // The same shape `meta.hooks.test.tsx` uses: `vi.hoisted` runs before the
@@ -50,14 +53,19 @@ vi.mock(
   () => ({ usePersistTableStateAction: () => persistTableState }),
 );
 
-import { useSetTableGrouping } from './actions/useSetTableGrouping.hook';
+import { useClearTableGrouping } from './actions/useClearTableGrouping.hook';
+import { useSetTableColumnAggregate } from './actions/useSetTableColumnAggregate.hook';
+import { useSetTableGroupKeys } from './actions/useSetTableGroupKeys.hook';
+import { useToggleTableGroupKey } from './actions/useToggleTableGroupKey.hook';
+import { useGetTableColumnAggregate } from './selectors/useGetTableColumnAggregate.hook';
+import { useGetTableGroupingAggregates } from './selectors/useGetTableGroupingAggregates.hook';
 import { useGetTableGroupingKeys } from './selectors/useGetTableGroupingKeys.hook';
 import { useGroupingStore } from './useGroupingStore.hook';
 
 describe('TableConfig grouping hooks', () => {
   beforeEach(() => {
     storesRef.dataStore = createMockStore({});
-    storesRef.groupingStore = createMockStore<TableGroupingState>({ keys: [] });
+    storesRef.groupingStore = createMockStore<TableGroupingState>(NO_GROUPING);
     persistTableState.mockClear();
     persistTableState.mockReturnValue(true);
   });
@@ -87,8 +95,23 @@ describe('TableConfig grouping hooks', () => {
     ]);
   });
 
+  it('exposes the applied aggregates, whole and per column', () => {
+    storesRef.groupingStore.set({ aggregates: { total_amount: 'sum' } });
+
+    expect(
+      renderHook(() => useGetTableGroupingAggregates()).result.current,
+    ).toEqual({ total_amount: 'sum' });
+    expect(
+      renderHook(() => useGetTableColumnAggregate('total_amount')).result
+        .current,
+    ).toBe('sum');
+    expect(
+      renderHook(() => useGetTableColumnAggregate('quantity')).result.current,
+    ).toBeUndefined();
+  });
+
   it('writes the grouping param and the store on one interaction', () => {
-    const { result } = renderHook(() => useSetTableGrouping());
+    const { result } = renderHook(() => useToggleTableGroupKey());
 
     act(() => {
       result.current('order_status');
@@ -102,12 +125,107 @@ describe('TableConfig grouping hooks', () => {
     expect(storesRef.groupingStore.get().keys).toStrictEqual(['order_status']);
   });
 
+  it('appends a second key rather than replacing the first', () => {
+    storesRef.groupingStore.set({ keys: ['order_status'] });
+
+    const { result } = renderHook(() => useToggleTableGroupKey());
+
+    act(() => {
+      result.current('shipping_country');
+    });
+
+    expect(storesRef.groupingStore.get().keys).toStrictEqual([
+      'order_status',
+      'shipping_country',
+    ]);
+    expect(persistTableState).toHaveBeenCalledWith({
+      searchParamKey: 'grouping',
+      searchParamValue: '{"keys":["order_status","shipping_country"]}',
+    });
+  });
+
+  it('removes a key that is already applied', () => {
+    storesRef.groupingStore.set({ keys: ['order_status', 'shipping_country'] });
+
+    const { result } = renderHook(() => useToggleTableGroupKey());
+
+    act(() => {
+      result.current('order_status');
+    });
+
+    expect(storesRef.groupingStore.get().keys).toStrictEqual([
+      'shipping_country',
+    ]);
+  });
+
+  it('refuses a key past the configured depth, leaving the store untouched', () => {
+    const appliedKeys = Array.from(
+      { length: MAX_TABLE_GROUP_KEYS },
+      (_, index) => `key_${index}`,
+    );
+    storesRef.groupingStore.set({ keys: appliedKeys });
+
+    const { result } = renderHook(() => useToggleTableGroupKey());
+
+    act(() => {
+      result.current('one_too_many');
+    });
+
+    expect(storesRef.groupingStore.get().keys).toStrictEqual(appliedKeys);
+    expect(persistTableState).not.toHaveBeenCalled();
+  });
+
+  it('reorders the key list through the drawer action', () => {
+    storesRef.groupingStore.set({ keys: ['a', 'b'] });
+
+    const { result } = renderHook(() => useSetTableGroupKeys());
+
+    act(() => {
+      result.current(['b', 'a']);
+    });
+
+    expect(storesRef.groupingStore.get().keys).toStrictEqual(['b', 'a']);
+    expect(persistTableState).toHaveBeenCalledWith({
+      searchParamKey: 'grouping',
+      searchParamValue: '{"keys":["b","a"]}',
+    });
+  });
+
+  it('applies and clears a column aggregate', () => {
+    storesRef.groupingStore.set({ keys: ['order_status'] });
+
+    const { result } = renderHook(() => useSetTableColumnAggregate());
+
+    act(() => {
+      result.current({ columnKey: 'total_amount', fn: 'sum' });
+    });
+
+    expect(storesRef.groupingStore.get().aggregates).toStrictEqual({
+      total_amount: 'sum',
+    });
+    expect(persistTableState).toHaveBeenLastCalledWith({
+      searchParamKey: 'grouping',
+      searchParamValue:
+        '{"agg":{"total_amount":"sum"},"keys":["order_status"]}',
+    });
+
+    act(() => {
+      result.current({ columnKey: 'total_amount', fn: undefined });
+    });
+
+    expect(storesRef.groupingStore.get().aggregates).toStrictEqual({});
+    expect(persistTableState).toHaveBeenLastCalledWith({
+      searchParamKey: 'grouping',
+      searchParamValue: '{"keys":["order_status"]}',
+    });
+  });
+
   it('fires one navigation per interaction, not one per re-render', () => {
     // The discriminating part is the re-renders. A URL write driven from the
     // render path (an effect, or a derivation with a side effect in it) would
     // grow this count with every render; one driven from the event handler
     // cannot. Re-rendering between the two clicks is what tells them apart.
-    const { rerender, result } = renderHook(() => useSetTableGrouping());
+    const { rerender, result } = renderHook(() => useToggleTableGroupKey());
 
     rerender();
     rerender();
@@ -127,13 +245,13 @@ describe('TableConfig grouping hooks', () => {
     expect(persistTableState).toHaveBeenCalledTimes(1);
   });
 
-  it('issues no navigation when the requested key is already applied', () => {
+  it('issues no navigation when the requested state is already applied', () => {
     storesRef.groupingStore.set({ keys: ['order_status'] });
 
-    const { result } = renderHook(() => useSetTableGrouping());
+    const { result } = renderHook(() => useSetTableGroupKeys());
 
     act(() => {
-      result.current('order_status');
+      result.current(['order_status']);
     });
 
     expect(persistTableState).not.toHaveBeenCalled();
@@ -142,7 +260,7 @@ describe('TableConfig grouping hooks', () => {
   it('leaves the store untouched when persistence refuses the write', () => {
     persistTableState.mockReturnValue(false);
 
-    const { result } = renderHook(() => useSetTableGrouping());
+    const { result } = renderHook(() => useToggleTableGroupKey());
 
     act(() => {
       result.current('order_status');
@@ -152,19 +270,37 @@ describe('TableConfig grouping hooks', () => {
     expect(storesRef.dataStore.get().isLoading).toBeUndefined();
   });
 
-  it('clears grouping and drops the param', () => {
-    storesRef.groupingStore.set({ keys: ['order_status'] });
+  it('clears every key and every aggregate, and drops the param', () => {
+    storesRef.groupingStore.set({
+      aggregates: { total_amount: 'sum' },
+      keys: ['order_status', 'shipping_country'],
+    });
 
-    const { result } = renderHook(() => useSetTableGrouping());
+    const { result } = renderHook(() => useClearTableGrouping());
 
     act(() => {
-      result.current(undefined);
+      result.current();
     });
 
     expect(persistTableState).toHaveBeenCalledWith({
       searchParamKey: 'grouping',
       searchParamValue: undefined,
     });
-    expect(storesRef.groupingStore.get().keys).toStrictEqual([]);
+    expect(storesRef.groupingStore.get()).toStrictEqual(NO_GROUPING);
+  });
+
+  it('drops the aggregates when the last key is removed', () => {
+    storesRef.groupingStore.set({
+      aggregates: { total_amount: 'sum' },
+      keys: ['order_status'],
+    });
+
+    const { result } = renderHook(() => useToggleTableGroupKey());
+
+    act(() => {
+      result.current('order_status');
+    });
+
+    expect(storesRef.groupingStore.get()).toStrictEqual(NO_GROUPING);
   });
 });

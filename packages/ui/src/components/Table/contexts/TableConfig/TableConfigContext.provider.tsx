@@ -32,6 +32,7 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
   // getInitialColumnsState.
   const normalizedMetaState = getInitialMetaState({ ...metaState });
   const normalizedGroupingState = getInitialGroupingState({
+    groupingAggregates: metaState?.groupingAggregates,
     groupingKeys: metaState?.groupingKeys,
   });
 

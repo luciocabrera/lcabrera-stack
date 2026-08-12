@@ -5,7 +5,7 @@ import {
   CLEAR_GROUPING_COMMAND,
   deriveToggleCommandState,
 } from '#ui/components/Table/commands';
-import { useSetTableGrouping } from '#ui/components/Table/contexts/TableConfig/grouping/actions';
+import { useClearTableGrouping } from '#ui/components/Table/contexts/TableConfig/grouping/actions';
 import { useGetTableGroupingKeys } from '#ui/components/Table/contexts/TableConfig/grouping/selectors';
 import { useGetTableIsGroupingEnabled } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 import { tableActionsPopoverStyles } from '#ui/components/Table/TableActionsPopover';
@@ -14,9 +14,10 @@ import type { ClearGroupingButtonProps } from './ClearGroupingButton.types';
 
 /**
  * "Clear Grouping" item of the grouping section: always shown to keep the menu
- * layout stable, disabled until some column is grouped. It clears whatever key
- * is applied, not necessarily the one whose menu is open — grouping is one
- * whole-table state, so an ungrouped column's menu can still switch it off.
+ * layout stable, disabled until some column is grouped. It clears every applied
+ * key and every selected aggregate, not only the column whose menu is open —
+ * grouping is one whole-table state, so an ungrouped column's menu can still
+ * switch it off.
  *
  * **It takes no `columnKey`, and that is the point.** Its sibling
  * `GroupByColumnButton` gates on the open column's `isGroupable`, which is
@@ -32,7 +33,7 @@ import type { ClearGroupingButtonProps } from './ClearGroupingButton.types';
  * `deriveToggleCommandState` already answers "is there anything to clear".
  */
 export const ClearGroupingButton = ({ onClose }: ClearGroupingButtonProps) => {
-  const setGrouping = useSetTableGrouping();
+  const clearGrouping = useClearTableGrouping();
   const groupingKeys = useGetTableGroupingKeys();
   const isGroupingEnabled = useGetTableIsGroupingEnabled();
   const { icon: ClearGroupingCommandIcon, label } = CLEAR_GROUPING_COMMAND;
@@ -43,7 +44,7 @@ export const ClearGroupingButton = ({ onClose }: ClearGroupingButtonProps) => {
   });
 
   const handleClearGrouping = () => {
-    setGrouping(undefined);
+    clearGrouping();
     onClose();
   };
 

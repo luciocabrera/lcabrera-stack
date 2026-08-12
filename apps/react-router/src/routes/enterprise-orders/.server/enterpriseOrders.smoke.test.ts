@@ -1,6 +1,7 @@
 // @vitest-environment node
 
-import { closePool } from '@lcabrera/server/db/get-pool.util';
+import { closePool, getPool } from '@lcabrera/server/db/get-pool.util';
+import { MAX_GROUP_KEYS } from '@lcabrera/server/db/group-query-builder/group-query-builder.constants';
 import { selectGroupedRows } from '@lcabrera/server/db/select-grouped-rows.util';
 import { TABLE_GROUP_ROW_FIELD } from '@lcabrera/ui/components/Table/Table.constants';
 import { afterAll, describe, expect, it } from 'vite-plus/test';
@@ -12,6 +13,7 @@ import {
   getNextOrderId,
   insertOrder,
   selectOrderById,
+  selectOrderGroupingCapabilities,
   selectOrdersPage,
   updateOrder,
 } from '@/routes/enterprise-orders/.server/enterpriseOrders.service';
@@ -245,7 +247,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
     it('reaches the route service as the same response shape a flat read returns', async () => {
       const grouped = await selectOrdersPage({
         filters: [],
-        grouping: [GROUP_KEY],
+        grouping: { aggregates: {}, keys: [GROUP_KEY] },
         includeTotal: true,
         limit: 50,
         offset: 0,
@@ -269,9 +271,10 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
       for (const row of grouped.data) {
         const summary = row[TABLE_GROUP_ROW_FIELD];
 
-        expect(summary?.columnKey).toBe(GROUP_KEY);
+        expect(summary?.path).toHaveLength(1);
+        expect(summary?.path[0]?.columnKey).toBe(GROUP_KEY);
         expect(summary?.count).toBeGreaterThan(0);
-        expect(typeof summary?.label).toBe('string');
+        expect(typeof summary?.path[0]?.label).toBe('string');
       }
     });
 
@@ -288,7 +291,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
       ]) {
         const { data } = await selectOrdersPage({
           filters: [],
-          grouping: [key],
+          grouping: { aggregates: {}, keys: [key] },
           includeTotal: true,
           limit: 50,
           offset: 0,
@@ -298,12 +301,213 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
         expect(data.length).toBeGreaterThan(0);
 
         for (const row of data) {
-          const label = row[TABLE_GROUP_ROW_FIELD]?.label;
+          const label = row[TABLE_GROUP_ROW_FIELD]?.path[0]?.label;
 
           expect(typeof label).toBe('string');
           expect(label).not.toBe('[object Object]');
         }
       }
+    });
+  });
+
+  /**
+   * Multi-key grouping and aggregate selection, against real Postgres.
+   *
+   * This block exists because of what #568 taught: its mocked suite asserted
+   * the generated SQL with `toContain` and passed 6/6 while the same query
+   * failed 7/7 against a live database, because the `GROUP BY GROUPING SETS`
+   * clause named a column that does not exist. Every string assertion was
+   * satisfied by a query Postgres rejects outright. So each case below is
+   * either arithmetic the database has to agree with, or a query it has to
+   * accept — never a claim about the text of one.
+   */
+  describe('multi-key grouping and aggregate selection', () => {
+    const KEYS = ['order_status', 'shipping_country'] as const;
+
+    it('groups by two keys and counts every row exactly once across the pairs', async () => {
+      // The check no string assertion can make: a wrong GROUP BY, a lost row or
+      // a stray cross product all break this sum while leaving the SQL valid.
+      const { data } = await selectOrdersPage({
+        filters: [],
+        grouping: { aggregates: {}, keys: [...KEYS] },
+        includeTotal: true,
+        limit: 50,
+        offset: 0,
+        sort: [],
+      });
+      const flat = await selectOrdersPage({
+        filters: [],
+        includeTotal: true,
+        limit: 1,
+        offset: 0,
+        sort: [],
+      });
+
+      expect(data.length).toBeGreaterThan(0);
+
+      const grouped = data.reduce(
+        (total, row) => total + (row[TABLE_GROUP_ROW_FIELD]?.count ?? 0),
+        0,
+      );
+
+      expect(grouped).toBe(flat.total);
+    });
+
+    it('names both levels of every group, in the order the keys were given', async () => {
+      const { data } = await selectOrdersPage({
+        filters: [],
+        grouping: { aggregates: {}, keys: [...KEYS] },
+        includeTotal: true,
+        limit: 50,
+        offset: 0,
+        sort: [],
+      });
+
+      for (const row of data) {
+        expect(
+          row[TABLE_GROUP_ROW_FIELD]?.path.map((k) => k.columnKey),
+        ).toEqual([...KEYS]);
+      }
+    });
+
+    it('groups to the configured maximum depth', async () => {
+      // The cap is the client's `MAX_TABLE_GROUP_KEYS` and the server's
+      // `MAX_GROUP_KEYS`, pinned together by `groupingContract.test.ts`. This is
+      // the live half: a query at exactly that depth has to run.
+      const deepKeys = [
+        'order_status',
+        'shipping_country',
+        'priority',
+        'carrier',
+      ];
+
+      expect(deepKeys).toHaveLength(MAX_GROUP_KEYS);
+
+      const { data } = await selectOrdersPage({
+        filters: [],
+        grouping: { aggregates: {}, keys: deepKeys },
+        includeTotal: true,
+        limit: 50,
+        offset: 0,
+        sort: [],
+      });
+
+      expect(data.length).toBeGreaterThan(0);
+      expect(data[0]?.[TABLE_GROUP_ROW_FIELD]?.path).toHaveLength(
+        MAX_GROUP_KEYS,
+      );
+    });
+
+    it('refuses one key past the cap, before any round trip', async () => {
+      await expect(
+        selectOrdersPage({
+          filters: [],
+          grouping: {
+            aggregates: {},
+            keys: [
+              'order_status',
+              'shipping_country',
+              'priority',
+              'carrier',
+              'payment_status',
+            ],
+          },
+          includeTotal: true,
+          limit: 50,
+          offset: 0,
+          sort: [],
+        }),
+      ).rejects.toThrow(/at most 4 group keys/);
+    });
+
+    it('computes a selected aggregate the database agrees with', async () => {
+      // `sum(total_amount)` per group has to equal the sum over the same
+      // filtered set — arithmetic Postgres itself settles, which is the point.
+      const { data } = await selectOrdersPage({
+        filters: [],
+        grouping: {
+          aggregates: { total_amount: 'sum' },
+          keys: ['order_status'],
+        },
+        includeTotal: true,
+        limit: 50,
+        offset: 0,
+        sort: [],
+      });
+
+      expect(data.length).toBeGreaterThan(0);
+
+      const summed = data.reduce((total, row) => {
+        const [aggregate] = row[TABLE_GROUP_ROW_FIELD]?.aggregates ?? [];
+
+        expect(aggregate?.columnKey).toBe('total_amount');
+        expect(aggregate?.fn).toBe('sum');
+
+        return total + Number(aggregate?.label ?? 0);
+      }, 0);
+
+      const { rows } = await getPool().query<{ readonly total: string }>(
+        'SELECT sum(total_amount)::text AS total FROM public.enterprise_orders',
+      );
+
+      expect(summed).toBeCloseTo(Number(rows[0]?.total ?? 0), 2);
+    });
+
+    it('accepts every aggregate the catalogue offers for a column', async () => {
+      // The legality claim, made against the live catalogue rather than against
+      // a fixture: what `getColumnGroupingCapabilities` reports for a column is
+      // exactly what the grouped query then accepts for it.
+      const capabilities = await selectOrderGroupingCapabilities();
+      const offered = capabilities.total_amount?.aggregates ?? [];
+
+      expect(offered.length).toBeGreaterThan(0);
+
+      for (const fn of offered) {
+        const { data } = await selectOrdersPage({
+          filters: [],
+          grouping: {
+            aggregates: { total_amount: fn },
+            keys: ['order_status'],
+          },
+          includeTotal: true,
+          limit: 50,
+          offset: 0,
+          sort: [],
+        });
+
+        expect(data.length).toBeGreaterThan(0);
+        expect(data[0]?.[TABLE_GROUP_ROW_FIELD]?.aggregates[0]?.fn).toBe(fn);
+      }
+    });
+
+    it('refuses an aggregate the catalogue does not offer for a column', async () => {
+      // The other direction, and the one a mocked suite cannot reach: `sum` on
+      // a `varchar` is a query Postgres rejects, and the builder's own gate is
+      // what turns it into a named refusal instead.
+      await expect(
+        selectOrdersPage({
+          filters: [],
+          grouping: {
+            aggregates: { customer_name: 'sum' },
+            keys: ['order_status'],
+          },
+          includeTotal: true,
+          limit: 50,
+          offset: 0,
+          sort: [],
+        }),
+      ).rejects.toThrow(/is not legal for column "customer_name"/);
+    });
+
+    it('resolves a capability for every column the route allows', async () => {
+      // What the loader ships to the client on every grouping-enabled page
+      // load. A column missing here is a column whose aggregate menu would be
+      // silently empty.
+      const capabilities = await selectOrderGroupingCapabilities();
+
+      expect(Object.keys(capabilities).length).toBeGreaterThan(0);
+      expect(capabilities.order_status?.canGroup).toBe(true);
+      expect(capabilities.order_id?.canGroup).toBe(false);
     });
   });
 });

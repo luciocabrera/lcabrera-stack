@@ -29,9 +29,9 @@ const groupRows: readonly TestRow[] = Array.from(
   { length: GROUP_COUNT },
   (_unused, index) => ({
     [TABLE_GROUP_ROW_FIELD]: {
-      columnKey: 'order_status',
+      aggregates: [],
       count: index + 1,
-      label: `Group ${index}`,
+      path: [{ columnKey: 'order_status', label: `Group ${index}` }],
     },
   }),
 );
