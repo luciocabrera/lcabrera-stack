@@ -15,12 +15,14 @@ import { TableBase } from './TableBase.component';
 const {
   useGetTableDensityMock,
   useGetTableIsBorderedMock,
+  useGetTableIsLoadingMock,
   useGetTableIsStripedMock,
   useGetTableTotalRowsMock,
   useTableGridFocusMock,
 } = vi.hoisted(() => ({
   useGetTableDensityMock: vi.fn(),
   useGetTableIsBorderedMock: vi.fn(),
+  useGetTableIsLoadingMock: vi.fn(),
   useGetTableIsStripedMock: vi.fn(),
   useGetTableTotalRowsMock: vi.fn(),
   useTableGridFocusMock: vi.fn(),
@@ -33,6 +35,7 @@ vi.mock('../contexts/TableConfig/meta/selectors', () => ({
 }));
 
 vi.mock('../contexts/TableData/data/selectors', () => ({
+  useGetTableIsLoading: useGetTableIsLoadingMock,
   useGetTableTotalRows: useGetTableTotalRowsMock,
 }));
 
@@ -52,6 +55,7 @@ describe('TableBase', () => {
     useGetTableDensityMock.mockReturnValue('comfortable');
     useGetTableIsBorderedMock.mockReturnValue(true);
     useGetTableIsStripedMock.mockReturnValue(false);
+    useGetTableIsLoadingMock.mockReturnValue(false);
     useGetTableTotalRowsMock.mockReturnValue(0);
     useTableGridFocusMock.mockReturnValue({ tabIndex: 0 });
   });
@@ -119,8 +123,27 @@ describe('TableBase', () => {
     expect(screen.getByRole('grid').getAttribute('aria-rowcount')).toBe('121');
   });
 
-  it('reports an unknown aria-rowcount when the consumer supplied no total', () => {
+  it('reports a resolved empty grid as holding exactly its header row', () => {
+    // A filter matching nothing is an ordinary outcome and the count is known.
     useGetTableTotalRowsMock.mockReturnValue(0);
+    useGetTableIsLoadingMock.mockReturnValue(false);
+
+    render(
+      <TableBase>
+        <tbody>
+          <tr>
+            <td>Orders</td>
+          </tr>
+        </tbody>
+      </TableBase>,
+    );
+
+    expect(screen.getByRole('grid').getAttribute('aria-rowcount')).toBe('1');
+  });
+
+  it('reports an unknown aria-rowcount only while the data has not resolved', () => {
+    useGetTableTotalRowsMock.mockReturnValue(0);
+    useGetTableIsLoadingMock.mockReturnValue(true);
 
     render(
       <TableBase>
@@ -133,6 +156,27 @@ describe('TableBase', () => {
     );
 
     expect(screen.getByRole('grid').getAttribute('aria-rowcount')).toBe('-1');
+  });
+
+  it('keeps its ARIA contract when a caller passes conflicting props', () => {
+    // The role and the row count are the grid's only source of those semantics
+    // once CSS has stripped the implicit ones, so `{...rest}` must not be able
+    // to replace them. Revert the spread order and this is what fails.
+    useGetTableTotalRowsMock.mockReturnValue(120);
+
+    render(
+      <TableBase aria-rowcount={7} role='table'>
+        <tbody>
+          <tr>
+            <td>Orders</td>
+          </tr>
+        </tbody>
+      </TableBase>,
+    );
+
+    const grid = screen.getByTestId('table');
+    expect(grid.getAttribute('role')).toBe('grid');
+    expect(grid.getAttribute('aria-rowcount')).toBe('121');
   });
 
   it('forwards native table attributes', () => {

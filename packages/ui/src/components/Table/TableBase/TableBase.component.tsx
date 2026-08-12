@@ -10,7 +10,10 @@ import {
   useGetTableIsBordered,
   useGetTableIsStriped,
 } from '../contexts/TableConfig/meta/selectors';
-import { useGetTableTotalRows } from '../contexts/TableData/data/selectors';
+import {
+  useGetTableIsLoading,
+  useGetTableTotalRows,
+} from '../contexts/TableData/data/selectors';
 import { tableStyles } from './TableBase.stylex';
 
 /**
@@ -33,15 +36,16 @@ export const TableBase = <TData extends Record<string, unknown>, TResponse>({
   const isBordered = useGetTableIsBordered();
   const isStriped = useGetTableIsStriped();
   const totalRows = useGetTableTotalRows();
+  const isLoading = useGetTableIsLoading();
   const gridFocusProps = useTableGridFocus<TData>();
 
   return (
     <table
-      aria-rowcount={resolveAriaRowCount({ totalRows })}
       data-striped={isStriped}
       data-testid='table'
-      role='grid'
       {...rest}
+      aria-rowcount={resolveAriaRowCount({ isLoading, totalRows })}
+      role='grid'
       {...gridFocusProps}
       {...stylex.props(
         tableStyles.base,

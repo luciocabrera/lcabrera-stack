@@ -8,14 +8,27 @@ import {
 
 describe('resolveGridRowIndexing', () => {
   it('counts the dataset plus its header row', () => {
-    expect(resolveAriaRowCount({ totalRows: 120 })).toBe(121);
-    expect(resolveAriaRowCount({ totalRows: 1 })).toBe(2);
+    expect(resolveAriaRowCount({ isLoading: false, totalRows: 120 })).toBe(121);
+    expect(resolveAriaRowCount({ isLoading: false, totalRows: 1 })).toBe(2);
   });
 
-  it('reports an unknown total rather than a grid holding only its header', () => {
-    // `totalRows` sits at its `0` default when the consumer supplied none;
-    // `1` would assert a header and no data, which is a different claim.
-    expect(resolveAriaRowCount({ totalRows: 0 })).toBe(-1);
+  it('reports a resolved empty grid as holding exactly its header row', () => {
+    // A filter that matches nothing is an ordinary outcome and the count is
+    // known: one row. Answering -1 here would tell a screen-reader user the
+    // size is unknowable at the moment it is most definitely known.
+    expect(resolveAriaRowCount({ isLoading: false, totalRows: 0 })).toBe(1);
+  });
+
+  it('reports an unknown total only while the data has not resolved', () => {
+    expect(resolveAriaRowCount({ isLoading: true, totalRows: 0 })).toBe(-1);
+  });
+
+  it('does not call a total unknown just because it is zero', () => {
+    // The discriminating pair: same `totalRows`, different answers, and the
+    // difference is whether the response has come back — not the count.
+    expect(resolveAriaRowCount({ isLoading: true, totalRows: 0 })).not.toBe(
+      resolveAriaRowCount({ isLoading: false, totalRows: 0 }),
+    );
   });
 
   it('numbers body rows from 2, the header having taken 1', () => {
@@ -30,7 +43,7 @@ describe('resolveGridRowIndexing', () => {
     // and a change to one of them shows up only here.
     for (const totalRows of [1, 2, 50, 199, 10_000]) {
       expect(resolveBodyAriaRowIndex({ rowIndex: totalRows - 1 })).toBe(
-        resolveAriaRowCount({ totalRows }),
+        resolveAriaRowCount({ isLoading: false, totalRows }),
       );
     }
   });

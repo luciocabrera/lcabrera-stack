@@ -25,6 +25,17 @@ every page and describes the fetch rather than the data. It shares one base with
 every row's `aria-rowindex`, so the last body row's index equals this count —
 the invariant `resolveGridRowIndexing.util.test.ts` pins.
 
+**Zero rows is a count, not a missing one.** `-1` — ARIA's "unknown" — is
+reported only while `isLoading`, because that is the state in which the total
+genuinely is not known yet. A filter matching nothing is an ordinary outcome
+with a known answer: one row, the header. Reporting it as unknown would tell a
+screen-reader user the table's size is unknowable at the moment it is most
+definitely known.
+
+Both attributes are applied **after** `{...rest}`, so a caller cannot replace
+them; `TableBase.test.tsx` asserts that a conflicting `role`/`aria-rowcount`
+loses.
+
 ## Keyboard surface
 
 `useTableGridFocus` supplies the container's `tabIndex` plus its focus, blur and
