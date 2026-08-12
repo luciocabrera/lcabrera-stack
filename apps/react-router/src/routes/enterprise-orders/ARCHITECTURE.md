@@ -93,9 +93,19 @@ Client-safe types (`EnterpriseOrder`, `EnterpriseOrderListRow`,
 column/`allowedColumns`/`listColumns`/enum sets, the shared create/update **Zod schema**,
 and pure derivation/mapping utils (`deriveOrderTotals`, `toOrderInsertValues`/
 `toOrderUpdateValues`, `readOrderFormValues`, `toOrderFieldErrors`, `toOrderFormValues`,
-`toOrderKeysetCursor`). Each util is pure with a colocated test. Sorting is **not**
-translated here — `@lcabrera/ui/routing/shared`'s `toQuerySort` is table-agnostic
-and does it for every route.
+`toOrderKeysetCursor`). Each util is pure with a colocated test.
+
+Sort **translation** is not here, and the two read paths reach it differently.
+The loader translates its already-tiebroken sorting with `toQuerySort`
+(`@lcabrera/ui/routing/shared`); the paginated resource route composes
+`sanitizeSorting` (same package) with `resolveQuerySort` (`@lcabrera/server/sort`),
+because it also has to supply a fallback. All three are table-agnostic package
+utils — none of them knows about orders, which is why none of them lives here.
+
+The one sort value that _is_ table-specific does live here:
+`ENTERPRISE_ORDER_FALLBACK_SORT`, the ordering the paginated read falls back to
+when a request carries no sort at all. See the read path below for why it exists
+at all, given the client always sends one.
 
 ### The read path — how a page of orders is paid for
 
@@ -125,6 +135,19 @@ obvious-but-slower spelling (epic #391):
   columns no cell reads are no longer fetched, serialized and shipped per row per
   page. `EnterpriseOrderListRow` is that projection as a type, and `COLUMNS` is
   typed on it. The detail and edit views still read the full row — they read one.
+
+**Every page is ordered, and the route guarantees that itself.**
+`parseOrdersPageParams` resolves the request's sort through `resolveQuerySort`
+(`@lcabrera/server/sort`) against `ENTERPRISE_ORDER_FALLBACK_SORT`, so an empty
+result is impossible. That looks redundant against the client — `buildTablePageQuery`
+appends `order_id` via `appendPrimaryKeySorting`, so a scrolled page always arrives
+sorted, and page 1 and page 2+ already agreed. It is not, because
+`/_api/enterprise-orders/paginated` is a **public URL** and that guarantee lived
+entirely in another package's client-side code: a direct request, a non-Table
+consumer, or a column config that loses `isPrimaryKey` would otherwise produce a
+paginated read with no `ORDER BY`, which repeats and skips rows as the planner
+changes plans between requests. The fallback applies only to an empty sort, never
+as an extra tiebreaker on one the caller supplied.
 
 ### `.server/enterpriseOrders.service.ts` — server-only Postgres access
 

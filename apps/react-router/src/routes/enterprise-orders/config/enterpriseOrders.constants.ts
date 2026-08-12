@@ -13,6 +13,7 @@
 
 // Type-only (erased at build) — carries no `pg`/SQL runtime into this file.
 import type { ColumnType } from '@lcabrera/server/db/query-builder/query-builder.types';
+import type { ColumnSort } from '@lcabrera/server/sort/sort.types';
 
 export const ENTERPRISE_ORDERS_SCHEMA = 'public';
 export const ENTERPRISE_ORDERS_TABLE = 'enterprise_orders';
@@ -22,6 +23,21 @@ export const ENTERPRISE_ORDERS_TABLE = 'enterprise_orders';
  * (ADR-008), which is what a keyset cursor needs to resume from (ADR-052).
  */
 export const ENTERPRISE_ORDER_PRIMARY_KEY = 'order_id';
+
+/**
+ * The ordering a paginated read falls back to when the request carries no sort
+ * at all — the primary key ascending, the one column guaranteed unique.
+ *
+ * The Table client never needs this: `buildTablePageQuery` appends this same key
+ * via `appendPrimaryKeySorting`, so a scrolled page always arrives sorted. It
+ * exists because `/_api/enterprise-orders/paginated` is a public URL and that
+ * guarantee lives in another package's client-side code — a direct request, a
+ * non-Table consumer, or a column config that loses `isPrimaryKey` would
+ * otherwise get a paginated read with no ORDER BY, which repeats and skips rows.
+ */
+export const ENTERPRISE_ORDER_FALLBACK_SORT = [
+  { columnKey: ENTERPRISE_ORDER_PRIMARY_KEY, direction: 'asc' },
+] as const satisfies readonly ColumnSort[];
 
 /** The list route the create/edit/view modals overlay and return to. */
 export const ENTERPRISE_ORDERS_PATH = '/enterprise-orders';
