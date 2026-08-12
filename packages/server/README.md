@@ -85,6 +85,16 @@ The contract a table filter UI speaks, and the mappers that translate it into
 | `to-text-query-filters.util`   | Text filter → `ilike`/`notIlike` patterns and `eq`/`neq`            |
 | `to-select-query-filters.util` | Select/multi-select → `in`/`eq`/`neq`                               |
 
+### Request sort — `@lcabrera/server/sort/*`
+
+The same boundary for sorting: the `{ columnKey, direction }` shape a paginated
+request carries, and the mapper into the `QuerySort[]` the builders consume.
+
+| Import                    | What it does                                                                                         |
+| ------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `sort.types`              | `ColumnSort` — the request-sort shape                                                                |
+| `resolve-query-sort.util` | Request sort, or a fallback when it is empty → non-empty `QuerySort[]`; refuses to yield no ORDER BY |
+
 ### Credentials — `@lcabrera/server/crypto/*`, `/tokens/*`, `/tickets/*`
 
 | Import                                | What it does                                                                  |
@@ -141,6 +151,34 @@ const rows = await selectRows<Order>({
 ```
 
 An identifier outside the list throws before any SQL is built.
+
+### Sort a page by what the request asked for
+
+A paginated request carries `{ columnKey, direction }` rules; `selectRows` wants
+`{ column, direction }`. `resolveQuerySort` renames them and substitutes your
+endpoint's default when the request sorted by nothing.
+
+```ts
+import { resolveQuerySort } from '@lcabrera/server/sort/resolve-query-sort.util';
+
+const DEFAULT_SORT = [{ columnKey: 'id', direction: 'asc' }] as const;
+
+const rows = await selectRows<Order>({
+  allowedColumns: ['id', 'country', 'total'],
+  fields: ['id', 'country'],
+  limit: 50,
+  offset: skip,
+  schema: 'sales',
+  sort: resolveQuerySort({ fallback: DEFAULT_SORT, sorting }), // ← from the request
+  table: 'orders',
+});
+```
+
+The result is never empty, and that is the reason to use it rather than a
+two-line rename. A paginated read with no ORDER BY leaves row order unspecified,
+so pages repeat and skip rows whenever the planner changes its mind between
+requests — a bug that reads as data corruption and only shows up under load. An
+empty `fallback` throws here instead of reaching the database.
 
 ### Handle a constraint violation without leaking your schema
 

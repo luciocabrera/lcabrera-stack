@@ -66,6 +66,8 @@
     "./filters/to-query-filters.util": "./src/filters/to-query-filters.util.ts",
     "./filters/to-select-query-filters.util": "./src/filters/to-select-query-filters.util.ts",
     "./filters/to-text-query-filters.util": "./src/filters/to-text-query-filters.util.ts",
+    "./sort/resolve-query-sort.util": "./src/sort/resolve-query-sort.util.ts",
+    "./sort/sort.types": "./src/sort/sort.types.ts",
     "./tickets/sign-access-ticket.util": "./src/tickets/sign-access-ticket.util.ts",
     "./tickets/is-access-ticket-valid.util": "./src/tickets/is-access-ticket-valid.util.ts",
     "./tokens/generate-api-token.util": "./src/tokens/generate-api-token.util.ts",
@@ -224,6 +226,14 @@
       "./filters/to-text-query-filters.util": {
         "types": "./dist/filters/to-text-query-filters.util.d.mts",
         "default": "./dist/filters/to-text-query-filters.util.mjs"
+      },
+      "./sort/resolve-query-sort.util": {
+        "types": "./dist/sort/resolve-query-sort.util.d.mts",
+        "default": "./dist/sort/resolve-query-sort.util.mjs"
+      },
+      "./sort/sort.types": {
+        "types": "./dist/sort/sort.types.d.mts",
+        "default": "./dist/sort/sort.types.mjs"
       },
       "./tickets/sign-access-ticket.util": {
         "types": "./dist/tickets/sign-access-ticket.util.d.mts",

@@ -141,6 +141,23 @@ See `filters/ARCHITECTURE.md`.
 
 ---
 
+## `src/sort/`
+
+The sort half of the same boundary: the request-sort shape a paginated client
+sends (`{ columnKey, direction }` — structurally `@lcabrera/api`'s
+`PaginatedSort`) and the mapper that turns it into the `QuerySort[]` the
+builders consume. Table-agnostic; reach for it instead of rewriting the rename
+in every endpoint.
+
+| Artifact           | Location                          | Description                                                                                                                       |
+| ------------------ | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `sort.types`       | `sort/sort.types.ts`              | `ColumnSort` — the `{ columnKey, direction }` request shape                                                                       |
+| `resolveQuerySort` | `sort/resolve-query-sort.util.ts` | Request sorting (or a fallback when it is empty) → non-empty `QuerySort[]`; throws rather than let a paginated read run unordered |
+
+See `sort/ARCHITECTURE.md`.
+
+---
+
 ## `src/tickets/`
 
 Reusable, DB-free **stateless capability** primitives (ADR-041). A ticket
