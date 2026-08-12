@@ -31,13 +31,18 @@ export const resolveColumnCapability = (
     typeNamespace: row.typeNamespace,
   });
 
-  return {
+  const shared = {
     aggregates: toRoleAggregates({ availableSqlNames: row.aggregates, role }),
-    canGroup: refusal === undefined,
     column: row.column,
     role,
     typeName: row.typeName,
     ...(estimate.kind === 'known' && { distinctEstimate: estimate.value }),
-    ...(refusal !== undefined && { refusal }),
   };
+
+  // Two explicit branches rather than one object with a computed `canGroup`:
+  // the type pairs the flag with its reason, so there is no shape in between
+  // for a `boolean` expression to produce.
+  return refusal === undefined
+    ? { ...shared, canGroup: true }
+    : { ...shared, canGroup: false, refusal };
 };

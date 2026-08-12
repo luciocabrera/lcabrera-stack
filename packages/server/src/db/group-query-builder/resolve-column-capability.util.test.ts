@@ -300,4 +300,29 @@ describe('resolveColumnCapability', () => {
       'countDistinct',
     ]);
   });
+
+  it.each([
+    { column: 'doc', typeCategory: 'U', typeName: 'jsonb' },
+    {
+      column: 'shape',
+      hasEquality: false,
+      typeCategory: 'G',
+      typeName: 'point',
+    },
+    { column: 'id', nDistinct: -1, typeCategory: 'S', typeName: 'text' },
+    { column: 'sku', nDistinct: 50_000, typeCategory: 'S', typeName: 'text' },
+    {
+      column: 'amount',
+      hasStats: false,
+      typeCategory: 'N',
+      typeName: 'numeric',
+    },
+  ])('always pairs a refusal with its reason, for $typeName', (overrides) => {
+    // The type makes the unpaired state unrepresentable; this pins that the
+    // producer never has to be talked into it, on one row per refusal reason.
+    const capability = resolveColumnCapability(row(overrides));
+
+    expect(capability.canGroup).toBe(false);
+    expect(capability.refusal).toBeDefined();
+  });
 });

@@ -61,15 +61,29 @@ import them directly only from within `query-builder/`.
 ### `src/db/group-query-builder/` — see its own `ARCHITECTURE.md`
 
 The pure half of grouped reads, sibling to `query-builder/` and equally
-DB-free. Today it holds the ADR-058 legality gates: `resolveColumnCapability`
-(`resolve-column-capability.util.ts`) is the entry point, composing
-`resolveAnalyticalRole` (Gate 1, from `pg_type.typcategory`),
-`buildColumnCapabilitiesQuery` (Gate 2, one bound-parameter catalogue query),
-`resolveDistinctEstimate` and `toRoleAggregates`.
+DB-free. It has two entry points, one per half.
+
+**Legality (ADR-058).** `resolveColumnCapability`
+(`resolve-column-capability.util.ts`) composes `resolveAnalyticalRole` (Gate 1,
+from `pg_type.typcategory`), `buildColumnCapabilitiesQuery` (Gate 2, one
+bound-parameter catalogue query), `resolveDistinctEstimate` and
+`toRoleAggregates`. Run it through `getColumnGroupingCapabilities` above rather
+than by hand.
+
+**Emission (ADR-059).** `buildGroupQuery` (`build-group-query.util.ts`) turns a
+`GroupQueryDescriptor` into `GROUP BY GROUPING SETS` with a variadic
+`GROUPING()` mask, and is the only export of this half. It takes the capability
+map the legality half resolved and refuses anything the catalogue turned down,
+which is how a pure function enforces ADR-058. Everything it composes
+(`expandGroupingSets`, `toGroupingSetMask`, `assertGroupKeys`,
+`assertGroupAggregates`, `assertGroupAliases`, `resolveAggregateAlias`,
+`buildAggregateProjection`, `buildGroupingSetsClause`,
+`buildGroupOrderByClause`) is a private, individually-tested implementation
+detail — import those directly only from within `group-query-builder/`.
+
 `group-query-builder.constants.ts` holds every constant the folder owns —
-including the closed `AggregateFn` → SQL map — and
-`group-query-builder.types.ts` holds the shared types. Run it through
-`getColumnGroupingCapabilities` above rather than by hand.
+including the closed `AggregateFn` → SQL map, the depth cap and the identifier
+limit — and `group-query-builder.types.ts` holds the shared types.
 
 ---
 
