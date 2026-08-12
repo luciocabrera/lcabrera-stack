@@ -1,6 +1,7 @@
 import { getRowsCount } from '@lcabrera/server/db/get-rows-count.util';
 import { selectRows } from '@lcabrera/server/db/select-rows.util';
 import { toQueryFilters } from '@lcabrera/server/filters/to-query-filters.util';
+import { resolveQuerySort } from '@lcabrera/server/sort/resolve-query-sort.util';
 
 import type { DbRow, SortRule } from '../../types/api.types.js';
 import type {
@@ -9,7 +10,6 @@ import type {
   EnterpriseOrdersResponse,
 } from './enterpriseOrders.types.js';
 
-import { resolveSortRules } from '../../utils/resolveSortRules.util.js';
 import {
   DEFAULT_ENTERPRISE_ORDER_SORTING,
   ENTERPRISE_ORDER_COLUMNS,
@@ -76,8 +76,8 @@ export const createEnterpriseOrdersRepository =
         filters: queryFilters,
         limit,
         offset: skip,
-        sort: resolveSortRules({
-          fallbackSorting: DEFAULT_ENTERPRISE_ORDER_SORTING,
+        sort: resolveQuerySort({
+          fallback: DEFAULT_ENTERPRISE_ORDER_SORTING,
           sorting,
         }),
       });

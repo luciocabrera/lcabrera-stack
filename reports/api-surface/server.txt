@@ -150,6 +150,13 @@ ToSelectQueryFiltersArgs [type] { readonly column: string; readonly filter: Sele
 toTextQueryFilters [const] ({ column, filter }: ToTextQueryFiltersArgs) => readonly QueryFilter[]
 ToTextQueryFiltersArgs [type] { readonly column: string; readonly filter: TextFilter; }
 
+## ./sort/resolve-query-sort.util
+resolveQuerySort [const] ({ fallback, sorting }: ResolveQuerySortArgs) => readonly QuerySort[]
+ResolveQuerySortArgs [type] { /** Applied when `sorting` is empty. Must itself be non-empty. */ readonly fallback: readonly ColumnSort[]; /** The sort the request asked for; empty when it asked for none. */ readonly sorting: readonly ColumnSort[]; }
+
+## ./sort/sort.types
+ColumnSort [type] { readonly columnKey: string; readonly direction: 'asc' | 'desc'; }
+
 ## ./tickets/is-access-ticket-valid.util
 isAccessTicketValid [const] ({ now, secret, subject, ticket }: VerifyAccessTicketArgs) => boolean
 
