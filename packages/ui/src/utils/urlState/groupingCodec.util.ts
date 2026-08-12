@@ -31,7 +31,7 @@ const narrowCompactGrouping = (parsed: unknown) => {
   const entries = Object.entries(parsed);
   const [entry] = entries;
 
-  if (entry === undefined || entry[0] !== 'keys' || entries.length !== 1) {
+  if (entry?.[0] !== 'keys' || entries.length !== 1) {
     return;
   }
 
