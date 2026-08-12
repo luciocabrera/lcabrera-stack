@@ -62,9 +62,23 @@ export const parseRenameDiff = (output) =>
  * it. A file that only moved between directories keeps its basename resolving,
  * so only its root-anchored path went stale — which `docs:verify` already
  * checks.
+ *
+ * `renames` is applied to `trackedPaths` before the live set is taken, because
+ * the two arrive from different snapshots: the caller diffs the working tree but
+ * lists the index. Half-stage a rename — new path added, old one not yet removed
+ * from the index — and the old basename still looks live, so the rename is
+ * skipped and the gate reports a pass it did not earn. Rebuilding the "after"
+ * set here makes both sides describe the same tree. (Diffing `--cached` instead
+ * would not do it: in that same half-staged state git sees no rename at all.)
  */
 export const vanishedNames = ({ renames, trackedPaths }) => {
-  const live = new Set(trackedPaths.map((filePath) => basenameOf(filePath)));
+  const renamedAway = new Set(renames.map((rename) => rename.from));
+  const live = new Set(
+    [
+      ...trackedPaths.filter((filePath) => !renamedAway.has(filePath)),
+      ...renames.map((rename) => rename.to),
+    ].map((filePath) => basenameOf(filePath)),
+  );
   const byName = new Map(
     renames
       .map((rename) => ({

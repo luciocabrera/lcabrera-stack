@@ -69,7 +69,9 @@ const mergeBaseWith = (baseRef) => {
       [
         `Rename-mention gate: cannot resolve a merge base with '${baseRef}'.`,
         '  The ref is missing or unfetched. In CI use actions/checkout with',
-        "  fetch-depth: 0; locally run 'git fetch origin main'.",
+        `  fetch-depth: 0; locally fetch that ref — 'git fetch origin' brings`,
+        '  every branch. The base is --base, else TEST_CHANGED_BASE, else',
+        '  origin/main.',
         '  Refusing to continue: an unresolved base would check nothing.',
       ].join('\n'),
     );
