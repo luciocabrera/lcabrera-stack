@@ -47,3 +47,4 @@ or run `vp run adr:new`, which takes the next free number for you.
 | [ADR-058](./ADR-058-grouping-legality-by-analytical-role.md)          | Gate grouping legality on analytical role, with the Postgres catalogue as the floor                                      |
 | [ADR-059](./ADR-059-aggregation-is-builder-generated.md)              | Generate aggregation in a sibling builder that always emits GROUPING SETS                                                |
 | [ADR-060](./ADR-060-source-shipping-package-module-resolution.md)     | A source-shipping package resolves its internals through `imports`, and exports a curated list                           |
+| [ADR-061](./ADR-061-grouping-config-in-url-expansion-in-store.md)     | Grouping configuration is URL state; expansion is client state                                                           |
