@@ -2,7 +2,7 @@
 id: release-gate-per-package
 title: Scope the release publish gate per package
 owner: agent:claude
-status: active
+status: review
 branch: fix/620-release-gate-per-package
 area:
   - .github/workflows/release.yml
@@ -10,7 +10,7 @@ area:
 started: 2026-08-12
 updated: 2026-08-12
 plan: (none)
-pr: (none)
+pr: 622
 issue: #620
 ---
 
@@ -20,6 +20,6 @@ Scope the release publish gate per package
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: PR #622 ready for review; full quality gate green
 - Blockers: none
-- Next:
+- Next: review + merge. The composed publish path is unexercised until the first real release — watch it.
