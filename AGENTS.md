@@ -135,6 +135,13 @@ Selection guideline:
   verifier subagent certifies it from the diff and the criteria alone, never the
   builder's reasoning. The standard it enforces is
   [`docs/agents/refactor-verified-contract.md`](docs/agents/refactor-verified-contract.md).
+- **Driving a whole epic to merged?** Use `epic` (`/epic <n>`) — the epic-scale
+  form of the above, not a replacement for it. It maps the dependency graph,
+  dispatches the same builder per issue in waves of at most three, runs the same
+  blind verifier per PR alongside Copilot's review, and holds the merge bar. Its
+  contract is [`docs/agents/epic-orchestration.md`](docs/agents/epic-orchestration.md),
+  which is deliberately epic-agnostic: the live state of any one epic belongs on
+  that epic's issue, never in the contract.
 
 ---
 
