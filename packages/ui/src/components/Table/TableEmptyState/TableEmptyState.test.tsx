@@ -227,6 +227,41 @@ describe('TableEmptyState', () => {
 
       expect(screen.getByRole('button', { name: 'Retry' })).not.toBeNull();
     });
+
+    it('blames no column when a key combination is what was refused', () => {
+      // `estimate-too-large` names the **widest** key, not the one just picked,
+      // so a heading built from it would tell a user who added a third column
+      // that the first was refused. Clearing is still the way out.
+      useGetTableDataErrorMock.mockReturnValue({
+        column: 'delivery_date',
+        estimatedRows: 73_600,
+        kind: 'grouping-refused',
+        message:
+          'This grouping is estimated to return 73600 rows, past the 50000 ceiling. Column "delivery_date" is the widest group key at 736 distinct values — drop it or filter it down.',
+        reason: 'estimate-too-large',
+      });
+      useGetTableGroupingKeysMock.mockReturnValue([
+        'delivery_date',
+        'shipping_cost',
+        'is_gift',
+      ]);
+      useGetNormalizedColumnMock.mockReturnValue({
+        key: 'delivery_date',
+        label: 'Delivery Date',
+      });
+
+      renderInTable(<TableEmptyState />);
+
+      expect(screen.getByRole('heading').textContent).toBe(
+        'This grouping was refused',
+      );
+      expect(
+        screen.getByText((text) => text.includes('widest group key')),
+      ).not.toBeNull();
+      expect(
+        screen.getByRole('button', { name: 'Clear grouping' }),
+      ).not.toBeNull();
+    });
   });
 
   it('surfaces a cancelled read without offering to clear a grouping', () => {

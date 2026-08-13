@@ -3,6 +3,7 @@
 import type { TableColumnGroupingCapability } from '@lcabrera/ui/components/Table/Table.types';
 
 import { closePool } from '@lcabrera/server/db/get-pool.util';
+import { MAX_GROUP_ROWS_REFUSE } from '@lcabrera/server/db/group-query-builder/group-query-builder.constants';
 import { NotificationProvider } from '@lcabrera/ui/contexts/NotificationContext';
 import { act, cleanup, render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
@@ -204,6 +205,70 @@ describe.skipIf(!IS_SMOKE_ENABLED)(
       expect(
         screen.queryByText(/No records match the current view/),
       ).toBeNull();
+    });
+
+    it('refuses a legal-per-column combination on its row bound, naming the widest key', async () => {
+      // Every key here passes the per-column gate, so the menu offers all three
+      // and this refusal is one no client-side gate could have predicted — the
+      // bound is the product, which belongs to no single column. That is why
+      // suppressing menu entries cannot be the whole answer (ADR-067).
+      //
+      // The keys are chosen from the **live** estimates, widest first, so the
+      // key the endpoint names is deliberately *not* the one added last.
+      const byWidth = [...allowedKeys].toSorted(
+        (a, b) =>
+          (capabilities[b]?.distinctEstimate ?? 0) -
+          (capabilities[a]?.distinctEstimate ?? 0),
+      );
+      const keys = [byWidth[0] ?? '', byWidth[1] ?? '', byWidth.at(-1) ?? ''];
+      const bound = keys.reduce(
+        (product, key) => product * (capabilities[key]?.distinctEstimate ?? 1),
+        1,
+      );
+
+      // Preconditions, asserted rather than assumed: three distinct keys the
+      // catalogue accepts individually, whose product clears the ceiling. If
+      // the fixture ever changes so it does not, this fails here rather than
+      // turning the assertions below into a test of nothing.
+      expect(new Set(keys).size).toBe(3);
+      expect(bound).toBeGreaterThan(MAX_GROUP_ROWS_REFUSE);
+
+      const loaderData = await loadRoute(keys);
+      const response = await loaderData.dataPromise;
+
+      expect(response.error?.kind).toBe('grouping-refused');
+
+      const error = response.error;
+
+      if (error?.kind !== 'grouping-refused')
+        throw new Error('expected a grouping refusal');
+
+      expect(error.reason).toBe('estimate-too-large');
+      expect(error.estimatedRows).toBeGreaterThan(MAX_GROUP_ROWS_REFUSE);
+      // The widest key, which is the actionable one — and *not* the key added
+      // last, which is the surprise this pins.
+      expect(error.column).toBe(keys[0]);
+      expect(error.column).not.toBe(keys.at(-1));
+
+      await renderRoute(loaderData);
+
+      // So the heading must not say "Grouping by <widest> was refused": that
+      // column was already applied and is legal on its own. The endpoint's
+      // sentence still names it, in the role it actually plays.
+      expect(
+        screen.getByRole('heading', { name: 'This grouping was refused' }),
+      ).not.toBeNull();
+      expect(
+        screen.queryByRole('heading', {
+          name: (name) => name.startsWith('Grouping by '),
+        }),
+      ).toBeNull();
+      expect(
+        screen.getByText((text) => text.includes('widest group key')),
+      ).not.toBeNull();
+      expect(
+        screen.getByRole('button', { name: 'Clear grouping' }),
+      ).not.toBeNull();
     });
 
     it('ships the catalogue verdict to the client for every offered column', async () => {

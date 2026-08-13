@@ -33,6 +33,14 @@ type ResolveGroupKeyAvailabilityArgs<TData> = {
  * *aggregate* menu reads absence — there, nothing offered means nothing legal,
  * because an aggregate is only ever legal by the catalogue's say-so.
  *
+ * **The consumer's opt-out is checked first, and carries no reason.** A column
+ * declared `isGroupable: false` is unavailable because the table said so, which
+ * is a different fact from the database refusing it — and both can be true at
+ * once. Reporting the catalogue's reason there would attribute the table's own
+ * decision to the endpoint, and hand the user a sentence about distinct values
+ * for a column that was never going to be on the menu. `undefined` is the
+ * honest answer: the endpoint said nothing, and there is nothing to act on.
+ *
  * It cannot promise the read will succeed. The pre-flight row bound is a
  * property of the whole key combination rather than of any one column, and
  * statistics go stale, so a key that passes here can still be refused when the
@@ -44,8 +52,10 @@ export const resolveGroupKeyAvailability = <TData>({
 }: ResolveGroupKeyAvailabilityArgs<TData>) => {
   const { isGroupable } = resolveColumnCapabilities(column);
 
+  if (!isGroupable) return { isGroupable: false, refusal: undefined };
+
   if (capability?.canGroup === false)
     return { isGroupable: false, refusal: capability.refusal };
 
-  return { isGroupable, refusal: undefined };
+  return { isGroupable: true, refusal: undefined };
 };

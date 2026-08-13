@@ -40,12 +40,13 @@ title is store-driven and both branches read what they need for themselves.
 
 `toTableEmptyStateNotice` maps the read's outcome to `{ message, title }`:
 
-| Outcome                    | Heading                            | Sentence           |
-| -------------------------- | ---------------------------------- | ------------------ |
-| no error                   | the table's singular title         | the filters nudge  |
-| `grouping-refused`         | `Grouping by <column> was refused` | the endpoint's own |
-| `db-canceled`              | `This query took too long`         | the endpoint's own |
-| `db-failed` / `unexpected` | `This table could not be loaded`   | the endpoint's own |
+| Outcome                                     | Heading                            | Sentence           |
+| ------------------------------------------- | ---------------------------------- | ------------------ |
+| no error                                    | the table's singular title         | the filters nudge  |
+| `grouping-refused` + `column-not-groupable` | `Grouping by <column> was refused` | the endpoint's own |
+| `grouping-refused` + any other reason       | `This grouping was refused`        | the endpoint's own |
+| `db-canceled`                               | `This query took too long`         | the endpoint's own |
+| `db-failed` / `unexpected`                  | `This table could not be loaded`   | the endpoint's own |
 
 **The heading is the table's, the sentence is the endpoint's**, and neither can
 be written by the other. Only the endpoint knows why it refused — the catalogue
@@ -53,9 +54,26 @@ rule, the estimate, the threshold — and it has already vetted that text for
 anything a client may not see (ADR-050). Only the table knows what the user
 calls the column: the refusal names `total_amount`, the header said "Total
 Amount". `<column>` is that label, falling back to the raw key when this table
-declares no column by that name, and the heading drops the name entirely for a
-refusal about the key combination rather than one column (`too-many-keys`,
-`estimate-too-large` with no widest key).
+declares no column by that name.
+
+**Only `column-not-groupable` may name the column**, because it is the one
+refusal whose column _is_ the group key that was refused. Every other reason
+names a column in a different role, and "Grouping by X was refused" would be a
+false sentence about each:
+
+- `estimate-too-large` names the **widest** key — the one worth dropping, which
+  is usually _not_ the one just picked. A user who adds a third column would
+  otherwise be told the first was refused, about a column that was already
+  applied and is legal on its own.
+- `aggregate-not-legal` names an _aggregated_ column, which need not be a group
+  key at all.
+- `unknown-column` is raised for a group key and for an aggregated column alike,
+  so the payload cannot tell the two apart.
+- `too-many-keys`, `duplicate-keys`, `no-keys` and `row-limit-reached` name no
+  column in the first place.
+
+Those keep the neutral heading and let the endpoint's sentence carry the column
+in the role it actually plays — which each of those messages already does.
 
 ## Design Decision — Which recovery is offered
 

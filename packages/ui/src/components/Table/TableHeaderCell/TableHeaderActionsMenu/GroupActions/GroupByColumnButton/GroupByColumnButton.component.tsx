@@ -37,7 +37,9 @@ import type { GroupByColumnButtonProps } from './GroupByColumnButton.types';
  * table declares `isGroupable` — so an item built from the declaration alone
  * offers keys the query then rejects. A refused column is disabled here and
  * says why in its `title`, which is the difference between an affordance a user
- * can rule out before clicking and one that empties the table.
+ * can rule out before clicking and one that empties the table. `title` and
+ * `isDisabled` are gated on the **same** condition, so the explanation can never
+ * appear on a control that is about to do something else.
  *
  * Disabling is never applied to a key that is **already applied**, at the depth
  * cap or under a refusal: a click on an applied key removes it, and a URL can
@@ -89,9 +91,15 @@ export const GroupByColumnButton = <TData,>({
       size='mini'
       // The reason rides the disabled item rather than a tooltip: a disabled
       // button fires no pointer events, so a tooltip on one never opens.
-      {...(refusal !== undefined && {
-        title: `Cannot group by this column: ${TABLE_GROUP_KEY_REFUSAL_LABELS[refusal]}.`,
-      })}
+      //
+      // Gated on `!isEnabled` and not merely on the refusal: an applied key is
+      // still clickable under one, and there the click **removes** the
+      // grouping. "Cannot group by this column" on a control about to ungroup
+      // would describe an action the user is not taking.
+      {...(refusal !== undefined &&
+        !isEnabled && {
+          title: `Cannot group by this column: ${TABLE_GROUP_KEY_REFUSAL_LABELS[refusal]}.`,
+        })}
       variant={isActive ? 'primary' : 'ghost'}
     >
       {label}

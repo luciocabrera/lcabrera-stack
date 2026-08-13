@@ -56,6 +56,19 @@ describe('resolveGroupKeyAvailability', () => {
     ).toEqual({ isGroupable: false, refusal: undefined });
   });
 
+  it('reports no reason for a consumer opt-out the catalogue also refuses', () => {
+    // Both facts are true at once, and they are different facts. Forwarding the
+    // catalogue's reason here would attribute the table's own decision to the
+    // endpoint, and hand the user a sentence about distinct values for a column
+    // that was never going to be on the menu.
+    expect(
+      resolveGroupKeyAvailability<Row>({
+        capability: refused,
+        column: { ...column, isGroupable: false },
+      }),
+    ).toEqual({ isGroupable: false, refusal: undefined });
+  });
+
   it('allows a column both gates accept', () => {
     expect(
       resolveGroupKeyAvailability<Row>({ capability: allowed, column }),

@@ -68,14 +68,24 @@ still a menu whose selections can be refused.
    `TableEmptyStateMessage` composes the heading from the table's own column
    label and the sentence from the endpoint, and `TableEmptyStateAction` offers
    **Clear grouping** in place of **Retry** when the refusal is a grouping one,
-   because revalidating sends the same keys and is refused again.
-3. **The catalogue narrows the declared answer everywhere a group key is
+   because revalidating sends the same keys and is refused again. A cancelled or
+   failed read keeps Retry — those can succeed on a second attempt.
+3. **The heading names the column only when the column _is_ the refused key** —
+   that is, for `column-not-groupable` alone. `estimate-too-large` names the
+   **widest** key rather than the one just picked, `aggregate-not-legal` names an
+   aggregated column, and `unknown-column` is raised for both roles, so
+   "Grouping by X was refused" would be a false sentence about each. Those take a
+   neutral heading and let the endpoint's sentence carry the column in its real
+   role.
+4. **The catalogue narrows the declared answer everywhere a group key is
    offered.** `resolveGroupKeyAvailability` composes `resolveColumnCapabilities`
    with the shipped capability: a column the catalogue refused is not offered,
-   and the reason rides the disabled header-menu item. An **absent** capability
-   leaves the declared answer standing — a route may group without shipping a
-   map at all.
-4. **A refused key that is already applied stays removable.** Neither the depth
+   and the reason rides the disabled header-menu item, gated on the same
+   condition that disables it. An **absent** capability leaves the declared
+   answer standing — a route may group without shipping a map at all — and a
+   **consumer opt-out wins with no reason attached**, since `isGroupable: false`
+   is the table's own decision rather than anything the endpoint said.
+5. **A refused key that is already applied stays removable.** Neither the depth
    cap nor a refusal disables the header item when clicking it would _remove_ the
    key, because a URL can seed a grouping the catalogue refuses today.
 
@@ -83,7 +93,10 @@ The behaviour is proved against the live catalogue, not a mocked map:
 `groupingRefusalSurface.smoke.test.tsx` resolves the real capabilities, asserts
 both a refused and a legal column exist, drives the route's real `loader` for
 every refused column and asserts its `dataPromise` **resolves**, then renders the
-real route component and asserts the refusal is on screen naming the column.
+real route component and asserts the refusal is on screen naming the column. It
+also builds a **multi-key** grouping from the live estimates — every key legal on
+its own, the product past the ceiling — which is the refusal no client-side gate
+could have predicted, and pins that its heading blames no column.
 
 ## Consequences
 

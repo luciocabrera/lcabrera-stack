@@ -14,7 +14,15 @@ the table's own column label over the endpoint's own sentence: _Grouping by Tota
 Amount was refused — Column "total_amount" is not a legal group key:
 too-many-distinct._ The recovery offered follows the same fact: **Clear
 grouping** for a refused grouping, since revalidating sends the same keys and is
-refused again, and **Retry** otherwise.
+refused again, and **Retry** otherwise — a cancelled or failed read can succeed
+on a second attempt.
+
+The heading names the column only for `column-not-groupable`, the one refusal
+whose column _is_ the refused group key. A refusal on the estimated row bound
+names the **widest** key rather than the one just picked, an illegal aggregate
+names an aggregated column, and `unknown-column` covers both roles — so those get
+_This grouping was refused_, and the endpoint's sentence names the column in the
+role it actually plays.
 
 **The grouping menus narrow to the catalogue.** `TableColumn.isGroupable`
 defaults to `true` and is the consumer's declaration; whether a column can
@@ -24,7 +32,10 @@ statistics, which the loader already ships on
 settings drawer's add-key list now resolve both through the new
 `resolveGroupKeyAvailability`, so a refused column is disabled (with the reason in
 its `title`) or left out rather than offered. An **absent** capability leaves the
-declared answer standing, so a route that ships no capability map is unaffected.
+declared answer standing, so a route that ships no capability map is unaffected —
+and a **consumer opt-out wins with no reason attached**, because
+`isGroupable: false` is the table's own decision rather than anything the
+endpoint said.
 
 A key that is already applied stays removable from the header menu — under a
 refusal and at the depth cap alike — because a URL can seed a grouping the
