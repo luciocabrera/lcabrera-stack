@@ -9,27 +9,27 @@ import {
   SidePanelSectionHeader,
 } from '#ui/components/SidePanel';
 import { useGetColumns } from '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
-import { useSetTableGroupKeys } from '#ui/components/Table/contexts/TableConfig/grouping/actions';
-import { useGetTableGroupingKeys } from '#ui/components/Table/contexts/TableConfig/grouping/selectors';
 import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
 
 import type { ActiveGroupKeyListProps } from './ActiveGroupKeyList.types';
 
+import { useSetGroupKeys } from '../../TableDrawerContext/actions';
+import { useGetGroupingKeys } from '../../TableDrawerContext/selectors';
 import { GroupingSectionToolbar } from '../GroupingSectionToolbar';
 import { toGroupKeyItems } from '../utils';
 import { styles } from './ActiveGroupKeyList.stylex';
 import { GroupKeyItemContent } from './GroupKeyItemContent';
 
 /**
- * The applied group keys, in nesting order, with drag-to-reorder and per-key
+ * The staged group keys, in nesting order, with drag-to-reorder and per-key
  * removal.
  *
  * Reordering is a real edit rather than a view preference: the order is the
  * grouped query's nesting order, so dragging a key changes the question the
- * table answers — which is why every drop writes through the grouping action
- * and re-runs the loader rather than sorting a local list.
+ * table answers. It is staged like every other drawer edit and applied on
+ * Accept, so a drag costs no loader run of its own.
  *
- * A self-connected delegate: it reads the applied keys and the route's columns
+ * A self-connected delegate: it reads the staged keys and the route's columns
  * from their stores itself, so the section shell above it forwards only
  * `isBusy`.
  */
@@ -37,8 +37,8 @@ export const ActiveGroupKeyList = ({
   isBusy = false,
 }: ActiveGroupKeyListProps) => {
   const columns = useGetColumns();
-  const groupingKeys = useGetTableGroupingKeys();
-  const setGroupKeys = useSetTableGroupKeys();
+  const groupingKeys = useGetGroupingKeys();
+  const setGroupKeys = useSetGroupKeys();
 
   const groupKeyItems = toGroupKeyItems({ columns, keys: groupingKeys });
 

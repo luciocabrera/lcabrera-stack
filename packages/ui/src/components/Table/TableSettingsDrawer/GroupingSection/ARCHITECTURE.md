@@ -1,30 +1,47 @@
 # GroupingSection Architecture
 
-The settings drawer's Grouping tab: the applied group keys in nesting order,
-the selected aggregates, and the controls to add either.
+The settings drawer's Grouping tab: the staged group keys in nesting order,
+the staged aggregates, and the controls to add either.
 
 Rendered only where the route declared `isGroupingEnabled` on its loader `meta`
 ([ADR-063](../../../../../../../docs/decisions/ADR-063-request-shaping-capabilities-on-the-loader-meta.md)).
 Absent means off, so a table whose endpoint cannot group has no Grouping tab at
 all.
 
-## The one deliberate departure from its siblings
+## Staged like every other section, committed differently
 
-Every other drawer section edits a **draft** — `TableDrawerContext` seeds a copy
-of the columns store and `useBatchSetTableDrawerSettings` commits the lot on
-Accept. This section writes through the **live** grouping store instead.
+Every control here writes the drawer's grouping **draft**, and Accept commits
+it. That is the same contract the sorting, filters and columns sections keep —
+`TableDrawerContext` seeds the drafts when the drawer opens, edits accumulate
+there, Accept commits and Cancel discards.
 
-The draft exists so a batch of cookie-persisted column state commits in one
-write. Grouping is URL state
-([ADR-061](../../../../../../../docs/decisions/ADR-061-grouping-config-in-url-expansion-in-store.md)):
-every change writes the `grouping` search param through the persist-cookie flow
-and the resulting redirect re-runs the loader, because the configuration decides
-what SQL the route emits. Drafting it would mean the drawer showed a grouping
-the table was not showing — for a control that restates the query, a worse trade
-than a navigation per edit.
+What differs is the commit, not the staging. Column state is cookie-persisted;
+grouping is URL state
+([ADR-061](../../../../../../../docs/decisions/ADR-061-grouping-config-in-url-expansion-in-store.md)),
+so committing it writes the `grouping` search param and the resulting redirect
+re-runs the loader, because the configuration decides what SQL the route emits.
+So grouping is a **second store** on `TableDrawerContext` rather than a slice of
+the columns draft, and `useBatchSetTableSettings` carries both.
 
-The consequence to know: **each edit here is a navigation**, the same as a click
-in the column header menu.
+**Accept is one navigation, whatever was staged.** Both commits ride in a single
+`persistTableState` call, which matters for a reason that is easy to miss:
+column state and grouping submit through the same `persist-table-state` fetcher
+key, and `router.fetch` aborts a key's in-flight request before starting the
+next — two calls would cancel one commit and cost two navigations for the half
+that survived. `GroupingSection.test.tsx` asserts the count across a multi-edit
+sequence, because asserting the resulting grouping alone passes under the
+per-edit behaviour this replaced.
+
+The **column-header grouping menu is the surface that still applies
+immediately**, and legitimately: it is a direct action with no Accept to wait
+for. Its actions live in `TableConfig/grouping/actions`; the drawer's staged
+twins live in `TableDrawerContext/actions` and resolve through the same
+`applyGroupingReducer`, so the drawer cannot stage a configuration Accept would
+then refuse.
+
+This reverses the live-write departure #568 introduced ([#654](https://github.com/luciocabrera/vite-react-compiler/issues/654)):
+a Cancel button that did not cancel is a correctness problem, and batching turns
+N loader round trips into one.
 
 ## File Structure
 
@@ -32,17 +49,18 @@ in the column header menu.
 GroupingSection/
 ├── ARCHITECTURE.md
 ├── GroupingSection.component.tsx       → Shell: add-key, overlay, lists, toolbar
+├── GroupingSection.test.tsx            → Staging + navigation-count integration test
 ├── GroupingSection.types.ts            → GroupingSectionProps, GroupKeyItem
 ├── index.ts
 ├── AddGroupKeySection/                 → VirtualSelect for adding a group key
-├── ActiveGroupKeyList/                 → DraggableList of applied keys
+├── ActiveGroupKeyList/                 → DraggableList of staged keys
 │   └── GroupKeyItemContent/            → One key row: level, label, remove
 ├── AddAggregateSection/                → Column select → legal-function select
-├── ActiveAggregateList/                → Selected aggregates, each removable
+├── ActiveAggregateList/                → Staged aggregates, each removable
 ├── GroupingSectionToolbar/             → Clear grouping (toolbar + footer)
 └── utils/
-    ├── toGroupKeyItems.util.ts         → Applied keys + labels, in nesting order
-    ├── toAggregateItems.util.ts        → Selected aggregates + labels, column order
+    ├── toGroupKeyItems.util.ts         → Staged keys + labels, in nesting order
+    ├── toAggregateItems.util.ts        → Staged aggregates + labels, column order
     └── toAggregatableColumnOptions.util.ts → Columns the catalogue can aggregate
 ```
 
@@ -50,9 +68,10 @@ GroupingSection/
 
 ```mermaid
 flowchart TD
-  A["Loader meta<br/>groupingKeys / groupingAggregates / groupingCapabilities"] --> B["metaStore + groupingStore"]
-  B --> C["useGetTableGroupingKeys"]
-  B --> D["useGetTableGroupingAggregates"]
+  A["Loader meta<br/>groupingKeys / groupingAggregates / groupingCapabilities"] --> B["metaStore + groupingStore (live)"]
+  B -->|"seeded when the drawer opens"| B2["TableDrawerContext groupingStore (draft)"]
+  B2 --> C["useGetGroupingKeys"]
+  B2 --> D["useGetGroupingAggregates"]
   B --> E["useGetTableGroupingCapabilities"]
 
   C --> F["ActiveGroupKeyList"]
@@ -61,28 +80,36 @@ flowchart TD
   E --> I["AddAggregateSection"]
   E --> G
 
-  F -->|reorder / remove| J["useSetTableGroupKeys"]
-  G -->|add| K["useToggleTableGroupKey"]
-  H -->|remove| L["useSetTableColumnAggregate"]
+  F -->|reorder / remove| J["useSetGroupKeys"]
+  G -->|add| K["useToggleGroupKey"]
+  H -->|remove| L["useSetColumnAggregate"]
   I -->|add| L
-  M["GroupingSectionToolbar"] -->|clear| N["useClearTableGrouping"]
+  M["GroupingSectionToolbar"] -->|clear| N["useClearGrouping"]
 
-  J --> O["useSetTableGrouping (internal)"]
+  J --> O["useSetGrouping (internal)"]
   K --> O
   L --> O
   N --> O
   O --> P["resolveTableGroupingUpdate<br/>(depth cap, unchanged check)"]
-  P -->|updated| Q["persist-cookie → redirect → loader re-runs"]
+  P -->|updated| B2
+
+  R["Footer Accept"] --> S["useBatchSetTableDrawerSettings"]
+  S --> T["useBatchSetTableSettings<br/>(columns + grouping, one call)"]
+  T --> U["one persist-cookie → redirect → loader re-runs"]
+  V["Footer Cancel"] --> W["useResetTableSettings<br/>(re-seeds both drafts, no navigation)"]
+  W --> B2
 ```
 
 ## Where each answer comes from
 
-| Question                               | Answered by                                      | Not by                              |
-| -------------------------------------- | ------------------------------------------------ | ----------------------------------- |
-| May this column be a group key at all? | `resolveColumnCapabilities(column).isGroupable`  | the catalogue (that is #642's half) |
-| Which aggregates may this column take? | `metaState.groupingCapabilities[key].aggregates` | `TableColumn.dataType` (#550)       |
-| How many keys may be applied?          | `MAX_TABLE_GROUP_KEYS`                           | anything local to a component       |
-| Is this configuration a change at all? | `resolveTableGroupingUpdate`                     | the component                       |
+| Question                                | Answered by                                        | Not by                                |
+| --------------------------------------- | -------------------------------------------------- | ------------------------------------- |
+| May this column be a group key at all?  | `resolveColumnCapabilities(column).isGroupable`    | the catalogue (that is #642's half)   |
+| Which aggregates may this column take?  | `metaState.groupingCapabilities[key].aggregates`   | `TableColumn.dataType` (#550)         |
+| How many keys may be applied?           | `MAX_TABLE_GROUP_KEYS`                             | anything local to a component         |
+| Is this configuration a change at all?  | `resolveTableGroupingUpdate`                       | the component                         |
+| What grouping is the section showing?   | `TableDrawerContext`'s `groupingStore` (the draft) | the live `TableConfig` grouping store |
+| What grouping is the **table** showing? | `TableConfig`'s `groupingStore`                    | the draft, until Accept commits it    |
 
 `TableColumn.dataType` is a five-member presentation vocabulary that reports
 `numeric`, `jsonb` and `point` alike as `string`, so a menu built from it offers
@@ -99,7 +126,9 @@ settled; the aggregate lists here read the catalogue's per-column answer instead
 - `GroupByColumnButton` (header menu) disables adding at the cap;
 - `resolveTableGroupingUpdate` **refuses** a longer list, whole rather than
   truncated — truncating would group by a prefix of what was asked for and
-  answer a different question in silence.
+  answer a different question in silence. Both write paths run it, the staged
+  one and the live one, so the drawer refuses at the cap exactly where the
+  commit would.
 
 The cap is one of two key-list invariants, both checked by `areGroupKeysLegal`
 and both refused whole: the other is that no key repeats. `getInitialGroupingState`

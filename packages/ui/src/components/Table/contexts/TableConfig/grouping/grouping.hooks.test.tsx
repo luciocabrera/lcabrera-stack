@@ -55,10 +55,8 @@ vi.mock(
 
 import { useClearTableGrouping } from './actions/useClearTableGrouping.hook';
 import { useSetTableColumnAggregate } from './actions/useSetTableColumnAggregate.hook';
-import { useSetTableGroupKeys } from './actions/useSetTableGroupKeys.hook';
 import { useToggleTableGroupKey } from './actions/useToggleTableGroupKey.hook';
 import { useGetTableColumnAggregate } from './selectors/useGetTableColumnAggregate.hook';
-import { useGetTableGroupingAggregates } from './selectors/useGetTableGroupingAggregates.hook';
 import { useGetTableGroupingKeys } from './selectors/useGetTableGroupingKeys.hook';
 import { useGroupingStore } from './useGroupingStore.hook';
 
@@ -95,12 +93,9 @@ describe('TableConfig grouping hooks', () => {
     ]);
   });
 
-  it('exposes the applied aggregates, whole and per column', () => {
+  it('exposes the aggregate applied to one column', () => {
     storesRef.groupingStore.set({ aggregates: { total_amount: 'sum' } });
 
-    expect(
-      renderHook(() => useGetTableGroupingAggregates()).result.current,
-    ).toEqual({ total_amount: 'sum' });
     expect(
       renderHook(() => useGetTableColumnAggregate('total_amount')).result
         .current,
@@ -175,22 +170,6 @@ describe('TableConfig grouping hooks', () => {
     expect(persistTableState).not.toHaveBeenCalled();
   });
 
-  it('reorders the key list through the drawer action', () => {
-    storesRef.groupingStore.set({ keys: ['a', 'b'] });
-
-    const { result } = renderHook(() => useSetTableGroupKeys());
-
-    act(() => {
-      result.current(['b', 'a']);
-    });
-
-    expect(storesRef.groupingStore.get().keys).toStrictEqual(['b', 'a']);
-    expect(persistTableState).toHaveBeenCalledWith({
-      searchParamKey: 'grouping',
-      searchParamValue: '{"keys":["b","a"]}',
-    });
-  });
-
   it('applies and clears a column aggregate', () => {
     storesRef.groupingStore.set({ keys: ['order_status'] });
 
@@ -246,12 +225,15 @@ describe('TableConfig grouping hooks', () => {
   });
 
   it('issues no navigation when the requested state is already applied', () => {
-    storesRef.groupingStore.set({ keys: ['order_status'] });
+    storesRef.groupingStore.set({
+      aggregates: { total_amount: 'sum' },
+      keys: ['order_status'],
+    });
 
-    const { result } = renderHook(() => useSetTableGroupKeys());
+    const { result } = renderHook(() => useSetTableColumnAggregate());
 
     act(() => {
-      result.current(['order_status']);
+      result.current({ columnKey: 'total_amount', fn: 'sum' });
     });
 
     expect(persistTableState).not.toHaveBeenCalled();

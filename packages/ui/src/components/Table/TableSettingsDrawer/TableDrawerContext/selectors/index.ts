@@ -3,3 +3,5 @@ export { useGetColumnOrder } from './useGetColumnOrder.hook';
 export { useGetColumnPinning } from './useGetColumnPinning.hook';
 export { useGetColumnsSorting } from './useGetColumnsSorting.hook';
 export { useGetColumnVisibility } from './useGetColumnVisibility.hook';
+export { useGetGroupingAggregates } from './useGetGroupingAggregates.hook';
+export { useGetGroupingKeys } from './useGetGroupingKeys.hook';

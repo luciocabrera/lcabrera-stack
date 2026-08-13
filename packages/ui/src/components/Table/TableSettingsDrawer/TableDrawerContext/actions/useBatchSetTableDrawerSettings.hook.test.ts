@@ -5,21 +5,34 @@ import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { useBatchSetTableDrawerSettings } from './useBatchSetTableDrawerSettings.hook';
 
-const { batchSetTableSettings, drawerColumnsStore, setDrawerState } =
-  vi.hoisted(() => {
-    let drawerState: Record<string, unknown> | undefined;
+const {
+  batchSetTableSettings,
+  drawerColumnsStore,
+  drawerGroupingStore,
+  setDrawerGrouping,
+  setDrawerState,
+} = vi.hoisted(() => {
+  let drawerState: Record<string, unknown> | undefined;
+  let drawerGrouping: Record<string, unknown> = { aggregates: {}, keys: [] };
 
-    return {
-      batchSetTableSettings: vi.fn(),
-      drawerColumnsStore: { get: vi.fn(() => drawerState) },
-      setDrawerState: (next: Record<string, unknown> | undefined) => {
-        drawerState = next;
-      },
-    };
-  });
+  return {
+    batchSetTableSettings: vi.fn(),
+    drawerColumnsStore: { get: vi.fn(() => drawerState) },
+    drawerGroupingStore: { get: vi.fn(() => drawerGrouping) },
+    setDrawerGrouping: (next: Record<string, unknown>) => {
+      drawerGrouping = next;
+    },
+    setDrawerState: (next: Record<string, unknown> | undefined) => {
+      drawerState = next;
+    },
+  };
+});
 
 vi.mock('../useTableDrawerContextValue.hook', () => ({
-  useTableDrawerContextValue: () => ({ columnsStore: drawerColumnsStore }),
+  useTableDrawerContextValue: () => ({
+    columnsStore: drawerColumnsStore,
+    groupingStore: drawerGroupingStore,
+  }),
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/columns/actions', () => ({
@@ -29,6 +42,7 @@ vi.mock('#ui/components/Table/contexts/TableConfig/columns/actions', () => ({
 beforeEach(() => {
   batchSetTableSettings.mockClear();
   setDrawerState(undefined);
+  setDrawerGrouping({ aggregates: {}, keys: [] });
 });
 
 describe('useBatchSetTableDrawerSettings', () => {
@@ -45,12 +59,15 @@ describe('useBatchSetTableDrawerSettings', () => {
     });
 
     expect(batchSetTableSettings).toHaveBeenCalledExactlyOnceWith({
-      columnFilters: {},
-      columnOrder: ['id', 'name'],
-      columnPinning: { left: [], right: [] },
-      columnSizing: {},
-      columnVisibility: new Set(),
-      sorting: [{ columnKey: 'name', direction: 'asc' }],
+      grouping: { aggregates: {}, keys: [] },
+      settings: {
+        columnFilters: {},
+        columnOrder: ['id', 'name'],
+        columnPinning: { left: [], right: [] },
+        columnSizing: {},
+        columnVisibility: new Set(),
+        sorting: [{ columnKey: 'name', direction: 'asc' }],
+      },
     });
   });
 
@@ -62,12 +79,40 @@ describe('useBatchSetTableDrawerSettings', () => {
     });
 
     expect(batchSetTableSettings).toHaveBeenCalledExactlyOnceWith({
-      columnFilters: {},
-      columnOrder: [],
-      columnPinning: { left: [], right: [] },
-      columnSizing: {},
-      columnVisibility: new Set(),
-      sorting: [],
+      grouping: { aggregates: {}, keys: [] },
+      settings: {
+        columnFilters: {},
+        columnOrder: [],
+        columnPinning: { left: [], right: [] },
+        columnSizing: {},
+        columnVisibility: new Set(),
+        sorting: [],
+      },
+    });
+  });
+
+  it('sends the staged grouping and the column draft in one commit call', () => {
+    setDrawerState({ columnOrder: ['id', 'name'] });
+    setDrawerGrouping({ aggregates: { total: 'sum' }, keys: ['status'] });
+
+    const { result } = renderHook(() => useBatchSetTableDrawerSettings());
+
+    act(() => {
+      result.current();
+    });
+
+    // Exactly once, with both drafts: two commit calls would each submit on
+    // the shared persist fetcher key, and the second would abort the first.
+    expect(batchSetTableSettings).toHaveBeenCalledExactlyOnceWith({
+      grouping: { aggregates: { total: 'sum' }, keys: ['status'] },
+      settings: {
+        columnFilters: {},
+        columnOrder: ['id', 'name'],
+        columnPinning: { left: [], right: [] },
+        columnSizing: {},
+        columnVisibility: new Set(),
+        sorting: [],
+      },
     });
   });
 });

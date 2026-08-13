@@ -10,6 +10,7 @@ import type {
   ColumnSizingState,
   ColumnVisibilityState,
   SortingState,
+  TableGroupingState,
 } from '#ui/components/Table/Table.types';
 
 import { useBatchSetTableSettings } from './useBatchSetTableSettings.hook';
@@ -20,10 +21,13 @@ type Row = {
   readonly name: string;
 };
 
+const NO_GROUPING: TableGroupingState = { aggregates: {}, keys: [] };
+
 const {
   mockBuildPersistencePayload,
   mockColumnsStore,
   mockDataStore,
+  mockGroupingStore,
   mockMetaStore,
   mockPersistTableState,
   mockPersistUiFlags,
@@ -52,6 +56,10 @@ const {
       set: vi.fn(),
     },
     mockDataStore: {
+      set: vi.fn(),
+    },
+    mockGroupingStore: {
+      get: vi.fn((): TableGroupingState => ({ aggregates: {}, keys: [] })),
       set: vi.fn(),
     },
     mockMetaStore: {
@@ -114,6 +122,7 @@ vi.mock(
   () => ({
     useTableConfigContextValue: () => ({
       columnsStore: mockColumnsStore,
+      groupingStore: mockGroupingStore,
       metaStore: mockMetaStore,
     }),
   }),
@@ -151,7 +160,16 @@ describe('useBatchSetTableSettings', () => {
     mockColumnsStore.get.mockClear();
     mockColumnsStore.set.mockClear();
     mockDataStore.set.mockClear();
+    mockGroupingStore.get.mockClear();
+    mockGroupingStore.get.mockReturnValue({ aggregates: {}, keys: [] });
+    mockGroupingStore.set.mockClear();
     mockMetaStore.get.mockClear();
+    // Restored rather than only cleared: one case below pins the drawer, and
+    // without this every later case would inherit that.
+    mockMetaStore.get.mockReturnValue({
+      isTableSettingsPinned: false,
+      persistenceKey: 'orders-table',
+    });
     mockMetaStore.set.mockClear();
     mockPersistUiFlags.mockClear();
     mockPersistTableState.mockClear();
@@ -186,7 +204,7 @@ describe('useBatchSetTableSettings', () => {
     };
 
     act(() => {
-      result.current(settings);
+      result.current({ grouping: NO_GROUPING, settings });
     });
 
     expect(mockDataStore.set).toHaveBeenNthCalledWith(1, {
@@ -242,19 +260,24 @@ describe('useBatchSetTableSettings', () => {
 
     act(() => {
       result.current({
-        columnFilters: {
-          name: { operator: 'contains', type: 'text', value: 'ali' },
-        } as ColumnFiltersState<Row>,
-        columnOrder: ['id', 'age', 'name'],
-        columnPinning: { left: ['id'], right: ['name'] },
-        columnSizing: {
-          actions: 0,
-          age: 80,
-          id: 100,
-          name: 220,
-        } as ColumnSizingState<Row>,
-        columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
-        sorting: [{ columnKey: 'name', direction: 'asc' }] as SortingState<Row>,
+        grouping: NO_GROUPING,
+        settings: {
+          columnFilters: {
+            name: { operator: 'contains', type: 'text', value: 'ali' },
+          } as ColumnFiltersState<Row>,
+          columnOrder: ['id', 'age', 'name'],
+          columnPinning: { left: ['id'], right: ['name'] },
+          columnSizing: {
+            actions: 0,
+            age: 80,
+            id: 100,
+            name: 220,
+          } as ColumnSizingState<Row>,
+          columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
+          sorting: [
+            { columnKey: 'name', direction: 'asc' },
+          ] as SortingState<Row>,
+        },
       });
     });
 
@@ -268,21 +291,24 @@ describe('useBatchSetTableSettings', () => {
 
     act(() => {
       result.current({
-        columnFilters: {
-          name: { operator: 'contains', type: 'text', value: 'new-value' },
-        } as ColumnFiltersState<Row>,
-        columnOrder: ['id', 'age', 'name'],
-        columnPinning: { left: ['id'], right: ['name'] },
-        columnSizing: {
-          actions: 0,
-          age: 80,
-          id: 100,
-          name: 220,
-        } as ColumnSizingState<Row>,
-        columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
-        sorting: [
-          { columnKey: 'name', direction: 'desc' },
-        ] as SortingState<Row>,
+        grouping: NO_GROUPING,
+        settings: {
+          columnFilters: {
+            name: { operator: 'contains', type: 'text', value: 'new-value' },
+          } as ColumnFiltersState<Row>,
+          columnOrder: ['id', 'age', 'name'],
+          columnPinning: { left: ['id'], right: ['name'] },
+          columnSizing: {
+            actions: 0,
+            age: 80,
+            id: 100,
+            name: 220,
+          } as ColumnSizingState<Row>,
+          columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
+          sorting: [
+            { columnKey: 'name', direction: 'desc' },
+          ] as SortingState<Row>,
+        },
       });
     });
 
@@ -301,17 +327,20 @@ describe('useBatchSetTableSettings', () => {
 
     act(() => {
       result.current({
-        columnFilters: {} as ColumnFiltersState<Row>,
-        columnOrder: ['id', 'age', 'name'],
-        columnPinning: { left: ['id'], right: ['name'] },
-        columnSizing: {
-          actions: 0,
-          age: 80,
-          id: 100,
-          name: 220,
-        } as ColumnSizingState<Row>,
-        columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
-        sorting: [] as SortingState<Row>,
+        grouping: NO_GROUPING,
+        settings: {
+          columnFilters: {} as ColumnFiltersState<Row>,
+          columnOrder: ['id', 'age', 'name'],
+          columnPinning: { left: ['id'], right: ['name'] },
+          columnSizing: {
+            actions: 0,
+            age: 80,
+            id: 100,
+            name: 220,
+          } as ColumnSizingState<Row>,
+          columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
+          sorting: [] as SortingState<Row>,
+        },
       });
     });
 
@@ -319,5 +348,103 @@ describe('useBatchSetTableSettings', () => {
     expect(mockMetaStore.set).not.toHaveBeenCalledWith({
       isTableSettingsOpen: false,
     });
+  });
+  it('carries a staged grouping change in the same persistence call as the column state', () => {
+    const { result } = renderHook(() => useBatchSetTableSettings<Row>());
+
+    act(() => {
+      result.current({
+        grouping: { aggregates: { age: 'sum' }, keys: ['name'] },
+        settings: {
+          columnFilters: {} as ColumnFiltersState<Row>,
+          columnOrder: ['id', 'age', 'name'],
+          columnPinning: { left: [], right: [] },
+          columnSizing: {} as ColumnSizingState<Row>,
+          columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(),
+          sorting: [] as SortingState<Row>,
+        },
+      });
+    });
+
+    // One call, not two: a second submission on the shared persist fetcher key
+    // would abort this one, so the grouping entry has to ride along with the
+    // column entries rather than follow them.
+    expect(mockPersistTableState).toHaveBeenCalledTimes(1);
+    expect(mockPersistTableState).toHaveBeenCalledWith([
+      {
+        persistenceKey: 'orders-table',
+        slice: 'columnOrder',
+        valueSlice: ['id', 'age', 'name'],
+      },
+      {
+        searchParamKey: 'grouping',
+        searchParamValue: '{"agg":{"age":"sum"},"keys":["name"]}',
+      },
+    ]);
+    expect(mockGroupingStore.set).toHaveBeenCalledWith({
+      aggregates: { age: 'sum' },
+      keys: ['name'],
+    });
+    expect(mockDataStore.set).toHaveBeenCalledWith({ isLoading: true });
+  });
+
+  it('adds no grouping entry when the staged grouping is the applied one', () => {
+    mockGroupingStore.get.mockReturnValue({
+      aggregates: {},
+      keys: ['name'],
+    });
+
+    const { result } = renderHook(() => useBatchSetTableSettings<Row>());
+
+    act(() => {
+      result.current({
+        grouping: { aggregates: {}, keys: ['name'] },
+        settings: {
+          columnFilters: {
+            name: { operator: 'contains', type: 'text', value: 'ali' },
+          } as ColumnFiltersState<Row>,
+          columnOrder: ['id', 'age', 'name'],
+          columnPinning: { left: [], right: [] },
+          columnSizing: {} as ColumnSizingState<Row>,
+          columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(),
+          sorting: [
+            { columnKey: 'name', direction: 'asc' },
+          ] as SortingState<Row>,
+        },
+      });
+    });
+
+    expect(mockPersistTableState).toHaveBeenCalledWith([
+      {
+        persistenceKey: 'orders-table',
+        slice: 'columnOrder',
+        valueSlice: ['id', 'age', 'name'],
+      },
+    ]);
+    expect(mockGroupingStore.set).not.toHaveBeenCalled();
+    expect(mockDataStore.set).not.toHaveBeenCalled();
+  });
+
+  it('leaves the grouping store untouched when persistence refuses the write', () => {
+    mockPersistTableState.mockReturnValue(false);
+
+    const { result } = renderHook(() => useBatchSetTableSettings<Row>());
+
+    act(() => {
+      result.current({
+        grouping: { aggregates: {}, keys: ['name'] },
+        settings: {
+          columnFilters: {} as ColumnFiltersState<Row>,
+          columnOrder: ['id', 'age', 'name'],
+          columnPinning: { left: [], right: [] },
+          columnSizing: {} as ColumnSizingState<Row>,
+          columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(),
+          sorting: [] as SortingState<Row>,
+        },
+      });
+    });
+
+    expect(mockGroupingStore.set).not.toHaveBeenCalled();
+    expect(mockColumnsStore.set).not.toHaveBeenCalled();
   });
 });

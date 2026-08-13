@@ -35,13 +35,13 @@ vi.mock(
   }),
 );
 
-vi.mock('#ui/components/Table/contexts/TableConfig/grouping/actions', () => ({
-  useClearTableGrouping: () => vi.fn(),
-  useSetTableGroupKeys: () => mockSetGroupKeys,
+vi.mock('../../TableDrawerContext/actions', () => ({
+  useClearGrouping: () => vi.fn(),
+  useSetGroupKeys: () => mockSetGroupKeys,
 }));
 
-vi.mock('#ui/components/Table/contexts/TableConfig/grouping/selectors', () => ({
-  useGetTableGroupingKeys: () => groupingKeysRef.current,
+vi.mock('../../TableDrawerContext/selectors', () => ({
+  useGetGroupingKeys: () => groupingKeysRef.current,
 }));
 
 vi.mock('#ui/components/DraggableList', () => ({

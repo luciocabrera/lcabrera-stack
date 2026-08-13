@@ -1,15 +1,16 @@
 import { CLEAR_GROUPING_COMMAND } from '#ui/components/Table/commands';
-import { useClearTableGrouping } from '#ui/components/Table/contexts/TableConfig/grouping/actions';
-import { useGetTableGroupingKeys } from '#ui/components/Table/contexts/TableConfig/grouping/selectors';
 
 import type { SectionToolbarButton } from '../../SectionToolbar';
 import type { GroupingSectionToolbarProps } from './GroupingSectionToolbar.types';
 
 import { SectionToolbar } from '../../SectionToolbar';
+import { useClearGrouping } from '../../TableDrawerContext/actions';
+import { useGetGroupingKeys } from '../../TableDrawerContext/selectors';
 
 /**
  * The grouping section's toolbar, in both the header (compact) and footer
- * (labelled) variants the drawer-section pattern defines.
+ * (labelled) variants the drawer-section pattern defines. One component serves
+ * both placements, so Clear stages the change on either of them.
  *
  * It carries the clear command and no reset: grouping has no cookie-persisted
  * default to reset *to*. It is URL state (ADR-061), so "reset" and "clear" would
@@ -17,14 +18,15 @@ import { SectionToolbar } from '../../SectionToolbar';
  * therefore not the shape to copy wholesale.
  *
  * The command descriptor is the one the header menu uses, so the two surfaces
- * cannot come to label the same action differently.
+ * cannot come to label the same action differently — but the actions differ on
+ * purpose: the header menu applies immediately, this one stages for Accept.
  */
 export const GroupingSectionToolbar = ({
   isBusy = false,
   variant = 'footer',
 }: GroupingSectionToolbarProps) => {
-  const groupingKeys = useGetTableGroupingKeys();
-  const clearGrouping = useClearTableGrouping();
+  const groupingKeys = useGetGroupingKeys();
+  const clearGrouping = useClearGrouping();
 
   const buttons: readonly SectionToolbarButton[] = [
     {

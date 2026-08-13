@@ -36,8 +36,8 @@ vi.mock(
   }),
 );
 
-vi.mock('#ui/components/Table/contexts/TableConfig/grouping/actions', () => ({
-  useSetTableColumnAggregate: () => mockSetColumnAggregate,
+vi.mock('../../TableDrawerContext/actions', () => ({
+  useSetColumnAggregate: () => mockSetColumnAggregate,
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({

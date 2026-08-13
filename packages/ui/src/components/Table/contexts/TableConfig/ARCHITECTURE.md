@@ -91,21 +91,26 @@ TableConfig/
 ├── grouping/                                → Row grouping store, actions, selectors (ADR-061)
 │   ├── useGroupingStore.hook.ts             → Resolves the config groupingStore, delegates to useStoreSelector
 │   │
+│   │  Everything here is the **live** store — the surface is the column-header
+│   │  menu, which acts immediately. The settings drawer stages into its own
+│   │  grouping draft (`TableSettingsDrawer/TableDrawerContext`) and commits
+│   │  through `useBatchSetTableSettings`, so whole-list replace and whole-map
+│   │  read live there rather than here.
+│   │
 │   ├── utils/areGroupKeysLegal.util.ts      → Pure predicate shared by both write paths: within the depth cap, and no key repeated
 │   │
 │   ├── actions/
+│   │   ├── utils/applyGroupingReducer.util.ts       → Pure: apply an action's reducer to the caller's snapshot and resolve the result; shared with the drawer's draft write path
 │   │   ├── utils/resolveTableGroupingUpdate.util.ts → Pure: one interaction's grouping change as data (updated / unchanged); refuses an illegal key list whole
 │   │   ├── utils/toggleTableGroupKey.util.ts        → Pure: append a key at the tail, or remove it
 │   │   ├── utils/setTableColumnAggregate.util.ts    → Pure: set or clear one column's aggregate
 │   │   ├── useSetTableGrouping.hook.ts      → **Internal**: the single write path, taking a reducer so the store is read once
 │   │   ├── useToggleTableGroupKey.hook.ts   → Add/remove one key (header menu)
-│   │   ├── useSetTableGroupKeys.hook.ts     → Replace the ordered key list (drawer: reorder, remove)
 │   │   ├── useSetTableColumnAggregate.hook.ts → Apply or clear one column's aggregate
 │   │   └── useClearTableGrouping.hook.ts    → Clear every key and every aggregate
 │   │
 │   └── selectors/
 │       ├── useGetTableGroupingKeys.hook.ts       → The applied group keys, in nesting order
-│       ├── useGetTableGroupingAggregates.hook.ts → The whole column-to-function map
 │       └── useGetTableColumnAggregate.hook.ts    → The aggregate applied to one column
 │
 ├── utils/
