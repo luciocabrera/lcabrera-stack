@@ -2,7 +2,7 @@
 id: copilot-coding-agent-setup
 title: Provision the Copilot coding agent's environment
 owner: agent:claude
-status: active
+status: review
 branch: ci/668-copilot-coding-agent-setup
 area:
   - .github/workflows/copilot-setup-steps.yml
@@ -10,7 +10,7 @@ area:
 started: 2026-08-13
 updated: 2026-08-13
 plan: (none)
-pr: (none)
+pr: #669
 issue: #668
 ---
 

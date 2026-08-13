@@ -600,6 +600,18 @@ entry are in [`.gitleaks.toml`](.gitleaks.toml); the binary is version-pinned an
 checksum-verified rather than pulled from a third-party action, because it is a
 security control.
 
+[`copilot-setup-steps.yml`](.github/workflows/copilot-setup-steps.yml) is the one
+workflow here that is **not a check**. GitHub runs its job inside the container
+the Copilot coding agent works in, before the agent starts and before its network
+is firewalled — so it is the only chance to install anything. It mirrors the
+Quality Gate's bootstrap deliberately (`setup-vp`, then
+`vp install --frozen-lockfile --ignore-scripts && vp config`), because an agent
+bootstrapped differently from CI produces failures nobody can reproduce. Its job
+name is load-bearing: GitHub looks for `copilot-setup-steps` exactly, and renaming
+it disables the file with no error anywhere. The path triggers exist so the
+bootstrap can be proven in Actions rather than discovered through an agent failing
+opaquely inside it.
+
 ---
 
 ## 6b. What runs before a commit

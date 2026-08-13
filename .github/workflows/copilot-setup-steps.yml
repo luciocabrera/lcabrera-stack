@@ -1,0 +1,57 @@
+# This is NOT a CI check. GitHub runs the job below inside the container the
+# Copilot coding agent works in, *before* the agent starts, and the agent's
+# network is firewalled afterwards — so anything not installed here cannot be
+# installed later. The job name `copilot-setup-steps` is the contract; renaming
+# it silently disables the whole file, with no error anywhere.
+#
+# It deliberately mirrors check-safe.yml's bootstrap step for step. A second,
+# divergent bootstrap is how an agent ends up working on a tree that behaves
+# differently from the one the gate judges.
+name: Copilot setup steps
+
+on:
+  # Triggered on its own so the bootstrap can be proven in Actions before an
+  # agent depends on it, and re-proven whenever it changes. Without this, the
+  # only way to discover a broken setup is an agent failing opaquely inside it.
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+jobs:
+  copilot-setup-steps:
+    name: Provision the agent workspace
+    runs-on: ubuntu-latest
+    permissions:
+      # Read-only: this job installs, it never writes. The agent is issued its
+      # own token for the branch and pull request it opens.
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          # Same reason as check-safe.yml: typecheck:changed, the rename gate and
+          # the fallow audit all diff against a base ref.
+          fetch-depth: 0
+
+      - name: Setup Vite+
+        # Vite+'s managed mode resolves the node shim from `engines.node`, so this
+        # is also what puts the container on Node 26. Do NOT add a setup-node step
+        # alongside it — a second node on PATH is how `engineStrict` starts
+        # refusing installs.
+        uses: voidzero-dev/setup-vp@8ecb39174989ce55af90f45cf55b02738599831d
+        with:
+          cache: false
+          run-install: false
+
+      - name: Install dependencies
+        # `vp config` is the root `prepare` script: it installs the git hooks, so
+        # the agent's commits meet the commit-message standard at commit time
+        # rather than discovering it in CI.
+        run: vp install --frozen-lockfile --ignore-scripts && vp config
