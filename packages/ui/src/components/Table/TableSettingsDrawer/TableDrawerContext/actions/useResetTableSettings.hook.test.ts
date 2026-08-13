@@ -31,7 +31,8 @@ const {
   let grouping: {
     readonly aggregates: Record<string, string>;
     readonly keys: readonly string[];
-  } = { aggregates: {}, keys: [] };
+    readonly mode: string;
+  } = { aggregates: {}, keys: [], mode: 'flat' };
 
   return {
     drawerColumnsStore: {
@@ -76,7 +77,7 @@ vi.mock('../useTableDrawerContextValue.hook', () => ({
 describe('useResetTableSettings', () => {
   beforeEach(() => {
     setTableColumnsState(undefined);
-    setTableGrouping({ aggregates: {}, keys: [] });
+    setTableGrouping({ aggregates: {}, keys: [], mode: 'flat' });
     drawerColumnsStore.set.mockClear();
     drawerGroupingStore.set.mockClear();
   });
@@ -125,7 +126,11 @@ describe('useResetTableSettings', () => {
     });
   });
   it('re-seeds the grouping draft from the live grouping, discarding what was staged', () => {
-    setTableGrouping({ aggregates: { total: 'sum' }, keys: ['status'] });
+    setTableGrouping({
+      aggregates: { total: 'sum' },
+      keys: ['status'],
+      mode: 'flat',
+    });
 
     const { result } = renderHook(() => useResetTableSettings());
 
@@ -136,6 +141,7 @@ describe('useResetTableSettings', () => {
     expect(drawerGroupingStore.set).toHaveBeenCalledWith({
       aggregates: { total: 'sum' },
       keys: ['status'],
+      mode: 'flat',
     });
   });
 });

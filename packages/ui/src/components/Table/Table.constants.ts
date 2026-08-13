@@ -1,4 +1,8 @@
-import type { TableAggregateFn, TableGroupRow } from './Table.types';
+import type {
+  TableAggregateFn,
+  TableGroupingMode,
+  TableGroupRow,
+} from './Table.types';
 
 /**
  * Default minimum column width when not specified
@@ -120,3 +124,89 @@ export const TABLE_AGGREGATE_FNS: readonly TableAggregateFn[] = [
   'boolAnd',
   'boolOr',
 ];
+
+/**
+ * The grid-owned column a grouped table renders its hierarchy in (ADR-065).
+ *
+ * Not one of the consumer's columns and never in the columns store: it is
+ * injected into the *derived* view state while grouping is on, so it paints, is
+ * focusable and takes part in the sticky-offset arithmetic without ever
+ * reaching the cookie the user's column layout persists through.
+ *
+ * A consumer column keyed the same would be shadowed by it. The name is
+ * deliberately one nobody would give a database column, for the same reason
+ * `TABLE_GROUP_ROW_FIELD` is.
+ */
+export const TABLE_GROUP_HIERARCHY_COLUMN_KEY = 'tableGroupHierarchy';
+
+/**
+ * Pixels one level of group nesting indents the hierarchy label by.
+ *
+ * Indentation narrows the text rather than the row: the label is on one line
+ * and ellipsizes, because `TableRow` clamps `minHeight`/`maxHeight` to
+ * `rowHeight` and a wrapped label is not a taller row, it is a clipped one.
+ */
+export const TABLE_GROUP_HIERARCHY_INDENT_PX = 14;
+
+/** Default width of the hierarchy column — wide enough for a nested label. */
+export const TABLE_GROUP_HIERARCHY_MIN_WIDTH = 220;
+
+/**
+ * What a group row's cell shows for a column no aggregate was selected on.
+ *
+ * A dash, not blank and not zero (ADR-065): blank already means "this row has
+ * no value here" — a claim about the data — and reads as content that has not
+ * arrived, while zero states a number nobody computed. Only a dash keeps "no
+ * aggregate", "the aggregate is zero" and "still loading" apart.
+ */
+export const TABLE_GROUP_NO_AGGREGATE_GLYPH = '—';
+
+/**
+ * The same state, spoken. A standalone em dash may or may not be announced
+ * depending on the reader's punctuation verbosity, so the cell carries this
+ * beside the glyph rather than depending on it (ADR-065 hands #570 exactly this
+ * obligation).
+ */
+export const TABLE_GROUP_NO_AGGREGATE_LABEL = 'No aggregate';
+
+/** The label of the rollup row that totals every group — the empty path. */
+export const TABLE_GROUP_GRAND_TOTAL_LABEL = 'Grand total';
+
+/**
+ * What an aggregated cell says when its own column carries a filter.
+ *
+ * A `WHERE` filter runs before aggregation, so "all countries" over a filtered
+ * column is really "all countries among the rows that survived the filter" —
+ * correct SQL, and a total that lies by omission unless the cell says so.
+ */
+export const TABLE_GROUP_FILTERED_AGGREGATE_LABEL =
+  'Filtered — this total covers the filtered rows only';
+
+/**
+ * How a subtotal states the level it totals: `EMEA total`. It is what separates
+ * a structural NULL from a real one in the rendered grid, together with the
+ * shallower indentation a subtotal sits at.
+ */
+export const TABLE_GROUP_SUBTOTAL_SUFFIX = 'total';
+
+/**
+ * The grouping modes in **menu order**, which a `Record` cannot express — the
+ * same split `TABLE_AGGREGATE_FNS` and `TABLE_AGGREGATE_LABELS` keep, and
+ * `Table.constants.test.ts` asserts the two agree.
+ */
+export const TABLE_GROUPING_MODES: readonly TableGroupingMode[] = [
+  'flat',
+  'rollup',
+];
+
+/**
+ * Each mode's user-facing name, as a map **closed over the union**, so a member
+ * added to `TableGroupingMode` is a compile error here rather than a menu entry
+ * labelled with a SQL-ish token. The names describe the result rather than the
+ * SQL construct: a user picking "with subtotals" is choosing what they will
+ * read, not a `GROUP BY` clause.
+ */
+export const TABLE_GROUPING_MODE_LABELS: Record<TableGroupingMode, string> = {
+  flat: 'Groups only',
+  rollup: 'Groups with subtotals',
+};

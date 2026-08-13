@@ -238,6 +238,7 @@ export const createTableRouteLoader = <
         groupingAggregates: grouping.aggregates,
         groupingCapabilities,
         groupingKeys: grouping.keys,
+        groupingMode: grouping.mode,
         ...capabilityMeta,
       },
     };

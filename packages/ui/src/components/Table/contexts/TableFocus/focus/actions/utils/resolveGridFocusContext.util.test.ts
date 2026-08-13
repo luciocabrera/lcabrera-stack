@@ -38,7 +38,14 @@ const rows: readonly Row[] = [
 const groupPath = [{ columnKey: 'city', label: 'A' }];
 
 const groupedRows: readonly Row[] = [
-  { [TABLE_GROUP_ROW_FIELD]: { aggregates: [], count: 2, path: groupPath } },
+  {
+    [TABLE_GROUP_ROW_FIELD]: {
+      aggregates: [],
+      count: 2,
+      isSubtotal: false,
+      path: groupPath,
+    },
+  },
   { city: 'A', id: 1 },
   { city: 'A', id: 2 },
 ];

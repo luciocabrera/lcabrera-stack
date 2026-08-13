@@ -60,17 +60,23 @@ vi.mock('@lcabrera/server/db/update-rows.util', () => ({
 const sortKeys = (value: object) =>
   Object.keys(value).toSorted((a, b) => a.localeCompare(b));
 
-const NO_GROUPING: TableGroupingState = { aggregates: {}, keys: [] };
+const NO_GROUPING: TableGroupingState = {
+  aggregates: {},
+  keys: [],
+  mode: 'flat',
+};
 
 type GroupingArgs = {
   readonly aggregates?: TableGroupingState['aggregates'];
   readonly keys: readonly string[];
+  readonly mode?: TableGroupingState['mode'];
 };
 
 const grouping = ({
   aggregates = {},
   keys,
-}: GroupingArgs): TableGroupingState => ({ aggregates, keys });
+  mode = 'flat',
+}: GroupingArgs): TableGroupingState => ({ aggregates, keys, mode });
 
 beforeEach(() => {
   vi.mocked(selectRows).mockClear();
@@ -239,6 +245,63 @@ it('runs the ungrouped read when the loader applied no group keys', async () => 
   expect(selectGroupedRows).not.toHaveBeenCalled();
 });
 
+it('emits the rollup mode the grouping configuration asked for', async () => {
+  await selectOrdersPage({
+    filters: [],
+    grouping: grouping({ keys: ['order_status'], mode: 'rollup' }),
+    includeTotal: true,
+    limit: 10,
+    offset: 0,
+    sort: [],
+  });
+
+  expect(selectGroupedRows).toHaveBeenCalledWith(
+    expect.objectContaining({ grouping: 'rollup' }),
+  );
+});
+
+it('carries a user sort on a group key into the grouped read', async () => {
+  // Criterion 4 end to end: the direction has to reach the builder for the
+  // hierarchy to be able to hold under it. Hard-coding `asc` here would drop a
+  // user's sort silently, and the builder's own test could not see it.
+  await selectOrdersPage({
+    filters: [],
+    grouping: grouping({ keys: ['order_status', 'shipping_country'] }),
+    includeTotal: true,
+    limit: 10,
+    offset: 0,
+    sort: [{ column: 'order_status', direction: 'desc' }],
+  });
+
+  expect(selectGroupedRows).toHaveBeenCalledWith(
+    expect.objectContaining({
+      // Nesting order is preserved and is not the sort's to change: the user's
+      // direction sets a level, it does not reorder the levels.
+      sort: [
+        { direction: 'desc', key: 'order_status' },
+        { direction: 'asc', key: 'shipping_country' },
+      ],
+    }),
+  );
+});
+
+it('ignores a sort on a column the grouped read does not project', async () => {
+  await selectOrdersPage({
+    filters: [],
+    grouping: grouping({ keys: ['order_status'] }),
+    includeTotal: true,
+    limit: 10,
+    offset: 0,
+    sort: [{ column: 'customer_name', direction: 'desc' }],
+  });
+
+  expect(selectGroupedRows).toHaveBeenCalledWith(
+    expect.objectContaining({
+      sort: [{ direction: 'asc', key: 'order_status' }],
+    }),
+  );
+});
+
 it('runs the grouped read when the loader applied a group key', async () => {
   const page = await selectOrdersPage({
     filters: [{ column: 'priority', operator: 'eq', value: 'High' }],
@@ -268,6 +331,7 @@ it('runs the grouped read when the loader applied a group key', async () => {
       tableGroup: {
         aggregates: [],
         count: 12,
+        isSubtotal: false,
         path: [{ columnKey: 'order_status', label: 'Shipped' }],
       },
     },
@@ -275,6 +339,7 @@ it('runs the grouped read when the loader applied a group key', async () => {
       tableGroup: {
         aggregates: [],
         count: 3,
+        isSubtotal: false,
         path: [{ columnKey: 'order_status', label: '(empty)' }],
       },
     },

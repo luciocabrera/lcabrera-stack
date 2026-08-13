@@ -26,17 +26,23 @@ const columns: TableColumn<Row>[] = [
   { isGroupable, isStatic, key: 'actions', label: 'Actions' },
 ];
 
-const NO_GROUPING: TableGroupingState = { aggregates: {}, keys: [] };
+const NO_GROUPING: TableGroupingState = {
+  aggregates: {},
+  keys: [],
+  mode: 'flat',
+};
 
 type GroupingArgs = {
   readonly aggregates?: TableGroupingState['aggregates'];
   readonly keys: readonly string[];
+  readonly mode?: TableGroupingState['mode'];
 };
 
 const grouping = ({
   aggregates = {},
   keys,
-}: GroupingArgs): TableGroupingState => ({ aggregates, keys });
+  mode = 'flat',
+}: GroupingArgs): TableGroupingState => ({ aggregates, keys, mode });
 
 describe('sanitizeGroupingByColumns', () => {
   it('keeps keys that name a groupable column', () => {
@@ -61,9 +67,15 @@ describe('sanitizeGroupingByColumns', () => {
     expect(
       sanitizeGroupingByColumns({
         columns,
-        grouping: grouping({ aggregates: { id: 'sum' }, keys: ['status'] }),
+        grouping: grouping({
+          aggregates: { id: 'sum' },
+          keys: ['status'],
+          mode: 'flat',
+        }),
       }),
-    ).toStrictEqual(grouping({ aggregates: { id: 'sum' }, keys: ['status'] }));
+    ).toStrictEqual(
+      grouping({ aggregates: { id: 'sum' }, keys: ['status'], mode: 'flat' }),
+    );
   });
 
   it('refuses the whole configuration when one key names no column', () => {
@@ -84,6 +96,7 @@ describe('sanitizeGroupingByColumns', () => {
         grouping: grouping({
           aggregates: { not_a_column: 'sum' },
           keys: ['status'],
+          mode: 'flat',
         }),
       }),
     ).toStrictEqual(NO_GROUPING);

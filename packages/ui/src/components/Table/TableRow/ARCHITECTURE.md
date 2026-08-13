@@ -69,9 +69,14 @@ the default row height and now follow `rowHeight` with every other row.
 
 ## Usage
 
-Used by `TableHeader` (with `isHeader`), `TableBodyRows` (with default striping)
-and `TableGroupHeaderRow`. All render inside `TableConfigProvider`, which
-supplies the meta store the row height is read from.
+Used by `TableHeader` (with `isHeader`) and by `TableBodyRows` for **every**
+body row — a group row and a detail row alike, since ADR-065 gave both the same
+cells and left one rendering path. Both render inside `TableConfigProvider`,
+which supplies the meta store the row height is read from.
+
+That is what makes the height guarantee hold by construction rather than by a
+matching literal: there is no second component that could paint a row at a
+different height.
 
 `SpacerRow` deliberately does **not** compose this component: the virtualization
 filler declares no role and stays `aria-hidden`, so it never joins the grid's

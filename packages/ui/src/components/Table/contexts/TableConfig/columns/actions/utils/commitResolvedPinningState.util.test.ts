@@ -56,6 +56,7 @@ describe('commitResolvedPinningState', () => {
       columnsStore,
       columnVisibility: new Set<keyof TData>(),
       drawersSyncNonce: 7,
+      groupingKeys: [],
       metaStore,
       persistenceKey: 'orders-table',
       persistTableState,
@@ -74,6 +75,7 @@ describe('commitResolvedPinningState', () => {
         name: 0,
       },
       columnVisibility: new Set<keyof TData>(),
+      groupingKeys: [],
     });
 
     expect(mockCommitPinningAndOrderUpdate).toHaveBeenCalledWith({

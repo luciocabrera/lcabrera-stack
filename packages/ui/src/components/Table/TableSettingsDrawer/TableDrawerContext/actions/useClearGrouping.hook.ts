@@ -10,6 +10,6 @@ export const useClearGrouping = () => {
   const setGrouping = useSetGrouping();
 
   return () => {
-    setGrouping(() => ({ aggregates: {}, keys: [] }));
+    setGrouping(() => ({ aggregates: {}, keys: [], mode: 'flat' }));
   };
 };

@@ -174,6 +174,32 @@ affordance, `sanitizeGroupingByColumns` drops the whole configuration, and
 `assertGroupDepth` throws **before the executor borrows a connection**, so a
 hand-edited depth-9 URL costs no catalogue query.
 
+**Rollup emits the subtotals, and the mask is what makes them readable.** The
+`grouping` param carries a `mode` beside the keys, and `rollup` asks the builder
+for one grouping set per prefix of the key list plus the empty grand total. Each
+row comes back with `GROUPING(k₁, …, kₙ)` under `maskAlias`, which is the only
+thing separating a **real** NULL key from a **structural** one — the two rows are
+textually identical. `toOrderGroupRow` decodes it: the keys whose bit is set are
+dropped from `path`, so the path that remains is the row's own prefix and its
+length is the row's depth, and `isSubtotal` says whether anything was rolled up
+at all. A `flat` read never sets a bit, so every row is a leaf and the decode is
+the identity it always was.
+
+**The ordering keeps subtotals with their children.** `buildGroupOrderByClause`
+emits `GROUPING(key) ASC, key <user>` per key, so a subtotal lands after the rows
+it totals whichever direction the user sorted that key by, and the grand total
+lands last.
+
+The user's sort **reaches** that clause: `selectGroupedOrders` emits one term per
+group key in nesting order, carrying the applied direction where the user sorted
+that key and ascending where they did not. Nesting order is not the sort's to
+change — it is the tree — so a sort sets a level's direction rather than
+reordering the levels, and a sort on a column the grouped read does not project
+is dropped, because a grouped result has no row of that column's values to
+order. This route requests key sorts only; an aggregate sort would be legal at
+the innermost level, and one that would rank an ancestor is refused at
+construction rather than emitted as a term that orders nothing.
+
 **The aggregate menu is the catalogue's answer, not the column's declared type.**
 `selectOrderGroupingCapabilities` resolves what every allowed column may do from
 `pg_type`/`pg_aggregate`, and the loader ships that on
@@ -205,12 +231,15 @@ structurally, so a response that branched on grouping would change the loader
 type of all four table routes at once.
 
 Each row carries a `TableGroupRowSummary` and nothing else, built by
-`toOrderGroupRow`. Its `path` names every level of the group in nesting order,
-and its `aggregates` carry each selected aggregate decoded by the alias the
-builder reported. It formats there rather than in the renderer because only this
-side knows `count(*)` arrives as a **string**, that a `numeric` aggregate does
-too, and that a NULL key is a real group. `@lcabrera/ui`'s `TableGroupHeaderRow`
-renders the finished labels and count.
+`toOrderGroupRow`. Its `path` names the levels **that row is actually grouped
+by**, in nesting order — which under `rollup` is a prefix of the key list rather
+than all of it: a subtotal carries one level fewer than the rows it totals, and
+the grand total carries none. `isSubtotal` says which it is, and `aggregates`
+carries each selected aggregate decoded by the alias the builder reported. It
+formats there rather than in the renderer because only this side knows
+`count(*)` arrives as a **string**, that a `numeric` aggregate does too, and
+that a NULL key is a real group. `@lcabrera/ui` renders the finished labels and
+count in the grid's hierarchy column (ADR-065).
 
 **A hand-edited `grouping` param yields a flat table, never a partial one.** The
 codec refuses any payload outside `{ keys: string[], agg?: … }` with a known

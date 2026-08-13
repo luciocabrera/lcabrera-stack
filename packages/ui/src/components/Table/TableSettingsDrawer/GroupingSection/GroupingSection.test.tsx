@@ -50,7 +50,11 @@ const CAPABILITIES = {
   total_amount: { aggregates: ['sum', 'avg'], canGroup: false },
 };
 
-const NO_GROUPING: TableGroupingState = { aggregates: {}, keys: [] };
+const NO_GROUPING: TableGroupingState = {
+  aggregates: {},
+  keys: [],
+  mode: 'flat',
+};
 
 const stores = {
   columnsStore: createMockStore<Record<string, unknown>>({}),
@@ -251,6 +255,42 @@ describe('GroupingSection staging', () => {
     expect(stores.groupingStore.get()).toStrictEqual({
       aggregates: { total_amount: 'sum' },
       keys: ['order_status'],
+      mode: 'flat',
+    });
+  });
+
+  it('stages the totals mode and carries it in the same commit', () => {
+    // The mode decides which grouping sets the read emits, so it travels in the
+    // `grouping` param with the keys rather than as a display setting.
+    renderDrawer();
+
+    stageGroupKey('Status');
+    fireEvent.click(
+      screen.getByRole('radio', { name: /Groups with subtotals/ }),
+    );
+
+    expect(persistTableState).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
+
+    expect(persistTableState.mock.calls[0]?.[0]).toContainEqual({
+      searchParamKey: 'grouping',
+      searchParamValue: '{"keys":["order_status"],"mode":"rollup"}',
+    });
+    expect(stores.groupingStore.get().mode).toBe('rollup');
+  });
+
+  it('leaves the mode out of the param while it is the default', () => {
+    // A table left on `flat` produces the param it produced before rollup
+    // existed, so an existing shared link and a new one are the same string.
+    renderDrawer();
+
+    stageGroupKey('Status');
+    fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
+
+    expect(persistTableState.mock.calls[0]?.[0]).toContainEqual({
+      searchParamKey: 'grouping',
+      searchParamValue: '{"keys":["order_status"]}',
     });
   });
 
@@ -278,6 +318,7 @@ describe('GroupingSection staging', () => {
     stores.groupingStore.reset({
       aggregates: {},
       keys: ['shipping_country'],
+      mode: 'flat',
     });
 
     renderDrawer();
@@ -294,6 +335,7 @@ describe('GroupingSection staging', () => {
     expect(stores.groupingStore.get()).toStrictEqual({
       aggregates: {},
       keys: ['shipping_country'],
+      mode: 'flat',
     });
     expect(screen.getByText('1. Country')).not.toBeNull();
   });
@@ -302,6 +344,7 @@ describe('GroupingSection staging', () => {
     stores.groupingStore.reset({
       aggregates: {},
       keys: ['shipping_country'],
+      mode: 'flat',
     });
 
     const firstOpen = renderDrawer();
@@ -323,6 +366,7 @@ describe('GroupingSection staging', () => {
     stores.groupingStore.reset({
       aggregates: { total_amount: 'sum' },
       keys: ['order_status'],
+      mode: 'flat',
     });
 
     renderDrawer();
@@ -346,6 +390,7 @@ describe('GroupingSection staging', () => {
     stores.groupingStore.reset({
       aggregates: {},
       keys: ['order_status'],
+      mode: 'flat',
     });
 
     renderDrawer();

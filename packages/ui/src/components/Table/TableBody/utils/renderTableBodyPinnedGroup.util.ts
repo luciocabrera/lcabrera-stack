@@ -1,7 +1,11 @@
+import type { TableGroupRowSummary } from '#ui/components/Table/Table.types';
+
 type RenderTableBodyPinnedGroupArgs<TData, TColumn, TResult> = {
   readonly columns: readonly TColumn[];
+  readonly groupSummary?: TableGroupRowSummary;
   readonly renderCell: (args: {
     readonly col: TColumn;
+    readonly groupSummary?: TableGroupRowSummary;
     readonly row: TData;
     readonly rowIndex: number;
     readonly rowKey: string;
@@ -14,15 +18,18 @@ type RenderTableBodyPinnedGroupArgs<TData, TColumn, TResult> = {
 /**
  * Maps a column group to rendered cell results using shared row data.
  *
- * The row's identity and absolute index travel with the row itself rather than
- * being bound into the renderer, because they change per row while sizing and
- * pinning do not.
+ * The row's identity, its absolute index and its group summary travel with the
+ * row itself rather than being bound into the renderer, because all three
+ * change per row while sizing and pinning do not.
  */
 export const renderTableBodyPinnedGroup = <TData, TColumn, TResult>({
   columns,
+  groupSummary,
   renderCell,
   row,
   rowIndex,
   rowKey,
 }: RenderTableBodyPinnedGroupArgs<TData, TColumn, TResult>) =>
-  columns.map((col) => renderCell({ col, row, rowIndex, rowKey }));
+  columns.map((col) =>
+    renderCell({ col, groupSummary, row, rowIndex, rowKey }),
+  );

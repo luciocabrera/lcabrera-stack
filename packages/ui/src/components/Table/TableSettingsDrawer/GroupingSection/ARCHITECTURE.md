@@ -1,7 +1,13 @@
 # GroupingSection Architecture
 
 The settings drawer's Grouping tab: the staged group keys in nesting order,
-the staged aggregates, and the controls to add either.
+the staged aggregates, the totals mode, and the controls to add either.
+
+**The totals mode is grouping configuration, not a display setting.** `rollup`
+adds a subtotal row per level and a grand total to what the read returns, so it
+changes the SQL and travels in the `grouping` param with the keys — which is why
+it stages and commits here rather than sitting in the general settings section
+([ADR-065](../../../../../../../docs/decisions/ADR-065-grouped-rows-render-a-hierarchy-column.md)).
 
 Rendered only where the route declared `isGroupingEnabled` on its loader `meta`
 ([ADR-063](../../../../../../../docs/decisions/ADR-063-request-shaping-capabilities-on-the-loader-meta.md)).
@@ -57,6 +63,7 @@ GroupingSection/
 │   └── GroupKeyItemContent/            → One key row: level, label, remove
 ├── AddAggregateSection/                → Column select → legal-function select
 ├── ActiveAggregateList/                → Staged aggregates, each removable
+├── GroupingModeSection/                → Totals mode: groups only, or groups with subtotals
 ├── GroupingSectionToolbar/             → Clear grouping (toolbar + footer)
 └── utils/
     ├── toGroupKeyItems.util.ts         → Staged keys + labels, in nesting order

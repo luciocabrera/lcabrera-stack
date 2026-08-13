@@ -9,16 +9,24 @@ counts those — the same index space the focus store, `aria-rowindex` and the
 `<tbody>` height all use, because all four come off the one array
 `useTableGroupTree` returns (ADR-067).
 
-Which component a row gets is asked of the **row**: one carrying a group summary
-renders as a `TableGroupHeaderRow`, everything else renders its cells. The
-grouping configuration is never consulted here, so a group row and a detail row
-can arrive in the same result.
+**One rendering path, whatever a row is**
+([ADR-065](../../../../../../docs/decisions/ADR-065-grouped-rows-render-a-hierarchy-column.md)).
+A row carrying a group summary and a detail row produce the same `TableRow` over
+the same columns in the same order; only what each cell holds differs, and that
+is `buildTableBodyCellDescriptor`'s decision. The spanning banner a group row
+used to be, and the branch that chose it, are both gone.
+
+What a row _is_ is still asked of the **row**, not of the grouping
+configuration, so a group row and a detail row can arrive in the same result.
+The configuration is consulted for one thing only: which data columns a _detail_
+row blanks, because its group row already states them.
 
 ## File Structure
 
 ```
 TableBodyRows/
-├── TableBodyRows.component.tsx   → Visible-row loop: group header or column-group cell rendering, per row
+├── TableBodyRows.component.tsx   → Visible-row loop: one TableRow per row, cells per pinning partition
+├── TableBodyRows.stylex.ts       → Group-row tint
 ├── TableBodyRows.types.ts        → TableBodyRowsProps (startIndex, endIndex, isLoadingState)
 ├── utils/
 │   ├── resolveRowKey.util.ts     → Row identity key from a group summary, else from the primary-key column(s)
@@ -44,6 +52,7 @@ TableBodyRows/
 | `useGetPinnedColumnPartition` | Pre-split left/center/right pinning partition                                                         |
 | `useGetColumnSizing`          | Column widths for cell rendering                                                                      |
 | `useGetPinnedColumnOffsets`   | Pre-computed sticky offsets for pinned columns                                                        |
+| `useGetTableGroupingKeys`     | Which data columns a detail row blanks (ADR-065)                                                      |
 
 `useGetColumns` is read instead of re-assembling the pinning partition: the
 partition carries only the visible columns in display order, so a hidden or
@@ -59,20 +68,20 @@ graph TD
   TBR --> CS["useGetColumnSizing()"]
   TBR --> PO["useGetPinnedColumnOffsets()"]
 
+  TBR --> GK["useGetTableGroupingKeys()"]
+
   data --> slice["visibleRows = rows.slice(startIndex, endIndex)"]
-  CS --> renderer["createRenderTableBodyCell({ columnSizing, isLoadingState, pinnedOffsets })"]
+  CS --> renderer["createRenderTableBodyCell({ columnSizing, groupingKeys, isLoadingState, pinnedOffsets })"]
   PO --> renderer
+  GK --> renderer
 
   slice --> map["visibleRows.map(row => ...)"]
   COL --> key["resolveRowKey({ columns, index: rowIndex, row })"]
   map --> key
   map --> tree["resolveTreeRowAriaProps(rowMeta[rowIndex])"]
   map --> summary["getTableGroupRowSummary(row)"]
-  tree --> GH
   tree --> TR
-  summary -->|"summary present"| GH["TableGroupHeaderRow"]
-  summary -->|"otherwise"| TR["TableRow"]
-  key --> GH
+  summary --> TR["TableRow (tinted when the row is a group)"]
   key --> TR
   TR --> left["renderTableBodyPinnedGroup(leftPinnedCols)"]
   TR --> center["renderTableBodyPinnedGroup(centerCols)"]
@@ -91,11 +100,25 @@ a half-written one renders as a data row rather than putting `undefined` on
 screen.
 
 **One visible row still produces exactly one `<tr>`.** `TableBody` sizes
-`<tbody>` as `visible rows × rowHeight` and derives both spacers from the same number,
+`<tbody>` from a visible-row count times `rowHeight` and derives both spacers
+from that same number — which count is `TableBody`'s to state, not this file's —
 so emitting a header _plus_ a detail row per entry would desynchronize the body
-from its contents. `TableGroupHeaderRow` composes `TableRow`, which is where
-`rowHeight` is read, so the group row paints at the same height as every other
-row by construction rather than by a matching literal.
+from its contents. Every row goes through `TableRow`, which is where `rowHeight`
+is read, so a group row paints at the same height as every other row by
+construction rather than by a matching literal — and the hierarchy label stays
+on **one line** for the same reason: `TableRow` clamps `minHeight`/`maxHeight`
+alongside `height`, so a wrapped label is not a taller row, it is a clipped one.
+
+**A group row's cells are ordinary cells**, built by the same descriptor
+pipeline: the hierarchy column holds `TableGroupLabel`, the actions column holds
+nothing, and every other column holds `TableGroupAggregate` — that group's
+selected aggregate, or an em dash saying none was selected. Because they are
+real `TableBodyCell`s they carry `role="gridcell"` and the roving tab stop, so
+the keypress a one-cell banner used to swallow now lands (#651, ADR-062).
+
+**A detail row blanks the columns it is grouped by**, and its own hierarchy cell
+is empty: the value is stated once by the group row above it, and a detail row's
+values are already in their own columns.
 
 ## ARIA Row Indexing
 
@@ -114,8 +137,7 @@ the grid advertises, and if they are computed from different bases one of them
 is wrong.
 
 Group rows take the same attribute — a group is one row of the sequence, not an
-annotation beside it — which is why `TableGroupHeaderRow` forwards native `<tr>`
-attributes.
+annotation beside it — which follows from every row going through `TableRow`.
 
 Under a tree the sequence counts the rows a collapse leaves standing, and so
 does `aria-rowcount`: a collapsed row is not a row of the grid, so counting it

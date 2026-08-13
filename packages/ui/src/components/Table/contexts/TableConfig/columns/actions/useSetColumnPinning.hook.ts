@@ -15,7 +15,8 @@ type SetColumnPinningArgs<TData> = {
 };
 
 export const useSetColumnPinning = <TData>() => {
-  const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
+  const { columnsStore, groupingStore, metaStore } =
+    useTableConfigContextValue<TData>();
   const persistTableState = usePersistTableStateAction();
 
   return ({ columnKey, side }: SetColumnPinningArgs<TData>) => {
@@ -47,6 +48,7 @@ export const useSetColumnPinning = <TData>() => {
       columnsStore,
       columnVisibility,
       drawersSyncNonce,
+      groupingKeys: groupingStore.get().keys,
       metaStore,
       persistenceKey,
       persistTableState,

@@ -6,7 +6,11 @@ import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
 
 import { applyGroupingReducer } from './applyGroupingReducer.util';
 
-const NO_GROUPING: TableGroupingState = { aggregates: {}, keys: [] };
+const NO_GROUPING: TableGroupingState = {
+  aggregates: {},
+  keys: [],
+  mode: 'flat',
+};
 
 describe('applyGroupingReducer', () => {
   it('resolves the reducer against the snapshot it was handed', () => {
@@ -15,13 +19,19 @@ describe('applyGroupingReducer', () => {
         deriveNextGrouping: (grouping) => ({
           aggregates: grouping.aggregates,
           keys: [...grouping.keys, 'shipping_country'],
+          mode: 'flat',
         }),
-        existingGrouping: { aggregates: {}, keys: ['order_status'] },
+        existingGrouping: {
+          aggregates: {},
+          keys: ['order_status'],
+          mode: 'flat',
+        },
       }),
     ).toStrictEqual({
       grouping: {
         aggregates: {},
         keys: ['order_status', 'shipping_country'],
+        mode: 'flat',
       },
       kind: 'updated',
       persistenceEntry: {
@@ -42,11 +52,15 @@ describe('applyGroupingReducer', () => {
         seen.push(grouping);
         return grouping;
       },
-      existingGrouping: { aggregates: { total_amount: 'sum' }, keys: ['a'] },
+      existingGrouping: {
+        aggregates: { total_amount: 'sum' },
+        keys: ['a'],
+        mode: 'flat',
+      },
     });
 
     expect(seen).toStrictEqual([
-      { aggregates: { total_amount: 'sum' }, keys: ['a'] },
+      { aggregates: { total_amount: 'sum' }, keys: ['a'], mode: 'flat' },
     ]);
   });
 
@@ -54,7 +68,11 @@ describe('applyGroupingReducer', () => {
     expect(
       applyGroupingReducer({
         deriveNextGrouping: (grouping) => grouping,
-        existingGrouping: { aggregates: {}, keys: ['order_status'] },
+        existingGrouping: {
+          aggregates: {},
+          keys: ['order_status'],
+          mode: 'flat',
+        },
       }),
     ).toStrictEqual({ kind: 'unchanged' });
   });
@@ -68,6 +86,7 @@ describe('applyGroupingReducer', () => {
             { length: MAX_TABLE_GROUP_KEYS + 1 },
             (_, index) => `key_${index}`,
           ),
+          mode: 'flat' as const,
         }),
         existingGrouping: NO_GROUPING,
       }),

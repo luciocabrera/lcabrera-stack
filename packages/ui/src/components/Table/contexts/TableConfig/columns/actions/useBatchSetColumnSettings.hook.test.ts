@@ -9,6 +9,7 @@ const {
   mockBuildPersistencePayload,
   mockColumnsStore,
   mockDataStore,
+  mockGroupingStore,
   mockMetaStore,
   mockPersistTableState,
   mockPersistUiFlags,
@@ -39,6 +40,10 @@ const {
       set: vi.fn(),
     },
     mockDataStore: {
+      set: vi.fn(),
+    },
+    mockGroupingStore: {
+      get: vi.fn(() => ({ aggregates: {}, keys: [], mode: 'flat' })),
       set: vi.fn(),
     },
     mockMetaStore: {
@@ -100,6 +105,7 @@ vi.mock(
   () => ({
     useTableConfigContextValue: () => ({
       columnsStore: mockColumnsStore,
+      groupingStore: mockGroupingStore,
       metaStore: mockMetaStore,
     }),
   }),
@@ -197,6 +203,7 @@ describe('useBatchSetColumnSettings', () => {
         sorting: [],
         staticKeys: new Set<string>(['id']),
       },
+      groupingKeys: [],
       settings: {
         columnFilter: { operator: 'contains', type: 'text', value: 'ali' },
         columnKey: 'name',

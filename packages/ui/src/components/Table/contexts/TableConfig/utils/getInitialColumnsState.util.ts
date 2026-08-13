@@ -17,6 +17,12 @@ type GetInitialTableStateArgs<TData extends Record<string, unknown>> = Partial<
   TableColumnsState<TData>
 > & {
   readonly crud?: TableCrudConfig;
+  /**
+   * The group keys the loader applied, already sanitized. The derived slices
+   * carry the hierarchy column while grouping is on (ADR-065), and seeding it
+   * here is what makes the server's first paint and the client's agree.
+   */
+  readonly groupingKeys?: readonly string[];
 };
 
 /**
@@ -33,6 +39,7 @@ export const getInitialColumnsState = <TData extends Record<string, unknown>>({
   columnSizing = {} as ColumnSizingState<TData>,
   columnVisibility = new Set<DataKey<TData>>(),
   crud,
+  groupingKeys = [],
   sorting = [],
 }: GetInitialTableStateArgs<TData>) => {
   const { columns: resolvedColumns, hasActionsColumn } =
@@ -70,6 +77,7 @@ export const getInitialColumnsState = <TData extends Record<string, unknown>>({
     columns: resolvedColumns,
     columnSizing: nextColumnSizing,
     columnVisibility: nextColumnVisibility,
+    groupingKeys,
     sorting,
   });
 

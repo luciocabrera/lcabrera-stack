@@ -61,6 +61,12 @@ const narrowEvery = <TValue>({ narrow, values }: NarrowEveryArgs<TValue>) => {
  * `path` or `aggregates` entry that does not narrow refuses the **whole**
  * summary — a group described by some of its keys is not the group the row
  * holds, and rendering it would label a two-key group with one key's value.
+ *
+ * **An empty `path` is a legal summary**, not a malformed one: it is the
+ * rollup's grand total, the row that totals every group and is keyed by none
+ * (ADR-065). Refusing it — which this did while `flat` was the only mode —
+ * would drop the one row a rollup exists to produce, silently, as an ordinary
+ * data row with no columns in it.
  */
 export const getTableGroupRowSummary = (
   row: Record<string, unknown>,
@@ -71,12 +77,12 @@ export const getTableGroupRowSummary = (
     return;
   }
 
-  const { aggregates, count, path } = summary;
+  const { aggregates, count, isSubtotal, path } = summary;
 
   if (
     typeof count !== 'number' ||
+    typeof isSubtotal !== 'boolean' ||
     !Array.isArray(path) ||
-    path.length === 0 ||
     !Array.isArray(aggregates)
   ) {
     return;
@@ -90,5 +96,5 @@ export const getTableGroupRowSummary = (
 
   return narrowedPath === undefined || narrowedAggregates === undefined
     ? undefined
-    : { aggregates: narrowedAggregates, count, path: narrowedPath };
+    : { aggregates: narrowedAggregates, count, isSubtotal, path: narrowedPath };
 };

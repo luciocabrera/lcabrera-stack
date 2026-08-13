@@ -35,5 +35,6 @@ export const setTableColumnAggregate = ({
       fn === undefined ? remaining : [...remaining, [columnKey, fn]],
     ),
     keys: grouping.keys,
+    mode: grouping.mode,
   };
 };

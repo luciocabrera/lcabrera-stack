@@ -18,7 +18,12 @@ const columns: TableColumn<Row>[] = [
 ];
 
 const groupRow = (path: readonly TableGroupKeyValue[]): Row => ({
-  [TABLE_GROUP_ROW_FIELD]: { aggregates: [], count: 2, path },
+  [TABLE_GROUP_ROW_FIELD]: {
+    aggregates: [],
+    count: 2,
+    isSubtotal: false,
+    path,
+  },
 });
 
 const paris = [{ columnKey: 'city', label: 'Paris' }];

@@ -435,6 +435,23 @@ export type TableGroupExpansionState = {
 };
 
 /**
+ * Which grouping sets a grouped read emits — duplicated from
+ * `@lcabrera/server`'s `GroupingMode` for the reason `TableAggregateFn` is
+ * (ADR-038, ADR-039), and pinned to it by `groupingContract.test.ts`.
+ *
+ * `flat` emits one set: one row per distinct combination of every key, and no
+ * row is anything's parent. `rollup` emits that set plus one per key dropped
+ * from the tail, down to the empty grand total — so every set is a **prefix**
+ * of the key list, every row has at most one parent, and a row's path length is
+ * its depth. That is what the hierarchy column indents by (ADR-065).
+ *
+ * `cube` is deliberately absent (#574): its sets are not prefixes, so its rows
+ * form a lattice rather than a tree and it renders flat rather than indented.
+ * Adding it here would let the URL ask for a shape nothing renders.
+ */
+export type TableGroupingMode = 'flat' | 'rollup';
+
+/**
  * The grouping store's state — the config context's third store (ADR-061).
  *
  * `aggregates` is a **column-to-function** map, at most one aggregate per
@@ -459,6 +476,8 @@ export type TableGroupingState = {
   readonly aggregates: Readonly<Record<string, TableAggregateFn>>;
   /** Ordered — the order is the grouped query's nesting order. */
   readonly keys: readonly string[];
+  /** Which grouping sets the read emits. See `TableGroupingMode`. */
+  readonly mode: TableGroupingMode;
 };
 
 /**
@@ -506,6 +525,11 @@ export type TableGroupRow = Record<'tableGroup', TableGroupRowSummary>;
  * a single `columnKey`/`label` could only ever name one of them. A one-key
  * grouping is the one-element case, not a different shape.
  *
+ * It holds **only the keys the row's grouping set actually grouped by**, so its
+ * length is the row's depth: under a rollup a subtotal over the innermost key
+ * carries one entry fewer than a leaf does, and the grand total carries none.
+ * That is what the hierarchy column indents by (ADR-065).
+ *
  * Every `label` is already formatted, because formatting a key value needs the
  * column's `dataType` and locale, both of which the row does not carry.
  */
@@ -514,6 +538,18 @@ export type TableGroupRowSummary = {
   readonly aggregates: readonly TableGroupAggregateValue[];
   /** How many rows the group aggregates. */
   readonly count: number;
+  /**
+   * Whether this row totals the levels below it rather than being one of them.
+   *
+   * It is carried, not inferred. A shorter `path` says the same thing only by
+   * comparison with the grouping configuration, and the row is the one thing
+   * that survives a configuration change intact — the table never asks the
+   * configuration what a row is (see above). It is also the only carrier for
+   * the distinction the rendering exists to make: a real NULL key and a
+   * structural subtotal produce the same `label` from the same column, and
+   * nothing in the row text separates them.
+   */
+  readonly isSubtotal: boolean;
   readonly path: readonly TableGroupKeyValue[];
 };
 
@@ -571,6 +607,12 @@ export type TableMetaState = {
    * "is this table grouped" is one question with one answer.
    */
   readonly groupingKeys?: readonly string[];
+  /**
+   * The grouping mode the loader applied, sanitized from the same `grouping`
+   * param. Absent means `flat` — what a link written before rollup existed
+   * says, and what a route that never offers the choice keeps.
+   */
+  readonly groupingMode?: TableGroupingMode;
   /** Initial page size for first load */
   readonly initialPageSize: number;
   readonly isBordered: boolean;

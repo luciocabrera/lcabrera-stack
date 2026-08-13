@@ -41,7 +41,14 @@ describe('resolveGroupPathKey', () => {
     const rowKey = resolveRowKey({
       columns: [],
       index: 0,
-      row: { [TABLE_GROUP_ROW_FIELD]: { aggregates: [], count: 1, path } },
+      row: {
+        [TABLE_GROUP_ROW_FIELD]: {
+          aggregates: [],
+          count: 1,
+          isSubtotal: false,
+          path,
+        },
+      },
     });
 
     expect(rowKey).toContain(resolveGroupPathKey(path));

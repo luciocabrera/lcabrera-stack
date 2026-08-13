@@ -29,6 +29,13 @@ export type CommitResolvedColumnStateArgs<
   readonly columnsStore: Pick<TStore<TableColumnsState<TData>>, 'set'>;
   readonly columnVisibility?: ColumnVisibilityState<TData>;
   readonly drawersSyncNonce: number;
+  /**
+   * The applied group keys, read from the grouping store by the action hook.
+   * The derived column slices carry the hierarchy column while grouping is on
+   * (ADR-065), so a commit that did not know about it would drop the column on
+   * the next pin or hide.
+   */
+  readonly groupingKeys: readonly string[];
   readonly metaStore: Pick<TStore<TableMetaState>, 'set'>;
   readonly persistenceKey: string;
   readonly persistTableState: (

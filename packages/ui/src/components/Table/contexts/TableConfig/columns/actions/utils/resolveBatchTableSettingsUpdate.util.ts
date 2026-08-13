@@ -21,11 +21,18 @@ export type BatchTableSettingsUpdate<TData> = {
 
 type ResolveBatchTableSettingsUpdateArgs<TData> = {
   readonly columns: readonly TableColumn<TData>[];
+  /**
+   * The group keys the same Accept is committing — the **next** ones, not the
+   * applied ones, so the hierarchy column appears and disappears in the same
+   * write that turns grouping on or off (ADR-065).
+   */
+  readonly groupingKeys: readonly string[];
   readonly settings: BatchTableSettingsUpdate<TData>;
 };
 
 export const resolveBatchTableSettingsUpdate = <TData>({
   columns,
+  groupingKeys,
   settings,
 }: ResolveBatchTableSettingsUpdateArgs<TData>) => {
   const {
@@ -39,6 +46,7 @@ export const resolveBatchTableSettingsUpdate = <TData>({
     columns,
     columnSizing: settings.columnSizing,
     columnVisibility: settings.columnVisibility,
+    groupingKeys,
     sorting: settings.sorting,
   });
 

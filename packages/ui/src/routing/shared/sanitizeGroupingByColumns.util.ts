@@ -9,7 +9,11 @@ type SanitizeGroupingByColumnsArgs<TData extends Record<string, unknown>> = {
   readonly grouping: TableGroupingState;
 };
 
-const NO_GROUPING: TableGroupingState = { aggregates: {}, keys: [] };
+const NO_GROUPING: TableGroupingState = {
+  aggregates: {},
+  keys: [],
+  mode: 'flat',
+};
 
 /**
  * Narrows a URL-supplied grouping configuration to what this route's columns
@@ -28,6 +32,11 @@ const NO_GROUPING: TableGroupingState = { aggregates: {}, keys: [] };
  * `MAX_TABLE_GROUP_KEYS`: the server refuses both too, and turning a 400 into a
  * flat table beats turning it into a 500.
  *
+ * The **mode** passes through untouched. Which grouping sets a read emits is a
+ * property of the query rather than of any column, so no column declaration can
+ * refuse one — the closed vocabulary is enforced by the codec before this, and
+ * the server refuses a mode its builder has no expansion for after it.
+ *
  * `resolveColumnCapabilities` is the only column predicate here: a column keyed
  * `actions` is refused because `createActionsColumn` declares it ungroupable,
  * not because this function knows about that key. An aggregate's column is
@@ -41,7 +50,7 @@ export const sanitizeGroupingByColumns = <
   columns,
   grouping,
 }: SanitizeGroupingByColumnsArgs<TData>): TableGroupingState => {
-  const { aggregates, keys } = grouping;
+  const { aggregates, keys, mode } = grouping;
 
   if (keys.length === 0 || keys.length > MAX_TABLE_GROUP_KEYS) {
     return NO_GROUPING;
@@ -63,6 +72,6 @@ export const sanitizeGroupingByColumns = <
   return isEveryKeyGroupable &&
     areKeysDistinct &&
     isEveryAggregateColumnDeclared
-    ? { aggregates: { ...aggregates }, keys: [...keys] }
+    ? { aggregates: { ...aggregates }, keys: [...keys], mode }
     : NO_GROUPING;
 };

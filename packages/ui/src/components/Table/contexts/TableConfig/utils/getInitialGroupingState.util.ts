@@ -1,5 +1,6 @@
 import type {
   TableAggregateFn,
+  TableGroupingMode,
   TableGroupingState,
 } from '#ui/components/Table/Table.types';
 
@@ -8,9 +9,14 @@ import { areGroupKeysLegal } from '../grouping/utils';
 type GetInitialGroupingStateArgs = {
   readonly groupingAggregates?: Readonly<Record<string, TableAggregateFn>>;
   readonly groupingKeys?: readonly string[];
+  readonly groupingMode?: TableGroupingMode;
 };
 
-const NO_GROUPING: TableGroupingState = { aggregates: {}, keys: [] };
+const NO_GROUPING: TableGroupingState = {
+  aggregates: {},
+  keys: [],
+  mode: 'flat',
+};
 
 /**
  * Builds the grouping store's initial state from the configuration the loader
@@ -41,6 +47,10 @@ const NO_GROUPING: TableGroupingState = { aggregates: {}, keys: [] };
  * is `unchanged`, leaving the applied grouping alone, while a seed has no prior
  * state to leave alone and can only answer no grouping.
  *
+ * The mode goes with them too, defaulting to `flat`: a route that never offers
+ * the choice, and every link written before rollup existed, both mean the one
+ * grouping set they have always meant.
+ *
  * Aggregates go with the keys. An aggregate is computed per group, so with no
  * key there is nothing for it to describe — the same normalisation
  * `resolveTableGroupingUpdate` applies when the last key is removed.
@@ -48,6 +58,7 @@ const NO_GROUPING: TableGroupingState = { aggregates: {}, keys: [] };
 export const getInitialGroupingState = ({
   groupingAggregates = {},
   groupingKeys = [],
+  groupingMode = 'flat',
 }: GetInitialGroupingStateArgs): TableGroupingState => {
   if (groupingKeys.length === 0 || !areGroupKeysLegal(groupingKeys)) {
     return NO_GROUPING;
@@ -56,5 +67,6 @@ export const getInitialGroupingState = ({
   return {
     aggregates: { ...groupingAggregates },
     keys: [...groupingKeys],
+    mode: groupingMode,
   };
 };

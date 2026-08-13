@@ -17,6 +17,7 @@ export const commitResolvedPinningState = <TData>({
   columnsStore,
   columnVisibility,
   drawersSyncNonce,
+  groupingKeys,
   metaStore,
   persistenceKey,
   persistTableState,
@@ -28,6 +29,7 @@ export const commitResolvedPinningState = <TData>({
       columns,
       columnSizing,
       columnVisibility,
+      groupingKeys,
     });
 
   if (

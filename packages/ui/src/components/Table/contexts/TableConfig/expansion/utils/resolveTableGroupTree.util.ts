@@ -28,6 +28,29 @@ type VisibleRow<TData> = {
   readonly row: TData;
 };
 
+/**
+ * The path keys that some other row calls its parent — i.e. every group row
+ * that owns something.
+ *
+ * Read off the **tree**, not off adjacency. The obvious walk asks whether the
+ * *next* row is deeper, and that answer is only right while a parent precedes
+ * its children: rollup emits a subtotal **after** the rows it totals (#570), so
+ * an adjacency test reports every subtotal as childless, withholds
+ * `aria-expanded` from it, and leaves the one row a user most wants to fold
+ * unfoldable.
+ *
+ * Built over the **loaded** nodes rather than the visible ones, so a collapsed
+ * group still reports the children it is hiding — which is what keeps its
+ * `aria-expanded` present and `false` rather than disappearing on collapse.
+ */
+const collectParentKeys = (nodes: readonly GroupTreeNode[]) => {
+  const parentKeys = new Set<string>();
+
+  for (const node of nodes) parentKeys.add(node.parentKey);
+
+  return parentKeys;
+};
+
 const countSiblings = (parentKeys: readonly string[]) => {
   const counts = new Map<string, number>();
 
@@ -80,6 +103,7 @@ export const resolveTableGroupTree = <TData extends Record<string, unknown>>({
 
   const summaries = data.map((row) => getTableGroupRowSummary(row));
   const nodes = resolveGroupTreeNodes({ collapsedGroupPaths, summaries });
+  const parentKeys = collectParentKeys(nodes);
   const visible: VisibleRow<TData>[] = [];
 
   for (const [index, node] of nodes.entries()) {
@@ -88,7 +112,7 @@ export const resolveTableGroupTree = <TData extends Record<string, unknown>>({
     if (row === undefined || !node.isVisible) continue;
 
     visible.push({
-      hasChildren: (nodes[index + 1]?.level ?? 0) > node.level,
+      hasChildren: node.pathKey !== undefined && parentKeys.has(node.pathKey),
       node,
       row,
     });

@@ -45,6 +45,7 @@ describe('commitResolvedVisibilityState', () => {
       columnsStore,
       columnVisibility,
       drawersSyncNonce: 3,
+      groupingKeys: [],
       metaStore,
       persistenceKey: 'orders-table',
       persistTableState,
@@ -59,6 +60,7 @@ describe('commitResolvedVisibilityState', () => {
       ],
       columnSizing: { actions: 0, id: 100, name: 0 },
       columnVisibility,
+      groupingKeys: [],
     });
 
     expect(persistTableState).toHaveBeenCalledWith([
@@ -106,6 +108,7 @@ describe('commitResolvedVisibilityState', () => {
       columnsStore,
       columnVisibility: new Set(['name']),
       drawersSyncNonce: 3,
+      groupingKeys: [],
       metaStore,
       persistenceKey: 'orders-table',
       persistTableState,

@@ -32,6 +32,7 @@ describe('buildTableBodyCellDescriptor', () => {
     const descriptor = buildTableBodyCellDescriptor({
       col,
       columnSizing: {} as ColumnSizingState<Row>,
+      groupingKeys: [],
       isLoadingState: false,
       pinnedOffsets: {} as Record<RowKey, PinnedColumnInfo>,
       row: { amount: 42 },
@@ -65,6 +66,7 @@ describe('buildTableBodyCellDescriptor', () => {
     const descriptor = buildTableBodyCellDescriptor({
       col,
       columnSizing: { name: 180 } as ColumnSizingState<Row>,
+      groupingKeys: [],
       isLoadingState: false,
       pinnedOffsets: {} as Record<RowKey, PinnedColumnInfo>,
       row: { name: 'A' },
@@ -102,6 +104,7 @@ describe('buildTableBodyCellDescriptor', () => {
     const descriptor = buildTableBodyCellDescriptor({
       col,
       columnSizing: {} as ColumnSizingState<Row>,
+      groupingKeys: [],
       isLoadingState: false,
       pinnedOffsets: {
         name: pinInfo,

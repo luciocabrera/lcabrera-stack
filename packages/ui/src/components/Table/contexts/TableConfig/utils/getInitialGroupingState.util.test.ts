@@ -4,16 +4,31 @@ import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
 
 import { getInitialGroupingState } from './getInitialGroupingState.util';
 
-const NO_GROUPING = { aggregates: {}, keys: [] };
+const NO_GROUPING = { aggregates: {}, keys: [], mode: 'flat' };
 
 const keysOfLength = (length: number) =>
   Array.from({ length }, (_unused, index) => `key_${index}`);
 
 describe('getInitialGroupingState', () => {
+  it('seeds the mode the loader applied', () => {
+    expect(
+      getInitialGroupingState({
+        groupingKeys: ['order_status'],
+        groupingMode: 'rollup',
+      }).mode,
+    ).toBe('rollup');
+  });
+
+  it('defaults the mode to flat, which is what a pre-rollup link means', () => {
+    expect(
+      getInitialGroupingState({ groupingKeys: ['order_status'] }).mode,
+    ).toBe('flat');
+  });
+
   it('seeds the keys the loader applied', () => {
     expect(
       getInitialGroupingState({ groupingKeys: ['order_status'] }),
-    ).toStrictEqual({ aggregates: {}, keys: ['order_status'] });
+    ).toStrictEqual({ aggregates: {}, keys: ['order_status'], mode: 'flat' });
   });
 
   it('seeds the aggregates the loader applied', () => {
@@ -25,6 +40,7 @@ describe('getInitialGroupingState', () => {
     ).toStrictEqual({
       aggregates: { total_amount: 'sum' },
       keys: ['order_status'],
+      mode: 'flat',
     });
   });
 
@@ -32,6 +48,7 @@ describe('getInitialGroupingState', () => {
     expect(getInitialGroupingState({})).toStrictEqual({
       aggregates: {},
       keys: [],
+      mode: 'flat',
     });
   });
 

@@ -104,6 +104,8 @@ TableConfig/
 │   │   ├── utils/resolveTableGroupingUpdate.util.ts → Pure: one interaction's grouping change as data (updated / unchanged); refuses an illegal key list whole
 │   │   ├── utils/toggleTableGroupKey.util.ts        → Pure: append a key at the tail, or remove it
 │   │   ├── utils/setTableColumnAggregate.util.ts    → Pure: set or clear one column's aggregate
+│   │   ├── utils/setTableGroupingMode.util.ts       → Pure: set which grouping sets the read emits, keys and aggregates untouched (the drawer's `useSetGroupingMode` is its only caller — the mode has no apply-immediately surface)
+│   │   ├── utils/resolveGroupingColumnsPatch.util.ts → Pure: the derived columns-store patch a grouping change produces — the hierarchy column follows the keys (ADR-065)
 │   │   ├── useSetTableGrouping.hook.ts      → **Internal**: the single write path, taking a reducer so the store is read once
 │   │   ├── useToggleTableGroupKey.hook.ts   → Add/remove one key (header menu)
 │   │   ├── useSetTableColumnAggregate.hook.ts → Apply or clear one column's aggregate
@@ -139,7 +141,7 @@ TableConfig/
 ├── utils/
   ├── getInitialColumnsState.util.ts       → Build initial columns state from props; synthesizes the `actions` column via `resolveTableActionsColumn` when `crud.read/update/delete` is enabled (or a consumer `actions` column is declared), and only force-pins it right when it actually exists
   ├── getInitialExpansionState.util.ts     → Nothing collapsed: a grouped read returns whole, so the tree opens (ADR-067). No loader seed — expansion does not travel in the URL
-  ├── getInitialGroupingState.util.ts      → Build initial grouping state from the configuration the loader applied (`metaState.groupingKeys` + `metaState.groupingAggregates`)
+  ├── getInitialGroupingState.util.ts      → Build initial grouping state from the configuration the loader applied (`metaState.groupingKeys` + `metaState.groupingAggregates` + `metaState.groupingMode`)
   ├── getInitialMetaState.util.ts          → Build initial meta state from props
   └── index.ts                             → Barrel: utils
 ```
@@ -205,8 +207,16 @@ TableColumnsState<TData> = {
 TableGroupingState = {
   aggregates: Readonly<Record<string, TableAggregateFn>>; // At most one aggregate per column — the whole shape the compact URL param can carry, and the shape of the #569 deferral: no state here describes a *filtered* aggregate
   keys: readonly string[];           // Applied group keys, in the query's nesting order
+  mode: TableGroupingMode;           // `flat` (one set) or `rollup` (one per prefix, plus the grand total). Duplicated from `@lcabrera/server`'s `GroupingMode`; `cube` is deliberately absent because its sets are not prefixes and nothing renders a lattice as a tree (#574)
 };
 ```
+
+**A grouping change writes the columns store too.** The hierarchy column a
+grouped grid renders its tree in is a _derivation_ of this state, not a member
+of it (ADR-065), so `useSetTableGrouping` re-derives the columns store's view
+slices in the same interaction — from one snapshot of each store. What it does
+not touch is `columns`, `columnOrder` or `columnPinning`: the synthetic column
+must reach neither the persisted layout nor the settings drawer.
 
 ## Expansion State Shape
 
@@ -238,6 +248,7 @@ TableMetaState = {
   groupingAggregates?: Readonly<Record<string, TableAggregateFn>>; // Per-column aggregate the loader applied, sanitized from the same param; seeds the grouping store
   groupingCapabilities?: Readonly<Record<string, TableColumnGroupingCapability>>; // What each column may do in a grouped read, from the pg catalogue (ADR-058) and shipped by the loader (ADR-063). The aggregate menu is built from this and nothing else — `dataType` cannot answer it (#550). Absent = nothing is legal, never everything
   groupingKeys?: readonly string[];  // Group keys the loader applied, read from the `grouping` param and sanitized (ADR-061); seeds the grouping store
+  groupingMode?: TableGroupingMode;  // Grouping mode the loader applied, from the same param. Absent = `flat`, which is what a link written before rollup existed means
   initialPageSize: number;           // First page row count
   isBordered: boolean;               // Show borders
   isColumnSettingsOpen: boolean;     // Column settings drawer open

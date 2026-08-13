@@ -20,6 +20,7 @@ export const commitResolvedVisibilityState = <TData>({
   columnsStore,
   columnVisibility,
   drawersSyncNonce,
+  groupingKeys,
   metaStore,
   persistenceKey,
   persistTableState,
@@ -31,6 +32,7 @@ export const commitResolvedVisibilityState = <TData>({
       columns,
       columnSizing,
       columnVisibility,
+      groupingKeys,
     });
 
   const didPersist = persistTableState([

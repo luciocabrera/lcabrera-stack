@@ -33,6 +33,7 @@ describe('deriveColumnViewState', () => {
       columnPinning: { left: ['id'], right: ['age'] },
       columns,
       columnSizing,
+      groupingKeys: [],
       sorting: [{ columnKey: 'name', direction: 'asc' }],
     });
 
@@ -63,6 +64,7 @@ describe('deriveColumnViewState', () => {
       columns,
       columnSizing,
       columnVisibility: new Set(['name']),
+      groupingKeys: [],
       sorting: [],
     });
 

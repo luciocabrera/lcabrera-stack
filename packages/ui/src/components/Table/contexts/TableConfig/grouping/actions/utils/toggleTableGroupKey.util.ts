@@ -29,4 +29,5 @@ export const toggleTableGroupKey = ({
   keys: grouping.keys.includes(columnKey)
     ? grouping.keys.filter((key) => key !== columnKey)
     : [...grouping.keys, columnKey],
+  mode: grouping.mode,
 });

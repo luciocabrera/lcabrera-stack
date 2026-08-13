@@ -4,7 +4,7 @@ import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableC
 import { useTableDataContextValue } from '#ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
 
 import { usePersistTableStateAction } from '../../columns/actions/hooks/usePersistTableStateAction.hook';
-import { applyGroupingReducer } from './utils';
+import { applyGroupingReducer, resolveGroupingColumnsPatch } from './utils';
 
 /**
  * The single write path for the grouping store: hand it a function from the
@@ -44,7 +44,7 @@ import { applyGroupingReducer } from './utils';
  * render instead.
  */
 export const useSetTableGrouping = () => {
-  const { groupingStore } = useTableConfigContextValue();
+  const { columnsStore, groupingStore } = useTableConfigContextValue();
   const { dataStore } = useTableDataContextValue();
   const persistTableState = usePersistTableStateAction();
 
@@ -63,6 +63,16 @@ export const useSetTableGrouping = () => {
     if (!persistTableState(result.persistenceEntry)) return;
 
     dataStore.set({ isLoading: true });
+    // The columns store carries the derived view state, and the hierarchy
+    // column is part of it while grouping is on (ADR-065) — so a grouping
+    // change writes both stores, in the same interaction, from one snapshot
+    // each.
+    columnsStore.set(
+      resolveGroupingColumnsPatch({
+        columnsState: columnsStore.get(),
+        groupingKeys: result.grouping.keys,
+      }),
+    );
     groupingStore.set(result.grouping);
   };
 };

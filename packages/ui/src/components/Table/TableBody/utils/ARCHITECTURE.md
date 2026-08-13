@@ -7,11 +7,12 @@ Pure helper utilities used by `TableBody.component.tsx`.
 ```
 utils/
 ├── ARCHITECTURE.md                        -> This overview
-├── buildTableBodyCellDescriptor.util.tsx   -> Derives pure cell-render descriptor data
+├── buildTableBodyCellDescriptor.util.tsx   -> Derives pure cell-render descriptor data, for a group row and a detail row alike
 ├── createRenderTableBodyCell.util.ts      -> Binds sizing/pinning, then delegates to renderFromDescriptor
 ├── renderFromDescriptor.util.ts           -> Turns one cell descriptor into a TableBodyCell element
 ├── generatePlaceholderData.util.ts        -> Creates placeholder row objects for skeletons
 ├── renderTableBodyPinnedGroup.util.ts     -> Maps one pinning partition (left/center/right) through the shared cell renderer
+├── resolveGroupCellChildren.util.tsx      -> What one cell of a group row holds: label, aggregate, or nothing
 └── index.ts                               -> Barrel exports
 ```
 
@@ -20,10 +21,34 @@ utils/
 | Utility                        | Description                                                                |
 | ------------------------------ | -------------------------------------------------------------------------- |
 | `buildTableBodyCellDescriptor` | Builds default/custom cell descriptor data from a column and row           |
+| `resolveGroupCellChildren`     | The three cases a group row's cell can be, in one place                    |
 | `createRenderTableBodyCell`    | Creates a row-cell renderer bound to sizing/pinning, delegating the render |
 | `renderFromDescriptor`         | Renders a `TableBodyCell` from a built descriptor (custom vs default)      |
 | `generatePlaceholderData`      | Creates empty row objects keyed by visible columns                         |
 | `renderTableBodyPinnedGroup`   | Maps columns to rendered cells while preserving order and shared row data  |
+
+## Group rows come through the same pipeline
+
+A group row and a detail row share one cell grid
+([ADR-065](../../../../../../../docs/decisions/ADR-065-grouped-rows-render-a-hierarchy-column.md)):
+the descriptor decides what a cell **holds**, and the chrome around it — the
+`gridcell` role, the roving tab stop, the sticky offset, the width — is
+identical either way. That is what makes a group row a first-class focus target
+with no branch anywhere in the focus model, and it is why the group branch lives
+here rather than in `TableBodyRows`.
+
+Four rules, in the order the builder applies them:
+
+| Row    | Column                   | Cell holds                                          |
+| ------ | ------------------------ | --------------------------------------------------- |
+| Group  | hierarchy                | `TableGroupLabel` — the level, its label, its count |
+| Group  | actions                  | nothing: a group is not a row to act on             |
+| Group  | any other                | `TableGroupAggregate` — the aggregate, or a dash    |
+| Detail | hierarchy or a group key | nothing: stated once, by the group row above        |
+
+The last one is the first rule on the detail path that needs to know a **column**
+is a group key, which is why `groupingKeys` is bound into the renderer for the
+whole window.
 
 ## TableBodyCellDescriptor
 

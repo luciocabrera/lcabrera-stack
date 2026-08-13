@@ -10,6 +10,6 @@ export const useClearTableGrouping = () => {
   const setGrouping = useSetTableGrouping();
 
   return () => {
-    setGrouping(() => ({ aggregates: {}, keys: [] }));
+    setGrouping(() => ({ aggregates: {}, keys: [], mode: 'flat' }));
   };
 };
