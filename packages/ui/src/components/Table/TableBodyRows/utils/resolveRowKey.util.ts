@@ -1,5 +1,6 @@
 import type { TableColumn } from '#ui/components/Table/Table.types';
 
+import { resolveGroupPathKey } from '#ui/components/Table/contexts/TableConfig/grouping/utils/resolveGroupPathKey.util';
 import { getTableGroupRowSummary } from '#ui/components/Table/utils/getTableGroupRowSummary.util';
 import { resolvePrimaryKeyColumnKeys } from '#ui/components/Table/utils/resolvePrimaryKeyColumnKeys.util';
 
@@ -51,9 +52,11 @@ const isScalarKeyValue = (value: unknown): value is number | string =>
  * aggregates, so the primary-key branch below would drop every group row to its
  * index and hand the whole grouped result unstable identity.
  *
- * The identity is the group's **whole** path. Under multi-key grouping the
- * outermost key repeats across every group beneath it, so keying on one level
- * would hand every sibling the same key.
+ * The identity is the group's **whole** path, and the encoding is
+ * `resolveGroupPathKey`'s rather than a second copy of it: expansion is stored
+ * under that same key (ADR-061), so a group a collapse remembers and the row
+ * that renders it must resolve to one string or a collapse would survive a
+ * refetch by name only.
  */
 export const resolveRowKey = <TData extends Record<string, unknown>>({
   columns,
@@ -64,9 +67,7 @@ export const resolveRowKey = <TData extends Record<string, unknown>>({
   const groupSummary = getTableGroupRowSummary(row);
 
   if (groupSummary !== undefined) {
-    return `${GROUP_KEY_PREFIX}${JSON.stringify(
-      groupSummary.path.map(({ columnKey, label }) => [columnKey, label]),
-    )}`;
+    return `${GROUP_KEY_PREFIX}${resolveGroupPathKey(groupSummary.path)}`;
   }
 
   const primaryKeyKeys = resolvePrimaryKeyColumnKeys({ columns });

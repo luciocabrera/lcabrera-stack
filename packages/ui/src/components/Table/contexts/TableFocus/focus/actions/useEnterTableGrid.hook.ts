@@ -23,7 +23,8 @@ import { commitTableFocusTarget, resolveGridFocusContext } from './utils';
  */
 export const useEnterTableGrid = <TData extends Record<string, unknown>>() => {
   const { focusStore } = useTableFocusContextValue();
-  const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
+  const { columnsStore, expansionStore, metaStore } =
+    useTableConfigContextValue<TData>();
   const { dataStore } = useTableDataContextValue<TData>();
   const containerRef = useTableContainerRef();
 
@@ -44,6 +45,7 @@ export const useEnterTableGrid = <TData extends Record<string, unknown>>() => {
       resolveGridFocusContext({
         columnsState: columnsStore.get(),
         dataState: dataStore.get(),
+        expansionState: expansionStore.get(),
         focusState,
         metaState: metaStore.get(),
       });

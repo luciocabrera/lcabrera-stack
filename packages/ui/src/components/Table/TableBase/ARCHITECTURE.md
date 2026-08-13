@@ -25,6 +25,23 @@ every page and describes the fetch rather than the data. It shares one base with
 every row's `aria-rowindex`, so the last body row's index equals this count —
 the invariant `resolveGridRowIndexing.util.test.ts` pins.
 
+## A tree changes both the role and what a row is
+
+The element declares `role="treegrid"` when the loaded rows contain a group row
+and `role="grid"` otherwise — asked of the **rows**, the same question
+`TableBodyRows` asks to decide which component a row gets, so a grouped read that
+returned no groups is not announced as a tree with nothing in it
+([ADR-067](../../../../../../docs/decisions/ADR-067-expansion-is-the-collapsed-set-and-a-group-row-is-a-tree-node.md)).
+
+The row count moves with the role. Under a tree the dataset **is** the rows a
+collapse leaves standing — a hidden row is not a row of the grid — so
+`aria-rowcount` counts those, and the invariant above still holds because the
+body's indices come off the same array. Counting the dataset instead would
+advertise a total no `aria-rowindex` could ever reach.
+
+`useSyncTableGroupExpansion` is mounted here too: the grid is where the tree's
+state belongs, and it is the one element rendered in every table.
+
 **Zero rows is a count, not a missing one.** `-1` — ARIA's "unknown" — is
 reported only while `isLoading`, because that is the state in which the total
 genuinely is not known yet. A filter matching nothing is an ordinary outcome
@@ -63,12 +80,13 @@ the count and the indices are only meaningful against one another.
 
 Reads from `TableConfigContext` meta selectors:
 
-| Selector                | Controls                         |
-| ----------------------- | -------------------------------- |
-| `useGetTableDensity`    | Compact vs comfortable spacing   |
-| `useGetTableIsBordered` | Show/hide cell borders           |
-| `useGetTableIsStriped`  | `data-striped` attribute         |
-| `useGetTableTotalRows`  | `aria-rowcount` over the dataset |
+| Selector                | Controls                                                       |
+| ----------------------- | -------------------------------------------------------------- |
+| `useGetTableDensity`    | Compact vs comfortable spacing                                 |
+| `useGetTableIsBordered` | Show/hide cell borders                                         |
+| `useGetTableIsStriped`  | `data-striped` attribute                                       |
+| `useGetTableTotalRows`  | `aria-rowcount` over the dataset (outside a tree)              |
+| `useTableGroupTree`     | `role`, and `aria-rowcount` over the visible rows under a tree |
 
 ## Render
 
@@ -79,6 +97,8 @@ graph TD
   TB --> striped["useGetTableIsStriped()"]
   TB --> total["useGetTableTotalRows() → resolveAriaRowCount"]
   TB --> focus["useTableGridFocus() → tabIndex + onFocus/onBlur/onKeyDown"]
-  TB --> table["<table role='grid'> with StyleX variants"]
+  TB --> tree["useTableGroupTree() → { isTreeGrid, rows }"]
+  TB --> sync["useSyncTableGroupExpansion()"]
+  TB --> table["<table role='grid' | 'treegrid'> with StyleX variants"]
   table --> children["children (TableHeader + TableBody)"]
 ```

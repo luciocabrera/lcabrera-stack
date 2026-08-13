@@ -40,12 +40,14 @@ const {
   useGetColumnsMock,
   useGetPinnedColumnOffsetsMock,
   useGetPinnedColumnPartitionMock,
+  useGetTableCollapsedGroupPathsMock,
   useGetTableDataMock,
 } = vi.hoisted(() => ({
   useGetColumnSizingMock: vi.fn(),
   useGetColumnsMock: vi.fn(),
   useGetPinnedColumnOffsetsMock: vi.fn(),
   useGetPinnedColumnPartitionMock: vi.fn(),
+  useGetTableCollapsedGroupPathsMock: vi.fn(),
   useGetTableDataMock: vi.fn(),
 }));
 
@@ -112,6 +114,16 @@ vi.mock('../contexts/TableData/data/selectors', () => ({
   useGetTableData: useGetTableDataMock,
 }));
 
+// Only the store read is stubbed here. `useTableGroupTree` and the tree
+// derivation under it run for real, so what this suite renders is what a
+// collapse actually produces rather than a hand-written row list (ADR-067).
+vi.mock(
+  '#ui/components/Table/contexts/TableConfig/expansion/selectors',
+  () => ({
+    useGetTableCollapsedGroupPaths: useGetTableCollapsedGroupPathsMock,
+  }),
+);
+
 const setupDefaultMocks = () => {
   useGetPinnedColumnPartitionMock.mockReturnValue({
     centerCols: [
@@ -127,6 +139,7 @@ const setupDefaultMocks = () => {
   ]);
   useGetColumnSizingMock.mockReturnValue({});
   useGetPinnedColumnOffsetsMock.mockReturnValue({});
+  useGetTableCollapsedGroupPathsMock.mockReturnValue(new Set<string>());
   useGetTableDataMock.mockReturnValue([
     { amount: 10, name: 'A' },
     { amount: 20, name: 'B' },

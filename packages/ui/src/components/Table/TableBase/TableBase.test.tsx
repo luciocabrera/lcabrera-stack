@@ -18,14 +18,18 @@ const {
   useGetTableIsLoadingMock,
   useGetTableIsStripedMock,
   useGetTableTotalRowsMock,
+  useSyncTableGroupExpansionMock,
   useTableGridFocusMock,
+  useTableGroupTreeMock,
 } = vi.hoisted(() => ({
   useGetTableDensityMock: vi.fn(),
   useGetTableIsBorderedMock: vi.fn(),
   useGetTableIsLoadingMock: vi.fn(),
   useGetTableIsStripedMock: vi.fn(),
   useGetTableTotalRowsMock: vi.fn(),
+  useSyncTableGroupExpansionMock: vi.fn(),
   useTableGridFocusMock: vi.fn(),
+  useTableGroupTreeMock: vi.fn(),
 }));
 
 vi.mock('../contexts/TableConfig/meta/selectors', () => ({
@@ -43,7 +47,9 @@ vi.mock('../contexts/TableData/data/selectors', () => ({
 // a real provider stack and a real virtualization window. Stubbing it here keeps
 // this suite about the element TableBase renders.
 vi.mock('#ui/components/Table/hooks', () => ({
+  useSyncTableGroupExpansion: useSyncTableGroupExpansionMock,
   useTableGridFocus: useTableGridFocusMock,
+  useTableGroupTree: useTableGroupTreeMock,
 }));
 
 afterEach(() => {
@@ -58,6 +64,11 @@ describe('TableBase', () => {
     useGetTableIsLoadingMock.mockReturnValue(false);
     useGetTableTotalRowsMock.mockReturnValue(0);
     useTableGridFocusMock.mockReturnValue({ tabIndex: 0 });
+    useTableGroupTreeMock.mockReturnValue({
+      isTreeGrid: false,
+      rowMeta: undefined,
+      rows: [],
+    });
   });
 
   it('renders children inside a table element', () => {
@@ -177,6 +188,32 @@ describe('TableBase', () => {
     const grid = screen.getByTestId('table');
     expect(grid.getAttribute('role')).toBe('grid');
     expect(grid.getAttribute('aria-rowcount')).toBe('121');
+  });
+
+  it('upgrades to role=treegrid, and counts the rows a collapse leaves standing', () => {
+    // The two move together on purpose: a treegrid's rows *are* the visible
+    // ones, so a count taken from the dataset would advertise more rows than
+    // the body can ever emit an `aria-rowindex` for (ADR-067).
+    useGetTableTotalRowsMock.mockReturnValue(120);
+    useTableGroupTreeMock.mockReturnValue({
+      isTreeGrid: true,
+      rowMeta: [],
+      rows: [{}, {}, {}],
+    });
+
+    render(
+      <TableBase>
+        <tbody>
+          <tr>
+            <td>Orders</td>
+          </tr>
+        </tbody>
+      </TableBase>,
+    );
+
+    const grid = screen.getByTestId('table');
+    expect(grid.getAttribute('role')).toBe('treegrid');
+    expect(grid.getAttribute('aria-rowcount')).toBe('4');
   });
 
   it('forwards native table attributes', () => {

@@ -5,15 +5,19 @@ import type {
   TableColumnsState,
   TableDataState,
   TableFocusState,
+  TableGroupExpansionState,
   TableMetaState,
 } from '#ui/components/Table/Table.types';
 
+import { resolveGroupPathKey } from '#ui/components/Table/contexts/TableConfig/grouping/utils/resolveGroupPathKey.util';
 import {
   getInitialColumnsState,
+  getInitialExpansionState,
   getInitialMetaState,
 } from '#ui/components/Table/contexts/TableConfig/utils';
 import { getInitialDataState } from '#ui/components/Table/contexts/TableData/utils';
 import { getInitialFocusState } from '#ui/components/Table/contexts/TableFocus/focus/utils';
+import { TABLE_GROUP_ROW_FIELD } from '#ui/components/Table/Table.constants';
 import { resolveRowKey } from '#ui/components/Table/TableBodyRows/utils/resolveRowKey.util';
 
 import { resolveGridFocusContext } from './resolveGridFocusContext.util';
@@ -30,6 +34,16 @@ const rows: readonly Row[] = [
   { city: 'B', id: 2 },
   { city: 'C', id: 3 },
 ];
+
+const groupPath = [{ columnKey: 'city', label: 'A' }];
+
+const groupedRows: readonly Row[] = [
+  { [TABLE_GROUP_ROW_FIELD]: { aggregates: [], count: 2, path: groupPath } },
+  { city: 'A', id: 1 },
+  { city: 'A', id: 2 },
+];
+
+const expansionState = getInitialExpansionState();
 
 const columnsState = getInitialColumnsState<Row>({
   columns,
@@ -57,13 +71,16 @@ describe('resolveGridFocusContext', () => {
     const context = resolveGridFocusContext({
       columnsState,
       dataState,
+      expansionState,
       focusState: focusStateFor({}),
       metaState,
     });
 
     expect(context.columnKeys).toEqual(['id', 'city']);
     expect(context.columns).toBe(columnsState.columns);
+    // Ungrouped rows come back by reference: no tree, no per-row allocation.
     expect(context.data).toBe(rows);
+    expect(context.rowMeta).toBeUndefined();
     expect(context.rowHeight).toBe(44);
   });
 
@@ -71,6 +88,7 @@ describe('resolveGridFocusContext', () => {
     const context = resolveGridFocusContext({
       columnsState,
       dataState,
+      expansionState,
       focusState: focusStateFor({}),
       metaState,
     });
@@ -82,6 +100,7 @@ describe('resolveGridFocusContext', () => {
     const context = resolveGridFocusContext({
       columnsState,
       dataState,
+      expansionState,
       focusState: focusStateFor({
         columnKey: 'city',
         rowIndex: 0,
@@ -92,5 +111,37 @@ describe('resolveGridFocusContext', () => {
 
     // The stored index is stale — identity is what decides, not position.
     expect(context.focusedRowIndex).toBe(2);
+  });
+
+  it('navigates the rows a collapse leaves standing, not every loaded row', () => {
+    // The discriminating case: a row hidden under a collapsed ancestor has no
+    // cell to receive focus, so a move that still counted it would consume a
+    // key press and land nowhere.
+    const groupedDataState = getInitialDataState<Row>({
+      data: groupedRows,
+      totalRows: groupedRows.length,
+    }) as TableDataState<Row>;
+    const collapsed: TableGroupExpansionState = {
+      collapsedGroupPaths: new Set([resolveGroupPathKey(groupPath)]),
+    };
+
+    const expanded = resolveGridFocusContext({
+      columnsState,
+      dataState: groupedDataState,
+      expansionState,
+      focusState: focusStateFor({}),
+      metaState,
+    });
+    const context = resolveGridFocusContext({
+      columnsState,
+      dataState: groupedDataState,
+      expansionState: collapsed,
+      focusState: focusStateFor({}),
+      metaState,
+    });
+
+    expect(expanded.data).toHaveLength(3);
+    expect(context.data).toHaveLength(1);
+    expect(context.rowMeta?.[0]?.isExpanded).toBe(false);
   });
 });

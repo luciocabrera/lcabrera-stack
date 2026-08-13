@@ -21,5 +21,10 @@ export const getShouldApplyCellFocus = ({
     return true;
   }
 
-  return cell.closest('[role="grid"]')?.contains(activeElement) ?? false;
+  // Both roles: the same element answers to `treegrid` while its rows are a
+  // tree (ADR-067), and a cell has to find its grid either way.
+  return (
+    cell.closest('[role="grid"],[role="treegrid"]')?.contains(activeElement) ??
+    false
+  );
 };

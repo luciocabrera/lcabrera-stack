@@ -14,12 +14,13 @@ contexts/
 │   ├── FiltersDataContext.*     → Context, Provider, Types
 │   └── filters/                → 1 store, 2 actions, 1 selector, 1 util
 │
-├── TableConfig/                → Column settings + UI meta + row grouping (multi-store)
+├── TableConfig/                → Column settings + UI meta + row grouping + expansion (multi-store)
 │   ├── TableConfigContext.*     → Context, Provider, Types
 │   ├── columns/                → Column store, actions, selectors
+│   ├── expansion/              → Expansion store, actions, selectors, the group-tree derivation (ADR-067)
 │   ├── grouping/               → Grouping store, actions, selectors (ADR-061)
 │   ├── meta/                   → Meta store, actions, selectors
-│   └── utils/                  → getInitialColumnsState, getInitialGroupingState, getInitialMetaState
+│   └── utils/                  → getInitialColumnsState, getInitialExpansionState, getInitialGroupingState, getInitialMetaState
 │
 ├── TableData/                  → Row data + loading + pagination
 │   ├── TableDataContext.*       → Context, Provider, Types
@@ -54,10 +55,12 @@ graph TD
 
 **Why this order matters:**
 
-- **TableConfigProvider** is outermost — column definitions, meta config and
-  grouping state are stable across data fetches. Grouping lives here for exactly
-  that reason: a grouping change causes a navigation, and state on the data
-  context would not survive it (ADR-061)
+- **TableConfigProvider** is outermost — column definitions, meta config,
+  grouping state and expansion are stable across data fetches. Grouping lives
+  here for exactly that reason: a grouping change causes a navigation, and state
+  on the data context would not survive it (ADR-061). Expansion sits beside it
+  rather than on it, because `TableGroupingState` also crosses the loader
+  boundary and a `Set` does not (ADR-067)
 - **TableFocusProvider** sits beside the config, above Suspense, for the same
   reason grouping does: the data context is re-created on every navigation, so
   focus held there would be discarded by a revalidation the user did not ask for
@@ -74,6 +77,7 @@ graph TD
 graph LR
   subgraph TableConfigProvider
     CS["columnsStore"]
+    ES["expansionStore"]
     GS["groupingStore"]
     MS["metaStore"]
   end
@@ -100,13 +104,13 @@ graph LR
 The per-slice hook lists live in each context's own `ARCHITECTURE.md` and its
 `INVENTORY.md` rows, which is where they stay in step with the code.
 
-| Context        | Store(s)                                       | State Pattern                            |
-| -------------- | ---------------------------------------------- | ---------------------------------------- |
-| `TableConfig`  | `columnsStore` + `groupingStore` + `metaStore` | `TStore` + `useSyncExternalStore`        |
-| `FiltersData`  | `filtersDataStore`                             | Single `TStore` + `useSyncExternalStore` |
-| `TableData`    | `dataStore`                                    | Single `TStore` + `useSyncExternalStore` |
-| `TableFocus`   | `focusStore`                                   | Single `TStore` + `useSyncExternalStore` |
-| `TableWrapper` | — (ref only)                                   | `RefObject<HTMLDivElement>`              |
+| Context        | Store(s)                                                          | State Pattern                            |
+| -------------- | ----------------------------------------------------------------- | ---------------------------------------- |
+| `TableConfig`  | `columnsStore` + `expansionStore` + `groupingStore` + `metaStore` | `TStore` + `useSyncExternalStore`        |
+| `FiltersData`  | `filtersDataStore`                                                | Single `TStore` + `useSyncExternalStore` |
+| `TableData`    | `dataStore`                                                       | Single `TStore` + `useSyncExternalStore` |
+| `TableFocus`   | `focusStore`                                                      | Single `TStore` + `useSyncExternalStore` |
+| `TableWrapper` | — (ref only)                                                      | `RefObject<HTMLDivElement>`              |
 
 ## Cross-Context Data Flow
 
@@ -115,6 +119,7 @@ graph TD
   subgraph "Configuration Layer"
     CS["columnsStore<br/>(columns, filters, sorting, pinning, sizing, visibility)"]
     GS["groupingStore<br/>(applied group keys)"]
+    ES["expansionStore<br/>(collapsed group paths)"]
     MS["metaStore<br/>(density, title, drawer toggles, row height, capabilities)"]
   end
 

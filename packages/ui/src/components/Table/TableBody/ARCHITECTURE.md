@@ -24,10 +24,18 @@ eliminating visual gaps regardless of scroll speed.
 slice visible rows. This caused `TableBody` to re-render on every data
 change (fetch, load-more).
 
-Now `TableBody` subscribes only to `useGetTableTotalLoadedRows()` (a number)
-for virtualisation, and delegates row rendering to `TableBodyRows` via props
-`{ startIndex, endIndex, isLoadingState }`. Data-dependent re-renders are
-scoped to `TableBodyRows`.
+Now `TableBody` reads only a **count** for virtualisation and delegates row
+rendering to `TableBodyRows` via props `{ startIndex, endIndex, isLoadingState }`.
+Data-dependent re-renders are scoped to `TableBodyRows`.
+
+The count is the rows a collapse leaves standing (`useTableGroupTree().rows.length`),
+not `totalLoadedRows`: `<tbody>`'s declared height and both spacers are derived
+from it, so counting rows hidden under a collapsed ancestor would leave the body
+taller than its contents by exactly that subtree
+([ADR-067](../../../../../../docs/decisions/ADR-067-expansion-is-the-collapsed-set-and-a-group-row-is-a-tree-node.md)).
+`useGetTableTotalLoadedRows` still decides the **empty** branch — a fully
+collapsed tree is not an empty table, it is a table showing only its group
+rows.
 
 ## The populated body declares role="rowgroup"; the empty one does not
 

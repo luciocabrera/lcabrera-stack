@@ -13,6 +13,7 @@ const {
   useGetTableOverscanMock,
   useGetTableRowHeightMock,
   useGetTableTotalLoadedRowsMock,
+  useTableGroupTreeMock,
   useVirtualizationMock,
 } = vi.hoisted(() => ({
   useGetPinnedColumnPartitionMock: vi.fn(),
@@ -21,6 +22,7 @@ const {
   useGetTableOverscanMock: vi.fn(),
   useGetTableRowHeightMock: vi.fn(),
   useGetTableTotalLoadedRowsMock: vi.fn(),
+  useTableGroupTreeMock: vi.fn(),
   useVirtualizationMock: vi.fn(),
 }));
 
@@ -89,6 +91,10 @@ vi.mock('#ui/components/Table/TableEmptyState', () => ({
   ),
 }));
 
+vi.mock('#ui/components/Table/hooks', () => ({
+  useTableGroupTree: useTableGroupTreeMock,
+}));
+
 vi.mock('#ui/hooks', () => ({
   useVirtualization: useVirtualizationMock,
 }));
@@ -103,6 +109,11 @@ const setupDefaultMocks = () => {
   useGetTableIsLoadingMock.mockReturnValue(false);
   useGetTableIsLoadingMoreMock.mockReturnValue(false);
   useGetTableTotalLoadedRowsMock.mockReturnValue(3);
+  useTableGroupTreeMock.mockReturnValue({
+    isTreeGrid: false,
+    rowMeta: undefined,
+    rows: [{}, {}, {}],
+  });
   useGetPinnedColumnPartitionMock.mockReturnValue({
     centerCols: [
       { key: 'name', label: 'Name' },
@@ -196,15 +207,25 @@ describe('TableBody', () => {
     expect(spacers[1]?.dataset.height).toBe('400');
   });
 
-  it('passes totalLoadedRows to useVirtualization as totalItems', () => {
+  it('sizes the window from the rows a collapse leaves standing, not the loaded count', () => {
+    // The discriminating case, and the height invariant itself: `<tbody>`'s
+    // declared height and both spacers come from `totalItems`, so counting rows
+    // hidden under a collapsed ancestor would leave the body taller than its
+    // contents by exactly that subtree (ADR-067). The two numbers are
+    // deliberately different here — reading the loaded count would answer 42.
     setupDefaultMocks();
     useGetTableTotalLoadedRowsMock.mockReturnValue(42);
+    useTableGroupTreeMock.mockReturnValue({
+      isTreeGrid: true,
+      rowMeta: [],
+      rows: Array.from({ length: 7 }, () => ({})),
+    });
     useVirtualizationMock.mockReturnValue({
       bottomSpacerHeight: 0,
-      endIndex: 10,
+      endIndex: 7,
       offsetY: 0,
       startIndex: 0,
-      totalHeight: 1848,
+      totalHeight: 308,
     });
 
     const tableContainerRef = {
@@ -218,7 +239,7 @@ describe('TableBody', () => {
     );
 
     expect(useVirtualizationMock).toHaveBeenCalledWith(
-      expect.objectContaining({ totalItems: 42 }),
+      expect.objectContaining({ totalItems: 7 }),
     );
   });
 
