@@ -2,8 +2,9 @@
 
 - **Status:** Accepted
 - **Date:** 2026-08-13
+- **Amended:** 2026-08-13 (#659) — the primary decision is unchanged; the rejection of the repurposed data column is restated on multi-key grouping, a grouped-by data column blanks on its detail rows, the retained banner is withdrawn, and all three are read off one principle. The body below is the record as accepted; every passage the amendment changes is marked where it stands. See [Amendments](#amendments).
 - **Scope:** `@lcabrera/ui` — `src/components/Table/` group rows and the cell grid they share with detail rows
-- **Issue:** #647 — constrains #570, #571, #648 and #651
+- **Issue:** #647 — constrains #570, #571, #648 and #651; amended by #659
 - **Related:** [ADR-062](./ADR-062-grid-semantics-roving-focus-and-row-identity.md) (grid roles, roving focus, row identity), [ADR-061](./ADR-061-grouping-config-in-url-expansion-in-store.md) (where grouping configuration and expansion live), [ADR-059](./ADR-059-aggregation-is-builder-generated.md) (what a grouped read returns), [ADR-058](./ADR-058-grouping-legality-by-analytical-role.md) (which aggregates a column may offer)
 
 ## Context
@@ -86,6 +87,10 @@ Two constraints narrow the field before any aesthetic judgement:
    in order to render less.
 3. **Hierarchy column, with the banner retained for exactly one configuration.
    `Chosen.`**
+
+> **Amended by #659.** Option 3 is withdrawn and option 2 — hierarchy column
+> everywhere, banner deleted — is the decision. Its rejection above is answered
+> in [Amendments](#amendments): the cost it names is real and accepted.
 
 ## Decision
 
@@ -179,6 +184,11 @@ table large enough to want it (ADR-059: a grouped read returns whole).
 
 ### The banner survives in exactly one configuration
 
+> **Withdrawn by #659.** This sub-decision is no longer in force: a single group
+> key with no aggregates is a tree like every other tree, so it takes the
+> hierarchy column too. The paragraphs below are the record of what was accepted
+> and of the readability cost now being paid; see [Amendments](#amendments).
+
 **A single group key with no selected aggregates.** There, every non-label column
 would be a dash, the row has nothing to align, and the existing one-line
 `Key: Value (n)` summary reads better than a label followed by an empty grid. It
@@ -256,6 +266,11 @@ Give the group row one `TableBodyCell` per rendered column and step 3 is answere
 by construction. No branch in the focus model changes, and #571 inherits a row
 that is already a first-class focus target before it adds expansion to it.
 
+> **Withdrawn by #659**, together with the banner it describes. The escape it
+> records is the one that was taken: the banner collapses into the hierarchy
+> column, and #651 closes across the board rather than in all but one
+> configuration.
+
 **The retained banner keeps that hole open in its one configuration, and that is
 the cost of retaining it.** A single-key group row with no aggregates still has
 one cell, so #651's swallowed keypress persists there and **#651 cannot be closed
@@ -293,6 +308,8 @@ of pinning it unconditionally, accepted because the alternative failure — grou
 rows detached from their labels — is worse and happens in the ordinary case
 rather than at the margin.
 
+> **Withdrawn by #659.** One rendering path exists, not two.
+
 **Two rendering paths exist where there was one.** The banner's narrow survival
 means "how does a group row render" has two answers, and every later change to
 group-row rendering has to be applied to both or deliberately not. That is the
@@ -300,6 +317,11 @@ price of the mix, and it is the reason the boundary is written as a condition on
 the data rather than as a preference.
 
 ## Alternatives considered
+
+> **Superseded by #659.** The rejection stands; the reason recorded here does
+> not carry it. Hiding and reordering are both already withheld by `isStatic`,
+> so this paragraph is answerable as written — the argument that survives is
+> multi-key grouping, and it is in [Amendments](#amendments).
 
 **Rejected: repurposing the first group key's data column as the hierarchy
 column.** It reads well — the label lands in the column the group is keyed by, so
@@ -335,6 +357,204 @@ choose the row shape in order to place a subtotal's values, so the decision woul
 have been made either way — just inside a feature PR, undocumented, and binding
 on #571, #648 and #651 without any of them being consulted.
 
+## Amendments
+
+**2026-08-13 — the result-shape principle, and the three things it settles
+(#659).** The primary decision is unchanged: a grid-owned hierarchy column, with
+every other column's aggregate in its own cell. What changes is the argument
+under it. The rejection of the repurposed data column was rested on column hide
+and reorder, and that argument does not survive contact with the code — so it is
+restated on the ground that does. Two further points follow from stating the
+principle the decision was actually made on, and one of them withdraws a
+sub-decision.
+
+### The principle
+
+**The rendering follows the shape of the result set, and the grouping mode
+determines that shape.** It is not a per-configuration judgement about what reads
+more nicely.
+
+`GroupingMode` in
+`packages/server/src/db/group-query-builder/group-query-builder.types.ts` has two
+members today, `flat` and `rollup`, and `expandGroupingSets` builds both by
+dropping keys from the tail of the key list — so every grouping set either mode
+emits is a **prefix** of it. Prefixes form a chain, so every row has exactly one
+parent, and depth is a property the row carries. That is a **tree**, and a tree
+renders as the hierarchy column: indentation is a faithful encoding of depth
+because depth exists.
+
+`cube` (#574) is deliberately absent from that union, for the same structural
+reason: it emits every subset of the keys, so it returns rows like
+`(all countries, Electronics)` — a child of no country. Its sets are not
+prefixes, which is why the comment on `expandGroupingSets` records that adding it
+needs a real expansion rather than an entry in the count map, and why
+[`table-row-grouping-plan.md`](../agents/planning/table-row-grouping-plan.md)
+notes that a row's grouped-key count equals tree depth **only** under rollup.
+A row with no parent has no depth, so indentation has nothing to encode. That is
+a **lattice**, and a lattice renders flat: each group key keeps its own column
+and the filled cells are coordinates rather than a level. When cube lands, that
+is the shape it takes, and it is a different rendering because it is a different
+result set — not a second opinion about the same one.
+
+### 1 — Why the repurposed data column is rejected, restated
+
+The rejection recorded above leans on hide and reorder, and `isStatic` on
+`TableColumn` already withholds both — a shipped capability, not a proposal.
+`resolveColumnCapabilities` resolves the flag;
+`useToggleColumnVisibility` returns early for a static column;
+`TableHeaderActionsMenu` computes `hasPinAndHide = !isStatic`, so a static
+column's header menu offers neither hide nor pin; `createDraggableItems` marks
+the drawer row `isDraggable: !isStatic`, and `DraggableListItem` wires the drag
+handlers only while dragging is enabled, so a static row is neither a drag source
+nor a drop target. **`isStatic` was considered for this and is not the missing
+piece** — the rejection does not need it.
+
+The argument that carries the rejection is multi-key grouping.
+`MAX_TABLE_GROUP_KEYS` (`@lcabrera/ui`) and `MAX_GROUP_KEYS` (`@lcabrera/server`)
+are pinned to each other by
+`apps/react-router/src/routes/enterprise-orders/.server/groupingContract.test.ts`,
+and `Table.constants.test.ts` asserts the UI cap admits more than one key, so a
+group's identity is a tuple by contract and not by today's configuration:
+`TableGroupRowSummary.path` is the key values **in key order**. Repurposing has
+two readings and neither survives it.
+
+**Reading A — only the first group key's column is the hierarchy column.** A
+group at depth _n_ carries _n_ path entries and this reading offers one cell for
+them, so levels two and below have nowhere to render. A second group key is
+enough to break it. Nothing has to be hidden and nothing has to be reordered,
+which is why the original rejection could be answered without touching the
+conclusion.
+
+**Reading B — each grouped column carries its own level.** The staircase: the
+level-1 key's value sits in the level-1 key's column, the level-2 key's in its
+own, and depth is read from which column is filled. This **works**, and the data
+already supports it — `TableGroupKeyValue` carries `columnKey` beside `label`, so
+every level names the column it belongs in. It is the flat rollup-report form,
+and by the principle above it is the right rendering for a lattice.
+
+It fails for **this** grid, for a reason that is about arrangement rather than
+about capability. A staircase reads only while the group-key columns appear in
+key order with nothing between them, because "which column is filled" is the
+entire depth signal — an ungrouped column sitting between two of them is read as
+a rung. Grouping establishes neither property:
+
+- **Column order and grouping are independent state, persisted through different
+  channels.** Column order, pinning and visibility are per-browser layout,
+  written to the cookie by `usePersistTableStateAction` and seeded back by the
+  loader; the grouping configuration is in the URL (ADR-061). Group by `Country`
+  then `Status` in a table whose columns run Name, Status, Amount, Country and
+  level 2 sits to the left of level 1 with an unrelated column between them —
+  before anyone drags anything.
+- **`isStatic` freezes an arrangement; it cannot create one.**
+  `restoreStaticColumnOrder` re-inserts every static key at its **index** in the
+  current order and lets the rest fill in around them, so marking the group-key
+  columns static pins them to exactly the positions they already occupy — gaps
+  and inversions included — and the number of columns standing between two of
+  them is then invariant under every drag. The user can change which column sits
+  in the gap; the only way to close it is to hide the column, which makes the
+  hierarchy's legibility depend on visibility state that has nothing to do with
+  the query. Pinning is the same story on another axis: one group-key column
+  pinned left while its sibling sits in the centre puts two rungs of the ladder
+  either side of the horizontal scroll region, and `isStatic` locks that in
+  rather than resolving it.
+
+Making the staircase safe therefore means the grid **imposing** the arrangement —
+moving the group-key columns to the front in key order when grouping is applied,
+and forbidding every other column from crossing them for as long as it is on.
+That is two costs, not one. It rewrites cookie-persisted layout the user chose,
+as a side effect of a query change. And it makes column order into query
+structure: if position carries the level, a drag is a re-key, so a presentation
+gesture rewrites the `GROUP BY` — and since order is per-browser while grouping
+travels in the link, two people opening the same grouped URL would be reading
+different hierarchies. A grid-owned column has neither problem, because its
+position is not the user's to hold an opinion about.
+
+### 2 — A grouped-by data column renders blank on its detail rows
+
+**New sub-decision.** Group by `Status` and every detail row inside a group
+carries the same value under a header that already says it — a column of one
+word, repeated. The value is stated once, by the group row that owns it, and
+which group a detail row belongs to is what the indentation above it already
+says. So a data column that is currently a group key renders **blank** on detail
+rows.
+
+On a **group** row that column follows the general rule unchanged: the selected
+aggregate if one was chosen on it, the em dash if not. Filling it with the key's
+own value instead is reading B, rejected above.
+
+Two constraints hold it in place.
+
+**The column stays visible, with its header.** Ungrouping is one interaction
+away, and this is not a hidden column — the user did not ask for it to go, and
+the grid must not spend the user's visibility state to say something about the
+query. It is also where the column's own controls live: `getEffectiveColumns`
+drops a hidden column before the header renders, and `ManageColumnAction` — the
+only opener of the per-column `ColumnSettingsDrawer`, whose Filter tab is where
+that column's filter is edited — sits inside the header actions menu. Hiding the
+column would take that with it. (The settings drawer's add-filter picker offers
+every filterable column regardless of visibility, so filtering would not be lost
+outright; the column's own header-anchored route to it would be.)
+
+**Blank here does not collide with the two blanks the grid already has.** Against
+the **em dash**, the two never share a row: the dash is a group-row state meaning
+_no aggregate was requested_, and paints a glyph; this is a detail-row state, and
+paints nothing. Against `renderCellContent`'s empty string — _absent value_, the
+reading `parseNumberValue`'s comment protects — the separation is not by glyph
+but by the fact that in a grouped column the two readings cannot disagree. Every
+detail row in a group carries that group's key value by construction, so "the
+value is on my group row" is true; and when the key itself is NULL, "there is no
+value here" is true at the same time. The blank never asserts something false,
+and in every **ungrouped** column it keeps its existing meaning untouched.
+
+What this hands to #570/#571 rather than deciding: the detail path has no reason
+to read the grouping configuration today — `TableBodyRows` asks the **row** which
+component it gets, not the configuration — so this is the first rule on that path
+that needs to know a **column** is a group key. `useGetTableGroupingKeys` is the
+selector, and the store it reads is one the body cells are already inside; the
+requirement is that the cell consult it, in the same way that keeping the
+hierarchy column out of the drawer is a `filterSettingsColumns` exclusion someone
+has to write.
+
+### 3 — The banner is dropped
+
+**The retained banner is withdrawn. There is one rendering path for a group
+row.** A single group key with no selected aggregates is a `flat` result with one
+key: a tree, like every other tree, so by the principle it takes the hierarchy
+column. The carve-out rested on that configuration reading more nicely, which is
+exactly the case-by-case reasoning the principle exists to remove — and a
+boundary that has to be re-argued per configuration is one that spreads.
+
+What follows:
+
+- **One rendering path, not two.** Every later change to group-row rendering is
+  made once, rather than being applied to both paths or deliberately not. The
+  Consequences note about two paths is withdrawn, and with it the reason the
+  boundary had to be written as a condition on the data — there is no boundary
+  left to hold.
+- **One fewer focus special case, and #651 closes outright.** The Consequences
+  section above establishes that the swallowed keypress is answered by giving a
+  group row real cells, and that the retained banner would have kept the hole
+  open in its one configuration. With no banner there is no exception: every
+  group row is a row of `TableBodyCell`s and the roving tab stop needs no branch.
+  #651 is self-closing across the board rather than "except in one
+  configuration", and the sentence that said otherwise goes with the banner.
+- **The gridcell-count assertion inverts everywhere.**
+  `Table.groupedGridSemantics.test.tsx` pins groups at contributing no gridcells;
+  it now becomes a full row of them for **every** grouped table, with no
+  configuration excluded.
+- **The cost, plainly.** In that one configuration the user now gets a label, a
+  count and a row of dashes where a one-line `Key: Value (n)` summary would have
+  been. That is less pleasant to read, and it is accepted for one shape instead
+  of two. Note what the banner carried that the row no longer does: its segments
+  are `<column label>: <value>` per key (`toGroupHeaderSegments`), so the key's
+  column name was stated inline. Where that context now lives — the hierarchy
+  column's own header is the obvious candidate — is #570's to answer, and it is
+  a real question this amendment creates rather than one it settles.
+- **A built, tested component is deleted to render less.** That was option 2's
+  stated cost when it was rejected, and it is still true. It is accepted:
+  `TableGroupHeaderRow` has no surviving configuration to render, so keeping it
+  would mean keeping a second path alive for nothing.
+
 ## References
 
 - [ADR-062](./ADR-062-grid-semantics-roving-focus-and-row-identity.md) — the roving tab stop this shape satisfies, and the row identity group rows are keyed by
@@ -344,4 +564,5 @@ on #571, #648 and #651 without any of them being consulted.
 - [`packages/ui/src/components/Table/TableGroupHeaderRow/ARCHITECTURE.md`](../../packages/ui/src/components/Table/TableGroupHeaderRow/ARCHITECTURE.md) — the banner as built, and why it composes `TableRow`
 - [`packages/ui/src/components/Table/TableRow/ARCHITECTURE.md`](../../packages/ui/src/components/Table/TableRow/ARCHITECTURE.md) — the height invariant and the `minHeight`/`maxHeight` clamp
 - [`docs/agents/planning/table-row-grouping-plan.md`](../agents/planning/table-row-grouping-plan.md) — the grouping programme this slices
-- Issues #647 (this decision), #568 / #641 (the banner as shipped), #569 / #646 (multi-key grouping), #570 (rollup and subtotals), #571 (expansion and treegrid), #648 (share of total), #651 (the swallowed keypress), #560 / #645 (the focus model), #547 (parent)
+- [`packages/server/src/db/group-query-builder/expand-grouping-sets.util.ts`](../../packages/server/src/db/group-query-builder/expand-grouping-sets.util.ts) — the grouping sets each mode emits, and why cube is not one of them
+- Issues #647 (this decision), #659 (the amendment), #568 / #641 (the banner as shipped), #569 / #646 (multi-key grouping), #570 (rollup and subtotals), #571 (expansion and treegrid), #574 (cube), #648 (share of total), #651 (the swallowed keypress), #560 / #645 (the focus model), #547 (parent)
