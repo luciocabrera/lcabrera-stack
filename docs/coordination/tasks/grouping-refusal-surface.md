@@ -42,54 +42,62 @@ longer offered.
 
 ## Status / next
 
-- Current step: review round 2 answered (PASS, three Copilot threads closed in `cbf80900`), full gate re-run green
-- Blockers: none — but see the merge sequence and ADR collision below, both of which must be settled before merge
-- Next: wait for #665 (#571) **and** #663 (#570) to land, then rebase **once** against the final `main`
+- Current step: rebased onto `main` after #665 and #663 landed; ADR renumbered to 068; full gate re-run on the rebased head
+- Blockers: none
+- Next: merge
 
-### Pending: merge sequence, and the ADR number collision
+### Done: merge sequence, and the ADR number collision
 
-**This branch is third.** #665 (#571) merges first, then #663 (#570), then this
-one. Both touch files this one touches, so the rebase happens **once**, against
-the final `main` — rebasing after each would resolve the same conflicts twice.
+**This branch was third**, behind #665 (#571) and #663 (#570), so the rebase
+happened **once** against the final `main` rather than twice.
 
 `chore/571-treegrid-expansion` (PR #665) allocated **ADR-067** concurrently
 (`ADR-067-expansion-is-the-collapsed-set-and-a-group-row-is-a-tree-node.md`).
 `vp run adr:verify` reported 067 free on both branches and cannot see an
-unmerged sibling, so neither claim was wrong when it was made. #665 merges
-first, so **this one renumbers** — to whatever `adr:verify` reports free at the
-time.
+unmerged sibling, so neither claim was wrong when it was made. #665 landed
+first, so this one renumbered to **ADR-068**.
 
-**Deliberately not done yet.** Both are still open, so renumbering now would
-rename against a prediction. Do it during the rebase.
+**Renumbering needs a discriminator, because both ADR-067s coexist mid-rebase.**
+A repo-wide `grep -rn 'ADR-067'` finds this branch's references _and_ #571's, and
+most are bare `(ADR-067)` mentions that name no filename. What separates them is
+authorship, so the rename was driven by the lines this branch **adds**:
 
-Recipe, verified against `origin/chore/571-treegrid-expansion` @ `0c2096fc`.
-It covers #571 only — re-probe against #570 before starting, since its own
-conflicts have not been enumerated here:
+```
+git diff origin/main -- . ':(exclude)docs/decisions/README.md' \
+  | awk '/^\+\+\+ /{f=$2} /^\+/ && /ADR-067/ {print f"  ::  "$0}'
+```
 
-1. Rebase onto the landed `main`. **Three** files conflict with #571 — see
-   below.
-2. `git mv` the ADR to the free number and update every reference to it: the
-   filename, the `# ADR-NNN —` heading, the cross-links from
-   `TableEmptyState/ARCHITECTURE.md`, `Table/utils/ARCHITECTURE.md`,
-   `Table/commands/ARCHITECTURE.md`,
-   `TableSettingsDrawer/GroupingSection/ARCHITECTURE.md`, `TableRouteView/ARCHITECTURE.md`,
-   `contexts/TableData/ARCHITECTURE.md`, `PATTERNS.md`, `INVENTORY.md`, the
-   enterprise-orders `ARCHITECTURE.md`, the changeset, and the PR body.
-   `grep -rn 'ADR-067' --include='*.md' .` finds them; #665's own references
-   must be left alone.
-3. **Regenerate, never hand-merge, the two generated files** — take either side
-   wholesale to clear the conflict, then run the generator and commit its output:
-   - `docs/decisions/README.md` → `vp run adr:verify -- --write`
-   - `reports/api-surface/ui.txt` → `vp run api-surface:verify -- --write`
-4. `packages/ui/src/components/Table/Table.types.ts` is the one substantive
-   conflict and is pure adjacency: both branches add a new exported type at the
-   same alphabetical insertion point (`TableGroupExpansionState` from #665,
-   `TableGroupingRefusalReason` here). Keep **both**, #665's first — that is the
-   order `perfectionist/sort-modules` requires. `packages/ui/src/INVENTORY.md`
-   auto-merges.
-5. Re-run the **full gate on the rebased head**, including
-   `vp run --filter vite-react-compiler test:smoke` against a live database. A
-   clean rebase is a text operation and proves nothing about behaviour.
+Every line it prints is this branch's and renumbers; everything else the repo-wide
+grep finds is #571's and stays. `adr:verify` then confirms the result — it reports
+a duplicate number if one side was missed, and a stray if a file and its heading
+disagree.
+
+**What actually conflicted — six files, not the three predicted here.** The
+earlier probe covered #571 only; #663 added three more:
+
+| File                            | Kind                | Resolution                                                          |
+| ------------------------------- | ------------------- | ------------------------------------------------------------------- |
+| `docs/decisions/README.md`      | generated           | `vp run adr:verify -- --write`                                      |
+| `reports/api-surface/ui.txt`    | generated           | `vp run packages:build` then `vp run api-surface:verify -- --write` |
+| `Table.types.ts`                | adjacency           | keep both, #571's first                                             |
+| `Table.constants.ts`            | adjacency           | keep both — an import member and an appended block                  |
+| `stylex-module-paths.test.json` | **hand-maintained** | keep both new entries; drop the deleted one                         |
+| `INVENTORY.md`                  | **semantic**        | see below                                                           |
+
+The last two are the ones a mechanical "keep both sides" gets wrong.
+`stylex-module-paths.test.json` looks generated and is not — it is the frozen
+register that gives each `*.stylex.ts` path its identity, so a wrong entry there
+renames custom properties for every consumer. And in `INVENTORY.md` both sides
+touch the same rows for different reasons: #663 **deleted** `TableGroupHeaderRow`
+(ADR-065 replaced the banner), while this branch's side still lists it and also
+rewrites the `TableEmptyState` row. Keeping both sides would have reinstated a
+component that no longer exists. Resolution: #663's `TableGroupAggregate` and
+`TableGroupLabel` rows, this branch's `TableEmptyState*` rows, and no
+`TableGroupHeaderRow` row at all.
+
+A clean rebase is a text operation and proves nothing about behaviour, so the
+full gate — including `vp run --filter vite-react-compiler test:smoke` against a
+live database — was re-run on the rebased head, not inherited from before it.
 
 **A "zero conflicts" hand-off was wrong, and the cause is settled.** The
 original claim came from the **deprecated three-argument** `git merge-tree`,
