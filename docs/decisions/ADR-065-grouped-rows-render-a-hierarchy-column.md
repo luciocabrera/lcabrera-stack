@@ -41,7 +41,13 @@ indentation while the measures stay in their own columns.
 The banner does not merely look different from the hierarchy column. Three of
 the four issues that depend on this decision are **blocked** by it, and all three
 for the same reason — a row with one cell has nowhere to put a value that belongs
-to a column:
+to a column.
+
+_Blocked_ here means **cannot be built without this answer**, which is not the
+same thing as the `blockedBy` list in an issue's §9 Planning Metadata, and the
+two do not agree: #648 records `blockedBy: ['#570']` and #571 records
+`blockedBy: ['#560', '#570']`, neither naming #647. Read the structural sense
+below; the metadata is the scheduling graph and is maintained separately.
 
 - **#570 (rollup subtotals).** A subtotal row exists to show aggregates _for that
   level_. A banner can print them as text but cannot align them under the columns
@@ -52,9 +58,10 @@ to a column:
   addressed by row key **plus column key**; a row that registers no cell for any
   column key cannot receive it.
 
-The fourth, **#571 (treegrid)**, is not blocked but is shaped by it:
-`aria-level` / `aria-posinset` land differently on a row with one cell than on a
-row with N.
+The fourth, **#571 (treegrid)**, is not blocked in that sense but is shaped by
+it: `aria-level` / `aria-posinset` can be attached to a one-cell row, so tree
+semantics are buildable either way — they just land differently on a row with one
+cell than on a row with N.
 
 Two constraints narrow the field before any aesthetic judgement:
 
@@ -90,10 +97,7 @@ order, same count.
 ### The hierarchy column is synthetic and owned by the grid
 
 It is **not** one of the consumer's `TableColumn` entries. It is injected by the
-grid when grouping is active, and it is absent from the column-settings surfaces
-that derive from `columns` — visibility, ordering and pinning. The user cannot
-hide it, move it, or unpin it, and it does not appear in
-`TableSettingsDrawer/ColumnOrderSection`.
+grid when grouping is active, and the user cannot hide it, move it, or unpin it.
 
 It is not enough to mark a consumer column `isStatic`. That capability already
 exists and it withholds dragging, pinning and hiding from a column that is still
@@ -102,12 +106,21 @@ occupies a slot in `columns`. The hierarchy column is not a column of the data a
 all; it is a rendering of the grouping configuration, which lives on a different
 store (ADR-061).
 
-The column must still appear in the **rendered** partition — the
-`pinnedColumnPartition` that `TableBodyRows` maps over and that
-`getGridColumnKeys` reads — because that partition is what the body paints and
-what the focus sequence is derived from. "Absent from the user-controllable list"
-and "present in the rendered partition" are two different lists, and this column
-is deliberately in one and not the other.
+**Two lists exist, and the column belongs to one of them.** It must appear in the
+**rendered** partition — the `pinnedColumnPartition` that `TableBodyRows` maps
+over and that `getGridColumnKeys` reads — because that partition is what the body
+paints and what the focus sequence is derived from. It must **not** appear in the
+**settings** list the column-order drawer offers.
+
+Today those two lists have one source. `getEffectiveColumns` derives
+`effectiveColumns` from the columns store, and `ColumnOrderSectionBody` and
+`ColumnOrderSectionHeader` read that same store through `useGetColumns` and
+narrow it with `filterSettingsColumns`. Keeping the column out of the drawer is
+therefore **an exclusion someone has to write** — in `filterSettingsColumns`, the
+one place both the draggable list and the header count agree on — and not
+something that follows from injecting it. This is a requirement on #570/#571, not
+a property they inherit. Anything that puts the column in the store without that
+exclusion ships a drawer row for a column the user cannot act on.
 
 ### A cell with no selected aggregate renders an em dash at reduced opacity
 
@@ -117,19 +130,26 @@ that from a column nobody asked for an aggregate on, and from a value that has
 not arrived yet. Only a dash keeps **"no aggregate"**, **"the aggregate is
 zero"** and **"still loading"** as three distinct states.
 
-Blank is already spoken for. `renderCellContent` turns a `null` or `undefined`
-value into `''`, and `parseNumberValue` carries the comment that says why — _"a
-blank cell is absent, not zero"_. An empty cell in this grid therefore already
-means _this row has no value here_, which is a claim about the data; a group
-row's non-aggregated cell is not that, it is a question nobody asked. Reusing
-blank for both makes them indistinguishable, and an unexplained empty cell in a
-grid reads as content that has not arrived. Zero collides with the second state
-by stating a number that was never computed.
+Blank is already spoken for in the columns that render text. For `renderCellContent`'s
+`currency`, `number`, `date` and `default` branches, a `null` or `undefined`
+value becomes `''`, and `parseNumberValue` carries the comment that says why —
+_"a blank cell is absent, not zero"_. (The `boolean` branch is the exception: it
+renders `TableCheckDisplay`, so a null boolean paints an unchecked box rather
+than nothing.) In every column that can carry an aggregate at all, therefore, an
+empty cell already means _this row has no value here_ — a claim about the data.
+A group row's non-aggregated cell is not that; it is a question nobody asked.
+Reusing blank for both makes them indistinguishable, and an unexplained empty
+cell in a grid reads as content that has not arrived. Zero collides with the
+second state by stating a number that was never computed.
 
 The dash is a rendered character in a real `role="gridcell"`, so the cell is not
-announced as blank. Giving it an accessible equivalent that does not depend on a
-screen reader's handling of the glyph itself is #570's to implement; what is
-decided here is that the cell exists and is not empty.
+**visually** blank. Whether it is also distinguishable to a screen reader is an
+open question rather than a settled one: a standalone em dash may or may not be
+spoken depending on the user's punctuation verbosity, nothing in this repo tests
+it, and it was not verified for this decision. #570 owns giving the cell an
+accessible equivalent that does not depend on the glyph being announced, and
+should treat that as required work rather than a refinement. What is decided here
+is only that the cell exists and is not empty.
 
 ### The hierarchy column is left-pinned, unconditionally
 
@@ -154,8 +174,8 @@ on data the reader cannot see, so two identical-looking cells would mean
 different things. It would flip on refresh with no visible cause: one order ships
 late, the group stops being uniform, and a value becomes a dash. And it has no
 server story — uniformity is not something `GROUP BY` returns, so the client
-would have to fetch a group's children to know, which defeats grouping on a
-500k-row table (ADR-059: a grouped read returns whole).
+would have to fetch a group's children to know, which defeats grouping on any
+table large enough to want it (ADR-059: a grouped read returns whole).
 
 ### The banner survives in exactly one configuration
 
@@ -216,9 +236,14 @@ is worth stating because the fix is an absence of work:
 
 1. `useMoveTableGridFocus` computes the move over `data.length` — every loaded
    row, group rows included — and resolves the target column from
-   `getGridColumnKeys(pinnedColumnPartition)`. Nothing in
-   `contexts/TableFocus/` mentions grouping; it never asks whether the target row
-   is a group.
+   `getGridColumnKeys(pinnedColumnPartition)`. No branch on the focus path reads
+   `TABLE_GROUP_ROW_FIELD` or otherwise inspects a row's kind: not
+   `resolveGridFocusContext`, `resolveGridFocusMove`, `commitTableFocusTarget` or
+   `setTableFocusTarget`. It never asks whether the target row is a group.
+   (`contexts/TableFocus/` does mention grouping twice — in
+   `TableFocusContext.provider.tsx` and its `ARCHITECTURE.md` — but both are
+   about which context the focus store is mounted on, per ADR-061, not about a
+   row's kind.)
 2. `commitTableFocusTarget` scrolls, writes `{ rowKey, columnKey, rowIndex }` to
    the focus store, and reports the key as handled, so `useTableGridFocus` calls
    `preventDefault()`.
