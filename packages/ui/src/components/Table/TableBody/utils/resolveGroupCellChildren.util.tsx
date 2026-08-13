@@ -25,15 +25,20 @@ type ResolveGroupCellChildrenArgs = {
  * not.
  *
  * **`EMPTY_CELL` is an empty fragment on purpose, and Biome's
- * `noUselessFragments` reports it at info severity — the finding is wrong
- * here.** `TableBodyCell` decides whether a caller supplied content with
- * `children !== undefined`, so the two nullish spellings mean opposite things:
- * a fragment is "custom content, deliberately empty" and `undefined` is "no
- * custom content", which sends the cell down the default branch and renders
- * the row's own value into a group row. `buildTableBodyCellDescriptor.util.tsx`
- * carries the same value for a detail row's blanked columns, for the same
- * reason. Replacing either with `undefined` is a behaviour change, not a
- * tidy-up; `TableBodyRows.test.tsx` fails if it is made.
+ * `noUselessFragments` reports it at info severity.** `TableBodyCell` decides
+ * whether a caller supplied content with `children !== undefined`, so the two
+ * spellings do not produce the same DOM: a fragment leaves the `<td>` genuinely
+ * empty, while `undefined` takes the default branch and wraps *nothing* in
+ * `<span title="" class="…">` — an element and an attribute in the
+ * accessibility tree for a cell that holds nothing.
+ *
+ * That is the whole of the difference, and it is worth being exact: the
+ * `custom` descriptor never forwards `value` or `dataType`, so `undefined`
+ * would **not** render the row's own value. The choice is between an empty cell
+ * and an empty span, and the empty cell is the honest one.
+ * `buildTableBodyCellDescriptor.util.tsx` uses the same constant for a detail
+ * row's blanked columns. `Table.groupedGridSemantics.test.tsx` pins the
+ * difference.
  */
 
 /**

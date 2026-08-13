@@ -140,9 +140,10 @@ export const buildTableBodyCellDescriptor = <
 
   // A detail row's own hierarchy cell holds nothing: its values are already in
   // their own columns. The cell exists so the grid stays rectangular and every
-  // row offers the same focus targets. The empty fragment is load-bearing —
-  // see the note in `resolveGroupCellChildren.util.tsx`; `undefined` here reads
-  // as "no custom content" and renders the row's value after all.
+  // row offers the same focus targets. `EMPTY_CELL` rather than `undefined`:
+  // see the note in `resolveGroupCellChildren.util.tsx` — `undefined` takes the
+  // default branch and puts an empty `<span title="">` in a cell that holds
+  // nothing.
   if (
     isTableGroupHierarchyColumn(col.key) ||
     groupingKeys.includes(columnKey)

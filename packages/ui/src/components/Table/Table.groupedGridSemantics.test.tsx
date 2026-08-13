@@ -343,5 +343,10 @@ describe('a grouped table under the grid ARIA model', () => {
 
     // Hierarchy, Id, City — the last is the grouped-by column.
     expect(cells.map((cell) => cell.textContent)).toStrictEqual(['', '1', '']);
+
+    // Empty means *empty*, not an empty `<span title="">`. The descriptor hands
+    // these cells a fragment rather than `undefined` precisely so the cell
+    // holds no element at all — text content alone cannot tell the two apart.
+    expect(cells.map((cell) => cell.children.length)).toStrictEqual([0, 1, 0]);
   });
 });
