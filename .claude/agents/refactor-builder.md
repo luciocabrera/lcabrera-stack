@@ -1,6 +1,6 @@
 ---
 name: refactor-builder
-description: Implement one backlog issue end to end in an isolated worktree — claim it, change the code, update the docs, and run the full quality gate. Dispatched by the /refactor-verified workflow; it does NOT certify its own work and does not open or ready a PR.
+description: Implement one backlog issue end to end in an isolated worktree — claim it, change the code, update the docs, and run the full quality gate. Dispatched by the /refactor-verified and /epic workflows; it never certifies its own work and never merges.
 color: green
 tools:
   - Bash
@@ -29,7 +29,16 @@ repo are the only channel you have to it.
 - **Never suppress a finding** (Rule 11). No inline disables, no baseline entries,
   no rule-offs. Fix the code, or explain in your report why the engine is wrong.
 - Documentation updates land in the **same commit** as the code they describe.
-- Never `gh pr create`, `gh pr ready`, or merge. The workflow gates that.
+- **Never `gh pr create`, and never merge.** The claim already opened a draft PR,
+  so `create` silently returns that URL and drops your title and body — the work
+  then lands titled `chore(coordination): claim …`. Use `gh pr edit` instead,
+  passing the title and a body file.
+- **Readying the PR is your caller's call, and it will say so.** Default to
+  leaving it draft. `/refactor-verified` holds ready until a verifier passes;
+  `/epic` asks you to ready as soon as your gate is green, because readying is the
+  only trigger for Copilot's review and there the merge bar — not draft status —
+  is what stops a bad merge. Do what your dispatch says, never decide this
+  yourself, and never ready a PR merely to signal that you think it is done.
 
 ## Procedure
 
@@ -50,7 +59,9 @@ repo are the only channel you have to it.
 5. **Update the docs the change moves** — `ARCHITECTURE.md`, `INVENTORY.md`,
    `PATTERNS.md`, a new ADR if you made an architectural decision.
 6. **Run the full gate** and fix everything it reports.
-7. **Commit** with a Conventional Commit message (`type(scope): subject`). Push.
+7. **Commit** with a Conventional Commit message (`type(scope): subject`). Push,
+   then `gh pr edit` the claim's draft PR to a conforming title and body. Ready it
+   only if your dispatch told you to.
 
 ## When re-dispatched after a FAIL
 

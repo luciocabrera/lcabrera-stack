@@ -21,12 +21,14 @@ This document describes every layer of the AI config for this project — what e
 └── agents/
     ├── quality-gate.md
     ├── architecture-guard.md
-    └── fallow-scan.md
+    ├── fallow-scan.md
+    ├── refactor-builder.md   ← the developer role, for /refactor-verified and /epic
+    └── refactor-verifier.md  ← the blind reviewer role, for the same two
 
 .github/
 ├── ARCHITECTURE.md
 ├── copilot-instructions.md → ../AGENTS.md   (Copilot alias)
-└── skills/                 ← canonical skill sources (10 skills + code-smell-shared docs)
+└── skills/                 ← canonical skill sources (+ code-smell-shared docs)
 
 AGENTS.md   ← single source of truth for universal agent instructions
 CLAUDE.md → AGENTS.md   (symlink — Claude Code reads this)
@@ -83,6 +85,17 @@ Auto-invocation is driven by the `description` field (Claude matches it against 
 | `fallow-code-checker`         | Fallow static hygiene scan (runs in forked context)        | description                                       |
 | `linter-checker`              | Deterministic oxlint + eslint report (forked context)      | description                                       |
 | `commit-and-pr`               | Commit message + PR body that pass the enforced standard   | description (before committing / opening a PR)    |
+| `refactor-verified`           | One issue: builder subagent + blind verifier subagent      | description (implementing an issue with criteria) |
+| `epic`                        | A whole epic: waves of builders, a blind reviewer per PR   | description, or `/epic <n>`                       |
+| `health-swarm`                | Six parallel scouts auditing repo-wide rot                 | description (periodic audit / "what has rotted")  |
+| `lint-toolchain`              | Configure or debug Oxlint / eslint / Biome / Sonar         | description + `paths`                             |
+| `releasing`                   | Changesets release, changelog, PR label taxonomy           | description (cutting a release)                   |
+| `typescript-api-engineering`  | API-layer architecture standards                           | description + `paths: **/routes/api/**`           |
+
+A skill with `paths:` frontmatter is **not** in an agent's skill listing until it
+opens a matching file. That is the intended economy, but it has one sharp edge:
+Non-Negotiable Rule 5 tells you to invoke `store-pattern` _before_ touching a
+store, and the skill does not appear until you already have. Invoke it by name.
 
 **Skill anatomy:**
 
@@ -101,11 +114,17 @@ skill-name/
 
 Agents are sub-agents spawned explicitly by Claude (or by you) for isolated, heavy, or parallelisable work. They start with no conversation context — their markdown file is their full system prompt. Filenames must match the `name:` frontmatter field (`<name>.md`).
 
-| Agent                | Purpose                                                                      | Tools             | When to use                                 |
-| -------------------- | ---------------------------------------------------------------------------- | ----------------- | ------------------------------------------- |
-| `quality-gate`       | Runs fmt→lint→check→test, returns pass/fail table                            | Bash, Read        | Mid-session validation or structured report |
-| `architecture-guard` | Reads INVENTORY.md, ARCHITECTURE.md, PATTERNS.md, ADRs — returns reuse brief | Read, Glob, Grep  | Before implementing anything new            |
-| `fallow-scan`        | Runs full fallow pipeline in background, saves JSON + report                 | Bash, Read, Write | Before large refactors or after big merges  |
+| Agent                | Purpose                                                                        | Tools                               | When to use                                    |
+| -------------------- | ------------------------------------------------------------------------------ | ----------------------------------- | ---------------------------------------------- |
+| `quality-gate`       | Runs fmt→lint→check→test, returns pass/fail table                              | Bash, Read                          | Mid-session validation or structured report    |
+| `architecture-guard` | Reads INVENTORY.md, ARCHITECTURE.md, PATTERNS.md, ADRs — returns reuse brief   | Read, Glob, Grep                    | Before implementing anything new               |
+| `fallow-scan`        | Runs full fallow pipeline in background, saves JSON + report                   | Bash, Read, Write                   | Before large refactors or after big merges     |
+| `refactor-builder`   | Implements one issue in its own worktree; never certifies or merges it         | Bash, Read, Write, Edit, Glob, Grep | Dispatched by `/refactor-verified` and `/epic` |
+| `refactor-verifier`  | Certifies a diff against acceptance criteria, blind to the builder's reasoning | Bash, Read, Write, Edit, Glob, Grep | Dispatched by the same two                     |
+
+The last two take **dispatch parameters** — whether to ready the PR, whether to
+post findings to GitHub — because `/refactor-verified` and `/epic` want opposite
+answers and one agent with a parameter beats two agents that drift apart.
 
 **Unlike skills**, agents do not auto-invoke. Claude spawns them when it recognises the right moment, or when you ask.
 
