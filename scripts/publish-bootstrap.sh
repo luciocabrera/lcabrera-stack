@@ -36,7 +36,11 @@ set -euo pipefail
 DRY_RUN=false
 [[ "${1:-}" == "--dry-run" ]] && DRY_RUN=true
 
-PACKAGES=(utils api server ui)
+# Directory names, not package names — `@lcabrera/eslint-plugin` lives in
+# `packages/eslint-local-rules` (ADR-057). A package absent from this list is
+# skipped in silence rather than reported, which is how the newest one stayed
+# unpublished while `release.yml` warned about it on every push to main.
+PACKAGES=(utils api server ui eslint-local-rules)
 EXPECTED_USER="${NPM_EXPECTED_USER:-lcabrera}"
 
 # Naming the positional parameters is not decoration here: `fail` reads the
@@ -196,7 +200,8 @@ Two things remain, and they are what retire the token for good.
        Repository:           vite-react-compiler
        Workflow filename:    release.yml
 
-2. Log out of npm once all four are configured, so no credential is left behind:
+2. Log out of npm once every package is configured, so no credential is left
+   behind:
      npm logout
    and remove the bootstrap token from your env file and from npmjs.com.
 
