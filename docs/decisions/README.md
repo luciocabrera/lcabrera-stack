@@ -54,3 +54,4 @@ or run `vp run adr:new`, which takes the next free number for you.
 | [ADR-065](./ADR-065-grouped-rows-render-a-hierarchy-column.md)                        | A grouped grid renders its hierarchy in a grid-owned column, not a spanning banner                                       |
 | [ADR-066](./ADR-066-grouping-guard-rails-and-per-query-timeout.md)                    | Bound a grouped read with a cardinality estimate, a row-limit backstop and a transaction-scoped statement timeout        |
 | [ADR-067](./ADR-067-expansion-is-the-collapsed-set-and-a-group-row-is-a-tree-node.md) | Expansion is stored as the collapsed set, and the visible rows are the grid                                              |
+| [ADR-068](./ADR-068-a-refused-read-is-rendered-data-not-an-exception.md)              | A refused read is data the table renders; the menu narrows to the catalogue but never replaces it                        |

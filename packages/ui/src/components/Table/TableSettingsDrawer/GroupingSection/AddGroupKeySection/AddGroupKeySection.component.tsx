@@ -5,20 +5,25 @@ import { Button } from '#ui/components/Button';
 import { InfoBox } from '#ui/components/InfoBox';
 import { SidePanelSectionHeader } from '#ui/components/SidePanel';
 import { useGetColumns } from '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
+import { useGetTableGroupingCapabilities } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
-import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
 import { VirtualSelect } from '#ui/components/VirtualSelect';
 
 import type { AddGroupKeySectionProps } from './AddGroupKeySection.types';
 
 import { useToggleGroupKey } from '../../TableDrawerContext/actions';
 import { useGetGroupingKeys } from '../../TableDrawerContext/selectors';
+import { toGroupKeyColumnOptions } from '../utils';
 import { styles } from './AddGroupKeySection.stylex';
 
 /**
- * The drawer's "add a group key" control: the groupable columns not already
- * staged, and an Add button that appends the chosen one as the innermost
- * level.
+ * The drawer's "add a group key" control: the columns that may still be a group
+ * key, and an Add button that appends the chosen one as the innermost level.
+ *
+ * Which columns those are is `toGroupKeyColumnOptions`' answer, so this list and
+ * the header menu's enabled items come from one derivation — the column's own
+ * declaration narrowed by the catalogue (ADR-058, #642). Offering a key the
+ * endpoint refuses would empty the table instead of grouping it.
  *
  * At `MAX_TABLE_GROUP_KEYS` the control is replaced by a message saying so
  * rather than left enabled to be refused — `resolveTableGroupingUpdate` would
@@ -29,6 +34,7 @@ export const AddGroupKeySection = ({
   onDropdownOpenChange,
 }: AddGroupKeySectionProps) => {
   const columns = useGetColumns();
+  const capabilities = useGetTableGroupingCapabilities();
   const groupingKeys = useGetGroupingKeys();
   const toggleGroupKey = useToggleGroupKey();
 
@@ -42,16 +48,13 @@ export const AddGroupKeySection = ({
     onDropdownOpenChange?.(isOpen);
   };
 
-  // A Set rather than `groupingKeys.includes` inside the filter: the filter is
-  // the loop, so an array scan per column is quadratic in the column count.
-  const stagedKeys = new Set(groupingKeys);
-  const availableColumnOptions = columns
-    .filter(
-      (column) =>
-        resolveColumnCapabilities(column).isGroupable &&
-        !stagedKeys.has(String(column.key)),
-    )
-    .map((column) => ({ label: column.label, value: String(column.key) }));
+  const availableColumnOptions = toGroupKeyColumnOptions({
+    capabilities,
+    columns,
+    // A Set rather than `groupingKeys.includes` inside the filter: the filter is
+    // the loop, so an array scan per column is quadratic in the column count.
+    stagedKeys: new Set(groupingKeys),
+  });
 
   const handleAddGroupKey = () => {
     if (!selectedColumn) return;

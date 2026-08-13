@@ -352,6 +352,14 @@ export type TableCrudConfig = {
 export type TableDataState<TData> = {
   /** Table data array */
   readonly data: readonly TData[] /** Pagination state */;
+  /**
+   * Why this read returned no rows, when the endpoint said so. Required and
+   * nullable rather than optional, because the provider re-seeds the store with
+   * a **shallow merge**: a key the next state omits keeps the value the last one
+   * put there, so an optional member would leave a refusal on screen after the
+   * navigation that resolved it.
+   */
+  readonly error: TableResponseError | undefined;
   /** Whether there are more rows to load (infinite scroll) */
   readonly hasMore: boolean;
   /** Initial loading state */
@@ -450,6 +458,27 @@ export type TableGroupExpansionState = {
  * Adding it here would let the URL ask for a shape nothing renders.
  */
 export type TableGroupingMode = 'flat' | 'rollup';
+
+/**
+ * Why the endpoint refused to **run** a grouped read, as opposed to why a single
+ * column may not be a key (`TableGroupKeyRefusalReason`). Both exist because the
+ * two questions are answered at different times: a column's legality is settled
+ * per column before anything is selected, while these depend on the whole
+ * request — its depth, its key combination, or the row bound the combination
+ * implies — so no per-column answer can predict them.
+ *
+ * Duplicated from `@lcabrera/server`'s `GroupingRefusalReason` for the reason
+ * `TableAggregateFn` is, and pinned by the same contract test.
+ */
+export type TableGroupingRefusalReason =
+  | 'aggregate-not-legal'
+  | 'column-not-groupable'
+  | 'duplicate-keys'
+  | 'estimate-too-large'
+  | 'no-keys'
+  | 'row-limit-reached'
+  | 'too-many-keys'
+  | 'unknown-column';
 
 /**
  * The grouping store's state — the config context's third store (ADR-061).
@@ -709,10 +738,57 @@ export type TableProps<
   TResponse,
 > = BaseProps &
   InfiniteScroll<TData, TResponse> & {
+    /**
+     * Reads why the endpoint returned no rows out of the response, when it said
+     * so. It sits here rather than beside `dataSelector` on `InfiniteScroll`
+     * because it is not part of the load-more contract: a load-more failure is
+     * a rejected promise, while this is a **successful** response that carries
+     * a refusal as data.
+     *
+     * Omit it and a refusal is indistinguishable from an empty result — which
+     * is the failure mode this exists to close (#642).
+     */
+    readonly dataErrorSelector?: (
+      response: TResponse,
+    ) => TableResponseError | undefined;
     readonly isFlexWrapperEnabled?: boolean;
     readonly isLoading?: boolean;
     readonly response: TResponse;
   };
+
+/**
+ * Why a table read returned no rows, as **plain data** — the discriminated union
+ * a loader may put in its payload in place of an error class.
+ *
+ * Duplicated from `@lcabrera/server`'s `SerializableDbError` for the reason
+ * `TableAggregateFn` is (ADR-038/039), and pinned by the same contract test.
+ *
+ * A class cannot be used here even in principle: React Router single fetch drops
+ * an object's prototype without a word, so `instanceof` on the client is always
+ * false and `Error.message` — a non-enumerable own property — never arrives at
+ * all (ADR-050, ADR-066). `kind` is what a component branches on instead.
+ *
+ * `message` is the endpoint's own vetted sentence. The Table renders it beside
+ * its own heading rather than in place of one, because only the endpoint knows
+ * *why* and only the Table knows what the user called the column.
+ */
+export type TableResponseError =
+  | {
+      /** The column the refusal is about, when exactly one is. */
+      readonly column?: string;
+      readonly estimatedRows?: number;
+      readonly kind: 'grouping-refused';
+      readonly message: string;
+      readonly reason: TableGroupingRefusalReason;
+    }
+  | {
+      /** The raw SQLSTATE, when the endpoint supplied one. Never the message. */
+      readonly code?: string;
+      readonly kind: 'db-failed';
+      readonly message: string;
+    }
+  | { readonly kind: 'db-canceled'; readonly message: string }
+  | { readonly kind: 'unexpected'; readonly message: string };
 
 export type TableTitle = {
   readonly plural: string;

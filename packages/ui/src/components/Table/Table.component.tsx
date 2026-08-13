@@ -8,6 +8,7 @@ import { TableContent } from './TableContent';
 
 export const Table = <TData extends Record<string, unknown>, TResponse>({
   actions,
+  dataErrorSelector,
   dataSelector,
   dataTotalSelector,
   icon,
@@ -25,6 +26,10 @@ export const Table = <TData extends Record<string, unknown>, TResponse>({
     <TableDataProvider<TData>
       dataState={{
         data,
+        // Read once here and seeded into the store, so every surface that has
+        // to say why the table is empty reads a selector rather than the
+        // response shape.
+        error: dataErrorSelector?.(response),
         isLoading,
         totalRows,
       }}

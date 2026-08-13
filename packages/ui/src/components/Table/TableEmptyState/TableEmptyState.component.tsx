@@ -1,18 +1,14 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
-import { useRevalidator } from 'react-router';
 
-import { Button } from '#ui/components/Button';
 import { NoDataDescriptive } from '#ui/components/Icons';
 import { useGetPinnedColumnPartition } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
 import { useTableContainerRef } from '#ui/components/Table/contexts/TableWrapper';
 import { useElementSize, useResizeObserver } from '#ui/hooks';
 
-import { useGetTableTitleSingular } from '../contexts/TableConfig/meta/selectors';
 import { styles } from './TableEmptyState.stylex';
-
-const DEFAULT_MESSAGE =
-  'No records match the current view. Try adjusting your filters or refreshing the table.';
+import { TableEmptyStateAction } from './TableEmptyStateAction/TableEmptyStateAction.component';
+import { TableEmptyStateMessage } from './TableEmptyStateMessage/TableEmptyStateMessage.component';
 
 /**
  * Empty-state row rendered inside the table body when there are no rows and the
@@ -20,17 +16,19 @@ const DEFAULT_MESSAGE =
  * the scroll container's viewport minus the sticky header height, so it stays
  * centered in the visible body area — both axes — without introducing a
  * vertical scrollbar, even when the table body overflows horizontally.
+ *
+ * A thin shell over that arithmetic. *Why* the body is empty — nothing matched,
+ * or the endpoint refused the query — decides both what it says and which
+ * recovery it offers, and each delegate reads that for itself.
  */
 export const TableEmptyState = () => {
   const { centerCols, leftPinnedCols, rightPinnedCols } =
     useGetPinnedColumnPartition();
-  const titleSingular = useGetTableTitleSingular();
 
   const containerRef = useTableContainerRef();
   const { height: containerHeight, width } = useElementSize({
     ref: containerRef,
   });
-  const { revalidate } = useRevalidator();
 
   const [headerHeight, setHeaderHeight] = useState(0);
 
@@ -56,11 +54,8 @@ export const TableEmptyState = () => {
             <div {...stylex.props(styles.illustration)}>
               <NoDataDescriptive />
             </div>
-            <h3 {...stylex.props(styles.title)}>{titleSingular}</h3>
-            <p {...stylex.props(styles.message)}>{DEFAULT_MESSAGE}</p>
-            <Button onClick={revalidate} variant='primary'>
-              Retry
-            </Button>
+            <TableEmptyStateMessage />
+            <TableEmptyStateAction />
           </div>
         </div>
       </td>

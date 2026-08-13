@@ -1,6 +1,7 @@
 import type {
   TableAggregateFn,
   TableGroupingMode,
+  TableGroupKeyRefusalReason,
   TableGroupRow,
 } from './Table.types';
 
@@ -209,4 +210,25 @@ export const TABLE_GROUPING_MODES: readonly TableGroupingMode[] = [
 export const TABLE_GROUPING_MODE_LABELS: Record<TableGroupingMode, string> = {
   flat: 'Groups only',
   rollup: 'Groups with subtotals',
+};
+
+/**
+ * Why a column cannot be a group key, said the way a user can act on it — a map
+ * **closed over the union**, so a reason added to `TableGroupKeyRefusalReason`
+ * is a compile error here rather than a raw catalogue token shown on screen.
+ *
+ * Each entry completes "cannot be grouped because …", and names what would
+ * change the answer wherever anything can: a filter narrows a wide column and an
+ * `ANALYZE` produces missing statistics, while a type refusal is permanent.
+ */
+export const TABLE_GROUP_KEY_REFUSAL_LABELS: Record<
+  TableGroupKeyRefusalReason,
+  string
+> = {
+  'no-equality-operator': 'the database cannot compare its values for equality',
+  'not-a-dimension': 'its data type cannot be used as a group key',
+  'stats-unavailable': 'the database has no statistics for it yet',
+  'too-many-distinct':
+    'it holds too many distinct values — filter the table down first',
+  'unique-ish': 'nearly every row has its own value',
 };

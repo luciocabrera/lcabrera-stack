@@ -21,6 +21,7 @@ TableData/
 │   │
 │   └── selectors/
 │       ├── useGetTableData.hook.ts          → Full data array
+│       ├── useGetTableDataError.hook.ts     → Why the read returned nothing, when it said
 │       ├── useGetTableHasMore.hook.ts       → Whether more pages exist
 │       ├── useGetTableIsLoading.hook.ts     → Initial loading state
 │       ├── useGetTableIsLoadingMore.hook.ts → Pagination loading state
@@ -53,6 +54,7 @@ graph LR
 ```typescript
 TableDataState<TData> = {
   data: TData[];           // Current loaded rows
+  error: TableResponseError | undefined; // Why the read returned nothing (ADR-068)
   hasMore: boolean;        // More pages available (derived: totalRows > totalLoadedRows)
   isLoading: boolean;      // Initial fetch in progress
   isLoadingMore: boolean;  // Subsequent page fetch in progress
@@ -60,6 +62,13 @@ TableDataState<TData> = {
   totalRows: number;       // Total row count from server
 };
 ```
+
+`error` is **required and nullable**, not optional, and `getInitialDataState`
+always emits the key. The provider re-seeds through the store's shallow merge,
+which keeps every key the next state does not name — so an omitted `error` would
+leave the previous read's refusal on screen after the navigation that resolved
+it. `Table` fills it by running the `dataErrorSelector` prop over the response,
+which `TableRouteView` defaults to `response.error`.
 
 ## Provider Initialization
 
@@ -102,11 +111,12 @@ After fetch:
 
 ## Selectors
 
-| Hook                         | Returns   | Description                         |
-| ---------------------------- | --------- | ----------------------------------- |
-| `useGetTableData`            | `TData[]` | Full array of loaded rows           |
-| `useGetTableHasMore`         | `boolean` | Whether more pages can be fetched   |
-| `useGetTableIsLoading`       | `boolean` | Initial loading state               |
-| `useGetTableIsLoadingMore`   | `boolean` | Pagination loading state            |
-| `useGetTableTotalLoadedRows` | `number`  | Number of currently loaded rows     |
-| `useGetTableTotalRows`       | `number`  | Total record count from data source |
+| Hook                         | Returns                           | Description                                              |
+| ---------------------------- | --------------------------------- | -------------------------------------------------------- |
+| `useGetTableData`            | `TData[]`                         | Full array of loaded rows                                |
+| `useGetTableDataError`       | `TableResponseError \| undefined` | Why the read returned no rows, when the endpoint said so |
+| `useGetTableHasMore`         | `boolean`                         | Whether more pages can be fetched                        |
+| `useGetTableIsLoading`       | `boolean`                         | Initial loading state                                    |
+| `useGetTableIsLoadingMore`   | `boolean`                         | Pagination loading state                                 |
+| `useGetTableTotalLoadedRows` | `number`                          | Number of currently loaded rows                          |
+| `useGetTableTotalRows`       | `number`                          | Total record count from data source                      |

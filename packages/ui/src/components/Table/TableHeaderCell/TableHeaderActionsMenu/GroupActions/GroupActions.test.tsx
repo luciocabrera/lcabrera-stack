@@ -161,6 +161,74 @@ describe('GroupActions', () => {
     expect(getButton('Group by This').disabled).toBe(false);
   });
 
+  it('disables Group by This for a column the catalogue refuses, and says why', () => {
+    // The defect: `isGroupable` defaults to true, so every column the endpoint
+    // refuses was still offered as a group key, and picking one emptied the
+    // table (#642). The declared flag is untouched here — the catalogue is the
+    // only thing saying no.
+    capabilityRef.current = numericCapability;
+
+    render(<GroupActions columnKey='total_amount' onClose={mockOnClose} />);
+
+    const button = getButton('Group by This');
+
+    expect(button.disabled).toBe(true);
+    expect(button.getAttribute('title')).toBe(
+      'Cannot group by this column: it holds too many distinct values — filter the table down first.',
+    );
+
+    fireEvent.click(button);
+
+    expect(mockToggleGroupKey).not.toHaveBeenCalled();
+  });
+
+  it('still removes a refused key that is already applied, and explains nothing there', () => {
+    // A URL can seed a grouping the catalogue refuses today (ADR-061), so the
+    // one item that can undo it must not be disabled by that same refusal — and
+    // must not explain it either: this click *removes* the grouping, so "Cannot
+    // group by this column" would describe an action nobody is taking.
+    capabilityRef.current = numericCapability;
+    groupingKeysRef.current = ['total_amount'];
+
+    render(<GroupActions columnKey='total_amount' onClose={mockOnClose} />);
+
+    const button = getButton('Group by This');
+
+    expect(button.disabled).toBe(false);
+    expect(button.getAttribute('title')).toBeNull();
+
+    fireEvent.click(button);
+
+    expect(mockToggleGroupKey).toHaveBeenCalledWith('total_amount');
+  });
+
+  it('quotes no catalogue reason for a column the table itself declared ungroupable', () => {
+    // Two different facts, and only one of them is the endpoint's. A column the
+    // consumer hid from grouping is off the menu because the table said so, so
+    // quoting the catalogue's distinct-value reason would blame the wrong party
+    // for a decision the user cannot act on.
+    capabilityRef.current = numericCapability;
+    normalizedColumnRef.current = { isGroupable: false };
+
+    render(<GroupActions columnKey='total_amount' onClose={mockOnClose} />);
+
+    const button = getButton('Group by This');
+
+    expect(button.disabled).toBe(true);
+    expect(button.getAttribute('title')).toBeNull();
+  });
+
+  it('leaves the column offered when the route resolved no capability for it', () => {
+    // Absence is "nobody asked": a route may group without shipping a
+    // capability map, and reading absence as a refusal would switch it off.
+    render(<GroupActions columnKey='order_status' onClose={mockOnClose} />);
+
+    const button = getButton('Group by This');
+
+    expect(button.disabled).toBe(false);
+    expect(button.getAttribute('title')).toBeNull();
+  });
+
   it('disables Clear Grouping until some column is grouped', () => {
     render(<GroupActions columnKey='order_status' onClose={mockOnClose} />);
 

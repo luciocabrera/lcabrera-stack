@@ -48,6 +48,29 @@ commands are unavailable on a non-sortable column, pinning commands on a static
 one, and "Group by This" on a column declared `isGroupable: false` (which is how
 the row-actions column is excluded, rather than by a `key === 'actions'` test).
 
+"Group by This" resolves through **`resolveGroupKeyAvailability`** rather than
+`resolveColumnCapabilities` directly, because grouping is the one capability with
+a second gate: the catalogue's per-column answer, shipped on the loader meta
+(ADR-058/ADR-063), narrows the declared flag. The util composes the two, so this
+command's `isDisabled` and the drawer's add-key list cannot come to disagree
+(ADR-068). Three details that look like exceptions and are not:
+
+- The refusal reason rides the disabled item's `title`, because a disabled button
+  fires no pointer events and so can carry no tooltip.
+- **No** gate, refusal or depth cap, disables the item while the column is
+  already a key: that click removes rather than adds, and a URL can seed a
+  grouping the catalogue refuses today.
+- Which is why `title` is gated on **`!isEnabled`** rather than on the refusal
+  alone. Both follow from one condition, so the explanation cannot land on the
+  applied-key item that is about to _ungroup_. A `title` saying why a command is
+  unavailable, on a command that is available, is worse than no title.
+
+`resolveGroupKeyAvailability` also settles the **precedence** between the two
+gates: a column the consumer declared `isGroupable: false` reports no reason at
+all, even when the catalogue refuses it too. That unavailability is the table's
+own decision — not something the endpoint said, and not something the user can
+act on — so quoting a distinct-value sentence there would blame the wrong party.
+
 "Clear Grouping" is the exception, and the reason this paragraph now spells the
 rule out. Grouping is one **whole-table** state, so clearing it depends on
 nothing about the column whose menu is open — it reads the route capability

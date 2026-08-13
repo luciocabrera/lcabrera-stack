@@ -210,6 +210,16 @@ The grouped-read guard rails have their own live suite in
 the pool default surviving on the same pooled connection are claims a mocked test
 reports green either way.
 
+`.server/groupingRefusalSurface.smoke.test.tsx` is the same kind of claim on the
+**client** side: which of this table's columns the live catalogue refuses as a
+group key, and what a user then sees. A mocked capability map shows only that the
+component renders whatever it was handed, so this one resolves the real
+capabilities, drives the route's real `loader` for every refused column —
+asserting each `dataPromise` **resolves** rather than reaching the error boundary
+— and renders the real route component to check the refusal is on screen, naming
+the column. It runs a legal key as the control, without which "the refusal shows"
+would also pass for a component that showed it unconditionally.
+
 ## Next Steps
 
 - [x] Add detail view for individual orders (read-only `view`-mode Form modal)
