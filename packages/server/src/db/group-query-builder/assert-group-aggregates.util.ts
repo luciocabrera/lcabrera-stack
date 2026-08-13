@@ -4,8 +4,7 @@ import type {
 } from './group-query-builder.types.ts';
 
 import { GroupingRefusedError } from '../../errors/grouping-refused.error.ts';
-import { assertColumnAllowed } from '../query-builder/assert-column-allowed.util.ts';
-import { assertSafeIdentifier } from '../query-builder/assert-safe-identifier.util.ts';
+import { assertGroupColumn } from './assert-group-column.util.ts';
 import { MAX_COUNT_DISTINCT_AGGREGATES } from './group-query-builder.constants.ts';
 
 type AssertGroupAggregatesArgs = {
@@ -59,8 +58,7 @@ export const assertGroupAggregates = ({
       continue;
     }
 
-    assertSafeIdentifier(aggregate.column);
-    assertColumnAllowed({ allowedColumns, column: aggregate.column });
+    assertGroupColumn({ allowedColumns, column: aggregate.column });
 
     const capability = capabilities[aggregate.column];
 

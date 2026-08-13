@@ -9,7 +9,15 @@ import { selectGroupedRows } from './select-grouped-rows.util.ts';
 // suite DB-free (ADR-032) while still asserting the exact SQL that reaches pg.
 vi.mock('./get-pool.util.ts', () => ({ getPool: vi.fn() }));
 
+/** The borrowed transaction client. */
 const query = vi.fn();
+/**
+ * The pool singleton's own spy, deliberately **not** the same function as the
+ * client's. Sharing one made every "runs on the transaction" assertion
+ * unfalsifiable: a pool call and a client call landed in the same call list, so
+ * dropping `tx` anywhere left the suite green.
+ */
+const poolQuery = vi.fn();
 const release = vi.fn();
 const connect = vi.fn();
 
@@ -46,10 +54,15 @@ const resolvePreamble = () => {
 
 beforeEach(() => {
   query.mockReset();
+  poolQuery.mockReset();
   release.mockReset();
   connect.mockReset();
+  poolQuery.mockResolvedValue({ rows: [] });
   connect.mockResolvedValue({ query, release } as unknown as PoolClient);
-  vi.mocked(getPool).mockReturnValue({ connect, query } as unknown as Pool);
+  vi.mocked(getPool).mockReturnValue({
+    connect,
+    query: poolQuery,
+  } as unknown as Pool);
 });
 
 describe('selectGroupedRows', () => {
@@ -100,9 +113,6 @@ describe('selectGroupedRows', () => {
 
     await selectGroupedRows(DESCRIPTOR);
 
-    // An executor called without `tx` would use the pool singleton instead —
-    // outside the transaction, unbounded, and with no symptom, because the
-    // query still succeeds.
     expect(statements()).toEqual([
       'BEGIN',
       expect.stringContaining('set_config'),
@@ -110,6 +120,11 @@ describe('selectGroupedRows', () => {
       expect.stringContaining('GROUP BY GROUPING SETS'),
       'COMMIT',
     ]);
+    // The assertion that makes the one above mean anything. An executor called
+    // without `tx` runs on the pool singleton — outside the transaction,
+    // unbounded, and with no symptom, because the query still succeeds. Only a
+    // spy the pool does not share with the client can see that.
+    expect(poolQuery).not.toHaveBeenCalled();
   });
 
   it('returns the decode metadata the rows cannot be read without', async () => {
@@ -200,6 +215,7 @@ describe('selectGroupedRows', () => {
 
     expect(connect).not.toHaveBeenCalled();
     expect(query).not.toHaveBeenCalled();
+    expect(poolQuery).not.toHaveBeenCalled();
   });
 
   it('refuses a key the catalogue will not group, before running the query', async () => {
@@ -242,5 +258,6 @@ describe('selectGroupedRows', () => {
       expect.stringContaining('GROUP BY GROUPING SETS'),
     ]);
     expect(connect).not.toHaveBeenCalled();
+    expect(poolQuery).not.toHaveBeenCalled();
   });
 });

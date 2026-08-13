@@ -1,6 +1,12 @@
 import type { GroupingRefusalReason } from './errors.types.ts';
 
 type GroupingRefusedErrorArgs = {
+  /**
+   * The rejection this replaces, when it replaces one — the shared identifier
+   * and allow-list assertions throw a bare `Error`, and the refusal that wraps
+   * them keeps it here for a server log.
+   */
+  readonly cause?: unknown;
   /** The column the refusal is about, when exactly one is. */
   readonly column?: string;
   /** The pre-flight row bound, when a bound is what refused the request. */
@@ -30,12 +36,13 @@ export class GroupingRefusedError extends Error {
   public readonly reason: GroupingRefusalReason;
 
   public constructor({
+    cause,
     column,
     estimatedRows,
     message,
     reason,
   }: GroupingRefusedErrorArgs) {
-    super(message);
+    super(message, { cause });
     this.name = 'GroupingRefusedError';
     this.reason = reason;
     this.column = column;

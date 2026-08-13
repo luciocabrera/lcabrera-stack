@@ -17,7 +17,7 @@ split this folder is built around.
 
 | Artifact                        | Location                                      | Description                                                                                                                                                                                                                                                                                                                           |
 | ------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `readEnvConfig`                 | `db/env.schema.ts`                            | Zod schema + parser for the five `DB_*` credentials plus the optional tuning keys (pool max, connection/idle/statement timeouts, and the grouped-read statement timeout)                                                                                                                                                              |
+| `readEnvConfig`                 | `db/env.schema.ts`                            | Zod schema + parser for the required `DB_*` credentials plus the optional, defaulted tuning keys (pool max, connection/idle/statement timeouts, and the grouped-read statement timeout)                                                                                                                                               |
 | `readGroupStatementTimeoutMs`   | `db/env.schema.ts`                            | Just `DB_GROUP_STATEMENT_TIMEOUT_MS`, picked off the same schema — read per grouped read, so it must not require the credential keys it does not use                                                                                                                                                                                  |
 | `getPool`                       | `db/get-pool.util.ts`                         | Lazily-initialized `pg.Pool` singleton, one per Node process, built from those tuning keys                                                                                                                                                                                                                                            |
 | `closePool`                     | `db/get-pool.util.ts`                         | Tears down the pool singleton (test teardown)                                                                                                                                                                                                                                                                                         |
@@ -99,7 +99,11 @@ connection**, and `assertGroupRowBackstop` (`assert-group-row-backstop.util.ts`)
 is the post-execution half — a result that reached the guard's own ceiling is
 refused rather than returned truncated. Everything they compose
 (`estimateGroupCardinality`, `assertGroupCardinality`, `resolveGroupRowLimit`,
-`resolveWidestGroupKey`) is private to the folder.
+`resolveWidestGroupKey`, `assertGroupColumn`) is private to the folder.
+`assertGroupColumn` is the one worth knowing about: it wraps the two assertions
+shared with `query-builder/` so an allow-list or identifier refusal is a typed
+`GroupingRefusedError` rather than a bare `Error` the loader edge can only report
+as `unexpected`.
 
 `group-query-builder.constants.ts` holds every constant the folder owns —
 including the closed `AggregateFn` → SQL map, the depth cap, the warn/refuse row

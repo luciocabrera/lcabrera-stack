@@ -94,10 +94,10 @@ export const MAX_GROUP_KEYS = 4;
  * Estimated result rows past which a grouped read is refused outright — roughly
  * 10 MB through a server-rendered payload, which is not a page anyone waits for.
  *
- * The estimate is an upper bound (`∏dₖ` assumes every key combination occurs),
- * so it over-refuses on sparse data; measured ~2.5× conservative on a 500k-row
- * table. That is the safe direction for a *hard* refusal, and it is why the warn
- * threshold below exists rather than this being the only rail (ADR-066).
+ * The estimate is an upper bound — `∏dₖ` assumes every key combination occurs —
+ * so it over-refuses on sparse data. That is the safe direction for a *hard*
+ * refusal, and it is why the warn threshold below exists rather than this being
+ * the only rail (ADR-066, which names the query that re-derives the gap).
  */
 export const MAX_GROUP_ROWS_REFUSE = 50_000;
 

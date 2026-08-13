@@ -34,6 +34,12 @@ type SetStatementTimeoutArgs = {
  *
  * The value is passed as a string because `set_config`'s signature is
  * `(text, text, boolean)`; a bare integer means milliseconds.
+ *
+ * Transaction-locality cuts both ways, and the second edge is the one to
+ * remember: the setting lasts until the transaction ends, so it governs
+ * **every** later statement on `tx`, not only the next one. Call it on a
+ * transaction you own, or on one whose remaining statements should share the
+ * ceiling.
  */
 export const setStatementTimeout = async ({
   timeoutMs,

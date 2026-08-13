@@ -43,6 +43,16 @@ No executor calls `getPool().query` any more; they all go through
 Six executors each owning their own copy of both is six chances to omit one, and
 the reads had already omitted the second.
 
+`run-in-transaction.util.ts` issues its `BEGIN` and `COMMIT` through the same
+helper. They were the last statements in the package reaching the driver
+untranslated — tolerable while only explicit multi-step writes opened a
+transaction, less so now that every grouped **read** does. What `run` itself
+throws is rethrown untouched: it has already been translated by whichever
+executor raised it, and re-mapping would bury a `GroupingRefusedError` — not a
+driver failure at all — under a generic `PersistenceError`. `ROLLBACK` stays
+bare, because `rollback-transaction.util.ts` discards its own failure by design
+and translating something you throw away buys nothing.
+
 The trap to know: an executor called **without** `tx` inside a `withTransaction`
 block runs on a different connection, outside that transaction, and commits on its
 own. Nothing detects it — thread `tx` through every step that must be atomic.
@@ -58,28 +68,28 @@ same reason — the one place in this folder where the seam is not optional.
 
 ## Files
 
-| File                                       | Role                                                                                                                                                                                                |
-| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `env.schema.ts`                            | Zod schema + `readEnvConfig` for the `DB_*` credentials and the four optional pool-tuning keys                                                                                                      |
-| `db.types.ts`                              | `ExecutorOptions` (the optional `tx`) + `TransactionClient` — kept out of `query-builder/`, which must not know about connections                                                                   |
-| `get-pool.util.ts`                         | Lazily-initialized `pg.Pool` singleton (one per Node process) + `closePool` for teardown                                                                                                            |
-| `run-query.util.ts`                        | Private. The one place a built query meets a connection: resolves `tx`-or-pool and translates the rejection                                                                                         |
-| `set-statement-timeout.util.ts`            | Private. `set_config('statement_timeout', $1, true)` — transaction-scoped, parameterised, and **`tx` is required** rather than optional (ADR-066)                                                   |
-| `with-transaction.util.ts`                 | **Public entry point.** Borrows a pooled connection, runs a callback in BEGIN/COMMIT/ROLLBACK, always releases                                                                                      |
-| `run-in-transaction.util.ts`               | **Public entry point.** The same, over a connection the caller owns; opens and closes nothing                                                                                                       |
-| `rollback-transaction.util.ts`             | Private. ROLLBACK that swallows its own failure so it cannot mask the error being unwound                                                                                                           |
-| `select-rows.util.ts`                      | **Public entry point.** Builds a `SelectQueryDescriptor` and executes it on the pool, returning its rows                                                                                            |
-| `select-distinct-rows.util.ts`             | **Public entry point.** `selectRows` + `distinct: true` — deduplicated rows over the same descriptor                                                                                                |
-| `select-grouped-rows.util.ts`              | **Public entry point.** Checks depth, opens a transaction, scopes a statement timeout to it, resolves capabilities, builds and runs — returning the rows beside the aliases they must be decoded by |
-| `select-filter-options.util.ts`            | **Public entry point.** Filter-dropdown specialization over `selectDistinctRows`: one column's distinct, non-empty, ordered values → `{ values, hasMore }`                                          |
-| `insert-row.util.ts`                       | **Public entry point.** Builds + runs an `InsertQueryDescriptor`; defaults `RETURNING *`, returns rows                                                                                              |
-| `update-rows.util.ts`                      | **Public entry point.** Builds + runs an `UpdateQueryDescriptor`; defaults `RETURNING *`, returns rows                                                                                              |
-| `delete-rows.util.ts`                      | **Public entry point.** Builds + runs a `DeleteQueryDescriptor`; defaults `RETURNING *`, returns rows                                                                                               |
-| `get-max-value.util.ts`                    | **Public entry point.** Runs `buildMaxValueQuery` and returns the numeric `MAX(col)` (0 if empty)                                                                                                   |
-| `get-column-grouping-capabilities.util.ts` | **Public entry point.** One catalogue round trip resolving, per column, whether it may be a group key (and why not) and which aggregates are legal                                                  |
-| `get-rows-count.util.ts`                   | **Public entry point.** Runs `buildCountQuery` and returns the row count; requires an explicit `column` (never `count(*)`) so a page and its total share filters                                    |
-| `query-builder/`                           | Pure SELECT/count/distinct/insert/update/delete/max construction — see `query-builder/ARCHITECTURE.md`                                                                                              |
-| `group-query-builder/`                     | Pure grouped-read construction and the ADR-058 legality gates — see `group-query-builder/ARCHITECTURE.md`                                                                                           |
+| File                                       | Role                                                                                                                                                                                                  |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env.schema.ts`                            | Zod schema for the `DB_*` credentials and the optional, defaulted tuning keys, plus `readEnvConfig` and `readGroupStatementTimeoutMs` (the grouped-read ceiling, read without requiring a credential) |
+| `db.types.ts`                              | `ExecutorOptions` (the optional `tx`) + `TransactionClient` — kept out of `query-builder/`, which must not know about connections                                                                     |
+| `get-pool.util.ts`                         | Lazily-initialized `pg.Pool` singleton (one per Node process) + `closePool` for teardown                                                                                                              |
+| `run-query.util.ts`                        | Private. The one place a built query meets a connection: resolves `tx`-or-pool and translates the rejection                                                                                           |
+| `set-statement-timeout.util.ts`            | Private. `set_config('statement_timeout', $1, true)` — transaction-scoped, parameterised, and **`tx` is required** rather than optional (ADR-066)                                                     |
+| `with-transaction.util.ts`                 | **Public entry point.** Borrows a pooled connection, runs a callback in BEGIN/COMMIT/ROLLBACK, always releases                                                                                        |
+| `run-in-transaction.util.ts`               | **Public entry point.** The same, over a connection the caller owns; opens and closes nothing                                                                                                         |
+| `rollback-transaction.util.ts`             | Private. ROLLBACK that swallows its own failure so it cannot mask the error being unwound                                                                                                             |
+| `select-rows.util.ts`                      | **Public entry point.** Builds a `SelectQueryDescriptor` and executes it on the pool, returning its rows                                                                                              |
+| `select-distinct-rows.util.ts`             | **Public entry point.** `selectRows` + `distinct: true` — deduplicated rows over the same descriptor                                                                                                  |
+| `select-grouped-rows.util.ts`              | **Public entry point.** Checks depth, opens a transaction, scopes a statement timeout to it, resolves capabilities, builds and runs — returning the rows beside the aliases they must be decoded by   |
+| `select-filter-options.util.ts`            | **Public entry point.** Filter-dropdown specialization over `selectDistinctRows`: one column's distinct, non-empty, ordered values → `{ values, hasMore }`                                            |
+| `insert-row.util.ts`                       | **Public entry point.** Builds + runs an `InsertQueryDescriptor`; defaults `RETURNING *`, returns rows                                                                                                |
+| `update-rows.util.ts`                      | **Public entry point.** Builds + runs an `UpdateQueryDescriptor`; defaults `RETURNING *`, returns rows                                                                                                |
+| `delete-rows.util.ts`                      | **Public entry point.** Builds + runs a `DeleteQueryDescriptor`; defaults `RETURNING *`, returns rows                                                                                                 |
+| `get-max-value.util.ts`                    | **Public entry point.** Runs `buildMaxValueQuery` and returns the numeric `MAX(col)` (0 if empty)                                                                                                     |
+| `get-column-grouping-capabilities.util.ts` | **Public entry point.** One catalogue round trip resolving, per column, whether it may be a group key (and why not) and which aggregates are legal                                                    |
+| `get-rows-count.util.ts`                   | **Public entry point.** Runs `buildCountQuery` and returns the row count; requires an explicit `column` (never `count(*)`) so a page and its total share filters                                      |
+| `query-builder/`                           | Pure SELECT/count/distinct/insert/update/delete/max construction — see `query-builder/ARCHITECTURE.md`                                                                                                |
+| `group-query-builder/`                     | Pure grouped-read construction and the ADR-058 legality gates — see `group-query-builder/ARCHITECTURE.md`                                                                                             |
 
 ## Choosing an entry point
 

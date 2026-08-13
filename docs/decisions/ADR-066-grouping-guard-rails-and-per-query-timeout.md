@@ -14,11 +14,19 @@ legal for each; ADR-059 settled how the SQL is emitted. Neither bounds the
 still return a payload nobody can use: the product of their cardinalities is what
 decides the row count, and no per-column rule sees the product.
 
-Two facts from the design probes frame everything below. A depth-4 cube over
-500 000 rows returned 1 422 rows in 654 ms, while the `∏(dₖ+1)` bound predicted
-3 564 — a true upper bound, roughly 2.5× conservative when the combinations are
-sparse. And `pg_stats` has **no row at all** for a table that has never been
-analysed, which is every freshly restored database.
+Two facts from the design probes frame everything below, and both are
+re-runnable rather than recorded here as figures — the measurement and its exact
+steps are on PR #656, which is dated and cannot silently go stale.
+
+**The bound is real but loose.** `∏(dₖ+1)` assumes every key combination occurs;
+real data is sparser, so a measured depth-4 cube returns a fraction of what the
+bound predicts. Re-derive it on any table with
+`SELECT attname, n_distinct FROM pg_stats WHERE tablename = …` against
+`SELECT count(*) FROM (SELECT 1 FROM … GROUP BY CUBE (…)) g`.
+
+**Statistics are absent far more often than they are stale.** `pg_stats` has
+**no row at all** for a table that has never been analysed, which is every
+freshly restored database.
 
 The pool sets `statement_timeout` once per connection from
 `DB_STATEMENT_TIMEOUT_MS` (30 s by default) and `runQuery` had no override, so a
@@ -52,9 +60,9 @@ statement_timeout = $1` is a **syntax error** — `SET` is a utility statement
    statistics exist and equally blind when they do not. (`EXPLAIN ANALYZE` is not
    a candidate at all — it executes the query.)
 2. **Pure pre-flight refusal, with no row limit.** Rejected on the measurement
-   above: a bound that is 2.5× conservative on sparse data refuses queries that
-   would have been fine, and with no statistics it can only refuse everything or
-   allow everything.
+   above: a bound that loose on sparse data refuses queries that would have been
+   fine, and with no statistics it can only refuse everything or allow
+   everything.
 3. **Estimate, then warn or refuse, with a row limit as the backstop.**
    `Chosen.` The estimate handles the case it can answer; the limit handles the
    case it cannot, and the same mechanism serves both.
@@ -133,13 +141,22 @@ a field-error object (ADR-050): the edge returns plain data, never a class.
   rails' answer rather than the requested `maxRows`. A caller reading `maxRows`
   back off its own descriptor and assuming it is what ran would now be wrong —
   read `guardRails.rowLimit.limit`.
-- **The estimate over-refuses on sparse data**, by roughly the measured 2.5×.
-  That is the safe direction for a hard ceiling, and the warn threshold plus the
-  backstop exist so that the common case still returns data. If it bites in
-  practice, the bound needs a sparsity factor — not a higher ceiling.
+- **The estimate over-refuses on sparse data**, measurably so. That is the safe
+  direction for a hard ceiling, and the warn threshold plus the backstop exist so
+  that the common case still returns data. If it bites in practice, the bound
+  needs a sparsity factor — not a higher ceiling.
 - **`GroupingRefusedError` is not caught by `instanceof PersistenceError`.** Any
   consumer that treated that check as "everything `@lcabrera/server` throws" has
   to add the second arm, or use `toSerializableDbError`, which covers both.
+- **A caller who passes its own `tx` inherits the ceiling for the rest of that
+  transaction**, not only for this call. That follows from transaction-locality
+  rather than being a choice: restoring the previous value afterwards is not
+  atomic with the query it wraps. Call without `tx` to get a transaction scoped
+  to the read alone.
+- **`runInTransaction`'s `BEGIN`/`COMMIT` are now translated too.** They were the
+  last untranslated pair in the package, and this decision is what makes them
+  reachable from a read. `ROLLBACK` stays bare — it discards its own failure by
+  design.
 - **The enterprise-orders grouped read no longer rejects on a refusal**, so the
   route's error boundary no longer sees one. The refusal reaches the client as
   `response.error` instead; rendering it is a follow-up, and until then a refused

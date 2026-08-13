@@ -50,7 +50,18 @@ pooled connection.
   answer rather than the requested `maxRows`. Read
   `guardRails.rowLimit.limit` if you need the number that ran.
 - The grouped-read assertions now throw `GroupingRefusedError` instead of a bare
-  `Error`. Messages are unchanged, and it still extends `Error` — but it is
-  **not** a `PersistenceError`, because nothing in it came from the driver.
-  A consumer using `instanceof PersistenceError` as "everything this package
-  throws" needs the second arm, or `toSerializableDbError`, which covers both.
+  `Error` — including an allow-list or malformed-identifier refusal, which used
+  to escape as a plain `Error`. Messages are unchanged, and it still extends
+  `Error` — but it is **not** a `PersistenceError`, because nothing in it came
+  from the driver. A consumer using `instanceof PersistenceError` as "everything
+  this package throws" needs the second arm, or `toSerializableDbError`, which
+  covers both.
+- `runInTransaction` translates its own `BEGIN` and `COMMIT` failures through
+  `mapDbError`; they were the last statements in the package reaching the driver
+  untranslated. A caller that was matching on pg's text for those two will stop
+  matching — the original stays on `Error.cause`. What the callback throws is
+  rethrown untouched, as before.
+- Passing your own `tx` to `selectGroupedRows` applies the grouped-read ceiling
+  to the rest of **that** transaction, not only to this call — a consequence of
+  the timeout being transaction-local. Call it without `tx` to get a transaction
+  scoped to the read alone.

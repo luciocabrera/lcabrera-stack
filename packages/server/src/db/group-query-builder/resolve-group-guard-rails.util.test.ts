@@ -24,6 +24,8 @@ const capability = ({
 const CAPABILITIES: Readonly<Record<string, ColumnGroupingCapability>> = {
   city: capability({ column: 'city', distinctEstimate: 900 }),
   country: capability({ column: 'country', distinctEstimate: 60 }),
+  /** Small enough that `region x city` lands between the two thresholds. */
+  region: capability({ column: 'region', distinctEstimate: 12 }),
   unanalysed: capability({ column: 'unanalysed' }),
 };
 
@@ -48,16 +50,28 @@ describe('resolveGroupGuardRails', () => {
     });
   });
 
-  it('warns without refusing between the two thresholds', () => {
-    // 60 × 900 = 54 000 — past the warn threshold, past the refuse one too, so
-    // the pair below is what separates them.
+  it('says nothing about a bound under the warn threshold', () => {
     expect(resolve({ keys: ['city'] })).toEqual({
       estimate: { kind: 'known', rows: 900 },
       rowLimit: { limit: 5000 },
     });
   });
 
+  it('warns without refusing between the two thresholds', () => {
+    // 12 x 900 = 10 800 — past the warn threshold, well short of the refuse
+    // one, which is the only band where a warning is the whole outcome.
+    expect(resolve({ keys: ['region', 'city'] })).toEqual({
+      estimate: { kind: 'known', rows: 10_800 },
+      rowLimit: { limit: 5000 },
+      warning: {
+        estimatedRows: 10_800,
+        kind: 'estimate-above-warn-threshold',
+      },
+    });
+  });
+
   it('refuses the product of two wide keys', () => {
+    // 60 x 900 = 54 000, past the refuse ceiling.
     expect(() => resolve({ keys: ['country', 'city'] })).toThrow(
       /Column "city"/,
     );

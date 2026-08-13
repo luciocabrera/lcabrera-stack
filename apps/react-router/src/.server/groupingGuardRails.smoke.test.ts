@@ -225,6 +225,46 @@ describe.skipIf(!IS_SMOKE_ENABLED)('grouped-read guard rails', () => {
     },
   );
 
+  it(
+    'leaves its ceiling on a caller-supplied transaction until that transaction ends',
+    { timeout: 30_000 },
+    async () => {
+      // The documented consequence of transaction-locality, pinned rather than
+      // left as prose: a caller passing its own `tx` gets the grouped read's
+      // ceiling applied to the rest of *its* transaction too.
+      const client = await getPool().connect();
+
+      try {
+        await client.query('BEGIN');
+        withGroupTimeout(700);
+        await selectGroupedRows({
+          aggregates: [{ fn: 'count' }],
+          allowedColumns: ['a', 'b'],
+          grouping: 'flat',
+          keys: ['a'],
+          maxRows: 20_000,
+          schema: SCHEMA,
+          table: WIDE_NAME,
+          tx: client,
+        });
+
+        // Still inside the caller's transaction, so the 700 ms ceiling is still
+        // in force and a two-second sleep cannot survive it.
+        await expect(client.query('SELECT pg_sleep(2)')).rejects.toMatchObject({
+          code: '57014',
+        });
+      } finally {
+        await client.query('ROLLBACK');
+        client.release();
+      }
+
+      // …and it does end with the transaction, on the very same connection.
+      await expect(
+        getPool().query('SELECT pg_sleep(2)'),
+      ).resolves.toBeDefined();
+    },
+  );
+
   it('refuses a grouping whose estimate is past the ceiling, naming the column', async () => {
     withGroupTimeout(10_000);
 

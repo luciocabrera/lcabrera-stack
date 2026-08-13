@@ -40,8 +40,15 @@ type SelectGroupedRowsArgs = Omit<GroupQueryDescriptor, 'capabilities'>;
  *    timeout. An executor called here without `tx` would silently run on the
  *    pool instead, outside the transaction, with no ceiling and no symptom.
  *
- * A caller's own `tx` is used as-is: it is already a transaction, so the timeout
- * is local to it and reverts at the caller's `COMMIT` exactly the same way.
+ * **Passing your own `tx` has a consequence worth knowing.** It is used as-is,
+ * so the timeout is local to *your* transaction and reverts at *your* `COMMIT` —
+ * which means this read's ceiling also applies to every statement you run after
+ * it on that transaction, not only to this call. That follows from
+ * transaction-locality rather than being a choice made here: the alternative is
+ * reading the previous value back and restoring it afterwards, which is not
+ * atomic with the query it wraps. If the rest of your transaction needs a
+ * different ceiling, either call this **without** `tx` and let it open its own,
+ * or set the value you want once it returns.
  *
  * The result carries the emitted `aggregates`, `keys` and `maskAlias` because a
  * grouped row cannot be decoded without them, plus `estimate` and any `warning`

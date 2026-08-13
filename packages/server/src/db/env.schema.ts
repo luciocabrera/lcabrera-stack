@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
 /**
- * The five credential keys are required; every tuning key is optional and
- * defaulted, so an environment that predates one still boots unchanged.
+ * The credential keys are required; every tuning key is optional and defaulted,
+ * so an environment that predates one still boots unchanged.
  *
  * The defaults are not pg's. pg waits **forever** to acquire a connection and
  * puts no ceiling on a statement, so a single slow query holds its connection

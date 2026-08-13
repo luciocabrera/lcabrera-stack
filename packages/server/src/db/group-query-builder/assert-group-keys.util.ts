@@ -1,8 +1,7 @@
 import type { ColumnGroupingCapability } from './group-query-builder.types.ts';
 
 import { GroupingRefusedError } from '../../errors/grouping-refused.error.ts';
-import { assertColumnAllowed } from '../query-builder/assert-column-allowed.util.ts';
-import { assertSafeIdentifier } from '../query-builder/assert-safe-identifier.util.ts';
+import { assertGroupColumn } from './assert-group-column.util.ts';
 import { assertGroupDepth } from './assert-group-depth.util.ts';
 
 type AssertGroupKeysArgs = {
@@ -33,8 +32,7 @@ export const assertGroupKeys = ({
   assertGroupDepth({ keys });
 
   for (const key of keys) {
-    assertSafeIdentifier(key);
-    assertColumnAllowed({ allowedColumns, column: key });
+    assertGroupColumn({ allowedColumns, column: key });
 
     const capability = capabilities[key];
 
