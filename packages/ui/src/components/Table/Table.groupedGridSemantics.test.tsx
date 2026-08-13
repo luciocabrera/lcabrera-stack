@@ -1,12 +1,6 @@
 // @vitest-environment jsdom
 
-import {
-  act,
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-} from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { useRef } from 'react';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
@@ -152,17 +146,21 @@ const readExpanded = () =>
     .getAllByRole('row')
     .map((row) => row.getAttribute('aria-expanded') ?? 'absent');
 
-/** Tab into the grid: focus lands on the container, which delegates onwards. */
+/**
+ * Tab into the grid: focus lands on the container, which delegates onwards.
+ *
+ * Neither helper wraps its call in `act`. `fireEvent` already does so, and the
+ * focus handler's update is flushed by the microtask both of them await — the
+ * shape `Table.gridFocus.test.tsx` and `Table.treeExpansion.test.tsx` use.
+ */
 const enterGrid = async () => {
-  await act(async () => {
-    getGrid().focus();
-  });
+  getGrid().focus();
+  await Promise.resolve();
 };
 
 const pressKey = async (key: string) => {
-  await act(async () => {
-    fireEvent.keyDown(document.activeElement ?? getGrid(), { key });
-  });
+  fireEvent.keyDown(document.activeElement ?? getGrid(), { key });
+  await Promise.resolve();
 };
 
 afterEach(cleanup);
