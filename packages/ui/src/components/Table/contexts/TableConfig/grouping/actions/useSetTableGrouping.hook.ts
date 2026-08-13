@@ -1,3 +1,5 @@
+import type { TableGroupingState } from '#ui/components/Table/Table.types';
+
 import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useTableDataContextValue } from '#ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
 
@@ -5,7 +7,21 @@ import { usePersistTableStateAction } from '../../columns/actions/hooks/usePersi
 import { resolveTableGroupingUpdate } from './utils';
 
 /**
- * Apply a group key, or clear grouping when called with `undefined`.
+ * The single write path for the grouping store: hand it a function from the
+ * applied configuration to the next one, and it commits, persists and
+ * navigates.
+ *
+ * Internal to `actions/` — the named actions beside it
+ * (`useToggleTableGroupKey`, `useSetTableGroupKeys`,
+ * `useSetTableColumnAggregate`, `useClearTableGrouping`) are what surfaces
+ * call. Keeping this one out of the barrel is what stops a component computing
+ * grouping state for itself, which is the store-pattern rule that components
+ * consume actions rather than state transitions.
+ *
+ * It takes a **reducer** rather than a finished state so the store is read
+ * exactly once per interaction. A finished state would need the caller to read
+ * the store too, and two reads of one store in a single action path can
+ * straddle a concurrent update.
  *
  * Grouping changes the SQL the route emits, so this writes the `grouping`
  * search param through the persist-cookie flow and lets the resulting redirect
@@ -24,11 +40,13 @@ export const useSetTableGrouping = () => {
   const { dataStore } = useTableDataContextValue();
   const persistTableState = usePersistTableStateAction();
 
-  return (columnKey: string | undefined) => {
-    const groupingState = groupingStore.get();
+  return (
+    deriveNextGrouping: (current: TableGroupingState) => TableGroupingState,
+  ) => {
+    const existingGrouping = groupingStore.get();
     const result = resolveTableGroupingUpdate({
-      columnKey,
-      existingKeys: groupingState?.keys ?? [],
+      existingGrouping,
+      nextGrouping: deriveNextGrouping(existingGrouping),
     });
 
     if (result.kind !== 'updated') return;
@@ -38,6 +56,6 @@ export const useSetTableGrouping = () => {
     if (!persistTableState(result.persistenceEntry)) return;
 
     dataStore.set({ isLoading: true });
-    groupingStore.set({ keys: result.keys });
+    groupingStore.set(result.grouping);
   };
 };

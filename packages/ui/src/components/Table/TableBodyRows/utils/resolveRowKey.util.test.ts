@@ -23,9 +23,16 @@ const col = ({
   label: key,
 });
 
-const groupRow = (label: string) =>
+const groupRow = (...labels: readonly string[]) =>
   ({
-    [TABLE_GROUP_ROW_FIELD]: { columnKey: 'order_number', count: 2, label },
+    [TABLE_GROUP_ROW_FIELD]: {
+      aggregates: [],
+      count: 2,
+      path: labels.map((label, index) => ({
+        columnKey: index === 0 ? 'order_number' : `key_${index}`,
+        label,
+      })),
+    },
   }) as unknown as Row;
 
 const singleKeyColumns = [
@@ -261,6 +268,25 @@ describe('resolveRowKey', () => {
       expect(groupDerived.startsWith('grp:')).toBe(true);
       expect(groupDerived.startsWith('pk:')).toBe(false);
       expect(groupDerived.startsWith('idx:')).toBe(false);
+    });
+
+    it('identifies a multi-key group by its whole path, not by one level', () => {
+      // Under multi-key grouping the outermost key repeats across every group
+      // beneath it, so a key derived from one level would hand every sibling
+      // the same identity.
+      expect(
+        resolveRowKey<Row>({
+          columns: singleKeyColumns,
+          index: 0,
+          row: groupRow('ORD-1', 'USA'),
+        }),
+      ).not.toBe(
+        resolveRowKey<Row>({
+          columns: singleKeyColumns,
+          index: 0,
+          row: groupRow('ORD-1', 'CAN'),
+        }),
+      );
     });
 
     it('ignores a malformed summary and falls back to the ordinary derivation', () => {

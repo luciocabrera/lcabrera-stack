@@ -1,5 +1,7 @@
 export { deriveToggleCommandState } from './deriveToggleCommandState.util';
 export {
+  AGGREGATE_COMMANDS,
+  CLEAR_COLUMN_AGGREGATE_COMMAND,
   CLEAR_GROUPING_COMMAND,
   GROUP_BY_COLUMN_COMMAND,
 } from './grouping/groupingCommands';

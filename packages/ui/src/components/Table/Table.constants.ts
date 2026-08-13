@@ -1,4 +1,4 @@
-import type { TableGroupRow } from './Table.types';
+import type { TableAggregateFn, TableGroupRow } from './Table.types';
 
 /**
  * Default minimum column width when not specified
@@ -71,3 +71,52 @@ export const ACTIONS_COLUMN_KEY = 'actions';
  * that silently stops rendering.
  */
 export const TABLE_GROUP_ROW_FIELD: keyof TableGroupRow = 'tableGroup';
+
+/**
+ * How many group keys may be applied at once. A **duplicate** of
+ * `MAX_GROUP_KEYS` in `@lcabrera/server`, which is Node-only and so unreachable
+ * from this client-safe package (ADR-038, ADR-039).
+ *
+ * The two are pinned together by `groupingContract.test.ts` in
+ * `apps/react-router`, the one workspace that legitimately depends on both. If
+ * that test is failing, change the server's value and this one — never only
+ * this one, which would let the UI offer a depth the query then refuses.
+ */
+export const MAX_TABLE_GROUP_KEYS = 4;
+
+/**
+ * Every aggregate's user-facing name, as a map **closed over the union** — so a
+ * member added to `TableAggregateFn` is a compile error here rather than a menu
+ * entry labelled with a SQL-ish token.
+ *
+ * This is also the vocabulary the URL guard tests against, which is why it is a
+ * map rather than a list: `Object.hasOwn` over it is total by construction,
+ * where a hand-maintained list can silently miss a member.
+ */
+export const TABLE_AGGREGATE_LABELS: Record<TableAggregateFn, string> = {
+  avg: 'Average',
+  boolAnd: 'All True',
+  boolOr: 'Any True',
+  count: 'Count',
+  countDistinct: 'Distinct Count',
+  max: 'Maximum',
+  min: 'Minimum',
+  sum: 'Sum',
+};
+
+/**
+ * The aggregate vocabulary in **menu order**, which a `Record` cannot express.
+ * Its agreement with `TABLE_AGGREGATE_LABELS` is asserted in
+ * `Table.constants.test.ts` — a new member forces a label entry, and that test
+ * is what forces it in here too.
+ */
+export const TABLE_AGGREGATE_FNS: readonly TableAggregateFn[] = [
+  'count',
+  'countDistinct',
+  'sum',
+  'avg',
+  'min',
+  'max',
+  'boolAnd',
+  'boolOr',
+];

@@ -90,6 +90,17 @@ TableSettingsDrawer/
 │   ├── SortingSectionToolbar/             → Sort/clear/reset (toolbar + footer)
 │   └── utils/
 │
+├── GroupingSection/                       → Multi-key grouping + aggregate selection
+│   ├── GroupingSection.component.tsx       → Orchestrator
+│   ├── GroupingSection.types.ts
+│   ├── index.ts
+│   ├── AddGroupKeySection/                → VirtualSelect for adding a group key
+│   ├── ActiveGroupKeyList/                → DraggableList of applied keys
+│   ├── AddAggregateSection/               → Column → legal-function selects
+│   ├── ActiveAggregateList/               → Selected aggregates, each removable
+│   ├── GroupingSectionToolbar/            → Clear grouping (toolbar + footer)
+│   └── utils/
+│
 └── ColumnOrderSection/                    → Drag-drop column order + pin + visibility
     ├── ColumnOrderSection.component.tsx    → DraggableList + conflict modals
     ├── ColumnOrderSection.types.ts         → Conflict resolution types
@@ -189,6 +200,9 @@ graph TD
   D --> I["Tab: Sorting"]
   I --> J["SortingSection"]
 
+  D --> I2["Tab: Grouping (only when isGroupingEnabled)"]
+  I2 --> J2["GroupingSection"]
+
   D --> K["Tab: Columns"]
   K --> L["ColumnOrderSectionProvider"]
   L --> M["ColumnOrderSection"]
@@ -235,17 +249,18 @@ All sections follow a consistent pattern: they use SidePanel sub-components for 
 read/write state through TableDrawerContext actions and selectors, and each features
 a toolbar in dual-variant mode.
 
-| Section                  | Tab     | Features                                                           | Details                                                   |
-| ------------------------ | ------- | ------------------------------------------------------------------ | --------------------------------------------------------- |
-| `GeneralSettingsSection` | General | Width presets, cross-section clear/reset, all settings clear/reset | [ARCHITECTURE.md](GeneralSettingsSection/ARCHITECTURE.md) |
-| `DetailsSection`         | Details | Required row counts, optional table/schema, technical metadata     | [ARCHITECTURE.md](DetailsSection/ARCHITECTURE.md)         |
-| `FiltersSection`         | Filters | Add/remove/expand filters, FilterInputs, validation                | [ARCHITECTURE.md](FiltersSection/ARCHITECTURE.md)         |
-| `SortingSection`         | Sorting | Add/remove/reorder sorts, direction toggle                         | [ARCHITECTURE.md](SortingSection/ARCHITECTURE.md)         |
-| `ColumnOrderSection`     | Columns | Drag-drop reorder, pin toggle, visibility toggle, conflict modals  | [ARCHITECTURE.md](ColumnOrderSection/ARCHITECTURE.md)     |
+| Section                  | Tab      | Features                                                                                                                                                                                                                                                                                     | Details                                                   |
+| ------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `GeneralSettingsSection` | General  | Width presets, cross-section clear/reset, all settings clear/reset                                                                                                                                                                                                                           | [ARCHITECTURE.md](GeneralSettingsSection/ARCHITECTURE.md) |
+| `DetailsSection`         | Details  | Required row counts, optional table/schema, technical metadata                                                                                                                                                                                                                               | [ARCHITECTURE.md](DetailsSection/ARCHITECTURE.md)         |
+| `FiltersSection`         | Filters  | Add/remove/expand filters, FilterInputs, validation                                                                                                                                                                                                                                          | [ARCHITECTURE.md](FiltersSection/ARCHITECTURE.md)         |
+| `SortingSection`         | Sorting  | Add/remove/reorder sorts, direction toggle                                                                                                                                                                                                                                                   | [ARCHITECTURE.md](SortingSection/ARCHITECTURE.md)         |
+| `GroupingSection`        | Grouping | Multi-key group add/remove/reorder, legality-derived aggregate selection. Tab present only where the route declared `isGroupingEnabled`, and the one section that writes the **live** store rather than the drawer draft — grouping is URL state, so every edit re-runs the loader (ADR-061) | [ARCHITECTURE.md](GroupingSection/ARCHITECTURE.md)        |
+| `ColumnOrderSection`     | Columns  | Drag-drop reorder, pin toggle, visibility toggle, conflict modals                                                                                                                                                                                                                            | [ARCHITECTURE.md](ColumnOrderSection/ARCHITECTURE.md)     |
 
 ### Section Toolbar Pattern
 
-Filters, Sorting, and ColumnOrder sections each have a `*SectionToolbar` sub-component
+Filters, Sorting, Grouping, and ColumnOrder sections each have a `*SectionToolbar` sub-component
 that renders in two variants controlled by a `variant` prop:
 
 | Variant     | Placement              | Button Style            | Shows Labels?  |

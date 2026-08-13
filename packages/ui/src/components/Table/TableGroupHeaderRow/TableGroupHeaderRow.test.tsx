@@ -3,7 +3,10 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
-import type { TableColumn } from '#ui/components/Table/Table.types';
+import type {
+  TableColumn,
+  TableGroupRowSummary,
+} from '#ui/components/Table/Table.types';
 
 import { TableConfigProvider } from '#ui/components/Table/contexts';
 import { DEFAULT_ROW_HEIGHT } from '#ui/components/Table/Table.constants';
@@ -13,27 +16,27 @@ import { TableGroupHeaderRow } from './TableGroupHeaderRow.component';
 
 type RenderGroupRowArgs = {
   readonly rowHeight?: number;
-  readonly summary?: {
-    readonly columnKey: string;
-    readonly count: number;
-    readonly label: string;
-  };
+  readonly summary?: TableGroupRowSummary;
 };
 
 type TestRow = {
   readonly order_id: number;
   readonly order_status: string;
+  readonly shipping_country: string;
+  readonly total_amount: number;
 };
 
 const columns: TableColumn<TestRow>[] = [
   { isPrimaryKey: true, key: 'order_id', label: 'Order ID' },
   { key: 'order_status', label: 'Status' },
+  { key: 'shipping_country', label: 'Country' },
+  { key: 'total_amount', label: 'Total' },
 ];
 
-const defaultSummary = {
-  columnKey: 'order_status',
+const defaultSummary: TableGroupRowSummary = {
+  aggregates: [],
   count: 12,
-  label: 'Shipped',
+  path: [{ columnKey: 'order_status', label: 'Shipped' }],
 };
 
 /**
@@ -74,9 +77,43 @@ describe('TableGroupHeaderRow', () => {
     expect(screen.getByText('(12)')).toBeTruthy();
   });
 
+  it('names every level of a multi-key group', () => {
+    renderGroupRow({
+      summary: {
+        aggregates: [],
+        count: 3,
+        path: [
+          { columnKey: 'order_status', label: 'Shipped' },
+          { columnKey: 'shipping_country', label: 'USA' },
+        ],
+      },
+    });
+
+    expect(screen.getByText('Status: Shipped')).toBeTruthy();
+    expect(screen.getByText('Country: USA')).toBeTruthy();
+  });
+
+  it('shows each selected aggregate beside the keys', () => {
+    renderGroupRow({
+      summary: {
+        aggregates: [
+          { columnKey: 'total_amount', fn: 'sum', label: '1,234.00' },
+        ],
+        count: 3,
+        path: [{ columnKey: 'order_status', label: 'Shipped' }],
+      },
+    });
+
+    expect(screen.getByText('Sum of Total: 1,234.00')).toBeTruthy();
+  });
+
   it('falls back to the column key when the table declares no such column', () => {
     renderGroupRow({
-      summary: { columnKey: 'not_a_column', count: 1, label: 'x' },
+      summary: {
+        aggregates: [],
+        count: 1,
+        path: [{ columnKey: 'not_a_column', label: 'x' }],
+      },
     });
 
     expect(screen.getByText('not_a_column: x')).toBeTruthy();

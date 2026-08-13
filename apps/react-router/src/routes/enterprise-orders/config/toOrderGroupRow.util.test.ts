@@ -4,7 +4,8 @@ import { describe, expect, it } from 'vite-plus/test';
 import { toOrderGroupRow } from './toOrderGroupRow.util';
 
 const args = {
-  columnKey: 'order_status',
+  aggregates: [],
+  columnKeys: ['order_status'],
   countAlias: 'count_rows',
 } as const;
 
@@ -17,11 +18,48 @@ describe('toOrderGroupRow', () => {
       }),
     ).toStrictEqual({
       [TABLE_GROUP_ROW_FIELD]: {
-        columnKey: 'order_status',
+        aggregates: [],
         count: 12,
-        label: 'Shipped',
+        path: [{ columnKey: 'order_status', label: 'Shipped' }],
       },
     });
+  });
+
+  it('names every level of a multi-key group, in the query nesting order', () => {
+    const result = toOrderGroupRow({
+      ...args,
+      columnKeys: ['order_status', 'shipping_country'],
+      row: {
+        count_rows: '5',
+        order_status: 'Shipped',
+        shipping_country: 'USA',
+      },
+    });
+
+    expect(result[TABLE_GROUP_ROW_FIELD].path).toStrictEqual([
+      { columnKey: 'order_status', label: 'Shipped' },
+      { columnKey: 'shipping_country', label: 'USA' },
+    ]);
+  });
+
+  it('decodes each aggregate by the alias the builder reported', () => {
+    // The alias is the builder's, never spelled here — a grouped row cannot be
+    // decoded by a name the SQL did not project.
+    const result = toOrderGroupRow({
+      ...args,
+      aggregates: [
+        { alias: 'sum_total_amount', columnKey: 'total_amount', fn: 'sum' },
+      ],
+      row: {
+        count_rows: '12',
+        order_status: 'Shipped',
+        sum_total_amount: '1234.5600',
+      },
+    });
+
+    expect(result[TABLE_GROUP_ROW_FIELD].aggregates).toStrictEqual([
+      { columnKey: 'total_amount', fn: 'sum', label: '1234.5600' },
+    ]);
   });
 
   it('coerces the count, which pg returns as a string for bigint', () => {
@@ -44,7 +82,7 @@ describe('toOrderGroupRow', () => {
       >,
     });
 
-    expect(result[TABLE_GROUP_ROW_FIELD].label).toBe('(empty)');
+    expect(result[TABLE_GROUP_ROW_FIELD].path[0]?.label).toBe('(empty)');
     expect(result[TABLE_GROUP_ROW_FIELD].count).toBe(3);
   });
 

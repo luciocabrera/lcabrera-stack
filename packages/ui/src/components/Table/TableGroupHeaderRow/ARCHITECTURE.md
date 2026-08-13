@@ -1,7 +1,8 @@
 # TableGroupHeaderRow Architecture
 
-One group of a grouped read, rendered as an ordinary body row: the grouped
-column's label, the group's key value, and how many rows it aggregates.
+One group of a grouped read, rendered as an ordinary body row: every level of
+its key path (column label plus key value), every selected aggregate, and how
+many rows it covers.
 
 Private delegate of `TableBodyRows`. Nothing outside the Table renders it.
 
@@ -13,6 +14,7 @@ TableGroupHeaderRow/
 ├── TableGroupHeaderRow.types.ts       → TableGroupHeaderRowProps (summary)
 ├── TableGroupHeaderRow.stylex.ts      → Row tint, cell layout, label/count/icon
 ├── TableGroupHeaderRow.test.tsx       → Label resolution, row height, colSpan
+├── utils/toGroupHeaderSegments.util.ts → Pure: summary + column labels → ordered text segments
 ├── ARCHITECTURE.md                    → This file
 └── index.ts                           → Barrel export
 ```
@@ -21,15 +23,20 @@ TableGroupHeaderRow/
 
 | Prop      | Type                   | Description                                             |
 | --------- | ---------------------- | ------------------------------------------------------- |
-| `summary` | `TableGroupRowSummary` | `{ columnKey, count, label }` the grouped read attached |
+| `summary` | `TableGroupRowSummary` | `{ aggregates, count, path }` the grouped read attached |
+
+`path` is the group's key values **in key order**, which is what makes a
+multi-key group identifiable: with two keys applied a group is the pair, and a
+single `columnKey`/`label` could only ever name one of them. A one-key grouping
+is the one-element case, not a different shape.
 
 ## Context Dependencies
 
-| Selector                      | Purpose                                                        |
-| ----------------------------- | -------------------------------------------------------------- |
-| `useGetNormalizedColumn`      | The grouped column's human label — configuration, not row data |
-| `useGetPinnedColumnPartition` | Rendered column count, for the summary cell's `colSpan`        |
-| `useGetTableRowHeight`        | Read indirectly, through the `TableRow` it composes            |
+| Selector                      | Purpose                                                                                                                                                                             |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `useGetNormalizedColumns`     | Every column's human label — configuration, not row data. Read once as a map rather than per segment, because a hook cannot be called inside the loop that renders a multi-key path |
+| `useGetPinnedColumnPartition` | Rendered column count, for the summary cell's `colSpan`                                                                                                                             |
+| `useGetTableRowHeight`        | Read indirectly, through the `TableRow` it composes                                                                                                                                 |
 
 ## Why it composes `TableRow`
 

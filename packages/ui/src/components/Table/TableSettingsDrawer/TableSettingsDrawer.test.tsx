@@ -105,7 +105,20 @@ vi.mock('#ui/components/Button', () => ({
 }));
 
 vi.mock('#ui/components/Icons', () => ({
+  // The grouping section reaches the commands barrel for its clear descriptor,
+  // and the barrel re-exports the pinning and sorting sets — so every icon any
+  // command descriptor names has to resolve here.
+  BarChartIcon: () => <span>Bar chart icon</span>,
+  EraserIcon: () => <span>Eraser icon</span>,
+  GroupRowsIcon: () => <span>Group rows icon</span>,
+  MenuCloseIcon: () => <span>Menu close icon</span>,
+  PinLeftIcon: () => <span>Pin left icon</span>,
+  PinOffIcon: () => <span>Pin off icon</span>,
+  PinRightIcon: () => <span>Pin right icon</span>,
   SettingsIcon: () => <span>Settings icon</span>,
+  SortAscIcon: () => <span>Sort ascending icon</span>,
+  SortDescIcon: () => <span>Sort descending icon</span>,
+  UngroupRowsIcon: () => <span>Ungroup rows icon</span>,
 }));
 
 vi.mock('#ui/components/NotificationCenter', () => ({
@@ -180,6 +193,7 @@ vi.mock('../contexts/TableConfig/meta/actions', () => ({
 }));
 
 vi.mock('../contexts/TableConfig/meta/selectors', () => ({
+  useGetTableIsGroupingEnabled: () => false,
   useGetTableIsTableSettingsPinned: () => isTableSettingsPinnedMock(),
   useGetTableSettingsSelectedTab: () => selectedTabMock(),
 }));

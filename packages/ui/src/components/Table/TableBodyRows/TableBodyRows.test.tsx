@@ -74,11 +74,16 @@ const MockTableGroupHeaderRow = vi.hoisted(() => {
   return function MockTableGroupHeaderRow({
     summary,
   }: {
-    readonly summary: { readonly count: number; readonly label: string };
+    readonly summary: {
+      readonly count: number;
+      readonly path: readonly { readonly label: string }[];
+    };
   }) {
+    const labels = summary.path.map((level) => level.label).join('/');
+
     return (
       <tr>
-        <td>{`group:${summary.label}:${summary.count}`}</td>
+        <td>{`group:${labels}:${summary.count}`}</td>
       </tr>
     );
   };
@@ -262,9 +267,9 @@ describe('TableBodyRows', () => {
     useGetTableDataMock.mockReturnValue([
       {
         [TABLE_GROUP_ROW_FIELD]: {
-          columnKey: 'name',
+          aggregates: [],
           count: 3,
-          label: 'A',
+          path: [{ columnKey: 'name', label: 'A' }],
         },
       },
     ]);
@@ -288,7 +293,11 @@ describe('TableBodyRows', () => {
     setupDefaultMocks();
     useGetTableDataMock.mockReturnValue([
       {
-        [TABLE_GROUP_ROW_FIELD]: { columnKey: 'name', count: 1, label: 'A' },
+        [TABLE_GROUP_ROW_FIELD]: {
+          aggregates: [],
+          count: 1,
+          path: [{ columnKey: 'name', label: 'A' }],
+        },
       },
       { amount: 10, name: 'A' },
     ]);
@@ -313,9 +322,27 @@ describe('TableBodyRows', () => {
     // contents. One row in, one <tr> out, whatever kind of row it is.
     setupDefaultMocks();
     useGetTableDataMock.mockReturnValue([
-      { [TABLE_GROUP_ROW_FIELD]: { columnKey: 'name', count: 2, label: 'A' } },
-      { [TABLE_GROUP_ROW_FIELD]: { columnKey: 'name', count: 5, label: 'B' } },
-      { [TABLE_GROUP_ROW_FIELD]: { columnKey: 'name', count: 1, label: 'C' } },
+      {
+        [TABLE_GROUP_ROW_FIELD]: {
+          aggregates: [],
+          count: 2,
+          path: [{ columnKey: 'name', label: 'A' }],
+        },
+      },
+      {
+        [TABLE_GROUP_ROW_FIELD]: {
+          aggregates: [],
+          count: 5,
+          path: [{ columnKey: 'name', label: 'B' }],
+        },
+      },
+      {
+        [TABLE_GROUP_ROW_FIELD]: {
+          aggregates: [],
+          count: 1,
+          path: [{ columnKey: 'name', label: 'C' }],
+        },
+      },
     ]);
 
     const { container } = render(
@@ -332,8 +359,20 @@ describe('TableBodyRows', () => {
   it('keys group rows by their own values, so a reorder moves the group node', () => {
     setupDefaultMocks();
     useGetTableDataMock.mockReturnValue([
-      { [TABLE_GROUP_ROW_FIELD]: { columnKey: 'name', count: 2, label: 'A' } },
-      { [TABLE_GROUP_ROW_FIELD]: { columnKey: 'name', count: 5, label: 'B' } },
+      {
+        [TABLE_GROUP_ROW_FIELD]: {
+          aggregates: [],
+          count: 2,
+          path: [{ columnKey: 'name', label: 'A' }],
+        },
+      },
+      {
+        [TABLE_GROUP_ROW_FIELD]: {
+          aggregates: [],
+          count: 5,
+          path: [{ columnKey: 'name', label: 'B' }],
+        },
+      },
     ]);
 
     const { container, rerender } = render(
@@ -349,8 +388,20 @@ describe('TableBodyRows', () => {
     expect(groupNodeForA?.textContent).toBe('group:A:2');
 
     useGetTableDataMock.mockReturnValue([
-      { [TABLE_GROUP_ROW_FIELD]: { columnKey: 'name', count: 5, label: 'B' } },
-      { [TABLE_GROUP_ROW_FIELD]: { columnKey: 'name', count: 2, label: 'A' } },
+      {
+        [TABLE_GROUP_ROW_FIELD]: {
+          aggregates: [],
+          count: 5,
+          path: [{ columnKey: 'name', label: 'B' }],
+        },
+      },
+      {
+        [TABLE_GROUP_ROW_FIELD]: {
+          aggregates: [],
+          count: 2,
+          path: [{ columnKey: 'name', label: 'A' }],
+        },
+      },
     ]);
 
     rerender(

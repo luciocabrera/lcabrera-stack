@@ -35,6 +35,8 @@ describe('groupingCodec', () => {
   });
 
   it('refuses a member outside the envelope', () => {
+    // The vocabulary was *extended* to admit `agg`, not opened: a third member
+    // still refuses the payload (ADR-061).
     expect(
       groupingCodec.deserialize('{"keys":["a"],"mode":"rollup"}'),
     ).toStrictEqual({ keys: [] });
@@ -42,6 +44,77 @@ describe('groupingCodec', () => {
       keys: [],
     });
     expect(groupingCodec.deserialize('{}')).toStrictEqual({ keys: [] });
+    expect(groupingCodec.deserialize('{"agg":{"amount":"sum"}}')).toStrictEqual(
+      { keys: [] },
+    );
+  });
+
+  it('round-trips an aggregate map beside the keys', () => {
+    const compact = {
+      agg: { total_amount: 'sum' },
+      keys: ['order_status'],
+    } as const;
+
+    expect(groupingCodec.serialize(compact)).toBe(
+      '{"agg":{"total_amount":"sum"},"keys":["order_status"]}',
+    );
+    expect(
+      groupingCodec.deserialize(groupingCodec.serialize(compact)),
+    ).toStrictEqual(compact);
+  });
+
+  it('refuses an aggregate token outside the vocabulary, dropping the whole payload', () => {
+    // The keys here are valid and still go: an unrecognised token would index
+    // the SQL aggregate map and resolve to `undefined` (ADR-061).
+    expect(
+      groupingCodec.deserialize(
+        '{"agg":{"total_amount":"median"},"keys":["order_status"]}',
+      ),
+    ).toStrictEqual({ keys: [] });
+    expect(
+      groupingCodec.deserialize(
+        '{"agg":{"total_amount":"toString"},"keys":["a"]}',
+      ),
+    ).toStrictEqual({ keys: [] });
+    expect(
+      groupingCodec.deserialize('{"agg":{"total_amount":7},"keys":["a"]}'),
+    ).toStrictEqual({ keys: [] });
+  });
+
+  it('refuses an `agg` that is not an object', () => {
+    expect(
+      groupingCodec.deserialize('{"agg":["sum"],"keys":["a"]}'),
+    ).toStrictEqual({ keys: [] });
+    expect(
+      groupingCodec.deserialize('{"agg":null,"keys":["a"]}'),
+    ).toStrictEqual({ keys: [] });
+  });
+
+  it('accepts an empty aggregate map', () => {
+    expect(groupingCodec.deserialize('{"agg":{},"keys":["a"]}')).toStrictEqual({
+      agg: {},
+      keys: ['a'],
+    });
+  });
+
+  it('drops an empty aggregate map on the way out', () => {
+    expect(groupingCodec.serialize({ agg: {}, keys: ['a'] })).toBe(
+      '{"keys":["a"]}',
+    );
+  });
+
+  it('carries an aggregate column named __proto__ as an own property', () => {
+    // `agg` is rebuilt with `Object.fromEntries`, so a `__proto__` column name
+    // survives as data rather than reaching the prototype setter — the
+    // per-field drop the refusal contract exists to rule out. The loader's
+    // sanitizer is what then refuses it for not being a column.
+    const result = groupingCodec.deserialize(
+      '{"agg":{"__proto__":"sum"},"keys":["a"]}',
+    );
+
+    expect(result.keys).toStrictEqual(['a']);
+    expect(Object.hasOwn(result.agg ?? {}, '__proto__')).toBe(true);
+    expect(Object.getPrototypeOf(result.agg)).toBe(Object.prototype);
   });
 
   it('refuses a `keys` that is not an array', () => {

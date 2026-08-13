@@ -38,6 +38,7 @@
     "./db/get-pool.util": "./src/db/get-pool.util.ts",
     "./db/get-rows-count.util": "./src/db/get-rows-count.util.ts",
     "./db/group-query-builder/build-group-query.util": "./src/db/group-query-builder/build-group-query.util.ts",
+    "./db/group-query-builder/group-query-builder.constants": "./src/db/group-query-builder/group-query-builder.constants.ts",
     "./db/group-query-builder/group-query-builder.types": "./src/db/group-query-builder/group-query-builder.types.ts",
     "./db/insert-row.util": "./src/db/insert-row.util.ts",
     "./db/query-builder/build-count-query.util": "./src/db/query-builder/build-count-query.util.ts",
@@ -116,6 +117,10 @@
       "./db/group-query-builder/build-group-query.util": {
         "types": "./dist/db/group-query-builder/build-group-query.util.d.mts",
         "default": "./dist/db/group-query-builder/build-group-query.util.mjs"
+      },
+      "./db/group-query-builder/group-query-builder.constants": {
+        "types": "./dist/db/group-query-builder/group-query-builder.constants.d.mts",
+        "default": "./dist/db/group-query-builder/group-query-builder.constants.mjs"
       },
       "./db/group-query-builder/group-query-builder.types": {
         "types": "./dist/db/group-query-builder/group-query-builder.types.d.mts",

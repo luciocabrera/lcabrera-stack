@@ -1,3 +1,5 @@
+import type { TableGroupingState } from '@lcabrera/ui/components/Table/Table.types';
+
 import { deleteRows } from '@lcabrera/server/db/delete-rows.util';
 import { getMaxValue } from '@lcabrera/server/db/get-max-value.util';
 import { getRowsCount } from '@lcabrera/server/db/get-rows-count.util';
@@ -55,6 +57,18 @@ vi.mock('@lcabrera/server/db/update-rows.util', () => ({
 
 const sortKeys = (value: object) =>
   Object.keys(value).toSorted((a, b) => a.localeCompare(b));
+
+const NO_GROUPING: TableGroupingState = { aggregates: {}, keys: [] };
+
+type GroupingArgs = {
+  readonly aggregates?: TableGroupingState['aggregates'];
+  readonly keys: readonly string[];
+};
+
+const grouping = ({
+  aggregates = {},
+  keys,
+}: GroupingArgs): TableGroupingState => ({ aggregates, keys });
 
 beforeEach(() => {
   vi.mocked(selectRows).mockClear();
@@ -212,7 +226,7 @@ it('deletes by primary key', async () => {
 it('runs the ungrouped read when the loader applied no group keys', async () => {
   await selectOrdersPage({
     filters: [],
-    grouping: [],
+    grouping: NO_GROUPING,
     includeTotal: true,
     limit: 10,
     offset: 0,
@@ -226,7 +240,7 @@ it('runs the ungrouped read when the loader applied no group keys', async () => 
 it('runs the grouped read when the loader applied a group key', async () => {
   const page = await selectOrdersPage({
     filters: [{ column: 'priority', operator: 'eq', value: 'High' }],
-    grouping: ['order_status'],
+    grouping: grouping({ keys: ['order_status'] }),
     includeTotal: true,
     limit: 10,
     offset: 0,
@@ -248,15 +262,76 @@ it('runs the grouped read when the loader applied a group key', async () => {
     }),
   );
   expect(page.data).toStrictEqual([
-    { tableGroup: { columnKey: 'order_status', count: 12, label: 'Shipped' } },
-    { tableGroup: { columnKey: 'order_status', count: 3, label: '(empty)' } },
+    {
+      tableGroup: {
+        aggregates: [],
+        count: 12,
+        path: [{ columnKey: 'order_status', label: 'Shipped' }],
+      },
+    },
+    {
+      tableGroup: {
+        aggregates: [],
+        count: 3,
+        path: [{ columnKey: 'order_status', label: '(empty)' }],
+      },
+    },
   ]);
+});
+
+it('groups by several keys and sorts by each of them', async () => {
+  await selectOrdersPage({
+    filters: [],
+    grouping: grouping({ keys: ['order_status', 'shipping_country'] }),
+    includeTotal: true,
+    limit: 10,
+    offset: 0,
+    sort: [],
+  });
+
+  expect(selectGroupedRows).toHaveBeenCalledWith(
+    expect.objectContaining({
+      keys: ['order_status', 'shipping_country'],
+      sort: [
+        { direction: 'asc', key: 'order_status' },
+        { direction: 'asc', key: 'shipping_country' },
+      ],
+    }),
+  );
+});
+
+it('requests the selected aggregates beside the row count, and never a filtered one', async () => {
+  await selectOrdersPage({
+    filters: [],
+    grouping: grouping({
+      aggregates: { total_amount: 'sum' },
+      keys: ['order_status'],
+    }),
+    includeTotal: true,
+    limit: 10,
+    offset: 0,
+    sort: [],
+  });
+
+  // `count(*)` first, then the selection. No `filters` on any of them: a
+  // filtered aggregate has no slot in the URL param this configuration arrives
+  // through, and `UnfilteredOrderAggregate` removes the slot from what this
+  // service builds — so it is unrequestable here, not merely unrequested (#569).
+  const [descriptor] = vi.mocked(selectGroupedRows).mock.calls.at(-1) ?? [];
+
+  expect(descriptor?.aggregates).toStrictEqual([
+    { fn: 'count' },
+    { column: 'total_amount', fn: 'sum' },
+  ]);
+  expect(
+    descriptor?.aggregates.some((aggregate) => 'filters' in aggregate),
+  ).toBe(false);
 });
 
 it('returns the whole grouped result at once, because it is not paginated', async () => {
   const page = await selectOrdersPage({
     filters: [],
-    grouping: ['order_status'],
+    grouping: grouping({ keys: ['order_status'] }),
     includeTotal: true,
     limit: 1,
     offset: 0,
@@ -280,7 +355,7 @@ it('keeps the response shape identical whether or not the read is grouped', asyn
   });
   const grouped = await selectOrdersPage({
     filters: [],
-    grouping: ['order_status'],
+    grouping: grouping({ keys: ['order_status'] }),
     includeTotal: true,
     limit: 10,
     offset: 0,

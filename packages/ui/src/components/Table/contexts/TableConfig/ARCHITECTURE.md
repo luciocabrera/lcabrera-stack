@@ -91,16 +91,26 @@ TableConfig/
 ├── grouping/                                → Row grouping store, actions, selectors (ADR-061)
 │   ├── useGroupingStore.hook.ts             → Resolves the config groupingStore, delegates to useStoreSelector
 │   │
+│   ├── utils/areGroupKeysLegal.util.ts      → Pure predicate shared by both write paths: within the depth cap, and no key repeated
+│   │
 │   ├── actions/
-│   │   ├── utils/resolveTableGroupingUpdate.util.ts → Pure: one interaction's grouping change as data (updated / unchanged)
-│   │   └── useSetTableGrouping.hook.ts      → Apply a group key, or clear grouping with `undefined`
+│   │   ├── utils/resolveTableGroupingUpdate.util.ts → Pure: one interaction's grouping change as data (updated / unchanged); refuses an illegal key list whole
+│   │   ├── utils/toggleTableGroupKey.util.ts        → Pure: append a key at the tail, or remove it
+│   │   ├── utils/setTableColumnAggregate.util.ts    → Pure: set or clear one column's aggregate
+│   │   ├── useSetTableGrouping.hook.ts      → **Internal**: the single write path, taking a reducer so the store is read once
+│   │   ├── useToggleTableGroupKey.hook.ts   → Add/remove one key (header menu)
+│   │   ├── useSetTableGroupKeys.hook.ts     → Replace the ordered key list (drawer: reorder, remove)
+│   │   ├── useSetTableColumnAggregate.hook.ts → Apply or clear one column's aggregate
+│   │   └── useClearTableGrouping.hook.ts    → Clear every key and every aggregate
 │   │
 │   └── selectors/
-│       └── useGetTableGroupingKeys.hook.ts  → The applied group keys
+│       ├── useGetTableGroupingKeys.hook.ts       → The applied group keys, in nesting order
+│       ├── useGetTableGroupingAggregates.hook.ts → The whole column-to-function map
+│       └── useGetTableColumnAggregate.hook.ts    → The aggregate applied to one column
 │
 ├── utils/
   ├── getInitialColumnsState.util.ts       → Build initial columns state from props; synthesizes the `actions` column via `resolveTableActionsColumn` when `crud.read/update/delete` is enabled (or a consumer `actions` column is declared), and only force-pins it right when it actually exists
-  ├── getInitialGroupingState.util.ts      → Build initial grouping state from the keys the loader applied (`metaState.groupingKeys`)
+  ├── getInitialGroupingState.util.ts      → Build initial grouping state from the configuration the loader applied (`metaState.groupingKeys` + `metaState.groupingAggregates`)
   ├── getInitialMetaState.util.ts          → Build initial meta state from props
   └── index.ts                             → Barrel: utils
 ```
@@ -161,6 +171,7 @@ TableColumnsState<TData> = {
 
 ```typescript
 TableGroupingState = {
+  aggregates: Readonly<Record<string, TableAggregateFn>>; // At most one aggregate per column — the whole shape the compact URL param can carry, and the shape of the #569 deferral: no state here describes a *filtered* aggregate
   keys: readonly string[];           // Applied group keys, in the query's nesting order
 };
 ```
@@ -177,6 +188,8 @@ TableMetaState = {
   drawersSyncNonce?: number;          // Monotonic nonce used to force drawer provider re-seed
   enablePrefetch: boolean;           // Prefetch next page after load-more (ADR-006)
   error: Error | null;               // Table-level error
+  groupingAggregates?: Readonly<Record<string, TableAggregateFn>>; // Per-column aggregate the loader applied, sanitized from the same param; seeds the grouping store
+  groupingCapabilities?: Readonly<Record<string, TableColumnGroupingCapability>>; // What each column may do in a grouped read, from the pg catalogue (ADR-058) and shipped by the loader (ADR-063). The aggregate menu is built from this and nothing else — `dataType` cannot answer it (#550). Absent = nothing is legal, never everything
   groupingKeys?: readonly string[];  // Group keys the loader applied, read from the `grouping` param and sanitized (ADR-061); seeds the grouping store
   initialPageSize: number;           // First page row count
   isBordered: boolean;               // Show borders

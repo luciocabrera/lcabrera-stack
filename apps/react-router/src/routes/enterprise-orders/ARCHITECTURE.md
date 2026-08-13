@@ -157,15 +157,42 @@ constants test pins `COLUMNS` to the projected list — and removing it would me
 changing `TableColumn`'s key/render typing in `@lcabrera/ui`, which is a package
 decision rather than this route's.
 
-### Grouping — one key, server-side (ADR-061 / ADR-063)
+### Grouping — several keys and selected aggregates, server-side (ADR-061 / ADR-063)
 
 **The route's entire opt-in is `isGroupingEnabled: true` on its loader `meta`.**
 From that one flag: `createTableRouteLoader` reads the `grouping` search param,
-sanitizes the keys against `COLUMNS`, seeds the table's grouping store, and hands
-the keys to `fetchPage` — which forwards them to `selectOrdersPage` the same way
-it already forwards `filters` and the effective sort. Remove the flag and the
+sanitizes the configuration against `COLUMNS`, seeds the table's grouping store,
+and hands it to `fetchPage` — which forwards it to `selectOrdersPage` the same
+way it already forwards `filters` and the effective sort. Remove the flag and the
 param is ignored end to end, whatever the URL or the persisted UI-flags cookie
 carries.
+
+**Several keys, to the configured depth.** The `grouping` param carries an
+ordered `keys` list, and the order is the grouped query's nesting order. Past
+`MAX_GROUP_KEYS` every layer refuses rather than truncating: the UI disables the
+affordance, `sanitizeGroupingByColumns` drops the whole configuration, and
+`assertGroupKeys` throws before any round trip.
+
+**The aggregate menu is the catalogue's answer, not the column's declared type.**
+`selectOrderGroupingCapabilities` resolves what every allowed column may do from
+`pg_type`/`pg_aggregate`, and the loader ships that on
+`metaState.groupingCapabilities` so the menu can be built client-side. It has to
+come from the server: `TableColumn.dataType` reports `numeric`, `jsonb` and
+`point` all as `string`, so a menu built from it offers `sum` on columns that
+cannot take it and hides it on `total_amount`, which can
+([ADR-058](../../../../../docs/decisions/ADR-058-grouping-legality-by-analytical-role.md), #550).
+That is one extra catalogue query per page load on this route, issued **before**
+the loader awaits it and therefore concurrent with the data query; the measured
+cost is recorded in the PR for #569 rather than here, where it would rot.
+
+**Filtered aggregates are deferred, and closed on every path this route has**
+(#569). The compact `grouping` param carries a column-to-function map with no
+slot for a filter or an alias, so a filtered aggregate cannot round-trip through
+the only transport this configuration has. `selectGroupedOrders` builds
+`UnfilteredOrderAggregate` — `GroupAggregate` with the `filters` and `alias`
+slots removed — so this route's type refuses one as well as its UI never
+offering one. The slot still exists on `@lcabrera/server`'s `GroupAggregate`,
+which is what a later slice will widen; nothing here reaches it.
 
 **Grouped rows travel in the same response.** `selectGroupedOrders` returns
 `EnterpriseOrdersResponse` — the identical shape, with `hasMore: false`, because a
@@ -177,15 +204,27 @@ structurally, so a response that branched on grouping would change the loader
 type of all four table routes at once.
 
 Each row carries a `TableGroupRowSummary` and nothing else, built by
-`toOrderGroupRow`. It formats there rather than in the renderer because only this
-side knows `count(*)` arrives as a **string** and that a NULL key is a real group.
-`@lcabrera/ui`'s `TableGroupHeaderRow` renders the finished label and count.
+`toOrderGroupRow`. Its `path` names every level of the group in nesting order,
+and its `aggregates` carry each selected aggregate decoded by the alias the
+builder reported. It formats there rather than in the renderer because only this
+side knows `count(*)` arrives as a **string**, that a `numeric` aggregate does
+too, and that a NULL key is a real group. `@lcabrera/ui`'s `TableGroupHeaderRow`
+renders the finished labels and count.
 
 **A hand-edited `grouping` param yields a flat table, never a partial one.** The
-codec refuses any payload outside `{ keys: string[] }`, and
-`sanitizeGroupingByColumns` refuses the whole list if one key is not a groupable
-column of this route — key order is the query's nesting order, so dropping one
-would answer a different question from the one the URL describes.
+codec refuses any payload outside `{ keys: string[], agg?: … }` with a known
+aggregate token, and `sanitizeGroupingByColumns` refuses the whole configuration
+if one key is not a groupable column of this route, if the list is longer than
+the cap, or if an aggregate names a column this route does not declare — key
+order is the query's nesting order, so dropping one would answer a different
+question from the one the URL describes.
+
+**What is still an error page.** A key or an aggregate the _catalogue_ refuses —
+a primary key, a `jsonb` column, `sum` on a `varchar` — reaches
+`assertGroupKeys`/`assertGroupAggregates` and throws. The UI cannot construct one
+(both menus are built from the shipped capabilities), so this is only reachable
+by hand-editing the URL. Turning that refusal into a rendered state is #642,
+which is what `groupingCapabilities.canGroup` and `refusal` are carried for.
 
 **Every page is ordered, and the route guarantees that itself.**
 `parseOrdersPageParams` resolves the request's sort through `resolveQuerySort`

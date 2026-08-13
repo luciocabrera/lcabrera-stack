@@ -5,6 +5,11 @@ import type { ReactNode } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
+import type {
+  TableAggregateFn,
+  TableColumnGroupingCapability,
+} from '#ui/components/Table/Table.types';
+
 const { MockTableActionsPopover } = vi.hoisted(() => ({
   MockTableActionsPopover: vi.fn(
     ({
@@ -19,9 +24,15 @@ const { MockTableActionsPopover } = vi.hoisted(() => ({
 
 const mockCloseMenu = vi.fn();
 
-const { isGroupingEnabledRef } = vi.hoisted(() => ({
-  isGroupingEnabledRef: { current: false },
-}));
+const { appliedAggregateRef, capabilityRef, isGroupingEnabledRef } = vi.hoisted(
+  () => ({
+    appliedAggregateRef: { current: undefined as TableAggregateFn | undefined },
+    capabilityRef: {
+      current: undefined as TableColumnGroupingCapability | undefined,
+    },
+    isGroupingEnabledRef: { current: false },
+  }),
+);
 
 vi.mock('#ui/components/Table/contexts/TableConfig/columns/actions', () => ({
   useSetColumnPinning: () => vi.fn(),
@@ -30,14 +41,24 @@ vi.mock('#ui/components/Table/contexts/TableConfig/columns/actions', () => ({
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/grouping/actions', () => ({
-  useSetTableGrouping: () => vi.fn(),
+  useClearTableGrouping: () => vi.fn(),
+  useSetTableColumnAggregate: () => vi.fn(),
+  useToggleTableGroupKey: () => vi.fn(),
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/grouping/selectors', () => ({
+  useGetTableColumnAggregate: () => appliedAggregateRef.current,
   useGetTableGroupingKeys: () => [],
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
+  // Read from typed refs rather than spelled inline. Both hooks really answer
+  // `X | undefined`, and the absent case is what the aggregation-mode block is
+  // gated on — so the mock has to be able to express it *and* to be seen
+  // expressing it. `() => undefined` is not an option: `unicorn/no-useless-undefined`
+  // rewrites it to `() => {}`, an empty block that returns `undefined` and reads
+  // like an empty object, which is exactly the confusion a reviewer hit.
+  useGetTableColumnGroupingCapability: () => capabilityRef.current,
   useGetTableIsGroupingEnabled: () => isGroupingEnabledRef.current,
 }));
 
@@ -65,6 +86,8 @@ import { TableHeaderActionsMenu } from './TableHeaderActionsMenu.component';
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
+  appliedAggregateRef.current = undefined;
+  capabilityRef.current = undefined;
   isGroupingEnabledRef.current = false;
 });
 
@@ -290,8 +313,40 @@ describe('TableHeaderActionsMenu', () => {
       );
 
       // sort │ group │ pin │ hide │ manage — four boundaries, one more than the
-      // same column renders with grouping off.
+      // same column renders with grouping off. No capability is resolved for
+      // this column, so the aggregation-mode block contributes none.
       expect(screen.getAllByRole('separator')).toHaveLength(4);
+    });
+
+    it('adds the aggregation-mode block only once a capability is resolved', () => {
+      // The case the mock could not express while it answered a fixed value:
+      // absent capability and present capability have to produce *different*
+      // menus, or the suite cannot fail for the reason criterion 2 exists.
+      isGroupingEnabledRef.current = true;
+      capabilityRef.current = {
+        aggregates: ['count', 'sum'],
+        canGroup: false,
+        column: 'name',
+        refusal: 'too-many-distinct',
+        role: 'fact',
+        typeName: 'numeric',
+      };
+
+      render(
+        <TableHeaderActionsMenu
+          columnKey='name'
+          columnLabel='Name'
+          hasSettings
+          isSortable
+          isStatic={false}
+        />,
+      );
+
+      expect(screen.getByText('Sum')).not.toBeNull();
+      expect(screen.getByText('Count')).not.toBeNull();
+      expect(screen.getByText('No Aggregate')).not.toBeNull();
+      // One more boundary than the absent-capability case above.
+      expect(screen.getAllByRole('separator')).toHaveLength(5);
     });
 
     it('renders a trigger for a locked column that has nothing else to offer', () => {

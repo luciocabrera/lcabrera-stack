@@ -160,6 +160,30 @@ export type StaticFilterOptionsDescriptor = {
 export type StorageType = 'cookie' | 'localStorage';
 
 /**
+ * The aggregate vocabulary a grouped read may request, **duplicated** from
+ * `@lcabrera/server`'s `AggregateFn` rather than imported.
+ *
+ * `@lcabrera/ui` is client-safe and may not depend on the Node-only server
+ * package (ADR-038), so the two are written twice and kept in step by a
+ * conformance test in the app that legitimately depends on both (ADR-039) —
+ * `apps/react-router/src/routes/enterprise-orders/groupingContract.test.ts`.
+ *
+ * Which members are legal for a given column is **not** decided here: that is a
+ * catalogue answer that reaches the client on `TableMetaState.groupingCapabilities`
+ * (ADR-058, ADR-063). This union is only the closed set of tokens the URL codec
+ * will accept.
+ */
+export type TableAggregateFn =
+  | 'avg'
+  | 'boolAnd'
+  | 'boolOr'
+  | 'count'
+  | 'countDistinct'
+  | 'max'
+  | 'min'
+  | 'sum';
+
+/**
  * A column definition. The capability flags (`isFilterable`, `isGroupable`,
  * `isResizable`, `isSortable`, `isStatic`) are optional and an omitted one is
  * NOT a missing value — every surface resolves them through `resolveColumnCapabilities`,
@@ -213,6 +237,14 @@ export type TableColumn<TData> = {
   readonly render?: (row: TData) => ReactNode;
 };
 
+/**
+ * ADR-058's Gate 1, as the client sees it: a dimension is what you group by, a
+ * fact is what you aggregate, and everything else is out of both. Duplicated
+ * from `@lcabrera/server`'s `ColumnAnalyticalRole` for the reason
+ * `TableAggregateFn` is.
+ */
+export type TableColumnAnalyticalRole = 'dimension' | 'fact' | 'unsupported';
+
 export type TableColumnDataType =
   | 'boolean'
   | 'currency'
@@ -231,6 +263,27 @@ export type TableColumnFormat = {
   /** Number formatting options (for dataType: 'number') */
   readonly number?: NumberFormatOptions;
 };
+
+/**
+ * What one column may do in a grouped read, as the catalogue answered it —
+ * ADR-058's two gates resolved server-side and carried to the client on the
+ * loader `meta` (ADR-063), because neither gate is answerable in the browser.
+ *
+ * Duplicated from `@lcabrera/server`'s `ColumnGroupingCapability`, discriminated
+ * arm for discriminated arm, so a refusal still cannot arrive without its
+ * reason. The whole object travels rather than a trimmed aggregate list:
+ * `canGroup`/`refusal` cost nothing extra on a round trip that had to happen
+ * anyway, and the group-key refusal surface (#642) reads them.
+ */
+export type TableColumnGroupingCapability =
+  | (TableColumnCapabilityShared & {
+      readonly canGroup: false;
+      readonly refusal: TableGroupKeyRefusalReason;
+    })
+  | (TableColumnCapabilityShared & {
+      readonly canGroup: true;
+      readonly refusal?: never;
+    });
 
 /**
  * Main table state stored in tableStore
@@ -343,15 +396,54 @@ export type TableFocusState = {
   readonly rowKey: string | undefined;
 };
 
+/** One aggregate a grouped row carries, already formatted for display. */
+export type TableGroupAggregateValue = {
+  /** The column the aggregate was applied to. */
+  readonly columnKey: string;
+  readonly fn: TableAggregateFn;
+  /** The aggregate's value, formatted — see `TableGroupRowSummary.path`. */
+  readonly label: string;
+};
+
 /**
  * The grouping store's state — the config context's third store (ADR-061).
  *
- * Only the applied keys today. It is a store rather than a field on the columns
- * store because expansion joins it here next, and expansion must survive the
- * data context being re-created on every navigation.
+ * `aggregates` is a **column-to-function** map, at most one aggregate per
+ * column, which is what makes it expressible in the compact URL param the whole
+ * configuration has to round-trip through. It is also the shape of the #569
+ * deferral: there is no slot here for a filter, so no state this package can
+ * hold describes a *filtered* aggregate and no interaction can produce one.
+ * `@lcabrera/server`'s `GroupAggregate` still has the slot, so a consumer
+ * calling its grouped read directly can build one — what is closed is every
+ * path through this package, not the capability itself.
+ *
+ * It is a store rather than a field on the columns store because expansion joins
+ * it here next, and expansion must survive the data context being re-created on
+ * every navigation.
  */
 export type TableGroupingState = {
+  readonly aggregates: Readonly<Record<string, TableAggregateFn>>;
+  /** Ordered — the order is the grouped query's nesting order. */
   readonly keys: readonly string[];
+};
+
+/**
+ * Why a column may not be a group key. Duplicated from `@lcabrera/server`'s
+ * `GroupKeyRefusalReason` for the reason `TableAggregateFn` is; the reasons stay
+ * distinguishable because grouping by a primary key is the likeliest user
+ * mistake and deserves to say so.
+ */
+export type TableGroupKeyRefusalReason =
+  | 'no-equality-operator'
+  | 'not-a-dimension'
+  | 'stats-unavailable'
+  | 'too-many-distinct'
+  | 'unique-ish';
+
+/** One level of a group's identity: the column, and its value formatted. */
+export type TableGroupKeyValue = {
+  readonly columnKey: string;
+  readonly label: string;
 };
 
 /**
@@ -375,16 +467,20 @@ export type TableGroupRow = Record<'tableGroup', TableGroupRowSummary>;
  * grouping configuration, so a grouped row and a detail row can sit in the same
  * result — which is what the nested rows in a later slice need.
  *
- * `label` is already formatted, because formatting a key value needs the
+ * `path` is the group's key values **in key order** and is what makes a
+ * multi-key group identifiable: with two keys applied, a group is the pair, and
+ * a single `columnKey`/`label` could only ever name one of them. A one-key
+ * grouping is the one-element case, not a different shape.
+ *
+ * Every `label` is already formatted, because formatting a key value needs the
  * column's `dataType` and locale, both of which the row does not carry.
  */
 export type TableGroupRowSummary = {
-  /** The column the rows are grouped by. */
-  readonly columnKey: string;
+  /** The selected aggregates, in the order the read emitted them. */
+  readonly aggregates: readonly TableGroupAggregateValue[];
   /** How many rows the group aggregates. */
   readonly count: number;
-  /** The group's key value, formatted for display. */
-  readonly label: string;
+  readonly path: readonly TableGroupKeyValue[];
 };
 
 export type TableMetadataValue = boolean | number | string;
@@ -409,6 +505,28 @@ export type TableMetaState = {
   readonly enablePrefetch: boolean;
   /** Error message if data fetch failed */
   readonly error?: string;
+  /**
+   * The per-column aggregate the loader actually applied, sanitized alongside
+   * `groupingKeys` from the same `grouping` param. Seeds the grouping store.
+   */
+  readonly groupingAggregates?: Readonly<Record<string, TableAggregateFn>>;
+  /**
+   * What each of this route's columns may do in a grouped read, as the
+   * catalogue answered it (ADR-058), keyed by column.
+   *
+   * It is here rather than on `TableColumn` because it is not a property of the
+   * consumer's column declaration: the same column is legal or not depending on
+   * the real Postgres type behind it, which only the server can see. The
+   * aggregate menu is built from this and from nothing else — a menu shaped
+   * from `dataType` offers `sum` on a `numeric` it thinks is a `string`, and
+   * hides it on the one it does not (#550).
+   *
+   * Absent means the route resolved none, which the menu reads as "no aggregate
+   * is legal here" rather than as "all of them are".
+   */
+  readonly groupingCapabilities?: Readonly<
+    Record<string, TableColumnGroupingCapability>
+  >;
   /**
    * The group keys the loader actually applied, read from the `grouping` search
    * param and sanitized against this route's columns (ADR-061). It seeds the
@@ -529,4 +647,17 @@ type BaseProps = ComponentPropsWithRef<'table'> & {
   readonly actions?: ReactNode;
   readonly customStylex?: StyleXStyles;
   readonly icon?: ReactNode;
+};
+
+/**
+ * The half of a grouping capability that does not depend on whether the column
+ * is groupable — the client-side twin of the server's `ColumnCapabilityShared`.
+ */
+type TableColumnCapabilityShared = {
+  readonly aggregates: readonly TableAggregateFn[];
+  readonly column: string;
+  /** Resolved distinct-value estimate; absent when statistics are unavailable. */
+  readonly distinctEstimate?: number;
+  readonly role: TableColumnAnalyticalRole;
+  readonly typeName: string;
 };

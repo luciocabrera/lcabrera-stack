@@ -257,7 +257,7 @@ describe('readTableLoaderStateFromRequest', () => {
         request: groupingRequest(),
       });
 
-      expect(result.grouping).toEqual(['status']);
+      expect(result.grouping).toEqual({ aggregates: {}, keys: ['status'] });
       expect(result.standaloneGroupingParam).not.toBeNull();
     });
 
@@ -270,7 +270,7 @@ describe('readTableLoaderStateFromRequest', () => {
         request: groupingRequest(),
       });
 
-      expect(result.grouping).toEqual([]);
+      expect(result.grouping).toEqual({ aggregates: {}, keys: [] });
       expect(result.standaloneGroupingParam).toBeUndefined();
     });
 
@@ -286,7 +286,7 @@ describe('readTableLoaderStateFromRequest', () => {
         request: groupingRequest(),
       });
 
-      expect(result.grouping).toEqual([]);
+      expect(result.grouping).toEqual({ aggregates: {}, keys: [] });
     });
 
     it('answers no grouping for a URL that carries no param', () => {
@@ -299,7 +299,7 @@ describe('readTableLoaderStateFromRequest', () => {
         request: new Request('https://example.com/orders'),
       });
 
-      expect(result.grouping).toEqual([]);
+      expect(result.grouping).toEqual({ aggregates: {}, keys: [] });
       expect(result.standaloneGroupingParam).toBeNull();
     });
   });
