@@ -317,10 +317,25 @@ const enterGrid = async () => {
   await flushFrame();
 };
 
-const clickButton = async (testId: string) => {
-  await act(async () => {
-    fireEvent.click(screen.getByTestId(testId));
-  });
+/**
+ * Deliberately synchronous, unlike the two helpers above, and the difference is
+ * not an oversight.
+ *
+ * `pressKey`/`enterGrid` await `flushFrame` because the scroll listener defers
+ * its state update through `requestAnimationFrame`, so nothing but an awaited
+ * `act` drains it. A click has no such deferral: it writes the stores, and
+ * Testing Library already wraps `fireEvent` in a synchronous `act`, which
+ * flushes the re-render and the effects that follow it.
+ *
+ * Checked rather than assumed, because the two facts point opposite ways: with
+ * both the `act` and the `await` removed the suite passes, and the assertions
+ * that prove it sit on the line **after** the call with nothing between them —
+ * `clickButton('toggle-paris')` then `expect(getRenderedRows()).toHaveLength(4)`
+ * reads a DOM that has already collapsed. There is no Suspense in this harness
+ * for an awaited `act` to serve.
+ */
+const clickButton = (testId: string) => {
+  fireEvent.click(screen.getByTestId(testId));
 };
 
 describe('a grouped table that expands and collapses', () => {
@@ -345,12 +360,12 @@ describe('a grouped table that expands and collapses', () => {
 
     expect(getRenderedRows()).toHaveLength(7);
 
-    await clickButton('toggle-paris');
+    clickButton('toggle-paris');
     // Paris survives, its three rows do not, and Berlin's branch is untouched.
     expect(getRenderedRows()).toHaveLength(4);
     expect(screen.queryByText('Paris')).toBeNull();
 
-    await clickButton('toggle-paris');
+    clickButton('toggle-paris');
     expect(getRenderedRows()).toHaveLength(7);
   });
 
@@ -362,11 +377,11 @@ describe('a grouped table that expands and collapses', () => {
 
     expect(readBodyHeight()).toBe(`${rows.length * ROW_HEIGHT}px`);
 
-    await clickButton('toggle-paris');
+    clickButton('toggle-paris');
     expect(getRenderedRows()).toHaveLength(4);
     expect(readBodyHeight()).toBe(`${4 * ROW_HEIGHT}px`);
 
-    await clickButton('toggle-berlin');
+    clickButton('toggle-berlin');
     expect(getRenderedRows()).toHaveLength(2);
     expect(readBodyHeight()).toBe(`${2 * ROW_HEIGHT}px`);
   });
@@ -374,7 +389,7 @@ describe('a grouped table that expands and collapses', () => {
   it('renumbers the grid over the rows that remain', async () => {
     render(<Harness data={rows} />);
 
-    await clickButton('toggle-paris');
+    clickButton('toggle-paris');
 
     const indices = getRenderedRows().map((row) =>
       Number(row.getAttribute('aria-rowindex')),
@@ -392,14 +407,14 @@ describe('a grouped table that expands and collapses', () => {
 
     expect(getGroupRows()[0]?.getAttribute('aria-expanded')).toBe('true');
 
-    await clickButton('toggle-paris');
+    clickButton('toggle-paris');
     expect(getGroupRows()[0]?.getAttribute('aria-expanded')).toBe('false');
   });
 
   it('keys the collapse by group path, not by row index', async () => {
     render(<Harness data={rows} />);
 
-    await clickButton('toggle-paris');
+    clickButton('toggle-paris');
 
     expect(getCollapsedPaths()).toStrictEqual([resolveGroupPathKey(paris)]);
   });
@@ -410,10 +425,10 @@ describe('a grouped table that expands and collapses', () => {
     // index. An index-keyed one would reopen Paris and close Berlin instead.
     render(<RefetchingHarness />);
 
-    await clickButton('toggle-paris');
+    clickButton('toggle-paris');
     expect(getRenderedRows()).toHaveLength(4);
 
-    await clickButton('resort');
+    clickButton('resort');
 
     expect(getRenderedRows()).toHaveLength(4);
     expect(getCollapsedPaths()).toStrictEqual([resolveGroupPathKey(paris)]);
@@ -425,13 +440,13 @@ describe('a grouped table that expands and collapses', () => {
   it('drops a path a filter change removed, rather than re-applying it later', async () => {
     render(<RefetchingHarness />);
 
-    await clickButton('toggle-paris');
-    await clickButton('filter-out-paris');
+    clickButton('toggle-paris');
+    clickButton('filter-out-paris');
 
     // Nothing left to hide, so nothing is remembered.
     expect(getCollapsedPaths()).toStrictEqual([]);
 
-    await clickButton('restore');
+    clickButton('restore');
 
     // The discriminating half: a collapse kept from data that no longer existed
     // would silently re-close Paris the moment the filter let it back.
@@ -492,7 +507,7 @@ describe('a grouped table that expands and collapses', () => {
     // nothing.
     expect(trace).toStrictEqual(['grid', '1', '2', '3']);
 
-    await clickButton('toggle-paris');
+    clickButton('toggle-paris');
     record();
 
     // The claim: the focus target is the collapsed group row, at its new index.
@@ -542,7 +557,7 @@ describe('a grouped table that expands and collapses', () => {
     const before = getFocusTarget();
 
     // Berlin's subtree does not contain the focused row, so nothing moves.
-    await clickButton('toggle-berlin');
+    clickButton('toggle-berlin');
 
     expect(getFocusTarget()).toStrictEqual(before);
     expect(readFocus()).toBe('2');

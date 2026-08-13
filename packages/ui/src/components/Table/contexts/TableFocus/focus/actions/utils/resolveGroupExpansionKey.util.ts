@@ -37,6 +37,4 @@ export const resolveGroupExpansionKey = ({
   if (key === 'ArrowRight' && !isExpanded) return 'expand' as const;
 
   if (key === 'ArrowLeft' && isExpanded) return 'collapse' as const;
-
-  return;
 };
