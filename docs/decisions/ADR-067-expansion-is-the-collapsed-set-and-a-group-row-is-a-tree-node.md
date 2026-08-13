@@ -114,9 +114,14 @@ is its absolute position in it. Under a tree the dataset **is** the visible rows
 a collapsed row is not a row of the grid at all, so counting it would advertise a
 row no `aria-rowindex` can ever be emitted for. ADR-062's invariant — that the
 largest index the grid emits equals the count it advertises — is preserved, and
-it is preserved by deriving both from the same array. Outside a tree nothing
-changes: the derivation returns the caller's own array by reference, so an
-ungrouped grid pays neither an allocation nor a behaviour change.
+it is preserved by deriving both from the same array. Outside a tree the
+derivation returns the caller's own array by reference, so an ungrouped grid
+sees no behaviour change and no allocation — but the second half of that holds
+only because deciding there is no tree is an `every` over the rows rather than a
+`map` building an N-length array of summaries to throw away. Written the obvious
+way the sentence would be false, and three call sites lean on it per render, so
+the cost and the shape that buys it are stated together rather than one being
+inferred from the other.
 
 Ancestry is read off a group's **path**, not off its position among the rows.
 Every grouping set either mode emits is a prefix of the key list (ADR-065), so a
@@ -192,8 +197,22 @@ is more of it.
 element, the virtualization window and the row loop each call the hook, and each
 gets its own React Compiler memo cell keyed on the rows and the collapsed set
 (ADR-004). The short-circuit for a non-tree is what keeps that acceptable: an
-ungrouped table walks the rows once looking for a group summary and returns its
-own array.
+ungrouped table walks the rows once looking for a group summary, allocating
+nothing, and returns its own array.
+
+**The derivation may not use iterator helpers, and that is a package-wide
+constraint rather than a preference here.** `@lcabrera/ui` ships **source** —
+`files: ["src"]`, every `exports` entry pointing at a `.ts` file — so a consumer
+compiles these files with their own `target` and runs them on their own runtime.
+`Iterator.prototype.filter`/`toArray` are ES2025 runtime **methods**, not syntax,
+so a downlevel target cannot rewrite them; only a polyfill helps, and requiring
+one of every consumer is not a contract this package offers. The probe, which
+discriminates because a syntax feature would come back rewritten: compiling
+`nodes.entries().filter(…).toArray()` at `--target es2018 --lib es2018` reports
+`TS2339: Property 'filter' does not exist on type 'ArrayIterator<…>'`, and
+emitting anyway produces the call **verbatim**. Iterating `array.entries()` with
+`for...of` is ordinary ES2015 and carries none of this, which is what the
+derivation uses.
 
 **#651 is not closed by this.** A group row still registers no cell, so a focus
 target on one is a target no node answers: the container keeps DOM focus and the

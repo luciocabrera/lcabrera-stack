@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vite-plus/test';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 import type { TableGroupKeyValue } from '#ui/components/Table/Table.types';
 
@@ -57,6 +57,25 @@ describe('resolveTableGroupTree', () => {
     expect(tree.isTreeGrid).toBe(false);
     expect(tree.rows).toBe(flat);
     expect(tree.rowMeta).toBeUndefined();
+  });
+
+  it('builds no summaries array for an ungrouped table', () => {
+    // Counting element *reads* cannot see this — a predicate walk and a `map`
+    // each read every index exactly once, so a read-counting probe passes on
+    // both (checked, before this one replaced it). What separates them is that
+    // one allocates an N-length array to throw away, and the observable trace
+    // of that is which method is called on `data` at all.
+    const watched: Row[] = [{ id: 1 }, { id: 2 }, { id: 3 }];
+    const everySpy = vi.spyOn(watched, 'every');
+    const mapSpy = vi.spyOn(watched, 'map');
+
+    resolveTableGroupTree({
+      collapsedGroupPaths: noneCollapsed,
+      data: watched,
+    });
+
+    expect(everySpy).toHaveBeenCalledTimes(1);
+    expect(mapSpy).not.toHaveBeenCalled();
   });
 
   it('leaves every row standing while nothing is collapsed', () => {

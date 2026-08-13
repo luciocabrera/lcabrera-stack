@@ -21,10 +21,17 @@ type ResolveTableGroupTreeArgs<TData> = {
   readonly data: readonly TData[];
 };
 
-const countSiblings = (nodes: readonly GroupTreeNode[]) => {
+type VisibleRow<TData> = {
+  /** Read from the **loaded** rows, so a collapsed group still reports the children it hides. */
+  readonly hasChildren: boolean;
+  readonly node: GroupTreeNode;
+  readonly row: TData;
+};
+
+const countSiblings = (parentKeys: readonly string[]) => {
   const counts = new Map<string, number>();
 
-  for (const { parentKey } of nodes) {
+  for (const parentKey of parentKeys) {
     counts.set(parentKey, (counts.get(parentKey) ?? 0) + 1);
   }
 
@@ -42,12 +49,21 @@ const countSiblings = (nodes: readonly GroupTreeNode[]) => {
  * counts **visible** rows and not loaded ones (ADR-067).
  *
  * A table with no group rows short-circuits to its own `data` array, by
- * reference: an ungrouped grid must not pay a per-row allocation on every
- * scroll frame for a tree it does not have.
+ * reference. The check is an `every` rather than a `map`, and that is the whole
+ * of what makes the sentence above true: an ungrouped grid re-derives this on
+ * every scroll frame, so it walks the rows and allocates **nothing**, while a
+ * grouped one stops at its first group row and pays for the summaries once.
  *
  * `isTreeGrid` is asked of the **rows**, not of the grouping configuration, so
  * a grouped read that returned no groups is not announced as a tree with
  * nothing in it.
+ *
+ * No iterator helper appears below. `@lcabrera/ui` ships source rather than a
+ * build, so a consumer compiles this file with their own toolchain — and
+ * `Iterator.prototype.filter`/`toArray` are runtime **methods**, which a
+ * downlevel target emits verbatim instead of rewriting. Iterating
+ * `array.entries()` with `for...of` is ordinary ES2015 and carries none of
+ * that.
  *
  * `posInSet`/`setSize` are counted over the visible rows alone. Every sibling of
  * a rendered row is itself rendered — they share a parent, and that parent is
@@ -58,33 +74,38 @@ export const resolveTableGroupTree = <TData extends Record<string, unknown>>({
   collapsedGroupPaths,
   data,
 }: ResolveTableGroupTreeArgs<TData>) => {
-  const summaries = data.map((row) => getTableGroupRowSummary(row));
-
-  if (summaries.every((summary) => summary === undefined)) {
+  if (data.every((row) => getTableGroupRowSummary(row) === undefined)) {
     return { isTreeGrid: false, rowMeta: undefined, rows: data };
   }
 
+  const summaries = data.map((row) => getTableGroupRowSummary(row));
   const nodes = resolveGroupTreeNodes({ collapsedGroupPaths, summaries });
-  const visible = nodes
-    .entries()
-    .filter(([, node]) => node.isVisible)
-    .toArray();
-  const setSizes = countSiblings(visible.map(([, node]) => node));
+  const visible: VisibleRow<TData>[] = [];
+
+  for (const [index, node] of nodes.entries()) {
+    const row = data[index];
+
+    if (row === undefined || !node.isVisible) continue;
+
+    visible.push({
+      hasChildren: (nodes[index + 1]?.level ?? 0) > node.level,
+      node,
+      row,
+    });
+  }
+
+  const setSizes = countSiblings(visible.map(({ node }) => node.parentKey));
   const positions = new Map<string, number>();
   const rowMeta: TableGroupTreeRowMeta[] = [];
   const rows: TData[] = [];
 
-  for (const [index, node] of visible) {
-    const row = data[index];
-
-    if (row === undefined) continue;
-
+  for (const { hasChildren, node, row } of visible) {
     const posInSet = (positions.get(node.parentKey) ?? 0) + 1;
 
     positions.set(node.parentKey, posInSet);
     rows.push(row);
     rowMeta.push({
-      hasChildren: (nodes[index + 1]?.level ?? 0) > node.level,
+      hasChildren,
       isExpanded:
         node.pathKey !== undefined && !collapsedGroupPaths.has(node.pathKey),
       level: node.level,
