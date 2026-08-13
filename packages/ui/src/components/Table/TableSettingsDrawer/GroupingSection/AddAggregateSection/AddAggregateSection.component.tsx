@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { Button } from '#ui/components/Button';
 import { SidePanelSectionHeader } from '#ui/components/SidePanel';
 import { useGetColumns } from '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
-import { useSetTableColumnAggregate } from '#ui/components/Table/contexts/TableConfig/grouping/actions';
 import { useGetTableGroupingCapabilities } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 import { TABLE_AGGREGATE_LABELS } from '#ui/components/Table/Table.constants';
 import {
@@ -15,6 +14,7 @@ import { VirtualSelect } from '#ui/components/VirtualSelect';
 
 import type { AddAggregateSectionProps } from './AddAggregateSection.types';
 
+import { useSetColumnAggregate } from '../../TableDrawerContext/actions';
 import { toAggregatableColumnOptions } from '../utils';
 import { styles } from './AddAggregateSection.stylex';
 
@@ -37,7 +37,7 @@ export const AddAggregateSection = ({
 }: AddAggregateSectionProps) => {
   const columns = useGetColumns();
   const capabilities = useGetTableGroupingCapabilities();
-  const setColumnAggregate = useSetTableColumnAggregate();
+  const setColumnAggregate = useSetColumnAggregate();
 
   const [selectedColumn, setSelectedColumn] = useState('');
   const [selectedFn, setSelectedFn] = useState('');

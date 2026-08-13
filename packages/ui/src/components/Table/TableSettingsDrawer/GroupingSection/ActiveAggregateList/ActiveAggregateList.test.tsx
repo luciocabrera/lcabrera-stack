@@ -27,12 +27,12 @@ vi.mock(
   }),
 );
 
-vi.mock('#ui/components/Table/contexts/TableConfig/grouping/actions', () => ({
-  useSetTableColumnAggregate: () => mockSetColumnAggregate,
+vi.mock('../../TableDrawerContext/actions', () => ({
+  useSetColumnAggregate: () => mockSetColumnAggregate,
 }));
 
-vi.mock('#ui/components/Table/contexts/TableConfig/grouping/selectors', () => ({
-  useGetTableGroupingAggregates: () => aggregatesRef.current,
+vi.mock('../../TableDrawerContext/selectors', () => ({
+  useGetGroupingAggregates: () => aggregatesRef.current,
 }));
 
 import { ActiveAggregateList } from './ActiveAggregateList.component';

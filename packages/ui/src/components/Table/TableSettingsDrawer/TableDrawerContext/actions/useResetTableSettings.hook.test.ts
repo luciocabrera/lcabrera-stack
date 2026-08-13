@@ -7,9 +7,12 @@ import { useResetTableSettings } from './useResetTableSettings.hook';
 
 const {
   drawerColumnsStore,
+  drawerGroupingStore,
   setTableColumnsState,
+  setTableGrouping,
   tableColumnsState,
   tableColumnsStore,
+  tableGroupingStore,
 } = vi.hoisted(() => {
   let state:
     | undefined
@@ -25,16 +28,30 @@ const {
         readonly sorting?: readonly unknown[];
       };
 
+  let grouping: {
+    readonly aggregates: Record<string, string>;
+    readonly keys: readonly string[];
+  } = { aggregates: {}, keys: [] };
+
   return {
     drawerColumnsStore: {
+      set: vi.fn(),
+    },
+    drawerGroupingStore: {
       set: vi.fn(),
     },
     setTableColumnsState: (next: typeof state) => {
       state = next;
     },
+    setTableGrouping: (next: typeof grouping) => {
+      grouping = next;
+    },
     tableColumnsState: () => state,
     tableColumnsStore: {
       get: vi.fn(() => state),
+    },
+    tableGroupingStore: {
+      get: vi.fn(() => grouping),
     },
   };
 });
@@ -42,18 +59,26 @@ const {
 vi.mock(
   '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
   () => ({
-    useTableConfigContextValue: () => ({ columnsStore: tableColumnsStore }),
+    useTableConfigContextValue: () => ({
+      columnsStore: tableColumnsStore,
+      groupingStore: tableGroupingStore,
+    }),
   }),
 );
 
 vi.mock('../useTableDrawerContextValue.hook', () => ({
-  useTableDrawerContextValue: () => ({ columnsStore: drawerColumnsStore }),
+  useTableDrawerContextValue: () => ({
+    columnsStore: drawerColumnsStore,
+    groupingStore: drawerGroupingStore,
+  }),
 }));
 
 describe('useResetTableSettings', () => {
   beforeEach(() => {
     setTableColumnsState(undefined);
+    setTableGrouping({ aggregates: {}, keys: [] });
     drawerColumnsStore.set.mockClear();
+    drawerGroupingStore.set.mockClear();
   });
 
   it('copies table config slices into drawer state when values exist', () => {
@@ -97,6 +122,20 @@ describe('useResetTableSettings', () => {
       columnSizing: {},
       columnVisibility: new Set(),
       sorting: [],
+    });
+  });
+  it('re-seeds the grouping draft from the live grouping, discarding what was staged', () => {
+    setTableGrouping({ aggregates: { total: 'sum' }, keys: ['status'] });
+
+    const { result } = renderHook(() => useResetTableSettings());
+
+    act(() => {
+      result.current();
+    });
+
+    expect(drawerGroupingStore.set).toHaveBeenCalledWith({
+      aggregates: { total: 'sum' },
+      keys: ['status'],
     });
   });
 });

@@ -8,17 +8,17 @@ import {
   SidePanelSectionHeader,
 } from '#ui/components/SidePanel';
 import { useGetColumns } from '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
-import { useSetTableColumnAggregate } from '#ui/components/Table/contexts/TableConfig/grouping/actions';
-import { useGetTableGroupingAggregates } from '#ui/components/Table/contexts/TableConfig/grouping/selectors';
 import { ICON_SIZE_MD } from '#ui/design-system/constants';
 
 import type { ActiveAggregateListProps } from './ActiveAggregateList.types';
 
+import { useSetColumnAggregate } from '../../TableDrawerContext/actions';
+import { useGetGroupingAggregates } from '../../TableDrawerContext/selectors';
 import { toAggregateItems } from '../utils';
 import { styles } from './ActiveAggregateList.stylex';
 
 /**
- * The aggregates currently selected, one row each, with a remove control.
+ * The aggregates currently staged, one row each, with a remove control.
  *
  * Not draggable, unlike the group-key list beside it: the key order is the
  * query's nesting order and means something, where the aggregate order means
@@ -29,8 +29,8 @@ export const ActiveAggregateList = ({
   isBusy = false,
 }: ActiveAggregateListProps) => {
   const columns = useGetColumns();
-  const aggregates = useGetTableGroupingAggregates();
-  const setColumnAggregate = useSetTableColumnAggregate();
+  const aggregates = useGetGroupingAggregates();
+  const setColumnAggregate = useSetColumnAggregate();
 
   const aggregateItems = toAggregateItems({ aggregates, columns });
 

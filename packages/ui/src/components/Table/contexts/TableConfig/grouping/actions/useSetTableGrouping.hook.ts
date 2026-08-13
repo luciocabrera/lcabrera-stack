@@ -4,7 +4,7 @@ import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableC
 import { useTableDataContextValue } from '#ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
 
 import { usePersistTableStateAction } from '../../columns/actions/hooks/usePersistTableStateAction.hook';
-import { resolveTableGroupingUpdate } from './utils';
+import { applyGroupingReducer } from './utils';
 
 /**
  * The single write path for the grouping store: hand it a function from the
@@ -21,7 +21,9 @@ import { resolveTableGroupingUpdate } from './utils';
  * It takes a **reducer** rather than a finished state so the store is read
  * exactly once per interaction. A finished state would need the caller to read
  * the store too, and two reads of one store in a single action path can
- * straddle a concurrent update.
+ * straddle a concurrent update. `applyGroupingReducer` holds that shape, shared
+ * with the drawer's draft write path so the two cannot come to resolve a change
+ * differently.
  *
  * Grouping changes the SQL the route emits, so this writes the `grouping`
  * search param through the persist-cookie flow and lets the resulting redirect
@@ -43,10 +45,9 @@ export const useSetTableGrouping = () => {
   return (
     deriveNextGrouping: (current: TableGroupingState) => TableGroupingState,
   ) => {
-    const existingGrouping = groupingStore.get();
-    const result = resolveTableGroupingUpdate({
-      existingGrouping,
-      nextGrouping: deriveNextGrouping(existingGrouping),
+    const result = applyGroupingReducer({
+      deriveNextGrouping,
+      existingGrouping: groupingStore.get(),
     });
 
     if (result.kind !== 'updated') return;

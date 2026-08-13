@@ -33,12 +33,12 @@ vi.mock(
   }),
 );
 
-vi.mock('#ui/components/Table/contexts/TableConfig/grouping/actions', () => ({
-  useToggleTableGroupKey: () => mockToggleGroupKey,
+vi.mock('../../TableDrawerContext/actions', () => ({
+  useToggleGroupKey: () => mockToggleGroupKey,
 }));
 
-vi.mock('#ui/components/Table/contexts/TableConfig/grouping/selectors', () => ({
-  useGetTableGroupingKeys: () => groupingKeysRef.current,
+vi.mock('../../TableDrawerContext/selectors', () => ({
+  useGetGroupingKeys: () => groupingKeysRef.current,
 }));
 
 vi.mock('#ui/components/VirtualSelect', () => ({

@@ -28,36 +28,44 @@ TableSettingsDrawer/
 │
 ├── TableDrawerContext/                   → Store-based context for drawer state
 │   ├── TableDrawerContext.context.ts      → createContext
-│   ├── TableDrawerContext.provider.tsx     → Provider: reads table state, creates store
+│   ├── TableDrawerContext.provider.tsx     → Provider: seeds both drafts from table state
 │   ├── TableDrawerContext.types.ts        → TableDrawerColumnsState, ContextValue
 │   ├── useTableDrawerContextValue.hook.ts → use(TableDrawerContext)
 │   ├── useColumnsStore.hook.ts            → useSyncExternalStore + selector
+│   ├── useGroupingStore.hook.ts           → useSyncExternalStore + selector (grouping draft)
 │   │
-│   ├── actions/                           → 17 action hooks (set/clear/reset/batch)
-│   │   ├── useBatchSetTableDrawerSettings → Push all drawer state to table
-│   │   ├── useClearAllSettings            → Clear all fields
+│   ├── actions/                           → Action hooks (set/clear/reset/batch/stage)
+│   │   ├── useBatchSetTableDrawerSettings → Push both drafts to the table in one commit
+│   │   ├── useClearAllSettings            → Clear all column fields
 │   │   ├── useClearColumnOrderSection     → Clear visibility + pinning
 │   │   ├── useClearFilters                → Clear all filters
+│   │   ├── useClearGrouping               → Stage grouping switched off
 │   │   ├── useClearSorting                → Clear all sorting
 │   │   ├── useOrderColumnsBySorting       → Reorder columns by sorting
 │   │   ├── useResetColumnOrderAndVisibility → Reset order + visibility from table
 │   │   ├── useResetFilters                → Reset filters from table
 │   │   ├── useResetSorting                → Reset sorting from table
-│   │   ├── useResetTableSettings          → Reset all from table
+│   │   ├── useResetTableSettings          → Re-seed both drafts from the table
+│   │   ├── useSetColumnAggregate          → Stage / clear one column's aggregate
 │   │   ├── useSetColumnFilters            → Set filters object
 │   │   ├── useSetColumnPinning            → Set pinning state + sync draft order
 │   │   ├── useSetColumnsOrder             → Set column order array
 │   │   ├── useSetColumnsSizing            → Set column widths
 │   │   ├── useSetColumnsSortings          → Set sorting array
 │   │   ├── useSetColumnsVisibility        → Set visibility set
-│   │   └── useSortByColumnOrder           → Create sorts from column order
+│   │   ├── useSetGrouping                 → Internal: the draft's grouping write path
+│   │   ├── useSetGroupKeys                → Stage the whole ordered key list
+│   │   ├── useSortByColumnOrder           → Create sorts from column order
+│   │   └── useToggleGroupKey              → Stage adding / removing one key
 │   │
-│   └── selectors/                         → 5 selector hooks (read drawer state)
+│   └── selectors/                         → Selector hooks (read drawer state)
 │       ├── useGetColumnFilters
 │       ├── useGetColumnOrder
 │       ├── useGetColumnPinning
 │       ├── useGetColumnsSorting
-│       └── useGetColumnVisibility
+│       ├── useGetColumnVisibility
+│       ├── useGetGroupingAggregates
+│       └── useGetGroupingKeys
 │
 ├── GeneralSettingsSection/                → Width presets + cross-section toolbars
 │   ├── GeneralSettingsSection.component.tsx → Thin composition
@@ -92,6 +100,7 @@ TableSettingsDrawer/
 │
 ├── GroupingSection/                       → Multi-key grouping + aggregate selection
 │   ├── GroupingSection.component.tsx       → Orchestrator
+│   ├── GroupingSection.test.tsx            → Staging + navigation-count integration test
 │   ├── GroupingSection.types.ts
 │   ├── index.ts
 │   ├── AddGroupKeySection/                → VirtualSelect for adding a group key
@@ -231,8 +240,10 @@ See [TableDrawerContext/ARCHITECTURE.md](TableDrawerContext/ARCHITECTURE.md) for
 
 **Key flows**:
 
-- **Accept**: `useBatchSetTableDrawerSettings` reads all drawer state and pushes it to
-  `TableConfigContext`
+- **Accept**: `useBatchSetTableDrawerSettings` reads both drawer drafts — column
+  state and grouping — and pushes them to `TableConfigContext` through one
+  `useBatchSetTableSettings` call, which issues exactly one persistence write and
+  therefore one navigation
 - **Invalid accept**: `notify(...)` sends a warning through the app-level `NotificationProvider`; the viewport is rendered once at the root, not inside the drawer
 - **Pin state**: `isTableSettingsPinned` is owned by `TableConfig.metaStore`, not local component state
 - **Expanded filter children state**: `tableSettingsExpandedFilters` is owned by `TableConfig.metaStore` and restored by `FiltersSection`
@@ -241,7 +252,8 @@ See [TableDrawerContext/ARCHITECTURE.md](TableDrawerContext/ARCHITECTURE.md) for
   header toolbar close, and the footer Cancel button) calls
   `useResetTableSettings()` to read current table state back into the drawer
   store, then `hooks/useCloseTableSettingsIfUnpinned` closes only when
-  unpinned; the whole flow no-ops while busy
+  unpinned; the whole flow no-ops while busy. It re-seeds the grouping draft
+  too, so discarding a grouping edit costs no navigation and no loader run
 
 ## Tab Sections
 
@@ -249,14 +261,14 @@ All sections follow a consistent pattern: they use SidePanel sub-components for 
 read/write state through TableDrawerContext actions and selectors, and each features
 a toolbar in dual-variant mode.
 
-| Section                  | Tab      | Features                                                                                                                                                                                                                                                                                     | Details                                                   |
-| ------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| `GeneralSettingsSection` | General  | Width presets, cross-section clear/reset, all settings clear/reset                                                                                                                                                                                                                           | [ARCHITECTURE.md](GeneralSettingsSection/ARCHITECTURE.md) |
-| `DetailsSection`         | Details  | Required row counts, optional table/schema, technical metadata                                                                                                                                                                                                                               | [ARCHITECTURE.md](DetailsSection/ARCHITECTURE.md)         |
-| `FiltersSection`         | Filters  | Add/remove/expand filters, FilterInputs, validation                                                                                                                                                                                                                                          | [ARCHITECTURE.md](FiltersSection/ARCHITECTURE.md)         |
-| `SortingSection`         | Sorting  | Add/remove/reorder sorts, direction toggle                                                                                                                                                                                                                                                   | [ARCHITECTURE.md](SortingSection/ARCHITECTURE.md)         |
-| `GroupingSection`        | Grouping | Multi-key group add/remove/reorder, legality-derived aggregate selection. Tab present only where the route declared `isGroupingEnabled`, and the one section that writes the **live** store rather than the drawer draft — grouping is URL state, so every edit re-runs the loader (ADR-061) | [ARCHITECTURE.md](GroupingSection/ARCHITECTURE.md)        |
-| `ColumnOrderSection`     | Columns  | Drag-drop reorder, pin toggle, visibility toggle, conflict modals                                                                                                                                                                                                                            | [ARCHITECTURE.md](ColumnOrderSection/ARCHITECTURE.md)     |
+| Section                  | Tab      | Features                                                                                                                                                                                                                                                                                                                         | Details                                                   |
+| ------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `GeneralSettingsSection` | General  | Width presets, cross-section clear/reset, all settings clear/reset                                                                                                                                                                                                                                                               | [ARCHITECTURE.md](GeneralSettingsSection/ARCHITECTURE.md) |
+| `DetailsSection`         | Details  | Required row counts, optional table/schema, technical metadata                                                                                                                                                                                                                                                                   | [ARCHITECTURE.md](DetailsSection/ARCHITECTURE.md)         |
+| `FiltersSection`         | Filters  | Add/remove/expand filters, FilterInputs, validation                                                                                                                                                                                                                                                                              | [ARCHITECTURE.md](FiltersSection/ARCHITECTURE.md)         |
+| `SortingSection`         | Sorting  | Add/remove/reorder sorts, direction toggle                                                                                                                                                                                                                                                                                       | [ARCHITECTURE.md](SortingSection/ARCHITECTURE.md)         |
+| `GroupingSection`        | Grouping | Multi-key group add/remove/reorder, legality-derived aggregate selection. Tab present only where the route declared `isGroupingEnabled`. Staged like every other section; what differs is the commit — grouping is URL state (ADR-061), so it rides in the same single Accept write as the column state rather than a second one | [ARCHITECTURE.md](GroupingSection/ARCHITECTURE.md)        |
+| `ColumnOrderSection`     | Columns  | Drag-drop reorder, pin toggle, visibility toggle, conflict modals                                                                                                                                                                                                                                                                | [ARCHITECTURE.md](ColumnOrderSection/ARCHITECTURE.md)     |
 
 ### Section Toolbar Pattern
 
@@ -280,7 +292,7 @@ graph TD
   end
 
   subgraph "TableDrawerContext"
-    TDC["columnsStore (drawer-local copy)"]
+    TDC["columnsStore + groupingStore (drawer-local copies)"]
   end
 
   subgraph "ColumnOrderSectionContext"
@@ -295,7 +307,7 @@ graph TD
 Three context layers:
 
 1. **TableConfigContext** (external) — source of truth for the table
-2. **TableDrawerContext** — local working copy of column state
+2. **TableDrawerContext** — local working copies of column state and grouping
 3. **ColumnOrderSectionContext** — modal state for pin/order conflict resolution
 
 ## Consumers
