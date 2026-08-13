@@ -16,6 +16,7 @@ import { buildGroupingSetsClause } from './build-grouping-sets-clause.util.ts';
 import { expandGroupingSets } from './expand-grouping-sets.util.ts';
 import { GROUP_MASK_ALIAS } from './group-query-builder.constants.ts';
 import { resolveAggregateAlias } from './resolve-aggregate-alias.util.ts';
+import { resolveGroupGuardRails } from './resolve-group-guard-rails.util.ts';
 import { toGroupingSetMask } from './to-grouping-set-mask.util.ts';
 
 /**
@@ -29,7 +30,10 @@ import { toGroupingSetMask } from './to-grouping-set-mask.util.ts';
  *
  * The result carries `keys` and `groupingSetMasks` beside the SQL, because the
  * mask alone cannot be decoded — bit positions are relative to the key order,
- * so the decoder has to travel with the data it decodes.
+ * so the decoder has to travel with the data it decodes. It carries `guardRails`
+ * for the same reason: the emitted `LIMIT` is the rails' answer rather than the
+ * requested `maxRows`, and a caller has to know when reaching it means the
+ * result was refused rather than merely truncated (ADR-066).
  *
  * One departure from every other builder here: the `SELECT` list is assembled
  * first, so a `FILTER (WHERE …)` aggregate claims `$1…$k` and the query's own
@@ -52,6 +56,17 @@ export const buildGroupQuery = ({
   assertSafeIdentifier(table);
   assertGroupKeys({ allowedColumns, capabilities, keys });
   assertGroupAggregates({ aggregates, allowedColumns, capabilities });
+
+  // After the legality gates and before anything is emitted: the catalogue's
+  // verdict on a single column is more specific than a bound on the whole
+  // result, so a column that cannot be grouped is refused with its own reason
+  // rather than with an arithmetic one.
+  const guardRails = resolveGroupGuardRails({
+    capabilities,
+    grouping,
+    keys,
+    maxRows,
+  });
 
   const aliased = aggregates.map((aggregate) => ({
     aggregate,
@@ -78,7 +93,7 @@ export const buildGroupQuery = ({
     startParamIndex: projection.nextParamIndex,
   });
   const limitClause = buildOptionalNumericClauses({
-    clauses: [{ keyword: 'LIMIT', value: maxRows }],
+    clauses: [{ keyword: 'LIMIT', value: guardRails.rowLimit.limit }],
     startParamIndex: whereClause.nextParamIndex,
   });
 
@@ -111,6 +126,7 @@ export const buildGroupQuery = ({
       ...(aggregate.column !== undefined && { column: aggregate.column }),
     })),
     groupingSetMasks: sets.map((set) => toGroupingSetMask({ keys, set })),
+    guardRails,
     keys,
     maskAlias: GROUP_MASK_ALIAS,
     text,

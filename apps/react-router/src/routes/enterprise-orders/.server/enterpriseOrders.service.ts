@@ -16,6 +16,7 @@ import { insertRow } from '@lcabrera/server/db/insert-row.util';
 import { selectGroupedRows } from '@lcabrera/server/db/select-grouped-rows.util';
 import { selectRows } from '@lcabrera/server/db/select-rows.util';
 import { updateRows } from '@lcabrera/server/db/update-rows.util';
+import { toSerializableDbError } from '@lcabrera/server/errors/to-serializable-db-error.util';
 
 import type {
   EnterpriseOrder,
@@ -75,6 +76,14 @@ export type SelectGroupedOrdersArgs = {
  * Every alias comes back from `selectGroupedRows` rather than being spelled
  * here, so the name the SQL projected and the name this decodes by are one
  * string.
+ *
+ * **This is the loader edge, so no error class leaves it.** A grouped read is
+ * the one call here with guard rails that refuse it and a statement timeout
+ * that cuts it off, and `@lcabrera/server` raises both as classes — which React
+ * Router single fetch strips of their prototype without a word, so an
+ * `instanceof` on the client is always false. Every refusal is mapped to the
+ * plain `SerializableDbError` union instead (ADR-050, ADR-066). A warning is
+ * not an error and rides beside real data.
  */
 export const selectGroupedOrders = async ({
   aggregates: selectedAggregates,
@@ -88,35 +97,49 @@ export const selectGroupedOrders = async ({
     selectedAggregates,
   ).map(([column, fn]) => ({ column, fn }) satisfies UnfilteredOrderAggregate);
 
-  const { aggregates, rows } = await selectGroupedRows({
-    ...TARGET,
-    aggregates: [{ fn: 'count' }, ...requested],
-    filters,
-    grouping: 'flat',
-    keys: groupKeys,
-    maxRows: ENTERPRISE_ORDER_GROUP_MAX_ROWS,
-    sort: groupKeys.map((key) => ({ direction: 'asc' as const, key })),
-  });
+  try {
+    const { aggregates, rows, warning } = await selectGroupedRows({
+      ...TARGET,
+      aggregates: [{ fn: 'count' }, ...requested],
+      filters,
+      grouping: 'flat',
+      keys: groupKeys,
+      maxRows: ENTERPRISE_ORDER_GROUP_MAX_ROWS,
+      sort: groupKeys.map((key) => ({ direction: 'asc' as const, key })),
+    });
 
-  // `count(*)` is requested first, so the emitted aliases line up with
-  // `requested` one place along.
-  const countAlias = aggregates[0]?.alias ?? '';
-  const decodedAggregates = requested.map((aggregate, index) => ({
-    alias: aggregates[index + 1]?.alias ?? '',
-    columnKey: aggregate.column,
-    fn: aggregate.fn,
-  }));
+    // `count(*)` is requested first, so the emitted aliases line up with
+    // `requested` one place along.
+    const countAlias = aggregates[0]?.alias ?? '';
+    const decodedAggregates = requested.map((aggregate, index) => ({
+      alias: aggregates[index + 1]?.alias ?? '',
+      columnKey: aggregate.column,
+      fn: aggregate.fn,
+    }));
 
-  const data = rows.map((row) =>
-    toOrderGroupRow({
-      aggregates: decodedAggregates,
-      columnKeys: groupKeys,
-      countAlias,
-      row,
-    }),
-  );
+    const data = rows.map((row) =>
+      toOrderGroupRow({
+        aggregates: decodedAggregates,
+        columnKeys: groupKeys,
+        countAlias,
+        row,
+      }),
+    );
 
-  return { data, hasMore: false, total: data.length };
+    return {
+      data,
+      hasMore: false,
+      total: data.length,
+      ...(warning !== undefined && { groupingWarning: warning }),
+    };
+  } catch (error) {
+    return {
+      data: [],
+      error: toSerializableDbError(error),
+      hasMore: false,
+      total: 0,
+    };
+  }
 };
 
 /**

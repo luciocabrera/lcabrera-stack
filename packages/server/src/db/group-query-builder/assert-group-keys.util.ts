@@ -1,8 +1,8 @@
 import type { ColumnGroupingCapability } from './group-query-builder.types.ts';
 
-import { assertColumnAllowed } from '../query-builder/assert-column-allowed.util.ts';
-import { assertSafeIdentifier } from '../query-builder/assert-safe-identifier.util.ts';
-import { MAX_GROUP_KEYS } from './group-query-builder.constants.ts';
+import { GroupingRefusedError } from '../../errors/grouping-refused.error.ts';
+import { assertGroupColumn } from './assert-group-column.util.ts';
+import { assertGroupDepth } from './assert-group-depth.util.ts';
 
 type AssertGroupKeysArgs = {
   readonly allowedColumns: readonly string[];
@@ -12,8 +12,12 @@ type AssertGroupKeysArgs = {
 
 /**
  * Every reason a set of group keys can be refused, checked before anything is
- * emitted and before any round trip — depth is pure, so a request past the cap
- * never costs a catalogue query.
+ * emitted.
+ *
+ * The depth half is delegated to `assertGroupDepth`, which needs no capability
+ * map — and that is what lets the executor run it *before any round trip*, so a
+ * request past the cap never costs a catalogue query (ADR-066). The builder
+ * still runs it too: the pre-flight check is an earlier gate, never the only one.
  *
  * The capability lookup is what enforces ADR-058 from inside a pure function:
  * a column the catalogue refused is refused here with the catalogue's own
@@ -25,36 +29,27 @@ export const assertGroupKeys = ({
   capabilities,
   keys,
 }: AssertGroupKeysArgs): void => {
-  if (keys.length === 0) {
-    throw new Error('A grouped query needs at least one group key.');
-  }
-
-  if (keys.length > MAX_GROUP_KEYS) {
-    throw new Error(
-      `A grouped query takes at most ${MAX_GROUP_KEYS} group keys; got ${keys.length}.`,
-    );
-  }
-
-  if (new Set(keys).size !== keys.length) {
-    throw new Error(`Group keys must be distinct; got "${keys.join('", "')}".`);
-  }
+  assertGroupDepth({ keys });
 
   for (const key of keys) {
-    assertSafeIdentifier(key);
-    assertColumnAllowed({ allowedColumns, column: key });
+    assertGroupColumn({ allowedColumns, column: key });
 
     const capability = capabilities[key];
 
     if (capability === undefined) {
-      throw new Error(
-        `No grouping capability was resolved for column "${key}"; it is not a column of this table, or the catalogue could not see it.`,
-      );
+      throw new GroupingRefusedError({
+        column: key,
+        message: `No grouping capability was resolved for column "${key}"; it is not a column of this table, or the catalogue could not see it.`,
+        reason: 'unknown-column',
+      });
     }
 
     if (!capability.canGroup) {
-      throw new Error(
-        `Column "${key}" is not a legal group key: ${capability.refusal}.`,
-      );
+      throw new GroupingRefusedError({
+        column: key,
+        message: `Column "${key}" is not a legal group key: ${capability.refusal}.`,
+        reason: 'column-not-groupable',
+      });
     }
   }
 };

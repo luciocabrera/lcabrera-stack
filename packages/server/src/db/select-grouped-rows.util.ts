@@ -1,12 +1,17 @@
 import type { QueryResultRow } from 'pg';
 
-import type { ExecutorOptions } from './db.types.ts';
+import type { ExecutorOptions, TransactionClient } from './db.types.ts';
 import type { GroupQueryDescriptor } from './group-query-builder/group-query-builder.types.ts';
 
+import { readGroupStatementTimeoutMs } from './env.schema.ts';
 import { getColumnGroupingCapabilities } from './get-column-grouping-capabilities.util.ts';
+import { assertGroupDepth } from './group-query-builder/assert-group-depth.util.ts';
+import { assertGroupRowBackstop } from './group-query-builder/assert-group-row-backstop.util.ts';
 import { buildGroupQuery } from './group-query-builder/build-group-query.util.ts';
 import { collectCapabilityColumns } from './group-query-builder/collect-capability-columns.util.ts';
 import { runQuery } from './run-query.util.ts';
+import { setStatementTimeout } from './set-statement-timeout.util.ts';
+import { withTransaction } from './with-transaction.util.ts';
 
 /**
  * `capabilities` is resolved here rather than supplied, which is the whole
@@ -17,46 +22,85 @@ import { runQuery } from './run-query.util.ts';
 type SelectGroupedRowsArgs = Omit<GroupQueryDescriptor, 'capabilities'>;
 
 /**
- * Runs a grouped read: resolve what each column may do, build the
- * `GROUPING SETS` query from that answer, execute it.
+ * Runs a grouped read under its own guard rails: refuse what is too deep,
+ * resolve what each column may do, bound the result, and cut the query off at a
+ * ceiling of its own.
  *
- * The flat sibling of `selectRows` for the analytical path. It returns the
- * emitted `aggregates`, `keys` and `maskAlias` beside the rows because a
- * grouped row cannot be decoded without them — an aggregate's alias is derived,
- * and the mask's bit positions are relative to the key order.
+ * Four things happen in an order that is not arbitrary (ADR-066):
  *
- * `tx` threads through **both** round trips, so the capability answer and the
- * query it authorises see one snapshot. Omitted, each runs on the pool: fine
- * for a read, and the reason this does not open a transaction of its own — a
- * caller that needs the stronger guarantee already has `withTransaction`, and
- * one that does not should not pay for a connection it will not reuse.
+ * 1. **Depth, before anything else.** It is pure, so a request past the cap is
+ *    refused without borrowing a connection or issuing a catalogue query.
+ * 2. **A transaction, always.** Not for atomicity — a read needs none — but
+ *    because `statement_timeout` can only be set for *this* query by being set
+ *    transaction-locally. Outside one it would persist on the pooled connection
+ *    and re-tune every later query that borrows it.
+ * 3. **The timeout first inside it**, so it covers the catalogue query too.
+ * 4. **The capability answer and the query it authorises share the connection**,
+ *    so both see one snapshot — and, critically, both are covered by the
+ *    timeout. An executor called here without `tx` would silently run on the
+ *    pool instead, outside the transaction, with no ceiling and no symptom.
+ *
+ * **Passing your own `tx` has a consequence worth knowing.** It is used as-is,
+ * so the timeout is local to *your* transaction and reverts at *your* `COMMIT` —
+ * which means this read's ceiling also applies to every statement you run after
+ * it on that transaction, not only to this call. That follows from
+ * transaction-locality rather than being a choice made here: the alternative is
+ * reading the previous value back and restoring it afterwards, which is not
+ * atomic with the query it wraps. If the rest of your transaction needs a
+ * different ceiling, either call this **without** `tx` and let it open its own,
+ * or set the value you want once it returns.
+ *
+ * The result carries the emitted `aggregates`, `keys` and `maskAlias` because a
+ * grouped row cannot be decoded without them, plus `estimate` and any `warning`
+ * the rails produced — a grouping that ran on missing statistics is worth
+ * saying out loud even though it succeeded.
  */
 export const selectGroupedRows = async <TRow extends QueryResultRow>({
   tx,
   ...descriptor
 }: ExecutorOptions & SelectGroupedRowsArgs) => {
-  const capabilities = await getColumnGroupingCapabilities({
-    columns: collectCapabilityColumns({
-      aggregates: descriptor.aggregates,
-      keys: descriptor.keys,
-    }),
-    schema: descriptor.schema,
-    table: descriptor.table,
-    tx,
-  });
+  assertGroupDepth({ keys: descriptor.keys });
 
-  const built = buildGroupQuery({ ...descriptor, capabilities });
-  const result = await runQuery<TRow>({
-    text: built.text,
-    tx,
-    values: built.values,
-  });
+  const run = async (client: TransactionClient) => {
+    await setStatementTimeout({
+      timeoutMs: readGroupStatementTimeoutMs({ env: process.env }),
+      tx: client,
+    });
 
-  return {
-    aggregates: built.aggregates,
-    groupingSetMasks: built.groupingSetMasks,
-    keys: built.keys,
-    maskAlias: built.maskAlias,
-    rows: result.rows as readonly TRow[],
+    const capabilities = await getColumnGroupingCapabilities({
+      columns: collectCapabilityColumns({
+        aggregates: descriptor.aggregates,
+        keys: descriptor.keys,
+      }),
+      schema: descriptor.schema,
+      table: descriptor.table,
+      tx: client,
+    });
+
+    const built = buildGroupQuery({ ...descriptor, capabilities });
+    const result = await runQuery<TRow>({
+      text: built.text,
+      tx: client,
+      values: built.values,
+    });
+
+    assertGroupRowBackstop({
+      rowCount: result.rows.length,
+      rowLimit: built.guardRails.rowLimit,
+    });
+
+    return {
+      aggregates: built.aggregates,
+      estimate: built.guardRails.estimate,
+      groupingSetMasks: built.groupingSetMasks,
+      keys: built.keys,
+      maskAlias: built.maskAlias,
+      rows: result.rows as readonly TRow[],
+      ...(built.guardRails.warning !== undefined && {
+        warning: built.guardRails.warning,
+      }),
+    };
   };
+
+  return tx === undefined ? withTransaction({ run }) : run(tx);
 };

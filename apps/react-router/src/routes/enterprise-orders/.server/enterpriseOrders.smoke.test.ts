@@ -398,26 +398,35 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
       );
     });
 
-    it('refuses one key past the cap, before any round trip', async () => {
-      await expect(
-        selectOrdersPage({
-          filters: [],
-          grouping: {
-            aggregates: {},
-            keys: [
-              'order_status',
-              'shipping_country',
-              'priority',
-              'carrier',
-              'payment_status',
-            ],
-          },
-          includeTotal: true,
-          limit: 50,
-          offset: 0,
-          sort: [],
-        }),
-      ).rejects.toThrow(/at most 4 group keys/);
+    it('refuses one key past the cap, as plain data rather than a class', async () => {
+      // The loader edge maps every refusal into the serializable union, because
+      // React Router single fetch strips a class of its prototype on the way to
+      // the client without a word (ADR-066).
+      const page = await selectOrdersPage({
+        filters: [],
+        grouping: {
+          aggregates: {},
+          keys: [
+            'order_status',
+            'shipping_country',
+            'priority',
+            'carrier',
+            'payment_status',
+          ],
+        },
+        includeTotal: true,
+        limit: 50,
+        offset: 0,
+        sort: [],
+      });
+
+      expect(page.error).toEqual({
+        kind: 'grouping-refused',
+        message: 'A grouped query takes at most 4 group keys; got 5.',
+        reason: 'too-many-keys',
+      });
+      expect(page.data).toEqual([]);
+      expect(structuredClone(page)).toEqual(page);
     });
 
     it('computes a selected aggregate the database agrees with', async () => {
@@ -484,19 +493,26 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
       // The other direction, and the one a mocked suite cannot reach: `sum` on
       // a `varchar` is a query Postgres rejects, and the builder's own gate is
       // what turns it into a named refusal instead.
-      await expect(
-        selectOrdersPage({
-          filters: [],
-          grouping: {
-            aggregates: { customer_name: 'sum' },
-            keys: ['order_status'],
-          },
-          includeTotal: true,
-          limit: 50,
-          offset: 0,
-          sort: [],
-        }),
-      ).rejects.toThrow(/is not legal for column "customer_name"/);
+      const page = await selectOrdersPage({
+        filters: [],
+        grouping: {
+          aggregates: { customer_name: 'sum' },
+          keys: ['order_status'],
+        },
+        includeTotal: true,
+        limit: 50,
+        offset: 0,
+        sort: [],
+      });
+
+      expect(page.error).toMatchObject({
+        column: 'customer_name',
+        kind: 'grouping-refused',
+        reason: 'aggregate-not-legal',
+      });
+      expect(page.error?.message).toMatch(
+        /is not legal for column "customer_name"/,
+      );
     });
 
     it('resolves a capability for every column the route allows', async () => {

@@ -1,3 +1,5 @@
+import type { GroupCardinalityWarning } from '@lcabrera/server/db/group-query-builder/group-query-builder.types';
+import type { SerializableDbError } from '@lcabrera/server/errors/errors.types';
 import type { TableGroupRow } from '@lcabrera/ui/components/Table/Table.types';
 
 import type { ENTERPRISE_ORDER_LIST_COLUMNS } from './enterpriseOrders.constants';
@@ -98,6 +100,22 @@ export type EnterpriseOrderListRow = Pick<
 
 export type EnterpriseOrdersResponse = {
   readonly data: readonly EnterpriseOrderTableRow[];
+  /**
+   * Why the read returned nothing, as **plain data**. A grouped read can be
+   * refused (too deep, an illegal key, a result bound past the ceiling) or cut
+   * off by its statement timeout, and `@lcabrera/server` raises each as a typed
+   * error class — which React Router single fetch silently strips of its
+   * prototype on the way here. The loader edge maps it through
+   * `toSerializableDbError` so the client gets a discriminant instead of a
+   * shape it cannot recognise (ADR-050, ADR-066).
+   */
+  readonly error?: SerializableDbError;
+  /**
+   * The grouped read ran, and something about it is worth saying: the estimate
+   * was above the warn threshold, or the table has no statistics to estimate
+   * from at all. The data below is real either way — this is not an error.
+   */
+  readonly groupingWarning?: GroupCardinalityWarning;
   readonly hasMore: boolean;
   /**
    * Rows matching the current filters — present only on the **first** page of a

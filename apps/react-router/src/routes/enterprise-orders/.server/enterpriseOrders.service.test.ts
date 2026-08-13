@@ -7,6 +7,8 @@ import { insertRow } from '@lcabrera/server/db/insert-row.util';
 import { selectGroupedRows } from '@lcabrera/server/db/select-grouped-rows.util';
 import { selectRows } from '@lcabrera/server/db/select-rows.util';
 import { updateRows } from '@lcabrera/server/db/update-rows.util';
+import { GroupingRefusedError } from '@lcabrera/server/errors/grouping-refused.error';
+import { QueryCanceledError } from '@lcabrera/server/errors/query-canceled.error';
 import { beforeEach, expect, it, vi } from 'vite-plus/test';
 
 import {
@@ -363,4 +365,104 @@ it('keeps the response shape identical whether or not the read is grouped', asyn
   });
 
   expect(sortKeys(grouped)).toStrictEqual(sortKeys(ungrouped));
+});
+
+it('maps a refusal to a plain union rather than letting the class escape', async () => {
+  vi.mocked(selectGroupedRows).mockRejectedValueOnce(
+    new GroupingRefusedError({
+      column: 'order_id',
+      estimatedRows: 500_001,
+      message: 'This grouping is estimated to return 500001 rows.',
+      reason: 'estimate-too-large',
+    }),
+  );
+
+  const page = await selectOrdersPage({
+    filters: [],
+    grouping: grouping({ keys: ['order_status'] }),
+    includeTotal: true,
+    limit: 10,
+    offset: 0,
+    sort: [],
+  });
+
+  expect(page.error).toStrictEqual({
+    column: 'order_id',
+    estimatedRows: 500_001,
+    kind: 'grouping-refused',
+    message: 'This grouping is estimated to return 500001 rows.',
+    reason: 'estimate-too-large',
+  });
+  expect(page.data).toStrictEqual([]);
+});
+
+it('maps a cancelled query to the union arm the edge branches on', async () => {
+  vi.mocked(selectGroupedRows).mockRejectedValueOnce(
+    new QueryCanceledError({ cause: undefined, fields: { code: '57014' } }),
+  );
+
+  const page = await selectOrdersPage({
+    filters: [],
+    grouping: grouping({ keys: ['order_status'] }),
+    includeTotal: true,
+    limit: 10,
+    offset: 0,
+    sort: [],
+  });
+
+  expect(page.error?.kind).toBe('db-canceled');
+});
+
+it('returns an error the single-fetch boundary cannot flatten', async () => {
+  // The discriminating half: `Error.message` is non-enumerable, so returning
+  // the class itself would put a payload carrying no message on the wire. The
+  // union carries the same sentence as an ordinary own property.
+  const refusal = new GroupingRefusedError({
+    message: 'too deep',
+    reason: 'too-many-keys',
+  });
+  vi.mocked(selectGroupedRows).mockRejectedValueOnce(refusal);
+
+  const page = await selectOrdersPage({
+    filters: [],
+    grouping: grouping({ keys: ['order_status'] }),
+    includeTotal: true,
+    limit: 10,
+    offset: 0,
+    sort: [],
+  });
+
+  expect(Object.keys(refusal)).not.toContain('message');
+  expect(Object.keys(page.error ?? {})).toContain('message');
+  expect(structuredClone(page)).toStrictEqual(page);
+});
+
+it('carries a stats-unavailable warning beside real rows', async () => {
+  vi.mocked(selectGroupedRows).mockResolvedValueOnce({
+    aggregates: [{ alias: 'count_rows', fn: 'count' }],
+    estimate: { columns: ['order_status'], kind: 'unknown' },
+    groupingSetMasks: [0],
+    keys: ['order_status'],
+    maskAlias: 'group_mask',
+    rows: [{ count_rows: '12', group_mask: 0, order_status: 'Shipped' }],
+    warning: { columns: ['order_status'], kind: 'stats-unavailable' },
+  });
+
+  const page = await selectOrdersPage({
+    filters: [],
+    grouping: grouping({ keys: ['order_status'] }),
+    includeTotal: true,
+    limit: 10,
+    offset: 0,
+    sort: [],
+  });
+
+  // A warning is not an error: the data is real, and the operator learns why it
+  // was expensive.
+  expect(page.groupingWarning).toStrictEqual({
+    columns: ['order_status'],
+    kind: 'stats-unavailable',
+  });
+  expect(page.error).toBeUndefined();
+  expect(page.data).toHaveLength(1);
 });

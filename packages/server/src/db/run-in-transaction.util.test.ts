@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import type { TransactionClient } from './db.types.ts';
 
+import { GroupingRefusedError } from '../errors/grouping-refused.error.ts';
+import { PersistenceError } from '../errors/persistence.error.ts';
 import { runInTransaction } from './run-in-transaction.util.ts';
 
 const query = vi.fn();
@@ -65,17 +67,48 @@ describe('runInTransaction', () => {
     ).rejects.toBe(failure);
   });
 
-  it('does not swallow a failing COMMIT', async () => {
-    const failure = new Error('could not serialize access');
+  it('does not swallow a failing COMMIT, and translates it', async () => {
+    // BEGIN and COMMIT are the two statements that used to reach the driver
+    // untranslated. `could not serialize access` is a real serialization
+    // failure message; it must not be what a consumer sees.
+    const failure = Object.assign(new Error('could not serialize access'), {
+      code: '40001',
+    });
     query.mockImplementation(async (text: string) =>
       text === 'COMMIT'
         ? Promise.reject(failure)
         : Promise.resolve({ rows: [] }),
     );
 
-    await expect(
-      runInTransaction({ client, run: async () => 'x' }),
-    ).rejects.toBe(failure);
+    const rejection = runInTransaction({ client, run: async () => 'x' });
+
+    await expect(rejection).rejects.toBeInstanceOf(PersistenceError);
+    await expect(rejection).rejects.not.toThrow('could not serialize access');
+    await expect(rejection).rejects.toMatchObject({
+      cause: failure,
+      fields: { code: '40001' },
+    });
     expect(statements()).toEqual(['BEGIN', 'COMMIT', 'ROLLBACK']);
+  });
+
+  it('rethrows the callback’s own rejection untouched', async () => {
+    // The other half of the rule, and the one that would break the loader-edge
+    // union if it were dropped: `run` has already been translated by whatever
+    // executor raised it, and a `GroupingRefusedError` is not a driver failure
+    // at all — re-mapping here would bury both under a generic
+    // `PersistenceError`.
+    const refusal = new GroupingRefusedError({
+      message: 'too deep',
+      reason: 'too-many-keys',
+    });
+
+    await expect(
+      runInTransaction({
+        client,
+        run: async () => {
+          throw refusal;
+        },
+      }),
+    ).rejects.toBe(refusal);
   });
 });

@@ -15,24 +15,26 @@ individually but imported only within its own folder.
 See `db/ARCHITECTURE.md` for the pure (`query-builder/`) vs impure (execution)
 split this folder is built around.
 
-| Artifact                        | Location                                      | Description                                                                                                                                                                                                         |
-| ------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `readEnvConfig`                 | `db/env.schema.ts`                            | Zod schema + parser for the five `DB_*` credentials plus four optional pool-tuning keys (max, connection/idle/statement timeouts)                                                                                   |
-| `getPool`                       | `db/get-pool.util.ts`                         | Lazily-initialized `pg.Pool` singleton, one per Node process, built from those tuning keys                                                                                                                          |
-| `closePool`                     | `db/get-pool.util.ts`                         | Tears down the pool singleton (test teardown)                                                                                                                                                                       |
-| `withTransaction`               | `db/with-transaction.util.ts`                 | Borrows a pooled connection and runs a callback inside BEGIN/COMMIT/ROLLBACK, always releasing it — thread its `tx` through every executor in the sequence (ADR-051)                                                |
-| `runInTransaction`              | `db/run-in-transaction.util.ts`               | The same BEGIN/COMMIT/ROLLBACK over a connection the **caller** owns; opens and closes nothing (the migration runner's case)                                                                                        |
-| `ExecutorOptions`               | `db/db.types.ts`                              | The optional `tx` seam every executor accepts, plus `TransactionClient` (pg's `ClientBase`) — kept off the pure `query-builder/` descriptors on purpose                                                             |
-| `selectRows`                    | `db/select-rows.util.ts`                      | Builds a `SelectQueryDescriptor` and runs it on the pool — the one place `buildSelectQuery` meets `getPool`                                                                                                         |
-| `selectDistinctRows`            | `db/select-distinct-rows.util.ts`             | `selectRows` + `distinct: true` — deduplicated rows over the same descriptor                                                                                                                                        |
-| `selectGroupedRows`             | `db/select-grouped-rows.util.ts`              | Resolves the group keys' and aggregate columns' capabilities, builds the `GROUPING SETS` query from that answer and runs it — the analytical sibling of `selectRows`, returning the decode metadata beside the rows |
-| `selectFilterOptions`           | `db/select-filter-options.util.ts`            | Filter-dropdown read over `selectDistinctRows`: one column's distinct, non-empty (empty dropped only for `text`), ordered values → `{ values, hasMore }`                                                            |
-| `insertRow`                     | `db/insert-row.util.ts`                       | Builds + runs an `InsertQueryDescriptor`; defaults `RETURNING *`, returns the inserted row(s)                                                                                                                       |
-| `updateRows`                    | `db/update-rows.util.ts`                      | Builds + runs an `UpdateQueryDescriptor`; defaults `RETURNING *`, returns the updated row(s)                                                                                                                        |
-| `deleteRows`                    | `db/delete-rows.util.ts`                      | Builds + runs a `DeleteQueryDescriptor`; defaults `RETURNING *`, returns the deleted row(s)                                                                                                                         |
-| `getMaxValue`                   | `db/get-max-value.util.ts`                    | Runs `buildMaxValueQuery` and returns the numeric `MAX(col)` (0 if empty) — generic "next id" for id assignment                                                                                                     |
-| `getRowsCount`                  | `db/get-rows-count.util.ts`                   | Runs `buildCountQuery` and returns the row count; requires an explicit `column` (never `count(*)`) — pass the data query's filters so a page and its total share them                                               |
-| `getColumnGroupingCapabilities` | `db/get-column-grouping-capabilities.util.ts` | Per column: may it be a group key (and if not, which of five reasons), and which aggregates are legal for its real Postgres type — one catalogue round trip, ADR-058                                                |
+| Artifact                        | Location                                      | Description                                                                                                                                                                                                                                                                                                                           |
+| ------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `readEnvConfig`                 | `db/env.schema.ts`                            | Zod schema + parser for the required `DB_*` credentials plus the optional, defaulted tuning keys (pool max, connection/idle/statement timeouts, and the grouped-read statement timeout)                                                                                                                                               |
+| `readGroupStatementTimeoutMs`   | `db/env.schema.ts`                            | Just `DB_GROUP_STATEMENT_TIMEOUT_MS`, picked off the same schema — read per grouped read, so it must not require the credential keys it does not use                                                                                                                                                                                  |
+| `getPool`                       | `db/get-pool.util.ts`                         | Lazily-initialized `pg.Pool` singleton, one per Node process, built from those tuning keys                                                                                                                                                                                                                                            |
+| `closePool`                     | `db/get-pool.util.ts`                         | Tears down the pool singleton (test teardown)                                                                                                                                                                                                                                                                                         |
+| `withTransaction`               | `db/with-transaction.util.ts`                 | Borrows a pooled connection and runs a callback inside BEGIN/COMMIT/ROLLBACK, always releasing it — thread its `tx` through every executor in the sequence (ADR-051)                                                                                                                                                                  |
+| `runInTransaction`              | `db/run-in-transaction.util.ts`               | The same BEGIN/COMMIT/ROLLBACK over a connection the **caller** owns; opens and closes nothing (the migration runner's case)                                                                                                                                                                                                          |
+| `ExecutorOptions`               | `db/db.types.ts`                              | The optional `tx` seam every executor accepts, plus `TransactionClient` (pg's `ClientBase`) — kept off the pure `query-builder/` descriptors on purpose                                                                                                                                                                               |
+| `selectRows`                    | `db/select-rows.util.ts`                      | Builds a `SelectQueryDescriptor` and runs it on the pool — the one place `buildSelectQuery` meets `getPool`                                                                                                                                                                                                                           |
+| `selectDistinctRows`            | `db/select-distinct-rows.util.ts`             | `selectRows` + `distinct: true` — deduplicated rows over the same descriptor                                                                                                                                                                                                                                                          |
+| `selectGroupedRows`             | `db/select-grouped-rows.util.ts`              | Resolves the group keys' and aggregate columns' capabilities, builds the `GROUPING SETS` query from that answer and runs it — the analytical sibling of `selectRows`, returning the decode metadata beside the rows. Checks depth before any round trip, and runs inside a transaction carrying its own `statement_timeout` (ADR-066) |
+| `setStatementTimeout`           | `db/set-statement-timeout.util.ts`            | Private. `set_config('statement_timeout', $1, true)` — parameterised and transaction-scoped, with `tx` **required** rather than optional                                                                                                                                                                                              |
+| `selectFilterOptions`           | `db/select-filter-options.util.ts`            | Filter-dropdown read over `selectDistinctRows`: one column's distinct, non-empty (empty dropped only for `text`), ordered values → `{ values, hasMore }`                                                                                                                                                                              |
+| `insertRow`                     | `db/insert-row.util.ts`                       | Builds + runs an `InsertQueryDescriptor`; defaults `RETURNING *`, returns the inserted row(s)                                                                                                                                                                                                                                         |
+| `updateRows`                    | `db/update-rows.util.ts`                      | Builds + runs an `UpdateQueryDescriptor`; defaults `RETURNING *`, returns the updated row(s)                                                                                                                                                                                                                                          |
+| `deleteRows`                    | `db/delete-rows.util.ts`                      | Builds + runs a `DeleteQueryDescriptor`; defaults `RETURNING *`, returns the deleted row(s)                                                                                                                                                                                                                                           |
+| `getMaxValue`                   | `db/get-max-value.util.ts`                    | Runs `buildMaxValueQuery` and returns the numeric `MAX(col)` (0 if empty) — generic "next id" for id assignment                                                                                                                                                                                                                       |
+| `getRowsCount`                  | `db/get-rows-count.util.ts`                   | Runs `buildCountQuery` and returns the row count; requires an explicit `column` (never `count(*)`) — pass the data query's filters so a page and its total share them                                                                                                                                                                 |
+| `getColumnGroupingCapabilities` | `db/get-column-grouping-capabilities.util.ts` | Per column: may it be a group key (and if not, which of five reasons), and which aggregates are legal for its real Postgres type — one catalogue round trip, ADR-058                                                                                                                                                                  |
 
 ### `src/db/query-builder/` — see its own `ARCHITECTURE.md`
 
@@ -87,9 +89,25 @@ within `group-query-builder/`.
 joins the two halves to a connection: it resolves the capabilities, builds, and
 runs. Reach for it rather than for `buildGroupQuery` directly.
 
+**Guard rails (ADR-066).** `resolveGroupGuardRails`
+(`resolve-group-guard-rails.util.ts`) is the third entry point, called from
+inside `buildGroupQuery` after the legality gates: it estimates the result over
+the sets that will be emitted, refuses or warns against the two thresholds, and
+settles the `LIMIT`. `assertGroupDepth` (`assert-group-depth.util.ts`) is split
+out of `assertGroupKeys` so the executor can run it **before borrowing a
+connection**, and `assertGroupRowBackstop` (`assert-group-row-backstop.util.ts`)
+is the post-execution half — a result that reached the guard's own ceiling is
+refused rather than returned truncated. Everything they compose
+(`estimateGroupCardinality`, `assertGroupCardinality`, `resolveGroupRowLimit`,
+`resolveWidestGroupKey`, `assertGroupColumn`) is private to the folder.
+`assertGroupColumn` is the one worth knowing about: it wraps the two assertions
+shared with `query-builder/` so an allow-list or identifier refusal is a typed
+`GroupingRefusedError` rather than a bare `Error` the loader edge can only report
+as `unexpected`.
+
 `group-query-builder.constants.ts` holds every constant the folder owns —
-including the closed `AggregateFn` → SQL map, the depth cap and the identifier
-limit — and `group-query-builder.types.ts` holds the shared types. Both are
+including the closed `AggregateFn` → SQL map, the depth cap, the warn/refuse row
+thresholds and the identifier limit — and `group-query-builder.types.ts` holds the shared types. Both are
 reachable through the package's `exports`, because `@lcabrera/ui` duplicates the
 depth cap and the aggregate vocabulary rather than depending on this Node-only
 package ([ADR-039](../../../docs/decisions/ADR-039-duplicate-over-undeclared-edges.md)),
@@ -100,26 +118,35 @@ and the app that depends on both pins the two together in
 
 ## `src/errors/`
 
-Typed translation of `pg` rejections, so no consumer ever sees a raw driver
-message and none has to hand-roll SQLSTATE detection ([ADR-050](../../../docs/decisions/ADR-050-server-error-translation-and-result-contract.md)).
+This package's typed error vocabulary: translated `pg` rejections, so no consumer
+ever sees a raw driver message and none has to hand-roll SQLSTATE detection
+([ADR-050](../../../docs/decisions/ADR-050-server-error-translation-and-result-contract.md)),
+plus the refusals the package raises itself
+([ADR-066](../../../docs/decisions/ADR-066-grouping-guard-rails-and-per-query-timeout.md)).
 The executors apply `mapDbError` for you — reach for it directly only when you run
 SQL through `getPool` yourself.
 
-| Artifact                         | Location                                      | Description                                                                                                                                |
-| -------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `mapDbError`                     | `errors/map-db-error.util.ts`                 | `23505` → `UniqueConstraintViolationError`, `23503` → `ForeignKeyViolationError`, else `PersistenceError`; passes a translated one through |
-| `PersistenceError`               | `errors/persistence.error.ts`                 | Base translated failure: a safe message of ours, the driver rejection on `cause`, pg's routing fields on `fields`                          |
-| `UniqueConstraintViolationError` | `errors/unique-constraint-violation.error.ts` | `23505` — `fields.constraint` names the index, which is the consumer's key for routing to a form field                                     |
-| `ForeignKeyViolationError`       | `errors/foreign-key-violation.error.ts`       | `23503` — insert/update and delete directions share the code; `fields.constraint` tells them apart                                         |
-| `hasPostgresErrorCode`           | `errors/has-postgres-error-code.util.ts`      | Narrows `unknown` to a pg rejection with a given SQLSTATE (e.g. `55000`), structurally so two copies of `pg` cannot defeat it              |
-| `PgErrorFields`                  | `errors/errors.types.ts`                      | The `code`/`column`/`constraint` a translated error carries. `detail` is excluded on purpose — it quotes the offending values              |
+| Artifact                         | Location                                      | Description                                                                                                                                                        |
+| -------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `mapDbError`                     | `errors/map-db-error.util.ts`                 | `23505` → `UniqueConstraintViolationError`, `23503` → `ForeignKeyViolationError`, `57014` → `QueryCanceledError`, else `PersistenceError`; idempotent              |
+| `PersistenceError`               | `errors/persistence.error.ts`                 | Base translated failure: a safe message of ours, the driver rejection on `cause`, pg's routing fields on `fields`                                                  |
+| `UniqueConstraintViolationError` | `errors/unique-constraint-violation.error.ts` | `23505` — `fields.constraint` names the index, which is the consumer's key for routing to a form field                                                             |
+| `ForeignKeyViolationError`       | `errors/foreign-key-violation.error.ts`       | `23503` — insert/update and delete directions share the code; `fields.constraint` tells them apart                                                                 |
+| `QueryCanceledError`             | `errors/query-canceled.error.ts`              | `57014` — the statement was stopped early. Named for the SQLSTATE, because `pg_cancel_backend` raises it as well as `statement_timeout`                            |
+| `GroupingRefusedError`           | `errors/grouping-refused.error.ts`            | A grouped read this package refused, carrying `reason`, the offending `column` and the estimated rows. **Not** a `PersistenceError` — nothing came from the driver |
+| `toSerializableDbError`          | `errors/to-serializable-db-error.util.ts`     | Any of the above → `SerializableDbError`, the plain union a loader or action may return. The mandatory step at any edge (see below)                                |
+| `hasPostgresErrorCode`           | `errors/has-postgres-error-code.util.ts`      | Narrows `unknown` to a pg rejection with a given SQLSTATE (e.g. `55000`), structurally so two copies of `pg` cannot defeat it                                      |
+| `PgErrorFields`                  | `errors/errors.types.ts`                      | The `code`/`column`/`constraint` a translated error carries. `detail` is excluded on purpose — it quotes the offending values                                      |
+| `GroupingRefusalReason`          | `errors/errors.types.ts`                      | The closed set of reasons a grouped read is refused, from `no-keys` to `row-limit-reached`                                                                         |
+| `SerializableDbError`            | `errors/errors.types.ts`                      | `db-canceled` / `db-failed` / `grouping-refused` / `unexpected` — plain data, no prototype, no `cause`                                                             |
 
-`readPgErrorFields` (`errors/read-pg-error-fields.util.ts`) and the two SQLSTATE
+`readPgErrorFields` (`errors/read-pg-error-fields.util.ts`) and the SQLSTATE
 constants (`errors/errors.constants.ts`) are private to this folder.
 
 **These are classes, and server-only.** React Router single fetch strips
-functions, so map one to a plain discriminated union at the action edge rather
-than returning it from a loader or action.
+functions, so a class arrives at the client with no prototype and — because
+`Error.message` is non-enumerable — no message either. Map one through
+`toSerializableDbError` at the loader/action edge rather than returning it.
 
 ---
 

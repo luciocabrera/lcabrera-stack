@@ -2,6 +2,7 @@ import type { Pool, PoolClient } from 'pg';
 
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
+import { PersistenceError } from '../errors/persistence.error.ts';
 import { getPool } from './get-pool.util.ts';
 import { withTransaction } from './with-transaction.util.ts';
 
@@ -74,12 +75,13 @@ describe('withTransaction', () => {
     expect(release).toHaveBeenCalledTimes(1);
   });
 
-  it('releases the connection when BEGIN itself fails', async () => {
+  it('releases the connection when BEGIN itself fails, and translates it', async () => {
     query.mockRejectedValue(new Error('no connection'));
 
-    await expect(withTransaction({ run: async () => 1 })).rejects.toThrow(
-      'no connection',
-    );
+    const rejection = withTransaction({ run: async () => 1 });
+
+    await expect(rejection).rejects.toBeInstanceOf(PersistenceError);
+    await expect(rejection).rejects.not.toThrow('no connection');
     expect(release).toHaveBeenCalledTimes(1);
   });
 });
