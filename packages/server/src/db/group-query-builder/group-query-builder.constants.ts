@@ -91,6 +91,28 @@ export const MAX_GROUP_KEY_DISTINCT = 1000;
 export const MAX_GROUP_KEYS = 4;
 
 /**
+ * Estimated result rows past which a grouped read is refused outright — roughly
+ * 10 MB through a server-rendered payload, which is not a page anyone waits for.
+ *
+ * The estimate is an upper bound (`∏dₖ` assumes every key combination occurs),
+ * so it over-refuses on sparse data; measured ~2.5× conservative on a 500k-row
+ * table. That is the safe direction for a *hard* refusal, and it is why the warn
+ * threshold below exists rather than this being the only rail (ADR-066).
+ */
+export const MAX_GROUP_ROWS_REFUSE = 50_000;
+
+/**
+ * Estimated result rows past which a grouped read is warned about but still run
+ * — roughly 1 MB of payload, past what a person reads and still recoverable.
+ *
+ * It doubles as the row ceiling when the estimate could not be computed at all:
+ * an unanalysed table warns and proceeds under a `LIMIT` of this plus one, and
+ * hitting that limit is what converts the warning into a refusal after the fact.
+ * One mechanism, two jobs.
+ */
+export const MAX_GROUP_ROWS_WARN = 5000;
+
+/**
  * `NAMEDATALEN - 1`. Past it Postgres truncates with only a `NOTICE`, and `pg`
  * then folds two truncation-equal aliases into one row key holding the second
  * value — losing the first column with no error anywhere. Probed; see ADR-059.

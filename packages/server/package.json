@@ -59,9 +59,12 @@
     "./db/with-transaction.util": "./src/db/with-transaction.util.ts",
     "./errors/errors.types": "./src/errors/errors.types.ts",
     "./errors/foreign-key-violation.error": "./src/errors/foreign-key-violation.error.ts",
+    "./errors/grouping-refused.error": "./src/errors/grouping-refused.error.ts",
     "./errors/has-postgres-error-code.util": "./src/errors/has-postgres-error-code.util.ts",
     "./errors/map-db-error.util": "./src/errors/map-db-error.util.ts",
     "./errors/persistence.error": "./src/errors/persistence.error.ts",
+    "./errors/query-canceled.error": "./src/errors/query-canceled.error.ts",
+    "./errors/to-serializable-db-error.util": "./src/errors/to-serializable-db-error.util.ts",
     "./errors/unique-constraint-violation.error": "./src/errors/unique-constraint-violation.error.ts",
     "./filters/filters.types": "./src/filters/filters.types.ts",
     "./filters/to-date-query-filters.util": "./src/filters/to-date-query-filters.util.ts",
@@ -202,6 +205,10 @@
         "types": "./dist/errors/foreign-key-violation.error.d.mts",
         "default": "./dist/errors/foreign-key-violation.error.mjs"
       },
+      "./errors/grouping-refused.error": {
+        "types": "./dist/errors/grouping-refused.error.d.mts",
+        "default": "./dist/errors/grouping-refused.error.mjs"
+      },
       "./errors/has-postgres-error-code.util": {
         "types": "./dist/errors/has-postgres-error-code.util.d.mts",
         "default": "./dist/errors/has-postgres-error-code.util.mjs"
@@ -213,6 +220,14 @@
       "./errors/persistence.error": {
         "types": "./dist/errors/persistence.error.d.mts",
         "default": "./dist/errors/persistence.error.mjs"
+      },
+      "./errors/query-canceled.error": {
+        "types": "./dist/errors/query-canceled.error.d.mts",
+        "default": "./dist/errors/query-canceled.error.mjs"
+      },
+      "./errors/to-serializable-db-error.util": {
+        "types": "./dist/errors/to-serializable-db-error.util.d.mts",
+        "default": "./dist/errors/to-serializable-db-error.util.mjs"
       },
       "./errors/unique-constraint-violation.error": {
         "types": "./dist/errors/unique-constraint-violation.error.d.mts",

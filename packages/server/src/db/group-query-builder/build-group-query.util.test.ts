@@ -352,4 +352,68 @@ describe('buildGroupQuery', () => {
       'GROUPING("shipping_country") ASC, "shipping_country" ASC, "sum_total_amount" DESC',
     );
   });
+
+  it('carries the pre-flight bound it emitted the LIMIT from', () => {
+    const result = buildGroupQuery(descriptor());
+
+    // 12 x 12 for the two keys. Emitted rather than left to the caller, so the
+    // number in the SQL and the number the caller reasons about are the same.
+    expect(result.guardRails).toEqual({
+      estimate: { kind: 'known', rows: 144 },
+      rowLimit: { limit: 5001 },
+    });
+  });
+
+  it('caps the LIMIT at the backstop when a key has no statistics', () => {
+    const result = buildGroupQuery(
+      descriptor({ keys: ['is_gift'], maxRows: 20_000 }),
+    );
+
+    // The caller asked for 20 000; `is_gift` carries no estimate, so the read
+    // runs under the guard's own ceiling instead and reaching it is a refusal.
+    expect(result.guardRails.rowLimit).toEqual({
+      backstopAt: 5001,
+      limit: 5001,
+    });
+    expect(result.values.at(-1)).toBe(5001);
+    expect(result.guardRails.warning).toEqual({
+      columns: ['is_gift'],
+      kind: 'stats-unavailable',
+    });
+  });
+
+  it('refuses a grouping whose bound is past the ceiling, naming the column', () => {
+    // 12 x 9000 = 108 000, past the 50 000 ceiling.
+    const wide: ColumnGroupingCapability = {
+      ...dimension('city'),
+      distinctEstimate: 9000,
+    };
+
+    expect(() =>
+      buildGroupQuery(
+        descriptor({
+          capabilities: { ...CAPABILITIES, city: wide },
+          keys: ['order_status', 'city'],
+        }),
+      ),
+    ).toThrow(/Column "city"/);
+  });
+
+  it('prefers the catalogue’s refusal over an arithmetic one', () => {
+    // Both would fire for this request. "That column cannot be a group key" is
+    // the actionable sentence; "the product is too large" is not.
+    const wide: ColumnGroupingCapability = {
+      ...dimension('city'),
+      distinctEstimate: 9000,
+    };
+
+    expect(() =>
+      buildGroupQuery(
+        descriptor({
+          capabilities: { ...CAPABILITIES, city: wide },
+          keys: ['order_date', 'city'],
+        }),
+      ),
+    ).toThrow('not a legal group key');
+  });
 });

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vite-plus/test';
 import { ForeignKeyViolationError } from './foreign-key-violation.error.ts';
 import { mapDbError } from './map-db-error.util.ts';
 import { PersistenceError } from './persistence.error.ts';
+import { QueryCanceledError } from './query-canceled.error.ts';
 import { UniqueConstraintViolationError } from './unique-constraint-violation.error.ts';
 
 type PgErrorArgs = {
@@ -37,6 +38,18 @@ describe('mapDbError', () => {
     });
 
     expect(mapDbError(cause)).toBeInstanceOf(ForeignKeyViolationError);
+  });
+
+  it('translates 57014 into a query cancellation', () => {
+    // Raised by `statement_timeout` and by `pg_cancel_backend` alike, which is
+    // why the type is named for the code rather than for the timeout.
+    const cause = pgError({ code: '57014' });
+    const error = mapDbError(cause);
+
+    expect(error).toBeInstanceOf(QueryCanceledError);
+    expect(error).toBeInstanceOf(PersistenceError);
+    expect(error.fields.code).toBe('57014');
+    expect(error.cause).toBe(cause);
   });
 
   it('falls back to PersistenceError for an unnamed SQLSTATE', () => {

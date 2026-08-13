@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
 /**
- * The five credential keys are required; the four tuning keys are optional and
- * defaulted, so an environment that predates them still boots unchanged.
+ * The five credential keys are required; every tuning key is optional and
+ * defaulted, so an environment that predates one still boots unchanged.
  *
  * The defaults are not pg's. pg waits **forever** to acquire a connection and
  * puts no ceiling on a statement, so a single slow query holds its connection
@@ -13,6 +13,18 @@ import { z } from 'zod';
  */
 export const envSchema = z.object({
   DB_CONNECTION_TIMEOUT_MS: z.coerce.number().int().positive().default(10_000),
+  /**
+   * The ceiling a grouped read installs on its own transaction, deliberately far
+   * shorter than the pool-wide `DB_STATEMENT_TIMEOUT_MS`: a grouped read sits
+   * behind a loader, 30 s outlasts any browser-side patience, and failing at 10 s
+   * leaves headroom to render an error rather than having the request itself time
+   * out (ADR-066).
+   */
+  DB_GROUP_STATEMENT_TIMEOUT_MS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(10_000),
   DB_HOST: z.string().min(1),
   DB_IDLE_TIMEOUT_MS: z.coerce.number().int().positive().default(10_000),
   DB_NAME: z.string().min(1),
@@ -31,3 +43,15 @@ type ReadEnvConfigArgs = {
 
 export const readEnvConfig = ({ env }: ReadEnvConfigArgs): EnvConfig =>
   envSchema.parse(env);
+
+/**
+ * Just the grouped-read ceiling, picked off the same schema rather than restated
+ * — one key can never drift from the shape that documents it.
+ *
+ * Narrowed on purpose: it is read per grouped read, and requiring the five
+ * credential keys to answer "how long may this query run" would make the guard
+ * rail depend on configuration it does not use.
+ */
+export const readGroupStatementTimeoutMs = ({ env }: ReadEnvConfigArgs) =>
+  envSchema.pick({ DB_GROUP_STATEMENT_TIMEOUT_MS: true }).parse(env)
+    .DB_GROUP_STATEMENT_TIMEOUT_MS;

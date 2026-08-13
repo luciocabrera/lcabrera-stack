@@ -17,8 +17,9 @@ deleteRows [const] <TRow extends QueryResultRow>({ tx, ...descriptor }: DeleteQu
 
 ## ./db/env.schema
 EnvConfig [type] z.infer<typeof envSchema>
-envSchema [const] z.ZodObject<{ DB_CONNECTION_TIMEOUT_MS: z.ZodDefault<z.ZodCoercedNumber<unknown>>; DB_HOST: z.ZodString; DB_IDLE_TIMEOUT_MS: z.ZodDefault<z.ZodCoercedNumber<unknown>>; DB_NAME: z.ZodString; DB_PASSWORD: z.ZodString; DB_POOL_MAX: z.ZodDefault<z.ZodCoercedNumber<unknown>>; DB_PORT: z.ZodCoercedNumber<unknown>; DB_STATEMENT_TIMEOUT_MS: z.ZodDefault<z.ZodCoercedNumber<unknown>>; DB_USER: z.ZodString; }, z.core.$strip>
+envSchema [const] z.ZodObject<{ DB_CONNECTION_TIMEOUT_MS: z.ZodDefault<z.ZodCoercedNumber<unknown>>; DB_GROUP_STATEMENT_TIMEOUT_MS: z.ZodDefault<z.ZodCoercedNumber<unknown>>; DB_HOST: z.ZodString; DB_IDLE_TIMEOUT_MS: z.ZodDefault<z.ZodCoercedNumber<unknown>>; DB_NAME: z.ZodString; DB_PASSWORD: z.ZodString; DB_POOL_MAX: z.ZodDefault<z.ZodCoercedNumber<unknown>>; DB_PORT: z.ZodCoercedNumber<unknown>; DB_STATEMENT_TIMEOUT_MS: z.ZodDefault<z.ZodCoercedNumber<unknown>>; DB_USER: z.ZodString; }, z.core.$strip>
 readEnvConfig [const] ({ env }: ReadEnvConfigArgs) => EnvConfig
+readGroupStatementTimeoutMs [const] ({ env }: ReadEnvConfigArgs) => number
 
 ## ./db/get-column-grouping-capabilities.util
 getColumnGroupingCapabilities [const] ({ tx, ...descriptor }: ColumnCapabilitiesQueryDescriptor & ExecutorOptions) => Promise<Readonly<Record<string, ColumnGroupingCapability>>>
@@ -45,6 +46,8 @@ IDENTIFIER_TYPE_NAMES [const] ReadonlySet<string>
 MAX_COUNT_DISTINCT_AGGREGATES [const] 1
 MAX_GROUP_KEY_DISTINCT [const] 1000
 MAX_GROUP_KEYS [const] 4
+MAX_GROUP_ROWS_REFUSE [const] 50000
+MAX_GROUP_ROWS_WARN [const] 5000
 MAX_IDENTIFIER_LENGTH [const] 63
 UNIQUE_ISH_DISTINCT_RATIO [const] 0.95
 
@@ -53,16 +56,20 @@ AggregateFn [type] 'avg' | 'boolAnd' | 'boolOr' | 'count' | 'countDistinct' | 'm
 AggregateSpec [type] { readonly distinct: boolean; readonly sql: string; }
 AliasedGroupAggregate [type] { readonly aggregate: GroupAggregate; readonly alias: string; }
 BuiltGroupAggregate [type] { readonly alias: string; /** Absent for `count(*)`. */ readonly column?: string; readonly fn: AggregateFn; }
-BuiltGroupQuery [type] { readonly aggregates: readonly BuiltGroupAggregate[]; /** * The `GROUPING()` value of each emitted set, in emission order. Bit * `keys.length - 1 - i` is 1 when `keys[i]` was rolled up in that set, which * is how a structural NULL is told apart from a real one. */ readonly groupingSetMasks: readonly number[]; /** The group keys, ordered — the bit positions above are relative to this. */ readonly keys: readonly string[]; readonly maskAlias: 'group_mask'; readonly text: string; readonly values: readonly unknown[]; }
+BuiltGroupQuery [type] { readonly aggregates: readonly BuiltGroupAggregate[]; /** * The `GROUPING()` value of each emitted set, in emission order. Bit * `keys.length - 1 - i` is 1 when `keys[i]` was rolled up in that set, which * is how a structural NULL is told apart from a real one. */ readonly groupingSetMasks: readonly number[]; /** * What the cardinality rails decided: the pre-flight bound, the `LIMIT` this * query actually carries, and any warning worth passing on. Emitted rather * than recomputed by the caller, so the number in the SQL and the number the * caller reasons about are the same one. */ readonly guardRails: GroupGuardRails; /** The group keys, ordered — the bit positions above are relative to this. */ readonly keys: readonly string[]; readonly maskAlias: 'group_mask'; readonly text: string; readonly values: readonly unknown[]; }
 ColumnAnalyticalRole [type] 'dimension' | 'fact' | 'unsupported'
 ColumnCapabilitiesQueryDescriptor [type] { readonly columns: readonly string[]; readonly schema: string; readonly table: string; }
 ColumnCapabilityRow [type] { /** SQL aggregate names that exist for this column's type. */ readonly aggregates: readonly string[]; readonly column: string; /** Whether the type resolves a default btree/hash equality operator. */ readonly hasEquality: boolean; /** * Whether `pg_stats` holds a row for this column at all — and the only thing * that makes `nDistinct` meaningful, since the query coalesces the absent * case to a zero that would otherwise be indistinguishable from Postgres * reporting undefined distinctness. */ readonly hasStats: boolean; readonly nDistinct: number; readonly relTuples: number; readonly typeCategory: string; readonly typeName: string; /** * The schema the *type* lives in, not the table. Load-bearing for the named * identifier exception: type names are per-schema, so a user-defined * `app.uuid` reports `typname = 'uuid'` exactly like `pg_catalog.uuid` does, * and only the namespace tells them apart. */ readonly typeNamespace: string; }
 ColumnGroupingCapability [type] (ColumnCapabilityShared & { readonly canGroup: false; readonly refusal: GroupKeyRefusalReason; }) | (ColumnCapabilityShared & { readonly canGroup: true; readonly refusal?: never; })
 DistinctEstimate [type] { readonly kind: 'known'; readonly value: number; } | { readonly kind: 'undefinedDistinctness'; } | { readonly kind: 'unknown'; }
 GroupAggregate [type] { /** * Overrides the derived `${fn}_${column}` name. It is the escape hatch for * two aggregates that would otherwise derive the same alias, and for a column * name long enough to push the derived one past Postgres's identifier limit. */ readonly alias?: string; /** Omitted only for `count`, which then becomes `count(*)`. */ readonly column?: string; /** * Emitted as `FILTER (WHERE …)`. These values claim the leading `$n` slots, * because the `SELECT` list is built before the `WHERE` clause. */ readonly filters?: readonly QueryFilter[]; readonly fn: AggregateFn; }
+GroupCardinalityEstimate [type] { readonly columns: readonly string[]; readonly kind: 'unknown'; } | { readonly kind: 'known'; readonly rows: number; }
+GroupCardinalityWarning [type] { readonly columns: readonly string[]; readonly kind: 'stats-unavailable'; } | { readonly estimatedRows: number; readonly kind: 'estimate-above-warn-threshold'; }
+GroupGuardRails [type] { readonly estimate: GroupCardinalityEstimate; readonly rowLimit: GroupRowLimit; readonly warning?: GroupCardinalityWarning; }
 GroupingMode [type] 'flat' | 'rollup'
 GroupKeyRefusalReason [type] 'no-equality-operator' | 'not-a-dimension' | 'stats-unavailable' | 'too-many-distinct' | 'unique-ish'
 GroupQueryDescriptor [type] { readonly aggregates: readonly GroupAggregate[]; /** * **Required**, unlike `SelectQueryDescriptor` where it is opt-in: every group * key is request-derived by construction, so opt-in semantics would be a * silent hole (ADR-059). */ readonly allowedColumns: readonly string[]; /** * What each column may do, as `getColumnGroupingCapabilities` resolved it from * the catalogue. Passed in rather than re-derived so this builder stays pure * while still enforcing ADR-058 — the impure half answers "what is legal * here", the builder refuses everything else. */ readonly capabilities: Readonly<Record<string, ColumnGroupingCapability>>; readonly filters?: readonly QueryFilter[]; readonly grouping: GroupingMode; /** Ordered, and the order is the tree's nesting order. */ readonly keys: readonly string[]; /** A safety belt, not a page — a grouped read is never paginated (ADR-059). */ readonly maxRows: number; readonly schema: string; readonly sort?: readonly GroupSort[]; /** Where a subtotal sits relative to the rows it totals. Defaults to `last`. */ readonly subtotalPlacement?: 'first' | 'last'; readonly table: string; }
+GroupRowLimit [type] { readonly backstopAt?: number; readonly limit: number; }
 GroupSort [type] { readonly aggregateAlias: string; readonly direction: 'asc' | 'desc'; } | { readonly direction: 'asc' | 'desc'; readonly key: string; }
 
 ## ./db/insert-row.util
@@ -118,7 +125,7 @@ selectDistinctRows [const] <TRow extends QueryResultRow>(descriptor: ExecutorOpt
 selectFilterOptions [const] ({ allowedColumns, column, columnType, limit, offset, schema, table, tx }: SelectFilterOptionsArgs) => Promise<FilterOptionsPage>
 
 ## ./db/select-grouped-rows.util
-selectGroupedRows [const] <TRow extends QueryResultRow>({ tx, ...descriptor }: ExecutorOptions & SelectGroupedRowsArgs) => Promise<{ aggregates: readonly BuiltGroupAggregate[]; groupingSetMasks: readonly number[]; keys: readonly string[]; maskAlias: "group_mask"; rows: readonly TRow[]; }>
+selectGroupedRows [const] <TRow extends QueryResultRow>({ tx, ...descriptor }: ExecutorOptions & SelectGroupedRowsArgs) => Promise<{ aggregates: readonly BuiltGroupAggregate[]; estimate: GroupCardinalityEstimate; groupingSetMasks: readonly number[]; keys: readonly string[]; maskAlias: "group_mask"; rows: readonly TRow[]; warning?: GroupCardinalityWarning | undefined; }>
 
 ## ./db/select-rows.util
 selectRows [const] <TRow extends QueryResultRow>({ tx, ...descriptor }: ExecutorOptions & SelectQueryDescriptor) => Promise<readonly TRow[]>
@@ -130,10 +137,15 @@ updateRows [const] <TRow extends QueryResultRow>({ tx, ...descriptor }: Executor
 withTransaction [const] <TResult>({ run }: WithTransactionArgs<TResult>) => Promise<TResult>
 
 ## ./errors/errors.types
+GroupingRefusalReason [type] 'aggregate-not-legal' | 'column-not-groupable' | 'duplicate-keys' | 'estimate-too-large' | 'no-keys' | 'row-limit-reached' | 'too-many-keys' | 'unknown-column'
 PgErrorFields [type] { readonly code?: string; readonly column?: string; readonly constraint?: string; }
+SerializableDbError [type] { /** The raw SQLSTATE, when the driver supplied one. Never the message. */ readonly code?: string; readonly kind: 'db-failed'; readonly message: string; } | { readonly column?: string; readonly estimatedRows?: number; readonly kind: 'grouping-refused'; readonly message: string; readonly reason: GroupingRefusalReason; } | { readonly kind: 'db-canceled'; readonly message: string; } | { readonly kind: 'unexpected'; readonly message: string; }
 
 ## ./errors/foreign-key-violation.error
 ForeignKeyViolationError [class] ForeignKeyViolationError
+
+## ./errors/grouping-refused.error
+GroupingRefusedError [class] GroupingRefusedError
 
 ## ./errors/has-postgres-error-code.util
 hasPostgresErrorCode [const] ({ code, error }: HasPostgresErrorCodeArgs) => boolean
@@ -143,6 +155,12 @@ mapDbError [const] (error: unknown) => PersistenceError
 
 ## ./errors/persistence.error
 PersistenceError [class] PersistenceError
+
+## ./errors/query-canceled.error
+QueryCanceledError [class] QueryCanceledError
+
+## ./errors/to-serializable-db-error.util
+toSerializableDbError [const] (error: unknown) => SerializableDbError
 
 ## ./errors/unique-constraint-violation.error
 UniqueConstraintViolationError [class] UniqueConstraintViolationError

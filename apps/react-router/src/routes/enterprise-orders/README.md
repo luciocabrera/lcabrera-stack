@@ -205,6 +205,11 @@ vp run test:smoke     # from apps/react-router — sources DB_* + sets SMOKE_DB
 The suite deletes the single row it creates (the delete is part of the flow), so it
 is safe to re-run.
 
+The grouped-read guard rails have their own live suite in
+[`src/.server/`](../../.server/ARCHITECTURE.md) — the statement timeout firing and
+the pool default surviving on the same pooled connection are claims a mocked test
+reports green either way.
+
 ## Next Steps
 
 - [x] Add detail view for individual orders (read-only `view`-mode Form modal)

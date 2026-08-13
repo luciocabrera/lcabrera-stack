@@ -47,6 +47,13 @@ export type BuiltGroupQuery = {
    * is how a structural NULL is told apart from a real one.
    */
   readonly groupingSetMasks: readonly number[];
+  /**
+   * What the cardinality rails decided: the pre-flight bound, the `LIMIT` this
+   * query actually carries, and any warning worth passing on. Emitted rather
+   * than recomputed by the caller, so the number in the SQL and the number the
+   * caller reasons about are the same one.
+   */
+  readonly guardRails: GroupGuardRails;
   /** The group keys, ordered — the bit positions above are relative to this. */
   readonly keys: readonly string[];
   readonly maskAlias: 'group_mask';
@@ -142,6 +149,46 @@ export type GroupAggregate = {
 };
 
 /**
+ * The pre-flight row bound for a grouped read, computed before a single row is
+ * read.
+ *
+ * `unknown` is not a number this code failed to compute — it is the catalogue
+ * having no distinct estimate for at least one key, which ADR-066 answers with
+ * warn-and-proceed plus the row-limit backstop rather than a refusal. Refusing
+ * would leave grouping dead on a freshly restored database, where nothing has
+ * been analysed yet.
+ */
+export type GroupCardinalityEstimate =
+  | { readonly columns: readonly string[]; readonly kind: 'unknown' }
+  | { readonly kind: 'known'; readonly rows: number };
+
+/**
+ * A grouped read that ran and is worth telling the caller about. Carried beside
+ * the rows rather than thrown, because the data is there and usable — the point
+ * is that the operator learns why it was expensive.
+ */
+export type GroupCardinalityWarning =
+  | { readonly columns: readonly string[]; readonly kind: 'stats-unavailable' }
+  | {
+      readonly estimatedRows: number;
+      readonly kind: 'estimate-above-warn-threshold';
+    };
+
+/**
+ * What the cardinality rails decided about a grouped read, carried on the built
+ * query so the executor can act on it without re-deriving anything.
+ *
+ * `warning` is absent when there is nothing to say, rather than being a nullable
+ * field: "no warning" and "a warning of kind none" are not two states worth
+ * having.
+ */
+export type GroupGuardRails = {
+  readonly estimate: GroupCardinalityEstimate;
+  readonly rowLimit: GroupRowLimit;
+  readonly warning?: GroupCardinalityWarning;
+};
+
+/**
  * `cube` is deliberately absent until #574 adds it: the expander map is closed
  * over this union, so widening it is a compile error until the expansion exists.
  */
@@ -184,6 +231,20 @@ export type GroupQueryDescriptor = {
   /** Where a subtotal sits relative to the rows it totals. Defaults to `last`. */
   readonly subtotalPlacement?: 'first' | 'last';
   readonly table: string;
+};
+
+/**
+ * The `LIMIT` a grouped read runs under, and whether reaching it means anything.
+ *
+ * `backstopAt` is set only when the guard's own ceiling is the binding one — a
+ * result that long is then a refusal rather than a truncation, because it proves
+ * the read blew past the budget the missing statistics could not predict. When
+ * the *caller's* `maxRows` binds first there is no backstop: a caller that asked
+ * for at most N rows got what it asked for.
+ */
+export type GroupRowLimit = {
+  readonly backstopAt?: number;
+  readonly limit: number;
 };
 
 /**

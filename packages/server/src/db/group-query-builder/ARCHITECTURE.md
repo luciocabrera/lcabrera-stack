@@ -6,7 +6,7 @@ whole suite runs without a database (ADR-032). The one impure partner is
 `../get-column-grouping-capabilities.util.ts`, which pairs the query this folder
 builds with `runQuery`.
 
-The folder has two halves and one entry point each.
+The folder has three halves — two entry points and one rail set they share.
 
 - **Capability** — which columns may be a group key, which aggregates are legal
   for each, and why a column was refused. `resolveColumnCapability`, decided by
@@ -14,6 +14,11 @@ The folder has two halves and one entry point each.
 - **Emission** — `GROUPING SETS`, the variadic mask, aggregate projection and
   ordering. `buildGroupQuery`, decided by
   [ADR-059](../../../../../docs/decisions/ADR-059-aggregation-is-builder-generated.md).
+- **Guard rails** — how large the result will be, whether that is allowed, and
+  what `LIMIT` it runs under. `resolveGroupGuardRails`, decided by
+  [ADR-066](../../../../../docs/decisions/ADR-066-grouping-guard-rails-and-per-query-timeout.md).
+  Called from inside `buildGroupQuery`, after the legality gates, so the emitted
+  `LIMIT` is the rails' answer and not the requested `maxRows`.
 
 They are joined by a **descriptor field, not an import**: `buildGroupQuery`
 takes the capability map the other half resolved and refuses anything the
@@ -95,7 +100,14 @@ documented in ADR-058, and something the UI has to surface rather than hide.
 | `resolve-column-capability.util.ts`       | **Public entry point.** One catalogue row → one `ColumnGroupingCapability`, refusal reason included                                                                                    |
 | `expand-grouping-sets.util.ts`            | Grouping mode → the ordered sets, over key names rather than SQL, so its suite is array equality                                                                                       |
 | `to-grouping-set-mask.util.ts`            | One set → the `GROUPING()` integer, the only thing separating a structural NULL from a real one                                                                                        |
-| `assert-group-keys.util.ts`               | Depth cap, distinctness, the allowlist, and the catalogue's own refusal — all before any round trip                                                                                    |
+| `assert-group-depth.util.ts`              | The capability-free half of the key rules — non-empty, within the depth cap, no repeats. Split out so the executor can run it **before borrowing a connection**                        |
+| `assert-group-keys.util.ts`               | `assertGroupDepth` plus the allowlist and the catalogue's own refusal                                                                                                                  |
+| `estimate-group-cardinality.util.ts`      | The pre-flight row bound, summed over the sets `expandGroupingSets` will emit — so a new mode needs no formula here                                                                    |
+| `resolve-widest-group-key.util.ts`        | Which key contributes most to that bound, i.e. which one a refusal should name                                                                                                         |
+| `assert-group-cardinality.util.ts`        | Refuse / warn / say nothing, against the two thresholds. Unknown statistics warn — never refuse                                                                                        |
+| `resolve-group-row-limit.util.ts`         | The `LIMIT` the read runs under, and whether reaching it is a refusal or a truncation the caller asked for                                                                             |
+| `assert-group-row-backstop.util.ts`       | The post-execution half of that: a result that reached the guard's own ceiling is refused, not returned short                                                                          |
+| `resolve-group-guard-rails.util.ts`       | The three rails as one answer, so `buildGroupQuery` gains one call rather than three                                                                                                   |
 | `assert-group-aggregates.util.ts`         | Every requested `{column, fn}` against the catalogue's menu, plus the one-`countDistinct` budget                                                                                       |
 | `resolve-aggregate-alias.util.ts`         | `count(*)` → `count_rows`, otherwise `${fn}_${column}` with `distinct` folded into the prefix                                                                                          |
 | `assert-group-aliases.util.ts`            | The identifier-length refusal and the collision rules — see the fourth trap below                                                                                                      |
@@ -208,3 +220,44 @@ parents by their own totals" inexpressible rather than merely discouraged: an
 aggregate sort can order leaves within a parent, never reorder the tree. Doing
 it properly needs the parent's aggregate on the child row
 (`sum(…) OVER (PARTITION BY k₁)`), which is a named v2.
+
+## The guard rails, and the order they fire in
+
+[ADR-066](../../../../../docs/decisions/ADR-066-grouping-guard-rails-and-per-query-timeout.md)
+is the decision; four things about the implementation are easy to get wrong.
+
+**Depth is checked twice, deliberately.** `assertGroupDepth` needs no capability
+map, which is what lets `../select-grouped-rows.util.ts` run it before it borrows
+a connection — a request at depth 9 must not cost a catalogue query. The builder
+still runs it through `assertGroupKeys`, because the pre-flight check is an
+earlier gate and never the only one.
+
+**The catalogue's verdict beats the arithmetic one.** Both can fire for the same
+request; "this column cannot be a group key" is actionable and "the product is
+too large" is not, so `resolveGroupGuardRails` is called after
+`assertGroupKeys`/`assertGroupAggregates`, never before.
+
+**The estimate is summed over the emitted sets, not from a per-mode formula.**
+`expandGroupingSets` is the same function the SQL is built from, so `flat`
+(`∏dₖ`), `rollup` (`1 + Σᵢ ∏_{j≤i} dⱼ`) and cube (`∏(dₖ+1)`) all fall out of one
+reduction. Adding a mode adds nothing here. One key with no estimate makes the
+whole answer unknown — treating the missing factor as 1 would let the widest
+column in the request be the one that hides the cost.
+
+**Unknown statistics warn and proceed; the row limit is what makes that safe.**
+`pg_stats` is empty for every table until something analyses it, so refusing
+would make grouping look broken on every fresh restore. Instead the read runs
+under a `LIMIT` of `MAX_GROUP_ROWS_WARN + 1`, and **reaching that limit is a
+refusal**, not a truncation: a grouped result missing its tail is missing the
+subtotals that belong to it, so it reads exactly like a correct one. A caller
+whose own `maxRows` is tighter keeps its number and gets no backstop.
+
+| Threshold               | Effect                                                                       |
+| ----------------------- | ---------------------------------------------------------------------------- |
+| `MAX_GROUP_ROWS_WARN`   | above it, a warning beside the rows; also the backstop `LIMIT` when unknown  |
+| `MAX_GROUP_ROWS_REFUSE` | above it, refused — naming the widest group key, which is the actionable one |
+
+`../../../../../apps/react-router/src/.server/groupingGuardRails.smoke.test.ts`
+is the live-Postgres proof for the rails whose behaviour a mocked suite reports
+green either way — the statement timeout firing, and the pool default surviving
+on the same pooled connection.

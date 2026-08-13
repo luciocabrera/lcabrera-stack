@@ -171,7 +171,8 @@ carries.
 ordered `keys` list, and the order is the grouped query's nesting order. Past
 `MAX_GROUP_KEYS` every layer refuses rather than truncating: the UI disables the
 affordance, `sanitizeGroupingByColumns` drops the whole configuration, and
-`assertGroupKeys` throws before any round trip.
+`assertGroupDepth` throws **before the executor borrows a connection**, so a
+hand-edited depth-9 URL costs no catalogue query.
 
 **The aggregate menu is the catalogue's answer, not the column's declared type.**
 `selectOrderGroupingCapabilities` resolves what every allowed column may do from
@@ -219,12 +220,32 @@ the cap, or if an aggregate names a column this route does not declare — key
 order is the query's nesting order, so dropping one would answer a different
 question from the one the URL describes.
 
-**What is still an error page.** A key or an aggregate the _catalogue_ refuses —
-a primary key, a `jsonb` column, `sum` on a `varchar` — reaches
-`assertGroupKeys`/`assertGroupAggregates` and throws. The UI cannot construct one
-(both menus are built from the shipped capabilities), so this is only reachable
-by hand-editing the URL. Turning that refusal into a rendered state is #642,
-which is what `groupingCapabilities.canGroup` and `refusal` are carried for.
+**A refused grouping is plain data on the response, never an error class.** A key
+or an aggregate the _catalogue_ refuses — a primary key, a `jsonb` column, `sum`
+on a `varchar` — plus a grouping estimated past the row ceiling and a query the
+statement timeout cut off, all reach `selectGroupedOrders` as
+`@lcabrera/server` error classes. It maps every one through
+`toSerializableDbError` and returns it as `response.error`
+([ADR-066](../../../../../docs/decisions/ADR-066-grouping-guard-rails-and-per-query-timeout.md)).
+
+That mapping is not a style choice. React Router single fetch drops functions, so
+a class arrives at the client with no prototype and — `Error.message` being
+non-enumerable — no message either, silently. The union gives the client a `kind`
+to branch on and a message that is this package's own, never the driver's; it is
+the loader-side mirror of what the mutating actions already do with a field-error
+object ([ADR-050](../../../../../docs/decisions/ADR-050-server-error-translation-and-result-contract.md)).
+
+The UI cannot construct any of these (both menus are built from the shipped
+capabilities), so they are only reachable by hand-editing the URL — **and until
+#642 renders `response.error`, a refused grouping shows an empty table rather
+than a message.** `groupingCapabilities.canGroup`/`refusal` and this union are
+what that issue reads.
+
+**A grouped read that ran on missing statistics says so.** `response.groupingWarning`
+carries `stats-unavailable` (the table has never been analysed, so nothing could
+estimate the result) or `estimate-above-warn-threshold`. The rows beside it are
+real — a warning is not an error — and rendering it belongs to the same
+follow-up.
 
 **Every page is ordered, and the route guarantees that itself.**
 `parseOrdersPageParams` resolves the request's sort through `resolveQuerySort`
