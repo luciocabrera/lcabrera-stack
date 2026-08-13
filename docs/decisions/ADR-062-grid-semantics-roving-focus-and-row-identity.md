@@ -245,4 +245,5 @@ a real scroll container.
 - [ADR-011](../../apps/react-router/docs/decisions/ADR-011-grid-interaction-architecture.md) — deferred this as "Step 0", and assigned ARIA role/focus mechanics to the surface layer
 - [`docs/agents/planning/table-row-grouping-plan.md`](../agents/planning/table-row-grouping-plan.md) — the design session this decision was extracted from
 - [`packages/ui/src/components/Table/TableRow/ARCHITECTURE.md`](../../packages/ui/src/components/Table/TableRow/ARCHITECTURE.md) — the height invariant, and why `<tbody>` is `display: grid`
+- [ADR-065](./ADR-065-grouped-rows-render-a-hierarchy-column.md) — how a grouped grid renders hierarchy, decided so that a group row owns addressable cells and the roving tab stop above needs no special case for it
 - Issues #554 (this decision), #559 (data-derived row identity), #560 (roles and focus), #547 (parent)
