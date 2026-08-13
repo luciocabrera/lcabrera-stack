@@ -54,7 +54,11 @@ const TARGET = {
   table: ENTERPRISE_ORDERS_TABLE,
 } as const;
 
-const NO_GROUPING: TableGroupingState = { aggregates: {}, keys: [] };
+const NO_GROUPING: TableGroupingState = {
+  aggregates: {},
+  keys: [],
+  mode: 'flat',
+};
 
 export type SelectGroupedOrdersArgs = {
   /** The aggregate applied to each column, at most one per column. */
@@ -62,6 +66,8 @@ export type SelectGroupedOrdersArgs = {
   readonly filters: readonly QueryFilter[];
   /** The columns the rows are grouped by, in nesting order. */
   readonly groupKeys: readonly string[];
+  /** Which grouping sets to emit — one, or one per prefix plus the total. */
+  readonly groupMode: TableGroupingState['mode'];
 };
 
 /**
@@ -89,6 +95,7 @@ export const selectGroupedOrders = async ({
   aggregates: selectedAggregates,
   filters,
   groupKeys,
+  groupMode,
 }: SelectGroupedOrdersArgs): Promise<EnterpriseOrdersResponse> => {
   // `satisfies` rather than an annotation: the narrow type keeps `column`
   // required for the decode below, while the check still proves the literal
@@ -98,13 +105,17 @@ export const selectGroupedOrders = async ({
   ).map(([column, fn]) => ({ column, fn }) satisfies UnfilteredOrderAggregate);
 
   try {
-    const { aggregates, rows, warning } = await selectGroupedRows({
+    const { aggregates, maskAlias, rows, warning } = await selectGroupedRows({
       ...TARGET,
       aggregates: [{ fn: 'count' }, ...requested],
       filters,
-      grouping: 'flat',
+      grouping: groupMode,
       keys: groupKeys,
       maxRows: ENTERPRISE_ORDER_GROUP_MAX_ROWS,
+      // Key sorts only, in nesting order. An aggregate sort would be legal at
+      // the innermost level and is not offered here: nothing in this route's UI
+      // can express one yet, and the builder refuses the ancestor-ranking shape
+      // at construction rather than emitting a term that orders nothing.
       sort: groupKeys.map((key) => ({ direction: 'asc' as const, key })),
     });
 
@@ -122,6 +133,7 @@ export const selectGroupedOrders = async ({
         aggregates: decodedAggregates,
         columnKeys: groupKeys,
         countAlias,
+        maskAlias,
         row,
       }),
     );
@@ -242,6 +254,7 @@ export const selectOrdersPage = async ({
       aggregates: grouping.aggregates,
       filters,
       groupKeys: grouping.keys,
+      groupMode: grouping.mode,
     });
   }
 

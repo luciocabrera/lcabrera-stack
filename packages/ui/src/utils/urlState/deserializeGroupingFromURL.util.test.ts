@@ -3,13 +3,13 @@ import { describe, expect, it } from 'vite-plus/test';
 import { deserializeGroupingFromURL } from './deserializeGroupingFromURL.util';
 import { serializeGroupingToURL } from './serializeGroupingToURL.util';
 
-const NO_GROUPING = { aggregates: {}, keys: [] };
+const NO_GROUPING = { aggregates: {}, keys: [], mode: 'flat' };
 
 describe('deserializeGroupingFromURL', () => {
   it('reads the keys back out of a compact param', () => {
     expect(
       deserializeGroupingFromURL('{"keys":["order_status"]}'),
-    ).toStrictEqual({ aggregates: {}, keys: ['order_status'] });
+    ).toStrictEqual({ aggregates: {}, keys: ['order_status'], mode: 'flat' });
   });
 
   it('reads several keys in the order the param carried them', () => {
@@ -26,13 +26,25 @@ describe('deserializeGroupingFromURL', () => {
     ).toStrictEqual({
       aggregates: { total_amount: 'sum' },
       keys: ['order_status'],
+      mode: 'flat',
     });
+  });
+
+  it('reads an absent mode as flat, which is what a pre-rollup link means', () => {
+    expect(deserializeGroupingFromURL('{"keys":["order_status"]}').mode).toBe(
+      'flat',
+    );
+    expect(
+      deserializeGroupingFromURL('{"keys":["order_status"],"mode":"rollup"}')
+        .mode,
+    ).toBe('rollup');
   });
 
   it('round-trips what serializeGroupingToURL wrote', () => {
     const grouping = {
       aggregates: { total_amount: 'avg' },
       keys: ['order_status', 'shipping_country'],
+      mode: 'rollup',
     } as const;
     const param = serializeGroupingToURL(grouping);
 

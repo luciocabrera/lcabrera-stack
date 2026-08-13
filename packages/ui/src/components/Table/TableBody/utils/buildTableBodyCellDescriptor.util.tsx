@@ -3,11 +3,15 @@ import type {
   DataKey,
   PinnedColumnInfo,
   TableColumn,
+  TableGroupRowSummary,
 } from '#ui/components/Table/Table.types';
 import type { TableBodyCellProps } from '#ui/components/Table/TableBodyCell/TableBodyCell.types';
 
 import { DEFAULT_MIN_COLUMN_WIDTH } from '#ui/components/Table/Table.constants';
 import { TableRowActionsMenu } from '#ui/components/Table/TableRowActionsMenu';
+import { isTableGroupHierarchyColumn } from '#ui/components/Table/utils/isTableGroupHierarchyColumn.util';
+
+import { resolveGroupCellChildren } from './resolveGroupCellChildren.util';
 
 /**
  * `kind` is a rendering decision, not a column type: `custom` for the actions
@@ -22,6 +26,18 @@ export type TableBodyCellDescriptor<TData extends Record<string, unknown>> =
 type BuildTableBodyCellDescriptorArgs<TData extends Record<string, unknown>> = {
   readonly col: TableColumn<TData>;
   readonly columnSizing: ColumnSizingState<TData>;
+  /**
+   * The applied group keys. A detail row blanks the columns it is grouped by:
+   * the value is stated once by the group row above it, and repeating it down a
+   * column whose header already says it is a column of one word (ADR-065).
+   */
+  readonly groupingKeys: readonly string[];
+  /**
+   * Present when the row carries a group summary, absent when it is a detail
+   * row. Asked of the **row**, never of the grouping configuration, so a group
+   * row and a detail row can sit in one result.
+   */
+  readonly groupSummary?: TableGroupRowSummary;
   readonly isLoadingState: boolean;
   readonly pinnedOffsets: Partial<Record<DataKey<TData>, PinnedColumnInfo>>;
   readonly row: TData;
@@ -75,12 +91,20 @@ type TableBodyCellDescriptorBase<TData extends Record<string, unknown>> = {
 
 /**
  * Builds the props-derived descriptor needed to render a TableBodyCell.
+ *
+ * Group rows and detail rows come through here alike, because they share one
+ * cell grid (ADR-065): the descriptor decides what a cell *holds*, and the
+ * chrome around it — the `gridcell` role, the roving tab stop, the sticky
+ * offset, the width — is identical either way. That is what makes a group row a
+ * first-class focus target with no branch anywhere in the focus model.
  */
 export const buildTableBodyCellDescriptor = <
   TData extends Record<string, unknown>,
 >({
   col,
   columnSizing,
+  groupingKeys,
+  groupSummary,
   isLoadingState,
   pinnedOffsets,
   row,
@@ -91,6 +115,37 @@ export const buildTableBodyCellDescriptor = <
   const width = columnSizing[col.key] ?? minWidth;
   const pinInfo = pinnedOffsets[col.key];
   const columnKey = col.key as string;
+  const shared = {
+    columnKey,
+    isLoadingState,
+    key: col.key,
+    kind: 'custom',
+    label: '',
+    minWidth,
+    pinInfo,
+    rowIndex,
+    rowKey,
+    width,
+  } as const;
+
+  if (groupSummary !== undefined) {
+    return {
+      ...shared,
+      children: resolveGroupCellChildren({ columnKey, summary: groupSummary }),
+    };
+  }
+
+  // A detail row's own hierarchy cell holds nothing: its values are already in
+  // their own columns. The cell exists so the grid stays rectangular and every
+  // row offers the same focus targets. An empty fragment rather than
+  // `undefined`, which reads as "no custom content" and would send the cell
+  // down the default branch to render the row's value after all.
+  if (
+    isTableGroupHierarchyColumn(col.key) ||
+    groupingKeys.includes(columnKey)
+  ) {
+    return { ...shared, children: <></> };
+  }
 
   const customActions = col.render?.(row);
 

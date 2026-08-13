@@ -1,6 +1,12 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from '@testing-library/react';
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from '@testing-library/react';
 import { useRef } from 'react';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
@@ -37,6 +43,8 @@ type TestRow = Record<string, unknown>;
 const ROW_HEIGHT = 40;
 const CONTAINER_HEIGHT = 400;
 
+const GROUPING_KEYS = ['city'];
+
 const columns: TableColumn<TestRow>[] = [
   { isPrimaryKey: true, key: 'id', label: 'Id' },
   { key: 'city', label: 'City' },
@@ -47,6 +55,7 @@ const rows: readonly TestRow[] = [
     [TABLE_GROUP_ROW_FIELD]: {
       aggregates: [],
       count: 2,
+      isSubtotal: false,
       path: [{ columnKey: 'city', label: 'Paris' }],
     },
   },
@@ -56,6 +65,7 @@ const rows: readonly TestRow[] = [
     [TABLE_GROUP_ROW_FIELD]: {
       aggregates: [],
       count: 2,
+      isSubtotal: false,
       path: [{ columnKey: 'city', label: 'Berlin' }],
     },
   },
@@ -63,6 +73,7 @@ const rows: readonly TestRow[] = [
     [TABLE_GROUP_ROW_FIELD]: {
       aggregates: [{ columnKey: 'id', fn: 'sum', label: '7' }],
       count: 2,
+      isSubtotal: false,
       path: [
         { columnKey: 'city', label: 'Berlin' },
         { columnKey: 'id', label: '3' },
@@ -100,7 +111,11 @@ const Harness = () => {
   return (
     <TableConfigProvider<TestRow>
       columnsState={{ columns }}
-      metaState={{ overscan: 2, rowHeight: ROW_HEIGHT }}
+      metaState={{
+        groupingKeys: GROUPING_KEYS,
+        overscan: 2,
+        rowHeight: ROW_HEIGHT,
+      }}
     >
       <TableFocusProvider>
         <TableDataProvider<TestRow>
@@ -136,6 +151,19 @@ const readExpanded = () =>
   screen
     .getAllByRole('row')
     .map((row) => row.getAttribute('aria-expanded') ?? 'absent');
+
+/** Tab into the grid: focus lands on the container, which delegates onwards. */
+const enterGrid = async () => {
+  await act(async () => {
+    getGrid().focus();
+  });
+};
+
+const pressKey = async (key: string) => {
+  await act(async () => {
+    fireEvent.keyDown(document.activeElement ?? getGrid(), { key });
+  });
+};
 
 afterEach(cleanup);
 
@@ -225,23 +253,95 @@ describe('a grouped table under the grid ARIA model', () => {
     ]);
   });
 
-  it('renders every level of a multi-key group and its aggregates', () => {
+  it('renders the innermost level of a group in the hierarchy column', () => {
+    // The outer levels are not repeated on the row: the group above it already
+    // states them, which is the whole argument for a hierarchy column over a
+    // banner that reprints the path (ADR-065). `Berlin` is the outer level of
+    // the second group and is deliberately absent from its own label.
     render(<Harness />);
 
-    expect(screen.getAllByText('City: Berlin')).toHaveLength(2);
-    expect(screen.getByText('Id: 3')).toBeTruthy();
-    expect(screen.getByText('Sum of Id: 7')).toBeTruthy();
+    const labels = screen
+      .getAllByTestId('table-group-label')
+      .map((label) => label.textContent);
+
+    expect(labels).toStrictEqual(['Paris(2)', 'Berlin(2)', '3(2)']);
   });
 
-  it('keeps one gridcell per data row and column, groups contributing none', () => {
-    // Four data rows across two columns. A group row spans the grid with a
-    // single presentational cell, so it adds none — which is what makes the
-    // count a check on the interleaving rather than on the row total.
-    //
-    // ADR-065 records this assertion as inverting when the hierarchy column
-    // lands (#570): a group row will then contribute a full row of gridcells.
+  it('renders a group aggregate under its own column', () => {
     render(<Harness />);
 
-    expect(getGrid().querySelectorAll('[role="gridcell"]')).toHaveLength(8);
+    expect(screen.getByText('7')).toBeTruthy();
+  });
+
+  it('gives every row the same number of gridcells, groups included', () => {
+    // The assertion this replaces pinned groups at contributing *none*, which
+    // is the shape ADR-065 withdrew: a banner had one presentational cell, so a
+    // group row was not addressable by column at all. Seven rows across three
+    // rendered columns — the two data columns plus the grid's hierarchy column.
+    render(<Harness />);
+
+    expect(getGrid().querySelectorAll('[role="gridcell"]')).toHaveLength(21);
+
+    for (const row of screen.getAllByRole('row')) {
+      expect(row.querySelectorAll('[role="gridcell"]')).toHaveLength(3);
+    }
+  });
+
+  it('renders an em dash with a spoken equivalent where no aggregate was selected', () => {
+    // Not blank and not zero: blank already means "this row has no value here"
+    // and zero states a number nobody computed. The text beside the glyph is
+    // what makes the state readable without depending on punctuation verbosity.
+    render(<Harness />);
+
+    const absent = screen.getAllByTestId('table-group-aggregate-absent');
+
+    expect(absent.length).toBeGreaterThan(0);
+    expect(absent[0]?.textContent).toContain('—');
+    expect(absent[0]?.textContent).toContain('No aggregate');
+  });
+
+  it('lands the roving tab stop on a group row cell', async () => {
+    // #651: a group row used to swallow the keypress that moved to it, because
+    // the focus request was addressed by row *and column* and a one-cell
+    // banner registered no cell for any column key. Giving the row real cells
+    // answers it with no branch in the focus model (ADR-062, ADR-065).
+    render(<Harness />);
+    await enterGrid();
+
+    const focused = document.activeElement;
+
+    expect(focused?.getAttribute('role')).toBe('gridcell');
+    expect(focused?.closest('tr')?.dataset.testid).toBe(
+      'table-group-header-row',
+    );
+    expect(focused?.getAttribute('tabindex')).toBe('0');
+  });
+
+  it('moves along a group row cell by cell, not past the row', async () => {
+    render(<Harness />);
+    await enterGrid();
+    await pressKey('ArrowRight');
+
+    const focused = document.activeElement;
+
+    // Still inside the same group row, one column along: the row is addressable
+    // by column like every other row.
+    expect(focused?.closest('tr')?.dataset.testid).toBe(
+      'table-group-header-row',
+    );
+    expect(focused?.textContent).toContain('—');
+  });
+
+  it('leaves the grouped-by column blank on a detail row', () => {
+    // `city` is the group key, so the group row above states it and the detail
+    // rows below do not repeat it. The hierarchy cell of a detail row is empty
+    // for the same reason: its values are already in their own columns.
+    render(<Harness />);
+
+    const detailRow = screen.getAllByRole('row')[1];
+    const cells = [...(detailRow?.querySelectorAll('[role="gridcell"]') ?? [])];
+
+    // Hierarchy, Id, City — the last is the grouped-by column.
+    expect(cells.map((cell) => cell.textContent)).toStrictEqual(['', '1', '']);
   });
 });

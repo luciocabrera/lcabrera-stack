@@ -4,7 +4,10 @@ import type { ReactNode } from 'react';
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
-import { TABLE_GROUP_ROW_FIELD } from '#ui/components/Table/Table.constants';
+import {
+  TABLE_GROUP_HIERARCHY_COLUMN_KEY,
+  TABLE_GROUP_ROW_FIELD,
+} from '#ui/components/Table/Table.constants';
 
 import { TableBodyRows } from './TableBodyRows.component';
 
@@ -42,6 +45,7 @@ const {
   useGetPinnedColumnPartitionMock,
   useGetTableCollapsedGroupPathsMock,
   useGetTableDataMock,
+  useGetTableGroupingKeysMock,
 } = vi.hoisted(() => ({
   useGetColumnSizingMock: vi.fn(),
   useGetColumnsMock: vi.fn(),
@@ -49,6 +53,7 @@ const {
   useGetPinnedColumnPartitionMock: vi.fn(),
   useGetTableCollapsedGroupPathsMock: vi.fn(),
   useGetTableDataMock: vi.fn(),
+  useGetTableGroupingKeysMock: vi.fn((): readonly string[] => []),
 }));
 
 const MockTableBodyCell = vi.hoisted(() => {
@@ -67,13 +72,18 @@ const MockTableBodyCell = vi.hoisted(() => {
 });
 
 const MockTableRow = vi.hoisted(() => {
-  return function MockTableRow({ children }: { readonly children: ReactNode }) {
-    return <tr>{children}</tr>;
+  return function MockTableRow({
+    children,
+    ...rest
+  }: {
+    readonly children: ReactNode;
+  }) {
+    return <tr {...rest}>{children}</tr>;
   };
 });
 
-const MockTableGroupHeaderRow = vi.hoisted(() => {
-  return function MockTableGroupHeaderRow({
+const MockTableGroupLabel = vi.hoisted(() => {
+  return function MockTableGroupLabel({
     summary,
   }: {
     readonly summary: {
@@ -83,11 +93,17 @@ const MockTableGroupHeaderRow = vi.hoisted(() => {
   }) {
     const labels = summary.path.map((level) => level.label).join('/');
 
-    return (
-      <tr>
-        <td>{`group:${labels}:${summary.count}`}</td>
-      </tr>
-    );
+    return `group:${labels}:${summary.count}`;
+  };
+});
+
+const MockTableGroupAggregate = vi.hoisted(() => {
+  return function MockTableGroupAggregate({
+    columnKey,
+  }: {
+    readonly columnKey: string;
+  }) {
+    return `agg:${columnKey}`;
   };
 });
 
@@ -106,8 +122,16 @@ vi.mock('#ui/components/Table/TableRow', () => ({
   TableRow: MockTableRow,
 }));
 
-vi.mock('#ui/components/Table/TableGroupHeaderRow', () => ({
-  TableGroupHeaderRow: MockTableGroupHeaderRow,
+vi.mock('#ui/components/Table/TableGroupLabel', () => ({
+  TableGroupLabel: MockTableGroupLabel,
+}));
+
+vi.mock('#ui/components/Table/TableGroupAggregate', () => ({
+  TableGroupAggregate: MockTableGroupAggregate,
+}));
+
+vi.mock('#ui/components/Table/contexts/TableConfig/grouping/selectors', () => ({
+  useGetTableGroupingKeys: useGetTableGroupingKeysMock,
 }));
 
 vi.mock('../contexts/TableData/data/selectors', () => ({
@@ -140,11 +164,30 @@ const setupDefaultMocks = () => {
   useGetColumnSizingMock.mockReturnValue({});
   useGetPinnedColumnOffsetsMock.mockReturnValue({});
   useGetTableCollapsedGroupPathsMock.mockReturnValue(new Set<string>());
+  useGetTableGroupingKeysMock.mockReturnValue([]);
   useGetTableDataMock.mockReturnValue([
     { amount: 10, name: 'A' },
     { amount: 20, name: 'B' },
     { amount: 30, name: 'C' },
   ]);
+};
+
+/**
+ * The partition a grouped table actually paints: the grid's own hierarchy
+ * column at the head of the left-pinned group, then the data columns
+ * (ADR-065).
+ */
+const setupGroupedMocks = () => {
+  setupDefaultMocks();
+  useGetTableGroupingKeysMock.mockReturnValue(['name']);
+  useGetPinnedColumnPartitionMock.mockReturnValue({
+    centerCols: [
+      { key: 'name', label: 'Name' },
+      { key: 'amount', label: 'Amount' },
+    ],
+    leftPinnedCols: [{ key: TABLE_GROUP_HIERARCHY_COLUMN_KEY, label: 'Name' }],
+    rightPinnedCols: [],
+  });
 };
 
 describe('TableBodyRows', () => {
@@ -275,13 +318,14 @@ describe('TableBodyRows', () => {
     expect(reorderedRowNodes[1]).toBe(rowNodeForA);
   });
 
-  it('renders a row carrying a group summary as a group header, not as cells', () => {
-    setupDefaultMocks();
+  it('renders a group row as a full row of cells, the label in the hierarchy column', () => {
+    setupGroupedMocks();
     useGetTableDataMock.mockReturnValue([
       {
         [TABLE_GROUP_ROW_FIELD]: {
           aggregates: [],
           count: 3,
+          isSubtotal: false,
           path: [{ columnKey: 'name', label: 'A' }],
         },
       },
@@ -295,20 +339,70 @@ describe('TableBodyRows', () => {
       </table>,
     );
 
-    expect(screen.getByText('group:A:3')).toBeTruthy();
-    // The cell path is what it would have taken without the summary, and the
-    // group row projects no columns — so a group rendered through it would show
-    // the empty cells this asserts are absent.
-    expect(screen.queryByText('Name:')).toBeNull();
+    // One cell per rendered column, not one spanning cell: the label sits in
+    // the hierarchy column and every other column carries that group's
+    // aggregate (ADR-065). The banner this replaces had exactly one cell.
+    const cells = [...(screen.getByRole('row').querySelectorAll('td') ?? [])];
+
+    expect(cells.map((cell) => cell.textContent)).toStrictEqual([
+      'group:A:3',
+      'agg:name',
+      'agg:amount',
+    ]);
+  });
+
+  it('marks a group row so a grouped body is recognisable in the DOM', () => {
+    setupGroupedMocks();
+    useGetTableDataMock.mockReturnValue([
+      {
+        [TABLE_GROUP_ROW_FIELD]: {
+          aggregates: [],
+          count: 3,
+          isSubtotal: false,
+          path: [{ columnKey: 'name', label: 'A' }],
+        },
+      },
+      { amount: 10, name: 'A' },
+    ]);
+
+    render(
+      <table>
+        <tbody>
+          <TableBodyRows endIndex={2} isLoadingState={false} startIndex={0} />
+        </tbody>
+      </table>,
+    );
+
+    expect(screen.getAllByTestId('table-group-header-row')).toHaveLength(1);
+  });
+
+  it('blanks a grouped-by column on a detail row, leaving the ungrouped ones', () => {
+    // The value is stated once, by the group row above; repeating it down a
+    // column whose header already says it is a column of one word (ADR-065).
+    setupGroupedMocks();
+    useGetTableDataMock.mockReturnValue([{ amount: 10, name: 'A' }]);
+
+    render(
+      <table>
+        <tbody>
+          <TableBodyRows endIndex={1} isLoadingState={false} startIndex={0} />
+        </tbody>
+      </table>,
+    );
+
+    expect(screen.queryByText('Name:A')).toBeNull();
+    expect(screen.getByText('Amount:10')).toBeTruthy();
   });
 
   it('renders group and detail rows from one result, by row rather than by mode', () => {
-    setupDefaultMocks();
+    setupGroupedMocks();
+    useGetTableGroupingKeysMock.mockReturnValue([]);
     useGetTableDataMock.mockReturnValue([
       {
         [TABLE_GROUP_ROW_FIELD]: {
           aggregates: [],
           count: 1,
+          isSubtotal: false,
           path: [{ columnKey: 'name', label: 'A' }],
         },
       },
@@ -329,16 +423,17 @@ describe('TableBodyRows', () => {
   });
 
   it('emits exactly one row per data row under grouping, which is what the window math counts', () => {
-    // `TableBody` sizes <tbody> as totalLoadedRows x rowHeight and derives both
-    // spacers from the same number, so a grouped result that emitted a header
-    // *plus* a detail row per entry would desynchronize the body from its
-    // contents. One row in, one <tr> out, whatever kind of row it is.
-    setupDefaultMocks();
+    // `TableBody` sizes <tbody> from a row count times rowHeight and derives
+    // both spacers from that same number, so a grouped result that emitted a
+    // header *plus* a detail row per entry would desynchronize the body from
+    // its contents. One row in, one <tr> out, whatever kind of row it is.
+    setupGroupedMocks();
     useGetTableDataMock.mockReturnValue([
       {
         [TABLE_GROUP_ROW_FIELD]: {
           aggregates: [],
           count: 2,
+          isSubtotal: false,
           path: [{ columnKey: 'name', label: 'A' }],
         },
       },
@@ -346,6 +441,7 @@ describe('TableBodyRows', () => {
         [TABLE_GROUP_ROW_FIELD]: {
           aggregates: [],
           count: 5,
+          isSubtotal: false,
           path: [{ columnKey: 'name', label: 'B' }],
         },
       },
@@ -353,6 +449,7 @@ describe('TableBodyRows', () => {
         [TABLE_GROUP_ROW_FIELD]: {
           aggregates: [],
           count: 1,
+          isSubtotal: false,
           path: [{ columnKey: 'name', label: 'C' }],
         },
       },
@@ -370,12 +467,13 @@ describe('TableBodyRows', () => {
   });
 
   it('keys group rows by their own values, so a reorder moves the group node', () => {
-    setupDefaultMocks();
+    setupGroupedMocks();
     useGetTableDataMock.mockReturnValue([
       {
         [TABLE_GROUP_ROW_FIELD]: {
           aggregates: [],
           count: 2,
+          isSubtotal: false,
           path: [{ columnKey: 'name', label: 'A' }],
         },
       },
@@ -383,6 +481,7 @@ describe('TableBodyRows', () => {
         [TABLE_GROUP_ROW_FIELD]: {
           aggregates: [],
           count: 5,
+          isSubtotal: false,
           path: [{ columnKey: 'name', label: 'B' }],
         },
       },
@@ -398,13 +497,14 @@ describe('TableBodyRows', () => {
 
     const groupNodeForA = container.querySelector('tr');
 
-    expect(groupNodeForA?.textContent).toBe('group:A:2');
+    expect(groupNodeForA?.textContent).toContain('group:A:2');
 
     useGetTableDataMock.mockReturnValue([
       {
         [TABLE_GROUP_ROW_FIELD]: {
           aggregates: [],
           count: 5,
+          isSubtotal: false,
           path: [{ columnKey: 'name', label: 'B' }],
         },
       },
@@ -412,6 +512,7 @@ describe('TableBodyRows', () => {
         [TABLE_GROUP_ROW_FIELD]: {
           aggregates: [],
           count: 2,
+          isSubtotal: false,
           path: [{ columnKey: 'name', label: 'A' }],
         },
       },
@@ -427,7 +528,7 @@ describe('TableBodyRows', () => {
 
     const reordered = container.querySelectorAll('tr');
 
-    expect(reordered[1]?.textContent).toBe('group:A:2');
+    expect(reordered[1]?.textContent).toContain('group:A:2');
     expect(reordered[1]).toBe(groupNodeForA);
   });
 });

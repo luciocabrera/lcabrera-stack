@@ -15,7 +15,8 @@ import {
 } from './utils';
 
 export const useBatchSetColumnSettings = <TData>() => {
-  const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
+  const { columnsStore, groupingStore, metaStore } =
+    useTableConfigContextValue<TData>();
   const { dataStore } = useTableDataContextValue<TData>();
   const persistTableState = usePersistTableStateAction();
   const persistUiFlags = usePersistTableUiFlagsAction();
@@ -26,6 +27,7 @@ export const useBatchSetColumnSettings = <TData>() => {
     const persistenceKey = metaState?.persistenceKey ?? '';
     const resolvedUpdate = resolveBatchColumnSettingsUpdate<TData>({
       columnsState,
+      groupingKeys: groupingStore.get().keys,
       settings,
     });
     const hasQueryChanged = getHasQueryChanged<TData>({

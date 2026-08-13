@@ -6,17 +6,21 @@ import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
 
 import { resolveTableGroupingUpdate } from './resolveTableGroupingUpdate.util';
 
-const NO_GROUPING: TableGroupingState = { aggregates: {}, keys: [] };
+const NO_GROUPING: TableGroupingState = {
+  aggregates: {},
+  keys: [],
+  mode: 'flat',
+};
 
 describe('resolveTableGroupingUpdate', () => {
   it('applies a first group key and writes the compact param', () => {
     const result = resolveTableGroupingUpdate({
       existingGrouping: NO_GROUPING,
-      nextGrouping: { aggregates: {}, keys: ['order_status'] },
+      nextGrouping: { aggregates: {}, keys: ['order_status'], mode: 'flat' },
     });
 
     expect(result).toStrictEqual({
-      grouping: { aggregates: {}, keys: ['order_status'] },
+      grouping: { aggregates: {}, keys: ['order_status'], mode: 'flat' },
       kind: 'updated',
       persistenceEntry: {
         searchParamKey: 'grouping',
@@ -27,12 +31,24 @@ describe('resolveTableGroupingUpdate', () => {
 
   it('applies several keys in the order given, which is the nesting order', () => {
     const result = resolveTableGroupingUpdate({
-      existingGrouping: { aggregates: {}, keys: ['order_status'] },
-      nextGrouping: { aggregates: {}, keys: ['order_status', 'ship_country'] },
+      existingGrouping: {
+        aggregates: {},
+        keys: ['order_status'],
+        mode: 'flat',
+      },
+      nextGrouping: {
+        aggregates: {},
+        keys: ['order_status', 'ship_country'],
+        mode: 'flat',
+      },
     });
 
     expect(result).toStrictEqual({
-      grouping: { aggregates: {}, keys: ['order_status', 'ship_country'] },
+      grouping: {
+        aggregates: {},
+        keys: ['order_status', 'ship_country'],
+        mode: 'flat',
+      },
       kind: 'updated',
       persistenceEntry: {
         searchParamKey: 'grouping',
@@ -43,10 +59,15 @@ describe('resolveTableGroupingUpdate', () => {
 
   it('carries the selected aggregates into the param beside the keys', () => {
     const result = resolveTableGroupingUpdate({
-      existingGrouping: { aggregates: {}, keys: ['order_status'] },
+      existingGrouping: {
+        aggregates: {},
+        keys: ['order_status'],
+        mode: 'flat',
+      },
       nextGrouping: {
         aggregates: { total_amount: 'sum' },
         keys: ['order_status'],
+        mode: 'flat',
       },
     });
 
@@ -54,6 +75,7 @@ describe('resolveTableGroupingUpdate', () => {
       grouping: {
         aggregates: { total_amount: 'sum' },
         keys: ['order_status'],
+        mode: 'flat',
       },
       kind: 'updated',
       persistenceEntry: {
@@ -75,7 +97,7 @@ describe('resolveTableGroupingUpdate', () => {
     expect(
       resolveTableGroupingUpdate({
         existingGrouping: NO_GROUPING,
-        nextGrouping: { aggregates: {}, keys: tooManyKeys },
+        nextGrouping: { aggregates: {}, keys: tooManyKeys, mode: 'flat' },
       }),
     ).toStrictEqual({ kind: 'unchanged' });
   });
@@ -89,7 +111,7 @@ describe('resolveTableGroupingUpdate', () => {
     expect(
       resolveTableGroupingUpdate({
         existingGrouping: NO_GROUPING,
-        nextGrouping: { aggregates: {}, keys: maximumKeys },
+        nextGrouping: { aggregates: {}, keys: maximumKeys, mode: 'flat' },
       }).kind,
     ).toBe('updated');
   });
@@ -99,8 +121,13 @@ describe('resolveTableGroupingUpdate', () => {
       existingGrouping: {
         aggregates: { total_amount: 'sum' },
         keys: ['order_status'],
+        mode: 'flat',
       },
-      nextGrouping: { aggregates: { total_amount: 'sum' }, keys: [] },
+      nextGrouping: {
+        aggregates: { total_amount: 'sum' },
+        keys: [],
+        mode: 'flat',
+      },
     });
 
     expect(result).toStrictEqual({
@@ -117,6 +144,7 @@ describe('resolveTableGroupingUpdate', () => {
     const applied: TableGroupingState = {
       aggregates: { total_amount: 'sum' },
       keys: ['order_status'],
+      mode: 'flat',
     };
 
     expect(
@@ -125,6 +153,7 @@ describe('resolveTableGroupingUpdate', () => {
         nextGrouping: {
           aggregates: { total_amount: 'sum' },
           keys: ['order_status'],
+          mode: 'flat',
         },
       }),
     ).toStrictEqual({ kind: 'unchanged' });
@@ -135,8 +164,8 @@ describe('resolveTableGroupingUpdate', () => {
     // is a different grouping — not a no-op.
     expect(
       resolveTableGroupingUpdate({
-        existingGrouping: { aggregates: {}, keys: ['a', 'b'] },
-        nextGrouping: { aggregates: {}, keys: ['b', 'a'] },
+        existingGrouping: { aggregates: {}, keys: ['a', 'b'], mode: 'flat' },
+        nextGrouping: { aggregates: {}, keys: ['b', 'a'], mode: 'flat' },
       }).kind,
     ).toBe('updated');
   });
@@ -144,8 +173,16 @@ describe('resolveTableGroupingUpdate', () => {
   it('treats an aggregate change alone as a change', () => {
     expect(
       resolveTableGroupingUpdate({
-        existingGrouping: { aggregates: { amount: 'sum' }, keys: ['a'] },
-        nextGrouping: { aggregates: { amount: 'avg' }, keys: ['a'] },
+        existingGrouping: {
+          aggregates: { amount: 'sum' },
+          keys: ['a'],
+          mode: 'flat',
+        },
+        nextGrouping: {
+          aggregates: { amount: 'avg' },
+          keys: ['a'],
+          mode: 'flat',
+        },
       }).kind,
     ).toBe('updated');
   });
@@ -160,6 +197,7 @@ describe('resolveTableGroupingUpdate', () => {
         nextGrouping: {
           aggregates: {},
           keys: ['order_status', 'order_status'],
+          mode: 'flat',
         },
       }),
     ).toStrictEqual({ kind: 'unchanged' });
@@ -171,12 +209,17 @@ describe('resolveTableGroupingUpdate', () => {
     const applied: TableGroupingState = {
       aggregates: {},
       keys: ['order_status'],
+      mode: 'flat',
     };
 
     expect(
       resolveTableGroupingUpdate({
         existingGrouping: applied,
-        nextGrouping: { aggregates: {}, keys: ['priority', 'priority'] },
+        nextGrouping: {
+          aggregates: {},
+          keys: ['priority', 'priority'],
+          mode: 'flat',
+        },
       }),
     ).toStrictEqual({ kind: 'unchanged' });
   });
@@ -185,7 +228,11 @@ describe('resolveTableGroupingUpdate', () => {
     expect(
       resolveTableGroupingUpdate({
         existingGrouping: NO_GROUPING,
-        nextGrouping: { aggregates: {}, keys: ['order_status', 'priority'] },
+        nextGrouping: {
+          aggregates: {},
+          keys: ['order_status', 'priority'],
+          mode: 'flat',
+        },
       }).kind,
     ).toBe('updated');
   });

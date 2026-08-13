@@ -230,6 +230,45 @@ export const styles = {
 
 ---
 
+## Grid-Owned Columns Are Derived, Never Stored
+
+A column the **grid** owns rather than the consumer — today the grouping
+hierarchy column
+([ADR-065](../../../docs/decisions/ADR-065-grouped-rows-render-a-hierarchy-column.md)) —
+is injected into the _derived_ view state and never into the columns store:
+
+```ts
+// ✅ one injection point, inside the derivation every re-render funnels through
+getPinnedDerivedColumnsState({ …, groupingKeys });
+
+// ❌ writing it into the store's own columns / columnOrder / columnPinning
+columnsStore.set({ columns: [hierarchyColumn, ...columns] });
+```
+
+**Why the store is the wrong home.** `columns`, `columnOrder` and
+`columnPinning` are what the user's layout is persisted from and what the
+settings drawer offers. A synthetic key written there is a key that reaches the
+cookie, comes back on the next load as a column the consumer never declared, and
+appears in the drawer as a row nobody can act on. The actions column is in the
+store and pays exactly that cost — it has to be filtered back out of persisted
+pinning at every seam.
+
+**Three rules follow, and each has a failure it prevents:**
+
+1. **Inject into all of `columns`, `columnOrder` and `columnPinning` at once**
+   (`withGroupHierarchyColumn`). Sticky offsets are a running sum over the
+   left-pinned columns in effective order, so a column missing from the pinning
+   leaves every column behind it overlapping; one missing from the order is
+   appended last rather than first.
+2. **Make the trigger a required argument of the derivation.** `groupingKeys` is
+   required on `deriveColumnViewState`/`getPinnedDerivedColumnsState`, so every
+   re-derivation site is a compile error until it says what is applied — a
+   caller free to omit it silently drops the column on the next pin or hide.
+3. **Exclude it from the settings list explicitly** (`filterSettingsColumns`).
+   It is static, so the capability arm there would list it — locked, but listed.
+   The exclusion is written even where the list cannot currently contain it,
+   because that is what keeps it out if a later slice does put it in the store.
+
 ## Column Capability Defaults
 
 `TableColumn`'s capability flags — `isFilterable`, `isResizable`, `isSortable`,

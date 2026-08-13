@@ -21,7 +21,11 @@ type Row = {
   readonly name: string;
 };
 
-const NO_GROUPING: TableGroupingState = { aggregates: {}, keys: [] };
+const NO_GROUPING: TableGroupingState = {
+  aggregates: {},
+  keys: [],
+  mode: 'flat',
+};
 
 const {
   mockBuildPersistencePayload,
@@ -59,7 +63,9 @@ const {
       set: vi.fn(),
     },
     mockGroupingStore: {
-      get: vi.fn((): TableGroupingState => ({ aggregates: {}, keys: [] })),
+      get: vi.fn(
+        (): TableGroupingState => ({ aggregates: {}, keys: [], mode: 'flat' }),
+      ),
       set: vi.fn(),
     },
     mockMetaStore: {
@@ -161,7 +167,11 @@ describe('useBatchSetTableSettings', () => {
     mockColumnsStore.set.mockClear();
     mockDataStore.set.mockClear();
     mockGroupingStore.get.mockClear();
-    mockGroupingStore.get.mockReturnValue({ aggregates: {}, keys: [] });
+    mockGroupingStore.get.mockReturnValue({
+      aggregates: {},
+      keys: [],
+      mode: 'flat',
+    });
     mockGroupingStore.set.mockClear();
     mockMetaStore.get.mockClear();
     // Restored rather than only cleared: one case below pins the drawer, and
@@ -217,6 +227,9 @@ describe('useBatchSetTableSettings', () => {
         { key: 'name', label: 'Name' },
         { key: 'age', label: 'Age' },
       ],
+      // Empty because this Accept stages no grouping: the hierarchy column
+      // follows the grouping being committed, not the one already applied.
+      groupingKeys: [],
       settings,
     });
     expect(mockBuildPersistencePayload).toHaveBeenCalledWith({
@@ -354,7 +367,7 @@ describe('useBatchSetTableSettings', () => {
 
     act(() => {
       result.current({
-        grouping: { aggregates: { age: 'sum' }, keys: ['name'] },
+        grouping: { aggregates: { age: 'sum' }, keys: ['name'], mode: 'flat' },
         settings: {
           columnFilters: {} as ColumnFiltersState<Row>,
           columnOrder: ['id', 'age', 'name'],
@@ -384,6 +397,7 @@ describe('useBatchSetTableSettings', () => {
     expect(mockGroupingStore.set).toHaveBeenCalledWith({
       aggregates: { age: 'sum' },
       keys: ['name'],
+      mode: 'flat',
     });
     expect(mockDataStore.set).toHaveBeenCalledWith({ isLoading: true });
   });
@@ -392,13 +406,14 @@ describe('useBatchSetTableSettings', () => {
     mockGroupingStore.get.mockReturnValue({
       aggregates: {},
       keys: ['name'],
+      mode: 'flat',
     });
 
     const { result } = renderHook(() => useBatchSetTableSettings<Row>());
 
     act(() => {
       result.current({
-        grouping: { aggregates: {}, keys: ['name'] },
+        grouping: { aggregates: {}, keys: ['name'], mode: 'flat' },
         settings: {
           columnFilters: {
             name: { operator: 'contains', type: 'text', value: 'ali' },
@@ -432,7 +447,7 @@ describe('useBatchSetTableSettings', () => {
 
     act(() => {
       result.current({
-        grouping: { aggregates: {}, keys: ['name'] },
+        grouping: { aggregates: {}, keys: ['name'], mode: 'flat' },
         settings: {
           columnFilters: {} as ColumnFiltersState<Row>,
           columnOrder: ['id', 'age', 'name'],

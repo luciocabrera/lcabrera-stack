@@ -90,7 +90,7 @@ Context providers over external stores, one graph per provider:
 graph LR
   subgraph "TableConfigProvider"
     CS["columnsStore<br/><small>columns, filters, sorting,<br/>pinning, sizing, visibility</small>"]
-    GS["groupingStore<br/><small>applied group keys</small>"]
+    GS["groupingStore<br/><small>applied group keys,<br/>aggregates, mode</small>"]
     ES["expansionStore<br/><small>collapsed group paths</small>"]
     MS["metaStore<br/><small>density, title, drawer toggles,<br/>row height, overscan</small>"]
   end
@@ -191,6 +191,33 @@ group row, and everything the grid counts — the virtualization window,
 a collapse leaves standing rather than every loaded row
 ([ADR-067](../../../../../docs/decisions/ADR-067-expansion-is-the-collapsed-set-and-a-group-row-is-a-tree-node.md)),
 pinned by `Table.treeExpansion.test.tsx` and `Table.groupedGridSemantics.test.tsx`.
+
+**A group row is one row of that grid, with cells of its own.** It is not a
+banner beside the data: it carries the same `aria-rowindex` sequence, the same
+one cell per rendered column, and therefore the same roving tab stop
+([ADR-065](../../../../../docs/decisions/ADR-065-grouped-rows-render-a-hierarchy-column.md)).
+`Table.groupedGridSemantics.test.tsx` is where the two models meet.
+
+## Grouped rows
+
+While grouping is applied the grid injects a **hierarchy column**: its own, at
+the head of the left-pinned group, labelled with the group keys in nesting
+order, and absent from the column-order drawer because there is nothing a user
+can do to it. It is a derivation and never state, so it reaches neither the
+cookie the column layout persists through nor the list the drawer offers.
+
+A group row renders its label there, indented by depth, and every other column
+renders that group's selected aggregate under its own header — an em dash where
+none was selected. A data column that is currently a group key renders **blank**
+on its detail rows: the value is stated once, by the group row above them.
+
+**`path` holds only the keys a row's grouping set grouped by, so its length is
+the row's depth.** Under `rollup` a subtotal carries one entry fewer than the
+rows it totals, and **the grand total carries none at all** — anything deriving
+depth or ancestry from `path` has to treat the empty path as the root rather
+than as a malformed summary. `resolveGroupTreeNodes` reads it as the **root**:
+the grand total is a sibling of the top-level groups, not their parent — making
+it their ancestor would put the whole grid inside one collapsible subtree.
 
 ## Persistence
 

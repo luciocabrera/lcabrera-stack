@@ -3,6 +3,7 @@ import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import type {
+  TableColumnsState,
   TableDataState,
   TableGroupingState,
 } from '#ui/components/Table/Table.types';
@@ -11,12 +12,46 @@ import type { MockStore } from '#ui/utils/tests/createMockStore.util';
 import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
 import { createMockStore } from '#ui/utils/tests/createMockStore.util';
 
-const NO_GROUPING: TableGroupingState = { aggregates: {}, keys: [] };
+const NO_GROUPING: TableGroupingState = {
+  aggregates: {},
+  keys: [],
+  mode: 'flat',
+};
+
+/**
+ * The columns store is here because a grouping change re-derives the column
+ * view state: the hierarchy column is a rendering of the grouping
+ * configuration, so it appears and disappears with the keys (ADR-065).
+ */
+const createColumnsState = () =>
+  ({
+    columnFilters: {},
+    columnOrder: [],
+    columnPinning: { left: [], right: [] },
+    columns: [
+      { key: 'order_status', label: 'Status' },
+      { key: 'priority', label: 'Priority' },
+    ],
+    columnSizing: {},
+    columnVisibility: new Set<string>(),
+    effectiveColumns: [],
+    normalizedColumns: {},
+    pinnedColumnOffsets: {},
+    pinnedColumnPartition: {
+      centerCols: [],
+      leftPinnedCols: [],
+      rightPinnedCols: [],
+    },
+    sorting: [],
+    staticKeys: new Set<string>(),
+  }) as unknown as TableColumnsState<Record<string, unknown>>;
 
 const storesRef: {
+  columnsStore: MockStore<TableColumnsState<Record<string, unknown>>>;
   dataStore: MockStore<Partial<TableDataState<Record<string, unknown>>>>;
   groupingStore: MockStore<TableGroupingState>;
 } = {
+  columnsStore: createMockStore(createColumnsState()),
   dataStore: createMockStore({}),
   groupingStore: createMockStore<TableGroupingState>(NO_GROUPING),
 };
@@ -26,7 +61,10 @@ const storesRef: {
 // reference `storesRef` when called, never at hoist time.
 const getTableConfigContextValue = vi.hoisted(() => {
   return function getTableConfigContextValue() {
-    return { groupingStore: storesRef.groupingStore };
+    return {
+      columnsStore: storesRef.columnsStore,
+      groupingStore: storesRef.groupingStore,
+    };
   };
 });
 
@@ -62,6 +100,7 @@ import { useGroupingStore } from './useGroupingStore.hook';
 
 describe('TableConfig grouping hooks', () => {
   beforeEach(() => {
+    storesRef.columnsStore = createMockStore(createColumnsState());
     storesRef.dataStore = createMockStore({});
     storesRef.groupingStore = createMockStore<TableGroupingState>(NO_GROUPING);
     persistTableState.mockClear();
@@ -228,6 +267,7 @@ describe('TableConfig grouping hooks', () => {
     storesRef.groupingStore.set({
       aggregates: { total_amount: 'sum' },
       keys: ['order_status'],
+      mode: 'flat',
     });
 
     const { result } = renderHook(() => useSetTableColumnAggregate());
@@ -256,6 +296,7 @@ describe('TableConfig grouping hooks', () => {
     storesRef.groupingStore.set({
       aggregates: { total_amount: 'sum' },
       keys: ['order_status', 'shipping_country'],
+      mode: 'flat',
     });
 
     const { result } = renderHook(() => useClearTableGrouping());
@@ -275,6 +316,7 @@ describe('TableConfig grouping hooks', () => {
     storesRef.groupingStore.set({
       aggregates: { total_amount: 'sum' },
       keys: ['order_status'],
+      mode: 'flat',
     });
 
     const { result } = renderHook(() => useToggleTableGroupKey());

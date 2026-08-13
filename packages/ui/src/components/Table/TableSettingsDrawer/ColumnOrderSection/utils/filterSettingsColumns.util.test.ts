@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import type { TableColumn } from '#ui/components/Table/Table.types';
 
+import { createGroupHierarchyColumn } from '#ui/components/Table/utils/createGroupHierarchyColumn.util';
+
 import { filterSettingsColumns } from './filterSettingsColumns.util';
 
 type Row = { actions: string; id: string; name: string };
@@ -38,6 +40,22 @@ describe('filterSettingsColumns', () => {
     };
     const result = filterSettingsColumns([staticRenderColumn]);
     expect(result.map((c) => c.key)).toEqual(['actions']);
+  });
+
+  it('drops the grid-owned hierarchy column, static though it is', () => {
+    // Spelled from the column the grid actually injects rather than by hand:
+    // it is static, so the `isStatic` arm above would list it — locked in
+    // place, but listed — and there is nothing a user can do to it (ADR-065).
+    const hierarchyColumn = createGroupHierarchyColumn<Row>({
+      columns,
+      groupingKeys: ['name'],
+    });
+
+    expect(
+      filterSettingsColumns<Row>([hierarchyColumn, ...columns]).map(
+        (col) => col.key,
+      ),
+    ).toStrictEqual(['id', 'name']);
   });
 
   it('returns an empty array for empty input', () => {

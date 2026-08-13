@@ -85,6 +85,7 @@ describe('resolveBatchTableSettingsUpdate', () => {
         { key: 'name', label: 'Name' },
         { key: 'age', label: 'Age' },
       ],
+      groupingKeys: ['age'],
       settings,
     });
 
@@ -98,6 +99,9 @@ describe('resolveBatchTableSettingsUpdate', () => {
       ],
       columnSizing: { actions: 0, age: 80, id: 100, name: 220 },
       columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
+      // Forwarded, not derived: the Accept that commits a grouping change is
+      // the one that has to bring the hierarchy column with it.
+      groupingKeys: ['age'],
       sorting: [{ columnKey: 'name', direction: 'asc' }],
     });
 

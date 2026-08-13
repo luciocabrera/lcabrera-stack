@@ -137,6 +137,7 @@ describe('resolveBatchColumnSettingsUpdate', () => {
       readonly name: string;
     }>({
       columnsState,
+      groupingKeys: [],
       settings: {
         columnFilter: { operator: 'contains', type: 'text', value: 'ali' },
         columnKey: 'name',
@@ -188,6 +189,7 @@ describe('resolveBatchColumnSettingsUpdate', () => {
         { key: 'age', label: 'Age' },
       ],
       columnSizing: { actions: 0, age: 80, id: 100, name: 220 },
+      groupingKeys: [],
       sorting: [{ columnKey: 'name', direction: 'desc' }],
     });
 
@@ -267,6 +269,7 @@ describe('resolveBatchColumnSettingsUpdate', () => {
       readonly name: string;
     }>({
       columnsState,
+      groupingKeys: [],
       settings: {
         columnKey: 'name',
         sorting: 'desc',
@@ -283,6 +286,7 @@ describe('resolveBatchColumnSettingsUpdate', () => {
         { key: 'age', label: 'Age' },
       ],
       columnSizing: { actions: 0, age: 80, id: 100, name: 220 },
+      groupingKeys: [],
       sorting: [{ columnKey: 'name', direction: 'desc' }],
     });
     expect(result.columnOrder).toEqual(['name', 'id', 'age']);

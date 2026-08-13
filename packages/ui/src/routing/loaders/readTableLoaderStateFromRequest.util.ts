@@ -22,7 +22,11 @@ import {
 import { sanitizeFiltersByColumns } from '../shared/sanitizeFiltersByColumns.util';
 import { sanitizeGroupingByColumns } from '../shared/sanitizeGroupingByColumns.util';
 
-const NO_GROUPING: TableGroupingState = { aggregates: {}, keys: [] };
+const NO_GROUPING: TableGroupingState = {
+  aggregates: {},
+  keys: [],
+  mode: 'flat',
+};
 
 type ReadTableLoaderStateFromRequestArgs<
   TData extends Record<string, unknown>,

@@ -5,7 +5,10 @@ import { groupingCodec } from './groupingCodec.util';
 /**
  * Read the compact `grouping` URL param back into the grouping configuration.
  *
- * Only the envelope and the aggregate vocabulary are closed here — the keys are
+ * An absent `mode` reads as `flat`, which is what every link written before
+ * rollup existed means, and the default the mode control starts from.
+ *
+ * Only the envelope, the aggregate vocabulary and the mode are closed here — the keys are
  * still arbitrary strings, and nothing in this step checks them against a
  * table's real columns. That is `sanitizeGroupingByColumns`'s job in the loader
  * path, and the server's `assertGroupKeys` / `assertGroupAggregates` behind it;
@@ -14,7 +17,7 @@ import { groupingCodec } from './groupingCodec.util';
 export const deserializeGroupingFromURL = (
   param: string,
 ): TableGroupingState => {
-  const { agg, keys } = groupingCodec.deserialize(param);
+  const { agg, keys, mode } = groupingCodec.deserialize(param);
 
-  return { aggregates: agg ?? {}, keys };
+  return { aggregates: agg ?? {}, keys, mode: mode ?? 'flat' };
 };

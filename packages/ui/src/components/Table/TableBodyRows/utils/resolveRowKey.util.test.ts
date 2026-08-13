@@ -28,6 +28,7 @@ const groupRow = (...labels: readonly string[]) =>
     [TABLE_GROUP_ROW_FIELD]: {
       aggregates: [],
       count: 2,
+      isSubtotal: false,
       path: labels.map((label, index) => ({
         columnKey: index === 0 ? 'order_number' : `key_${index}`,
         label,

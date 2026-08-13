@@ -25,10 +25,6 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
   columnsState,
   metaState,
 }: TableConfigProviderProps<TData>) => {
-  const normalizedColumnsState = getInitialColumnsState<TData>({
-    ...columnsState,
-    crud: metaState?.crud,
-  });
   // All three stores seed purely from the loader's URL- and cookie-derived
   // state, so the client renders exactly what the server did — see
   // getInitialColumnsState.
@@ -36,6 +32,16 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
   const normalizedGroupingState = getInitialGroupingState({
     groupingAggregates: metaState?.groupingAggregates,
     groupingKeys: metaState?.groupingKeys,
+    groupingMode: metaState?.groupingMode,
+  });
+  // Seeded from the grouping state rather than from the raw meta, so the
+  // hierarchy column appears under exactly the key list the grouping store
+  // accepted — an illegal one is refused there, and a column injected for a
+  // grouping that was refused would be a column labelling nothing.
+  const normalizedColumnsState = getInitialColumnsState<TData>({
+    ...columnsState,
+    crud: metaState?.crud,
+    groupingKeys: normalizedGroupingState.keys,
   });
 
   const columnsStore = useStore<TableColumnsState<TData>>(

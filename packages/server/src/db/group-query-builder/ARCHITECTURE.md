@@ -114,7 +114,8 @@ documented in ADR-058, and something the UI has to surface rather than hide.
 | `assert-group-aliases.util.ts`            | The identifier-length refusal and the collision rules — see the fourth trap below                                                                                                         |
 | `build-aggregate-projection.util.ts`      | The aggregate half of the SELECT list, and where `FILTER (WHERE …)` claims the leading `$n`                                                                                               |
 | `build-grouping-sets-clause.util.ts`      | `GROUP BY GROUPING SETS (…)`, the one grouping construct emitted                                                                                                                          |
-| `build-group-order-by-clause.util.ts`     | `GROUPING(key) <placement>, key <user>` per key, then aggregates — and why no `NULLS` keyword appears                                                                                     |
+| `assert-group-sort.util.ts`               | Every rule a sort request clears first: the two name checks, and the refusal of an aggregate listed ahead of a group key                                                                  |
+| `build-group-order-by-clause.util.ts`     | `GROUPING(key) <placement>, key <user>` per key, aggregates spliced into the innermost level — and why no `NULLS` keyword appears                                                         |
 | `build-group-query.util.ts`               | **Public entry point.** One `GroupQueryDescriptor` → the SQL, its values, and the keys and masks needed to decode the result                                                              |
 
 ## Four traps this folder already pays for
@@ -201,12 +202,14 @@ bit clear and the value NULL → a real NULL; otherwise a value.
 
 ## Ordering, and the `NULLS` keyword that must not appear
 
-`GROUPING(key) <placement>, key <user>` per key in descriptor order, then any
-aggregate sort. Two properties are worth stating because both are easy to break.
+`GROUPING(key) <placement>, key <user>` per key in descriptor order, with any
+aggregate sort spliced into the innermost level. Three properties are worth
+stating because each is easy to break.
 
 **The `GROUPING` term is emitted only when that key is rolled up in at least one
 set.** One rule that degenerates correctly: a flat grouping never rolls anything
-up, so its `ORDER BY` is byte-identical to `buildOrderByClause`'s.
+up, so its `ORDER BY` is byte-identical to `buildOrderByClause`'s — asserted by
+calling both builders rather than by a copied string.
 
 **No `NULLS FIRST`/`NULLS LAST`, ever.** The `GROUPING` term partitions first:
 where it is 1 the key is NULL on every row in the partition, so the term after
@@ -216,11 +219,20 @@ two kinds of NULL are never adjacent, so there is no placement to state — and
 emitting one would break `../query-builder/build-keyset-comparison.util.ts`,
 which deliberately depends on the default.
 
-**Key terms always precede aggregate terms.** That is what makes "rank the
-parents by their own totals" inexpressible rather than merely discouraged: an
-aggregate sort can order leaves within a parent, never reorder the tree. Doing
-it properly needs the parent's aggregate on the child row
-(`sum(…) OVER (PARTITION BY k₁)`), which is a named v2.
+**An aggregate sort acts at the innermost level, and asking for more is
+refused.** Its term goes after `GROUPING(kₙ)` and _ahead_ of `kₙ`'s own value
+term, which is the one position where it both does something and keeps the tree:
+every ancestor is already separated above it, `GROUPING(kₙ)` still holds each
+parent's subtotal apart from the rows it totals, and the value term stays last
+as the tiebreak. Appended _after_ the value term instead it can never fire —
+within a grouping set the key columns identify the row on their own — so the
+sort is accepted, emitted and dead.
+
+Ranking the parents by their own totals is therefore refused at construction
+rather than reordered into that dead form: an aggregate entry listed ahead of a
+key entry throws (`assert-group-sort.util.ts`). Doing it properly needs the
+parent's aggregate on the child row (`sum(…) OVER (PARTITION BY k₁)`), which is
+a named v2.
 
 ## The guard rails, and the order they fire in
 

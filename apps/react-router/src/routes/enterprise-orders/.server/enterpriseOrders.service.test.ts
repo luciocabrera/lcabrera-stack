@@ -60,17 +60,23 @@ vi.mock('@lcabrera/server/db/update-rows.util', () => ({
 const sortKeys = (value: object) =>
   Object.keys(value).toSorted((a, b) => a.localeCompare(b));
 
-const NO_GROUPING: TableGroupingState = { aggregates: {}, keys: [] };
+const NO_GROUPING: TableGroupingState = {
+  aggregates: {},
+  keys: [],
+  mode: 'flat',
+};
 
 type GroupingArgs = {
   readonly aggregates?: TableGroupingState['aggregates'];
   readonly keys: readonly string[];
+  readonly mode?: TableGroupingState['mode'];
 };
 
 const grouping = ({
   aggregates = {},
   keys,
-}: GroupingArgs): TableGroupingState => ({ aggregates, keys });
+  mode = 'flat',
+}: GroupingArgs): TableGroupingState => ({ aggregates, keys, mode });
 
 beforeEach(() => {
   vi.mocked(selectRows).mockClear();
@@ -268,6 +274,7 @@ it('runs the grouped read when the loader applied a group key', async () => {
       tableGroup: {
         aggregates: [],
         count: 12,
+        isSubtotal: false,
         path: [{ columnKey: 'order_status', label: 'Shipped' }],
       },
     },
@@ -275,6 +282,7 @@ it('runs the grouped read when the loader applied a group key', async () => {
       tableGroup: {
         aggregates: [],
         count: 3,
+        isSubtotal: false,
         path: [{ columnKey: 'order_status', label: '(empty)' }],
       },
     },

@@ -22,6 +22,7 @@ const groupRow: EnterpriseOrderTableRow = {
   [TABLE_GROUP_ROW_FIELD]: {
     aggregates: [],
     count: 12,
+    isSubtotal: false,
     path: [{ columnKey: 'order_status', label: 'Shipped' }],
   },
 };
@@ -63,6 +64,7 @@ describe('EnterpriseOrderTableRow', () => {
     expect(getTableGroupRowSummary(groupRow)).toStrictEqual({
       aggregates: [],
       count: 12,
+      isSubtotal: false,
       path: [{ columnKey: 'order_status', label: 'Shipped' }],
     });
     expect(groupRow[TABLE_GROUP_ROW_FIELD]).toBeDefined();

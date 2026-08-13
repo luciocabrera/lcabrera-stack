@@ -3,6 +3,7 @@ import { isObject } from '@lcabrera/utils/guards/is-object.util';
 import type { TableAggregateFn } from '#ui/components/Table/Table.types';
 
 import { isTableAggregateFn } from '#ui/components/Table/utils/isTableAggregateFn.util';
+import { isTableGroupingMode } from '#ui/components/Table/utils/isTableGroupingMode.util';
 
 import type { CompactGrouping } from './urlState.types';
 
@@ -12,11 +13,16 @@ import { createUrlStateCodec } from './createUrlStateCodec.util';
 const NO_GROUPING: CompactGrouping = { keys: [] };
 
 /**
- * The envelope's **whole** vocabulary. Aggregate selection needed a second
- * slot, so the closed set was extended; opening it is what ADR-061 forbids, and
- * a member outside these two still refuses the payload.
+ * The envelope's **whole** vocabulary. Aggregate selection needed a second slot
+ * and the grouping mode a third, so the closed set was extended twice; opening
+ * it is what ADR-061 forbids, and a member outside these three still refuses
+ * the payload.
  */
-const COMPACT_GROUPING_MEMBERS: ReadonlySet<string> = new Set(['agg', 'keys']);
+const COMPACT_GROUPING_MEMBERS: ReadonlySet<string> = new Set([
+  'agg',
+  'keys',
+  'mode',
+]);
 
 const isString = (value: unknown): value is string => typeof value === 'string';
 
@@ -49,9 +55,10 @@ const narrowAggregates = (value: unknown) => {
 /**
  * Accepts `{"keys":["order_status"]}` and, optionally beside it,
  * `{"agg":{"total_amount":"sum"}}` — a **column-to-function** map, at most one
- * aggregate per column. Nothing else: a third member, a missing `keys`, a
- * misspelling, one non-string key, or an aggregate token outside
- * `TableAggregateFn` refuses the **whole** payload.
+ * aggregate per column — and `{"mode":"rollup"}`. Nothing else: a fourth
+ * member, a missing `keys`, a misspelling, one non-string key, an aggregate
+ * token outside `TableAggregateFn`, or a mode outside `TableGroupingMode`
+ * refuses the **whole** payload.
  *
  * Refusing whole is the point (ADR-061): grouping changes the SQL a route
  * emits, so a partly-accepted configuration would run a query nobody asked for
@@ -95,15 +102,26 @@ const narrowCompactGrouping = (parsed: unknown) => {
     return;
   }
 
+  // A `mode` outside the union refuses the whole payload rather than falling
+  // back to `flat`: the mode decides which grouping sets the read emits, so
+  // substituting one answers a different question from the one the link
+  // describes — the same whole-state rule the keys are refused under.
+  if (Object.hasOwn(parsed, 'mode') && !isTableGroupingMode(parsed.mode)) {
+    return;
+  }
+
+  const rawMode: unknown = parsed.mode;
+  const mode = isTableGroupingMode(rawMode) ? { mode: rawMode } : {};
+
   if (!Object.hasOwn(parsed, 'agg')) {
-    return { keys } satisfies CompactGrouping;
+    return { keys, ...mode } satisfies CompactGrouping;
   }
 
   const agg = narrowAggregates(parsed.agg);
 
   return agg === undefined
     ? undefined
-    : ({ agg, keys } satisfies CompactGrouping);
+    : ({ agg, keys, ...mode } satisfies CompactGrouping);
 };
 
 /** Codec for the compact `grouping` search param. */
@@ -112,10 +130,14 @@ export const groupingCodec = createUrlStateCodec<CompactGrouping>({
   // selected produces the same param it produced before aggregates existed —
   // `"agg":{}` in a shared link would say "aggregates considered and cleared",
   // which is not a state this table has.
-  compact: ({ agg, keys }) =>
-    agg === undefined || Object.keys(agg).length === 0
-      ? { keys }
-      : { agg, keys },
+  compact: ({ agg, keys, mode }) => ({
+    ...(agg !== undefined && Object.keys(agg).length > 0 && { agg }),
+    keys,
+    // `flat` is dropped rather than emitted, so a table left on the default
+    // produces the param it produced before rollup existed — and a link is
+    // shorter by the member nobody chose.
+    ...(mode !== undefined && mode !== 'flat' && { mode }),
+  }),
   fallback: NO_GROUPING,
   label: 'grouping',
   narrow: narrowCompactGrouping,

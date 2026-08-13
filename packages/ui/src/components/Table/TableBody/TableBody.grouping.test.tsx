@@ -9,6 +9,7 @@ import type { TableColumn } from '#ui/components/Table/Table.types';
 import {
   TableConfigProvider,
   TableDataProvider,
+  TableFocusProvider,
 } from '#ui/components/Table/contexts';
 import { TABLE_GROUP_ROW_FIELD } from '#ui/components/Table/Table.constants';
 
@@ -31,6 +32,7 @@ const groupRows: readonly TestRow[] = Array.from(
     [TABLE_GROUP_ROW_FIELD]: {
       aggregates: [],
       count: index + 1,
+      isSubtotal: false,
       path: [{ columnKey: 'order_status', label: `Group ${index}` }],
     },
   }),
@@ -42,22 +44,28 @@ const Harness = () => {
   return (
     <TableConfigProvider<TestRow>
       columnsState={{ columns }}
-      metaState={{ overscan: OVERSCAN, rowHeight: ROW_HEIGHT }}
+      metaState={{
+        groupingKeys: ['order_status'],
+        overscan: OVERSCAN,
+        rowHeight: ROW_HEIGHT,
+      }}
     >
-      <TableDataProvider<TestRow>
-        dataState={{
-          data: groupRows,
-          isLoading: false,
-          isLoadingMore: false,
-          totalRows: GROUP_COUNT,
-        }}
-      >
-        <div ref={containerRef}>
-          <table>
-            <TableBody tableContainerRef={containerRef} />
-          </table>
-        </div>
-      </TableDataProvider>
+      <TableFocusProvider>
+        <TableDataProvider<TestRow>
+          dataState={{
+            data: groupRows,
+            isLoading: false,
+            isLoadingMore: false,
+            totalRows: GROUP_COUNT,
+          }}
+        >
+          <div ref={containerRef}>
+            <table>
+              <TableBody tableContainerRef={containerRef} />
+            </table>
+          </div>
+        </TableDataProvider>
+      </TableFocusProvider>
     </TableConfigProvider>
   );
 };

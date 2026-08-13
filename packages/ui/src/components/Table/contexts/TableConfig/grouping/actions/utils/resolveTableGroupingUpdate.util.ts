@@ -27,6 +27,7 @@ const isSameGrouping = ({
   const aggregateEntries = Object.entries(nextGrouping.aggregates);
 
   return (
+    nextGrouping.mode === existingGrouping.mode &&
     nextGrouping.keys.length === existingGrouping.keys.length &&
     nextGrouping.keys.every(
       (key, index) => key === existingGrouping.keys[index],
@@ -60,6 +61,10 @@ const isSameGrouping = ({
  * `sanitizeGroupingByColumns` refuses the same lists arriving through the URL,
  * and the server's `assertGroupKeys` refuses them again before emitting SQL.
  *
+ * The mode is part of the comparison, because it changes which grouping sets
+ * the read emits and therefore which rows come back — switching it is a real
+ * update even when every key and aggregate stays put.
+ *
  * Clearing the last key clears the aggregates with it: an aggregate is computed
  * per group, so with no key there is nothing for it to describe, and leaving it
  * in the store would resurrect it on the next grouping the user applies.
@@ -74,7 +79,7 @@ export const resolveTableGroupingUpdate = ({
 
   const grouping: TableGroupingState =
     nextGrouping.keys.length === 0
-      ? { aggregates: {}, keys: [] }
+      ? { aggregates: {}, keys: [], mode: 'flat' }
       : nextGrouping;
 
   if (isSameGrouping({ existingGrouping, nextGrouping: grouping })) {

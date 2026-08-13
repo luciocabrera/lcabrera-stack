@@ -26,11 +26,14 @@ export type BatchColumnSettingsUpdate<TData> = {
 
 type ResolveBatchColumnSettingsUpdateArgs<TData> = {
   readonly columnsState?: Partial<TableColumnsState<TData>>;
+  /** The applied group keys — see `getPinnedDerivedColumnsState`. */
+  readonly groupingKeys: readonly string[];
   readonly settings: BatchColumnSettingsUpdate<TData>;
 };
 
 export const resolveBatchColumnSettingsUpdate = <TData>({
   columnsState,
+  groupingKeys,
   settings,
 }: ResolveBatchColumnSettingsUpdateArgs<TData>) => {
   const { columnFilter, columnKey, columnPinning, columnSizing, sorting } =
@@ -90,6 +93,7 @@ export const resolveBatchColumnSettingsUpdate = <TData>({
     columnPinning: newPinning,
     columns,
     columnSizing: newColumnSizing,
+    groupingKeys,
     sorting: newSorting,
   });
 

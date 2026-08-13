@@ -174,6 +174,24 @@ affordance, `sanitizeGroupingByColumns` drops the whole configuration, and
 `assertGroupDepth` throws **before the executor borrows a connection**, so a
 hand-edited depth-9 URL costs no catalogue query.
 
+**Rollup emits the subtotals, and the mask is what makes them readable.** The
+`grouping` param carries a `mode` beside the keys, and `rollup` asks the builder
+for one grouping set per prefix of the key list plus the empty grand total. Each
+row comes back with `GROUPING(k₁, …, kₙ)` under `maskAlias`, which is the only
+thing separating a **real** NULL key from a **structural** one — the two rows are
+textually identical. `toOrderGroupRow` decodes it: the keys whose bit is set are
+dropped from `path`, so the path that remains is the row's own prefix and its
+length is the row's depth, and `isSubtotal` says whether anything was rolled up
+at all. A `flat` read never sets a bit, so every row is a leaf and the decode is
+the identity it always was.
+
+**The ordering keeps subtotals with their children.** `buildGroupOrderByClause`
+emits `GROUPING(key) ASC, key <user>` per key, so a subtotal lands after the rows
+it totals whichever direction the user sorted that key by, and the grand total
+lands last. This route requests key sorts only; an aggregate sort would be legal
+at the innermost level, and one that would rank an ancestor is refused at
+construction rather than emitted as a term that orders nothing.
+
 **The aggregate menu is the catalogue's answer, not the column's declared type.**
 `selectOrderGroupingCapabilities` resolves what every allowed column may do from
 `pg_type`/`pg_aggregate`, and the loader ships that on

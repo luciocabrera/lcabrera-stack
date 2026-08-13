@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 
+import { buildOrderByClause } from '../query-builder/build-order-by-clause.util.ts';
 import { buildGroupOrderByClause } from './build-group-order-by-clause.util.ts';
 import { expandGroupingSets } from './expand-grouping-sets.util.ts';
 
@@ -26,6 +27,22 @@ describe('buildGroupOrderByClause', () => {
     );
   });
 
+  it('emits, for a single flat grouping set, what the flat builder emits', () => {
+    // The degenerate case checked against the other builder rather than against
+    // a string copied out of it: a hand-written expectation stays green when
+    // `buildOrderByClause` changes, which is exactly when the two would drift.
+    const sort = [
+      { direction: 'desc' as const, key: 'order_status' },
+      { direction: 'asc' as const, key: 'shipping_country' },
+    ];
+
+    expect(clause({ sort })).toBe(
+      buildOrderByClause({
+        sort: sort.map(({ direction, key }) => ({ column: key, direction })),
+      }),
+    );
+  });
+
   it('leads each key with its GROUPING term under a rollup', () => {
     expect(clause({ sets: ROLLUP })).toBe(
       'ORDER BY GROUPING("order_status") ASC, "order_status" ASC, ' +
@@ -47,6 +64,23 @@ describe('buildGroupOrderByClause', () => {
     );
   });
 
+  it('keeps every GROUPING term ASC whichever key the user reversed', () => {
+    // The hierarchy cannot invert: a descending key reverses the order of the
+    // parents, and each parent's subtotal still lands after its own children.
+    expect(
+      clause({
+        sets: ROLLUP,
+        sort: [
+          { direction: 'desc', key: 'order_status' },
+          { direction: 'desc', key: 'shipping_country' },
+        ],
+      }),
+    ).toBe(
+      'ORDER BY GROUPING("order_status") ASC, "order_status" DESC, ' +
+        'GROUPING("shipping_country") ASC, "shipping_country" DESC',
+    );
+  });
+
   it('flips only the GROUPING terms for subtotalPlacement first', () => {
     expect(clause({ sets: ROLLUP, subtotalPlacement: 'first' })).toBe(
       'ORDER BY GROUPING("order_status") DESC, "order_status" ASC, ' +
@@ -54,7 +88,10 @@ describe('buildGroupOrderByClause', () => {
     );
   });
 
-  it('appends an aggregate sort after every key term', () => {
+  it('splices an aggregate sort into the innermost level', () => {
+    // §1.7(d) of the planning document, proven against a live database:
+    // `GROUPING(a), a, GROUPING(b), sum(v) DESC` sorts leaves within each
+    // parent and leaves the tree intact.
     expect(
       clause({
         sets: ROLLUP,
@@ -62,15 +99,42 @@ describe('buildGroupOrderByClause', () => {
       }),
     ).toBe(
       'ORDER BY GROUPING("order_status") ASC, "order_status" ASC, ' +
-        'GROUPING("shipping_country") ASC, "shipping_country" ASC, ' +
-        '"sum_total_amount" DESC',
+        'GROUPING("shipping_country") ASC, "sum_total_amount" DESC, ' +
+        '"shipping_country" ASC',
     );
   });
 
-  it('keeps key terms first even when the aggregate sort is listed first', () => {
-    // This is the structural guarantee: an aggregate can order leaves within a
-    // parent but can never be hoisted above a key and reorder the tree.
+  it('keeps the innermost key as the last term, as the aggregate tiebreak', () => {
+    // Without it, two leaves with equal aggregates have no defined order —
+    // a result set that reshuffles between two identical requests.
     expect(
+      clause({
+        sets: ROLLUP,
+        sort: [{ aggregateAlias: 'count_rows', direction: 'asc' }],
+      }).endsWith('"shipping_country" ASC'),
+    ).toBe(true);
+  });
+
+  it('never puts an aggregate term ahead of an ancestor key', () => {
+    // The discriminating property: whatever else the clause contains, every key
+    // above the innermost is separated before the aggregate is consulted.
+    const terms = clause({
+      sets: ROLLUP,
+      sort: [
+        { direction: 'asc', key: 'order_status' },
+        { aggregateAlias: 'sum_total_amount', direction: 'desc' },
+      ],
+    })
+      .replace('ORDER BY ', '')
+      .split(', ');
+
+    expect(terms.indexOf('"order_status" ASC')).toBeLessThan(
+      terms.indexOf('"sum_total_amount" DESC'),
+    );
+  });
+
+  it('refuses an aggregate sort that would rank an ancestor', () => {
+    expect(() =>
       clause({
         sets: ROLLUP,
         sort: [
@@ -78,7 +142,7 @@ describe('buildGroupOrderByClause', () => {
           { direction: 'asc', key: 'order_status' },
         ],
       }),
-    ).toMatch(/^ORDER BY GROUPING\("order_status"\)/);
+    ).toThrow('never rank an ancestor');
   });
 
   it('never emits a NULLS keyword', () => {

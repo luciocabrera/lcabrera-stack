@@ -6,6 +6,7 @@ import { getTableGroupRowSummary } from './getTableGroupRowSummary.util';
 const summary = {
   aggregates: [],
   count: 12,
+  isSubtotal: false,
   path: [{ columnKey: 'order_status', label: 'Shipped' }],
 };
 
@@ -57,7 +58,7 @@ describe('getTableGroupRowSummary', () => {
 
     expect(
       Object.keys(result ?? {}).toSorted((a, b) => a.localeCompare(b)),
-    ).toStrictEqual(['aggregates', 'count', 'path']);
+    ).toStrictEqual(['aggregates', 'count', 'isSubtotal', 'path']);
   });
 
   it('refuses a partial summary rather than rendering a hole', () => {
@@ -73,9 +74,30 @@ describe('getTableGroupRowSummary', () => {
     ).toBeUndefined();
     expect(
       getTableGroupRowSummary({
-        [TABLE_GROUP_ROW_FIELD]: { ...summary, path: [] },
+        [TABLE_GROUP_ROW_FIELD]: { ...summary, isSubtotal: 'yes' },
       }),
     ).toBeUndefined();
+  });
+
+  it('reads an empty path as the grand total, not as a malformed summary', () => {
+    // A rollup's grand total is keyed by nothing, so an empty path is the one
+    // row it produces — refusing it would drop exactly the row rollup exists
+    // for, and it would arrive as an ordinary data row with no columns.
+    expect(
+      getTableGroupRowSummary({
+        [TABLE_GROUP_ROW_FIELD]: { ...summary, isSubtotal: true, path: [] },
+      }),
+    ).toStrictEqual({ ...summary, isSubtotal: true, path: [] });
+  });
+
+  it('carries the subtotal flag, which the text alone cannot say', () => {
+    // The two rows this separates are textually identical: a real NULL key and
+    // a subtotal over that key both render an empty label from the same column.
+    expect(
+      getTableGroupRowSummary({
+        [TABLE_GROUP_ROW_FIELD]: { ...summary, isSubtotal: true },
+      })?.isSubtotal,
+    ).toBe(true);
   });
 
   it('refuses the whole summary when one path entry is malformed', () => {

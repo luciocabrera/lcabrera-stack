@@ -4,7 +4,11 @@ import type { TableGroupingState } from '#ui/components/Table/Table.types';
 
 import { setTableColumnAggregate } from './setTableColumnAggregate.util';
 
-const GROUPED: TableGroupingState = { aggregates: {}, keys: ['order_status'] };
+const GROUPED: TableGroupingState = {
+  aggregates: {},
+  keys: ['order_status'],
+  mode: 'flat',
+};
 
 describe('setTableColumnAggregate', () => {
   it('applies an aggregate to a column', () => {
@@ -17,6 +21,7 @@ describe('setTableColumnAggregate', () => {
     ).toStrictEqual({
       aggregates: { total_amount: 'sum' },
       keys: ['order_status'],
+      mode: 'flat',
     });
   });
 
@@ -27,7 +32,11 @@ describe('setTableColumnAggregate', () => {
       setTableColumnAggregate({
         columnKey: 'total_amount',
         fn: 'avg',
-        grouping: { aggregates: { total_amount: 'sum' }, keys: ['a'] },
+        grouping: {
+          aggregates: { total_amount: 'sum' },
+          keys: ['a'],
+          mode: 'flat',
+        },
       }).aggregates,
     ).toStrictEqual({ total_amount: 'avg' });
   });
@@ -40,6 +49,7 @@ describe('setTableColumnAggregate', () => {
         grouping: {
           aggregates: { quantity: 'max', total_amount: 'sum' },
           keys: ['a'],
+          mode: 'flat',
         },
       }).aggregates,
     ).toStrictEqual({ quantity: 'max' });
@@ -49,7 +59,11 @@ describe('setTableColumnAggregate', () => {
     const { aggregates } = setTableColumnAggregate({
       columnKey: 'total_amount',
       fn: undefined,
-      grouping: { aggregates: { total_amount: 'sum' }, keys: ['a'] },
+      grouping: {
+        aggregates: { total_amount: 'sum' },
+        keys: ['a'],
+        mode: 'flat',
+      },
     });
 
     expect(Object.keys(aggregates)).toStrictEqual([]);
@@ -61,7 +75,7 @@ describe('setTableColumnAggregate', () => {
     setTableColumnAggregate({
       columnKey: 'quantity',
       fn: 'max',
-      grouping: { aggregates, keys: ['a'] },
+      grouping: { aggregates, keys: ['a'], mode: 'flat' },
     });
 
     expect(aggregates).toStrictEqual({ total_amount: 'sum' });

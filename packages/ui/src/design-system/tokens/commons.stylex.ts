@@ -308,6 +308,28 @@ export const skeleton = stylex.create({
   },
 });
 
+export const accessibility = stylex.create({
+  /**
+   * Removed from the visual layout, kept in the accessibility tree — for text
+   * that carries what a glyph alone cannot be relied on to say.
+   *
+   * `clip-path` rather than `display: none` or `visibility: hidden`, both of
+   * which take the element out of the accessibility tree along with the layout.
+   * The 1px box with `overflow: hidden` is what keeps it out of the flow
+   * without a screen reader skipping it.
+   */
+  visuallyHidden: {
+    padding: 0,
+    borderWidth: 0,
+    overflow: 'hidden',
+    clipPath: 'inset(50%)',
+    position: 'absolute',
+    whiteSpace: 'nowrap',
+    height: '1px',
+    width: '1px',
+  },
+});
+
 // parent
 // mix-blend-mode: screen;
 // background-size: auto;

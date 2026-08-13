@@ -13,12 +13,14 @@ import { groupingCodec } from './groupingCodec.util';
  *
  * A selected aggregate is dropped with the keys for the same reason: an
  * aggregate is computed per group, so with no key there is nothing to aggregate
- * over and nothing to describe.
+ * over and nothing to describe. The mode goes with them — which grouping sets a
+ * read emits is not a state an ungrouped table has.
  */
 export const serializeGroupingToURL = ({
   aggregates,
   keys,
+  mode,
 }: TableGroupingState) =>
   keys.length === 0
     ? undefined
-    : groupingCodec.serialize({ agg: aggregates, keys });
+    : groupingCodec.serialize({ agg: aggregates, keys, mode });

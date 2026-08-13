@@ -1,6 +1,7 @@
 import type { GroupSort } from './group-query-builder.types.ts';
 
 import { quoteIdentifier } from '../query-builder/quote-identifier.util.ts';
+import { assertGroupSort } from './assert-group-sort.util.ts';
 
 type BuildGroupOrderByClauseArgs = {
   readonly aggregateAliases: readonly string[];
@@ -10,8 +11,12 @@ type BuildGroupOrderByClauseArgs = {
   readonly subtotalPlacement?: 'first' | 'last';
 };
 
+const toDirection = (direction: 'asc' | 'desc' | undefined) =>
+  direction === 'desc' ? 'DESC' : 'ASC';
+
 /**
- * `GROUPING(key) <placement>, key <user>` per key, then any aggregate sort.
+ * `GROUPING(key) <placement>, key <user>` per key, with any aggregate sort
+ * spliced in at the innermost level.
  *
  * The leading `GROUPING` term is what puts a subtotal beside the rows it
  * totals, and it is emitted only when that key is rolled up in at least one
@@ -26,9 +31,18 @@ type BuildGroupOrderByClauseArgs = {
  * so there is no placement to state — and emitting one would break
  * `build-keyset-comparison.util.ts`, which depends on the default.
  *
- * Key terms always precede aggregate terms, which is what makes "rank the
- * parents by their own totals" inexpressible rather than merely discouraged: an
- * aggregate can only order leaves within a parent, never reorder the tree.
+ * **An aggregate sort lands after the innermost key's `GROUPING` term and ahead
+ * of that key's own value term**, which is the one position where it does
+ * anything and still keeps the tree: every ancestor level is already separated
+ * by the terms above it, and `GROUPING(kₙ)` still holds each parent's subtotal
+ * apart from the rows it totals. Appending it after the value term instead —
+ * the shape this replaces — emits a term that can never fire, because within a
+ * grouping set the key columns identify the row on their own. The value term
+ * stays, last, as the tiebreak two equal aggregates would otherwise have none
+ * of.
+ *
+ * Ranking an ancestor by an aggregate is refused rather than reordered — see
+ * `assert-group-sort.util.ts`, which every request passes through first.
  */
 export const buildGroupOrderByClause = ({
   aggregateAliases,
@@ -37,42 +51,34 @@ export const buildGroupOrderByClause = ({
   sort = [],
   subtotalPlacement = 'last',
 }: BuildGroupOrderByClauseArgs): string => {
+  assertGroupSort({ aggregateAliases, keys, sort });
+
   const placement = subtotalPlacement === 'first' ? 'DESC' : 'ASC';
 
-  const keyTerms = keys.flatMap((key) => {
-    const entry = sort.find((item) => 'key' in item && item.key === key);
-    const valueTerm = `${quoteIdentifier(key)} ${entry?.direction === 'desc' ? 'DESC' : 'ASC'}`;
-
-    return sets.some((set) => !set.includes(key))
-      ? [`GROUPING(${quoteIdentifier(key)}) ${placement}`, valueTerm]
-      : [valueTerm];
-  });
-
-  // One pass, because every entry is either validated-and-dropped (a key, whose
-  // direction the loop above already read) or validated-and-emitted.
+  // One pass into an array this call allocated: a key entry is dropped here
+  // (the key loop below reads its direction in place) and an aggregate entry is
+  // emitted in request order.
   const aggregateTerms: string[] = [];
 
   for (const entry of sort) {
-    if ('key' in entry) {
-      if (!keys.includes(entry.key)) {
-        throw new Error(
-          `Cannot sort by "${entry.key}": it is not one of this query's group keys.`,
-        );
-      }
-
-      continue;
-    }
-
-    if (!aggregateAliases.includes(entry.aggregateAlias)) {
-      throw new Error(
-        `Cannot sort by "${entry.aggregateAlias}": it is not one of this query's aggregates.`,
-      );
-    }
+    if ('key' in entry) continue;
 
     aggregateTerms.push(
-      `${quoteIdentifier(entry.aggregateAlias)} ${entry.direction === 'desc' ? 'DESC' : 'ASC'}`,
+      `${quoteIdentifier(entry.aggregateAlias)} ${toDirection(entry.direction)}`,
     );
   }
 
-  return `ORDER BY ${[...keyTerms, ...aggregateTerms].join(', ')}`;
+  const terms = keys.flatMap((key, index) => {
+    const entry = sort.find((item) => 'key' in item && item.key === key);
+    const valueTerm = `${quoteIdentifier(key)} ${toDirection(entry?.direction)}`;
+    const groupingTerms = sets.some((set) => !set.includes(key))
+      ? [`GROUPING(${quoteIdentifier(key)}) ${placement}`]
+      : [];
+
+    return index === keys.length - 1
+      ? [...groupingTerms, ...aggregateTerms, valueTerm]
+      : [...groupingTerms, valueTerm];
+  });
+
+  return `ORDER BY ${terms.join(', ')}`;
 };

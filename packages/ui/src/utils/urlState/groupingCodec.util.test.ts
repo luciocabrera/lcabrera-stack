@@ -34,12 +34,34 @@ describe('groupingCodec', () => {
     ).toStrictEqual({ keys: [] });
   });
 
-  it('refuses a member outside the envelope', () => {
-    // The vocabulary was *extended* to admit `agg`, not opened: a third member
-    // still refuses the payload (ADR-061).
+  it('reads the grouping mode, and omits it when the URL states none', () => {
     expect(
       groupingCodec.deserialize('{"keys":["a"],"mode":"rollup"}'),
+    ).toStrictEqual({ keys: ['a'], mode: 'rollup' });
+    expect(groupingCodec.deserialize('{"keys":["a"]}')).toStrictEqual({
+      keys: ['a'],
+    });
+  });
+
+  it('refuses a mode outside the vocabulary rather than falling back to flat', () => {
+    // Whole-state refusal (ADR-061): the mode decides which grouping sets the
+    // read emits, so substituting one answers a different question from the
+    // one the link describes. `cube` is a real server-side mode and still not
+    // one this package renders (#574).
+    expect(
+      groupingCodec.deserialize('{"keys":["a"],"mode":"cube"}'),
     ).toStrictEqual({ keys: [] });
+    expect(
+      groupingCodec.deserialize('{"keys":["a"],"mode":"toString"}'),
+    ).toStrictEqual({ keys: [] });
+  });
+
+  it('refuses a member outside the envelope', () => {
+    // The vocabulary was *extended* twice — to admit `agg`, then `mode` — not
+    // opened: a fourth member still refuses the payload (ADR-061).
+    expect(groupingCodec.deserialize('{"keys":["a"],"depth":2}')).toStrictEqual(
+      { keys: [] },
+    );
     expect(groupingCodec.deserialize('{"key":["a"]}')).toStrictEqual({
       keys: [],
     });

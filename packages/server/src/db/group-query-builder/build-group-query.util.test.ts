@@ -349,8 +349,22 @@ describe('buildGroupQuery', () => {
     );
 
     expect(result.text).toContain(
-      'GROUPING("shipping_country") ASC, "shipping_country" ASC, "sum_total_amount" DESC',
+      'GROUPING("shipping_country") ASC, "sum_total_amount" DESC, "shipping_country" ASC',
     );
+  });
+
+  it('refuses an aggregate sort that would rank an ancestor', () => {
+    expect(() =>
+      buildGroupQuery(
+        descriptor({
+          grouping: 'rollup',
+          sort: [
+            { aggregateAlias: 'sum_total_amount', direction: 'desc' },
+            { direction: 'asc', key: 'order_status' },
+          ],
+        }),
+      ),
+    ).toThrow('never rank an ancestor');
   });
 
   it('carries the pre-flight bound it emitted the LIMIT from', () => {

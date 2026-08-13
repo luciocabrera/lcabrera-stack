@@ -22,7 +22,8 @@ type SetColumnVisibilityArgs<TData> = {
  * menu. No-op for static columns.
  */
 export const useSetColumnVisibility = <TData>() => {
-  const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
+  const { columnsStore, groupingStore, metaStore } =
+    useTableConfigContextValue<TData>();
   const persistTableState = usePersistTableStateAction();
 
   return ({ columnKey, isVisible }: SetColumnVisibilityArgs<TData>) => {
@@ -53,6 +54,7 @@ export const useSetColumnVisibility = <TData>() => {
       columnsStore,
       columnVisibility,
       drawersSyncNonce,
+      groupingKeys: groupingStore.get().keys,
       metaStore,
       persistenceKey,
       persistTableState,

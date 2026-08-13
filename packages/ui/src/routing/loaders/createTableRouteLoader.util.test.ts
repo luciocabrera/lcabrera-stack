@@ -41,7 +41,11 @@ type FetchPageArgs = {
   readonly grouping: TableGroupingState;
 };
 
-const NO_GROUPING: TableGroupingState = { aggregates: {}, keys: [] };
+const NO_GROUPING: TableGroupingState = {
+  aggregates: {},
+  keys: [],
+  mode: 'flat',
+};
 
 const groupingUrl = (param: string) =>
   `http://localhost/rows?grouping=${encodeURIComponent(param)}`;
@@ -309,7 +313,7 @@ describe('createTableRouteLoader', () => {
 
       expect(fetchPage).toHaveBeenCalledWith(
         expect.objectContaining({
-          grouping: { aggregates: {}, keys: ['status'] },
+          grouping: { aggregates: {}, keys: ['status'], mode: 'flat' },
         }),
       );
       expect(result.metaState.groupingKeys).toEqual(['status']);
@@ -359,7 +363,7 @@ describe('createTableRouteLoader', () => {
         '{"keys":[7]}',
         '{"keys":"status"}',
         '["status"]',
-        '{"keys":["status"],"mode":"rollup"}',
+        '{"keys":["status"],"mode":"cube"}',
       ]) {
         const { fetchPage, result } = await invoke({
           config: { meta: { isGroupingEnabled: true } },
@@ -440,7 +444,7 @@ describe('createTableRouteLoader', () => {
       expect(result.metaState.groupingKeys).toEqual(['status', 'name']);
       expect(fetchPage).toHaveBeenCalledWith(
         expect.objectContaining({
-          grouping: { aggregates: {}, keys: ['status', 'name'] },
+          grouping: { aggregates: {}, keys: ['status', 'name'], mode: 'flat' },
         }),
       );
     });
@@ -454,7 +458,11 @@ describe('createTableRouteLoader', () => {
       expect(result.metaState.groupingAggregates).toEqual({ id: 'sum' });
       expect(fetchPage).toHaveBeenCalledWith(
         expect.objectContaining({
-          grouping: { aggregates: { id: 'sum' }, keys: ['status'] },
+          grouping: {
+            aggregates: { id: 'sum' },
+            keys: ['status'],
+            mode: 'flat',
+          },
         }),
       );
     });

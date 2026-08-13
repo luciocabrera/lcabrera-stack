@@ -618,7 +618,9 @@ claims nothing had checked.
 - [ADR-061](./ADR-061-grouping-config-in-url-expansion-in-store.md) — grouping configuration and expansion state, the stores the hierarchy column renders
 - [ADR-059](./ADR-059-aggregation-is-builder-generated.md) — what a grouped read returns, including that it returns whole
 - [ADR-058](./ADR-058-grouping-legality-by-analytical-role.md) — the aggregate vocabulary whose values fill the non-label cells
-- [`packages/ui/src/components/Table/TableGroupHeaderRow/ARCHITECTURE.md`](../../packages/ui/src/components/Table/TableGroupHeaderRow/ARCHITECTURE.md) — the banner as built, and why it composes `TableRow`
+- `packages/ui/src/components/Table/TableGroupHeaderRow/ARCHITECTURE.md` — the banner as built, and why it composed `TableRow`. **Deleted by #570**, which is what this decision asked for; unlinked here rather than repointed, because nothing replaces a document about a shape that no longer exists. What took its place is
+  [`TableGroupLabel/ARCHITECTURE.md`](../../packages/ui/src/components/Table/TableGroupLabel/ARCHITECTURE.md) (the hierarchy cell) and
+  [`TableGroupAggregate/ARCHITECTURE.md`](../../packages/ui/src/components/Table/TableGroupAggregate/ARCHITECTURE.md) (every other cell)
 - [`packages/ui/src/components/Table/TableRow/ARCHITECTURE.md`](../../packages/ui/src/components/Table/TableRow/ARCHITECTURE.md) — the height invariant and the `minHeight`/`maxHeight` clamp
 - [`docs/agents/planning/table-row-grouping-plan.md`](../agents/planning/table-row-grouping-plan.md) — the grouping programme this slices
 - [`packages/server/src/db/group-query-builder/expand-grouping-sets.util.ts`](../../packages/server/src/db/group-query-builder/expand-grouping-sets.util.ts) — the grouping sets each mode emits, and why cube is not one of them

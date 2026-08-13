@@ -9,6 +9,10 @@ export const useSetGroupKeys = () => {
   const setGrouping = useSetGrouping();
 
   return (keys: readonly string[]) => {
-    setGrouping((grouping) => ({ aggregates: grouping.aggregates, keys }));
+    setGrouping((grouping) => ({
+      aggregates: grouping.aggregates,
+      keys,
+      mode: grouping.mode,
+    }));
   };
 };
