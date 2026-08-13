@@ -112,29 +112,42 @@ TableGroupingState = {
 
 ## Provider Initialization
 
+Both drafts are seeded here, once, at mount — and mount **is** the drawer
+opening, because `TableDrawersSection` renders this provider only while the
+drawer is open and keys it on the drawers sync nonce. That is what gives Cancel
+a baseline to restore even when the user's first action is a removal.
+
 ```mermaid
 graph TD
   A["TableDrawerProvider receives children"] --> B["Read columnsStore.get() from TableConfigContext"]
+  A --> B2["Read groupingStore.get() from TableConfigContext"]
   B --> C["Extract columnFilters"]
   B --> D["Extract columnOrder"]
   B --> E["Extract columnPinning"]
   B --> F["Extract columnSizing"]
   B --> G["Extract columnVisibility"]
   B --> H["Extract sorting"]
-  C --> I["Build initialState"]
+  B2 --> G2["Extract aggregates"]
+  B2 --> H2["Extract keys"]
+  C --> I["Build columns initialState"]
   D --> I
   E --> I
   F --> I
   G --> I
   H --> I
+  G2 --> I2["Build grouping initialState"]
+  H2 --> I2
   I --> J["useStore(initialState) → columnsStore"]
+  I2 --> J2["useStore(initialState) → groupingStore"]
   J --> K["Provide via TableDrawerContext"]
+  J2 --> K
 ```
 
 ## Actions
 
-Actions are hooks that return a callback. Each callback reads the store and
-calls `columnsStore.set(partial)`.
+Actions are hooks that return a callback. Each callback reads the store it owns
+and calls `set(partial)` on it — `columnsStore` for the column draft,
+`groupingStore` for the grouping one.
 
 | Hook                               | Reads From           | Writes To          | Side Effect                                                                  |
 | ---------------------------------- | -------------------- | ------------------ | ---------------------------------------------------------------------------- |

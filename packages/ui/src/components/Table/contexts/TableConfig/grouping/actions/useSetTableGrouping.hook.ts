@@ -11,12 +11,18 @@ import { applyGroupingReducer } from './utils';
  * applied configuration to the next one, and it commits, persists and
  * navigates.
  *
+ * Its surface is the **column-header menu**, which acts immediately because it
+ * has no Accept to wait for. The drawer stages into `TableDrawerContext`'s
+ * grouping draft instead and commits through `useBatchSetTableSettings`, so a
+ * whole-list replace has no caller on this side — reorder and remove are
+ * drawer affordances and live there.
+ *
  * Internal to `actions/` — the named actions beside it
- * (`useToggleTableGroupKey`, `useSetTableGroupKeys`,
- * `useSetTableColumnAggregate`, `useClearTableGrouping`) are what surfaces
- * call. Keeping this one out of the barrel is what stops a component computing
- * grouping state for itself, which is the store-pattern rule that components
- * consume actions rather than state transitions.
+ * (`useToggleTableGroupKey`, `useSetTableColumnAggregate`,
+ * `useClearTableGrouping`) are what surfaces call. Keeping this one out of the
+ * barrel is what stops a component computing grouping state for itself, which
+ * is the store-pattern rule that components consume actions rather than state
+ * transitions.
  *
  * It takes a **reducer** rather than a finished state so the store is read
  * exactly once per interaction. A finished state would need the caller to read

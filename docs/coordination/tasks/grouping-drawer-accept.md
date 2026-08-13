@@ -6,7 +6,10 @@ status: review
 branch: chore/654-grouping-drawer-accept
 area:
   - packages/ui/src/components/Table/TableSettingsDrawer/**
+  - packages/ui/src/components/Table/contexts/TableConfig/grouping/**
+  - packages/ui/src/components/Table/contexts/TableConfig/ARCHITECTURE.md
   - packages/ui/src/components/Table/contexts/TableConfig/columns/actions/useBatchSetTableSettings.hook.*
+  - packages/ui/src/INVENTORY.md
 started: 2026-08-13
 updated: 2026-08-13
 plan: (none)
@@ -21,6 +24,7 @@ configuration on Accept, in one navigation.
 
 ## Status / next
 
-- Current step: implemented, gate run, PR left as a draft for review
+- Current step: review findings addressed (two orphaned live hooks deleted,
+  doc contradictions fixed); gate re-run
 - Blockers: none
 - Next: verification

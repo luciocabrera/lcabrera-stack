@@ -32,7 +32,16 @@ cost five navigations and five grouped queries.
 
 **For a consumer calling the internals directly**
 
-`useBatchSetTableSettings` now takes `{ grouping, settings }` rather than the
-settings object alone, so the one Accept write can carry both. It is not part of
-the published entry points; a consumer reaching it through a deep import must
-update the call.
+None of the following is reachable from a published entry point — the `exports`
+map has no path into `components/Table/contexts/TableConfig/grouping`, and
+`components/Table`'s barrel re-exports only `Table` plus a curated type list —
+so a consumer on the documented surface is unaffected. A consumer reaching past
+it by deep import is not:
+
+- `useBatchSetTableSettings` now takes `{ grouping, settings }` rather than the
+  settings object alone, so the one Accept write can carry both.
+- `useSetTableGroupKeys` and `useGetTableGroupingAggregates` are removed. The
+  drawer was their last caller and it now stages instead. The live store keeps
+  `useToggleTableGroupKey`, `useSetTableColumnAggregate`,
+  `useClearTableGrouping`, `useGetTableGroupingKeys` and
+  `useGetTableColumnAggregate`, which the column-header menu still uses.
