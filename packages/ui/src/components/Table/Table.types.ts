@@ -366,15 +366,6 @@ export type TableDataState<TData> = {
 
 export type TableDensity = 'comfortable' | 'compact';
 
-/** One aggregate a grouped row carries, already formatted for display. */
-export type TableGroupAggregateValue = {
-  /** The column the aggregate was applied to. */
-  readonly columnKey: string;
-  readonly fn: TableAggregateFn;
-  /** The aggregate's value, formatted — see `TableGroupRowSummary.path`. */
-  readonly label: string;
-};
-
 /**
  * The focus store's state — where the grid's single tab stop points (ADR-062).
  *
@@ -403,6 +394,15 @@ export type TableFocusState = {
   readonly rowIndex: number | undefined;
   /** Data-derived identity of the focused row (ADR-062), never its position. */
   readonly rowKey: string | undefined;
+};
+
+/** One aggregate a grouped row carries, already formatted for display. */
+export type TableGroupAggregateValue = {
+  /** The column the aggregate was applied to. */
+  readonly columnKey: string;
+  readonly fn: TableAggregateFn;
+  /** The aggregate's value, formatted — see `TableGroupRowSummary.path`. */
+  readonly label: string;
 };
 
 /**
