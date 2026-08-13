@@ -51,3 +51,4 @@ or run `vp run adr:new`, which takes the next free number for you.
 | [ADR-062](./ADR-062-grid-semantics-roving-focus-and-row-identity.md)    | Declare grid semantics explicitly and rove focus over data-derived rows                                                  |
 | [ADR-063](./ADR-063-request-shaping-capabilities-on-the-loader-meta.md) | A request-shaping capability is declared once, on the loader `meta`                                                      |
 | [ADR-064](./ADR-064-converge-app-copies-of-a-declared-contract.md)      | Duplicate a contract across a boundary you may not declare; alias it across one you already have                         |
+| [ADR-065](./ADR-065-grouped-rows-render-a-hierarchy-column.md)          | A grouped grid renders its hierarchy in a grid-owned column, not a spanning banner                                       |
