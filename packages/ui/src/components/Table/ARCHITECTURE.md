@@ -15,7 +15,7 @@ filtering, infinite scroll, settings drawers, and cookie-based persistence.
 ```mermaid
 graph TD
   TL["TableLayout<br/><small>Entry · providers · Suspense</small>"]
-  TCP["TableConfigProvider<br/><small>columnsStore + groupingStore + metaStore</small>"]
+  TCP["TableConfigProvider<br/><small>columnsStore + expansionStore + groupingStore + metaStore</small>"]
   TFP["TableFocusProvider<br/><small>focusStore · roving focus</small>"]
   FDP["FiltersDataProvider<br/><small>filtersDataStore</small>"]
   TSB["TableSuspenseBoundary<br/><small>Suspense + TableSkeleton</small>"]
@@ -91,6 +91,7 @@ graph LR
   subgraph "TableConfigProvider"
     CS["columnsStore<br/><small>columns, filters, sorting,<br/>pinning, sizing, visibility</small>"]
     GS["groupingStore<br/><small>applied group keys</small>"]
+    ES["expansionStore<br/><small>collapsed group paths</small>"]
     MS["metaStore<br/><small>density, title, drawer toggles,<br/>row height, overscan</small>"]
   end
 
@@ -166,14 +167,14 @@ upgrades an implicit role rather than replacing a missing one. `<thead>` and the
 empty-state `<tbody>` set no overriding `display` either, so neither declares a
 role — where the implicit one survives, none is added.
 
-| Element                  | Carries                                             |
-| ------------------------ | --------------------------------------------------- |
-| `TableBase` `<table>`    | `role='grid'`, `aria-rowcount`, the roving tab stop |
-| `TableBody` `<tbody>`    | `role='rowgroup'` — on the populated branch only    |
-| `TableRow` `<tr>`        | `role='row'`, `aria-rowindex`                       |
-| `TableHeaderCell` `<th>` | `role='columnheader'`, `scope='col'`, `aria-sort`   |
-| `TableBodyCell` `<td>`   | `role='gridcell'`, `tabIndex` 0 on exactly one cell |
-| `SpacerRow` `<tr>`       | `aria-hidden='true'`, and no role at all            |
+| Element                  | Carries                                                                                                           |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `TableBase` `<table>`    | `role='grid'` / `'treegrid'`, `aria-rowcount`, the roving tab stop                                                |
+| `TableBody` `<tbody>`    | `role='rowgroup'` — on the populated branch only                                                                  |
+| `TableRow` `<tr>`        | `role='row'`, `aria-rowindex`, and under a tree `aria-level` / `aria-posinset` / `aria-setsize` / `aria-expanded` |
+| `TableHeaderCell` `<th>` | `role='columnheader'`, `scope='col'`, `aria-sort`                                                                 |
+| `TableBodyCell` `<td>`   | `role='gridcell'`, `tabIndex` 0 on exactly one cell                                                               |
+| `SpacerRow` `<tr>`       | `aria-hidden='true'`, and no role at all                                                                          |
 
 Exactly one element carries `tabIndex={0}` at any time — the focused cell while
 the grid holds focus and that row is rendered, the grid container otherwise.
@@ -182,6 +183,14 @@ in the store as a data-derived row key so it survives the row being unmounted by
 a scroll. The model is
 [contexts/TableFocus/ARCHITECTURE.md](contexts/TableFocus/ARCHITECTURE.md); the
 end-to-end behaviour is pinned by `Table.gridFocus.test.tsx`.
+
+Under grouping the grid upgrades to `role='treegrid'`, every row states its
+level, position and set size, `ArrowRight`/`ArrowLeft` expand and collapse a
+group row, and everything the grid counts — the virtualization window,
+`aria-rowcount`, the row indices, the focus store's `rowIndex` — counts the rows
+a collapse leaves standing rather than every loaded row
+([ADR-067](../../../../../docs/decisions/ADR-067-expansion-is-the-collapsed-set-and-a-group-row-is-a-tree-node.md)),
+pinned by `Table.treeExpansion.test.tsx` and `Table.groupedGridSemantics.test.tsx`.
 
 ## Persistence
 

@@ -406,6 +406,35 @@ export type TableGroupAggregateValue = {
 };
 
 /**
+ * The expansion store's state — which group rows are open (ADR-061, ADR-067).
+ *
+ * It is client state and it is the config context's, not the data context's: a
+ * grouping, sort or filter change re-creates the data context, and expansion
+ * held there would be discarded before the path re-application meant to restore
+ * it could run.
+ *
+ * It is its own store rather than a field on `TableGroupingState` because that
+ * type is the URL codec's and the loader's, and everything in it crosses the
+ * single-fetch boundary where a `Set` cannot go (ADR-009).
+ */
+export type TableGroupExpansionState = {
+  /**
+   * Group paths whose subtree is **hidden** — the tree's expansion state, held
+   * by its complement.
+   *
+   * Membership means collapsed, not expanded, exactly as
+   * `ColumnVisibilityState` holds the *hidden* columns. An empty set is a fully
+   * expanded tree, which is the state a grouped read already materialises
+   * (ADR-059) and so the one that costs nothing to render.
+   *
+   * A member is a group's whole path, encoded by `resolveGroupPathKey`, never a
+   * row index — that is what lets a collapse be re-applied after a refetch and
+   * survive a sort (ADR-061).
+   */
+  readonly collapsedGroupPaths: ReadonlySet<string>;
+};
+
+/**
  * The grouping store's state — the config context's third store (ADR-061).
  *
  * `aggregates` is a **column-to-function** map, at most one aggregate per
@@ -417,9 +446,14 @@ export type TableGroupAggregateValue = {
  * calling its grouped read directly can build one — what is closed is every
  * path through this package, not the capability itself.
  *
- * It is a store rather than a field on the columns store because expansion joins
- * it here next, and expansion must survive the data context being re-created on
- * every navigation.
+ * It is a store rather than a field on the columns store because expansion sits
+ * beside it on the same context, and both must survive the data context being
+ * re-created on every navigation (ADR-061).
+ *
+ * Expansion is **not** a member here: this type is also the URL codec's and the
+ * loader's (`createTableRouteLoader`'s `grouping`), so everything in it crosses
+ * the single-fetch boundary and must be plain and serializable (ADR-009). A
+ * `Set` is neither. See `TableGroupExpansionState` and ADR-067.
  */
 export type TableGroupingState = {
   readonly aggregates: Readonly<Record<string, TableAggregateFn>>;

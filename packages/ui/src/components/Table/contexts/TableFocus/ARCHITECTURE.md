@@ -50,15 +50,18 @@ TableFocus/
         ├── useLeaveTableGrid.hook.ts        → focus left the grid
         ├── useReleaseTableGridFocus.hook.ts → the focused cell's node has gone away
         ├── useFocusTableCell.hook.ts        → a cell took focus on its own (pointer)
-        ├── useMoveTableGridFocus.hook.ts    → a key moved the tab stop
+        ├── useMoveTableGridFocus.hook.ts    → a key moved the tab stop, or expanded a group
         └── utils/
             ├── resolveGridFocusKey.util.ts       → the keyboard map, unclamped
             ├── resolveGridFocusMove.util.ts      → that answer, bounded by this grid
+            ├── resolveGroupExpansionKey.util.ts  → is this key a tree expansion rather than a move (ADR-067)
+            ├── resolveGridFocusContext.util.ts   → the four snapshots, derived once; `data` is the visible rows
             ├── resolveFocusedRowIndex.util.ts    → recover the target's index in current data
             ├── getGridColumnKeys.util.ts         → navigable columns, in painted order
             ├── getGridPageRows.util.ts           → rows per PageUp/PageDown
             ├── setTableFocusTarget.service.ts    → the one place a request is raised
             ├── scrollRowIntoView.service.ts      → bring an off-window row in
+            ├── moveTableFocusToRow.service.ts    → reposition the target when something removed its row
             └── commitTableFocusTarget.service.ts → scroll, then request (in that order)
 ```
 
@@ -133,6 +136,25 @@ lives:
 | Row moved (sort, filter, insert) | follows the row, found by identity                |
 | Row gone from the data           | nearest surviving row at the same absolute index  |
 | No rows survive                  | the grid container, which is always focusable     |
+
+One feature overrides the third row rather than inheriting it, exactly as ADR-062
+required each of them to decide: a **collapse** that hides the focused row hands
+focus to the collapsed group row, its nearest surviving ancestor, because the
+nearest survivor by index is whatever shifted up into the vacated slot — usually
+a row in a different group ([ADR-067](../../../../../../../docs/decisions/ADR-067-expansion-is-the-collapsed-set-and-a-group-row-is-a-tree-node.md)).
+`resolveGroupCollapseFocusTarget` decides it and `moveTableFocusToRow` writes it,
+including handing the tab stop back to the container — the cell's own release
+cannot fire, because the store has already been re-pointed away from it.
+
+## Navigating a tree
+
+Under grouping the grid navigates the rows a collapse leaves standing, not every
+loaded row: `resolveGridFocusContext` derives them through
+`resolveTableGroupTree`, so a hidden row cannot be a focus target that no cell
+answers. On a **group row** the two horizontal keys are expansion keys first —
+`ArrowRight` opens a closed group, `ArrowLeft` closes an open one — and cell
+navigation second, so nothing is lost and the fallback is one more press
+(ADR-067).
 
 ## Consumers
 

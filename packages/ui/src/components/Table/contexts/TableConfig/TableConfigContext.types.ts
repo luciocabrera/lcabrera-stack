@@ -1,5 +1,6 @@
 import type {
   TableColumnsState,
+  TableGroupExpansionState,
   TableGroupingState,
   TableMetaState,
 } from '#ui/components/Table/Table.types';
@@ -8,6 +9,13 @@ import type { TStore } from '#ui/hooks/useStore.hook';
 export type TableConfigContextValue<TData = Record<string, unknown>> = {
   /** Store managing column-related state */
   readonly columnsStore: TStore<TableColumnsState<TData>>;
+  /**
+   * Store managing which group rows are collapsed. It sits beside the grouping
+   * store for the same lifecycle reason, and apart from it because grouping
+   * configuration crosses the loader boundary while expansion never does
+   * (ADR-067).
+   */
+  readonly expansionStore: TStore<TableGroupExpansionState>;
   /**
    * Store managing row grouping. It sits on the config context, not the data
    * context, because it has to outlive a data revalidation: `TableDataProvider`

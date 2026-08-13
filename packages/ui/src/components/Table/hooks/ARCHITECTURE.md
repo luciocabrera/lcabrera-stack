@@ -1,7 +1,7 @@
 # hooks/ Architecture
 
-Table-specific hooks for column resizing, infinite scroll, scroll reset and the
-grid's roving focus.
+Table-specific hooks for column resizing, infinite scroll, scroll reset, the
+grid's roving focus and the group tree the body renders.
 
 These are **UI mechanics** — pointer gestures, observers, scroll position. They
 may call actions (that direction is fine), but nothing in `contexts/` imports
@@ -19,6 +19,8 @@ hooks/
 ├── useScrollResetAfterLoad.hook.ts      → Self-connected scroll-to-origin after full (non-load-more) loads
 ├── useTableGridFocus.hook.ts            → The grid element's tabIndex + focus/blur/keydown handlers
 ├── useTableCellFocus.hook.ts            → One cell's tabIndex, focus ref and pointer-focus handler
+├── useTableGroupTree.hook.ts            → The rows a collapse leaves standing plus their ARIA tree metadata
+├── useSyncTableGroupExpansion.hook.ts   → Drops collapsed paths the rows just loaded no longer carry
 ├── utils/
 │   ├── createResizeStartData.util.ts    → Drag-start snapshot: origin + effective width/bounds (+ .test)
 │   ├── getIsGridNavigationTarget.util.ts → Is this key event the grid's to interpret (+ .test)
@@ -42,6 +44,25 @@ to be data rather than `document.activeElement`, is
 from moving between two cells inside it, and `getIsGridNavigationTarget` to leave
 a key pressed inside a cell's own control — a row-actions menu, a filter input —
 to that control rather than swallowing it from the bubbling phase.
+
+## useTableGroupTree / useSyncTableGroupExpansion
+
+The render side of expansion ([ADR-067](../../../../../../docs/decisions/ADR-067-expansion-is-the-collapsed-set-and-a-group-row-is-a-tree-node.md)).
+
+`useTableGroupTree` is the one derivation `TableBase`, `TableBody` and
+`TableBodyRows` all read: the rows a collapse leaves standing, and each row's
+level, position, set size and expansion state. It composes two selectors and
+derives outside them rather than being one selector, deliberately — a selector
+handed to `useSyncExternalStore` is called on every check and must return a
+stable value for an unchanged store, and this derivation allocates. The React
+Compiler memoizes the result on the two stable inputs (ADR-004), and a table
+with no group rows short-circuits to its own array by reference, so an ungrouped
+grid pays no per-row allocation on a scroll frame.
+
+`useSyncTableGroupExpansion` is the effect half, mounted once on `TableBase`. It
+runs the prune action whenever the data array's identity changes — a navigation
+or a loaded page — and the action writes only when a path was actually dropped,
+which is what stops the effect re-entering itself.
 
 ## useColumnResize
 

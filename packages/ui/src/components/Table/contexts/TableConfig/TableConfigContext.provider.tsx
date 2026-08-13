@@ -1,5 +1,6 @@
 import type {
   TableColumnsState,
+  TableGroupExpansionState,
   TableGroupingState,
   TableMetaState,
 } from '#ui/components/Table/Table.types';
@@ -14,6 +15,7 @@ import type {
 import { TableConfigContext } from './TableConfigContext.context';
 import {
   getInitialColumnsState,
+  getInitialExpansionState,
   getInitialGroupingState,
   getInitialMetaState,
 } from './utils';
@@ -41,9 +43,15 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
   );
   const metaStore = useStore<TableMetaState>(normalizedMetaState);
   const groupingStore = useStore<TableGroupingState>(normalizedGroupingState);
+  // Expansion seeds from nothing — it is client state and does not travel in
+  // the URL (ADR-061), so there is no loader half of it to normalize.
+  const expansionStore = useStore<TableGroupExpansionState>(
+    getInitialExpansionState(),
+  );
 
   const value: TableConfigContextValue<TData> = {
     columnsStore,
+    expansionStore,
     groupingStore,
     metaStore,
   };

@@ -1,7 +1,7 @@
 # TableConfig Context Architecture
 
 Central configuration context that manages **column settings**, **UI meta state**
-and **row grouping** through three independent stores. This is the primary source
+and **row grouping** through four independent stores. This is the primary source
 of truth for how columns are displayed, filtered, sorted, grouped, pinned, and
 sized.
 
@@ -11,7 +11,7 @@ sized.
 TableConfig/
 ├── TableConfigContext.context.ts            → createContext (undefined default)
 ├── TableConfigContext.provider.tsx           → Provider: creates all three stores from initial state props
-├── TableConfigContext.types.ts              → ContextValue (columnsStore + groupingStore + metaStore)
+├── TableConfigContext.types.ts              → ContextValue (columnsStore + expansionStore + groupingStore + metaStore)
 ├── useTableConfigContextValue.hook.ts       → use(TableConfigContext) with guard
 ├── index.ts                                 → Barrel: TableConfigProvider, hooks
 │
@@ -109,12 +109,36 @@ TableConfig/
 │   │   ├── useSetTableColumnAggregate.hook.ts → Apply or clear one column's aggregate
 │   │   └── useClearTableGrouping.hook.ts    → Clear every key and every aggregate
 │   │
+│   ├── utils/resolveGroupPathKey.util.ts    → Pure: a group's identity as one string — the key expansion is stored under, and the one `resolveRowKey` gives a group row
+│   │
 │   └── selectors/
 │       ├── useGetTableGroupingKeys.hook.ts       → The applied group keys, in nesting order
 │       └── useGetTableColumnAggregate.hook.ts    → The aggregate applied to one column
 │
+├── expansion/                               → Which group rows are collapsed (ADR-061, ADR-067)
+│   ├── useExpansionStore.hook.ts            → Resolves the config expansionStore, delegates to useStoreSelector
+│   │
+│   │  A separate store from grouping, and the reason is the loader boundary:
+│   │  `TableGroupingState` is also the URL codec's and the loader's type, and a
+│   │  `Set` does not cross it (ADR-009).
+│   │
+│   ├── utils/
+│   │   ├── resolveGroupTreeNodes.util.ts    → Pure: each loaded row's level, parent and visibility; group ancestry from the path, detail rows from the nearest group above
+│   │   ├── resolveTableGroupTree.util.ts    → Pure: the rows a collapse leaves standing plus their ARIA tree metadata; returns the caller's array by reference when there is no tree
+│   │   ├── toggleCollapsedGroupPath.util.ts → Pure: one group's expansion flipped, as a new set
+│   │   └── pruneCollapsedGroupPaths.util.ts → Pure: drop collapsed paths the new rows no longer carry; same instance back when nothing changed
+│   │
+│   ├── actions/
+│   │   ├── utils/resolveGroupCollapseFocusTarget.util.ts → Pure: the ancestor focus falls back to when a collapse hides the focused row
+│   │   ├── useToggleTableGroupExpansion.hook.ts → Open or close one group by path, moving focus first when the collapse takes the focused row with it
+│   │   └── usePruneTableGroupExpansion.hook.ts  → Reconcile the collapsed paths against the rows just loaded
+│   │
+│   └── selectors/
+│       └── useGetTableCollapsedGroupPaths.hook.ts → The paths whose subtree is hidden
+│
 ├── utils/
   ├── getInitialColumnsState.util.ts       → Build initial columns state from props; synthesizes the `actions` column via `resolveTableActionsColumn` when `crud.read/update/delete` is enabled (or a consumer `actions` column is declared), and only force-pins it right when it actually exists
+  ├── getInitialExpansionState.util.ts     → Nothing collapsed: a grouped read returns whole, so the tree opens (ADR-067). No loader seed — expansion does not travel in the URL
   ├── getInitialGroupingState.util.ts      → Build initial grouping state from the configuration the loader applied (`metaState.groupingKeys` + `metaState.groupingAggregates`)
   ├── getInitialMetaState.util.ts          → Build initial meta state from props
   └── index.ts                             → Barrel: utils
@@ -128,15 +152,18 @@ graph LR
     Provider["TableConfigProvider"]
     Provider -->|"getInitialColumnsState()"| CS["columnsStore (TStore)"]
     Provider -->|"getInitialGroupingState()"| GS["groupingStore (TStore)"]
+    Provider -->|"getInitialExpansionState()"| ES["expansionStore (TStore)"]
     Provider -->|"getInitialMetaState()"| MS["metaStore (TStore)"]
 
     CS -->|"get / set / subscribe"| ColState["TableColumnsState"]
     GS -->|"get / set / subscribe"| GrpState["TableGroupingState"]
+    ES -->|"get / set / subscribe"| ExpState["TableGroupExpansionState"]
     MS -->|"get / set / subscribe"| MetState["TableMetaState"]
   end
 
   useColumnsStore["useColumnsStore(selector)"] -->|"useSyncExternalStore"| CS
   useGroupingStore["useGroupingStore(selector)"] -->|"useSyncExternalStore"| GS
+  useExpansionStore["useExpansionStore(selector)"] -->|"useSyncExternalStore"| ES
   useMetaStore["useMetaStore(selector)"] -->|"useSyncExternalStore"| MS
 ```
 
@@ -180,6 +207,21 @@ TableGroupingState = {
   keys: readonly string[];           // Applied group keys, in the query's nesting order
 };
 ```
+
+## Expansion State Shape
+
+```typescript
+TableGroupExpansionState = {
+  collapsedGroupPaths: ReadonlySet<string>; // Group paths whose subtree is HIDDEN — membership means collapsed, as `ColumnVisibilityState` holds the hidden columns. Empty = fully expanded, which is the initial state
+};
+```
+
+**Why the complement, and why a separate store.** A grouped read returns whole
+(ADR-059) and lazy per-level fetching is a non-goal, so collapsing by default
+would hide rows already fetched and save nothing; the empty set therefore has to
+mean "expanded". And it is not a field on `TableGroupingState` because that type
+is also the URL codec's and `createTableRouteLoader`'s — everything in it crosses
+the single-fetch boundary, where a `Set` does not survive (ADR-009, ADR-067).
 
 ## Meta State Shape
 
@@ -227,11 +269,13 @@ graph TD
   A --> B["getInitialColumnsState(columnsState, crud)"]
   A --> C["getInitialMetaState(metaState)"]
   A --> G["getInitialGroupingState(metaState.groupingKeys)"]
+  A --> GE["getInitialExpansionState() — nothing collapsed, no loader seed"]
   B --> B1["resolveTableActionsColumn(columns, crud)"]
   B1 --> D["useStore(columnsInitial) → columnsStore"]
   C --> E["useStore(metaInitial) → metaStore"]
   G --> H["useStore(groupingInitial) → groupingStore"]
-  D --> F["Provide { columnsStore, groupingStore, metaStore } via TableConfigContext"]
+  GE --> HE["useStore(expansionInitial) → expansionStore"]
+  D --> F["Provide { columnsStore, expansionStore, groupingStore, metaStore } via TableConfigContext"]
   E --> F
   H --> F
 ```

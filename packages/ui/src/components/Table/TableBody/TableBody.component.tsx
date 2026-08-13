@@ -4,6 +4,7 @@ import {
   useGetTableOverscan,
   useGetTableRowHeight,
 } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
+import { useTableGroupTree } from '#ui/components/Table/hooks';
 import { SpacerRow } from '#ui/components/Table/SpacerRow';
 import { TableBodyRows } from '#ui/components/Table/TableBodyRows';
 import { TableEmptyState } from '#ui/components/Table/TableEmptyState';
@@ -24,16 +25,22 @@ export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
   const isLoadingMore = useGetTableIsLoadingMore();
   const rowHeight = useGetTableRowHeight();
   const overscan = useGetTableOverscan();
+  const { rows } = useTableGroupTree();
 
   const isLoadingState = isLoading || isLoadingMore;
   const isEmpty = totalLoadedRows === 0 && !isLoadingState;
 
+  // The window counts the rows a collapse leaves standing, not every loaded
+  // one: `<tbody>`'s declared height and both spacers come from this number, so
+  // counting hidden rows would leave the body taller than its contents by
+  // exactly the collapsed subtree (ADR-067). `isEmpty` stays on the loaded
+  // count — a fully collapsed tree still paints its group rows.
   const { bottomSpacerHeight, endIndex, offsetY, startIndex, totalHeight } =
     useVirtualization({
       containerRef: tableContainerRef,
       itemHeight: rowHeight,
       overscan,
-      totalItems: totalLoadedRows,
+      totalItems: rows.length,
     });
 
   // The empty body keeps `display: table-row-group`, so its implicit

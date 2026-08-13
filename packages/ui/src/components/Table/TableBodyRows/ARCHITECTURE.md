@@ -4,6 +4,11 @@ Row-rendering delegate for `TableBody`. Owns the `visibleRows.map()` loop
 and cell creation, isolating data-dependent re-renders from the
 virtualisation layout in `TableBody`.
 
+The rows it loops over are the ones a collapse leaves standing, and `rowIndex`
+counts those — the same index space the focus store, `aria-rowindex` and the
+`<tbody>` height all use, because all four come off the one array
+`useTableGroupTree` returns (ADR-067).
+
 Which component a row gets is asked of the **row**: one carrying a group summary
 renders as a `TableGroupHeaderRow`, everything else renders its cells. The
 grouping configuration is never consulted here, so a group row and a detail row
@@ -16,7 +21,8 @@ TableBodyRows/
 ├── TableBodyRows.component.tsx   → Visible-row loop: group header or column-group cell rendering, per row
 ├── TableBodyRows.types.ts        → TableBodyRowsProps (startIndex, endIndex, isLoadingState)
 ├── utils/
-│   └── resolveRowKey.util.ts     → Row identity key from a group summary, else from the primary-key column(s)
+│   ├── resolveRowKey.util.ts     → Row identity key from a group summary, else from the primary-key column(s)
+│   └── resolveTreeRowAriaProps.util.ts → One row's aria-level / posinset / setsize / expanded, or nothing outside a tree
 ├── ARCHITECTURE.md               → This file
 └── index.ts                      → Barrel export
 ```
@@ -31,13 +37,13 @@ TableBodyRows/
 
 ## Context Dependencies
 
-| Selector                      | Purpose                                            |
-| ----------------------------- | -------------------------------------------------- |
-| `useGetTableData`             | Full data array — sliced to visible window         |
-| `useGetColumns`               | Declared columns — the primary-key source for keys |
-| `useGetPinnedColumnPartition` | Pre-split left/center/right pinning partition      |
-| `useGetColumnSizing`          | Column widths for cell rendering                   |
-| `useGetPinnedColumnOffsets`   | Pre-computed sticky offsets for pinned columns     |
+| Selector                      | Purpose                                                                                               |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `useTableGroupTree`           | The rows a collapse leaves standing, plus each one's place in the tree — sliced to the visible window |
+| `useGetColumns`               | Declared columns — the primary-key source for keys                                                    |
+| `useGetPinnedColumnPartition` | Pre-split left/center/right pinning partition                                                         |
+| `useGetColumnSizing`          | Column widths for cell rendering                                                                      |
+| `useGetPinnedColumnOffsets`   | Pre-computed sticky offsets for pinned columns                                                        |
 
 `useGetColumns` is read instead of re-assembling the pinning partition: the
 partition carries only the visible columns in display order, so a hidden or
@@ -47,20 +53,23 @@ reordered primary key would silently change a row's identity.
 
 ```mermaid
 graph TD
-  TBR["TableBodyRows"] --> data["useGetTableData()"]
+  TBR["TableBodyRows"] --> data["useTableGroupTree() → { rows, rowMeta }"]
   TBR --> COL["useGetColumns()"]
   TBR --> CG["useGetPinnedColumnPartition()"]
   TBR --> CS["useGetColumnSizing()"]
   TBR --> PO["useGetPinnedColumnOffsets()"]
 
-  data --> slice["visibleRows = data.slice(startIndex, endIndex)"]
+  data --> slice["visibleRows = rows.slice(startIndex, endIndex)"]
   CS --> renderer["createRenderTableBodyCell({ columnSizing, isLoadingState, pinnedOffsets })"]
   PO --> renderer
 
   slice --> map["visibleRows.map(row => ...)"]
   COL --> key["resolveRowKey({ columns, index: rowIndex, row })"]
   map --> key
+  map --> tree["resolveTreeRowAriaProps(rowMeta[rowIndex])"]
   map --> summary["getTableGroupRowSummary(row)"]
+  tree --> GH
+  tree --> TR
   summary -->|"summary present"| GH["TableGroupHeaderRow"]
   summary -->|"otherwise"| TR["TableRow"]
   key --> GH
@@ -81,8 +90,8 @@ under `TABLE_GROUP_ROW_FIELD` ([ADR-061](../../../../../../docs/decisions/ADR-06
 a half-written one renders as a data row rather than putting `undefined` on
 screen.
 
-**One data row still produces exactly one `<tr>`.** `TableBody` sizes `<tbody>`
-as `totalLoadedRows × rowHeight` and derives both spacers from the same number,
+**One visible row still produces exactly one `<tr>`.** `TableBody` sizes
+`<tbody>` as `visible rows × rowHeight` and derives both spacers from the same number,
 so emitting a header _plus_ a detail row per entry would desynchronize the body
 from its contents. `TableGroupHeaderRow` composes `TableRow`, which is where
 `rowHeight` is read, so the group row paints at the same height as every other
@@ -108,6 +117,27 @@ Group rows take the same attribute — a group is one row of the sequence, not a
 annotation beside it — which is why `TableGroupHeaderRow` forwards native `<tr>`
 attributes.
 
+Under a tree the sequence counts the rows a collapse leaves standing, and so
+does `aria-rowcount`: a collapsed row is not a row of the grid, so counting it
+would advertise a total no index can ever reach
+([ADR-067](../../../../../../docs/decisions/ADR-067-expansion-is-the-collapsed-set-and-a-group-row-is-a-tree-node.md)).
+Both numbers come off the one array `useTableGroupTree` returns, which is what
+keeps them from being derived from different bases.
+
+## Tree Semantics
+
+`resolveTreeRowAriaProps` writes `aria-level`, `aria-posinset` and
+`aria-setsize` on **every** row of a tree, group and detail alike — two rows
+exposing different structures is what makes a tree unreadable rather than merely
+under-annotated. `aria-expanded` is written only where there is something to
+expand: on a leaf it would announce a control the user cannot operate. Outside a
+tree the util returns nothing at all, so an ungrouped grid's markup is what it
+was before tree semantics existed.
+
+A row's level comes from the group's **path**, never from its position among the
+rows: prefixes are what a grouping mode emits (ADR-065), so ancestry read that
+way does not depend on emission order.
+
 ## Cell Addressing
 
 `rowIndex` and `rowKey` travel with the row into every cell, through
@@ -123,7 +153,10 @@ column.
 Rows are keyed by data, not by position ([ADR-062](../../../../../../docs/decisions/ADR-062-grid-semantics-roving-focus-and-row-identity.md)).
 `resolveRowKey` derives the key from the `isPrimaryKey` column(s) — the same
 derivation `resolveCrudRowId` uses for a CRUD id, via the shared
-`resolvePrimaryKeyColumnKeys`.
+`resolvePrimaryKeyColumnKeys`. A group row's key is `resolveGroupPathKey`'s
+encoding of its path, called rather than repeated: expansion is stored under
+that same key, so a collapse could not be re-applied after a refetch if the two
+drifted (ADR-067).
 
 The two helpers share which columns they read and nothing else — not the
 encoding, and not the failure handling. `resolveCrudRowId` throws a `TypeError`
@@ -192,10 +225,11 @@ records.
 `TableBody` owns virtualisation (spacers, total height, scroll window) and
 delegates row rendering to `TableBodyRows`. This separation means:
 
-- **`TableBody`** subscribes to `totalLoadedRows` (a number) instead of the
-  full `data` array, avoiding re-renders when row content changes.
-- **`TableBodyRows`** subscribes to `data`, the declared columns, the pinned column
-  partition, sizing, and pinned offsets — re-renders when any of those change.
+- **`TableBody`** reads only the visible row **count** for its window, not the
+  rows themselves, avoiding re-renders when row content changes.
+- **`TableBodyRows`** subscribes to the rows and the collapsed paths (through
+  `useTableGroupTree`), the declared columns, the pinned column partition,
+  sizing, and pinned offsets — re-renders when any of those change.
 
 ## Utility Reuse
 
@@ -204,6 +238,7 @@ Uses existing utilities from `TableBody/utils/`:
 - `createRenderTableBodyCell` — factory that binds sizing + pinned offsets into a cell renderer
 - `renderTableBodyPinnedGroup` — maps one pinning partition through the bound renderer
 
-Owns one private delegate in `utils/`, imported by direct file path (ADR-007 rule 3 — no deep `utils/` barrel):
+Owns two private delegates in `utils/`, imported by direct file path (ADR-007 rule 3 — no deep `utils/` barrel):
 
 - `resolveRowKey` — row identity key; see [Row Identity](#row-identity)
+- `resolveTreeRowAriaProps` — one row's tree attributes; see [Tree Semantics](#tree-semantics)
