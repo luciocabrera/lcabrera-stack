@@ -26,9 +26,10 @@ subtotal has nowhere to put its measures without one.
 
 ## Status / next
 
-- Current step: implemented; running the gate.
+- Current step: round 2 done — rebased onto #665, gate green, three review
+  threads answered and resolved.
 - Blockers: none.
-- Next: push, leave the PR a draft.
+- Next: awaiting review.
 
 ## Overlap with #571 (PR #665, `chore/571-treegrid-expansion`)
 
@@ -61,7 +62,7 @@ the summary and nothing else). When a slice does interleave detail rows into a
 grouped result, the answer is to give the detail row an explicit parent — not to
 reorder the query, which is fixed.
 
-### What that costs #571, in their files
+### Applied here, now that #571 has merged
 
 `getTableGroupRowSummary` used to refuse an empty path and now accepts it,
 because that row is the one a rollup exists to produce. Their two expressions,
@@ -73,11 +74,17 @@ level     = path.length                                              → 0
 parentKey = level === 1 ? '' : resolveGroupPathKey(path.slice(0, -1)) → "[]"
 ```
 
-So the grand total is **its own parent**, and its `level` is `0` where the type
-documents "1-based depth" and `aria-level` requires 1-based. Under the decision
-above both are one condition — `level <= 1` takes the root key, and the level
-the grand total is annotated at is the top one. Theirs to make; flagged to the
-coordinator rather than edited here.
+So the grand total was **its own parent**, and its `level` was `0` where the
+type documents "1-based depth" and `aria-level` requires 1-based. Both are fixed
+in `940d99dd`: the level is clamped to the top one, and the parent is read off
+`path.length <= 1` rather than off the clamped level, so the two conditions stay
+independently falsifiable.
+
+One more defect the same shape reaches: `hasChildren` asked whether the _next_
+row was deeper, which is only right while a parent precedes its children.
+Rollup emits a subtotal after the rows it totals, so every subtotal reported
+itself childless and could not be folded. It is now read off the tree — a row
+owns children when some other row names it as parent.
 
 ### Rebase
 
