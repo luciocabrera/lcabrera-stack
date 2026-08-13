@@ -1,11 +1,32 @@
 // @vitest-environment jsdom
 
+import * as stylex from '@stylexjs/stylex';
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import type { TableGroupRowSummary } from '#ui/components/Table/Table.types';
 
 import { TableGroupLabel } from './TableGroupLabel.component';
+
+/**
+ * The one-line contract, declared here independently of the component.
+ *
+ * StyleX compiles a declaration to an **atomic** class keyed by the property
+ * and value, so the same three declarations compile to the same three classes
+ * wherever they are written. Restating them here and asserting the rendered
+ * element carries all three is therefore a real check on the shipped style: it
+ * fails the moment one is dropped from `TableGroupLabel.stylex.ts`.
+ *
+ * Reading the component's own style object instead would prove nothing —
+ * removing a property would change the expectation and the subject together.
+ */
+const oneLineContract = stylex.create({
+  text: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
+});
 
 const summary = (
   overrides: Partial<TableGroupRowSummary> = {},
@@ -45,9 +66,21 @@ describe('TableGroupLabel', () => {
     const text = label.querySelector('[title]');
 
     expect(text?.getAttribute('title')).toContain('a very long group label');
-    // The truncation is visible rather than silent: an ellipsized label tells
-    // the reader something was cut, where a clipped row does not.
-    expect(label.querySelectorAll('br')).toHaveLength(0);
+
+    // jsdom lays nothing out, so there is no geometry to measure and no
+    // `<br>` to count — a CSS wrap emits neither. What is checkable is the
+    // declared contract: `white-space: nowrap` is what stops the wrap, and
+    // `text-overflow: ellipsis` with `overflow: hidden` is what makes the
+    // truncation visible instead of silent.
+    const required = (stylex.props(oneLineContract.text).className ?? '').split(
+      ' ',
+    );
+
+    expect(required).not.toHaveLength(0);
+
+    for (const className of required) {
+      expect(text?.classList.contains(className)).toBe(true);
+    }
   });
 
   it('indents one step per level, so a level reads off the row', () => {

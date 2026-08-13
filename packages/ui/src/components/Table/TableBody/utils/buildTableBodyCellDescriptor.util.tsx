@@ -11,7 +11,10 @@ import { DEFAULT_MIN_COLUMN_WIDTH } from '#ui/components/Table/Table.constants';
 import { TableRowActionsMenu } from '#ui/components/Table/TableRowActionsMenu';
 import { isTableGroupHierarchyColumn } from '#ui/components/Table/utils/isTableGroupHierarchyColumn.util';
 
-import { resolveGroupCellChildren } from './resolveGroupCellChildren.util';
+import {
+  EMPTY_CELL,
+  resolveGroupCellChildren,
+} from './resolveGroupCellChildren.util';
 
 /**
  * `kind` is a rendering decision, not a column type: `custom` for the actions
@@ -137,14 +140,14 @@ export const buildTableBodyCellDescriptor = <
 
   // A detail row's own hierarchy cell holds nothing: its values are already in
   // their own columns. The cell exists so the grid stays rectangular and every
-  // row offers the same focus targets. An empty fragment rather than
-  // `undefined`, which reads as "no custom content" and would send the cell
-  // down the default branch to render the row's value after all.
+  // row offers the same focus targets. The empty fragment is load-bearing —
+  // see the note in `resolveGroupCellChildren.util.tsx`; `undefined` here reads
+  // as "no custom content" and renders the row's value after all.
   if (
     isTableGroupHierarchyColumn(col.key) ||
     groupingKeys.includes(columnKey)
   ) {
-    return { ...shared, children: <></> };
+    return { ...shared, children: EMPTY_CELL };
   }
 
   const customActions = col.render?.(row);

@@ -10,7 +10,12 @@ import { pruneCollapsedGroupPaths } from './pruneCollapsedGroupPaths.util';
 type Row = Record<string, unknown>;
 
 const groupRow = (path: readonly TableGroupKeyValue[]): Row => ({
-  [TABLE_GROUP_ROW_FIELD]: { aggregates: [], count: 1, path },
+  [TABLE_GROUP_ROW_FIELD]: {
+    aggregates: [],
+    count: 1,
+    isSubtotal: false,
+    path,
+  },
 });
 
 const paris = [{ columnKey: 'city', label: 'Paris' }];

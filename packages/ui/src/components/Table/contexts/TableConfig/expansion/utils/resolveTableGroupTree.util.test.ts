@@ -10,7 +10,17 @@ import { resolveTableGroupTree } from './resolveTableGroupTree.util';
 type Row = Record<string, unknown>;
 
 const groupRow = (path: readonly TableGroupKeyValue[]): Row => ({
-  [TABLE_GROUP_ROW_FIELD]: { aggregates: [], count: 2, path },
+  [TABLE_GROUP_ROW_FIELD]: {
+    aggregates: [],
+    count: 2,
+    isSubtotal: false,
+    path,
+  },
+});
+
+/** A rollup row: the same shape, totalling the levels beneath it (#570). */
+const subtotalRow = (path: readonly TableGroupKeyValue[]): Row => ({
+  [TABLE_GROUP_ROW_FIELD]: { aggregates: [], count: 4, isSubtotal: true, path },
 });
 
 const paris = [{ columnKey: 'city', label: 'Paris' }];
@@ -157,6 +167,64 @@ describe('resolveTableGroupTree', () => {
     });
 
     expect(tree.rowMeta?.[0]?.hasChildren).toBe(true);
+  });
+
+  it('reads a rollup, whose parents follow their children and end at a grand total', () => {
+    // The shape #570 emits, and the one an adjacency walk gets wrong in three
+    // separate places. `[EMEA, Spain]` and `[EMEA, France]` are leaves; `[EMEA]`
+    // is their parent *and* is emitted after them; `[]` is the grand total,
+    // keyed by nothing.
+    const emea = [{ columnKey: 'region', label: 'EMEA' }];
+    const spain = [...emea, { columnKey: 'country', label: 'Spain' }];
+    const france = [...emea, { columnKey: 'country', label: 'France' }];
+
+    const tree = resolveTableGroupTree({
+      collapsedGroupPaths: noneCollapsed,
+      data: [
+        groupRow(spain),
+        groupRow(france),
+        subtotalRow(emea),
+        subtotalRow([]),
+      ],
+    });
+
+    // Ancestry from the path, so a parent emitted last is still a parent.
+    expect(tree.rowMeta?.map((meta) => meta.level)).toStrictEqual([2, 2, 1, 1]);
+    // The grand total is a *sibling* of the top-level groups, not their
+    // ancestor: read as an ancestor it would put the whole grid inside one
+    // collapsible subtree. Three roots would be wrong too — `[EMEA]` and `[]`
+    // are the only two rows at the top level.
+    expect(tree.rowMeta?.map((meta) => meta.setSize)).toStrictEqual([
+      2, 2, 2, 2,
+    ]);
+    expect(tree.rowMeta?.map((meta) => meta.posInSet)).toStrictEqual([
+      1, 2, 1, 2,
+    ]);
+    // And `[EMEA]` owns the two rows above it, so it can be folded. An
+    // adjacency test answers `false` here — the next row is shallower, not
+    // deeper — and withholds `aria-expanded` from the one row a reader most
+    // wants to close.
+    expect(tree.rowMeta?.map((meta) => meta.hasChildren)).toStrictEqual([
+      false,
+      false,
+      true,
+      false,
+    ]);
+  });
+
+  it('folds a rollup parent that sits below the rows it totals', () => {
+    const emea = [{ columnKey: 'region', label: 'EMEA' }];
+    const spain = [...emea, { columnKey: 'country', label: 'Spain' }];
+
+    const tree = resolveTableGroupTree({
+      collapsedGroupPaths: new Set([resolveGroupPathKey(emea)]),
+      data: [groupRow(spain), subtotalRow(emea), subtotalRow([])],
+    });
+
+    // Its child goes, it stays, and it still reports the child it is hiding.
+    expect(tree.rows).toHaveLength(2);
+    expect(tree.rowMeta?.[0]?.hasChildren).toBe(true);
+    expect(tree.rowMeta?.[0]?.isExpanded).toBe(false);
   });
 
   it('is unmoved by a collapsed path no row carries', () => {

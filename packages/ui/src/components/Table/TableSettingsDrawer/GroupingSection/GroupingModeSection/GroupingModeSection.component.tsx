@@ -6,12 +6,16 @@ import {
   TABLE_GROUPING_MODE_LABELS,
   TABLE_GROUPING_MODES,
 } from '#ui/components/Table/Table.constants';
+import { accessibility } from '#ui/design-system/tokens/commons.stylex';
 
 import type { GroupingModeSectionProps } from './GroupingModeSection.types';
 
 import { useSetGroupingMode } from '../../TableDrawerContext/actions';
 import { useGetGroupingMode } from '../../TableDrawerContext/selectors';
 import { styles } from './GroupingModeSection.stylex';
+
+/** Named once, so the visible heading and the accessible group name agree. */
+const SECTION_TITLE = 'Totals';
 
 /**
  * The drawer's grouping-mode control: whether the read returns one row per
@@ -42,7 +46,17 @@ export const GroupingModeSection = ({
       {...stylex.props(styles.container, styles.fieldsetReset)}
       data-testid='grouping-mode-section'
     >
-      <SidePanelSectionHeader title='Totals' />
+      {/*
+       * A `<fieldset>` takes its accessible name from its `<legend>` and from
+       * nothing else — `SidePanelSectionHeader` renders a heading beside the
+       * group, not a name for it, so without this the radios are an unnamed
+       * group. It is visually hidden because the heading already shows the
+       * word; both read from `SECTION_TITLE` so they cannot drift apart.
+       */}
+      <legend {...stylex.props(accessibility.visuallyHidden)}>
+        {SECTION_TITLE}
+      </legend>
+      <SidePanelSectionHeader title={SECTION_TITLE} />
       <RadioOptionGroup
         name='table-grouping-mode'
         onChange={setGroupingMode}

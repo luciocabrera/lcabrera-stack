@@ -248,10 +248,19 @@ export type GroupRowLimit = {
 };
 
 /**
- * A sort on a group key sets that key's direction in place; a sort on an
- * aggregate is appended after every key term. That ordering is structural, not
- * a convention: it is what makes ranking an ancestor by an aggregate
- * inexpressible, which is the thing that would scramble the hierarchy.
+ * A sort on a group key sets that key's direction in place. A sort on an
+ * aggregate acts at the **innermost** level: its term is emitted after the
+ * innermost key's `GROUPING` term and ahead of that key's own value term,
+ * which stays last as the tiebreak.
+ *
+ * **The order of this list is meaningful, and an aggregate listed ahead of a
+ * key is refused at construction** (`assert-group-sort.util.ts`). Ranking
+ * parents by their own totals scrambles the hierarchy, and doing it correctly
+ * needs the parent's aggregate on the child row
+ * (`sum(…) OVER (PARTITION BY k₁)`) — a named v2. The refusal replaced an
+ * earlier behaviour that silently moved such a sort behind every key term,
+ * where it can never fire: within one grouping set the key columns already
+ * identify the row, so the sort was accepted, emitted and dead.
  */
 export type GroupSort =
   | { readonly aggregateAlias: string; readonly direction: 'asc' | 'desc' }

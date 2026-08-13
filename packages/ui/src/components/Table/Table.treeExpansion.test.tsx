@@ -69,7 +69,12 @@ const berlin: readonly TableGroupKeyValue[] = [
 ];
 
 const groupRow = (path: readonly TableGroupKeyValue[]): TestRow => ({
-  [TABLE_GROUP_ROW_FIELD]: { aggregates: [], count: 3, path },
+  [TABLE_GROUP_ROW_FIELD]: {
+    aggregates: [],
+    count: 3,
+    isSubtotal: false,
+    path,
+  },
 });
 
 /**
@@ -186,7 +191,15 @@ const Harness = ({ data }: HarnessProps) => {
   return (
     <TableConfigProvider<TestRow>
       columnsState={{ columns }}
-      metaState={{ overscan: 2, rowHeight: ROW_HEIGHT }}
+      metaState={{
+        // A grouped table declares its keys, and that is what injects the
+        // hierarchy column a group row puts its label in (ADR-065). Without it
+        // the grid would render group rows into data columns only, which is not
+        // a state a grouped route can be in.
+        groupingKeys: ['city'],
+        overscan: 2,
+        rowHeight: ROW_HEIGHT,
+      }}
     >
       <TableFocusProvider>
         <TableDataProvider<TestRow>
@@ -259,7 +272,42 @@ const getBody = () => screen.getByTestId('table-body');
  */
 const readBodyHeight = () => getBody().style.getPropertyValue('--x-height');
 
+/**
+ * Every pixel value StyleX wrote onto one element, as numbers.
+ *
+ * `TableRow` declares `height`, `minHeight` and `maxHeight` from one dynamic
+ * style, so a row that paints at the row height reports that number three
+ * times — and reading all three is what makes the clamp itself checkable,
+ * rather than only the nominal height.
+ */
+const readPixelValues = (element: Element) =>
+  (element.getAttribute('style') ?? '')
+    .matchAll(/(\d+)px/g)
+    .map(([, value]) => Number(value))
+    .toArray();
+
 const getGroupRows = () => screen.getAllByTestId('table-group-header-row');
+
+/**
+ * The hierarchy label of every rendered group row, in order.
+ *
+ * Queried in place of the bare city text these assertions used to read. Since
+ * ADR-065 the city column is a **group key**, so it blanks on the detail rows
+ * and the only place the value appears is the group row's own label — a
+ * `getAllByText('Paris')` would now count one element whatever the collapse
+ * did, and could not fail.
+ */
+const getGroupLabels = () =>
+  screen.getAllByTestId('table-group-label').map((label) => label.textContent);
+
+/**
+ * The `Id` cell of every rendered **detail** row, in order. `id` is not a group
+ * key, so it still renders — and it is what says which rows a collapse removed.
+ */
+const getDetailIds = () =>
+  getRenderedRows()
+    .filter((row) => row.dataset.testid !== 'table-group-header-row')
+    .map((row) => row.querySelectorAll('[role="gridcell"]')[1]?.textContent);
 
 const getRenderedRows = () => screen.getAllByRole('row');
 
@@ -363,7 +411,8 @@ describe('a grouped table that expands and collapses', () => {
     clickButton('toggle-paris');
     // Paris survives, its three rows do not, and Berlin's branch is untouched.
     expect(getRenderedRows()).toHaveLength(4);
-    expect(screen.queryByText('Paris')).toBeNull();
+    expect(getGroupLabels()).toStrictEqual(['Paris(3)', 'Berlin(3)']);
+    expect(getDetailIds()).toStrictEqual(['4', '5']);
 
     clickButton('toggle-paris');
     expect(getRenderedRows()).toHaveLength(7);
@@ -384,6 +433,79 @@ describe('a grouped table that expands and collapses', () => {
     clickButton('toggle-berlin');
     expect(getRenderedRows()).toHaveLength(2);
     expect(readBodyHeight()).toBe(`${2 * ROW_HEIGHT}px`);
+  });
+
+  it('paints every visible row at the row height while a subtree is collapsed', async () => {
+    // The composition #570 and #571 have to survive together: a group row now
+    // carries real cells — a hierarchy label that can ellipsize, and one
+    // aggregate cell per column (ADR-065) — and a collapse changes how many
+    // rows the body is sized for (ADR-067). The invariant is that the two
+    // never drift: offsetY + painted rows + bottom spacer === the declared
+    // height, with every painted row at exactly one row height.
+    render(<Harness data={rows} />);
+
+    clickButton('toggle-paris');
+
+    const allRows = [...getBody().querySelectorAll('tr')];
+    const spacers = allRows.filter(
+      (row) => row.getAttribute('aria-hidden') === 'true',
+    );
+    const painted = allRows.filter(
+      (row) => row.getAttribute('aria-hidden') !== 'true',
+    );
+
+    expect(painted).toHaveLength(4);
+
+    for (const row of painted) {
+      // height, minHeight and maxHeight — a label allowed to wrap would be a
+      // clipped row rather than a taller one, so the clamp is the guarantee.
+      expect(readPixelValues(row)).toStrictEqual([
+        ROW_HEIGHT,
+        ROW_HEIGHT,
+        ROW_HEIGHT,
+      ]);
+    }
+
+    const spacerHeight = spacers.reduce(
+      (total, spacer) => total + (readPixelValues(spacer)[0] ?? 0),
+      0,
+    );
+
+    expect(spacerHeight + painted.length * ROW_HEIGHT).toBe(
+      Number(readBodyHeight().replace('px', '')),
+    );
+  });
+
+  it('walks focus across group boundaries with a subtree collapsed', async () => {
+    // The per-press trace the two slices have to agree on: every row is a stop,
+    // group rows included (#651 closes because they own cells now), and a
+    // collapsed group's rows are not stops at all because they are not rendered
+    // — the same index space the height above is computed from.
+    render(<Harness data={rows} />);
+
+    clickButton('toggle-berlin');
+
+    const trace: string[] = [];
+
+    await enterGrid();
+    await pressKey('ArrowRight');
+    trace.push(readFocus());
+
+    for (let step = 0; step < 4; step += 1) {
+      await pressKey('ArrowDown');
+      trace.push(readFocus());
+    }
+
+    // Paris (a group row's own `Id` cell), its three rows, then Berlin —
+    // collapsed, so its two rows are absent and the last ArrowDown clamps
+    // there rather than walking into them.
+    expect(trace).toStrictEqual([
+      '—No aggregate',
+      '1',
+      '2',
+      '3',
+      '—No aggregate',
+    ]);
   });
 
   it('renumbers the grid over the rows that remain', async () => {
@@ -433,8 +555,8 @@ describe('a grouped table that expands and collapses', () => {
     expect(getRenderedRows()).toHaveLength(4);
     expect(getCollapsedPaths()).toStrictEqual([resolveGroupPathKey(paris)]);
     // Berlin is first now and still open; Paris is last and still closed.
-    expect(screen.getAllByText('Berlin')).toHaveLength(2);
-    expect(screen.queryByText('Paris')).toBeNull();
+    expect(getGroupLabels()).toStrictEqual(['Berlin(3)', 'Paris(3)']);
+    expect(getDetailIds()).toStrictEqual(['5', '4']);
   });
 
   it('drops a path a filter change removed, rather than re-applying it later', async () => {
@@ -451,7 +573,7 @@ describe('a grouped table that expands and collapses', () => {
     // The discriminating half: a collapse kept from data that no longer existed
     // would silently re-close Paris the moment the filter let it back.
     expect(getRenderedRows()).toHaveLength(7);
-    expect(screen.getAllByText('Paris')).toHaveLength(3);
+    expect(getDetailIds()).toStrictEqual(['1', '2', '3', '4', '5']);
   });
 
   it('expands with Right and collapses with Left, on the group row', async () => {
@@ -476,12 +598,15 @@ describe('a grouped table that expands and collapses', () => {
     await enterGrid();
     await pressKey('ArrowDown');
 
-    expect(readFocus()).toBe('1');
+    // The first cell of every row is now the grid's hierarchy column, and a
+    // detail row's is empty: its values are already in their own columns
+    // (ADR-065).
+    expect(readFocus()).toBe('');
 
     await pressKey('ArrowRight');
 
-    // Moved one cell, collapsed nothing.
-    expect(readFocus()).toBe('Paris');
+    // Moved one cell — onto this row's `Id` — and collapsed nothing.
+    expect(readFocus()).toBe('1');
     expect(getCollapsedPaths()).toStrictEqual([]);
   });
 
@@ -494,6 +619,10 @@ describe('a grouped table that expands and collapses', () => {
     };
 
     await enterGrid();
+    // One column right of the hierarchy column, onto `Id`: it is the only
+    // column that renders on both kinds of row here, so a trace read there
+    // names which row focus is on rather than reading blank down the tree.
+    await pressKey('ArrowRight');
     record();
     await pressKey('ArrowDown');
     record();
@@ -504,8 +633,9 @@ describe('a grouped table that expands and collapses', () => {
 
     // Focus is on the last row of Paris — inside the subtree about to close,
     // which is the whole point: collapsing while focus sits elsewhere proves
-    // nothing.
-    expect(trace).toStrictEqual(['grid', '1', '2', '3']);
+    // nothing. The first entry is the Paris group row's own `Id` cell: no
+    // aggregate was selected on that column, so it renders the dash.
+    expect(trace).toStrictEqual(['—No aggregate', '1', '2', '3']);
 
     clickButton('toggle-paris');
     record();
@@ -516,9 +646,19 @@ describe('a grouped table that expands and collapses', () => {
     expect(getFocusTarget().rowIndex).toBe(0);
     expect(getFocusTarget().rowKey).toContain(resolveGroupPathKey(paris));
 
-    // And the grid is still one stop in the page's tab order, so the user can
-    // Tab back into it rather than being dropped out of the table.
-    expect(getAllTabStops()).toStrictEqual([getGrid()]);
+    // And the grid is still exactly one stop in the page's tab order, so the
+    // user can Tab back into it rather than being dropped out of the table.
+    // That stop is now the collapsed group row's own cell rather than the
+    // container: the row survives the collapse and, since ADR-065, has cells
+    // for the tab stop to sit on — so Tab returns the user to the row they
+    // just closed instead of to the top of the grid.
+    const stops = getAllTabStops();
+
+    expect(stops).toHaveLength(1);
+    expect(stops[0]?.getAttribute('role')).toBe('gridcell');
+    expect(stops[0]?.closest('tr')?.dataset.testid).toBe(
+      'table-group-header-row',
+    );
 
     await enterGrid();
     record();
@@ -527,21 +667,27 @@ describe('a grouped table that expands and collapses', () => {
     await pressKey('ArrowDown');
     record();
 
-    // `grid` twice over is the group rows: a group row registers no cell, so no
-    // node answers the outstanding focus request and the container keeps it
-    // (#651 — ADR-065 closes this by giving a group row real cells, at which
-    // point these two entries become that row's own cell). Navigation still
-    // continues from the ancestor, which is what the last entry proves: two
-    // rows below Paris is `{ id: 4 }`. From `{ id: 5 }` — the index-based
-    // answer — two ArrowDowns clamp at the last row and read `5`.
+    // Every dash is a group row read at the `Id` column — no aggregate was
+    // selected there, so it renders one. Three of these four entries used to
+    // be something else, and all three change for the same reason (#651): a
+    // one-cell banner registered no cell for any column key, so no node
+    // answered the outstanding focus request. Entry 5 was `body` — the
+    // collapse left DOM focus on the document, because the row it recovered to
+    // had nothing to receive it; entries 6 and 7 were `grid`, the container
+    // keeping a stop no cell would take. ADR-065 gives a group row real cells,
+    // so the recovery now lands on the collapsed row itself and stays there.
+    //
+    // Navigation still continues from the ancestor, which is what the last
+    // entry proves: two rows below Paris is `{ id: 4 }`. From `{ id: 5 }` — the
+    // index-based answer — two ArrowDowns clamp at the last row and read `5`.
     expect(trace).toStrictEqual([
-      'grid',
+      '—No aggregate',
       '1',
       '2',
       '3',
-      'body',
-      'grid',
-      'grid',
+      '—No aggregate',
+      '—No aggregate',
+      '—No aggregate',
       '4',
     ]);
   });
@@ -552,6 +698,7 @@ describe('a grouped table that expands and collapses', () => {
     await enterGrid();
     await pressKey('ArrowDown');
     await pressKey('ArrowDown');
+    await pressKey('ArrowRight');
     expect(readFocus()).toBe('2');
 
     const before = getFocusTarget();

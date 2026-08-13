@@ -68,6 +68,13 @@ export type SelectGroupedOrdersArgs = {
   readonly groupKeys: readonly string[];
   /** Which grouping sets to emit — one, or one per prefix plus the total. */
   readonly groupMode: TableGroupingState['mode'];
+  /**
+   * The table's applied sort. Only the entries naming a **group key** are
+   * carried into the grouped read; a sort on any other column has nothing to
+   * order, because a grouped result has one row per group and no row of that
+   * column's values.
+   */
+  readonly sort: readonly QuerySort[];
 };
 
 /**
@@ -96,6 +103,7 @@ export const selectGroupedOrders = async ({
   filters,
   groupKeys,
   groupMode,
+  sort,
 }: SelectGroupedOrdersArgs): Promise<EnterpriseOrdersResponse> => {
   // `satisfies` rather than an annotation: the narrow type keeps `column`
   // required for the decode below, while the check still proves the literal
@@ -112,11 +120,22 @@ export const selectGroupedOrders = async ({
       grouping: groupMode,
       keys: groupKeys,
       maxRows: ENTERPRISE_ORDER_GROUP_MAX_ROWS,
-      // Key sorts only, in nesting order. An aggregate sort would be legal at
-      // the innermost level and is not offered here: nothing in this route's UI
-      // can express one yet, and the builder refuses the ancestor-ranking shape
-      // at construction rather than emitting a term that orders nothing.
-      sort: groupKeys.map((key) => ({ direction: 'asc' as const, key })),
+      // One term per key, in **nesting order**, carrying the user's direction
+      // where they sorted that key and ascending where they did not. The
+      // nesting order is not negotiable — it is the tree — so a user's sort
+      // sets a level's direction rather than reordering the levels, and under
+      // a rollup the `GROUPING` term keeps its own placement so a subtotal
+      // stays a footer whichever way its key runs.
+      //
+      // Key sorts only. An aggregate sort would be legal at the innermost
+      // level and is not offered here: nothing in this route's UI can express
+      // one, and the builder refuses the ancestor-ranking shape at
+      // construction rather than emitting a term that orders nothing.
+      sort: groupKeys.map((key) => ({
+        direction:
+          sort.find((entry) => entry.column === key)?.direction ?? 'asc',
+        key,
+      })),
     });
 
     // `count(*)` is requested first, so the emitted aliases line up with
@@ -255,6 +274,7 @@ export const selectOrdersPage = async ({
       filters,
       groupKeys: grouping.keys,
       groupMode: grouping.mode,
+      sort,
     });
   }
 

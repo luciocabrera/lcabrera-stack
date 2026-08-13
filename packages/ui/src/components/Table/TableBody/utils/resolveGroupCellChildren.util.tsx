@@ -23,7 +23,24 @@ type ResolveGroupCellChildrenArgs = {
  * was selected on this column", which is a statement about a column that could
  * have carried one; the actions column cannot, and acts on a row a group is
  * not.
+ *
+ * **`EMPTY_CELL` is an empty fragment on purpose, and Biome's
+ * `noUselessFragments` reports it at info severity — the finding is wrong
+ * here.** `TableBodyCell` decides whether a caller supplied content with
+ * `children !== undefined`, so the two nullish spellings mean opposite things:
+ * a fragment is "custom content, deliberately empty" and `undefined` is "no
+ * custom content", which sends the cell down the default branch and renders
+ * the row's own value into a group row. `buildTableBodyCellDescriptor.util.tsx`
+ * carries the same value for a detail row's blanked columns, for the same
+ * reason. Replacing either with `undefined` is a behaviour change, not a
+ * tidy-up; `TableBodyRows.test.tsx` fails if it is made.
  */
+
+/**
+ * A cell that holds nothing, said in the one spelling the descriptor reads as
+ * "content was supplied". See the note above before changing it.
+ */
+export const EMPTY_CELL = <></>;
 export const resolveGroupCellChildren = ({
   columnKey,
   summary,
@@ -33,10 +50,7 @@ export const resolveGroupCellChildren = ({
   }
 
   if (columnKey === ACTIONS_COLUMN_KEY) {
-    // An empty fragment rather than `undefined`: the cell descriptor reads
-    // "custom content was supplied" off `children !== undefined`, so undefined
-    // would send the cell down the default branch and render the row's value.
-    return <></>;
+    return EMPTY_CELL;
   }
 
   return <TableGroupAggregate columnKey={columnKey} summary={summary} />;

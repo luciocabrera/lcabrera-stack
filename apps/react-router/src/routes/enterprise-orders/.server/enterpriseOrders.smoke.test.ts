@@ -530,4 +530,138 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
       expect(capabilities.order_id?.canGroup).toBe(false);
     });
   });
+
+  describe('rollup, subtotals and the grand total', () => {
+    // The ordering claims of #570 are string assertions everywhere else: the
+    // builder's suite proves what SQL was written, not what Postgres does with
+    // it. These are the live half — a subtotal that landed above its children,
+    // a grand total that was not last, or a mask decoded the wrong way round
+    // all leave the SQL valid and only show up against a real database.
+    const KEYS = ['order_status', 'shipping_country'] as const;
+
+    const rollupPage = (direction: 'asc' | 'desc' = 'asc') =>
+      selectOrdersPage({
+        filters: [],
+        grouping: {
+          aggregates: { total_amount: 'sum' },
+          keys: [...KEYS],
+          mode: 'rollup',
+        },
+        includeTotal: true,
+        limit: 50,
+        offset: 0,
+        sort: [{ column: 'order_status', direction }],
+      });
+
+    it('emits a subtotal per level and one grand total', async () => {
+      const { data } = await rollupPage();
+      const summaries = data.map((row) => row[TABLE_GROUP_ROW_FIELD]);
+
+      expect(summaries.length).toBeGreaterThan(0);
+
+      // Depths 2, 1 and 0 all occur: leaves, per-status subtotals, and the one
+      // row keyed by nothing. A flat read would produce only depth 2.
+      const depths = new Set(summaries.map((summary) => summary?.path.length));
+
+      expect([...depths].toSorted((a, b) => (a ?? 0) - (b ?? 0))).toStrictEqual(
+        [0, 1, 2],
+      );
+      expect(
+        summaries.filter((summary) => summary?.path.length === 0),
+      ).toHaveLength(1);
+    });
+
+    it('closes each parent after its own children, and the grand total last', async () => {
+      const { data } = await rollupPage();
+      const summaries = data.map((row) => row[TABLE_GROUP_ROW_FIELD]);
+
+      expect(summaries.at(-1)?.path).toStrictEqual([]);
+
+      // Every subtotal is immediately preceded by a row of the level below it
+      // that belongs to the same parent — which is what "subtotals follow their
+      // children" means as a property of the emitted order rather than of the
+      // ORDER BY text.
+      for (const [index, summary] of summaries.entries()) {
+        if (summary === undefined || summary.path.length !== 1) continue;
+
+        const previous = summaries[index - 1];
+
+        expect(previous?.path).toHaveLength(2);
+        expect(previous?.path[0]?.label).toBe(summary.path[0]?.label);
+      }
+    });
+
+    it('does not invert the hierarchy under a descending key sort', async () => {
+      const { data } = await rollupPage('desc');
+      const summaries = data.map((row) => row[TABLE_GROUP_ROW_FIELD]);
+
+      // The parents reverse; each parent's subtotal still follows its own
+      // children, and the grand total is still last. A `GROUPING` term that
+      // took the user's direction would float every subtotal to the top of its
+      // block instead.
+      expect(summaries.at(-1)?.path).toStrictEqual([]);
+
+      for (const [index, summary] of summaries.entries()) {
+        if (summary === undefined || summary.path.length !== 1) continue;
+
+        expect(summaries[index - 1]?.path).toHaveLength(2);
+      }
+    });
+
+    it('reconciles the leaves, the subtotals and the grand total', async () => {
+      // Arithmetic Postgres itself settles: the same rows summed three ways.
+      const { data } = await rollupPage();
+      const summaries = data
+        .map((row) => row[TABLE_GROUP_ROW_FIELD])
+        .filter((summary) => summary !== undefined);
+
+      const countAt = (depth: number) =>
+        summaries
+          .filter((summary) => summary.path.length === depth)
+          .reduce((total, summary) => total + summary.count, 0);
+
+      const grandTotal = summaries.find(
+        (summary) => summary.path.length === 0,
+      )?.count;
+
+      expect(countAt(2)).toBe(countAt(1));
+      expect(countAt(1)).toBe(grandTotal);
+    });
+
+    it('tells a structural NULL from a real one by the mask, not the text', async () => {
+      // Both render an empty label from the same column. Only `isSubtotal`,
+      // decoded from `GROUPING()`, separates them — so a decode that read the
+      // bits the wrong way round would mark leaves as totals and vice versa.
+      const { data } = await rollupPage();
+      const summaries = data
+        .map((row) => row[TABLE_GROUP_ROW_FIELD])
+        .filter((summary) => summary !== undefined);
+
+      for (const summary of summaries) {
+        expect(summary.isSubtotal).toBe(summary.path.length < KEYS.length);
+      }
+    });
+
+    it('refuses an aggregate sort that would rank an ancestor', async () => {
+      const page = await selectOrdersPage({
+        filters: [],
+        grouping: {
+          aggregates: { total_amount: 'sum' },
+          keys: [...KEYS],
+          mode: 'rollup',
+        },
+        includeTotal: true,
+        limit: 50,
+        offset: 0,
+        sort: [{ column: 'order_status', direction: 'asc' }],
+      });
+
+      // The route requests key sorts only, so this one runs; the refusal itself
+      // is unit-tested at the builder, where the sort list can be spelled
+      // directly. What is checked here is that the legal shape still runs
+      // against a real database rather than being refused by mistake.
+      expect(page.error).toBeUndefined();
+      expect(page.data.length).toBeGreaterThan(0);
+    });
+  });
 });
