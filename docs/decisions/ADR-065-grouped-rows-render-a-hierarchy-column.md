@@ -378,19 +378,23 @@ more nicely.
 `packages/server/src/db/group-query-builder/group-query-builder.types.ts` has two
 members today, `flat` and `rollup`, and `expandGroupingSets` builds both by
 dropping keys from the tail of the key list — so every grouping set either mode
-emits is a **prefix** of it. Prefixes form a chain, so every row has exactly one
-parent, and depth is a property the row carries. That is a **tree**, and a tree
+emits is a **prefix** of it. Prefixes form a chain, so a row's ancestors are the
+prefixes of its own key list and it has **at most one** parent — one for every
+row but the grand total, which is rollup's empty prefix and has none. Depth is
+therefore a property the row carries. That is a **tree**, and a tree
 renders as the hierarchy column: indentation is a faithful encoding of depth
 because depth exists.
 
 `cube` (#574) is deliberately absent from that union, for the same structural
 reason: it emits every subset of the keys, so it returns rows like
-`(all countries, Electronics)` — a child of no country. Its sets are not
+`(all countries, Electronics)` — under the grand total, but under no country. Its
+sets are not
 prefixes, which is why the comment on `expandGroupingSets` records that adding it
 needs a real expansion rather than an entry in the count map, and why
 [`table-row-grouping-plan.md`](../agents/planning/table-row-grouping-plan.md)
 notes that a row's grouped-key count equals tree depth **only** under rollup.
-A row with no parent has no depth, so indentation has nothing to encode. That is
+A row whose ancestors are not a single chain has no one place to sit, so there is
+no depth for indentation to encode. That is
 a **lattice**, and a lattice renders flat: each group key keeps its own column
 and the filled cells are coordinates rather than a level. When cube lands, that
 is the shape it takes, and it is a different rendering because it is a different
@@ -436,7 +440,8 @@ It fails for **this** grid, for a reason that is about arrangement rather than
 about capability. A staircase reads only while the group-key columns appear in
 key order with nothing between them, because "which column is filled" is the
 entire depth signal — an ungrouped column sitting between two of them is read as
-a rung. Grouping establishes neither property:
+a rung. Grouping establishes neither property, and the layout controls the grid
+already has work against both:
 
 - **Column order and grouping are independent state, persisted through different
   channels.** Column order, pinning and visibility are per-browser layout,
@@ -451,12 +456,18 @@ a rung. Grouping establishes neither property:
   columns static pins them to exactly the positions they already occupy — gaps
   and inversions included — and the number of columns standing between two of
   them is then invariant under every drag. The user can change which column sits
-  in the gap; the only way to close it is to hide the column, which makes the
-  hierarchy's legibility depend on visibility state that has nothing to do with
-  the query. Pinning is the same story on another axis: one group-key column
-  pinned left while its sibling sits in the centre puts two rungs of the ladder
-  either side of the horizontal scroll region, and `isStatic` locks that in
-  rather than resolving it.
+  in the gap but cannot close it by reordering. Closing it means taking the
+  intervening column out of the rendered run some other way, and there are two:
+  hide it, or pin it — `getEffectiveColumns` drops hidden columns and then
+  re-partitions the rest into left-pinned → centre → right-pinned, so either
+  route lifts it out from between the two group keys. Both make the hierarchy's
+  legibility depend on visibility or pinning state that has nothing to do with
+  the query.
+- **Pinning cuts the other way too.** One group-key column pinned left while its
+  sibling sits in the centre puts two rungs of the ladder either side of the
+  horizontal scroll region, and `isStatic` locks that in rather than resolving
+  it. So the same partition that can close a gap can also open one that no
+  reordering reaches.
 
 Making the staircase safe therefore means the grid **imposing** the arrangement —
 moving the group-key columns to the front in key order when grouping is applied,
@@ -482,7 +493,8 @@ On a **group** row that column follows the general rule unchanged: the selected
 aggregate if one was chosen on it, the em dash if not. Filling it with the key's
 own value instead is reading B, rejected above.
 
-Two constraints hold it in place.
+Two constraints hold it in place, and the second carries an open condition with
+it.
 
 **The column stays visible, with its header.** Ungrouping is one interaction
 away, and this is not a hidden column — the user did not ask for it to go, and
@@ -495,16 +507,38 @@ column would take that with it. (The settings drawer's add-filter picker offers
 every filterable column regardless of visibility, so filtering would not be lost
 outright; the column's own header-anchored route to it would be.)
 
-**Blank here does not collide with the two blanks the grid already has.** Against
-the **em dash**, the two never share a row: the dash is a group-row state meaning
-_no aggregate was requested_, and paints a glyph; this is a detail-row state, and
-paints nothing. Against `renderCellContent`'s empty string — _absent value_, the
-reading `parseNumberValue`'s comment protects — the separation is not by glyph
-but by the fact that in a grouped column the two readings cannot disagree. Every
-detail row in a group carries that group's key value by construction, so "the
-value is on my group row" is true; and when the key itself is NULL, "there is no
-value here" is true at the same time. The blank never asserts something false,
-and in every **ungrouped** column it keeps its existing meaning untouched.
+**Blank here is kept apart from the two blanks the grid already has, and it is
+worth being exact about how, because only one of the two separations is free.**
+
+Against the **em dash** the separation is structural: the dash is a group-row
+state meaning _no aggregate was requested_ and it paints a glyph, while this is a
+detail-row state that paints nothing. They cannot occur in the same cell of the
+same row, and they do not look alike.
+
+Against `renderCellContent`'s empty string the separation is a **partition by
+column**, and it is a real reassignment of meaning rather than an agreement
+between two readings. In an **ungrouped** column, blank keeps exactly the meaning
+it has today — _this row has no value here_, a claim about the data, the reading
+`parseNumberValue`'s comment protects. In a **grouped** column it means _my group
+row states this value_. The two do not reconcile: a detail row inside a
+`Status = Shipped` group **has** a value, so the old reading is simply false
+there. What keeps them apart is that exactly one of them is in force for a given
+column, and the grouping configuration is what says which. (They happen to
+coincide in the NULL-key group, where both are true at once. That is a
+convenience, not the mechanism, and it should not be mistaken for one.)
+
+**A partition only reads if the reader can see which side of it a column is on,
+and today the grid barely says.** A grouped column is marked nowhere on the
+header face; the only in-grid signal is inside that column's own actions menu,
+where `GroupByColumnButton` renders itself as applied. Sub-decision 3 below then
+removes the banner, which was the one place the key's column name was stated
+inline. **These are one question, not two.** Whatever #570 does with the
+hierarchy column's header to carry the context the banner used to state — naming
+the group keys, in key order, is the obvious form — is also what tells a reader
+which data columns are blanked by this rule. If that lands, the partition is
+legible. If it does not, this sub-decision ships an unlabelled empty column, and
+it should be revisited rather than shipped that way; **that is a condition on
+#570, not a refinement.**
 
 What this hands to #570/#571 rather than deciding: the detail path has no reason
 to read the grouping configuration today — `TableBodyRows` asks the **row** which
@@ -549,11 +583,34 @@ What follows:
   are `<column label>: <value>` per key (`toGroupHeaderSegments`), so the key's
   column name was stated inline. Where that context now lives — the hierarchy
   column's own header is the obvious candidate — is #570's to answer, and it is
-  a real question this amendment creates rather than one it settles.
+  a real question this amendment creates rather than one it settles. **It is the
+  same question sub-decision 2 hands to #570**: the header that names the group
+  keys is also what tells a reader which data columns are blanked, so answering
+  it once answers both, and leaving it unanswered costs both.
 - **A built, tested component is deleted to render less.** That was option 2's
   stated cost when it was rejected, and it is still true. It is accepted:
   `TableGroupHeaderRow` has no surviving configuration to render, so keeping it
   would mean keeping a second path alive for nothing.
+
+### A note on reading this record
+
+**The code paths named above are not machine-checked, and an ADR is where that
+matters most.** `docs:verify` treats a dated record differently on purpose:
+`enforcedTokens` in `scripts/lib/docs-paths.mjs` drops root-anchored path
+_tokens_ for anything under `decisions/`, because an ADR naming a path is
+recording what existed when the decision was made and that stays true after the
+file moves. Confirmed here by probe rather than by reading: breaking a backticked
+`packages/server/…` citation in this section leaves the gate at exit 0, and so
+does breaking a relative link to a `.ts` file (`extractCandidates` keeps a link
+only when it is root-anchored or ends in `.md`); breaking the relative `.md` link
+above fails it. So the links between documents are gated and the citations into
+the code are not.
+
+Every claim this amendment makes about the code was therefore checked by hand
+against the tree at the time of writing, and a later reader has to do the same
+rather than infer from a green pipeline that the citations still hold. That is
+the failure mode this ADR already has history with — its first round shipped
+claims nothing had checked.
 
 ## References
 
