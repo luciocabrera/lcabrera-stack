@@ -52,15 +52,23 @@ graph TD
 
 ## Props
 
-| Prop                | Type                                       | Required | Description                                                              |
-| ------------------- | ------------------------------------------ | -------- | ------------------------------------------------------------------------ |
-| `actions`           | `ReactNode`                                | No       | Toolbar content, forwarded to `TableLayout`                              |
-| `dataSelector`      | `(r: TResponse) => readonly TData[]`       | No       | Defaults to `response.data`                                              |
-| `dataTotalSelector` | `(r: TResponse) => number \| undefined`    | No       | Defaults to `response.total`                                             |
-| `fetchPage`         | `(query: PaginatedQuery) => Promise<TRes>` | Yes      | The route's paginated read — typically a `createPaginatedFetcher` result |
+| Prop                | Type                                                | Required | Description                                                              |
+| ------------------- | --------------------------------------------------- | -------- | ------------------------------------------------------------------------ |
+| `actions`           | `ReactNode`                                         | No       | Toolbar content, forwarded to `TableLayout`                              |
+| `dataErrorSelector` | `(r: TResponse) => TableResponseError \| undefined` | No       | Defaults to `response.error` (ADR-068)                                   |
+| `dataSelector`      | `(r: TResponse) => readonly TData[]`                | No       | Defaults to `response.data`                                              |
+| `dataTotalSelector` | `(r: TResponse) => number \| undefined`             | No       | Defaults to `response.total`                                             |
+| `fetchPage`         | `(query: PaginatedQuery) => Promise<TRes>`          | Yes      | The route's paginated read — typically a `createPaginatedFetcher` result |
 
 Every prop here is something only the component can supply — a function or a
 node. What the _endpoint_ can do is not a prop; see below.
+
+`dataErrorSelector` is what makes a refused read visible instead of silently
+empty (ADR-068): an endpoint that declines a query — a grouping the catalogue
+refuses, a statement that timed out — returns a **successful** response carrying
+`error`, and the table's empty body reads it to say which of the two things
+happened. A route reading its rows with a custom `dataSelector` must supply this
+one too, or its refusals stay invisible.
 
 ## Where the capability flags live
 
@@ -103,8 +111,8 @@ the load-more query would have to read it, it is a capability and goes on `meta`
 
 ## Response constraint
 
-`TResponse extends TablePageResponse<TData>` — `{ data, hasMore?, total? }` —
-so the two selectors have working defaults. A route whose response names its
+`TResponse extends TablePageResponse<TData>` — `{ data, error?, hasMore?, total? }`
+— so the three selectors have working defaults. A route whose response names its
 fields differently, or that needs its own JSX around the table, composes
 `useTableRoutePage` with `TableLayout` directly instead; the hook is exported
 for exactly that case.

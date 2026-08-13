@@ -161,6 +161,53 @@ describe('GroupActions', () => {
     expect(getButton('Group by This').disabled).toBe(false);
   });
 
+  it('disables Group by This for a column the catalogue refuses, and says why', () => {
+    // The defect: `isGroupable` defaults to true, so every column the endpoint
+    // refuses was still offered as a group key, and picking one emptied the
+    // table (#642). The declared flag is untouched here — the catalogue is the
+    // only thing saying no.
+    capabilityRef.current = numericCapability;
+
+    render(<GroupActions columnKey='total_amount' onClose={mockOnClose} />);
+
+    const button = getButton('Group by This');
+
+    expect(button.disabled).toBe(true);
+    expect(button.getAttribute('title')).toBe(
+      'Cannot group by this column: it holds too many distinct values — filter the table down first.',
+    );
+
+    fireEvent.click(button);
+
+    expect(mockToggleGroupKey).not.toHaveBeenCalled();
+  });
+
+  it('still removes a refused key that is already applied', () => {
+    // A URL can seed a grouping the catalogue refuses today (ADR-061), so the
+    // one item that can undo it must not be disabled by that same refusal.
+    capabilityRef.current = numericCapability;
+    groupingKeysRef.current = ['total_amount'];
+
+    render(<GroupActions columnKey='total_amount' onClose={mockOnClose} />);
+
+    expect(getButton('Group by This').disabled).toBe(false);
+
+    fireEvent.click(getButton('Group by This'));
+
+    expect(mockToggleGroupKey).toHaveBeenCalledWith('total_amount');
+  });
+
+  it('leaves the column offered when the route resolved no capability for it', () => {
+    // Absence is "nobody asked": a route may group without shipping a
+    // capability map, and reading absence as a refusal would switch it off.
+    render(<GroupActions columnKey='order_status' onClose={mockOnClose} />);
+
+    const button = getButton('Group by This');
+
+    expect(button.disabled).toBe(false);
+    expect(button.getAttribute('title')).toBeNull();
+  });
+
   it('disables Clear Grouping until some column is grouped', () => {
     render(<GroupActions columnKey='order_status' onClose={mockOnClose} />);
 

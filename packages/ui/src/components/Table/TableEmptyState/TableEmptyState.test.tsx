@@ -13,16 +13,26 @@ import {
 } from 'vite-plus/test';
 
 const {
+  clearGroupingMock,
   revalidateMock,
+  useClearTableGroupingMock,
   useElementSizeMock,
+  useGetNormalizedColumnMock,
   useGetPinnedColumnPartitionMock,
+  useGetTableDataErrorMock,
+  useGetTableGroupingKeysMock,
   useGetTableTitleSingularMock,
   useResizeObserverMock,
   useTableContainerRefMock,
 } = vi.hoisted(() => ({
+  clearGroupingMock: vi.fn(),
   revalidateMock: vi.fn(),
+  useClearTableGroupingMock: vi.fn(),
   useElementSizeMock: vi.fn(),
+  useGetNormalizedColumnMock: vi.fn(),
   useGetPinnedColumnPartitionMock: vi.fn(),
+  useGetTableDataErrorMock: vi.fn(),
+  useGetTableGroupingKeysMock: vi.fn(),
   useGetTableTitleSingularMock: vi.fn(),
   useResizeObserverMock: vi.fn(),
   useTableContainerRefMock: vi.fn(),
@@ -51,7 +61,24 @@ vi.mock('#ui/components/Icons', () => ({
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
+  useGetNormalizedColumn: useGetNormalizedColumnMock,
   useGetPinnedColumnPartition: useGetPinnedColumnPartitionMock,
+}));
+
+vi.mock('#ui/components/Table/contexts/TableConfig/grouping/actions', () => ({
+  useClearTableGrouping: useClearTableGroupingMock,
+}));
+
+vi.mock('#ui/components/Table/contexts/TableConfig/grouping/selectors', () => ({
+  useGetTableGroupingKeys: useGetTableGroupingKeysMock,
+}));
+
+vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
+  useGetTableTitleSingular: useGetTableTitleSingularMock,
+}));
+
+vi.mock('#ui/components/Table/contexts/TableData/data/selectors', () => ({
+  useGetTableDataError: useGetTableDataErrorMock,
 }));
 
 vi.mock('#ui/components/Table/contexts/TableWrapper', () => ({
@@ -63,11 +90,10 @@ vi.mock('#ui/hooks', () => ({
   useResizeObserver: useResizeObserverMock,
 }));
 
-vi.mock('../contexts/TableConfig/meta/selectors', () => ({
-  useGetTableTitleSingular: useGetTableTitleSingularMock,
-}));
-
 import { TableEmptyState } from './TableEmptyState.component';
+
+const REFUSAL_MESSAGE =
+  'Column "total_amount" is not a legal group key: too-many-distinct.';
 
 const renderInTable = (ui: ReactNode) =>
   render(
@@ -83,12 +109,17 @@ beforeEach(() => {
     rightPinnedCols: [],
   });
   useElementSizeMock.mockReturnValue({ height: 0, width: 0 });
+  useGetNormalizedColumnMock.mockReturnValue(undefined);
+  useGetTableDataErrorMock.mockReturnValue(undefined);
+  useGetTableGroupingKeysMock.mockReturnValue([]);
   useGetTableTitleSingularMock.mockReturnValue('Order');
+  useClearTableGroupingMock.mockReturnValue(clearGroupingMock);
   useTableContainerRefMock.mockReturnValue(createRef<HTMLDivElement>());
 });
 
 afterEach(() => {
   cleanup();
+  clearGroupingMock.mockReset();
   revalidateMock.mockReset();
 });
 
@@ -134,5 +165,82 @@ describe('TableEmptyState', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
 
     expect(revalidateMock).toHaveBeenCalledTimes(1);
+  });
+
+  describe('when the read was refused rather than empty', () => {
+    beforeEach(() => {
+      useGetTableDataErrorMock.mockReturnValue({
+        column: 'total_amount',
+        kind: 'grouping-refused',
+        message: REFUSAL_MESSAGE,
+        reason: 'column-not-groupable',
+      });
+      useGetTableGroupingKeysMock.mockReturnValue(['total_amount']);
+      useGetNormalizedColumnMock.mockReturnValue({
+        key: 'total_amount',
+        label: 'Total Amount',
+      });
+    });
+
+    it('says the grouping was refused, naming the column as the header labels it', () => {
+      renderInTable(<TableEmptyState />);
+
+      expect(screen.getByRole('heading').textContent).toBe(
+        'Grouping by Total Amount was refused',
+      );
+      expect(screen.getByText(REFUSAL_MESSAGE)).not.toBeNull();
+    });
+
+    it('drops the no-data message, which would explain the wrong thing', () => {
+      renderInTable(<TableEmptyState />);
+
+      expect(
+        screen.queryByText(/No records match the current view/),
+      ).toBeNull();
+    });
+
+    it('offers clearing the grouping instead of a retry that would be refused again', () => {
+      renderInTable(<TableEmptyState />);
+
+      expect(screen.queryByRole('button', { name: 'Retry' })).toBeNull();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Clear grouping' }));
+
+      expect(clearGroupingMock).toHaveBeenCalledTimes(1);
+      expect(revalidateMock).not.toHaveBeenCalled();
+    });
+
+    it('falls back to the raw column key when no column carries that label', () => {
+      useGetNormalizedColumnMock.mockReturnValue(undefined);
+
+      renderInTable(<TableEmptyState />);
+
+      expect(screen.getByRole('heading').textContent).toBe(
+        'Grouping by total_amount was refused',
+      );
+    });
+
+    it('keeps the retry offer for a refusal with nothing grouped to clear', () => {
+      useGetTableGroupingKeysMock.mockReturnValue([]);
+
+      renderInTable(<TableEmptyState />);
+
+      expect(screen.getByRole('button', { name: 'Retry' })).not.toBeNull();
+    });
+  });
+
+  it('surfaces a cancelled read without offering to clear a grouping', () => {
+    useGetTableDataErrorMock.mockReturnValue({
+      kind: 'db-canceled',
+      message: 'The query was cancelled.',
+    });
+
+    renderInTable(<TableEmptyState />);
+
+    expect(screen.getByRole('heading').textContent).toBe(
+      'This query took too long',
+    );
+    expect(screen.getByText('The query was cancelled.')).not.toBeNull();
+    expect(screen.getByRole('button', { name: 'Retry' })).not.toBeNull();
   });
 });

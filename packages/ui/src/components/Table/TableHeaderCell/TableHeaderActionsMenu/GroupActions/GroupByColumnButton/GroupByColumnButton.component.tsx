@@ -8,9 +8,13 @@ import {
 import { useGetNormalizedColumn } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
 import { useToggleTableGroupKey } from '#ui/components/Table/contexts/TableConfig/grouping/actions';
 import { useGetTableGroupingKeys } from '#ui/components/Table/contexts/TableConfig/grouping/selectors';
-import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
+import { useGetTableColumnGroupingCapability } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
+import {
+  MAX_TABLE_GROUP_KEYS,
+  TABLE_GROUP_KEY_REFUSAL_LABELS,
+} from '#ui/components/Table/Table.constants';
 import { tableActionsPopoverStyles } from '#ui/components/Table/TableActionsPopover';
-import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
+import { resolveGroupKeyAvailability } from '#ui/components/Table/utils/resolveGroupKeyAvailability.util';
 
 import type { GroupByColumnButtonProps } from './GroupByColumnButton.types';
 
@@ -27,10 +31,21 @@ import type { GroupByColumnButtonProps } from './GroupByColumnButton.types';
  * it is also grouped by. Reading `keys[0]` would light up only the outermost
  * level and leave every deeper one looking unapplied.
  *
- * At the depth cap the item is disabled unless removing this key is what a
- * click would do. Refusing past the cap is `resolveTableGroupingUpdate`'s job
- * and happens whatever this button says; disabling here is so a user is not
- * offered an action that would be ignored.
+ * **The catalogue's answer narrows the declared one** (ADR-058, #642). The
+ * endpoint decides group-key legality from the column's real Postgres type and
+ * its distinct-value statistics, and refuses a large share of the columns a
+ * table declares `isGroupable` — so an item built from the declaration alone
+ * offers keys the query then rejects. A refused column is disabled here and
+ * says why in its `title`, which is the difference between an affordance a user
+ * can rule out before clicking and one that empties the table.
+ *
+ * Disabling is never applied to a key that is **already applied**, at the depth
+ * cap or under a refusal: a click on an applied key removes it, and a URL can
+ * seed a grouping the catalogue would refuse today (ADR-061), so making that
+ * item unclickable would be the one state a user could not leave from here.
+ * Refusing past the cap is `resolveTableGroupingUpdate`'s job and happens
+ * whatever this button says; disabling is so a user is not offered an action
+ * that would be ignored.
  */
 export const GroupByColumnButton = <TData,>({
   columnKey,
@@ -39,14 +54,18 @@ export const GroupByColumnButton = <TData,>({
   const toggleGroupKey = useToggleTableGroupKey();
   const groupingKeys = useGetTableGroupingKeys();
   const column = useGetNormalizedColumn<TData>(columnKey);
-  const { isGroupable } = resolveColumnCapabilities(column);
+  const capability = useGetTableColumnGroupingCapability(String(columnKey));
+  const { isGroupable, refusal } = resolveGroupKeyAvailability<TData>({
+    capability,
+    column,
+  });
   const { icon: GroupByColumnCommandIcon, label } = GROUP_BY_COLUMN_COMMAND;
 
   const isApplied = groupingKeys.includes(String(columnKey));
   const isAtDepthCap = groupingKeys.length >= MAX_TABLE_GROUP_KEYS;
   const { isActive, isEnabled } = deriveToggleCommandState({
     current: isApplied ? String(columnKey) : undefined,
-    isDisabled: !isGroupable || (isAtDepthCap && !isApplied),
+    isDisabled: !isApplied && (!isGroupable || isAtDepthCap),
     target: String(columnKey),
   });
 
@@ -68,6 +87,11 @@ export const GroupByColumnButton = <TData,>({
       onClick={handleGroupByColumn}
       orientation='horizontal'
       size='mini'
+      // The reason rides the disabled item rather than a tooltip: a disabled
+      // button fires no pointer events, so a tooltip on one never opens.
+      {...(refusal !== undefined && {
+        title: `Cannot group by this column: ${TABLE_GROUP_KEY_REFUSAL_LABELS[refusal]}.`,
+      })}
       variant={isActive ? 'primary' : 'ghost'}
     >
       {label}

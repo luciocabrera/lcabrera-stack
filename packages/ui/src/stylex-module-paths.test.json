@@ -80,6 +80,7 @@
   "src/components/Table/TableBodyRows/TableBodyRows.stylex.ts",
   "src/components/Table/TableContent/TableContent.stylex.ts",
   "src/components/Table/TableEmptyState/TableEmptyState.stylex.ts",
+  "src/components/Table/TableEmptyState/TableEmptyStateMessage/TableEmptyStateMessage.stylex.ts",
   "src/components/Table/TableGroupAggregate/TableGroupAggregate.stylex.ts",
   "src/components/Table/TableGroupLabel/TableGroupLabel.stylex.ts",
   "src/components/Table/TableHeader/TableHeader.stylex.ts",

@@ -19,13 +19,15 @@ import type { TableRouteViewProps } from './TableRouteView.types';
  * What the endpoint can do — seek by cursor, filter server-side — is declared on
  * the loader `meta`, not here, so the loader and the load-more read one
  * declaration (ADR-063). The props this component does take are the pieces only
- * the component can supply: a fetcher, a toolbar node and two selectors.
+ * the component can supply: a fetcher, a toolbar node and the response
+ * selectors.
  */
 export const TableRouteView = <
   TData extends Record<string, unknown>,
   TResponse extends TablePageResponse<TData>,
 >({
   actions,
+  dataErrorSelector = (response) => response.error,
   dataSelector = (response) => response.data,
   dataTotalSelector = (response) => response.total,
   fetchPage,
@@ -37,6 +39,7 @@ export const TableRouteView = <
     <TableLayout<TData, TResponse>
       actions={actions}
       columnsState={columnsState}
+      dataErrorSelector={dataErrorSelector}
       dataPromise={dataPromise}
       dataSelector={dataSelector}
       dataTotalSelector={dataTotalSelector}

@@ -304,6 +304,61 @@ The resolver is also what feeds `deriveToggleCommandState`'s `isDisabled`, so a
 command's availability and the gate that decides whether to render it come from
 one derivation (`components/Table/commands/ARCHITECTURE.md`).
 
+**One capability has a second gate, and it composes rather than replaces.**
+Whether a column may be a **group key** is answered twice: `isGroupable` is the
+consumer's declaration, and the database's catalogue decides what is actually
+legal from the column's real Postgres type and its distinct-value statistics
+(ADR-058), an answer that reaches the client on
+`TableMetaState.groupingCapabilities` (ADR-063). Every surface that offers a
+group key goes through **`resolveGroupKeyAvailability`**, which calls the
+resolver above and then narrows it:
+
+```ts
+// ✅ one derivation, so the header menu and the drawer cannot disagree
+const { isGroupable, refusal } = resolveGroupKeyAvailability({
+  capability,
+  column,
+});
+
+// ❌ the declared half only — this offers every column the endpoint will refuse
+resolveColumnCapabilities(column).isGroupable;
+```
+
+Two rules go with it. An **absent** capability leaves the declared answer
+standing — a route may group without shipping a map at all, so absence is
+"nobody asked", not "refused". (An _aggregate_ menu reads absence the opposite
+way, because an aggregate is only ever legal by the catalogue's say-so.) And the
+gate is never complete: the row bound depends on the whole key combination,
+statistics go stale, and grouping is URL state — so a refusal must also render,
+which is the next section.
+
+---
+
+## A Refused Read Is Data, Not an Exception
+
+An endpoint that **declines** a query returns a successful response carrying
+`error: TableResponseError` — it does not reject (ADR-068). The table reads it
+through `dataErrorSelector` (defaulted on `TableRouteView` to `response.error`),
+seeds it into the data store, and the empty body says which of the two reasons it
+is empty: the filters matched nothing, or the database said no.
+
+```ts
+// ✅ a refusal resolves, carrying its reason
+catch (error) { return { data: [], error: toSerializableDbError(error), hasMore: false, total: 0 }; }
+
+// ❌ rethrowing puts an expected outcome through the route error boundary,
+//    which discards the page, the table state and the URL context
+```
+
+- **`fetchPage` must not reject on a refusal.** The boundary shows a sanitized
+  sentence naming neither the column nor the reason, and takes the whole view
+  down to say it.
+- **A route with a custom `dataSelector` needs a custom `dataErrorSelector`
+  too**, or its refusals are invisible again.
+- **The message is the endpoint's, the heading is the table's.** Only the
+  endpoint knows why; only the table knows the column's header label. Neither
+  can write the other's half — see `Table/TableEmptyState/ARCHITECTURE.md`.
+
 ---
 
 ## Serializable Fetch Descriptors (Tool-Call Pattern)

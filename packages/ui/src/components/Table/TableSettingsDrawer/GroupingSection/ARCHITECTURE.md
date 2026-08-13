@@ -68,7 +68,8 @@ GroupingSection/
 └── utils/
     ├── toGroupKeyItems.util.ts         → Staged keys + labels, in nesting order
     ├── toAggregateItems.util.ts        → Staged aggregates + labels, column order
-    └── toAggregatableColumnOptions.util.ts → Columns the catalogue can aggregate
+    ├── toAggregatableColumnOptions.util.ts → Columns the catalogue can aggregate
+    └── toGroupKeyColumnOptions.util.ts → Columns that may still be a group key (declared ∧ catalogue, minus staged)
 ```
 
 ## Data flow
@@ -109,14 +110,14 @@ flowchart TD
 
 ## Where each answer comes from
 
-| Question                                | Answered by                                        | Not by                                |
-| --------------------------------------- | -------------------------------------------------- | ------------------------------------- |
-| May this column be a group key at all?  | `resolveColumnCapabilities(column).isGroupable`    | the catalogue (that is #642's half)   |
-| Which aggregates may this column take?  | `metaState.groupingCapabilities[key].aggregates`   | `TableColumn.dataType` (#550)         |
-| How many keys may be applied?           | `MAX_TABLE_GROUP_KEYS`                             | anything local to a component         |
-| Is this configuration a change at all?  | `resolveTableGroupingUpdate`                       | the component                         |
-| What grouping is the section showing?   | `TableDrawerContext`'s `groupingStore` (the draft) | the live `TableConfig` grouping store |
-| What grouping is the **table** showing? | `TableConfig`'s `groupingStore`                    | the draft, until Accept commits it    |
+| Question                                | Answered by                                                                 | Not by                                |
+| --------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------- |
+| May this column be a group key at all?  | `resolveGroupKeyAvailability` — the declared flag narrowed by the catalogue | either gate alone (ADR-068)           |
+| Which aggregates may this column take?  | `metaState.groupingCapabilities[key].aggregates`                            | `TableColumn.dataType` (#550)         |
+| How many keys may be applied?           | `MAX_TABLE_GROUP_KEYS`                                                      | anything local to a component         |
+| Is this configuration a change at all?  | `resolveTableGroupingUpdate`                                                | the component                         |
+| What grouping is the section showing?   | `TableDrawerContext`'s `groupingStore` (the draft)                          | the live `TableConfig` grouping store |
+| What grouping is the **table** showing? | `TableConfig`'s `groupingStore`                                             | the draft, until Accept commits it    |
 
 `TableColumn.dataType` is a five-member presentation vocabulary that reports
 `numeric`, `jsonb` and `point` alike as `string`, so a menu built from it offers
@@ -124,6 +125,16 @@ flowchart TD
 That is the defect #550 found and
 [ADR-058](../../../../../../../docs/decisions/ADR-058-grouping-legality-by-analytical-role.md)
 settled; the aggregate lists here read the catalogue's per-column answer instead.
+
+The **key** list reads it too, since #642: `toGroupKeyColumnOptions` filters
+through `resolveGroupKeyAvailability`, so a column the catalogue refuses is not
+offered here any more than the header menu leaves it enabled. Offering one meant
+a selection the endpoint rejected, which reached the user as an empty table with
+no message
+([ADR-068](../../../../../../../docs/decisions/ADR-068-a-refused-read-is-rendered-data-not-an-exception.md)).
+A refused column is **left out** here rather than listed and disabled: a
+`VirtualSelect` option carries no room for a reason, and the header menu is where
+a user asks about one specific column.
 
 ## Depth cap
 

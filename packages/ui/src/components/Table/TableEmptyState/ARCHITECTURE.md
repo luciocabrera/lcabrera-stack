@@ -5,16 +5,75 @@ the table is not loading. Mirrors the visual language of `RouteErrorBoundary`
 (illustration + title + message + action) but lives entirely inside a
 `<tr><td>` so it participates in normal table layout.
 
+**There are two reasons a table body is empty and they are not the same
+answer.** The filters matched nothing, or the endpoint declined to run the query
+— a grouping it refused (ADR-058/ADR-066), a statement it cut off. Before #642
+the body said "No records match the current view" either way, which is a claim
+about the filters and simply false in the second case. The read's outcome now
+reaches the data store as `error` (ADR-068), and both the sentence and the
+recovery follow from it.
+
 ## Responsibilities
 
 - Render a theme-adaptive, animated `NoDataDescriptive` illustration
   (`currentColor` + `prefers-reduced-motion` aware).
-- Show the table's singular title from `useGetTableTitleSingular` above a fixed
-  default message. Neither is a prop — there is no `TableProps.emptyState`
-  override, so the title is store-driven and the message is a constant.
-- Offer a single **Retry** button that re-runs the route loader through React
-  Router 7's `useRevalidator()` — because filters and sorting live in the URL,
-  revalidation re-fetches with the current query state.
+- Size and pin the content to the scroll container's visible body area (below).
+- Compose the heading and sentence from the read's outcome — delegated to
+  `TableEmptyStateMessage`.
+- Offer exactly one recovery, chosen by that outcome — delegated to
+  `TableEmptyStateAction`.
+
+Nothing here is a prop: there is no `TableProps.emptyState` override, so the
+title is store-driven and both branches read what they need for themselves.
+
+## State Ownership Rule
+
+| Delegate                             | Selectors read                                                               | Actions dispatched      |
+| ------------------------------------ | ---------------------------------------------------------------------------- | ----------------------- |
+| `TableEmptyState` (shell)            | `useGetPinnedColumnPartition`, `useTableContainerRef`                        | —                       |
+| `TableEmptyStateMessage`             | `useGetTableDataError`, `useGetTableTitleSingular`, `useGetNormalizedColumn` | —                       |
+| `TableEmptyStateAction` (shell)      | `useGetTableDataError`, `useGetTableGroupingKeys`                            | —                       |
+| `TableEmptyStateRetryButton`         | —                                                                            | `useRevalidator()`      |
+| `TableEmptyStateClearGroupingButton` | —                                                                            | `useClearTableGrouping` |
+
+## Design Decision — What the body says, and who writes it
+
+`toTableEmptyStateNotice` maps the read's outcome to `{ message, title }`:
+
+| Outcome                    | Heading                            | Sentence           |
+| -------------------------- | ---------------------------------- | ------------------ |
+| no error                   | the table's singular title         | the filters nudge  |
+| `grouping-refused`         | `Grouping by <column> was refused` | the endpoint's own |
+| `db-canceled`              | `This query took too long`         | the endpoint's own |
+| `db-failed` / `unexpected` | `This table could not be loaded`   | the endpoint's own |
+
+**The heading is the table's, the sentence is the endpoint's**, and neither can
+be written by the other. Only the endpoint knows why it refused — the catalogue
+rule, the estimate, the threshold — and it has already vetted that text for
+anything a client may not see (ADR-050). Only the table knows what the user
+calls the column: the refusal names `total_amount`, the header said "Total
+Amount". `<column>` is that label, falling back to the raw key when this table
+declares no column by that name, and the heading drops the name entirely for a
+refusal about the key combination rather than one column (`too-many-keys`,
+`estimate-too-large` with no widest key).
+
+## Design Decision — Which recovery is offered
+
+**Retry** for an empty result: it can turn into rows the moment the data does,
+and revalidation re-runs the loader with the filters and sorting already in the
+URL. **Clear grouping** for a grouping refusal: the refusal is a property of the
+request, so revalidating sends the same keys and is refused again. That write
+goes through `useClearTableGrouping`, taking the persist-then-navigate path every
+grouping change takes (ADR-061) rather than resetting a store the next loader
+would overwrite.
+
+The choice is made by rendering **one of two delegates**, not by branching inside
+one, and that is load-bearing: the grouping write path reaches
+`usePersistTableStateAction`, which requires a `NotificationProvider`. A single
+component calling it unconditionally would make every empty table require one.
+
+The offer is also guarded on the applied keys — a refusal with nothing grouped
+has nothing to clear, so it keeps Retry.
 
 ## Design Decision — Centering Across Horizontal Overflow
 
@@ -41,20 +100,46 @@ container scrolls horizontally). A naive centered cell would center against the
 
 ```
 TableEmptyState/
-├── TableEmptyState.component.tsx → <tr><td colSpan><sticky sized box> illustration + title + message + Retry
-├── TableEmptyState.stylex.ts     → viewport(height,width) sticky/centered box + content/title/message styles
-├── TableEmptyState.test.tsx      → Unit tests (store-driven title, colSpan, header observation, retry → revalidate)
-└── index.ts                      → Barrel export
+├── TableEmptyState.component.tsx → <tr><td colSpan><sticky sized box> illustration + the two delegates
+├── TableEmptyState.stylex.ts     → viewport(height,width) sticky/centered box + row/cell/content/illustration
+├── TableEmptyState.test.tsx      → Shell + both delegates, empty and refused
+├── TableEmptyStateAction/
+│   ├── TableEmptyStateAction.component.tsx                → picks the one recovery
+│   ├── TableEmptyStateClearGroupingButton/…               → useClearTableGrouping
+│   └── TableEmptyStateRetryButton/…                       → useRevalidator
+├── TableEmptyStateMessage/
+│   ├── TableEmptyStateMessage.component.tsx → heading + sentence, self-connected
+│   └── TableEmptyStateMessage.stylex.ts     → title/message typography
+├── utils/
+│   └── toTableEmptyStateNotice.util.ts → the pure outcome → { message, title } map
+└── index.ts                            → Barrel export
 ```
+
+No `index.ts` in the delegate folders: they are private to this module and
+imported by direct path (ADR-007 rule 3).
 
 ## Dependencies
 
 ```mermaid
 flowchart TD
   TES[TableEmptyState] --> Icon[NoDataDescriptive]
-  TES --> Btn[Button]
-  TES --> RR[react-router useRevalidator]
   TES --> CG[useGetPinnedColumnPartition]
   TES --> CR[useTableContainerRef]
   TES --> ES[useElementSize]
+  TES --> MSG[TableEmptyStateMessage]
+  TES --> ACT[TableEmptyStateAction]
+  MSG --> ERR[useGetTableDataError]
+  MSG --> TTL[useGetTableTitleSingular]
+  MSG --> COL[useGetNormalizedColumn]
+  MSG --> NOTICE[toTableEmptyStateNotice]
+  ACT --> ERR
+  ACT --> KEYS[useGetTableGroupingKeys]
+  ACT --> RETRY[TableEmptyStateRetryButton] --> RR[react-router useRevalidator]
+  ACT --> CLEAR[TableEmptyStateClearGroupingButton] --> CTG[useClearTableGrouping]
 ```
+
+## Related
+
+- [ADR-068](../../../../../../docs/decisions/ADR-068-a-refused-read-is-rendered-data-not-an-exception.md) — a refused read is data the table renders
+- [ADR-066](../../../../../../docs/decisions/ADR-066-grouping-guard-rails-and-per-query-timeout.md) — what can refuse a grouped read, and the union it arrives as
+- [ADR-061](../../../../../../docs/decisions/ADR-061-grouping-config-in-url-expansion-in-store.md) — why clearing goes through the URL

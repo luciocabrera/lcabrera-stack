@@ -31,21 +31,22 @@ graph TD
   FDP --> TSB["TableSuspenseBoundary"]
   TSB -->|pending| SK["TableSkeleton"]
   TSB -->|resolved| TDR["TableDataResolver"]
-  TDR --> T["Table (dataSelector, dataTotalSelector, onLoadMore, response)"]
+  TDR --> T["Table (dataErrorSelector, dataSelector, dataTotalSelector, onLoadMore, response)"]
 
   style TSB stroke-dasharray: 5 5
 ```
 
 ## Props
 
-| Prop                | Type                                    | Required | Description                                                                                              |
-| ------------------- | --------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------- |
-| `columnsState`      | `TableColumnsStateInput<TData>`         | Yes      | Loader-seeded initial column state                                                                       |
-| `dataPromise`       | `Promise<TResponse>`                    | Yes      | Async data source                                                                                        |
-| `dataSelector`      | `(r: TResponse) => TData[]`             | Yes      | Extract rows from response                                                                               |
-| `dataTotalSelector` | `(r: TResponse) => number \| undefined` | No       | Extract total row count; `undefined` on a load-more page keeps the stored total (count once per session) |
-| `metaState`         | `Partial<TableMetaState>`               | Yes      | Loader-seeded initial meta state (include `crud` + `deleteActionPath` here for row/create actions)       |
-| `onLoadMore`        | Infinite scroll callback                | No       | Fetch next page                                                                                          |
+| Prop                | Type                                                | Required | Description                                                                                              |
+| ------------------- | --------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------- |
+| `columnsState`      | `TableColumnsStateInput<TData>`                     | Yes      | Loader-seeded initial column state                                                                       |
+| `dataErrorSelector` | `(r: TResponse) => TableResponseError \| undefined` | No       | Why the read returned no rows, when the endpoint said so — surfaced in the empty body (ADR-068)          |
+| `dataPromise`       | `Promise<TResponse>`                                | Yes      | Async data source                                                                                        |
+| `dataSelector`      | `(r: TResponse) => TData[]`                         | Yes      | Extract rows from response                                                                               |
+| `dataTotalSelector` | `(r: TResponse) => number \| undefined`             | No       | Extract total row count; `undefined` on a load-more page keeps the stored total (count once per session) |
+| `metaState`         | `Partial<TableMetaState>`                           | Yes      | Loader-seeded initial meta state (include `crud` + `deleteActionPath` here for row/create actions)       |
+| `onLoadMore`        | Infinite scroll callback                            | No       | Fetch next page                                                                                          |
 
 ## suspenseKey Behavior
 

@@ -5,10 +5,16 @@ import type {
   GroupKeyRefusalReason,
 } from '@lcabrera/server/db/group-query-builder/group-query-builder.types';
 import type {
+  GroupingRefusalReason,
+  SerializableDbError,
+} from '@lcabrera/server/errors/errors.types';
+import type {
   TableAggregateFn,
   TableColumnAnalyticalRole,
   TableColumnGroupingCapability,
+  TableGroupingRefusalReason,
   TableGroupKeyRefusalReason,
+  TableResponseError,
 } from '@lcabrera/ui/components/Table/Table.types';
 
 import { MAX_GROUP_KEYS } from '@lcabrera/server/db/group-query-builder/group-query-builder.constants';
@@ -90,6 +96,53 @@ const serverCapability: ColumnGroupingCapability = {
 const uiCapability: TableColumnGroupingCapability = serverCapability;
 const backToServerCapability: ColumnGroupingCapability = uiCapability;
 
+/**
+ * Why a grouped **read** was refused, both directions. Distinct from the
+ * key-refusal vocabulary above: that one is per column and pre-flight, this one
+ * is per request and is what the loader edge returns as data (#642).
+ */
+const uiGroupingRefusals: readonly TableGroupingRefusalReason[] = [
+  'aggregate-not-legal',
+  'column-not-groupable',
+  'duplicate-keys',
+  'estimate-too-large',
+  'no-keys',
+  'row-limit-reached',
+  'too-many-keys',
+  'unknown-column',
+];
+const serverGroupingRefusals: readonly GroupingRefusalReason[] =
+  uiGroupingRefusals;
+const backToUiGroupingRefusals: readonly TableGroupingRefusalReason[] =
+  serverGroupingRefusals;
+
+/**
+ * The serializable error union itself, arm for arm.
+ *
+ * The loader edge maps every failure of a grouped read into
+ * `SerializableDbError` and the Table reads it back as `TableResponseError`
+ * (#642) — through the loader boundary, where nothing checks the shape at
+ * runtime. A member added on one side alone would make the Table silently miss
+ * an arm and fall back to "no records match", which is the empty table this
+ * exists to prevent. Each arm is written out rather than only the union, so a
+ * *widened* arm (one that dropped `reason`, say) fails here too.
+ */
+const serverErrors: readonly SerializableDbError[] = [
+  { code: '23505', kind: 'db-failed', message: 'The database rejected it.' },
+  {
+    column: 'total_amount',
+    estimatedRows: 77_567,
+    kind: 'grouping-refused',
+    message: 'Column "total_amount" is not a legal group key.',
+    reason: 'column-not-groupable',
+  },
+  { kind: 'db-canceled', message: 'The query was cancelled.' },
+  { kind: 'unexpected', message: 'The request could not be completed.' },
+];
+
+const uiErrors: readonly TableResponseError[] = serverErrors;
+const backToServerErrors: readonly SerializableDbError[] = uiErrors;
+
 describe('grouping contract between @lcabrera/ui and @lcabrera/server', () => {
   it('pins the group-key depth cap to one value across both packages', () => {
     // The UI disables its affordances at its own constant and the builder
@@ -121,5 +174,24 @@ describe('grouping contract between @lcabrera/ui and @lcabrera/server', () => {
     expect(backToServerCapability).toStrictEqual(serverCapability);
     expect(uiCapability.canGroup).toBe(false);
     expect(uiCapability.refusal).toBe('unique-ish');
+  });
+
+  it('carries the same grouped-read refusal vocabulary in both directions', () => {
+    expect(backToUiGroupingRefusals).toStrictEqual(uiGroupingRefusals);
+    expect(serverGroupingRefusals).toStrictEqual(uiGroupingRefusals);
+  });
+
+  it('carries the same serializable error union, arm for arm', () => {
+    // Survives `structuredClone` by construction — this is what crosses the
+    // single-fetch boundary, where a class would arrive prototype-less and every
+    // `instanceof` on the client would be false without a word (ADR-050).
+    expect(backToServerErrors).toStrictEqual(serverErrors);
+    expect(structuredClone(uiErrors)).toStrictEqual(uiErrors);
+    expect(uiErrors.map((error) => error.kind)).toStrictEqual([
+      'db-failed',
+      'grouping-refused',
+      'db-canceled',
+      'unexpected',
+    ]);
   });
 });

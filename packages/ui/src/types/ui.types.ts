@@ -1,6 +1,9 @@
 import type { ReactNode } from 'react';
 
-import type { DataKey } from '#ui/components/Table/Table.types';
+import type {
+  DataKey,
+  TableResponseError,
+} from '#ui/components/Table/Table.types';
 
 export type InfiniteScroll<TData, TResponse> = {
   readonly dataSelector?: (response: TResponse) => readonly TData[];
@@ -66,6 +69,14 @@ export type Sorting<TData = Record<string, unknown>> = {
  */
 export type TablePageResponse<TData> = {
   readonly data: readonly TData[];
+  /**
+   * Why the read returned no rows, when the endpoint refused it rather than
+   * failing. A refusal is an expected outcome — a grouping the database will
+   * not run, a statement that timed out — so it arrives as a **successful**
+   * response carrying data, not as a rejected promise, and the route's error
+   * boundary never sees it. `dataErrorSelector` defaults to reading it (#642).
+   */
+  readonly error?: TableResponseError;
   readonly hasMore?: boolean;
   readonly total?: number;
 };

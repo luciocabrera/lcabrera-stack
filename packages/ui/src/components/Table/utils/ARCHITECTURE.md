@@ -31,6 +31,7 @@ utils/
 ├── resolveCrudRowId.util.ts                       → Resolve CRUD row id from the primary-key column(s)
 ├── resolveFetchMoreState.util.ts                 → Shared append/hasMore/total resolution for paginated fetch actions
 ├── resolveGridRowIndexing.util.ts                 → aria-rowcount and a body row's aria-rowindex, from one base (not exported from the barrel)
+├── resolveGroupKeyAvailability.util.ts            → Whether a column may be OFFERED as a group key: the declared flag narrowed by the catalogue
 ├── resolvePrimaryKeyColumnKeys.util.ts            → Keys of isPrimaryKey columns (declaration order, excludes 'actions')
 ├── resolveTableActionsColumn.util.ts              → Synthesize/merge the row-actions column from `crud` + any consumer override
 ├── serializeStateSlice.util.ts                   → JSON serialize a state slice
@@ -126,6 +127,7 @@ graph TD
 | getColumnPinSide                | columnKey, pinning                            | PinSide or undefined                                                                | Which side a column is pinned to                                                                                                                                                                                  |
 | resolveColumnCapabilities       | column (or undefined)                         | { isFilterable, isResizable, isSortable, isStatic }                                 | Materialize a column's capability defaults in one place; the only reader of the optional flags in the component tree                                                                                              |
 | resolveCrudRowId                | row, columns                                  | string                                                                              | Build a CRUD row id from the primary-key column(s) (single = raw value, composite = encoded values joined by `_`)                                                                                                 |
+| resolveGroupKeyAvailability     | column, catalogue capability                  | { isGroupable, refusal }                                                            | Whether a column may be **offered** as a group key: `resolveColumnCapabilities`' declared answer narrowed by the catalogue's (ADR-058/067). Absent capability leaves the declaration standing                     |
 | resolvePrimaryKeyColumnKeys     | columns                                       | DataKey[]                                                                           | Keys of `isPrimaryKey` columns in declaration order (excludes `actions`)                                                                                                                                          |
 | resolveTableActionsColumn       | columns, crud                                 | { columns, hasActionsColumn }                                                       | Adds/merges the synthetic `actions` column when `crud.read/update/delete` is enabled or the consumer declared one                                                                                                 |
 | resolveFetchMoreState           | currentData, selectors, response, totals      | { combinedData, hasMore, totalLoadedRows, totalRows }                               | Shared pagination merge logic used by table rows and filter-options load-more                                                                                                                                     |
@@ -142,6 +144,16 @@ did not agree with one another. It also folds `isStatic` into `isResizable`,
 because a static column is locked against every user modification, resizing
 included. `deriveToggleCommandState` takes its availability argument from it
 (`commands/ARCHITECTURE.md`).
+
+**Grouping is the one capability with a second gate, and it composes rather than
+competes.** `resolveGroupKeyAvailability` calls the resolver and then narrows its
+`isGroupable` with the catalogue's answer from the loader meta (ADR-058,
+ADR-063), because a column's real Postgres type and its distinct-value
+statistics are questions the browser cannot answer and the declared flag defaults
+to `true`. Every surface that offers a group key goes through it — the header
+menu item and the drawer's add-key list — so the two cannot disagree. An absent
+capability leaves the declared answer standing: a route may group without
+shipping a map at all.
 
 The one code that still reads the flags directly is `src/benchmarks/`, which
 re-implements the predicate on purpose to measure array shapes and is excluded

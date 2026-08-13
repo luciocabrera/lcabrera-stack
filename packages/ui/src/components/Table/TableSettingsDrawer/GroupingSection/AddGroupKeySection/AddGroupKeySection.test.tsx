@@ -10,6 +10,8 @@ import {
   vi,
 } from 'vite-plus/test';
 
+import type { TableColumnGroupingCapability } from '#ui/components/Table/Table.types';
+
 import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
 
 type MockVirtualSelectProps = {
@@ -20,11 +22,13 @@ type MockVirtualSelectProps = {
   }[];
 };
 
-const { columnsRef, groupingKeysRef, mockToggleGroupKey } = vi.hoisted(() => ({
-  columnsRef: { current: [] as readonly Record<string, unknown>[] },
-  groupingKeysRef: { current: [] as readonly string[] },
-  mockToggleGroupKey: vi.fn(),
-}));
+const { capabilitiesRef, columnsRef, groupingKeysRef, mockToggleGroupKey } =
+  vi.hoisted(() => ({
+    capabilitiesRef: { current: {} as Readonly<Record<string, unknown>> },
+    columnsRef: { current: [] as readonly Record<string, unknown>[] },
+    groupingKeysRef: { current: [] as readonly string[] },
+    mockToggleGroupKey: vi.fn(),
+  }));
 
 vi.mock(
   '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook',
@@ -32,6 +36,10 @@ vi.mock(
     useGetColumns: () => columnsRef.current,
   }),
 );
+
+vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
+  useGetTableGroupingCapabilities: () => capabilitiesRef.current,
+}));
 
 vi.mock('../../TableDrawerContext/actions', () => ({
   useToggleGroupKey: () => mockToggleGroupKey,
@@ -68,6 +76,7 @@ const listedOptions = () =>
   );
 
 beforeEach(() => {
+  capabilitiesRef.current = {};
   columnsRef.current = [
     { key: 'id', label: 'ID' },
     { isGroupable: false, key: 'notes', label: 'Notes' },
@@ -86,6 +95,25 @@ describe('AddGroupKeySection', () => {
     render(<AddGroupKeySection />);
 
     expect(listedOptions()).toEqual(['ID', 'Status']);
+  });
+
+  it('drops a column the catalogue refuses as a group key', () => {
+    // The declared flag says yes and the endpoint says no — the case a menu
+    // built from the declaration alone offers and the query then empties (#642).
+    const refused: TableColumnGroupingCapability = {
+      aggregates: ['count'],
+      canGroup: false,
+      column: 'id',
+      distinctEstimate: 500_000,
+      refusal: 'unique-ish',
+      role: 'dimension',
+      typeName: 'int4',
+    };
+    capabilitiesRef.current = { id: refused };
+
+    render(<AddGroupKeySection />);
+
+    expect(listedOptions()).toEqual(['Status']);
   });
 
   it('drops a column that is already a group key', () => {

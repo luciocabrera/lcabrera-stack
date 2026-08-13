@@ -9,7 +9,11 @@ export type TableLayoutProps<
   TResponse,
 > = Pick<
   TableProps<TData, TResponse>,
-  'actions' | 'dataSelector' | 'dataTotalSelector' | 'onLoadMore'
+  | 'actions'
+  | 'dataErrorSelector'
+  | 'dataSelector'
+  | 'dataTotalSelector'
+  | 'onLoadMore'
 > & {
   readonly columnsState: TableColumnsStateInput<TData>;
   readonly dataPromise: Promise<TResponse>;

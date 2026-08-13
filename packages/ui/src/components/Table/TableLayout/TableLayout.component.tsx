@@ -18,6 +18,7 @@ export const TableLayout = <
 >({
   actions,
   columnsState,
+  dataErrorSelector,
   dataPromise,
   dataSelector,
   dataTotalSelector,
@@ -39,6 +40,7 @@ export const TableLayout = <
               {(response) => (
                 <Table<TData, TResponse>
                   actions={actions}
+                  dataErrorSelector={dataErrorSelector}
                   dataSelector={dataSelector}
                   dataTotalSelector={dataTotalSelector}
                   onLoadMore={onLoadMore}

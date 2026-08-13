@@ -264,17 +264,32 @@ to branch on and a message that is this package's own, never the driver's; it is
 the loader-side mirror of what the mutating actions already do with a field-error
 object ([ADR-050](../../../../../docs/decisions/ADR-050-server-error-translation-and-result-contract.md)).
 
-The UI cannot construct any of these (both menus are built from the shipped
-capabilities), so they are only reachable by hand-editing the URL — **and until
-#642 renders `response.error`, a refused grouping shows an empty table rather
-than a message.** `groupingCapabilities.canGroup`/`refusal` and this union are
-what that issue reads.
+**And the table renders it** (#642,
+[ADR-068](../../../../../docs/decisions/ADR-068-a-refused-read-is-rendered-data-not-an-exception.md)).
+`TableRouteView` defaults its `dataErrorSelector` to `response.error`, so this
+route wires nothing for it: the empty body names the refused column by its
+header label, prints the endpoint's own sentence, and offers **Clear grouping**
+in place of Retry — repeating the request would be refused again for the same
+reason.
+
+Reaching one now takes a hand-edited URL. Both menus are built from the shipped
+capabilities: the aggregate list from `aggregates`, and — since #642 — the
+group-by item and the drawer's add-key list from `canGroup`, which the catalogue
+refuses for a large share of this table's columns. The two gates answer at
+different times, though, so the rendering half is not made redundant by the menu
+half: the pre-flight row bound is a property of the whole key combination,
+statistics move under a loaded page, and `grouping` is user-editable URL state
+(ADR-061).
+
+Re-derive the current refusal split with
+`.server/groupingRefusalSurface.smoke.test.tsx` (`vp run test:smoke`) rather than
+reading a number here — it comes from `n_distinct` and moves with the data.
 
 **A grouped read that ran on missing statistics says so.** `response.groupingWarning`
 carries `stats-unavailable` (the table has never been analysed, so nothing could
 estimate the result) or `estimate-above-warn-threshold`. The rows beside it are
-real — a warning is not an error — and rendering it belongs to the same
-follow-up.
+real — a warning is not an error — and **nothing renders it yet**: #642 covered
+the refusal, not the warning.
 
 **Every page is ordered, and the route guarantees that itself.**
 `parseOrdersPageParams` resolves the request's sort through `resolveQuerySort`

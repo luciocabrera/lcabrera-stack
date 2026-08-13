@@ -19,6 +19,7 @@ import { TableRouteView } from './TableRouteView.component';
 
 type Response = {
   readonly data: readonly Row[];
+  readonly error?: { readonly kind: 'db-canceled'; readonly message: string };
   readonly hasMore: boolean;
   readonly total?: number;
 };
@@ -109,6 +110,22 @@ describe('TableRouteView', () => {
     ).toBe(7);
     expect(
       lastProps().dataTotalSelector?.({ data: [], hasMore: false }),
+    ).toBeUndefined();
+  });
+
+  it('defaults dataErrorSelector to the response error', () => {
+    // The default is what makes a refusal visible without every route wiring it
+    // up: a response carrying `error` and nobody reading it is the silent empty
+    // table this closed (#642).
+    render(<TableRouteView<Row, Response> fetchPage={fetchPage} />);
+
+    const error = { kind: 'db-canceled', message: 'Cancelled.' } as const;
+
+    expect(
+      lastProps().dataErrorSelector?.({ data: [], error, hasMore: false }),
+    ).toBe(error);
+    expect(
+      lastProps().dataErrorSelector?.({ data: [], hasMore: false }),
     ).toBeUndefined();
   });
 
