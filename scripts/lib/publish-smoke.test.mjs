@@ -86,6 +86,35 @@ describe('selfContained', () => {
       '@lcabrera/utils',
     ]);
   });
+
+  // The check has to walk the whole closure, not one level. `@lcabrera/vite-config`
+  // depends only on `@lcabrera/eslint-plugin`, which is packed — so a direct-only
+  // check admits it, and the consumer then dies importing that plugin's own
+  // `@typescript-eslint/utils`, which no tarball carries.
+  it('drops a package whose packed dependency needs a registry', () => {
+    const plugin = packed({
+      dependencies: { '@typescript-eslint/utils': '^8.0.0' },
+      name: '@lcabrera/eslint-plugin',
+    });
+    const config = packed({
+      dependencies: { '@lcabrera/eslint-plugin': '0.1.0' },
+      name: '@lcabrera/vite-config',
+    });
+
+    expect(
+      selfContained([utils, plugin, config]).map(({ name }) => name),
+    ).toEqual(['@lcabrera/utils']);
+  });
+
+  it('tolerates a dependency cycle among packed packages', () => {
+    const left = packed({ dependencies: { right: '1.0.0' }, name: 'left' });
+    const right = packed({ dependencies: { left: '1.0.0' }, name: 'right' });
+
+    expect(selfContained([left, right]).map(({ name }) => name)).toEqual([
+      'left',
+      'right',
+    ]);
+  });
 });
 
 describe('unimportableProblems', () => {

@@ -26,7 +26,8 @@ issue: #675
 ## What
 
 `packages/vite-configs` becomes the published package `@lcabrera/vite-config`,
-with `packages/plugins` folded in and deleted (ADR-069). The repo data it carried
+with the one-plugin workspace folded in and deleted (ADR-069). The repo data it
+carried
 — the Oxlint workspace roster, the `@lcabrera/ui`/`@lcabrera/server` import
 boundaries, the StyleX source alias, the local env path — becomes configuration
 passed in from this repo's own configs.

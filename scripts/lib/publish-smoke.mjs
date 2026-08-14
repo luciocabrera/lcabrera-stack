@@ -80,12 +80,27 @@ export const importSpecifiers = ({ manifest, name }) =>
  * so nothing has to be fetched from a registry to import one.
  */
 export const selfContained = (packages) => {
-  const packed = new Set(packages.map(({ name }) => name));
-  return packages.filter(({ manifest }) =>
-    Object.keys(manifest.dependencies ?? {}).every((dependency) =>
-      packed.has(dependency),
-    ),
-  );
+  const packed = new Map(packages.map((entry) => [entry.name, entry]));
+
+  // Transitive, not one level: a package can depend on a packed sibling that
+  // itself needs a registry dependency, and a direct-only check calls that
+  // self-contained and then dies in the consumer on an import it cannot
+  // resolve. `seen` stops a dependency cycle from recursing forever — a cycle
+  // among packed packages needs nothing fetched, so it is contained.
+  const closureIsPacked = (entry, seen) =>
+    Object.keys(entry.manifest.dependencies ?? {}).every((dependency) => {
+      const packedDependency = packed.get(dependency);
+      if (packedDependency === undefined) {
+        return false;
+      }
+      if (seen.has(dependency)) {
+        return true;
+      }
+      seen.add(dependency);
+      return closureIsPacked(packedDependency, seen);
+    });
+
+  return packages.filter((entry) => closureIsPacked(entry, new Set()));
 };
 
 /**

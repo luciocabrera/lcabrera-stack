@@ -39,7 +39,7 @@ the custom lint rules sat unscoped until they became `@lcabrera/eslint-plugin`
 renames.**
 [ADR-069](docs/decisions/ADR-069-publish-the-shared-toolchain.md) publishes
 `packages/node-runtime` as `@lcabrera/node` (done, #676) and
-`packages/vite-configs`, with `packages/plugins` folded in and deleted, as
+`packages/vite-configs`, with the one-plugin workspace folded in and deleted, as
 `@lcabrera/vite-config` (done, #675). Those workspaces **became** the published
 package — the directory keeps its name, the npm name is the one that changes —
 and the repo data they carried left for a repo-owned home: the Oxlint workspace
@@ -92,7 +92,7 @@ covered the day it is added; keep the prose in step.
 
 `packages/vite-configs` joined that list as `@lcabrera/vite-config` under #675
 ([ADR-069](docs/decisions/ADR-069-publish-the-shared-toolchain.md)), the way the
-rule above requires: it and the now-deleted `packages/plugins` each committed an
+rule above requires: it and the plugins workspace it absorbed each committed an
 `eslint-suppressions.json`, and admission meant _clearing_ those findings and
 gitignoring the file — not being named here. `packages/node-runtime` joined the
 same way under #676, more cheaply: it carried no suppressions to clear, so
