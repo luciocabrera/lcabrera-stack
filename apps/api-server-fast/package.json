@@ -13,7 +13,7 @@
     "lint:check": "vp lint . && vp run lint:eslint:check",
     "lint:eslint": "eslint . --config eslint.config.mjs --fix --max-warnings 0",
     "lint:eslint:check": "eslint . --config eslint.config.mjs --max-warnings 0",
-    "seed": "node --env-file-if-exists=../../docker/local/.env --env-file-if-exists=.env ../../scripts/seed-db.cjs",
+    "seed": "vp run --filter car-sales-api seed",
     "start": "vp run build && node --env-file-if-exists=../../docker/local/.env --env-file-if-exists=.env dist/server.js",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },

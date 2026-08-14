@@ -27,10 +27,13 @@ Package-local `.env` files are optional and used only as app-specific overrides.
 
 Programmatic entrypoint:
 
-- `../../scripts/seed-db.cjs`
-- `../../scripts/seed-db.cjs` resolves `psql` from fixed system directories and executes it with a fixed safe `PATH`
+- `vp run seed` delegates to `car-sales-api`'s own `seed` by workspace name
+  rather than by path — both servers serve the same tables from the same
+  database, so there is one seeding entry point for the pair
+- that script resolves `psql` from fixed system directories and executes it with a fixed safe `PATH`
 
-SQL assets are reused from `apps/api-server/db/`.
+The SQL assets belong to `car-sales-api`, which is also the workspace that owns
+them once the pair leaves this repository.
 
 ## Operational Guardrails
 

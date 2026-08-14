@@ -12,7 +12,7 @@
     "format": "vp fmt .",
     "format:check": "vp fmt --check .",
     "dev": "nodemon --watch src --ext ts --exec \"vp run build && node --env-file-if-exists=../../docker/local/.env --env-file-if-exists=.env dist/server.js\"",
-    "seed": "node --env-file-if-exists=../../docker/local/.env --env-file-if-exists=.env ../../scripts/seed-db.cjs",
+    "seed": "node --env-file-if-exists=../../docker/local/.env --env-file-if-exists=.env scripts/seed-db.mjs",
     "db:seed": "vp run -w db:up && vp run seed",
     "start": "vp run build && node --env-file-if-exists=../../docker/local/.env --env-file-if-exists=.env dist/server.js",
     "typecheck": "tsc -p tsconfig.json --noEmit"

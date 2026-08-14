@@ -1,4 +1,3 @@
-\timing on
 SET client_min_messages TO warning;
 SET statement_timeout = 0;
 SET lock_timeout = '10s';

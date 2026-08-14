@@ -77,46 +77,57 @@ does nothing, silently. Full map of both paths, the check that tells a built
 bundle's two states apart, and why the response shapes are identical:
 [`docs/data-sources.md`](docs/data-sources.md).
 
+## Database
+
+This app owns the DDL for every table it queries — `db/setup_large_data.sql`
+(`car_sales`, `wide_alltypes_150`) and `db/setup_enterprise_orders.sql`
+(`enterprise_orders`) — and seeds itself with them. Nothing outside this
+workspace is involved; [`db/README.md`](db/README.md) covers the one file that
+is deliberately duplicated with `apps/api-server` and how the copies are kept
+from drifting.
+
+Start local PostgreSQL from the monorepo root, then seed:
+
+```bash
+vp run db:up
+vp run --filter vite-react-compiler seed
+# or one-shot bring-up + seed
+vp run --filter vite-react-compiler db:seed
+```
+
+The seeder creates the database named by `DB_NAME` if it does not exist, then
+applies both files (each drops and recreates the tables it owns, so re-running
+is how you get back to a known state). It connects with `pg` and needs no
+`psql` on the machine — Docker and Node are the whole requirement. It reads the
+same five `DB_*` variables the app itself requires and fails naming any that are
+missing rather than guessing.
+
+Check database container status with `vp run db:status`, and stop it with
+`vp run db:down`.
+
 ## API Server
 
 Only needed for the `VITE_API_URL` override above (and for `apps/admin_system`).
 When it is running, the dev server proxies `/api` requests to
 `http://localhost:3001`.
 
-Start the API server from the nested workspace package:
+Start the API server from its workspace:
 
 ```bash
-cd api-server
-vp run start
+vp run --filter car-sales-api start
 ```
 
-### DB Recovery And Backup
-
-Start local PostgreSQL from the monorepo root:
-
-```bash
-vp run db:up
-```
-
-Check database container status:
-
-```bash
-vp run db:status
-```
-
-If API responses suddenly return `total: 0`, first check DB sanity:
+If its responses suddenly return `total: 0`, first check DB sanity:
 
 ```bash
 curl http://localhost:3001/api/db-sanity
 ```
 
-Seed all API tables in one command:
+It seeds its own copy of the car-sales tables
+(`vp run --filter car-sales-api seed`) — that command does **not** create
+`enterprise_orders`, which belongs to this app.
 
-```bash
-vp run seed
-# or one-shot bring-up + seed
-vp run db:seed
-```
+### DB Recovery And Backup
 
 Create a backup dump:
 
@@ -158,16 +169,15 @@ Production builds generate:
 
 ```text
 src/
-  components/
-  contexts/
-  design-system/
-  hooks/
+  auth/
+  constants/
+  features/
+  root/
   routes/
   services/
-  types/
-  utils/
-api-server/
+db/
 docs/
+scripts/
 ```
 
 ## Quality Gate

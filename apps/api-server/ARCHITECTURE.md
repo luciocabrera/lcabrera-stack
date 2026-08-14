@@ -60,10 +60,29 @@ TypeScript source lives in `api-server/src/`:
 
 SQL assets:
 
-- `db/setup_large_data.sql`
-- `db/setup_enterprise_orders.sql`
+- `db/setup_large_data.sql` — `car_sales` and `wide_alltypes_150`, the tables
+  both API servers serve. A byte-identical copy lives in
+  `apps/react-router/db/`, deliberately
+  ([ADR-071](../../docs/decisions/ADR-071-split-the-demo-database-setup.md)):
+  change one and change the other in the same commit.
+
+`enterprise_orders` is **not** created here. The showcase owns that table's DDL
+(`apps/react-router/db/setup_enterprise_orders.sql`) and seeds it into the same
+local database, which is what keeps this workspace's enterprise-order endpoints
+working today.
 
 Programmatic entrypoint:
 
-- `../../scripts/seed-db.cjs`
-- `vp run seed`
+- `scripts/seed-db.mjs` — resolves `psql` from fixed system directories, or pipes
+  into the local Postgres container when there is no host `psql`
+- `vp run seed`, or `vp run db:seed` to bring the database up first
+
+Both client paths carry the same two guarantees, built once in the shared
+argument builder so they cannot drift apart again:
+
+- **`ON_ERROR_STOP=1`** — psql's default is to report a failed statement and
+  carry on, exiting 0, which is a half-applied seed that calls itself successful.
+- **`docker exec -e PGPASSWORD`** — the spawn environment reaches the docker
+  client, not the psql running _inside_ the container, so the container path has
+  to forward it explicitly. The bare `-e VAR` form is used on purpose: an
+  `-e VAR=value` would put the password in the command line for `ps` to show.
