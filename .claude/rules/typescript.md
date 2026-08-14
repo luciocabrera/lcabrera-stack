@@ -241,10 +241,11 @@ import { Button } from '../../../../components/Button';
 
 **In a publishable package, never `@/`.** It resolves only through a tsconfig
 `paths` entry, so it cannot survive publication: a consumer compiling our source
-has no such alias and the import fails to resolve. All four are generated with
-`srcAlias: false` (`packages/ts-configs/generate.ts`), so they have no `@/*`
-mapping and tsc rejects such an import outright. Do not add the alias back to
-make one compile — rewrite the import.
+has no such alias and the import fails to resolve. None of them is generated with
+one — a Node-context package gets no `@/*` from `createNodeTsConfig` at all, and
+`packages/ui` passes `srcAlias: false` explicitly
+(`packages/ts-configs/tsconfig.entries.ts`) — so tsc rejects such an import
+outright. Do not add the alias back to make one compile — rewrite the import.
 
 What to use instead **depends on whether the package ships source**, and the two
 answers are not interchangeable:

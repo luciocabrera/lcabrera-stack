@@ -5,7 +5,7 @@ are the product, the `@lcabrera/` vs `@repo/` scope split, the never-baseline ru
 — is in the root [AGENTS.md](../AGENTS.md) §1 and §4. This file is the
 **publishing contract** for the public packages: `@lcabrera/ui`,
 `@lcabrera/api`, `@lcabrera/server`, `@lcabrera/utils`,
-`@lcabrera/eslint-plugin`.
+`@lcabrera/eslint-plugin`, `@lcabrera/tsconfig`.
 
 ## Publishing invariants
 
@@ -24,12 +24,14 @@ pnpm on PATH itself.
 What holds, verified by packing each package and reading the tarball rather than
 by inspection:
 
-- **Three of them build; `@lcabrera/ui` ships source.** A `.ts` file inside
+- **All but `@lcabrera/ui` build; `ui` alone ships source.** A `.ts` file inside
   `node_modules` is not loadable at all — Node refuses to strip types there
   (`ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`) — and Vite externalizes
   dependencies for SSR by default, so a source-shipping package fails when a
-  consumer's server _starts_, not when it typechecks. `api`, `server` and `utils`
-  therefore run `vp pack` (tsdown) to `dist` with `.d.mts` and sourcemaps. `ui`
+  consumer's server _starts_, not when it typechecks. Every other public package
+  therefore runs `vp pack` (tsdown) to `dist` with `.d.mts` and sourcemaps —
+  which is also how you tell the two apart in a manifest, since a `build` script
+  is exactly what `publish:verify` and the API-surface gate key on. `ui`
   cannot: StyleX derives theme identity from the source path, so a consumer's own
   plugin has to compile it.
 - **Shipping source changes how `@lcabrera/ui` may import itself, and the rule is

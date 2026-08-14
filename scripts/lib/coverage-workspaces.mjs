@@ -64,13 +64,17 @@ export const COVERAGE_REPORT_WORKSPACES = [
   // nothing to cover"; that stopped being true for these two when
   // eslint-local-rules gained a suite per rule (#205). Their tests are a lint
   // RuleTester and a set of pure utils, so neither reaches a service.
-  // `packages/plugins` and `packages/ts-configs` genuinely still have none.
+  // `packages/plugins` genuinely still has none.
   {
     dir: 'packages/eslint-local-rules',
     name: '@lcabrera/eslint-plugin',
     run: true,
   },
   { dir: 'packages/agent-runner', name: '@repo/agent-runner', run: true },
+  // Pure factories plus a writer whose one effect is injected, so the whole
+  // package is covered without a filesystem (ADR-069 split it out of
+  // `@repo/ts-configs`, which keeps only this repo's entry table).
+  { dir: 'packages/tsconfig', name: '@lcabrera/tsconfig', run: true },
 ];
 
 /**
@@ -91,6 +95,7 @@ export const COVERAGE_MERGE_WORKSPACES = [
   { dir: 'packages/node-runtime', name: '@repo/node-runtime' },
   { dir: 'packages/scan-ingestion', name: '@repo/scan-ingestion' },
   { dir: 'packages/server', name: '@lcabrera/server' },
+  { dir: 'packages/tsconfig', name: '@lcabrera/tsconfig' },
   { dir: 'packages/ui', name: '@lcabrera/ui' },
   { dir: 'packages/utils', name: '@lcabrera/utils' },
   { dir: 'apps/admin_system', name: 'admin-system' },

@@ -1,9 +1,12 @@
 # Suppressions in the public packages
 
-`packages/ui`, `packages/api`, `packages/server`, `packages/utils` and
-`packages/eslint-local-rules` ship to consumers outside this repo. AGENTS.md §4
-holds them to a single rule: **every finding gets fixed — never baselined, never
-scoped off, never inline-disabled.**
+`packages/ui`, `packages/api`, `packages/server`, `packages/utils`,
+`packages/eslint-local-rules` and `packages/tsconfig` ship to consumers outside
+this repo. AGENTS.md §4 holds them to a single rule: **every finding gets fixed —
+never baselined, never scoped off, never inline-disabled.** The membership is not
+this sentence: `vp run suppressions:verify` resolves it from the workspaces that
+gitignore `eslint-suppressions.json`, so a new package joins the day its manifest
+and gitignore change.
 
 This page is how that rule is checked, and what to do when you think you have
 found the exception it allows.

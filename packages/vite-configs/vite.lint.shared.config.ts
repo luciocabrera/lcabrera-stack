@@ -47,6 +47,7 @@ const NODE_WORKSPACES = [
   'packages/eslint-local-rules/**',
   'packages/plugins/**',
   'packages/ts-configs/**',
+  'packages/tsconfig/**',
   'packages/vite-configs/**',
 ];
 

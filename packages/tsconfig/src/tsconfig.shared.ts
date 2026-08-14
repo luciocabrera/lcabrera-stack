@@ -1,4 +1,4 @@
-type CreateAppTsConfigArgs = {
+export type CreateAppTsConfigArgs = {
   readonly exclude?: readonly string[];
   readonly include?: readonly string[];
   /** Extra path aliases merged on top of the default `@/*` → `./src/*` mapping — for a package's own self-referencing alias (e.g. `@lcabrera/ui/*`) or a cross-package one. */
@@ -11,7 +11,7 @@ type CreateAppTsConfigArgs = {
   readonly types?: readonly string[];
 };
 
-type CreateNodeTsConfigArgs = {
+export type CreateNodeTsConfigArgs = {
   readonly exclude?: readonly string[];
   readonly include?: readonly string[];
   /** Path aliases for this config — node configs have none by default. */
@@ -21,7 +21,7 @@ type CreateNodeTsConfigArgs = {
   readonly types?: readonly string[];
 };
 
-type TsConfig = {
+export type TsConfig = {
   readonly compilerOptions: Record<string, unknown>;
   readonly exclude: readonly string[];
   readonly include: readonly string[];
@@ -117,10 +117,15 @@ const createNodeCompilerOptions = ({
   verbatimModuleSyntax: true,
 });
 
-const mergeTsConfig = (
-  baseConfig: TsConfig,
-  overrides: Partial<TsConfig> = {},
-): TsConfig => ({
+type MergeTsConfigArgs = {
+  readonly baseConfig: TsConfig;
+  readonly overrides?: Partial<TsConfig>;
+};
+
+const mergeTsConfig = ({
+  baseConfig,
+  overrides = {},
+}: MergeTsConfigArgs): TsConfig => ({
   ...baseConfig,
   ...overrides,
   compilerOptions: {
@@ -140,8 +145,8 @@ export const createAppTsConfig = ({
   tsBuildInfoFile,
   types,
 }: CreateAppTsConfigArgs): TsConfig =>
-  mergeTsConfig(
-    {
+  mergeTsConfig({
+    baseConfig: {
       compilerOptions: createAppCompilerOptions({
         paths,
         rootDirs,
@@ -152,11 +157,11 @@ export const createAppTsConfig = ({
       exclude: APP_TS_CONFIG.exclude,
       include: APP_TS_CONFIG.include,
     },
-    {
+    overrides: {
       exclude,
       include,
     },
-  );
+  });
 
 export const createNodeTsConfig = ({
   exclude,
@@ -165,8 +170,8 @@ export const createNodeTsConfig = ({
   tsBuildInfoFile,
   types,
 }: CreateNodeTsConfigArgs): TsConfig =>
-  mergeTsConfig(
-    {
+  mergeTsConfig({
+    baseConfig: {
       compilerOptions: createNodeCompilerOptions({
         paths,
         tsBuildInfoFile,
@@ -175,8 +180,8 @@ export const createNodeTsConfig = ({
       exclude: NODE_TS_CONFIG.exclude,
       include: NODE_TS_CONFIG.include,
     },
-    {
+    overrides: {
       exclude,
       include,
     },
-  );
+  });

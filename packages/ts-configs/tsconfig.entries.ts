@@ -1,20 +1,25 @@
+import {
+  createAppTsConfig,
+  createNodeTsConfig,
+} from '@lcabrera/tsconfig/shared';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-
-import { createAppTsConfig, createNodeTsConfig } from './tsconfig.shared.ts';
 
 const packageDirectory = path.dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = path.resolve(packageDirectory, '..', '..');
 
 /**
- * Every generated tsconfig, as data. Kept apart from `generate.ts` so the set
- * can be asserted without running the generator: importing the writer would
- * rewrite all 17 configs as a side effect of the import, which no test can do.
+ * Every generated tsconfig, as data — this repo's own workspace roster, which
+ * is exactly what `@lcabrera/tsconfig` must not carry (ADR-069).
+ *
+ * Kept apart from `generate.ts` so the set can be asserted without running the
+ * generator: importing the runner would rewrite every config in the repo as a
+ * side effect of the import, which no test can do.
  */
 export const configs = [
   {
-    // This package's own source (generate.ts + tsconfig.shared.ts) is
-    // Node-only: node:fs/node:path/node:url, run via `node`, no bundler and
+    // This package's own source (the runner + tsconfig.entries.ts) is
+    // Node-only: node:path/node:url, run via `node`, no bundler and
     // no browser context. It previously emitted an app-config/node-config
     // demo pair for itself, but neither one ever checked this source: the app
     // config demanded `vite/client` types from a package that does not depend
@@ -295,6 +300,19 @@ export const configs = [
     filePath: path.resolve(
       workspaceRoot,
       'packages/eslint-local-rules/tsconfig.app.json',
+    ),
+  },
+  {
+    // Genuinely Node-only: the tsconfig factories and the writer that produced
+    // every entry in this table, including this one. Sources under src/ with a
+    // root vite.config.ts, so include names both, matching @lcabrera/utils.
+    config: createNodeTsConfig({
+      include: ['src', 'vite.config.ts'],
+      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
+    }),
+    filePath: path.resolve(
+      workspaceRoot,
+      'packages/tsconfig/tsconfig.app.json',
     ),
   },
 ] as const;

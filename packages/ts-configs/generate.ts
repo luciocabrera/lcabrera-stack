@@ -1,22 +1,14 @@
-import { mkdir, writeFile } from 'node:fs/promises';
-import path from 'node:path';
+/**
+ * This repo's tsconfig generation run: hand the local entry table to the
+ * published writer.
+ *
+ * The factories and the writer live in `@lcabrera/tsconfig` (ADR-069); what
+ * stays here is `tsconfig.entries.ts`, which is nothing but this repo's own
+ * workspace roster. That is the whole reason the split is a split rather than a
+ * rename — a consumer installing the package must not receive our roster.
+ */
+import { writeTsConfigs } from '@lcabrera/tsconfig/generate';
 
 import { configs } from './tsconfig.entries.ts';
 
-type WriteConfigArgs = {
-  readonly config: unknown;
-  readonly filePath: string;
-};
-
-const stringifyConfig = (config: unknown): string =>
-  `${JSON.stringify(config, null, 2)}\n`;
-
-const writeConfigFile = async ({
-  config,
-  filePath,
-}: WriteConfigArgs): Promise<void> => {
-  await mkdir(path.dirname(filePath), { recursive: true });
-  await writeFile(filePath, stringifyConfig(config), 'utf8');
-};
-
-await Promise.all(configs.map(writeConfigFile));
+await writeTsConfigs({ entries: configs });
