@@ -2,7 +2,7 @@
 id: toolchain-publishing-adr
 title: Decide the toolchain publishing plan for cross-repo reuse
 owner: agent:claude
-status: active
+status: review
 branch: docs/673-toolchain-publishing-adr
 area:
   - docs/decisions/**
@@ -10,7 +10,7 @@ area:
 started: 2026-08-14
 updated: 2026-08-14
 plan: (none)
-pr: (none)
+pr: #700
 issue: #673
 ---
 
@@ -20,6 +20,6 @@ Decide the toolchain publishing plan for cross-repo reuse
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: ADR-069 written, AGENTS.md §1 updated, full gate green
 - Blockers: none
-- Next:
+- Next: review and merge; #674–#677 implement the decision

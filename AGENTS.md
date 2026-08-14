@@ -34,6 +34,21 @@ A package in **neither** scope means that question was never asked — that is h
 the custom lint rules sat unscoped until they became `@lcabrera/eslint-plugin`
 ([ADR-057](docs/decisions/ADR-057-publish-the-custom-lint-rules.md)).
 
+**Four of those `@repo/*` names are on their way out, and the answer to "does it
+ship?" is now yes for each.**
+[ADR-069](docs/decisions/ADR-069-publish-the-shared-toolchain.md) publishes
+`packages/ts-configs` as `@lcabrera/tsconfig`, `packages/vite-configs` (folding
+in `packages/plugins`) as `@lcabrera/vite-config`, `packages/node-runtime` as
+`@lcabrera/node`, and the three scan-report skills' shared scripts as
+`@lcabrera/scan-report` — so the list above is what the manifests still say, not
+where they are going. #674–#677 do the renames; until one lands, its package is
+`@repo/*` and `private: true` in fact. Treat all four as public-in-waiting: what
+makes them publishable at all is that this repo's own data — the Oxlint
+workspace roster, the `@lcabrera/ui`/`@lcabrera/server` boundary tables, the
+`docker/local` env path, the tsconfig entry table — comes out of them and
+becomes configuration, so adding a new hardcoded repo fact to one of them now
+works against that.
+
 **They are published on npm, and nothing but the version number stands between
 a mistake and the registry** — `private` is off and each has a trusted publisher,
 so a merged version bump publishes on its own, and **an npm version is permanent**.
@@ -63,6 +78,17 @@ that list is not this sentence — it is which workspaces gitignore
 `eslint-suppressions.json`, which `vp run suppressions:verify` reads at runtime,
 so a new public package is covered the day it is added; keep the prose in step.
 
+`packages/ts-configs`, `packages/vite-configs` (absorbing `packages/plugins`)
+and `packages/node-runtime` join that list as `@lcabrera/tsconfig`,
+`@lcabrera/vite-config` and `@lcabrera/node`, and a fourth is built from the
+scan-report skills' shared scripts as `@lcabrera/scan-report`
+([ADR-069](docs/decisions/ADR-069-publish-the-shared-toolchain.md)). None of
+them is in the tier yet, and the rule above says why: `packages/ts-configs`,
+`packages/vite-configs` and `packages/plugins` each still commit an
+`eslint-suppressions.json`. Each is admitted by its own implementing issue
+(#674–#677) clearing those suppressions and gitignoring the file — not by being
+named here.
+
 `api` and `server` split on **runtime**, and the split is load-bearing, not
 cosmetic — the two names say which runtime each one is for, and the tsconfigs
 enforce it in both directions. `@lcabrera/api` is browser-safe: its tsconfig omits
@@ -80,7 +106,9 @@ which supersedes ADR-008.
 `utils` and `node-runtime` split on purity, and the split is deliberate:
 `@lcabrera/utils` guarantees pure, side-effect-free helpers, so anything that must
 touch the process (signal handlers, exit paths) belongs in `@repo/node-runtime`
-instead of eroding that guarantee.
+instead of eroding that guarantee. That is also why publishing does not merge the
+two — nor fold `node-runtime` into `@lcabrera/server`, which would drag `pg` into
+a consumer that only wanted a shutdown handler (ADR-069, on ADR-038's reasoning).
 
 All source paths below (e.g. `src/components/`) are relative to `apps/react-router/` unless otherwise noted.
 
