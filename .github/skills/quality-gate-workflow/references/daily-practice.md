@@ -16,7 +16,8 @@ Run the quality gate after every change set so correctness and maintainability d
 vp fmt .
 vp lint .
 vp run lint:eslint:check
-vp run lint:biome:check   # from the repo ROOT
+vp run lint:biome:check     # from the repo ROOT
+vp run react-doctor:verify  # from the repo ROOT — errors block
 vp check
 vp run typecheck
 vp run test
@@ -24,25 +25,34 @@ vp run test
 
 ## Why This Order
 
-| Step | Command                    | What It Catches                                           | Why First/Next                                            |
-| ---- | -------------------------- | --------------------------------------------------------- | --------------------------------------------------------- |
-| 1    | `vp fmt .`                 | formatting drift                                          | cheapest auto-fix pass                                    |
-| 2    | `vp lint .`                | rule violations, unsafe patterns, architecture guardrails | avoids type/test noise from known lint failures           |
-| 3    | `vp run lint:eslint:check` | import/module order, react/stylex rules, `local-rules`    | eslint-only rule sets no other stage runs                 |
-| 4    | `vp run lint:biome:check`  | the React-domain rules the other two miss                 | root-only pass; last of the three linters                 |
-| 5    | `vp check`                 | fmt + Oxlint + the tsgolint type pass                     | verifies structural correctness before runtime assertions |
-| 6    | `vp run typecheck`         | real `tsc`; `check:public-api` in `packages/ui`           | the reference type-check the tsgolint pass approximates   |
-| 7    | `vp run test`              | behavioral regressions                                    | highest-cost stage, run after static checks pass          |
+| Step | Command                      | What It Catches                                           | Why First/Next                                            |
+| ---- | ---------------------------- | --------------------------------------------------------- | --------------------------------------------------------- |
+| 1    | `vp fmt .`                   | formatting drift                                          | cheapest auto-fix pass                                    |
+| 2    | `vp lint .`                  | rule violations, unsafe patterns, architecture guardrails | avoids type/test noise from known lint failures           |
+| 3    | `vp run lint:eslint:check`   | import/module order, react/stylex rules, `local-rules`    | eslint-only rule sets no other stage runs                 |
+| 4    | `vp run lint:biome:check`    | the React-domain rules the other two miss                 | root-only pass; last of the three linters                 |
+| 5    | `vp run react-doctor:verify` | effect cleanup, server/client boundaries, render cost     | the only pass covering these; errors block                |
+| 6    | `vp check`                   | fmt + Oxlint + the tsgolint type pass                     | verifies structural correctness before runtime assertions |
+| 7    | `vp run typecheck`           | real `tsc`; `check:public-api` in `packages/ui`           | the reference type-check the tsgolint pass approximates   |
+| 8    | `vp run test`                | behavioral regressions                                    | highest-cost stage, run after static checks pass          |
 
 **Three linters, none redundant.** Oxlint (2) runs repo-wide from the root;
 eslint (3) fans out per workspace; Biome (4) is root-only — there is no
 per-workspace `lint:biome`, because `biome.jsonc`'s `overrides` already scope the
 react domain. Run stage 4 from the repo root: inside a workspace it is not the
-gate.
+gate. `vp run lint:all` chains those three with autofix and stops there — it does
+**not** run stage 5.
 
-**Stages 5 and 6 are different passes, not a retry.** Stage 5's types come from
+**Stage 5 is not a linter, and no other stage substitutes for it.** React Doctor
+is the only pass checking effect cleanup, server/client boundaries and render-path
+cost; its errors block ([ADR-055](../../../../docs/decisions/ADR-055-react-doctor-as-a-gate.md)).
+Root-only and repo-wide like Biome. When it fails, read
+[`react-doctor-triage.md`](../../../../docs/agents/react-doctor-triage.md) before
+reaching for any suppression.
+
+**Stages 6 and 7 are different passes, not a retry.** Stage 6's types come from
 tsgolint (Oxlint's type-aware path reading each workspace's `tsconfig.app.json`);
-stage 6 is the actual compiler, and it is the only stage that runs the
+stage 7 is the actual compiler, and it is the only stage that runs the
 workspace's `typecheck` script — where `packages/ui` gates its public API against
 server-only `node:*` imports and the React Router apps regenerate route types.
 
@@ -69,14 +79,15 @@ Use an incremental loop while coding, then full gate before completion.
 
 ## Failure Handling Playbook
 
-| Failure Stage      | Action                                                                    |
-| ------------------ | ------------------------------------------------------------------------- |
-| `fmt` failed       | re-run `vp fmt .`, inspect changed files                                  |
-| `lint` failed      | fix root cause (avoid suppressions unless justified)                      |
-| `biome` failed     | fix the code; if it contradicts eslint, find the form that satisfies both |
-| `check` failed     | resolve types at source boundary, avoid widening to `any`                 |
-| `typecheck` failed | same, but check whether a generated tsconfig drifted — never hand-edit it |
-| `test` failed      | reproduce deterministically, fix code/tests, re-run suite                 |
+| Failure Stage         | Action                                                                                                                                       |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fmt` failed          | re-run `vp fmt .`, inspect changed files                                                                                                     |
+| `lint` failed         | fix root cause (avoid suppressions unless justified)                                                                                         |
+| `biome` failed        | fix the code; if it contradicts eslint, find the form that satisfies both                                                                    |
+| `react-doctor` failed | read `docs/agents/react-doctor-triage.md` first — it records which findings were already argued, and that suppressions exist but are policed |
+| `check` failed        | resolve types at source boundary, avoid widening to `any`                                                                                    |
+| `typecheck` failed    | same, but check whether a generated tsconfig drifted — never hand-edit it                                                                    |
+| `test` failed         | reproduce deterministically, fix code/tests, re-run suite                                                                                    |
 
 ## Suggested Strictness Levels
 
@@ -84,8 +95,8 @@ Use an incremental loop while coding, then full gate before completion.
 | ----------------------------- | ------------------------------------ |
 | Tiny docs/comment-only change | `vp lint .` + `vp check`             |
 | Local WIP coding loop         | targeted lint/check during iteration |
-| Ready to mark task done       | full gate (all 7 steps)              |
-| Pre-merge or PR update        | full gate (all 7 steps)              |
+| Ready to mark task done       | the full gate, every stage           |
+| Pre-merge or PR update        | the full gate, every stage           |
 
 ## Common Anti-Patterns
 
@@ -121,7 +132,8 @@ cd packages/ui && vp run lint:biome:check
 vp fmt .
 vp lint .
 vp run lint:eslint:check
-vp run lint:biome:check   # from the repo ROOT
+vp run lint:biome:check     # from the repo ROOT
+vp run react-doctor:verify  # from the repo ROOT — errors block
 vp check
 vp run typecheck
 vp run test
@@ -137,6 +149,7 @@ Use this in PR templates or review guides:
 - [ ] `vp lint .` passed
 - [ ] `vp run lint:eslint:check` passed
 - [ ] `vp run lint:biome:check` passed (from the root)
+- [ ] `vp run react-doctor:verify` passed (from the root)
 - [ ] `vp check` passed
 - [ ] `vp run typecheck` passed
 - [ ] `vp run test` passed

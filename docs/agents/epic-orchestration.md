@@ -385,4 +385,4 @@ A useful seed states, in a few lines each:
 What a seed must **not** contain is a count of closed children, a wave plan copied
 from a previous run, or a summary of an issue that is one `gh` call away. Those
 are derivable, and a derivable number written down is a number that is wrong later
-([AGENTS.md §7](../../AGENTS.md#documentation--workflow)).
+([AGENTS.md §7](../../AGENTS.md#7-documentation--workflow)).

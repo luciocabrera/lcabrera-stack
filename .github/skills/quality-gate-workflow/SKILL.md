@@ -63,6 +63,14 @@ Biome it is **root-only and repo-wide** — there is no per-workspace variant, s
 as it goes, which means the warnings behind a passing run are readable without
 paying for a second scan.
 
+When stage 5 fails, read
+[`docs/agents/react-doctor-triage.md`](../../../docs/agents/react-doctor-triage.md)
+**before** reaching for a suppression. It records which findings have already been
+argued, and corrects the belief that React Doctor offers no suppression mechanism —
+it has both `ignore.overrides` and `react-doctor-disable` comments, and
+`scripts/lib/suppressions-react-doctor.mjs` polices them, so reaching for one is
+not a quiet exit.
+
 **Stage 7 is not optional and is not covered by stage 6 either.** Stage 6's type
 pass is tsgolint — Oxlint's type-aware path. It reads each workspace's own
 strict `tsconfig.app.json`, so it is a genuine type-check, but it is not `tsc`
@@ -76,9 +84,11 @@ in dependency order.
 Shortcut: `vp run lint` in a workspace chains `vp lint . --fix` **and**
 `vp run lint:eslint` (autofix for both), which is usually what you want while
 iterating — but it does **not** include Biome or React Doctor, so stages 4 and 5
-still need their own runs. From the root, `vp run lint:all` chains all three
-linters with autofix, and `vp run check:safe` chains the entire gate the way CI
-does.
+still need their own runs. `vp run lint:all` does **not** close that gap either:
+it chains the three _linters_ with autofix (`vp lint . --fix`, `lint:eslint`,
+`lint:biome`) and stops there, so stage 5 is still unrun after it. The only
+shortcut that covers every stage is `vp run check:safe`, which chains the entire
+gate the way CI does.
 
 ## Documentation Update Rule
 
@@ -96,25 +106,16 @@ commit as the code**:
 
 ### Where a new ADR goes
 
-**Three homes, one number sequence, and the home is chosen by one question: when
-CQMS moves to its own repository, does this decision go with it?**
-([ADR-048](../../../docs/decisions/ADR-048-adr-taxonomy-and-one-sequence.md).)
+There are three ADR homes on **one** number sequence, and
+[ADR-048](../../../docs/decisions/ADR-048-adr-taxonomy-and-one-sequence.md) owns
+the rule for picking between them — read it rather than a summary here, so this
+does not become a fourth place the taxonomy is written down.
 
-- `docs/decisions/` — the repo, the published packages, the toolchain (package topology is ADR-038/039/040 there).
-- `docs/cqms/decisions/` — CQMS/CodePulse; schema, scanners, ingestion, orchestration.
-- `apps/react-router/docs/decisions/` — a component or route inside the showcase app.
-
-A decision spanning two tiers is written where its durable half lives and
-cross-referenced from the other. **The number is global**: take the one
-`vp run adr:verify` reports as free, whichever home you are writing in, and add it
-to that home's generated index with `vp run adr:verify -- --write`. That gate fails
-a stray, a reused number, a malformed name and a stale index.
-
-**Numbers 001–012 predate the single sequence and each mean two things** (there are
-two ADR-008s — the primary-key sort tiebreaker, and the `@repo/api` →
-`@repo/data-access` rename); always cite one of those with its path. They are not
-renumbered on purpose: an ADR is a dated record, and rewriting old ones would break
-every existing cross-reference.
+The two mechanics you need at gate time: take the number
+`vp run adr:verify` reports as free (it is global across all three homes,
+whichever you are writing in), and register it with
+`vp run adr:verify -- --write`. That gate fails a stray, a reused number, a
+malformed name and a stale index.
 
 ## Non-Negotiable Rules
 

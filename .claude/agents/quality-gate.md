@@ -31,15 +31,21 @@ Return exactly this structure:
 | 2. Oxlint (`vp lint .`)               | ✅ pass / ❌ fail / ⏭️ not reached | error count + first 3 messages |
 | 3. ESLint (`lint:eslint:check`)       | ✅ pass / ❌ fail / ⏭️ not reached | error count + first 3 messages |
 | 4. Biome (`lint:biome:check`, root)   | ✅ pass / ❌ fail / ⏭️ not reached | error count + first 3 messages |
-| 5. tsgolint (`vp check`)              | ✅ pass / ❌ fail / ⏭️ not reached | error count + first 3 messages |
-| 6. tsc (`vp run typecheck`)           | ✅ pass / ❌ fail / ⏭️ not reached | error count + first 3 messages |
-| 7. Tests (`vp run test`)              | ✅ pass / ❌ fail / ⏭️ not reached | pass/fail counts + first 3 failures |
+| 5. React Doctor (`react-doctor:verify`, root) | ✅ pass / ❌ fail / ⏭️ not reached | error count + first 3 messages |
+| 6. tsgolint (`vp check`)              | ✅ pass / ❌ fail / ⏭️ not reached | error count + first 3 messages |
+| 7. tsc (`vp run typecheck`)           | ✅ pass / ❌ fail / ⏭️ not reached | error count + first 3 messages |
+| 8. Tests (`vp run test`)              | ✅ pass / ❌ fail / ⏭️ not reached | pass/fail counts + first 3 failures |
 
-**Report all seven rows, every time.** Steps 3, 4 and 6 are the ones that get
-skipped in practice and none is covered by another: `vp check` runs neither the
-ESLint pass nor Biome nor real `tsc`. A four-row table hides exactly the stages a
-caller most needs to know ran. Because you stop at the first failure, mark every
-later stage **⏭️ not reached** — never omit the row, and never imply it passed.
+**Report a row for every stage in the skill's Canonical Gate Order, every time.**
+Steps 3, 4, 5 and 7 are the ones that get skipped in practice and none is covered
+by another: `vp check` runs neither the ESLint pass, nor Biome, nor React Doctor,
+nor real `tsc`. A short table hides exactly the stages a caller most needs to know
+ran. Because you stop at the first failure, mark every later stage **⏭️ not
+reached** — never omit the row, and never imply it passed.
+
+If the skill's gate order and this template ever disagree, **the skill wins** —
+add the missing row and report it. This template drifted once already, which is
+why it now says so.
 
 **Overall: ✅ PASS** or **❌ FAIL — blocked at step N**
 

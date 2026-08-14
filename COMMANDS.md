@@ -60,9 +60,11 @@ and is the fastest iteration loop.
 
 ## 3. The quality gate
 
-The mandatory post-change sequence. Canonical definition and rationale:
-the [`quality-gate-workflow` skill](.github/skills/quality-gate-workflow/SKILL.md)
-and [AGENTS.md → Post-Change Quality Gate](AGENTS.md#post-change-quality-gate).
+The mandatory post-change sequence. **Canonical definition and rationale: the
+[`quality-gate-workflow` skill](.github/skills/quality-gate-workflow/SKILL.md)**,
+and nowhere else. The table below is the _command reference_ this file exists to be
+— which is why it is here and gated by `commands:verify`. If it and the skill ever
+disagree about the stages, the skill is right and this table is the bug.
 
 | #   | Command                      | Pass                                          |
 | --- | ---------------------------- | --------------------------------------------- |
@@ -75,9 +77,9 @@ and [AGENTS.md → Post-Change Quality Gate](AGENTS.md#post-change-quality-gate)
 | 7   | `vp run typecheck`           | real **tsc** — **not** the same as step 6     |
 | 8   | `vp run test`                | vitest                                        |
 
-Steps 3, 4, 5 and 7 are the ones that get skipped, and none is redundant — see
-[AGENTS.md §4](AGENTS.md#4-toolchain--vite-vp). From the root, `vp run check:safe`
-chains the whole thing the way CI does.
+Which stages get skipped in practice and why none is redundant is the skill's to
+explain, not this file's. From the root, `vp run check:safe` chains the whole thing
+the way CI does.
 
 The **`pre-push` git hook** (`.vite-hooks/pre-push`) runs `vp run check:push` — the
 **DB-free CI Quality Gate** (steps 3–6 plus `commands:verify`, `coordination:verify`,

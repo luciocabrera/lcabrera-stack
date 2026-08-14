@@ -489,12 +489,20 @@ history and the PR label taxonomy are in the **`releasing` skill**.
 
 ### Post-Change Quality Gate
 
-**Invoke the `quality-gate-workflow` skill after every code change.** It owns the
-canonical eight-stage sequence, why each stage is not covered by another, and the
-Documentation Update Rule that follows a green gate — including which of the three
-ADR homes a new decision belongs in. Do not restate that sequence here: a copy in
-this file is a copy nothing polices, which is how the old duplicate silently lost a
-stage the skill had gained.
+**Invoke the `quality-gate-workflow` skill after every code change.** Agents that
+cannot invoke a skill (Copilot, Gemini — this file is symlinked for them) read
+[`.github/skills/quality-gate-workflow/SKILL.md`](.github/skills/quality-gate-workflow/SKILL.md)
+directly. It owns the canonical stage order, why each stage is not covered by
+another, and the Documentation Update Rule that follows a green gate.
+
+Do not restate the sequence here — not the stages, and not how many there are. A
+copy in this file is a copy nothing polices, and the direction that failure ran is
+worth stating exactly: `vp run react-doctor:verify` was added to **this** file when
+[ADR-055](docs/decisions/ADR-055-react-doctor-as-a-gate.md) made it a blocking gate
+(#457) and was never added to the skill, so for months the skill this file calls
+canonical was the copy missing a stage (#670). The lesson is not that one file rots
+and the other stays current; it is that two copies drift and only the one nothing
+points at gets noticed late.
 
 Two root-level entry points worth knowing without opening the skill: `vp run
 check:safe` chains the whole gate the way CI does, and `vp run typecheck:all`
