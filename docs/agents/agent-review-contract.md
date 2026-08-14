@@ -95,7 +95,7 @@ Each finding:
 | Field              | Type                                      | Required                      | Meaning                                                                                                 |
 | ------------------ | ----------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------- |
 | `id`               | string, unique within the document        | always                        | What an override names (§6) — _added_. Uniqueness is per document only; §6 pins an override to a commit |
-| `kind`             | `in-diff` \| `omission`                   | always                        | Whether the defect is in changed lines or in something the change left out — _added_, see §2.4 step 5   |
+| `kind`             | `in-diff` \| `omission`                   | always                        | Which anchor the finding has, defined normatively in §2.4 step 5 — _added_                              |
 | `severity`         | `critical` \| `high` \| `medium` \| `low` | always                        | §3                                                                                                      |
 | `file`             | repository-relative path                  | always                        | Where the defect is, or where the omission belongs                                                      |
 | `line`             | integer ≥ 1, or `null`                    | always                        | The line, or `null` for an `omission`                                                                   |
@@ -136,10 +136,23 @@ by a step that is not a language model. Every failure below yields `error`:
 4. `head_sha` equals the pull request's current head (§2.5).
 5. Each finding is admissible for its severity: a `critical` or `high` finding
    carries a non-empty `failure_scenario` **and** `refutation`; a `kind` of
-   `in-diff` carries a `line` inside a hunk this diff changed; a `kind` of
-   `omission` carries `line: null` and a non-empty `rule`.
+   `in-diff` carries a `line` **the diff added or modified** in `file`; a `kind`
+   of `omission` carries `line: null` and a non-empty `rule`.
 6. `verdict` is consistent with `findings` — `fail` if and only if at least one
    admissible blocking finding is present.
+
+**Step 5 is the normative definition of where a finding may be anchored**, and
+the rest of this document points at it rather than restating it — a rule
+described in three places is a rule with three meanings, which is what §1 exists
+to prevent. Two consequences of the wording, both deliberate:
+
+- **The added side of a hunk, never a context line.** A hunk carries unchanged
+  context, and a context line is code this change did not introduce — §3 already
+  forbids blocking on that. It is also the cheaper check: the added-line set
+  comes straight out of the diff, with no hunk arithmetic to get wrong.
+- **A defect that is a pure deletion is an `omission`**, not an `in-diff`
+  finding. There is no added line to cite, so the finding names the rule that
+  required what was removed.
 
 Step 6 is the one that stops a rubber stamp in either direction: a reviewer that
 lists a `critical` finding and reports `pass`, or reports `fail` with nothing to
@@ -219,9 +232,9 @@ following it land on the same severity.
    command. Record what you did in `refutation`. Refuted → **drop the finding
    entirely.** Do not re-file it at a lower severity to look thorough; that is
    how a reviewer's findings list becomes noise nobody reads.
-3. **Locate it in the change.** `in-diff` with a line this diff touched, or
-   `omission` with the rule that required the missing thing. Neither → §3's
-   "nothing outside the change blocks": `medium` at most.
+3. **Locate it in the change.** Anchor it as §2.4 step 5 defines — `in-diff` or
+   `omission`. Neither anchor available → §3's "nothing outside the change
+   blocks": `medium` at most.
 4. **Check who owns the rule.** A mechanically-enforced rule with a green check
    → §3's "a green required check outranks the reviewer's opinion of its
    subject": `medium` at most, and name the check.
