@@ -489,42 +489,16 @@ history and the PR label taxonomy are in the **`releasing` skill**.
 
 ### Post-Change Quality Gate
 
-The canonical validation sequence is owned by the **`quality-gate-workflow` skill** — invoke it after every code change. In short (run from `apps/react-router/`, in order, fix failures before proceeding):
+**Invoke the `quality-gate-workflow` skill after every code change.** It owns the
+canonical eight-stage sequence, why each stage is not covered by another, and the
+Documentation Update Rule that follows a green gate — including which of the three
+ADR homes a new decision belongs in. Do not restate that sequence here: a copy in
+this file is a copy nothing polices, which is how the old duplicate silently lost a
+stage the skill had gained.
 
-```bash
-vp fmt .                    # 1. auto-format (Oxfmt)
-vp lint .                   # 2. lint (Oxlint) — fix all reported issues (use --fix first)
-vp run lint:eslint:check    # 3. eslint custom-rules pass — NOT covered by `vp check` (autofix: `vp run lint:eslint`)
-vp run lint:biome:check     # 4. Biome pass — NOT covered by `vp check`; run from the ROOT (autofix: `vp run lint:biome`)
-vp run react-doctor:verify  # 5. React Doctor gate — root-only, repo-wide; errors block (ADR-055)
-vp check                    # 6. fmt + Oxlint + tsgolint type pass — zero errors required
-vp run typecheck            # 7. real tsc for this workspace — NOT the same pass as step 6
-vp run test                 # 8. unit/integration tests — all must pass (never `vp test`)
-```
-
-Steps 3, 4, 5 and 7 are the ones that get skipped, and none is redundant:
-
-- **Step 3** — `vp check` is Vite+'s built-in fmt + **Oxlint** + tsgolint and never runs the eslint pass, so `perfectionist` import/module ordering, the react/stylex rule sets, and `local-rules` surface only there.
-- **Step 4** — `vp check` does not run Biome either. Unlike the other two linters this is a **root-only, repo-wide** pass; there is no per-workspace `lint:biome` script, because `biome.jsonc`'s `overrides` already scope the react domain to the three React workspaces.
-- **Step 5** — React Doctor is not a linter any of the other passes contains; it is the only one checking effect cleanup, server/client boundaries and render-path cost. Root-only and repo-wide like Biome, and it writes `reports/react-doctor/full-latest.json` as it goes, so the warnings behind a pass are readable without a second scan.
-- **Step 7** — `vp check`'s type pass is tsgolint, not `tsc`, and it knows nothing about the workspace's `typecheck` script. In `packages/ui` that script is also what runs `check:public-api` (the server-only `node:*` import guard); in the React Router apps it regenerates route types first.
-
-From the repo root, `vp run typecheck:all` covers all 17 workspaces in dependency order, and `vp run check:safe` chains the whole gate the way CI does. While iterating, `vp run lint` in a workspace chains both lint autofixes (`vp lint . --fix` then `vp run lint:eslint`) and is the fastest loop.
-
-### Documentation Update Rule
-
-After the quality gate passes, update every doc affected by the change:
-
-- **Props added/removed** → update the Props table in the component's `ARCHITECTURE.md`.
-- **Render flow changed** → update the relevant Mermaid diagram.
-- **New hook/util introduced** → add it to the parent directory `ARCHITECTURE.md` and create its own if the directory is new.
-- **Type added/changed** → update the `ARCHITECTURE.md` of the directory that owns the type.
-- **New dependency added** → update the Dependencies diagram in the affected `ARCHITECTURE.md`.
-- **New naming/structural convention established** → update `packages/ui/src/PATTERNS.md` and the matching `.claude/rules/` file.
-- **New architectural decision made** → add a new ADR. **Three homes, one number sequence, and the home is chosen by one question: when CQMS moves to its own repository, does this decision go with it?** ([ADR-048](docs/decisions/ADR-048-adr-taxonomy-and-one-sequence.md).) `docs/decisions/` — the repo, the published packages, the toolchain (package topology is ADR-038/039/040 there). `docs/cqms/decisions/` — CQMS/CodePulse; schema, scanners, ingestion, orchestration. `apps/react-router/docs/decisions/` — a component or route inside the showcase app. A decision spanning two tiers is written where its durable half lives and cross-referenced from the other. **The number is global**: take the one `vp run adr:verify` reports as free, whichever home you are writing in, and add it to that home's generated index with `vp run adr:verify -- --write`. `vp run adr:verify` fails a stray, a reused number, a malformed name and a stale index. **Numbers 001–012 predate the single sequence and each mean two things** (there are two ADR-008s — the primary-key sort tiebreaker, and the `@repo/api` → `@repo/data-access` rename); always cite one of those with its path. They are not renumbered on purpose: an ADR is a dated record, and rewriting old ones would break every existing cross-reference.
-- **New artifact created or existing artifact enhanced/renamed** → update the relevant row in the owning workspace's `INVENTORY.md` (`packages/ui/src/`, `packages/server/src/`, `apps/react-router/src/`, …).
-
-Documentation updates must be part of the **same commit** as the code change.
+Two root-level entry points worth knowing without opening the skill: `vp run
+check:safe` chains the whole gate the way CI does, and `vp run typecheck:all`
+covers every workspace in dependency order.
 
 ### Exploration Scratchpads
 

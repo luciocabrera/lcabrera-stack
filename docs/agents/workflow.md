@@ -57,8 +57,9 @@ ambiguity introduced for the next one.
 
 ## 4. Updating documentation
 
-Follow the **Documentation Update Rule** in [`AGENTS.md`](../../AGENTS.md): docs
-change in the _same commit_ as the code. It names the specific homes —
+Follow the **Documentation Update Rule** in the
+[`quality-gate-workflow` skill](../../.github/skills/quality-gate-workflow/SKILL.md#documentation-update-rule):
+docs change in the _same commit_ as the code. It names the specific homes —
 `ARCHITECTURE.md`, `INVENTORY.md`, `PATTERNS.md`, ADRs, `COMMANDS.md`.
 
 Update **this** page only when the workflow itself changes, and

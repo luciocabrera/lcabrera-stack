@@ -30,20 +30,21 @@ This skill defines the mandatory validation sequence after code changes.
 2. `vp lint .` — Oxlint
 3. `vp run lint:eslint:check` — the eslint custom-rules pass (`--fix` variant: `vp run lint:eslint`)
 4. `vp run lint:biome:check` — the Biome pass (`--write` variant: `vp run lint:biome`) — **run from the repo root**
-5. `vp check` — fmt + Oxlint + the **tsgolint** type pass
-6. `vp run typecheck` — the real **tsc** pass (plus `check:public-api` in `packages/ui`)
-7. `vp run test`
+5. `vp run react-doctor:verify` — the React Doctor gate — **run from the repo root**
+6. `vp check` — fmt + Oxlint + the **tsgolint** type pass
+7. `vp run typecheck` — the real **tsc** pass (plus `check:public-api` in `packages/ui`)
+8. `vp run test`
 
 Use this exact order because each stage catches issues earlier/cheaper than the next.
 
-**Stage 3 is not optional and is not covered by stage 5.** `vp check` is Vite+'s
+**Stage 3 is not optional and is not covered by stage 6.** `vp check` is Vite+'s
 built-in fmt + **Oxlint** + tsgolint; it does not know about the per-workspace
 eslint pass. Every eslint-only rule set lives behind stage 3 — `perfectionist`
 import/module ordering, the react/stylex rule sets, and `local-rules`. Running
 only `vp lint .` will report clean on code that fails CI, which now runs
 `vp run -r lint:eslint:check` as its own step.
 
-**Stage 4 is not covered by stage 5 either, and it is root-only.** `vp check` does
+**Stage 4 is not covered by stage 6 either, and it is root-only.** `vp check` does
 not run Biome. Unlike stages 2 and 3 there is no per-workspace variant: `biome.jsonc`
 lives at the repo root and its `overrides` scope the react domain to the three React
 workspaces (`apps/react-router`, `apps/admin_system`, `packages/ui`), so one
@@ -53,8 +54,17 @@ Biome is the only linter here carrying the React-domain rules the other two miss
 `vp run lint:biome:check` as its own step, and the pre-commit hook runs Biome on
 staged files via the `staged` block in the root `vite.config.ts`.
 
-**Stage 6 is not optional and is not covered by stage 5 either.** Stage 5's type
-pass is tsgolint — Oxlint's type-aware path. It does read each workspace's own
+**Stage 5 is a gate no linter in this list contains, and it blocks.** React Doctor
+is the only pass checking effect cleanup, server/client boundaries and render-path
+cost, so nothing in stages 2–4 or 6 will surface what it finds; its errors block
+the gate ([ADR-055](../../../docs/decisions/ADR-055-react-doctor-as-a-gate.md)). Like
+Biome it is **root-only and repo-wide** — there is no per-workspace variant, so
+`cd` to the root for this stage. It writes `reports/react-doctor/full-latest.json`
+as it goes, which means the warnings behind a passing run are readable without
+paying for a second scan.
+
+**Stage 7 is not optional and is not covered by stage 6 either.** Stage 6's type
+pass is tsgolint — Oxlint's type-aware path. It reads each workspace's own
 strict `tsconfig.app.json`, so it is a genuine type-check, but it is not `tsc`
 and it never runs the workspace's `typecheck` script. That script is where
 `packages/ui` enforces `check:public-api` (its guard against server-only `node:*`
@@ -65,9 +75,46 @@ in dependency order.
 
 Shortcut: `vp run lint` in a workspace chains `vp lint . --fix` **and**
 `vp run lint:eslint` (autofix for both), which is usually what you want while
-iterating — but it does **not** include Biome, so stage 4 still needs its own run.
-From the root, `vp run lint:all` chains all three with autofix, and
-`vp run check:safe` chains the entire gate the way CI does.
+iterating — but it does **not** include Biome or React Doctor, so stages 4 and 5
+still need their own runs. From the root, `vp run lint:all` chains all three
+linters with autofix, and `vp run check:safe` chains the entire gate the way CI
+does.
+
+## Documentation Update Rule
+
+Once the gate is green, update every doc the change affected — **in the same
+commit as the code**:
+
+- **Props added/removed** → update the Props table in the component's `ARCHITECTURE.md`.
+- **Render flow changed** → update the relevant Mermaid diagram.
+- **New hook/util introduced** → add it to the parent directory `ARCHITECTURE.md` and create its own if the directory is new.
+- **Type added/changed** → update the `ARCHITECTURE.md` of the directory that owns the type.
+- **New dependency added** → update the Dependencies diagram in the affected `ARCHITECTURE.md`.
+- **New naming/structural convention established** → update `packages/ui/src/PATTERNS.md` and the matching `.claude/rules/` file.
+- **New architectural decision made** → add a new ADR (see below).
+- **New artifact created or existing artifact enhanced/renamed** → update the relevant row in the owning workspace's `INVENTORY.md` (`packages/ui/src/`, `packages/server/src/`, `apps/react-router/src/`, …).
+
+### Where a new ADR goes
+
+**Three homes, one number sequence, and the home is chosen by one question: when
+CQMS moves to its own repository, does this decision go with it?**
+([ADR-048](../../../docs/decisions/ADR-048-adr-taxonomy-and-one-sequence.md).)
+
+- `docs/decisions/` — the repo, the published packages, the toolchain (package topology is ADR-038/039/040 there).
+- `docs/cqms/decisions/` — CQMS/CodePulse; schema, scanners, ingestion, orchestration.
+- `apps/react-router/docs/decisions/` — a component or route inside the showcase app.
+
+A decision spanning two tiers is written where its durable half lives and
+cross-referenced from the other. **The number is global**: take the one
+`vp run adr:verify` reports as free, whichever home you are writing in, and add it
+to that home's generated index with `vp run adr:verify -- --write`. That gate fails
+a stray, a reused number, a malformed name and a stale index.
+
+**Numbers 001–012 predate the single sequence and each mean two things** (there are
+two ADR-008s — the primary-key sort tiebreaker, and the `@repo/api` →
+`@repo/data-access` rename); always cite one of those with its path. They are not
+renumbered on purpose: an ADR is a dated record, and rewriting old ones would break
+every existing cross-reference.
 
 ## Non-Negotiable Rules
 

@@ -246,7 +246,7 @@ All of it, every time. Any failure aborts the merge.
 - [ ] The full [quality gate](../../.github/skills/quality-gate-workflow/SKILL.md)
       passed **on the final commit**, not on an earlier one
 - [ ] Docs updated in the **same commit** — ARCHITECTURE, INVENTORY, PATTERNS, ADR
-      as the [Documentation Update Rule](../../AGENTS.md#documentation-update-rule) requires
+      as the [Documentation Update Rule](../../.github/skills/quality-gate-workflow/SKILL.md#documentation-update-rule) requires
 - [ ] A changeset exists if any `@lcabrera/*` package changed
 - [ ] [`merge-checklist.md`](merge-checklist.md)'s **[judgement]** items have been
       read by you, not ticked. Its **[auto]** items you confirm ran — you do not
