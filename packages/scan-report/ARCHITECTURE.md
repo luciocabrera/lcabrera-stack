@@ -66,6 +66,33 @@ The outcomes are deliberately not interchangeable:
 Collapsing `failed` back into a warning is what let a permanent breakage read as
 a transient blip, and is the specific regression this split exists to prevent.
 
+## Asking git where it is
+
+`run-git.mjs` is the only place that spawns git, and it does three things a
+bare `execFileSync('git', …)` would not.
+
+It **scrubs the seven repository-selecting `GIT_*` variables** before spawning.
+Probed on git 2.53 with two throwaway repositories: standing in repo A,
+`GIT_WORK_TREE=<B>` makes `rev-parse --show-toplevel` answer `B`, an unrelated
+project, and `GIT_DIR=<B>/.git` alone answers with the current directory rather
+than A's real top level. Both are wrong in different ways, which is the argument
+for scrubbing all seven rather than the one that looks dangerous — the answer
+becomes every finding's `location_path`, and these runners are spawned by a
+parent process whose environment they inherit wholesale.
+
+It **names the binary by absolute path** from a fixed directory list, so no
+writable directory earlier in an inherited PATH can shadow git (Sonar S4036).
+That list covers Homebrew on both architectures, Nix system and per-user
+profiles, MacPorts, Xcode's command line tools and Git for Windows — a
+published package cannot assume the `/usr/bin` of the machine it was written
+on. `SCAN_REPORT_GIT_BINARY` overrides it, and is required to be absolute and
+to exist, because accepting a bare name would reintroduce the lookup.
+
+It **says so when git is missing**. "Not a repository" and "no git installed"
+are both an absent answer, and only the first is a fact about the scanned
+directory; conflating them makes every path in the report subtly wrong with
+nothing to indicate it.
+
 ## An absent tool is not a failure
 
 Each scanner answers "nothing to report, and here is why" rather than throwing

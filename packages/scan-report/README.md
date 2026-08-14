@@ -79,6 +79,7 @@ or with environment variables, which take precedence over the file:
 | `SCAN_REPORT_INGEST_CWD`       | working directory                                   |
 | `SCAN_REPORT_CONFIG`           | an alternative path to the config file              |
 | `SCAN_REPORT_HOST_ROOT`        | override the detected repository root               |
+| `SCAN_REPORT_GIT_BINARY`       | absolute path to git, when it is somewhere unusual  |
 
 The command is invoked with the configured arguments followed by
 `--skill=<scanner> --run-dir=<dir> --local-path=<git root> --scope-type=folder
@@ -89,6 +90,17 @@ The command is invoked with the configured arguments followed by
 _configured_ command that fails is the opposite: it prints `Ingestion FAILED`
 and exits non-zero, because a persistence path that used to work and stopped is
 not a normal state. The report artifacts are written and complete in both cases.
+
+## Finding git
+
+Every finding's `location_path` is relative to the scanned project's repository
+root, which means running `git`. It is looked up by absolute path in a fixed
+list of directories rather than through `PATH` — `/usr/bin`, `/usr/local/bin`,
+`/bin`, Homebrew on both architectures, Nix system and per-user profiles,
+MacPorts, Xcode's command line tools and Git for Windows. If your host keeps
+git elsewhere, set `SCAN_REPORT_GIT_BINARY` to its absolute path; a scan that
+cannot find git says so on stderr and falls back to paths relative to the
+scanned directory.
 
 ## Programmatic use
 

@@ -40,6 +40,13 @@ artifacts and reports `No fallow installation found under <root>` rather than
 throwing. `scan-report-oxlint` and `scan-report-eslint` behave the same way when
 the scanned scope has no config for their tool.
 
+Every finding's `location_path` is relative to the scanned project's repository
+root, so the scanners run `git`. It is resolved by absolute path from a fixed
+directory list rather than through `PATH` — including Homebrew, Nix, MacPorts
+and Git for Windows locations, with `SCAN_REPORT_GIT_BINARY` as an override —
+and a scan that cannot find git says so rather than quietly reporting paths
+relative to the scanned directory instead.
+
 Nothing in the package names a repository, a workspace or a database. The
 default scan scope is the whole repository, and "the repository" is derived from
 where the package is installed rather than from a fixed directory depth or the

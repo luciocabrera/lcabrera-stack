@@ -100,13 +100,19 @@ export const resolveIngestConfig = ({ env = process.env, hostRoot }) => {
   return configured ? normalize(configured) : undefined;
 };
 
-/** Variables from the configured env files; an absent file contributes nothing. */
+/**
+ * Variables from the configured env files; an absent file contributes nothing.
+ * Later files win, so the order in the configuration is the precedence order.
+ *
+ * The accumulator is assigned into rather than respread each round — it is
+ * allocated here and escapes nowhere, which is the case AGENTS.md §5 rule 6
+ * carves out, and respreading it is quadratic (Biome `noAccumulatingSpread`).
+ */
 export const readEnvFiles = ({ envFiles, hostRoot }) =>
   envFiles.reduce((accumulated, file) => {
     const filePath = isAbsolute(file) ? file : resolve(hostRoot, file);
-    return existsSync(filePath)
-      ? { ...accumulated, ...parseEnv(readFileSync(filePath, 'utf8')) }
-      : accumulated;
+    if (!existsSync(filePath)) return accumulated;
+    return Object.assign(accumulated, parseEnv(readFileSync(filePath, 'utf8')));
   }, {});
 
 /** Runs the configured command with the scan arguments appended. Throws on failure. */
