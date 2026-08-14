@@ -32,9 +32,9 @@ immediately):
 2. **Claim it.** Copy [`tasks/_TEMPLATE.md`](./tasks/_TEMPLATE.md) to
    `tasks/<id>.md`, fill in the frontmatter — crucially the `area` globs, which
    are the soft lock others read. That file **is** the claim; there is no board
-   to regenerate or commit. Commit it **on the branch you are about to work on**,
-   not on `main` — [rule 2](#keeping-the-register-current-across-branches) has the
-   reason, and the check reads it there.
+   to regenerate or commit. It is committed **on the work branch you pick in step
+   3**, never on `main` — [rule 2](#keeping-the-register-current-across-branches)
+   has the reason, and the check reads it there.
 3. **Pick a branch strategy** — an independent branch (the default) or join a
    shared one. See [Independent vs shared branches](#independent-vs-shared-branches)
    below. Never commit non-trivial work straight to `main`.
@@ -341,8 +341,10 @@ the output.
   _in-flight_ view (_who is touching what, right now_). Adopted in
   [ADR-036](../decisions/ADR-036-github-planning-layer.md); runbook in
   [`docs/tooling/github-planning.md`](../tooling/github-planning.md). The two link
-  one-way: a task that picks up a backlog item points to it with its optional
-  `issue:` field, and PRs close issues (`Closes #N`). The register is **not** moved
+  one-way: every task points at its backlog item through the **required**
+  `issue:` field — `coordination:verify` rejects a task without a real reference,
+  and `coordination:claim --new-issue` creates the item when none exists yet —
+  and PRs close issues (`Closes #N`). The register is **not** moved
   to Issues — Issues need `gh` + auth + network and are invisible to fork/headless
   agents, whereas a task file is read offline on any branch and gated by
   `coordination:verify`. There is deliberately **no** bidirectional file↔Project
