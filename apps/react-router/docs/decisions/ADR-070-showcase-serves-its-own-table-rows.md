@@ -82,10 +82,14 @@ and `vi.stubEnv` can move it. It buys nothing in a build, where either spelling
 folds identically — and claiming otherwise is what would make the paragraph
 above wrong.
 
-**Both sources answer byte-identical responses.** Each converted endpoint keeps
-the shape its external counterpart returned, field for field:
-`{ data, hasMore, total }`, with `total` on **every** page rather than only the
-first. That last part is a deliberate refusal of the cheaper read
+**Both sources answer byte-identical responses, with one deliberate exception.**
+Each converted endpoint keeps the shape its external counterpart returned, field
+for field: `{ data, hasMore, total }`, with `total` on **every** page rather than
+only the first. The exception is a request asking for more rows than
+`MAX_CAR_SALES_LIMIT`: the replaced endpoint served it, and this one clamps.
+Preserving an uncapped `?limit=` on a public, unauthenticated URL over a 500k-row
+table was not worth the parity, and the deviation is stated rather than
+smuggled. That last part is a deliberate refusal of the cheaper read
 `enterprise-orders` uses: `skip === 0`-only counting changes the response shape,
 and these two tables read a total from every page.
 
@@ -125,6 +129,14 @@ load-more page cannot arrive in different shapes.
 - **A page is now bounded by this process's connection pool** rather than by a
   separate server's. The pool is `@lcabrera/server`'s singleton, shared with the
   enterprise-orders routes and the filter-options service.
+- **Every request-derived number reaching SQL is now bounded**, on both
+  converted endpoints: `limit` in each resource route's parser, sort-term count
+  in each service (so the SSR path is covered too), and column identifiers by
+  the builder's `allowedColumns`. Two of those bounds did not exist on the
+  endpoints being replaced and two were missing from the first version of this
+  change — the asymmetry between the two new parsers is what review caught
+  (#701). `skip` is deliberately unbounded: an offset past the table returns an
+  empty page after work bounded by the table rather than by the request.
 - **The two paths are interchangeable except on one request**: a sort naming
   `wide_alltypes_150.c_018` (`point`). The external endpoint rejects it with a
   `400` and the route renders its error boundary; this one drops the unorderable

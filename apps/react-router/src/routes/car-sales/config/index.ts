@@ -6,6 +6,8 @@ export {
   CAR_SALES_PRIMARY_KEY,
   CAR_SALES_SCHEMA,
   CAR_SALES_TABLE,
+  MAX_CAR_SALES_LIMIT,
+  MAX_CAR_SALES_SORT_RULES,
 } from './carSales.constants';
 export type { CarSaleRow } from './carSales.types';
 export { toCarSaleRow } from './toCarSaleRow.util';

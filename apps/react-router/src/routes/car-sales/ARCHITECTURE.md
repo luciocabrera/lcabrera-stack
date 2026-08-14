@@ -82,6 +82,39 @@ There is no `filters` argument: this endpoint never filtered server-side. Both
 car-sales routes filter in the browser over rows they already hold, and neither
 declares `isServerFilterEnabled` (ADR-063), so no `filter` param is ever sent.
 
+## What bounds a request to the public endpoint
+
+`/_api/car-sales/paginated` is a public, unauthenticated URL over a 500k-row
+table, so every request-derived number that reaches SQL is bounded. Both bounds
+are siblings of the wide-alltypes ones, and both were added after review found
+the first of them missing (#701).
+
+| Input        | Bound                                     | Where                                       |
+| ------------ | ----------------------------------------- | ------------------------------------------- |
+| `limit`      | `[1, MAX_CAR_SALES_LIMIT]`                | the resource route's parser                 |
+| sort terms   | `MAX_CAR_SALES_SORT_RULES`                | the service, so the SSR path is covered too |
+| sort columns | `allowedColumns` + `assertSafeIdentifier` | `@lcabrera/server`'s builder                |
+
+`MAX_CAR_SALES_LIMIT` is the largest slice this app ever takes of the table in
+one request — the measured figure `CLIENT_PAGINATION_ROW_LIMIT` documents — and
+nothing legitimate reaches it: the only caller of the route is
+`/car-sales-infinite`'s load-more at `INITIAL_PAGE_SIZE`, and `/car-sales` takes
+its larger slice through the service without passing through the parser.
+
+`MAX_CAR_SALES_SORT_RULES` is the table's column count, so a sort past it
+necessarily repeats a column already in the list and orders nothing new. Neither
+bound can truncate a sort or a page a user is able to ask for.
+
+**`skip` is deliberately not capped**, on this route or its sibling. An offset
+past the end of the table returns an empty page after a scan bounded by the
+table, not by the request — so unlike `limit` there is no value that makes the
+response or the work unbounded.
+
+The endpoint this route replaced capped neither `limit` nor the sort terms, so
+these are pre-existing gaps closed on the way rather than regressions
+introduced. Closing the `limit` one is a deliberate deviation from #687's
+field-by-field parity criterion, recorded in the PR's Known Limitations.
+
 ## Guardrails
 
 - `config/` holds **plain data and pure rules only** — no SQL, no `pg`. Its

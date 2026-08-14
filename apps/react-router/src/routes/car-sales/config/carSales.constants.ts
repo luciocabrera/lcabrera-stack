@@ -84,6 +84,45 @@ export const CAR_SALES_FALLBACK_SORT = [
 ] as const satisfies readonly ColumnSort[];
 
 /**
+ * The largest page `/_api/car-sales/paginated` will serve — the sibling of
+ * `MAX_WIDE_ALLTYPES_LIMIT`.
+ *
+ * `car_sales` holds 500k rows and that URL is public and unauthenticated, so
+ * without a ceiling `?limit=999999999` is a whole-table read and a whole-table
+ * JSON response. The endpoint this route replaced had no cap either, so this is
+ * a pre-existing exposure being closed rather than a regression being fixed —
+ * but it was an exposure on a separate api-server, and it is now on the
+ * showcase itself.
+ *
+ * The value is the largest slice this app ever takes of the table in one
+ * request: `CLIENT_PAGINATION_ROW_LIMIT`, which `CarSales.constants.tsx`
+ * documents as the measured point where SSR stays healthy (~0.8MB against the
+ * ~421MB an unbounded read produced). It is written out rather than imported
+ * from there because that constant is a UI pagination decision: lowering it for
+ * the in-memory demo should not quietly loosen — or, worse, tighten — what a
+ * public endpoint will serve.
+ *
+ * Nothing legitimate is clamped by it. The only caller of that route is
+ * `/car-sales-infinite`'s load-more, which asks for `INITIAL_PAGE_SIZE`; the
+ * `/car-sales` route takes its larger slice through the service directly and
+ * never passes through the parser.
+ */
+export const MAX_CAR_SALES_LIMIT = 1000;
+
+/**
+ * The most ORDER BY terms one read may carry — the sibling of
+ * `MAX_WIDE_ALLTYPES_SORT_RULES`, and bounded by a different fact.
+ *
+ * Wide-alltypes caps at a number well below its column count, because 150
+ * columns of tiebreakers over 1M rows is work no user asked for. Here the bound
+ * is the column count itself: past it every further term necessarily repeats a
+ * column already in the list, and `ORDER BY car_id, car_id` orders nothing the
+ * first term did not. So this cannot truncate a sort a user could express —
+ * it only stops a hand-made request from growing the SQL text without limit.
+ */
+export const MAX_CAR_SALES_SORT_RULES = CAR_SALES_COLUMNS.length;
+
+/**
  * Columns offered as distinct-value filter dropdowns, each mapped to its
  * `ColumnType` (consumed by `@lcabrera/server`'s `selectFilterOptions`, where
  * only `text` columns also exclude the empty string). Keys are the distinct

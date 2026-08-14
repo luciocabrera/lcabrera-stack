@@ -1,6 +1,8 @@
 import { INITIAL_PAGE_SIZE } from '@lcabrera/ui/components/Table/Table.constants';
 import { describe, expect, it } from 'vite-plus/test';
 
+import { MAX_CAR_SALES_LIMIT } from '@/routes/car-sales/config';
+
 import { parseCarSalesPageParams } from './parseCarSalesPageParams.util';
 
 const parse = (query: string) =>
@@ -23,6 +25,24 @@ describe('parseCarSalesPageParams', () => {
       skip: 0,
       sorting: [],
     });
+  });
+
+  it('clamps the window to the endpoint ceiling', () => {
+    // `/_api/car-sales/paginated` is public and unauthenticated over a 500k-row
+    // table, so an uncapped `?limit=` is a whole-table read and a whole-table
+    // JSON body. Asserting an OVER-cap request is what makes this test fail
+    // without the clamp — a normal request passes either way (#701 review).
+    expect(parse(`limit=${MAX_CAR_SALES_LIMIT + 1}`).limit).toBe(
+      MAX_CAR_SALES_LIMIT,
+    );
+    expect(parse('limit=999999999').limit).toBe(MAX_CAR_SALES_LIMIT);
+  });
+
+  it('leaves a request at or below the ceiling untouched', () => {
+    expect(parse(`limit=${MAX_CAR_SALES_LIMIT}`).limit).toBe(
+      MAX_CAR_SALES_LIMIT,
+    );
+    expect(parse('limit=50').limit).toBe(50);
   });
 
   it('never asks for a page of zero rows', () => {

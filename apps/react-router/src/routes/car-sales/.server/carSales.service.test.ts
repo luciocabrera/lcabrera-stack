@@ -15,6 +15,7 @@ import {
   CAR_SALES_COLUMNS,
   CAR_SALES_SCHEMA,
   CAR_SALES_TABLE,
+  MAX_CAR_SALES_SORT_RULES,
 } from '../config';
 import { readCarSalesPage, selectCarSalesPage } from './carSales.service';
 
@@ -84,6 +85,39 @@ describe('selectCarSalesPage', () => {
     await selectCarSalesPage({ limit: 10, offset: 0, sorting: [] });
 
     expect(vi.mocked(selectRows).mock.calls.at(0)?.at(0)?.sort).toStrictEqual([
+      { column: 'car_id', direction: 'asc' },
+    ]);
+  });
+
+  it('bounds how many ORDER BY terms one read can carry', async () => {
+    // The sibling of the wide-alltypes sort cap. A hand-made request to this
+    // public URL could otherwise grow the ORDER BY without limit; the bound is
+    // the column count, so no sort a user can express reaches it. Over-cap
+    // input is the assertion — an in-range sort passes with or without the fix.
+    const overCap = Array.from(
+      { length: MAX_CAR_SALES_SORT_RULES + 25 },
+      () => ({ columnKey: 'car_id', direction: 'asc' as const }),
+    );
+
+    await selectCarSalesPage({ limit: 10, offset: 0, sorting: overCap });
+
+    expect(vi.mocked(selectRows).mock.calls.at(0)?.at(0)?.sort).toHaveLength(
+      MAX_CAR_SALES_SORT_RULES,
+    );
+  });
+
+  it('leaves a sort within the bound untouched', async () => {
+    await selectCarSalesPage({
+      limit: 10,
+      offset: 0,
+      sorting: [
+        { columnKey: 'model', direction: 'desc' },
+        { columnKey: 'car_id', direction: 'asc' },
+      ],
+    });
+
+    expect(vi.mocked(selectRows).mock.calls.at(0)?.at(0)?.sort).toStrictEqual([
+      { column: 'model', direction: 'desc' },
       { column: 'car_id', direction: 'asc' },
     ]);
   });

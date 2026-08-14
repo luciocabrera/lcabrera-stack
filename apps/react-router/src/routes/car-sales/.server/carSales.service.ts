@@ -21,6 +21,7 @@ import {
   CAR_SALES_PRIMARY_KEY,
   CAR_SALES_SCHEMA,
   CAR_SALES_TABLE,
+  MAX_CAR_SALES_SORT_RULES,
   toCarSaleRow,
 } from '../config';
 
@@ -67,12 +68,21 @@ export type SelectCarSalesPageArgs = {
  * There is no filter argument: this endpoint never filtered server-side. Both
  * car-sales routes filter in the browser over rows they already hold, and
  * neither declares `isServerFilterEnabled`, so no `filter` param ever arrives.
+ *
+ * The sort is bounded at `MAX_CAR_SALES_SORT_RULES` before it reaches the
+ * builder — the counterpart of what the wide-alltypes service does, and for the
+ * same reason: a hand-made request to a public URL could otherwise grow the
+ * ORDER BY without limit. The bound is the table's column count, so no sort a
+ * user can express reaches it. It lives here rather than in the resource
+ * route's parser because the SSR loader does not go through that parser.
  */
 export const selectCarSalesPage = async ({
   limit,
   offset,
   sorting,
 }: SelectCarSalesPageArgs) => {
+  const boundedSorting = sorting.slice(0, MAX_CAR_SALES_SORT_RULES);
+
   const [rows, total] = await Promise.all([
     selectRows<CarSaleRow>({
       ...TARGET,
@@ -81,7 +91,7 @@ export const selectCarSalesPage = async ({
       offset,
       sort: resolveQuerySort({
         fallback: CAR_SALES_FALLBACK_SORT,
-        sorting,
+        sorting: boundedSorting,
       }),
     }),
     getRowsCount({ ...TARGET, column: CAR_SALES_PRIMARY_KEY }),
