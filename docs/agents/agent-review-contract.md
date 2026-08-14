@@ -54,7 +54,7 @@ needs and are marked with what.
 {
   "schema": "agent-review-verdict/v1",
   "pr": 671,
-  "head_sha": "dd8fb786c0e3f6b1a2d4e5f60718293a4b5c6d7e",
+  "head_sha": "0123456789abcdef0123456789abcdef01234567",
   "reviewed_at": "2026-08-14T08:47:27Z",
   "verdict": "fail",
   "findings": [
@@ -73,7 +73,10 @@ needs and are marked with what.
 }
 ```
 
-_Illustrative. The finding is a real one from #671; the line number is not._
+_Illustrative. The finding is a real one from #671; the `head_sha` and the line
+number are placeholders — every SHA in this document is synthetic, because a
+fabricated citation is `error`-grade for the reviewer (§7.11) and a document
+teaching the format should not model one._
 
 ### 2.2 Fields
 
@@ -171,15 +174,21 @@ Four levels, the ones `/code-review` already uses. **`critical` and `high` block
 | `medium`   | is a real defect whose failure scenario is not reachable here, or breakage this diff touches but did not introduce, or something a green required check already owns | no     |
 | `low`      | is a preference — naming, structure, an alternative the reviewer finds cleaner                                                                                       | no     |
 
-Four rules make the assignment reproducible rather than a matter of mood:
+These rules make the assignment reproducible rather than a matter of mood:
 
 - **Severity is consequence, not confidence.** How sure the reviewer is belongs
   in §4's admissibility bar, not in this table. A finding it is unsure of is not
   thereby a `medium`: it goes through §4 first, which either refutes it (drop
   it), finds no failure scenario to name (`low`), or clears it — and only then
   does this table apply.
-- **Unsure downgrades, never upgrades.** If two rows both fit, take the lower
-  one. Blocking is the expensive direction.
+- **A change that matches more than one row takes the highest one it matches.**
+  The rows are consequences, not categories, and the severity is the worst
+  consequence the change carries — a Non-Negotiable Rule violation that _also_
+  breaks a required gate for everyone is `critical`, not `high`. Nothing is
+  averaged.
+- **Uncertainty downgrades, never upgrades.** That is a different question from
+  the one above: where the reviewer cannot tell whether a row's description holds
+  at all, it takes the row below. Blocking is the expensive direction.
 - **Nothing outside the change blocks.** A defect the diff did not introduce is
   `medium` at most, however bad it is, and belongs in an issue. Otherwise every
   pull request inherits the repository's whole backlog of debt.
@@ -211,11 +220,13 @@ following it land on the same severity.
    entirely.** Do not re-file it at a lower severity to look thorough; that is
    how a reviewer's findings list becomes noise nobody reads.
 3. **Locate it in the change.** `in-diff` with a line this diff touched, or
-   `omission` with the rule that required the missing thing. Neither → §3, rule
-   three: `medium` at most.
+   `omission` with the rule that required the missing thing. Neither → §3's
+   "nothing outside the change blocks": `medium` at most.
 4. **Check who owns the rule.** A mechanically-enforced rule with a green check
-   → §3, rule four: `medium` at most, and name the check.
-5. **Then, and only then, assign consequence** from §3's table.
+   → §3's "a green required check outranks the reviewer's opinion of its
+   subject": `medium` at most, and name the check.
+5. **Then, and only then, assign consequence** from §3's table — the highest row
+   the change matches.
 
 Two prohibitions sit inside this loop and are repeated in §7 because they are the
 ones under pressure: severity is never raised to force someone to pay attention,
@@ -356,15 +367,18 @@ The reviewer never:
 
 Severity, on changes this repository has actually seen or gates against:
 
-| A change that…                                                                     | Severity   | Why                                                                     |
-| ---------------------------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------- |
-| adds an `eslint-suppressions.json` entry in a public package to get the gate green | `critical` | Rule 11, and the public packages take no suppressions at all            |
-| makes a client-safe package depend on a Node-only workspace                        | `critical` | Pulls a server-only dependency into every consumer's graph (ADR-038)    |
-| documents a gate sequence that reports clean when run from the wrong directory     | `high`     | A reader following it believes a stage passed that never ran            |
-| changes a `@lcabrera/*` package's public surface with no changeset                 | `high`     | The change ships unversioned; consumers get it without a version to pin |
-| writes a finding count into a document                                             | `medium`   | Real rot, but nothing breaks the day it lands (AGENTS.md §7)            |
-| leaves a pre-existing `any` in a file it happened to touch                         | `medium`   | Not introduced by this diff (§3)                                        |
-| names a helper `getRows` where the file's neighbours use `selectRows`              | `low`      | Preference; no reachable failure                                        |
+| A change that…                                                                     | Severity   | Why                                                                                                                                                     |
+| ---------------------------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| adds an `eslint-suppressions.json` entry in a public package to get the gate green | `critical` | Breaks a required gate for everyone — `suppressions:verify` fails on `main`, and it is a Rule 11 violation besides, so the highest matching row applies |
+| makes a client-safe package depend on a Node-only workspace                        | `critical` | Pulls a server-only dependency into every consumer's graph (ADR-038)                                                                                    |
+| documents a gate sequence that reports clean when run from the wrong directory     | `high`     | A reader following it believes a stage passed that never ran                                                                                            |
+| changes a `@lcabrera/*` package's public surface with no changeset                 | `high`     | The change ships unversioned; consumers get it without a version to pin                                                                                 |
+| writes a finding count into a document                                             | `medium`   | Real rot, but nothing breaks the day it lands (AGENTS.md §7)                                                                                            |
+| leaves a pre-existing `any` in a file it happened to touch                         | `medium`   | Not introduced by this diff (§3)                                                                                                                        |
+| names a helper `getRows` where the file's neighbours use `selectRows`              | `low`      | Preference; no reachable failure                                                                                                                        |
+
+Both verdicts below are illustrative, and their `head_sha` is the same synthetic
+placeholder §2.1 uses — no commit in this repository has it.
 
 A pass verdict with a non-blocking finding — note that `failure_scenario` is
 still required, and states plainly that nothing follows:
@@ -373,7 +387,7 @@ still required, and states plainly that nothing follows:
 {
   "schema": "agent-review-verdict/v1",
   "pr": 702,
-  "head_sha": "0c42944b0a1e2d3c4b5a69788796a5b4c3d2e1f0",
+  "head_sha": "0123456789abcdef0123456789abcdef01234567",
   "reviewed_at": "2026-08-14T12:04:11Z",
   "verdict": "pass",
   "findings": [
@@ -396,7 +410,7 @@ An `error` verdict carries no findings and says why:
 {
   "schema": "agent-review-verdict/v1",
   "pr": 702,
-  "head_sha": "0c42944b0a1e2d3c4b5a69788796a5b4c3d2e1f0",
+  "head_sha": "0123456789abcdef0123456789abcdef01234567",
   "reviewed_at": "2026-08-14T12:04:11Z",
   "verdict": "error",
   "error_reason": "The diff exceeded the reviewer's input budget; no part of the change was reviewed.",
