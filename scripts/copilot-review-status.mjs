@@ -30,6 +30,7 @@ import { flagValue } from './lib/cli-input.mjs';
 import {
   copilotReviews,
   decideReviewStatus,
+  reviewsFromPages,
   STATUS_CONTEXT,
 } from './lib/copilot-review.mjs';
 import { errorMessage } from './lib/error-message.mjs';
@@ -75,19 +76,25 @@ const fetchPullRequest = (repository, number) =>
   JSON.parse(runGh(['api', `repos/${repository}/pulls/${number}`]));
 
 /**
- * Every review on the pull request, oldest first.
+ * Every review on the pull request, oldest first — all pages of them.
  *
- * `per_page` goes in the path rather than through `-F`: any field argument makes
- * `gh api` issue a POST, and `POST /pulls/{n}/reviews` opens a review instead of
- * listing them — a read that silently writes.
+ * Two flags earn their place. `--slurp` makes gh wrap the pages in one outer
+ * array; without it gh documents each page as a separate JSON document, which
+ * `JSON.parse` cannot read. `per_page` goes in the path rather than through
+ * `-F`, because any field argument makes `gh api` issue a POST, and
+ * `POST /pulls/{n}/reviews` opens a review instead of listing them — a read that
+ * silently writes.
  */
 const fetchReviews = (repository, number) =>
-  JSON.parse(
-    runGh([
-      'api',
-      '--paginate',
-      `repos/${repository}/pulls/${number}/reviews?per_page=100`,
-    ]),
+  reviewsFromPages(
+    JSON.parse(
+      runGh([
+        'api',
+        '--paginate',
+        '--slurp',
+        `repos/${repository}/pulls/${number}/reviews?per_page=100`,
+      ]),
+    ),
   );
 
 /** The run that decided this status, so the check links to its own reasoning. */

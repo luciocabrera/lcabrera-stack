@@ -640,8 +640,10 @@ commit status against the head SHA, green only while Copilot's newest review
 names that commit. It is the only workflow here triggered by
 `pull_request_review` as well as `pull_request`, because its verdict changes when
 the diff has not — a review landing flips it, and a push takes it back to
-`pending`. It reports but does not block until #698 makes the context required.
-See [`docs/tooling/copilot-review-gate.md`](docs/tooling/copilot-review-gate.md).
+`pending`. It reports but does not block until #698 makes the context required,
+and a run triggered by Copilot's own review currently waits for approval before
+it executes — both caveats, and the way out of the second, are in
+[`docs/tooling/copilot-review-gate.md`](docs/tooling/copilot-review-gate.md).
 
 [`secret-scan.yml`](.github/workflows/secret-scan.yml) scans repository
 **content** for credentials — the layer the two agent-boundary guards

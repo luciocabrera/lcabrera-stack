@@ -45,6 +45,36 @@ Dismissed and still-unsubmitted reviews are not counted, and an unrecognised
 review state is not counted either — the comparison is whitelisted so an
 unfamiliar payload leaves the gate pending rather than passing it.
 
+### Reading it out of a status rollup
+
+Anything that classifies a pull request's checks programmatically — the PR queue
+operator, a board view, an agent deciding whether a PR is ready — must handle
+this one carefully, because **its normal waiting state is easy to misread as a
+failure**. In a `statusCheckRollup` it appears as a legacy status context, not a
+check run:
+
+```json
+{
+  "__typename": "StatusContext",
+  "context": "Copilot review complete",
+  "state": "PENDING"
+}
+```
+
+Two traps in that payload:
+
+- **There is no `status` field**, only `state`, and `state` is
+  `PENDING | SUCCESS | FAILURE | ERROR | EXPECTED`. A consumer that reads "a
+  non-null verdict means the check has finished" — the shape a `CheckRun` has,
+  where `status` says finished and `conclusion` says how — classifies `PENDING`
+  as a finished, non-success check. Treat `PENDING` and `EXPECTED` as
+  **in flight**; terminality comes from the value being one of the terminal
+  states, never from it merely being present.
+- **`gh` reports an in-flight check run's `conclusion` as `""`, not `null`**, so
+  an emptiness test on the neighbouring check runs has to cover both.
+
+This is not hypothetical: it misfired on this gate's own pull request.
+
 ## What recomputes it
 
 `opened`, `reopened`, `synchronize`, `ready_for_review`, `converted_to_draft`,
@@ -103,6 +133,44 @@ In order — reach for the last only when the ones above genuinely do not apply.
 4. **Admin bypass of the ruleset**, once #698 has made the context required.
    `RepositoryRole` 5 keeps `bypass_mode: always` on ruleset `19141543`.
 
+## Known limitation: a Copilot-triggered run waits for approval
+
+**A `pull_request_review` submitted by Copilot creates a workflow run that a
+maintainer has to approve before it executes.** So the review that should flip
+this status to `success` does not, on its own, run the job that would.
+
+Measured on #707, two review events on the same head commit minutes apart:
+
+| Review submitted by | Run conclusion    |
+| ------------------- | ----------------- |
+| `Copilot`           | `action_required` |
+| `luciocabrera`      | `success`         |
+
+Only the reviewer differs, so the reviewer is what moved it — a run that failed
+for some property of the workflow or the branch would have failed for both. The
+repository's Actions approval policy at the time of that reading was
+`first_time_contributors`
+(`gh api repos/luciocabrera/vite-react-compiler/actions/permissions/fork-pr-contributor-approval`),
+and the `Copilot` bot is not a contributor to this repository.
+
+Consequences while this stands:
+
+- The status still goes `pending` on every push, and still reports on every
+  `pull_request` event. Nothing false is ever published.
+- It reaches `success` when the **next** handled event recomputes it — the next
+  push, a human review, or an approved run. It does not reach `success` on the
+  Copilot review alone.
+- The `failure` state, which needs a Copilot review to have executed the job, is
+  therefore rare in practice. `pending` is what a stale review reports instead,
+  and `pending` also blocks.
+
+Three ways out, cheapest first: approve the waiting run from the PR's Checks tab;
+push (including an empty commit); or break-glass step 3 below. The durable fix is
+a repository Actions setting rather than a change to this workflow, so it belongs
+with the other configuration decisions in **#698** — this gate cannot fix it in
+code, and a workflow that auto-approved its own gated runs would be a much worse
+thing to own.
+
 ## Known limitation: fork pull requests
 
 A pull request from a fork gets a read-only `GITHUB_TOKEN`, so no commit status
@@ -116,16 +184,23 @@ construction; it is documented so that it is understood rather than discovered.
 
 Everything above describes the repository **after** #694 added
 `copilot_code_review` (with `review_on_push: true`,
-`review_draft_pull_requests: false`) and `pull_request` to ruleset `19141543`,
-and after this gate's workflow is on `main`. Two consequences of that second
-precondition are worth stating, because they make the gate behave differently on
-the pull request that introduces it than it will afterwards:
+`review_draft_pull_requests: false`) and `pull_request` to ruleset `19141543`.
+Two further things the notes assume:
 
-- Workflows for events other than `pull_request` run from the **default branch**,
-  so the `pull_request_review` half of the trigger starts working only once the
-  workflow file is on `main`. Before then only the `pull_request` half fires,
-  which is enough to show `pending` on every push but not to show the flip to
-  `success`.
-- Until #698, nothing merges or fails on what this status says.
+- **Until #698, nothing merges or fails on what this status says.** It is
+  advisory, which is why the approval limitation above is a nuisance today and a
+  blocker the day the context becomes required.
+- **The Actions approval policy is `first_time_contributors`.** Loosen it and the
+  Copilot-triggered run executes on its own, which changes the table in that
+  section; tighten it and more actors are gated the same way. Re-read the setting
+  before trusting either reading.
+
+One expectation the measurements **disproved**, recorded so it is not
+re-inherited: the `pull_request_review` half was expected to be inert until the
+workflow file reached `main`, on the general rule that non-`pull_request` events
+run workflows from the default branch. Both review-triggered runs on #707 came
+from the pull request's own branch
+(`head_branch: ci/695-copilot-review-complete-check`) while `main` had no such
+file, so on this event GitHub used the branch's copy.
 
 Re-read this section before treating a quiet gate as a broken one.

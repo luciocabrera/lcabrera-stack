@@ -61,6 +61,19 @@ const sameCommit = (left, right) =>
 const shortSha = (sha) =>
   typeof sha === 'string' && sha.length > 0 ? sha.slice(0, 7) : '(unknown)';
 
+/**
+ * One review list from what `gh api --paginate --slurp` returns.
+ *
+ * `--slurp` wraps every page in an outer array, so one page arrives as `[[…]]`
+ * and three as `[[…],[…],[…]]`. It is asked for rather than relying on
+ * `--paginate` alone because gh documents each page as **a separate JSON
+ * document** — a contract under which concatenated pages do not parse at all —
+ * even though today it happens to merge array responses into one. Flattening
+ * one level is correct under both, and leaves an already-flat list untouched.
+ */
+export const reviewsFromPages = (pages) =>
+  Array.isArray(pages) ? pages.flat() : [];
+
 /** Copilot's submitted reviews — dismissed and still-pending ones dropped. */
 export const copilotReviews = (reviews = []) =>
   reviews.filter(

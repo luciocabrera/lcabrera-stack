@@ -5,6 +5,7 @@ import {
   decideReviewStatus,
   isCopilotReviewer,
   latestCopilotReview,
+  reviewsFromPages,
   STATUS_CONTEXT,
 } from './copilot-review.mjs';
 
@@ -58,6 +59,46 @@ describe('recognising the reviewer', () => {
     expect(isCopilotReviewer('copilot')).toBe(false);
     expect(isCopilotReviewer('not-copilot-pull-request-reviewer')).toBe(false);
     expect(isCopilotReviewer(undefined)).toBe(false);
+  });
+});
+
+describe('reading a paginated review list', () => {
+  // The single-page case passes whether or not pagination is handled, so it
+  // cannot be the only case here. `--slurp` wraps EVERY page, including the
+  // first, so `[[…]]` is what one page looks like.
+  it('joins the pages gh returns into one list', () => {
+    const first = restReview({ commit: EARLIER });
+    const second = restReview({ login: 'luciocabrera' });
+    const third = restReview();
+    expect(reviewsFromPages([[first, second], [third]])).toEqual([
+      first,
+      second,
+      third,
+    ]);
+  });
+
+  it('handles one page, an empty response and an already-flat list', () => {
+    const only = restReview();
+    expect(reviewsFromPages([[only]])).toEqual([only]);
+    expect(reviewsFromPages([])).toEqual([]);
+    expect(reviewsFromPages([only])).toEqual([only]);
+    expect(reviewsFromPages(undefined)).toEqual([]);
+  });
+
+  it('sees a covering review that is not on the first page', () => {
+    // The regression this guards: reading only the first page reports `pending`
+    // on a pull request Copilot has in fact reviewed at its head.
+    const pages = [
+      [restReview({ commit: EARLIER, submitted: '2026-08-14T08:20:53Z' })],
+      [restReview({ submitted: '2026-08-14T08:47:27Z' })],
+    ];
+    expect(
+      decideReviewStatus({ headSha: HEAD, reviews: reviewsFromPages(pages) })
+        .state,
+    ).toBe('success');
+    expect(decideReviewStatus({ headSha: HEAD, reviews: pages[0] }).state).toBe(
+      'pending',
+    );
   });
 });
 
