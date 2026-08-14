@@ -4,9 +4,10 @@
 
 ## Context
 
-Four workspaces carry the toolchain every other workspace depends on, and none
+These workspaces carry the toolchain every other workspace depends on, and none
 of them can leave this repository. Reverse dependencies were enumerated from the
-workspace manifests on 2026-08-14:
+workspace manifests on 2026-08-14
+(`grep -rn '"@repo/' --include=package.json apps packages`):
 
 | Workspace               | Consumers today                                                     |
 | ----------------------- | ------------------------------------------------------------------- |
@@ -37,69 +38,108 @@ The obstacle is not packaging. It is that each package mixes generic machinery
 with this repository's own data, so publishing as-is would impose our shape on
 every consumer.
 
-#673 named three such sites. Reading the sources on 2026-08-14 found **six**, and
-the three extra ones matter because each would have been discovered mid-implementation:
+#673 named some of these sites. Reading the sources on 2026-08-14 found more, and
+the ones it missed — marked **no** below — matter because each would otherwise
+have been discovered mid-implementation:
 
-| Site                                                   | The repo data                                                                                                        | Named in #673 |
-| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- | ------------- |
-| `packages/ts-configs/tsconfig.entries.ts`              | this repo's workspace roster and per-app `paths`                                                                     | yes           |
-| `packages/vite-configs/vite.plugins.shared.config.ts`  | a StyleX alias mapping `@lcabrera/ui/*` to `../../../packages/ui/src/*`                                              | yes           |
-| `packages/vite-configs/eslint.restrictions.shared.mjs` | `@lcabrera/ui` / `@lcabrera/server` import-boundary tables                                                           | yes           |
-| `packages/vite-configs/vite.lint.shared.config.ts`     | `BROWSER_WORKSPACES` / `NODE_WORKSPACES` / `RUNTIME_AGNOSTIC_WORKSPACES`, this repo's whole workspace roster by glob | **no**        |
-| `packages/vite-configs/vite.run.shared.config.ts`      | `LOAD_LOCAL_ENV`, which reads `../../docker/local/.env` — this repo's dev-compose layout                             | **no**        |
-| `packages/vite-configs/package.json`                   | every dependency declared `devDependencies`, and five that `./eslint-custom-rules` needs declared nowhere            | partly        |
+| Site                                                   | The repo data                                                                                                            | Named in #673 |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ | ------------- |
+| `packages/ts-configs/tsconfig.entries.ts`              | this repo's workspace roster and per-app `paths`                                                                         | yes           |
+| `packages/vite-configs/vite.plugins.shared.config.ts`  | a StyleX alias mapping `@lcabrera/ui/*` to `../../../packages/ui/src/*`                                                  | yes           |
+| `packages/vite-configs/eslint.restrictions.shared.mjs` | `@lcabrera/ui` / `@lcabrera/server` import-boundary tables                                                               | yes           |
+| `packages/vite-configs/vite.lint.shared.config.ts`     | `BROWSER_WORKSPACES` / `NODE_WORKSPACES` / `RUNTIME_AGNOSTIC_WORKSPACES`, this repo's whole workspace roster by glob     | **no**        |
+| `packages/vite-configs/vite.run.shared.config.ts`      | `LOAD_LOCAL_ENV`, which reads `../../docker/local/.env` — this repo's dev-compose layout                                 | **no**        |
+| `packages/vite-configs/package.json`                   | every dependency declared `devDependencies`, plus ESLint plugins `./eslint-custom-rules` needs that are declared nowhere | partly        |
 
 The third row is also wrong in the other direction. #673 says
 `eslint.restrictions.shared.mjs` "is entirely `@lcabrera/ui`/`@lcabrera/server`
-boundary enforcement" and therefore does not ship. It is not: four of its six
-exports (`BARREL_SYNTAX_RESTRICTIONS`, `REACT_TYPE_IMPORT_PATHS`,
-`STATE_LIBRARY_IMPORT_PATTERNS`, `TEST_RUNNER_IMPORT_PATTERNS`) are generic house
-style naming no workspace, and one of them —
-`TEST_RUNNER_IMPORT_PATTERNS` — is imported by
-`eslint.base-custom-rules.shared.config.mjs`, which is the generic
-`./eslint-base-custom-rules` export. Leaving the whole file behind would ship a
-config that cannot load.
+boundary enforcement" and therefore does not ship. It is not. Most of what it
+exports is generic house style naming no workspace —
+`BARREL_SYNTAX_RESTRICTIONS`, `REACT_TYPE_IMPORT_PATHS`,
+`STATE_LIBRARY_IMPORT_PATTERNS` and `TEST_RUNNER_IMPORT_PATTERNS` — and the last
+of those is imported by `eslint.base-custom-rules.shared.config.mjs`, which _is_
+the generic `./eslint-base-custom-rules` export. Leaving the whole file behind
+would ship a config that cannot load.
 
 ## Decision
 
 **Four packages publish**, all `@lcabrera/*`, all under the publishing contract
 in [`packages/CLAUDE.md`](../../packages/CLAUDE.md).
 
-| Source                                       | Published as            | Implemented by |
-| -------------------------------------------- | ----------------------- | -------------- |
-| `packages/ts-configs`                        | `@lcabrera/tsconfig`    | #674           |
-| `packages/vite-configs` + `packages/plugins` | `@lcabrera/vite-config` | #675           |
-| `packages/node-runtime`                      | `@lcabrera/node`        | #676           |
-| the three scan-report skills' shared scripts | `@lcabrera/scan-report` | #677           |
+| Source                                                     | Rename or split                    | Published as            | Implemented by |
+| ---------------------------------------------------------- | ---------------------------------- | ----------------------- | -------------- |
+| `packages/ts-configs` — its factories and writer only      | **split** — the workspace survives | `@lcabrera/tsconfig`    | #674           |
+| `packages/vite-configs`, with `packages/plugins` folded in | rename                             | `@lcabrera/vite-config` | #675           |
+| `packages/node-runtime`                                    | rename                             | `@lcabrera/node`        | #676           |
+| the three scan-report skills' shared scripts               | new package                        | `@lcabrera/scan-report` | #677           |
+
+**Read the first row as a split, not a rename — it is the only one.**
+`packages/ts-configs` does not _become_ `@lcabrera/tsconfig`; part of it does. The
+workspace survives the change, still named `@repo/ts-configs` and still
+`private: true`, holding the repo data the published half must not carry. The
+other rows are renames: those workspaces become the published package, and what
+repo data they carry leaves for a repo-owned home rather than for a surviving
+private workspace.
 
 `packages/plugins` does not publish under its own name (see below), and no
 manifest changes under this issue — the ADR is the deliverable.
 
-### `@lcabrera/tsconfig` ← `packages/ts-configs`
+### `packages/ts-configs` splits: the factories ship, the entry table stays
 
-The split is already physical. `tsconfig.shared.ts` holds the
-`createAppTsConfig` / `createNodeTsConfig` factories and is generic: it names no
-workspace, and its only two mentions of `@lcabrera/*` are illustrative JSDoc.
-`generate.ts` is a 22-line writer, also generic.
+The seam is already physical, which is what makes this the one clean split.
+`tsconfig.shared.ts` holds the `createAppTsConfig` / `createNodeTsConfig`
+factories and is generic: it names no workspace, and every mention of
+`@lcabrera/*` in it is illustrative JSDoc. `generate.ts` is a thin writer around
+`mkdir` + `writeFile`, also generic.
 
-**Ships:** the two factories and the writer.
+**Ships as `@lcabrera/tsconfig`:** both factories and the writer.
 
-**Stays here:** `packages/ts-configs/tsconfig.entries.ts` — nothing but this
-repo's workspace list and per-app `paths`. Its own header comment already says it
-is kept apart from the generator deliberately.
+**Stays behind in `@repo/ts-configs`:** `packages/ts-configs/tsconfig.entries.ts`
+— nothing but this repo's workspace list and per-app `paths`. Its own header
+comment already says it is kept apart from the generator deliberately.
+
+So #674 leaves two artifacts with similar names, and telling them apart matters:
+
+|                 | `@lcabrera/tsconfig`          | `@repo/ts-configs`                                        |
+| --------------- | ----------------------------- | --------------------------------------------------------- |
+| What it is      | the published package         | the private workspace that survives the split             |
+| Holds           | both factories and the writer | `tsconfig.entries.ts` plus a runner that calls the writer |
+| `private`       | `false`                       | `true`                                                    |
+| Who consumes it | this repo, and any other repo | nothing — it is a task host, not a library                |
 
 `generate.ts` imports `./tsconfig.entries.ts` statically today, so the writer has
-to take the entry list as an argument before the two can separate.
-`packages/ts-configs` **remains a private workspace** holding the entry table and
-a one-line runner that calls the published writer, so
-`vp run --filter @repo/ts-configs generate` keeps working and the entry table
-keeps a home that is neither a root script nor a published file.
+to take the entry list as an argument before the halves can separate. Once it
+does, `vp run --filter @repo/ts-configs generate` keeps working **unchanged** —
+that is the surviving workspace's own task, deliberately, so the entry table
+keeps a home that is neither a root script nor a published file and no caller has
+to learn a new command.
 
 ### `@lcabrera/vite-config` ← `packages/vite-configs`, with `packages/plugins` folded in
 
-**Ships:** `./fmt`, `./lint`, `./pack`, `./plugins`, `./run`,
-`./eslint-custom-rules`, `./eslint-base-custom-rules`, and the four generic
-restriction tables — the same subpath map as today.
+**Ships:** every subpath the package exports today — `./fmt`, `./lint`, `./pack`,
+`./plugins`, `./run`, `./eslint-custom-rules`, `./eslint-base-custom-rules`
+(`node -e "console.log(Object.keys(require('./packages/vite-configs/package.json').exports))"`
+prints the live list) — **plus one the map does not have yet**,
+`./eslint-restrictions`, for the generic restriction tables.
+
+That addition is the correction to an easy misreading: the generic tables are
+**not** reachable through any subpath today. `eslint.restrictions.shared.mjs` is a
+package-internal module that the two eslint configs import by relative path, and
+nothing in `exports` resolves it —
+
+```sh
+node -e "const e=require('./packages/vite-configs/package.json').exports; console.log(Object.values(e).some(v => String(v).includes('restrictions')))"
+# false
+```
+
+So shipping them **grows** the map rather than preserving it. They need a subpath
+of their own because ESLint flat config replaces a rule wholesale: a consumer
+that adds its own `no-restricted-syntax` block after the factory's silently drops
+every restriction the factory set, and can only avoid that by re-composing the
+generic tables into its own value. That is the trap
+`eslint.custom-rules.shared.config.mjs` already documents in a comment for
+in-repo callers; publication turns it into a trap for people who cannot read that
+comment.
 
 **Stays here**, each with the option that replaces it:
 
@@ -108,14 +148,16 @@ restriction tables — the same subpath map as today.
    Today it is unconditional, so a consumer would get an alias to a directory
    three levels above its repo.
 2. **The `@lcabrera/ui` / `@lcabrera/server` boundary tables** —
-   `UI_PUBLIC_IMPORT_BOUNDARY_PATTERNS`, the two `@lcabrera/ui` selectors inside
-   `CLIENT_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS`, and the `@lcabrera/server/db`
-   half of its DB restrictions. They move to a repo-owned
-   `eslint.restrictions.repo.mjs` at the repo root, and
+   `UI_PUBLIC_IMPORT_BOUNDARY_PATTERNS`, plus the entries of
+   `CLIENT_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS` whose selector names
+   `@lcabrera/ui` (the `entry/createHandleRequest.util` and `@lcabrera/ui/server`
+   bans) and the `@lcabrera/server/db` half of its DB restrictions. They move to
+   a repo-owned `eslint.restrictions.repo.mjs` at the repo root, and
    `createCustomRulesLintConfig` takes them as tables rather than as the
    `enforceUiPublicImportBoundary` / `enforceServerClientImportBoundary` booleans
-   it has now. The generic tables listed under **Problem**, and the three
-   `node:`-builtin selectors, ship.
+   it has now. What ships is the rest: the generic tables listed under
+   **Problem**, and the `node:`-builtin selectors of the same restriction list,
+   which name no package at all.
 3. **The Oxlint workspace roster** — `BROWSER_WORKSPACES`, `NODE_WORKSPACES`,
    `RUNTIME_AGNOSTIC_WORKSPACES` and the `WORKSPACE_RUNTIMES` map they feed.
    `lintSharedConfig` becomes a `createLintConfig({ workspaceRuntimes })`
@@ -166,13 +208,27 @@ right.
 `linter-checker`, `code-smell-checker` and `fallow-code-checker` split cleanly:
 **`SKILL.md` is prompt text, the `scripts/` are code.**
 
-- **The scripts publish** as `@lcabrera/scan-report`:
-  `.github/skills/code-smell-shared/scripts/deterministic-scan-shared.mjs`,
-  `finding-templates.mjs`, `.github/skills/linter-checker/scripts/lint-report-shared.mjs`
-  and the four report generators, exposed as `bin` entries so a consuming repo
-  runs them by name rather than by path. `SCHEMA_V1.md` and
-  `REPORT_JSON_CONTRACT.md` ship in `files`, so a consumer can read the contract
-  it is producing.
+- **The scripts publish** as `@lcabrera/scan-report`: the shared halves
+  (`.github/skills/code-smell-shared/scripts/deterministic-scan-shared.mjs`,
+  `.github/skills/code-smell-shared/scripts/finding-templates.mjs`,
+  `.github/skills/linter-checker/scripts/lint-report-shared.mjs`) and the report
+  generators belonging to these three skills —
+  `.github/skills/linter-checker/scripts/generate-oxlint-report.mjs`,
+  `.github/skills/linter-checker/scripts/generate-eslint-report.mjs` and
+  `.github/skills/fallow-code-checker/scripts/generate-fallow-report.mjs`, plus
+  the `run-fallow.sh` helper the last one shells out to. Each becomes a `bin`
+  entry so a consuming repo runs it by name rather than by path. `SCHEMA_V1.md`
+  and `REPORT_JSON_CONTRACT.md` ship in `files`, so a consumer can read the
+  contract it is producing.
+
+  `find .github/skills -name 'generate-*-report.mjs'` returns more than that
+  list, and the surplus does **not** travel:
+  `.github/skills/app-graph/scripts/generate-app-graph-report.mjs` belongs to a
+  different skill family with its own output contract, and `app-graph` is not one
+  of the three skills this section is about. Selecting by that filename glob
+  rather than by skill membership is the mistake to avoid when #677 assembles the
+  `files` list.
+
 - **The `SKILL.md` files do not.** An agent discovers a skill by scanning
   `.github/skills/`, so each repo keeps its own — and it should: the scope
   defaults, `allowed-tools` and argument hints are per-repo. `validate-skills.yml`
@@ -197,8 +253,8 @@ the infix is "noise on the consumer's import line". It is not on the consumer's
 import line at all: the consumer-visible surface is the `exports` subpath map
 (`./fmt`, `./lint`, `./pack`, `./plugins`, `./run`, `./eslint-custom-rules`,
 `./eslint-base-custom-rules`), which already carries no infix, and the file names
-sit behind it. Renaming five files changes nothing anyone types and breaks
-`git log --follow` on all five.
+sit behind it. Renaming the `vite.*.shared.config.ts` files changes nothing
+anyone types, and breaks `git log --follow` on every one of them.
 
 The infix also still disambiguates inside the package, which keeps its own
 `eslint.config.mjs` and `vite.config.ts` alongside the shared ones.
@@ -210,9 +266,12 @@ package resolved only through the monorepo, and wrong for a published one. A
 consumer loading `./eslint-custom-rules` needs those plugins _present_, and the
 failure will not reproduce in this repo, where pnpm hoists them anyway.
 
-Classification below is from the import sites, read on 2026-08-14 with an
-exact-specifier grep over the package's `.ts` and `.mjs` sources. "Optional peer"
-means `peerDependenciesMeta.optional`
+One row per `devDependency` in `packages/vite-configs/package.json` as it stood
+on 2026-08-14 — compare against
+`node -e "console.log(Object.keys(require('./packages/vite-configs/package.json').devDependencies))"`
+before relying on the table. Each verdict comes from the import sites, read with
+an exact-specifier grep over the package's `.ts` and `.mjs` sources. "Optional
+peer" means `peerDependenciesMeta.optional`
 ([ADR-047](ADR-047-declare-optional-peer-dependencies.md)) — required only by the
 export that uses it.
 
@@ -240,13 +299,14 @@ export that uses it.
 | `vite-plus`                   | peer          | every config export is typed against `vite-plus`; a Vite+ config package's consumer has it by definition                                                                                                                   |
 | `vitest`                      | dev-only      | runs this package's own `vite.run.shared.config.test.ts`                                                                                                                                                                   |
 
-**Five more are required and declared nowhere.**
+**More are required and declared nowhere at all.**
 `createCustomRulesLintConfig` resolves `@stylexjs/eslint-plugin`,
 `eslint-plugin-react-dom`, `eslint-plugin-react-hooks`,
-`eslint-plugin-react-refresh` and `eslint-plugin-react-x` at call time, and none
-appears in `packages/vite-configs/package.json`. It works today only because
-`apps/react-router`, `apps/admin_system` and `packages/ui` each declare all five
-themselves. All five become peers.
+`eslint-plugin-react-refresh` and `eslint-plugin-react-x` at call time, and not
+one of them appears in `packages/vite-configs/package.json`. It works today only
+because `apps/react-router`, `apps/admin_system` and `packages/ui` each declare
+them for themselves. They all become peers, on the same reasoning as the peer
+rows above.
 
 **The trap that makes this more than a manifest edit.**
 `./eslint-custom-rules` does not import its plugins — it resolves them through a
@@ -296,15 +356,18 @@ derives the public-package list from which workspaces gitignore
 change — not the day this ADR merged. AGENTS.md names these four as decided, and
 says so.
 
-**All four must ship built `dist`, not source.** Node refuses to strip types for
-anything under `node_modules`
-(`ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`), and both packages are _loaded_
-rather than only typechecked: `@lcabrera/tsconfig`'s writer is run by
-`node --experimental-strip-types`, and `@lcabrera/vite-config`'s `.ts` configs
-are imported by a consumer's `vite.config.ts`. So each needs the
+**The three that ship TypeScript must ship built `dist`, not source.** Node
+refuses to strip types for anything under `node_modules`
+(`ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`), and each of
+`@lcabrera/tsconfig`, `@lcabrera/vite-config` and `@lcabrera/node` is _loaded_
+rather than only typechecked: the first's writer is run by
+`node --experimental-strip-types`, the second's `.ts` configs are imported by a
+consumer's `vite.config.ts`, and the third's `exports` points straight at
+`src/registerShutdownSignals.util.ts`. So each needs the
 `exports`/`publishConfig.exports` swap that ADR-057 describes and
-`scripts/verify-publish-surface.mjs` enforces. `@lcabrera/scan-report` is `.mjs`
-already and is exempt from that particular hazard.
+`scripts/verify-publish-surface.mjs` enforces. `@lcabrera/scan-report` is the
+exception: it ships `.mjs`, which loads from `node_modules` fine, so it has no
+build step and no swap.
 
 **Two of the four repo-data extractions are visible outside the packages.**
 Moving the Oxlint roster to the root `vite.config.ts` moves what
@@ -318,13 +381,16 @@ deliberate violation, because an unloaded table reports exactly the clean pass
 that correct code does.
 
 **The `@lcabrera/vite-config` peer list is long, and that is the honest cost.**
-Sixteen peers, five of which are undeclared today. A consumer installs the config
-package and still has to declare the ESLint plugin set for `./eslint-custom-rules`
-to resolve. Making that list shorter means changing the per-app resolution
-strategy, which exists for a real reason and is out of scope here.
+Most of the table above lands in `peerDependencies`, and some of those entries
+are not declared anywhere today. A consumer installs the config package and still
+has to declare the ESLint plugin set itself for `./eslint-custom-rules` to
+resolve. Making that list shorter means changing the per-app resolution strategy,
+which exists for a real reason and is out of scope here.
 
 **This repo gains a dependency on its own published packages.** After #674–#676,
-twelve workspaces stop depending on something unpublishable, and this repo starts
+every workspace that depends on the toolchain today
+(`grep -rln '"@repo/vite-configs"\|"@repo/ts-configs"\|"@repo/node-runtime"' --include=package.json apps packages`
+lists them) stops depending on something unpublishable, and this repo starts
 consuming the toolchain the way any other repo would — which is the first honest
 test of it, the same argument #672 makes about `@lcabrera/ui`.
 
@@ -351,9 +417,10 @@ speculative generality; folding is reversible, an npm name is not.
 
 **Fold `@repo/node-runtime` into `@lcabrera/server` or `@lcabrera/utils`, or
 inline it into `apps/scan-orchestrator`.** The first two are rejected above on
-ADR-038 and the purity guarantee. Inlining is rejected because
-`registerShutdownSignals` has three consumers, two of which stay in this repo, so
-inlining into the one that leaves means duplicating it into the two that do not —
+ADR-038 and the purity guarantee. Inlining is rejected because of the consumer
+split in the Context table: `apps/scan-orchestrator` leaves with CQMS while
+`apps/api-server` and `apps/api-server-fast` stay, so inlining into the one that
+leaves means duplicating `registerShutdownSignals` into the ones that do not —
 without the boundary ADR-039 asks for when duplication is the right call.
 
 **Ship the scan-report scripts from the CodePulse repo instead.** CodePulse owns
