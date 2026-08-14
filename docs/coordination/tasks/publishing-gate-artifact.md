@@ -2,7 +2,7 @@
 id: publishing-gate-artifact
 title: Verify a real artifact in the publishing gates
 owner: agent:claude
-status: active
+status: review
 branch: fix/715-publishing-gate-artifact
 area:
   - scripts/verify-publish-surface.mjs
@@ -34,6 +34,6 @@ unbuilt tree instead of reporting a pass they did not earn. The pnpm-only
 
 ## Status / next
 
-- Current step: implemented; gate run and negative controls done
+- Current step: in review — gate green, negative controls recorded on PR #719
 - Blockers: none
 - Next: review on PR #719
