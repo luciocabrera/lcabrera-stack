@@ -24,6 +24,12 @@ The status is published against the head SHA under the context
 `Copilot review complete`. The name is the whole interface — ruleset contexts
 match by name, so renaming it detaches the gate silently.
 
+For the same reason the workflow's **job** is deliberately called something
+else. A job's check run and a commit status share one namespace on a pull
+request, so a job named after the status would publish a second check under that
+name which is green whenever the workflow merely ran — and once #698 makes the
+context required, that is the one that could satisfy it.
+
 | State     | When                                                                           |
 | --------- | ------------------------------------------------------------------------------ |
 | `success` | Copilot's newest submitted review names the head commit                        |

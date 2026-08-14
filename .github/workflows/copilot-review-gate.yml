@@ -43,8 +43,13 @@ permissions:
 # read, so a slow run publishes the same verdict as the fast one that overtook it.
 
 jobs:
-  copilot-review-complete:
-    name: Copilot review complete
+  publish-copilot-review-status:
+    # This name must NOT be `Copilot review complete`. A job's check run and a
+    # commit status share one namespace on the PR, and ruleset contexts match by
+    # name — so a job named after the status would put a second, always-green
+    # check under that name, and the gate #698 promotes could be satisfied by
+    # "the workflow ran" instead of "Copilot reviewed the head".
+    name: Publish the Copilot review status
     runs-on: ubuntu-latest
     steps:
       # Default ref on purpose, which differs per event and is right both times:
