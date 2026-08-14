@@ -30,9 +30,12 @@ tooling implements and #233 built for, with the residual visibility gap stated.
 - Blockers: none — waiting on review, then the merge closes this file
 - Next: nothing outstanding
 
-Known overlap, coordinated rather than narrowed: `publishing-gate-artifact`
-(`fix/715-publishing-gate-artifact`) claims `docs/decisions/**`, so
-`coordination:verify` warns against this task's `docs/decisions/ADR-074-*`. The
-only file both touch is the generated index `docs/decisions/README.md` —
-whichever lands second rebases and re-runs `vp run adr:verify -- --write`. Their
-ADR is 073, this one is 074, so the numbers do not collide.
+Settled overlap, kept here as the record: `publishing-gate-artifact`
+(`fix/715-publishing-gate-artifact`) claimed `docs/decisions/**`, which
+`coordination:verify` warned against this task's `docs/decisions/ADR-074-*`.
+Coordinated rather than narrowed, because the only file both touched was the
+generated index `docs/decisions/README.md` and the ADR numbers (073 there, 074
+here) never collided. It landed first as #719; this branch rebased and re-ran
+`vp run adr:verify -- --write`, and the register now reports no warning. The
+underlying problem — the generated index conflicts between _any_ two concurrent
+ADR branches — is #724.
