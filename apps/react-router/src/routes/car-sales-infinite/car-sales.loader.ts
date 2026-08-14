@@ -4,8 +4,8 @@ import { createTableRouteLoader } from '@lcabrera/ui/routing/loaders/createTable
 import type { CarSale, CarSalesResponse } from '@/services';
 
 import { APP_ID } from '@/constants/app.constants';
-import { fetchCarSalesPage } from '@/services';
 
+import { readCarSalesPage } from '../car-sales/.server/carSales.service';
 import { COLUMNS } from '../car-sales/CarSales.constants';
 import {
   PERSISTENCE_KEY,
@@ -16,8 +16,13 @@ import {
 
 /**
  * Loader for the infinite-scroll car sales route. Loads the first page only;
- * the component fetches subsequent pages via `onLoadMore`. The fetch promise is
- * returned unawaited for Suspense streaming.
+ * the component fetches subsequent pages via `onLoadMore`, through
+ * `/_api/car-sales/paginated`. The read promise is returned unawaited for
+ * Suspense streaming.
+ *
+ * `readCarSalesPage` reads Postgres **server-side** by default — no api-server
+ * round-trip — and goes to the external endpoint only when `VITE_API_URL` asks
+ * for it.
  */
 export const loader = createTableRouteLoader<
   CarSale,
@@ -26,7 +31,7 @@ export const loader = createTableRouteLoader<
   appId: APP_ID,
   columns: COLUMNS,
   fetchPage: ({ effectiveSorting, request }) =>
-    fetchCarSalesPage({
+    readCarSalesPage({
       limit: INITIAL_PAGE_SIZE,
       requestUrl: request.url,
       skip: 0,

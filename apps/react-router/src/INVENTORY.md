@@ -8,12 +8,36 @@ Shared components/hooks/utils/design-tokens live in `@lcabrera/ui` — see [`pac
 
 ## Routes
 
-| Route                  | Location                     | Description                                                                                                                                                                             |
-| ---------------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/login`               | `routes/login/`              | Auth login built with the `@lcabrera/ui` Form; `clientAction` Zod-validates (no server hit on failure) then delegates to the credential-verifying server `action`; honors `?redirectTo` |
-| `/logout`              | `routes/logout/`             | Action-only route; clears the auth cookie and redirects to `/login` (POST only)                                                                                                         |
-| `/_api/filter-options` | `routes/api/filter-options/` | Resource route for `transport: 'loader'` filter-option descriptors (ADR-009); its loader calls the BFF `/api/distinct` server-side                                                      |
-| `/wide-alltypes-150`   | `routes/wide-alltypes-150/`  | Stress-test page for the `wide_alltypes_150` dataset using the shared `TableLayout` implementation                                                                                      |
+Every table route serves its own rows from Postgres — see
+[`docs/data-sources.md`](../docs/data-sources.md) for the shared shape and the
+`VITE_API_URL` override.
+
+| Route                               | Location                                  | Description                                                                                                                                                                             |
+| ----------------------------------- | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/login`                            | `routes/login/`                           | Auth login built with the `@lcabrera/ui` Form; `clientAction` Zod-validates (no server hit on failure) then delegates to the credential-verifying server `action`; honors `?redirectTo` |
+| `/logout`                           | `routes/logout/`                          | Action-only route; clears the auth cookie and redirects to `/login` (POST only)                                                                                                         |
+| `/car-sales`                        | `routes/car-sales/`                       | `car_sales` in one bounded slice, paginated in the browser; owns the entity `config/` and the `.server` service both car-sales routes read through                                      |
+| `/car-sales-infinite`               | `routes/car-sales-infinite/`              | The same table and columns through infinite scroll; reuses `/car-sales`'s `COLUMNS`, `config/` and service                                                                              |
+| `/wide-alltypes-150`                | `routes/wide-alltypes-150/`               | Stress-test page for the `wide_alltypes_150` dataset using the shared `TableLayout` implementation                                                                                      |
+| `/_api/filter-options`              | `routes/api/filter-options/`              | Resource route for `transport: 'loader'` filter-option descriptors (ADR-009); its loader reads Postgres server-side                                                                     |
+| `/_api/car-sales/paginated`         | `routes/api/car-sales-paginated/`         | Resource route serving `/car-sales-infinite`'s load-more from `selectCarSalesPage` — raw JSON `{ data, hasMore, total }`                                                                |
+| `/_api/wide-alltypes-150/paginated` | `routes/api/wide-alltypes-150-paginated/` | Resource route serving `/wide-alltypes-150`'s load-more from `selectWideAlltypes150Page` — raw JSON `{ data, hasMore, total }`                                                          |
+
+---
+
+## Data sources (`src/services/`)
+
+The app-local browser fetch layer. Each fetcher targets this app's own resource
+route by default and the external API only under the `VITE_API_URL` override.
+
+| Artifact                    | Location                                     | Description                                                                                                                    |
+| --------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `fetchCarSalesPage`         | `services/carSales.api.ts`                   | A page of `car_sales`, plus the `CarSale` / `CarSalesResponse` shapes; applies `fakeDelay` for the loading-skeleton demo       |
+| `fetchWideAlltypes150Page`  | `services/wideAlltypes150.api.ts`            | A page of `wide_alltypes_150`, plus the `WideAlltypes150` / `WideAlltypes150Response` shapes                                   |
+| `readExternalApiUrl`        | `services/readExternalApiUrl.util.ts`        | The single read of `VITE_API_URL`; an empty value counts as unset. The two utils below derive from it, so they cannot disagree |
+| `isExternalApiEnabled`      | `services/isExternalApiEnabled.util.ts`      | **Whether** the external path is taken — the switch every data path reads                                                      |
+| `resolveExternalApiBaseUrl` | `services/resolveExternalApiBaseUrl.util.ts` | **Where** it goes: the override host, ranked ahead of `@lcabrera/api`'s `getApiBaseUrl`, which puts the SSR request URL first  |
+| `fakeDelay`                 | `services/fakeDelay.util.ts`                 | Artificial `VITE_API_DELAY_MS` delay so the loading skeleton is visible against a local data source; no-ops when unset         |
 
 ---
 

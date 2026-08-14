@@ -12,17 +12,18 @@ for why, and for what to do with a decision that spans two tiers.
 Writing one: start from [`_TEMPLATE.md`](../../../../docs/decisions/_TEMPLATE.md)
 or run `vp run adr:new`, which takes the next free number for you.
 
-| ADR                                                             | Decision                                                                |
-| --------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| [ADR-001](./ADR-001-native-dialog-modal.md)                     | Native `<dialog>` for Modal                                             |
-| [ADR-002](./ADR-002-css-anchor-positioning-tooltip.md)          | CSS Anchor Positioning for Tooltip                                      |
-| [ADR-003](./ADR-003-useref-external-store.md)                   | `useRef`-based External Store                                           |
-| [ADR-004](./ADR-004-react-compiler.md)                          | React Compiler over Manual Memoization                                  |
-| [ADR-005](./ADR-005-stylex.md)                                  | StyleX for All Styling                                                  |
-| [ADR-006](./ADR-006-infinite-scroll-prefetch.md)                | Infinite Scroll Prefetch Buffer                                         |
-| [ADR-007](./ADR-007-barrel-export-boundaries.md)                | Barrel Export Boundaries                                                |
-| [ADR-008](./ADR-008-primary-key-sort-tiebreaker.md)             | Columns-Derived Primary Key & Sort Tiebreaker                           |
-| [ADR-009](./ADR-009-serializable-filter-options-descriptors.md) | Serializable Filter-Options Fetch Descriptors (Tool-Call Pattern)       |
-| [ADR-010](./ADR-010-cookie-persistence-server-action.md)        | All Cookie Writes Persist Through One Server Action                     |
-| [ADR-011](./ADR-011-grid-interaction-architecture.md)           | Grid Interaction Architecture (Capability / Command / Surface)          |
-| [ADR-012](./ADR-012-column-width.md)                            | Column Width as the First Instance of the Grid Interaction Architecture |
+| ADR                                                             | Decision                                                                      |
+| --------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| [ADR-001](./ADR-001-native-dialog-modal.md)                     | Native `<dialog>` for Modal                                                   |
+| [ADR-002](./ADR-002-css-anchor-positioning-tooltip.md)          | CSS Anchor Positioning for Tooltip                                            |
+| [ADR-003](./ADR-003-useref-external-store.md)                   | `useRef`-based External Store                                                 |
+| [ADR-004](./ADR-004-react-compiler.md)                          | React Compiler over Manual Memoization                                        |
+| [ADR-005](./ADR-005-stylex.md)                                  | StyleX for All Styling                                                        |
+| [ADR-006](./ADR-006-infinite-scroll-prefetch.md)                | Infinite Scroll Prefetch Buffer                                               |
+| [ADR-007](./ADR-007-barrel-export-boundaries.md)                | Barrel Export Boundaries                                                      |
+| [ADR-008](./ADR-008-primary-key-sort-tiebreaker.md)             | Columns-Derived Primary Key & Sort Tiebreaker                                 |
+| [ADR-009](./ADR-009-serializable-filter-options-descriptors.md) | Serializable Filter-Options Fetch Descriptors (Tool-Call Pattern)             |
+| [ADR-010](./ADR-010-cookie-persistence-server-action.md)        | All Cookie Writes Persist Through One Server Action                           |
+| [ADR-011](./ADR-011-grid-interaction-architecture.md)           | Grid Interaction Architecture (Capability / Command / Surface)                |
+| [ADR-012](./ADR-012-column-width.md)                            | Column Width as the First Instance of the Grid Interaction Architecture       |
+| [ADR-070](./ADR-070-showcase-serves-its-own-table-rows.md)      | The showcase serves its own table rows; an external API is an opt-in override |

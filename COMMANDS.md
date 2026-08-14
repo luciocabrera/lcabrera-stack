@@ -230,18 +230,30 @@ the script exits without opening anything.
 
 ### Dev & prod servers
 
-| Command             | Runs                                  |
-| ------------------- | ------------------------------------- |
-| `vp run dev`        | frontend + **express** api            |
-| `vp run dev:fast`   | frontend + **fastify** api            |
-| `vp run dev:cqms`   | admin_system + scan-orchestrator      |
-| `vp run start`      | prod frontend + express api           |
-| `vp run start:fast` | prod frontend + fastify api           |
-| `vp run start:cqms` | prod admin_system + scan-orchestrator |
+| Command                   | Runs                                                        |
+| ------------------------- | ----------------------------------------------------------- |
+| `vp run dev:showcase`     | the showcase frontend **alone** — Postgres is all it needs  |
+| `vp run dev`              | frontend + **express** api                                  |
+| `vp run dev:fast`         | frontend + **fastify** api                                  |
+| `vp run dev:external-api` | frontend + express api, with the `VITE_API_URL` override on |
+| `vp run dev:cqms`         | admin_system + scan-orchestrator                            |
+| `vp run start`            | prod frontend + express api                                 |
+| `vp run start:fast`       | prod frontend + fastify api                                 |
+| `vp run start:cqms`       | prod admin_system + scan-orchestrator                       |
 
 There is deliberately **no `dev:all`/`start:all`**: `car-sales-api` and
 `car-sales-api-fast` serve the same domain as performance-comparison alternatives
 and must never run simultaneously. Always pick one combo.
+
+**`dev:showcase` is the one to reach for.** Every table route in
+`apps/react-router` serves its own rows from Postgres, so the api-server is no
+longer part of rendering the showcase — see
+[the app's data-sources doc](apps/react-router/docs/data-sources.md).
+`dev:external-api` is the counterpart that keeps the other path honest: it sets
+`VITE_API_URL` so the same routes go through `car-sales-api` instead, which is
+the only way that branch gets exercised by hand. (An app-level `.env` is loaded
+after the variable is exported, so one that sets `VITE_API_URL` itself wins —
+that is the local override of the local override, and it is deliberate.)
 
 ### Database
 

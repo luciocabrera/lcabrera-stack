@@ -1,6 +1,10 @@
-import { getApiBaseUrl } from '@lcabrera/api/config/get-api-base-url.util';
+import type { PaginatedFetchArgs } from '@lcabrera/api/http/http.types';
+
 import { createPaginatedFetcher } from '@lcabrera/api/http/create-paginated-fetcher.util';
 import { isObject } from '@lcabrera/utils/guards/is-object.util';
+
+import { isExternalApiEnabled } from './isExternalApiEnabled.util';
+import { resolveExternalApiBaseUrl } from './resolveExternalApiBaseUrl.util';
 
 /**
  * Wide All-Types 150 API Service
@@ -13,7 +17,8 @@ import { isObject } from '@lcabrera/utils/guards/is-object.util';
  *   6→boolean, 7→varchar, 8→text, 9→date, 10→time, 11→timestamp,
  *   12→timestamptz, 13→uuid, 14→jsonb, 15→bytea, 16→inet,
  *   17→interval, 18→point, 19→integer[]
- * The server converts bytea→hex string and jsonb/objects→JSON string.
+ * Whichever endpoint answers converts bytea→hex string and jsonb/objects→JSON
+ * string; `toWideAlltypes150Row` is the self-hosted half of that contract.
  */
 
 // ─── Type ────────────────────────────────────────────────────────────────────
@@ -189,14 +194,34 @@ const isWideAlltypes150Response = (
 // ─── Service ──────────────────────────────────────────────────────────────────
 
 /**
+ * The same-origin resource route this app serves for its own wide rows.
+ * Exported so `routes.ts` and this fetcher can be asserted to still name the
+ * same URL — they are declared in different shapes and nothing else pairs them.
+ */
+export const WIDE_ALLTYPES_150_PAGINATED_PATH =
+  '/_api/wide-alltypes-150/paginated';
+
+/** This app's own resource route, reading Postgres server-side. The default. */
+const fetchSelfHostedPage = createPaginatedFetcher<WideAlltypes150Response>({
+  isValid: isWideAlltypes150Response,
+  path: WIDE_ALLTYPES_150_PAGINATED_PATH,
+});
+
+/** The external `car-sales-api` endpoint, reachable only under the override. */
+const fetchExternalPage = createPaginatedFetcher<WideAlltypes150Response>({
+  isValid: isWideAlltypes150Response,
+  path: '/wide-alltypes-150/paginated',
+  resolveBaseUrl: resolveExternalApiBaseUrl,
+});
+
+/**
  * Fetch a page of rows from wide_alltypes_150.
  * Supports offset pagination and multi-column sorting.
  * No filter support (varied column types make generic filtering impractical),
  * and no keyset support — so the route sends neither.
+ *
+ * Reads this app's own resource route by default and the external API when
+ * `VITE_API_URL` is set; both answer the identical `{ data, hasMore, total }`.
  */
-export const fetchWideAlltypes150Page =
-  createPaginatedFetcher<WideAlltypes150Response>({
-    isValid: isWideAlltypes150Response,
-    path: '/wide-alltypes-150/paginated',
-    resolveBaseUrl: getApiBaseUrl,
-  });
+export const fetchWideAlltypes150Page = (args: PaginatedFetchArgs) =>
+  isExternalApiEnabled() ? fetchExternalPage(args) : fetchSelfHostedPage(args);

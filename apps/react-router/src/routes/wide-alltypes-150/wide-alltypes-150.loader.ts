@@ -4,8 +4,8 @@ import { createTableRouteLoader } from '@lcabrera/ui/routing/loaders/createTable
 import type { WideAlltypes150, WideAlltypes150Response } from '@/services';
 
 import { APP_ID } from '@/constants/app.constants';
-import { fetchWideAlltypes150Page } from '@/services';
 
+import { readWideAlltypes150Page } from './.server/wideAlltypes150.service';
 import {
   COLUMNS,
   PERSISTENCE_KEY,
@@ -17,8 +17,12 @@ import {
 /**
  * Loader for the wide-columns route. No `filterOptions` — this route's filter
  * support is deliberately minimal (see its ARCHITECTURE.md), so columns are
- * returned undecorated. The fetch promise is returned unawaited for Suspense
+ * returned undecorated. The read promise is returned unawaited for Suspense
  * streaming.
+ *
+ * `readWideAlltypes150Page` reads Postgres **server-side** by default — no
+ * api-server round-trip — and goes to the external endpoint only when
+ * `VITE_API_URL` asks for it.
  */
 export const loader = createTableRouteLoader<
   WideAlltypes150,
@@ -27,7 +31,7 @@ export const loader = createTableRouteLoader<
   appId: APP_ID,
   columns: COLUMNS,
   fetchPage: ({ effectiveSorting, request }) =>
-    fetchWideAlltypes150Page({
+    readWideAlltypes150Page({
       limit: INITIAL_PAGE_SIZE,
       requestUrl: request.url,
       skip: 0,
