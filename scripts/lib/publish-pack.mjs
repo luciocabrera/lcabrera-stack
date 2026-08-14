@@ -61,7 +61,7 @@ const packPackage = ({ destination, directory }) => {
   );
   const { filename } = JSON.parse(stdout);
   if (typeof filename !== 'string') {
-    throw new Error(`pnpm pack reported no tarball for ${directory}.`);
+    throw new TypeError(`pnpm pack reported no tarball for ${directory}.`);
   }
   return filename;
 };

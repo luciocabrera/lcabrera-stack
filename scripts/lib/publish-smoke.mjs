@@ -71,13 +71,13 @@ export const selfContained = (packages) => {
 };
 
 /** Variables through which the parent could inject modules into the consumer. */
-const AMBIENT_RESOLUTION_VARIABLES = ['NODE_OPTIONS', 'NODE_PATH'];
+const AMBIENT_RESOLUTION_VARIABLES = new Set(['NODE_OPTIONS', 'NODE_PATH']);
 
 /** Node's resolver must see only what was installed, never an ambient path. */
 const consumerEnvironment = () =>
   Object.fromEntries(
     Object.entries(process.env).filter(
-      ([name]) => !AMBIENT_RESOLUTION_VARIABLES.includes(name),
+      ([name]) => !AMBIENT_RESOLUTION_VARIABLES.has(name),
     ),
   );
 
