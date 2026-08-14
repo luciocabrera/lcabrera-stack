@@ -56,9 +56,22 @@ by inspection:
   build before it can typecheck, test or run. The cost is that the repo exercises
   the `src` map on every command and the `dist` map on none — a subpath added to
   one and forgotten in the other is invisible until someone installs the package.
-  `vp run publish:verify` is what catches that, and CI runs `packages:build`
-  first so the check has a real `dist/` to resolve against; without one it
-  verifies only that the two maps agree and says so in its output.
+  `vp run publish:verify` is what catches that: it packs each package with pnpm,
+  reads the tarball back and imports the result from outside this repo, so it
+  answers for the artifact rather than for the manifest. CI runs
+  `packages:build` first, and with no `dist/` the gate **fails** — there is no
+  artifact, so there is nothing it could have verified.
+- **The `publishConfig` swap is a pnpm extension, and the release path is what
+  makes it real.** `npm pack` ignores field overrides entirely and produces a
+  tarball whose `exports` still point at `./src/*.ts`, which a consumer cannot
+  load. Nothing is broken today because `changeset publish` shells out to
+  `pnpm publish` — a property of the release tooling, not of the manifest — so
+  `publish:verify` asserts it: the root `pnpm-lock.yaml` (changesets picks its
+  publish tool by detecting it), the `pnpm@` `packageManager` pin, and a release
+  workflow that still runs `pnpm exec changeset publish` and no `npm publish`.
+  Publishing one of these packages by hand with npm ships something no consumer
+  can import, permanently
+  ([ADR-072](../docs/decisions/ADR-072-publishing-gates-check-the-packed-tarball.md)).
 - **A breaking change to the published _type surface_ is a gate, not a review
   call.** `publish:verify` checks subpath parity but never reads the types, so a
   removed export, a changed signature or a reshaped union inside a surviving

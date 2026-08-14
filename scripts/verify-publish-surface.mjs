@@ -1,48 +1,61 @@
 /**
- * Keeps a built package's published surface honest.
+ * Keeps a built package's published surface honest — against the artifact, not
+ * against the manifest's intentions.
  *
- * The four public packages are consumed from outside this monorepo, where a
- * `.ts` file inside `node_modules` is not loadable at all: Node refuses to strip
- * types there and throws `ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`. Three of
- * them therefore build to `dist`, while `exports` keeps pointing at `src` so
- * nothing in this repo has to build before it can typecheck, test or run. pnpm
- * substitutes `publishConfig.exports` when it packs the tarball.
+ * The public packages are consumed from outside this monorepo, where a `.ts`
+ * file inside `node_modules` is not loadable at all: Node refuses to strip
+ * types there and throws `ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`. The
+ * built ones therefore build to `dist`, while `exports` keeps pointing at `src`
+ * so nothing in this repo has to build before it can typecheck, test or run.
+ * The swap lives in `publishConfig.exports`, which **pnpm** substitutes at pack
+ * time — an override `npm pack` ignores outright.
  *
- * That split is the hazard this file exists for. The repo exercises the `src`
- * map on every command and the `dist` map on none of them — so a subpath added
- * to `exports` and forgotten in `publishConfig.exports` looks perfectly healthy
- * here and is simply absent for consumers. Nothing fails until someone installs
- * the package.
+ * So the manifest states an intention and only the tarball states a fact. This
+ * gate packs every in-scope package with pnpm and reads the result back: the
+ * exports a consumer would get, the files that are really in it, and — for the
+ * packages whose dependencies are packed alongside them — a real import from a
+ * temporary directory outside this repo. It also asserts that the release path
+ * is still the pnpm one the guarantee rests on. See ADR-072.
  *
- * Checks, per package with a `build` script and `publishConfig.access: public`:
- *   1. `publishConfig.exports` covers exactly the same subpaths as `exports`.
- *   2. Every subpath resolves to a built file, with a `types` entry beside it.
- *   3. `files` ships `dist`, or the tarball would contain none of the build.
- *   4. Every target exists on disk — but only once the package has been built,
- *      so run this AFTER `build:all` for the check to mean anything. Without a
- *      `dist/` it reports only the structural half.
+ * There is deliberately no "nothing was built, so nothing to check" outcome: a
+ * publishing gate that reports success having produced no artifact is worse
+ * than no gate, because it is believed.
  *
- * Usage (from the repo root):
- *   vp run publish:verify              # check (CI runs it after building)
+ * Usage (from the repo root, AFTER `vp run packages:build`):
+ *   vp run publish:verify              # check
  *   vp run publish:verify -- --write   # regenerate publishConfig.exports
  *
- * Exit codes: 0 = the published surface matches the source surface, 1 = it does
- * not (every discrepancy is listed, not just the first).
+ * Exit codes: 0 = every package packed and its tarball matches the source
+ * surface, 1 = it does not, or nothing could be packed (every discrepancy is
+ * listed, not just the first).
  */
-import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { packAndRead } from './lib/publish-pack.mjs';
+import { runConsumerSmoke } from './lib/publish-smoke.mjs';
 import {
   buildPublishExports,
   diffSubpaths,
   isBuiltPublicPackage,
   isPublishedTargetCorrect,
+  packedSurfaceProblems,
   toBuiltPaths,
 } from './lib/publish-surface.mjs';
+import { releasePackerProblems } from './lib/release-packer.mjs';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
 const PACKAGES_DIR = 'packages';
+const RELEASE_WORKFLOW = '.github/workflows/release.yml';
 
 /** Reads every workspace manifest under `packages/`. */
 const readPackageManifests = () =>
@@ -76,8 +89,6 @@ const checkSubpathCoverage = ({ directory, manifest }, problems) => {
 };
 
 const checkTargets = ({ directory, manifest }, problems) => {
-  const isBuilt = existsSync(join(REPO_ROOT, directory, 'dist'));
-
   for (const [subpath, sourceTarget] of Object.entries(
     manifest.exports ?? {},
   )) {
@@ -89,17 +100,6 @@ const checkTargets = ({ directory, manifest }, problems) => {
       problems.push(
         `${directory}: \`${subpath}\` should publish as ${toBuiltPaths(sourceTarget).default}, not ${JSON.stringify(published)}. Run with --write.`,
       );
-      continue;
-    }
-    if (!isBuilt) {
-      continue;
-    }
-    for (const target of Object.values(toBuiltPaths(sourceTarget))) {
-      if (!existsSync(join(REPO_ROOT, directory, target))) {
-        problems.push(
-          `${directory}: \`${subpath}\` points at ${target}, which the build did not produce.`,
-        );
-      }
     }
   }
 };
@@ -112,6 +112,64 @@ const checkFiles = ({ directory, manifest }, problems) => {
   }
 };
 
+/** Packing an unbuilt package reports dozens of missing targets; say it once. */
+const unbuiltProblems = (packages) =>
+  packages
+    .filter(({ directory }) => !existsSync(join(REPO_ROOT, directory, 'dist')))
+    .map(
+      ({ directory }) =>
+        `${directory}: no dist/, so there is no publishable tarball to check — run \`vp run packages:build\` first.`,
+    );
+
+/** Packs every package, checks each tarball, then imports them as a consumer. */
+const checkArtifacts = (packages, problems) => {
+  const workDirectory = mkdtempSync(join(tmpdir(), 'publish-verify-'));
+  try {
+    const packed = packages.map((entry) => ({
+      ...packAndRead({
+        destination: workDirectory,
+        directory: join(REPO_ROOT, entry.directory),
+      }),
+      sourceExports: entry.manifest.exports ?? {},
+      sourceLabel: entry.directory,
+    }));
+
+    for (const entry of packed) {
+      problems.push(
+        ...packedSurfaceProblems({
+          files: entry.files,
+          label: entry.sourceLabel,
+          packedExports: entry.manifest.exports,
+          sourceExports: entry.sourceExports,
+        }),
+      );
+    }
+
+    const smoke = runConsumerSmoke({
+      packages: packed,
+      workDirectory: join(workDirectory, 'consumer'),
+    });
+    problems.push(...smoke.problems);
+    if (smoke.smoked.length === 0) {
+      problems.push(
+        'no packed package could be imported without a registry, so nothing was proven end to end — at least one package whose dependencies are all packed here must stay in the set.',
+      );
+    }
+    return smoke;
+  } finally {
+    rmSync(workDirectory, { force: true, recursive: true });
+  }
+};
+
+const releaseProblems = () =>
+  releasePackerProblems({
+    lockfiles: readdirSync(REPO_ROOT),
+    packageManager: JSON.parse(
+      readFileSync(join(REPO_ROOT, 'package.json'), 'utf8'),
+    ).packageManager,
+    workflowText: readFileSync(join(REPO_ROOT, RELEASE_WORKFLOW), 'utf8'),
+  }).map((problem) => `${RELEASE_WORKFLOW}: ${problem}`);
+
 const writePublishExports = ({ manifest, manifestPath }) => {
   const rebuilt = buildPublishExports(manifest.exports);
   const updated = {
@@ -120,6 +178,55 @@ const writePublishExports = ({ manifest, manifestPath }) => {
   };
   writeFileSync(manifestPath, `${JSON.stringify(updated, undefined, 2)}\n`);
   return Object.keys(rebuilt).length;
+};
+
+const reportFailure = (problems) => {
+  console.error('Published surface does not match the source surface:\n');
+  for (const problem of problems) {
+    console.error(`  - ${problem}`);
+  }
+  console.error(
+    `\n${problems.length} problem(s). Consumers install \`dist\`, and nothing else in this repo exercises that map — so these surface only after publishing.`,
+  );
+  process.exitCode = 1;
+};
+
+const reportSuccess = ({ packages, smoke }) => {
+  const subpathCount = packages.reduce(
+    (total, { manifest }) =>
+      total + Object.keys(manifest.publishConfig?.exports ?? {}).length,
+    0,
+  );
+  console.log(
+    `Packed and checked ${packages.length} package(s), ${subpathCount} subpath(s); ` +
+      `${smoke.specifiers.length} subpath(s) imported by a consumer outside this repo (${smoke.smoked
+        .map(({ name }) => name)
+        .join(', ')}).`,
+  );
+};
+
+const runChecks = (packages) => {
+  const problems = packages.flatMap((entry) => {
+    const collected = [];
+    checkSubpathCoverage(entry, collected);
+    checkTargets(entry, collected);
+    checkFiles(entry, collected);
+    return collected;
+  });
+  problems.push(...releaseProblems());
+
+  const unbuilt = unbuiltProblems(packages);
+  if (unbuilt.length > 0) {
+    reportFailure([...problems, ...unbuilt]);
+    return;
+  }
+
+  const smoke = checkArtifacts(packages, problems);
+  if (problems.length > 0) {
+    reportFailure(problems);
+    return;
+  }
+  reportSuccess({ packages, smoke });
 };
 
 const main = () => {
@@ -144,37 +251,12 @@ const main = () => {
     return;
   }
 
-  const problems = [];
-  for (const entry of packages) {
-    checkSubpathCoverage(entry, problems);
-    checkTargets(entry, problems);
-    checkFiles(entry, problems);
-  }
-
-  if (problems.length > 0) {
-    console.error('Published surface does not match the source surface:\n');
-    for (const problem of problems) {
-      console.error(`  - ${problem}`);
-    }
-    console.error(
-      `\n${problems.length} problem(s). Consumers install \`dist\`, and nothing else in this repo exercises that map — so these surface only after publishing.`,
-    );
-    process.exitCode = 1;
-    return;
-  }
-
-  const subpathCount = packages.reduce(
-    (total, { manifest }) =>
-      total + Object.keys(manifest.publishConfig?.exports ?? {}).length,
-    0,
-  );
-  const builtCount = packages.filter(({ directory }) =>
-    existsSync(join(REPO_ROOT, directory, 'dist')),
-  ).length;
-  console.log(
-    `Published surface is accurate: ${packages.length} built package(s), ${subpathCount} subpath(s); ` +
-      `${builtCount} of ${packages.length} verified against a real dist/.`,
-  );
+  runChecks(packages);
 };
 
-main();
+try {
+  main();
+} catch (error) {
+  console.error(`publish-surface: ${error.message}`);
+  process.exitCode = 1;
+}

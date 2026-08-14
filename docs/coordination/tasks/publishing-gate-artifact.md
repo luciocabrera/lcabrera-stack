@@ -11,7 +11,7 @@ area:
   - scripts/lib/publish-*
   - scripts/lib/attw-check*
   - scripts/lib/api-surface-config.mjs
-  - scripts/lib/tar-*
+  - scripts/lib/release-packer*
   - docs/decisions/**
   - COMMANDS.md
   - .github/workflows/release.yml
@@ -20,16 +20,20 @@ area:
 started: 2026-08-14
 updated: 2026-08-14
 plan: (none)
-pr: (none)
+pr: '#719'
 issue: #715
 ---
 
 ## What
 
-Verify a real artifact in the publishing gates
+Verify a real artifact in the publishing gates: `publish:verify` packs each
+public package with pnpm and checks the tarball a consumer would install (plus a
+real import from outside the repo), and all three publishing gates fail on an
+unbuilt tree instead of reporting a pass they did not earn. The pnpm-only
+`publishConfig` substitution is asserted rather than assumed — ADR-072.
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implemented; gate run and negative controls done
 - Blockers: none
-- Next:
+- Next: review on PR #719

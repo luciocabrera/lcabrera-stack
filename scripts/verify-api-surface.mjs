@@ -14,8 +14,14 @@
  *   vp run api-surface:verify            # check; lists every drift
  *   vp run api-surface:verify -- --write # regenerate the snapshots
  *
- * Exit codes: 0 = surface matches the snapshots (and breaking changes carry a
- * changeset), 1 = drift or an unaccompanied breaking change (all listed).
+ * A package with no `dist` fails here rather than being skipped: the gate used
+ * to report success for the packages it could read while announcing the rest as
+ * "skipped, unbuilt", which on an unbuilt tree is a pass that compared nothing
+ * (ADR-072).
+ *
+ * Exit codes: 0 = every public package was compared and matches its snapshot
+ * (and breaking changes carry a changeset), 1 = drift, an unaccompanied
+ * breaking change, or a package that could not be read (all listed).
  */
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -150,12 +156,12 @@ const changesetProblems = (changedPackages) => {
 
 const runVerify = (packages) => {
   const active = packages.filter((packageConfig) => !isUnbuilt(packageConfig));
-  const skipped = packages.filter(isUnbuilt);
-  for (const packageConfig of skipped) {
-    console.warn(
-      `${packageConfig.name}: dist missing, skipped (structural mode) — build for a full check.`,
+  const unbuilt = packages
+    .filter(isUnbuilt)
+    .map(
+      (packageConfig) =>
+        `${packageConfig.name}: dist is missing, so its published surface was compared to nothing — run \`vp run packages:build\` first.`,
     );
-  }
 
   const results = active.map(verifyPackage);
   const drift = results.flatMap((result) => result.drift);
@@ -169,7 +175,7 @@ const runVerify = (packages) => {
     console.warn(`warning: ${warning}`);
   }
 
-  const problems = [...drift, ...changesetFailures];
+  const problems = [...unbuilt, ...drift, ...changesetFailures];
   if (problems.length > 0) {
     console.error('Public API surface gate failed:\n');
     for (const problem of problems) {
@@ -178,15 +184,22 @@ const runVerify = (packages) => {
     process.exitCode = 1;
     return;
   }
-  const skippedNote =
-    skipped.length > 0 ? ` (${skipped.length} skipped, unbuilt)` : '';
   console.log(
-    `Public API surface is accurate for ${active.length} package(s)${skippedNote}.`,
+    `Public API surface is accurate for ${active.length} package(s): ${active
+      .map((packageConfig) => packageConfig.name)
+      .join(', ')}.`,
   );
 };
 
 const main = () => {
   const packages = readPublicPackages(REPO_ROOT);
+  if (packages.length === 0) {
+    console.error(
+      'Public API surface gate failed: no public package is configured, so this gate would check nothing — which is almost certainly a mistake.',
+    );
+    process.exitCode = 1;
+    return;
+  }
   if (process.argv.includes('--write')) {
     const problems = writeSnapshots(packages);
     if (problems.length > 0) {

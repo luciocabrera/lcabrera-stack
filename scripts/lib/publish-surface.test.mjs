@@ -6,9 +6,12 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import {
   buildPublishExports,
+  collectTargets,
   diffSubpaths,
   isBuiltPublicPackage,
   isPublishedTargetCorrect,
+  isSourceTarget,
+  packedSurfaceProblems,
   toBuiltPaths,
 } from './publish-surface.mjs';
 
@@ -147,6 +150,93 @@ describe('buildPublishExports', () => {
       );
       expect(manifest.files).toContain('dist');
     }
+  });
+});
+
+describe('collectTargets', () => {
+  it('flattens nested export conditions', () => {
+    expect(
+      collectTargets({
+        import: { default: './dist/x.mjs', types: './dist/x.d.mts' },
+        require: './dist/x.cjs',
+      }),
+    ).toEqual(['./dist/x.mjs', './dist/x.d.mts', './dist/x.cjs']);
+  });
+});
+
+describe('isSourceTarget', () => {
+  it('flags what a consumer cannot load from node_modules', () => {
+    expect(isSourceTarget('./src/x.util.ts')).toBe(true);
+    expect(isSourceTarget('./dist/x.util.d.mts')).toBe(false);
+    expect(isSourceTarget('./dist/x.util.mjs')).toBe(false);
+  });
+});
+
+describe('packedSurfaceProblems', () => {
+  // These run against the manifest and file list read back out of the tarball,
+  // which is the only place the pnpm-only publishConfig substitution has
+  // actually happened. The manifest on disk cannot answer any of them.
+  const sourceExports = { './x.util': './src/x.util.ts' };
+  const files = ['package.json', 'dist/x.util.mjs', 'dist/x.util.d.mts'];
+  const label = 'packages/example';
+
+  it('accepts a tarball whose exports point at files it contains', () => {
+    expect(
+      packedSurfaceProblems({
+        files,
+        label,
+        packedExports: {
+          './x.util': {
+            default: './dist/x.util.mjs',
+            types: './dist/x.util.d.mts',
+          },
+        },
+        sourceExports,
+      }),
+    ).toEqual([]);
+  });
+
+  it('rejects a tarball still exporting TypeScript source', () => {
+    // What `npm pack` produces: publishConfig.exports is a pnpm extension, so
+    // npm leaves `exports` pointing at ./src and the import throws
+    // ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING in a consumer.
+    expect(
+      packedSurfaceProblems({
+        files: [...files, 'src/x.util.ts'],
+        label,
+        packedExports: sourceExports,
+        sourceExports,
+      }).join('\n'),
+    ).toContain('ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING');
+  });
+
+  it('rejects a target the tarball does not contain', () => {
+    // `files` can exclude a built file while `dist` is still listed, which
+    // every manifest-only check reads as healthy.
+    expect(
+      packedSurfaceProblems({
+        files: ['package.json', 'dist/x.util.d.mts'],
+        label,
+        packedExports: {
+          './x.util': {
+            default: './dist/x.util.mjs',
+            types: './dist/x.util.d.mts',
+          },
+        },
+        sourceExports,
+      }).join('\n'),
+    ).toContain('not in the tarball');
+  });
+
+  it('rejects a subpath missing from the packed exports', () => {
+    expect(
+      packedSurfaceProblems({
+        files,
+        label,
+        packedExports: {},
+        sourceExports,
+      }).join('\n'),
+    ).toContain('absent from the packed tarball');
   });
 });
 

@@ -59,3 +59,77 @@ export const buildPublishExports = (exports_) =>
       toBuiltPaths(sourceTarget),
     ]),
   );
+
+/** Every file path an export entry can resolve to, conditions flattened. */
+export const collectTargets = (target) => {
+  if (typeof target === 'string') {
+    return [target];
+  }
+  if (target === null || typeof target !== 'object') {
+    return [];
+  }
+  return Object.values(target).flatMap((value) => collectTargets(value));
+};
+
+/** The path a `./`-relative export target has inside the tarball. */
+const toTarballPath = (target) =>
+  target.startsWith('./') ? target.slice(2) : target;
+
+/**
+ * True for a target a consumer cannot load out of `node_modules`: Node refuses
+ * to strip types there, so a `.ts` file is unreachable however present it is
+ * (`ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`). This is the exact state the
+ * `publishConfig.exports` swap exists to prevent, and the state an
+ * `npm pack`-produced tarball is in, since the swap is a pnpm extension.
+ */
+export const isSourceTarget = (target) =>
+  target.startsWith('./src/') ||
+  target.endsWith('.ts') ||
+  target.endsWith('.tsx');
+
+const targetProblems = ({ files, label, subpath, target }) => {
+  const problems = collectTargets(target)
+    .filter(isSourceTarget)
+    .map(
+      (path) =>
+        `${label}: the packed tarball exports \`${subpath}\` as ${path} — a TypeScript source file, which Node refuses to load from node_modules (ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING). Only \`publishConfig.exports\` swaps src for dist, and only pnpm applies it.`,
+    );
+  const absent = collectTargets(target)
+    .filter((path) => !isSourceTarget(path) && !path.includes('*'))
+    .filter((path) => !files.includes(toTarballPath(path)))
+    .map(
+      (path) =>
+        `${label}: the packed tarball exports \`${subpath}\` as ${path}, which is not in the tarball — \`files\` does not ship it, or the build did not produce it.`,
+    );
+  return [...problems, ...absent];
+};
+
+/**
+ * What is wrong with the artifact itself: the manifest and file list read back
+ * out of the tarball, checked against the subpaths the source manifest
+ * promises. Pure, so the rules are unit-tested without packing anything.
+ */
+export const packedSurfaceProblems = ({
+  files,
+  label,
+  packedExports,
+  sourceExports,
+}) => {
+  const { extra, missing } = diffSubpaths({
+    published: Object.keys(packedExports ?? {}),
+    source: Object.keys(sourceExports ?? {}),
+  });
+  return [
+    ...missing.map(
+      (subpath) =>
+        `${label}: \`${subpath}\` is in \`exports\` but absent from the packed tarball's \`exports\` — a consumer could not import it. Run with --write.`,
+    ),
+    ...extra.map(
+      (subpath) =>
+        `${label}: the packed tarball exports \`${subpath}\`, which \`exports\` no longer has — it was renamed or removed. Run with --write.`,
+    ),
+    ...Object.entries(packedExports ?? {}).flatMap(([subpath, target]) =>
+      targetProblems({ files, label, subpath, target }),
+    ),
+  ];
+};

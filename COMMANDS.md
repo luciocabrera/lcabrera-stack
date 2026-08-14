@@ -312,31 +312,37 @@ is what the guidance rests on, not the absolute timings.
 
 ### Publishing the public packages
 
-`@lcabrera/api`, `@lcabrera/server` and `@lcabrera/utils` build to `dist` because a
-`.ts` file inside `node_modules` is not loadable — Node refuses to strip types
-there (`ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`), and Vite externalizes
-dependencies for SSR by default, so source-shipping fails when a consumer's
-server starts rather than when it typechecks.
+The public packages that build (every one but `@lcabrera/ui`) emit `dist`
+because a `.ts` file inside `node_modules` is not loadable — Node refuses to
+strip types there (`ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`), and Vite
+externalizes dependencies for SSR by default, so source-shipping fails when a
+consumer's server starts rather than when it typechecks.
 
 `exports` still points at `src`, so **nothing in this repo has to build first**;
-pnpm substitutes `publishConfig.exports` (pointing at `dist`) at pack time.
-`@lcabrera/ui` is deliberately excluded — StyleX derives theme identity from the
-source path, so it ships source and the consumer's own plugin compiles it.
+pnpm substitutes `publishConfig.exports` (pointing at `dist`) at pack time. That
+substitution is a **pnpm** extension — `npm pack` ignores it and produces a
+tarball a consumer cannot load — which is why `publish:verify` checks the packed
+tarball and asserts the release path is still the pnpm one
+([ADR-072](docs/decisions/ADR-072-publishing-gates-check-the-packed-tarball.md)).
+`@lcabrera/ui` is deliberately excluded from the build — StyleX derives theme
+identity from the source path, so it ships source and the consumer's own plugin
+compiles it.
 
 | Command                                | Does                                                                                                                     |
 | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `vp run packages:build`                | build the three publishable packages (`vp pack` → `dist` with `.d.mts` and sourcemaps)                                   |
-| `vp run publish:verify`                | check `publishConfig.exports` matches `exports` and resolves to built files                                              |
+| `vp run packages:build`                | build the publishable packages (`vp pack` → `dist` with `.d.mts` and sourcemaps)                                         |
+| `vp run publish:verify`                | pack each one with pnpm and check the tarball — exports, files, and a real consumer import from outside the repo         |
 | `vp run publish:verify -- --write`     | regenerate `publishConfig.exports` from `exports`                                                                        |
 | `vp run api-surface:verify`            | diff each public package's exported type surface against its tracked snapshot; require a changeset for a breaking change |
 | `vp run api-surface:verify -- --write` | regenerate the surface snapshots under `reports/api-surface/`                                                            |
-| `vp run attw:verify`                   | run Are The Types Wrong? over the three built packages — do the published types resolve for a consumer?                  |
+| `vp run attw:verify`                   | run Are The Types Wrong? over the built public packages — do the published types resolve for a consumer?                 |
 
 Run `packages:build` **before** `publish:verify`, `api-surface:verify` and
-`attw:verify` for the full check — the first verifies only the structural half
-without a `dist/`, and the latter two snapshot the built `dist` a consumer
-installs (`ui` ships source, so its surface is always checked). The API-surface
-snapshot and its `ui`-vs-built split are
+`attw:verify`: with no `dist/` there is no artifact to check, and all three
+**fail** rather than reporting a pass they did not earn (ADR-072).
+`publish:verify` also needs pnpm on PATH, which running it through `vp` provides.
+`ui` ships source, so its surface is always checked. The API-surface snapshot and
+its `ui`-vs-built split are
 [ADR-046](docs/decisions/ADR-046-public-api-surface-snapshot.md).
 
 ### Releasing a package
