@@ -8,7 +8,7 @@ area:
   - .github/workflows/copilot-setup-steps.yml
   - COMMANDS.md
 started: 2026-08-13
-updated: 2026-08-13
+updated: 2026-08-14
 plan: (none)
 pr: #669
 issue: #668
@@ -20,6 +20,6 @@ Provision the Copilot coding agent's environment
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: #669 open and under review; addressing review feedback
 - Blockers: none
-- Next:
+- Next: merge #669, then delete this file

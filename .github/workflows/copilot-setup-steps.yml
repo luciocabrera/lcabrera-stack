@@ -1,8 +1,9 @@
-# This is NOT a CI check. GitHub runs the job below inside the container the
-# Copilot coding agent works in, *before* the agent starts, and the agent's
-# network is firewalled afterwards — so anything not installed here cannot be
-# installed later. The job name `copilot-setup-steps` is the contract; renaming
-# it silently disables the whole file, with no error anywhere.
+# This provisions the container the Copilot coding agent works in; it judges
+# nothing and gates no other pull request. GitHub runs the job below inside that
+# container *before* the agent starts, and the agent's network is firewalled
+# afterwards — so anything not installed here cannot be installed later. The job
+# name `copilot-setup-steps` is the contract; renaming it silently disables the
+# whole file, with no error anywhere.
 #
 # It deliberately mirrors check-safe.yml's bootstrap step for step. A second,
 # divergent bootstrap is how an agent ends up working on a tree that behaves
@@ -13,6 +14,8 @@ on:
   # Triggered on its own so the bootstrap can be proven in Actions before an
   # agent depends on it, and re-proven whenever it changes. Without this, the
   # only way to discover a broken setup is an agent failing opaquely inside it.
+  # Both triggers are path-scoped to this file, so it does surface as a check —
+  # on a pull request that changes the bootstrap, and on no other.
   workflow_dispatch:
   push:
     paths:
