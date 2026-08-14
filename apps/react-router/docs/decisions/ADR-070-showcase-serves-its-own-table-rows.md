@@ -13,11 +13,22 @@
 > opt-in build-time override, `isExternalApiEnabled` is the switch — is
 > unchanged.
 >
-> One recipe below is also wrong as written and was wrong on the day: the
-> unanchored `grep -A2 'isExternalApiEnabled = () => {'` matches the docblock
-> that documents it, which the bundler preserves, so it prints the same lines
-> whichever way the predicate folded. Anchor it: `grep -n -A2 '^var
-isExternalApiEnabled'`. `docs/data-sources.md` carries the corrected form.
+> **Amendment, #708.** One recipe below is wrong as written, in two ways, and was
+> wrong on the day. The body's
+> `grep -A2 'isExternalApiEnabled = () => {' build/server/index.js` names a path
+> that does not exist from the repo root — the bundle is at
+> `apps/react-router/build/server/index.js` — and its pattern is unanchored,
+> which matters because the bundler preserves the `isExternalApiEnabled` docblock
+> verbatim into the output, command and all. On the tree this ADR shipped with,
+> that docblock quoted the unanchored form, so running it matched its own
+> documentation and printed the same lines whichever way the predicate folded.
+> The corrected form —
+> `grep -n -A2 '^var isExternalApiEnabled' apps/react-router/build/server/index.js`
+> — is carried verbatim by `docs/data-sources.md` and by the
+> `isExternalApiEnabled` docblock, and the anchor is still what separates the
+> code from the comment quoting it. The body below is left as written, per the
+> ADR-008 precedent of correcting a dated record from its header rather than
+> rewriting it.
 
 - **Date:** 2026-08-14
 - **Scope:** `apps/react-router` — the four table routes, their `.server`

@@ -107,10 +107,15 @@ vp run start
 ```
 
 Check which way a bundle actually folded, rather than trusting the environment.
-**Anchor the pattern at the line start.** The docblock above
-`isExternalApiEnabled` survives into the bundle and contains this very command,
-so an unanchored pattern matches the comment and prints the same three lines
-whichever way the fold went — a probe that cannot fail:
+**Both halves of the command below are load-bearing** (#708). The path is
+repo-root-relative, because the bundle is written inside this app workspace, not
+at the repo root — the bare `build/server/index.js` the earlier form named
+resolves to nothing from the directory these docs tell you to run commands in.
+The `^` anchor is what makes it a probe rather than an echo: the bundler
+preserves the docblock above `isExternalApiEnabled` verbatim into the output,
+including the command itself, so dropping the anchor matches the documentation
+before it matches the code and reports the same first line whichever way the fold
+went. Remove the `^` and see it for yourself.
 
 ```bash
 grep -n -A2 '^var isExternalApiEnabled' apps/react-router/build/server/index.js

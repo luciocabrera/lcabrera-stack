@@ -35,10 +35,20 @@
  * that reasoning does not apply: both spellings fold to the same constant, and
  * the per-call form simply costs nothing.
  *
- * Re-derive which way a given bundle folded — the anchor matters, because this
- * very comment survives into the bundle and an unanchored pattern matches it
- * whichever way the fold went:
- * `grep -n '^var isExternalApiEnabled' build/server/index.js`.
+ * Re-derive which way a given bundle folded (#708):
+ *
+ * `grep -n -A2 '^var isExternalApiEnabled' apps/react-router/build/server/index.js`
+ *
+ * Both halves of that are load-bearing. **The path is repo-root-relative**,
+ * which is where the surrounding docs tell you to run everything; the bare
+ * `build/server/index.js` the earlier form named does not exist from there.
+ * **The `^` anchor is what makes it a probe rather than an echo**: the bundler
+ * preserves this comment verbatim into the output, including the line you are
+ * reading, so dropping the anchor matches the documentation before it matches
+ * the code — and would report the same first line whichever way the fold went.
+ *
+ * Byte-identical to the copy in `docs/data-sources.md`, deliberately: the same
+ * command written two ways is one of them being wrong.
  */
 export const isExternalApiEnabled = () => {
   const externalApiUrl = import.meta.env.VITE_API_URL as string | undefined;
