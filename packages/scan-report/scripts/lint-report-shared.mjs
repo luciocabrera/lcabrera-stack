@@ -3,31 +3,30 @@
 // deterministic, no LLM step anywhere. Each entry script
 // (generate-eslint-report.mjs / generate-oxlint-report.mjs) runs ONE tool,
 // maps its output into the canonical scan_findings shape, writes
-// <tool>.raw.json + report.json + report.md, and (unless --skip-ingest)
-// ingests as its own scanner.
+// <tool>.raw.json + report.json + report.md, and hands the run to the
+// configured ingestion command (unless --skip-ingest).
 //
-// The scanner-agnostic helpers (arg parsing, finding ids, artifact
-// writing, CQMS ingest) live in code-smell-shared's
-// deterministic-scan-shared.mjs — shared with generate-fallow-report.mjs —
-// and are re-exported here so the two lint entry scripts keep a single
-// import site.
+// The scanner-agnostic helpers (arg parsing, finding ids, artifact writing,
+// ingestion) live in deterministic-scan-shared.mjs — shared with
+// generate-fallow-report.mjs — and are re-exported here so the two lint entry
+// scripts keep a single import site.
 
 import { relative } from 'node:path';
 
-import { repoRoot } from '../../code-smell-shared/scripts/deterministic-scan-shared.mjs';
+import { hostRoot } from './deterministic-scan-shared.mjs';
 
 export {
   findConfigFile,
-  ingestIntoCqms,
+  hostRoot,
+  ingestScanArtifacts,
   makeFindingId,
   makeGitRootRelative,
   makeTimestamp,
   parseRunContext,
-  repoRoot,
   resolveOutputDirectory,
   runCapturingStdout,
   writeArtifacts,
-} from '../../code-smell-shared/scripts/deterministic-scan-shared.mjs';
+} from './deterministic-scan-shared.mjs';
 
 export const ESLINT_CONFIG_NAMES = [
   'eslint.config.mjs',
@@ -148,7 +147,7 @@ export const renderReportMarkdown = ({
 - report_id: ${report.report_id}
 - generated_at: ${report.generated_at}
 - skill_name: ${skillName}
-- repository: ${context.isTargetMode ? context.gitRoot : relative(repoRoot, context.gitRoot) || '.'}
+- repository: ${context.isTargetMode ? context.gitRoot : relative(hostRoot, context.gitRoot) || '.'}
 - scope_type: folder
 - scope_value: ${context.scopeArgument}
 - severity_scale: BLOCKER, HIGH, MEDIUM, LOW, NIT

@@ -4,13 +4,13 @@
 // every real config filename — an arbitrary target may use any of them),
 // producing eslint.raw.json + report.json + report.md unattended.
 
-import { buildEslintFixText } from '../../code-smell-shared/scripts/finding-templates.mjs';
+import { buildEslintFixText } from './finding-templates.mjs';
 import {
   buildReport,
   deriveTag,
   ESLINT_CONFIG_NAMES,
   findConfigFile,
-  ingestIntoCqms,
+  ingestScanArtifacts,
   makeFindingId,
   makeGitRootRelative,
   makeTimestamp,
@@ -140,7 +140,7 @@ const main = () => {
     `Findings: ${findings.length} (${report.high_count} HIGH, ${report.medium_count} MEDIUM)`,
   );
 
-  ingestIntoCqms({
+  ingestScanArtifacts({
     context,
     outputDirectory,
     rawFileName: 'eslint.raw.json',

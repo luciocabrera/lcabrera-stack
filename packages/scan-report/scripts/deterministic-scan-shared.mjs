@@ -1,12 +1,14 @@
 // Scanner-agnostic machinery shared by every deterministic runner script
 // (generate-eslint-report.mjs, generate-oxlint-report.mjs,
-// generate-fallow-report.mjs — ADR-019). Promoted here from
-// linter-checker/scripts/lint-report-shared.mjs when fallow became the
-// second consumer skill; code-smell-shared is already the cross-skill home
-// for the report contract these scripts implement. Lint-specific helpers
-// (config names, deriveTag, buildReport, renderReportMarkdown) stay in
-// lint-report-shared.mjs, which re-exports everything below so its two
-// entry scripts keep a single import site.
+// generate-fallow-report.mjs — CQMS ADR-019). Lint-specific helpers (config
+// names, deriveTag, buildReport, renderReportMarkdown) stay in
+// lint-report-shared.mjs, which re-exports everything below so its two entry
+// scripts keep a single import site.
+//
+// Nothing here names a repository, a workspace or a database: the host root is
+// derived from the install location (resolve-host-root.mjs) and persistence is
+// a configured command (ingest-configuration.mjs), so the same code runs in the
+// repository it ships from and in one that installed it.
 
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -14,14 +16,28 @@ import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const scriptDirectory = fileURLToPath(new URL('.', import.meta.url));
-export const repoRoot = resolve(scriptDirectory, '..', '..', '..', '..');
+import { resolveHostRoot } from './resolve-host-root.mjs';
+import { runIngestion } from './run-ingestion.mjs';
 
-// Legacy positional usage (`node script.mjs apps/react-router`, relative to
-// this CQMS repo) stays unchanged; `--target=<abs>` is how the
-// scan-orchestrator points a script at an arbitrary registered project
-// (which may not have vp/this repo's tooling at all — ADR-015).
-export const parseRunContext = (defaultLegacyScope = 'apps/react-router') => {
+const moduleDirectory = fileURLToPath(new URL('.', import.meta.url));
+
+/** The repository this tooling is installed in — never the scanned project. */
+export const hostRoot = resolveHostRoot({ moduleDirectory });
+
+const runGit = (args, cwd) => {
+  try {
+    return execFileSync('git', args, { cwd, encoding: 'utf8' }).trim();
+  } catch {
+    return undefined;
+  }
+};
+
+// Positional usage (`node script.mjs packages/utils`) is resolved against the
+// host root; `--target=<abs>` points a script at an arbitrary project, which
+// may have none of the host's tooling (CQMS ADR-015). The default scope is the
+// whole repository in both modes — naming one workspace here would bake this
+// repository's data into a shared runner.
+export const parseRunContext = () => {
   const rawArgs = process.argv.slice(2);
   const flags = {};
   const positional = [];
@@ -37,11 +53,10 @@ export const parseRunContext = (defaultLegacyScope = 'apps/react-router') => {
   }
 
   const isTargetMode = Boolean(flags.target);
-  const scopeArgument =
-    flags.scope ?? positional[0] ?? (isTargetMode ? '.' : defaultLegacyScope);
+  const scopeArgument = flags.scope ?? positional[0] ?? '.';
   const scopeDirectory = isTargetMode
     ? resolve(flags.target, scopeArgument)
-    : resolve(repoRoot, scopeArgument);
+    : resolve(hostRoot, scopeArgument);
 
   const gitRoot =
     runGit(['rev-parse', '--show-toplevel'], scopeDirectory) ?? scopeDirectory;
@@ -63,14 +78,6 @@ export const runCapturingStdout = (command, args, cwd) => {
       return error.stdout;
     }
     throw error;
-  }
-};
-
-const runGit = (args, cwd) => {
-  try {
-    return execFileSync('git', args, { cwd, encoding: 'utf8' }).trim();
-  } catch {
-    return undefined;
   }
 };
 
@@ -102,13 +109,13 @@ export const makeTimestamp = () =>
     .replace('T', '--')
     .replace('Z', '');
 
-// CQMS scratch files always live under this repo's own .tmp, never inside
-// an arbitrary scanned project's working tree — unless the caller (the
-// scan-orchestrator) explicitly overrides it.
+// Scratch files always live under the HOST's own .tmp, never inside an
+// arbitrary scanned project's working tree — unless the caller (an
+// orchestrator) explicitly overrides it.
 export const resolveOutputDirectory = (context, skillTmpName, timestamp) => {
   const outputDirectory = context.flags['output-dir']
     ? resolve(context.flags['output-dir'])
-    : join(repoRoot, '.tmp', skillTmpName, timestamp);
+    : join(hostRoot, '.tmp', skillTmpName, timestamp);
   mkdirSync(outputDirectory, { recursive: true });
   return outputDirectory;
 };
@@ -133,37 +140,29 @@ export const writeArtifacts = ({
   writeFileSync(join(outputDirectory, 'report.md'), markdown, 'utf8');
 };
 
-// Best-effort CQMS ingestion, matching the other skills. Skipped when the
-// caller (the scan-orchestrator) already has its own run/scan row and will
-// call ingestReport() itself.
-export const ingestIntoCqms = ({
+/**
+ * Hands the finished run to the configured ingestion command. The argument
+ * shape is the scan contract an ingestion CLI receives, unchanged from when
+ * that command was hardcoded.
+ */
+export const ingestScanArtifacts = ({
   context,
   outputDirectory,
   rawFileName,
   scannerId,
-}) => {
-  if (context.flags['skip-ingest']) return;
-
-  try {
-    execFileSync(
-      'node',
-      [
-        '--env-file-if-exists=docker/local/.env',
-        '--env-file-if-exists=packages/scan-ingestion/.env',
-        '--experimental-strip-types',
-        'packages/scan-ingestion/src/cli/ingest.cli.ts',
-        `--skill=${scannerId}`,
-        `--run-dir=${outputDirectory}`,
-        `--local-path=${context.gitRoot}`,
-        '--scope-type=folder',
-        `--scope-value=${context.scopeArgument}`,
-        `--raw-json=${rawFileName}`,
-      ],
-      { cwd: repoRoot, encoding: 'utf8', stdio: 'inherit' },
-    );
-  } catch (error) {
-    console.warn(
-      `⚠️  CQMS ingestion failed (report files are saved regardless): ${error.message}`,
-    );
-  }
-};
+}) =>
+  runIngestion({
+    artifactsMessage: `The report artifacts in ${outputDirectory}/ are written and complete.`,
+    hostRoot,
+    scanArguments: [
+      `--skill=${scannerId}`,
+      `--run-dir=${outputDirectory}`,
+      `--local-path=${context.gitRoot}`,
+      '--scope-type=folder',
+      `--scope-value=${context.scopeArgument}`,
+      `--raw-json=${rawFileName}`,
+    ],
+    skipReason: context.flags['skip-ingest']
+      ? '--skip-ingest was passed'
+      : undefined,
+  });

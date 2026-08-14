@@ -43,6 +43,7 @@ const NODE_WORKSPACES = [
   'packages/agent-runner/**',
   'packages/node-runtime/**',
   'packages/scan-ingestion/**',
+  'packages/scan-report/**',
   'packages/server/**',
   'packages/eslint-local-rules/**',
   'packages/plugins/**',

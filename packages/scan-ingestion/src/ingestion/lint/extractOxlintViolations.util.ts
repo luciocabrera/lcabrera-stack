@@ -1,10 +1,9 @@
+import { makeFindingId } from '@lcabrera/scan-report/deterministic-scan';
+import { buildOxlintFixText } from '@lcabrera/scan-report/finding-templates';
 import path from 'node:path';
 
 import type { LintViolationInput } from './lint.types.ts';
 import type { OxlintRaw } from './oxlintRaw.schema.ts';
-
-import { makeFindingId } from '../../../../../.github/skills/code-smell-shared/scripts/deterministic-scan-shared.mjs';
-import { buildOxlintFixText } from '../../../../../.github/skills/code-smell-shared/scripts/finding-templates.mjs';
 
 type ExtractOxlintViolationsArgs = {
   readonly raw: OxlintRaw;

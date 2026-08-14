@@ -5,12 +5,12 @@
 // and only if the target opted into an oxlint config — skipping gracefully
 // otherwise, since most projects won't have one.
 
-import { buildOxlintFixText } from '../../code-smell-shared/scripts/finding-templates.mjs';
+import { buildOxlintFixText } from './finding-templates.mjs';
 import {
   buildReport,
   deriveTag,
   findConfigFile,
-  ingestIntoCqms,
+  ingestScanArtifacts,
   makeFindingId,
   makeGitRootRelative,
   makeTimestamp,
@@ -139,7 +139,7 @@ const main = () => {
     `Findings: ${findings.length} (${report.high_count} HIGH, ${report.medium_count} MEDIUM)`,
   );
 
-  ingestIntoCqms({
+  ingestScanArtifacts({
     context,
     outputDirectory,
     rawFileName: 'oxlint.raw.json',

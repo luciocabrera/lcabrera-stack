@@ -1,8 +1,6 @@
-import type { FallowFindingTemplate } from '../../../../../.github/skills/code-smell-shared/scripts/finding-templates.d.mts';
-import type { FallowDeadCodeInput } from './fallow.types.ts';
-import type { FallowRaw } from './fallowRaw.schema.ts';
+import type { FallowFindingTemplate } from '@lcabrera/scan-report/finding-templates';
 
-import { makeFindingId } from '../../../../../.github/skills/code-smell-shared/scripts/deterministic-scan-shared.mjs';
+import { makeFindingId } from '@lcabrera/scan-report/deterministic-scan';
 import {
   buildUnlistedDependencyFinding,
   buildUnresolvedImportFinding,
@@ -10,7 +8,10 @@ import {
   buildUnusedExportFinding,
   buildUnusedFileFinding,
   buildUnusedTypeFinding,
-} from '../../../../../.github/skills/code-smell-shared/scripts/finding-templates.mjs';
+} from '@lcabrera/scan-report/finding-templates';
+
+import type { FallowDeadCodeInput } from './fallow.types.ts';
+import type { FallowRaw } from './fallowRaw.schema.ts';
 
 type ExtractFallowDeadCodeArgs = {
   readonly raw: FallowRaw;

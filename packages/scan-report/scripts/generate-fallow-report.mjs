@@ -7,7 +7,7 @@
 // fallow.raw.json (written by fallow itself, verbatim) + report.json +
 // report.md unattended.
 //
-// The fallow binary is resolved from THIS repo's node_modules (same
+// The fallow binary is resolved from the HOST repo's node_modules (same
 // technique as scripts/refresh-fallow-complexity-report.cjs) — an
 // arbitrary registered target needs no fallow install or config. fallow
 // runs from the target's git root (where workspace config would live);
@@ -20,14 +20,14 @@ import { createRequire } from 'node:module';
 import { dirname, join, relative } from 'node:path';
 
 import {
-  ingestIntoCqms,
+  hostRoot,
+  ingestScanArtifacts,
   makeFindingId,
   makeTimestamp,
   parseRunContext,
-  repoRoot,
   resolveOutputDirectory,
   writeArtifacts,
-} from '../../code-smell-shared/scripts/deterministic-scan-shared.mjs';
+} from './deterministic-scan-shared.mjs';
 import {
   buildCircularDependencyFinding,
   buildCloneGroupFinding,
@@ -38,11 +38,9 @@ import {
   buildUnusedExportFinding,
   buildUnusedFileFinding,
   buildUnusedTypeFinding,
-} from '../../code-smell-shared/scripts/finding-templates.mjs';
+} from './finding-templates.mjs';
 
-// Legacy positional default is the whole repo — fallow is configured once
-// at a repo root and auto-detects workspaces, unlike the per-app linters.
-const context = parseRunContext('.');
+const context = parseRunContext();
 
 // An arbitrary target project can break fallow in ways this repo never
 // does — a hard execution failure must degrade this one scanner gracefully
@@ -53,7 +51,7 @@ const toolFailures = [];
 const resolveFallowBin = () => {
   const require = createRequire(import.meta.url);
   const fallowPackageJsonPath = require.resolve('fallow/package.json', {
-    paths: [repoRoot],
+    paths: [hostRoot],
   });
   const fallowPackageJson = JSON.parse(
     readFileSync(fallowPackageJsonPath, 'utf8'),
@@ -287,7 +285,7 @@ const renderFallowReportMarkdown = ({ report }) => {
 - report_id: ${report.report_id}
 - generated_at: ${report.generated_at}
 - skill_name: fallow-code-checker
-- repository: ${context.isTargetMode ? context.gitRoot : relative(repoRoot, context.gitRoot) || '.'}
+- repository: ${context.isTargetMode ? context.gitRoot : relative(hostRoot, context.gitRoot) || '.'}
 - scope_type: folder
 - scope_value: ${context.scopeArgument}
 - severity_scale: BLOCKER, HIGH, MEDIUM, LOW, NIT
@@ -394,7 +392,7 @@ const main = () => {
     `Findings: ${findings.length} (${report.high_count} HIGH, ${report.medium_count} MEDIUM, ${report.low_count} LOW)`,
   );
 
-  ingestIntoCqms({
+  ingestScanArtifacts({
     context,
     outputDirectory,
     rawFileName: 'fallow.raw.json',

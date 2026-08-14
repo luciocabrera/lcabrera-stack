@@ -1,10 +1,19 @@
 export type DeterministicScannerId = keyof typeof DETERMINISTIC_SCANNER_CONFIGS;
 
+/**
+ * Where a runner lives. `installed` is a subpath of `@lcabrera/scan-report`,
+ * resolved through node's module resolution so it works the same whether the
+ * package is a workspace link or a registry install; `repository` is a path
+ * relative to the CQMS repo root, for a scanner this repository owns.
+ */
+export type DeterministicScannerRunner =
+  | { readonly kind: 'installed'; readonly specifier: string }
+  | { readonly kind: 'repository'; readonly path: string };
+
 type DeterministicScannerConfig = {
   /** The raw artifact the runner script writes into the scan output directory (verbatim tool output + kind discriminator). */
   readonly rawArtifactFileName: string;
-  /** Runner script path relative to the CQMS repo root. */
-  readonly scriptPath: string;
+  readonly runner: DeterministicScannerRunner;
 };
 
 /**
@@ -20,23 +29,31 @@ type DeterministicScannerConfig = {
 export const DETERMINISTIC_SCANNER_CONFIGS = {
   'app-graph': {
     rawArtifactFileName: 'app-graph.raw.json',
-    scriptPath:
-      '.github/skills/app-graph/scripts/generate-app-graph-report.mjs',
+    runner: {
+      kind: 'repository',
+      path: '.github/skills/app-graph/scripts/generate-app-graph-report.mjs',
+    },
   },
   eslint: {
     rawArtifactFileName: 'eslint.raw.json',
-    scriptPath:
-      '.github/skills/linter-checker/scripts/generate-eslint-report.mjs',
+    runner: {
+      kind: 'installed',
+      specifier: '@lcabrera/scan-report/generate-eslint-report',
+    },
   },
   fallow: {
     rawArtifactFileName: 'fallow.raw.json',
-    scriptPath:
-      '.github/skills/fallow-code-checker/scripts/generate-fallow-report.mjs',
+    runner: {
+      kind: 'installed',
+      specifier: '@lcabrera/scan-report/generate-fallow-report',
+    },
   },
   oxlint: {
     rawArtifactFileName: 'oxlint.raw.json',
-    scriptPath:
-      '.github/skills/linter-checker/scripts/generate-oxlint-report.mjs',
+    runner: {
+      kind: 'installed',
+      specifier: '@lcabrera/scan-report/generate-oxlint-report',
+    },
   },
 } as const satisfies Record<string, DeterministicScannerConfig>;
 

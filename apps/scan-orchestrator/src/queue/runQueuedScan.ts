@@ -9,16 +9,15 @@ import { markScanFailed } from '@repo/scan-ingestion/queries/markScanFailed.util
 import { recordScanLlmUsage } from '@repo/scan-ingestion/queries/recordScanLlmUsage.util';
 import { updateScanProgress } from '@repo/scan-ingestion/queries/updateScanProgress.util';
 import { execFileSync } from 'node:child_process';
-import path from 'node:path';
 
 import type { RunStatusHub } from '../ws/runStatusHub.ts';
 import type { DeterministicScannerId } from './queue.constants.ts';
 
-import { cqmsRepoRoot } from '../cqmsRepoRoot.util.ts';
 import {
   DETERMINISTIC_SCANNER_CONFIGS,
   isDeterministicScannerId,
 } from './queue.constants.ts';
+import { resolveRunnerScriptPath } from './resolveRunnerScriptPath.util.ts';
 import {
   createScanOutputDirectory,
   getScanOutputPathIfExists,
@@ -84,7 +83,7 @@ const runDeterministicScan = async ({
       // it can also pick a different Node version than the one running here.
       process.execPath,
       [
-        path.join(cqmsRepoRoot, config.scriptPath),
+        resolveRunnerScriptPath(config.runner),
         `--target=${scan.snapshot_path}`,
         `--scope=${scan.scope_value || '.'}`,
         `--output-dir=${outputDirectory}`,

@@ -16,6 +16,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
   "dependencies": {
+    "@lcabrera/scan-report": "workspace:*",
     "@lcabrera/server": "workspace:*",
     "@repo/agent-runner": "workspace:*",
     "@repo/node-runtime": "workspace:*",

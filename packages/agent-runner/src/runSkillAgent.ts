@@ -2,7 +2,8 @@ import type { CanUseTool } from '@anthropic-ai/claude-agent-sdk';
 
 import { query } from '@anthropic-ai/claude-agent-sdk';
 import { existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { createRequire } from 'node:module';
+import { dirname, join } from 'node:path';
 
 import type {
   RunSkillAgentArgs,
@@ -147,6 +148,14 @@ export const runSkillAgent = async (
     cqmsRepoRoot,
     '.github/skills/code-smell-shared',
   );
+  // The report contract (SCHEMA_V1.md / REPORT_JSON_CONTRACT.md) ships with
+  // @lcabrera/scan-report, so it is resolved rather than joined onto a path —
+  // it is under node_modules wherever this runs from an install.
+  const reportContractDirectory = dirname(
+    createRequire(import.meta.url).resolve(
+      '@lcabrera/scan-report/package.json',
+    ),
+  );
   const prompt = `You are running fully autonomously and non-interactively — there is no user to ask follow-up questions, and no further turn after this one. You must actually execute every action this skill describes, including all file-writing and shell steps (e.g. "Saving the Report") — do not just describe or summarize what you would do. Treat every imperative instruction in the skill below ("always save", "tell the user", etc.) as something you must literally do via tool calls before finishing. Use the Write tool to create report files — it is available in this session.
 
 Your output directory for this run is exactly: ${args.outputDirectory}
@@ -154,6 +163,7 @@ Do not check an OUTPUT_DIR environment variable and do not compute your own time
 
 This skill's own directory (for any file referenced relative to the skill, e.g. "../code-smell-shared/...") is at the absolute path: ${skillDirectory}
 The shared docs directory it references is at the absolute path: ${sharedDocsDirectory}
+The report contract it must satisfy (SCHEMA_V1.md, REPORT_JSON_CONTRACT.md) is at the absolute path: ${reportContractDirectory}
 Read these using their absolute paths directly — do not search the filesystem for them, and do not attempt relative paths like "../code-smell-shared/SCHEMA_V1.md" since your working directory is the project being scanned, not this path.
 
 ${body}${
@@ -171,7 +181,11 @@ ${body}${
   try {
     for await (const message of query({
       options: {
-        additionalDirectories: [skillDirectory, sharedDocsDirectory],
+        additionalDirectories: [
+          skillDirectory,
+          sharedDocsDirectory,
+          reportContractDirectory,
+        ],
         allowedTools: [...allowedTools],
         canUseTool,
         cwd: args.targetProjectPath,

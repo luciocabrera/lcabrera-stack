@@ -90,6 +90,7 @@
     "@arethetypeswrong/core": "catalog:tooling",
     "@biomejs/biome": "catalog:lint",
     "@changesets/cli": "catalog:tooling",
+    "@lcabrera/scan-report": "workspace:*",
     "@repo/vite-configs": "workspace:*",
     "@vitest/coverage-v8": "catalog:test",
     "fallow": "catalog:tooling",

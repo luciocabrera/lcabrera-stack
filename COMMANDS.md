@@ -556,6 +556,7 @@ Beyond that, tasks are per-workspace. `build` and `test` are common but come fro
 | `packages/ts-configs`         | `@repo/ts-configs`        | `generate`                                                                                                             |
 | `packages/tsconfig`           | `@lcabrera/tsconfig`      | `build`, `test:coverage`                                                                                               |
 | `packages/eslint-local-rules` | `@lcabrera/eslint-plugin` | —                                                                                                                      |
+| `packages/scan-report`        | `@lcabrera/scan-report`   | `test`, `test:coverage`                                                                                                |
 | `packages/plugins`            | `@repo/plugins`           | —                                                                                                                      |
 | `packages/utils`              | `@lcabrera/utils`         | —                                                                                                                      |
 | `packages/vite-configs`       | `@repo/vite-configs`      | —                                                                                                                      |

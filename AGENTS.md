@@ -14,8 +14,9 @@ in opposite directions, the package wins. A package must stand on its own —
 declared dependencies, a resolvable public surface, no reliance on a consumer's
 tsconfig `paths` to make an import work — because it is meant to be consumed from
 outside this repo, where none of this monorepo's wiring exists. `packages/ui`,
-`packages/api`, `packages/server`, `packages/utils` and
-`packages/eslint-local-rules` are held strictest for exactly that reason (§4). This is why the column-filter shapes are **duplicated**
+`packages/api`, `packages/server`, `packages/utils`,
+`packages/eslint-local-rules` and `packages/scan-report` are held strictest for
+exactly that reason (§4). This is why the column-filter shapes are **duplicated**
 in `@lcabrera/ui` and `@lcabrera/server` rather than shared through an elegant edge that
 only resolves in-repo ([ADR-039](docs/decisions/ADR-039-duplicate-over-undeclared-edges.md)).
 Facing that call — promote it into a package, or write it twice?
@@ -77,24 +78,25 @@ the listing cannot tell you is below.
 
 `packages/ui`,
 `packages/api`, `packages/server`, `packages/utils`,
-`packages/eslint-local-rules` and `packages/tsconfig` are public packages and are
-held strictest: never baseline, scope, or inline-disable a finding in any of
-them. The authority on that list is not this sentence — it is which workspaces
-gitignore `eslint-suppressions.json`, which `vp run suppressions:verify` reads at
-runtime, so a new public package is covered the day it is added; keep the prose
-in step.
+`packages/eslint-local-rules`, `packages/tsconfig` and `packages/scan-report`
+are public packages and are held strictest: never baseline, scope, or
+inline-disable a finding in any of them. The authority on that list is not this
+sentence — it is which workspaces gitignore `eslint-suppressions.json`, which
+`vp run suppressions:verify` reads at runtime, so a new public package is
+covered the day it is added; keep the prose in step.
 
 `packages/vite-configs` (absorbing `packages/plugins`) and
-`packages/node-runtime` join that list as `@lcabrera/vite-config` and
-`@lcabrera/node`, and a third is built from the scan-report skills' shared
-scripts as `@lcabrera/scan-report`
-([ADR-069](docs/decisions/ADR-069-publish-the-shared-toolchain.md)). Neither
-workspace is in the tier yet, and the rule above says why: `packages/vite-configs`
-and `packages/plugins` each still commit an `eslint-suppressions.json`. Each is
-admitted by its own implementing issue (#675–#677) clearing those suppressions
+`packages/node-runtime` still have to join that list as `@lcabrera/vite-config`
+and `@lcabrera/node`
+([ADR-069](docs/decisions/ADR-069-publish-the-shared-toolchain.md)); neither is
+in the tier yet, and the rule above says why — `packages/vite-configs` and
+`packages/plugins` each still commit an `eslint-suppressions.json`. Each is
+admitted by its own implementing issue (#675, #676) clearing those suppressions
 and gitignoring the file — not by being named here. `packages/ts-configs` is not
 on that list because it never joins it: it is the split, so what became public is
 the new `packages/tsconfig` above, and the surviving workspace stays private.
+`packages/scan-report` was built from the scan-report skills' shared scripts
+under #677 and is in the tier already.
 
 `api` and `server` split on **runtime**, and the split is load-bearing, not
 cosmetic — the two names say which runtime each one is for, and the tsconfigs

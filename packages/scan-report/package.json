@@ -1,0 +1,78 @@
+{
+  "name": "@lcabrera/scan-report",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Deterministic oxlint, ESLint and fallow scanners that emit one canonical scan report (raw JSON + report.json + report.md), with pluggable persistence.",
+  "keywords": [
+    "code-quality",
+    "eslint",
+    "fallow",
+    "oxlint",
+    "static-analysis"
+  ],
+  "homepage": "https://github.com/luciocabrera/vite-react-compiler/tree/main/packages/scan-report#readme",
+  "bugs": "https://github.com/luciocabrera/vite-react-compiler/issues",
+  "license": "MIT",
+  "author": "Lucio Cabrera",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luciocabrera/vite-react-compiler.git",
+    "directory": "packages/scan-report"
+  },
+  "bin": {
+    "scan-report-eslint": "./scripts/generate-eslint-report.mjs",
+    "scan-report-fallow": "./scripts/generate-fallow-report.mjs",
+    "scan-report-ingest": "./scripts/ingest-report.mjs",
+    "scan-report-oxlint": "./scripts/generate-oxlint-report.mjs"
+  },
+  "files": [
+    "scripts",
+    "CHANGELOG.md",
+    "REPORT_JSON_CONTRACT.md",
+    "SCHEMA_V1.md",
+    "!scripts/**/*.test.*"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    "./deterministic-scan": {
+      "types": "./scripts/deterministic-scan-shared.d.mts",
+      "default": "./scripts/deterministic-scan-shared.mjs"
+    },
+    "./finding-templates": {
+      "types": "./scripts/finding-templates.d.mts",
+      "default": "./scripts/finding-templates.mjs"
+    },
+    "./generate-eslint-report": "./scripts/generate-eslint-report.mjs",
+    "./generate-fallow-report": "./scripts/generate-fallow-report.mjs",
+    "./generate-oxlint-report": "./scripts/generate-oxlint-report.mjs",
+    "./ingest-configuration": "./scripts/ingest-configuration.mjs",
+    "./ingest-report": "./scripts/ingest-report.mjs",
+    "./lint-report": "./scripts/lint-report-shared.mjs",
+    "./package.json": "./package.json",
+    "./resolve-host-root": "./scripts/resolve-host-root.mjs",
+    "./run-fallow.sh": "./scripts/run-fallow.sh",
+    "./run-ingestion": "./scripts/run-ingestion.mjs"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "format": "vp fmt .",
+    "format:check": "vp fmt --check .",
+    "lint": "vp lint . --fix && vp run lint:eslint",
+    "lint:check": "vp lint . && vp run lint:eslint:check",
+    "lint:eslint": "eslint . --config eslint.config.mjs --fix --max-warnings 0",
+    "lint:eslint:check": "eslint . --config eslint.config.mjs --max-warnings 0",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json"
+  },
+  "devDependencies": {
+    "@repo/vite-configs": "workspace:*",
+    "@types/node": "catalog:types",
+    "eslint": "catalog:lint",
+    "typescript": "catalog:build",
+    "vite": "catalog:build",
+    "vite-plus": "catalog:build",
+    "vitest": "catalog:test"
+  }
+}

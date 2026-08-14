@@ -6,7 +6,7 @@
 // Honors the shared deterministic-runner flag contract
 // (--target/--scope/--output-dir/--skip-ingest).
 //
-// ts-morph is resolved from THIS repo's node_modules (same technique as
+// ts-morph is resolved from the HOST repo's node_modules (same technique as
 // the fallow bin) — an arbitrary registered target needs no install. Files
 // are parsed one at a time and forgotten immediately, so memory stays flat
 // on large targets. The directory skip list mirrors
@@ -18,17 +18,15 @@ import { createRequire } from 'node:module';
 import { basename, join, relative } from 'node:path';
 
 import {
-  ingestIntoCqms,
+  hostRoot,
+  ingestScanArtifacts,
   makeTimestamp,
   parseRunContext,
-  repoRoot,
   resolveOutputDirectory,
   writeArtifacts,
-} from '../../code-smell-shared/scripts/deterministic-scan-shared.mjs';
+} from '@lcabrera/scan-report/deterministic-scan';
 
-// Legacy positional default is the whole repo — the graph of a single app
-// is a scoped run, not the default.
-const context = parseRunContext('.');
+const context = parseRunContext();
 
 // An arbitrary target can break the walk or the parser — degrade this one
 // scanner gracefully (0 findings, failure noted in top_risk) rather than
@@ -68,7 +66,7 @@ const resolveTsMorph = () => {
   try {
     const require = createRequire(import.meta.url);
     const packageJsonPath = require.resolve('ts-morph/package.json', {
-      paths: [repoRoot],
+      paths: [hostRoot],
     });
     const { version } = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
     return { tsMorph: require('ts-morph'), version };
@@ -513,7 +511,7 @@ const renderAppGraphReportMarkdown = ({ report, stats }) => `# app-graph Report
 - report_id: ${report.report_id}
 - generated_at: ${report.generated_at}
 - skill_name: app-graph
-- repository: ${context.isTargetMode ? context.gitRoot : relative(repoRoot, context.gitRoot) || '.'}
+- repository: ${context.isTargetMode ? context.gitRoot : relative(hostRoot, context.gitRoot) || '.'}
 - scope_type: folder
 - scope_value: ${context.scopeArgument}
 - severity_scale: BLOCKER, HIGH, MEDIUM, LOW, NIT
@@ -639,7 +637,7 @@ const main = () => {
     `Nodes: ${stats.total_node_count} (${stats.folder_count} folders, ${stats.file_count} files, max depth ${stats.max_depth})`,
   );
 
-  ingestIntoCqms({
+  ingestScanArtifacts({
     context,
     outputDirectory,
     rawFileName: 'app-graph.raw.json',

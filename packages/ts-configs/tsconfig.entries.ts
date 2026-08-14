@@ -315,4 +315,20 @@ export const configs = [
       'packages/tsconfig/tsconfig.app.json',
     ),
   },
+  {
+    // Genuinely Node-only: CLI scanners spawning lint/analysis tools. They live
+    // under scripts/, the directory both shared eslint configs globally ignore,
+    // because that is where this repo puts tooling scripts (.claude/rules/
+    // scripts.md). The runtime is plain `.mjs` that ships unmodified, so what
+    // tsc checks here is the hand-written `.d.mts` declarations the TS consumers
+    // import and the workspace's own vite.config.ts.
+    config: createNodeTsConfig({
+      include: ['scripts', 'vite.config.ts'],
+      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
+    }),
+    filePath: path.resolve(
+      workspaceRoot,
+      'packages/scan-report/tsconfig.app.json',
+    ),
+  },
 ] as const;
