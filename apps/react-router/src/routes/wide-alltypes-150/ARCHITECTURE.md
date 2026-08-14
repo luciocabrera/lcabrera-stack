@@ -56,8 +56,12 @@ wide-alltypes-150/
 5. `TableLayout`, beneath it, owns rendering, persistence, sorting, and
    incremental loading.
 
-No API server is involved (#687). Setting `VITE_API_URL` sends both halves to
-the external endpoint instead; the response shape is identical either way.
+No API server is involved (#687). Building with `VITE_API_URL` set sends both
+halves to the external endpoint instead; the response shape is identical either
+way — with one documented exception, the `c_018` sort below. That switch is
+resolved at **build** time: setting the variable for a server that is already
+built does nothing, silently. See
+[`docs/data-sources.md`](../../../docs/data-sources.md).
 
 ## Reading 20 Postgres types through one grid
 
@@ -82,6 +86,31 @@ about it are deliberate:
 - **The count runs on every page**, because the endpoint this replaced always
   answered a `total` and this route's table reads one from every page. It runs
   concurrently with the page query rather than after it.
+
+## The one place the two data paths disagree: sorting `c_018`
+
+Everywhere else the self-hosted and external endpoints are interchangeable. On
+a sort naming **`c_018`** (`Point 18`) they are not, and the column's header is
+clickable — `WideAlltypes150.constants.ts` sets `isSortable: mod !== 19`, which
+excludes only the `integer[]` columns, so `point` is offered.
+
+| Request                                                                        | External (built with `VITE_API_URL`)                                         | Self-hosted (default)                               |
+| ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- | --------------------------------------------------- |
+| `…/wide-alltypes-150/paginated?sort=[{"columnKey":"c_018","direction":"asc"}]` | `400` — `{"error":"Unsupported wide-alltypes sort column: c_018"}`           | `200` — a normal page, ordered by the `id` fallback |
+| `/wide-alltypes-150?sorting={"c_018":"asc"}`                                   | HTTP `500`; the error boundary renders `API request failed: 400 Bad Request` | HTTP `200`; the table renders                       |
+
+The external endpoint **rejects** a sort it cannot serve; this one **drops the
+term** and falls back to the primary key. That is deliberate and it is the
+forgiving direction — a clickable header that returns rows beats one that
+replaces the page with an error — but it is a behavioural difference, not a
+detail: a user who clicks `Point 18` sees the table re-render apparently
+unsorted rather than being told the column cannot be ordered.
+
+Neither behaviour is the one this route ideally wants, which is for the header
+not to offer the sort at all. Making `isSortable` exclude `point` as well as
+`integer[]` is the real fix and it changes what the route renders, so it belongs
+in its own change rather than in the one that moved the data source (#687 §5).
+Until then, the divergence is the documented cost of the move.
 
 ## Guardrails
 

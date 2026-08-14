@@ -42,8 +42,11 @@ differs.
    and calls the same `selectCarSalesPage` the SSR loader reached directly.
 
 So the first page and every page after it are produced by one function, and no
-API server is involved (#687). Setting `VITE_API_URL` sends both halves to the
-external `car-sales-api` instead; the response shape is identical either way.
+API server is involved (#687). Building with `VITE_API_URL` set sends both
+halves to the external `car-sales-api` instead; the response shape is identical
+either way. That switch is resolved at **build** time — setting the variable for
+a server that is already built does nothing, silently. See
+[`docs/data-sources.md`](../../../docs/data-sources.md).
 
 ## Capabilities this route does not declare
 

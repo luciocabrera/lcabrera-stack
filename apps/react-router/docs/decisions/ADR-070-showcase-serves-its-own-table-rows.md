@@ -1,4 +1,4 @@
-# ADR-069 — The showcase serves its own table rows; an external API is an opt-in override
+# ADR-070 — The showcase serves its own table rows; an external API is an opt-in override
 
 **Status:** Accepted
 
@@ -52,12 +52,27 @@ The column lists in those `config/` modules are **copied, not imported**, from
 `apps/shared`. That is ADR-039 applied unchanged: this app may not take a runtime
 dependency on `api-shared`, and after #686 it will not be able to.
 
-**`VITE_API_URL` remains an override, and it is real rather than vestigial.**
-Set it and the same routes fetch from the external API instead — the loader
-through `readCarSalesPage` / `readWideAlltypes150Page`, the browser through the
-matching fetcher. One predicate decides,
-`services/isExternalApiEnabled.util.ts`, and it is read per call rather than
-captured at module scope so both branches are reachable from a test.
+**`VITE_API_URL` remains an override, and it is a _build-time_ one.** Set it and
+the same routes fetch from the external API instead — the loader through
+`readCarSalesPage` / `readWideAlltypes150Page`, the browser through the matching
+fetcher. One predicate decides,
+`services/isExternalApiEnabled.util.ts`.
+
+The build-time part is not an implementation detail to be glossed. The predicate
+reads `import.meta.env.VITE_API_URL`, which Vite substitutes when the bundle is
+produced, so a production build folds it to `return false;` or `return true;`
+and eliminates the losing branch. **Setting the variable for
+`react-router-serve` against a bundle built without it changes nothing, and says
+nothing** — the folded self-hosted path still works, so the deployment silently
+keeps reading its own database. It must be set for the build:
+`VITE_API_URL=… vp run build`. In dev there is no prebuilt bundle and exporting
+it is enough, which is all `vp run dev:external-api` does.
+
+Reading the variable per call rather than capturing it at module scope is what
+keeps both branches reachable **from a test**, where `import.meta.env` is live
+and `vi.stubEnv` can move it. It buys nothing in a build, where either spelling
+folds identically — and claiming otherwise is what would make the paragraph
+above wrong.
 
 **Both sources answer byte-identical responses.** Each converted endpoint keeps
 the shape its external counterpart returned, field for field:
@@ -89,11 +104,27 @@ load-more page cannot arrive in different shapes.
   rots. It is therefore exercised two ways: `vp run dev:external-api` by hand,
   and unit tests that stub `VITE_API_URL` and assert the URL each branch builds.
   Deleting either leaves the branch unwatched.
+- **The override cannot be flipped on a running deployment**, and that is a cost
+  rather than a detail. Pointing a deployed showcase at the extracted API is a
+  rebuild, not a restart, and the failure mode of getting it wrong is silence.
+  `grep -A2 'isExternalApiEnabled = () => {' build/server/index.js` is what
+  tells a bundle's two states apart; `docs/data-sources.md` carries it. A
+  runtime switch was not built because the browser half cannot read `process.env`
+  — it would send the loader external while the load-more stayed self-hosted,
+  which is a worse failure than the one it replaces.
 - **`car-sales-api` is no longer part of rendering this app.** `vp run dev` still
   starts it; it now serves the override and `apps/admin_system` only.
 - **A page is now bounded by this process's connection pool** rather than by a
   separate server's. The pool is `@lcabrera/server`'s singleton, shared with the
   enterprise-orders routes and the filter-options service.
+- **The two paths are interchangeable except on one request**: a sort naming
+  `wide_alltypes_150.c_018` (`point`). The external endpoint rejects it with a
+  `400` and the route renders its error boundary; this one drops the unorderable
+  term and answers a page on the fallback key. The forgiving direction was
+  chosen, but it is a behavioural difference and the header offering the sort is
+  the underlying defect — narrowing `isSortable` changes what the route renders
+  and so belongs in its own change (#687 §5). Recorded in that route's
+  `ARCHITECTURE.md`.
 
 ## Alternatives considered
 

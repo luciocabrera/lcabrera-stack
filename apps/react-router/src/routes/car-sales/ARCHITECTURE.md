@@ -57,8 +57,10 @@ Postgres read, composed entirely from the generic `@lcabrera/server` executors
 (`selectRows` + `getRowsCount`) with no entity-specific SQL.
 
 - **Default — this process.** No API server is involved (#687).
-- **`VITE_API_URL` set** — the external `car-sales-api`, which answers the
-  identical `{ data, hasMore, total }`.
+- **Built with `VITE_API_URL`** — the external `car-sales-api`, which answers
+  the identical `{ data, hasMore, total }`. Build-time, not runtime: Vite
+  substitutes the variable into the bundle, so setting it at server start does
+  nothing. See [`docs/data-sources.md`](../../../docs/data-sources.md).
 
 Three properties of the read are deliberate:
 

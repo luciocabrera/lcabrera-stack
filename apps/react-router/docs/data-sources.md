@@ -60,13 +60,42 @@ all. The same reasoning already governs
 
 ## The external-API override
 
-Set **`VITE_API_URL`** and the same routes fetch their rows from an external
-`car-sales-api` instead — the loader through `readCarSalesPage` /
-`readWideAlltypes150Page`, the browser through `fetchCarSalesPage` /
-`fetchWideAlltypes150Page`. Both endpoints answer the identical
-`{ data, hasMore, total }`, so nothing downstream can tell which one replied.
+**`VITE_API_URL` points the same routes at an external `car-sales-api`** — the
+loader through `readCarSalesPage` / `readWideAlltypes150Page`, the browser
+through `fetchCarSalesPage` / `fetchWideAlltypes150Page`. Both endpoints answer
+the identical `{ data, hasMore, total }`, so nothing downstream can tell which
+one replied.
 
-Run it:
+### It is a build-time switch
+
+Read this part before pointing a deployment anywhere. `isExternalApiEnabled`
+reads `import.meta.env.VITE_API_URL`, and **Vite substitutes that when the
+bundle is produced**, not when the server starts. A production build therefore
+folds the predicate to a constant and eliminates the losing branch:
+
+| Built with                     | `build/server/index.js` contains                 |
+| ------------------------------ | ------------------------------------------------ |
+| _(nothing)_                    | `isExternalApiEnabled = () => { return false; }` |
+| `VITE_API_URL=http://host/api` | `isExternalApiEnabled = () => { return true; }`  |
+
+So **setting `VITE_API_URL` for `react-router-serve` does nothing** if the
+bundle was built without it. There is no error: the folded self-hosted path
+still works, and the deployment quietly keeps reading its own database. The
+variable has to be present **for the build**:
+
+```bash
+VITE_API_URL=https://api.example.com/api vp run build
+vp run start
+```
+
+Check which way a bundle actually folded, rather than trusting the environment:
+
+```bash
+grep -A2 'isExternalApiEnabled = () => {' apps/react-router/build/server/index.js
+```
+
+In **dev** there is no prebuilt bundle, so exporting the variable before the dev
+server is enough — that is all `dev:external-api` does:
 
 ```bash
 vp run db:up
@@ -80,11 +109,27 @@ vp run db:up
 vp run dev:showcase        # showcase alone
 ```
 
+### Keeping the override honest
+
 An override nobody runs is an override that breaks silently, so it is exercised
 two ways: `dev:external-api` by hand, and
 `services/isExternalApiEnabled.util.test.ts` plus each fetcher's test in CI —
 those stub `VITE_API_URL` and assert the request URL each branch produces, so a
-change that quietly collapses the two paths into one fails the build.
+change that quietly collapses the two paths into one fails the build. Note what
+those tests can and cannot show: they run under Vitest, where `import.meta.env`
+is live, so they prove **the branch is wired correctly**. That a given
+_deployment_ took it is a property of how that deployment was built, and the
+`grep` above is what answers it.
 
 `enterprise-orders` has no override. It never had an external path worth keeping
 — it was self-hosted from the start.
+
+### Where the two paths disagree
+
+One case, and it is documented rather than fixed here: sorting
+`wide_alltypes_150.c_018` (`point`). The external endpoint answers `400` and the
+route renders its error boundary; the self-hosted one drops the unorderable term
+and answers a normal page ordered by the fallback key. The column's header is
+clickable either way. Full table of both responses, and why the fix belongs in
+its own change, in
+[that route's ARCHITECTURE.md](../src/routes/wide-alltypes-150/ARCHITECTURE.md).

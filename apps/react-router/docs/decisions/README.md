@@ -26,4 +26,4 @@ or run `vp run adr:new`, which takes the next free number for you.
 | [ADR-010](./ADR-010-cookie-persistence-server-action.md)        | All Cookie Writes Persist Through One Server Action                           |
 | [ADR-011](./ADR-011-grid-interaction-architecture.md)           | Grid Interaction Architecture (Capability / Command / Surface)                |
 | [ADR-012](./ADR-012-column-width.md)                            | Column Width as the First Instance of the Grid Interaction Architecture       |
-| [ADR-069](./ADR-069-showcase-serves-its-own-table-rows.md)      | The showcase serves its own table rows; an external API is an opt-in override |
+| [ADR-070](./ADR-070-showcase-serves-its-own-table-rows.md)      | The showcase serves its own table rows; an external API is an opt-in override |
