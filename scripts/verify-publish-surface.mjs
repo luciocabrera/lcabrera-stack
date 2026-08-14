@@ -41,6 +41,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { errorMessage } from './lib/error-message.mjs';
 import { packAndRead } from './lib/publish-pack.mjs';
 import { runConsumerSmoke } from './lib/publish-smoke.mjs';
 import {
@@ -257,6 +258,6 @@ const main = () => {
 try {
   main();
 } catch (error) {
-  console.error(`publish-surface: ${error.message}`);
+  console.error(`publish-surface: ${errorMessage(error)}`);
   process.exitCode = 1;
 }

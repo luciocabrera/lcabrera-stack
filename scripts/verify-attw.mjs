@@ -23,6 +23,7 @@ import { existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { errorMessage } from './lib/error-message.mjs';
 import { checkPackageTypes, formatProblem } from './lib/attw-check.mjs';
 import { readPublicPackages } from './lib/api-surface-config.mjs';
 
@@ -85,6 +86,6 @@ const main = async () => {
 try {
   await main();
 } catch (error) {
-  console.error(`attw: ${error.message}`);
+  console.error(`attw: ${errorMessage(error)}`);
   process.exitCode = 1;
 }

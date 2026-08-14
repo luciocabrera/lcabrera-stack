@@ -27,6 +27,7 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { errorMessage } from './lib/error-message.mjs';
 import {
   collectBumpedPackages,
   missingChangesets,
@@ -232,6 +233,6 @@ const main = () => {
 try {
   main();
 } catch (error) {
-  console.error(`api-surface: ${error.message}`);
+  console.error(`api-surface: ${errorMessage(error)}`);
   process.exitCode = 1;
 }

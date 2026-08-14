@@ -31,16 +31,34 @@ const isContained = ({ path, root }) => {
   return inside.length > 0 && !inside.startsWith('..');
 };
 
-/** Writes one packed package into `<work>/node_modules/<name>`. */
+/**
+ * Writes one packed package into `<work>/node_modules/<name>`, and reports any
+ * entry that would land outside it.
+ *
+ * An escaping path is refused rather than written — but refusing it quietly
+ * would leave a tarball that writes over its neighbours looking like a healthy
+ * one, which is this gate's own failure mode wearing a different hat. Nothing
+ * this repo packs can produce one, so a report here means something upstream of
+ * pnpm's packer has gone wrong and the run should stop.
+ */
 const install = ({ nodeModules, packed }) => {
   const root = join(nodeModules, packed.name);
-  for (const file of packed.files.filter((path) =>
-    isContained({ path, root }),
-  )) {
+  const [contained, escaping] = packed.files.reduce(
+    ([inside, outside], path) =>
+      isContained({ path, root })
+        ? [[...inside, path], outside]
+        : [inside, [...outside, path]],
+    [[], []],
+  );
+  for (const file of contained) {
     const destination = join(root, file);
     mkdirSync(dirname(destination), { recursive: true });
     writeFileSync(destination, packed.readFile(file));
   }
+  return escaping.map(
+    (path) =>
+      `${packed.name}: the packed tarball contains \`${path}\`, which resolves outside the package directory — it was not written, and a tarball that reaches its neighbours is not one to publish.`,
+  );
 };
 
 /** A subpath a consumer can `import` — concrete, and resolving to a module. */
@@ -107,9 +125,9 @@ const consumerEnvironment = () =>
  */
 export const runConsumerSmoke = ({ packages, workDirectory }) => {
   const nodeModules = join(workDirectory, 'node_modules');
-  for (const packed of packages) {
-    install({ nodeModules, packed });
-  }
+  const escaping = packages.flatMap((packed) =>
+    install({ nodeModules, packed }),
+  );
 
   const lanes = selfContained(packages).map((packed) => ({
     packed,
@@ -117,7 +135,7 @@ export const runConsumerSmoke = ({ packages, workDirectory }) => {
   }));
   const smoked = lanes.map((lane) => lane.packed);
   const specifiers = lanes.flatMap((lane) => lane.specifiers);
-  const empty = unimportableProblems(lanes);
+  const empty = [...escaping, ...unimportableProblems(lanes)];
   const entry = join(workDirectory, 'consumer.mjs');
   const lines = specifiers.map(
     (specifier) => `await import(${JSON.stringify(specifier)});`,
