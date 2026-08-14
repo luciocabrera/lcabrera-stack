@@ -16,6 +16,11 @@ export default [
     '_api/enterprise-orders/paginated',
     'routes/api/enterprise-orders-paginated/root.ts',
   ),
+  route('_api/car-sales/paginated', 'routes/api/car-sales-paginated/root.ts'),
+  route(
+    '_api/wide-alltypes-150/paginated',
+    'routes/api/wide-alltypes-150-paginated/root.ts',
+  ),
   route('settings', 'routes/settings/root.ts'),
   route('car-sales', 'routes/car-sales/root.ts'),
   route('car-sales-infinite', 'routes/car-sales-infinite/root.ts'),

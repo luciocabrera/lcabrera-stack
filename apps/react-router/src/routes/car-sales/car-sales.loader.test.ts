@@ -5,14 +5,14 @@ import { describe, expect, it, vi } from 'vite-plus/test';
 import { loader } from './car-sales.loader';
 import { CLIENT_PAGINATION_ROW_LIMIT } from './CarSales.constants';
 
-const { fetchCarSalesPageMock } = vi.hoisted(() => ({
-  fetchCarSalesPageMock: vi.fn(() =>
+const { readCarSalesPageMock } = vi.hoisted(() => ({
+  readCarSalesPageMock: vi.fn(() =>
     Promise.resolve({ data: [], hasMore: false, total: 0 }),
   ),
 }));
 
-vi.mock('@/services', () => ({
-  fetchCarSalesPage: fetchCarSalesPageMock,
+vi.mock('./.server/carSales.service', () => ({
+  readCarSalesPage: readCarSalesPageMock,
 }));
 
 type CollectFunctionPathsArgs = {
@@ -71,18 +71,43 @@ describe('car-sales loader', () => {
   });
 
   it('requests a bounded slice rather than the whole table', async () => {
-    // car_sales holds 500k rows. Fetching it unbounded produced a ~421MB body
+    // car_sales holds 500k rows. Reading it unbounded produced a ~421MB body
     // and killed SSR with a V8 zone allocation failure, so this route must
     // always ask for a limit.
-    fetchCarSalesPageMock.mockClear();
+    readCarSalesPageMock.mockClear();
 
     await invokeLoader();
 
-    expect(fetchCarSalesPageMock).toHaveBeenCalledTimes(1);
-    expect(fetchCarSalesPageMock).toHaveBeenCalledWith(
+    expect(readCarSalesPageMock).toHaveBeenCalledTimes(1);
+    expect(readCarSalesPageMock).toHaveBeenCalledWith(
       expect.objectContaining({
         limit: CLIENT_PAGINATION_ROW_LIMIT,
         skip: 0,
+      }),
+    );
+  });
+
+  it('reads through the route`s own server service, not an api-server URL', async () => {
+    // The route renders with no API server running, so its first page must come
+    // from the service that reads Postgres in this process. `readCarSalesPage`
+    // owns the external-override branch behind that call.
+    readCarSalesPageMock.mockClear();
+
+    await invokeLoader();
+
+    expect(readCarSalesPageMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('carries the primary-key tiebreaker into the sort it asks for', async () => {
+    // `createTableRouteLoader` appends it (ADR-008); without it a page boundary
+    // inside a tie group repeats and skips rows.
+    readCarSalesPageMock.mockClear();
+
+    await invokeLoader();
+
+    expect(readCarSalesPageMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sorting: [{ columnKey: 'car_id', direction: 'asc' }],
       }),
     );
   });

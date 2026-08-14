@@ -57,9 +57,28 @@ vp run lint:eslint:check
 - Use `vp run test`, not `vp test`, because this repo uses a custom Vitest
   command to avoid the Vite+ built-in test-path issue in this setup.
 
+## Data Sources
+
+**This app serves its own table rows.** Every table route reads Postgres in this
+process — through a `.server` service for the first page and its own
+`_api/…/paginated` resource route for the load-more — so the whole showcase runs
+on a database and nothing else:
+
+```bash
+vp run db:up
+vp run dev:showcase
+```
+
+Setting `VITE_API_URL` points the same routes at an external `car-sales-api`
+instead; `vp run dev:external-api` is that path pre-wired. Full map of both,
+and why the response shapes are identical:
+[`docs/data-sources.md`](docs/data-sources.md).
+
 ## API Server
 
-The frontend proxies `/api` requests to `http://localhost:3001`.
+Only needed for the `VITE_API_URL` override above (and for `apps/admin_system`).
+When it is running, the dev server proxies `/api` requests to
+`http://localhost:3001`.
 
 Start the API server from the nested workspace package:
 
