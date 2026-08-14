@@ -5,22 +5,34 @@ owner: agent:claude
 status: active
 branch: chore/704-claim-protocol-agrees
 area:
+  - AGENTS.md
   - docs/coordination/README.md
   - docs/decisions/ADR-074-*
+  - docs/decisions/README.md
   - scripts/coordination-claim.sh
 started: 2026-08-14
 updated: 2026-08-14
 plan: (none)
-pr: (none)
+pr: 722
 issue: #704
 ---
 
 ## What
 
-Make the claim protocol and coordination:claim agree
+Resolve the contradiction in `docs/coordination/README.md` about where a claim
+lands: option (b) — the README is corrected to describe the one-branch flow the
+tooling implements and #233 built for, with the residual visibility gap stated.
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: review — README rule 2 rewritten, ADR-074 added, AGENTS.md and
+  the claim script cross-linked
 - Blockers: none
-- Next:
+- Next: quality gate, then PR #722
+
+Known overlap, coordinated rather than narrowed: `publishing-gate-artifact`
+(`fix/715-publishing-gate-artifact`) claims `docs/decisions/**`, so
+`coordination:verify` warns against this task's `docs/decisions/ADR-074-*`. The
+only file both touch is the generated index `docs/decisions/README.md` —
+whichever lands second rebases and re-runs `vp run adr:verify -- --write`. Their
+ADR is 073, this one is 074, so the numbers do not collide.

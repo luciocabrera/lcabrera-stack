@@ -457,7 +457,11 @@ branch and gated by `coordination:verify`; GitHub Issues are not.
    branch** when several agents need each other's WIP (declare it with a
    `branches/<slug>.md` descriptor + an integrator; overlap between tasks on the
    same shared branch is then treated as collaboration, not a collision). Open a
-   **draft PR early** (the human-visible progress surface).
+   **draft PR early** (the human-visible progress surface). The task file is
+   committed **on that branch**, in the same PR as the work — there is no
+   claim-only PR, and cross-branch visibility comes from `coordination:verify`
+   reading every live branch on `origin`
+   ([ADR-074](docs/decisions/ADR-074-the-claim-lives-on-its-work-branch.md)).
 4. **Keep `status`/`updated` current**; move through `active → review`. (Status also
    lives in the linked Issue + the Planning board — the GitHub-visible source. If the
    **self-assign the `issue:` when you start** — `gh issue edit <n> --add-assignee @me`

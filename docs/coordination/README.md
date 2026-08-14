@@ -32,7 +32,9 @@ immediately):
 2. **Claim it.** Copy [`tasks/_TEMPLATE.md`](./tasks/_TEMPLATE.md) to
    `tasks/<id>.md`, fill in the frontmatter — crucially the `area` globs, which
    are the soft lock others read. That file **is** the claim; there is no board
-   to regenerate or commit.
+   to regenerate or commit. Commit it **on the branch you are about to work on**,
+   not on `main` — [rule 2](#keeping-the-register-current-across-branches) has the
+   reason, and the check reads it there.
 3. **Pick a branch strategy** — an independent branch (the default) or join a
    shared one. See [Independent vs shared branches](#independent-vs-shared-branches)
    below. Never commit non-trivial work straight to `main`.
@@ -57,8 +59,8 @@ does steps 2–4 in one command (step 5 is automatic) — it **creates (`--new-i
 the backlog issue and self-assigns it right away** (so its board card moves to In
 Progress at the START, before any PR — closing the window where another agent
 picks up the same issue), writes the required `issue:` field, scaffolds the task,
-branches off `main`, commits, and opens a draft PR so the claim is visible
-immediately (via `coordination:board:live`). It works in an **isolated
+branches off `main`, commits the task file **onto that branch**, and opens a draft
+PR so the claim is visible immediately (via `coordination:board:live`). It works in an **isolated
 `../vrc-<id>` worktree by default** — installing dependencies and generating
 route types there — because branching in the shared clone moves `HEAD` under
 every other agent in it. `--in-place` opts out when you are certain you are alone
@@ -183,12 +185,32 @@ reads as a bug in the code under test rather than a missing fixture. Symlink or
 copy the primary checkout's `docker/local/.env` into the worktree before such a
 run.
 
-**2. The claim lives on `main`, landed early — not on your feature branch.** A
-task file is a shared lock only once it's on `main`, where every other agent
-branching off `main` sees it. So commit `tasks/<id>.md` to `main` **first** — a
-tiny claim-only PR, before the real work — separate from the work branch. If
-claims sit only on feature branches, no one sees them until merge and the register
-fragments.
+**2. The claim lives on the branch it locks, from the moment that branch exists —
+not on `main`.** `coordination:claim` creates the work branch, commits
+`tasks/<id>.md` onto it and pushes, so the claim and the work it describes travel
+together: **there is no claim-only PR**, and a claim reaches `main` only when the
+work merges (which is also what deletes it). Cross-branch visibility is the
+check's job, not `main`'s — `coordination:verify` reads claims from every live
+branch on `origin` ([below](#overlap-detection-sees-other-branches)), so another
+agent's overlap warning fires while both branches are still unmerged, which is
+the window it exists for.
+
+Landing the claim on `main` first was the earlier rule, and
+[ADR-074](../decisions/ADR-074-the-claim-lives-on-its-work-branch.md) retires it:
+`main` carries a ruleset with a pull-request requirement and required status
+checks, so a claim-only PR could not exist until a green CI run had finished —
+after the moment the lock is meant to precede. What it would have bought is real
+and is worth naming: **a claim is invisible to a reader who never fetches a
+branch**, including the web view of `tasks/` on `main`, which holds only
+`_TEMPLATE.md`. What covers that reader instead is the draft PR opened at
+claim time, `vp run coordination:board:live`, and the linked issue, which
+`coordination:claim` self-assigns so its Planning-board card moves to In Progress
+before any code exists.
+
+Nothing gates where the file sits, deliberately: a check that failed a PR for
+carrying its own task file would fail every PR this repo's tooling produces. What
+keeps the visibility honest instead is the remote read's own failure mode — a
+live branch it could not read is **reported as unread**, never silently dropped.
 
 **`BOARD.md` never conflicts, by construction.** It is a **gitignored, local-only
 view** ([ADR-037](../decisions/ADR-037-coordination-board-is-a-local-view.md)):
@@ -287,8 +309,10 @@ Coordination register — 1 warning(s):
 The check reads claims from **every live branch on `origin`**, not just the
 files in your working tree. That matters because `coordination:claim` commits
 the task file onto the branch it creates, so a claim is off-`main` from the
-moment it exists: a tree-only check compared each agent's claim against nothing
-and reported a clean register to both sides of a real collision (#233).
+moment it exists ([rule 2](#keeping-the-register-current-across-branches) and
+[ADR-074](../decisions/ADR-074-the-claim-lives-on-its-work-branch.md)): a
+tree-only check compared each agent's claim against nothing and reported a clean
+register to both sides of a real collision (#233).
 
 Two consequences worth knowing:
 
