@@ -54,12 +54,13 @@ describe('fetchCarSalesPage', () => {
   });
 
   it('honours the override host under SSR, where a requestUrl is present', async () => {
-    // The regression this pins: `getApiBaseUrl` ranks the SSR `requestUrl`
-    // ABOVE `VITE_API_URL`, so handing it one made the override pick the
-    // external branch while the request went to the request's own origin. The
-    // override host is deliberately not `localhost:3001` — that is the value
+    // The regression this pins, end to end through the fetcher: until #705,
+    // `getApiBaseUrl` ranked the SSR `requestUrl` above `VITE_API_URL`, so
+    // handing it one made the override pick the external branch while the
+    // request went to the request's own origin (#701 review). The override
+    // host is deliberately not `localhost:3001` — that is the value
     // `getApiBaseUrl` returns for a local requestUrl, so an assertion using it
-    // would pass either way and prove nothing (#701 review).
+    // would pass either way and prove nothing.
     vi.stubEnv('VITE_API_URL', 'http://override.example:9999/api');
 
     await fetchCarSalesPage({

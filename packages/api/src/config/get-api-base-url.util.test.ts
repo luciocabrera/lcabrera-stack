@@ -1,13 +1,39 @@
 // @vitest-environment jsdom
 
-import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vite-plus/test';
 
 import { API_SERVER_PORT, CONFIG } from './config.constants.ts';
 import { getApiBaseUrl } from './get-api-base-url.util.ts';
 
 const originalEnvApiUrl = import.meta.env.VITE_API_URL;
 
+/**
+ * Deliberately a host no other branch of the function can produce, so an
+ * assertion against it cannot be satisfied by the branch it is meant to rule
+ * out. The override that hid this defect for two rounds of review was
+ * `http://localhost:3001/api` — byte-identical to `CONFIG.localhost.apiHost`,
+ * which is what a local request URL resolves to (#705).
+ */
+const OVERRIDE_API_URL = 'https://api.override.test/api';
+
+const LOCAL_SSR_REQUEST_URL = 'http://localhost:5173/orders';
+const DEPLOYED_SSR_REQUEST_URL = 'https://app.example.com/orders';
+
 describe('getApiBaseUrl', () => {
+  beforeEach(() => {
+    // Every assertion below now depends on whether the variable is set, because
+    // it is priority 1 — so state the precondition rather than inheriting it
+    // from whatever the runner's env happens to hold.
+    Reflect.deleteProperty(import.meta.env, 'VITE_API_URL');
+  });
+
   afterEach(() => {
     vi.unstubAllEnvs();
     vi.unstubAllGlobals();
@@ -35,18 +61,67 @@ describe('getApiBaseUrl', () => {
     );
   });
 
-  it('falls back to VITE_API_URL when the request URL is invalid', () => {
-    import.meta.env.VITE_API_URL = 'https://api.example.com/custom';
+  it('ignores an invalid request URL and falls through', () => {
+    vi.stubGlobal('window', undefined);
 
-    expect(getApiBaseUrl('not a valid url')).toBe(
-      'https://api.example.com/custom',
-    );
+    expect(getApiBaseUrl('not a valid url')).toBe(CONFIG.localhost.apiHost);
   });
 
   it('prefers VITE_API_URL when no request URL is provided', () => {
-    import.meta.env.VITE_API_URL = 'https://api.example.com/custom';
+    import.meta.env.VITE_API_URL = OVERRIDE_API_URL;
 
-    expect(getApiBaseUrl()).toBe('https://api.example.com/custom');
+    expect(getApiBaseUrl()).toBe(OVERRIDE_API_URL);
+  });
+
+  describe('precedence: VITE_API_URL outranks the request URL', () => {
+    it('is a decision this test exists to pin, so the two answers must differ', () => {
+      // Without this, the assertions below could pass on either ordering — the
+      // exact failure that let the old order survive a review, a verification
+      // and a round of fixes (#705).
+      expect(OVERRIDE_API_URL).not.toBe(CONFIG.localhost.apiHost);
+      expect(getApiBaseUrl(LOCAL_SSR_REQUEST_URL)).toBe(
+        CONFIG.localhost.apiHost,
+      );
+      expect(getApiBaseUrl(DEPLOYED_SSR_REQUEST_URL)).toBe(
+        'https://app.example.com/api',
+      );
+    });
+
+    it('returns the override for a local SSR request URL', () => {
+      import.meta.env.VITE_API_URL = OVERRIDE_API_URL;
+
+      expect(getApiBaseUrl(LOCAL_SSR_REQUEST_URL)).toBe(OVERRIDE_API_URL);
+    });
+
+    it('returns the override for a deployed SSR request URL', () => {
+      import.meta.env.VITE_API_URL = OVERRIDE_API_URL;
+
+      expect(getApiBaseUrl(DEPLOYED_SSR_REQUEST_URL)).toBe(OVERRIDE_API_URL);
+    });
+
+    it('answers the same host to both halves of a render', () => {
+      // The invariant the old order broke: a loader passes a request URL and
+      // the browser does not, so ranking it first sent one page to two hosts.
+      import.meta.env.VITE_API_URL = OVERRIDE_API_URL;
+
+      expect(getApiBaseUrl(LOCAL_SSR_REQUEST_URL)).toBe(getApiBaseUrl());
+    });
+
+    it('leaves the request URL in charge when no override was built in', () => {
+      // The other direction of the same order: priority 1 must not swallow
+      // priority 2 when the variable is absent or bare.
+      import.meta.env.VITE_API_URL = '';
+
+      expect(getApiBaseUrl(DEPLOYED_SSR_REQUEST_URL)).toBe(
+        'https://app.example.com/api',
+      );
+
+      Reflect.deleteProperty(import.meta.env, 'VITE_API_URL');
+
+      expect(getApiBaseUrl(DEPLOYED_SSR_REQUEST_URL)).toBe(
+        'https://app.example.com/api',
+      );
+    });
   });
 
   it('falls back to the localhost API host during SSR when no request URL is provided', () => {

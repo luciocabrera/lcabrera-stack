@@ -57,9 +57,9 @@ describe('fetchWideAlltypes150Page', () => {
   });
 
   it('honours the override host under SSR, where a requestUrl is present', async () => {
-    // Same regression as the car-sales fetcher: an SSR `requestUrl` outranked
-    // `VITE_API_URL` inside `getApiBaseUrl`, so the loader fetched the
-    // request's own origin instead of the override (#701 review).
+    // Same regression as the car-sales fetcher: until #705 an SSR `requestUrl`
+    // outranked `VITE_API_URL` inside `getApiBaseUrl`, so the loader fetched
+    // the request's own origin instead of the override (#701 review).
     vi.stubEnv('VITE_API_URL', 'http://override.example:9999/api');
 
     await fetchWideAlltypes150Page({

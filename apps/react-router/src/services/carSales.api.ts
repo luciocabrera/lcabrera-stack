@@ -1,11 +1,11 @@
 import type { PaginatedFetchArgs } from '@lcabrera/api/http/http.types';
 
+import { getApiBaseUrl } from '@lcabrera/api/config/get-api-base-url.util';
 import { createPaginatedFetcher } from '@lcabrera/api/http/create-paginated-fetcher.util';
 import { isObject } from '@lcabrera/utils/guards/is-object.util';
 
 import { fakeDelay } from './fakeDelay.util';
 import { isExternalApiEnabled } from './isExternalApiEnabled.util';
-import { resolveExternalApiBaseUrl } from './resolveExternalApiBaseUrl.util';
 
 /**
  * Browser fetcher for a page of car sales.
@@ -79,7 +79,7 @@ const fetchSelfHostedPage = createPaginatedFetcher({
 const fetchExternalPage = createPaginatedFetcher({
   isValid: isCarSalesPaginatedResponse,
   path: '/car-sales/paginated',
-  resolveBaseUrl: resolveExternalApiBaseUrl,
+  resolveBaseUrl: getApiBaseUrl,
 });
 
 /**
