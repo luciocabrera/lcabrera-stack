@@ -323,7 +323,7 @@ pnpm substitutes `publishConfig.exports` (pointing at `dist`) at pack time. That
 substitution is a **pnpm** extension — `npm pack` ignores it and produces a
 tarball a consumer cannot load — which is why `publish:verify` checks the packed
 tarball and asserts the release path is still the pnpm one
-([ADR-072](docs/decisions/ADR-072-publishing-gates-check-the-packed-tarball.md)).
+([ADR-073](docs/decisions/ADR-073-publishing-gates-check-the-packed-tarball.md)).
 `@lcabrera/ui` is deliberately excluded from the build — StyleX derives theme
 identity from the source path, so it ships source and the consumer's own plugin
 compiles it.
@@ -339,7 +339,7 @@ compiles it.
 
 Run `packages:build` **before** `publish:verify`, `api-surface:verify` and
 `attw:verify`: with no `dist/` there is no artifact to check, and all three
-**fail** rather than reporting a pass they did not earn (ADR-072).
+**fail** rather than reporting a pass they did not earn (ADR-073).
 `publish:verify` also needs pnpm on PATH, which running it through `vp` provides.
 `ui` ships source, so its surface is always checked. The API-surface snapshot and
 its `ui`-vs-built split are

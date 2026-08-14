@@ -270,7 +270,7 @@ jobs:
         # — a map nothing here exercises. The gate packs each package with pnpm
         # and reads the tarball a consumer would install, so with no build there
         # is no artifact and it fails, rather than reporting the structural half
-        # as a pass the way it used to (ADR-072). The build is what gives it
+        # as a pass the way it used to (ADR-073). The build is what gives it
         # something real to check.
         run: vp run packages:build && vp run publish:verify
 
@@ -295,7 +295,7 @@ jobs:
         # even resolve?" for the built public packages, catching the ESM/CJS and
         # module-resolution traps ADR-038 documents. Needs the built dist, and
         # fails without it — it used to report that types resolved for packages
-        # it had skipped (ADR-072).
+        # it had skipped (ADR-073).
         run: vp run attw:verify
 
       - name: Write quality summary

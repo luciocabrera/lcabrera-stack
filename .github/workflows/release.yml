@@ -104,7 +104,7 @@ jobs:
         # still point at ./src, which no consumer can load
         # (ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING), and an npm version is
         # permanent. Changing the publish command below means revisiting
-        # docs/decisions/ADR-072-publishing-gates-check-the-packed-tarball.md
+        # docs/decisions/ADR-073-publishing-gates-check-the-packed-tarball.md
         # first; the gate will stop you either way.
         run: vp run packages:build && vp run publish:verify
 

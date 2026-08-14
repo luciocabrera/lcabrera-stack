@@ -7,7 +7,7 @@
  * `./src`, which a consumer cannot load (ADR-057). Changesets picks its
  * publishing tool by detecting the lockfile, so the guarantee rests on facts
  * nobody states out loud — the lockfile's name, the pinned package manager, and
- * one line of the release workflow. This module states them. ADR-072 records
+ * one line of the release workflow. This module states them. ADR-073 records
  * why they are asserted rather than removed.
  */
 
@@ -57,7 +57,7 @@ export const releasePackerProblems = ({
     ...(commands.includes('pnpm exec changeset publish')
       ? []
       : [
-          'the release workflow no longer runs `pnpm exec changeset publish` — the published tarball is only correct when pnpm packs it, so a different publish command needs this gate revisited (see ADR-072).',
+          'the release workflow no longer runs `pnpm exec changeset publish` — the published tarball is only correct when pnpm packs it, so a different publish command needs this gate revisited (see ADR-073).',
         ]),
     ...(/\bnpm publish/.test(commands)
       ? [

@@ -17,7 +17,7 @@
  * A package with no `dist` fails here rather than being skipped: the gate used
  * to report success for the packages it could read while announcing the rest as
  * "skipped, unbuilt", which on an unbuilt tree is a pass that compared nothing
- * (ADR-072).
+ * (ADR-073).
  *
  * Exit codes: 0 = every public package was compared and matches its snapshot
  * (and breaking changes carry a changeset), 1 = drift, an unaccompanied

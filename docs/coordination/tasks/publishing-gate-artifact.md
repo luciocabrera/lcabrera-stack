@@ -29,7 +29,7 @@ Verify a real artifact in the publishing gates: `publish:verify` packs each
 public package with pnpm and checks the tarball a consumer would install (plus a
 real import from outside the repo), and all three publishing gates fail on an
 unbuilt tree instead of reporting a pass they did not earn. The pnpm-only
-`publishConfig` substitution is asserted rather than assumed — ADR-072.
+`publishConfig` substitution is asserted rather than assumed — ADR-073.
 
 ## Status / next
 

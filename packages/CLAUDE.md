@@ -71,7 +71,7 @@ by inspection:
   workflow that still runs `pnpm exec changeset publish` and no `npm publish`.
   Publishing one of these packages by hand with npm ships something no consumer
   can import, permanently
-  ([ADR-072](../docs/decisions/ADR-072-publishing-gates-check-the-packed-tarball.md)).
+  ([ADR-073](../docs/decisions/ADR-073-publishing-gates-check-the-packed-tarball.md)).
 - **A breaking change to the published _type surface_ is a gate, not a review
   call.** `publish:verify` checks subpath parity but never reads the types, so a
   removed export, a changed signature or a reshaped union inside a surviving

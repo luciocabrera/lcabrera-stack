@@ -7,7 +7,7 @@
  * lives in `publishConfig.exports` — a **pnpm** extension that `npm pack`
  * ignores entirely. A gate reading `package.json` therefore checks a map that
  * may never reach a consumer; only the tarball says what ships. See
- * ADR-072 and ADR-057 for the hazard the swap exists to prevent.
+ * ADR-073 and ADR-057 for the hazard the swap exists to prevent.
  *
  * pnpm is spawned directly because `vp` does not wrap npm packing — its own
  * `vp pack` is a Vite library build, a different thing (AGENTS.md section 4).

@@ -7,7 +7,7 @@
  * fresh Node process import each published subpath, so the answer comes from
  * the module resolver rather than from the gate's own model of it. A tarball
  * whose `exports` still point at `src` fails here with the very error the
- * manifest exists to prevent — see ADR-072.
+ * manifest exists to prevent — see ADR-073.
  *
  * Only packages whose runtime dependencies are all in the packed set can be
  * imported without a registry; the caller refuses a run that smoke-tests none.

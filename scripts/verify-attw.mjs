@@ -11,7 +11,7 @@
  *
  * A package with no `dist` is a failure here, not a skip: this gate used to
  * announce that types resolved for every package while having checked none of
- * them, on a tree nobody had built — see ADR-072.
+ * them, on a tree nobody had built — see ADR-073.
  *
  * Usage (from the repo root, AFTER `vp run packages:build`):
  *   vp run attw:verify

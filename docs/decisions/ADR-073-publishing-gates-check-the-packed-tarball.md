@@ -1,4 +1,4 @@
-# ADR-072 — Check the packed tarball, and assert the pnpm publish path
+# ADR-073 — Check the packed tarball, and assert the pnpm publish path
 
 **Status:** Accepted
 

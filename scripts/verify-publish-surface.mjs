@@ -15,7 +15,7 @@
  * exports a consumer would get, the files that are really in it, and — for the
  * packages whose dependencies are packed alongside them — a real import from a
  * temporary directory outside this repo. It also asserts that the release path
- * is still the pnpm one the guarantee rests on. See ADR-072.
+ * is still the pnpm one the guarantee rests on. See ADR-073.
  *
  * There is deliberately no "nothing was built, so nothing to check" outcome: a
  * publishing gate that reports success having produced no artifact is worse
