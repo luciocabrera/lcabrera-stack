@@ -370,8 +370,9 @@ Documentation MUST reflect new behavior, constraints, patterns and agent rules.
 
 > Scope note: update `workflow.md` when the _workflow_ changes and
 > `merge-checklist.md` when the _merge bar_ changes. Per-artifact documentation
-> follows the Documentation Update Rule in [`AGENTS.md`](../../AGENTS.md), which names
-> the specific homes (`ARCHITECTURE.md`, `INVENTORY.md`, `PATTERNS.md`, ADRs).
+> follows the Documentation Update Rule in the
+> [`quality-gate-workflow` skill](../../.github/skills/quality-gate-workflow/SKILL.md#documentation-update-rule),
+> which names the specific homes (`ARCHITECTURE.md`, `INVENTORY.md`, `PATTERNS.md`, ADRs).
 
 ## **5. When modifying existing code**
 

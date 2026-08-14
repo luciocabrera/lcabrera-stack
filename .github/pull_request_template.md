@@ -46,7 +46,8 @@
 ## Documentation Updates
 
 <!-- Docs changed: ARCHITECTURE.md, INVENTORY.md, PATTERNS.md, ADRs, COMMANDS.md.
-     See the Documentation Update Rule in AGENTS.md. -->
+     See the Documentation Update Rule in
+     .github/skills/quality-gate-workflow/SKILL.md -->
 
 ## Linked Issues
 

@@ -25,8 +25,9 @@ trust the check and look at its output.
       **[judgement]**
 - [ ] **No regressions** **[auto: Unit Tests & Coverage, Quality Gate,
       Fallow Audit (new-only)]**
-- [ ] **Documentation updated** per the Documentation Update Rule in
-      [`AGENTS.md`](../../AGENTS.md) **[judgement; auto for paths: `docs:verify`]**
+- [ ] **Documentation updated** per the Documentation Update Rule in the
+      [`quality-gate-workflow` skill](../../.github/skills/quality-gate-workflow/SKILL.md#documentation-update-rule)
+      **[judgement; auto for paths: `docs:verify`]**
 - [ ] **No conflicting approaches introduced** — no second way to do something
       the repo already does one way **[judgement]**
 - [ ] **Reviewed by a supervising agent or human** **[judgement]**
