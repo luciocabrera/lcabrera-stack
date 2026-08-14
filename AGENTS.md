@@ -34,20 +34,25 @@ A package in **neither** scope means that question was never asked — that is h
 the custom lint rules sat unscoped until they became `@lcabrera/eslint-plugin`
 ([ADR-057](docs/decisions/ADR-057-publish-the-custom-lint-rules.md)).
 
-**Four of those `@repo/*` names are on their way out, and the answer to "does it
-ship?" is now yes for each.**
+**Four packages come out of that `@repo/*` list, and only three of them are
+renames.**
 [ADR-069](docs/decisions/ADR-069-publish-the-shared-toolchain.md) publishes
-`packages/ts-configs` as `@lcabrera/tsconfig`, `packages/vite-configs` (folding
-in `packages/plugins`) as `@lcabrera/vite-config`, `packages/node-runtime` as
-`@lcabrera/node`, and the three scan-report skills' shared scripts as
-`@lcabrera/scan-report` — so the list above is what the manifests still say, not
-where they are going. #674–#677 do the renames; until one lands, its package is
-`@repo/*` and `private: true` in fact. Treat all four as public-in-waiting: what
-makes them publishable at all is that this repo's own data — the Oxlint
-workspace roster, the `@lcabrera/ui`/`@lcabrera/server` boundary tables, the
-`docker/local` env path, the tsconfig entry table — comes out of them and
-becomes configuration, so adding a new hardcoded repo fact to one of them now
-works against that.
+`packages/vite-configs` (folding in `packages/plugins`) as
+`@lcabrera/vite-config`, `packages/node-runtime` as `@lcabrera/node`, and the
+three scan-report skills' shared scripts as `@lcabrera/scan-report`. Those
+workspaces **become** the published package, and the repo data they carry leaves
+for a repo-owned home. **`packages/ts-configs` is the one split, not a rename**:
+`@lcabrera/tsconfig` is a new package (`packages/tsconfig`) holding the factories
+and the writer, while `@repo/ts-configs` survives — still `@repo/*`, still
+`private: true` — as the host of `tsconfig.entries.ts`, this repo's own workspace
+roster, which the published package must never carry. So
+`vp run --filter @repo/ts-configs generate` keeps working unchanged, and that
+name is not on its way anywhere. #674–#677 do the work; until one lands, its
+package is `@repo/*` and `private: true` in fact. What makes all four
+publishable is that this repo's own data — the Oxlint workspace roster, the
+`@lcabrera/ui`/`@lcabrera/server` boundary tables, the `docker/local` env path,
+the tsconfig entry table — comes out of them and becomes configuration, so
+adding a new hardcoded repo fact to one of them now works against that.
 
 **They are published on npm, and nothing but the version number stands between
 a mistake and the registry** — `private` is off and each has a trusted publisher,
@@ -71,23 +76,25 @@ _package_ relies on into an app.
 the listing cannot tell you is below.
 
 `packages/ui`,
-`packages/api`, `packages/server`, `packages/utils` and
-`packages/eslint-local-rules` are public packages and are held strictest: never
-baseline, scope, or inline-disable a finding in any of them. The authority on
-that list is not this sentence — it is which workspaces gitignore
-`eslint-suppressions.json`, which `vp run suppressions:verify` reads at runtime,
-so a new public package is covered the day it is added; keep the prose in step.
+`packages/api`, `packages/server`, `packages/utils`,
+`packages/eslint-local-rules` and `packages/tsconfig` are public packages and are
+held strictest: never baseline, scope, or inline-disable a finding in any of
+them. The authority on that list is not this sentence — it is which workspaces
+gitignore `eslint-suppressions.json`, which `vp run suppressions:verify` reads at
+runtime, so a new public package is covered the day it is added; keep the prose
+in step.
 
-`packages/ts-configs`, `packages/vite-configs` (absorbing `packages/plugins`)
-and `packages/node-runtime` join that list as `@lcabrera/tsconfig`,
-`@lcabrera/vite-config` and `@lcabrera/node`, and a fourth is built from the
-scan-report skills' shared scripts as `@lcabrera/scan-report`
-([ADR-069](docs/decisions/ADR-069-publish-the-shared-toolchain.md)). None of
-them is in the tier yet, and the rule above says why: `packages/ts-configs`,
-`packages/vite-configs` and `packages/plugins` each still commit an
-`eslint-suppressions.json`. Each is admitted by its own implementing issue
-(#674–#677) clearing those suppressions and gitignoring the file — not by being
-named here.
+`packages/vite-configs` (absorbing `packages/plugins`) and
+`packages/node-runtime` join that list as `@lcabrera/vite-config` and
+`@lcabrera/node`, and a third is built from the scan-report skills' shared
+scripts as `@lcabrera/scan-report`
+([ADR-069](docs/decisions/ADR-069-publish-the-shared-toolchain.md)). Neither
+workspace is in the tier yet, and the rule above says why: `packages/vite-configs`
+and `packages/plugins` each still commit an `eslint-suppressions.json`. Each is
+admitted by its own implementing issue (#675–#677) clearing those suppressions
+and gitignoring the file — not by being named here. `packages/ts-configs` is not
+on that list because it never joins it: it is the split, so what became public is
+the new `packages/tsconfig` above, and the surviving workspace stays private.
 
 `api` and `server` split on **runtime**, and the split is load-bearing, not
 cosmetic — the two names say which runtime each one is for, and the tsconfigs
@@ -247,9 +254,9 @@ policy that governs them:
 
 There is deliberately **no `start:all`/`dev:all`**: `car-sales-api` and `car-sales-api-fast` are performance-comparison alternatives serving the same domain and must never run at the same time — always pick one combo.
 
-**`vp check` type-checks, but it is not `tsc` — both run, and `typecheck:all` is the authority.** `vp check`'s type pass is **tsgolint** (Oxlint's type-aware path, enabled by `lint.options.typeCheck` in the root `vite.config.ts`), and it does resolve each workspace's own strict `tsconfig.app.json` — `strict`, `noUncheckedIndexedAccess` and `noUnusedLocals` all fire under it. What it does **not** do is run the per-workspace `typecheck` scripts, and those carry work no linter replicates: `packages/ui` gates its public API against server-only `node:*` imports (`check:public-api`), and both React Router apps regenerate route types first. Every one of the 17 workspaces now has a `typecheck` script, CI runs `vp run typecheck:all` as its own step in `check-safe.yml`, and `check:safe` chains it. Keep the two passes in sync: a new workspace gets a `typecheck` script **and** a tsconfig, or it silently falls back to the near-empty root `tsconfig.json` and is checked far more loosely than every other workspace (this is exactly how `utils`/`plugins`/`vite-configs` went un-strict for so long — `noUncheckedIndexedAccess` never fired there).
+**`vp check` type-checks, but it is not `tsc` — both run, and `typecheck:all` is the authority.** `vp check`'s type pass is **tsgolint** (Oxlint's type-aware path, enabled by `lint.options.typeCheck` in the root `vite.config.ts`), and it does resolve each workspace's own strict `tsconfig.app.json` — `strict`, `noUncheckedIndexedAccess` and `noUnusedLocals` all fire under it. What it does **not** do is run the per-workspace `typecheck` scripts, and those carry work no linter replicates: `packages/ui` gates its public API against server-only `node:*` imports (`check:public-api`), and both React Router apps regenerate route types first. Every workspace now has a `typecheck` script, CI runs `vp run typecheck:all` as its own step in `check-safe.yml`, and `check:safe` chains it. Keep the two passes in sync: a new workspace gets a `typecheck` script **and** a tsconfig, or it silently falls back to the near-empty root `tsconfig.json` and is checked far more loosely than every other workspace (this is exactly how `utils`/`plugins`/`vite-configs` went un-strict for so long — `noUncheckedIndexedAccess` never fired there).
 
-**tsconfigs are generated — never hand-edit them.** `packages/ts-configs/generate.ts` + `tsconfig.shared.ts` are the source of truth for every `tsconfig.app.json`/`tsconfig.node.json`; run `vp run --filter @repo/ts-configs generate` after changing either. A hand-edit survives exactly until the next unrelated regeneration silently reverts it — the `@lcabrera/ui` bare-specifier alias in both apps was lost this way and had to be folded back into the generator. If a config needs something bespoke, add it to the generator entry, not to the JSON.
+**tsconfigs are generated — never hand-edit them.** `packages/ts-configs/tsconfig.entries.ts` (this repo's per-workspace entries) + `packages/tsconfig/src/tsconfig.shared.ts` (the published factories) are the source of truth for every `tsconfig.app.json`/`tsconfig.node.json`; run `vp run --filter @repo/ts-configs generate` after changing either, then `vp fmt .`. A hand-edit survives exactly until the next unrelated regeneration silently reverts it — the `@lcabrera/ui` bare-specifier alias in both apps was lost this way and had to be folded back into the generator. If a config needs something bespoke, add it to the generator entry, not to the JSON.
 
 **Four analysers run, and `vp check` is not one of them.** Oxlint (`vp lint`,
 configured once in the root `vite.config.ts`), the per-workspace eslint

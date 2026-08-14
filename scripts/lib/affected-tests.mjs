@@ -40,7 +40,11 @@ export const COVERAGE_TASK_PACKAGE = 'vite-react-compiler';
  * Package names whose change forces a full run because they define the shared
  * test/tsconfig machinery every other workspace's task is built from.
  */
-const GLOBAL_PACKAGES = new Set(['@repo/vite-configs', '@repo/ts-configs']);
+const GLOBAL_PACKAGES = new Set([
+  '@lcabrera/tsconfig',
+  '@repo/ts-configs',
+  '@repo/vite-configs',
+]);
 
 /**
  * Files that change how EVERY workspace builds or resolves its tests, so a diff

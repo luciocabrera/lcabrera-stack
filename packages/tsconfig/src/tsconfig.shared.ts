@@ -1,4 +1,6 @@
-type CreateAppTsConfigArgs = {
+export type CreateAppTsConfigArgs = {
+  /** The ambient type roots `types` is appended to — defaults to `['vite/client']`. Pass `[]` (or your own bundler's client types) outside a Vite project: `vite/client` does not resolve there, and a default a consumer cannot drop is this toolchain leaking out of the factory. */
+  readonly baseTypes?: readonly string[];
   readonly exclude?: readonly string[];
   readonly include?: readonly string[];
   /** Extra path aliases merged on top of the default `@/*` → `./src/*` mapping — for a package's own self-referencing alias (e.g. `@lcabrera/ui/*`) or a cross-package one. */
@@ -7,11 +9,11 @@ type CreateAppTsConfigArgs = {
   /** Set `false` to omit the default `@/*` → `./src/*` alias. Publishable packages pass this: `@/` resolves only through a tsconfig, so an `@/` import cannot survive publication, and dropping the alias makes tsc reject one instead of a reviewer having to spot it. */
   readonly srcAlias?: boolean;
   readonly tsBuildInfoFile: string;
-  /** Extra ambient type roots appended to the default `['vite/client']` — e.g. `'node'` for a package whose src/ mixes browser-context and Node-context (SSR entry) files. */
+  /** Extra ambient type roots appended to `baseTypes` — e.g. `'node'` for a package whose src/ mixes browser-context and Node-context (SSR entry) files. */
   readonly types?: readonly string[];
 };
 
-type CreateNodeTsConfigArgs = {
+export type CreateNodeTsConfigArgs = {
   readonly exclude?: readonly string[];
   readonly include?: readonly string[];
   /** Path aliases for this config — node configs have none by default. */
@@ -21,7 +23,7 @@ type CreateNodeTsConfigArgs = {
   readonly types?: readonly string[];
 };
 
-type TsConfig = {
+export type TsConfig = {
   readonly compilerOptions: Record<string, unknown>;
   readonly exclude: readonly string[];
   readonly include: readonly string[];
@@ -44,6 +46,7 @@ const NODE_TS_CONFIG: Omit<TsConfig, 'compilerOptions'> = {
 };
 
 const createAppCompilerOptions = ({
+  baseTypes = ['vite/client'],
   paths,
   rootDirs = ['.', './.react-router/types'],
   srcAlias = true,
@@ -82,7 +85,7 @@ const createAppCompilerOptions = ({
   strict: true,
   target: 'ES2025',
   tsBuildInfoFile,
-  types: ['vite/client', ...types],
+  types: [...baseTypes, ...types],
   useDefineForClassFields: true,
   verbatimModuleSyntax: true,
 });
@@ -117,10 +120,15 @@ const createNodeCompilerOptions = ({
   verbatimModuleSyntax: true,
 });
 
-const mergeTsConfig = (
-  baseConfig: TsConfig,
-  overrides: Partial<TsConfig> = {},
-): TsConfig => ({
+type MergeTsConfigArgs = {
+  readonly baseConfig: TsConfig;
+  readonly overrides?: Partial<TsConfig>;
+};
+
+const mergeTsConfig = ({
+  baseConfig,
+  overrides = {},
+}: MergeTsConfigArgs): TsConfig => ({
   ...baseConfig,
   ...overrides,
   compilerOptions: {
@@ -132,6 +140,7 @@ const mergeTsConfig = (
 });
 
 export const createAppTsConfig = ({
+  baseTypes,
   exclude,
   include,
   paths,
@@ -140,9 +149,10 @@ export const createAppTsConfig = ({
   tsBuildInfoFile,
   types,
 }: CreateAppTsConfigArgs): TsConfig =>
-  mergeTsConfig(
-    {
+  mergeTsConfig({
+    baseConfig: {
       compilerOptions: createAppCompilerOptions({
+        baseTypes,
         paths,
         rootDirs,
         srcAlias,
@@ -152,11 +162,11 @@ export const createAppTsConfig = ({
       exclude: APP_TS_CONFIG.exclude,
       include: APP_TS_CONFIG.include,
     },
-    {
+    overrides: {
       exclude,
       include,
     },
-  );
+  });
 
 export const createNodeTsConfig = ({
   exclude,
@@ -165,8 +175,8 @@ export const createNodeTsConfig = ({
   tsBuildInfoFile,
   types,
 }: CreateNodeTsConfigArgs): TsConfig =>
-  mergeTsConfig(
-    {
+  mergeTsConfig({
+    baseConfig: {
       compilerOptions: createNodeCompilerOptions({
         paths,
         tsBuildInfoFile,
@@ -175,8 +185,8 @@ export const createNodeTsConfig = ({
       exclude: NODE_TS_CONFIG.exclude,
       include: NODE_TS_CONFIG.include,
     },
-    {
+    overrides: {
       exclude,
       include,
     },
-  );
+  });

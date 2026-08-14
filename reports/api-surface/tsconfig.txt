@@ -1,0 +1,16 @@
+# @lcabrera/tsconfig — public API surface
+# Generated. Regenerate with: vp run api-surface:verify -- --write
+# One line per export: <name> <signature>. Do not edit by hand.
+
+## ./generate
+renderTsConfig [const] (config: unknown) => string
+TsConfigEntry [type] { readonly config: unknown; readonly filePath: string; }
+TsConfigFileSystem [type] { readonly mkdir: (directory: string, options: { readonly recursive: true; }) => Promise<unknown>; readonly writeFile: (filePath: string, contents: string, encoding: 'utf8') => Promise<unknown>; }
+writeTsConfigs [const] ({ entries, fileSystem }: WriteTsConfigsArgs) => Promise<void>
+
+## ./shared
+createAppTsConfig [const] ({ baseTypes, exclude, include, paths, rootDirs, srcAlias, tsBuildInfoFile, types }: CreateAppTsConfigArgs) => TsConfig
+CreateAppTsConfigArgs [type] { /** The ambient type roots `types` is appended to — defaults to `['vite/client']`. Pass `[]` (or your own bundler's client types) outside a Vite project: `vite/client` does not resolve there, and a default a consumer cannot drop is this toolchain leaking out of the factory. */ readonly baseTypes?: readonly string[]; readonly exclude?: readonly string[]; readonly include?: readonly string[]; /** Extra path aliases merged on top of the default `@/*` → `./src/*` mapping — for a package's own self-referencing alias (e.g. `@lcabrera/ui/*`) or a cross-package one. */ readonly paths?: Record<string, readonly string[]>; readonly rootDirs?: readonly string[]; /** Set `false` to omit the default `@/*` → `./src/*` alias. Publishable packages pass this: `@/` resolves only through a tsconfig, so an `@/` import cannot survive publication, and dropping the alias makes tsc reject one instead of a reviewer having to spot it. */ readonly srcAlias?: boolean; readonly tsBuildInfoFile: string; /** Extra ambient type roots appended to `baseTypes` — e.g. `'node'` for a package whose src/ mixes browser-context and Node-context (SSR entry) files. */ readonly types?: readonly string[]; }
+createNodeTsConfig [const] ({ exclude, include, paths, tsBuildInfoFile, types }: CreateNodeTsConfigArgs) => TsConfig
+CreateNodeTsConfigArgs [type] { readonly exclude?: readonly string[]; readonly include?: readonly string[]; /** Path aliases for this config — node configs have none by default. */ readonly paths?: Record<string, readonly string[]>; readonly tsBuildInfoFile: string; /** Ambient type roots — defaults to `['node']`. Pass `[]` for a package contractually barred from Node globals (e.g. `@lcabrera/utils`, which is pure and side-effect free), so the config cannot hand it the APIs it must not reach for. */ readonly types?: readonly string[]; }
+TsConfig [type] { readonly compilerOptions: Record<string, unknown>; readonly exclude: readonly string[]; readonly include: readonly string[]; }

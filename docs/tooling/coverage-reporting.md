@@ -102,7 +102,7 @@ The soft rule mirrors `coverage:merge`'s opt-in: **a workspace joins the report
 only once its coverage runs clean and means something.** Checklist:
 
 1. **It has tests.** A `test`/`test:coverage` task that actually executes source.
-   Config-only or typegen-only workspaces (`ts-configs`, `plugins`) have nothing
+   Config-only or typegen-only workspaces (`plugins`) have nothing
    to measure — skip them. Check rather than assume: `eslint-local-rules` and
    `agent-runner` sat on this list long after they had suites, because nobody
    re-counted. `find <dir> -name '*.test.*' | wc -l` settles it.
@@ -126,8 +126,9 @@ only once its coverage runs clean and means something.** Checklist:
   `packages/scan-ingestion`, `packages/utils` and `packages/api` (each has a
   DB-free `test:coverage`). ✅ done. `utils` was deferred at first for having no
   test files; it now carries 21 suites and its own 95% threshold (#124), so it
-  was admitted alongside the others. `plugins` and `ts-configs` are config-only with nothing to
-  cover. `agent-runner` and `eslint-local-rules` were listed here too, which
+  was admitted alongside the others. `plugins` is config-only with nothing to
+  cover; `ts-configs` was too until ADR-069 split its factories into
+  `packages/tsconfig`, which is on both lists as a public package. `agent-runner` and `eslint-local-rules` were listed here too, which
   stopped being true once the latter gained a suite per rule (#205); both were
   admitted in the Phase 3 second pass below.
 - **Phase 3 — apps & server workspaces.** `apps/scan-orchestrator`,

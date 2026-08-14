@@ -133,7 +133,7 @@ project-specific belongs in that project's own `package.json`.
 | `vp run ready`               | `check:safe` + `build:all` — the full "is it shippable" check                                     |
 | `vp run check:safe`          | typegen → `vp check` → typecheck → eslint → biome → tests                                         |
 | `vp run check:push`          | the DB-free CI Quality Gate (no tests/fallow) — the `pre-push` hook runs this then `test:changed` |
-| `vp run typecheck:all`       | real tsc in all 17 workspaces, dependency order                                                   |
+| `vp run typecheck:all`       | real tsc in all 18 workspaces, dependency order                                                   |
 | `vp run typecheck:changed`   | real tsc for the changed workspaces + dependents only — see below                                 |
 | `vp run typegen:all`         | route types for both React Router apps                                                            |
 | `vp run lint:all`            | Oxlint + eslint + Biome **with autofix**, every workspace                                         |
@@ -180,7 +180,7 @@ Tests job (and its coverage report) scope to the diff on pull requests; pushes t
 `main` still run the full `test:ci`.
 
 `typecheck:changed` applies the same change-based selection to the Quality Gate's
-slowest per-workspace step — real `tsc` across all 17 workspaces. It runs
+slowest per-workspace step — real `tsc` across all 18 workspaces. It runs
 `typecheck` only for the changed workspaces plus their dependents (a type error a
 diff introduces surfaces where the type is used, which the dependents walk covers),
 falling back to the full run on the same shared/root triggers and on pushes to
@@ -524,7 +524,7 @@ file under `reports/sonar/runs/` ([ADR-049](docs/decisions/ADR-049-findings-repo
 
 ## 5. Per-workspace tasks
 
-**Every one of the 17 workspaces** defines these seven:
+**Every one of the 18 workspaces** defines these seven:
 
 `format` · `format:check` · `lint` · `lint:check` · `lint:eslint` ·
 `lint:eslint:check` · `typecheck`
@@ -546,6 +546,7 @@ Beyond that, tasks are per-workspace. `build` and `test` are common but come fro
 | `packages/node-runtime`       | `@repo/node-runtime`      | `test:coverage`                                                                                     |
 | `packages/agent-runner`       | `@repo/agent-runner`      | —                                                                                                   |
 | `packages/ts-configs`         | `@repo/ts-configs`        | `generate`                                                                                          |
+| `packages/tsconfig`           | `@lcabrera/tsconfig`      | `build`, `test:coverage`                                                                            |
 | `packages/eslint-local-rules` | `@lcabrera/eslint-plugin` | —                                                                                                   |
 | `packages/plugins`            | `@repo/plugins`           | —                                                                                                   |
 | `packages/utils`              | `@lcabrera/utils`         | —                                                                                                   |
@@ -559,7 +560,11 @@ Notes on the non-obvious ones:
 - **`packages/ts-configs` → `generate`** rewrites every `tsconfig.app.json` /
   `tsconfig.node.json` in the repo. These are **generated artifacts — never
   hand-edit them**; a hand-edit survives only until the next regeneration
-  silently reverts it. Always follow `generate` with `vp fmt .`.
+  silently reverts it. Always follow `generate` with `vp fmt .`. The factories
+  and the writer it calls are the published `@lcabrera/tsconfig`
+  (`packages/tsconfig`); what stays in `packages/ts-configs` is this repo's own
+  entry table, which is why the task lives there and not in the package
+  ([ADR-069](docs/decisions/ADR-069-publish-the-shared-toolchain.md)).
 - **A workspace with real-Postgres tests must split them**: keep the full suite as
   `test`, and expose a DB-free `test:unit` (plus `test:coverage`) — otherwise the
   whole workspace drops out of `test:ci` and takes its pure tests with it.

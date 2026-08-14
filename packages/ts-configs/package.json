@@ -3,10 +3,6 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "exports": {
-    "./shared": "./tsconfig.shared.ts",
-    "./generate": "./generate.ts"
-  },
   "scripts": {
     "format": "vp fmt .",
     "format:check": "vp fmt --check .",
@@ -15,10 +11,11 @@
     "lint:check": "vp lint . && vp run lint:eslint:check",
     "lint:eslint": "eslint . --config eslint.config.mjs --fix --max-warnings 0",
     "lint:eslint:check": "eslint . --config eslint.config.mjs --max-warnings 0",
-    "test": "node node_modules/vitest/vitest.mjs run --passWithNoTests",
+    "test": "node node_modules/vitest/vitest.mjs run",
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
   "devDependencies": {
+    "@lcabrera/tsconfig": "workspace:*",
     "@repo/vite-configs": "workspace:*",
     "@types/node": "catalog:types",
     "eslint": "catalog:lint",

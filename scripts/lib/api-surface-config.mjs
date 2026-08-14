@@ -24,6 +24,7 @@ const PUBLIC_PACKAGE_DIRS = [
   'api',
   'eslint-local-rules',
   'server',
+  'tsconfig',
   'ui',
   'utils',
 ];

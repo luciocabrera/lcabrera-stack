@@ -1,0 +1,10 @@
+# ESLint bulk-suppressions tooling regenerates this as an empty `{}` for a
+# workspace with nothing to suppress, and committing/deleting it is an endless
+# loop. @lcabrera/tsconfig is public-facing and suppression-free by construction
+# (AGENTS.md §4) — CI checks out no file, so any real finding fails the gate.
+# Never un-ignore this or commit a non-empty one.
+#
+# It carries a second weight here: this package DEFINES the strictness every
+# workspace is held to. A suppression in it would be the standard exempting
+# itself from the standard.
+eslint-suppressions.json

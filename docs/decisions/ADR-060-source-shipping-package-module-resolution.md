@@ -106,13 +106,15 @@ No detection gate was needed; deleting the thing that hid the problem was enough
 
 What the alias's **absence** needed was a gate of its own, because nothing else
 would notice it coming back — and re-adding it is a one-line, well-meaning fix
-for an editor complaint. `packages/ts-configs/tsconfig.shared.test.ts` asserts
-that the generated `packages/ui` config carries no `paths` at all, and that no
-workspace aliases `@lcabrera/ui/*` by wildcard. Proved by reintroducing the
-alias in the generator, regenerating, and watching both tests fail. This is why
-the per-workspace entries now live in `tsconfig.entries.ts` apart from the
-writer: importing `generate.ts` rewrites all 17 configs as a side effect, so
-the set was previously unassertable.
+for an editor complaint. `packages/ts-configs/tsconfig.entries.test.ts` (then
+named `tsconfig.shared.test.ts`, before ADR-069 split the factories out into
+`@lcabrera/tsconfig`) asserts that the generated `packages/ui` config carries no
+`paths` at all, and that no workspace aliases `@lcabrera/ui/*` by wildcard.
+Proved by reintroducing the alias in the generator, regenerating, and watching
+both tests fail. This is why the per-workspace entries live in
+`tsconfig.entries.ts` apart from the writer: importing `generate.ts` rewrites
+every config in the repo as a side effect, so the set was previously
+unassertable.
 
 ## Consequences
 
