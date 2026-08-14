@@ -450,6 +450,22 @@ runs both in CI. See the [`commit-and-pr`](.github/skills/commit-and-pr/SKILL.md
 | `vp run issue:verify`                             | validate an issue description (`ISSUE_BODY`) against the issue template         |
 | `vp run issue:verify -- --body-file <p>`          | validate an issue description from a file                                       |
 
+### Review gates
+
+`Copilot review complete` is a commit status that is green only while Copilot's
+newest review names the pull request's **current head commit** — a review of a
+superseded commit looks identical in the UI to a review of the head, which is how
+a PR reaches a mergeable state unreviewed.
+[`copilot-review-gate.yml`](.github/workflows/copilot-review-gate.yml) recomputes
+it on every push and every review; the command below is the same comparison run
+by hand. The states and the break-glass path are in
+[`docs/tooling/copilot-review-gate.md`](docs/tooling/copilot-review-gate.md).
+
+| Command                                              | Does                                                             |
+| ---------------------------------------------------- | ---------------------------------------------------------------- |
+| `vp run copilot-review:status -- --pr <n> --dry-run` | print the state the gate would publish for a PR, posting nothing |
+| `vp run copilot-review:status -- --pr <n>`           | publish that state against the PR's current head commit          |
+
 ### Autonomous PR queue
 
 `vp run pr:queue` reads every open PR, derives the merge order, and decides each
@@ -617,6 +633,15 @@ and committed through an ordinary PR — see
 [AGENTS.md § Releasing, Changelog & Labels](AGENTS.md#releasing-changelog--labels)
 and the `releasing` skill for why no bot
 pushes it to `main`.
+
+[`copilot-review-gate.yml`](.github/workflows/copilot-review-gate.yml) judges the
+**review** rather than the code: it publishes the `Copilot review complete`
+commit status against the head SHA, green only while Copilot's newest review
+names that commit. It is the only workflow here triggered by
+`pull_request_review` as well as `pull_request`, because its verdict changes when
+the diff has not — a review landing flips it, and a push takes it back to
+`pending`. It reports but does not block until #698 makes the context required.
+See [`docs/tooling/copilot-review-gate.md`](docs/tooling/copilot-review-gate.md).
 
 [`secret-scan.yml`](.github/workflows/secret-scan.yml) scans repository
 **content** for credentials — the layer the two agent-boundary guards
