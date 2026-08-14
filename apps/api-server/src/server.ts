@@ -1,5 +1,5 @@
+import { registerShutdownSignals } from '@lcabrera/node/registerShutdownSignals.util';
 import { closePool } from '@lcabrera/server/db/get-pool.util';
-import { registerShutdownSignals } from '@repo/node-runtime/registerShutdownSignals.util';
 import { runStartupDbSanityCheck } from 'api-shared';
 
 import { createApp } from './app/app';

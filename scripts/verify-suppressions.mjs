@@ -1,6 +1,7 @@
 /**
- * Gate: the four public packages carry no suppression that has not been argued
- * for in writing (AGENTS.md §4).
+ * Gate: the public packages carry no suppression that has not been argued for in
+ * writing (AGENTS.md §4). Membership is resolved at runtime from the workspaces
+ * that gitignore `eslint-suppressions.json`, never from a list written here.
  *
  * Findings are diffed against `docs/agents/public-package-suppressions.json` in
  * two lanes — `approved` (scoped to a public package) and `acknowledged`

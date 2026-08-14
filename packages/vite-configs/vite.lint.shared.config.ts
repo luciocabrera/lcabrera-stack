@@ -57,7 +57,7 @@ const NODE_WORKSPACES = [
  *
  * `@lcabrera/utils` guarantees pure, side-effect-free helpers: its tsconfig gives
  * it no DOM lib and no node types, and anything that must touch the process
- * belongs in `@repo/node-runtime` instead. Handing it `process` here would
+ * belongs in `@lcabrera/node` instead. Handing it `process` here would
  * contradict the boundary the tsconfig exists to enforce.
  */
 const RUNTIME_AGNOSTIC_WORKSPACES = ['packages/utils/**'];

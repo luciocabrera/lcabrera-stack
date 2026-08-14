@@ -18,8 +18,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@lcabrera/node": "workspace:*",
     "@lcabrera/server": "workspace:*",
-    "@repo/node-runtime": "workspace:*",
     "api-shared": "workspace:*",
     "cors": "catalog:backend",
     "express": "catalog:backend",

@@ -1,13 +1,46 @@
 {
-  "name": "@repo/node-runtime",
-  "version": "0.0.0",
-  "private": true,
+  "name": "@lcabrera/node",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Process-lifecycle primitives for long-running Node services — graceful shutdown on the signals a container runtime actually sends.",
+  "keywords": [
+    "graceful-shutdown",
+    "node",
+    "sigint",
+    "signals",
+    "sigterm"
+  ],
+  "homepage": "https://github.com/luciocabrera/vite-react-compiler/tree/main/packages/node-runtime#readme",
+  "bugs": "https://github.com/luciocabrera/vite-react-compiler/issues",
+  "license": "MIT",
+  "author": "Lucio Cabrera",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luciocabrera/vite-react-compiler.git",
+    "directory": "packages/node-runtime"
+  },
+  "files": [
+    "dist",
+    "src",
+    "CHANGELOG.md",
+    "!src/**/*.test.*"
+  ],
   "type": "module",
   "sideEffects": false,
   "exports": {
     "./registerShutdownSignals.util": "./src/registerShutdownSignals.util.ts"
   },
+  "publishConfig": {
+    "exports": {
+      "./registerShutdownSignals.util": {
+        "types": "./dist/registerShutdownSignals.util.d.mts",
+        "default": "./dist/registerShutdownSignals.util.mjs"
+      }
+    },
+    "access": "public"
+  },
   "scripts": {
+    "build": "vp pack",
     "format": "vp fmt .",
     "format:check": "vp fmt --check .",
     "lint": "vp lint . --fix && vp run lint:eslint",

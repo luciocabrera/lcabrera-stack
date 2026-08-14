@@ -74,7 +74,8 @@ among them.
 
 `packages/utils` is deliberately in neither runtime list. Its tsconfig gives it
 no DOM lib and no node types, it imports nothing from `node:`, and anything that
-must touch the process belongs in `@repo/node-runtime` instead. Handing it
+must touch the process belongs in `@repo/node-runtime` (now `@lcabrera/node`)
+instead. Handing it
 `process` here would contradict the boundary that tsconfig exists to enforce.
 
 ## Consequences

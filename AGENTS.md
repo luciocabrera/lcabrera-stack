@@ -14,8 +14,9 @@ in opposite directions, the package wins. A package must stand on its own —
 declared dependencies, a resolvable public surface, no reliance on a consumer's
 tsconfig `paths` to make an import work — because it is meant to be consumed from
 outside this repo, where none of this monorepo's wiring exists. `packages/ui`,
-`packages/api`, `packages/server`, `packages/utils` and
-`packages/eslint-local-rules` are held strictest for exactly that reason (§4). This is why the column-filter shapes are **duplicated**
+`packages/api`, `packages/server`, `packages/utils`,
+`packages/eslint-local-rules`, `packages/tsconfig` and `packages/node-runtime`
+are held strictest for exactly that reason (§4). This is why the column-filter shapes are **duplicated**
 in `@lcabrera/ui` and `@lcabrera/server` rather than shared through an elegant edge that
 only resolves in-repo ([ADR-039](docs/decisions/ADR-039-duplicate-over-undeclared-edges.md)).
 Facing that call — promote it into a package, or write it twice?
@@ -24,7 +25,7 @@ walks the decision in order and links the ADR that owns each step.
 
 **Two scopes, and the split carries meaning.** The publishable packages are
 **`@lcabrera/*`**; the internal ones (`vite-configs`, `ts-configs`, `plugins`,
-`agent-runner`, `node-runtime`, `scan-ingestion`) stay **`@repo/*`**. So the
+`agent-runner`, `scan-ingestion`, `scan-report`) stay **`@repo/*`**. So the
 import line tells you which side of the product boundary you are on: `@lcabrera/`
 means it ships and has consumers outside this repo, `@repo/` means internal, change
 it freely. A new package picks its scope by one question — does it ship? — and a
@@ -37,17 +38,19 @@ the custom lint rules sat unscoped until they became `@lcabrera/eslint-plugin`
 **Three packages come out of that `@repo/*` list, and two of them are
 renames.**
 [ADR-069](docs/decisions/ADR-069-publish-the-shared-toolchain.md) publishes
-`packages/vite-configs` (folding in `packages/plugins`) as
-`@lcabrera/vite-config` and `packages/node-runtime` as `@lcabrera/node`. Those
-workspaces **become** the published package, and the repo data they carry leaves
-for a repo-owned home. **`packages/ts-configs` is the one split, not a rename**:
+`packages/node-runtime` as `@lcabrera/node` (done, #676) and
+`packages/vite-configs`, folding in `packages/plugins`, as
+`@lcabrera/vite-config`. Those workspaces **become** the published package —
+the directory keeps its name, the npm name is the one that changes — and the
+repo data they carry leaves for a repo-owned home.
+**`packages/ts-configs` is the one split, not a rename**:
 `@lcabrera/tsconfig` is a new package (`packages/tsconfig`) holding the factories
 and the writer, while `@repo/ts-configs` survives — still `@repo/*`, still
 `private: true` — as the host of `tsconfig.entries.ts`, this repo's own workspace
 roster, which the published package must never carry. So
 `vp run --filter @repo/ts-configs generate` keeps working unchanged, and that
 name is not on its way anywhere. #674–#677 do the work; until one lands, its
-package is `@repo/*` and `private: true` in fact. What makes all four
+package is `@repo/*` and `private: true` in fact. What makes all three
 publishable is that this repo's own data — the Oxlint workspace roster, the
 `@lcabrera/ui`/`@lcabrera/server` boundary tables, the `docker/local` env path,
 the tsconfig entry table — comes out of them and becomes configuration, so
@@ -76,21 +79,22 @@ the listing cannot tell you is below.
 
 `packages/ui`,
 `packages/api`, `packages/server`, `packages/utils`,
-`packages/eslint-local-rules` and `packages/tsconfig`
+`packages/eslint-local-rules`, `packages/tsconfig` and `packages/node-runtime`
 are public packages and are held strictest: never baseline, scope, or
 inline-disable a finding in any of them. The authority on that list is not this
 sentence — it is which workspaces gitignore `eslint-suppressions.json`, which
 `vp run suppressions:verify` reads at runtime, so a new public package is
 covered the day it is added; keep the prose in step.
 
-`packages/vite-configs` (absorbing `packages/plugins`) and
-`packages/node-runtime` still have to join that list as `@lcabrera/vite-config`
-and `@lcabrera/node`
-([ADR-069](docs/decisions/ADR-069-publish-the-shared-toolchain.md)); neither is
+`packages/vite-configs` (absorbing `packages/plugins`) still has to join that
+list as `@lcabrera/vite-config`
+([ADR-069](docs/decisions/ADR-069-publish-the-shared-toolchain.md)); it is not
 in the tier yet, and the rule above says why — `packages/vite-configs` and
-`packages/plugins` each still commit an `eslint-suppressions.json`. Each is
-admitted by its own implementing issue (#675, #676) clearing those suppressions
-and gitignoring the file — not by being named here. `packages/ts-configs` is not
+`packages/plugins` each still commit an `eslint-suppressions.json`. It is
+admitted by its own implementing issue (#675) clearing those suppressions and
+gitignoring the file — not by being named here. `packages/node-runtime` joined
+that way under #676: it carried no suppressions to clear, so publishing it as
+`@lcabrera/node` was a manifest, a `.gitignore` and a README. `packages/ts-configs` is not
 on that list because it never joins it: it is the split, so what became public is
 the new `packages/tsconfig` above, and the surviving workspace stays private.
 `packages/scan-report` is not on it either, and for a different reason: it was
@@ -113,12 +117,13 @@ instead of passing silently. The full topology and what each tsconfig denies is
 [ADR-038](docs/decisions/ADR-038-public-package-topology-by-runtime.md),
 which supersedes ADR-008.
 
-`utils` and `node-runtime` split on purity, and the split is deliberate:
+`utils` and `node` split on purity, and the split is deliberate:
 `@lcabrera/utils` guarantees pure, side-effect-free helpers, so anything that must
-touch the process (signal handlers, exit paths) belongs in `@repo/node-runtime`
-instead of eroding that guarantee. That is also why publishing does not merge the
-two — nor fold `node-runtime` into `@lcabrera/server`, which would drag `pg` into
-a consumer that only wanted a shutdown handler (ADR-069, on ADR-038's reasoning).
+touch the process (signal handlers, exit paths) belongs in `@lcabrera/node`
+(the `packages/node-runtime` workspace) instead of eroding that guarantee. That
+is also why publishing did not merge the two — nor fold `@lcabrera/node` into
+`@lcabrera/server`, which would drag `pg` into a consumer that only wanted a
+shutdown handler (ADR-069, on ADR-038's reasoning).
 
 All source paths below (e.g. `src/components/`) are relative to `apps/react-router/` unless otherwise noted.
 

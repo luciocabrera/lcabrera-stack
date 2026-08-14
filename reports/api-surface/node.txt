@@ -1,0 +1,6 @@
+# @lcabrera/node — public API surface
+# Generated. Regenerate with: vp run api-surface:verify -- --write
+# One line per export: <name> <signature>. Do not edit by hand.
+
+## ./registerShutdownSignals.util
+registerShutdownSignals [const] ({ shutdown }: RegisterShutdownSignalsArgs) => void
