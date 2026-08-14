@@ -1,6 +1,43 @@
 # ADR-070 — The showcase serves its own table rows; an external API is an opt-in override
 
-**Status:** Accepted
+**Status:** Accepted — one rejected alternative has since been adopted (#705)
+
+> **Amendment, #705.** "Reorder the priorities inside `@lcabrera/api`'s
+> `getApiBaseUrl`" is listed below under _Alternatives considered_ and was
+> rejected here as the wrong home, needing its own issue and a changeset. It got
+> both: `VITE_API_URL` now outranks the SSR `requestUrl` inside the package, so
+> `resolveExternalApiBaseUrl` and `readExternalApiUrl` no longer exist and the
+> fetchers pass `getApiBaseUrl` directly. Every mention of those two utils below
+> is a dated record of the shape this ADR shipped, not current structure. What
+> this ADR actually decided — the showcase self-hosts, `VITE_API_URL` is an
+> opt-in build-time override, `isExternalApiEnabled` is the switch — is
+> unchanged.
+>
+> **Amendment, #708.** One recipe below is wrong as written, in two ways, and was
+> wrong on the day. The body's
+> `grep -A2 'isExternalApiEnabled = () => {' build/server/index.js` names a path
+> that does not exist from the repo root — the bundle is at
+> `apps/react-router/build/server/index.js` — and its pattern is unanchored,
+> which matters because the bundler preserves the `isExternalApiEnabled` docblock
+> verbatim into the output, command and all. On the tree this ADR shipped with,
+> that docblock quoted the unanchored form, so running it matched its own
+> documentation and printed the same lines whichever way the predicate folded.
+> The corrected form —
+> `grep -n -A2 '^var isExternalApiEnabled' apps/react-router/build/server/index.js`
+> — is carried verbatim by `docs/data-sources.md` and by the
+> `isExternalApiEnabled` docblock, and the anchor is still what separates the
+> code from the comment quoting it.
+>
+> **The same body sentence's cross-reference is stale in its own right**, and it
+> is worth naming separately because it is a claim about another document rather
+> than about a command. It reads "`docs/data-sources.md` carries it", where "it"
+> is the wrong command quoted immediately before. That document carries the
+> corrected form above instead, so a reader who follows the pointer will not find
+> what the body says is there — and could reasonably conclude that
+> `data-sources.md` had drifted rather than that this line had.
+>
+> The body below is left as written, per the ADR-008 precedent of correcting a
+> dated record from its header rather than rewriting it.
 
 - **Date:** 2026-08-14
 - **Scope:** `apps/react-router` — the four table routes, their `.server`
@@ -176,6 +213,10 @@ priority list is published behaviour for every consumer of the package, so
 changing it needs its own issue, its own justification and a changeset.
 `resolveExternalApiBaseUrl` inverts the order for this app in four lines and
 leaves the package's contract alone.
+
+**Adopted since, in #705.** The issue, the justification and the changeset all
+exist, and the reorder landed in `@lcabrera/api`. The app-side inversion was
+deleted in the same change — see the amendment at the top of this file.
 
 **Adopt the `skip === 0`-only `COUNT` while converting.** It is the cheaper read
 and the pattern the repo already prefers (#402). Rejected here because it removes

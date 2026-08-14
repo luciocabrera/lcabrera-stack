@@ -92,6 +92,22 @@ export const loader = async ({ request }: { request: Request }) => {
 };
 ```
 
+**`VITE_API_URL` wins over every derived answer, including the request URL you
+just passed.** Set it and this function returns it for every caller in that
+bundle; leave it unset and the request URL, then the runtime, decide. The order
+is that way round because only a loader can supply a request URL — the browser
+half of the same render cannot — so ranking the request URL first made one page
+resolve two different API hosts. If you want the request's own origin under SSR,
+do not set `VITE_API_URL` for that build; Vite substitutes it at build time, so
+there is no argument to this function that overrules it.
+
+| Priority | Source                         | Answer                                        |
+| -------- | ------------------------------ | --------------------------------------------- |
+| 1        | `VITE_API_URL`                 | the value, verbatim                           |
+| 2        | `requestUrl` (loader/action)   | localhost API host, or `<request origin>/api` |
+| 3        | neither, and no `window` (SSR) | localhost API host                            |
+| 4        | neither, in the browser        | dev proxy, `<host>:3001/api`, or same origin  |
+
 ### Fetch a page of table rows
 
 Declare the endpoint once; the fetcher takes the query. The origin is a

@@ -57,3 +57,4 @@ or run `vp run adr:new`, which takes the next free number for you.
 | [ADR-068](./ADR-068-a-refused-read-is-rendered-data-not-an-exception.md)              | A refused read is data the table renders; the menu narrows to the catalogue but never replaces it                        |
 | [ADR-069](./ADR-069-publish-the-shared-toolchain.md)                                  | The shared toolchain publishes, and the repo data it carries becomes configuration                                       |
 | [ADR-071](./ADR-071-split-the-demo-database-setup.md)                                 | Split the demo database setup                                                                                            |
+| [ADR-072](./ADR-072-explicit-api-base-url-outranks-the-derived-one.md)                | An explicitly configured API base URL outranks the one derived from the SSR request                                      |

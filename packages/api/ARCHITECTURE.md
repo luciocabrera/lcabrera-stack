@@ -55,14 +55,14 @@ half out removes that edge at the package boundary rather than papering over it.
 
 ```mermaid
 flowchart TD
-  A[getApiBaseUrl called] --> B{requestUrl provided?}
+  A[getApiBaseUrl called] --> G{VITE_API_URL set?}
+  G -- yes --> H[Return env URL]
+  G -- no --> B{requestUrl provided?}
   B -- yes --> C[Parse request URL hostname]
   C --> D{Local / private IP?}
   D -- yes --> E[Return CONFIG.localhost.apiHost]
   D -- no --> F[Return protocol + hostname + /api]
-  B -- no --> G{VITE_API_URL set?}
-  G -- yes --> H[Return env URL]
-  G -- no --> I{Server-side rendering?}
+  B -- no --> I{Server-side rendering?}
   I -- yes --> J[Return CONFIG.localhost.apiHost]
   I -- no --> K{Dev mode?}
   K -- yes --> L[Return /api Vite proxy]
@@ -70,6 +70,23 @@ flowchart TD
   M -- yes --> N[Return same hostname:3001/api]
   M -- no --> O[Return CONFIG.prod.apiHost]
 ```
+
+**`VITE_API_URL` is the first branch rather than the second, and that is a
+decision** — #705 reversed the order the package shipped with through `0.2.0`.
+The argument is not that explicit configuration beats inference on principle; it
+is that only a loader can supply `requestUrl`. Ranking it first meant the SSR
+half of a render resolved the request's own origin while the browser half
+resolved the variable — silently, because both halves rendered something.
+`requestUrl` keeps the job it actually had: under SSR there is no `location`, so
+it is the only way to learn the origin being served.
+
+Nothing a caller passes overrules the variable. It is substituted at build time,
+so an app needing both behaviours from one bundle has to choose between them
+itself and pass an explicit base URL. The order is pinned by the
+`precedence: VITE_API_URL outranks the request URL` block in
+`get-api-base-url.util.test.ts`, whose override host is deliberately one no
+other branch can produce — the probe that hid this defect used a value both
+branches returned.
 
 ## Consumers
 

@@ -66,15 +66,23 @@ through `fetchCarSalesPage` / `fetchWideAlltypes150Page`. Both endpoints answer
 the identical `{ data, hasMore, total }`, so nothing downstream can tell which
 one replied.
 
-Two app-local utils split the decision, and both read the variable through
-`readExternalApiUrl` so they cannot disagree: `isExternalApiEnabled` says
-**whether** the external path is taken, `resolveExternalApiBaseUrl` says
-**where** it goes. The second one has to exist. `@lcabrera/api`'s
-`getApiBaseUrl` ranks the SSR request URL _above_ `VITE_API_URL` — handed one by
-a loader it never reads the variable at all — so without the inversion the
-loader fetched the request's own origin while the browser fetched the override.
-The order is inverted here, for this app, rather than in the package, whose
-priority list is published behaviour for every consumer.
+**Whether** the external path is taken is one app-local util,
+`isExternalApiEnabled`. **Where** it goes is not the app's business any more:
+`@lcabrera/api`'s `getApiBaseUrl` ranks `VITE_API_URL` above the SSR request URL
+since #705, so the loader and the browser resolve the same host and the fetchers
+simply pass it as their `resolveBaseUrl`.
+
+This app used to carry a `resolveExternalApiBaseUrl` that inverted the package's
+order for itself, because `getApiBaseUrl` ranked the request URL first: handed
+one by a loader it never read the variable, so the loader fetched the request's
+own origin while the browser fetched the override. That util and its
+`readExternalApiUrl` helper are gone — the package answers correctly now, and a
+second answer in the app would be a second thing to keep in step.
+
+The one agreement that still spans the boundary: **an empty `VITE_API_URL`
+counts as unset on both sides.** `isExternalApiEnabled` checks it explicitly and
+`getApiBaseUrl` checks truthiness, so a bare `export VITE_API_URL=` selects
+neither the external branch nor an origin of `''`.
 
 ### It is a build-time switch
 
@@ -83,10 +91,10 @@ reads `import.meta.env.VITE_API_URL`, and **Vite substitutes that when the
 bundle is produced**, not when the server starts. A production build therefore
 folds the predicate to a constant and eliminates the losing branch:
 
-| Built with                     | `build/server/index.js` contains                 |
-| ------------------------------ | ------------------------------------------------ |
-| _(nothing)_                    | `isExternalApiEnabled = () => { return false; }` |
-| `VITE_API_URL=http://host/api` | `isExternalApiEnabled = () => { return true; }`  |
+| Built with                     | `build/server/index.js` contains                       |
+| ------------------------------ | ------------------------------------------------------ |
+| _(nothing)_                    | `var isExternalApiEnabled = () => {` … `return false;` |
+| `VITE_API_URL=http://host/api` | `var isExternalApiEnabled = () => {` … `return true;`  |
 
 So **setting `VITE_API_URL` for `react-router-serve` does nothing** if the
 bundle was built without it. There is no error: the folded self-hosted path
@@ -98,10 +106,28 @@ VITE_API_URL=https://api.example.com/api vp run build
 vp run start
 ```
 
-Check which way a bundle actually folded, rather than trusting the environment:
+Check which way a bundle actually folded, rather than trusting the environment.
+**Both halves of the command below are load-bearing** (#708). The path is
+repo-root-relative, because the bundle is written inside this app workspace, not
+at the repo root — the bare `build/server/index.js` the earlier form named
+resolves to nothing from the directory these docs tell you to run commands in.
+The `^` anchor is what makes it a probe rather than an echo: the bundler
+preserves the docblock above `isExternalApiEnabled` verbatim into the output,
+including the command itself, so dropping the anchor matches the documentation
+before it matches the code and reports the same first line whichever way the fold
+went. Remove the `^` and see it for yourself.
 
 ```bash
-grep -A2 'isExternalApiEnabled = () => {' apps/react-router/build/server/index.js
+grep -n -A2 '^var isExternalApiEnabled' apps/react-router/build/server/index.js
+```
+
+The same anchored read answers the sharper question, which host the loader will
+actually call, because `getApiBaseUrl` folds too — with the variable set it
+collapses to a single `return "<the value>";` with the `requestUrl` branch
+eliminated:
+
+```bash
+grep -n -A3 '^var getApiBaseUrl' apps/react-router/build/server/index.js
 ```
 
 In **dev** there is no prebuilt bundle, so exporting the variable before the dev
@@ -122,21 +148,25 @@ vp run dev:showcase        # showcase alone
 ### Keeping the override honest
 
 An override nobody runs is an override that breaks silently, so it is exercised
-two ways: `dev:external-api` by hand, and
-`services/isExternalApiEnabled.util.test.ts`,
-`services/resolveExternalApiBaseUrl.util.test.ts` plus each fetcher's test in
-CI — those stub `VITE_API_URL` and assert the request URL each branch produces,
-**including with an SSR `requestUrl` present**, so a change that quietly
-collapses the two paths into one fails the build.
+three ways: `dev:external-api` by hand;
+`services/isExternalApiEnabled.util.test.ts` plus each fetcher's test in CI,
+which stub `VITE_API_URL` and assert the request URL each branch produces
+**including with an SSR `requestUrl` present**; and, in the package that now
+owns the precedence, the `precedence: VITE_API_URL outranks the request URL`
+block in `packages/api/src/config/get-api-base-url.util.test.ts`. Deleting any
+of them leaves the branch less watched than it reads.
 
 **Point it somewhere the fallback would never reach.** `dev:external-api` sets
 `VITE_API_URL=http://localhost:3001/api`, which is convenient and useless as a
 check: it is byte-identical to what `getApiBaseUrl` answers for a local request
 URL anyway, so a request arriving at the api-server proves nothing about which
 of the two produced the address. It hid a real defect for two rounds of review
-on #701. To actually test the override, point it at a host nothing else uses —
-a stub server on a spare port — and assert the request lands _there_ while the
-api-server on `:3001` stays idle.
+on #701, and #705 is the issue that settled it. To actually test the override,
+point it at a host nothing else uses — a stub server on a spare port — and
+assert the request lands _there_ while a **live** server on `:3001` stays idle.
+The second server matters as much as the first: without it, the wrong host
+produces a connection error, and "the override worked" and "the page broke" stop
+looking different.
 
 Note what the unit tests can and cannot show: they run under Vitest, where
 `import.meta.env` is live, so they prove **the branch and the host are wired
