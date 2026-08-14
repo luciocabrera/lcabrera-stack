@@ -1,18 +1,15 @@
+import { createPackConfig } from '@lcabrera/vite-config/pack';
+import { VITEST_COVERAGE_FLAGS } from '@lcabrera/vite-config/run';
 import { defineConfig } from 'vite-plus';
 
-// Coverage flags are inlined rather than imported from `@repo/vite-configs/run`:
-// vite-configs depends on @lcabrera/utils, so importing it back — even for a const —
-// creates a workspace cycle that breaks every recursive `vp run -r` task graph
-// (the same reason eslint.config.mjs imports its shared config by relative path).
-// The reporter half mirrors VITEST_COVERAGE_FLAGS in packages/vite-configs; the
-// threshold half is the 95% gate — @lcabrera/utils is public-facing (AGENTS.md §4),
-// so any drop below 95% fails `test:coverage`.
+// Both blocks were inlined while @lcabrera/vite-config declared @lcabrera/utils
+// as a devDependency and importing it back would have closed a workspace cycle.
+// ADR-069 dropped that edge — the config package has no import site for it — so
+// the shared values are imported again. The 95% thresholds stay local: they are
+// this package's own gate (@lcabrera/utils is public-facing, AGENTS.md §4), not
+// something every workspace shares.
 const COVERAGE_FLAGS = [
-  '--coverage',
-  '--coverage.provider=v8',
-  '--coverage.reporter=json',
-  '--coverage.reporter=json-summary',
-  '--coverage.reportsDirectory=coverage',
+  VITEST_COVERAGE_FLAGS,
   '--coverage.thresholds.statements=95',
   '--coverage.thresholds.branches=95',
   '--coverage.thresholds.functions=95',
@@ -20,16 +17,7 @@ const COVERAGE_FLAGS = [
 ].join(' ');
 
 export default defineConfig({
-  // Mirrors createPackConfig in packages/vite-configs, inlined for the same
-  // reason COVERAGE_FLAGS is: vite-configs depends on @lcabrera/utils, so importing
-  // it back would create a workspace cycle. See that file for why these packages
-  // are built at all rather than shipping source.
-  pack: {
-    dts: { tsconfig: 'tsconfig.app.json' },
-    entry: ['src/**/*.ts', '!src/**/*.test.ts'],
-    sourcemap: true,
-    unbundle: true,
-  },
+  pack: createPackConfig(),
   run: {
     tasks: {
       test: {

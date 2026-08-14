@@ -5,12 +5,14 @@ are the product, the `@lcabrera/` vs `@repo/` scope split, the never-baseline ru
 — is in the root [AGENTS.md](../AGENTS.md) §1 and §4. This file is the
 **publishing contract** for the public packages: `@lcabrera/ui`,
 `@lcabrera/api`, `@lcabrera/server`, `@lcabrera/utils`,
-`@lcabrera/eslint-plugin`, `@lcabrera/tsconfig`, `@lcabrera/node`.
+`@lcabrera/eslint-plugin`, `@lcabrera/tsconfig`, `@lcabrera/node`,
+`@lcabrera/vite-config`.
 
 A published package's npm name and its workspace directory need not match, and
-two of them already do not: `@lcabrera/eslint-plugin` lives in
-`packages/eslint-local-rules` and `@lcabrera/node` in `packages/node-runtime`.
-Read the manifest, not the path.
+three of them already do not: `@lcabrera/eslint-plugin` lives in
+`packages/eslint-local-rules`, `@lcabrera/node` in `packages/node-runtime` and
+`@lcabrera/vite-config` in `packages/vite-configs`. Read the manifest, not the
+path.
 
 ## Publishing invariants
 
@@ -103,8 +105,20 @@ by inspection:
   still resolves them for typecheck and tests. `@react-router/node` is an
   **optional** peer: only the `./entry/*` SSR helpers import it, so a
   browser-only consumer should not be forced to install it.
+  `@lcabrera/vite-config` is the same shape at a larger scale — every ESLint and
+  Vite plugin it composes is a peer, so a consumer never resolves a second copy
+  of one, and the five that only `./plugins` reaches are optional peers.
+- **A `.mjs` source is still a built entry.** `@lcabrera/vite-config` ships
+  ESLint flat configs, which are JavaScript; tsdown builds them like any other
+  entry, but emits their `.d.mts` only when the workspace's **generated**
+  tsconfig sets `allowJs` — a `dts.compilerOptions` build option is silently
+  ignored and the build fails with "tsgo did not generate dts file". Without the
+  declarations the subpath resolves untyped and `attw:verify` fails; and because
+  they are then inferred, an option defaulting to `[]` publishes as `never[]`
+  unless the source carries a JSDoc `@param`.
 - `catalog:` and `workspace:*` need no special handling — pnpm rewrites both to
-  real version ranges at pack time.
+  real version ranges at pack time, in `peerDependencies` as well as
+  `dependencies` (verified by packing and reading the tarball's manifest).
 - **`publishConfig.access: "public"`** on each. npm defaults a scoped package to
   restricted and a free org cannot host private packages, so without it the first
   publish fails on permissions without naming the missing field.

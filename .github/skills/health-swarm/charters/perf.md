@@ -39,7 +39,7 @@ that means nothing.
 ## Prior findings
 
 Still open as JUDGMENT (#520): the ~46 KB orphan client stylesheet emitted by
-`packages/plugins/fixReactRouterAssets.plugin.ts` and referenced by zero files;
+`packages/vite-configs/src/fixReactRouterAssets.plugin.ts` and referenced by zero files;
 per-cell `Intl` formatter construction in `@lcabrera/utils`.
 
 Measured and deliberately not filed, recorded in #520 so they are not

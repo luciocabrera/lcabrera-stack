@@ -43,7 +43,7 @@ export const COVERAGE_TASK_PACKAGE = 'vite-react-compiler';
 const GLOBAL_PACKAGES = new Set([
   '@lcabrera/tsconfig',
   '@repo/ts-configs',
-  '@repo/vite-configs',
+  '@lcabrera/vite-config',
 ]);
 
 /**

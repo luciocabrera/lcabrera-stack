@@ -36,7 +36,7 @@ per-workspace test:coverage
 Three moving parts:
 
 1. **The shared reporter.** `VITEST_COVERAGE_FLAGS`
-   ([`packages/vite-configs/vite.run.shared.config.ts`](../../packages/vite-configs/vite.run.shared.config.ts))
+   ([`packages/vite-configs/src/vite.run.shared.config.ts`](../../packages/vite-configs/src/vite.run.shared.config.ts))
    emits **both** `coverage-final.json` (the `json` reporter, per-statement
    detail) and `coverage-summary.json` (the `json-summary` reporter, totals).
    Every workspace's `test:coverage` inherits it, so coverage is reported

@@ -160,6 +160,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
   "devDependencies": {
+    "@lcabrera/vite-config": "workspace:*",
     "eslint": "catalog:lint",
     "typescript": "catalog:build",
     "vite": "catalog:build",

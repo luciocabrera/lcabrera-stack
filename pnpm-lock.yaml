@@ -217,12 +217,12 @@ importers:
       '@changesets/cli':
         specifier: catalog:tooling
         version: 2.31.1(@types/node@26.2.0)
+      '@lcabrera/vite-config':
+        specifier: workspace:*
+        version: link:packages/vite-configs
       '@repo/scan-report':
         specifier: workspace:*
         version: link:packages/scan-report
-      '@repo/vite-configs':
-        specifier: workspace:*
-        version: link:packages/vite-configs
       '@vitest/coverage-v8':
         specifier: catalog:test
         version: 4.1.10(@vitest/browser@4.1.10)(vitest@4.1.10)
@@ -284,12 +284,12 @@ importers:
       '@eslint/js':
         specifier: catalog:lint
         version: 10.0.1(eslint@10.8.1(jiti@2.7.0)(supports-color@7.2.0))
+      '@lcabrera/vite-config':
+        specifier: workspace:*
+        version: link:../../packages/vite-configs
       '@react-router/dev':
         specifier: catalog:react
         version: 8.3.0(@react-router/serve@8.3.0(react-router@8.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(supports-color@7.2.0)(typescript@6.0.3))(@voidzero-dev/vite-plus-core@0.2.6(@arethetypeswrong/core@0.18.5)(@types/node@26.2.0)(jiti@2.7.0)(typescript@6.0.3)(yaml@2.9.0))(react-router@8.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(supports-color@7.2.0)(typescript@6.0.3)
-      '@repo/vite-configs':
-        specifier: workspace:*
-        version: link:../../packages/vite-configs
       '@stylexjs/eslint-plugin':
         specifier: catalog:react
         version: 0.19.0
@@ -390,7 +390,7 @@ importers:
         specifier: catalog:runtime
         version: 4.4.3
     devDependencies:
-      '@repo/vite-configs':
+      '@lcabrera/vite-config':
         specifier: workspace:*
         version: link:../../packages/vite-configs
       '@types/cors':
@@ -439,7 +439,7 @@ importers:
         specifier: catalog:backend
         version: 5.11.3
     devDependencies:
-      '@repo/vite-configs':
+      '@lcabrera/vite-config':
         specifier: workspace:*
         version: link:../../packages/vite-configs
       '@types/node':
@@ -503,12 +503,12 @@ importers:
       '@eslint/js':
         specifier: catalog:lint
         version: 10.0.1(eslint@10.8.1(jiti@2.7.0)(supports-color@7.2.0))
+      '@lcabrera/vite-config':
+        specifier: workspace:*
+        version: link:../../packages/vite-configs
       '@react-router/dev':
         specifier: catalog:react
         version: 8.3.0(@react-router/serve@8.3.0(react-router@8.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(supports-color@7.2.0)(typescript@6.0.3))(@voidzero-dev/vite-plus-core@0.2.6(@arethetypeswrong/core@0.18.5)(@types/node@26.2.0)(jiti@2.7.0)(typescript@6.0.3)(yaml@2.9.0))(react-router@8.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(supports-color@7.2.0)(typescript@6.0.3)
-      '@repo/vite-configs':
-        specifier: workspace:*
-        version: link:../../packages/vite-configs
       '@stylexjs/eslint-plugin':
         specifier: catalog:react
         version: 0.19.0
@@ -627,7 +627,7 @@ importers:
         specifier: catalog:runtime
         version: 4.4.3
     devDependencies:
-      '@repo/vite-configs':
+      '@lcabrera/vite-config':
         specifier: workspace:*
         version: link:../../packages/vite-configs
       '@types/node':
@@ -664,7 +664,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/server
     devDependencies:
-      '@repo/vite-configs':
+      '@lcabrera/vite-config':
         specifier: workspace:*
         version: link:../../packages/vite-configs
       '@types/node':
@@ -698,7 +698,7 @@ importers:
         specifier: catalog:runtime
         version: 4.4.3
     devDependencies:
-      '@repo/vite-configs':
+      '@lcabrera/vite-config':
         specifier: workspace:*
         version: link:../vite-configs
       '@types/node':
@@ -726,7 +726,7 @@ importers:
         specifier: workspace:*
         version: link:../utils
     devDependencies:
-      '@repo/vite-configs':
+      '@lcabrera/vite-config':
         specifier: workspace:*
         version: link:../vite-configs
       eslint:
@@ -778,30 +778,9 @@ importers:
 
   packages/node-runtime:
     devDependencies:
-      '@repo/vite-configs':
+      '@lcabrera/vite-config':
         specifier: workspace:*
         version: link:../vite-configs
-      '@types/node':
-        specifier: catalog:types
-        version: 26.2.0
-      eslint:
-        specifier: catalog:lint
-        version: 10.8.1(jiti@2.7.0)(supports-color@7.2.0)
-      typescript:
-        specifier: catalog:build
-        version: 6.0.3
-      vite:
-        specifier: npm:@voidzero-dev/vite-plus-core@0.2.6
-        version: '@voidzero-dev/vite-plus-core@0.2.6(@arethetypeswrong/core@0.18.5)(@types/node@26.2.0)(jiti@2.7.0)(typescript@6.0.3)(yaml@2.9.0)'
-      vite-plus:
-        specifier: catalog:build
-        version: 0.2.6(@arethetypeswrong/core@0.18.5)(@opentelemetry/api@1.9.1)(@types/node@26.2.0)(@vitest/coverage-v8@4.1.10)(@voidzero-dev/vite-plus-core@0.2.6(@arethetypeswrong/core@0.18.5)(@types/node@26.2.0)(jiti@2.7.0)(typescript@6.0.3)(yaml@2.9.0))(jiti@2.7.0)(jsdom@29.1.1)(typescript@6.0.3)(yaml@2.9.0)
-      vitest:
-        specifier: 4.1.10
-        version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.2.0)(@vitest/browser-preview@4.1.10)(@vitest/coverage-v8@4.1.10)(@voidzero-dev/vite-plus-core@0.2.6(@arethetypeswrong/core@0.18.5)(@types/node@26.2.0)(jiti@2.7.0)(typescript@6.0.3)(yaml@2.9.0))(jsdom@29.1.1)
-
-  packages/plugins:
-    devDependencies:
       '@types/node':
         specifier: catalog:types
         version: 26.2.0
@@ -842,7 +821,7 @@ importers:
         specifier: catalog:runtime
         version: 4.4.3
     devDependencies:
-      '@repo/vite-configs':
+      '@lcabrera/vite-config':
         specifier: workspace:*
         version: link:../vite-configs
       '@types/node':
@@ -869,7 +848,7 @@ importers:
 
   packages/scan-report:
     devDependencies:
-      '@repo/vite-configs':
+      '@lcabrera/vite-config':
         specifier: workspace:*
         version: link:../vite-configs
       '@types/node':
@@ -900,7 +879,7 @@ importers:
         specifier: catalog:runtime
         version: 4.4.3
     devDependencies:
-      '@repo/vite-configs':
+      '@lcabrera/vite-config':
         specifier: workspace:*
         version: link:../vite-configs
       '@types/node':
@@ -930,7 +909,7 @@ importers:
       '@lcabrera/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
-      '@repo/vite-configs':
+      '@lcabrera/vite-config':
         specifier: workspace:*
         version: link:../vite-configs
       '@types/node':
@@ -951,7 +930,7 @@ importers:
 
   packages/tsconfig:
     devDependencies:
-      '@repo/vite-configs':
+      '@lcabrera/vite-config':
         specifier: workspace:*
         version: link:../vite-configs
       '@types/node':
@@ -994,12 +973,12 @@ importers:
       '@eslint/js':
         specifier: catalog:lint
         version: 10.0.1(eslint@10.8.1(jiti@2.7.0)(supports-color@7.2.0))
+      '@lcabrera/vite-config':
+        specifier: workspace:*
+        version: link:../vite-configs
       '@react-router/node':
         specifier: catalog:react
         version: 8.3.0(react-router@8.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(typescript@6.0.3)
-      '@repo/vite-configs':
-        specifier: workspace:*
-        version: link:../vite-configs
       '@stylexjs/eslint-plugin':
         specifier: catalog:react
         version: 0.19.0
@@ -1087,6 +1066,9 @@ importers:
 
   packages/utils:
     devDependencies:
+      '@lcabrera/vite-config':
+        specifier: workspace:*
+        version: link:../vite-configs
       eslint:
         specifier: catalog:lint
         version: 10.8.1(jiti@2.7.0)(supports-color@7.2.0)
@@ -1104,6 +1086,10 @@ importers:
         version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.2.0)(@vitest/browser-preview@4.1.10)(@vitest/coverage-v8@4.1.10)(@voidzero-dev/vite-plus-core@0.2.6(@arethetypeswrong/core@0.18.5)(@types/node@26.2.0)(jiti@2.7.0)(typescript@6.0.3)(yaml@2.9.0))(jsdom@29.1.1)
 
   packages/vite-configs:
+    dependencies:
+      '@lcabrera/eslint-plugin':
+        specifier: workspace:*
+        version: link:../eslint-local-rules
     devDependencies:
       '@babel/preset-typescript':
         specifier: catalog:build
@@ -1111,18 +1097,12 @@ importers:
       '@eslint/js':
         specifier: catalog:lint
         version: 10.0.1(eslint@10.8.1(jiti@2.7.0)(supports-color@7.2.0))
-      '@lcabrera/eslint-plugin':
-        specifier: workspace:*
-        version: link:../eslint-local-rules
-      '@lcabrera/utils':
-        specifier: workspace:*
-        version: link:../utils
       '@react-router/dev':
         specifier: catalog:react
         version: 8.3.0(@react-router/serve@8.3.0(react-router@8.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(supports-color@7.2.0)(typescript@6.0.3))(@voidzero-dev/vite-plus-core@0.2.6(@arethetypeswrong/core@0.18.5)(@types/node@26.2.0)(jiti@2.7.0)(typescript@6.0.3)(yaml@2.9.0))(react-router@8.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(supports-color@7.2.0)(typescript@6.0.3)
-      '@repo/plugins':
-        specifier: workspace:*
-        version: link:../plugins
+      '@stylexjs/eslint-plugin':
+        specifier: catalog:react
+        version: 0.19.0
       '@stylexjs/unplugin':
         specifier: catalog:react
         version: 0.19.0(supports-color@7.2.0)(unplugin@2.3.11)
@@ -1141,6 +1121,18 @@ importers:
       eslint-plugin-perfectionist:
         specifier: catalog:lint
         version: 5.10.1(eslint@10.8.1(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
+      eslint-plugin-react-dom:
+        specifier: catalog:lint
+        version: 5.18.3(eslint@10.8.1(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
+      eslint-plugin-react-hooks:
+        specifier: catalog:lint
+        version: 7.1.1(eslint@10.8.1(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)
+      eslint-plugin-react-refresh:
+        specifier: catalog:lint
+        version: 0.5.4(eslint@10.8.1(jiti@2.7.0)(supports-color@7.2.0))
+      eslint-plugin-react-x:
+        specifier: catalog:lint
+        version: 5.18.3(eslint@10.8.1(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
       eslint-plugin-security:
         specifier: catalog:lint
         version: 4.0.1
@@ -1156,9 +1148,6 @@ importers:
       typescript-eslint:
         specifier: catalog:lint
         version: 8.67.0(eslint@10.8.1(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
-      vite:
-        specifier: npm:@voidzero-dev/vite-plus-core@0.2.6
-        version: '@voidzero-dev/vite-plus-core@0.2.6(@arethetypeswrong/core@0.18.5)(@types/node@26.2.0)(jiti@2.7.0)(typescript@6.0.3)(yaml@2.9.0)'
       vite-plugin-babel:
         specifier: catalog:build
         version: 1.7.3(@babel/core@7.29.7(supports-color@7.2.0))(@voidzero-dev/vite-plus-core@0.2.6(@arethetypeswrong/core@0.18.5)(@types/node@26.2.0)(jiti@2.7.0)(typescript@6.0.3)(yaml@2.9.0))

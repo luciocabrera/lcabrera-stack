@@ -12,7 +12,6 @@
     "apps/api-server-fast/vite.config.ts:5-33|apps/api-server/vite.config.ts:5-33",
     "apps/react-router/src/routes/car-sales-infinite/car-sales.loader.ts:21-51|apps/react-router/src/routes/car-sales/car-sales.loader.ts:28-55",
     "apps/react-router/src/routes/car-sales/car-sales.loader.ts:31-69|apps/react-router/src/routes/enterprise-orders/enterprise-orders.loader.ts:34-64",
-    "apps/react-router/src/routes/car-sales-infinite/car-sales.loader.ts:59-88|apps/react-router/src/routes/car-sales/car-sales.loader.ts:63-92",
-    "packages/vite-configs/eslint.base-custom-rules.shared.config.mjs:69-110|packages/vite-configs/eslint.custom-rules.shared.config.mjs:239-278"
+    "apps/react-router/src/routes/car-sales-infinite/car-sales.loader.ts:59-88|apps/react-router/src/routes/car-sales/car-sales.loader.ts:63-92"
   ]
 }

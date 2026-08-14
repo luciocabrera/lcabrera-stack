@@ -1,4 +1,4 @@
-import { createBaseCustomRulesLintConfig } from '@repo/vite-configs/eslint-base-custom-rules';
+import { createBaseCustomRulesLintConfig } from '@lcabrera/vite-config/eslint-base-custom-rules';
 
 export default [
   ...createBaseCustomRulesLintConfig({

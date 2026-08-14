@@ -39,10 +39,13 @@ the custom lint rules sat unscoped until they became `@lcabrera/eslint-plugin`
 renames.**
 [ADR-069](docs/decisions/ADR-069-publish-the-shared-toolchain.md) publishes
 `packages/node-runtime` as `@lcabrera/node` (done, #676) and
-`packages/vite-configs`, folding in `packages/plugins`, as
-`@lcabrera/vite-config`. Those workspaces **become** the published package —
-the directory keeps its name, the npm name is the one that changes — and the
-repo data they carry leaves for a repo-owned home.
+`packages/vite-configs`, with `packages/plugins` folded in and deleted, as
+`@lcabrera/vite-config` (done, #675). Those workspaces **became** the published
+package — the directory keeps its name, the npm name is the one that changes —
+and the repo data they carried left for a repo-owned home: the Oxlint workspace
+roster now lives in the root `vite.config.ts`, and the
+`@lcabrera/ui`/`@lcabrera/server` import boundaries in the root
+`eslint.restrictions.repo.mjs`.
 **`packages/ts-configs` is the one split, not a rename**:
 `@lcabrera/tsconfig` is a new package (`packages/tsconfig`) holding the factories
 and the writer, while `@repo/ts-configs` survives — still `@repo/*`, still
@@ -79,22 +82,22 @@ the listing cannot tell you is below.
 
 `packages/ui`,
 `packages/api`, `packages/server`, `packages/utils`,
-`packages/eslint-local-rules`, `packages/tsconfig` and `packages/node-runtime`
+`packages/eslint-local-rules`, `packages/tsconfig`, `packages/node-runtime` and
+`packages/vite-configs`
 are public packages and are held strictest: never baseline, scope, or
 inline-disable a finding in any of them. The authority on that list is not this
 sentence — it is which workspaces gitignore `eslint-suppressions.json`, which
 `vp run suppressions:verify` reads at runtime, so a new public package is
 covered the day it is added; keep the prose in step.
 
-`packages/vite-configs` (absorbing `packages/plugins`) still has to join that
-list as `@lcabrera/vite-config`
-([ADR-069](docs/decisions/ADR-069-publish-the-shared-toolchain.md)); it is not
-in the tier yet, and the rule above says why — `packages/vite-configs` and
-`packages/plugins` each still commit an `eslint-suppressions.json`. It is
-admitted by its own implementing issue (#675) clearing those suppressions and
-gitignoring the file — not by being named here. `packages/node-runtime` joined
-that way under #676: it carried no suppressions to clear, so publishing it as
-`@lcabrera/node` was a manifest, a `.gitignore` and a README. `packages/ts-configs` is not
+`packages/vite-configs` joined that list as `@lcabrera/vite-config` under #675
+([ADR-069](docs/decisions/ADR-069-publish-the-shared-toolchain.md)), the way the
+rule above requires: it and the now-deleted `packages/plugins` each committed an
+`eslint-suppressions.json`, and admission meant _clearing_ those findings and
+gitignoring the file — not being named here. `packages/node-runtime` joined the
+same way under #676, more cheaply: it carried no suppressions to clear, so
+publishing it as `@lcabrera/node` was a manifest, a `.gitignore` and a README.
+`packages/ts-configs` is not
 on that list because it never joins it: it is the split, so what became public is
 the new `packages/tsconfig` above, and the surviving workspace stays private.
 `packages/scan-report` is not on it either, and for a different reason: it was

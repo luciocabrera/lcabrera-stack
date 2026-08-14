@@ -1,0 +1,41 @@
+# @lcabrera/vite-config — public API surface
+# Generated. Regenerate with: vp run api-surface:verify -- --write
+# One line per export: <name> <signature>. Do not edit by hand.
+
+## ./eslint-base-custom-rules
+createBaseCustomRulesLintConfig [const] ({ ignorePatterns, tsconfigRootDir }?: { ignorePatterns?: readonly string[]; tsconfigRootDir?: string; }) => any[]
+
+## ./eslint-custom-rules
+createCustomRulesLintConfig [const] ({ ignorePatterns, publicImportBoundaryPatterns, serverOnlySyntaxRestrictions, tsconfigRootDir }?: { ignorePatterns?: readonly string[]; publicImportBoundaryPatterns?: readonly RestrictedImportPattern[]; serverOnlySyntaxRestrictions?: readonly RestrictedSyntaxEntry[]; tsconfigRootDir?: string; }) => Promise<any[]>
+RestrictedImportPattern [type] { readonly group: readonly string[]; readonly message: string; }
+RestrictedSyntaxEntry [type] { readonly message: string; readonly selector: string; }
+
+## ./eslint-restrictions
+BARREL_SYNTAX_RESTRICTIONS [const] { message: string; selector: string; }[]
+NODE_BUILTIN_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS [const] { message: string; selector: string; }[]
+PG_DRIVER_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS [const] { message: string; selector: string; }[]
+REACT_TYPE_IMPORT_PATHS [const] { importNames: string[]; message: string; name: string; }[]
+STATE_LIBRARY_IMPORT_PATTERNS [const] { group: string[]; message: string; }[]
+TEST_RUNNER_IMPORT_PATTERNS [const] { group: string[]; message: string; }[]
+
+## ./fixReactRouterAssets
+fixReactRouterAssets [const] ({ cwd, fileSystem }?: FixReactRouterAssetsArgs) => Plugin
+ReactRouterAssetsFileSystem [type] { readonly copyFileSync: (source: string, destination: string) => void; readonly existsSync: (target: string) => boolean; readonly mkdirSync: (directory: string, options: { readonly recursive: true; }) => unknown; readonly readdirSync: (directory: string) => readonly string[]; readonly readFileSync: (target: string, encoding: 'utf8') => string; readonly writeFileSync: (target: string, contents: string) => void; }
+
+## ./fmt
+createFmtConfig [const] ({ ignorePatterns, overrides }?: CreateFmtConfigArgs) => FmtConfig
+
+## ./lint
+createLintConfig [const] ({ overrides, workspaceRuntimes }?: CreateLintConfigArgs) => OxlintConfig
+WorkspaceRuntimes [type] { readonly agnostic?: readonly string[]; readonly browser?: readonly string[]; readonly node?: readonly string[]; }
+
+## ./pack
+createPackConfig [const] () => { dts: { tsconfig: string; }; entry: string[]; sourcemap: boolean; unbundle: boolean; }
+
+## ./plugins
+createReactRouterPluginsConfig [const] ({ appRootUrl, babelConfigOverrides, babelIncludePattern, isTestTaskRun, pluginsAfter, pluginsBefore, stylexAliases, stylexAliasPattern, stylexDev, stylexUseCSSLayers, withBabelPlugin, withFixReactRouterAssetsPlugin, withReactRouterPlugin }: CreateReactRouterPluginsConfigArgs) => PluginOption[]
+
+## ./run
+createLoadLocalEnv [const] (envFiles?: readonly string[]) => string
+createReactRouterRunConfig [const] ({ envFiles }?: CreateReactRouterRunConfigArgs) => { tasks: { build: { cache: boolean; command: string; env: string[]; input: (string | { auto: boolean; })[]; }; start: { command: string; }; test: { cache: boolean; command: string; }; "test:coverage": { cache: boolean; command: string; }; }; }
+VITEST_COVERAGE_FLAGS [const] "--coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reportsDirectory=coverage"

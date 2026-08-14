@@ -64,7 +64,6 @@ export const COVERAGE_REPORT_WORKSPACES = [
   // nothing to cover"; that stopped being true for these two when
   // eslint-local-rules gained a suite per rule (#205). Their tests are a lint
   // RuleTester and a set of pure utils, so neither reaches a service.
-  // `packages/plugins` genuinely still has none.
   {
     dir: 'packages/eslint-local-rules',
     name: '@lcabrera/eslint-plugin',
@@ -79,6 +78,10 @@ export const COVERAGE_REPORT_WORKSPACES = [
   // configuration. The runners themselves shell out to lint tools and are
   // exercised by running them, not by a unit suite.
   { dir: 'packages/scan-report', name: '@repo/scan-report', run: true },
+  // The shell fragment the `start` task emits, and the React Router asset
+  // plugin folded in from `@repo/plugins` — the plugin's filesystem calls are
+  // an injected seam, so its suite runs against an in-memory one (ADR-069).
+  { dir: 'packages/vite-configs', name: '@lcabrera/vite-config', run: true },
 ];
 
 /**
@@ -103,6 +106,7 @@ export const COVERAGE_MERGE_WORKSPACES = [
   { dir: 'packages/tsconfig', name: '@lcabrera/tsconfig' },
   { dir: 'packages/ui', name: '@lcabrera/ui' },
   { dir: 'packages/utils', name: '@lcabrera/utils' },
+  { dir: 'packages/vite-configs', name: '@lcabrera/vite-config' },
   { dir: 'apps/admin_system', name: 'admin-system' },
   { dir: 'apps/scan-orchestrator', name: '@repo/scan-orchestrator' },
 ];

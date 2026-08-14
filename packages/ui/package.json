@@ -125,8 +125,8 @@
   "devDependencies": {
     "@babel/preset-typescript": "catalog:build",
     "@eslint/js": "catalog:lint",
+    "@lcabrera/vite-config": "workspace:*",
     "@react-router/node": "catalog:react",
-    "@repo/vite-configs": "workspace:*",
     "@stylexjs/eslint-plugin": "catalog:react",
     "@stylexjs/stylex": "catalog:react",
     "@stylexjs/unplugin": "catalog:react",

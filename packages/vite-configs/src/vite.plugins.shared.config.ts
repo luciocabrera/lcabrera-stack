@@ -1,10 +1,11 @@
 import type { PluginOption } from 'vite-plus';
 
 import { reactRouter } from '@react-router/dev/vite';
-import { fixReactRouterAssets } from '@repo/plugins/fixReactRouterAssets';
 import { unplugin as stylex } from '@stylexjs/unplugin';
 import { fileURLToPath, URL } from 'node:url';
 import babel from 'vite-plugin-babel';
+
+import { fixReactRouterAssets } from './fixReactRouterAssets.plugin.ts';
 
 type CreateReactRouterPluginsConfigArgs = {
   readonly appRootUrl: string;
@@ -13,6 +14,13 @@ type CreateReactRouterPluginsConfigArgs = {
   readonly isTestTaskRun?: boolean;
   readonly pluginsAfter?: PluginOption[];
   readonly pluginsBefore?: PluginOption[];
+  /**
+   * Extra StyleX aliases beyond `@/*`, each a URL pattern resolved against
+   * `appRootUrl`. Empty by default: a monorepo that compiles a sibling
+   * package's StyleX needs one, and its path is that repo's layout, not
+   * something a consumer of this package should inherit (ADR-069).
+   */
+  readonly stylexAliases?: Readonly<Record<string, string>>;
   readonly stylexAliasPattern?: string;
   readonly stylexDev?: boolean;
   readonly stylexUseCSSLayers?: boolean;
@@ -58,7 +66,7 @@ const migrateOptimizeDepsConfig = (configResult: unknown): unknown => {
 
 const patchDeprecatedOptimizeDeps = (pluginOption: unknown): unknown => {
   if (Array.isArray(pluginOption)) {
-    return pluginOption.map(patchDeprecatedOptimizeDeps);
+    return pluginOption.map((option) => patchDeprecatedOptimizeDeps(option));
   }
 
   if (!isRecord(pluginOption)) {
@@ -87,15 +95,19 @@ const patchDeprecatedOptimizeDeps = (pluginOption: unknown): unknown => {
 // irrelevant under vitest, so strip the hook for test task runs only.
 const stripConfigureServerHook = (pluginOption: PluginOption): PluginOption => {
   if (Array.isArray(pluginOption)) {
-    return pluginOption.map(stripConfigureServerHook);
+    return pluginOption.map((option) => stripConfigureServerHook(option));
   }
 
   if (!isRecord(pluginOption) || !('configureServer' in pluginOption)) {
     return pluginOption;
   }
 
-  const { configureServer: _configureServer, ...rest } = pluginOption;
-  return rest as PluginOption;
+  // Rebuilt by filtering rather than by rest-destructuring the key away: the
+  // omitted binding is unused by construction, and an unused binding is a
+  // finding this package may not suppress (AGENTS.md §4).
+  return Object.fromEntries(
+    Object.entries(pluginOption).filter(([key]) => key !== 'configureServer'),
+  ) as PluginOption;
 };
 
 const isTestTaskRunFromEnv = (): boolean =>
@@ -109,6 +121,7 @@ export const createReactRouterPluginsConfig = ({
   isTestTaskRun = isTestTaskRunFromEnv(),
   pluginsAfter = [],
   pluginsBefore = [],
+  stylexAliases = {},
   stylexAliasPattern = '../src/*',
   stylexDev = process.env.NODE_ENV === 'development',
   stylexUseCSSLayers = true,
@@ -137,9 +150,12 @@ export const createReactRouterPluginsConfig = ({
   const stylexPlugin = stylex.vite({
     aliases: {
       '@/*': [fileURLToPath(new URL(stylexAliasPattern, appRootUrl))],
-      '@lcabrera/ui/*': [
-        fileURLToPath(new URL('../../../packages/ui/src/*', appRootUrl)),
-      ],
+      ...Object.fromEntries(
+        Object.entries(stylexAliases).map(([alias, pattern]) => [
+          alias,
+          [fileURLToPath(new URL(pattern, appRootUrl))],
+        ]),
+      ),
     },
     dev: stylexDev,
     useCSSLayers: stylexUseCSSLayers,

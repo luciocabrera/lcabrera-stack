@@ -37,8 +37,9 @@ own `vite.config.ts` is for its Vite/Vitest/framework config. See
 Configuration Files" section, which is the supported way to keep the rule sets in
 separate files and merge them into overrides.
 
-The config object is `@repo/vite-configs/lint`, imported by the root config — the
-factory pattern kept, moved to where Vite+ reads it
+The config comes from `@lcabrera/vite-config/lint`'s `createLintConfig`, called by
+the root config with this repo's `WORKSPACE_RUNTIMES` roster — the factory
+pattern kept, moved to where Vite+ reads it
 ([ADR-042](../../../docs/decisions/ADR-042-oxlint-config-at-the-root.md), #318).
 The repo ran the other way round for a long time, with a `lint` block in every
 workspace built from a `*-lint` factory and **none of it loaded**; that layer is
@@ -92,8 +93,8 @@ theirs — [ADR-055](../../../docs/decisions/ADR-055-react-doctor-as-a-gate.md).
 
 Oxlint (`vp lint`) covers the whole tree from the root; the eslint pass
 (`vp run lint:eslint` / `lint:eslint:check`) exists in every workspace — React
-workspaces use `@repo/vite-configs/eslint-custom-rules`, node/library workspaces
-use `@repo/vite-configs/eslint-base-custom-rules` (same stack minus React/StyleX,
+workspaces use `@lcabrera/vite-config/eslint-custom-rules`, node/library workspaces
+use `@lcabrera/vite-config/eslint-base-custom-rules` (same stack minus React/StyleX,
 and without `clean-import-paths`, which strips the import extensions
 node-resolution code requires).
 

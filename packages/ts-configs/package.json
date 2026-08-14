@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "@lcabrera/tsconfig": "workspace:*",
-    "@repo/vite-configs": "workspace:*",
+    "@lcabrera/vite-config": "workspace:*",
     "@types/node": "catalog:types",
     "eslint": "catalog:lint",
     "typescript": "catalog:build",

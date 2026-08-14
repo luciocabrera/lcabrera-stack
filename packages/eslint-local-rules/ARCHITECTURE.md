@@ -80,15 +80,16 @@ external consumer could reproduce, since nobody outside this repo has a
 
 - Built with: `vp pack` (`vp run --filter @lcabrera/eslint-plugin build`)
 - Consumed by the shared ESLint flat-config helpers:
-  - `packages/vite-configs/eslint.custom-rules.shared.config.mjs` (React)
-  - `packages/vite-configs/eslint.base-custom-rules.shared.config.mjs` (non-React)
-- App roots consume those helpers via `@repo/vite-configs/eslint-custom-rules`.
+  - `packages/vite-configs/src/eslint.custom-rules.shared.config.mjs` (React)
+  - `packages/vite-configs/src/eslint.base-custom-rules.shared.config.mjs` (non-React)
+- App roots consume those helpers via `@lcabrera/vite-config/eslint-custom-rules`.
 
-`packages/vite-configs` depends on this package, so this package must **not**
-depend on `@repo/vite-configs` — that cycle breaks every recursive `vp run -r`
-task graph. Its `eslint.config.mjs` therefore imports the shared config by
-relative path, and its `vite.config.ts` inlines the pack and coverage settings.
-`@lcabrera/utils` resolves the same cycle the same way.
+`@lcabrera/vite-config` takes a runtime `dependency` on this package, so this
+package must **not** depend on it back — that cycle breaks every recursive
+`vp run -r` task graph. Its `eslint.config.mjs` therefore imports the shared
+config by relative path, and its `vite.config.ts` inlines the pack and coverage
+settings. `@lcabrera/utils` used to resolve the same cycle the same way and no
+longer needs to: ADR-069 dropped it from the config package's dependencies.
 
 ## Guardrails
 

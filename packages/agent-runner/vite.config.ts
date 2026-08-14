@@ -1,5 +1,5 @@
-import { createFmtConfig } from '@repo/vite-configs/fmt';
-import { VITEST_COVERAGE_FLAGS } from '@repo/vite-configs/run';
+import { createFmtConfig } from '@lcabrera/vite-config/fmt';
+import { VITEST_COVERAGE_FLAGS } from '@lcabrera/vite-config/run';
 import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vite-plus';
 

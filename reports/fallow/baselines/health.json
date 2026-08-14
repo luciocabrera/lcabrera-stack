@@ -35,11 +35,6 @@
         "count": 1
       }
     },
-    "packages/plugins/fixReactRouterAssets.plugin.ts": {
-      "crap_moderate": {
-        "count": 1
-      }
-    },
     "packages/scan-ingestion/src/cli/ingest.cli.ts": {
       "crap_critical": {
         "count": 1
@@ -47,19 +42,6 @@
     },
     "packages/scan-ingestion/src/cli/push.cli.ts": {
       "crap_high": {
-        "count": 1
-      }
-    },
-    "packages/vite-configs/eslint.custom-rules.shared.config.mjs": {
-      "crap_critical": {
-        "count": 2
-      }
-    },
-    "packages/vite-configs/vite.plugins.shared.config.ts": {
-      "crap_high": {
-        "count": 1
-      },
-      "crap_moderate": {
         "count": 1
       }
     },

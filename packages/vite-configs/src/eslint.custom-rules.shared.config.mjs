@@ -1,17 +1,29 @@
 import localRules from '@lcabrera/eslint-plugin';
-import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { dirname, resolve } from 'node:path';
+import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import {
   BARREL_SYNTAX_RESTRICTIONS,
-  CLIENT_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS,
   REACT_TYPE_IMPORT_PATHS,
   STATE_LIBRARY_IMPORT_PATTERNS,
   TEST_RUNNER_IMPORT_PATTERNS,
-  UI_PUBLIC_IMPORT_BOUNDARY_PATTERNS,
 } from './eslint.restrictions.shared.mjs';
+import {
+  createNodeScriptFileConfig,
+  SHARED_PLUGIN_RULE_SEVERITIES,
+} from './eslint.rules.shared.mjs';
+
+/**
+ * The two restriction-table shapes this factory accepts. Declared here rather
+ * than imported from the tables module: `vp pack` emits this file's `.d.mts`
+ * from these annotations, and a cross-module `@typedef` does not survive that.
+ *
+ * @typedef {{ readonly message: string, readonly selector: string }} RestrictedSyntaxEntry
+ *   One `no-restricted-syntax` entry: an ESLint selector and what to say.
+ * @typedef {{ readonly group: readonly string[], readonly message: string }} RestrictedImportPattern
+ *   One `no-restricted-imports` pattern entry: specifier globs and what to say.
+ */
 
 // Resolved from tsconfigRootDir (each consuming app's own directory), never
 // process.cwd() — process.cwd() is a single, fixed value for the entire
@@ -40,10 +52,15 @@ const resolveWorkspaceImportSpecifier = (workspaceRequire, specifier) => {
       throw error;
     }
 
+    // `require` of a `.json` path parses it, so the manifest is read through
+    // the same resolver that found it rather than through a second `fs` call on
+    // a computed path — which is also what keeps this file free of the
+    // `security/detect-non-literal-fs-filename` finding a public package may
+    // not suppress (AGENTS.md §4).
     const packageJsonPath = workspaceRequire.resolve(
       `${specifier}/package.json`,
     );
-    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+    const packageJson = workspaceRequire(packageJsonPath);
     const rootExport = packageJson.exports?.['.'];
 
     let entryPoint;
@@ -60,7 +77,9 @@ const resolveWorkspaceImportSpecifier = (workspaceRequire, specifier) => {
       throw error;
     }
 
-    return pathToFileURL(resolve(dirname(packageJsonPath), entryPoint)).href;
+    return pathToFileURL(
+      path.resolve(path.dirname(packageJsonPath), entryPoint),
+    ).href;
   }
 };
 
@@ -92,10 +111,34 @@ const GLOBAL_IGNORES = [
   'utils/**',
 ];
 
+/**
+ * The React/StyleX flat config, with the caller's own import boundaries mixed in.
+ *
+ * `publicImportBoundaryPatterns` and `serverOnlySyntaxRestrictions` are tables
+ * rather than the on/off switches this took before publication: the tables they
+ * used to switch on named `@lcabrera/ui` and `@lcabrera/server`, which no
+ * consumer outside this repo has (ADR-069). Pass the generic tables from
+ * `@lcabrera/vite-config/eslint-restrictions` composed with your own — a second
+ * `no-restricted-syntax` block would replace this one's value wholesale.
+ * Omitting `serverOnlySyntaxRestrictions` omits the server/client block
+ * entirely, which is what a package with no client bundle wants.
+ *
+ * The annotations are load-bearing, not decoration: `vp pack` derives this
+ * package's published `.d.mts` from them, and without them every array option
+ * is inferred from its `[]` default as `never[]` — a type that rejects the one
+ * thing a consumer is supposed to pass.
+ *
+ * @param {{
+ *   ignorePatterns?: readonly string[],
+ *   publicImportBoundaryPatterns?: readonly RestrictedImportPattern[],
+ *   serverOnlySyntaxRestrictions?: readonly RestrictedSyntaxEntry[],
+ *   tsconfigRootDir?: string,
+ * }} [options]
+ */
 export const createCustomRulesLintConfig = async ({
-  enforceServerClientImportBoundary = false,
-  enforceUiPublicImportBoundary = false,
   ignorePatterns = [],
+  publicImportBoundaryPatterns = [],
+  serverOnlySyntaxRestrictions = [],
   tsconfigRootDir = process.cwd(),
 } = {}) => {
   // Scoped to tsconfigRootDir, not process.cwd() — see the comment above
@@ -190,48 +233,14 @@ export const createCustomRulesLintConfig = async ({
 
     {
       rules: {
-        // Escalated from the plugins' default `warn` so the bulk-suppression
-        // baseline (eslint-suppressions.json) covers inherited findings and
-        // NEW occurrences fail the gate (suppressions only apply to
-        // error-severity rules).
+        ...SHARED_PLUGIN_RULE_SEVERITIES,
+        // React-only, so it stays here rather than in the shared block: the
+        // base factory loads no React plugin to escalate.
         'react-x/set-state-in-effect': 'error',
-        'security/detect-non-literal-fs-filename': 'error',
-        'security/detect-non-literal-regexp': 'error',
-        'security/detect-object-injection': 'off',
-        'security/detect-unsafe-regex': 'error',
-        'unicorn/consistent-boolean-name': [
-          'error',
-          {
-            prefixes: {
-              are: true,
-            },
-          },
-        ],
-        'unicorn/filename-case': 'off',
-        'unicorn/name-replacements': 'off',
-        'unicorn/no-array-reduce': 'off',
-        // Auto-fixer rewrites http:// string literals to https://, silently
-        // corrupting test fixtures and local-dev URLs — see the base factory.
-        'unicorn/prefer-https': 'off',
-        'unicorn/prefer-query-selector': 'off',
-        'unicorn/prevent-abbreviations': 'off',
       },
     },
     // 5. JavaScript files configuration (for Node.js server files, etc.)
-    {
-      files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
-      languageOptions: {
-        ecmaVersion: 'latest',
-        globals: {
-          ...globals.node,
-        },
-      },
-      rules: {
-        'no-console': 'off',
-        'unicorn/prefer-module': 'off',
-        'unicorn/prevent-abbreviations': 'off',
-      },
-    },
+    createNodeScriptFileConfig({ globals }),
     {
       ignores: [...GLOBAL_IGNORES, ...ignorePatterns],
     },
@@ -245,7 +254,7 @@ export const createCustomRulesLintConfig = async ({
         'no-restricted-syntax': ['error', ...BARREL_SYNTAX_RESTRICTIONS],
       },
     },
-    ...(enforceServerClientImportBoundary
+    ...(serverOnlySyntaxRestrictions.length > 0
       ? [
           {
             files: ['src/**/*.ts', 'src/**/*.tsx'],
@@ -262,7 +271,7 @@ export const createCustomRulesLintConfig = async ({
             rules: {
               'no-restricted-syntax': [
                 'error',
-                ...CLIENT_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS,
+                ...serverOnlySyntaxRestrictions,
                 ...BARREL_SYNTAX_RESTRICTIONS,
               ],
             },
@@ -302,9 +311,7 @@ export const createCustomRulesLintConfig = async ({
           {
             paths: REACT_TYPE_IMPORT_PATHS,
             patterns: [
-              ...(enforceUiPublicImportBoundary
-                ? UI_PUBLIC_IMPORT_BOUNDARY_PATTERNS
-                : []),
+              ...publicImportBoundaryPatterns,
               ...STATE_LIBRARY_IMPORT_PATTERNS,
               ...TEST_RUNNER_IMPORT_PATTERNS,
             ],

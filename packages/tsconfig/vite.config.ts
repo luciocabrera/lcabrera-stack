@@ -1,5 +1,5 @@
-import { createPackConfig } from '@repo/vite-configs/pack';
-import { VITEST_COVERAGE_FLAGS } from '@repo/vite-configs/run';
+import { createPackConfig } from '@lcabrera/vite-config/pack';
+import { VITEST_COVERAGE_FLAGS } from '@lcabrera/vite-config/run';
 import { defineConfig } from 'vite-plus';
 
 export default defineConfig({

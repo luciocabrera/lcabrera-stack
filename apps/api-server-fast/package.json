@@ -25,7 +25,7 @@
     "fastify": "catalog:backend"
   },
   "devDependencies": {
-    "@repo/vite-configs": "workspace:*",
+    "@lcabrera/vite-config": "workspace:*",
     "@types/node": "catalog:types",
     "eslint": "catalog:lint",
     "nodemon": "catalog:backend",

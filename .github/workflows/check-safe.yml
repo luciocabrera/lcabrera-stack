@@ -130,7 +130,7 @@ jobs:
         #
         # Ground truth is `vp run`'s own task list, so this sees tasks from all
         # three sources (package.json scripts, vite.config.ts run.tasks, shared
-        # @repo/vite-configs factories) instead of re-implementing resolution.
+        # @lcabrera/vite-config factories) instead of re-implementing resolution.
         run: vp run commands:verify
 
       - name: Coordination register is consistent

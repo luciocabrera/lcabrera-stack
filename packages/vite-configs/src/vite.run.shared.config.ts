@@ -16,19 +16,48 @@
 export const VITEST_COVERAGE_FLAGS =
   '--coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reportsDirectory=coverage';
 
+type CreateReactRouterRunConfigArgs = {
+  readonly envFiles?: readonly string[];
+};
+
 /**
+ * The app's own `.env`, and nothing above it.
+ *
+ * A monorepo usually has a second file a level or two up — a compose env file,
+ * a shared secrets file — but where that sits is the consuming repo's layout,
+ * so it is passed in rather than assumed (ADR-069). Paths are relative to the
+ * app directory, because that is the task's cwd.
+ */
+const DEFAULT_ENV_FILES = ['./.env'] as const;
+
+/**
+ * Sources one env file into the shell if it is there.
+ *
+ * Load-if-exists (`[ -f ]`) mirrors api-server's `--env-file-if-exists`, so a
+ * missing file is skipped rather than fatal; the `tr -d "\r"` strips CRs from
+ * Windows/WSL-authored .env files.
+ */
+const sourceEnvFile = (file: string) =>
+  String.raw`[ -f ${file} ] && eval "$(tr -d "\r" < ${file})";`;
+
+/**
+ * A shell fragment that exports every variable in `envFiles`, later files
+ * winning.
+ *
  * react-router-serve serves the production build in-process, and these SSR apps'
  * loaders read DB_* from `process.env` at runtime (`getPool` → `readEnvConfig`).
  * A bare `react-router-serve` inherits none of those, so the first DB-backed
  * request throws a ZodError — while `vp dev` works because each app's `dev`
- * script loads the same two files into the shell before serving. The prod `start`
- * task must do the same. Load-if-exists (`[ -f ]`) mirrors api-server's
- * `--env-file-if-exists`, so a missing file is skipped rather than fatal; the
- * `tr -d "\r"` strips CRs from Windows/WSL-authored .env files.
+ * script loads the same files into the shell before serving. The prod `start`
+ * task must do the same.
  */
-export const LOAD_LOCAL_ENV = String.raw`set -a; [ -f ../../docker/local/.env ] && eval "$(tr -d "\r" < ../../docker/local/.env)"; [ -f ./.env ] && eval "$(tr -d "\r" < ./.env)"; set +a;`;
+export const createLoadLocalEnv = (
+  envFiles: readonly string[] = DEFAULT_ENV_FILES,
+) => `set -a; ${envFiles.map((file) => sourceEnvFile(file)).join(' ')} set +a;`;
 
-export const createReactRouterRunConfig = () => ({
+export const createReactRouterRunConfig = ({
+  envFiles = DEFAULT_ENV_FILES,
+}: CreateReactRouterRunConfigArgs = {}) => ({
   tasks: {
     build: {
       cache: true,
@@ -46,7 +75,7 @@ export const createReactRouterRunConfig = () => ({
       ],
     },
     start: {
-      command: `${LOAD_LOCAL_ENV} if [ ! -f ./build/server/index.js ]; then react-router build; fi && exec react-router-serve ./build/server/index.js`,
+      command: `${createLoadLocalEnv(envFiles)} if [ ! -f ./build/server/index.js ]; then react-router build; fi && exec react-router-serve ./build/server/index.js`,
     },
     test: {
       cache: false,

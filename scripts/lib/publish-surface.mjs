@@ -24,6 +24,13 @@ export const isBuiltPublicPackage = (manifest) =>
  * tsdown emits ESM as `.mjs` with declarations beside it as `.d.mts`, and
  * `unbundle` keeps the `src` tree shape, so this is a pure path rewrite.
  *
+ * A `src` entry is not always TypeScript: `@lcabrera/vite-config` ships its
+ * ESLint flat configs as `.mjs`, because flat config is JavaScript. tsdown
+ * builds those too (with `allowJs`, so their declarations are emitted), and
+ * strips the extension the same way — so the rule is "drop the source
+ * extension", not "drop `.ts`". Getting that wrong produced `x.mjs.d.mts`,
+ * which resolves for nobody.
+ *
  * Key order matters on the way out: Node matches export conditions in the order
  * they are written, so `types` must come first or a resolver can take `default`
  * and never look for the declarations. `--write` serialises this object straight
@@ -32,7 +39,7 @@ export const isBuiltPublicPackage = (manifest) =>
 export const toBuiltPaths = (sourceTarget) => {
   const built = sourceTarget
     .replace(/^\.\/src\//, './dist/')
-    .replace(/\.tsx?$/, '');
+    .replace(/\.(?:tsx?|mts|mjs|js)$/, '');
   return { types: `${built}.d.mts`, default: `${built}.mjs` };
 };
 

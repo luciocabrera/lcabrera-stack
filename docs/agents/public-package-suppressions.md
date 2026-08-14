@@ -219,7 +219,7 @@ These failures mean something other than "you added a suppression":
 Stated so nobody mistakes this for more than it is:
 
 - **The shared lint configs are out of scope.** A rule turned off in
-  `@repo/vite-configs`' shared eslint config affects every workspace and is a
+  `@lcabrera/vite-config`' shared eslint config affects every workspace and is a
   repo-wide decision reviewed there. Only a public package's _own_ config is
   scanned.
 - **tsconfig strictness is not checked here.** Weakening `strict` or

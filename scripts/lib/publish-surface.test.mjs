@@ -46,6 +46,18 @@ describe('toBuiltPaths', () => {
     );
   });
 
+  it('handles a .mjs source, which builds like any other entry', () => {
+    // @lcabrera/vite-config ships its ESLint flat configs as .mjs — flat config
+    // is JavaScript. Leaving the extension on produced `…config.mjs.d.mts`,
+    // which resolves for nobody and is exactly what this gate exists to catch.
+    expect(toBuiltPaths('./src/eslint.custom-rules.shared.config.mjs')).toEqual(
+      {
+        default: './dist/eslint.custom-rules.shared.config.mjs',
+        types: './dist/eslint.custom-rules.shared.config.d.mts',
+      },
+    );
+  });
+
   it('only rewrites a leading ./src/, never a nested one', () => {
     // A `src` segment deeper in the path is part of the module's own layout.
     expect(toBuiltPaths('./src/db/src-helpers/parse.util.ts').default).toBe(
