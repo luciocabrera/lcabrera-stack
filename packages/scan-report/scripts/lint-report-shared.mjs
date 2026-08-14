@@ -1,5 +1,5 @@
 // Lint-specific machinery for the per-tool lint report generators
-// (ADR-019 — 'linter' split into 'eslint' + 'oxlint'). Fully
+// ('linter' is split into independent 'eslint' and 'oxlint' scanners). Fully
 // deterministic, no LLM step anywhere. Each entry script
 // (generate-eslint-report.mjs / generate-oxlint-report.mjs) runs ONE tool,
 // maps its output into the canonical scan_findings shape, writes

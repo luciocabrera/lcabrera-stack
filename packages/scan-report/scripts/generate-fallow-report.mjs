@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Deterministic fallow scanner (ADR-019 addendum, Phase-3 Step 4). Runs the
+// Deterministic fallow scanner. Runs the
 // fallow CLI directly (`fallow --format json`) — no LLM step anywhere; the
 // interactive /fallow-code-checker skill keeps the LLM triage flavor.
 // Honors the shared deterministic-runner flag contract
@@ -45,7 +45,7 @@ const context = parseRunContext();
 // An arbitrary target project can break fallow in ways the host repo never
 // does — a hard execution failure must degrade this one scanner gracefully
 // (0 findings, failure noted in top_risk) rather than crash the whole scan
-// (ADR-015). A fallow that is installed but exits non-zero against the host's
+// A fallow that is installed but exits non-zero against the host's
 // OWN repo is still a hard error: that is the host's tooling being broken,
 // which it should hear about immediately.
 const toolFailures = [];

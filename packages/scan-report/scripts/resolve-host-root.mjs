@@ -5,9 +5,9 @@
 //
 // Derived from the caller module's own location rather than from `cwd`, so a
 // runner spawned from an arbitrary working directory still agrees with one run
-// by hand, and so it survives being installed into `node_modules` instead of
-// vendored at a fixed depth (the previous "four levels up" rule assumed
-// `.github/skills/<skill>/scripts/` and broke anywhere else).
+// by hand. Counting a fixed number of directories upward — what this replaced —
+// only works while the code sits at the one depth it was written for, which
+// stops being true the moment it is installed rather than vendored.
 
 import { existsSync } from 'node:fs';
 import { dirname, join, resolve, sep } from 'node:path';

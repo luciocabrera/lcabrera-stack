@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-// Deterministic oxlint scanner (ADR-019 — one tool per scanner). Legacy
-// mode (no --target) runs `vp lint` (this repo's own tool, merging each
-// workspace's vite.config lint block); target mode runs raw `npx oxlint`
-// and only if the target opted into an oxlint config — skipping gracefully
-// otherwise, since most projects won't have one.
+// Deterministic oxlint scanner — one tool per scanner. Without --target it
+// runs `vp lint` (Vite+'s own pass, which merges each workspace's vite.config
+// lint block, so it matches what a developer there sees); with --target it runs
+// raw `npx oxlint`, and only if the target opted into an oxlint config —
+// skipping gracefully otherwise, since most projects won't have one.
 
 import { buildOxlintFixText } from './finding-templates.mjs';
 import {

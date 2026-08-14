@@ -1,9 +1,10 @@
 /**
- * Type declarations for deterministic-scan-shared.mjs, scoped to the one
- * export the TS detail extractors in packages/scan-ingestion actually
- * import (makeFindingId) — not a full re-declaration of this module's
- * runner-only machinery (parseRunContext, writeArtifacts, etc.), which
- * has no TS consumer.
+ * Type declarations for deterministic-scan-shared.mjs, scoped to the one export
+ * a TypeScript consumer imports — `makeFindingId`, to reproduce the same
+ * finding identities when re-deriving detail from a raw artifact. The rest of
+ * the module is runner-only machinery (parseRunContext, writeArtifacts, …) that
+ * nothing imports from TypeScript, and declaring it would imply a typed
+ * contract this package does not intend to keep.
  */
 
 export function makeFindingId(

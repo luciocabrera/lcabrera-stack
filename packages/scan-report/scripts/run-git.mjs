@@ -1,6 +1,6 @@
 // Spawning git under the same discipline the rest of this repo applies, and
 // for the same two reasons — restated here rather than imported, because a
-// published package cannot depend on root tooling (ADR-039):
+// published package cannot depend on the repo tooling it was extracted from:
 //
 // - **`cwd` does not select the repository — `GIT_DIR` does.** Git resolves
 //   that variable and its six relatives ahead of the working directory, and
@@ -13,8 +13,8 @@
 //   outright, so a writable directory earlier in the inherited PATH cannot
 //   shadow the real git (Sonar S4036).
 //
-// `scripts/lib/git-exec.test.mjs` asserts this variable list agrees with the
-// repo's other copies, so the duplication cannot drift.
+// The originating repo's `scripts/lib/git-exec.test.mjs` asserts this variable
+// list agrees with its other copies, so the duplication cannot drift.
 
 import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';

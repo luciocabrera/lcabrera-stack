@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Deterministic eslint scanner (ADR-019 — one tool per scanner). Runs the
+// Deterministic eslint scanner — one tool per scanner. Runs the
 // custom-rules eslint pass only if the scope has a flat config (checking
 // every real config filename — an arbitrary target may use any of them),
 // producing eslint.raw.json + report.json + report.md unattended.
@@ -27,7 +27,7 @@ const toGitRootRelative = makeGitRootRelative(context);
 // An arbitrary target project's own tooling can be broken in ways this
 // repo's packages never are — a hard execution failure must degrade this
 // one scanner gracefully (0 findings, failure noted in top_risk) rather
-// than crash the whole scan (ADR-015).
+// than crash the whole scan.
 const toolFailures = [];
 
 const runEslint = () => {

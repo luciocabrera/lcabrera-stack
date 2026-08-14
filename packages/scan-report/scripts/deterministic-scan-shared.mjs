@@ -1,6 +1,6 @@
 // Scanner-agnostic machinery shared by every deterministic runner script
 // (generate-eslint-report.mjs, generate-oxlint-report.mjs,
-// generate-fallow-report.mjs — CQMS ADR-019). Lint-specific helpers (config
+// generate-fallow-report.mjs). Lint-specific helpers (config
 // names, deriveTag, buildReport, renderReportMarkdown) stay in
 // lint-report-shared.mjs, which re-exports everything below so its two entry
 // scripts keep a single import site.
@@ -27,7 +27,7 @@ export const hostRoot = resolveHostRoot({ moduleDirectory });
 
 // Positional usage (`node script.mjs packages/utils`) is resolved against the
 // host root; `--target=<abs>` points a script at an arbitrary project, which
-// may have none of the host's tooling (CQMS ADR-015). The default scope is the
+// may have none of the host's tooling. The default scope is the
 // whole repository in both modes — naming one workspace here would bake this
 // repository's data into a shared runner.
 export const parseRunContext = () => {
