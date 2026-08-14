@@ -2,7 +2,7 @@
 id: self-host-showcase-table-routes
 title: Self-host the car-sales and wide-alltypes routes
 owner: agent:claude
-status: active
+status: review
 branch: refactor/687-self-host-showcase-table-routes
 area:
   - apps/react-router/src/routes/car-sales/**
