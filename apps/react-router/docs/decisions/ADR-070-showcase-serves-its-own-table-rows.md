@@ -26,9 +26,18 @@
 > `grep -n -A2 '^var isExternalApiEnabled' apps/react-router/build/server/index.js`
 > — is carried verbatim by `docs/data-sources.md` and by the
 > `isExternalApiEnabled` docblock, and the anchor is still what separates the
-> code from the comment quoting it. The body below is left as written, per the
-> ADR-008 precedent of correcting a dated record from its header rather than
-> rewriting it.
+> code from the comment quoting it.
+>
+> **The same body sentence's cross-reference is stale in its own right**, and it
+> is worth naming separately because it is a claim about another document rather
+> than about a command. It reads "`docs/data-sources.md` carries it", where "it"
+> is the wrong command quoted immediately before. That document carries the
+> corrected form above instead, so a reader who follows the pointer will not find
+> what the body says is there — and could reasonably conclude that
+> `data-sources.md` had drifted rather than that this line had.
+>
+> The body below is left as written, per the ADR-008 precedent of correcting a
+> dated record from its header rather than rewriting it.
 
 - **Date:** 2026-08-14
 - **Scope:** `apps/react-router` — the four table routes, their `.server`
