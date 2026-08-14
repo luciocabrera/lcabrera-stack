@@ -1,33 +1,32 @@
 // Lint-specific machinery for the per-tool lint report generators
-// (ADR-019 — 'linter' split into 'eslint' + 'oxlint'). Fully
+// ('linter' is split into independent 'eslint' and 'oxlint' scanners). Fully
 // deterministic, no LLM step anywhere. Each entry script
 // (generate-eslint-report.mjs / generate-oxlint-report.mjs) runs ONE tool,
 // maps its output into the canonical scan_findings shape, writes
-// <tool>.raw.json + report.json + report.md, and (unless --skip-ingest)
-// ingests as its own scanner.
+// <tool>.raw.json + report.json + report.md, and hands the run to the
+// configured ingestion command (unless --skip-ingest).
 //
-// The scanner-agnostic helpers (arg parsing, finding ids, artifact
-// writing, CQMS ingest) live in code-smell-shared's
-// deterministic-scan-shared.mjs — shared with generate-fallow-report.mjs —
-// and are re-exported here so the two lint entry scripts keep a single
-// import site.
+// The scanner-agnostic helpers (arg parsing, finding ids, artifact writing,
+// ingestion) live in deterministic-scan-shared.mjs — shared with
+// generate-fallow-report.mjs — and are re-exported here so the two lint entry
+// scripts keep a single import site.
 
 import { relative } from 'node:path';
 
-import { repoRoot } from '../../code-smell-shared/scripts/deterministic-scan-shared.mjs';
+import { hostRoot } from './deterministic-scan-shared.mjs';
 
 export {
   findConfigFile,
-  ingestIntoCqms,
+  hostRoot,
+  ingestScanArtifacts,
   makeFindingId,
   makeGitRootRelative,
   makeTimestamp,
   parseRunContext,
-  repoRoot,
   resolveOutputDirectory,
   runCapturingStdout,
   writeArtifacts,
-} from '../../code-smell-shared/scripts/deterministic-scan-shared.mjs';
+} from './deterministic-scan-shared.mjs';
 
 export const ESLINT_CONFIG_NAMES = [
   'eslint.config.mjs',
@@ -42,6 +41,19 @@ export const deriveTag = (source, code) => {
   if (match) return match[1];
   const slashIndex = (code ?? '').indexOf('/');
   return slashIndex === -1 ? source : code.slice(0, slashIndex);
+};
+
+/**
+ * The one headline line of a lint report, in precedence order: the rule that
+ * fired most, then whatever stopped the tool from running, then why there was
+ * nothing to report.
+ */
+const describeTopRisk = ({ noConfigMessage, toolFailures, topRule }) => {
+  if (topRule) {
+    return `\`${topRule[0]}\` reported ${topRule[1]} time(s) — the most frequent lint violation in this scope.`;
+  }
+  if (toolFailures.length > 0) return toolFailures.join(' ');
+  return noConfigMessage ?? 'No lint findings.';
 };
 
 export const buildReport = ({
@@ -72,11 +84,7 @@ export const buildReport = ({
     medium_count: mediumCount,
     nit_count: 0,
     report_id: `${reportIdPrefix}-${timestamp}`,
-    top_risk: topRule
-      ? `\`${topRule[0]}\` reported ${topRule[1]} time(s) — the most frequent lint violation in this scope.`
-      : toolFailures.length > 0
-        ? toolFailures.join(' ')
-        : (noConfigMessage ?? 'No lint findings.'),
+    top_risk: describeTopRisk({ noConfigMessage, toolFailures, topRule }),
   };
 };
 
@@ -148,7 +156,7 @@ export const renderReportMarkdown = ({
 - report_id: ${report.report_id}
 - generated_at: ${report.generated_at}
 - skill_name: ${skillName}
-- repository: ${context.isTargetMode ? context.gitRoot : relative(repoRoot, context.gitRoot) || '.'}
+- repository: ${context.isTargetMode ? context.gitRoot : relative(hostRoot, context.gitRoot) || '.'}
 - scope_type: folder
 - scope_value: ${context.scopeArgument}
 - severity_scale: BLOCKER, HIGH, MEDIUM, LOW, NIT

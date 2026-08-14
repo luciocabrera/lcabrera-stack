@@ -1,9 +1,9 @@
 /**
- * Type declarations for finding-templates.mjs (plain JS, no build step —
- * runs unmodified via `node --experimental-strip-types` from the .mjs
- * report generators AND is imported here by the TS detail extractors in
- * packages/scan-ingestion). Kept hand-written and colocated rather than
- * generated, since the runtime module must stay plain JS.
+ * Type declarations for finding-templates.mjs, which is plain JS with no build
+ * step: it runs unmodified in the report generators beside it and is imported
+ * by TypeScript consumers re-deriving detail from a raw artifact. Hand-written
+ * and colocated rather than generated, since the runtime module must stay
+ * plain JS.
  */
 
 export type FallowFindingTemplate = {

@@ -20,6 +20,7 @@
     "@repo/agent-runner": "workspace:*",
     "@repo/node-runtime": "workspace:*",
     "@repo/scan-ingestion": "workspace:*",
+    "@repo/scan-report": "workspace:*",
     "pg": "catalog:backend",
     "ws": "catalog:backend",
     "zod": "catalog:runtime"

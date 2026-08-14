@@ -1,8 +1,8 @@
+import { makeFindingId } from '@repo/scan-report/deterministic-scan';
+import { buildCloneGroupFinding } from '@repo/scan-report/finding-templates';
+
 import type { FallowCloneGroupInput } from './fallow.types.ts';
 import type { FallowRaw } from './fallowRaw.schema.ts';
-
-import { makeFindingId } from '../../../../../.github/skills/code-smell-shared/scripts/deterministic-scan-shared.mjs';
-import { buildCloneGroupFinding } from '../../../../../.github/skills/code-smell-shared/scripts/finding-templates.mjs';
 
 type ExtractFallowCloneGroupsArgs = {
   readonly raw: FallowRaw;

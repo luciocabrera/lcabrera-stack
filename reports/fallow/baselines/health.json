@@ -102,7 +102,7 @@
   },
   "runtime_coverage_findings": [],
   "target_keys": [
-    ".github/skills/code-smell-shared/scripts/finding-templates.mjs:high impact",
+    "packages/scan-report/scripts/finding-templates.mjs:high impact",
     "packages/server/src/db/query-builder/quote-identifier.util.ts:high impact"
   ]
 }

@@ -33,15 +33,15 @@ export const buildRunnerScriptScaffold = ({
 // (a deliberate code change — DB rows never name executables).
 
 import {
-  ingestIntoCqms,
+  ingestScanArtifacts,
   makeFindingId,
   makeTimestamp,
   parseRunContext,
   resolveOutputDirectory,
   writeArtifacts,
-} from '../../code-smell-shared/scripts/deterministic-scan-shared.mjs';
+} from '@repo/scan-report/deterministic-scan';
 
-const context = parseRunContext('.');
+const context = parseRunContext();
 
 const main = () => {
   const timestamp = makeTimestamp();
@@ -116,7 +116,7 @@ const main = () => {
 
   console.log('Run directory: ' + outputDirectory + '/');
 
-  ingestIntoCqms({
+  ingestScanArtifacts({
     context,
     outputDirectory,
     rawFileName: '${rawFileName}',

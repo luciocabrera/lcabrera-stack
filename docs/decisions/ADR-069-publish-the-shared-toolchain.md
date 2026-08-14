@@ -1,6 +1,6 @@
 # ADR-069 — The shared toolchain publishes, and the repo data it carries becomes configuration
 
-**Status:** Accepted · **Date:** 2026-08-14 · **Issue:** #673 · **Parent:** #672
+**Status:** Accepted, amended 2026-08-14 (see [Amendment](#amendment-2026-08-14--scan-report-does-not-publish)) · **Date:** 2026-08-14 · **Issue:** #673 · **Parent:** #672
 
 ## Context
 
@@ -63,15 +63,16 @@ would ship a config that cannot load.
 
 ## Decision
 
-**Four packages publish**, all `@lcabrera/*`, all under the publishing contract
-in [`packages/CLAUDE.md`](../../packages/CLAUDE.md).
+**Three packages publish**, all `@lcabrera/*`, all under the publishing contract
+in [`packages/CLAUDE.md`](../../packages/CLAUDE.md). A fourth was decided here
+and reversed before it landed — see the amendment below.
 
-| Source                                                     | Rename or split                    | Published as            | Implemented by |
-| ---------------------------------------------------------- | ---------------------------------- | ----------------------- | -------------- |
-| `packages/ts-configs` — its factories and writer only      | **split** — the workspace survives | `@lcabrera/tsconfig`    | #674           |
-| `packages/vite-configs`, with `packages/plugins` folded in | rename                             | `@lcabrera/vite-config` | #675           |
-| `packages/node-runtime`                                    | rename                             | `@lcabrera/node`        | #676           |
-| the three scan-report skills' shared scripts               | new package                        | `@lcabrera/scan-report` | #677           |
+| Source                                                     | Rename or split                                       | Published as                 | Implemented by |
+| ---------------------------------------------------------- | ----------------------------------------------------- | ---------------------------- | -------------- |
+| `packages/ts-configs` — its factories and writer only      | **split** — the workspace survives                    | `@lcabrera/tsconfig`         | #674           |
+| `packages/vite-configs`, with `packages/plugins` folded in | rename                                                | `@lcabrera/vite-config`      | #675           |
+| `packages/node-runtime`                                    | rename                                                | `@lcabrera/node`             | #676           |
+| the three scan-report skills' shared scripts               | new package — **does not publish**, see the amendment | `@repo/scan-report`, private | #677           |
 
 **Read the first row as a split, not a rename — it is the only one.**
 `packages/ts-configs` does not _become_ `@lcabrera/tsconfig`; part of it does. The
@@ -203,12 +204,18 @@ Two merges look tempting and both are wrong:
 So it stays a small package. Small is the right size for a boundary that is
 right.
 
-### `@lcabrera/scan-report` — how the scan-report skills are distributed
+### `@repo/scan-report` — how the scan-report skills are distributed
+
+**Amended 2026-08-14: this package does not publish.** What follows was the
+reasoning as accepted; the amendment at the end of this ADR records what
+replaced it and why. Everything about the split between prompt text and code
+still holds — only the registry step is withdrawn.
 
 `linter-checker`, `code-smell-checker` and `fallow-code-checker` split cleanly:
 **`SKILL.md` is prompt text, the `scripts/` are code.**
 
-- **The scripts publish** as `@lcabrera/scan-report`: the shared halves
+- **The scripts become one package**, `@repo/scan-report` (as accepted: publish
+  as `@lcabrera/scan-report`): the shared halves
   (`.github/skills/code-smell-shared/scripts/deterministic-scan-shared.mjs`,
   `.github/skills/code-smell-shared/scripts/finding-templates.mjs`,
   `.github/skills/linter-checker/scripts/lint-report-shared.mjs`) and the report
@@ -365,9 +372,8 @@ rather than only typechecked: the first's writer is run by
 consumer's `vite.config.ts`, and the third's `exports` points straight at
 `src/registerShutdownSignals.util.ts`. So each needs the
 `exports`/`publishConfig.exports` swap that ADR-057 describes and
-`scripts/verify-publish-surface.mjs` enforces. `@lcabrera/scan-report` is the
-exception: it ships `.mjs`, which loads from `node_modules` fine, so it has no
-build step and no swap.
+`scripts/verify-publish-surface.mjs` enforces. `@repo/scan-report` needs no swap
+at all — it is private, and its `.mjs` loads from `node_modules` unchanged.
 
 **Two of the four repo-data extractions are visible outside the packages.**
 Moving the Oxlint roster to the root `vite.config.ts` moves what
@@ -433,6 +439,41 @@ product to get them, when the scan half already runs standalone via
 
 **Rename the shared config files to drop the `.shared.` infix.** Rejected above:
 it is invisible to consumers, who see only the `exports` subpaths.
+
+## Amendment 2026-08-14 — scan-report does not publish
+
+The fourth row of the Decision table is withdrawn before it ever landed.
+`@repo/scan-report` stays private and leaves with the CQMS extraction (#679).
+The other three are unaffected: they are reusable in any TypeScript project,
+which is exactly what this package turned out not to be.
+
+**Every consumer is CQMS.** Traced across the implementing branch for #677:
+`packages/scan-ingestion`, `apps/scan-orchestrator` and `packages/agent-runner`
+all move to the CQMS repository under #679, and the one consumer staying here —
+the `app-graph` skill — is itself CQMS-coupled. Everything else the name matches
+is registry wiring (`.fallowrc.json`, `tsconfig.entries.ts`,
+`vite.lint.shared.config.ts`, the lockfile), not a consumer. So no consumer
+survives the extraction with a reason to exist independently of CQMS.
+
+**And its contract is CQMS's contract.** The package's own `ARCHITECTURE.md`
+states the versioned surface is the CLI flags plus `SCHEMA_V1.md` /
+`REPORT_JSON_CONTRACT.md` — a report schema that means nothing without a CQMS to
+ingest it. Publishing that would put an experimental application's internal
+contract on npm permanently, and an npm version cannot be withdrawn
+([`packages/CLAUDE.md`](../../packages/CLAUDE.md)).
+
+**The cross-repo consumer that justified publishing was not consuming.** The
+argument was that this repository's skills feed CQMS from outside it. #714
+records that ingestion had been failing silently the whole time: the runners
+passed `--local-path`, which the ingestion CLI retired for a required
+`--project-id`, and the failure was swallowed as a best-effort warning. The link
+that publishing existed to preserve did not work.
+
+What this does not change: the decoupling #677 performed is still required
+wherever the code lives. A runner that hardcodes a path into another product's
+workspace breaks the moment that product moves, whether or not the code is on a
+registry — so the configured ingestion command, the removed workspace default
+and the install-derived host root all stand.
 
 ## References
 

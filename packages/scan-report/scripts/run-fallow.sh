@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Runs a full fallow scan and captures JSON output for fallow-code-checker Step 2.
+# Runs a full fallow scan and captures its JSON output, for the interactive
+# fallow-code-checker skill's Step 2. The unattended equivalent is the
+# scan-report-fallow bin, which needs no vp and writes the full report contract.
 #
 # Usage: run-fallow.sh [workspace-glob]
 #
@@ -9,18 +11,19 @@
 #
 # Environment:
 #   FALLOW_WORKSPACE Fallback scope when no argument is given.
-#   OUTPUT_DIR       Pre-set run directory (packages/agent-runner sets this for
-#                    UI-triggered scans — TECH_SPEC §2.6). Default:
-#                    reports/fallow/runs/<timestamp>/ (the canonical fallow
-#                    output root — see AGENTS.md "Fallow Static Analysis")
+#   OUTPUT_DIR       Pre-set run directory, for a caller that already owns one.
+#                    Default: reports/fallow/runs/<timestamp>/
 #
-# Examples:
-#   bash .github/skills/fallow-code-checker/scripts/run-fallow.sh
-#   bash .github/skills/fallow-code-checker/scripts/run-fallow.sh 'apps/react-router'
-#   bash .github/skills/fallow-code-checker/scripts/run-fallow.sh 'apps/*,!apps/shared'
-#   OUTPUT_DIR=reports/fallow/runs/my-run bash .github/skills/fallow-code-checker/scripts/run-fallow.sh
+# Examples, with SELF standing for wherever this script sits — its own
+# directory in a checkout, or node_modules/@repo/scan-report/scripts when
+# installed:
+#   bash SELF/run-fallow.sh
+#   bash SELF/run-fallow.sh 'packages/ui'
+#   bash SELF/run-fallow.sh 'apps/*,!apps/shared'
+#   OUTPUT_DIR=reports/fallow/runs/my-run bash SELF/run-fallow.sh
 #
-# Works from any directory inside the repo — it cd's to the repo root itself.
+# Requires `vp` (Vite+) and a repo-root .fallowrc.json. Works from any directory
+# inside the repository — it cd's to the root itself.
 set -euo pipefail
 
 # Fallow is configured once at the repo root (.fallowrc.json) and auto-detects
@@ -30,9 +33,9 @@ cd "$(git rev-parse --show-toplevel)"
 
 WORKSPACE="${1:-${FALLOW_WORKSPACE:-}}"
 
-# Honor a pre-set OUTPUT_DIR (packages/agent-runner sets this for a
-# UI-triggered scan of another project — TECH_SPEC §2.6) — otherwise fall
-# back to today's self-generated timestamped path for the interactive case.
+# Honor a pre-set OUTPUT_DIR — an orchestrator driving a scan of another
+# project owns the run directory — otherwise fall back to a self-generated
+# timestamped path for the interactive case.
 if [[ -z "${OUTPUT_DIR:-}" ]]; then
   TIMESTAMP=$(date +%Y-%m-%d--%H-%M-%S)
   OUTPUT_DIR="reports/fallow/runs/$TIMESTAMP"

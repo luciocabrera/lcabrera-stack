@@ -84,8 +84,9 @@ and it never runs the workspace's `typecheck` script. That script is where
 `packages/ui` enforces `check:public-api` (its guard against server-only `node:*`
 imports reaching the public API) and where the React Router apps regenerate route
 types before checking. CI runs `vp run typecheck:all` as its own step in
-`check-safe.yml`. From the root, `vp run typecheck:all` covers all 17 workspaces
-in dependency order.
+`check-safe.yml`. From the root, `vp run typecheck:all` covers every workspace
+in dependency order — the run prints them, and COMMANDS.md §5 lists them under a
+gate that keeps the count honest.
 
 Shortcut: `vp run lint` in a workspace chains `vp lint . --fix` **and**
 `vp run lint:eslint` (autofix for both), which is usually what you want while

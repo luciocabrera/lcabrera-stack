@@ -1,8 +1,8 @@
+import { makeFindingId } from '@repo/scan-report/deterministic-scan';
+import { buildCircularDependencyFinding } from '@repo/scan-report/finding-templates';
+
 import type { FallowCircularDependencyInput } from './fallow.types.ts';
 import type { FallowRaw } from './fallowRaw.schema.ts';
-
-import { makeFindingId } from '../../../../../.github/skills/code-smell-shared/scripts/deterministic-scan-shared.mjs';
-import { buildCircularDependencyFinding } from '../../../../../.github/skills/code-smell-shared/scripts/finding-templates.mjs';
 
 type ExtractFallowCircularDependenciesArgs = {
   readonly raw: FallowRaw;

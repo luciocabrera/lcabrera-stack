@@ -3,6 +3,7 @@
   "entry": [
     "scripts/**/*.{cjs,mjs,js}",
     ".github/skills/*/scripts/*.{js,mjs,cjs}",
+    "packages/scan-report/scripts/*.mjs",
     "apps/react-router/lighthouse.config.js",
     "apps/react-router/config/*.ts",
     "apps/admin_system/config/*.ts",
@@ -56,23 +57,24 @@
         "files": ["**/*.test.*"],
         "maxCrap": 1000000,
         "maxUnitSize": 10000,
-        "reason": "describe()/it() blocks in test suites legitimately span hundreds of lines, and CRAP scores untested complexity — a test file is never exercised by its own tests, so its coverage is either absent (estimated 0%) or meaningless, which inflates CRAP without signalling anything. Cyclomatic and cognitive limits still apply to test files."
+        "reason": "describe()/it() blocks in test suites legitimately span hundreds of lines, and CRAP scores untested complexity \u2014 a test file is never exercised by its own tests, so its coverage is either absent (estimated 0%) or meaningless, which inflates CRAP without signalling anything. Cyclomatic and cognitive limits still apply to test files."
       },
       {
         "files": [
           ".github/skills/**/*.mjs",
+          "packages/scan-report/scripts/*.mjs",
           "packages/eslint-local-rules/**/*.ts"
         ],
         "maxCyclomatic": 65535,
         "maxCognitive": 65535,
         "maxCrap": 1000000,
         "maxUnitSize": 100000,
-        "reason": "Dev tooling, not shipped product: the fallow/lint/app-graph report generators and the custom ESLint rule visitors are inherently procedural CLI/AST-walker code where complexity/CRAP/unit-size limits do not apply."
+        "reason": "Dev tooling, not shipped product: the fallow/lint/app-graph report generators (in .github/skills and in @repo/scan-report, which is where three of them now live) and the custom ESLint rule visitors are inherently procedural CLI/AST-walker code where complexity/CRAP/unit-size limits do not apply."
       },
       {
         "files": ["scripts/**/*.{mjs,cjs}", "apps/*/scripts/**/*.{mjs,cjs}"],
         "maxCrap": 1000000,
-        "reason": "Root/app build & tooling scripts are procedural CLI code the repo does not unit-test (by convention — see .claude/rules/scripts.md). CRAP = cyclomatic² × (1 − coverage)³ + cyclomatic, so at an untested script's estimated 0% coverage it flags ordinary branching (a cyclomatic-5 function scores CRAP 30) — the coverage-driven false signal AGENTS.md §4 calls out ('crap alone means untested'). Only CRAP is relaxed here: cyclomatic, cognitive, and unit-size limits still apply, so genuinely complex script code is still caught, and per-file size is separately gated by scripts:verify."
+        "reason": "Root/app build & tooling scripts are procedural CLI code the repo does not unit-test (by convention \u2014 see .claude/rules/scripts.md). CRAP = cyclomatic\u00b2 \u00d7 (1 \u2212 coverage)\u00b3 + cyclomatic, so at an untested script's estimated 0% coverage it flags ordinary branching (a cyclomatic-5 function scores CRAP 30) \u2014 the coverage-driven false signal AGENTS.md \u00a74 calls out ('crap alone means untested'). Only CRAP is relaxed here: cyclomatic, cognitive, and unit-size limits still apply, so genuinely complex script code is still caught, and per-file size is separately gated by scripts:verify."
       }
     ]
   },
@@ -90,7 +92,9 @@
     {
       "reason": "Route loaders return serializable state/promises consumed by shared components (TableLayout, panels) and via use() in Suspense children; fallow cannot trace useLoaderData<typeof loader>() destructuring across the route barrel + component-file split, so unused-load-data-keys is a systematic false positive on *.loader.ts here.",
       "files": ["**/*.loader.ts"],
-      "rules": { "unused-load-data-keys": "off" }
+      "rules": {
+        "unused-load-data-keys": "off"
+      }
     }
   ],
   "duplicates": {

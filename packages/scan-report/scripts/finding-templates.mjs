@@ -1,21 +1,19 @@
 // Per-rule why/fix wording for the deterministic scanners (fallow, eslint,
-// oxlint), shared between two independent consumers so neither can drift
-// from the other:
+// oxlint). Exported rather than kept private because it has two independent
+// kinds of consumer and neither may drift from the other:
 //
-//   1. The `.mjs` report generators (generate-fallow-report.mjs,
-//      generate-eslint-report.mjs, generate-oxlint-report.mjs), which write
-//      this text straight to report.json/report.md — the file an agent
-//      reads directly to build a work plan, unrelated to CQMS/Postgres.
-//   2. The TS detail extractors (packages/scan-ingestion/src/ingestion/
-//      fallow/*.util.ts, lint/*.util.ts), which now store this same text as
-//      real columns on the per-scanner detail tables (cqms.fallow_dead_code,
-//      cqms.lint_violations, etc.) instead of only living in the generic,
-//      scan_findings-only copy.
+//   1. The report generators beside this file, which write this text straight
+//      into report.json/report.md — what an agent reads to build a work plan.
+//   2. Whatever re-derives per-finding detail from a raw artifact downstream,
+//      typically to store the same text as real columns rather than only
+//      inside the generic finding blob. That is what the `./finding-templates`
+//      export is for; pair it with `makeFindingId` from `./deterministic-scan`
+//      to reproduce the same finding identities.
 //
-// Before this module existed, both consumers independently hand-authored
-// this wording — the exact drift this file exists to prevent (caught live:
-// eslint's real suggestion text was being discarded in favor of a hardcoded
-// "Address per rule: X." string on one side only).
+// Before this module existed, both kinds hand-authored the wording separately
+// — the exact drift it exists to prevent, caught live when eslint's real
+// suggestion text was discarded in favour of a hardcoded "Address per rule: X."
+// on one side only.
 //
 // Each builder returns exactly the fields that vary per rule/per raw item
 // (ruleId, severity, why, fix, effort, tag, locationPath, locationHint, plus
@@ -25,10 +23,11 @@
 // builds its own full finding shape — a hardcoded literal can't drift from
 // itself, so there is nothing to share there.
 
-const lineHint = (item) =>
-  typeof item.line === 'number'
-    ? `${item.line}${typeof item.col === 'number' ? `:${item.col}` : ''}`
-    : undefined;
+const lineHint = (item) => {
+  if (typeof item.line !== 'number') return undefined;
+  const column = typeof item.col === 'number' ? `:${item.col}` : '';
+  return `${item.line}${column}`;
+};
 
 export const buildUnusedFileFinding = (item) => ({
   effort: 'small',
@@ -109,6 +108,9 @@ export const buildCircularDependencyFinding = (item) => ({
 export const buildCloneGroupFinding = (group) => {
   const instances = group.instances ?? [];
   const primary = instances[0] ?? {};
+  const suggestion = group.suggested_name
+    ? ` (suggested name: \`${group.suggested_name}\`)`
+    : '';
   return {
     effort: 'medium',
     extra: {
@@ -118,7 +120,7 @@ export const buildCloneGroupFinding = (group) => {
       })),
     },
     findingKind: 'duplication_group',
-    fix: `Extract the duplicated block into a shared helper${group.suggested_name ? ` (suggested name: \`${group.suggested_name}\`)` : ''}.`,
+    fix: `Extract the duplicated block into a shared helper${suggestion}.`,
     locationHint: `${primary.start_line ?? ''}-${primary.end_line ?? ''}`,
     locationPath: primary.file ?? '',
     ruleId: 'fallow/duplicate-code',

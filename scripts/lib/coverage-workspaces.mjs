@@ -75,6 +75,10 @@ export const COVERAGE_REPORT_WORKSPACES = [
   // package is covered without a filesystem (ADR-069 split it out of
   // `@repo/ts-configs`, which keeps only this repo's entry table).
   { dir: 'packages/tsconfig', name: '@lcabrera/tsconfig', run: true },
+  // The scan runners' own pure halves — host-root derivation and ingestion
+  // configuration. The runners themselves shell out to lint tools and are
+  // exercised by running them, not by a unit suite.
+  { dir: 'packages/scan-report', name: '@repo/scan-report', run: true },
 ];
 
 /**
@@ -94,6 +98,7 @@ export const COVERAGE_MERGE_WORKSPACES = [
   { dir: 'packages/eslint-local-rules', name: '@lcabrera/eslint-plugin' },
   { dir: 'packages/node-runtime', name: '@repo/node-runtime' },
   { dir: 'packages/scan-ingestion', name: '@repo/scan-ingestion' },
+  { dir: 'packages/scan-report', name: '@repo/scan-report' },
   { dir: 'packages/server', name: '@lcabrera/server' },
   { dir: 'packages/tsconfig', name: '@lcabrera/tsconfig' },
   { dir: 'packages/ui', name: '@lcabrera/ui' },

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Deterministic fallow scanner (ADR-019 addendum, Phase-3 Step 4). Runs the
+// Deterministic fallow scanner. Runs the
 // fallow CLI directly (`fallow --format json`) — no LLM step anywhere; the
 // interactive /fallow-code-checker skill keeps the LLM triage flavor.
 // Honors the shared deterministic-runner flag contract
@@ -7,7 +7,7 @@
 // fallow.raw.json (written by fallow itself, verbatim) + report.json +
 // report.md unattended.
 //
-// The fallow binary is resolved from THIS repo's node_modules (same
+// The fallow binary is resolved from the HOST repo's node_modules (same
 // technique as scripts/refresh-fallow-complexity-report.cjs) — an
 // arbitrary registered target needs no fallow install or config. fallow
 // runs from the target's git root (where workspace config would live);
@@ -20,14 +20,14 @@ import { createRequire } from 'node:module';
 import { dirname, join, relative } from 'node:path';
 
 import {
-  ingestIntoCqms,
+  hostRoot,
+  ingestScanArtifacts,
   makeFindingId,
   makeTimestamp,
   parseRunContext,
-  repoRoot,
   resolveOutputDirectory,
   writeArtifacts,
-} from '../../code-smell-shared/scripts/deterministic-scan-shared.mjs';
+} from './deterministic-scan-shared.mjs';
 import {
   buildCircularDependencyFinding,
   buildCloneGroupFinding,
@@ -38,23 +38,33 @@ import {
   buildUnusedExportFinding,
   buildUnusedFileFinding,
   buildUnusedTypeFinding,
-} from '../../code-smell-shared/scripts/finding-templates.mjs';
+} from './finding-templates.mjs';
 
-// Legacy positional default is the whole repo — fallow is configured once
-// at a repo root and auto-detects workspaces, unlike the per-app linters.
-const context = parseRunContext('.');
+const context = parseRunContext();
 
-// An arbitrary target project can break fallow in ways this repo never
+// An arbitrary target project can break fallow in ways the host repo never
 // does — a hard execution failure must degrade this one scanner gracefully
 // (0 findings, failure noted in top_risk) rather than crash the whole scan
-// (ADR-015).
+// A fallow that is installed but exits non-zero against the host's
+// OWN repo is still a hard error: that is the host's tooling being broken,
+// which it should hear about immediately.
 const toolFailures = [];
 
+// `undefined` when the host has no fallow, which is a normal state for a
+// consumer that installed this package for its lint scanners only — fallow is
+// an OPTIONAL peer. An absent tool is the same kind of answer as oxlint's
+// absent config: report nothing, say why, exit 0. Anything else here still
+// throws, because a fallow that is installed but unreadable is a real fault.
 const resolveFallowBin = () => {
   const require = createRequire(import.meta.url);
-  const fallowPackageJsonPath = require.resolve('fallow/package.json', {
-    paths: [repoRoot],
-  });
+  let fallowPackageJsonPath;
+  try {
+    fallowPackageJsonPath = require.resolve('fallow/package.json', {
+      paths: [hostRoot],
+    });
+  } catch {
+    return undefined;
+  }
   const fallowPackageJson = JSON.parse(
     readFileSync(fallowPackageJsonPath, 'utf8'),
   );
@@ -70,8 +80,16 @@ const resolveFallowBin = () => {
   return join(dirname(fallowPackageJsonPath), binRelativePath);
 };
 
+const NO_FALLOW_MESSAGE = `No fallow installation found under ${hostRoot} — nothing was analysed. Install fallow (an optional peer of @repo/scan-report) to enable this scanner.`;
+
+const WINDOWS_SYSTEM_DIRECTORY = String.raw`C:\Windows\System32`;
+
 const runFallow = (rawArtifactPath) => {
   const fallowBinPath = resolveFallowBin();
+  if (fallowBinPath === undefined) {
+    toolFailures.push(NO_FALLOW_MESSAGE);
+    return undefined;
+  }
   // The workspace scope is the target directory + --scope, relative to the
   // git root fallow runs from ('' = scan the whole repo).
   const workspaceScope = relative(context.gitRoot, context.scopeDirectory);
@@ -82,7 +100,7 @@ const runFallow = (rawArtifactPath) => {
   const nodeBinDir = dirname(process.execPath);
   const fixedPathEnv =
     process.platform === 'win32'
-      ? `${nodeBinDir};${String.raw`C:\Windows\System32`}`
+      ? `${nodeBinDir};${WINDOWS_SYSTEM_DIRECTORY}`
       : `${nodeBinDir}:/usr/bin:/bin`;
 
   const result = spawnSync(
@@ -287,7 +305,7 @@ const renderFallowReportMarkdown = ({ report }) => {
 - report_id: ${report.report_id}
 - generated_at: ${report.generated_at}
 - skill_name: fallow-code-checker
-- repository: ${context.isTargetMode ? context.gitRoot : relative(repoRoot, context.gitRoot) || '.'}
+- repository: ${context.isTargetMode ? context.gitRoot : relative(hostRoot, context.gitRoot) || '.'}
 - scope_type: folder
 - scope_value: ${context.scopeArgument}
 - severity_scale: BLOCKER, HIGH, MEDIUM, LOW, NIT
@@ -394,7 +412,7 @@ const main = () => {
     `Findings: ${findings.length} (${report.high_count} HIGH, ${report.medium_count} MEDIUM, ${report.low_count} LOW)`,
   );
 
-  ingestIntoCqms({
+  ingestScanArtifacts({
     context,
     outputDirectory,
     rawFileName: 'fallow.raw.json',

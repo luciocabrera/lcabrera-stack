@@ -1,12 +1,16 @@
-# `report.json` Contract (CQMS ingestion)
+# `report.json` Contract
 
-This document defines the **JSON** sibling of `report.md`, written by:
+This document defines the **JSON** sibling of `report.md`, written by every
+scanner in `@repo/scan-report` and by the agent-authored scan skills
+(`code-smell-checker`, `code-smell-zen`, `fallow-code-checker`).
 
-- code-smell-checker
-- code-smell-zen
-- fallow-code-checker
-
-Unlike `SCHEMA_V1.md` (the Markdown report contract), `report.json` is consumed by `packages/scan-ingestion`'s `ingestReport()` — a machine parser, not a human reader. Save it as `report.json` in the same run directory as `report.md`, then invoke the ingestion CLI (see each skill's "Saving the Report" step for the exact command).
+Unlike `SCHEMA_V1.md` (the Markdown report contract), `report.json` is for a
+machine parser rather than a human reader — it is what an ingestion command
+receives. Save it as `report.json` in the same run directory as `report.md`,
+then hand the run to `scan-report-ingest`, which forwards it to whatever
+command the repository configured (`ingest` in `scan-report.config.json`, or
+the `SCAN_REPORT_INGEST_*` variables). Where nothing is configured, this file
+is still the deliverable.
 
 **This is the same findings you already wrote to `report.md` — it must not add, drop, or reinterpret any finding.** Author it directly from the Markdown you just produced; do not re-derive findings independently.
 

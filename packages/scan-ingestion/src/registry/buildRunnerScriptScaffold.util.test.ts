@@ -10,11 +10,9 @@ describe('buildRunnerScriptScaffold', () => {
       scannerId: 'cycle-finder',
     });
 
-    expect(script).toContain(
-      "from '../../code-smell-shared/scripts/deterministic-scan-shared.mjs'",
-    );
+    expect(script).toContain("from '@repo/scan-report/deterministic-scan'");
     expect(script).toContain('TODO(parser)');
-    expect(script).toContain("parseRunContext('.')");
+    expect(script).toContain('parseRunContext()');
     expect(script).toContain("rawFileName: 'cycles.raw.json'");
     expect(script).toContain("scannerId: 'cycle-finder'");
     expect(script).toContain('queue.constants.ts');

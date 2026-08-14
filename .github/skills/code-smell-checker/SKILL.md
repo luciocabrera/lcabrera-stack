@@ -99,7 +99,7 @@ Use this branching logic while triaging:
 Produce the final report using the shared output contract exactly as defined in:
 
 - `../code-smell-shared/REPORT_TEMPLATE.md` — section order and field structure
-- `../code-smell-shared/SCHEMA_V1.md` — canonical severity scale and validation rules
+- `../../../packages/scan-report/SCHEMA_V1.md` — canonical severity scale and validation rules
 - `../code-smell-shared/TEST_PLAN.md` — verification step patterns
 - `../code-smell-shared/RULE_FIX_QUICK_REFERENCE.md` — remediation patterns
 
@@ -132,15 +132,15 @@ After producing the final report, **always** save it to disk without prompting t
 1. Determine the output directory. Check whether the `OUTPUT_DIR` environment variable is already set (`echo "$OUTPUT_DIR"`) — a UI-triggered scan sets this so its scratch files land in the right place, not the target project's own working tree. If it's set, use it as-is. Otherwise, capture the current timestamp (`date +%Y-%m-%d--%H-%M-%S`) and use `.tmp/code-smell-checker/{timestamp}/`.
 2. Create the output directory (`mkdir -p`) if it doesn't already exist.
 3. Write the full report as `report.md` inside that directory, following the shared `REPORT_TEMPLATE.md` structure exactly.
-4. Build `report.json` from the same findings, following `../code-smell-shared/REPORT_JSON_CONTRACT.md` exactly (flatten severity counts, map any non-canonical `status` — e.g. `resolved` — to `done`; every finding is `single_location`, this skill never emits `duplication_group`), and write it as `report.json` in the same directory.
+4. Build `report.json` from the same findings, following `../../../packages/scan-report/REPORT_JSON_CONTRACT.md` exactly (flatten severity counts, map any non-canonical `status` — e.g. `resolved` — to `done`; every finding is `single_location`, this skill never emits `duplication_group`), and write it as `report.json` in the same directory.
 5. Tell the user the paths to both saved files.
-6. Ingest into CQMS (best-effort — do not fail the skill run if this step fails; both files are already saved regardless). Run, substituting `$OUTPUT_DIR` with the resolved directory from step 1:
+6. Persist the run. `ingest-report.mjs` (published as the `scan-report-ingest` bin) forwards to whatever ingestion command this repository configured in `scan-report.config.json`; where nothing is configured it prints a skip and exits 0, so this step is safe to run anywhere. Run, substituting `$OUTPUT_DIR` with the resolved directory from step 1:
 
 ```bash
-node --env-file-if-exists=docker/local/.env --env-file-if-exists=packages/scan-ingestion/.env --experimental-strip-types packages/scan-ingestion/src/cli/ingest.cli.ts --skill=code-smell-checker --run-dir="$OUTPUT_DIR" --local-path="$(git rev-parse --show-toplevel)"
+node packages/scan-report/scripts/ingest-report.mjs --skill=code-smell-checker --run-dir="$OUTPUT_DIR" --local-path="$(git rev-parse --show-toplevel)"
 ```
 
-If it fails (e.g. `cqms_db` unreachable), tell the user the ingestion failed and why, but do not treat it as a skill failure.
+Read its output: `Ingestion skipped` (nothing configured) is a normal state to mention in passing, while `Ingestion FAILED` — a configured command that did not complete, e.g. `cqms_db` unreachable — exits non-zero and must be reported to the user with the reason. Neither one is a skill failure; both report files are already saved.
 
 The directory layout groups all runs of this skill together, with each run in its own timestamped subfolder:
 
@@ -173,7 +173,7 @@ Before finalizing the report:
 - validation steps defined (lint/type/tests/monitoring where applicable)
 - residual risk documented
 - `report.md` and `report.json` both saved to the same run directory
-- ingestion into CQMS attempted (best-effort; failures reported but non-fatal)
+- persistence attempted via `scan-report-ingest` (skip reported as normal; a configured failure reported as a failure)
 
 ## Example Prompts
 

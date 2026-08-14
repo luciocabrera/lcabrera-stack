@@ -34,12 +34,11 @@ A package in **neither** scope means that question was never asked — that is h
 the custom lint rules sat unscoped until they became `@lcabrera/eslint-plugin`
 ([ADR-057](docs/decisions/ADR-057-publish-the-custom-lint-rules.md)).
 
-**Four packages come out of that `@repo/*` list, and only three of them are
+**Three packages come out of that `@repo/*` list, and two of them are
 renames.**
 [ADR-069](docs/decisions/ADR-069-publish-the-shared-toolchain.md) publishes
 `packages/vite-configs` (folding in `packages/plugins`) as
-`@lcabrera/vite-config`, `packages/node-runtime` as `@lcabrera/node`, and the
-three scan-report skills' shared scripts as `@lcabrera/scan-report`. Those
+`@lcabrera/vite-config` and `packages/node-runtime` as `@lcabrera/node`. Those
 workspaces **become** the published package, and the repo data they carry leaves
 for a repo-owned home. **`packages/ts-configs` is the one split, not a rename**:
 `@lcabrera/tsconfig` is a new package (`packages/tsconfig`) holding the factories
@@ -77,24 +76,28 @@ the listing cannot tell you is below.
 
 `packages/ui`,
 `packages/api`, `packages/server`, `packages/utils`,
-`packages/eslint-local-rules` and `packages/tsconfig` are public packages and are
-held strictest: never baseline, scope, or inline-disable a finding in any of
-them. The authority on that list is not this sentence — it is which workspaces
-gitignore `eslint-suppressions.json`, which `vp run suppressions:verify` reads at
-runtime, so a new public package is covered the day it is added; keep the prose
-in step.
+`packages/eslint-local-rules` and `packages/tsconfig`
+are public packages and are held strictest: never baseline, scope, or
+inline-disable a finding in any of them. The authority on that list is not this
+sentence — it is which workspaces gitignore `eslint-suppressions.json`, which
+`vp run suppressions:verify` reads at runtime, so a new public package is
+covered the day it is added; keep the prose in step.
 
 `packages/vite-configs` (absorbing `packages/plugins`) and
-`packages/node-runtime` join that list as `@lcabrera/vite-config` and
-`@lcabrera/node`, and a third is built from the scan-report skills' shared
-scripts as `@lcabrera/scan-report`
-([ADR-069](docs/decisions/ADR-069-publish-the-shared-toolchain.md)). Neither
-workspace is in the tier yet, and the rule above says why: `packages/vite-configs`
-and `packages/plugins` each still commit an `eslint-suppressions.json`. Each is
-admitted by its own implementing issue (#675–#677) clearing those suppressions
+`packages/node-runtime` still have to join that list as `@lcabrera/vite-config`
+and `@lcabrera/node`
+([ADR-069](docs/decisions/ADR-069-publish-the-shared-toolchain.md)); neither is
+in the tier yet, and the rule above says why — `packages/vite-configs` and
+`packages/plugins` each still commit an `eslint-suppressions.json`. Each is
+admitted by its own implementing issue (#675, #676) clearing those suppressions
 and gitignoring the file — not by being named here. `packages/ts-configs` is not
 on that list because it never joins it: it is the split, so what became public is
 the new `packages/tsconfig` above, and the surviving workspace stays private.
+`packages/scan-report` is not on it either, and for a different reason: it was
+built under #677 from the scan-report skills' shared scripts, and every consumer
+it has is CQMS, so it stays `@repo/scan-report`, `private: true`, and leaves with
+the extraction (#679) rather than shipping. ADR-069's note of 2026-08-14 records
+why.
 
 `api` and `server` split on **runtime**, and the split is load-bearing, not
 cosmetic — the two names say which runtime each one is for, and the tsconfigs

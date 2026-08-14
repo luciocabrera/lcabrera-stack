@@ -1,8 +1,8 @@
+import { makeFindingId } from '@repo/scan-report/deterministic-scan';
+import { buildFunctionFinding } from '@repo/scan-report/finding-templates';
+
 import type { FallowFunctionFindingInput } from './fallow.types.ts';
 import type { FallowRaw } from './fallowRaw.schema.ts';
-
-import { makeFindingId } from '../../../../../.github/skills/code-smell-shared/scripts/deterministic-scan-shared.mjs';
-import { buildFunctionFinding } from '../../../../../.github/skills/code-smell-shared/scripts/finding-templates.mjs';
 
 type ExtractFallowFunctionFindingsArgs = {
   readonly raw: FallowRaw;

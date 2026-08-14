@@ -15,9 +15,10 @@
  *   earlier in the inherited PATH cannot shadow the real `git` binary
  *   (Sonar S4036).
  *
- * The variable list is duplicated in three places by necessity — a shell hook,
- * a TypeScript package util, and this module cannot import from each other.
- * `git-exec.test.mjs` asserts all three agree, so the copies cannot drift.
+ * The variable list is duplicated by necessity — a shell hook, a TypeScript
+ * package util, a published package's runner and this module cannot import from
+ * each other. `git-exec.test.mjs` asserts every copy agrees, so they cannot
+ * drift.
  *
  * Most root scripts deliberately avoid subprocesses entirely and read `.git`
  * directly (see `git-dir.mjs`). Use this only where that is impractical —

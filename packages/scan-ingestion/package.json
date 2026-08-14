@@ -28,6 +28,7 @@
   "dependencies": {
     "@lcabrera/server": "workspace:*",
     "@lcabrera/utils": "workspace:*",
+    "@repo/scan-report": "workspace:*",
     "fflate": "catalog:runtime",
     "pg": "catalog:backend",
     "zod": "catalog:runtime"
