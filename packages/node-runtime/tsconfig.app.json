@@ -13,9 +13,6 @@
     "noUncheckedSideEffectImports": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "paths": {
-      "@repo/node-runtime/*": ["./src/*"]
-    },
     "skipLibCheck": true,
     "strict": true,
     "target": "ES2025",

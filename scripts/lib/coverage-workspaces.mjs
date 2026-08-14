@@ -50,7 +50,7 @@ export const COVERAGE_REPORT_WORKSPACES = [
   // Phase 2 — remaining library packages with a DB-free test:coverage.
   // scan-ingestion's task measures its DB-free subset only (its real-Postgres
   // queries/* stay out), same as the fallow coverage merge.
-  { dir: 'packages/node-runtime', name: '@repo/node-runtime', run: true },
+  { dir: 'packages/node-runtime', name: '@lcabrera/node', run: true },
   { dir: 'packages/scan-ingestion', name: '@repo/scan-ingestion', run: true },
   { dir: 'packages/utils', name: '@lcabrera/utils', run: true },
   // Phase 3 — apps and servers. Only scan-orchestrator needs a DB-free subset
@@ -96,7 +96,7 @@ export const COVERAGE_REPORT_WORKSPACES = [
 export const COVERAGE_MERGE_WORKSPACES = [
   { dir: 'packages/api', name: '@lcabrera/api' },
   { dir: 'packages/eslint-local-rules', name: '@lcabrera/eslint-plugin' },
-  { dir: 'packages/node-runtime', name: '@repo/node-runtime' },
+  { dir: 'packages/node-runtime', name: '@lcabrera/node' },
   { dir: 'packages/scan-ingestion', name: '@repo/scan-ingestion' },
   { dir: 'packages/scan-report', name: '@repo/scan-report' },
   { dir: 'packages/server', name: '@lcabrera/server' },

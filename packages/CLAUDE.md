@@ -5,7 +5,12 @@ are the product, the `@lcabrera/` vs `@repo/` scope split, the never-baseline ru
 — is in the root [AGENTS.md](../AGENTS.md) §1 and §4. This file is the
 **publishing contract** for the public packages: `@lcabrera/ui`,
 `@lcabrera/api`, `@lcabrera/server`, `@lcabrera/utils`,
-`@lcabrera/eslint-plugin`, `@lcabrera/tsconfig`.
+`@lcabrera/eslint-plugin`, `@lcabrera/tsconfig`, `@lcabrera/node`.
+
+A published package's npm name and its workspace directory need not match, and
+two of them already do not: `@lcabrera/eslint-plugin` lives in
+`packages/eslint-local-rules` and `@lcabrera/node` in `packages/node-runtime`.
+Read the manifest, not the path.
 
 ## Publishing invariants
 
@@ -123,9 +128,13 @@ client-safe package may only depend on workspace packages that are themselves
 client-safe**. Full topology:
 [ADR-038](../docs/decisions/ADR-038-public-package-topology-by-runtime.md).
 
-`utils` and `node-runtime` split on purity: `@lcabrera/utils` guarantees pure,
+`utils` and `node` split on purity: `@lcabrera/utils` guarantees pure,
 side-effect-free helpers, so anything that must touch the process (signal
-handlers, exit paths) belongs in `@repo/node-runtime`.
+handlers, exit paths) belongs in `@lcabrera/node` (`packages/node-runtime`).
+Publishing did not merge them, and did not fold `@lcabrera/node` into
+`@lcabrera/server` either — that would drag `pg` into a consumer that only
+wanted a shutdown handler
+([ADR-069](../docs/decisions/ADR-069-publish-the-shared-toolchain.md)).
 
 Release mechanics (Changesets, the manual first publish, `private: true`) are in
 the **`releasing` skill**.

@@ -371,12 +371,12 @@ importers:
 
   apps/api-server:
     dependencies:
+      '@lcabrera/node':
+        specifier: workspace:*
+        version: link:../../packages/node-runtime
       '@lcabrera/server':
         specifier: workspace:*
         version: link:../../packages/server
-      '@repo/node-runtime':
-        specifier: workspace:*
-        version: link:../../packages/node-runtime
       api-shared:
         specifier: workspace:*
         version: link:../shared
@@ -426,12 +426,12 @@ importers:
       '@fastify/cors':
         specifier: catalog:backend
         version: 11.3.0
+      '@lcabrera/node':
+        specifier: workspace:*
+        version: link:../../packages/node-runtime
       '@lcabrera/server':
         specifier: workspace:*
         version: link:../../packages/server
-      '@repo/node-runtime':
-        specifier: workspace:*
-        version: link:../../packages/node-runtime
       api-shared:
         specifier: workspace:*
         version: link:../shared
@@ -602,15 +602,15 @@ importers:
 
   apps/scan-orchestrator:
     dependencies:
+      '@lcabrera/node':
+        specifier: workspace:*
+        version: link:../../packages/node-runtime
       '@lcabrera/server':
         specifier: workspace:*
         version: link:../../packages/server
       '@repo/agent-runner':
         specifier: workspace:*
         version: link:../../packages/agent-runner
-      '@repo/node-runtime':
-        specifier: workspace:*
-        version: link:../../packages/node-runtime
       '@repo/scan-ingestion':
         specifier: workspace:*
         version: link:../../packages/scan-ingestion

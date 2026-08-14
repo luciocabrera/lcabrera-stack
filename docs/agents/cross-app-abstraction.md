@@ -55,18 +55,18 @@ typecheck rather than review
 ([ADR-038](../decisions/ADR-038-public-package-topology-by-runtime.md) has the
 table and what each tsconfig denies):
 
-| It needs…                             | Home                            |
-| ------------------------------------- | ------------------------------- |
-| nothing — pure, no side effects       | `@lcabrera/utils`               |
-| `fetch`, an HTTP contract, a base URL | `@lcabrera/api` (browser-safe)  |
-| `pg`, `node:crypto`, a query, a token | `@lcabrera/server` (Node-only)  |
-| to render                             | `@lcabrera/ui`                  |
-| the process — signals, exit paths     | `@repo/node-runtime` (internal) |
+| It needs…                             | Home                           |
+| ------------------------------------- | ------------------------------ |
+| nothing — pure, no side effects       | `@lcabrera/utils`              |
+| `fetch`, an HTTP contract, a base URL | `@lcabrera/api` (browser-safe) |
+| `pg`, `node:crypto`, a query, a token | `@lcabrera/server` (Node-only) |
+| to render                             | `@lcabrera/ui`                 |
+| the process — signals, exit paths     | `@lcabrera/node` (Node-only)   |
 
 Two traps live here:
 
 - **Purity is a guarantee, not a vibe.** Anything touching the process belongs in
-  `@repo/node-runtime`, not in `@lcabrera/utils` — that is the whole reason the
+  `@lcabrera/node`, not in `@lcabrera/utils` — that is the whole reason the
   two are separate packages.
 - **A client-safe package may only depend on workspace packages that are
   themselves client-safe**, and `packages/ui`'s `check:public-api` enforces it.

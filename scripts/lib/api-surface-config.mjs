@@ -23,6 +23,7 @@ import { toBuiltPaths } from './publish-surface.mjs';
 const PUBLIC_PACKAGE_DIRS = [
   'api',
   'eslint-local-rules',
+  'node-runtime',
   'server',
   'tsconfig',
   'ui',

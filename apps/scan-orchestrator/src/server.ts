@@ -1,5 +1,5 @@
+import { registerShutdownSignals } from '@lcabrera/node/registerShutdownSignals.util';
 import { closePool } from '@lcabrera/server/db/get-pool.util';
-import { registerShutdownSignals } from '@repo/node-runtime/registerShutdownSignals.util';
 import { failStaleRunningScans } from '@repo/scan-ingestion/queries/failStaleRunningScans.util';
 import { getUserByUsername } from '@repo/scan-ingestion/queries/getUserByUsername.util';
 

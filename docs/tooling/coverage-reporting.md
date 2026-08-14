@@ -83,7 +83,7 @@ Adding a fifth public package extends the check with no edit here:
 | `packages/server`             | `@lcabrera/server`        | true  | Same                                                                                                                                 |
 | `packages/api`                | `@lcabrera/api`           | true  | Same — the browser half of the former `data-access` ([ADR-038](../decisions/ADR-038-public-package-topology-by-runtime.md))          |
 | `apps/react-router`           | `vite-react-compiler`     | false | Its `test:ci` already emits the summary; re-running the repo's largest suite would be wasteful                                       |
-| `packages/node-runtime`       | `@repo/node-runtime`      | true  | Phase 2 — DB-free `test:coverage`                                                                                                    |
+| `packages/node-runtime`       | `@lcabrera/node`          | true  | Phase 2 — DB-free `test:coverage`                                                                                                    |
 | `packages/scan-ingestion`     | `@repo/scan-ingestion`    | true  | Phase 2 — DB-free `test:coverage` **subset** (its real-Postgres `queries/*` stay out, so the number is the DB-free portion only)     |
 | `packages/utils`              | `@lcabrera/utils`         | true  | Phase 2 — pure helpers, own 95% threshold ([#124](https://github.com/luciocabrera/vite-react-compiler/issues/124))                   |
 | `apps/scan-orchestrator`      | `@repo/scan-orchestrator` | true  | Phase 3 — DB-free **subset** (`runQueuedScan` drives the real scan queue and stays out)                                              |

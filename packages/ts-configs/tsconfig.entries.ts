@@ -188,22 +188,20 @@ export const configs = [
     ),
   },
   {
-    // Genuinely Node-only — process-lifecycle primitives (SIGINT/SIGTERM
-    // handlers), the deliberate impure counterpart to @lcabrera/utils.
+    // @lcabrera/node is genuinely Node-only — process-lifecycle primitives
+    // (SIGINT/SIGTERM handlers), the deliberate impure counterpart to
+    // @lcabrera/utils. `createNodeTsConfig` gives it no DOM lib, so a
+    // `document`/`window` reach-in fails typecheck here rather than shipping a
+    // package that only works in a bundler (ADR-038's posture, applied by
+    // ADR-069 when this package became publishable).
     //
-    // This was the one tsconfig.app.json the generator did not own: it was
-    // hand-written, so every tsconfig.shared.ts change silently skipped it
-    // while its name promised otherwise (the README calls these generated
-    // artifacts). It had drifted to carry esModuleInterop, resolveJsonModule
-    // and useDefineForClassFields, none of which this package uses — no
-    // default imports, no JSON imports, no classes — plus an `@/*` alias
-    // nothing imports through. Folding it in drops the dead options and
-    // makes it identical in shape to its Node-only siblings above.
+    // No `paths`: it is publishable, and a self-alias resolves only through a
+    // tsconfig. Without one, tsc checks the package's own subpaths against its
+    // real `exports` map instead of short-circuiting them to `src/` — the
+    // resolution hazard ADR-060 records, same reasoning as packages/api and
+    // packages/tsconfig.
     config: createNodeTsConfig({
       include: ['src', 'vite.config.ts'],
-      paths: {
-        '@repo/node-runtime/*': ['./src/*'],
-      },
       tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
     }),
     filePath: path.resolve(
