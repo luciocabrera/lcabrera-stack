@@ -297,10 +297,18 @@ Entry policy, the full output table, the glob-crosses-`/` trap and the coverage-
 ### Local Database Workflow (run from repo root)
 
 Commands: [COMMANDS.md §4 → Database](COMMANDS.md#database). `vp run db:up` starts
-local Postgres; seeding goes through `vp run --filter car-sales-api seed`, because
-`seed`/`db:seed` are **api-server scripts, not root scripts**.
+local Postgres; seeding goes through `vp run --filter vite-react-compiler seed`,
+because `seed`/`db:seed` are **workspace scripts, not root scripts**.
 
-The API server (`apps/api-server/`) reads env from `docker/local/.env`. The frontend proxies `/api` to `http://localhost:3001`.
+**Each side owns the DDL for the tables it serves and seeds itself**
+([ADR-071](docs/decisions/ADR-071-split-the-demo-database-setup.md)) — the
+showcase from `apps/react-router/db/`, the API servers from
+`apps/api-server/db/`. Two things follow that surprise people: seeding the
+**showcase** is what creates `enterprise_orders`, and `setup_large_data.sql`
+exists **twice** on purpose. While both copies are in this repository they are
+byte-identical, and a change to one belongs in the other in the same commit.
+
+Both sides read env from `docker/local/.env` and then the workspace's own `.env`. The frontend proxies `/api` to `http://localhost:3001`.
 
 **Critical:** Import Vite config from `vite-plus`, not `vite`, for tooling integration. Example: `import { defineConfig } from 'vite-plus'`. For tests, import test utilities from `vite-plus/test`, not `vitest` directly (e.g. `import { expect, test, vi } from 'vite-plus/test'`) — it re-exports the vite-plus-bundled Vitest, so the test runtime always matches the toolchain and there is no self-managed `vitest` to drift. This convention was re-evaluated and changed once vite-plus became the runner ([ADR-045](docs/decisions/ADR-045-vite-plus-test-imports.md)); the earlier `vitest`-direct rule predated it.
 

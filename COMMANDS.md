@@ -257,17 +257,25 @@ that is the local override of the local override, and it is deliberate.)
 
 ### Database
 
-| Command                                 | Does                 |
-| --------------------------------------- | -------------------- |
-| `vp run db:up`                          | start local Postgres |
-| `vp run db:status`                      | container status     |
-| `vp run db:down`                        | stop it              |
-| `vp run --filter car-sales-api seed`    | seed data            |
-| `vp run --filter car-sales-api db:seed` | bring up + seed      |
+| Command                                       | Does                                               |
+| --------------------------------------------- | -------------------------------------------------- |
+| `vp run db:up`                                | start local Postgres                               |
+| `vp run db:status`                            | container status                                   |
+| `vp run db:down`                              | stop it                                            |
+| `vp run --filter vite-react-compiler seed`    | create + seed the showcase's own tables            |
+| `vp run --filter vite-react-compiler db:seed` | bring up + seed                                    |
+| `vp run --filter car-sales-api seed`          | seed the API servers' copy of the car-sales tables |
+| `vp run --filter car-sales-api db:seed`       | bring up + seed                                    |
 
-`seed` and `db:seed` are **api-server scripts, not root scripts** — they need the
-`--filter` (or run them from `apps/api-server/`). The API server reads env from
-`docker/local/.env`; the frontend proxies `/api` to `http://localhost:3001`.
+`seed` and `db:seed` are **workspace scripts, not root scripts** — they need the
+`--filter` (or run them from the workspace directory). **Each side owns its own
+DDL and its own runner**
+([ADR-071](docs/decisions/ADR-071-split-the-demo-database-setup.md)): the
+showcase's is `apps/react-router/db/`, applied through `pg` so it needs only
+Docker and Node, and the API servers' is `apps/api-server/db/`, which covers the
+car-sales tables alone. Seeding the showcase is what creates `enterprise_orders`.
+Both read env from `docker/local/.env` and then the workspace's own `.env`; the
+frontend proxies `/api` to `http://localhost:3001`.
 
 ### Fallow static analysis
 
@@ -532,25 +540,25 @@ file under `reports/sonar/runs/` ([ADR-049](docs/decisions/ADR-049-findings-repo
 Beyond that, tasks are per-workspace. `build` and `test` are common but come from
 `vite.config.ts` rather than `scripts` in most workspaces (see §1).
 
-| Workspace                     | Package name              | Notable extra tasks                                                                                 |
-| ----------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------- |
-| `apps/react-router`           | `vite-react-compiler`     | `typegen`, `test:ci`, `test:watch`, `preview`, `knip`, `audit:lighthouse`, `audit:lighthouse:check` |
-| `apps/admin_system`           | `admin-system`            | `typegen`                                                                                           |
-| `apps/api-server`             | `car-sales-api`           | `seed`, `db:seed`, `start`                                                                          |
-| `apps/api-server-fast`        | `car-sales-api-fast`      | `seed`, `db:seed`, `start`                                                                          |
-| `apps/scan-orchestrator`      | `@repo/scan-orchestrator` | `start`, `test:unit`, `test:coverage`                                                               |
-| `apps/shared`                 | `api-shared`              | `build`, `test`                                                                                     |
-| `packages/ui`                 | `@lcabrera/ui`            | `check:public-api`, `test:coverage`, `bench`                                                        |
-| `packages/server`             | `@lcabrera/server`        | `test:coverage`                                                                                     |
-| `packages/scan-ingestion`     | `@repo/scan-ingestion`    | `migrate`, `push`, `test:unit`, `test:coverage`                                                     |
-| `packages/node-runtime`       | `@repo/node-runtime`      | `test:coverage`                                                                                     |
-| `packages/agent-runner`       | `@repo/agent-runner`      | —                                                                                                   |
-| `packages/ts-configs`         | `@repo/ts-configs`        | `generate`                                                                                          |
-| `packages/tsconfig`           | `@lcabrera/tsconfig`      | `build`, `test:coverage`                                                                            |
-| `packages/eslint-local-rules` | `@lcabrera/eslint-plugin` | —                                                                                                   |
-| `packages/plugins`            | `@repo/plugins`           | —                                                                                                   |
-| `packages/utils`              | `@lcabrera/utils`         | —                                                                                                   |
-| `packages/vite-configs`       | `@repo/vite-configs`      | —                                                                                                   |
+| Workspace                     | Package name              | Notable extra tasks                                                                                                    |
+| ----------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `apps/react-router`           | `vite-react-compiler`     | `typegen`, `test:ci`, `test:watch`, `preview`, `knip`, `seed`, `db:seed`, `audit:lighthouse`, `audit:lighthouse:check` |
+| `apps/admin_system`           | `admin-system`            | `typegen`                                                                                                              |
+| `apps/api-server`             | `car-sales-api`           | `seed`, `db:seed`, `start`                                                                                             |
+| `apps/api-server-fast`        | `car-sales-api-fast`      | `seed`, `db:seed`, `start`                                                                                             |
+| `apps/scan-orchestrator`      | `@repo/scan-orchestrator` | `start`, `test:unit`, `test:coverage`                                                                                  |
+| `apps/shared`                 | `api-shared`              | `build`, `test`                                                                                                        |
+| `packages/ui`                 | `@lcabrera/ui`            | `check:public-api`, `test:coverage`, `bench`                                                                           |
+| `packages/server`             | `@lcabrera/server`        | `test:coverage`                                                                                                        |
+| `packages/scan-ingestion`     | `@repo/scan-ingestion`    | `migrate`, `push`, `test:unit`, `test:coverage`                                                                        |
+| `packages/node-runtime`       | `@repo/node-runtime`      | `test:coverage`                                                                                                        |
+| `packages/agent-runner`       | `@repo/agent-runner`      | —                                                                                                                      |
+| `packages/ts-configs`         | `@repo/ts-configs`        | `generate`                                                                                                             |
+| `packages/tsconfig`           | `@lcabrera/tsconfig`      | `build`, `test:coverage`                                                                                               |
+| `packages/eslint-local-rules` | `@lcabrera/eslint-plugin` | —                                                                                                                      |
+| `packages/plugins`            | `@repo/plugins`           | —                                                                                                                      |
+| `packages/utils`              | `@lcabrera/utils`         | —                                                                                                                      |
+| `packages/vite-configs`       | `@repo/vite-configs`      | —                                                                                                                      |
 
 Notes on the non-obvious ones:
 

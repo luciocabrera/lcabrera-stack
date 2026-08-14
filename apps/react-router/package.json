@@ -6,7 +6,9 @@
   "scripts": {
     "audit:lighthouse": "node scripts/lighthouse-audit.mjs",
     "audit:lighthouse:check": "node scripts/check-lighthouse-scores.mjs",
+    "db:seed": "vp run -w db:up && vp run seed",
     "dev": "sh -c 'set -a; eval \"$(tr -d \"\\r\" < ../../docker/local/.env)\"; eval \"$(tr -d \"\\r\" < ./.env 2>/dev/null)\"; set +a; exec react-router dev'",
+    "seed": "node --env-file-if-exists=../../docker/local/.env --env-file-if-exists=.env scripts/seed-db.mjs",
     "lint": "vp lint . --fix && vp run lint:eslint",
     "lint:check": "vp lint . && vp run lint:eslint:check",
     "lint:eslint": "eslint . --config eslint.config.mjs --fix --max-warnings 0 --no-inline-config",
@@ -60,6 +62,7 @@
     "jsdom": "catalog:test",
     "knip": "catalog:tooling",
     "lighthouse": "catalog:tooling",
+    "pg": "catalog:backend",
     "playwright": "catalog:test",
     "typescript": "catalog:build",
     "typescript-eslint": "catalog:lint",

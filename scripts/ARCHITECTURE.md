@@ -10,9 +10,6 @@ Shared repository-level automation scripts.
 
 ## Current Scripts
 
-- `seed-db.cjs` - seeds PostgreSQL using SQL assets in `apps/api-server/db/`.
-  - Prefer host `psql` from fixed paths.
-  - Fallback to `docker exec` into `postgres_container` when host `psql` is unavailable.
 - `validate-skills.cjs` - validates agent skill contracts in `.github/skills`.
   - Checks required frontmatter fields (`name`, `description`, `license`).
   - Verifies frontmatter `name` matches the skill folder.
@@ -32,17 +29,18 @@ Defined in root `package.json`:
 - `db:up` - starts local postgres via `docker/local/docker-compose.yml`.
 - `db:status` - shows local docker compose status.
 - `db:down` - stops local postgres.
-- `seed` - runs shared seeding flow through `apps/api-server`.
-- `db:seed` - convenience sequence: `db:up` then `seed`.
 - `skills:validate` - runs `node scripts/validate-skills.cjs`.
 - `skills:report` - runs `node scripts/generate-skills-compliance-report.cjs`.
   - Outcome: source findings report plus refreshed fix-plan/prompts/runbooks.
 
 ## Guardrails
 
-- Resolve `psql` only from fixed system locations.
-- Resolve `docker` only from fixed system locations when using fallback mode.
-- Use a fixed safe `PATH` when spawning subprocesses.
-- Require SQL paths to be absolute and derived from repository root.
-- Keep script behavior package-agnostic so app scripts can call it via relative path.
+- Use a fixed safe `PATH` when spawning subprocesses, and resolve the binary from
+  fixed system locations rather than the caller's `PATH`.
 - Keep reporting scripts deterministic and safe for CI artifact generation.
+
+Database seeding is **not** here: each workspace owns its own DDL and its own
+runner (`apps/react-router/scripts/seed-db.mjs`,
+`apps/api-server/scripts/seed-db.mjs`), so neither breaks when the other's
+workspace moves — see
+[ADR-071](../docs/decisions/ADR-071-split-the-demo-database-setup.md).

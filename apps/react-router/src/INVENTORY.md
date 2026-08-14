@@ -41,6 +41,21 @@ route by default and the external API only under the `VITE_API_URL` override.
 
 ---
 
+## Database setup (`db/`, `scripts/`)
+
+Outside `src/`, but the routes above have nothing to read without it. This app
+owns the DDL for every table it queries and seeds itself — see
+[`db/README.md`](../db/README.md) and
+[ADR-071](../../../docs/decisions/ADR-071-split-the-demo-database-setup.md).
+
+| Artifact                      | Location   | Description                                                                                                   |
+| ----------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------- |
+| `setup_large_data.sql`        | `db/`      | `car_sales` + `wide_alltypes_150`. **Duplicated** with `apps/api-server/db/`; keep the two byte-identical     |
+| `setup_enterprise_orders.sql` | `db/`      | `enterprise_orders` — this app is the only thing that serves it                                               |
+| `seed-db.mjs`                 | `scripts/` | Creates `DB_NAME` if absent, then applies both files through `pg`. `vp run --filter vite-react-compiler seed` |
+
+---
+
 ## Auth (`src/auth/`)
 
 Self-contained, server-only auth for the secured-routes showcase. See [`src/auth/ARCHITECTURE.md`](auth/ARCHITECTURE.md) for the full flow and file map.

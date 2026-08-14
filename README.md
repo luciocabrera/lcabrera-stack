@@ -39,11 +39,12 @@ vp run db:up
 # Check status
 vp run db:status
 
-# Seed data (seed/db:seed are api-server scripts, so they need --filter)
-vp run --filter car-sales-api seed
+# Seed the showcase's own tables (seed/db:seed are workspace scripts, so they
+# need --filter); car-sales-api seeds its own copy of the car-sales tables
+vp run --filter vite-react-compiler seed
 
 # Or do both bring-up + seed
-vp run --filter car-sales-api db:seed
+vp run --filter vite-react-compiler db:seed
 
 # Stop local postgres
 vp run db:down
