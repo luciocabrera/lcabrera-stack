@@ -1,11 +1,16 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { importSpecifiers, selfContained } from './publish-smoke.mjs';
+import {
+  importSpecifiers,
+  selfContained,
+  unimportableProblems,
+} from './publish-smoke.mjs';
 
 // What these assertions defend: the consumer smoke run is only evidence if it
 // actually imports the subpath that would break. Both selectors below narrow
 // what is attempted, and a selector that quietly narrows to nothing is the
-// failure this whole gate exists to stop.
+// failure this whole gate exists to stop — which is why narrowing all the way
+// to zero is itself a reported problem.
 
 const packed = ({ dependencies = {}, exports_ = {}, name }) => ({
   manifest: { dependencies, exports: exports_ },
@@ -80,5 +85,39 @@ describe('selfContained', () => {
     expect(selfContained([utils, server]).map(({ name }) => name)).toEqual([
       '@lcabrera/utils',
     ]);
+  });
+});
+
+describe('unimportableProblems', () => {
+  // The vacuity this gate would otherwise keep: a package that reaches the
+  // consumer lane and contributes no import. The run would print "0 subpath(s)
+  // imported" and exit 0 — a cheerful pass over nothing, which is the shape of
+  // the defect the whole change is about.
+  const lane = ({ name, specifiers }) => ({ packed: { name }, specifiers });
+
+  it('reports a lane package that contributes no specifier', () => {
+    expect(
+      unimportableProblems([
+        lane({ name: '@lcabrera/assets', specifiers: [] }),
+      ]).join('\n'),
+    ).toContain('@lcabrera/assets');
+  });
+
+  it('reports each empty package, not just the first', () => {
+    expect(
+      unimportableProblems([
+        lane({ name: '@lcabrera/a', specifiers: [] }),
+        lane({ name: '@lcabrera/b', specifiers: ['@lcabrera/b/x'] }),
+        lane({ name: '@lcabrera/c', specifiers: [] }),
+      ]),
+    ).toHaveLength(2);
+  });
+
+  it('says nothing when every lane package imports something', () => {
+    expect(
+      unimportableProblems([
+        lane({ name: '@lcabrera/a', specifiers: ['@lcabrera/a/x'] }),
+      ]),
+    ).toEqual([]);
   });
 });

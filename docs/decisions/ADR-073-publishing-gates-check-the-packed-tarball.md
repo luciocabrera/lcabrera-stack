@@ -69,7 +69,11 @@ tooling therefore fails the gate that the switch would silently invalidate.
 
 **A package that is not built is a failure in all three gates**, not a skip.
 There is no outcome in which a publishing gate exits 0 having produced or read
-no artifact.
+no artifact. Three states enforce that, and each is a failure rather than a zero
+in the output: no package in scope, no package importable without a registry,
+and a package that reaches the consumer lane yet contributes no subpath to
+import. The last is not reachable from today's manifests — nor was the unbuilt
+tree, until a fresh worktree made it routine.
 
 The tarball is produced by spawning pnpm directly. `vp` does not wrap npm
 packing — its own `vp pack` is a Vite library build — so this is the exception
@@ -84,8 +88,14 @@ AGENTS.md §4 already allows, alongside `pnpm clean`.
 - The consumer import covers the packages whose dependencies are packed with
   them; one with an external runtime dependency (`pg`, `zod`,
   `@typescript-eslint/utils`) is packed and read but not imported, since doing
-  so would need a registry. The gate fails if that set ever becomes empty,
-  because then nothing is proven end to end.
+  so would need a registry. That leaves the largest published package checked
+  only through attw's simulated layout, which is the real cost of keeping the
+  lane registry-free.
+- A package can therefore be in the lane and still import nothing, if its every
+  subpath becomes a wildcard or a linked asset. That is a failure, not a quiet
+  zero: an asset-only public package may be a legitimate reason to import
+  nothing, but it has to be decided in this gate rather than inferred from a
+  count.
 - Editing the release workflow's publish step now has a second place to update.
   That is the point: the comment there names this ADR.
 - `attw:verify` still assembles its installed layout from `dist` plus

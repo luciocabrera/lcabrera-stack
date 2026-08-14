@@ -70,6 +70,26 @@ export const selfContained = (packages) => {
   );
 };
 
+/**
+ * A package that contributes no specifier is packed, installed, and then not
+ * exercised at all — the lane reports a number that says nothing.
+ *
+ * Reachable the moment a package's every subpath becomes a wildcard or a linked
+ * asset, which is a manifest edit away and not currently true of any of them.
+ * "Not currently true of any of them" is exactly the state `publish:verify` was
+ * in while every package happened to be built, so this is a failure rather than
+ * a quiet zero. An asset-only public package would be a legitimate reason to
+ * import nothing; it has to be decided here, out loud, not inferred from a
+ * count of zero.
+ */
+export const unimportableProblems = (smoked) =>
+  smoked
+    .filter(({ specifiers }) => specifiers.length === 0)
+    .map(
+      ({ packed }) =>
+        `${packed.name}: packed with its whole dependency closure, yet not one published subpath could be imported — every one is a wildcard, a linked asset or the manifest. Packing it proved nothing a consumer would notice.`,
+    );
+
 /** Variables through which the parent could inject modules into the consumer. */
 const AMBIENT_RESOLUTION_VARIABLES = new Set(['NODE_OPTIONS', 'NODE_PATH']);
 
@@ -91,8 +111,13 @@ export const runConsumerSmoke = ({ packages, workDirectory }) => {
     install({ nodeModules, packed });
   }
 
-  const smoked = selfContained(packages);
-  const specifiers = smoked.flatMap((packed) => importSpecifiers(packed));
+  const lanes = selfContained(packages).map((packed) => ({
+    packed,
+    specifiers: importSpecifiers(packed),
+  }));
+  const smoked = lanes.map((lane) => lane.packed);
+  const specifiers = lanes.flatMap((lane) => lane.specifiers);
+  const empty = unimportableProblems(lanes);
   const entry = join(workDirectory, 'consumer.mjs');
   const lines = specifiers.map(
     (specifier) => `await import(${JSON.stringify(specifier)});`,
@@ -106,7 +131,7 @@ export const runConsumerSmoke = ({ packages, workDirectory }) => {
       env: consumerEnvironment(),
       stdio: ['ignore', 'pipe', 'pipe'],
     });
-    return { problems: [], smoked, specifiers };
+    return { problems: empty, smoked, specifiers };
   } catch (error) {
     const detail = String(error.stderr ?? error.message)
       .split('\n')
@@ -115,6 +140,7 @@ export const runConsumerSmoke = ({ packages, workDirectory }) => {
       .join('\n    ');
     return {
       problems: [
+        ...empty,
         `a consumer outside this repo could not import the packed tarballs (${smoked
           .map(({ name }) => name)
           .join(', ')}):\n    ${detail}`,

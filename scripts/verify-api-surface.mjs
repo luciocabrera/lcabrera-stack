@@ -14,17 +14,17 @@
  *   vp run api-surface:verify            # check; lists every drift
  *   vp run api-surface:verify -- --write # regenerate the snapshots
  *
- * A package with no `dist` fails here rather than being skipped: the gate used
- * to report success for the packages it could read while announcing the rest as
- * "skipped, unbuilt", which on an unbuilt tree is a pass that compared nothing
- * (ADR-073).
+ * A package whose published entry files are not on disk fails here rather than
+ * being skipped: the gate used to report success for the packages it could read
+ * while announcing the rest as "skipped, unbuilt", which on an unbuilt tree is a
+ * pass that compared nothing (ADR-073).
  *
  * Exit codes: 0 = every public package was compared and matches its snapshot
  * (and breaking changes carry a changeset), 1 = drift, an unaccompanied
  * breaking change, or a package that could not be read (all listed).
  */
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
@@ -64,17 +64,36 @@ const readChangesetContents = () => {
     .map((name) => readFileSync(join(directory, name), 'utf8'));
 };
 
-/** True for a built package whose `dist` is not on disk — nothing to read yet. */
+/** True for a built package whose entry files are not on disk — nothing to read. */
 const isUnbuilt = (packageConfig) =>
   !packageConfig.source && !entriesAreBuilt(packageConfig);
+
+/** The published entry files this package exports that are not on disk. */
+const missingEntries = (packageConfig) =>
+  packageConfig.entries
+    .filter(({ entryFile }) => !existsSync(entryFile))
+    .map(({ entryFile }) => relative(REPO_ROOT, entryFile));
+
+/**
+ * Names the files that are actually absent, not a directory.
+ *
+ * `isUnbuilt` is true when any exported entry is missing, which is usually a
+ * missing `dist` but is equally a single subpath the build no longer emits.
+ * Reporting the second as "dist is missing" sends the reader to look at a
+ * directory that is plainly there.
+ */
+const unreadableProblem = (packageConfig) => {
+  const missing = missingEntries(packageConfig);
+  const listed = missing.slice(0, 3).join(', ');
+  const rest = missing.length > 3 ? ', …' : '';
+  return `${packageConfig.name}: no surface was read, so it was compared to nothing — these published entry files are not on disk: ${listed}${rest}. Run \`vp run packages:build\`; if the build is current, \`exports\` names a file it does not produce.`;
+};
 
 const writeSnapshots = (packages) => {
   const problems = [];
   for (const packageConfig of packages) {
     if (isUnbuilt(packageConfig)) {
-      problems.push(
-        `${packageConfig.name}: dist is missing — run \`vp run packages:build\` before --write.`,
-      );
+      problems.push(unreadableProblem(packageConfig));
       continue;
     }
     const surface = extractSurface(packageConfig);
@@ -158,10 +177,7 @@ const runVerify = (packages) => {
   const active = packages.filter((packageConfig) => !isUnbuilt(packageConfig));
   const unbuilt = packages
     .filter(isUnbuilt)
-    .map(
-      (packageConfig) =>
-        `${packageConfig.name}: dist is missing, so its published surface was compared to nothing — run \`vp run packages:build\` first.`,
-    );
+    .map((packageConfig) => unreadableProblem(packageConfig));
 
   const results = active.map(verifyPackage);
   const drift = results.flatMap((result) => result.drift);
