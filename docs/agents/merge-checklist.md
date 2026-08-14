@@ -30,7 +30,12 @@ trust the check and look at its output.
       **[judgement; auto for paths: `docs:verify`]**
 - [ ] **No conflicting approaches introduced** — no second way to do something
       the repo already does one way **[judgement]**
-- [ ] **Reviewed by a supervising agent or human** **[judgement]**
+- [ ] **Reviewed by a supervising agent or human** **[judgement]**. Where an
+      agent code review has reported a verdict on the PR, what that verdict has
+      to satisfy — which severities block, and the only sanctioned way to merge
+      past a blocking finding — is
+      [`agent-review-contract.md`](agent-review-contract.md). A missing or
+      unparseable verdict is a blocking `error` there, never a pass.
 - [ ] **Impact analysis completed** — the PR's Impact Analysis section is filled
       in, not "N/A" by default **[judgement]**
 - [ ] **Security / privacy implications reviewed**
