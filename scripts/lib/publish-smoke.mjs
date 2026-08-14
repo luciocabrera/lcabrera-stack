@@ -94,10 +94,10 @@ export const runConsumerSmoke = ({ packages, workDirectory }) => {
   const smoked = selfContained(packages);
   const specifiers = smoked.flatMap((packed) => importSpecifiers(packed));
   const entry = join(workDirectory, 'consumer.mjs');
-  writeFileSync(
-    entry,
-    `${specifiers.map((specifier) => `await import(${JSON.stringify(specifier)});`).join('\n')}\n`,
+  const lines = specifiers.map(
+    (specifier) => `await import(${JSON.stringify(specifier)});`,
   );
+  writeFileSync(entry, `${lines.join('\n')}\n`);
 
   try {
     execFileSync(process.execPath, [entry], {
