@@ -31,7 +31,7 @@ node packages/scan-report/scripts/generate-oxlint-report.mjs [scope-directory]
 node packages/scan-report/scripts/generate-eslint-report.mjs [scope-directory]
 ```
 
-Both runners ship in [`@lcabrera/scan-report`](../../../packages/scan-report/README.md); the paths above are this repository's own workspace copy, and a repository that installed the package runs them by name instead (`npx scan-report-oxlint`, `npx scan-report-eslint`). `scope-directory` defaults to the whole repository (`.`) if omitted — pass one to narrow the sweep. Each runner:
+Both runners ship in [`@repo/scan-report`](../../../packages/scan-report/README.md); the paths above are this repository's own workspace copy, and a repository that installed the package runs them by name instead (`npx scan-report-oxlint`, `npx scan-report-eslint`). `scope-directory` defaults to the whole repository (`.`) if omitted — pass one to narrow the sweep. Each runner:
 
 1. Runs its one tool — oxlint via `vp lint . --format json` inside the scope directory (not the raw `oxlint` binary — `vp lint` merges in the app/package's own `vite.config.ts` lint config, matching what a developer actually sees); eslint via the custom-rules `eslint . --config <flat config> --format json` pass, only if a flat config exists in the scope directory (most `packages/*` don't have one — skipped gracefully, not an error).
 2. Writes its raw artifact verbatim (`oxlint.raw.json` / `eslint.raw.json`, each with a `kind` discriminator).

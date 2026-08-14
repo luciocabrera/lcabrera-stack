@@ -80,7 +80,7 @@ const resolveFallowBin = () => {
   return join(dirname(fallowPackageJsonPath), binRelativePath);
 };
 
-const NO_FALLOW_MESSAGE = `No fallow installation found under ${hostRoot} — nothing was analysed. Install fallow (an optional peer of @lcabrera/scan-report) to enable this scanner.`;
+const NO_FALLOW_MESSAGE = `No fallow installation found under ${hostRoot} — nothing was analysed. Install fallow (an optional peer of @repo/scan-report) to enable this scanner.`;
 
 const WINDOWS_SYSTEM_DIRECTORY = String.raw`C:\Windows\System32`;
 

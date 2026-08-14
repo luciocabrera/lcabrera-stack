@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "catalog:runtime",
-    "@lcabrera/scan-report": "workspace:*",
+    "@repo/scan-report": "workspace:*",
     "zod": "catalog:runtime"
   },
   "devDependencies": {

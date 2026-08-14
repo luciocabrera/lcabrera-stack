@@ -25,7 +25,7 @@ issue: #677
 ## What
 
 Move the three deterministic scan runners and their shared machinery out of
-`.github/skills/*/scripts/` into `packages/scan-report` (`@lcabrera/scan-report`,
+`.github/skills/*/scripts/` into `packages/scan-report` (`@repo/scan-report`,
 ADR-069), and replace the hardcoded CQMS ingestion call with a command the host
 repository configures. The skills keep their `SKILL.md`; this repository keeps
 ingesting via `scan-report.config.json`.

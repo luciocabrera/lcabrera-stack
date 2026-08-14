@@ -15,7 +15,7 @@ declared dependencies, a resolvable public surface, no reliance on a consumer's
 tsconfig `paths` to make an import work — because it is meant to be consumed from
 outside this repo, where none of this monorepo's wiring exists. `packages/ui`,
 `packages/api`, `packages/server`, `packages/utils`,
-`packages/eslint-local-rules` and `packages/scan-report` are held strictest for
+`packages/eslint-local-rules` are held strictest for
 exactly that reason (§4). This is why the column-filter shapes are **duplicated**
 in `@lcabrera/ui` and `@lcabrera/server` rather than shared through an elegant edge that
 only resolves in-repo ([ADR-039](docs/decisions/ADR-039-duplicate-over-undeclared-edges.md)).
@@ -35,12 +35,11 @@ A package in **neither** scope means that question was never asked — that is h
 the custom lint rules sat unscoped until they became `@lcabrera/eslint-plugin`
 ([ADR-057](docs/decisions/ADR-057-publish-the-custom-lint-rules.md)).
 
-**Four packages come out of that `@repo/*` list, and only three of them are
+**Three packages come out of that `@repo/*` list, and two of them are
 renames.**
 [ADR-069](docs/decisions/ADR-069-publish-the-shared-toolchain.md) publishes
 `packages/vite-configs` (folding in `packages/plugins`) as
-`@lcabrera/vite-config`, `packages/node-runtime` as `@lcabrera/node`, and the
-three scan-report skills' shared scripts as `@lcabrera/scan-report`. Those
+`@lcabrera/vite-config` and `packages/node-runtime` as `@lcabrera/node`. Those
 workspaces **become** the published package, and the repo data they carry leaves
 for a repo-owned home. **`packages/ts-configs` is the one split, not a rename**:
 `@lcabrera/tsconfig` is a new package (`packages/tsconfig`) holding the factories
@@ -78,7 +77,7 @@ the listing cannot tell you is below.
 
 `packages/ui`,
 `packages/api`, `packages/server`, `packages/utils`,
-`packages/eslint-local-rules`, `packages/tsconfig` and `packages/scan-report`
+`packages/eslint-local-rules` and `packages/tsconfig`
 are public packages and are held strictest: never baseline, scope, or
 inline-disable a finding in any of them. The authority on that list is not this
 sentence — it is which workspaces gitignore `eslint-suppressions.json`, which
@@ -95,8 +94,11 @@ admitted by its own implementing issue (#675, #676) clearing those suppressions
 and gitignoring the file — not by being named here. `packages/ts-configs` is not
 on that list because it never joins it: it is the split, so what became public is
 the new `packages/tsconfig` above, and the surviving workspace stays private.
-`packages/scan-report` was built from the scan-report skills' shared scripts
-under #677 and is in the tier already.
+`packages/scan-report` is not on it either, and for a different reason: it was
+built under #677 from the scan-report skills' shared scripts, and every consumer
+it has is CQMS, so it stays `@repo/scan-report`, `private: true`, and leaves with
+the extraction (#679) rather than shipping. ADR-069's note of 2026-08-14 records
+why.
 
 `api` and `server` split on **runtime**, and the split is load-bearing, not
 cosmetic — the two names say which runtime each one is for, and the tsconfigs

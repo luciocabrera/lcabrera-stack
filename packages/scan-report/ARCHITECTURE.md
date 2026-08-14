@@ -1,4 +1,4 @@
-# `@lcabrera/scan-report` — architecture
+# `@repo/scan-report` — architecture
 
 The scanners behind the `linter-checker`, `code-smell-checker`,
 `code-smell-zen` and `fallow-code-checker` skills. They used to live under
@@ -6,6 +6,16 @@ The scanners behind the `linter-checker`, `code-smell-checker`,
 repository; [ADR-069](../../docs/decisions/ADR-069-publish-the-shared-toolchain.md)
 made them a package instead, and the skills kept their `SKILL.md` — prompt text
 is per-repository, code is not.
+
+**Private on purpose.** ADR-069 first had this package publishing as
+`@lcabrera/scan-report`; its
+[amendment](../../docs/decisions/ADR-069-publish-the-shared-toolchain.md#amendment-2026-08-14--scan-report-does-not-publish)
+withdrew that before it landed, because every consumer is CQMS and the versioned
+contract below is CQMS's report schema. It moves with the extraction (#679). The
+decoupling that got it here — a configured ingestion command, no workspace-named
+default scope, an install-derived host root — is needed either way: a runner that
+hardcodes a path into another product's workspace breaks when that product moves,
+registry or no registry.
 
 ## Layout
 
@@ -25,20 +35,19 @@ is per-repository, code is not.
 
 ## Three decisions worth knowing before editing
 
-**It ships source, and that is not the trap it is for the other public
-packages.** `packages/CLAUDE.md` warns that a `.ts` file inside `node_modules`
-cannot be loaded at all. These are `.mjs` — plain ESM that node runs unmodified —
-so there is no build step, no `dist`, and no `publishConfig.exports`
-substitution. `publish:verify` scopes itself to packages with a `build` script
-and therefore skips this one by construction, not by exemption.
+**There is no build step, and none is missing.** These are `.mjs` — plain ESM
+that node runs unmodified, unlike the `.ts` a consumer cannot load out of
+`node_modules` (`packages/CLAUDE.md`). So there is no `dist` and no
+`exports`/`publishConfig.exports` swap to keep in step. It is in no publishing
+gate either: `publish:verify` scopes itself to packages that build AND declare
+`publishConfig.access`, and `api-surface:verify`/`attw:verify` read an explicit
+list this package is not on. All three by construction, not by exemption.
 
-**Its versioned contract is the report shape, not a TypeScript surface.** The
-package is deliberately absent from `PUBLIC_PACKAGE_DIRS` in
-`scripts/lib/api-surface-config.mjs`: what a consumer depends on is the CLI flag
-set and `SCHEMA_V1.md`/`REPORT_JSON_CONTRACT.md`, and snapshotting the two
-hand-written `.d.mts` files would ratchet the wrong thing while leaving the real
-contract ungated. Change either document and you have changed the contract, with
-or without a type diff.
+**Its contract is the report shape, not a TypeScript surface.** What a consumer
+depends on is the CLI flag set and `SCHEMA_V1.md`/`REPORT_JSON_CONTRACT.md` —
+change either document and you have changed the contract, with or without a type
+diff. That the contract is a _CQMS_ report schema is what settled the packaging
+question: it is meaningless without a CQMS to ingest it.
 
 **The host root is derived from the install location, never from `cwd`.** An
 orchestrator spawns these runners from wherever it happens to be, so a
@@ -82,7 +91,7 @@ parent process whose environment they inherit wholesale.
 
 It **names the binary by absolute path** from a fixed directory list, so no
 writable directory earlier in an inherited PATH can shadow git (Sonar S4036).
-A published package cannot assume the `/usr/bin` of the machine it was written
+Tooling cannot assume the `/usr/bin` of the machine it was written
 on, so there are two lists — Homebrew on both architectures, Nix system and
 per-user profiles, MacPorts and Xcode's command line tools on POSIX; Git for
 Windows on `win32` — and which one applies is chosen by platform.
@@ -112,7 +121,8 @@ when the tool it drives is not there: oxlint checks for a config first, eslint
 checks for a flat config, and fallow's bin resolution returns `undefined` rather
 than propagating `MODULE_NOT_FOUND`. That last one was a latent crash while
 these were private scripts in a repo that always has fallow installed; as a
-published `bin` the first external consumer would have hit it.
+`bin` run from a repository that has no fallow, the first such run would have
+hit it.
 
 The line is drawn at _installed but broken_. A fallow that exists and exits
 non-zero against the host's own repository still hard-exits, because that is the
@@ -120,12 +130,13 @@ host's tooling failing and it should hear about it immediately; the same failure
 against a `--target` project only degrades, since an arbitrary project can break
 a tool in ways the host never does (CQMS ADR-015).
 
-`fallow` is an optional `peerDependency` rather than a `dependency`
-([ADR-047](../../docs/decisions/ADR-047-declare-optional-peer-dependencies.md)):
-a consumer installing this package for its lint scanners should not be made to
-pull in a static analyser it will not run. `ts-morph` is deliberately absent
-entirely — only `app-graph`'s generator uses it, and ADR-069 keeps that script
-out of this package.
+`fallow` is deliberately not a dependency of this package at all: the runner
+resolves it from the repository being scanned rather than from its own
+`node_modules`, so declaring it would describe the wrong graph and force it on
+anyone using only the lint scanners. The requirement is carried by the README
+and by the runtime message instead. `ts-morph` is absent for a different reason —
+only `app-graph`'s generator uses it, and ADR-069 keeps that script out of this
+package.
 
 ## Adding a scanner
 

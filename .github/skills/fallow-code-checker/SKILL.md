@@ -64,7 +64,7 @@ Run both passes in a single shell invocation so the timestamp is consistent:
 
 !`bash packages/scan-report/scripts/run-fallow.sh`
 
-To scope the report to specific workspaces, pass a fallow `-w` glob as the first argument, e.g. `bash packages/scan-report/scripts/run-fallow.sh 'apps/react-router'`. The helper ships in [`@lcabrera/scan-report`](../../../packages/scan-report/README.md); the path above is this repository's own workspace copy, and a repository that installed the package runs `node_modules/@lcabrera/scan-report/scripts/run-fallow.sh`. The full dependency graph is analyzed either way; the glob only filters reported findings.
+To scope the report to specific workspaces, pass a fallow `-w` glob as the first argument, e.g. `bash packages/scan-report/scripts/run-fallow.sh 'apps/react-router'`. The helper ships in [`@repo/scan-report`](../../../packages/scan-report/README.md); the path above is this repository's own workspace copy, and a repository that installed the package runs `node_modules/@repo/scan-report/scripts/run-fallow.sh`. The full dependency graph is analyzed either way; the glob only filters reported findings.
 
 Note the run directory path from the final echo — it is used for all subsequent saves.
 

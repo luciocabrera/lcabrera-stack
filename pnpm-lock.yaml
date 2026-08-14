@@ -217,7 +217,7 @@ importers:
       '@changesets/cli':
         specifier: catalog:tooling
         version: 2.31.1(@types/node@26.2.0)
-      '@lcabrera/scan-report':
+      '@repo/scan-report':
         specifier: workspace:*
         version: link:packages/scan-report
       '@repo/vite-configs':
@@ -602,9 +602,6 @@ importers:
 
   apps/scan-orchestrator:
     dependencies:
-      '@lcabrera/scan-report':
-        specifier: workspace:*
-        version: link:../../packages/scan-report
       '@lcabrera/server':
         specifier: workspace:*
         version: link:../../packages/server
@@ -617,6 +614,9 @@ importers:
       '@repo/scan-ingestion':
         specifier: workspace:*
         version: link:../../packages/scan-ingestion
+      '@repo/scan-report':
+        specifier: workspace:*
+        version: link:../../packages/scan-report
       pg:
         specifier: catalog:backend
         version: 8.23.0
@@ -691,7 +691,7 @@ importers:
       '@anthropic-ai/claude-agent-sdk':
         specifier: catalog:runtime
         version: 0.3.227(@anthropic-ai/sdk@0.116.0(zod@4.4.3))(@modelcontextprotocol/sdk@1.30.0(supports-color@7.2.0)(zod@4.4.3))(zod@4.4.3)
-      '@lcabrera/scan-report':
+      '@repo/scan-report':
         specifier: workspace:*
         version: link:../scan-report
       zod:
@@ -823,15 +823,15 @@ importers:
 
   packages/scan-ingestion:
     dependencies:
-      '@lcabrera/scan-report':
-        specifier: workspace:*
-        version: link:../scan-report
       '@lcabrera/server':
         specifier: workspace:*
         version: link:../server
       '@lcabrera/utils':
         specifier: workspace:*
         version: link:../utils
+      '@repo/scan-report':
+        specifier: workspace:*
+        version: link:../scan-report
       fflate:
         specifier: catalog:runtime
         version: 0.8.3
@@ -868,10 +868,6 @@ importers:
         version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.2.0)(@vitest/browser-preview@4.1.10)(@vitest/coverage-v8@4.1.10)(@voidzero-dev/vite-plus-core@0.2.6(@arethetypeswrong/core@0.18.5)(@types/node@26.2.0)(jiti@2.7.0)(typescript@6.0.3)(yaml@2.9.0))(jsdom@29.1.1)
 
   packages/scan-report:
-    dependencies:
-      fallow:
-        specifier: '>=3.0.0'
-        version: 3.14.0
     devDependencies:
       '@repo/vite-configs':
         specifier: workspace:*

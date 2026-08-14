@@ -15,7 +15,7 @@ This folder contains shared output and validation standards used by:
 - COMPLIANCE_AUDIT.md: detailed alignment check against project guidelines (16-section matrix)
 
 The two contract documents live with the code that produces them, in
-[`@lcabrera/scan-report`](../../../packages/scan-report/README.md), and ship in
+[`@repo/scan-report`](../../../packages/scan-report/README.md), and ship in
 its tarball so a consuming repository can read the contract it is emitting:
 
 - [SCHEMA_V1.md](../../../packages/scan-report/SCHEMA_V1.md): canonical report contract and validation rules

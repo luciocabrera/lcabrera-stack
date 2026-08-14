@@ -58,7 +58,7 @@ describe('the repository-variable list', () => {
     }
   });
 
-  it('matches run-git.mjs in @lcabrera/scan-report', () => {
+  it('matches run-git.mjs in @repo/scan-report', () => {
     // A published package cannot import root tooling (ADR-039), so it carries
     // its own copy of the same discipline.
     const runner = readRepoFile('packages/scan-report/scripts/run-git.mjs');

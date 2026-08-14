@@ -9,16 +9,14 @@ import {
 describe('rootFromInstallPath', () => {
   test('returns the consumer root left of the first node_modules segment', () => {
     expect(
-      rootFromInstallPath(
-        '/srv/app/node_modules/@lcabrera/scan-report/scripts',
-      ),
+      rootFromInstallPath('/srv/app/node_modules/@repo/scan-report/scripts'),
     ).toBe('/srv/app');
   });
 
   test("takes the FIRST segment, so pnpm's nested store still resolves to the consumer", () => {
     expect(
       rootFromInstallPath(
-        '/srv/app/node_modules/.pnpm/@lcabrera+scan-report@0.1.0/node_modules/@lcabrera/scan-report/scripts',
+        '/srv/app/node_modules/.pnpm/@lcabrera+scan-report@0.1.0/node_modules/@repo/scan-report/scripts',
       ),
     ).toBe('/srv/app');
   });
@@ -30,9 +28,9 @@ describe('rootFromInstallPath', () => {
   });
 
   test('returns undefined when node_modules is the root itself — there is no consumer above it', () => {
-    expect(
-      rootFromInstallPath('/node_modules/@lcabrera/scan-report/scripts'),
-    ).toBe(undefined);
+    expect(rootFromInstallPath('/node_modules/@repo/scan-report/scripts')).toBe(
+      undefined,
+    );
   });
 });
 
@@ -41,7 +39,7 @@ describe('resolveHostRoot', () => {
     expect(
       resolveHostRoot({
         env: { [HOST_ROOT_ENV]: '/elsewhere' },
-        moduleDirectory: '/srv/app/node_modules/@lcabrera/scan-report/scripts',
+        moduleDirectory: '/srv/app/node_modules/@repo/scan-report/scripts',
       }),
     ).toBe('/elsewhere');
   });
@@ -50,7 +48,7 @@ describe('resolveHostRoot', () => {
     expect(
       resolveHostRoot({
         env: {},
-        moduleDirectory: '/srv/app/node_modules/@lcabrera/scan-report/scripts',
+        moduleDirectory: '/srv/app/node_modules/@repo/scan-report/scripts',
       }),
     ).toBe('/srv/app');
   });

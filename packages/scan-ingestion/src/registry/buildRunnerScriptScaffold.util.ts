@@ -39,7 +39,7 @@ import {
   parseRunContext,
   resolveOutputDirectory,
   writeArtifacts,
-} from '@lcabrera/scan-report/deterministic-scan';
+} from '@repo/scan-report/deterministic-scan';
 
 const context = parseRunContext();
 

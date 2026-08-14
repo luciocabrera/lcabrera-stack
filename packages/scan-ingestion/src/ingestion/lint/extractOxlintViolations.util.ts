@@ -1,5 +1,5 @@
-import { makeFindingId } from '@lcabrera/scan-report/deterministic-scan';
-import { buildOxlintFixText } from '@lcabrera/scan-report/finding-templates';
+import { makeFindingId } from '@repo/scan-report/deterministic-scan';
+import { buildOxlintFixText } from '@repo/scan-report/finding-templates';
 import path from 'node:path';
 
 import type { LintViolationInput } from './lint.types.ts';

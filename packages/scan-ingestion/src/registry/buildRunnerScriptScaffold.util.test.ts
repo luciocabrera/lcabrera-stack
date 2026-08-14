@@ -10,7 +10,7 @@ describe('buildRunnerScriptScaffold', () => {
       scannerId: 'cycle-finder',
     });
 
-    expect(script).toContain("from '@lcabrera/scan-report/deterministic-scan'");
+    expect(script).toContain("from '@repo/scan-report/deterministic-scan'");
     expect(script).toContain('TODO(parser)');
     expect(script).toContain('parseRunContext()');
     expect(script).toContain("rawFileName: 'cycles.raw.json'");

@@ -1,4 +1,4 @@
-# @lcabrera/scan-report
+# @repo/scan-report
 
 Deterministic code-quality scanners that all emit **one** report shape. Point
 one at a directory and it writes three files: the tool's verbatim output, a
@@ -7,20 +7,19 @@ machine-readable `report.json`, and a human-readable `report.md`.
 - **[SCHEMA_V1.md](SCHEMA_V1.md)** — the canonical report contract
 - **[REPORT_JSON_CONTRACT.md](REPORT_JSON_CONTRACT.md)** — the `report.json` shape a consumer parses
 
-Both ship in the tarball, so the contract you are producing is readable from
-`node_modules`.
+**Private, and staying that way.** Every consumer is CQMS, and the contract
+above is CQMS's report schema, so this package travels with the extraction
+(#679) rather than going to a registry — the reasoning is recorded in
+[ADR-069's amendment](../../docs/decisions/ADR-069-publish-the-shared-toolchain.md#amendment-2026-08-14--scan-report-does-not-publish).
+Nothing below assumes a registry; it works the same in whichever repository the
+workspace lives.
 
-## Install
+## Requirements
 
-```bash
-npm install --save-dev @lcabrera/scan-report
-```
-
-`oxlint`, `eslint` and `fallow` are resolved from the installing repository, and
-each scanner degrades to a clean 0-findings report when its tool or config is
-absent — so nothing here forces you to adopt all three. `fallow` is declared as
-an **optional peer**, which is the only one your package manager will mention;
-`scan-report-fallow` without it still writes all three artifacts and says
+`oxlint`, `eslint` and `fallow` are resolved from the repository being worked
+in, and each scanner degrades to a clean 0-findings report when its tool or
+config is absent — so nothing here forces you to have all three.
+`scan-report-fallow` without fallow still writes all three artifacts and says
 `No fallow installation found under <root>` in `top_risk`.
 
 `scan-report-fallow` additionally expects a repo-root `.fallowrc.json`, and
@@ -46,9 +45,12 @@ Every scanner takes the same flags:
 | `--skip-ingest`              | write the artifacts and stop                                                       |
 
 ```bash
-npx scan-report-oxlint packages/ui
-npx scan-report-fallow --target=/srv/checkouts/some-app --scope=.
+node packages/scan-report/scripts/generate-oxlint-report.mjs packages/ui
+node packages/scan-report/scripts/generate-fallow-report.mjs --target=/srv/checkouts/some-app --scope=.
 ```
+
+Each is also a `bin`, so `node_modules/.bin/scan-report-oxlint` works from any
+workspace that depends on this one.
 
 ## Persisting a run
 
@@ -105,11 +107,7 @@ scanned directory.
 
 ## Programmatic use
 
-`@lcabrera/scan-report/finding-templates` and
-`@lcabrera/scan-report/deterministic-scan` expose the per-rule fix wording and
+`@repo/scan-report/finding-templates` and
+`@repo/scan-report/deterministic-scan` expose the per-rule fix wording and
 `makeFindingId`, so a downstream consumer can re-derive the same finding
 identities from a raw artifact instead of copying the strings.
-
-## License
-
-MIT

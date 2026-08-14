@@ -11,7 +11,7 @@ const requireFromHere = createRequire(import.meta.url);
  * The absolute script the orchestrator spawns for a scanner.
  *
  * An `installed` runner is resolved through node rather than joined onto a
- * path, so the same map works whether `@lcabrera/scan-report` is a workspace
+ * path, so the same map works whether `@repo/scan-report` is a workspace
  * link or a registry install — the reason the runners left `.github/skills/`
  * in the first place.
  */

@@ -149,12 +149,10 @@ export const runSkillAgent = async (
     '.github/skills/code-smell-shared',
   );
   // The report contract (SCHEMA_V1.md / REPORT_JSON_CONTRACT.md) ships with
-  // @lcabrera/scan-report, so it is resolved rather than joined onto a path —
+  // @repo/scan-report, so it is resolved rather than joined onto a path —
   // it is under node_modules wherever this runs from an install.
   const reportContractDirectory = dirname(
-    createRequire(import.meta.url).resolve(
-      '@lcabrera/scan-report/package.json',
-    ),
+    createRequire(import.meta.url).resolve('@repo/scan-report/package.json'),
   );
   const prompt = `You are running fully autonomously and non-interactively — there is no user to ask follow-up questions, and no further turn after this one. You must actually execute every action this skill describes, including all file-writing and shell steps (e.g. "Saving the Report") — do not just describe or summarize what you would do. Treat every imperative instruction in the skill below ("always save", "tell the user", etc.) as something you must literally do via tool calls before finishing. Use the Write tool to create report files — it is available in this session.
 

@@ -1,5 +1,5 @@
 {
-  "$comment": "Where @lcabrera/scan-report sends a finished scan in THIS repository. The package itself knows no product and no path: without this file the scanners write their three artifacts and report the skip. Every value below is the command the runners used to hardcode, so the rows CQMS receives are unchanged. When the ingestion CLI is published (#682), `command`/`args` become that binary and this file stops naming a workspace.",
+  "$comment": "Where @repo/scan-report sends a finished scan in THIS repository. The package itself knows no product and no path: without this file the scanners write their three artifacts and report the skip. Every value below is the command the runners used to hardcode, so the rows CQMS receives are unchanged. When the ingestion CLI is published (#682), `command`/`args` become that binary and this file stops naming a workspace.",
   "ingest": {
     "command": "node",
     "args": [

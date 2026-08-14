@@ -1,7 +1,7 @@
 # `report.json` Contract
 
 This document defines the **JSON** sibling of `report.md`, written by every
-scanner in `@lcabrera/scan-report` and by the agent-authored scan skills
+scanner in `@repo/scan-report` and by the agent-authored scan skills
 (`code-smell-checker`, `code-smell-zen`, `fallow-code-checker`).
 
 Unlike `SCHEMA_V1.md` (the Markdown report contract), `report.json` is for a

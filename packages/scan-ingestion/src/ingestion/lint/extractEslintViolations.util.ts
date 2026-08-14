@@ -1,5 +1,5 @@
-import { makeFindingId } from '@lcabrera/scan-report/deterministic-scan';
-import { buildEslintFixText } from '@lcabrera/scan-report/finding-templates';
+import { makeFindingId } from '@repo/scan-report/deterministic-scan';
+import { buildEslintFixText } from '@repo/scan-report/finding-templates';
 import path from 'node:path';
 
 import type { EslintMessage, EslintRaw } from './eslintRaw.schema.ts';

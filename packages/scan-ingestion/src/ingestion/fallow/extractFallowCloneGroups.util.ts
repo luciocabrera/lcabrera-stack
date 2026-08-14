@@ -1,5 +1,5 @@
-import { makeFindingId } from '@lcabrera/scan-report/deterministic-scan';
-import { buildCloneGroupFinding } from '@lcabrera/scan-report/finding-templates';
+import { makeFindingId } from '@repo/scan-report/deterministic-scan';
+import { buildCloneGroupFinding } from '@repo/scan-report/finding-templates';
 
 import type { FallowCloneGroupInput } from './fallow.types.ts';
 import type { FallowRaw } from './fallowRaw.schema.ts';

@@ -69,7 +69,7 @@
         "maxCognitive": 65535,
         "maxCrap": 1000000,
         "maxUnitSize": 100000,
-        "reason": "Dev tooling, not shipped product: the fallow/lint/app-graph report generators (in .github/skills and in @lcabrera/scan-report, which is where three of them now live) and the custom ESLint rule visitors are inherently procedural CLI/AST-walker code where complexity/CRAP/unit-size limits do not apply."
+        "reason": "Dev tooling, not shipped product: the fallow/lint/app-graph report generators (in .github/skills and in @repo/scan-report, which is where three of them now live) and the custom ESLint rule visitors are inherently procedural CLI/AST-walker code where complexity/CRAP/unit-size limits do not apply."
       },
       {
         "files": ["scripts/**/*.{mjs,cjs}", "apps/*/scripts/**/*.{mjs,cjs}"],

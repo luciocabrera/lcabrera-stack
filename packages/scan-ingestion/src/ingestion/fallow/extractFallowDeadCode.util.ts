@@ -1,6 +1,6 @@
-import type { FallowFindingTemplate } from '@lcabrera/scan-report/finding-templates';
+import type { FallowFindingTemplate } from '@repo/scan-report/finding-templates';
 
-import { makeFindingId } from '@lcabrera/scan-report/deterministic-scan';
+import { makeFindingId } from '@repo/scan-report/deterministic-scan';
 import {
   buildUnlistedDependencyFinding,
   buildUnresolvedImportFinding,
@@ -8,7 +8,7 @@ import {
   buildUnusedExportFinding,
   buildUnusedFileFinding,
   buildUnusedTypeFinding,
-} from '@lcabrera/scan-report/finding-templates';
+} from '@repo/scan-report/finding-templates';
 
 import type { FallowDeadCodeInput } from './fallow.types.ts';
 import type { FallowRaw } from './fallowRaw.schema.ts';

@@ -15,7 +15,7 @@
 #                    Default: reports/fallow/runs/<timestamp>/
 #
 # Examples, with SELF standing for wherever this script sits — its own
-# directory in a checkout, or node_modules/@lcabrera/scan-report/scripts when
+# directory in a checkout, or node_modules/@repo/scan-report/scripts when
 # installed:
 #   bash SELF/run-fallow.sh
 #   bash SELF/run-fallow.sh 'packages/ui'

@@ -26,9 +26,9 @@
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
   "dependencies": {
-    "@lcabrera/scan-report": "workspace:*",
     "@lcabrera/server": "workspace:*",
     "@lcabrera/utils": "workspace:*",
+    "@repo/scan-report": "workspace:*",
     "fflate": "catalog:runtime",
     "pg": "catalog:backend",
     "zod": "catalog:runtime"
