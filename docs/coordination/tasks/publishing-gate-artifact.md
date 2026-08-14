@@ -10,7 +10,6 @@ area:
   - scripts/verify-api-surface.mjs
   - scripts/lib/publish-*
   - scripts/lib/attw-check*
-  - scripts/lib/api-surface-config.mjs
   - scripts/lib/release-packer*
   - docs/decisions/**
   - COMMANDS.md
