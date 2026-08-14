@@ -1,3 +1,5 @@
+import { resolveFilterOptionsSource } from '@lcabrera/server/filters/resolve-filter-options-source.util';
+
 import { HttpError } from '../../errors/httpError.js';
 import { DISTINCT_SOURCES } from './distinct.constants.js';
 
@@ -8,37 +10,42 @@ type ParseDistinctSourceArgs = {
 };
 
 /**
- * Validates a distinct-values request against the DISTINCT_SOURCES
- * allow-list BEFORE any SQL composition. Throws HttpError 400 on an unknown
- * schema/table pair or a column not allow-listed for that source. Returns
- * the validated identifiers plus the source's allowed columns so the query
- * builder can enforce the same list as defense in depth.
+ * The HTTP edge of `@lcabrera/server`'s `resolveFilterOptionsSource`: validates
+ * a distinct-values request against the DISTINCT_SOURCES allow-list BEFORE any
+ * SQL composition, and turns a refusal into the 400 this API answers with — an
+ * unknown schema/table pair and a column not allow-listed for that source are
+ * reported apart. The lookup is the package's; the registry is ours.
+ *
+ * Returns the validated identifiers plus the source's allowed columns and the
+ * column's type, so the query builder can enforce the same list as defense in
+ * depth.
  */
 export const parseDistinctSource = ({
   columnName,
   schemaName,
   tableName,
 }: ParseDistinctSourceArgs) => {
-  const sourceKey = `${schemaName}.${tableName}`;
-  const allowedColumnsSet = DISTINCT_SOURCES[sourceKey];
+  const source = resolveFilterOptionsSource({
+    column: columnName,
+    schema: schemaName,
+    sources: DISTINCT_SOURCES,
+    table: tableName,
+  });
 
-  if (!allowedColumnsSet) {
+  if (!source.allowed) {
     throw new HttpError({
-      message: `Unsupported distinct source: ${sourceKey}`,
-      statusCode: 400,
-    });
-  }
-
-  if (!allowedColumnsSet.has(columnName)) {
-    throw new HttpError({
-      message: `Unsupported distinct column: ${columnName}`,
+      message:
+        source.refusal === 'unknown-source'
+          ? `Unsupported distinct source: ${schemaName}.${tableName}`
+          : `Unsupported distinct column: ${columnName}`,
       statusCode: 400,
     });
   }
 
   return {
-    allowedColumns: [...allowedColumnsSet],
+    allowedColumns: source.allowedColumns,
     columnName,
+    columnType: source.columnType,
     schemaName,
     tableName,
   };

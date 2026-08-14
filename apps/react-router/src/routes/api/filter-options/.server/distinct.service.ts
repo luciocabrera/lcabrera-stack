@@ -1,6 +1,7 @@
-import type { ColumnType } from '@lcabrera/server/db/query-builder/query-builder.types';
+import type { FilterOptionsSources } from '@lcabrera/server/filters/resolve-filter-options-source.util';
 
 import { selectFilterOptions } from '@lcabrera/server/db/select-filter-options.util';
+import { resolveFilterOptionsSource } from '@lcabrera/server/filters/resolve-filter-options-source.util';
 
 import {
   CAR_SALES_DISTINCT_FILTER_COLUMNS,
@@ -17,20 +18,19 @@ import {
  * Server-only distinct-values access for the same-origin `/_api/filter-options`
  * loader — the filter-dropdown equivalent of `.server/enterpriseOrders.service.ts`.
  *
- * Delegates the build→run→shape to `@lcabrera/server`'s `selectFilterOptions`;
- * this file supplies only the app's specifics — which `schema.table`s expose
- * which columns, and each column's `ColumnType` — sourced from the per-entity
- * `config/` modules, so the allow-list is never duplicated here (each entity
- * owns its own, next to its schema/table).
+ * Delegates both halves to `@lcabrera/server`: `resolveFilterOptionsSource`
+ * authorizes the request against the registry below, `selectFilterOptions` runs
+ * the read. This file supplies only the app's specifics — which `schema.table`s
+ * expose which columns, and each column's `ColumnType` — sourced from the
+ * per-entity `config/` modules, so the allow-list is never duplicated here (each
+ * entity owns its own, next to its schema/table).
  *
  * Lives in `.server/` so it can never enter the client bundle (it reaches the
  * pool through the package helper); import it only from the loader.
  */
 
 /** `schema.table` → (allow-listed column → its predicate column type). */
-const DISTINCT_SOURCES: Readonly<
-  Record<string, Readonly<Record<string, ColumnType>>>
-> = {
+const DISTINCT_SOURCES: FilterOptionsSources = {
   [`${CAR_SALES_SCHEMA}.${CAR_SALES_TABLE}`]: CAR_SALES_DISTINCT_FILTER_COLUMNS,
   [`${ENTERPRISE_ORDERS_SCHEMA}.${ENTERPRISE_ORDERS_TABLE}`]:
     ENTERPRISE_ORDER_DISTINCT_FILTER_COLUMNS,
@@ -58,22 +58,21 @@ export const selectDistinctFilterOptions = async ({
   schemaName,
   tableName,
 }: SelectDistinctFilterOptionsArgs) => {
-  const columns = DISTINCT_SOURCES[`${schemaName}.${tableName}`];
+  const source = resolveFilterOptionsSource({
+    column: columnName,
+    schema: schemaName,
+    sources: DISTINCT_SOURCES,
+    table: tableName,
+  });
 
-  if (columns === undefined) {
-    return;
-  }
-
-  const columnType = columns[columnName];
-
-  if (columnType === undefined) {
+  if (!source.allowed) {
     return;
   }
 
   return selectFilterOptions({
-    allowedColumns: Object.keys(columns),
+    allowedColumns: source.allowedColumns,
     column: columnName,
-    columnType,
+    columnType: source.columnType,
     limit,
     offset,
     schema: schemaName,

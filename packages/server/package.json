@@ -67,6 +67,7 @@
     "./errors/to-serializable-db-error.util": "./src/errors/to-serializable-db-error.util.ts",
     "./errors/unique-constraint-violation.error": "./src/errors/unique-constraint-violation.error.ts",
     "./filters/filters.types": "./src/filters/filters.types.ts",
+    "./filters/resolve-filter-options-source.util": "./src/filters/resolve-filter-options-source.util.ts",
     "./filters/to-date-query-filters.util": "./src/filters/to-date-query-filters.util.ts",
     "./filters/to-number-query-filters.util": "./src/filters/to-number-query-filters.util.ts",
     "./filters/to-query-filters.util": "./src/filters/to-query-filters.util.ts",
@@ -236,6 +237,10 @@
       "./filters/filters.types": {
         "types": "./dist/filters/filters.types.d.mts",
         "default": "./dist/filters/filters.types.mjs"
+      },
+      "./filters/resolve-filter-options-source.util": {
+        "types": "./dist/filters/resolve-filter-options-source.util.d.mts",
+        "default": "./dist/filters/resolve-filter-options-source.util.mjs"
       },
       "./filters/to-date-query-filters.util": {
         "types": "./dist/filters/to-date-query-filters.util.d.mts",

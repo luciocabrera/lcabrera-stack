@@ -5,6 +5,12 @@ query layer, plus the pure mappers that translate one into the other. Nothing
 here touches the database — the mappers produce `QueryFilter[]` values that the
 `db/query-builder` builders (and their executors) consume.
 
+The other half of that boundary is where a filter's **options** come from:
+`resolve-filter-options-source.util.ts` resolves a request for one column's
+distinct values against a caller-supplied source registry, producing the
+`allowedColumns` + `columnType` that `db/select-filter-options.util.ts` then
+runs on. Also pure, and equally table-agnostic.
+
 ## Why it lives in `@lcabrera/server`
 
 The filter _shapes_ describe the Table's per-column filter state — a UI concept
@@ -61,14 +67,15 @@ honour them.
 
 ## Files
 
-| File                              | Role                                                                                                                                         |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `filters.types.ts`                | The discriminated filter shapes: `BooleanFilter`, `DateFilter`, `NumberFilter`, `SelectFilter`, `TextFilter`, and their `ColumnFilter` union |
-| `to-query-filters.util.ts`        | **Entry point.** `Record<column, ColumnFilter>` → flat `QueryFilter[]`; dispatches each column to its per-type mapper                        |
-| `to-date-query-filters.util.ts`   | Date filter → `gt`/`lt`/`eq`; `between` → `gte` + `lte` (falls back to `eq` with no upper bound)                                             |
-| `to-number-query-filters.util.ts` | Number/currency filter → comparison ops; `between` → `gte` + `lte`; a drafting (undefined) value → nothing                                   |
-| `to-text-query-filters.util.ts`   | Text filter → `ilike` patterns (`contains`/`startsWith`/`endsWith`), `notIlike` (`notContains`), `eq`/`neq`                                  |
-| `to-select-query-filters.util.ts` | Select/multi-select → `in`/`eq`/`neq`; a multi-value `notEquals` expands to an AND of `neq` (NOT IN)                                         |
+| File                                    | Role                                                                                                                                                 |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `filters.types.ts`                      | The discriminated filter shapes: `BooleanFilter`, `DateFilter`, `NumberFilter`, `SelectFilter`, `TextFilter`, and their `ColumnFilter` union         |
+| `to-query-filters.util.ts`              | **Entry point.** `Record<column, ColumnFilter>` → flat `QueryFilter[]`; dispatches each column to its per-type mapper                                |
+| `to-date-query-filters.util.ts`         | Date filter → `gt`/`lt`/`eq`; `between` → `gte` + `lte` (falls back to `eq` with no upper bound)                                                     |
+| `to-number-query-filters.util.ts`       | Number/currency filter → comparison ops; `between` → `gte` + `lte`; a drafting (undefined) value → nothing                                           |
+| `to-text-query-filters.util.ts`         | Text filter → `ilike` patterns (`contains`/`startsWith`/`endsWith`), `notIlike` (`notContains`), `eq`/`neq`                                          |
+| `to-select-query-filters.util.ts`       | Select/multi-select → `in`/`eq`/`neq`; a multi-value `notEquals` expands to an AND of `neq` (NOT IN)                                                 |
+| `resolve-filter-options-source.util.ts` | **Entry point.** A filter-options request + the caller's source registry → the source's `allowedColumns` and the column's `ColumnType`, or a refusal |
 
 ## Contract notes
 
@@ -81,9 +88,41 @@ honour them.
   `notContains` maps to the generic `notIlike` (`NOT ILIKE`) operator; nothing is
   silently dropped.
 
+## Filter-options sources
+
+`selectFilterOptions` takes `schema` and `table` as data and allow-lists only the
+column it is handed, so a consumer serving a generic distinct-values endpoint —
+where all three identifiers arrive on a request — has no package-side answer to
+_which tables may be asked at all_. Both consumers in this repo had hand-rolled
+the same lookup before `resolveFilterOptionsSource` existed.
+
+It takes the registry (`schema.table` → column → `ColumnType`) as an argument:
+which sources exist is the consumer's data, the refusal rule is not.
+
+**Refusal is a return value, not a throw.** The edges answer in different shapes
+— the showcase's `/_api/filter-options` loader returns a 400 `Response`,
+`api-shared`'s repository throws a typed `HttpError` for its middleware to
+render — and neither should have to catch to tell "not allowed" from "the query
+failed".
+
+**Naming which half was refused is separate from repeating it.** Branching on
+the discriminant is always safe; echoing it is not, because `unknown-column` on
+a source that exists confirms the table exists where `unknown-source` would have
+hidden it. The two consumers here differ on purpose and neither is the rule: the
+showcase loader answers one message for both halves, while the `/api/distinct`
+endpoint — whose callers already know the schema they asked for — keeps the
+specific message it has always returned.
+
+Both lookups read **own properties only**. A registry is an object literal, so
+a request for the column `constructor` otherwise resolves to `Object`'s and the
+resolution comes back allowed with a function for a `columnType`.
+
 ## What this does NOT do
 
 - No SQL construction — that is `db/query-builder`. These mappers only produce the
   intermediate `QueryFilter[]`.
-- No column authorization — identifier safety and `allowedColumns` are enforced
-  downstream by the builders (`assertSafeIdentifier` / `assertColumnAllowed`).
+- No column authorization _for a query_ — identifier safety and `allowedColumns`
+  are enforced downstream by the builders (`assertSafeIdentifier` /
+  `assertColumnAllowed`). `resolveFilterOptionsSource` sits upstream of that: it
+  turns a registry into the `allowedColumns` list the builders then enforce, and
+  never decides whether an identifier is safe to emit.

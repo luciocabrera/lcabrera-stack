@@ -173,6 +173,13 @@ NumberFilter [type] { readonly operator: 'between' | 'equals' | 'greaterThan' | 
 SelectFilter [type] { /** Operator for select filter (defaults to 'equals' if not specified) */ readonly operator?: 'equals' | 'notEquals'; readonly type: 'multiSelect' | 'select'; /** Single value for 'select' type */ readonly value?: string; /** Multiple values for 'multiSelect' type */ readonly values?: readonly string[]; }
 TextFilter [type] { readonly operator: 'contains' | 'endsWith' | 'equals' | 'notContains' | 'notEquals' | 'startsWith'; readonly type: 'text'; readonly value: string; }
 
+## ./filters/resolve-filter-options-source.util
+FilterOptionsSourceRefusal [type] 'unknown-column' | 'unknown-source'
+FilterOptionsSourceResolution [type] { readonly allowed: false; readonly refusal: FilterOptionsSourceRefusal; } | { readonly allowed: true; /** Every column the source exposes — pass straight to `selectFilterOptions`. */ readonly allowedColumns: readonly string[]; readonly columnType: ColumnType; }
+FilterOptionsSources [type] Readonly<Record<string, Readonly<Record<string, ColumnType>>>>
+resolveFilterOptionsSource [const] ({ column, schema, sources, table }: ResolveFilterOptionsSourceArgs) => FilterOptionsSourceResolution
+ResolveFilterOptionsSourceArgs [type] { readonly column: string; readonly schema: string; readonly sources: FilterOptionsSources; readonly table: string; }
+
 ## ./filters/to-date-query-filters.util
 toDateQueryFilters [const] ({ column, filter }: ToDateQueryFiltersArgs) => readonly QueryFilter[]
 ToDateQueryFiltersArgs [type] { readonly column: string; readonly filter: DateFilter; }

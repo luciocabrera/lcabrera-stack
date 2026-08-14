@@ -45,13 +45,10 @@ export {
 export { createWideAlltypes150Repository } from './features/wideAlltypes150/wideAlltypes150.repository.js';
 export type { WideAlltypes150Repository } from './features/wideAlltypes150/wideAlltypes150.repository.js';
 export type {
-  ApiSuccessResponse,
   DbRow,
   DbSanityResult,
   DistinctValuesResponse,
   PaginatedResponse,
-  PaginationArgs,
-  SortDirection,
   SortRule,
 } from './types/api.types.js';
 export { runStartupDbSanityCheck } from './utils/runStartupDbSanityCheck.util.js';

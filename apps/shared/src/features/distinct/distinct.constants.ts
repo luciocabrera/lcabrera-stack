@@ -1,36 +1,44 @@
+import type { FilterOptionsSources } from '@lcabrera/server/filters/resolve-filter-options-source.util';
+
 /**
- * Allow-list of distinct-value sources: `schema.table` → the set of columns
- * the generic /api/distinct endpoint may query. This is the authorization
- * boundary — parseDistinctSource validates every request against it before
- * any SQL is composed. A future DB-introspection feature can populate this
- * dynamically; today it is developer-curated.
+ * Allow-list of distinct-value sources: `schema.table` → the columns the
+ * generic /api/distinct endpoint may query, each with the type its values are
+ * read as. This is the authorization boundary — `parseDistinctSource` validates
+ * every request against it, through `@lcabrera/server`'s
+ * `resolveFilterOptionsSource`, before any SQL is composed. A future
+ * DB-introspection feature can populate this dynamically; today it is
+ * developer-curated.
+ *
+ * Every source here exposes text columns only, which is what makes the
+ * endpoint's empty-string exclusion apply: `selectFilterOptions` drops `''` for
+ * `text` and for nothing else.
  */
-export const DISTINCT_SOURCES: Readonly<Record<string, ReadonlySet<string>>> = {
-  'public.car_sales': new Set([
-    'buyer_name',
-    'city',
-    'color',
-    'country',
-    'fuel_type',
-    'model',
-    'seller_name',
-    'transmission',
-  ]),
-  'public.enterprise_orders': new Set([
-    'carrier',
-    'customer_email',
-    'customer_name',
-    'customer_type',
-    'order_number',
-    'order_status',
-    'payment_method',
-    'payment_status',
-    'priority',
-    'product_category',
-    'product_subcategory',
-    'shipping_city',
-    'shipping_country',
-    'shipping_state',
-    'warehouse_location',
-  ]),
+export const DISTINCT_SOURCES: FilterOptionsSources = {
+  'public.car_sales': {
+    buyer_name: 'text',
+    city: 'text',
+    color: 'text',
+    country: 'text',
+    fuel_type: 'text',
+    model: 'text',
+    seller_name: 'text',
+    transmission: 'text',
+  },
+  'public.enterprise_orders': {
+    carrier: 'text',
+    customer_email: 'text',
+    customer_name: 'text',
+    customer_type: 'text',
+    order_number: 'text',
+    order_status: 'text',
+    payment_method: 'text',
+    payment_status: 'text',
+    priority: 'text',
+    product_category: 'text',
+    product_subcategory: 'text',
+    shipping_city: 'text',
+    shipping_country: 'text',
+    shipping_state: 'text',
+    warehouse_location: 'text',
+  },
 };

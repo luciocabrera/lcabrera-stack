@@ -1,7 +1,3 @@
-export type ApiSuccessResponse<TData> = {
-  readonly data: TData;
-};
-
 export type DbRow = Readonly<Record<string, unknown>>;
 
 export type DbSanityResult = {
@@ -24,14 +20,18 @@ export type PaginatedResponse<TData> = {
   readonly total: number;
 };
 
-export type PaginationArgs = {
-  readonly limit: number;
-  readonly skip: number;
-};
-
-export type SortDirection = 'asc' | 'desc';
-
-export type SortRule = {
-  readonly columnKey: string;
-  readonly direction: SortDirection;
-};
+/**
+ * The request-sort shape, aliased from `@lcabrera/server` rather than restated.
+ *
+ * It is the same contract, field for field, and every repository here hands its
+ * sort rules straight to that package's `resolveQuerySort`. ADR-039 has
+ * `@lcabrera/api` and `@lcabrera/ui` each declare their own copy because neither
+ * may depend on this Node-only package; that reason does not reach this one,
+ * which already declares it — so the rule that applies is
+ * [ADR-064](../../../../docs/decisions/ADR-064-converge-app-copies-of-a-declared-contract.md),
+ * the same call that made `EnterpriseOrdersFilter` an alias of `ColumnFilter`.
+ *
+ * The local name stays `SortRule` because that is what this API's request
+ * parsers and schemas call it.
+ */
+export type { ColumnSort as SortRule } from '@lcabrera/server/sort/sort.types';

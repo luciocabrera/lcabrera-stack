@@ -8,21 +8,38 @@ Eliminate code duplication between `apps/api-server` and `apps/api-server-fast` 
 
 ## Current Shared Modules
 
-| Artifact                               | File                                                                  | Description                                                               |
-| -------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| `server.constants`                     | `src/constants/server.constants.ts`                                   | Shared pagination and sanity-check constants used by both APIs            |
-| `HttpError`                            | `src/errors/httpError.ts`                                             | Shared HTTP-aware error type for request validation and handlers          |
-| `api.types`                            | `src/types/api.types.ts`                                              | Shared API response/query/pagination types and query client contract      |
-| `buildOrderByClause`                   | `src/utils/buildOrderByClause.util.ts`                                | Shared safe SQL ORDER BY construction utility                             |
-| `formatPgAdminQuery`                   | `src/utils/formatPgAdminQuery.util.ts`                                | Shared SQL logging formatter utility                                      |
-| `runStartupDbSanityCheck`              | `src/utils/runStartupDbSanityCheck.util.ts`                           | Shared startup sanity logging flow used by both API server variants       |
-| `serializeDatabaseValue`               | `src/utils/serializeDatabaseValue.util.ts`                            | Convert PostgreSQL row values (Buffers, objects) to JSON-safe format      |
-| `carSales.constants/types/repository`  | `src/features/carSales/*`                                             | Shared car-sales sorting contracts and repository implementation          |
-| `dbSanity.repository`                  | `src/features/dbSanity/dbSanity.repository.ts`                        | Shared database sanity checks implementation                              |
-| `enterpriseOrders.constants/types`     | `src/features/enterpriseOrders/enterpriseOrders.{constants,types}.ts` | Shared enterprise order filter/sort contracts                             |
-| `enterpriseOrders.fixtures`            | `src/features/enterpriseOrders/enterpriseOrders.fixtures.ts`          | Filter states both API servers must accept (`api-shared/filter-contract`) |
-| `enterpriseOrders.repository`          | `src/features/enterpriseOrders/enterpriseOrders.repository.ts`        | Shared enterprise-order repository implementation                         |
-| `wideAlltypes150.constants/repository` | `src/features/wideAlltypes150/*`                                      | Shared wide table sorting contracts and repository implementation         |
+Every one of them has an extraction verdict — leaves with the API servers, or
+promoted into a package — recorded in [EXTRACTION-AUDIT.md](EXTRACTION-AUDIT.md).
+Read that before concluding a module was never examined.
+
+| Artifact                               | File                                                                  | Description                                                                                       |
+| -------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `server.constants`                     | `src/constants/server.constants.ts`                                   | Shared pagination and sanity-check constants used by both APIs                                    |
+| `HttpError`                            | `src/errors/httpError.ts`                                             | Shared HTTP-aware error type for request validation and handlers                                  |
+| `api.types`                            | `src/types/api.types.ts`                                              | Shared API response/row types, plus `SortRule` aliased from `@lcabrera/server`                    |
+| `distinct.constants/repository`        | `src/features/distinct/*`                                             | The distinct-values source registry and the authorize-then-read repository behind `/api/distinct` |
+| `runStartupDbSanityCheck`              | `src/utils/runStartupDbSanityCheck.util.ts`                           | Shared startup sanity logging flow used by both API server variants                               |
+| `serializeDatabaseValue`               | `src/utils/serializeDatabaseValue.util.ts`                            | Convert PostgreSQL row values (Buffers, objects) to JSON-safe format                              |
+| `carSales.constants/types/repository`  | `src/features/carSales/*`                                             | Shared car-sales sorting contracts and repository implementation                                  |
+| `dbSanity.repository`                  | `src/features/dbSanity/dbSanity.repository.ts`                        | Shared database sanity checks implementation                                                      |
+| `enterpriseOrders.constants/types`     | `src/features/enterpriseOrders/enterpriseOrders.{constants,types}.ts` | Shared enterprise order filter/sort contracts                                                     |
+| `enterpriseOrders.fixtures`            | `src/features/enterpriseOrders/enterpriseOrders.fixtures.ts`          | Filter states both API servers must accept (`api-shared/filter-contract`)                         |
+| `enterpriseOrders.repository`          | `src/features/enterpriseOrders/enterpriseOrders.repository.ts`        | Shared enterprise-order repository implementation                                                 |
+| `wideAlltypes150.constants/repository` | `src/features/wideAlltypes150/*`                                      | Shared wide table sorting contracts and repository implementation                                 |
+
+## Distinct-Source Authorization
+
+`/api/distinct` takes schema, table and column off the request, and
+`selectFilterOptions` can judge none of them — it allow-lists the column it is
+handed and treats schema/table as data. The lookup that decides which sources may
+be asked at all is `@lcabrera/server`'s `resolveFilterOptionsSource`, promoted out
+of this package by [#688](https://github.com/luciocabrera/vite-react-compiler/issues/688)
+because the showcase's own `/_api/filter-options` had hand-rolled the same one.
+
+What stays here is the part that is ours: `distinct.constants.ts` is the registry
+(which tables, which columns, each column's type), and `parseDistinctSource` is
+the HTTP edge that turns a refusal into a 400 — separating an unknown source from
+an unknown column, as this API always has.
 
 ## The Enterprise-Order Filter Contract
 

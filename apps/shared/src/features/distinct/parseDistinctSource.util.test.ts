@@ -15,6 +15,9 @@ describe('parseDistinctSource', () => {
     expect(result.schemaName).toBe('public');
     expect(result.tableName).toBe('enterprise_orders');
     expect(result.allowedColumns).toContain('customer_email');
+    // Carried from the registry rather than assumed: the column type is what
+    // decides whether the read drops the empty string.
+    expect(result.columnType).toBe('text');
   });
 
   it('throws a 400 HttpError for an unknown schema/table source', () => {
