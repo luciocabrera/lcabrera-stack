@@ -65,6 +65,37 @@ describe('createAppTsConfig', () => {
     expect(compilerOptions.types).toStrictEqual(['vite/client', 'node']);
   });
 
+  // The negative case for the one default that is a toolchain fact rather than
+  // a config-variant fact: `vite/client` does not resolve outside a Vite
+  // project, so a consumer that cannot drop it gets a config that fails to
+  // load. Appending was the only thing `types` allowed before this.
+  it('lets a caller drop vite/client entirely', () => {
+    const { compilerOptions } = createAppTsConfig({
+      baseTypes: [],
+      tsBuildInfoFile: TS_BUILD_INFO,
+    });
+
+    expect(compilerOptions.types).toStrictEqual([]);
+  });
+
+  it('lets a caller replace vite/client with its own client types', () => {
+    const { compilerOptions } = createAppTsConfig({
+      baseTypes: ['webpack-env'],
+      tsBuildInfoFile: TS_BUILD_INFO,
+      types: ['node'],
+    });
+
+    expect(compilerOptions.types).toStrictEqual(['webpack-env', 'node']);
+  });
+
+  it('still defaults to vite/client when baseTypes is not passed', () => {
+    const { compilerOptions } = createAppTsConfig({
+      tsBuildInfoFile: TS_BUILD_INFO,
+    });
+
+    expect(compilerOptions.types).toStrictEqual(['vite/client']);
+  });
+
   it('lets a caller override include and exclude', () => {
     const config = createAppTsConfig({
       exclude: ['node_modules'],

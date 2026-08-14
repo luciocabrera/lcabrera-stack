@@ -25,7 +25,7 @@ it('resolves the listing to the rule directory', () => {
   expect(entries).toContain('index.ts');
 });
 
-// The ratchet. Every rule in this plugin runs on all 17 workspaces, and four of
+// The ratchet. Every rule in this plugin runs on every workspace, and four of
 // them decide whether to run at all from a filename suffix — so a rule can stop
 // matching anything without a single test failing or a single finding appearing.
 // `no-type-definitions-in-components` sat dead on every error boundary in the

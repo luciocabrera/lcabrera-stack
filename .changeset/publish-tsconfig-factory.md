@@ -46,9 +46,18 @@ Two exports: `./shared` for `createAppTsConfig` / `createNodeTsConfig`, and
 `node:fs/promises`, so a generation can be dry-run or routed through a virtual
 filesystem without touching disk.
 
-Nothing in the package names a workspace, and every option carries a neutral
-default — `types: []` for a package that must stay free of Node globals,
-`srcAlias: false` for a publishable package that cannot ship an `@/` import, and
-a `paths` map that accepts a bare package specifier with no wildcard sibling, so
-`tsc` resolves deep imports through a source-shipping package's real `exports`
-map instead of short-circuiting them to `src/`.
+Nothing in the package names a workspace, and every repo- or toolchain-specific
+default is an option a consumer can drop: `baseTypes: []` to shed `vite/client`
+outside a Vite project, `types: []` for a package that must stay free of Node
+globals, `srcAlias: false` for a publishable package that cannot ship an `@/`
+import, and `rootDirs` for a project with no `.react-router/types`. The `paths`
+map accepts a bare package specifier with no wildcard sibling, so `tsc` resolves
+deep imports through a source-shipping package's real `exports` map instead of
+short-circuiting them to `src/`.
+
+`renderTsConfig` and `writeTsConfigs` throw a `TypeError` for a config
+`JSON.stringify` cannot represent — `undefined`, a function and a symbol return
+`undefined` from it rather than throwing, which would otherwise reach disk as the
+literal text `undefined`. `writeTsConfigs` renders every entry before writing any
+of them, so such a failure names the offending `filePath` and leaves no
+half-generated tree.

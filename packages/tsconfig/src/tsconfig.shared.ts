@@ -1,4 +1,6 @@
 export type CreateAppTsConfigArgs = {
+  /** The ambient type roots `types` is appended to — defaults to `['vite/client']`. Pass `[]` (or your own bundler's client types) outside a Vite project: `vite/client` does not resolve there, and a default a consumer cannot drop is this toolchain leaking out of the factory. */
+  readonly baseTypes?: readonly string[];
   readonly exclude?: readonly string[];
   readonly include?: readonly string[];
   /** Extra path aliases merged on top of the default `@/*` → `./src/*` mapping — for a package's own self-referencing alias (e.g. `@lcabrera/ui/*`) or a cross-package one. */
@@ -7,7 +9,7 @@ export type CreateAppTsConfigArgs = {
   /** Set `false` to omit the default `@/*` → `./src/*` alias. Publishable packages pass this: `@/` resolves only through a tsconfig, so an `@/` import cannot survive publication, and dropping the alias makes tsc reject one instead of a reviewer having to spot it. */
   readonly srcAlias?: boolean;
   readonly tsBuildInfoFile: string;
-  /** Extra ambient type roots appended to the default `['vite/client']` — e.g. `'node'` for a package whose src/ mixes browser-context and Node-context (SSR entry) files. */
+  /** Extra ambient type roots appended to `baseTypes` — e.g. `'node'` for a package whose src/ mixes browser-context and Node-context (SSR entry) files. */
   readonly types?: readonly string[];
 };
 
@@ -44,6 +46,7 @@ const NODE_TS_CONFIG: Omit<TsConfig, 'compilerOptions'> = {
 };
 
 const createAppCompilerOptions = ({
+  baseTypes = ['vite/client'],
   paths,
   rootDirs = ['.', './.react-router/types'],
   srcAlias = true,
@@ -82,7 +85,7 @@ const createAppCompilerOptions = ({
   strict: true,
   target: 'ES2025',
   tsBuildInfoFile,
-  types: ['vite/client', ...types],
+  types: [...baseTypes, ...types],
   useDefineForClassFields: true,
   verbatimModuleSyntax: true,
 });
@@ -137,6 +140,7 @@ const mergeTsConfig = ({
 });
 
 export const createAppTsConfig = ({
+  baseTypes,
   exclude,
   include,
   paths,
@@ -148,6 +152,7 @@ export const createAppTsConfig = ({
   mergeTsConfig({
     baseConfig: {
       compilerOptions: createAppCompilerOptions({
+        baseTypes,
         paths,
         rootDirs,
         srcAlias,

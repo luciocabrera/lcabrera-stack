@@ -112,10 +112,10 @@ regenerated file is dirty against its committed copy on pure whitespace.
 
 ## `@lcabrera/tsconfig/shared` — the factories
 
-| Factory              | For                                    | What it sets                                                                         |
-| -------------------- | -------------------------------------- | ------------------------------------------------------------------------------------ |
-| `createAppTsConfig`  | browser / React workspaces             | `jsx: react-jsx`, `DOM` libs, `types: ['vite/client', …]`, a `@/*` → `./src/*` alias |
-| `createNodeTsConfig` | Node services, tooling, Node-only libs | no JSX, no DOM lib, `types: ['node']` by default, no aliases                         |
+| Factory              | For                                    | What it sets                                                                               |
+| -------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `createAppTsConfig`  | browser / React workspaces             | `jsx: react-jsx`, `DOM` libs, `types: [...baseTypes, ...types]`, a `@/*` → `./src/*` alias |
+| `createNodeTsConfig` | Node services, tooling, Node-only libs | no JSX, no DOM lib, `types: ['node']` by default, no aliases                               |
 
 Both apply the same strictness — `strict`, `noUncheckedIndexedAccess`,
 `noUnusedLocals`, `noUnusedParameters`, `noFallthroughCasesInSwitch`,
@@ -126,6 +126,13 @@ principled reason.
 
 Options worth knowing, because each one exists to prevent a specific failure:
 
+- **`baseTypes`** on `createAppTsConfig` — the ambient type roots `types` is
+  appended to, defaulting to `['vite/client']`. **Pass `[]`, or your own
+  bundler's client types, outside a Vite project**: `vite/client` does not
+  resolve there, and a config naming a type root that does not exist fails to
+  load. This is the one default in the package that is a toolchain fact rather
+  than a config-variant fact, which is why it is an option rather than a
+  constant.
 - **`types: []`** on `createNodeTsConfig` — for a package contractually barred
   from Node globals. The config then cannot hand it the APIs it must not reach
   for, so purity is checked rather than reviewed.
@@ -170,7 +177,15 @@ import { renderTsConfig, writeTsConfigs } from '@lcabrera/tsconfig/generate';
   two-space JSON with a trailing newline. Use it if your own build system owns
   the writing.
 - **`writeTsConfigs({ entries, fileSystem? })`** → writes every entry,
-  creating each missing parent directory first.
+  creating each missing parent directory first. Every entry is rendered **before
+  any is written**, so a config JSON cannot represent fails the whole run —
+  naming that entry's `filePath` — rather than leaving a half-generated tree.
+
+Both throw a `TypeError` for a config `JSON.stringify` cannot represent
+(`undefined`, a function, a symbol). Those return `undefined` from
+`JSON.stringify` rather than throwing, so without the guard they would reach disk
+as the literal text `undefined` and surface much later as a tsc parse error
+against the generated file. A circular structure already throws on its own.
 
 `fileSystem` defaults to `node:fs/promises`. Pass your own `{ mkdir, writeFile }`
 to dry-run a generation, to route writes through a virtual filesystem, or to

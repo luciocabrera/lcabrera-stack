@@ -29,9 +29,20 @@ export type TsConfigFileSystem = {
   ) => Promise<unknown>;
 };
 
+type PlannedWrite = {
+  readonly contents: string;
+  readonly filePath: string;
+};
+
+type RenderArgs = {
+  readonly config: unknown;
+  /** Prefixed to the failure message — the entry's path, when there is one. */
+  readonly subject?: string;
+};
+
 type WriteEntryArgs = {
-  readonly entry: TsConfigEntry;
   readonly fileSystem: TsConfigFileSystem;
+  readonly write: PlannedWrite;
 };
 
 type WriteTsConfigsArgs = {
@@ -47,29 +58,57 @@ type WriteTsConfigsArgs = {
 const NODE_FILE_SYSTEM: TsConfigFileSystem = { mkdir, writeFile };
 
 /**
+ * `JSON.stringify` signals "not representable as JSON" two different ways, and
+ * only one of them is loud: a circular structure throws, but `undefined`, a
+ * function and a symbol each return `undefined` instead. Interpolated, that
+ * becomes the literal text `undefined` in a committed tsconfig — which surfaces
+ * much later as a parse error against the generated file, naming neither the
+ * entry that produced it nor the reason.
+ */
+const render = ({ config, subject }: RenderArgs) => {
+  const json = JSON.stringify(config, undefined, 2);
+
+  if (json === undefined) {
+    const reason = `not representable as JSON (${typeof config}) — a tsconfig must be a plain object`;
+    throw new TypeError(
+      subject === undefined ? reason : `${subject}: ${reason}`,
+    );
+  }
+
+  return `${json}\n`;
+};
+
+/**
  * A config as it is written to disk: two-space JSON with a trailing newline.
+ * Throws a `TypeError` for a config JSON cannot represent.
  *
  * Exported because the exact bytes are the contract. A generated tsconfig is
  * committed, so any drift in this rendering shows up as a diff in every
  * workspace at once, and a consumer generating through its own build system
  * needs to be able to produce the identical string.
  */
-export const renderTsConfig = (config: unknown) =>
-  `${JSON.stringify(config, undefined, 2)}\n`;
+export const renderTsConfig = (config: unknown) => render({ config });
 
-const writeEntry = async ({ entry, fileSystem }: WriteEntryArgs) => {
-  await fileSystem.mkdir(path.dirname(entry.filePath), { recursive: true });
-  await fileSystem.writeFile(
-    entry.filePath,
-    renderTsConfig(entry.config),
-    'utf8',
-  );
+const writeEntry = async ({ fileSystem, write }: WriteEntryArgs) => {
+  await fileSystem.mkdir(path.dirname(write.filePath), { recursive: true });
+  await fileSystem.writeFile(write.filePath, write.contents, 'utf8');
 };
 
-/** Writes every entry, creating any missing parent directory first. */
+/**
+ * Writes every entry, creating any missing parent directory first.
+ *
+ * Every entry is rendered before any of them is written, so a config that
+ * cannot be represented as JSON fails the whole run instead of leaving a
+ * half-generated tree behind — the failure names the entry's `filePath`.
+ */
 export const writeTsConfigs = async ({
   entries,
   fileSystem = NODE_FILE_SYSTEM,
 }: WriteTsConfigsArgs) => {
-  await Promise.all(entries.map((entry) => writeEntry({ entry, fileSystem })));
+  const writes = entries.map(({ config, filePath }) => ({
+    contents: render({ config, subject: filePath }),
+    filePath,
+  }));
+
+  await Promise.all(writes.map((write) => writeEntry({ fileSystem, write })));
 };
