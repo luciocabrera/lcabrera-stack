@@ -8,6 +8,12 @@
 # `vp run coordination:board:live` immediately, even before it merges. See
 # docs/coordination/README.md.
 #
+# The task file is committed onto the WORK branch, not onto `main` in a separate
+# claim-only PR: `main`'s ruleset would hold the claim behind a green CI run,
+# after the moment the lock is meant to precede, and `coordination:verify` reads
+# claims off every live branch anyway (ADR-074, #233). Reviewers ask about this,
+# so the answer lives here as well as in the README.
+#
 # Usage:
 #   vp run coordination:claim -- <id> "<title>" (--issue <n> | --new-issue)
 #                                [--area <glob> ...] [--branch <name>]
