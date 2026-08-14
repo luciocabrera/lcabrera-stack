@@ -210,13 +210,15 @@ const main = () => {
   const settings = readSettings(process.env);
   const env = { PATH: SAFE_PATH, PGPASSWORD: process.env.DB_PASSWORD };
 
+  const mode = psqlBinary
+    ? 'host-psql'
+    : `docker-exec(${settings.dockerContainer})`;
+
   console.log('Seeding the car-sales database...');
   console.log(
     `   host=${settings.host} port=${settings.port} db=${settings.database} user=${settings.user}`,
   );
-  console.log(
-    `   mode=${psqlBinary ? 'host-psql' : `docker-exec(${settings.dockerContainer})`}`,
-  );
+  console.log(`   mode=${mode}`);
 
   ensureDatabaseExists({ env, settings });
 
