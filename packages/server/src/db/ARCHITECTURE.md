@@ -30,6 +30,11 @@ distinct, non-empty, ordered values as a `{ values, hasMore }` page). Keep that
 split — the generic builders/executors take a list of columns and stay unaware of
 dropdowns; the dropdown shaping lives only in `selectFilterOptions`.
 
+`selectFilterOptions` takes `schema`/`table` as data and cannot judge them, so a
+caller that reads all three identifiers off a request authorizes the source
+first, through `filters/resolve-filter-options-source.util.ts` — pure, and
+upstream of every builder assertion.
+
 ## One connection seam, one translation point
 
 No executor calls `getPool().query` any more; they all go through
