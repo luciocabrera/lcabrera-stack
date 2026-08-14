@@ -8,7 +8,9 @@
 // could read as a transient blip for as long as nobody looked.
 //
 // Either way the report artifacts are already on disk and complete; ingestion
-// only decides whether they were also persisted somewhere.
+// only decides whether they were also persisted somewhere. Nothing below may
+// throw: a scanner that wrote its three files has done its job, and letting a
+// persistence problem surface as a stack trace loses that.
 
 import {
   MISSING_INGEST_MESSAGE,
@@ -20,6 +22,42 @@ export const INGESTION_OUTCOMES = {
   failed: 'failed',
   ingested: 'ingested',
   skipped: 'skipped',
+};
+
+/**
+ * A description of anything that was thrown.
+ *
+ * `error.message` is only safe on an Error: `throw null` and `throw 'text'` are
+ * both legal, and reading `.message` off the first one throws again from inside
+ * the handler meant to contain it.
+ */
+const describeError = (error) => {
+  if (error instanceof Error && typeof error.message === 'string') {
+    return error.message;
+  }
+  try {
+    return String(error);
+  } catch {
+    return 'an unprintable value was thrown';
+  }
+};
+
+/** Resolves the configuration, turning a malformed one into a failure rather than a crash. */
+const readConfig = (hostRoot) => {
+  try {
+    return { config: resolveIngestConfig({ hostRoot }) };
+  } catch (error) {
+    return {
+      failure: `its configuration could not be read — ${describeError(error)}`,
+    };
+  }
+};
+
+const reportFailure = ({ artifactsMessage, detail }) => {
+  console.error(`Ingestion FAILED: ${detail}`);
+  console.error(artifactsMessage);
+  process.exitCode = 1;
+  return INGESTION_OUTCOMES.failed;
 };
 
 /**
@@ -37,7 +75,12 @@ export const runIngestion = ({
     return INGESTION_OUTCOMES.skipped;
   }
 
-  const config = resolveIngestConfig({ hostRoot });
+  // A configuration that exists but cannot be parsed is a failure, not a skip:
+  // the host meant to configure something and got it wrong, which is exactly
+  // the case that must not read like "nothing to do here".
+  const { config, failure } = readConfig(hostRoot);
+  if (failure) return reportFailure({ artifactsMessage, detail: failure });
+
   if (!config) {
     console.log(`Ingestion skipped: ${MISSING_INGEST_MESSAGE}.`);
     console.log(artifactsMessage);
@@ -48,11 +91,9 @@ export const runIngestion = ({
     runConfiguredIngest({ config, hostRoot, scanArguments });
     return INGESTION_OUTCOMES.ingested;
   } catch (error) {
-    console.error(
-      `Ingestion FAILED: the configured command \`${config.command}\` did not complete — ${error.message}`,
-    );
-    console.error(artifactsMessage);
-    process.exitCode = 1;
-    return INGESTION_OUTCOMES.failed;
+    return reportFailure({
+      artifactsMessage,
+      detail: `the configured command \`${config.command}\` did not complete — ${describeError(error)}`,
+    });
   }
 };

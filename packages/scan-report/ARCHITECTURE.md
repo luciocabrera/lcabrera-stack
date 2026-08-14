@@ -82,11 +82,23 @@ parent process whose environment they inherit wholesale.
 
 It **names the binary by absolute path** from a fixed directory list, so no
 writable directory earlier in an inherited PATH can shadow git (Sonar S4036).
-That list covers Homebrew on both architectures, Nix system and per-user
-profiles, MacPorts, Xcode's command line tools and Git for Windows — a
-published package cannot assume the `/usr/bin` of the machine it was written
-on. `SCAN_REPORT_GIT_BINARY` overrides it, and is required to be absolute and
-to exist, because accepting a bare name would reintroduce the lookup.
+A published package cannot assume the `/usr/bin` of the machine it was written
+on, so there are two lists — Homebrew on both architectures, Nix system and
+per-user profiles, MacPorts and Xcode's command line tools on POSIX; Git for
+Windows on `win32` — and which one applies is chosen by platform.
+
+That split is not tidiness. The same list is what the child's PATH is pinned
+to, and a Windows path joined into a POSIX PATH with `:` splits at its drive
+colon into `C` and `\Program Files\Git\cmd`. A bare `C` is a **relative**
+PATH entry, and these runners work with `cwd` inside the project being scanned
+— so a scanned repository containing a `C/` directory would get a say in what
+git executes for a hook, pager or credential helper, which is precisely the
+hazard the pinning removes. The filename follows the platform too: `git.exe` on
+Windows, since `execFileSync` needs the real name rather than a PATH-style stem.
+
+`SCAN_REPORT_GIT_BINARY` overrides the search, and is required to be absolute
+(by that platform's rules) and to exist, because accepting a bare name would
+reintroduce the lookup.
 
 It **says so when git is missing**. "Not a repository" and "no git installed"
 are both an absent answer, and only the first is a fact about the scanned

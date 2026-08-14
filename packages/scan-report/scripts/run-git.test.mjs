@@ -1,3 +1,5 @@
+import { posix, win32 } from 'node:path';
+
 import { describe, expect, test } from 'vite-plus/test';
 
 import {
@@ -37,9 +39,62 @@ describe('buildGitEnv', () => {
   test('searches where the package managers that are not apt install git', () => {
     // This ships; a macOS or Nix consumer keeps git in none of /usr/bin, /bin
     // or /usr/local/bin, and a silent miss would skew every location_path.
-    const { PATH } = buildGitEnv({ HOME: '/home/dev' });
+    const { PATH } = buildGitEnv({ HOME: '/home/dev' }, 'linux');
     expect(PATH).toContain('/opt/homebrew/bin');
     expect(PATH).toContain('/home/dev/.nix-profile/bin');
+  });
+});
+
+describe('the pinned PATH is valid for the platform it is built for', () => {
+  // The reason this is asserted rather than eyeballed: a Windows directory
+  // joined into a POSIX PATH with `:` splits at the drive colon, and one of the
+  // halves is the bare RELATIVE segment `C`. These runners work with `cwd`
+  // inside the project being scanned, so that hands a scanned repository
+  // containing a `C/` directory a say in what git runs for a hook or a
+  // credential helper — undoing the whole point of pinning PATH.
+  test.each([['linux'], ['darwin']])(
+    'every %s segment is an absolute POSIX path',
+    (platform) => {
+      const segments = buildGitEnv({ HOME: '/home/dev' }, platform).PATH.split(
+        ':',
+      );
+      const relative = segments.filter((segment) => !posix.isAbsolute(segment));
+      expect(relative).toEqual([]);
+    },
+  );
+
+  test('a POSIX PATH contains no Windows directory at all', () => {
+    const { PATH } = buildGitEnv({ HOME: '/home/dev' }, 'linux');
+    expect(PATH).not.toContain('\\');
+    expect(PATH).not.toContain('C:');
+  });
+
+  test('windows joins with `;` and every segment is an absolute Windows path', () => {
+    const segments = buildGitEnv(
+      { HOME: 'C:\\Users\\dev' },
+      'win32',
+    ).PATH.split(';');
+    expect(segments.length).toBeGreaterThan(0);
+    expect(segments.filter((segment) => !win32.isAbsolute(segment))).toEqual(
+      [],
+    );
+  });
+
+  test('a Windows PATH contains no POSIX directory', () => {
+    expect(buildGitEnv({}, 'win32').PATH).not.toContain('/usr/bin');
+  });
+});
+
+describe('the searched filename matches the platform', () => {
+  test('windows looks for git.exe — execFileSync needs the extension', () => {
+    expect(resolveGitBinary({}, 'win32').reason).toContain('git.exe');
+  });
+
+  test('posix looks for git', () => {
+    const { reason } = resolveGitBinary({ HOME: '/nowhere' }, 'linux');
+    // Found on this host, so there is no reason string; the name check below
+    // is what matters when it is absent.
+    expect(reason ?? 'no git in').not.toContain('git.exe');
   });
 });
 

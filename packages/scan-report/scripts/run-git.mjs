@@ -23,7 +23,7 @@
 
 import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { isAbsolute } from 'node:path';
+import path from 'node:path';
 
 /** An absolute path to a git binary, when the host keeps it somewhere unusual. */
 export const GIT_BINARY_ENV = 'SCAN_REPORT_GIT_BINARY';
@@ -32,24 +32,52 @@ export const GIT_BINARY_ENV = 'SCAN_REPORT_GIT_BINARY';
  * Fixed directories to look for git in — never the inherited PATH, which is
  * the lookup this exists to avoid.
  *
- * The list covers the package managers that do not install into `/usr/bin`,
+ * The two lists are disjoint and chosen by platform, and that is load-bearing
+ * rather than tidy: this list is also what `buildGitEnv` pins PATH to, and a
+ * Windows path joined into a POSIX PATH with `:` splits at its drive colon into
+ * the segments `C` and `\Program Files\Git\cmd`. A bare `C` is a RELATIVE
+ * PATH entry, and these runners work with `cwd` inside the project being
+ * scanned — so a scanned repository containing a `C/` directory would get a say
+ * in what git executes for a hook, pager or credential helper. That is the
+ * exact hazard the pinning exists to remove.
+ *
+ * Each list covers the installers that do not use the platform default,
  * because this ships: Homebrew on both architectures, Nix system and per-user
- * profiles, Xcode's command line tools, and Git for Windows. A host outside
- * all of them sets `SCAN_REPORT_GIT_BINARY` rather than going without.
+ * profiles, MacPorts and Xcode's command line tools on POSIX; Git for Windows
+ * in both program-files locations. A host outside its list sets
+ * `SCAN_REPORT_GIT_BINARY` rather than going without.
  */
-const trustedDirectories = (env) =>
-  [
-    '/usr/local/bin',
-    '/usr/bin',
-    '/bin',
-    '/opt/homebrew/bin',
-    '/opt/local/bin',
-    '/run/current-system/sw/bin',
-    env.HOME ? `${env.HOME}/.nix-profile/bin` : undefined,
-    '/Library/Developer/CommandLineTools/usr/bin',
-    String.raw`C:\Program Files\Git\cmd`,
-    String.raw`C:\Program Files (x86)\Git\cmd`,
-  ].filter((directory) => directory !== undefined);
+const POSIX_DIRECTORIES = [
+  '/usr/local/bin',
+  '/usr/bin',
+  '/bin',
+  '/opt/homebrew/bin',
+  '/opt/local/bin',
+  '/run/current-system/sw/bin',
+  '/Library/Developer/CommandLineTools/usr/bin',
+];
+
+const WINDOWS_DIRECTORIES = [
+  String.raw`C:\Program Files\Git\cmd`,
+  String.raw`C:\Program Files (x86)\Git\cmd`,
+  String.raw`C:\Program Files\Git\bin`,
+];
+
+const isWindows = (platform) => platform === 'win32';
+
+/** `git.exe` on Windows: `execFileSync` needs the real filename, extension included. */
+const gitFileName = (platform) => (isWindows(platform) ? 'git.exe' : 'git');
+
+const pathDelimiter = (platform) => (isWindows(platform) ? ';' : ':');
+
+const trustedDirectories = (env, platform = process.platform) =>
+  isWindows(platform)
+    ? WINDOWS_DIRECTORIES
+    : [
+        ...POSIX_DIRECTORIES,
+        // Nix installs per user, so this one is only knowable from the env.
+        ...(env.HOME ? [`${env.HOME}/.nix-profile/bin`] : []),
+      ];
 
 /**
  * Every variable through which git can be told which repository to operate on.
@@ -67,36 +95,43 @@ export const GIT_REPOSITORY_VARIABLES = [
 ];
 
 /** A denylist, not an allowlist — git still needs HOME, the locale, and so on. */
-export const buildGitEnv = (env) => ({
+export const buildGitEnv = (env, platform = process.platform) => ({
   ...Object.fromEntries(
     Object.entries(env).filter(
       ([name]) => !GIT_REPOSITORY_VARIABLES.includes(name),
     ),
   ),
-  PATH: trustedDirectories(env).join(process.platform === 'win32' ? ';' : ':'),
+  PATH: trustedDirectories(env, platform).join(pathDelimiter(platform)),
 });
 
 /**
  * The git binary as an absolute path, or `undefined` with the reason, so the
  * caller can tell "no git here" from "not a repository".
  */
-export const resolveGitBinary = (env = process.env) => {
+export const resolveGitBinary = (
+  env = process.env,
+  platform = process.platform,
+) => {
   const override = env[GIT_BINARY_ENV];
   if (override) {
-    return isAbsolute(override) && existsSync(override)
+    const isAbsolutePath = isWindows(platform)
+      ? path.win32.isAbsolute(override)
+      : path.posix.isAbsolute(override);
+    return isAbsolutePath && existsSync(override)
       ? { path: override }
       : {
           reason: `${GIT_BINARY_ENV} is set to \`${override}\`, which is not an existing absolute path.`,
         };
   }
-  const searched = trustedDirectories(env);
+  const searched = trustedDirectories(env, platform);
+  const separator = isWindows(platform) ? '\\' : '/';
   const found = searched
-    .map((directory) => `${directory}/git`)
-    .find((path) => existsSync(path));
+    .map((directory) => `${directory}${separator}${gitFileName(platform)}`)
+    .find((candidate) => existsSync(candidate));
   return found
     ? { path: found }
     : {
-        reason: `no git binary in any of ${searched.join(', ')}. Set ${GIT_BINARY_ENV} to its absolute path.`,
+        reason: `no ${gitFileName(platform)} in any of ${searched.join(', ')}. Set ${GIT_BINARY_ENV} to its absolute path.`,
       };
 };
 

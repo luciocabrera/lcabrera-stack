@@ -94,11 +94,12 @@ not a normal state. The report artifacts are written and complete in both cases.
 ## Finding git
 
 Every finding's `location_path` is relative to the scanned project's repository
-root, which means running `git`. It is looked up by absolute path in a fixed
-list of directories rather than through `PATH` — `/usr/bin`, `/usr/local/bin`,
-`/bin`, Homebrew on both architectures, Nix system and per-user profiles,
-MacPorts, Xcode's command line tools and Git for Windows. If your host keeps
-git elsewhere, set `SCAN_REPORT_GIT_BINARY` to its absolute path; a scan that
+root, which means running `git`. It is looked up by absolute path in a fixed,
+per-platform list of directories rather than through `PATH` — on POSIX
+`/usr/bin`, `/usr/local/bin`, `/bin`, Homebrew on both architectures, Nix
+system and per-user profiles, MacPorts and Xcode's command line tools; on
+Windows the Git-for-Windows install locations. If your host keeps git
+elsewhere, set `SCAN_REPORT_GIT_BINARY` to its absolute path; a scan that
 cannot find git says so on stderr and falls back to paths relative to the
 scanned directory.
 
