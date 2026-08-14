@@ -66,6 +66,28 @@ The outcomes are deliberately not interchangeable:
 Collapsing `failed` back into a warning is what let a permanent breakage read as
 a transient blip, and is the specific regression this split exists to prevent.
 
+## An absent tool is not a failure
+
+Each scanner answers "nothing to report, and here is why" rather than throwing
+when the tool it drives is not there: oxlint checks for a config first, eslint
+checks for a flat config, and fallow's bin resolution returns `undefined` rather
+than propagating `MODULE_NOT_FOUND`. That last one was a latent crash while
+these were private scripts in a repo that always has fallow installed; as a
+published `bin` the first external consumer would have hit it.
+
+The line is drawn at _installed but broken_. A fallow that exists and exits
+non-zero against the host's own repository still hard-exits, because that is the
+host's tooling failing and it should hear about it immediately; the same failure
+against a `--target` project only degrades, since an arbitrary project can break
+a tool in ways the host never does (CQMS ADR-015).
+
+`fallow` is an optional `peerDependency` rather than a `dependency`
+([ADR-047](../../docs/decisions/ADR-047-declare-optional-peer-dependencies.md)):
+a consumer installing this package for its lint scanners should not be made to
+pull in a static analyser it will not run. `ts-morph` is deliberately absent
+entirely — only `app-graph`'s generator uses it, and ADR-069 keeps that script
+out of this package.
+
 ## Adding a scanner
 
 Add `generate-<tool>-report.mjs` beside the others, import the shared context

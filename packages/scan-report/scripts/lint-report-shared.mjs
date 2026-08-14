@@ -43,6 +43,19 @@ export const deriveTag = (source, code) => {
   return slashIndex === -1 ? source : code.slice(0, slashIndex);
 };
 
+/**
+ * The one headline line of a lint report, in precedence order: the rule that
+ * fired most, then whatever stopped the tool from running, then why there was
+ * nothing to report.
+ */
+const describeTopRisk = ({ noConfigMessage, toolFailures, topRule }) => {
+  if (topRule) {
+    return `\`${topRule[0]}\` reported ${topRule[1]} time(s) — the most frequent lint violation in this scope.`;
+  }
+  if (toolFailures.length > 0) return toolFailures.join(' ');
+  return noConfigMessage ?? 'No lint findings.';
+};
+
 export const buildReport = ({
   filesAnalyzed,
   findings,
@@ -71,11 +84,7 @@ export const buildReport = ({
     medium_count: mediumCount,
     nit_count: 0,
     report_id: `${reportIdPrefix}-${timestamp}`,
-    top_risk: topRule
-      ? `\`${topRule[0]}\` reported ${topRule[1]} time(s) — the most frequent lint violation in this scope.`
-      : toolFailures.length > 0
-        ? toolFailures.join(' ')
-        : (noConfigMessage ?? 'No lint findings.'),
+    top_risk: describeTopRisk({ noConfigMessage, toolFailures, topRule }),
   };
 };
 

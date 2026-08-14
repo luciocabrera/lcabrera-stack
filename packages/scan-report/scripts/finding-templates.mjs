@@ -25,10 +25,11 @@
 // builds its own full finding shape — a hardcoded literal can't drift from
 // itself, so there is nothing to share there.
 
-const lineHint = (item) =>
-  typeof item.line === 'number'
-    ? `${item.line}${typeof item.col === 'number' ? `:${item.col}` : ''}`
-    : undefined;
+const lineHint = (item) => {
+  if (typeof item.line !== 'number') return undefined;
+  const column = typeof item.col === 'number' ? `:${item.col}` : '';
+  return `${item.line}${column}`;
+};
 
 export const buildUnusedFileFinding = (item) => ({
   effort: 'small',
@@ -109,6 +110,9 @@ export const buildCircularDependencyFinding = (item) => ({
 export const buildCloneGroupFinding = (group) => {
   const instances = group.instances ?? [];
   const primary = instances[0] ?? {};
+  const suggestion = group.suggested_name
+    ? ` (suggested name: \`${group.suggested_name}\`)`
+    : '';
   return {
     effort: 'medium',
     extra: {
@@ -118,7 +122,7 @@ export const buildCloneGroupFinding = (group) => {
       })),
     },
     findingKind: 'duplication_group',
-    fix: `Extract the duplicated block into a shared helper${group.suggested_name ? ` (suggested name: \`${group.suggested_name}\`)` : ''}.`,
+    fix: `Extract the duplicated block into a shared helper${suggestion}.`,
     locationHint: `${primary.start_line ?? ''}-${primary.end_line ?? ''}`,
     locationPath: primary.file ?? '',
     ruleId: 'fallow/duplicate-code',

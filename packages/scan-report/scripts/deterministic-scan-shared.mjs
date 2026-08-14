@@ -17,20 +17,13 @@ import { join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { resolveHostRoot } from './resolve-host-root.mjs';
+import { runGit } from './run-git.mjs';
 import { runIngestion } from './run-ingestion.mjs';
 
 const moduleDirectory = fileURLToPath(new URL('.', import.meta.url));
 
 /** The repository this tooling is installed in — never the scanned project. */
 export const hostRoot = resolveHostRoot({ moduleDirectory });
-
-const runGit = (args, cwd) => {
-  try {
-    return execFileSync('git', args, { cwd, encoding: 'utf8' }).trim();
-  } catch {
-    return undefined;
-  }
-};
 
 // Positional usage (`node script.mjs packages/utils`) is resolved against the
 // host root; `--target=<abs>` points a script at an arbitrary project, which
@@ -59,7 +52,8 @@ export const parseRunContext = () => {
     : resolve(hostRoot, scopeArgument);
 
   const gitRoot =
-    runGit(['rev-parse', '--show-toplevel'], scopeDirectory) ?? scopeDirectory;
+    runGit({ args: ['rev-parse', '--show-toplevel'], cwd: scopeDirectory }) ??
+    scopeDirectory;
 
   return { flags, gitRoot, isTargetMode, scopeArgument, scopeDirectory };
 };

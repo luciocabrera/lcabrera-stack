@@ -74,5 +74,13 @@
     "vite": "catalog:build",
     "vite-plus": "catalog:build",
     "vitest": "catalog:test"
+  },
+  "peerDependencies": {
+    "fallow": ">=3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "fallow": {
+      "optional": true
+    }
   }
 }

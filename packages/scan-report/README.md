@@ -16,9 +16,16 @@ Both ship in the tarball, so the contract you are producing is readable from
 npm install --save-dev @lcabrera/scan-report
 ```
 
-`oxlint`, `eslint` and `fallow` are resolved from the installing repository —
+`oxlint`, `eslint` and `fallow` are resolved from the installing repository, and
 each scanner degrades to a clean 0-findings report when its tool or config is
-absent, so nothing here forces you to adopt all three.
+absent — so nothing here forces you to adopt all three. `fallow` is declared as
+an **optional peer**, which is the only one your package manager will mention;
+`scan-report-fallow` without it still writes all three artifacts and says
+`No fallow installation found under <root>` in `top_risk`.
+
+`scan-report-fallow` additionally expects a repo-root `.fallowrc.json`, and
+`run-fallow.sh` — the interactive two-pass helper — expects `vp` (Vite+) on
+PATH. The three `scan-report-*` scanners themselves need neither.
 
 ## Run
 

@@ -35,6 +35,11 @@ configured command that fails is deliberately not the same outcome: it prints
 work and stopped is not a normal state. The report artifacts are complete either
 way.
 
+`fallow` is an optional peer: `scan-report-fallow` without it writes all three
+artifacts and reports `No fallow installation found under <root>` rather than
+throwing. `scan-report-oxlint` and `scan-report-eslint` behave the same way when
+the scanned scope has no config for their tool.
+
 Nothing in the package names a repository, a workspace or a database. The
 default scan scope is the whole repository, and "the repository" is derived from
 where the package is installed rather than from a fixed directory depth or the

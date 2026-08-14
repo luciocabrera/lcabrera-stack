@@ -42,17 +42,29 @@ import {
 
 const context = parseRunContext();
 
-// An arbitrary target project can break fallow in ways this repo never
+// An arbitrary target project can break fallow in ways the host repo never
 // does — a hard execution failure must degrade this one scanner gracefully
 // (0 findings, failure noted in top_risk) rather than crash the whole scan
-// (ADR-015).
+// (ADR-015). A fallow that is installed but exits non-zero against the host's
+// OWN repo is still a hard error: that is the host's tooling being broken,
+// which it should hear about immediately.
 const toolFailures = [];
 
+// `undefined` when the host has no fallow, which is a normal state for a
+// consumer that installed this package for its lint scanners only — fallow is
+// an OPTIONAL peer. An absent tool is the same kind of answer as oxlint's
+// absent config: report nothing, say why, exit 0. Anything else here still
+// throws, because a fallow that is installed but unreadable is a real fault.
 const resolveFallowBin = () => {
   const require = createRequire(import.meta.url);
-  const fallowPackageJsonPath = require.resolve('fallow/package.json', {
-    paths: [hostRoot],
-  });
+  let fallowPackageJsonPath;
+  try {
+    fallowPackageJsonPath = require.resolve('fallow/package.json', {
+      paths: [hostRoot],
+    });
+  } catch {
+    return undefined;
+  }
   const fallowPackageJson = JSON.parse(
     readFileSync(fallowPackageJsonPath, 'utf8'),
   );
@@ -68,8 +80,16 @@ const resolveFallowBin = () => {
   return join(dirname(fallowPackageJsonPath), binRelativePath);
 };
 
+const NO_FALLOW_MESSAGE = `No fallow installation found under ${hostRoot} — nothing was analysed. Install fallow (an optional peer of @lcabrera/scan-report) to enable this scanner.`;
+
+const WINDOWS_SYSTEM_DIRECTORY = String.raw`C:\Windows\System32`;
+
 const runFallow = (rawArtifactPath) => {
   const fallowBinPath = resolveFallowBin();
+  if (fallowBinPath === undefined) {
+    toolFailures.push(NO_FALLOW_MESSAGE);
+    return undefined;
+  }
   // The workspace scope is the target directory + --scope, relative to the
   // git root fallow runs from ('' = scan the whole repo).
   const workspaceScope = relative(context.gitRoot, context.scopeDirectory);
@@ -80,7 +100,7 @@ const runFallow = (rawArtifactPath) => {
   const nodeBinDir = dirname(process.execPath);
   const fixedPathEnv =
     process.platform === 'win32'
-      ? `${nodeBinDir};${String.raw`C:\Windows\System32`}`
+      ? `${nodeBinDir};${WINDOWS_SYSTEM_DIRECTORY}`
       : `${nodeBinDir}:/usr/bin:/bin`;
 
   const result = spawnSync(
