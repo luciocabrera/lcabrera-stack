@@ -2,7 +2,7 @@
 id: claim-protocol-agrees
 title: Make the claim protocol and coordination:claim agree
 owner: agent:claude
-status: active
+status: review
 branch: chore/704-claim-protocol-agrees
 area:
   - AGENTS.md
@@ -11,7 +11,7 @@ area:
   - docs/decisions/README.md
   - scripts/coordination-claim.sh
 started: 2026-08-14
-updated: 2026-08-14
+updated: 2026-08-15
 plan: (none)
 pr: 722
 issue: #704
@@ -26,9 +26,9 @@ tooling implements and #233 built for, with the residual visibility gap stated.
 ## Status / next
 
 - Current step: review — README rule 2 rewritten, ADR-074 added, AGENTS.md and
-  the claim script cross-linked
-- Blockers: none
-- Next: quality gate, then PR #722
+  the claim script cross-linked; gate green and PR #722 in review
+- Blockers: none — waiting on review, then the merge closes this file
+- Next: nothing outstanding
 
 Known overlap, coordinated rather than narrowed: `publishing-gate-artifact`
 (`fix/715-publishing-gate-artifact`) claims `docs/decisions/**`, so
