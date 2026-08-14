@@ -14,9 +14,8 @@ in opposite directions, the package wins. A package must stand on its own —
 declared dependencies, a resolvable public surface, no reliance on a consumer's
 tsconfig `paths` to make an import work — because it is meant to be consumed from
 outside this repo, where none of this monorepo's wiring exists. `packages/ui`,
-`packages/api`, `packages/server`, `packages/utils`,
-`packages/eslint-local-rules` are held strictest for
-exactly that reason (§4). This is why the column-filter shapes are **duplicated**
+`packages/api`, `packages/server`, `packages/utils` and
+`packages/eslint-local-rules` are held strictest for exactly that reason (§4). This is why the column-filter shapes are **duplicated**
 in `@lcabrera/ui` and `@lcabrera/server` rather than shared through an elegant edge that
 only resolves in-repo ([ADR-039](docs/decisions/ADR-039-duplicate-over-undeclared-edges.md)).
 Facing that call — promote it into a package, or write it twice?
