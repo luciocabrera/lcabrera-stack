@@ -16,7 +16,8 @@ The gate sequence is single-sourced in the `quality-gate-workflow` skill — do 
 
 1. Read `.github/skills/quality-gate-workflow/SKILL.md` and run its **Canonical Gate Order** exactly, respecting its **Non-Negotiable Rules** (execution directory, `vp run test` not `vp test`, no skipped stages).
 2. Default scope is `apps/react-router/`. If the caller passes `root`, run from the repo root; if a package path, run from that path.
-3. Stop at the first failure and report it — do not continue to later steps, as their output would be misleading.
+3. **Stages 4 (Biome) and 5 (React Doctor) are root-only regardless of scope** — they are repo-wide passes with no per-workspace variant. Run those two from the repo root and the rest from the scope, whatever the scope is. Running either from inside a workspace does not exercise the gate.
+4. Stop at the first failure and report it — do not continue to later steps, as their output would be misleading.
 
 ## Output format
 

@@ -24,7 +24,13 @@ This skill defines the mandatory validation sequence after code changes.
 
 ## Canonical Gate Order
 
-> **Run from `apps/react-router/`** — not the monorepo root. Commands like `vp run test` and `vp check` must execute from the app directory, not the workspace root.
+> **Default working directory: `apps/react-router/`.** `vp run test`, `vp check` and
+> `vp run typecheck` resolve per workspace, so running them from the monorepo root
+> checks something other than the workspace you changed.
+>
+> **Stages 4 and 5 are the exceptions** — both are root-only, repo-wide passes and
+> are marked as such below. `cd` to the repo root for those two, then come back.
+> Running either from inside a workspace is not the gate.
 
 1. `vp fmt .`
 2. `vp lint .` — Oxlint
