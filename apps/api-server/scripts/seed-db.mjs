@@ -102,6 +102,29 @@ const assertSpawned = ({ command, result }) => {
   }
 };
 
+/**
+ * Without this, psql reports a failed statement and carries on to the next one,
+ * then exits 0 — a seed that half-applied and called itself successful. It
+ * belongs in the shared argument builder rather than at one call site, because
+ * that is how the two client paths came to disagree about it in the first place.
+ */
+const ON_ERROR_STOP_ARGS = ['-v', 'ON_ERROR_STOP=1'];
+
+/**
+ * `-e PGPASSWORD` (no `=value`) forwards this process's value **into the
+ * container**, where the psql that needs it actually runs; the spawn `env`
+ * alone only reaches the docker client. The bare form is deliberate — writing
+ * `-e PGPASSWORD=<value>` would put the password in the command line, where
+ * `ps` shows it to every user on the machine.
+ */
+const dockerExecArgs = (settings) => [
+  'exec',
+  '-e',
+  'PGPASSWORD',
+  '-i',
+  settings.dockerContainer,
+];
+
 /** Host `psql` reaches the server over TCP; the fallback runs inside the container. */
 const clientArgs = ({ database, settings }) =>
   psqlBinary
@@ -114,16 +137,16 @@ const clientArgs = ({ database, settings }) =>
         settings.user,
         '-d',
         database,
+        ...ON_ERROR_STOP_ARGS,
       ]
     : [
-        'exec',
-        '-i',
-        settings.dockerContainer,
+        ...dockerExecArgs(settings),
         'psql',
         '-U',
         settings.user,
         '-d',
         database,
+        ...ON_ERROR_STOP_ARGS,
       ];
 
 const runSqlFile = ({ env, settings, sqlFilePath }) => {
@@ -133,7 +156,7 @@ const runSqlFile = ({ env, settings, sqlFilePath }) => {
         env,
         stdio: 'inherit',
       })
-    : spawnSync(dockerBinary, [...args, '-v', 'ON_ERROR_STOP=1'], {
+    : spawnSync(dockerBinary, args, {
         env,
         input: readFileSync(sqlFilePath, 'utf8'),
         stdio: ['pipe', 'inherit', 'inherit'],
@@ -160,9 +183,7 @@ const createDatabase = ({ env, settings }) => {
     : spawnSync(
         dockerBinary,
         [
-          'exec',
-          '-i',
-          settings.dockerContainer,
+          ...dockerExecArgs(settings),
           'createdb',
           '-U',
           settings.user,
