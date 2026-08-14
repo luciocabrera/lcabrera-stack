@@ -267,10 +267,11 @@ jobs:
         id: publish_gate
         # Builds first on purpose. `exports` points at `src` so this repo never
         # needs a build, while consumers install `dist` via publishConfig.exports
-        # — a map nothing here exercises. Without the build this step still
-        # passes, checking only that the two maps agree structurally and never
-        # that a target exists, so it would report success while the tarball was
-        # missing files. The build is what gives it something real to check.
+        # — a map nothing here exercises. The gate packs each package with pnpm
+        # and reads the tarball a consumer would install, so with no build there
+        # is no artifact and it fails, rather than reporting the structural half
+        # as a pass the way it used to (ADR-073). The build is what gives it
+        # something real to check.
         run: vp run packages:build && vp run publish:verify
 
       - name: Public package API surface is unbroken
@@ -291,8 +292,10 @@ jobs:
       - name: Published types resolve (attw)
         id: attw_gate
         # Complements the surface snapshot: it answers "does the shipped surface
-        # even resolve?" for the three built packages, catching the ESM/CJS and
-        # module-resolution traps ADR-038 documents. Also needs the built dist.
+        # even resolve?" for the built public packages, catching the ESM/CJS and
+        # module-resolution traps ADR-038 documents. Needs the built dist, and
+        # fails without it — it used to report that types resolved for packages
+        # it had skipped (ADR-073).
         run: vp run attw:verify
 
       - name: Write quality summary

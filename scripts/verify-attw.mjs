@@ -4,21 +4,26 @@
  *
  * The surface snapshot gate (scripts/verify-api-surface.mjs) answers "did the
  * surface change?"; this answers "does the shipped surface even resolve?" — the
- * ESM/CJS and module-resolution traps ADR-038 documents. Runs over the three
- * built packages (`api`, `server`, `utils`); source-shipped `ui` is out of
- * scope, since attw's `.ts`-in-node_modules model does not describe a package
- * whose consumer compiles the source itself.
+ * ESM/CJS and module-resolution traps ADR-038 documents. It runs over the
+ * public packages that build; source-shipped `ui` is out of scope, since attw's
+ * `.ts`-in-node_modules model does not describe a package whose consumer
+ * compiles the source itself.
+ *
+ * A package with no `dist` is a failure here, not a skip: this gate used to
+ * announce that types resolved for every package while having checked none of
+ * them, on a tree nobody had built — see ADR-073.
  *
  * Usage (from the repo root, AFTER `vp run packages:build`):
  *   vp run attw:verify
  *
- * Exit codes: 0 = every built package's types resolve, 1 = at least one does
- * not (every problem is listed). Unbuilt packages are skipped with a notice.
+ * Exit codes: 0 = every in-scope package was checked and its types resolve,
+ * 1 = at least one does not, or one could not be checked (all are listed).
  */
 import { existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { errorMessage } from './lib/error-message.mjs';
 import { checkPackageTypes, formatProblem } from './lib/attw-check.mjs';
 import { readPublicPackages } from './lib/api-surface-config.mjs';
 
@@ -27,26 +32,40 @@ const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
 const builtPackages = () =>
   readPublicPackages(REPO_ROOT).filter((entry) => !entry.source);
 
-const main = async () => {
-  const packages = builtPackages();
-  const failures = [];
+const isBuilt = (packageConfig) =>
+  existsSync(join(REPO_ROOT, packageConfig.directory, 'dist'));
 
-  for (const packageConfig of packages) {
-    const directory = join(REPO_ROOT, packageConfig.directory);
-    if (!existsSync(join(directory, 'dist'))) {
-      console.warn(
-        `${packageConfig.name}: dist missing, skipped — run \`vp run packages:build\` first.`,
-      );
-      continue;
-    }
-    const { problems } = await checkPackageTypes(directory);
-    if (problems.length > 0) {
-      failures.push(
+const checkResolution = async (packageConfig) => {
+  const { problems } = await checkPackageTypes(
+    join(REPO_ROOT, packageConfig.directory),
+  );
+  return problems.length === 0
+    ? []
+    : [
         `${packageConfig.name}: published types do not resolve:\n${problems
           .map(formatProblem)
           .join('\n')}`,
-      );
-    }
+      ];
+};
+
+const main = async () => {
+  const packages = builtPackages();
+  if (packages.length === 0) {
+    console.error(
+      'attw gate failed: no public package builds a dist/, so this gate would check nothing — which is almost certainly a mistake.',
+    );
+    process.exitCode = 1;
+    return;
+  }
+
+  const failures = packages
+    .filter((packageConfig) => !isBuilt(packageConfig))
+    .map(
+      (packageConfig) =>
+        `${packageConfig.name}: no dist/, so its published types were not checked — run \`vp run packages:build\` first.`,
+    );
+  for (const packageConfig of packages.filter(isBuilt)) {
+    failures.push(...(await checkResolution(packageConfig)));
   }
 
   if (failures.length > 0) {
@@ -58,13 +77,15 @@ const main = async () => {
     return;
   }
   console.log(
-    `Published types resolve for ${packages.length} built package(s).`,
+    `Published types resolve for ${packages.length} package(s): ${packages
+      .map((packageConfig) => packageConfig.name)
+      .join(', ')}.`,
   );
 };
 
 try {
   await main();
 } catch (error) {
-  console.error(`attw: ${error.message}`);
+  console.error(`attw: ${errorMessage(error)}`);
   process.exitCode = 1;
 }

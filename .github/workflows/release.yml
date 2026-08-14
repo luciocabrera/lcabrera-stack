@@ -95,7 +95,17 @@ jobs:
         if: steps.plan.outputs.count != '0'
         # Consumers install `dist`, and `publishConfig.exports` points there, so
         # publishing without building would ship a tarball whose every export
-        # target is missing. publish:verify fails on exactly that.
+        # target is missing. publish:verify packs each package and reads the
+        # tarball back, so it fails on exactly that.
+        #
+        # It also asserts that THIS workflow still publishes through pnpm, and
+        # that is not decoration: substituting `publishConfig.exports` is a pnpm
+        # extension. An `npm publish` here would upload tarballs whose `exports`
+        # still point at ./src, which no consumer can load
+        # (ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING), and an npm version is
+        # permanent. Changing the publish command below means revisiting
+        # docs/decisions/ADR-073-publishing-gates-check-the-packed-tarball.md
+        # first; the gate will stop you either way.
         run: vp run packages:build && vp run publish:verify
 
       - name: Provide pnpm for the publish step
