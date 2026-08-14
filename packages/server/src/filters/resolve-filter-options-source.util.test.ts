@@ -74,3 +74,31 @@ it('refuses a column name inherited from Object.prototype', () => {
     }),
   ).toStrictEqual({ allowed: false, refusal: 'unknown-column' });
 });
+
+// The other half of the rule above: refusing an *inherited* prototype name must
+// not refuse a real column that happens to share one. That is why the guard is
+// `Object.hasOwn` — a denylist of prototype names would reject this column, and
+// `column in columns` walks the prototype chain, so it would let the inherited
+// one back through.
+it('allows a column the registry really lists, prototype name or not', () => {
+  // `as const` is load-bearing here, and for the same reason the rule above
+  // exists: TypeScript resolves a `constructor` property to `Object.prototype`'s
+  // rather than to the index signature, so the literal is never contextually
+  // typed and widens to `string`.
+  const sources: FilterOptionsSources = {
+    'public.audit': { constructor: 'text' as const },
+  };
+
+  expect(
+    resolveFilterOptionsSource({
+      column: 'constructor',
+      schema: 'public',
+      sources,
+      table: 'audit',
+    }),
+  ).toStrictEqual({
+    allowed: true,
+    allowedColumns: ['constructor'],
+    columnType: 'text',
+  });
+});

@@ -45,11 +45,17 @@ export type ResolveFilterOptionsSourceArgs = {
  * with the registry supplied by the caller: the columns and their types are the
  * consumer's data, the refusal rule is not.
  *
- * Returns a refusal rather than throwing, and distinguishes an unknown source
- * from an unknown column, because the two edges consuming it answer differently
- * — one maps the refusal to a 400 body, the other to a typed HTTP error — and
- * neither wants to catch. Do **not** put the refusal in the response: it tells a
- * caller which tables exist.
+ * Refusal is a **return value, not a throw**, because the edges consuming it
+ * answer in different shapes — one returns a 400 `Response`, another throws a
+ * typed HTTP error for its middleware to render — and neither should have to
+ * catch to tell "not allowed" from "the query failed".
+ *
+ * It names *which* half was refused, and whether to repeat that to the caller is
+ * a separate decision. Branching on it is always safe; echoing it is not —
+ * `unknown-column` on a source that exists confirms the table exists, which
+ * `unknown-source` would have hidden. Answer a public endpoint with one message
+ * for both, and echo the specific one only where the caller already knows the
+ * schema.
  */
 export const resolveFilterOptionsSource = ({
   column,

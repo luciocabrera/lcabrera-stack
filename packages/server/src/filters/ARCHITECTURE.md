@@ -97,12 +97,21 @@ _which tables may be asked at all_. Both consumers in this repo had hand-rolled
 the same lookup before `resolveFilterOptionsSource` existed.
 
 It takes the registry (`schema.table` → column → `ColumnType`) as an argument:
-which sources exist is the consumer's data, the refusal rule is not. It returns
-a refusal rather than throwing, and separates an unknown source from an unknown
-column, because the two edges answer differently — one maps it to a 400 body,
-the other to a typed HTTP error — and neither wants to catch. That refusal is
-for the caller's branch, not for the response body: naming which half failed
-tells a caller which tables exist.
+which sources exist is the consumer's data, the refusal rule is not.
+
+**Refusal is a return value, not a throw.** The edges answer in different shapes
+— the showcase's `/_api/filter-options` loader returns a 400 `Response`,
+`api-shared`'s repository throws a typed `HttpError` for its middleware to
+render — and neither should have to catch to tell "not allowed" from "the query
+failed".
+
+**Naming which half was refused is separate from repeating it.** Branching on
+the discriminant is always safe; echoing it is not, because `unknown-column` on
+a source that exists confirms the table exists where `unknown-source` would have
+hidden it. The two consumers here differ on purpose and neither is the rule: the
+showcase loader answers one message for both halves, while the `/api/distinct`
+endpoint — whose callers already know the schema they asked for — keeps the
+specific message it has always returned.
 
 Both lookups read **own properties only**. A registry is an object literal, so
 a request for the column `constructor` otherwise resolves to `Object`'s and the

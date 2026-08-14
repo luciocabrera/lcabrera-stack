@@ -68,9 +68,22 @@ already written down on the other side of it: `@lcabrera/api`'s
 happens downstream in the BFF". The registry stays the consumer's data; the
 refusal rule is now the package's, tested there.
 
-Behaviour is unchanged on both sides. This package still throws `HttpError` 400
-and still distinguishes an unknown source from an unknown column; the showcase
-service still returns `undefined` and its suite was not touched.
+Behaviour is unchanged for every request either endpoint can legitimately serve.
+This package still throws `HttpError` 400 and still distinguishes an unknown
+source from an unknown column; the showcase service still returns `undefined`,
+and its suite was not touched.
+
+One input class does change, on the showcase side only, and it is a fix rather
+than a regression. The old service indexed its registry raw
+(`columns[columnName]`), so a column name that is an `Object.prototype` member —
+`toString`, `constructor` — passed the "is this column exposed?" guard carrying a
+**function** as its `columnType`, then failed downstream in
+`assertColumnAllowed` (the name is not among `Object.keys`), throwing out of the
+loader as a 500 instead of the 400 that route documents.
+`resolveFilterOptionsSource` reads own properties only, so the same request now
+takes the documented 400 path. `api-shared` was never exposed to this: its
+registry was a `Set`, and `Set.prototype.has` does not consult
+`Object.prototype`.
 
 ## Adjacent modules the issue named
 
