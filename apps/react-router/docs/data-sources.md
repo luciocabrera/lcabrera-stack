@@ -66,6 +66,16 @@ through `fetchCarSalesPage` / `fetchWideAlltypes150Page`. Both endpoints answer
 the identical `{ data, hasMore, total }`, so nothing downstream can tell which
 one replied.
 
+Two app-local utils split the decision, and both read the variable through
+`readExternalApiUrl` so they cannot disagree: `isExternalApiEnabled` says
+**whether** the external path is taken, `resolveExternalApiBaseUrl` says
+**where** it goes. The second one has to exist. `@lcabrera/api`'s
+`getApiBaseUrl` ranks the SSR request URL _above_ `VITE_API_URL` — handed one by
+a loader it never reads the variable at all — so without the inversion the
+loader fetched the request's own origin while the browser fetched the override.
+The order is inverted here, for this app, rather than in the package, whose
+priority list is published behaviour for every consumer.
+
 ### It is a build-time switch
 
 Read this part before pointing a deployment anywhere. `isExternalApiEnabled`
@@ -113,13 +123,25 @@ vp run dev:showcase        # showcase alone
 
 An override nobody runs is an override that breaks silently, so it is exercised
 two ways: `dev:external-api` by hand, and
-`services/isExternalApiEnabled.util.test.ts` plus each fetcher's test in CI —
-those stub `VITE_API_URL` and assert the request URL each branch produces, so a
-change that quietly collapses the two paths into one fails the build. Note what
-those tests can and cannot show: they run under Vitest, where `import.meta.env`
-is live, so they prove **the branch is wired correctly**. That a given
-_deployment_ took it is a property of how that deployment was built, and the
-`grep` above is what answers it.
+`services/isExternalApiEnabled.util.test.ts`,
+`services/resolveExternalApiBaseUrl.util.test.ts` plus each fetcher's test in
+CI — those stub `VITE_API_URL` and assert the request URL each branch produces,
+**including with an SSR `requestUrl` present**, so a change that quietly
+collapses the two paths into one fails the build.
+
+**Point it somewhere the fallback would never reach.** `dev:external-api` sets
+`VITE_API_URL=http://localhost:3001/api`, which is convenient and useless as a
+check: it is byte-identical to what `getApiBaseUrl` answers for a local request
+URL anyway, so a request arriving at the api-server proves nothing about which
+of the two produced the address. It hid a real defect for two rounds of review
+on #701. To actually test the override, point it at a host nothing else uses —
+a stub server on a spare port — and assert the request lands _there_ while the
+api-server on `:3001` stays idle.
+
+Note what the unit tests can and cannot show: they run under Vitest, where
+`import.meta.env` is live, so they prove **the branch and the host are wired
+correctly**. That a given _deployment_ took it is a property of how that
+deployment was built, and the `grep` above is what answers it.
 
 `enterprise-orders` has no override. It never had an external path worth keeping
 — it was self-hosted from the start.

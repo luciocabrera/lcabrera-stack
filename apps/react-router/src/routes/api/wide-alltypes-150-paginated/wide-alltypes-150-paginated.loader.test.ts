@@ -26,7 +26,7 @@ beforeEach(() => {
 });
 
 describe('wide-alltypes-150 paginated resource route', () => {
-  it('turns the search params into the service`s window and sort', async () => {
+  it("turns the search params into the service's window and sort", async () => {
     await invokeLoader(
       'limit=50&skip=100&sort=[{"columnKey":"c_002","direction":"desc"}]',
     );

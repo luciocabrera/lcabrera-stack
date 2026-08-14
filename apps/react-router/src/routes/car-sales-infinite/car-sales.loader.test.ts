@@ -25,7 +25,7 @@ beforeEach(() => {
 });
 
 describe('car-sales-infinite loader', () => {
-  it('reads its first page through the route`s own server service', async () => {
+  it("reads its first page through the route's own server service", async () => {
     await invokeLoader();
 
     expect(readCarSalesPageMock).toHaveBeenCalledTimes(1);

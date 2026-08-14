@@ -1,10 +1,10 @@
 import type { PaginatedFetchArgs } from '@lcabrera/api/http/http.types';
 
-import { getApiBaseUrl } from '@lcabrera/api/config/get-api-base-url.util';
 import { createPaginatedFetcher } from '@lcabrera/api/http/create-paginated-fetcher.util';
 import { isObject } from '@lcabrera/utils/guards/is-object.util';
 
 import { isExternalApiEnabled } from './isExternalApiEnabled.util';
+import { resolveExternalApiBaseUrl } from './resolveExternalApiBaseUrl.util';
 
 /**
  * Wide All-Types 150 API Service
@@ -211,7 +211,7 @@ const fetchSelfHostedPage = createPaginatedFetcher<WideAlltypes150Response>({
 const fetchExternalPage = createPaginatedFetcher<WideAlltypes150Response>({
   isValid: isWideAlltypes150Response,
   path: '/wide-alltypes-150/paginated',
-  resolveBaseUrl: getApiBaseUrl,
+  resolveBaseUrl: resolveExternalApiBaseUrl,
 });
 
 /**

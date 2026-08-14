@@ -24,7 +24,7 @@ beforeEach(() => {
 });
 
 describe('car-sales paginated resource route', () => {
-  it('turns the search params into the service`s window and sort', async () => {
+  it("turns the search params into the service's window and sort", async () => {
     await invokeLoader(
       'limit=25&skip=50&sort=[{"columnKey":"model","direction":"desc"}]',
     );

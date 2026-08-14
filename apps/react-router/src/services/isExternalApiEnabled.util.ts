@@ -1,3 +1,5 @@
+import { readExternalApiUrl } from './readExternalApiUrl.util';
+
 /**
  * Whether this app should read its table pages from an external API server
  * rather than serving them itself.
@@ -25,9 +27,10 @@
  *
  * Re-derive which way a given bundle folded:
  * `grep -A2 'isExternalApiEnabled = () => {' build/server/index.js`.
+ *
+ * This decides **whether** the external path is taken;
+ * `resolveExternalApiBaseUrl` decides **where** it goes. Both read the variable
+ * through `readExternalApiUrl`, so the two answers cannot disagree about
+ * whether an override exists.
  */
-export const isExternalApiEnabled = () => {
-  const externalApiUrl = import.meta.env.VITE_API_URL as string | undefined;
-
-  return externalApiUrl !== undefined && externalApiUrl !== '';
-};
+export const isExternalApiEnabled = () => readExternalApiUrl() !== undefined;

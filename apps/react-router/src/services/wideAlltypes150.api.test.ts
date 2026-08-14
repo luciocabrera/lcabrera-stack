@@ -36,7 +36,7 @@ afterEach(() => {
 });
 
 describe('fetchWideAlltypes150Page', () => {
-  it('reads this app`s own resource route when no external API is configured', async () => {
+  it("reads this app's own resource route when no external API is configured", async () => {
     vi.stubEnv('VITE_API_URL', undefined);
 
     await fetchWideAlltypes150Page({ limit: 50, skip: 100 });
@@ -53,6 +53,23 @@ describe('fetchWideAlltypes150Page', () => {
 
     expect(requestedUrl()).toBe(
       'http://api.test/api/wide-alltypes-150/paginated?limit=50&skip=100',
+    );
+  });
+
+  it('honours the override host under SSR, where a requestUrl is present', async () => {
+    // Same regression as the car-sales fetcher: an SSR `requestUrl` outranked
+    // `VITE_API_URL` inside `getApiBaseUrl`, so the loader fetched the
+    // request's own origin instead of the override (#701 review).
+    vi.stubEnv('VITE_API_URL', 'http://override.example:9999/api');
+
+    await fetchWideAlltypes150Page({
+      limit: 50,
+      requestUrl: 'http://localhost:5173/wide-alltypes-150',
+      skip: 0,
+    });
+
+    expect(requestedUrl()).toBe(
+      'http://override.example:9999/api/wide-alltypes-150/paginated?limit=50&skip=0',
     );
   });
 

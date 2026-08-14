@@ -66,7 +66,7 @@ describe('selectCarSalesPage', () => {
     );
   });
 
-  it('orders by the request`s sort when it has one', async () => {
+  it("orders by the request's sort when it has one", async () => {
     await selectCarSalesPage({
       limit: 10,
       offset: 0,

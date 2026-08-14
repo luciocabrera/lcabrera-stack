@@ -30,12 +30,14 @@ Every table route serves its own rows from Postgres — see
 The app-local browser fetch layer. Each fetcher targets this app's own resource
 route by default and the external API only under the `VITE_API_URL` override.
 
-| Artifact                   | Location                                | Description                                                                                                                 |
-| -------------------------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `fetchCarSalesPage`        | `services/carSales.api.ts`              | A page of `car_sales`, plus the `CarSale` / `CarSalesResponse` shapes; applies `fakeDelay` for the loading-skeleton demo    |
-| `fetchWideAlltypes150Page` | `services/wideAlltypes150.api.ts`       | A page of `wide_alltypes_150`, plus the `WideAlltypes150` / `WideAlltypes150Response` shapes                                |
-| `isExternalApiEnabled`     | `services/isExternalApiEnabled.util.ts` | The one switch every data path reads: `VITE_API_URL` set means the external API, unset means this app's own resource routes |
-| `fakeDelay`                | `services/fakeDelay.util.ts`            | Artificial `VITE_API_DELAY_MS` delay so the loading skeleton is visible against a local data source; no-ops when unset      |
+| Artifact                    | Location                                     | Description                                                                                                                    |
+| --------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `fetchCarSalesPage`         | `services/carSales.api.ts`                   | A page of `car_sales`, plus the `CarSale` / `CarSalesResponse` shapes; applies `fakeDelay` for the loading-skeleton demo       |
+| `fetchWideAlltypes150Page`  | `services/wideAlltypes150.api.ts`            | A page of `wide_alltypes_150`, plus the `WideAlltypes150` / `WideAlltypes150Response` shapes                                   |
+| `readExternalApiUrl`        | `services/readExternalApiUrl.util.ts`        | The single read of `VITE_API_URL`; an empty value counts as unset. The two utils below derive from it, so they cannot disagree |
+| `isExternalApiEnabled`      | `services/isExternalApiEnabled.util.ts`      | **Whether** the external path is taken — the switch every data path reads                                                      |
+| `resolveExternalApiBaseUrl` | `services/resolveExternalApiBaseUrl.util.ts` | **Where** it goes: the override host, ranked ahead of `@lcabrera/api`'s `getApiBaseUrl`, which puts the SSR request URL first  |
+| `fakeDelay`                 | `services/fakeDelay.util.ts`                 | Artificial `VITE_API_DELAY_MS` delay so the loading skeleton is visible against a local data source; no-ops when unset         |
 
 ---
 

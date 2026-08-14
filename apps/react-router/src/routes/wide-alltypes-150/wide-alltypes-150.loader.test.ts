@@ -25,7 +25,7 @@ beforeEach(() => {
 });
 
 describe('wide-alltypes-150 loader', () => {
-  it('reads its first page through the route`s own server service', async () => {
+  it("reads its first page through the route's own server service", async () => {
     await invokeLoader();
 
     expect(readWideAlltypes150PageMock).toHaveBeenCalledTimes(1);

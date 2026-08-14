@@ -58,6 +58,14 @@ the same routes fetch from the external API instead — the loader through
 fetcher. One predicate decides,
 `services/isExternalApiEnabled.util.ts`.
 
+Two utils split that decision — `isExternalApiEnabled` for **whether**,
+`resolveExternalApiBaseUrl` for **where** — because the second question has an
+answer the package would get wrong. `getApiBaseUrl` ranks the SSR request URL
+above `VITE_API_URL`, so a loader handing it one gets the request's own origin
+and the variable is never read; the browser, which passes no request URL, gets
+the override. The two halves of a route would talk to different hosts. The app
+inverts that order for itself.
+
 The build-time part is not an implementation detail to be glossed. The predicate
 reads `import.meta.env.VITE_API_URL`, which Vite substitutes when the bundle is
 produced, so a production build folds it to `return false;` or `return true;`
@@ -146,7 +154,16 @@ tempting: an override nobody runs is dead code. Rejected because the external
 path is a real deployment topology for a library consumer, and because the
 `@lcabrera/api` fetch layer — `createPaginatedFetcher`'s `resolveBaseUrl`
 strategy, `getApiBaseUrl` — is product that would lose its only in-repo exercise
-along with it. Keeping it costs one predicate and two tests.
+along with it. Keeping it costs three small utils and their tests.
+
+**Reorder the priorities inside `@lcabrera/api`'s `getApiBaseUrl`.** That
+function ranks the SSR request URL above `VITE_API_URL`, which is what made the
+override select the external branch while the request still went to the
+request's own origin. Rejected as the wrong home rather than the wrong fix: the
+priority list is published behaviour for every consumer of the package, so
+changing it needs its own issue, its own justification and a changeset.
+`resolveExternalApiBaseUrl` inverts the order for this app in four lines and
+leaves the package's contract alone.
 
 **Adopt the `skip === 0`-only `COUNT` while converting.** It is the cheaper read
 and the pattern the repo already prefers (#402). Rejected here because it removes
