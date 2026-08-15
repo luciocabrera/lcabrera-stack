@@ -250,10 +250,11 @@ const fileInTemplateHome = (dir, filename) => {
 /**
  * An index reduced to its content, so the freshness check survives Oxfmt.
  *
- * Oxfmt formats markdown after this file has generated it, and a byte
- * comparison would then report the generated file as stale — while regenerating
- * would un-format it again, which is a loop with no exit. Table padding is the
- * case that produced the loop; trailing whitespace is the one that still can.
+ * Oxfmt formats markdown after this file has generated it. Compare bytes
+ * instead of this, and the reformatted file reads as stale while regenerating
+ * un-formats it again — a loop with no exit. The two differences absorbed here
+ * are table column padding, which is what produced that loop back when the
+ * index carried a table, and line-end whitespace.
  */
 export const normalizeIndex = (markdown) =>
   markdown
