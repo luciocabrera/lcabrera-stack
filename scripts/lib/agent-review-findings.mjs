@@ -76,6 +76,9 @@ export const blockingFindingIds = (findings) =>
     .filter((finding) => BLOCKING_SEVERITIES.has(finding.severity))
     .map((finding) => finding.id);
 
+/** Ids rendered for a message, so the messages need no nested template. (pure) */
+const quotedIds = (ids) => ids.map((id) => `\`${id}\``).join(', ');
+
 /**
  * §2.4 step 6 — `verdict` against what the document shows.
  *
@@ -92,7 +95,7 @@ export const consistencyErrors = (document) => {
   }
   if (document.verdict === 'pass' && blocking.length > 0) {
     errors.push(
-      `\`verdict\` is \`pass\` while carrying blocking finding(s) ${blocking.map((id) => `\`${id}\``).join(', ')} (§2.4 step 6)`,
+      `\`verdict\` is \`pass\` while carrying blocking finding(s) ${quotedIds(blocking)} (§2.4 step 6)`,
     );
   }
   const unmet = (document.criteria ?? [])
@@ -100,7 +103,7 @@ export const consistencyErrors = (document) => {
     .map((criterion) => criterion.id);
   if (document.verdict === 'pass' && unmet.length > 0) {
     errors.push(
-      `\`verdict\` is \`pass\` while criterion/criteria ${unmet.map((id) => `\`${id}\``).join(', ')} are \`not-met\` (§2.4 step 6)`,
+      `\`verdict\` is \`pass\` while criterion/criteria ${quotedIds(unmet)} are \`not-met\` (§2.4 step 6)`,
     );
   }
   return errors;
