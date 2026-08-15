@@ -1,0 +1,83 @@
+name: Copilot Review Gate
+
+# Publishes the `Copilot review complete` commit status, which is green only
+# while Copilot's newest review names the pull request's current head commit.
+#
+# Why a workflow at all, when ruleset `19141543` already carries
+# `copilot_code_review` with `review_on_push: true`: that setting REQUESTS a
+# re-review on each push, it does not report whether one arrived. On #671 a
+# review of `ff868c68` stood through two further pushes and a human had to
+# re-request it — a completed review of superseded code is indistinguishable, in
+# the UI, from a review of the head. This job makes that window visible while it
+# is open, and permanent when the re-review never comes.
+#
+# Event-driven, never polling. A job that sleeps waiting for a review burns
+# Actions minutes and still races; recomputing when the head or the reviews
+# change is both cheaper and correct.
+#
+# It is NOT yet a required context — promotion to the ruleset is #698,
+# deliberately separate, because a required check that has never reported blocks
+# every pull request including the one that would fix it.
+#
+# The decision logic is scripts/lib/copilot-review.mjs (pure, unit-tested); the
+# behaviour, the never-reviewed case and the break-glass path are documented in
+# docs/tooling/copilot-review-gate.md.
+
+on:
+  # `synchronize` is the one that matters: it fires on every push and the new
+  # head has no review yet, so the status goes pending within this run.
+  # `converted_to_draft` is here so a PR pulled back to draft still reports.
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review, converted_to_draft]
+  pull_request_review:
+    types: [submitted, dismissed]
+
+permissions:
+  contents: read
+  pull-requests: read
+  statuses: write
+
+# No `concurrency` group on purpose. Cancelling a superseded run would leave the
+# event it was handling with no status at all, and the runs cannot disagree: each
+# one re-reads the head and the reviews together and posts against the head it
+# read, so a slow run publishes the same verdict as the fast one that overtook it.
+
+jobs:
+  publish-copilot-review-status:
+    # This name must NOT be `Copilot review complete`. A job's check run and a
+    # commit status share one namespace on the PR, and ruleset contexts match by
+    # name — so a job named after the status would put a second, always-green
+    # check under that name, and the gate #698 promotes could be satisfied by
+    # "the workflow ran" instead of "Copilot reviewed the head".
+    name: Publish the Copilot review status
+    runs-on: ubuntu-latest
+    steps:
+      # Default ref on purpose, which differs per event and is right both times:
+      # for `pull_request` it is the merge ref, so the YAML and the script it
+      # runs come from one commit (the skew that broke #177); for
+      # `pull_request_review` GitHub runs the workflow from the default branch
+      # and this brings the matching script. Nothing here reads the working tree
+      # beyond that script — the head SHA comes from the API, not from git.
+      - name: Check out the ref this event runs from
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      # A fork PR gets a read-only GITHUB_TOKEN, so no status can be posted from
+      # one and the check is absent rather than red. That is fail-closed and
+      # intended — the break-glass path in docs/tooling/copilot-review-gate.md
+      # covers it — but it must be understood rather than discovered, so the run
+      # says so out loud and still prints the verdict it would have published.
+      - name: Publish the status against the current head
+        env:
+          GH_TOKEN: ${{ github.token }}
+          # Present on both events' payloads. Passed through env, never a shell
+          # interpolation, so nothing from a PR is executed.
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          IS_FORK: ${{ github.event.pull_request.head.repo.full_name !=
+            github.repository }}
+        run: |
+          if [ "$IS_FORK" = "true" ]; then
+            echo "::warning::Fork pull request — GITHUB_TOKEN is read-only here, so no commit status can be published. The check stays absent; see docs/tooling/copilot-review-gate.md for the break-glass path."
+            node scripts/copilot-review-status.mjs --pr "$PR_NUMBER" --dry-run
+          else
+            node scripts/copilot-review-status.mjs --pr "$PR_NUMBER"
+          fi

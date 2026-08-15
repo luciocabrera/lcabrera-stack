@@ -30,6 +30,14 @@ trust the check and look at its output.
       **[judgement; auto for paths: `docs:verify`]**
 - [ ] **No conflicting approaches introduced** — no second way to do something
       the repo already does one way **[judgement]**
+- [ ] **Copilot has reviewed the current head commit** — not merely the pull
+      request at some earlier point **[auto: `Copilot review complete`]**. The
+      status is green only while Copilot's newest review names the head SHA, so
+      a push after a review takes it back to `pending`. What each state means,
+      why a review that arrives already stale reports `failure`, and the
+      break-glass path for when Copilot never reviews are in
+      [`copilot-review-gate.md`](../tooling/copilot-review-gate.md). It reports
+      but does not block until #698 promotes it to a required context.
 - [ ] **Reviewed by a supervising agent or human** **[judgement]**. Where an
       agent code review has reported a verdict on the PR, what that verdict has
       to satisfy — which severities block, and the only sanctioned way to merge
@@ -59,6 +67,11 @@ Run locally by the [`quality-gate-workflow`](../../.github/skills) skill, and in
 by [`check-safe.yml`](../../.github/workflows/check-safe.yml) and
 [`pr-standards.yml`](../../.github/workflows/pr-standards.yml). The canonical
 command list is [`COMMANDS.md`](../../COMMANDS.md).
+
+[`copilot-review-gate.yml`](../../.github/workflows/copilot-review-gate.yml) is
+the odd one out: it judges the **review**, not the code, so it is recomputed by
+review and head-commit events rather than by the gate command, and its verdict
+changes when nothing in the diff has.
 
 A green PR means those ran — it does not mean the **[judgement]** items were
 considered. That is the gap this checklist covers.
