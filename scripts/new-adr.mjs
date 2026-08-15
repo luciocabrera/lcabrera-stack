@@ -117,7 +117,7 @@ const main = () => {
 
   writeFileSync(join(REPO_ROOT, path), contents);
   console.log(
-    `Wrote ${path} as ADR-${pad(number)}.\nNext: fill in the sections, then run \`vp run adr:verify -- --write\` to update the index and commit both.`,
+    `Wrote ${path} as ADR-${pad(number)}.\nNext: fill in the sections, then run \`vp run adr:verify\`. The file is the whole change — the home's index carries no row per ADR, so nothing else moves (ADR-075).`,
   );
 };
 

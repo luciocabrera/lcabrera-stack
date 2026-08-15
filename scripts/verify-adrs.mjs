@@ -12,6 +12,11 @@
  * Usage:
  *   node scripts/verify-adrs.mjs           check; exit 1 on any violation
  *   node scripts/verify-adrs.mjs --write   regenerate each home's README index
+ *   node scripts/verify-adrs.mjs --list    print every ADR with its title
+ *
+ * `--list` is where the per-ADR table went: the committed index carries no row
+ * per ADR, because that made every pair of concurrent ADR branches conflict
+ * (ADR-075).
  *
  * Exit codes: 0 = clean, 1 = a violation, or an index that is out of date.
  */
@@ -30,6 +35,7 @@ import {
   nextFreeNumber,
   normalizeIndex,
   renderIndex,
+  renderListing,
 } from './lib/adr-registry.mjs';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
@@ -113,17 +119,14 @@ const staleIndexes = (homes) =>
     return (
       !existsSync(path) ||
       normalizeIndex(readFileSync(path, 'utf8')) !==
-        normalizeIndex(renderIndex(home, home.entries))
+        normalizeIndex(renderIndex(home))
     );
   });
 
 const writeIndexes = (homes) => {
   const stale = staleIndexes(homes);
   for (const home of stale) {
-    writeFileSync(
-      join(REPO_ROOT, home.dir, INDEX_FILE),
-      renderIndex(home, home.entries),
-    );
+    writeFileSync(join(REPO_ROOT, home.dir, INDEX_FILE), renderIndex(home));
   }
   console.log(
     stale.length === 0
@@ -149,6 +152,12 @@ const report = (findings, stale) => {
 
 const main = () => {
   const homes = readHomes();
+
+  if (process.argv.includes('--list')) {
+    console.log(renderListing(homes));
+    return;
+  }
+
   const findings = adrFindings({
     drafts: listMarkdown(DRAFT_DIR),
     homes,

@@ -118,11 +118,16 @@ There are three ADR homes on **one** number sequence, and
 the rule for picking between them — read it rather than a summary here, so this
 does not become a fourth place the taxonomy is written down.
 
-The two mechanics you need at gate time: take the number
-`vp run adr:verify` reports as free (it is global across all three homes,
-whichever you are writing in), and register it with
-`vp run adr:verify -- --write`. That gate fails a stray, a reused number, a
-malformed name and a stale index.
+The one mechanic you need at gate time: take the number `vp run adr:verify`
+reports as free (it is global across all three homes, whichever you are writing
+in). That gate fails a stray, a reused number, a malformed name and a stale
+index.
+
+The ADR file is the whole change. A home's `README.md` carries no row per ADR, so
+there is no index to regenerate and — the point of it — no file for a second ADR
+branch to conflict with
+([ADR-075](../../../docs/decisions/ADR-075-the-index-does-not-list-the-adrs.md)).
+`vp run adr:list` prints the ADRs with their titles.
 
 ## Non-Negotiable Rules
 

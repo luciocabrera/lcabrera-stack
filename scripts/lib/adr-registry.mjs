@@ -203,14 +203,38 @@ export const nextFreeNumber = (homes) => {
 /** A pipe inside a title would end the cell, so it is escaped. */
 const ESCAPED_PIPE = String.raw`\|`;
 
-const indexRow = (entry) => {
+/** One listing row, linked from the repository root so that every home's rows
+ *  read the same way in one combined listing. */
+const listingRow = (home, entry) => {
   const parsed = parseAdrFilename(entry.filename);
   const number = parsed === undefined ? '?' : pad(parsed.number);
   const title = entry.title.replaceAll('|', ESCAPED_PIPE);
-  return `| [ADR-${number}](./${entry.filename}) | ${title} |`;
+  return `| [ADR-${number}](${home.dir}/${entry.filename}) | ${title} |`;
 };
 
+/**
+ * Every home's ADRs with their titles, for `vp run adr:list`. This is the table
+ * that used to be committed into each index; producing it on demand is what
+ * keeps two concurrent ADR branches off the same lines (ADR-075).
+ *
+ * `homes` is `{ dir, title, entries: [{ filename, title }] }` per home.
+ */
+export const renderListing = (homes) =>
+  homes
+    .flatMap((home) => [
+      `## ${home.title} — \`${home.dir}\``,
+      '',
+      '| ADR | Decision |',
+      '| --- | --- |',
+      ...[...home.entries]
+        .sort((a, b) => a.filename.localeCompare(b.filename))
+        .map((entry) => listingRow(home, entry)),
+      '',
+    ])
+    .join('\n');
+
 const TAXONOMY_ADR_FILE = 'ADR-048-adr-taxonomy-and-one-sequence.md';
+const CONFLICT_ADR_FILE = 'ADR-075-the-index-does-not-list-the-adrs.md';
 
 /** The path from one home back up to `docs/decisions`, which holds both ADR-048
  *  and the template. `docs/decisions` links to its own files directly. */
@@ -226,11 +250,11 @@ const fileInTemplateHome = (dir, filename) => {
 /**
  * An index reduced to its content, so the freshness check survives Oxfmt.
  *
- * Oxfmt formats markdown, and it pads table columns to align them; this renders
- * them compact. Both spellings are the same index, so a byte comparison would
- * report every generated file as stale the moment `vp fmt` touched it — and
- * regenerating would un-format it again, which is a loop with no exit. Collapse
- * the padding and compare what the table says.
+ * Oxfmt formats markdown after this file has generated it. Compare bytes
+ * instead of this, and the reformatted file reads as stale while regenerating
+ * un-formats it again — a loop with no exit. The two differences absorbed here
+ * are table column padding, which is what produced that loop back when the
+ * index carried a table, and line-end whitespace.
  */
 export const normalizeIndex = (markdown) =>
   markdown
@@ -247,11 +271,21 @@ export const normalizeIndex = (markdown) =>
     .trim();
 
 /**
- * A home's `README.md`, rendered from the directory itself. Generated rather
- * than hand-kept: an index nobody regenerates is the same rot the ADRs already
- * had, one level up.
+ * A home's `README.md`: what is true of the home itself, and deliberately not a
+ * row per ADR.
+ *
+ * **It takes no entries, and that is deliberate.** A committed list is one
+ * region every ADR branch appends to, so two branches adding different ADRs
+ * conflict on it however carefully their numbers are sequenced (#724). An index
+ * that cannot see the directory cannot differ between two branches that hold
+ * different ADRs, so there is nothing to conflict on. `renderListing` produces
+ * the list on demand instead — see ADR-075.
+ *
+ * Feeding the directory back in restores the conflict. The test that catches
+ * that reads the rendered output, not this signature: a defaulted second
+ * parameter would leave the arity at 1.
  */
-export const renderIndex = (home, entries) =>
+export const renderIndex = (home) =>
   [
     `# ${home.title} — ADR index`,
     '',
@@ -269,10 +303,11 @@ export const renderIndex = (home, entries) =>
     `Writing one: start from [\`_TEMPLATE.md\`](${fileInTemplateHome(home.dir, TEMPLATE_FILE)})`,
     'or run `vp run adr:new`, which takes the next free number for you.',
     '',
-    '| ADR | Decision |',
-    '| --- | --- |',
-    ...[...entries]
-      .sort((a, b) => a.filename.localeCompare(b.filename))
-      .map((entry) => indexRow(entry)),
+    'The ADRs are the `ADR-NNN-*.md` files [in this directory](./), whose names',
+    'carry their titles; this page does not list them on purpose, because a',
+    'committed list is one region every ADR branch appends to, so any two',
+    'concurrent ADRs would conflict on it even when their',
+    `numbers are correctly sequenced — see [ADR-075](${fileInTemplateHome(home.dir, CONFLICT_ADR_FILE)}).`,
+    'Run `vp run adr:list` for every ADR with its title.',
     '',
   ].join('\n');

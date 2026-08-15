@@ -16,6 +16,7 @@ import {
   normalizeIndex,
   parseAdrFilename,
   renderIndex,
+  renderListing,
 } from './adr-registry.mjs';
 
 const home = (dir, filenames) => ({
@@ -192,19 +193,40 @@ describe('renderIndex', () => {
   it('links ADR-048 relative to the home it renders', () => {
     const [repo, , app] = ADR_HOMES;
 
-    expect(renderIndex(repo, [])).toContain('](./ADR-048-');
-    expect(renderIndex(app, [])).toContain(
-      '](../../../../docs/decisions/ADR-048-',
-    );
+    expect(renderIndex(repo)).toContain('](./ADR-048-');
+    expect(renderIndex(app)).toContain('](../../../../docs/decisions/ADR-048-');
   });
 
-  it('survives Oxfmt padding the table, but not a changed row', () => {
-    const rendered = renderIndex(ADR_HOMES[0], [
-      { filename: 'ADR-001-a.md', title: 'One' },
-    ]);
-    const padded = rendered
-      .replace('| ADR | Decision |', '| ADR   | Decision |')
-      .replace('| --- | --- |', '| ----- | -------- |');
+  /**
+   * ADR-075 in one assertion: a committed index that names the ADRs is a file
+   * every ADR branch appends to, so two of them conflict.
+   *
+   * It asserts on the **output** given a directory, by both routes a
+   * reintroduced parameter could arrive — a second argument, and an `entries`
+   * key on the home. Asserting on the function's shape instead does not hold:
+   * `Function.length` stops counting at the first default, so
+   * `renderIndex = (home, entries = [])` with the rows restored passes an arity
+   * check and renders nothing when called with one argument.
+   */
+  it('names no ADR, however it is handed the directory', () => {
+    const planted = [
+      { filename: 'ADR-901-planted.md', title: 'A planted decision' },
+    ];
+
+    for (const each of ADR_HOMES) {
+      const rendered = renderIndex({ ...each, entries: planted }, planted);
+
+      expect(rendered).not.toMatch(/\[ADR-901/u);
+      expect(rendered).not.toContain('A planted decision');
+      expect(rendered).not.toMatch(/^\|\s*\[ADR-/mu);
+    }
+  });
+});
+
+describe('normalizeIndex', () => {
+  it('survives Oxfmt padding a table, but not a changed cell', () => {
+    const rendered = '| ADR | Decision |\n| --- | --- |\n| A | One |';
+    const padded = '| ADR | Decision |\n| --- | ------ |\n| A   | One    |';
 
     expect(normalizeIndex(padded)).toBe(normalizeIndex(rendered));
     expect(normalizeIndex(padded.replace('One', 'Two'))).not.toBe(
@@ -212,11 +234,40 @@ describe('renderIndex', () => {
     );
   });
 
-  it('escapes a pipe in a title so the table cannot be broken by one', () => {
-    const rendered = renderIndex(ADR_HOMES[0], [
-      { filename: 'ADR-001-a.md', title: 'A | B' },
+  it('ignores trailing whitespace, which is what Oxfmt strips from prose', () => {
+    expect(normalizeIndex('a line   \nanother\n')).toBe('a line\nanother');
+  });
+});
+
+describe('renderListing', () => {
+  it('rows every ADR, linked from the repository root', () => {
+    const listing = renderListing([
+      {
+        dir: 'docs/decisions',
+        entries: [{ filename: 'ADR-002-b.md', title: 'Two' }],
+        title: 'Repo',
+      },
     ]);
 
-    expect(rendered).toContain(String.raw`| A \| B |`);
+    expect(listing).toContain(
+      '| [ADR-002](docs/decisions/ADR-002-b.md) | Two |',
+    );
+  });
+
+  it('sorts by filename and escapes a pipe in a title', () => {
+    const listing = renderListing([
+      {
+        dir: 'docs/decisions',
+        entries: [
+          { filename: 'ADR-002-b.md', title: 'A | B' },
+          { filename: 'ADR-001-a.md', title: 'One' },
+        ],
+        title: 'Repo',
+      },
+    ]);
+    const rows = listing.split('\n').filter((line) => line.includes('](docs/'));
+
+    expect(rows[0]).toContain('ADR-001');
+    expect(rows[1]).toContain(String.raw`| A \| B |`);
   });
 });

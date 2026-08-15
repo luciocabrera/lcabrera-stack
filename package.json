@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "adr:list": "node scripts/verify-adrs.mjs --list",
     "adr:new": "node scripts/new-adr.mjs",
     "adr:verify": "node scripts/verify-adrs.mjs",
     "api-surface:verify": "node scripts/verify-api-surface.mjs",

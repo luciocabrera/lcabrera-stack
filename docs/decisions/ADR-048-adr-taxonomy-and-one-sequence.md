@@ -1,6 +1,13 @@
 # ADR-048 — One ADR home per tier, split on the extraction boundary; one global number sequence
 
-**Status:** Accepted
+**Status:** Accepted; §"Each home carries a generated index" amended by [ADR-075](ADR-075-the-index-does-not-list-the-adrs.md)
+
+> The body below is left exactly as written — a dated record. The three homes,
+> the one global sequence, the grandfathered 001–012 overlap and the gate all
+> still hold. What changed is what the generated index _contains_: it no longer
+> carries a row per ADR, because that row was the one region every ADR branch
+> appended to, so any two concurrent ADRs conflicted on it. `vp run adr:list`
+> prints the table this ADR argued for. See ADR-075.
 
 ## Context
 
