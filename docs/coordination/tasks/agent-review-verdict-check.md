@@ -28,7 +28,9 @@ make `refactor-verifier` emit that verdict alongside its prose report.
 
 ## Status / next
 
-- Current step: implemented; running the gate and the live gate probes on #727.
+- Current step: implemented and green; exercising the check's four states on
+  this pull request itself, since a green run on good code and a check that is
+  not wired up look identical.
 - Blockers: none
-- Next: probe the four states on this PR, then hand to review. Promotion to a
-  blocking check is #698, not this task.
+- Next: finish the state probes, record them on #697, then hand to review.
+  Promotion to a blocking check is #698, not this task.
