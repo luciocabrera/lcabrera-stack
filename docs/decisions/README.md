@@ -12,51 +12,8 @@ for why, and for what to do with a decision that spans two tiers.
 Writing one: start from [`_TEMPLATE.md`](./_TEMPLATE.md)
 or run `vp run adr:new`, which takes the next free number for you.
 
-| ADR                                                                                   | Decision                                                                                                                 |
-| ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| [ADR-001](./ADR-001-packages-ui-extraction.md)                                        | Extract `packages/ui` from `apps/react-router`                                                                           |
-| [ADR-002](./ADR-002-packages-ui-scope-widening-and-packages-api.md)                   | Widen `packages/ui` scope to whole compositions; add `packages/api`                                                      |
-| [ADR-003](./ADR-003-package-standalone-tsconfigs.md)                                  | Give `packages/ui`/`packages/api` their own tsconfig                                                                     |
-| [ADR-004](./ADR-004-package-standalone-quality-gate.md)                               | Give `packages/ui`/`packages/api` their own full quality gate                                                            |
-| [ADR-005](./ADR-005-form-component.md)                                                | Generic `Form` component in `packages/ui`                                                                                |
-| [ADR-008](./ADR-008-packages-api-renamed-data-access.md)                              | `packages/api` renamed to `packages/data-access`; Postgres pool/env utilities moved there from `packages/scan-ingestion` |
-| [ADR-014](./ADR-014-path-field-and-form-cancel-ux.md)                                 | Browsable `path` Form field + built-in Form Cancel/discard-changes flow                                                  |
-| [ADR-032](./ADR-032-real-coverage-for-the-fallow-gate.md)                             | Feed real coverage to the fallow audit gate (DB-free suites only)                                                        |
-| [ADR-035](./ADR-035-biome-third-linter.md)                                            | Biome as the third linter (root-only, lint-only)                                                                         |
-| [ADR-036](./ADR-036-github-planning-layer.md)                                         | GitHub Issues, sub-issues, Milestones & Projects as the durable planning layer                                           |
-| [ADR-037](./ADR-037-coordination-board-is-a-local-view.md)                            | The coordination `BOARD.md` is a gitignored local view, not a committed artifact                                         |
-| [ADR-038](./ADR-038-public-package-topology-by-runtime.md)                            | The shared packages are split by runtime — `@repo/api`, `@repo/server`, `@repo/utils`                                    |
-| [ADR-039](./ADR-039-duplicate-over-undeclared-edges.md)                               | The packages are the product — duplicate a contract rather than share it through an undeclared edge                      |
-| [ADR-040](./ADR-040-npm-scope-for-the-public-packages.md)                             | The public packages publish under `@lcabrera`, internal ones stay `@repo`                                                |
-| [ADR-042](./ADR-042-oxlint-config-at-the-root.md)                                     | Oxlint is configured once, at the root                                                                                   |
-| [ADR-043](./ADR-043-release-tooling-changesets-over-pnpm-native.md)                   | Release tooling: keep Changesets over pnpm-native releases                                                               |
-| [ADR-044](./ADR-044-decline-pnpm-global-virtual-store.md)                             | Decline pnpm `enableGlobalVirtualStore` (breaks the rolldown native binding)                                             |
-| [ADR-045](./ADR-045-vite-plus-test-imports.md)                                        | Adopt `vite-plus/test` imports; retire the `vitest`-direct convention                                                    |
-| [ADR-046](./ADR-046-public-api-surface-snapshot.md)                                   | Detect breaking changes to the public package API surface                                                                |
-| [ADR-047](./ADR-047-declare-optional-peer-dependencies.md)                            | Declare optional peer dependencies, and prove vestigial ones by regenerating the lockfile                                |
-| [ADR-048](./ADR-048-adr-taxonomy-and-one-sequence.md)                                 | One ADR home per tier, split on the extraction boundary; one global number sequence                                      |
-| [ADR-049](./ADR-049-findings-reports-are-produced-on-demand.md)                       | Findings reports are produced on demand; only gate baselines are tracked                                                 |
-| [ADR-050](./ADR-050-server-error-translation-and-result-contract.md)                  | Translate pg errors at the persistence layer; cross the loader boundary as plain data                                    |
-| [ADR-051](./ADR-051-with-transaction-and-tx-executor-option.md)                       | `withTransaction` + an optional `tx` executor option, and how id allocation is made safe                                 |
-| [ADR-052](./ADR-052-keyset-pagination-for-infinite-scroll.md)                         | Keyset pagination for infinite scroll; `OFFSET` stays for jump-to-page                                                   |
-| [ADR-053](./ADR-053-package-owned-app-root-and-app-config-context.md)                 | The app root is package-owned, and consumer configuration travels by context                                             |
-| [ADR-054](./ADR-054-array-operation-hierarchy.md)                                     | An array-operation hierarchy chosen by intent, and measured                                                              |
-| [ADR-055](./ADR-055-react-doctor-as-a-gate.md)                                        | React Doctor as a gate, via the CLI                                                                                      |
-| [ADR-056](./ADR-056-generic-table-route-data-path.md)                                 | One generic data path for a paginated table route                                                                        |
-| [ADR-057](./ADR-057-publish-the-custom-lint-rules.md)                                 | The custom lint rules publish as `@lcabrera/eslint-plugin`                                                               |
-| [ADR-058](./ADR-058-grouping-legality-by-analytical-role.md)                          | Gate grouping legality on analytical role, with the Postgres catalogue as the floor                                      |
-| [ADR-059](./ADR-059-aggregation-is-builder-generated.md)                              | Generate aggregation in a sibling builder that always emits GROUPING SETS                                                |
-| [ADR-060](./ADR-060-source-shipping-package-module-resolution.md)                     | A source-shipping package resolves its internals through `imports`, and exports a curated list                           |
-| [ADR-061](./ADR-061-grouping-config-in-url-expansion-in-store.md)                     | Grouping configuration is URL state; expansion is client state                                                           |
-| [ADR-062](./ADR-062-grid-semantics-roving-focus-and-row-identity.md)                  | Declare grid semantics explicitly and rove focus over data-derived rows                                                  |
-| [ADR-063](./ADR-063-request-shaping-capabilities-on-the-loader-meta.md)               | A request-shaping capability is declared once, on the loader `meta`                                                      |
-| [ADR-064](./ADR-064-converge-app-copies-of-a-declared-contract.md)                    | Duplicate a contract across a boundary you may not declare; alias it across one you already have                         |
-| [ADR-065](./ADR-065-grouped-rows-render-a-hierarchy-column.md)                        | A grouped grid renders its hierarchy in a grid-owned column, not a spanning banner                                       |
-| [ADR-066](./ADR-066-grouping-guard-rails-and-per-query-timeout.md)                    | Bound a grouped read with a cardinality estimate, a row-limit backstop and a transaction-scoped statement timeout        |
-| [ADR-067](./ADR-067-expansion-is-the-collapsed-set-and-a-group-row-is-a-tree-node.md) | Expansion is stored as the collapsed set, and the visible rows are the grid                                              |
-| [ADR-068](./ADR-068-a-refused-read-is-rendered-data-not-an-exception.md)              | A refused read is data the table renders; the menu narrows to the catalogue but never replaces it                        |
-| [ADR-069](./ADR-069-publish-the-shared-toolchain.md)                                  | The shared toolchain publishes, and the repo data it carries becomes configuration                                       |
-| [ADR-071](./ADR-071-split-the-demo-database-setup.md)                                 | Split the demo database setup                                                                                            |
-| [ADR-072](./ADR-072-explicit-api-base-url-outranks-the-derived-one.md)                | An explicitly configured API base URL outranks the one derived from the SSR request                                      |
-| [ADR-073](./ADR-073-publishing-gates-check-the-packed-tarball.md)                     | Check the packed tarball, and assert the pnpm publish path                                                               |
-| [ADR-074](./ADR-074-the-claim-lives-on-its-work-branch.md)                            | A claim lives on its work branch; cross-branch visibility is the check's job                                             |
+The ADRs are the `ADR-NNN-*.md` files beside this page, and this page does
+not list them on purpose: a committed list is one region every ADR branch
+appends to, so any two concurrent ADRs conflict on it even when their
+numbers are correctly sequenced — see [ADR-075](./ADR-075-the-index-does-not-list-the-adrs.md).
+Run `vp run adr:list` for every ADR with its title.

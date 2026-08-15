@@ -12,32 +12,8 @@ for why, and for what to do with a decision that spans two tiers.
 Writing one: start from [`_TEMPLATE.md`](../../../docs/decisions/_TEMPLATE.md)
 or run `vp run adr:new`, which takes the next free number for you.
 
-| ADR                                                                 | Decision                                                                                                                  |
-| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| [ADR-006](./ADR-006-cqms-schema-provisioning.md)                    | CQMS Postgres schema provisioning                                                                                         |
-| [ADR-007](./ADR-007-scan-ingestion-core.md)                         | `packages/scan-ingestion` core — `ingestReport()`, the `report.json` contract, and the CLI wrapper                        |
-| [ADR-009](./ADR-009-report-json-emission.md)                        | `report.json` emission added to the three existing scan skills                                                            |
-| [ADR-010](./ADR-010-linter-checker-skill.md)                        | `linter-checker` skill — the one fully-deterministic scanner                                                              |
-| [ADR-011](./ADR-011-agent-runner-permission-model.md)               | `packages/agent-runner` — SKILL.md loader and the Agent SDK permission model                                              |
-| [ADR-012](./ADR-012-admin-system-cqms-routes.md)                    | `admin_system`'s CQMS routes/UI                                                                                           |
-| [ADR-013](./ADR-013-cqms-crud-routes-and-shared-ui-corrections.md)  | CQMS CRUD route restructure + shared-UI corrections                                                                       |
-| [ADR-015](./ADR-015-scan-orchestrator-step9.md)                     | Step 9 — standalone `scan-orchestrator` process                                                                           |
-| [ADR-016](./ADR-016-local-path-canonicalization-and-scan-toasts.md) | `resolveLocalPath` for UI-driven project paths + scan-status toast notifications                                          |
-| [ADR-017](./ADR-017-rbac-schema-and-auth-core.md)                   | RBAC schema + username/password authentication core                                                                       |
-| [ADR-018](./ADR-018-audit-fields-and-functions-only-access.md)      | Audit fields + functions-only database access                                                                             |
-| [ADR-019](./ADR-019-lint-split-and-master-detail-extraction.md)     | Lint split (eslint/oxlint) + per-scanner master/detail extraction                                                         |
-| [ADR-020](./ADR-020-self-scan-and-secret-file-guard.md)             | Self-scan + secret-file PreToolUse guard                                                                                  |
-| [ADR-021](./ADR-021-workspace-discovery-and-scoped-scans.md)        | Monorepo workspace discovery + workspace-scoped scans                                                                     |
-| [ADR-022](./ADR-022-app-graph-scanner.md)                           | App-graph scanner (structure inventory via ts-morph)                                                                      |
-| [ADR-023](./ADR-023-scanner-registry-and-artifact-generation.md)    | Scanner registry + artifact generation                                                                                    |
-| [ADR-024](./ADR-024-user-role-management.md)                        | User/role management UI + per-instance grants editor                                                                      |
-| [ADR-025](./ADR-025-findings-ingest-completeness.md)                | Findings ingest completeness (final-E2E fixes)                                                                            |
-| [ADR-026](./ADR-026-atomic-claim-and-stale-scan-reconciliation.md)  | Atomic queue claim + stale-'running' reconciliation                                                                       |
-| [ADR-027](./ADR-027-app-graph-symbol-nodes.md)                      | App-graph symbol nodes (recursive function/class/type extraction)                                                         |
-| [ADR-028](./ADR-028-snapshot-ingestion-foundation.md)               | Snapshot ingestion foundation (CodePulse Phase 1)                                                                         |
-| [ADR-029](./ADR-029-cli-push-and-api-tokens.md)                     | CLI push + per-user revocable API tokens (CodePulse Phase 1 remainder)                                                    |
-| [ADR-030](./ADR-030-bounded-column-types.md)                        | Bounded column types via in-place migration re-baseline                                                                   |
-| [ADR-031](./ADR-031-browser-folder-picker-snapshot-packing.md)      | Browser folder-picker client-side snapshot packing                                                                        |
-| [ADR-033](./ADR-033-no-queue-is-per-project-admission-control.md)   | "No queuing, ever" is per-project **admission control** — the internal hand-off stays, and host capacity gets its own cap |
-| [ADR-034](./ADR-034-pin-runs-to-their-snapshot.md)                  | Pin a run to its snapshot id; retain that snapshot until the run finishes, then collect it                                |
-| [ADR-041](./ADR-041-ws-runs-subscription-tickets.md)                | `/ws/runs` authorizes with short-lived subscription tickets                                                               |
+The ADRs are the `ADR-NNN-*.md` files beside this page, and this page does
+not list them on purpose: a committed list is one region every ADR branch
+appends to, so any two concurrent ADRs conflict on it even when their
+numbers are correctly sequenced — see [ADR-075](../../../docs/decisions/ADR-075-the-index-does-not-list-the-adrs.md).
+Run `vp run adr:list` for every ADR with its title.
