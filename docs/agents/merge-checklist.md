@@ -42,8 +42,16 @@ trust the check and look at its output.
       agent code review has reported a verdict on the PR, what that verdict has
       to satisfy — which severities block, and the only sanctioned way to merge
       past a blocking finding — is
-      [`agent-review-contract.md`](agent-review-contract.md). A missing or
-      unparseable verdict is a blocking `error` there, never a pass.
+      [`agent-review-contract.md`](agent-review-contract.md). An unparseable
+      verdict is an `error` there, never a pass.
+- [ ] **The `Agent review verdict` check reports `pass` for the commit being
+      merged** **[judgement — the check is advisory and cannot stop you, which is
+      why it is on this list]**. It validates a verdict rather than producing
+      one, so read its description: `fail` names a blocking finding, `error`
+      means the document itself is unusable, and `absent` means no review answers
+      for this head — not a failure, and not a review either. A verdict expires
+      on every push (contract §2.5), so a `pass` on an earlier commit says
+      nothing about this one.
 - [ ] **Impact analysis completed** — the PR's Impact Analysis section is filled
       in, not "N/A" by default **[judgement]**
 - [ ] **Security / privacy implications reviewed**

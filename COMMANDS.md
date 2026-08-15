@@ -460,6 +460,11 @@ runs both in CI. See the [`commit-and-pr`](.github/skills/commit-and-pr/SKILL.md
 
 ### Review gates
 
+Two checks that judge the **review** rather than the code, and so are recomputed
+by review and head-commit events rather than by the gate command. One mechanism,
+two subjects: did Copilot review _this_ head, and does a valid agent-review
+verdict exist for _this_ head?
+
 `Copilot review complete` is a commit status that is green only while Copilot's
 newest review names the pull request's **current head commit** — a review of a
 superseded commit looks identical in the UI to a review of the head, which is how
@@ -473,6 +478,22 @@ by hand. The states and the break-glass path are in
 | ---------------------------------------------------- | ---------------------------------------------------------------- |
 | `vp run copilot-review:status -- --pr <n> --dry-run` | print the state the gate would publish for a PR, posting nothing |
 | `vp run copilot-review:status -- --pr <n>`           | publish that state against the PR's current head commit          |
+
+`Agent review verdict` reads the verdict posted for a pull request's current head
+and validates it against
+[`docs/agents/agent-review-contract.md`](docs/agents/agent-review-contract.md)
+§2.4 — parse, schema, head binding, admissibility, consistency — reporting
+`pass`, `fail`, `error` or `absent`. **It runs no model:** the repo-aware review
+happens locally under `/epic` and `/refactor-verified`, and this checks the
+document that review produced. `.github/workflows/agent-review-verdict.yml` runs
+the same script on every pull request, advisory for now (#697; promoting it is
+#698).
+
+| Command                                            | Does                                                                       |
+| -------------------------------------------------- | -------------------------------------------------------------------------- |
+| `vp run agent-review:verify -- --pr <n>`           | validate the verdict on a PR and publish the advisory commit status        |
+| `vp run agent-review:verify -- --pr <n> --dry-run` | the same, reported to the terminal without touching the commit status      |
+| `vp run agent-review:verify -- --pr <n> --strict`  | exit with the contract's §2.3 codes (0 pass, 1 fail, 2 error) instead of 0 |
 
 ### Autonomous PR queue
 
@@ -651,6 +672,16 @@ the diff has not — a review landing flips it, and a push takes it back to
 and a run triggered by Copilot's own review currently waits for approval before
 it executes — both caveats, and the way out of the second, are in
 [`docs/tooling/copilot-review-gate.md`](docs/tooling/copilot-review-gate.md).
+
+[`agent-review-verdict.yml`](.github/workflows/agent-review-verdict.yml) runs
+`scripts/verify-agent-review.mjs` on every pull request and on every comment made
+on one, publishing an `Agent review verdict` commit status. It **validates** the
+verdict the repo-aware reviewer already posted; it runs no model and needs no
+model credential. The `issue_comment` trigger is what lets a verdict posted after
+the last push refresh a check that reported `absent` — and, because GitHub runs an
+`issue_comment` workflow from the default branch, that half only works once the
+file is on `main`. The status is pinned to `success` while the check is advisory,
+so the state lives in its description; promoting it is #698.
 
 [`secret-scan.yml`](.github/workflows/secret-scan.yml) scans repository
 **content** for credentials — the layer the two agent-boundary guards
