@@ -44,14 +44,16 @@ trust the check and look at its output.
       past a blocking finding — is
       [`agent-review-contract.md`](agent-review-contract.md). An unparseable
       verdict is an `error` there, never a pass.
-- [ ] **The `Agent review verdict` check reports `pass` for the commit being
-      merged** **[judgement — the check is advisory and cannot stop you, which is
-      why it is on this list]**. It validates a verdict rather than producing
-      one, so read its description: `fail` names a blocking finding, `error`
-      means the document itself is unusable, and `absent` means no review answers
-      for this head — not a failure, and not a review either. A verdict expires
-      on every push (contract §2.5), so a `pass` on an earlier commit says
-      nothing about this one.
+- [ ] **The `Agent review verdict` commit status reports `pass` for the commit
+      being merged** **[judgement — the check is advisory and cannot stop you,
+      which is why it is on this list]**. It validates a verdict rather than
+      producing one, so read its description: `fail` names a blocking finding,
+      `error` means the document itself is unusable, and `absent` means no review
+      answers for this head — not a failure, and not a review either. A verdict
+      expires on every push (contract §2.5), so a `pass` on an earlier commit
+      says nothing about this one. The workflow's own row
+      (`Publish the agent review verdict status`) is green whenever the job ran
+      and says nothing about the verdict — the two are deliberately named apart.
 - [ ] **Impact analysis completed** — the PR's Impact Analysis section is filled
       in, not "N/A" by default **[judgement]**
 - [ ] **Security / privacy implications reviewed**

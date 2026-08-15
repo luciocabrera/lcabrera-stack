@@ -1,4 +1,4 @@
-name: Agent review verdict
+name: Agent Review Gate
 
 # Reads the agent-review verdict posted for the pull request's current head and
 # validates it against docs/agents/agent-review-contract.md §2.4 — parse, schema,
@@ -30,13 +30,26 @@ permissions:
   pull-requests: read
   statuses: write
 
+# `copilot-review-gate.yml` deliberately has no concurrency group; this one does,
+# and the difference is safe for the reason that file gives for its own choice.
+# Every run reads the head, the comments and the diff from the API rather than
+# from its event payload, so a cancelled run would have posted whatever the run
+# that replaced it posts. Nothing is lost, and the newest run always survives.
 concurrency:
   group: agent-review-verdict-${{ github.event.pull_request.number || github.event.issue.number }}
   cancel-in-progress: true
 
 jobs:
-  verdict:
-    name: Agent review verdict
+  publish-agent-review-status:
+    # This name must NOT be `Agent review verdict`. A job's check run and a
+    # commit status share one namespace on the PR, and ruleset contexts match by
+    # name — so a job named after the status would put a second, always-green
+    # check under that name, and the gate #698 promotes could be satisfied by
+    # "the workflow ran" instead of "a valid verdict exists for this head".
+    # `copilot-review-gate.yml` carries the same warning; this one was written
+    # without reading it, the collision reached the pull request's check list,
+    # and `scripts/lib/agent-review-workflow.test.mjs` now asserts it instead.
+    name: Publish the agent review verdict status
     # `issue_comment` fires for issues too; `.pull_request` is present only when
     # the comment is on a pull request.
     if: github.event_name == 'pull_request' || github.event.issue.pull_request

@@ -260,11 +260,13 @@ All of it, every time. Any failure aborts the merge.
       checked by the GraphQL query above, not by eye
 - [ ] Every CI check green, including SonarCloud's strict gate. A local green gate
       does **not** predict Sonar
-- [ ] The `Agent review verdict` check reports `pass` **for the commit you are
-      merging**. It is advisory, so it will not stop you — which is exactly why it
-      is on this list. `fail` names a blocking finding, `error` means the verdict
-      itself is unusable, and `absent` means nothing answered for this head:
-      re-post the verdict, or re-review, but do not merge past it silently
+- [ ] The `Agent review verdict` **commit status** reports `pass` **for the
+      commit you are merging** — not the workflow's own row, which is green
+      whenever the job ran. It is advisory, so it will not stop you, which is
+      exactly why it is on this list. `fail` names a blocking finding, `error`
+      means the verdict itself is unusable, and `absent` means nothing answered
+      for this head: re-post the verdict, or re-review, but do not merge past it
+      silently
 - [ ] `mergeable` is not `CONFLICTING`
 - [ ] The full [quality gate](../../.github/skills/quality-gate-workflow/SKILL.md)
       passed **on the final commit**, not on an earlier one
