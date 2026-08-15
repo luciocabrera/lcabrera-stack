@@ -164,6 +164,17 @@ they need different responses: nothing was ever posted, or everything posted nam
 an earlier commit — which §2.5 says is history rather than a verdict, so for
 _this_ commit no review was attempted.
 
+**`error` covers two cases, and the description separates those too.** A verdict
+whose own `verdict` field is `error` is a **valid document** — the reviewer ran,
+could not conclude, and said why in `error_reason`; there is nothing to fix in the
+document, and the author's next move is the reviewer. A verdict this contract's
+§2.4 refuses is a **broken document**, and the author's next move is the document.
+Both exit `2` and both fail closed — the table above keys on the state, not on who
+produced it — but telling an author their verdict "is not valid" when the reviewer
+honestly reported it could not review sends them to debug the wrong thing.
+`error_reason` is rendered for the first case for exactly that reason: it is the
+only field carrying why.
+
 **Known limitation, stated rather than papered over:** a local reviewer that dies
 hard posts nothing, so it is indistinguishable from one that never ran. The
 orchestrator emitting an `error` verdict when its verifier fails covers the

@@ -79,6 +79,12 @@ export const validateVerdictBody = (body, { pr, headSha, files }) => {
     errors: [],
     document,
     blocking: blockingFindingIds(document.findings),
+    // Set only on this path — a document that validated. It is what lets the
+    // report tell a reviewer that could not conclude (§2.3) from a document
+    // this validator refused (§2.4), which are the same `error` state and
+    // completely different things to do about. The schema guarantees a
+    // non-empty string when `verdict` is `error`, and nothing otherwise.
+    errorReason: document.error_reason,
   };
 };
 

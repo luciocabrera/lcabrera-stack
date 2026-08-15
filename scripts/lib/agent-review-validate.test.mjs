@@ -97,6 +97,28 @@ describe('validateVerdictBody — the happy paths', () => {
     expect(result.errors).toEqual([]);
   });
 
+  it('carries the reviewer reason out, so the report can say why', () => {
+    // Without this the two kinds of `error` — the reviewer could not conclude
+    // (§2.3), and the document is not usable (§2.4) — are indistinguishable
+    // downstream, and the report has to guess which one it is holding.
+    const result = validate(
+      passDocument({
+        criteria: undefined,
+        error_reason: 'The diff exceeded the reviewer input budget.',
+        verdict: 'error',
+      }),
+    );
+    expect(result.errorReason).toBe(
+      'The diff exceeded the reviewer input budget.',
+    );
+  });
+
+  it('leaves the reviewer reason unset on a verdict it rejected', () => {
+    expect(
+      validate(passDocument({ criteria: undefined })).errorReason,
+    ).toBeUndefined();
+  });
+
   it('accepts an omission finding anchored by a rule instead of a line', () => {
     const result = validate(
       failDocument({
