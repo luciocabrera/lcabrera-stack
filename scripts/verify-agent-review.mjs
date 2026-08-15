@@ -30,6 +30,7 @@ import { errorMessage } from './lib/error-message.mjs';
 import { runGh } from './lib/gh-exec.mjs';
 import {
   exitCodeFor,
+  oneLine,
   statusDescription,
   summaryMarkdown,
 } from './lib/agent-review-report.mjs';
@@ -141,7 +142,10 @@ const main = async () => {
   const description = statusDescription(result);
   console.log(`${STATUS_CONTEXT}: ${description}`);
   for (const error of result.errors) {
-    console.log(`  - ${error}`);
+    // Flattened for the same reason the description is: these messages quote
+    // the verdict document, and a runner reads a `::` directive at the start of
+    // a log line — so a value that can add a newline can add a directive.
+    console.log(`  - ${oneLine(error)}`);
   }
   await writeSummary(summaryMarkdown(result, { headSha, pr }));
   if (!dryRun) {

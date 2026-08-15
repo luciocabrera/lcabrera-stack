@@ -15,11 +15,22 @@
  * `errorReason` is set by the validator only for the first, so it is the
  * discriminator rather than a guess from the error list being empty.
  *
- * Both `error_reason` and every finding id are free text chosen by whoever
- * posted the comment, so anything document-derived is flattened to one line
- * before it reaches a status description, and rendered as inline code in the
- * summary — a reason spelling out its own heading otherwise renders as this
- * report's.
+ * **Everything that originates in the verdict document is untrusted text** — a
+ * finding id, `error_reason`, and the validator's own messages, which quote
+ * both. Two renderings, each with its own hazard:
+ *
+ *   - the status description is one line, so every such value goes through
+ *     `oneLine`;
+ *   - the job summary is Markdown, so every such value goes through
+ *     `asInlineCode`. Without it a finding id carrying a newline and a `##`
+ *     emits a second heading, and the report's own headings are how a reader
+ *     tells the report from its subject.
+ *
+ * Values that do **not** come from the document are rendered as they are, and
+ * the distinction is the thing to keep straight when extending this file: the
+ * `absent` reason is composed here from fixed prose and a SHA the marker regex
+ * already constrained to hex; `commentUrl`, `headSha` and `pr` come from the
+ * API; `passDetail` is counts.
  *
  * Governed by .claude/rules/scripts.md.
  */
@@ -45,15 +56,19 @@ const truncate = (text) =>
     : `${text.slice(0, MAX_DESCRIPTION - 1)}…`;
 
 /**
- * One line, whatever came in. A status description holds a single line, and
- * this text came from a pull request comment. (pure)
+ * One line, whatever came in.
+ *
+ * A status description holds a single line, and so does an Actions log line —
+ * where a runner reads `::` directives at the start of one, so a value that can
+ * introduce a newline can introduce a directive. (pure)
  */
-const oneLine = (text) => String(text).replaceAll(/\s+/gu, ' ').trim();
+export const oneLine = (text) => String(text).replaceAll(/\s+/gu, ' ').trim();
 
 /**
- * Free text rendered so it cannot pass for the report's own Markdown: inline
- * code renders literally, and stripping backticks is what stops the span being
- * closed early. (pure)
+ * Free text rendered so it cannot pass for the report's own Markdown. Three
+ * things, and all three are load-bearing: `oneLine` denies it a line of its own,
+ * so it cannot open a block; stripping backticks stops it closing the span
+ * early; the span itself renders whatever survives literally. (pure)
  */
 const asInlineCode = (text) =>
   `\`${oneLine(text).replaceAll('`', '').slice(0, MAX_SUMMARY_REASON)}\``;
@@ -110,20 +125,24 @@ const summaryLines = (result) => {
       'The verdict on this pull request does not satisfy the contract, so it',
       'is not usable as one. The validator never repairs a verdict (§2.4).',
       '',
-      ...result.errors.map((error) => `- ${error}`),
+      // Each message quotes the document — a finding id, a file path — so the
+      // whole line is a span rather than the quoted part being escaped.
+      ...result.errors.map((error) => `- ${asInlineCode(error)}`),
     ];
   }
   if (result.state === 'absent') {
     return [
       `No agent review answers for this commit — ${result.reason}.`,
       '',
-      'This is **not** a failure and does not block the merge. A verdict is',
-      'posted by the reviewer `/epic` and `/refactor-verified` already run.',
+      'This is **not** a failure and does not block the merge. The reviewer',
+      'that produces a verdict runs under `/epic`, which posts it.',
+      '`/refactor-verified` reads its own verdict in-band and posts nothing, so',
+      'a pull request reviewed that way reports `absent` until one is posted.',
     ];
   }
   if (result.state === 'fail') {
     return [
-      `The reviewer found ${result.blocking.length} blocking finding(s): ${result.blocking.join(', ')}.`,
+      `The reviewer found ${result.blocking.length} blocking finding(s): ${result.blocking.map((id) => asInlineCode(id)).join(', ')}.`,
       '',
       'Fix them, or override under §6 of the contract — the override is per',
       'finding, needs admin or maintain permission, and dies with the commit.',

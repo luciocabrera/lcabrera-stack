@@ -152,12 +152,12 @@ request opened outside that process has had **no review attempted**, which is no
 the same as a reviewer that was attempted and could not conclude. Conflating them
 would either block every hand-opened pull request or excuse every crash.
 
-| Check state | Means                                                                 | Reported as                         |
-| ----------- | --------------------------------------------------------------------- | ----------------------------------- |
-| `pass`      | A review ran and found no admissible blocking finding                 | success                             |
-| `fail`      | A review ran and found one                                            | failure, once the check is blocking |
-| `error`     | A review was attempted and could not conclude, or broke this contract | failure — **never** success         |
-| `absent`    | No review answers for this commit                                     | **not blocking** — decided in #697  |
+| Check state | Means                                                                 | Reported as                                             |
+| ----------- | --------------------------------------------------------------------- | ------------------------------------------------------- |
+| `pass`      | A review ran and found no admissible blocking finding                 | success                                                 |
+| `fail`      | A review ran and found one                                            | failure, once the check is blocking                     |
+| `error`     | A review was attempted and could not conclude, or broke this contract | failure, once the check is blocking — **never** success |
+| `absent`    | No review answers for this commit                                     | **not blocking** — decided in #697                      |
 
 `absent` covers two cases, and the check's description separates them because
 they need different responses: nothing was ever posted, or everything posted names
