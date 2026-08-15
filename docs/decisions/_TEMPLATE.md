@@ -16,8 +16,10 @@
   Context / Decision / Consequences / Alternatives considered are in all of them.
   Drop a section that has nothing to say; do not rename the ones you keep.
 
-  After adding the file, run `vp run adr:verify -- --write` to regenerate the
-  home's index, and commit both.
+  After adding the file, run `vp run adr:verify`. This file is the whole change:
+  a home's index carries no row per ADR, so there is nothing to regenerate and
+  nothing for a second ADR branch to conflict with
+  (ADR-075-the-index-does-not-list-the-adrs.md).
 -->
 
 # ADR-NNN — <one line, in the imperative: what was decided>

@@ -58,16 +58,17 @@ The home is chosen by **one question — when CQMS moves to its own repository,
 does this decision go with it?**
 ([ADR-048](./decisions/ADR-048-adr-taxonomy-and-one-sequence.md).)
 
-| Home                                                                                 | Holds                                                                   | At extraction |
-| ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------- | ------------- |
-| [`docs/decisions/`](./decisions/README.md)                                           | the repo, the published `@lcabrera/*` packages, the toolchain           | **stays**     |
-| [`docs/cqms/decisions/`](./cqms/decisions/README.md)                                 | CQMS / CodePulse — schema, scanners, ingestion, orchestration           | **leaves**    |
-| [`apps/react-router/docs/decisions/`](../apps/react-router/docs/decisions/README.md) | the showcase app — Modal, Tooltip, the store pattern, grid interaction… | **stays**     |
+| Home                                                                        | Holds                                                                   | At extraction |
+| --------------------------------------------------------------------------- | ----------------------------------------------------------------------- | ------------- |
+| [`docs/decisions/`](./decisions/)                                           | the repo, the published `@lcabrera/*` packages, the toolchain           | **stays**     |
+| [`docs/cqms/decisions/`](./cqms/decisions/)                                 | CQMS / CodePulse — schema, scanners, ingestion, orchestration           | **leaves**    |
+| [`apps/react-router/docs/decisions/`](../apps/react-router/docs/decisions/) | the showcase app — Modal, Tooltip, the store pattern, grid interaction… | **stays**     |
 
-Each home's `README.md` is a generated page describing the home; it lists no ADRs
-on purpose, because a committed list is one region every ADR branch appends to
-([ADR-075](./decisions/ADR-075-the-index-does-not-list-the-adrs.md)). To find one
-by title rather than by filename, run `vp run adr:list`.
+Those links open the **directory**, which is the listing — each home's `README.md`
+is a generated page describing the home and lists no ADRs on purpose, because a
+committed list is one region every ADR branch appends to
+([ADR-075](./decisions/ADR-075-the-index-does-not-list-the-adrs.md)). To read the
+titles as prose rather than as filenames, run `vp run adr:list`.
 **A number identifies exactly one ADR**: take the next free one from
 `vp run adr:verify`, whichever home you are writing in. Unadopted proposals wait
 in [`docs/agents/planning/adr-drafts/`](./agents/planning/adr-drafts/) and hold

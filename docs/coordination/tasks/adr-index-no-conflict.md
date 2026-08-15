@@ -31,6 +31,6 @@ rejected on evidence.
 
 ## Status / next
 
-- Current step: implemented; gate running
+- Current step: verifier round 1 returned PASS with four follow-ups; all four done
 - Blockers: none
-- Next: push, update PR #726, leave it draft for the verifier
+- Next: PR #726 stays draft — readying and merging are the coordinator's call

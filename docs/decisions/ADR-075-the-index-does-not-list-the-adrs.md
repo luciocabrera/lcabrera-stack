@@ -62,9 +62,17 @@ that fires on every concurrent pair and takes the PR's check record with it.
 **What it buys.** Two concurrent ADRs merge with no hand-resolution, so neither
 PR loses its checks to a conflict on a file that nothing but a generator writes.
 
-**The trap.** The guarantee is the missing parameter. Giving `renderIndex` the
-directory back — however small the row — restores the conflict in full, and the
-unit test asserting the render carries no ADR row exists to catch that.
+**The trap.** Giving `renderIndex` the directory back — however small the row —
+restores the conflict in full. What catches that is a test on the **rendered
+output**: it hands the function a directory by both routes a parameter could
+arrive back through, and asserts no ADR is named in what comes out.
+
+The shape of the function does not catch it, and believing otherwise is the
+sharper trap. `Function.length` stops counting at the first defaulted parameter,
+so `renderIndex = (home, entries = [])` with the rows restored reports arity 1,
+renders nothing when called with one argument, and passes an arity check while
+regenerating an index with a row per ADR. An earlier revision of this ADR claimed
+the missing parameter was itself the guarantee; it was not.
 
 ## Alternatives considered
 

@@ -198,18 +198,28 @@ describe('renderIndex', () => {
   });
 
   /**
-   * The whole of ADR-075 in two assertions. A committed index that names the
-   * ADRs is a file every ADR branch appends to, so two of them conflict; an
-   * index that cannot see the directory cannot differ between two branches.
-   * The arity is the enforceable half — putting the entries back is how the
-   * conflict returns, and it cannot be done quietly.
+   * ADR-075 in one assertion: a committed index that names the ADRs is a file
+   * every ADR branch appends to, so two of them conflict.
+   *
+   * It asserts on the **output** given a directory, by both routes a
+   * reintroduced parameter could arrive — a second argument, and an `entries`
+   * key on the home. Asserting on the function's shape instead does not hold:
+   * `Function.length` stops counting at the first default, so
+   * `renderIndex = (home, entries = [])` with the rows restored passes an arity
+   * check and renders nothing when called with one argument.
    */
-  it('names no ADR, and cannot be given the directory to name one from', () => {
-    for (const each of ADR_HOMES) {
-      expect(renderIndex(each)).not.toMatch(/^\|\s*\[ADR-/mu);
-    }
+  it('names no ADR, however it is handed the directory', () => {
+    const planted = [
+      { filename: 'ADR-901-planted.md', title: 'A planted decision' },
+    ];
 
-    expect(renderIndex).toHaveLength(1);
+    for (const each of ADR_HOMES) {
+      const rendered = renderIndex({ ...each, entries: planted }, planted);
+
+      expect(rendered).not.toMatch(/\[ADR-901/u);
+      expect(rendered).not.toContain('A planted decision');
+      expect(rendered).not.toMatch(/^\|\s*\[ADR-/mu);
+    }
   });
 });
 
