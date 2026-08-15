@@ -185,7 +185,9 @@ in that change's PR.
 ## Testing
 
 With `vp dev` running (local Postgres up via `vp run db:up`), exercise the
-load-more resource route directly:
+load-more resource route directly. `vp dev` prints the port it bound on startup —
+5173 unless something already holds it, in which case substitute the port it
+actually named.
 
 ```bash
 # Basic page
@@ -200,8 +202,9 @@ curl -G "http://localhost:5173/_api/enterprise-orders/paginated" \
 # The window is bounded (#706): this prints MAX_ENTERPRISE_ORDERS_LIMIT, not the
 # table's row count. The same limit on /enterprise-orders changes nothing —
 # that first page is INITIAL_PAGE_SIZE and takes no window from the URL.
+# Counted with node rather than jq, which this repo does not require.
 curl -s "http://localhost:5173/_api/enterprise-orders/paginated?skip=0&limit=999999999" \
-  | jq '.data | length'
+  | node -e "let s='';process.stdin.on('data',c=>s+=c).on('end',()=>console.log(JSON.parse(s).data.length))"
 ```
 
 Unit tests cover the pure translation utils, the param parser, the fetcher, the
