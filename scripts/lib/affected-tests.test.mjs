@@ -15,7 +15,7 @@ const GRAPH = [
     name: 'vite-configs',
     kind: 'pkg',
     dir: 'packages/vite-configs',
-    pkgName: '@repo/vite-configs',
+    pkgName: '@lcabrera/vite-config',
     deps: new Set(),
   },
   {
@@ -23,21 +23,21 @@ const GRAPH = [
     kind: 'pkg',
     dir: 'packages/utils',
     pkgName: '@lcabrera/utils',
-    deps: new Set(['@repo/vite-configs']),
+    deps: new Set(['@lcabrera/vite-config']),
   },
   {
     name: 'ui',
     kind: 'pkg',
     dir: 'packages/ui',
     pkgName: '@lcabrera/ui',
-    deps: new Set(['@repo/vite-configs', '@lcabrera/utils']),
+    deps: new Set(['@lcabrera/vite-config', '@lcabrera/utils']),
   },
   {
     name: 'react-router',
     kind: 'app',
     dir: 'apps/react-router',
     pkgName: 'vite-react-compiler',
-    deps: new Set(['@repo/vite-configs', '@lcabrera/ui']),
+    deps: new Set(['@lcabrera/vite-config', '@lcabrera/ui']),
   },
 ];
 

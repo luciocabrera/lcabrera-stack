@@ -13,7 +13,7 @@
  * Ground truth is `vp run` with no task, which lists every runnable task as
  * `packageName#taskName`. That matters: tasks come from THREE sources
  * (package.json scripts, vite.config.ts `run.tasks`, and shared factories in
- * @repo/vite-configs), so reading package.json alone would report false
+ * @lcabrera/vite-config), so reading package.json alone would report false
  * failures for `test`/`build` in most workspaces. Asking the toolchain avoids
  * re-implementing its resolution.
  *

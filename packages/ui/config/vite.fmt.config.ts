@@ -1,3 +1,3 @@
-import { createFmtConfig } from '@repo/vite-configs/fmt';
+import { createFmtConfig } from '@lcabrera/vite-config/fmt';
 
 export const fmtConfig = createFmtConfig();

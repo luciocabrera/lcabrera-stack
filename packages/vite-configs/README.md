@@ -1,113 +1,158 @@
-# `@repo/vite-configs`
+# `@lcabrera/vite-config`
 
-Shared Vite+ configuration builders for formatting (`oxfmt`) and linting (`oxlint`) across all apps in this monorepo. Every app imports from this package instead of duplicating config.
+Vite+ configuration factories and shareable ESLint flat configs for TypeScript
+and React workspaces — the format, lint, pack and run settings a monorepo
+otherwise copies into every workspace.
+
+Nothing here hardcodes a directory of ours: the workspace roster, the StyleX
+source alias and the env-file list are all arguments
+([ADR-069](https://github.com/luciocabrera/vite-react-compiler/blob/main/docs/decisions/ADR-069-publish-the-shared-toolchain.md)).
+
+```bash
+npm install --save-dev @lcabrera/vite-config
+```
 
 ## Exports
 
-| Import path                                   | Factory                           | Used by                                                                 |
-| --------------------------------------------- | --------------------------------- | ----------------------------------------------------------------------- |
-| `@repo/vite-configs/fmt`                      | `createFmtConfig`                 | All apps                                                                |
-| `@repo/vite-configs/lint`                     | `lintSharedConfig`                | The ROOT config only — see below                                        |
-| `@repo/vite-configs/eslint-custom-rules`      | `createCustomRulesLintConfig`     | Shared ESLint flat-config for custom local rules in React apps          |
-| `@repo/vite-configs/plugins`                  | `createReactRouterPluginsConfig`  | React Router-style apps using StyleX + React Router + Babel             |
-| `@repo/vite-configs/eslint-base-custom-rules` | `createBaseCustomRulesLintConfig` | Shared ESLint flat-config for node/library workspaces (no React/StyleX) |
-| `@repo/vite-configs/run`                      | `createReactRouterRunConfig`      | React Router apps; also exports `VITEST_COVERAGE_FLAGS`                 |
+| Subpath                      | Export                                                | What it is                                                        |
+| ---------------------------- | ----------------------------------------------------- | ----------------------------------------------------------------- |
+| `./fmt`                      | `createFmtConfig`                                     | Oxfmt settings, with extra `ignorePatterns` and overrides         |
+| `./lint`                     | `createLintConfig`                                    | The one Oxlint config — for the **root** config only, see below   |
+| `./pack`                     | `createPackConfig`                                    | `vp pack` (tsdown) settings for a package that ships built `dist` |
+| `./plugins`                  | `createReactRouterPluginsConfig`                      | StyleX + React Router + Babel plugin list                         |
+| `./run`                      | `createReactRouterRunConfig`, `VITEST_COVERAGE_FLAGS` | The `build`/`start`/`test` task set, and the coverage flags       |
+| `./eslint-custom-rules`      | `createCustomRulesLintConfig`                         | ESLint flat config for React + StyleX workspaces                  |
+| `./eslint-base-custom-rules` | `createBaseCustomRulesLintConfig`                     | The same stack minus React/StyleX, for Node and library packages  |
+| `./eslint-restrictions`      | the generic restriction tables                        | Compose them into your own `no-restricted-*` values               |
+| `./fixReactRouterAssets`     | `fixReactRouterAssets`                                | Vite plugin: pre-create the CSS assets an SSR build never emitted |
+
+`./fmt`, `./lint`, `./pack`, `./run` and `./eslint-base-custom-rules` need only
+`vite-plus` and `eslint`. `./plugins` and `./eslint-custom-rules` pull in the
+React/StyleX halves of the peer list — see **Peer dependencies** below.
 
 ## Oxlint is configured once, at the root
 
-`lint` is exported as a single object rather than a factory-per-workspace,
-because Vite+ reads `lint` from the **root** `vite.config.ts` only — a `lint`
-block in a workspace config is never loaded. Per-workspace differences are
-`overrides` inside that one object, with globs resolved from the repo root.
-
-There used to be a `base-lint` → `api-lint` / `frontend-lint` →
-`react-router-lint` chain wired into all eleven workspace configs. None of it
-ever ran. [ADR-042](../../docs/decisions/ADR-042-oxlint-config-at-the-root.md)
-is the account; `vp run lint:plugins:verify` is what keeps it from coming back.
-
-```
-lint                ← the one Oxlint config: categories, plugins, overrides
-eslint-custom-rules ← shared ESLint flat config for custom local-rules enforcement
-```
-
-## Usage in a `vite.config.ts`
-
-## Install in a consumer app/package
-
-To use this package from another workspace package (for example an app), add it to that package's `package.json`:
-
-```json
-{
-  "devDependencies": {
-    "@repo/vite-configs": "workspace:*"
-  }
-}
-```
-
-Then install dependencies from the workspace root:
-
-```bash
-vp install
-```
+Vite+ reads `lint` from the **root** `vite.config.ts` only; a `lint` block in a
+workspace config is never loaded. So `createLintConfig` returns one object for
+the whole repo, and per-workspace differences are `overrides` inside it.
 
 ```ts
+import { createFmtConfig } from '@lcabrera/vite-config/fmt';
+import { createLintConfig } from '@lcabrera/vite-config/lint';
 import { defineConfig } from 'vite-plus';
-import { createFmtConfig } from '@repo/vite-configs/fmt';
 
-// A workspace config sets `fmt`, Vite, Vitest and framework config — never
-// `lint`, which only the root config can carry.
 export default defineConfig({
-  fmt: createFmtConfig(),
+  fmt: createFmtConfig({ ignorePatterns: ['build/'] }),
+  lint: createLintConfig({
+    // Your workspaces, by runtime. Only used for `env` globals today, so an
+    // empty roster is valid — it just classifies nothing.
+    workspaceRuntimes: {
+      agnostic: ['packages/pure-helpers/**'],
+      browser: ['apps/web/**'],
+      node: ['apps/server/**', 'packages/tooling/**'],
+    },
+  }),
 });
 ```
 
-### Adding project-level ignore patterns to the formatter
+A workspace config sets `fmt`, `pack`, `run` and its Vite/Vitest config — never
+`lint`.
 
-```ts
-const fmtConfig = createFmtConfig({
-  ignorePatterns: ['.react-router/', 'build/'],
-});
-```
+## ESLint
 
-### Overriding lint rules for a specific app
-
-```ts
-const lintConfig = createApiLintConfig({
-  rules: {
-    'unicorn/no-process-exit': 'off',
-  },
-});
-```
-
-### Sharing the custom local-rules ESLint config
+Both factories return a flat-config array. The React one is `async`: it resolves
+its plugins through a `createRequire` rooted at `tsconfigRootDir`, so a
+long-lived editor ESLint process resolves per project rather than from a single
+`process.cwd()`.
 
 ```js
-import { createCustomRulesLintConfig } from '@repo/vite-configs/eslint-custom-rules';
+// eslint.config.mjs
+import { createBaseCustomRulesLintConfig } from '@lcabrera/vite-config/eslint-base-custom-rules';
 
-export default createCustomRulesLintConfig();
+export default createBaseCustomRulesLintConfig({
+  tsconfigRootDir: import.meta.dirname,
+});
 ```
 
-### Shared plugins config with optional overrides
+### Import boundaries are tables you pass in
+
+`createCustomRulesLintConfig` takes your boundaries rather than switching ours
+on. **Compose, never re-declare:** ESLint flat config replaces a rule wholesale
+when a later block sets it again, so adding your own `no-restricted-syntax`
+block after this factory's silently drops everything it set. That is what
+`./eslint-restrictions` is for.
+
+```js
+import { createCustomRulesLintConfig } from '@lcabrera/vite-config/eslint-custom-rules';
+import {
+  NODE_BUILTIN_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS,
+  PG_DRIVER_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS,
+} from '@lcabrera/vite-config/eslint-restrictions';
+
+export default await createCustomRulesLintConfig({
+  publicImportBoundaryPatterns: [
+    { group: ['@acme/ui/src/**'], message: 'Import @acme/ui public exports.' },
+  ],
+  serverOnlySyntaxRestrictions: [
+    ...NODE_BUILTIN_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS,
+    ...PG_DRIVER_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS,
+  ],
+  tsconfigRootDir: import.meta.dirname,
+});
+```
+
+Omitting `serverOnlySyntaxRestrictions` omits the server/client block entirely —
+which is what a package with no client bundle wants.
+
+`./eslint-restrictions` also carries the tables both factories apply
+unconditionally, so you can re-compose them: `BARREL_SYNTAX_RESTRICTIONS`,
+`REACT_TYPE_IMPORT_PATHS`, `STATE_LIBRARY_IMPORT_PATTERNS` and
+`TEST_RUNNER_IMPORT_PATTERNS`.
+
+## Plugins and run tasks
 
 ```ts
-import { createReactRouterPluginsConfig } from '@repo/vite-configs/plugins';
+import { createReactRouterPluginsConfig } from '@lcabrera/vite-config/plugins';
+import { createReactRouterRunConfig } from '@lcabrera/vite-config/run';
 
 export const pluginsConfig = createReactRouterPluginsConfig({
   appRootUrl: import.meta.url,
-  // Optional overrides:
-  // pluginsAfter: [myPlugin()],
-  // stylexAliasPattern: '../src/*',
-  // withBabelPlugin: false,
+  // Extra StyleX aliases, resolved against `appRootUrl`. None by default.
+  stylexAliases: { '@acme/ui/*': '../../../packages/acme-ui/src/*' },
+  // withBabelPlugin / withReactRouterPlugin / withFixReactRouterAssetsPlugin
+  // each decline one plugin.
+});
+
+export const runConfig = createReactRouterRunConfig({
+  // Sourced into the shell before `react-router-serve`, in order, skipped when
+  // absent. Defaults to the app-local `.env` alone — a bare
+  // `react-router-serve` inherits no environment at all, which is the failure
+  // this exists for.
+  envFiles: ['../../.env', './.env'],
 });
 ```
 
-## Files
+## Peer dependencies
 
-| File                                         | Purpose                                                                      |
-| -------------------------------------------- | ---------------------------------------------------------------------------- |
-| `vite.fmt.shared.config.ts`                  | Formatter config factory (`createFmtConfig`)                                 |
-| `vite.lint.shared.config.ts`                 | The repo's one Oxlint config (`lintSharedConfig`) — imported by the ROOT     |
-| `eslint.custom-rules.shared.config.mjs`      | Shared ESLint flat-config factory for local custom rules                     |
-| `vite.plugins.shared.config.ts`              | React Router-style plugins config factory (`createReactRouterPluginsConfig`) |
-| `eslint.base-custom-rules.shared.config.mjs` | ESLint flat-config factory for node/library workspaces (no React/StyleX)     |
-| `vite.run.shared.config.ts`                  | `createReactRouterRunConfig` + `VITEST_COVERAGE_FLAGS` + `LOAD_LOCAL_ENV`    |
+The peer list is long on purpose: this package composes other people's ESLint
+plugins and Vite plugins, and resolving a second copy of one of them is the
+failure mode that would otherwise be silent. Install the peers for the subpaths
+you use — the optional ones (`@react-router/dev`, `@stylexjs/unplugin`,
+`vite-plugin-babel`, `@babel/preset-typescript`, `babel-plugin-react-compiler`)
+are needed only by `./plugins`.
+
+One trap worth stating plainly: `./eslint-custom-rules` resolves its plugins
+from **the consuming project's** `tsconfigRootDir`, not from this package. Under
+pnpm's isolated layout a peer dependency is linked into the dependent's
+directory, so declaring the peers here documents the requirement but does not
+satisfy that resolver — the project running ESLint has to declare the React
+plugin set (`eslint-plugin-react-x`, `eslint-plugin-react-dom`,
+`eslint-plugin-react-hooks`, `eslint-plugin-react-refresh`,
+`@stylexjs/eslint-plugin`) itself.
+
+The declared peer ranges are the versions this package is exercised against; a
+wider range has not been tested.
+
+## License
+
+MIT

@@ -23,15 +23,16 @@ Everything runs through `vp` (Vite+). **Never use `pnpm`/`npm`/`yarn` directly.*
 Read this before hunting for a task definition. A runnable task can come from
 **three** places, and grepping `package.json` alone will not find it:
 
-| Source                                     | Example                                                         |
-| ------------------------------------------ | --------------------------------------------------------------- |
-| `package.json` → `scripts`                 | `packages/ui`'s `typecheck`                                     |
-| `vite.config.ts` → `run.tasks`             | `apps/api-server`'s `build` and `test`                          |
-| A shared factory from `@repo/vite-configs` | `apps/react-router`'s `test` (via `createReactRouterRunConfig`) |
+| Source                                        | Example                                                         |
+| --------------------------------------------- | --------------------------------------------------------------- |
+| `package.json` → `scripts`                    | `packages/ui`'s `typecheck`                                     |
+| `vite.config.ts` → `run.tasks`                | `apps/api-server`'s `build` and `test`                          |
+| A shared factory from `@lcabrera/vite-config` | `apps/react-router`'s `test` (via `createReactRouterRunConfig`) |
 
-This is why `test` appears in only 4 of 16 `package.json` files yet
-`vp run -r test` runs suites nearly everywhere: the other definitions live in
-`vite.config.ts` or come from `packages/vite-configs/vite.run.shared.config.ts`.
+This is why `grep -l '"test":' apps/*/package.json packages/*/package.json`
+finds almost nothing yet `vp run -r test` runs suites nearly everywhere: the
+other definitions live in each workspace's `vite.config.ts`, or come from
+`packages/vite-configs/src/vite.run.shared.config.ts`.
 
 Useful flags: `-r` (recursive, dependency order), `--filter <name>` (one
 workspace, by **package name** not directory), `--parallel`. Note `--filter` and
@@ -93,7 +94,7 @@ type-check first turn red in CI otherwise. **Tests are scoped, not the full suit
 `test:changed` runs only the workspaces the push touches plus their dependents, so a
 docs-only push runs none. The full suite is forced only by a change to `pnpm-lock.yaml`,
 `pnpm-workspace.yaml`, the root `vite.config.ts`, or the shared config packages
-(`@repo/vite-configs` / `@repo/ts-configs`) — deliberately **not** by any root file, since
+(`@lcabrera/vite-config` / `@repo/ts-configs`) — deliberately **not** by any root file, since
 a real dependency change always moves the lockfile.
 The **fallow audit** stays CI-only — it is a new-only gate scored against the merge base,
 needing full history and a coverage merge. `vp run` caches per task, so a warm push is
@@ -133,7 +134,7 @@ project-specific belongs in that project's own `package.json`.
 | `vp run ready`               | `check:safe` + `build:all` — the full "is it shippable" check                                     |
 | `vp run check:safe`          | typegen → `vp check` → typecheck → eslint → biome → tests                                         |
 | `vp run check:push`          | the DB-free CI Quality Gate (no tests/fallow) — the `pre-push` hook runs this then `test:changed` |
-| `vp run typecheck:all`       | real tsc in all 19 workspaces, dependency order                                                   |
+| `vp run typecheck:all`       | real tsc in all 18 workspaces, dependency order                                                   |
 | `vp run typecheck:changed`   | real tsc for the changed workspaces + dependents only — see below                                 |
 | `vp run typegen:all`         | route types for both React Router apps                                                            |
 | `vp run lint:all`            | Oxlint + eslint + Biome **with autofix**, every workspace                                         |
@@ -180,7 +181,7 @@ Tests job (and its coverage report) scope to the diff on pull requests; pushes t
 `main` still run the full `test:ci`.
 
 `typecheck:changed` applies the same change-based selection to the Quality Gate's
-slowest per-workspace step — real `tsc` across all 19 workspaces. It runs
+slowest per-workspace step — real `tsc` across all 18 workspaces. It runs
 `typecheck` only for the changed workspaces plus their dependents (a type error a
 diff introduces surfaces where the type is used, which the dependents walk covers),
 falling back to the full run on the same shared/root triggers and on pushes to
@@ -554,7 +555,7 @@ file under `reports/sonar/runs/` ([ADR-049](docs/decisions/ADR-049-findings-repo
 
 ## 5. Per-workspace tasks
 
-**Every one of the 19 workspaces** defines these seven:
+**Every one of the 18 workspaces** defines these seven:
 
 `format` · `format:check` · `lint` · `lint:check` · `lint:eslint` ·
 `lint:eslint:check` · `typecheck`
@@ -579,9 +580,8 @@ Beyond that, tasks are per-workspace. `build` and `test` are common but come fro
 | `packages/tsconfig`           | `@lcabrera/tsconfig`      | `build`, `test:coverage`                                                                                               |
 | `packages/eslint-local-rules` | `@lcabrera/eslint-plugin` | —                                                                                                                      |
 | `packages/scan-report`        | `@repo/scan-report`       | `test`, `test:coverage`                                                                                                |
-| `packages/plugins`            | `@repo/plugins`           | —                                                                                                                      |
 | `packages/utils`              | `@lcabrera/utils`         | —                                                                                                                      |
-| `packages/vite-configs`       | `@repo/vite-configs`      | —                                                                                                                      |
+| `packages/vite-configs`       | `@lcabrera/vite-config`   | `build`, `test`, `test:coverage`                                                                                       |
 
 Notes on the non-obvious ones:
 

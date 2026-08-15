@@ -162,9 +162,9 @@ describe('parseWorkspaceSpecifier', () => {
   // and the docs name both. A parser that understood only one would quietly
   // validate half of them while still reporting a clean pass.
   it('parses the internal @repo scope too', () => {
-    expect(parseWorkspaceSpecifier('@repo/vite-configs/eslint-base')).toEqual({
-      packageName: 'vite-configs',
-      subpath: 'eslint-base',
+    expect(parseWorkspaceSpecifier('@repo/ts-configs/entries')).toEqual({
+      packageName: 'ts-configs',
+      subpath: 'entries',
     });
   });
 });

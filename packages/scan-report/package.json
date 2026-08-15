@@ -40,7 +40,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
   "devDependencies": {
-    "@repo/vite-configs": "workspace:*",
+    "@lcabrera/vite-config": "workspace:*",
     "@types/node": "catalog:types",
     "eslint": "catalog:lint",
     "typescript": "catalog:build",

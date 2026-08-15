@@ -28,6 +28,7 @@ const PUBLIC_PACKAGE_DIRS = [
   'tsconfig',
   'ui',
   'utils',
+  'vite-configs',
 ];
 
 /**

@@ -220,7 +220,6 @@
         "packages/scan-ingestion/**",
         "packages/ts-configs/**",
         "packages/eslint-local-rules/**",
-        "packages/plugins/**",
         "packages/utils/**",
         "packages/vite-configs/**",
       ],

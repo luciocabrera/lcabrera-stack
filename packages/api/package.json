@@ -103,7 +103,7 @@
     "@lcabrera/utils": "workspace:*"
   },
   "devDependencies": {
-    "@repo/vite-configs": "workspace:*",
+    "@lcabrera/vite-config": "workspace:*",
     "eslint": "catalog:lint",
     "typescript": "catalog:build",
     "vite": "catalog:build",

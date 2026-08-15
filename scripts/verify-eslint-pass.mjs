@@ -91,7 +91,7 @@ const FAILURE_HINT = {
   silent:
     `the pass ran but never reported \`${PROBE_RULE}\` for a deliberately\n` +
     `  misordered import, so the rule is not loaded. Check the shared eslint\n` +
-    `  configs in @repo/vite-configs.`,
+    `  configs in @lcabrera/vite-config.`,
 };
 
 const verdictFor = (workspace) => {

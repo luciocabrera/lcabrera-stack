@@ -161,7 +161,7 @@ vp run --filter ./apps/web build
 
 ## How this repo maps to the guidance
 
-- Root [vite.config.ts](../../vite.config.ts) uses `defineConfig` from `vite-plus` with shared `fmt` config composed from `@repo/vite-configs` — the documented composition pattern.
+- Root [vite.config.ts](../../vite.config.ts) uses `defineConfig` from `vite-plus` with shared `fmt` config composed from `@lcabrera/vite-config` — the documented composition pattern.
 - Shared lint/fmt/run fragments live in [packages/vite-configs/](../../packages/vite-configs/).
 - Versions are pinned through the pnpm `catalog:` in [pnpm-workspace.yaml](../../pnpm-workspace.yaml).
 - All operations go through `vp` (never pnpm/npm/yarn directly) per [AGENTS.md](../../AGENTS.md).

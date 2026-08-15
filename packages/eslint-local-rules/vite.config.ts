@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite-plus';
 
-// Both blocks below are inlined rather than imported from `@repo/vite-configs`:
+// Both blocks below are inlined rather than imported from `@lcabrera/vite-config`:
 // vite-configs depends on this package for the custom rules, so importing it
 // back — even for a const — creates a workspace cycle that breaks every
 // recursive `vp run -r` task graph. @lcabrera/utils inlines the same two blocks for

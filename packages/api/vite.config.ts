@@ -1,8 +1,8 @@
-import { createPackConfig } from '@repo/vite-configs/pack';
-import { VITEST_COVERAGE_FLAGS } from '@repo/vite-configs/run';
+import { createPackConfig } from '@lcabrera/vite-config/pack';
+import { VITEST_COVERAGE_FLAGS } from '@lcabrera/vite-config/run';
 import { defineConfig } from 'vite-plus';
 
-// The reporter half comes from @repo/vite-configs so it cannot drift from the
+// The reporter half comes from @lcabrera/vite-config so it cannot drift from the
 // rest of the repo. Only the threshold half is local: @lcabrera/api is public-facing
 // (AGENTS.md §4), so any drop below 95% fails `test:coverage`.
 //

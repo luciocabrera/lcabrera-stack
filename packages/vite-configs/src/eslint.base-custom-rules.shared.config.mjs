@@ -8,11 +8,15 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 import { TEST_RUNNER_IMPORT_PATTERNS } from './eslint.restrictions.shared.mjs';
+import {
+  createNodeScriptFileConfig,
+  SHARED_PLUGIN_RULE_SEVERITIES,
+} from './eslint.rules.shared.mjs';
 
 // Generic (non-React) variant of eslint.custom-rules.shared.config.mjs for
 // API servers, node services, and library packages: same core stack and
 // local architectural rules, without the React/StyleX layers. Plugins here
-// are static imports resolved from @repo/vite-configs' own node_modules —
+// are static imports resolved from @lcabrera/vite-config's own node_modules —
 // consuming workspaces only need `eslint` itself.
 const GLOBAL_IGNORES = [
   '.react-router/**',
@@ -32,6 +36,17 @@ const createTypescriptLanguageOptions = (tsconfigRootDir) => ({
   },
 });
 
+/**
+ * The annotation is load-bearing, not decoration: `vp pack` derives this
+ * package's published `.d.mts` from it, and without it `ignorePatterns` is
+ * inferred from its `[]` default as `never[]` — a type that rejects every value
+ * a consumer would pass.
+ *
+ * @param {{
+ *   ignorePatterns?: readonly string[],
+ *   tsconfigRootDir?: string,
+ * }} [options]
+ */
 export const createBaseCustomRulesLintConfig = ({
   ignorePatterns = [],
   tsconfigRootDir = process.cwd(),
@@ -76,51 +91,9 @@ export const createBaseCustomRulesLintConfig = ({
       ? tseslint.configs.recommended
       : [tseslint.configs.recommended]),
 
-    {
-      rules: {
-        // Escalated from the plugin's default `warn` so the bulk-suppression
-        // baseline (eslint-suppressions.json) covers the inherited findings
-        // and NEW occurrences fail the gate (suppressions only apply to
-        // error-severity rules).
-        'security/detect-non-literal-fs-filename': 'error',
-        'security/detect-non-literal-regexp': 'error',
-        'security/detect-object-injection': 'off',
-        'security/detect-unsafe-regex': 'error',
-        'unicorn/consistent-boolean-name': [
-          'error',
-          {
-            prefixes: {
-              are: true,
-            },
-          },
-        ],
-        'unicorn/filename-case': 'off',
-        'unicorn/name-replacements': 'off',
-        'unicorn/no-array-reduce': 'off',
-        // Its auto-fixer rewrites http:// to https:// inside string literals,
-        // which silently corrupts test fixtures and local-dev URLs (a fixture
-        // asserting that an http origin is rejected became https and the test
-        // inverted). Localhost/dev URLs in this repo are legitimate http.
-        'unicorn/prefer-https': 'off',
-        'unicorn/prefer-query-selector': 'off',
-        'unicorn/prevent-abbreviations': 'off',
-      },
-    },
+    { rules: { ...SHARED_PLUGIN_RULE_SEVERITIES } },
     // 4. JavaScript files configuration (Node.js config/tooling files)
-    {
-      files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
-      languageOptions: {
-        ecmaVersion: 'latest',
-        globals: {
-          ...globals.node,
-        },
-      },
-      rules: {
-        'no-console': 'off',
-        'unicorn/prefer-module': 'off',
-        'unicorn/prevent-abbreviations': 'off',
-      },
-    },
+    createNodeScriptFileConfig({ globals }),
     {
       ignores: [...GLOBAL_IGNORES, ...ignorePatterns],
     },

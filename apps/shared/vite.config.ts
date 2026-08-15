@@ -1,4 +1,4 @@
-import { VITEST_COVERAGE_FLAGS } from '@repo/vite-configs/run';
+import { VITEST_COVERAGE_FLAGS } from '@lcabrera/vite-config/run';
 import { defineConfig } from 'vite-plus';
 
 const VITEST = 'node node_modules/vitest/vitest.mjs';

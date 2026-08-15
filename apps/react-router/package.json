@@ -38,8 +38,8 @@
   "devDependencies": {
     "@babel/preset-typescript": "catalog:build",
     "@eslint/js": "catalog:lint",
+    "@lcabrera/vite-config": "workspace:*",
     "@react-router/dev": "catalog:react",
-    "@repo/vite-configs": "workspace:*",
     "@stylexjs/eslint-plugin": "catalog:react",
     "@stylexjs/unplugin": "catalog:react",
     "@testing-library/react": "catalog:test",

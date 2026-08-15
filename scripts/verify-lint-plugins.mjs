@@ -94,16 +94,22 @@ const workspaceDirs = (group) => {
   }
 };
 
-/** The root Oxlint config module — the source of truth both readers below use. */
-const lintConfigModule = () =>
-  import(join(REPO_ROOT, 'packages/vite-configs/vite.lint.shared.config.ts'));
+/**
+ * The root Vite+ config — the source of truth both readers below use.
+ *
+ * `@lcabrera/vite-config` ships the `createLintConfig` factory; this repo owns
+ * the roster it is called with, and the root config is where that data lives
+ * (ADR-069, ADR-042). Reading the built object rather than the factory is what
+ * keeps this gate honest about the config Oxlint actually loads.
+ */
+const lintConfigModule = () => import(join(REPO_ROOT, 'vite.config.ts'));
 
 /** The classification the root Oxlint config declares, read from the config itself. */
 const runtimeLists = async () => (await lintConfigModule()).WORKSPACE_RUNTIMES;
 
 /** The plugin families the root config actually names. */
 const configuredPlugins = async () =>
-  (await lintConfigModule()).lintSharedConfig.plugins;
+  (await lintConfigModule()).lintConfig.plugins;
 
 /**
  * Every `vite.config.ts` in the repo, root included.
@@ -148,14 +154,13 @@ const main = async () => {
     process.stdout.write(
       `Oxlint did not report ${probeCode(probe)} for a deliberate violation.\n` +
         `  The \`${probe.plugin}\` family is not loaded — add it to PLUGINS in\n` +
-        '  packages/vite-configs/vite.lint.shared.config.ts.\n',
+        '  packages/vite-configs/src/vite.lint.shared.config.ts.\n',
     );
   for (const workspace of unclassified)
     process.stdout.write(
       `${workspace} is in no runtime list in the root Oxlint config.\n` +
-        '  Add it to BROWSER_WORKSPACES, NODE_WORKSPACES or\n' +
-        '  RUNTIME_AGNOSTIC_WORKSPACES in\n' +
-        '  packages/vite-configs/vite.lint.shared.config.ts.\n',
+        '  Add it to `browser`, `node` or `agnostic` in WORKSPACE_RUNTIMES in\n' +
+        '  the root vite.config.ts.\n',
     );
   for (const glob of stale)
     process.stdout.write(

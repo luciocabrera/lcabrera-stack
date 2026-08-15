@@ -214,7 +214,7 @@ enter "$work"
 # 1b. A worktree starts empty of dependencies. This used to symlink the primary
 #     checkout's node_modules, which was faster and silently wrong: the pnpm
 #     workspace links inside it still point at the PRIMARY checkout's packages,
-#     so `@repo/vite-configs`, `@lcabrera/ui` and friends resolved there while you
+#     so `@lcabrera/vite-config`, `@lcabrera/ui` and friends resolved there while you
 #     edited the worktree. Tooling then read code you had not changed — a shared
 #     eslint config edit never took effect, and another agent's uncommitted work
 #     in the primary tree leaked in, which is the cross-contamination worktrees

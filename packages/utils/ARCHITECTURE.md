@@ -30,12 +30,16 @@ importable by any consumer (`@lcabrera/ui`, `@lcabrera/server`, apps).
 - **Suppression-free by construction** — `eslint-suppressions.json` is gitignored
   and never committed; any real finding fails the gate.
 
-## Config-import constraint
+## Config imports: the cycle is gone
 
-`@repo/vite-configs` depends on `@lcabrera/utils`, so this package's config files
-(`eslint.config.mjs`, `vite.config.ts`) must reference vite-configs helpers by
-**relative path or inline** them — never via a bare `@repo/vite-configs`
-specifier, which would create a workspace cycle that breaks `vp run -r`.
+These config files (`eslint.config.mjs`, `vite.config.ts`) used to inline the
+shared pack/coverage settings and reach the ESLint factory by relative path,
+because the config package declared `@lcabrera/utils` as a devDependency and a
+bare specifier back would have closed a workspace cycle.
+[ADR-069](../../docs/decisions/ADR-069-publish-the-shared-toolchain.md) dropped
+that edge — there was no import site for it — so both now import
+`@lcabrera/vite-config` by name like every other workspace. The 95% coverage
+thresholds stay local: they are this package's own gate, not a shared value.
 
 ## Current Exports
 

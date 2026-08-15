@@ -1,6 +1,6 @@
-import { createFmtConfig } from '@repo/vite-configs/fmt';
-import { createPackConfig } from '@repo/vite-configs/pack';
-import { VITEST_COVERAGE_FLAGS } from '@repo/vite-configs/run';
+import { createFmtConfig } from '@lcabrera/vite-config/fmt';
+import { createPackConfig } from '@lcabrera/vite-config/pack';
+import { VITEST_COVERAGE_FLAGS } from '@lcabrera/vite-config/run';
 import { defineConfig } from 'vite-plus';
 
 const fmtConfig = createFmtConfig();

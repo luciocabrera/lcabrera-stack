@@ -26,7 +26,7 @@
     "zod": "catalog:runtime"
   },
   "devDependencies": {
-    "@repo/vite-configs": "workspace:*",
+    "@lcabrera/vite-config": "workspace:*",
     "@types/node": "catalog:types",
     "@types/pg": "catalog:types",
     "@types/ws": "catalog:types",

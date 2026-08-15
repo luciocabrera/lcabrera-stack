@@ -1,48 +1,159 @@
 {
-  "name": "@repo/vite-configs",
-  "version": "0.0.0",
-  "private": true,
+  "name": "@lcabrera/vite-config",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Vite+ fmt/lint/pack/run config factories and shareable ESLint flat configs for TypeScript and React workspaces.",
+  "keywords": [
+    "config",
+    "eslint",
+    "eslint-config",
+    "monorepo",
+    "oxlint",
+    "vite",
+    "vite-plus"
+  ],
+  "homepage": "https://github.com/luciocabrera/vite-react-compiler/tree/main/packages/vite-configs#readme",
+  "bugs": "https://github.com/luciocabrera/vite-react-compiler/issues",
+  "license": "MIT",
+  "author": "Lucio Cabrera",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luciocabrera/vite-react-compiler.git",
+    "directory": "packages/vite-configs"
+  },
+  "files": [
+    "dist",
+    "src",
+    "CHANGELOG.md",
+    "!src/**/*.test.*"
+  ],
   "type": "module",
+  "sideEffects": false,
   "exports": {
-    "./fmt": "./vite.fmt.shared.config.ts",
-    "./eslint-custom-rules": "./eslint.custom-rules.shared.config.mjs",
-    "./eslint-base-custom-rules": "./eslint.base-custom-rules.shared.config.mjs",
-    "./lint": "./vite.lint.shared.config.ts",
-    "./pack": "./vite.pack.shared.config.ts",
-    "./plugins": "./vite.plugins.shared.config.ts",
-    "./run": "./vite.run.shared.config.ts"
+    "./fmt": "./src/vite.fmt.shared.config.ts",
+    "./eslint-custom-rules": "./src/eslint.custom-rules.shared.config.mjs",
+    "./eslint-base-custom-rules": "./src/eslint.base-custom-rules.shared.config.mjs",
+    "./eslint-restrictions": "./src/eslint.restrictions.shared.mjs",
+    "./fixReactRouterAssets": "./src/fixReactRouterAssets.plugin.ts",
+    "./lint": "./src/vite.lint.shared.config.ts",
+    "./pack": "./src/vite.pack.shared.config.ts",
+    "./plugins": "./src/vite.plugins.shared.config.ts",
+    "./run": "./src/vite.run.shared.config.ts"
+  },
+  "publishConfig": {
+    "exports": {
+      "./fmt": {
+        "types": "./dist/vite.fmt.shared.config.d.mts",
+        "default": "./dist/vite.fmt.shared.config.mjs"
+      },
+      "./eslint-custom-rules": {
+        "types": "./dist/eslint.custom-rules.shared.config.d.mts",
+        "default": "./dist/eslint.custom-rules.shared.config.mjs"
+      },
+      "./eslint-base-custom-rules": {
+        "types": "./dist/eslint.base-custom-rules.shared.config.d.mts",
+        "default": "./dist/eslint.base-custom-rules.shared.config.mjs"
+      },
+      "./eslint-restrictions": {
+        "types": "./dist/eslint.restrictions.shared.d.mts",
+        "default": "./dist/eslint.restrictions.shared.mjs"
+      },
+      "./fixReactRouterAssets": {
+        "types": "./dist/fixReactRouterAssets.plugin.d.mts",
+        "default": "./dist/fixReactRouterAssets.plugin.mjs"
+      },
+      "./lint": {
+        "types": "./dist/vite.lint.shared.config.d.mts",
+        "default": "./dist/vite.lint.shared.config.mjs"
+      },
+      "./pack": {
+        "types": "./dist/vite.pack.shared.config.d.mts",
+        "default": "./dist/vite.pack.shared.config.mjs"
+      },
+      "./plugins": {
+        "types": "./dist/vite.plugins.shared.config.d.mts",
+        "default": "./dist/vite.plugins.shared.config.mjs"
+      },
+      "./run": {
+        "types": "./dist/vite.run.shared.config.d.mts",
+        "default": "./dist/vite.run.shared.config.mjs"
+      }
+    },
+    "access": "public"
   },
   "scripts": {
+    "build": "vp pack",
     "format": "vp fmt .",
     "format:check": "vp fmt --check .",
     "lint": "vp lint . --fix && vp run lint:eslint",
     "lint:check": "vp lint . && vp run lint:eslint:check",
     "lint:eslint": "eslint . --config eslint.config.mjs --fix --max-warnings 0",
     "lint:eslint:check": "eslint . --config eslint.config.mjs --max-warnings 0",
-    "typecheck": "tsc --noEmit -p tsconfig.app.json",
-    "test": "node node_modules/vitest/vitest.mjs run --passWithNoTests"
+    "typecheck": "tsc --noEmit -p tsconfig.app.json"
+  },
+  "dependencies": {
+    "@lcabrera/eslint-plugin": "workspace:*"
   },
   "devDependencies": {
     "@babel/preset-typescript": "catalog:build",
     "@eslint/js": "catalog:lint",
-    "@lcabrera/eslint-plugin": "workspace:*",
-    "@lcabrera/utils": "workspace:*",
     "@react-router/dev": "catalog:react",
-    "@repo/plugins": "workspace:*",
+    "@stylexjs/eslint-plugin": "catalog:react",
     "@stylexjs/unplugin": "catalog:react",
     "@types/node": "catalog:types",
     "babel-plugin-react-compiler": "catalog:react",
     "eslint": "catalog:lint",
     "eslint-config-prettier": "catalog:lint",
     "eslint-plugin-perfectionist": "catalog:lint",
+    "eslint-plugin-react-dom": "catalog:lint",
+    "eslint-plugin-react-hooks": "catalog:lint",
+    "eslint-plugin-react-refresh": "catalog:lint",
+    "eslint-plugin-react-x": "catalog:lint",
     "eslint-plugin-security": "catalog:lint",
     "eslint-plugin-unicorn": "catalog:lint",
     "globals": "catalog:lint",
     "typescript": "catalog:build",
     "typescript-eslint": "catalog:lint",
-    "vite": "catalog:build",
     "vite-plugin-babel": "catalog:build",
     "vite-plus": "catalog:build",
     "vitest": "catalog:test"
+  },
+  "peerDependencies": {
+    "@babel/preset-typescript": "catalog:build",
+    "@eslint/js": "catalog:lint",
+    "@react-router/dev": "catalog:react",
+    "@stylexjs/eslint-plugin": "catalog:react",
+    "@stylexjs/unplugin": "catalog:react",
+    "babel-plugin-react-compiler": "catalog:react",
+    "eslint": "catalog:lint",
+    "eslint-config-prettier": "catalog:lint",
+    "eslint-plugin-perfectionist": "catalog:lint",
+    "eslint-plugin-react-dom": "catalog:lint",
+    "eslint-plugin-react-hooks": "catalog:lint",
+    "eslint-plugin-react-refresh": "catalog:lint",
+    "eslint-plugin-react-x": "catalog:lint",
+    "eslint-plugin-security": "catalog:lint",
+    "eslint-plugin-unicorn": "catalog:lint",
+    "globals": "catalog:lint",
+    "typescript-eslint": "catalog:lint",
+    "vite-plugin-babel": "catalog:build",
+    "vite-plus": "catalog:build"
+  },
+  "peerDependenciesMeta": {
+    "@babel/preset-typescript": {
+      "optional": true
+    },
+    "@react-router/dev": {
+      "optional": true
+    },
+    "@stylexjs/unplugin": {
+      "optional": true
+    },
+    "babel-plugin-react-compiler": {
+      "optional": true
+    },
+    "vite-plugin-babel": {
+      "optional": true
+    }
   }
 }

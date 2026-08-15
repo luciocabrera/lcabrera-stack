@@ -6,7 +6,7 @@ This directory owns app-specific Vite+ configuration wiring for the `admin_syste
 
 - Export isolated config slices (`fmt`, `lint`, `plugins`, `run`).
 - Keep `vite.config.ts` thin by composing pre-built config objects.
-- Prefer shared config builders from workspace packages (`@repo/vite-configs`) and only keep app-specific overrides here.
+- Prefer shared config builders from workspace packages (`@lcabrera/vite-config`) and only keep app-specific overrides here.
 
 ## Files
 
@@ -17,6 +17,6 @@ This directory owns app-specific Vite+ configuration wiring for the `admin_syste
 
 ## Extension Rules
 
-- Reuse `@repo/vite-configs` factories first.
+- Reuse `@lcabrera/vite-config` factories first.
 - Add overrides in this folder only when app behavior diverges.
 - Keep this layer declarative (no side effects other than config creation).

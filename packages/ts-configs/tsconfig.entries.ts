@@ -9,6 +9,23 @@ const packageDirectory = path.dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = path.resolve(packageDirectory, '..', '..');
 
 /**
+ * `@lcabrera/vite-config` is the one workspace here that ships JavaScript
+ * sources: ESLint flat config is `.mjs`, and it is published, so `vp pack` has
+ * to emit a `.d.mts` beside each one or the subpath resolves untyped and
+ * `attw:verify` fails. `rolldown-plugin-dts` reads that flag from the tsconfig
+ * on disk — passing it through the `dts` build option instead is silently
+ * ignored, and the build fails with "tsgo did not generate dts file".
+ *
+ * A local merge rather than a `createNodeTsConfig` option: it is one workspace's
+ * fact, and `@lcabrera/tsconfig` is the half of this split that must not carry
+ * this repo's specifics (ADR-069).
+ */
+const withAllowJs = (config: ReturnType<typeof createNodeTsConfig>) => ({
+  ...config,
+  compilerOptions: { ...config.compilerOptions, allowJs: true },
+});
+
+/**
  * Every generated tsconfig, as data — this repo's own workspace roster, which
  * is exactly what `@lcabrera/tsconfig` must not carry (ADR-069).
  *
@@ -261,25 +278,16 @@ export const configs = [
     filePath: path.resolve(workspaceRoot, 'packages/utils/tsconfig.app.json'),
   },
   {
-    // Genuinely Node-only: a Vite build plugin reading the emitted manifest
-    // through node:fs/node:path off process.cwd(). Flat package, same
-    // include/exclude reasoning as @lcabrera/utils above.
-    config: createNodeTsConfig({
-      exclude: ['node_modules'],
-      include: ['**/*.ts'],
-      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
-    }),
-    filePath: path.resolve(workspaceRoot, 'packages/plugins/tsconfig.app.json'),
-  },
-  {
     // Genuinely Node-only: the shared Vite/lint/fmt config factories every
-    // workspace's vite.config.ts imports. Flat package, same include/exclude
-    // reasoning as @lcabrera/utils above.
-    config: createNodeTsConfig({
-      exclude: ['node_modules'],
-      include: ['**/*.ts'],
-      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
-    }),
+    // workspace's vite.config.ts imports, plus the React Router asset plugin
+    // that used to be @repo/plugins (ADR-069 folded it in). Sources under src/
+    // with a root vite.config.ts, so include names both, matching @lcabrera/utils.
+    config: withAllowJs(
+      createNodeTsConfig({
+        include: ['src', 'vite.config.ts'],
+        tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
+      }),
+    ),
     filePath: path.resolve(
       workspaceRoot,
       'packages/vite-configs/tsconfig.app.json',
