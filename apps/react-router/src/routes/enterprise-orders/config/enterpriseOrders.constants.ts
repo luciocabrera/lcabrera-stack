@@ -172,6 +172,51 @@ export const ENTERPRISE_ORDER_LIST_COLUMNS = [
 export const ENTERPRISE_ORDER_ALLOWED_COLUMNS: readonly string[] =
   ENTERPRISE_ORDER_COLUMNS;
 
+// ---------------------------------------------------------------------------
+// What bounds a paginated read. Both are applied in `selectOrdersPage`, the one
+// function every entry point goes through — see the route's ARCHITECTURE.md.
+// ---------------------------------------------------------------------------
+
+/**
+ * The largest page a read of this table will serve — the sibling of
+ * `MAX_CAR_SALES_LIMIT` and `MAX_WIDE_ALLTYPES_LIMIT`, and the same kind of
+ * bound over a table seeded to the same size as car-sales.
+ *
+ * `/_api/enterprise-orders/paginated` is a public, unauthenticated URL, so
+ * without a ceiling `?limit=999999999` is a whole-table read and a whole-table
+ * JSON response (#706). It is pre-existing rather than a regression: this route
+ * has always accepted the parameter unbounded, and it is the last of the three
+ * paginated routes to close the gap.
+ *
+ * The value is written out rather than imported from
+ * `CLIENT_PAGINATION_ROW_LIMIT`, which happens to hold the same number. That
+ * one is `/car-sales`'s **UI pagination** decision, and lowering it for that
+ * demo must not quietly change what a public endpoint serves — the coupling
+ * would run in the unsafe direction. `ENTERPRISE_ORDER_GROUP_MAX_ROWS` is not
+ * it either: that bounds a grouped result, which is not a page and is not
+ * scrolled (ADR-059).
+ *
+ * Nothing legitimate is clamped by it. Both readers of this table ask for
+ * `INITIAL_PAGE_SIZE` — the SSR loader for the first page, the table's
+ * load-more for every page after it — so the ceiling is headroom, not a limit
+ * any UI reaches.
+ */
+export const MAX_ENTERPRISE_ORDERS_LIMIT = 1000;
+
+/**
+ * The most ORDER BY terms one read may carry — the sibling of
+ * `MAX_CAR_SALES_SORT_RULES`, bounded by the same fact.
+ *
+ * The bound is the table's own column count: past it every further term
+ * necessarily repeats a column already named, and `ORDER BY order_id, order_id`
+ * orders nothing the first term did not. So it cannot truncate a sort a user is
+ * able to express. What it stops is a hand-made request growing the ORDER BY
+ * without limit — `sanitizeSorting` drops directionless entries but does not
+ * deduplicate, so a repeated column would otherwise pass straight through to
+ * the builder.
+ */
+export const MAX_ENTERPRISE_ORDERS_SORT_RULES = ENTERPRISE_ORDER_COLUMNS.length;
+
 /**
  * Columns offered as distinct-value filter dropdowns, each mapped to its
  * `ColumnType` (consumed by `@lcabrera/server`'s `selectFilterOptions`, where

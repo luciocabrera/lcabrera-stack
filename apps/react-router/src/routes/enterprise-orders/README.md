@@ -185,6 +185,12 @@ curl -G "http://localhost:3000/_api/enterprise-orders/paginated" \
   --data-urlencode 'skip=0' \
   --data-urlencode 'limit=10' \
   --data-urlencode 'filter={"is_vip_customer":{"type":"boolean","value":true}}'
+
+# The window is bounded (#706): this prints MAX_ENTERPRISE_ORDERS_LIMIT, not the
+# table's row count. The same limit on /enterprise-orders changes nothing —
+# that first page is INITIAL_PAGE_SIZE and takes no window from the URL.
+curl -s "http://localhost:3000/_api/enterprise-orders/paginated?skip=0&limit=999999999" \
+  | jq '.data | length'
 ```
 
 Unit tests cover the pure translation utils, the param parser, the fetcher, the

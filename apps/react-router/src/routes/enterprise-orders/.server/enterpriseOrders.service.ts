@@ -32,6 +32,8 @@ import {
   ENTERPRISE_ORDER_PRIMARY_KEY,
   ENTERPRISE_ORDERS_SCHEMA,
   ENTERPRISE_ORDERS_TABLE,
+  MAX_ENTERPRISE_ORDERS_LIMIT,
+  MAX_ENTERPRISE_ORDERS_SORT_RULES,
   toOrderGroupRow,
   toOrderKeysetCursor,
 } from '../config';
@@ -217,8 +219,17 @@ export type SelectOrdersPageArgs = {
    * so counting per page is work with a known answer (#402).
    */
   readonly includeTotal: boolean;
+  /**
+   * The page window the caller asked for. Clamped into
+   * `[1, MAX_ENTERPRISE_ORDERS_LIMIT]` here rather than trusted, because this
+   * is the one function both entry points reach — see the ceiling note below.
+   */
   readonly limit: number;
   readonly offset: number;
+  /**
+   * The ORDER BY terms the caller asked for, truncated to
+   * `MAX_ENTERPRISE_ORDERS_SORT_RULES` here for the same reason as `limit`.
+   */
   readonly sort: readonly QuerySort[];
 };
 
@@ -258,6 +269,22 @@ type UnfilteredOrderAggregate = Omit<GroupAggregate, 'alias' | 'filters'>;
  *   query's own `filters`/`allowedColumns`, so the two still cannot drift.
  * - The count runs only when `includeTotal` says so (#402).
  * - The projection is the list read model, not every column (#405).
+ *
+ * **The request-derived window is bounded here, not at the route's parser**
+ * (#706). Both entry points size this read — `/_api/enterprise-orders/paginated`
+ * from its search params, and the SSR loader from its own constant — and only
+ * one of them passes through `parseOrdersPageParams`, so a bound applied there
+ * covers half the surface and has to be written twice to cover the rest. This
+ * function is the half both halves share, which is what makes one clamp
+ * complete: no caller of it, present or future, can widen the window past
+ * `MAX_ENTERPRISE_ORDERS_LIMIT` or the ORDER BY past
+ * `MAX_ENTERPRISE_ORDERS_SORT_RULES`. `LIMIT 0` is floored to 1 for a different
+ * reason: it is a page with no rows and a `hasMore` that says the set is
+ * exhausted — a scroll session that silently ends.
+ *
+ * `offset` is deliberately **not** bounded. One past the end of the table
+ * returns an empty page after work bounded by the table rather than by the
+ * request, so no value of it makes the response or the read unbounded.
  */
 export const selectOrdersPage = async ({
   cursor,
@@ -268,25 +295,34 @@ export const selectOrdersPage = async ({
   offset,
   sort,
 }: SelectOrdersPageArgs): Promise<EnterpriseOrdersResponse> => {
+  // Before the branch, so the grouped read orders by a bounded sort too, and
+  // before the cursor is built, so the tuple is still checked against the sort
+  // the query will actually carry.
+  const boundedSort = sort.slice(0, MAX_ENTERPRISE_ORDERS_SORT_RULES);
+
   if (grouping.keys.length > 0) {
     return selectGroupedOrders({
       aggregates: grouping.aggregates,
       filters,
       groupKeys: grouping.keys,
       groupMode: grouping.mode,
-      sort,
+      sort: boundedSort,
     });
   }
 
-  const keysetCursor = toOrderKeysetCursor({ cursor, sort });
+  const boundedLimit = Math.min(
+    MAX_ENTERPRISE_ORDERS_LIMIT,
+    Math.max(1, limit),
+  );
+  const keysetCursor = toOrderKeysetCursor({ cursor, sort: boundedSort });
 
   const [data, total] = await Promise.all([
     selectRows<EnterpriseOrderListRow>({
       ...TARGET,
       fields: ENTERPRISE_ORDER_LIST_COLUMNS,
       filters,
-      limit,
-      sort,
+      limit: boundedLimit,
+      sort: boundedSort,
       // One or the other, never both: `OFFSET` on top of a cursor would skip a
       // further `offset` rows past the row we asked to resume after.
       ...(keysetCursor === undefined ? { offset } : { cursor: keysetCursor }),
@@ -304,10 +340,12 @@ export const selectOrdersPage = async ({
     data,
     // `offset` is the count of rows the client already holds, which the keyset
     // path sends too — so this reads the same either way. Without a total to
-    // compare against, a page shorter than asked for is the end of the set.
+    // compare against, a page shorter than asked for is the end of the set —
+    // measured against the window the query ran with, never the one the caller
+    // asked for, or a clamped request would report the set exhausted.
     hasMore:
       total === undefined
-        ? data.length === limit
+        ? data.length === boundedLimit
         : offset + data.length < total,
     ...(total !== undefined && { total }),
   };

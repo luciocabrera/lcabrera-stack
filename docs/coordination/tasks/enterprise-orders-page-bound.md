@@ -10,7 +10,7 @@ area:
 started: 2026-08-15
 updated: 2026-08-15
 plan: (none)
-pr: (none)
+pr: '#725'
 issue: #706
 ---
 
@@ -20,6 +20,7 @@ Bound the enterprise-orders paginated window
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implemented — `limit` and the ORDER BY length bounded in
+  `selectOrdersPage`, the one function both entry points reach; gate green
 - Blockers: none
-- Next:
+- Next: verification of PR #725
