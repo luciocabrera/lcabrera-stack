@@ -37,6 +37,15 @@ export type ParsedOrdersPageParams = {
  * client always sends a sort — `buildTablePageQuery` appends the primary key —
  * but this is a public URL, and a caller that is not that client would otherwise
  * get a paginated read with no ORDER BY, which repeats and skips rows.
+ *
+ * **`limit` and the sort length are bounded — deliberately not here** (#706).
+ * The sibling parsers clamp `limit` themselves; this route's SSR loader reads
+ * the same table through `selectOrdersPage` **without** passing through this
+ * function, so a clamp here would bound one of the two entry points and would
+ * have to be repeated — in two places free to drift — to bound the other. Both
+ * bounds live in `selectOrdersPage` instead, which every entry point does
+ * reach: `MAX_ENTERPRISE_ORDERS_LIMIT` and `MAX_ENTERPRISE_ORDERS_SORT_RULES`.
+ * What this returns is what the request asked for.
  */
 export const parseOrdersPageParams = (
   params: URLSearchParams,

@@ -11,10 +11,13 @@ This route displays enterprise orders data with infinite scrolling capabilities.
 
 ## Features
 
-✅ **Infinite Scrolling** - Loads 50 records initially, then 50 more as you scroll
+✅ **Infinite Scrolling** - Loads `INITIAL_PAGE_SIZE` rows, then that many again per scroll
 ✅ **Sorting** - Click column headers to sort (persisted in URL)
 ✅ **Column Management** - Show/hide columns, reorder, resize (persisted in cookies)
-✅ **100,000 Records** - Displays large dataset with ~50 columns
+✅ **Large Dataset** - The whole `enterprise_orders` table, seeded at scale by
+[`db/setup_enterprise_orders.sql`](../../../db/setup_enterprise_orders.sql);
+`ENTERPRISE_ORDER_COLUMNS` lists every column and `ENTERPRISE_ORDER_LIST_COLUMNS`
+the subset the list view projects
 ✅ **Diverse Data Types** - Currency, integers, decimals, text, booleans, dates
 
 ## Setup
@@ -28,8 +31,10 @@ cd /home/lucio/workspace/db
 
 This will:
 
-- Create the `enterprise_orders` table with 52 columns
-- Generate 100,000 realistic records
+- Create the `enterprise_orders` table, with the columns
+  `config/enterpriseOrders.constants.ts` lists in `ENTERPRISE_ORDER_COLUMNS`
+- Generate the demo rows — the `generate_series` in the DDL is the count, and
+  `SELECT count(*) FROM enterprise_orders` is what the database actually holds
 - Create indexes for performance
 
 ### 2. Start API Server
@@ -100,7 +105,7 @@ mappers shared by any table — `@lcabrera/server/filters`' `toQueryFilters` and
 > (`between`), multi-select NOT-IN, and text **notContains** (now `NOT ILIKE`,
 > via the generic `notIlike` operator) are all preserved.
 
-## Columns (31 displayed by default)
+## Columns (`ENTERPRISE_ORDER_LIST_COLUMNS` is what the list view projects)
 
 ### Order Information
 
@@ -166,25 +171,40 @@ mappers shared by any table — `@lcabrera/server/filters`' `toQueryFilters` and
 
 ## Performance
 
-- **Initial Load**: ~50ms (indexed queries)
-- **Scroll Load**: ~50ms per 50 records
-- **Total Records**: 100,000
-- **Indexed Columns**: 11 frequently queried columns
+What makes a page of this table cheap — and why each choice was made — is
+"The read path — how a page of orders is paid for" in
+[`ARCHITECTURE.md`](ARCHITECTURE.md). The indexes it leans on are declared in
+[`db/setup_enterprise_orders.sql`](../../../db/setup_enterprise_orders.sql), and
+what the database actually holds is `SELECT count(*) FROM enterprise_orders`.
+
+Latency figures are deliberately not kept here: a measurement with no hardware,
+dataset or date attached cannot be corrected, only removed, and nothing checks a
+number written into a doc (AGENTS.md §7). The figures for a given change belong
+in that change's PR.
 
 ## Testing
 
 With `vp dev` running (local Postgres up via `vp run db:up`), exercise the
-load-more resource route directly:
+load-more resource route directly. `vp dev` prints the port it bound on startup —
+5173 unless something already holds it, in which case substitute the port it
+actually named.
 
 ```bash
 # Basic page
-curl "http://localhost:3000/_api/enterprise-orders/paginated?skip=0&limit=10"
+curl "http://localhost:5173/_api/enterprise-orders/paginated?skip=0&limit=10"
 
 # With filters (VIP customers)
-curl -G "http://localhost:3000/_api/enterprise-orders/paginated" \
+curl -G "http://localhost:5173/_api/enterprise-orders/paginated" \
   --data-urlencode 'skip=0' \
   --data-urlencode 'limit=10' \
   --data-urlencode 'filter={"is_vip_customer":{"type":"boolean","value":true}}'
+
+# The window is bounded (#706): this prints MAX_ENTERPRISE_ORDERS_LIMIT, not the
+# table's row count. The same limit on /enterprise-orders changes nothing —
+# that first page is INITIAL_PAGE_SIZE and takes no window from the URL.
+# Counted with node rather than jq, which this repo does not require.
+curl -s "http://localhost:5173/_api/enterprise-orders/paginated?skip=0&limit=999999999" \
+  | node -e "let s='';process.stdin.on('data',c=>s+=c).on('end',()=>console.log(JSON.parse(s).data.length))"
 ```
 
 Unit tests cover the pure translation utils, the param parser, the fetcher, the

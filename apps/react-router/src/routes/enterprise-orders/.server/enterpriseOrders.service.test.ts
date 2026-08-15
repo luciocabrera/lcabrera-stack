@@ -14,6 +14,8 @@ import { beforeEach, expect, it, vi } from 'vite-plus/test';
 import {
   ENTERPRISE_ORDER_GROUP_MAX_ROWS,
   ENTERPRISE_ORDER_LIST_COLUMNS,
+  MAX_ENTERPRISE_ORDERS_LIMIT,
+  MAX_ENTERPRISE_ORDERS_SORT_RULES,
 } from '../config';
 import {
   deleteOrder,
@@ -150,6 +152,99 @@ it('reports the end of the set when a page comes back short of its limit', async
 
   // The mock returns one row for a limit of ten.
   expect(page.hasMore).toBe(false);
+});
+
+// The window and the ORDER BY are the two request-derived inputs that can size
+// this read, and both are bounded here rather than at the resource route's
+// parser — the SSR loader never passes through it (#706). Each case asks for
+// more than the bound allows; without the clamps, each reaches the executor
+// exactly as asked.
+it('clamps a page window asked for above the ceiling', async () => {
+  await selectOrdersPage({
+    filters: [],
+    includeTotal: true,
+    limit: 999_999_999,
+    offset: 0,
+    sort: [],
+  });
+
+  const [descriptor] = vi.mocked(selectRows).mock.calls[0] ?? [];
+
+  expect(descriptor?.limit).toBe(MAX_ENTERPRISE_ORDERS_LIMIT);
+});
+
+it('raises a zero window to one row', async () => {
+  await selectOrdersPage({
+    filters: [],
+    includeTotal: false,
+    limit: 0,
+    offset: 0,
+    sort: [],
+  });
+
+  const [descriptor] = vi.mocked(selectRows).mock.calls[0] ?? [];
+
+  // `LIMIT 0` is a page with no rows and a `hasMore` that says the set is
+  // exhausted, which ends a scroll session silently.
+  expect(descriptor?.limit).toBe(1);
+});
+
+it('leaves a window and an offset the table can actually ask for untouched', async () => {
+  await selectOrdersPage({
+    filters: [],
+    includeTotal: false,
+    limit: 50,
+    offset: 100,
+    sort: [{ column: 'order_id', direction: 'asc' }],
+  });
+
+  const [descriptor] = vi.mocked(selectRows).mock.calls[0] ?? [];
+
+  expect(descriptor?.limit).toBe(50);
+  expect(descriptor?.offset).toBe(100);
+  expect(descriptor?.sort).toStrictEqual([
+    { column: 'order_id', direction: 'asc' },
+  ]);
+});
+
+it('truncates a sort longer than the table has columns', async () => {
+  await selectOrdersPage({
+    filters: [],
+    includeTotal: false,
+    limit: 50,
+    offset: 0,
+    sort: Array.from(
+      { length: MAX_ENTERPRISE_ORDERS_SORT_RULES + 25 },
+      () => ({ column: 'order_id', direction: 'asc' }) as const,
+    ),
+  });
+
+  const [descriptor] = vi.mocked(selectRows).mock.calls[0] ?? [];
+
+  expect(descriptor?.sort).toHaveLength(MAX_ENTERPRISE_ORDERS_SORT_RULES);
+});
+
+it('orders a grouped read by the bounded sort too', async () => {
+  await selectOrdersPage({
+    filters: [],
+    grouping: grouping({ keys: ['order_status'] }),
+    includeTotal: true,
+    limit: 50,
+    offset: 0,
+    sort: Array.from(
+      { length: MAX_ENTERPRISE_ORDERS_SORT_RULES + 25 },
+      () => ({ column: 'order_status', direction: 'desc' }) as const,
+    ),
+  });
+
+  // The grouped read emits one term per key rather than one per sort entry, so
+  // what the bound protects here is the lookup: it reads a sort the builder
+  // would have accepted, not one that grew without limit.
+  const [descriptor] = vi.mocked(selectGroupedRows).mock.calls[0] ?? [];
+
+  expect(descriptor?.sort).toStrictEqual([
+    { direction: 'desc', key: 'order_status' },
+  ]);
 });
 
 it('seeks past a keyset cursor instead of applying an offset', async () => {

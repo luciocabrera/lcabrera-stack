@@ -157,6 +157,52 @@ constants test pins `COLUMNS` to the projected list — and removing it would me
 changing `TableColumn`'s key/render typing in `@lcabrera/ui`, which is a package
 decision rather than this route's.
 
+### What bounds a read of this table
+
+`/_api/enterprise-orders/paginated` is a public, unauthenticated URL (see the
+auth note at the top) over a table this app seeds at scale
+([`db/setup_enterprise_orders.sql`](../../../db/setup_enterprise_orders.sql)),
+so every request-derived number that reaches SQL is bounded. The window and the
+ORDER BY length were added by #706, which made this the last of the three
+paginated routes to close that gap; the sibling tables are `MAX_CAR_SALES_LIMIT`
+/ `MAX_CAR_SALES_SORT_RULES` in
+[`car-sales/ARCHITECTURE.md`](../car-sales/ARCHITECTURE.md) and
+`MAX_WIDE_ALLTYPES_*` in `wide-alltypes-150/config/`.
+
+| Input               | Bound                                     | Where                                                   |
+| ------------------- | ----------------------------------------- | ------------------------------------------------------- |
+| `limit`             | `[1, MAX_ENTERPRISE_ORDERS_LIMIT]`        | `selectOrdersPage`, so **every** entry point is covered |
+| sort terms          | `MAX_ENTERPRISE_ORDERS_SORT_RULES`        | the same place, for the same reason                     |
+| sort/filter columns | `allowedColumns` + `assertSafeIdentifier` | `@lcabrera/server`'s builder                            |
+| group keys          | `MAX_GROUP_KEYS`                          | `sanitizeGroupingByColumns` + `assertGroupDepth`        |
+| grouped rows        | `ENTERPRISE_ORDER_GROUP_MAX_ROWS`         | `selectGroupedRows` — a grouped result, not a page      |
+
+**Two entry points can size this read, and only one of them parses a request.**
+The resource route takes its window from search params through
+`parseOrdersPageParams`; the SSR loader takes its own from `INITIAL_PAGE_SIZE`
+and never touches that parser. So both bounds live in `selectOrdersPage`, the
+one function both reach, rather than in the parser — which is where the sibling
+routes clamp `limit`, and where a clamp would cover half of this route's surface
+and have to be written a second time to cover the rest. #701 found the same split
+on car-sales and bounded that route's sort in its service for exactly this
+reason. `.server/pageWindowContract.test.ts` drives both entry points against a
+mocked executor layer and asserts the descriptor the builder would have run.
+
+**The ceiling is this route's own constant, not a borrowed one.**
+`CLIENT_PAGINATION_ROW_LIMIT` holds the same number but is `/car-sales`'s UI
+pagination decision, so importing it would mean lowering that demo's page size
+quietly changed what a public endpoint serves — the coupling runs in the unsafe
+direction. `ENTERPRISE_ORDER_GROUP_MAX_ROWS` is not the page window either: it
+bounds a grouped result, which is returned whole and never scrolled (ADR-059).
+Neither bound can truncate anything a user can ask for — both readers of this
+table request `INITIAL_PAGE_SIZE`, and a sort longer than the table has columns
+necessarily repeats a column already named.
+
+**`skip` is deliberately not capped**, as on the sibling routes. An offset past
+the end returns an empty page after work bounded by the table rather than by the
+request, so unlike `limit` there is no value of it that makes the response or the
+read unbounded.
+
 ### Grouping — several keys and selected aggregates, server-side (ADR-061 / ADR-063)
 
 **The route's entire opt-in is `isGroupingEnabled: true` on its loader `meta`.**
