@@ -2,7 +2,7 @@
 id: agent-review-verdict-check
 title: Validate a head-bound agent-review verdict on every PR
 owner: agent:claude
-status: active
+status: review
 branch: ci/697-agent-review-verdict-check
 area:
   - .github/workflows/agent-review-verdict.yml
@@ -28,9 +28,9 @@ make `refactor-verifier` emit that verdict alongside its prose report.
 
 ## Status / next
 
-- Current step: implemented and green; exercising the check's four states on
-  this pull request itself, since a green run on good code and a check that is
-  not wired up look identical.
+- Current step: PR #727 is green and every state the check reports — `absent`,
+  `pass`, stale, `fail`, `error` — has been observed on this pull request in
+  Actions, with the evidence on #697. Left as a draft, per dispatch.
 - Blockers: none
-- Next: finish the state probes, record them on #697, then hand to review.
-  Promotion to a blocking check is #698, not this task.
+- Next: review, then merge. Promotion to a blocking check and the `absent`
+  policy are #698, not this task.
