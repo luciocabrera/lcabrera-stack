@@ -50,6 +50,16 @@ const declaredNames = () =>
     match[1].trim(),
   );
 
+/**
+ * The workflow's comments as running prose. Read this way, not line by line: a
+ * YAML comment wraps wherever it must, so matching the raw text would pin the
+ * line breaks rather than what they say.
+ */
+const commentProse = () =>
+  read(WORKFLOW)
+    .replaceAll(/^[ \t]*#[ \t]?/gm, '')
+    .replaceAll(/\s+/gu, ' ');
+
 describe('the agent-review workflow', () => {
   it('publishes a status context that is not empty', () => {
     expect(statusContext()).toBe('Agent review verdict');
@@ -66,11 +76,27 @@ describe('the agent-review workflow', () => {
   });
 
   it('carries the warning, since #698 will read this file', () => {
-    // Read as prose, not as lines: a YAML comment wraps wherever it must, so
-    // matching raw text would pin the line breaks rather than the warning.
-    const prose = read(WORKFLOW)
-      .replaceAll(/^[ \t]*#[ \t]?/gm, '')
-      .replaceAll(/\s+/gu, ' ');
-    expect(prose).toMatch(/ruleset contexts match by name/i);
+    expect(commentProse()).toMatch(/ruleset contexts match by name/i);
+  });
+});
+
+describe('the agent-review workflow — what it deliberately does not do', () => {
+  // An absence is the hardest thing to keep. A comment explaining why something
+  // is missing is exactly what a later refactor removes in good faith, and
+  // "add a concurrency group" is a plausible tidy-up that would reintroduce the
+  // failure it was removed for.
+  it('cancels no run that would publish a status', () => {
+    // Cancelling would leave the cancelled event with no status at all, and the
+    // `issue_comment` run this gate depends on most is bot-triggered — the class
+    // that goes missing in this repository (#698 carries the measurement).
+    //
+    // The hazard is cancellation, not grouping: a group that queues still lets
+    // every event's run publish. Pinning `cancel-in-progress` rather than
+    // `concurrency:` keeps a future non-cancelling group from failing falsely.
+    expect(read(WORKFLOW)).not.toMatch(/cancel-in-progress:[ \t]*true/);
+  });
+
+  it('says why the group is absent, so the absence survives a refactor', () => {
+    expect(commentProse()).toMatch(/no concurrency group/i);
   });
 });

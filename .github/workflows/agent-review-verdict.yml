@@ -30,14 +30,20 @@ permissions:
   pull-requests: read
   statuses: write
 
-# `copilot-review-gate.yml` deliberately has no concurrency group; this one does,
-# and the difference is safe for the reason that file gives for its own choice.
-# Every run reads the head, the comments and the diff from the API rather than
-# from its event payload, so a cancelled run would have posted whatever the run
-# that replaced it posts. Nothing is lost, and the newest run always survives.
-concurrency:
-  group: agent-review-verdict-${{ github.event.pull_request.number || github.event.issue.number }}
-  cancel-in-progress: true
+# No concurrency group, deliberately — the same choice, for the same two reasons,
+# as `copilot-review-gate.yml`. Do not add one back without answering both.
+#
+# Cancelling a superseded run would leave the event it was handling with no
+# status at all, and that bites hardest here: the verdict arrives as a comment
+# posted by an agent, so the `issue_comment` run is the one this gate depends on
+# most — and bot-triggered runs are the ones that go missing in this repository,
+# held at `action_required` or never created at all. #698 carries the
+# measurement. Cancelling would trade a stale window bounded by one run for an
+# open-ended one.
+#
+# Nothing is bought by cancelling either: every run re-reads the head, the
+# comments and the diff from the API rather than from its event payload, so a
+# slow run publishes the same state as the fast one that overtook it.
 
 jobs:
   publish-agent-review-status:
