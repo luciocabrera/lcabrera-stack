@@ -35,9 +35,14 @@ header rejects.
 
 ## Status / next
 
-- Current step: PR #738 open (draft), full gate green, every CI check passing
+- Current step: PR #738 open (draft), round 2 applied, full gate green, every CI
+  check passing
 - Blockers: none
 - Next: blind verification. The PR stays draft until the caller says otherwise.
-  #725's `Copilot review complete` is deliberately left stale — head `498dd02a`,
-  reviewed by Copilot with no run on that head — as the reproducible instance
-  for whoever checks that the sweep corrects a real one.
+- **Do not expect a stale status to be waiting.** #721, #725 and #734 each were
+  one, and each has since been corrected by a run demonstrating the fix — so a
+  checker who looks for them now finds `success` and would reasonably conclude
+  the claim was false. Find a fresh one instead: the two commands in #737 §1
+  list the Copilot reviews and the runs on each head, and a review with no
+  executed run on the head it names is an instance. They occur on their own,
+  often.
