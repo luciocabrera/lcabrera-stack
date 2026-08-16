@@ -123,12 +123,18 @@ const writeSummary = (markdown) => {
   appendFileSync(path, `${markdown}\n`, 'utf8');
 };
 
+/** The swept pull requests, named, or `none` — the count alone hides which. */
+const sweptList = (pullRequests) =>
+  pullRequests.length === 0
+    ? 'none'
+    : pullRequests.map((number) => `#${number}`).join(', ');
+
 const summaryMarkdown = ({ pullRequests, repository, results, text }) =>
   [
     '### Review gate reconcile',
     '',
     `Repository: \`${repository}\``,
-    `Pull requests swept: ${pullRequests.length === 0 ? 'none' : pullRequests.map((number) => `#${number}`).join(', ')}`,
+    `Pull requests swept: ${sweptList(pullRequests)}`,
     '',
     ...results.map((result) => `- ${outcomeLine(result)}`),
     '',

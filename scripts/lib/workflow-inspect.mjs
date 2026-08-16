@@ -20,9 +20,17 @@ const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 export const readRepoFile = (path) =>
   readFileSync(join(REPO_ROOT, path), 'utf8');
 
-/** Every `name:` a workflow declares — workflow, job and step alike. */
+/**
+ * Every `name:` a workflow declares — workflow, job and step alike.
+ *
+ * The value starts at a non-space (`\S`) rather than at `.`: `[ \t]*` and `.`
+ * both match a space, and that overlap is what gives the pattern super-linear
+ * backtracking on a line padded with whitespace (Sonar S8786). Anchoring the
+ * capture to a non-space makes the two halves disjoint and captures the same
+ * text, since the leading run is consumed either way.
+ */
 export const declaredNames = (source) =>
-  [...source.matchAll(/^[ \t]*name:[ \t]*(.+)$/gm)].map((match) =>
+  [...source.matchAll(/^[ \t]*name:[ \t]*(\S.*)$/gm)].map((match) =>
     match[1].trim(),
   );
 

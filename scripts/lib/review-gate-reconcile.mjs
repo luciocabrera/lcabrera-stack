@@ -123,9 +123,12 @@ export const shouldPublishStatus = ({ current, next } = {}) => {
   return !(TERMINAL_STATES.has(current.state) && next.state === 'pending');
 };
 
+/** The gate's own last line, when it said anything, as a trailing clause. */
+const outcomeDetail = (output) => (output ? ` — ${output}` : '');
+
 /** One line per gate run, for the log and the job summary alike. */
 export const outcomeLine = ({ gate, number, ok, output }) =>
-  `#${number} ${gate}: ${ok ? 'ok' : 'FAILED'}${output ? ` — ${output}` : ''}`;
+  `#${number} ${gate}: ${ok ? 'ok' : 'FAILED'}${outcomeDetail(output)}`;
 
 /**
  * What the sweep reports at the end.
