@@ -75,9 +75,11 @@ jobs:
     if: github.event_name != 'issue_comment' || github.event.issue.pull_request
     runs-on: ubuntu-latest
     steps:
-      # The merge ref for a pull_request run (actions/checkout's default), the
-      # dispatched ref otherwise — the default branch for an issue_comment or a
-      # workflow_dispatch one. Same reason as pr-standards.yml:
+      # The merge ref for a pull_request run (actions/checkout's default); the
+      # default branch for an issue_comment one, which GitHub always runs from
+      # there; and the DISPATCHED ref for a workflow_dispatch, which is the
+      # default branch only when nobody chose another — not the same rule as the
+      # line before it. Same reason as pr-standards.yml:
       # GitHub runs the workflow file from the merge result, so pinning the
       # checkout to the head would put the YAML and the scripts it invokes on
       # different commits. Nothing here reads git — the head SHA, the comments and

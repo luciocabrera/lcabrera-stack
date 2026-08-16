@@ -16,7 +16,7 @@
  * codes instead, for a local run.
  *
  * Usage (from the repo root):
- *   vp run agent-review:verify -- --pr 727
+ *   vp run agent-review:verify -- --pr 727 [--repo owner/name]
  *   vp run agent-review:verify -- --pr 727 --dry-run --strict
  *
  * `--if-changed` posts only when the head does not already carry this
@@ -159,7 +159,13 @@ const writeSummary = async (markdown) => {
   await appendFile(path, `${markdown}\n`, 'utf8');
 };
 
+/**
+ * `--repo` first, matching `copilot-review-status.mjs`, so the reconcile sweep
+ * can tell both gates which repository it listed instead of each one resolving
+ * its own and agreeing by coincidence.
+ */
 const resolveRepo = () =>
+  flagValue('--repo') ??
   process.env.GITHUB_REPOSITORY ??
   runGh(['repo', 'view', '--json', 'nameWithOwner', '--jq', '.nameWithOwner']);
 

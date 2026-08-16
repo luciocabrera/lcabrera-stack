@@ -17,6 +17,7 @@
  * Usage (from the repo root):
  *   vp run review-gates:reconcile
  *   vp run review-gates:reconcile -- --pr 738 --dry-run
+ *   vp run review-gates:reconcile -- --repo owner/name
  *
  * Exit codes: 0 = every gate run reported; 1 = the pull requests could not be
  * listed, or at least one gate run failed. It never exits 0 on a sweep that
@@ -33,6 +34,7 @@ import { flagValue } from './lib/cli-input.mjs';
 import { errorMessage } from './lib/error-message.mjs';
 import { runGh } from './lib/gh-exec.mjs';
 import {
+  gateArgs,
   openPullRequestNumbers,
   outcomeLine,
   sweepSummary,
@@ -75,15 +77,21 @@ const fetchOpenPullRequests = (repository) =>
     ),
   );
 
-/** Runs one gate script for one pull request, capturing whatever it printed. */
-const runGate = ({ extraArgs, gate, number }) => {
-  const args = [
-    join(SCRIPTS_DIR, gate.script),
-    '--pr',
-    String(number),
-    '--if-changed',
-    ...extraArgs,
-  ];
+/**
+ * Runs one gate script for one pull request, capturing whatever it printed.
+ *
+ * The argv is built by `gateArgs`, not here, because two of its entries are
+ * load-bearing and neither is visible in the effect: `--if-changed` is the whole
+ * of the sweep's idempotence, and `--repo` is what stops a gate resolving a
+ * different repository from the one the sweep listed. Both are unit-tested there.
+ */
+const runGate = ({ extraArgs, gate, number, repository }) => {
+  const args = gateArgs({
+    extraArgs,
+    number,
+    repository,
+    script: join(SCRIPTS_DIR, gate.script),
+  });
   try {
     const output = execFileSync(process.execPath, args, {
       encoding: 'utf8',
@@ -153,7 +161,7 @@ const main = () => {
   );
   const results = pullRequests.flatMap((number) =>
     GATES.map((gate) => {
-      const result = runGate({ extraArgs, gate, number });
+      const result = runGate({ extraArgs, gate, number, repository });
       console.log(outcomeLine(result));
       return result;
     }),

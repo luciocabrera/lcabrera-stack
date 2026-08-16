@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
+  gateArgs,
   openPullRequestNumbers,
   outcomeLine,
   publishedStatus,
   shouldPublishStatus,
   sweepSummary,
 } from './review-gate-reconcile.mjs';
+import { readRepoFile } from './workflow-inspect.mjs';
 
 // The sweep exists to correct a status nobody recomputed, so every assertion
 // here is written to be able to fail on the shape that would make it useless:
@@ -63,6 +65,70 @@ describe('choosing what to sweep', () => {
     expect(
       openPullRequestNumbers([[{ number: 0 }, { number: null }, {}]]),
     ).toEqual([]);
+  });
+});
+
+describe('the argv the sweep hands each gate', () => {
+  // Asserted on the ARGV rather than on the effect, deliberately: both entries
+  // below are invisible in the outcome of getting them wrong — a sweep missing
+  // `--if-changed` still reports "ok" on every line while quietly re-posting an
+  // identical status every pass, and one missing `--repo` still works whenever
+  // the gate happens to resolve the same repository by itself. An end-to-end
+  // test would need a live pull request and would still not fail on the second.
+  const args = () =>
+    gateArgs({
+      number: 738,
+      repository: 'luciocabrera/vite-react-compiler',
+      script: '/repo/scripts/copilot-review-status.mjs',
+    });
+
+  it('is exactly this, so a silent addition or removal shows up here', () => {
+    expect(args()).toEqual([
+      '/repo/scripts/copilot-review-status.mjs',
+      '--pr',
+      '738',
+      '--repo',
+      'luciocabrera/vite-react-compiler',
+      '--if-changed',
+    ]);
+  });
+
+  it('always passes --if-changed, which IS the sweep’s idempotence', () => {
+    expect(args()).toContain('--if-changed');
+  });
+
+  it('tells the gate which repository the sweep listed', () => {
+    const argv = args();
+    expect(argv[argv.indexOf('--repo') + 1]).toBe(
+      'luciocabrera/vite-react-compiler',
+    );
+  });
+
+  it('stringifies the number, so 738 and "738" build one argv', () => {
+    expect(
+      gateArgs({ number: '738', repository: 'o/r', script: 's.mjs' }),
+    ).toEqual(gateArgs({ number: 738, repository: 'o/r', script: 's.mjs' }));
+  });
+
+  it('appends the caller’s extra flags after its own', () => {
+    expect(
+      gateArgs({
+        extraArgs: ['--dry-run'],
+        number: 738,
+        repository: 'o/r',
+        script: 's.mjs',
+      }).at(-1),
+    ).toBe('--dry-run');
+  });
+
+  it('is what the sweep actually spawns — not a parallel definition', () => {
+    // The assertions above are worth nothing if the sweep builds its own argv
+    // beside them, so this pins the wiring: one child spawn in that file, and it
+    // takes the argv from `gateArgs`.
+    const source = readRepoFile('scripts/reconcile-review-gates.mjs');
+    expect(source.match(/execFileSync\(/g)).toHaveLength(1);
+    expect(source).toMatch(/execFileSync\(\s*process\.execPath,\s*args\b/);
+    expect(source).toMatch(/const args = gateArgs\(/);
   });
 });
 

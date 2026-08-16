@@ -41,7 +41,7 @@ const pullNumber = (pull) =>
  *
  * No filtering. A draft is included because the Copilot gate has a state that
  * only drafts produce, and a fork pull request is included because the sweep
- * runs from the default branch with a token that can publish — which the fork's
+ * runs in the base repository with a token that can publish — which the fork's
  * own event-driven run cannot.
  *
  * `--slurp` wraps each page in an outer array, so one page arrives as `[[…]]`;
@@ -122,6 +122,35 @@ export const shouldPublishStatus = ({ current, next } = {}) => {
   }
   return !(TERMINAL_STATES.has(current.state) && next.state === 'pending');
 };
+
+/**
+ * The argv the sweep runs one gate script with.
+ *
+ * Here rather than inline at the spawn, because two of these entries are
+ * load-bearing and neither is visible in the result of getting them wrong:
+ *
+ * - **`--if-changed` is the whole of the sweep's idempotence.** Without it every
+ *   pass re-posts an identical status, so "the status moved" stops meaning
+ *   anything and a pull request nobody reviewed is no longer left alone. Drop it
+ *   and the sweep still looks like it works.
+ * - **`--repo` is what stops the gate resolving a different repository** from
+ *   the one the sweep listed. The sweep may take it from `--repo`, the
+ *   environment, or `gh repo view`; passing the answer on means the parent and
+ *   the child cannot disagree about which repository a pull request number
+ *   belongs to, instead of agreeing by coincidence.
+ *
+ * `--pr` is stringified here rather than at the call site so a number and a
+ * numeric string produce the same argv.
+ */
+export const gateArgs = ({ extraArgs = [], number, repository, script }) => [
+  script,
+  '--pr',
+  String(number),
+  '--repo',
+  repository,
+  '--if-changed',
+  ...extraArgs,
+];
 
 /** The gate's own last line, when it said anything, as a trailing clause. */
 const outcomeDetail = (output) => (output ? ` — ${output}` : '');

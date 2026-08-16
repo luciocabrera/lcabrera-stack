@@ -101,9 +101,12 @@ jobs:
       pull-requests: read
       statuses: write
     steps:
-      # The default branch, which is where a scheduled or dispatched run always
-      # executes from. Nothing here reads the working tree beyond these scripts —
-      # every head SHA, review and comment comes from the API.
+      # The ref this run started from: the default branch for a `schedule`, which
+      # GitHub always runs from there; the DISPATCHED ref for a
+      # `workflow_dispatch`, which is the default branch only when nobody chose
+      # another (docs/tooling/review-gate-reconcile.md has the measured rule).
+      # Nothing here reads the working tree beyond these scripts — every head
+      # SHA, review and comment comes from the API.
       - name: Check out the scripts this sweep runs
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
