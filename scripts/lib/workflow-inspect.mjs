@@ -43,6 +43,39 @@ export const declaredNames = (source) =>
 export const commentProse = (source) =>
   source.replaceAll(/^[ \t]*#[ \t]?/gm, '').replaceAll(/\s+/gu, ' ');
 
+/** A step's opening line: its indentation, and the name it declares. */
+const STEP_LINE = /^([ \t]*)-[ \t]+name:[ \t]*(\S.*)$/;
+
+/**
+ * One workflow step's text, from its `- name:` line to the next step at the same
+ * indentation, or `undefined` when no step carries that name.
+ *
+ * Why a test needs this rather than a `toMatch` over the whole file: a condition
+ * such as `if: steps.<id>.outcome == 'failure'` is shared by every step reacting
+ * to the same failure, so an assertion anchored on it is satisfied by any one of
+ * them and keeps passing with the others deleted. An anchor has to appear only in
+ * the thing it protects, and a step's name is the only thing here that does.
+ *
+ * Assumes this repository's convention that a step opens with `- name:`. One
+ * written another way returns `undefined` — a failed assertion at the call site,
+ * not a silent pass.
+ */
+export const stepBlock = (source, name) => {
+  const lines = source.split('\n');
+  const start = lines.findIndex(
+    (line) => STEP_LINE.exec(line)?.[2].trim() === name,
+  );
+  if (start === -1) {
+    return undefined;
+  }
+  const indent = STEP_LINE.exec(lines[start])[1];
+  const after = lines.slice(start + 1);
+  const next = after.findIndex((line) => STEP_LINE.exec(line)?.[1] === indent);
+  return [lines[start], ...(next === -1 ? after : after.slice(0, next))].join(
+    '\n',
+  );
+};
+
 /**
  * The value of a single-quoted `const NAME = '…'` in a script, so a test
  * compares against the one definition rather than a second copy of the string.

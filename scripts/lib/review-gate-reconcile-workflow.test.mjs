@@ -5,6 +5,7 @@ import {
   declaredNames,
   readRepoFile,
   singleQuotedConst,
+  stepBlock,
 } from './workflow-inspect.mjs';
 
 // What this file holds in place is a workflow that is easy to break by tidying:
@@ -22,6 +23,17 @@ const AGENT_GATE = '.github/workflows/agent-review-verdict.yml';
 
 const COPILOT_LIB = 'scripts/lib/copilot-review.mjs';
 const AGENT_SCRIPT = 'scripts/verify-agent-review.mjs';
+
+/**
+ * The three steps of the reconcile job that are asserted individually.
+ *
+ * By name, because a name is the only thing in a step that belongs to it alone —
+ * the `if:` condition the failure steps react to is shared, and anchoring on it
+ * lets either step be deleted with the suite still green.
+ */
+const SWEEP_STEP = 'Reconcile every open pull request';
+const TRACKING_ISSUE_STEP = 'File or update the tracking issue';
+const FAIL_RUN_STEP = 'Fail the run when the sweep did';
 
 /** Both status contexts, from their one definition apiece. */
 const statusContexts = () => {
@@ -99,10 +111,38 @@ describe('the reconcile workflow — that it does not contradict the gates', () 
     expect(readRepoFile(RECONCILE)).toMatch(/cancel-in-progress:[ \t]*false/);
   });
 
-  it('fails loudly, because a silent sweep is indistinguishable from a healthy one', () => {
-    const source = readRepoFile(RECONCILE);
-    expect(source).toMatch(/steps\.sweep\.outcome == 'failure'/);
-    expect(source).toMatch(/issues\.create/);
+  // "Fails loudly" is TWO mechanisms — it tells someone, and it fails the run —
+  // and they are asserted separately because either one alone still looks fine.
+  // Both steps carry `if: steps.sweep.outcome == 'failure'`, so an assertion
+  // anchored on that condition is satisfied by whichever step survives: delete
+  // the other and the suite stays green. Each test below anchors on the step
+  // NAME, which appears only in the step it protects.
+  it('tells someone when the sweep fails, rather than only going red', () => {
+    const step = stepBlock(readRepoFile(RECONCILE), TRACKING_ISSUE_STEP);
+    expect(
+      step,
+      `no step named "${TRACKING_ISSUE_STEP}" — a scheduled red X is wallpaper, so the failure has to reach a person`,
+    ).toBeDefined();
+    expect(step).toMatch(/steps\.sweep\.outcome == 'failure'/);
+    expect(step).toMatch(/issues\.create/);
+  });
+
+  it('fails the run the sweep failed in, so the schedule is not green-on-failure', () => {
+    const step = stepBlock(readRepoFile(RECONCILE), FAIL_RUN_STEP);
+    expect(
+      step,
+      `no step named "${FAIL_RUN_STEP}" — the sweep step is continue-on-error, so without this the job reports success`,
+    ).toBeDefined();
+    expect(step).toMatch(/steps\.sweep\.outcome == 'failure'/);
+    expect(step).toMatch(/exit 1/);
+  });
+
+  it('keeps the sweep step continue-on-error, which is why both of the above exist', () => {
+    // If this ever stops being true the two steps above become dead weight, and
+    // the reason they are separate stops being obvious.
+    expect(stepBlock(readRepoFile(RECONCILE), SWEEP_STEP)).toMatch(
+      /continue-on-error:[ \t]*true/,
+    );
   });
 });
 
