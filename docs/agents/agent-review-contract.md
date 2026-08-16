@@ -253,7 +253,12 @@ line is exactly:
 Agent-review verdict: <head_sha>
 ```
 
-followed by the document in a fenced `json` block.
+followed by the document in a fenced `json` block. **Both fences are lines of
+their own**, and the opening one's info string is exactly `json` — a ` ```jsonc `
+block is not this, and a fence quoted mid-line neither opens nor closes one. That
+is not pedantry: matched loosely, a verdict whose `summary` quotes a code fence
+truncates its own document, and the reviewer's honest verdict is rejected for its
+prose.
 
 That is §6's override shape, deliberately, rather than a second convention: a
 trust-bearing comment on this pull request is located by its first line and the

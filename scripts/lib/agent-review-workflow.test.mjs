@@ -80,6 +80,30 @@ describe('the agent-review workflow', () => {
   });
 });
 
+describe('the gate script — every line it prints', () => {
+  // A runner reads a `::` directive at the START of a log line, so any value
+  // that can introduce a newline can introduce a directive. Every value this
+  // gate prints is untrusted: the validator's messages quote the verdict
+  // document, and a caught error carries `gh`'s stderr.
+  //
+  // Asserted at the source rather than per call site, because the defect this
+  // encodes was a MISSED site — flattening went onto the success path while the
+  // `catch` kept its raw interpolation. A test naming the sites that existed
+  // would have passed then too; this one fails on a site that is added.
+  it('writes only through the flattening helpers', () => {
+    const rawWrites = [
+      ...read(GATE_SCRIPT).matchAll(/console\.(?:log|error)\([ \t]*([^\n]*)/g),
+    ]
+      .map((match) => match[1].trim())
+      .filter((argument) => !argument.startsWith('oneLine('));
+    expect(rawWrites).toEqual([]);
+  });
+
+  it('writes at all, so the assertion above is not vacuous', () => {
+    expect(read(GATE_SCRIPT)).toMatch(/console\.(?:log|error)\(/);
+  });
+});
+
 describe('the agent-review workflow — what it deliberately does not do', () => {
   // An absence is the hardest thing to keep. A comment explaining why something
   // is missing is exactly what a later refactor removes in good faith, and

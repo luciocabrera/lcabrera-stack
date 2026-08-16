@@ -61,7 +61,7 @@ describe('markerSha', () => {
 
 describe('jsonBlock', () => {
   it('returns the contents of the first fenced json block', () => {
-    expect(jsonBlock(verdictBody(HEAD, '{"a":1}'))).toBe('{"a":1}\n');
+    expect(jsonBlock(verdictBody(HEAD, '{"a":1}'))).toBe('{"a":1}');
   });
 
   it('returns undefined when the block is never closed', () => {
@@ -74,6 +74,63 @@ describe('jsonBlock', () => {
     expect(
       jsonBlock(`Agent-review verdict: ${HEAD}\n\n{"a":1}\n`),
     ).toBeUndefined();
+  });
+
+  // Every case below fails SAFE either way — it yields `error`, never a false
+  // pass. They are fixed because a false positive is what kills a gate like
+  // this (#697 §3): a reviewer whose honest verdict is rejected because its
+  // prose contained a backtick learns to ignore the check.
+  it('does not treat a jsonc block as a json one', () => {
+    // '```jsonc'.indexOf('```json') === 0, so a substring match accepts it and
+    // then parses contents that are not JSON. §2.6 says a `json` block.
+    expect(
+      jsonBlock(
+        `Agent-review verdict: ${HEAD}\n\n\`\`\`jsonc\n{"a":1}\n\`\`\`\n`,
+      ),
+    ).toBeUndefined();
+  });
+
+  it('does not treat any fence-prefixed word as json', () => {
+    expect(
+      jsonBlock(
+        `Agent-review verdict: ${HEAD}\n\n\`\`\`json5\n{"a":1}\n\`\`\`\n`,
+      ),
+    ).toBeUndefined();
+  });
+
+  it('is not closed by a fence quoted inside the document', () => {
+    // Entirely plausible in a review OF this repository: a finding quoting a
+    // code fence truncated its own verdict, which then failed to parse.
+    const document = '{"summary":"the docs show ``` around it"}';
+    expect(
+      jsonBlock(
+        `Agent-review verdict: ${HEAD}\n\n\`\`\`json\n${document}\n\`\`\`\n`,
+      ),
+    ).toBe(document);
+  });
+
+  it('is not opened by a fence quoted mid-line', () => {
+    expect(
+      jsonBlock(
+        `Agent-review verdict: ${HEAD}\n\nprose about \`\`\`json blocks\n`,
+      ),
+    ).toBeUndefined();
+  });
+
+  it('tolerates trailing whitespace on the fence lines', () => {
+    expect(
+      jsonBlock(
+        `Agent-review verdict: ${HEAD}\n\n\`\`\`json  \n{"a":1}\n\`\`\`  \n`,
+      ),
+    ).toBe('{"a":1}');
+  });
+
+  it('tolerates the CRLF GitHub sends', () => {
+    expect(
+      jsonBlock(
+        `Agent-review verdict: ${HEAD}\r\n\r\n\`\`\`json\r\n{"a":1}\r\n\`\`\`\r\n`,
+      ).trim(),
+    ).toBe('{"a":1}');
   });
 });
 

@@ -38,6 +38,29 @@ import { validatePullRequestVerdict } from './lib/agent-review-validate.mjs';
 
 const STATUS_CONTEXT = 'Agent review verdict';
 
+/**
+ * Every line this gate prints goes through one of these two.
+ *
+ * A runner reads a `::` directive at the **start of a log line**, so any value
+ * that can introduce a newline can introduce a directive — and every value
+ * printed below is untrusted: the validator's messages quote the verdict
+ * document, and a caught error carries `gh`'s stderr.
+ *
+ * Routing the writes through one pair is the point. Flattening was added to the
+ * success path first and the `catch` was missed, because the fix chased the
+ * reported instance instead of enumerating the sinks; a new `console.` call is
+ * now the thing to notice, and
+ * `scripts/lib/agent-review-workflow.test.mjs` fails on one that does not use
+ * these.
+ */
+const printLine = (text) => {
+  console.log(oneLine(text));
+};
+
+const printProblem = (text) => {
+  console.error(oneLine(text));
+};
+
 /** Runs `gh api --paginate --jq`, whose output is one JSON value per line. */
 const ghJsonLines = (path, jq) =>
   runGh(['api', '--paginate', path, '--jq', jq])
@@ -94,7 +117,7 @@ const postStatus = (repo, headSha, description) => {
       ...(target ? ['-f', `target_url=${target}`] : []),
     ]);
   } catch (error) {
-    console.error(
+    printProblem(
       `::warning::could not post the commit status: ${errorMessage(error)}`,
     );
   }
@@ -140,12 +163,9 @@ const main = async () => {
   });
 
   const description = statusDescription(result);
-  console.log(`${STATUS_CONTEXT}: ${description}`);
+  printLine(`${STATUS_CONTEXT}: ${description}`);
   for (const error of result.errors) {
-    // Flattened for the same reason the description is: these messages quote
-    // the verdict document, and a runner reads a `::` directive at the start of
-    // a log line — so a value that can add a newline can add a directive.
-    console.log(`  - ${oneLine(error)}`);
+    printLine(`  - ${error}`);
   }
   await writeSummary(summaryMarkdown(result, { headSha, pr }));
   if (!dryRun) {
@@ -157,6 +177,6 @@ const main = async () => {
 try {
   await main();
 } catch (error) {
-  console.error(`agent-review:verify failed: ${errorMessage(error)}`);
+  printProblem(`agent-review:verify failed: ${errorMessage(error)}`);
   process.exitCode = 1;
 }

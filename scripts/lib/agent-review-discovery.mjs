@@ -33,6 +33,7 @@ export const MAX_VERDICT_BODY_BYTES = 65_536;
 const MARKER_LINE = /^Agent-review verdict: ([0-9a-f]{40})$/;
 
 const FENCE = '```';
+const OPENING_FENCE = `${FENCE}json`;
 
 /**
  * The head SHA a comment claims to be a verdict for, or `undefined` when its
@@ -50,21 +51,33 @@ export const markerSha = (body) => {
 /**
  * The contents of the first fenced `json` block, or `undefined`.
  *
- * Scanned with `indexOf` rather than a lazy regex delimiter hunt: the regex form
- * of this is the classic backtracking shape (Sonar S8786), and the verdict is
- * attacker-influenced text. (pure)
+ * **Both fences are whole lines**, and that is the correctness of this function
+ * rather than a nicety. Matched as substrings instead, an opening ```` ```jsonc ````
+ * is accepted — `'```jsonc'` starts with `'```json'` — and its contents are then
+ * parsed as JSON; and the closer is the first ```` ``` `` anywhere after the
+ * content, so a verdict whose `summary` quotes a code fence truncates its own
+ * document. Both yield `error` rather than a false pass, so neither is a hole —
+ * they are false positives, and a reviewer whose honest verdict is rejected
+ * because its prose contained a backtick is how a gate like this stops being
+ * read (#697 §3).
+ *
+ * A JSON string cannot contain a raw newline, so a fence quoted inside the
+ * document can never be alone on a line — which is why matching whole lines
+ * settles that case completely rather than narrowing it.
+ *
+ * Still no regex: the delimiter hunt written as one is the classic backtracking
+ * shape (Sonar S8786), and this is attacker-influenced text. (pure)
  */
 export const jsonBlock = (body) => {
-  const open = body.indexOf(`${FENCE}json`);
+  const lines = body.split('\n');
+  const open = lines.findIndex((line) => line.trim() === OPENING_FENCE);
   if (open === -1) {
     return undefined;
   }
-  const contentStart = body.indexOf('\n', open);
-  if (contentStart === -1) {
-    return undefined;
-  }
-  const close = body.indexOf(FENCE, contentStart);
-  return close === -1 ? undefined : body.slice(contentStart + 1, close);
+  const close = lines.findIndex(
+    (line, index) => index > open && line.trim() === FENCE,
+  );
+  return close === -1 ? undefined : lines.slice(open + 1, close).join('\n');
 };
 
 /**
