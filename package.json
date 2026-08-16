@@ -7,6 +7,7 @@
     "adr:list": "node scripts/verify-adrs.mjs --list",
     "adr:new": "node scripts/new-adr.mjs",
     "adr:verify": "node scripts/verify-adrs.mjs",
+    "agent-review:verify": "node scripts/verify-agent-review.mjs",
     "api-surface:verify": "node scripts/verify-api-surface.mjs",
     "attw:verify": "node scripts/verify-attw.mjs",
     "bench:array-ops": "node scripts/bench-array-operations.mjs",

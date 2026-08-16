@@ -82,7 +82,13 @@ Base: origin/main    Branch: <branch>
 <paste `git diff origin/main...HEAD`, or give the exact command if it is large>
 
 Read docs/agents/refactor-verified-contract.md, then follow it. Return the §5 schema.
+Post nothing — this flow reads your report in-band.
 ```
+
+The verifier returns the machine-readable `agent-review-verdict/v1` document
+after that report as well. This flow posts nothing, so it stays in-band; `/epic`
+is where it is posted and where CI reads it
+([`agent-review-contract.md`](../../../docs/agents/agent-review-contract.md) §2.6).
 
 > **This is the step the whole workflow rests on.** Nothing the builder wrote —
 > its report, its round summary, its confidence, its explanation of a tricky bit

@@ -1,0 +1,80 @@
+name: Agent Review Gate
+
+# Reads the agent-review verdict posted for the pull request's current head and
+# validates it against docs/agents/agent-review-contract.md §2.4 — parse, schema,
+# head binding (§2.5), admissibility, consistency. It runs NO model: the repo-aware
+# review already happens locally under /epic and /refactor-verified, and CI's job
+# is to check the document it produced. Nothing here needs a model credential, and
+# the gate is deterministic and unit-tested because of it.
+#
+# Advisory: the commit status is always `success` and the state lives in its
+# description, so this check cannot be the reason a merge is refused. Promoting it
+# is issue #698.
+#
+# `issue_comment` is a trigger, not a nicety: a verdict posted after the final push
+# arrives with no `pull_request` event behind it, and without this the check would
+# report `absent` on a pull request that has just been reviewed with no way to
+# refresh it. GitHub runs an `issue_comment` workflow from the DEFAULT branch, so
+# that path only works once this file is on `main` — the `pull_request` path runs
+# from the merge ref and works on the branch that adds it.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  issue_comment:
+    types: [created, edited]
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+  statuses: write
+
+# No concurrency group, deliberately — the same choice, for the same two reasons,
+# as `copilot-review-gate.yml`. Do not add one back without answering both.
+#
+# Cancelling a superseded run would leave the event it was handling with no
+# status at all, and that bites hardest here: the verdict arrives as a comment
+# posted by an agent, so the `issue_comment` run is the one this gate depends on
+# most — and bot-triggered runs are the ones that go missing in this repository,
+# held at `action_required` or never created at all. #698 carries the
+# measurement. Cancelling would trade a stale window bounded by one run for an
+# open-ended one.
+#
+# Nothing is bought by cancelling either: every run re-reads the head, the
+# comments and the diff from the API rather than from its event payload, so a
+# slow run publishes the same state as the fast one that overtook it.
+
+jobs:
+  publish-agent-review-status:
+    # This name must NOT be `Agent review verdict`. A job's check run and a
+    # commit status share one namespace on the PR, and ruleset contexts match by
+    # name — so a job named after the status would put a second, always-green
+    # check under that name, and the gate #698 promotes could be satisfied by
+    # "the workflow ran" instead of "a valid verdict exists for this head".
+    # `copilot-review-gate.yml` carries the same warning; this one was written
+    # without reading it, the collision reached the pull request's check list,
+    # and `scripts/lib/agent-review-workflow.test.mjs` now asserts it instead.
+    name: Publish the agent review verdict status
+    # `issue_comment` fires for issues too; `.pull_request` is present only when
+    # the comment is on a pull request.
+    if: github.event_name == 'pull_request' || github.event.issue.pull_request
+    runs-on: ubuntu-latest
+    steps:
+      # The merge ref for a pull_request run (actions/checkout's default), the
+      # default branch for an issue_comment one. Same reason as pr-standards.yml:
+      # GitHub runs the workflow file from the merge result, so pinning the
+      # checkout to the head would put the YAML and the scripts it invokes on
+      # different commits. Nothing here reads git — the head SHA, the comments and
+      # the diff all come from the API — so a shallow checkout is enough.
+      - name: Check out the scripts this gate runs
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Validate the verdict for this head
+        # The verdict is untrusted input from a pull request comment. It reaches
+        # the validator through the API, never through a shell interpolation, and
+        # is parsed as JSON under a size cap — never evaluated.
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
+        run: node scripts/verify-agent-review.mjs

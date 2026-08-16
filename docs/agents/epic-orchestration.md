@@ -135,15 +135,17 @@ merge, and nothing lands until every thread from both readers is resolved.
 Spawn one [`refactor-verifier`](../../.claude/agents/refactor-verifier.md) per PR.
 Again the prompt is short, and again the short part is load-bearing:
 
-> PR `#<n>`, issue `#<i>`, worktree `<path>`. Post your findings to the PR.
+> PR `#<n>`, issue `#<i>`, worktree `<path>`. Post your findings and your verdict
+> to the PR.
 
 Give it the issue number so it can read the Scope and Acceptance Criteria for
 itself. Give it **nothing** about how the change was built — no summary of the
 developer's approach, no plan, no PR body. That is the blindness §1 is about, and
 "context" is exactly the wrong thing to add.
 
-The second sentence is the reviewer's dispatch parameter. Its findings go **to
-GitHub**, not only to you, so the record is where the next reader looks:
+The second sentence is the reviewer's dispatch parameter, and it asks for **two**
+postings, because a review has two readers. The prose goes where the next human
+looks:
 
 ```bash
 gh pr review <n> --comment --body-file .tmp/epic-<e>/review-<n>.md
@@ -151,6 +153,22 @@ gh pr review <n> --comment --body-file .tmp/epic-<e>/review-<n>.md
 
 For line-anchored comments use `gh api repos/{owner}/{repo}/pulls/{n}/reviews`
 with a `comments[]` array of `{path, line, body}`.
+
+The **verdict document** goes where the merge bar looks — a timeline comment
+whose first line is the marker and the head SHA, which the `Agent review verdict`
+check validates against
+[`agent-review-contract.md`](agent-review-contract.md) §2.4:
+
+```bash
+gh pr comment <n> --body-file .tmp/epic-<e>/verdict-<n>.md
+```
+
+**`gh pr review` will not do for the verdict.** A review body is a different
+collection that the check does not read, and it fires no `issue_comment` event,
+so a verdict posted that way is invisible and cannot refresh a check that has
+already reported `absent`. If the reviewer returns a report with no verdict
+document, that is a defect in the review — ask for it rather than writing one
+yourself, which would make you the reviewer of a change you dispatched.
 
 **The internal reviewer posts `--comment` or `--request-changes`. Never
 `--approve`, and never anything that claims to be an approval.** Developer and
@@ -242,6 +260,13 @@ All of it, every time. Any failure aborts the merge.
       checked by the GraphQL query above, not by eye
 - [ ] Every CI check green, including SonarCloud's strict gate. A local green gate
       does **not** predict Sonar
+- [ ] The `Agent review verdict` **commit status** reports `pass` **for the
+      commit you are merging** — not the workflow's own row, which is green
+      whenever the job ran. It is advisory, so it will not stop you, which is
+      exactly why it is on this list. `fail` names a blocking finding, `error`
+      means the verdict itself is unusable, and `absent` means nothing answered
+      for this head: re-post the verdict, or re-review, but do not merge past it
+      silently
 - [ ] `mergeable` is not `CONFLICTING`
 - [ ] The full [quality gate](../../.github/skills/quality-gate-workflow/SKILL.md)
       passed **on the final commit**, not on an earlier one
