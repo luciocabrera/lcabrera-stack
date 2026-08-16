@@ -144,10 +144,17 @@ Waiting up to one interval is the ordinary answer. When that is too long:
    gh workflow run review-gate-reconcile.yml -f pr=<n>
    ```
 
-   **Precondition:** `workflow_dispatch` resolves against the workflow file on
-   the default branch, so this works for a pull request only once these
-   workflows are on `main` — the same rule that made the agent-review gate's
-   `issue_comment` path inert until #727 merged.
+   **Precondition, and it is narrower than it looks.** The API resolves a
+   workflow by **filename against the default branch**, but reads the trigger and
+   the job from the ref you dispatch. Measured on #738 while none of this was on
+   `main`: `--ref <branch>` dispatches of `copilot-review-gate.yml` and
+   `agent-review-verdict.yml` both ran and published, from the branch's copy,
+   because those filenames already existed on `main` — while
+   `review-gate-reconcile.yml` returned `HTTP 404: workflow … not found on the
+default branch`. So a **new** workflow cannot be dispatched until it merges; a
+   new `workflow_dispatch` trigger on an existing one can. Do not generalise this
+   from the `issue_comment` rule in the agent-review gate's header — that one is
+   about which ref the workflow _runs from_, and it is a different rule.
 
 Neither of these is the hand-posted status in
 [`copilot-review-gate.md`](./copilot-review-gate.md#break-glass); both recompute
