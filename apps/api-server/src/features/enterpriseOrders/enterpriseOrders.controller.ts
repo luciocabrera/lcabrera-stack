@@ -4,6 +4,7 @@ import {
   DEFAULT_PAGE_LIMIT,
   ENTERPRISE_ORDER_ALLOWED_COLUMNS,
   HttpError,
+  MAX_ENTERPRISE_ORDERS_LIMIT,
 } from 'api-shared';
 
 import type { EnterpriseOrdersRepository } from './enterpriseOrders.repository';
@@ -69,6 +70,7 @@ export const createEnterpriseOrdersController = ({
       });
       const limit = readQueryInteger({
         fallback: DEFAULT_PAGE_LIMIT,
+        max: MAX_ENTERPRISE_ORDERS_LIMIT,
         min: 1,
         value: request.query.limit,
       });

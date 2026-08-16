@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 
-import { HttpError } from 'api-shared';
+import { HttpError, MAX_DISTINCT_LIMIT } from 'api-shared';
 import { describe, expect, it, vi } from 'vite-plus/test';
 
 import type { DistinctRepository } from './distinct.repository';
@@ -58,6 +58,53 @@ describe('createDistinctController', () => {
     });
     expect(json).toHaveBeenCalledWith({ hasMore: false, values: ['Pending'] });
     expect(next).not.toHaveBeenCalled();
+  });
+
+  /**
+   * Express bounds the page window by *clamping* in the controller, where
+   * `readQueryInteger` already applies `min` — the Fastify server rejects with a
+   * 400 in its route schema instead. The divergence is deliberate and predates
+   * this bound: `wideAlltypes150` has always answered this way on each server,
+   * and the two exist to be compared, so each keeps its own idiom.
+   */
+  it('clamps a limit above MAX_DISTINCT_LIMIT to the ceiling', async () => {
+    const getDistinctValues = vi
+      .fn()
+      .mockResolvedValue({ hasMore: false, values: [] });
+
+    await invokeGetDistinctValues({
+      query: {
+        columnName: 'order_status',
+        limit: String(MAX_DISTINCT_LIMIT + 1),
+        schemaName: 'public',
+        tableName: 'enterprise_orders',
+      },
+      repository: { getDistinctValues },
+    });
+
+    expect(getDistinctValues).toHaveBeenCalledWith(
+      expect.objectContaining({ limit: MAX_DISTINCT_LIMIT }),
+    );
+  });
+
+  it('leaves an ordinary limit below the ceiling untouched', async () => {
+    const getDistinctValues = vi
+      .fn()
+      .mockResolvedValue({ hasMore: false, values: [] });
+
+    await invokeGetDistinctValues({
+      query: {
+        columnName: 'order_status',
+        limit: '25',
+        schemaName: 'public',
+        tableName: 'enterprise_orders',
+      },
+      repository: { getDistinctValues },
+    });
+
+    expect(getDistinctValues).toHaveBeenCalledWith(
+      expect.objectContaining({ limit: 25 }),
+    );
   });
 
   it('rejects requests missing source params with a 400 HttpError', async () => {

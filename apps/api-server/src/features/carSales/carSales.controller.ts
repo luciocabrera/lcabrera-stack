@@ -1,6 +1,6 @@
 import type { RequestHandler } from 'express';
 
-import { DEFAULT_PAGE_LIMIT } from 'api-shared';
+import { DEFAULT_PAGE_LIMIT, MAX_CAR_SALES_LIMIT } from 'api-shared';
 
 import type { CarSalesRepository } from './carSales.repository';
 
@@ -39,6 +39,7 @@ export const createCarSalesController = ({
       });
       const limit = readQueryInteger({
         fallback: DEFAULT_PAGE_LIMIT,
+        max: MAX_CAR_SALES_LIMIT,
         min: 1,
         value: request.query.limit,
       });

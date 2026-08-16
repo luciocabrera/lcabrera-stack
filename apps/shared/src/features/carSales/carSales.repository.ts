@@ -14,6 +14,7 @@ import {
   CAR_SALES_SCHEMA,
   CAR_SALES_TABLE,
   DEFAULT_CAR_SALES_SORTING,
+  MAX_CAR_SALES_SORT_RULES,
 } from './carSales.constants.js';
 
 export type CarSalesRepository = {
@@ -39,6 +40,9 @@ const TARGET = {
  * `@lcabrera/server` executors (no hand-rolled SQL): `selectRows` for the page,
  * `getRowsCount` for the total. Both reach the `getPool()` singleton, so this
  * repository needs no injected pool.
+ *
+ * The ORDER BY term count is bounded here for the reason given in
+ * `enterpriseOrders.repository.ts` — this is the one place both servers reach.
  */
 export const createCarSalesRepository = (): CarSalesRepository => ({
   getAll: async () => {
@@ -60,7 +64,7 @@ export const createCarSalesRepository = (): CarSalesRepository => ({
       offset: skip,
       sort: resolveQuerySort({
         fallback: DEFAULT_CAR_SALES_SORTING,
-        sorting,
+        sorting: sorting.slice(0, MAX_CAR_SALES_SORT_RULES),
       }),
     });
     const total = await getRowsCount({

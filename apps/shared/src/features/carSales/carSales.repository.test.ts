@@ -2,6 +2,7 @@ import { getRowsCount } from '@lcabrera/server/db/get-rows-count.util';
 import { selectRows } from '@lcabrera/server/db/select-rows.util';
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
+import { MAX_CAR_SALES_SORT_RULES } from './carSales.constants.js';
 import { createCarSalesRepository } from './carSales.repository.js';
 
 vi.mock('@lcabrera/server/db/select-rows.util', () => ({
@@ -76,6 +77,51 @@ describe('createCarSalesRepository', () => {
     expect(mockedSelectRows).toHaveBeenCalledWith(
       expect.objectContaining({
         sort: [{ column: 'car_id', direction: 'asc' }],
+      }),
+    );
+  });
+
+  it('getPaginated truncates the ORDER BY at MAX_CAR_SALES_SORT_RULES', async () => {
+    mockedSelectRows.mockResolvedValue([]);
+    mockedGetRowsCount.mockResolvedValue(0);
+    const repository = createCarSalesRepository();
+    const oversizedSorting = Array.from(
+      { length: MAX_CAR_SALES_SORT_RULES + 10 },
+      () => ({ columnKey: 'color', direction: 'asc' }) as const,
+    );
+
+    await repository.getPaginated({
+      limit: 50,
+      skip: 0,
+      sorting: oversizedSorting,
+    });
+
+    const [call] = mockedSelectRows.mock.calls;
+    expect(call?.[0].sort).toHaveLength(MAX_CAR_SALES_SORT_RULES);
+  });
+
+  it('getPaginated forwards an ordinary multi-column sort unchanged', async () => {
+    mockedSelectRows.mockResolvedValue([]);
+    mockedGetRowsCount.mockResolvedValue(0);
+    const repository = createCarSalesRepository();
+
+    await repository.getPaginated({
+      limit: 50,
+      skip: 0,
+      sorting: [
+        { columnKey: 'color', direction: 'desc' },
+        { columnKey: 'model', direction: 'asc' },
+      ],
+    });
+
+    // Exact equality, not a length: a bound that also truncated a legitimate
+    // sort would be a different bug, and a length assertion would miss it.
+    expect(mockedSelectRows).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sort: [
+          { column: 'color', direction: 'desc' },
+          { column: 'model', direction: 'asc' },
+        ],
       }),
     );
   });

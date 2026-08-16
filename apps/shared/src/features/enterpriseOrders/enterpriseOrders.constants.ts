@@ -70,6 +70,16 @@ export const ENTERPRISE_ORDER_ALLOWED_COLUMNS = new Set(
   ENTERPRISE_ORDER_COLUMNS,
 );
 
+/**
+ * The most ORDER BY terms one read may carry, bounded by the table's own column
+ * count: past it every further term necessarily repeats a column already named,
+ * and `ORDER BY order_id, order_id` orders nothing the first term did not. So
+ * it cannot truncate a sort anyone is able to express — what it stops is a
+ * hand-made request growing the ORDER BY without limit, since nothing upstream
+ * deduplicates. Same bound, same reason, as the showcase's copy.
+ */
+export const MAX_ENTERPRISE_ORDERS_SORT_RULES = ENTERPRISE_ORDER_COLUMNS.length;
+
 export const DEFAULT_ENTERPRISE_ORDER_SORTING = [
   { columnKey: 'order_id', direction: 'desc' },
 ] as const satisfies readonly SortRule[];
