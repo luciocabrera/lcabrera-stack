@@ -2,7 +2,7 @@
 id: review-gate-reconcile
 title: Reconcile both review-gate statuses on a schedule
 owner: agent:claude
-status: active
+status: review
 branch: ci/737-review-gate-reconcile
 area:
   - .github/workflows/copilot-review-gate.yml
@@ -35,6 +35,9 @@ header rejects.
 
 ## Status / next
 
-- Current step: implemented; quality gate and evidence gathering
+- Current step: PR #738 open (draft), full gate green, every CI check passing
 - Blockers: none
-- Next: hand to the blind verifier; leave the PR draft
+- Next: blind verification. The PR stays draft until the caller says otherwise.
+  #725's `Copilot review complete` is deliberately left stale — head `498dd02a`,
+  reviewed by Copilot with no run on that head — as the reproducible instance
+  for whoever checks that the sweep corrects a real one.
