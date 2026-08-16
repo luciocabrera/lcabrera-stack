@@ -9,15 +9,8 @@ import {
   MAX_ENTERPRISE_ORDERS_LIMIT,
   MAX_WIDE_ALLTYPES_LIMIT,
 } from 'api-shared';
-import {
-  afterAll,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from 'vite-plus/test';
+import { once } from 'node:events';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import type { EnvConfig } from '../config/env.schema';
 
@@ -50,39 +43,25 @@ const envConfig: EnvConfig = {
 };
 
 /**
- * Drives the page-window bound over a real HTTP connection through the real
- * Express stack — router, middleware and all — rather than by calling a
- * controller directly. Only the `@lcabrera/server` executors are mocked, so
- * everything between the socket and the query layer is the code that ships.
+ * Runs `run` against a real Express server listening on an ephemeral port, and
+ * closes it however `run` ends.
  *
- * The reason this exists alongside the per-controller tests: those construct a
- * handler and hand it a fake `Request`, so a bound lost in routing or in a
- * middleware ordering change would not show up in them.
- *
- * `wideAlltypes150` is here as the **control**. It was already bounded before
- * this suite was written, so it must clamp whether or not the other three do —
- * if every row behaves identically, the probe is measuring something other than
- * the bound.
+ * Scoped per call rather than shared through a `beforeAll`, so the suite holds
+ * no module-level mutable state and each case gets a server it fully owns.
  */
-let baseUrl = '';
-let server: ReturnType<ReturnType<typeof createApp>['listen']>;
+const withServer = async (run: (baseUrl: string) => Promise<void>) => {
+  const server = createApp({ envConfig }).listen(0, '127.0.0.1');
 
-beforeAll(async () => {
-  const app = createApp({ envConfig });
+  await once(server, 'listening');
 
-  await new Promise<void>((resolve) => {
-    server = app.listen(0, '127.0.0.1', resolve);
-  });
-
-  const { port } = server.address() as AddressInfo;
-  baseUrl = `http://127.0.0.1:${port}`;
-});
-
-afterAll(async () => {
-  await new Promise<void>((resolve, reject) => {
-    server.close((error) => (error ? reject(error) : resolve()));
-  });
-});
+  try {
+    const { port } = server.address() as AddressInfo;
+    await run(`http://127.0.0.1:${port}`);
+  } finally {
+    server.close();
+    await once(server, 'close');
+  }
+};
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -109,52 +88,75 @@ const ROW_ROUTES = [
   },
 ] as const;
 
+/**
+ * Drives the page-window bound over a real HTTP connection through the real
+ * Express stack — router, middleware and all — rather than by calling a
+ * controller directly. Only the `@lcabrera/server` executors are mocked, so
+ * everything between the socket and the query layer is the code that ships.
+ *
+ * The reason this exists alongside the per-controller tests: those construct a
+ * handler and hand it a fake `Request`, so a bound lost in routing or in a
+ * middleware ordering change would not show up in them.
+ *
+ * `wideAlltypes150` is here as the **control**. It was already bounded before
+ * this suite was written, so it must clamp whether or not the other three do —
+ * if every row behaves identically, the probe is measuring something other than
+ * the bound.
+ */
 describe('page window over real HTTP', () => {
   it.each(ROW_ROUTES)(
     '$name clamps an over-ceiling limit to exactly the ceiling',
     async ({ ceiling, path }) => {
-      const response = await fetch(
-        `${baseUrl}${path}?skip=0&limit=${ceiling + 1_000_000}`,
-      );
+      await withServer(async (baseUrl) => {
+        const response = await fetch(
+          `${baseUrl}${path}?skip=0&limit=${ceiling + 1_000_000}`,
+        );
 
-      expect(response.status).toBe(200);
-      expect(mockedSelectRows).toHaveBeenCalledWith(
-        expect.objectContaining({ limit: ceiling }),
-      );
+        expect(response.status).toBe(200);
+        expect(mockedSelectRows).toHaveBeenCalledWith(
+          expect.objectContaining({ limit: ceiling }),
+        );
+      });
     },
   );
 
   it.each(ROW_ROUTES)(
     '$name serves an ordinary page unchanged',
     async ({ path }) => {
-      const response = await fetch(`${baseUrl}${path}?skip=40&limit=20`);
+      await withServer(async (baseUrl) => {
+        const response = await fetch(`${baseUrl}${path}?skip=40&limit=20`);
 
-      expect(response.status).toBe(200);
-      expect(mockedSelectRows).toHaveBeenCalledWith(
-        expect.objectContaining({ limit: 20, offset: 40 }),
-      );
+        expect(response.status).toBe(200);
+        expect(mockedSelectRows).toHaveBeenCalledWith(
+          expect.objectContaining({ limit: 20, offset: 40 }),
+        );
+      });
     },
   );
 
   it('distinct clamps an over-ceiling limit to exactly the ceiling', async () => {
-    const response = await fetch(
-      `${baseUrl}/api/distinct?schemaName=public&tableName=enterprise_orders&columnName=order_status&limit=${MAX_DISTINCT_LIMIT + 1_000_000}`,
-    );
+    await withServer(async (baseUrl) => {
+      const response = await fetch(
+        `${baseUrl}/api/distinct?schemaName=public&tableName=enterprise_orders&columnName=order_status&limit=${MAX_DISTINCT_LIMIT + 1_000_000}`,
+      );
 
-    expect(response.status).toBe(200);
-    expect(mockedSelectFilterOptions).toHaveBeenCalledWith(
-      expect.objectContaining({ limit: MAX_DISTINCT_LIMIT }),
-    );
+      expect(response.status).toBe(200);
+      expect(mockedSelectFilterOptions).toHaveBeenCalledWith(
+        expect.objectContaining({ limit: MAX_DISTINCT_LIMIT }),
+      );
+    });
   });
 
   it('distinct serves an ordinary page unchanged', async () => {
-    const response = await fetch(
-      `${baseUrl}/api/distinct?schemaName=public&tableName=enterprise_orders&columnName=order_status&limit=25&offset=50`,
-    );
+    await withServer(async (baseUrl) => {
+      const response = await fetch(
+        `${baseUrl}/api/distinct?schemaName=public&tableName=enterprise_orders&columnName=order_status&limit=25&offset=50`,
+      );
 
-    expect(response.status).toBe(200);
-    expect(mockedSelectFilterOptions).toHaveBeenCalledWith(
-      expect.objectContaining({ limit: 25, offset: 50 }),
-    );
+      expect(response.status).toBe(200);
+      expect(mockedSelectFilterOptions).toHaveBeenCalledWith(
+        expect.objectContaining({ limit: 25, offset: 50 }),
+      );
+    });
   });
 });
