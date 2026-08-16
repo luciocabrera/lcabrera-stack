@@ -1,66 +1,20 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
+  BLOCKING_FINDING,
+  CRITERION,
+  FILES,
+  HEAD,
+  OTHER,
+  PR,
+  failDocument,
+  passDocument,
+  verdictBody as body,
+} from './agent-review-fixtures.mjs';
+import {
   validatePullRequestVerdict,
   validateVerdictBody,
 } from './agent-review-validate.mjs';
-
-const HEAD = 'a'.repeat(40);
-const OTHER = 'b'.repeat(40);
-const PR = 42;
-
-/** One file, whose only added line in the new file is line 2. */
-const FILES = [
-  {
-    changes: 2,
-    filename: 'src/a.ts',
-    patch: '@@ -1,2 +1,3 @@\n one\n+two added\n two',
-  },
-];
-
-const CRITERION = {
-  criterion: 'The check runs on every pull request without being invoked',
-  falsifier:
-    'Opened a pull request with no verdict; the check reported absent.',
-  id: '1',
-  method: 'observed on PR #727',
-  outcome: 'met',
-};
-
-const BLOCKING_FINDING = {
-  failure_scenario:
-    'A verdict for an earlier commit is accepted, so the merge bar reports a review of code nobody looked at.',
-  file: 'src/a.ts',
-  id: 'f1',
-  kind: 'in-diff',
-  line: 2,
-  refutation:
-    'Checked whether the caller compares the SHAs itself: it passes the document straight through.',
-  severity: 'high',
-  summary: 'The head SHA is never compared with the pull request head.',
-};
-
-const passDocument = (overrides = {}) => ({
-  criteria: [CRITERION],
-  findings: [],
-  head_sha: HEAD,
-  pr: PR,
-  reviewed_at: '2026-08-15T09:00:00Z',
-  schema: 'agent-review-verdict/v1',
-  verdict: 'pass',
-  ...overrides,
-});
-
-const failDocument = (overrides = {}) =>
-  passDocument({
-    criteria: [{ ...CRITERION, outcome: 'not-met' }],
-    findings: [BLOCKING_FINDING],
-    verdict: 'fail',
-    ...overrides,
-  });
-
-const body = (document, sha = HEAD) =>
-  `Agent-review verdict: ${sha}\n\n\`\`\`json\n${JSON.stringify(document, null, 2)}\n\`\`\`\n`;
 
 const validate = (document, options = {}) =>
   validateVerdictBody(body(document), {

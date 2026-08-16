@@ -53,6 +53,16 @@ const ISO_UTC = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?Z$/;
 const isFilledString = (value) =>
   typeof value === 'string' && value.trim() !== '';
 
+/**
+ * §2.2 says `file` is a "repository-relative path". An `in-diff` finding's file
+ * is checked against the diff by §2.4 step 5, but an `omission` names where
+ * something *should* be, so nothing else looks at it — and a reader following an
+ * absolute path or a `..` out of the tree is what the row exists to prevent.
+ * (pure)
+ */
+const isRepositoryRelative = (path) =>
+  !path.startsWith('/') && !path.split('/').includes('..');
+
 /** The keys present on `object` that `allowed` does not name. (pure) */
 const unknownKeys = (object, allowed) =>
   Object.keys(object).filter((key) => !allowed.has(key));
@@ -81,7 +91,11 @@ const findingShapeErrors = (finding, at) => {
   if (!SEVERITIES.has(finding.severity)) {
     errors.push(`${at} has \`severity\` ${JSON.stringify(finding.severity)}`);
   }
-  if (!isFilledString(finding.file)) {
+  if (isFilledString(finding.file)) {
+    if (!isRepositoryRelative(finding.file)) {
+      errors.push(`${at} has a \`file\` that is not repository-relative`);
+    }
+  } else {
     errors.push(`${at} has no \`file\``);
   }
   if (finding.line !== null && !Number.isInteger(finding.line)) {
@@ -162,17 +176,26 @@ const criteriaShapeErrors = (criteria) => {
   if (criteria.length === 0) {
     return ['`criteria` is empty'];
   }
-  return criteria.flatMap((criterion, index) =>
-    criterionShapeErrors(criterion, `criterion ${index + 1}`),
-  );
+  return [
+    ...criteria.flatMap((criterion, index) =>
+      criterionShapeErrors(criterion, `criterion ${index + 1}`),
+    ),
+    ...duplicateIdErrors(criteria, 'criterion'),
+  ];
 };
 
-/** §2.2: a finding id is what an override names, so it identifies one finding. */
-const duplicateIdErrors = (findings) => {
+/**
+ * §2.2 says an `id` is "unique within the document", of a finding and of a
+ * criterion alike, and both are named by id in something that matters: §6's
+ * override discharges a finding by id — and is built so that a finding it does
+ * not name still blocks — while §2.4 step 6 reports unmet criteria by id.
+ * A duplicate makes both ambiguous. (pure)
+ */
+const duplicateIdErrors = (entries, label) => {
   const seen = new Set();
   const duplicates = new Set();
-  for (const finding of findings) {
-    const id = finding?.id;
+  for (const entry of entries) {
+    const id = entry?.id;
     if (typeof id === 'string') {
       if (seen.has(id)) {
         duplicates.add(id);
@@ -181,7 +204,7 @@ const duplicateIdErrors = (findings) => {
     }
   }
   return [...duplicates].map(
-    (id) => `finding id \`${id}\` appears more than once`,
+    (id) => `${label} id \`${id}\` appears more than once`,
   );
 };
 
@@ -217,7 +240,7 @@ export const documentShapeErrors = (document) => {
       ...document.findings.flatMap((finding, index) =>
         findingShapeErrors(finding, `finding ${index + 1}`),
       ),
-      ...duplicateIdErrors(document.findings),
+      ...duplicateIdErrors(document.findings, 'finding'),
     );
   } else {
     errors.push('`findings` is not an array');
