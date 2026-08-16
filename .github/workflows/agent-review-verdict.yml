@@ -17,12 +17,25 @@ name: Agent Review Gate
 # refresh it. GitHub runs an `issue_comment` workflow from the DEFAULT branch, so
 # that path only works once this file is on `main` — the `pull_request` path runs
 # from the merge ref and works on the branch that adds it.
+#
+# And that trigger is the one this gate can least afford to lose: the verdict is
+# posted BY an agent, which is the actor class whose events go missing here
+# (#737's measurement is of Copilot reviews, the same class). So the recompute
+# does not rest on it alone — `review-gate-reconcile.yml` re-runs this same
+# script for every open pull request on a schedule, and `workflow_dispatch`
+# re-runs it for one named pull request by hand.
 
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
   issue_comment:
     types: [created, edited]
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: The pull request number to revalidate
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -57,12 +70,14 @@ jobs:
     # and `scripts/lib/agent-review-workflow.test.mjs` now asserts it instead.
     name: Publish the agent review verdict status
     # `issue_comment` fires for issues too; `.pull_request` is present only when
-    # the comment is on a pull request.
-    if: github.event_name == 'pull_request' || github.event.issue.pull_request
+    # the comment is on a pull request. Every other trigger here already names a
+    # pull request, so only that one needs the guard.
+    if: github.event_name != 'issue_comment' || github.event.issue.pull_request
     runs-on: ubuntu-latest
     steps:
       # The merge ref for a pull_request run (actions/checkout's default), the
-      # default branch for an issue_comment one. Same reason as pr-standards.yml:
+      # dispatched ref otherwise — the default branch for an issue_comment or a
+      # workflow_dispatch one. Same reason as pr-standards.yml:
       # GitHub runs the workflow file from the merge result, so pinning the
       # checkout to the head would put the YAML and the scripts it invokes on
       # different commits. Nothing here reads git — the head SHA, the comments and
@@ -76,5 +91,7 @@ jobs:
         # is parsed as JSON under a size cap — never evaluated.
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
+          PR_NUMBER:
+            ${{ github.event.pull_request.number || github.event.issue.number ||
+            inputs.pr }}
         run: node scripts/verify-agent-review.mjs

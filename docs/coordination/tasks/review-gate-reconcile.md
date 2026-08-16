@@ -13,6 +13,7 @@ area:
   - scripts/reconcile-review-gates.mjs
   - scripts/lib/review-gate-*
   - scripts/lib/agent-review-workflow.test.mjs
+  - scripts/lib/workflow-inspect.mjs
   - docs/tooling/copilot-review-gate.md
   - docs/tooling/review-gate-reconcile.md
   - docs/agents/agent-review-contract.md
@@ -20,16 +21,20 @@ area:
 started: 2026-08-16
 updated: 2026-08-16
 plan: (none)
-pr: (none)
+pr: 738
 issue: #737
 ---
 
 ## What
 
-Reconcile both review-gate statuses on a schedule
+Add the recompute path both review gates lack: a low-frequency scheduled sweep
+over open pull requests that republishes `Copilot review complete` and
+`Agent review verdict`, plus a `workflow_dispatch` break-glass on all three
+workflows. ADR-076 records why a reconcile is not the polling the Copilot gate's
+header rejects.
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implemented; quality gate and evidence gathering
 - Blockers: none
-- Next:
+- Next: hand to the blind verifier; leave the PR draft

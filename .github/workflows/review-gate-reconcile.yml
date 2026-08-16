@@ -1,0 +1,252 @@
+name: Review Gate Reconcile
+
+# Republishes both review-gate commit statuses — `Copilot review complete` and
+# `Agent review verdict` — for every open pull request, on a schedule and on
+# demand.
+#
+# Why, when both gates already recompute on an event: the events they depend on
+# are not delivered here. A review submitted by Copilot usually creates no
+# workflow run at all, and the agent-review verdict arrives as a bot-authored
+# comment, the same actor class. The status then keeps reporting the previous
+# commit, and a status nobody recomputed is indistinguishable from one that is
+# honestly still waiting. #737 carries the measurement and the two commands that
+# reproduce it. #698 is why it has to be fixed before promotion: a required check
+# that only a missing event would refresh makes break-glass the normal path.
+#
+# THIS IS NOT THE POLLING `copilot-review-gate.yml` REJECTS, and the distinction
+# is mechanical rather than a matter of degree. What that header rules out is a
+# job that sleeps inside a run waiting for one review: it bills for the length of
+# the wait, and it still races the push that supersedes what it was waiting for.
+# A reconcile sweep holds nothing open; its cost is bounded by the number of open
+# pull requests rather than by how long a review takes; and it cannot race,
+# because it carries no SHA across an I/O boundary. It hands each gate a pull
+# request NUMBER, and the gate reads the head and the reviews together and posts
+# against the head it read — so a push landing mid-sweep leaves the sweep posting
+# about a commit that is no longer the head, never a verdict about the new head
+# derived from the old one.
+#
+# One workflow for both gates, not one each. There is one mechanism here —
+# "recompute a review-gate status without the event that normally would" — and
+# splitting it in two would mean two schedules to keep in step, two places to
+# change the interval, and two ways for one of them to quietly stop running.
+#
+# ON FAILURE IT IS LOUD, because this is the one component whose failure is
+# otherwise invisible: if the sweep errors, both statuses simply stop being
+# corrected and every pull request still looks normal. The sweep exits non-zero
+# when it could not list the pull requests or when any gate run failed, and this
+# workflow turns that into a tracking issue rather than only a red X on a
+# schedule nobody is watching — the same argument `deps-audit.yml` makes about a
+# check that could not run.
+#
+# Full reasoning, the interval, and what an author should do about a stale status
+# are in docs/tooling/review-gate-reconcile.md.
+
+on:
+  schedule:
+    # Every 30 minutes, offset off the hour. THE INTERVAL IS A DECISION:
+    #
+    # - Low enough that a stale status corrects itself inside a working session.
+    #   An author who pushes, gets a review, and comes back to the tab finds the
+    #   status right; the longest anyone waits before break-glass is worth
+    #   reaching for is one interval.
+    # - High enough not to be the thing the other header rejects. The run does no
+    #   install and no build; it reads a handful of API pages per open pull
+    #   request, and this repository holds a handful of them open at a time. The
+    #   cost is bounded by open pull requests, not by review latency, which is
+    #   exactly the property a sleeping job does not have.
+    # - The offset avoids the top of the hour, where scheduled runs across GitHub
+    #   queue longest. A tighter cron would not buy a tighter bound anyway:
+    #   scheduled runs are delivered on a best-effort basis and are routinely
+    #   late under load, so a five-minute schedule promises a freshness it cannot
+    #   keep.
+    - cron: '7,37 * * * *'
+  # Break-glass, and the one rung that recomputes BOTH gates at once. A dispatch
+  # is attributed to whoever pressed it, so a maintainer's run executes where the
+  # bot-triggered event it stands in for does not.
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: One pull request to reconcile (blank sweeps every open one)
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  pull-requests: read
+  statuses: write
+
+# A group that QUEUES, never one that cancels. Two sweeps overlapping would
+# compute the same answers twice, so serialising them is free; cancelling would
+# drop a sweep's corrections on the floor, which is the same reason both gates
+# carry no cancelling group at all.
+concurrency:
+  group: review-gate-reconcile
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    # This name must NOT be `Copilot review complete` or `Agent review verdict`.
+    # A job's check run and a commit status share one namespace on a pull
+    # request, and ruleset contexts match by name, so a job named after either
+    # status would publish a second row under it — green because the sweep ran,
+    # not because a review happened. Both gates carry the same warning and
+    # `scripts/lib/review-gate-reconcile-workflow.test.mjs` asserts it.
+    name: Reconcile the review gate statuses
+    runs-on: ubuntu-latest
+    # A sweep that hangs must not queue the next ones behind it indefinitely.
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: read
+      statuses: write
+    steps:
+      # The default branch, which is where a scheduled or dispatched run always
+      # executes from. Nothing here reads the working tree beyond these scripts —
+      # every head SHA, review and comment comes from the API.
+      - name: Check out the scripts this sweep runs
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Reconcile every open pull request
+        id: sweep
+        # `continue-on-error` so a failure becomes the tracking issue below
+        # rather than only a red X. The step's own conclusion is still recorded,
+        # and the last step re-fails the run.
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          # Blank on a schedule; a number only when someone dispatched one.
+          # Through env, never a shell interpolation.
+          ONLY_PR: ${{ inputs.pr }}
+        run: |
+          set -o pipefail
+          if [ -n "$ONLY_PR" ]; then
+            node scripts/reconcile-review-gates.mjs --pr "$ONLY_PR" 2>&1 | tee reconcile-output.txt
+          else
+            node scripts/reconcile-review-gates.mjs 2>&1 | tee reconcile-output.txt
+          fi
+
+      - name: File or update the tracking issue
+        if: steps.sweep.outcome == 'failure'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        with:
+          script: |
+            const fs = require('node:fs');
+            const output = fs.readFileSync('reconcile-output.txt', 'utf8').trim();
+            const title =
+              'ci(repo): the review-gate reconcile sweep is failing';
+
+            // Fills the standard issue template. issue-standards.yml checks
+            // every issue and grants automation no exemption, so an auto-filed
+            // issue that skipped it would open already failing its own gate.
+            const body = [
+              '## 1. Problem Statement',
+              '',
+              'The scheduled review-gate reconcile could not republish one or both',
+              'commit statuses. While it stays broken, a status left stale by a missed',
+              'event is not corrected by anything, and every pull request still looks',
+              'normal — which is the failure mode this sweep exists to remove.',
+              '',
+              '```',
+              output,
+              '```',
+              '',
+              `Run: ${process.env.RUN_URL}`,
+              '',
+              '## 2. Objective / Desired Outcome',
+              '',
+              '`vp run review-gates:reconcile` exits 0 again, and the scheduled run is',
+              'green.',
+              '',
+              '## 3. Context & Background',
+              '',
+              'The sweep is the recompute path that does not depend on the events both',
+              'review gates are triggered by (#737). It is deliberately loud, because a',
+              'reconcile that fails quietly is indistinguishable from one that has',
+              'nothing to do. `docs/tooling/review-gate-reconcile.md` explains what it',
+              'does and how to run it by hand.',
+              '',
+              '## 4. Reproduction Steps',
+              '',
+              '1. `vp run review-gates:reconcile -- --dry-run`',
+              '2. Expected: one line per gate per open pull request, exit 0.',
+              '3. Actual: the output above.',
+              '',
+              'Preconditions: a `gh` login that can read pull requests and write commit',
+              'statuses on this repository. The sweep fails rather than reporting clean',
+              'when it cannot read them, so a failure here is a real finding.',
+              '',
+              '## 5. Scope Definition',
+              '',
+              '### In Scope',
+              '',
+              '- Restoring the sweep above.',
+              '',
+              '### Out of Scope',
+              '',
+              '- Promoting either review gate to a required context (#698).',
+              '',
+              '## 6. Acceptance Criteria',
+              '',
+              '- [ ] `vp run review-gates:reconcile` exits 0',
+              '- [ ] The scheduled run is green, and republishes both statuses',
+              '- [ ] No regressions',
+              '- [ ] Documentation updated (only if the sweep behaviour changed)',
+              '- [ ] Approach consistent with repository conventions',
+              '',
+              '## 7. Implementation Notes',
+              '',
+              'Opened automatically by `.github/workflows/review-gate-reconcile.yml`.',
+              'Later runs comment on this issue rather than opening another, so it stays',
+              'one thread.',
+              '',
+              '## 8. Related Work',
+              '',
+              '- #737 — the reconcile sweep and the measurement behind it',
+              '- #698 — promotion, which depends on this staying green',
+              '',
+              '## 9. Planning Metadata',
+              '',
+              '```yaml',
+              'dependencies:',
+              '  blocking: []',
+              '  blockedBy: []',
+              '  parent: null',
+              '  children: []',
+              '```',
+            ].join('\n');
+
+            // `type: ci` is the canonical label for build/CI plumbing
+            // (scripts/lib/labels.mjs). A label outside that taxonomy would be
+            // pruned by sync-labels and take the lookup below with it.
+            const label = 'type: ci';
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: label,
+            });
+            const match = existing.data.find((issue) => issue.title === title);
+
+            if (match) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: match.number,
+                body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: [label],
+              });
+            }
+
+      - name: Fail the run when the sweep did
+        if: steps.sweep.outcome == 'failure'
+        run: exit 1

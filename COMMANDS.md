@@ -495,6 +495,23 @@ the same script on every pull request, advisory for now (#697; promoting it is
 | `vp run agent-review:verify -- --pr <n> --dry-run` | the same, reported to the terminal without touching the commit status      |
 | `vp run agent-review:verify -- --pr <n> --strict`  | exit with the contract's §2.3 codes (0 pass, 1 fail, 2 error) instead of 0 |
 
+Neither gate's trigger is reliable here — a Copilot review usually creates no
+workflow run, and the agent-review verdict arrives as a bot-authored comment,
+the same class (#737). So one **reconcile** republishes both statuses for every
+open pull request on a schedule, and the command below is that same sweep run by
+hand. It posts only when the head does not already carry the verdict it computes,
+so running it twice changes nothing.
+[`.github/workflows/review-gate-reconcile.yml`](.github/workflows/review-gate-reconcile.yml)
+is the schedule; the interval, the recovery and what it does on failure are in
+[`docs/tooling/review-gate-reconcile.md`](docs/tooling/review-gate-reconcile.md)
+([ADR-076](docs/decisions/ADR-076-reconcile-the-review-gate-statuses-on-a-schedule.md)).
+
+| Command                                               | Does                                                             |
+| ----------------------------------------------------- | ---------------------------------------------------------------- |
+| `vp run review-gates:reconcile`                       | republish both statuses for every open PR that needs it          |
+| `vp run review-gates:reconcile -- --pr <n>`           | the same for one PR — the local form of the break-glass dispatch |
+| `vp run review-gates:reconcile -- --pr <n> --dry-run` | print what it would publish, posting nothing                     |
+
 ### Autonomous PR queue
 
 `vp run pr:queue` reads every open PR, derives the merge order, and decides each
@@ -642,11 +659,10 @@ Biome, and it does not run `tsc`.
 The three jobs run in **parallel** — "Biome runs before Fallow" holds within the
 Quality Gate job's step order, not across jobs.
 
-[`deps-audit.yml`](.github/workflows/deps-audit.yml) is the repo's only
-**scheduled** workflow: it runs `deps:audit` daily and opens (or comments on) a
-single tracking issue when it finds something. The per-PR gate catches what a
-change introduces; only the schedule catches an advisory published overnight
-against a tree nobody touched.
+[`deps-audit.yml`](.github/workflows/deps-audit.yml) is **scheduled**: it runs
+`deps:audit` daily and opens (or comments on) a single tracking issue when it
+finds something. The per-PR gate catches what a change introduces; only the
+schedule catches an advisory published overnight against a tree nobody touched.
 
 Other workflows: `lighthouse.yml`, `validate-skills.yml`, and
 [`pr-standards.yml`](.github/workflows/pr-standards.yml) — on every pull request
@@ -682,6 +698,17 @@ the last push refresh a check that reported `absent` — and, because GitHub run
 `issue_comment` workflow from the default branch, that half only works once the
 file is on `main`. The status is pinned to `success` while the check is advisory,
 so the state lives in its description; promoting it is #698.
+
+[`review-gate-reconcile.yml`](.github/workflows/review-gate-reconcile.yml) is the
+other **scheduled** workflow, and it serves both of the gates above: half-hourly
+it republishes their statuses for every open pull request, because the review and
+comment events those gates depend on are not delivered reliably here (#737). It
+is not the polling `copilot-review-gate.yml` rejects — it holds nothing open and
+carries no SHA across an I/O boundary; the distinction, the interval and the
+tracking issue it files when it fails are in
+[`docs/tooling/review-gate-reconcile.md`](docs/tooling/review-gate-reconcile.md).
+All three review-gate workflows also take a `workflow_dispatch` with a PR number,
+which is the break-glass path.
 
 [`secret-scan.yml`](.github/workflows/secret-scan.yml) scans repository
 **content** for credentials — the layer the two agent-boundary guards

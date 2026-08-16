@@ -19,6 +19,10 @@
  *   vp run agent-review:verify -- --pr 727
  *   vp run agent-review:verify -- --pr 727 --dry-run --strict
  *
+ * `--if-changed` posts only when the head does not already carry this
+ * description, which is how the reconcile sweep
+ * (`scripts/reconcile-review-gates.mjs`) stays idempotent.
+ *
  * Exit codes: 0 = the check reported (advisory); 1 = this script could not read
  * the pull request. Under `--strict`, §2.3's codes: 0 pass/absent, 1 fail,
  * 2 error.
@@ -35,6 +39,10 @@ import {
   summaryMarkdown,
 } from './lib/agent-review-report.mjs';
 import { validatePullRequestVerdict } from './lib/agent-review-validate.mjs';
+import {
+  publishedStatus,
+  shouldPublishStatus,
+} from './lib/review-gate-reconcile.mjs';
 
 const STATUS_CONTEXT = 'Agent review verdict';
 
@@ -123,6 +131,24 @@ const postStatus = (repo, headSha, description) => {
   }
 };
 
+/**
+ * Whether this description is worth posting over what the head already carries.
+ *
+ * Only consulted under `--if-changed`, which the reconcile sweep passes: a sweep
+ * that re-posted an identical status every half hour would fill the timeline
+ * with noise and make "the status moved" stop meaning anything.
+ */
+const changedOnHead = (repo, headSha, description) =>
+  shouldPublishStatus({
+    current: publishedStatus(
+      JSON.parse(
+        runGh(['api', `repos/${repo}/commits/${headSha}/status?per_page=100`]),
+      ),
+      STATUS_CONTEXT,
+    ),
+    next: { description, state: 'success' },
+  });
+
 /** Appends the summary where the runner shows it, when there is one. */
 const writeSummary = async (markdown) => {
   const path = process.env.GITHUB_STEP_SUMMARY;
@@ -168,7 +194,12 @@ const main = async () => {
     printLine(`  - ${error}`);
   }
   await writeSummary(summaryMarkdown(result, { headSha, pr }));
-  if (!dryRun) {
+  const unchanged =
+    process.argv.includes('--if-changed') &&
+    !changedOnHead(repo, headSha, description);
+  if (unchanged) {
+    printLine(`Unchanged on ${headSha}: nothing was posted.`);
+  } else if (!dryRun) {
     postStatus(repo, headSha, description);
   }
   process.exitCode = strict ? exitCodeFor(result.state) : 0;

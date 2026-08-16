@@ -616,6 +616,16 @@ rule, from there.
   well-formed, bound to this commit and internally consistent; it cannot witness
   that a review happened. `criteria` raises the price of a forged pass; #699's
   distinct posting identity is what would remove the option.
+- **The check's own trigger is unreliable, and a reconcile is what covers it.**
+  A verdict posted after the last push refreshes the check through
+  `issue_comment` — and the verdict is posted **by an agent**, the actor class
+  whose events go missing in this repository (#737). So the check can report
+  `absent` on a pull request that has just been reviewed. A scheduled sweep
+  revalidates every open pull request half-hourly, and
+  `gh workflow run agent-review-verdict.yml -f pr=<n>` revalidates one on demand.
+  Locally, `vp run agent-review:verify -- --pr <n> --dry-run` prints what the
+  check would report right now, which is how "no verdict yet" is told apart from
+  "verdict posted, check not recomputed".
 
 ---
 
@@ -624,6 +634,7 @@ rule, from there.
 - [`merge-checklist.md`](merge-checklist.md) — the merge bar this becomes one item of
 - [`refactor-verified-contract.md`](refactor-verified-contract.md) — the blind-verification standard, and the verdict's producer (§9)
 - [`.github/workflows/agent-review-verdict.yml`](../../.github/workflows/agent-review-verdict.yml) — the check; `vp run agent-review:verify` runs the same validator locally
+- [`docs/tooling/review-gate-reconcile.md`](../tooling/review-gate-reconcile.md) — the sweep that recomputes this check when its trigger does not ([ADR-076](../decisions/ADR-076-reconcile-the-review-gate-statuses-on-a-schedule.md))
 - [`epic-orchestration.md`](epic-orchestration.md) — where an orchestrator holds the same bar by hand
 - AGENTS.md §5 — Rule 11 (never suppress a finding), Rule 14 (the evidence standard)
 - Epic #685 — the merge gate this contract is written for; #697 implements it, advisory first
