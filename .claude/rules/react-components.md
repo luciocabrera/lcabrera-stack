@@ -4,7 +4,7 @@ paths: ['**/*.tsx', '**/*.jsx', '**/*.stylex.ts']
 
 # React Component Standards
 
-> Before creating or modifying any component, also read `packages/ui/src/PATTERNS.md` (shared component conventions) and consult the nearest `INVENTORY.md` (`packages/ui/src/INVENTORY.md`, `apps/react-router/src/INVENTORY.md`, `apps/admin_system/src/INVENTORY.md`, `packages/server/src/INVENTORY.md`). For full React 19 hook/compiler patterns, invoke the `react-19` skill; for shared state, invoke the `store-pattern` skill.
+> Before creating or modifying any component, also read `packages/ui/src/PATTERNS.md` (shared component conventions) and consult the nearest `INVENTORY.md` (`packages/ui/src/INVENTORY.md`, `apps/react-router/src/INVENTORY.md`, `packages/server/src/INVENTORY.md`). For full React 19 hook/compiler patterns, invoke the `react-19` skill; for shared state, invoke the `store-pattern` skill.
 
 ## Component File Structure (Bundle Pattern)
 

@@ -71,10 +71,11 @@ lives at the root only.
 ## Docs
 
 **An ADR is a dated record.** A superseded ADR naming deleted code, or an ADR
-naming the path it renamed away from, is correct — not drift. `docs/decisions/`,
-`docs/cqms/decisions/` and `apps/react-router/docs/decisions/` are three homes on
-**one** number sequence (ADR-048), and numbers 001–012 predate it so each means
-two things — always cite one of those with its path.
+naming the path it renamed away from, is correct — not drift. `docs/decisions/`
+and `apps/react-router/docs/decisions/` are two homes on **one** number sequence
+(ADR-048); 001–005 and 008 predate it, so each of those means two things — always
+cite one of them with its path. A third home left the repo with CQMS in #683, which is
+why an old ADR may cite a number that now resolves only once.
 
 `AGENTS.md` is the real file; `CLAUDE.md` is a symlink to it. Fixes go in
 `AGENTS.md`.

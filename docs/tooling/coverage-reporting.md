@@ -84,11 +84,8 @@ Adding a fifth public package extends the check with no edit here:
 | `packages/api`                | `@lcabrera/api`           | true  | Same — the browser half of the former `data-access` ([ADR-038](../decisions/ADR-038-public-package-topology-by-runtime.md))          |
 | `apps/react-router`           | `vite-react-compiler`     | false | Its `test:ci` already emits the summary; re-running the repo's largest suite would be wasteful                                       |
 | `packages/node-runtime`       | `@lcabrera/node`          | true  | Phase 2 — DB-free `test:coverage`                                                                                                    |
-| `packages/scan-ingestion`     | `@repo/scan-ingestion`    | true  | Phase 2 — DB-free `test:coverage` **subset** (its real-Postgres `queries/*` stay out, so the number is the DB-free portion only)     |
 | `packages/utils`              | `@lcabrera/utils`         | true  | Phase 2 — pure helpers, own 95% threshold ([#124](https://github.com/luciocabrera/vite-react-compiler/issues/124))                   |
-| `apps/scan-orchestrator`      | `@repo/scan-orchestrator` | true  | Phase 3 — DB-free **subset** (`runQueuedScan` drives the real scan queue and stays out)                                              |
 | `packages/eslint-local-rules` | `@lcabrera/eslint-plugin` | true  | Phase 3 — a `RuleTester` suite per rule ([#205](https://github.com/luciocabrera/vite-react-compiler/issues/205)); reaches no service |
-| `packages/agent-runner`       | `@repo/agent-runner`      | true  | Phase 3 — its tested surface is pure utils; the CLI-spawning half has no tests (see the caveat below)                                |
 
 `run: false` reuses a summary produced upstream; `--all` forces every workspace
 to run (standalone local use, where `test:ci` has not run first).
@@ -100,14 +97,14 @@ only once its coverage runs clean and means something.** Checklist:
 
 1. **It has tests.** A `test`/`test:coverage` task that actually executes source.
    Config-only or typegen-only workspaces (`plugins`) have nothing
-   to measure — skip them. Check rather than assume: `eslint-local-rules` and
-   `agent-runner` sat on this list long after they had suites, because nobody
-   re-counted. `find <dir> -name '*.test.*' | wc -l` settles it.
+   to measure — skip them. Check rather than assume: `eslint-local-rules` sat on
+   this list long after it had suites, because nobody re-counted. `find <dir> -name '*.test.*' | wc -l` settles it.
 2. **Coverage is external-service-free.** `test:coverage` must not need Postgres,
    a browser beyond jsdom, or a network service — the `unit-tests` job has none.
    A workspace with real-DB tests must expose a DB-free `test:coverage` subset
-   first (the `scan-ingestion` / `scan-orchestrator` pattern). This is the exact
-   constraint that reverted the first coverage-into-CI attempt (2026-07-14).
+   first. Nothing here needs that today — the workspaces that did left with CQMS
+   (#683) — but it is the exact constraint that reverted the first
+   coverage-into-CI attempt (2026-07-14).
 3. **It emits `coverage-summary.json`.** Automatic once `test:coverage` uses the
    shared `VITEST_COVERAGE_FLAGS` (all current ones do).
 4. **Append it** to `COVERAGE_REPORT_WORKSPACES` in
@@ -120,37 +117,30 @@ only once its coverage runs clean and means something.** Checklist:
 - **Phase 1 — critical surfaces.** `packages/ui`, `packages/server`,
   `apps/react-router`. ✅ done (PR #32).
 - **Phase 2 — remaining library packages.** `packages/node-runtime`,
-  `packages/scan-ingestion`, `packages/utils` and `packages/api` (each has a
+  `packages/utils` and `packages/api` (each has a
   DB-free `test:coverage`). ✅ done. `utils` was deferred at first for having no
   test files; it now carries 21 suites and its own 95% threshold (#124), so it
   was admitted alongside the others. `plugins` is config-only with nothing to
   cover; `ts-configs` was too until ADR-069 split its factories into
-  `packages/tsconfig`, which is on both lists as a public package. `agent-runner` and `eslint-local-rules` were listed here too, which
-  stopped being true once the latter gained a suite per rule (#205); both were
-  admitted in the Phase 3 second pass below.
-- **Phase 3 — apps & server workspaces.** `apps/scan-orchestrator` plus the three
+  `packages/tsconfig`, which is on both lists as a public package.
+  `eslint-local-rules` was listed here too, which stopped being true once it
+  gained a suite per rule (#205); it was admitted in the Phase 3 second pass
+  below.
+- **Phase 3 — apps & server workspaces.** The CQMS orchestrator plus the three
   car-sales workspaces (`api-shared`, `car-sales-api`, `car-sales-api-fast`).
-  ✅ done (#52/#53/#54). The car-sales three left the repo in #686 and their
-  roster rows left with them.
+  ✅ done (#52/#53/#54). All four have since left the repo — car-sales in #686,
+  CQMS in #683 — and their roster rows left with them.
 
-  **Second pass**: `packages/eslint-local-rules` and `packages/agent-runner`
-  (#302). Both had been written off as having nothing to cover. That was written
-  before #205 gave every custom rule a `RuleTester` suite, and it was never
-  revisited — they carry 138 and 57 tests respectively, all of which already ran
-  in `test:ci` unmeasured. `eslint-local-rules` also dropped `--passWithNoTests`
-  from its `test` task: correct while it had no suites, but with ten files it
-  only meant the suite vanishing would still report success.
-
-  `apps/admin_system` (#51) is **deferred while that app is being refactored** —
-  adding a row now would report coverage against a surface that is changing
-  underneath it. Note this defers only the _report row_: the workspace inherits
-  `test` and `test:coverage` from `createReactRouterRunConfig()`, so its suites
-  already run in `test:ci`, and it is already in the fallow coverage merge.
-  Nothing goes unrun in the meantime.
+  **Second pass**: `packages/eslint-local-rules` (#302), written off as having
+  nothing to cover. That was written before #205 gave every custom rule a
+  `RuleTester` suite, and was never revisited — those tests already ran in
+  `test:ci` unmeasured. It also dropped `--passWithNoTests` from its `test` task:
+  correct while it had no suites, but afterwards it only meant the suite
+  vanishing would still report success.
 
   The plan expected the two API servers to need a DB-free `test:coverage`
-  **subset** carved out of real-Postgres suites, the way `scan-ingestion` and
-  `scan-orchestrator` did. That turned out to be wrong: every suite in
+  **subset** carved out of real-Postgres suites, the way the CQMS workspaces
+  did. That turned out to be wrong: every suite in
   `api-shared`, `car-sales-api` and `car-sales-api-fast` injects its
   dependencies — controllers and plugins take a repository, `readEnvConfig`
   takes a plain object, the distinct repository test passes a pool mock — so
@@ -172,9 +162,10 @@ Each phase is its own PR, kept reviewable and green before the next.
   shared `VITEST_COVERAGE_FLAGS` do not pass `--coverage.all`, and v8 only
   instruments modules that were actually loaded. A source file no test imports is
   therefore **absent from the report** rather than counted as 0% — so it cannot
-  pull the number down. `@repo/agent-runner` is the clearest illustration: it
-  reports ~100%, measured across seven of its ten source files, because
-  `runSkillAgent.ts` and `index.ts` are never imported by a test.
+  pull the number down. The clearest illustration used to be `@repo/agent-runner`,
+  which reported ~100% measured across most of its source files because two were
+  never imported by a test; it left with CQMS (#683), but the effect is a
+  property of the flags, not of that package.
 
   This applies to every workspace in the table, and it is why a high percentage
   is evidence about tested code rather than about a workspace's completeness.

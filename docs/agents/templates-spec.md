@@ -79,7 +79,7 @@ this repo is organised, and one of those paths is not ours to choose:
   folder leaves the files present and **never offered to anyone**: a broken
   feature that looks exactly like a working one.
 - **Everything else follows the existing docs layout.** Docs live in a domain
-  folder — `docs/coordination/`, `docs/cqms/`, `docs/tooling/` — with kebab-case
+  folder — `docs/coordination/`, `docs/tooling/`, `docs/agents/` — with kebab-case
   filenames (`github-planning.md`, `coverage-reporting.md`). Nothing but
   `README.md` sits loose in `docs/`, and the repository root is reserved for
   repo-wide canon (`AGENTS.md`, `COMMANDS.md`, `CHANGELOG.md`).

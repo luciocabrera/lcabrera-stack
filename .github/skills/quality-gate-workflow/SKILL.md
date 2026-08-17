@@ -53,7 +53,7 @@ only `vp lint .` will report clean on code that fails CI, which now runs
 **Stage 4 is not covered by stage 6 either, and it is root-only.** `vp check` does
 not run Biome. Unlike stages 2 and 3 there is no per-workspace variant: `biome.jsonc`
 lives at the repo root and its `overrides` scope the react domain to the three React
-workspaces (`apps/react-router`, `apps/admin_system`, `packages/ui`), so one
+workspaces (`apps/react-router`, `packages/ui`), so one
 repo-wide pass covers everything. `cd` to the root for this stage, then come back.
 Biome is the only linter here carrying the React-domain rules the other two miss
 (`noNestedComponentDefinitions`, `noDuplicatedSpreadProps`). CI runs

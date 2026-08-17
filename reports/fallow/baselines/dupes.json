@@ -1,13 +1,5 @@
 {
   "clone_groups": [
-    ".github/skills/app-graph/scripts/generate-app-graph-report.mjs:157-177|packages/scan-ingestion/src/ingestion/classifyFileTypeCategory.util.ts:1-24",
-    "apps/admin_system/src/routes/cqms/edit-project/editProject.action.ts:10-32|apps/admin_system/src/routes/cqms/trigger-scan/triggerScan.action.ts:16-34",
-    "apps/admin_system/src/routes/cqms/edit-project/editProject.action.ts:10-32|apps/admin_system/src/routes/cqms/project-detail/projectDetail.action.ts:113-151|apps/admin_system/src/routes/cqms/trigger-scan/triggerScan.action.ts:16-34",
-    "apps/admin_system/src/routes/cqms/edit-role/editRole.action.ts:23-35|apps/admin_system/src/routes/cqms/edit-role/editRole.loader.ts:16-29|apps/admin_system/src/routes/cqms/role-detail/roleDetail.loader.ts:15-29",
-    "apps/admin_system/src/routes/cqms/edit-role/editRole.loader.ts:16-29|apps/admin_system/src/routes/cqms/role-detail/roleDetail.loader.ts:15-29",
-    "apps/admin_system/src/routes/cqms/edit-scanner/editScanner.loader.ts:7-22|apps/admin_system/src/routes/cqms/scanner-detail/scannerDetail.loader.ts:8-26",
-    "apps/admin_system/src/routes/cqms/edit-user/editUser.loader.ts:16-27|apps/admin_system/src/routes/cqms/user-detail/userDetail.loader.ts:14-25",
-    "apps/admin_system/vite.config.ts:9-32|apps/react-router/vite.config.ts:9-32",
     "apps/react-router/src/routes/car-sales-infinite/car-sales.loader.ts:21-51|apps/react-router/src/routes/car-sales/car-sales.loader.ts:28-55",
     "apps/react-router/src/routes/car-sales/car-sales.loader.ts:31-69|apps/react-router/src/routes/enterprise-orders/enterprise-orders.loader.ts:34-64",
     "apps/react-router/src/routes/car-sales-infinite/car-sales.loader.ts:59-88|apps/react-router/src/routes/car-sales/car-sales.loader.ts:63-92"

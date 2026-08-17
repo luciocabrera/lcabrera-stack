@@ -4,7 +4,7 @@
  *
  * Why this exists: AGENTS.md §6 says "never commit .env files or credentials",
  * but nothing enforced it at the Claude Code tool boundary (ADR-020's guard
- * covers only the agent-runner SDK runtime). This command hook denies, before
+ * predates the interactive CLI). This command hook denies, before
  * the tool runs:
  *   - Read/Grep/Glob or a Bash command that would read a secret/.env file
  *     (exception: .example/.sample/.template templates), and

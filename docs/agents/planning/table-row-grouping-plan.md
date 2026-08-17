@@ -129,7 +129,7 @@ boundary is at the service edge; the builder's checks are defense in depth.
    `build-keyset-comparison.util.ts` deliberately depends on default placement.
    Emitting explicit NULLS silently breaks keyset pagination.
 3. `query-builder/ARCHITECTURE.md` excludes joins, subqueries and aggregates;
-   [`docs/cqms/PRD.md`](../../cqms/PRD.md) says rollup belongs in Postgres
+   CQMS's `PRD.md` (moved to the CQMS repository in #683) says rollup belongs in Postgres
    **views**. Generating GROUP BY contradicts both — **needs an ADR**.
 
 Zero `GROUP BY`/`ROLLUP`/`CUBE`/`GROUPING`/`HAVING` generation exists. The only
@@ -575,7 +575,7 @@ estimate is the displayed total.
 ### 2.10 What needs an ADR
 
 1. **Aggregation is builder-generated, not view-defined** — qualifies
-   `query-builder/ARCHITECTURE.md` and `docs/cqms/PRD.md`. Must state why Mode 2
+   `query-builder/ARCHITECTURE.md` and CQMS's `PRD.md`. Must state why Mode 2
    makes views impossible (runtime-chosen keys) and why a _sibling_ module
    preserves the flat builder's non-goals. Fold in the grouping-set primitive with
    the identical-plan evidence. → adopted as

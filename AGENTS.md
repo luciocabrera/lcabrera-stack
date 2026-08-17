@@ -25,7 +25,7 @@ walks the decision in order and links the ADR that owns each step.
 
 **Two scopes, and the split carries meaning.** The publishable packages are
 **`@lcabrera/*`**; the internal ones (`vite-configs`, `ts-configs`, `plugins`,
-`agent-runner`, `scan-ingestion`, `scan-report`) stay **`@repo/*`**. So the
+`scan-report`) stay **`@repo/*`**. So the
 import line tells you which side of the product boundary you are on: `@lcabrera/`
 means it ships and has consumers outside this repo, `@repo/` means internal, change
 it freely. A new package picks its scope by one question — does it ship? — and a
@@ -101,10 +101,14 @@ publishing it as `@lcabrera/node` was a manifest, a `.gitignore` and a README.
 on that list because it never joins it: it is the split, so what became public is
 the new `packages/tsconfig` above, and the surviving workspace stays private.
 `packages/scan-report` is not on it either, and for a different reason: it was
-built under #677 from the scan-report skills' shared scripts, and every consumer
-it has is CQMS, so it stays `@repo/scan-report`, `private: true`, and leaves with
-the extraction (#679) rather than shipping. ADR-069's note of 2026-08-14 records
-why.
+built under #677 from the scan-report skills' shared scripts, so it stays
+`@repo/scan-report` and `private: true`. It was expected to leave with the CQMS
+extraction, on the reasoning that every consumer it has is CQMS. **That was
+wrong, and #683 found out by trying**: the root manifest declares it, and the
+`app-graph`, `linter-checker` and `fallow-code-checker` skills import and execute
+its scripts to scan _this_ repo. So it stayed when the CQMS workspaces left, and
+it cannot leave until #682 publishes the ingestion CLI those skills would call
+instead. ADR-069's note of 2026-08-14 records the original reasoning.
 
 `api` and `server` split on **runtime**, and the split is load-bearing, not
 cosmetic — the two names say which runtime each one is for, and the tsconfigs
@@ -263,7 +267,7 @@ Root scripts are **orchestration only** — anything project-specific lives in t
 **Full list: [COMMANDS.md §4](COMMANDS.md#4-root-orchestration-scripts).** The
 policy that governs them:
 
-There is deliberately **no `start:all`/`dev:all`**, and the reason has changed. It used to be that `car-sales-api` and `car-sales-api-fast` served the same domain and could never run at once; both left with [`api-playground`](https://github.com/luciocabrera/api-playground) (#686). What remains is that the showcase and CQMS are unrelated products sharing a checkout, so a command starting "everything" would only ever be starting two things that have nothing to do with each other. Reach for `dev:showcase` or `dev:cqms`.
+There is deliberately **no `start:all`/`dev:all`**, and the reason has now expired twice. It began as a safety rule — `car-sales-api` and `car-sales-api-fast` served the same domain and could never run at once — and those left with [`api-playground`](https://github.com/luciocabrera/api-playground) (#686). It then became a coherence rule: the showcase and CQMS were unrelated products sharing a checkout. CQMS left too (#683). What remains is a single runnable app, so `dev:showcase` and `start:showcase` are the commands, and an "all" alias would just be a second name for one of them. Add one only when a second app arrives — and then say which of these two reasons it answers to.
 
 **`vp check` type-checks, but it is not `tsc` — both run, and `typecheck:all` is the authority.** `vp check`'s type pass is **tsgolint** (Oxlint's type-aware path, enabled by `lint.options.typeCheck` in the root `vite.config.ts`), and it does resolve each workspace's own strict `tsconfig.app.json` — `strict`, `noUncheckedIndexedAccess` and `noUnusedLocals` all fire under it. What it does **not** do is run the per-workspace `typecheck` scripts, and those carry work no linter replicates: `packages/ui` gates its public API against server-only `node:*` imports (`check:public-api`), and both React Router apps regenerate route types first. Every workspace now has a `typecheck` script, CI runs `vp run typecheck:all` as its own step in `check-safe.yml`, and `check:safe` chains it. Keep the two passes in sync: a new workspace gets a `typecheck` script **and** a tsconfig, or it silently falls back to the near-empty root `tsconfig.json` and is checked far more loosely than every other workspace (this is exactly how `utils`/`plugins`/`vite-configs` went un-strict for so long — `noUncheckedIndexedAccess` never fired there).
 
@@ -285,11 +289,9 @@ deliberate violation (Rule 14). Handling a _finding_ is Non-Negotiable Rule 11 �
 verify, then fix; never suppress. The public packages (§1) take no
 suppressions at all, enforced by `vp run suppressions:verify`.
 
-Known constraint: `scan-orchestrator`'s queue integration test shares the local CQMS Postgres queue — while `vp run dev:cqms` is running, the live orchestrator races the test for queued scans and `vp run test:all` can flake on `runQueuedScan.test.ts` (duplicate `reports_scan_id_key`). Stop the CQMS dev session before a full test run, or treat that single failure as environmental.
+**`test:all` vs `test:ci`.** No suite here needs a database any more — the DB-bound ones left with CQMS (#683) — so the two now differ only in ordering: `test:ci` runs `vite-react-compiler` last, via its own `test:ci`, so the coverage summary the PR comment reads is the fresh one. Keep using `test:ci` before pushing; it is what CI runs.
 
-**`test:all` vs `test:ci`.** `test:all` runs every workspace and needs a database. CI has no Postgres, so its unit-tests job runs `vp run test:ci`, which is every DB-free suite in the repo: each workspace's `test`, except that `@repo/scan-ingestion` and `@repo/scan-orchestrator` contribute their DB-free `test:unit` subsets (their full `test` tasks stay real-Postgres, so `test:all` still covers everything), and `vite-react-compiler` runs last via its own `test:ci` so the coverage summary the PR comment reads is the fresh one. Run `vp run test:ci` before pushing if you don't have a DB up.
-
-**A workspace with real-Postgres tests must split them**, the way `scan-ingestion` and `scan-orchestrator` do: keep the full suite as `test`, and expose a `test:unit` (plus `test:coverage`) that `--exclude`s the DB-bound files. Without the split the whole workspace has to be dropped from `test:ci`, which silently takes its pure tests with it.
+**A workspace with real-Postgres tests must split them**: keep the full suite as `test`, and expose a `test:unit` (plus `test:coverage`) that `--exclude`s the DB-bound files. Without the split the whole workspace has to be dropped from `test:ci`, which silently takes its pure tests with it. Nothing here needs this today — `UNIT_TASK_PACKAGES` in `scripts/lib/affected-tests.mjs` is empty — but the machinery is still wired, so a DB-bound workspace can rejoin `test:ci` without dragging its whole suite in.
 
 ### Fallow Static Analysis (run from repo root)
 
@@ -491,7 +493,7 @@ Before making **any** code change, read every `ARCHITECTURE.md` that covers the 
 - The component/hook/util directory being modified (e.g. `packages/ui/src/components/Table/ARCHITECTURE.md`)
 - Parent directories if the change crosses boundaries (e.g. `packages/ui/src/hooks/ARCHITECTURE.md`)
 - `packages/ui/src/PATTERNS.md` — always read this before creating or modifying any component; it defines naming conventions, StyleX composition order, the drawer-section pattern, filter contract, context+store pattern, and props-forwarding rules
-- **The ADRs covering the area** — `vp run adr:list` prints every one with its title; if you cannot run a command, **list the home's directory** (`ls docs/decisions/`, or open the directory rather than the file on GitHub) — the filenames carry the titles in kebab case. What no longer works is opening a home's `README.md` expecting an index: it says what the home holds and deliberately lists no ADRs, because a committed list is one region every ADR branch appends to ([ADR-075](docs/decisions/ADR-075-the-index-does-not-list-the-adrs.md)). The homes are [`docs/decisions/`](docs/decisions/) (repo, packages, toolchain), [`docs/cqms/decisions/`](docs/cqms/decisions/) (CQMS/CodePulse), [`apps/react-router/docs/decisions/`](apps/react-router/docs/decisions/) (showcase app). In the app home: Modal → ADR-001, Tooltip → ADR-002, store → ADR-003, memoization/React Compiler → ADR-004, styling → ADR-005, infinite-scroll prefetch → ADR-006, barrel-export boundaries → ADR-007, primary-key sort tiebreaker / columns-derived id → ADR-008, filter-options fetch descriptors → ADR-009, cookie persistence via `/_action/persist-cookie` → ADR-010, grid interaction architecture (capability/command/surface) → ADR-011, column width → ADR-012
+- **The ADRs covering the area** — `vp run adr:list` prints every one with its title; if you cannot run a command, **list the home's directory** (`ls docs/decisions/`, or open the directory rather than the file on GitHub) — the filenames carry the titles in kebab case. What no longer works is opening a home's `README.md` expecting an index: it says what the home holds and deliberately lists no ADRs, because a committed list is one region every ADR branch appends to ([ADR-075](docs/decisions/ADR-075-the-index-does-not-list-the-adrs.md)). The homes are [`docs/decisions/`](docs/decisions/) (repo, packages, toolchain) and [`apps/react-router/docs/decisions/`](apps/react-router/docs/decisions/) (showcase app); the CQMS home left with #683. In the app home: Modal → ADR-001, Tooltip → ADR-002, store → ADR-003, memoization/React Compiler → ADR-004, styling → ADR-005, infinite-scroll prefetch → ADR-006, barrel-export boundaries → ADR-007, primary-key sort tiebreaker / columns-derived id → ADR-008, filter-options fetch descriptors → ADR-009, cookie persistence via `/_action/persist-cookie` → ADR-010, grid interaction architecture (capability/command/surface) → ADR-011, column width → ADR-012
 
 If no `ARCHITECTURE.md` exists yet for the area you are changing, create one **before** implementing.
 

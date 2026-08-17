@@ -13,7 +13,7 @@ This component has **no opinion on what a tone means** for any given
 domain — it just renders the label in that tone's colors. Mapping a
 domain-specific status string (e.g. CQMS's `queued`/`running`/`succeeded`/
 `failed`/`partially_failed`/`canceled`) to a tone is the consuming app's own
-util (e.g. `apps/admin_system/src/routes/cqms/utils/resolveRunStatusTone.util.ts`),
+util owned by the consuming route,
 not this component's concern — the same boundary `AppNavigation` draws for
 its own route items.
 

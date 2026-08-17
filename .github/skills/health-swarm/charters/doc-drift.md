@@ -28,7 +28,6 @@ link is now a gate failure rather than something for a scout to find.
 - ADRs contradicted by code; superseded ADRs still cited as current.
 - `packages/ui/src/INVENTORY.md` and `PATTERNS.md` versus what exists.
 - `ARCHITECTURE.md` Props tables versus actual props.
-- `docs/cqms/STATUS.md`, a living built-vs-spec doc.
 - `AGENTS.md` itself.
 - Any hardcoded count — those rot by construction and nothing checks them.
 

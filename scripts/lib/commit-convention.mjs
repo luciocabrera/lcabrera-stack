@@ -13,7 +13,7 @@
  * Grammar (Conventional Commits): type, optional scope, optional breaking `!`,
  * a colon-space, then the subject —
  *   type     one of ALLOWED_TYPES (lowercase)
- *   scope    optional; a workspace name (ui, admin_system, api-server, …) or a
+ *   scope    optional; a workspace name (ui, server, react-router, …) or a
  *            cross-cutting area (ci, docs, tooling, …). Free-form in shape; an
  *            unrecognised scope is a WARNING, never a hard failure.
  *   subject  non-empty, no trailing period, within HEADER_MAX.

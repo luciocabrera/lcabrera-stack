@@ -9,8 +9,8 @@
  *   exports them to every hook and everything a hook spawns. A script that
  *   reads one repository while another is named by the environment answers
  *   confidently about the wrong one. The same inheritance has twice damaged
- *   this repository outright — see the `ingestion/git/` section of
- *   `packages/scan-ingestion/ARCHITECTURE.md`.
+ *   this repository outright (#270/#271): a test fixture's `git init`
+ *   inherited a linked worktree's `GIT_DIR` and git guessed the repo was bare.
  * - **PATH is pinned to fixed system directories** so a writable directory
  *   earlier in the inherited PATH cannot shadow the real `git` binary
  *   (Sonar S4036).

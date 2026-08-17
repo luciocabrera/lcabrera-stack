@@ -30,17 +30,13 @@ export const WORKSPACE_RUNTIMES = {
   /** Workspaces whose code runs in a browser. */
   browser: [
     'apps/react-router/**',
-    'apps/admin_system/**',
     'packages/ui/**',
     // Browser-safe by construction — its tsconfig omits node types (ADR-038).
     'packages/api/**',
   ],
   /** Workspaces whose code runs in Node — services and build tooling alike. */
   node: [
-    'apps/scan-orchestrator/**',
-    'packages/agent-runner/**',
     'packages/node-runtime/**',
-    'packages/scan-ingestion/**',
     'packages/scan-report/**',
     'packages/server/**',
     'packages/eslint-local-rules/**',

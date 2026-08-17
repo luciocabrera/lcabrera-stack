@@ -14,9 +14,16 @@
  * (see `LINT_ONLY_PATTERNS`).
  *
  * The per-workspace task substitution mirrors `test:ci` exactly so the two never
- * diverge: the DB-bound scan packages run their DB-free `test:unit`, and (in CI
- * mode) `vite-react-compiler` runs its coverage `test:ci` last. A FULL run is
- * just "every workspace is affected", so it reproduces `test:ci` by construction.
+ * diverge: in CI mode `vite-react-compiler` runs its coverage `test:ci` last. A
+ * FULL run is just "every workspace is affected", so it reproduces `test:ci` by
+ * construction.
+ *
+ * It also used to substitute a DB-free `test:unit` for the workspaces that
+ * needed a real Postgres. Those left with CQMS (#683), and the substitution went
+ * with them rather than staying as an empty list: a constant that can only be
+ * empty, a filter that can only return nothing and a group that is always
+ * dropped is dead code, not a preserved mechanism. `test:ci` in the root
+ * manifest is the shape to mirror if one is ever needed again.
  *
  * Effectful only in `readWorkspaceGraph` (reads package.json files); the rest is
  * pure and drives the runner in `scripts/test-changed.mjs`. See
@@ -26,12 +33,6 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { deriveWorkspaces, workspacesForFiles } from './workspace-scopes.mjs';
-
-/** Package names whose DB-free subset runs as `test:unit` (see `test:ci`). */
-export const UNIT_TASK_PACKAGES = [
-  '@repo/scan-ingestion',
-  '@repo/scan-orchestrator',
-];
 
 /** The one package that emits the PR coverage summary via its `test:ci`. */
 export const COVERAGE_TASK_PACKAGE = 'vite-react-compiler';
@@ -166,22 +167,18 @@ export const withDependents = (seeds, dependents) => {
 
 /**
  * Split affected packages into ordered `vp run` groups mirroring `test:ci`:
- * plain `test` first, DB-free `test:unit` for the scan packages, then (CI only)
- * `vite-react-compiler`'s coverage `test:ci` LAST so its summary is the fresh one.
- * Empty groups are dropped. Without `ci`, react-router runs plain `test`.
+ * plain `test` first, then (CI only) `vite-react-compiler`'s coverage `test:ci`
+ * LAST so its summary is the fresh one. Empty groups are dropped. Without `ci`,
+ * react-router runs plain `test`.
  */
 export const partitionTasks = (affectedPackages, { ci = false } = {}) => {
   const affected = new Set(affectedPackages);
-  const unit = UNIT_TASK_PACKAGES.filter((pkg) => affected.has(pkg));
   const useCoverage = ci && affected.has(COVERAGE_TASK_PACKAGE);
-  const special = new Set([
-    ...unit,
-    ...(useCoverage ? [COVERAGE_TASK_PACKAGE] : []),
-  ]);
-  const plain = [...affected].filter((pkg) => !special.has(pkg));
+  const plain = [...affected].filter(
+    (pkg) => !useCoverage || pkg !== COVERAGE_TASK_PACKAGE,
+  );
   return [
     { task: 'test', packages: plain },
-    { task: 'test:unit', packages: unit },
     ...(useCoverage
       ? [{ task: 'test:ci', packages: [COVERAGE_TASK_PACKAGE] }]
       : []),

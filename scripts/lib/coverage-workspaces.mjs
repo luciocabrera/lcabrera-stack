@@ -48,24 +48,16 @@ export const COVERAGE_REPORT_WORKSPACES = [
   { dir: 'packages/api', name: '@lcabrera/api', run: true },
   { dir: 'apps/react-router', name: 'vite-react-compiler', run: false },
   // Phase 2 — remaining library packages with a DB-free test:coverage.
-  // scan-ingestion's task measures its DB-free subset only (its real-Postgres
-  // queries/* stay out), same as the fallow coverage merge.
   { dir: 'packages/node-runtime', name: '@lcabrera/node', run: true },
-  { dir: 'packages/scan-ingestion', name: '@repo/scan-ingestion', run: true },
   { dir: 'packages/utils', name: '@lcabrera/utils', run: true },
-  // Phase 3 — apps. scan-orchestrator needs a DB-free subset (one suite drives
-  // the real scan queue).
-  { dir: 'apps/scan-orchestrator', name: '@repo/scan-orchestrator', run: true },
-  // Phase 3, second pass. Both were written off as "config/CLI-only with
-  // nothing to cover"; that stopped being true for these two when
-  // eslint-local-rules gained a suite per rule (#205). Their tests are a lint
-  // RuleTester and a set of pure utils, so neither reaches a service.
+  // Phase 3, second pass. Written off as "config/CLI-only with nothing to
+  // cover"; that stopped being true once eslint-local-rules gained a suite per
+  // rule (#205). Its tests are a lint RuleTester, so it reaches no service.
   {
     dir: 'packages/eslint-local-rules',
     name: '@lcabrera/eslint-plugin',
     run: true,
   },
-  { dir: 'packages/agent-runner', name: '@repo/agent-runner', run: true },
   // Pure factories plus a writer whose one effect is injected, so the whole
   // package is covered without a filesystem (ADR-069 split it out of
   // `@repo/ts-configs`, which keeps only this repo's entry table).
@@ -96,15 +88,12 @@ export const COVERAGE_MERGE_WORKSPACES = [
   { dir: 'packages/api', name: '@lcabrera/api' },
   { dir: 'packages/eslint-local-rules', name: '@lcabrera/eslint-plugin' },
   { dir: 'packages/node-runtime', name: '@lcabrera/node' },
-  { dir: 'packages/scan-ingestion', name: '@repo/scan-ingestion' },
   { dir: 'packages/scan-report', name: '@repo/scan-report' },
   { dir: 'packages/server', name: '@lcabrera/server' },
   { dir: 'packages/tsconfig', name: '@lcabrera/tsconfig' },
   { dir: 'packages/ui', name: '@lcabrera/ui' },
   { dir: 'packages/utils', name: '@lcabrera/utils' },
   { dir: 'packages/vite-configs', name: '@lcabrera/vite-config' },
-  { dir: 'apps/admin_system', name: 'admin-system' },
-  { dir: 'apps/scan-orchestrator', name: '@repo/scan-orchestrator' },
 ];
 
 /** Whether a workspace directory gitignores its eslint suppressions file. */

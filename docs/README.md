@@ -17,15 +17,12 @@ Start here when you're not sure where something belongs, or where to look.
 | -------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **The rules** — TS/React/StyleX standards, the non-negotiables, the quality gate | [`AGENTS.md`](../AGENTS.md) (+ path-scoped [`.claude/rules/`](../.claude/rules/))                                                                                                                                     |
 | **How to run something** — every `vp` command, what CI runs                      | [`COMMANDS.md`](../COMMANDS.md)                                                                                                                                                                                       |
-| **Why a thing is built the way it is** — an architectural decision               | an **ADR** (three homes, one number sequence — see the warning below)                                                                                                                                                 |
+| **Why a thing is built the way it is** — an architectural decision               | an **ADR** (two homes, one number sequence — see the warning below)                                                                                                                                                   |
 | **Who's working on what right now** — in-flight work, owners, area locks         | [`docs/coordination/`](./coordination/README.md) — the task register (`tasks/*.md`); `vp run coordination:board` renders a local table view                                                                           |
 | **The durable backlog** — what should happen next, epics, milestones             | GitHub **Issues / sub-issues / Milestones / Projects**; boundary vs. the register in [ADR-036](decisions/ADR-036-github-planning-layer.md), runbook [`docs/tooling/github-planning.md`](./tooling/github-planning.md) |
-| **What's built vs. specified for CQMS/CodePulse**                                | [`docs/cqms/STATUS.md`](./cqms/STATUS.md) — the living page; start there                                                                                                                                              |
-| **The CQMS product spec** (canonical requirements)                               | [`docs/cqms/PRD_V2.md`](./cqms/PRD_V2.md)                                                                                                                                                                             |
-| **Planned-but-unbuilt work** (approved, deferred)                                | a `docs/cqms/*_PLAN.md` spec, indexed from [STATUS.md §2](./cqms/STATUS.md)                                                                                                                                           |
 | **How one component/hook is wired**                                              | that directory's `ARCHITECTURE.md` (`git ls-files "**/ARCHITECTURE.md"` lists them)                                                                                                                                   |
 | **Naming / structure / StyleX conventions**                                      | the nearest `PATTERNS.md` (e.g. [`packages/ui/src/PATTERNS.md`](../packages/ui/src/PATTERNS.md))                                                                                                                      |
-| **Does an artifact already exist before I build one**                            | the app/package `INVENTORY.md` (react-router, ui, server, admin_system)                                                                                                                                               |
+| **Does an artifact already exist before I build one**                            | the app/package `INVENTORY.md` (react-router, ui, server)                                                                                                                                                             |
 | **Whether to extract shared code into a package or duplicate it**                | [`docs/agents/cross-app-abstraction.md`](./agents/cross-app-abstraction.md) — the decision in order; ADR-038/039/040 own the steps                                                                                    |
 | **A task workflow** (review, fallow scan, quality gate…)                         | [`.github/skills/`](../.github/skills/) `SKILL.md` files                                                                                                                                                              |
 | **How to write a commit / PR** (the enforced format)                             | the [`commit-and-pr`](../.github/skills/commit-and-pr/SKILL.md) skill; spec in [`scripts/lib/commit-convention.mjs`](../scripts/lib/commit-convention.mjs)                                                            |
@@ -44,27 +41,26 @@ Start here when you're not sure where something belongs, or where to look.
 | `AGENTS.md` (+ `.claude/rules/`) | every agent + human       | durable              | universal standards, the gate, the non-negotiables |
 | `COMMANDS.md`                    | every agent + human       | durable              | the command surface (CI-verified — see below)      |
 | ADRs                             | every agent + human       | durable, append-only | one decision each, with context + consequences     |
-| `docs/cqms/STATUS.md`            | CQMS contributors         | living               | built-vs-spec truth; deferrals; live deviations    |
-| `docs/cqms/*_PLAN.md`            | whoever resumes that work | until it ships       | one deferred work item's execute-ready spec        |
 | `*/ARCHITECTURE.md`              | anyone touching that area | durable              | that unit's data flow, deps, constraints           |
 | `INVENTORY.md` / `PATTERNS.md`   | anyone building UI        | durable              | reuse catalog / conventions                        |
 
-`PRD.md`, `PRD_V1.md`, `TECH_SPEC.md`, `IMPLEMENTATION_PLAN.md` under `docs/cqms/`
-are **history** — superseded drafts kept for provenance. `STATUS.md` says which.
-
 ---
 
-## ADRs: three homes, one number sequence
+## ADRs: two homes, one number sequence
 
-The home is chosen by **one question — when CQMS moves to its own repository,
-does this decision go with it?**
+The home is chosen by **scope — is this a decision about the repository and what
+it ships, or about the showcase app's own internals?**
 ([ADR-048](./decisions/ADR-048-adr-taxonomy-and-one-sequence.md).)
 
-| Home                                                                        | Holds                                                                   | At extraction |
-| --------------------------------------------------------------------------- | ----------------------------------------------------------------------- | ------------- |
-| [`docs/decisions/`](./decisions/)                                           | the repo, the published `@lcabrera/*` packages, the toolchain           | **stays**     |
-| [`docs/cqms/decisions/`](./cqms/decisions/)                                 | CQMS / CodePulse — schema, scanners, ingestion, orchestration           | **leaves**    |
-| [`apps/react-router/docs/decisions/`](../apps/react-router/docs/decisions/) | the showcase app — Modal, Tooltip, the store pattern, grid interaction… | **stays**     |
+| Home                                                                        | Holds                                                                   |
+| --------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| [`docs/decisions/`](./decisions/)                                           | the repo, the published `@lcabrera/*` packages, the toolchain           |
+| [`apps/react-router/docs/decisions/`](../apps/react-router/docs/decisions/) | the showcase app — Modal, Tooltip, the store pattern, grid interaction… |
+
+There were three. The split was originally drawn by "when CQMS moves to its own
+repository, does this decision go with it?" — that move happened in #683 and the
+CQMS home went with it, which is why an old ADR may cite a number that now
+resolves in only one place.
 
 Those links open the **directory**, which is the listing — each home's `README.md`
 is a generated page describing the home and lists no ADRs on purpose, because a

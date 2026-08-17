@@ -13,8 +13,8 @@ const poolRef: { current: Pool | undefined } = { current: undefined };
 
 /**
  * Lazily-initialized singleton — shared across every Node-context consumer
- * of this package (packages/scan-ingestion's CLI + admin_system job code,
- * and potentially apps/api-server(-fast) in the future), none of which is
+ * of this package — CLIs, job runners and HTTP servers alike, now all outside
+ * this repository — none of which is
  * "the" single server process with one obvious place to construct a Pool
  * up front. Each process gets its own module-level singleton via getPool();
  * callers still supply their own DB_NAME et al. via env, so this is not a

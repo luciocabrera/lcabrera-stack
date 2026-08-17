@@ -4,19 +4,16 @@
  * Why this exists: the harness must be structurally unable to (a) read a
  * secret/.env file or (b) write a file that introduces a credential — a policy
  * that AGENTS.md §6 states but nothing enforced at the tool boundary for the
- * interactive Claude Code CLI (ADR-020's guard covers only the agent-runner SDK
- * runtime). This module is the pure brain: given a PreToolUse payload it returns
+ * interactive Claude Code CLI. This module is the pure brain: given a PreToolUse payload it returns
  * an allow/deny decision, with no I/O, so it is trivially unit-testable and the
  * entry script (`claude-secrets-guard.mjs`) stays a thin stdin→stdout shell.
  *
- * The secret-file policy is the SAME as ADR-020
- * (packages/agent-runner/src/isSecretFilePath.util.ts) — the two guards must
- * agree on what "secret" means. It is an INDEPENDENT implementation, not a
- * shared module: the CLI hook is bare-node `.mjs` and the SDK guard is TS, so
- * sharing one module would couple a security control to another package's
- * internals or to the experimental TS loader. Each runtime is instead locked to
- * the shared spec by its own tests (here: `secrets-guard.test.mjs`, mirroring
- * secretFileGuardHook.util.test.ts). Keep the taxonomy VALUES in sync.
+ * The secret-file policy is ADR-020's. It had a twin in the agent-runner SDK
+ * guard, deliberately reimplemented rather than shared — the CLI hook is
+ * bare-node `.mjs` and that guard was TS, so one module would have coupled a
+ * security control to another package's internals. That twin left with CQMS
+ * (#683), making this the only copy here; `secrets-guard.test.mjs` is now the
+ * whole lock on the taxonomy rather than half of it.
  *
  * Governed by .claude/rules/scripts.md.
  */

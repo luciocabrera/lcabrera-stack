@@ -68,7 +68,7 @@ describe('adrFindings', () => {
     const result = findings({
       homes: [
         home('docs/decisions', ['ADR-047-a.md']),
-        home('docs/cqms/decisions', ['ADR-047-b.md']),
+        home('apps/react-router/docs/decisions', ['ADR-047-b.md']),
       ],
     });
 
@@ -164,7 +164,7 @@ describe('nextFreeNumber', () => {
     expect(
       nextFreeNumber([
         home('docs/decisions', ['ADR-047-a.md']),
-        home('docs/cqms/decisions', ['ADR-041-b.md']),
+        home('apps/react-router/docs/decisions', ['ADR-041-b.md']),
       ]),
     ).toBe(48);
   });
@@ -191,7 +191,7 @@ describe('looksLikeAdr', () => {
 
 describe('renderIndex', () => {
   it('links ADR-048 relative to the home it renders', () => {
-    const [repo, , app] = ADR_HOMES;
+    const [repo, app] = ADR_HOMES;
 
     expect(renderIndex(repo)).toContain('](./ADR-048-');
     expect(renderIndex(app)).toContain('](../../../../docs/decisions/ADR-048-');

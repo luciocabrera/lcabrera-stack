@@ -26,7 +26,6 @@ Read this before hunting for a task definition. A runnable task can come from
 | Source                                        | Example                                                         |
 | --------------------------------------------- | --------------------------------------------------------------- |
 | `package.json` → `scripts`                    | `packages/ui`'s `typecheck`                                     |
-| `vite.config.ts` → `run.tasks`                | `apps/scan-orchestrator`'s `build` and `test`                   |
 | A shared factory from `@lcabrera/vite-config` | `apps/react-router`'s `test` (via `createReactRouterRunConfig`) |
 
 This is why `grep -l '"test":' apps/*/package.json packages/*/package.json`
@@ -134,7 +133,7 @@ project-specific belongs in that project's own `package.json`.
 | `vp run ready`               | `check:safe` + `build:all` — the full "is it shippable" check                                     |
 | `vp run check:safe`          | typegen → `vp check` → typecheck → eslint → biome → tests                                         |
 | `vp run check:push`          | the DB-free CI Quality Gate (no tests/fallow) — the `pre-push` hook runs this then `test:changed` |
-| `vp run typecheck:all`       | real tsc in all 15 workspaces, dependency order                                                   |
+| `vp run typecheck:all`       | real tsc in all 11 workspaces, dependency order                                                   |
 | `vp run typecheck:changed`   | real tsc for the changed workspaces + dependents only — see below                                 |
 | `vp run typegen:all`         | route types for both React Router apps                                                            |
 | `vp run lint:all`            | Oxlint + eslint + Biome **with autofix**, every workspace                                         |
@@ -152,10 +151,10 @@ project-specific belongs in that project's own `package.json`.
 | `vp run coverage:merge`      | merged coverage for the fallow gate (DB-free workspaces only)                                     |
 | `vp run coverage:report`     | per-workspace + monorepo coverage summary for the PR comment (ui, server, react-router)           |
 
-`test:all` vs `test:ci`: CI has no database, so `test:ci` substitutes the DB-free
-`test:unit` subsets for `@repo/scan-ingestion` / `@repo/scan-orchestrator` and runs
-`vite-react-compiler` last so the PR's coverage summary is the fresh one. Run
-`test:ci` before pushing if you have no DB up.
+`test:all` vs `test:ci`: no suite here needs a database since the CQMS workspaces
+left (#683), so the two differ only in ordering — `test:ci` runs
+`vite-react-compiler` last so the PR's coverage summary is the fresh one. Use
+`test:ci` before pushing; it is what CI runs.
 
 `test:scripts` is chained into both, and needs to be: root `scripts/` is **not a
 workspace**, so `vp run -r test` never reaches it. That is why the logic behind
@@ -181,7 +180,7 @@ Tests job (and its coverage report) scope to the diff on pull requests; pushes t
 `main` still run the full `test:ci`.
 
 `typecheck:changed` applies the same change-based selection to the Quality Gate's
-slowest per-workspace step — real `tsc` across all 15 workspaces. It runs
+slowest per-workspace step — real `tsc` across all 11 workspaces. It runs
 `typecheck` only for the changed workspaces plus their dependents (a type error a
 diff introduces surfaces where the type is used, which the dependents walk covers),
 falling back to the full run on the same shared/root triggers and on pushes to
@@ -235,8 +234,6 @@ the script exits without opening anything.
 | ----------------------- | ------------------------------------------------ |
 | `vp run dev:showcase`   | the showcase frontend — Postgres is all it needs |
 | `vp run start:showcase` | the built showcase                               |
-| `vp run dev:cqms`       | admin_system + scan-orchestrator                 |
-| `vp run start:cqms`     | prod admin_system + scan-orchestrator            |
 
 Every table route in `apps/react-router` serves its own rows from Postgres, so
 the showcase needs nothing but a database — see
@@ -439,7 +436,7 @@ is believed — the same property [`deps:audit`](#dependencies) is built around.
 | `vp run renames:verify`      | check no document still names a file this change renamed away — scoped to the diff, which is what lets it check bare filenames at all (`--base <ref>`, default `origin/main`)                        |
 | `vp run route-names:verify`  | check every `*.types`/`*.constants` file in a route folder names an artifact that folder holds — the half of `local-rules/domain-folder-filename` an ESLint rule cannot reach (#613)                 |
 | `vp run adr:verify`          | check ADR home, filename, heading and number uniqueness, and that each home's index is current; prints the next free number (`--write` regenerates the indexes)                                      |
-| `vp run adr:new`             | scaffold an ADR from [`_TEMPLATE.md`](docs/decisions/_TEMPLATE.md) with the next free number — `-- "<title>" [--home repo\|cqms\|app] [--slug <s>] [--dry-run]`                                      |
+| `vp run adr:new`             | scaffold an ADR from [`_TEMPLATE.md`](docs/decisions/_TEMPLATE.md) with the next free number — `-- "<title>" [--home repo\|app] [--slug <s>] [--dry-run]`                                            |
 | `vp run adr:list`            | print every ADR with its title, per home — the listing each home's index deliberately does not carry ([ADR-075](docs/decisions/ADR-075-the-index-does-not-list-the-adrs.md))                         |
 | `vp run viteplus:verify`     | check AGENTS.md has no Vite+ managed block rendering content — the markers are removed so `vp install` cannot refill them; this catches them coming back (`--write` re-empties a refilled one)       |
 | `vp run configs:verify`      | check no formatter/linter config file exists that no engine reads — fmt and lint are configured once in the root `vite.config.ts` (ADR-042), so a `.oxfmtrc.json`/`.prettierrc` beside it is a decoy |
@@ -630,7 +627,7 @@ file under `reports/sonar/runs/` ([ADR-049](docs/decisions/ADR-049-findings-repo
 
 ## 5. Per-workspace tasks
 
-**Every one of the 15 workspaces** defines these seven:
+**Every one of the 11 workspaces** defines these seven:
 
 `format` · `format:check` · `lint` · `lint:check` · `lint:eslint` ·
 `lint:eslint:check` · `typecheck`
@@ -641,13 +638,9 @@ Beyond that, tasks are per-workspace. `build` and `test` are common but come fro
 | Workspace                     | Package name              | Notable extra tasks                                                                                                    |
 | ----------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `apps/react-router`           | `vite-react-compiler`     | `typegen`, `test:ci`, `test:watch`, `preview`, `knip`, `seed`, `db:seed`, `audit:lighthouse`, `audit:lighthouse:check` |
-| `apps/admin_system`           | `admin-system`            | `typegen`                                                                                                              |
-| `apps/scan-orchestrator`      | `@repo/scan-orchestrator` | `start`, `test:unit`, `test:coverage`                                                                                  |
 | `packages/ui`                 | `@lcabrera/ui`            | `check:public-api`, `test:coverage`, `bench`                                                                           |
 | `packages/server`             | `@lcabrera/server`        | `test:coverage`                                                                                                        |
-| `packages/scan-ingestion`     | `@repo/scan-ingestion`    | `migrate`, `push`, `test:unit`, `test:coverage`                                                                        |
 | `packages/node-runtime`       | `@lcabrera/node`          | `build`, `test:coverage`                                                                                               |
-| `packages/agent-runner`       | `@repo/agent-runner`      | —                                                                                                                      |
 | `packages/ts-configs`         | `@repo/ts-configs`        | `generate`                                                                                                             |
 | `packages/tsconfig`           | `@lcabrera/tsconfig`      | `build`, `test:coverage`                                                                                               |
 | `packages/eslint-local-rules` | `@lcabrera/eslint-plugin` | —                                                                                                                      |
@@ -671,7 +664,8 @@ Notes on the non-obvious ones:
 - **A workspace with real-Postgres tests must split them**: keep the full suite as
   `test`, and expose a DB-free `test:unit` (plus `test:coverage`) — otherwise the
   whole workspace drops out of `test:ci` and takes its pure tests with it.
-  `scan-ingestion` and `scan-orchestrator` are the precedent.
+  Nothing needs this today — the precedent left with CQMS (#683) — but the
+  machinery is still wired.
 
 ---
 
@@ -751,9 +745,9 @@ All three review-gate workflows also take a `workflow_dispatch` with a PR number
 which is the break-glass path.
 
 [`secret-scan.yml`](.github/workflows/secret-scan.yml) scans repository
-**content** for credentials — the layer the two agent-boundary guards
-(`scripts/claude-secrets-guard.mjs`, `packages/agent-runner`) do not cover, since
-neither looks at what lands in a commit. Two scans: the working tree, and the
+**content** for credentials — the layer the agent-boundary guard
+(`scripts/claude-secrets-guard.mjs`) does not cover, since it does not look at
+what lands in a commit. Two scans: the working tree, and the
 commits this PR adds (a secret added then removed within one PR never reaches the
 tree, but the branch carrying it was pushed). Config and its single allowlist
 entry are in [`.gitleaks.toml`](.gitleaks.toml); the binary is version-pinned and
@@ -808,10 +802,9 @@ in a hook either; it is a CI-and-local-gate step.
 
 ## 7. Troubleshooting
 
-| Symptom                                       | Do this                                                             |
-| --------------------------------------------- | ------------------------------------------------------------------- |
-| Setup / runtime / package-manager looks wrong | `vp env doctor` — include its output when asking for help           |
-| Can't find where a task is defined            | Check all three sources in §1, not just `package.json`              |
-| `--filter` errors out                         | It cannot be combined with `-r`; and it takes the **package name**  |
-| Every regenerated tsconfig looks dirty        | You skipped `vp fmt .` after `generate` — it is whitespace only     |
-| `runQueuedScan.test.ts` flakes on `test:all`  | Stop `vp run dev:cqms` first — it races the test for the CQMS queue |
+| Symptom                                       | Do this                                                            |
+| --------------------------------------------- | ------------------------------------------------------------------ |
+| Setup / runtime / package-manager looks wrong | `vp env doctor` — include its output when asking for help          |
+| Can't find where a task is defined            | Check all three sources in §1, not just `package.json`             |
+| `--filter` errors out                         | It cannot be combined with `-r`; and it takes the **package name** |
+| Every regenerated tsconfig looks dirty        | You skipped `vp fmt .` after `generate` — it is whitespace only    |

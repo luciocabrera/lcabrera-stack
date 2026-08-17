@@ -107,7 +107,7 @@ Check database container status with `vp run db:status`, and stop it with
 
 ## API Server
 
-Only needed for the `VITE_API_URL` override above (and for `apps/admin_system`).
+Only needed for the `VITE_API_URL` override above.
 When it is running, the dev server proxies `/api` requests to
 `http://localhost:3001`.
 
