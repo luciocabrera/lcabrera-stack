@@ -16,6 +16,7 @@ no review at all.
 | [`.github/workflows/copilot-review-gate.yml`](../../.github/workflows/copilot-review-gate.yml) | when it recomputes                                            |
 | [`scripts/copilot-review-status.mjs`](../../scripts/copilot-review-status.mjs)                 | the I/O — reads the PR, posts the status                      |
 | [`scripts/lib/copilot-review.mjs`](../../scripts/lib/copilot-review.mjs)                       | the comparison, pure and unit-tested                          |
+| [`review-gate-reconcile.md`](./review-gate-reconcile.md)                                       | the sweep that recomputes it when the event does not          |
 | `vp run copilot-review:status -- --pr <n> --dry-run`                                           | what the gate would say about a PR right now, posting nothing |
 
 ## The states
@@ -82,6 +83,18 @@ and any review `submitted` or `dismissed`. `synchronize` is the load-bearing
 one: it fires on every push, the new head has no review yet, and the status
 therefore goes `pending` inside that run.
 
+Three things recompute it that are not events on this pull request:
+
+- **The scheduled reconcile**, half-hourly over every open pull request. The
+  review events are not delivered reliably here, and this is the recompute path
+  that does not depend on them — see
+  [`review-gate-reconcile.md`](./review-gate-reconcile.md) for the interval, the
+  failure behaviour, and why a sweep is not the polling the workflow header
+  rejects (#737, [ADR-076](../decisions/ADR-076-reconcile-the-review-gate-statuses-on-a-schedule.md)).
+- **`workflow_dispatch`**, given a pull request number — the same recompute for
+  one pull request, attributed to whoever pressed it.
+- **`vp run copilot-review:status -- --pr <n>`**, which is the same script.
+
 The run reads the head **and** the reviews from the API and posts against the
 head it read, never against the SHA in the event payload. Two runs racing then
 agree instead of publishing verdicts about different commits, which is why the
@@ -133,6 +146,33 @@ In order — reach for the last only when the ones above genuinely do not apply.
 4. **Admin bypass of the ruleset**, once #698 has made the context required.
    `RepositoryRole` 5 keeps `bypass_mode: always` on ruleset `19141543`.
 
+### When the review landed and the status did not move
+
+A separate case from the ladder above, and the common one: Copilot **has**
+reviewed the head, and the event that should have recomputed the status never
+produced a workflow run. The status is not waiting for anything; it is stale.
+
+Tell the two apart before acting — the ladder's rungs all assume the review has
+not happened yet:
+
+```bash
+vp run copilot-review:status -- --pr <n> --dry-run
+```
+
+If that prints `success` while the pull request shows `pending`, the review is in
+and only the status is behind. Nothing needs re-requesting. Either wait for the
+scheduled reconcile (half-hourly), or recompute it now:
+
+```bash
+vp run review-gates:reconcile -- --pr <n>      # from a checkout
+gh workflow run copilot-review-gate.yml -f pr=<n>   # or from Actions
+```
+
+Both re-derive the verdict rather than asserting one, so neither leaves a status
+a later reader cannot reproduce — which is what separates them from rung 3.
+[`review-gate-reconcile.md`](./review-gate-reconcile.md) has the full table and
+the preconditions.
+
 ## Known limitation: a Copilot-triggered run waits for approval
 
 **A `pull_request_review` submitted by Copilot creates a workflow run that a
@@ -153,32 +193,45 @@ repository's Actions approval policy at the time of that reading was
 (`gh api repos/luciocabrera/vite-react-compiler/actions/permissions/fork-pr-contributor-approval`),
 and the `Copilot` bot is not a contributor to this repository.
 
+A held run is not the whole story, and the wider measurement is in **#737**: most
+Copilot reviews here create **no run at all**, so approval explains only a
+minority of the cases. Read `conclusion`, not merely that a run row exists.
+
 Consequences while this stands:
 
 - The status still goes `pending` on every push, and still reports on every
   `pull_request` event. Nothing false is ever published.
-- It reaches `success` when the **next** handled event recomputes it — the next
-  push, a human review, or an approved run. It does not reach `success` on the
-  Copilot review alone.
+- It reaches `success` when the **next** handled recompute happens — the next
+  push, a human review, an approved run, or the scheduled reconcile. It does not
+  reach `success` on the Copilot review alone.
 - The `failure` state, which needs a Copilot review to have executed the job, is
   therefore rare in practice. `pending` is what a stale review reports instead,
   and `pending` also blocks.
 
-Three ways out, cheapest first: approve the waiting run from the PR's Checks tab;
-push (including an empty commit); or break-glass step 3 below. The durable fix is
-a repository Actions setting rather than a change to this workflow, so it belongs
-with the other configuration decisions in **#698** — this gate cannot fix it in
-code, and a workflow that auto-approved its own gated runs would be a much worse
-thing to own.
+Ways out, cheapest first: **wait for the reconcile**, which corrects it within
+one interval without anybody doing anything; approve the waiting run from the
+PR's Checks tab; recompute it now with `vp run review-gates:reconcile -- --pr <n>`
+or a `workflow_dispatch`; push (including an empty commit); or break-glass step 3
+above. The reconcile ([ADR-076](../decisions/ADR-076-reconcile-the-review-gate-statuses-on-a-schedule.md))
+removes the _consequence_, not the cause — the durable fix for the held runs is a
+repository Actions setting rather than a change to this workflow, so it belongs
+with the other configuration decisions in **#698**, and a workflow that
+auto-approved its own gated runs would be a much worse thing to own.
 
 ## Known limitation: fork pull requests
 
 A pull request from a fork gets a read-only `GITHUB_TOKEN`, so no commit status
-can be published from its run. The workflow detects this, prints the verdict it
-would have posted, and emits a warning rather than failing opaquely on a 403.
-The check is then **absent** on that PR — fail-closed, and break-glass step 3 or
-4 is the way through. This repository is single-owner, so the case is rare by
-construction; it is documented so that it is understood rather than discovered.
+can be published from **its own** run. The workflow detects this, prints the
+verdict it would have posted, and emits a warning rather than failing opaquely on
+a 403. This repository is single-owner, so the case is rare by construction; it is
+documented so that it is understood rather than discovered.
+
+The scheduled reconcile is not subject to this — it runs from the default branch
+with a token that can write statuses, so a fork pull request does get a status
+from it, within one interval. That is the same verdict the fork's own run
+computed and could not post, so nothing weaker is being asserted: `pending` until
+Copilot reviews the head, exactly as for any other pull request. Break-glass step
+3 or 4 remains the way through if it is needed sooner.
 
 ## Preconditions these notes depend on
 
@@ -194,6 +247,10 @@ Two further things the notes assume:
   Copilot-triggered run executes on its own, which changes the table in that
   section; tighten it and more actors are gated the same way. Re-read the setting
   before trusting either reading.
+- **The scheduled reconcile is running.** Everything above that says a stale
+  status corrects itself assumes it is. GitHub disables `schedule` triggers after
+  60 days of repository inactivity; `gh workflow list` says whether this one is
+  still active.
 
 One expectation the measurements **disproved**, recorded so it is not
 re-inherited: the `pull_request_review` half was expected to be inert until the

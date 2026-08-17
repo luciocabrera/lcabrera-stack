@@ -20,13 +20,22 @@
  *   vp run copilot-review:status -- --pr <number> [--repo <owner/name>] [--dry-run]
  *   node scripts/copilot-review-status.mjs --pr 671 --dry-run
  *
- * Exit codes: 0 = a state was computed, and posted unless --dry-run;
- * 1 = the pull request could not be read, or the status could not be posted.
+ * `--if-changed` posts only when the head does not already carry this verdict,
+ * which is how the reconcile sweep (`scripts/reconcile-review-gates.mjs`) stays
+ * idempotent and leaves an unreviewed pull request untouched.
+ *
+ * Exit codes: 0 = a state was computed, and posted unless --dry-run or
+ * --if-changed withheld it; 1 = the pull request could not be read, or the
+ * status could not be posted.
  */
 import { readFileSync } from 'node:fs';
 import process from 'node:process';
 
-import { flagValue } from './lib/cli-input.mjs';
+import {
+  flagValue,
+  parsePullNumber,
+  parseRepository,
+} from './lib/cli-input.mjs';
 import {
   copilotReviews,
   decideReviewStatus,
@@ -35,10 +44,14 @@ import {
 } from './lib/copilot-review.mjs';
 import { errorMessage } from './lib/error-message.mjs';
 import { runGh } from './lib/gh-exec.mjs';
+import {
+  publishedStatus,
+  shouldPublishStatus,
+} from './lib/review-gate-reconcile.mjs';
 
 const USAGE =
   'usage: node scripts/copilot-review-status.mjs --pr <number> ' +
-  '[--repo <owner/name>] [--dry-run]';
+  '[--repo <owner/name>] [--dry-run] [--if-changed]';
 
 /** The Actions event payload, or `undefined` outside Actions. */
 const readEventPayload = () => {
@@ -63,13 +76,30 @@ const triggeringReviewFrom = (payload) =>
     : undefined;
 
 const resolveRepository = (payload) =>
-  flagValue('--repo') ??
-  process.env.GITHUB_REPOSITORY ??
-  payload?.repository?.full_name ??
-  runGh(['repo', 'view', '--json', 'nameWithOwner', '--jq', '.nameWithOwner']);
+  parseRepository(
+    flagValue('--repo') ??
+      process.env.GITHUB_REPOSITORY ??
+      payload?.repository?.full_name ??
+      runGh([
+        'repo',
+        'view',
+        '--json',
+        'nameWithOwner',
+        '--jq',
+        '.nameWithOwner',
+      ]),
+  );
 
-const resolvePullNumber = (payload) =>
-  flagValue('--pr') ?? payload?.pull_request?.number;
+/**
+ * `undefined` when nothing named a pull request — the caller prints usage for
+ * that. A value that is present but not a pull request number throws instead,
+ * because `#738` would otherwise become `NaN` and reach the API path as
+ * `pulls/NaN`, where a bare 404 is all anyone sees.
+ */
+const resolvePullNumber = (payload) => {
+  const raw = flagValue('--pr') ?? payload?.pull_request?.number;
+  return raw === undefined ? undefined : parsePullNumber(raw);
+};
 
 /** The pull request as it stands now — not as the event payload described it. */
 const fetchPullRequest = (repository, number) =>
@@ -95,6 +125,20 @@ const fetchReviews = (repository, number) =>
         `repos/${repository}/pulls/${number}/reviews?per_page=100`,
       ]),
     ),
+  );
+
+/**
+ * What is published under this context on `sha` right now, or `undefined`.
+ *
+ * Read against the head this run resolved, never against an event payload's
+ * SHA, so the comparison it feeds is about one commit.
+ */
+const fetchPublishedStatus = (repository, sha) =>
+  publishedStatus(
+    JSON.parse(
+      runGh(['api', `repos/${repository}/commits/${sha}/status?per_page=100`]),
+    ),
+    STATUS_CONTEXT,
   );
 
 /** The run that decided this status, so the check links to its own reasoning. */
@@ -158,6 +202,16 @@ const main = () => {
   console.log(describeReviews(reviews));
   console.log(`${STATUS_CONTEXT}: ${state} — ${description}`);
 
+  if (
+    process.argv.includes('--if-changed') &&
+    !shouldPublishStatus({
+      current: fetchPublishedStatus(repository, headSha),
+      next: { description, state },
+    })
+  ) {
+    console.log(`Unchanged on ${headSha}: nothing was posted.`);
+    return;
+  }
   if (process.argv.includes('--dry-run')) {
     console.log('--dry-run: nothing was posted.');
     return;

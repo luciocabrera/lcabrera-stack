@@ -11,9 +11,30 @@ name: Copilot Review Gate
 # the UI, from a review of the head. This job makes that window visible while it
 # is open, and permanent when the re-review never comes.
 #
-# Event-driven, never polling. A job that sleeps waiting for a review burns
-# Actions minutes and still races; recomputing when the head or the reviews
-# change is both cheaper and correct.
+# Event-driven, and never a job that sleeps. Waiting inside a run for a review to
+# arrive burns Actions minutes for the length of the wait and still races the
+# push that supersedes it; recomputing when the head or the reviews change is
+# both cheaper and correct.
+#
+# That objection is to holding a run open, not to a second way of being told to
+# recompute — and a second way turned out to be necessary. `pull_request_review`
+# is not delivered reliably here: a review submitted by Copilot usually creates
+# no workflow run at all, so the status keeps reporting the previous commit, and
+# a status nobody recomputed reads exactly like one that is honestly still
+# waiting. #737 carries the measurement and the two commands that reproduce it.
+#
+# So `review-gate-reconcile.yml` sweeps the open pull requests on a schedule and
+# re-runs the script below for each. It is a reconcile loop, not a wait loop, and
+# the difference is not a matter of taste: it holds nothing open, its cost is
+# bounded by the number of open pull requests rather than by how long a review
+# takes, and it cannot race, because it carries no SHA across an I/O boundary —
+# each pull request is handed to this same script, which reads the head and the
+# reviews together and posts against the head it read. That file's header carries
+# the interval and why it is what it is.
+#
+# `workflow_dispatch` is the same recompute for one named pull request, so an
+# author looking at a stale status has something to press instead of having to
+# find and re-run an earlier workflow run.
 #
 # It is NOT yet a required context — promotion to the ruleset is #698,
 # deliberately separate, because a required check that has never reported blocks
@@ -31,6 +52,16 @@ on:
     types: [opened, reopened, synchronize, ready_for_review, converted_to_draft]
   pull_request_review:
     types: [submitted, dismissed]
+  # Break-glass, and the one rung an author can reach without push access to a
+  # status API. A dispatch run is attributed to whoever pressed it, so a
+  # maintainer's dispatch executes where the same recompute triggered by a bot's
+  # review does not.
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: The pull request number to recompute
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -52,12 +83,13 @@ jobs:
     name: Publish the Copilot review status
     runs-on: ubuntu-latest
     steps:
-      # Default ref on purpose, which differs per event and is right both times:
+      # Default ref on purpose, which differs per event and is right every time:
       # for `pull_request` it is the merge ref, so the YAML and the script it
       # runs come from one commit (the skew that broke #177); for
-      # `pull_request_review` GitHub runs the workflow from the default branch
-      # and this brings the matching script. Nothing here reads the working tree
-      # beyond that script — the head SHA comes from the API, not from git.
+      # `pull_request_review` and `workflow_dispatch` GitHub runs the workflow
+      # from the ref it was dispatched on (the default branch, normally) and this
+      # brings the matching script. Nothing here reads the working tree beyond
+      # that script — the head SHA comes from the API, not from git.
       - name: Check out the ref this event runs from
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
@@ -69,11 +101,16 @@ jobs:
       - name: Publish the status against the current head
         env:
           GH_TOKEN: ${{ github.token }}
-          # Present on both events' payloads. Passed through env, never a shell
-          # interpolation, so nothing from a PR is executed.
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          IS_FORK: ${{ github.event.pull_request.head.repo.full_name !=
-            github.repository }}
+          # Present on both review events' payloads, and given by hand on a
+          # dispatch. Passed through env, never a shell interpolation, so nothing
+          # from a PR is executed.
+          PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr }}
+          # The emptiness test is what keeps a dispatch out of the fork branch:
+          # `workflow_dispatch` carries no `pull_request` object, and comparing
+          # an absent name against the repository would call every dispatch a
+          # fork and silently turn break-glass into a dry run.
+          IS_FORK: ${{ github.event.pull_request.head.repo.full_name != '' &&
+            github.event.pull_request.head.repo.full_name != github.repository }}
         run: |
           if [ "$IS_FORK" = "true" ]; then
             echo "::warning::Fork pull request — GITHUB_TOKEN is read-only here, so no commit status can be published. The check stays absent; see docs/tooling/copilot-review-gate.md for the break-glass path."

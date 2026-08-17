@@ -25,6 +25,65 @@ export const flagValue = (name, argv = process.argv) => {
   return index === -1 ? undefined : argv[index + 1];
 };
 
+/** Digits only — a leading `#` is stripped before this sees the value. */
+const DIGITS = /^\d+$/;
+
+/**
+ * The pull request number a `--pr` argument names, or a throw saying why not.
+ *
+ * **`#738` is accepted**, not rejected, because that is how this repository
+ * writes a pull request everywhere else — issue bodies, PR references, doc links
+ * — so it is the form someone will paste, not an exotic one. `Number('#738')` is
+ * `NaN`, and a `NaN` reaching a gate runs it against `#NaN`: a 404 per gate and
+ * nothing anywhere saying the input was the problem.
+ *
+ * Everything else throws, naming the value it was given. Two things it must not
+ * do: fall through to the caller's "no pull request named" branch, which would
+ * turn a typo into a sweep of every open pull request, and reach an API path,
+ * where the value stops being recognisable as the thing that was typed.
+ */
+export const parsePullNumber = (raw) => {
+  const text = String(raw ?? '').trim();
+  const digits = text.startsWith('#') ? text.slice(1) : text;
+  const number = Number(digits);
+  if (!DIGITS.test(digits) || !Number.isSafeInteger(number) || number < 1) {
+    throw new Error(
+      `--pr must be a positive pull request number, optionally written as #738 — got ${JSON.stringify(raw)}`,
+    );
+  }
+  return number;
+};
+
+/** One `owner` or `name`: what GitHub allows, and never a bare dot run. */
+const SEGMENT = /^[\w.-]+$/;
+const NOT_A_NAME = new Set(['.', '..']);
+
+/**
+ * A repository as `owner/name`, or a throw saying why not.
+ *
+ * Validated because the value is interpolated into every `gh api` path the sweep
+ * builds and is forwarded to both gates, and every wrong shape fails the same
+ * indistinguishable way: `''`, `foo` and `a/b/c` each produce a bare
+ * `Not Found (HTTP 404)` that never mentions the repository. The empty string is
+ * the worst of them — `??` does not catch it, so it reaches the log as
+ * `Reconciling 1 pull request(s) in .` where the only trace of it is a full stop.
+ *
+ * Dot-only segments are refused for the same reason a path is not built from
+ * unchecked input, not because a traversal was demonstrated: `gh api
+ * repos/../../user` returns 404 here rather than reaching another endpoint.
+ */
+export const parseRepository = (raw) => {
+  const text = String(raw ?? '').trim();
+  const parts = text.split('/');
+  const wellFormed =
+    parts.length === 2 &&
+    parts.every((part) => SEGMENT.test(part) && !NOT_A_NAME.has(part));
+  if (!wellFormed) {
+    throw new Error(`--repo must be owner/name — got ${JSON.stringify(raw)}`);
+  }
+  return text;
+};
+
 /**
  * Everything piped in, or `''` when nothing is.
  *

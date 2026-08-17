@@ -1,8 +1,11 @@
-import { readFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-
 import { describe, expect, it } from 'vite-plus/test';
+
+import {
+  commentProse as prose,
+  declaredNames as namesIn,
+  readRepoFile,
+  singleQuotedConst,
+} from './workflow-inspect.mjs';
 
 // A job's check run and a commit status share ONE namespace on a pull request,
 // and ruleset contexts match by name. So a job named after the status the gate
@@ -19,12 +22,10 @@ import { describe, expect, it } from 'vite-plus/test';
 // The two strings are read from their own files rather than restated here, so
 // renaming either side is what this test sees.
 
-const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
-
 const WORKFLOW = '.github/workflows/agent-review-verdict.yml';
 const GATE_SCRIPT = 'scripts/verify-agent-review.mjs';
 
-const read = (path) => readFileSync(join(REPO_ROOT, path), 'utf8');
+const read = (path) => readRepoFile(path);
 
 /**
  * The commit-status context the gate publishes, taken from its one definition.
@@ -33,32 +34,19 @@ const read = (path) => readFileSync(join(REPO_ROOT, path), 'utf8');
  * assertion below while checking nothing.
  */
 const statusContext = () => {
-  const source = read(GATE_SCRIPT);
-  const marker = "const STATUS_CONTEXT = '";
-  const start = source.indexOf(marker);
+  const value = singleQuotedConst(read(GATE_SCRIPT), 'STATUS_CONTEXT');
   expect(
-    start,
+    value,
     `could not find STATUS_CONTEXT in ${GATE_SCRIPT} — if it moved, re-anchor this test`,
-  ).toBeGreaterThan(-1);
-  const rest = source.slice(start + marker.length);
-  return rest.slice(0, rest.indexOf("'"));
+  ).toBeDefined();
+  return value;
 };
 
 /** Every `name:` the workflow declares — workflow, job and step alike. */
-const declaredNames = () =>
-  [...read(WORKFLOW).matchAll(/^[ \t]*name:[ \t]*(.+)$/gm)].map((match) =>
-    match[1].trim(),
-  );
+const declaredNames = () => namesIn(read(WORKFLOW));
 
-/**
- * The workflow's comments as running prose. Read this way, not line by line: a
- * YAML comment wraps wherever it must, so matching the raw text would pin the
- * line breaks rather than what they say.
- */
-const commentProse = () =>
-  read(WORKFLOW)
-    .replaceAll(/^[ \t]*#[ \t]?/gm, '')
-    .replaceAll(/\s+/gu, ' ');
+/** The workflow's comments as running prose. */
+const commentProse = () => prose(read(WORKFLOW));
 
 describe('the agent-review workflow', () => {
   it('publishes a status context that is not empty', () => {

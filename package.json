@@ -69,6 +69,7 @@
     "release:plan": "node scripts/release-publish-plan.mjs",
     "release:status": "changeset status --since origin/main",
     "release:version": "changeset version && vp install --lockfile-only && vp fmt .",
+    "review-gates:reconcile": "node scripts/reconcile-review-gates.mjs",
     "scripts:verify": "node scripts/verify-script-size.mjs",
     "skills:report": "node scripts/generate-skills-compliance-report.cjs",
     "skills:validate": "node scripts/validate-skills.cjs",
