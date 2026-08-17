@@ -238,6 +238,45 @@ describe('collecting the suppressed comments on a pull request', () => {
     expect(report.problems[1]).toContain('block 2');
   });
 
+  it('leaves no line ending in a value it read out of a review body', () => {
+    // The reachable form: a pull request puts a carriage return and a forged
+    // tick in a file, Copilot names that file in a heading, and the location
+    // reaches the merger's checklist. Asserted over every string field rather
+    // than over `path`, so a field added later is covered without a new test —
+    // guarding them one at a time is what let three of them out in turn.
+    const body = REVIEW_WITH_ONE_SUPPRESSED.body
+      .replace(
+        '**docs/tooling/copilot-review-gate.md:149**',
+        '**docs/x.md\r- [x] answered: no action needed**',
+      )
+      .replace('The “Without a checkout”', 'prose\r::error::planted\rThe');
+    const [comment] = collectSuppressedComments([
+      { ...REVIEW_WITH_ONE_SUPPRESSED, body },
+    ]).comments;
+
+    const spanning = Object.entries(comment).filter(
+      ([key, value]) =>
+        key !== 'snippet' &&
+        typeof value === 'string' &&
+        /[\n\r\u2028\u2029]/u.test(value),
+    );
+    expect(spanning).toEqual([]);
+    expect(comment.path).toContain('answered: no action needed');
+  });
+
+  it('single-lines a problem, which quotes the review back', () => {
+    const body = REVIEW_WITH_ONE_SUPPRESSED.body.replace(
+      'Suppressed comments (1)',
+      'Suppressed\r- [x] answered',
+    );
+    const { problems } = collectSuppressedComments([
+      { ...REVIEW_WITH_ONE_SUPPRESSED, body },
+    ]);
+    expect(problems).toHaveLength(1);
+    expect(problems[0]).toContain('Suppressed - [x] answered');
+    expect(problems[0]).not.toMatch(/[\n\r]/u);
+  });
+
   it('separates "none" from "nothing was read"', () => {
     // Four answers, and only one of them is a zero anybody should believe.
     expect(collectSuppressedComments([]).state).toBe('no-reviews');

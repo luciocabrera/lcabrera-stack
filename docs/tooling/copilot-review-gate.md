@@ -130,11 +130,21 @@ groups those by file and line.
 ### Finding one whose line has moved
 
 **Search for the quoted source, not the line number.** Each finding is printed
-with the source Copilot quoted under it — behind a `|` in the terminal, in a
-fenced block in the job summary — and that is the part worth pasting into a
-search. The line number in the heading is the one Copilot saw, on the commit it
+with the source Copilot quoted under it — behind a `|` in the terminal, as an
+indented code block in the job summary — and that is the part worth pasting into
+a search. The line number in the heading is the one Copilot saw, on the commit it
 reviewed, and a pull request has usually moved past it by the time anyone reads
 the report; the quoted text survives that where a number does not.
+
+Both of those shapes are load-bearing rather than styling: a review body quotes
+the pull request's own diff, so every value in this report is text an outside
+author chose. A fenced block would end on a line of backticks the quote itself
+can carry, and an unprefixed line can begin with a runner directive — so quoted
+source is transformed line by line, and everything else is single-lined where it
+is parsed, in
+[`scripts/lib/copilot-suppressed.mjs`](../../scripts/lib/copilot-suppressed.mjs),
+whose header lists every value and what makes it safe. Change either shape and
+that guarantee is what changes with it.
 
 ### Reading them straight out of the API
 

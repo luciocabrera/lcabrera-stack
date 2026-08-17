@@ -119,6 +119,52 @@ const splitProse = (text) => {
 };
 
 /**
+ * Everything a review contributes, and what makes each of them safe to render.
+ *
+ * The renderers' guards all rest on one property — a value cannot begin a line —
+ * and it is established HERE, once, rather than at each place a value is
+ * printed. Guarding per field is what let three of them escape in turn: the
+ * quoted snippet, then prose's line endings, then the finding's own path, each
+ * fixed where it was found while the next one waited.
+ *
+ * | Value                   | Comes from          | What makes it safe           |
+ * | ----------------------- | ------------------- | ---------------------------- |
+ * | `path`, `text`          | the review body     | single-lined below           |
+ * | `review`, `submittedAt` | the reviews API     | single-lined below           |
+ * | `line`, `declared`      | a digits-only match | cannot hold anything else    |
+ * | a block's summary label | the review body     | single-lined into `problems` |
+ * | `snippet`               | the review body     | THE exception — see below    |
+ *
+ * `snippet` is quoted source and its line breaks are the point, so it is the one
+ * value that keeps them — and the renderers earn that by transforming every one
+ * of its lines. Adding a key to `KEEPS_ITS_LINES` is therefore a decision to
+ * guard that value at every render site, not a formatting preference.
+ */
+const KEEPS_ITS_LINES = new Set(['snippet']);
+
+/**
+ * One value with no line ending left in it. `\s` covers every terminator a
+ * consumer might split on — CR, LF, CRLF and the Unicode ones — so what comes
+ * out cannot begin a line anywhere.
+ */
+const singleLine = (value) => String(value).replaceAll(/\s+/gu, ' ').trim();
+
+/**
+ * A record of values a review contributed, each single-lined unless it is the
+ * declared exception. A field added later is covered by having been passed
+ * through here, which is the point — so build these records nowhere else.
+ */
+export const fromReviewBody = (fields) =>
+  Object.fromEntries(
+    Object.entries(fields).map(([key, value]) => [
+      key,
+      typeof value === 'string' && !KEEPS_ITS_LINES.has(key)
+        ? singleLine(value)
+        : value,
+    ]),
+  );
+
+/**
  * The comments in one block.
  *
  * `String.split` on a capturing pattern yields `[before, heading, body, …]`, so
@@ -131,10 +177,10 @@ const commentsIn = (block) => {
   return parts
     .map((part, index) =>
       index % 2 === 1
-        ? {
+        ? fromReviewBody({
             ...locationFrom(part.trim()),
             ...splitProse(parts[index + 1] ?? ''),
-          }
+          })
         : undefined,
     )
     .filter((comment) => comment !== undefined);
@@ -223,7 +269,12 @@ const problemsIn = ({ blocks, body, id }) => {
   const counted = blocks.flatMap((block, index) =>
     blockProblems(block, blocks.length > 1 ? `${at} block ${index + 1}` : at),
   );
-  return [...labels, ...shape, ...counted];
+  // Single-lined here rather than at each template above: a problem quotes a
+  // block's summary label, which is the review's text, and the next message
+  // someone adds will quote something too. The label itself is left raw for the
+  // matching above — normalising before classification would let a label broken
+  // across lines match the shape this is meant to notice.
+  return [...labels, ...shape, ...counted].map(singleLine);
 };
 
 /** One finding per location; Copilot restates the same one across re-reviews. */
@@ -281,11 +332,16 @@ export const collectSuppressedComments = (reviews = []) => {
     return {
       blocks,
       comments: blocks.flatMap((block) =>
-        block.comments.map((comment) => ({
-          ...comment,
-          review: id,
-          submittedAt: submittedAt(review),
-        })),
+        block.comments.map((comment) =>
+          // Through the same door as the body's own values: an id and a
+          // timestamp are the API's, not this repository's, and a renderer
+          // cannot tell which of a comment's fields came from where.
+          fromReviewBody({
+            ...comment,
+            review: id,
+            submittedAt: submittedAt(review),
+          }),
+        ),
       ),
       problems: problemsIn({ blocks, body, id }),
       shape: classifyReviewBody(body),

@@ -129,6 +129,16 @@ for one spelling matches nothing on the other and reports a confident zero.
   question: there an unfamiliar state must not count as a review, because an
   absent verdict has to block; here it must not hide a finding, because nothing
   blocks.
+- **Untrusted values are contained where they are parsed, not where they are
+  printed.** Every value in this report is text an outside author chose — a
+  review body quotes the pull request's own diff — and it reaches a runner's
+  stdout and a Markdown checklist. Guarding per field failed three times in
+  review, each time correctly for the field being looked at and never for the
+  next one, so the rule is now that nothing a review contributes may contain a
+  line ending, established once at the parse boundary, with the quoted source as
+  the single declared exception and both renderers transforming it line by line.
+  The cost is that a value cannot carry meaningful line breaks unless it is added
+  to that exception, which is a decision to guard it at every render site.
 - **The job summary quotes source as an indented code block, not a fenced one.**
   A fence closes on any line carrying at least as many backticks, so the quoted
   diff can end it and the rest escapes as Markdown — a checked `- [x]` item among

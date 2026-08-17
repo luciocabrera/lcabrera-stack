@@ -25,9 +25,17 @@ const plural = (count, noun) => `${count} ${noun}${count === 1 ? '' : 's'}`;
  */
 const oneLine = (text) => String(text).replaceAll(/\s+/gu, ' ').trim();
 
-/** The location a finding is at, as a reader would paste it into an editor. */
+/**
+ * The location a finding is at, as a reader would paste it into an editor.
+ *
+ * `oneLine` because a path is a review's text, not this repository's: it is read
+ * out of a heading in the review body, and that heading quotes whatever the pull
+ * request put in the file it names. `copilot-suppressed.mjs` single-lines it at
+ * the parse boundary, which is where the guarantee is established; this is the
+ * second of the two, for a caller assembling a report some other way.
+ */
 export const findingLocation = ({ line, path }) =>
-  line === undefined ? path : `${path}:${line}`;
+  oneLine(line === undefined ? path : `${path}:${line}`);
 
 /** The newest occurrence — Copilot's latest wording for a restated finding. */
 export const latestOccurrence = (finding) =>
@@ -130,7 +138,11 @@ const findingLines = (report) =>
         ? ` (restated ${plural(finding.occurrences.length, 'time')})`
         : '';
     return [
-      `  ${findingLocation(finding)}${restated} — review ${latest.review}`,
+      // Every value on this line comes from outside: the location and the
+      // review id are the API's, `restated` is a count computed here. Only the
+      // snippet below is allowed to span lines, and only because each of its
+      // lines is transformed.
+      `  ${findingLocation(finding)}${restated} — review ${oneLine(latest.review)}`,
       `    ${oneLine(latest.text)}`,
       ...snippetLines(latest.snippet),
     ];

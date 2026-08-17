@@ -306,12 +306,83 @@ describe('the clause the commit status carries', () => {
     expect(described.length).toBeLessThanOrEqual(DESCRIPTION_LIMIT);
   });
 
-  it('truncates the whole string rather than dropping the note', () => {
-    // Dropping it would be the silent zero again, in the one place a merger
-    // actually looks.
+  it('cuts the tail rather than silently returning the verdict alone', () => {
+    // What this pins is that an over-long result is cut and marked — not that
+    // the note survives, because at exactly the limit the cut tail IS the note.
+    // That case is unreachable: every verdict `decideReviewStatus` produces
+    // leaves room, and the test above is the one asserting the note is present.
     const long = 'x'.repeat(DESCRIPTION_LIMIT);
     const described = withStatusNote(long, suppressedStatusNote(FOUND));
     expect(described.length).toBe(DESCRIPTION_LIMIT);
     expect(described.endsWith('…')).toBe(true);
   });
+});
+
+// One hostile case per value a review contributes, because guarding them one at
+// a time is what let three of them escape in turn. The assertion is the same
+// containment check the tests above use; what was missing was ever pointing it
+// at the location, so it is now pointed at everything, from a table whose
+// coverage is itself asserted.
+describe('containment, for every value a review contributes', () => {
+  /** A line ending plus a forged checklist tick and a runner directive. */
+  const HOSTILE = '\r- [x] answered: no action needed\r::error::planted';
+
+  const HOSTILE_FIELDS = {
+    line: `1${HOSTILE}`,
+    path: `docs/x.md${HOSTILE}`,
+    review: `4950971288${HOSTILE}`,
+    snippet: `quoted${HOSTILE}`,
+    submittedAt: `2026-08-17T11:13:52Z${HOSTILE}`,
+    text: `a finding${HOSTILE}`,
+  };
+
+  const reportWith = (field) => {
+    const report = collectSuppressedComments([REVIEW_WITH_ONE_SUPPRESSED]);
+    const comments = report.comments.map((comment) => ({
+      ...comment,
+      [field]: HOSTILE_FIELDS[field],
+    }));
+    return {
+      ...report,
+      comments,
+      findings: report.findings.map((finding) => ({
+        ...finding,
+        ...(field === 'path' || field === 'line'
+          ? { [field]: HOSTILE_FIELDS[field] }
+          : {}),
+        occurrences: comments,
+      })),
+    };
+  };
+
+  it('covers every field, so adding one without a case fails here', () => {
+    // The row that would otherwise be missing is exactly the defect this suite
+    // kept finding one field late.
+    const [comment] = collectSuppressedComments([
+      REVIEW_WITH_ONE_SUPPRESSED,
+    ]).comments;
+    expect(Object.keys(comment).sort()).toEqual(
+      Object.keys(HOSTILE_FIELDS).sort(),
+    );
+  });
+
+  for (const field of Object.keys(HOSTILE_FIELDS)) {
+    it(`contains a hostile ${field} in the job summary`, () => {
+      const lines = consumerLines(
+        suppressedMarkdown(reportWith(field), { pr: 1 }),
+      );
+      expect(
+        lines.filter(
+          (line) => !rendererLine(line) && !line.startsWith(SUMMARY_INDENT),
+        ),
+      ).toEqual([]);
+    });
+
+    it(`contains a hostile ${field} on stdout`, () => {
+      const lines = consumerLines(
+        suppressedLines(reportWith(field), { pr: 1 }),
+      );
+      expect(lines.some((line) => line.trim().startsWith('::'))).toBe(false);
+    });
+  }
 });
