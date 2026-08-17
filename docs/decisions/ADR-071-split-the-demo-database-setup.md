@@ -1,6 +1,25 @@
 # ADR-071 — Split the demo database setup
 
-**Status:** Accepted
+**Status:** **Accepted (showcase half — still live)**; **historical (API half —
+that workspace left the repository)**.
+
+> **⚠️ Amended 2026-08-17.** The body below is left exactly as written — a dated
+> record of what was true when the decision was made. What has changed since:
+> `apps/api-server`, `apps/api-server-fast` and `apps/shared` moved to the
+> [`api-playground`](https://github.com/luciocabrera/api-playground) repository
+> in #686, so every `apps/api-server/…` bullet below now describes a path in
+> that repository, not this one.
+>
+> **What still governs here:** the showcase owns the DDL for the tables it
+> serves and seeds itself — `apps/react-router/db/` and its `seed-db.mjs`.
+>
+> **What this ADR can no longer promise:** the last line of the Decision says
+> "nothing in this repository names a path under `apps/api-server/`". That was
+> the point of the split and it held; it is now true for the trivial reason that
+> the workspace is gone. The consequence the ADR did not foresee is that
+> `setup_large_data.sql` is still duplicated — but the two copies are now in
+> **different repositories**, so nothing can compare them and the drift check
+> this ADR relied on does not exist. AGENTS.md records that.
 
 ## Context
 

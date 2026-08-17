@@ -62,6 +62,33 @@ repository, does this decision go with it?" — that move happened in #683 and t
 CQMS home went with it, which is why an old ADR may cite a number that now
 resolves in only one place.
 
+### Reading an ADR written in an earlier era
+
+This repository has been three things, and an ADR means what it meant when it was
+written:
+
+| Era                 | What the repo was                                                  |
+| ------------------- | ------------------------------------------------------------------ |
+| **One app**         | `apps/react-router` alone; no packages                             |
+| **A monorepo**      | several apps — the car-sales API servers, CQMS — plus the packages |
+| **Public packages** | the `@lcabrera/*` packages are the product; one app exercises them |
+
+So an older ADR naming one of the car-sales API workspaces, or the CQMS admin
+app, is not necessarily rot. Two cases, and they are treated differently on purpose:
+
+- **Named as Context** — the evidence that motivated a decision about the
+  packages. Left exactly as written. Editing it would falsify _why_ the decision
+  was made, which is the one thing an ADR exists to record. ADR-001, ADR-004,
+  ADR-005, ADR-035, ADR-039 and ADR-053 are in this group.
+- **Named in the Decision** — instructions a reader would follow today, pointing
+  at a repository this no longer is. That gets a **dated amendment block** at the
+  top: status split, what still governs, what moved and under which issue. The
+  body stays verbatim below it. ADR-008 established the shape; ADR-014, ADR-064
+  and ADR-071 use it.
+
+The rule that makes this decidable: **never rewrite a body to match today.**
+Amend above it, and say what changed.
+
 Those links open the **directory**, which is the listing — each home's `README.md`
 is a generated page describing the home and lists no ADRs on purpose, because a
 committed list is one region every ADR branch appends to
