@@ -8,6 +8,7 @@ import {
   flattenExportTargets,
   localProtocolProblems,
   manifestProblems,
+  readNothing,
   renderAudit,
   resolvedNothing,
   selectBroken,
@@ -292,6 +293,39 @@ describe('resolvedNothing', () => {
 
   it('fires on a single explicit spec that resolved to nothing', () => {
     expect(resolvedNothing([missing])).toBe(true);
+  });
+});
+
+describe('readNothing', () => {
+  const registry = 'https://registry.npmjs.org';
+
+  it('blames a wrong name when the run was handed one', () => {
+    // The cause this message used to omit. A reader who named a package that
+    // does not exist was sent to check their proxy and their
+    // `npm_config_registry`, both of which were fine.
+    const message = readNothing({ named: true, registry });
+
+    expect(message).toContain('a name asked for is not on this registry');
+    expect(message).not.toContain('nothing here has been published yet');
+  });
+
+  it('blames an empty repository when the run asked for the roster', () => {
+    // A sweep cannot have been given a wrong name, so offering that cause here
+    // would point every reader at the one thing that cannot be true.
+    const message = readNothing({ named: false, registry });
+
+    expect(message).toContain('nothing here has been published yet');
+    expect(message).not.toContain('a name asked for is not on this registry');
+  });
+
+  it('keeps the registry and the never-report-clean line in both', () => {
+    for (const named of [true, false]) {
+      const message = readNothing({ named, registry });
+
+      expect(message).toContain(registry);
+      expect(message).toContain('not answering');
+      expect(message).toContain('does not report clean');
+    }
   });
 });
 
