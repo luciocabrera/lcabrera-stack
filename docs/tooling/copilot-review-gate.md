@@ -141,15 +141,27 @@ vp run copilot-review:status -- --pr <n> --dry-run
 
 `success` from that while the pull request shows `pending` is the stale case: the
 review is in and only the status is behind, so nothing needs re-requesting.
-Without a checkout, compare the head against Copilot's newest review directly:
+
+Without a checkout, ask the API the same question. It answers in one line, and
+the pull request number is the only thing to fill in:
 
 ```bash
-gh pr view <n> --json headRefOid --jq '.headRefOid[0:8]'
-gh api repos/luciocabrera/vite-react-compiler/pulls/<n>/reviews \
-  --jq 'map(select(.user.login|test("[Cc]opilot")))|last|"\(.commit_id[0:8]) \(.submitted_at)"'
+PR_HEAD=$(gh pr view <n> --json headRefOid --jq .headRefOid) \
+gh api repos/luciocabrera/vite-react-compiler/pulls/<n>/reviews --jq '
+  [.[] | select(.user.login | test("[Cc]opilot"))] | last
+  | if . == null then "no Copilot review on this pull request yet — wait"
+    elif .commit_id == env.PR_HEAD then "Copilot reviewed the head (\(.commit_id[0:8])) at \(.submitted_at) — if the pull request still shows pending, it is stale"
+    else "the newest Copilot review is of \(.commit_id[0:8]), not the head — wait"
+    end'
 ```
 
-The same SHA on both lines, with the pull request showing `pending`, is stale.
+**The `null` arm is load-bearing, not defensive padding.** `last` of an empty
+array is `null`, and jq reads a field off `null` and slices it without
+complaining, so the obvious one-liner — `… | last | "\(.commit_id[0:8])"` —
+prints `null null` and exits 0 for a pull request Copilot has not reviewed at
+all. That is precisely the state this command exists to name, and it is the one
+where a reader is least able to tell nonsense from an answer.
+
 The third reading — the gate would publish `pending` while the pull request shows
 `success` — is in
 [`review-gate-reconcile.md`](./review-gate-reconcile.md#telling-not-reviewed-yet-from-reviewed-but-not-recomputed),
@@ -178,10 +190,14 @@ rest of the preconditions.
    that works: no push access, no checkout, no new commit, and usually an action
    you were taking anyway while working through the findings.
 
-   A reply is a **review**, not a comment: it arrives as
-   `pull_request_review.submitted` from a human actor, and human-submitted
-   reviews have fired an executing run every time this has been measured
-   (#737 §1). Use the Reply box on a thread, or the endpoint behind it:
+   **A thread reply is wrapped in a review, and that is why it works here.** The
+   reply is a review _comment_, which is its own event — but GitHub also creates
+   a `PullRequestReview` around it (the reply's response carries
+   `pull_request_review_id`, and the review appears in the pull request's
+   `reviews` list) and delivers `pull_request_review.submitted`. That is the
+   event this workflow subscribes to, and a human-submitted review has fired a
+   run that executes every time this has been measured (#737 §1). Use the Reply
+   box on a thread, or the endpoint behind it:
 
    ```bash
    gh api repos/luciocabrera/vite-react-compiler/pulls/<n>/comments/<comment-id>/replies \
@@ -192,12 +208,18 @@ rest of the preconditions.
    `issue_comment`, which this workflow does not listen to — see its `on:` block;
    the agent-review gate is the one that does.
 
-   Observed end to end on #726 at head `81659dff`, 2026-08-15: Copilot reviewed
-   at 08:35:28Z and no run appeared; two thread replies at 08:46:26Z and 08:46:27Z each
-   created a review (the reply comments carry `in_reply_to_id`, and
-   `pull_request_review_id` `4943392944`/`4943392963` are those two reviews),
-   each fired a run two seconds later, both `success`, and the status read
-   `success` at 08:46:35Z.
+   Both forms are measured, because the API one looks as though it should
+   produce nothing but a review comment:
+
+   - **The endpoint**, on #740, 2026-08-17. That exact call created review
+     `4950884297` and fired run `32022891578` two seconds later —
+     `pull_request_review`, first attempt, `success` — which published the
+     status at 11:01:11Z. No push and no other review happened in that window.
+   - **The Reply box**, on #726 at head `81659dff`, 2026-08-15: Copilot reviewed
+     at 08:35:28Z and no run appeared; two thread replies at 08:46:26Z and
+     08:46:27Z each created a review (`pull_request_review_id` `4943392944` and
+     `4943392963`), each fired a run two seconds later, both `success`, and the
+     status read `success` at 08:46:35Z.
 
    **It needs a thread to reply to.** A pull request with every thread resolved,
    or one Copilot reviewed with no findings, has nothing to reply to — take rung 2.
