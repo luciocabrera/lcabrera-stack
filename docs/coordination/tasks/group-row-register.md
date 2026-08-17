@@ -2,7 +2,7 @@
 id: group-row-register
 title: A grouped row reads as a total, not as a styled data row
 owner: agent:claude
-status: active
+status: review
 branch: feat/765-group-row-register
 area:
   - packages/ui/src/components/Table/TableGroupLabel/**
