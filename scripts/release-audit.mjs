@@ -21,7 +21,7 @@
  *   vp run release:audit -- @lcabrera/eslint-plugin@0.1.0 # one version
  *
  * Exit codes: 0 = every published manifest is loadable and installable, 1 = one
- * is not, a named spec is not on the registry, the registry could not be
+ * is not, a named spec could not be resolved, the registry could not be
  * reached, or the run resolved no packument at all — a registry answering 404
  * to everything must not read as "audited everything, all clean" (every finding
  * is listed, not just the first).
@@ -147,7 +147,7 @@ const report = ({ audited, blind, broken, unresolved }) => {
   console.log(renderAudit({ audited, registry: registryOrigin() }));
 
   for (const spec of unresolved) {
-    console.error(`✗ ${spec} is not on the registry.`);
+    console.error(`✗ ${spec} could not be resolved on the registry.`);
   }
 
   if (blind) {
