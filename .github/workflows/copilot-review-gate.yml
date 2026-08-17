@@ -84,12 +84,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Default ref on purpose, which differs per event and is right every time:
-      # for `pull_request` it is the merge ref, so the YAML and the script it
-      # runs come from one commit (the skew that broke #177); for
-      # `pull_request_review` and `workflow_dispatch` GitHub runs the workflow
-      # from the ref it was dispatched on (the default branch, normally) and this
-      # brings the matching script. Nothing here reads the working tree beyond
-      # that script — the head SHA comes from the API, not from git.
+      # for BOTH `pull_request` and `pull_request_review` it is that pull
+      # request's merge ref, so the YAML and the script it runs come from one
+      # commit (the skew that broke #177); for `workflow_dispatch` it is the ref
+      # the dispatch named. Each of those checks out the script that matches the
+      # YAML that ran. Nothing here reads the working tree beyond that script —
+      # the head SHA comes from the API, not from git.
+      #
+      # The `pull_request_review` half is measured, not assumed, and it is worth
+      # stating precisely because two wrong readings are available. It said "the
+      # ref it was dispatched on (the default branch, normally)" until #732; what
+      # rules the default branch out is that four such runs were created from
+      # ci/695-copilot-review-complete-check on 2026-08-14, three of them
+      # executing, while this file was not on `main` at all — it landed there in
+      # 4660e05f the next morning. It is not the branch TIP either: run
+      # 32022891578 (`pull_request_review` on #740) checked out
+      # refs/remotes/pull/740/merge. Do not infer the ref for another event from
+      # a general rule; read a run's checkout step.
       - name: Check out the ref this event runs from
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
