@@ -61,9 +61,37 @@ describe('toOrderGroupRow', () => {
       },
     });
 
+    // The value passes through untouched, at the scale `pg` reported it. How
+    // much of it to show is the column's decision, made at the cell — deciding
+    // it here is what put a raw `numeric` string under a currency header.
     expect(result[TABLE_GROUP_ROW_FIELD].aggregates).toStrictEqual([
-      { columnKey: 'total_amount', fn: 'sum', label: '1234.5600' },
+      { columnKey: 'total_amount', fn: 'sum', value: '1234.5600' },
     ]);
+  });
+
+  it('passes a NULL aggregate through rather than reading it as a label', () => {
+    // `avg` over a group whose rows are all NULL is SQL NULL. It stays null so
+    // the cell can render it as an absence; `(empty)` here would apply a
+    // group-key reading to a measure.
+    //
+    // Parsed rather than written as a literal, because a JSON `null` is how a
+    // NULL column reaches this decoder — and it is the shape under test, not an
+    // incidental one.
+    const row = JSON.parse(
+      '{"avg_unit_price":null,"count_rows":"12","group_mask":0,"order_status":"Shipped"}',
+    ) as Record<string, unknown>;
+
+    const result = toOrderGroupRow({
+      ...args,
+      aggregates: [
+        { alias: 'avg_unit_price', columnKey: 'unit_price', fn: 'avg' },
+      ],
+      row,
+    });
+
+    expect(result[TABLE_GROUP_ROW_FIELD].aggregates).toStrictEqual(
+      JSON.parse('[{"columnKey":"unit_price","fn":"avg","value":null}]'),
+    );
   });
 
   it('coerces the count, which pg returns as a string for bigint', () => {

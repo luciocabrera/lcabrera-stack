@@ -41,11 +41,20 @@ const summary = (
 describe('TableGroupLabel', () => {
   afterEach(cleanup);
 
-  it('shows the innermost level and how many rows it covers', () => {
+  it('shows the innermost level of the group', () => {
     render(<TableGroupLabel summary={summary()} />);
 
     expect(screen.getByText('Spain')).toBeTruthy();
-    expect(screen.getByText('(12)')).toBeTruthy();
+  });
+
+  it('does not print the row count beside the label', () => {
+    // ADR-065 puts a measure in the column it aggregates, under that column's
+    // header. A count printed here is the one measure aligned under nothing;
+    // a route that wants it selects a `count` aggregate on a column instead.
+    render(<TableGroupLabel summary={summary({ count: 12 })} />);
+
+    expect(screen.queryByText('(12)')).toBeNull();
+    expect(screen.getByTestId('table-group-label').textContent).toBe('Spain');
   });
 
   it('keeps the label on one line, whatever its length', () => {

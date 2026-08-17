@@ -404,13 +404,32 @@ export type TableFocusState = {
   readonly rowKey: string | undefined;
 };
 
-/** One aggregate a grouped row carries, already formatted for display. */
+/**
+ * One aggregate a grouped row carries, **unformatted**.
+ *
+ * It travels as the raw value rather than as a rendered string, which is the
+ * opposite of how `path` travels and deliberately so. A key label cannot be
+ * formatted client-side — nothing in the row says which column a key came from
+ * in a way the table can resolve back to a `dataType`. An aggregate names its
+ * `columnKey`, and the columns store answers that name with the column's
+ * `dataType` and `format`, so `TableGroupAggregate` can render the value
+ * through exactly the path a data cell in that column uses.
+ *
+ * Formatting it service-side instead is what put a raw Postgres `numeric`
+ * string under a currency header: `sum(total_amount)` arrives as
+ * `"302540833.38"`, and a service with no access to the column descriptor has
+ * nothing better to do with it than pass it along.
+ */
 export type TableGroupAggregateValue = {
   /** The column the aggregate was applied to. */
   readonly columnKey: string;
   readonly fn: TableAggregateFn;
-  /** The aggregate's value, formatted — see `TableGroupRowSummary.path`. */
-  readonly label: string;
+  /**
+   * The aggregate's raw value. A `numeric` aggregate arrives from `pg` as a
+   * string and is passed through as one — the renderer parses it, so precision
+   * is not spent on a float that only has to be printed.
+   */
+  readonly value: unknown;
 };
 
 /**
@@ -559,8 +578,11 @@ export type TableGroupRow = Record<'tableGroup', TableGroupRowSummary>;
  * carries one entry fewer than a leaf does, and the grand total carries none.
  * That is what the hierarchy column indents by (ADR-065).
  *
- * Every `label` is already formatted, because formatting a key value needs the
- * column's `dataType` and locale, both of which the row does not carry.
+ * Every key `label` is already formatted, because formatting a key value needs
+ * the column's `dataType` and locale, and nothing in the row resolves a key
+ * back to the column it came from. **Aggregates are the other way round** —
+ * they name their column, so they travel raw and are formatted at the cell.
+ * See `TableGroupAggregateValue`.
  */
 export type TableGroupRowSummary = {
   /** The selected aggregates, in the order the read emitted them. */

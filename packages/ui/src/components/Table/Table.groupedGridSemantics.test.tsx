@@ -65,7 +65,7 @@ const rows: readonly TestRow[] = [
   },
   {
     [TABLE_GROUP_ROW_FIELD]: {
-      aggregates: [{ columnKey: 'id', fn: 'sum', label: '7' }],
+      aggregates: [{ columnKey: 'id', fn: 'sum', value: '7' }],
       count: 2,
       isSubtotal: false,
       path: [
@@ -262,7 +262,7 @@ describe('a grouped table under the grid ARIA model', () => {
       .getAllByTestId('table-group-label')
       .map((label) => label.textContent);
 
-    expect(labels).toStrictEqual(['Paris(2)', 'Berlin(2)', '3(2)']);
+    expect(labels).toStrictEqual(['Paris', 'Berlin', '3']);
   });
 
   it('renders a group aggregate under its own column', () => {

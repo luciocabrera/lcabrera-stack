@@ -14,7 +14,7 @@ import { resolveBodyAriaRowIndex } from '#ui/components/Table/utils/resolveGridR
 
 import type { TableBodyRowsProps } from './TableBodyRows.types';
 
-import { tableBodyRowsStyles } from './TableBodyRows.stylex';
+import { resolveGroupRowStyle } from './utils/resolveGroupRowStyle.util';
 import { resolveRowKey } from './utils/resolveRowKey.util';
 import { resolveTreeRowAriaProps } from './utils/resolveTreeRowAriaProps.util';
 
@@ -86,7 +86,7 @@ export const TableBodyRows = <TData extends Record<string, unknown>>({
           <TableRow
             {...treeProps}
             aria-rowindex={ariaRowIndex}
-            customStylex={isGroupRow ? tableBodyRowsStyles.groupRow : undefined}
+            customStylex={resolveGroupRowStyle(groupSummary)}
             data-testid={isGroupRow ? 'table-group-header-row' : undefined}
             isStriped={!isGroupRow}
             key={rowKey}

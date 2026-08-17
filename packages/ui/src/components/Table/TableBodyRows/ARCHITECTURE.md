@@ -26,9 +26,10 @@ row blanks, because its group row already states them.
 ```
 TableBodyRows/
 ├── TableBodyRows.component.tsx   → Visible-row loop: one TableRow per row, cells per pinning partition
-├── TableBodyRows.stylex.ts       → Group-row tint
+├── TableBodyRows.stylex.ts       → The three group-row grounds (group, subtotal, grand total)
 ├── TableBodyRows.types.ts        → TableBodyRowsProps (startIndex, endIndex, isLoadingState)
 ├── utils/
+│   ├── resolveGroupRowStyle.util.ts → Which of the three grounds a row paints on, or none for a detail row
 │   ├── resolveRowKey.util.ts     → Row identity key from a group summary, else from the primary-key column(s)
 │   └── resolveTreeRowAriaProps.util.ts → One row's aria-level / posinset / setsize / expanded, or nothing outside a tree
 ├── ARCHITECTURE.md               → This file
@@ -81,7 +82,7 @@ graph TD
   map --> tree["resolveTreeRowAriaProps(rowMeta[rowIndex])"]
   map --> summary["getTableGroupRowSummary(row)"]
   tree --> TR
-  summary --> TR["TableRow (tinted when the row is a group)"]
+  summary --> TR["TableRow (one of three grounds when the row is a group)"]
   key --> TR
   TR --> left["renderTableBodyPinnedGroup(leftPinnedCols)"]
   TR --> center["renderTableBodyPinnedGroup(centerCols)"]
@@ -264,3 +265,30 @@ Owns two private delegates in `utils/`, imported by direct file path (ADR-007 ru
 
 - `resolveRowKey` — row identity key; see [Row Identity](#row-identity)
 - `resolveTreeRowAriaProps` — one row's tree attributes; see [Tree Semantics](#tree-semantics)
+
+## Three grounds, and why ground rather than weight
+
+A rollup body is scanned, not read line by line, and a subtotal used to be
+separable from an ordinary group row only by a heavier font and the word `total`
+appended to its label. That fails at a glance among hundreds of rows, and fails
+outright for a group whose key value legitimately ends in that word. Ground is
+the one difference that survives both.
+
+`resolveGroupRowStyle` answers with the row's ground, and the order it asks in is
+not interchangeable: **the grand total is tested first because it is also a
+subtotal.** It rolls up every key, so `isSubtotal` is true on it too, and asking
+that question first would paint the end of the table as one more level total.
+The empty `path` is what separates them.
+
+A detail row gets no ground and keeps `TableRow`'s striping — the one row kind
+whose alternation carries no false meaning.
+
+**Colour and weight only.** `TableRow` pins `height`/`minHeight`/`maxHeight` to
+the store's `rowHeight` and `TableBody` derives `<tbody>`'s height from that same
+number, so a variant that changed box metrics would desynchronize the body from
+its contents. The grand total's rule is a `border-top` under
+`box-sizing: border-box`, which paints inside the pinned height rather than
+adding to it — the one property that makes an accounting rule affordable here.
+`TableBody.grouping.test.tsx` holds every kind to the same declared height;
+what it cannot hold is a variant that paints taller, because jsdom runs no
+layout. That one is held by this rule and by review of the StyleX file.

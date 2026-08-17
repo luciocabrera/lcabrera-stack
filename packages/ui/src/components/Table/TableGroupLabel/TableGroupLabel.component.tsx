@@ -9,8 +9,7 @@ import { tableGroupLabelStyles } from './TableGroupLabel.stylex';
 import { toGroupHierarchyLabel } from './utils/toGroupHierarchyLabel.util';
 
 /**
- * A group row's cell content in the hierarchy column: its level, its label and
- * how many rows it covers.
+ * A group row's cell content in the hierarchy column: its level and its label.
  *
  * Everything about it is on **one line**, and that is a constraint rather than
  * a style choice: `TableRow` clamps `minHeight`/`maxHeight` to the store's
@@ -19,10 +18,13 @@ import { toGroupHierarchyLabel } from './utils/toGroupHierarchyLabel.util';
  * painted (ADR-065). The label ellipsizes instead, which is a truncation the
  * reader can see, and indentation narrows the text rather than the row.
  *
- * The row count stays here rather than aligning under a column, because
- * `count(*)` over the group is a property of the group and no column heads it.
- * A per-column `count` aggregate is a different thing and renders in its own
- * cell like every other aggregate.
+ * **The row count is not here, and its absence is the decision.** ADR-065 puts
+ * a measure in the column it aggregates, under that column's header; a count
+ * printed beside the label is the one measure exempt from that, aligned under
+ * nothing and headed by nothing. A route that wants it selects a `count`
+ * aggregate on a column, which renders in its own cell like every other
+ * aggregate. `summary.count` stays on the contract for consumers that need the
+ * number without projecting it.
  */
 export const TableGroupLabel = ({ summary }: TableGroupLabelProps) => {
   const { depth, isSubtotal, text } = toGroupHierarchyLabel({ summary });
@@ -46,9 +48,6 @@ export const TableGroupLabel = ({ summary }: TableGroupLabelProps) => {
         title={text}
       >
         {text}
-      </span>
-      <span {...stylex.props(tableGroupLabelStyles.count)}>
-        {`(${summary.count})`}
       </span>
     </span>
   );
