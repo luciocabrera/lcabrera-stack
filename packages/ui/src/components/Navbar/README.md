@@ -172,8 +172,9 @@ If not provided, items get auto-generated IDs: `Navbar-item-0`, `Navbar-item-1`,
 
 ## Examples
 
-`Navbar.test.tsx` is the worked usage: it renders both item shapes (`href` and
-`onClick`) and asserts the rendered element for each.
+`Navbar.test.tsx` is the worked usage: it renders both item shapes (`type:
+'link'` with `to`, and `type: 'button'` with `onClick`) and asserts the rendered
+element for each.
 
 There is no `Navbar.examples.tsx`. This section pointed at one for a long time
 and nothing noticed, because the documented-path gate did not check a relative
