@@ -172,11 +172,13 @@ difference between an answer and a confident wrong one:
   request Copilot has not reviewed at all. That is precisely the state this
   command exists to name, and the one where a reader is least able to tell
   nonsense from an answer.
-- **The repository is named in the query.** Nothing here reads the working
-  directory, so it is checkout-free in fact. `gh pr view <n>` without
-  `-R owner/repo` is not: outside a checkout it fails with `failed to run git`,
-  and inside a _different_ repository it answers about that repository's pull
-  request `<n>`.
+- **The repository is named in the query — and `-R` is on every `gh` command in
+  this section for the same reason.** Otherwise `gh` takes the repository from
+  the working directory's git remote: `gh pr view`, `gh run list`,
+  `gh run rerun` and `gh workflow run` all fail outside a checkout with
+  `failed to run git`, and inside a _different_ repository they answer about, or
+  act on, that one. A break-glass command has to work from wherever the person
+  reading this happens to be.
 - **One request carries the head and the reviews**, the same way the gate itself
   reads them, so nothing can move between two calls. It also sidesteps the trap
   in the REST form: `GET /pulls/<n>/reviews` returns one page of 30 unless you
@@ -201,7 +203,8 @@ within one interval with nobody doing anything, so these rungs are for when that
 is too long, or when the sweep is not running. Check rather than assume —
 
 ```bash
-gh run list --workflow=review-gate-reconcile.yml --limit 5
+gh run list -R luciocabrera/vite-react-compiler \
+  --workflow=review-gate-reconcile.yml --limit 5
 ```
 
 — because a workflow reads `active` in `gh workflow list` from the moment its
@@ -252,10 +255,11 @@ rest of the preconditions.
    SHA, then re-run it:
 
    ```bash
-   gh run list --workflow=copilot-review-gate.yml --limit 20 \
+   gh run list -R luciocabrera/vite-react-compiler \
+     --workflow=copilot-review-gate.yml --limit 20 \
      --json databaseId,headSha,event,createdAt \
      --jq '.[]|select(.headSha|startswith("<head-sha>"))|"\(.databaseId) \(.event) \(.createdAt)"'
-   gh run rerun <id>
+   gh run rerun -R luciocabrera/vite-react-compiler <id>
    ```
 
    Any run on that head will do, whatever event created it. A re-run replays the
@@ -288,7 +292,8 @@ rest of the preconditions.
 
    ```bash
    vp run review-gates:reconcile -- --pr <n>          # from a checkout
-   gh workflow run copilot-review-gate.yml -f pr=<n>  # or from Actions
+   gh workflow run copilot-review-gate.yml -f pr=<n> \
+     -R luciocabrera/vite-react-compiler          # or press it in Actions
    ```
 
    Both re-derive the verdict rather than asserting one, so neither leaves a
@@ -354,7 +359,8 @@ the ladder is for. So no ratio is written down, and the commands are here instea
 — #737 §1 carries this method and the sample it was first taken on:
 
 ```bash
-gh run list --workflow=copilot-review-gate.yml --limit 60 \
+gh run list -R luciocabrera/vite-react-compiler \
+  --workflow=copilot-review-gate.yml --limit 60 \
   --json event,headSha,createdAt,conclusion \
   --jq '.[]|select(.event=="pull_request_review")|"\(.headSha[0:8]) \(.createdAt) \(.conclusion)"'
 gh api --paginate repos/luciocabrera/vite-react-compiler/pulls/<n>/reviews \
@@ -459,7 +465,8 @@ Further things the notes assume:
   status corrects itself assumes it is. GitHub disables `schedule` triggers after
   60 days of repository inactivity, so `gh workflow list` says whether this one
   is still active — and
-  `gh run list --workflow=review-gate-reconcile.yml --limit 5` says whether it
+  `gh run list -R luciocabrera/vite-react-compiler --workflow=review-gate-reconcile.yml --limit 5`
+  says whether it
   has actually run, which is the question. A workflow reads `active` from the
   moment its file lands on `main`, before any scheduled run has happened, and
   that reads exactly like one that is sweeping.
@@ -468,16 +475,21 @@ One expectation the measurements **disproved**, recorded so it is not
 re-inherited: the `pull_request_review` half was expected to be inert until the
 workflow file reached `main`, on the general rule that non-`pull_request` events
 run workflows from the default branch. The review-triggered runs on #707 came
-from the pull request's own branch
+from that pull request's own code
 (`head_branch: ci/695-copilot-review-complete-check`) on 2026-08-14, while the
 workflow file did not reach `main` until `4660e05f` the next morning — so on this
-event GitHub used the branch's copy, and could not have used any other.
-Re-derive it with
+event GitHub cannot have used the default branch's copy.
+
+The ref it does use is the pull request's **merge ref**, not the branch tip: run
+`32022891578` checked out `refs/remotes/pull/740/merge`. Both halves are worth
+keeping, because "not the default branch" and "the branch tip" are different
+claims and only the first follows from the run list. Re-derive them with
 
 ```bash
 git log --format='%h %ad' --date=short main -- .github/workflows/copilot-review-gate.yml
 gh api '/repos/luciocabrera/vite-react-compiler/actions/workflows/copilot-review-gate.yml/runs?per_page=100' \
   --jq '.workflow_runs[]|select(.event=="pull_request_review")|"\(.created_at) \(.head_branch) \(.conclusion)"'
+gh run view <id> -R luciocabrera/vite-react-compiler --log | grep 'Checking out the ref' -A2
 ```
 
 Re-read this section before treating a quiet gate as a broken one.
