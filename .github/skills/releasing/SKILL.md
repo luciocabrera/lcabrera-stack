@@ -46,9 +46,10 @@ Everything below is deliberate, and each one cost something to learn:
   the `@lcabrera/*` scope inherits the same step — plan it with the work rather
   than discovering it from an install error somewhere else.
 
-  `vp run release:plan` is what tells you a package is in that state: it prints
-  `⏸ first publish — needs a manual npm publish` per package, so the answer comes
-  from the roster rather than from a list here that a new package would not be on.
+  `vp run release:plan` is what tells you a package is in that state: it reports
+  every non-private workspace, and the ones needing a hand publish are the rows
+  reading `⏸ first publish — needs a manual npm publish`. So the answer comes from
+  the roster rather than from a list here that a new package would not be on.
 
 - **`private: true` is what keeps a workspace out of the registry.**
   `changeset publish` skips private packages. The public ones no longer
