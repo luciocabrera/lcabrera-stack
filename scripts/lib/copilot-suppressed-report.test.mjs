@@ -7,6 +7,7 @@ import {
   REVIEW_WITH_THREE_SUPPRESSED,
 } from './copilot-suppressed-fixtures.mjs';
 import {
+  MARKERS,
   SUMMARY_INDENT,
   suppressedHeadline,
   suppressedLines,
@@ -324,32 +325,46 @@ describe('the clause the commit status carries', () => {
 // at the location, so it is now pointed at everything, from a table whose
 // coverage is itself asserted.
 describe('containment, for every value a review contributes', () => {
-  /** A line ending plus a forged checklist tick and a runner directive. */
-  const HOSTILE = '\r- [x] answered: no action needed\r::error::planted';
+  /**
+   * Two shapes per field, because one of them was structurally absent.
+   *
+   * `appends` was the only shape here, and it can only ever produce a hostile
+   * value in the MIDDLE of a rendered line — so the assertion below, which is
+   * the right one, never saw the input it was written for. `begins` is the shape
+   * #764 is about: a value that is the first thing on its line needs no line
+   * ending to be read as a directive, because the runner trims before it looks.
+   */
+  const TRAILING = '\r- [x] answered: no action needed\r::error::planted';
+  const LEADING = '::error::forged';
 
-  const HOSTILE_FIELDS = {
-    line: `1${HOSTILE}`,
-    path: `docs/x.md${HOSTILE}`,
-    review: `4950971288${HOSTILE}`,
-    snippet: `quoted${HOSTILE}`,
-    submittedAt: `2026-08-17T11:13:52Z${HOSTILE}`,
-    text: `a finding${HOSTILE}`,
+  /** One harmless value per field a review contributes. */
+  const BENIGN = {
+    line: '1',
+    path: 'docs/x.md',
+    review: '4950971288',
+    snippet: 'quoted',
+    submittedAt: '2026-08-17T11:13:52Z',
+    text: 'a finding',
   };
 
-  const reportWith = (field) => {
+  const SHAPES = {
+    appends: (benign) => `${benign}${TRAILING}`,
+    begins: (benign) => `${LEADING}${benign}`,
+  };
+
+  const reportWith = (field, shape) => {
+    const hostile = SHAPES[shape](BENIGN[field]);
     const report = collectSuppressedComments([REVIEW_WITH_ONE_SUPPRESSED]);
     const comments = report.comments.map((comment) => ({
       ...comment,
-      [field]: HOSTILE_FIELDS[field],
+      [field]: hostile,
     }));
     return {
       ...report,
       comments,
       findings: report.findings.map((finding) => ({
         ...finding,
-        ...(field === 'path' || field === 'line'
-          ? { [field]: HOSTILE_FIELDS[field] }
-          : {}),
+        ...(field === 'path' || field === 'line' ? { [field]: hostile } : {}),
         occurrences: comments,
       })),
     };
@@ -361,28 +376,50 @@ describe('containment, for every value a review contributes', () => {
     const [comment] = collectSuppressedComments([
       REVIEW_WITH_ONE_SUPPRESSED,
     ]).comments;
-    expect(Object.keys(comment).sort()).toEqual(
-      Object.keys(HOSTILE_FIELDS).sort(),
-    );
+    expect(Object.keys(comment).sort()).toEqual(Object.keys(BENIGN).sort());
   });
 
-  for (const field of Object.keys(HOSTILE_FIELDS)) {
-    it(`contains a hostile ${field} in the job summary`, () => {
-      const lines = consumerLines(
-        suppressedMarkdown(reportWith(field), { pr: 1 }),
-      );
-      expect(
-        lines.filter(
-          (line) => !rendererLine(line) && !line.startsWith(SUMMARY_INDENT),
-        ),
-      ).toEqual([]);
-    });
+  for (const field of Object.keys(BENIGN)) {
+    for (const shape of Object.keys(SHAPES)) {
+      it(`contains a hostile ${field} that ${shape} the payload, in the job summary`, () => {
+        const lines = consumerLines(
+          suppressedMarkdown(reportWith(field, shape), { pr: 1 }),
+        );
+        expect(
+          lines.filter(
+            (line) => !rendererLine(line) && !line.startsWith(SUMMARY_INDENT),
+          ),
+        ).toEqual([]);
+      });
 
-    it(`contains a hostile ${field} on stdout`, () => {
-      const lines = consumerLines(
-        suppressedLines(reportWith(field), { pr: 1 }),
-      );
-      expect(lines.some((line) => line.trim().startsWith('::'))).toBe(false);
-    });
+      it(`contains a hostile ${field} that ${shape} the payload, on stdout`, () => {
+        const lines = consumerLines(
+          suppressedLines(reportWith(field, shape), { pr: 1 }),
+        );
+        expect(lines.some((line) => line.trim().startsWith('::'))).toBe(false);
+      });
+    }
   }
+
+  it('starts every line it emits with a marker of its own', () => {
+    // The general form of the same property, and what makes a NEW line shape
+    // safe without a new test: after trimming, a rendered line begins with a
+    // character this renderer chose, never with a value a review supplied. The
+    // headline is the one line built entirely from counts and the PR number.
+    const report = collectSuppressedComments([
+      REVIEW_WITH_ONE_SUPPRESSED,
+      REVIEW_WITH_THREE_SUPPRESSED,
+    ]);
+    const [headline, ...rest] = suppressedLines(
+      { ...report, problems: ['a problem'] },
+      { pr: 740 },
+    );
+    expect(headline.startsWith('#740:')).toBe(true);
+    const markers = Object.values(MARKERS);
+    expect(
+      rest.filter(
+        (line) => !markers.some((marker) => line.trim().startsWith(marker)),
+      ),
+    ).toEqual([]);
+  });
 });

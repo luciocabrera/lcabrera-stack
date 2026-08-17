@@ -139,6 +139,14 @@ for one spelling matches nothing on the other and reports a confident zero.
   the single declared exception and both renderers transforming it line by line.
   The cost is that a value cannot carry meaningful line breaks unless it is added
   to that exception, which is a decision to guard it at every render site.
+- **Not containing a line ending is half of it.** A value that never opens a new
+  line still begins the line it is printed on, and the Actions runner trims
+  before testing for a `::` command — so the terminal renderer starts every line
+  with a marker of its own (`- `, `> `, `| `, `! `). The job summary needs no
+  equivalent: its container is the indented block below. What this does not cover
+  is the runner's v1 syntax, which matches `##[` anywhere in a line rather than
+  at the start, so no prefix can defeat it; that is tracked separately and is
+  inherited from `agent-review-report.mjs`.
 - **The job summary quotes source as an indented code block, not a fenced one.**
   A fence closes on any line carrying at least as many backticks, so the quoted
   diff can end it and the rest escapes as Markdown — a checked `- [x]` item among

@@ -139,6 +139,11 @@ const splitProse = (text) => {
  * value that keeps them — and the renderers earn that by transforming every one
  * of its lines. Adding a key to `KEEPS_ITS_LINES` is therefore a decision to
  * guard that value at every render site, not a formatting preference.
+ *
+ * **This is half of the containment, not all of it.** Single-lining stops a value
+ * opening a line of its own; it does nothing about one that BEGINS the line it is
+ * printed on, which needs no line ending to be read as a runner directive. The
+ * other half is `MARKERS` in `./copilot-suppressed-report.mjs`.
  */
 const KEEPS_ITS_LINES = new Set(['snippet']);
 

@@ -138,13 +138,24 @@ the report; the quoted text survives that where a number does not.
 
 Both of those shapes are load-bearing rather than styling: a review body quotes
 the pull request's own diff, so every value in this report is text an outside
-author chose. A fenced block would end on a line of backticks the quote itself
-can carry, and an unprefixed line can begin with a runner directive — so quoted
-source is transformed line by line, and everything else is single-lined where it
-is parsed, in
+author chose. Two things follow, and changing either shape changes the guarantee
+with it.
+
+- **In the terminal, every line begins with a marker the renderer owns** — `- `
+  for a finding, `> ` for Copilot's prose, `| ` for quoted source, `! ` for a
+  problem. The Actions runner trims a line before testing it for a `::` command
+  (`actions/runner`, `src/Runner.Common/ActionCommand.cs`), so indentation is not
+  a guard and a visible character is: after trimming, the line starts with a
+  marker rather than with a path or a phrase a pull request wrote.
+- **In the job summary, quoted source is an indented code block**, never a fenced
+  one, because a fence ends on a line of backticks the quote itself can carry.
+
+Neither replaces the other half: values are single-lined where they are parsed,
+in
 [`scripts/lib/copilot-suppressed.mjs`](../../scripts/lib/copilot-suppressed.mjs),
-whose header lists every value and what makes it safe. Change either shape and
-that guarantee is what changes with it.
+whose header lists every value and what makes it safe. Single-lining stops a
+value opening a line of its own; the markers stop it owning the start of the line
+it is already on.
 
 ### Reading them straight out of the API
 

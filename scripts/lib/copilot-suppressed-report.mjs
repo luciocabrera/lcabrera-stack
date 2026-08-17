@@ -22,8 +22,37 @@ const plural = (count, noun) => `${count} ${noun}${count === 1 ? '' : 's'}`;
  * of a line, so anything that can introduce a newline can introduce a directive;
  * denying it a line of its own is what stops that. `agent-review-report.mjs`
  * guards its own free text the same way, for the same reason.
+ *
+ * Not sufficient on its own — see MARKERS. A value that never starts a NEW line
+ * still begins one when it is the first thing on the line the renderer emits.
  */
 const oneLine = (text) => String(text).replaceAll(/\s+/gu, ' ').trim();
+
+/**
+ * The first non-whitespace character of every line this file emits, so that no
+ * untrusted value is ever the first thing on one.
+ *
+ * `actions/runner` decides in `src/Runner.Common/ActionCommand.cs`:
+ *
+ *     message = message.TrimStart();
+ *     if (!message.StartsWith(_commandKey))   // _commandKey is "::"
+ *
+ * so indentation is not a guard and a visible character is — the trimmed line
+ * begins with a marker this file chose rather than with a path or a phrase a
+ * pull request wrote. Single-lining the values (`oneLine`, and the parse
+ * boundary in `copilot-suppressed.mjs`) stops a value opening a line of its own;
+ * this stops it owning the start of the line it is already on. Both are needed,
+ * and the second was the one missing.
+ *
+ * A new line shape needs a marker from this set, and the suite fails on one that
+ * does not carry it.
+ */
+export const MARKERS = {
+  finding: '- ',
+  problem: '! ',
+  prose: '> ',
+  source: '| ',
+};
 
 /**
  * The location a finding is at, as a reader would paste it into an editor.
@@ -96,7 +125,7 @@ const sourceLines = (snippet) => snippet.split(LINE_ENDING);
 const snippetLines = (snippet) =>
   snippet === undefined
     ? []
-    : sourceLines(snippet).map((line) => `    | ${line}`);
+    : sourceLines(snippet).map((line) => `    ${MARKERS.source}${line}`);
 
 /**
  * Two spaces for the list item's content column, four more for the code block.
@@ -138,12 +167,12 @@ const findingLines = (report) =>
         ? ` (restated ${plural(finding.occurrences.length, 'time')})`
         : '';
     return [
-      // Every value on this line comes from outside: the location and the
-      // review id are the API's, `restated` is a count computed here. Only the
-      // snippet below is allowed to span lines, and only because each of its
-      // lines is transformed.
-      `  ${findingLocation(finding)}${restated} — review ${oneLine(latest.review)}`,
-      `    ${oneLine(latest.text)}`,
+      // Every value on these two lines comes from outside — the location and the
+      // review id from the API, the prose from the review — so neither may be
+      // the first thing on its line. Only the snippet spans lines, and only
+      // because each of its lines carries a marker too.
+      `  ${MARKERS.finding}${findingLocation(finding)}${restated} — review ${oneLine(latest.review)}`,
+      `    ${MARKERS.prose}${oneLine(latest.text)}`,
       ...snippetLines(latest.snippet),
     ];
   });
@@ -151,7 +180,9 @@ const findingLines = (report) =>
 /** The whole report as terminal lines, headline included. */
 export const suppressedLines = (report, options = {}) => [
   suppressedHeadline(report, options),
-  ...report.problems.map((problem) => `  ! ${oneLine(problem)}`),
+  ...report.problems.map(
+    (problem) => `  ${MARKERS.problem}${oneLine(problem)}`,
+  ),
   ...findingLines(report),
 ];
 
