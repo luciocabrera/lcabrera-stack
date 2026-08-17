@@ -1,6 +1,9 @@
 export {
   DEFAULT_PAGE_LIMIT,
   DISTINCT_DEFAULT_LIMIT,
+  MAX_CAR_SALES_LIMIT,
+  MAX_DISTINCT_LIMIT,
+  MAX_ENTERPRISE_ORDERS_LIMIT,
   MAX_WIDE_ALLTYPES_LIMIT,
   SANITY_TABLES,
 } from './constants/server.constants.js';
@@ -8,6 +11,7 @@ export { HttpError } from './errors/httpError.js';
 export {
   CAR_SALES_SORTABLE_COLUMNS,
   DEFAULT_CAR_SALES_SORTING,
+  MAX_CAR_SALES_SORT_RULES,
 } from './features/carSales/carSales.constants.js';
 export { createCarSalesRepository } from './features/carSales/carSales.repository.js';
 export type { CarSalesRepository } from './features/carSales/carSales.repository.js';
@@ -24,6 +28,7 @@ export { parseDistinctSource } from './features/distinct/parseDistinctSource.uti
 export {
   DEFAULT_ENTERPRISE_ORDER_SORTING,
   ENTERPRISE_ORDER_ALLOWED_COLUMNS,
+  MAX_ENTERPRISE_ORDERS_SORT_RULES,
 } from './features/enterpriseOrders/enterpriseOrders.constants.js';
 export { createEnterpriseOrdersRepository } from './features/enterpriseOrders/enterpriseOrders.repository.js';
 export type { EnterpriseOrdersRepository } from './features/enterpriseOrders/enterpriseOrders.repository.js';

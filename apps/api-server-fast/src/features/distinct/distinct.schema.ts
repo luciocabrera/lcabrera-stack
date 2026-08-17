@@ -1,4 +1,4 @@
-import { DISTINCT_DEFAULT_LIMIT } from 'api-shared';
+import { DISTINCT_DEFAULT_LIMIT, MAX_DISTINCT_LIMIT } from 'api-shared';
 
 /**
  * TypeScript type for the /api/distinct querystring.
@@ -19,7 +19,12 @@ export type DistinctQuery = {
 export const distinctQuerySchema = {
   properties: {
     columnName: { minLength: 1, type: 'string' },
-    limit: { default: DISTINCT_DEFAULT_LIMIT, minimum: 1, type: 'integer' },
+    limit: {
+      default: DISTINCT_DEFAULT_LIMIT,
+      maximum: MAX_DISTINCT_LIMIT,
+      minimum: 1,
+      type: 'integer',
+    },
     offset: { default: 0, minimum: 0, type: 'integer' },
     schemaName: { minLength: 1, type: 'string' },
     tableName: { minLength: 1, type: 'string' },

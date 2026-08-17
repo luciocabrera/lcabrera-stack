@@ -1,4 +1,5 @@
 import { selectFilterOptions } from '@lcabrera/server/db/select-filter-options.util';
+import { MAX_DISTINCT_LIMIT } from 'api-shared';
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import type { EnvConfig } from '../../config/env.schema';
@@ -68,6 +69,38 @@ describe('distinct fastify plugin', () => {
 
     expect(response.statusCode).toBe(400);
     expect(mockedSelectFilterOptions).not.toHaveBeenCalled();
+
+    await app.close();
+  });
+
+  it('rejects a limit above MAX_DISTINCT_LIMIT with 400', async () => {
+    const app = createApp({ envConfig });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/api/distinct?schemaName=public&tableName=enterprise_orders&columnName=order_status&limit=${MAX_DISTINCT_LIMIT + 1}`,
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(mockedSelectFilterOptions).not.toHaveBeenCalled();
+
+    await app.close();
+  });
+
+  it('serves a limit exactly at the ceiling', async () => {
+    mockedSelectFilterOptions.mockResolvedValue({ hasMore: false, values: [] });
+
+    const app = createApp({ envConfig });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/api/distinct?schemaName=public&tableName=enterprise_orders&columnName=order_status&limit=${MAX_DISTINCT_LIMIT}`,
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(mockedSelectFilterOptions).toHaveBeenCalledWith(
+      expect.objectContaining({ limit: MAX_DISTINCT_LIMIT }),
+    );
 
     await app.close();
   });

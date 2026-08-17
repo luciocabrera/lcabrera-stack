@@ -1,6 +1,10 @@
 import type { RequestHandler } from 'express';
 
-import { DISTINCT_DEFAULT_LIMIT, HttpError } from 'api-shared';
+import {
+  DISTINCT_DEFAULT_LIMIT,
+  HttpError,
+  MAX_DISTINCT_LIMIT,
+} from 'api-shared';
 
 import type { DistinctRepository } from './distinct.repository';
 
@@ -47,6 +51,7 @@ export const createDistinctController = ({
 
       const limit = readQueryInteger({
         fallback: DISTINCT_DEFAULT_LIMIT,
+        max: MAX_DISTINCT_LIMIT,
         min: 1,
         value: request.query.limit,
       });

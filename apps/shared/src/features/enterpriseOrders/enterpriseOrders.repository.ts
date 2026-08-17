@@ -16,6 +16,7 @@ import {
   ENTERPRISE_ORDER_PRIMARY_KEY,
   ENTERPRISE_ORDERS_SCHEMA,
   ENTERPRISE_ORDERS_TABLE,
+  MAX_ENTERPRISE_ORDERS_SORT_RULES,
 } from './enterpriseOrders.constants.js';
 
 export type EnterpriseOrdersRepository = {
@@ -46,6 +47,11 @@ const TARGET = {
  * the table's typed column filters to the flat `QueryFilter[]` that `selectRows`
  * and `getRowsCount` share, so the page and its total can never drift. The same
  * mapping the React Router app uses, so all three consumers agree.
+ *
+ * The ORDER BY term count is bounded **here** rather than in either server's
+ * parser, because this repository is the one place both of them reach —
+ * `api-server` and `api-server-fast` each re-export it verbatim. A bound in one
+ * parser leaves the other server open, which is how the `limit` gap survived.
  */
 export const createEnterpriseOrdersRepository =
   (): EnterpriseOrdersRepository => ({
@@ -78,7 +84,7 @@ export const createEnterpriseOrdersRepository =
         offset: skip,
         sort: resolveQuerySort({
           fallback: DEFAULT_ENTERPRISE_ORDER_SORTING,
-          sorting,
+          sorting: sorting.slice(0, MAX_ENTERPRISE_ORDERS_SORT_RULES),
         }),
       });
       const total = await getRowsCount({

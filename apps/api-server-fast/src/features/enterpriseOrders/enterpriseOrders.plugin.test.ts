@@ -3,6 +3,7 @@ import type { EnterpriseOrdersFilters } from 'api-shared';
 import { getRowsCount } from '@lcabrera/server/db/get-rows-count.util';
 import { selectRows } from '@lcabrera/server/db/select-rows.util';
 import { toQueryFilters } from '@lcabrera/server/filters/to-query-filters.util';
+import { MAX_ENTERPRISE_ORDERS_LIMIT } from 'api-shared';
 import { ENTERPRISE_ORDER_FILTER_CONTRACT_CASES } from 'api-shared/filter-contract';
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
@@ -175,6 +176,51 @@ describe('enterpriseOrders fastify plugin', () => {
       await app.close();
     },
   );
+
+  /**
+   * Fastify bounds the page window by *rejecting* the request in the route's
+   * query schema, where its other constraints already live — the Express server
+   * clamps instead. The divergence is deliberate and predates this bound:
+   * `wideAlltypes150` has always answered this way on each server, and the two
+   * exist to be compared, so each keeps its own idiom.
+   */
+  it('rejects a limit above MAX_ENTERPRISE_ORDERS_LIMIT with 400', async () => {
+    mockedSelectRows.mockResolvedValue([]);
+    mockedGetRowsCount.mockResolvedValue(0);
+
+    const app = createApp({ envConfig });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/api/enterprise-orders/paginated?skip=0&limit=${MAX_ENTERPRISE_ORDERS_LIMIT + 1}`,
+    });
+
+    expect(response.statusCode).toBe(400);
+    // The read must never start: a 400 alongside a whole-table query would
+    // still have served the request this bound exists to refuse.
+    expect(mockedSelectRows).not.toHaveBeenCalled();
+
+    await app.close();
+  });
+
+  it('serves a limit exactly at the ceiling', async () => {
+    mockedSelectRows.mockResolvedValue([]);
+    mockedGetRowsCount.mockResolvedValue(0);
+
+    const app = createApp({ envConfig });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/api/enterprise-orders/paginated?skip=0&limit=${MAX_ENTERPRISE_ORDERS_LIMIT}`,
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(mockedSelectRows).toHaveBeenCalledWith(
+      expect.objectContaining({ limit: MAX_ENTERPRISE_ORDERS_LIMIT }),
+    );
+
+    await app.close();
+  });
 
   it('still rejects an operator outside the contract', async () => {
     const app = createApp({ envConfig });

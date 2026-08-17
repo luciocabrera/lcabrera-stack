@@ -71,6 +71,9 @@ export const CAR_SALES_SORTABLE_COLUMNS = new Set([
   'year',
 ]);
 
+/** The most ORDER BY terms one read may carry — see `MAX_ENTERPRISE_ORDERS_SORT_RULES`. */
+export const MAX_CAR_SALES_SORT_RULES = CAR_SALES_COLUMNS.length;
+
 export const DEFAULT_CAR_SALES_SORTING = [
   { columnKey: 'car_id', direction: 'asc' },
 ] as const satisfies readonly SortRule[];

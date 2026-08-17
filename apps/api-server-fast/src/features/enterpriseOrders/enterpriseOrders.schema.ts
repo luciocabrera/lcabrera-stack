@@ -3,6 +3,7 @@ import type { SortRule } from 'api-shared';
 import {
   DEFAULT_PAGE_LIMIT,
   ENTERPRISE_ORDER_ALLOWED_COLUMNS,
+  MAX_ENTERPRISE_ORDERS_LIMIT,
 } from 'api-shared';
 
 import type { EnterpriseOrdersFilters } from './enterpriseOrders.types';
@@ -191,7 +192,12 @@ export const paginatedEnterpriseOrdersQuerySchema = {
       propertyNames: { enum: [...ENTERPRISE_ORDER_ALLOWED_COLUMNS] },
       type: 'object',
     },
-    limit: { default: DEFAULT_PAGE_LIMIT, minimum: 1, type: 'integer' },
+    limit: {
+      default: DEFAULT_PAGE_LIMIT,
+      maximum: MAX_ENTERPRISE_ORDERS_LIMIT,
+      minimum: 1,
+      type: 'integer',
+    },
     skip: { default: 0, minimum: 0, type: 'integer' },
     sort: {
       default: [],

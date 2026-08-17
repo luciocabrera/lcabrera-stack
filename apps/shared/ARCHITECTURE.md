@@ -41,6 +41,32 @@ What stays here is the part that is ours: `distinct.constants.ts` is the registr
 the HTTP edge that turns a refusal into a 400 — separating an unknown source from
 an unknown column, as this API always has.
 
+## What Bounds a Paginated Read
+
+Every paginated endpoint on both servers bounds two things, and they are bounded
+in **different places on purpose**.
+
+**The page window (`limit`) is bounded at each server's entry**, in that server's
+own idiom: `apps/api-server` passes `max:` to `readQueryInteger` and **clamps**,
+`apps/api-server-fast` sets `maximum:` in the route's query schema and **rejects
+with a 400**. The ceilings are the `MAX_*_LIMIT` constants in
+`server.constants.ts`, one per feature, matching the showcase's ceilings for the
+same tables. The divergence between the two servers is deliberate — each bounds
+where its framework already validates, and the two exist to be compared, so a
+gratuitous difference in _mechanism_ would be noise in the thing they measure.
+
+**The ORDER BY term count is bounded in the shared repositories** —
+`sorting.slice(0, MAX_*_SORT_RULES)` — because a repository here is the one place
+both servers reach (each server's own repository file re-exports this one
+verbatim). A bound in one parser leaves the other server open, which is exactly
+how the `limit` gap survived being fixed on the showcase. The ceiling is the
+table's own column count: past it every further term necessarily repeats a
+column already named, so it cannot truncate a sort anyone can express.
+
+Neither bound is a security control on its own — these are demo servers — but an
+unbounded window turns one request into a whole-table read and a whole-table JSON
+response, which is what makes them worth having and worth keeping consistent.
+
 ## The Enterprise-Order Filter Contract
 
 The column-filter shape is `@lcabrera/server`'s, aliased — not restated.
@@ -106,4 +132,4 @@ that.
 - Add JSDoc to all exported utilities
 - Test shared utilities independently in `shared`
 - Update both api-server and api-server-fast imports when adding new shared utilities
-- Wide-alltypes sorting excludes non-orderable columns (currently `c_018` with PostgreSQL `point` type) and caps accepted sort rules to prevent invalid or excessive ORDER BY clauses
+- Wide-alltypes sorting additionally excludes non-orderable columns (currently `c_018` with PostgreSQL `point` type), which is separate from the sort-rule cap every feature now carries — see [What Bounds a Paginated Read](#what-bounds-a-paginated-read)
