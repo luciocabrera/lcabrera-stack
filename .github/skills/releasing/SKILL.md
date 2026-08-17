@@ -1,6 +1,6 @@
 ---
 name: releasing
-description: Release the four public @lcabrera/* packages with Changesets, regenerate CHANGELOG.md, and maintain the PR label taxonomy. Use when cutting a release, adding a changeset, tagging a repo-level `v*` milestone, editing release.yml/changelog.yml/sync-labels.yml/labeler.yml, or when a publish or changelog automation misbehaves.
+description: Release the public @lcabrera/* packages with Changesets, regenerate CHANGELOG.md, and maintain the PR label taxonomy. Use when cutting a release, adding a changeset, tagging a repo-level `v*` milestone, editing release.yml/changelog.yml/sync-labels.yml/labeler.yml, or when a publish or changelog automation misbehaves.
 user-invocable: true
 allowed-tools: Read, Grep, Glob, Bash(vp:*), Bash(gh:*)
 ---
@@ -37,8 +37,22 @@ Everything below is deliberate, and each one cost something to learn:
   npmjs.com, and every release after that is automatic. `release.yml` carries no
   `NPM_TOKEN` and passes no `--provenance`: under trusted publishing npm attaches
   provenance itself and the flag is unnecessary.
+
+  **This has already been paid for `@lcabrera/tsconfig`, `@lcabrera/node` and
+  `@lcabrera/vite-config`** (#720), and it is worth knowing it was a step nobody
+  had planned: #674/#675/#676 each put publishing out of scope, so merging all
+  three left `@lcabrera/tsconfig` unresolvable on npm and both extraction epics
+  blocked on a wall that only appears in a brand-new clone. A package added to
+  the `@lcabrera/*` scope inherits the same step — plan it with the work rather
+  than discovering it from an install error somewhere else.
+
+  `vp run release:plan` is what tells you a package is in that state: it reports
+  every non-private workspace, and the ones needing a hand publish are the rows
+  reading `⏸ first publish — needs a manual npm publish`. So the answer comes from
+  the roster rather than from a list here that a new package would not be on.
+
 - **`private: true` is what keeps a workspace out of the registry.**
-  `changeset publish` skips private packages. The four public ones no longer
+  `changeset publish` skips private packages. The public ones no longer
   carry it, so nothing but the version number decides whether a merge publishes.
   Every workspace not meant to publish MUST carry the flag: `api-server` and
   `api-server-fast` had none at all and were one `npm publish` from going out.
