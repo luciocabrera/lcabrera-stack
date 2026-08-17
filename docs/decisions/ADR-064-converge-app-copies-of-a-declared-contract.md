@@ -3,9 +3,28 @@
 - **Status:** Accepted
 - **Date:** 2026-08-12
 - **Scope:** `apps/shared` (`api-shared`), `apps/api-server`, `apps/api-server-fast` — the enterprise-order column-filter contract
+- **Amended:** 2026-08-17 — all three workspaces left for
+  [`api-playground`](https://github.com/luciocabrera/api-playground) (#686)
 - **Issue:** #567
 - **Extends:** [ADR-039](./ADR-039-duplicate-over-undeclared-edges.md) — its decision stands unchanged; this names the case it does not cover
 - **Related:** [ADR-038](./ADR-038-public-package-topology-by-runtime.md) (runtime split), [ADR-049](./ADR-049-findings-reports-are-produced-on-demand.md)
+
+> **⚠️ Amended 2026-08-17.** The body below is left exactly as written — a dated
+> record of what was true when the decision was made. The three workspaces in
+> its Scope moved to the `api-playground` repository in #686, so every artifact
+> named below is now over there.
+>
+> **The status stays Accepted, because the decision was the rule, not the
+> example.** "Duplication is bought by an edge you may not declare; where the
+> edge is already declared, alias" still governs this repository, and it still
+> extends [ADR-039](./ADR-039-duplicate-over-undeclared-edges.md), which is
+> live. Read the app copies below as the worked case that produced the rule.
+>
+> One thing did change in substance: `api-shared` declared `@lcabrera/server` as
+> a workspace dependency, and the aliasing this ADR chose rested on that edge
+> being declared. It now resolves that package **from the registry** instead.
+> The rule is unaffected — a declared edge is a declared edge — but a reader
+> checking the reasoning against this repository will not find the workspace.
 
 ## Context
 
