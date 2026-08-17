@@ -89,6 +89,34 @@ published"), and anything else — an outage, a proxy, an unroutable host —
 rethrows. A supply-chain check that goes green because it could not run is worse
 than none, because it is believed.
 
+**5. A run that resolved _no_ packument at all fails too.** An unroutable
+registry throws, so decision 4 covers it; a registry that _answers_ 404 to
+everything does not. A misconfigured proxy, a wrong `npm_config_registry` and an
+auth failure serving 404 rather than 401 all present that way, and the audit
+would otherwise print every package as "not on npm" and exit 0 — "audited
+everything, all clean" from a run that read nothing, which is the same believed
+green in a different costume.
+
+A 404 cannot simply be a failure, because that is exactly how a package awaiting
+its first publish presents, and the sweep has to tolerate that (it is why
+`@lcabrera/tsconfig` did not fail this gate before it shipped). **The
+discriminator is how many.** One 404 among several answers is a package that has
+not shipped yet; every package 404ing at once is not that many coincidences, it
+is a registry that is not answering. So individual 404s are tolerated as before,
+and the run fails when it asked about at least one package and resolved none.
+
+**A repository that has published nothing yet lands in that state too, and it
+fails on purpose.** From 404s alone the audit cannot tell "nothing has shipped"
+apart from "the registry is not answering", so the choice is which way to be
+wrong, and staying green while blind is the one that gets believed — the founding
+argument of this whole gate, applied to itself. The cost is real and was weighed:
+a fresh fork of this repository gets a red scheduled run from day one. It is
+bounded, though. The message says the run resolved nothing and names both causes
+rather than inventing a defect, the condition clears itself on the first publish,
+and a fork with nothing published has no use for a publishing audit yet and can
+turn the schedule off. Being loud in a state that lasts until the first release
+is cheaper than being silent in the state this gate exists to catch.
+
 ## Consequences
 
 - The audit fails today, on the artifacts #730 describes and their siblings.
@@ -113,6 +141,9 @@ than none, because it is believed.
   reading it would find no bad target in anything and pass. That is a
   non-discriminating probe, and the shared client makes the choice explicit
   (`{ full: true }`) rather than incidental.
+- A fork of this repository that has published nothing gets a failing audit until
+  its first release (decision 5). That is the deliberate cost of refusing to
+  report clean on a run that resolved nothing.
 
 ## Alternatives considered
 
@@ -131,6 +162,23 @@ than none, because it is believed.
 - **Extend `publish:verify` instead of adding a gate.** Rejected: it checks an
   artifact it built, from a tree it can see. The question here is about an
   artifact already on the registry, which may have come from a laptop.
+- **Treat any 404 as a failure**, rather than only a run that resolved nothing.
+  Rejected: a package awaiting its first publish 404s identically, and #733 §5
+  requires tolerating that — it is why `@lcabrera/tsconfig` did not fail this
+  gate before it shipped. Failing on one 404 would make the audit unusable for
+  the state it is supposed to pass.
+- **Tolerate a run that resolved nothing**, on the grounds that a fresh fork is
+  a legitimate way to reach it. Rejected on the gate's own founding argument:
+  the run cannot distinguish that from a registry answering 404 to everything,
+  and it would report "audited every package, all clean" having read nothing.
+  Verified before the fix by pointing it at a local server answering 404 to
+  every path — it exited 0.
+- **Discriminate with a liveness probe**, such as fetching a package known to
+  exist on the public registry or hitting `/-/ping`. Rejected: it hardcodes an
+  external name into a supply-chain gate, and neither probe is guaranteed on a
+  private mirror or proxy — so it trades a clear failure for a new way to be
+  wrong. The count of resolved packuments is already the discriminator and needs
+  no extra request.
 - **List the tarball's file contents rather than reading its manifest.**
   Rejected on evidence: `npm pack` and `pnpm pack` produce byte-identical
   _files_ — substitution changes only `package.json` — so a contents check

@@ -21,8 +21,10 @@
  *   vp run release:audit -- @lcabrera/eslint-plugin@0.1.0 # one version
  *
  * Exit codes: 0 = every published manifest is loadable and installable, 1 = one
- * is not, a named spec is not on the registry, or the registry could not be
- * read (every finding is listed, not just the first).
+ * is not, a named spec is not on the registry, the registry could not be
+ * reached, or the run resolved no packument at all — a registry answering 404
+ * to everything must not read as "audited everything, all clean" (every finding
+ * is listed, not just the first).
  */
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -33,6 +35,7 @@ import { readPublishableManifests } from './lib/publishable-workspaces.mjs';
 import {
   auditPackument,
   renderAudit,
+  resolvedNothing,
   selectBroken,
 } from './lib/release-audit.mjs';
 import { fetchPackument, registryOrigin } from './lib/registry-packument.mjs';
@@ -127,11 +130,28 @@ const REMEDIATION = [
 const LIMITATION =
   'This reads the registry after the fact. It cannot stop a hand-publish, and a green run is not a claim that the registry cannot drift.';
 
-const report = ({ audited, broken, unresolved }) => {
+/**
+ * The message for a run that resolved nothing. It names both causes, because
+ * the audit genuinely cannot tell them apart from 404s alone, and a reader
+ * needs to know which one to go and check.
+ */
+const readNothing = (registry) =>
+  [
+    `✗ ${registry} answered "not published" for every package asked about, so this run read nothing.`,
+    '  Either nothing here has been published yet, or the registry is not answering —',
+    '  a proxy, a wrong `npm_config_registry`, or an auth failure serving 404 rather than 401.',
+    '  This audit does not report clean on a run that established nothing. See ADR-077.',
+  ].join('\n');
+
+const report = ({ audited, blind, broken, unresolved }) => {
   console.log(renderAudit({ audited, registry: registryOrigin() }));
 
   for (const spec of unresolved) {
     console.error(`✗ ${spec} is not on the registry.`);
+  }
+
+  if (blind) {
+    console.error(readNothing(registryOrigin()));
   }
 
   if (broken.length > 0) {
@@ -150,12 +170,13 @@ const report = ({ audited, broken, unresolved }) => {
 const main = async () => {
   const specs = process.argv.slice(2).filter((arg) => !arg.startsWith('-'));
   const audited = await Promise.all(toTargets(specs).map(auditTarget));
+  const blind = resolvedNothing(audited);
   const broken = selectBroken(audited);
   const unresolved = selectUnresolved(audited);
 
-  report({ audited, broken, unresolved });
+  report({ audited, blind, broken, unresolved });
 
-  if (broken.length > 0 || unresolved.length > 0) {
+  if (blind || broken.length > 0 || unresolved.length > 0) {
     process.exitCode = 1;
   }
 };

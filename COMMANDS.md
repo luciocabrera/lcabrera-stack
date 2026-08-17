@@ -416,9 +416,14 @@ can repair an artifact that already shipped —
 [ADR-077](docs/decisions/ADR-077-audit-every-published-version-and-report-rather-than-block.md)
 records both decisions.
 
-An unreachable registry **fails**. A supply-chain check that reports clean
-because it could not run is worse than none, because it is believed — the same
-property [`deps:audit`](#dependencies) is built around.
+An unreachable registry **fails**, and so does a run that resolved **no**
+manifest at all — a registry answering 404 to everything (a proxy, a wrong
+`npm_config_registry`, an auth failure serving 404 rather than 401) would
+otherwise print every package as "not on npm" and exit 0. A single 404 is still
+tolerated, because that is how a package awaiting its first publish presents;
+what fails is asking about packages and resolving none of them. A supply-chain
+check that reports clean because it could not run is worse than none, because it
+is believed — the same property [`deps:audit`](#dependencies) is built around.
 
 ### AI config & skills tooling
 

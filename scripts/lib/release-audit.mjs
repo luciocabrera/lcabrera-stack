@@ -190,6 +190,31 @@ export const selectBroken = (audited) =>
       .map(({ version }) => `${name}@${version}`),
   );
 
+/**
+ * True when the run asked the registry about at least one package and resolved
+ * none of them.
+ *
+ * A single 404 is an **answer**: it is how a package awaiting its first publish
+ * presents, which is why the sweep tolerates one and why `@lcabrera/tsconfig`
+ * did not fail this gate before it shipped. Every package 404ing at once is not
+ * that many coincidences — it is a registry that is not answering. A
+ * misconfigured proxy, a wrong `npm_config_registry` and an auth failure
+ * serving 404 instead of 401 all present exactly that way, and each one
+ * produces "audited every package, all clean" from a run that read nothing.
+ * That is the believed-green failure this whole gate is built to refuse, so an
+ * unroutable registry and a registry that denies everything must reach the same
+ * verdict.
+ *
+ * **A repository that has published nothing yet lands here too, and fails on
+ * purpose.** The audit cannot tell that state apart from a dead registry from
+ * 404s alone, and of the two ways to be wrong, staying green while blind is the
+ * one that gets believed. The cost is bounded: it clears itself the moment the
+ * first package publishes, and it says it resolved nothing rather than naming a
+ * defect that does not exist. ADR-077.
+ */
+export const resolvedNothing = (audited) =>
+  audited.length > 0 && audited.every(({ published }) => !published);
+
 const STATE_MARK = { broken: '✗', clean: '✓', deprecated: '⚠' };
 
 const renderTags = (tags) => {

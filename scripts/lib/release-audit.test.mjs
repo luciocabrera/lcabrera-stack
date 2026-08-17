@@ -9,6 +9,7 @@ import {
   localProtocolProblems,
   manifestProblems,
   renderAudit,
+  resolvedNothing,
   selectBroken,
   sourceExportProblems,
   tagsByVersion,
@@ -264,6 +265,33 @@ describe('selectBroken', () => {
     ];
 
     expect(selectBroken(audited)).toEqual(['@lcabrera/eslint-plugin@0.1.0']);
+  });
+});
+
+describe('resolvedNothing', () => {
+  const resolved = { name: '@lcabrera/utils', published: true, versions: [] };
+  const missing = { name: '@lcabrera/new', published: false, versions: [] };
+
+  it('fires when every package the run asked about was a 404', () => {
+    // A registry answering 404 to everything — a proxy, a wrong
+    // `npm_config_registry`, an auth failure serving 404 instead of 401 —
+    // otherwise reports "audited every package, all clean" having read nothing.
+    expect(resolvedNothing([missing, missing, missing])).toBe(true);
+  });
+
+  it('tolerates one package awaiting its first publish', () => {
+    // The state this must NOT fail: a 404 is an answer for a package that has
+    // simply not shipped yet, which is why the sweep survives one.
+    expect(resolvedNothing([resolved, missing])).toBe(false);
+  });
+
+  it('does not fire on a run that asked about nothing', () => {
+    // No targets is not blindness — there was no question to answer.
+    expect(resolvedNothing([])).toBe(false);
+  });
+
+  it('fires on a single explicit spec that resolved to nothing', () => {
+    expect(resolvedNothing([missing])).toBe(true);
   });
 });
 
