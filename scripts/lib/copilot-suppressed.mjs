@@ -246,14 +246,17 @@ export const parseSuppressedBlocks = (body) => {
       continue;
     }
 
-    const end = body.indexOf(DETAILS_CLOSE, section.start);
+    // An unclosed block runs to the end of the body. `body.length` rather than
+    // `undefined` as the slice end: both mean "to the end", but one of them is
+    // a number, and the other makes every caller of this slice reason about an
+    // argument that is sometimes absent.
+    const close = body.indexOf(DETAILS_CLOSE, section.start);
+    const end = close === -1 ? body.length : close;
 
     blocks.push({
-      comments: commentsIn(
-        body.slice(section.start, end === -1 ? undefined : end),
-      ),
+      comments: commentsIn(body.slice(section.start, end)),
       declared,
-      truncated: end === -1,
+      truncated: close === -1,
     });
   }
 
