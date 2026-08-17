@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
+import { MAX_FILTER_OPTIONS_LIMIT } from '@/routes/api/filter-options/filter-options.constants';
+
 import { selectDistinctFilterOptions } from './distinct.service';
 
 const { selectFilterOptionsMock } = vi.hoisted(() => ({
@@ -46,6 +48,67 @@ describe('selectDistinctFilterOptions', () => {
     const [descriptor] = selectFilterOptionsMock.mock.calls[0] ?? [];
     expect(descriptor.allowedColumns).toContain('color');
     expect(descriptor.allowedColumns).toContain('buyer_name');
+  });
+
+  it('clamps a limit above the ceiling to exactly the ceiling', async () => {
+    await selectDistinctFilterOptions({
+      columnName: 'color',
+      limit: MAX_FILTER_OPTIONS_LIMIT + 1_000_000,
+      offset: 0,
+      schemaName: 'public',
+      tableName: 'car_sales',
+    });
+
+    expect(selectFilterOptionsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ limit: MAX_FILTER_OPTIONS_LIMIT }),
+    );
+  });
+
+  it('serves a limit exactly at the ceiling', async () => {
+    await selectDistinctFilterOptions({
+      columnName: 'color',
+      limit: MAX_FILTER_OPTIONS_LIMIT,
+      offset: 0,
+      schemaName: 'public',
+      tableName: 'car_sales',
+    });
+
+    expect(selectFilterOptionsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ limit: MAX_FILTER_OPTIONS_LIMIT }),
+    );
+  });
+
+  /**
+   * `hasMore` is `values.length === limit`, so `LIMIT 0` returns no values and
+   * reports `0 === 0` — an empty page claiming another follows. A dropdown
+   * paging on `hasMore` would fetch forever without showing a value.
+   */
+  it('floors a zero limit to 1 rather than serving a page that claims more', async () => {
+    await selectDistinctFilterOptions({
+      columnName: 'color',
+      limit: 0,
+      offset: 0,
+      schemaName: 'public',
+      tableName: 'car_sales',
+    });
+
+    expect(selectFilterOptionsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ limit: 1 }),
+    );
+  });
+
+  it('leaves an ordinary limit and offset untouched', async () => {
+    await selectDistinctFilterOptions({
+      columnName: 'color',
+      limit: 25,
+      offset: 75,
+      schemaName: 'public',
+      tableName: 'car_sales',
+    });
+
+    expect(selectFilterOptionsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ limit: 25, offset: 75 }),
+    );
   });
 
   it('returns undefined for a source outside the allow-list, without delegating', async () => {

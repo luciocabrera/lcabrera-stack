@@ -3,6 +3,7 @@ import type { FilterOptionsSources } from '@lcabrera/server/filters/resolve-filt
 import { selectFilterOptions } from '@lcabrera/server/db/select-filter-options.util';
 import { resolveFilterOptionsSource } from '@lcabrera/server/filters/resolve-filter-options-source.util';
 
+import { MAX_FILTER_OPTIONS_LIMIT } from '@/routes/api/filter-options/filter-options.constants';
 import {
   CAR_SALES_DISTINCT_FILTER_COLUMNS,
   CAR_SALES_SCHEMA,
@@ -50,6 +51,21 @@ type SelectDistinctFilterOptionsArgs = {
  * that to a 400 — so an unknown column never reaches SQL. The column's
  * `ColumnType` (from config) drives which values count as meaningful; `hasMore`
  * follows the page-size convention.
+ *
+ * **The request-derived window is bounded here, not in the route's parser**
+ * (#736), for the reason #706 gives at `selectOrdersPage`: this function is what
+ * every entry point reaches, so one clamp here is complete, while a clamp in
+ * `parseFilterOptionsParams` would bound only callers that route through it —
+ * and that parser is published in `@lcabrera/api`, so a ceiling there would also
+ * decide the bound on behalf of consumers outside this repository.
+ *
+ * `LIMIT 0` is floored to 1 for a second reason: `hasMore` is
+ * `values.length === limit`, so a zero-width page reports `0 === 0` — an empty
+ * result that claims another page follows, which is a dropdown that pages
+ * forever without ever showing a value.
+ *
+ * `offset` is deliberately not bounded: one past the end returns an empty page
+ * after work bounded by the column rather than by the request.
  */
 export const selectDistinctFilterOptions = async ({
   columnName,
@@ -73,7 +89,7 @@ export const selectDistinctFilterOptions = async ({
     allowedColumns: source.allowedColumns,
     column: columnName,
     columnType: source.columnType,
-    limit,
+    limit: Math.min(MAX_FILTER_OPTIONS_LIMIT, Math.max(1, limit)),
     offset,
     schema: schemaName,
     table: tableName,
