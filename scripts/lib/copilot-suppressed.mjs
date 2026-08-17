@@ -232,20 +232,32 @@ export const parseSuppressedBlocks = (body) => {
     return [];
   }
 
-  return summarySections(body)
-    .map((section) => ({ declared: declaredCount(section.label), section }))
-    .filter(({ declared }) => declared !== undefined)
-    .map(({ declared, section }) => {
-      const end = body.indexOf(DETAILS_CLOSE, section.start);
+  const blocks = [];
 
-      return {
-        comments: commentsIn(
-          body.slice(section.start, end === -1 ? undefined : end),
-        ),
-        declared,
-        truncated: end === -1,
-      };
+  // `for...of` rather than `.filter().map()` because the absent count has to be
+  // gone by the time the block is built, not merely filtered out: a predicate
+  // does not narrow the value for the map that follows it, so a chain hands a
+  // possibly-absent `declared` to a caller whose whole job is comparing it
+  // against a parsed one. Restoring the chain reintroduces that.
+  for (const section of summarySections(body)) {
+    const declared = declaredCount(section.label);
+
+    if (declared === undefined) {
+      continue;
+    }
+
+    const end = body.indexOf(DETAILS_CLOSE, section.start);
+
+    blocks.push({
+      comments: commentsIn(
+        body.slice(section.start, end === -1 ? undefined : end),
+      ),
+      declared,
+      truncated: end === -1,
     });
+  }
+
+  return blocks;
 };
 
 /** Labels that talk about suppression in a shape this cannot read. */
