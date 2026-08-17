@@ -25,6 +25,7 @@
     "coordination:close": "node scripts/close-coordination-claim.mjs",
     "coordination:verify": "node scripts/verify-coordination.mjs",
     "copilot-review:status": "node scripts/copilot-review-status.mjs",
+    "copilot-review:suppressed": "node scripts/copilot-suppressed-comments.mjs",
     "coverage:merge": "node scripts/merge-coverage.mjs",
     "coverage:report": "node scripts/coverage-report.mjs",
     "db:down": "docker compose -f docker/local/docker-compose.yml --env-file docker/local/.env down",

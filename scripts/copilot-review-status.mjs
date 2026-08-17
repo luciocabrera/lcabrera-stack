@@ -12,8 +12,14 @@
  * with verdicts about different commits, and a status is never left on a commit
  * that has already been superseded.
  *
- * The comparison itself is `./lib/copilot-review.mjs` (pure, unit-tested); the
- * gate's behaviour and its break-glass path are in
+ * It also reports the findings Copilot SUPPRESSED — the ones it puts in the
+ * review body instead of filing as threads, which conversation resolution
+ * therefore never sees (#750). Those never move the state: they are read from
+ * the reviews this already fetched, and reported (ADR-078).
+ *
+ * The comparison itself is `./lib/copilot-review.mjs` and the suppressed-comment
+ * reader is `./lib/copilot-suppressed.mjs` (both pure, unit-tested); the gate's
+ * behaviour and its break-glass path are in
  * `docs/tooling/copilot-review-gate.md`. See `.claude/rules/scripts.md`.
  *
  * Usage (from the repo root):
@@ -28,7 +34,7 @@
  * --if-changed withheld it; 1 = the pull request could not be read, or the
  * status could not be posted.
  */
-import { readFileSync } from 'node:fs';
+import { appendFileSync, readFileSync } from 'node:fs';
 import process from 'node:process';
 
 import {
@@ -39,9 +45,16 @@ import {
 import {
   copilotReviews,
   decideReviewStatus,
-  reviewsFromPages,
   STATUS_CONTEXT,
 } from './lib/copilot-review.mjs';
+import { fetchPullRequestReviews } from './lib/copilot-reviews-api.mjs';
+import {
+  suppressedLines,
+  suppressedMarkdown,
+  suppressedStatusNote,
+  withStatusNote,
+} from './lib/copilot-suppressed-report.mjs';
+import { collectSuppressedComments } from './lib/copilot-suppressed.mjs';
 import { errorMessage } from './lib/error-message.mjs';
 import { runGh } from './lib/gh-exec.mjs';
 import {
@@ -106,28 +119,6 @@ const fetchPullRequest = (repository, number) =>
   JSON.parse(runGh(['api', `repos/${repository}/pulls/${number}`]));
 
 /**
- * Every review on the pull request, oldest first — all pages of them.
- *
- * Two flags earn their place. `--slurp` makes gh wrap the pages in one outer
- * array; without it gh documents each page as a separate JSON document, which
- * `JSON.parse` cannot read. `per_page` goes in the path rather than through
- * `-F`, because any field argument makes `gh api` issue a POST, and
- * `POST /pulls/{n}/reviews` opens a review instead of listing them — a read that
- * silently writes.
- */
-const fetchReviews = (repository, number) =>
-  reviewsFromPages(
-    JSON.parse(
-      runGh([
-        'api',
-        '--paginate',
-        '--slurp',
-        `repos/${repository}/pulls/${number}/reviews?per_page=100`,
-      ]),
-    ),
-  );
-
-/**
  * What is published under this context on `sha` right now, or `undefined`.
  *
  * Read against the head this run resolved, never against an event payload's
@@ -170,6 +161,44 @@ const postStatus = ({ description, repository, sha, state }) => {
 const describeReviews = (reviews) =>
   `${reviews.length} review(s) on the pull request, ${copilotReviews(reviews).length} counted from Copilot`;
 
+/** Appends the suppressed-comment report where the runner shows it, if it can. */
+const writeSummary = (markdown) => {
+  const path = process.env.GITHUB_STEP_SUMMARY;
+  if (path === undefined || path === '') {
+    return;
+  }
+  appendFileSync(path, `${markdown}\n`, 'utf8');
+};
+
+/** The gate's own verdict. */
+const verdictLine = ({ description, state }) =>
+  `${STATUS_CONTEXT}: ${state} — ${description}`;
+
+/**
+ * The suppressed comments, reported alongside the verdict but never folded into
+ * it: the state stays a statement about whether Copilot reviewed the head, and
+ * the findings ride in the description and the job summary. ADR-078 has the
+ * reason a suppressed comment does not move a merge bar.
+ *
+ * Printed above the verdict, and therefore above the line that says what became
+ * of the status — which is the last one, and the one the reconcile sweep records
+ * as this gate's outcome for the pull request. A finding printed below them
+ * would take that line's place.
+ */
+const reportSuppressed = (report, number) => {
+  for (const line of suppressedLines(report, { pr: number })) {
+    console.log(line);
+  }
+  if (report.state === 'found' || report.state === 'unreadable') {
+    writeSummary(suppressedMarkdown(report, { pr: number }));
+  }
+  if (report.state === 'unreadable') {
+    console.log(
+      '::warning::Copilot suppressed comments could not be read — see the lines above. This does not change the review status.',
+    );
+  }
+};
+
 const main = () => {
   const payload = readEventPayload();
   const number = resolvePullNumber(payload);
@@ -190,17 +219,24 @@ const main = () => {
     return;
   }
 
-  const reviews = fetchReviews(repository, number);
-  const { description, state } = decideReviewStatus({
+  const reviews = fetchPullRequestReviews(repository, number);
+  const verdict = decideReviewStatus({
     headSha,
     isDraft: pullRequest.draft === true,
     reviews,
     triggeringReview: triggeringReviewFrom(payload),
   });
+  const suppressed = collectSuppressedComments(reviews);
+  const description = withStatusNote(
+    verdict.description,
+    suppressedStatusNote(suppressed),
+  );
+  const { state } = verdict;
 
   console.log(`${repository}#${number} head ${headSha}`);
   console.log(describeReviews(reviews));
-  console.log(`${STATUS_CONTEXT}: ${state} — ${description}`);
+  reportSuppressed(suppressed, number);
+  console.log(verdictLine({ description, state }));
 
   if (
     process.argv.includes('--if-changed') &&

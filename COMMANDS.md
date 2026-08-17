@@ -512,6 +512,18 @@ by hand. The states and the break-glass path are in
 | `vp run copilot-review:status -- --pr <n> --dry-run` | print the state the gate would publish for a PR, posting nothing |
 | `vp run copilot-review:status -- --pr <n>`           | publish that state against the PR's current head commit          |
 
+That gate also reports the findings Copilot **suppressed** — the low-confidence
+ones it puts in the review body instead of filing as threads, which conversation
+resolution therefore never sees. They are reported and never block
+([ADR-078](docs/decisions/ADR-078-surface-suppressed-comments-without-blocking.md));
+the command below is the same read on demand, and the four answers it can give —
+including the two different zeros — are in
+[`docs/tooling/copilot-review-gate.md`](docs/tooling/copilot-review-gate.md).
+
+| Command                                        | Does                                                                        |
+| ---------------------------------------------- | --------------------------------------------------------------------------- |
+| `vp run copilot-review:suppressed -- --pr <n>` | list every suppressed Copilot finding on a PR; exits 1 if it could not read |
+
 `Agent review verdict` reads the verdict posted for a pull request's current head
 and validates it against
 [`docs/agents/agent-review-contract.md`](docs/agents/agent-review-contract.md)

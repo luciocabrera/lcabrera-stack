@@ -41,7 +41,12 @@ export const isCopilotReviewer = (login) =>
 // workflow fetches) and GraphQL (`gh pr view --json reviews`, what the issue's
 // reproduction command prints). One shape would make the documented repro
 // disagree with the gate it is meant to explain.
-const reviewerLogin = (review) => review?.user?.login ?? review?.author?.login;
+//
+// The login reader is exported because `./copilot-suppressed.mjs` filters the
+// same list: two readers of the reviewer would be two places to forget that the
+// spelling differs by API.
+export const reviewerLogin = (review) =>
+  review?.user?.login ?? review?.author?.login;
 const reviewedCommit = (review) => review?.commit_id ?? review?.commit?.oid;
 const submittedAt = (review) => review?.submitted_at ?? review?.submittedAt;
 const reviewState = (review) => (review?.state ?? '').toUpperCase();
