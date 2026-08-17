@@ -54,6 +54,22 @@ export const isRootAnchored = (token) => {
   return REPO_ROOTS.has(token.split('/')[0]);
 };
 
+/**
+ * A `./` or `../` prefix, which makes a link target a path by construction —
+ * no extension guess required.
+ *
+ * This exists because the extension was doing two unrelated jobs. `.md`
+ * identifies a DOCUMENT for the corpus, and it was also deciding WHICH LINKS to
+ * enforce; the second job it did badly, exempting every relative link to a
+ * `.tsx`, `.ts` or script. Three ADRs and READMEs pointed at deleted files for
+ * months with the gate green (#756).
+ *
+ * Deliberately narrower than "anything relative": a bare `(Foo.tsx)` with no
+ * `./` is left alone, because parenthesised prose is not reliably a path and
+ * this gate is worth more when it never cries wolf.
+ */
+const isExplicitlyRelative = (token) => /^\.\.?\//.test(token);
+
 /** Punctuation a sentence leaves attached to a path it just named. */
 const TRAILING_PUNCTUATION = new Set(['.', ',', ':', ';', ')']);
 
@@ -101,7 +117,9 @@ export const extractCandidates = (markdown) => {
     .filter(
       (token) =>
         !isDisqualified(token) &&
-        (isRootAnchored(token) || token.endsWith('.md')),
+        (isRootAnchored(token) ||
+          isExplicitlyRelative(token) ||
+          token.endsWith('.md')),
     );
 
   return [...new Set([...backticked, ...linked])];

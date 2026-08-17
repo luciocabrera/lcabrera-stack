@@ -58,6 +58,31 @@ describe('extractCandidates', () => {
     ).toEqual(['packages/ui/src/PATTERNS.md']);
   });
 
+  it('enforces a relative link whatever the target extension', () => {
+    // The bug this covers: the filter asked for `.md`, so a relative link to a
+    // .tsx was never a candidate and could rot indefinitely (#756). Both
+    // spellings of the SAME dead pointer must be picked up, or the gate's
+    // verdict depends on the file type rather than on whether it resolves.
+    expect(extractCandidates('[a](../../apps/x/Nope.tsx)')).toEqual([
+      '../../apps/x/Nope.tsx',
+    ]);
+    expect(extractCandidates('[a](../../apps/x/Nope.md)')).toEqual([
+      '../../apps/x/Nope.md',
+    ]);
+    expect(extractCandidates('[a](./Sibling.util.ts)')).toEqual([
+      './Sibling.util.ts',
+    ]);
+  });
+
+  it('still ignores anchors, URLs and bare parenthesised prose', () => {
+    // The counterweight: widening to relative links must not start reporting
+    // things that were never paths, or the gate cries wolf and gets bypassed.
+    expect(extractCandidates('[a](#section)')).toEqual([]);
+    expect(extractCandidates('[a](https://example.com/x.tsx)')).toEqual([]);
+    expect(extractCandidates('some prose (Foo.tsx) inline')).toEqual([]);
+    expect(extractCandidates('[a](mailto:someone@example.com)')).toEqual([]);
+  });
+
   it('ignores everything inside a fenced block', () => {
     // Fenced blocks are examples; their paths are illustrative far more often
     // than not, and including them was most of the original false-positive mass.

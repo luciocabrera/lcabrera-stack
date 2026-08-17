@@ -10,7 +10,7 @@
 ## Context
 
 A group row is rendered today as a **spanning banner**.
-[`TableGroupHeaderRow.component.tsx`](../../packages/ui/src/components/Table/TableGroupHeaderRow/TableGroupHeaderRow.component.tsx)
+`TableGroupHeaderRow.component.tsx`
 composes `TableRow` and puts one
 `<td colSpan={leftPinnedCols.length + centerCols.length + rightPinnedCols.length}>`
 inside it, holding an icon, one text segment per group key, one per selected
