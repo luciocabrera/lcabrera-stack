@@ -2,7 +2,7 @@
 id: copilot-gate-break-glass
 title: Correct the Copilot review gate break-glass ladder
 owner: agent:claude
-status: active
+status: review
 branch: docs/732-copilot-gate-break-glass
 area:
   - docs/tooling/copilot-review-gate.md
@@ -24,6 +24,10 @@ known limitation as the measured split rather than a universal, and fix the
 
 ## Status / next
 
-- Current step: implemented, full gate green, pushed to #740 (draft)
+- Current step: review round 2 answered on #740, which is ready rather than
+  draft. The checkout-free probe now branches on the empty-review case and was
+  exercised in all three states; the thread-reply endpoint was measured on this
+  pull request rather than assumed. Full gate green, both review threads
+  resolved.
 - Blockers: none
-- Next: verification, then ready/merge by the caller
+- Next: merge by the caller
