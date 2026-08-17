@@ -107,8 +107,19 @@ extraction, on the reasoning that every consumer it has is CQMS. **That was
 wrong, and #683 found out by trying**: the root manifest declares it, and the
 `app-graph`, `linter-checker` and `fallow-code-checker` skills import and execute
 its scripts to scan _this_ repo. So it stayed when the CQMS workspaces left, and
-it cannot leave until #682 publishes the ingestion CLI those skills would call
-instead. ADR-069's note of 2026-08-14 records the original reasoning.
+it is not going anywhere on its own.
+
+**#682 is not what unblocks it** — that publishes CQMS's _ingestion_ CLI, the
+command `ingest-report.mjs` forwards to. The half that pins the package here is
+the other one: the report **generators** those skills execute, and the
+`deterministic-scan` module `app-graph` imports. Neither is ingestion, and #682
+never proposed to publish them. The decision that would move it is **#716**
+(make the agent skills reusable), because the package and the skills are one
+problem — #677 built it out of their shared scripts, so shipping a skill whose
+first instruction runs a generator from `packages/scan-report/scripts` hands a
+consumer a path it does not have. #716 had excluded these three skills on the same "every
+consumer is CQMS" premise and has been corrected. ADR-069's note of 2026-08-14
+records the original reasoning.
 
 `api` and `server` split on **runtime**, and the split is load-bearing, not
 cosmetic — the two names say which runtime each one is for, and the tsconfigs
