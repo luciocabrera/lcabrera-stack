@@ -215,6 +215,29 @@ export const selectBroken = (audited) =>
 export const resolvedNothing = (audited) =>
   audited.length > 0 && audited.every(({ published }) => !published);
 
+/**
+ * What to tell a reader whose run established nothing.
+ *
+ * Which explanations are worth offering depends on what was asked for, and the
+ * difference is not cosmetic. A sweep of this repository's own packages can only
+ * be an empty registry or one that is not answering. A run handed package names
+ * has a third way to get here that is far likelier than either — a name that is
+ * simply wrong — and sending that reader to go and check their proxy is sending
+ * them at the two things that are fine.
+ *
+ * The offending names are already listed above this message by the caller, so
+ * this only has to say which class of cause to suspect.
+ */
+export const readNothing = ({ named, registry }) =>
+  [
+    `✗ ${registry} answered "not published" for every package asked about, so this run read nothing.`,
+    named
+      ? '  Either a name asked for is not on this registry, or the registry is not answering —'
+      : '  Either nothing here has been published yet, or the registry is not answering —',
+    '  a proxy, a wrong `npm_config_registry`, or an auth failure serving 404 rather than 401.',
+    '  This audit does not report clean on a run that established nothing. See ADR-077.',
+  ].join('\n');
+
 const STATE_MARK = { broken: '✗', clean: '✓', deprecated: '⚠' };
 
 const renderTags = (tags) => {

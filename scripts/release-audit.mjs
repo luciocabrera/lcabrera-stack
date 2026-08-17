@@ -34,6 +34,7 @@ import { isBuiltPublicPackage } from './lib/publish-surface.mjs';
 import { readPublishableManifests } from './lib/publishable-workspaces.mjs';
 import {
   auditPackument,
+  readNothing,
   renderAudit,
   resolvedNothing,
   selectBroken,
@@ -130,19 +131,6 @@ const REMEDIATION = [
 const LIMITATION =
   'This reads the registry after the fact. It cannot stop a hand-publish, and a green run is not a claim that the registry cannot drift.';
 
-/**
- * The message for a run that resolved nothing. It names both causes, because
- * the audit genuinely cannot tell them apart from 404s alone, and a reader
- * needs to know which one to go and check.
- */
-const readNothing = (registry) =>
-  [
-    `✗ ${registry} answered "not published" for every package asked about, so this run read nothing.`,
-    '  Either nothing here has been published yet, or the registry is not answering —',
-    '  a proxy, a wrong `npm_config_registry`, or an auth failure serving 404 rather than 401.',
-    '  This audit does not report clean on a run that established nothing. See ADR-077.',
-  ].join('\n');
-
 const report = ({ audited, blind, broken, unresolved }) => {
   console.log(renderAudit({ audited, registry: registryOrigin() }));
 
@@ -151,7 +139,12 @@ const report = ({ audited, blind, broken, unresolved }) => {
   }
 
   if (blind) {
-    console.error(readNothing(registryOrigin()));
+    console.error(
+      readNothing({
+        named: audited.some(({ explicit }) => explicit),
+        registry: registryOrigin(),
+      }),
+    );
   }
 
   if (broken.length > 0) {
