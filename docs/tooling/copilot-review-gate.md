@@ -151,19 +151,21 @@ gh api graphql -F n=<n> -f query='
     repository(owner: "luciocabrera", name: "vite-react-compiler") {
       pullRequest(number: $n) {
         headRefOid
-        reviews(last: 100) { nodes { author { login } commit { oid } submittedAt } }
+        reviews(last: 100) { nodes { author { login } state commit { oid } submittedAt } }
       }
     }
   }' --jq '
   .data.repository.pullRequest as $pr
-  | [$pr.reviews.nodes[] | select(.author.login | test("[Cc]opilot"))] | last
+  | [ $pr.reviews.nodes[]
+      | select(.author.login | test("[Cc]opilot"))
+      | select(.state | IN("APPROVED", "CHANGES_REQUESTED", "COMMENTED")) ] | last
   | if . == null then "no Copilot review on this pull request yet — wait"
     elif .commit.oid == $pr.headRefOid then "Copilot reviewed the head (\($pr.headRefOid[0:8])) at \(.submittedAt) — if the pull request still shows pending, it is stale"
     else "the newest Copilot review is of \(.commit.oid[0:8]), not the head — wait"
     end'
 ```
 
-Three things in it are load-bearing rather than decorative, and each is the
+Everything in it that looks like padding is load-bearing, and each part is the
 difference between an answer and a confident wrong one:
 
 - **The `null` arm.** `last` of an empty array is `null`, and jq reads a field
@@ -172,13 +174,13 @@ difference between an answer and a confident wrong one:
   request Copilot has not reviewed at all. That is precisely the state this
   command exists to name, and the one where a reader is least able to tell
   nonsense from an answer.
-- **The repository is named in the query — and `-R` is on every `gh` command in
-  this section for the same reason.** Otherwise `gh` takes the repository from
-  the working directory's git remote: `gh pr view`, `gh run list`,
-  `gh run rerun` and `gh workflow run` all fail outside a checkout with
-  `failed to run git`, and inside a _different_ repository they answer about, or
-  act on, that one. A break-glass command has to work from wherever the person
-  reading this happens to be.
+- **The repository is named in the query**, which is why this one command needs
+  no `-R` while every other `gh` command below carries one. Left to itself `gh`
+  takes the repository from the working directory's git remote: `gh pr view`,
+  `gh run list`, `gh run rerun` and `gh workflow run` all fail outside a checkout
+  with `failed to run git`, and inside a _different_ repository they answer
+  about, or act on, that one. A break-glass command has to work from wherever
+  the person reading this happens to be.
 - **One request carries the head and the reviews**, the same way the gate itself
   reads them, so nothing can move between two calls. It also sidesteps the trap
   in the REST form: `GET /pulls/<n>/reviews` returns one page of 30 unless you
@@ -186,6 +188,12 @@ difference between an answer and a confident wrong one:
   passes 30 easily — at which point `last` is the thirtieth review rather than
   the newest one. `reviews(last: 100)` takes the newest hundred instead; beyond
   that, use the `--dry-run` form above.
+- **The state whitelist is the gate's own.** `scripts/lib/copilot-review.mjs`
+  counts `APPROVED`, `CHANGES_REQUESTED` and `COMMENTED` and drops everything
+  else, so a probe that took the newest Copilot review of _any_ state would call
+  a dismissed review a review of the head and disagree with the status it is
+  meant to explain. Keep the two lists identical, whitelisted the same way
+  round: an unfamiliar state must fall out of the count, not into it.
 
 The third reading — the gate would publish `pending` while the pull request shows
 `success` — is in
