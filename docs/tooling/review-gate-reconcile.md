@@ -139,10 +139,19 @@ Waiting up to one interval is the ordinary answer. When that is too long:
    bot-triggered event it stands in for does not.
 
    ```bash
-   gh workflow run copilot-review-gate.yml -f pr=<n>
-   gh workflow run agent-review-verdict.yml -f pr=<n>
-   gh workflow run review-gate-reconcile.yml -f pr=<n>
+   gh workflow run copilot-review-gate.yml -f pr=<n> \
+     -R luciocabrera/vite-react-compiler
+   gh workflow run agent-review-verdict.yml -f pr=<n> \
+     -R luciocabrera/vite-react-compiler
+   gh workflow run review-gate-reconcile.yml -f pr=<n> \
+     -R luciocabrera/vite-react-compiler
    ```
+
+   `-R` is what makes "needs no checkout" true. `gh` infers the repository from a
+   git remote, so without it these fail with `not a git repository` before any
+   dispatch is attempted — which is exactly the wrong moment, since step 1 above
+   is the one that already needs a clone. Same rule as the ladder in
+   [`copilot-review-gate.md`](./copilot-review-gate.md#break-glass).
 
    **Precondition, and it is narrower than it looks.** The API resolves a
    workflow by **filename against the default branch**, but reads the trigger and
