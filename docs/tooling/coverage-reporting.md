@@ -87,9 +87,6 @@ Adding a fifth public package extends the check with no edit here:
 | `packages/scan-ingestion`     | `@repo/scan-ingestion`    | true  | Phase 2 — DB-free `test:coverage` **subset** (its real-Postgres `queries/*` stay out, so the number is the DB-free portion only)     |
 | `packages/utils`              | `@lcabrera/utils`         | true  | Phase 2 — pure helpers, own 95% threshold ([#124](https://github.com/luciocabrera/vite-react-compiler/issues/124))                   |
 | `apps/scan-orchestrator`      | `@repo/scan-orchestrator` | true  | Phase 3 — DB-free **subset** (`runQueuedScan` drives the real scan queue and stays out)                                              |
-| `apps/shared`                 | `api-shared`              | true  | Phase 3 — whole suite is DB-free (every test injects its dependencies)                                                               |
-| `apps/api-server`             | `car-sales-api`           | true  | Phase 3 — same; its `test:coverage` deliberately loads no environment file                                                           |
-| `apps/api-server-fast`        | `car-sales-api-fast`      | true  | Phase 3 — same                                                                                                                       |
 | `packages/eslint-local-rules` | `@lcabrera/eslint-plugin` | true  | Phase 3 — a `RuleTester` suite per rule ([#205](https://github.com/luciocabrera/vite-react-compiler/issues/205)); reaches no service |
 | `packages/agent-runner`       | `@repo/agent-runner`      | true  | Phase 3 — its tested surface is pure utils; the CLI-spawning half has no tests (see the caveat below)                                |
 
@@ -131,9 +128,10 @@ only once its coverage runs clean and means something.** Checklist:
   `packages/tsconfig`, which is on both lists as a public package. `agent-runner` and `eslint-local-rules` were listed here too, which
   stopped being true once the latter gained a suite per rule (#205); both were
   admitted in the Phase 3 second pass below.
-- **Phase 3 — apps & server workspaces.** `apps/scan-orchestrator`,
-  `apps/shared`, `apps/api-server` and `apps/api-server-fast`. ✅ done
-  (#52/#53/#54).
+- **Phase 3 — apps & server workspaces.** `apps/scan-orchestrator` plus the three
+  car-sales workspaces (`api-shared`, `car-sales-api`, `car-sales-api-fast`).
+  ✅ done (#52/#53/#54). The car-sales three left the repo in #686 and their
+  roster rows left with them.
 
   **Second pass**: `packages/eslint-local-rules` and `packages/agent-runner`
   (#302). Both had been written off as having nothing to cover. That was written
@@ -153,7 +151,7 @@ only once its coverage runs clean and means something.** Checklist:
   The plan expected the two API servers to need a DB-free `test:coverage`
   **subset** carved out of real-Postgres suites, the way `scan-ingestion` and
   `scan-orchestrator` did. That turned out to be wrong: every suite in
-  `apps/shared`, `apps/api-server` and `apps/api-server-fast` injects its
+  `api-shared`, `car-sales-api` and `car-sales-api-fast` injects its
   dependencies — controllers and plugins take a repository, `readEnvConfig`
   takes a plain object, the distinct repository test passes a pool mock — so
   none of them opens a connection and no split was needed. Their

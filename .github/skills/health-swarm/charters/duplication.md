@@ -29,8 +29,10 @@ Already handled (do not refile): the copy-pasted root-script CLI helpers, now in
 `scripts/lib/cli-input.mjs`.
 
 Reviewed and deliberately left, with reasons in #519: the `apps/react-router` ⇄
-`apps/shared` enterprise-orders constants (documented as deliberate, in sync,
-both app-local); `edit-order`/`order-detail` loaders (~10 lines, and the
+`api-shared` enterprise-orders constants (documented as deliberate, in sync, both
+app-local — and no longer a repo-local duplication at all since #686 moved
+`api-shared` to its own repository, which is what the copies existed to survive);
+`edit-order`/`order-detail` loaders (~10 lines, and the
 identical `admin_system` pattern is already accepted in
 `reports/fallow/baselines/dupes.json`); `coverage-report.mjs`/`merge-coverage.mjs`
 (divergences deliberate and documented); `build-insert-query`/`build-update-query`

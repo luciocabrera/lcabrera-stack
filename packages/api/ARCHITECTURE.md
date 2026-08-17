@@ -26,9 +26,10 @@ half out removes that edge at the package boundary rather than papering over it.
   contains a `node:*` import. That is what makes this split hold.
 - **Relative imports carry explicit `.ts` extensions.** The package must resolve
   under both bundler mode (Vite/Vitest/tsc) and `moduleResolution: NodeNext`
-  (`apps/shared`, both API servers). Extensionless imports are bundler-only —
-  that is precisely why the old `src/api/` barrel could not be consumed from
-  `apps/shared` at all.
+  (the car-sales servers and their shared domain layer, extracted to the
+  `api-playground` repository under #686). Extensionless imports are
+  bundler-only — that is precisely why the old `src/api/` barrel could not be
+  consumed from that domain layer at all.
 - **Explicit per-file subpath exports, no barrel** (ADR-007). Consumers import
   the module they need, and tests mock that module rather than a barrel.
 - **kebab-case `.util` files**, matching `@lcabrera/utils`. Asserted by the
@@ -105,7 +106,10 @@ From `apps/react-router`:
   `createPaginatedFetcher` (same-origin, no base URL)
 - `src/routes/api/filter-options/filter-options.loader.ts`
 
-From `apps/shared`:
+From the car-sales servers' shared domain layer (`api-shared`, in the
+`api-playground` repository since #686):
 
 - `src/types/api.types.ts` re-exports `DistinctValuesResponse` (NodeNext — the
-  reason explicit extensions are mandatory here).
+  reason explicit extensions are mandatory here). It is the only consumer that
+  resolves this package under NodeNext, and it is now out-of-repo, so nothing
+  here would catch a regression in that resolution mode.

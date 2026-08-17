@@ -9,9 +9,11 @@ Published as **`@lcabrera/node`** from the `packages/node-runtime` workspace
 its consumers are no longer only in-repo ones. `README.md` is the
 consumer-facing document; this file is why the package is shaped the way it is.
 
-In-repo consumers: `apps/api-server` and `apps/api-server-fast` (car-sales demo)
-and `apps/scan-orchestrator` (CQMS product) — the last of which leaves with the
-CQMS extraction (#672) and then resolves the same package from the registry.
+In-repo consumers: `apps/scan-orchestrator` (CQMS product), which leaves with the
+CQMS extraction (#672) and then resolves the same package from the registry. The
+car-sales demo servers already left that way under #686 and consume it from npm
+today — the first consumers to exercise the package as an outside project would,
+which is what publishing it was for.
 
 ## Why this package exists
 

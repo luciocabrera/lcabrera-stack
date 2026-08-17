@@ -4,7 +4,7 @@ Implementation Plan step 8 (see ADR-012 for the full decision record;
 ADR-013 for the list/new/edit/view CRUD restructure and streaming
 corrections applied after review). Routes under `/cqms`, all
 reading/writing through `@repo/scan-ingestion/src/queries/` — this app
-never talks to `apps/api-server`, per TECH_SPEC decision #4.
+never talks to the car-sales demo API, per TECH_SPEC decision #4.
 
 ## Route Tree
 

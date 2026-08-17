@@ -90,7 +90,7 @@ transport the architecture has — extend the codec or defer them explicitly.
 
 **Rolling out to the other three routes is not configuration.** They fetch over
 HTTP from the api-server rather than reading Postgres in process, so grouping
-them means an endpoint in `apps/shared`, an Express route, a Fastify plugin and
+them means an endpoint in `api-shared`, an Express route, a Fastify plugin and
 new fetchers — plus three more unguarded copies of the grouping shape, which is
 the mechanism the design's own Risk 7 forbids. #575 proves the same genericity
 claim with a type probe that owns its fixture instead; crossing the api-server
