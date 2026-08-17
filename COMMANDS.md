@@ -344,6 +344,7 @@ Versions are chosen by people, bumped by one command, and published by CI.
 | Command                  | Does                                                                          |
 | ------------------------ | ----------------------------------------------------------------------------- |
 | `vp run release:add`     | write a changeset — pick the packages and patch/minor/major, say what changed |
+| `vp run release:audit`   | read the manifests already on npm and check what a consumer would get         |
 | `vp run release:plan`    | per package: local version vs npm, and what CI would publish right now        |
 | `vp run release:status`  | show what would be released, versus `origin/main`                             |
 | `vp run release:version` | consume the changesets: bump versions, write per-package changelogs           |
@@ -379,6 +380,45 @@ bash scripts/publish-bootstrap.sh                 # publishes
 It is safe to re-run: a package already on the registry at its current version is
 skipped, so a run that fails halfway can simply be repeated. Needed once per
 package, ever.
+
+### Auditing the published manifests
+
+`publish:verify` answers "is the tarball this repo would produce correct?".
+`release:audit` answers the other one — "is what is **already on npm** still
+correct?" — by fetching each published manifest and checking it.
+
+```bash
+vp run release:audit                                  # every published version
+vp run release:audit -- @lcabrera/eslint-plugin       # one package
+vp run release:audit -- @lcabrera/eslint-plugin@0.1.0 # one version
+```
+
+Two questions asked of every version: does an `exports` target point inside
+`src` (in a package this repo _builds_ — `@lcabrera/ui` ships source on purpose),
+and does any dependency range still carry `catalog:` or `workspace:`? The second
+is what makes a package uninstallable: npm has no handler for either protocol and
+aborts with `EUNSUPPORTEDPROTOCOL` before it ever reads `exports`.
+
+Nothing else here can see this. `publish:verify` packs with pnpm — it must,
+since the `publishConfig.exports` swap is a pnpm extension (ADR-073) — so a
+defect that exists only in an `npm pack` tarball is invisible to it permanently.
+That is how `@lcabrera/eslint-plugin@0.1.0` shipped uninstallable with every gate
+in this repo green (#730).
+
+**It observes drift; it cannot prevent it.** A hand-publish reaches the registry
+without passing through anything here, and a green `release:audit` says the
+registry was correct when it was read — not that it cannot drift. An npm version
+is immutable, so a finding is resolved by publishing a corrected version and
+`npm deprecate`-ing the broken one; the audit then reports that version without
+failing, unless a dist-tag still points at it. It runs on a schedule rather than
+per PR, because the registry is not a property of a pull request and no commit
+can repair an artifact that already shipped —
+[ADR-077](docs/decisions/ADR-077-audit-every-published-version-and-report-rather-than-block.md)
+records both decisions.
+
+An unreachable registry **fails**. A supply-chain check that reports clean
+because it could not run is worse than none, because it is believed — the same
+property [`deps:audit`](#dependencies) is built around.
 
 ### AI config & skills tooling
 
@@ -651,6 +691,13 @@ Quality Gate job's step order, not across jobs.
 `deps:audit` daily and opens (or comments on) a single tracking issue when it
 finds something. The per-PR gate catches what a change introduces; only the
 schedule catches an advisory published overnight against a tree nobody touched.
+
+[`release-audit.yml`](.github/workflows/release-audit.yml) is scheduled for the
+same reason, one subject over: it runs `release:audit` daily against the
+registry and files the same kind of tracking issue. Its subject moves without
+anyone touching this repository — a hand-publish never passes through CI — and
+an immutable broken version cannot be fixed by a commit, so it deliberately does
+not gate a pull request ([ADR-077](docs/decisions/ADR-077-audit-every-published-version-and-report-rather-than-block.md)).
 
 Other workflows: `lighthouse.yml`, `validate-skills.yml`, and
 [`pr-standards.yml`](.github/workflows/pr-standards.yml) — on every pull request

@@ -1,0 +1,189 @@
+# Watches the registry for a published manifest that drifted from what this
+# repo intends.
+#
+# `publish:verify` checks the tarball this repo would produce, packing with
+# pnpm because the `publishConfig.exports` swap is a pnpm extension (ADR-073).
+# It cannot see an artifact that reached npm some other way — a hand-publish
+# from a laptop passes through no gate here at all, which is how
+# `@lcabrera/eslint-plugin@0.1.0` shipped uninstallable with CI green (#730).
+#
+# It runs on a schedule rather than on a pull request. The registry is not a
+# property of a PR, a finding is fixed with npm credentials rather than a
+# commit, and an immutable broken version would otherwise block every merge
+# including the one meant to fix it (ADR-077, and #698's liveness argument).
+#
+# A finding opens or updates a single tracking issue instead of leaving a red X
+# on a schedule nobody watches.
+name: Published Manifest Audit
+
+on:
+  schedule:
+    # 07:00 UTC daily, an hour after the dependency audit so the two do not
+    # file at the same moment. Drift only appears when someone publishes, so
+    # this is about detection latency, not about the registry changing on us.
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: Published manifests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@8ecb39174989ce55af90f45cf55b02738599831d
+        with:
+          cache: false
+          run-install: false
+
+      - name: Install dependencies
+        run: vp install --frozen-lockfile --ignore-scripts && vp config
+
+      - name: Audit the published manifests
+        id: audit
+        # `continue-on-error` so a finding becomes an issue rather than only a
+        # red X. The step's own conclusion is still recorded, and the run fails
+        # at the end.
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          vp run release:audit 2>&1 | tee audit-output.txt
+
+      - name: File or update the tracking issue
+        if: steps.audit.outcome == 'failure'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        with:
+          script: |
+            const fs = require('node:fs');
+            const output = fs.readFileSync('audit-output.txt', 'utf8').trim();
+            const title =
+              'chore(release): published manifest drift found by the scheduled audit';
+
+            // Fills the standard issue template. issue-standards.yml checks
+            // every issue and grants automation no exemption, so an auto-filed
+            // issue that skipped it would open already failing its own gate.
+            const body = [
+              '## 1. Problem Statement',
+              '',
+              'The scheduled published-manifest audit found a version on the registry that',
+              'a consumer cannot use: an `exports` target inside `src`, or a `catalog:` /',
+              '`workspace:` range npm has no handler for. `publish:verify` cannot see this —',
+              'it checks the tarball this repo would produce, not the one that shipped.',
+              '',
+              '```',
+              output,
+              '```',
+              '',
+              `Run: ${process.env.RUN_URL}`,
+              '',
+              '## 2. Objective / Desired Outcome',
+              '',
+              '`vp run release:audit` exits 0 — every version a consumer can install is',
+              'either correct, or superseded and deprecated so npm says so on install.',
+              '',
+              '## 3. Context & Background',
+              '',
+              'An npm version is immutable: a broken one is never repaired, only superseded.',
+              'Publish a corrected version through the normal release path, then',
+              '`npm deprecate` the broken one with a pointer to it. The audit reports a',
+              'deprecated, superseded version without failing — but never one a dist-tag',
+              'still points at, because `npm install <name>` resolves there regardless.',
+              '',
+              'Both actions need registry credentials, so neither is a code change here.',
+              'See ADR-077 and #730.',
+              '',
+              '## 4. Reproduction Steps',
+              '',
+              '1. `vp install`',
+              '2. `vp run release:audit`',
+              '3. Expected: exit 0. Actual: the versions above, exit 1.',
+              '',
+              'Preconditions: network access to the registry. The audit fails rather than',
+              'reporting clean when it cannot reach it, so a failure here is a real finding',
+              'and not an offline artefact.',
+              '',
+              '## 5. Scope Definition',
+              '',
+              '### In Scope',
+              '',
+              '- Superseding and deprecating each version listed above.',
+              '',
+              '### Out of Scope',
+              '',
+              '- Changing the audit thresholds to make this pass.',
+              '',
+              '## 6. Acceptance Criteria',
+              '',
+              '- [ ] `vp run release:audit` exits 0',
+              '- [ ] Each broken version is superseded by a corrected publish',
+              '- [ ] Each broken version is deprecated, pointing at its replacement',
+              '- [ ] No regressions',
+              '- [ ] Documentation updated (only if the publishing path changed)',
+              '- [ ] Approach consistent with repository conventions',
+              '',
+              '## 7. Implementation Notes',
+              '',
+              'Opened automatically by `.github/workflows/release-audit.yml`. Later runs',
+              'comment on this issue rather than opening another, so it stays one thread.',
+              '',
+              '## 8. Related Work',
+              '',
+              '- #730 — the broken publish that exposed the gap',
+              '- #733 — the audit itself',
+              '',
+              '## 9. Planning Metadata',
+              '',
+              '```yaml',
+              'dependencies:',
+              '  blocking: []',
+              '  blockedBy: []',
+              '  parent: null',
+              '  children: []',
+              '```',
+            ].join('\n');
+
+            // `type: ci` is the canonical label for this work
+            // (scripts/lib/labels.mjs). A label outside that taxonomy would be
+            // pruned by sync-labels and take the lookup below with it.
+            const label = 'type: ci';
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: label,
+            });
+            const match = existing.data.find((issue) => issue.title === title);
+
+            if (match) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: match.number,
+                body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: [label],
+              });
+            }
+
+      - name: Fail the run when the audit did
+        if: steps.audit.outcome == 'failure'
+        run: exit 1
