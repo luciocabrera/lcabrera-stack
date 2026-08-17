@@ -146,30 +146,44 @@ Without a checkout, ask the API the same question. It answers in one line, and
 the pull request number is the only thing to fill in:
 
 ```bash
-PR_HEAD=$(gh pr view <n> -R luciocabrera/vite-react-compiler --json headRefOid --jq .headRefOid) \
-gh api repos/luciocabrera/vite-react-compiler/pulls/<n>/reviews --jq '
-  [.[] | select(.user.login | test("[Cc]opilot"))] | last
+gh api graphql -F n=<n> -f query='
+  query($n: Int!) {
+    repository(owner: "luciocabrera", name: "vite-react-compiler") {
+      pullRequest(number: $n) {
+        headRefOid
+        reviews(last: 100) { nodes { author { login } commit { oid } submittedAt } }
+      }
+    }
+  }' --jq '
+  .data.repository.pullRequest as $pr
+  | [$pr.reviews.nodes[] | select(.author.login | test("[Cc]opilot"))] | last
   | if . == null then "no Copilot review on this pull request yet — wait"
-    elif .commit_id == env.PR_HEAD then "Copilot reviewed the head (\(.commit_id[0:8])) at \(.submitted_at) — if the pull request still shows pending, it is stale"
-    else "the newest Copilot review is of \(.commit_id[0:8]), not the head — wait"
+    elif .commit.oid == $pr.headRefOid then "Copilot reviewed the head (\($pr.headRefOid[0:8])) at \(.submittedAt) — if the pull request still shows pending, it is stale"
+    else "the newest Copilot review is of \(.commit.oid[0:8]), not the head — wait"
     end'
 ```
 
-Two things in it are load-bearing rather than decorative, and both are the
+Three things in it are load-bearing rather than decorative, and each is the
 difference between an answer and a confident wrong one:
 
 - **The `null` arm.** `last` of an empty array is `null`, and jq reads a field
-  off `null` and slices it without complaining, so the obvious one-liner —
-  `… | last | "\(.commit_id[0:8])"` — prints `null null` and exits 0 for a pull
+  off `null` and slices it without complaining, so the obvious form —
+  `… | last | "\(.commit.oid[0:8])"` — prints `null null` and exits 0 for a pull
   request Copilot has not reviewed at all. That is precisely the state this
   command exists to name, and the one where a reader is least able to tell
   nonsense from an answer.
-- **`-R` on the `gh pr view` half.** Without it, `gh` resolves the repository
-  from the working directory's git remote: outside a checkout it fails with
-  `failed to run git`, and inside a _different_ repository it answers about that
-  one's pull request #`<n>` while the `gh api` half stays pinned here — two
-  repositories compared against each other, reported as a verdict about this
-  one.
+- **The repository is named in the query.** Nothing here reads the working
+  directory, so it is checkout-free in fact. `gh pr view <n>` without
+  `-R owner/repo` is not: outside a checkout it fails with `failed to run git`,
+  and inside a _different_ repository it answers about that repository's pull
+  request `<n>`.
+- **One request carries the head and the reviews**, the same way the gate itself
+  reads them, so nothing can move between two calls. It also sidesteps the trap
+  in the REST form: `GET /pulls/<n>/reviews` returns one page of 30 unless you
+  pass `--paginate`, **every thread reply is a review**, and a busy pull request
+  passes 30 easily — at which point `last` is the thirtieth review rather than
+  the newest one. `reviews(last: 100)` takes the newest hundred instead; beyond
+  that, use the `--dry-run` form above.
 
 The third reading — the gate would publish `pending` while the pull request shows
 `success` — is in
@@ -343,9 +357,14 @@ the ladder is for. So no ratio is written down, and the commands are here instea
 gh run list --workflow=copilot-review-gate.yml --limit 60 \
   --json event,headSha,createdAt,conclusion \
   --jq '.[]|select(.event=="pull_request_review")|"\(.headSha[0:8]) \(.createdAt) \(.conclusion)"'
-gh api repos/luciocabrera/vite-react-compiler/pulls/<n>/reviews \
+gh api --paginate repos/luciocabrera/vite-react-compiler/pulls/<n>/reviews \
   --jq '.[]|"\(.user.login) \(.commit_id[0:8]) \(.submitted_at)"'
 ```
+
+`--paginate` is not optional there: the endpoint returns 30 reviews a page, and
+a review-heavy pull request silently loses the rest — every thread reply is its
+own review, so the count runs ahead of what a reader expects. It streams the
+filter over each page, so the output is in submission order across all of them.
 
 Match each Copilot review against the runs on the same head. Three ways that
 check reports a healthy trigger while the status is stale:
