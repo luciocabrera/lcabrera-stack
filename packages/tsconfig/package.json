@@ -1,6 +1,6 @@
 {
   "name": "@lcabrera/tsconfig",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": false,
   "description": "Strict TypeScript config factories and a generator that writes a tsconfig per workspace — app (browser/bundler) and node variants.",
   "keywords": [
