@@ -35,14 +35,21 @@ header rejects.
 
 ## Status / next
 
-- Current step: PR #738 open (draft), round 2 applied, full gate green, every CI
-  check passing
+- Current step: PR #738 open and ready, round 4 applied, full gate green, the
+  Copilot review thread resolved
 - Blockers: none
-- Next: blind verification. The PR stays draft until the caller says otherwise.
-- **Do not expect a stale status to be waiting.** #721, #725 and #734 each were
-  one, and each has since been corrected by a run demonstrating the fix — so a
-  checker who looks for them now finds `success` and would reasonably conclude
-  the claim was false. Find a fresh one instead: the two commands in #737 §1
-  list the Copilot reviews and the runs on each head, and a review with no
-  executed run on the head it names is an instance. They occur on their own,
-  often.
+- Next: blind verification. Readying was the caller's call and is done; merging
+  is not mine.
+- **Do not expect a stale status to be waiting.** #721, #725, #734 and #738's own
+  head have each been one, and each was corrected by a run demonstrating the fix
+  — so a checker who looks for them now finds `success` and would reasonably
+  conclude the claim was false. Find a fresh one instead: the two commands in
+  #737 §1 list the Copilot reviews and the runs on each head. They occur on
+  their own, often.
+- **Reading `conclusion` is not enough**, which #738's own head showed on
+  2026-08-17: a `pull_request_review` run existed on it and had succeeded, so
+  both of #737 §1's checks passed, and the status was stale anyway — that run
+  finished at `08:56:15Z` and Copilot reviewed at `08:59:57Z`. Compare the
+  review's `submitted_at` against the run times, not just the run's existence.
+  Those two timestamps are immutable, so an instance stays re-derivable long
+  after its status has been corrected.
