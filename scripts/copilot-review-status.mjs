@@ -170,11 +170,7 @@ const writeSummary = (markdown) => {
   appendFileSync(path, `${markdown}\n`, 'utf8');
 };
 
-/**
- * The gate's own verdict, and the LAST thing this script prints. The reconcile
- * sweep reads a gate's last line as its outcome for that pull request, so
- * anything printed after this is read as a state.
- */
+/** The gate's own verdict. */
 const verdictLine = ({ description, state }) =>
   `${STATUS_CONTEXT}: ${state} — ${description}`;
 
@@ -184,7 +180,10 @@ const verdictLine = ({ description, state }) =>
  * the findings ride in the description and the job summary. ADR-078 has the
  * reason a suppressed comment does not move a merge bar.
  *
- * Printed before `verdictLine` on purpose, for the reason given there.
+ * Printed above the verdict, and therefore above the line that says what became
+ * of the status — which is the last one, and the one the reconcile sweep records
+ * as this gate's outcome for the pull request. A finding printed below them
+ * would take that line's place.
  */
 const reportSuppressed = (report, number) => {
   for (const line of suppressedLines(report, { pr: number })) {

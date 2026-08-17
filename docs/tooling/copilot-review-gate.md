@@ -167,11 +167,22 @@ gh api graphql -F n=<n> -f query='
 — which is the measurement #750 is built on: a suppressed comment contributes
 nothing to that number.
 
-**When the markup moves**, the fixtures in
-[`scripts/lib/copilot-suppressed-fixtures.mjs`](../../scripts/lib/copilot-suppressed-fixtures.mjs)
-are re-captured from a live review with the first command above, verbatim. They are
-frozen bodies and cannot notice a format change on their own; what notices is the
-declared-count check, running against real bodies every time this gate does.
+**When the markup moves**, the bodies in
+[`scripts/lib/copilot-suppressed-fixtures.json`](../../scripts/lib/copilot-suppressed-fixtures.json)
+are re-captured from a live review. The command above prints one block for
+reading; that file stores the **whole body**, JSON-escaped, so capture it as JSON
+rather than transcribing it — a fixture someone retyped teaches the parser a
+format that never existed:
+
+```bash
+gh api --paginate 'repos/luciocabrera/vite-react-compiler/pulls/<n>/reviews?per_page=100' \
+  --jq '.[] | select(.id == <review-id>)
+        | {body, id, login: .user.login, pr: <n>, submittedAt: .submitted_at}'
+```
+
+That prints one entry of that file. They are frozen bodies and cannot notice a
+format change on their own; what notices is the declared-count check, running
+against real bodies every time this gate does.
 
 ## What recomputes it
 

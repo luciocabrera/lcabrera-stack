@@ -74,22 +74,34 @@ const snippetLines = (snippet) =>
     ? []
     : snippet.split('\n').map((line) => `    | ${line}`);
 
-/** Four backticks, so quoted source containing a fence cannot end the block. */
-const SUMMARY_FENCE = '````';
+/**
+ * Two spaces for the list item's content column, four more for the code block.
+ * The width is what makes an indented block an indented block, so it is not a
+ * setting to taste.
+ */
+export const SUMMARY_INDENT = '      ';
 
 /**
- * The same source for the job summary, fenced and indented to the list item's
- * content column — inside the checkbox it belongs to, and rendered literally
- * rather than as Markdown.
+ * The same source for the job summary, as an **indented** code block.
+ *
+ * Not a fenced one, and not a longer fence: a fence closes on any line carrying
+ * at least as many backticks, so quoted source can end it and everything after
+ * escapes as Markdown. That is a checked `- [x]` line landing among the
+ * findings, in a checklist whose whole meaning is that an unchecked box is an
+ * unanswered finding. No fence width fixes it, because the input chooses the
+ * width.
+ *
+ * An indented block has no closing delimiter to imitate: it ends at a line that
+ * is not indented, and every line here is indented by this function. That is the
+ * same shape as the terminal renderer's per-line prefix, for the same reason —
+ * transform every line, and no line can be special.
  */
 const snippetBlock = (snippet) =>
   snippet === undefined
     ? []
     : [
         '',
-        `  ${SUMMARY_FENCE}`,
-        ...snippet.split('\n').map((line) => `  ${line}`),
-        `  ${SUMMARY_FENCE}`,
+        ...snippet.split('\n').map((line) => `${SUMMARY_INDENT}${line}`),
         '',
       ];
 

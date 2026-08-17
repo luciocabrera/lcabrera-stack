@@ -91,8 +91,10 @@ one more parse and no new API call, no new workflow, and no second reviews clien
 `vp run copilot-review:suppressed -- --pr <n>` is the same report on demand, and
 it is the form the status description points at.
 
-The gate's own verdict stays the last line it prints, because the reconcile sweep
-reads a gate's last line as its outcome.
+The report is printed above the verdict, and so above the line that says what
+became of the status — which is the last line, and the one the reconcile sweep
+records as this gate's outcome for the pull request. A finding printed below
+would take that line's place.
 
 **4. A finding is a location, and the instance count is printed beside it.**
 Copilot re-emits a still-open suppressed comment on every re-review, in fresh
@@ -127,6 +129,13 @@ for one spelling matches nothing on the other and reports a confident zero.
   question: there an unfamiliar state must not count as a review, because an
   absent verdict has to block; here it must not hide a finding, because nothing
   blocks.
+- **The job summary quotes source as an indented code block, not a fenced one.**
+  A fence closes on any line carrying at least as many backticks, so the quoted
+  diff can end it and the rest escapes as Markdown — a checked `- [x]` item among
+  the findings, in a checklist whose meaning is that an unchecked box is
+  unanswered. No fence width fixes that, because the input picks the width; an
+  indented block has no delimiter to imitate. The terminal renderer has the same
+  property from its per-line prefix, for a different attacker.
 - The fixtures are review bodies captured verbatim from this repository, so they
   document a real format rather than one we invented — and they are frozen, so
   they cannot notice it moving. The live check is the gate itself, which runs the

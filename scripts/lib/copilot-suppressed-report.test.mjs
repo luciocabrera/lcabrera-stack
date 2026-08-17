@@ -7,6 +7,7 @@ import {
   REVIEW_WITH_THREE_SUPPRESSED,
 } from './copilot-suppressed-fixtures.mjs';
 import {
+  SUMMARY_INDENT,
   suppressedHeadline,
   suppressedLines,
   suppressedMarkdown,
@@ -131,13 +132,58 @@ describe('the job summary', () => {
     expect(markdown).toContain('docs/tooling/copilot-review-gate.md');
   });
 
-  it('fences the quoted source inside the checkbox it belongs to', () => {
+  it('indents the quoted source into the checkbox it belongs to', () => {
     const markdown = suppressedMarkdown(FOUND, { pr: 740 });
-    // Indented to the list item's content column, or the block ends the list;
-    // fenced with four backticks, or source carrying a fence ends the block.
+    // Two spaces put it inside the list item; four more make it a code block.
+    // The blank line either side is what opens and closes one, so both are part
+    // of the assertion rather than formatting.
     expect(markdown).toContain(
-      '  ````\n  gh run list --workflow=review-gate-reconcile.yml --limit 5\n  ````',
+      `\n\n${SUMMARY_INDENT}gh run list --workflow=review-gate-reconcile.yml --limit 5\n\n`,
     );
+  });
+
+  it('cannot be escaped by the source it quotes', () => {
+    // A fence closes on any line of at least as many backticks, so a four-tick
+    // fence was ended by four-tick quoted source and the rest of the quote
+    // rendered as Markdown — a checked `- [x]` among the findings, in a list
+    // where an unchecked box is what "unanswered" means. Every line of quoted
+    // source is indented instead, and an indented block has no delimiter to
+    // imitate.
+    const hostile = {
+      ...REVIEW_WITH_ONE_SUPPRESSED,
+      body: REVIEW_WITH_ONE_SUPPRESSED.body.replace(
+        'PR_HEAD=$(gh pr view <n> --json headRefOid --jq .headRefOid) \\',
+        '````\n## injected heading\n- [x] fake resolved',
+      ),
+    };
+    const report = collectSuppressedComments([hostile]);
+    const lines = suppressedMarkdown(report, { pr: 1 }).split('\n');
+
+    // The total assertion: no line of quoted source reaches the document at an
+    // indentation where Markdown would read it as anything.
+    const own = (line) =>
+      line === '' ||
+      line === '### Copilot suppressed comments' ||
+      line.startsWith('- [ ] ') ||
+      line.startsWith('#1:') ||
+      line.startsWith('These are review findings');
+    expect(
+      lines.filter((line) => !own(line) && !line.startsWith(SUMMARY_INDENT)),
+    ).toEqual([]);
+
+    // And the quote is still there, in full, rather than dropped or mangled.
+    expect(lines).toContain(`${SUMMARY_INDENT}- [x] fake resolved`);
+    expect(lines).toContain(`${SUMMARY_INDENT}## injected heading`);
+    expect(lines).toContain(`${SUMMARY_INDENT}\`\`\`\``);
+
+    // Width-independent, and the reason the assertion above is not enough on its
+    // own: a longer fence passes any test whose planted input is shorter, so
+    // what is asserted is that the container has NO delimiter to outrun. The
+    // only backtick-only line in the document is the one the quote itself
+    // carries.
+    expect(lines.filter((line) => /^\s*`+\s*$/u.test(line))).toEqual([
+      `${SUMMARY_INDENT}\`\`\`\``,
+    ]);
   });
 
   it('says the findings do not block, and where that is decided', () => {
@@ -157,10 +203,12 @@ describe('the job summary', () => {
 });
 
 describe('where the gate prints this', () => {
-  it('keeps the verdict as the last line the gate emits', () => {
-    // The reconcile sweep reads a gate's LAST line as its outcome for that pull
-    // request. Moving the suppressed-comment report below the verdict would put
-    // a finding where the sweep expects a state, and nothing else would notice.
+  it('keeps the suppressed report above the verdict the gate prints', () => {
+    // The reconcile sweep records a gate's LAST line as its outcome for that
+    // pull request — the line about the status being posted or withheld, which
+    // follows the verdict. Reporting above the verdict is above both, so no
+    // finding can take that line's place, and nothing else would notice if one
+    // did.
     const source = readRepoFile('scripts/copilot-review-status.mjs');
     const report = source.indexOf('reportSuppressed(suppressed');
     const verdict = source.indexOf('console.log(verdictLine(');
