@@ -8,8 +8,6 @@
     "apps/admin_system/src/routes/cqms/edit-scanner/editScanner.loader.ts:7-22|apps/admin_system/src/routes/cqms/scanner-detail/scannerDetail.loader.ts:8-26",
     "apps/admin_system/src/routes/cqms/edit-user/editUser.loader.ts:16-27|apps/admin_system/src/routes/cqms/user-detail/userDetail.loader.ts:14-25",
     "apps/admin_system/vite.config.ts:9-32|apps/react-router/vite.config.ts:9-32",
-    "apps/api-server-fast/src/server.ts:8-20|apps/api-server/src/server.ts:9-28",
-    "apps/api-server-fast/vite.config.ts:5-33|apps/api-server/vite.config.ts:5-33",
     "apps/react-router/src/routes/car-sales-infinite/car-sales.loader.ts:21-51|apps/react-router/src/routes/car-sales/car-sales.loader.ts:28-55",
     "apps/react-router/src/routes/car-sales/car-sales.loader.ts:31-69|apps/react-router/src/routes/enterprise-orders/enterprise-orders.loader.ts:34-64",
     "apps/react-router/src/routes/car-sales-infinite/car-sales.loader.ts:59-88|apps/react-router/src/routes/car-sales/car-sales.loader.ts:63-92"

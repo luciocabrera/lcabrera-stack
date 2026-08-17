@@ -51,7 +51,7 @@ Detailed per-file-type conventions intentionally do **not** live here — they l
 
 ### Path-Specific Rules — `.claude/rules/`
 
-Each rule file has a `paths:` frontmatter with glob patterns. Claude Code loads a rule **only when editing files that match its globs** — TypeScript rules don't load while editing docs, React rules don't load while working in `apps/api-server`, etc.
+Each rule file has a `paths:` frontmatter with glob patterns. Claude Code loads a rule **only when editing files that match its globs** — TypeScript rules don't load while editing docs, React rules don't load while working in `packages/server`, etc.
 
 | Rule file             | Loads when editing                              | Owns                                                                         |
 | --------------------- | ----------------------------------------------- | ---------------------------------------------------------------------------- |

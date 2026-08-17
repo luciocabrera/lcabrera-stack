@@ -1,7 +1,7 @@
 # scan-ingestion Architecture
 
 CQMS's entire persistence/API backend (TECH_SPEC §2.4 decision #4) — no
-route or job anywhere reaches `apps/api-server`. A thin validate-then-call
+route or job anywhere reaches the car-sales demo API. A thin validate-then-call
 library: Zod-parses a scanner's `report.json`/`report.md` off disk, resolves
 or creates the run/scan/project rows, and delegates the actual multi-table
 write to `cqms.sp_ingest_scan_result` (see ADR-006). Two consumers: each

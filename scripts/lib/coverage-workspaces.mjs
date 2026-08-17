@@ -53,13 +53,9 @@ export const COVERAGE_REPORT_WORKSPACES = [
   { dir: 'packages/node-runtime', name: '@lcabrera/node', run: true },
   { dir: 'packages/scan-ingestion', name: '@repo/scan-ingestion', run: true },
   { dir: 'packages/utils', name: '@lcabrera/utils', run: true },
-  // Phase 3 — apps and servers. Only scan-orchestrator needs a DB-free subset
-  // (one suite drives the real scan queue); the rest inject their dependencies
-  // throughout, so their whole suite runs with no database.
+  // Phase 3 — apps. scan-orchestrator needs a DB-free subset (one suite drives
+  // the real scan queue).
   { dir: 'apps/scan-orchestrator', name: '@repo/scan-orchestrator', run: true },
-  { dir: 'apps/shared', name: 'api-shared', run: true },
-  { dir: 'apps/api-server', name: 'car-sales-api', run: true },
-  { dir: 'apps/api-server-fast', name: 'car-sales-api-fast', run: true },
   // Phase 3, second pass. Both were written off as "config/CLI-only with
   // nothing to cover"; that stopped being true for these two when
   // eslint-local-rules gained a suite per rule (#205). Their tests are a lint

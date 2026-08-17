@@ -263,7 +263,7 @@ Root scripts are **orchestration only** — anything project-specific lives in t
 **Full list: [COMMANDS.md §4](COMMANDS.md#4-root-orchestration-scripts).** The
 policy that governs them:
 
-There is deliberately **no `start:all`/`dev:all`**: `car-sales-api` and `car-sales-api-fast` are performance-comparison alternatives serving the same domain and must never run at the same time — always pick one combo.
+There is deliberately **no `start:all`/`dev:all`**, and the reason has changed. It used to be that `car-sales-api` and `car-sales-api-fast` served the same domain and could never run at once; both left with [`api-playground`](https://github.com/luciocabrera/api-playground) (#686). What remains is that the showcase and CQMS are unrelated products sharing a checkout, so a command starting "everything" would only ever be starting two things that have nothing to do with each other. Reach for `dev:showcase` or `dev:cqms`.
 
 **`vp check` type-checks, but it is not `tsc` — both run, and `typecheck:all` is the authority.** `vp check`'s type pass is **tsgolint** (Oxlint's type-aware path, enabled by `lint.options.typeCheck` in the root `vite.config.ts`), and it does resolve each workspace's own strict `tsconfig.app.json` — `strict`, `noUncheckedIndexedAccess` and `noUnusedLocals` all fire under it. What it does **not** do is run the per-workspace `typecheck` scripts, and those carry work no linter replicates: `packages/ui` gates its public API against server-only `node:*` imports (`check:public-api`), and both React Router apps regenerate route types first. Every workspace now has a `typecheck` script, CI runs `vp run typecheck:all` as its own step in `check-safe.yml`, and `check:safe` chains it. Keep the two passes in sync: a new workspace gets a `typecheck` script **and** a tsconfig, or it silently falls back to the near-empty root `tsconfig.json` and is checked far more loosely than every other workspace (this is exactly how `utils`/`plugins`/`vite-configs` went un-strict for so long — `noUncheckedIndexedAccess` never fired there).
 
@@ -311,15 +311,16 @@ Commands: [COMMANDS.md §4 → Database](COMMANDS.md#database). `vp run db:up` s
 local Postgres; seeding goes through `vp run --filter vite-react-compiler seed`,
 because `seed`/`db:seed` are **workspace scripts, not root scripts**.
 
-**Each side owns the DDL for the tables it serves and seeds itself**
-([ADR-071](docs/decisions/ADR-071-split-the-demo-database-setup.md)) — the
-showcase from `apps/react-router/db/`, the API servers from
-`apps/api-server/db/`. Two things follow that surprise people: seeding the
-**showcase** is what creates `enterprise_orders`, and `setup_large_data.sql`
-exists **twice** on purpose. While both copies are in this repository they are
-byte-identical, and a change to one belongs in the other in the same commit.
+**The showcase owns the DDL for the tables it serves and seeds itself**
+([ADR-071](docs/decisions/ADR-071-split-the-demo-database-setup.md)) from
+`apps/react-router/db/`, which is what creates `enterprise_orders`. That split
+was made while the API servers lived here and each side needed its own copy;
+they left with [`api-playground`](https://github.com/luciocabrera/api-playground)
+(#686) and took theirs with them, so the second copy of `setup_large_data.sql`
+is no longer in this repository — the duplication ADR-071 describes is now
+cross-repo, and the two copies can drift with nothing to catch it.
 
-Both sides read env from `docker/local/.env` and then the workspace's own `.env`. The frontend proxies `/api` to `http://localhost:3001`.
+It reads env from `docker/local/.env` and then the workspace's own `.env`. The frontend proxies `/api` to `http://localhost:3001` for the external-API lane, which now means a server run from `api-playground`.
 
 **Critical:** Import Vite config from `vite-plus`, not `vite`, for tooling integration. Example: `import { defineConfig } from 'vite-plus'`. For tests, import test utilities from `vite-plus/test`, not `vitest` directly (e.g. `import { expect, test, vi } from 'vite-plus/test'`) — it re-exports the vite-plus-bundled Vitest, so the test runtime always matches the toolchain and there is no self-managed `vitest` to drift. This convention was re-evaluated and changed once vite-plus became the runner ([ADR-045](docs/decisions/ADR-045-vite-plus-test-imports.md)); the earlier `vitest`-direct rule predated it.
 

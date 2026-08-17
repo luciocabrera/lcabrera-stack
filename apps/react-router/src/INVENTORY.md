@@ -46,11 +46,11 @@ owns the DDL for every table it queries and seeds itself — see
 [`db/README.md`](../db/README.md) and
 [ADR-071](../../../docs/decisions/ADR-071-split-the-demo-database-setup.md).
 
-| Artifact                      | Location   | Description                                                                                                   |
-| ----------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------- |
-| `setup_large_data.sql`        | `db/`      | `car_sales` + `wide_alltypes_150`. **Duplicated** with `apps/api-server/db/`; keep the two byte-identical     |
-| `setup_enterprise_orders.sql` | `db/`      | `enterprise_orders` — this app is the only thing that serves it                                               |
-| `seed-db.mjs`                 | `scripts/` | Creates `DB_NAME` if absent, then applies both files through `pg`. `vp run --filter vite-react-compiler seed` |
+| Artifact                      | Location   | Description                                                                                                       |
+| ----------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------- |
+| `setup_large_data.sql`        | `db/`      | `car_sales` + `wide_alltypes_150`. A copy lives in `api-playground`; the two are independent (see `db/README.md`) |
+| `setup_enterprise_orders.sql` | `db/`      | `enterprise_orders` — this app is the only thing that serves it                                                   |
+| `seed-db.mjs`                 | `scripts/` | Creates `DB_NAME` if absent, then applies both files through `pg`. `vp run --filter vite-react-compiler seed`     |
 
 ---
 

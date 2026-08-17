@@ -83,8 +83,8 @@ This app owns the DDL for every table it queries — `db/setup_large_data.sql`
 (`car_sales`, `wide_alltypes_150`) and `db/setup_enterprise_orders.sql`
 (`enterprise_orders`) — and seeds itself with them. Nothing outside this
 workspace is involved; [`db/README.md`](db/README.md) covers the one file that
-is deliberately duplicated with `apps/api-server` and how the copies are kept
-from drifting.
+is deliberately duplicated with the car-sales API servers and how the copies are
+kept from drifting now that those servers live in a separate repository (#686).
 
 Start local PostgreSQL from the monorepo root, then seed:
 

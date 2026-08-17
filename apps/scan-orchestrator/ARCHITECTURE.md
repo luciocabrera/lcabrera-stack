@@ -9,8 +9,8 @@ does, and the only one that ever needs `ANTHROPIC_API_KEY`.
 
 - Source entry point: `src/server.ts`, run directly via
   `node --experimental-strip-types` (no build step — matches
-  `packages/scan-ingestion`'s own CLI/migration scripts, not
-  `apps/api-server`'s `tsc`-then-`dist` pattern).
+  `packages/scan-ingestion`'s own CLI/migration scripts, not the published
+  packages' `tsc`-then-`dist` pattern).
 - HTTP server: plain `node:http`, only for the `/ws/runs` WebSocket upgrade
   and a bare `GET /healthz`.
 - Database: `@lcabrera/server`'s pooled `getPool()` for normal queries, plus

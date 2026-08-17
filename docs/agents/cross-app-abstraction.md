@@ -122,10 +122,12 @@ Apps are disposable; packages are not.
 ## What does not get extracted
 
 - **App-specific anything.** Routes, loaders, and the shape of one app's screens.
-- **Demo-only code.** [`apps/shared`](../../apps/shared) holds what is genuinely
-  specific to comparing the Express and Fastify servers, and nothing else. Code
-  that is generic belongs in a package — but check step 1 first: being generic is
-  not on its own a reason to move something.
+- **Demo-only code.** The car-sales servers' `api-shared` held what was genuinely
+  specific to comparing Express against Fastify, and nothing else. Code that is
+  generic belongs in a package — but check step 1 first: being generic is not on
+  its own a reason to move something. That bucket left the repo entirely in #686,
+  which is the end state this rule was pointing at: demo-only code has no claim
+  on a package, and eventually no claim on the repo either.
 - **A guarantee that already has a home.** Prefer widening the existing artifact
   over adding a second one that overlaps it.
 

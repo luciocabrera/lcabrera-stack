@@ -20,11 +20,6 @@
         "count": 1
       }
     },
-    "apps/api-server/src/features/enterpriseOrders/enterpriseOrders.schema.ts": {
-      "crap_moderate": {
-        "count": 1
-      }
-    },
     "apps/react-router/scripts/check-lighthouse-scores.mjs": {
       "crap_moderate": {
         "count": 1
