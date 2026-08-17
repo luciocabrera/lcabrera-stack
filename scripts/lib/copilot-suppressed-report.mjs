@@ -60,6 +60,39 @@ export const suppressedHeadline = (report, { pr } = {}) => {
   return `${at}: ${plural(report.findings.length, 'suppressed finding')} from ${plural(report.comments.length, 'comment')} in ${plural(report.blocks, 'block')} of ${reviews}.${declinedNote(report)}`;
 };
 
+/**
+ * The source Copilot quoted, for the terminal: one line each behind a `|`.
+ *
+ * The prefix is not decoration. This text is untrusted and reaches a runner's
+ * stdout, a snippet is the one thing here that must keep its line breaks, and
+ * the runner matches a `::` directive on the TRIMMED line — so indentation
+ * alone would not stop `::error::` in quoted source from being obeyed, and a
+ * visible first character does.
+ */
+const snippetLines = (snippet) =>
+  snippet === undefined
+    ? []
+    : snippet.split('\n').map((line) => `    | ${line}`);
+
+/** Four backticks, so quoted source containing a fence cannot end the block. */
+const SUMMARY_FENCE = '````';
+
+/**
+ * The same source for the job summary, fenced and indented to the list item's
+ * content column — inside the checkbox it belongs to, and rendered literally
+ * rather than as Markdown.
+ */
+const snippetBlock = (snippet) =>
+  snippet === undefined
+    ? []
+    : [
+        '',
+        `  ${SUMMARY_FENCE}`,
+        ...snippet.split('\n').map((line) => `  ${line}`),
+        `  ${SUMMARY_FENCE}`,
+        '',
+      ];
+
 /** Every finding, newest wording first, one block of lines each. */
 const findingLines = (report) =>
   report.findings.flatMap((finding) => {
@@ -71,6 +104,7 @@ const findingLines = (report) =>
     return [
       `  ${findingLocation(finding)}${restated} — review ${latest.review}`,
       `    ${oneLine(latest.text)}`,
+      ...snippetLines(latest.snippet),
     ];
   });
 
@@ -90,9 +124,12 @@ export const suppressedLines = (report, options = {}) => [
  */
 export const suppressedMarkdown = (report, options = {}) => {
   const problems = report.problems.map((problem) => `- ⚠ ${oneLine(problem)}`);
-  const findings = report.findings.map((finding) => {
+  const findings = report.findings.flatMap((finding) => {
     const latest = latestOccurrence(finding);
-    return `- [ ] \`${findingLocation(finding)}\` — ${oneLine(latest.text)}`;
+    return [
+      `- [ ] \`${findingLocation(finding)}\` — ${oneLine(latest.text)}`,
+      ...snippetBlock(latest.snippet),
+    ];
   });
   return [
     '### Copilot suppressed comments',

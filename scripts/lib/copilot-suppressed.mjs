@@ -76,16 +76,44 @@ const locationFrom = (heading) => {
     : { line: Number(match[2]), path: match[1] };
 };
 
+/** Copilot quotes the source under a suppressed comment, in a fenced block. */
+const FENCE = '```';
+
 /**
- * One suppressed comment's prose, without the source snippet Copilot quotes
- * under it. The snippet is kept: it is what makes a finding locatable when the
- * line number has since moved.
+ * The quoted source, without its fence markers, or `undefined` when the comment
+ * carries none.
+ *
+ * Stored as the source rather than as the markup around it because both
+ * renderers in `./copilot-suppressed-report.mjs` print it, and what a reader
+ * does with it is search the file for it: the line number in the heading is the
+ * one Copilot saw, on a commit the pull request has usually moved past, and the
+ * quoted text survives that where a number does not.
  */
+const fencedSource = (text, fence) => {
+  const opened = fence === -1 ? -1 : text.indexOf('\n', fence + 1);
+  if (opened === -1) {
+    return undefined;
+  }
+  // The LAST fence closes it, not the next one. Copilot quotes the source
+  // verbatim, so quoting a fenced example nests a fence inside the block and
+  // leaves it unbalanced — measured on #740, one comment in ten. Closing at the
+  // next fence drops the rest of the quote, which is where the flagged line
+  // usually is; closing at the last one costs nothing, because a suppressed
+  // comment ends with its quote (no comment in that sample carries prose after
+  // it).
+  const closed = text.lastIndexOf(`\n${FENCE}`);
+  const source = (
+    closed <= opened ? text.slice(opened + 1) : text.slice(opened + 1, closed)
+  ).trimEnd();
+  return source === '' ? undefined : source;
+};
+
+/** One suppressed comment's prose, and the source quoted under it, apart. */
 const splitProse = (text) => {
-  const fence = text.indexOf('\n```');
+  const fence = text.indexOf(`\n${FENCE}`);
   const prose = (fence === -1 ? text : text.slice(0, fence)).trim();
   return {
-    snippet: fence === -1 ? undefined : text.slice(fence + 1).trim(),
+    snippet: fencedSource(text, fence),
     text: prose.startsWith('* ') ? prose.slice(2).trim() : prose,
   };
 };

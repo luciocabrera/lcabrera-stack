@@ -26,5 +26,12 @@
     "login": "copilot-pull-request-reviewer[bot]",
     "pr": 747,
     "submittedAt": "2026-08-17T13:34:26Z"
+  },
+  "withNestedFence": {
+    "body": "## Pull request overview\n\nCopilot reviewed 3 out of 3 changed files in this pull request and generated no new comments.\n\n\n\n\n<details>\n<summary>Suppressed comments (1)</summary>\n\n**docs/tooling/copilot-review-gate.md:149**\n* The “Without a checkout” one-liner still relies on implicit repo context for `gh pr view <n> ...`. Outside a checkout (or if `gh`’s default repo isn’t set to this repo), this will fail or compute `PR_HEAD` from the wrong repository while the subsequent `gh api repos/luciocabrera/vite-react-compiler/...` line is explicit. Add `-R luciocabrera/vite-react-compiler` so the snippet is truly checkout-free and self-consistent.\n```\nWithout a checkout, ask the API the same question. It answers in one line, and\nthe pull request number is the only thing to fill in:\n\n```bash\nPR_HEAD=$(gh pr view <n> --json headRefOid --jq .headRefOid) \\\n```\n</details>\n\n",
+    "id": 4951005663,
+    "login": "copilot-pull-request-reviewer[bot]",
+    "pr": 740,
+    "submittedAt": "2026-08-17T11:19:01Z"
   }
 }

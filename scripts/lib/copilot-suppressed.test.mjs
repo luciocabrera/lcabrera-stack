@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import {
   REVIEW_DECLINED,
+  REVIEW_WITH_NESTED_FENCE,
   REVIEW_WITH_NO_SUPPRESSED,
   REVIEW_WITH_ONE_SUPPRESSED,
   REVIEW_WITH_THREE_SUPPRESSED,
@@ -69,7 +70,34 @@ describe('parsing one suppressed block', () => {
       258, 204, 92,
     ]);
     expect(block.comments[0].text).toContain('infer the repo from the current');
+  });
+
+  it('keeps the quoted source as source, without its fence markers', () => {
+    // What a reader does with a snippet is search the file for it, so it has to
+    // be the text that is in the file — the fences are GitHub's packaging.
+    const block = parseSuppressedBlock(REVIEW_WITH_THREE_SUPPRESSED.body);
+    expect(block.comments[1].snippet).toBe(
+      'gh run list --workflow=review-gate-reconcile.yml --limit 5',
+    );
     expect(block.comments[0].snippet).toContain('gh run rerun <id>');
+    expect(block.comments[0].snippet).not.toContain('```');
+    expect(block.comments[0].text).not.toContain('gh run rerun <id>');
+  });
+
+  it('keeps the whole quote when the quoted source contains a fence', () => {
+    // Copilot quotes verbatim, so quoting a fenced example nests a fence and
+    // leaves the block unbalanced — this fixture is a real one. Closing at the
+    // first inner fence would drop the rest of the quote, which is where the
+    // flagged line is.
+    const { snippet } = parseSuppressedBlock(REVIEW_WITH_NESTED_FENCE.body)
+      .comments[0];
+    expect(snippet).toContain('Without a checkout, ask the API');
+    expect(snippet).toContain('PR_HEAD=$(gh pr view <n>');
+  });
+
+  it('leaves the snippet undefined when a comment quotes nothing', () => {
+    const body = REVIEW_WITH_ONE_SUPPRESSED.body.replaceAll('```', '');
+    expect(parseSuppressedBlock(body).comments[0].snippet).toBeUndefined();
   });
 
   it('finds no block in a real review that suppressed nothing', () => {

@@ -127,6 +127,15 @@ whose label does not match.
 still-open suppressed comment on every re-review, in fresh wording, and the report
 groups those by file and line.
 
+### Finding one whose line has moved
+
+**Search for the quoted source, not the line number.** Each finding is printed
+with the source Copilot quoted under it — behind a `|` in the terminal, in a
+fenced block in the job summary — and that is the part worth pasting into a
+search. The line number in the heading is the one Copilot saw, on the commit it
+reviewed, and a pull request has usually moved past it by the time anyone reads
+the report; the quoted text survives that where a number does not.
+
 ### Reading them straight out of the API
 
 The command above is the same read, done for you. When you want the raw evidence —

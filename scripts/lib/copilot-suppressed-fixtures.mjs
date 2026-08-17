@@ -42,6 +42,13 @@ export const REVIEW_WITH_ONE_SUPPRESSED = asRestReview(
   BODIES.withOneSuppressed,
 );
 
+/**
+ * One suppressed comment whose quoted source contains a fence of its own, so
+ * the block GitHub emitted is unbalanced. Real, and the reason the reader closes
+ * a quote at the last fence rather than the next one.
+ */
+export const REVIEW_WITH_NESTED_FENCE = asRestReview(BODIES.withNestedFence);
+
 /** A full review with a collapsed section of its own and no suppressed block. */
 export const REVIEW_WITH_NO_SUPPRESSED = asRestReview(BODIES.withNoSuppressed);
 

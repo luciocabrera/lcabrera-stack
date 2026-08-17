@@ -76,6 +76,15 @@ describe('the terminal report', () => {
     expect(lines).toContain('review 4951170361');
   });
 
+  it('prints the source Copilot quoted, so a moved line is still findable', () => {
+    // The line number in a finding is the one Copilot saw, on a commit the pull
+    // request has usually moved past. The quoted source is what survives that.
+    const lines = suppressedLines(FOUND, { pr: 740 });
+    expect(lines).toContain(
+      '    | gh run list --workflow=review-gate-reconcile.yml --limit 5',
+    );
+  });
+
   it('gives untrusted review text no line of its own', () => {
     // A suppressed comment quotes the diff, and this output reaches a runner's
     // stdout, where a `::` at the start of a line is a workflow command.
@@ -91,6 +100,22 @@ describe('the terminal report', () => {
     expect(lines.join('\n')).toContain('::error::planted');
   });
 
+  it('keeps a directive inside quoted source off the start of a line', () => {
+    // A snippet is the one thing here that keeps its newlines, so flattening
+    // cannot be the guard — and the runner matches `::` on the TRIMMED line, so
+    // indentation is not one either. Only the visible prefix stops this.
+    const injected = {
+      ...REVIEW_WITH_ONE_SUPPRESSED,
+      body: REVIEW_WITH_ONE_SUPPRESSED.body.replace(
+        'PR_HEAD=$(gh pr view <n> --json headRefOid --jq .headRefOid) \\',
+        '::error::planted in a snippet',
+      ),
+    };
+    const lines = suppressedLines(collectSuppressedComments([injected]));
+    expect(lines.join('\n')).toContain('::error::planted in a snippet');
+    expect(lines.some((line) => line.trim().startsWith('::'))).toBe(false);
+  });
+
   it('reports a problem before it reports a count', () => {
     const lines = suppressedLines(UNREADABLE, { pr: 1 });
     expect(lines[0]).toContain('could NOT be read');
@@ -104,6 +129,15 @@ describe('the job summary', () => {
     expect(markdown).toContain('### Copilot suppressed comments');
     expect(markdown.match(/^- \[ ] /gm)).toHaveLength(FOUND.findings.length);
     expect(markdown).toContain('docs/tooling/copilot-review-gate.md');
+  });
+
+  it('fences the quoted source inside the checkbox it belongs to', () => {
+    const markdown = suppressedMarkdown(FOUND, { pr: 740 });
+    // Indented to the list item's content column, or the block ends the list;
+    // fenced with four backticks, or source carrying a fence ends the block.
+    expect(markdown).toContain(
+      '  ````\n  gh run list --workflow=review-gate-reconcile.yml --limit 5\n  ````',
+    );
   });
 
   it('says the findings do not block, and where that is decided', () => {
