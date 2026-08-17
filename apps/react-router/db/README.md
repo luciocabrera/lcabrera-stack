@@ -15,24 +15,20 @@ one is how you return to a known state rather than something to run once.
 Neither file uses a `psql` meta-command. That is what lets the seeder apply them
 through `pg`, so seeding needs no `psql` on the machine.
 
-## `setup_large_data.sql` is duplicated on purpose
+## `setup_large_data.sql` has a copy in another repository
 
-`apps/api-server/db/setup_large_data.sql` is a copy of this file: both this app
-and the car-sales API servers serve `car_sales` and `wide_alltypes_150`, and the
-API workspaces are leaving for their own repository (#686), where a path into
-this one would not resolve. The alternative — one owner and a cross-repo setup
-step — was rejected for the reason
+The car-sales API servers serve `car_sales` and `wide_alltypes_150` from their
+own copy of this file. They left for
+[`api-playground`](https://github.com/luciocabrera/api-playground) under #686,
+taking it with them. The alternative — one owner and a cross-repo setup step —
+was rejected for the reason
 [ADR-039](../../../docs/decisions/ADR-039-duplicate-over-undeclared-edges.md)
 gives, and the choice is recorded in
-[ADR-071](../../../docs/decisions/ADR-071-split-the-demo-database-setup.md)
-along with what the copies do and do not promise each other.
+[ADR-071](../../../docs/decisions/ADR-071-split-the-demo-database-setup.md).
 
-**While both copies live in this repository they are byte-identical, and a change
-to one belongs in the other in the same commit.** Confirm with:
-
-```bash
-diff apps/react-router/db/setup_large_data.sql apps/api-server/db/setup_large_data.sql
-```
-
-After the API workspaces leave, the copies are independent: each repository's
-copy is authoritative for its own routes, and neither promises the other's shape.
+**The two copies are now independent, and nothing checks that they agree.**
+While both lived here a `diff` kept them byte-identical in the same commit; that
+is no longer possible, and it is not meant to be. Each repository's copy is
+authoritative for its own routes and neither promises the other's shape, so a
+change here does **not** imply a change there — decide deliberately whether the
+other side needs it.

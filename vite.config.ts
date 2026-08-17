@@ -37,10 +37,7 @@ export const WORKSPACE_RUNTIMES = {
   ],
   /** Workspaces whose code runs in Node — services and build tooling alike. */
   node: [
-    'apps/api-server/**',
-    'apps/api-server-fast/**',
     'apps/scan-orchestrator/**',
-    'apps/shared/**',
     'packages/agent-runner/**',
     'packages/node-runtime/**',
     'packages/scan-ingestion/**',

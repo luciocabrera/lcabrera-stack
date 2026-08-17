@@ -26,7 +26,7 @@ Read this before hunting for a task definition. A runnable task can come from
 | Source                                        | Example                                                         |
 | --------------------------------------------- | --------------------------------------------------------------- |
 | `package.json` → `scripts`                    | `packages/ui`'s `typecheck`                                     |
-| `vite.config.ts` → `run.tasks`                | `apps/api-server`'s `build` and `test`                          |
+| `vite.config.ts` → `run.tasks`                | `apps/scan-orchestrator`'s `build` and `test`                   |
 | A shared factory from `@lcabrera/vite-config` | `apps/react-router`'s `test` (via `createReactRouterRunConfig`) |
 
 This is why `grep -l '"test":' apps/*/package.json packages/*/package.json`
@@ -134,7 +134,7 @@ project-specific belongs in that project's own `package.json`.
 | `vp run ready`               | `check:safe` + `build:all` — the full "is it shippable" check                                     |
 | `vp run check:safe`          | typegen → `vp check` → typecheck → eslint → biome → tests                                         |
 | `vp run check:push`          | the DB-free CI Quality Gate (no tests/fallow) — the `pre-push` hook runs this then `test:changed` |
-| `vp run typecheck:all`       | real tsc in all 18 workspaces, dependency order                                                   |
+| `vp run typecheck:all`       | real tsc in all 15 workspaces, dependency order                                                   |
 | `vp run typecheck:changed`   | real tsc for the changed workspaces + dependents only — see below                                 |
 | `vp run typegen:all`         | route types for both React Router apps                                                            |
 | `vp run lint:all`            | Oxlint + eslint + Biome **with autofix**, every workspace                                         |
@@ -181,7 +181,7 @@ Tests job (and its coverage report) scope to the diff on pull requests; pushes t
 `main` still run the full `test:ci`.
 
 `typecheck:changed` applies the same change-based selection to the Quality Gate's
-slowest per-workspace step — real `tsc` across all 18 workspaces. It runs
+slowest per-workspace step — real `tsc` across all 15 workspaces. It runs
 `typecheck` only for the changed workspaces plus their dependents (a type error a
 diff introduces surfaces where the type is used, which the dependents walk covers),
 falling back to the full run on the same shared/root triggers and on pushes to
@@ -231,52 +231,43 @@ the script exits without opening anything.
 
 ### Dev & prod servers
 
-| Command                   | Runs                                                        |
-| ------------------------- | ----------------------------------------------------------- |
-| `vp run dev:showcase`     | the showcase frontend **alone** — Postgres is all it needs  |
-| `vp run dev`              | frontend + **express** api                                  |
-| `vp run dev:fast`         | frontend + **fastify** api                                  |
-| `vp run dev:external-api` | frontend + express api, with the `VITE_API_URL` override on |
-| `vp run dev:cqms`         | admin_system + scan-orchestrator                            |
-| `vp run start`            | prod frontend + express api                                 |
-| `vp run start:fast`       | prod frontend + fastify api                                 |
-| `vp run start:cqms`       | prod admin_system + scan-orchestrator                       |
+| Command                 | Runs                                             |
+| ----------------------- | ------------------------------------------------ |
+| `vp run dev:showcase`   | the showcase frontend — Postgres is all it needs |
+| `vp run start:showcase` | the built showcase                               |
+| `vp run dev:cqms`       | admin_system + scan-orchestrator                 |
+| `vp run start:cqms`     | prod admin_system + scan-orchestrator            |
 
-There is deliberately **no `dev:all`/`start:all`**: `car-sales-api` and
-`car-sales-api-fast` serve the same domain as performance-comparison alternatives
-and must never run simultaneously. Always pick one combo.
-
-**`dev:showcase` is the one to reach for.** Every table route in
-`apps/react-router` serves its own rows from Postgres, so the api-server is no
-longer part of rendering the showcase — see
+Every table route in `apps/react-router` serves its own rows from Postgres, so
+the showcase needs nothing but a database — see
 [the app's data-sources doc](apps/react-router/docs/data-sources.md).
-`dev:external-api` is the counterpart that keeps the other path honest: it sets
-`VITE_API_URL` so the same routes go through `car-sales-api` instead, which is
-the only way that branch gets exercised by hand. (An app-level `.env` is loaded
+
+**The external-API lane still exists and is no longer run from here.** Setting
+`VITE_API_URL` points the same routes at an external server instead; the servers
+that lane was built against now live in
+[`api-playground`](https://github.com/luciocabrera/api-playground), so exercising
+it means running one of them from that repository. (An app-level `.env` is loaded
 after the variable is exported, so one that sets `VITE_API_URL` itself wins —
 that is the local override of the local override, and it is deliberate.)
 
 ### Database
 
-| Command                                       | Does                                               |
-| --------------------------------------------- | -------------------------------------------------- |
-| `vp run db:up`                                | start local Postgres                               |
-| `vp run db:status`                            | container status                                   |
-| `vp run db:down`                              | stop it                                            |
-| `vp run --filter vite-react-compiler seed`    | create + seed the showcase's own tables            |
-| `vp run --filter vite-react-compiler db:seed` | bring up + seed                                    |
-| `vp run --filter car-sales-api seed`          | seed the API servers' copy of the car-sales tables |
-| `vp run --filter car-sales-api db:seed`       | bring up + seed                                    |
+| Command                                       | Does                                    |
+| --------------------------------------------- | --------------------------------------- |
+| `vp run db:up`                                | start local Postgres                    |
+| `vp run db:status`                            | container status                        |
+| `vp run db:down`                              | stop it                                 |
+| `vp run --filter vite-react-compiler seed`    | create + seed the showcase's own tables |
+| `vp run --filter vite-react-compiler db:seed` | bring up + seed                         |
 
 `seed` and `db:seed` are **workspace scripts, not root scripts** — they need the
 `--filter` (or run them from the workspace directory). **Each side owns its own
 DDL and its own runner**
 ([ADR-071](docs/decisions/ADR-071-split-the-demo-database-setup.md)): the
 showcase's is `apps/react-router/db/`, applied through `pg` so it needs only
-Docker and Node, and the API servers' is `apps/api-server/db/`, which covers the
-car-sales tables alone. Seeding the showcase is what creates `enterprise_orders`.
-Both read env from `docker/local/.env` and then the workspace's own `.env`; the
-frontend proxies `/api` to `http://localhost:3001`.
+Docker and Node. Seeding the showcase is what creates `enterprise_orders`. It
+reads env from `docker/local/.env` and then the workspace's own `.env`; the
+frontend proxies `/api` to `http://localhost:3001` for the external-API lane.
 
 ### Fallow static analysis
 
@@ -594,7 +585,7 @@ file under `reports/sonar/runs/` ([ADR-049](docs/decisions/ADR-049-findings-repo
 
 ## 5. Per-workspace tasks
 
-**Every one of the 18 workspaces** defines these seven:
+**Every one of the 15 workspaces** defines these seven:
 
 `format` · `format:check` · `lint` · `lint:check` · `lint:eslint` ·
 `lint:eslint:check` · `typecheck`
@@ -606,10 +597,7 @@ Beyond that, tasks are per-workspace. `build` and `test` are common but come fro
 | ----------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `apps/react-router`           | `vite-react-compiler`     | `typegen`, `test:ci`, `test:watch`, `preview`, `knip`, `seed`, `db:seed`, `audit:lighthouse`, `audit:lighthouse:check` |
 | `apps/admin_system`           | `admin-system`            | `typegen`                                                                                                              |
-| `apps/api-server`             | `car-sales-api`           | `seed`, `db:seed`, `start`                                                                                             |
-| `apps/api-server-fast`        | `car-sales-api-fast`      | `seed`, `db:seed`, `start`                                                                                             |
 | `apps/scan-orchestrator`      | `@repo/scan-orchestrator` | `start`, `test:unit`, `test:coverage`                                                                                  |
-| `apps/shared`                 | `api-shared`              | `build`, `test`                                                                                                        |
 | `packages/ui`                 | `@lcabrera/ui`            | `check:public-api`, `test:coverage`, `bench`                                                                           |
 | `packages/server`             | `@lcabrera/server`        | `test:coverage`                                                                                                        |
 | `packages/scan-ingestion`     | `@repo/scan-ingestion`    | `migrate`, `push`, `test:unit`, `test:coverage`                                                                        |
