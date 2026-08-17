@@ -212,19 +212,37 @@ export const classifyReviewBody = (body) => {
  * because each block's declared count agrees with its own parse. A confident
  * undercount is the exact answer this module exists to refuse.
  */
+/**
+ * The count a block's own label declares, or `undefined` when the label is not
+ * one of those.
+ *
+ * Parsed once. `test` to select and `exec` to read runs the same match twice,
+ * and the second result reads as possibly-absent even where the first has just
+ * proved it is not — so the count it produces is `NaN` for a compiler and a
+ * number in fact. Selecting on this instead keeps the two answers the same one.
+ */
+const declaredCount = (label) => {
+  const [, digits] = DECLARED_LABEL.exec(label) ?? [];
+
+  return digits === undefined ? undefined : Number(digits);
+};
+
 export const parseSuppressedBlocks = (body) => {
   if (typeof body !== 'string') {
     return [];
   }
+
   return summarySections(body)
-    .filter((section) => DECLARED_LABEL.test(section.label))
-    .map((section) => {
+    .map((section) => ({ declared: declaredCount(section.label), section }))
+    .filter(({ declared }) => declared !== undefined)
+    .map(({ declared, section }) => {
       const end = body.indexOf(DETAILS_CLOSE, section.start);
+
       return {
         comments: commentsIn(
           body.slice(section.start, end === -1 ? undefined : end),
         ),
-        declared: Number(DECLARED_LABEL.exec(section.label)?.[1]),
+        declared,
         truncated: end === -1,
       };
     });
