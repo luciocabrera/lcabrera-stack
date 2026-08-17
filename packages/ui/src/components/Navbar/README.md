@@ -172,8 +172,9 @@ If not provided, items get auto-generated IDs: `Navbar-item-0`, `Navbar-item-1`,
 
 ## Examples
 
-See [Navbar.examples.tsx](./Navbar.examples.tsx) for complete usage examples including:
+`Navbar.test.tsx` is the worked usage: it renders both item shapes (`href` and
+`onClick`) and asserts the rendered element for each.
 
-- SidePanel integration
-- Horizontal action bars
-- Mixed button/link configurations
+There is no `Navbar.examples.tsx`. This section pointed at one for a long time
+and nothing noticed, because the documented-path gate did not check a relative
+link unless it ended in `.md` (#756).

@@ -152,10 +152,10 @@ The gate scans all three React workspaces, so a `packages/ui`-only run (the
 Each is criterion 2, and none has the precomputed-array escape hatch the two
 fixed sites had.
 
-| File                                                                                                                                         | Shape                                            | Why accepted                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [`RoleDetail.component.tsx`](../../apps/admin_system/src/routes/cqms/role-detail/RoleDetail.component.tsx)                                   | `permissions.filter(assignedIds.has).map(…)`     | N is the permission catalogue (tens). Already uses a `Set` for the membership test, so the part that could have been quadratic is not.                                                                                                                                                                                                                                                                                                                                                           |
-| [`useFolderSnapshotUpload.hook.ts`](../../apps/admin_system/src/routes/cqms/project-detail/ProjectSyncPanel/useFolderSnapshotUpload.hook.ts) | `files.map(→ {file, key}).filter(!ignored(key))` | **The largest N in the report** — a picked project folder, thousands of files — and the one place the `.map().filter()` order is _not_ invertible: the predicate tests `key`, which the map computes. So `resolveArchiveEntryKey` does run for files about to be dropped. Accepted anyway on absolute cost: this is the prelude to reading and zipping every one of those files, which is orders of magnitude more work than the projection. Re-open it with a profile, not by reading the code. |
+| File                              | Shape                                            | Why accepted                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| --------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `RoleDetail.component.tsx`        | `permissions.filter(assignedIds.has).map(…)`     | N is the permission catalogue (tens). Already uses a `Set` for the membership test, so the part that could have been quadratic is not.                                                                                                                                                                                                                                                                                                                                                           |
+| `useFolderSnapshotUpload.hook.ts` | `files.map(→ {file, key}).filter(!ignored(key))` | **The largest N in the report** — a picked project folder, thousands of files — and the one place the `.map().filter()` order is _not_ invertible: the predicate tests `key`, which the map computes. So `resolveArchiveEntryKey` does run for files about to be dropped. Accepted anyway on absolute cost: this is the prelude to reading and zipping every one of those files, which is orders of magnitude more work than the projection. Re-open it with a profile, not by reading the code. |
 
 The enterprise-orders `toOrderQuerySort` util was a fourth entry here, on the same
 reasoning as `buildOrderBySorting`. It stopped firing when the util was promoted
@@ -306,7 +306,7 @@ Straightforward, and recorded only so they are not re-derived.
 Beyond the array chains above, and all fixed:
 
 - **`zod-v4-prefer-top-level-string-formats`** — every occurrence was the same
-  shape, `z.string().uuid(…)` → `z.uuid(…)`, across `admin_system` route
+  shape, `z.string().uuid(…)` → `z.uuid(…)`, across the CQMS admin app's route
   schemas/loaders/actions. Message arguments carry over unchanged. Two test files
   the report did not list were swept as well, so the pattern is gone rather than
   reduced.
@@ -327,7 +327,7 @@ Beyond the array chains above, and all fixed:
 
 ### `no-locale-format-in-render` — fixed, and the decision behind it
 
-[`RunLink.component.tsx`](../../apps/admin_system/src/routes/cqms/project-detail/RunLink/RunLink.component.tsx)
+`RunLink.component.tsx`
 rendered `new Date(run.created_at).toLocaleString()`, a genuine SSR hydration
 mismatch: the server formats in its locale and zone, the browser in the user's.
 Recorded here because the fix was a **product** choice, not a code one — every
