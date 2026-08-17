@@ -96,11 +96,11 @@ const fencedSource = (text, fence) => {
   }
   // The LAST fence closes it, not the next one. Copilot quotes the source
   // verbatim, so quoting a fenced example nests a fence inside the block and
-  // leaves it unbalanced — measured on #740, one comment in ten. Closing at the
-  // next fence drops the rest of the quote, which is where the flagged line
-  // usually is; closing at the last one costs nothing, because a suppressed
-  // comment ends with its quote (no comment in that sample carries prose after
-  // it).
+  // leaves it unbalanced; closing at the next fence drops the rest of the quote,
+  // which is where the flagged line usually is. Closing at the last one costs
+  // nothing while a suppressed comment ends with its quote — re-check either
+  // half against real bodies with the review read in
+  // docs/tooling/copilot-review-gate.md.
   const closed = text.lastIndexOf(`\n${FENCE}`);
   const source = (
     closed <= opened ? text.slice(opened + 1) : text.slice(opened + 1, closed)
@@ -153,29 +153,35 @@ export const classifyReviewBody = (body) => {
 };
 
 /**
- * The suppressed-comment block in one review body, or `undefined`.
+ * Every suppressed-comment block in one review body, in the order they appear.
  *
  * `declared` is GitHub's own count and `comments` is what this parsed; the
  * caller compares them. They are returned separately on purpose — reconciling
  * them here would let the parser report the number it was told rather than the
  * one it found.
+ *
+ * **Every block, not the first one that matches.** Bodies with two are not a
+ * shape GitHub emits today, and that is not a property this can rely on: taking
+ * the first would drop the rest silently, and no check here would notice,
+ * because each block's declared count agrees with its own parse. A confident
+ * undercount is the exact answer this module exists to refuse.
  */
-export const parseSuppressedBlock = (body) => {
+export const parseSuppressedBlocks = (body) => {
   if (typeof body !== 'string') {
-    return undefined;
+    return [];
   }
-  const sections = summarySections(body);
-  const section = sections.find((entry) => DECLARED_LABEL.test(entry.label));
-  if (section === undefined) {
-    return undefined;
-  }
-  const end = body.indexOf(DETAILS_CLOSE, section.start);
-  const block = body.slice(section.start, end === -1 ? undefined : end);
-  return {
-    comments: commentsIn(block),
-    declared: Number(DECLARED_LABEL.exec(section.label)?.[1]),
-    truncated: end === -1,
-  };
+  return summarySections(body)
+    .filter((section) => DECLARED_LABEL.test(section.label))
+    .map((section) => {
+      const end = body.indexOf(DETAILS_CLOSE, section.start);
+      return {
+        comments: commentsIn(
+          body.slice(section.start, end === -1 ? undefined : end),
+        ),
+        declared: Number(DECLARED_LABEL.exec(section.label)?.[1]),
+        truncated: end === -1,
+      };
+    });
 };
 
 /** Labels that talk about suppression in a shape this cannot read. */
@@ -188,7 +194,19 @@ export const unreadableLabels = (body) =>
     )
     .map((section) => section.label);
 
-const problemsIn = ({ block, body, id }) => {
+/** What one block cannot account for, named so the reader knows which block. */
+const blockProblems = (block, at) => [
+  ...(block.declared === block.comments.length
+    ? []
+    : [
+        `${at}: the block declares ${block.declared} comment(s) and ${block.comments.length} parsed`,
+      ]),
+  ...(block.truncated
+    ? [`${at}: the suppressed block is not closed, so it may be incomplete`]
+    : []),
+];
+
+const problemsIn = ({ blocks, body, id }) => {
   const at = `review ${id ?? '(unknown)'}`;
   const labels = unreadableLabels(body).map(
     (label) =>
@@ -200,19 +218,12 @@ const problemsIn = ({ block, body, id }) => {
           `${at}: the body matches no known Copilot review shape, so it was not read`,
         ]
       : [];
-  if (block === undefined) {
-    return [...labels, ...shape];
-  }
-  const counted =
-    block.declared === block.comments.length
-      ? []
-      : [
-          `${at}: the block declares ${block.declared} comment(s) and ${block.comments.length} parsed`,
-        ];
-  const cut = block.truncated
-    ? [`${at}: the suppressed block is not closed, so it may be incomplete`]
-    : [];
-  return [...labels, ...shape, ...counted, ...cut];
+  // Numbered only when there is more than one, so the usual message stays the
+  // one people have read before, and an unusual body says which half is wrong.
+  const counted = blocks.flatMap((block, index) =>
+    blockProblems(block, blocks.length > 1 ? `${at} block ${index + 1}` : at),
+  );
+  return [...labels, ...shape, ...counted];
 };
 
 /** One finding per location; Copilot restates the same one across re-reviews. */
@@ -265,16 +276,18 @@ export const collectSuppressedComments = (reviews = []) => {
   );
   const read = mine.map((review) => {
     const body = review?.body;
-    const block = parseSuppressedBlock(body);
+    const blocks = parseSuppressedBlocks(body);
     const id = reviewId(review);
     return {
-      block,
-      comments: (block?.comments ?? []).map((comment) => ({
-        ...comment,
-        review: id,
-        submittedAt: submittedAt(review),
-      })),
-      problems: problemsIn({ block, body, id }),
+      blocks,
+      comments: blocks.flatMap((block) =>
+        block.comments.map((comment) => ({
+          ...comment,
+          review: id,
+          submittedAt: submittedAt(review),
+        })),
+      ),
+      problems: problemsIn({ blocks, body, id }),
       shape: classifyReviewBody(body),
     };
   });
@@ -282,7 +295,7 @@ export const collectSuppressedComments = (reviews = []) => {
   const comments = read.flatMap((entry) => entry.comments);
   const problems = read.flatMap((entry) => entry.problems);
   return {
-    blocks: read.filter((entry) => entry.block !== undefined).length,
+    blocks: read.flatMap((entry) => entry.blocks).length,
     comments,
     declined: read.filter((entry) => entry.shape === 'declined').length,
     findings: groupByLocation(comments),

@@ -75,6 +75,14 @@ different way the read can go wrong without erroring:
 
 An empty body is not a problem: it cannot be hiding anything.
 
+**Completeness is part of the same commitment**, and it does not come from a
+check. The reader takes **every** suppressed block in a body rather than the
+first one it matches. A body with two is not a shape GitHub emits today, and that
+is deliberately not relied on: taking the first would drop the rest silently, and
+none of the three checks above would notice, because each block's declared count
+agrees with its own parse. That is a confident undercount — the one answer this
+module exists to refuse — so the corpus being kind today does not earn it.
+
 **3. It lives in the gate that already reads the reviews.** The
 `Copilot review complete` gate fetches every page of a pull request's reviews on
 every push and on every reconcile sweep. Reading the bodies it already has costs
@@ -145,9 +153,10 @@ for one spelling matches nothing on the other and reports a confident zero.
   reviews a second time, on its own schedule, and add a second thing that can be
   stale about one subject. The gate already runs on every push and every sweep.
 - **Report the raw comment count only.** Rejected on the data: on #740 that count
-  is one higher than the number of distinct findings, because a finding restated
-  in a later review is counted twice. Both numbers are printed instead, since each
-  answers a different question.
+  exceeds the number of distinct findings, because a finding restated in a later
+  review is counted twice. Both numbers are printed instead, since each answers a
+  different question — `vp run copilot-review:suppressed -- --pr 740` prints them
+  side by side.
 - **Treat "no suppressed block found" as the answer.** Rejected — it is the
   failure mode this whole design is against. It is what a wrong login spelling, a
   renamed section and a shape shift all produce.

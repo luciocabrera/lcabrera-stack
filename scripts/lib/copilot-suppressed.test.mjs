@@ -6,11 +6,12 @@ import {
   REVIEW_WITH_NO_SUPPRESSED,
   REVIEW_WITH_ONE_SUPPRESSED,
   REVIEW_WITH_THREE_SUPPRESSED,
+  REVIEW_WITH_TWO_BLOCKS,
 } from './copilot-suppressed-fixtures.mjs';
 import {
   classifyReviewBody,
   collectSuppressedComments,
-  parseSuppressedBlock,
+  parseSuppressedBlocks,
   unreadableLabels,
 } from './copilot-suppressed.mjs';
 
@@ -59,7 +60,7 @@ describe('recognising Copilot review bodies', () => {
 
 describe('parsing one suppressed block', () => {
   it('reads every comment out of a real three-comment block', () => {
-    const block = parseSuppressedBlock(REVIEW_WITH_THREE_SUPPRESSED.body);
+    const [block] = parseSuppressedBlocks(REVIEW_WITH_THREE_SUPPRESSED.body);
     expect(block.declared).toBe(3);
     expect(block.comments.map((comment) => comment.path)).toEqual([
       'docs/tooling/copilot-review-gate.md',
@@ -75,7 +76,7 @@ describe('parsing one suppressed block', () => {
   it('keeps the quoted source as source, without its fence markers', () => {
     // What a reader does with a snippet is search the file for it, so it has to
     // be the text that is in the file — the fences are GitHub's packaging.
-    const block = parseSuppressedBlock(REVIEW_WITH_THREE_SUPPRESSED.body);
+    const [block] = parseSuppressedBlocks(REVIEW_WITH_THREE_SUPPRESSED.body);
     expect(block.comments[1].snippet).toBe(
       'gh run list --workflow=review-gate-reconcile.yml --limit 5',
     );
@@ -89,15 +90,15 @@ describe('parsing one suppressed block', () => {
     // leaves the block unbalanced — this fixture is a real one. Closing at the
     // first inner fence would drop the rest of the quote, which is where the
     // flagged line is.
-    const { snippet } = parseSuppressedBlock(REVIEW_WITH_NESTED_FENCE.body)
-      .comments[0];
+    const [{ comments }] = parseSuppressedBlocks(REVIEW_WITH_NESTED_FENCE.body);
+    const { snippet } = comments[0];
     expect(snippet).toContain('Without a checkout, ask the API');
     expect(snippet).toContain('PR_HEAD=$(gh pr view <n>');
   });
 
   it('leaves the snippet undefined when a comment quotes nothing', () => {
     const body = REVIEW_WITH_ONE_SUPPRESSED.body.replaceAll('```', '');
-    expect(parseSuppressedBlock(body).comments[0].snippet).toBeUndefined();
+    expect(parseSuppressedBlocks(body)[0].comments[0].snippet).toBeUndefined();
   });
 
   it('finds no block in a real review that suppressed nothing', () => {
@@ -105,11 +106,9 @@ describe('parsing one suppressed block', () => {
     // parser that grabbed the first collapsed section would report findings that
     // do not exist.
     expect(REVIEW_WITH_NO_SUPPRESSED.body).toContain('<details>');
-    expect(
-      parseSuppressedBlock(REVIEW_WITH_NO_SUPPRESSED.body),
-    ).toBeUndefined();
-    expect(parseSuppressedBlock(REVIEW_DECLINED.body)).toBeUndefined();
-    expect(parseSuppressedBlock(undefined)).toBeUndefined();
+    expect(parseSuppressedBlocks(REVIEW_WITH_NO_SUPPRESSED.body)).toEqual([]);
+    expect(parseSuppressedBlocks(REVIEW_DECLINED.body)).toEqual([]);
+    expect(parseSuppressedBlocks(undefined)).toEqual([]);
   });
 
   it('keeps the declared count separate from what it parsed', () => {
@@ -119,7 +118,7 @@ describe('parsing one suppressed block', () => {
       'Suppressed comments (1)',
       'Suppressed comments (2)',
     );
-    const block = parseSuppressedBlock(body);
+    const [block] = parseSuppressedBlocks(body);
     expect(block.declared).toBe(2);
     expect(block.comments).toHaveLength(1);
   });
@@ -129,7 +128,7 @@ describe('parsing one suppressed block', () => {
       'Suppressed comments (1)',
       'Suppressed feedback',
     );
-    expect(parseSuppressedBlock(body)).toBeUndefined();
+    expect(parseSuppressedBlocks(body)).toEqual([]);
     expect(unreadableLabels(body)).toEqual(['Suppressed feedback']);
     expect(unreadableLabels(REVIEW_WITH_NO_SUPPRESSED.body)).toEqual([]);
   });
@@ -189,6 +188,54 @@ describe('collecting the suppressed comments on a pull request', () => {
     expect(report.findings).toHaveLength(1);
     expect(report.findings[0].occurrences).toHaveLength(2);
     expect(report.findings[0].occurrences.at(-1).review).toBe(99);
+  });
+
+  it('reads every block in a body, not only the first', () => {
+    // A second block dropped silently is a confident undercount, and the
+    // declared-count check cannot catch it: each block's own count agrees with
+    // its own parse, so the read looks clean while half of it is missing.
+    const report = collectSuppressedComments([REVIEW_WITH_TWO_BLOCKS]);
+    expect(report.problems).toEqual([]);
+    expect(report.blocks).toBe(2);
+    expect(report.comments).toHaveLength(4);
+    expect(report.findings).toHaveLength(4);
+    expect(report.state).toBe('found');
+  });
+
+  it('cross-checks each block, and says which one disagrees', () => {
+    // Asserted on the SECOND block: a fix that reached every block but still
+    // compared one declared count — or compared the sum of them — would pass
+    // the test above and let this through.
+    const report = collectSuppressedComments([
+      {
+        ...REVIEW_WITH_TWO_BLOCKS,
+        body: REVIEW_WITH_TWO_BLOCKS.body.replace(
+          'Suppressed comments (3)',
+          'Suppressed comments (9)',
+        ),
+      },
+    ]);
+    expect(report.state).toBe('unreadable');
+    expect(report.problems).toHaveLength(1);
+    expect(report.problems[0]).toContain('block 2');
+    expect(report.problems[0]).toContain('declares 9 comment(s) and 3 parsed');
+  });
+
+  it('never lets one block cover for another one that miscounted', () => {
+    // The sharpest case, and the reason the comparison is per block rather than
+    // on the total: the fixture parses one comment then three, so swapping the
+    // two declared counts makes the totals agree while both halves are wrong.
+    // Each `replace` takes the first occurrence, so the order below swaps them.
+    const swapped = REVIEW_WITH_TWO_BLOCKS.body
+      .replace('Suppressed comments (3)', 'Suppressed comments (1)')
+      .replace('Suppressed comments (1)', 'Suppressed comments (3)');
+    const report = collectSuppressedComments([
+      { ...REVIEW_WITH_TWO_BLOCKS, body: swapped },
+    ]);
+    expect(report.state).toBe('unreadable');
+    expect(report.problems).toHaveLength(2);
+    expect(report.problems[0]).toContain('block 1');
+    expect(report.problems[1]).toContain('block 2');
   });
 
   it('separates "none" from "nothing was read"', () => {
