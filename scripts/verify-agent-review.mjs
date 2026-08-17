@@ -29,7 +29,11 @@
  */
 import process from 'node:process';
 
-import { flagValue } from './lib/cli-input.mjs';
+import {
+  flagValue,
+  parsePullNumber,
+  parseRepository,
+} from './lib/cli-input.mjs';
 import { errorMessage } from './lib/error-message.mjs';
 import { runGh } from './lib/gh-exec.mjs';
 import {
@@ -165,19 +169,32 @@ const writeSummary = async (markdown) => {
  * its own and agreeing by coincidence.
  */
 const resolveRepo = () =>
-  flagValue('--repo') ??
-  process.env.GITHUB_REPOSITORY ??
-  runGh(['repo', 'view', '--json', 'nameWithOwner', '--jq', '.nameWithOwner']);
+  parseRepository(
+    flagValue('--repo') ??
+      process.env.GITHUB_REPOSITORY ??
+      runGh([
+        'repo',
+        'view',
+        '--json',
+        'nameWithOwner',
+        '--jq',
+        '.nameWithOwner',
+      ]),
+  );
 
+/**
+ * Absent and malformed are different failures and now say different things.
+ * "Pass `--pr <n>`" is the wrong advice for someone who passed `--pr '#738'` —
+ * they did exactly that, and the old message sent them round the same loop.
+ */
 const resolvePrNumber = () => {
   const raw = flagValue('--pr') ?? process.env.PR_NUMBER;
-  const pr = Number(raw);
-  if (!Number.isInteger(pr) || pr < 1) {
+  if (raw === undefined || String(raw).trim() === '') {
     throw new Error(
       'no pull request to check — pass `--pr <n>` or set PR_NUMBER',
     );
   }
-  return pr;
+  return parsePullNumber(raw);
 };
 
 const main = async () => {

@@ -31,7 +31,11 @@
 import { readFileSync } from 'node:fs';
 import process from 'node:process';
 
-import { flagValue } from './lib/cli-input.mjs';
+import {
+  flagValue,
+  parsePullNumber,
+  parseRepository,
+} from './lib/cli-input.mjs';
 import {
   copilotReviews,
   decideReviewStatus,
@@ -72,13 +76,30 @@ const triggeringReviewFrom = (payload) =>
     : undefined;
 
 const resolveRepository = (payload) =>
-  flagValue('--repo') ??
-  process.env.GITHUB_REPOSITORY ??
-  payload?.repository?.full_name ??
-  runGh(['repo', 'view', '--json', 'nameWithOwner', '--jq', '.nameWithOwner']);
+  parseRepository(
+    flagValue('--repo') ??
+      process.env.GITHUB_REPOSITORY ??
+      payload?.repository?.full_name ??
+      runGh([
+        'repo',
+        'view',
+        '--json',
+        'nameWithOwner',
+        '--jq',
+        '.nameWithOwner',
+      ]),
+  );
 
-const resolvePullNumber = (payload) =>
-  flagValue('--pr') ?? payload?.pull_request?.number;
+/**
+ * `undefined` when nothing named a pull request — the caller prints usage for
+ * that. A value that is present but not a pull request number throws instead,
+ * because `#738` would otherwise become `NaN` and reach the API path as
+ * `pulls/NaN`, where a bare 404 is all anyone sees.
+ */
+const resolvePullNumber = (payload) => {
+  const raw = flagValue('--pr') ?? payload?.pull_request?.number;
+  return raw === undefined ? undefined : parsePullNumber(raw);
+};
 
 /** The pull request as it stands now — not as the event payload described it. */
 const fetchPullRequest = (repository, number) =>

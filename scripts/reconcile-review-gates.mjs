@@ -30,7 +30,11 @@ import { dirname, join } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
-import { flagValue } from './lib/cli-input.mjs';
+import {
+  flagValue,
+  parsePullNumber,
+  parseRepository,
+} from './lib/cli-input.mjs';
 import { errorMessage } from './lib/error-message.mjs';
 import { runGh } from './lib/gh-exec.mjs';
 import {
@@ -151,10 +155,14 @@ const summaryMarkdown = ({ pullRequests, repository, results, text }) =>
 
 const main = () => {
   const extraArgs = process.argv.includes('--dry-run') ? ['--dry-run'] : [];
-  const repository = resolveRepository();
+  // Both parse before anything is read or published, so a bad argument costs one
+  // message rather than a sweep's worth of 404s that never mention the input.
+  const repository = parseRepository(resolveRepository());
   const only = flagValue('--pr');
   const pullRequests =
-    only === undefined ? fetchOpenPullRequests(repository) : [Number(only)];
+    only === undefined
+      ? fetchOpenPullRequests(repository)
+      : [parsePullNumber(only)];
 
   console.log(
     `Reconciling ${pullRequests.length} pull request(s) in ${repository}.`,

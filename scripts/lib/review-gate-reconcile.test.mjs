@@ -132,6 +132,40 @@ describe('the argv the sweep hands each gate', () => {
   });
 });
 
+// `--pr '#738'` used to become `NaN` and reach `pulls/NaN`: a 404 per gate and
+// nothing naming the input. The parsers that fix it live in `cli-input.mjs` and
+// are unit-tested there — but unwiring a CALL leaves those tests green, so the
+// call sites are what these assert. A `parsePullNumber(` with a paren appears
+// only at a call site; the import lists the name without one.
+describe('the scripts that take a pull request on the command line', () => {
+  const SCRIPTS = [
+    'scripts/reconcile-review-gates.mjs',
+    'scripts/copilot-review-status.mjs',
+    'scripts/verify-agent-review.mjs',
+  ];
+
+  for (const script of SCRIPTS) {
+    it(`${script} parses --pr and --repo instead of using them raw`, () => {
+      const source = readRepoFile(script);
+      expect(source).toMatch(/parsePullNumber\(/);
+      expect(source).toMatch(/parseRepository\(/);
+    });
+  }
+
+  it('the sweep parses both before it can read or publish anything', () => {
+    // Specifically these two call sites, because the failure they prevent is a
+    // sweep that runs both gates against `#NaN` — or, for a typo, one that falls
+    // through and reconciles every open pull request.
+    const source = readRepoFile(SCRIPTS[0]);
+    expect(source).toMatch(/parseRepository\(resolveRepository\(\)\)/);
+    expect(source).toMatch(/parsePullNumber\(only\)/);
+    // `\b` is load-bearing: `Number(only)` is a substring of
+    // `parsePullNumber(only)`, so without it this negative can never hold — the
+    // same shared-anchor mistake this file's other tests were rewritten to avoid.
+    expect(source).not.toMatch(/\bNumber\(only\)/);
+  });
+});
+
 describe('reading what is already published', () => {
   it('finds the entry for the context and lowercases its state', () => {
     expect(
