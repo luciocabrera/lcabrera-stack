@@ -25,6 +25,19 @@ import { readRepoFile } from './workflow-inspect.mjs';
 /** GitHub truncates a commit-status description past this. */
 const DESCRIPTION_LIMIT = 140;
 
+/**
+ * A line as the CONSUMERS end one, which is what the guards below have to be
+ * asserted against. CommonMark and .NET's line readers both end a line at a bare
+ * `\r`; splitting these assertions on `\n` alone would call a line safe because
+ * the test agreed with the bug about where lines end.
+ */
+const CONSUMER_LINE_ENDING = /\r\n|[\n\r]/u;
+
+const consumerLines = (text) =>
+  (Array.isArray(text) ? text : [text]).flatMap((line) =>
+    line.split(CONSUMER_LINE_ENDING),
+  );
+
 const FOUND = collectSuppressedComments([
   REVIEW_WITH_ONE_SUPPRESSED,
   REVIEW_WITH_THREE_SUPPRESSED,
@@ -96,7 +109,9 @@ describe('the terminal report', () => {
         'text\n::error::planted\n',
       ),
     };
-    const lines = suppressedLines(collectSuppressedComments([injected]));
+    const lines = consumerLines(
+      suppressedLines(collectSuppressedComments([injected])),
+    );
     expect(lines.some((line) => line.trim().startsWith('::'))).toBe(false);
     expect(lines.join('\n')).toContain('::error::planted');
   });
@@ -112,8 +127,28 @@ describe('the terminal report', () => {
         '::error::planted in a snippet',
       ),
     };
-    const lines = suppressedLines(collectSuppressedComments([injected]));
+    const lines = consumerLines(
+      suppressedLines(collectSuppressedComments([injected])),
+    );
     expect(lines.join('\n')).toContain('::error::planted in a snippet');
+    expect(lines.some((line) => line.trim().startsWith('::'))).toBe(false);
+  });
+
+  it('prefixes every line, on every line ending, not only on newlines', () => {
+    // A line ending the renderer does not split on is a line it does not
+    // transform, so the remainder arrives unprefixed — the same defect as a
+    // fence the input can close, one layer down.
+    const injected = {
+      ...REVIEW_WITH_ONE_SUPPRESSED,
+      body: REVIEW_WITH_ONE_SUPPRESSED.body.replace(
+        'PR_HEAD=$(gh pr view <n> --json headRefOid --jq .headRefOid) \\',
+        'first segment\r::error::planted after a bare carriage return',
+      ),
+    };
+    const lines = consumerLines(
+      suppressedLines(collectSuppressedComments([injected])),
+    );
+    expect(lines.join('\n')).toContain('::error::planted');
     expect(lines.some((line) => line.trim().startsWith('::'))).toBe(false);
   });
 
@@ -123,6 +158,15 @@ describe('the terminal report', () => {
     expect(lines[1]).toContain('no known Copilot review shape');
   });
 });
+
+/** A line this renderer emits itself, as opposed to one taken from a review. */
+const rendererLine = (line) =>
+  line === '' ||
+  line === '### Copilot suppressed comments' ||
+  line.startsWith('- [ ] ') ||
+  line.startsWith('#1:') ||
+  line.startsWith('#740:') ||
+  line.startsWith('These are review findings');
 
 describe('the job summary', () => {
   it('renders one checkbox per finding, under its own heading', () => {
@@ -157,18 +201,14 @@ describe('the job summary', () => {
       ),
     };
     const report = collectSuppressedComments([hostile]);
-    const lines = suppressedMarkdown(report, { pr: 1 }).split('\n');
+    const lines = consumerLines(suppressedMarkdown(report, { pr: 1 }));
 
     // The total assertion: no line of quoted source reaches the document at an
     // indentation where Markdown would read it as anything.
-    const own = (line) =>
-      line === '' ||
-      line === '### Copilot suppressed comments' ||
-      line.startsWith('- [ ] ') ||
-      line.startsWith('#1:') ||
-      line.startsWith('These are review findings');
     expect(
-      lines.filter((line) => !own(line) && !line.startsWith(SUMMARY_INDENT)),
+      lines.filter(
+        (line) => !rendererLine(line) && !line.startsWith(SUMMARY_INDENT),
+      ),
     ).toEqual([]);
 
     // And the quote is still there, in full, rather than dropped or mangled.
@@ -184,6 +224,29 @@ describe('the job summary', () => {
     expect(lines.filter((line) => /^\s*`+\s*$/u.test(line))).toEqual([
       `${SUMMARY_INDENT}\`\`\`\``,
     ]);
+  });
+
+  it('indents every line, on every line ending, not only on newlines', () => {
+    // Rendered through GitHub's own Markdown (`POST /markdown`, `mode: gfm`)
+    // before this was fixed, an unsplit bare carriage return produced
+    // `aria-label="Completed task" checked=""` — a forged tick in a checklist
+    // where an unticked box is what "unanswered" means.
+    const hostile = {
+      ...REVIEW_WITH_ONE_SUPPRESSED,
+      body: REVIEW_WITH_ONE_SUPPRESSED.body.replace(
+        'PR_HEAD=$(gh pr view <n> --json headRefOid --jq .headRefOid) \\',
+        'first segment\r- [x] fake resolved',
+      ),
+    };
+    const lines = consumerLines(
+      suppressedMarkdown(collectSuppressedComments([hostile]), { pr: 1 }),
+    );
+    expect(lines).toContain(`${SUMMARY_INDENT}- [x] fake resolved`);
+    expect(
+      lines.filter(
+        (line) => !rendererLine(line) && !line.startsWith(SUMMARY_INDENT),
+      ),
+    ).toEqual([]);
   });
 
   it('says the findings do not block, and where that is decided', () => {

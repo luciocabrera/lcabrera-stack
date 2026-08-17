@@ -3,14 +3,15 @@ import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 import { fetchPullRequestReviews } from './copilot-reviews-api.mjs';
 import { runGh } from './gh-exec.mjs';
 
-// This client's own header says a pagination mistake here is silent: page one
+// What this pins is the ARGV, and the limit is worth stating plainly because the
+// subject suggests more: `gh` is mocked, so gh's own pagination never runs here
+// and nothing below shows that every page is really fetched. What it does show
+// is that the three things whose loss is silent are still asked for — page one
 // alone reports a stale review and an empty suppressed block, and both read as
-// answers. Nothing pinned that while it was a private function in one script; it
-// is now the single client two readers share, so the argv it builds is asserted
-// rather than described.
+// answers — and that what is parsed is the shape `--slurp` returns.
 //
-// `gh` is mocked because the assertion is about the request, and a test that
-// needed the network could not make it.
+// Nothing pinned even that while this was a private function inside one script.
+// It is now the single client two readers share.
 vi.mock('./gh-exec.mjs', () => ({ runGh: vi.fn() }));
 
 const REVIEW = { id: 1, state: 'COMMENTED', user: { login: 'copilot' } };
@@ -23,7 +24,7 @@ beforeEach(() => {
 });
 
 describe('fetching a pull request reviews', () => {
-  it('asks for every page, and can read what comes back', () => {
+  it('asks gh for all pages, and reads the shape --slurp returns', () => {
     // Without `--slurp` gh documents each page as a separate JSON document,
     // which `JSON.parse` cannot read; without `--paginate` there is only one.
     expect(fetchPullRequestReviews('luciocabrera/repo', 740)).toEqual([REVIEW]);

@@ -61,6 +61,22 @@ export const suppressedHeadline = (report, { pr } = {}) => {
 };
 
 /**
+ * Every line ending, not just `\n`.
+ *
+ * Both guards below rest on transforming EVERY line, so what counts as a line is
+ * the load-bearing part of each. CommonMark ends a line at `\n`, `\r\n` or a
+ * bare `\r`, and .NET's line readers — which is what parses a runner's stdout —
+ * do the same; `split('\n')` does not. A line ending that is not split on is a
+ * line that is not transformed, and its remainder arrives at column zero, which
+ * is the fenced-block defect one layer down. Verified against GitHub's own
+ * renderer (`POST /markdown`, `mode: gfm`), which turned an unsplit bare `\r`
+ * into a checked task item.
+ */
+const LINE_ENDING = /\r\n|[\n\r]/u;
+
+const sourceLines = (snippet) => snippet.split(LINE_ENDING);
+
+/**
  * The source Copilot quoted, for the terminal: one line each behind a `|`.
  *
  * The prefix is not decoration. This text is untrusted and reaches a runner's
@@ -72,7 +88,7 @@ export const suppressedHeadline = (report, { pr } = {}) => {
 const snippetLines = (snippet) =>
   snippet === undefined
     ? []
-    : snippet.split('\n').map((line) => `    | ${line}`);
+    : sourceLines(snippet).map((line) => `    | ${line}`);
 
 /**
  * Two spaces for the list item's content column, four more for the code block.
@@ -101,7 +117,7 @@ const snippetBlock = (snippet) =>
     ? []
     : [
         '',
-        ...snippet.split('\n').map((line) => `${SUMMARY_INDENT}${line}`),
+        ...sourceLines(snippet).map((line) => `${SUMMARY_INDENT}${line}`),
         '',
       ];
 
