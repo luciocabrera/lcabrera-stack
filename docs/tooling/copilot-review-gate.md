@@ -146,7 +146,7 @@ Without a checkout, ask the API the same question. It answers in one line, and
 the pull request number is the only thing to fill in:
 
 ```bash
-PR_HEAD=$(gh pr view <n> --json headRefOid --jq .headRefOid) \
+PR_HEAD=$(gh pr view <n> -R luciocabrera/vite-react-compiler --json headRefOid --jq .headRefOid) \
 gh api repos/luciocabrera/vite-react-compiler/pulls/<n>/reviews --jq '
   [.[] | select(.user.login | test("[Cc]opilot"))] | last
   | if . == null then "no Copilot review on this pull request yet — wait"
@@ -155,12 +155,21 @@ gh api repos/luciocabrera/vite-react-compiler/pulls/<n>/reviews --jq '
     end'
 ```
 
-**The `null` arm is load-bearing, not defensive padding.** `last` of an empty
-array is `null`, and jq reads a field off `null` and slices it without
-complaining, so the obvious one-liner — `… | last | "\(.commit_id[0:8])"` —
-prints `null null` and exits 0 for a pull request Copilot has not reviewed at
-all. That is precisely the state this command exists to name, and it is the one
-where a reader is least able to tell nonsense from an answer.
+Two things in it are load-bearing rather than decorative, and both are the
+difference between an answer and a confident wrong one:
+
+- **The `null` arm.** `last` of an empty array is `null`, and jq reads a field
+  off `null` and slices it without complaining, so the obvious one-liner —
+  `… | last | "\(.commit_id[0:8])"` — prints `null null` and exits 0 for a pull
+  request Copilot has not reviewed at all. That is precisely the state this
+  command exists to name, and the one where a reader is least able to tell
+  nonsense from an answer.
+- **`-R` on the `gh pr view` half.** Without it, `gh` resolves the repository
+  from the working directory's git remote: outside a checkout it fails with
+  `failed to run git`, and inside a _different_ repository it answers about that
+  one's pull request #`<n>` while the `gh api` half stays pinned here — two
+  repositories compared against each other, reported as a verdict about this
+  one.
 
 The third reading — the gate would publish `pending` while the pull request shows
 `success` — is in
