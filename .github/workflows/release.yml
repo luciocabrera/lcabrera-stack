@@ -35,6 +35,10 @@ name: Release
 #
 # The action's one irreplaceable contribution was the GitHub Release body, so
 # that is rebuilt from the same `CHANGELOG.md` by `scripts/release-notes.mjs`.
+# It made one more contribution that was invisible until it was gone: it
+# configured a git identity, without which `changeset publish` cannot create the
+# annotated tags it reports creating. That is the `Configure the tagging
+# identity` step below, and it is load-bearing (#745).
 #
 # Authentication is npm trusted publishing (OIDC): no NPM_TOKEN, and npm attaches
 # a provenance attestation on its own, so `--provenance` must NOT be passed.
@@ -134,6 +138,20 @@ jobs:
             exit 1
           fi
 
+      # NOT decoration, and not "git housekeeping": `@changesets/git` tags with
+      # `git tag <name> -m <name>`, and the `-m` makes it an ANNOTATED tag so
+      # that `git push --follow-tags` carries it. An annotated tag needs a
+      # committer identity, `actions/checkout` does not set one, and without it
+      # every tag call exits 128. `changesets/action` used to configure this;
+      # #622 replaced the action with the CLI and the identity went with it, so
+      # eight versions reached npm untagged before anyone noticed (#745).
+      # Deleting these two lines silently restores that.
+      - name: Configure the tagging identity
+        if: steps.plan.outputs.count != '0'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
       # `changeset publish` creates the `<name>@<version>` tags locally but does
       # not push them, which is what the action used to do. Diffing the tag list
       # around the call is how we learn what actually shipped: its exit status
@@ -143,6 +161,9 @@ jobs:
         id: publish
         if: steps.plan.outputs.count != '0'
         run: |
+          # `pipefail` because the publish is piped into `tee`: without it the
+          # step's status is tee's, so a failed publish would report success.
+          set -o pipefail
           # Piped through `sort` explicitly: `comm` silently produces nonsense
           # on unsorted input, and `git tag` honours a `tag.sort` config that
           # this workflow does not control.
@@ -151,10 +172,24 @@ jobs:
           # the one job holding an OIDC token with publish rights. `pnpm exec`
           # runs the binary already in node_modules, at the lockfile's version.
           git tag | sort > /tmp/tags-before
-          pnpm exec changeset publish
+          pnpm exec changeset publish 2>&1 | tee /tmp/publish.log
           git tag | sort > /tmp/tags-after
           comm -13 /tmp/tags-before /tmp/tags-after > /tmp/tags-new
-          echo "Newly published tags:"; cat /tmp/tags-new
+
+          # `changeset publish` logs `New tag: <name>` BEFORE calling git and
+          # discards the result, so its log names tags git may never have made.
+          # Its count and the refs that actually exist are therefore independent
+          # signals, and comparing them is the only thing that tells a real
+          # tagging failure apart from a publish that legitimately shipped
+          # nothing — both leave the diff empty.
+          reported="$(grep -c 'New tag:' /tmp/publish.log || true)"
+          created="$(grep -c . /tmp/tags-new || true)"
+          echo "Newly published tags: $created (changeset reported $reported)"
+          cat /tmp/tags-new
+          if [ "$reported" -ne "$created" ]; then
+            echo "::error::changeset publish reported $reported tag(s) but $created exist. The packages are already on npm and CANNOT be republished — re-running will not fix this. Create the missing tags and Releases by hand, then fix the tagging step."
+            exit 1
+          fi
 
       # Split from the publish on purpose. npm is already written to by this
       # point and cannot be undone, so a failure here must be recoverable by

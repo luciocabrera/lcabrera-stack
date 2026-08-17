@@ -15,13 +15,14 @@ to the spec.
 
 ## Releasing
 
-The four `@lcabrera/*` packages are versioned with **Changesets**, independently
-— each moves only when it changes, and a dependent gets a patch bump
-automatically (`updateInternalDependencies: "patch"`). A change that affects
+The public `@lcabrera/*` packages are versioned with **Changesets**,
+independently — each moves only when it changes, and a dependent gets a patch
+bump automatically (`updateInternalDependencies: "patch"`). A change that affects
 consumers carries a changeset in the same PR; `vp run release:version` consumes
-them.
+them. `vp run release:plan` prints the current set; the roster is every
+non-private workspace, so a count here would be wrong the next time one is added.
 
-Four things here are deliberate, and each cost something to learn:
+Everything below is deliberate, and each one cost something to learn:
 
 - **The version PR is opened by a human, not a bot.** Changesets' usual flow has
   its action open the "Version Packages" PR, and that PR **can never merge
@@ -41,6 +42,14 @@ Four things here are deliberate, and each cost something to learn:
   carry it, so nothing but the version number decides whether a merge publishes.
   Every workspace not meant to publish MUST carry the flag: `api-server` and
   `api-server-fast` had none at all and were one `npm publish` from going out.
+- **The tags are not a side effect of publishing — they need a git identity.**
+  `changeset publish` tags with `git tag -m`, i.e. annotated, which requires
+  `user.name`/`user.email`; `actions/checkout` sets neither. It also logs
+  `New tag: <name>` _before_ calling git and throws the result away, so its
+  output is a claim rather than a record. `release.yml` configures the identity
+  and then compares that claim against the refs that actually exist, because a
+  tagging failure and a publish that shipped nothing otherwise leave the same
+  empty tag diff (#745).
 - **The job asks the registry, per package, what to publish.**
   `vp run release:plan` is that gate and runs locally: for each non-private
   workspace it compares the manifest version against npm and reports
@@ -75,7 +84,7 @@ package. `changelog.yml` handles `v*` tags — the repo-level milestone — and
 nothing creates those automatically, so it fires only when someone tags by hand.
 That is also the only thing that gives CHANGELOG.md more than one section.
 
-Publishing invariants for the four packages (the `exports`/`publishConfig` split,
+Publishing invariants for the public packages (the `exports`/`publishConfig` split,
 `files`, peer dependencies, the StyleX rename trap) are in
 [`packages/CLAUDE.md`](../../../packages/CLAUDE.md).
 
