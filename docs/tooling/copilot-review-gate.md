@@ -16,8 +16,10 @@ no review at all.
 | [`.github/workflows/copilot-review-gate.yml`](../../.github/workflows/copilot-review-gate.yml) | when it recomputes                                            |
 | [`scripts/copilot-review-status.mjs`](../../scripts/copilot-review-status.mjs)                 | the I/O — reads the PR, posts the status                      |
 | [`scripts/lib/copilot-review.mjs`](../../scripts/lib/copilot-review.mjs)                       | the comparison, pure and unit-tested                          |
+| [`scripts/lib/copilot-suppressed.mjs`](../../scripts/lib/copilot-suppressed.mjs)               | the suppressed-comment reader, pure and unit-tested           |
 | [`review-gate-reconcile.md`](./review-gate-reconcile.md)                                       | the sweep that recomputes it when the event does not          |
 | `vp run copilot-review:status -- --pr <n> --dry-run`                                           | what the gate would say about a PR right now, posting nothing |
+| `vp run copilot-review:suppressed -- --pr <n>`                                                 | the findings Copilot suppressed rather than filed as threads  |
 
 ## The states
 
@@ -75,6 +77,92 @@ Two traps in that payload:
   an emptiness test on the neighbouring check runs has to cover both.
 
 This is not hypothetical: it misfired on this gate's own pull request.
+
+## Suppressed comments — the findings no merge bar sees
+
+Conversation resolution (ruleset `19141543`) is what forces a Copilot finding to
+be answered before a merge, and it sees **review threads**. Copilot does not file
+every finding as one: what it judges low-confidence goes into the review **body**,
+inside a collapsed `Suppressed comments` block, which never becomes a thread. So a
+pull request can carry unanswered review findings and still resolve to zero
+unresolved threads. Some of them are real defects — #750 measures a merged pull
+request where they were.
+
+**They are reported, and they never block.** The state this gate publishes says
+nothing about them; the findings ride in its log, its job summary and a clause on
+the status description. Why reporting rather than blocking, and why no rule
+promotes one to a blocker, is
+[ADR-078](../decisions/ADR-078-surface-suppressed-comments-without-blocking.md).
+
+One command lists them, from a checkout, posting nothing:
+
+```bash
+vp run copilot-review:suppressed -- --pr <n>
+```
+
+### The four answers, and why none of them is a bare zero
+
+Every way of failing to read Copilot's markup produces the same output as a pull
+request that genuinely has nothing suppressed — a wrong reviewer-login spelling, a
+renamed section, an API shape shift. So the report names a **state** rather than
+printing a count, and a reader has to be able to tell these apart:
+
+| It says                                   | It means                                                                                   |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `N suppressed findings from M comments …` | Copilot suppressed findings; `N` locations to answer, `M` is what its own blocks add up to |
+| `no suppressed comments in … reviews`     | Copilot reviewed and suppressed nothing — the only zero to believe                         |
+| `no Copilot review to read`               | nothing has been reviewed yet, so nothing can be said either way                           |
+| `could NOT be read`                       | the parser hit something it does not understand; the count is unknown, **not** zero        |
+
+`could NOT be read` is the one to act on: it means Copilot's block has moved, and
+the reader in
+[`scripts/lib/copilot-suppressed.mjs`](../../scripts/lib/copilot-suppressed.mjs)
+needs updating. It exits non-zero, prints what it could not read, and — because it
+never blocks — leaves the merge bar exactly where it was. Three checks raise it:
+the count GitHub declares in the block's own summary disagreeing with what parsed,
+a review body in no shape this knows, and a collapsed section about suppression
+whose label does not match.
+
+`M` running ahead of `N` is normal rather than a discrepancy: Copilot re-emits a
+still-open suppressed comment on every re-review, in fresh wording, and the report
+groups those by file and line.
+
+### Reading them straight out of the API
+
+The command above is the same read, done for you. When you want the raw evidence —
+or are checking the parser against it — this is what it is reading. Note the
+`[bot]` suffix: `.user.login` is `copilot-pull-request-reviewer[bot]` over REST and
+`copilot-pull-request-reviewer` over GraphQL, and a filter written for one silently
+matches nothing on the other.
+
+```bash
+gh api --paginate 'repos/luciocabrera/vite-react-compiler/pulls/<n>/reviews?per_page=100' \
+  --jq '.[] | select(.user.login | startswith("copilot")) | .body' \
+  | grep -A20 'Suppressed comments'
+```
+
+`--paginate` is not optional: every thread reply is its own review, so a busy pull
+request runs past one page and the suppressed blocks on the later ones vanish
+without a word. The count of blocks that command finds and the pull request's
+thread count answer different questions — compare them with
+
+```bash
+gh api graphql -F n=<n> -f query='
+  query($n: Int!) {
+    repository(owner: "luciocabrera", name: "vite-react-compiler") {
+      pullRequest(number: $n) { reviewThreads(first: 100) { totalCount } }
+    }
+  }' --jq '.data.repository.pullRequest.reviewThreads.totalCount'
+```
+
+— which is the measurement #750 is built on: a suppressed comment contributes
+nothing to that number.
+
+**When the markup moves**, the fixtures in
+[`scripts/lib/copilot-suppressed-fixtures.mjs`](../../scripts/lib/copilot-suppressed-fixtures.mjs)
+are re-captured from a live review with the first command above, verbatim. They are
+frozen bodies and cannot notice a format change on their own; what notices is the
+declared-count check, running against real bodies every time this gate does.
 
 ## What recomputes it
 
