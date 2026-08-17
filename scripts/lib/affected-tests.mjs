@@ -27,11 +27,15 @@ import { join } from 'node:path';
 
 import { deriveWorkspaces, workspacesForFiles } from './workspace-scopes.mjs';
 
-/** Package names whose DB-free subset runs as `test:unit` (see `test:ci`). */
-export const UNIT_TASK_PACKAGES = [
-  '@repo/scan-ingestion',
-  '@repo/scan-orchestrator',
-];
+/**
+ * Package names whose DB-free subset runs as `test:unit` (see `test:ci`).
+ *
+ * Empty since the CQMS workspaces left (#683) — they were the only suites here
+ * that needed a real Postgres. Kept rather than deleted because the mechanism
+ * is what lets a DB-bound workspace rejoin `test:ci` without dragging its whole
+ * suite in, and rediscovering that costs more than one empty array.
+ */
+export const UNIT_TASK_PACKAGES = [];
 
 /** The one package that emits the PR coverage summary via its `test:ci`. */
 export const COVERAGE_TASK_PACKAGE = 'vite-react-compiler';

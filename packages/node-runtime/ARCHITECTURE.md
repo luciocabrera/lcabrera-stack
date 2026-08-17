@@ -9,11 +9,12 @@ Published as **`@lcabrera/node`** from the `packages/node-runtime` workspace
 its consumers are no longer only in-repo ones. `README.md` is the
 consumer-facing document; this file is why the package is shaped the way it is.
 
-In-repo consumers: `apps/scan-orchestrator` (CQMS product), which leaves with the
-CQMS extraction (#672) and then resolves the same package from the registry. The
-car-sales demo servers already left that way under #686 and consume it from npm
-today — the first consumers to exercise the package as an outside project would,
-which is what publishing it was for.
+**It has no in-repo consumers left.** The car-sales demo servers left under #686
+and the CQMS orchestrator under #683; both now resolve it from npm, which is what
+publishing it was for — they are the only thing exercising it the way an outside
+project would. The consequence is worth stating plainly: nothing in this
+repository will fail if this package breaks, so its own suite is the whole
+safety net.
 
 ## Why this package exists
 
@@ -23,7 +24,7 @@ was wrong in its own way:
 | Candidate           | Why not                                                                                                                                  |
 | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | `@lcabrera/utils`   | Its `ARCHITECTURE.md` commits to "keep utilities pure and side-effect free". Registering signal handlers is a side effect by definition. |
-| `api-shared`        | The car-sales demo's shared lib. `scan-orchestrator` is CQMS product code; depending on it would couple product to demo.                 |
+| `api-shared`        | The car-sales demo's shared lib. The other consumer was CQMS product code; depending on it would have coupled product to demo.           |
 | `@lcabrera/server`  | Owns DB/query/crypto/token concerns. A process signal is not data access.                                                                |
 | Duplicating per app | What we had: 12 lines of identical `process.on` wiring in two servers, flagged as a fallow clone group.                                  |
 

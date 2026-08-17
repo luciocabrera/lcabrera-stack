@@ -4,7 +4,7 @@
 
 Decisions internal to the `apps/react-router` showcase app — its components, routes and interaction model.
 
-**Survives the CQMS extraction.**
+**Moves with CQMS when it is extracted.**
 
 Numbers are unique across every ADR home in this repo — see [ADR-048](../../../../docs/decisions/ADR-048-adr-taxonomy-and-one-sequence.md)
 for why, and for what to do with a decision that spans two tiers.

@@ -42,9 +42,13 @@ describe('buildGitEnv', () => {
 });
 
 describe('the repository-variable list', () => {
-  // Copies exist because a shell hook, a TypeScript package util, a published
-  // package's runner and this module cannot import from one another. Copies
-  // drift; this is the guard that makes them fail loudly instead.
+  // Copies exist because a shell hook, a package's runner and this module
+  // cannot import from one another. Copies drift; this is the guard that makes
+  // them fail loudly instead.
+  //
+  // A fourth copy now lives in the CQMS repository (#683 took the workspace
+  // that held it). Nothing here can reach it, so that one is unguarded — say so
+  // rather than letting two green assertions imply all copies agree.
   it('matches the set the pre-push hook scrubs', () => {
     const shell = readRepoFile('.vite-hooks/scrub-git-env.sh');
     const unset = new Set(
@@ -63,21 +67,6 @@ describe('the repository-variable list', () => {
     // its own copy of the same discipline.
     const runner = readRepoFile('packages/scan-report/scripts/run-git.mjs');
     const listed = [...runner.matchAll(/'(?<name>GIT_[A-Z_]+)'/gu)].map(
-      (match) => match.groups.name,
-    );
-
-    const byName = (a, b) => a.localeCompare(b);
-
-    expect(listed.toSorted(byName)).toEqual(
-      GIT_REPOSITORY_VARIABLES.toSorted(byName),
-    );
-  });
-
-  it('matches buildGitChildEnv in @repo/scan-ingestion', () => {
-    const util = readRepoFile(
-      'packages/scan-ingestion/src/ingestion/git/buildGitChildEnv.util.ts',
-    );
-    const listed = [...util.matchAll(/'(?<name>GIT_[A-Z_]+)'/gu)].map(
       (match) => match.groups.name,
     );
 

@@ -1,25 +1,5 @@
 {
   "finding_counts": {
-    "apps/admin_system/src/routes/cqms/account-tokens/AccountTokens.component.tsx": {
-      "crap_critical": {
-        "count": 1
-      }
-    },
-    "apps/admin_system/src/routes/cqms/edit-project/editProject.action.ts": {
-      "crap_moderate": {
-        "count": 1
-      }
-    },
-    "apps/admin_system/src/routes/cqms/new-project/newProject.action.ts": {
-      "crap_moderate": {
-        "count": 1
-      }
-    },
-    "apps/admin_system/src/routes/cqms/project-detail/ProjectSyncPanel/ProjectSyncPanel.component.tsx": {
-      "crap_high": {
-        "count": 1
-      }
-    },
     "apps/react-router/scripts/check-lighthouse-scores.mjs": {
       "crap_moderate": {
         "count": 1
@@ -27,16 +7,6 @@
     },
     "apps/react-router/src/features/showcase/ShowcasePage/VirtualSelectSection/VirtualSelectSection.component.tsx": {
       "crap_moderate": {
-        "count": 1
-      }
-    },
-    "packages/scan-ingestion/src/cli/ingest.cli.ts": {
-      "crap_critical": {
-        "count": 1
-      }
-    },
-    "packages/scan-ingestion/src/cli/push.cli.ts": {
-      "crap_high": {
         "count": 1
       }
     },

@@ -27,7 +27,7 @@ silence one, which defeats the point of having it.
 
 `biome.jsonc` lives at the repo root and `vp run lint:biome:check` runs one
 repo-wide pass — like Oxlint, unlike the per-workspace eslint fan-out. The react
-domain is scoped by `overrides` (`apps/react-router`, `apps/admin_system`,
+domain is scoped by `overrides` (`apps/react-router`,
 `packages/ui`), so there is nothing to fan out.
 
 **Do not add per-workspace `biome.jsonc` files or `lint:biome` scripts.** The
@@ -290,7 +290,7 @@ independent scanner rows, master/detail tables, and runner scripts; the
 has no scanner row and is not in `linter-checker`. That is a deliberate scope
 line, not an oversight — extending it is a follow-up with its own migration.
 The full, execute-ready spec for that follow-up (approved then parked before
-implementation) is [`docs/cqms/BIOME_SCANNER_PLAN.md`](../cqms/BIOME_SCANNER_PLAN.md):
+implementation) is `BIOME_SCANNER_PLAN.md`, now in the CQMS repository:
 it records the JSON-shape facts, the error/warning/info→HIGH/MEDIUM/LOW mapping,
 and the load-bearing gotcha — `lint_violations.source` is a closed CHECK, so a
 half-built integration ingests and then fails at INSERT in production.

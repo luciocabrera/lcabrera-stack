@@ -52,47 +52,18 @@ export const configs = [
     filePath: path.resolve(packageDirectory, 'tsconfig.app.json'),
   },
   {
-    // admin_system consumes @lcabrera/server/@repo/scan-ingestion/@lcabrera/ui
-    // directly (CQMS routes, TECH_SPEC §2.4/§2.8) — without these, this
-    // config drifts from the actual hand-verified tsconfig.app.json the
-    // moment this generator re-runs for an unrelated reason (found the
-    // hard way: re-running it for apps/scan-orchestrator's new entry
-    // silently wiped these three, breaking oxlint resolution for the
-    // entire cqms routes tree).
     config: createAppTsConfig({
       paths: {
         '@lcabrera/server/*': ['../../packages/server/src/*'],
         // Bare specifier only. There is deliberately NO `@lcabrera/ui/*`
-        // wildcard here: an alias for the subpaths resolves them straight to
-        // `src/`, which is how a broken `exports` map stayed invisible in this
-        // repo while the published package could not be imported at all
-        // (ADR-060). Without it, every deep import is checked against the real
-        // export map by `tsc`, so an unexported subpath fails typecheck here
-        // rather than on a consumer's machine.
-        '@lcabrera/ui': ['../../packages/ui/src/public-api.ts'],
-        '@repo/scan-ingestion/*': ['../../packages/scan-ingestion/src/*'],
-      },
-      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
-    }),
-    filePath: path.resolve(
-      workspaceRoot,
-      'apps/admin_system/tsconfig.app.json',
-    ),
-  },
-  {
-    config: createNodeTsConfig({
-      tsBuildInfoFile: './node_modules/.tmp/tsconfig.node.tsbuildinfo',
-    }),
-    filePath: path.resolve(
-      workspaceRoot,
-      'apps/admin_system/tsconfig.node.json',
-    ),
-  },
-  {
-    config: createAppTsConfig({
-      paths: {
-        '@lcabrera/server/*': ['../../packages/server/src/*'],
-        // Bare specifier only — see the identical entry under admin_system.
+        // wildcard: an alias for the subpaths resolves them straight to `src/`,
+        // which is how a broken `exports` map stayed invisible in this repo
+        // while the published package could not be imported at all (ADR-060).
+        // Without it, every deep import is checked against the real export map
+        // by `tsc`, so an unexported subpath fails typecheck here rather than
+        // on a consumer's machine. This used to be stated on the admin_system
+        // entry and cross-referenced from here; that entry left with #683, so
+        // the reasoning lives here now.
         '@lcabrera/ui': ['../../packages/ui/src/public-api.ts'],
       },
       tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
@@ -172,39 +143,6 @@ export const configs = [
     filePath: path.resolve(workspaceRoot, 'packages/server/tsconfig.app.json'),
   },
   {
-    // Genuinely Node-only (pg client, fs/path, git CLI via child_process,
-    // no DOM/vite.client usage anywhere). Overrides createNodeTsConfig's
-    // default include (['vite.config.ts'] only, meant for an app's
-    // Node-context sibling config) since this package has no app-context
-    // tsconfig to pair with — its own src/ needs typechecking.
-    config: createNodeTsConfig({
-      include: ['src', 'vite.config.ts'],
-      paths: {
-        '@repo/scan-ingestion/*': ['./src/*'],
-      },
-      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
-    }),
-    filePath: path.resolve(
-      workspaceRoot,
-      'packages/scan-ingestion/tsconfig.app.json',
-    ),
-  },
-  {
-    // Genuinely Node-only — spawns the Claude Agent SDK's own CLI
-    // subprocess, no DOM/vite.client usage anywhere.
-    config: createNodeTsConfig({
-      include: ['src', 'vite.config.ts'],
-      paths: {
-        '@repo/agent-runner/*': ['./src/*'],
-      },
-      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
-    }),
-    filePath: path.resolve(
-      workspaceRoot,
-      'packages/agent-runner/tsconfig.app.json',
-    ),
-  },
-  {
     // @lcabrera/node is genuinely Node-only — process-lifecycle primitives
     // (SIGINT/SIGTERM handlers), the deliberate impure counterpart to
     // @lcabrera/utils. `createNodeTsConfig` gives it no DOM lib, so a
@@ -224,22 +162,6 @@ export const configs = [
     filePath: path.resolve(
       workspaceRoot,
       'packages/node-runtime/tsconfig.app.json',
-    ),
-  },
-  {
-    // Genuinely Node-only — the standalone scan-orchestrator process
-    // (Implementation Plan step 9): a dedicated Postgres LISTEN client, a
-    // plain node:http + ws server, no DOM/vite.client usage anywhere.
-    config: createNodeTsConfig({
-      include: ['src', 'vite.config.ts'],
-      paths: {
-        '@repo/scan-orchestrator/*': ['./src/*'],
-      },
-      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
-    }),
-    filePath: path.resolve(
-      workspaceRoot,
-      'apps/scan-orchestrator/tsconfig.app.json',
     ),
   },
   {

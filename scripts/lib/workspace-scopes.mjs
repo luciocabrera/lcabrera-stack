@@ -1,5 +1,5 @@
 /**
- * Derives the set of workspace scope names (ui, admin_system, api-server, …) from
+ * Derives the set of workspace scope names (ui, server, react-router, …) from
  * `pnpm-workspace.yaml`, so the commit/PR scope vocabulary self-updates whenever a
  * workspace is added — no hand-maintained list to rot. Effectful (reads the
  * filesystem); kept out of the pure `commit-convention.mjs` spec so that stays

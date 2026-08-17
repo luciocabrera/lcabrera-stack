@@ -19,9 +19,6 @@ const IGNORED_DOCS = [
   // which hid every dead link in the corpus; they are now filtered per TOKEN by
   // `enforcedTokens` instead — the paths an ADR *names* stay exempt as dated
   // record, the links it asks you to *follow* do not. See lib/docs-paths.mjs.
-  'docs/cqms/PRD',
-  'docs/cqms/TECH_SPEC',
-  'docs/cqms/IMPLEMENTATION_PLAN',
   'docs/coordination/PLAN_TRIAGE.md',
   '_PLAN.md', // approved-but-unbuilt specs name files that do not exist yet
   '_TEMPLATE.md', // a template's paths are placeholders to be replaced

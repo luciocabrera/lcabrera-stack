@@ -18,8 +18,7 @@ import { runQuery } from './run-query.util.ts';
  *
  * `TRow` is an unchecked contract with the view — pg does not validate it.
  * Note `numeric` columns arrive as **strings**, not numbers: type them
- * `string` here and coerce at the caller (see scan-ingestion's
- * `selectLlmCostRows.util.ts`).
+ * `string` here and coerce at the caller.
  *
  * The return type is widened to `readonly` deliberately: pg hands back a
  * mutable array, and nothing downstream should be writing to it.

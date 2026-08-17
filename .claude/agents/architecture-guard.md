@@ -21,14 +21,13 @@ and **two** ADR namespaces, so always cite a path, never a bare number.
 - Inventories (catalog of existing components, hooks, utilities, types, constants):
   - `packages/ui/src/INVENTORY.md` — the shared UI library (start here for anything UI)
   - `apps/react-router/src/INVENTORY.md`
-  - `apps/admin_system/src/INVENTORY.md`
   - `packages/server/src/INVENTORY.md`
 - `packages/ui/src/PATTERNS.md` — the single PATTERNS.md: naming conventions, StyleX
   composition order, the thin-shell/store-wiring rule, drawer-section pattern, filter contract
-- `**/ARCHITECTURE.md` — ~148 of them, colocated with the directory they describe
-- ADRs, in two namespaces whose numbers **collide**:
+- `**/ARCHITECTURE.md` — colocated with the directory each describes (`vp run adr:list` for ADRs; glob for these)
+- ADRs, in two homes whose low numbers **collide**:
+  - `docs/decisions/` — repo, published packages and toolchain decisions
   - `apps/react-router/docs/decisions/` — component/app decisions (Modal, Tooltip, store, StyleX…)
-  - `docs/cqms/decisions/` — CQMS/tooling decisions (package splits, linters, migrations…)
 
 ## Procedure
 
@@ -47,9 +46,9 @@ Given the caller's task description:
    - Parent directories if the change crosses boundaries
    - The types directory of the owning package if types are involved
 
-4. **Read relevant ADRs.** Glob **both** `apps/react-router/docs/decisions/` and
-   `docs/cqms/decisions/` first, then read any whose title suggests relevance. The two
-   namespaces reuse the same numbers, so always cite an ADR by path or topic — never by
+4. **Read relevant ADRs.** Glob **both** `docs/decisions/` and
+   `apps/react-router/docs/decisions/` first, then read any whose title suggests relevance.
+   The two homes reuse numbers 001–005 and 008, so cite an ADR by path or topic — never by
    number alone.
 
 5. **Grep for existing implementations** if INVENTORY.md mentions a candidate artifact — confirm it still exists at the stated path before recommending reuse.

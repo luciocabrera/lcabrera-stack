@@ -18,10 +18,10 @@
  * `fallow audit --coverage <this file>` replaces the guess with measurement.
  *
  * ONLY DB-FREE SUITES RUN HERE. An earlier attempt to feed coverage into the
- * audit was reverted (2026-07-14) because it ran scan-ingestion's real-Postgres
+ * audit was reverted (2026-07-14) because it ran real-Postgres
  * `queries/*` tests in CI, where `getPool()` → `readEnvConfig()` throws on the
- * missing `DB_*`. scan-ingestion's `test:coverage` task is the DB-free subset
- * for exactly this reason — see packages/scan-ingestion/vite.config.ts.
+ * missing `DB_*`. Those suites left with CQMS (#683), so every workspace merged
+ * here is DB-free today — but a new one must earn its place the same way.
  *
  * Usage (from the repo root):
  *   vp run coverage:merge                  # run suites + merge

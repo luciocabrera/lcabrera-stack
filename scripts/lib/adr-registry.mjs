@@ -2,39 +2,33 @@
  * The ADR taxonomy, as data plus pure decisions over it. The effectful half —
  * reading the directories, writing an index — is `scripts/verify-adrs.mjs`.
  *
- * The rule this encodes: one home per tier, chosen by what survives the CQMS
- * extraction, and one global number sequence across all of them. See
+ * The rule this encodes: one home per tier, and one global number sequence
+ * across all of them. See
  * docs/decisions/ADR-048-adr-taxonomy-and-one-sequence.md.
  */
 
 /**
  * Every directory allowed to hold an `ADR-NNN-*.md`, in index order. `tier` is
- * the stable key the gate reports; `keeps` says what happens to the directory
- * when CQMS moves to its own repository, which is the whole reason the split
- * runs where it does.
+ * the stable key the gate reports.
+ *
+ * The split was originally drawn by what would survive the CQMS extraction, and
+ * each entry carried a `keeps` flag recording that. The extraction has
+ * happened: the `docs/cqms/decisions` home left with it, so every remaining
+ * home would be `keeps: true` and a field that cannot be false is not data.
+ * Both are gone rather than kept as a monument — the reasoning is ADR-048's.
  */
 export const ADR_HOMES = [
   {
     blurb:
-      'The repository, its published `@lcabrera/*` packages, and the toolchain. Stays here when CQMS is extracted.',
+      'The repository, its published `@lcabrera/*` packages, and the toolchain.',
     dir: 'docs/decisions',
-    keeps: true,
     tier: 'repo',
     title: 'Repository, packages & tooling',
   },
   {
     blurb:
-      'CQMS / CodePulse product decisions — schema, scanners, ingestion, orchestration. Moves with the app.',
-    dir: 'docs/cqms/decisions',
-    keeps: false,
-    tier: 'cqms',
-    title: 'CQMS / CodePulse',
-  },
-  {
-    blurb:
       'Decisions internal to the `apps/react-router` showcase app — its components, routes and interaction model.',
     dir: 'apps/react-router/docs/decisions',
-    keeps: true,
     tier: 'app',
     title: 'React Router showcase app',
   },
@@ -62,15 +56,19 @@ export const TEMPLATE_HOME = 'docs/decisions';
 export const NON_ADR_FILES = new Set(['README.md', TEMPLATE_FILE]);
 
 /**
- * Numbers that already meant two things before the one-sequence rule existed:
- * the showcase app and the then-single `docs/cqms/decisions` sequence both
- * started at 001. They are not renumbered, because an ADR is a dated record and
- * every merged PR, issue and commit citing one would silently start pointing at
- * a different document. Each may appear exactly twice; nothing else may repeat.
+ * Numbers that already meant two things before the one-sequence rule existed,
+ * because each home started its own sequence at 001. They are not renumbered:
+ * an ADR is a dated record, and every merged PR, issue and commit citing one
+ * would silently start pointing at a different document. Each may appear
+ * exactly twice; nothing else may repeat.
+ *
+ * The set shrank when CQMS left. 006, 007 and 009–012 were duplicates only
+ * because `docs/cqms/decisions` also used them; with that home gone the
+ * showcase app holds each of those alone, so allowing a second would license a
+ * NEW collision rather than tolerate an old one. What remains is the genuine
+ * overlap between the repo and app homes.
  */
-const GRANDFATHERED_DUPLICATES = new Set([
-  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
-]);
+const GRANDFATHERED_DUPLICATES = new Set([1, 2, 3, 4, 5, 8]);
 
 const FILENAME = /^ADR-(\d{3})-([a-z0-9]+(?:-[a-z0-9]+)*)\.md$/;
 

@@ -43,10 +43,6 @@ wrong from the next commit onward with nothing to say which; the Sonar one was
 wrong across many merges. Same reasoning as the no-changing-numbers rule in
 AGENTS.md §7, at file scale.
 
-Sole exception: CQMS UI-triggered scans run by `apps/scan-orchestrator` use their
-own `.tmp/scan-orchestrator/<scan_id>/` workspace — their results land in the
-CQMS database, not the filesystem.
-
 ## The audit gate
 
 The commands live in

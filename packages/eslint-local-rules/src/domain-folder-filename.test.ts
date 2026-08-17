@@ -157,14 +157,17 @@ ruleTester.run('domain-folder-filename', rule, {
     {
       code,
       filename:
-        'apps/admin_system/src/routes/cqms/trigger-scan/triggerScan.constants.ts',
+        'apps/react-router/src/routes/orders/trigger-sync/triggerSync.constants.ts',
     },
     {
       code,
       filename:
-        'apps/admin_system/src/routes/cqms/project-detail/ProjectDetail.types.ts',
+        'apps/react-router/src/routes/orders/order-detail/OrderDetail.types.ts',
     },
-    { code, filename: 'apps/admin_system/src/routes/cqms/Cqms.constants.tsx' },
+    {
+      code,
+      filename: 'apps/react-router/src/routes/orders/Orders.constants.tsx',
+    },
     {
       code,
       filename:

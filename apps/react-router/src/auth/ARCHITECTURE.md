@@ -1,7 +1,7 @@
 # Auth (`src/auth/`)
 
 Self-contained, **server-only** authentication for the secured-routes showcase
-(epic #79, Track 4). It has no CQMS / `scan-ingestion` coupling — it reuses only
+(epic #79, Track 4). It has no CQMS coupling — it reuses only
 the generic primitives in `@lcabrera/server` (`tokens/*`, `crypto/*`) and RR7's
 own cookie/middleware/context APIs.
 

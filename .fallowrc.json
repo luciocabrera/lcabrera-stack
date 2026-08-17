@@ -6,10 +6,8 @@
     "packages/scan-report/scripts/*.mjs",
     "apps/react-router/lighthouse.config.js",
     "apps/react-router/config/*.ts",
-    "apps/admin_system/config/*.ts",
     "packages/ui/config/*.ts",
-    "apps/*/scripts/**/*.{ts,js,mjs}",
-    "packages/scan-ingestion/src/cli/*.ts"
+    "apps/*/scripts/**/*.{ts,js,mjs}"
   ],
   "ignorePatterns": [
     "**/build/**",

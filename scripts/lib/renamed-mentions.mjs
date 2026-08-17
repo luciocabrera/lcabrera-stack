@@ -14,8 +14,7 @@
  * is "a file moved and a doc did not". That makes it a property of the change,
  * so the names to look for come from the diff and an untouched document naming
  * an example filename is never examined. #604 renamed a batch of modules and
- * `docs/cqms/decisions/ADR-029-cli-push-and-api-tokens.md` went on naming one of
- * them until a human found it (#611).
+ * a CQMS ADR went on naming one of them until a human found it (#611).
  *
  * Renames only, deliberately — not deletions. A rename is provable rot: the
  * content still exists under a new name, so prose naming the old one points at
