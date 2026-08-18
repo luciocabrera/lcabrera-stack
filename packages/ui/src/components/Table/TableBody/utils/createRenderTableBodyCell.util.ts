@@ -5,6 +5,7 @@ import type {
   TableColumn,
   TableGroupRowSummary,
 } from '#ui/components/Table/Table.types';
+import type { TableGroupDisclosureState } from '#ui/components/Table/TableGroupDisclosure';
 
 import { buildTableBodyCellDescriptor } from './buildTableBodyCellDescriptor.util';
 import { renderFromDescriptor } from './renderFromDescriptor.util';
@@ -23,6 +24,8 @@ type CreateRenderTableBodyCellArgs<TData extends Record<string, unknown>> = {
 
 type RenderBodyCellArgs<TData extends Record<string, unknown>> = {
   readonly col: TableColumn<TData>;
+  /** The row's place in the tree, when it is a group row — per row, like the summary. */
+  readonly disclosure?: TableGroupDisclosureState;
   /** The row's group summary, when it has one — per row, like the row itself. */
   readonly groupSummary?: TableGroupRowSummary;
   readonly row: TData;
@@ -45,10 +48,18 @@ export const createRenderTableBodyCell =
     isLoadingState,
     pinnedOffsets,
   }: CreateRenderTableBodyCellArgs<TData>) =>
-  ({ col, groupSummary, row, rowIndex, rowKey }: RenderBodyCellArgs<TData>) => {
+  ({
+    col,
+    disclosure,
+    groupSummary,
+    row,
+    rowIndex,
+    rowKey,
+  }: RenderBodyCellArgs<TData>) => {
     const descriptor = buildTableBodyCellDescriptor({
       col,
       columnSizing,
+      disclosure,
       groupingKeys,
       groupSummary,
       isLoadingState,

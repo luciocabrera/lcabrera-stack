@@ -2,11 +2,19 @@
 
 import * as stylex from '@stylexjs/stylex';
 import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vite-plus/test';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import type { TableGroupRowSummary } from '#ui/components/Table/Table.types';
 
 import { TableGroupLabel } from './TableGroupLabel.component';
+
+// The label now leads with the disclosure control, which wires its own toggle
+// from the config context. These are unit tests of the label's text, indent and
+// one-line contract, so the store is stubbed rather than stood up — the
+// control's own behaviour is covered in `TableGroupDisclosure.test.tsx`.
+vi.mock('#ui/components/Table/contexts/TableConfig/expansion/actions', () => ({
+  useToggleTableGroupExpansion: () => vi.fn(),
+}));
 
 /**
  * The one-line contract, declared here independently of the component.
@@ -42,7 +50,7 @@ describe('TableGroupLabel', () => {
   afterEach(cleanup);
 
   it('shows the innermost level of the group', () => {
-    render(<TableGroupLabel summary={summary()} />);
+    render(<TableGroupLabel disclosure={undefined} summary={summary()} />);
 
     expect(screen.getByText('Spain')).toBeTruthy();
   });
@@ -51,7 +59,12 @@ describe('TableGroupLabel', () => {
     // ADR-065 puts a measure in the column it aggregates, under that column's
     // header. A count printed here is the one measure aligned under nothing;
     // a route that wants it selects a `count` aggregate on a column instead.
-    render(<TableGroupLabel summary={summary({ count: 12 })} />);
+    render(
+      <TableGroupLabel
+        disclosure={undefined}
+        summary={summary({ count: 12 })}
+      />,
+    );
 
     expect(screen.queryByText('(12)')).toBeNull();
     expect(screen.getByTestId('table-group-label').textContent).toBe('Spain');
@@ -63,6 +76,7 @@ describe('TableGroupLabel', () => {
     // and <tbody>'s declared height stops matching what is painted (ADR-065).
     render(
       <TableGroupLabel
+        disclosure={undefined}
         summary={summary({
           path: [
             { columnKey: 'city', label: 'a very long group label '.repeat(8) },
@@ -95,6 +109,7 @@ describe('TableGroupLabel', () => {
   it('indents one step per level, so a level reads off the row', () => {
     render(
       <TableGroupLabel
+        disclosure={undefined}
         summary={summary({
           path: [
             { columnKey: 'region', label: 'EMEA' },
@@ -114,6 +129,7 @@ describe('TableGroupLabel', () => {
   it('renders a subtotal as a total of its own level, unindented', () => {
     render(
       <TableGroupLabel
+        disclosure={undefined}
         summary={summary({
           isSubtotal: true,
           path: [{ columnKey: 'region', label: 'EMEA' }],
@@ -129,7 +145,10 @@ describe('TableGroupLabel', () => {
 
   it('names the grand total, which no key identifies', () => {
     render(
-      <TableGroupLabel summary={summary({ isSubtotal: true, path: [] })} />,
+      <TableGroupLabel
+        disclosure={undefined}
+        summary={summary({ isSubtotal: true, path: [] })}
+      />,
     );
 
     expect(screen.getByText('Grand total')).toBeTruthy();

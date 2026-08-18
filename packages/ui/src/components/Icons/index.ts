@@ -4,6 +4,7 @@ export { CheckIcon } from './CheckIcon';
 export { CollapseAllIcon } from './CollapseAllIcon';
 export { ColumnsOrderIcon } from './ColumnsOrderIcon';
 export { CopyIcon } from './CopyIcon';
+export { DisclosureIcon } from './DisclosureIcon';
 export { EraserIcon } from './EraserIcon';
 export { ErrorDescriptive } from './ErrorDescriptive';
 export { ErrorIcon } from './ErrorIcon';

@@ -382,6 +382,14 @@ const enterGrid = async () => {
  * reads a DOM that has already collapsed. There is no Suspense in this harness
  * for an awaited `act` to serve.
  */
+/** The disclosure chevron of the nth rendered group row. */
+const chevronOf = (index: number) =>
+  screen
+    .getAllByTestId('table-group-header-row')
+    [index]?.querySelector('[data-testid="table-group-disclosure"]') as
+    | HTMLElement
+    | undefined;
+
 const clickButton = (testId: string) => {
   fireEvent.click(screen.getByTestId(testId));
 };
@@ -401,6 +409,66 @@ describe('a grouped table that expands and collapses', () => {
   afterEach(() => {
     cleanup();
     vi.unstubAllGlobals();
+  });
+
+  it('folds a group when its own disclosure chevron is clicked', () => {
+    // The pointer path, end to end in a real grid. Every other test here drives
+    // expansion through the harness button or the arrow keys, so none of them
+    // would notice the chevron being unwired, mispointed at another group, or
+    // absent altogether.
+    render(<Harness data={rows} />);
+
+    expect(getRenderedRows()).toHaveLength(7);
+
+    const [parisRow] = screen.getAllByTestId('table-group-header-row');
+    const chevron = parisRow?.querySelector(
+      '[data-testid="table-group-disclosure"]',
+    );
+
+    fireEvent.click(chevron as Element);
+
+    expect(getRenderedRows()).toHaveLength(4);
+    expect(getGroupLabels()).toStrictEqual(['Paris', 'Berlin']);
+
+    fireEvent.click(
+      screen
+        .getAllByTestId('table-group-header-row')[0]
+        ?.querySelector('[data-testid="table-group-disclosure"]') as Element,
+    );
+
+    expect(getRenderedRows()).toHaveLength(7);
+  });
+
+  it('points the chevron the way its group is currently folded', () => {
+    render(<Harness data={rows} />);
+
+    expect(chevronOf(0)?.dataset.expanded).toBe('true');
+
+    clickButton('toggle-paris');
+
+    expect(chevronOf(0)?.dataset.expanded).toBe('false');
+  });
+
+  it('adds no tab stop to the grid', () => {
+    // ADR-062 gives the grid exactly one roving tab stop. A chevron rendered as
+    // a <button> would put a second one inside a cell that already owns one, so
+    // this asserts the count over a real grouped body rather than over the
+    // component alone — the only place the regression would show.
+    render(<Harness data={rows} />);
+
+    const tabbable = [
+      ...screen.getByRole('treegrid').querySelectorAll('[tabindex="0"]'),
+    ];
+
+    expect(tabbable.length).toBeLessThanOrEqual(1);
+
+    for (const chevron of screen.getAllByTestId('table-group-disclosure')) {
+      expect(chevron.getAttribute('tabindex')).toBeNull();
+      expect(chevron.tagName).not.toBe('BUTTON');
+      // The row already carries `aria-expanded`; announcing it here too would
+      // state the same thing twice to a screen reader.
+      expect(chevron.getAttribute('aria-hidden')).toBe('true');
+    }
   });
 
   it('removes a collapsed group’s rows and puts them back', async () => {

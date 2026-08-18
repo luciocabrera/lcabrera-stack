@@ -75,6 +75,7 @@ export const TableBodyRows = <TData extends Record<string, unknown>>({
         const groupSummary = getTableGroupRowSummary(row);
         const isGroupRow = groupSummary !== undefined;
         const cellArgs = {
+          disclosure: rowMeta?.[rowIndex],
           groupSummary,
           renderCell: renderBodyCell,
           row,

@@ -11,6 +11,7 @@ import {
   TableDataProvider,
   TableFocusProvider,
 } from '#ui/components/Table/contexts';
+import { TableWrapperContext } from '#ui/components/Table/contexts/TableWrapper/TableWrapperContext.context';
 import { TABLE_GROUP_ROW_FIELD } from '#ui/components/Table/Table.constants';
 
 import { TableBody } from './TableBody.component';
@@ -90,6 +91,7 @@ type HarnessProps = {
 
 const BodyHarness = ({ data }: HarnessProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   return (
     <TableConfigProvider<TestRow>
@@ -109,11 +111,13 @@ const BodyHarness = ({ data }: HarnessProps) => {
             totalRows: data.length,
           }}
         >
-          <div ref={containerRef}>
-            <table>
-              <TableBody tableContainerRef={containerRef} />
-            </table>
-          </div>
+          <TableWrapperContext value={{ containerRef, wrapperRef }}>
+            <div ref={containerRef}>
+              <table>
+                <TableBody tableContainerRef={containerRef} />
+              </table>
+            </div>
+          </TableWrapperContext>
         </TableDataProvider>
       </TableFocusProvider>
     </TableConfigProvider>

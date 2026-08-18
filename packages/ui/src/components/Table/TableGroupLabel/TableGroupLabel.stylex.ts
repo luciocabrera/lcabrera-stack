@@ -21,13 +21,6 @@ export const tableGroupLabelStyles = stylex.create({
     minWidth: 0,
     width: '100%',
   },
-  icon: {
-    alignItems: 'center',
-    color: colors.brandPrimaryCardText,
-    display: 'inline-flex',
-    flexShrink: 0,
-    opacity: 0.7,
-  },
   /**
    * Depth as padding rather than as a margin or a nested box: padding leaves
    * the flex line intact, so the label ellipsizes into whatever width is left

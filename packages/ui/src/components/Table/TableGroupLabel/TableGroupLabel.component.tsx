@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { GroupRowsIcon } from '#ui/components/Icons';
 import { TABLE_GROUP_HIERARCHY_INDENT_PX } from '#ui/components/Table/Table.constants';
+import { TableGroupDisclosure } from '#ui/components/Table/TableGroupDisclosure';
 
 import type { TableGroupLabelProps } from './TableGroupLabel.types';
 
@@ -18,6 +18,12 @@ import { toGroupHierarchyLabel } from './utils/toGroupHierarchyLabel.util';
  * painted (ADR-065). The label ellipsizes instead, which is a truncation the
  * reader can see, and indentation narrows the text rather than the row.
  *
+ * The disclosure chevron leads the line and is the row's only pointer path to
+ * expansion — see `TableGroupDisclosure` for why it is not a button. It
+ * replaces the decorative group icon that used to sit here: the row's own
+ * ground now says "this is a group", so a second, non-interactive marker in the
+ * one place a user will click was working against itself.
+ *
  * **The row count is not here, and its absence is the decision.** ADR-065 puts
  * a measure in the column it aggregates, under that column's header; a count
  * printed beside the label is the one measure exempt from that, aligned under
@@ -26,7 +32,10 @@ import { toGroupHierarchyLabel } from './utils/toGroupHierarchyLabel.util';
  * aggregate. `summary.count` stays on the contract for consumers that need the
  * number without projecting it.
  */
-export const TableGroupLabel = ({ summary }: TableGroupLabelProps) => {
+export const TableGroupLabel = ({
+  disclosure,
+  summary,
+}: TableGroupLabelProps) => {
   const { depth, isSubtotal, text } = toGroupHierarchyLabel({ summary });
 
   return (
@@ -37,9 +46,7 @@ export const TableGroupLabel = ({ summary }: TableGroupLabelProps) => {
       )}
       data-testid='table-group-label'
     >
-      <span {...stylex.props(tableGroupLabelStyles.icon)}>
-        <GroupRowsIcon size={14} />
-      </span>
+      <TableGroupDisclosure disclosure={disclosure} path={summary.path} />
       <span
         {...stylex.props(
           tableGroupLabelStyles.text,

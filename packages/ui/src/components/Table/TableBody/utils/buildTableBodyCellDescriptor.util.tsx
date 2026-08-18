@@ -6,6 +6,7 @@ import type {
   TableGroupRowSummary,
 } from '#ui/components/Table/Table.types';
 import type { TableBodyCellProps } from '#ui/components/Table/TableBodyCell/TableBodyCell.types';
+import type { TableGroupDisclosureState } from '#ui/components/Table/TableGroupDisclosure';
 
 import { DEFAULT_MIN_COLUMN_WIDTH } from '#ui/components/Table/Table.constants';
 import { TableRowActionsMenu } from '#ui/components/Table/TableRowActionsMenu';
@@ -29,6 +30,12 @@ export type TableBodyCellDescriptor<TData extends Record<string, unknown>> =
 type BuildTableBodyCellDescriptorArgs<TData extends Record<string, unknown>> = {
   readonly col: TableColumn<TData>;
   readonly columnSizing: ColumnSizingState<TData>;
+  /**
+   * The row's place in the tree, when it has one. Resolved from the group tree
+   * rather than from the summary, because whether a row owns rows is a question
+   * about the other rows — see `TableGroupDisclosure.types.ts`.
+   */
+  readonly disclosure?: TableGroupDisclosureState;
   /**
    * The applied group keys. A detail row blanks the columns it is grouped by:
    * the value is stated once by the group row above it, and repeating it down a
@@ -106,6 +113,7 @@ export const buildTableBodyCellDescriptor = <
 >({
   col,
   columnSizing,
+  disclosure,
   groupingKeys,
   groupSummary,
   isLoadingState,
@@ -134,7 +142,11 @@ export const buildTableBodyCellDescriptor = <
   if (groupSummary !== undefined) {
     return {
       ...shared,
-      children: resolveGroupCellChildren({ columnKey, summary: groupSummary }),
+      children: resolveGroupCellChildren({
+        columnKey,
+        disclosure,
+        summary: groupSummary,
+      }),
     };
   }
 

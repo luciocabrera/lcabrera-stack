@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vite-plus/test';
 import { BarChartIcon } from './BarChartIcon';
 import { CheckIcon } from './CheckIcon';
 import { ColumnsOrderIcon } from './ColumnsOrderIcon';
+import { DisclosureIcon } from './DisclosureIcon';
 import { EraserIcon } from './EraserIcon';
 import { ErrorIcon } from './ErrorIcon';
 import { EyeIcon } from './EyeIcon';
@@ -44,6 +45,7 @@ const iconComponents = [
   { Component: BarChartIcon, defaultSize: 24, name: 'BarChartIcon' },
   { Component: CheckIcon, defaultSize: 10, name: 'CheckIcon' },
   { Component: ColumnsOrderIcon, defaultSize: 16, name: 'ColumnsOrderIcon' },
+  { Component: DisclosureIcon, defaultSize: 24, name: 'DisclosureIcon' },
   { Component: EraserIcon, defaultSize: 16, name: 'EraserIcon' },
   { Component: ErrorIcon, defaultSize: 24, name: 'ErrorIcon' },
   { Component: EyeIcon, defaultSize: 24, name: 'EyeIcon' },
