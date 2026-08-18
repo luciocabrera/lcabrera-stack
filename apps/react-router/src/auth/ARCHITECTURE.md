@@ -28,7 +28,7 @@ flowchart TD
   M -- invalid --> N[return errors\nno network]
   M -- valid --> O[serverAction -> action]
   O --> P[verifyCredentials\nisSecretHashValid]
-  P -- ok --> Q[generateApiToken jti\n+ signAuthToken\n+ Set-Cookie]
+  P -- ok --> Q[randomUUID jti\n+ signAuthToken\n+ Set-Cookie]
   Q --> R[redirect redirectTo ?? '/']
 
   X[POST /logout] --> Y[clear cookie\n+ redirect /login]
@@ -39,15 +39,28 @@ flowchart TD
 `signAuthToken` serializes the claims to `<payloadB64>.<signature>`:
 
 - `payloadB64` — base64url of the `AuthClaims` JSON (`sub`, `jti`, `iat`, `exp`,
-  unix **seconds**). `jti` comes from `generateApiToken()` (a random nonce), so
-  every session token is unique and unguessable.
+  unix **seconds**). `jti` is a `crypto.randomUUID()` nonce, so every session
+  token is unique and unguessable.
 - `signature` — HMAC-SHA256 of `payloadB64` under `AUTH_TOKEN_SECRET`.
 
-`verifyAuthToken` splits it with `parseApiToken` (the `.` separator matches the
-primitive's `<tokenId>.<secret>` shape), recomputes the HMAC and compares it in
-**constant time** (`timingSafeStringEqual`), decodes the claims, and rejects
-anything expired. It is stateless — no token store — and pure (`nowSeconds` is
-injected), so it is fully unit-testable.
+`verifyAuthToken` splits it with `parseAuthToken`, recomputes the HMAC and
+compares it in **constant time** (`timingSafeStringEqual`), decodes the claims,
+and rejects anything expired. It is stateless — no token store — and pure
+(`nowSeconds` is injected), so it is fully unit-testable.
+
+**Why the bearer-token primitives are not reused here.** Both halves of this
+token once came from `@lcabrera/server`'s API-token utils, because the shapes
+line up: `parseApiToken` splits `<tokenId>.<secret>`, and `generateApiToken()`
+yields a random `tokenId`. The contracts do not line up. A bearer token's second
+half is a **secret the server looks up**; this token's second half is a
+**signature the server recomputes**, and its first half is the signed message.
+Borrowing the names left `parsed.secret` holding a signature and a token
+_identifier_ standing in for a nonce — misleading to a reader, and read by
+CodeQL as a credential flowing into a fast hash
+(`js/insufficient-password-hash`, alert 1). The crypto was never wrong: an HMAC
+is the correct primitive for a signature and **must** stay deterministic so
+verification can recompute it, while the password itself is checked with
+**scrypt** (`isSecretHashValid`). Only the naming was.
 
 The cookie itself is **unsigned** (`createCookie` without `secrets`): tamper-proofing
 is the token's own HMAC, giving a single signature story. `httpOnly` + `sameSite=lax`;
@@ -97,6 +110,7 @@ for anything beyond local demoing; generate a replacement hash with
 | `signAuthPayload.server.ts`       | HMAC of a payload (server-only — `.server.ts` per the node-import rule) |
 | `timingSafeStringEqual.server.ts` | Constant-time compare (server-only)                                     |
 | `signAuthToken.util.ts`           | Claims → signed token                                                   |
+| `parseAuthToken.util.ts`          | Token → `{ payload, signature }` \| undefined (shape only)              |
 | `decodeAuthClaims.util.ts`        | Payload → claims (guarded, total)                                       |
 | `verifyAuthToken.util.ts`         | Token → claims \| undefined (signature + expiry)                        |
 | `readAuthCookie.util.ts`          | Request → raw token (the effectful edge)                                |
