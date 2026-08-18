@@ -10,7 +10,7 @@ const summary = (overrides: Partial<TableGroupRowSummary>) =>
       aggregates: [],
       count: 3,
       isSubtotal: false,
-      path: [{ columnKey: 'shipping_country', label: 'EMEA' }],
+      path: [{ columnKey: 'shipping_country', label: 'EMEA', value: 'EMEA' }],
       ...overrides,
     },
   });
@@ -22,8 +22,8 @@ describe('toGroupHierarchyLabel', () => {
     expect(
       summary({
         path: [
-          { columnKey: 'region', label: 'EMEA' },
-          { columnKey: 'shipping_country', label: 'Spain' },
+          { columnKey: 'region', label: 'EMEA', value: 'EMEA' },
+          { columnKey: 'shipping_country', label: 'Spain', value: 'Spain' },
         ],
       }).text,
     ).toBe('Spain');
@@ -34,8 +34,8 @@ describe('toGroupHierarchyLabel', () => {
     expect(
       summary({
         path: [
-          { columnKey: 'region', label: 'EMEA' },
-          { columnKey: 'shipping_country', label: 'Spain' },
+          { columnKey: 'region', label: 'EMEA', value: 'EMEA' },
+          { columnKey: 'shipping_country', label: 'Spain', value: 'Spain' },
         ],
       }).depth,
     ).toBe(1);
@@ -52,13 +52,13 @@ describe('toGroupHierarchyLabel', () => {
     // what separate them.
     const realNull = summary({
       path: [
-        { columnKey: 'region', label: 'EMEA' },
-        { columnKey: 'shipping_country', label: '(empty)' },
+        { columnKey: 'region', label: 'EMEA', value: 'EMEA' },
+        { columnKey: 'shipping_country', label: '(empty)', value: '(empty)' },
       ],
     });
     const subtotal = summary({
       isSubtotal: true,
-      path: [{ columnKey: 'region', label: 'EMEA' }],
+      path: [{ columnKey: 'region', label: 'EMEA', value: 'EMEA' }],
     });
 
     expect(realNull.depth).toBe(1);

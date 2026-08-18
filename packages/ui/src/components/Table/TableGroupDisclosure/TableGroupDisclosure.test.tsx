@@ -14,7 +14,7 @@ vi.mock('#ui/components/Table/contexts/TableConfig/expansion/actions', () => ({
 }));
 
 const PATH: readonly TableGroupKeyValue[] = [
-  { columnKey: 'region', label: 'EMEA' },
+  { columnKey: 'region', label: 'EMEA', value: 'EMEA' },
 ];
 
 describe('TableGroupDisclosure', () => {

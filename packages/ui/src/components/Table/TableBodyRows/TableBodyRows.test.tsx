@@ -326,7 +326,7 @@ describe('TableBodyRows', () => {
           aggregates: [],
           count: 3,
           isSubtotal: false,
-          path: [{ columnKey: 'name', label: 'A' }],
+          path: [{ columnKey: 'name', label: 'A', value: 'A' }],
         },
       },
     ]);
@@ -359,7 +359,7 @@ describe('TableBodyRows', () => {
           aggregates: [],
           count: 3,
           isSubtotal: false,
-          path: [{ columnKey: 'name', label: 'A' }],
+          path: [{ columnKey: 'name', label: 'A', value: 'A' }],
         },
       },
       { amount: 10, name: 'A' },
@@ -403,7 +403,7 @@ describe('TableBodyRows', () => {
           aggregates: [],
           count: 1,
           isSubtotal: false,
-          path: [{ columnKey: 'name', label: 'A' }],
+          path: [{ columnKey: 'name', label: 'A', value: 'A' }],
         },
       },
       { amount: 10, name: 'A' },
@@ -434,7 +434,7 @@ describe('TableBodyRows', () => {
           aggregates: [],
           count: 2,
           isSubtotal: false,
-          path: [{ columnKey: 'name', label: 'A' }],
+          path: [{ columnKey: 'name', label: 'A', value: 'A' }],
         },
       },
       {
@@ -442,7 +442,7 @@ describe('TableBodyRows', () => {
           aggregates: [],
           count: 5,
           isSubtotal: false,
-          path: [{ columnKey: 'name', label: 'B' }],
+          path: [{ columnKey: 'name', label: 'B', value: 'B' }],
         },
       },
       {
@@ -450,7 +450,7 @@ describe('TableBodyRows', () => {
           aggregates: [],
           count: 1,
           isSubtotal: false,
-          path: [{ columnKey: 'name', label: 'C' }],
+          path: [{ columnKey: 'name', label: 'C', value: 'C' }],
         },
       },
     ]);
@@ -474,7 +474,7 @@ describe('TableBodyRows', () => {
           aggregates: [],
           count: 2,
           isSubtotal: false,
-          path: [{ columnKey: 'name', label: 'A' }],
+          path: [{ columnKey: 'name', label: 'A', value: 'A' }],
         },
       },
       {
@@ -482,7 +482,7 @@ describe('TableBodyRows', () => {
           aggregates: [],
           count: 5,
           isSubtotal: false,
-          path: [{ columnKey: 'name', label: 'B' }],
+          path: [{ columnKey: 'name', label: 'B', value: 'B' }],
         },
       },
     ]);
@@ -505,7 +505,7 @@ describe('TableBodyRows', () => {
           aggregates: [],
           count: 5,
           isSubtotal: false,
-          path: [{ columnKey: 'name', label: 'B' }],
+          path: [{ columnKey: 'name', label: 'B', value: 'B' }],
         },
       },
       {
@@ -513,7 +513,7 @@ describe('TableBodyRows', () => {
           aggregates: [],
           count: 2,
           isSubtotal: false,
-          path: [{ columnKey: 'name', label: 'A' }],
+          path: [{ columnKey: 'name', label: 'A', value: 'A' }],
         },
       },
     ]);

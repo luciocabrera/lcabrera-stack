@@ -35,7 +35,7 @@ const rows: readonly Row[] = [
   { city: 'C', id: 3 },
 ];
 
-const groupPath = [{ columnKey: 'city', label: 'A' }];
+const groupPath = [{ columnKey: 'city', label: 'A', value: 'A' }];
 
 const groupedRows: readonly Row[] = [
   {

@@ -32,6 +32,7 @@ const groupRow = (...labels: readonly string[]) =>
       path: labels.map((label, index) => ({
         columnKey: index === 0 ? 'order_number' : `key_${index}`,
         label,
+        value: label,
       })),
     },
   }) as unknown as Row;

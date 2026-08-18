@@ -62,10 +62,10 @@ const columns: TableColumn<TestRow>[] = [
 ];
 
 const paris: readonly TableGroupKeyValue[] = [
-  { columnKey: 'city', label: 'Paris' },
+  { columnKey: 'city', label: 'Paris', value: 'Paris' },
 ];
 const berlin: readonly TableGroupKeyValue[] = [
-  { columnKey: 'city', label: 'Berlin' },
+  { columnKey: 'city', label: 'Berlin', value: 'Berlin' },
 ];
 
 const groupRow = (path: readonly TableGroupKeyValue[]): TestRow => ({

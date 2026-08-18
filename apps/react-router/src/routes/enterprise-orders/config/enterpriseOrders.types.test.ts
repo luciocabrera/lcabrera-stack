@@ -23,7 +23,7 @@ const groupRow: EnterpriseOrderTableRow = {
     aggregates: [],
     count: 12,
     isSubtotal: false,
-    path: [{ columnKey: 'order_status', label: 'Shipped' }],
+    path: [{ columnKey: 'order_status', label: 'Shipped', value: 'Shipped' }],
   },
 };
 
@@ -65,7 +65,7 @@ describe('EnterpriseOrderTableRow', () => {
       aggregates: [],
       count: 12,
       isSubtotal: false,
-      path: [{ columnKey: 'order_status', label: 'Shipped' }],
+      path: [{ columnKey: 'order_status', label: 'Shipped', value: 'Shipped' }],
     });
     expect(groupRow[TABLE_GROUP_ROW_FIELD]).toBeDefined();
   });

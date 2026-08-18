@@ -65,15 +65,20 @@ const isKeyRolledUp = ({ index, keyCount, mask }: IsKeyRolledUpArgs) =>
  *   sets a bit, so every row is a leaf and this stays `false` throughout, which
  *   is byte for byte the behaviour before rollup existed.
  *
- * **Keys are formatted here; aggregates are not.** Only this side knows a key
- * is a Postgres value — a NULL key is a real group rather than a missing one —
- * and nothing downstream can resolve a key back to the column it came from. An
- * aggregate is the opposite case: it names its column, so the cell that renders
- * it can ask the columns store for that column's `dataType` and `format` and
- * render it exactly as the cells beneath it. Formatting one here is how a
- * `numeric` sum reached a currency column as `"302540833.38"` — `pg` hands
- * `numeric` and `bigint` back as strings, and this side has nothing better to
- * do with one than pass it along. So it passes it along raw instead.
+ * **A key is emitted twice — formatted and raw; an aggregate only raw.** Only
+ * this side can format a key: nothing downstream resolves a path entry back to
+ * the column it came from, so the label has to be produced here. But formatting
+ * is lossy in exactly the direction a query needs — a NULL key becomes
+ * `(empty)`, a date an ISO string — so the raw value is carried beside it, and
+ * that is what a drill turns into a filter (ADR-079). They answer two
+ * questions, so collapsing them loses one.
+ *
+ * An aggregate is the opposite case and needs only the raw half: it names its
+ * column, so the cell that renders it can ask the columns store for that
+ * column's `dataType` and `format` and render it exactly as the cells beneath
+ * it. Formatting one here is how a `numeric` sum reached a currency column as
+ * `"302540833.38"` — `pg` hands `numeric` and `bigint` back as strings, and
+ * this side has nothing better to do with one than pass it along.
  *
  * The result carries the summary and nothing else. A grouped read projects only
  * the group keys and their aggregates, so there is no detail row hiding
@@ -114,6 +119,7 @@ export const toOrderGroupRow = ({
       path: groupedKeys.map((columnKey) => ({
         columnKey,
         label: toOrderGroupLabel(row[columnKey]),
+        value: row[columnKey],
       })),
     },
   };

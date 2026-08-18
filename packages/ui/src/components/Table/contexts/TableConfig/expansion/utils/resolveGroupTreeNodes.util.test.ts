@@ -10,11 +10,11 @@ import { resolveGroupPathKey } from '#ui/components/Table/contexts/TableConfig/g
 import { resolveGroupTreeNodes } from './resolveGroupTreeNodes.util';
 
 const emea: readonly TableGroupKeyValue[] = [
-  { columnKey: 'region', label: 'EMEA' },
+  { columnKey: 'region', label: 'EMEA', value: 'EMEA' },
 ];
 const spain: readonly TableGroupKeyValue[] = [
   ...emea,
-  { columnKey: 'country', label: 'Spain' },
+  { columnKey: 'country', label: 'Spain', value: 'Spain' },
 ];
 
 type SummaryArgs = {

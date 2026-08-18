@@ -11,7 +11,7 @@ const summary = (
   aggregates: [],
   count: 4,
   isSubtotal: false,
-  path: [{ columnKey: 'region', label: 'EMEA' }],
+  path: [{ columnKey: 'region', label: 'EMEA', value: 'EMEA' }],
   ...overrides,
 });
 

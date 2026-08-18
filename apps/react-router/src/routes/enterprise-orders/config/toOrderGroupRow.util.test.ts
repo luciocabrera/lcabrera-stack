@@ -22,7 +22,9 @@ describe('toOrderGroupRow', () => {
         aggregates: [],
         count: 12,
         isSubtotal: false,
-        path: [{ columnKey: 'order_status', label: 'Shipped' }],
+        path: [
+          { columnKey: 'order_status', label: 'Shipped', value: 'Shipped' },
+        ],
       },
     });
   });
@@ -40,8 +42,8 @@ describe('toOrderGroupRow', () => {
     });
 
     expect(result[TABLE_GROUP_ROW_FIELD].path).toStrictEqual([
-      { columnKey: 'order_status', label: 'Shipped' },
-      { columnKey: 'shipping_country', label: 'USA' },
+      { columnKey: 'order_status', label: 'Shipped', value: 'Shipped' },
+      { columnKey: 'shipping_country', label: 'USA', value: 'USA' },
     ]);
   });
 
@@ -118,6 +120,41 @@ describe('toOrderGroupRow', () => {
     expect(result[TABLE_GROUP_ROW_FIELD].isSubtotal).toBe(false);
   });
 
+  it('carries a NULL key as `null`, not as the string it renders as', () => {
+    // The pair that makes both fields necessary. `(empty)` is the right thing
+    // to *print* and the wrong thing to *query* — `order_status = '(empty)'`
+    // matches no row, and nothing raises. So the label stays formatted and the
+    // value stays raw, on the one group where the difference is silent.
+    const result = toOrderGroupRow({
+      ...args,
+      row: JSON.parse(
+        '{"count_rows":"3","group_mask":0,"order_status":null}',
+      ) as Record<string, unknown>,
+    });
+    const [key] = result[TABLE_GROUP_ROW_FIELD].path;
+
+    expect(key?.label).toBe('(empty)');
+    expect(key?.value).toBeNull();
+  });
+
+  it('carries the raw key beside the label for every dimension type', () => {
+    // A boolean key renders as `'true'` and a number as `'42'`; both are
+    // strings once formatted, and neither round-trips back to a value. Parsed
+    // from JSON so the types are the driver's, not a literal's.
+    const result = toOrderGroupRow({
+      ...args,
+      columnKeys: ['is_gift', 'priority'],
+      row: JSON.parse(
+        '{"count_rows":"7","group_mask":0,"is_gift":true,"priority":42}',
+      ) as Record<string, unknown>,
+    });
+
+    expect(result[TABLE_GROUP_ROW_FIELD].path).toStrictEqual([
+      { columnKey: 'is_gift', label: 'true', value: true },
+      { columnKey: 'priority', label: '42', value: 42 },
+    ]);
+  });
+
   it('tells a structural NULL apart from that real one by the mask alone', () => {
     // The discriminating pair. Same column, same NULL, same text as the row
     // above — that one has `group_mask: 0` and is a real NULL group, this one
@@ -150,7 +187,7 @@ describe('toOrderGroupRow', () => {
     });
 
     expect(result[TABLE_GROUP_ROW_FIELD].path).toStrictEqual([
-      { columnKey: 'order_status', label: 'Shipped' },
+      { columnKey: 'order_status', label: 'Shipped', value: 'Shipped' },
     ]);
     expect(result[TABLE_GROUP_ROW_FIELD].isSubtotal).toBe(true);
   });
@@ -179,7 +216,7 @@ describe('toOrderGroupRow', () => {
 
     expect(result[TABLE_GROUP_ROW_FIELD].isSubtotal).toBe(false);
     expect(result[TABLE_GROUP_ROW_FIELD].path).toStrictEqual([
-      { columnKey: 'order_status', label: 'Shipped' },
+      { columnKey: 'order_status', label: 'Shipped', value: 'Shipped' },
     ]);
   });
 

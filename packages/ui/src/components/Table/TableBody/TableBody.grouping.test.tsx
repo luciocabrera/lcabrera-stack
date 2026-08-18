@@ -51,7 +51,13 @@ const groupRows: readonly TestRow[] = Array.from(
         isSubtotal,
         path: isGrandTotal
           ? []
-          : [{ columnKey: 'order_status', label: `Group ${index}` }],
+          : [
+              {
+                columnKey: 'order_status',
+                label: `Group ${index}`,
+                value: `Group ${index}`,
+              },
+            ],
       },
     };
   },
@@ -64,7 +70,7 @@ const SMALL_ROWS: readonly TestRow[] = [
       aggregates: [],
       count: 4,
       isSubtotal: false,
-      path: [{ columnKey: 'order_status', label: 'Shipped' }],
+      path: [{ columnKey: 'order_status', label: 'Shipped', value: 'Shipped' }],
     },
   },
   {
@@ -72,7 +78,7 @@ const SMALL_ROWS: readonly TestRow[] = [
       aggregates: [],
       count: 4,
       isSubtotal: true,
-      path: [{ columnKey: 'order_status', label: 'Shipped' }],
+      path: [{ columnKey: 'order_status', label: 'Shipped', value: 'Shipped' }],
     },
   },
   {

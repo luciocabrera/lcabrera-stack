@@ -23,11 +23,11 @@ const subtotalRow = (path: readonly TableGroupKeyValue[]): Row => ({
   [TABLE_GROUP_ROW_FIELD]: { aggregates: [], count: 4, isSubtotal: true, path },
 });
 
-const paris = [{ columnKey: 'city', label: 'Paris' }];
-const berlin = [{ columnKey: 'city', label: 'Berlin' }];
+const paris = [{ columnKey: 'city', label: 'Paris', value: 'Paris' }];
+const berlin = [{ columnKey: 'city', label: 'Berlin', value: 'Berlin' }];
 const berlinOpen = [
-  { columnKey: 'city', label: 'Berlin' },
-  { columnKey: 'status', label: 'Open' },
+  { columnKey: 'city', label: 'Berlin', value: 'Berlin' },
+  { columnKey: 'status', label: 'Open', value: 'Open' },
 ];
 
 /**
@@ -174,9 +174,15 @@ describe('resolveTableGroupTree', () => {
     // separate places. `[EMEA, Spain]` and `[EMEA, France]` are leaves; `[EMEA]`
     // is their parent *and* is emitted after them; `[]` is the grand total,
     // keyed by nothing.
-    const emea = [{ columnKey: 'region', label: 'EMEA' }];
-    const spain = [...emea, { columnKey: 'country', label: 'Spain' }];
-    const france = [...emea, { columnKey: 'country', label: 'France' }];
+    const emea = [{ columnKey: 'region', label: 'EMEA', value: 'EMEA' }];
+    const spain = [
+      ...emea,
+      { columnKey: 'country', label: 'Spain', value: 'Spain' },
+    ];
+    const france = [
+      ...emea,
+      { columnKey: 'country', label: 'France', value: 'France' },
+    ];
 
     const tree = resolveTableGroupTree({
       collapsedGroupPaths: noneCollapsed,
@@ -213,8 +219,11 @@ describe('resolveTableGroupTree', () => {
   });
 
   it('folds a rollup parent that sits below the rows it totals', () => {
-    const emea = [{ columnKey: 'region', label: 'EMEA' }];
-    const spain = [...emea, { columnKey: 'country', label: 'Spain' }];
+    const emea = [{ columnKey: 'region', label: 'EMEA', value: 'EMEA' }];
+    const spain = [
+      ...emea,
+      { columnKey: 'country', label: 'Spain', value: 'Spain' },
+    ];
 
     const tree = resolveTableGroupTree({
       collapsedGroupPaths: new Set([resolveGroupPathKey(emea)]),
@@ -230,7 +239,9 @@ describe('resolveTableGroupTree', () => {
   it('is unmoved by a collapsed path no row carries', () => {
     const tree = resolveTableGroupTree({
       collapsedGroupPaths: new Set([
-        resolveGroupPathKey([{ columnKey: 'city', label: 'Madrid' }]),
+        resolveGroupPathKey([
+          { columnKey: 'city', label: 'Madrid', value: 'Madrid' },
+        ]),
       ]),
       data: rows,
     });

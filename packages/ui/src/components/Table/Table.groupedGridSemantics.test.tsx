@@ -50,7 +50,7 @@ const rows: readonly TestRow[] = [
       aggregates: [],
       count: 2,
       isSubtotal: false,
-      path: [{ columnKey: 'city', label: 'Paris' }],
+      path: [{ columnKey: 'city', label: 'Paris', value: 'Paris' }],
     },
   },
   { city: 'Paris', id: 1 },
@@ -60,7 +60,7 @@ const rows: readonly TestRow[] = [
       aggregates: [],
       count: 2,
       isSubtotal: false,
-      path: [{ columnKey: 'city', label: 'Berlin' }],
+      path: [{ columnKey: 'city', label: 'Berlin', value: 'Berlin' }],
     },
   },
   {
@@ -69,8 +69,8 @@ const rows: readonly TestRow[] = [
       count: 2,
       isSubtotal: false,
       path: [
-        { columnKey: 'city', label: 'Berlin' },
-        { columnKey: 'id', label: '3' },
+        { columnKey: 'city', label: 'Berlin', value: 'Berlin' },
+        { columnKey: 'id', label: '3', value: '3' },
       ],
     },
   },
