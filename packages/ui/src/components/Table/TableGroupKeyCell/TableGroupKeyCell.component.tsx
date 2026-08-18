@@ -49,7 +49,7 @@ export const TableGroupKeyCell = ({
     summary,
   });
 
-  if (resolved === undefined) return null;
+  if (resolved === undefined) return;
 
   const { isInnermost, text } = resolved;
 
@@ -68,9 +68,9 @@ export const TableGroupKeyCell = ({
       {...stylex.props(tableGroupKeyCellStyles.container)}
       data-testid='table-group-key-cell'
     >
-      {isInnermost ? (
+      {Boolean(isInnermost) && (
         <TableGroupDisclosure disclosure={disclosure} path={summary.path} />
-      ) : null}
+      )}
       <span
         {...stylex.props(
           tableGroupKeyCellStyles.text,

@@ -6,17 +6,27 @@ import { resolveGroupKeyCellText } from './resolveGroupKeyCellText.util';
 
 const GROUPING_KEYS = ['city', 'district'];
 
-const summaryOf = (
-  path: readonly (readonly [string, string])[],
+type SummaryArgs = {
+  readonly isSubtotal?: boolean;
+  readonly path: readonly (readonly [string, string])[];
+};
+
+const summaryOf = ({
   isSubtotal = false,
-): TableGroupRowSummary => ({
+  path,
+}: SummaryArgs): TableGroupRowSummary => ({
   aggregates: [],
   count: 1,
   isSubtotal,
   path: path.map(([columnKey, label]) => ({ columnKey, label, value: label })),
 });
 
-const resolve = (columnKey: string, summary: TableGroupRowSummary) =>
+type ResolveArgs = {
+  readonly columnKey: string;
+  readonly summary: TableGroupRowSummary;
+};
+
+const resolve = ({ columnKey, summary }: ResolveArgs) =>
   resolveGroupKeyCellText({
     columnKey,
     groupingKeys: GROUPING_KEYS,
@@ -30,14 +40,21 @@ const FULL_PATH = [
 
 describe('resolveGroupKeyCellText', () => {
   it("renders a level's label in that level's own column", () => {
-    expect(resolve('city', summaryOf(FULL_PATH))).toStrictEqual({
+    expect(
+      resolve({ columnKey: 'city', summary: summaryOf({ path: FULL_PATH }) }),
+    ).toStrictEqual({
       isInnermost: false,
       text: 'Paris',
     });
   });
 
   it('marks the last path entry as the innermost level', () => {
-    expect(resolve('district', summaryOf(FULL_PATH))).toStrictEqual({
+    expect(
+      resolve({
+        columnKey: 'district',
+        summary: summaryOf({ path: FULL_PATH }),
+      }),
+    ).toStrictEqual({
       isInnermost: true,
       text: 'Marais',
     });
@@ -47,43 +64,66 @@ describe('resolveGroupKeyCellText', () => {
     // A rollup subtotal carries one entry fewer than the rows it totals, so
     // most grouped results leave some key columns empty on some rows. Which
     // columns are filled is the depth signal (ADR-080).
-    expect(resolve('district', summaryOf([['city', 'Paris']]))).toBeUndefined();
+    expect(
+      resolve({
+        columnKey: 'district',
+        summary: summaryOf({ path: [['city', 'Paris']] }),
+      }),
+    ).toBeUndefined();
   });
 
   it('suffixes a subtotal at the level it totals', () => {
-    expect(resolve('city', summaryOf([['city', 'Paris']], true))).toStrictEqual(
-      { isInnermost: true, text: 'Paris total' },
-    );
+    expect(
+      resolve({
+        columnKey: 'city',
+        summary: summaryOf({ isSubtotal: true, path: [['city', 'Paris']] }),
+      }),
+    ).toStrictEqual({ isInnermost: true, text: 'Paris total' });
   });
 
   it('does not suffix a subtotal’s ancestors', () => {
     // The ancestry reads exactly as a leaf group's does; the one column where a
     // subtotal differs is the level it totals.
-    expect(resolve('city', summaryOf(FULL_PATH, true))).toStrictEqual({
+    expect(
+      resolve({
+        columnKey: 'city',
+        summary: summaryOf({ isSubtotal: true, path: FULL_PATH }),
+      }),
+    ).toStrictEqual({
       isInnermost: false,
       text: 'Paris',
     });
   });
 
   it('places the grand total on the first key column', () => {
-    expect(resolve('city', summaryOf([], true))).toStrictEqual({
+    expect(
+      resolve({
+        columnKey: 'city',
+        summary: summaryOf({ isSubtotal: true, path: [] }),
+      }),
+    ).toStrictEqual({
       isInnermost: true,
       text: 'Grand total',
     });
   });
 
   it('leaves every other key column empty for the grand total', () => {
-    expect(resolve('district', summaryOf([], true))).toBeUndefined();
+    expect(
+      resolve({
+        columnKey: 'district',
+        summary: summaryOf({ isSubtotal: true, path: [] }),
+      }),
+    ).toBeUndefined();
   });
 
   it('reads a cube row’s arbitrary subset by column, not by position', () => {
     // Cube emits every subset, so a row may carry the second key and not the
     // first. `path.at(-1)` is still its innermost; `path.length - 1` is not a
     // depth and is never consulted.
-    const cubeRow = summaryOf([['district', 'Marais']]);
+    const cubeRow = summaryOf({ path: [['district', 'Marais']] });
 
-    expect(resolve('city', cubeRow)).toBeUndefined();
-    expect(resolve('district', cubeRow)).toStrictEqual({
+    expect(resolve({ columnKey: 'city', summary: cubeRow })).toBeUndefined();
+    expect(resolve({ columnKey: 'district', summary: cubeRow })).toStrictEqual({
       isInnermost: true,
       text: 'Marais',
     });

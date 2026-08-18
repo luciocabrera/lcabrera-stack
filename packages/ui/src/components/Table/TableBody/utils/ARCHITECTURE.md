@@ -39,12 +39,12 @@ here rather than in `TableBodyRows`.
 
 Four rules, in the order the builder applies them:
 
-| Row    | Column                   | Cell holds                                          |
-| ------ | ------------------------ | --------------------------------------------------- |
-| Group  | hierarchy                | `TableGroupLabel` — the level, its label, its count |
-| Group  | actions                  | nothing: a group is not a row to act on             |
-| Group  | any other                | `TableGroupAggregate` — the aggregate, or a dash    |
-| Detail | hierarchy or a group key | nothing: stated once, by the group row above        |
+| Row    | Column                   | Cell holds                                                |
+| ------ | ------------------------ | --------------------------------------------------------- |
+| Group  | a group key              | `TableGroupKeyCell` — that key's value, in its own column |
+| Group  | actions                  | nothing: a group is not a row to act on                   |
+| Group  | any other                | `TableGroupAggregate` — the aggregate, or a dash          |
+| Detail | hierarchy or a group key | nothing: stated once, by the group row above              |
 
 The last one is the first rule on the detail path that needs to know a **column**
 is a group key, which is why `groupingKeys` is bound into the renderer for the

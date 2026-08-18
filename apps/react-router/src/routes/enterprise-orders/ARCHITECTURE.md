@@ -285,7 +285,7 @@ carries each selected aggregate decoded by the alias the builder reported. It
 formats there rather than in the renderer because only this side knows
 `count(*)` arrives as a **string**, that a `numeric` aggregate does too, and
 that a NULL key is a real group. `@lcabrera/ui` renders the finished labels and
-count in the grid's hierarchy column (ADR-065).
+count in the group key's own column (ADR-080).
 
 **A hand-edited `grouping` param yields a flat table, never a partial one.** The
 codec refuses any payload outside `{ keys: string[], agg?: … }` with a known

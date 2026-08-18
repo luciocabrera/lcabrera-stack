@@ -18,7 +18,12 @@ const columns: TableColumn<Row>[] = [
   { key: 'district', label: 'District' },
 ];
 
-const layout = (groupingKeys: readonly string[], overrides = {}) =>
+type LayoutArgs = {
+  readonly groupingKeys: readonly string[];
+  readonly overrides?: Record<string, unknown>;
+};
+
+const layout = ({ groupingKeys, overrides = {} }: LayoutArgs) =>
   withGroupedColumnLayout<Row>({
     columnOrder: ['id', 'amount', 'city', 'district'],
     columnPinning: { left: ['id'], right: [] },
@@ -30,7 +35,7 @@ const layout = (groupingKeys: readonly string[], overrides = {}) =>
 
 describe('withGroupedColumnLayout', () => {
   it('returns every input untouched while nothing is grouped', () => {
-    const result = layout([]);
+    const result = layout({ groupingKeys: [] });
 
     expect(result.columnOrder).toStrictEqual([
       'id',
@@ -42,7 +47,7 @@ describe('withGroupedColumnLayout', () => {
   });
 
   it('hoists the keys to the head of the order and the left pin, in key order', () => {
-    const result = layout(['district', 'city']);
+    const result = layout({ groupingKeys: ['district', 'city'] });
 
     expect(result.columnOrder).toStrictEqual([
       'district',
@@ -54,12 +59,15 @@ describe('withGroupedColumnLayout', () => {
   });
 
   it('adds no column of its own', () => {
-    expect(layout(['city']).columns).toBe(columns);
+    expect(layout({ groupingKeys: ['city'] }).columns).toBe(columns);
   });
 
   it('moves a key out of the right pin rather than leaving it in both', () => {
-    const result = layout(['city'], {
-      columnPinning: { left: [], right: ['city', 'amount'] },
+    const result = layout({
+      groupingKeys: ['city'],
+      overrides: {
+        columnPinning: { left: [], right: ['city', 'amount'] },
+      },
     });
 
     expect(result.columnPinning.left).toStrictEqual(['city']);
@@ -67,7 +75,7 @@ describe('withGroupedColumnLayout', () => {
   });
 
   it('does not duplicate a key already pinned left', () => {
-    const result = layout(['id']);
+    const result = layout({ groupingKeys: ['id'] });
 
     expect(result.columnPinning.left).toStrictEqual(['id']);
     expect(result.columnOrder).toStrictEqual([
@@ -81,8 +89,11 @@ describe('withGroupedColumnLayout', () => {
   it('forces a hidden key visible', () => {
     // Under one column per key a hidden key erases a level rather than merely
     // hiding a column, because the depth signal is which columns are filled.
-    const result = layout(['city'], {
-      columnVisibility: new Set(['city', 'amount']),
+    const result = layout({
+      groupingKeys: ['city'],
+      overrides: {
+        columnVisibility: new Set(['amount', 'city']),
+      },
     });
 
     expect([...result.columnVisibility]).toStrictEqual(['amount']);
@@ -92,13 +103,14 @@ describe('withGroupedColumnLayout', () => {
     // Reallocating on every grouped render would churn the memo below it.
     const columnVisibility = new Set<'amount'>(['amount']);
 
-    expect(layout(['city'], { columnVisibility }).columnVisibility).toBe(
-      columnVisibility,
-    );
+    expect(
+      layout({ groupingKeys: ['city'], overrides: { columnVisibility } })
+        .columnVisibility,
+    ).toBe(columnVisibility);
   });
 
   it('skips a key naming no declared column', () => {
-    const result = layout(['not_a_column']);
+    const result = layout({ groupingKeys: ['not_a_column'] });
 
     expect(result.columnOrder).toStrictEqual([
       'id',
@@ -110,11 +122,8 @@ describe('withGroupedColumnLayout', () => {
   });
 
   it('hoists the keys it can when only some name a declared column', () => {
-    expect(layout(['not_a_column', 'city']).columnOrder).toStrictEqual([
-      'city',
-      'id',
-      'amount',
-      'district',
-    ]);
+    expect(
+      layout({ groupingKeys: ['not_a_column', 'city'] }).columnOrder,
+    ).toStrictEqual(['city', 'id', 'amount', 'district']);
   });
 });

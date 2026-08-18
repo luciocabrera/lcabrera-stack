@@ -230,44 +230,55 @@ export const styles = {
 
 ---
 
-## Grid-Owned Columns Are Derived, Never Stored
+## A Grouped Layout Is Derived, Never Stored
 
-A column the **grid** owns rather than the consumer — today the grouping
-hierarchy column
-([ADR-065](../../../docs/decisions/ADR-065-grouped-rows-render-a-hierarchy-column.md)) —
-is injected into the _derived_ view state and never into the columns store:
+The layout a **grid** imposes rather than the consumer — today the group-key
+hoist
+([ADR-080](../../../docs/decisions/ADR-080-a-group-key-renders-in-its-own-column.md))
+— is computed in the _derived_ view state and never written to the columns
+store:
 
 ```ts
-// ✅ one injection point, inside the derivation every re-render funnels through
+// ✅ one derivation point, inside the pass every re-render funnels through
 getPinnedDerivedColumnsState({ …, groupingKeys });
 
-// ❌ writing it into the store's own columns / columnOrder / columnPinning
-columnsStore.set({ columns: [hierarchyColumn, ...columns] });
+// ❌ writing the hoist into the store's own order / pinning / visibility
+columnsStore.set({ columnOrder: [...groupingKeys, ...columnOrder] });
 ```
 
-**Why the store is the wrong home.** `columns`, `columnOrder` and
-`columnPinning` are what the user's layout is persisted from and what the
-settings drawer offers. A synthetic key written there is a key that reaches the
-cookie, comes back on the next load as a column the consumer never declared, and
-appears in the drawer as a row nobody can act on. The actions column is in the
-store and pays exactly that cost — it has to be filtered back out of persisted
-pinning at every seam.
+**Why the store is the wrong home.** `columns`, `columnOrder`, `columnPinning`
+and `columnVisibility` are what the user's layout is persisted from and what the
+settings drawer offers. A hoist written there is a hoist that reaches the cookie
+and comes back on the next load as an order the user never chose — and
+ungrouping then has to _undo_ it, which means keeping a snapshot of the previous
+layout, invalidating it on every edit made while grouped, and reconciling it when
+the column set changes. Deriving keeps none of that: the layout was never
+modified, so ungrouping restores it for free. The actions column is the
+counterexample — it _is_ in the store, and pays exactly that cost by having to be
+filtered back out of persisted pinning at every seam.
 
 **Three rules follow, and each has a failure it prevents:**
 
-1. **Inject into all of `columns`, `columnOrder` and `columnPinning` at once**
-   (`withGroupHierarchyColumn`). Sticky offsets are a running sum over the
-   left-pinned columns in effective order, so a column missing from the pinning
-   leaves every column behind it overlapping; one missing from the order is
-   appended last rather than first.
+1. **Rewrite `columnOrder`, `columnPinning.left` and `columnVisibility`
+   together** (`withGroupedColumnLayout`). `getEffectiveColumns` filters by
+   visibility, orders by `columnOrder`, then partitions by pinning — so a key
+   hoisted in only one of them lands wherever the others left it, and a hidden
+   key erases a level rather than merely hiding a column.
 2. **Make the trigger a required argument of the derivation.** `groupingKeys` is
    required on `deriveColumnViewState`/`getPinnedDerivedColumnsState`, so every
    re-derivation site is a compile error until it says what is applied — a
-   caller free to omit it silently drops the column on the next pin or hide.
-3. **Exclude it from the settings list explicitly** (`filterSettingsColumns`).
-   It is static, so the capability arm there would list it — locked, but listed.
-   The exclusion is written even where the list cannot currently contain it,
-   because that is what keeps it out if a later slice does put it in the store.
+   caller free to omit it silently drops the hoist on the next pin or hide.
+3. **Lock a key in the settings list; do not remove it from it.** A group key is
+   one of the consumer's own columns, so it stays listed and
+   `createDraggableItems` makes it undraggable — with a flag of its own, never by
+   borrowing `isStatic`, which would also freeze its width and strip its header
+   menu. Filtering it out would take the row away in the one configuration where
+   a user most wants to see which columns the grouping is holding.
+
+**A gesture the derivation would undo is refused, not accepted.** The hoist
+already guarantees no column can sit between two keys, so a drag could not break
+anything — it would simply be undone on the next derivation, and a gesture that
+visibly does nothing is worse than one that is refused.
 
 ## Column Capability Defaults
 

@@ -359,7 +359,10 @@ describe('a grouped table under the grid ARIA model', () => {
     // One more along reaches the measure column, where the em dash states that
     // no aggregate was selected.
     await pressKey('ArrowRight');
-    expect(document.activeElement?.textContent).toContain('—');
+
+    const measure = document.activeElement;
+
+    expect(measure?.textContent).toContain('—');
   });
 
   it('leaves the grouped-by column blank on a detail row', () => {

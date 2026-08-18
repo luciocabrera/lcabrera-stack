@@ -45,7 +45,7 @@ export const ColumnOrderItemContent = ({
 
   return (
     <div {...stylex.props(styles.columnItem)}>
-      {isLocked ? <LockIcon size={14} /> : null}
+      {Boolean(isLocked) && <LockIcon size={14} />}
       <span {...stylex.props(styles.columnLabel)}>{label}</span>
       <ToggleSwitch
         isBusy={isBusy}

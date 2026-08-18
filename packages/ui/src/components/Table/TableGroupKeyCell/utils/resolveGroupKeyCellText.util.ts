@@ -41,7 +41,7 @@ export const resolveGroupKeyCellText = ({
   const entry = summary.path.find((level) => level.columnKey === columnKey);
 
   if (entry === undefined) {
-    return summary.path.length === 0 && groupingKeys[0] === columnKey
+    return groupingKeys[0] === columnKey && summary.path.length === 0
       ? { isInnermost: true, text: TABLE_GROUP_GRAND_TOTAL_LABEL }
       : undefined;
   }
@@ -51,7 +51,7 @@ export const resolveGroupKeyCellText = ({
   return {
     isInnermost,
     text:
-      summary.isSubtotal && isInnermost
+      isInnermost && summary.isSubtotal
         ? `${entry.label} ${TABLE_GROUP_SUBTOTAL_SUFFIX}`
         : entry.label,
   };

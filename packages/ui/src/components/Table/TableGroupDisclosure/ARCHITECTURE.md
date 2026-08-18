@@ -3,8 +3,10 @@
 The chevron a group row is opened and closed by, and the space it reserves on
 rows that have nothing to open.
 
-Private delegate of the hierarchy cell. `TableGroupLabel` renders it as the
-first thing on its line; nothing outside the Table uses it.
+Private delegate of a group key's cell. `TableGroupKeyCell` renders it as the
+first thing on the line of the row's **innermost** filled level — never on a
+carried one, which is why the innermost level always draws. Nothing outside the
+Table uses it.
 
 ## File Structure
 
@@ -58,9 +60,9 @@ an adjacency test reports every subtotal as childless and leaves the one row a
 user most wants to fold unfoldable. `resolveTableGroupTree` already settles this
 off the tree, and the answer travels down the same path the group summary does —
 `TableBodyRows` → `renderTableBodyPinnedGroup` → `createRenderTableBodyCell` →
-`buildTableBodyCellDescriptor` → `resolveGroupCellChildren` → `TableGroupLabel`.
+`buildTableBodyCellDescriptor` → `resolveGroupCellChildren` → `TableGroupKeyCell`.
 
-Re-deriving it here would mean resolving the whole tree once per hierarchy cell,
+Re-deriving it here would mean resolving the whole tree once per group-key cell,
 which is once per visible group row per render.
 
 ## Why the spacer exists

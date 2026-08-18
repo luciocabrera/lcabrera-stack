@@ -200,16 +200,24 @@ one cell per rendered column, and therefore the same roving tab stop
 
 ## Grouped rows
 
-While grouping is applied the grid injects a **hierarchy column**: its own, at
-the head of the left-pinned group, labelled with the group keys in nesting
-order, and absent from the column-order drawer because there is nothing a user
-can do to it. It is a derivation and never state, so it reaches neither the
-cookie the column layout persists through nor the list the drawer offers.
+While grouping is applied the grid adds **no column of its own**. Each group key
+is hoisted to the head of the order and of the left pin, in key order, and forced
+visible ([ADR-080](../../../../../docs/decisions/ADR-080-a-group-key-renders-in-its-own-column.md)).
+That is a derivation and never state, so it reaches neither the cookie the column
+layout persists through nor the list the drawer offers — which is what makes
+ungrouping free.
 
-A group row renders its label there, indented by depth, and every other column
-renders that group's selected aggregate under its own header — an em dash where
-none was selected. A data column that is currently a group key renders **blank**
-on its detail rows: the value is stated once, by the group row above them.
+A group row renders **each key's value in that key's own column**, and every
+other column renders that group's selected aggregate under its own header — an em
+dash where none was selected. **Depth is read from which key columns are filled**,
+not from a pixel offset: a rollup fills a prefix, a cube fills an arbitrary
+subset, and neither needs the other's reading. A key column renders **blank** on
+its detail rows: the value is stated once, by the group row directly above them,
+in the same column.
+
+An ancestor that repeats the row above is carried rather than restated — blank on
+screen, still announced — and refills at the top of the rendered window, where
+there is no row above to have stated it.
 
 **`path` holds only the keys a row's grouping set grouped by, so its length is
 the row's depth.** Under `rollup` a subtotal carries one entry fewer than the

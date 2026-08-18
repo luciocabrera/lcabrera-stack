@@ -26,7 +26,12 @@ const FULL_PATH = [
   ['district', 'Marais'],
 ] as const;
 
-const renderCell = (columnKey: string, isCarried = false) =>
+type RenderCellArgs = {
+  readonly columnKey: string;
+  readonly isCarried?: boolean;
+};
+
+const renderCell = ({ columnKey, isCarried = false }: RenderCellArgs) =>
   render(
     <TableGroupKeyCell
       columnKey={columnKey}
@@ -41,7 +46,7 @@ describe('TableGroupKeyCell', () => {
   afterEach(cleanup);
 
   it("renders the key's value in its own column", () => {
-    renderCell('city');
+    renderCell({ columnKey: 'city' });
 
     expect(screen.getByTestId('table-group-key-cell').textContent).toBe(
       'Paris',
@@ -49,19 +54,19 @@ describe('TableGroupKeyCell', () => {
   });
 
   it('leads the innermost level with the disclosure, and nothing else', () => {
-    renderCell('district');
+    renderCell({ columnKey: 'district' });
     expect(screen.queryByTestId('disclosure')).toBeTruthy();
 
     cleanup();
 
-    renderCell('city');
+    renderCell({ columnKey: 'city' });
     expect(screen.queryByTestId('disclosure')).toBeNull();
   });
 
   it('renders a carried level as visually-hidden text, not as an empty cell', () => {
     // An empty cell announces as empty, so an ancestor that is only implied
     // would be announced nowhere at all (ADR-080).
-    renderCell('city', true);
+    renderCell({ columnKey: 'city', isCarried: true });
 
     const carried = screen.getByTestId('table-group-key-carried');
 

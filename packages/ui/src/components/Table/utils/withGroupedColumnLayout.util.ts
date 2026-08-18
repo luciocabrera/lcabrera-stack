@@ -70,13 +70,13 @@ export const withGroupedColumnLayout = <TData>({
 
   if (keys.length === 0) return unchanged;
 
-  const isGroupKey = new Set(keys);
+  const groupKeySet = new Set(keys);
   const hoisted = keys as readonly DataKey<TData>[];
   const withoutKeys = (list: readonly DataKey<TData>[]) =>
-    list.filter((key) => !isGroupKey.has(String(key)));
+    list.filter((key) => !groupKeySet.has(String(key)));
 
   const hiddenKeys = [...columnVisibility].filter((key) =>
-    isGroupKey.has(String(key)),
+    groupKeySet.has(String(key)),
   );
 
   return {
@@ -92,7 +92,9 @@ export const withGroupedColumnLayout = <TData>({
       hiddenKeys.length === 0
         ? columnVisibility
         : new Set(
-            [...columnVisibility].filter((key) => !isGroupKey.has(String(key))),
+            [...columnVisibility].filter(
+              (key) => !groupKeySet.has(String(key)),
+            ),
           ),
   };
 };
