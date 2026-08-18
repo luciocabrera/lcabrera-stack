@@ -21,6 +21,7 @@ import {
 const {
   mockColumns,
   mockColumnVisibility,
+  mockGroupingKeys,
   mockReorderColumns,
   mockToggleColumnPin,
   mockToggleColumnVisibility,
@@ -31,6 +32,7 @@ const {
     { key: 'skip', label: 'Skip', render: () => 'cell' },
   ],
   mockColumnVisibility: new Set(['name']),
+  mockGroupingKeys: [] as string[],
   mockReorderColumns: vi.fn(),
   mockToggleColumnPin: vi.fn(),
   mockToggleColumnVisibility: vi.fn(),
@@ -80,6 +82,10 @@ vi.mock(
     useGetColumns: () => mockColumns,
   }),
 );
+
+vi.mock('#ui/components/Table/contexts/TableConfig/grouping/selectors', () => ({
+  useGetTableGroupingKeys: () => mockGroupingKeys,
+}));
 
 vi.mock(
   '#ui/components/Table/TableSettingsDrawer/TableDrawerContext/selectors',

@@ -23,6 +23,11 @@ type CreateRenderTableBodyCellArgs<TData extends Record<string, unknown>> = {
 };
 
 type RenderBodyCellArgs<TData extends Record<string, unknown>> = {
+  /**
+   * Which key columns this row carries from the row above — per row, like the
+   * summary, because it is a statement about this row's neighbours.
+   */
+  readonly carriedGroupKeys: ReadonlySet<string>;
   readonly col: TableColumn<TData>;
   /** The row's place in the tree, when it is a group row — per row, like the summary. */
   readonly disclosure?: TableGroupDisclosureState;
@@ -49,6 +54,7 @@ export const createRenderTableBodyCell =
     pinnedOffsets,
   }: CreateRenderTableBodyCellArgs<TData>) =>
   ({
+    carriedGroupKeys,
     col,
     disclosure,
     groupSummary,
@@ -57,6 +63,7 @@ export const createRenderTableBodyCell =
     rowKey,
   }: RenderBodyCellArgs<TData>) => {
     const descriptor = buildTableBodyCellDescriptor({
+      carriedGroupKeys,
       col,
       columnSizing,
       disclosure,

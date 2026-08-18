@@ -2,10 +2,12 @@ import type { TableGroupRowSummary } from '#ui/components/Table/Table.types';
 import type { TableGroupDisclosureState } from '#ui/components/Table/TableGroupDisclosure';
 
 type RenderTableBodyPinnedGroupArgs<TData, TColumn, TResult> = {
+  readonly carriedGroupKeys: ReadonlySet<string>;
   readonly columns: readonly TColumn[];
   readonly disclosure?: TableGroupDisclosureState;
   readonly groupSummary?: TableGroupRowSummary;
   readonly renderCell: (args: {
+    readonly carriedGroupKeys: ReadonlySet<string>;
     readonly col: TColumn;
     readonly disclosure?: TableGroupDisclosureState;
     readonly groupSummary?: TableGroupRowSummary;
@@ -26,6 +28,7 @@ type RenderTableBodyPinnedGroupArgs<TData, TColumn, TResult> = {
  * change per row while sizing and pinning do not.
  */
 export const renderTableBodyPinnedGroup = <TData, TColumn, TResult>({
+  carriedGroupKeys,
   columns,
   disclosure,
   groupSummary,
@@ -35,5 +38,13 @@ export const renderTableBodyPinnedGroup = <TData, TColumn, TResult>({
   rowKey,
 }: RenderTableBodyPinnedGroupArgs<TData, TColumn, TResult>) =>
   columns.map((col) =>
-    renderCell({ col, disclosure, groupSummary, row, rowIndex, rowKey }),
+    renderCell({
+      carriedGroupKeys,
+      col,
+      disclosure,
+      groupSummary,
+      row,
+      rowIndex,
+      rowKey,
+    }),
   );

@@ -2,6 +2,7 @@ import type { DraggableItem } from '#ui/components/DraggableList';
 
 import { DraggableList } from '#ui/components/DraggableList';
 import { useGetColumns } from '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
+import { useGetTableGroupingKeys } from '#ui/components/Table/contexts/TableConfig/grouping/selectors';
 import {
   useGetColumnOrder,
   useGetColumnPinning,
@@ -31,6 +32,7 @@ export const ColumnOrderSectionBody = ({
   const columnsOrder = useGetColumnOrder();
   const columnPinning = useGetColumnPinning();
   const columnVisibility = useGetColumnVisibility();
+  const groupingKeys = useGetTableGroupingKeys();
   const reorderColumns = useReorderColumns();
 
   const settingsColumns = filterSettingsColumns(columns);
@@ -43,6 +45,7 @@ export const ColumnOrderSectionBody = ({
     allOrderedColumns,
     columnPinning,
     columnVisibility,
+    groupingKeys,
     renderItemContent: (itemContentProps) => (
       <ColumnOrderItemContent {...itemContentProps} isBusy={isBusy} />
     ),

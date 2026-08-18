@@ -21,13 +21,13 @@ type MockVirtualSelectProps = {
   readonly placeholder: string;
 };
 
-const { capabilitiesRef, columnsRef, mockSetColumnAggregate } = vi.hoisted(
-  () => ({
+const { capabilitiesRef, columnsRef, groupingKeysRef, mockSetColumnAggregate } =
+  vi.hoisted(() => ({
     capabilitiesRef: { current: {} as Record<string, unknown> },
     columnsRef: { current: [] as readonly Record<string, unknown>[] },
+    groupingKeysRef: { current: [] as readonly string[] },
     mockSetColumnAggregate: vi.fn(),
-  }),
-);
+  }));
 
 vi.mock(
   '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook',
@@ -38,6 +38,10 @@ vi.mock(
 
 vi.mock('../../TableDrawerContext/actions', () => ({
   useSetColumnAggregate: () => mockSetColumnAggregate,
+}));
+
+vi.mock('../../TableDrawerContext/selectors', () => ({
+  useGetGroupingKeys: () => groupingKeysRef.current,
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({

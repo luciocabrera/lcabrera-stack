@@ -3,12 +3,12 @@ import * as stylex from '@stylexjs/stylex';
 import { spacing, typography } from '#ui/design-system/tokens/base.stylex';
 import { colors } from '#ui/design-system/tokens/colors.stylex';
 
-export const tableGroupLabelStyles = stylex.create({
+export const tableGroupKeyCellStyles = stylex.create({
   /**
-   * Brand-tinted rather than `textPrimary`, so the hierarchy column reads as
-   * structure at a glance instead of as one more data column.
-   * `brandPrimaryCardText` is the token tuned to sit on a tinted card, which is
-   * what every group-row ground is — the subtotal band included.
+   * Brand-tinted rather than `textPrimary`, so a key column reads as structure
+   * at a glance instead of as one more data column — the property the retired
+   * hierarchy column carried, kept now that the value sits in the consumer's
+   * own column beside ordinary data.
    */
   container: {
     gap: spacing.xs,
@@ -21,14 +21,6 @@ export const tableGroupLabelStyles = stylex.create({
     minWidth: 0,
     width: '100%',
   },
-  /**
-   * Depth as padding rather than as a margin or a nested box: padding leaves
-   * the flex line intact, so the label ellipsizes into whatever width is left
-   * rather than overflowing the cell.
-   */
-  indent: (indentPx: number) => ({
-    paddingInlineStart: `${indentPx}px`,
-  }),
   /** A subtotal states its own level and is read as a total, not as a group. */
   subtotalText: {
     fontWeight: typography.fontWeightBold,

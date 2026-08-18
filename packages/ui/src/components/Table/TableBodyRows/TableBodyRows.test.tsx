@@ -4,10 +4,7 @@ import type { ReactNode } from 'react';
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
-import {
-  TABLE_GROUP_HIERARCHY_COLUMN_KEY,
-  TABLE_GROUP_ROW_FIELD,
-} from '#ui/components/Table/Table.constants';
+import { TABLE_GROUP_ROW_FIELD } from '#ui/components/Table/Table.constants';
 
 import { TableBodyRows } from './TableBodyRows.component';
 
@@ -82,18 +79,29 @@ const MockTableRow = vi.hoisted(() => {
   };
 });
 
-const MockTableGroupLabel = vi.hoisted(() => {
-  return function MockTableGroupLabel({
+const MockTableGroupKeyCell = vi.hoisted(() => {
+  return function MockTableGroupKeyCell({
+    columnKey,
+    isCarried,
     summary,
   }: {
+    readonly columnKey: string;
+    readonly isCarried: boolean;
     readonly summary: {
       readonly count: number;
-      readonly path: readonly { readonly label: string }[];
+      readonly path: readonly {
+        readonly columnKey: string;
+        readonly label: string;
+      }[];
     };
   }) {
-    const labels = summary.path.map((level) => level.label).join('/');
+    const entry = summary.path.find((level) => level.columnKey === columnKey);
 
-    return `group:${labels}:${summary.count}`;
+    if (entry === undefined) return `key:${columnKey}:absent`;
+
+    return isCarried
+      ? `key:${columnKey}:carried:${entry.label}`
+      : `key:${columnKey}:${entry.label}:${summary.count}`;
   };
 });
 
@@ -122,8 +130,8 @@ vi.mock('#ui/components/Table/TableRow', () => ({
   TableRow: MockTableRow,
 }));
 
-vi.mock('#ui/components/Table/TableGroupLabel', () => ({
-  TableGroupLabel: MockTableGroupLabel,
+vi.mock('#ui/components/Table/TableGroupKeyCell', () => ({
+  TableGroupKeyCell: MockTableGroupKeyCell,
 }));
 
 vi.mock('#ui/components/Table/TableGroupAggregate', () => ({
@@ -173,19 +181,16 @@ const setupDefaultMocks = () => {
 };
 
 /**
- * The partition a grouped table actually paints: the grid's own hierarchy
- * column at the head of the left-pinned group, then the data columns
- * (ADR-065).
+ * The partition a grouped table actually paints: the group key hoisted to the
+ * head of the left-pinned group — its **own** column, not a synthetic one —
+ * then the remaining data columns (ADR-080).
  */
 const setupGroupedMocks = () => {
   setupDefaultMocks();
   useGetTableGroupingKeysMock.mockReturnValue(['name']);
   useGetPinnedColumnPartitionMock.mockReturnValue({
-    centerCols: [
-      { key: 'name', label: 'Name' },
-      { key: 'amount', label: 'Amount' },
-    ],
-    leftPinnedCols: [{ key: TABLE_GROUP_HIERARCHY_COLUMN_KEY, label: 'Name' }],
+    centerCols: [{ key: 'amount', label: 'Amount' }],
+    leftPinnedCols: [{ key: 'name', label: 'Name' }],
     rightPinnedCols: [],
   });
 };
@@ -318,7 +323,7 @@ describe('TableBodyRows', () => {
     expect(reorderedRowNodes[1]).toBe(rowNodeForA);
   });
 
-  it('renders a group row as a full row of cells, the label in the hierarchy column', () => {
+  it("renders a group row as a full row of cells, each key's value in its own column", () => {
     setupGroupedMocks();
     useGetTableDataMock.mockReturnValue([
       {
@@ -339,15 +344,125 @@ describe('TableBodyRows', () => {
       </table>,
     );
 
-    // One cell per rendered column, not one spanning cell: the label sits in
-    // the hierarchy column and every other column carries that group's
-    // aggregate (ADR-065). The banner this replaces had exactly one cell.
+    // One cell per rendered column, not one spanning cell, and no synthetic
+    // column among them: the key's value sits under the key's own header and
+    // every other column carries that group's aggregate (ADR-080). The row
+    // paints exactly the columns the consumer declared.
     const cells = [...(screen.getByRole('row').querySelectorAll('td') ?? [])];
 
     expect(cells.map((cell) => cell.textContent)).toStrictEqual([
-      'group:A:3',
-      'agg:name',
+      'key:name:A:3',
       'agg:amount',
+    ]);
+  });
+
+  it('carries an ancestor rather than repeating it down a run of siblings', () => {
+    setupGroupedMocks();
+    useGetTableGroupingKeysMock.mockReturnValue(['name', 'amount']);
+    useGetPinnedColumnPartitionMock.mockReturnValue({
+      centerCols: [],
+      leftPinnedCols: [
+        { key: 'name', label: 'Name' },
+        { key: 'amount', label: 'Amount' },
+      ],
+      rightPinnedCols: [],
+    });
+    useGetTableDataMock.mockReturnValue([
+      {
+        [TABLE_GROUP_ROW_FIELD]: {
+          aggregates: [],
+          count: 1,
+          isSubtotal: false,
+          path: [
+            { columnKey: 'name', label: 'A', value: 'A' },
+            { columnKey: 'amount', label: '10', value: 10 },
+          ],
+        },
+      },
+      {
+        [TABLE_GROUP_ROW_FIELD]: {
+          aggregates: [],
+          count: 1,
+          isSubtotal: false,
+          path: [
+            { columnKey: 'name', label: 'A', value: 'A' },
+            { columnKey: 'amount', label: '20', value: 20 },
+          ],
+        },
+      },
+    ]);
+
+    const { container } = render(
+      <table>
+        <tbody>
+          <TableBodyRows endIndex={2} isLoadingState={false} startIndex={0} />
+        </tbody>
+      </table>,
+    );
+
+    const rows = [...container.querySelectorAll('tr')];
+
+    // The window's first row refills every level; the sibling below it carries
+    // `name` and still states its own innermost level (ADR-080).
+    expect(
+      [...(rows[0]?.querySelectorAll('td') ?? [])].map((c) => c.textContent),
+    ).toStrictEqual(['key:name:A:1', 'key:amount:10:1']);
+    expect(
+      [...(rows[1]?.querySelectorAll('td') ?? [])].map((c) => c.textContent),
+    ).toStrictEqual(['key:name:carried:A', 'key:amount:20:1']);
+  });
+
+  it('refills a carried level at the top of the rendered window', () => {
+    setupGroupedMocks();
+    useGetTableGroupingKeysMock.mockReturnValue(['name', 'amount']);
+    useGetPinnedColumnPartitionMock.mockReturnValue({
+      centerCols: [],
+      leftPinnedCols: [
+        { key: 'name', label: 'Name' },
+        { key: 'amount', label: 'Amount' },
+      ],
+      rightPinnedCols: [],
+    });
+    useGetTableDataMock.mockReturnValue([
+      {
+        [TABLE_GROUP_ROW_FIELD]: {
+          aggregates: [],
+          count: 1,
+          isSubtotal: false,
+          path: [
+            { columnKey: 'name', label: 'A', value: 'A' },
+            { columnKey: 'amount', label: '10', value: 10 },
+          ],
+        },
+      },
+      {
+        [TABLE_GROUP_ROW_FIELD]: {
+          aggregates: [],
+          count: 1,
+          isSubtotal: false,
+          path: [
+            { columnKey: 'name', label: 'A', value: 'A' },
+            { columnKey: 'amount', label: '20', value: 20 },
+          ],
+        },
+      },
+    ]);
+
+    // Same data, window starting at the row that WOULD carry. Its ancestor was
+    // scrolled past, so carrying it would state the block nowhere.
+    render(
+      <table>
+        <tbody>
+          <TableBodyRows endIndex={2} isLoadingState={false} startIndex={1} />
+        </tbody>
+      </table>,
+    );
+
+    const cells = [...(screen.getByRole('row').querySelectorAll('td') ?? [])];
+
+    expect(cells.map((cell) => cell.textContent)).toStrictEqual([
+      'key:name:A:1',
+      'key:amount:20:1',
     ]);
   });
 
@@ -377,8 +492,9 @@ describe('TableBodyRows', () => {
   });
 
   it('blanks a grouped-by column on a detail row, leaving the ungrouped ones', () => {
-    // The value is stated once, by the group row above; repeating it down a
-    // column whose header already says it is a column of one word (ADR-065).
+    // The value is stated once, by the group row above, in the same column —
+    // which is what a drilled group reads as, with no rule of its own
+    // (ADR-065 sub-decision 2, ADR-080).
     setupGroupedMocks();
     useGetTableDataMock.mockReturnValue([{ amount: 10, name: 'A' }]);
 
@@ -417,8 +533,13 @@ describe('TableBodyRows', () => {
       </table>,
     );
 
+    // The configuration says nothing is grouped, so there is no key column for
+    // a level to render in — and the summary-carrying row is *still* rendered
+    // as a group, from its own summary, beside an ordinary detail row. That is
+    // the property: what a row is comes from the row (ADR-065).
     expect(container.querySelectorAll('tr')).toHaveLength(2);
-    expect(screen.getByText('group:A:1')).toBeTruthy();
+    expect(screen.getAllByTestId('table-group-header-row')).toHaveLength(1);
+    expect(screen.getByText('agg:name')).toBeTruthy();
     expect(screen.getByText('Name:A')).toBeTruthy();
   });
 
@@ -497,7 +618,7 @@ describe('TableBodyRows', () => {
 
     const groupNodeForA = container.querySelector('tr');
 
-    expect(groupNodeForA?.textContent).toContain('group:A:2');
+    expect(groupNodeForA?.textContent).toContain('key:name:A:2');
 
     useGetTableDataMock.mockReturnValue([
       {
@@ -528,7 +649,7 @@ describe('TableBodyRows', () => {
 
     const reordered = container.querySelectorAll('tr');
 
-    expect(reordered[1]?.textContent).toContain('group:A:2');
+    expect(reordered[1]?.textContent).toContain('key:name:A:2');
     expect(reordered[1]).toBe(groupNodeForA);
   });
 });

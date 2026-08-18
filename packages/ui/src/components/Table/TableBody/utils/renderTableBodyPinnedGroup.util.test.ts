@@ -13,6 +13,7 @@ describe('renderTableBodyPinnedGroup', () => {
     );
 
     const result = renderTableBodyPinnedGroup({
+      carriedGroupKeys: new Set<string>(),
       columns: ['name', 'amount'],
       renderCell,
       row,
@@ -22,12 +23,14 @@ describe('renderTableBodyPinnedGroup', () => {
 
     expect(result).toEqual(['cell:name', 'cell:amount']);
     expect(renderCell).toHaveBeenNthCalledWith(1, {
+      carriedGroupKeys: new Set<string>(),
       col: 'name',
       row,
       rowIndex: ROW_INDEX,
       rowKey: ROW_KEY,
     });
     expect(renderCell).toHaveBeenNthCalledWith(2, {
+      carriedGroupKeys: new Set<string>(),
       col: 'amount',
       row,
       rowIndex: ROW_INDEX,
@@ -37,6 +40,7 @@ describe('renderTableBodyPinnedGroup', () => {
 
   it('returns an empty array for an empty column group', () => {
     const result = renderTableBodyPinnedGroup({
+      carriedGroupKeys: new Set<string>(),
       columns: [],
       renderCell: vi.fn(),
       row: {},
@@ -55,6 +59,7 @@ describe('renderTableBodyPinnedGroup', () => {
     );
 
     const result = renderTableBodyPinnedGroup({
+      carriedGroupKeys: new Set<string>(),
       columns,
       renderCell,
       row,
@@ -64,12 +69,14 @@ describe('renderTableBodyPinnedGroup', () => {
 
     expect(result).toEqual(['id', 'name']);
     expect(renderCell).toHaveBeenCalledWith({
+      carriedGroupKeys: new Set<string>(),
       col: columns[0],
       row,
       rowIndex: ROW_INDEX,
       rowKey: ROW_KEY,
     });
     expect(renderCell).toHaveBeenCalledWith({
+      carriedGroupKeys: new Set<string>(),
       col: columns[1],
       row,
       rowIndex: ROW_INDEX,

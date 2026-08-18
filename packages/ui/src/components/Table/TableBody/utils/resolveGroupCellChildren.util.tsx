@@ -3,23 +3,32 @@ import type { TableGroupDisclosureState } from '#ui/components/Table/TableGroupD
 
 import { ACTIONS_COLUMN_KEY } from '#ui/components/Table/Table.constants';
 import { TableGroupAggregate } from '#ui/components/Table/TableGroupAggregate';
-import { TableGroupLabel } from '#ui/components/Table/TableGroupLabel';
-import { isTableGroupHierarchyColumn } from '#ui/components/Table/utils/isTableGroupHierarchyColumn.util';
+import { TableGroupKeyCell } from '#ui/components/Table/TableGroupKeyCell';
 
 type ResolveGroupCellChildrenArgs = {
+  readonly carriedGroupKeys: ReadonlySet<string>;
   readonly columnKey: string;
   readonly disclosure: TableGroupDisclosureState | undefined;
+  readonly groupingKeys: readonly string[];
   readonly summary: TableGroupRowSummary;
 };
 
 /**
- * What one cell of a group row holds: the hierarchy label, an aggregate, or
+ * What one cell of a group row holds: its own key's value, an aggregate, or
  * nothing.
  *
  * The three cases in one place, because the second is the general rule and the
  * other two are the only exceptions to it — every column carries that group's
- * selected aggregate under its own header, the hierarchy column carries the
- * label instead, and the actions column carries neither.
+ * selected aggregate under its own header, a **group-key** column carries that
+ * key's value instead (ADR-080), and the actions column carries neither.
+ *
+ * **The key is tested before the aggregate, and that ordering is the rule.**
+ * Nothing forbids a request naming one column as both a key and an aggregate —
+ * `assertGroupAggregates` checks each aggregate against the catalogue and never
+ * cross-checks the key list, and the grouping configuration is URL state, so a
+ * request can always ask for the combination however the picker is built. Under
+ * one column per key that column cannot render both, so the key wins here, in
+ * the derivation, rather than only in the menu that offers it (ADR-080).
  *
  * The **actions column renders empty**, not a dash. A dash says "no aggregate
  * was selected on this column", which is a statement about a column that could
@@ -49,12 +58,22 @@ type ResolveGroupCellChildrenArgs = {
  */
 export const EMPTY_CELL = <></>;
 export const resolveGroupCellChildren = ({
+  carriedGroupKeys,
   columnKey,
   disclosure,
+  groupingKeys,
   summary,
 }: ResolveGroupCellChildrenArgs) => {
-  if (isTableGroupHierarchyColumn(columnKey)) {
-    return <TableGroupLabel disclosure={disclosure} summary={summary} />;
+  if (groupingKeys.includes(columnKey)) {
+    return (
+      <TableGroupKeyCell
+        columnKey={columnKey}
+        disclosure={disclosure}
+        groupingKeys={groupingKeys}
+        isCarried={carriedGroupKeys.has(columnKey)}
+        summary={summary}
+      />
+    );
   }
 
   if (columnKey === ACTIONS_COLUMN_KEY) {
