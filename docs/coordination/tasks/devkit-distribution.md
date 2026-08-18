@@ -10,7 +10,7 @@ area:
 started: 2026-08-18
 updated: 2026-08-18
 plan: (none)
-pr: (none)
+pr: '#795'
 issue: #716
 ---
 
@@ -20,6 +20,6 @@ Ship the repo setup as @lcabrera/devkit and @lcabrera/repo-standards
 
 ## Status / next
 
-- Current step: ADR-081 written (the distribution shape)
+- Current step: ADR-081 accepted in #795 (draft); #716 amended; waves filed as #797-#801
 - Blockers: none
-- Next: amend #716 with the corrected classification, then file the phase sub-issues
+- Next: flip #795 to ready, then start #797 (classification + the devkit materialiser) under its own claim
