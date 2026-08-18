@@ -26,6 +26,11 @@ import { tableGroupDisclosureStyles } from './TableGroupDisclosure.stylex';
  * announced once as a row state and again as a button is the failure this
  * avoids, not an accessibility gap it accepts.
  *
+ * `aria-hidden` carries that on its own — it removes this element **and its
+ * subtree** from the accessibility tree, which a `role='presentation'` beside
+ * it would not add to: that only strips an element's own semantics, and a
+ * `span` has none to strip.
+ *
  * **A row with nothing under it still renders the box, empty.** Without it the
  * labels of sibling rows would not line up, and indentation — the only thing
  * stating depth in this column — would read as noise.
@@ -54,7 +59,6 @@ export const TableGroupDisclosure = ({
       data-expanded={disclosure.isExpanded}
       data-testid='table-group-disclosure'
       onClick={() => toggleGroupExpansion(path)}
-      role='presentation'
     >
       <DisclosureIcon size={12} />
     </span>
