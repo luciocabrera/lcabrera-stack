@@ -5,8 +5,9 @@
 -- `setup_enterprise_orders.sql` derives every dimension from the same
 -- `generate_series` counter, so the dimensions are correlated: each
 -- (product_category, product_subcategory, customer_type) cell holds exactly
--- **one** customer_name, and every leaf group of that four-key grouping is
--- 1,785–3,572 rows. Two consequences make drilling untestable on it:
+-- **one** customer_name, and every leaf group of that four-key grouping comes
+-- out large, and within a narrow band of every other. Two consequences make
+-- drilling untestable on it:
 --
 --   * adding `customer_name` as a fourth key changes nothing — the group count
 --     is identical to grouping by three;
@@ -15,7 +16,10 @@
 --
 -- This script adds rows whose dimensions are drawn from **independent** hashes
 -- of the row id, with a customer pool whose size varies by category, so leaf
--- groups span roughly 4 to 400 rows and all three drill outcomes occur.
+-- group sizes span orders of magnitude and all three drill outcomes occur: a
+-- group that fits one page, one that needs several, and one past the hand-off.
+-- #788 records the distribution measured when this landed — re-measure rather
+-- than trusting a number written here, which nothing checks.
 --
 -- IT IS ADDITIVE. The batch starts after the highest order_id already present,
 -- so no existing row is written and every count and total already recorded
@@ -47,6 +51,7 @@
 
 SET client_min_messages TO warning;
 SET statement_timeout = 0;
+SET lock_timeout = '10s';
 SET synchronous_commit = off;
 
 INSERT INTO enterprise_orders (
@@ -250,7 +255,8 @@ SELECT
   st,
   country,
   lpad((h_geo % 99999)::text, 5, '0'),
-  (ord_date::timestamptz + ((h_date % 86400) * interval '1 second')),
+  ((ord_date::timestamp AT TIME ZONE 'UTC')
+     + ((h_date % 86400) * interval '1 second')),
   CASE WHEN h_date % 13 = 0 THEN 'Customer requested a delivery window.' END,
   CASE WHEN h_date % 17 = 0 THEN 'Flagged for margin review.' END,
   modified_by,
