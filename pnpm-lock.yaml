@@ -41,9 +41,6 @@ catalogs:
     eslint-config-prettier:
       specifier: ^10.1.8
       version: 10.1.8
-    eslint-plugin-local-rules:
-      specifier: ^3.0.2
-      version: 3.0.2
     eslint-plugin-perfectionist:
       specifier: ^5.10.1
       version: 5.10.1
@@ -274,9 +271,6 @@ importers:
       '@types/react-dom':
         specifier: catalog:types
         version: 19.2.4(@types/react@19.2.18)
-      '@typescript-eslint/utils':
-        specifier: catalog:lint
-        version: 8.67.0(eslint@10.8.1(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
       babel-plugin-react-compiler:
         specifier: catalog:react
         version: 1.0.0
@@ -286,9 +280,6 @@ importers:
       eslint-config-prettier:
         specifier: catalog:lint
         version: 10.1.8(eslint@10.8.1(jiti@2.7.0)(supports-color@7.2.0))
-      eslint-plugin-local-rules:
-        specifier: catalog:lint
-        version: 3.0.2
       eslint-plugin-perfectionist:
         specifier: catalog:lint
         version: 5.10.1(eslint@10.8.1(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
@@ -590,9 +581,6 @@ importers:
       eslint-config-prettier:
         specifier: catalog:lint
         version: 10.1.8(eslint@10.8.1(jiti@2.7.0)(supports-color@7.2.0))
-      eslint-plugin-local-rules:
-        specifier: catalog:lint
-        version: 3.0.2
       eslint-plugin-perfectionist:
         specifier: catalog:lint
         version: 5.10.1(eslint@10.8.1(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
@@ -3272,9 +3260,6 @@ packages:
     hasBin: true
     peerDependencies:
       eslint: '>=7.0.0'
-
-  eslint-plugin-local-rules@3.0.2:
-    resolution: {integrity: sha512-IWME7GIYHXogTkFsToLdBCQVJ0U4kbSuVyDT+nKoR4UgtnVrrVeNWuAZkdEu1nxkvi9nsPccGehEEF6dgA28IQ==}
 
   eslint-plugin-perfectionist@5.10.1:
     resolution: {integrity: sha512-Kprsp9Us0GqAesYaAIzUViw57xYp5WBqzXrcE0Mtww++E5fexWXYBipMuuD7yvyH4vvpBH0+oJ+OMAmZ0oYXkw==}
@@ -7510,8 +7495,6 @@ snapshots:
   eslint-config-prettier@10.1.8(eslint@10.8.1(jiti@2.7.0)(supports-color@7.2.0)):
     dependencies:
       eslint: 10.8.1(jiti@2.7.0)(supports-color@7.2.0)
-
-  eslint-plugin-local-rules@3.0.2: {}
 
   eslint-plugin-perfectionist@5.10.1(eslint@10.8.1(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3):
     dependencies:
