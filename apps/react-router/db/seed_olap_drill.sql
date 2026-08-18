@@ -5,8 +5,9 @@
 -- `setup_enterprise_orders.sql` derives every dimension from the same
 -- `generate_series` counter, so the dimensions are correlated: each
 -- (product_category, product_subcategory, customer_type) cell holds exactly
--- **one** customer_name, and every leaf group of that four-key grouping is
--- 1,785–3,572 rows. Two consequences make drilling untestable on it:
+-- **one** customer_name, and every leaf group of that four-key grouping comes
+-- out large, and within a narrow band of every other. Two consequences make
+-- drilling untestable on it:
 --
 --   * adding `customer_name` as a fourth key changes nothing — the group count
 --     is identical to grouping by three;
@@ -15,7 +16,10 @@
 --
 -- This script adds rows whose dimensions are drawn from **independent** hashes
 -- of the row id, with a customer pool whose size varies by category, so leaf
--- groups span roughly 4 to 400 rows and all three drill outcomes occur.
+-- group sizes are spread rather than clustered and all three drill outcomes
+-- occur: a group that fits one page, one that needs several, and one past the
+-- hand-off. #788 records the distribution measured when this landed — measure
+-- it again rather than trusting a span written here, which nothing checks.
 --
 -- IT IS ADDITIVE. The batch starts after the highest order_id already present,
 -- so no existing row is written and every count and total already recorded
@@ -47,6 +51,7 @@
 
 SET client_min_messages TO warning;
 SET statement_timeout = 0;
+SET lock_timeout = '10s';
 SET synchronous_commit = off;
 
 INSERT INTO enterprise_orders (
@@ -105,9 +110,11 @@ dimensioned AS (
     (ARRAY['Cancelled','Delivered','On Hold','Pending',
            'Processing','Refunded','Returned','Shipped'])[1 + h_stat % 8] AS status,
     (ARRAY['Critical','High','Low','Normal','Urgent'])[1 + h_stat % 5] AS prio,
-    -- The customer pool widens by category, so leaf-group size spans two
-    -- orders of magnitude and a drill meets every outcome: comfortably inside
-    -- one page, near it, and past it.
+    -- The customer pool widens by category on purpose. A pool of one size
+    -- would make every leaf group about the same size as every other, and a
+    -- drill would then only ever meet one outcome; widening it spreads the
+    -- sizes far enough apart that a drill meets all three — comfortably
+    -- inside one page, near it, and past it.
     (ARRAY[3, 5, 8, 12, 20, 30, 50, 80, 150, 300])[1 + h_cat % 10] AS pool,
     (ARRAY['Amazon Logistics','DHL','FedEx','UPS','USPS'])[1 + h_geo % 5] AS carrier_val,
     (ARRAY['Warehouse A','Warehouse B','Warehouse C','Warehouse D','Warehouse E'])[1 + h_geo % 5] AS wh_loc,
@@ -250,7 +257,8 @@ SELECT
   st,
   country,
   lpad((h_geo % 99999)::text, 5, '0'),
-  (ord_date::timestamptz + ((h_date % 86400) * interval '1 second')),
+  ((ord_date::timestamp AT TIME ZONE 'UTC')
+     + ((h_date % 86400) * interval '1 second')),
   CASE WHEN h_date % 13 = 0 THEN 'Customer requested a delivery window.' END,
   CASE WHEN h_date % 17 = 0 THEN 'Flagged for margin review.' END,
   modified_by,
