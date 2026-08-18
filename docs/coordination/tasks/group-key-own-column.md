@@ -2,7 +2,7 @@
 id: group-key-own-column
 title: ADR-080 — a group key renders in its own column
 owner: agent:claude
-status: active
+status: review
 branch: docs/789-group-key-own-column
 area:
   - docs/decisions/ADR-080-*
@@ -11,7 +11,7 @@ area:
 started: 2026-08-18
 updated: 2026-08-18
 plan: (none)
-pr: (none)
+pr: #790
 issue: #789
 ---
 
@@ -21,6 +21,6 @@ ADR-080 — a group key renders in its own column
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: ADR-080 written, ADR-065 and ADR-061 cross-referenced, gates green
 - Blockers: none
-- Next:
+- Next: address review, merge, delete this file

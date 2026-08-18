@@ -1,6 +1,6 @@
 # ADR-061 — Grouping configuration is URL state; expansion is client state
 
-- **Status:** Accepted
+- **Status:** Accepted; extended by [ADR-080](./ADR-080-a-group-key-renders-in-its-own-column.md) (2026-08-18, #789) — the grouping param also carries the layout overrides a grouped view implies, and the layout cookie is never written while grouping is applied
 - **Date:** 2026-08-12
 - **Scope:** `@lcabrera/ui` (the Table store and the routing/persistence path), the grouped-read routes in `apps/react-router`
 - **Issue:** #553 — blocks #561. It also blocked #557, which was resolved by #612 while this ADR was in draft; the outcome is recorded below rather than left open.
