@@ -82,6 +82,7 @@
   "src/components/Table/TableEmptyState/TableEmptyState.stylex.ts",
   "src/components/Table/TableEmptyState/TableEmptyStateMessage/TableEmptyStateMessage.stylex.ts",
   "src/components/Table/TableGroupAggregate/TableGroupAggregate.stylex.ts",
+  "src/components/Table/TableGroupDisclosure/TableGroupDisclosure.stylex.ts",
   "src/components/Table/TableGroupLabel/TableGroupLabel.stylex.ts",
   "src/components/Table/TableHeader/TableHeader.stylex.ts",
   "src/components/Table/TableHeaderCell/ResizeHandle/ResizeHandle.stylex.ts",

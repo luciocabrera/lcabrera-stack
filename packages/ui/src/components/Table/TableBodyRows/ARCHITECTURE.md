@@ -292,3 +292,13 @@ adding to it — the one property that makes an accounting rule affordable here.
 `TableBody.grouping.test.tsx` holds every kind to the same declared height;
 what it cannot hold is a variant that paints taller, because jsdom runs no
 layout. That one is held by this rule and by review of the StyleX file.
+
+## The tree meta travels to the cell
+
+`useTableGroupTree` answers `hasChildren` / `isExpanded` / `pathKey` per visible
+row, and the hierarchy cell needs the first two to draw its disclosure. That
+answer travels down the same path the group summary does, rather than being
+re-derived at the cell: deriving it there would resolve the whole tree once per
+hierarchy cell, and deriving it from adjacency would be wrong under rollup,
+where a subtotal sits below the rows it totals. See
+[`TableGroupDisclosure/ARCHITECTURE.md`](../TableGroupDisclosure/ARCHITECTURE.md).

@@ -1,4 +1,5 @@
 import type { TableGroupRowSummary } from '#ui/components/Table/Table.types';
+import type { TableGroupDisclosureState } from '#ui/components/Table/TableGroupDisclosure';
 
 import { ACTIONS_COLUMN_KEY } from '#ui/components/Table/Table.constants';
 import { TableGroupAggregate } from '#ui/components/Table/TableGroupAggregate';
@@ -7,6 +8,7 @@ import { isTableGroupHierarchyColumn } from '#ui/components/Table/utils/isTableG
 
 type ResolveGroupCellChildrenArgs = {
   readonly columnKey: string;
+  readonly disclosure: TableGroupDisclosureState | undefined;
   readonly summary: TableGroupRowSummary;
 };
 
@@ -48,10 +50,11 @@ type ResolveGroupCellChildrenArgs = {
 export const EMPTY_CELL = <></>;
 export const resolveGroupCellChildren = ({
   columnKey,
+  disclosure,
   summary,
 }: ResolveGroupCellChildrenArgs) => {
   if (isTableGroupHierarchyColumn(columnKey)) {
-    return <TableGroupLabel summary={summary} />;
+    return <TableGroupLabel disclosure={disclosure} summary={summary} />;
   }
 
   if (columnKey === ACTIONS_COLUMN_KEY) {

@@ -96,6 +96,7 @@ CheckIcon [const] ({ size, ...props }: IconProps) => JSX.Element
 CollapseAllIcon [const] ({ size, ...props }: IconProps) => JSX.Element
 ColumnsOrderIcon [const] ({ size, ...props }: IconProps) => JSX.Element
 CopyIcon [const] ({ size, ...props }: IconProps) => JSX.Element
+DisclosureIcon [const] ({ size, ...props }: IconProps) => JSX.Element
 EraserIcon [const] ({ size, ...props }: IconProps) => JSX.Element
 ErrorDescriptive [const] () => JSX.Element
 ErrorIcon [const] ({ size, ...props }: IconProps) => JSX.Element

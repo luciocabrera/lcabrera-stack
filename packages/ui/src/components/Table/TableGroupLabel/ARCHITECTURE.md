@@ -13,7 +13,7 @@ and the width are the same ones every other cell gets
 
 ```
 TableGroupLabel/
-├── TableGroupLabel.component.tsx          → Icon, indent, label
+├── TableGroupLabel.component.tsx          → Disclosure, indent, label
 ├── TableGroupLabel.types.ts               → TableGroupLabelProps (summary)
 ├── TableGroupLabel.stylex.ts              → One-line layout, depth indent, subtotal weight
 ├── TableGroupLabel.test.tsx               → Label, depth, subtotal, grand total, one line
@@ -68,6 +68,17 @@ Nothing in the text separates them.
 The flag is carried on the row rather than inferred from the grouping
 configuration, because the row is the one thing that survives a configuration
 change intact — the table never asks the configuration what a row is.
+
+## The disclosure leads the line
+
+The chevron is the row's only pointer path to expansion, and it replaced the
+decorative group icon that used to sit here: the row's own ground says "this is
+a group" since #765, so a second, non-interactive marker in the one place a user
+will click was working against itself.
+
+It is deliberately **not a button** — see
+[`TableGroupDisclosure/ARCHITECTURE.md`](../TableGroupDisclosure/ARCHITECTURE.md),
+which holds that decision and the roving-tab-stop constraint behind it.
 
 ## The one-line constraint
 
