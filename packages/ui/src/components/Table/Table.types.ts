@@ -577,7 +577,7 @@ export type TableGroupKeyValue = {
   /**
    * The key's **raw value**, exactly as the read produced it — what a filter is
    * built from when a group is turned back into the restriction it came from
-   * ([ADR-079](../../../../../docs/decisions/ADR-079-drilling-from-a-group-to-its-rows.md)).
+   * (ADR-079).
    *
    * It cannot be recovered from `label`, which is why both are carried:
    * formatting is lossy in exactly the direction a query needs. A NULL key

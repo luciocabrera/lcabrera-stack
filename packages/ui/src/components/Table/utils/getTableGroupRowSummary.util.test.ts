@@ -123,9 +123,11 @@ describe('getTableGroupRowSummary', () => {
       getTableGroupRowSummary({
         [TABLE_GROUP_ROW_FIELD]: { ...summary, path: withNull },
       })?.path,
-      // Compared against the parsed input rather than a `null` literal: the
-      // point is that the guard passes the driver's own value through
-      // untouched, which is exactly what identity to `withNull` states.
+      // Compared against the parsed input rather than a `null` literal, so the
+      // expected value has the shape a driver actually returns. `toStrictEqual`
+      // is deep equality, not identity — the guard rebuilds each entry in
+      // `toKeyValue`, so identity would fail here by design. What this pins is
+      // that the NULL survives the rebuild uncoerced.
     ).toStrictEqual(withNull);
 
     expect(
