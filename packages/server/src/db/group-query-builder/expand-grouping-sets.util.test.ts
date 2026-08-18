@@ -83,6 +83,22 @@ describe('expandGroupingSets', () => {
     );
   });
 
+  it.each(['cube', 'flat', 'rollup'] as const)(
+    'never hands back the caller’s own key array, under %s',
+    (grouping) => {
+      // `readonly` is a compile-time claim and is erased for a published
+      // consumer, so identity is what actually stops a mutation reaching back
+      // into the caller's list. `flat` regressed here once, by returning
+      // `[keys]` where the other two allocate.
+      const keys = ['a', 'b', 'c'];
+      const sets = expandGroupingSets({ grouping, keys });
+
+      for (const set of sets) {
+        expect(set).not.toBe(keys);
+      }
+    },
+  );
+
   it('starts every mode at the full key list and ends at the grand total', () => {
     // The one shape all three share, and the reason nothing downstream needs a
     // per-mode case: most specific first, grand total last.

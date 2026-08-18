@@ -31,7 +31,11 @@ export const expandGroupingSets = ({
     Record<GroupingMode, () => readonly (readonly string[])[]>
   > = {
     cube: () => expandCubeSets({ keys }),
-    flat: () => [keys],
+    // A copy rather than `keys` itself: every mode hands back arrays it
+    // allocated, so nothing here can alias the caller's key list. `readonly`
+    // says so in this repo and is erased for a published consumer, where a
+    // mutation would reach back into their own array.
+    flat: () => [[...keys]],
     // n+1: one per key dropped from the tail, down to the empty grand total.
     rollup: () =>
       Array.from({ length: keys.length + 1 }, (_, dropped) =>
