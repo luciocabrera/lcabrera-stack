@@ -20,6 +20,6 @@ Ship the repo setup as @lcabrera/devkit and @lcabrera/repo-standards
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: ADR-081 written (the distribution shape)
 - Blockers: none
-- Next:
+- Next: amend #716 with the corrected classification, then file the phase sub-issues
