@@ -6,6 +6,8 @@ import type {
   TableColumn,
 } from '../Table.types';
 
+import { resolveDeclaredGroupingKeys } from './resolveDeclaredGroupingKeys.util';
+
 type WithGroupedColumnLayoutArgs<TData> = {
   readonly columnOrder: ColumnOrderState<TData>;
   readonly columnPinning: ColumnPinningState<TData>;
@@ -51,8 +53,9 @@ type WithGroupedColumnLayoutArgs<TData> = {
  * modified.
  *
  * A key naming no declared column is skipped rather than hoisted — the honest
- * answer for a URL naming a column this route does not render, and the same
- * fallback a group summary's own labels take.
+ * answer for a URL naming a column this route does not render. The render path
+ * skips the same ones, through the same function, because the two disagreeing
+ * is what loses the grand total (see `resolveDeclaredGroupingKeys`).
  */
 export const withGroupedColumnLayout = <TData>({
   columnOrder,
@@ -65,8 +68,7 @@ export const withGroupedColumnLayout = <TData>({
 
   if (groupingKeys.length === 0) return unchanged;
 
-  const declared = new Set(columns.map((column) => String(column.key)));
-  const keys = groupingKeys.filter((groupKey) => declared.has(groupKey));
+  const keys = resolveDeclaredGroupingKeys({ columns, groupingKeys });
 
   if (keys.length === 0) return unchanged;
 

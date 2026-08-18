@@ -82,10 +82,12 @@ const MockTableRow = vi.hoisted(() => {
 const MockTableGroupKeyCell = vi.hoisted(() => {
   return function MockTableGroupKeyCell({
     columnKey,
+    groupingKeys,
     isCarried,
     summary,
   }: {
     readonly columnKey: string;
+    readonly groupingKeys: readonly string[];
     readonly isCarried: boolean;
     readonly summary: {
       readonly count: number;
@@ -97,7 +99,13 @@ const MockTableGroupKeyCell = vi.hoisted(() => {
   }) {
     const entry = summary.path.find((level) => level.columnKey === columnKey);
 
-    if (entry === undefined) return `key:${columnKey}:absent`;
+    if (entry === undefined) {
+      // Mirrors the real component's grand-total placement, which is the one
+      // behaviour that depends on *which* key is first.
+      return summary.path.length === 0 && groupingKeys[0] === columnKey
+        ? `key:${columnKey}:grand`
+        : `key:${columnKey}:absent`;
+    }
 
     return isCarried
       ? `key:${columnKey}:carried:${entry.label}`
@@ -651,5 +659,41 @@ describe('TableBodyRows', () => {
 
     expect(reordered[1]?.textContent).toContain('key:name:A:2');
     expect(reordered[1]).toBe(groupNodeForA);
+  });
+
+  it('places the grand total on the first key that has a column', () => {
+    // Grouping is URL state, so it can name a column this route never declared.
+    // `withGroupedColumnLayout` hoists only the declared keys; the render path
+    // has to skip the same ones, or the grand total is looked for in a column
+    // that is never painted and renders nowhere at all.
+    setupGroupedMocks();
+    useGetTableGroupingKeysMock.mockReturnValue(['not_a_column', 'name']);
+    useGetTableDataMock.mockReturnValue([
+      {
+        [TABLE_GROUP_ROW_FIELD]: {
+          aggregates: [],
+          count: 9,
+          isSubtotal: true,
+          path: [],
+        },
+      },
+    ]);
+
+    render(
+      <table>
+        <tbody>
+          <TableBodyRows endIndex={1} isLoadingState={false} startIndex={0} />
+        </tbody>
+      </table>,
+    );
+
+    // The mock key cell reports `absent` when the row carries no entry for the
+    // column, so a grand total placed nowhere would show that instead.
+    const cells = [...(screen.getByRole('row').querySelectorAll('td') ?? [])];
+
+    expect(cells.map((cell) => cell.textContent)).toStrictEqual([
+      'key:name:grand',
+      'agg:amount',
+    ]);
   });
 });
