@@ -8,7 +8,7 @@ import { resolveRowKey } from '#ui/components/Table/TableBodyRows/utils/resolveR
 import { resolveGroupPathKey } from './resolveGroupPathKey.util';
 
 describe('resolveGroupPathKey', () => {
-  it('keys a group by its values in key order, so the order is part of the identity', () => {
+  it('keys a group by its labels in key order, so the order is part of the identity', () => {
     const forward = resolveGroupPathKey([
       { columnKey: 'city', label: 'Berlin', value: 'Berlin' },
       { columnKey: 'status', label: 'Open', value: 'Open' },

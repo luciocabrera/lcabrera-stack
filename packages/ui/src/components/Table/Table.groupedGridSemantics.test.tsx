@@ -70,7 +70,7 @@ const rows: readonly TestRow[] = [
       isSubtotal: false,
       path: [
         { columnKey: 'city', label: 'Berlin', value: 'Berlin' },
-        { columnKey: 'id', label: '3', value: '3' },
+        { columnKey: 'id', label: '3', value: 3 },
       ],
     },
   },

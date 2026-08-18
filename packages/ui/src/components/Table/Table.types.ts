@@ -551,7 +551,11 @@ export type TableGroupKeyRefusalReason =
   | 'too-many-distinct'
   | 'unique-ish';
 
-/** One level of a group's identity: the column, and its value formatted. */
+/**
+ * One level of a group's identity: the column, its value **formatted** for
+ * display, and that value **raw**. Both are carried because neither answers the
+ * other's question — see the fields.
+ */
 export type TableGroupKeyValue = {
   /** The group key column this entry is for. */
   readonly columnKey: string;
