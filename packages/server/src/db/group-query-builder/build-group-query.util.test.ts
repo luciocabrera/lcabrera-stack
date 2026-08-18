@@ -84,6 +84,18 @@ const descriptor = (
   ...overrides,
 });
 
+/** The `ORDER BY` tail, so two modes' ordering can be compared as one string. */
+const orderByOf = (text: string) => text.slice(text.indexOf('ORDER BY'));
+
+/**
+ * The `GROUP BY` clause alone. The scoping is load-bearing: against the whole
+ * statement a set like `("shipping_country")` also matches the `ORDER BY`'s
+ * `GROUPING("shipping_country")` term, which every mode emits — so the same
+ * probe run over `text` reports a cube and a rollup as identical.
+ */
+const groupByOf = (text: string) =>
+  text.slice(text.indexOf('GROUP BY'), text.indexOf('ORDER BY'));
+
 const SELECT_LIST =
   'SELECT "order_status", "shipping_country", ' +
   'GROUPING("order_status", "shipping_country") AS "group_mask", ' +
@@ -132,6 +144,47 @@ describe('buildGroupQuery', () => {
         'LIMIT $3',
     );
     expect(result.groupingSetMasks).toEqual([0, 1, 3]);
+  });
+
+  it('emits a cube as every subset, in ascending mask order', () => {
+    const result = buildGroupQuery(descriptor({ grouping: 'cube' }));
+
+    expect(result.text).toContain(
+      'GROUP BY GROUPING SETS ' +
+        '(("order_status", "shipping_country"), ("order_status"), ("shipping_country"), ())',
+    );
+    expect(result.groupingSetMasks).toEqual([0, 1, 2, 3]);
+  });
+
+  it('gives a cube the same ORDER BY shape a rollup gets', () => {
+    // Ordering is driven by "is this key rolled up in some set", not by the
+    // mode, so cube must reach byte-identical terms — it rolls up every key.
+    const cube = buildGroupQuery(descriptor({ grouping: 'cube' }));
+    const rollup = buildGroupQuery(descriptor({ grouping: 'rollup' }));
+
+    expect(orderByOf(cube.text)).toBe(orderByOf(rollup.text));
+  });
+
+  it('emits the cross-cutting set a rollup never does', () => {
+    // The one output difference that identifies the mode from the SQL alone:
+    // `("shipping_country")` totals across every status, so it is a child of no
+    // status row. Compared over the GROUP BY clause only — see `groupByOf`.
+    const cube = buildGroupQuery(descriptor({ grouping: 'cube' }));
+    const rollup = buildGroupQuery(descriptor({ grouping: 'rollup' }));
+
+    expect(groupByOf(cube.text)).toContain('("shipping_country")');
+    expect(groupByOf(rollup.text)).not.toContain('("shipping_country")');
+  });
+
+  it('refuses a cube past its own depth cap, one key before a rollup', () => {
+    const keys = ['order_status', 'shipping_country', 'city', 'priority'];
+
+    expect(() =>
+      buildGroupQuery(descriptor({ grouping: 'cube', keys })),
+    ).toThrow('A cube grouping takes at most 3 group keys; got 4.');
+    expect(() =>
+      buildGroupQuery(descriptor({ grouping: 'rollup', keys })),
+    ).not.toThrow();
   });
 
   it('ships the keys and masks the caller needs to decode the mask column', () => {

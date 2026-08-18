@@ -189,10 +189,16 @@ export type GroupGuardRails = {
 };
 
 /**
- * `cube` is deliberately absent until #574 adds it: the expander map is closed
- * over this union, so widening it is a compile error until the expansion exists.
+ * `cube` emits every subset of the keys, so its result is a **lattice, not a
+ * tree**: `(category)` with no country is a child of nothing and has no depth.
+ * Anything that indents by path length holds for `flat` and `rollup` and must
+ * not assume it here — ADR-065's amendment puts a cube result in the flat form,
+ * each row carrying its own coordinates.
+ *
+ * The expander map is closed over this union, which is what made cube arrive as
+ * a real expansion rather than another entry: its sets are not prefixes.
  */
-export type GroupingMode = 'flat' | 'rollup';
+export type GroupingMode = 'cube' | 'flat' | 'rollup';
 
 /**
  * Why a column may not be a group key. Distinguishable on purpose: grouping by a

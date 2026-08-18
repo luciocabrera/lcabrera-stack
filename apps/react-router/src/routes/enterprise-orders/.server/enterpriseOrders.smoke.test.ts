@@ -423,7 +423,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
 
       expect(page.error).toEqual({
         kind: 'grouping-refused',
-        message: 'A grouped query takes at most 4 group keys; got 5.',
+        message: 'A flat grouping takes at most 4 group keys; got 5.',
         reason: 'too-many-keys',
       });
       expect(page.data).toEqual([]);

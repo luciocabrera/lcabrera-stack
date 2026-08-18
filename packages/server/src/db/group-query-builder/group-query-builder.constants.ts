@@ -2,6 +2,7 @@ import type {
   AggregateFn,
   AggregateSpec,
   BuiltGroupQuery,
+  GroupingMode,
 } from './group-query-builder.types.ts';
 
 /**
@@ -89,6 +90,27 @@ export const MAX_GROUP_KEY_DISTINCT = 1000;
  * sixteen sets whose product blows past any sane row budget.
  */
 export const MAX_GROUP_KEYS = 4;
+
+/**
+ * The depth cap per mode, closed over `GroupingMode` so a new mode must state
+ * its own bound rather than inherit one.
+ *
+ * Cube stops a key earlier than the others because its set count is `2ⁿ`, not
+ * `n+1` — the sentence above already prices depth 4 at sixteen sets. Three is
+ * eight, which the row budget absorbs.
+ *
+ * **It has to be a construction-time rule, and the cardinality rail is exactly
+ * why.** That rail returns `unknown` when any key lacks a `pg_stats` row, and
+ * ADR-066 answers `unknown` with warn-and-proceed so grouping survives a fresh
+ * restore. So on an unanalysed table the estimate cannot refuse anything, and a
+ * depth-4 cube would run its sixteen sets under nothing but the row backstop.
+ * A bound that disappears on the least-analysed tables is not a bound.
+ */
+export const MAX_KEYS_BY_GROUPING: Readonly<Record<GroupingMode, number>> = {
+  cube: 3,
+  flat: MAX_GROUP_KEYS,
+  rollup: MAX_GROUP_KEYS,
+};
 
 /**
  * Estimated result rows past which a grouped read is refused outright — roughly

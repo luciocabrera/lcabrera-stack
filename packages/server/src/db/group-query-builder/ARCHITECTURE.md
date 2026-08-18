@@ -98,7 +98,8 @@ documented in ADR-058, and something the UI has to surface rather than hide.
 | `resolve-distinct-estimate.util.ts`       | `n_distinct` → a known count, genuinely unknown, or undefined distinctness — three outcomes on purpose                                                                                    |
 | `to-role-aggregates.util.ts`              | Both gates applied to the aggregate menu: the role sets the ceiling, the catalogue removes what does not exist                                                                            |
 | `resolve-column-capability.util.ts`       | **Public entry point.** One catalogue row → one `ColumnGroupingCapability`, refusal reason included                                                                                       |
-| `expand-grouping-sets.util.ts`            | Grouping mode → the ordered sets, over key names rather than SQL, so its suite is array equality                                                                                          |
+| `expand-grouping-sets.util.ts`            | Grouping mode → the ordered sets, over key names rather than SQL, so its suite is array equality. A closed record, so a new mode cannot be added without one                              |
+| `expand-cube-sets.util.ts`                | Cube's own expansion: every subset, in ascending `GROUPING()` mask — the order the PostgreSQL manual lists for `CUBE`                                                                     |
 | `to-grouping-set-mask.util.ts`            | One set → the `GROUPING()` integer, the only thing separating a structural NULL from a real one                                                                                           |
 | `assert-group-column.util.ts`             | The two shared column assertions (`assertSafeIdentifier`, `assertColumnAllowed`) raised as a **typed** refusal — they are shared with the flat builder and so cannot throw one themselves |
 | `assert-group-depth.util.ts`              | The capability-free half of the key rules — non-empty, within the depth cap, no repeats. Split out so the executor can run it **before borrowing a connection**                           |
@@ -200,6 +201,35 @@ So the builder ships the decoder with the data:
 Decoding, for key _i_ of _n_: bit set → the row is an aggregate over that key;
 bit clear and the value NULL → a real NULL; otherwise a value.
 
+## Cube is a lattice, and the result stays long
+
+`flat` and `rollup` emit prefixes of the key list, so every row has exactly one
+parent and depth is well defined — which is what lets the grid indent them into a
+hierarchy column. **Cube does not have that property.** It emits every subset,
+including `(channel)` with no region, which is a child of no region row and has
+no depth at all.
+
+ADR-065's amendment is the governing rule: the rendering follows the shape of the
+result set, so a tree renders indented and a lattice renders flat, each row
+carrying its own coordinates in the grouped columns. Anything that indents by
+path length is correct for two modes and wrong for this one. Nothing downstream
+should try to find a cube row's parent, because for most cube rows there isn't
+one.
+
+The result also stays **long** — one row per grouping-set combination, each
+stating its own coordinates — rather than being pre-flattened or widened into a
+matrix. A long result can be re-projected into a pivot later; a pre-widened one
+has already thrown the coordinates away. That is the difference between a pivot
+table being a rendering change and being a rewrite.
+
+`../../../../../apps/react-router/src/.server/cubeExpansion.smoke.test.ts` is the
+live-Postgres proof that the sets expanded here are the ones `CUBE (…)` means.
+A unit test can only assert the expansion against _our own_ expectation of
+`CUBE`, which reports green whether or not that expectation is right; running
+both and diffing the results is what separates them. Its fixture carries a real
+NULL in one key, because a structural NULL and a real one are textually identical
+and a comparison ignoring `GROUPING()` would call two different results equal.
+
 ## Ordering, and the `NULLS` keyword that must not appear
 
 `GROUPING(key) <placement>, key <user>` per key in descriptor order, with any
@@ -245,6 +275,18 @@ a connection — a request at depth 9 must not cost a catalogue query. The build
 still runs it through `assertGroupKeys`, because the pre-flight check is an
 earlier gate and never the only one.
 
+**The cap is per mode, and cube's is lower.** `MAX_KEYS_BY_GROUPING` is closed
+over `GroupingMode`, so a new mode has to state its own bound. Cube stops one key
+short of the others because its set count is `2ⁿ` where theirs is `n+1`.
+
+That has to be a construction-time rule rather than something the cardinality
+rail catches, and the rail is the reason why: it returns `unknown` whenever a key
+has no `pg_stats` row, and unknown means warn-and-proceed. So on an unanalysed
+table — the state every fresh restore is in — the estimate cannot refuse
+anything, and a depth-4 cube would run sixteen grouping sets under nothing but
+the row backstop. A bound that disappears on exactly the least-analysed tables is
+not a bound.
+
 **The catalogue's verdict beats the arithmetic one.** Both can fire for the same
 request; "this column cannot be a group key" is actionable and "the product is
 too large" is not, so `resolveGroupGuardRails` is called after
@@ -253,8 +295,9 @@ too large" is not, so `resolveGroupGuardRails` is called after
 **The estimate is summed over the emitted sets, not from a per-mode formula.**
 `expandGroupingSets` is the same function the SQL is built from, so `flat`
 (`∏dₖ`), `rollup` (`1 + Σᵢ ∏_{j≤i} dⱼ`) and cube (`∏(dₖ+1)`) all fall out of one
-reduction. Adding a mode adds nothing here. One key with no estimate makes the
-whole answer unknown — treating the missing factor as 1 would let the widest
+reduction — cube's identity in particular was reached with nothing added here,
+which is the property this design was aiming at. One key with no estimate makes
+the whole answer unknown — treating the missing factor as 1 would let the widest
 column in the request be the one that hides the cost.
 
 **Every refusal here is a `GroupingRefusedError`, including the two borrowed

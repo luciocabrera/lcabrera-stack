@@ -59,7 +59,10 @@ export const selectGroupedRows = async <TRow extends QueryResultRow>({
   tx,
   ...descriptor
 }: ExecutorOptions & SelectGroupedRowsArgs) => {
-  assertGroupDepth({ keys: descriptor.keys });
+  assertGroupDepth({
+    grouping: descriptor.grouping,
+    keys: descriptor.keys,
+  });
 
   const run = async (client: TransactionClient) => {
     await setStatementTimeout({

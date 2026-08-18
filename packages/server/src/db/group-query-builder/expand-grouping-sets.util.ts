@@ -1,5 +1,7 @@
 import type { GroupingMode } from './group-query-builder.types.ts';
 
+import { expandCubeSets } from './expand-cube-sets.util.ts';
+
 type ExpandGroupingSetsArgs = {
   readonly grouping: GroupingMode;
   readonly keys: readonly string[];
@@ -9,27 +11,33 @@ type ExpandGroupingSetsArgs = {
  * The grouping sets to emit, in Postgres's own order — most specific first,
  * grand total last.
  *
- * ADR-059 expands here rather than emitting `ROLLUP(…)` sugar: the planner
- * normalises both into the same node, so expansion is free, and the guard rails
- * need this list anyway to bound the result. Keeping it over key *names* rather
- * than SQL text is what lets this file's whole suite be array equality.
+ * ADR-059 expands here rather than emitting `ROLLUP(…)`/`CUBE(…)` sugar: the
+ * planner normalises both into the same node, so expansion is free, and the
+ * guard rails need this list anyway to bound the result. Keeping it over key
+ * *names* rather than SQL text is what lets this file's whole suite be array
+ * equality.
  *
- * Both modes are prefixes of the key list and differ only in how many they
- * emit, so the mode selects a count rather than a shape. The record is closed
- * over `GroupingMode`, which is what makes adding `cube` a compile error here —
- * cube's sets are not prefixes, so it needs a real expansion, not an entry.
+ * The record is closed over `GroupingMode`, so a new mode is a compile error
+ * here rather than a silent fallthrough — and that is exactly how cube arrived.
+ * `flat` and `rollup` are prefixes of the key list and differ only in how many
+ * they emit, so each is a count; cube's sets are subsets, so it needed a real
+ * expansion and has its own file.
  */
 export const expandGroupingSets = ({
   grouping,
   keys,
 }: ExpandGroupingSetsArgs): readonly (readonly string[])[] => {
-  const setCountByMode: Readonly<Record<GroupingMode, number>> = {
-    flat: 1,
+  const setsByMode: Readonly<
+    Record<GroupingMode, () => readonly (readonly string[])[]>
+  > = {
+    cube: () => expandCubeSets({ keys }),
+    flat: () => [keys],
     // n+1: one per key dropped from the tail, down to the empty grand total.
-    rollup: keys.length + 1,
+    rollup: () =>
+      Array.from({ length: keys.length + 1 }, (_, dropped) =>
+        keys.slice(0, keys.length - dropped),
+      ),
   };
 
-  return Array.from({ length: setCountByMode[grouping] }, (_, dropped) =>
-    keys.slice(0, keys.length - dropped),
-  );
+  return setsByMode[grouping]();
 };

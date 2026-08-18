@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import type { ColumnGroupingCapability } from './group-query-builder.types.ts';
+import type {
+  ColumnGroupingCapability,
+  GroupingMode,
+} from './group-query-builder.types.ts';
 
 import { estimateGroupCardinality } from './estimate-group-cardinality.util.ts';
 
@@ -29,7 +32,7 @@ const CAPABILITIES: Readonly<Record<string, ColumnGroupingCapability>> = {
 };
 
 type EstimateArgs = {
-  readonly grouping: 'flat' | 'rollup';
+  readonly grouping: GroupingMode;
   readonly keys: readonly string[];
 };
 
@@ -79,6 +82,40 @@ describe('estimateGroupCardinality', () => {
 
     expect(known).toEqual({ kind: 'known', rows: 3 });
     expect(withUnknown.kind).toBe('unknown');
+  });
+
+  it('reaches ∏(dₖ+1) for a cube with no formula of its own', () => {
+    // 4·6·8. The `+1` per key is the subset that omits it, and it falls out of
+    // summing over the emitted sets — nothing in the estimator knows what a
+    // cube is, which is the property worth pinning.
+    expect(estimate({ grouping: 'cube', keys: ['a', 'b', 'c'] })).toEqual({
+      kind: 'known',
+      rows: 192,
+    });
+  });
+
+  it('bounds a cube above the rollup over the same keys', () => {
+    // Cube's sets are a superset of rollup's, so its bound can never be the
+    // smaller of the two — the ordering a guard rail depends on to refuse the
+    // more expensive mode first.
+    const keys = ['a', 'b', 'c'];
+    const cube = estimate({ grouping: 'cube', keys });
+    const rollup = estimate({ grouping: 'rollup', keys });
+
+    expect(cube.kind === 'known' && rollup.kind === 'known').toBe(true);
+    expect(cube).toEqual({ kind: 'known', rows: 192 });
+    expect(rollup).toEqual({ kind: 'known', rows: 124 });
+  });
+
+  it('refuses to guess for a cube too, on one missing factor', () => {
+    // The rail that cannot enforce cube's depth cap, stated where it is
+    // observable: an unanalysed key makes the whole bound unknown, and ADR-066
+    // answers unknown with warn-and-proceed. That is why the cap is asserted at
+    // construction instead (`assert-group-depth.util.ts`).
+    expect(estimate({ grouping: 'cube', keys: ['a', 'unanalysed'] })).toEqual({
+      columns: ['unanalysed'],
+      kind: 'unknown',
+    });
   });
 
   it('treats a column with no capability at all as unknown', () => {
