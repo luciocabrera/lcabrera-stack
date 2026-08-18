@@ -35,7 +35,7 @@ describe('getTableGroupRowSummary', () => {
 
   it('reads the aggregates a grouped read attached', () => {
     const aggregates = [
-      { columnKey: 'total_amount', fn: 'sum', label: '1,234.00' },
+      { columnKey: 'total_amount', fn: 'sum', value: '302540833.38' },
     ];
 
     expect(
@@ -43,6 +43,37 @@ describe('getTableGroupRowSummary', () => {
         [TABLE_GROUP_ROW_FIELD]: { ...summary, aggregates },
       })?.aggregates,
     ).toStrictEqual(aggregates);
+  });
+
+  it('keeps a SQL NULL aggregate rather than rejecting the summary', () => {
+    // `avg` over a group whose rows are all NULL returns SQL NULL. That is a
+    // value the cell renders as an absence, not a malformed summary — and it
+    // is why `value` is checked for presence rather than for type.
+    //
+    // Parsed rather than written as a literal, for the reason given below: a
+    // JSON `null` is exactly how such a value reaches a row across the loader
+    // boundary, and it is the shape under test rather than an incidental one.
+    const aggregates = JSON.parse(
+      '[{"columnKey":"unit_price","fn":"avg","value":null}]',
+    ) as readonly unknown[];
+
+    expect(
+      getTableGroupRowSummary({
+        [TABLE_GROUP_ROW_FIELD]: { ...summary, aggregates },
+      })?.aggregates,
+    ).toStrictEqual(aggregates);
+  });
+
+  it('refuses an aggregate carrying no value at all', () => {
+    // The other side of that coin: absent is malformed where null is data.
+    expect(
+      getTableGroupRowSummary({
+        [TABLE_GROUP_ROW_FIELD]: {
+          ...summary,
+          aggregates: [{ columnKey: 'unit_price', fn: 'avg' }],
+        },
+      }),
+    ).toBeUndefined();
   });
 
   it('answers undefined for an ordinary data row', () => {
@@ -121,7 +152,7 @@ describe('getTableGroupRowSummary', () => {
       getTableGroupRowSummary({
         [TABLE_GROUP_ROW_FIELD]: {
           ...summary,
-          aggregates: [{ columnKey: 'total_amount', fn: 'median', label: '1' }],
+          aggregates: [{ columnKey: 'total_amount', fn: 'median', value: '1' }],
         },
       }),
     ).toBeUndefined();

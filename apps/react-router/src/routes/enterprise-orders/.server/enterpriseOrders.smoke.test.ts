@@ -454,7 +454,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
         expect(aggregate?.columnKey).toBe('total_amount');
         expect(aggregate?.fn).toBe('sum');
 
-        return total + Number(aggregate?.label ?? 0);
+        return total + Number(aggregate?.value ?? 0);
       }, 0);
 
       const { rows } = await getPool().query<{ readonly total: string }>(

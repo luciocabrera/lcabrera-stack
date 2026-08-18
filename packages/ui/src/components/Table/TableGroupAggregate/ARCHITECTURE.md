@@ -14,7 +14,9 @@ TableGroupAggregate/
 ├── TableGroupAggregate.component.tsx → Aggregate value, filter indicator, or the dash
 ├── TableGroupAggregate.types.ts      → TableGroupAggregateProps (columnKey, summary)
 ├── TableGroupAggregate.stylex.ts     → Value, dimmed absent state, indicator
-├── TableGroupAggregate.test.tsx      → Value, zero, dash, filter indicator
+├── TableGroupAggregate.test.tsx      → Formatting, zero, dash, filter indicator
+├── utils/
+│   └── resolveAggregateDataType.util.ts → How an aggregate renders, which is not always how its column does
 ├── ARCHITECTURE.md                   → This file
 └── index.ts                          → Barrel export
 ```
@@ -83,3 +85,31 @@ nothing for the builder to refuse.
 - **No formatting.** The `label` arrives already formatted, because formatting a
   Postgres value needs to know that `count(*)` comes back as a string and that a
   `numeric` aggregate does too. The route's grouped service resolves that.
+
+## Where the value is formatted, and why here
+
+The aggregate arrives **raw** and is formatted in this cell, through the same
+`renderCellContent` call a data cell in the same column makes. This is the
+opposite of how a group **key** travels, and the asymmetry is deliberate:
+nothing in a row resolves a key back to the column it came from, so a key has to
+arrive pre-formatted; an aggregate names its `columnKey`, so the columns store
+answers with that column's `dataType` and `format` and this cell can do better.
+
+Formatting it service-side instead is what put a raw Postgres `numeric` string
+under a currency header — `sum(total_amount)` arrives as `"302540833.38"`, and a
+grouped service with no access to the column descriptor has nothing better to do
+with it than pass it along. Sharing the renderer rather than reimplementing it is
+what keeps a group row's number and the numbers beneath it in one format; two
+formatters drift the first time either gains an option.
+
+**An aggregate does not always render as its column does**, which is what
+`resolveAggregateDataType` exists for. `sum`/`avg`/`min`/`max` answer in the
+column's own units and inherit its type. `count`/`countDistinct` answer "how many
+rows" — a tally over a currency column is not money, and inheriting the type
+would put a symbol and two decimals on an integer that has neither.
+`boolAnd`/`boolOr` answer yes or no whatever they are applied to.
+
+A SQL `NULL` aggregate — `avg` over a group whose rows are all NULL — reaches
+this cell as `null` and renders as an absence. That is why the summary guard
+checks `value` for **presence** rather than for type: absent is malformed, `null`
+is data.

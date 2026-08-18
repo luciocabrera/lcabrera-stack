@@ -4,32 +4,34 @@ import { spacing, typography } from '#ui/design-system/tokens/base.stylex';
 import { colors } from '#ui/design-system/tokens/colors.stylex';
 
 export const tableGroupLabelStyles = stylex.create({
+  /**
+   * Brand-tinted rather than `textPrimary`, so the hierarchy column reads as
+   * structure at a glance instead of as one more data column.
+   * `brandPrimaryCardText` is the token tuned to sit on a tinted card, which is
+   * what every group-row ground is — the subtotal band included.
+   */
   container: {
     gap: spacing.xs,
     overflow: 'hidden',
     alignItems: 'center',
-    color: colors.textPrimary,
+    color: colors.brandPrimaryCardText,
     display: 'flex',
     fontSize: typography.fontSizeSm,
     fontWeight: typography.fontWeightSemibold,
     minWidth: 0,
     width: '100%',
   },
-  count: {
-    color: colors.textSecondary,
-    flexShrink: 0,
-    fontWeight: typography.fontWeightNormal,
-  },
   icon: {
     alignItems: 'center',
-    color: colors.textSecondary,
+    color: colors.brandPrimaryCardText,
     display: 'inline-flex',
     flexShrink: 0,
+    opacity: 0.7,
   },
   /**
    * Depth as padding rather than as a margin or a nested box: padding leaves
-   * the flex line intact, so the label still ellipsizes into whatever width is
-   * left rather than pushing the count out of the cell.
+   * the flex line intact, so the label ellipsizes into whatever width is left
+   * rather than overflowing the cell.
    */
   indent: (indentPx: number) => ({
     paddingInlineStart: `${indentPx}px`,

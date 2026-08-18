@@ -3,52 +3,127 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
-import type { TableGroupRowSummary } from '#ui/components/Table/Table.types';
+import type {
+  TableColumn,
+  TableGroupRowSummary,
+} from '#ui/components/Table/Table.types';
 
 import { TableGroupAggregate } from './TableGroupAggregate.component';
 
-const { useGetHasColumnFilterMock } = vi.hoisted(() => ({
-  useGetHasColumnFilterMock: vi.fn(() => false),
-}));
+const { useGetHasColumnFilterMock, useGetNormalizedColumnMock } = vi.hoisted(
+  () => ({
+    useGetHasColumnFilterMock: vi.fn(() => false),
+    useGetNormalizedColumnMock: vi.fn(),
+  }),
+);
 
 vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
   useGetHasColumnFilter: useGetHasColumnFilterMock,
+  useGetNormalizedColumn: useGetNormalizedColumnMock,
 }));
 
+vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
+  useGetTableLocale: () => 'en-US',
+}));
+
+/**
+ * The columns the summary below is read against. `total_amount` is money,
+ * `unit_price` is a plain number capped at two decimals, and `order_count` is
+ * money that will be asked for a tally — which is what makes three near
+ * identical raw inputs render three different ways.
+ */
+const COLUMNS: Record<string, TableColumn<Record<string, unknown>>> = {
+  order_count: { dataType: 'currency', key: 'order_count', label: 'Orders' },
+  total_amount: {
+    dataType: 'currency',
+    format: { currency: { currency: 'USD', locale: 'en-US' } },
+    key: 'total_amount',
+    label: 'Total Amount',
+  },
+  unit_price: {
+    dataType: 'number',
+    format: { number: { maximumFractionDigits: 2, minimumFractionDigits: 2 } },
+    key: 'unit_price',
+    label: 'Unit Price',
+  },
+};
+
+/**
+ * Values as `pg` actually hands them over: `numeric` and `bigint` arrive as
+ * **strings**, because neither survives a JS number losslessly. Writing them
+ * as numbers here would test a case the database never produces.
+ */
 const summary: TableGroupRowSummary = {
   aggregates: [
-    { columnKey: 'total_amount', fn: 'sum', label: '1,234.00' },
-    { columnKey: 'discount', fn: 'sum', label: '0.00' },
+    { columnKey: 'total_amount', fn: 'sum', value: '302540833.38' },
+    { columnKey: 'unit_price', fn: 'avg', value: '2503.3168000000000000' },
+    { columnKey: 'order_count', fn: 'count', value: '1380' },
+    { columnKey: 'discount', fn: 'sum', value: '0.00' },
   ],
   count: 12,
   isSubtotal: false,
   path: [{ columnKey: 'order_status', label: 'Shipped' }],
 };
 
+const renderAggregate = (columnKey: string) => {
+  useGetNormalizedColumnMock.mockImplementation(
+    (key: unknown) => COLUMNS[key as string],
+  );
+
+  return render(
+    <TableGroupAggregate columnKey={columnKey} summary={summary} />,
+  );
+};
+
 describe('TableGroupAggregate', () => {
   afterEach(() => {
     cleanup();
     useGetHasColumnFilterMock.mockReturnValue(false);
+    useGetNormalizedColumnMock.mockReset();
   });
 
-  it('renders the aggregate selected on its own column', () => {
-    render(<TableGroupAggregate columnKey='total_amount' summary={summary} />);
+  it('formats a currency column’s sum as currency', () => {
+    // The regression this replaces: the value reached the cell already
+    // stringified by the group-KEY formatter, so a `numeric` sum rendered as
+    // the raw `302540833.38` under a currency header and was then ellipsized
+    // by the column.
+    renderAggregate('total_amount');
 
-    expect(screen.getByText('1,234.00')).toBeTruthy();
+    expect(screen.getByText(/302,540,833\.38/u)).toBeTruthy();
+    expect(screen.queryByText('302540833.38')).toBeNull();
+  });
+
+  it('honours the column’s fraction digits on an average', () => {
+    // `avg` over `numeric` comes back at full scale. Nothing but the column's
+    // own format descriptor says how much of that to show.
+    renderAggregate('unit_price');
+
+    expect(screen.getByText('2,503.32')).toBeTruthy();
+  });
+
+  it('renders a count as a tally even on a currency column', () => {
+    // The discriminating case for `resolveAggregateDataType`: `count` answers
+    // "how many rows", not "how many dollars". Inheriting the column's type
+    // here would put a currency symbol and two decimals on an integer.
+    renderAggregate('order_count');
+
+    expect(screen.getByText('1,380')).toBeTruthy();
+    expect(screen.queryByText(/\$/u)).toBeNull();
   });
 
   it('renders a genuine zero as a value, not as an absence', () => {
     // The discriminating case for the dash: a `sum()` of `0.00` over a group
     // with no discounts is a computed number, and must not read like a column
-    // nobody asked for an aggregate on.
-    render(<TableGroupAggregate columnKey='discount' summary={summary} />);
+    // nobody asked for an aggregate on. The column is undeclared here, so it
+    // falls back to `string` and the raw text is what renders.
+    renderAggregate('discount');
 
     expect(screen.getByText('0.00')).toBeTruthy();
     expect(screen.queryByTestId('table-group-aggregate-absent')).toBeNull();
   });
 
   it('renders a dash with a spoken equivalent where none was selected', () => {
-    render(<TableGroupAggregate columnKey='customer_name' summary={summary} />);
+    renderAggregate('customer_name');
 
     const absent = screen.getByTestId('table-group-aggregate-absent');
 
@@ -64,7 +139,7 @@ describe('TableGroupAggregate', () => {
     // cell says so.
     useGetHasColumnFilterMock.mockReturnValue(true);
 
-    render(<TableGroupAggregate columnKey='total_amount' summary={summary} />);
+    renderAggregate('total_amount');
 
     expect(screen.getByTestId('table-group-aggregate-filtered')).toBeTruthy();
     expect(
@@ -73,13 +148,13 @@ describe('TableGroupAggregate', () => {
   });
 
   it('leaves an unfiltered column unmarked', () => {
-    render(<TableGroupAggregate columnKey='total_amount' summary={summary} />);
+    renderAggregate('total_amount');
 
     expect(screen.queryByTestId('table-group-aggregate-filtered')).toBeNull();
   });
 
   it('asks about its own column, not about the table', () => {
-    render(<TableGroupAggregate columnKey='total_amount' summary={summary} />);
+    renderAggregate('total_amount');
 
     expect(useGetHasColumnFilterMock).toHaveBeenCalledWith('total_amount');
   });

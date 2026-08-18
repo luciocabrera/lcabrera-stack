@@ -1,7 +1,7 @@
 # TableGroupLabel Architecture
 
-A group row's cell content in the grid-owned **hierarchy column**: its level,
-its label and how many rows it covers.
+A group row's cell content in the grid-owned **hierarchy column**: its level
+and its label.
 
 Private delegate of the body-cell descriptor. Nothing outside the Table renders
 it, and it renders no cell of its own — it is the `children` of an ordinary
@@ -13,7 +13,7 @@ and the width are the same ones every other cell gets
 
 ```
 TableGroupLabel/
-├── TableGroupLabel.component.tsx          → Icon, indent, label, row count
+├── TableGroupLabel.component.tsx          → Icon, indent, label
 ├── TableGroupLabel.types.ts               → TableGroupLabelProps (summary)
 ├── TableGroupLabel.stylex.ts              → One-line layout, depth indent, subtotal weight
 ├── TableGroupLabel.test.tsx               → Label, depth, subtotal, grand total, one line
@@ -41,10 +41,14 @@ actually grouped by, so its length _is_ the row's depth: a subtotal carries one
 entry fewer than the rows it totals, which puts it at its children's parent's
 level. The grand total carries none and sits at zero.
 
-**The row count stays here** rather than aligning under a column. `count(*)` over
-the group is a property of the group, and no column heads it. A per-column
-`count` aggregate is a different thing and renders in its own cell like every
-other aggregate.
+**The row count is not here, and its absence is the decision.** ADR-065 puts a
+measure in the column it aggregates, under that column's header; a count printed
+beside the label was the one measure exempt from that — aligned under nothing and
+headed by nothing. A route that wants the number selects a `count` aggregate on a
+column, which renders in its own cell like every other aggregate.
+
+`summary.count` stays on the contract for consumers that need the figure without
+projecting it, and this component no longer reads it.
 
 ## How a real NULL and a structural subtotal stay apart
 
@@ -76,8 +80,8 @@ The label therefore ellipsizes, which is a truncation the reader can see, and
 indentation narrows the text rather than the row.
 
 Indentation is `padding-inline-start` rather than a margin or a nested box:
-padding leaves the flex line intact, so the label still ellipsizes into whatever
-width is left rather than pushing the count out of the cell.
+padding leaves the flex line intact, so the label ellipsizes into whatever width
+is left rather than overflowing the cell.
 
 `TableBody.grouping.test.tsx` measures the height identity off a rendered body
 whose every row is a group row.

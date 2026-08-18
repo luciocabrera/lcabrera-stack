@@ -411,7 +411,7 @@ describe('a grouped table that expands and collapses', () => {
     clickButton('toggle-paris');
     // Paris survives, its three rows do not, and Berlin's branch is untouched.
     expect(getRenderedRows()).toHaveLength(4);
-    expect(getGroupLabels()).toStrictEqual(['Paris(3)', 'Berlin(3)']);
+    expect(getGroupLabels()).toStrictEqual(['Paris', 'Berlin']);
     expect(getDetailIds()).toStrictEqual(['4', '5']);
 
     clickButton('toggle-paris');
@@ -555,7 +555,7 @@ describe('a grouped table that expands and collapses', () => {
     expect(getRenderedRows()).toHaveLength(4);
     expect(getCollapsedPaths()).toStrictEqual([resolveGroupPathKey(paris)]);
     // Berlin is first now and still open; Paris is last and still closed.
-    expect(getGroupLabels()).toStrictEqual(['Berlin(3)', 'Paris(3)']);
+    expect(getGroupLabels()).toStrictEqual(['Berlin', 'Paris']);
     expect(getDetailIds()).toStrictEqual(['5', '4']);
   });
 

@@ -21,6 +21,14 @@ const toKeyValue = (entry: unknown): TableGroupKeyValue | undefined => {
     : undefined;
 };
 
+/**
+ * `value` is checked for **presence**, not for type, and those are different
+ * questions. Its type is `unknown` because an aggregate is whatever its column
+ * is, and `null` is a legitimate answer — `avg` over a group whose rows are all
+ * NULL returns SQL NULL, which the cell should render as an absence rather than
+ * a reason to reject the whole summary. An entry carrying no `value` key at all
+ * is malformed, and `Object.hasOwn` is what separates the two.
+ */
 const toAggregateValue = (
   entry: unknown,
 ): TableGroupAggregateValue | undefined => {
@@ -28,12 +36,12 @@ const toAggregateValue = (
     return;
   }
 
-  const { columnKey, fn, label } = entry;
+  const { columnKey, fn, value } = entry;
 
   return typeof columnKey === 'string' &&
-    typeof label === 'string' &&
-    isTableAggregateFn(fn)
-    ? { columnKey, fn, label }
+    isTableAggregateFn(fn) &&
+    Object.hasOwn(entry, 'value')
+    ? { columnKey, fn, value }
     : undefined;
 };
 
