@@ -551,10 +551,44 @@ export type TableGroupKeyRefusalReason =
   | 'too-many-distinct'
   | 'unique-ish';
 
-/** One level of a group's identity: the column, and its value formatted. */
+/**
+ * One level of a group's identity: the column, its value **formatted** for
+ * display, and that value **raw**. Both are carried because neither answers the
+ * other's question — see the fields.
+ */
 export type TableGroupKeyValue = {
+  /** The group key column this entry is for. */
   readonly columnKey: string;
+  /**
+   * The key **formatted for display**, produced service-side.
+   *
+   * It stays formatted rather than being rendered at the cell, and the asymmetry
+   * with `TableGroupAggregateValue` is real rather than an oversight: an
+   * aggregate names the column it was applied to, so the cell can ask the
+   * columns store for that column's `dataType` and `format`. A path entry
+   * cannot — nothing in the row resolves it back to a column descriptor — so the
+   * only side that knows how to format a key is the one that read it.
+   *
+   * This is also the string `resolveGroupPathKey` encodes into the key
+   * expansion is stored under, so changing what it holds invalidates every
+   * stored collapse.
+   */
   readonly label: string;
+  /**
+   * The key's **raw value**, exactly as the read produced it — what a filter is
+   * built from when a group is turned back into the restriction it came from
+   * (ADR-079).
+   *
+   * It cannot be recovered from `label`, which is why both are carried:
+   * formatting is lossy in exactly the direction a query needs. A NULL key
+   * renders as `(empty)`, and `category = '(empty)'` matches nothing — silently,
+   * on the group a user is most likely to click. A date renders as an ISO
+   * string, a boolean as `'true'`.
+   *
+   * `unknown` because a key is whatever its column is, and `null` is a
+   * legitimate value rather than a missing one — a NULL group is a group.
+   */
+  readonly value: unknown;
 };
 
 /**

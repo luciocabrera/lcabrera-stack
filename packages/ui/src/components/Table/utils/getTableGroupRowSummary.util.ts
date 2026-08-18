@@ -9,15 +9,28 @@ import type {
 import { TABLE_GROUP_ROW_FIELD } from '../Table.constants';
 import { isTableAggregateFn } from './isTableAggregateFn.util';
 
+/**
+ * `value` is checked for **presence**, not for type — the same distinction
+ * `toAggregateValue` documents below, and for the same reason one type over. A
+ * key is whatever its column is, and `null` is a legitimate key rather than a
+ * missing one: a NULL group is a group, and it is precisely the group a drill
+ * would otherwise silently return nothing for. An entry carrying no `value` key
+ * at all is malformed, and `Object.hasOwn` separates the two.
+ *
+ * `label` is still type-checked, because it is always a formatted string and
+ * the hierarchy column renders it directly.
+ */
 const toKeyValue = (entry: unknown): TableGroupKeyValue | undefined => {
   if (!isObject(entry)) {
     return;
   }
 
-  const { columnKey, label } = entry;
+  const { columnKey, label, value } = entry;
 
-  return typeof columnKey === 'string' && typeof label === 'string'
-    ? { columnKey, label }
+  return typeof columnKey === 'string' &&
+    typeof label === 'string' &&
+    Object.hasOwn(entry, 'value')
+    ? { columnKey, label, value }
     : undefined;
 };
 

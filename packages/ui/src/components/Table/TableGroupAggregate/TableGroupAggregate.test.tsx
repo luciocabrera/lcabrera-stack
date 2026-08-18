@@ -62,7 +62,7 @@ const summary: TableGroupRowSummary = {
   ],
   count: 12,
   isSubtotal: false,
-  path: [{ columnKey: 'order_status', label: 'Shipped' }],
+  path: [{ columnKey: 'order_status', label: 'Shipped', value: 'Shipped' }],
 };
 
 const renderAggregate = (columnKey: string) => {

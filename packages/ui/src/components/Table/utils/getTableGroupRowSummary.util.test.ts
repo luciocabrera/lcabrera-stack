@@ -7,7 +7,7 @@ const summary = {
   aggregates: [],
   count: 12,
   isSubtotal: false,
-  path: [{ columnKey: 'order_status', label: 'Shipped' }],
+  path: [{ columnKey: 'order_status', label: 'Shipped', value: 'Shipped' }],
 };
 
 describe('getTableGroupRowSummary', () => {
@@ -22,8 +22,8 @@ describe('getTableGroupRowSummary', () => {
 
   it('reads a multi-key path in the order it was written', () => {
     const path = [
-      { columnKey: 'order_status', label: 'Shipped' },
-      { columnKey: 'shipping_country', label: 'USA' },
+      { columnKey: 'order_status', label: 'Shipped', value: 'Shipped' },
+      { columnKey: 'shipping_country', label: 'USA', value: 'USA' },
     ];
 
     expect(
@@ -110,6 +110,36 @@ describe('getTableGroupRowSummary', () => {
     ).toBeUndefined();
   });
 
+  it('accepts a NULL key value and refuses a path entry with no `value` key', () => {
+    // Presence, not type — the same distinction the aggregate side draws. A
+    // NULL key is a real group and must survive; an entry that never carried
+    // the field is malformed and must take the whole summary down, because a
+    // group described by some of its keys is not the group the row holds.
+    const withNull = JSON.parse(
+      '[{"columnKey":"order_status","label":"(empty)","value":null}]',
+    ) as readonly unknown[];
+
+    expect(
+      getTableGroupRowSummary({
+        [TABLE_GROUP_ROW_FIELD]: { ...summary, path: withNull },
+      })?.path,
+      // Compared against the parsed input rather than a `null` literal, so the
+      // expected value has the shape a driver actually returns. `toStrictEqual`
+      // is deep equality, not identity — the guard rebuilds each entry in
+      // `toKeyValue`, so identity would fail here by design. What this pins is
+      // that the NULL survives the rebuild uncoerced.
+    ).toStrictEqual(withNull);
+
+    expect(
+      getTableGroupRowSummary({
+        [TABLE_GROUP_ROW_FIELD]: {
+          ...summary,
+          path: [{ columnKey: 'order_status', label: 'Shipped' }],
+        },
+      }),
+    ).toBeUndefined();
+  });
+
   it('reads an empty path as the grand total, not as a malformed summary', () => {
     // A rollup's grand total is keyed by nothing, so an empty path is the one
     // row it produces — refusing it would drop exactly the row rollup exists
@@ -139,7 +169,7 @@ describe('getTableGroupRowSummary', () => {
         [TABLE_GROUP_ROW_FIELD]: {
           ...summary,
           path: [
-            { columnKey: 'order_status', label: 'Shipped' },
+            { columnKey: 'order_status', label: 'Shipped', value: 'Shipped' },
             { columnKey: 'shipping_country' },
           ],
         },

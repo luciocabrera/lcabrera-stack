@@ -26,8 +26,8 @@ const groupRow = (path: readonly TableGroupKeyValue[]): Row => ({
   },
 });
 
-const paris = [{ columnKey: 'city', label: 'Paris' }];
-const berlin = [{ columnKey: 'city', label: 'Berlin' }];
+const paris = [{ columnKey: 'city', label: 'Paris', value: 'Paris' }];
+const berlin = [{ columnKey: 'city', label: 'Berlin', value: 'Berlin' }];
 
 /** What is left once Paris is collapsed: its two details are gone. */
 const survivingRows: readonly Row[] = [

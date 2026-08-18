@@ -42,7 +42,7 @@ const summary = (
   aggregates: [],
   count: 12,
   isSubtotal: false,
-  path: [{ columnKey: 'shipping_country', label: 'Spain' }],
+  path: [{ columnKey: 'shipping_country', label: 'Spain', value: 'Spain' }],
   ...overrides,
 });
 
@@ -79,7 +79,11 @@ describe('TableGroupLabel', () => {
         disclosure={undefined}
         summary={summary({
           path: [
-            { columnKey: 'city', label: 'a very long group label '.repeat(8) },
+            {
+              columnKey: 'city',
+              label: 'a very long group label '.repeat(8),
+              value: 'a very long group label '.repeat(8),
+            },
           ],
         })}
       />,
@@ -112,8 +116,8 @@ describe('TableGroupLabel', () => {
         disclosure={undefined}
         summary={summary({
           path: [
-            { columnKey: 'region', label: 'EMEA' },
-            { columnKey: 'shipping_country', label: 'Spain' },
+            { columnKey: 'region', label: 'EMEA', value: 'EMEA' },
+            { columnKey: 'shipping_country', label: 'Spain', value: 'Spain' },
           ],
         })}
       />,
@@ -132,7 +136,7 @@ describe('TableGroupLabel', () => {
         disclosure={undefined}
         summary={summary({
           isSubtotal: true,
-          path: [{ columnKey: 'region', label: 'EMEA' }],
+          path: [{ columnKey: 'region', label: 'EMEA', value: 'EMEA' }],
         })}
       />,
     );

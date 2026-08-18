@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import type { TableGroupRowSummary } from '#ui/components/Table/Table.types';
+import type {
+  TableGroupKeyValue,
+  TableGroupRowSummary,
+} from '#ui/components/Table/Table.types';
 
 import { toGroupHierarchyLabel } from './toGroupHierarchyLabel.util';
 
@@ -10,7 +13,7 @@ const summary = (overrides: Partial<TableGroupRowSummary>) =>
       aggregates: [],
       count: 3,
       isSubtotal: false,
-      path: [{ columnKey: 'shipping_country', label: 'EMEA' }],
+      path: [{ columnKey: 'shipping_country', label: 'EMEA', value: 'EMEA' }],
       ...overrides,
     },
   });
@@ -22,8 +25,8 @@ describe('toGroupHierarchyLabel', () => {
     expect(
       summary({
         path: [
-          { columnKey: 'region', label: 'EMEA' },
-          { columnKey: 'shipping_country', label: 'Spain' },
+          { columnKey: 'region', label: 'EMEA', value: 'EMEA' },
+          { columnKey: 'shipping_country', label: 'Spain', value: 'Spain' },
         ],
       }).text,
     ).toBe('Spain');
@@ -34,8 +37,8 @@ describe('toGroupHierarchyLabel', () => {
     expect(
       summary({
         path: [
-          { columnKey: 'region', label: 'EMEA' },
-          { columnKey: 'shipping_country', label: 'Spain' },
+          { columnKey: 'region', label: 'EMEA', value: 'EMEA' },
+          { columnKey: 'shipping_country', label: 'Spain', value: 'Spain' },
         ],
       }).depth,
     ).toBe(1);
@@ -50,15 +53,22 @@ describe('toGroupHierarchyLabel', () => {
     // handed #570. A real NULL country and the subtotal across every country
     // produce the same label from the same column; the depth and the word are
     // what separate them.
+    // The NULL entry is parsed rather than written as a literal: a SQL NULL
+    // arrives as the driver's own `null`, and copying the `(empty)` label into
+    // `value` would make the fixture describe a country literally named
+    // "(empty)" — the exact confusion this pair exists to rule out.
+    const nullCountry = JSON.parse(
+      '{"columnKey":"shipping_country","label":"(empty)","value":null}',
+    ) as TableGroupKeyValue;
     const realNull = summary({
       path: [
-        { columnKey: 'region', label: 'EMEA' },
-        { columnKey: 'shipping_country', label: '(empty)' },
+        { columnKey: 'region', label: 'EMEA', value: 'EMEA' },
+        nullCountry,
       ],
     });
     const subtotal = summary({
       isSubtotal: true,
-      path: [{ columnKey: 'region', label: 'EMEA' }],
+      path: [{ columnKey: 'region', label: 'EMEA', value: 'EMEA' }],
     });
 
     expect(realNull.depth).toBe(1);

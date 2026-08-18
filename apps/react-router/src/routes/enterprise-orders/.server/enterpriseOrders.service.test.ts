@@ -421,24 +421,33 @@ it('runs the grouped read when the loader applied a group key', async () => {
       table: 'enterprise_orders',
     }),
   );
-  expect(page.data).toStrictEqual([
-    {
-      tableGroup: {
-        aggregates: [],
-        count: 12,
-        isSubtotal: false,
-        path: [{ columnKey: 'order_status', label: 'Shipped' }],
+  // The NULL group's two fields disagree, and that is the point of #775: it
+  // renders as `(empty)` and queries as `null`. Parsed from JSON so the
+  // expected `null` is the shape the driver actually hands back.
+  expect(page.data).toStrictEqual(
+    JSON.parse(`[
+      {
+        "tableGroup": {
+          "aggregates": [],
+          "count": 12,
+          "isSubtotal": false,
+          "path": [
+            { "columnKey": "order_status", "label": "Shipped", "value": "Shipped" }
+          ]
+        }
       },
-    },
-    {
-      tableGroup: {
-        aggregates: [],
-        count: 3,
-        isSubtotal: false,
-        path: [{ columnKey: 'order_status', label: '(empty)' }],
-      },
-    },
-  ]);
+      {
+        "tableGroup": {
+          "aggregates": [],
+          "count": 3,
+          "isSubtotal": false,
+          "path": [
+            { "columnKey": "order_status", "label": "(empty)", "value": null }
+          ]
+        }
+      }
+    ]`),
+  );
 });
 
 it('groups by several keys and sorts by each of them', async () => {

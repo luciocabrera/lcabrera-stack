@@ -18,8 +18,8 @@ const groupRow = (path: readonly TableGroupKeyValue[]): Row => ({
   },
 });
 
-const paris = [{ columnKey: 'city', label: 'Paris' }];
-const berlin = [{ columnKey: 'city', label: 'Berlin' }];
+const paris = [{ columnKey: 'city', label: 'Paris', value: 'Paris' }];
+const berlin = [{ columnKey: 'city', label: 'Berlin', value: 'Berlin' }];
 
 describe('pruneCollapsedGroupPaths', () => {
   it('keeps a collapse whose group the new rows still contain', () => {
