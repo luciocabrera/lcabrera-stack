@@ -51,10 +51,11 @@ product.
 - **A cube cannot be rendered at all, and worse, renders wrongly if forced.**
   Its sets are not prefixes, so `path.length - 1` is not a depth and
   `path.at(-1)` does not identify a level. Two different grouping sets can
-  produce byte-identical rows: `GROUP BY CUBE (billing_country,
-shipping_country)` emits one row for _everything billed to Canada_ and another
-  for _everything shipped to Canada_, and both render as `Canada total` at depth
-  zero in one column, with nothing separating them.
+  produce byte-identical rows. A cube over two same-domain keys —
+  `billing_country` and `shipping_country` — emits one row for _everything
+  billed to Canada_ and another for _everything shipped to Canada_, and both
+  render as `Canada total` at depth zero in the one column, with nothing
+  separating them.
 - **A key has no header of its own.** The synthetic column is `isSortable: false`
   and carries no filter, so sorting or filtering _by_ a group key has no
   in-grid home — while `assertGroupSort` and `buildGroupOrderByClause` already
@@ -130,11 +131,13 @@ Two overrides are required and no more:
   silently, and a gesture that visibly does nothing is worse than one refused.
 
 A broader lock was considered and rejected on its own terms. Grouping a wide
-table is precisely when a user most wants to put columns away: on the showcase's
-31-column grid a ~68-row window paints on the order of 2,100 cells, and hiding
-the columns that are neither keys nor measures takes that to a few hundred. A
-lock on visibility would forbid the largest saving available, in the one
-configuration that needs it.
+table is precisely when a user most wants to put columns away. The grid does not
+virtualize columns, so the rendered cell count is the declared column count times
+the row window, and on a wide table hiding everything that is neither a key nor a
+measure is a larger saving than any layout choice here moves. A lock on
+visibility would forbid it, in the one configuration that needs it. The figures
+behind that comparison are recorded on #789 rather than here, because they are
+measurements and this is not their home.
 
 **`isStatic` is the wrong instrument for the second override.**
 `resolveColumnCapabilities` makes `isResizable` a veto of `isStatic`, and
@@ -188,8 +191,8 @@ param, so the cookie layout reasserts itself with no snapshot to keep, invalidat
 and get wrong.
 
 **Intent, never a resolved layout.** The param carries what the derivation cannot
-infer, not the answer the derivation produces. Serialising 31 column keys of
-order plus visibility, pinning and sizing is kilobytes, and
+infer, not the answer the derivation produces. Serialising a whole column order
+plus visibility, pinning and sizing scales with the table's width, and
 `usePersistTableStateAction` already refuses a grouping change whose persistence
 would be oversized — a limit this would spend on data the keys already imply.
 
