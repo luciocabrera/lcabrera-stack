@@ -202,7 +202,9 @@ before relying on it again.
   promotes them). Nothing merges or fails on what it publishes. `Review threads
 resolved` is the report; `required_review_thread_resolution` on the `main`
   ruleset is what actually holds the merge.
-- The Actions approval policy is `first_time_contributors`. The sweep is
+- The Actions approval policy is `first_time_contributors_new_to_github`
+  (loosened 2026-08-18; see
+  [`copilot-review-gate.md`](./copilot-review-gate.md)). The sweep is
   unaffected by it — a scheduled run is attributed to the repository, not to the
   actor whose event went missing — and that is precisely why it works where the
   event does not.
