@@ -40,7 +40,7 @@ catalogs:
     vite-plus: 0.2.6
 
   lint:
-    '@biomejs/biome': ^2.5.7
+    '@biomejs/biome': ^2.5.8
     '@eslint/js': ^10.0.1
     '@typescript-eslint/rule-tester': ^8.67.0
     '@typescript-eslint/utils': ^8.67.0
@@ -48,14 +48,14 @@ catalogs:
     eslint-config-prettier: ^10.1.8
     eslint-plugin-local-rules: ^3.0.2
     eslint-plugin-perfectionist: ^5.10.1
-    eslint-plugin-react-dom: ^5.18.3
+    eslint-plugin-react-dom: ^5.18.6
     eslint-plugin-react-hooks: ^7.1.1
     eslint-plugin-react-refresh: ^0.5.4
-    eslint-plugin-react-x: ^5.18.3
+    eslint-plugin-react-x: ^5.18.6
     eslint-plugin-security: ^4.0.1
     eslint-plugin-unicorn: ^72.0.0
-    globals: ^17.9.0
-    react-doctor: ^0.9.11
+    globals: ^17.11.0
+    react-doctor: ^0.9.12
     typescript-eslint: ^8.67.0
 
   react:
@@ -97,14 +97,14 @@ catalogs:
   tooling:
     '@arethetypeswrong/core': ^0.18.5
     '@changesets/cli': ^2.31.1
-    fallow: ^3.14.0
-    knip: ^6.32.1
+    fallow: ^3.17.0
+    knip: ^6.32.2
     lighthouse: ^13.4.1
     ts-morph: ^28.0.0
 
   types:
     '@types/node': ^26.2.0
-    '@types/pg': ^8.21.0
+    '@types/pg': ^8.23.1
     '@types/react': ^19.2.18
     '@types/react-dom': ^19.2.4
 catalogMode: prefer
