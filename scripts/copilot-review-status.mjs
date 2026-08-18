@@ -34,14 +34,9 @@
  * --if-changed withheld it; 1 = the pull request could not be read, or the
  * status could not be posted.
  */
-import { appendFileSync, readFileSync } from 'node:fs';
+import { appendFileSync } from 'node:fs';
 import process from 'node:process';
 
-import {
-  flagValue,
-  parsePullNumber,
-  parseRepository,
-} from './lib/cli-input.mjs';
 import {
   copilotReviews,
   decideReviewStatus,
@@ -58,22 +53,13 @@ import { collectSuppressedComments } from './lib/copilot-suppressed.mjs';
 import { errorMessage } from './lib/error-message.mjs';
 import { runGh } from './lib/gh-exec.mjs';
 import {
-  publishedStatus,
-  shouldPublishStatus,
-} from './lib/review-gate-reconcile.mjs';
+  publishGateStatus,
+  resolveGateTarget,
+} from './lib/review-gate-status.mjs';
 
 const USAGE =
   'usage: node scripts/copilot-review-status.mjs --pr <number> ' +
   '[--repo <owner/name>] [--dry-run] [--if-changed]';
-
-/** The Actions event payload, or `undefined` outside Actions. */
-const readEventPayload = () => {
-  const path = process.env.GITHUB_EVENT_PATH;
-  if (path === undefined || path === '') {
-    return undefined;
-  }
-  return JSON.parse(readFileSync(path, 'utf8'));
-};
 
 /**
  * The review that triggered this run, when one did.
@@ -88,74 +74,9 @@ const triggeringReviewFrom = (payload) =>
     ? payload.review
     : undefined;
 
-const resolveRepository = (payload) =>
-  parseRepository(
-    flagValue('--repo') ??
-      process.env.GITHUB_REPOSITORY ??
-      payload?.repository?.full_name ??
-      runGh([
-        'repo',
-        'view',
-        '--json',
-        'nameWithOwner',
-        '--jq',
-        '.nameWithOwner',
-      ]),
-  );
-
-/**
- * `undefined` when nothing named a pull request — the caller prints usage for
- * that. A value that is present but not a pull request number throws instead,
- * because `#738` would otherwise become `NaN` and reach the API path as
- * `pulls/NaN`, where a bare 404 is all anyone sees.
- */
-const resolvePullNumber = (payload) => {
-  const raw = flagValue('--pr') ?? payload?.pull_request?.number;
-  return raw === undefined ? undefined : parsePullNumber(raw);
-};
-
 /** The pull request as it stands now — not as the event payload described it. */
 const fetchPullRequest = (repository, number) =>
   JSON.parse(runGh(['api', `repos/${repository}/pulls/${number}`]));
-
-/**
- * What is published under this context on `sha` right now, or `undefined`.
- *
- * Read against the head this run resolved, never against an event payload's
- * SHA, so the comparison it feeds is about one commit.
- */
-const fetchPublishedStatus = (repository, sha) =>
-  publishedStatus(
-    JSON.parse(
-      runGh(['api', `repos/${repository}/commits/${sha}/status?per_page=100`]),
-    ),
-    STATUS_CONTEXT,
-  );
-
-/** The run that decided this status, so the check links to its own reasoning. */
-const runUrl = () => {
-  const { GITHUB_REPOSITORY, GITHUB_RUN_ID, GITHUB_SERVER_URL } = process.env;
-  return GITHUB_RUN_ID === undefined
-    ? undefined
-    : `${GITHUB_SERVER_URL ?? 'https://github.com'}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}`;
-};
-
-const postStatus = ({ description, repository, sha, state }) => {
-  const target = runUrl();
-  runGh([
-    'api',
-    '--method',
-    'POST',
-    `repos/${repository}/statuses/${sha}`,
-    '-f',
-    `state=${state}`,
-    '-f',
-    `context=${STATUS_CONTEXT}`,
-    '-f',
-    `description=${description}`,
-    ...(target === undefined ? [] : ['-f', `target_url=${target}`]),
-  ]);
-};
 
 /** What was read, so a `pending` status is diagnosable from the run log alone. */
 const describeReviews = (reviews) =>
@@ -200,15 +121,13 @@ const reportSuppressed = (report, number) => {
 };
 
 const main = () => {
-  const payload = readEventPayload();
-  const number = resolvePullNumber(payload);
-  if (number === undefined) {
-    console.error(`${USAGE}\n\nGive --pr, or run inside a pull-request event.`);
+  const target = resolveGateTarget(USAGE);
+  if (target === undefined) {
     process.exitCode = 1;
     return;
   }
 
-  const repository = resolveRepository(payload);
+  const { number, payload, repository } = target;
   const pullRequest = fetchPullRequest(repository, number);
   const headSha = pullRequest?.head?.sha;
   if (typeof headSha !== 'string' || headSha === '') {
@@ -237,23 +156,15 @@ const main = () => {
   console.log(describeReviews(reviews));
   reportSuppressed(suppressed, number);
   console.log(verdictLine({ description, state }));
-
-  if (
-    process.argv.includes('--if-changed') &&
-    !shouldPublishStatus({
-      current: fetchPublishedStatus(repository, headSha),
-      next: { description, state },
-    })
-  ) {
-    console.log(`Unchanged on ${headSha}: nothing was posted.`);
-    return;
-  }
-  if (process.argv.includes('--dry-run')) {
-    console.log('--dry-run: nothing was posted.');
-    return;
-  }
-  postStatus({ description, repository, sha: headSha, state });
-  console.log(`Posted to ${repository}/statuses/${headSha}.`);
+  console.log(
+    publishGateStatus({
+      context: STATUS_CONTEXT,
+      description,
+      repository,
+      sha: headSha,
+      state,
+    }),
+  );
 };
 
 try {

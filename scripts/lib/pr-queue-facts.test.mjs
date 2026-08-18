@@ -86,7 +86,9 @@ describe('summarizeThreads', () => {
     expect(summary.unresolved[0]).toEqual({
       author: 'copilot',
       body: 'x',
+      id: '',
       isOutdated: true,
+      line: undefined,
       path: 'a.ts',
     });
   });

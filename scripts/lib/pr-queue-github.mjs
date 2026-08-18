@@ -29,8 +29,8 @@ query($owner:String!, $repo:String!, $limit:Int!) {
         files(first:100) { nodes { path additions deletions } }
         reviewThreads(first:50) {
           nodes {
-            isResolved isOutdated
-            comments(first:1) { nodes { author { login } body path } }
+            id isResolved isOutdated
+            comments(first:1) { nodes { author { login } body path line } }
           }
         }
         commits(last:1) {

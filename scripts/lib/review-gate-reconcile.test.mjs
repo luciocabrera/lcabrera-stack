@@ -137,14 +137,26 @@ describe('the argv the sweep hands each gate', () => {
 // are unit-tested there — but unwiring a CALL leaves those tests green, so the
 // call sites are what these assert. A `parsePullNumber(` with a paren appears
 // only at a call site; the import lists the name without one.
+//
+// The gate scripts no longer parse for themselves: `review-gate-status.mjs`
+// resolves the pull request and the repository for both of them, so the call
+// site moved rather than disappearing. Splitting the list keeps the property
+// exact — one file must hold the calls, and a delegating gate must be shown to
+// reach them rather than to have dropped them.
 describe('the scripts that take a pull request on the command line', () => {
-  const SCRIPTS = [
+  const PARSE_DIRECTLY = [
     'scripts/reconcile-review-gates.mjs',
-    'scripts/copilot-review-status.mjs',
     'scripts/verify-agent-review.mjs',
+    'scripts/lib/review-gate-status.mjs',
   ];
 
-  for (const script of SCRIPTS) {
+  const DELEGATE = [
+    'scripts/copilot-review-status.mjs',
+    'scripts/pr-threads.mjs',
+    'scripts/verify-review-threads.mjs',
+  ];
+
+  for (const script of PARSE_DIRECTLY) {
     it(`${script} parses --pr and --repo instead of using them raw`, () => {
       const source = readRepoFile(script);
       expect(source).toMatch(/parsePullNumber\(/);
@@ -152,11 +164,29 @@ describe('the scripts that take a pull request on the command line', () => {
     });
   }
 
+  for (const script of DELEGATE) {
+    it(`${script} takes both from review-gate-status, never from argv`, () => {
+      const source = readRepoFile(script);
+      // Either entry point counts: the gates take the whole target through
+      // `resolveGateTarget`, while `pr-threads.mjs` calls the two resolvers
+      // itself because it also falls back to the current branch. What matters
+      // is that the parsing happens in the shared module, not here.
+      expect(source).toMatch(
+        /import \{[^}]*(?:resolveGateTarget|resolvePullNumber)[^}]*\} from '\.\/lib\/review-gate-status\.mjs'/s,
+      );
+      // The failure this forbids: a script that reaches past the shared
+      // resolver and reads the flag itself, which is how one of them would
+      // drift back to an unparsed `#738`.
+      expect(source).not.toMatch(/flagValue\('--pr'\)/);
+      expect(source).not.toMatch(/flagValue\('--repo'\)/);
+    });
+  }
+
   it('the sweep parses both before it can read or publish anything', () => {
     // Specifically these two call sites, because the failure they prevent is a
     // sweep that runs both gates against `#NaN` — or, for a typo, one that falls
     // through and reconciles every open pull request.
-    const source = readRepoFile(SCRIPTS[0]);
+    const source = readRepoFile(PARSE_DIRECTLY[0]);
     expect(source).toMatch(/parseRepository\(resolveRepository\(\)\)/);
     expect(source).toMatch(/parsePullNumber\(only\)/);
     // `\b` is load-bearing: `Number(only)` is a substring of

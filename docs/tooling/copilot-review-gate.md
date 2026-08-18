@@ -541,7 +541,12 @@ for some property of the workflow or the branch would have failed for both. The
 repository's Actions approval policy at the time of that reading was
 `first_time_contributors`
 (`gh api repos/luciocabrera/vite-react-compiler/actions/permissions/fork-pr-contributor-approval`),
-and the `Copilot` bot is not a contributor to this repository. What that does not
+and the `Copilot` bot is not a contributor to this repository. **That reading is
+now historical**: the policy was loosened to
+`first_time_contributors_new_to_github` on 2026-08-18, which is what the bullet
+below predicted would let a Copilot-triggered run execute unheld. Re-read the
+setting before reproducing the table above — it was measured under the old
+value. What that does not
 explain is the majority case, where there is no run to approve; that cause is
 undetermined and belongs to **#698**.
 
@@ -594,10 +599,15 @@ Further things the notes assume:
 - **Until #698, nothing merges or fails on what this status says.** It is
   advisory, which is why the approval limitation above is a nuisance today and a
   blocker the day the context becomes required.
-- **The Actions approval policy is `first_time_contributors`.** Loosen it and a
-  Copilot-triggered run executes on its own, which changes the table in that
-  section; tighten it and more actors are gated the same way. Re-read the setting
-  before trusting either reading.
+- **The Actions approval policy is `first_time_contributors_new_to_github`**
+  (loosened from `first_time_contributors` on 2026-08-18, because holding every
+  Copilot-triggered run meant a maintainer had to approve one before the status
+  could post). The prediction that a Copilot-triggered run then executes on its
+  own is **observational and not yet confirmed** — the next held run, or the
+  absence of one, is the evidence. Tighten it and more actors are gated. Read
+  the setting rather than this line before trusting either table above; loosening
+  it was safe here only because no workflow uses `pull_request_target`, so a fork
+  pull request never receives secrets.
 - **The scheduled reconcile is running.** Everything above that says a stale
   status corrects itself assumes it is. GitHub disables `schedule` triggers after
   60 days of repository inactivity, so `gh workflow list` says whether this one

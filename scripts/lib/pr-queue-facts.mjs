@@ -13,6 +13,8 @@
  * .claude/pr-queue-policy.md.
  */
 
+import { summarizeThreads } from './pr-threads.mjs';
+
 /** Check states that mean "not finished yet" — policy E3 reads these as WAIT. */
 const PENDING_STATES = new Set([
   'ACTION_REQUIRED',
@@ -64,29 +66,7 @@ export const summarizeChecks = (contexts) => {
   };
 };
 
-/**
- * Unresolved review threads, with the opening comment that explains each.
- *
- * `isResolved !== true` rather than `=== false` on purpose: a thread whose
- * resolution field is missing has not been shown to be settled, and policy E4
- * treats unknown as unresolved. An outdated thread still counts — the line moved,
- * the question did not.
- */
-export const summarizeThreads = (nodes) => {
-  const threads = nodes ?? [];
-  const unresolved = threads
-    .filter((thread) => thread.isResolved !== true)
-    .map((thread) => {
-      const opener = thread.comments?.nodes?.[0] ?? {};
-      return {
-        author: opener.author?.login ?? 'unknown',
-        body: (opener.body ?? '').trim(),
-        isOutdated: thread.isOutdated === true,
-        path: opener.path ?? '',
-      };
-    });
-  return { total: threads.length, unresolved };
-};
+export { summarizeThreads };
 
 /** Changed paths with their line counts — the input to policy O3 and §5. */
 export const summarizeFiles = (nodes) =>
