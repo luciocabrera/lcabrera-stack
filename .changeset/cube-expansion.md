@@ -36,8 +36,18 @@ cannot be relied on to catch that: the estimate is `unknown` whenever a key has
 no statistics, and unknown warns rather than refuses, so on an unanalysed table
 there would be no bound at all.
 
-**The depth-refusal message now names the mode** — `A cube grouping takes at
-most 3 group keys; got 4.` where it previously read `A grouped query takes at
-most 4 group keys; got 5.`. Anything matching on that message text needs
-updating; the `reason` discriminant is unchanged and is what callers should
-branch on.
+**The depth-refusal message now names the mode**, for every mode rather than
+only for cube. For the same over-deep `flat` request that previously read:
+
+> A grouped query takes at most 4 group keys; got 5.
+
+it now reads:
+
+> A flat grouping takes at most 4 group keys; got 5.
+
+The cap for `flat` and `rollup` is unchanged at four — only the wording moved.
+Cube then states its own lower cap in the same shape: `A cube grouping takes at
+most 3 group keys; got 4.`
+
+Anything matching on that message text needs updating. The `reason`
+discriminant is unchanged and is what callers should branch on.

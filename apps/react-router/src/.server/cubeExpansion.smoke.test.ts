@@ -36,7 +36,9 @@ const TABLE = `${SCHEMA}.${TABLE_NAME}`;
 
 const KEYS = ['region', 'channel', 'tier'] as const;
 
-type ProbeRow = Record<(typeof KEYS)[number], null | string> & {
+type ProbeRow = {
+  readonly [Key in (typeof KEYS)[number]]: null | string;
+} & {
   readonly count_rows: string;
   readonly group_mask: number;
   readonly sum_amount: null | string;
