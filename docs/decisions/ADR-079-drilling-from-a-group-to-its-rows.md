@@ -43,7 +43,10 @@ in the middle. Nothing in this codebase does that.
 
 ## Problem
 
-Four costs, and one blocker that has to be cleared before any of them matter.
+A blocker that has to be cleared before anything else matters, then the costs
+the decision has to price. The scroll cost is the fourth and it is stated in
+Context above, because it is what narrows the field rather than what the
+decision pays for.
 
 **The blocker: a group path carries labels, not values.**
 `TableGroupKeyValue` is `{ columnKey, label }`, and `label` is the value
