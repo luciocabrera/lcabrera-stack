@@ -55,7 +55,7 @@ describe('TableGroupKeyCell', () => {
 
   it('leads the innermost level with the disclosure, and nothing else', () => {
     renderCell({ columnKey: 'district' });
-    expect(screen.queryByTestId('disclosure')).toBeTruthy();
+    expect(screen.getByTestId('disclosure')).toBeTruthy();
 
     cleanup();
 

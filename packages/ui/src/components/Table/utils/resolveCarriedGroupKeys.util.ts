@@ -59,13 +59,9 @@ export const resolveCarriedGroupKeys = ({
     const entry = summary.path[level];
     const previousEntry = previousSummary.path[level];
 
-    if (
-      entry === undefined ||
-      previousEntry === undefined ||
-      entry.columnKey !== previousEntry.columnKey ||
-      entry.label !== previousEntry.label
-    )
-      break;
+    if (entry === undefined || previousEntry === undefined) break;
+    if (entry.columnKey !== previousEntry.columnKey) break;
+    if (entry.label !== previousEntry.label) break;
 
     carried.add(entry.columnKey);
   }
