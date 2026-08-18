@@ -152,6 +152,7 @@ describe('the scripts that take a pull request on the command line', () => {
 
   const DELEGATE = [
     'scripts/copilot-review-status.mjs',
+    'scripts/pr-threads.mjs',
     'scripts/verify-review-threads.mjs',
   ];
 

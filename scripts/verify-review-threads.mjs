@@ -29,7 +29,7 @@
 import process from 'node:process';
 
 import { errorMessage } from './lib/error-message.mjs';
-import { runGh } from './lib/gh-exec.mjs';
+import { fetchPullRequestThreads } from './lib/pr-threads-api.mjs';
 import {
   decideThreadStatus,
   STATUS_CONTEXT,
@@ -48,40 +48,6 @@ const USAGE =
   'usage: node scripts/verify-review-threads.mjs --pr <number> ' +
   '[--repo <owner/name>] [--dry-run] [--if-changed]';
 
-const HEAD_AND_THREADS = `
-query($owner:String!, $repo:String!, $number:Int!) {
-  repository(owner:$owner, name:$repo) {
-    pullRequest(number:$number) {
-      isDraft
-      headRefOid
-      reviewThreads(first:100) {
-        nodes {
-          id isResolved isOutdated
-          comments(first:1) { nodes { author { login } body path line } }
-        }
-      }
-    }
-  }
-}`;
-
-/** The head and the threads in one read, so both describe the same commit. */
-const fetchPullRequest = (repository, number) => {
-  const [owner, repo] = repository.split('/');
-  const raw = runGh([
-    'api',
-    'graphql',
-    '-f',
-    `query=${HEAD_AND_THREADS}`,
-    '-F',
-    `owner=${owner}`,
-    '-F',
-    `repo=${repo}`,
-    '-F',
-    `number=${number}`,
-  ]);
-  return JSON.parse(raw)?.data?.repository?.pullRequest ?? undefined;
-};
-
 /** What was read, so the verdict is diagnosable from the run log alone. */
 const describeThreads = (threads) =>
   `${threads.total} review thread(s), ${threads.unresolved.length} unresolved` +
@@ -99,7 +65,7 @@ const main = () => {
   }
 
   const repository = resolveRepository(payload);
-  const pullRequest = fetchPullRequest(repository, number);
+  const pullRequest = fetchPullRequestThreads({ number, repository });
   const headSha = pullRequest?.headRefOid;
   if (typeof headSha !== 'string' || headSha === '') {
     console.error(

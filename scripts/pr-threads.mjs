@@ -29,90 +29,39 @@
  */
 import process from 'node:process';
 
-import {
-  flagValue,
-  parsePullNumber,
-  parseRepository,
-} from './lib/cli-input.mjs';
+import { flagValue } from './lib/cli-input.mjs';
 import { errorMessage } from './lib/error-message.mjs';
 import { runGh } from './lib/gh-exec.mjs';
+import { fetchPullRequestThreads } from './lib/pr-threads-api.mjs';
 import { formatThreads, summarizeThreads } from './lib/pr-threads.mjs';
-
-const USAGE =
-  'Usage: vp run pr:threads -- [--pr <number>] [--repo <owner/name>] [--json] [--resolve <thread-id>]';
-
-const THREADS_QUERY = `
-query($owner:String!, $repo:String!, $number:Int!) {
-  repository(owner:$owner, name:$repo) {
-    pullRequest(number:$number) {
-      isDraft url
-      reviewThreads(first:100) {
-        nodes {
-          id isResolved isOutdated
-          comments(first:1) { nodes { author { login } body path line } }
-        }
-      }
-    }
-  }
-}`;
-
-const RESOLVE_MUTATION = `
-mutation($thread:ID!) {
-  resolveReviewThread(input:{threadId:$thread}) { thread { isResolved } }
-}`;
-
-const repositoryOf = () =>
-  parseRepository(
-    flagValue('--repo') ??
-      process.env.GITHUB_REPOSITORY ??
-      runGh([
-        'repo',
-        'view',
-        '--json',
-        'nameWithOwner',
-        '--jq',
-        '.nameWithOwner',
-      ]),
-  );
+import {
+  resolvePullNumber,
+  resolveRepository,
+} from './lib/review-gate-status.mjs';
 
 /**
- * `undefined` when nothing named a pull request, so the caller can print usage.
- * A `--pr` that is present but malformed throws instead of becoming `NaN` in a
- * query variable, where the only symptom is an empty result.
+ * The pull request for the branch checked out here, or `undefined`.
+ *
+ * Only consulted when `--pr` named none: the point of the bare command is that
+ * an agent finishing work does not have to look its own number up.
  */
-const pullNumberOf = () => {
-  const flag = flagValue('--pr');
-  if (flag !== undefined) {
-    return parsePullNumber(flag);
-  }
+const pullForCurrentBranch = () => {
   try {
-    return parsePullNumber(
-      runGh(['pr', 'view', '--json', 'number', '--jq', '.number']),
+    return Number(
+      runGh(['pr', 'view', '--json', 'number', '--jq', '.number']).trim(),
     );
   } catch {
     return undefined;
   }
 };
 
-const fetchThreads = ({ number, owner, repo }) => {
-  const raw = runGh([
-    'api',
-    'graphql',
-    '-f',
-    `query=${THREADS_QUERY}`,
-    '-F',
-    `owner=${owner}`,
-    '-F',
-    `repo=${repo}`,
-    '-F',
-    `number=${number}`,
-  ]);
-  const pullRequest = JSON.parse(raw)?.data?.repository?.pullRequest;
-  if (pullRequest === null || pullRequest === undefined) {
-    throw new Error(`${owner}/${repo}#${number} could not be read`);
-  }
-  return pullRequest;
-};
+const USAGE =
+  'Usage: vp run pr:threads -- [--pr <number>] [--repo <owner/name>] [--json] [--resolve <thread-id>]';
+
+const RESOLVE_MUTATION = `
+mutation($thread:ID!) {
+  resolveReviewThread(input:{threadId:$thread}) { thread { isResolved } }
+}`;
 
 /** Resolve one thread. Reports what GitHub says it became, never what we asked. */
 const resolveThread = (threadId) => {
@@ -141,7 +90,7 @@ const main = () => {
     return;
   }
 
-  const number = pullNumberOf();
+  const number = resolvePullNumber() ?? pullForCurrentBranch();
   if (number === undefined) {
     console.error(
       `${USAGE}\n\nGive --pr, or run on a branch that has a pull request.`,
@@ -149,10 +98,14 @@ const main = () => {
     process.exitCode = 1;
     return;
   }
-  const repository = repositoryOf();
-  const [owner, repo] = repository.split('/');
+  const repository = resolveRepository();
 
-  const pullRequest = fetchThreads({ number, owner, repo });
+  const pullRequest = fetchPullRequestThreads({ number, repository });
+  if (pullRequest === undefined) {
+    console.error(`${repository}#${number} could not be read.`);
+    process.exitCode = 1;
+    return;
+  }
   const threads = summarizeThreads(pullRequest.reviewThreads?.nodes);
 
   if (process.argv.includes('--json')) {
