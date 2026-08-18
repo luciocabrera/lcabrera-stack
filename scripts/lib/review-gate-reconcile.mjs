@@ -3,15 +3,15 @@
  * visits, and whether a freshly computed status is worth publishing over the one
  * already on the head.
  *
- * Why a sweep exists when both review gates are event-driven: the events they
+ * Why a sweep exists when the review gates are event-driven: the events they
  * depend on are not delivered reliably in this repository, and a status nobody
  * recomputed reads exactly like one that is honestly still waiting. Issue #737
  * carries the measurement and the two commands that reproduce it;
  * `docs/tooling/review-gate-reconcile.md` carries the reasoning, the interval,
  * and what the sweep does when it fails.
  *
- * The I/O shells are `scripts/reconcile-review-gates.mjs` and the two gate
- * scripts it drives.
+ * The I/O shells are `scripts/reconcile-review-gates.mjs` and the gate scripts
+ * it drives.
  *
  * Governed by .claude/rules/scripts.md.
  */

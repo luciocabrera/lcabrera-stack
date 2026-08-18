@@ -1,10 +1,10 @@
 name: Review Gate Reconcile
 
-# Republishes both review-gate commit statuses — `Copilot review complete` and
-# `Agent review verdict` — for every open pull request, on a schedule and on
-# demand.
+# Republishes every review-gate commit status — `Copilot review complete`,
+# `Agent review verdict` and `Review threads resolved` — for every open pull
+# request, on a schedule and on demand.
 #
-# Why, when both gates already recompute on an event: the events they depend on
+# Why, when each gate already recomputes on an event: the events they depend on
 # are not delivered here. A review submitted by Copilot usually creates no
 # workflow run at all, and the agent-review verdict arrives as a bot-authored
 # comment, the same actor class. The status then keeps reporting the previous
@@ -25,13 +25,13 @@ name: Review Gate Reconcile
 # about a commit that is no longer the head, never a verdict about the new head
 # derived from the old one.
 #
-# One workflow for both gates, not one each. There is one mechanism here —
+# One workflow for every gate, not one each. There is one mechanism here —
 # "recompute a review-gate status without the event that normally would" — and
-# splitting it in two would mean two schedules to keep in step, two places to
-# change the interval, and two ways for one of them to quietly stop running.
+# splitting it per gate would mean a schedule apiece to keep in step, as many
+# places to change the interval, and that many ways for one to stop running.
 #
 # ON FAILURE IT IS LOUD, because this is the one component whose failure is
-# otherwise invisible: if the sweep errors, both statuses simply stop being
+# otherwise invisible: if the sweep errors, every status simply stops being
 # corrected and every pull request still looks normal. The sweep exits non-zero
 # when it could not list the pull requests or when any gate run failed, and this
 # workflow turns that into a tracking issue rather than only a red X on a
@@ -77,7 +77,7 @@ permissions:
 
 # A group that QUEUES, never one that cancels. Two sweeps overlapping would
 # compute the same answers twice, so serialising them is free; cancelling would
-# drop a sweep's corrections on the floor, which is the same reason both gates
+# drop a sweep's corrections on the floor, which is the same reason the gates
 # carry no cancelling group at all.
 concurrency:
   group: review-gate-reconcile
@@ -147,7 +147,7 @@ jobs:
             const body = [
               '## 1. Problem Statement',
               '',
-              'The scheduled review-gate reconcile could not republish one or both',
+              'The scheduled review-gate reconcile could not republish one or more',
               'commit statuses. While it stays broken, a status left stale by a missed',
               'event is not corrected by anything, and every pull request still looks',
               'normal — which is the failure mode this sweep exists to remove.',
@@ -165,7 +165,7 @@ jobs:
               '',
               '## 3. Context & Background',
               '',
-              'The sweep is the recompute path that does not depend on the events both',
+              'The sweep is the recompute path that does not depend on the events the',
               'review gates are triggered by (#737). It is deliberately loud, because a',
               'reconcile that fails quietly is indistinguishable from one that has',
               'nothing to do. `docs/tooling/review-gate-reconcile.md` explains what it',
@@ -194,7 +194,7 @@ jobs:
               '## 6. Acceptance Criteria',
               '',
               '- [ ] `vp run review-gates:reconcile` exits 0',
-              '- [ ] The scheduled run is green, and republishes both statuses',
+              '- [ ] The scheduled run is green, and republishes every status',
               '- [ ] No regressions',
               '- [ ] Documentation updated (only if the sweep behaviour changed)',
               '- [ ] Approach consistent with repository conventions',

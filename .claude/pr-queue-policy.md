@@ -46,7 +46,7 @@ of time (`WAIT`), or is in §5 (`ESCALATE`).
 | E1  | **Not a draft.** Draft is the author's own "not yet" and the operator never overrides it (see A9)                                            | `gh pr view <n> --json isDraft`                                   |
 | E2  | **No conflict.** `mergeable` is `MERGEABLE` — `CONFLICTING` is §5/S3, `UNKNOWN` is `WAIT` (GitHub is still computing it)                     | `gh pr view <n> --json mergeable,mergeStateStatus`                |
 | E3  | **Every check concluded, none failed.** A queued or in-progress check is `WAIT`, never "probably fine"                                       | `gh pr checks <n>`                                                |
-| E4  | **Zero unresolved review threads**, whoever opened them — human, Copilot, or another agent. An outdated-but-unresolved thread still counts   | `reviewThreads(…){ isResolved }` via the GraphQL query in §6      |
+| E4  | **Zero unresolved review threads**, whoever opened them — human, Copilot, or another agent. An outdated-but-unresolved thread still counts   | `vp run pr:threads -- --pr <n>` (exit 0 = clear)                  |
 | E5  | **No changes requested** by a reviewer that are still outstanding                                                                            | `gh pr view <n> --json reviewDecision`                            |
 | E6  | **The PR body conforms** to the enforced template — every heading of `.github/pull_request_template.md`, plain spelling                      | `node scripts/verify-pr.mjs --body-file <path>`                   |
 | E7  | **The title is a Conventional Commit.** A squash merge takes the PR title as the commit subject, so a bad title becomes a bad commit on main | `node scripts/verify-commit-msg.mjs -` with the title             |
@@ -124,7 +124,10 @@ apply one without checking it either. Copilot's comments here have been wrong
 about repo facts. So: reproduce the claim against the tree first. If it holds,
 fix the code and reply with what changed. If it does not, reply with the probe
 that disproves it and resolve the thread — a wrong comment is answered, not
-obeyed, and never silently ignored. Applying an unverified comment is S10.
+obeyed, and never silently ignored. Applying an unverified comment is S10. The
+rule and the mechanics are
+[`docs/agents/pr-review-threads.md`](../docs/agents/pr-review-threads.md);
+`vp run pr:threads -- --resolve <id>` is the resolve step.
 
 ## 5. STOP-AND-ESCALATE
 

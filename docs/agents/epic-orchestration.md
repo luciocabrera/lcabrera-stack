@@ -186,44 +186,22 @@ agent-issued approval.
 
 ### Phase 3 — Address and resolve
 
-Every thread — the reviewer's and Copilot's — ends one of two ways:
+The rule is [`pr-review-threads.md`](pr-review-threads.md): every thread ends
+either with a fix that names its commit, or with a reply refuting the finding
+with a re-runnable probe — and only then is it resolved. `outdated` is not
+resolution. `vp run pr:threads` lists what is still open and exits non-zero
+while any is. Read that document rather than a summary of it; this section adds
+only what is specific to an epic.
 
-- **the code changed**, and the reply says which commit; or
-- **the finding is wrong**, and the reply says why, with a probe someone else can
-  re-run.
+**Both readers count.** A wave's threads come from the blind reviewer subagent
+_and_ from Copilot, and neither set may be discharged by the other's verdict —
+they read different things (§4). Nothing in the wave merges until both are clear.
 
-Then, and only then, resolve the thread. There is **no third option**: a thread
-is never resolved silently, and never resolved because it went `outdated`.
-
-**GitHub marks a thread `outdated` when the line moves. That is not resolution**
-and nothing in CI notices the difference. PR #646 merged with three unresolved
-Copilot threads, all `outdated=true`, all in fact fixed in code — the fixes
-happened, the record does not show it, and
-[`merge-checklist.md`](merge-checklist.md) has no box for it. That gap is why this
-section exists.
-
-`gh` has no command for resolving a thread. Use GraphQL:
-
-```bash
-# List every thread and its state
-gh api graphql -f query='
-{ repository(owner:"luciocabrera", name:"vite-react-compiler") {
-    pullRequest(number: PR) {
-      reviewThreads(first:50) { nodes {
-        id isResolved isOutdated path
-        comments(first:1){ nodes { author{login} body } } } } } } }'
-
-# Resolve one, after it has been answered
-gh api graphql -f query='
-mutation($t:ID!){ resolveReviewThread(input:{threadId:$t}){ thread{ isResolved } } }' \
-  -f t='<thread-id>'
-```
-
-**A developer who disagrees with a finding should say so with evidence.** That
-behaviour is correct and has twice been right in this repo (see
-[§6](#6-how-this-goes-wrong)). Route the disagreement back to the reviewer; if
-they still disagree after **two** rounds, escalate — do not let a subagent pair
-loop.
+**Disagreement has a bounded path.** Route it back to the reviewer that raised
+it; if it survives **two** rounds, escalate to the orchestrator rather than
+letting a subagent pair loop. Twice in this repo the developer was right (see
+[§6](#6-how-this-goes-wrong)), so a refuted finding is a normal outcome, not a
+process failure — but the escalation bound is what keeps it from becoming one.
 
 ### Phase 4 — Merge
 
@@ -256,8 +234,8 @@ All of it, every time. Any failure aborts the merge.
 - [ ] Every acceptance criterion in the issue is met, or the deviation is stated
       in the PR's Known Limitations
 - [ ] **Every review thread is resolved** — reviewer's _and_ Copilot's — each with
-      a reply that changed code or refuted the finding. `isResolved: true` for all,
-      checked by the GraphQL query above, not by eye
+      a reply that changed code or refuted the finding. Checked by
+      `vp run pr:threads -- --pr <n>` exiting 0, not by eye
 - [ ] Every CI check green, including SonarCloud's strict gate. A local green gate
       does **not** predict Sonar
 - [ ] The `Agent review verdict` **commit status** reports `pass` **for the

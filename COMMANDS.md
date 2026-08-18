@@ -547,9 +547,24 @@ the same script on every pull request, advisory for now (#697; promoting it is
 | `vp run agent-review:verify -- --pr <n> --dry-run` | the same, reported to the terminal without touching the commit status      |
 | `vp run agent-review:verify -- --pr <n> --strict`  | exit with the contract's §2.3 codes (0 pass, 1 fail, 2 error) instead of 0 |
 
-Neither gate's trigger is reliable here — a Copilot review usually creates no
+A third gate reports the **review threads** still holding a pull request. The
+`main` ruleset sets `required_review_thread_resolution`, so one open thread
+blocks the merge and nothing says so once the checks are green — #780 sat 70
+minutes that way. The rule it reports on is
+[`docs/agents/pr-review-threads.md`](docs/agents/pr-review-threads.md).
+
+| Command                                              | Does                                                                  |
+| ---------------------------------------------------- | --------------------------------------------------------------------- |
+| `vp run pr:threads`                                  | list unresolved threads on the current branch's PR; non-zero if any   |
+| `vp run pr:threads -- --pr <n>`                      | the same for one PR, with each thread's node id                       |
+| `vp run pr:threads -- --pr <n> --json`               | the same as JSON                                                      |
+| `vp run pr:threads -- --resolve <thread-id>`         | resolve one thread, after you have fixed or answered it               |
+| `vp run review-threads:verify -- --pr <n>`           | publish the advisory `Review threads resolved` status                 |
+| `vp run review-threads:verify -- --pr <n> --dry-run` | the same, reported to the terminal without touching the commit status |
+
+No gate's trigger is reliable here — a Copilot review usually creates no
 workflow run, and the agent-review verdict arrives as a bot-authored comment,
-the same class (#737). So one **reconcile** republishes both statuses for every
+the same class (#737). So one **reconcile** republishes every status for every
 open pull request on a schedule, and the command below is that same sweep run by
 hand. It posts only when the head does not already carry the verdict it computes,
 so running it twice changes nothing.
@@ -560,7 +575,7 @@ is the schedule; the interval, the recovery and what it does on failure are in
 
 | Command                                               | Does                                                             |
 | ----------------------------------------------------- | ---------------------------------------------------------------- |
-| `vp run review-gates:reconcile`                       | republish both statuses for every open PR that needs it          |
+| `vp run review-gates:reconcile`                       | republish every status for every open PR that needs it           |
 | `vp run review-gates:reconcile -- --pr <n>`           | the same for one PR — the local form of the break-glass dispatch |
 | `vp run review-gates:reconcile -- --pr <n> --dry-run` | print what it would publish, posting nothing                     |
 

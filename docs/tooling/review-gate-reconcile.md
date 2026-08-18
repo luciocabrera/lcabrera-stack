@@ -1,21 +1,22 @@
 # The review-gate reconcile
 
-**What it is:** a scheduled sweep that republishes both review-gate commit
-statuses — `Copilot review complete` and `Agent review verdict` — for every open
-pull request, so that a status left stale by an event that never arrived corrects
-itself without anybody noticing it was stale.
+**What it is:** a scheduled sweep that republishes every review-gate commit
+status — `Copilot review complete`, `Agent review verdict` and
+`Review threads resolved` — for every open pull request, so that a status left
+stale by an event that never arrived corrects itself without anybody noticing it
+was stale.
 
 | Piece                                                                                              | What it is                                               |
 | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
 | [`.github/workflows/review-gate-reconcile.yml`](../../.github/workflows/review-gate-reconcile.yml) | the schedule, the dispatch, and what it does on failure  |
-| [`scripts/reconcile-review-gates.mjs`](../../scripts/reconcile-review-gates.mjs)                   | the sweep — lists open pull requests, runs both gates    |
+| [`scripts/reconcile-review-gates.mjs`](../../scripts/reconcile-review-gates.mjs)                   | the sweep — lists open pull requests, runs each gate     |
 | [`scripts/lib/review-gate-reconcile.mjs`](../../scripts/lib/review-gate-reconcile.mjs)             | the two decisions, pure and unit-tested                  |
 | `vp run review-gates:reconcile`                                                                    | the same sweep by hand                                   |
 | `vp run review-gates:reconcile -- --pr <n> --dry-run`                                              | what it would do about one pull request, posting nothing |
 
 ## Why it exists
 
-Both gates recompute from an event, and the events they need are not delivered
+Each gate recomputes from an event, and the events they need are not delivered
 reliably in this repository. A review submitted by Copilot usually creates no
 workflow run at all; the agent-review verdict arrives as a comment posted by an
 agent, which is the same actor class. When the event goes missing, the status
@@ -66,10 +67,11 @@ it is a judgement, not a default:
   are best-effort and routinely late under load, so a five-minute schedule
   promises a freshness it cannot keep.
 
-One workflow serves both gates rather than one each. There is a single mechanism
+One workflow serves every gate rather than one each. There is a single mechanism
 here — recompute a review-gate status without the event that normally would — and
-two copies of it would mean two schedules to keep in step and two ways for one of
-them to stop running unnoticed.
+a copy per gate would mean a schedule apiece to keep in step, and that many ways
+for one of them to stop running unnoticed. Adding a gate is one entry in the
+sweep's `GATES` list; it is deliberately not a new workflow.
 
 ## What it will and will not publish
 
@@ -173,7 +175,7 @@ re-derived by a later reader.
 ## When the sweep itself fails
 
 This is the one component here whose failure would otherwise be invisible: if it
-errors, both statuses simply stop being corrected and every pull request still
+errors, every status simply stops being corrected and every pull request still
 looks normal. So it is deliberately loud.
 
 - The sweep **exits non-zero** when it could not list the pull requests, or when
@@ -196,13 +198,15 @@ before relying on it again.
 
 ## Preconditions these notes depend on
 
-- The reconcile is **advisory today**, because both gates are (#698 promotes
-  them). Nothing merges or fails on what it publishes.
+- The reconcile is **advisory today**, because every gate it drives is (#698
+  promotes them). Nothing merges or fails on what it publishes. `Review threads
+resolved` is the report; `required_review_thread_resolution` on the `main`
+  ruleset is what actually holds the merge.
 - The Actions approval policy is `first_time_contributors`. The sweep is
   unaffected by it — a scheduled run is attributed to the repository, not to the
   actor whose event went missing — and that is precisely why it works where the
   event does not.
-- Both statuses are read and written by context **name**. Renaming either
+- Every status is read and written by context **name**. Renaming one
   detaches the gate, the sweep and the ruleset entry all at once.
 
 ## Related

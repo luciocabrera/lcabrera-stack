@@ -19,6 +19,8 @@ satisfy them.
 - Before writing any commit message.
 - Before opening or updating a pull request (title **and** description).
 - When a commit or the `pr-standards` check fails and you need to fix it.
+- **After a review lands on your PR** — see **After review** below. A green gate
+  is not a mergeable pull request.
 
 ## Commit messages — Conventional Commits
 
@@ -73,13 +75,34 @@ PR_TITLE='feat(ci): add pr standards gate' \
   vp run pr:verify -- --body-file my-pr-body.md
 ```
 
+## After review
+
+Once a reviewer — human, Copilot, or another agent — has commented, the pull
+request is blocked until **every thread is addressed and resolved**. The `main`
+ruleset enforces it and reports it only in the merge box, so a finished-looking
+PR with green checks can sit blocked indefinitely.
+
+```bash
+vp run pr:threads                              # exits non-zero while any is open
+vp run pr:threads -- --resolve <thread-id>     # after you have fixed or answered it
+```
+
+Each thread ends with a fix that names its commit, or a reply refuting the
+finding with a probe someone else can re-run — then it is resolved. `outdated`
+is not resolution. Note that the ruleset requires **zero** approving reviews, so
+if a PR will not merge, an approval is almost never what it is waiting for.
+
+The full rule, and why it is a rule, is
+[`docs/agents/pr-review-threads.md`](../../../docs/agents/pr-review-threads.md).
+
 ## How it is enforced
 
-| Layer     | What runs                                                                    |
-| --------- | ---------------------------------------------------------------------------- |
-| Local     | `.vite-hooks/commit-msg` → `commit:verify` on every `git commit`             |
-| Local     | `.vite-hooks/pre-push` → `branch:verify` on the head ref                     |
-| CI (gate) | `pr-standards.yml` → `pr:verify` (title + body) + `commit:verify` per commit |
+| Layer     | What runs                                                                            |
+| --------- | ------------------------------------------------------------------------------------ |
+| Local     | `.vite-hooks/commit-msg` → `commit:verify` on every `git commit`                     |
+| Local     | `.vite-hooks/pre-push` → `branch:verify` on the head ref                             |
+| CI (gate) | `pr-standards.yml` → `pr:verify` (title + body) + `commit:verify` per commit         |
+| Ruleset   | `required_review_thread_resolution` on `main`, reported by `Review threads resolved` |
 
 Per **Rule 11**, do not work around a failure by weakening the check — fix the
 message or the description. The spec (`scripts/lib/commit-convention.mjs`) is the

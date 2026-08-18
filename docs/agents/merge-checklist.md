@@ -38,6 +38,13 @@ trust the check and look at its output.
       break-glass path for when Copilot never reviews are in
       [`copilot-review-gate.md`](../tooling/copilot-review-gate.md). It reports
       but does not block until #698 promotes it to a required context.
+- [ ] **Every review thread is addressed and resolved** — whoever opened it
+      **[auto: `Review threads resolved`; `vp run pr:threads -- --pr <n>` exits 0]**.
+      Each ends with a fix naming its commit, or a reply refuting the finding
+      with a re-runnable probe; `outdated` is not resolution. The `main` ruleset
+      blocks the merge on this, and says so only in the merge box — #646 and
+      #780 are what the box not being read costs. The rule is
+      [`pr-review-threads.md`](pr-review-threads.md).
 - [ ] **Reviewed by a supervising agent or human** **[judgement]**. Where an
       agent code review has reported a verdict on the PR, what that verdict has
       to satisfy — which severities block, and the only sanctioned way to merge

@@ -1,7 +1,7 @@
 /**
- * Republishes both review-gate commit statuses for every open pull request.
+ * Republishes every review-gate commit status for every open pull request.
  *
- * Why it exists: both gates recompute from an event, and the events they need
+ * Why it exists: each gate recomputes from an event, and the events they need
  * are not delivered reliably here — a Copilot review usually creates no workflow
  * run at all, and the agent-review verdict arrives as a bot-authored comment,
  * the same class. A status nobody recomputed is indistinguishable from one that
@@ -55,6 +55,7 @@ const SCRIPTS_DIR = dirname(fileURLToPath(import.meta.url));
 const GATES = [
   { name: 'copilot-review', script: 'copilot-review-status.mjs' },
   { name: 'agent-review', script: 'verify-agent-review.mjs' },
+  { name: 'review-threads', script: 'verify-review-threads.mjs' },
 ];
 
 const resolveRepository = () =>
