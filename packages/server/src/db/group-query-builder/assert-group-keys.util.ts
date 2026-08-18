@@ -1,4 +1,7 @@
-import type { ColumnGroupingCapability } from './group-query-builder.types.ts';
+import type {
+  ColumnGroupingCapability,
+  GroupingMode,
+} from './group-query-builder.types.ts';
 
 import { GroupingRefusedError } from '../../errors/grouping-refused.error.ts';
 import { assertGroupColumn } from './assert-group-column.util.ts';
@@ -7,6 +10,7 @@ import { assertGroupDepth } from './assert-group-depth.util.ts';
 type AssertGroupKeysArgs = {
   readonly allowedColumns: readonly string[];
   readonly capabilities: Readonly<Record<string, ColumnGroupingCapability>>;
+  readonly grouping: GroupingMode;
   readonly keys: readonly string[];
 };
 
@@ -27,9 +31,10 @@ type AssertGroupKeysArgs = {
 export const assertGroupKeys = ({
   allowedColumns,
   capabilities,
+  grouping,
   keys,
 }: AssertGroupKeysArgs): void => {
-  assertGroupDepth({ keys });
+  assertGroupDepth({ grouping, keys });
 
   for (const key of keys) {
     assertGroupColumn({ allowedColumns, column: key });

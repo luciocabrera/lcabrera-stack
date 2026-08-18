@@ -54,7 +54,7 @@ export const buildGroupQuery = ({
 }: GroupQueryDescriptor): BuiltGroupQuery => {
   assertSafeIdentifier(schema);
   assertSafeIdentifier(table);
-  assertGroupKeys({ allowedColumns, capabilities, keys });
+  assertGroupKeys({ allowedColumns, capabilities, grouping, keys });
   assertGroupAggregates({ aggregates, allowedColumns, capabilities });
 
   // After the legality gates and before anything is emitted: the catalogue's

@@ -49,6 +49,7 @@ MAX_GROUP_KEYS [const] 4
 MAX_GROUP_ROWS_REFUSE [const] 50000
 MAX_GROUP_ROWS_WARN [const] 5000
 MAX_IDENTIFIER_LENGTH [const] 63
+MAX_KEYS_BY_GROUPING [const] Readonly<Record<GroupingMode, number>>
 UNIQUE_ISH_DISTINCT_RATIO [const] 0.95
 
 ## ./db/group-query-builder/group-query-builder.types
@@ -66,7 +67,7 @@ GroupAggregate [type] { /** * Overrides the derived `${fn}_${column}` name. It i
 GroupCardinalityEstimate [type] { readonly columns: readonly string[]; readonly kind: 'unknown'; } | { readonly kind: 'known'; readonly rows: number; }
 GroupCardinalityWarning [type] { readonly columns: readonly string[]; readonly kind: 'stats-unavailable'; } | { readonly estimatedRows: number; readonly kind: 'estimate-above-warn-threshold'; }
 GroupGuardRails [type] { readonly estimate: GroupCardinalityEstimate; readonly rowLimit: GroupRowLimit; readonly warning?: GroupCardinalityWarning; }
-GroupingMode [type] 'flat' | 'rollup'
+GroupingMode [type] 'cube' | 'flat' | 'rollup'
 GroupKeyRefusalReason [type] 'no-equality-operator' | 'not-a-dimension' | 'stats-unavailable' | 'too-many-distinct' | 'unique-ish'
 GroupQueryDescriptor [type] { readonly aggregates: readonly GroupAggregate[]; /** * **Required**, unlike `SelectQueryDescriptor` where it is opt-in: every group * key is request-derived by construction, so opt-in semantics would be a * silent hole (ADR-059). */ readonly allowedColumns: readonly string[]; /** * What each column may do, as `getColumnGroupingCapabilities` resolved it from * the catalogue. Passed in rather than re-derived so this builder stays pure * while still enforcing ADR-058 — the impure half answers "what is legal * here", the builder refuses everything else. */ readonly capabilities: Readonly<Record<string, ColumnGroupingCapability>>; readonly filters?: readonly QueryFilter[]; readonly grouping: GroupingMode; /** Ordered, and the order is the tree's nesting order. */ readonly keys: readonly string[]; /** A safety belt, not a page — a grouped read is never paginated (ADR-059). */ readonly maxRows: number; readonly schema: string; readonly sort?: readonly GroupSort[]; /** Where a subtotal sits relative to the rows it totals. Defaults to `last`. */ readonly subtotalPlacement?: 'first' | 'last'; readonly table: string; }
 GroupRowLimit [type] { readonly backstopAt?: number; readonly limit: number; }

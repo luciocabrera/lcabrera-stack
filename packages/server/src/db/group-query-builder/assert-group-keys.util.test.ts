@@ -34,10 +34,16 @@ const CAPABILITIES: Readonly<Record<string, ColumnGroupingCapability>> = {
   shipping_country: groupable('shipping_country'),
 };
 
+/**
+ * Rollup throughout: this file is about the *catalogue* half of the rules, and
+ * the per-mode depth cap is asserted where it lives
+ * (`assert-group-depth.util.test.ts`).
+ */
 const assert = (keys: readonly string[]) =>
   assertGroupKeys({
     allowedColumns: ALLOWED,
     capabilities: CAPABILITIES,
+    grouping: 'rollup',
     keys,
   });
 
@@ -78,6 +84,7 @@ describe('assertGroupKeys', () => {
           ...CAPABILITIES,
           secret: groupable('secret'),
         },
+        grouping: 'rollup',
         keys: ['secret'],
       }),
     ).toThrow('not in the allowed list');
@@ -90,6 +97,7 @@ describe('assertGroupKeys', () => {
       assertGroupKeys({
         allowedColumns: [...ALLOWED, 'ghost'],
         capabilities: CAPABILITIES,
+        grouping: 'rollup',
         keys: ['ghost'],
       }),
     ).toThrow('No grouping capability was resolved');

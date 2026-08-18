@@ -5,9 +5,12 @@
  */
 import { describe, expect, it } from 'vite-plus/test';
 
+import { expandCubeSets } from './expand-cube-sets.util.ts';
 import { expandGroupingSets } from './expand-grouping-sets.util.ts';
 
 const KEYS = ['a', 'b', 'c', 'd'];
+/** Cube's own cap is three, so its cases share a shorter list. */
+const CUBE_KEYS = ['a', 'b', 'c'];
 
 describe('expandGroupingSets', () => {
   it.each([1, 2, 3, 4])(
@@ -52,5 +55,58 @@ describe('expandGroupingSets', () => {
     expect(
       expandGroupingSets({ grouping: 'rollup', keys: ['a', 'b'] }),
     ).not.toContainEqual(['b']);
+  });
+
+  it('emits that same set for a cube', () => {
+    // The other half of the line above, so the pair reads as one contrast: the
+    // mode decides, over an identical key list.
+    expect(
+      expandGroupingSets({ grouping: 'cube', keys: ['a', 'b'] }),
+    ).toContainEqual(['b']);
+  });
+
+  it.each([1, 2, 3])('emits 2^%i sets for a cube at that depth', (depth) => {
+    const sets = expandGroupingSets({
+      grouping: 'cube',
+      keys: CUBE_KEYS.slice(0, depth),
+    });
+
+    expect(sets).toHaveLength(2 ** depth);
+  });
+
+  it('delegates cube unchanged — the dispatcher adds nothing', () => {
+    // Keeps this file's job "pick an expansion" rather than "be one". The
+    // canonical-order assertions live in `expand-cube-sets.util.test.ts`, and
+    // this is what stops the two drifting apart.
+    expect(expandGroupingSets({ grouping: 'cube', keys: CUBE_KEYS })).toEqual(
+      expandCubeSets({ keys: CUBE_KEYS }),
+    );
+  });
+
+  it.each(['cube', 'flat', 'rollup'] as const)(
+    'never hands back the caller’s own key array, under %s',
+    (grouping) => {
+      // `readonly` is a compile-time claim and is erased for a published
+      // consumer, so identity is what actually stops a mutation reaching back
+      // into the caller's list. `flat` regressed here once, by returning
+      // `[keys]` where the other two allocate.
+      const keys = ['a', 'b', 'c'];
+      const sets = expandGroupingSets({ grouping, keys });
+
+      for (const set of sets) {
+        expect(set).not.toBe(keys);
+      }
+    },
+  );
+
+  it('starts every mode at the full key list and ends at the grand total', () => {
+    // The one shape all three share, and the reason nothing downstream needs a
+    // per-mode case: most specific first, grand total last.
+    for (const grouping of ['cube', 'rollup'] as const) {
+      const sets = expandGroupingSets({ grouping, keys: CUBE_KEYS });
+
+      expect(sets.at(0)).toEqual(CUBE_KEYS);
+      expect(sets.at(-1)).toEqual([]);
+    }
   });
 });
