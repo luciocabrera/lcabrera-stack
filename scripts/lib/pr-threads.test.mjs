@@ -114,6 +114,11 @@ describe('formatThreads', () => {
     expect(report(summarizeThreads([wordy]))).toContain('first second');
   });
 
+  it('names a placeholder for a thread anchored to no file', () => {
+    const text = report(summarizeThreads([{ comments: null, id: 'z' }]));
+    expect(text).toContain('• (no file)');
+  });
+
   it('says so plainly when nothing is open', () => {
     expect(report(summarizeThreads([thread({ isResolved: true })]))).toContain(
       'no unresolved review threads (1 total)',

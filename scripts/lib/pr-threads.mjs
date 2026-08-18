@@ -60,9 +60,15 @@ export const summarizeThreads = (nodes) => {
   return { total: threads.length, unresolved };
 };
 
-/** `path:line`, or just the path when the comment is not anchored to a line. */
-const where = (thread) =>
-  thread.line === undefined ? thread.path : `${thread.path}:${thread.line}`;
+/**
+ * `path:line`, degrading to the path alone, then to a placeholder. A review
+ * comment carries no path when it is anchored to the pull request rather than
+ * to a file, and an empty location would leave a bullet with nothing after it.
+ */
+const where = (thread) => {
+  const file = thread.path === '' ? '(no file)' : thread.path;
+  return thread.line === undefined ? file : `${file}:${thread.line}`;
+};
 
 /**
  * The report an author reads. One block per unresolved thread, each carrying the
