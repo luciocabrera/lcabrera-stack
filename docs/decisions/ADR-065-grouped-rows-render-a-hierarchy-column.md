@@ -1,11 +1,22 @@
 # ADR-065 — A grouped grid renders its hierarchy in a grid-owned column, not a spanning banner
 
-- **Status:** Accepted
+- **Status:** Accepted; the **grid-owned hierarchy column** and the rejection of "reading B" are superseded by [ADR-080](./ADR-080-a-group-key-renders-in-its-own-column.md) (2026-08-18, #789)
 - **Date:** 2026-08-13
 - **Amended:** 2026-08-13 (#659) — the primary decision is unchanged; the rejection of the repurposed data column is restated on multi-key grouping, a grouped-by data column blanks on its detail rows, the retained banner is withdrawn, and all three are read off one principle. The body below is the record as accepted; every passage the amendment changes is marked where it stands. See [Amendments](#amendments).
 - **Scope:** `@lcabrera/ui` — `src/components/Table/` group rows and the cell grid they share with detail rows
 - **Issue:** #647 — constrains #570, #571, #648 and #651; amended by #659
 - **Related:** [ADR-062](./ADR-062-grid-semantics-roving-focus-and-row-identity.md) (grid roles, roving focus, row identity), [ADR-061](./ADR-061-grouping-config-in-url-expansion-in-store.md) (where grouping configuration and expansion live), [ADR-059](./ADR-059-aggregation-is-builder-generated.md) (what a grouped read returns), [ADR-058](./ADR-058-grouping-legality-by-analytical-role.md) (which aggregates a column may offer)
+
+> **Superseded in part by ADR-080.** A group key's value now renders in that
+> key's **own data column**, and no synthetic column is injected — so the
+> designated hierarchy column below, and the rejection of "reading B" in
+> [Amendments §1](#1--why-the-repurposed-data-column-is-rejected-restated), no
+> longer hold. ADR-080 rests on this document's reasoning rather than against it:
+> the objection here is that column order is the user's state, and ADR-080's
+> hoist is a derivation that never writes it. Everything else decided here
+> stands — the shared cell grid, the em dash for an unrequested aggregate, the
+> refusal to leak a uniform detail value onto a group row, the dropped banner,
+> and blanking a grouped-by column on its detail rows.
 
 ## Context
 
