@@ -425,9 +425,19 @@ export type TableGroupAggregateValue = {
   readonly columnKey: string;
   readonly fn: TableAggregateFn;
   /**
-   * The aggregate's raw value. A `numeric` aggregate arrives from `pg` as a
-   * string and is passed through as one — the renderer parses it, so precision
-   * is not spent on a float that only has to be printed.
+   * The aggregate's raw value, exactly as the read produced it. A `numeric` or
+   * `bigint` aggregate arrives from `pg` as a **string**, because neither
+   * survives a JS number losslessly, and it is carried here as one.
+   *
+   * **Rendering it is still lossy past a double**, and this is the honest
+   * limit of the type rather than a guarantee against it: the cell formats
+   * through `renderCellContent`, which calls `Number()` on the string, so a
+   * value beyond ~15–17 significant digits is rounded on the way to the
+   * screen — `'9007199254740993.55'` prints as `9,007,199,254,740,994.00`.
+   * What the string buys is that the loss happens **once, at the edge that
+   * prints**, and only there: this value is still exact for a consumer that
+   * reads it for anything else. A grid that needs exact display past a double
+   * needs a formatter that never converts, which this is not.
    */
   readonly value: unknown;
 };
