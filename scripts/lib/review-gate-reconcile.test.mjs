@@ -167,15 +167,16 @@ describe('the scripts that take a pull request on the command line', () => {
   for (const script of DELEGATE) {
     it(`${script} takes both from review-gate-status, never from argv`, () => {
       const source = readRepoFile(script);
+      // Either entry point counts: the gates take the whole target through
+      // `resolveGateTarget`, while `pr-threads.mjs` calls the two resolvers
+      // itself because it also falls back to the current branch. What matters
+      // is that the parsing happens in the shared module, not here.
       expect(source).toMatch(
-        /import \{[^}]*resolvePullNumber[^}]*\} from '\.\/lib\/review-gate-status\.mjs'/s,
+        /import \{[^}]*(?:resolveGateTarget|resolvePullNumber)[^}]*\} from '\.\/lib\/review-gate-status\.mjs'/s,
       );
-      expect(source).toMatch(
-        /import \{[^}]*resolveRepository[^}]*\} from '\.\/lib\/review-gate-status\.mjs'/s,
-      );
-      // The failure this forbids: a gate that reaches past the shared resolver
-      // and reads the flag itself, which is how one of them would drift back to
-      // an unparsed `#738`.
+      // The failure this forbids: a script that reaches past the shared
+      // resolver and reads the flag itself, which is how one of them would
+      // drift back to an unparsed `#738`.
       expect(source).not.toMatch(/flagValue\('--pr'\)/);
       expect(source).not.toMatch(/flagValue\('--repo'\)/);
     });

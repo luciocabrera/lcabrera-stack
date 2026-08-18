@@ -20,7 +20,10 @@ import process from 'node:process';
 
 import { flagValue, parsePullNumber, parseRepository } from './cli-input.mjs';
 import { runGh } from './gh-exec.mjs';
-import { publishedStatus } from './review-gate-reconcile.mjs';
+import {
+  publishedStatus,
+  shouldPublishStatus,
+} from './review-gate-reconcile.mjs';
 
 /** The Actions event payload, or `undefined` outside Actions. */
 export const readEventPayload = () => {
@@ -106,3 +109,56 @@ export const fetchPublishedStatus = ({ context, repository, sha }) =>
     ),
     context,
   );
+
+/**
+ * The pull request a gate run is about — `{ number, payload, repository }` — or
+ * `undefined` after printing `usage`.
+ *
+ * Both gates open the same way, and the interesting part is the failure: a run
+ * that cannot name a pull request must say so and stop, never fall through to a
+ * default. Sharing it means neither gate can grow its own answer to that. The
+ * payload is handed back because a gate may still need what triggered the run,
+ * which is the one thing that cannot be re-read from the pull request.
+ */
+export const resolveGateTarget = (usage) => {
+  const payload = readEventPayload();
+  const number = resolvePullNumber(payload);
+  if (number === undefined) {
+    console.error(`${usage}\n\nGive --pr, or run inside a pull-request event.`);
+    return undefined;
+  }
+  return { number, payload, repository: resolveRepository(payload) };
+};
+
+/**
+ * Publish one gate's verdict, honouring `--if-changed` and `--dry-run`, and
+ * return the line describing what became of it.
+ *
+ * This protocol is shared rather than written per gate because the reconcile
+ * sweep depends on it being identical: it re-runs every gate on a schedule and
+ * relies on `--if-changed` making a re-run a no-op. A gate that implemented that
+ * check slightly differently would either republish on every sweep or stop
+ * correcting a stale status, and neither is visible from the sweep's own log.
+ */
+export const publishGateStatus = ({
+  context,
+  description,
+  repository,
+  sha,
+  state,
+}) => {
+  if (
+    process.argv.includes('--if-changed') &&
+    !shouldPublishStatus({
+      current: fetchPublishedStatus({ context, repository, sha }),
+      next: { description, state },
+    })
+  ) {
+    return `Unchanged on ${sha}: nothing was posted.`;
+  }
+  if (process.argv.includes('--dry-run')) {
+    return '--dry-run: nothing was posted.';
+  }
+  postStatus({ context, description, repository, sha, state });
+  return `Posted to ${repository}/statuses/${sha}.`;
+};

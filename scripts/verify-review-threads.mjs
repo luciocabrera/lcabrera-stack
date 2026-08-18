@@ -35,13 +35,9 @@ import {
   STATUS_CONTEXT,
   summarizeThreads,
 } from './lib/pr-threads.mjs';
-import { shouldPublishStatus } from './lib/review-gate-reconcile.mjs';
 import {
-  fetchPublishedStatus,
-  postStatus,
-  readEventPayload,
-  resolvePullNumber,
-  resolveRepository,
+  publishGateStatus,
+  resolveGateTarget,
 } from './lib/review-gate-status.mjs';
 
 const USAGE =
@@ -56,15 +52,13 @@ const describeThreads = (threads) =>
     : `: ${threads.unresolved.map((one) => one.path || '(no path)').join(', ')}`);
 
 const main = () => {
-  const payload = readEventPayload();
-  const number = resolvePullNumber(payload);
-  if (number === undefined) {
-    console.error(`${USAGE}\n\nGive --pr, or run inside a pull-request event.`);
+  const target = resolveGateTarget(USAGE);
+  if (target === undefined) {
     process.exitCode = 1;
     return;
   }
 
-  const repository = resolveRepository(payload);
+  const { number, repository } = target;
   const pullRequest = fetchPullRequestThreads({ number, repository });
   const headSha = pullRequest?.headRefOid;
   if (typeof headSha !== 'string' || headSha === '') {
@@ -84,33 +78,15 @@ const main = () => {
   console.log(`${repository}#${number} head ${headSha}`);
   console.log(describeThreads(threads));
   console.log(`${STATUS_CONTEXT}: ${state} — ${description}`);
-
-  if (
-    process.argv.includes('--if-changed') &&
-    !shouldPublishStatus({
-      current: fetchPublishedStatus({
-        context: STATUS_CONTEXT,
-        repository,
-        sha: headSha,
-      }),
-      next: { description, state },
-    })
-  ) {
-    console.log(`Unchanged on ${headSha}: nothing was posted.`);
-    return;
-  }
-  if (process.argv.includes('--dry-run')) {
-    console.log('--dry-run: nothing was posted.');
-    return;
-  }
-  postStatus({
-    context: STATUS_CONTEXT,
-    description,
-    repository,
-    sha: headSha,
-    state,
-  });
-  console.log(`Posted to ${repository}/statuses/${headSha}.`);
+  console.log(
+    publishGateStatus({
+      context: STATUS_CONTEXT,
+      description,
+      repository,
+      sha: headSha,
+      state,
+    }),
+  );
 };
 
 try {

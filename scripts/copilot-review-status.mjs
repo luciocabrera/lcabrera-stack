@@ -52,13 +52,9 @@ import {
 import { collectSuppressedComments } from './lib/copilot-suppressed.mjs';
 import { errorMessage } from './lib/error-message.mjs';
 import { runGh } from './lib/gh-exec.mjs';
-import { shouldPublishStatus } from './lib/review-gate-reconcile.mjs';
 import {
-  fetchPublishedStatus,
-  postStatus,
-  readEventPayload,
-  resolvePullNumber,
-  resolveRepository,
+  publishGateStatus,
+  resolveGateTarget,
 } from './lib/review-gate-status.mjs';
 
 const USAGE =
@@ -125,15 +121,13 @@ const reportSuppressed = (report, number) => {
 };
 
 const main = () => {
-  const payload = readEventPayload();
-  const number = resolvePullNumber(payload);
-  if (number === undefined) {
-    console.error(`${USAGE}\n\nGive --pr, or run inside a pull-request event.`);
+  const target = resolveGateTarget(USAGE);
+  if (target === undefined) {
     process.exitCode = 1;
     return;
   }
 
-  const repository = resolveRepository(payload);
+  const { number, payload, repository } = target;
   const pullRequest = fetchPullRequest(repository, number);
   const headSha = pullRequest?.head?.sha;
   if (typeof headSha !== 'string' || headSha === '') {
@@ -162,33 +156,15 @@ const main = () => {
   console.log(describeReviews(reviews));
   reportSuppressed(suppressed, number);
   console.log(verdictLine({ description, state }));
-
-  if (
-    process.argv.includes('--if-changed') &&
-    !shouldPublishStatus({
-      current: fetchPublishedStatus({
-        context: STATUS_CONTEXT,
-        repository,
-        sha: headSha,
-      }),
-      next: { description, state },
-    })
-  ) {
-    console.log(`Unchanged on ${headSha}: nothing was posted.`);
-    return;
-  }
-  if (process.argv.includes('--dry-run')) {
-    console.log('--dry-run: nothing was posted.');
-    return;
-  }
-  postStatus({
-    context: STATUS_CONTEXT,
-    description,
-    repository,
-    sha: headSha,
-    state,
-  });
-  console.log(`Posted to ${repository}/statuses/${headSha}.`);
+  console.log(
+    publishGateStatus({
+      context: STATUS_CONTEXT,
+      description,
+      repository,
+      sha: headSha,
+      state,
+    }),
+  );
 };
 
 try {
