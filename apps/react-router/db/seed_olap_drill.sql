@@ -35,8 +35,15 @@
 -- batches multiplies every leaf group, so drill against one batch's id range
 -- when the spread is what you are testing.
 --
--- To undo the appended rows:
---   DELETE FROM enterprise_orders WHERE order_id > 500000;
+-- To undo, delete by customer id rather than by order id:
+--
+--   DELETE FROM enterprise_orders WHERE customer_id >= 900000;
+--
+-- Every row this file writes carries `900000 + <pool slot>`, and the base seed's
+-- customer ids sit far below that, so the statement removes exactly the appended
+-- batches however many there are. An `order_id > 500000` bound would instead
+-- depend on the base seed's row count, and would silently delete base-seed rows
+-- if that count ever dropped.
 
 SET client_min_messages TO warning;
 SET statement_timeout = 0;

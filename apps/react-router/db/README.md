@@ -14,8 +14,8 @@ one is how you return to a known state rather than something to run once.
 
 No file here uses a `psql` meta-command. That is what lets the seeder apply them
 through `pg`, so seeding needs no `psql` on the machine — and it holds for the
-opt-in fixture below too, which the seeder does not apply but which must stay
-appliable the same way.
+opt-in fixture below too, which the seeder does not apply but which must remain
+something it could apply.
 
 ## `seed_olap_drill.sql` — an opt-in fixture, not part of the reset
 
@@ -40,7 +40,15 @@ testing.
 
 ```sh
 docker exec -i <container> psql -U <user> -d <db> < apps/react-router/db/seed_olap_drill.sql
-DELETE FROM enterprise_orders WHERE order_id > 500000;   -- to undo
+```
+
+To undo, delete by customer id — every appended row carries `900000 + <pool
+slot>` and the base seed's customer ids sit far below that, so this removes the
+appended batches however many there are, without depending on the base seed's
+row count:
+
+```sql
+DELETE FROM enterprise_orders WHERE customer_id >= 900000;
 ```
 
 ## `setup_large_data.sql` has a copy in another repository
