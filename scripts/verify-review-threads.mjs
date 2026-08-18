@@ -26,14 +26,8 @@
  *
  * Governed by .claude/rules/scripts.md.
  */
-import { readFileSync } from 'node:fs';
 import process from 'node:process';
 
-import {
-  flagValue,
-  parsePullNumber,
-  parseRepository,
-} from './lib/cli-input.mjs';
 import { errorMessage } from './lib/error-message.mjs';
 import { runGh } from './lib/gh-exec.mjs';
 import {
@@ -41,10 +35,14 @@ import {
   STATUS_CONTEXT,
   summarizeThreads,
 } from './lib/pr-threads.mjs';
+import { shouldPublishStatus } from './lib/review-gate-reconcile.mjs';
 import {
-  publishedStatus,
-  shouldPublishStatus,
-} from './lib/review-gate-reconcile.mjs';
+  fetchPublishedStatus,
+  postStatus,
+  readEventPayload,
+  resolvePullNumber,
+  resolveRepository,
+} from './lib/review-gate-status.mjs';
 
 const USAGE =
   'usage: node scripts/verify-review-threads.mjs --pr <number> ' +
@@ -66,35 +64,6 @@ query($owner:String!, $repo:String!, $number:Int!) {
   }
 }`;
 
-/** The Actions event payload, or `undefined` outside Actions. */
-const readEventPayload = () => {
-  const path = process.env.GITHUB_EVENT_PATH;
-  return path === undefined || path === ''
-    ? undefined
-    : JSON.parse(readFileSync(path, 'utf8'));
-};
-
-const resolveRepository = (payload) =>
-  parseRepository(
-    flagValue('--repo') ??
-      process.env.GITHUB_REPOSITORY ??
-      payload?.repository?.full_name ??
-      runGh([
-        'repo',
-        'view',
-        '--json',
-        'nameWithOwner',
-        '--jq',
-        '.nameWithOwner',
-      ]),
-  );
-
-/** `undefined` when nothing named a pull request — the caller prints usage. */
-const resolvePullNumber = (payload) => {
-  const raw = flagValue('--pr') ?? payload?.pull_request?.number;
-  return raw === undefined ? undefined : parsePullNumber(raw);
-};
-
 /** The head and the threads in one read, so both describe the same commit. */
 const fetchPullRequest = (repository, number) => {
   const [owner, repo] = repository.split('/');
@@ -113,46 +82,12 @@ const fetchPullRequest = (repository, number) => {
   return JSON.parse(raw)?.data?.repository?.pullRequest ?? undefined;
 };
 
-/** The run that decided this status, so the check links to its own reasoning. */
-const runUrl = () => {
-  const { GITHUB_REPOSITORY, GITHUB_RUN_ID, GITHUB_SERVER_URL } = process.env;
-  return GITHUB_RUN_ID === undefined
-    ? undefined
-    : `${GITHUB_SERVER_URL ?? 'https://github.com'}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}`;
-};
-
-const postStatus = ({ description, repository, sha, state }) => {
-  const target = runUrl();
-  runGh([
-    'api',
-    '--method',
-    'POST',
-    `repos/${repository}/statuses/${sha}`,
-    '-f',
-    `state=${state}`,
-    '-f',
-    `context=${STATUS_CONTEXT}`,
-    '-f',
-    `description=${description}`,
-    ...(target === undefined ? [] : ['-f', `target_url=${target}`]),
-  ]);
-};
-
 /** What was read, so the verdict is diagnosable from the run log alone. */
 const describeThreads = (threads) =>
   `${threads.total} review thread(s), ${threads.unresolved.length} unresolved` +
   (threads.unresolved.length === 0
     ? ''
     : `: ${threads.unresolved.map((one) => one.path || '(no path)').join(', ')}`);
-
-/** What is published under this context on `sha` right now, or `undefined`. */
-const fetchPublishedStatus = (repository, sha) =>
-  publishedStatus(
-    JSON.parse(
-      runGh(['api', `repos/${repository}/commits/${sha}/status?per_page=100`]),
-    ),
-    STATUS_CONTEXT,
-  );
 
 const main = () => {
   const payload = readEventPayload();
@@ -187,7 +122,11 @@ const main = () => {
   if (
     process.argv.includes('--if-changed') &&
     !shouldPublishStatus({
-      current: fetchPublishedStatus(repository, headSha),
+      current: fetchPublishedStatus({
+        context: STATUS_CONTEXT,
+        repository,
+        sha: headSha,
+      }),
       next: { description, state },
     })
   ) {
@@ -198,7 +137,13 @@ const main = () => {
     console.log('--dry-run: nothing was posted.');
     return;
   }
-  postStatus({ description, repository, sha: headSha, state });
+  postStatus({
+    context: STATUS_CONTEXT,
+    description,
+    repository,
+    sha: headSha,
+    state,
+  });
   console.log(`Posted to ${repository}/statuses/${headSha}.`);
 };
 

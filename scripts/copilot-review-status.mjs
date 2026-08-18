@@ -34,14 +34,9 @@
  * --if-changed withheld it; 1 = the pull request could not be read, or the
  * status could not be posted.
  */
-import { appendFileSync, readFileSync } from 'node:fs';
+import { appendFileSync } from 'node:fs';
 import process from 'node:process';
 
-import {
-  flagValue,
-  parsePullNumber,
-  parseRepository,
-} from './lib/cli-input.mjs';
 import {
   copilotReviews,
   decideReviewStatus,
@@ -57,23 +52,18 @@ import {
 import { collectSuppressedComments } from './lib/copilot-suppressed.mjs';
 import { errorMessage } from './lib/error-message.mjs';
 import { runGh } from './lib/gh-exec.mjs';
+import { shouldPublishStatus } from './lib/review-gate-reconcile.mjs';
 import {
-  publishedStatus,
-  shouldPublishStatus,
-} from './lib/review-gate-reconcile.mjs';
+  fetchPublishedStatus,
+  postStatus,
+  readEventPayload,
+  resolvePullNumber,
+  resolveRepository,
+} from './lib/review-gate-status.mjs';
 
 const USAGE =
   'usage: node scripts/copilot-review-status.mjs --pr <number> ' +
   '[--repo <owner/name>] [--dry-run] [--if-changed]';
-
-/** The Actions event payload, or `undefined` outside Actions. */
-const readEventPayload = () => {
-  const path = process.env.GITHUB_EVENT_PATH;
-  if (path === undefined || path === '') {
-    return undefined;
-  }
-  return JSON.parse(readFileSync(path, 'utf8'));
-};
 
 /**
  * The review that triggered this run, when one did.
@@ -88,74 +78,9 @@ const triggeringReviewFrom = (payload) =>
     ? payload.review
     : undefined;
 
-const resolveRepository = (payload) =>
-  parseRepository(
-    flagValue('--repo') ??
-      process.env.GITHUB_REPOSITORY ??
-      payload?.repository?.full_name ??
-      runGh([
-        'repo',
-        'view',
-        '--json',
-        'nameWithOwner',
-        '--jq',
-        '.nameWithOwner',
-      ]),
-  );
-
-/**
- * `undefined` when nothing named a pull request — the caller prints usage for
- * that. A value that is present but not a pull request number throws instead,
- * because `#738` would otherwise become `NaN` and reach the API path as
- * `pulls/NaN`, where a bare 404 is all anyone sees.
- */
-const resolvePullNumber = (payload) => {
-  const raw = flagValue('--pr') ?? payload?.pull_request?.number;
-  return raw === undefined ? undefined : parsePullNumber(raw);
-};
-
 /** The pull request as it stands now — not as the event payload described it. */
 const fetchPullRequest = (repository, number) =>
   JSON.parse(runGh(['api', `repos/${repository}/pulls/${number}`]));
-
-/**
- * What is published under this context on `sha` right now, or `undefined`.
- *
- * Read against the head this run resolved, never against an event payload's
- * SHA, so the comparison it feeds is about one commit.
- */
-const fetchPublishedStatus = (repository, sha) =>
-  publishedStatus(
-    JSON.parse(
-      runGh(['api', `repos/${repository}/commits/${sha}/status?per_page=100`]),
-    ),
-    STATUS_CONTEXT,
-  );
-
-/** The run that decided this status, so the check links to its own reasoning. */
-const runUrl = () => {
-  const { GITHUB_REPOSITORY, GITHUB_RUN_ID, GITHUB_SERVER_URL } = process.env;
-  return GITHUB_RUN_ID === undefined
-    ? undefined
-    : `${GITHUB_SERVER_URL ?? 'https://github.com'}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}`;
-};
-
-const postStatus = ({ description, repository, sha, state }) => {
-  const target = runUrl();
-  runGh([
-    'api',
-    '--method',
-    'POST',
-    `repos/${repository}/statuses/${sha}`,
-    '-f',
-    `state=${state}`,
-    '-f',
-    `context=${STATUS_CONTEXT}`,
-    '-f',
-    `description=${description}`,
-    ...(target === undefined ? [] : ['-f', `target_url=${target}`]),
-  ]);
-};
 
 /** What was read, so a `pending` status is diagnosable from the run log alone. */
 const describeReviews = (reviews) =>
@@ -241,7 +166,11 @@ const main = () => {
   if (
     process.argv.includes('--if-changed') &&
     !shouldPublishStatus({
-      current: fetchPublishedStatus(repository, headSha),
+      current: fetchPublishedStatus({
+        context: STATUS_CONTEXT,
+        repository,
+        sha: headSha,
+      }),
       next: { description, state },
     })
   ) {
@@ -252,7 +181,13 @@ const main = () => {
     console.log('--dry-run: nothing was posted.');
     return;
   }
-  postStatus({ description, repository, sha: headSha, state });
+  postStatus({
+    context: STATUS_CONTEXT,
+    description,
+    repository,
+    sha: headSha,
+    state,
+  });
   console.log(`Posted to ${repository}/statuses/${headSha}.`);
 };
 
