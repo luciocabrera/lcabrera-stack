@@ -29,7 +29,7 @@
  */
 import process from 'node:process';
 
-import { flagValue } from './lib/cli-input.mjs';
+import { flagValue, parsePullNumber } from './lib/cli-input.mjs';
 import { errorMessage } from './lib/error-message.mjs';
 import { runGh } from './lib/gh-exec.mjs';
 import { fetchPullRequestThreads } from './lib/pr-threads-api.mjs';
@@ -47,10 +47,13 @@ import {
  */
 const pullForCurrentBranch = () => {
   try {
-    return Number(
-      runGh(['pr', 'view', '--json', 'number', '--jq', '.number']).trim(),
+    return parsePullNumber(
+      runGh(['pr', 'view', '--json', 'number', '--jq', '.number']),
     );
   } catch {
+    // Either gh found no pull request for this branch, or it printed something
+    // that is not one (`null` on a branch with none). Both mean "no PR" here,
+    // and neither may reach the query as `NaN`.
     return undefined;
   }
 };
@@ -79,7 +82,16 @@ const resolveThread = (threadId) => {
 };
 
 const main = () => {
+  // Presence, not value: `flagValue` returns undefined for a trailing flag, so
+  // a bare `--resolve` would otherwise fall through and list threads instead —
+  // silently doing the opposite of what an action-shaped command was asked for.
+  const wantsResolve = process.argv.includes('--resolve');
   const threadId = flagValue('--resolve');
+  if (wantsResolve && threadId === undefined) {
+    console.error(`${USAGE}\n\n--resolve needs a thread id.`);
+    process.exitCode = 1;
+    return;
+  }
   if (threadId !== undefined) {
     if (!resolveThread(threadId)) {
       console.error(`${threadId} is not resolved — GitHub did not confirm it.`);

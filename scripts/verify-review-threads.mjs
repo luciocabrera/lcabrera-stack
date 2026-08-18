@@ -2,11 +2,11 @@
  * Publishes a commit status saying how many review threads still hold a pull
  * request open.
  *
- * Why a status when the ruleset already enforces this: `required_review_thread_
- * resolution` blocks the merge but says so only in the merge box, which nobody
- * is looking at once the checks go green. The agent that opened the pull request
- * has stopped, and the block is discovered whenever a human next opens the
- * queue — 70 minutes, on #780. A status turns "silently blocked" into a red
+ * Why a status when the ruleset already enforces this: the
+ * `required_review_thread_resolution` rule blocks the merge but says so only in
+ * the merge box, which nobody is looking at once the checks go green. The agent
+ * that opened the pull request has stopped, and the block is discovered
+ * whenever a human next opens the queue — 70 minutes, on #780. A status turns "silently blocked" into a red
  * check next to the others, which is the surface an author already reads.
  *
  * Deliberately not a required context. The ruleset is the enforcement; this is
@@ -21,8 +21,10 @@
  *   vp run review-threads:verify -- --pr 780
  *   vp run review-threads:verify -- --pr 780 --dry-run
  *
- * Exit codes: 0 = the status reported (whatever it says); 1 = the pull request
- * could not be read. The gate reports; it does not fail the build.
+ * Exit codes: 0 = the status reported, whatever it says — an unresolved thread
+ * is a `failure` status and still exit 0, because the gate reports rather than
+ * failing the build. 1 = this run could not do its job: the pull request or its
+ * head was unreadable, or publishing the status threw.
  *
  * Governed by .claude/rules/scripts.md.
  */
