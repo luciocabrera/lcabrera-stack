@@ -200,24 +200,41 @@ one cell per rendered column, and therefore the same roving tab stop
 
 ## Grouped rows
 
-While grouping is applied the grid injects a **hierarchy column**: its own, at
-the head of the left-pinned group, labelled with the group keys in nesting
-order, and absent from the column-order drawer because there is nothing a user
-can do to it. It is a derivation and never state, so it reaches neither the
-cookie the column layout persists through nor the list the drawer offers.
+While grouping is applied the grid adds **no column of its own**. Each group key
+is hoisted to the head of the order and of the left pin, in key order, and forced
+visible ([ADR-080](../../../../../docs/decisions/ADR-080-a-group-key-renders-in-its-own-column.md)).
+That is a derivation and never state, so it reaches neither the cookie the column
+layout persists through nor the list the drawer offers — which is what makes
+ungrouping free.
 
-A group row renders its label there, indented by depth, and every other column
-renders that group's selected aggregate under its own header — an em dash where
-none was selected. A data column that is currently a group key renders **blank**
-on its detail rows: the value is stated once, by the group row above them.
+A group row renders **each key's value in that key's own column**, and every
+other column renders that group's selected aggregate under its own header — an em
+dash where none was selected. **Depth is read from which key columns are filled**,
+not from a pixel offset: a rollup fills a prefix, a cube fills an arbitrary
+subset, and neither needs the other's reading. A key column renders **blank** on
+its detail rows: the value is stated once, by the group row directly above them,
+in the same column.
 
-**`path` holds only the keys a row's grouping set grouped by, so its length is
-the row's depth.** Under `rollup` a subtotal carries one entry fewer than the
-rows it totals, and **the grand total carries none at all** — anything deriving
-depth or ancestry from `path` has to treat the empty path as the root rather
-than as a malformed summary. `resolveGroupTreeNodes` reads it as the **root**:
-the grand total is a sibling of the top-level groups, not their parent — making
-it their ancestor would put the whole grid inside one collapsible subtree.
+An ancestor that repeats the row above is carried rather than restated — blank on
+screen, still announced — and refills at the top of the rendered window, where
+there is no row above to have stated it.
+
+**`path` holds only the keys a row's grouping set grouped by**, so under
+`rollup` a subtotal carries one entry fewer than the rows it totals, and **the
+grand total carries none at all** — anything deriving ancestry from `path` has
+to treat the empty path as the root rather than as a malformed summary.
+`resolveGroupTreeNodes` reads it as the **root**: the grand total is a sibling
+of the top-level groups, not their parent — making it their ancestor would put
+the whole grid inside one collapsible subtree.
+
+**`path.length` is not a depth, and the rendering never treats it as one.** It
+coincides with depth only while every grouping set is a **prefix** of the key
+list, which is true of `flat` and `rollup` and false of `cube`, whose sets are
+arbitrary subsets: a row carrying the second key and not the first is the child
+of nothing. The tree derivation may rely on the prefix property, because a tree
+is what it builds and only the prefix modes produce one. The **cell** rendering
+may not, which is why it reads a level from which key column is filled — the one
+reading that serves a tree and a lattice alike (ADR-080).
 
 ## Persistence
 

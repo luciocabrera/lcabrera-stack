@@ -63,6 +63,7 @@ describe('createRenderTableBodyCell', () => {
         <tbody>
           <tr>
             {renderBodyCell({
+              carriedGroupKeys: new Set<string>(),
               col,
               row: { amount: 12 },
               rowIndex: ROW_INDEX,
@@ -94,6 +95,7 @@ describe('createRenderTableBodyCell', () => {
         <tbody>
           <tr>
             {renderBodyCell({
+              carriedGroupKeys: new Set<string>(),
               col,
               row: { name: 'Z' },
               rowIndex: ROW_INDEX,
@@ -132,6 +134,7 @@ describe('createRenderTableBodyCell', () => {
         <tbody>
           <tr>
             {renderBodyCell({
+              carriedGroupKeys: new Set<string>(),
               col,
               row: { name: 'A' },
               rowIndex: ROW_INDEX,

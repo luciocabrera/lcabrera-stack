@@ -224,9 +224,6 @@ TABLE_AGGREGATE_FNS [const] readonly TableAggregateFn[]
 TABLE_AGGREGATE_LABELS [const] Record<TableAggregateFn, string>
 TABLE_GROUP_FILTERED_AGGREGATE_LABEL [const] "Filtered — this total covers the filtered rows only"
 TABLE_GROUP_GRAND_TOTAL_LABEL [const] "Grand total"
-TABLE_GROUP_HIERARCHY_COLUMN_KEY [const] "tableGroupHierarchy"
-TABLE_GROUP_HIERARCHY_INDENT_PX [const] 14
-TABLE_GROUP_HIERARCHY_MIN_WIDTH [const] 220
 TABLE_GROUP_KEY_REFUSAL_LABELS [const] Record<TableGroupKeyRefusalReason, string>
 TABLE_GROUP_NO_AGGREGATE_GLYPH [const] "—"
 TABLE_GROUP_NO_AGGREGATE_LABEL [const] "No aggregate"

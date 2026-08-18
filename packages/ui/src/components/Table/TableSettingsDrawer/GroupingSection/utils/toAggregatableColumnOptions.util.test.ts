@@ -50,7 +50,7 @@ const capabilities: Readonly<Record<string, TableColumnGroupingCapability>> = {
 describe('toAggregatableColumnOptions', () => {
   it('offers the columns the catalogue has aggregates for', () => {
     expect(
-      toAggregatableColumnOptions({ capabilities, columns }),
+      toAggregatableColumnOptions({ capabilities, columns, groupingKeys: [] }),
     ).toStrictEqual([
       { label: 'Status', value: 'order_status' },
       { label: 'Total', value: 'total_amount' },
@@ -61,24 +61,44 @@ describe('toAggregatableColumnOptions', () => {
     // The two gates are independent: a high-cardinality numeric is a bad group
     // key and a perfectly good thing to sum.
     expect(
-      toAggregatableColumnOptions({ capabilities, columns }).map(
-        ({ value }) => value,
-      ),
+      toAggregatableColumnOptions({
+        capabilities,
+        columns,
+        groupingKeys: [],
+      }).map(({ value }) => value),
     ).toContain('total_amount');
   });
 
   it('omits a column the catalogue offers nothing for', () => {
     expect(
-      toAggregatableColumnOptions({ capabilities, columns }).map(
-        ({ value }) => value,
-      ),
+      toAggregatableColumnOptions({
+        capabilities,
+        columns,
+        groupingKeys: [],
+      }).map(({ value }) => value),
     ).not.toContain('doc');
   });
 
   it('omits every column when no capability was resolved', () => {
     // Absent means "nothing is legal here", never "everything is".
     expect(
-      toAggregatableColumnOptions({ capabilities: {}, columns }),
+      toAggregatableColumnOptions({
+        capabilities: {},
+        columns,
+        groupingKeys: [],
+      }),
     ).toStrictEqual([]);
+  });
+
+  it('does not offer a column that is already a group key', () => {
+    // Under one column per key that column renders its key's value, so an
+    // aggregate selected on it could never be shown (ADR-080).
+    expect(
+      toAggregatableColumnOptions({
+        capabilities,
+        columns,
+        groupingKeys: ['order_status'],
+      }).map(({ value }) => value),
+    ).toStrictEqual(['total_amount']);
   });
 });

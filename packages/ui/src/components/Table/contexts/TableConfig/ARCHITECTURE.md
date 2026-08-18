@@ -105,7 +105,7 @@ TableConfig/
 │   │   ├── utils/toggleTableGroupKey.util.ts        → Pure: append a key at the tail, or remove it
 │   │   ├── utils/setTableColumnAggregate.util.ts    → Pure: set or clear one column's aggregate
 │   │   ├── utils/setTableGroupingMode.util.ts       → Pure: set which grouping sets the read emits, keys and aggregates untouched (the drawer's `useSetGroupingMode` is its only caller — the mode has no apply-immediately surface)
-│   │   ├── utils/resolveGroupingColumnsPatch.util.ts → Pure: the derived columns-store patch a grouping change produces — the hierarchy column follows the keys (ADR-065)
+│   │   ├── utils/resolveGroupingColumnsPatch.util.ts → Pure: the derived columns-store patch a grouping change produces — the key hoist follows the keys (ADR-080)
 │   │   ├── useSetTableGrouping.hook.ts      → **Internal**: the single write path, taking a reducer so the store is read once
 │   │   ├── useToggleTableGroupKey.hook.ts   → Add/remove one key (header menu)
 │   │   ├── useSetTableColumnAggregate.hook.ts → Apply or clear one column's aggregate
@@ -211,12 +211,14 @@ TableGroupingState = {
 };
 ```
 
-**A grouping change writes the columns store too.** The hierarchy column a
-grouped grid renders its tree in is a _derivation_ of this state, not a member
-of it (ADR-065), so `useSetTableGrouping` re-derives the columns store's view
-slices in the same interaction — from one snapshot of each store. What it does
-not touch is `columns`, `columnOrder` or `columnPinning`: the synthetic column
-must reach neither the persisted layout nor the settings drawer.
+**A grouping change writes the columns store too.** The layout a grouped grid
+paints — the group keys hoisted to the head of the order and the left pin, and
+forced visible — is a _derivation_ of this state, not a member of it (ADR-080),
+so `useSetTableGrouping` re-derives the columns store's view slices in the same
+interaction, from one snapshot of each store. What it does not touch is
+`columns`, `columnOrder`, `columnPinning` or `columnVisibility`: the hoist must
+reach neither the persisted layout nor the settings drawer, which is what lets
+ungrouping restore the user's layout with no snapshot to keep.
 
 ## Expansion State Shape
 

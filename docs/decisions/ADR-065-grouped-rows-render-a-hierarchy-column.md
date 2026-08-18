@@ -630,8 +630,15 @@ claims nothing had checked.
 - [ADR-059](./ADR-059-aggregation-is-builder-generated.md) — what a grouped read returns, including that it returns whole
 - [ADR-058](./ADR-058-grouping-legality-by-analytical-role.md) — the aggregate vocabulary whose values fill the non-label cells
 - `packages/ui/src/components/Table/TableGroupHeaderRow/ARCHITECTURE.md` — the banner as built, and why it composed `TableRow`. **Deleted by #570**, which is what this decision asked for; unlinked here rather than repointed, because nothing replaces a document about a shape that no longer exists. What took its place is
-  [`TableGroupLabel/ARCHITECTURE.md`](../../packages/ui/src/components/Table/TableGroupLabel/ARCHITECTURE.md) (the hierarchy cell) and
+  `packages/ui/src/components/Table/TableGroupLabel/ARCHITECTURE.md` (the
+  hierarchy cell) and
   [`TableGroupAggregate/ARCHITECTURE.md`](../../packages/ui/src/components/Table/TableGroupAggregate/ARCHITECTURE.md) (every other cell)
+- `packages/ui/src/components/Table/TableGroupLabel/ARCHITECTURE.md` — the
+  hierarchy cell as built. **Deleted by #793**, which is what ADR-080 asked for;
+  unlinked here for the same reason the banner's document is, and replaced by
+  [`TableGroupKeyCell/ARCHITECTURE.md`](../../packages/ui/src/components/Table/TableGroupKeyCell/ARCHITECTURE.md),
+  which renders a key's value in that key's own column rather than a label in a
+  column of the grid's own
 - [`packages/ui/src/components/Table/TableRow/ARCHITECTURE.md`](../../packages/ui/src/components/Table/TableRow/ARCHITECTURE.md) — the height invariant and the `minHeight`/`maxHeight` clamp
 - [`docs/agents/planning/table-row-grouping-plan.md`](../agents/planning/table-row-grouping-plan.md) — the grouping programme this slices
 - [`packages/server/src/db/group-query-builder/expand-grouping-sets.util.ts`](../../packages/server/src/db/group-query-builder/expand-grouping-sets.util.ts) — the grouping sets each mode emits, and why cube is not one of them

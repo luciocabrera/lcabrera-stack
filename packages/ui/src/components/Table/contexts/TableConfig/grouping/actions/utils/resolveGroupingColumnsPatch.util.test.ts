@@ -6,7 +6,6 @@ import type {
 } from '#ui/components/Table/Table.types';
 
 import { getInitialColumnsState } from '#ui/components/Table/contexts/TableConfig/utils';
-import { TABLE_GROUP_HIERARCHY_COLUMN_KEY } from '#ui/components/Table/Table.constants';
 
 import { resolveGroupingColumnsPatch } from './resolveGroupingColumnsPatch.util';
 
@@ -15,10 +14,15 @@ type Row = Record<string, unknown>;
 const columns: TableColumn<Row>[] = [
   { key: 'order_status', label: 'Status' },
   { key: 'total_amount', label: 'Amount' },
+  { key: 'ship_country', label: 'Country' },
 ];
 
 const columnsState = getInitialColumnsState<Row>({
-  columnPinning: { left: ['order_status'], right: [] },
+  // `total_amount` pinned left and ordered ahead of the key on purpose: the
+  // hoist has to beat both, which is what makes "no column can sit between two
+  // group keys" a property rather than a coincidence (ADR-080).
+  columnOrder: ['total_amount', 'order_status', 'ship_country'],
+  columnPinning: { left: ['total_amount'], right: [] },
   columns,
 }) as TableColumnsState<Row>;
 
@@ -26,44 +30,65 @@ const patch = (groupingKeys: readonly string[]) =>
   resolveGroupingColumnsPatch<Row>({ columnsState, groupingKeys });
 
 describe('resolveGroupingColumnsPatch', () => {
-  it('adds the hierarchy column to the painted partition when grouping goes on', () => {
+  it('hoists the group keys to the head of the painted grid, in key order', () => {
+    // Ahead of `total_amount`, which the user both ordered first and pinned
+    // left. The keys land at indices 0…N-1 whatever the saved layout says.
     expect(
-      patch(['order_status']).pinnedColumnPartition.leftPinnedCols.map(
+      patch(['ship_country', 'order_status']).effectiveColumns.map(
         (col) => col.key,
       ),
-    ).toStrictEqual([TABLE_GROUP_HIERARCHY_COLUMN_KEY, 'order_status']);
+    ).toStrictEqual(['ship_country', 'order_status', 'total_amount']);
   });
 
-  it('takes it away again when grouping goes off', () => {
+  it('adds no column of its own', () => {
+    // The synthetic hierarchy column is retired: a grouped row paints exactly
+    // the columns the consumer declared, one cell fewer than before (ADR-080).
+    expect(patch(['order_status']).effectiveColumns).toHaveLength(
+      columns.length,
+    );
+  });
+
+  it('leaves no column between two group keys', () => {
+    const keys = patch(['ship_country', 'order_status'])
+      .effectiveColumns.map((col) => String(col.key))
+      .filter((key) => key !== 'total_amount');
+
+    expect(keys).toStrictEqual(['ship_country', 'order_status']);
+  });
+
+  it('restores the user layout exactly when grouping goes off', () => {
     expect(
       patch([]).pinnedColumnPartition.leftPinnedCols.map((col) => col.key),
-    ).toStrictEqual(['order_status']);
+    ).toStrictEqual(['total_amount']);
+    expect(patch([]).effectiveColumns.map((col) => col.key)).toStrictEqual([
+      'total_amount',
+      'order_status',
+      'ship_country',
+    ]);
   });
 
-  it('gives it the label the grouping states, so the header names the keys', () => {
-    expect(
-      patch(['order_status']).normalizedColumns[
-        TABLE_GROUP_HIERARCHY_COLUMN_KEY
-      ]?.label,
-    ).toBe('Status');
-  });
-
-  it('shifts the consumer-pinned columns right by its width', () => {
-    // Sticky offsets are a running sum over the left-pinned columns, so a
-    // hierarchy column that did not take part would leave the columns behind
-    // it overlapping (ADR-065).
-    const grouped = patch(['order_status']);
+  it('moves a key out of the right pin rather than duplicating it', () => {
+    const pinnedRight = getInitialColumnsState<Row>({
+      columnPinning: { left: [], right: ['order_status'] },
+      columns,
+    }) as TableColumnsState<Row>;
+    const grouped = resolveGroupingColumnsPatch<Row>({
+      columnsState: pinnedRight,
+      groupingKeys: ['order_status'],
+    });
 
     expect(
-      grouped.pinnedColumnOffsets[TABLE_GROUP_HIERARCHY_COLUMN_KEY]?.offset,
-    ).toBe(0);
-    expect(grouped.pinnedColumnOffsets.order_status?.offset).toBeGreaterThan(0);
+      grouped.effectiveColumns.filter((col) => col.key === 'order_status'),
+    ).toHaveLength(1);
+    expect(
+      grouped.pinnedColumnPartition.rightPinnedCols.map((col) => col.key),
+    ).not.toContain('order_status');
   });
 
   it('patches only the derived slices, never the state the user owns', () => {
-    // The hierarchy column is a rendering of the grouping configuration, so it
+    // The grouped layout is a rendering of the grouping configuration, so it
     // must not reach the cookie the layout persists through or the list the
-    // settings drawer offers.
+    // settings drawer offers — which is what makes ungrouping free.
     expect(
       Object.keys(patch(['order_status'])).toSorted((a, b) =>
         a.localeCompare(b),

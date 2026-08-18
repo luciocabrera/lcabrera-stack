@@ -15,6 +15,7 @@ import { VirtualSelect } from '#ui/components/VirtualSelect';
 import type { AddAggregateSectionProps } from './AddAggregateSection.types';
 
 import { useSetColumnAggregate } from '../../TableDrawerContext/actions';
+import { useGetGroupingKeys } from '../../TableDrawerContext/selectors';
 import { toAggregatableColumnOptions } from '../utils';
 import { styles } from './AddAggregateSection.stylex';
 
@@ -37,12 +38,17 @@ export const AddAggregateSection = ({
 }: AddAggregateSectionProps) => {
   const columns = useGetColumns();
   const capabilities = useGetTableGroupingCapabilities();
+  const groupingKeys = useGetGroupingKeys();
   const setColumnAggregate = useSetColumnAggregate();
 
   const [selectedColumn, setSelectedColumn] = useState('');
   const [selectedFn, setSelectedFn] = useState('');
 
-  const columnOptions = toAggregatableColumnOptions({ capabilities, columns });
+  const columnOptions = toAggregatableColumnOptions({
+    capabilities,
+    columns,
+    groupingKeys,
+  });
   const fnOptions = orderLegalAggregates({
     legal: capabilities[selectedColumn]?.aggregates ?? [],
   }).map((fn) => ({ label: TABLE_AGGREGATE_LABELS[fn], value: fn }));

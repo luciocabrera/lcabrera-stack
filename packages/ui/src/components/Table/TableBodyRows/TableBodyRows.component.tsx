@@ -10,6 +10,8 @@ import { createRenderTableBodyCell } from '#ui/components/Table/TableBody/utils/
 import { renderTableBodyPinnedGroup } from '#ui/components/Table/TableBody/utils/renderTableBodyPinnedGroup.util';
 import { TableRow } from '#ui/components/Table/TableRow';
 import { getTableGroupRowSummary } from '#ui/components/Table/utils';
+import { resolveCarriedGroupKeys } from '#ui/components/Table/utils/resolveCarriedGroupKeys.util';
+import { resolveDeclaredGroupingKeys } from '#ui/components/Table/utils/resolveDeclaredGroupingKeys.util';
 import { resolveBodyAriaRowIndex } from '#ui/components/Table/utils/resolveGridRowIndexing.util';
 
 import type { TableBodyRowsProps } from './TableBodyRows.types';
@@ -54,7 +56,15 @@ export const TableBodyRows = <TData extends Record<string, unknown>>({
     useGetPinnedColumnPartition();
   const columnSizing = useGetColumnSizing<TData>();
   const pinnedOffsets = useGetPinnedColumnOffsets();
-  const groupingKeys = useGetTableGroupingKeys();
+  const appliedGroupingKeys = useGetTableGroupingKeys();
+
+  // The same skip `withGroupedColumnLayout` applies to the hoist. A key naming
+  // no declared column is painted nowhere, so treating it as a key here would
+  // look for the grand total in a column that does not exist.
+  const groupingKeys = resolveDeclaredGroupingKeys<TData>({
+    columns,
+    groupingKeys: appliedGroupingKeys,
+  });
 
   const visibleRows = rows.slice(startIndex, endIndex);
 
@@ -74,7 +84,16 @@ export const TableBodyRows = <TData extends Record<string, unknown>>({
         const treeProps = resolveTreeRowAriaProps(rowMeta?.[rowIndex]);
         const groupSummary = getTableGroupRowSummary(row);
         const isGroupRow = groupSummary !== undefined;
+        // Read off `rows`, the loaded array, never off `visibleRows` — a level
+        // carried from a row scrolled out of the window would be stated
+        // nowhere, so the window's first row refills (ADR-080).
+        const carriedGroupKeys = resolveCarriedGroupKeys({
+          isWindowFirst: index === 0,
+          previousRow: rows[rowIndex - 1],
+          summary: groupSummary,
+        });
         const cellArgs = {
+          carriedGroupKeys,
           disclosure: rowMeta?.[rowIndex],
           groupSummary,
           renderCell: renderBodyCell,

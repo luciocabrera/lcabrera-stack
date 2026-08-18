@@ -111,7 +111,7 @@ on **one line** for the same reason: `TableRow` clamps `minHeight`/`maxHeight`
 alongside `height`, so a wrapped label is not a taller row, it is a clipped one.
 
 **A group row's cells are ordinary cells**, built by the same descriptor
-pipeline: the hierarchy column holds `TableGroupLabel`, the actions column holds
+pipeline: a group-key column holds `TableGroupKeyCell`, the actions column holds
 nothing, and every other column holds `TableGroupAggregate` — that group's
 selected aggregate, or an em dash saying none was selected. Because they are
 real `TableBodyCell`s they carry `role="gridcell"` and the roving tab stop, so

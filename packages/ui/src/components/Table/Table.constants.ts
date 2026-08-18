@@ -127,32 +127,6 @@ export const TABLE_AGGREGATE_FNS: readonly TableAggregateFn[] = [
 ];
 
 /**
- * The grid-owned column a grouped table renders its hierarchy in (ADR-065).
- *
- * Not one of the consumer's columns and never in the columns store: it is
- * injected into the *derived* view state while grouping is on, so it paints, is
- * focusable and takes part in the sticky-offset arithmetic without ever
- * reaching the cookie the user's column layout persists through.
- *
- * A consumer column keyed the same would be shadowed by it. The name is
- * deliberately one nobody would give a database column, for the same reason
- * `TABLE_GROUP_ROW_FIELD` is.
- */
-export const TABLE_GROUP_HIERARCHY_COLUMN_KEY = 'tableGroupHierarchy';
-
-/**
- * Pixels one level of group nesting indents the hierarchy label by.
- *
- * Indentation narrows the text rather than the row: the label is on one line
- * and ellipsizes, because `TableRow` clamps `minHeight`/`maxHeight` to
- * `rowHeight` and a wrapped label is not a taller row, it is a clipped one.
- */
-export const TABLE_GROUP_HIERARCHY_INDENT_PX = 14;
-
-/** Default width of the hierarchy column — wide enough for a nested label. */
-export const TABLE_GROUP_HIERARCHY_MIN_WIDTH = 220;
-
-/**
  * What a group row's cell shows for a column no aggregate was selected on.
  *
  * A dash, not blank and not zero (ADR-065): blank already means "this row has

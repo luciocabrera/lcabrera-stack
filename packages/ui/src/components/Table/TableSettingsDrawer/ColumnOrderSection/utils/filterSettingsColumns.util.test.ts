@@ -2,8 +2,6 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import type { TableColumn } from '#ui/components/Table/Table.types';
 
-import { createGroupHierarchyColumn } from '#ui/components/Table/utils/createGroupHierarchyColumn.util';
-
 import { filterSettingsColumns } from './filterSettingsColumns.util';
 
 type Row = { actions: string; id: string; name: string };
@@ -42,20 +40,15 @@ describe('filterSettingsColumns', () => {
     expect(result.map((c) => c.key)).toEqual(['actions']);
   });
 
-  it('drops the grid-owned hierarchy column, static though it is', () => {
-    // Spelled from the column the grid actually injects rather than by hand:
-    // it is static, so the `isStatic` arm above would list it — locked in
-    // place, but listed — and there is nothing a user can do to it (ADR-065).
-    const hierarchyColumn = createGroupHierarchyColumn<Row>({
-      columns,
-      groupingKeys: ['name'],
-    });
-
-    expect(
-      filterSettingsColumns<Row>([hierarchyColumn, ...columns]).map(
-        (col) => col.key,
-      ),
-    ).toStrictEqual(['id', 'name']);
+  it('keeps a group key listed rather than filtering it out', () => {
+    // The grid no longer injects a synthetic column to exclude, and a group key
+    // is one of the consumer's own columns (ADR-080). It stays listed and is
+    // locked in its row by `createDraggableItems` — filtering it out here would
+    // take the row away in the one configuration where a user most wants to see
+    // which columns the grouping is holding.
+    expect(filterSettingsColumns<Row>(columns).map((col) => col.key)).toContain(
+      'id',
+    );
   });
 
   it('returns an empty array for empty input', () => {

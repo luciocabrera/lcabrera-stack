@@ -8,6 +8,8 @@ type ToAggregatableColumnOptionsArgs<TData extends Record<string, unknown>> = {
     Record<string, TableColumnGroupingCapability>
   >;
   readonly columns: readonly TableColumn<TData>[];
+  /** The keys currently staged in the drawer draft. */
+  readonly groupingKeys: readonly string[];
 };
 
 /**
@@ -21,16 +23,28 @@ type ToAggregatableColumnOptionsArgs<TData extends Record<string, unknown>> = {
  *
  * Iterating the columns rather than the capability map is what keeps the list
  * in the table's own display order and gives each option a human label.
+ *
+ * **A column that is already a group key is not offered** (ADR-080). Under one
+ * column per key that column renders its key's value, so an aggregate selected
+ * on it could never be shown. The picker is not the rule, though — the grouping
+ * configuration is URL state, so a request can always name one column as both,
+ * and `resolveGroupCellChildren` is where the key actually wins. This keeps the
+ * menu from offering a choice the rendering would then drop.
  */
 export const toAggregatableColumnOptions = <
   TData extends Record<string, unknown>,
 >({
   capabilities,
   columns,
-}: ToAggregatableColumnOptionsArgs<TData>) =>
-  columns
+  groupingKeys,
+}: ToAggregatableColumnOptionsArgs<TData>) => {
+  const groupKeys = new Set(groupingKeys);
+
+  return columns
     .filter(
       (column) =>
+        !groupKeys.has(String(column.key)) &&
         (capabilities[String(column.key)]?.aggregates.length ?? 0) > 0,
     )
     .map((column) => ({ label: column.label, value: String(column.key) }));
+};

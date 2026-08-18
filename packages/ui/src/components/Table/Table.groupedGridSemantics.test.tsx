@@ -37,11 +37,16 @@ type TestRow = Record<string, unknown>;
 const ROW_HEIGHT = 40;
 const CONTAINER_HEIGHT = 400;
 
-const GROUPING_KEYS = ['city'];
+// Two keys, both declared columns. Under reading B a level renders in its own
+// column, so a nested path whose second level names no group key would have
+// nowhere to go — the fixture has to be a tree the configuration agrees with
+// (ADR-080).
+const GROUPING_KEYS = ['city', 'district'];
 
 const columns: TableColumn<TestRow>[] = [
   { isPrimaryKey: true, key: 'id', label: 'Id' },
   { key: 'city', label: 'City' },
+  { key: 'district', label: 'District' },
 ];
 
 const rows: readonly TestRow[] = [
@@ -53,8 +58,8 @@ const rows: readonly TestRow[] = [
       path: [{ columnKey: 'city', label: 'Paris', value: 'Paris' }],
     },
   },
-  { city: 'Paris', id: 1 },
-  { city: 'Paris', id: 2 },
+  { city: 'Paris', district: 'Marais', id: 1 },
+  { city: 'Paris', district: 'Marais', id: 2 },
   {
     [TABLE_GROUP_ROW_FIELD]: {
       aggregates: [],
@@ -70,12 +75,12 @@ const rows: readonly TestRow[] = [
       isSubtotal: false,
       path: [
         { columnKey: 'city', label: 'Berlin', value: 'Berlin' },
-        { columnKey: 'id', label: '3', value: 3 },
+        { columnKey: 'district', label: 'Mitte', value: 'Mitte' },
       ],
     },
   },
-  { city: 'Berlin', id: 3 },
-  { city: 'Berlin', id: 4 },
+  { city: 'Berlin', district: 'Mitte', id: 3 },
+  { city: 'Berlin', district: 'Mitte', id: 4 },
 ];
 
 /**
@@ -251,18 +256,35 @@ describe('a grouped table under the grid ARIA model', () => {
     ]);
   });
 
-  it('renders the innermost level of a group in the hierarchy column', () => {
-    // The outer levels are not repeated on the row: the group above it already
-    // states them, which is the whole argument for a hierarchy column over a
-    // banner that reprints the path (ADR-065). `Berlin` is the outer level of
-    // the second group and is deliberately absent from its own label.
+  it("renders a group's key value in that key's own column", () => {
+    // No synthetic column and no indentation: the value sits under the header
+    // of the column it is a value of, and depth is read from which key columns
+    // are filled (ADR-080).
     render(<Harness />);
 
-    const labels = screen
-      .getAllByTestId('table-group-label')
-      .map((label) => label.textContent);
+    const cells = screen
+      .getAllByTestId('table-group-key-cell')
+      .map((cell) => cell.textContent);
 
-    expect(labels).toStrictEqual(['Paris', 'Berlin', '3']);
+    // `Berlin`'s nested group carries its city from the row above rather than
+    // restating it, and draws its own innermost level — so the drawn cells are
+    // the three levels the reader has not already been told.
+    expect(cells).toStrictEqual(['Paris', 'Berlin', 'Mitte']);
+    expect(
+      screen
+        .getAllByTestId('table-group-key-carried')
+        .map((cell) => cell.textContent),
+    ).toStrictEqual(['Berlin']);
+
+    // …and that column is the group key's own, not one the grid invented.
+    const groupRow = screen.getAllByTestId('table-group-header-row')[0];
+    const filled = [
+      ...(groupRow?.querySelectorAll('[role="gridcell"]') ?? []),
+    ].findIndex((cell) =>
+      cell.querySelector('[data-testid="table-group-key-cell"]'),
+    );
+
+    expect(filled).toBe(0);
   });
 
   it('renders a group aggregate under its own column', () => {
@@ -274,8 +296,10 @@ describe('a grouped table under the grid ARIA model', () => {
   it('gives every row the same number of gridcells, groups included', () => {
     // The assertion this replaces pinned groups at contributing *none*, which
     // is the shape ADR-065 withdrew: a banner had one presentational cell, so a
-    // group row was not addressable by column at all. Seven rows across three
-    // rendered columns — the two data columns plus the grid's hierarchy column.
+    // group row was not addressable by column at all. Seven rows across the two
+    // declared columns — and no third, because the synthetic hierarchy column
+    // is retired: a grouped row paints exactly what the consumer declared, one
+    // cell fewer per row than before (ADR-080).
     render(<Harness />);
 
     expect(getGrid().querySelectorAll('[role="gridcell"]')).toHaveLength(21);
@@ -323,28 +347,40 @@ describe('a grouped table under the grid ARIA model', () => {
     const focused = document.activeElement;
 
     // Still inside the same group row, one column along: the row is addressable
-    // by column like every other row.
+    // by column like every other row. Column 1 is now the second group key,
+    // which this row does not carry a level for — an ordinary empty cell, and
+    // still its own tab stop.
     expect(focused?.closest('tr')?.dataset.testid).toBe(
       'table-group-header-row',
     );
-    expect(focused?.textContent).toContain('—');
+    expect(focused?.getAttribute('role')).toBe('gridcell');
+    expect(focused?.previousElementSibling?.textContent).toBe('Paris');
+
+    // One more along reaches the measure column, where the em dash states that
+    // no aggregate was selected.
+    await pressKey('ArrowRight');
+
+    const measure = document.activeElement;
+
+    expect(measure?.textContent).toContain('—');
   });
 
   it('leaves the grouped-by column blank on a detail row', () => {
-    // `city` is the group key, so the group row above states it and the detail
-    // rows below do not repeat it. The hierarchy cell of a detail row is empty
-    // for the same reason: its values are already in their own columns.
+    // `city` is the group key, so the group row above states it — in this very
+    // column — and the detail rows below leave it blank. Under one column per
+    // key that blank sits directly beneath the value explaining it, which is
+    // what a drilled group reads as with no rule of its own (ADR-080).
     render(<Harness />);
 
     const detailRow = screen.getAllByRole('row')[1];
     const cells = [...(detailRow?.querySelectorAll('[role="gridcell"]') ?? [])];
 
-    // Hierarchy, Id, City — the last is the grouped-by column.
-    expect(cells.map((cell) => cell.textContent)).toStrictEqual(['', '1', '']);
+    // City, District, Id — both keys are hoisted to the head and blank here.
+    expect(cells.map((cell) => cell.textContent)).toStrictEqual(['', '', '1']);
 
     // Empty means *empty*, not an empty `<span title="">`. The descriptor hands
     // these cells a fragment rather than `undefined` precisely so the cell
     // holds no element at all — text content alone cannot tell the two apart.
-    expect(cells.map((cell) => cell.children.length)).toStrictEqual([0, 1, 0]);
+    expect(cells.map((cell) => cell.children.length)).toStrictEqual([0, 0, 1]);
   });
 });

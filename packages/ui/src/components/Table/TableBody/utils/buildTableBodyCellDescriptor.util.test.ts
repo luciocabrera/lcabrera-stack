@@ -30,6 +30,7 @@ describe('buildTableBodyCellDescriptor', () => {
       minWidth: 120,
     };
     const descriptor = buildTableBodyCellDescriptor({
+      carriedGroupKeys: new Set<string>(),
       col,
       columnSizing: {} as ColumnSizingState<Row>,
       groupingKeys: [],
@@ -64,6 +65,7 @@ describe('buildTableBodyCellDescriptor', () => {
       render: () => 'custom',
     };
     const descriptor = buildTableBodyCellDescriptor({
+      carriedGroupKeys: new Set<string>(),
       col,
       columnSizing: { name: 180 } as ColumnSizingState<Row>,
       groupingKeys: [],
@@ -102,6 +104,7 @@ describe('buildTableBodyCellDescriptor', () => {
       side: 'left',
     };
     const descriptor = buildTableBodyCellDescriptor({
+      carriedGroupKeys: new Set<string>(),
       col,
       columnSizing: {} as ColumnSizingState<Row>,
       groupingKeys: [],

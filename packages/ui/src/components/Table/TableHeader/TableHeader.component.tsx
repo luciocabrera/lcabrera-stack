@@ -5,7 +5,6 @@ import {
   useGetTableIsLoading,
   useGetTableIsLoadingMore,
 } from '#ui/components/Table/contexts/TableData/data/selectors';
-import { isTableGroupHierarchyColumn } from '#ui/components/Table/utils/isTableGroupHierarchyColumn.util';
 import { HEADER_ARIA_ROW_INDEX } from '#ui/components/Table/utils/resolveGridRowIndexing.util';
 
 import type { TableHeaderProps } from './TableHeader.types';
@@ -16,13 +15,15 @@ import { tableHeaderStyles } from './TableHeader.stylex';
 
 /**
  * "Manage Column" opens the per-column settings drawer — filter and width — so
- * it is offered for a column that has both. The hierarchy column is the grid's
- * own (ADR-065): it is not filterable, its width is not the user's, and its
- * header exists to name the group keys, so the entry would open a drawer with
- * nothing in it to change.
+ * it is offered for a column that has both.
+ *
+ * Every painted column is now one of the consumer's own, including the group
+ * keys (ADR-080), and a key keeps its filter and its width while grouped: the
+ * hoist fixes where it sits, not what it is. So there is no column here whose
+ * drawer would open with nothing in it to change.
  */
 const hasHeaderSettings = (col: { isHeaderHidden?: boolean; key: unknown }) =>
-  !col.isHeaderHidden && !isTableGroupHierarchyColumn(col.key);
+  !col.isHeaderHidden;
 
 export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
   customStylex,

@@ -289,16 +289,19 @@ const readPixelValues = (element: Element) =>
 const getGroupRows = () => screen.getAllByTestId('table-group-header-row');
 
 /**
- * The hierarchy label of every rendered group row, in order.
+ * The drawn key value of every rendered group row, in order.
  *
- * Queried in place of the bare city text these assertions used to read. Since
- * ADR-065 the city column is a **group key**, so it blanks on the detail rows
- * and the only place the value appears is the group row's own label — a
+ * Queried in place of the bare city text these assertions used to read. The
+ * city column is a **group key**, so it blanks on the detail rows and the only
+ * place the value appears is the group row's own cell in that column — a
  * `getAllByText('Paris')` would now count one element whatever the collapse
  * did, and could not fail.
+ *
+ * A *carried* cell is deliberately not counted: it renders no visible value, so
+ * including it would report a level the reader cannot see (ADR-080).
  */
 const getGroupLabels = () =>
-  screen.getAllByTestId('table-group-label').map((label) => label.textContent);
+  screen.getAllByTestId('table-group-key-cell').map((cell) => cell.textContent);
 
 /**
  * The `Id` cell of every rendered **detail** row, in order. `id` is not a group

@@ -10,7 +10,7 @@ import type {
 import { getEffectiveColumns } from './getEffectiveColumns.util';
 import { getPinnedColumnOffsets } from './getPinnedColumnOffsets.util';
 import { splitColumnsByPinning } from './splitColumnsByPinning.util';
-import { withGroupHierarchyColumn } from './withGroupHierarchyColumn.util';
+import { withGroupedColumnLayout } from './withGroupedColumnLayout.util';
 
 type GetPinnedDerivedColumnsStateArgs<TData> = {
   readonly columnOrder: ColumnOrderState<TData>;
@@ -21,7 +21,7 @@ type GetPinnedDerivedColumnsStateArgs<TData> = {
   /**
    * The applied group keys. **Required**, so every re-derivation is a compile
    * error until it says what grouping is applied — a caller free to omit it
-   * would silently drop the hierarchy column on the next column change.
+   * would silently drop the key hoist on the next column change.
    */
   readonly groupingKeys: readonly string[];
 };
@@ -30,11 +30,13 @@ type GetPinnedDerivedColumnsStateArgs<TData> = {
  * Every column slice the body and header paint from, derived together so they
  * cannot disagree about which columns exist.
  *
- * The hierarchy column is injected here, at the one point all three slices are
- * computed from (ADR-065). `gridColumns` comes back beside them because the
- * normalized-column map has to be built from that same augmented list — the
- * header cell reads its label out of the map, and a column in the partition but
- * not in the map renders an empty header.
+ * The grouped layout is derived here, at the one point all the slices are
+ * computed from (ADR-080): the group keys are hoisted to the head of the order
+ * and the left pin, and forced visible. No column is added — a group row states
+ * each key's value in that key's own column — so `gridColumns` is the
+ * consumer's own list, and comes back beside the slices because the
+ * normalized-column map has to be built from the same list the header reads its
+ * labels out of.
  */
 export const getPinnedDerivedColumnsState = <TData>({
   columnOrder,
@@ -48,10 +50,12 @@ export const getPinnedDerivedColumnsState = <TData>({
     columnOrder: gridColumnOrder,
     columnPinning: gridColumnPinning,
     columns: gridColumns,
-  } = withGroupHierarchyColumn<TData>({
+    columnVisibility: gridColumnVisibility,
+  } = withGroupedColumnLayout<TData>({
     columnOrder,
     columnPinning,
     columns,
+    columnVisibility,
     groupingKeys,
   });
 
@@ -59,7 +63,7 @@ export const getPinnedDerivedColumnsState = <TData>({
     columnOrder: gridColumnOrder,
     columnPinning: gridColumnPinning,
     columns: gridColumns,
-    columnVisibility,
+    columnVisibility: gridColumnVisibility,
   });
 
   const pinnedColumnPartition = splitColumnsByPinning<TData>({

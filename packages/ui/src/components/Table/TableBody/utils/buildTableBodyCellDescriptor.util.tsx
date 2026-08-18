@@ -10,7 +10,6 @@ import type { TableGroupDisclosureState } from '#ui/components/Table/TableGroupD
 
 import { DEFAULT_MIN_COLUMN_WIDTH } from '#ui/components/Table/Table.constants';
 import { TableRowActionsMenu } from '#ui/components/Table/TableRowActionsMenu';
-import { isTableGroupHierarchyColumn } from '#ui/components/Table/utils/isTableGroupHierarchyColumn.util';
 
 import {
   EMPTY_CELL,
@@ -28,6 +27,11 @@ export type TableBodyCellDescriptor<TData extends Record<string, unknown>> =
   | (TableBodyCellDefaultFields<TData> & TableBodyCellDescriptorBase<TData>);
 
 type BuildTableBodyCellDescriptorArgs<TData extends Record<string, unknown>> = {
+  /**
+   * Which of this row's group-key columns repeat the row above and render
+   * blank. Empty for a detail row, which blanks every key column outright.
+   */
+  readonly carriedGroupKeys: ReadonlySet<string>;
   readonly col: TableColumn<TData>;
   readonly columnSizing: ColumnSizingState<TData>;
   /**
@@ -111,6 +115,7 @@ type TableBodyCellDescriptorBase<TData extends Record<string, unknown>> = {
 export const buildTableBodyCellDescriptor = <
   TData extends Record<string, unknown>,
 >({
+  carriedGroupKeys,
   col,
   columnSizing,
   disclosure,
@@ -143,23 +148,22 @@ export const buildTableBodyCellDescriptor = <
     return {
       ...shared,
       children: resolveGroupCellChildren({
+        carriedGroupKeys,
         columnKey,
         disclosure,
+        groupingKeys,
         summary: groupSummary,
       }),
     };
   }
 
-  // A detail row's own hierarchy cell holds nothing: its values are already in
-  // their own columns. The cell exists so the grid stays rectangular and every
-  // row offers the same focus targets. `EMPTY_CELL` rather than `undefined`:
-  // see the note in `resolveGroupCellChildren.util.tsx` — `undefined` takes the
-  // default branch and puts an empty `<span title="">` in a cell that holds
-  // nothing.
-  if (
-    isTableGroupHierarchyColumn(col.key) ||
-    groupingKeys.includes(columnKey)
-  ) {
+  // A detail row blanks the columns it is grouped by: the value is stated by
+  // the group row above it, in the same column, and repeating it down a column
+  // whose header already says it is a column of one word (ADR-065, ADR-080).
+  // `EMPTY_CELL` rather than `undefined`: see the note in
+  // `resolveGroupCellChildren.util.tsx` — `undefined` takes the default branch
+  // and puts an empty `<span title="">` in a cell that holds nothing.
+  if (groupingKeys.includes(columnKey)) {
     return { ...shared, children: EMPTY_CELL };
   }
 
