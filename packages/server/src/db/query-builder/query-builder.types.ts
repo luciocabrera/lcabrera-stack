@@ -92,7 +92,13 @@ export type QueryCursor = {
 
 /**
  * A single WHERE condition. A `BinaryOperator` carries the value it compares
- * against; a `UnaryOperator` (`isNotNull`) stands alone and takes no value.
+ * against; a `UnaryOperator` (`isNull`, `isNotNull`) stands alone and takes no
+ * value.
+ *
+ * The null tests are unary rather than `eq`/`neq` against `null` because SQL
+ * three-valued logic makes those two spellings mean different things: `col =
+ * NULL` is never true, not even for a NULL row. A filter that means "this
+ * column is null" has to say so.
  */
 export type QueryFilter =
   | {
@@ -137,7 +143,13 @@ export type SelectQueryDescriptor = {
 };
 
 /** Operators that stand alone — no value, no bound parameter. */
-export type UnaryOperator = 'isNotNull';
+/**
+ * The operators that stand alone. Both null tests are here so the vocabulary is
+ * closed under negation — `isNotNull` without `isNull` leaves "this group's key
+ * is NULL" inexpressible, which is exactly the restriction a NULL group row
+ * drills into (ADR-079).
+ */
+export type UnaryOperator = 'isNotNull' | 'isNull';
 
 export type UpdateQueryDescriptor = {
   /** Same opt-in authorization semantics as SelectQueryDescriptor. */
