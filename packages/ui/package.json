@@ -137,7 +137,6 @@
     "babel-plugin-react-compiler": "catalog:react",
     "eslint": "catalog:lint",
     "eslint-config-prettier": "catalog:lint",
-    "eslint-plugin-local-rules": "catalog:lint",
     "eslint-plugin-perfectionist": "catalog:lint",
     "eslint-plugin-react-dom": "catalog:lint",
     "eslint-plugin-react-hooks": "catalog:lint",

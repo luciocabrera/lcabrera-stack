@@ -1,6 +1,5 @@
 import type { ActionFunctionArgs } from 'react-router';
 
-import { generateApiToken } from '@lcabrera/server/tokens/generate-api-token.util';
 import { redirect } from 'react-router';
 
 import { AUTH_TOKEN_TTL_SECONDS } from '@/auth/auth.constants';
@@ -48,12 +47,19 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   const { AUTH_TOKEN_SECRET } = readAuthEnvConfig({ env: process.env });
   const nowSeconds = Math.floor(Date.now() / 1000);
-  const { tokenId } = generateApiToken();
+  // A plain random nonce. This used to call `generateApiToken()` and keep only
+  // its `tokenId`, which minted a 256-bit bearer secret and a full plaintext
+  // token to throw both away — and made a token *identifier* stand in for a
+  // nonce, so the claim read as a credential to CodeQL. Web Crypto rather than
+  // `node:crypto`: a nonce needs nothing Node-specific, and this file is not a
+  // `.server.ts`, where the import boundary confines built-ins. 122 bits of
+  // entropy, against that tokenId's 64.
+  const jti = crypto.randomUUID();
   const token = signAuthToken({
     claims: {
       exp: nowSeconds + AUTH_TOKEN_TTL_SECONDS,
       iat: nowSeconds,
-      jti: tokenId,
+      jti,
       sub: credential.email,
     },
     secret: AUTH_TOKEN_SECRET,

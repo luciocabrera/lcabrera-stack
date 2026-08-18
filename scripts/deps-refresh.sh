@@ -13,11 +13,29 @@
 # scripts/update-deps.sh, which only touched apps/* and left the catalog — where
 # nearly every version actually lives — to be edited by hand.
 #
-# Node is NOT bumped here. The repo does pin one — `.node-version` plus the
-# `engines.node` band, enforced by `engineStrict` (#378) — but bumping it is a
-# machine-level change: it alters the global default of whoever runs this, and
-# taze cannot move a runtime. Change it deliberately with `vp env` and a PR that
-# moves both declarations together.
+# Node IS bumped here, and that is declared rather than incidental. taze rewrites
+# `.node-version` (it reads the file as an update target, the same as a manifest),
+# so a refresh carries the pin whether or not anyone intends it. This header used
+# to claim the opposite — "taze cannot move a runtime" — which was half true and
+# actively misleading: taze cannot move an installed runtime, but it moves the
+# PIN, and the pin is what decides the version. That wording is why a Node bump
+# once rode along inside a PR describing itself as manifests-only.
+#
+# What makes it safe to let ride is that CI runs on the pin: setup-vp is in
+# managed mode and resolves from `.node-version` (its log prints the version and
+# the file it came from), so the full gate executes on the new Node before the PR
+# can merge. `engines.node` is a deliberately wider band, so a minor inside it
+# needs no second edit; a bump that LEAVES the band is a different change and
+# must move both declarations together.
+#
+# What CI cannot do is update anyone's machine. Locally the vp shim is
+# system-first, so the runtime comes from whatever manages it there (nvm's
+# default, typically) — not from `.node-version`. A merged Node bump therefore
+# leaves every local checkout running the old version, and the local pre-push
+# gate silently disagrees with CI until each person installs it and repoints
+# their default. That is the cost being accepted, so the commit and PR SAY the
+# pin moved instead of burying it in the version list — see `node_footer` (the
+# commit message) and `node_note` (the PR body) below.
 #
 # Two things here are deliberate and worth knowing before editing:
 #   - It reaches for pnpm and taze DIRECTLY. The repo rule is "use vp, not pnpm",
@@ -83,6 +101,21 @@ have() { local cmd="$1"; command -v "$cmd" >/dev/null 2>&1; }
 open_the_pr() {
   local issue="$1" branch="$2" moved="$3"
   local deps_commit extra impact pr_body
+  # A Node move gets its own callout instead of a line in `moved`. It is the one
+  # bump CI verifies but no machine inherits, so listing it among the packages
+  # reads as "another version" when it is really a request to everyone to go
+  # install something. Computed from the tree, so it appears only on runs that
+  # actually moved the pin.
+  local node_from node_to node_note=""
+  node_from="$(git show "origin/${base}:.node-version" 2>/dev/null || git show "${base}:.node-version" 2>/dev/null || true)"
+  node_to="$(cat .node-version 2>/dev/null || true)"
+  node_from="${node_from//[[:space:]]/}"
+  node_to="${node_to//[[:space:]]/}"
+  if [[ -n "$node_to" && -n "$node_from" && "$node_from" != "$node_to" ]]; then
+    node_note="
+
+**The Node pin moves with this PR: \`${node_from}\` → \`${node_to}\`** (\`.node-version\`). CI runs on the pin — setup-vp is in managed mode and resolves from that file — so the gate above executed on ${node_to} and a failure there would have blocked this. Local checkouts do **not** inherit it: the vp shim is system-first, so the runtime comes from whatever manages Node on each machine. After this merges, install ${node_to} and repoint your default, or your pre-push gate keeps silently running ${node_from} while CI runs ${node_to}."
+  fi
   deps_commit="$(git log --format=%H --grep='^build(deps): refresh the toolchain' -1)"
   extra=""
   [[ -n "$deps_commit" ]] && extra="$(git log --format='- %s' "${deps_commit}..HEAD")"
@@ -116,7 +149,7 @@ Full pre-push quality gate ran against the bumped tree (\`vp check\`, typecheck 
 
 ## Impact Analysis
 
-${impact} No changeset: a dependency/toolchain refresh carries no consumer-facing package change (consistent with prior refreshes). TypeScript held at its pin for a known compatibility issue.
+${impact} No changeset: a dependency/toolchain refresh carries no consumer-facing package change (consistent with prior refreshes). TypeScript held at its pin for a known compatibility issue.${node_note}
 
 ## Test Coverage
 
@@ -297,7 +330,7 @@ Refresh all dependencies to their latest in-range versions (TypeScript held for 
 
 ## 3. Context & Background
 
-Opened by `vp run deps:refresh` (scripts/deps-refresh.sh): vp upgrade → pnpm clean → taze → corepack use pnpm@latest → vp install, then this issue + branch + PR. Manifests + lockfile only; no source change expected.
+Opened by `vp run deps:refresh` (scripts/deps-refresh.sh): vp upgrade → pnpm clean → taze → corepack use pnpm@latest → vp install, then this issue + branch + PR. Manifests + lockfile, and the `.node-version` pin when taze moves it; no source change expected.
 
 ## 4. Reproduction Steps
 
@@ -308,6 +341,7 @@ Not a bug — routine maintenance.
 ### In Scope
 
 - Version bumps in `pnpm-workspace.yaml` (catalog) and workspace `package.json` files, plus the regenerated `pnpm-lock.yaml`.
+- The `.node-version` pin, when taze moves it. CI runs on that pin, so the gate verifies the new runtime; local machines do not inherit it and must install it.
 
 ### Out of Scope
 
@@ -329,6 +363,23 @@ branch="build/${issue}-deps-refresh"
 log "Branching $branch and committing"
 git checkout -q -b "$branch"
 git add -A
+
+# Same reasoning as the PR callout: a Node move is stated, not listed among the
+# versions. HEAD is still the base commit here, so it holds the pin taze replaced.
+node_footer="Manifests + lockfile only; verified by the pre-push quality gate."
+node_old="$(git show HEAD:.node-version 2>/dev/null || true)"
+node_new="$(cat .node-version 2>/dev/null || true)"
+node_old="${node_old//[[:space:]]/}"
+node_new="${node_new//[[:space:]]/}"
+if [[ -n "$node_new" && -n "$node_old" && "$node_old" != "$node_new" ]]; then
+  node_footer="The Node pin moves with this: ${node_old} → ${node_new} (.node-version).
+CI resolves the runtime from that file, so the gate ran on ${node_new}. Local
+checkouts do NOT inherit it — install ${node_new} and repoint your default, or
+your pre-push gate keeps running ${node_old} while CI runs ${node_new}.
+
+Manifests, lockfile and the Node pin; verified by the pre-push quality gate."
+fi
+
 git commit -q -F - <<COMMIT
 build(deps): refresh the toolchain and dependencies
 
@@ -341,7 +392,7 @@ TypeScript is held at its pinned version for a known compatibility issue.
 Moved:
 ${moved}
 
-Manifests + lockfile only; verified by the pre-push quality gate.
+${node_footer}
 COMMIT
 
 log "Pushing (the pre-push hook runs the full quality gate; a failure stops here)"

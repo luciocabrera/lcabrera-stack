@@ -239,6 +239,14 @@ pin, so a Node patch release does not hard-fail every install before someone
 updates the file. Do not make them identical, and do not relax `engineStrict` to
 get past a failure — install the Node version the repo asks for.
 
+`vp run deps:refresh` moves that pin along with everything else, and CI runs on
+it, so the gate verifies the new runtime before the PR can merge. **A local
+checkout does not inherit it** — the vp shim is system-first, so the runtime comes
+from whatever manages Node on your machine. When a refresh moves the pin, install
+that version and repoint your default; otherwise your pre-push gate and CI are
+running different runtimes, which is exactly the silent divergence `engineStrict`
+exists to prevent.
+
 This is enforcement the repo previously got by accident. Vite+'s default managed
 mode resolves the `node` shim **from** `engines.node`, so it could not hand you a
 version outside the range; on a machine where Node comes from anywhere else

@@ -87,8 +87,12 @@
     "duplicate-prop-shape": "warn"
   },
   "overrides": [
+    // Route loaders return serializable state/promises consumed by shared
+    // components (TableLayout, panels) and via use() in Suspense children;
+    // fallow cannot trace useLoaderData<typeof loader>() destructuring across
+    // the route barrel + component-file split, so unused-load-data-keys is a
+    // systematic false positive on *.loader.ts here.
     {
-      "reason": "Route loaders return serializable state/promises consumed by shared components (TableLayout, panels) and via use() in Suspense children; fallow cannot trace useLoaderData<typeof loader>() destructuring across the route barrel + component-file split, so unused-load-data-keys is a systematic false positive on *.loader.ts here.",
       "files": ["**/*.loader.ts"],
       "rules": {
         "unused-load-data-keys": "off"
