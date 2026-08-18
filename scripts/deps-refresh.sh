@@ -34,7 +34,8 @@
 # leaves every local checkout running the old version, and the local pre-push
 # gate silently disagrees with CI until each person installs it and repoints
 # their default. That is the cost being accepted, so the commit and PR SAY the
-# pin moved instead of burying it in the version list — see node_line below.
+# pin moved instead of burying it in the version list — see `node_footer` (the
+# commit message) and `node_note` (the PR body) below.
 #
 # Two things here are deliberate and worth knowing before editing:
 #   - It reaches for pnpm and taze DIRECTLY. The repo rule is "use vp, not pnpm",
