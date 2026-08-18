@@ -214,6 +214,13 @@ auto-merging: a failing quality gate leaves the branch for a human. `-- --dry-ru
 previews what would move without changing anything. The pnpm-direct policy nuance
 is tracked in issue #334.
 
+**It moves `.node-version` too**, and the commit and PR say so rather than listing
+it among the packages. CI resolves the runtime from that pin, so the gate runs on
+the new Node before the PR can merge; local checkouts do not inherit it, because
+the vp shim is system-first. After a refresh that moved the pin, install that Node
+and repoint your default — otherwise your pre-push gate runs a different runtime
+than CI does.
+
 **A gate failure is resumable — do not re-run the full refresh.** The stop leaves
 the issue, branch and commit in place but no PR, and a second full run would open
 a duplicate issue and branch. Fix the findings, commit them on the same branch,
