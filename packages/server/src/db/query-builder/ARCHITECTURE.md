@@ -24,6 +24,7 @@ the `../*.util.ts` executors that pair each builder with `getPool`).
 | `assert-safe-identifier.util.ts`         | **Mandatory**, always called — syntax check (see Security model)                                                                                                                                                      |
 | `assert-column-allowed.util.ts`          | **Optional**, opt-in — membership check (see Security model)                                                                                                                                                          |
 | `append-filter-clause.util.ts`           | Reducer step used by `buildWhereClause`: one filter → one SQL clause + values                                                                                                                                         |
+| `is-unary-filter.util.ts`                | Narrows a filter to the arm that carries no value (`IS NULL` / `IS NOT NULL`) — a predicate, because excluding the operators by literal does not subtract the arm and leaves `filter.value` unresolved                |
 | `build-where-clause.util.ts`             | `QueryFilter[]` (plus an optional keyset `cursor`) → `{ text, values }`, correctly incrementing `$n` placeholders                                                                                                     |
 | `assert-keyset-cursor.util.ts`           | Refuses a keyset cursor the builder cannot resume correctly — no sort, a tuple that does not match it, or one not ending on a non-null unique column (ADR-052)                                                        |
 | `build-keyset-comparison.util.ts`        | The "sorts strictly after this value" half of one keyset branch, for one column, honouring Postgres's default null placement                                                                                          |
@@ -39,6 +40,28 @@ the `../*.util.ts` executors that pair each builder with `getPool`).
 | `build-update-query.util.ts`             | **Public entry point.** `UPDATE … SET col = $n WHERE … [RETURNING …]`; reuses `buildWhereClause` with an offset `startParamIndex`, requires ≥1 filter                                                                 |
 | `build-delete-query.util.ts`             | **Public entry point.** `DELETE FROM … WHERE … [RETURNING …]`; reuses `buildWhereClause`, requires ≥1 filter                                                                                                          |
 | `build-max-value-query.util.ts`          | **Public entry point.** `SELECT COALESCE(MAX(col), 0)` — the generic "next id" read for tables without a sequence/default                                                                                             |
+
+## The null tests are unary, and both directions exist
+
+`isNull` and `isNotNull` stand alone and take no value, where every other
+operator carries one. That is forced by SQL's three-valued logic rather than
+being a spelling preference: `col = NULL` is not false, it is _unknown_, so it
+never matches — not even the rows that are null. A filter meaning "this column
+is null" cannot be written as an equality at all.
+
+Two properties are easy to break and are each pinned by a test:
+
+- **A unary clause consumes no `$n` slot.** Advancing `paramIndex` for one would
+  shift every later filter's placeholder off its value, producing a query that
+  runs and compares the wrong columns.
+- **The two are not interchangeable.** They select disjoint row sets, so a
+  copy-paste emitting one for the other passes any check that only asserts "a
+  clause was appended".
+
+`isNull` was added for the group drill (ADR-079): a group row whose key is NULL
+is a real group, and it is the one a user is most likely to click into, so the
+equality spelling fails silently on the most-clicked case — it returns an empty
+page rather than an error.
 
 ## Security model — read this before adding a call site
 

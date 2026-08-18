@@ -1,7 +1,12 @@
-import type { BinaryOperator, QueryFilter } from './query-builder.types.ts';
+import type {
+  BinaryOperator,
+  QueryFilter,
+  UnaryOperator,
+} from './query-builder.types.ts';
 
 import { assertColumnAllowed } from './assert-column-allowed.util.ts';
 import { assertSafeIdentifier } from './assert-safe-identifier.util.ts';
+import { isUnaryFilter } from './is-unary-filter.util.ts';
 import { quoteIdentifier } from './quote-identifier.util.ts';
 
 export type ClauseAccumulator = {
@@ -22,6 +27,12 @@ const OPERATOR_SQL: Record<BinaryOperator, string> = {
   notIlike: 'NOT ILIKE',
 };
 
+/** Closed over `UnaryOperator`, so a new standalone operator is a type error here. */
+const UNARY_OPERATOR_SQL: Record<UnaryOperator, string> = {
+  isNotNull: 'IS NOT NULL',
+  isNull: 'IS NULL',
+};
+
 type AppendFilterClauseArgs = {
   readonly accumulator: ClauseAccumulator;
   readonly allowedColumns?: readonly string[];
@@ -39,9 +50,14 @@ export const appendFilterClause = ({
 
   const quotedColumn = quoteIdentifier(filter.column);
 
-  if (filter.operator === 'isNotNull') {
+  if (isUnaryFilter(filter)) {
+    // No placeholder and no value: `IS [NOT] NULL` takes none, and consuming a
+    // `$n` slot here would shift every later filter's parameter index.
     return {
-      clauses: [...accumulator.clauses, `${quotedColumn} IS NOT NULL`],
+      clauses: [
+        ...accumulator.clauses,
+        `${quotedColumn} ${UNARY_OPERATOR_SQL[filter.operator]}`,
+      ],
       paramIndex: accumulator.paramIndex,
       values: accumulator.values,
     };
