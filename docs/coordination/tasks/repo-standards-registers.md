@@ -11,7 +11,7 @@ area:
 started: 2026-08-19
 updated: 2026-08-19
 plan: (none)
-pr: (none)
+pr: '#806'
 issue: #798
 ---
 
@@ -21,6 +21,6 @@ Extract the coordination and ADR registers into repo-standards
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: family 2 (coordination register, ADR registry) extracted; ADR homes now configuration
 - Blockers: none
-- Next:
+- Next: family 3 — publish surface, release audit, attw, API surface
