@@ -1,12 +1,13 @@
 import { describe, expect, test } from 'vite-plus/test';
 
 import {
-  analyseClosure,
-  classifyLink,
   extractCommands,
   extractImportSpecifiers,
   extractLinkTargets,
-} from './closure.mjs';
+  extractPathTokens,
+  isPathToken,
+} from './closure-extract.mjs';
+import { analyseClosure, classifyLink, classifyPathToken } from './closure.mjs';
 
 describe('extractLinkTargets', () => {
   test('reads the target out of a markdown link', () => {
@@ -195,5 +196,121 @@ describe('analyseClosure', () => {
     expect(
       analyseClosure({ allowedCommands: ['vp'], files, rootDirectory }).escapes,
     ).toEqual([]);
+  });
+});
+
+describe('isPathToken', () => {
+  test('accepts an explicitly relative path and a path with an extension', () => {
+    expect(isPathToken('./references/advanced.md')).toBe(true);
+    expect(isPathToken('packages/scan-report/SCHEMA_V1.md')).toBe(true);
+  });
+
+  test('rejects a url, a spaced string and a slashed word with no extension', () => {
+    expect(isPathToken('https://example.com/a.md')).toBe(false);
+    expect(isPathToken('a b/c.md')).toBe(false);
+    expect(isPathToken('feat/797-devkit')).toBe(false);
+  });
+});
+
+describe('classifyPathToken', () => {
+  const rootDirectory = 'skills/epic';
+  const fromDirectory = 'skills/epic';
+
+  test('prefers the file-relative reading when that is the file that exists', () => {
+    const exists = (path) => path === 'skills/epic/references/advanced.md';
+    expect(
+      classifyPathToken({
+        exists,
+        fromDirectory,
+        rootDirectory,
+        token: 'references/advanced.md',
+      }),
+    ).toEqual({
+      kind: 'internal',
+      resolved: 'skills/epic/references/advanced.md',
+    });
+  });
+
+  test('falls back to the repository root, which is where prose usually means', () => {
+    const exists = (path) => path === 'packages/scan-report/SCHEMA_V1.md';
+    expect(
+      classifyPathToken({
+        exists,
+        fromDirectory,
+        rootDirectory,
+        token: 'packages/scan-report/SCHEMA_V1.md',
+      }),
+    ).toEqual({
+      kind: 'escape',
+      resolved: 'packages/scan-report/SCHEMA_V1.md',
+    });
+  });
+
+  test('reports nothing when neither reading exists, rather than guessing', () => {
+    expect(
+      classifyPathToken({
+        exists: () => false,
+        fromDirectory,
+        rootDirectory,
+        token: 'some/placeholder.md',
+      }),
+    ).toEqual({ kind: 'unresolved' });
+  });
+});
+
+describe('analyseClosure path tokens', () => {
+  const rootDirectory = 'skills/epic';
+
+  test('a backticked path outside the directory is an escape', () => {
+    const files = [
+      {
+        content: 'Follow `packages/scan-report/SCHEMA_V1.md` exactly.',
+        path: 'skills/epic/SKILL.md',
+      },
+    ];
+    const { escapes } = analyseClosure({
+      exists: (path) => path === 'packages/scan-report/SCHEMA_V1.md',
+      files,
+      rootDirectory,
+    });
+    expect(escapes).toEqual([
+      {
+        file: 'skills/epic/SKILL.md',
+        kind: 'link',
+        line: 1,
+        reference: 'packages/scan-report/SCHEMA_V1.md',
+        resolved: 'packages/scan-report/SCHEMA_V1.md',
+      },
+    ]);
+  });
+
+  test('a path argument handed to an allowed command is still a dependency', () => {
+    const files = [
+      {
+        content:
+          '```bash\nnode packages/scan-report/scripts/ingest-report.mjs\n```',
+        path: 'skills/epic/SKILL.md',
+      },
+    ];
+    const { escapes } = analyseClosure({
+      allowedCommands: ['node'],
+      exists: (path) =>
+        path === 'packages/scan-report/scripts/ingest-report.mjs',
+      files,
+      rootDirectory,
+    });
+    expect(escapes.map((escape) => escape.resolved)).toEqual([
+      'packages/scan-report/scripts/ingest-report.mjs',
+    ]);
+  });
+
+  test('without an existence check no prose token is analysed', () => {
+    const files = [
+      {
+        content: 'Follow `packages/scan-report/SCHEMA_V1.md` exactly.',
+        path: 'skills/epic/SKILL.md',
+      },
+    ];
+    expect(analyseClosure({ files, rootDirectory }).escapes).toEqual([]);
   });
 });

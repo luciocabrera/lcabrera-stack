@@ -6,6 +6,9 @@
  * counts as one.
  */
 
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
+
 import { analyseClosure } from './closure.mjs';
 import { readFilesUnder } from './files.mjs';
 
@@ -36,6 +39,7 @@ export const analyseDirectory = ({
     .join('/');
   const { escapes } = analyseClosure({
     allowedCommands,
+    exists: (path) => existsSync(resolve(root, path)),
     files,
     rootDirectory,
   });
