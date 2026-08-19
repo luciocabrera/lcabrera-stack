@@ -44,6 +44,7 @@ and `issue:verify`.
       { "dir": "docs/decisions", "tier": "repo", "title": "…", "blurb": "…" }
     ],
     "adrTemplateHome": "docs/decisions",
+    "coordinationBoardDoc": "docs/coordination/BOARD.md",
     "coordinationTasksDir": "docs/coordination/tasks"
   }
 }

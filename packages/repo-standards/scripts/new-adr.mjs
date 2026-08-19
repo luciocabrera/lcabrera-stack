@@ -8,8 +8,8 @@
  * gets created — which is exactly what ADR-048 was written to stop.
  *
  * Usage:
- *   node scripts/new-adr.mjs "<title>" [--home repo|cqms|app] [--slug <slug>]
- *   node scripts/new-adr.mjs "<title>" --dry-run
+ *   repo-adr "<title>" [--home <tier>] [--slug <slug>]
+ *   repo-adr "<title>" --dry-run
  *
  * Exit codes: 0 = written, 1 = bad arguments, an occupied path, or a template
  * that no longer has a heading to fill in.

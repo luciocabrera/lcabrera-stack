@@ -35,6 +35,7 @@ export const DEFAULT_REGISTERS = {
     },
   ],
   adrTemplateHome: 'docs/decisions',
+  coordinationBoardDoc: 'docs/coordination/BOARD.md',
   coordinationTasksDir: 'docs/coordination/tasks',
 };
 
@@ -45,6 +46,10 @@ export const DEFAULT_CONVENTIONS = {
 
 const isPlainObject = (value) =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
+
+/** An empty string is a mistake, not an override — it would resolve to the host root. */
+const readableString = (value, fallback) =>
+  typeof value === 'string' && value !== '' ? value : fallback;
 
 /**
  * A malformed config is a failure rather than a silent fallback: a consumer who
@@ -59,15 +64,14 @@ export const resolveConventions = (raw) => {
   }
   const block = isPlainObject(parsed.conventions) ? parsed.conventions : {};
   return {
-    defaultBranch:
-      typeof block.defaultBranch === 'string' && block.defaultBranch !== ''
-        ? block.defaultBranch
-        : DEFAULT_CONVENTIONS.defaultBranch,
-    sharedBranchesDir:
-      typeof block.sharedBranchesDir === 'string' &&
-      block.sharedBranchesDir !== ''
-        ? block.sharedBranchesDir
-        : DEFAULT_CONVENTIONS.sharedBranchesDir,
+    defaultBranch: readableString(
+      block.defaultBranch,
+      DEFAULT_CONVENTIONS.defaultBranch,
+    ),
+    sharedBranchesDir: readableString(
+      block.sharedBranchesDir,
+      DEFAULT_CONVENTIONS.sharedBranchesDir,
+    ),
   };
 };
 
@@ -92,15 +96,18 @@ export const resolveRegisters = (raw) => {
     : [];
   return {
     adrHomes: homes.length > 0 ? homes : DEFAULT_REGISTERS.adrHomes,
-    adrTemplateHome:
-      typeof block.adrTemplateHome === 'string' && block.adrTemplateHome !== ''
-        ? block.adrTemplateHome
-        : DEFAULT_REGISTERS.adrTemplateHome,
-    coordinationTasksDir:
-      typeof block.coordinationTasksDir === 'string' &&
-      block.coordinationTasksDir !== ''
-        ? block.coordinationTasksDir
-        : DEFAULT_REGISTERS.coordinationTasksDir,
+    adrTemplateHome: readableString(
+      block.adrTemplateHome,
+      DEFAULT_REGISTERS.adrTemplateHome,
+    ),
+    coordinationBoardDoc: readableString(
+      block.coordinationBoardDoc,
+      DEFAULT_REGISTERS.coordinationBoardDoc,
+    ),
+    coordinationTasksDir: readableString(
+      block.coordinationTasksDir,
+      DEFAULT_REGISTERS.coordinationTasksDir,
+    ),
   };
 };
 
@@ -122,3 +129,27 @@ export const readConventions = (root = hostRoot()) =>
 
 export const readRegisters = (root = hostRoot()) =>
   resolveRegisters(readRaw(root));
+
+/**
+ * The coordination register's three locations, absolute, from one read of the
+ * config. Both commands that touch the register resolve them here rather than
+ * each joining its own — which is how the closer came to delete from
+ * `docs/coordination/tasks` while reporting the configured path.
+ *
+ * The relative forms travel with them because they are what a message should
+ * print: an absolute path inside a runner's checkout tells the reader nothing.
+ */
+export const readCoordinationPaths = (root = hostRoot()) => {
+  const raw = readRaw(root);
+  const { coordinationBoardDoc, coordinationTasksDir } = resolveRegisters(raw);
+  const { sharedBranchesDir } = resolveConventions(raw);
+
+  return {
+    boardDoc: join(root, coordinationBoardDoc),
+    boardRel: coordinationBoardDoc,
+    branchesDir: join(root, sharedBranchesDir),
+    branchesRel: sharedBranchesDir,
+    tasksDir: join(root, coordinationTasksDir),
+    tasksRel: coordinationTasksDir,
+  };
+};

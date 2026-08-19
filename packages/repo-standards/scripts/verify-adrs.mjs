@@ -10,9 +10,9 @@
  * makes it hold.
  *
  * Usage:
- *   node scripts/verify-adrs.mjs           check; exit 1 on any violation
- *   node scripts/verify-adrs.mjs --write   regenerate each home's README index
- *   node scripts/verify-adrs.mjs --list    print every ADR with its title
+ *   repo-verify-adrs           check; exit 1 on any violation
+ *   repo-verify-adrs --write   regenerate each home's README index
+ *   repo-verify-adrs --list    print every ADR with its title
  *
  * `--list` is where the per-ADR table went: the committed index carries no row
  * per ADR, because that made every pair of concurrent ADR branches conflict

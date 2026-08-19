@@ -1,5 +1,5 @@
 /**
- * Verifies the in-git work register under `docs/coordination/` — the canonical
+ * Verifies the in-git work register `devkit.config.json` names — the canonical
  * "who is working on what" for this monorepo. Keeps the register honest the same
  * way `verify-commands-doc.mjs` keeps COMMANDS.md honest. Pure parsing/rendering
  * live in `packages/repo-standards/scripts/coordination-parse.mjs` and `./lib/coordination-board.mjs`; this
@@ -59,11 +59,9 @@
  * repository-selecting variables.
  *
  * Modes:
- *   node scripts/verify-coordination.mjs                 → verify (default)
- *   node scripts/verify-coordination.mjs --no-remote     → skip the remote read
- *                                                          (offline / fast loop)
- *   node scripts/verify-coordination.mjs --write-board   → write the local,
- *                                                          gitignored BOARD.md view
+ *   repo-verify-claims                → verify (default)
+ *   repo-verify-claims --no-remote    → verify, skipping the remote read
+ *   repo-verify-claims --write-board  → write the local, gitignored board view
  *
  * Exit codes: 0 = consistent (warnings allowed), 1 = an ERROR check failed.
  */
@@ -85,15 +83,18 @@ import {
   withoutLocalDuplicates,
 } from './coordination-remote.mjs';
 import { branchErrors, ISO_DATE, taskErrors } from './coordination-schema.mjs';
+import { readCoordinationPaths } from './config.mjs';
 import { resolveHostRoot } from './host-root.mjs';
 
 const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),
 });
-const COORD_DIR = join(REPO_ROOT, 'docs', 'coordination');
-const TASKS_DIR = join(COORD_DIR, 'tasks');
-const BRANCHES_DIR = join(COORD_DIR, 'branches');
-const BOARD_DOC = join(COORD_DIR, 'BOARD.md');
+const {
+  boardDoc: BOARD_DOC,
+  boardRel: BOARD_REL,
+  branchesDir: BRANCHES_DIR,
+  tasksDir: TASKS_DIR,
+} = readCoordinationPaths(REPO_ROOT);
 
 const STALE_DAYS = 14;
 const GHOST_DAYS = 3;
@@ -335,7 +336,7 @@ const main = () => {
   if (process.argv.includes('--write-board')) {
     writeFileSync(BOARD_DOC, renderBoard(tasks, branches));
     console.log(
-      `Wrote the local docs/coordination/BOARD.md view (gitignored) — ` +
+      `Wrote the local ${BOARD_REL} view (gitignored) — ` +
         `${tasks.length} task(s), ${branches.length} shared branch(es).`,
     );
     return;

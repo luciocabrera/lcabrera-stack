@@ -14,10 +14,9 @@
  * `generate-changelog.mjs` takes `git log` on stdin. Prints to stdout only — it
  * never writes `BOARD.md` (that stays a gitignored, local-only view — ADR-037).
  *
- * Usage (from the repo root):
- *   vp run coordination:board:live
+ * Usage:
  *   gh pr list --state open --json number,title,headRefName,isDraft,url,statusCheckRollup \
- *     | node scripts/coordination-board-live.mjs
+ *     | repo-claim-board
  *
  * With no PR JSON on stdin (no `gh`, no token, no open PRs) it still prints the
  * claims, just without live PR columns. Exit code is always 0 — it is a view.
