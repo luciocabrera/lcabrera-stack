@@ -7,7 +7,7 @@ name: Close coordination claim
 # `coordination:verify` warns rather than fails, on purpose. A claim nobody holds
 # still reads as a live soft lock and fences the next agent off finished work.
 #
-# Matching is scripts/lib/coordination-close.mjs (pure, unit-tested); the
+# Matching is packages/repo-standards/scripts/coordination-close.mjs (pure, unit-tested); the
 # deletion is `repo-close-claim` — `vp run coordination:close` locally, and the
 # same command by path here because this workflow does not install; this file
 # only commits the result.
