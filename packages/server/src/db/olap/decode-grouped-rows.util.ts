@@ -65,13 +65,19 @@ export const toGroupAggregates = ({
  * The offset by one is `count(*)`, which `toGroupAggregates` puts first. See
  * there for why the two belong in one module.
  *
- * **A list that does not line up throws rather than decoding.** The failure this
- * refuses is the quiet one: reading an alias that is not there yields
- * `row[undefined]`, so every group would report a count of `NaN` and aggregates
- * of `undefined` — valid-looking rows carrying no data, with nothing thrown and
- * nothing logged. A caller who reached this state has passed a `requested` list
- * that is not the one the read was issued with, which is a programming error and
- * is worth saying so at the point it is detectable.
+ * **The pairing is checked at every position, not just counted.** Decoding is
+ * positional, so a `requested` list of the right length in the wrong order is
+ * the dangerous input: it mislabels every aggregate and reads the count off
+ * whichever alias happens to be first. Length alone cannot see that, and
+ * `BuiltGroupAggregate` carries the `fn` and `column` that can — so each pair is
+ * asserted to agree before a row is touched.
+ *
+ * The failure being refused is the quiet one. A mismatch that decoded anyway
+ * yields `row[undefined]` or the wrong column's value, so every group reports a
+ * count of `NaN` or an aggregate belonging to its neighbour — valid-looking rows
+ * carrying wrong data, with nothing thrown and nothing logged. A caller in that
+ * state has passed a list that is not the one the read was issued with, which is
+ * a programming error and is worth naming where it is still detectable.
  */
 export const decodeGroupedRows = ({
   aggregates,
@@ -88,13 +94,29 @@ export const decodeGroupedRows = ({
     );
   }
 
-  // The guard above pins the two lists to the same length, so the fallback is
-  // unreachable and present only for `noUncheckedIndexedAccess`.
-  const decoded = requested.map((aggregate, index) => ({
-    alias: selected[index]?.alias ?? '',
-    columnKey: aggregate.column,
-    fn: aggregate.fn,
-  }));
+  if (count.fn !== 'count' || count.column !== undefined) {
+    throw new Error(
+      `Grouped read projected \`${count.fn}\` first, not \`count(*)\`; the aggregate list was not built by \`toGroupAggregates\`.`,
+    );
+  }
+
+  const decoded = requested.map((aggregate, index) => {
+    // Non-null by the length guard above; the fallback is unreachable and
+    // present only for `noUncheckedIndexedAccess`.
+    const emitted = selected[index] ?? count;
+
+    if (emitted.fn !== aggregate.fn || emitted.column !== aggregate.column) {
+      throw new Error(
+        `Grouped read projected \`${emitted.fn}\` on \`${emitted.column ?? '*'}\` at position ${String(index + 1)} but \`${aggregate.fn}\` on \`${aggregate.column}\` was requested there; the two lists are ordered differently.`,
+      );
+    }
+
+    return {
+      alias: emitted.alias,
+      columnKey: aggregate.column,
+      fn: aggregate.fn,
+    };
+  });
 
   return rows.map((row) =>
     toGroupRow({

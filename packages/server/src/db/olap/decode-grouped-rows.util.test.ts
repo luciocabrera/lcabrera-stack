@@ -123,6 +123,45 @@ describe('decodeGroupedRows', () => {
     ).toThrow(/aggregate alias/);
   });
 
+  it('throws on a list of the right length in the wrong order', () => {
+    // The dangerous input, and the one a length check cannot see: every
+    // aggregate would be mislabelled with its neighbour's value and nothing
+    // would be thrown.
+    const built = emit(toGroupAggregates({ requested: REQUESTED }));
+
+    expect(() =>
+      decodeGroupedRows({
+        aggregates: built,
+        columnKeys: ['status'],
+        maskAlias: 'grouping_mask',
+        requested: [REQUESTED[1], REQUESTED[0]],
+        rows: [
+          {
+            avg_quantity: 7,
+            count_all: '42',
+            grouping_mask: 0,
+            status: 'Cancelled',
+            sum_amount: 1000,
+          },
+        ],
+      }),
+    ).toThrow(/ordered differently/);
+  });
+
+  it('throws when the first projection is not count(*)', () => {
+    // Reading the count off whichever alias happens to be first is the other
+    // half of the same failure.
+    expect(() =>
+      decodeGroupedRows({
+        aggregates: emit(REQUESTED),
+        columnKeys: ['status'],
+        maskAlias: 'grouping_mask',
+        requested: [REQUESTED[1]],
+        rows: [{ avg_quantity: 7, grouping_mask: 0, status: 'Cancelled' }],
+      }),
+    ).toThrow(/not `count\(\*\)`/);
+  });
+
   it('returns one decoded row per row read', () => {
     const built = emit(toGroupAggregates({ requested: [] }));
 
