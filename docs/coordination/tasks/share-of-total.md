@@ -2,7 +2,7 @@
 id: share-of-total
 title: Share-of-total measure and its proportional bar
 owner: agent:claude
-status: active
+status: review
 branch: chore/648-share-of-total
 area:
   - packages/server/src/db/**
@@ -22,7 +22,7 @@ Each measure as a percentage of the grand total, with a proportional bar.
 
 ## Status / next
 
-- Current step: implementing
+- Current step: review
 - Blockers: none
 
 ## The three questions the issue asks to answer first

@@ -63,6 +63,7 @@ GroupingSection/
 │   └── GroupKeyItemContent/            → One key row: level, label, remove
 ├── AddAggregateSection/                → Column select → legal-function select
 ├── ActiveAggregateList/                → Staged aggregates, each removable
+│   └── ShareOfTotalToggle/             → Share of the grand total, on the aggregates it is defined for
 ├── GroupingModeSection/                → Totals mode: groups only, or groups with subtotals
 ├── TotalsPlacementSection/             → Totals position: above or below their rows (rollup only)
 ├── GroupingSectionToolbar/             → Clear grouping (toolbar + footer)
@@ -115,6 +116,7 @@ flowchart TD
 | --------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------- |
 | May this column be a group key at all?  | `resolveGroupKeyAvailability` — the declared flag narrowed by the catalogue | either gate alone (ADR-068)           |
 | Which aggregates may this column take?  | `metaState.groupingCapabilities[key].aggregates`                            | `TableColumn.dataType` (#550)         |
+| May this measure show a share?          | `isShareableAggregate` — additive measures only (ADR-086)                   | the column, which has no say in it    |
 | How many keys may be applied?           | `MAX_TABLE_GROUP_KEYS`                                                      | anything local to a component         |
 | Is this configuration a change at all?  | `resolveTableGroupingUpdate`                                                | the component                         |
 | What grouping is the section showing?   | `TableDrawerContext`'s `groupingStore` (the draft)                          | the live `TableConfig` grouping store |
@@ -150,6 +152,19 @@ on (ADR-085).
 
 It renders only under `rollup`. `flat` emits no subtotal and no grand total, so
 there would be nothing to position.
+
+## A share is chosen here and rendered elsewhere
+
+`ShareOfTotalToggle` sits on each applied aggregate and stages a column into the
+grouping draft's `shares`. What it turns on is rendered by `TableGroupShare`,
+inside the measure's own cell in the grid — not by anything in this section, and
+not in a column of its own (ADR-086 §4 records why a derived column would undo
+ADR-080).
+
+It renders itself away on every aggregate a share is **not** defined for, which
+is everything but `sum` and `count`. That is a legality rule rather than a
+preference: the denominator is derived from the rows the read returned, and only
+an additive measure has one that can be derived correctly.
 
 ## A locked preset
 

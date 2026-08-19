@@ -11,8 +11,8 @@ import { accessibility } from '#ui/design-system/tokens/commons.stylex';
 import type { TableGroupShareValueProps } from './TableGroupShareValue.types';
 
 import { useGetTableShareDenominator } from '../../utils/useGetTableShareDenominator.hook';
-import { resolveShareRatio } from '../utils/resolveShareRatio.util';
 import { tableGroupShareStyles } from '../TableGroupShare.stylex';
+import { resolveShareRatio } from '../utils/resolveShareRatio.util';
 
 /**
  * The percentage and its bar, for a column that is showing a share.
@@ -54,6 +54,10 @@ export const TableGroupShareValue = ({
     );
   }
 
+  // Named rather than nested into the style call below: the clamp is a
+  // decision about the bar, not about the number, and the two read as one
+  // expression when they are written as one.
+  const barWidth = `${Math.min(Math.abs(ratio), 1) * 100}%`;
   const formatted = new Intl.NumberFormat(locale, {
     maximumFractionDigits: 1,
     minimumFractionDigits: 1,
@@ -82,13 +86,7 @@ export const TableGroupShareValue = ({
          * would paint outside the cell. The number beside it still reads the
          * unclamped value, which is the one the data supports.
          */}
-        <span
-          {...stylex.props(
-            tableGroupShareStyles.barFill(
-              `${Math.min(Math.abs(ratio), 1) * 100}%`,
-            ),
-          )}
-        />
+        <span {...stylex.props(tableGroupShareStyles.barFill(barWidth))} />
       </span>
     </span>
   );

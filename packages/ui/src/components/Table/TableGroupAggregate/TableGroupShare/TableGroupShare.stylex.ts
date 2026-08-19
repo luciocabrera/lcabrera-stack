@@ -17,17 +17,17 @@ export const tableGroupShareStyles = stylex.create({
    * `TableBodyCell`'s pinned offsets take).
    */
   barFill: (width: string) => ({
-    backgroundColor: colors.brandPrimary,
     borderRadius: 'inherit',
+    backgroundColor: colors.brandPrimary,
     height: '100%',
     width,
   }),
   barTrack: {
-    backgroundColor: colors.borderSecondary,
     borderRadius: spacing.xxs,
+    overflow: 'hidden',
+    backgroundColor: colors.borderSecondary,
     flexShrink: 0,
     height: 4,
-    overflow: 'hidden',
     width: 48,
   },
   container: {

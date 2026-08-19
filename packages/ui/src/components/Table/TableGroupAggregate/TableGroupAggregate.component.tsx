@@ -16,8 +16,8 @@ import { accessibility } from '#ui/design-system/tokens/commons.stylex';
 
 import type { TableGroupAggregateProps } from './TableGroupAggregate.types';
 
-import { TableGroupShare } from './TableGroupShare';
 import { tableGroupAggregateStyles } from './TableGroupAggregate.stylex';
+import { TableGroupShare } from './TableGroupShare';
 import { resolveAggregateDataType } from './utils/resolveAggregateDataType.util';
 
 /**

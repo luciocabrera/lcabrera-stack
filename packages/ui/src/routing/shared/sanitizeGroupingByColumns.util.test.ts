@@ -193,4 +193,43 @@ describe('sanitizeGroupingByColumns', () => {
       }),
     ).toStrictEqual(NO_GROUPING);
   });
+
+  it('keeps a share on an additive measure', () => {
+    expect(
+      sanitizeGroupingByColumns({
+        columns,
+        grouping: grouping({
+          aggregates: { name: 'count' },
+          keys: ['status'],
+          shares: ['name'],
+        }),
+      }).shares,
+    ).toStrictEqual(['name']);
+  });
+
+  it('refuses the whole configuration for a share on a non-additive one', () => {
+    // Whole-state refusal, like every other illegal member (ADR-061): a link
+    // promising a percentage column that silently does not appear is the
+    // failure that rule exists to avoid — and here the percentage it promised
+    // would have been wrong rather than merely missing (#648).
+    expect(
+      sanitizeGroupingByColumns({
+        columns,
+        grouping: grouping({
+          aggregates: { name: 'avg' },
+          keys: ['status'],
+          shares: ['name'],
+        }),
+      }).keys,
+    ).toStrictEqual([]);
+  });
+
+  it('refuses a share on a column carrying no aggregate', () => {
+    expect(
+      sanitizeGroupingByColumns({
+        columns,
+        grouping: grouping({ keys: ['status'], shares: ['name'] }),
+      }).keys,
+    ).toStrictEqual([]);
+  });
 });

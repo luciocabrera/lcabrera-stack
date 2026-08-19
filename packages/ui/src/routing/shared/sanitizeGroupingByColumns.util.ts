@@ -1,8 +1,8 @@
 import type { TableColumn } from '#ui/components/Table';
 import type { TableGroupingState } from '#ui/components/Table/Table.types';
 
-import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
 import { isShareableAggregate } from '#ui/components/Table/contexts/TableConfig/grouping/utils';
+import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
 import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
 
 type SanitizeGroupingByColumnsArgs<TData extends Record<string, unknown>> = {

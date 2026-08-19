@@ -15,8 +15,8 @@ import type { ActiveAggregateListProps } from './ActiveAggregateList.types';
 import { useSetColumnAggregate } from '../../TableDrawerContext/actions';
 import { useGetGroupingAggregates } from '../../TableDrawerContext/selectors';
 import { toAggregateItems } from '../utils';
-import { ShareOfTotalToggle } from './ShareOfTotalToggle';
 import { styles } from './ActiveAggregateList.stylex';
+import { ShareOfTotalToggle } from './ShareOfTotalToggle';
 
 /**
  * The aggregates currently staged, one row each, with a remove control.
