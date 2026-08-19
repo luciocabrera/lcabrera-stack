@@ -264,6 +264,83 @@ gives: a boundary that has to be re-argued per configuration is one that spreads
 **Repeating every level on every row** instead of carrying. Not rejected —
 retained as the stated fallback if either carrying requirement proves unworkable.
 
+## Amendments
+
+**2026-08-19 — the fold control follows the drawn cell (#802).** The primary
+decision is unchanged: one column per key, the value in its own column, ancestors
+carried rather than restated. What this settles is the thing that decision moved
+and did not re-home — **where the control that folds a level lives.**
+
+### What was left behind
+
+Putting the identity in the key columns left the chevron where the hierarchy
+column had it: on whichever row `resolveTableGroupTree` reported as owning loaded
+children. Under a rollup that is the **subtotal**, because a subtotal is emitted
+_after_ the rows it totals (#570) and is therefore their tree parent. So the
+label of a group appeared at the top of its block and the control for it sat at
+the bottom — on a group longer than the viewport, off-screen entirely.
+
+### The decision
+
+**A group's fold control renders in the cell where that group's key is drawn.**
+A row states its ancestors and does not own them, so those are the levels it
+folds; the level it _does_ own is answered separately, below. `carriedGroupKeys`
+is the only predicate — a carried cell renders no control, exactly as it renders
+no label. No second notion of "first row of the group" is introduced, because
+two predicates that must agree is how this drifted the first time.
+
+**A row skips its own group only when it is a subtotal, and only while that group
+is open.** The `isSubtotal` half is load-bearing and was found by breaking it:
+every other group row _precedes_ what it owns, so folding itself from its own
+cell already puts the control at the top, and a rule stated as "a row never folds
+itself" takes the chevron away from an ordinary grouped grid entirely. The
+`isCollapsed` half is what keeps a folded group reopenable — once it folds, every
+row inside it is hidden and the subtotal is the only row left.
+
+**A subtotal that offers no control renders the reserved box, empty** — the same
+spacer any non-openable row has always drawn. Only some rows of a key column
+offer a control, so a cell that dropped the box would sit a chevron's width off
+from its siblings in the same column. No row's height changes; the box is inline.
+
+### The tab-stop model, restated because it constrains this
+
+ADR-062 gives the grid exactly one roving tab stop, addressed by row key plus
+column key. **This amendment adds no tab stops and no ARIA.** The chevron is
+`aria-hidden` and is not a button — unchanged from the original placement — so a
+row that now draws three of them is still one cell-addressed stop per cell.
+
+That is also the answer to the ambiguity a multi-control row would otherwise
+create: **`aria-expanded` stays on the row and keeps describing the row's own
+group only.** A row does not report its ancestors' states, because in a treegrid
+`aria-expanded` means "this row's children are shown" and an ancestor's children
+are not this row's. The ancestor chevrons are pointer affordances that the
+accessibility tree does not see, and the keyboard reaches the same folds through
+the cell it is already in: **`ArrowLeft`/`ArrowRight` act on the level the focused
+column holds**, falling back to the row where that column holds none. Without
+that the two paths would disagree on every row that states an ancestor.
+
+### Its interaction with the drill (#777), decided rather than discovered
+
+One row can carry ancestor folds and, on its own innermost level, a drill. They
+never compete for the same cell — a fold belongs to a level the row does not own,
+a drill to the one it does — so the only question is a leaf whose drilled rows are
+already spliced in, which owns loaded children _and_ is drillable. **The drill
+answers there**, because it reports a group as open from the moment the fetch
+starts rather than when its rows arrive (ADR-079); a fold derived from the
+collapsed set alone would call it shut while its spinner showed.
+
+### What this deliberately does not preserve
+
+#802 asked for "exactly one row per group offers the control". That holds for the
+ordinary case and **not** for the two restatements ADR-080 already specifies: the
+virtualization window's first row refills carried levels, and a group row
+following a drilled detail block refills them too. Both now restate the _control_
+along with the label, and that is the intended reading rather than a concession —
+a restated level whose chevron was suppressed would be an inert copy of a live
+label elsewhere on screen. In the window-first case it is the point: it is what
+keeps a control on screen for a group whose first row has been scrolled past,
+which is the defect this amendment exists to fix.
+
 ## A note on reading this record
 
 `docs:verify` does not gate code citations inside `decisions/`, by design: an ADR

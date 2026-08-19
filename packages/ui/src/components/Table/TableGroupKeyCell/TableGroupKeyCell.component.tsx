@@ -6,6 +6,7 @@ import { accessibility } from '#ui/design-system/tokens/commons.stylex';
 import type { TableGroupKeyCellProps } from './TableGroupKeyCell.types';
 
 import { tableGroupKeyCellStyles } from './TableGroupKeyCell.stylex';
+import { resolveGroupKeyCellDisclosure } from './utils/resolveGroupKeyCellDisclosure.util';
 import { resolveGroupKeyCellText } from './utils/resolveGroupKeyCellText.util';
 
 /**
@@ -31,10 +32,18 @@ import { resolveGroupKeyCellText } from './utils/resolveGroupKeyCellText.util';
  * value goes in visually-hidden text, which is what keeps the row a complete
  * sentence to a screen reader while staying quiet on screen.
  *
- * The disclosure chevron leads the row's **innermost** filled level and is the
- * row's only pointer path to expansion — see `TableGroupDisclosure` for why it
- * is not a button. The innermost level is never carried, so the chevron always
- * has a drawn cell to sit in.
+ * **A fold control leads the level it folds, in that level's own column**
+ * (#802). A row states its ancestors and does not own them, so those are the
+ * levels it can fold; its own innermost level offers a drill instead, where the
+ * route serves one (ADR-079). `resolveGroupKeyCellDisclosure` decides which of
+ * the two a cell draws — see `TableGroupDisclosure` for why neither is a
+ * button.
+ *
+ * **Every drawn key cell reserves the chevron's box, filled or not.** Only some
+ * rows of a key column offer a control — a subtotal does not fold the level it
+ * totals while that level is open — and without the reserved space those rows'
+ * labels would sit a chevron's width off from their siblings' in the same
+ * column.
  */
 export const TableGroupKeyCell = ({
   columnKey,
@@ -63,14 +72,22 @@ export const TableGroupKeyCell = ({
       </span>
     );
 
+  const control = resolveGroupKeyCellDisclosure({
+    columnKey,
+    disclosure,
+    isInnermost,
+    path: summary.path,
+  });
+
   return (
     <span
       {...stylex.props(tableGroupKeyCellStyles.container)}
       data-testid='table-group-key-cell'
     >
-      {Boolean(isInnermost) && (
-        <TableGroupDisclosure disclosure={disclosure} path={summary.path} />
-      )}
+      <TableGroupDisclosure
+        disclosure={control?.disclosure}
+        path={control?.path ?? summary.path}
+      />
       <span
         {...stylex.props(
           tableGroupKeyCellStyles.text,

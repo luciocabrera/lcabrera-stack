@@ -127,6 +127,7 @@ TableConfig/
 │   ├── utils/
 │   │   ├── resolveGroupTreeNodes.util.ts    → Pure: each loaded row's level, parent and visibility; group ancestry from the path, detail rows from the nearest group above
 │   │   ├── resolveTableGroupTree.util.ts    → Pure: the rows a collapse leaves standing plus their ARIA tree metadata, with each drilled page spliced under its group; returns the caller's array by reference when there is no tree
+│   │   ├── resolveGroupLevelDisclosures.util.ts → Pure: the groups one row can fold, keyed by the column stating each level — ancestors, plus its own only when it is a collapsed subtotal (ADR-080 amendment)
 │   │   ├── toggleCollapsedGroupPath.util.ts → Pure: one group's expansion flipped, as a new set
 │   │   ├── pruneCollapsedGroupPaths.util.ts → Pure: drop collapsed paths the new rows no longer carry; same instance back when nothing changed
 │   │   ├── isDrillableGroupPath.util.ts     → Pure: whether a path names a complete, non-total grouping set — the half a path can answer

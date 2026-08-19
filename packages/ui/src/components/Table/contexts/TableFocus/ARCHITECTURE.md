@@ -55,6 +55,7 @@ TableFocus/
             ├── resolveGridFocusKey.util.ts       → the keyboard map, unclamped
             ├── resolveGridFocusMove.util.ts      → that answer, bounded by this grid
             ├── resolveGroupExpansionKey.util.ts  → is this key a tree expansion rather than a move (ADR-067)
+            ├── resolveFocusedGroupFold.util.ts   → which group the expansion keys act on: the level the focused column holds, else the row's own (ADR-080 amendment)
             ├── resolveGridFocusContext.util.ts   → the four snapshots, derived once; `data` is the visible rows
             ├── resolveFocusedRowIndex.util.ts    → recover the target's index in current data
             ├── getGridColumnKeys.util.ts         → navigable columns, in painted order

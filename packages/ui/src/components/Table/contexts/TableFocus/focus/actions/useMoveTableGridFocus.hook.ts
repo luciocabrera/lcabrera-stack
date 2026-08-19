@@ -11,6 +11,7 @@ import {
   commitTableFocusTarget,
   getGridPageRows,
   resolveFocusedGridCell,
+  resolveFocusedGroupFold,
   resolveGridFocusContext,
   resolveGridFocusMove,
   resolveGroupExpansionKey,
@@ -73,16 +74,22 @@ export const useMoveTableGridFocus = <
       rowMeta,
     });
 
+    const fold = resolveFocusedGroupFold({
+      columnKey: focusState.columnKey,
+      groupPath: focusedGroupPath,
+      meta: focusedMeta,
+    });
+
     const expansion = resolveGroupExpansionKey({
-      hasChildren: focusedMeta?.hasChildren ?? false,
-      isDrillable: focusedMeta?.isDrillable ?? false,
-      isExpanded: focusedMeta?.isExpanded ?? false,
+      hasChildren: fold.hasChildren,
+      isDrillable: fold.isDrillable,
+      isExpanded: fold.isExpanded,
       isGroupRow: hasFocusedCell && focusedGroupPath !== undefined,
       key,
     });
 
-    if (expansion !== undefined && focusedGroupPath !== undefined) {
-      toggleGroupExpansion(focusedGroupPath);
+    if (expansion !== undefined && fold.path !== undefined) {
+      toggleGroupExpansion(fold.path);
 
       return true;
     }

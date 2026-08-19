@@ -2,6 +2,7 @@ import type { TableGroupDrill } from '#ui/components/Table/Table.types';
 
 import { getTableGroupRowSummary } from '#ui/components/Table/utils/getTableGroupRowSummary.util';
 
+import type { TableGroupLevelDisclosure } from './resolveGroupLevelDisclosures.util';
 import type { TableGroupTreeRowMeta } from './resolveTableGroupTree.util';
 
 import { resolveDrilledRows } from './resolveDrilledRows.util';
@@ -22,6 +23,7 @@ type ResolveDrilledBlockArgs = {
 };
 
 const NOTHING: readonly DrilledEntry[] = [];
+const NO_LEVEL_DISCLOSURES: readonly TableGroupLevelDisclosure[] = [];
 
 /**
  * The rows one group contributes below itself, each paired with its tree
@@ -63,6 +65,9 @@ export const resolveDrilledBlock = ({
       // among each other: they are a set of siblings under it, not members of
       // the group row's own set.
       level: level + 1,
+      // A drilled row is a detail row: it has no path, so no level of it is
+      // stated in a key column and there is nothing here to fold.
+      levelDisclosures: NO_LEVEL_DISCLOSURES,
       pathKey: undefined,
       posInSet: index + 1,
       setSize: drilled.length,

@@ -32,6 +32,7 @@ const META: readonly TableGroupTreeRowMeta[] = [
     isDrillable: false,
     isExpanded: true,
     level: 1,
+    levelDisclosures: [],
     pathKey: 'city:Paris',
     posInSet: 1,
     setSize: 1,
