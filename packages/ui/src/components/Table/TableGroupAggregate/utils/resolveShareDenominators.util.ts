@@ -90,10 +90,13 @@ const sumLeafAggregates = ({
  * explicit absence for a missing entry — `0` would divide to `Infinity` and
  * render as a number nobody computed (#648).
  *
- * Deriving this client-side is sound because a grouped read is whole
- * (`hasMore: false`, ADR-059), so these summaries are every row there is.
- * `Table.shareOfTotal.test.tsx` pins that: a partial read yields an absence,
- * not a plausible wrong number.
+ * **Deriving this client-side is sound only while a grouped read is whole**
+ * (`hasMore: false`, ADR-059), and this function cannot check that: it sees the
+ * summaries it is handed and no indication of whether they are all of them. Fed
+ * a partial page it computes a denominator from the rows present and returns a
+ * plausible wrong number — no absence, no warning. If a grouped read ever gains
+ * pagination, the share has to be reconsidered here rather than expected to
+ * fail loudly (ADR-086).
  */
 export const resolveShareDenominators = ({
   shares,
