@@ -29,8 +29,9 @@ and names the gesture that retries — closing and reopening the group. Nothing
 retries on the user's behalf, which is what keeps a bounded read bounded.
 
 **Accessibility.** A drillable leaf now carries `aria-expanded`, reading `false`
-until something has been fetched, and responds to `ArrowRight`/`ArrowLeft` like
-any other tree node. The hand-off is a real link but is **not** a tab stop — the
+until the group has been opened — it flips when the drill is asked for, not when
+the rows land, because the loading and failure rows are themselves content under
+it — and responds to `ArrowRight`/`ArrowLeft` like any other tree node. The hand-off is a real link but is **not** a tab stop — the
 grid has exactly one (ADR-062) — and is reached with `Enter` on the focused
 cell, which now follows any linked cell's link.
 
