@@ -81,7 +81,7 @@ Then:
 - **Validate every issue body** against the repo standard:
 
   ```bash
-  node scripts/verify-issue-body.mjs --body-file <path>
+  vp run issue:verify -- --body-file <path>
   ```
 
   It refuses paths outside the repo, so stage drafts in `.tmp/` rather than a

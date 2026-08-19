@@ -13,8 +13,8 @@
  * text never reaches a shell.
  *
  * Usage:
- *   ISSUE_BODY=… node scripts/verify-issue-body.mjs
- *   node scripts/verify-issue-body.mjs --body-file issue.md
+ *   ISSUE_BODY=… repo-verify-issue
+ *   repo-verify-issue --body-file issue.md
  *
  * Exit codes: 0 = valid, 1 = a required section is missing.
  */

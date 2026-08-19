@@ -6,11 +6,7 @@ status: active
 branch: feat/798-repo-standards-conventions
 area:
   - packages/repo-standards/**
-  - scripts/verify-commit-msg.mjs
-  - scripts/verify-branch-name.mjs
-  - scripts/verify-pr.mjs
-  - scripts/verify-issue-body.mjs
-  - scripts/lib/commit-convention*
+  - scripts/lib/**
 started: 2026-08-19
 updated: 2026-08-19
 plan: (none)

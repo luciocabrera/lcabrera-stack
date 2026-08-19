@@ -15,8 +15,8 @@
  * `BRANCH_NAME`, then `git rev-parse --abbrev-ref HEAD`.
  *
  * Usage:
- *   node scripts/verify-branch-name.mjs
- *   node scripts/verify-branch-name.mjs --branch feat/123-add-pagination
+ *   repo-verify-branch
+ *   repo-verify-branch --branch feat/123-add-pagination
  *
  * Exit codes: 0 = valid or exempt, 1 = does not conform.
  */

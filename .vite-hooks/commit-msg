@@ -1,1 +1,1 @@
-node scripts/verify-commit-msg.mjs "$1"
+node node_modules/@repo/repo-standards/scripts/verify-commit-msg.mjs "$1"

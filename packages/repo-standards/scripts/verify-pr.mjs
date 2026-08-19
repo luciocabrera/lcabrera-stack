@@ -12,8 +12,8 @@
  * `--body-file <path>` and `--base <branch>` to simulate a PR without opening one.
  *
  * Usage:
- *   PR_TITLE=… PR_BODY=… PR_BASE=main node scripts/verify-pr.mjs
- *   node scripts/verify-pr.mjs --title "feat(ci): x" --body-file body.md --base main
+ *   PR_TITLE=… PR_BODY=… PR_BASE=main repo-verify-pr
+ *   repo-verify-pr --title "feat(ci): x" --body-file body.md --base main
  *
  * Exit codes: 0 = valid (warnings allowed), 1 = a rule was broken.
  */

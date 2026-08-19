@@ -12,8 +12,8 @@
  * `Co-Authored-By:` trailer are never inspected or rejected.
  *
  * Usage:
- *   node scripts/verify-commit-msg.mjs <path-to-message-file>
- *   node scripts/verify-commit-msg.mjs -        (read the message from stdin)
+ *   repo-verify-commit <path-to-message-file>
+ *   repo-verify-commit -        (read the message from stdin)
  *
  * Exit codes: 0 = valid or skipped (warnings allowed), 1 = a rule was broken.
  */
@@ -49,9 +49,7 @@ const readMessage = (source) =>
 const main = () => {
   const source = positional(2);
   if (source === undefined) {
-    console.error(
-      'Usage: node scripts/verify-commit-msg.mjs <message-file | ->',
-    );
+    console.error('Usage: repo-verify-commit <message-file | ->');
     process.exitCode = 1;
     return;
   }

@@ -3,9 +3,9 @@ name: PR Standards
 # Enforces the repo's commit + PR conventions on every pull request. The local
 # .vite-hooks/commit-msg hook gives the same feedback, but it can be skipped with
 # --no-verify, so this job is the real wall. Two checks, ONE spec
-# (scripts/lib/commit-convention.mjs):
-#   - the PR title + description (verify-pr.mjs);
-#   - every non-merge commit in the PR range (verify-commit-msg.mjs on stdin).
+# (packages/repo-standards/scripts/commit-convention.mjs):
+#   - the PR title + description (repo-verify-pr);
+#   - every non-merge commit in the PR range (repo-verify-commit on stdin).
 # `edited` re-runs the check when the title/description is changed after opening;
 # without it a bad title "fixed" by an edit would keep a stale red check. Both
 # scripts use only Node built-ins, so there is no workspace install step.
@@ -41,7 +41,7 @@ jobs:
         # not the topic branch and would always read as exempt.
         env:
           BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
-        run: node scripts/verify-branch-name.mjs
+        run: vp run branch:verify
 
       - name: Validate PR title, description and base branch
         # Title/body/base come in through env, never a shell interpolation, so no
@@ -51,7 +51,7 @@ jobs:
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_BODY: ${{ github.event.pull_request.body }}
           PR_BASE: ${{ github.event.pull_request.base.ref }}
-        run: node scripts/verify-pr.mjs
+        run: vp run pr:verify
 
       - name: Validate every commit message in the PR
         # --no-merges drops the Merge commits; each surviving message is piped to
@@ -64,7 +64,10 @@ jobs:
           set -o pipefail
           status=0
           for sha in $(git rev-list --no-merges "$BASE_SHA..$HEAD_SHA"); do
-            if ! git log -1 --format=%B "$sha" | node scripts/verify-commit-msg.mjs -; then
+            # The bin directly rather than through the task runner: this runs
+            # once per commit in the range, and the runner would rebuild its
+            # task graph on every iteration.
+            if ! git log -1 --format=%B "$sha" | node_modules/.bin/repo-verify-commit -; then
               echo "::error::commit $sha has a non-conforming message"
               status=1
             fi
