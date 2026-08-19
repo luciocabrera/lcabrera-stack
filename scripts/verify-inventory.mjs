@@ -25,7 +25,7 @@
  * undocumented export exists, or the tracked file list could not be read.
  */
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { errorMessage } from '../packages/repo-standards/scripts/error-message.mjs';
@@ -84,7 +84,7 @@ const writeBaseline = (findings) => {
     BASELINE_PATH,
     `${JSON.stringify(toBaseline(findings), undefined, 2)}\n`,
   );
-  const relativeBaselinePath = BASELINE_PATH.replace(`${REPO_ROOT}/`, '');
+  const relativeBaselinePath = relative(REPO_ROOT, BASELINE_PATH);
   console.log(
     `Wrote ${relativeBaselinePath}: ${findings.length} undocumented export(s) grandfathered.`,
   );
@@ -109,11 +109,12 @@ const reportNewFindings = (findings) => {
     console.error(`  - ${describeFinding(finding)}`);
   }
   console.error(
-    '\nAdd it to the inventory (a table row for `ui`, or a backtick mention in the',
+    '\nAdd it to the inventory (a table row for `ui`/the app, or a backtick',
   );
   console.error(
-    'relevant prose for `server`) — see AGENTS.md § "Reuse Before You Build".',
+    'mention in the relevant prose for `server`) — see AGENTS.md § "Reuse',
   );
+  console.error('Before You Build".');
   console.error(
     'Pre-existing gap this gate should not block on right now? Grandfather it with:',
   );
