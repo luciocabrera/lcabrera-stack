@@ -1,0 +1,639 @@
+{
+  "apps/react-router/src/auth/buildLoginRedirectUrl.util.ts": [
+    "buildLoginRedirectUrl"
+  ],
+  "apps/react-router/src/auth/decodeAuthClaims.util.ts": ["decodeAuthClaims"],
+  "apps/react-router/src/auth/parseAuthToken.util.ts": ["parseAuthToken"],
+  "apps/react-router/src/auth/readAuthCookie.util.ts": ["readAuthCookie"],
+  "apps/react-router/src/features/showcase/ShowcasePage/showcaseData.util.ts": [
+    "FAKE_API_DELAY_MS",
+    "FETCH_DELAY_MS",
+    "FETCH_PAGE_SIZE",
+    "getTableDataPromise",
+    "LARGE_DATASET",
+    "resetTableDataPromise",
+    "SHOWCASE_COLUMNS_STATE",
+    "SHOWCASE_META_STATE",
+    "STATIC_FRUITS"
+  ],
+  "apps/react-router/src/routes/api/car-sales-paginated/parseCarSalesPageParams.util.ts": [
+    "parseCarSalesPageParams"
+  ],
+  "apps/react-router/src/routes/api/enterprise-orders-delete/parseOrderId.util.ts": [
+    "parseOrderId"
+  ],
+  "apps/react-router/src/routes/api/enterprise-orders-paginated/parseOrdersPageParams.util.ts": [
+    "parseOrdersPageParams"
+  ],
+  "apps/react-router/src/routes/api/wide-alltypes-150-paginated/parseWideAlltypes150PageParams.util.ts": [
+    "parseWideAlltypes150PageParams"
+  ],
+  "apps/react-router/src/routes/car-sales/config/toCarSaleRow.util.ts": [
+    "toCarSaleRow"
+  ],
+  "apps/react-router/src/routes/enterprise-orders/.server/toOrderDrillRead.util.ts": [
+    "toOrderDrillRead"
+  ],
+  "apps/react-router/src/routes/enterprise-orders/config/deriveOrderTotals.util.ts": [
+    "deriveOrderTotals"
+  ],
+  "apps/react-router/src/routes/enterprise-orders/config/formatOrderNumber.util.ts": [
+    "formatOrderNumber"
+  ],
+  "apps/react-router/src/routes/enterprise-orders/config/isEnterpriseOrdersResponse.util.ts": [
+    "isEnterpriseOrdersResponse"
+  ],
+  "apps/react-router/src/routes/enterprise-orders/config/parseOrderFormData.util.ts": [
+    "parseOrderFormData"
+  ],
+  "apps/react-router/src/routes/enterprise-orders/config/readOrderFormValues.util.ts": [
+    "readOrderFormValues"
+  ],
+  "apps/react-router/src/routes/enterprise-orders/config/toOrderColumnValues.util.ts": [
+    "toOrderColumnValues"
+  ],
+  "apps/react-router/src/routes/enterprise-orders/config/toOrderFieldErrors.util.ts": [
+    "toOrderFieldErrors"
+  ],
+  "apps/react-router/src/routes/enterprise-orders/config/toOrderFormValues.util.ts": [
+    "toOrderFormValues"
+  ],
+  "apps/react-router/src/routes/enterprise-orders/config/toOrderInsertValues.util.ts": [
+    "toOrderInsertValues"
+  ],
+  "apps/react-router/src/routes/enterprise-orders/config/toOrderKeysetCursor.util.ts": [
+    "toOrderKeysetCursor"
+  ],
+  "apps/react-router/src/routes/enterprise-orders/config/toOrderUpdateValues.util.ts": [
+    "toOrderUpdateValues"
+  ],
+  "apps/react-router/src/routes/enterprise-orders/utils/buildAddressLocalityRows.util.ts": [
+    "buildAddressLocalityRows"
+  ],
+  "apps/react-router/src/routes/enterprise-orders/utils/orderFormFields.util.ts": [
+    "buildOrderFormFields"
+  ],
+  "apps/react-router/src/routes/enterprise-orders/utils/parseOrderIdParam.util.ts": [
+    "parseOrderIdParam"
+  ],
+  "apps/react-router/src/routes/login/resolveRedirectTo.util.ts": [
+    "resolveRedirectTo"
+  ],
+  "apps/react-router/src/routes/login/toLoginFieldErrors.util.ts": [
+    "toLoginFieldErrors"
+  ],
+  "apps/react-router/src/routes/wide-alltypes-150/config/serializeDatabaseValue.util.ts": [
+    "serializeDatabaseValue"
+  ],
+  "apps/react-router/src/routes/wide-alltypes-150/config/toHexString.util.ts": [
+    "toHexString"
+  ],
+  "apps/react-router/src/routes/wide-alltypes-150/config/toWideAlltypes150Row.util.ts": [
+    "toWideAlltypes150Row"
+  ],
+  "packages/server/src/db/group-query-builder/assert-group-key-periods.util.ts": [
+    "assertGroupKeyPeriods"
+  ],
+  "packages/server/src/db/query-builder/is-unary-filter.util.ts": [
+    "isUnaryFilter"
+  ],
+  "packages/server/src/db/rollback-transaction.util.ts": [
+    "rollbackTransaction"
+  ],
+  "packages/server/src/db/run-query.util.ts": ["runQuery"],
+  "packages/ui/src/components/AppNavigation/utils/getBodyDensityStyle.util.ts": [
+    "getBodyDensityStyle"
+  ],
+  "packages/ui/src/components/AppNavigation/utils/getBrandIconSizeStyle.util.ts": [
+    "getBrandIconSizeStyle"
+  ],
+  "packages/ui/src/components/AppNavigation/utils/getHeaderDensityStyle.util.ts": [
+    "getHeaderDensityStyle"
+  ],
+  "packages/ui/src/components/AppNavigation/utils/resolveExpandButtonLabel.util.ts": [
+    "resolveExpandButtonLabel"
+  ],
+  "packages/ui/src/components/AppNavigation/utils/resolveThemeLabel.util.ts": [
+    "resolveThemeLabel"
+  ],
+  "packages/ui/src/components/Button/utils/getButtonElement.util.tsx": [
+    "getButtonElement"
+  ],
+  "packages/ui/src/components/DraggableList/DraggableListItem/utils/handleDragOver.util.ts": [
+    "handleDragOver"
+  ],
+  "packages/ui/src/components/Form/contexts/FormContext/utils/getInitialFieldsState.util.ts": [
+    "getInitialFieldsState"
+  ],
+  "packages/ui/src/components/Form/contexts/FormContext/utils/getInitialFormMetaState.util.ts": [
+    "getInitialFormMetaState"
+  ],
+  "packages/ui/src/components/Form/fields/CurrencyField/utils/getCurrencySymbol.util.ts": [
+    "getCurrencySymbol"
+  ],
+  "packages/ui/src/components/Form/fields/FormFieldDisplay/utils/formatFieldDisplayValue.util.ts": [
+    "formatFieldDisplayValue"
+  ],
+  "packages/ui/src/components/Form/fields/FormFieldDisplay/utils/resolveOptionLabels.util.ts": [
+    "resolveOptionLabels"
+  ],
+  "packages/ui/src/components/Form/fields/FormFieldDisplay/utils/stringifyLeafValue.util.ts": [
+    "stringifyLeafValue"
+  ],
+  "packages/ui/src/components/Form/FormFields/utils/hasScrollOwningChild.util.ts": [
+    "hasScrollOwningChild"
+  ],
+  "packages/ui/src/components/Navbar/NavbarItem/utils/getCompactItemStyle.util.ts": [
+    "getCompactItemStyle"
+  ],
+  "packages/ui/src/components/Navbar/utils/getCompactControlStyle.util.ts": [
+    "getCompactControlStyle"
+  ],
+  "packages/ui/src/components/NavLink/utils/getClassName.util.ts": [
+    "getClassName"
+  ],
+  "packages/ui/src/components/NotificationCenter/utils/getAccentStyle.util.ts": [
+    "getAccentStyle"
+  ],
+  "packages/ui/src/components/NotificationCenter/utils/getNotificationDismissIconStyle.util.ts": [
+    "getNotificationDismissIconStyle"
+  ],
+  "packages/ui/src/components/NotificationCenter/utils/groupNotificationsByPlacement.util.ts": [
+    "groupNotificationsByPlacement"
+  ],
+  "packages/ui/src/components/NotificationCenter/utils/sortNotificationsByNewest.util.ts": [
+    "sortNotificationsByNewest"
+  ],
+  "packages/ui/src/components/Settings/utils/getSettingsDraftChanges.util.ts": [
+    "getSettingsDraftChanges"
+  ],
+  "packages/ui/src/components/Settings/utils/toDraft.util.ts": ["toDraft"],
+  "packages/ui/src/components/Settings/utils/toGlobalNavigationPreferencesUpdate.util.ts": [
+    "toGlobalNavigationPreferencesUpdate"
+  ],
+  "packages/ui/src/components/Settings/utils/toGlobalPinningPreferencesUpdate.util.ts": [
+    "toGlobalPinningPreferencesUpdate"
+  ],
+  "packages/ui/src/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils/getClosedColumnSettingsStatePatch.util.ts": [
+    "getClosedColumnSettingsStatePatch"
+  ],
+  "packages/ui/src/components/Table/ColumnSettingsDrawer/DetailsSection/utils/getBadgeStyle.util.ts": [
+    "getBadgeStyle"
+  ],
+  "packages/ui/src/components/Table/ColumnSettingsDrawer/GeneralSection/utils/resolvePresetColumnWidth.util.ts": [
+    "resolvePresetColumnWidth"
+  ],
+  "packages/ui/src/components/Table/contexts/FiltersData/filters/actions/clearPrefetchIfPresent.util.ts": [
+    "clearPrefetchIfPresent"
+  ],
+  "packages/ui/src/components/Table/contexts/FiltersData/filters/actions/getTotalRows.util.ts": [
+    "getTotalRows"
+  ],
+  "packages/ui/src/components/Table/contexts/FiltersData/filters/actions/maybePrefetchFilterPage.util.ts": [
+    "maybePrefetchFilterPage"
+  ],
+  "packages/ui/src/components/Table/contexts/FiltersData/filters/actions/setFilterSlice.util.ts": [
+    "setFilterSlice"
+  ],
+  "packages/ui/src/components/Table/contexts/FiltersData/filters/actions/shouldSkipInitialFetch.util.ts": [
+    "shouldSkipInitialFetch"
+  ],
+  "packages/ui/src/components/Table/contexts/FiltersData/filters/utils/getInitialFiltersDataState.util.ts": [
+    "getInitialFiltersDataState"
+  ],
+  "packages/ui/src/components/Table/contexts/TableConfig/columns/actions/utils/commitResolvedPinningState.util.ts": [
+    "commitResolvedPinningState"
+  ],
+  "packages/ui/src/components/Table/contexts/TableConfig/columns/actions/utils/commitResolvedVisibilityState.util.ts": [
+    "commitResolvedVisibilityState"
+  ],
+  "packages/ui/src/components/Table/contexts/TableConfig/columns/actions/utils/getPinningActionContext.util.ts": [
+    "getPinningActionContext"
+  ],
+  "packages/ui/src/components/Table/contexts/TableConfig/columns/actions/utils/resolveColumnFilterUpdate.util.ts": [
+    "resolveColumnFilterUpdate"
+  ],
+  "packages/ui/src/components/Table/contexts/TableConfig/columns/actions/utils/resolveColumnPinningUpdate.util.ts": [
+    "resolveColumnPinningUpdate"
+  ],
+  "packages/ui/src/components/Table/contexts/TableConfig/columns/actions/utils/resolveColumnSizingUpdate.util.ts": [
+    "resolveColumnSizingUpdate"
+  ],
+  "packages/ui/src/components/Table/contexts/TableConfig/columns/actions/utils/resolveColumnSortingUpdate.util.ts": [
+    "resolveColumnSortingUpdate"
+  ],
+  "packages/ui/src/components/Table/contexts/TableConfig/columns/actions/utils/resolveColumnVisibilityUpdate.util.ts": [
+    "resolveColumnVisibilityUpdate"
+  ],
+  "packages/ui/src/components/Table/contexts/TableConfig/columns/actions/utils/writeColumnSizing.util.ts": [
+    "writeColumnSizing"
+  ],
+  "packages/ui/src/components/Table/contexts/TableConfig/expansion/utils/resolveGroupTreeNodes.util.ts": [
+    "ROOT_PARENT_KEY"
+  ],
+  "packages/ui/src/components/Table/contexts/TableConfig/meta/actions/utils/getNextStatePatch.util.ts": [
+    "getNextStatePatch"
+  ],
+  "packages/ui/src/components/Table/contexts/TableConfig/meta/actions/utils/getNextToggleColumnSettingsStatePatch.util.ts": [
+    "getNextToggleColumnSettingsStatePatch"
+  ],
+  "packages/ui/src/components/Table/contexts/TableConfig/utils/getInitialExpansionState.util.ts": [
+    "getInitialExpansionState"
+  ],
+  "packages/ui/src/components/Table/contexts/TableConfig/utils/getInitialMetaState.util.ts": [
+    "getInitialMetaState"
+  ],
+  "packages/ui/src/components/Table/contexts/TableData/data/actions/commitFetchMoreError.util.ts": [
+    "commitFetchMoreError"
+  ],
+  "packages/ui/src/components/Table/contexts/TableData/data/actions/commitFetchMoreSuccess.util.ts": [
+    "commitFetchMoreSuccess"
+  ],
+  "packages/ui/src/components/Table/contexts/TableData/data/actions/executeFetchMore.util.ts": [
+    "executeFetchMore"
+  ],
+  "packages/ui/src/components/Table/contexts/TableData/data/actions/fetchMoreResponse.util.ts": [
+    "fetchMoreResponse"
+  ],
+  "packages/ui/src/components/Table/contexts/TableData/data/actions/getFetchMoreRuntime.util.ts": [
+    "getFetchMoreRuntime"
+  ],
+  "packages/ui/src/components/Table/contexts/TableData/data/actions/maybePrefetchNextPage.util.ts": [
+    "maybePrefetchNextPage"
+  ],
+  "packages/ui/src/components/Table/contexts/TableFocus/focus/actions/utils/resolveFocusedGridCell.util.ts": [
+    "resolveFocusedGridCell"
+  ],
+  "packages/ui/src/components/Table/contexts/TableFocus/focus/actions/utils/resolveGridFocusContext.util.ts": [
+    "resolveGridFocusContext"
+  ],
+  "packages/ui/src/components/Table/filters/DateFilterInput/utils/computeInitialEndDate.util.ts": [
+    "computeInitialEndDate"
+  ],
+  "packages/ui/src/components/Table/filters/DateFilterInput/utils/computeInitialValue.util.ts": [
+    "computeInitialValue"
+  ],
+  "packages/ui/src/components/Table/filters/FilterInputs/utils/getDraftedText.util.ts": [
+    "getDraftedText"
+  ],
+  "packages/ui/src/components/Table/filters/FilterInputs/utils/getOperatorFromFilter.util.ts": [
+    "getOperatorFromFilter"
+  ],
+  "packages/ui/src/components/Table/filters/FilterInputs/utils/getOperatorOptions.util.ts": [
+    "getOperatorOptions"
+  ],
+  "packages/ui/src/components/Table/filters/FilterInputs/utils/getSelectedOperatorLabel.util.ts": [
+    "getSelectedOperatorLabel"
+  ],
+  "packages/ui/src/components/Table/filters/FilterInputs/utils/resolveDateOperatorChange.util.ts": [
+    "resolveDateOperatorChange"
+  ],
+  "packages/ui/src/components/Table/filters/FilterInputs/utils/resolveNumberOperatorChange.util.ts": [
+    "resolveNumberOperatorChange"
+  ],
+  "packages/ui/src/components/Table/filters/FilterInputs/utils/resolveOperatorChange.util.ts": [
+    "resolveOperatorChange"
+  ],
+  "packages/ui/src/components/Table/filters/FilterInputs/utils/resolveTextOperatorChange.util.ts": [
+    "resolveTextOperatorChange"
+  ],
+  "packages/ui/src/components/Table/filters/NumberFilterInput/utils/computeInitialMaxValue.util.ts": [
+    "computeInitialMaxValue"
+  ],
+  "packages/ui/src/components/Table/filters/NumberFilterInput/utils/computeInitialValue.util.ts": [
+    "computeInitialValue"
+  ],
+  "packages/ui/src/components/Table/hooks/utils/activateGridCellLink.util.ts": [
+    "activateGridCellLink"
+  ],
+  "packages/ui/src/components/Table/hooks/utils/createResizeStartData.util.ts": [
+    "createResizeStartData"
+  ],
+  "packages/ui/src/components/Table/hooks/utils/resolveKeyboardResizeAction.util.ts": [
+    "resolveKeyboardResizeAction"
+  ],
+  "packages/ui/src/components/Table/hooks/utils/resolveResizeWidth.util.ts": [
+    "resolveResizeWidth"
+  ],
+  "packages/ui/src/components/Table/TableActionsPopover/utils/applyRepositionOutcome.util.ts": [
+    "applyRepositionOutcome"
+  ],
+  "packages/ui/src/components/Table/TableActionsPopover/utils/computeMenuPosition.util.ts": [
+    "computeMenuPosition"
+  ],
+  "packages/ui/src/components/Table/TableActionsPopover/utils/createViewportRect.util.ts": [
+    "createViewportRect"
+  ],
+  "packages/ui/src/components/Table/TableActionsPopover/utils/getIsPopoverOpen.util.ts": [
+    "getIsPopoverOpen"
+  ],
+  "packages/ui/src/components/Table/TableActionsPopover/utils/getTableActionsPopoverPosition.util.ts": [
+    "getTableActionsPopoverPosition"
+  ],
+  "packages/ui/src/components/Table/TableActionsPopover/utils/handlePopoverToggle.util.ts": [
+    "handlePopoverToggle"
+  ],
+  "packages/ui/src/components/Table/TableActionsPopover/utils/handleToggleMenu.util.ts": [
+    "handleToggleMenu"
+  ],
+  "packages/ui/src/components/Table/TableActionsPopover/utils/resolveOpenMenuReposition.util.ts": [
+    "resolveOpenMenuReposition"
+  ],
+  "packages/ui/src/components/Table/TableBody/utils/resolveDrillCellChildren.util.tsx": [
+    "resolveDrillCellChildren"
+  ],
+  "packages/ui/src/components/Table/TableBody/utils/resolveGroupCellChildren.util.tsx": [
+    "EMPTY_CELL",
+    "resolveGroupCellChildren"
+  ],
+  "packages/ui/src/components/Table/TableBody/utils/resolveStructuralCellChildren.util.tsx": [
+    "resolveStructuralCellChildren"
+  ],
+  "packages/ui/src/components/Table/TableBodyCell/utils/detectDataType.util.ts": [
+    "detectDataType"
+  ],
+  "packages/ui/src/components/Table/TableBodyCell/utils/getCellStyleProps.util.ts": [
+    "getCellStyleProps"
+  ],
+  "packages/ui/src/components/Table/TableBodyCell/utils/renderCellContent.util.tsx": [
+    "renderCellContent"
+  ],
+  "packages/ui/src/components/Table/TableBodyCell/utils/renderDisplayedContent.util.tsx": [
+    "renderDisplayedContent"
+  ],
+  "packages/ui/src/components/Table/TableDrillRowCell/utils/resolveDrillHandoffSearch.util.ts": [
+    "resolveDrillHandoffSearch"
+  ],
+  "packages/ui/src/components/Table/TableDrillRowCell/utils/resolveDrillShortfallText.util.ts": [
+    "resolveDrillShortfallText"
+  ],
+  "packages/ui/src/components/Table/TableGroupAggregate/utils/resolveAggregateDataType.util.ts": [
+    "resolveAggregateDataType"
+  ],
+  "packages/ui/src/components/Table/TableHeaderCell/utils/getPinnedStyle.util.ts": [
+    "getPinnedStyle"
+  ],
+  "packages/ui/src/components/Table/TableHeaderCell/utils/getShadowStyle.util.ts": [
+    "getShadowStyle"
+  ],
+  "packages/ui/src/components/Table/TableHeaderCell/utils/resolveAriaSort.util.ts": [
+    "resolveAriaSort"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/buildOrderBySorting.util.ts": [
+    "buildOrderBySorting"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/utils/getInitialModalsState.util.ts": [
+    "getInitialModalsState"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/applyPin.util.ts": [
+    "applyPin"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/buildAllOrderedColumns.util.ts": [
+    "buildAllOrderedColumns"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/createDraggableItems.util.ts": [
+    "createDraggableItems"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/getHasPinOrderConflict.util.ts": [
+    "getHasPinOrderConflict"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/getIsContiguousPin.util.ts": [
+    "getIsContiguousPin"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/getPinnedEntries.util.ts": [
+    "getPinnedEntries"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/insertAdjacentToPinnedGroup.util.ts": [
+    "insertAdjacentToPinnedGroup"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/pinAllBetween.util.ts": [
+    "pinAllBetween"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/recalculatePinSides.util.ts": [
+    "recalculatePinSides"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/resolveClosestEdgeSide.util.ts": [
+    "resolveClosestEdgeSide"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/resolveClosestSide.util.ts": [
+    "resolveClosestSide"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/resolvePinOrderConflict.util.ts": [
+    "resolvePinOrderConflict"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/restoreStaticColumnOrder.util.ts": [
+    "restoreStaticColumnOrder"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/sortPinnedKeysByOrder.util.ts": [
+    "sortPinnedKeysByOrder"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/DetailsSection/utils/buildCustomMetadataRows.util.ts": [
+    "buildCustomMetadataRows"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/DetailsSection/utils/buildIdentityRows.util.ts": [
+    "buildIdentityRows"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/DetailsSection/utils/buildRequiredRows.util.ts": [
+    "buildRequiredRows"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/DetailsSection/utils/buildTechnicalRows.util.ts": [
+    "buildTechnicalRows"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/DetailsSection/utils/formatMetadataLabel.util.ts": [
+    "formatMetadataLabel"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/DetailsSection/utils/formatMetadataValue.util.ts": [
+    "formatMetadataValue"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/DetailsSection/utils/resolveDetailsLocale.util.ts": [
+    "resolveDetailsLocale"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/FiltersSection/AddFilterSection/utils/createInitialFilter.util.ts": [
+    "createInitialFilter"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/FiltersSection/AddFilterSection/utils/getSelectedColumnLabel.util.ts": [
+    "getSelectedColumnLabel"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/FiltersSection/utils/areAllFiltersExpanded.util.ts": [
+    "areAllFiltersExpanded"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/FiltersSection/utils/isDateFilterValid.util.ts": [
+    "isDateFilterValid"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/FiltersSection/utils/isFilterValid.util.ts": [
+    "isFilterValid"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/FiltersSection/utils/isNumberFilterValid.util.ts": [
+    "isNumberFilterValid"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/FiltersSection/utils/isSelectFilterValid.util.ts": [
+    "isSelectFilterValid"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/FiltersSection/utils/isTextFilterValid.util.ts": [
+    "isTextFilterValid"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/GroupingSection/utils/toAggregateItems.util.ts": [
+    "toAggregateItems"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/GroupingSection/utils/toGroupKeyItems.util.ts": [
+    "toGroupKeyItems"
+  ],
+  "packages/ui/src/components/Table/TableSettingsDrawer/SortingSection/utils/getSelectedColumnLabel.util.ts": [
+    "getSelectedColumnLabel"
+  ],
+  "packages/ui/src/components/Table/utils/createEmptyColumnsState.util.ts": [
+    "createEmptyColumnsState"
+  ],
+  "packages/ui/src/components/Table/utils/getColumnSettingsNextStatePatch.util.ts": [
+    "getColumnSettingsNextStatePatch"
+  ],
+  "packages/ui/src/components/Table/utils/getHasQueryChanged.util.ts": [
+    "getHasQueryChanged"
+  ],
+  "packages/ui/src/components/Table/utils/getIsTableSettingsOpen.util.ts": [
+    "getIsTableSettingsOpen"
+  ],
+  "packages/ui/src/components/Table/utils/getRequiredOnLoadMore.util.ts": [
+    "getRequiredOnLoadMore"
+  ],
+  "packages/ui/src/components/Table/utils/getTableDrillRow.util.ts": [
+    "getTableDrillRow"
+  ],
+  "packages/ui/src/components/Table/utils/resolveGridRowIndexing.util.ts": [
+    "HEADER_ARIA_ROW_INDEX"
+  ],
+  "packages/ui/src/components/Table/utils/toGroupKeyColumnFilter.util.ts": [
+    "toGroupKeyColumnFilter"
+  ],
+  "packages/ui/src/components/Tooltip/TooltipContent/utils/getArrowStyle.util.ts": [
+    "getArrowStyle"
+  ],
+  "packages/ui/src/components/Tooltip/TooltipTrigger/utils/getIsNativeInteractiveElement.util.ts": [
+    "getIsNativeInteractiveElement"
+  ],
+  "packages/ui/src/components/Tooltip/utils/getArrowOffset.util.ts": [
+    "getArrowOffset"
+  ],
+  "packages/ui/src/components/TrendSparkline/utils/getSparklinePoints.util.ts": [
+    "getSparklinePoints"
+  ],
+  "packages/ui/src/components/VirtualList/contexts/data/actions/utils/resolveSelectAllFilter.util.ts": [
+    "resolveSelectAllFilter"
+  ],
+  "packages/ui/src/components/VirtualList/contexts/data/actions/utils/resolveToggleOptionFilter.util.ts": [
+    "resolveToggleOptionFilter"
+  ],
+  "packages/ui/src/components/VirtualList/contexts/utils/getInitialListDataState.util.ts": [
+    "getInitialListDataState"
+  ],
+  "packages/ui/src/components/VirtualList/contexts/utils/getInitialListState.util.ts": [
+    "getInitialListState"
+  ],
+  "packages/ui/src/components/VirtualList/utils/getFilteredOptions.util.ts": [
+    "getFilteredOptions"
+  ],
+  "packages/ui/src/components/VirtualList/utils/getIsAllSelected.util.ts": [
+    "getIsAllSelected"
+  ],
+  "packages/ui/src/components/VirtualList/utils/isClientFilterActive.util.ts": [
+    "isClientFilterActive"
+  ],
+  "packages/ui/src/components/VirtualList/utils/resolveContentMode.util.ts": [
+    "resolveContentMode"
+  ],
+  "packages/ui/src/components/VirtualList/utils/resolveIsInitialLoading.util.ts": [
+    "resolveIsInitialLoading"
+  ],
+  "packages/ui/src/components/VirtualList/utils/resolveListDerivedState.util.ts": [
+    "resolveListDerivedState"
+  ],
+  "packages/ui/src/components/VirtualSelect/contexts/utils/getInitialSelectMetaState.util.ts": [
+    "getInitialSelectMetaState"
+  ],
+  "packages/ui/src/components/VirtualSelect/utils/buildFallbackDataState.util.ts": [
+    "buildFallbackDataState"
+  ],
+  "packages/ui/src/components/VirtualSelect/utils/countVisibleTags.util.ts": [
+    "countVisibleTags"
+  ],
+  "packages/ui/src/components/VirtualSelect/utils/resolveSingleModeChange.util.ts": [
+    "resolveSingleModeChange"
+  ],
+  "packages/ui/src/components/VirtualSelect/utils/resolveTagOverflow.util.ts": [
+    "resolveTagOverflow"
+  ],
+  "packages/ui/src/components/VirtualSelect/utils/resolveVirtualSelectChange.util.ts": [
+    "resolveVirtualSelectChange"
+  ],
+  "packages/ui/src/components/VirtualSelect/utils/resolveVirtualSelectOptions.util.ts": [
+    "resolveVirtualSelectOptions"
+  ],
+  "packages/ui/src/components/VirtualSelect/utils/toOptionEntry.util.ts": [
+    "toOptionEntry"
+  ],
+  "packages/ui/src/components/VirtualSelect/VirtualSelectDropdown/utils/getDropdownStyle.util.ts": [
+    "getDropdownStyle"
+  ],
+  "packages/ui/src/components/VirtualSelect/VirtualSelectDropdown/utils/resolveDropdownPlacement.util.ts": [
+    "resolveDropdownPlacement"
+  ],
+  "packages/ui/src/components/VirtualSelect/VirtualSelectDropdown/utils/resolveDropdownStyles.util.ts": [
+    "resolveDropdownStyles"
+  ],
+  "packages/ui/src/components/VirtualSelect/VirtualSelectTrigger/utils/assignTriggerRef.util.ts": [
+    "assignTriggerRef"
+  ],
+  "packages/ui/src/components/VirtualSelect/VirtualSelectTrigger/utils/getTriggerStyleProps.util.ts": [
+    "getTriggerStyleProps"
+  ],
+  "packages/ui/src/components/VirtualSelect/VirtualSelectTrigger/utils/handleDivTriggerKeyDown.util.ts": [
+    "handleDivTriggerKeyDown"
+  ],
+  "packages/ui/src/components/VirtualSelect/VirtualSelectTrigger/utils/renderChevron.util.tsx": [
+    "renderChevron"
+  ],
+  "packages/ui/src/components/VirtualSelect/VirtualSelectTrigger/utils/renderTriggerContent.util.tsx": [
+    "renderTriggerContent"
+  ],
+  "packages/ui/src/entry/addPreloadHeaders.util.ts": ["addPreloadHeaders"],
+  "packages/ui/src/entry/buildShellStreamResponse.util.ts": [
+    "buildShellStreamResponse"
+  ],
+  "packages/ui/src/entry/createHandleRequest.util.tsx": ["createHandleRequest"],
+  "packages/ui/src/entry/getStreamTimeout.util.ts": ["getStreamTimeout"],
+  "packages/ui/src/entry/hydrateApp.util.tsx": ["hydrateApp"],
+  "packages/ui/src/routing/actions/isPersistCookieAction.util.ts": [
+    "isPersistCookieAction"
+  ],
+  "packages/ui/src/routing/actions/shouldRevalidatePersistCookieAction.util.ts": [
+    "shouldRevalidatePersistCookieAction"
+  ],
+  "packages/ui/src/routing/shared/getRootLoaderData.util.ts": [
+    "getRootLoaderData"
+  ],
+  "packages/ui/src/routing/shared/isFilterCompatibleWithColumn.util.ts": [
+    "isFilterCompatibleWithColumn"
+  ],
+  "packages/ui/src/routing/shared/sanitizeFiltersByColumns.util.ts": [
+    "sanitizeFiltersByColumns"
+  ],
+  "packages/ui/src/utils/globalSettings/isNavigationCollapsedPreference.util.ts": [
+    "isNavigationCollapsedPreference"
+  ],
+  "packages/ui/src/utils/globalSettings/isNavigationSizePreference.util.ts": [
+    "isNavigationSizePreference"
+  ],
+  "packages/ui/src/utils/globalSettings/isOrderConflictResolution.util.ts": [
+    "isOrderConflictResolution"
+  ],
+  "packages/ui/src/utils/globalSettings/isPinConflictResolution.util.ts": [
+    "isPinConflictResolution"
+  ],
+  "packages/ui/src/utils/globalSettings/isPinSide.util.ts": ["isPinSide"],
+  "packages/ui/src/utils/globalSettings/isUnpinConflictResolution.util.ts": [
+    "isUnpinConflictResolution"
+  ],
+  "packages/ui/src/utils/prefetch/clearPrefetchCache.util.ts": [
+    "clearPrefetchCache"
+  ]
+}
