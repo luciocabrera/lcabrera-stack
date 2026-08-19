@@ -1,17 +1,17 @@
 /**
  * Runs Are The Types Wrong? over a built public package
- * (scripts/verify-attw.mjs).
+ * (verify-attw.mjs).
  *
  * Answers a question the surface snapshot cannot: do the PUBLISHED types
  * actually resolve for a consumer? A subpath can have a perfectly stable surface
  * and still fail to resolve under a real project's module resolution — the
- * ESM/CJS and `.ts`-in-node_modules traps this repo already reasons about
- * (ADR-038). The three built packages are ESM-only, so the legacy `node10` and
- * `node16-cjs` findings attw emits are expected by design; only modern ESM /
- * bundler resolution reflects a consumer that could actually break.
+ * ESM/CJS and `.ts`-in-node_modules traps ADR-038 reasons about. The packages
+ * this runs over are ESM-only, so the legacy `node10` and `node16-cjs` findings
+ * attw emits are expected by design; only modern ESM / bundler resolution
+ * reflects a consumer that could actually break.
  *
  * The installed layout is built from `dist` plus the `publishConfig` manifest —
- * exactly the substitution pnpm applies at pack time, which `publish:verify`
+ * exactly the substitution pnpm applies at pack time, which `repo-verify-publish`
  * independently validates — so no package manager subprocess is needed.
  */
 import { readdirSync, readFileSync, statSync } from 'node:fs';

@@ -1,11 +1,11 @@
 /**
- * Fails when a built public package's published types don't resolve for a
- * consumer (Are The Types Wrong?).
+ * Fails when a built package's published types don't resolve for a consumer
+ * (Are The Types Wrong?).
  *
- * The surface snapshot gate (scripts/verify-api-surface.mjs) answers "did the
- * surface change?"; this answers "does the shipped surface even resolve?" — the
- * ESM/CJS and module-resolution traps ADR-038 documents. It runs over the
- * public packages that build; source-shipped `ui` is out of scope, since attw's
+ * The surface snapshot gate (verify-api-surface.mjs) answers "did the surface
+ * change?"; this answers "does the shipped surface even resolve?" — the ESM/CJS
+ * and module-resolution traps ADR-038 documents. It runs over the configured
+ * packages that build; one that ships source is out of scope, since attw's
  * `.ts`-in-node_modules model does not describe a package whose consumer
  * compiles the source itself.
  *
@@ -13,21 +13,25 @@
  * announce that types resolved for every package while having checked none of
  * them, on a tree nobody had built — see ADR-073.
  *
- * Usage (from the repo root, AFTER `vp run packages:build`):
- *   vp run attw:verify
+ * Usage (from the repository root, AFTER the packages are built):
+ *   repo-verify-types
  *
  * Exit codes: 0 = every in-scope package was checked and its types resolve,
  * 1 = at least one does not, or one could not be checked (all are listed).
  */
 import { existsSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { errorMessage } from './lib/error-message.mjs';
-import { checkPackageTypes, formatProblem } from './lib/attw-check.mjs';
-import { readPublicPackages } from './lib/api-surface-config.mjs';
+import { errorMessage } from './error-message.mjs';
+import { checkPackageTypes, formatProblem } from './attw-check.mjs';
+import { readPublicPackages } from './api-surface-config.mjs';
+import { CONFIG_FILE_NAME } from './config.mjs';
+import { resolveHostRoot } from './host-root.mjs';
 
-const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
+const REPO_ROOT = resolveHostRoot({
+  moduleDirectory: dirname(fileURLToPath(import.meta.url)),
+});
 
 const builtPackages = () =>
   readPublicPackages(REPO_ROOT).filter((entry) => !entry.source);
@@ -52,7 +56,7 @@ const main = async () => {
   const packages = builtPackages();
   if (packages.length === 0) {
     console.error(
-      'attw gate failed: no public package builds a dist/, so this gate would check nothing — which is almost certainly a mistake.',
+      `attw gate failed: no package configured in ${CONFIG_FILE_NAME} builds a dist/, so this gate would check nothing — which is almost certainly a mistake.`,
     );
     process.exitCode = 1;
     return;
@@ -62,7 +66,7 @@ const main = async () => {
     .filter((packageConfig) => !isBuilt(packageConfig))
     .map(
       (packageConfig) =>
-        `${packageConfig.name}: no dist/, so its published types were not checked — run \`vp run packages:build\` first.`,
+        `${packageConfig.name}: no dist/, so its published types were not checked — build the packages first.`,
     );
   for (const packageConfig of packages.filter(isBuilt)) {
     failures.push(...(await checkResolution(packageConfig)));

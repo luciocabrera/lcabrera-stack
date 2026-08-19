@@ -341,6 +341,14 @@ Run `packages:build` **before** `publish:verify`, `api-surface:verify` and
 its `ui`-vs-built split are
 [ADR-046](docs/decisions/ADR-046-public-api-surface-snapshot.md).
 
+**Which packages these watch is `publishing.publicPackageDirs` in
+[`devkit.config.json`](devkit.config.json)**, not a list inside the gate: they
+run from `@repo/repo-standards`, which ships to other repositories and cannot
+carry this one's roster. A new public package is added there in the same commit
+as its manifest — until it is, its surface is not under the ratchet and nothing
+says so. Deleting the roster does not quietly disable them: both gates refuse an
+empty one rather than passing over nothing.
+
 ### Releasing a package
 
 Versions are chosen by people, bumped by one command, and published by CI.

@@ -6,7 +6,7 @@ import { formatProblem, relevantProblems } from './attw-check.mjs';
 // `node16-cjs` findings are expected by design — failing on them would make the
 // gate permanently red. Only modern ESM / bundler resolution (and findings with
 // no resolution mode at all) reflect a break a real consumer would hit. See
-// scripts/verify-attw.mjs and ADR-038.
+// verify-attw.mjs and ADR-038.
 
 describe('relevantProblems', () => {
   it('drops the expected legacy ESM-only findings', () => {

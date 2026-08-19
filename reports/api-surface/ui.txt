@@ -1,5 +1,5 @@
 # @lcabrera/ui — public API surface
-# Generated. Regenerate with: vp run api-surface:verify -- --write
+# Generated. Regenerate with: repo-verify-api-surface --write
 # One line per export: <name> <signature>. Do not edit by hand.
 
 ## .

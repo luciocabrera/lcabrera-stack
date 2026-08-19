@@ -2,11 +2,11 @@
  * Keeps a built package's published surface honest — against the artifact, not
  * against the manifest's intentions.
  *
- * The public packages are consumed from outside this monorepo, where a `.ts`
- * file inside `node_modules` is not loadable at all: Node refuses to strip
- * types there and throws `ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`. The
- * built ones therefore build to `dist`, while `exports` keeps pointing at `src`
- * so nothing in this repo has to build before it can typecheck, test or run.
+ * A published package is consumed from outside its monorepo, where a `.ts` file
+ * inside `node_modules` is not loadable at all: Node refuses to strip types
+ * there and throws `ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`. The built
+ * ones therefore build to `dist`, while `exports` keeps pointing at `src` so
+ * nothing in the source tree has to build before it can typecheck, test or run.
  * The swap lives in `publishConfig.exports`, which **pnpm** substitutes at pack
  * time — an override `npm pack` ignores outright.
  *
@@ -21,9 +21,9 @@
  * publishing gate that reports success having produced no artifact is worse
  * than no gate, because it is believed.
  *
- * Usage (from the repo root, AFTER `vp run packages:build`):
- *   vp run publish:verify              # check
- *   vp run publish:verify -- --write   # regenerate publishConfig.exports
+ * Usage (from the repository root, AFTER the packages are built):
+ *   repo-verify-publish            # check
+ *   repo-verify-publish --write    # regenerate publishConfig.exports
  *
  * Exit codes: 0 = every package packed and its tarball matches the source
  * surface, 1 = it does not, or nothing could be packed (every discrepancy is
@@ -38,12 +38,12 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { errorMessage } from './lib/error-message.mjs';
-import { packAndRead } from './lib/publish-pack.mjs';
-import { runConsumerSmoke } from './lib/publish-smoke.mjs';
+import { errorMessage } from './error-message.mjs';
+import { packAndRead } from './publish-pack.mjs';
+import { runConsumerSmoke } from './publish-smoke.mjs';
 import {
   buildPublishExports,
   diffSubpaths,
@@ -51,14 +51,18 @@ import {
   isPublishedTargetCorrect,
   packedSurfaceProblems,
   toBuiltPaths,
-} from './lib/publish-surface.mjs';
-import { releasePackerProblems } from './lib/release-packer.mjs';
+} from './publish-surface.mjs';
+import { readPublishing } from './config.mjs';
+import { resolveHostRoot } from './host-root.mjs';
+import { releasePackerProblems } from './release-packer.mjs';
 
-const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
-const PACKAGES_DIR = 'packages';
-const RELEASE_WORKFLOW = '.github/workflows/release.yml';
+const REPO_ROOT = resolveHostRoot({
+  moduleDirectory: dirname(fileURLToPath(import.meta.url)),
+});
+const { packagesDir: PACKAGES_DIR, releaseWorkflow: RELEASE_WORKFLOW } =
+  readPublishing(REPO_ROOT);
 
-/** Reads every workspace manifest under `packages/`. */
+/** Reads every workspace manifest under the configured packages directory. */
 const readPackageManifests = () =>
   readdirSync(join(REPO_ROOT, PACKAGES_DIR))
     .map((name) => ({
@@ -119,7 +123,7 @@ const unbuiltProblems = (packages) =>
     .filter(({ directory }) => !existsSync(join(REPO_ROOT, directory, 'dist')))
     .map(
       ({ directory }) =>
-        `${directory}: no dist/, so there is no publishable tarball to check — run \`vp run packages:build\` first.`,
+        `${directory}: no dist/, so there is no publishable tarball to check — build the packages first.`,
     );
 
 /** Packs every package, checks each tarball, then imports them as a consumer. */
@@ -187,7 +191,7 @@ const reportFailure = (problems) => {
     console.error(`  - ${problem}`);
   }
   console.error(
-    `\n${problems.length} problem(s). Consumers install \`dist\`, and nothing else in this repo exercises that map — so these surface only after publishing.`,
+    `\n${problems.length} problem(s). Consumers install \`dist\`, and nothing else in the source tree exercises that map — so these surface only after publishing.`,
   );
   process.exitCode = 1;
 };

@@ -31,7 +31,7 @@
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { errorMessage } from './lib/error-message.mjs';
+import { errorMessage } from '../packages/repo-standards/scripts/error-message.mjs';
 import { runGit } from '../packages/repo-standards/scripts/git-exec.mjs';
 import {
   describeFinding,

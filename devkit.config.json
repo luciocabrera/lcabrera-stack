@@ -14,5 +14,17 @@
         "title": "React Router showcase app"
       }
     ]
+  },
+  "publishing": {
+    "publicPackageDirs": [
+      "api",
+      "eslint-local-rules",
+      "node-runtime",
+      "server",
+      "tsconfig",
+      "ui",
+      "utils",
+      "vite-configs"
+    ]
   }
 }

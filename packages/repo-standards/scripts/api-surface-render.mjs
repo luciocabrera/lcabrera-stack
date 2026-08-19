@@ -1,6 +1,6 @@
 /**
  * Renders a surface to its tracked snapshot text and parses it back
- * (scripts/verify-api-surface.mjs).
+ * (verify-api-surface.mjs).
  *
  * The snapshot is a plain `.txt` golden file reviewed by diff, like the fallow
  * baselines. `.txt` on purpose: Oxfmt formats `.md`/`.json` and would reflow the
@@ -14,7 +14,7 @@ const SUBPATH_PREFIX = '## ';
 
 const headerLines = (packageName) => [
   `${HEADER_PREFIX}${packageName} — public API surface`,
-  `${HEADER_PREFIX}Generated. Regenerate with: vp run api-surface:verify -- --write`,
+  `${HEADER_PREFIX}Generated. Regenerate with: repo-verify-api-surface --write`,
   `${HEADER_PREFIX}One line per export: <name> <signature>. Do not edit by hand.`,
 ];
 

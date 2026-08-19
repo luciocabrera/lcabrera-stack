@@ -1,6 +1,6 @@
 /**
  * Imports a packed package the way a consumer would, from outside this repo
- * (scripts/verify-publish-surface.mjs).
+ * (verify-publish-surface.mjs).
  *
  * Every other check reads a manifest and reasons about it. This one lays the
  * packed tarballs out as `node_modules` in a temporary directory and has a

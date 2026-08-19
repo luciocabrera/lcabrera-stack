@@ -1,35 +1,24 @@
 /**
  * Which packages the public-API surface gate watches, and where each one's
- * shipped types live (scripts/verify-api-surface.mjs).
+ * shipped types live (verify-api-surface.mjs).
  *
- * Only the `@lcabrera/*` packages ship outside this repo, so only they have an
- * external contract to protect — `@repo/*` may change freely (ADR-040). The
- * snapshot must be taken against what a consumer actually installs: the built
- * `dist` `.d.mts` for the built packages, and the `src` entry for `ui`, which
- * ships source because StyleX derives theme identity from the source path
- * (ADR-038). Running one path over both would repeat the exact hazard
- * `publish:verify` exists for.
+ * Only a repository's published packages have an external contract to protect;
+ * its private ones may change freely (ADR-040). The snapshot must be taken
+ * against what a consumer actually installs: the built `.d.mts` for a package
+ * that builds, and the `src` entry for one that ships source (ADR-038). Running
+ * one path over both would repeat the exact hazard `repo-verify-publish` exists
+ * for.
  *
- * The list is spelled out rather than derived from `publishConfig.access`, so
- * that publishing a package is a deliberate two-part act: a manifest that says
- * it ships, and an entry here that puts its surface under the ratchet.
+ * The roster is spelled out in `devkit.config.json` rather than derived from
+ * `publishConfig.access`, so that publishing a package is a deliberate two-part
+ * act: a manifest that says it ships, and an entry in the config that puts its
+ * surface under the ratchet.
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { readPublishing } from './config.mjs';
 import { toBuiltPaths } from './publish-surface.mjs';
-
-/** The public packages, by directory name under `packages/`. */
-const PUBLIC_PACKAGE_DIRS = [
-  'api',
-  'eslint-local-rules',
-  'node-runtime',
-  'server',
-  'tsconfig',
-  'ui',
-  'utils',
-  'vite-configs',
-];
 
 /**
  * A subpath is part of the versioned contract only when it names a concrete
@@ -50,8 +39,8 @@ const entryForBuilt = (sourceTarget) => toBuiltPaths(sourceTarget).types;
  * Resolves one package into the entries the extractor snapshots: its concrete
  * subpaths, each mapped to the type file a consumer would load.
  */
-const toPackageConfig = ({ dir, repoRoot }) => {
-  const directory = `packages/${dir}`;
+const toPackageConfig = ({ dir, packagesDir, repoRoot }) => {
+  const directory = `${packagesDir}/${dir}`;
   const manifest = JSON.parse(
     readFileSync(join(repoRoot, directory, 'package.json'), 'utf8'),
   );
@@ -79,15 +68,29 @@ const toPackageConfig = ({ dir, repoRoot }) => {
   };
 };
 
-/** Every public package's snapshot configuration, in stable name order. */
-export const readPublicPackages = (repoRoot) =>
-  PUBLIC_PACKAGE_DIRS.map((dir) => toPackageConfig({ dir, repoRoot })).sort(
-    (left, right) => left.name.localeCompare(right.name),
-  );
+/** Every configured package's snapshot configuration, in stable name order. */
+export const readPublicPackages = (repoRoot) => {
+  const { packagesDir, publicPackageDirs } = readPublishing(repoRoot);
 
-/** The tracked snapshot path for a package, relative to the repo root. */
-export const snapshotPathFor = (packageName) =>
-  `reports/api-surface/${packageName.replace('@lcabrera/', '')}.txt`;
+  return publicPackageDirs
+    .map((dir) => toPackageConfig({ dir, packagesDir, repoRoot }))
+    .sort((left, right) => left.name.localeCompare(right.name));
+};
+
+/**
+ * The scope dropped from a package name, so `@scope/thing` files itself as
+ * `thing`. Any scope, not one this package knows: a snapshot named
+ * `@scope/thing.txt` would put a directory separator in the filename and write
+ * outside the snapshot directory.
+ */
+const unscoped = (packageName) =>
+  packageName.startsWith('@')
+    ? packageName.slice(packageName.indexOf('/') + 1)
+    : packageName;
+
+/** The tracked snapshot path for a package, relative to the repository root. */
+export const snapshotPathFor = (packageName, repoRoot) =>
+  `${readPublishing(repoRoot).apiSurfaceDir}/${unscoped(packageName)}.txt`;
 
 /** True once every entry file the config points at exists on disk. */
 export const entriesAreBuilt = (packageConfig) =>

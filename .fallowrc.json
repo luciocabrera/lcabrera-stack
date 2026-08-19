@@ -67,6 +67,8 @@
           "packages/repo-standards/scripts/new-adr.mjs",
           "packages/repo-standards/scripts/close-coordination-claim.mjs",
           "packages/repo-standards/scripts/coordination-board-live.mjs",
+          "packages/repo-standards/scripts/audit-release.mjs",
+          "packages/repo-standards/scripts/release-publish-plan.mjs",
           "packages/eslint-local-rules/**/*.ts"
         ],
         "maxCyclomatic": 65535,

@@ -1,6 +1,6 @@
 /**
  * The ADR taxonomy, as data plus pure decisions over it. The effectful half —
- * reading the directories, writing an index — is `scripts/verify-adrs.mjs`.
+ * reading the directories, writing an index — is `verify-adrs.mjs`.
  *
  * The rule this encodes: one home per tier, and one global number sequence
  * across all of them. See

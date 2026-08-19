@@ -1,13 +1,13 @@
 /**
  * Audits the manifests that actually shipped, against the registry.
  *
- * `publish:verify` checks the tarball this repo *would* produce and packs with
- * pnpm, because the `publishConfig.exports` swap is a pnpm extension (ADR-073).
- * So a defect present only in an `npm pack` tarball is invisible to it
- * permanently — which is how `@lcabrera/eslint-plugin@0.1.0` reached npm
- * uninstallable with every gate in this repo green (#730). This sits beside it
- * and asks the other question: is what a consumer can install still the shape
- * this repo intends?
+ * `repo-verify-publish` checks the tarball the source tree *would* produce and
+ * packs with pnpm, because the `publishConfig.exports` swap is a pnpm extension
+ * (ADR-073). So a defect present only in an `npm pack` tarball is invisible to
+ * it permanently — which is how a package once reached npm uninstallable with
+ * every gate in its repository green (#730). This sits beside it and asks the
+ * other question: is what a consumer can install still the shape the repository
+ * intends?
  *
  * **It observes drift; it cannot prevent it.** A hand-publish from a laptop
  * reaches the registry without passing anything here, and an npm version is
@@ -15,10 +15,10 @@
  * repairing. The decisions on version coverage and on why this reports rather
  * than blocking a pull request are ADR-077.
  *
- * Usage (from the repo root):
- *   vp run release:audit                                  # every published version
- *   vp run release:audit -- @lcabrera/eslint-plugin       # one package
- *   vp run release:audit -- @lcabrera/eslint-plugin@0.1.0 # one version
+ * Usage (from the repository root):
+ *   repo-audit-release                     # every published version
+ *   repo-audit-release <name>              # one package
+ *   repo-audit-release <name>@<version>    # one version
  *
  * Exit codes: 0 = every published manifest is loadable and installable, 1 = one
  * is not, a named spec could not be resolved, the registry could not be
@@ -26,28 +26,31 @@
  * to everything must not read as "audited everything, all clean" (every finding
  * is listed, not just the first).
  */
-import { resolve } from 'node:path';
+import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { errorMessage } from './lib/error-message.mjs';
-import { isBuiltPublicPackage } from './lib/publish-surface.mjs';
-import { readPublishableManifests } from './lib/publishable-workspaces.mjs';
+import { errorMessage } from './error-message.mjs';
+import { isBuiltPublicPackage } from './publish-surface.mjs';
+import { readPublishableManifests } from './publishable-workspaces.mjs';
 import {
   auditPackument,
   readNothing,
   renderAudit,
   resolvedNothing,
   selectBroken,
-} from './lib/release-audit.mjs';
-import { fetchPackument, registryOrigin } from './lib/registry-packument.mjs';
+} from './release-audit.mjs';
+import { fetchPackument, registryOrigin } from './registry-packument.mjs';
+import { resolveHostRoot } from './host-root.mjs';
 
-const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
+const REPO_ROOT = resolveHostRoot({
+  moduleDirectory: dirname(fileURLToPath(import.meta.url)),
+});
 
 /**
  * Every workspace that can reach the registry, with the one classification the
- * audit needs. `isBuiltPublicPackage` is `publish:verify`'s own predicate: a
- * package that does not build ships source deliberately (`@lcabrera/ui`), and
- * for it a `./src/` export target is the intended surface rather than a defect.
+ * audit needs. `isBuiltPublicPackage` is `repo-verify-publish`'s own predicate:
+ * a package that does not build ships source deliberately, and for it a `./src/`
+ * export target is the intended surface rather than a defect.
  */
 const readWorkspaceTargets = () =>
   readPublishableManifests(REPO_ROOT).map((manifest) => ({

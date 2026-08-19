@@ -139,9 +139,9 @@ requires a changeset.** `packages/ui/package.json` carries `"private": false`, s
 nothing but the version number stands between a merge and the registry, and an npm
 version is permanent. Dropping the two props rewrites the recorded signature of
 `TableRouteView`, `TableRouteViewProps` and `useTableRoutePage`, which
-[`api-surface-diff.mjs`](../../scripts/lib/api-surface-diff.mjs) classifies as
+[`api-surface-diff.mjs`](../../packages/repo-standards/scripts/api-surface-diff.mjs) classifies as
 `changed` — breaking — and
-[`api-surface-changeset.mjs`](../../scripts/lib/api-surface-changeset.mjs) then
+[`api-surface-changeset.mjs`](../../packages/repo-standards/scripts/api-surface-changeset.mjs) then
 marks `required`, so the "Public package API surface is unbroken" step in
 [`check-safe.yml`](../../.github/workflows/check-safe.yml) hard-fails without a
 `@lcabrera/ui` changeset. #564 must carry one and regenerate the snapshot with

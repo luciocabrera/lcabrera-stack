@@ -4,7 +4,7 @@ import { parseSurface, renderSurface } from './api-surface-render.mjs';
 
 // The snapshot is a golden file reviewed by diff, so render and parse must be
 // exact inverses — otherwise a round-trip through the file would report drift
-// that isn't there. See scripts/verify-api-surface.mjs and issue #359.
+// that isn't there. See verify-api-surface.mjs and issue #359.
 
 const surface = {
   './a/first.util': { foo: '[const] (x: string) => void' },

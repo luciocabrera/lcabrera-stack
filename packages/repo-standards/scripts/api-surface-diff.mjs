@@ -1,6 +1,6 @@
 /**
  * Pure diff + semver classification for the public-API surface gate
- * (scripts/verify-api-surface.mjs).
+ * (verify-api-surface.mjs).
  *
  * Separated from the CLI so the "what changed, and is it breaking?" decision is
  * unit-testable without a filesystem or a TypeScript program — `test:scripts`
@@ -70,7 +70,7 @@ export const diffSurfaces = ({ base, next }) => {
  * A `removed` or `changed` export can break an external consumer's compile; an
  * `added` one cannot. Classification is what decides whether a changeset is
  * merely advisable (additive) or required (breaking) — see
- * scripts/lib/api-surface-changeset.mjs.
+ * api-surface-changeset.mjs.
  */
 export const isBreakingChange = (change) =>
   change.kind === 'removed' || change.kind === 'changed';

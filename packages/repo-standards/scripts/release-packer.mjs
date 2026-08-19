@@ -1,6 +1,6 @@
 /**
  * Asserts that the release path still packs with pnpm
- * (scripts/verify-publish-surface.mjs).
+ * (verify-publish-surface.mjs).
  *
  * The published `exports` come from `publishConfig.exports`, and applying that
  * override is a pnpm extension: `npm pack` produces a tarball still pointing at
@@ -15,9 +15,9 @@
 const FOREIGN_LOCKFILES = ['package-lock.json', 'yarn.lock', 'bun.lockb'];
 
 /**
- * Comments cannot publish anything, and this repo's workflows discuss npm and
- * npx at length in theirs — checking the raw text would flag the explanation
- * for the thing it explains.
+ * Comments cannot publish anything, and a release workflow that explains why it
+ * avoids npm and npx says both words in its own — checking the raw text would
+ * flag the explanation for the thing it explains.
  */
 export const stripComments = (text) =>
   text

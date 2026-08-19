@@ -28,7 +28,7 @@ name: Release
 # and it was worse than the problem: several agents merge into this repo, so the
 # count is essentially never zero, and the job reported success through every
 # push while publishing nothing (#620). Calling the CLI directly removes the
-# reason the gate existed. `scripts/release-publish-plan.mjs` now asks the
+# reason the gate existed. `repo-plan-release` now asks the
 # registry, per package, which is the same question `changeset publish` asks
 # itself — the gate only avoids a pointless build, and the CLI stays the
 # authority on what ships.
@@ -83,7 +83,7 @@ jobs:
       # costs a build; under-reporting would silently skip a release.
       - name: Plan the release
         id: plan
-        run: node scripts/release-publish-plan.mjs --github
+        run: node packages/repo-standards/scripts/release-publish-plan.mjs --github
 
       - name: Setup Vite+
         if: steps.plan.outputs.count != '0'

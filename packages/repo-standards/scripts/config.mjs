@@ -45,6 +45,24 @@ export const DEFAULT_CONVENTIONS = {
   sharedBranchesDir: 'docs/coordination/branches',
 };
 
+/**
+ * `publicPackageDirs` has no useful default: the roster is the repository's own
+ * data, and guessing it would point the gate at directories a consumer does not
+ * have. Empty is therefore the honest default — and it is safe, because every
+ * gate that reads it refuses to run on an empty roster rather than reporting a
+ * clean pass over nothing.
+ *
+ * The rest default to the conventional layout, so a repository that follows it
+ * configures nothing.
+ */
+export const DEFAULT_PUBLISHING = {
+  apiSurfaceDir: 'reports/api-surface',
+  packagesDir: 'packages',
+  publicPackageDirs: [],
+  releaseWorkflow: '.github/workflows/release.yml',
+  workspaceDirs: ['apps', 'packages'],
+};
+
 const isPlainObject = (value) =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
@@ -200,6 +218,55 @@ export const resolveRegisters = (raw) => {
   };
 };
 
+/** Every entry held to the containment rule, in the order it was declared. */
+const containedList = (value, fallback, key) => {
+  if (!Array.isArray(value)) return fallback;
+  const entries = value
+    .filter((entry) => typeof entry === 'string' && entry.trim() !== '')
+    .map((entry) => repoRelative(entry, entry, key));
+  return entries.length > 0 ? entries : fallback;
+};
+
+export const resolvePublishing = (raw) => {
+  if (raw === undefined) return DEFAULT_PUBLISHING;
+  const parsed = JSON.parse(raw);
+  if (!isPlainObject(parsed)) {
+    throw new Error(`${CONFIG_FILE_NAME} must contain a JSON object`);
+  }
+  const block = isPlainObject(parsed.publishing) ? parsed.publishing : {};
+
+  return {
+    apiSurfaceDir: repoRelative(
+      block.apiSurfaceDir,
+      DEFAULT_PUBLISHING.apiSurfaceDir,
+      'publishing.apiSurfaceDir',
+    ),
+    packagesDir: repoRelative(
+      block.packagesDir,
+      DEFAULT_PUBLISHING.packagesDir,
+      'publishing.packagesDir',
+    ),
+    // An empty roster stays empty: it is the signal every reader turns into a
+    // loud failure, so replacing it with a default would hide the one state
+    // that must not pass silently.
+    publicPackageDirs: containedList(
+      block.publicPackageDirs,
+      DEFAULT_PUBLISHING.publicPackageDirs,
+      'publishing.publicPackageDirs[]',
+    ),
+    releaseWorkflow: repoRelative(
+      block.releaseWorkflow,
+      DEFAULT_PUBLISHING.releaseWorkflow,
+      'publishing.releaseWorkflow',
+    ),
+    workspaceDirs: containedList(
+      block.workspaceDirs,
+      DEFAULT_PUBLISHING.workspaceDirs,
+      'publishing.workspaceDirs[]',
+    ),
+  };
+};
+
 /**
  * The repository this package is installed in — not the working directory, so a
  * gate invoked from a subdirectory reads the same config as one invoked from
@@ -218,6 +285,9 @@ export const readConventions = (root = hostRoot()) =>
 
 export const readRegisters = (root = hostRoot()) =>
   resolveRegisters(readRaw(root));
+
+export const readPublishing = (root = hostRoot()) =>
+  resolvePublishing(readRaw(root));
 
 /**
  * The coordination register's three locations, absolute, from one read of the
