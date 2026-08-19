@@ -86,6 +86,7 @@ describe('resolveGridFocusContext', () => {
       focusState: focusStateFor({}),
       groupingState,
       metaState,
+      onDrillGroup: undefined,
     });
 
     expect(context.columnKeys).toEqual(['id', 'city']);
@@ -104,6 +105,7 @@ describe('resolveGridFocusContext', () => {
       focusState: focusStateFor({}),
       groupingState,
       metaState,
+      onDrillGroup: undefined,
     });
 
     expect(context.focusedRowIndex).toBeUndefined();
@@ -121,6 +123,7 @@ describe('resolveGridFocusContext', () => {
       }),
       groupingState,
       metaState,
+      onDrillGroup: undefined,
     });
 
     // The stored index is stale — identity is what decides, not position.
@@ -147,6 +150,7 @@ describe('resolveGridFocusContext', () => {
       focusState: focusStateFor({}),
       groupingState,
       metaState,
+      onDrillGroup: undefined,
     });
     const context = resolveGridFocusContext({
       columnsState,
@@ -155,6 +159,7 @@ describe('resolveGridFocusContext', () => {
       focusState: focusStateFor({}),
       groupingState,
       metaState,
+      onDrillGroup: undefined,
     });
 
     expect(expanded.data).toHaveLength(3);
@@ -188,6 +193,9 @@ describe('resolveGridFocusContext — a drilled group', () => {
       focusState: focusStateFor({}),
       groupingState: { ...groupingState, keys: ['city'] },
       metaState: { ...metaState, isGroupDrillEnabled: true },
+      // Both halves must be present for a row to be drillable — the flag alone
+      // would leave the affordance offered and permanently inert.
+      onDrillGroup: async () => [],
     });
 
   it('navigates the rows a drill added, not the rows without them', () => {
@@ -211,5 +219,26 @@ describe('resolveGridFocusContext — a drilled group', () => {
 
   it('leaves the array alone when nothing has been drilled', () => {
     expect(withDrill(expansionState).data).toHaveLength(1);
+  });
+
+  it('marks no row drillable when the route declared the capability but no fetcher', () => {
+    // The flag says the endpoint exists; the fetcher is the call that reaches
+    // it. With only the first, every leaf would carry a chevron and an
+    // `aria-expanded` whose every use does nothing.
+    const context = resolveGridFocusContext({
+      columnsState,
+      dataState: drilledState,
+      expansionState,
+      focusState: focusStateFor({}),
+      groupingState: { ...groupingState, keys: ['city'] },
+      metaState: { ...metaState, isGroupDrillEnabled: true },
+      onDrillGroup: undefined,
+    });
+
+    expect(context.rowMeta?.[0]?.isDrillable).toBe(false);
+  });
+
+  it('marks the leaf drillable once both halves are present', () => {
+    expect(withDrill(expansionState).rowMeta?.[0]?.isDrillable).toBe(true);
   });
 });

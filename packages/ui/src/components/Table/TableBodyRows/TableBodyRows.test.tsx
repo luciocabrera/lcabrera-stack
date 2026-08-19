@@ -150,10 +150,6 @@ vi.mock('#ui/components/Table/contexts/TableConfig/grouping/selectors', () => ({
   useGetTableGroupingKeys: useGetTableGroupingKeysMock,
 }));
 
-vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
-  useGetTableIsGroupDrillEnabled: () => false,
-}));
-
 vi.mock('../contexts/TableData/data/selectors', () => ({
   useGetTableData: useGetTableDataMock,
 }));
@@ -164,6 +160,7 @@ vi.mock('../contexts/TableData/data/selectors', () => ({
 vi.mock(
   '#ui/components/Table/contexts/TableConfig/expansion/selectors',
   () => ({
+    useGetTableCanDrillGroups: () => false,
     useGetTableCollapsedGroupPaths: useGetTableCollapsedGroupPathsMock,
     useGetTableDrilledGroups: () => new Map(),
   }),

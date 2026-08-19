@@ -36,8 +36,13 @@ export const useMoveTableGridFocus = <
   TData extends Record<string, unknown>,
 >() => {
   const { focusStore } = useTableFocusContextValue();
-  const { columnsStore, expansionStore, groupingStore, metaStore } =
-    useTableConfigContextValue<TData>();
+  const {
+    columnsStore,
+    expansionStore,
+    groupingStore,
+    metaStore,
+    onDrillGroup,
+  } = useTableConfigContextValue<TData>();
   const { dataStore } = useTableDataContextValue<TData>();
   const containerRef = useTableContainerRef();
   const toggleGroupExpansion = useToggleTableGroupExpansion<TData>();
@@ -52,6 +57,7 @@ export const useMoveTableGridFocus = <
         focusState,
         groupingState: groupingStore.get(),
         metaState: metaStore.get(),
+        onDrillGroup,
       });
 
     const {

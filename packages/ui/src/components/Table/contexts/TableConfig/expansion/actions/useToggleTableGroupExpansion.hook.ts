@@ -1,6 +1,7 @@
 import type { TableGroupKeyValue } from '#ui/components/Table/Table.types';
 
 import {
+  canDrillGroups,
   isDrillableGroupPath,
   resolveGroupToggleAction,
   resolveTableGroupTree,
@@ -33,8 +34,13 @@ import { resolveGroupCollapseFocusTarget } from './utils';
 export const useToggleTableGroupExpansion = <
   TData extends Record<string, unknown>,
 >() => {
-  const { columnsStore, expansionStore, groupingStore, metaStore } =
-    useTableConfigContextValue<TData>();
+  const {
+    columnsStore,
+    expansionStore,
+    groupingStore,
+    metaStore,
+    onDrillGroup,
+  } = useTableConfigContextValue<TData>();
   const { dataStore } = useTableDataContextValue<TData>();
   const { focusStore } = useTableFocusContextValue();
   const containerRef = useTableContainerRef();
@@ -43,11 +49,15 @@ export const useToggleTableGroupExpansion = <
   return (path: readonly TableGroupKeyValue[]) => {
     const { collapsedGroupPaths, drilledGroups } = expansionStore.get();
     const groupPathKey = resolveGroupPathKey(path);
+    const canDrill = canDrillGroups({
+      isGroupDrillEnabled: metaStore.get().isGroupDrillEnabled,
+      onDrillGroup,
+    });
     const action = resolveGroupToggleAction({
       drill: drilledGroups.get(groupPathKey),
       isCollapsed: collapsedGroupPaths.has(groupPathKey),
       isDrillable: isDrillableGroupPath({
-        canDrill: metaStore.get().isGroupDrillEnabled ?? false,
+        canDrill,
         groupingKeys: groupingStore.get().keys,
         path,
       }),
@@ -82,7 +92,7 @@ export const useToggleTableGroupExpansion = <
       // without them would hand back an index into a grid that is not the one
       // on screen (ADR-079).
       const { rows } = resolveTableGroupTree({
-        canDrill: metaStore.get().isGroupDrillEnabled,
+        canDrill,
         collapsedGroupPaths: nextCollapsed,
         data: dataStore.get().data,
         drilledGroups,
