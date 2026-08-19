@@ -1,0 +1,23 @@
+{
+  "files": {
+    ".claude/rules/routes-data.md": "24697daa5673b3507859da0939014f01129a51c3ccbf9999ec682d3df9069882",
+    ".github/skills/codebase-explorer/SKILL.md": "a46859d982d4574d4ebc2968ba0e6c774f4f38bd60dc8cef3631992fe6ff11b5",
+    ".github/skills/react-19/references/advanced.md": "a94fa5087b961d3b22ef7129565f0cc375660f92b9c8f3c0d9f2a08b721e1136",
+    ".github/skills/react-19/SKILL.md": "c969e57d771544b7f6de7f32f05ee33aee246e3802763b49dcd3c026777c4ffc",
+    ".github/skills/react-router-framework-mode/references/actions.md": "4033452028e3160eb7bdaf110d688ca2533470fd2084e7f3e4c05b246f72ffa4",
+    ".github/skills/react-router-framework-mode/references/data-loading.md": "2a06d21d747452b09259fbc7b5cb475872e906816767ca97ca88e10754a35447",
+    ".github/skills/react-router-framework-mode/references/error-handling.md": "ff051047c2f5a14093db1139b6e46ca347051556eb03ce5e859a92a637e110e1",
+    ".github/skills/react-router-framework-mode/references/middleware.md": "b9e0ea4a921d79ae04aefa9c92628e4eaad5f62bea1a4ceea742d2b7b87fcb59",
+    ".github/skills/react-router-framework-mode/references/navigation.md": "b9c21e6b3dcc9583da8990e05d9e1543c90c2736825ab5eb457f950a0e07f5de",
+    ".github/skills/react-router-framework-mode/references/pending-ui.md": "e2e6cd9de41d2637ccc3c80ad8e1ace7bed2aaa0f9b706e89ded70f5bebde900",
+    ".github/skills/react-router-framework-mode/references/rendering-strategies.md": "95b29ae61abc145f012ea5420e2540666b19772d57a9e35aeed85d97cc8a3b35",
+    ".github/skills/react-router-framework-mode/references/route-modules.md": "7451ab850dd49dec43aa1a96dbce18327014ae5856a9dc6940465f06999832e1",
+    ".github/skills/react-router-framework-mode/references/routing.md": "5e5b185001dcbddb04e28c5c087f1805cbcaaec101384f92b82c18659b20a406",
+    ".github/skills/react-router-framework-mode/references/sessions.md": "7023a8aa18c3ea9db49b6a1da6130e9d8f30e10d8d299edeacdb379a1004b912",
+    ".github/skills/react-router-framework-mode/references/special-files.md": "1fd575c4139db529b092d4d0a7d7395109c08124f028120e36b2e74eeec6f1b4",
+    ".github/skills/react-router-framework-mode/references/type-safety.md": "e35c6e6fe656670b26811a60d06290e152b8360dfb7bb86c7f9c0b29084e4f62",
+    ".github/skills/react-router-framework-mode/SKILL.md": "518b6f0a9d58ffe817ad9e1c1e77b48be4c2fe7defc624afce1ee8d3b7c091d3"
+  },
+  "packageVersion": "0.0.0",
+  "version": 1
+}

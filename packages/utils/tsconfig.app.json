@@ -3,9 +3,7 @@
     "allowImportingTsExtensions": true,
     "erasableSyntaxOnly": true,
     "forceConsistentCasingInFileNames": true,
-    "lib": [
-      "ES2025"
-    ],
+    "lib": ["ES2025"],
     "module": "ESNext",
     "moduleDetection": "force",
     "moduleResolution": "bundler",
@@ -23,8 +21,5 @@
     "verbatimModuleSyntax": true
   },
   "exclude": [],
-  "include": [
-    "src",
-    "vite.config.ts"
-  ]
+  "include": ["src", "vite.config.ts"]
 }

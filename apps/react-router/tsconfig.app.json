@@ -5,11 +5,7 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
-    "lib": [
-      "ES2025",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["ES2025", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "moduleDetection": "force",
     "moduleResolution": "bundler",
@@ -20,28 +16,17 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "@lcabrera/server/*": [
-        "../../packages/server/src/*"
-      ],
-      "@lcabrera/ui": [
-        "../../packages/ui/src/public-api.ts"
-      ]
+      "@/*": ["./src/*"],
+      "@lcabrera/server/*": ["../../packages/server/src/*"],
+      "@lcabrera/ui": ["../../packages/ui/src/public-api.ts"]
     },
     "resolveJsonModule": true,
-    "rootDirs": [
-      ".",
-      "./.react-router/types"
-    ],
+    "rootDirs": [".", "./.react-router/types"],
     "skipLibCheck": true,
     "strict": true,
     "target": "ES2025",
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
-    "types": [
-      "vite/client"
-    ],
+    "types": ["vite/client"],
     "useDefineForClassFields": true,
     "verbatimModuleSyntax": true
   },

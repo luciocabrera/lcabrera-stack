@@ -4,52 +4,84 @@
  * The devkit CLI.
  *
  * Why: the setup that makes this repository work is discovered by PATH — an
- * agent reads `.github/skills`, GitHub reads `.github/workflows` — so a package
- * that only sits in node_modules delivers none of it. This command is what puts
- * the files where they are looked for, and what reports when a consumer's copy
- * and the package have diverged.
+ * agent reads the skills directory, GitHub reads the workflows directory — so a
+ * package that only sits in node_modules delivers none of it. These commands put
+ * the files where they are looked for, report when a consumer's copy and the
+ * package have diverged, and measure whether a directory can travel at all.
  *
  * Usage:
+ *   devkit sync [--profile <name>]
+ *   devkit doctor [--check]
  *   devkit closure <directory> [<directory> ...]
  *
- * Exit codes: 0 = nothing to report, 1 = findings or bad arguments.
+ * Exit codes: 0 = nothing to report, 1 = findings, drift under --check, or bad
+ * arguments.
  */
 
-import { existsSync, statSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 
-import { analyseDirectory, renderClosureReport } from './closure-report.mjs';
+import { runClosure } from './command-closure.mjs';
+import {
+  buildPlan,
+  countsFor,
+  nextManifestFor,
+  renderPlan,
+} from './command-materialise.mjs';
+import { MANIFEST_FILE, serialiseManifest } from './manifest.mjs';
+import { applySync } from './sync.mjs';
 
-const USAGE = 'usage: devkit closure <directory> [<directory> ...]';
+const USAGE = [
+  'usage:',
+  '  devkit sync [--profile <name>]',
+  '  devkit doctor [--check]',
+  '  devkit closure <directory> [<directory> ...]',
+].join('\n');
 
-const runClosure = (directories, root) => {
-  const missing = directories.filter(
-    (directory) =>
-      !existsSync(resolve(root, directory)) ||
-      !statSync(resolve(root, directory)).isDirectory(),
-  );
+const flagValue = (argv, name) => {
+  const index = argv.indexOf(name);
+  return index === -1 ? undefined : argv[index + 1];
+};
 
-  if (missing.length > 0) {
-    console.error(`not a directory: ${missing.join(', ')}`);
-    return 1;
+const runSync = (argv, root) => {
+  const { entries, manifest } = buildPlan({
+    profile: flagValue(argv, '--profile'),
+    root,
+  });
+  const { reported, written } = countsFor(entries);
+
+  console.log(renderPlan(entries));
+
+  if (written > 0) applySync({ entries, root });
+
+  // The record is written even when nothing was — a file already identical to
+  // the package is adopted into it, and without that a later edit to one reads
+  // as an untracked file rather than as drift.
+  const updated = serialiseManifest(nextManifestFor({ entries, manifest }));
+  if (updated !== serialiseManifest(manifest)) {
+    writeFileSync(join(root, MANIFEST_FILE), updated);
   }
 
-  const results = directories.map((directory) =>
-    analyseDirectory({ directory: resolve(root, directory), root }),
-  );
-
-  console.log(renderClosureReport(results));
-
-  const total = results.reduce(
-    (count, result) => count + result.escapes.length,
-    0,
-  );
-  if (total === 0) {
-    console.log(`\nClosure gate passed: ${results.length} directory(ies).`);
-    return 0;
+  if (reported > 0) {
+    console.log(
+      '\nFiles left alone are yours to keep. Re-run after resolving them, or leave them diverged.',
+    );
   }
+  return 0;
+};
+
+const runDoctor = (argv, root) => {
+  const { entries } = buildPlan({ root });
+  const { reported, written } = countsFor(entries);
+
+  console.log(renderPlan(entries));
+
+  const drifted = written + reported;
+  if (drifted === 0) return 0;
+  if (!argv.includes('--check')) return 0;
+
   console.error(
-    `\n${total} escape(s) across ${results.filter((result) => result.escapes.length > 0).length} directory(ies).`,
+    `\n${drifted} file(s) differ from the package. Run devkit sync.`,
   );
   return 1;
 };
@@ -65,6 +97,8 @@ const main = () => {
     }
     return runClosure(rest, root);
   }
+  if (command === 'sync') return runSync(rest, root);
+  if (command === 'doctor') return runDoctor(rest, root);
 
   console.error(USAGE);
   return 1;

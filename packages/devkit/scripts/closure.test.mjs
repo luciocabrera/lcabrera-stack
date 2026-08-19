@@ -314,3 +314,25 @@ describe('analyseClosure path tokens', () => {
     expect(analyseClosure({ files, rootDirectory }).escapes).toEqual([]);
   });
 });
+
+describe('extractPathTokens', () => {
+  test('reads a path out of prose backticks and out of a command argument', () => {
+    const content = [
+      'Follow `packages/scan-report/SCHEMA_V1.md` exactly.',
+      '',
+      '```bash',
+      'node scripts/ingest-report.mjs --run-dir="$OUT"',
+      '```',
+    ].join('\n');
+    expect(extractPathTokens(content)).toEqual([
+      { line: 1, token: 'packages/scan-report/SCHEMA_V1.md' },
+      { line: 4, token: 'scripts/ingest-report.mjs' },
+    ]);
+  });
+
+  test('drops trailing prose punctuation that is not part of the path', () => {
+    expect(extractPathTokens('see `docs/a.md`, then stop')).toEqual([
+      { line: 1, token: 'docs/a.md' },
+    ]);
+  });
+});

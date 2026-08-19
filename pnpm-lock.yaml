@@ -183,6 +183,9 @@ importers:
       '@lcabrera/vite-config':
         specifier: workspace:*
         version: link:packages/vite-configs
+      '@repo/devkit':
+        specifier: workspace:*
+        version: link:packages/devkit
       '@repo/scan-report':
         specifier: workspace:*
         version: link:packages/scan-report
