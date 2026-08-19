@@ -35,6 +35,7 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
     groupingKeys: metaState?.groupingKeys,
     groupingMode: metaState?.groupingMode,
     groupingPeriods: metaState?.groupingPeriods,
+    groupingShares: metaState?.groupingShares,
   });
   // Seeded from the grouping state rather than from the raw meta, so the
   // hierarchy column appears under exactly the key list the grouping store

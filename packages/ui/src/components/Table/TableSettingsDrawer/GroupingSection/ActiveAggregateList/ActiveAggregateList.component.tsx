@@ -15,6 +15,7 @@ import type { ActiveAggregateListProps } from './ActiveAggregateList.types';
 import { useSetColumnAggregate } from '../../TableDrawerContext/actions';
 import { useGetGroupingAggregates } from '../../TableDrawerContext/selectors';
 import { toAggregateItems } from '../utils';
+import { ShareOfTotalToggle } from './ShareOfTotalToggle';
 import { styles } from './ActiveAggregateList.stylex';
 
 /**
@@ -48,6 +49,11 @@ export const ActiveAggregateList = ({
             <div key={columnKey} {...stylex.props(styles.aggregateItem)}>
               <span {...stylex.props(styles.aggregateItemLabel)}>{label}</span>
               <div {...stylex.props(styles.aggregateItemControls)}>
+                <ShareOfTotalToggle
+                  columnKey={columnKey}
+                  isBusy={isBusy}
+                  label={label}
+                />
                 <Button
                   aria-label={`Remove ${label}`}
                   icon={<MenuCloseIcon size={ICON_SIZE_MD} />}

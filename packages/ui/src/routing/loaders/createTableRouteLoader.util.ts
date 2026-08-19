@@ -267,6 +267,7 @@ export const createTableRouteLoader = <
         groupingKeys: grouping.keys,
         groupingMode: grouping.mode,
         groupingPeriods: grouping.periods,
+        groupingShares: grouping.shares,
         // Route-declared, so the client cannot claim it and cannot deny it: it
         // is what tells the clear path to record "off" in the URL, and a cookie
         // able to set it would make an ordinary table write an envelope no

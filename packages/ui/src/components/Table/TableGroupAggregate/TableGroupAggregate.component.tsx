@@ -16,6 +16,7 @@ import { accessibility } from '#ui/design-system/tokens/commons.stylex';
 
 import type { TableGroupAggregateProps } from './TableGroupAggregate.types';
 
+import { TableGroupShare } from './TableGroupShare';
 import { tableGroupAggregateStyles } from './TableGroupAggregate.stylex';
 import { resolveAggregateDataType } from './utils/resolveAggregateDataType.util';
 
@@ -85,6 +86,7 @@ export const TableGroupAggregate = ({
           value: aggregate.value,
         })}
       </span>
+      <TableGroupShare columnKey={columnKey} value={aggregate.value} />
       {hasColumnFilter && (
         <span
           {...stylex.props(tableGroupAggregateStyles.filterIndicator)}

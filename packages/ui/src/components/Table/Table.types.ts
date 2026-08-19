@@ -854,6 +854,12 @@ export type TableMetaState = {
    */
   readonly groupingPeriods?: Readonly<Record<string, TableGroupPeriod>>;
   /**
+   * The columns the loader applied a share of the grand total to, from the same
+   * `grouping` param. Seeds the grouping store; absent means none, which is
+   * what every link written before shares existed says (#648).
+   */
+  readonly groupingShares?: readonly string[];
+  /**
    * Whether this route declared a default grouping (#578). It is the client's
    * half of that declaration: with a default in play, clearing the grouping has
    * to record itself in the URL, because an absent `grouping` param is what the

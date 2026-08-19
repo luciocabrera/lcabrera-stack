@@ -12,13 +12,19 @@ import {
 
 import type { TableGroupingState } from '#ui/components/Table/Table.types';
 
-const { aggregatesRef, columnsRef, mockSetColumnAggregate } = vi.hoisted(
-  () => ({
-    aggregatesRef: { current: {} as TableGroupingState['aggregates'] },
-    columnsRef: { current: [] as readonly Record<string, unknown>[] },
-    mockSetColumnAggregate: vi.fn(),
-  }),
-);
+const {
+  aggregatesRef,
+  columnsRef,
+  mockSetColumnAggregate,
+  mockToggleGroupShare,
+  sharesRef,
+} = vi.hoisted(() => ({
+  aggregatesRef: { current: {} as TableGroupingState['aggregates'] },
+  columnsRef: { current: [] as readonly Record<string, unknown>[] },
+  mockSetColumnAggregate: vi.fn(),
+  mockToggleGroupShare: vi.fn(),
+  sharesRef: { current: [] as readonly string[] },
+}));
 
 vi.mock(
   '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook',
@@ -29,10 +35,12 @@ vi.mock(
 
 vi.mock('../../TableDrawerContext/actions', () => ({
   useSetColumnAggregate: () => mockSetColumnAggregate,
+  useToggleGroupShare: () => mockToggleGroupShare,
 }));
 
 vi.mock('../../TableDrawerContext/selectors', () => ({
   useGetGroupingAggregates: () => aggregatesRef.current,
+  useGetGroupingShares: () => sharesRef.current,
 }));
 
 import { ActiveAggregateList } from './ActiveAggregateList.component';
