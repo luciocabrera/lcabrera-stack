@@ -1,7 +1,5 @@
 import type { TableGroupExpansionState } from '#ui/components/Table/Table.types';
 
-const NO_DRILLS: TableGroupExpansionState['drilledGroups'] = new Map();
-
 /**
  * Discards every drilled page when the rows underneath them have been re-read.
  *
@@ -22,8 +20,11 @@ const NO_DRILLS: TableGroupExpansionState['drilledGroups'] = new Map();
  * it costs nothing, while a drilled page is data with a query attached.
  *
  * Returns the **same instance** when there is nothing to discard, so the caller
- * can skip the store write and the effect that calls it does not re-enter.
+ * can skip the store write and the effect that calls it does not re-enter — and
+ * a **fresh** one when it did. Not a shared module-level empty `Map`: the value
+ * is written into a store, `Map` is mutable, and one instance held by every
+ * table on the page couples them the first time anything writes to it.
  */
 export const pruneDrilledGroups = (
   drilledGroups: TableGroupExpansionState['drilledGroups'],
-) => (drilledGroups.size === 0 ? drilledGroups : NO_DRILLS);
+) => (drilledGroups.size === 0 ? drilledGroups : new Map());
