@@ -118,6 +118,20 @@ describe('containment of the configured locations', () => {
     expect(tasksDir(String.raw`ops\claims`)).toBe('ops/claims');
   });
 
+  // The value is checked into git and read wherever the gate runs, so the
+  // verdict must not depend on the host's separator. Parsing with the platform
+  // `normalize` made this guard inert on Windows: `../../etc` became
+  // `..\..\etc`, which the segment check read as one ordinary name.
+  it('refuses a backslash-separated climb the way it refuses a slashed one', () => {
+    expect(() => tasksDir(String.raw`..\..\etc`)).toThrow(/leaves it/);
+  });
+
+  it('refuses a drive letter and a UNC share, on any host', () => {
+    expect(() => tasksDir('C:/claims')).toThrow(/must be relative/);
+    expect(() => tasksDir(String.raw`C:\claims`)).toThrow(/must be relative/);
+    expect(() => tasksDir('//server/share')).toThrow(/must be relative/);
+  });
+
   // `..` only climbs when it is a whole segment. A directory whose NAME starts
   // with two dots stays put, so matching the prefix would refuse a location
   // that never left.

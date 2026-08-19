@@ -46,11 +46,18 @@ const renderBranches = (branches, tasks) =>
     })
     .join('\n');
 
-export const renderBoard = (tasks, branches) => {
+/**
+ * `tasksRel` is passed in rather than read here: the register's location is
+ * configurable, and the empty-board message is the one place a reader is told
+ * where to go, so a renderer that guessed would send them to the wrong path.
+ */
+export const renderBoard = (tasks, branches, { tasksRel } = {}) => {
   const hasTasks = tasks.some(({ data }) => data !== undefined);
   const hasBranches = branches.some(({ data }) => data !== undefined);
   if (!hasTasks && !hasBranches) {
-    return `${HEADER}_No active tasks. Claim one by copying the task \`_TEMPLATE.md\`._\n`;
+    const template =
+      tasksRel === undefined ? '_TEMPLATE.md' : `${tasksRel}/_TEMPLATE.md`;
+    return `${HEADER}_No active tasks. Claim one by copying \`${template}\`._\n`;
   }
 
   const tasksSection = hasTasks

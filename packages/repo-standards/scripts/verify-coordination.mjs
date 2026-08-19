@@ -336,7 +336,10 @@ const main = () => {
   const branches = readEntries(BRANCHES_DIR);
 
   if (process.argv.includes('--write-board')) {
-    writeFileSync(BOARD_DOC, renderBoard(tasks, branches));
+    writeFileSync(
+      BOARD_DOC,
+      renderBoard(tasks, branches, { tasksRel: TASKS_REL }),
+    );
     console.log(
       `Wrote the local ${BOARD_REL} view (gitignored) — ` +
         `${tasks.length} task(s), ${branches.length} shared branch(es).`,

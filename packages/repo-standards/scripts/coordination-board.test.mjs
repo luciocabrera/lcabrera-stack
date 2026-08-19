@@ -29,6 +29,14 @@ describe('renderBoard', () => {
     expect(board).not.toContain('| Task |');
   });
 
+  it('points an empty register at the configured template, not a guessed one', () => {
+    const board = renderBoard([{ data: undefined }], [{ data: undefined }], {
+      tasksRel: 'ops/claims',
+    });
+
+    expect(board).toContain('`ops/claims/_TEMPLATE.md`');
+  });
+
   it('renders only the sections that have entries', () => {
     const board = renderBoard([task(A_TASK)], []);
     expect(board).toContain('## Tasks');

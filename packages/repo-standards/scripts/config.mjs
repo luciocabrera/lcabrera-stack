@@ -13,7 +13,7 @@
  */
 
 import { existsSync, readFileSync } from 'node:fs';
-import { dirname, isAbsolute, join, normalize } from 'node:path';
+import { dirname, join, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { resolveHostRoot } from './host-root.mjs';
@@ -70,15 +70,35 @@ const readableString = (value, fallback) =>
  * home as `docs/decisions/` rather than `docs/decisions` and every ADR in it is
  * reported as a stray — from a trailing slash.
  */
-const canonical = (candidate) => {
+/**
+ * Parsed with POSIX semantics on every platform, because the value is checked
+ * into git and read wherever the gate runs — a verdict that depends on the
+ * host's separator is not a verdict.
+ *
+ * The platform `normalize` is what makes that a real hazard rather than a
+ * tidiness point: on Windows it turns `../../etc` into `..\..\etc`, which the
+ * segment check below (splitting on `/`) then reads as a single ordinary name.
+ * The containment check would pass and the escape would go through.
+ */
+const slashed = (value) => value.replaceAll('\\', '/');
+
+const canonical = (value) => {
   // `normalize` has already collapsed any run of separators, so at most one
   // trailing slash can be left — stripped by hand because the regex that does
   // it rescans from every offset (Sonar S8786).
-  const normalised = normalize(candidate.replaceAll('\\', '/'));
+  const normalised = posix.normalize(slashed(value));
   const trimmed = normalised.endsWith('/')
     ? normalised.slice(0, -1)
     : normalised;
   return trimmed === '' ? '.' : trimmed;
+};
+
+/** `C:` and `\\server` are roots too, on whichever platform reads the config. */
+const DRIVE_OR_UNC = /^(?:[a-z]:|\/\/)/i;
+
+const isRooted = (value) => {
+  const withSlashes = slashed(value);
+  return posix.isAbsolute(withSlashes) || DRIVE_OR_UNC.test(withSlashes);
 };
 
 /** `..` climbs only as a whole segment — `..data` is a name, not a parent. */
@@ -86,7 +106,7 @@ const leavesRoot = (candidate) => candidate.split('/')[0] === '..';
 
 const repoRelative = (value, fallback, key) => {
   const raw = readableString(value, fallback);
-  if (isAbsolute(raw)) {
+  if (isRooted(raw)) {
     throw new Error(
       `${CONFIG_FILE_NAME}: \`${key}\` must be relative to the repository root, but is \`${raw}\`.`,
     );
