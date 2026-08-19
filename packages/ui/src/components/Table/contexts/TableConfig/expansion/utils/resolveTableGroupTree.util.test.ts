@@ -7,6 +7,7 @@ import type {
 
 import { resolveGroupPathKey } from '#ui/components/Table/contexts/TableConfig/grouping/utils/resolveGroupPathKey.util';
 import { TABLE_GROUP_ROW_FIELD } from '#ui/components/Table/Table.constants';
+import { getTableGroupRowSummary } from '#ui/components/Table/utils/getTableGroupRowSummary.util';
 
 import { resolveTableGroupTree } from './resolveTableGroupTree.util';
 
@@ -409,6 +410,29 @@ describe('resolveTableGroupTree', () => {
       expect(foldableGroupPaths.has(resolveGroupPathKey(berlinOpen))).toBe(
         true,
       );
+    });
+
+    it('keeps a group row standing through its own collapse', () => {
+      // The property "collapse all" rests on, and the one that makes a
+      // top-level group safe to fold: ancestry is read from a path's *proper*
+      // prefixes, so a collapse hides a group's descendants and never its own
+      // row. Both roots are foldable — they own rows — and folding every
+      // foldable path leaves one row per root plus anything that is nobody's
+      // descendant.
+      const parisKey = resolveGroupPathKey(paris);
+      const { foldableGroupPaths } = drilled(rows);
+
+      expect(foldableGroupPaths.has(parisKey)).toBe(true);
+
+      const { rows: standing } = resolveTableGroupTree({
+        collapsedGroupPaths: foldableGroupPaths,
+        data: rows,
+        groupingKeys: ['city', 'status'],
+      });
+
+      expect(
+        standing.map((row) => getTableGroupRowSummary(row)?.path),
+      ).toStrictEqual([paris, berlin]);
     });
 
     it('is empty on a grid with no group rows in it', () => {

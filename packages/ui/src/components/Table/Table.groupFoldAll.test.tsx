@@ -289,11 +289,12 @@ describe('folding every group at once', () => {
 
     fireEvent.click(control('collapse-all'));
 
-    // Every level below the top is folded away; the top-level subtotals and the
-    // grand total survive, because neither is anybody's parent. A set built
-    // from parent keys alone would also hold no top-level path — but one built
-    // from the grouping *configuration* would fold `status` too and leave the
-    // grand total alone on screen.
+    // Every level below the top is folded away, and the top-level subtotals
+    // survive their **own** collapse: a collapse hides a group's descendants,
+    // never its row. The grand total survives because it is nobody's
+    // descendant. A set built from the grouping *configuration* rather than
+    // from the tree would name levels this result never populated, and
+    // `pruneCollapsedGroupPaths` would drop them on the next read.
     expect(drawnLabels()).toStrictEqual([
       'Cancelled total',
       'Active total',

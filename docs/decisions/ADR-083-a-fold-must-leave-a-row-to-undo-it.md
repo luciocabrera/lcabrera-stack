@@ -82,10 +82,16 @@ is the single answer behind all three surfaces —
 - and the fold-every-group pair (`useTableGroupFoldAll`).
 
 **"Collapse all" therefore means collapse to the outermost level, never to
-nothing.** A top-level group and the grand total are nobody's parent, so neither
-is in the set and both stay on screen. That is not a guard bolted onto the
-action — it falls out of the definition, which is why the action needs no special
-case and the button's disabled state is the same predicate.
+nothing** — and that follows from how a collapse hides rows, not from what is in
+the set. `resolveGroupTreeNodes` asks whether any _proper_ prefix of a row's path
+is collapsed, so a collapse hides a group's **descendants** and never the group
+row itself. Top-level groups are therefore in the foldable set — they own rows —
+and folding them leaves their own rows standing. The grand total survives because
+it is nobody's descendant, and the root is never foldable, which is what stops
+the whole table sitting inside one collapsible subtree.
+
+So the action needs no special case and the button's disabled state is the same
+predicate.
 
 **Under `flat`, nothing is foldable, and the grid says so.** The chevrons are
 gone and both menu items are disabled, which is the honest report: a flat result

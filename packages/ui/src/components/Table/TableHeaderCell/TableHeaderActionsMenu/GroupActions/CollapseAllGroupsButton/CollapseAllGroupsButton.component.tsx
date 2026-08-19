@@ -11,9 +11,11 @@ import type { CollapseAllGroupsButtonProps } from './CollapseAllGroupsButton.typ
  * "Collapse All Groups" item of the grouping section: always shown to keep the
  * menu layout stable, disabled while every foldable group is already folded.
  *
- * It folds to the **outermost** level rather than to nothing — the top-level
- * groups and the grand total are nobody's parent, so they stay on screen and
- * there is something left to expand from (#774).
+ * It folds to the **outermost** level rather than to nothing, because a collapse
+ * hides a group's **descendants** and never the group row itself. So folding
+ * every foldable path — top-level groups included, since they own rows — leaves
+ * exactly one row per top-level group, plus the grand total, which is nobody's
+ * descendant (#774).
  */
 export const CollapseAllGroupsButton = ({
   onClose,

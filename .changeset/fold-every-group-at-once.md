@@ -12,9 +12,10 @@ menu items, so they are reachable by keyboard, and they take effect immediately
 rather than being staged behind the settings drawer's Accept: expansion is client
 state, not a setting.
 
-**"Collapse all" folds to the outermost level, never to nothing.** A top-level
-group and the grand total are nobody's parent, so both stay on screen and there
-is something left to expand back from.
+**"Collapse all" folds to the outermost level, never to nothing**, because a
+collapse hides a group's **descendants** and never the group row itself. Folding
+every group therefore leaves one row per top-level group, plus the grand total —
+so there is always something left to expand back from.
 
 ```
 Cancelled  Business  Critical            Cancelled ·total·

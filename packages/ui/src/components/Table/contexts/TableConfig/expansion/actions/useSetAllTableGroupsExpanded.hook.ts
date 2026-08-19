@@ -33,9 +33,13 @@ const NOTHING_COLLAPSED: ReadonlySet<string> = new Set<string>();
  * of its own, which is what stops a `flat` grid from folding itself out of
  * existence — see `collectFoldableGroupPaths`.
  *
- * It therefore collapses **to the outermost level**, never to nothing: a
- * top-level group and the grand total are nobody's parent, so neither is in the
- * set and both stay on screen, leaving something to expand back from.
+ * It therefore collapses **to the outermost level**, never to nothing — and the
+ * reason is that a collapse hides a group's **descendants**, never the group row
+ * itself: `resolveGroupTreeNodes` tests a path's *proper* prefixes. Top-level
+ * groups are in the set, since they own rows, and folding them leaves their own
+ * rows standing. The grand total survives because it is nobody's descendant, and
+ * the root is never foldable — which is what stops the whole table sitting
+ * inside one collapsible subtree.
  *
  * Focus is repositioned **before** the store write, for the ordering reason
  * `useToggleTableGroupExpansion` records: the focused cell's unmount releases
