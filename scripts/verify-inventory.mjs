@@ -35,6 +35,7 @@ import { errorMessage } from '../packages/repo-standards/scripts/error-message.m
 import { runGit } from '../packages/repo-standards/scripts/git-exec.mjs';
 import {
   describeFinding,
+  describeStaleEntry,
   INVENTORY_TREES,
   isBaselined,
   missingExports,
@@ -101,7 +102,7 @@ const writeBaseline = (findings) => {
 
 const printStaleWarnings = (stale) => {
   for (const finding of stale) {
-    const line = `${describeFinding(finding)} — now documented, or the file is gone. Drop it with --write.`;
+    const line = `${describeStaleEntry(finding)} — drop it with --write.`;
     console.error(
       process.env.GITHUB_ACTIONS === 'true'
         ? `::warning::${line}`

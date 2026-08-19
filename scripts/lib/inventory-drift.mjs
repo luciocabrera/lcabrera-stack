@@ -118,3 +118,8 @@ export const staleBaselineEntries = (baseline, findings) => {
 
 export const describeFinding = ({ file, symbol }) =>
   `${file}: \`${symbol}\` is not named anywhere in its tree's INVENTORY.md`;
+
+/** A dedicated message for a stale entry — the opposite claim of `describeFinding`,
+ * so it must not reuse that wording ("is not named…") for something now documented. */
+export const describeStaleEntry = ({ file, symbol }) =>
+  `${file}: \`${symbol}\` was grandfathered but is now documented, or the file is gone`;

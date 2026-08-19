@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import {
   describeFinding,
+  describeStaleEntry,
   exportedSymbolNames,
   isBaselined,
   isDocumented,
@@ -212,5 +213,19 @@ describe('describeFinding', () => {
     ).toBe(
       "packages/ui/src/utils/x.util.ts: `missing` is not named anywhere in its tree's INVENTORY.md",
     );
+  });
+});
+
+describe('describeStaleEntry', () => {
+  it('makes the opposite claim to describeFinding, not the same one', () => {
+    // A stale entry means the symbol IS now documented (or its file is gone)
+    // — reusing describeFinding's "is not named…" wording here would be
+    // self-contradictory in the printed warning.
+    const message = describeStaleEntry({
+      file: 'packages/ui/src/utils/x.util.ts',
+      symbol: 'nowDocumented',
+    });
+    expect(message).toContain('nowDocumented');
+    expect(message).not.toContain('is not named');
   });
 });
