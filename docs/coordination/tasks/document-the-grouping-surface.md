@@ -2,7 +2,7 @@
 id: document-the-grouping-surface
 title: Document the grouping surface and its SQL-backed precondition
 owner: agent:claude
-status: active
+status: review
 branch: docs/579-document-the-grouping-surface
 area:
   - packages/ui/src/components/Table/ARCHITECTURE.md
@@ -13,16 +13,19 @@ area:
 started: 2026-08-19
 updated: 2026-08-19
 plan: (none)
-pr: (none)
+pr: 811
 issue: #579
 ---
 
 ## What
 
-Document the grouping surface and its SQL-backed precondition
+Document the grouping surface (#579) and state its SQL-backed precondition
+(#572). Adds the 19 grouping artifacts missing from the two package inventories,
+records why no client-side grouping path is offered, and documents the
+grouping/expansion store split.
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: written, docs gates green, PR #811 open for review
 - Blockers: none
-- Next:
+- Next: address review, then merge
