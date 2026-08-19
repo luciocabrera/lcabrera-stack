@@ -841,6 +841,14 @@ export type TableMetaState = {
    * values — what a link written before granularities existed says (#786).
    */
   readonly groupingPeriods?: Readonly<Record<string, TableGroupPeriod>>;
+  /**
+   * Whether this route declared a default grouping (#578). It is the client's
+   * half of that declaration: with a default in play, clearing the grouping has
+   * to record itself in the URL, because an absent `grouping` param is what the
+   * loader reads as "apply the default" — so a cleared table would re-group on
+   * the next navigation that writes any other param.
+   */
+  readonly hasDefaultGrouping?: boolean;
   /** Initial page size for first load */
   readonly initialPageSize: number;
   readonly isBordered: boolean;
@@ -860,6 +868,16 @@ export type TableMetaState = {
    */
   readonly isGroupDrillEnabled?: boolean;
   readonly isGroupingEnabled?: boolean;
+  /**
+   * The route's grouping is curated and the user may not reshape it (#578).
+   * Locks the keys, the mode and the per-key granularity — the shape — while
+   * leaving the aggregates editable, because a preset says how rows are grouped
+   * rather than what is measured.
+   *
+   * Every surface that edits the shape reads this, not only the drawer: a lock
+   * honoured in one place and ignored in another is not a lock.
+   */
+  readonly isGroupingLocked?: boolean;
   /**
    * Endpoint capability (ADR-063): the load-more sends the last loaded row as a
    * keyset cursor (ADR-052). Absent means off — an endpoint that cannot seek
@@ -891,6 +909,16 @@ export type TableMetaState = {
   readonly tableSettingsSelectedTab: string;
   readonly threshold: number;
   readonly title?: TableTitle;
+  /**
+   * Where a subtotal sits relative to the rows it totals (#578). Absent means
+   * `last`, which is what the query builder already defaults to, so a route
+   * that never offers the choice emits byte-identical SQL.
+   *
+   * It is a query setting, not a display one: the placement is emitted as the
+   * direction of the `GROUPING()` term in the `ORDER BY`, so it reaches the
+   * server rather than being applied to rows already fetched.
+   */
+  readonly totalsPlacement?: TableTotalsPlacement;
   readonly wasTableSettingsOpenBeforeColumnSettings?: boolean;
 };
 
@@ -1000,6 +1028,17 @@ export type TableTitle = {
   readonly plural: string;
   readonly singular: string;
 };
+
+/**
+ * Where a subtotal sits relative to the rows it totals.
+ *
+ * The same two tokens `@lcabrera/server`'s `GroupQueryDescriptor` spells as
+ * `subtotalPlacement`, and deliberately the same shape rather than a shared
+ * import: this package is client-safe and may not depend on the Node-only one
+ * (ADR-038, ADR-039). The contract test is what holds the two spellings
+ * together.
+ */
+export type TableTotalsPlacement = 'first' | 'last';
 
 type BaseProps = ComponentPropsWithRef<'table'> & {
   readonly actions?: ReactNode;

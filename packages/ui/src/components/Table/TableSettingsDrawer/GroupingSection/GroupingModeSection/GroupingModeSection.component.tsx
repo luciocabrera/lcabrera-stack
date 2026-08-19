@@ -2,6 +2,7 @@ import * as stylex from '@stylexjs/stylex';
 
 import { RadioOptionGroup } from '#ui/components/RadioOptionGroup';
 import { SidePanelSectionHeader } from '#ui/components/SidePanel';
+import { useGetTableIsGroupingLocked } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 import {
   TABLE_GROUPING_MODE_LABELS,
   TABLE_GROUPING_MODES,
@@ -33,7 +34,12 @@ export const GroupingModeSection = ({
   isBusy = false,
 }: GroupingModeSectionProps) => {
   const mode = useGetGroupingMode();
+  const isGroupingLocked = useGetTableIsGroupingLocked();
   const setGroupingMode = useSetGroupingMode();
+
+  // Which grouping sets the read emits is part of the curated shape, so a lock
+  // covers it (#578).
+  if (isGroupingLocked) return;
 
   const options = TABLE_GROUPING_MODES.map((value) => ({
     label: TABLE_GROUPING_MODE_LABELS[value],

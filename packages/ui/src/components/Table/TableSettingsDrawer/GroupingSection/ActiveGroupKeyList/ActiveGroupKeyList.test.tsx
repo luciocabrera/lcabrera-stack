@@ -22,11 +22,13 @@ type MockDraggableListProps = {
   readonly onOrderChange?: (items: readonly { readonly id: string }[]) => void;
 };
 
-const { columnsRef, groupingKeysRef, mockSetGroupKeys } = vi.hoisted(() => ({
-  columnsRef: { current: [] as readonly Record<string, unknown>[] },
-  groupingKeysRef: { current: [] as readonly string[] },
-  mockSetGroupKeys: vi.fn(),
-}));
+const { columnsRef, groupingKeysRef, isGroupingLockedRef, mockSetGroupKeys } =
+  vi.hoisted(() => ({
+    columnsRef: { current: [] as readonly Record<string, unknown>[] },
+    groupingKeysRef: { current: [] as readonly string[] },
+    isGroupingLockedRef: { current: false },
+    mockSetGroupKeys: vi.fn(),
+  }));
 
 const { NO_PERIODS } = vi.hoisted(() => ({
   NO_PERIODS: {} as Readonly<Record<string, never>>,
@@ -55,6 +57,7 @@ vi.mock('../../TableDrawerContext/selectors', () => ({
 // capability is stubbed absent — the state in which the control renders nothing.
 vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
   useGetTableColumnGroupingCapability: () => {},
+  useGetTableIsGroupingLocked: () => isGroupingLockedRef.current,
 }));
 
 vi.mock('#ui/components/DraggableList', () => ({
@@ -78,6 +81,7 @@ vi.mock('#ui/components/DraggableList', () => ({
 import { ActiveGroupKeyList } from './ActiveGroupKeyList.component';
 
 beforeEach(() => {
+  isGroupingLockedRef.current = false;
   columnsRef.current = [
     { key: 'order_status', label: 'Status' },
     { key: 'shipping_country', label: 'Country' },
@@ -148,5 +152,29 @@ describe('ActiveGroupKeyList', () => {
     render(<ActiveGroupKeyList />);
 
     expect(screen.getByText('1. not_a_column')).not.toBeNull();
+  });
+
+  it('still renders the applied keys under a locked preset', () => {
+    // "Hides the picker while still rendering the grouping": the rows stay, so
+    // a reader can see what the table is grouped by (#578).
+    isGroupingLockedRef.current = true;
+    groupingKeysRef.current = ['order_status', 'shipping_country'];
+
+    render(<ActiveGroupKeyList />);
+
+    expect(screen.getByText('1. Status')).toBeTruthy();
+    expect(screen.getByText('2. Country')).toBeTruthy();
+  });
+
+  it('offers neither removal nor reorder under a locked preset', () => {
+    // The order is the query's nesting order, so a drag is an edit — a lock
+    // that stopped removal but allowed reordering would not be a lock.
+    isGroupingLockedRef.current = true;
+    groupingKeysRef.current = ['order_status', 'shipping_country'];
+
+    render(<ActiveGroupKeyList />);
+
+    expect(screen.queryByRole('button', { name: /Remove/ })).toBeNull();
+    expect(screen.queryByTestId('group-key-list')).toBeNull();
   });
 });

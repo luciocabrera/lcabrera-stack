@@ -39,6 +39,7 @@ const response = { data: [], total: 0 };
 
 type FetchPageArgs = {
   readonly grouping: TableGroupingState;
+  readonly totalsPlacement: 'first' | 'last';
 };
 
 const NO_GROUPING: TableGroupingState = {
@@ -437,6 +438,7 @@ describe('createTableRouteLoader', () => {
         'filters',
         'grouping',
         'request',
+        'totalsPlacement',
       ]);
       expect(keysOf(grouped)).toEqual(keysOf(ungrouped));
     });
@@ -578,6 +580,154 @@ describe('createTableRouteLoader', () => {
       await result.dataPromise;
 
       expect(order).toEqual(['fetchPage', 'capabilities']);
+    });
+  });
+
+  describe('a route-declared default grouping (#578)', () => {
+    const defaultGrouping: TableGroupingState = {
+      aggregates: {},
+      keys: ['status'],
+      mode: 'rollup',
+      periods: {},
+    };
+
+    const groupingConfig = {
+      defaultGrouping,
+      meta: { isGroupingEnabled: true },
+    } as const;
+
+    it('applies it when the URL carried no grouping param', async () => {
+      const { fetchPage, result } = await invoke({ config: groupingConfig });
+
+      expect(fetchPage.mock.calls[0]?.[0].grouping.keys).toStrictEqual([
+        'status',
+      ]);
+      expect(result.metaState.groupingKeys).toStrictEqual(['status']);
+      expect(result.metaState.groupingMode).toBe('rollup');
+    });
+
+    it('lets the URL override it', async () => {
+      const { fetchPage } = await invoke({
+        config: groupingConfig,
+        url: groupingUrl('{"keys":["name"]}'),
+      });
+
+      expect(fetchPage.mock.calls[0]?.[0].grouping.keys).toStrictEqual([
+        'name',
+      ]);
+    });
+
+    it('stays cleared when the URL says so explicitly', async () => {
+      // The empty envelope is what the clear path writes on such a route, and
+      // the distinction it makes is the point: an absent param means "apply the
+      // default", so without it a filter change would silently re-group the
+      // table under the user (#578).
+      const { fetchPage } = await invoke({
+        config: groupingConfig,
+        url: groupingUrl('{"keys":[]}'),
+      });
+
+      expect(fetchPage.mock.calls[0]?.[0].grouping.keys).toStrictEqual([]);
+    });
+
+    it('is ignored by a route that never declared grouping', async () => {
+      // A default on a route that cannot group would ask its endpoint for a
+      // shape it does not produce — the same rule the `grouping` param follows.
+      const { fetchPage, result } = await invoke({
+        config: { defaultGrouping },
+      });
+
+      expect(fetchPage.mock.calls[0]?.[0].grouping.keys).toStrictEqual([]);
+      expect(result.metaState.hasDefaultGrouping).toBe(false);
+    });
+
+    it('tells the client a default exists, so a clear can record itself', async () => {
+      const { result } = await invoke({ config: groupingConfig });
+
+      expect(result.metaState.hasDefaultGrouping).toBe(true);
+    });
+
+    it('reports no default where the route declared none', async () => {
+      const { result } = await invoke({
+        config: { meta: { isGroupingEnabled: true } },
+      });
+
+      expect(result.metaState.hasDefaultGrouping).toBe(false);
+    });
+
+    it('refuses a cookie claiming the route has one', async () => {
+      // `hasDefaultGrouping` decides whether an ordinary clear writes an
+      // envelope no loader reads back differently, so it is route-derived and
+      // spread after the cookie.
+      const { result } = await invoke({
+        config: { meta: { isGroupingEnabled: true } },
+        cookie: uiFlagsCookie({ hasDefaultGrouping: true }),
+      });
+
+      expect(result.metaState.hasDefaultGrouping).toBe(false);
+    });
+  });
+
+  describe('totals placement (#578)', () => {
+    it('defaults to last, so the emitted SQL is unchanged', async () => {
+      const { fetchPage, result } = await invoke();
+
+      expect(fetchPage.mock.calls[0]?.[0].totalsPlacement).toBe('last');
+      expect(result.metaState.totalsPlacement).toBe('last');
+    });
+
+    it('reads the persisted preference out of the UI-flags cookie', async () => {
+      const { fetchPage } = await invoke({
+        cookie: uiFlagsCookie({ totalsPlacement: 'first' }),
+      });
+
+      expect(fetchPage.mock.calls[0]?.[0].totalsPlacement).toBe('first');
+    });
+
+    it('lets the param win over the cookie', async () => {
+      const { fetchPage } = await invoke({
+        cookie: uiFlagsCookie({ totalsPlacement: 'first' }),
+        url: 'http://localhost/rows?totals=last',
+      });
+
+      expect(fetchPage.mock.calls[0]?.[0].totalsPlacement).toBe('last');
+    });
+
+    it('falls back to last for a token outside the vocabulary', async () => {
+      const { fetchPage } = await invoke({
+        url: 'http://localhost/rows?totals=sideways',
+      });
+
+      expect(fetchPage.mock.calls[0]?.[0].totalsPlacement).toBe('last');
+    });
+  });
+
+  describe('a locked grouping (#578)', () => {
+    it('carries the route declaration to the client', async () => {
+      const { result } = await invoke({
+        config: { meta: { isGroupingEnabled: true, isGroupingLocked: true } },
+      });
+
+      expect(result.metaState.isGroupingLocked).toBe(true);
+    });
+
+    it('refuses a cookie claiming the grouping is unlocked', async () => {
+      // A cookie able to seed this is a cookie able to unlock a curated table,
+      // so it is resolved from the route's meta and spread last.
+      const { result } = await invoke({
+        config: { meta: { isGroupingEnabled: true, isGroupingLocked: true } },
+        cookie: uiFlagsCookie({ isGroupingLocked: false }),
+      });
+
+      expect(result.metaState.isGroupingLocked).toBe(true);
+    });
+
+    it('refuses a cookie claiming a lock the route never declared', async () => {
+      const { result } = await invoke({
+        cookie: uiFlagsCookie({ isGroupingLocked: true }),
+      });
+
+      expect(result.metaState.isGroupingLocked).toBe(false);
     });
   });
 });

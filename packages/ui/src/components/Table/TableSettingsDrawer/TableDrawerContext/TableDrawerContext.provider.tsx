@@ -6,6 +6,7 @@ import { useStore } from '#ui/hooks';
 import type {
   TableDrawerColumnsState,
   TableDrawerProviderProps,
+  TableDrawerTotalsPlacementState,
 } from './TableDrawerContext.types';
 
 import { TableDrawerContext } from './TableDrawerContext.context';
@@ -19,8 +20,11 @@ import { TableDrawerContext } from './TableDrawerContext.context';
  * is a removal.
  */
 export const TableDrawerProvider = ({ children }: TableDrawerProviderProps) => {
-  const { columnsStore: tableColumnsStore, groupingStore: tableGroupingStore } =
-    useTableConfigContextValue();
+  const {
+    columnsStore: tableColumnsStore,
+    groupingStore: tableGroupingStore,
+    metaStore,
+  } = useTableConfigContextValue();
 
   const tableColumnsState = tableColumnsStore.get();
   const {
@@ -49,9 +53,16 @@ export const TableDrawerProvider = ({ children }: TableDrawerProviderProps) => {
     mode,
     periods,
   });
+  // Seeded from the applied placement, defaulting the way every other reader of
+  // it does — absent is `last`, the order the rows on screen are already in.
+  const totalsPlacementStore = useStore<TableDrawerTotalsPlacementState>({
+    totalsPlacement: metaStore.get()?.totalsPlacement ?? 'last',
+  });
 
   return (
-    <TableDrawerContext value={{ columnsStore, groupingStore }}>
+    <TableDrawerContext
+      value={{ columnsStore, groupingStore, totalsPlacementStore }}
+    >
       {children}
     </TableDrawerContext>
   );

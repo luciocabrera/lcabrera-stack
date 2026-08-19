@@ -64,6 +64,7 @@ GroupingSection/
 ├── AddAggregateSection/                → Column select → legal-function select
 ├── ActiveAggregateList/                → Staged aggregates, each removable
 ├── GroupingModeSection/                → Totals mode: groups only, or groups with subtotals
+├── TotalsPlacementSection/             → Totals position: above or below their rows (rollup only)
 ├── GroupingSectionToolbar/             → Clear grouping (toolbar + footer)
 └── utils/
     ├── toGroupKeyItems.util.ts         → Staged keys + labels, in nesting order
@@ -118,6 +119,8 @@ flowchart TD
 | Is this configuration a change at all?  | `resolveTableGroupingUpdate`                                                | the component                         |
 | What grouping is the section showing?   | `TableDrawerContext`'s `groupingStore` (the draft)                          | the live `TableConfig` grouping store |
 | What grouping is the **table** showing? | `TableConfig`'s `groupingStore`                                             | the draft, until Accept commits it    |
+| Where do the totals go?                 | `TableDrawerContext`'s `totalsPlacementStore` (the draft)                   | the grouping draft — see below        |
+| May the user reshape the grouping?      | `metaState.isGroupingLocked`, read by each delegate itself                  | a prop drilled from the shell         |
 
 `TableColumn.dataType` is a five-member presentation vocabulary that reports
 `numeric`, `jsonb` and `point` alike as `string`, so a menu built from it offers
@@ -135,6 +138,36 @@ no message
 A refused column is **left out** here rather than listed and disabled: a
 `VirtualSelect` option carries no room for a reason, and the header menu is where
 a user asks about one specific column.
+
+## Totals placement is staged here but is not part of the grouping
+
+`TotalsPlacementSection` sits beside the mode control and stages like everything
+else, but what it stages lives in its **own** draft store rather than in the
+grouping draft, because it commits somewhere else: the grouping goes to the
+`grouping` search param, while the placement goes to the `totals` param **and**
+the UI-flags cookie, since it is a preference that outlives the table it was set
+on (ADR-085).
+
+It renders only under `rollup`. `flat` emits no subtotal and no grand total, so
+there would be nothing to position.
+
+## A locked preset
+
+A route may declare `meta.isGroupingLocked`, which fixes the grouping's shape —
+its keys, its mode and its per-key granularity — while leaving the aggregates
+editable: a curated grouping says how rows are grouped, not what is measured
+over them.
+
+Every delegate that reshapes the grouping reads the flag **itself**, the same
+way it reads everything else here. That is not only the self-connected-delegate
+pattern: the drawer is not the only surface that edits a grouping — the
+column-header menu does too — so the lock is applied per surface rather than by
+hiding one container. A lock honoured in the drawer and ignored in the header
+menu is not a lock.
+
+Under a lock the key list still renders, without its drag handles and remove
+controls. "Hides the picker while still rendering the grouping" is the
+requirement, and a reader still needs to see what the table is grouped by.
 
 ## Depth cap
 
@@ -168,6 +201,7 @@ pinned to it by `groupingContract.test.ts` in `apps/react-router`.
 | `ActiveGroupKeyList`     | `isBusy`               | `boolean`                   | `false`    |                                         |
 | `AddAggregateSection`    | `isBusy`               | `boolean`                   | `false`    |                                         |
 | `ActiveAggregateList`    | `isBusy`               | `boolean`                   | `false`    |                                         |
+| `TotalsPlacementSection` | `isBusy`               | `boolean`                   | `false`    | Renders nothing outside `rollup`        |
 | `GroupingSectionToolbar` | `isBusy`               | `boolean`                   | `false`    |                                         |
 | `GroupingSectionToolbar` | `variant`              | `'footer' \| 'toolbar'`     | `'footer'` | The dual-variant pattern                |
 

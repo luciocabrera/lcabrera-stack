@@ -11,7 +11,10 @@ import type { TableGroupingState } from '#ui/components/Table/Table.types';
 import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
 import { createMockStore } from '#ui/utils/tests/createMockStore.util';
 
-import type { TableDrawerContextValue } from './TableDrawerContext.types';
+import type {
+  TableDrawerContextValue,
+  TableDrawerTotalsPlacementState,
+} from './TableDrawerContext.types';
 
 import { useClearGrouping } from './actions/useClearGrouping.hook';
 import { useSetColumnAggregate } from './actions/useSetColumnAggregate.hook';
@@ -54,9 +57,14 @@ const groupingStore = createMockStore<TableGroupingState>({
   periods: {},
 });
 
+const totalsPlacementStore = createMockStore<TableDrawerTotalsPlacementState>({
+  totalsPlacement: 'last',
+});
+
 const contextValue: TableDrawerContextValue = {
   columnsStore: columnsStore as never,
   groupingStore: groupingStore as never,
+  totalsPlacementStore: totalsPlacementStore as never,
 };
 
 const Wrapper = ({ children }: WrapperProps) =>

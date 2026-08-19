@@ -1,9 +1,13 @@
-import type { TableGroupingState } from '#ui/components/Table/Table.types';
+import type {
+  TableGroupingState,
+  TableTotalsPlacement,
+} from '#ui/components/Table/Table.types';
 
 import { resolveTableGroupingUpdate } from '#ui/components/Table/contexts/TableConfig/grouping/actions/utils';
 import { usePersistTableUiFlagsAction } from '#ui/components/Table/contexts/TableConfig/meta/actions/usePersistTableUiFlagsAction.hook';
 import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useTableDataContextValue } from '#ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
+import { TABLE_TOTALS_PLACEMENT_PARAM } from '#ui/components/Table/Table.constants';
 import { getHasQueryChanged } from '#ui/components/Table/utils';
 
 import type { BatchTableSettingsUpdate } from './utils/resolveBatchTableSettingsUpdate.util';
@@ -18,6 +22,8 @@ type BatchSetTableSettingsArgs<TData> = {
   /** The whole grouping configuration to apply — staged, or unchanged. */
   readonly grouping: TableGroupingState;
   readonly settings: BatchTableSettingsUpdate<TData>;
+  /** Where totals go — staged, or unchanged. */
+  readonly totalsPlacement: TableTotalsPlacement;
 };
 
 /**
@@ -43,7 +49,11 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
   const persistTableState = usePersistTableStateAction();
   const persistUiFlags = usePersistTableUiFlagsAction();
 
-  return ({ grouping, settings }: BatchSetTableSettingsArgs<TData>) => {
+  return ({
+    grouping,
+    settings,
+    totalsPlacement,
+  }: BatchSetTableSettingsArgs<TData>) => {
     const columnsState = columnsStore.get();
     const metaState = metaStore.get();
     const persistenceKey = metaState?.persistenceKey ?? '';
@@ -54,6 +64,7 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
     });
     const groupingUpdate = resolveTableGroupingUpdate({
       existingGrouping: groupingStore.get(),
+      hasDefaultGrouping: metaState?.hasDefaultGrouping === true,
       nextGrouping: grouping,
     });
     // Resolved before the column state, and derived from the grouping this
@@ -78,17 +89,41 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
       sorting: settings.sorting,
     });
 
+    // Absent reads as `last` on every other side of this, so comparing against
+    // the raw value would report a change the query cannot tell apart.
+    const hasPlacementChanged =
+      totalsPlacement !== (metaState?.totalsPlacement ?? 'last');
+
     if (
-      !persistTableState(
-        groupingUpdate.kind === 'updated'
-          ? [...persistenceEntries, groupingUpdate.persistenceEntry]
-          : persistenceEntries,
-      )
+      !persistTableState([
+        ...persistenceEntries,
+        ...(groupingUpdate.kind === 'updated'
+          ? [groupingUpdate.persistenceEntry]
+          : []),
+        // Param-only, and deliberately not a cookie write of its own: the
+        // UI-flags cookie is rewritten whole below, so a second entry writing
+        // the same key on a different fetcher would be overwritten by whichever
+        // landed last (#578).
+        ...(hasPlacementChanged
+          ? [
+              {
+                searchParamKey: TABLE_TOTALS_PLACEMENT_PARAM,
+                searchParamValue: totalsPlacement,
+              },
+            ]
+          : []),
+      ])
     ) {
       return;
     }
 
-    if (hasQueryChanged || groupingUpdate.kind === 'updated') {
+    // All three are pure reads, so the order is free; the two plain booleans
+    // lead because the comparison is the only one that has to be evaluated.
+    if (
+      hasQueryChanged ||
+      hasPlacementChanged ||
+      groupingUpdate.kind === 'updated'
+    ) {
       dataStore.set({
         isLoading: true,
       });
@@ -98,9 +133,18 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
     if (groupingUpdate.kind === 'updated') {
       groupingStore.set(groupingUpdate.grouping);
     }
-    if (!metaState?.isTableSettingsPinned) {
-      const nextStatePatch = { isTableSettingsOpen: false };
 
+    // One UI-flags write carrying both changes. They share a cookie whose value
+    // is serialized whole from the meta state, so writing them separately would
+    // have the second overwrite the first with a snapshot taken before it.
+    const nextStatePatch = {
+      ...(hasPlacementChanged && { totalsPlacement }),
+      ...(metaState?.isTableSettingsPinned !== true && {
+        isTableSettingsOpen: false,
+      }),
+    };
+
+    if (Object.keys(nextStatePatch).length > 0) {
       persistUiFlags({
         currentState: metaState,
         nextStatePatch,

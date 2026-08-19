@@ -6,6 +6,7 @@ import type {
   TableColumnsState,
   TableDataState,
   TableGroupingState,
+  TableMetaState,
 } from '#ui/components/Table/Table.types';
 import type { MockStore } from '#ui/utils/tests/createMockStore.util';
 
@@ -51,10 +52,12 @@ const storesRef: {
   columnsStore: MockStore<TableColumnsState<Record<string, unknown>>>;
   dataStore: MockStore<Partial<TableDataState<Record<string, unknown>>>>;
   groupingStore: MockStore<TableGroupingState>;
+  metaStore: MockStore<Partial<TableMetaState>>;
 } = {
   columnsStore: createMockStore(createColumnsState()),
   dataStore: createMockStore({}),
   groupingStore: createMockStore<TableGroupingState>(NO_GROUPING),
+  metaStore: createMockStore<Partial<TableMetaState>>({}),
 };
 
 // The same shape `meta.hooks.test.tsx` uses: `vi.hoisted` runs before the
@@ -65,6 +68,7 @@ const getTableConfigContextValue = vi.hoisted(() => {
     return {
       columnsStore: storesRef.columnsStore,
       groupingStore: storesRef.groupingStore,
+      metaStore: storesRef.metaStore,
     };
   };
 });
@@ -104,6 +108,7 @@ describe('TableConfig grouping hooks', () => {
     storesRef.columnsStore = createMockStore(createColumnsState());
     storesRef.dataStore = createMockStore({});
     storesRef.groupingStore = createMockStore<TableGroupingState>(NO_GROUPING);
+    storesRef.metaStore = createMockStore<Partial<TableMetaState>>({});
     persistTableState.mockClear();
     persistTableState.mockReturnValue(true);
   });

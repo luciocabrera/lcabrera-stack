@@ -11,4 +11,5 @@ export const getPersistedUiState = (state: TableMetaState | undefined) => ({
   isTableSettingsPinned: state?.isTableSettingsPinned,
   tableSettingsExpandedFilters: state?.tableSettingsExpandedFilters,
   tableSettingsSelectedTab: state?.tableSettingsSelectedTab,
+  totalsPlacement: state?.totalsPlacement,
 });

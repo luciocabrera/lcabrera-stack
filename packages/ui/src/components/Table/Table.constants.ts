@@ -7,6 +7,7 @@ import type {
   TableGroupKeyRefusalReason,
   TableGroupPeriod,
   TableGroupRow,
+  TableTotalsPlacement,
 } from './Table.types';
 
 /**
@@ -256,3 +257,39 @@ export const TABLE_GROUP_KEY_REFUSAL_LABELS: Record<
     'it holds too many distinct values — filter the table down first',
   'unique-ish': 'nearly every row has its own value',
 };
+
+/**
+ * The totals placements in **menu order**, the same list/label split
+ * `TABLE_GROUPING_MODES` keeps and for the same reason: a `Record` cannot carry
+ * an order, and the control renders these top to bottom (#578).
+ */
+export const TABLE_TOTALS_PLACEMENTS: readonly TableTotalsPlacement[] = [
+  'last',
+  'first',
+];
+
+/**
+ * Each placement's user-facing name, a map **closed over the union**, so a
+ * member added to `TableTotalsPlacement` is a compile error here rather than a
+ * control labelled with a SQL-ish token.
+ *
+ * The names say where the total lands relative to the rows, because that is the
+ * thing the reader will see; `first`/`last` describe the sort direction that
+ * produces it, which is the query's business and not the reader's.
+ */
+export const TABLE_TOTALS_PLACEMENT_LABELS: Record<
+  TableTotalsPlacement,
+  string
+> = {
+  first: 'Above their rows',
+  last: 'Below their rows',
+};
+
+/**
+ * The search param carrying the totals placement.
+ *
+ * A named constant rather than the bare literal the other table params still
+ * use, because this one is read by the loader and written by the drawer action,
+ * and the two have to agree for the setting to reach the query at all (#578).
+ */
+export const TABLE_TOTALS_PLACEMENT_PARAM = 'totals';

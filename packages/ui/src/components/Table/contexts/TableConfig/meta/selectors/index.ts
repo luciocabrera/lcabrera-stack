@@ -14,6 +14,7 @@ export { useGetTableIsColumnSettingsOpen } from './useGetTableIsColumnSettingsOp
 export { useGetTableIsColumnSettingsPinned } from './useGetTableIsColumnSettingsPinned.hook';
 export { useGetTableIsGroupDrillEnabled } from './useGetTableIsGroupDrillEnabled.hook';
 export { useGetTableIsGroupingEnabled } from './useGetTableIsGroupingEnabled.hook';
+export { useGetTableIsGroupingLocked } from './useGetTableIsGroupingLocked.hook';
 export { useGetTableIsRounded } from './useGetTableIsRounded.hook';
 export { useGetTableIsStriped } from './useGetTableIsStriped.hook';
 export { useGetTableIsTableSettingsOpen } from './useGetTableIsTableSettingsOpen.hook';

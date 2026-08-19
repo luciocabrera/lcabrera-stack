@@ -8,6 +8,12 @@ type ApplyGroupingReducerArgs = {
   ) => TableGroupingState;
   /** The snapshot the caller already read — never a second `store.get()`. */
   readonly existingGrouping: TableGroupingState;
+  /**
+   * Forwarded to `resolveTableGroupingUpdate`, which uses it only to decide how
+   * an empty configuration is written to the URL. The drawer's draft path omits
+   * it because it never persists (#578).
+   */
+  readonly hasDefaultGrouping?: boolean;
 };
 
 /**
@@ -27,8 +33,10 @@ type ApplyGroupingReducerArgs = {
 export const applyGroupingReducer = ({
   deriveNextGrouping,
   existingGrouping,
+  hasDefaultGrouping,
 }: ApplyGroupingReducerArgs) =>
   resolveTableGroupingUpdate({
     existingGrouping,
+    hasDefaultGrouping,
     nextGrouping: deriveNextGrouping(existingGrouping),
   });

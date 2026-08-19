@@ -16,7 +16,8 @@ import { buildBatchTableSettingsUpdate } from './buildBatchTableSettingsUpdate.u
  * apiece.
  */
 export const useBatchSetTableDrawerSettings = () => {
-  const { columnsStore, groupingStore } = useTableDrawerContextValue();
+  const { columnsStore, groupingStore, totalsPlacementStore } =
+    useTableDrawerContextValue();
   const batchSetTableSettings = useBatchSetTableSettings();
 
   return () => {
@@ -25,6 +26,7 @@ export const useBatchSetTableDrawerSettings = () => {
     batchSetTableSettings({
       grouping: groupingStore.get(),
       settings: buildBatchTableSettingsUpdate(columnsState),
+      totalsPlacement: totalsPlacementStore.get().totalsPlacement,
     });
   };
 };

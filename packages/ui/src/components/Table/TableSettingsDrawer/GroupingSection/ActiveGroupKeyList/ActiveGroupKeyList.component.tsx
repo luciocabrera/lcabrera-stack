@@ -9,6 +9,7 @@ import {
   SidePanelSectionHeader,
 } from '#ui/components/SidePanel';
 import { useGetColumns } from '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
+import { useGetTableIsGroupingLocked } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
 
 import type { ActiveGroupKeyListProps } from './ActiveGroupKeyList.types';
@@ -38,6 +39,7 @@ export const ActiveGroupKeyList = ({
 }: ActiveGroupKeyListProps) => {
   const columns = useGetColumns();
   const groupingKeys = useGetGroupingKeys();
+  const isGroupingLocked = useGetTableIsGroupingLocked();
   const setGroupKeys = useSetGroupKeys();
 
   const groupKeyItems = toGroupKeyItems({ columns, keys: groupingKeys });
@@ -65,20 +67,38 @@ export const ActiveGroupKeyList = ({
   return (
     <SidePanelSection>
       <SidePanelSectionHeader
-        title={`Group Keys (${groupKeyItems.length}/${MAX_TABLE_GROUP_KEYS})`}
+        title={
+          isGroupingLocked
+            ? `Group Keys (${groupKeyItems.length})`
+            : `Group Keys (${groupKeyItems.length}/${MAX_TABLE_GROUP_KEYS})`
+        }
         toolbar={<GroupingSectionToolbar isBusy={isBusy} variant='toolbar' />}
       />
-      {groupKeyItems.length === 0 ? (
+      {groupKeyItems.length === 0 && (
         <InfoBox>
-          No grouping applied. Add a column above to group the rows.
+          {isGroupingLocked
+            ? 'This table is grouped by a fixed set of columns.'
+            : 'No grouping applied. Add a column above to group the rows.'}
         </InfoBox>
-      ) : (
+      )}
+      {groupKeyItems.length > 0 && (
         <div {...stylex.props(styles.groupKeyList)}>
-          <DraggableList
-            isBusy={isBusy}
-            items={draggableItems}
-            onOrderChange={handleReorder}
-          />
+          {/*
+           * A locked list renders the same rows without the drag handles: the
+           * order is the query's nesting order, so reordering is an edit and a
+           * lock has to cover it as much as it covers removal (#578).
+           */}
+          {isGroupingLocked ? (
+            draggableItems.map((item) => (
+              <div key={item.id}>{item.content}</div>
+            ))
+          ) : (
+            <DraggableList
+              isBusy={isBusy}
+              items={draggableItems}
+              onOrderChange={handleReorder}
+            />
+          )}
         </div>
       )}
     </SidePanelSection>

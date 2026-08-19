@@ -106,6 +106,7 @@
   "src/components/Table/TableSettingsDrawer/GroupingSection/AddAggregateSection/AddAggregateSection.stylex.ts",
   "src/components/Table/TableSettingsDrawer/GroupingSection/AddGroupKeySection/AddGroupKeySection.stylex.ts",
   "src/components/Table/TableSettingsDrawer/GroupingSection/GroupingModeSection/GroupingModeSection.stylex.ts",
+  "src/components/Table/TableSettingsDrawer/GroupingSection/TotalsPlacementSection/TotalsPlacementSection.stylex.ts",
   "src/components/Table/TableSettingsDrawer/SectionToolbar/SectionToolbar.stylex.ts",
   "src/components/Table/TableSettingsDrawer/SortingSection/ActiveSortList/ActiveSortList.stylex.ts",
   "src/components/Table/TableSettingsDrawer/SortingSection/ActiveSortList/SortItemContent/SortItemContent.stylex.ts",

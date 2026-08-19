@@ -22,13 +22,19 @@ type MockVirtualSelectProps = {
   }[];
 };
 
-const { capabilitiesRef, columnsRef, groupingKeysRef, mockToggleGroupKey } =
-  vi.hoisted(() => ({
-    capabilitiesRef: { current: {} as Readonly<Record<string, unknown>> },
-    columnsRef: { current: [] as readonly Record<string, unknown>[] },
-    groupingKeysRef: { current: [] as readonly string[] },
-    mockToggleGroupKey: vi.fn(),
-  }));
+const {
+  capabilitiesRef,
+  columnsRef,
+  groupingKeysRef,
+  isGroupingLockedRef,
+  mockToggleGroupKey,
+} = vi.hoisted(() => ({
+  capabilitiesRef: { current: {} as Readonly<Record<string, unknown>> },
+  columnsRef: { current: [] as readonly Record<string, unknown>[] },
+  groupingKeysRef: { current: [] as readonly string[] },
+  isGroupingLockedRef: { current: false },
+  mockToggleGroupKey: vi.fn(),
+}));
 
 vi.mock(
   '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook',
@@ -39,6 +45,7 @@ vi.mock(
 
 vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
   useGetTableGroupingCapabilities: () => capabilitiesRef.current,
+  useGetTableIsGroupingLocked: () => isGroupingLockedRef.current,
 }));
 
 vi.mock('../../TableDrawerContext/actions', () => ({
@@ -77,6 +84,7 @@ const listedOptions = () =>
 
 beforeEach(() => {
   capabilitiesRef.current = {};
+  isGroupingLockedRef.current = false;
   columnsRef.current = [
     { key: 'id', label: 'ID' },
     { isGroupable: false, key: 'notes', label: 'Notes' },
@@ -162,5 +170,19 @@ describe('AddGroupKeySection', () => {
         text.includes(`limited to ${MAX_TABLE_GROUP_KEYS} keys`),
       ),
     ).not.toBeNull();
+  });
+
+  it('offers no way to add a key under a locked preset', () => {
+    // Hidden rather than disabled: the lock is not a state the user can clear,
+    // so an inert Add would only ask them to keep trying (#578).
+    columnsRef.current = [
+      { isGroupable: true, key: 'region', label: 'Region' },
+    ];
+    isGroupingLockedRef.current = true;
+
+    render(<AddGroupKeySection />);
+
+    expect(screen.queryByTestId('column-options')).toBeNull();
+    expect(screen.queryByRole('button', { name: /add/i })).toBeNull();
   });
 });

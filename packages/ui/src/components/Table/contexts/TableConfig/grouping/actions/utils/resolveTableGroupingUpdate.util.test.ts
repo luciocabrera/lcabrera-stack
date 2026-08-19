@@ -292,4 +292,48 @@ describe('resolveTableGroupingUpdate', () => {
       }),
     ).toStrictEqual({ kind: 'unchanged' });
   });
+
+  it('drops the grouping param when the last key is cleared', () => {
+    expect(
+      resolveTableGroupingUpdate({
+        existingGrouping: {
+          aggregates: {},
+          keys: ['order_status'],
+          mode: 'flat',
+          periods: {},
+        },
+        nextGrouping: { aggregates: {}, keys: [], mode: 'flat', periods: {} },
+      }),
+    ).toMatchObject({
+      kind: 'updated',
+      persistenceEntry: {
+        searchParamKey: 'grouping',
+        searchParamValue: undefined,
+      },
+    });
+  });
+
+  it('records the clear in the URL instead on a route with a default', () => {
+    // Dropping the param there would read as "apply the default" on the next
+    // loader run, so the user's clear would be undone by any later navigation
+    // (#578).
+    expect(
+      resolveTableGroupingUpdate({
+        existingGrouping: {
+          aggregates: {},
+          keys: ['order_status'],
+          mode: 'flat',
+          periods: {},
+        },
+        hasDefaultGrouping: true,
+        nextGrouping: { aggregates: {}, keys: [], mode: 'flat', periods: {} },
+      }),
+    ).toMatchObject({
+      kind: 'updated',
+      persistenceEntry: {
+        searchParamKey: 'grouping',
+        searchParamValue: '{"keys":[]}',
+      },
+    });
+  });
 });

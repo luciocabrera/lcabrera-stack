@@ -8,7 +8,10 @@ import {
 import { useGetNormalizedColumn } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
 import { useToggleTableGroupKey } from '#ui/components/Table/contexts/TableConfig/grouping/actions';
 import { useGetTableGroupingKeys } from '#ui/components/Table/contexts/TableConfig/grouping/selectors';
-import { useGetTableColumnGroupingCapability } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
+import {
+  useGetTableColumnGroupingCapability,
+  useGetTableIsGroupingLocked,
+} from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 import {
   MAX_TABLE_GROUP_KEYS,
   TABLE_GROUP_KEY_REFUSAL_LABELS,
@@ -57,9 +60,16 @@ export const GroupByColumnButton = <TData,>({
   const groupingKeys = useGetTableGroupingKeys();
   const column = useGetNormalizedColumn<TData>(columnKey);
   const capability = useGetTableColumnGroupingCapability(String(columnKey));
+  const isGroupingLocked = useGetTableIsGroupingLocked();
   const { isGroupable, refusal, requiredPeriod } =
     resolveGroupKeyAvailability<TData>({ capability, column });
   const { icon: GroupByColumnCommandIcon, label } = GROUP_BY_COLUMN_COMMAND;
+
+  // A curated grouping is not editable from here either. Hiding the item rather
+  // than disabling it, for the reason the drawer's Add is hidden: the lock is
+  // not a state the user can clear, so an inert control would only ask them to
+  // keep trying (#578).
+  if (isGroupingLocked) return;
 
   const isApplied = groupingKeys.includes(String(columnKey));
   const isAtDepthCap = groupingKeys.length >= MAX_TABLE_GROUP_KEYS;
