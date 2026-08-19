@@ -2,7 +2,7 @@
 id: gate-inventory-drift
 title: Gate .util.ts exports against their package INVENTORY.md
 owner: agent:claude
-status: active
+status: review
 branch: chore/817-gate-inventory-drift
 area:
   - scripts/verify-inventory.mjs
@@ -14,7 +14,7 @@ area:
 started: 2026-08-19
 updated: 2026-08-19
 plan: (none)
-pr: (none)
+pr: https://github.com/luciocabrera/vite-react-compiler/pull/818
 issue: #817
 ---
 
@@ -24,6 +24,6 @@ Gate .util.ts exports against their package INVENTORY.md
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: `vp run check:safe` green, deliberate-violation probe recorded, PR #818 ready for review
 - Blockers: none
-- Next:
+- Next: address review feedback, then merge and close this task
