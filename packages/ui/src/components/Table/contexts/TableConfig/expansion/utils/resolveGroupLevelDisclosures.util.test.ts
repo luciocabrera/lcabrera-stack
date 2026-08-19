@@ -54,7 +54,7 @@ describe('resolveGroupLevelDisclosures', () => {
   it('offers nothing on a detail row, which states no level of its own', () => {
     const disclosures = resolveGroupLevelDisclosures({
       collapsedGroupPaths: NO_COLLAPSE,
-      parentKeys: CANCELLED_HAS_ROWS,
+      foldableKeys: CANCELLED_HAS_ROWS,
       pathKey: undefined,
       summary: undefined,
     });
@@ -65,7 +65,7 @@ describe('resolveGroupLevelDisclosures', () => {
   it('offers nothing on the grand total, which is keyed by nothing', () => {
     const disclosures = resolveGroupLevelDisclosures({
       collapsedGroupPaths: NO_COLLAPSE,
-      parentKeys: CANCELLED_HAS_ROWS,
+      foldableKeys: CANCELLED_HAS_ROWS,
       pathKey: resolveGroupPathKey([]),
       summary: summaryOf({ isSubtotal: true, path: [] }),
     });
@@ -79,7 +79,7 @@ describe('resolveGroupLevelDisclosures', () => {
     // rows below.
     const disclosures = resolveGroupLevelDisclosures({
       collapsedGroupPaths: NO_COLLAPSE,
-      parentKeys: BOTH_HAVE_ROWS,
+      foldableKeys: BOTH_HAVE_ROWS,
       pathKey: CRITICAL_KEY,
       summary: summaryOf({ path: CANCELLED_BUSINESS_CRITICAL }),
     });
@@ -94,7 +94,7 @@ describe('resolveGroupLevelDisclosures', () => {
   it('skips a level nothing sits under', () => {
     const disclosures = resolveGroupLevelDisclosures({
       collapsedGroupPaths: NO_COLLAPSE,
-      parentKeys: CANCELLED_HAS_ROWS,
+      foldableKeys: CANCELLED_HAS_ROWS,
       pathKey: CANCELLED_BUSINESS_KEY,
       summary: summaryOf({ path: CANCELLED_BUSINESS }),
     });
@@ -109,7 +109,7 @@ describe('resolveGroupLevelDisclosures', () => {
     // trails its block, which is why `isSubtotal` and not identity decides it.
     const disclosures = resolveGroupLevelDisclosures({
       collapsedGroupPaths: NO_COLLAPSE,
-      parentKeys: CANCELLED_HAS_ROWS,
+      foldableKeys: CANCELLED_HAS_ROWS,
       pathKey: CANCELLED_KEY,
       summary: summaryOf({ path: CANCELLED }),
     });
@@ -120,7 +120,7 @@ describe('resolveGroupLevelDisclosures', () => {
   it('takes the control off an open subtotal, which trails its own block', () => {
     const disclosures = resolveGroupLevelDisclosures({
       collapsedGroupPaths: NO_COLLAPSE,
-      parentKeys: CANCELLED_HAS_ROWS,
+      foldableKeys: CANCELLED_HAS_ROWS,
       pathKey: CANCELLED_KEY,
       summary: summaryOf({ isSubtotal: true, path: CANCELLED }),
     });
@@ -133,7 +133,7 @@ describe('resolveGroupLevelDisclosures', () => {
     // group could be closed and never reopened.
     const disclosures = resolveGroupLevelDisclosures({
       collapsedGroupPaths: CANCELLED_COLLAPSED,
-      parentKeys: CANCELLED_HAS_ROWS,
+      foldableKeys: CANCELLED_HAS_ROWS,
       pathKey: CANCELLED_KEY,
       summary: summaryOf({ isSubtotal: true, path: CANCELLED }),
     });
@@ -145,7 +145,7 @@ describe('resolveGroupLevelDisclosures', () => {
   it('states a collapsed ancestor as folded', () => {
     const disclosures = resolveGroupLevelDisclosures({
       collapsedGroupPaths: CANCELLED_COLLAPSED,
-      parentKeys: CANCELLED_HAS_ROWS,
+      foldableKeys: CANCELLED_HAS_ROWS,
       pathKey: CANCELLED_BUSINESS_KEY,
       summary: summaryOf({ path: CANCELLED_BUSINESS }),
     });

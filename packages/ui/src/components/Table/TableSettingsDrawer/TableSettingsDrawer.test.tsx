@@ -109,7 +109,9 @@ vi.mock('#ui/components/Icons', () => ({
   // and the barrel re-exports the pinning and sorting sets — so every icon any
   // command descriptor names has to resolve here.
   BarChartIcon: () => <span>Bar chart icon</span>,
+  CollapseAllIcon: () => <span>Collapse all icon</span>,
   EraserIcon: () => <span>Eraser icon</span>,
+  ExpandAllIcon: () => <span>Expand all icon</span>,
   GroupRowsIcon: () => <span>Group rows icon</span>,
   MenuCloseIcon: () => <span>Menu close icon</span>,
   PinLeftIcon: () => <span>Pin left icon</span>,

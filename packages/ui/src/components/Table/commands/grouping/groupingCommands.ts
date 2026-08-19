@@ -2,7 +2,9 @@ import type { TableAggregateFn } from '#ui/components/Table/Table.types';
 
 import {
   BarChartIcon,
+  CollapseAllIcon,
   EraserIcon,
+  ExpandAllIcon,
   GroupRowsIcon,
   UngroupRowsIcon,
 } from '#ui/components/Icons';
@@ -26,6 +28,28 @@ export const CLEAR_GROUPING_COMMAND = {
   icon: UngroupRowsIcon,
   id: 'column.group.clear' as CommandId,
   label: 'Clear Grouping',
+} satisfies CommandDescriptor;
+
+/**
+ * The fold-every-group pair (#774). Whole-table commands like
+ * `CLEAR_GROUPING_COMMAND`, and named for the state they produce rather than
+ * the act — "Expand All Groups" says where the grid ends up, which is what a
+ * menu item has to say when the same item is offered from every column.
+ *
+ * They carry no `column.` prefix in their ids for the same reason: the two
+ * above are column commands whose *effect* is table-wide, while these are asked
+ * of the grouped body itself and no column takes part in the question.
+ */
+export const EXPAND_ALL_GROUPS_COMMAND = {
+  icon: ExpandAllIcon,
+  id: 'group.expand.all' as CommandId,
+  label: 'Expand All Groups',
+} satisfies CommandDescriptor;
+
+export const COLLAPSE_ALL_GROUPS_COMMAND = {
+  icon: CollapseAllIcon,
+  id: 'group.collapse.all' as CommandId,
+  label: 'Collapse All Groups',
 } satisfies CommandDescriptor;
 
 /**

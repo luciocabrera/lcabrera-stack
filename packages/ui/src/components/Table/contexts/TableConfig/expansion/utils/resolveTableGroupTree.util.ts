@@ -8,6 +8,7 @@ import { getTableGroupRowSummary } from '#ui/components/Table/utils/getTableGrou
 import type { TableGroupLevelDisclosure } from './resolveGroupLevelDisclosures.util';
 import type { GroupTreeNode } from './resolveGroupTreeNodes.util';
 
+import { collectFoldableGroupPaths } from './collectFoldableGroupPaths.util';
 import { isDrillableGroupRow } from './isDrillableGroupRow.util';
 import { resolveDrilledBlock } from './resolveDrilledBlock.util';
 import { resolveGroupLevelDisclosures } from './resolveGroupLevelDisclosures.util';
@@ -70,28 +71,8 @@ type VisibleRow<TData> = {
   readonly summary: TableGroupRowSummary | undefined;
 };
 
-/**
- * The path keys that some other row calls its parent — i.e. every group row
- * that owns something.
- *
- * Read off the **tree**, not off adjacency. The obvious walk asks whether the
- * *next* row is deeper, and that answer is only right while a parent precedes
- * its children: rollup emits a subtotal **after** the rows it totals (#570), so
- * an adjacency test reports every subtotal as childless, withholds
- * `aria-expanded` from it, and leaves the one row a user most wants to fold
- * unfoldable.
- *
- * Built over the **loaded** nodes rather than the visible ones, so a collapsed
- * group still reports the children it is hiding — which is what keeps its
- * `aria-expanded` present and `false` rather than disappearing on collapse.
- */
-const collectParentKeys = (nodes: readonly GroupTreeNode[]) => {
-  const parentKeys = new Set<string>();
-
-  for (const node of nodes) parentKeys.add(node.parentKey);
-
-  return parentKeys;
-};
+/** An ungrouped grid folds nothing, and shares one set rather than allocating per call. */
+const NO_FOLDABLE_GROUP_PATHS: ReadonlySet<string> = new Set<string>();
 
 const countSiblings = (parentKeys: readonly string[]) => {
   const counts = new Map<string, number>();
@@ -143,12 +124,17 @@ export const resolveTableGroupTree = <TData extends Record<string, unknown>>({
   groupingKeys = [],
 }: ResolveTableGroupTreeArgs<TData>) => {
   if (data.every((row) => getTableGroupRowSummary(row) === undefined)) {
-    return { isTreeGrid: false, rowMeta: undefined, rows: data };
+    return {
+      foldableGroupPaths: NO_FOLDABLE_GROUP_PATHS,
+      isTreeGrid: false,
+      rowMeta: undefined,
+      rows: data,
+    };
   }
 
   const summaries = data.map((row) => getTableGroupRowSummary(row));
   const nodes = resolveGroupTreeNodes({ collapsedGroupPaths, summaries });
-  const parentKeys = collectParentKeys(nodes);
+  const foldableGroupPaths = collectFoldableGroupPaths(nodes);
   const visible: VisibleRow<TData>[] = [];
 
   for (const [index, node] of nodes.entries()) {
@@ -157,7 +143,8 @@ export const resolveTableGroupTree = <TData extends Record<string, unknown>>({
     if (row === undefined || !node.isVisible) continue;
 
     visible.push({
-      hasChildren: node.pathKey !== undefined && parentKeys.has(node.pathKey),
+      hasChildren:
+        node.pathKey !== undefined && foldableGroupPaths.has(node.pathKey),
       isDrillable: isDrillableGroupRow({
         canDrill,
         groupingKeys,
@@ -195,7 +182,7 @@ export const resolveTableGroupTree = <TData extends Record<string, unknown>>({
       level: node.level,
       levelDisclosures: resolveGroupLevelDisclosures({
         collapsedGroupPaths,
-        parentKeys,
+        foldableKeys: foldableGroupPaths,
         pathKey: node.pathKey,
         summary,
       }),
@@ -224,5 +211,5 @@ export const resolveTableGroupTree = <TData extends Record<string, unknown>>({
     }
   }
 
-  return { isTreeGrid: true, rowMeta, rows };
+  return { foldableGroupPaths, isTreeGrid: true, rowMeta, rows };
 };

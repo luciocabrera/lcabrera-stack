@@ -266,6 +266,13 @@ retained as the stated fallback if either carrying requirement proves unworkable
 
 ## Amendments
 
+> **Narrowed by [ADR-083](./ADR-083-a-fold-must-leave-a-row-to-undo-it.md)**
+> (2026-08-19, #774). The amendment below says a row folds any ancestor level
+> that owns rows. ADR-083 adds the second half — the level must also _render_ a
+> row, or the fold hides the group with nothing left to reopen it from. Under
+> rollup and cube the subtotal always is that row, so nothing here changes;
+> under `flat` no ancestor is rendered and the control is withdrawn.
+
 **2026-08-19 — the fold control follows the drawn cell (#802).** The primary
 decision is unchanged: one column per key, the value in its own column, ancestors
 carried rather than restated. What this settles is the thing that decision moved
