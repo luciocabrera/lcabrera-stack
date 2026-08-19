@@ -44,9 +44,13 @@ export const utilFileEntries = (trackedPaths) =>
 
 // Anchored to the start of a (possibly indented) line so a JSDoc example —
 // ` * export async function loader(...) {` — is never mistaken for a real
-// declaration: the `*` isn't whitespace, so `^\s*` cannot reach past it.
+// declaration: the `*` isn't whitespace, so `^[ \t]*` cannot reach past it.
+// `[ \t]`, not `\s`, throughout: under the `m` flag `\s` also matches `\n`,
+// and several adjacent `\s*`/`\s+` groups can then overlap across line
+// breaks in more than one way — the super-linear backtracking Sonar S8786
+// flags. A single declaration line never needs to span a newline here.
 const EXPORT_NAME =
-  /^\s*export\s+(?:const|(?:async\s+)?function)\s+([A-Za-z_$][\w$]*)/gm;
+  /^[ \t]*export[ \t]+(?:const|(?:async[ \t]+)?function)[ \t]+([A-Za-z_$][\w$]*)/gm;
 
 /** Every top-level `export const`/`export function` name in a source file. */
 export const exportedSymbolNames = (source) => [
