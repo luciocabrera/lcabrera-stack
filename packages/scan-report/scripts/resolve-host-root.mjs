@@ -8,13 +8,12 @@
 // fallow reported when the second one was written. Only the environment
 // variable that overrides it is this package's own.
 
-import {
+import { resolveHostRoot as resolveWithin } from '@repo/repo-standards/host-root';
+
+export {
   findRepositoryRoot,
-  resolveHostRoot as resolveWithin,
   rootFromInstallPath,
 } from '@repo/repo-standards/host-root';
-
-export { findRepositoryRoot, rootFromInstallPath };
 
 export const HOST_ROOT_ENV = 'SCAN_REPORT_HOST_ROOT';
 

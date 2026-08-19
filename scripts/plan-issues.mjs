@@ -20,7 +20,7 @@
  * Exit codes: 0 = every issue would be accepted, 1 = at least one would not.
  */
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { flagValue } from '../packages/repo-standards/scripts/cli-input.mjs';
@@ -54,8 +54,25 @@ const MILESTONE_SCHEME = 'docs/agents/milestone-naming-scheme.md';
 /** Gitignored, per the repo's scratch convention. */
 const STAGING_DIR = '.tmp/plan-issues';
 
+/**
+ * A path that stays inside the repository, or a refusal.
+ *
+ * `--emit` reaches this from the command line, so a traversal would otherwise
+ * steer `mkdirSync`/`writeFileSync` anywhere the process can reach. Canonicalise
+ * first, then check containment — comparing the raw string cannot see `..`.
+ */
+const withinRoot = (relativePath) => {
+  const target = resolve(REPO_ROOT, relativePath);
+  if (target !== REPO_ROOT && !target.startsWith(REPO_ROOT + sep)) {
+    throw new Error(
+      `refusing to use a path outside the repository: ${relativePath}`,
+    );
+  }
+  return target;
+};
+
 const readRepoFile = (relativePath) =>
-  readFileSync(join(REPO_ROOT, relativePath), 'utf8');
+  readFileSync(withinRoot(relativePath), 'utf8');
 
 /** Every label name the taxonomy defines for this repo, in one flat list. */
 const allowedLabelNames = () =>
@@ -114,7 +131,7 @@ const creationOrder = (audits) =>
   );
 
 const emit = (directory, manifest, audits) => {
-  const target = resolve(REPO_ROOT, directory);
+  const target = withinRoot(directory);
   mkdirSync(target, { recursive: true });
   for (const { record, body } of audits) {
     writeFileSync(join(target, `${record.id}.md`), `${body}\n`);
