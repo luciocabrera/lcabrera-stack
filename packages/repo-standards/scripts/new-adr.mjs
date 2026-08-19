@@ -40,7 +40,7 @@ const REPO_ROOT = resolveHostRoot({
 
 const TIERS = ADR_HOMES.map((home) => home.tier);
 
-const USAGE = `usage: vp run adr:new -- "<title>" [--home ${TIERS.join('|')}] [--slug <slug>] [--dry-run]`;
+const USAGE = `usage: repo-adr "<title>" [--home ${TIERS.join('|')}] [--slug <slug>] [--dry-run]`;
 
 /** Argument parsing kept explicit rather than pulled from a library: this runs
  *  before install in a fresh worktree often enough to be worth the lines. */

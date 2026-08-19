@@ -54,6 +54,17 @@ describe('parseLsRemoteHeads', () => {
     expect(parsed).toEqual([{ branch: 'feat/x', sha: OTHER_SHA }]);
   });
 
+  // A repository whose default branch is not `main` must have ITS default
+  // dropped: leaving it in makes every claim merged to it read as live.
+  it('drops the default branch it is given, not the literal `main`', () => {
+    const parsed = parseLsRemoteHeads(
+      `${SHA}\trefs/heads/trunk\n${OTHER_SHA}\trefs/heads/main\n`,
+      'trunk',
+    );
+
+    expect(parsed).toEqual([{ branch: 'main', sha: OTHER_SHA }]);
+  });
+
   it('ignores tags and any other non-head ref', () => {
     expect(parseLsRemoteHeads(`${SHA}\trefs/tags/v1\n`)).toEqual([]);
   });

@@ -2,8 +2,8 @@
  * Verifies the in-git work register `devkit.config.json` names — the canonical
  * "who is working on what" for this monorepo. Keeps the register honest the same
  * way `verify-commands-doc.mjs` keeps COMMANDS.md honest. Pure parsing/rendering
- * live in `packages/repo-standards/scripts/coordination-parse.mjs` and `./lib/coordination-board.mjs`; this
- * file owns the effects (fs, git) and the checks.
+ * live in `./coordination-parse.mjs` and `./coordination-board.mjs`; this file
+ * owns the effects (fs, git) and the checks.
  *
  * Two units of work:
  *   - a TASK   (`tasks/<id>.md`)     — one person's claim: owner, status, branch,
@@ -93,7 +93,9 @@ const {
   boardDoc: BOARD_DOC,
   boardRel: BOARD_REL,
   branchesDir: BRANCHES_DIR,
+  branchesRel: BRANCHES_REL,
   tasksDir: TASKS_DIR,
+  tasksRel: TASKS_REL,
 } = readCoordinationPaths(REPO_ROOT);
 
 const STALE_DAYS = 14;
@@ -106,7 +108,7 @@ const checkTaskSchema = (tasks, problems) => {
   for (const task of tasks) {
     if (task.data === undefined) {
       problems.push(
-        `${task.name}: no YAML frontmatter — copy tasks/_TEMPLATE.md.`,
+        `${task.name}: no frontmatter — copy ${TASKS_REL}/_TEMPLATE.md.`,
       );
       continue;
     }
@@ -123,7 +125,7 @@ const checkBranchSchema = (branches, problems) => {
   for (const branch of branches) {
     if (branch.data === undefined) {
       problems.push(
-        `${branch.name}: no YAML frontmatter — copy branches/_TEMPLATE.md.`,
+        `${branch.name}: no frontmatter — copy ${BRANCHES_REL}/_TEMPLATE.md.`,
       );
       continue;
     }
