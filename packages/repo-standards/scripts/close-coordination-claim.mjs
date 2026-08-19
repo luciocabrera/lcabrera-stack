@@ -16,17 +16,21 @@
  * a delete failed.
  */
 import { unlinkSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { dirname, join } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
-import { flagValue } from '../packages/repo-standards/scripts/cli-input.mjs';
-import { tasksClosedBy } from './lib/coordination-close.mjs';
-import { readEntries } from '../packages/repo-standards/scripts/coordination-read.mjs';
+import { flagValue } from './cli-input.mjs';
+import { tasksClosedBy } from './coordination-close.mjs';
+import { readEntries } from './coordination-read.mjs';
+import { resolveHostRoot } from './host-root.mjs';
+import { readRegisters } from './config.mjs';
 
-const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
+const REPO_ROOT = resolveHostRoot({
+  moduleDirectory: dirname(fileURLToPath(import.meta.url)),
+});
 const TASKS_DIR = join(REPO_ROOT, 'docs', 'coordination', 'tasks');
-const TASKS_REL = 'docs/coordination/tasks';
+const TASKS_REL = readRegisters().coordinationTasksDir;
 
 const USAGE =
   'usage: node scripts/close-coordination-claim.mjs --pr <number> ' +

@@ -28,11 +28,13 @@
  *    branch is a blind spot; silently dropping it is the bug this module
  *    exists to fix.
  */
+
+import { readRegisters } from './config.mjs';
 import { NO_BRANCH } from './coordination-overlap.mjs';
-import { parseFrontmatter } from '../../packages/repo-standards/scripts/coordination-parse.mjs';
+import { parseFrontmatter } from './coordination-parse.mjs';
 import { runGit } from './git-exec.mjs';
 
-const TASKS_DIR = 'docs/coordination/tasks/';
+const TASKS_DIR = `${readRegisters().coordinationTasksDir}/`;
 const DEFAULT_BRANCH = 'main';
 const HEADS_PREFIX = 'refs/heads/';
 

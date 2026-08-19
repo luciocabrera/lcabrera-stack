@@ -38,11 +38,25 @@ and `issue:verify`.
   "conventions": {
     "defaultBranch": "main",
     "sharedBranchesDir": "docs/coordination/branches"
+  },
+  "registers": {
+    "adrHomes": [
+      { "dir": "docs/decisions", "tier": "repo", "title": "…", "blurb": "…" }
+    ],
+    "adrTemplateHome": "docs/decisions",
+    "coordinationTasksDir": "docs/coordination/tasks"
   }
 }
 ```
 
-Only these two are repository data: a gate that says "retarget to `main`" tells a
+`adrHomes` defaults to **one** home, because that is all a repository is assumed
+to have. A repository keeping a second — decisions internal to one app, say —
+declares both, and the order it declares them in is the order they are reported.
+This repository declares two; drop the second from its `devkit.config.json` and
+`vp run adr:verify` reports every ADR in the app home as homeless, which is the
+check that the config is really driving the gate.
+
+Only these are repository data: a gate that says "retarget to `main`" tells a
 repository with a differently-named default branch something false, and one that
 names a register directory names a path a consumer may not have. Everything else
 — the type vocabulary, the required sections, the grammar — is the standard

@@ -30,7 +30,10 @@ import {
 } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 
-import { runGit, runGitStatus } from './lib/git-exec.mjs';
+import {
+  runGit,
+  runGitStatus,
+} from '../packages/repo-standards/scripts/git-exec.mjs';
 import {
   isEnvFileName,
   linkTextFor,

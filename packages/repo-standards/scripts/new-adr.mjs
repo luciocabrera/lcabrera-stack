@@ -15,7 +15,7 @@
  * that no longer has a heading to fill in.
  */
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
@@ -24,16 +24,19 @@ import {
   TEMPLATE_FILE,
   TEMPLATE_HOME,
   nextFreeNumber,
-} from './lib/adr-registry.mjs';
+} from './adr-registry.mjs';
 import {
   adrFilename,
   pad,
   renderAdr,
   resolveHome,
   slugify,
-} from './lib/adr-scaffold.mjs';
+} from './adr-scaffold.mjs';
+import { resolveHostRoot } from './host-root.mjs';
 
-const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
+const REPO_ROOT = resolveHostRoot({
+  moduleDirectory: dirname(fileURLToPath(import.meta.url)),
+});
 
 const TIERS = ADR_HOMES.map((home) => home.tier);
 

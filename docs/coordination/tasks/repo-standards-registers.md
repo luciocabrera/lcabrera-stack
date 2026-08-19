@@ -6,13 +6,8 @@ status: active
 branch: feat/798-repo-standards-registers
 area:
   - packages/repo-standards/**
-  - scripts/verify-coordination.mjs
-  - scripts/verify-adrs.mjs
-  - scripts/new-adr.mjs
-  - scripts/close-coordination-claim.mjs
-  - scripts/coordination-board-live.mjs
-  - scripts/lib/coordination-*
-  - scripts/lib/adr-*
+  - scripts/lib/**
+  - devkit.config.json
 started: 2026-08-19
 updated: 2026-08-19
 plan: (none)

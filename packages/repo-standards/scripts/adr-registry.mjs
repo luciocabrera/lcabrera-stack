@@ -7,6 +7,8 @@
  * docs/decisions/ADR-048-adr-taxonomy-and-one-sequence.md.
  */
 
+import { readRegisters } from './config.mjs';
+
 /**
  * Every directory allowed to hold an `ADR-NNN-*.md`, in index order. `tier` is
  * the stable key the gate reports.
@@ -17,22 +19,7 @@
  * home would be `keeps: true` and a field that cannot be false is not data.
  * Both are gone rather than kept as a monument — the reasoning is ADR-048's.
  */
-export const ADR_HOMES = [
-  {
-    blurb:
-      'The repository, its published `@lcabrera/*` packages, and the toolchain.',
-    dir: 'docs/decisions',
-    tier: 'repo',
-    title: 'Repository, packages & tooling',
-  },
-  {
-    blurb:
-      'Decisions internal to the `apps/react-router` showcase app — its components, routes and interaction model.',
-    dir: 'apps/react-router/docs/decisions',
-    tier: 'app',
-    title: 'React Router showcase app',
-  },
-];
+export const ADR_HOMES = readRegisters().adrHomes;
 
 /** Where an unadopted proposal waits. A draft holds no number — see below. */
 export const DRAFT_DIR = 'docs/agents/planning/adr-drafts';
@@ -42,7 +29,7 @@ export const DRAFT_DIR = 'docs/agents/planning/adr-drafts';
 export const TEMPLATE_FILE = '_TEMPLATE.md';
 
 /** The single home that holds the template; the other indexes link to it. */
-export const TEMPLATE_HOME = 'docs/decisions';
+export const TEMPLATE_HOME = readRegisters().adrTemplateHome;
 
 /**
  * Markdown that lives in a home without being an ADR: the generated index, and

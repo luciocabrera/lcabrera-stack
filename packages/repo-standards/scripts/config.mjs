@@ -13,9 +13,30 @@
  */
 
 import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import { resolveHostRoot } from './host-root.mjs';
 
 export const CONFIG_FILE_NAME = 'devkit.config.json';
+
+/**
+ * One home, because that is all a repository is assumed to have. A repository
+ * that keeps a second — decisions internal to one app, say — declares both, and
+ * the order it declares them in is the order they are reported.
+ */
+export const DEFAULT_REGISTERS = {
+  adrHomes: [
+    {
+      blurb: 'Architecture decisions for this repository.',
+      dir: 'docs/decisions',
+      tier: 'repo',
+      title: 'Architecture decisions',
+    },
+  ],
+  adrTemplateHome: 'docs/decisions',
+  coordinationTasksDir: 'docs/coordination/tasks',
+};
 
 export const DEFAULT_CONVENTIONS = {
   defaultBranch: 'main',
@@ -50,9 +71,54 @@ export const resolveConventions = (raw) => {
   };
 };
 
-export const readConventions = (root = process.cwd()) => {
-  const path = join(root, CONFIG_FILE_NAME);
-  return resolveConventions(
-    existsSync(path) ? readFileSync(path, 'utf8') : undefined,
-  );
+/** A home needs somewhere to be and something to call itself; the rest is prose. */
+const readableHome = (home) =>
+  typeof home === 'object' &&
+  home !== null &&
+  typeof home.dir === 'string' &&
+  home.dir !== '' &&
+  typeof home.tier === 'string' &&
+  home.tier !== '';
+
+export const resolveRegisters = (raw) => {
+  if (raw === undefined) return DEFAULT_REGISTERS;
+  const parsed = JSON.parse(raw);
+  if (!isPlainObject(parsed)) {
+    throw new Error(`${CONFIG_FILE_NAME} must contain a JSON object`);
+  }
+  const block = isPlainObject(parsed.registers) ? parsed.registers : {};
+  const homes = Array.isArray(block.adrHomes)
+    ? block.adrHomes.filter(readableHome)
+    : [];
+  return {
+    adrHomes: homes.length > 0 ? homes : DEFAULT_REGISTERS.adrHomes,
+    adrTemplateHome:
+      typeof block.adrTemplateHome === 'string' && block.adrTemplateHome !== ''
+        ? block.adrTemplateHome
+        : DEFAULT_REGISTERS.adrTemplateHome,
+    coordinationTasksDir:
+      typeof block.coordinationTasksDir === 'string' &&
+      block.coordinationTasksDir !== ''
+        ? block.coordinationTasksDir
+        : DEFAULT_REGISTERS.coordinationTasksDir,
+  };
 };
+
+/**
+ * The repository this package is installed in — not the working directory, so a
+ * gate invoked from a subdirectory reads the same config as one invoked from
+ * the root.
+ */
+const hostRoot = () =>
+  resolveHostRoot({ moduleDirectory: dirname(fileURLToPath(import.meta.url)) });
+
+const readRaw = (root) => {
+  const path = join(root, CONFIG_FILE_NAME);
+  return existsSync(path) ? readFileSync(path, 'utf8') : undefined;
+};
+
+export const readConventions = (root = hostRoot()) =>
+  resolveConventions(readRaw(root));
+
+export const readRegisters = (root = hostRoot()) =>
+  resolveRegisters(readRaw(root));

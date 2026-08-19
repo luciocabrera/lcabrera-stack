@@ -68,33 +68,28 @@
  * Exit codes: 0 = consistent (warnings allowed), 1 = an ERROR check failed.
  */
 import { existsSync, readFileSync, statSync, writeFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
   checkoutIsolationFinding,
   readCheckoutFacts,
-} from './lib/checkout-isolation.mjs';
-import { renderBoard } from './lib/coordination-board.mjs';
-import {
-  branchSlug,
-  NO_BRANCH,
-  NO_PR,
-} from '../packages/repo-standards/scripts/coordination-parse.mjs';
-import { mergedTaskDriftWarnings } from './lib/coordination-reconcile.mjs';
-import { overlapWarnings } from './lib/coordination-overlap.mjs';
-import { readEntries } from '../packages/repo-standards/scripts/coordination-read.mjs';
+} from './checkout-isolation.mjs';
+import { renderBoard } from './coordination-board.mjs';
+import { branchSlug, NO_BRANCH, NO_PR } from './coordination-parse.mjs';
+import { mergedTaskDriftWarnings } from './coordination-reconcile.mjs';
+import { overlapWarnings } from './coordination-overlap.mjs';
+import { readEntries } from './coordination-read.mjs';
 import {
   readRemoteClaims,
   withoutLocalDuplicates,
-} from './lib/coordination-remote.mjs';
-import {
-  branchErrors,
-  ISO_DATE,
-  taskErrors,
-} from './lib/coordination-schema.mjs';
+} from './coordination-remote.mjs';
+import { branchErrors, ISO_DATE, taskErrors } from './coordination-schema.mjs';
+import { resolveHostRoot } from './host-root.mjs';
 
-const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
+const REPO_ROOT = resolveHostRoot({
+  moduleDirectory: dirname(fileURLToPath(import.meta.url)),
+});
 const COORD_DIR = join(REPO_ROOT, 'docs', 'coordination');
 const TASKS_DIR = join(COORD_DIR, 'tasks');
 const BRANCHES_DIR = join(COORD_DIR, 'branches');

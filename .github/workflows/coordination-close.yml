@@ -62,7 +62,7 @@ jobs:
         env:
           HEAD_REF: ${{ github.event.pull_request.head.ref }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: node scripts/close-coordination-claim.mjs --pr "$PR_NUMBER" --branch "$HEAD_REF"
+        run: node packages/repo-standards/scripts/close-coordination-claim.mjs --pr "$PR_NUMBER" --branch "$HEAD_REF"
 
       - name: Commit the deletion, only when there was one
         env:
