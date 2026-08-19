@@ -130,3 +130,21 @@ describe('parseRepository', () => {
     });
   }
 });
+
+describe('flagValue and the runner separator', () => {
+  it('reads the value that follows the flag', () => {
+    expect(flagValue('--body-file', ['node', 'x', '--body-file', 'a.md'])).toBe(
+      'a.md',
+    );
+  });
+
+  it('steps over a separator a task runner forwarded between the two', () => {
+    expect(
+      flagValue('--body-file', ['node', 'x', '--body-file', '--', 'a.md']),
+    ).toBe('a.md');
+  });
+
+  it('is undefined when the flag is absent', () => {
+    expect(flagValue('--body-file', ['node', 'x'])).toBeUndefined();
+  });
+});

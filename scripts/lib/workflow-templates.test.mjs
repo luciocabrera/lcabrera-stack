@@ -4,13 +4,16 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vite-plus/test';
 
-import { validateIssueBody, validatePrBody } from './commit-convention.mjs';
+import {
+  validateIssueBody,
+  validatePrBody,
+} from '../../packages/repo-standards/scripts/commit-convention.mjs';
 
 // The templates GitHub prefills, and the checks that judge what comes back.
 //
 // `.github/pull_request_template.md` and `.github/ISSUE_TEMPLATE/standard_issue.md`
 // are prose files with no consumer inside the repo, so nothing noticed if a
-// heading drifted out of the shape `scripts/lib/commit-convention.mjs` matches.
+// heading drifted out of the shape `packages/repo-standards/scripts/commit-convention.mjs` matches.
 // The cost lands on the NEXT author: pr-standards.yml rejects a description they
 // copied verbatim from the template, and the person who edited the heading is
 // long gone. These assertions move that failure to the PR that causes it.

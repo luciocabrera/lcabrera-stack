@@ -2,7 +2,7 @@
  * Generates CHANGELOG.md from Conventional-Commit history, grouped by version
  * (git tags) then by type (Features / Bug Fixes / …), each entry scope-labelled
  * and linked to its commit, with breaking changes called out. Reuses the one
- * commit spec (`./lib/commit-convention.mjs`) so the changelog groups by the same
+ * commit spec (`packages/repo-standards/scripts/commit-convention.mjs`) so the changelog groups by the same
  * types the commit-msg gate enforces.
  *
  * It reads `git log` on stdin rather than shelling out, so this file stays free of
@@ -21,8 +21,8 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { flagValue } from './lib/cli-input.mjs';
-import { parseCommitHeader } from './lib/commit-convention.mjs';
+import { flagValue } from '../packages/repo-standards/scripts/cli-input.mjs';
+import { parseCommitHeader } from '../packages/repo-standards/scripts/commit-convention.mjs';
 import { readRepoSlug } from './lib/git-remote.mjs';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');

@@ -29,7 +29,10 @@
  */
 import process from 'node:process';
 
-import { flagValue, parsePullNumber } from './lib/cli-input.mjs';
+import {
+  flagValue,
+  parsePullNumber,
+} from '../packages/repo-standards/scripts/cli-input.mjs';
 import { errorMessage } from './lib/error-message.mjs';
 import { runGh } from './lib/gh-exec.mjs';
 import { fetchPullRequestThreads } from './lib/pr-threads-api.mjs';

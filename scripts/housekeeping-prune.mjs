@@ -26,7 +26,7 @@
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { readStdin } from './lib/cli-input.mjs';
+import { readStdin } from '../packages/repo-standards/scripts/cli-input.mjs';
 import { runGit } from './lib/git-exec.mjs';
 import {
   buildPlan,

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { validateIssueBody } from './commit-convention.mjs';
+import { validateIssueBody } from '../../packages/repo-standards/scripts/commit-convention.mjs';
 import {
   knownLabels,
   renderIssueBody,

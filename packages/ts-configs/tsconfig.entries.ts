@@ -244,6 +244,19 @@ export const configs = [
     ),
   },
   {
+    // Genuinely Node-only: the repository gates, which read git, the filesystem
+    // and GitHub. Same shape as the other tooling workspaces — plain `.mjs`
+    // under scripts/, so tsc checks this workspace's own vite.config.ts.
+    config: createNodeTsConfig({
+      include: ['scripts', 'vite.config.ts'],
+      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
+    }),
+    filePath: path.resolve(
+      workspaceRoot,
+      'packages/repo-standards/tsconfig.app.json',
+    ),
+  },
+  {
     // Genuinely Node-only: a CLI that copies files into a consumer repository
     // and hashes what it wrote. Same shape as the scanners below — plain `.mjs`
     // under scripts/, so what tsc checks is the hand-written `.d.mts`

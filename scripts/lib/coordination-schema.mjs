@@ -4,7 +4,7 @@
  * Kept out of `verify-coordination.mjs` so that file stays under the size ceiling
  * and each validator is a small, single-purpose function. See `.claude/rules/scripts.md`.
  */
-import { branchSlug } from './coordination-parse.mjs';
+import { branchSlug } from '../../packages/repo-standards/scripts/coordination-parse.mjs';
 
 export const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const OWNER = /^(agent|human):.+/;

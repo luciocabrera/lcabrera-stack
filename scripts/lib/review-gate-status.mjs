@@ -18,7 +18,11 @@
 import { readFileSync } from 'node:fs';
 import process from 'node:process';
 
-import { flagValue, parsePullNumber, parseRepository } from './cli-input.mjs';
+import {
+  flagValue,
+  parsePullNumber,
+  parseRepository,
+} from '../../packages/repo-standards/scripts/cli-input.mjs';
 import { runGh } from './gh-exec.mjs';
 import {
   publishedStatus,

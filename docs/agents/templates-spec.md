@@ -31,7 +31,7 @@ no future agent "restores" the spec text and breaks the build.
 
 Section 2 spells these `## **📝 1. What**` and `## **🔬 3. Verification**`. This
 repository has enforced those two sections since before this spec existed:
-`scripts/lib/commit-convention.mjs` matches them with `/^#{1,6}\s+what\b/im`, run
+`packages/repo-standards/scripts/commit-convention.mjs` matches them with `/^#{1,6}\s+what\b/im`, run
 on every PR by `.github/workflows/pr-standards.yml`.
 
 The decorated spelling does not match — after `## ` comes `**📝 1.`, not `what`.
@@ -110,7 +110,7 @@ carries none of the information the convention exists for.
 Already enforced here, and unchanged:
 
 - **Commit messages and PR titles** — Conventional Commits, one spec at
-  [`scripts/lib/commit-convention.mjs`](../../scripts/lib/commit-convention.mjs),
+  [`packages/repo-standards/scripts/commit-convention.mjs`](../../packages/repo-standards/scripts/commit-convention.mjs),
   enforced by the `commit-msg` hook and `pr-standards.yml`.
 - **Branch naming, CI validation, template compliance** — already in place; see
   [`COMMANDS.md`](../../COMMANDS.md) and [`AGENTS.md`](../../AGENTS.md).

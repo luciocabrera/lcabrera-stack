@@ -30,7 +30,7 @@ import { join, resolve } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
-import { flagValue } from './lib/cli-input.mjs';
+import { flagValue } from '../packages/repo-standards/scripts/cli-input.mjs';
 import { errorMessage } from './lib/error-message.mjs';
 import {
   buildDecisionPrompt,
@@ -47,7 +47,7 @@ import {
 import { toQueue } from './lib/pr-queue-facts.mjs';
 import { renderLog, toJson } from './lib/pr-queue-log.mjs';
 import { descendants, deriveOrder, edgesFor } from './lib/pr-queue-order.mjs';
-import { deriveWorkspaceScopes } from './lib/workspace-scopes.mjs';
+import { deriveWorkspaceScopes } from '../packages/repo-standards/scripts/workspace-scopes.mjs';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
 const POLICY_PATH = join(REPO_ROOT, '.claude/pr-queue-policy.md');

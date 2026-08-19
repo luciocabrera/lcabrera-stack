@@ -1,14 +1,18 @@
 /**
- * The single source of truth for this repo's commit-message and PR-description
- * format. Pure: constants plus validators that take their inputs (a message
- * string and the derived workspace list) and return `{ errors, warnings }` —
- * string arrays the caller buckets into blocking problems vs non-blocking hints.
+ * The single source of truth for a repository's commit-message and
+ * PR-description format. Pure: constants plus validators that take their inputs
+ * (a message string and the derived workspace list) and return
+ * `{ errors, warnings }` — string arrays the caller buckets into blocking
+ * problems vs non-blocking hints.
  *
- * Consumed by BOTH `scripts/verify-commit-msg.mjs` (the commit-msg git hook and
- * the per-commit CI check) and `scripts/verify-pr.mjs` (the PR title + body CI
- * gate), so the hook, CI, and the pull-request template all validate against ONE
- * spec and cannot drift. Prose docs (AGENTS.md, the commit-and-pr skill) link
- * here instead of restating the type list, so they cannot drift either.
+ * Consumed by BOTH the commit gate (the commit-msg git hook and the per-commit
+ * CI check) and the pull-request gate, so the hook, CI, and the pull-request
+ * template all validate against ONE spec and cannot drift. Prose docs link here
+ * instead of restating the type list, so they cannot drift either.
+ *
+ * The names a message needs — the default branch, where shared branches are
+ * declared — are arguments with documented defaults rather than constants, so
+ * this file says nothing about the repository it happens to be running in.
  *
  * Grammar (Conventional Commits): type, optional scope, optional breaking `!`,
  * a colon-space, then the subject —
@@ -20,6 +24,8 @@
  *
  * See `.claude/rules/scripts.md` for the standards this file follows.
  */
+
+import { DEFAULT_CONVENTIONS } from './config.mjs';
 
 /** Allowed commit/PR-title types. Includes `revert` (git history uses it) and
  *  `build`/`style` (Conventional-Commit standard; pre-empt bot false-positives).
@@ -415,7 +421,14 @@ export const validateIssueBody = (body) => {
  *  reached `main`, until they were recovered by hand. `allowedBases` are the
  *  shared branches declared under docs/coordination/branches/; an empty base
  *  (a local simulation with no PR context) is not checked. */
-export const validatePrBase = (base, { allowedBases = [] } = {}) => {
+export const validatePrBase = (
+  base,
+  {
+    allowedBases = [],
+    defaultBranch = DEFAULT_CONVENTIONS.defaultBranch,
+    sharedBranchesDir = DEFAULT_CONVENTIONS.sharedBranchesDir,
+  } = {},
+) => {
   const name = (base ?? '').trim();
   if (name === '' || EXEMPT_BRANCHES.some((re) => re.test(name))) {
     return { errors: [], warnings: [] };
@@ -431,10 +444,11 @@ export const validatePrBase = (base, { allowedBases = [] } = {}) => {
   }
   return {
     errors: [
-      `PR base is \`${name}\`, a feature branch — retarget to \`main\`. Merging a stacked PR ` +
-        'into its base rather than `main` orphans the work (issue #367): the base merges first ' +
-        'and the stacked changes never reach `main`. Fix: rebase onto `main`, then ' +
-        `\`gh pr edit <n> --base main\` — or declare \`${name}\` a shared branch (docs/coordination/branches/).`,
+      `PR base is \`${name}\`, a feature branch — retarget to \`${defaultBranch}\`. Merging a ` +
+        `stacked PR into its base rather than \`${defaultBranch}\` orphans the work (issue #367): ` +
+        `the base merges first and the stacked changes never reach \`${defaultBranch}\`. Fix: ` +
+        `rebase onto \`${defaultBranch}\`, then \`gh pr edit <n> --base ${defaultBranch}\` — or ` +
+        `declare \`${name}\` a shared branch (${sharedBranchesDir}/).`,
     ],
     warnings: [],
   };

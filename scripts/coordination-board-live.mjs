@@ -25,8 +25,8 @@
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { readStdin } from './lib/cli-input.mjs';
-import { readEntries } from './lib/coordination-read.mjs';
+import { readStdin } from '../packages/repo-standards/scripts/cli-input.mjs';
+import { readEntries } from '../packages/repo-standards/scripts/coordination-read.mjs';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
 const TASKS_DIR = resolve(REPO_ROOT, 'docs/coordination/tasks');

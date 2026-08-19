@@ -1,7 +1,7 @@
 name: Issue Standards
 
 # Enforces the issue template on every issue, using the SAME spec as commits,
-# branches and PRs (scripts/lib/commit-convention.mjs).
+# branches and PRs (packages/repo-standards/scripts/commit-convention.mjs).
 #
 # Why it exists: nothing checked issue bodies, and the cost was issues carrying
 # no reproduction, no scope and no acceptance criteria. Those had to be
@@ -35,4 +35,4 @@ jobs:
         # untrusted text that anyone can author.
         env:
           ISSUE_BODY: ${{ github.event.issue.body }}
-        run: node scripts/verify-issue-body.mjs
+        run: node packages/repo-standards/scripts/verify-issue-body.mjs

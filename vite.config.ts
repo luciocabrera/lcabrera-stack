@@ -38,6 +38,7 @@ export const WORKSPACE_RUNTIMES = {
   node: [
     'packages/devkit/**',
     'packages/node-runtime/**',
+    'packages/repo-standards/**',
     'packages/scan-report/**',
     'packages/server/**',
     'packages/eslint-local-rules/**',

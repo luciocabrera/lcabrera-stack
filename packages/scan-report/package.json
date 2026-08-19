@@ -39,6 +39,9 @@
     "lint:eslint:check": "eslint . --config eslint.config.mjs --max-warnings 0",
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
+  "dependencies": {
+    "@repo/repo-standards": "workspace:*"
+  },
   "devDependencies": {
     "@lcabrera/vite-config": "workspace:*",
     "@types/node": "catalog:types",

@@ -9,7 +9,7 @@
   heading, so a reviewer can tell "considered, nothing to say" from "skipped".
 
   `## What` and `## Verification` are matched by the PR Standards CI check
-  (scripts/lib/commit-convention.mjs) and MUST keep those exact spellings —
+  (packages/repo-standards/scripts/commit-convention.mjs) and MUST keep those exact spellings —
   no numbering, emoji or bold in those two headings, or the gate fails.
   See the `commit-and-pr` skill and docs/agents/workflow.md.
 -->

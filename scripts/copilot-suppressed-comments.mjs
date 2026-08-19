@@ -24,7 +24,7 @@ import {
   flagValue,
   parsePullNumber,
   parseRepository,
-} from './lib/cli-input.mjs';
+} from '../packages/repo-standards/scripts/cli-input.mjs';
 import { fetchPullRequestReviews } from './lib/copilot-reviews-api.mjs';
 import { suppressedLines } from './lib/copilot-suppressed-report.mjs';
 import { collectSuppressedComments } from './lib/copilot-suppressed.mjs';
