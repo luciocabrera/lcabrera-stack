@@ -12,11 +12,22 @@
 const FENCE_PATTERN = /^```([\w-]*)\s*$/;
 const INLINE_CODE_PATTERN = /`([^`\n]+)`/g;
 
+/**
+ * Every class here is bounded to one line, deliberately. Under `/m` a `\s` next
+ * to `^` matches newlines too, so the engine can drag a match across lines and
+ * rescan — super-linear on a long file. `[ \t]` cannot.
+ *
+ * Which is why the static form is matched at its `from`, not at its `import`: a
+ * multi-line import spans lines, but its specifier always sits on the same line
+ * as the `from`. Anchoring at `import` and scanning forward misses every
+ * multi-line import in the file — silently, which is the worst way for a
+ * dependency probe to be wrong.
+ */
 const IMPORT_PATTERNS = [
-  /^\s*import\s[^'"]*from\s*['"]([^'"]+)['"]/gm,
-  /^\s*import\s*['"]([^'"]+)['"]/gm,
-  /\brequire\(\s*['"]([^'"]+)['"]\s*\)/g,
-  /\bimport\(\s*['"]([^'"]+)['"]\s*\)/g,
+  /\bfrom[ \t]+['"]([^'"\n]+)['"]/g,
+  /^[ \t]*import[ \t]+['"]([^'"\n]+)['"]/gm,
+  /\brequire\([ \t]*['"]([^'"\n]+)['"][ \t]*\)/g,
+  /\bimport\([ \t]*['"]([^'"\n]+)['"][ \t]*\)/g,
 ];
 
 const SHELL_LANGUAGES = new Set(['bash', 'console', 'sh', 'shell', 'zsh']);

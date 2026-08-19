@@ -7,7 +7,7 @@
  */
 
 import { existsSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { relative, resolve } from 'node:path';
 
 import { analyseClosure } from './closure.mjs';
 import { readFilesUnder } from './files.mjs';
@@ -24,11 +24,7 @@ export const analyseDirectory = ({
   root,
 }) => {
   const files = readFilesUnder({ directory, root });
-  const rootDirectory = directory
-    .replace(root, '')
-    .replace(/^[/\\]/, '')
-    .split(/[/\\]/)
-    .join('/');
+  const rootDirectory = relative(root, directory).replaceAll('\\', '/');
   const { escapes } = analyseClosure({
     allowedCommands,
     exists: (path) => existsSync(resolve(root, path)),

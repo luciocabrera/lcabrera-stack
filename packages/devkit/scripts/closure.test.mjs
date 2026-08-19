@@ -139,6 +139,18 @@ describe('extractCommands', () => {
 });
 
 describe('extractImportSpecifiers', () => {
+  test('reads an import whose specifier is lines below its keyword', () => {
+    const content = [
+      'import {',
+      '  readManifest,',
+      '  writeManifest,',
+      "} from '@repo/scan-report/deterministic-scan';",
+    ].join('\n');
+    expect(
+      extractImportSpecifiers(content).map((entry) => entry.specifier),
+    ).toEqual(['@repo/scan-report/deterministic-scan']);
+  });
+
   test('reads static, side-effect, dynamic and require forms', () => {
     const content = [
       "import { a } from '@repo/scan-report/deterministic-scan';",
