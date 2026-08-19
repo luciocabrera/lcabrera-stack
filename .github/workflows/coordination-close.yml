@@ -8,7 +8,9 @@ name: Close coordination claim
 # still reads as a live soft lock and fences the next agent off finished work.
 #
 # Matching is scripts/lib/coordination-close.mjs (pure, unit-tested); the
-# deletion is `vp run coordination:close`; this file only commits the result.
+# deletion is `repo-close-claim` — `vp run coordination:close` locally, and the
+# same command by path here because this workflow does not install; this file
+# only commits the result.
 # `coordination:verify`'s stale/branch/reconcile warnings stay as the backstop
 # for anything that slips past (issue #529 §5).
 #
