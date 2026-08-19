@@ -18,14 +18,17 @@
  *
  * Exit codes: 0 = valid, 1 = a required section is missing.
  */
-import { resolve } from 'node:path';
+import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { flagValue } from './lib/cli-input.mjs';
-import { validateIssueBody } from './lib/commit-convention.mjs';
-import { readTextWithin } from './lib/safe-read.mjs';
+import { flagValue } from './cli-input.mjs';
+import { validateIssueBody } from './commit-convention.mjs';
+import { readTextWithin } from './safe-read.mjs';
+import { resolveHostRoot } from './host-root.mjs';
 
-const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
+const REPO_ROOT = resolveHostRoot({
+  moduleDirectory: dirname(fileURLToPath(import.meta.url)),
+});
 
 const main = () => {
   const bodyFile = flagValue('--body-file');

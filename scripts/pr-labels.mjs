@@ -13,12 +13,12 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { parseCommitHeader } from './lib/commit-convention.mjs';
+import { parseCommitHeader } from '@repo/repo-standards/commit-convention';
 import { typeLabelName, workspaceLabelName } from './lib/labels.mjs';
 import {
   deriveWorkspaces,
   workspacesForFiles,
-} from './lib/workspace-scopes.mjs';
+} from '@repo/repo-standards/workspace-scopes';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
 

@@ -29,7 +29,7 @@
  *    exists to fix.
  */
 import { NO_BRANCH } from './coordination-overlap.mjs';
-import { parseFrontmatter } from './coordination-parse.mjs';
+import { parseFrontmatter } from '@repo/repo-standards/coordination-parse';
 import { runGit } from './git-exec.mjs';
 
 const TASKS_DIR = 'docs/coordination/tasks/';

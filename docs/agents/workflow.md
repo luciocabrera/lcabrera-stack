@@ -8,15 +8,15 @@ drifts, and this repo has been bitten by exactly that (a changelog job that
 reported success through 159 commits; three agent-instruction files that went 92
 lines stale because nothing checked them).
 
-| You are about to…      | Read                                                                                          |
-| ---------------------- | --------------------------------------------------------------------------------------------- |
-| Do anything            | [`AGENTS.md`](../../AGENTS.md) — the standing rules                                           |
-| Start non-trivial work | [`docs/coordination/README.md`](../coordination/README.md) — claim it first                   |
-| Open an issue          | [`standard_issue.md`](../../.github/ISSUE_TEMPLATE/standard_issue.md)                         |
-| Open a PR              | [`pull_request_template.md`](../../.github/pull_request_template.md)                          |
-| Merge                  | [`merge-checklist.md`](merge-checklist.md)                                                    |
-| Write a commit message | [`scripts/lib/commit-convention.mjs`](../../scripts/lib/commit-convention.mjs) — the one spec |
-| Run the checks         | [`COMMANDS.md`](../../COMMANDS.md)                                                            |
+| You are about to…      | Read                                                                                                                                  |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Do anything            | [`AGENTS.md`](../../AGENTS.md) — the standing rules                                                                                   |
+| Start non-trivial work | [`docs/coordination/README.md`](../coordination/README.md) — claim it first                                                           |
+| Open an issue          | [`standard_issue.md`](../../.github/ISSUE_TEMPLATE/standard_issue.md)                                                                 |
+| Open a PR              | [`pull_request_template.md`](../../.github/pull_request_template.md)                                                                  |
+| Merge                  | [`merge-checklist.md`](merge-checklist.md)                                                                                            |
+| Write a commit message | [`packages/repo-standards/scripts/commit-convention.mjs`](../../packages/repo-standards/scripts/commit-convention.mjs) — the one spec |
+| Run the checks         | [`COMMANDS.md`](../../COMMANDS.md)                                                                                                    |
 
 ## 1. Creating an issue
 
@@ -40,7 +40,7 @@ agents work this repo in parallel and a change that is safe in isolation may not
 be.
 
 Two headings are load-bearing: **`## What` and `## Verification` are matched by
-CI** (`scripts/lib/commit-convention.mjs`, run by
+CI** (`packages/repo-standards/scripts/commit-convention.mjs`, run by
 [`pr-standards.yml`](../../.github/workflows/pr-standards.yml)) and must keep those
 exact spellings. Numbering, emoji or bold in _those two_ headings fails the gate.
 Decorate the others freely.

@@ -13,7 +13,7 @@
  * `coordination-read.mjs` produces and `coordination-remote.mjs` mirrors for
  * claims read off other branches.
  */
-import { globsOverlap } from './coordination-parse.mjs';
+import { globsOverlap } from '@repo/repo-standards/coordination-parse';
 
 /** Branch fields that name no real branch, so they cannot mean "same branch". */
 export const NO_BRANCH = new Set(['(uncommitted)', '(none)', '(worktree)']);

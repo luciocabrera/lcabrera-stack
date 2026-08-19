@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { readFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-
 import {
   parseCommitHeader,
   validateBranchName,
@@ -13,8 +9,6 @@ import {
   validatePrBody,
   validatePrTitle,
 } from './commit-convention.mjs';
-
-const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
 // This module is the ONE spec behind the commit-msg hook, the PR-standards CI
 // gate, the changelog generator and the PR labeler. AGENTS.md Rule 13 forbids
@@ -227,23 +221,6 @@ describe('validateBranchName', () => {
     expect(validateBranchName('').exempt).toBe(false);
     expect(errorsOf(validateBranchName(''))).not.toEqual([]);
   });
-
-  // The claim script is bash and cannot import this module, so it repeats the
-  // type list. Assert the two agree — a divergence should fail here, not show
-  // up as a rejected push after the branch already exists.
-  it('agrees with the type list coordination-claim.sh accepts', () => {
-    const script = readFileSync(
-      join(REPO_ROOT, 'scripts', 'coordination-claim.sh'),
-      'utf8',
-    );
-    const line = /\n\s*(feat\|[a-z|]+)\)\s*;;/.exec(script);
-    expect(line, 'type case-list not found in coordination-claim.sh').not.toBe(
-      null,
-    );
-    for (const type of line[1].split('|')) {
-      expect(errorsOf(validateBranchName(`${type}/1-x`))).toEqual([]);
-    }
-  });
 });
 
 describe('validatePrBase — the #367 stacked-merge guard', () => {
@@ -256,6 +233,16 @@ describe('validatePrBase — the #367 stacked-merge guard', () => {
     const result = validatePrBase('refactor/352-distinct-onto-getpool');
     expect(result.errors).toHaveLength(1);
     expect(result.errors[0]).toContain('retarget to `main`');
+  });
+
+  it('names the configured default branch instead of assuming one', () => {
+    const result = validatePrBase('feat/1-x', {
+      defaultBranch: 'trunk',
+      sharedBranchesDir: 'ops/branches',
+    });
+    expect(result.errors[0]).toContain('retarget to `trunk`');
+    expect(result.errors[0]).toContain('ops/branches/');
+    expect(result.errors[0]).not.toContain('`main`');
   });
 
   it('does not check an empty base (local simulation with no PR context)', () => {

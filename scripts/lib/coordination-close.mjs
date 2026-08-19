@@ -8,7 +8,7 @@
  * `scripts/close-coordination-claim.mjs` and the commit in
  * `.github/workflows/coordination-close.yml`. See `.claude/rules/scripts.md`.
  */
-import { NO_BRANCH } from './coordination-parse.mjs';
+import { NO_BRANCH } from '@repo/repo-standards/coordination-parse';
 
 const PULL_PATH = '/pull/';
 // Anchored, single quantifier — nothing here can backtrack (S8786).

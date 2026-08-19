@@ -36,7 +36,7 @@ import { dirname, join, resolve } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
-import { flagValue, readStdin } from './lib/cli-input.mjs';
+import { flagValue, readStdin } from '@repo/repo-standards/cli-input';
 import {
   auditDidRun,
   classifyAdvisories,

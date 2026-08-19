@@ -57,7 +57,7 @@ dependencies:
 ```
 
 **This is enforced, not advisory.** `validateIssueBody` in
-[`scripts/lib/commit-convention.mjs`](../../scripts/lib/commit-convention.mjs)
+[`packages/repo-standards/scripts/commit-convention.mjs`](../../packages/repo-standards/scripts/commit-convention.mjs)
 checks for the heading, the `dependencies:` block and all four keys;
 [`issue-standards.yml`](../../.github/workflows/issue-standards.yml) runs it when
 an issue is opened or edited. It was unenforceable and unfilled before that

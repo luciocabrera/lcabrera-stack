@@ -15,7 +15,10 @@
  *
  * Governed by .claude/rules/scripts.md.
  */
-import { validatePrBody, validatePrTitle } from './commit-convention.mjs';
+import {
+  validatePrBody,
+  validatePrTitle,
+} from '@repo/repo-standards/commit-convention';
 import { runGh } from './gh-exec.mjs';
 
 const QUEUE_QUERY = `

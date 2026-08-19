@@ -33,7 +33,7 @@ import {
   flagValue,
   parsePullNumber,
   parseRepository,
-} from './lib/cli-input.mjs';
+} from '@repo/repo-standards/cli-input';
 import { errorMessage } from './lib/error-message.mjs';
 import { runGh } from './lib/gh-exec.mjs';
 import {

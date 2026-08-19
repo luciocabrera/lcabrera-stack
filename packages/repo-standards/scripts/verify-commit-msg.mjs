@@ -18,16 +18,20 @@
  * Exit codes: 0 = valid or skipped (warnings allowed), 1 = a rule was broken.
  */
 import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { validateCommitMessage } from './lib/commit-convention.mjs';
-import { resolveGitDir } from './lib/git-dir.mjs';
-import { reportWarnings } from './lib/report-warnings.mjs';
-import { readTextWithin } from './lib/safe-read.mjs';
-import { deriveWorkspaceScopes } from './lib/workspace-scopes.mjs';
+import { validateCommitMessage } from './commit-convention.mjs';
+import { positional } from './cli-input.mjs';
+import { resolveHostRoot } from './host-root.mjs';
+import { resolveGitDir } from './git-dir.mjs';
+import { reportWarnings } from './report-warnings.mjs';
+import { readTextWithin } from './safe-read.mjs';
+import { deriveWorkspaceScopes } from './workspace-scopes.mjs';
 
-const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
+const REPO_ROOT = resolveHostRoot({
+  moduleDirectory: dirname(fileURLToPath(import.meta.url)),
+});
 
 /**
  * Roots the message file may legitimately come from. Git owns `COMMIT_EDITMSG`,
@@ -43,7 +47,7 @@ const readMessage = (source) =>
     : readTextWithin(source, REPO_ROOT, allowedRoots());
 
 const main = () => {
-  const source = process.argv[2];
+  const source = positional(2);
   if (source === undefined) {
     console.error(
       'Usage: node scripts/verify-commit-msg.mjs <message-file | ->',

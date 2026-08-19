@@ -22,7 +22,7 @@
 import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { readTextWithin } from './safe-read.mjs';
+import { readTextWithin } from '@repo/repo-standards/safe-read';
 
 /** Workspace roots that can hold a publishable package. */
 const WORKSPACE_ROOTS = ['packages', 'apps'];
@@ -70,6 +70,9 @@ export const COVERAGE_REPORT_WORKSPACES = [
   // are pure; the filesystem is reached only by the thin command shells around
   // them, so the suite runs without one.
   { dir: 'packages/devkit', name: '@repo/devkit', run: true },
+  // The convention spec and the four gates built on it: pure parsing and
+  // validation, with the git and filesystem reads at the command edges.
+  { dir: 'packages/repo-standards', name: '@repo/repo-standards', run: true },
   // The shell fragment the `start` task emits, and the React Router asset
   // plugin folded in from `@repo/plugins` — the plugin's filesystem calls are
   // an injected seam, so its suite runs against an in-memory one (ADR-069).
@@ -91,6 +94,7 @@ export const COVERAGE_REPORT_WORKSPACES = [
 export const COVERAGE_MERGE_WORKSPACES = [
   { dir: 'packages/api', name: '@lcabrera/api' },
   { dir: 'packages/devkit', name: '@repo/devkit' },
+  { dir: 'packages/repo-standards', name: '@repo/repo-standards' },
   { dir: 'packages/eslint-local-rules', name: '@lcabrera/eslint-plugin' },
   { dir: 'packages/node-runtime', name: '@lcabrera/node' },
   { dir: 'packages/scan-report', name: '@repo/scan-report' },

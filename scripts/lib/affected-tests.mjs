@@ -32,7 +32,10 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { deriveWorkspaces, workspacesForFiles } from './workspace-scopes.mjs';
+import {
+  deriveWorkspaces,
+  workspacesForFiles,
+} from '@repo/repo-standards/workspace-scopes';
 
 /** The one package that emits the PR coverage summary via its `test:ci`. */
 export const COVERAGE_TASK_PACKAGE = 'vite-react-compiler';

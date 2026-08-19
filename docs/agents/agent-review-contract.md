@@ -27,7 +27,7 @@ answered implicitly by a prompt, and the gate's behaviour becomes whatever the
 model felt like that day.
 
 This repo already has the antidote: one spec, everything else follows from it —
-[`scripts/lib/commit-convention.mjs`](../../scripts/lib/commit-convention.mjs)
+[`packages/repo-standards/scripts/commit-convention.mjs`](../../packages/repo-standards/scripts/commit-convention.mjs)
 for commits and PRs, `refactor-verified-contract.md` for blind verification.
 
 **The test of this document:** implementing it should take no judgement about

@@ -17,21 +17,24 @@
  *
  * Exit codes: 0 = valid (warnings allowed), 1 = a rule was broken.
  */
-import { resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
   validatePrBase,
   validatePrBody,
   validatePrTitle,
-} from './lib/commit-convention.mjs';
-import { flagValue } from './lib/cli-input.mjs';
-import { readEntries } from './lib/coordination-read.mjs';
-import { reportWarnings } from './lib/report-warnings.mjs';
-import { readTextWithin } from './lib/safe-read.mjs';
-import { deriveWorkspaceScopes } from './lib/workspace-scopes.mjs';
+} from './commit-convention.mjs';
+import { flagValue } from './cli-input.mjs';
+import { readEntries } from './coordination-read.mjs';
+import { reportWarnings } from './report-warnings.mjs';
+import { readTextWithin } from './safe-read.mjs';
+import { deriveWorkspaceScopes } from './workspace-scopes.mjs';
+import { resolveHostRoot } from './host-root.mjs';
 
-const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
+const REPO_ROOT = resolveHostRoot({
+  moduleDirectory: dirname(fileURLToPath(import.meta.url)),
+});
 const BRANCHES_DIR = resolve(REPO_ROOT, 'docs/coordination/branches');
 
 const readInputs = () => {

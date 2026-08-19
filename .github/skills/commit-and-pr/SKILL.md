@@ -10,7 +10,7 @@ allowed-tools: Bash(vp:*)
 Every commit and every pull request in this repo follows one format, and it is
 **enforced** — a local `commit-msg` git hook plus a blocking CI gate
 (`pr-standards.yml`). Both derive from a single spec,
-[`scripts/lib/commit-convention.mjs`](../../../scripts/lib/commit-convention.mjs),
+[`packages/repo-standards/scripts/commit-convention.mjs`](../../../packages/repo-standards/scripts/commit-convention.mjs),
 so this skill never restates the rules that file owns — it tells you how to
 satisfy them.
 
@@ -105,7 +105,7 @@ The full rule, and why it is a rule, is
 | Ruleset   | `required_review_thread_resolution` on `main`, reported by `Review threads resolved` |
 
 Per **Rule 11**, do not work around a failure by weakening the check — fix the
-message or the description. The spec (`scripts/lib/commit-convention.mjs`) is the
+message or the description. The spec (`packages/repo-standards/scripts/commit-convention.mjs`) is the
 one place the rules live; change it there if the standard itself must change, and
 the hook, CI, and this skill stay in sync.
 

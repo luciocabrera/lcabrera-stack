@@ -8,7 +8,7 @@ allowed-tools: Read, Grep, Glob, Bash(vp:*), Bash(gh:*)
 # Releasing, changelog, and labels
 
 Everything here is downstream of the enforced commit convention
-(`scripts/lib/commit-convention.mjs`) — the changelog groups by Conventional
+(`packages/repo-standards/scripts/commit-convention.mjs`) — the changelog groups by Conventional
 Commit type and the labeler reads the PR title with the same parser, so they
 never diverge from what the gate accepts. **Do not restate the type list**; link
 to the spec.

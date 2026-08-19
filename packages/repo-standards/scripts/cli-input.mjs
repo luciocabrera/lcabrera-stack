@@ -20,9 +20,28 @@ import process from 'node:process';
  * throw here would turn a malformed invocation into a stack trace instead of
  * the gate's own usage message. (pure w.r.t. argv)
  */
+/**
+ * argv with the separator a task runner forwards removed.
+ *
+ * `vp run <task> -- <args>` puts a bare `--` in front of the forwarded
+ * arguments, which is invisible to the person typing the documented form and
+ * arrives here as a positional. Every reader below starts from this.
+ */
+export const withoutSeparator = (argv = process.argv) =>
+  argv.filter((entry) => entry !== '--');
+
+/** The nth positional argument, counting past node and the script itself. */
+export const positional = (index, argv = process.argv) =>
+  withoutSeparator(argv)[index];
+
 export const flagValue = (name, argv = process.argv) => {
   const index = argv.indexOf(name);
-  return index === -1 ? undefined : argv[index + 1];
+  if (index === -1) return undefined;
+  // A task runner forwards its own `--` separator into argv, so it can sit
+  // between a flag and its value. Skipping it is what makes the documented
+  // `vp run <task> -- --flag value` form behave like the bare invocation.
+  const next = argv[index + 1];
+  return next === '--' ? argv[index + 2] : next;
 };
 
 /** Digits only — a leading `#` is stripped before this sees the value. */

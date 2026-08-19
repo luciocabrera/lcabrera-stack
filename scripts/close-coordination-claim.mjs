@@ -20,9 +20,9 @@ import { join, resolve } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
-import { flagValue } from './lib/cli-input.mjs';
+import { flagValue } from '@repo/repo-standards/cli-input';
 import { tasksClosedBy } from './lib/coordination-close.mjs';
-import { readEntries } from './lib/coordination-read.mjs';
+import { readEntries } from '@repo/repo-standards/coordination-read';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
 const TASKS_DIR = join(REPO_ROOT, 'docs', 'coordination', 'tasks');

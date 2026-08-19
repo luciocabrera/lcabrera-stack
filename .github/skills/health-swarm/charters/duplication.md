@@ -26,7 +26,7 @@ normalised function bodies rather than trusting the tool.
 ## Prior findings
 
 Already handled (do not refile): the copy-pasted root-script CLI helpers, now in
-`scripts/lib/cli-input.mjs`.
+`packages/repo-standards/scripts/cli-input.mjs`.
 
 Reviewed and deliberately left, with reasons in #519: the `apps/react-router` ⇄
 `api-shared` enterprise-orders constants (documented as deliberate, in sync, both
