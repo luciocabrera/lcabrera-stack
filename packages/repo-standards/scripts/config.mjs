@@ -13,7 +13,7 @@
  */
 
 import { existsSync, readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, isAbsolute, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { resolveHostRoot } from './host-root.mjs';
@@ -49,7 +49,33 @@ const isPlainObject = (value) =>
 
 /** An empty string is a mistake, not an override — it would resolve to the host root. */
 const readableString = (value, fallback) =>
-  typeof value === 'string' && value !== '' ? value : fallback;
+  typeof value === 'string' && value.trim() !== '' ? value.trim() : fallback;
+
+/**
+ * A configured location that leaves the repository is refused by name rather
+ * than normalised into something harmless.
+ *
+ * These gates write and delete: the ADR scaffolder writes a file, the index
+ * regenerates one, the board is overwritten and the claim closer unlinks. A
+ * value like `../../etc` survives `join` — it does not "resolve to nothing", it
+ * resolves OUTSIDE the host root — and an absolute one silently becomes a
+ * subdirectory of it, so a consumer who wrote `/var/claims` would find their
+ * claims under `<root>/var/claims` and no error saying why.
+ */
+const repoRelative = (value, fallback, key) => {
+  const candidate = readableString(value, fallback);
+  if (isAbsolute(candidate)) {
+    throw new Error(
+      `${CONFIG_FILE_NAME}: \`${key}\` must be relative to the repository root, but is \`${candidate}\`.`,
+    );
+  }
+  if (normalize(candidate).startsWith('..')) {
+    throw new Error(
+      `${CONFIG_FILE_NAME}: \`${key}\` must stay inside the repository, but \`${candidate}\` leaves it.`,
+    );
+  }
+  return candidate;
+};
 
 /**
  * A malformed config is a failure rather than a silent fallback: a consumer who
@@ -68,9 +94,10 @@ export const resolveConventions = (raw) => {
       block.defaultBranch,
       DEFAULT_CONVENTIONS.defaultBranch,
     ),
-    sharedBranchesDir: readableString(
+    sharedBranchesDir: repoRelative(
       block.sharedBranchesDir,
       DEFAULT_CONVENTIONS.sharedBranchesDir,
+      'conventions.sharedBranchesDir',
     ),
   };
 };
@@ -80,9 +107,15 @@ const readableHome = (home) =>
   typeof home === 'object' &&
   home !== null &&
   typeof home.dir === 'string' &&
-  home.dir !== '' &&
+  home.dir.trim() !== '' &&
   typeof home.tier === 'string' &&
-  home.tier !== '';
+  home.tier.trim() !== '';
+
+/** A home writes ADRs, so its directory is held to the containment rule too. */
+const containedHome = (home) => ({
+  ...home,
+  dir: repoRelative(home.dir, home.dir, 'registers.adrHomes[].dir'),
+});
 
 export const resolveRegisters = (raw) => {
   if (raw === undefined) return DEFAULT_REGISTERS;
@@ -92,21 +125,24 @@ export const resolveRegisters = (raw) => {
   }
   const block = isPlainObject(parsed.registers) ? parsed.registers : {};
   const homes = Array.isArray(block.adrHomes)
-    ? block.adrHomes.filter(readableHome)
+    ? block.adrHomes.filter(readableHome).map(containedHome)
     : [];
   return {
     adrHomes: homes.length > 0 ? homes : DEFAULT_REGISTERS.adrHomes,
-    adrTemplateHome: readableString(
+    adrTemplateHome: repoRelative(
       block.adrTemplateHome,
       DEFAULT_REGISTERS.adrTemplateHome,
+      'registers.adrTemplateHome',
     ),
-    coordinationBoardDoc: readableString(
+    coordinationBoardDoc: repoRelative(
       block.coordinationBoardDoc,
       DEFAULT_REGISTERS.coordinationBoardDoc,
+      'registers.coordinationBoardDoc',
     ),
-    coordinationTasksDir: readableString(
+    coordinationTasksDir: repoRelative(
       block.coordinationTasksDir,
       DEFAULT_REGISTERS.coordinationTasksDir,
+      'registers.coordinationTasksDir',
     ),
   };
 };

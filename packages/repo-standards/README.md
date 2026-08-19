@@ -50,6 +50,11 @@ and `issue:verify`.
 }
 ```
 
+Every path here is relative to the repository root and must stay inside it: an
+absolute value or one that climbs out is refused by name rather than normalised,
+because these gates write and delete — the ADR scaffolder writes a file, the
+index and the board are overwritten, and the claim closer unlinks.
+
 `adrHomes` defaults to **one** home, because that is all a repository is assumed
 to have. A repository keeping a second — decisions internal to one app, say —
 declares both, and the order it declares them in is the order they are reported.

@@ -87,6 +87,52 @@ describe('resolveRegisters', () => {
   });
 });
 
+// These gates write and delete — the ADR scaffolder writes, the index and the
+// board are overwritten, the claim closer unlinks. A configured location that
+// leaves the repository must be refused by name, not normalised into something
+// that quietly points somewhere else.
+describe('containment of the configured locations', () => {
+  const tasksDir = (value) =>
+    resolveRegisters(
+      JSON.stringify({ registers: { coordinationTasksDir: value } }),
+    ).coordinationTasksDir;
+
+  it('refuses a value that climbs out of the repository', () => {
+    expect(() => tasksDir('../../etc')).toThrow(/leaves it/);
+  });
+
+  it('refuses an absolute value rather than nesting it under the root', () => {
+    expect(() => tasksDir('/tmp/claims')).toThrow(/must be relative/);
+  });
+
+  it('keeps a value whose `..` stays inside', () => {
+    expect(tasksDir('docs/../ops/claims')).toBe('docs/../ops/claims');
+  });
+
+  it('holds an ADR home to the same rule, since one writes files', () => {
+    expect(() =>
+      resolveRegisters(
+        JSON.stringify({
+          registers: { adrHomes: [{ dir: '../outside', tier: 'repo' }] },
+        }),
+      ),
+    ).toThrow(/leaves it/);
+  });
+
+  it('holds the shared-branches directory to it too', () => {
+    expect(() =>
+      resolveConventions(
+        JSON.stringify({ conventions: { sharedBranchesDir: '../x' } }),
+      ),
+    ).toThrow(/leaves it/);
+  });
+
+  it('trims a padded value and falls back on a blank one', () => {
+    expect(tasksDir(' ops/claims ')).toBe('ops/claims');
+    expect(tasksDir('   ')).toBe(DEFAULT_REGISTERS.coordinationTasksDir);
+  });
+});
+
 describe('readCoordinationPaths', () => {
   const withConfig = (config) => {
     const root = mkdtempSync(join(tmpdir(), 'repo-standards-config-'));
