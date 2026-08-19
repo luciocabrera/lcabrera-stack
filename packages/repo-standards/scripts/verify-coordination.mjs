@@ -52,11 +52,13 @@
  *                          `origin/*` ref still "resolves" it (so `branch` above
  *                          stays quiet): the PR landed, delete the task file.
  *
- * Local checks read the working tree only and never shell out (`git-dir.mjs`
- * reads `.git` directly). The overlap check is the one exception — reading a
- * blob out of another branch needs git's object store — and it goes through
- * `git-exec.mjs`, which pins PATH to system directories (S4036) and strips the
- * repository-selecting variables.
+ * Two checks shell out, and both go through `git-exec.mjs`, which pins PATH to
+ * system directories (S4036) and strips the repository-selecting variables:
+ * the overlap check, because reading a blob out of another branch needs git's
+ * object store, and the checkout-isolation check, because `status` and
+ * `branch --show-current` have no on-disk equivalent. Everything else reads the
+ * working tree — including the missing-branch check, which walks `.git` itself
+ * rather than asking git whether a ref resolves.
  *
  * Modes:
  *   repo-verify-claims                → verify (default)
