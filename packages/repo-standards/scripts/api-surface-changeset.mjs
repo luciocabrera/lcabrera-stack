@@ -1,6 +1,6 @@
 /**
  * Cross-checks a surface change against the changesets in the PR
- * (scripts/verify-api-surface.mjs).
+ * (verify-api-surface.mjs).
  *
  * A merged version bump publishes on its own, with no `private` flag between a
  * mistake and the npm registry (ADR-043). So a change to a package's published

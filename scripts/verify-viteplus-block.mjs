@@ -28,7 +28,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { errorMessage } from './lib/error-message.mjs';
+import { errorMessage } from '../packages/repo-standards/scripts/error-message.mjs';
 import {
   END_MARKER,
   findRegion,

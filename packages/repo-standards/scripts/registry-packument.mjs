@@ -1,7 +1,7 @@
 /**
  * The npm registry read shared by the release scripts.
  *
- * Extracted from `release-publish-plan.mjs` once `release-audit.mjs` needed the
+ * Extracted from `release-publish-plan.mjs` once `audit-release.mjs` needed the
  * same lookup. Two clients would mean two sets of failure semantics, and the
  * semantics are the load-bearing part: a **404 is an answer** (it is how "never
  * published" presents), while any other failure — an outage, a proxy, an

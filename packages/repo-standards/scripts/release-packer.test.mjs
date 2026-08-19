@@ -1,18 +1,12 @@
-import { readdirSync, readFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-
 import { describe, expect, it } from 'vite-plus/test';
 
 import { releasePackerProblems, stripComments } from './release-packer.mjs';
 
 // What these assertions defend: the published `exports` come from
-// `publishConfig.exports`, and substituting that field is a pnpm extension. The
-// tarball is only correct because changesets shells out to `pnpm publish` —
-// nothing else in the repo says so, which is why it is asserted here.
-
-const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
-const RELEASE_WORKFLOW = join(REPO_ROOT, '.github', 'workflows', 'release.yml');
+// `publishConfig.exports`, and substituting that field is a pnpm extension, so
+// the tarball is only correct because changesets shells out to `pnpm publish`.
+// That a given repository is still wired that way is asserted where the
+// repository is — `scripts/lib/publish-wiring.test.mjs` here.
 
 const healthy = {
   lockfiles: ['package.json', 'pnpm-lock.yaml'],
@@ -97,19 +91,5 @@ describe('releasePackerProblems', () => {
         packageManager: 'npm@11.0.0',
       }).join('\n'),
     ).toContain('packageManager');
-  });
-});
-
-describe('this repository', () => {
-  it('still publishes through pnpm', () => {
-    expect(
-      releasePackerProblems({
-        lockfiles: readdirSync(REPO_ROOT),
-        packageManager: JSON.parse(
-          readFileSync(join(REPO_ROOT, 'package.json'), 'utf8'),
-        ).packageManager,
-        workflowText: readFileSync(RELEASE_WORKFLOW, 'utf8'),
-      }),
-    ).toEqual([]);
   });
 });

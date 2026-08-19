@@ -1,18 +1,17 @@
 /**
  * Produces the tarball a package would publish, and reads it back
- * (scripts/verify-publish-surface.mjs).
+ * (verify-publish-surface.mjs).
  *
  * The manifest on disk describes an intention, not an artifact. `exports`
- * points at `src` so nothing in this repo has to build, and the swap to `dist`
- * lives in `publishConfig.exports` — a **pnpm** extension that `npm pack`
+ * points at `src` so nothing in the source tree has to build, and the swap to
+ * `dist` lives in `publishConfig.exports` — a **pnpm** extension that `npm pack`
  * ignores entirely. A gate reading `package.json` therefore checks a map that
  * may never reach a consumer; only the tarball says what ships. See
  * ADR-073 and ADR-057 for the hazard the swap exists to prevent.
  *
- * pnpm is spawned directly because `vp` does not wrap npm packing — its own
- * `vp pack` is a Vite library build, a different thing (AGENTS.md section 4).
- * Under `vp run` the toolchain's managed pnpm is on PATH, which is why the
- * gates are run that way.
+ * pnpm is spawned directly rather than through a wrapper: the substitution this
+ * gate exists to check is pnpm's, so no other packer answers the question. It
+ * must therefore be run from a context that has pnpm on PATH.
  */
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
@@ -25,8 +24,8 @@ import { createPackageFromTarballData } from '@arethetypeswrong/core';
  *
  * Resolved from PATH here rather than from a fixed system directory as
  * `git-exec.mjs` does: pnpm is not a system binary but the toolchain's own,
- * which `vp run` puts on PATH for the task. Naming the file outright still
- * removes the lookup from the spawn itself (Sonar S4036).
+ * wherever the runner put it. Naming the file outright still removes the lookup
+ * from the spawn itself (Sonar S4036).
  */
 const pnpmBinary = () =>
   (process.env.PATH ?? '')
@@ -46,7 +45,7 @@ const packPackage = ({ destination, directory }) => {
   const binary = pnpmBinary();
   if (binary === undefined) {
     throw new Error(
-      'pnpm is not on PATH, so no tarball could be produced. Run this gate through `vp run publish:verify`, which puts the toolchain’s pnpm there.',
+      'pnpm is not on PATH, so no tarball could be produced — and only pnpm applies the `publishConfig.exports` substitution this gate exists to check, so no other packer can stand in. Install pnpm, or run this gate through a task runner that provisions it for the task.',
     );
   }
   const stdout = execFileSync(

@@ -2,17 +2,22 @@
   "name": "@repo/repo-standards",
   "version": "0.0.0",
   "private": true,
-  "description": "The gates that keep a repository's commits, branches, pull requests and issues to one enforced shape — as commands, so any repository can run them.",
+  "description": "The gates that keep a repository's commits, branches, pull requests, issues, coordination register, architecture decisions and published packages to one enforced shape — as commands, so any repository can run them.",
   "bin": {
     "repo-adr": "./scripts/new-adr.mjs",
+    "repo-audit-release": "./scripts/audit-release.mjs",
     "repo-claim-board": "./scripts/coordination-board-live.mjs",
     "repo-close-claim": "./scripts/close-coordination-claim.mjs",
+    "repo-plan-release": "./scripts/release-publish-plan.mjs",
     "repo-verify-adrs": "./scripts/verify-adrs.mjs",
+    "repo-verify-api-surface": "./scripts/verify-api-surface.mjs",
     "repo-verify-branch": "./scripts/verify-branch-name.mjs",
     "repo-verify-claims": "./scripts/verify-coordination.mjs",
     "repo-verify-commit": "./scripts/verify-commit-msg.mjs",
     "repo-verify-issue": "./scripts/verify-issue-body.mjs",
-    "repo-verify-pr": "./scripts/verify-pr.mjs"
+    "repo-verify-pr": "./scripts/verify-pr.mjs",
+    "repo-verify-publish": "./scripts/verify-publish-surface.mjs",
+    "repo-verify-types": "./scripts/verify-attw.mjs"
   },
   "type": "module",
   "exports": {
@@ -29,9 +34,14 @@
     "./coordination-reconcile": "./scripts/coordination-reconcile.mjs",
     "./coordination-remote": "./scripts/coordination-remote.mjs",
     "./coordination-schema": "./scripts/coordination-schema.mjs",
+    "./error-message": "./scripts/error-message.mjs",
     "./git-dir": "./scripts/git-dir.mjs",
     "./host-root": "./scripts/host-root.mjs",
     "./package.json": "./package.json",
+    "./publish-surface": "./scripts/publish-surface.mjs",
+    "./publishable-workspaces": "./scripts/publishable-workspaces.mjs",
+    "./registry-packument": "./scripts/registry-packument.mjs",
+    "./release-publishable": "./scripts/release-publishable.mjs",
     "./report-warnings": "./scripts/report-warnings.mjs",
     "./safe-read": "./scripts/safe-read.mjs",
     "./workspace-scopes": "./scripts/workspace-scopes.mjs"
@@ -44,6 +54,10 @@
     "lint:eslint": "eslint . --config eslint.config.mjs --fix --max-warnings 0",
     "lint:eslint:check": "eslint . --config eslint.config.mjs --max-warnings 0",
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
+  },
+  "dependencies": {
+    "@arethetypeswrong/core": "catalog:tooling",
+    "ts-morph": "catalog:tooling"
   },
   "devDependencies": {
     "@lcabrera/vite-config": "workspace:*",

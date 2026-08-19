@@ -1,5 +1,5 @@
 /**
- * Pure helpers for the published-surface gate (scripts/verify-publish-surface.mjs).
+ * Pure helpers for the published-surface gate (verify-publish-surface.mjs).
  *
  * Separated from the CLI so the mapping rules can be unit-tested without
  * touching the filesystem — `test:scripts` covers this file. The CLI keeps the
@@ -10,9 +10,9 @@
  * A package is in scope when it is published publicly AND builds.
  *
  * Derived rather than listed, so adding a `build` script to a public package
- * enrols it automatically. `packages/ui` has no `build` script on purpose — its
- * StyleX theme identity is tied to the source path, so it ships source and is
- * gated by its own `check:public-api` instead.
+ * enrols it automatically. A package may omit `build` on purpose — one whose
+ * identity is tied to its source path (StyleX themes are the case this was
+ * written for) ships source and is gated by its own workspace check instead.
  */
 export const isBuiltPublicPackage = (manifest) =>
   manifest.scripts?.build !== undefined &&
@@ -24,8 +24,8 @@ export const isBuiltPublicPackage = (manifest) =>
  * tsdown emits ESM as `.mjs` with declarations beside it as `.d.mts`, and
  * `unbundle` keeps the `src` tree shape, so this is a pure path rewrite.
  *
- * A `src` entry is not always TypeScript: `@lcabrera/vite-config` ships its
- * ESLint flat configs as `.mjs`, because flat config is JavaScript. tsdown
+ * A `src` entry is not always TypeScript: a package shipping ESLint flat
+ * configs exports them as `.mjs`, because flat config is JavaScript. tsdown
  * builds those too (with `allowJs`, so their declarations are emitted), and
  * strips the extension the same way — so the rule is "drop the source
  * extension", not "drop `.ts`". Getting that wrong produced `x.mjs.d.mts`,

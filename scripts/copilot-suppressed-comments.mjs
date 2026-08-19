@@ -28,7 +28,7 @@ import {
 import { fetchPullRequestReviews } from './lib/copilot-reviews-api.mjs';
 import { suppressedLines } from './lib/copilot-suppressed-report.mjs';
 import { collectSuppressedComments } from './lib/copilot-suppressed.mjs';
-import { errorMessage } from './lib/error-message.mjs';
+import { errorMessage } from '../packages/repo-standards/scripts/error-message.mjs';
 import { runGh } from './lib/gh-exec.mjs';
 
 const USAGE =

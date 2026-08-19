@@ -35,7 +35,7 @@ import {
   parsePullNumber,
   parseRepository,
 } from '../packages/repo-standards/scripts/cli-input.mjs';
-import { errorMessage } from './lib/error-message.mjs';
+import { errorMessage } from '../packages/repo-standards/scripts/error-message.mjs';
 import { runGh } from './lib/gh-exec.mjs';
 import {
   gateArgs,

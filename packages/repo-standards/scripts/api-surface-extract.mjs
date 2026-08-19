@@ -1,6 +1,6 @@
 /**
  * Extracts a package's exported type surface with ts-morph
- * (scripts/verify-api-surface.mjs).
+ * (verify-api-surface.mjs).
  *
  * For each concrete entry a consumer can import, this enumerates the exported
  * names and renders a normalized signature per name, so the diff can list every

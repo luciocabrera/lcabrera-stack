@@ -7,9 +7,11 @@ import { describe, expect, it } from 'vite-plus/test';
 import {
   CONFIG_FILE_NAME,
   DEFAULT_CONVENTIONS,
+  DEFAULT_PUBLISHING,
   DEFAULT_REGISTERS,
   readCoordinationPaths,
   resolveConventions,
+  resolvePublishing,
   resolveRegisters,
 } from './config.mjs';
 
@@ -47,6 +49,21 @@ describe('resolveConventions', () => {
     expect(() => resolveConventions(JSON.stringify(['main']))).toThrow(
       /JSON object/,
     );
+  });
+
+  // The gates print a single line, so `Unexpected end of JSON input` on its own
+  // would leave a reader with nothing to open. Asserted for every block, since
+  // which one a consumer reaches first depends only on which gate they ran.
+  it('names the file when the config is not valid JSON at all', () => {
+    for (const resolve of [
+      resolveConventions,
+      resolvePublishing,
+      resolveRegisters,
+    ]) {
+      expect(() => resolve('{ "publishing": ')).toThrow(
+        /devkit\.config\.json is not valid JSON: /,
+      );
+    }
   });
 });
 
@@ -216,5 +233,90 @@ describe('readCoordinationPaths', () => {
     expect(paths.branchesDir).toBe(join(root, 'ops/branches'));
     expect(paths.boardDoc).toBe(join(root, 'ops/BOARD.md'));
     expect(paths.boardRel).toBe('ops/BOARD.md');
+  });
+});
+
+describe('resolvePublishing', () => {
+  const publishing = (block) => resolvePublishing(JSON.stringify(block));
+
+  it('an absent config is the documented default, not an error', () => {
+    expect(resolvePublishing(undefined)).toEqual(DEFAULT_PUBLISHING);
+  });
+
+  // The roster cannot be guessed, so it defaults to empty — and every gate that
+  // reads it refuses to run on empty rather than passing over nothing. A
+  // default roster would turn that loud state into a wrong one.
+  it('leaves an unconfigured roster empty rather than inventing one', () => {
+    expect(resolvePublishing(undefined).publicPackageDirs).toEqual([]);
+    expect(publishing({ publishing: {} }).publicPackageDirs).toEqual([]);
+    expect(
+      publishing({ publishing: { publicPackageDirs: [] } }).publicPackageDirs,
+    ).toEqual([]);
+  });
+
+  it('keeps the declared roster in the order it was declared', () => {
+    expect(
+      publishing({ publishing: { publicPackageDirs: ['ui', 'api'] } })
+        .publicPackageDirs,
+    ).toEqual(['ui', 'api']);
+  });
+
+  it('reads each location, and falls back per key rather than per block', () => {
+    const resolved = publishing({
+      publishing: { apiSurfaceDir: 'artifacts/surface' },
+    });
+
+    expect(resolved.apiSurfaceDir).toBe('artifacts/surface');
+    expect(resolved.packagesDir).toBe(DEFAULT_PUBLISHING.packagesDir);
+    expect(resolved.workspaceDirs).toEqual(DEFAULT_PUBLISHING.workspaceDirs);
+  });
+
+  // These gates write: the surface gate writes a snapshot per package and the
+  // publish gate rewrites a manifest. A location that leaves the repository is
+  // refused by name, not normalised into something harmless.
+  it('refuses a location that leaves the repository', () => {
+    expect(() =>
+      publishing({ publishing: { apiSurfaceDir: '../../elsewhere' } }),
+    ).toThrow(/must stay inside the repository/);
+    expect(() =>
+      publishing({ publishing: { packagesDir: '/var/packages' } }),
+    ).toThrow(/must be relative to the repository root/);
+    expect(() =>
+      publishing({ publishing: { releaseWorkflow: 'C:/publish.yml' } }),
+    ).toThrow(/must be relative to the repository root/);
+  });
+
+  // A roster entry is joined onto the packages directory, so it escapes the
+  // same way — `a/../..` climbs out of both once they are joined.
+  it('holds every roster and workspace entry to the same rule', () => {
+    expect(() =>
+      publishing({ publishing: { publicPackageDirs: ['ui', '../../etc'] } }),
+    ).toThrow(/must stay inside the repository/);
+    expect(() =>
+      publishing({ publishing: { publicPackageDirs: ['a/../../etc'] } }),
+    ).toThrow(/must stay inside the repository/);
+    expect(() =>
+      publishing({ publishing: { workspaceDirs: ['..\\..\\etc'] } }),
+    ).toThrow(/must stay inside the repository/);
+  });
+
+  // One spelling per location: the snapshot path is built by string
+  // concatenation, so `reports/api-surface/` would name `…//ui.txt`.
+  it('canonicalises a location to one spelling', () => {
+    expect(
+      publishing({ publishing: { apiSurfaceDir: 'reports/api-surface/' } })
+        .apiSurfaceDir,
+    ).toBe('reports/api-surface');
+    expect(
+      publishing({ publishing: { publicPackageDirs: ['./ui/'] } })
+        .publicPackageDirs,
+    ).toEqual(['ui']);
+  });
+
+  // `..data` is an ordinary name; only a whole `..` segment climbs.
+  it('does not mistake a leading-dots name for a parent', () => {
+    expect(
+      publishing({ publishing: { packagesDir: '..packages' } }).packagesDir,
+    ).toBe('..packages');
   });
 });

@@ -30,7 +30,7 @@
  */
 import process from 'node:process';
 
-import { errorMessage } from './lib/error-message.mjs';
+import { errorMessage } from '../packages/repo-standards/scripts/error-message.mjs';
 import { fetchPullRequestThreads } from './lib/pr-threads-api.mjs';
 import {
   decideThreadStatus,

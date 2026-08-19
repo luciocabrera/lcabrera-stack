@@ -1,24 +1,24 @@
 /**
- * The pure half of the published-manifest audit (scripts/release-audit.mjs).
+ * The pure half of the published-manifest audit (audit-release.mjs).
  *
- * `publish:verify` checks the tarball this repo *would* produce, packing with
- * pnpm because `publishConfig.exports` substitution is a pnpm extension
- * (ADR-073). A defect that exists only in an `npm pack` tarball is therefore
- * invisible to it by construction — which is how `@lcabrera/eslint-plugin@0.1.0`
- * reached npm uninstallable with every gate here green (#730). This module
- * decides the same questions against the manifest a consumer would actually
- * receive.
+ * `repo-verify-publish` checks the tarball the source tree *would* produce,
+ * packing with pnpm because `publishConfig.exports` substitution is a pnpm
+ * extension (ADR-073). A defect that exists only in an `npm pack` tarball is
+ * therefore invisible to it by construction — which is how a package once
+ * reached npm uninstallable with every gate in its repository green (#730).
+ * This module decides the same questions against the manifest a consumer would
+ * actually receive.
  *
  * Two assertions, and they are not symmetric:
  *
  * - **An unsubstituted `catalog:`/`workspace:` range** is a defect in every
  *   package. Nothing legitimately publishes one; npm has no handler for either
  *   protocol and aborts at resolution with `EUNSUPPORTEDPROTOCOL`.
- * - **A `./src/` export target** is a defect only in a package this repo
- *   *builds*. `@lcabrera/ui` ships source on purpose — StyleX derives theme
- *   identity from the source path — so the classification comes from the same
- *   `isBuiltPublicPackage` predicate `publish:verify` uses, and the two gates
- *   agree by construction rather than by two copies of a list.
+ * - **A `./src/` export target** is a defect only in a package the repository
+ *   *builds*. A package may ship source on purpose — one whose identity is tied
+ *   to its source path — so the classification comes from the same
+ *   `isBuiltPublicPackage` predicate `repo-verify-publish` uses, and the two
+ *   gates agree by construction rather than by two copies of a list.
  *
  * See ADR-077 for the version-coverage and blocking decisions this encodes.
  */
@@ -195,8 +195,9 @@ export const selectBroken = (audited) =>
  * none of them.
  *
  * A single 404 is an **answer**: it is how a package awaiting its first publish
- * presents, which is why the sweep tolerates one and why `@lcabrera/tsconfig`
- * did not fail this gate before it shipped. Every package 404ing at once is not
+ * presents, which is why the sweep tolerates one: a package added to the
+ * roster before its first publish must not fail this gate. Every package
+ * 404ing at once is not
  * that many coincidences — it is a registry that is not answering. A
  * misconfigured proxy, a wrong `npm_config_registry` and an auth failure
  * serving 404 instead of 401 all present exactly that way, and each one

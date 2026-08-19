@@ -16,6 +16,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { errorMessage } from './error-message.mjs';
 import { resolveHostRoot } from './host-root.mjs';
 
 export const CONFIG_FILE_NAME = 'devkit.config.json';
@@ -43,6 +44,24 @@ export const DEFAULT_REGISTERS = {
 export const DEFAULT_CONVENTIONS = {
   defaultBranch: 'main',
   sharedBranchesDir: 'docs/coordination/branches',
+};
+
+/**
+ * `publicPackageDirs` has no useful default: the roster is the repository's own
+ * data, and guessing it would point the gate at directories a consumer does not
+ * have. Empty is therefore the honest default — and it is safe, because every
+ * gate that reads it refuses to run on an empty roster rather than reporting a
+ * clean pass over nothing.
+ *
+ * The rest default to the conventional layout, so a repository that follows it
+ * configures nothing.
+ */
+export const DEFAULT_PUBLISHING = {
+  apiSurfaceDir: 'reports/api-surface',
+  packagesDir: 'packages',
+  publicPackageDirs: [],
+  releaseWorkflow: '.github/workflows/release.yml',
+  workspaceDirs: ['apps', 'packages'],
 };
 
 const isPlainObject = (value) =>
@@ -121,16 +140,32 @@ const repoRelative = (value, fallback, key) => {
 };
 
 /**
+ * The config as an object, or a failure that names the file.
+ *
  * A malformed config is a failure rather than a silent fallback: a consumer who
  * wrote one meant it, and quietly ignoring it would enforce a rule they did not
- * ask for while reporting success.
+ * ask for while reporting success. `JSON.parse` says what is wrong but not what
+ * it was reading, and the gates print a single line — so its message alone
+ * leaves a reader with nothing to open.
  */
-export const resolveConventions = (raw) => {
-  if (raw === undefined) return DEFAULT_CONVENTIONS;
-  const parsed = JSON.parse(raw);
+const parseConfig = (raw) => {
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (error) {
+    throw new Error(
+      `${CONFIG_FILE_NAME} is not valid JSON: ${errorMessage(error)}`,
+    );
+  }
   if (!isPlainObject(parsed)) {
     throw new Error(`${CONFIG_FILE_NAME} must contain a JSON object`);
   }
+  return parsed;
+};
+
+export const resolveConventions = (raw) => {
+  if (raw === undefined) return DEFAULT_CONVENTIONS;
+  const parsed = parseConfig(raw);
   const block = isPlainObject(parsed.conventions) ? parsed.conventions : {};
   return {
     defaultBranch: readableString(
@@ -167,10 +202,7 @@ const containedHome = (home) => ({
 
 export const resolveRegisters = (raw) => {
   if (raw === undefined) return DEFAULT_REGISTERS;
-  const parsed = JSON.parse(raw);
-  if (!isPlainObject(parsed)) {
-    throw new Error(`${CONFIG_FILE_NAME} must contain a JSON object`);
-  }
+  const parsed = parseConfig(raw);
   const block = isPlainObject(parsed.registers) ? parsed.registers : {};
   const homes = Array.isArray(block.adrHomes)
     ? block.adrHomes.filter(readableHome).map(containedHome)
@@ -200,6 +232,52 @@ export const resolveRegisters = (raw) => {
   };
 };
 
+/** Every entry held to the containment rule, in the order it was declared. */
+const containedList = (value, fallback, key) => {
+  if (!Array.isArray(value)) return fallback;
+  const entries = value
+    .filter((entry) => typeof entry === 'string' && entry.trim() !== '')
+    .map((entry) => repoRelative(entry, entry, key));
+  return entries.length > 0 ? entries : fallback;
+};
+
+export const resolvePublishing = (raw) => {
+  if (raw === undefined) return DEFAULT_PUBLISHING;
+  const parsed = parseConfig(raw);
+  const block = isPlainObject(parsed.publishing) ? parsed.publishing : {};
+
+  return {
+    apiSurfaceDir: repoRelative(
+      block.apiSurfaceDir,
+      DEFAULT_PUBLISHING.apiSurfaceDir,
+      'publishing.apiSurfaceDir',
+    ),
+    packagesDir: repoRelative(
+      block.packagesDir,
+      DEFAULT_PUBLISHING.packagesDir,
+      'publishing.packagesDir',
+    ),
+    // An empty roster stays empty: it is the signal every reader turns into a
+    // loud failure, so replacing it with a default would hide the one state
+    // that must not pass silently.
+    publicPackageDirs: containedList(
+      block.publicPackageDirs,
+      DEFAULT_PUBLISHING.publicPackageDirs,
+      'publishing.publicPackageDirs[]',
+    ),
+    releaseWorkflow: repoRelative(
+      block.releaseWorkflow,
+      DEFAULT_PUBLISHING.releaseWorkflow,
+      'publishing.releaseWorkflow',
+    ),
+    workspaceDirs: containedList(
+      block.workspaceDirs,
+      DEFAULT_PUBLISHING.workspaceDirs,
+      'publishing.workspaceDirs[]',
+    ),
+  };
+};
+
 /**
  * The repository this package is installed in — not the working directory, so a
  * gate invoked from a subdirectory reads the same config as one invoked from
@@ -218,6 +296,9 @@ export const readConventions = (root = hostRoot()) =>
 
 export const readRegisters = (root = hostRoot()) =>
   resolveRegisters(readRaw(root));
+
+export const readPublishing = (root = hostRoot()) =>
+  resolvePublishing(readRaw(root));
 
 /**
  * The coordination register's three locations, absolute, from one read of the

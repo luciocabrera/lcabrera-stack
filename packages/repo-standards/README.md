@@ -1,8 +1,9 @@
 # @repo/repo-standards
 
-The gates that keep a repository's commits, branches, pull requests and issues to
-one enforced shape — as commands, so a repository that installs this package can
-run them.
+The gates that keep a repository's commits, branches, pull requests, issues,
+coordination register, architecture decisions and published packages to one
+enforced shape — as commands, so a repository that installs this package can run
+them.
 
 Private while the first family is being proved here. It publishes as
 `@lcabrera/repo-standards`
@@ -19,15 +20,34 @@ upgrade can reach it.
 
 ## Commands
 
-| Bin                                          | Checks                                                |
-| -------------------------------------------- | ----------------------------------------------------- |
-| `repo-verify-commit <file>`                  | a commit message against the Conventional Commit spec |
-| `repo-verify-branch [name]`                  | a branch name against the same type vocabulary        |
-| `repo-verify-pr --title <t> --body-file <f>` | a pull request's title and every required section     |
-| `repo-verify-issue --body-file <f>`          | an issue body's required sections                     |
+| Bin                                          | Checks                                                        |
+| -------------------------------------------- | ------------------------------------------------------------- |
+| `repo-verify-commit <file>`                  | a commit message against the Conventional Commit spec         |
+| `repo-verify-branch [name]`                  | a branch name against the same type vocabulary                |
+| `repo-verify-pr --title <t> --body-file <f>` | a pull request's title and every required section             |
+| `repo-verify-issue --body-file <f>`          | an issue body's required sections                             |
+| `repo-verify-claims`                         | the coordination register's integrity, overlap and staleness  |
+| `repo-verify-adrs`                           | every ADR home, and regenerates the index                     |
+| `repo-verify-publish`                        | the tarball each built package would publish, by packing it   |
+| `repo-verify-api-surface`                    | each published package's exported surface against a snapshot  |
+| `repo-verify-types`                          | that a built package's published types resolve for a consumer |
+| `repo-audit-release`                         | every version already on the registry, after the fact         |
+| `repo-plan-release`                          | which packages have a version the registry does not have      |
+| `repo-adr "<title>"`                         | — scaffolds an ADR in the home you name                       |
+| `repo-claim-board`                           | — renders the live claims, including ones on other branches   |
+| `repo-close-claim --pr <n>`                  | — deletes the task file a merged pull request closes          |
 
-In this repository they are `vp run commit:verify`, `branch:verify`, `pr:verify`
-and `issue:verify`.
+In this repository they are the root `vp run` tasks of the same name —
+`commit:verify`, `pr:verify`, `coordination:verify`, `publish:verify`,
+`api-surface:verify`, `attw:verify`, `release:audit`, `release:plan` and the
+rest. [COMMANDS.md](../../COMMANDS.md) is the authority on which is which.
+
+The four publishing gates answer four different questions, and none substitutes
+for another: `repo-verify-publish` packs the tarball and checks what is in it,
+`repo-verify-types` asks whether the types in it resolve, `repo-verify-api-surface`
+asks whether the surface changed without a changeset, and `repo-audit-release`
+asks what is already on the registry — the only one of the four that can see a
+hand-publish, and the only one that cannot prevent anything.
 
 ## Configuration
 
@@ -47,9 +67,37 @@ and `issue:verify`.
     "adrTemplateHome": "docs/decisions",
     "coordinationBoardDoc": "docs/coordination/BOARD.md",
     "coordinationTasksDir": "docs/coordination/tasks"
+  },
+  "publishing": {
+    "publicPackageDirs": [],
+    "packagesDir": "packages",
+    "workspaceDirs": ["apps", "packages"],
+    "apiSurfaceDir": "reports/api-surface",
+    "releaseWorkflow": ".github/workflows/release.yml"
   }
 }
 ```
+
+Each `publicPackageDirs` entry is a **directory name under `packagesDir`** —
+`ui`, not `packages/ui`. Spelling it the second way is a valid repo-relative
+string, so it passes validation and fails at the read; the gate names the config
+key and the rule rather than reporting an ENOENT for a directory that was never
+meant to exist. The two spellings are not both accepted, because that would put
+two names on one location, which is what every other key here refuses.
+
+`publicPackageDirs` is the exception that defaults to nothing useful: the roster
+of packages under the API-surface ratchet is the repository's own data, and
+guessing it would point the gate at directories a consumer does not have. Empty
+is the honest default, and it is safe because `repo-verify-api-surface` and
+`repo-verify-types` both **refuse** an empty roster rather than reporting a clean
+pass over nothing — the same reason neither of them treats an unbuilt package as
+a skip. Naming a package here is the second half of publishing it: the manifest
+says it ships, and this puts its surface under the ratchet.
+
+`workspaceDirs` is what the release commands scan for non-private manifests, and
+it is the one key where configuring too little is the dangerous direction:
+`changeset publish` walks every non-private workspace regardless of directory,
+so a directory left out here under-reports what a release would publish.
 
 Every path here is relative to the repository root and must stay inside it: an
 absolute value or one that climbs out is refused by name rather than normalised,
@@ -86,9 +134,26 @@ Two ways, deliberately:
   request whose install is broken, which is when a malformed message is most
   likely. Those, and the root scripts they run, reach the modules by path.
 
-Everything here imports nothing but node builtins and its own siblings, which is
-what makes the second form possible. Keep it that way: a dependency added here
-silently breaks six workflows that never run `install`.
+Every module reachable **by path** imports nothing but node builtins and its own
+siblings, which is what makes the second form possible. Keep it that way: a
+dependency added to one of those silently breaks the workflows that never run
+`install` — including `release.yml`, which runs `release-publish-plan.mjs` with
+plain `node` precisely to decide whether installing is worth it.
+
+The package does have runtime dependencies — `@arethetypeswrong/core` and
+`ts-morph` — and the boundary is what keeps that safe: only the three gates that
+read build artifacts reach them (`repo-verify-publish`, `repo-verify-types`,
+`repo-verify-api-surface`), and none of those is ever run before an install,
+because a build has already had to happen. Adding a dependency to anything else
+here is the change to think twice about.
+
+`declared-imports.test.mjs` enforces both halves — every bare import declared,
+and a module a consumer runs restricted to `dependencies`. It exists because
+neither is observable from inside this monorepo: Node resolves a bare specifier
+by walking up from the module, so an undeclared import quietly finds the
+repository root's `node_modules` and every gate passes. The same walk from
+`node_modules/<name>/scripts/` reaches the consumer's tree instead, which under
+pnpm carries nothing nobody declared. `ts-morph` sat undeclared exactly that way.
 
 ## The one thing to know before moving a file here
 

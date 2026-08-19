@@ -31,7 +31,7 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
 import { flagValue } from '../packages/repo-standards/scripts/cli-input.mjs';
-import { errorMessage } from './lib/error-message.mjs';
+import { errorMessage } from '../packages/repo-standards/scripts/error-message.mjs';
 import {
   buildDecisionPrompt,
   resolveClaudeBinary,

@@ -77,7 +77,7 @@ const main = () => {
     }
     console.error(
       '\nFormat: `type(scope): subject` (e.g. `feat(ui): add column resize`). ' +
-        'See the commit-and-pr skill or scripts/lib/commit-convention.mjs.',
+        'See the commit-and-pr skill, or this package’s `./commit-convention` export.',
     );
     process.exitCode = 1;
     return;

@@ -19,7 +19,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { extractChangelogSection } from './lib/release-publishable.mjs';
+import { extractChangelogSection } from '../packages/repo-standards/scripts/release-publishable.mjs';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
 const WORKSPACE_DIRS = ['apps', 'packages'];

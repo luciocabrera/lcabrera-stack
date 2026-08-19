@@ -1,53 +1,74 @@
 /**
- * Refuses a silent breaking change to the four public packages' API surface.
+ * Refuses a silent breaking change to the configured packages' API surface.
  *
- * The harness compiles every in-repo consumer, so an in-repo break fails the
- * gate — but the real consumers of `@lcabrera/{api,server,ui,utils}` live outside
- * this tree, and nothing here compiles against them. A removed export, a changed
- * signature or a reshaped union in the PUBLISHED contract passes every existing
- * gate (`publish:verify` checks subpath parity, never the type surface). This is
- * that missing net: a tracked snapshot of each package's exported surface, taken
- * against what a consumer installs (`dist` `.d.mts`; `src` for source-shipped
- * `ui`), plus a changeset cross-check. See docs/decisions/ADR-046 and #359.
+ * A repository's own harness compiles every consumer inside it, so a break
+ * there fails the build — but the real consumers live outside the tree, and
+ * nothing here compiles against them. A removed export, a changed signature or
+ * a reshaped union in the PUBLISHED contract passes every gate that only looks
+ * inward (`repo-verify-publish` checks subpath parity, never the type surface).
+ * This is that missing net: a tracked snapshot of each package's exported
+ * surface, taken against what a consumer installs — the built `.d.mts` for a
+ * package that builds, the `src` entry for one that ships source — plus a
+ * changeset cross-check. See ADR-046 and #359.
  *
- * Usage (from the repo root, AFTER `vp run packages:build`):
- *   vp run api-surface:verify            # check; lists every drift
- *   vp run api-surface:verify -- --write # regenerate the snapshots
+ * Usage (from the repository root, AFTER the packages are built):
+ *   repo-verify-api-surface           # check; lists every drift
+ *   repo-verify-api-surface --write   # regenerate the snapshots
  *
  * A package whose published entry files are not on disk fails here rather than
  * being skipped: the gate used to report success for the packages it could read
  * while announcing the rest as "skipped, unbuilt", which on an unbuilt tree is a
  * pass that compared nothing (ADR-073).
  *
- * Exit codes: 0 = every public package was compared and matches its snapshot
+ * Exit codes: 0 = every configured package was compared and matches its snapshot
  * (and breaking changes carry a changeset), 1 = drift, an unaccompanied
  * breaking change, or a package that could not be read (all listed).
  */
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join, relative, resolve } from 'node:path';
+import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { errorMessage } from './lib/error-message.mjs';
+import { errorMessage } from './error-message.mjs';
 import {
   collectBumpedPackages,
   missingChangesets,
-} from './lib/api-surface-changeset.mjs';
+} from './api-surface-changeset.mjs';
 import {
   entriesAreBuilt,
   readPublicPackages,
   snapshotPathFor,
-} from './lib/api-surface-config.mjs';
+} from './api-surface-config.mjs';
 import {
   diffSurfaces,
   formatChange,
   hasBreakingChange,
-} from './lib/api-surface-diff.mjs';
-import { extractSurface } from './lib/api-surface-extract.mjs';
-import { parseSurface, renderSurface } from './lib/api-surface-render.mjs';
-import { runGit } from '../packages/repo-standards/scripts/git-exec.mjs';
+} from './api-surface-diff.mjs';
+import { extractSurface } from './api-surface-extract.mjs';
+import { parseSurface, renderSurface } from './api-surface-render.mjs';
+import { CONFIG_FILE_NAME, readConventions } from './config.mjs';
+import { runGit } from './git-exec.mjs';
+import { resolveHostRoot } from './host-root.mjs';
 
-const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
-const BASE_REF = process.env.API_SURFACE_BASE ?? 'origin/main';
+const REPO_ROOT = resolveHostRoot({
+  moduleDirectory: dirname(fileURLToPath(import.meta.url)),
+});
+
+/**
+ * What the surface is compared against to decide whether a change is breaking.
+ * The remote is `origin` because that is git's own default for the first
+ * remote; the branch is configured, since a repository whose trunk is not
+ * `main` would otherwise have every change measured against a ref that does
+ * not exist — which resolves to no base snapshot, and so to no breaking change
+ * ever being found.
+ *
+ * Read on use rather than at import, so that a malformed `devkit.config.json`
+ * is reported by the handler at the foot of this file. A read in the module
+ * body runs before that `try`, and a misconfigured host would get a stack
+ * trace where every other failure of this gate prints one formatted line.
+ */
+const baseRef = () =>
+  process.env.API_SURFACE_BASE ??
+  `origin/${readConventions(REPO_ROOT).defaultBranch}`;
 
 const readSnapshot = (relativePath) => {
   const absolute = join(REPO_ROOT, relativePath);
@@ -56,7 +77,7 @@ const readSnapshot = (relativePath) => {
 
 /** The snapshot as committed on the base ref, or undefined if it is new there. */
 const readBaseSnapshot = (relativePath) =>
-  runGit({ args: ['show', `${BASE_REF}:${relativePath}`], cwd: REPO_ROOT });
+  runGit({ args: ['show', `${baseRef()}:${relativePath}`], cwd: REPO_ROOT });
 
 const readChangesetContents = () => {
   const directory = join(REPO_ROOT, '.changeset');
@@ -87,7 +108,7 @@ const unreadableProblem = (packageConfig) => {
   const missing = missingEntries(packageConfig);
   const listed = missing.slice(0, 3).join(', ');
   const rest = missing.length > 3 ? ', …' : '';
-  return `${packageConfig.name}: no surface was read, so it was compared to nothing — these published entry files are not on disk: ${listed}${rest}. Run \`vp run packages:build\`; if the build is current, \`exports\` names a file it does not produce.`;
+  return `${packageConfig.name}: no surface was read, so it was compared to nothing — these published entry files are not on disk: ${listed}${rest}. Build the packages, then re-run; if the build is current, \`exports\` names a file it does not produce.`;
 };
 
 const writeSnapshots = (packages) => {
@@ -98,7 +119,7 @@ const writeSnapshots = (packages) => {
       continue;
     }
     const surface = extractSurface(packageConfig);
-    const relativePath = snapshotPathFor(packageConfig.name);
+    const relativePath = snapshotPathFor(packageConfig.name, REPO_ROOT);
     writeFileSync(
       join(REPO_ROOT, relativePath),
       renderSurface({ packageName: packageConfig.name, surface }),
@@ -115,13 +136,13 @@ const verifyPackage = (packageConfig) => {
     packageName: packageConfig.name,
     surface,
   });
-  const relativePath = snapshotPathFor(packageConfig.name);
+  const relativePath = snapshotPathFor(packageConfig.name, REPO_ROOT);
   const committed = readSnapshot(relativePath);
 
   const drift = [];
   if (committed === undefined) {
     drift.push(
-      `${packageConfig.name}: no snapshot at ${relativePath} — run \`vp run api-surface:verify -- --write\`.`,
+      `${packageConfig.name}: no snapshot at ${relativePath} — run \`repo-verify-api-surface --write\`.`,
     );
   } else if (committed !== liveText) {
     const changes = diffSurfaces({
@@ -133,7 +154,7 @@ const verifyPackage = (packageConfig) => {
         .map(formatChange)
         .join(
           '\n',
-        )}\n  → run \`vp run api-surface:verify -- --write\` and commit the snapshot.`,
+        )}\n  → run \`repo-verify-api-surface --write\` and commit the snapshot.`,
     );
   }
 
@@ -212,7 +233,7 @@ const main = () => {
   const packages = readPublicPackages(REPO_ROOT);
   if (packages.length === 0) {
     console.error(
-      'Public API surface gate failed: no public package is configured, so this gate would check nothing — which is almost certainly a mistake.',
+      `Public API surface gate failed: ${CONFIG_FILE_NAME} configures no package under \`publishing.publicPackageDirs\`, so this gate would check nothing — which is almost certainly a mistake.`,
     );
     process.exitCode = 1;
     return;

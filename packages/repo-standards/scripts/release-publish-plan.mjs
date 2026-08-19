@@ -16,26 +16,37 @@
  * over-report and waste a build; it must never under-report and silently skip a
  * release.
  *
- * Usage (from the repo root):
- *   node scripts/release-publish-plan.mjs            # print the plan
- *   node scripts/release-publish-plan.mjs --github   # + GITHUB_OUTPUT/SUMMARY
+ * Usage (from the repository root):
+ *   repo-plan-release              # print the plan
+ *   repo-plan-release --github     # + GITHUB_OUTPUT/SUMMARY
+ *
+ * It imports nothing outside `node:` builtins and this package, so a release
+ * job can run it by path with plain `node` before installing the toolchain —
+ * which is the point, since its answer decides whether installing is worth it.
+ * Keep it that way: one dependency here turns a cheap pre-install check into a
+ * full install.
  */
 
 import { appendFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { readPublishableManifests } from './lib/publishable-workspaces.mjs';
+import { readPublishableManifests } from './publishable-workspaces.mjs';
 import {
   classifyRelease,
   findBlockingFirstPublish,
   renderSummary,
   selectFirstPublish,
   selectPublishable,
-} from './lib/release-publishable.mjs';
-import { fetchPackument } from './lib/registry-packument.mjs';
+} from './release-publishable.mjs';
+import { errorMessage } from './error-message.mjs';
+import { fetchPackument } from './registry-packument.mjs';
+import { annotationData } from './workflow-annotation.mjs';
+import { resolveHostRoot } from './host-root.mjs';
 
-const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
+const REPO_ROOT = resolveHostRoot({
+  moduleDirectory: dirname(fileURLToPath(import.meta.url)),
+});
 
 /** The name and version `changeset publish` would compare with the registry. */
 const readReleaseTargets = () =>
@@ -49,7 +60,7 @@ const readReleaseTargets = () =>
  * what is current, `versions` for whether this one is already up. The failure
  * semantics that matter here (a 404 is "never published"; anything else
  * rethrows, so an outage never reads as "nothing is published") live in
- * `lib/registry-packument.mjs`, shared with `release-audit.mjs`.
+ * `registry-packument.mjs`, shared with `audit-release.mjs`.
  */
 const classifyPackage = async ({ name, version }) => {
   const packument = await fetchPackument(name);
@@ -111,4 +122,15 @@ const main = async () => {
   }
 };
 
-await main();
+// This runs before `pnpm install` in the release workflow, where a stack trace
+// is all a maintainer would get. It reads `devkit.config.json` for the
+// workspaces to scan, so a malformed one is now among the ways it can fail; the
+// annotation is `::error::` so the failure lands on the workflow run itself.
+try {
+  await main();
+} catch (error) {
+  console.error(
+    `::error::Cannot release: ${annotationData(errorMessage(error))}`,
+  );
+  process.exitCode = 1;
+}
