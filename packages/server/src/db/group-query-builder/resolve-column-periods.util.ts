@@ -14,7 +14,7 @@ type ResolveColumnPeriodsArgs = {
   readonly hasEquality: boolean;
   readonly relTuples: number;
   readonly role: ColumnAnalyticalRole;
-  readonly spanDays: number | null;
+  readonly spanDays: number | undefined;
   readonly typeName: string;
   readonly typeNamespace: string;
 };

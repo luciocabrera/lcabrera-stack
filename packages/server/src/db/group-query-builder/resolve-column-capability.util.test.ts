@@ -15,7 +15,7 @@ const row = (overrides: Partial<ColumnCapabilityRow>): ColumnCapabilityRow => ({
   hasStats: true,
   nDistinct: 7,
   relTuples: 2000,
-  spanDays: null,
+  spanDays: undefined,
   typeCategory: 'S',
   typeName: 'text',
   typeNamespace: 'pg_catalog',
@@ -410,7 +410,7 @@ describe('resolveColumnCapability', () => {
         resolveColumnCapability({
           ...orderDate,
           hasStats: false,
-          spanDays: null,
+          spanDays: undefined,
         }).periods,
       ).toEqual(['day', 'month', 'quarter', 'year']);
     });

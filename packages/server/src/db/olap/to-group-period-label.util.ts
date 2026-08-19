@@ -1,12 +1,16 @@
 import type { GroupKeyPeriod } from '../group-query-builder/group-query-builder.types.ts';
 import type { GroupKeyTruncation } from './olap.types.ts';
 
+type PadArgs = {
+  readonly length: number;
+  readonly value: number;
+};
+
 type ToGroupPeriodLabelArgs = GroupKeyTruncation & {
   readonly value: unknown;
 };
 
-const pad = (value: number, length: number) =>
-  String(value).padStart(length, '0');
+const pad = ({ length, value }: PadArgs) => String(value).padStart(length, '0');
 
 type PeriodFieldsArgs = {
   readonly day: number;
@@ -18,10 +22,12 @@ const FORMAT_BY_PERIOD: Readonly<
   Record<GroupKeyPeriod, (fields: PeriodFieldsArgs) => string>
 > = {
   day: ({ day, month, year }) =>
-    `${pad(year, 4)}-${pad(month, 2)}-${pad(day, 2)}`,
-  month: ({ month, year }) => `${pad(year, 4)}-${pad(month, 2)}`,
-  quarter: ({ month, year }) => `${pad(year, 4)}-Q${Math.ceil(month / 3)}`,
-  year: ({ year }) => pad(year, 4),
+    `${pad({ length: 4, value: year })}-${pad({ length: 2, value: month })}-${pad({ length: 2, value: day })}`,
+  month: ({ month, year }) =>
+    `${pad({ length: 4, value: year })}-${pad({ length: 2, value: month })}`,
+  quarter: ({ month, year }) =>
+    `${pad({ length: 4, value: year })}-Q${Math.ceil(month / 3)}`,
+  year: ({ year }) => pad({ length: 4, value: year }),
 };
 
 /**

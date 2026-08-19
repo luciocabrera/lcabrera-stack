@@ -94,8 +94,12 @@ export type ColumnCapabilityRow = {
   readonly nDistinct: number;
   readonly relTuples: number;
   /**
-   * How many days the column's `pg_stats` histogram spans, or `null` when the
+   * How many days the column's `pg_stats` histogram spans; absent when the
    * column is not a date/timestamp or has no histogram to measure.
+   *
+   * SQL NULL arrives here from `pg` as an absence, and `resolveColumnCapability`
+   * narrows anything that is not a finite number to one — which also catches the
+   * `numeric` a bare `extract(epoch …)` would hand back as a **string**.
    *
    * It is what makes a *derived* group key measurable. `pg_stats` describes the
    * raw column, so the catalogue has no distinct count for
@@ -103,7 +107,7 @@ export type ColumnCapabilityRow = {
    * covers follows from the range, and the histogram's first and last bound are
    * exactly that range, free of a table scan (#786).
    */
-  readonly spanDays: number | null;
+  readonly spanDays?: number;
   readonly typeCategory: string;
   readonly typeName: string;
   /**
@@ -319,6 +323,8 @@ export type GroupSort =
 type ColumnCapabilityShared = {
   readonly aggregates: readonly AggregateFn[];
   readonly column: string;
+  /** Resolved distinct-value estimate; absent when statistics are unavailable. */
+  readonly distinctEstimate?: number;
   /**
    * The granularities this column may be grouped at, empty for anything that is
    * not a date or a timestamp.
@@ -330,8 +336,6 @@ type ColumnCapabilityShared = {
    * one dimension every report is organised by (#786).
    */
   readonly periods: readonly GroupKeyPeriod[];
-  /** Resolved distinct-value estimate; absent when statistics are unavailable. */
-  readonly distinctEstimate?: number;
   readonly role: ColumnAnalyticalRole;
   readonly typeName: string;
 };

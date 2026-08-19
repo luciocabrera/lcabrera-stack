@@ -29,7 +29,9 @@ export const toGroupKeyTruncations = ({
 }: ToGroupKeyTruncationsArgs): Readonly<Record<string, GroupKeyTruncation>> => {
   const truncations: Record<string, GroupKeyTruncation> = {};
 
-  for (const [column, period] of Object.entries(periods ?? {})) {
+  const requested = Object.entries(periods ?? {});
+
+  for (const [column, period] of requested) {
     const capability = capabilities[column];
 
     if (capability === undefined) continue;

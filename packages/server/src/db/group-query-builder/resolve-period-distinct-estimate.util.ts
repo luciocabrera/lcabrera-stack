@@ -10,7 +10,7 @@ type ResolvePeriodDistinctEstimateArgs = {
   readonly estimate: DistinctEstimate;
   readonly period: GroupKeyPeriod;
   /** The column's histogram span, or `null` when there is none to measure. */
-  readonly spanDays: number | null;
+  readonly spanDays: number | undefined;
 };
 
 /**
@@ -44,7 +44,7 @@ export const resolvePeriodDistinctEstimate = ({
   period,
   spanDays,
 }: ResolvePeriodDistinctEstimateArgs): DistinctEstimate => {
-  if (estimate.kind === 'undefinedDistinctness' || spanDays === null) {
+  if (spanDays === undefined || estimate.kind === 'undefinedDistinctness') {
     return estimate;
   }
 

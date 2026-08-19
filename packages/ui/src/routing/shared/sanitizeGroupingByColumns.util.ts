@@ -76,8 +76,9 @@ export const sanitizeGroupingByColumns = <
   const isEveryAggregateColumnDeclared = Object.keys(aggregates).every(
     (column) => declaredKeys.has(column),
   );
+  const appliedKeys = new Set(keys);
   const isEveryGranularityOnAKey = Object.keys(periods).every((column) =>
-    keys.includes(column),
+    appliedKeys.has(column),
   );
 
   return isEveryKeyGroupable &&

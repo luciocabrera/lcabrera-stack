@@ -285,18 +285,24 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
 
     it('formats the key types Postgres actually returns for this table', async () => {
       // `pg` hands back a boolean for `bool`, a number for `int4`, a string for
-      // `numeric` and a `Date` for `date`. Each takes a different branch of
-      // `toGroupLabel`, and only a live read proves which branch is
+      // `numeric` and a `Date` for `date`. Each takes a different branch of the
+      // label formatting, and only a live read proves which branch is
       // reachable — a fixture would just restate the branch it was written for.
-      for (const key of [
-        'is_vip_customer',
-        'quantity',
-        'customer_rating',
-        'delivery_date',
-      ]) {
+      //
+      // The date key carries a **granularity**, and has to: this table's date
+      // columns hold one value per calendar day, which is exactly the tree the
+      // cardinality guard refuses, so the raw form returned no rows at all and
+      // asserted nothing about a `Date` (#786). At a month it returns groups and
+      // the value is still a `Date`.
+      for (const [key, periods] of [
+        ['is_vip_customer', {}],
+        ['quantity', {}],
+        ['customer_rating', {}],
+        ['delivery_date', { delivery_date: 'month' }],
+      ] as const) {
         const { data } = await selectOrdersPage({
           filters: [],
-          grouping: { aggregates: {}, keys: [key], mode: 'flat', periods: {} },
+          grouping: { aggregates: {}, keys: [key], mode: 'flat', periods },
           includeTotal: true,
           limit: 50,
           offset: 0,

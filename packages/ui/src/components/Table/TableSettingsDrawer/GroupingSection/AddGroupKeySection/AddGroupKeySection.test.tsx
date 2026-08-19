@@ -103,9 +103,9 @@ describe('AddGroupKeySection', () => {
     const refused: TableColumnGroupingCapability = {
       aggregates: ['count'],
       canGroup: false,
-      periods: [],
       column: 'id',
       distinctEstimate: 500_000,
+      periods: [],
       refusal: 'unique-ish',
       role: 'dimension',
       typeName: 'int4',

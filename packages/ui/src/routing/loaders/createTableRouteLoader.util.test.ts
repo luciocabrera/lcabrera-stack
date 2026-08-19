@@ -507,8 +507,8 @@ describe('createTableRouteLoader', () => {
       quantity: {
         aggregates: ['avg', 'sum'],
         canGroup: false,
-        periods: [],
         column: 'quantity',
+        periods: [],
         refusal: 'too-many-distinct',
         role: 'fact',
         typeName: 'numeric',

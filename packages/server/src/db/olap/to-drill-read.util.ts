@@ -48,6 +48,27 @@ const toKeyFilter = ({
     : { column: columnKey, operator: 'eq', value };
 
 /**
+ * The period's first instant, or `undefined` when the value is not one.
+ *
+ * `pg` hands a truncated key back as a `Date`; the string and number arms are
+ * for a caller that round-tripped the group through JSON, which is what the
+ * drill param does. Anything else is refused rather than coerced — `String()`
+ * over an object yields `[object Object]`, and `new Date` of that is an
+ * Invalid Date whose range would silently return the wrong rows.
+ */
+const toPeriodStart = (value: unknown) => {
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? undefined : value;
+  }
+
+  if (typeof value !== 'string' && typeof value !== 'number') return;
+
+  const parsed = new Date(value);
+
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed;
+};
+
+/**
  * A truncated key's filter: the half-open range `[start, next)` on the **raw**
  * column (#786).
  *
@@ -74,9 +95,9 @@ const toPeriodFilters = ({
     return [{ column: columnKey, operator: 'isNull' }];
   }
 
-  const start = value instanceof Date ? value : new Date(String(value));
+  const start = toPeriodStart(value);
 
-  if (Number.isNaN(start.getTime())) {
+  if (start === undefined) {
     // Not a date the grouping could have produced. Falling back to equality is
     // the honest failure: it returns nothing rather than a range drawn from a
     // parsed-to-garbage boundary, which would return the wrong rows and look

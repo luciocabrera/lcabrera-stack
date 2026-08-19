@@ -46,7 +46,7 @@ export const advanceGroupPeriod = ({
   period,
   start,
 }: AdvanceGroupPeriodArgs): Date => {
-  const next = new Date(start.getTime());
+  const next = new Date(start);
 
   if (period === 'day') {
     if (isZoned) next.setUTCDate(next.getUTCDate() + 1);

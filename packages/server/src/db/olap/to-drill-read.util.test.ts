@@ -179,3 +179,102 @@ describe('toDrillRead', () => {
     });
   });
 });
+
+describe('a truncated group key', () => {
+  const march = new Date(2021, 2, 1);
+
+  const drillPeriod = ({
+    truncations,
+    value = march,
+  }: {
+    readonly truncations: Record<
+      string,
+      { isZoned: boolean; period: 'day' | 'month' | 'quarter' | 'year' }
+    >;
+    readonly value?: unknown;
+  }) =>
+    toDrillRead({
+      filters: [{ column: 'priority', operator: 'eq', value: 'High' }],
+      group: {
+        isSubtotal: false,
+        path: [{ columnKey: 'order_date', value }],
+      },
+      groupKeys: ['order_date'],
+      limit: 50,
+      maxLimit: 100,
+      primaryKey: 'order_id',
+      sort: [],
+      truncations,
+    });
+
+  it('becomes a half-open range on the raw column, not an equality', () => {
+    // The group `2021-03` is `date_trunc('month', …)`, and no row holds that
+    // value — every row holds an instant inside the month. Equality returns the
+    // first of the month and nothing else.
+    const drill = drillPeriod({
+      truncations: { order_date: { isZoned: false, period: 'month' } },
+    });
+
+    expect(drill.kind).toBe('drillable');
+    expect(drill.kind === 'drillable' && drill.read.filters).toStrictEqual([
+      { column: 'priority', operator: 'eq', value: 'High' },
+      { column: 'order_date', operator: 'gte', value: march },
+      { column: 'order_date', operator: 'lt', value: new Date(2021, 3, 1) },
+    ]);
+  });
+
+  it("keeps the view's own filters ahead of the range", () => {
+    // The correctness criterion that fails quietly: a drill drawn without them
+    // returns rows that are true facts about the table and wrong under the
+    // heading they appear beneath.
+    const drill = drillPeriod({
+      truncations: { order_date: { isZoned: false, period: 'year' } },
+    });
+
+    expect(drill.kind === 'drillable' && drill.read.filters[0]).toStrictEqual({
+      column: 'priority',
+      operator: 'eq',
+      value: 'High',
+    });
+  });
+
+  it('still says IS NULL for a NULL period group', () => {
+    // `date_trunc` of NULL is NULL, so a truncated key has a NULL group exactly
+    // as an untruncated one does — and it is still the group a range comparison
+    // would silently return nothing for.
+    const drill = drillPeriod({
+      truncations: { order_date: { isZoned: false, period: 'month' } },
+      // A real JSON null without the literal the lint rules forbid — the same
+      // trick the untruncated NULL case above uses.
+      value: JSON.parse('null') as unknown,
+    });
+
+    expect(drill.kind === 'drillable' && drill.read.filters).toStrictEqual([
+      { column: 'priority', operator: 'eq', value: 'High' },
+      { column: 'order_date', operator: 'isNull' },
+    ]);
+  });
+
+  it('falls back to equality rather than a range drawn from an unparseable bound', () => {
+    // Returning nothing is the honest failure; a range computed from
+    // parsed-to-garbage boundaries would return the wrong rows and look right.
+    const drill = drillPeriod({
+      truncations: { order_date: { isZoned: false, period: 'month' } },
+      value: 'not a date',
+    });
+
+    expect(drill.kind === 'drillable' && drill.read.filters).toStrictEqual([
+      { column: 'priority', operator: 'eq', value: 'High' },
+      { column: 'order_date', operator: 'eq', value: 'not a date' },
+    ]);
+  });
+
+  it('leaves an untruncated key an equality', () => {
+    const drill = drillPeriod({ truncations: {} });
+
+    expect(drill.kind === 'drillable' && drill.read.filters).toStrictEqual([
+      { column: 'priority', operator: 'eq', value: 'High' },
+      { column: 'order_date', operator: 'eq', value: march },
+    ]);
+  });
+});

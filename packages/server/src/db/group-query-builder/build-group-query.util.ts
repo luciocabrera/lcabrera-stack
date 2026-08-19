@@ -16,8 +16,8 @@ import { buildGroupingSetsClause } from './build-grouping-sets-clause.util.ts';
 import { expandGroupingSets } from './expand-grouping-sets.util.ts';
 import { GROUP_MASK_ALIAS } from './group-query-builder.constants.ts';
 import { resolveAggregateAlias } from './resolve-aggregate-alias.util.ts';
-import { resolveGroupKeyExpression } from './resolve-group-key-expression.util.ts';
 import { resolveGroupGuardRails } from './resolve-group-guard-rails.util.ts';
+import { resolveGroupKeyExpression } from './resolve-group-key-expression.util.ts';
 import { toGroupingSetMask } from './to-grouping-set-mask.util.ts';
 
 /**

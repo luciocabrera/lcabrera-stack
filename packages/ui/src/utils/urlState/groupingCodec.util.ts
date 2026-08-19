@@ -1,6 +1,5 @@
-import { isObject } from '@lcabrera/utils/guards/is-object.util';
-
 import { isOlapGroupPeriod } from '@lcabrera/api/olap/is-olap-group-period.util';
+import { isObject } from '@lcabrera/utils/guards/is-object.util';
 
 import type {
   TableAggregateFn,
@@ -79,11 +78,13 @@ const narrowGranularities = ({
   }
 
   const entries = Object.entries(value);
+  // A Set rather than `keys.includes` inside the predicate: the predicate is
+  // the loop, so an array scan per entry is quadratic.
+  const applied = new Set(keys);
 
   if (
     entries.some(
-      ([column, period]) =>
-        !isOlapGroupPeriod(period) || !keys.includes(column),
+      ([column, period]) => !isOlapGroupPeriod(period) || !applied.has(column),
     )
   ) {
     return;

@@ -27,8 +27,8 @@ const dimension = (column: string): ColumnGroupingCapability => ({
   aggregates: ['count', 'countDistinct', 'max', 'min'],
   canGroup: true,
   column,
-  periods: [],
   distinctEstimate: 12,
+  periods: [],
   role: 'dimension',
   typeName: 'text',
 });
@@ -38,8 +38,8 @@ const CAPABILITIES: Readonly<Record<string, ColumnGroupingCapability>> = {
   doc: {
     aggregates: ['count'],
     canGroup: false,
-    periods: [],
     column: 'doc',
+    periods: [],
     refusal: 'not-a-dimension',
     role: 'unsupported',
     typeName: 'jsonb',
@@ -47,16 +47,16 @@ const CAPABILITIES: Readonly<Record<string, ColumnGroupingCapability>> = {
   is_gift: {
     aggregates: ['boolAnd', 'boolOr', 'count', 'countDistinct'],
     canGroup: true,
-    periods: [],
     column: 'is_gift',
+    periods: [],
     role: 'dimension',
     typeName: 'bool',
   },
   order_date: {
     aggregates: ['count', 'countDistinct', 'max', 'min'],
     canGroup: false,
-    periods: [],
     column: 'order_date',
+    periods: [],
     refusal: 'unique-ish',
     role: 'dimension',
     typeName: 'date',
@@ -67,8 +67,8 @@ const CAPABILITIES: Readonly<Record<string, ColumnGroupingCapability>> = {
   total_amount: {
     aggregates: ['avg', 'count', 'countDistinct', 'max', 'min', 'sum'],
     canGroup: false,
-    periods: [],
     column: 'total_amount',
+    periods: [],
     refusal: 'unique-ish',
     role: 'fact',
     typeName: 'numeric',
@@ -487,5 +487,113 @@ describe('buildGroupQuery', () => {
         }),
       ),
     ).toThrow('not a legal group key');
+  });
+});
+
+describe('a truncated group key in the SQL', () => {
+  const dated = {
+    ...dimension('order_date'),
+    canGroup: false as const,
+    periods: ['month', 'quarter', 'year'] as const,
+    refusal: 'too-many-distinct' as const,
+    typeName: 'date',
+  };
+  const zoned = {
+    ...dated,
+    column: 'order_timestamp',
+    typeName: 'timestamptz',
+  };
+
+  const built = ({
+    grouping = 'flat',
+    keys,
+    periods,
+  }: {
+    readonly grouping?: 'cube' | 'flat' | 'rollup';
+    readonly keys: readonly string[];
+    readonly periods: Record<string, 'day' | 'month' | 'quarter' | 'year'>;
+  }) =>
+    buildGroupQuery({
+      aggregates: [{ fn: 'count' }],
+      allowedColumns: ['order_date', 'order_timestamp', 'status'],
+      capabilities: {
+        order_date: dated,
+        order_timestamp: zoned,
+        status: dimension('status'),
+      },
+      grouping,
+      keys,
+      maxRows: 500,
+      periods,
+      schema: 'public',
+      table: 'orders',
+    });
+
+  it('spells the truncation identically in the projection, GROUPING and the sets', () => {
+    // Postgres matches a `GROUPING` argument against a `GROUP BY` expression
+    // syntactically, so a second spelling of the same truncation fails to plan
+    // rather than answering differently.
+    const { text } = built({
+      keys: ['order_date'],
+      periods: { order_date: 'month' },
+    });
+    const expression = `date_trunc('month', "order_date"::timestamp)`;
+
+    expect(text).toContain(`${expression} AS "order_date"`);
+    expect(text).toContain(`GROUPING(${expression})`);
+    expect(text).toContain(`GROUP BY GROUPING SETS ((${expression}))`);
+  });
+
+  it('aliases the truncation back to the column name, so nothing downstream changes', () => {
+    // The row decoder, the group path and the ORDER BY value term all read the
+    // key by the name it was asked for.
+    const { text } = built({
+      keys: ['order_date'],
+      periods: { order_date: 'year' },
+    });
+
+    expect(text).toContain('AS "order_date"');
+    expect(text).toContain('ORDER BY "order_date" ASC');
+  });
+
+  it('pins a zoned column to a stated zone and leaves an unzoned one cast', () => {
+    const { text } = built({
+      grouping: 'rollup',
+      keys: ['order_date', 'order_timestamp'],
+      periods: { order_date: 'month', order_timestamp: 'month' },
+    });
+
+    expect(text).toContain(`date_trunc('month', "order_date"::timestamp)`);
+    expect(text).toContain(`date_trunc('month', "order_timestamp", 'UTC')`);
+  });
+
+  it('leaves an untruncated key exactly as it was', () => {
+    // A grouping with no granularity has to emit byte-identical SQL to the one
+    // it emitted before granularities existed.
+    expect(built({ keys: ['status'], periods: {} }).text).toStrictEqual(
+      buildGroupQuery({
+        aggregates: [{ fn: 'count' }],
+        allowedColumns: ['status'],
+        capabilities: { status: dimension('status') },
+        grouping: 'flat',
+        keys: ['status'],
+        maxRows: 500,
+        schema: 'public',
+        table: 'orders',
+      }).text,
+    );
+  });
+
+  it('carries the truncation into every rollup set, including the prefix ones', () => {
+    const { text } = built({
+      grouping: 'rollup',
+      keys: ['order_date', 'status'],
+      periods: { order_date: 'quarter' },
+    });
+    const expression = `date_trunc('quarter', "order_date"::timestamp)`;
+
+    expect(text).toContain(
+      `GROUP BY GROUPING SETS ((${expression}, "status"), (${expression}), ())`,
+    );
   });
 });

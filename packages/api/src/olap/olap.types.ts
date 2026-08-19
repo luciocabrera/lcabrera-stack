@@ -22,6 +22,20 @@ export type OlapDrillRequest = {
 };
 
 /**
+ * One group key, as it crosses the wire.
+ *
+ * **No `label`.** A group row carries a formatted display string beside each key,
+ * and it is deliberately not sent: the drill is built from `value`, and a
+ * formatted string has no business reaching a query. The richer shape a grid
+ * holds is structurally assignable to this one, so a caller passes its own group
+ * row unchanged and the extra member is simply not read.
+ */
+export type OlapGroupPathEntry = {
+  readonly columnKey: string;
+  readonly value: unknown;
+};
+
+/**
  * The granularity a date or timestamp group key is truncated to.
  *
  * **Wire vocabulary, so it lives here** — it travels in the grouping URL param
@@ -35,17 +49,3 @@ export type OlapDrillRequest = {
  * rather than settling in passing.
  */
 export type OlapGroupPeriod = 'day' | 'month' | 'quarter' | 'year';
-
-/**
- * One group key, as it crosses the wire.
- *
- * **No `label`.** A group row carries a formatted display string beside each key,
- * and it is deliberately not sent: the drill is built from `value`, and a
- * formatted string has no business reaching a query. The richer shape a grid
- * holds is structurally assignable to this one, so a caller passes its own group
- * row unchanged and the extra member is simply not read.
- */
-export type OlapGroupPathEntry = {
-  readonly columnKey: string;
-  readonly value: unknown;
-};

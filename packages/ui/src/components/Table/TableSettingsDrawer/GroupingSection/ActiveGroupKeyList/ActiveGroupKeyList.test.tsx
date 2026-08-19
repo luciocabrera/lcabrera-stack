@@ -54,7 +54,7 @@ vi.mock('../../TableDrawerContext/selectors', () => ({
 // per-column capability. This file asserts what the *list* does, so the
 // capability is stubbed absent — the state in which the control renders nothing.
 vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
-  useGetTableColumnGroupingCapability: () => undefined,
+  useGetTableColumnGroupingCapability: () => {},
 }));
 
 vi.mock('#ui/components/DraggableList', () => ({

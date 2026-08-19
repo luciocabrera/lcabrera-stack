@@ -6,6 +6,13 @@ import { encodeDrillGroup } from './encode-drill-group.util';
 import { OLAP_DRILL_GROUP_PARAM } from './olap.constants';
 import { parseDrillGroup } from './parse-drill-group.util';
 
+/** The `group` param, as a `URLSearchParams` the parser reads. */
+const params = (value: string) =>
+  new URLSearchParams({ [OLAP_DRILL_GROUP_PARAM]: value });
+
+/** One descriptor as JSON, so a malformed payload can be written directly. */
+const rawParams = (payload: unknown) => params(JSON.stringify(payload));
+
 /**
  * The encoder and the parser are two halves of one codec (ADR-082). Nothing
  * about a *type* would catch them drifting apart — a JSON writer and its reader
@@ -102,5 +109,66 @@ describe('the drill-group codec round trip', () => {
     });
 
     expect(parsed?.group.isSubtotal).toBe(true);
+  });
+});
+
+describe('the granularity map', () => {
+  it('round-trips through the codec', () => {
+    // A truncated key's filter is a range, not an equality, so the server
+    // cannot turn the path back into a query without knowing what it was
+    // truncated by (#786).
+    const request = {
+      group: {
+        isSubtotal: false,
+        path: [{ columnKey: 'order_date', value: '2021-03-01' }],
+      },
+      groupKeys: ['order_date'],
+      periods: { order_date: 'month' },
+    } as const;
+
+    expect(roundTrip(request)).toStrictEqual(request);
+  });
+
+  it('omits an empty map, so an untruncated drill is the param it always was', () => {
+    const encoded = encodeDrillGroup({
+      group: {
+        isSubtotal: false,
+        path: [{ columnKey: 'city', value: 'Rome' }],
+      },
+      groupKeys: ['city'],
+      periods: {},
+    });
+
+    expect(encoded).not.toContain('periods');
+    expect(parseDrillGroup(params(encoded))).not.toHaveProperty('periods');
+  });
+
+  it('refuses the whole descriptor for a period outside the vocabulary', () => {
+    // It would drill a different set from the one the row summarises, with
+    // every returned row individually valid — the failure this refusal exists
+    // to prevent.
+    expect(
+      parseDrillGroup(
+        rawParams({
+          isSubtotal: false,
+          keys: ['order_date'],
+          path: [{ columnKey: 'order_date', value: '2021-03-01' }],
+          periods: { order_date: 'fortnight' },
+        }),
+      ),
+    ).toBeUndefined();
+  });
+
+  it('refuses a granularity map that is not a map', () => {
+    expect(
+      parseDrillGroup(
+        rawParams({
+          isSubtotal: false,
+          keys: ['order_date'],
+          path: [{ columnKey: 'order_date', value: '2021-03-01' }],
+          periods: ['month'],
+        }),
+      ),
+    ).toBeUndefined();
   });
 });

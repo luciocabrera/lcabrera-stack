@@ -52,7 +52,10 @@ const PERIOD_CAPABLE_TYPE_SQL_NAMES = [
  * is what makes a **derived** group key measurable: `pg_stats` describes the raw
  * column, so nothing in the catalogue counts the distinct months in it — but a
  * range does bound them, and the first and last histogram bound are that range
- * (#786). Two properties keep it safe. The `CASE` guards the cast: Postgres does
+ * (#786). The `::float8` is not decoration: `extract(epoch …)` is `numeric`, which
+ * `pg` hands back as a **string**, and a string would coerce its way through the
+ * arithmetic that reads it while comparing wrong. Two further properties keep it
+ * safe. The `CASE` guards the cast: Postgres does
  * not evaluate an unselected branch, so `histogram_bounds::text::text[]` — the
  * only way to read an `anyarray` — is never applied to a type it would fail on.
  * And the scalar subquery over an absent histogram yields `NULL`, which is the
@@ -100,7 +103,7 @@ export const buildColumnCapabilitiesQuery = ({
        coalesce(s.n_distinct, 0) AS "nDistinct",
        c.reltuples AS "relTuples",
        CASE WHEN bt.typname = ANY($5::text[])
-            THEN (SELECT extract(epoch FROM (max(b::timestamptz) - min(b::timestamptz))) / 86400
+            THEN (SELECT (extract(epoch FROM (max(b::timestamptz) - min(b::timestamptz))) / 86400)::float8
                     FROM unnest(s.histogram_bounds::text::text[]) AS b)
        END AS "spanDays"
   FROM pg_attribute a

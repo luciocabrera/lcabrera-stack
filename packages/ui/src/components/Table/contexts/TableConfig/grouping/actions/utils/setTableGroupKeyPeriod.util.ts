@@ -5,9 +5,9 @@ import type {
 
 type SetTableGroupKeyPeriodArgs = {
   readonly columnKey: string;
+  readonly grouping: TableGroupingState;
   /** `undefined` groups the column at its raw values again. */
   readonly period: TableGroupPeriod | undefined;
-  readonly grouping: TableGroupingState;
 };
 
 /**

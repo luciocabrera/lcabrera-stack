@@ -1,5 +1,4 @@
 import type { OlapGroupPeriod } from '@lcabrera/api/olap/olap.types';
-
 import type {
   CurrencyFormatOptions,
   DateFormatOptions,
@@ -657,16 +656,6 @@ export type TableGroupingState = {
 };
 
 /**
- * The granularity a date or timestamp group key is truncated to.
- *
- * An alias of the wire vocabulary, which `@lcabrera/api` owns and this package
- * already depends on (ADR-082) — so unlike the aggregate and refusal unions
- * beside it, this one is a single declaration rather than one of ADR-039's
- * duplicated shapes. There is no undeclared edge to route around here.
- */
-export type TableGroupPeriod = OlapGroupPeriod;
-
-/**
  * Why a column may not be a group key. Duplicated from `@lcabrera/server`'s
  * `GroupKeyRefusalReason` for the reason `TableAggregateFn` is; the reasons stay
  * distinguishable because grouping by a primary key is the likeliest user
@@ -718,6 +707,16 @@ export type TableGroupKeyValue = {
    */
   readonly value: unknown;
 };
+
+/**
+ * The granularity a date or timestamp group key is truncated to.
+ *
+ * An alias of the wire vocabulary, which `@lcabrera/api` owns and this package
+ * already depends on (ADR-082) — so unlike the aggregate and refusal unions
+ * beside it, this one is a single declaration rather than one of ADR-039's
+ * duplicated shapes. There is no undeclared edge to route around here.
+ */
+export type TableGroupPeriod = OlapGroupPeriod;
 
 /**
  * A row carrying a group summary — what a grouped read returns for each group.

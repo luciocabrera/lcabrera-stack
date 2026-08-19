@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { colors } from '#ui/design-system/tokens/colors.stylex';
 import { typography } from '#ui/design-system/tokens/base.stylex';
+import { colors } from '#ui/design-system/tokens/colors.stylex';
 
 const local = stylex.create({
   /**
@@ -10,15 +10,15 @@ const local = stylex.create({
    * would read as a second control rather than as part of the key.
    */
   periodSelect: {
-    backgroundColor: colors.backgroundPrimary,
     borderColor: colors.borderPrimary,
     borderRadius: '4px',
     borderStyle: 'solid',
     borderWidth: '1px',
-    color: colors.textPrimary,
-    fontSize: typography.fontSizeXs,
     paddingBlock: '2px',
     paddingInline: '4px',
+    backgroundColor: colors.backgroundPrimary,
+    color: colors.textPrimary,
+    fontSize: typography.fontSizeXs,
   },
 });
 

@@ -93,8 +93,8 @@ const mockOnClose = vi.fn();
 const numericCapability: TableColumnGroupingCapability = {
   aggregates: ['avg', 'count', 'sum'],
   canGroup: false,
-  periods: [],
   column: 'total_amount',
+  periods: [],
   refusal: 'too-many-distinct',
   role: 'fact',
   typeName: 'numeric',
@@ -394,8 +394,8 @@ describe('GroupActions', () => {
       capabilityRef.current = {
         aggregates: [],
         canGroup: false,
-        periods: [],
         column: 'doc',
+        periods: [],
         refusal: 'not-a-dimension',
         role: 'unsupported',
         typeName: 'jsonb',

@@ -20,8 +20,12 @@ export const pruneGroupPeriods = ({
   keys,
   periods,
 }: PruneGroupPeriodsArgs): Readonly<Record<string, TableGroupPeriod>> => {
+  // A Set rather than `keys.includes` inside the filter: the filter is the
+  // loop, so an array scan per entry is quadratic — the same reason
+  // `AddGroupKeySection` builds one.
+  const applied = new Set(keys);
   const kept = Object.entries(periods).filter(([column]) =>
-    keys.includes(column),
+    applied.has(column),
   );
 
   return kept.length === Object.keys(periods).length
