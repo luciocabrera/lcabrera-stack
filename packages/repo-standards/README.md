@@ -1,8 +1,9 @@
 # @repo/repo-standards
 
 The gates that keep a repository's commits, branches, pull requests, issues,
-coordination register and published packages to one enforced shape — as
-commands, so a repository that installs this package can run them.
+coordination register, architecture decisions and published packages to one
+enforced shape — as commands, so a repository that installs this package can run
+them.
 
 Private while the first family is being proved here. It publishes as
 `@lcabrera/repo-standards`

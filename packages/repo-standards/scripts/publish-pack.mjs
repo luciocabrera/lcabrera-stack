@@ -45,7 +45,7 @@ const packPackage = ({ destination, directory }) => {
   const binary = pnpmBinary();
   if (binary === undefined) {
     throw new Error(
-      'pnpm is not on PATH, so no tarball could be produced. Run this gate through your package manager (`pnpm exec repo-verify-publish`), which puts pnpm there.',
+      'pnpm is not on PATH, so no tarball could be produced — and only pnpm applies the `publishConfig.exports` substitution this gate exists to check, so no other packer can stand in. Install pnpm, or run this gate through a task runner that provisions it for the task.',
     );
   }
   const stdout = execFileSync(
