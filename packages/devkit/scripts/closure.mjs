@@ -31,12 +31,17 @@ const withoutAnchor = (target) => {
   return index === -1 ? target : target.slice(0, index);
 };
 
-const normalise = (segments) =>
-  segments.reduce((resolved, segment) => {
-    if (segment === '' || segment === '.') return resolved;
-    if (segment === '..') return resolved.slice(0, -1);
-    return [...resolved, segment];
-  }, []);
+const normalise = (segments) => {
+  // A local accumulator that never escapes this function; rebuilding the array
+  // per segment is quadratic on a deep path.
+  const resolved = [];
+  for (const segment of segments) {
+    if (segment === '' || segment === '.') continue;
+    if (segment === '..') resolved.pop();
+    else resolved.push(segment);
+  }
+  return resolved;
+};
 
 const isInside = (path, rootDirectory) => {
   const root = rootDirectory.replace(/\/$/, '');

@@ -118,6 +118,20 @@ describe('parseManifest', () => {
     expect(parseManifest(raw, '1.0.0').files).toEqual({ 'a.md': A });
   });
 
+  test('drops an entry whose hash is not a hash, rather than trusting it', () => {
+    const raw = JSON.stringify({
+      files: { 'bad.md': null, 'good.md': A },
+      packageVersion: '1.0.0',
+      version: 1,
+    });
+    expect(parseManifest(raw, '1.0.0').files).toEqual({ 'good.md': A });
+  });
+
+  test('falls back to the running version when the recorded one is not a string', () => {
+    const raw = JSON.stringify({ files: {}, packageVersion: 7, version: 1 });
+    expect(parseManifest(raw, '1.0.0').packageVersion).toBe('1.0.0');
+  });
+
   test('treats malformed, absent and future-versioned records as no record', () => {
     expect(parseManifest('{ not json', '1.0.0')).toEqual(
       emptyManifest('1.0.0'),

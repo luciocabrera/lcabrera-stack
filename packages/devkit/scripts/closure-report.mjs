@@ -13,15 +13,7 @@ import { analyseClosure } from './closure.mjs';
 import { readFilesUnder } from './files.mjs';
 
 /** Commands a consumer's shell is expected to provide regardless of this kit. */
-export const BASELINE_COMMANDS = [
-  'bash',
-  'gh',
-  'git',
-  'node',
-  'npm',
-  'npx',
-  'sh',
-];
+const BASELINE_COMMANDS = ['bash', 'gh', 'git', 'node', 'npm', 'npx', 'sh'];
 
 /**
  * @param {{ allowedCommands?: string[], directory: string, root: string }} args
@@ -52,8 +44,8 @@ const ESCAPE_VERBS = {
   link: 'needs',
 };
 
-const describeEscape = (escape) =>
-  `${escape.file}:${escape.line}  ${ESCAPE_VERBS[escape.kind]} ${escape.resolved ?? escape.reference}`;
+const describeEscape = (finding) =>
+  `${finding.file}:${finding.line}  ${ESCAPE_VERBS[finding.kind]} ${finding.resolved ?? finding.reference}`;
 
 /** @param {ReturnType<typeof analyseDirectory>[]} results */
 export const renderClosureReport = (results) => {
@@ -63,7 +55,7 @@ export const renderClosureReport = (results) => {
     }
     return [
       `✗ ${result.directory}`,
-      ...result.escapes.map((escape) => `    ${describeEscape(escape)}`),
+      ...result.escapes.map((finding) => `    ${describeEscape(finding)}`),
     ];
   });
   return lines.join('\n');

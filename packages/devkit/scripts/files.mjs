@@ -12,7 +12,7 @@ import { join, relative, sep } from 'node:path';
 const toPosix = (path) => path.split(sep).join('/');
 
 /** Every file under `directory`, depth-first, in a stable order. */
-export const listFilesUnder = (directory) =>
+const listFilesUnder = (directory) =>
   readdirSync(directory, { withFileTypes: true })
     .sort((left, right) => left.name.localeCompare(right.name))
     .flatMap((entry) => {

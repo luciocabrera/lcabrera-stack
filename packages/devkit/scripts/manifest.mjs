@@ -78,18 +78,40 @@ export const emptyManifest = (version) => ({
  * a newer kit gets conflicts reported rather than their files silently
  * overwritten against a record this version cannot interpret.
  */
+/** A record entry is a path mapped to a hash; anything else is not a record. */
+const readableEntries = (files) => {
+  if (typeof files !== 'object' || files === null || Array.isArray(files)) {
+    return {};
+  }
+  return Object.fromEntries(
+    Object.entries(files).filter(([, hash]) => typeof hash === 'string'),
+  );
+};
+
+/**
+ * Reads a manifest defensively: an unreadable or future-versioned one is
+ * treated as absent, so a consumer whose manifest was hand-edited or written by
+ * a newer kit gets conflicts reported rather than their files silently
+ * overwritten against a record this version cannot interpret.
+ *
+ * Entries are validated individually for the same reason. A non-string hash
+ * compares unequal to every real one, so an entry carrying `null` would classify
+ * its file as locally modified and be skipped for the rest of that consumer's
+ * life — a silent, permanent opt-out of updates that reads as a respected edit.
+ */
 export const parseManifest = (raw, version) => {
-  if (typeof raw !== 'string' || raw.trim() === '')
+  if (typeof raw !== 'string' || raw.trim() === '') {
     return emptyManifest(version);
+  }
   try {
     const parsed = JSON.parse(raw);
     if (parsed?.version !== MANIFEST_VERSION) return emptyManifest(version);
     return {
-      files:
-        typeof parsed.files === 'object' && parsed.files !== null
-          ? parsed.files
-          : {},
-      packageVersion: parsed.packageVersion,
+      files: readableEntries(parsed.files),
+      packageVersion:
+        typeof parsed.packageVersion === 'string'
+          ? parsed.packageVersion
+          : version,
       version: MANIFEST_VERSION,
     };
   } catch {
@@ -97,16 +119,13 @@ export const parseManifest = (raw, version) => {
   }
 };
 
-/**
- * @param {{ entries: { path: string, state: string, incomingHash: string }[],
- *   previous: ReturnType<typeof emptyManifest>, version: string }} args
- */
 export const nextManifest = ({ entries, previous, version }) => {
+  // The accumulator is allocated here and never escapes, so writing into it is
+  // the allowed form of mutation; rebuilding the object per entry is quadratic
+  // on a manifest that grows with every shipped file.
   const files = entries.reduce(
     (accumulated, entry) => {
-      if (isRecorded(entry.state)) {
-        return { ...accumulated, [entry.path]: entry.incomingHash };
-      }
+      if (isRecorded(entry.state)) accumulated[entry.path] = entry.incomingHash;
       return accumulated;
     },
     { ...previous.files },

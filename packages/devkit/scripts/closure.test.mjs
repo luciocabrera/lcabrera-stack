@@ -164,10 +164,10 @@ describe('analyseClosure', () => {
     const { escapes } = analyseClosure({ files, rootDirectory });
     expect(
       escapes
-        .map((escape) => escape.kind)
+        .map((finding) => finding.kind)
         .sort((left, right) => left.localeCompare(right)),
     ).toEqual(['command', 'import', 'link']);
-    expect(escapes.find((escape) => escape.kind === 'link')?.resolved).toBe(
+    expect(escapes.find((finding) => finding.kind === 'link')?.resolved).toBe(
       'docs/agents/contract.md',
     );
   });
@@ -184,7 +184,7 @@ describe('analyseClosure', () => {
     ];
     expect(
       analyseClosure({ files, rootDirectory }).escapes.map(
-        (escape) => escape.reference,
+        (finding) => finding.reference,
       ),
     ).toEqual(['ts-morph']);
   });
@@ -299,7 +299,7 @@ describe('analyseClosure path tokens', () => {
       files,
       rootDirectory,
     });
-    expect(escapes.map((escape) => escape.resolved)).toEqual([
+    expect(escapes.map((finding) => finding.resolved)).toEqual([
       'packages/scan-report/scripts/ingest-report.mjs',
     ]);
   });

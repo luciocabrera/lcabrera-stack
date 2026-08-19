@@ -4,6 +4,7 @@
     "scripts/**/*.{cjs,mjs,js}",
     ".github/skills/*/scripts/*.{js,mjs,cjs}",
     "packages/scan-report/scripts/*.mjs",
+    "packages/devkit/scripts/*.mjs",
     "apps/react-router/lighthouse.config.js",
     "apps/react-router/config/*.ts",
     "packages/ui/config/*.ts",

@@ -13,6 +13,11 @@ import { resolve } from 'node:path';
 import { analyseDirectory, renderClosureReport } from './closure-report.mjs';
 
 export const runClosure = (directories, root) => {
+  if (directories.length === 0) {
+    console.error('closure needs at least one directory to analyse');
+    return 1;
+  }
+
   const missing = directories.filter((directory) => {
     const path = resolve(root, directory);
     return !existsSync(path) || !statSync(path).isDirectory();
@@ -37,7 +42,7 @@ export const runClosure = (directories, root) => {
 
   const dirty = results.filter((result) => result.escapes.length > 0).length;
   console.error(
-    `\n${escapes.length} escape(s) across ${dirty} directory(ies).`,
+    `\n${escapes.length} finding(s) across ${dirty} directory(ies).`,
   );
   return 1;
 };

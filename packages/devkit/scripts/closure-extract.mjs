@@ -9,7 +9,11 @@
  * it is written as a markdown link, and only the link form was being read.
  */
 
-const LINK_PATTERN = /\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
+// Every quantified class here excludes the delimiter that ends it, so the match
+// is decided in one pass. Spelling the optional title as `(?:\s+"[^"]*")?` after
+// a `[^)\s]+` target reintroduces a choice at each position and is polynomial on
+// a line holding an unclosed link; the title is split off afterwards instead.
+const LINK_PATTERN = /\[[^\]]*\]\(([^)]*)\)/g;
 const FENCE_PATTERN = /^```([\w-]*)\s*$/;
 const INLINE_CODE_PATTERN = /`([^`\n]+)`/g;
 
@@ -44,7 +48,7 @@ const SHELL_NOISE = new Set([
  * as an invocation, which is how a reference table fills up with noise nobody
  * reads.
  */
-export const INVOKERS = new Set([
+const INVOKERS = new Set([
   'bash',
   'biome',
   'devkit',
@@ -65,13 +69,17 @@ export const INVOKERS = new Set([
 
 const lineOf = (content, index) => content.slice(0, index).split('\n').length;
 
+/** `(path "title")` is one link; only the path travels. */
+const linkTargetOf = (raw) => raw.trim().split(/\s+/)[0] ?? '';
+
 export const extractLinkTargets = (content) =>
-  content.split('\n').flatMap((line, index) =>
-    [...line.matchAll(LINK_PATTERN)].map((match) => ({
-      line: index + 1,
-      target: match[1],
-    })),
-  );
+  content
+    .split('\n')
+    .flatMap((line, index) =>
+      [...line.matchAll(LINK_PATTERN)]
+        .map((match) => ({ line: index + 1, target: linkTargetOf(match[1]) }))
+        .filter((entry) => entry.target !== ''),
+    );
 
 /** The fenced blocks whose language marks them as something a reader will run. */
 const shellBlockLines = (content) => {
@@ -131,6 +139,21 @@ export const extractCommands = (content) => {
 
 const HAS_EXTENSION = /\.[a-z0-9]+$/i;
 
+const TRAILING_PUNCTUATION = new Set([')', ',', '.', ':', ';']);
+
+/**
+ * Prose punctuation clinging to the end of a path. Scanned rather than matched:
+ * a quantified class anchored to the end retries from every position, which is
+ * polynomial on a long run of punctuation.
+ */
+const withoutTrailingPunctuation = (token) => {
+  const characters = [...token];
+  const lastKept = characters.findLastIndex(
+    (character) => !TRAILING_PUNCTUATION.has(character),
+  );
+  return characters.slice(0, lastKept + 1).join('');
+};
+
 /**
  * A token is treated as a path when it is explicitly relative, or when it has
  * both a directory separator and a file extension. Requiring the extension is
@@ -150,7 +173,7 @@ export const extractPathTokens = (content) => {
     )
     .map(({ line, token }) => ({
       line,
-      token: token.replace(/[),.;:]+$/, ''),
+      token: withoutTrailingPunctuation(token),
     }));
 
   const arguments_ = shellBlockLines(content).flatMap(({ line, text }) =>

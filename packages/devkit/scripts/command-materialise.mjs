@@ -23,11 +23,11 @@ const packageRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 const readIfPresent = (path) =>
   existsSync(path) ? readFileSync(path, 'utf8') : undefined;
 
-export const packageVersion = () =>
+const packageVersion = () =>
   JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf8')).version;
 
 /** The shipped files, addressed by their group-prefixed path. */
-export const readAssets = () => {
+const readAssets = () => {
   const assetsRoot = join(packageRoot, 'assets');
   if (!existsSync(assetsRoot)) return [];
   return readFilesUnder({ directory: assetsRoot, root: assetsRoot });
