@@ -23,6 +23,8 @@ export const DEFAULT_CONFIG = {
   commands: {},
   paths: {
     agents: '.claude/agents',
+    coordination: 'docs/coordination',
+    docs: 'docs/agents',
     rules: '.claude/rules',
     skills: '.github/skills',
   },
@@ -30,9 +32,14 @@ export const DEFAULT_CONFIG = {
 };
 
 /** Which asset groups a profile materialises. */
+/**
+ * `docs` and `coordination` are in the agent profile because the skills cannot
+ * run without them: an orchestration contract or a claim protocol that does not
+ * arrive leaves a skill whose first instruction is to read a missing file.
+ */
 export const PROFILES = {
-  agent: ['skills', 'rules', 'agents'],
-  full: ['skills', 'rules', 'agents'],
+  agent: ['skills', 'rules', 'agents', 'docs', 'coordination'],
+  full: ['skills', 'rules', 'agents', 'docs', 'coordination'],
 };
 
 const isPlainObject = (value) =>

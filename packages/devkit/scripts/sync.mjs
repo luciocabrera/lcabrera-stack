@@ -11,6 +11,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
 import { groupsFor, targetPathFor } from './config.mjs';
+import { substituteCommands } from './placeholders.mjs';
 import {
   classifyMaterialisation,
   hashContent,
@@ -31,10 +32,29 @@ export const planSync = ({ assets, config, manifest, onDiskHash }) => {
     .map((asset) => {
       const targetPath = targetPathFor({ assetPath: asset.path, config });
       if (targetPath === undefined) return undefined;
-      const incomingHash = hashContent(asset.content);
-      return {
+
+      // Substituted BEFORE hashing, so the record describes what is on disk
+      // rather than the template it came from.
+      const { content, missing } = substituteCommands({
+        commands: config.commands,
         content: asset.content,
+      });
+      const incomingHash = hashContent(content);
+
+      if (missing.length > 0) {
+        return {
+          content,
+          incomingHash,
+          missing,
+          path: targetPath,
+          state: 'unresolved',
+        };
+      }
+
+      return {
+        content,
         incomingHash,
+        missing,
         path: targetPath,
         state: classifyMaterialisation({
           incomingHash,

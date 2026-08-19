@@ -30,6 +30,11 @@ supplies that check and a token matching neither reading is left unreported
 rather than guessed at. Guessing produced false positives indistinguishable from
 real findings — a skill's own reference file reported as an escape.
 
+**Containment is judged against the package, not the directory.** A shipped file
+may point at anything the package also ships, wherever it lands. The alternative
+— every directory self-sufficient — forces a shared contract document to be
+copied into each skill that reads it, and then they drift.
+
 ## Assets
 
 `assets/<group>/…` where the group name is the `paths` key that places it, so

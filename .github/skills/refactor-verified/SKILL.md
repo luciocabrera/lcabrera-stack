@@ -121,7 +121,8 @@ gh pr edit <pr> --title "<type>(<scope>): <subject>" --body-file <path>
 gh pr ready <pr>
 ```
 
-Write the body with the [`commit-and-pr`](../commit-and-pr/SKILL.md) skill —
+Write the body with the `commit-and-pr` skill — invoke it by name, so this works
+wherever that skill is installed —
 every section of the PR template, and put the verifier's gate proof in
 **Verification**. That block is the strongest evidence the PR has: it is a
 fail→pass pair produced by someone who did not write the code.
@@ -173,6 +174,6 @@ reconstruct, and it is what separates this from a green run.
 ## Related
 
 - [`docs/agents/refactor-verified-contract.md`](../../../docs/agents/refactor-verified-contract.md) — the standard
-- [`quality-gate-workflow`](../quality-gate-workflow/SKILL.md) — the gate both agents run
-- [`commit-and-pr`](../commit-and-pr/SKILL.md) — the enforced commit/PR format
+- the `quality-gate-workflow` skill — the gate both agents run
+- the `commit-and-pr` skill — the enforced commit/PR format
 - [`docs/coordination/README.md`](../../../docs/coordination/README.md) — the claim protocol

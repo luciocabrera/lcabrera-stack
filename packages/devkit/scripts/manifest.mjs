@@ -61,8 +61,11 @@ const RECORDED_STATES = new Set(['added', 'current', 'restored', 'updated']);
 
 export const isRecorded = (state) => RECORDED_STATES.has(state);
 
-/** The states a consumer needs to see: their edit survived, or was refused. */
-const REPORTED_STATES = new Set(['conflict', 'modified']);
+/**
+ * The states a consumer needs to see: their edit survived, the path was already
+ * taken, or the file asks for a command they have not configured.
+ */
+const REPORTED_STATES = new Set(['conflict', 'modified', 'unresolved']);
 
 export const isReported = (state) => REPORTED_STATES.has(state);
 

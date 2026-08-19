@@ -54,7 +54,13 @@ describe('targetPathFor', () => {
 });
 
 describe('groupsFor', () => {
-  test('the agent profile materialises the three prose groups', () => {
-    expect(groupsFor(DEFAULT_CONFIG)).toEqual(['skills', 'rules', 'agents']);
+  test('the agent profile carries the documents its skills cannot run without', () => {
+    expect(groupsFor(DEFAULT_CONFIG)).toEqual([
+      'skills',
+      'rules',
+      'agents',
+      'docs',
+      'coordination',
+    ]);
   });
 });

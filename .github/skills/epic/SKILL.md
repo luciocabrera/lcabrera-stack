@@ -21,8 +21,9 @@ rule, the escalation list, and the failure modes this repo has actually hit.
 disagree, the contract wins and this file is the bug — fix it here rather than
 working around it in a prompt.
 
-You also run under [`AGENTS.md`](../../../AGENTS.md) and, before you dispatch
-anything, [`docs/coordination/README.md`](../../../docs/coordination/README.md).
+You also run under your repository's root agent instructions (`AGENTS.md`, or
+whatever it symlinks) and, before you dispatch anything,
+[`docs/coordination/README.md`](../../../docs/coordination/README.md).
 
 ## 2. Run Phase 0, then stop
 

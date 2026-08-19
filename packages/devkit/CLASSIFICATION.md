@@ -84,11 +84,29 @@ runtime package, and this whole group moves with it.
 | `architecture-guard` | **parameterise** | The procedure is general; the inventory paths it reads are per-repository config.                              |
 | `fallow-scan`        | **blocked**      | Binds to `fallow-code-checker`, and inherits its verdict.                                                      |
 
-## What this means for the first shipment
+## What this means for the shipping order
 
 `codebase-explorer`, `react-19` and `react-router-framework-mode` need no
-parameterising, so shipping them first tests the materialiser without also
-testing a content rewrite. `epic` and `refactor-verified` come next: they need
-nothing from the gate runtime, only their own documents travelling with them,
-which is what proves the "a shipped file references only what ships with it"
-rule before anything harder depends on it.
+parameterising, so they ship first and test the materialiser without also
+testing a content rewrite.
+
+**`epic` and `refactor-verified` were expected to follow, and cannot.** The plan
+assumed the prose set was independent of the gate runtime because the skills
+themselves are. Measuring the documents they bind to — rather than the skills —
+showed otherwise:
+
+```bash
+devkit closure docs/agents docs/coordination
+```
+
+The orchestration contract, the agent-review contract and the coordination
+README together cite four ADRs, the docs index, two workflows, a generated report
+artifact and the gate script. None of that is a skill's own text, and none of it
+travels; shipping the skills now would hand a consumer files whose first
+instruction is to read something they do not have.
+
+So the order inverts: the **documents** gate the prose, not the other way round.
+`epic` and `refactor-verified` ship after the gate runtime and the scaffolding
+seeds, and after the claim protocol is split from this repository's register —
+the generic half is what a consumer needs, and it is currently interleaved with
+ADR citations and gate wiring that are ours alone.
