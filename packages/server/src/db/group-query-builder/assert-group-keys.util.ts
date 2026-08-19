@@ -7,6 +7,7 @@ import type {
 import { GroupingRefusedError } from '../../errors/grouping-refused.error.ts';
 import { assertGroupColumn } from './assert-group-column.util.ts';
 import { assertGroupDepth } from './assert-group-depth.util.ts';
+import { assertGroupKeyPeriods } from './assert-group-key-periods.util.ts';
 
 type AssertGroupKeysArgs = {
   readonly allowedColumns: readonly string[];
@@ -52,16 +53,6 @@ export const assertGroupKeys = ({
 }: AssertGroupKeysArgs): void => {
   assertGroupDepth({ grouping, keys });
 
-  for (const column of Object.keys(periods)) {
-    if (keys.includes(column)) continue;
-
-    throw new GroupingRefusedError({
-      column,
-      message: `A granularity was given for column "${column}", which is not one of the group keys.`,
-      reason: 'unknown-column',
-    });
-  }
-
   for (const key of keys) {
     assertGroupColumn({ allowedColumns, column: key });
 
@@ -75,23 +66,11 @@ export const assertGroupKeys = ({
       });
     }
 
-    const period = periods[key];
-
-    // A granularity is checked instead of `canGroup`, not as well as it: a date
+    // A key carrying a granularity skips the `canGroup` check entirely, and is
+    // judged on that granularity by `assertGroupKeyPeriods` below: a date
     // column is normally refused raw — one group per calendar day — and asking
-    // for a month is asking a different question, which the capability answers
-    // separately (#786).
-    if (period !== undefined) {
-      if (!capability.periods.includes(period)) {
-        throw new GroupingRefusedError({
-          column: key,
-          message: `Column "${key}" cannot be grouped by ${period}${capability.periods.length === 0 ? '; it holds no date or timestamp to truncate' : `; it offers ${capability.periods.join(', ')}`}.`,
-          reason: 'column-not-groupable',
-        });
-      }
-
-      continue;
-    }
+    // for a month is asking a different question (#786).
+    if (periods[key] !== undefined) continue;
 
     if (!capability.canGroup) {
       throw new GroupingRefusedError({
@@ -101,4 +80,6 @@ export const assertGroupKeys = ({
       });
     }
   }
+
+  assertGroupKeyPeriods({ capabilities, keys, periods });
 };

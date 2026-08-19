@@ -35,13 +35,15 @@ getPool [const] () => Pool
 getRowsCount [const] ({ tx, ...descriptor }: CountQueryDescriptor & ExecutorOptions & { readonly column: string; }) => Promise<number>
 
 ## ./db/group-query-builder/build-group-query.util
-buildGroupQuery [const] ({ aggregates, allowedColumns, capabilities, filters, grouping, keys, maxRows, schema, sort, subtotalPlacement, table }: GroupQueryDescriptor) => BuiltGroupQuery
+buildGroupQuery [const] ({ aggregates, allowedColumns, capabilities, filters, grouping, keys, maxRows, periods, schema, sort, subtotalPlacement, table }: GroupQueryDescriptor) => BuiltGroupQuery
 
 ## ./db/group-query-builder/group-query-builder.constants
 AGGREGATE_SQL [const] Record<AggregateFn, AggregateSpec>
 AGGREGATE_SQL_NAMES [const] readonly string[]
 COUNT_ROWS_ALIAS [const] "count_rows"
+GROUP_KEY_PERIODS [const] readonly OlapGroupPeriod[]
 GROUP_MASK_ALIAS [const] "group_mask"
+GROUP_PERIOD_TIME_ZONE [const] "UTC"
 IDENTIFIER_TYPE_NAMES [const] ReadonlySet<string>
 MAX_COUNT_DISTINCT_AGGREGATES [const] 1
 MAX_GROUP_KEY_DISTINCT [const] 1000
@@ -50,6 +52,9 @@ MAX_GROUP_ROWS_REFUSE [const] 50000
 MAX_GROUP_ROWS_WARN [const] 5000
 MAX_IDENTIFIER_LENGTH [const] 63
 MAX_KEYS_BY_GROUPING [const] Readonly<Record<GroupingMode, number>>
+PERIOD_CAPABLE_TYPE_NAMES [const] ReadonlySet<string>
+PERIOD_MEAN_DAYS [const] Readonly<Record<OlapGroupPeriod, number>>
+PERIOD_SQL_FIELD [const] Readonly<Record<OlapGroupPeriod, string>>
 UNIQUE_ISH_DISTINCT_RATIO [const] 0.95
 
 ## ./db/group-query-builder/group-query-builder.types
@@ -60,7 +65,7 @@ BuiltGroupAggregate [type] { readonly alias: string; /** Absent for `count(*)`. 
 BuiltGroupQuery [type] { readonly aggregates: readonly BuiltGroupAggregate[]; /** * The `GROUPING()` value of each emitted set, in emission order. Bit * `keys.length - 1 - i` is 1 when `keys[i]` was rolled up in that set, which * is how a structural NULL is told apart from a real one. */ readonly groupingSetMasks: readonly number[]; /** * What the cardinality rails decided: the pre-flight bound, the `LIMIT` this * query actually carries, and any warning worth passing on. Emitted rather * than recomputed by the caller, so the number in the SQL and the number the * caller reasons about are the same one. */ readonly guardRails: GroupGuardRails; /** The group keys, ordered — the bit positions above are relative to this. */ readonly keys: readonly string[]; readonly maskAlias: 'group_mask'; readonly text: string; readonly values: readonly unknown[]; }
 ColumnAnalyticalRole [type] 'dimension' | 'fact' | 'unsupported'
 ColumnCapabilitiesQueryDescriptor [type] { readonly columns: readonly string[]; readonly schema: string; readonly table: string; }
-ColumnCapabilityRow [type] { /** SQL aggregate names that exist for this column's type. */ readonly aggregates: readonly string[]; readonly column: string; /** Whether the type resolves a default btree/hash equality operator. */ readonly hasEquality: boolean; /** * Whether `pg_stats` holds a row for this column at all — and the only thing * that makes `nDistinct` meaningful, since the query coalesces the absent * case to a zero that would otherwise be indistinguishable from Postgres * reporting undefined distinctness. */ readonly hasStats: boolean; readonly nDistinct: number; readonly relTuples: number; readonly typeCategory: string; readonly typeName: string; /** * The schema the *type* lives in, not the table. Load-bearing for the named * identifier exception: type names are per-schema, so a user-defined * `app.uuid` reports `typname = 'uuid'` exactly like `pg_catalog.uuid` does, * and only the namespace tells them apart. */ readonly typeNamespace: string; }
+ColumnCapabilityRow [type] { /** SQL aggregate names that exist for this column's type. */ readonly aggregates: readonly string[]; readonly column: string; /** Whether the type resolves a default btree/hash equality operator. */ readonly hasEquality: boolean; /** * Whether `pg_stats` holds a row for this column at all — and the only thing * that makes `nDistinct` meaningful, since the query coalesces the absent * case to a zero that would otherwise be indistinguishable from Postgres * reporting undefined distinctness. */ readonly hasStats: boolean; readonly nDistinct: number; readonly relTuples: number; /** * How many days the column's `pg_stats` histogram spans; absent when the * column is not a date/timestamp or has no histogram to measure. * * SQL NULL arrives here from `pg` as an absence, and `resolveColumnCapability` * narrows anything that is not a finite number to one — which also catches the * `numeric` a bare `extract(epoch …)` would hand back as a **string**. * * It is what makes a *derived* group key measurable. `pg_stats` describes the * raw column, so the catalogue has no distinct count for * `date_trunc('month', c)` and never will — but the number of months a range * covers follows from the range, and the histogram's first and last bound are * exactly that range, free of a table scan (#786). */ readonly spanDays?: number; readonly typeCategory: string; readonly typeName: string; /** * The schema the *type* lives in, not the table. Load-bearing for the named * identifier exception: type names are per-schema, so a user-defined * `app.uuid` reports `typname = 'uuid'` exactly like `pg_catalog.uuid` does, * and only the namespace tells them apart. */ readonly typeNamespace: string; }
 ColumnGroupingCapability [type] (ColumnCapabilityShared & { readonly canGroup: false; readonly refusal: GroupKeyRefusalReason; }) | (ColumnCapabilityShared & { readonly canGroup: true; readonly refusal?: never; })
 DistinctEstimate [type] { readonly kind: 'known'; readonly value: number; } | { readonly kind: 'undefinedDistinctness'; } | { readonly kind: 'unknown'; }
 GroupAggregate [type] { /** * Overrides the derived `${fn}_${column}` name. It is the escape hatch for * two aggregates that would otherwise derive the same alias, and for a column * name long enough to push the derived one past Postgres's identifier limit. */ readonly alias?: string; /** Omitted only for `count`, which then becomes `count(*)`. */ readonly column?: string; /** * Emitted as `FILTER (WHERE …)`. These values claim the leading `$n` slots, * because the `SELECT` list is built before the `WHERE` clause. */ readonly filters?: readonly QueryFilter[]; readonly fn: AggregateFn; }
@@ -68,8 +73,9 @@ GroupCardinalityEstimate [type] { readonly columns: readonly string[]; readonly 
 GroupCardinalityWarning [type] { readonly columns: readonly string[]; readonly kind: 'stats-unavailable'; } | { readonly estimatedRows: number; readonly kind: 'estimate-above-warn-threshold'; }
 GroupGuardRails [type] { readonly estimate: GroupCardinalityEstimate; readonly rowLimit: GroupRowLimit; readonly warning?: GroupCardinalityWarning; }
 GroupingMode [type] 'cube' | 'flat' | 'rollup'
+GroupKeyPeriod [type] OlapGroupPeriod
 GroupKeyRefusalReason [type] 'no-equality-operator' | 'not-a-dimension' | 'stats-unavailable' | 'too-many-distinct' | 'unique-ish'
-GroupQueryDescriptor [type] { readonly aggregates: readonly GroupAggregate[]; /** * **Required**, unlike `SelectQueryDescriptor` where it is opt-in: every group * key is request-derived by construction, so opt-in semantics would be a * silent hole (ADR-059). */ readonly allowedColumns: readonly string[]; /** * What each column may do, as `getColumnGroupingCapabilities` resolved it from * the catalogue. Passed in rather than re-derived so this builder stays pure * while still enforcing ADR-058 — the impure half answers "what is legal * here", the builder refuses everything else. */ readonly capabilities: Readonly<Record<string, ColumnGroupingCapability>>; readonly filters?: readonly QueryFilter[]; readonly grouping: GroupingMode; /** Ordered, and the order is the tree's nesting order. */ readonly keys: readonly string[]; /** A safety belt, not a page — a grouped read is never paginated (ADR-059). */ readonly maxRows: number; readonly schema: string; readonly sort?: readonly GroupSort[]; /** Where a subtotal sits relative to the rows it totals. Defaults to `last`. */ readonly subtotalPlacement?: 'first' | 'last'; readonly table: string; }
+GroupQueryDescriptor [type] { readonly aggregates: readonly GroupAggregate[]; /** * **Required**, unlike `SelectQueryDescriptor` where it is opt-in: every group * key is request-derived by construction, so opt-in semantics would be a * silent hole (ADR-059). */ readonly allowedColumns: readonly string[]; /** * What each column may do, as `getColumnGroupingCapabilities` resolved it from * the catalogue. Passed in rather than re-derived so this builder stays pure * while still enforcing ADR-058 — the impure half answers "what is legal * here", the builder refuses everything else. */ readonly capabilities: Readonly<Record<string, ColumnGroupingCapability>>; readonly filters?: readonly QueryFilter[]; readonly grouping: GroupingMode; /** Ordered, and the order is the tree's nesting order. */ readonly keys: readonly string[]; /** A safety belt, not a page — a grouped read is never paginated (ADR-059). */ readonly maxRows: number; /** * The granularity to truncate a temporal key to, by column — a map beside the * key list rather than a member of it. * * A key list of records would carry the granularity inside each key, and was * rejected: `keys` is `readonly string[]` on both sides of the boundary, in * the URL, in every group path and in the expansion store, so changing its * element type moves a shape that six unrelated things already agree on. A * column can be a key at most once, so a column-keyed map is per-key by * construction and carries the same information (#786). * * A column named here that is not in `keys` is refused rather than ignored — * see `assertGroupKeys`. */ readonly periods?: Readonly<Record<string, GroupKeyPeriod>>; readonly schema: string; readonly sort?: readonly GroupSort[]; /** Where a subtotal sits relative to the rows it totals. Defaults to `last`. */ readonly subtotalPlacement?: 'first' | 'last'; readonly table: string; }
 GroupRowLimit [type] { readonly backstopAt?: number; readonly limit: number; }
 GroupSort [type] { readonly aggregateAlias: string; readonly direction: 'asc' | 'desc'; } | { readonly direction: 'asc' | 'desc'; readonly key: string; }
 
@@ -77,24 +83,28 @@ GroupSort [type] { readonly aggregateAlias: string; readonly direction: 'asc' | 
 insertRow [const] <TRow extends QueryResultRow>({ tx, ...descriptor }: ExecutorOptions & InsertQueryDescriptor) => Promise<readonly TRow[]>
 
 ## ./db/olap/decode-grouped-rows.util
-decodeGroupedRows [const] ({ aggregates, columnKeys, maskAlias, requested, rows }: DecodeGroupedRowsArgs) => { tableGroup: { aggregates: { columnKey: string; fn: AggregateFn; value: unknown; }[]; count: number; isSubtotal: boolean; path: { columnKey: string; label: string; value: unknown; }[]; }; }[]
+decodeGroupedRows [const] ({ aggregates, columnKeys, maskAlias, requested, rows, truncations }: DecodeGroupedRowsArgs) => { tableGroup: { aggregates: { columnKey: string; fn: AggregateFn; value: unknown; }[]; count: number; isSubtotal: boolean; path: { columnKey: string; label: string; value: unknown; }[]; }; }[]
 RequestedGroupAggregate [type] { readonly column: string; readonly fn: AggregateFn; }
 toGroupAggregates [const] ({ requested }: { readonly requested: readonly RequestedGroupAggregate[]; }) => readonly GroupAggregate[]
 toGroupSort [const] ({ groupKeys, sort }: ToGroupSortArgs) => readonly GroupSort[]
 
 ## ./db/olap/olap.types
+GroupKeyTruncation [type] { readonly isZoned: boolean; readonly period: GroupKeyPeriod; }
 OlapDrillRead [type] { readonly filters: readonly QueryFilter[]; readonly includeTotal: boolean; readonly limit: number; readonly offset: number; readonly sort: readonly QuerySort[]; }
 OlapDrillRefusal [type] 'grand-total' | 'incomplete-path' | 'subtotal'
 OlapDrillTranslation [type] { readonly kind: 'drillable'; readonly read: OlapDrillRead; } | { readonly kind: 'refused'; readonly reason: OlapDrillRefusal; }
 
 ## ./db/olap/to-drill-read.util
-toDrillRead [const] ({ filters, group, groupKeys, limit, maxLimit, primaryKey, sort }: ToDrillReadArgs) => OlapDrillTranslation
+toDrillRead [const] ({ filters, group, groupKeys, limit, maxLimit, primaryKey, sort, truncations }: ToDrillReadArgs) => OlapDrillTranslation
+
+## ./db/olap/to-group-key-truncations.util
+toGroupKeyTruncations [const] ({ capabilities, periods }: ToGroupKeyTruncationsArgs) => Readonly<Record<string, GroupKeyTruncation>>
 
 ## ./db/olap/to-group-label.util
 toGroupLabel [const] (value: unknown) => string
 
 ## ./db/olap/to-group-row.util
-toGroupRow [const] ({ aggregates, columnKeys, countAlias, maskAlias, row }: ToGroupRowArgs) => { tableGroup: { aggregates: { columnKey: string; fn: AggregateFn; value: unknown; }[]; count: number; isSubtotal: boolean; path: { columnKey: string; label: string; value: unknown; }[]; }; }
+toGroupRow [const] ({ aggregates, columnKeys, countAlias, maskAlias, row, truncations }: ToGroupRowArgs) => { tableGroup: { aggregates: { columnKey: string; fn: AggregateFn; value: unknown; }[]; count: number; isSubtotal: boolean; path: { columnKey: string; label: string; value: unknown; }[]; }; }
 
 ## ./db/query-builder/build-count-query.util
 buildCountQuery [const] ({ allowedColumns, column, filters, schema, table }: CountQueryDescriptor) => BuiltQuery
@@ -146,7 +156,7 @@ selectDistinctRows [const] <TRow extends QueryResultRow>(descriptor: ExecutorOpt
 selectFilterOptions [const] ({ allowedColumns, column, columnType, limit, offset, schema, table, tx }: SelectFilterOptionsArgs) => Promise<FilterOptionsPage>
 
 ## ./db/select-grouped-rows.util
-selectGroupedRows [const] <TRow extends QueryResultRow>({ tx, ...descriptor }: ExecutorOptions & SelectGroupedRowsArgs) => Promise<{ aggregates: readonly BuiltGroupAggregate[]; estimate: GroupCardinalityEstimate; groupingSetMasks: readonly number[]; keys: readonly string[]; maskAlias: "group_mask"; rows: readonly TRow[]; warning?: GroupCardinalityWarning | undefined; }>
+selectGroupedRows [const] <TRow extends QueryResultRow>({ tx, ...descriptor }: ExecutorOptions & SelectGroupedRowsArgs) => Promise<{ aggregates: readonly BuiltGroupAggregate[]; estimate: GroupCardinalityEstimate; groupingSetMasks: readonly number[]; keys: readonly string[]; maskAlias: "group_mask"; rows: readonly TRow[]; truncations: Readonly<Record<string, GroupKeyTruncation>>; warning?: GroupCardinalityWarning | undefined; }>
 
 ## ./db/select-rows.util
 selectRows [const] <TRow extends QueryResultRow>({ tx, ...descriptor }: ExecutorOptions & SelectQueryDescriptor) => Promise<readonly TRow[]>

@@ -39,16 +39,21 @@ PaginatedQuery [type] { /** * Keyset cursor — the sort-key tuple of the last r
 PaginatedSort [type] { readonly columnKey: PropertyKey; readonly direction?: 'asc' | 'desc'; }
 
 ## ./olap/encode-drill-group.util
-encodeDrillGroup [const] ({ group, groupKeys }: EncodeDrillGroupArgs) => string
+encodeDrillGroup [const] ({ group, groupKeys, periods }: EncodeDrillGroupArgs) => string
+
+## ./olap/is-olap-group-period.util
+isOlapGroupPeriod [const] (value: unknown) => value is OlapGroupPeriod
 
 ## ./olap/olap.constants
 OLAP_DRILL_GROUP_PARAM [const] "group"
+OLAP_GROUP_PERIODS [const] readonly OlapGroupPeriod[]
 OLAP_GROUP_ROW_FIELD [const] "tableGroup"
 
 ## ./olap/olap.types
 OlapDrillGroup [type] { readonly isSubtotal: boolean; readonly path: readonly OlapGroupPathEntry[]; }
-OlapDrillRequest [type] { readonly group: OlapDrillGroup; readonly groupKeys: readonly string[]; }
+OlapDrillRequest [type] { readonly group: OlapDrillGroup; readonly groupKeys: readonly string[]; /** The granularity each temporal key was grouped at, by column. */ readonly periods?: Readonly<Record<string, OlapGroupPeriod>>; }
 OlapGroupPathEntry [type] { readonly columnKey: string; readonly value: unknown; }
+OlapGroupPeriod [type] 'day' | 'month' | 'quarter' | 'year'
 
 ## ./olap/parse-drill-group.util
 parseDrillGroup [const] (params: URLSearchParams) => OlapDrillRequest | undefined

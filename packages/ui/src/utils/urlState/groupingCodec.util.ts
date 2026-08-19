@@ -126,6 +126,44 @@ const narrowGranularities = ({
  * an object literal with fixed keys, and the aggregate map with
  * `Object.fromEntries` — neither reaches a prototype setter.
  */
+/**
+ * One optional member's outcome. `refused` is not `absent`: a member that is
+ * present and unreadable rejects the **whole** payload, and collapsing the two
+ * is how a partly-accepted configuration would get through (ADR-061).
+ */
+type NarrowedMember<TValue> =
+  | { readonly kind: 'absent' }
+  | { readonly kind: 'present'; readonly value: TValue }
+  | { readonly kind: 'refused' };
+
+const ABSENT = { kind: 'absent' } as const;
+const REFUSED = { kind: 'refused' } as const;
+
+type ReadOptionalMemberArgs<TValue> = {
+  readonly member: string;
+  readonly narrow: (value: unknown) => TValue | undefined;
+  readonly parsed: Record<string, unknown>;
+};
+
+/**
+ * Reads one optional member under the envelope's single rule, so `agg`, `gran`
+ * and `mode` cannot come to be refused on three slightly different terms.
+ */
+const readOptionalMember = <TValue>({
+  member,
+  narrow,
+  parsed,
+}: ReadOptionalMemberArgs<TValue>): NarrowedMember<TValue> => {
+  if (!Object.hasOwn(parsed, member)) return ABSENT;
+
+  const value = narrow(parsed[member]);
+
+  return value === undefined ? REFUSED : { kind: 'present', value };
+};
+
+const narrowMode = (value: unknown) =>
+  isTableGroupingMode(value) ? value : undefined;
+
 const narrowCompactGrouping = (parsed: unknown) => {
   if (!isObject(parsed) || Array.isArray(parsed)) {
     return;
@@ -145,37 +183,40 @@ const narrowCompactGrouping = (parsed: unknown) => {
     return;
   }
 
+  const agg = readOptionalMember({
+    member: 'agg',
+    narrow: narrowAggregates,
+    parsed,
+  });
+  const gran = readOptionalMember({
+    member: 'gran',
+    narrow: (value) => narrowGranularities({ keys, value }),
+    parsed,
+  });
   // A `mode` outside the union refuses the whole payload rather than falling
   // back to `flat`: the mode decides which grouping sets the read emits, so
   // substituting one answers a different question from the one the link
   // describes — the same whole-state rule the keys are refused under.
-  if (Object.hasOwn(parsed, 'mode') && !isTableGroupingMode(parsed.mode)) {
+  const mode = readOptionalMember({
+    member: 'mode',
+    narrow: narrowMode,
+    parsed,
+  });
+
+  if (
+    agg.kind === 'refused' ||
+    gran.kind === 'refused' ||
+    mode.kind === 'refused'
+  ) {
     return;
   }
 
-  const rawMode: unknown = parsed.mode;
-  const mode = isTableGroupingMode(rawMode) ? { mode: rawMode } : {};
-
-  const hasGranularities = Object.hasOwn(parsed, 'gran');
-  const granularities = hasGranularities
-    ? narrowGranularities({ keys, value: parsed.gran })
-    : undefined;
-
-  if (hasGranularities && granularities === undefined) {
-    return;
-  }
-
-  const gran = granularities === undefined ? {} : { gran: granularities };
-
-  if (!Object.hasOwn(parsed, 'agg')) {
-    return { ...gran, keys, ...mode } satisfies CompactGrouping;
-  }
-
-  const agg = narrowAggregates(parsed.agg);
-
-  return agg === undefined
-    ? undefined
-    : ({ agg, ...gran, keys, ...mode } satisfies CompactGrouping);
+  return {
+    ...(agg.kind === 'present' && { agg: agg.value }),
+    ...(gran.kind === 'present' && { gran: gran.value }),
+    keys,
+    ...(mode.kind === 'present' && { mode: mode.value }),
+  } satisfies CompactGrouping;
 };
 
 /** Codec for the compact `grouping` search param. */

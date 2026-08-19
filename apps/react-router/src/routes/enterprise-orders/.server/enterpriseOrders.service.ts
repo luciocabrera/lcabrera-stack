@@ -114,7 +114,7 @@ export type SelectGroupedOrdersArgs = {
  * plain `SerializableDbError` union instead (ADR-050, ADR-066). A warning is
  * not an error and rides beside real data.
  */
-export const selectGroupedOrders = async ({
+const selectGroupedOrders = async ({
   aggregates: selectedAggregates,
   filters,
   groupKeys,

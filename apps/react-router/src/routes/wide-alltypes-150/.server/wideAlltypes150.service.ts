@@ -91,7 +91,7 @@ export type SelectGroupedWideAlltypes150Args = {
  * strips their prototype without a word, so an `instanceof` on the client is
  * always false (ADR-050, ADR-066).
  */
-export const selectGroupedWideAlltypes150 = async ({
+const selectGroupedWideAlltypes150 = async ({
   aggregates: selectedAggregates,
   groupKeys,
   groupMode,
