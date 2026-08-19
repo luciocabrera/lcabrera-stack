@@ -1,4 +1,4 @@
-# ADR-081 — OLAP is a Table feature, so its seam lives in the packages
+# ADR-082 — OLAP is a Table feature, so its seam lives in the packages
 
 - **Status:** Accepted
 - **Date:** 2026-08-19

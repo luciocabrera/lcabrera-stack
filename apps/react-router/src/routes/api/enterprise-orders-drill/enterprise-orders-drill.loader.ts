@@ -18,7 +18,7 @@ import { parseOrdersPageParams } from '../enterprise-orders-paginated/parseOrder
  * group-key terms come out of the sort, the primary key goes back in as a
  * tiebreaker, and the view's own grouping must not travel with the read or it
  * returns group rows again. `@lcabrera/server`'s `toDrillRead` owns all four,
- * and this route supplies only its own primary key and page ceiling (ADR-081).
+ * and this route supplies only its own primary key and page ceiling (ADR-082).
  * A second implementation on the client would be a second place for them to
  * drift.
  *

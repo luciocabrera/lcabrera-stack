@@ -31,7 +31,7 @@ const toWireEntry = ({ columnKey, value }: OlapGroupPathEntry) => ({
 /**
  * The `group` search-param value for a drill into one group row (ADR-079).
  *
- * The parser is its other half and lives beside it (ADR-081): a drill request is
+ * The parser is its other half and lives beside it (ADR-082): a drill request is
  * encoded in the browser and decoded on the server, and the two are behaviour
  * rather than a shape — nothing about a type would catch them drifting apart.
  * `drill-group-codec.test.ts` is what asserts they have not.

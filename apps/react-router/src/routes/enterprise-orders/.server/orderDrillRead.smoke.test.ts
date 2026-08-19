@@ -105,7 +105,7 @@ type DrillArgs = {
 
 const drilledPage = async ({ filters, keys, summary }: DrillArgs) => {
   // A grid's group row carries a `label` the wire shape does not declare, and is
-  // structurally assignable to it — so it is passed through unchanged (ADR-081).
+  // structurally assignable to it — so it is passed through unchanged (ADR-082).
   const drill = toOrderDrillRead({
     filters,
     group: summary,

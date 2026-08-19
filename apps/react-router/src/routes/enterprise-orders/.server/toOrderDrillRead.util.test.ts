@@ -12,7 +12,7 @@ import { toOrderDrillRead } from './toOrderDrillRead.util';
  * The translation itself is tested in `@lcabrera/server` — this asserts only
  * what the app supplies, which is the whole of what this adapter adds. Both
  * constants are read from the config rather than written as literals, so the
- * test tracks a change to either instead of pinning today's value (ADR-081).
+ * test tracks a change to either instead of pinning today's value (ADR-082).
  */
 const GROUP: OlapDrillGroup = {
   isSubtotal: false,

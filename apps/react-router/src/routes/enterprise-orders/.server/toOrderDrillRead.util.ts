@@ -23,7 +23,7 @@ type ToOrderDrillReadArgs = {
 };
 
 /**
- * This route's binding of the generic drill translation (ADR-081).
+ * This route's binding of the generic drill translation (ADR-082).
  *
  * The rules that make a drill correct — inherited filters, `IS NULL` for a NULL
  * key, group-key terms out of the sort, no grouping on the read — are a table

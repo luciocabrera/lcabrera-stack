@@ -76,7 +76,7 @@ export const ACTIONS_COLUMN_KEY = 'actions';
  *
  * The literal comes from `@lcabrera/api`: a route's server-side read is what
  * writes this field, so the name belongs to the wire rather than to either end
- * (ADR-081). The `keyof TableGroupRow` annotation stays here and is the guard —
+ * (ADR-082). The `keyof TableGroupRow` annotation stays here and is the guard —
  * a compile error the moment the wire name and this package's row shape
  * disagree.
  */

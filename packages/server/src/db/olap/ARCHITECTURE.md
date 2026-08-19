@@ -10,7 +10,7 @@ the same way `query-builder/` is.
 Grouping, rollup, cube and drill are features of a table, in the same sense that
 sorting and filtering are — so their machinery belongs to the packages, not to
 whichever app first needed it
-([ADR-081](../../../../../docs/decisions/ADR-081-the-olap-seam-lives-in-the-packages.md)).
+([ADR-082](../../../../../docs/decisions/ADR-082-the-olap-seam-lives-in-the-packages.md)).
 Every file here was previously a `toOrder*` module in `apps/react-router`, and
 none of them referenced an order: what looked like route code was the protocol.
 

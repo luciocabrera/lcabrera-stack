@@ -34,7 +34,7 @@ export type FetchOrderDrillArgs = Omit<PaginatedFetchArgs, 'cursor' | 'skip'> &
  *
  * **The group descriptor is encoded by `@lcabrera/api`, not here.** Its parser
  * is the other half of one codec, and a request written by hand beside a reader
- * written elsewhere is behaviour duplicated rather than a shape (ADR-081) —
+ * written elsewhere is behaviour duplicated rather than a shape (ADR-082) —
  * which is how the `undefined`-valued key that JSON silently drops went
  * unnoticed. Dropping the display `label` is part of that contract: what a
  * drill is built from is the raw value.

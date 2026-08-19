@@ -7,7 +7,7 @@ import { OLAP_DRILL_GROUP_PARAM } from './olap.constants';
 import { parseDrillGroup } from './parse-drill-group.util';
 
 /**
- * The encoder and the parser are two halves of one codec (ADR-081). Nothing
+ * The encoder and the parser are two halves of one codec (ADR-082). Nothing
  * about a *type* would catch them drifting apart — a JSON writer and its reader
  * can disagree in any way at all and still compile — so the guard is this
  * round trip, and it is the reason both halves live in this package.

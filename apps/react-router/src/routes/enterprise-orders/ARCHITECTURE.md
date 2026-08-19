@@ -225,7 +225,7 @@ hand-edited depth-9 URL costs no catalogue query.
 for one grouping set per prefix of the key list plus the empty grand total. Each
 row comes back with `GROUPING(k₁, …, kₙ)` under `maskAlias`, which is the only
 thing separating a **real** NULL key from a **structural** one — the two rows are
-textually identical. `@lcabrera/server`'s `toGroupRow` decodes it (ADR-081): the
+textually identical. `@lcabrera/server`'s `toGroupRow` decodes it (ADR-082): the
 keys whose bit is set are
 dropped from `path`, so the path that remains is the row's own prefix and its
 length is the row's depth, and `isSubtotal` says whether anything was rolled up
@@ -279,7 +279,7 @@ type of all four table routes at once.
 
 Each row carries a `TableGroupRowSummary` and nothing else, built by
 `@lcabrera/server`'s `toGroupRow` — a table feature rather than a route one, so
-it ships with the package that writes the mask it reads (ADR-081). Its `path`
+it ships with the package that writes the mask it reads (ADR-082). Its `path`
 names the levels **that row is actually grouped
 by**, in nesting order — which under `rollup` is a prefix of the key list rather
 than all of it: a subtotal carries one level fewer than the rows it totals, and

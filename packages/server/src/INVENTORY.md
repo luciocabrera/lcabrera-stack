@@ -135,7 +135,7 @@ The route's primary key and page ceiling are arguments — only the route knows
 them — which is the whole of what a caller supplies.
 
 All of this lived in `apps/react-router` until
-[ADR-081](../../../docs/decisions/ADR-081-the-olap-seam-lives-in-the-packages.md);
+[ADR-082](../../../docs/decisions/ADR-082-the-olap-seam-lives-in-the-packages.md);
 none of it ever referenced an order. The drill request's wire codec is the one
 piece that is **not** here: it is `@lcabrera/api`'s `olap/`, because the encoder
 runs in the browser.

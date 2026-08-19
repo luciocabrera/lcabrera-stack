@@ -53,7 +53,7 @@ const isKeyRolledUp = ({ index, keyCount, mask }: IsKeyRolledUpArgs) =>
  * the subtotal across every country, and the two are textually identical — only
  * `GROUPING()` separates them. A set bit means "this row is not keyed by that
  * column", never "no value here". It lives beside `build-group-query`, which is
- * what *writes* the mask: the two are one protocol (ADR-081).
+ * what *writes* the mask: the two are one protocol (ADR-082).
  *
  * The decode produces two things the renderer needs and cannot derive:
  *

@@ -10,7 +10,7 @@ Grouping, rollup, cube and drill are features of a table in the same sense that
 sorting and filtering are, but the code joining the query engine to the grid had
 to be written by the consuming app: how to decode a grouped read, and how to turn
 a group row back into a query for the rows underneath it. Both are now shipped
-(ADR-081).
+(ADR-082).
 
 **`@lcabrera/server` gains `db/olap/`.**
 
