@@ -84,8 +84,9 @@ const writeBaseline = (findings) => {
     BASELINE_PATH,
     `${JSON.stringify(toBaseline(findings), undefined, 2)}\n`,
   );
+  const relativeBaselinePath = BASELINE_PATH.replace(`${REPO_ROOT}/`, '');
   console.log(
-    `Wrote ${BASELINE_PATH.replace(`${REPO_ROOT}/`, '')}: ${findings.length} undocumented export(s) grandfathered.`,
+    `Wrote ${relativeBaselinePath}: ${findings.length} undocumented export(s) grandfathered.`,
   );
 };
 
