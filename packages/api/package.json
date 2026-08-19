@@ -38,7 +38,11 @@
     "./http/build-paginated-query-params.util": "./src/http/build-paginated-query-params.util.ts",
     "./http/create-paginated-fetcher.util": "./src/http/create-paginated-fetcher.util.ts",
     "./http/http.types": "./src/http/http.types.ts",
-    "./http/fetch-and-validate.util": "./src/http/fetch-and-validate.util.ts"
+    "./http/fetch-and-validate.util": "./src/http/fetch-and-validate.util.ts",
+    "./olap/encode-drill-group.util": "./src/olap/encode-drill-group.util.ts",
+    "./olap/olap.constants": "./src/olap/olap.constants.ts",
+    "./olap/olap.types": "./src/olap/olap.types.ts",
+    "./olap/parse-drill-group.util": "./src/olap/parse-drill-group.util.ts"
   },
   "publishConfig": {
     "exports": {
@@ -85,6 +89,22 @@
       "./http/fetch-and-validate.util": {
         "types": "./dist/http/fetch-and-validate.util.d.mts",
         "default": "./dist/http/fetch-and-validate.util.mjs"
+      },
+      "./olap/encode-drill-group.util": {
+        "types": "./dist/olap/encode-drill-group.util.d.mts",
+        "default": "./dist/olap/encode-drill-group.util.mjs"
+      },
+      "./olap/olap.constants": {
+        "types": "./dist/olap/olap.constants.d.mts",
+        "default": "./dist/olap/olap.constants.mjs"
+      },
+      "./olap/olap.types": {
+        "types": "./dist/olap/olap.types.d.mts",
+        "default": "./dist/olap/olap.types.mjs"
+      },
+      "./olap/parse-drill-group.util": {
+        "types": "./dist/olap/parse-drill-group.util.d.mts",
+        "default": "./dist/olap/parse-drill-group.util.mjs"
       }
     },
     "access": "public"
