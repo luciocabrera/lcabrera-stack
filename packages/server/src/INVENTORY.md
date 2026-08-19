@@ -127,6 +127,15 @@ formats a key against the closed dimension vocabulary
 ([ADR-058](../../../docs/decisions/ADR-058-grouping-legality-by-analytical-role.md))
 and answers `(empty)` rather than guessing at anything outside it.
 
+**Issuing and decoding the read as one pair.** `toGroupAggregates` and
+`decodeGroupedRows` (`decode-grouped-rows.util.ts`) are the two halves of the
+`count(*)`-first convention — the position one puts the count in is the position
+the other skips, and nothing in the type system relates them, so they live in one
+module for the reason ADR-082 keeps an encoder beside its parser. `toGroupSort`
+sits with them: it derives the grouped `ORDER BY` from the table's own sort, one
+term per key in nesting order, dropping a sort on any column a grouped result has
+no values of.
+
 **Drilling back down.** `toDrillRead` (`to-drill-read.util.ts`) turns a group row
 into the paginated read of the rows underneath it, or a typed refusal for a
 grand total, a subtotal or an incomplete path

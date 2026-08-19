@@ -13,7 +13,11 @@ import { getColumnGroupingCapabilities } from '@lcabrera/server/db/get-column-gr
 import { getMaxValue } from '@lcabrera/server/db/get-max-value.util';
 import { getRowsCount } from '@lcabrera/server/db/get-rows-count.util';
 import { insertRow } from '@lcabrera/server/db/insert-row.util';
-import { toGroupRow } from '@lcabrera/server/db/olap/to-group-row.util';
+import {
+  decodeGroupedRows,
+  toGroupAggregates,
+  toGroupSort,
+} from '@lcabrera/server/db/olap/decode-grouped-rows.util';
 import { selectGroupedRows } from '@lcabrera/server/db/select-grouped-rows.util';
 import { selectRows } from '@lcabrera/server/db/select-rows.util';
 import { updateRows } from '@lcabrera/server/db/update-rows.util';
@@ -83,6 +87,11 @@ export type SelectGroupedOrdersArgs = {
  * Read one row per distinct combination of the group keys, each carrying how
  * many orders it covers and the selected aggregates.
  *
+ * What is left here is the route's own: which table, which aggregates the UI
+ * offered, and the row ceiling it will serve. Building the aggregate list,
+ * deriving the grouped ORDER BY and decoding the result are a table feature and
+ * live in `@lcabrera/server/db/olap` (ADR-082).
+ *
  * The whole result is returned at once and `hasMore` is `false`, because a
  * grouped read is not paginated (ADR-059): there is no stable cursor over a
  * result the server aggregated, and the row count is bounded by the number of
@@ -117,47 +126,21 @@ export const selectGroupedOrders = async ({
   try {
     const { aggregates, maskAlias, rows, warning } = await selectGroupedRows({
       ...TARGET,
-      aggregates: [{ fn: 'count' }, ...requested],
+      aggregates: toGroupAggregates({ requested }),
       filters,
       grouping: groupMode,
       keys: groupKeys,
       maxRows: ENTERPRISE_ORDER_GROUP_MAX_ROWS,
-      // One term per key, in **nesting order**, carrying the user's direction
-      // where they sorted that key and ascending where they did not. The
-      // nesting order is not negotiable — it is the tree — so a user's sort
-      // sets a level's direction rather than reordering the levels, and under
-      // a rollup the `GROUPING` term keeps its own placement so a subtotal
-      // stays a footer whichever way its key runs.
-      //
-      // Key sorts only. An aggregate sort would be legal at the innermost
-      // level and is not offered here: nothing in this route's UI can express
-      // one, and the builder refuses the ancestor-ranking shape at
-      // construction rather than emitting a term that orders nothing.
-      sort: groupKeys.map((key) => ({
-        direction:
-          sort.find((entry) => entry.column === key)?.direction ?? 'asc',
-        key,
-      })),
+      sort: toGroupSort({ groupKeys, sort }),
     });
 
-    // `count(*)` is requested first, so the emitted aliases line up with
-    // `requested` one place along.
-    const countAlias = aggregates[0]?.alias ?? '';
-    const decodedAggregates = requested.map((aggregate, index) => ({
-      alias: aggregates[index + 1]?.alias ?? '',
-      columnKey: aggregate.column,
-      fn: aggregate.fn,
-    }));
-
-    const data = rows.map((row) =>
-      toGroupRow({
-        aggregates: decodedAggregates,
-        columnKeys: groupKeys,
-        countAlias,
-        maskAlias,
-        row,
-      }),
-    );
+    const data = decodeGroupedRows({
+      aggregates,
+      columnKeys: groupKeys,
+      maskAlias,
+      requested,
+      rows,
+    });
 
     return {
       data,

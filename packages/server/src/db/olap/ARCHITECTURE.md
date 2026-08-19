@@ -23,12 +23,13 @@ them look separable.
 
 ## Files
 
-| File                     | Role                                                                                                  |
-| ------------------------ | ----------------------------------------------------------------------------------------------------- |
-| `to-drill-read.util.ts`  | **Entry point.** A group row → the paginated read of the rows underneath it, or a typed refusal       |
-| `to-group-row.util.ts`   | **Entry point.** One row of a grouped read → the group summary a grid renders, decoding the mask      |
-| `to-group-label.util.ts` | One group key value → its display string. Composed by `to-group-row`; the closed dimension vocabulary |
-| `olap.types.ts`          | `OlapDrillRead`, `OlapDrillRefusal`, `OlapDrillTranslation`                                           |
+| File                          | Role                                                                                                        |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `decode-grouped-rows.util.ts` | **Entry point.** `toGroupAggregates` / `decodeGroupedRows` — the `count(*)`-first pair — plus `toGroupSort` |
+| `to-drill-read.util.ts`       | **Entry point.** A group row → the paginated read of the rows underneath it, or a typed refusal             |
+| `to-group-row.util.ts`        | **Entry point.** One row of a grouped read → the group summary a grid renders, decoding the mask            |
+| `to-group-label.util.ts`      | One group key value → its display string. Composed by `to-group-row`; the closed dimension vocabulary       |
+| `olap.types.ts`               | `OlapDrillRead`, `OlapDrillRefusal`, `OlapDrillTranslation`                                                 |
 
 ## The mask is the only thing that separates a subtotal from a NULL
 

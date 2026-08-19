@@ -76,6 +76,12 @@ GroupSort [type] { readonly aggregateAlias: string; readonly direction: 'asc' | 
 ## ./db/insert-row.util
 insertRow [const] <TRow extends QueryResultRow>({ tx, ...descriptor }: ExecutorOptions & InsertQueryDescriptor) => Promise<readonly TRow[]>
 
+## ./db/olap/decode-grouped-rows.util
+decodeGroupedRows [const] ({ aggregates, columnKeys, maskAlias, requested, rows }: DecodeGroupedRowsArgs) => { tableGroup: { aggregates: { columnKey: string; fn: AggregateFn; value: unknown; }[]; count: number; isSubtotal: boolean; path: { columnKey: string; label: string; value: unknown; }[]; }; }[]
+RequestedGroupAggregate [type] { readonly column: string; readonly fn: AggregateFn; }
+toGroupAggregates [const] ({ requested }: { readonly requested: readonly RequestedGroupAggregate[]; }) => readonly GroupAggregate[]
+toGroupSort [const] ({ groupKeys, sort }: ToGroupSortArgs) => readonly GroupSort[]
+
 ## ./db/olap/olap.types
 OlapDrillRead [type] { readonly filters: readonly QueryFilter[]; readonly includeTotal: boolean; readonly limit: number; readonly offset: number; readonly sort: readonly QuerySort[]; }
 OlapDrillRefusal [type] 'grand-total' | 'incomplete-path' | 'subtotal'
