@@ -177,4 +177,18 @@ describe('ActiveGroupKeyList', () => {
     expect(screen.queryByRole('button', { name: /Remove/ })).toBeNull();
     expect(screen.queryByTestId('group-key-list')).toBeNull();
   });
+
+  it('claims no grouping exists when a lock is declared over no keys', () => {
+    // `isGroupingLocked` is a route declaration in its own right — nothing ties
+    // it to a default or to keys in the URL — so this state is reachable, and a
+    // message asserting the table "is grouped by a fixed set of columns" would
+    // be false in it.
+    isGroupingLockedRef.current = true;
+    groupingKeysRef.current = [];
+
+    render(<ActiveGroupKeyList />);
+
+    expect(screen.getByText(/No grouping applied/)).toBeTruthy();
+    expect(screen.queryByText(/grouped by a fixed set/)).toBeNull();
+  });
 });

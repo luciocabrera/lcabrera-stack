@@ -76,8 +76,13 @@ export const ActiveGroupKeyList = ({
       />
       {groupKeyItems.length === 0 && (
         <InfoBox>
+          {/*
+           * The locked wording describes the lock and does not claim a grouping
+           * exists: a route may declare `isGroupingLocked` with no default and
+           * no keys in the URL, and this branch is exactly that case.
+           */}
           {isGroupingLocked
-            ? 'This table is grouped by a fixed set of columns.'
+            ? 'No grouping applied, and it cannot be changed here.'
             : 'No grouping applied. Add a column above to group the rows.'}
         </InfoBox>
       )}
