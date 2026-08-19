@@ -33,11 +33,12 @@ describe('parseOrderDrillGroup', () => {
   it('keeps a null key rather than dropping it', () => {
     // The NULL group is a group, and it is precisely the one a drill would
     // otherwise silently return nothing for (ADR-079).
+    // Built from JSON rather than a source literal: a NULL key reaches this
+    // parser as the wire value `null`, and that is what the test should send.
     const parsed = parseOrderDrillGroup(
-      params({
-        ...VALID,
-        keys: ['status'],
-        path: [{ columnKey: 'status', value: null }],
+      new URLSearchParams({
+        group:
+          '{"isSubtotal":false,"keys":["status"],"path":[{"columnKey":"status","value":null}]}',
       }),
     );
 
@@ -74,9 +75,9 @@ describe('parseOrderDrillGroup', () => {
 
   it('refuses a descriptor missing the subtotal flag', () => {
     // Defaulting it to `false` would make every malformed request drillable.
-    const { isSubtotal: _dropped, ...withoutFlag } = VALID;
-
-    expect(parseOrderDrillGroup(params(withoutFlag))).toBeUndefined();
+    expect(
+      parseOrderDrillGroup(params({ keys: VALID.keys, path: VALID.path })),
+    ).toBeUndefined();
   });
 
   it('refuses a non-string key', () => {

@@ -1,7 +1,7 @@
-import type { OrderDrillGroup } from '@/routes/enterprise-orders/.server/toOrderDrillRead.util';
-
 import { isObject } from '@lcabrera/utils/guards/is-object.util';
 import { safeJsonParse } from '@lcabrera/utils/json/safe-json-parse.util';
+
+import type { OrderDrillGroup } from '@/routes/enterprise-orders/.server/toOrderDrillRead.util';
 
 export type ParsedOrderDrillGroup = {
   readonly groupKeys: readonly string[];
@@ -54,7 +54,7 @@ export const parseOrderDrillGroup = (
     typeof isSubtotal !== 'boolean' ||
     !Array.isArray(keys) ||
     !Array.isArray(path) ||
-    !keys.every((key) => typeof key === 'string')
+    keys.some((key) => typeof key !== 'string')
   )
     return;
 

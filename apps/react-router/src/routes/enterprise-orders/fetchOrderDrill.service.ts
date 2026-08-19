@@ -10,14 +10,11 @@ import { isEnterpriseOrdersResponse } from './config';
 
 const DRILL_PATH = '/_api/enterprise-orders/drill';
 
-export type FetchOrderDrillArgs = Omit<
-  PaginatedFetchArgs,
-  'cursor' | 'skip'
-> & {
+export type FetchOrderDrillArgs = {
   /** The applied group keys, in nesting order — what "complete" is measured against. */
   readonly groupKeys: readonly string[];
   readonly summary: TableGroupRowSummary;
-};
+} & Omit<PaginatedFetchArgs, 'cursor' | 'skip'>;
 
 /**
  * Fetches one bounded page of the rows underneath a group row

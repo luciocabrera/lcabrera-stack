@@ -11,6 +11,14 @@ import {
   MAX_ENTERPRISE_ORDERS_LIMIT,
 } from '../config/enterpriseOrders.constants';
 
+/**
+ * Only what the translation reads. A whole `TableGroupRowSummary` satisfies it
+ * structurally, so every existing caller is unaffected — but a caller that has
+ * only a path and a flag, which is all an HTTP request can carry, does not have
+ * to fabricate a `count` and an `aggregates` list nobody looks at.
+ */
+export type OrderDrillGroup = Pick<TableGroupRowSummary, 'isSubtotal' | 'path'>;
+
 export type OrderDrillRead =
   | { readonly kind: 'drillable'; readonly read: SelectOrdersPageArgs }
   | { readonly kind: 'refused'; readonly reason: OrderDrillRefusal };
@@ -22,14 +30,6 @@ export type OrderDrillRead =
  * is a bug rather than a state.
  */
 export type OrderDrillRefusal = 'grand-total' | 'incomplete-path' | 'subtotal';
-
-/**
- * Only what the translation reads. A whole `TableGroupRowSummary` satisfies it
- * structurally, so every existing caller is unaffected — but a caller that has
- * only a path and a flag, which is all an HTTP request can carry, does not have
- * to fabricate a `count` and an `aggregates` list nobody looks at.
- */
-export type OrderDrillGroup = Pick<TableGroupRowSummary, 'isSubtotal' | 'path'>;
 
 type ToOrderDrillReadArgs = {
   /** The filters the grouped view was read under, unchanged. */
