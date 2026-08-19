@@ -293,3 +293,44 @@ export const TABLE_TOTALS_PLACEMENT_LABELS: Record<
  * and the two have to agree for the setting to reach the query at all (#578).
  */
 export const TABLE_TOTALS_PLACEMENT_PARAM = 'totals';
+
+/**
+ * The aggregates a share of the total is offered on, and the reason it is a
+ * short list: a share is a ratio to a denominator the client derives, and only
+ * an **additive** measure has one it can derive correctly (#648).
+ *
+ * Measured against the seeded fixture rather than reasoned about: summing each
+ * group's `avg(total_amount)` gives 20,693.1712 where the true grand total is
+ * 21,302.8933, and summing each group's `count(DISTINCT shipping_country)`
+ * gives 24 where the true answer is 3. The second is the dangerous one — those
+ * shares still sum to 100% and read as correct while being wrong eightfold.
+ *
+ * `min`/`max` are excluded for a different reason: they are derivable across
+ * groups, but a share *of* a minimum is not a quantity anyone means.
+ */
+export const TABLE_SHAREABLE_AGGREGATE_FNS: readonly TableAggregateFn[] = [
+  'count',
+  'sum',
+];
+
+/**
+ * What the share says it is a share **of**. The denominator is a decision
+ * (#648, ADR-086), so it is named wherever the number is read rather than left
+ * for the reader to assume.
+ */
+export const TABLE_SHARE_OF_TOTAL_LABEL = 'of the grand total';
+
+/** The drawer control that turns the share on, named for the denominator. */
+export const TABLE_SHARE_OF_TOTAL_TOGGLE_LABEL = 'Show share of grand total';
+
+/**
+ * What a share cell renders when no denominator could be established — a zero
+ * total, an absent grand-total row, or a value that is not a finite number.
+ *
+ * A dash rather than `0.0%` or `NaN`, and paired with spoken text for the same
+ * reason `TABLE_GROUP_NO_AGGREGATE_GLYPH` is: a standalone dash may not be
+ * announced at all.
+ */
+export const TABLE_SHARE_UNAVAILABLE_GLYPH = '—';
+
+export const TABLE_SHARE_UNAVAILABLE_LABEL = 'No share available';

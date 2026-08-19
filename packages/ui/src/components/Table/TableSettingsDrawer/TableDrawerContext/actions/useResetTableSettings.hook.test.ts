@@ -33,7 +33,8 @@ const {
     readonly keys: readonly string[];
     readonly mode: string;
     readonly periods: Record<string, string>;
-  } = { aggregates: {}, keys: [], mode: 'flat', periods: {} };
+    readonly shares: readonly string[];
+  } = { aggregates: {}, keys: [], mode: 'flat', periods: {}, shares: [] };
 
   return {
     drawerColumnsStore: {
@@ -78,7 +79,13 @@ vi.mock('../useTableDrawerContextValue.hook', () => ({
 describe('useResetTableSettings', () => {
   beforeEach(() => {
     setTableColumnsState(undefined);
-    setTableGrouping({ aggregates: {}, keys: [], mode: 'flat', periods: {} });
+    setTableGrouping({
+      aggregates: {},
+      keys: [],
+      mode: 'flat',
+      periods: {},
+      shares: [],
+    });
     drawerColumnsStore.set.mockClear();
     drawerGroupingStore.set.mockClear();
   });
@@ -132,6 +139,7 @@ describe('useResetTableSettings', () => {
       keys: ['status'],
       mode: 'flat',
       periods: {},
+      shares: [],
     });
 
     const { result } = renderHook(() => useResetTableSettings());
@@ -145,6 +153,7 @@ describe('useResetTableSettings', () => {
       keys: ['status'],
       mode: 'flat',
       periods: {},
+      shares: [],
     });
   });
 });

@@ -2,6 +2,7 @@ import type { TableColumn } from '#ui/components/Table';
 import type { TableGroupingState } from '#ui/components/Table/Table.types';
 
 import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
+import { isShareableAggregate } from '#ui/components/Table/contexts/TableConfig/grouping/utils';
 import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
 
 type SanitizeGroupingByColumnsArgs<TData extends Record<string, unknown>> = {
@@ -14,6 +15,7 @@ const NO_GROUPING: TableGroupingState = {
   keys: [],
   mode: 'flat',
   periods: {},
+  shares: [],
 };
 
 /**
@@ -58,7 +60,7 @@ export const sanitizeGroupingByColumns = <
   columns,
   grouping,
 }: SanitizeGroupingByColumnsArgs<TData>): TableGroupingState => {
-  const { aggregates, keys, mode, periods } = grouping;
+  const { aggregates, keys, mode, periods, shares } = grouping;
 
   if (keys.length === 0 || keys.length > MAX_TABLE_GROUP_KEYS) {
     return NO_GROUPING;
@@ -80,16 +82,27 @@ export const sanitizeGroupingByColumns = <
   const isEveryGranularityOnAKey = Object.keys(periods).every((column) =>
     appliedKeys.has(column),
   );
+  // A share divides a measure by a total the client derives, and only an
+  // additive measure has one it can derive correctly — so a share on any other
+  // aggregate is not a rounding difference but a wrong number that still sums
+  // to 100% (#648). Refused with the rest rather than dropped, because a link
+  // promising a percentage column that silently does not appear is the failure
+  // ADR-061 refuses whole configurations to avoid.
+  const isEveryShareOnAShareableAggregate = shares.every((column) =>
+    isShareableAggregate(aggregates[column]),
+  );
 
   return isEveryKeyGroupable &&
     areKeysDistinct &&
     isEveryAggregateColumnDeclared &&
-    isEveryGranularityOnAKey
+    isEveryGranularityOnAKey &&
+    isEveryShareOnAShareableAggregate
     ? {
         aggregates: { ...aggregates },
         keys: [...keys],
         mode,
         periods: { ...periods },
+        shares: [...shares],
       }
     : NO_GROUPING;
 };

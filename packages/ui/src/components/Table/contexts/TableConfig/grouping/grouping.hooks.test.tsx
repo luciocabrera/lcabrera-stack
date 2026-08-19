@@ -18,6 +18,7 @@ const NO_GROUPING: TableGroupingState = {
   keys: [],
   mode: 'flat',
   periods: {},
+  shares: [],
 };
 
 /**
@@ -275,6 +276,7 @@ describe('TableConfig grouping hooks', () => {
       keys: ['order_status'],
       mode: 'flat',
       periods: {},
+      shares: [],
     });
 
     const { result } = renderHook(() => useSetTableColumnAggregate());
@@ -305,6 +307,7 @@ describe('TableConfig grouping hooks', () => {
       keys: ['order_status', 'shipping_country'],
       mode: 'flat',
       periods: {},
+      shares: [],
     });
 
     const { result } = renderHook(() => useClearTableGrouping());
@@ -326,6 +329,7 @@ describe('TableConfig grouping hooks', () => {
       keys: ['order_status'],
       mode: 'flat',
       periods: {},
+      shares: [],
     });
 
     const { result } = renderHook(() => useToggleTableGroupKey());

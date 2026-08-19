@@ -11,6 +11,7 @@ const NO_GROUPING: TableGroupingState = {
   keys: [],
   mode: 'flat',
   periods: {},
+  shares: [],
 };
 
 describe('resolveTableGroupingUpdate', () => {
@@ -22,6 +23,7 @@ describe('resolveTableGroupingUpdate', () => {
         keys: ['order_status'],
         mode: 'flat',
         periods: {},
+        shares: [],
       },
     });
 
@@ -31,6 +33,7 @@ describe('resolveTableGroupingUpdate', () => {
         keys: ['order_status'],
         mode: 'flat',
         periods: {},
+        shares: [],
       },
       kind: 'updated',
       persistenceEntry: {
@@ -47,12 +50,14 @@ describe('resolveTableGroupingUpdate', () => {
         keys: ['order_status'],
         mode: 'flat',
         periods: {},
+        shares: [],
       },
       nextGrouping: {
         aggregates: {},
         keys: ['order_status', 'ship_country'],
         mode: 'flat',
         periods: {},
+        shares: [],
       },
     });
 
@@ -62,6 +67,7 @@ describe('resolveTableGroupingUpdate', () => {
         keys: ['order_status', 'ship_country'],
         mode: 'flat',
         periods: {},
+        shares: [],
       },
       kind: 'updated',
       persistenceEntry: {
@@ -78,12 +84,14 @@ describe('resolveTableGroupingUpdate', () => {
         keys: ['order_status'],
         mode: 'flat',
         periods: {},
+        shares: [],
       },
       nextGrouping: {
         aggregates: { total_amount: 'sum' },
         keys: ['order_status'],
         mode: 'flat',
         periods: {},
+        shares: [],
       },
     });
 
@@ -93,6 +101,7 @@ describe('resolveTableGroupingUpdate', () => {
         keys: ['order_status'],
         mode: 'flat',
         periods: {},
+        shares: [],
       },
       kind: 'updated',
       persistenceEntry: {
@@ -119,6 +128,7 @@ describe('resolveTableGroupingUpdate', () => {
           keys: tooManyKeys,
           mode: 'flat',
           periods: {},
+          shares: [],
         },
       }),
     ).toStrictEqual({ kind: 'unchanged' });
@@ -138,6 +148,7 @@ describe('resolveTableGroupingUpdate', () => {
           keys: maximumKeys,
           mode: 'flat',
           periods: {},
+          shares: [],
         },
       }).kind,
     ).toBe('updated');
@@ -150,12 +161,14 @@ describe('resolveTableGroupingUpdate', () => {
         keys: ['order_status'],
         mode: 'flat',
         periods: {},
+        shares: [],
       },
       nextGrouping: {
         aggregates: { total_amount: 'sum' },
         keys: [],
         mode: 'flat',
         periods: {},
+        shares: [],
       },
     });
 
@@ -175,6 +188,7 @@ describe('resolveTableGroupingUpdate', () => {
       keys: ['order_status'],
       mode: 'flat',
       periods: {},
+      shares: [],
     };
 
     expect(
@@ -185,6 +199,7 @@ describe('resolveTableGroupingUpdate', () => {
           keys: ['order_status'],
           mode: 'flat',
           periods: {},
+          shares: [],
         },
       }),
     ).toStrictEqual({ kind: 'unchanged' });
@@ -200,12 +215,14 @@ describe('resolveTableGroupingUpdate', () => {
           keys: ['a', 'b'],
           mode: 'flat',
           periods: {},
+          shares: [],
         },
         nextGrouping: {
           aggregates: {},
           keys: ['b', 'a'],
           mode: 'flat',
           periods: {},
+          shares: [],
         },
       }).kind,
     ).toBe('updated');
@@ -219,12 +236,14 @@ describe('resolveTableGroupingUpdate', () => {
           keys: ['a'],
           mode: 'flat',
           periods: {},
+          shares: [],
         },
         nextGrouping: {
           aggregates: { amount: 'avg' },
           keys: ['a'],
           mode: 'flat',
           periods: {},
+          shares: [],
         },
       }).kind,
     ).toBe('updated');
@@ -242,6 +261,7 @@ describe('resolveTableGroupingUpdate', () => {
           keys: ['order_status', 'order_status'],
           mode: 'flat',
           periods: {},
+          shares: [],
         },
       }),
     ).toStrictEqual({ kind: 'unchanged' });
@@ -255,6 +275,7 @@ describe('resolveTableGroupingUpdate', () => {
       keys: ['order_status'],
       mode: 'flat',
       periods: {},
+      shares: [],
     };
 
     expect(
@@ -265,6 +286,7 @@ describe('resolveTableGroupingUpdate', () => {
           keys: ['priority', 'priority'],
           mode: 'flat',
           periods: {},
+          shares: [],
         },
       }),
     ).toStrictEqual({ kind: 'unchanged' });
@@ -279,6 +301,7 @@ describe('resolveTableGroupingUpdate', () => {
           keys: ['order_status', 'priority'],
           mode: 'flat',
           periods: {},
+          shares: [],
         },
       }).kind,
     ).toBe('updated');
@@ -301,8 +324,15 @@ describe('resolveTableGroupingUpdate', () => {
           keys: ['order_status'],
           mode: 'flat',
           periods: {},
+          shares: [],
         },
-        nextGrouping: { aggregates: {}, keys: [], mode: 'flat', periods: {} },
+        nextGrouping: {
+          aggregates: {},
+          keys: [],
+          mode: 'flat',
+          periods: {},
+          shares: [],
+        },
       }),
     ).toMatchObject({
       kind: 'updated',
@@ -324,9 +354,16 @@ describe('resolveTableGroupingUpdate', () => {
           keys: ['order_status'],
           mode: 'flat',
           periods: {},
+          shares: [],
         },
         hasDefaultGrouping: true,
-        nextGrouping: { aggregates: {}, keys: [], mode: 'flat', periods: {} },
+        nextGrouping: {
+          aggregates: {},
+          keys: [],
+          mode: 'flat',
+          periods: {},
+          shares: [],
+        },
       }),
     ).toMatchObject({
       kind: 'updated',

@@ -47,6 +47,7 @@ const NO_GROUPING: TableGroupingState = {
   keys: [],
   mode: 'flat',
   periods: {},
+  shares: [],
 };
 
 const groupingUrl = (param: string) =>
@@ -320,6 +321,7 @@ describe('createTableRouteLoader', () => {
             keys: ['status'],
             mode: 'flat',
             periods: {},
+            shares: [],
           },
         }),
       );
@@ -457,6 +459,7 @@ describe('createTableRouteLoader', () => {
             keys: ['status', 'name'],
             mode: 'flat',
             periods: {},
+            shares: [],
           },
         }),
       );
@@ -476,6 +479,7 @@ describe('createTableRouteLoader', () => {
             keys: ['status'],
             mode: 'flat',
             periods: {},
+            shares: [],
           },
         }),
       );
@@ -589,6 +593,7 @@ describe('createTableRouteLoader', () => {
       keys: ['status'],
       mode: 'rollup',
       periods: {},
+      shares: [],
     };
 
     const groupingConfig = {

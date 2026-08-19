@@ -26,6 +26,7 @@ const NO_GROUPING: TableGroupingState = {
   keys: [],
   mode: 'flat',
   periods: {},
+  shares: [],
 };
 
 const {
@@ -70,6 +71,7 @@ const {
           keys: [],
           mode: 'flat',
           periods: {},
+          shares: [],
         }),
       ),
       set: vi.fn(),
@@ -178,6 +180,7 @@ describe('useBatchSetTableSettings', () => {
       keys: [],
       mode: 'flat',
       periods: {},
+      shares: [],
     });
     mockGroupingStore.set.mockClear();
     mockMetaStore.get.mockClear();
@@ -386,6 +389,7 @@ describe('useBatchSetTableSettings', () => {
           keys: ['name'],
           mode: 'flat',
           periods: {},
+          shares: [],
         },
         settings: {
           columnFilters: {} as ColumnFiltersState<Row>,
@@ -419,6 +423,7 @@ describe('useBatchSetTableSettings', () => {
       keys: ['name'],
       mode: 'flat',
       periods: {},
+      shares: [],
     });
     expect(mockDataStore.set).toHaveBeenCalledWith({ isLoading: true });
   });
@@ -429,13 +434,20 @@ describe('useBatchSetTableSettings', () => {
       keys: ['name'],
       mode: 'flat',
       periods: {},
+      shares: [],
     });
 
     const { result } = renderHook(() => useBatchSetTableSettings<Row>());
 
     act(() => {
       result.current({
-        grouping: { aggregates: {}, keys: ['name'], mode: 'flat', periods: {} },
+        grouping: {
+          aggregates: {},
+          keys: ['name'],
+          mode: 'flat',
+          periods: {},
+          shares: [],
+        },
         settings: {
           columnFilters: {
             name: { operator: 'contains', type: 'text', value: 'ali' },
@@ -470,7 +482,13 @@ describe('useBatchSetTableSettings', () => {
 
     act(() => {
       result.current({
-        grouping: { aggregates: {}, keys: ['name'], mode: 'flat', periods: {} },
+        grouping: {
+          aggregates: {},
+          keys: ['name'],
+          mode: 'flat',
+          periods: {},
+          shares: [],
+        },
         settings: {
           columnFilters: {} as ColumnFiltersState<Row>,
           columnOrder: ['id', 'age', 'name'],

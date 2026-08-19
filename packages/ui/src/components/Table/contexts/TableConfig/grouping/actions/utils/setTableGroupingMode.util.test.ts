@@ -9,6 +9,7 @@ const grouping: TableGroupingState = {
   keys: ['order_status', 'shipping_country'],
   mode: 'flat',
   periods: {},
+  shares: [],
 };
 
 describe('setTableGroupingMode', () => {
@@ -39,9 +40,21 @@ describe('setTableGroupingMode', () => {
     // is empty, so a mode nobody can see never reaches the URL.
     expect(
       setTableGroupingMode({
-        grouping: { aggregates: {}, keys: [], mode: 'flat', periods: {} },
+        grouping: {
+          aggregates: {},
+          keys: [],
+          mode: 'flat',
+          periods: {},
+          shares: [],
+        },
         mode: 'rollup',
       }),
-    ).toStrictEqual({ aggregates: {}, keys: [], mode: 'rollup', periods: {} });
+    ).toStrictEqual({
+      aggregates: {},
+      keys: [],
+      mode: 'rollup',
+      periods: {},
+      shares: [],
+    });
   });
 });

@@ -9,6 +9,7 @@ const grouping: TableGroupingState = {
   keys: ['order_date', 'status'],
   mode: 'rollup',
   periods: { order_date: 'month' },
+  shares: [],
 };
 
 describe('setTableGroupKeyPeriod', () => {

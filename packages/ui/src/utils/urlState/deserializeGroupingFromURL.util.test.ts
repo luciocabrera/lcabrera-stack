@@ -3,7 +3,13 @@ import { describe, expect, it } from 'vite-plus/test';
 import { deserializeGroupingFromURL } from './deserializeGroupingFromURL.util';
 import { serializeGroupingToURL } from './serializeGroupingToURL.util';
 
-const NO_GROUPING = { aggregates: {}, keys: [], mode: 'flat', periods: {} };
+const NO_GROUPING = {
+  aggregates: {},
+  keys: [],
+  mode: 'flat',
+  periods: {},
+  shares: [],
+};
 
 describe('deserializeGroupingFromURL', () => {
   it('reads the keys back out of a compact param', () => {
@@ -14,6 +20,7 @@ describe('deserializeGroupingFromURL', () => {
       keys: ['order_status'],
       mode: 'flat',
       periods: {},
+      shares: [],
     });
   });
 
@@ -33,6 +40,7 @@ describe('deserializeGroupingFromURL', () => {
       keys: ['order_status'],
       mode: 'flat',
       periods: {},
+      shares: [],
     });
   });
 
@@ -52,6 +60,7 @@ describe('deserializeGroupingFromURL', () => {
       keys: ['order_status', 'shipping_country'],
       mode: 'rollup',
       periods: {},
+      shares: [],
     } as const;
     const param = serializeGroupingToURL({ grouping });
 

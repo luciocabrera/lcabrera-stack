@@ -54,6 +54,7 @@ export const createTableConfigColumnsActionMocks = <
       keys: groupingKeys,
       mode: 'flat',
       periods: {},
+      shares: [],
     })),
     set: vi.fn(),
   };

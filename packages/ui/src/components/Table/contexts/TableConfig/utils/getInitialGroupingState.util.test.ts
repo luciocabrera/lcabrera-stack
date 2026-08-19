@@ -4,7 +4,13 @@ import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
 
 import { getInitialGroupingState } from './getInitialGroupingState.util';
 
-const NO_GROUPING = { aggregates: {}, keys: [], mode: 'flat', periods: {} };
+const NO_GROUPING = {
+  aggregates: {},
+  keys: [],
+  mode: 'flat',
+  periods: {},
+  shares: [],
+};
 
 const keysOfLength = (length: number) =>
   Array.from({ length }, (_unused, index) => `key_${index}`);
@@ -33,6 +39,7 @@ describe('getInitialGroupingState', () => {
       keys: ['order_status'],
       mode: 'flat',
       periods: {},
+      shares: [],
     });
   });
 
@@ -47,6 +54,7 @@ describe('getInitialGroupingState', () => {
       keys: ['order_status'],
       mode: 'flat',
       periods: {},
+      shares: [],
     });
   });
 
@@ -56,6 +64,7 @@ describe('getInitialGroupingState', () => {
       keys: [],
       mode: 'flat',
       periods: {},
+      shares: [],
     });
   });
 

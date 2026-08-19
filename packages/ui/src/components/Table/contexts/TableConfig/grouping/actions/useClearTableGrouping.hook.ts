@@ -15,6 +15,7 @@ export const useClearTableGrouping = () => {
       keys: [],
       mode: 'flat',
       periods: {},
+      shares: [],
     }));
   };
 };

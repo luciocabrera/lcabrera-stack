@@ -653,6 +653,18 @@ export type TableGroupingState = {
    * key at most once, so a column-keyed map is per-key by construction (#786).
    */
   readonly periods: Readonly<Record<string, TableGroupPeriod>>;
+  /**
+   * The columns rendering their measure as a share of the grand total, as a
+   * list rather than a map: unlike an aggregate or a granularity a share
+   * carries no value of its own — the column either shows one or does not
+   * (#648).
+   *
+   * It changes no SQL. The denominator is derived from the rows the read
+   * already returned (ADR-086), so this travels in the URL for the same reason
+   * the rest of the configuration does — a shared link opens showing what its
+   * author saw — and for no query-shaping reason at all.
+   */
+  readonly shares: readonly string[];
 };
 
 /**

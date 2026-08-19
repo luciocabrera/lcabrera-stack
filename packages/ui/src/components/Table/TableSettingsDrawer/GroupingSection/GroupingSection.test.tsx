@@ -55,6 +55,7 @@ const NO_GROUPING: TableGroupingState = {
   keys: [],
   mode: 'flat',
   periods: {},
+  shares: [],
 };
 
 const stores = {
@@ -258,6 +259,7 @@ describe('GroupingSection staging', () => {
       keys: ['order_status'],
       mode: 'flat',
       periods: {},
+      shares: [],
     });
   });
 
@@ -322,6 +324,7 @@ describe('GroupingSection staging', () => {
       keys: ['shipping_country'],
       mode: 'flat',
       periods: {},
+      shares: [],
     });
 
     renderDrawer();
@@ -340,6 +343,7 @@ describe('GroupingSection staging', () => {
       keys: ['shipping_country'],
       mode: 'flat',
       periods: {},
+      shares: [],
     });
     expect(screen.getByText('1. Country')).not.toBeNull();
   });
@@ -350,6 +354,7 @@ describe('GroupingSection staging', () => {
       keys: ['shipping_country'],
       mode: 'flat',
       periods: {},
+      shares: [],
     });
 
     const firstOpen = renderDrawer();
@@ -373,6 +378,7 @@ describe('GroupingSection staging', () => {
       keys: ['order_status'],
       mode: 'flat',
       periods: {},
+      shares: [],
     });
 
     renderDrawer();
@@ -398,6 +404,7 @@ describe('GroupingSection staging', () => {
       keys: ['order_status'],
       mode: 'flat',
       periods: {},
+      shares: [],
     });
 
     renderDrawer();

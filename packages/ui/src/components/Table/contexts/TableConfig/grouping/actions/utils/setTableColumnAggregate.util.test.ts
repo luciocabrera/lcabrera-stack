@@ -9,6 +9,7 @@ const GROUPED: TableGroupingState = {
   keys: ['order_status'],
   mode: 'flat',
   periods: {},
+  shares: [],
 };
 
 describe('setTableColumnAggregate', () => {
@@ -24,6 +25,7 @@ describe('setTableColumnAggregate', () => {
       keys: ['order_status'],
       mode: 'flat',
       periods: {},
+      shares: [],
     });
   });
 
@@ -39,6 +41,7 @@ describe('setTableColumnAggregate', () => {
           keys: ['a'],
           mode: 'flat',
           periods: {},
+          shares: [],
         },
       }).aggregates,
     ).toStrictEqual({ total_amount: 'avg' });
@@ -54,6 +57,7 @@ describe('setTableColumnAggregate', () => {
           keys: ['a'],
           mode: 'flat',
           periods: {},
+          shares: [],
         },
       }).aggregates,
     ).toStrictEqual({ quantity: 'max' });
@@ -68,6 +72,7 @@ describe('setTableColumnAggregate', () => {
         keys: ['a'],
         mode: 'flat',
         periods: {},
+        shares: [],
       },
     });
 
@@ -80,7 +85,13 @@ describe('setTableColumnAggregate', () => {
     setTableColumnAggregate({
       columnKey: 'quantity',
       fn: 'max',
-      grouping: { aggregates, keys: ['a'], mode: 'flat', periods: {} },
+      grouping: {
+        aggregates,
+        keys: ['a'],
+        mode: 'flat',
+        periods: {},
+        shares: [],
+      },
     });
 
     expect(aggregates).toStrictEqual({ total_amount: 'sum' });

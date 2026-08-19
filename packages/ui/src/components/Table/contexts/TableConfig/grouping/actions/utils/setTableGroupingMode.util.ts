@@ -29,4 +29,5 @@ export const setTableGroupingMode = ({
   keys: grouping.keys,
   mode,
   periods: grouping.periods,
+  shares: grouping.shares,
 });

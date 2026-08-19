@@ -11,6 +11,7 @@ const NO_GROUPING: TableGroupingState = {
   keys: [],
   mode: 'flat',
   periods: {},
+  shares: [],
 };
 
 describe('applyGroupingReducer', () => {
@@ -22,12 +23,14 @@ describe('applyGroupingReducer', () => {
           keys: [...grouping.keys, 'shipping_country'],
           mode: 'flat',
           periods: {},
+          shares: [],
         }),
         existingGrouping: {
           aggregates: {},
           keys: ['order_status'],
           mode: 'flat',
           periods: {},
+          shares: [],
         },
       }),
     ).toStrictEqual({
@@ -36,6 +39,7 @@ describe('applyGroupingReducer', () => {
         keys: ['order_status', 'shipping_country'],
         mode: 'flat',
         periods: {},
+        shares: [],
       },
       kind: 'updated',
       persistenceEntry: {
@@ -61,6 +65,7 @@ describe('applyGroupingReducer', () => {
         keys: ['a'],
         mode: 'flat',
         periods: {},
+        shares: [],
       },
     });
 
@@ -70,6 +75,7 @@ describe('applyGroupingReducer', () => {
         keys: ['a'],
         mode: 'flat',
         periods: {},
+        shares: [],
       },
     ]);
   });
@@ -83,6 +89,7 @@ describe('applyGroupingReducer', () => {
           keys: ['order_status'],
           mode: 'flat',
           periods: {},
+          shares: [],
         },
       }),
     ).toStrictEqual({ kind: 'unchanged' });
@@ -99,6 +106,7 @@ describe('applyGroupingReducer', () => {
           ),
           mode: 'flat' as const,
           periods: {},
+          shares: [],
         }),
         existingGrouping: NO_GROUPING,
       }),

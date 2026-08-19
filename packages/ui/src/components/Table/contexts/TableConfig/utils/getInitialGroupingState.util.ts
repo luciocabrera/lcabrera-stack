@@ -5,13 +5,18 @@ import type {
   TableGroupPeriod,
 } from '#ui/components/Table/Table.types';
 
-import { areGroupKeysLegal, pruneGroupPeriods } from '../grouping/utils';
+import {
+  areGroupKeysLegal,
+  pruneGroupPeriods,
+  pruneGroupShares,
+} from '../grouping/utils';
 
 type GetInitialGroupingStateArgs = {
   readonly groupingAggregates?: Readonly<Record<string, TableAggregateFn>>;
   readonly groupingKeys?: readonly string[];
   readonly groupingMode?: TableGroupingMode;
   readonly groupingPeriods?: Readonly<Record<string, TableGroupPeriod>>;
+  readonly groupingShares?: readonly string[];
 };
 
 const NO_GROUPING: TableGroupingState = {
@@ -19,6 +24,7 @@ const NO_GROUPING: TableGroupingState = {
   keys: [],
   mode: 'flat',
   periods: {},
+  shares: [],
 };
 
 /**
@@ -63,6 +69,7 @@ export const getInitialGroupingState = ({
   groupingKeys = [],
   groupingMode = 'flat',
   groupingPeriods = {},
+  groupingShares = [],
 }: GetInitialGroupingStateArgs): TableGroupingState => {
   if (groupingKeys.length === 0 || !areGroupKeysLegal(groupingKeys)) {
     return NO_GROUPING;
@@ -77,6 +84,13 @@ export const getInitialGroupingState = ({
     periods: pruneGroupPeriods({
       keys: groupingKeys,
       periods: groupingPeriods,
+    }),
+    // Pruned to the columns that still carry a shareable aggregate: a share is
+    // a ratio over a measure, so one naming a column the loader applied no
+    // aggregate to would divide nothing (#648).
+    shares: pruneGroupShares({
+      aggregates: groupingAggregates,
+      shares: groupingShares,
     }),
   };
 };

@@ -24,6 +24,7 @@ const DEFAULT_GROUPING: TableGroupingState = {
   keys: ['order_status'],
   mode: 'rollup',
   periods: {},
+  shares: [],
 };
 
 describe('resolveLoaderGrouping', () => {
@@ -40,7 +41,13 @@ describe('resolveLoaderGrouping', () => {
   it('leaves a route with no default ungrouped on the same absent param', () => {
     expect(
       resolveLoaderGrouping<Row>({ columns: COLUMNS, param: ABSENT_PARAM }),
-    ).toStrictEqual({ aggregates: {}, keys: [], mode: 'flat', periods: {} });
+    ).toStrictEqual({
+      aggregates: {},
+      keys: [],
+      mode: 'flat',
+      periods: {},
+      shares: [],
+    });
   });
 
   it('does NOT re-apply the default over an explicitly cleared grouping', () => {
@@ -55,7 +62,13 @@ describe('resolveLoaderGrouping', () => {
         defaultGrouping: DEFAULT_GROUPING,
         param: '{"keys":[]}',
       }),
-    ).toStrictEqual({ aggregates: {}, keys: [], mode: 'flat', periods: {} });
+    ).toStrictEqual({
+      aggregates: {},
+      keys: [],
+      mode: 'flat',
+      periods: {},
+      shares: [],
+    });
   });
 
   it('prefers the URL over the default when the URL names keys', () => {
@@ -79,6 +92,7 @@ describe('resolveLoaderGrouping', () => {
           keys: ['no_such_column'],
           mode: 'flat',
           periods: {},
+          shares: [],
         },
         param: ABSENT_PARAM,
       }).keys,
