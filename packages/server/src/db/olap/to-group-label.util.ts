@@ -14,7 +14,7 @@ const EMPTY_GROUP_LABEL = '(empty)';
  * an unexpected object yields `[object Object]`, which reads as a group name and
  * is not one; `(empty)` at least says the value could not be read.
  */
-export const toOrderGroupLabel = (value: unknown) => {
+export const toGroupLabel = (value: unknown) => {
   if (typeof value === 'string') {
     return value;
   }

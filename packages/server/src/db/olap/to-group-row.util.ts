@@ -1,8 +1,15 @@
-import type { TableAggregateFn } from '@lcabrera/ui/components/Table/Table.types';
+import { OLAP_GROUP_ROW_FIELD } from '@lcabrera/api/olap/olap.constants';
 
-import { TABLE_GROUP_ROW_FIELD } from '@lcabrera/ui/components/Table/Table.constants';
+import type { AggregateFn } from '../group-query-builder/group-query-builder.types';
 
-import { toOrderGroupLabel } from './toOrderGroupLabel.util';
+import { toGroupLabel } from './to-group-label.util';
+
+/** One selected aggregate, paired with the alias the builder projected it under. */
+type GroupRowAggregate = {
+  readonly alias: string;
+  readonly columnKey: string;
+  readonly fn: AggregateFn;
+};
 
 type IsKeyRolledUpArgs = {
   readonly index: number;
@@ -10,20 +17,13 @@ type IsKeyRolledUpArgs = {
   readonly mask: number;
 };
 
-/** One selected aggregate, paired with the alias the builder projected it under. */
-type OrderGroupAggregate = {
-  readonly alias: string;
-  readonly columnKey: string;
-  readonly fn: TableAggregateFn;
-};
-
-type ToOrderGroupRowArgs = {
+type ToGroupRowArgs = {
   /**
    * The selected aggregates. The alias comes from the builder's own result
    * rather than being spelled here, so the name the SQL projected and the name
    * this decodes by are one string.
    */
-  readonly aggregates: readonly OrderGroupAggregate[];
+  readonly aggregates: readonly GroupRowAggregate[];
   /** The group keys, in the query's nesting order. */
   readonly columnKeys: readonly string[];
   /** The alias the builder projected `count(*)` under. */
@@ -46,21 +46,22 @@ const isKeyRolledUp = ({ index, keyCount, mask }: IsKeyRolledUpArgs) =>
   Math.trunc(mask / 2 ** (keyCount - 1 - index)) % 2 === 1;
 
 /**
- * Turns one row of a grouped read into a row the table can render.
+ * Turns one row of a grouped read into a row a table can render.
  *
  * **The mask is what makes a rollup readable, and this is where it is decoded.**
  * A row whose `shipping_country` is NULL is either a real NULL in the data or
  * the subtotal across every country, and the two are textually identical — only
  * `GROUPING()` separates them. A set bit means "this row is not keyed by that
- * column", never "no value here".
+ * column", never "no value here". It lives beside `build-group-query`, which is
+ * what *writes* the mask: the two are one protocol (ADR-081).
  *
  * The decode produces two things the renderer needs and cannot derive:
  *
  * - **`path` holds only the keys this row is actually grouped by.** A rollup
  *   emits sets that are prefixes of the key list, so dropping the rolled-up
- *   keys leaves a prefix whose length is the row's depth — what the hierarchy
- *   column indents by (ADR-065). The grand total rolls up every key and gets an
- *   empty path.
+ *   keys leaves a prefix whose length is the row's depth — what the grid reads
+ *   a group's level from (ADR-080). The grand total rolls up every key and gets
+ *   an empty path.
  * - **`isSubtotal`** — whether anything was rolled up at all. A flat read never
  *   sets a bit, so every row is a leaf and this stays `false` throughout, which
  *   is byte for byte the behaviour before rollup existed.
@@ -85,13 +86,13 @@ const isKeyRolledUp = ({ index, keyCount, mask }: IsKeyRolledUpArgs) =>
  * underneath — claiming otherwise by copying a key into its own column would
  * make the row look partly like a data row to every cell renderer.
  */
-export const toOrderGroupRow = ({
+export const toGroupRow = ({
   aggregates,
   columnKeys,
   countAlias,
   maskAlias,
   row,
-}: ToOrderGroupRowArgs) => {
+}: ToGroupRowArgs) => {
   const count = Number(row[countAlias]);
   const mask = Number(row[maskAlias]);
   // A mask that did not arrive as a number decodes as "nothing rolled up" —
@@ -108,7 +109,7 @@ export const toOrderGroupRow = ({
   );
 
   return {
-    [TABLE_GROUP_ROW_FIELD]: {
+    [OLAP_GROUP_ROW_FIELD]: {
       aggregates: aggregates.map(({ alias, columnKey, fn }) => ({
         columnKey,
         fn,
@@ -118,7 +119,7 @@ export const toOrderGroupRow = ({
       isSubtotal: groupedKeys.length < columnKeys.length,
       path: groupedKeys.map((columnKey) => ({
         columnKey,
-        label: toOrderGroupLabel(row[columnKey]),
+        label: toGroupLabel(row[columnKey]),
         value: row[columnKey],
       })),
     },

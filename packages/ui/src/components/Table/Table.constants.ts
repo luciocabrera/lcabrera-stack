@@ -1,3 +1,5 @@
+import { OLAP_GROUP_ROW_FIELD } from '@lcabrera/api/olap/olap.constants';
+
 import type {
   TableAggregateFn,
   TableDrillRow,
@@ -70,13 +72,15 @@ export const ACTIONS_COLUMN_KEY = 'actions';
  * Deliberately not a column key and not derived from one: a grouped row carries
  * its summary beside the group key's own value, so the renderer asks the row
  * what it is instead of asking the grouping configuration what every row must
- * be. It is exported because the route's server-side read is what writes it.
+ * be.
  *
- * Typed `keyof TableGroupRow` rather than left to infer, so renaming the field
- * in one place and not the other is a compile error rather than a group header
- * that silently stops rendering.
+ * The literal comes from `@lcabrera/api`: a route's server-side read is what
+ * writes this field, so the name belongs to the wire rather than to either end
+ * (ADR-081). The `keyof TableGroupRow` annotation stays here and is the guard —
+ * a compile error the moment the wire name and this package's row shape
+ * disagree.
  */
-export const TABLE_GROUP_ROW_FIELD: keyof TableGroupRow = 'tableGroup';
+export const TABLE_GROUP_ROW_FIELD: keyof TableGroupRow = OLAP_GROUP_ROW_FIELD;
 
 /**
  * The row field the **grid** attaches its drill chrome to — the loading state, a

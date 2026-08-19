@@ -36,8 +36,6 @@ export { isEnterpriseOrdersResponse } from './isEnterpriseOrdersResponse.util';
 export { parseOrderFormData } from './parseOrderFormData.util';
 export { toOrderFieldErrors } from './toOrderFieldErrors.util';
 export { toOrderFormValues } from './toOrderFormValues.util';
-export { toOrderGroupLabel } from './toOrderGroupLabel.util';
-export { toOrderGroupRow } from './toOrderGroupRow.util';
 export { toOrderInsertValues } from './toOrderInsertValues.util';
 export { toOrderKeysetCursor } from './toOrderKeysetCursor.util';
 export { toOrderUpdateValues } from './toOrderUpdateValues.util';

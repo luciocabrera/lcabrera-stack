@@ -13,6 +13,7 @@ import { getColumnGroupingCapabilities } from '@lcabrera/server/db/get-column-gr
 import { getMaxValue } from '@lcabrera/server/db/get-max-value.util';
 import { getRowsCount } from '@lcabrera/server/db/get-rows-count.util';
 import { insertRow } from '@lcabrera/server/db/insert-row.util';
+import { toGroupRow } from '@lcabrera/server/db/olap/to-group-row.util';
 import { selectGroupedRows } from '@lcabrera/server/db/select-grouped-rows.util';
 import { selectRows } from '@lcabrera/server/db/select-rows.util';
 import { updateRows } from '@lcabrera/server/db/update-rows.util';
@@ -34,7 +35,6 @@ import {
   ENTERPRISE_ORDERS_TABLE,
   MAX_ENTERPRISE_ORDERS_LIMIT,
   MAX_ENTERPRISE_ORDERS_SORT_RULES,
-  toOrderGroupRow,
   toOrderKeysetCursor,
 } from '../config';
 
@@ -150,7 +150,7 @@ export const selectGroupedOrders = async ({
     }));
 
     const data = rows.map((row) =>
-      toOrderGroupRow({
+      toGroupRow({
         aggregates: decodedAggregates,
         columnKeys: groupKeys,
         countAlias,
