@@ -34,6 +34,7 @@ export const DEFAULT_REGISTERS = {
       title: 'Architecture decisions',
     },
   ],
+  adrDraftDir: 'docs/agents/planning/adr-drafts',
   adrTemplateHome: 'docs/decisions',
   coordinationBoardDoc: 'docs/coordination/BOARD.md',
   coordinationTasksDir: 'docs/coordination/tasks',
@@ -62,19 +63,33 @@ const readableString = (value, fallback) =>
  * subdirectory of it, so a consumer who wrote `/var/claims` would find their
  * claims under `<root>/var/claims` and no error saying why.
  */
-const leavesRoot = (candidate) =>
-  normalize(candidate).split(/[/\\]/)[0] === '..';
+/**
+ * One spelling per location, because these values are compared as strings, not
+ * only joined onto a root: the ADR gate decides whether a file is a stray by
+ * asking whether its directory is in the set of configured homes. Declare that
+ * home as `docs/decisions/` rather than `docs/decisions` and every ADR in it is
+ * reported as a stray — 66 passing became 54 violations, from a trailing slash.
+ */
+const canonical = (candidate) => {
+  const normalised = normalize(candidate.replaceAll('\\', '/'));
+  const trimmed = normalised.replace(/\/+$/, '');
+  return trimmed === '' ? '.' : trimmed;
+};
+
+/** `..` climbs only as a whole segment — `..data` is a name, not a parent. */
+const leavesRoot = (candidate) => candidate.split('/')[0] === '..';
 
 const repoRelative = (value, fallback, key) => {
-  const candidate = readableString(value, fallback);
-  if (isAbsolute(candidate)) {
+  const raw = readableString(value, fallback);
+  if (isAbsolute(raw)) {
     throw new Error(
-      `${CONFIG_FILE_NAME}: \`${key}\` must be relative to the repository root, but is \`${candidate}\`.`,
+      `${CONFIG_FILE_NAME}: \`${key}\` must be relative to the repository root, but is \`${raw}\`.`,
     );
   }
+  const candidate = canonical(raw);
   if (leavesRoot(candidate)) {
     throw new Error(
-      `${CONFIG_FILE_NAME}: \`${key}\` must stay inside the repository, but \`${candidate}\` leaves it.`,
+      `${CONFIG_FILE_NAME}: \`${key}\` must stay inside the repository, but \`${raw}\` leaves it.`,
     );
   }
   return candidate;
@@ -132,6 +147,11 @@ export const resolveRegisters = (raw) => {
     : [];
   return {
     adrHomes: homes.length > 0 ? homes : DEFAULT_REGISTERS.adrHomes,
+    adrDraftDir: repoRelative(
+      block.adrDraftDir,
+      DEFAULT_REGISTERS.adrDraftDir,
+      'registers.adrDraftDir',
+    ),
     adrTemplateHome: repoRelative(
       block.adrTemplateHome,
       DEFAULT_REGISTERS.adrTemplateHome,

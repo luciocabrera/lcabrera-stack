@@ -105,8 +105,17 @@ describe('containment of the configured locations', () => {
     expect(() => tasksDir('/tmp/claims')).toThrow(/must be relative/);
   });
 
-  it('keeps a value whose `..` stays inside', () => {
-    expect(tasksDir('docs/../ops/claims')).toBe('docs/../ops/claims');
+  // One spelling per location: these values are compared as strings, not only
+  // joined onto a root. An ADR home spelled `docs/decisions/` matched nothing
+  // in the stray check, so every ADR in it was reported as a stray.
+  it('canonicalises the spellings that would otherwise fail to match', () => {
+    expect(tasksDir('docs/coordination/tasks/')).toBe(
+      'docs/coordination/tasks',
+    );
+    expect(tasksDir('./ops/claims')).toBe('ops/claims');
+    expect(tasksDir('docs/../ops/claims')).toBe('ops/claims');
+    expect(tasksDir('ops//claims')).toBe('ops/claims');
+    expect(tasksDir(String.raw`ops\claims`)).toBe('ops/claims');
   });
 
   // `..` only climbs when it is a whole segment. A directory whose NAME starts

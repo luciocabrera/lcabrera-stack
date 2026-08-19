@@ -24,7 +24,7 @@ const registers = readRegisters();
 export const ADR_HOMES = registers.adrHomes;
 
 /** Where an unadopted proposal waits. A draft holds no number — see below. */
-export const DRAFT_DIR = 'docs/agents/planning/adr-drafts';
+export const DRAFT_DIR = registers.adrDraftDir;
 
 /** The section shape a new ADR starts from. Named with a leading underscore so
  *  it sorts above the ADRs and cannot be mistaken for one. */

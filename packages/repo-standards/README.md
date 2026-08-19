@@ -43,6 +43,7 @@ and `issue:verify`.
     "adrHomes": [
       { "dir": "docs/decisions", "tier": "repo", "title": "…", "blurb": "…" }
     ],
+    "adrDraftDir": "docs/agents/planning/adr-drafts",
     "adrTemplateHome": "docs/decisions",
     "coordinationBoardDoc": "docs/coordination/BOARD.md",
     "coordinationTasksDir": "docs/coordination/tasks"
