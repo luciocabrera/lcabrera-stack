@@ -14,6 +14,7 @@ const column: TableColumn<Row> = { key: 'total_amount', label: 'Total Amount' };
 const refused: TableColumnGroupingCapability = {
   aggregates: ['avg', 'count', 'sum'],
   canGroup: false,
+  periods: [],
   column: 'total_amount',
   distinctEstimate: 77_567,
   refusal: 'too-many-distinct',
@@ -24,6 +25,7 @@ const refused: TableColumnGroupingCapability = {
 const allowed: TableColumnGroupingCapability = {
   aggregates: ['count'],
   canGroup: true,
+  periods: [],
   column: 'total_amount',
   distinctEstimate: 8,
   role: 'dimension',

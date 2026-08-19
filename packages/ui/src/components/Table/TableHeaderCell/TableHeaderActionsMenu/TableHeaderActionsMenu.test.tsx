@@ -355,6 +355,7 @@ describe('TableHeaderActionsMenu', () => {
       capabilityRef.current = {
         aggregates: ['count', 'sum'],
         canGroup: false,
+        periods: [],
         column: 'name',
         refusal: 'too-many-distinct',
         role: 'fact',

@@ -20,9 +20,9 @@ export const useResetTableSettings = () => {
 
   return () => {
     const columnsState = columnsStore.get();
-    const { aggregates, keys, mode } = groupingStore.get();
+    const { aggregates, keys, mode, periods } = groupingStore.get();
 
     columnsDrawerStore.set(buildBatchTableSettingsUpdate(columnsState));
-    groupingDrawerStore.set({ aggregates, keys, mode });
+    groupingDrawerStore.set({ aggregates, keys, mode, periods });
   };
 };

@@ -82,6 +82,7 @@ const listed = (placeholder: string) =>
 const numericCapability: TableColumnGroupingCapability = {
   aggregates: ['count', 'sum'],
   canGroup: false,
+  periods: [],
   column: 'total_amount',
   refusal: 'too-many-distinct',
   role: 'fact',
@@ -91,6 +92,7 @@ const numericCapability: TableColumnGroupingCapability = {
 const textCapability: TableColumnGroupingCapability = {
   aggregates: ['count', 'countDistinct', 'max', 'min'],
   canGroup: true,
+  periods: [],
   column: 'order_status',
   role: 'dimension',
   typeName: 'text',
@@ -108,6 +110,7 @@ beforeEach(() => {
     doc: {
       aggregates: [],
       canGroup: false,
+      periods: [],
       column: 'doc',
       refusal: 'not-a-dimension',
       role: 'unsupported',

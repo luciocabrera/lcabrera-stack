@@ -49,7 +49,12 @@ export const createTableConfigColumnsActionMocks = <
   // Every column action reads the applied group keys, because the derived
   // column slices carry the hierarchy column while grouping is on (ADR-065).
   const mockGroupingStore = {
-    get: vi.fn(() => ({ aggregates: {}, keys: groupingKeys, mode: 'flat' })),
+    get: vi.fn(() => ({
+      aggregates: {},
+      keys: groupingKeys,
+      mode: 'flat',
+      periods: {},
+    })),
     set: vi.fn(),
   };
 

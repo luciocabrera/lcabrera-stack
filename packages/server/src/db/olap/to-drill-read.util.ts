@@ -4,7 +4,9 @@ import type {
   QueryFilter,
   QuerySort,
 } from '../query-builder/query-builder.types';
-import type { OlapDrillTranslation } from './olap.types';
+import type { GroupKeyTruncation, OlapDrillTranslation } from './olap.types';
+
+import { advanceGroupPeriod } from './advance-group-period.util.ts';
 
 type ToDrillReadArgs = {
   /** The filters the grouped view was read under, unchanged. */
@@ -23,6 +25,8 @@ type ToDrillReadArgs = {
   readonly primaryKey: string;
   /** The sort the grouped view was read under. */
   readonly sort: readonly QuerySort[];
+  /** How each truncated key was derived, by column. Absent for an untruncated grouping. */
+  readonly truncations?: Readonly<Record<string, GroupKeyTruncation>>;
 };
 
 /**
@@ -44,6 +48,53 @@ const toKeyFilter = ({
     : { column: columnKey, operator: 'eq', value };
 
 /**
+ * A truncated key's filter: the half-open range `[start, next)` on the **raw**
+ * column (#786).
+ *
+ * Equality cannot express it. The group `2021-03` is `date_trunc('month', …)`,
+ * and no row holds that value — every row holds an instant inside the month —
+ * so `order_date = '2021-03-01'` returns the first of the month and nothing
+ * else. Half-open rather than `lte` the last instant, because "the last instant
+ * of March" has no representation a timestamp can hold exactly.
+ *
+ * The NULL branch is unchanged and comes first: `date_trunc` of NULL is NULL, so
+ * a truncated key has a NULL group exactly as an untruncated one does, and it is
+ * still the group a range comparison would silently return nothing for.
+ */
+const toPeriodFilters = ({
+  entry,
+  truncation,
+}: {
+  readonly entry: OlapDrillGroup['path'][number];
+  readonly truncation: GroupKeyTruncation;
+}): readonly QueryFilter[] => {
+  const { columnKey, value } = entry;
+
+  if (value === null || value === undefined) {
+    return [{ column: columnKey, operator: 'isNull' }];
+  }
+
+  const start = value instanceof Date ? value : new Date(String(value));
+
+  if (Number.isNaN(start.getTime())) {
+    // Not a date the grouping could have produced. Falling back to equality is
+    // the honest failure: it returns nothing rather than a range drawn from a
+    // parsed-to-garbage boundary, which would return the wrong rows and look
+    // right.
+    return [toKeyFilter(entry)];
+  }
+
+  return [
+    { column: columnKey, operator: 'gte', value: start },
+    {
+      column: columnKey,
+      operator: 'lt',
+      value: advanceGroupPeriod({ ...truncation, start }),
+    },
+  ];
+};
+
+/**
  * Turns a group row into the paginated read of the rows underneath it (ADR-079).
  *
  * **Filter inheritance is the correctness criterion, and it fails quietly.** A
@@ -53,6 +104,10 @@ const toKeyFilter = ({
  * user set. Both render, neither throws, and every number is individually
  * correct. So the view's filters go in first and unchanged, and the group's own
  * keys are appended to them rather than replacing them.
+ *
+ * **A truncated key becomes a range, not an equality** (#786). The group's value
+ * is a period start that no row holds, so equality returns the boundary row and
+ * nothing else — see `toPeriodFilters`.
  *
  * **Group-key terms are dropped from the sort** because they are constant within
  * a group and order nothing; the caller's primary key is appended so the page is
@@ -67,6 +122,7 @@ export const toDrillRead = ({
   maxLimit,
   primaryKey,
   sort,
+  truncations,
 }: ToDrillReadArgs): OlapDrillTranslation => {
   // Grand total first: it is *also* `isSubtotal`, so testing the subtotal rule
   // ahead of it would report every grand total as a subtotal and hide the more
@@ -94,7 +150,16 @@ export const toDrillRead = ({
   return {
     kind: 'drillable',
     read: {
-      filters: [...filters, ...group.path.map((entry) => toKeyFilter(entry))],
+      filters: [
+        ...filters,
+        ...group.path.flatMap((entry) => {
+          const truncation = truncations?.[entry.columnKey];
+
+          return truncation === undefined
+            ? [toKeyFilter(entry)]
+            : toPeriodFilters({ entry, truncation });
+        }),
+      ],
       // The group row already states its own `count`, so counting the same set
       // again would be work with a known answer.
       includeTotal: false,

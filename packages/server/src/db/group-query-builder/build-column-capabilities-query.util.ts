@@ -1,7 +1,25 @@
 import type { BuiltQuery } from '../query-builder/query-builder.types.ts';
 import type { ColumnCapabilitiesQueryDescriptor } from './group-query-builder.types.ts';
 
-import { AGGREGATE_SQL_NAMES } from './group-query-builder.constants.ts';
+import {
+  AGGREGATE_SQL_NAMES,
+  PERIOD_CAPABLE_TYPE_NAMES,
+} from './group-query-builder.constants.ts';
+
+/**
+ * The bare type names `spanDays` is measured for. The capability gate is
+ * schema-qualified (`isPeriodCapableType`) and this cannot be, because
+ * `bt.typname` carries no schema — so the SQL over-selects `app.date` and the
+ * gate then refuses it. Over-selecting is the safe direction: the worst case is
+ * a span computed for a column that will never be offered a granularity.
+ */
+const PERIOD_CAPABLE_TYPE_SQL_NAMES = [
+  ...new Set(
+    [...PERIOD_CAPABLE_TYPE_NAMES].map(
+      (name) => name.split('.').at(-1) ?? name,
+    ),
+  ),
+].toSorted((a, b) => a.localeCompare(b));
 
 /**
  * Gate 2 of ADR-058, plus the statistics the group-key rules need, in one
@@ -29,6 +47,16 @@ import { AGGREGATE_SQL_NAMES } from './group-query-builder.constants.ts';
  * `s.inherited = false` avoids double rows on a partition parent, and `pg_stats`
  * is permission-filtered, so a column the role cannot see falls into
  * "statistics unavailable" naturally rather than leaking its existence.
+ *
+ * `spanDays` measures the histogram's range for a date or timestamp column, and
+ * is what makes a **derived** group key measurable: `pg_stats` describes the raw
+ * column, so nothing in the catalogue counts the distinct months in it — but a
+ * range does bound them, and the first and last histogram bound are that range
+ * (#786). Two properties keep it safe. The `CASE` guards the cast: Postgres does
+ * not evaluate an unselected branch, so `histogram_bounds::text::text[]` — the
+ * only way to read an `anyarray` — is never applied to a type it would fail on.
+ * And the scalar subquery over an absent histogram yields `NULL`, which is the
+ * honest answer for a column with no statistics rather than a zero-length range.
  */
 export const buildColumnCapabilitiesQuery = ({
   columns,
@@ -70,7 +98,11 @@ export const buildColumnCapabilitiesQuery = ({
        ) AS aggregates,
        (s.attname IS NOT NULL) AS "hasStats",
        coalesce(s.n_distinct, 0) AS "nDistinct",
-       c.reltuples AS "relTuples"
+       c.reltuples AS "relTuples",
+       CASE WHEN bt.typname = ANY($5::text[])
+            THEN (SELECT extract(epoch FROM (max(b::timestamptz) - min(b::timestamptz))) / 86400
+                    FROM unnest(s.histogram_bounds::text::text[]) AS b)
+       END AS "spanDays"
   FROM pg_attribute a
   JOIN pg_class c ON c.oid = a.attrelid
   JOIN pg_namespace n ON n.oid = c.relnamespace
@@ -85,5 +117,11 @@ export const buildColumnCapabilitiesQuery = ({
    AND a.attname = ANY($3::text[])
    AND a.attnum > 0 AND NOT a.attisdropped
  ORDER BY a.attnum`,
-  values: [schema, table, columns, AGGREGATE_SQL_NAMES],
+  values: [
+    schema,
+    table,
+    columns,
+    AGGREGATE_SQL_NAMES,
+    PERIOD_CAPABLE_TYPE_SQL_NAMES,
+  ],
 });

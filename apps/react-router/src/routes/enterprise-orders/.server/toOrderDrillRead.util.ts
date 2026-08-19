@@ -1,4 +1,5 @@
 import type { OlapDrillGroup } from '@lcabrera/api/olap/olap.types';
+import type { GroupKeyTruncation } from '@lcabrera/server/db/olap/olap.types';
 import type {
   QueryFilter,
   QuerySort,
@@ -20,6 +21,8 @@ type ToOrderDrillReadArgs = {
   readonly limit: number;
   /** The sort the grouped view was read under. */
   readonly sort: readonly QuerySort[];
+  /** How each truncated key was derived, by column (#786). */
+  readonly truncations?: Readonly<Record<string, GroupKeyTruncation>>;
 };
 
 /**

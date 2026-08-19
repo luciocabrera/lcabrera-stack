@@ -1,8 +1,10 @@
 import { OLAP_GROUP_ROW_FIELD } from '@lcabrera/api/olap/olap.constants';
 
 import type { AggregateFn } from '../group-query-builder/group-query-builder.types';
+import type { GroupKeyTruncation } from './olap.types';
 
 import { toGroupLabel } from './to-group-label.util';
+import { toGroupPeriodLabel } from './to-group-period-label.util';
 
 /** One selected aggregate, paired with the alias the builder projected it under. */
 type GroupRowAggregate = {
@@ -31,6 +33,8 @@ type ToGroupRowArgs = {
   /** The alias the builder projected `GROUPING(k₁, …, kₙ)` under. */
   readonly maskAlias: string;
   readonly row: Record<string, unknown>;
+  /** How each truncated key was derived, by column. Absent for an untruncated grouping. */
+  readonly truncations?: Readonly<Record<string, GroupKeyTruncation>>;
 };
 
 /**
@@ -66,6 +70,10 @@ const isKeyRolledUp = ({ index, keyCount, mask }: IsKeyRolledUpArgs) =>
  *   sets a bit, so every row is a leaf and this stays `false` throughout, which
  *   is byte for byte the behaviour before rollup existed.
  *
+ * **A truncated key is headed by its period**, not by the instant it starts —
+ * `2021-06` rather than `2021-06-01T00:00:00.000Z`. `toGroupPeriodLabel` owns
+ * that, and owns the frame the value has to be read back in (#786).
+ *
  * **A key is emitted twice — formatted and raw; an aggregate only raw.** Only
  * this side can format a key: nothing downstream resolves a path entry back to
  * the column it came from, so the label has to be produced here. But formatting
@@ -92,6 +100,7 @@ export const toGroupRow = ({
   countAlias,
   maskAlias,
   row,
+  truncations,
 }: ToGroupRowArgs) => {
   const count = Number(row[countAlias]);
   const mask = Number(row[maskAlias]);
@@ -117,11 +126,20 @@ export const toGroupRow = ({
       })),
       count: Number.isFinite(count) ? count : 0,
       isSubtotal: groupedKeys.length < columnKeys.length,
-      path: groupedKeys.map((columnKey) => ({
-        columnKey,
-        label: toGroupLabel(row[columnKey]),
-        value: row[columnKey],
-      })),
+      path: groupedKeys.map((columnKey) => {
+        const truncation = truncations?.[columnKey];
+        const value = row[columnKey];
+        const periodLabel =
+          truncation === undefined
+            ? undefined
+            : toGroupPeriodLabel({ ...truncation, value });
+
+        return {
+          columnKey,
+          label: periodLabel ?? toGroupLabel(value),
+          value,
+        };
+      }),
     },
   };
 };

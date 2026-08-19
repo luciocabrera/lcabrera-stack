@@ -1,3 +1,5 @@
+import type { OlapGroupPeriod } from './olap.types';
+
 /**
  * The search param a drill request carries its group in.
  *
@@ -17,3 +19,15 @@ export const OLAP_DRILL_GROUP_PARAM = 'group';
  * header that silently stops rendering.
  */
 export const OLAP_GROUP_ROW_FIELD = 'tableGroup';
+
+/**
+ * The granularities offered, coarsening left to right. The order is the order a
+ * surface lists them in and the order a refusal walks when it suggests the next
+ * one up, so it is meaningful rather than alphabetical.
+ */
+export const OLAP_GROUP_PERIODS: readonly OlapGroupPeriod[] = [
+  'day',
+  'month',
+  'quarter',
+  'year',
+];

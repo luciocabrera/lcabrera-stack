@@ -71,7 +71,12 @@ type ReadGroupsArgs = {
 const readGroups = async ({ filters, keys }: ReadGroupsArgs) =>
   selectOrdersPage({
     filters,
-    grouping: { aggregates: { total_amount: 'sum' }, keys, mode: 'flat' },
+    grouping: {
+      aggregates: { total_amount: 'sum' },
+      keys,
+      mode: 'flat',
+      periods: {},
+    },
     includeTotal: false,
     limit: 1,
     offset: 0,

@@ -28,6 +28,10 @@ const { columnsRef, groupingKeysRef, mockSetGroupKeys } = vi.hoisted(() => ({
   mockSetGroupKeys: vi.fn(),
 }));
 
+const { NO_PERIODS } = vi.hoisted(() => ({
+  NO_PERIODS: {} as Readonly<Record<string, never>>,
+}));
+
 vi.mock(
   '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook',
   () => ({
@@ -37,11 +41,20 @@ vi.mock(
 
 vi.mock('../../TableDrawerContext/actions', () => ({
   useClearGrouping: () => vi.fn(),
+  useSetGroupKeyPeriod: () => vi.fn(),
   useSetGroupKeys: () => mockSetGroupKeys,
 }));
 
 vi.mock('../../TableDrawerContext/selectors', () => ({
   useGetGroupingKeys: () => groupingKeysRef.current,
+  useGetGroupingPeriods: () => NO_PERIODS,
+}));
+
+// Each key item now carries a granularity control, which reads the route's
+// per-column capability. This file asserts what the *list* does, so the
+// capability is stubbed absent — the state in which the control renders nothing.
+vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
+  useGetTableColumnGroupingCapability: () => undefined,
 }));
 
 vi.mock('#ui/components/DraggableList', () => ({

@@ -27,6 +27,7 @@ const capabilities: Readonly<Record<string, TableColumnGroupingCapability>> = {
   doc: {
     aggregates: [],
     canGroup: false,
+    periods: [],
     column: 'doc',
     refusal: 'not-a-dimension',
     role: 'unsupported',
@@ -35,6 +36,7 @@ const capabilities: Readonly<Record<string, TableColumnGroupingCapability>> = {
   order_status: {
     aggregates: ['count', 'countDistinct'],
     canGroup: true,
+    periods: [],
     column: 'order_status',
     role: 'dimension',
     typeName: 'text',
@@ -42,6 +44,7 @@ const capabilities: Readonly<Record<string, TableColumnGroupingCapability>> = {
   priority: {
     aggregates: ['count', 'countDistinct'],
     canGroup: true,
+    periods: [],
     column: 'priority',
     role: 'dimension',
     typeName: 'text',
@@ -49,6 +52,7 @@ const capabilities: Readonly<Record<string, TableColumnGroupingCapability>> = {
   total_amount: {
     aggregates: ['avg', 'count', 'sum'],
     canGroup: false,
+    periods: [],
     column: 'total_amount',
     distinctEstimate: 77_567,
     refusal: 'too-many-distinct',

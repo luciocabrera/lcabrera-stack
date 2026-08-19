@@ -5,13 +5,14 @@ import type {
 
 import { refuseGroupKey } from './refuse-group-key.util.ts';
 import { resolveAnalyticalRole } from './resolve-analytical-role.util.ts';
+import { resolveColumnPeriods } from './resolve-column-periods.util.ts';
 import { resolveDistinctEstimate } from './resolve-distinct-estimate.util.ts';
 import { toRoleAggregates } from './to-role-aggregates.util.ts';
 
 /**
  * Both ADR-058 gates for one column: what it may be grouped by, what it may be
- * aggregated with, and — when it may not be a group key — which of the reasons
- * applies.
+ * aggregated with, at which granularities if it is temporal, and — when it may
+ * not be a group key — which of the reasons applies.
  */
 export const resolveColumnCapability = (
   row: ColumnCapabilityRow,
@@ -34,6 +35,18 @@ export const resolveColumnCapability = (
   const shared = {
     aggregates: toRoleAggregates({ availableSqlNames: row.aggregates, role }),
     column: row.column,
+    // Resolved whatever `refusal` said. A date column is normally refused as a
+    // raw key — one group per calendar day — and that refusal is exactly the
+    // reason to state which granularities do clear the guard (#786).
+    periods: resolveColumnPeriods({
+      estimate,
+      hasEquality: row.hasEquality,
+      relTuples: row.relTuples,
+      role,
+      spanDays: row.spanDays,
+      typeName: row.typeName,
+      typeNamespace: row.typeNamespace,
+    }),
     role,
     typeName: row.typeName,
     ...(estimate.kind === 'known' && { distinctEstimate: estimate.value }),

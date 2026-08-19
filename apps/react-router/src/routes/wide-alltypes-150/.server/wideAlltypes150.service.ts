@@ -60,6 +60,7 @@ const NO_GROUPING: TableGroupingState = {
   aggregates: {},
   keys: [],
   mode: 'flat',
+  periods: {},
 };
 
 export type SelectGroupedWideAlltypes150Args = {

@@ -5,6 +5,7 @@ import type {
   TableDrillRow,
   TableGroupingMode,
   TableGroupKeyRefusalReason,
+  TableGroupPeriod,
   TableGroupRow,
 } from './Table.types';
 
@@ -114,6 +115,21 @@ export const MAX_TABLE_GROUP_KEYS = 4;
  * map rather than a list: `Object.hasOwn` over it is total by construction,
  * where a hand-maintained list can silently miss a member.
  */
+/**
+ * How each granularity reads in a control (#786). A `Record` closed over the
+ * vocabulary, so a member added to it is a compile error here rather than a
+ * period the picker renders by its wire name.
+ *
+ * "Raw" is not a member: absence of a granularity is not one of them, and the
+ * control spells its own no-truncation option.
+ */
+export const TABLE_GROUP_PERIOD_LABELS: Record<TableGroupPeriod, string> = {
+  day: 'Day',
+  month: 'Month',
+  quarter: 'Quarter',
+  year: 'Year',
+};
+
 export const TABLE_AGGREGATE_LABELS: Record<TableAggregateFn, string> = {
   avg: 'Average',
   boolAnd: 'All True',

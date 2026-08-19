@@ -88,6 +88,7 @@ const serverCapability: ColumnGroupingCapability = {
   canGroup: false,
   column: 'order_id',
   distinctEstimate: 500_000,
+  periods: [],
   refusal: 'unique-ish',
   role: 'dimension',
   typeName: 'int4',

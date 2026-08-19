@@ -44,6 +44,7 @@
     "./db/olap/decode-grouped-rows.util": "./src/db/olap/decode-grouped-rows.util.ts",
     "./db/olap/olap.types": "./src/db/olap/olap.types.ts",
     "./db/olap/to-drill-read.util": "./src/db/olap/to-drill-read.util.ts",
+    "./db/olap/to-group-key-truncations.util": "./src/db/olap/to-group-key-truncations.util.ts",
     "./db/olap/to-group-label.util": "./src/db/olap/to-group-label.util.ts",
     "./db/olap/to-group-row.util": "./src/db/olap/to-group-row.util.ts",
     "./db/query-builder/build-count-query.util": "./src/db/query-builder/build-count-query.util.ts",
@@ -150,6 +151,10 @@
       "./db/olap/to-drill-read.util": {
         "types": "./dist/db/olap/to-drill-read.util.d.mts",
         "default": "./dist/db/olap/to-drill-read.util.mjs"
+      },
+      "./db/olap/to-group-key-truncations.util": {
+        "types": "./dist/db/olap/to-group-key-truncations.util.d.mts",
+        "default": "./dist/db/olap/to-group-key-truncations.util.mjs"
       },
       "./db/olap/to-group-label.util": {
         "types": "./dist/db/olap/to-group-label.util.d.mts",

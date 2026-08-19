@@ -6,6 +6,7 @@ import type {
 import type {
   TableAggregateFn,
   TableGroupingState,
+  TableGroupPeriod,
 } from '@lcabrera/ui/components/Table/Table.types';
 
 import { deleteRows } from '@lcabrera/server/db/delete-rows.util';
@@ -18,6 +19,7 @@ import {
   toGroupAggregates,
   toGroupSort,
 } from '@lcabrera/server/db/olap/decode-grouped-rows.util';
+import { toGroupKeyTruncations } from '@lcabrera/server/db/olap/to-group-key-truncations.util';
 import { selectGroupedRows } from '@lcabrera/server/db/select-grouped-rows.util';
 import { selectRows } from '@lcabrera/server/db/select-rows.util';
 import { updateRows } from '@lcabrera/server/db/update-rows.util';
@@ -64,6 +66,7 @@ const NO_GROUPING: TableGroupingState = {
   aggregates: {},
   keys: [],
   mode: 'flat',
+  periods: {},
 };
 
 export type SelectGroupedOrdersArgs = {
@@ -74,6 +77,8 @@ export type SelectGroupedOrdersArgs = {
   readonly groupKeys: readonly string[];
   /** Which grouping sets to emit — one, or one per prefix plus the total. */
   readonly groupMode: TableGroupingState['mode'];
+  /** The granularity each temporal key is grouped at, by column (#786). */
+  readonly groupPeriods: TableGroupingState['periods'];
   /**
    * The table's applied sort. Only the entries naming a **group key** are
    * carried into the grouped read; a sort on any other column has nothing to
@@ -114,6 +119,7 @@ export const selectGroupedOrders = async ({
   filters,
   groupKeys,
   groupMode,
+  groupPeriods,
   sort,
 }: SelectGroupedOrdersArgs): Promise<EnterpriseOrdersResponse> => {
   // `satisfies` rather than an annotation: the narrow type keeps `column`
@@ -124,15 +130,17 @@ export const selectGroupedOrders = async ({
   ).map(([column, fn]) => ({ column, fn }) satisfies UnfilteredOrderAggregate);
 
   try {
-    const { aggregates, maskAlias, rows, warning } = await selectGroupedRows({
-      ...TARGET,
-      aggregates: toGroupAggregates({ requested }),
-      filters,
-      grouping: groupMode,
-      keys: groupKeys,
-      maxRows: ENTERPRISE_ORDER_GROUP_MAX_ROWS,
-      sort: toGroupSort({ groupKeys, sort }),
-    });
+    const { aggregates, maskAlias, rows, truncations, warning } =
+      await selectGroupedRows({
+        ...TARGET,
+        aggregates: toGroupAggregates({ requested }),
+        filters,
+        grouping: groupMode,
+        keys: groupKeys,
+        maxRows: ENTERPRISE_ORDER_GROUP_MAX_ROWS,
+        periods: groupPeriods,
+        sort: toGroupSort({ groupKeys, sort }),
+      });
 
     const data = decodeGroupedRows({
       aggregates,
@@ -140,6 +148,7 @@ export const selectGroupedOrders = async ({
       maskAlias,
       requested,
       rows,
+      truncations,
     });
 
     return {
@@ -178,6 +187,34 @@ export const selectOrderGroupingCapabilities = async () =>
     schema: ENTERPRISE_ORDERS_SCHEMA,
     table: ENTERPRISE_ORDERS_TABLE,
   });
+
+/**
+ * Pairs a drill request's granularities with whether each column carries a time
+ * zone — the fact `toDrillRead` needs to compute the right period boundary
+ * (#786).
+ *
+ * The drill route is a second entry point into the same grouping, and it does
+ * not go through `selectGroupedRows`, so it has no catalogue answer in hand.
+ * The catalogue query is issued only when a granularity is actually present,
+ * and only for the columns carrying one — an untruncated drill costs exactly
+ * what it cost before.
+ */
+export const selectOrderGroupKeyTruncations = async (
+  periods: Readonly<Record<string, TableGroupPeriod>> | undefined,
+) => {
+  const columns = Object.keys(periods ?? {});
+
+  if (columns.length === 0) return {};
+
+  return toGroupKeyTruncations({
+    capabilities: await getColumnGroupingCapabilities({
+      columns,
+      schema: ENTERPRISE_ORDERS_SCHEMA,
+      table: ENTERPRISE_ORDERS_TABLE,
+    }),
+    periods,
+  });
+};
 
 export type SelectOrdersPageArgs = {
   /**
@@ -289,6 +326,7 @@ export const selectOrdersPage = async ({
       filters,
       groupKeys: grouping.keys,
       groupMode: grouping.mode,
+      groupPeriods: grouping.periods,
       sort: boundedSort,
     });
   }

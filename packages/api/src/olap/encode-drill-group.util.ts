@@ -39,9 +39,14 @@ const toWireEntry = ({ columnKey, value }: OlapGroupPathEntry) => ({
 export const encodeDrillGroup = ({
   group,
   groupKeys,
+  periods,
 }: EncodeDrillGroupArgs): string =>
   JSON.stringify({
     isSubtotal: group.isSubtotal,
     keys: groupKeys,
     path: group.path.map((entry) => toWireEntry(entry)),
+    // Omitted when empty rather than written as `{}`, so an untruncated
+    // grouping produces the param it produced before granularities existed.
+    ...(periods !== undefined &&
+      Object.keys(periods).length > 0 && { periods }),
   });

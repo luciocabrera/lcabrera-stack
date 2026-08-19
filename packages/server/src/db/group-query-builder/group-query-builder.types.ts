@@ -1,3 +1,5 @@
+import type { OlapGroupPeriod } from '@lcabrera/api/olap/olap.types';
+
 import type { QueryFilter } from '../query-builder/query-builder.types.ts';
 
 /**
@@ -91,6 +93,17 @@ export type ColumnCapabilityRow = {
   readonly hasStats: boolean;
   readonly nDistinct: number;
   readonly relTuples: number;
+  /**
+   * How many days the column's `pg_stats` histogram spans, or `null` when the
+   * column is not a date/timestamp or has no histogram to measure.
+   *
+   * It is what makes a *derived* group key measurable. `pg_stats` describes the
+   * raw column, so the catalogue has no distinct count for
+   * `date_trunc('month', c)` and never will — but the number of months a range
+   * covers follows from the range, and the histogram's first and last bound are
+   * exactly that range, free of a table scan (#786).
+   */
+  readonly spanDays: number | null;
   readonly typeCategory: string;
   readonly typeName: string;
   /**
@@ -204,6 +217,21 @@ export type GroupingMode = 'cube' | 'flat' | 'rollup';
  * Why a column may not be a group key. Distinguishable on purpose: grouping by a
  * primary key is the likeliest user mistake and deserves its own message.
  */
+/**
+ * The granularity a date or timestamp group key is truncated to.
+ *
+ * **An alias, not a second declaration.** The vocabulary is wire vocabulary — it
+ * travels in the grouping param and again in the drill param — so it belongs to
+ * `@lcabrera/api`, which this package already declares a dependency on
+ * (ADR-082). None of ADR-039's duplication applies: there is no undeclared edge
+ * to route around, so a duplicate here would be two things that can disagree
+ * where one thing cannot.
+ *
+ * The local name stays because this module's vocabulary is stated in its own
+ * terms — a builder groups by *keys*, not by OLAP requests.
+ */
+export type GroupKeyPeriod = OlapGroupPeriod;
+
 export type GroupKeyRefusalReason =
   | 'no-equality-operator'
   | 'not-a-dimension'
@@ -232,6 +260,21 @@ export type GroupQueryDescriptor = {
   readonly keys: readonly string[];
   /** A safety belt, not a page — a grouped read is never paginated (ADR-059). */
   readonly maxRows: number;
+  /**
+   * The granularity to truncate a temporal key to, by column — a map beside the
+   * key list rather than a member of it.
+   *
+   * A key list of records would carry the granularity inside each key, and was
+   * rejected: `keys` is `readonly string[]` on both sides of the boundary, in
+   * the URL, in every group path and in the expansion store, so changing its
+   * element type moves a shape that six unrelated things already agree on. A
+   * column can be a key at most once, so a column-keyed map is per-key by
+   * construction and carries the same information (#786).
+   *
+   * A column named here that is not in `keys` is refused rather than ignored —
+   * see `assertGroupKeys`.
+   */
+  readonly periods?: Readonly<Record<string, GroupKeyPeriod>>;
   readonly schema: string;
   readonly sort?: readonly GroupSort[];
   /** Where a subtotal sits relative to the rows it totals. Defaults to `last`. */
@@ -276,6 +319,17 @@ export type GroupSort =
 type ColumnCapabilityShared = {
   readonly aggregates: readonly AggregateFn[];
   readonly column: string;
+  /**
+   * The granularities this column may be grouped at, empty for anything that is
+   * not a date or a timestamp.
+   *
+   * Independent of `canGroup`, and that is the point: a date column is normally
+   * refused as a raw key — one group per calendar day — while `month` and above
+   * clear the same guard comfortably. So a refused column can still carry a
+   * non-empty list, and a surface that reads `canGroup` alone would hide the
+   * one dimension every report is organised by (#786).
+   */
+  readonly periods: readonly GroupKeyPeriod[];
   /** Resolved distinct-value estimate; absent when statistics are unavailable. */
   readonly distinctEstimate?: number;
   readonly role: ColumnAnalyticalRole;

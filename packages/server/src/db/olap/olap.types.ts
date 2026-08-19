@@ -1,7 +1,22 @@
+import type { GroupKeyPeriod } from '../group-query-builder/group-query-builder.types';
 import type {
   QueryFilter,
   QuerySort,
 } from '../query-builder/query-builder.types';
+
+/**
+ * How one group key was truncated, as the drill translation needs it: the
+ * granularity, and whether the column carried a time zone.
+ *
+ * `isZoned` is here rather than being looked up because the translation is pure
+ * and the column's type is a catalogue fact — the route resolves it once (see
+ * `toGroupKeyTruncations`) and hands the answer down, the same way
+ * `capabilities` reaches the builder (ADR-058).
+ */
+export type GroupKeyTruncation = {
+  readonly isZoned: boolean;
+  readonly period: GroupKeyPeriod;
+};
 
 /**
  * The paginated read of the rows underneath one group row.

@@ -79,7 +79,7 @@ export const resolveTableGroupingUpdate = ({
 
   const grouping: TableGroupingState =
     nextGrouping.keys.length === 0
-      ? { aggregates: {}, keys: [], mode: 'flat' }
+      ? { aggregates: {}, keys: [], mode: 'flat', periods: {} }
       : nextGrouping;
 
   if (isSameGrouping({ existingGrouping, nextGrouping: grouping })) {

@@ -9,6 +9,7 @@ import { assertGroupDepth } from './group-query-builder/assert-group-depth.util.
 import { assertGroupRowBackstop } from './group-query-builder/assert-group-row-backstop.util.ts';
 import { buildGroupQuery } from './group-query-builder/build-group-query.util.ts';
 import { collectCapabilityColumns } from './group-query-builder/collect-capability-columns.util.ts';
+import { toGroupKeyTruncations } from './olap/to-group-key-truncations.util.ts';
 import { runQuery } from './run-query.util.ts';
 import { setStatementTimeout } from './set-statement-timeout.util.ts';
 import { withTransaction } from './with-transaction.util.ts';
@@ -51,8 +52,9 @@ type SelectGroupedRowsArgs = Omit<GroupQueryDescriptor, 'capabilities'>;
  * or set the value you want once it returns.
  *
  * The result carries the emitted `aggregates`, `keys` and `maskAlias` because a
- * grouped row cannot be decoded without them, plus `estimate` and any `warning`
- * the rails produced — a grouping that ran on missing statistics is worth
+ * grouped row cannot be decoded without them, `truncations` because a truncated
+ * key's heading and its later drill both need the granularity paired with the
+ * column's zonedness, plus `estimate` and any `warning` the rails produced — a grouping that ran on missing statistics is worth
  * saying out loud even though it succeeded.
  */
 export const selectGroupedRows = async <TRow extends QueryResultRow>({
@@ -99,6 +101,14 @@ export const selectGroupedRows = async <TRow extends QueryResultRow>({
       keys: built.keys,
       maskAlias: built.maskAlias,
       rows: result.rows as readonly TRow[],
+      // Emitted rather than left to the caller: it pairs the requested
+      // granularities with a catalogue fact — whether the column is zoned —
+      // that only this side has already read, and both the row heading and a
+      // later drill are wrong in a way that renders without it (#786).
+      truncations: toGroupKeyTruncations({
+        capabilities,
+        periods: descriptor.periods,
+      }),
       ...(built.guardRails.warning !== undefined && {
         warning: built.guardRails.warning,
       }),

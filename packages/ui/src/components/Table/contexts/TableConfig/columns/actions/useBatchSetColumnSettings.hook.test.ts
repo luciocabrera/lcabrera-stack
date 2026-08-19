@@ -43,7 +43,12 @@ const {
       set: vi.fn(),
     },
     mockGroupingStore: {
-      get: vi.fn(() => ({ aggregates: {}, keys: [], mode: 'flat' })),
+      get: vi.fn(() => ({
+        aggregates: {},
+        keys: [],
+        mode: 'flat',
+        periods: {},
+      })),
       set: vi.fn(),
     },
     mockMetaStore: {

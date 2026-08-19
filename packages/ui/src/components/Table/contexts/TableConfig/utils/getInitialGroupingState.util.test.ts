@@ -4,7 +4,7 @@ import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
 
 import { getInitialGroupingState } from './getInitialGroupingState.util';
 
-const NO_GROUPING = { aggregates: {}, keys: [], mode: 'flat' };
+const NO_GROUPING = { aggregates: {}, keys: [], mode: 'flat', periods: {} };
 
 const keysOfLength = (length: number) =>
   Array.from({ length }, (_unused, index) => `key_${index}`);
@@ -28,7 +28,12 @@ describe('getInitialGroupingState', () => {
   it('seeds the keys the loader applied', () => {
     expect(
       getInitialGroupingState({ groupingKeys: ['order_status'] }),
-    ).toStrictEqual({ aggregates: {}, keys: ['order_status'], mode: 'flat' });
+    ).toStrictEqual({
+      aggregates: {},
+      keys: ['order_status'],
+      mode: 'flat',
+      periods: {},
+    });
   });
 
   it('seeds the aggregates the loader applied', () => {
@@ -41,6 +46,7 @@ describe('getInitialGroupingState', () => {
       aggregates: { total_amount: 'sum' },
       keys: ['order_status'],
       mode: 'flat',
+      periods: {},
     });
   });
 
@@ -49,6 +55,7 @@ describe('getInitialGroupingState', () => {
       aggregates: {},
       keys: [],
       mode: 'flat',
+      periods: {},
     });
   });
 

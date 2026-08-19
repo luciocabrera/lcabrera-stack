@@ -5,6 +5,11 @@ import { assertGroupSort } from './assert-group-sort.util.ts';
 
 type BuildGroupOrderByClauseArgs = {
   readonly aggregateAliases: readonly string[];
+  /**
+   * Each key's SQL, by key. The value term still uses the output name — see
+   * below. A key with no entry falls back to its quoted identifier.
+   */
+  readonly expressionByKey?: Readonly<Record<string, string>>;
   readonly keys: readonly string[];
   readonly sets: readonly (readonly string[])[];
   readonly sort?: readonly GroupSort[];
@@ -43,9 +48,18 @@ const toDirection = (direction: 'asc' | 'desc' | undefined) =>
  *
  * Ranking an ancestor by an aggregate is refused rather than reordered — see
  * `assert-group-sort.util.ts`, which every request passes through first.
+ *
+ * **`GROUPING` takes the key's expression; the value term takes its output
+ * name.** Postgres matches a `GROUPING` argument against a `GROUP BY`
+ * expression syntactically, so a truncated key has to be spelled the same way
+ * there — while `ORDER BY` resolves a bare name against the select list first,
+ * where the projection has already aliased the truncation back to the column's
+ * name. So the value term needs no change at all, and stays the identifier a
+ * reader expects (#786).
  */
 export const buildGroupOrderByClause = ({
   aggregateAliases,
+  expressionByKey = {},
   keys,
   sets,
   sort = [],
@@ -72,7 +86,9 @@ export const buildGroupOrderByClause = ({
     const entry = sort.find((item) => 'key' in item && item.key === key);
     const valueTerm = `${quoteIdentifier(key)} ${toDirection(entry?.direction)}`;
     const groupingTerms = sets.some((set) => !set.includes(key))
-      ? [`GROUPING(${quoteIdentifier(key)}) ${placement}`]
+      ? [
+          `GROUPING(${expressionByKey[key] ?? quoteIdentifier(key)}) ${placement}`,
+        ]
       : [];
 
     return index === keys.length - 1

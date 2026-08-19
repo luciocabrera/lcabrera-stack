@@ -9,12 +9,18 @@ describe('toggleTableGroupKey', () => {
     expect(
       toggleTableGroupKey({
         columnKey: 'ship_country',
-        grouping: { aggregates: {}, keys: ['order_status'], mode: 'flat' },
+        grouping: {
+          aggregates: {},
+          keys: ['order_status'],
+          mode: 'flat',
+          periods: {},
+        },
       }),
     ).toStrictEqual({
       aggregates: {},
       keys: ['order_status', 'ship_country'],
       mode: 'flat',
+      periods: {},
     });
   });
 
@@ -26,9 +32,15 @@ describe('toggleTableGroupKey', () => {
           aggregates: {},
           keys: ['a', 'ship_country', 'b'],
           mode: 'flat',
+          periods: {},
         },
       }),
-    ).toStrictEqual({ aggregates: {}, keys: ['a', 'b'], mode: 'flat' });
+    ).toStrictEqual({
+      aggregates: {},
+      keys: ['a', 'b'],
+      mode: 'flat',
+      periods: {},
+    });
   });
 
   it('does not cap the depth — that refusal lives in one place', () => {
@@ -39,6 +51,7 @@ describe('toggleTableGroupKey', () => {
       aggregates: {},
       keys: ['a', 'b', 'c', 'd', 'e', 'f'],
       mode: 'flat',
+      periods: {},
     };
 
     expect(toggleTableGroupKey({ columnKey: 'g', grouping }).keys).toHaveLength(
@@ -52,20 +65,30 @@ describe('toggleTableGroupKey', () => {
     expect(
       toggleTableGroupKey({
         columnKey: 'total_amount',
-        grouping: { aggregates, keys: [], mode: 'flat' },
+        grouping: { aggregates, keys: [], mode: 'flat', periods: {} },
       }).aggregates,
     ).toStrictEqual(aggregates);
     expect(
       toggleTableGroupKey({
         columnKey: 'total_amount',
-        grouping: { aggregates, keys: ['total_amount'], mode: 'flat' },
+        grouping: {
+          aggregates,
+          keys: ['total_amount'],
+          mode: 'flat',
+          periods: {},
+        },
       }).aggregates,
     ).toStrictEqual(aggregates);
   });
 
   it('never mutates the grouping it was handed', () => {
     const keys = ['order_status'];
-    const grouping: TableGroupingState = { aggregates: {}, keys, mode: 'flat' };
+    const grouping: TableGroupingState = {
+      aggregates: {},
+      keys,
+      mode: 'flat',
+      periods: {},
+    };
 
     toggleTableGroupKey({ columnKey: 'ship_country', grouping });
 

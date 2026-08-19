@@ -3,6 +3,9 @@ import { describe, expect, it } from 'vite-plus/test';
 import { buildColumnCapabilitiesQuery } from './build-column-capabilities-query.util.ts';
 import { AGGREGATE_SQL_NAMES } from './group-query-builder.constants.ts';
 
+/** The bare names the `spanDays` branch is gated on, in the order the SQL binds them. */
+const PERIOD_TYPE_NAMES = ['date', 'timestamp', 'timestamptz'];
+
 const DESCRIPTOR = {
   columns: ['order_status', 'total_amount'],
   schema: 'public',
@@ -18,7 +21,22 @@ describe('buildColumnCapabilitiesQuery', () => {
       'enterprise_orders',
       ['order_status', 'total_amount'],
       AGGREGATE_SQL_NAMES,
+      PERIOD_TYPE_NAMES,
     ]);
+  });
+
+  it('measures the histogram span only for a date or timestamp column', () => {
+    // The cast that reads `histogram_bounds` — an `anyarray` — has to go
+    // through text, and it fails on a type whose text form is not a timestamp.
+    // The `CASE` is what keeps it off those columns: Postgres does not evaluate
+    // an unselected branch, so the guard is the SQL's and not a JS caller's.
+    const { text } = buildColumnCapabilitiesQuery(DESCRIPTOR);
+
+    expect(text).toContain('CASE WHEN bt.typname = ANY($5::text[])');
+    expect(text).toContain('unnest(s.histogram_bounds::text::text[])');
+    expect(text.indexOf('CASE WHEN bt.typname')).toBeLessThan(
+      text.indexOf('unnest(s.histogram_bounds'),
+    );
   });
 
   // The property that makes this query safe to run on request-derived input:

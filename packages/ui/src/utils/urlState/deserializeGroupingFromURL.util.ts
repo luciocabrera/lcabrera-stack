@@ -17,7 +17,12 @@ import { groupingCodec } from './groupingCodec.util';
 export const deserializeGroupingFromURL = (
   param: string,
 ): TableGroupingState => {
-  const { agg, keys, mode } = groupingCodec.deserialize(param);
+  const { agg, gran, keys, mode } = groupingCodec.deserialize(param);
 
-  return { aggregates: agg ?? {}, keys, mode: mode ?? 'flat' };
+  return {
+    aggregates: agg ?? {},
+    keys,
+    mode: mode ?? 'flat',
+    periods: gran ?? {},
+  };
 };

@@ -211,7 +211,12 @@ describe('readWideAlltypes150Page', () => {
   describe('grouping', () => {
     it('reads the grouped branch when keys are applied, not the paginated one', async () => {
       await selectWideAlltypes150Page({
-        grouping: { aggregates: {}, keys: ['c_001'], mode: 'flat' },
+        grouping: {
+          aggregates: {},
+          keys: ['c_001'],
+          mode: 'flat',
+          periods: {},
+        },
         limit: 50,
         offset: 0,
         sorting: [],
@@ -227,6 +232,7 @@ describe('readWideAlltypes150Page', () => {
           aggregates: { c_002: 'sum' },
           keys: ['c_001'],
           mode: 'flat',
+          periods: {},
         },
         limit: 50,
         offset: 0,
@@ -242,7 +248,12 @@ describe('readWideAlltypes150Page', () => {
 
     it('bounds the grouped read by this table’s own row ceiling', async () => {
       await selectWideAlltypes150Page({
-        grouping: { aggregates: {}, keys: ['c_001'], mode: 'flat' },
+        grouping: {
+          aggregates: {},
+          keys: ['c_001'],
+          mode: 'flat',
+          periods: {},
+        },
         limit: 50,
         offset: 0,
         sorting: [],
@@ -255,7 +266,12 @@ describe('readWideAlltypes150Page', () => {
 
     it('orders by the group keys in nesting order, carrying the user’s direction', async () => {
       await selectWideAlltypes150Page({
-        grouping: { aggregates: {}, keys: ['c_001', 'c_002'], mode: 'rollup' },
+        grouping: {
+          aggregates: {},
+          keys: ['c_001', 'c_002'],
+          mode: 'rollup',
+          periods: {},
+        },
         limit: 50,
         offset: 0,
         sorting: [{ columnKey: 'c_002', direction: 'desc' }],
@@ -277,7 +293,12 @@ describe('readWideAlltypes150Page', () => {
       );
 
       const result = await selectWideAlltypes150Page({
-        grouping: { aggregates: {}, keys: ['c_014'], mode: 'flat' },
+        grouping: {
+          aggregates: {},
+          keys: ['c_014'],
+          mode: 'flat',
+          periods: {},
+        },
         limit: 50,
         offset: 0,
         sorting: [],

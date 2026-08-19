@@ -36,5 +36,6 @@ export const setTableColumnAggregate = ({
     ),
     keys: grouping.keys,
     mode: grouping.mode,
+    periods: grouping.periods,
   };
 };

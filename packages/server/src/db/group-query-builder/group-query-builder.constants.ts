@@ -1,8 +1,11 @@
+import { OLAP_GROUP_PERIODS } from '@lcabrera/api/olap/olap.constants';
+
 import type {
   AggregateFn,
   AggregateSpec,
   BuiltGroupQuery,
   GroupingMode,
+  GroupKeyPeriod,
 } from './group-query-builder.types.ts';
 
 /**
@@ -80,8 +83,77 @@ export const MAX_COUNT_DISTINCT_AGGREGATES = 1;
  * A group key above this many distinct values produces a tree nobody reads and
  * a payload nobody wants. It bounds the **key**, which is why it lives here
  * rather than with the result-size guard rails.
+ *
+ * A temporal key is measured at the granularity it is grouped at, not raw —
+ * `date_trunc('month', c)` and `c` are different keys and the guard is asked
+ * about the one the query will emit (#786).
  */
 export const MAX_GROUP_KEY_DISTINCT = 1000;
+
+/**
+ * The granularities offered, coarsening left to right — re-exported from the
+ * wire vocabulary rather than restated, for `GroupKeyPeriod`'s reason.
+ */
+export const GROUP_KEY_PERIODS: readonly GroupKeyPeriod[] = OLAP_GROUP_PERIODS;
+
+/**
+ * Mean length of each period in days, used only to turn a date range into a
+ * count of periods.
+ *
+ * Mean rather than exact, and that is sound here because the result is an
+ * **upper bound** fed to a threshold, not a number anyone reads: a 1799-day
+ * span covers 60 months whether the leap day falls inside it or not, and the
+ * guard compares against 1000. The Gregorian mean year (365.2425) and the
+ * months and quarters derived from it keep the bound off by at most one period
+ * over a century, which no threshold in this file can notice.
+ */
+export const PERIOD_MEAN_DAYS: Readonly<Record<GroupKeyPeriod, number>> = {
+  day: 1,
+  month: 365.2425 / 12,
+  quarter: 365.2425 / 4,
+  year: 365.2425,
+};
+
+/**
+ * Types a granularity may be applied to, schema-qualified for
+ * `IDENTIFIER_TYPE_NAMES`' reason: type names are per-schema, so a composite
+ * `app.date` reports `typname = 'date'` exactly like the built-in.
+ *
+ * `time` and `timetz` are category `D` and are deliberately out: `date_trunc`
+ * accepts them, and truncating a time of day to a month is not a question
+ * anybody asked. The gate is by name because no structural property of a
+ * catalogue row separates a date from a time.
+ */
+export const PERIOD_CAPABLE_TYPE_NAMES: ReadonlySet<string> = new Set([
+  'pg_catalog.date',
+  'pg_catalog.timestamp',
+  'pg_catalog.timestamptz',
+]);
+
+/**
+ * The `date_trunc` field each granularity maps to — a closed map for
+ * `AGGREGATE_SQL`'s reason: the value reaching SQL comes from here and never
+ * from the caller's string, so an unvalidated period cannot become an
+ * identifier. A new `GroupKeyPeriod` is a type error rather than a silent gap.
+ */
+export const PERIOD_SQL_FIELD: Readonly<Record<GroupKeyPeriod, string>> = {
+  day: 'day',
+  month: 'month',
+  quarter: 'quarter',
+  year: 'year',
+};
+
+/**
+ * The time zone every `timestamptz` truncation is performed in.
+ *
+ * Stated rather than inherited, and that is the whole decision. `date_trunc`'s
+ * two-argument form resolves a `timestamptz` against the **session** `TimeZone`,
+ * so the same request would put a 23:30 order in December for one caller and in
+ * January for another, with nothing in the result saying which happened. A
+ * report whose boundaries move with the reader's connection is not a report
+ * (#786). `date` and `timestamp` have no zone and are unaffected.
+ */
+export const GROUP_PERIOD_TIME_ZONE = 'UTC';
 
 /**
  * Depth cap, checked before any round trip. Four is where an indented tree stops

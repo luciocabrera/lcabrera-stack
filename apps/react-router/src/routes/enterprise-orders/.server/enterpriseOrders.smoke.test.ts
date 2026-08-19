@@ -247,7 +247,12 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
     it('reaches the route service as the same response shape a flat read returns', async () => {
       const grouped = await selectOrdersPage({
         filters: [],
-        grouping: { aggregates: {}, keys: [GROUP_KEY], mode: 'flat' },
+        grouping: {
+          aggregates: {},
+          keys: [GROUP_KEY],
+          mode: 'flat',
+          periods: {},
+        },
         includeTotal: true,
         limit: 50,
         offset: 0,
@@ -291,7 +296,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
       ]) {
         const { data } = await selectOrdersPage({
           filters: [],
-          grouping: { aggregates: {}, keys: [key], mode: 'flat' },
+          grouping: { aggregates: {}, keys: [key], mode: 'flat', periods: {} },
           includeTotal: true,
           limit: 50,
           offset: 0,
@@ -329,7 +334,12 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
       // a stray cross product all break this sum while leaving the SQL valid.
       const { data } = await selectOrdersPage({
         filters: [],
-        grouping: { aggregates: {}, keys: [...KEYS], mode: 'flat' },
+        grouping: {
+          aggregates: {},
+          keys: [...KEYS],
+          mode: 'flat',
+          periods: {},
+        },
         includeTotal: true,
         limit: 50,
         offset: 0,
@@ -356,7 +366,12 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
     it('names both levels of every group, in the order the keys were given', async () => {
       const { data } = await selectOrdersPage({
         filters: [],
-        grouping: { aggregates: {}, keys: [...KEYS], mode: 'flat' },
+        grouping: {
+          aggregates: {},
+          keys: [...KEYS],
+          mode: 'flat',
+          periods: {},
+        },
         includeTotal: true,
         limit: 50,
         offset: 0,
@@ -385,7 +400,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
 
       const { data } = await selectOrdersPage({
         filters: [],
-        grouping: { aggregates: {}, keys: deepKeys, mode: 'flat' },
+        grouping: { aggregates: {}, keys: deepKeys, mode: 'flat', periods: {} },
         includeTotal: true,
         limit: 50,
         offset: 0,
@@ -414,6 +429,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
             'payment_status',
           ],
           mode: 'flat',
+          periods: {},
         },
         includeTotal: true,
         limit: 50,
@@ -439,6 +455,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
           aggregates: { total_amount: 'sum' },
           keys: ['order_status'],
           mode: 'flat',
+          periods: {},
         },
         includeTotal: true,
         limit: 50,
@@ -480,6 +497,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
             aggregates: { total_amount: fn },
             keys: ['order_status'],
             mode: 'flat',
+            periods: {},
           },
           includeTotal: true,
           limit: 50,
@@ -502,6 +520,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
           aggregates: { customer_name: 'sum' },
           keys: ['order_status'],
           mode: 'flat',
+          periods: {},
         },
         includeTotal: true,
         limit: 50,
@@ -546,6 +565,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
           aggregates: { total_amount: 'sum' },
           keys: [...KEYS],
           mode: 'rollup',
+          periods: {},
         },
         includeTotal: true,
         limit: 50,
@@ -649,6 +669,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
           aggregates: { total_amount: 'sum' },
           keys: [...KEYS],
           mode: 'rollup',
+          periods: {},
         },
         includeTotal: true,
         limit: 50,

@@ -12,6 +12,7 @@ const CAPABILITIES: Readonly<Record<string, ColumnGroupingCapability>> = {
   doc: {
     aggregates: ['count'],
     canGroup: false,
+    periods: [],
     column: 'doc',
     refusal: 'not-a-dimension',
     role: 'unsupported',
@@ -20,6 +21,7 @@ const CAPABILITIES: Readonly<Record<string, ColumnGroupingCapability>> = {
   is_gift: {
     aggregates: ['boolAnd', 'boolOr', 'count', 'countDistinct'],
     canGroup: true,
+    periods: [],
     column: 'is_gift',
     role: 'dimension',
     typeName: 'bool',
@@ -27,6 +29,7 @@ const CAPABILITIES: Readonly<Record<string, ColumnGroupingCapability>> = {
   shipping_country: {
     aggregates: ['count', 'countDistinct', 'max', 'min'],
     canGroup: true,
+    periods: [],
     column: 'shipping_country',
     role: 'dimension',
     typeName: 'text',
@@ -34,6 +37,7 @@ const CAPABILITIES: Readonly<Record<string, ColumnGroupingCapability>> = {
   total_amount: {
     aggregates: ['avg', 'count', 'countDistinct', 'max', 'min', 'sum'],
     canGroup: false,
+    periods: [],
     column: 'total_amount',
     refusal: 'unique-ish',
     role: 'fact',
@@ -114,6 +118,7 @@ describe('assertGroupAggregates', () => {
           salary: {
             aggregates: ['sum'],
             canGroup: false,
+            periods: [],
             column: 'salary',
             refusal: 'unique-ish',
             role: 'fact',

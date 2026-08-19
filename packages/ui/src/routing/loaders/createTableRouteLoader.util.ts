@@ -230,7 +230,7 @@ export const createTableRouteLoader = <
         // from the client-controlled UI-flags cookie and validated nowhere, so
         // a route that declares no capability would otherwise inherit one from
         // it and start sending a `filter` or `cursor` its endpoint ignores.
-        // The three grouping fields ride the same rule: each is
+        // The four grouping fields ride the same rule: each is
         // request-derived, so a conditional spread would let a stale cookie
         // entry stand in for one — and `groupingCapabilities` is the one that
         // decides which aggregates the menu offers, so a cookie able to seed it
@@ -239,6 +239,7 @@ export const createTableRouteLoader = <
         groupingCapabilities,
         groupingKeys: grouping.keys,
         groupingMode: grouping.mode,
+        groupingPeriods: grouping.periods,
         ...capabilityMeta,
       },
     };

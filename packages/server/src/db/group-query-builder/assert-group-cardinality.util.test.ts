@@ -17,6 +17,7 @@ const capability = ({
   aggregates: ['count'],
   canGroup: true,
   column,
+  periods: [],
   distinctEstimate,
   role: 'dimension',
   typeName: 'text',

@@ -40,6 +40,7 @@
     "./http/http.types": "./src/http/http.types.ts",
     "./http/fetch-and-validate.util": "./src/http/fetch-and-validate.util.ts",
     "./olap/encode-drill-group.util": "./src/olap/encode-drill-group.util.ts",
+    "./olap/is-olap-group-period.util": "./src/olap/is-olap-group-period.util.ts",
     "./olap/olap.constants": "./src/olap/olap.constants.ts",
     "./olap/olap.types": "./src/olap/olap.types.ts",
     "./olap/parse-drill-group.util": "./src/olap/parse-drill-group.util.ts"
@@ -93,6 +94,10 @@
       "./olap/encode-drill-group.util": {
         "types": "./dist/olap/encode-drill-group.util.d.mts",
         "default": "./dist/olap/encode-drill-group.util.mjs"
+      },
+      "./olap/is-olap-group-period.util": {
+        "types": "./dist/olap/is-olap-group-period.util.d.mts",
+        "default": "./dist/olap/is-olap-group-period.util.mjs"
       },
       "./olap/olap.constants": {
         "types": "./dist/olap/olap.constants.d.mts",

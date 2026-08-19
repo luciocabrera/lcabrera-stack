@@ -15,6 +15,7 @@ const groupable = (column: string): ColumnGroupingCapability => ({
   aggregates: ['count', 'countDistinct', 'max', 'min'],
   canGroup: true,
   column,
+  periods: [],
   role: 'dimension',
   typeName: 'text',
 });
@@ -24,6 +25,7 @@ const CAPABILITIES: Readonly<Record<string, ColumnGroupingCapability>> = {
   doc: {
     aggregates: ['count'],
     canGroup: false,
+    periods: [],
     column: 'doc',
     refusal: 'not-a-dimension',
     role: 'unsupported',

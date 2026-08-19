@@ -2,7 +2,10 @@ import type { LoaderFunctionArgs } from 'react-router';
 
 import { parseDrillGroup } from '@lcabrera/api/olap/parse-drill-group.util';
 
-import { selectOrdersPage } from '@/routes/enterprise-orders/.server/enterpriseOrders.service';
+import {
+  selectOrderGroupKeyTruncations,
+  selectOrdersPage,
+} from '@/routes/enterprise-orders/.server/enterpriseOrders.service';
 import { toOrderDrillRead } from '@/routes/enterprise-orders/.server/toOrderDrillRead.util';
 
 import { parseOrdersPageParams } from '../enterprise-orders-paginated/parseOrdersPageParams.util';
@@ -28,6 +31,13 @@ import { parseOrdersPageParams } from '../enterprise-orders-paginated/parseOrder
  * quietly: every row would be a true fact about the table and wrong under the
  * heading it appears beneath.
  *
+ * **A truncated key needs one extra catalogue read, and only then.** A group
+ * keyed by `date_trunc('month', …)` is filtered by a half-open range rather
+ * than an equality, and the range's upper bound depends on whether the column
+ * carries a time zone — a catalogue fact the client must not assert. So the
+ * granularities arrive on the wire and their zonedness is resolved here; a
+ * drill with no granularity issues no extra query at all (#786).
+ *
  * A refusal answers **400**, not an empty page. A subtotal, a grand total or an
  * incomplete path means the request and the row disagree about what is
  * drillable, which is a bug in the caller rather than a group that happens to
@@ -51,6 +61,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     groupKeys: drillRequest.groupKeys,
     limit,
     sort,
+    truncations: await selectOrderGroupKeyTruncations(drillRequest.periods),
   });
 
   if (drill.kind === 'refused') {
