@@ -30,6 +30,7 @@ request param and can only import a codec that lives in a package.
 
 ## Status / next
 
-- Current step: promoting the OLAP seam into `@lcabrera/api` / `@lcabrera/server`
+- Current step: OLAP seam promoted (ADR-081); back on the rendering half
 - Blockers: none
-- Next: ADR-081, then the codec, then the server translation, then re-point the app
+- Next: the visible drill chrome, the drill action hook, the hand-off href,
+  discard-on-refetch, the a11y sweep, then wire `isGroupDrillEnabled`
