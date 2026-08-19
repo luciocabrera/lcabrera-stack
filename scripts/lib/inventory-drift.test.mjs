@@ -76,10 +76,12 @@ describe('exportedSymbolNames', () => {
     ).toEqual(['getThing', 'loadThing']);
   });
 
-  it('dedupes a symbol referenced more than once in the same file', () => {
+  it('dedupes a name matched by more than one export declaration', () => {
+    // Two matches of the same name, so this would still pass without the
+    // `new Set(...)` wrapping unless the regex genuinely produced a dupe.
     expect(
       exportedSymbolNames(
-        'export const getThing = () => 1;\nconsole.log(getThing);',
+        'export const getThing = () => 1;\nexport const getThing = () => 2;',
       ),
     ).toEqual(['getThing']);
   });
