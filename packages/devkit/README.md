@@ -38,6 +38,11 @@ both arrive. Judging containment per directory instead would push every shared
 reference toward being copied into each directory that needs it, which is the
 duplication this whole mechanism exists to remove.
 
+A command reached through `{{commands.*}}` counts as answered too — the tools
+your `commands` block invokes are added to the baseline for the run. Otherwise
+parameterising a command, the very thing that makes a file portable, would make
+the closure gate fail.
+
 Run it against **materialised** output, never against `assets/`. A shipped file's
 links are written for where the file lands, so resolving them from the asset tree
 produces confident nonsense.

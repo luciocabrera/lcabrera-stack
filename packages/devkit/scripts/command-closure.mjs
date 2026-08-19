@@ -12,20 +12,26 @@ import { resolve } from 'node:path';
 
 import { analyseClosure } from './closure.mjs';
 import { BASELINE_COMMANDS } from './closure-report.mjs';
+import { configuredCommandWords } from './config.mjs';
 
 import { analyseDirectory, renderClosureReport } from './closure-report.mjs';
 import { buildPlan } from './command-materialise.mjs';
 
 /**
- * Everything the package would place in this repository. A reference to one of
- * these travels, wherever it sits — the shipping unit is the package.
+ * Everything the package would place in this repository, and the tools the
+ * consumer's config answers for. A reference to either travels.
+ *
+ * Deliberately not guarded: `buildPlan` throws on a malformed config, and
+ * catching that here would substitute an empty shipped set for an error, so
+ * every contract and sibling-skill reference would start reporting as an escape.
+ * A configuration fault must read as a configuration fault, not as findings.
  */
-const shippedPaths = (root) => {
-  try {
-    return new Set(buildPlan({ root }).entries.map((entry) => entry.path));
-  } catch {
-    return new Set();
-  }
+const shippedContext = (root) => {
+  const { config, entries } = buildPlan({ root });
+  return {
+    allowedCommands: [...BASELINE_COMMANDS, ...configuredCommandWords(config)],
+    shipped: new Set(entries.map((entry) => entry.path)),
+  };
 };
 
 /**
@@ -38,8 +44,8 @@ const shippedPaths = (root) => {
  * sits, only by being shipped.
  */
 const runShippedClosure = (root) => {
+  const { allowedCommands, shipped } = shippedContext(root);
   const plan = buildPlan({ root }).entries;
-  const shipped = new Set(plan.map((entry) => entry.path));
   const files = plan
     .filter((entry) => existsSync(resolve(root, entry.path)))
     .map((entry) => ({
@@ -48,7 +54,7 @@ const runShippedClosure = (root) => {
     }));
 
   const { escapes } = analyseClosure({
-    allowedCommands: BASELINE_COMMANDS,
+    allowedCommands,
     exists: (path) => existsSync(resolve(root, path)),
     files,
     rootDirectory: '',
@@ -87,9 +93,14 @@ export const runClosure = (directories, root) => {
     return 1;
   }
 
-  const shipped = shippedPaths(root);
+  const { allowedCommands, shipped } = shippedContext(root);
   const results = directories.map((directory) =>
-    analyseDirectory({ directory: resolve(root, directory), root, shipped }),
+    analyseDirectory({
+      allowedCommands,
+      directory: resolve(root, directory),
+      root,
+      shipped,
+    }),
   );
 
   console.log(renderClosureReport(results));

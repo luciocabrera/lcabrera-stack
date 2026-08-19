@@ -87,3 +87,17 @@ export const targetPathFor = ({ assetPath, config }) => {
 };
 
 export const groupsFor = (config) => PROFILES[config.profile] ?? [];
+
+/**
+ * The tools the consumer's own command map invokes.
+ *
+ * A command reached through a placeholder is one of the reference forms a
+ * shipped file is allowed to use, so closure must count it as answered. Without
+ * this, parameterising a command — the very thing that makes a file portable —
+ * would make the closure gate fail.
+ */
+export const configuredCommandWords = (config) =>
+  Object.values(config.commands ?? {})
+    .filter((command) => typeof command === 'string')
+    .map((command) => command.trim().split(/\s+/)[0] ?? '')
+    .filter((word) => word !== '');

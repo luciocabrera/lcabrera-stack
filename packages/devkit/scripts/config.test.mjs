@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vite-plus/test';
 
 import {
+  configuredCommandWords,
   DEFAULT_CONFIG,
   groupsFor,
   resolveConfig,
@@ -62,5 +63,23 @@ describe('groupsFor', () => {
       'docs',
       'coordination',
     ]);
+  });
+});
+
+describe('configuredCommandWords', () => {
+  test('names the tool each configured command invokes', () => {
+    expect(
+      configuredCommandWords({
+        commands: {
+          claim: 'vp run coordination:claim',
+          install: 'pnpm install',
+        },
+      }),
+    ).toEqual(['vp', 'pnpm']);
+  });
+
+  test('ignores an absent, empty or non-string command', () => {
+    expect(configuredCommandWords({})).toEqual([]);
+    expect(configuredCommandWords({ commands: { a: '', b: 7 } })).toEqual([]);
   });
 });
