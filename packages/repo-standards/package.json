@@ -56,7 +56,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
   "dependencies": {
-    "@arethetypeswrong/core": "catalog:tooling"
+    "@arethetypeswrong/core": "catalog:tooling",
+    "ts-morph": "catalog:tooling"
   },
   "devDependencies": {
     "@lcabrera/vite-config": "workspace:*",

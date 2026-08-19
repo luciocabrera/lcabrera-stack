@@ -453,6 +453,9 @@ importers:
       '@arethetypeswrong/core':
         specifier: catalog:tooling
         version: 0.18.5
+      ts-morph:
+        specifier: catalog:tooling
+        version: 28.0.0
     devDependencies:
       '@lcabrera/vite-config':
         specifier: workspace:*

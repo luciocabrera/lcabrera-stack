@@ -140,11 +140,20 @@ dependency added to one of those silently breaks the workflows that never run
 `install` — including `release.yml`, which runs `release-publish-plan.mjs` with
 plain `node` precisely to decide whether installing is worth it.
 
-The package does have one runtime dependency, `@arethetypeswrong/core`, and the
-boundary is what keeps that safe: only `repo-verify-publish` and
-`repo-verify-types` reach it, and neither is ever run before an install — they
-check build artifacts, so a build has already happened. Adding a dependency to
-anything else here is the change to think twice about.
+The package does have runtime dependencies — `@arethetypeswrong/core` and
+`ts-morph` — and the boundary is what keeps that safe: only the three gates that
+read build artifacts reach them (`repo-verify-publish`, `repo-verify-types`,
+`repo-verify-api-surface`), and none of those is ever run before an install,
+because a build has already had to happen. Adding a dependency to anything else
+here is the change to think twice about.
+
+`declared-imports.test.mjs` enforces both halves — every bare import declared,
+and a module a consumer runs restricted to `dependencies`. It exists because
+neither is observable from inside this monorepo: Node resolves a bare specifier
+by walking up from the module, so an undeclared import quietly finds the
+repository root's `node_modules` and every gate passes. The same walk from
+`node_modules/<name>/scripts/` reaches the consumer's tree instead, which under
+pnpm carries nothing nobody declared. `ts-morph` sat undeclared exactly that way.
 
 ## The one thing to know before moving a file here
 
