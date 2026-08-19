@@ -13,7 +13,7 @@ area:
 started: 2026-08-19
 updated: 2026-08-19
 plan: (none)
-pr: (none)
+pr: '#805'
 issue: #797
 ---
 
@@ -23,6 +23,6 @@ Ship epic and refactor-verified with their contracts
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: mechanism landed; epic and refactor-verified reclassified as blocked on their contract documents
 - Blockers: none
-- Next:
+- Next: they ship after #798 and #799, and after the claim protocol is split from this repo's register
