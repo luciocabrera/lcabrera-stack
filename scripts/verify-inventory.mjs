@@ -47,10 +47,16 @@ const BASELINE_PATH = join(
   'inventory-drift-baseline.json',
 );
 
-/** Tracked paths, refusing to report a clean pass on no data (see route-names). */
+/**
+ * Tracked paths, refusing to report a clean pass on no data (see route-names).
+ * An empty result is refused too, not just `undefined`: this repo always has
+ * thousands of tracked files, so `git ls-files` succeeding with nothing to
+ * show means the wrong `cwd` or a broken checkout, not a real empty repo —
+ * and "0 files checked" must not look identical to "everything passed".
+ */
 const trackedPaths = () => {
   const output = runGit({ args: ['ls-files'], cwd: REPO_ROOT });
-  if (output === undefined) {
+  if (output === undefined || output.trim() === '') {
     throw new Error(
       'Inventory gate: could not list tracked files. Refusing to report a clean pass on no data.',
     );
