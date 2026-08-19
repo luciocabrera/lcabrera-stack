@@ -44,7 +44,7 @@ import {
 } from './lib/api-surface-diff.mjs';
 import { extractSurface } from './lib/api-surface-extract.mjs';
 import { parseSurface, renderSurface } from './lib/api-surface-render.mjs';
-import { runGit } from './lib/git-exec.mjs';
+import { runGit } from '../packages/repo-standards/scripts/git-exec.mjs';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
 const BASE_REF = process.env.API_SURFACE_BASE ?? 'origin/main';

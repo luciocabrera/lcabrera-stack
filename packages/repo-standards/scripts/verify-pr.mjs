@@ -17,7 +17,7 @@
  *
  * Exit codes: 0 = valid (warnings allowed), 1 = a rule was broken.
  */
-import { dirname, resolve } from 'node:path';
+import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
@@ -26,6 +26,7 @@ import {
   validatePrTitle,
 } from './commit-convention.mjs';
 import { flagValue } from './cli-input.mjs';
+import { readCoordinationPaths } from './config.mjs';
 import { readEntries } from './coordination-read.mjs';
 import { reportWarnings } from './report-warnings.mjs';
 import { readTextWithin } from './safe-read.mjs';
@@ -35,7 +36,7 @@ import { resolveHostRoot } from './host-root.mjs';
 const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),
 });
-const BRANCHES_DIR = resolve(REPO_ROOT, 'docs/coordination/branches');
+const { branchesDir: BRANCHES_DIR } = readCoordinationPaths(REPO_ROOT);
 
 const readInputs = () => {
   const title = flagValue('--title') ?? process.env.PR_TITLE ?? '';
@@ -48,7 +49,7 @@ const readInputs = () => {
   return { base, body, title };
 };
 
-/** Shared branches declared under docs/coordination/branches/ are legitimate PR bases. */
+/** Shared branches declared in the register are legitimate PR bases. */
 const declaredSharedBranches = () =>
   readEntries(BRANCHES_DIR)
     .map(({ data }) => data?.branch)

@@ -10,9 +10,9 @@
  * makes it hold.
  *
  * Usage:
- *   node scripts/verify-adrs.mjs           check; exit 1 on any violation
- *   node scripts/verify-adrs.mjs --write   regenerate each home's README index
- *   node scripts/verify-adrs.mjs --list    print every ADR with its title
+ *   repo-verify-adrs           check; exit 1 on any violation
+ *   repo-verify-adrs --write   regenerate each home's README index
+ *   repo-verify-adrs --list    print every ADR with its title
  *
  * `--list` is where the per-ADR table went: the committed index carries no row
  * per ADR, because that made every pair of concurrent ADR branches conflict
@@ -21,7 +21,7 @@
  * Exit codes: 0 = clean, 1 = a violation, or an index that is out of date.
  */
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
@@ -36,9 +36,12 @@ import {
   normalizeIndex,
   renderIndex,
   renderListing,
-} from './lib/adr-registry.mjs';
+} from './adr-registry.mjs';
+import { resolveHostRoot } from './host-root.mjs';
 
-const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
+const REPO_ROOT = resolveHostRoot({
+  moduleDirectory: dirname(fileURLToPath(import.meta.url)),
+});
 const INDEX_FILE = 'README.md';
 
 /** Directories that never hold governed documentation. */

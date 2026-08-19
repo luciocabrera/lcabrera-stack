@@ -7,29 +7,32 @@
  * `.github/workflows/coordination-close.yml`. This file is only the effect
  * between them. See `.claude/rules/scripts.md`.
  *
- * Usage (from the repo root):
- *   vp run coordination:close -- --pr <number> [--branch <head-ref>] [--dry-run]
- *   node scripts/close-coordination-claim.mjs --pr 533 --dry-run
+ * Usage:
+ *   repo-close-claim --pr <number> [--branch <head-ref>] [--dry-run]
  *
  * Exit codes: 0 = the resolved files were deleted, or nothing claimed this PR
  * (the common case is a no-op, not a failure); 1 = neither signal was given, or
  * a delete failed.
  */
 import { unlinkSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { dirname, join } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
-import { flagValue } from '../packages/repo-standards/scripts/cli-input.mjs';
-import { tasksClosedBy } from './lib/coordination-close.mjs';
-import { readEntries } from '../packages/repo-standards/scripts/coordination-read.mjs';
+import { flagValue } from './cli-input.mjs';
+import { tasksClosedBy } from './coordination-close.mjs';
+import { readEntries } from './coordination-read.mjs';
+import { resolveHostRoot } from './host-root.mjs';
+import { readCoordinationPaths } from './config.mjs';
 
-const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
-const TASKS_DIR = join(REPO_ROOT, 'docs', 'coordination', 'tasks');
-const TASKS_REL = 'docs/coordination/tasks';
+const REPO_ROOT = resolveHostRoot({
+  moduleDirectory: dirname(fileURLToPath(import.meta.url)),
+});
+const { tasksDir: TASKS_DIR, tasksRel: TASKS_REL } =
+  readCoordinationPaths(REPO_ROOT);
 
 const USAGE =
-  'usage: node scripts/close-coordination-claim.mjs --pr <number> ' +
+  'usage: repo-close-claim --pr <number> ' +
   '[--branch <head-ref>] [--dry-run]';
 
 /** What was searched for, so a no-op says which PR it found no claim for

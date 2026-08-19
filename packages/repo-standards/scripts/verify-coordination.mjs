@@ -1,9 +1,9 @@
 /**
- * Verifies the in-git work register under `docs/coordination/` — the canonical
+ * Verifies the in-git work register `devkit.config.json` names — the canonical
  * "who is working on what" for this monorepo. Keeps the register honest the same
  * way `verify-commands-doc.mjs` keeps COMMANDS.md honest. Pure parsing/rendering
- * live in `packages/repo-standards/scripts/coordination-parse.mjs` and `./lib/coordination-board.mjs`; this
- * file owns the effects (fs, git) and the checks.
+ * live in `./coordination-parse.mjs` and `./coordination-board.mjs`; this file
+ * owns the effects (fs, git) and the checks.
  *
  * Two units of work:
  *   - a TASK   (`tasks/<id>.md`)     — one person's claim: owner, status, branch,
@@ -52,53 +52,53 @@
  *                          `origin/*` ref still "resolves" it (so `branch` above
  *                          stays quiet): the PR landed, delete the task file.
  *
- * Local checks read the working tree only and never shell out (`git-dir.mjs`
- * reads `.git` directly). The overlap check is the one exception — reading a
- * blob out of another branch needs git's object store — and it goes through
- * `git-exec.mjs`, which pins PATH to system directories (S4036) and strips the
- * repository-selecting variables.
+ * Two checks shell out, and both go through `git-exec.mjs`, which pins PATH to
+ * system directories (S4036) and strips the repository-selecting variables:
+ * the overlap check, because reading a blob out of another branch needs git's
+ * object store, and the checkout-isolation check, because `status` and
+ * `branch --show-current` have no on-disk equivalent. Everything else reads the
+ * working tree — including the missing-branch check, which walks `.git` itself
+ * rather than asking git whether a ref resolves.
  *
  * Modes:
- *   node scripts/verify-coordination.mjs                 → verify (default)
- *   node scripts/verify-coordination.mjs --no-remote     → skip the remote read
- *                                                          (offline / fast loop)
- *   node scripts/verify-coordination.mjs --write-board   → write the local,
- *                                                          gitignored BOARD.md view
+ *   repo-verify-claims                → verify (default)
+ *   repo-verify-claims --no-remote    → verify, skipping the remote read
+ *   repo-verify-claims --write-board  → write the local, gitignored board view
  *
  * Exit codes: 0 = consistent (warnings allowed), 1 = an ERROR check failed.
  */
 import { existsSync, readFileSync, statSync, writeFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
   checkoutIsolationFinding,
   readCheckoutFacts,
-} from './lib/checkout-isolation.mjs';
-import { renderBoard } from './lib/coordination-board.mjs';
-import {
-  branchSlug,
-  NO_BRANCH,
-  NO_PR,
-} from '../packages/repo-standards/scripts/coordination-parse.mjs';
-import { mergedTaskDriftWarnings } from './lib/coordination-reconcile.mjs';
-import { overlapWarnings } from './lib/coordination-overlap.mjs';
-import { readEntries } from '../packages/repo-standards/scripts/coordination-read.mjs';
+} from './checkout-isolation.mjs';
+import { renderBoard } from './coordination-board.mjs';
+import { branchSlug, NO_BRANCH, NO_PR } from './coordination-parse.mjs';
+import { mergedTaskDriftWarnings } from './coordination-reconcile.mjs';
+import { overlapWarnings } from './coordination-overlap.mjs';
+import { readEntries } from './coordination-read.mjs';
 import {
   readRemoteClaims,
   withoutLocalDuplicates,
-} from './lib/coordination-remote.mjs';
-import {
-  branchErrors,
-  ISO_DATE,
-  taskErrors,
-} from './lib/coordination-schema.mjs';
+} from './coordination-remote.mjs';
+import { branchErrors, ISO_DATE, taskErrors } from './coordination-schema.mjs';
+import { readCoordinationPaths } from './config.mjs';
+import { resolveHostRoot } from './host-root.mjs';
 
-const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
-const COORD_DIR = join(REPO_ROOT, 'docs', 'coordination');
-const TASKS_DIR = join(COORD_DIR, 'tasks');
-const BRANCHES_DIR = join(COORD_DIR, 'branches');
-const BOARD_DOC = join(COORD_DIR, 'BOARD.md');
+const REPO_ROOT = resolveHostRoot({
+  moduleDirectory: dirname(fileURLToPath(import.meta.url)),
+});
+const {
+  boardDoc: BOARD_DOC,
+  boardRel: BOARD_REL,
+  branchesDir: BRANCHES_DIR,
+  branchesRel: BRANCHES_REL,
+  tasksDir: TASKS_DIR,
+  tasksRel: TASKS_REL,
+} = readCoordinationPaths(REPO_ROOT);
 
 const STALE_DAYS = 14;
 const GHOST_DAYS = 3;
@@ -110,7 +110,7 @@ const checkTaskSchema = (tasks, problems) => {
   for (const task of tasks) {
     if (task.data === undefined) {
       problems.push(
-        `${task.name}: no YAML frontmatter — copy tasks/_TEMPLATE.md.`,
+        `${task.name}: no frontmatter — copy ${TASKS_REL}/_TEMPLATE.md.`,
       );
       continue;
     }
@@ -127,7 +127,7 @@ const checkBranchSchema = (branches, problems) => {
   for (const branch of branches) {
     if (branch.data === undefined) {
       problems.push(
-        `${branch.name}: no YAML frontmatter — copy branches/_TEMPLATE.md.`,
+        `${branch.name}: no frontmatter — copy ${BRANCHES_REL}/_TEMPLATE.md.`,
       );
       continue;
     }
@@ -338,9 +338,12 @@ const main = () => {
   const branches = readEntries(BRANCHES_DIR);
 
   if (process.argv.includes('--write-board')) {
-    writeFileSync(BOARD_DOC, renderBoard(tasks, branches));
+    writeFileSync(
+      BOARD_DOC,
+      renderBoard(tasks, branches, { tasksRel: TASKS_REL }),
+    );
     console.log(
-      `Wrote the local docs/coordination/BOARD.md view (gitignored) — ` +
+      `Wrote the local ${BOARD_REL} view (gitignored) — ` +
         `${tasks.length} task(s), ${branches.length} shared branch(es).`,
     );
     return;

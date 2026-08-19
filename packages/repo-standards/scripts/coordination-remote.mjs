@@ -28,12 +28,14 @@
  *    branch is a blind spot; silently dropping it is the bug this module
  *    exists to fix.
  */
+
+import { readConventions, readRegisters } from './config.mjs';
 import { NO_BRANCH } from './coordination-overlap.mjs';
-import { parseFrontmatter } from '../../packages/repo-standards/scripts/coordination-parse.mjs';
+import { parseFrontmatter } from './coordination-parse.mjs';
 import { runGit } from './git-exec.mjs';
 
-const TASKS_DIR = 'docs/coordination/tasks/';
-const DEFAULT_BRANCH = 'main';
+const TASKS_DIR = `${readRegisters().coordinationTasksDir}/`;
+const DEFAULT_BRANCH = readConventions().defaultBranch;
 const HEADS_PREFIX = 'refs/heads/';
 
 /**
@@ -41,14 +43,18 @@ const HEADS_PREFIX = 'refs/heads/';
  * branch. The sha matters as much as the name: it is what tells a local ref
  * that is merely *behind* origin apart from one that is current, and a stale
  * ref yields stale claims while looking exactly like a successful read.
+ *
+ * The branch to drop is a parameter so the exclusion can be exercised for a
+ * repository whose default is not this one's; production passes nothing and
+ * gets the configured value.
  */
-export const parseLsRemoteHeads = (stdout) =>
+export const parseLsRemoteHeads = (stdout, defaultBranch = DEFAULT_BRANCH) =>
   String(stdout ?? '')
     .split('\n')
     .map((line) => line.split('\t'))
     .filter(([sha, ref]) => sha && ref?.startsWith(HEADS_PREFIX))
     .map(([sha, ref]) => ({ branch: ref.slice(HEADS_PREFIX.length), sha }))
-    .filter(({ branch }) => branch !== DEFAULT_BRANCH);
+    .filter(({ branch }) => branch !== defaultBranch);
 
 /** Task file paths in a ref's tree (never the `_`-prefixed template). */
 const taskPathsAt = ({ cwd, git, ref }) => {

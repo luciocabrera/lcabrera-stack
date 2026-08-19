@@ -1,0 +1,18 @@
+{
+  "registers": {
+    "adrHomes": [
+      {
+        "blurb": "The repository, its published `@lcabrera/*` packages, and the toolchain.",
+        "dir": "docs/decisions",
+        "tier": "repo",
+        "title": "Repository, packages & tooling"
+      },
+      {
+        "blurb": "Decisions internal to the `apps/react-router` showcase app — its components, routes and interaction model.",
+        "dir": "apps/react-router/docs/decisions",
+        "tier": "app",
+        "title": "React Router showcase app"
+      }
+    ]
+  }
+}

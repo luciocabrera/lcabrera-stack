@@ -1,3 +1,9 @@
+import { mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+import { runGit } from './git-exec.mjs';
+
 /**
  * The failure this guards is a feature branch checked out in the SHARED clone,
  * which moves HEAD under every other agent working there. It must fire on that
@@ -11,7 +17,10 @@
  */
 import { describe, expect, it } from 'vite-plus/test';
 
-import { checkoutIsolationFinding } from './checkout-isolation.mjs';
+import {
+  checkoutIsolationFinding,
+  readCheckoutFacts,
+} from './checkout-isolation.mjs';
 
 const facts = (overrides) => ({
   branch: 'feat/123-something',
@@ -67,5 +76,52 @@ describe('checkoutIsolationFinding', () => {
     expect(
       checkoutIsolationFinding(facts({ branch: 'maintenance-work' })),
     ).not.toBe(undefined);
+  });
+});
+
+describe('readCheckoutFacts', () => {
+  /** A real repository, because these facts come from git rather than from a shape. */
+  const repository = () => {
+    const repositoryRoot = mkdtempSync(join(tmpdir(), 'checkout-facts-'));
+    runGit({
+      args: ['init', '--initial-branch=main', '.'],
+      cwd: repositoryRoot,
+    });
+    runGit({
+      args: ['config', 'user.email', 'test@example.com'],
+      cwd: repositoryRoot,
+    });
+    runGit({ args: ['config', 'user.name', 'Test'], cwd: repositoryRoot });
+    writeFileSync(join(repositoryRoot, 'a.txt'), 'one\n');
+    runGit({ args: ['add', 'a.txt'], cwd: repositoryRoot });
+    runGit({ args: ['commit', '-m', 'chore: first'], cwd: repositoryRoot });
+    return repositoryRoot;
+  };
+
+  it('reads the branch, and reports a clean primary checkout as clean', () => {
+    const checkout = repository();
+    const result = readCheckoutFacts(checkout);
+    expect(result.branch).toBe('main');
+    expect(result.isDirty).toBe(false);
+    expect(result.isPrimary).toBe(true);
+  });
+
+  it('reports a tracked modification as dirty', () => {
+    const checkout = repository();
+    writeFileSync(join(checkout, 'a.txt'), 'two\n');
+    expect(readCheckoutFacts(checkout).isDirty).toBe(true);
+  });
+
+  it('ignores an untracked file, which survives a branch switch', () => {
+    const checkout = repository();
+    writeFileSync(join(checkout, 'untracked.txt'), 'x\n');
+    expect(readCheckoutFacts(checkout).isDirty).toBe(false);
+  });
+
+  it('treats an unreadable git answer as dirty, the conservative direction', () => {
+    const empty = mkdtempSync(join(tmpdir(), 'checkout-facts-'));
+    const result = readCheckoutFacts(empty);
+    expect(result.isDirty).toBe(true);
+    expect(result.isPrimary).toBe(false);
   });
 });

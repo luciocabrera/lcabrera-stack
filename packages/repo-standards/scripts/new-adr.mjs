@@ -8,14 +8,14 @@
  * gets created — which is exactly what ADR-048 was written to stop.
  *
  * Usage:
- *   node scripts/new-adr.mjs "<title>" [--home repo|cqms|app] [--slug <slug>]
- *   node scripts/new-adr.mjs "<title>" --dry-run
+ *   repo-adr "<title>" [--home <tier>] [--slug <slug>]
+ *   repo-adr "<title>" --dry-run
  *
  * Exit codes: 0 = written, 1 = bad arguments, an occupied path, or a template
  * that no longer has a heading to fill in.
  */
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
@@ -24,20 +24,23 @@ import {
   TEMPLATE_FILE,
   TEMPLATE_HOME,
   nextFreeNumber,
-} from './lib/adr-registry.mjs';
+} from './adr-registry.mjs';
 import {
   adrFilename,
   pad,
   renderAdr,
   resolveHome,
   slugify,
-} from './lib/adr-scaffold.mjs';
+} from './adr-scaffold.mjs';
+import { resolveHostRoot } from './host-root.mjs';
 
-const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
+const REPO_ROOT = resolveHostRoot({
+  moduleDirectory: dirname(fileURLToPath(import.meta.url)),
+});
 
 const TIERS = ADR_HOMES.map((home) => home.tier);
 
-const USAGE = `usage: vp run adr:new -- "<title>" [--home ${TIERS.join('|')}] [--slug <slug>] [--dry-run]`;
+const USAGE = `usage: repo-adr "<title>" [--home ${TIERS.join('|')}] [--slug <slug>] [--dry-run]`;
 
 /** Argument parsing kept explicit rather than pulled from a library: this runs
  *  before install in a fresh worktree often enough to be worth the lines. */

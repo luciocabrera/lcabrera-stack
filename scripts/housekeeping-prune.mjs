@@ -27,7 +27,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { readStdin } from '../packages/repo-standards/scripts/cli-input.mjs';
-import { runGit } from './lib/git-exec.mjs';
+import { runGit } from '../packages/repo-standards/scripts/git-exec.mjs';
 import {
   buildPlan,
   parseWorktrees,

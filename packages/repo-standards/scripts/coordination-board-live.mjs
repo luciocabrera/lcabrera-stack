@@ -14,22 +14,25 @@
  * `generate-changelog.mjs` takes `git log` on stdin. Prints to stdout only — it
  * never writes `BOARD.md` (that stays a gitignored, local-only view — ADR-037).
  *
- * Usage (from the repo root):
- *   vp run coordination:board:live
+ * Usage:
  *   gh pr list --state open --json number,title,headRefName,isDraft,url,statusCheckRollup \
- *     | node scripts/coordination-board-live.mjs
+ *     | repo-claim-board
  *
  * With no PR JSON on stdin (no `gh`, no token, no open PRs) it still prints the
  * claims, just without live PR columns. Exit code is always 0 — it is a view.
  */
-import { resolve } from 'node:path';
+import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { readStdin } from '../packages/repo-standards/scripts/cli-input.mjs';
-import { readEntries } from '../packages/repo-standards/scripts/coordination-read.mjs';
+import { readStdin } from './cli-input.mjs';
+import { readCoordinationPaths } from './config.mjs';
+import { readEntries } from './coordination-read.mjs';
+import { resolveHostRoot } from './host-root.mjs';
 
-const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
-const TASKS_DIR = resolve(REPO_ROOT, 'docs/coordination/tasks');
+const REPO_ROOT = resolveHostRoot({
+  moduleDirectory: dirname(fileURLToPath(import.meta.url)),
+});
+const { tasksDir: TASKS_DIR } = readCoordinationPaths(REPO_ROOT);
 
 const parsePullRequests = (raw) => {
   if (!raw.trim()) {

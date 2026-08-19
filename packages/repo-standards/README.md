@@ -38,11 +38,32 @@ and `issue:verify`.
   "conventions": {
     "defaultBranch": "main",
     "sharedBranchesDir": "docs/coordination/branches"
+  },
+  "registers": {
+    "adrHomes": [
+      { "dir": "docs/decisions", "tier": "repo", "title": "…", "blurb": "…" }
+    ],
+    "adrDraftDir": "docs/agents/planning/adr-drafts",
+    "adrTemplateHome": "docs/decisions",
+    "coordinationBoardDoc": "docs/coordination/BOARD.md",
+    "coordinationTasksDir": "docs/coordination/tasks"
   }
 }
 ```
 
-Only these two are repository data: a gate that says "retarget to `main`" tells a
+Every path here is relative to the repository root and must stay inside it: an
+absolute value or one that climbs out is refused by name rather than normalised,
+because these gates write and delete — the ADR scaffolder writes a file, the
+index and the board are overwritten, and the claim closer unlinks.
+
+`adrHomes` defaults to **one** home, because that is all a repository is assumed
+to have. A repository keeping a second — decisions internal to one app, say —
+declares both, and the order it declares them in is the order they are reported.
+This repository declares two; drop the second from its `devkit.config.json` and
+`vp run adr:verify` reports every ADR in the app home as homeless, which is the
+check that the config is really driving the gate.
+
+Only these are repository data: a gate that says "retarget to `main`" tells a
 repository with a differently-named default branch something false, and one that
 names a register directory names a path a consumer may not have. Everything else
 — the type vocabulary, the required sections, the grammar — is the standard

@@ -273,7 +273,7 @@ maintained stood still.
 ## The check — `coordination:verify`
 
 `vp run coordination:verify` (CI step in `check-safe.yml`; script:
-[`scripts/verify-coordination.mjs`](../../scripts/verify-coordination.mjs)) keeps
+[`packages/repo-standards/scripts/verify-coordination.mjs`](../../packages/repo-standards/scripts/verify-coordination.mjs)) keeps
 the register honest, the way `commands:verify` keeps COMMANDS.md honest. It
 distinguishes **errors** (fail the build) from **warnings** (surfaced, never
 blocking — a warning must not fail an unrelated PR because someone else's task

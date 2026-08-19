@@ -7,8 +7,10 @@ name: Close coordination claim
 # `coordination:verify` warns rather than fails, on purpose. A claim nobody holds
 # still reads as a live soft lock and fences the next agent off finished work.
 #
-# Matching is scripts/lib/coordination-close.mjs (pure, unit-tested); the
-# deletion is `vp run coordination:close`; this file only commits the result.
+# Matching is packages/repo-standards/scripts/coordination-close.mjs (pure, unit-tested); the
+# deletion is `repo-close-claim` — `vp run coordination:close` locally, and the
+# same command by path here because this workflow does not install; this file
+# only commits the result.
 # `coordination:verify`'s stale/branch/reconcile warnings stay as the backstop
 # for anything that slips past (issue #529 §5).
 #
@@ -62,7 +64,7 @@ jobs:
         env:
           HEAD_REF: ${{ github.event.pull_request.head.ref }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: node scripts/close-coordination-claim.mjs --pr "$PR_NUMBER" --branch "$HEAD_REF"
+        run: node packages/repo-standards/scripts/close-coordination-claim.mjs --pr "$PR_NUMBER" --branch "$HEAD_REF"
 
       - name: Commit the deletion, only when there was one
         env:

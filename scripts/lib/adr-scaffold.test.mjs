@@ -9,14 +9,14 @@ import {
   TEMPLATE_FILE,
   TEMPLATE_HOME,
   parseAdrFilename,
-} from './adr-registry.mjs';
+} from '../../packages/repo-standards/scripts/adr-registry.mjs';
 import {
   adrFilename,
   pad,
   renderAdr,
   resolveHome,
   slugify,
-} from './adr-scaffold.mjs';
+} from '../../packages/repo-standards/scripts/adr-scaffold.mjs';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
