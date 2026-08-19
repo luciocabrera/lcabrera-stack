@@ -14,7 +14,7 @@ area:
 started: 2026-08-19
 updated: 2026-08-19
 plan: (none)
-pr: (none)
+pr: '#805'
 issue: #798
 ---
 
@@ -24,6 +24,6 @@ Extract the commit, branch, PR and issue gates into repo-standards
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: family 1 (commit, branch, PR, issue) extracted; package created and dogfooded
 - Blockers: none
-- Next:
+- Next: family 2 — the coordination register and the ADR registry
