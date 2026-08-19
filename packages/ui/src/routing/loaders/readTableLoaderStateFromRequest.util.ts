@@ -9,25 +9,19 @@ import type {
 } from '#ui/components/Table';
 import type { TableGroupingState } from '#ui/components/Table/Table.types';
 
+import { TABLE_TOTALS_PLACEMENT_PARAM } from '#ui/components/Table/Table.constants';
 import {
   readPersistedStateFromCookie,
   readPersistedUiFlagsFromCookie,
 } from '#ui/components/Table/utils';
 import {
   deserializeFiltersFromURL,
-  deserializeGroupingFromURL,
   deserializeSortingFromURL,
 } from '#ui/utils/urlState';
 
 import { sanitizeFiltersByColumns } from '../shared/sanitizeFiltersByColumns.util';
-import { sanitizeGroupingByColumns } from '../shared/sanitizeGroupingByColumns.util';
-
-const NO_GROUPING: TableGroupingState = {
-  aggregates: {},
-  keys: [],
-  mode: 'flat',
-  periods: {},
-};
+import { resolveLoaderGrouping } from './resolveLoaderGrouping.util';
+import { resolveLoaderTotalsPlacement } from './resolveLoaderTotalsPlacement.util';
 
 type ReadTableLoaderStateFromRequestArgs<
   TData extends Record<string, unknown>,
@@ -38,6 +32,12 @@ type ReadTableLoaderStateFromRequestArgs<
    */
   readonly appId?: string;
   readonly columns?: readonly TableColumn<TData>[];
+  /**
+   * The route's curated grouping, applied only when the URL carried no
+   * `grouping` param — see `resolveLoaderGrouping` for why that distinction is
+   * the whole feature.
+   */
+  readonly defaultGrouping?: TableGroupingState;
   readonly includeFilters?: boolean;
   /**
    * Whether this route may be grouped at all. Off leaves `grouping` empty
@@ -63,6 +63,7 @@ export const readTableLoaderStateFromRequest = <
 >({
   appId,
   columns,
+  defaultGrouping,
   includeFilters = false,
   includeGrouping = false,
   persistenceKey,
@@ -120,17 +121,21 @@ export const readTableLoaderStateFromRequest = <
     ? url.searchParams.get('grouping')
     : undefined;
 
-  // Sanitized here rather than by the caller, because an unsanitized key list
-  // has no safe consumer: it reaches SQL as an identifier. A route with no
-  // declared columns therefore gets no grouping at all, which is the opposite
-  // of the filters branch above — filters are values, keys are identifiers.
-  const grouping =
-    standaloneGroupingParam && columns
-      ? sanitizeGroupingByColumns({
-          columns,
-          grouping: deserializeGroupingFromURL(standaloneGroupingParam),
-        })
-      : NO_GROUPING;
+  // Sanitized there rather than here, because an unsanitized key list has no
+  // safe consumer: it reaches SQL as an identifier. A route with no declared
+  // columns therefore gets no grouping at all, which is the opposite of the
+  // filters branch above — filters are values, keys are identifiers.
+  const grouping = resolveLoaderGrouping({
+    columns,
+    ...(includeGrouping &&
+      defaultGrouping !== undefined && { defaultGrouping }),
+    param: standaloneGroupingParam,
+  });
+
+  const totalsPlacement = resolveLoaderTotalsPlacement({
+    param: url.searchParams.get(TABLE_TOTALS_PLACEMENT_PARAM),
+    persisted: metaUiFlags.totalsPlacement,
+  });
 
   return {
     columnOrder,
@@ -152,5 +157,6 @@ export const readTableLoaderStateFromRequest = <
     standaloneFiltersParam,
     standaloneGroupingParam,
     standaloneSortParam,
+    totalsPlacement,
   };
 };

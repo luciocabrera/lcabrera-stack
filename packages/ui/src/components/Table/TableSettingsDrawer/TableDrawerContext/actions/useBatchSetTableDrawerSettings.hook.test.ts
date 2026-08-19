@@ -9,8 +9,10 @@ const {
   batchSetTableSettings,
   drawerColumnsStore,
   drawerGroupingStore,
+  drawerTotalsPlacementStore,
   setDrawerGrouping,
   setDrawerState,
+  setDrawerTotalsPlacement,
 } = vi.hoisted(() => {
   let drawerState: Record<string, unknown> | undefined;
   let drawerGrouping: Record<string, unknown> = {
@@ -19,16 +21,23 @@ const {
     mode: 'flat',
     periods: {},
   };
+  let drawerTotalsPlacement = 'last';
 
   return {
     batchSetTableSettings: vi.fn(),
     drawerColumnsStore: { get: vi.fn(() => drawerState) },
     drawerGroupingStore: { get: vi.fn(() => drawerGrouping) },
+    drawerTotalsPlacementStore: {
+      get: vi.fn(() => ({ totalsPlacement: drawerTotalsPlacement })),
+    },
     setDrawerGrouping: (next: Record<string, unknown>) => {
       drawerGrouping = next;
     },
     setDrawerState: (next: Record<string, unknown> | undefined) => {
       drawerState = next;
+    },
+    setDrawerTotalsPlacement: (next: string) => {
+      drawerTotalsPlacement = next;
     },
   };
 });
@@ -37,6 +46,7 @@ vi.mock('../useTableDrawerContextValue.hook', () => ({
   useTableDrawerContextValue: () => ({
     columnsStore: drawerColumnsStore,
     groupingStore: drawerGroupingStore,
+    totalsPlacementStore: drawerTotalsPlacementStore,
   }),
 }));
 
@@ -48,6 +58,7 @@ beforeEach(() => {
   batchSetTableSettings.mockClear();
   setDrawerState(undefined);
   setDrawerGrouping({ aggregates: {}, keys: [], mode: 'flat', periods: {} });
+  setDrawerTotalsPlacement('last');
 });
 
 describe('useBatchSetTableDrawerSettings', () => {
@@ -73,6 +84,7 @@ describe('useBatchSetTableDrawerSettings', () => {
         columnVisibility: new Set(),
         sorting: [{ columnKey: 'name', direction: 'asc' }],
       },
+      totalsPlacement: 'last',
     });
   });
 
@@ -93,6 +105,7 @@ describe('useBatchSetTableDrawerSettings', () => {
         columnVisibility: new Set(),
         sorting: [],
       },
+      totalsPlacement: 'last',
     });
   });
 
@@ -128,6 +141,7 @@ describe('useBatchSetTableDrawerSettings', () => {
         columnVisibility: new Set(),
         sorting: [],
       },
+      totalsPlacement: 'last',
     });
   });
 });

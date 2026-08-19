@@ -221,7 +221,11 @@ describe('useBatchSetTableSettings', () => {
     };
 
     act(() => {
-      result.current({ grouping: NO_GROUPING, settings });
+      result.current({
+        grouping: NO_GROUPING,
+        settings,
+        totalsPlacement: 'last',
+      });
     });
 
     expect(mockDataStore.set).toHaveBeenNthCalledWith(1, {
@@ -298,6 +302,7 @@ describe('useBatchSetTableSettings', () => {
             { columnKey: 'name', direction: 'asc' },
           ] as SortingState<Row>,
         },
+        totalsPlacement: 'last',
       });
     });
 
@@ -329,6 +334,7 @@ describe('useBatchSetTableSettings', () => {
             { columnKey: 'name', direction: 'desc' },
           ] as SortingState<Row>,
         },
+        totalsPlacement: 'last',
       });
     });
 
@@ -361,6 +367,7 @@ describe('useBatchSetTableSettings', () => {
           columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
           sorting: [] as SortingState<Row>,
         },
+        totalsPlacement: 'last',
       });
     });
 
@@ -388,6 +395,7 @@ describe('useBatchSetTableSettings', () => {
           columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(),
           sorting: [] as SortingState<Row>,
         },
+        totalsPlacement: 'last',
       });
     });
 
@@ -440,6 +448,7 @@ describe('useBatchSetTableSettings', () => {
             { columnKey: 'name', direction: 'asc' },
           ] as SortingState<Row>,
         },
+        totalsPlacement: 'last',
       });
     });
 
@@ -470,6 +479,7 @@ describe('useBatchSetTableSettings', () => {
           columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(),
           sorting: [] as SortingState<Row>,
         },
+        totalsPlacement: 'last',
       });
     });
 

@@ -5,9 +5,18 @@ import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { GroupingModeSection } from './GroupingModeSection.component';
 
-const { setGroupingModeMock, useGetGroupingModeMock } = vi.hoisted(() => ({
+const {
+  setGroupingModeMock,
+  useGetGroupingModeMock,
+  useGetTableIsGroupingLockedMock,
+} = vi.hoisted(() => ({
   setGroupingModeMock: vi.fn(),
   useGetGroupingModeMock: vi.fn(() => 'flat'),
+  useGetTableIsGroupingLockedMock: vi.fn(() => false),
+}));
+
+vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
+  useGetTableIsGroupingLocked: useGetTableIsGroupingLockedMock,
 }));
 
 vi.mock('../../TableDrawerContext/actions', () => ({
@@ -23,6 +32,7 @@ describe('GroupingModeSection', () => {
     cleanup();
     setGroupingModeMock.mockClear();
     useGetGroupingModeMock.mockReturnValue('flat');
+    useGetTableIsGroupingLockedMock.mockReturnValue(false);
   });
 
   it('names the radio group for assistive technology', () => {
@@ -79,5 +89,16 @@ describe('GroupingModeSection', () => {
       // Inheriting it is the whole reason this section is a fieldset.
       expect(radio.matches(':disabled')).toBe(true);
     }
+  });
+
+  it('renders nothing at all under a locked preset', () => {
+    // Which grouping sets the read emits is part of the curated shape, so the
+    // lock covers the mode as much as it covers the keys (#578).
+    useGetTableIsGroupingLockedMock.mockReturnValue(true);
+
+    render(<GroupingModeSection />);
+
+    expect(screen.queryByRole('group')).toBeNull();
+    expect(screen.queryAllByRole('radio')).toStrictEqual([]);
   });
 });

@@ -44,7 +44,8 @@ import { applyGroupingReducer, resolveGroupingColumnsPatch } from './utils';
  * render instead.
  */
 export const useSetTableGrouping = () => {
-  const { columnsStore, groupingStore } = useTableConfigContextValue();
+  const { columnsStore, groupingStore, metaStore } =
+    useTableConfigContextValue();
   const { dataStore } = useTableDataContextValue();
   const persistTableState = usePersistTableStateAction();
 
@@ -54,6 +55,7 @@ export const useSetTableGrouping = () => {
     const result = applyGroupingReducer({
       deriveNextGrouping,
       existingGrouping: groupingStore.get(),
+      hasDefaultGrouping: metaStore.get()?.hasDefaultGrouping === true,
     });
 
     if (result.kind !== 'updated') return;

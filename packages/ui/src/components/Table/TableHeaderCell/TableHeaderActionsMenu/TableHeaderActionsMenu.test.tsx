@@ -68,6 +68,7 @@ vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
   // like an empty object, which is exactly the confusion a reviewer hit.
   useGetTableColumnGroupingCapability: () => capabilityRef.current,
   useGetTableIsGroupingEnabled: () => isGroupingEnabledRef.current,
+  useGetTableIsGroupingLocked: () => false,
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({

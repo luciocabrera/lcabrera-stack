@@ -5,7 +5,10 @@ import { Button } from '#ui/components/Button';
 import { InfoBox } from '#ui/components/InfoBox';
 import { SidePanelSectionHeader } from '#ui/components/SidePanel';
 import { useGetColumns } from '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
-import { useGetTableGroupingCapabilities } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
+import {
+  useGetTableGroupingCapabilities,
+  useGetTableIsGroupingLocked,
+} from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
 import { resolveGroupKeyAvailability } from '#ui/components/Table/utils/resolveGroupKeyAvailability.util';
 import { VirtualSelect } from '#ui/components/VirtualSelect';
@@ -37,10 +40,17 @@ export const AddGroupKeySection = ({
   const columns = useGetColumns();
   const capabilities = useGetTableGroupingCapabilities();
   const groupingKeys = useGetGroupingKeys();
+  const isGroupingLocked = useGetTableIsGroupingLocked();
   const toggleGroupKey = useToggleGroupKey();
 
   const [selectedColumn, setSelectedColumn] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  // A curated grouping offers no key to add. Rendered away rather than
+  // disabled: a disabled Add reads as "not yet", where the answer is "not
+  // here" (#578). Every hook above still runs, so the order of hooks is the
+  // same on either branch.
+  if (isGroupingLocked) return;
 
   const isAtDepthCap = groupingKeys.length >= MAX_TABLE_GROUP_KEYS;
 

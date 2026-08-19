@@ -17,6 +17,7 @@ const {
   dataRef,
   groupingKeysRef,
   isGroupingEnabledRef,
+  isGroupingLockedRef,
   mockClearGrouping,
   mockSetAllGroupsExpanded,
   mockSetColumnAggregate,
@@ -31,6 +32,7 @@ const {
 
   groupingKeysRef: { current: [] as readonly string[] },
   isGroupingEnabledRef: { current: true },
+  isGroupingLockedRef: { current: false },
   mockClearGrouping: vi.fn(),
   mockSetAllGroupsExpanded: vi.fn(),
   mockSetColumnAggregate: vi.fn(),
@@ -57,6 +59,7 @@ vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
 vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
   useGetTableColumnGroupingCapability: () => capabilityRef.current,
   useGetTableIsGroupingEnabled: () => isGroupingEnabledRef.current,
+  useGetTableIsGroupingLocked: () => isGroupingLockedRef.current,
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/expansion/actions', () => ({
@@ -144,6 +147,7 @@ afterEach(() => {
   dataRef.current = [];
   groupingKeysRef.current = [];
   isGroupingEnabledRef.current = true;
+  isGroupingLockedRef.current = false;
   normalizedColumnRef.current = {};
 });
 
@@ -539,6 +543,44 @@ describe('GroupActions', () => {
       render(<GroupActions columnKey='order_status' onClose={mockOnClose} />);
 
       expect(getButton('Collapse All Groups').disabled).toBe(true);
+    });
+  });
+
+  describe('a locked preset', () => {
+    it('offers neither Group by This nor Clear Grouping', () => {
+      // The drawer's picker is not the only surface that reshapes a grouping —
+      // this menu does it too, so a lock honoured in one and ignored in the
+      // other is not a lock (#578).
+      isGroupingLockedRef.current = true;
+      normalizedColumnRef.current = { isGroupable: true, key: 'order_status' };
+      groupingKeysRef.current = ['order_status'];
+
+      render(<GroupActions columnKey='order_status' onClose={mockOnClose} />);
+
+      expect(
+        screen.queryByRole('button', { name: 'Group by This' }),
+      ).toBeNull();
+      expect(
+        screen.queryByRole('button', { name: 'Clear Grouping' }),
+      ).toBeNull();
+    });
+
+    it('still offers the aggregate commands, which measure rather than group', () => {
+      // The lock covers the grouping shape, not what is measured over it.
+      isGroupingLockedRef.current = true;
+      normalizedColumnRef.current = { isGroupable: true, key: 'total_amount' };
+      capabilityRef.current = {
+        aggregates: ['sum'],
+        canGroup: true,
+        column: 'total_amount',
+        periods: [],
+        role: 'fact',
+        typeName: 'numeric',
+      } satisfies TableColumnGroupingCapability;
+
+      render(<GroupActions columnKey='order_status' onClose={mockOnClose} />);
+
+      expect(screen.getByRole('button', { name: /Sum/ })).toBeTruthy();
     });
   });
 });

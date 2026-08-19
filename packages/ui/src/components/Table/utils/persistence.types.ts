@@ -5,6 +5,7 @@ import type {
   ColumnSizingState,
   ColumnVisibilityState,
   SortingState,
+  TableTotalsPlacement,
 } from '../Table.types';
 
 export type PersistedState<TData = Record<string, unknown>> = {
@@ -33,4 +34,11 @@ export type PersistedUiState = {
   readonly isTableSettingsPinned?: boolean;
   readonly tableSettingsExpandedFilters?: readonly string[];
   readonly tableSettingsSelectedTab?: string;
+  /**
+   * The user's totals placement (#578). It rides this cookie because it must
+   * outlive the session, and the `totals` search param because it must reach
+   * the loader that emits the `ORDER BY` — the param wins where both are
+   * present, so this is what a fresh URL falls back to.
+   */
+  readonly totalsPlacement?: TableTotalsPlacement;
 };

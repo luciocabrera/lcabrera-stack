@@ -7,7 +7,9 @@ import { resolveTableCapabilityMeta } from './resolveTableCapabilityMeta.util';
 describe('resolveTableCapabilityMeta', () => {
   it('resolves every capability off when no meta is given', () => {
     expect(resolveTableCapabilityMeta({})).toStrictEqual({
+      isGroupDrillEnabled: false,
       isGroupingEnabled: false,
+      isGroupingLocked: false,
       isKeysetEnabled: false,
       isServerFilterEnabled: false,
     });
@@ -19,7 +21,9 @@ describe('resolveTableCapabilityMeta', () => {
         meta: { title: { plural: '', singular: '' } },
       }),
     ).toStrictEqual({
+      isGroupDrillEnabled: false,
       isGroupingEnabled: false,
+      isGroupingLocked: false,
       isKeysetEnabled: false,
       isServerFilterEnabled: false,
     });
@@ -29,13 +33,17 @@ describe('resolveTableCapabilityMeta', () => {
     expect(
       resolveTableCapabilityMeta({
         meta: {
+          isGroupDrillEnabled: true,
           isGroupingEnabled: true,
+          isGroupingLocked: true,
           isKeysetEnabled: true,
           isServerFilterEnabled: true,
         },
       }),
     ).toStrictEqual({
+      isGroupDrillEnabled: true,
       isGroupingEnabled: true,
+      isGroupingLocked: true,
       isKeysetEnabled: true,
       isServerFilterEnabled: true,
     });
@@ -45,7 +53,9 @@ describe('resolveTableCapabilityMeta', () => {
     expect(
       resolveTableCapabilityMeta({ meta: { isServerFilterEnabled: true } }),
     ).toStrictEqual({
+      isGroupDrillEnabled: false,
       isGroupingEnabled: false,
+      isGroupingLocked: false,
       isKeysetEnabled: false,
       isServerFilterEnabled: true,
     });
@@ -55,7 +65,9 @@ describe('resolveTableCapabilityMeta', () => {
     expect(
       resolveTableCapabilityMeta({ meta: { isGroupingEnabled: true } }),
     ).toStrictEqual({
+      isGroupDrillEnabled: false,
       isGroupingEnabled: true,
+      isGroupingLocked: false,
       isKeysetEnabled: false,
       isServerFilterEnabled: false,
     });
@@ -69,7 +81,9 @@ describe('resolveTableCapabilityMeta', () => {
         a.localeCompare(b),
       ),
     ).toEqual([
+      'isGroupDrillEnabled',
       'isGroupingEnabled',
+      'isGroupingLocked',
       'isKeysetEnabled',
       'isServerFilterEnabled',
     ]);
@@ -86,7 +100,9 @@ describe('resolveTableCapabilityMeta', () => {
     expect(
       resolveTableCapabilityMeta({ meta: cookieShapedMeta }),
     ).toStrictEqual({
+      isGroupDrillEnabled: false,
       isGroupingEnabled: false,
+      isGroupingLocked: false,
       isKeysetEnabled: false,
       isServerFilterEnabled: false,
     });
