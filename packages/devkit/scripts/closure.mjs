@@ -256,6 +256,7 @@ export const analyseClosure = ({
           ...classifyImport({
             fromDirectory: directoryOf(file.path),
             rootDirectory,
+            shipped,
             specifier: entry.specifier,
           }),
         }))

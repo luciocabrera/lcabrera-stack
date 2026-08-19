@@ -232,6 +232,25 @@ describe('analyseClosure deduplication and the shipped set', () => {
     ).toEqual([]);
   });
 
+  test('a relative import between two shipped files is not an escape', () => {
+    // Pins the `--shipped` mode, where rootDirectory is empty on purpose: the
+    // shipped set is the ONLY thing making a reference internal, so an import
+    // that does not consult it reports every shipped script as an escape.
+    const files = [
+      {
+        content: "import { scan } from './helper.mjs';",
+        path: 'skills/epic/scripts/run.mjs',
+      },
+    ];
+    expect(
+      analyseClosure({
+        files,
+        rootDirectory: '',
+        shipped: new Set(['skills/epic/scripts/helper.mjs']),
+      }).escapes,
+    ).toEqual([]);
+  });
+
   test('a sibling skill in the same package is not an escape', () => {
     const files = [
       {

@@ -10,12 +10,14 @@
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 
+import {
+  analyseDirectory,
+  BASELINE_COMMANDS,
+  renderClosureReport,
+} from './closure-report.mjs';
 import { analyseClosure } from './closure.mjs';
-import { BASELINE_COMMANDS } from './closure-report.mjs';
-import { configuredCommandWords } from './config.mjs';
-
-import { analyseDirectory, renderClosureReport } from './closure-report.mjs';
 import { buildPlan } from './command-materialise.mjs';
+import { configuredCommandWords } from './config.mjs';
 
 /**
  * Everything the package would place in this repository, and the tools the
