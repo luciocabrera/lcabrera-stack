@@ -100,15 +100,36 @@ export const readPublicPackages = (repoRoot) => {
 };
 
 /**
- * The scope dropped from a package name, so `@scope/thing` files itself as
- * `thing`. Any scope, not one this package knows: a snapshot named
- * `@scope/thing.txt` would put a directory separator in the filename and write
- * outside the snapshot directory.
+ * A package name, as npm defines one: `@scope/name` with exactly one separator,
+ * or a bare name with none. Backslash is excluded alongside `/` because the
+ * verdict must not depend on which platform reads it — npm allows neither, and
+ * `..\\..\\x` is a traversal on Windows while reading as an ordinary name here.
  */
-const unscoped = (packageName) =>
-  packageName.startsWith('@')
-    ? packageName.slice(packageName.indexOf('/') + 1)
-    : packageName;
+const SCOPED_NAME = /^@[^@/\\]+\/[^@/\\]+$/;
+const BARE_NAME = /^[^@/\\]+$/;
+
+/**
+ * The scope dropped from a package name, so `@scope/thing` files itself as
+ * `thing` — any scope, not one this package knows.
+ *
+ * The shape is checked rather than assumed, for the same reason the configured
+ * locations are: the result is concatenated into the snapshot path and `--write`
+ * writes there. A name that kept a separator would put the file outside the
+ * snapshot directory, and a manifest is no more trusted an origin than a config
+ * file — both are text somebody edited. A name failing this is malformed by
+ * npm's own rule, so there is nothing legitimate to accommodate.
+ */
+const unscoped = (packageName) => {
+  if (typeof packageName === 'string' && SCOPED_NAME.test(packageName)) {
+    return packageName.slice(packageName.indexOf('/') + 1);
+  }
+  if (typeof packageName === 'string' && BARE_NAME.test(packageName)) {
+    return packageName;
+  }
+  throw new Error(
+    `a rostered package declares the name ${JSON.stringify(packageName)}, which is not a package name — a snapshot path is built from it, so it must be \`@scope/name\` or \`name\`, with no other separator.`,
+  );
+};
 
 /** The tracked snapshot path for a package, relative to the repository root. */
 export const snapshotPathFor = (packageName, repoRoot) =>

@@ -94,4 +94,39 @@ describe('snapshotPathFor', () => {
       'artifacts/surface/unscoped.txt',
     );
   });
+
+  // The result is concatenated into a path that `--write` writes to, so the name
+  // is held to the same rule as a configured location. A manifest is no more
+  // trusted an origin than a config file — both are text somebody edited.
+  it('refuses a name that would write outside the snapshot directory', () => {
+    const root = scaffold({ publishing: {} });
+
+    for (const name of ['@scope/../x', '@scope/a/b', 'a/b']) {
+      expect(() => snapshotPathFor(name, root)).toThrow(/not a package name/);
+    }
+  });
+
+  // Backslash is refused wherever it appears, not only where it separates: the
+  // verdict must not depend on which platform reads it. That is the containment
+  // guard's own history — it was inert on Windows until it stopped relying on
+  // the platform's semantics.
+  it('refuses a Windows traversal read on any platform', () => {
+    const root = scaffold({ publishing: {} });
+
+    expect(() => snapshotPathFor(String.raw`..\..\x`, root)).toThrow(
+      /not a package name/,
+    );
+    expect(() => snapshotPathFor(String.raw`@a/b\c`, root)).toThrow(
+      /not a package name/,
+    );
+  });
+
+  it('refuses a manifest with no usable name at all', () => {
+    const root = scaffold({ publishing: {} });
+
+    expect(() => snapshotPathFor(undefined, root)).toThrow(
+      /not a package name/,
+    );
+    expect(() => snapshotPathFor('', root)).toThrow(/not a package name/);
+  });
 });
