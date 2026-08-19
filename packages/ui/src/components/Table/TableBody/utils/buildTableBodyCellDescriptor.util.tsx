@@ -3,6 +3,7 @@ import type {
   DataKey,
   PinnedColumnInfo,
   TableColumn,
+  TableDrillRowMarker,
   TableGroupRowSummary,
 } from '#ui/components/Table/Table.types';
 import type { TableBodyCellProps } from '#ui/components/Table/TableBodyCell/TableBodyCell.types';
@@ -11,6 +12,7 @@ import type { TableGroupDisclosureState } from '#ui/components/Table/TableGroupD
 import { DEFAULT_MIN_COLUMN_WIDTH } from '#ui/components/Table/Table.constants';
 import { TableRowActionsMenu } from '#ui/components/Table/TableRowActionsMenu';
 
+import { resolveDrillCellChildren } from './resolveDrillCellChildren.util';
 import {
   EMPTY_CELL,
   resolveGroupCellChildren,
@@ -40,6 +42,12 @@ type BuildTableBodyCellDescriptorArgs<TData extends Record<string, unknown>> = {
    * about the other rows — see `TableGroupDisclosure.types.ts`.
    */
   readonly disclosure?: TableGroupDisclosureState;
+  /**
+   * Present when the row is grid-created drill chrome — a page in flight, a
+   * failure, or the hand-off past one page (ADR-079). Asked of the **row**, like
+   * the group summary beside it, so all three kinds of row arrive in one array.
+   */
+  readonly drillRow?: TableDrillRowMarker;
   /**
    * The applied group keys. A detail row blanks the columns it is grouped by:
    * the value is stated once by the group row above it, and repeating it down a
@@ -119,6 +127,7 @@ export const buildTableBodyCellDescriptor = <
   col,
   columnSizing,
   disclosure,
+  drillRow,
   groupingKeys,
   groupSummary,
   isLoadingState,
@@ -143,6 +152,21 @@ export const buildTableBodyCellDescriptor = <
     rowKey,
     width,
   } as const;
+
+  // Before the group branch, and before the detail-row blanking below: a drill
+  // row carries neither a summary nor data, so both of those would read it as a
+  // detail row and blank every key column — including the one its chrome goes
+  // in.
+  if (drillRow !== undefined) {
+    return {
+      ...shared,
+      children: resolveDrillCellChildren({
+        columnKey,
+        groupingKeys,
+        marker: drillRow,
+      }),
+    };
+  }
 
   if (groupSummary !== undefined) {
     return {

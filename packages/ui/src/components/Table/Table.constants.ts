@@ -181,6 +181,24 @@ export const TABLE_GROUP_FILTERED_AGGREGATE_LABEL =
 export const TABLE_GROUP_SUBTOTAL_SUFFIX = 'total';
 
 /**
+ * What a drill row says while its page is in flight.
+ *
+ * A drill fetches once and the row paints at the store's `rowHeight` like every
+ * other row, so this is one short line rather than a skeleton of the page to
+ * come — the page's size is not known until it arrives (ADR-079).
+ */
+export const TABLE_DRILL_LOADING_LABEL = 'Loading rows…';
+
+/**
+ * What a failed drill says. It names no cause: a refusal and a timeout differ to
+ * the server and not to the reader of one group row (ADR-079, amended). It names
+ * the gesture that retries instead, because `failed` is not terminal and nothing
+ * else on the row says so.
+ */
+export const TABLE_DRILL_FAILED_LABEL =
+  'Could not load these rows — close and reopen the group to try again';
+
+/**
  * The grouping modes in **menu order**, which a `Record` cannot express — the
  * same split `TABLE_AGGREGATE_FNS` and `TABLE_AGGREGATE_LABELS` keep, and
  * `Table.constants.test.ts` asserts the two agree.

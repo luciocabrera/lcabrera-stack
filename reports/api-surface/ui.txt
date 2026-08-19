@@ -222,6 +222,8 @@ MAX_TABLE_GROUP_KEYS [const] 4
 PRIMARY_KEY_ID_DELIMITER [const] "_"
 TABLE_AGGREGATE_FNS [const] readonly TableAggregateFn[]
 TABLE_AGGREGATE_LABELS [const] Record<TableAggregateFn, string>
+TABLE_DRILL_FAILED_LABEL [const] "Could not load these rows — close and reopen the group to try again"
+TABLE_DRILL_LOADING_LABEL [const] "Loading rows…"
 TABLE_DRILL_ROW_FIELD [const] "tableDrill"
 TABLE_GROUP_FILTERED_AGGREGATE_LABEL [const] "Filtered — this total covers the filtered rows only"
 TABLE_GROUP_GRAND_TOTAL_LABEL [const] "Grand total"

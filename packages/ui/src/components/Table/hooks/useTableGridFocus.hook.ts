@@ -7,6 +7,7 @@ import {
 } from '#ui/components/Table/contexts/TableFocus/focus/actions';
 import { useGetIsTableGridTabStop } from '#ui/components/Table/contexts/TableFocus/focus/selectors';
 
+import { activateGridCellLink } from './utils/activateGridCellLink.util';
 import { getIsGridNavigationTarget } from './utils/getIsGridNavigationTarget.util';
 
 /**
@@ -22,6 +23,9 @@ import { getIsGridNavigationTarget } from './utils/getIsGridNavigationTarget.uti
  * distinguishes leaving the grid from moving between two cells inside it; a
  * row unmounting under focus reports no such element, and that is correctly
  * read as leaving.
+ *
+ * `Enter` is the one key here that acts rather than navigates — see
+ * `activateGridCellLink` for why a cell's link cannot be a tab stop of its own.
  */
 export const useTableGridFocus = <TData extends Record<string, unknown>>() => {
   const isTabStop = useGetIsTableGridTabStop();
@@ -46,6 +50,15 @@ export const useTableGridFocus = <TData extends Record<string, unknown>>() => {
     });
 
     if (!isOwnEvent) return;
+
+    // `Enter` acts on the focused cell rather than moving it. The grid claims
+    // it only when the cell actually holds a link, so an ordinary cell leaves
+    // the key to the page.
+    if (event.key === 'Enter' && activateGridCellLink(event.target)) {
+      event.preventDefault();
+
+      return;
+    }
 
     const wasHandled = moveTableGridFocus({
       isRangeModifier: event.ctrlKey || event.metaKey,

@@ -9,7 +9,10 @@ import { useTableGroupTree } from '#ui/components/Table/hooks';
 import { createRenderTableBodyCell } from '#ui/components/Table/TableBody/utils/createRenderTableBodyCell.util';
 import { renderTableBodyPinnedGroup } from '#ui/components/Table/TableBody/utils/renderTableBodyPinnedGroup.util';
 import { TableRow } from '#ui/components/Table/TableRow';
-import { getTableGroupRowSummary } from '#ui/components/Table/utils';
+import {
+  getTableDrillRow,
+  getTableGroupRowSummary,
+} from '#ui/components/Table/utils';
 import { resolveCarriedGroupKeys } from '#ui/components/Table/utils/resolveCarriedGroupKeys.util';
 import { resolveDeclaredGroupingKeys } from '#ui/components/Table/utils/resolveDeclaredGroupingKeys.util';
 import { resolveBodyAriaRowIndex } from '#ui/components/Table/utils/resolveGridRowIndexing.util';
@@ -95,6 +98,7 @@ export const TableBodyRows = <TData extends Record<string, unknown>>({
         const cellArgs = {
           carriedGroupKeys,
           disclosure: rowMeta?.[rowIndex],
+          drillRow: getTableDrillRow(row),
           groupSummary,
           renderCell: renderBodyCell,
           row,

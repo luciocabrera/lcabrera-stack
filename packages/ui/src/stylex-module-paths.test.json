@@ -81,6 +81,7 @@
   "src/components/Table/TableContent/TableContent.stylex.ts",
   "src/components/Table/TableEmptyState/TableEmptyState.stylex.ts",
   "src/components/Table/TableEmptyState/TableEmptyStateMessage/TableEmptyStateMessage.stylex.ts",
+  "src/components/Table/TableDrillRowCell/TableDrillRowCell.stylex.ts",
   "src/components/Table/TableGroupAggregate/TableGroupAggregate.stylex.ts",
   "src/components/Table/TableGroupDisclosure/TableGroupDisclosure.stylex.ts",
   "src/components/Table/TableGroupKeyCell/TableGroupKeyCell.stylex.ts",
