@@ -54,7 +54,7 @@ export const resolveLoaderGrouping = <TData extends Record<string, unknown>>({
   columns,
   defaultGrouping,
   param,
-}: ResolveLoaderGroupingArgs<TData>): TableGroupingState => {
+}: ResolveLoaderGroupingArgs<TData>) => {
   if (!columns) return NO_GROUPING;
 
   if (param === null && defaultGrouping) {

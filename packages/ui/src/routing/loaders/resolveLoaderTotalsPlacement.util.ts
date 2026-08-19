@@ -1,4 +1,3 @@
-import type { TableTotalsPlacement } from '#ui/components/Table/Table.types';
 import type { PersistedUiState } from '#ui/components/Table/utils/persistence.types';
 
 import { isTableTotalsPlacement } from '#ui/components/Table/utils/isTableTotalsPlacement.util';
@@ -26,7 +25,7 @@ type ResolveLoaderTotalsPlacementArgs = {
 export const resolveLoaderTotalsPlacement = ({
   param,
   persisted,
-}: ResolveLoaderTotalsPlacementArgs): TableTotalsPlacement => {
+}: ResolveLoaderTotalsPlacementArgs) => {
   if (isTableTotalsPlacement(param)) return param;
 
   return isTableTotalsPlacement(persisted) ? persisted : 'last';
