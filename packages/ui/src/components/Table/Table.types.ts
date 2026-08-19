@@ -463,16 +463,28 @@ export type TableGroupAggregateValue = {
  * splice that reads them from somewhere else.
  */
 export type TableGroupDrill = {
+  /** Empty while `loading` and after `failed`; the fetched page once `loaded`. */
   readonly rows: readonly Record<string, unknown>[];
   readonly status: TableGroupDrillStatus;
 };
 
 /**
- * How far a group's drill has got (ADR-079). There is deliberately no `error`
- * member: the ADR names three states, and a failed fetch returns the group to
- * having no entry at all, which is the state it was in before it was asked.
+ * How far a group's drill has got (ADR-079, amended 2026-08-19).
+ *
+ * A group with no entry is `idle` — nothing has been asked for — so the union
+ * names only the states a drill actually occupies once it has been.
+ *
+ * **`failed` carries no reason.** A refusal and a timeout differ to the server
+ * and not to the reader of one group row, and a state that fans out per cause
+ * is one every renderer has to exhaust. What the row needs to say is that the
+ * rows were asked for and did not arrive.
+ *
+ * **`failed` is not terminal; `loaded` is.** Toggling a failed group re-enters
+ * `loading`, which is the retry — deliberate, and asked for. Returning it to
+ * `idle` instead would leave a chevron that appears to do nothing, so the next
+ * click repeats the same failing request: a retry loop the interface invited.
  */
-export type TableGroupDrillStatus = 'loaded' | 'loading';
+export type TableGroupDrillStatus = 'failed' | 'loaded' | 'loading';
 
 export type TableGroupExpansionState = {
   /**
@@ -499,9 +511,9 @@ export type TableGroupExpansionState = {
    * nothing to derive.
    *
    * `loaded` is **terminal**. A drill fetches one bounded page and never pages
-   * again, so there is no fourth state for "loading more" — where the group
-   * holds more rows than the page, the answer is the hand-off row, not another
-   * request.
+   * again, so there is no state for "loading more" — where the group holds more
+   * rows than the page, the answer is the hand-off row, not another request.
+   * `failed` is not terminal: toggling the group retries it.
    */
   readonly drilledGroups: ReadonlyMap<string, TableGroupDrill>;
 };
