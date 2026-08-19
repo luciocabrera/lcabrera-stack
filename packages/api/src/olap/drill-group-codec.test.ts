@@ -159,6 +159,23 @@ describe('the granularity map', () => {
     ).toBeUndefined();
   });
 
+  it('refuses a granularity naming a column that is not a group key', () => {
+    // The same rule the grouping param is read under: a request whose
+    // granularity names no key could not have produced the grouped read it
+    // claims to drill, and accepting it costs a catalogue lookup for a column
+    // nothing else in the request mentions.
+    expect(
+      parseDrillGroup(
+        rawParams({
+          isSubtotal: false,
+          keys: ['order_date'],
+          path: [{ columnKey: 'order_date', value: '2021-03-01' }],
+          periods: { shipped_date: 'month' },
+        }),
+      ),
+    ).toBeUndefined();
+  });
+
   it('refuses a granularity map that is not a map', () => {
     expect(
       parseDrillGroup(

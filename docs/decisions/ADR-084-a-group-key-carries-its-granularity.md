@@ -90,6 +90,14 @@ A column of 1800 daily dates has a raw estimate of 1800 whatever period is asked
 for; a one-day span behind a million rows has a range bound of one whatever the
 raw count is.
 
+**The range is measured in the frame the truncation will run in**, which is the
+same split the truncation itself takes. Casting a `date` to `timestamptz` reads
+both endpoints through the session zone, and a range straddling a DST transition
+measures an hour short — under `America/Santiago`, 1 June to 1 December is
+182.958 days rather than 183. The period count floors that number, so an
+under-measured range can offer a granularity the guard would have refused, which
+is the one direction an **upper** bound must not be wrong in.
+
 `ColumnGroupingCapability` gains `periods`, and it is **independent of
 `canGroup`**: a date column is routinely refused as a raw key and legal at a
 month, so a surface reading `canGroup` alone hides the dimension this exists to

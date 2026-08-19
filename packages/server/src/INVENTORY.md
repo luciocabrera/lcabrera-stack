@@ -176,7 +176,11 @@ into the paginated read of the rows underneath it, or a typed refusal for a
 grand total, a subtotal or an incomplete path
 ([ADR-079](../../../docs/decisions/ADR-079-drilling-from-a-group-to-its-rows.md)).
 The route's primary key and page ceiling are arguments — only the route knows
-them — which is the whole of what a caller supplies. A **truncated** key becomes
+them — which is the whole of what a caller supplies. `resolveDrillRefusal`
+(`resolve-drill-refusal.util.ts`) is the refusal half on its own, so a route can
+ask before it pays: every reason is a property of the row and the applied keys,
+none of them needs the catalogue, and `toDrillRead` asks through the same
+function. A **truncated** key becomes
 a half-open range rather than an equality, since the group's value is a period
 start no row holds; `advanceGroupPeriod` (`advance-group-period.util.ts`)
 computes the upper bound by calendar arithmetic, and `toGroupKeyTruncations`

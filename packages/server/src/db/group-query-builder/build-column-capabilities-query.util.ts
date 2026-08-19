@@ -52,7 +52,19 @@ const PERIOD_CAPABLE_TYPE_SQL_NAMES = [
  * is what makes a **derived** group key measurable: `pg_stats` describes the raw
  * column, so nothing in the catalogue counts the distinct months in it — but a
  * range does bound them, and the first and last histogram bound are that range
- * (#786). The `::float8` is not decoration: `extract(epoch …)` is `numeric`, which
+ * (#786).
+ *
+ * **It is measured in the frame the truncation will run in**, which is why the
+ * `CASE` has two arms rather than one. Casting a `date` to `timestamptz` reads
+ * both endpoints through the session zone, and a range straddling a DST
+ * transition then comes back an hour short — measured under `America/Santiago`,
+ * 1 June to 1 December is 182.958 days rather than 183. Since the count of
+ * periods floors that number, an under-measured range can offer a granularity
+ * the guard would have refused, which is exactly the direction an **upper**
+ * bound must not be wrong in. `resolveGroupKeyExpression` splits on the same
+ * type for the same reason.
+ *
+ * The `::float8` is not decoration either: `extract(epoch …)` is `numeric`, which
  * `pg` hands back as a **string**, and a string would coerce its way through the
  * arithmetic that reads it while comparing wrong. Two further properties keep it
  * safe. The `CASE` guards the cast: Postgres does
@@ -102,9 +114,13 @@ export const buildColumnCapabilitiesQuery = ({
        (s.attname IS NOT NULL) AS "hasStats",
        coalesce(s.n_distinct, 0) AS "nDistinct",
        c.reltuples AS "relTuples",
-       CASE WHEN bt.typname = ANY($5::text[])
-            THEN (SELECT (extract(epoch FROM (max(b::timestamptz) - min(b::timestamptz))) / 86400)::float8
-                    FROM unnest(s.histogram_bounds::text::text[]) AS b)
+       CASE
+         WHEN bt.typname = 'timestamptz'
+           THEN (SELECT (extract(epoch FROM (max(b::timestamptz) - min(b::timestamptz))) / 86400)::float8
+                   FROM unnest(s.histogram_bounds::text::text[]) AS b)
+         WHEN bt.typname = ANY($5::text[])
+           THEN (SELECT (extract(epoch FROM (max(b::timestamp) - min(b::timestamp))) / 86400)::float8
+                   FROM unnest(s.histogram_bounds::text::text[]) AS b)
        END AS "spanDays"
   FROM pg_attribute a
   JOIN pg_class c ON c.oid = a.attrelid

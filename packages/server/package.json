@@ -43,6 +43,7 @@
     "./db/insert-row.util": "./src/db/insert-row.util.ts",
     "./db/olap/decode-grouped-rows.util": "./src/db/olap/decode-grouped-rows.util.ts",
     "./db/olap/olap.types": "./src/db/olap/olap.types.ts",
+    "./db/olap/resolve-drill-refusal.util": "./src/db/olap/resolve-drill-refusal.util.ts",
     "./db/olap/to-drill-read.util": "./src/db/olap/to-drill-read.util.ts",
     "./db/olap/to-group-key-truncations.util": "./src/db/olap/to-group-key-truncations.util.ts",
     "./db/olap/to-group-label.util": "./src/db/olap/to-group-label.util.ts",
@@ -147,6 +148,10 @@
       "./db/olap/olap.types": {
         "types": "./dist/db/olap/olap.types.d.mts",
         "default": "./dist/db/olap/olap.types.mjs"
+      },
+      "./db/olap/resolve-drill-refusal.util": {
+        "types": "./dist/db/olap/resolve-drill-refusal.util.d.mts",
+        "default": "./dist/db/olap/resolve-drill-refusal.util.mjs"
       },
       "./db/olap/to-drill-read.util": {
         "types": "./dist/db/olap/to-drill-read.util.d.mts",

@@ -7,6 +7,7 @@ import type {
 import type { GroupKeyTruncation, OlapDrillTranslation } from './olap.types';
 
 import { advanceGroupPeriod } from './advance-group-period.util.ts';
+import { resolveDrillRefusal } from './resolve-drill-refusal.util.ts';
 
 type ToDrillReadArgs = {
   /** The filters the grouped view was read under, unchanged. */
@@ -145,19 +146,13 @@ export const toDrillRead = ({
   sort,
   truncations,
 }: ToDrillReadArgs): OlapDrillTranslation => {
-  // Grand total first: it is *also* `isSubtotal`, so testing the subtotal rule
-  // ahead of it would report every grand total as a subtotal and hide the more
-  // specific answer.
-  if (group.path.length === 0) {
-    return { kind: 'refused', reason: 'grand-total' };
-  }
+  // Delegated rather than inlined so a route can ask the same question before
+  // resolving anything a refusal would not have needed — see
+  // `resolveDrillRefusal`.
+  const refusal = resolveDrillRefusal({ group, groupKeys });
 
-  if (group.isSubtotal) {
-    return { kind: 'refused', reason: 'subtotal' };
-  }
-
-  if (group.path.length !== groupKeys.length) {
-    return { kind: 'refused', reason: 'incomplete-path' };
+  if (refusal !== undefined) {
+    return { kind: 'refused', reason: refusal };
   }
 
   const groupedColumns = new Set(group.path.map(({ columnKey }) => columnKey));

@@ -32,15 +32,30 @@ const toPathEntry = (entry: unknown) => {
  * A period outside the vocabulary refuses the whole descriptor for the same
  * reason a malformed path entry does: it would drill a different set from the
  * one the row summarises, with every returned row individually valid (#786).
+ *
+ * **A granularity naming a column that is not a group key is refused here too**,
+ * which is what keeps this half of the wire under the same rule as the other:
+ * `groupingCodec` refuses one on the grouping param and `assertGroupKeys`
+ * refuses it again before SQL. Leaving the drill param looser would let a
+ * request through that the grouped read it claims to drill could not have been
+ * issued from — and would cost a catalogue lookup for a column nothing else in
+ * the request mentions.
  */
-const toPeriods = (
-  value: unknown,
-): Readonly<Record<string, OlapGroupPeriod>> | undefined => {
+const toPeriods = ({
+  keys,
+  value,
+}: {
+  readonly keys: readonly string[];
+  readonly value: unknown;
+}): Readonly<Record<string, OlapGroupPeriod>> | undefined => {
   if (!isObject(value) || Array.isArray(value)) return;
 
   const entries = Object.entries(value);
+  const applied = new Set(keys);
 
-  return entries.every(([, period]) => isOlapGroupPeriod(period))
+  return entries.every(
+    ([column, period]) => isOlapGroupPeriod(period) && applied.has(column),
+  )
     ? (Object.fromEntries(entries) as Readonly<Record<string, OlapGroupPeriod>>)
     : undefined;
 };
@@ -73,7 +88,9 @@ export const parseDrillGroup = (
     return;
 
   const hasPeriods = Object.hasOwn(raw, 'periods');
-  const periods = hasPeriods ? toPeriods(rawPeriods) : undefined;
+  const periods = hasPeriods
+    ? toPeriods({ keys, value: rawPeriods })
+    : undefined;
 
   if (hasPeriods && periods === undefined) return;
 

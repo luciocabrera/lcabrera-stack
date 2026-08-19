@@ -6,7 +6,10 @@ import {
   selectOrderGroupKeyTruncations,
   selectOrdersPage,
 } from '@/routes/enterprise-orders/.server/enterpriseOrders.service';
-import { toOrderDrillRead } from '@/routes/enterprise-orders/.server/toOrderDrillRead.util';
+import {
+  resolveDrillRefusal,
+  toOrderDrillRead,
+} from '@/routes/enterprise-orders/.server/toOrderDrillRead.util';
 
 import { parseOrdersPageParams } from '../enterprise-orders-paginated/parseOrdersPageParams.util';
 
@@ -31,6 +34,12 @@ import { parseOrdersPageParams } from '../enterprise-orders-paginated/parseOrder
  * quietly: every row would be a true fact about the table and wrong under the
  * heading it appears beneath.
  *
+ * **A refusal costs nothing.** The reasons a group cannot be drilled — a
+ * subtotal, a grand total, an incomplete path — are properties of the row and
+ * the applied keys, so they are asked first and answer `400` before the
+ * catalogue is touched. `toDrillRead` asks the same question through the same
+ * function, so the route cannot come to disagree with it.
+ *
  * **A truncated key needs one extra catalogue read, and only then.** A group
  * keyed by `date_trunc('month', …)` is filtered by a half-open range rather
  * than an equality, and the range's upper bound depends on whether the column
@@ -52,6 +61,18 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       { error: 'A drill request must name the group it drills.' },
       { status: 400 },
     );
+  }
+
+  // Asked before anything is resolved: every refusal is a property of the row
+  // and the applied keys alone, so a subtotal must not cost the catalogue read
+  // a truncated key's boundary arithmetic needs.
+  const refusal = resolveDrillRefusal({
+    group: drillRequest.group,
+    groupKeys: drillRequest.groupKeys,
+  });
+
+  if (refusal !== undefined) {
+    return Response.json({ error: refusal }, { status: 400 });
   }
 
   const { filters, limit, sort } = parseOrdersPageParams(url.searchParams);
