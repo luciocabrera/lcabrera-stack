@@ -30,7 +30,11 @@ import { toBuiltPaths } from './publish-surface.mjs';
 const isContractSubpath = (subpath) =>
   subpath !== './package.json' && !subpath.includes('*');
 
-/** A source-shipping package (`ui`) has no `build` script. */
+/**
+ * A package ships its source when it declares no `build` script — so the file a
+ * consumer loads is the `exports` target itself, not a compiled path beside it,
+ * and that is the file to snapshot.
+ */
 const shipsSource = (manifest) => manifest.scripts?.build === undefined;
 
 const entryForBuilt = (sourceTarget) => toBuiltPaths(sourceTarget).types;
@@ -52,10 +56,10 @@ const isPackageName = (value) =>
  * The manifest of a rostered package, or a failure that names the config.
  *
  * A roster entry is a directory name **under** `publishing.packagesDir`, not a
- * path from the repository root, and spelling it the other way (`packages/ui`
- * where `ui` was meant) is the mistake this catches: the entry is a valid
+ * path from the repository root. Spelling it the other way — `packages/thing`
+ * where `thing` was meant — is the mistake this catches: the entry is a valid
  * repo-relative string, so validation passes, and the read then goes looking
- * for `packages/packages/ui/package.json`. A bare ENOENT for that path sends
+ * for `packages/packages/thing/package.json`. A bare ENOENT for that path sends
  * the reader to check a directory rather than the line they mistyped.
  *
  * Named rather than tolerated. Accepting both spellings would put two names on

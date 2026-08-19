@@ -55,12 +55,12 @@ describe('readPublicPackages', () => {
 
   it('names the config when an entry repeats the packages directory', () => {
     const root = scaffold({
-      manifests: { 'packages/ui': { name: '@scope/ui' } },
-      publishing: { publicPackageDirs: ['packages/ui'] },
+      manifests: { 'packages/thing': { name: '@scope/thing' } },
+      publishing: { publicPackageDirs: ['packages/thing'] },
     });
 
     expect(() => readPublicPackages(root)).toThrow(
-      /`publishing.publicPackageDirs` names `packages\/ui`.*no manifest at `packages\/packages\/ui\/package\.json`.*directory name under `publishing\.packagesDir`/s,
+      /`publishing.publicPackageDirs` names `packages\/thing`.*no manifest at `packages\/packages\/thing\/package\.json`.*directory name under `publishing\.packagesDir`/s,
     );
   });
 
