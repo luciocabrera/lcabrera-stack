@@ -1,0 +1,34 @@
+{
+  "name": "@repo/devkit",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Materialises this repository's agent setup — skills, path rules, subagent definitions and the contracts they bind to — into a consumer repository, and reports what has diverged.",
+  "bin": {
+    "devkit": "./scripts/devkit.mjs"
+  },
+  "type": "module",
+  "exports": {
+    "./closure": "./scripts/closure.mjs",
+    "./config": "./scripts/config.mjs",
+    "./manifest": "./scripts/manifest.mjs",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "format": "vp fmt .",
+    "format:check": "vp fmt --check .",
+    "lint": "vp lint . --fix && vp run lint:eslint",
+    "lint:check": "vp lint . && vp run lint:eslint:check",
+    "lint:eslint": "eslint . --config eslint.config.mjs --fix --max-warnings 0",
+    "lint:eslint:check": "eslint . --config eslint.config.mjs --max-warnings 0",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json"
+  },
+  "devDependencies": {
+    "@lcabrera/vite-config": "workspace:*",
+    "@types/node": "catalog:types",
+    "eslint": "catalog:lint",
+    "typescript": "catalog:build",
+    "vite": "catalog:build",
+    "vite-plus": "catalog:build",
+    "vitest": "catalog:test"
+  }
+}

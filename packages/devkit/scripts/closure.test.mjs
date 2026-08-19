@@ -1,0 +1,199 @@
+import { describe, expect, test } from 'vite-plus/test';
+
+import {
+  analyseClosure,
+  classifyLink,
+  extractCommands,
+  extractImportSpecifiers,
+  extractLinkTargets,
+} from './closure.mjs';
+
+describe('extractLinkTargets', () => {
+  test('reads the target out of a markdown link', () => {
+    expect(extractLinkTargets('see [the doc](../docs/a.md) now')).toEqual([
+      { line: 1, target: '../docs/a.md' },
+    ]);
+  });
+
+  test('reads a link whose text is itself code, the spelling skills use', () => {
+    expect(
+      extractLinkTargets('Read [`docs/a.md`](../../../docs/a.md)'),
+    ).toEqual([{ line: 1, target: '../../../docs/a.md' }]);
+  });
+});
+
+describe('classifyLink', () => {
+  const rootDirectory = 'skills/epic';
+
+  test('a sibling file travels with the directory', () => {
+    expect(
+      classifyLink({
+        fromDirectory: 'skills/epic',
+        rootDirectory,
+        target: './references/contract.md',
+      }),
+    ).toEqual({
+      kind: 'internal',
+      resolved: 'skills/epic/references/contract.md',
+    });
+  });
+
+  test('a parent-relative file escapes it', () => {
+    expect(
+      classifyLink({
+        fromDirectory: 'skills/epic',
+        rootDirectory,
+        target: '../../docs/agents/orchestration.md',
+      }),
+    ).toEqual({ kind: 'escape', resolved: 'docs/agents/orchestration.md' });
+  });
+
+  test('a url and a bare anchor resolve to nothing on disk', () => {
+    expect(
+      classifyLink({
+        fromDirectory: 'skills/epic',
+        rootDirectory,
+        target: 'https://example.com/x.md',
+      }).kind,
+    ).toBe('url');
+    expect(
+      classifyLink({
+        fromDirectory: 'skills/epic',
+        rootDirectory,
+        target: '#section',
+      }).kind,
+    ).toBe('anchor');
+  });
+
+  test('a prefix match is not containment', () => {
+    expect(
+      classifyLink({
+        fromDirectory: 'skills/epic',
+        rootDirectory,
+        target: '../epic-notes/a.md',
+      }),
+    ).toEqual({ kind: 'escape', resolved: 'skills/epic-notes/a.md' });
+  });
+});
+
+describe('extractCommands', () => {
+  test('reads each command in a shell block, including both sides of &&', () => {
+    const content = ['```bash', 'vp run test && gh pr ready 4', '```'].join(
+      '\n',
+    );
+    expect(extractCommands(content)).toEqual([
+      { line: 2, word: 'vp' },
+      { line: 2, word: 'gh' },
+    ]);
+  });
+
+  test('ignores a fenced block that is not shell', () => {
+    const content = ['```ts', "import { vp } from 'x';", '```'].join('\n');
+    expect(extractCommands(content)).toEqual([]);
+  });
+
+  test('reads an inline command but not an inline path', () => {
+    expect(extractCommands('run `vp run test` on `docs/agents/x.md`')).toEqual([
+      { line: 1, word: 'vp' },
+    ]);
+  });
+
+  test('ignores a leading prompt and an environment assignment', () => {
+    const content = ['```bash', '$ OUT=x vp run test', '```'].join('\n');
+    expect(extractCommands(content)).toEqual([{ line: 2, word: 'vp' }]);
+  });
+});
+
+describe('extractImportSpecifiers', () => {
+  test('reads static, side-effect, dynamic and require forms', () => {
+    const content = [
+      "import { a } from '@repo/scan-report/deterministic-scan';",
+      "import './side-effect.mjs';",
+      "const b = require('ts-morph');",
+      "await import('node:fs');",
+    ].join('\n');
+    expect(
+      extractImportSpecifiers(content).map((entry) => entry.specifier),
+    ).toEqual(
+      expect.arrayContaining([
+        '@repo/scan-report/deterministic-scan',
+        './side-effect.mjs',
+        'ts-morph',
+        'node:fs',
+      ]),
+    );
+  });
+});
+
+describe('analyseClosure', () => {
+  const rootDirectory = 'skills/epic';
+
+  test('reports nothing for a directory that needs only itself', () => {
+    const files = [
+      {
+        content:
+          'See [the contract](./references/contract.md) and run `git status`.',
+        path: 'skills/epic/SKILL.md',
+      },
+    ];
+    expect(
+      analyseClosure({ allowedCommands: ['git'], files, rootDirectory })
+        .escapes,
+    ).toEqual([]);
+  });
+
+  test('reports a link, a command and an import as distinct kinds', () => {
+    const files = [
+      {
+        content: [
+          'Read [the contract](../../docs/agents/contract.md).',
+          '',
+          '```bash',
+          'vp run test',
+          '```',
+        ].join('\n'),
+        path: 'skills/epic/SKILL.md',
+      },
+      {
+        content: "import { scan } from '@repo/scan-report/deterministic-scan';",
+        path: 'skills/epic/scripts/run.mjs',
+      },
+    ];
+
+    const { escapes } = analyseClosure({ files, rootDirectory });
+    expect(
+      escapes
+        .map((escape) => escape.kind)
+        .sort((left, right) => left.localeCompare(right)),
+    ).toEqual(['command', 'import', 'link']);
+    expect(escapes.find((escape) => escape.kind === 'link')?.resolved).toBe(
+      'docs/agents/contract.md',
+    );
+  });
+
+  test('a node builtin is not an escape, an installed package is', () => {
+    const files = [
+      {
+        content: [
+          "import { readFileSync } from 'node:fs';",
+          "import 'ts-morph';",
+        ].join('\n'),
+        path: 'skills/epic/scripts/run.mjs',
+      },
+    ];
+    expect(
+      analyseClosure({ files, rootDirectory }).escapes.map(
+        (escape) => escape.reference,
+      ),
+    ).toEqual(['ts-morph']);
+  });
+
+  test('an allowed command is not reported, so the config can widen the baseline', () => {
+    const files = [
+      { content: '```bash\nvp run test\n```', path: 'skills/epic/SKILL.md' },
+    ];
+    expect(
+      analyseClosure({ allowedCommands: ['vp'], files, rootDirectory }).escapes,
+    ).toEqual([]);
+  });
+});
