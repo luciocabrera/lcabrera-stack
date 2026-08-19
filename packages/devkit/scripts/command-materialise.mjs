@@ -59,6 +59,7 @@ const STATE_LABELS = {
   current: 'up to date',
   modified: 'left alone — locally modified',
   restored: 'restored',
+  unresolved: 'not written — no command configured for',
   updated: 'updated',
 };
 
@@ -68,10 +69,13 @@ export const renderPlan = (entries) => {
   );
   if (notable.length === 0) return 'Everything is up to date.';
   return notable
-    .map(
-      (entry) =>
-        `  ${entry.state.padEnd(9)} ${entry.path}  (${STATE_LABELS[entry.state]})`,
-    )
+    .map((entry) => {
+      const detail =
+        entry.state === 'unresolved'
+          ? `${STATE_LABELS[entry.state]} ${entry.missing.join(', ')}`
+          : STATE_LABELS[entry.state];
+      return `  ${entry.state.padEnd(10)} ${entry.path}  (${detail})`;
+    })
     .join('\n');
 };
 

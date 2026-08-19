@@ -29,6 +29,17 @@ describe('runCommand', () => {
     error.mockRestore();
   });
 
+  test('ignores the separator a task runner forwards', () => {
+    const error = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
+    expect(runCommand({ argv: ['--', 'closure'], root: '/nowhere' })).toBe(1);
+    expect(error).toHaveBeenCalledWith(
+      'closure needs at least one directory to analyse',
+    );
+    error.mockRestore();
+  });
+
   test('reports rather than analyses when closure is given nothing to analyse', () => {
     const error = vi
       .spyOn(console, 'error')

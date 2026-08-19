@@ -13,7 +13,15 @@ import { analyseClosure } from './closure.mjs';
 import { readFilesUnder } from './files.mjs';
 
 /** Commands a consumer's shell is expected to provide regardless of this kit. */
-const BASELINE_COMMANDS = ['bash', 'gh', 'git', 'node', 'npm', 'npx', 'sh'];
+export const BASELINE_COMMANDS = [
+  'bash',
+  'gh',
+  'git',
+  'node',
+  'npm',
+  'npx',
+  'sh',
+];
 
 /**
  * @param {{ allowedCommands?: string[], directory: string, root: string }} args
@@ -22,6 +30,7 @@ export const analyseDirectory = ({
   allowedCommands = BASELINE_COMMANDS,
   directory,
   root,
+  shipped = new Set(),
 }) => {
   const files = readFilesUnder({ directory, root });
   const rootDirectory = relative(root, directory).replaceAll('\\', '/');
@@ -30,6 +39,7 @@ export const analyseDirectory = ({
     exists: (path) => existsSync(resolve(root, path)),
     files,
     rootDirectory,
+    shipped,
   });
   return { directory: rootDirectory, escapes, fileCount: files.length };
 };

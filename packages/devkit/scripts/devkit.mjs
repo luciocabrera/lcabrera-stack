@@ -38,9 +38,17 @@ const COMMANDS = {
   sync: runSync,
 };
 
+/**
+ * A bare `--` is how a task runner separates its own flags from the ones it
+ * forwards, so it arrives in argv and means nothing here. Left in place it reads
+ * as a directory name, which is how `devkit closure -- <dir>` failed while the
+ * same command without the separator worked.
+ */
+const withoutSeparator = (argv) => argv.filter((entry) => entry !== '--');
+
 /** @param {{ argv: string[], root: string }} args */
 export const runCommand = ({ argv, root }) => {
-  const [command, ...rest] = argv;
+  const [command, ...rest] = withoutSeparator(argv);
   const handler = Object.hasOwn(COMMANDS, command ?? '')
     ? COMMANDS[command]
     : undefined;

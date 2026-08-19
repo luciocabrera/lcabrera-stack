@@ -23,6 +23,8 @@ export const DEFAULT_CONFIG = {
   commands: {},
   paths: {
     agents: '.claude/agents',
+    coordination: 'docs/coordination',
+    docs: 'docs/agents',
     rules: '.claude/rules',
     skills: '.github/skills',
   },
@@ -30,9 +32,14 @@ export const DEFAULT_CONFIG = {
 };
 
 /** Which asset groups a profile materialises. */
+/**
+ * `docs` and `coordination` are in the agent profile because the skills cannot
+ * run without them: an orchestration contract or a claim protocol that does not
+ * arrive leaves a skill whose first instruction is to read a missing file.
+ */
 export const PROFILES = {
-  agent: ['skills', 'rules', 'agents'],
-  full: ['skills', 'rules', 'agents'],
+  agent: ['skills', 'rules', 'agents', 'docs', 'coordination'],
+  full: ['skills', 'rules', 'agents', 'docs', 'coordination'],
 };
 
 const isPlainObject = (value) =>
@@ -80,3 +87,17 @@ export const targetPathFor = ({ assetPath, config }) => {
 };
 
 export const groupsFor = (config) => PROFILES[config.profile] ?? [];
+
+/**
+ * The tools the consumer's own command map invokes.
+ *
+ * A command reached through a placeholder is one of the reference forms a
+ * shipped file is allowed to use, so closure must count it as answered. Without
+ * this, parameterising a command — the very thing that makes a file portable —
+ * would make the closure gate fail.
+ */
+export const configuredCommandWords = (config) =>
+  Object.values(config.commands ?? {})
+    .filter((command) => typeof command === 'string')
+    .map((command) => command.trim().split(/\s+/)[0] ?? '')
+    .filter((word) => word !== '');

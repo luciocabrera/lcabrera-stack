@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vite-plus/test';
 
 import {
+  configuredCommandWords,
   DEFAULT_CONFIG,
   groupsFor,
   resolveConfig,
@@ -54,7 +55,31 @@ describe('targetPathFor', () => {
 });
 
 describe('groupsFor', () => {
-  test('the agent profile materialises the three prose groups', () => {
-    expect(groupsFor(DEFAULT_CONFIG)).toEqual(['skills', 'rules', 'agents']);
+  test('the agent profile carries the documents its skills cannot run without', () => {
+    expect(groupsFor(DEFAULT_CONFIG)).toEqual([
+      'skills',
+      'rules',
+      'agents',
+      'docs',
+      'coordination',
+    ]);
+  });
+});
+
+describe('configuredCommandWords', () => {
+  test('names the tool each configured command invokes', () => {
+    expect(
+      configuredCommandWords({
+        commands: {
+          claim: 'vp run coordination:claim',
+          install: 'pnpm install',
+        },
+      }),
+    ).toEqual(['vp', 'pnpm']);
+  });
+
+  test('ignores an absent, empty or non-string command', () => {
+    expect(configuredCommandWords({})).toEqual([]);
+    expect(configuredCommandWords({ commands: { a: '', b: 7 } })).toEqual([]);
   });
 });

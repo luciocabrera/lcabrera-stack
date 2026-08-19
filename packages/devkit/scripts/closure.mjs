@@ -60,7 +60,17 @@ const normalise = (segments) => {
   return resolved;
 };
 
-const isInside = (path, rootDirectory) => {
+/**
+ * Whether a resolved path travels with the file that named it.
+ *
+ * The unit is the PACKAGE, not the directory. A skill legitimately points at a
+ * contract document or a sibling skill that ships alongside it, and calling that
+ * an escape would push every such reference toward being duplicated into each
+ * directory that needs it — the exact failure the shipping model exists to
+ * avoid. So a path the package ships is internal wherever it sits.
+ */
+const travelsWith = ({ path, rootDirectory, shipped }) => {
+  if (shipped.has(path)) return true;
   const root = rootDirectory.replace(/\/$/, '');
   return path === root || path.startsWith(`${root}/`);
 };
@@ -78,7 +88,12 @@ const resolveFrom = (base, target) =>
  * the repository root instead reports a skill's own `references/advanced.md` as
  * an escape — a false positive that reads exactly like a real finding.
  */
-export const classifyLink = ({ fromDirectory, rootDirectory, target }) => {
+export const classifyLink = ({
+  fromDirectory,
+  rootDirectory,
+  shipped = new Set(),
+  target,
+}) => {
   if (isExternalUrl(target)) return { kind: 'url' };
   if (isAbsolutePath(target)) return { kind: 'escape', resolved: target };
   const withoutFragment = withoutAnchor(target);
@@ -86,7 +101,7 @@ export const classifyLink = ({ fromDirectory, rootDirectory, target }) => {
 
   const path = resolveFrom(fromDirectory, withoutFragment);
   return {
-    kind: isInside(path, rootDirectory) ? 'internal' : 'escape',
+    kind: travelsWith({ path, rootDirectory, shipped }) ? 'internal' : 'escape',
     resolved: path,
   };
 };
@@ -103,6 +118,7 @@ export const classifyPathToken = ({
   exists,
   fromDirectory,
   rootDirectory,
+  shipped = new Set(),
   token,
 }) => {
   if (isExternalUrl(token)) return { kind: 'url' };
@@ -116,7 +132,9 @@ export const classifyPathToken = ({
   const resolved = candidates.find((candidate) => exists(candidate));
   if (resolved === undefined) return { kind: 'unresolved' };
   return {
-    kind: isInside(resolved, rootDirectory) ? 'internal' : 'escape',
+    kind: travelsWith({ path: resolved, rootDirectory, shipped })
+      ? 'internal'
+      : 'escape',
     resolved,
   };
 };
@@ -127,15 +145,39 @@ const isSourceFile = (path) =>
   SOURCE_EXTENSIONS.some((extension) => path.endsWith(extension));
 
 /** A builtin travels everywhere; a relative path is a link; anything else is a package. */
-const classifyImport = ({ fromDirectory, rootDirectory, specifier }) => {
+const classifyImport = ({
+  fromDirectory,
+  rootDirectory,
+  shipped,
+  specifier,
+}) => {
   if (specifier.startsWith('node:')) return { kind: 'builtin' };
   if (specifier.startsWith('.')) {
-    return classifyLink({ fromDirectory, rootDirectory, target: specifier });
+    return classifyLink({
+      fromDirectory,
+      rootDirectory,
+      shipped,
+      target: specifier,
+    });
   }
   return { kind: 'package' };
 };
 
 const directoryOf = (path) => path.split('/').slice(0, -1).join('/');
+
+const dedupe = (escapes) => {
+  const seen = new Set();
+  return escapes.filter((finding) => {
+    const key = [
+      finding.file,
+      finding.kind,
+      finding.resolved ?? finding.reference,
+    ].join('\u0000');
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+};
 
 const toEscapes = ({ classified, file }) =>
   classified
@@ -151,13 +193,15 @@ const toEscapes = ({ classified, file }) =>
 /**
  * @param {{ files: { path: string, content: string }[], rootDirectory: string,
  *   allowedCommands?: Iterable<string>,
- *   exists?: (repoRelativePath: string) => boolean }} args
+ *   exists?: (repoRelativePath: string) => boolean,
+ *   shipped?: Set<string> }} args
  */
 export const analyseClosure = ({
   allowedCommands = [],
   exists,
   files,
   rootDirectory,
+  shipped = new Set(),
 }) => {
   const allowed = new Set(allowedCommands);
 
@@ -165,7 +209,12 @@ export const analyseClosure = ({
     const fromDirectory = directoryOf(file.path);
     const links = extractLinkTargets(file.content).map((link) => ({
       ...link,
-      ...classifyLink({ fromDirectory, rootDirectory, target: link.target }),
+      ...classifyLink({
+        fromDirectory,
+        rootDirectory,
+        shipped,
+        target: link.target,
+      }),
     }));
     // Without an existence check there is no way to tell a root-relative path
     // from a file-relative one, so prose tokens are not analysed at all rather
@@ -180,6 +229,7 @@ export const analyseClosure = ({
               exists,
               fromDirectory,
               rootDirectory,
+              shipped,
               token: entry.token,
             }),
           }));
@@ -206,6 +256,7 @@ export const analyseClosure = ({
           ...classifyImport({
             fromDirectory: directoryOf(file.path),
             rootDirectory,
+            shipped,
             specifier: entry.specifier,
           }),
         }))
@@ -220,5 +271,10 @@ export const analyseClosure = ({
         })),
     );
 
-  return { escapes: [...linkEscapes, ...commandEscapes, ...importEscapes] };
+  // A link whose text repeats its own target — the spelling these skills use —
+  // is found twice, once as a link and once as a prose path. It is one
+  // dependency, and reporting it twice makes a short list look like a long one.
+  return {
+    escapes: dedupe([...linkEscapes, ...commandEscapes, ...importEscapes]),
+  };
 };

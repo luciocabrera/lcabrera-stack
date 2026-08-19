@@ -1,38 +1,6 @@
 import { describe, expect, test } from 'vite-plus/test';
 
-import {
-  extractCommands,
-  extractImportSpecifiers,
-  extractLinkTargets,
-  extractPathTokens,
-  isPathToken,
-} from './closure-extract.mjs';
 import { analyseClosure, classifyLink, classifyPathToken } from './closure.mjs';
-
-describe('extractLinkTargets', () => {
-  test('reads the target out of a markdown link', () => {
-    expect(extractLinkTargets('see [the doc](../docs/a.md) now')).toEqual([
-      { line: 1, target: '../docs/a.md' },
-    ]);
-  });
-
-  test('reads several links on one line, left to right', () => {
-    expect(extractLinkTargets('[a](one.md) and [b](two.md)')).toEqual([
-      { line: 1, target: 'one.md' },
-      { line: 1, target: 'two.md' },
-    ]);
-  });
-
-  test('stops cleanly on an unclosed link rather than scanning forever', () => {
-    expect(extractLinkTargets(`${'['.repeat(500)}a](`)).toEqual([]);
-  });
-
-  test('reads a link whose text is itself code, the spelling skills use', () => {
-    expect(
-      extractLinkTargets('Read [`docs/a.md`](../../../docs/a.md)'),
-    ).toEqual([{ line: 1, target: '../../../docs/a.md' }]);
-  });
-});
 
 describe('classifyLink', () => {
   const rootDirectory = 'skills/epic';
@@ -110,67 +78,6 @@ describe('classifyLink', () => {
   });
 });
 
-describe('extractCommands', () => {
-  test('reads each command in a shell block, including both sides of &&', () => {
-    const content = ['```bash', 'vp run test && gh pr ready 4', '```'].join(
-      '\n',
-    );
-    expect(extractCommands(content)).toEqual([
-      { line: 2, word: 'vp' },
-      { line: 2, word: 'gh' },
-    ]);
-  });
-
-  test('ignores a fenced block that is not shell', () => {
-    const content = ['```ts', "import { vp } from 'x';", '```'].join('\n');
-    expect(extractCommands(content)).toEqual([]);
-  });
-
-  test('reads an inline command but not an inline path', () => {
-    expect(extractCommands('run `vp run test` on `docs/agents/x.md`')).toEqual([
-      { line: 1, word: 'vp' },
-    ]);
-  });
-
-  test('ignores a leading prompt and an environment assignment', () => {
-    const content = ['```bash', '$ OUT=x vp run test', '```'].join('\n');
-    expect(extractCommands(content)).toEqual([{ line: 2, word: 'vp' }]);
-  });
-});
-
-describe('extractImportSpecifiers', () => {
-  test('reads an import whose specifier is lines below its keyword', () => {
-    const content = [
-      'import {',
-      '  readManifest,',
-      '  writeManifest,',
-      "} from '@repo/scan-report/deterministic-scan';",
-    ].join('\n');
-    expect(
-      extractImportSpecifiers(content).map((entry) => entry.specifier),
-    ).toEqual(['@repo/scan-report/deterministic-scan']);
-  });
-
-  test('reads static, side-effect, dynamic and require forms', () => {
-    const content = [
-      "import { a } from '@repo/scan-report/deterministic-scan';",
-      "import './side-effect.mjs';",
-      "const b = require('ts-morph');",
-      "await import('node:fs');",
-    ].join('\n');
-    expect(
-      extractImportSpecifiers(content).map((entry) => entry.specifier),
-    ).toEqual(
-      expect.arrayContaining([
-        '@repo/scan-report/deterministic-scan',
-        './side-effect.mjs',
-        'ts-morph',
-        'node:fs',
-      ]),
-    );
-  });
-});
-
 describe('analyseClosure', () => {
   const rootDirectory = 'skills/epic';
 
@@ -244,19 +151,6 @@ describe('analyseClosure', () => {
   });
 });
 
-describe('isPathToken', () => {
-  test('accepts an explicitly relative path and a path with an extension', () => {
-    expect(isPathToken('./references/advanced.md')).toBe(true);
-    expect(isPathToken('packages/scan-report/SCHEMA_V1.md')).toBe(true);
-  });
-
-  test('rejects a url, a spaced string and a slashed word with no extension', () => {
-    expect(isPathToken('https://example.com/a.md')).toBe(false);
-    expect(isPathToken('a b/c.md')).toBe(false);
-    expect(isPathToken('feat/797-devkit')).toBe(false);
-  });
-});
-
 describe('classifyPathToken', () => {
   const rootDirectory = 'skills/epic';
   const fromDirectory = 'skills/epic';
@@ -300,6 +194,77 @@ describe('classifyPathToken', () => {
         token: 'some/placeholder.md',
       }),
     ).toEqual({ kind: 'unresolved' });
+  });
+});
+
+describe('analyseClosure deduplication and the shipped set', () => {
+  const rootDirectory = 'skills/epic';
+
+  test('a link whose text repeats its target is one dependency, not two', () => {
+    const files = [
+      {
+        content: 'Read [`docs/a.md`](../../docs/a.md) first.',
+        path: 'skills/epic/SKILL.md',
+      },
+    ];
+    const { escapes } = analyseClosure({
+      exists: (path) => path === 'docs/a.md',
+      files,
+      rootDirectory,
+    });
+    expect(escapes).toHaveLength(1);
+    expect(escapes[0].resolved).toBe('docs/a.md');
+  });
+
+  test('a reference the package also ships travels with it', () => {
+    const files = [
+      {
+        content: 'Read [the contract](../../docs/a.md) first.',
+        path: 'skills/epic/SKILL.md',
+      },
+    ];
+    expect(
+      analyseClosure({
+        files,
+        rootDirectory,
+        shipped: new Set(['docs/a.md']),
+      }).escapes,
+    ).toEqual([]);
+  });
+
+  test('a relative import between two shipped files is not an escape', () => {
+    // Pins the `--shipped` mode, where rootDirectory is empty on purpose: the
+    // shipped set is the ONLY thing making a reference internal, so an import
+    // that does not consult it reports every shipped script as an escape.
+    const files = [
+      {
+        content: "import { scan } from './helper.mjs';",
+        path: 'skills/epic/scripts/run.mjs',
+      },
+    ];
+    expect(
+      analyseClosure({
+        files,
+        rootDirectory: '',
+        shipped: new Set(['skills/epic/scripts/helper.mjs']),
+      }).escapes,
+    ).toEqual([]);
+  });
+
+  test('a sibling skill in the same package is not an escape', () => {
+    const files = [
+      {
+        content: 'Use the [commit-and-pr](../commit-and-pr/SKILL.md) skill.',
+        path: 'skills/epic/SKILL.md',
+      },
+    ];
+    expect(
+      analyseClosure({
+        files,
+        rootDirectory,
+        shipped: new Set(['skills/commit-and-pr/SKILL.md']),
+      }).escapes,
+    ).toEqual([]);
   });
 });
 
@@ -357,27 +322,5 @@ describe('analyseClosure path tokens', () => {
       },
     ];
     expect(analyseClosure({ files, rootDirectory }).escapes).toEqual([]);
-  });
-});
-
-describe('extractPathTokens', () => {
-  test('reads a path out of prose backticks and out of a command argument', () => {
-    const content = [
-      'Follow `packages/scan-report/SCHEMA_V1.md` exactly.',
-      '',
-      '```bash',
-      'node scripts/ingest-report.mjs --run-dir="$OUT"',
-      '```',
-    ].join('\n');
-    expect(extractPathTokens(content)).toEqual([
-      { line: 1, token: 'packages/scan-report/SCHEMA_V1.md' },
-      { line: 4, token: 'scripts/ingest-report.mjs' },
-    ]);
-  });
-
-  test('drops trailing prose punctuation that is not part of the path', () => {
-    expect(extractPathTokens('see `docs/a.md`, then stop')).toEqual([
-      { line: 1, token: 'docs/a.md' },
-    ]);
   });
 });
