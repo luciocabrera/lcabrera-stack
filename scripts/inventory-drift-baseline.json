@@ -499,6 +499,9 @@
   "packages/ui/src/components/Table/utils/getTableDrillRow.util.ts": [
     "getTableDrillRow"
   ],
+  "packages/ui/src/components/Table/utils/isTableTotalsPlacement.util.ts": [
+    "isTableTotalsPlacement"
+  ],
   "packages/ui/src/components/Table/utils/resolveGridRowIndexing.util.ts": [
     "HEADER_ARIA_ROW_INDEX"
   ],
