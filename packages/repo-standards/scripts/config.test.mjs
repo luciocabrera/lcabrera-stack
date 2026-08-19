@@ -109,6 +109,18 @@ describe('containment of the configured locations', () => {
     expect(tasksDir('docs/../ops/claims')).toBe('docs/../ops/claims');
   });
 
+  // `..` only climbs when it is a whole segment. A directory whose NAME starts
+  // with two dots stays put, so matching the prefix would refuse a location
+  // that never left.
+  it('keeps a directory whose name merely starts with two dots', () => {
+    expect(tasksDir('..data/claims')).toBe('..data/claims');
+    expect(tasksDir('...claims')).toBe('...claims');
+  });
+
+  it('still refuses a bare `..`', () => {
+    expect(() => tasksDir('..')).toThrow(/leaves it/);
+  });
+
   it('holds an ADR home to the same rule, since one writes files', () => {
     expect(() =>
       resolveRegisters(

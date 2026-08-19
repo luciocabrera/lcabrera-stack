@@ -62,6 +62,9 @@ const readableString = (value, fallback) =>
  * subdirectory of it, so a consumer who wrote `/var/claims` would find their
  * claims under `<root>/var/claims` and no error saying why.
  */
+const leavesRoot = (candidate) =>
+  normalize(candidate).split(/[/\\]/)[0] === '..';
+
 const repoRelative = (value, fallback, key) => {
   const candidate = readableString(value, fallback);
   if (isAbsolute(candidate)) {
@@ -69,7 +72,7 @@ const repoRelative = (value, fallback, key) => {
       `${CONFIG_FILE_NAME}: \`${key}\` must be relative to the repository root, but is \`${candidate}\`.`,
     );
   }
-  if (normalize(candidate).startsWith('..')) {
+  if (leavesRoot(candidate)) {
     throw new Error(
       `${CONFIG_FILE_NAME}: \`${key}\` must stay inside the repository, but \`${candidate}\` leaves it.`,
     );
