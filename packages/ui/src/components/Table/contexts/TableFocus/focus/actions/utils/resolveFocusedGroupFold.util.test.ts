@@ -47,7 +47,44 @@ describe('resolveFocusedGroupFold', () => {
     expect(fold.isExpanded).toBe(true);
   });
 
-  it('falls back to the row where the focused column holds no level', () => {
+  it('offers nothing from a key cell that deliberately draws no chevron', () => {
+    // An open subtotal skips its own level, so its innermost key cell renders
+    // blank space. Folding from there with the keyboard would collapse the
+    // group from the one cell whose emptiness says it cannot — and would
+    // contradict the contract that the keyboard matches the chevron.
+    const fold = resolveFocusedGroupFold({
+      columnKey: 'district',
+      groupPath: MARAIS,
+      meta: metaOf({
+        hasChildren: true,
+        isExpanded: true,
+        levelDisclosures: [
+          { columnKey: 'city', isExpanded: true, path: PARIS },
+        ],
+      }),
+    });
+
+    expect(fold.hasChildren).toBe(false);
+    expect(fold.isDrillable).toBe(false);
+  });
+
+  it('still answers the drill from a drillable leaf’s innermost key cell', () => {
+    // A drillable leaf owns no loaded children, so it has no level entry by
+    // construction — the fallback is the drill, and it must survive the rule
+    // above (ADR-079).
+    const fold = resolveFocusedGroupFold({
+      columnKey: 'district',
+      groupPath: MARAIS,
+      meta: metaOf({ isDrillable: true }),
+    });
+
+    expect(fold.isDrillable).toBe(true);
+    expect(fold.path).toStrictEqual(MARAIS);
+  });
+
+  it('keeps the row-scoped keys on a column that holds no level at all', () => {
+    // An aggregate column is not a key column, so the question of *which* level
+    // cannot arise there and the treegrid's row-scoped keys still apply.
     const fold = resolveFocusedGroupFold({
       columnKey: 'unrelated',
       groupPath: MARAIS,

@@ -20,9 +20,21 @@ type ResolveFocusedGroupFoldArgs = {
  * level under the cursor while the keyboard folded the row's own group, from a
  * cell that draws a different one.
  *
- * A column with no level of its own falls back to the row — which is every
- * detail row, every non-key column, and a group row's own innermost level where
- * a drill rather than a fold is what it offers (ADR-079).
+ * **A key column answers for itself and never falls back**, which is the whole
+ * of the agreement. A key cell that deliberately draws no control — an open
+ * subtotal in the level it totals — must not fold from the keyboard either;
+ * falling back to the row there would collapse the group from the one cell whose
+ * blank space says it cannot. The group stays reachable, because the row that
+ * *does* draw the chevron is in the same column one block up, and the subtotal
+ * regains it the moment the group folds.
+ *
+ * The innermost key column of a **drillable** leaf is the exception, and it is
+ * the drill rather than a fold: it opens rows that are not loaded, so it has no
+ * level entry by construction (ADR-079).
+ *
+ * A column that is not a key column falls back to the row, which keeps the
+ * treegrid pattern's row-scoped `ArrowLeft`/`ArrowRight` everywhere the question
+ * of *which* level could not arise (ADR-062, ADR-067).
  */
 export const resolveFocusedGroupFold = ({
   columnKey,
@@ -42,10 +54,22 @@ export const resolveFocusedGroupFold = ({
       path: level.path,
     };
 
-  return {
+  const fromRow = {
     hasChildren: meta?.hasChildren ?? false,
     isDrillable: meta?.isDrillable ?? false,
     isExpanded: meta?.isExpanded ?? false,
     path: groupPath,
   };
+
+  const isKeyColumn =
+    columnKey !== undefined &&
+    groupPath?.some((entry) => entry.columnKey === columnKey) === true;
+
+  if (!isKeyColumn) return fromRow;
+
+  const isInnermost = groupPath?.at(-1)?.columnKey === columnKey;
+
+  return isInnermost && fromRow.isDrillable
+    ? fromRow
+    : { ...fromRow, hasChildren: false, isDrillable: false };
 };

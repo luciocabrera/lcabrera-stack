@@ -316,8 +316,22 @@ group only.** A row does not report its ancestors' states, because in a treegrid
 are not this row's. The ancestor chevrons are pointer affordances that the
 accessibility tree does not see, and the keyboard reaches the same folds through
 the cell it is already in: **`ArrowLeft`/`ArrowRight` act on the level the focused
-column holds**, falling back to the row where that column holds none. Without
-that the two paths would disagree on every row that states an ancestor.
+column holds**. Without that the two paths would disagree on every row that
+states an ancestor.
+
+**A key column answers for itself and never falls back to the row**, which is
+what makes that agreement exact rather than approximate. A key cell that
+deliberately draws no control — an open subtotal in the level it totals — must
+not fold from the keyboard either; falling back there would collapse the group
+from the one cell whose blank space says it cannot. Nothing becomes unreachable:
+the row that _does_ draw the chevron is in the same column one block up, and the
+subtotal regains it the moment the group folds. The innermost key column of a
+**drillable** leaf is the exception and is the drill, which by construction has no
+level entry (ADR-079).
+
+A column that is **not** a key column still falls back to the row, keeping the
+treegrid pattern's row-scoped horizontal keys everywhere the question of _which_
+level could not arise.
 
 ### Its interaction with the drill (#777), decided rather than discovered
 
