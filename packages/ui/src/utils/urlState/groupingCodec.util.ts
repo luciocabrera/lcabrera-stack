@@ -236,7 +236,7 @@ export const groupingCodec = createUrlStateCodec<CompactGrouping>({
   // selected produces the same param it produced before aggregates existed —
   // `"agg":{}` in a shared link would say "aggregates considered and cleared",
   // which is not a state this table has.
-  compact: ({ agg, gran, keys, mode }) => ({
+  compact: ({ agg, gran, keys, mode, share }) => ({
     ...(agg !== undefined && Object.keys(agg).length > 0 && { agg }),
     // Dropped when empty, like `agg`: an untruncated grouping produces the
     // param it produced before granularities existed.
@@ -246,6 +246,9 @@ export const groupingCodec = createUrlStateCodec<CompactGrouping>({
     // produces the param it produced before rollup existed — and a link is
     // shorter by the member nobody chose.
     ...(mode !== undefined && mode !== 'flat' && { mode }),
+    // Dropped when empty, like `agg` and `gran`: a table with no share showing
+    // produces the param it produced before shares existed.
+    ...(share !== undefined && share.length > 0 && { share }),
   }),
   fallback: NO_GROUPING,
   label: 'grouping',

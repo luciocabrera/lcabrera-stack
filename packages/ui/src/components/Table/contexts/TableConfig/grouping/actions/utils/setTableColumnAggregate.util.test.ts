@@ -106,4 +106,54 @@ describe('setTableColumnAggregate', () => {
       }).keys,
     ).toStrictEqual(['order_status']);
   });
+
+  it('keeps another column’s share when this column’s aggregate changes', () => {
+    // Changing one column's measure says nothing about any other column's
+    // share, and clearing them all was a real regression here (#648).
+    expect(
+      setTableColumnAggregate({
+        columnKey: 'quantity',
+        fn: 'max',
+        grouping: {
+          aggregates: { quantity: 'sum', revenue: 'sum' },
+          keys: ['status'],
+          mode: 'flat',
+          periods: {},
+          shares: ['revenue'],
+        },
+      }).shares,
+    ).toStrictEqual(['revenue']);
+  });
+
+  it('drops a share whose own measure just stopped being additive', () => {
+    expect(
+      setTableColumnAggregate({
+        columnKey: 'revenue',
+        fn: 'avg',
+        grouping: {
+          aggregates: { revenue: 'sum' },
+          keys: ['status'],
+          mode: 'flat',
+          periods: {},
+          shares: ['revenue'],
+        },
+      }).shares,
+    ).toStrictEqual([]);
+  });
+
+  it('drops a share whose measure was cleared altogether', () => {
+    expect(
+      setTableColumnAggregate({
+        columnKey: 'revenue',
+        fn: undefined,
+        grouping: {
+          aggregates: { revenue: 'sum' },
+          keys: ['status'],
+          mode: 'flat',
+          periods: {},
+          shares: ['revenue'],
+        },
+      }).shares,
+    ).toStrictEqual([]);
+  });
 });

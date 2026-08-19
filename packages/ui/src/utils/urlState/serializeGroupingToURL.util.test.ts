@@ -136,4 +136,38 @@ describe('serializeGroupingToURL', () => {
       }),
     ).toBe('{"keys":["order_status"]}');
   });
+
+  it('carries the shares beside the keys', () => {
+    // Round-tripped rather than asserted piecewise: the narrowing accepting a
+    // member and the serializer emitting it are two different halves, and a
+    // share that never reaches the URL never reaches the loader either — so the
+    // selection would survive exactly until the next navigation (#648).
+    expect(
+      serializeGroupingToURL({
+        grouping: {
+          aggregates: { revenue: 'sum' },
+          keys: ['status'],
+          mode: 'flat',
+          periods: {},
+          shares: ['revenue'],
+        },
+      }),
+    ).toBe('{"agg":{"revenue":"sum"},"keys":["status"],"share":["revenue"]}');
+  });
+
+  it('leaves `share` out entirely when nothing is showing one', () => {
+    // A grouped table with no share produces exactly the param it produced
+    // before shares existed.
+    expect(
+      serializeGroupingToURL({
+        grouping: {
+          aggregates: {},
+          keys: ['status'],
+          mode: 'flat',
+          periods: {},
+          shares: [],
+        },
+      }),
+    ).toBe('{"keys":["status"]}');
+  });
 });

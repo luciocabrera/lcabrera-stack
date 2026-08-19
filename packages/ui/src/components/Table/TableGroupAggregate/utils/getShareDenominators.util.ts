@@ -63,7 +63,7 @@ export const getShareDenominators = ({
   const sharesKey = shares.join(' ');
   const cached = cache.get(rows);
 
-  if (cached !== undefined && cached.sharesKey === sharesKey) {
+  if (cached?.sharesKey === sharesKey) {
     return cached.denominators;
   }
 
