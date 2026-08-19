@@ -2,7 +2,7 @@
 id: render-drilled-group
 title: Render a drilled group and hand off beyond one page
 owner: agent:claude
-status: active
+status: review
 branch: feat/777-render-drilled-group
 area:
   - packages/ui/src/components/Table/**
@@ -30,7 +30,6 @@ request param and can only import a codec that lives in a package.
 
 ## Status / next
 
-- Current step: OLAP seam promoted (ADR-081); back on the rendering half
+- Current step: drill is end to end — chrome, action, hand-off, a11y, app wiring
 - Blockers: none
-- Next: the visible drill chrome, the drill action hook, the hand-off href,
-  discard-on-refetch, the a11y sweep, then wire `isGroupDrillEnabled`
+- Next: retitle PR #796 off the claim title and mark it ready for review

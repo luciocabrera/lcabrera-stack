@@ -11,7 +11,7 @@ sized.
 TableConfig/
 ├── TableConfigContext.context.ts            → createContext (undefined default)
 ├── TableConfigContext.provider.tsx           → Provider: creates all three stores from initial state props
-├── TableConfigContext.types.ts              → ContextValue (columnsStore + expansionStore + groupingStore + metaStore)
+├── TableConfigContext.types.ts              → ContextValue (columnsStore + expansionStore + groupingStore + metaStore + onDrillGroup)
 ├── useTableConfigContextValue.hook.ts       → use(TableConfigContext) with guard
 ├── index.ts                                 → Barrel: TableConfigProvider, hooks
 │
@@ -117,7 +117,7 @@ TableConfig/
 │       ├── useGetTableGroupingKeys.hook.ts       → The applied group keys, in nesting order
 │       └── useGetTableColumnAggregate.hook.ts    → The aggregate applied to one column
 │
-├── expansion/                               → Which group rows are collapsed (ADR-061, ADR-067)
+├── expansion/                               → Which group rows are collapsed, and which have fetched their own rows (ADR-061, ADR-067, ADR-079)
 │   ├── useExpansionStore.hook.ts            → Resolves the config expansionStore, delegates to useStoreSelector
 │   │
 │   │  A separate store from grouping, and the reason is the loader boundary:
@@ -126,17 +126,25 @@ TableConfig/
 │   │
 │   ├── utils/
 │   │   ├── resolveGroupTreeNodes.util.ts    → Pure: each loaded row's level, parent and visibility; group ancestry from the path, detail rows from the nearest group above
-│   │   ├── resolveTableGroupTree.util.ts    → Pure: the rows a collapse leaves standing plus their ARIA tree metadata; returns the caller's array by reference when there is no tree
+│   │   ├── resolveTableGroupTree.util.ts    → Pure: the rows a collapse leaves standing plus their ARIA tree metadata, with each drilled page spliced under its group; returns the caller's array by reference when there is no tree
 │   │   ├── toggleCollapsedGroupPath.util.ts → Pure: one group's expansion flipped, as a new set
-│   │   └── pruneCollapsedGroupPaths.util.ts → Pure: drop collapsed paths the new rows no longer carry; same instance back when nothing changed
+│   │   ├── pruneCollapsedGroupPaths.util.ts → Pure: drop collapsed paths the new rows no longer carry; same instance back when nothing changed
+│   │   ├── isDrillableGroupPath.util.ts     → Pure: whether a path names a complete, non-total grouping set — the half a path can answer
+│   │   ├── isDrillableGroupRow.util.ts      → Pure: the above plus the half only a row can, that it is not a subtotal
+│   │   ├── resolveDrilledRows.util.ts       → Pure: the rows one drill contributes — its page, and the one chrome row saying what happened
+│   │   ├── resolveGroupToggleAction.util.ts → Pure: whether one gesture on a group means fetch or fold
+│   │   └── pruneDrilledGroups.util.ts       → Pure: discard every drilled page when the rows have been re-read; same instance back when there is none
 │   │
 │   ├── actions/
 │   │   ├── utils/resolveGroupCollapseFocusTarget.util.ts → Pure: the ancestor focus falls back to when a collapse hides the focused row
-│   │   ├── useToggleTableGroupExpansion.hook.ts → Open or close one group by path, moving focus first when the collapse takes the focused row with it
-│   │   └── usePruneTableGroupExpansion.hook.ts  → Reconcile the collapsed paths against the rows just loaded
+│   │   ├── utils/withGroupDrill.util.ts        → Pure: one group's drill entry replaced, as a new map
+│   │   ├── useToggleTableGroupExpansion.hook.ts → Open or close one group by path — or fetch it, when it is a drillable leaf; moves focus first when the collapse takes the focused row with it
+│   │   ├── useDrillTableGroup.hook.ts           → Fetch one group's rows, writing loading before awaiting and failed on a rejection
+│   │   └── usePruneTableGroupExpansion.hook.ts  → Reconcile the collapsed paths against the rows just loaded, and discard every drilled page
 │   │
 │   └── selectors/
-│       └── useGetTableCollapsedGroupPaths.hook.ts → The paths whose subtree is hidden
+│       ├── useGetTableCollapsedGroupPaths.hook.ts → The paths whose subtree is hidden
+│       └── useGetTableDrilledGroups.hook.ts       → Each group's fetched page and fetch state
 │
 ├── utils/
   ├── getInitialColumnsState.util.ts       → Build initial columns state from props; synthesizes the `actions` column via `resolveTableActionsColumn` when `crud.read/update/delete` is enabled (or a consumer `actions` column is declared), and only force-pins it right when it actually exists
