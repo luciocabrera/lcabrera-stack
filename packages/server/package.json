@@ -41,6 +41,7 @@
     "./db/group-query-builder/group-query-builder.constants": "./src/db/group-query-builder/group-query-builder.constants.ts",
     "./db/group-query-builder/group-query-builder.types": "./src/db/group-query-builder/group-query-builder.types.ts",
     "./db/insert-row.util": "./src/db/insert-row.util.ts",
+    "./db/olap/decode-grouped-rows.util": "./src/db/olap/decode-grouped-rows.util.ts",
     "./db/olap/olap.types": "./src/db/olap/olap.types.ts",
     "./db/olap/to-drill-read.util": "./src/db/olap/to-drill-read.util.ts",
     "./db/olap/to-group-label.util": "./src/db/olap/to-group-label.util.ts",
@@ -49,15 +50,15 @@
     "./db/query-builder/build-delete-query.util": "./src/db/query-builder/build-delete-query.util.ts",
     "./db/query-builder/build-distinct-query.util": "./src/db/query-builder/build-distinct-query.util.ts",
     "./db/query-builder/build-insert-query.util": "./src/db/query-builder/build-insert-query.util.ts",
-    "./db/query-builder/build-order-by-clause.util": "./src/db/query-builder/build-order-by-clause.util.ts",
     "./db/query-builder/build-max-value-query.util": "./src/db/query-builder/build-max-value-query.util.ts",
+    "./db/query-builder/build-order-by-clause.util": "./src/db/query-builder/build-order-by-clause.util.ts",
     "./db/query-builder/build-select-query.util": "./src/db/query-builder/build-select-query.util.ts",
     "./db/query-builder/build-update-query.util": "./src/db/query-builder/build-update-query.util.ts",
     "./db/query-builder/query-builder.types": "./src/db/query-builder/query-builder.types.ts",
     "./db/run-in-transaction.util": "./src/db/run-in-transaction.util.ts",
     "./db/select-distinct-rows.util": "./src/db/select-distinct-rows.util.ts",
-    "./db/select-grouped-rows.util": "./src/db/select-grouped-rows.util.ts",
     "./db/select-filter-options.util": "./src/db/select-filter-options.util.ts",
+    "./db/select-grouped-rows.util": "./src/db/select-grouped-rows.util.ts",
     "./db/select-rows.util": "./src/db/select-rows.util.ts",
     "./db/update-rows.util": "./src/db/update-rows.util.ts",
     "./db/with-transaction.util": "./src/db/with-transaction.util.ts",
@@ -79,8 +80,8 @@
     "./filters/to-text-query-filters.util": "./src/filters/to-text-query-filters.util.ts",
     "./sort/resolve-query-sort.util": "./src/sort/resolve-query-sort.util.ts",
     "./sort/sort.types": "./src/sort/sort.types.ts",
-    "./tickets/sign-access-ticket.util": "./src/tickets/sign-access-ticket.util.ts",
     "./tickets/is-access-ticket-valid.util": "./src/tickets/is-access-ticket-valid.util.ts",
+    "./tickets/sign-access-ticket.util": "./src/tickets/sign-access-ticket.util.ts",
     "./tokens/generate-api-token.util": "./src/tokens/generate-api-token.util.ts",
     "./tokens/parse-api-token.util": "./src/tokens/parse-api-token.util.ts"
   },
@@ -138,6 +139,10 @@
         "types": "./dist/db/insert-row.util.d.mts",
         "default": "./dist/db/insert-row.util.mjs"
       },
+      "./db/olap/decode-grouped-rows.util": {
+        "types": "./dist/db/olap/decode-grouped-rows.util.d.mts",
+        "default": "./dist/db/olap/decode-grouped-rows.util.mjs"
+      },
       "./db/olap/olap.types": {
         "types": "./dist/db/olap/olap.types.d.mts",
         "default": "./dist/db/olap/olap.types.mjs"
@@ -170,13 +175,13 @@
         "types": "./dist/db/query-builder/build-insert-query.util.d.mts",
         "default": "./dist/db/query-builder/build-insert-query.util.mjs"
       },
-      "./db/query-builder/build-order-by-clause.util": {
-        "types": "./dist/db/query-builder/build-order-by-clause.util.d.mts",
-        "default": "./dist/db/query-builder/build-order-by-clause.util.mjs"
-      },
       "./db/query-builder/build-max-value-query.util": {
         "types": "./dist/db/query-builder/build-max-value-query.util.d.mts",
         "default": "./dist/db/query-builder/build-max-value-query.util.mjs"
+      },
+      "./db/query-builder/build-order-by-clause.util": {
+        "types": "./dist/db/query-builder/build-order-by-clause.util.d.mts",
+        "default": "./dist/db/query-builder/build-order-by-clause.util.mjs"
       },
       "./db/query-builder/build-select-query.util": {
         "types": "./dist/db/query-builder/build-select-query.util.d.mts",
@@ -198,13 +203,13 @@
         "types": "./dist/db/select-distinct-rows.util.d.mts",
         "default": "./dist/db/select-distinct-rows.util.mjs"
       },
-      "./db/select-grouped-rows.util": {
-        "types": "./dist/db/select-grouped-rows.util.d.mts",
-        "default": "./dist/db/select-grouped-rows.util.mjs"
-      },
       "./db/select-filter-options.util": {
         "types": "./dist/db/select-filter-options.util.d.mts",
         "default": "./dist/db/select-filter-options.util.mjs"
+      },
+      "./db/select-grouped-rows.util": {
+        "types": "./dist/db/select-grouped-rows.util.d.mts",
+        "default": "./dist/db/select-grouped-rows.util.mjs"
       },
       "./db/select-rows.util": {
         "types": "./dist/db/select-rows.util.d.mts",
@@ -290,13 +295,13 @@
         "types": "./dist/sort/sort.types.d.mts",
         "default": "./dist/sort/sort.types.mjs"
       },
-      "./tickets/sign-access-ticket.util": {
-        "types": "./dist/tickets/sign-access-ticket.util.d.mts",
-        "default": "./dist/tickets/sign-access-ticket.util.mjs"
-      },
       "./tickets/is-access-ticket-valid.util": {
         "types": "./dist/tickets/is-access-ticket-valid.util.d.mts",
         "default": "./dist/tickets/is-access-ticket-valid.util.mjs"
+      },
+      "./tickets/sign-access-ticket.util": {
+        "types": "./dist/tickets/sign-access-ticket.util.d.mts",
+        "default": "./dist/tickets/sign-access-ticket.util.mjs"
       },
       "./tokens/generate-api-token.util": {
         "types": "./dist/tokens/generate-api-token.util.d.mts",
