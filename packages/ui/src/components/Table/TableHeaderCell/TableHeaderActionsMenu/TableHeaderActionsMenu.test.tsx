@@ -24,6 +24,14 @@ const { MockTableActionsPopover } = vi.hoisted(() => ({
 
 const mockCloseMenu = vi.fn();
 
+const { NO_COLLAPSED_GROUP_PATHS, NO_DRILLED_GROUPS, NO_ROWS } = vi.hoisted(
+  () => ({
+    NO_COLLAPSED_GROUP_PATHS: new Set<string>(),
+    NO_DRILLED_GROUPS: new Map<string, never>(),
+    NO_ROWS: [] as readonly Record<string, unknown>[],
+  }),
+);
+
 const { appliedAggregateRef, capabilityRef, isGroupingEnabledRef } = vi.hoisted(
   () => ({
     appliedAggregateRef: { current: undefined as TableAggregateFn | undefined },
@@ -69,6 +77,27 @@ vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
 vi.mock('#ui/components/Table/contexts/TableConfig/meta/actions', () => ({
   useSetTableColumnSelectedKey: () => vi.fn(),
   useSetTableDrawersOpenState: () => vi.fn(),
+}));
+
+// The grouping section's fold-all pair reads the rows and the collapsed set to
+// decide whether either action has anything to do. Neither is what this file
+// asserts — it checks which sections the menu composes — so both are stubbed
+// empty, which is also the state that renders them disabled.
+vi.mock('#ui/components/Table/contexts/TableConfig/expansion/actions', () => ({
+  useSetAllTableGroupsExpanded: () => vi.fn(),
+}));
+
+vi.mock(
+  '#ui/components/Table/contexts/TableConfig/expansion/selectors',
+  () => ({
+    useGetTableCanDrillGroups: () => false,
+    useGetTableCollapsedGroupPaths: () => NO_COLLAPSED_GROUP_PATHS,
+    useGetTableDrilledGroups: () => NO_DRILLED_GROUPS,
+  }),
+);
+
+vi.mock('#ui/components/Table/contexts/TableData/data/selectors', () => ({
+  useGetTableData: () => NO_ROWS,
 }));
 
 vi.mock('#ui/components/Table/TableActionsPopover', () => ({

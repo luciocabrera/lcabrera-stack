@@ -8,13 +8,13 @@ once.
 
 ## What lives here
 
-| Artifact                           | Kind      | Role                                                                                                                                                    |
-| ---------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `CommandDescriptor` / `CommandId`  | type      | Presentation-neutral identity `{ id, label, icon }`. No handler, no enablement.                                                                         |
-| `deriveToggleCommandState.util.ts` | pure util | Capability-agnostic `{ isActive, isEnabled }` from `{ current, target, isDisabled }`; `isDisabled` comes from `resolveColumnCapabilities`               |
-| `pinning/pinningCommands.ts`       | constants | `PIN_LEFT_COMMAND`, `PIN_RIGHT_COMMAND`, `CLEAR_PINNING_COMMAND`                                                                                        |
-| `sorting/sortingCommands.ts`       | constants | `SORT_ASCENDING_COMMAND`, `SORT_DESCENDING_COMMAND`, `CLEAR_SORTING_COMMAND`                                                                            |
-| `grouping/groupingCommands.ts`     | constants | `GROUP_BY_COLUMN_COMMAND`, `CLEAR_GROUPING_COMMAND`, `AGGREGATE_COMMANDS` (a `Record` closed over `TableAggregateFn`), `CLEAR_COLUMN_AGGREGATE_COMMAND` |
+| Artifact                           | Kind      | Role                                                                                                                                                                                                                |
+| ---------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CommandDescriptor` / `CommandId`  | type      | Presentation-neutral identity `{ id, label, icon }`. No handler, no enablement.                                                                                                                                     |
+| `deriveToggleCommandState.util.ts` | pure util | Capability-agnostic `{ isActive, isEnabled }` from `{ current, target, isDisabled }`; `isDisabled` comes from `resolveColumnCapabilities`                                                                           |
+| `pinning/pinningCommands.ts`       | constants | `PIN_LEFT_COMMAND`, `PIN_RIGHT_COMMAND`, `CLEAR_PINNING_COMMAND`                                                                                                                                                    |
+| `sorting/sortingCommands.ts`       | constants | `SORT_ASCENDING_COMMAND`, `SORT_DESCENDING_COMMAND`, `CLEAR_SORTING_COMMAND`                                                                                                                                        |
+| `grouping/groupingCommands.ts`     | constants | `GROUP_BY_COLUMN_COMMAND`, `CLEAR_GROUPING_COMMAND`, `EXPAND_ALL_GROUPS_COMMAND`, `COLLAPSE_ALL_GROUPS_COMMAND`, `AGGREGATE_COMMANDS` (a `Record` closed over `TableAggregateFn`), `CLEAR_COLUMN_AGGREGATE_COMMAND` |
 
 ## What deliberately does **not** live here
 
@@ -36,9 +36,16 @@ once.
 - Header menu (live commit-context): `TableHeaderCell/TableHeaderActionsMenu/` —
   `PinAndHideActions` (PinLeft/PinRight/ClearPinning), `SortActions`
   (SortAscending/SortDescending/ClearSorting) and `GroupActions`
-  (GroupByColumn/ClearGrouping plus the aggregation-mode block).
+  (GroupByColumn/ClearGrouping/ExpandAllGroups/CollapseAllGroups plus the
+  aggregation-mode block).
 - Settings drawer (draft commit-context): `ColumnSettingsDrawer/PinningSection/`
   and `ColumnSettingsDrawer/SortingSection/`.
+
+The fold pair is the one set here that asks nothing of a column. `EXPAND_ALL_`
+and `COLLAPSE_ALL_GROUPS_COMMAND` are commands of the grouped **body**, so their
+ids carry no `column.` prefix and their enablement comes from the rows rather
+than from `resolveColumnCapabilities` — `useTableGroupFoldAll` reads the same
+foldable set the per-row chevrons are drawn from (#774).
 
 Every consumer resolves its own capability and passes it as `isDisabled`, and
 **the capability is the one that governs that command, not the one its neighbour

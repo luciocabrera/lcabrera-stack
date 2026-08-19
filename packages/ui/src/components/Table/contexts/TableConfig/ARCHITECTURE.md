@@ -128,6 +128,8 @@ TableConfig/
 │   │   ├── resolveGroupTreeNodes.util.ts    → Pure: each loaded row's level, parent and visibility; group ancestry from the path, detail rows from the nearest group above
 │   │   ├── resolveTableGroupTree.util.ts    → Pure: the rows a collapse leaves standing plus their ARIA tree metadata, with each drilled page spliced under its group; returns the caller's array by reference when there is no tree
 │   │   ├── resolveGroupLevelDisclosures.util.ts → Pure: the groups one row can fold, keyed by the column stating each level — ancestors, plus its own only when it is a collapsed subtotal (ADR-080 amendment)
+│   │   ├── collectFoldableGroupPaths.util.ts → Pure: the groups a control may fold — those that own rows **and** render a row of their own, so a `flat` ancestor nothing draws is never offered (#774)
+│   │   ├── areAllGroupsCollapsed.util.ts    → Pure: whether every foldable group is already folded, by membership rather than size
 │   │   ├── toggleCollapsedGroupPath.util.ts → Pure: one group's expansion flipped, as a new set
 │   │   ├── pruneCollapsedGroupPaths.util.ts → Pure: drop collapsed paths the new rows no longer carry; same instance back when nothing changed
 │   │   ├── isDrillableGroupPath.util.ts     → Pure: whether a path names a complete, non-total grouping set — the half a path can answer
@@ -138,9 +140,11 @@ TableConfig/
 │   │
 │   ├── actions/
 │   │   ├── utils/resolveGroupCollapseFocusTarget.util.ts → Pure: the ancestor focus falls back to when a collapse hides the focused row
+│   │   ├── utils/resolveOutermostGroupPathKey.util.ts   → Pure: which ancestor that is when a collapse-all folds every level at once and names no single path (#774)
 │   │   ├── utils/withGroupDrill.util.ts        → Pure: one group's drill entry replaced, as a new map
 │   │   ├── useToggleTableGroupExpansion.hook.ts → Open or close one group by path — or fetch it, when it is a drillable leaf; moves focus first when the collapse takes the focused row with it
 │   │   ├── useDrillTableGroup.hook.ts           → Fetch one group's rows, writing loading before awaiting and failed on a rejection
+│   │   ├── useSetAllTableGroupsExpanded.hook.ts → Open every group, or fold to the outermost level — the tree's own foldable set, so it closes exactly what the chevrons offer (#774)
 │   │   └── usePruneTableGroupExpansion.hook.ts  → Reconcile the collapsed paths against the rows just loaded, and discard every drilled page
 │   │
 │   └── selectors/

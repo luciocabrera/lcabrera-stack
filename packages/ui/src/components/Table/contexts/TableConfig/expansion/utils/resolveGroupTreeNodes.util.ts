@@ -38,7 +38,7 @@ type ResolveGroupTreeNodesArgs = {
  * including the grand total's, which encodes the empty path as `"[]"` and is
  * therefore still distinct from this.
  */
-const ROOT_PARENT_KEY = '';
+export const ROOT_PARENT_KEY = '';
 
 /**
  * A group row's depth, 1-based, from its own path.

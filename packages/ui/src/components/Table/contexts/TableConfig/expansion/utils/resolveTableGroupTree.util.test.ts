@@ -394,4 +394,58 @@ describe('resolveTableGroupTree', () => {
       expect(rows).toHaveLength(2);
     });
   });
+  describe('the foldable set', () => {
+    it('publishes every group that owns rows and renders one, and nothing else', () => {
+      // The same set the chevrons are drawn from, so "collapse all" and the
+      // per-row control cannot disagree about what is foldable (#774). Both
+      // roots own detail rows and Berlin also owns a deeper group, so all three
+      // are here — a detail row makes its group a parent as surely as a group
+      // row does.
+      const { foldableGroupPaths } = drilled(rows);
+
+      expect(foldableGroupPaths.size).toBe(3);
+      expect(foldableGroupPaths.has(resolveGroupPathKey(paris))).toBe(true);
+      expect(foldableGroupPaths.has(resolveGroupPathKey(berlin))).toBe(true);
+      expect(foldableGroupPaths.has(resolveGroupPathKey(berlinOpen))).toBe(
+        true,
+      );
+    });
+
+    it('is empty on a grid with no group rows in it', () => {
+      expect([...drilled([{ id: 1 }]).foldableGroupPaths]).toStrictEqual([]);
+    });
+
+    it('offers no fold under `flat`, where no ancestor has a row of its own', () => {
+      // Every `flat` row carries the full key list, so `(Berlin)` is a parent
+      // and nothing renders it. Offering that fold hides both rows and leaves
+      // nothing behind to reopen it from — a one-way trip out of the data.
+      const flat = [
+        groupRow(berlinOpen),
+        groupRow([
+          { columnKey: 'city', label: 'Berlin', value: 'Berlin' },
+          { columnKey: 'status', label: 'Shut', value: 'Shut' },
+        ]),
+      ];
+      const { foldableGroupPaths, rowMeta } = drilled(flat);
+
+      expect([...foldableGroupPaths]).toStrictEqual([]);
+      expect(
+        rowMeta?.map(({ levelDisclosures }) => levelDisclosures),
+      ).toStrictEqual([[], []]);
+    });
+
+    it('offers the same path under rollup, where the subtotal survives the fold', () => {
+      // The discriminating pair: identical deepest rows, one subtotal added.
+      // If the answer came from parenthood alone both cases would fold.
+      const rollup = [groupRow(berlinOpen), subtotalRow(berlin)];
+      const { foldableGroupPaths, rowMeta } = drilled(rollup);
+
+      expect([...foldableGroupPaths]).toStrictEqual([
+        resolveGroupPathKey(berlin),
+      ]);
+      expect(
+        rowMeta?.[0]?.levelDisclosures.map(({ columnKey }) => columnKey),
+      ).toStrictEqual(['city']);
+    });
+  });
 });

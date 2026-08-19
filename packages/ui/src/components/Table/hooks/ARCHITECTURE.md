@@ -21,6 +21,7 @@ hooks/
 ├── useTableCellFocus.hook.ts            → One cell's tabIndex, focus ref and pointer-focus handler
 ├── useTableGroupTree.hook.ts            → The rows a collapse leaves standing plus their ARIA tree metadata
 ├── useSyncTableGroupExpansion.hook.ts   → Drops collapsed paths the rows just loaded no longer carry
+├── useTableGroupFoldAll.hook.ts         → The fold-every-group pair plus whether either has anything to do
 ├── utils/
 │   ├── createResizeStartData.util.ts    → Drag-start snapshot: origin + effective width/bounds (+ .test)
 │   ├── getIsGridNavigationTarget.util.ts → Is this key event the grid's to interpret (+ .test)
@@ -45,7 +46,7 @@ from moving between two cells inside it, and `getIsGridNavigationTarget` to leav
 a key pressed inside a cell's own control — a row-actions menu, a filter input —
 to that control rather than swallowing it from the bubbling phase.
 
-## useTableGroupTree / useSyncTableGroupExpansion
+## useTableGroupTree / useSyncTableGroupExpansion / useTableGroupFoldAll
 
 The render side of expansion ([ADR-067](../../../../../../docs/decisions/ADR-067-expansion-is-the-collapsed-set-and-a-group-row-is-a-tree-node.md)).
 
@@ -63,6 +64,13 @@ grid pays no per-row allocation on a scroll frame.
 runs the prune action whenever the data array's identity changes — a navigation
 or a loaded page — and the action writes only when a path was actually dropped,
 which is what stops the effect re-entering itself.
+
+`useTableGroupFoldAll` is what the header menu's "Expand All Groups" and
+"Collapse All Groups" items are wired to (#774). It takes the foldable set from
+`useTableGroupTree` rather than enumerating one of its own — that set is what
+every per-row chevron is drawn from, so a disabled "Collapse All" means exactly
+"no chevron on screen would close anything", and there is no second derivation
+for the two answers to drift apart in.
 
 ## useColumnResize
 

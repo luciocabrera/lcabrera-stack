@@ -5,25 +5,37 @@ import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import type { TableColumnGroupingCapability } from '#ui/components/Table/Table.types';
 
-import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
+import {
+  MAX_TABLE_GROUP_KEYS,
+  TABLE_GROUP_ROW_FIELD,
+} from '#ui/components/Table/Table.constants';
 
 const {
   appliedAggregateRef,
   capabilityRef,
+  collapsedGroupPathsRef,
+  dataRef,
   groupingKeysRef,
   isGroupingEnabledRef,
   mockClearGrouping,
+  mockSetAllGroupsExpanded,
   mockSetColumnAggregate,
   mockToggleGroupKey,
+  NO_DRILLED_GROUPS,
   normalizedColumnRef,
 } = vi.hoisted(() => ({
   appliedAggregateRef: { current: undefined as string | undefined },
   capabilityRef: { current: undefined as unknown },
+  collapsedGroupPathsRef: { current: new Set<string>() },
+  dataRef: { current: [] as readonly Record<string, unknown>[] },
+
   groupingKeysRef: { current: [] as readonly string[] },
   isGroupingEnabledRef: { current: true },
   mockClearGrouping: vi.fn(),
+  mockSetAllGroupsExpanded: vi.fn(),
   mockSetColumnAggregate: vi.fn(),
   mockToggleGroupKey: vi.fn(),
+  NO_DRILLED_GROUPS: new Map<string, never>(),
   normalizedColumnRef: { current: {} as Record<string, unknown> },
 }));
 
@@ -47,10 +59,32 @@ vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
   useGetTableIsGroupingEnabled: () => isGroupingEnabledRef.current,
 }));
 
+vi.mock('#ui/components/Table/contexts/TableConfig/expansion/actions', () => ({
+  useSetAllTableGroupsExpanded: () => mockSetAllGroupsExpanded,
+}));
+
+// The fold-all pair derives its enabled state from the same group tree the body
+// paints, so the whole expansion selector surface has to resolve — not only the
+// collapsed set the assertions vary.
+vi.mock(
+  '#ui/components/Table/contexts/TableConfig/expansion/selectors',
+  () => ({
+    useGetTableCanDrillGroups: () => false,
+    useGetTableCollapsedGroupPaths: () => collapsedGroupPathsRef.current,
+    useGetTableDrilledGroups: () => NO_DRILLED_GROUPS,
+  }),
+);
+
+vi.mock('#ui/components/Table/contexts/TableData/data/selectors', () => ({
+  useGetTableData: () => dataRef.current,
+}));
+
 vi.mock('#ui/components/Table/TableActionsPopover', () => ({
   TableActionsPopoverSeparator: () => <hr data-testid='separator' />,
   tableActionsPopoverStyles: { menuIcon: {}, menuItem: {} },
 }));
+
+import { resolveGroupPathKey } from '#ui/components/Table/contexts/TableConfig/grouping/utils/resolveGroupPathKey.util';
 
 import { GroupActions } from './GroupActions.component';
 
@@ -65,6 +99,33 @@ const numericCapability: TableColumnGroupingCapability = {
   typeName: 'numeric',
 };
 
+const GROUP_FIXTURE_KEYS = ['city', 'status'];
+
+const pathOf = (...labels: readonly string[]) =>
+  labels.map((label, index) => ({
+    columnKey: GROUP_FIXTURE_KEYS[index] ?? 'status',
+    label,
+    value: label,
+  }));
+
+type GroupRowArgs = {
+  readonly isSubtotal?: boolean;
+  readonly path: ReturnType<typeof pathOf>;
+};
+
+const groupRow = ({
+  isSubtotal = false,
+  path,
+}: GroupRowArgs): Record<string, unknown> => ({
+  [TABLE_GROUP_ROW_FIELD]: { aggregates: [], count: 2, isSubtotal, path },
+});
+
+/** A rollup block: the deepest row, then the subtotal that totals it (#570). */
+const rollupRows = [
+  groupRow({ path: pathOf('Berlin', 'Open') }),
+  groupRow({ isSubtotal: true, path: pathOf('Berlin') }),
+];
+
 const getButton = (label: string) => {
   const button = screen.getByText(label).closest('button');
 
@@ -78,6 +139,8 @@ afterEach(() => {
   vi.clearAllMocks();
   appliedAggregateRef.current = undefined;
   capabilityRef.current = undefined;
+  collapsedGroupPathsRef.current = new Set<string>();
+  dataRef.current = [];
   groupingKeysRef.current = [];
   isGroupingEnabledRef.current = true;
   normalizedColumnRef.current = {};
@@ -392,6 +455,79 @@ describe('GroupActions', () => {
         columnKey: 'total_amount',
         fn: undefined,
       });
+    });
+  });
+  describe('folding every group at once', () => {
+    it('composes the fold pair alongside the whole-table clear', () => {
+      render(<GroupActions columnKey='order_status' onClose={mockOnClose} />);
+
+      expect(screen.getByText('Expand All Groups')).not.toBeNull();
+      expect(screen.getByText('Collapse All Groups')).not.toBeNull();
+    });
+
+    it('offers neither on a grid with no groups in it', () => {
+      render(<GroupActions columnKey='order_status' onClose={mockOnClose} />);
+
+      expect(getButton('Expand All Groups').disabled).toBe(true);
+      expect(getButton('Collapse All Groups').disabled).toBe(true);
+    });
+
+    it('collapses every group and closes the menu', () => {
+      dataRef.current = rollupRows;
+      groupingKeysRef.current = ['city', 'status'];
+
+      render(<GroupActions columnKey='order_status' onClose={mockOnClose} />);
+
+      const button = getButton('Collapse All Groups');
+
+      expect(button.disabled).toBe(false);
+
+      fireEvent.click(button);
+
+      expect(mockSetAllGroupsExpanded).toHaveBeenCalledWith(false);
+      expect(mockOnClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('stops offering the collapse once every foldable group is folded', () => {
+      dataRef.current = rollupRows;
+      groupingKeysRef.current = ['city', 'status'];
+      collapsedGroupPathsRef.current = new Set([
+        resolveGroupPathKey(pathOf('Berlin')),
+      ]);
+
+      render(<GroupActions columnKey='order_status' onClose={mockOnClose} />);
+
+      expect(getButton('Collapse All Groups').disabled).toBe(true);
+    });
+
+    it('offers the expand only while something is collapsed, and closes on it', () => {
+      dataRef.current = rollupRows;
+      groupingKeysRef.current = ['city', 'status'];
+      collapsedGroupPathsRef.current = new Set([
+        resolveGroupPathKey(pathOf('Berlin')),
+      ]);
+
+      render(<GroupActions columnKey='order_status' onClose={mockOnClose} />);
+
+      fireEvent.click(getButton('Expand All Groups'));
+
+      expect(mockSetAllGroupsExpanded).toHaveBeenCalledWith(true);
+      expect(mockOnClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('offers no collapse under `flat`, where a fold could not be undone', () => {
+      // The same two key columns, without the subtotal that renders `(Berlin)`.
+      // Folding it there hides every row of the group and leaves nothing behind
+      // to reopen it from, so the grid must not offer it at all (#774).
+      dataRef.current = [
+        groupRow({ path: pathOf('Berlin', 'Open') }),
+        groupRow({ path: pathOf('Berlin', 'Shut') }),
+      ];
+      groupingKeysRef.current = ['city', 'status'];
+
+      render(<GroupActions columnKey='order_status' onClose={mockOnClose} />);
+
+      expect(getButton('Collapse All Groups').disabled).toBe(true);
     });
   });
 });

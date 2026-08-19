@@ -1,4 +1,6 @@
+export { areAllGroupsCollapsed } from './areAllGroupsCollapsed.util';
 export { canDrillGroups } from './canDrillGroups.util';
+export { collectFoldableGroupPaths } from './collectFoldableGroupPaths.util';
 export { isDrillableGroupPath } from './isDrillableGroupPath.util';
 export { pruneCollapsedGroupPaths } from './pruneCollapsedGroupPaths.util';
 export { pruneDrilledGroups } from './pruneDrilledGroups.util';

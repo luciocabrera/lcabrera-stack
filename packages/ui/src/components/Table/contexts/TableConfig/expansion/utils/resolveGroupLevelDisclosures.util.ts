@@ -16,8 +16,8 @@ export type TableGroupLevelDisclosure = {
 
 type ResolveGroupLevelDisclosuresArgs = {
   readonly collapsedGroupPaths: ReadonlySet<string>;
-  /** Every path key some other loaded row calls its parent. */
-  readonly parentKeys: ReadonlySet<string>;
+  /** The groups that own rows and have a row of their own — `collectFoldableGroupPaths`. */
+  readonly foldableKeys: ReadonlySet<string>;
   /** This row's own group, when it is a group row. */
   readonly pathKey: string | undefined;
   readonly summary: TableGroupRowSummary | undefined;
@@ -49,13 +49,19 @@ const NOTHING: readonly TableGroupLevelDisclosure[] = [];
  * every row inside it is hidden and the subtotal is all that survives, so the
  * control has to return there or the group could never be reopened.
  *
+ * **A level with no row of its own is not offered at all**, which is what
+ * `foldableKeys` carries and a bare set of parent keys does not. Under `flat`
+ * every ancestor is somebody's parent and none of them is rendered, so folding
+ * one would hide its rows and leave nothing behind to reopen it from — see
+ * `collectFoldableGroupPaths`, which is where that intersection is made.
+ *
  * Presence in the returned list **is** the answer — a level with no entry has no
  * control. The caller does not re-derive `hasChildren`, which is the mistake
  * that would put two disagreeing predicates on the same question.
  */
 export const resolveGroupLevelDisclosures = ({
   collapsedGroupPaths,
-  parentKeys,
+  foldableKeys,
   pathKey,
   summary,
 }: ResolveGroupLevelDisclosuresArgs): readonly TableGroupLevelDisclosure[] => {
@@ -67,7 +73,7 @@ export const resolveGroupLevelDisclosures = ({
     const path = summary.path.slice(0, index + 1);
     const levelKey = resolveGroupPathKey(path);
 
-    if (!parentKeys.has(levelKey)) continue;
+    if (!foldableKeys.has(levelKey)) continue;
 
     const isCollapsed = collapsedGroupPaths.has(levelKey);
 
