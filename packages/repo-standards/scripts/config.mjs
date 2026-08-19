@@ -134,10 +134,15 @@ const readableHome = (home) =>
   typeof home.tier === 'string' &&
   home.tier.trim() !== '';
 
-/** A home writes ADRs, so its directory is held to the containment rule too. */
+/**
+ * A home writes ADRs, so its directory is held to the containment rule too, and
+ * its tier is trimmed: the tier is a lookup key (`--home <tier>`), so a padded
+ * one would validate and then match nothing.
+ */
 const containedHome = (home) => ({
   ...home,
   dir: repoRelative(home.dir, home.dir, 'registers.adrHomes[].dir'),
+  tier: home.tier.trim(),
 });
 
 export const resolveRegisters = (raw) => {

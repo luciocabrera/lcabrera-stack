@@ -130,6 +130,18 @@ describe('containment of the configured locations', () => {
     expect(() => tasksDir('..')).toThrow(/leaves it/);
   });
 
+  // The tier is a lookup key (`--home <tier>`), so a padded one would pass
+  // validation and then match nothing a caller asks for.
+  it('trims an ADR home tier so it can still be looked up', () => {
+    const [home] = resolveRegisters(
+      JSON.stringify({
+        registers: { adrHomes: [{ dir: 'docs/decisions', tier: 'repo ' }] },
+      }),
+    ).adrHomes;
+
+    expect(home.tier).toBe('repo');
+  });
+
   it('holds an ADR home to the same rule, since one writes files', () => {
     expect(() =>
       resolveRegisters(
