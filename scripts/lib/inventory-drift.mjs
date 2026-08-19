@@ -42,8 +42,11 @@ export const utilFileEntries = (trackedPaths) =>
     .map((file) => ({ file, tree: treeFor(file) }))
     .filter((entry) => entry.tree !== undefined);
 
+// Anchored to the start of a (possibly indented) line so a JSDoc example —
+// ` * export async function loader(...) {` — is never mistaken for a real
+// declaration: the `*` isn't whitespace, so `^\s*` cannot reach past it.
 const EXPORT_NAME =
-  /export\s+(?:const|(?:async\s+)?function)\s+([A-Za-z_$][\w$]*)/g;
+  /^\s*export\s+(?:const|(?:async\s+)?function)\s+([A-Za-z_$][\w$]*)/gm;
 
 /** Every top-level `export const`/`export function` name in a source file. */
 export const exportedSymbolNames = (source) => [

@@ -91,6 +91,25 @@ describe('exportedSymbolNames', () => {
       exportedSymbolNames("export { getThing } from './other.util.ts';"),
     ).toEqual([]);
   });
+
+  it('ignores an "export" inside a JSDoc example, only a real declaration', () => {
+    // A real file: readPersistedStateFromCookie.util.ts's docblock shows a
+    // consumer's loader in a `* export async function loader(...)` example
+    // line. The leading `*` is not whitespace, so the anchored regex cannot
+    // reach "export" from the start of that line.
+    const source = [
+      '/**',
+      ' * @example',
+      ' * export async function loader({ request }) {',
+      ' *   return readPersistedStateFromCookie(request);',
+      ' * }',
+      ' */',
+      'export const readPersistedStateFromCookie = () => {};',
+    ].join('\n');
+    expect(exportedSymbolNames(source)).toEqual([
+      'readPersistedStateFromCookie',
+    ]);
+  });
 });
 
 describe('isDocumented', () => {
