@@ -1,10 +1,11 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
+import { parseDrillGroup } from '@lcabrera/api/olap/parse-drill-group.util';
+
 import { selectOrdersPage } from '@/routes/enterprise-orders/.server/enterpriseOrders.service';
 import { toOrderDrillRead } from '@/routes/enterprise-orders/.server/toOrderDrillRead.util';
 
 import { parseOrdersPageParams } from '../enterprise-orders-paginated/parseOrdersPageParams.util';
-import { parseOrderDrillGroup } from './parseOrderDrillParams.util';
 
 /**
  * Resource route serving one bounded page of the rows underneath a group row
@@ -16,8 +17,10 @@ import { parseOrderDrillGroup } from './parseOrderDrillParams.util';
  * a NULL key becomes `IS NULL` rather than an equality that is never true, the
  * group-key terms come out of the sort, the primary key goes back in as a
  * tiebreaker, and the view's own grouping must not travel with the read or it
- * returns group rows again. `toOrderDrillRead` owns all four. A second
- * implementation on the client would be a second place for them to drift.
+ * returns group rows again. `@lcabrera/server`'s `toDrillRead` owns all four,
+ * and this route supplies only its own primary key and page ceiling (ADR-081).
+ * A second implementation on the client would be a second place for them to
+ * drift.
  *
  * **It reuses the paginated route's parser for filters, sort and limit** so a
  * drill is read under exactly the filters the grouped view was read under. Those
@@ -32,9 +35,9 @@ import { parseOrderDrillGroup } from './parseOrderDrillParams.util';
  */
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
-  const group = parseOrderDrillGroup(url.searchParams);
+  const drillRequest = parseDrillGroup(url.searchParams);
 
-  if (group === undefined) {
+  if (drillRequest === undefined) {
     return Response.json(
       { error: 'A drill request must name the group it drills.' },
       { status: 400 },
@@ -44,10 +47,10 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { filters, limit, sort } = parseOrdersPageParams(url.searchParams);
   const drill = toOrderDrillRead({
     filters,
-    groupKeys: group.groupKeys,
+    group: drillRequest.group,
+    groupKeys: drillRequest.groupKeys,
     limit,
     sort,
-    summary: group.summary,
   });
 
   if (drill.kind === 'refused') {

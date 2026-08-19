@@ -76,6 +76,14 @@ GroupSort [type] { readonly aggregateAlias: string; readonly direction: 'asc' | 
 ## ./db/insert-row.util
 insertRow [const] <TRow extends QueryResultRow>({ tx, ...descriptor }: ExecutorOptions & InsertQueryDescriptor) => Promise<readonly TRow[]>
 
+## ./db/olap/olap.types
+OlapDrillRead [type] { readonly filters: readonly QueryFilter[]; readonly includeTotal: boolean; readonly limit: number; readonly offset: number; readonly sort: readonly QuerySort[]; }
+OlapDrillRefusal [type] 'grand-total' | 'incomplete-path' | 'subtotal'
+OlapDrillTranslation [type] { readonly kind: 'drillable'; readonly read: OlapDrillRead; } | { readonly kind: 'refused'; readonly reason: OlapDrillRefusal; }
+
+## ./db/olap/to-drill-read.util
+toDrillRead [const] ({ filters, group, groupKeys, limit, maxLimit, primaryKey, sort }: ToDrillReadArgs) => OlapDrillTranslation
+
 ## ./db/query-builder/build-count-query.util
 buildCountQuery [const] ({ allowedColumns, column, filters, schema, table }: CountQueryDescriptor) => BuiltQuery
 
