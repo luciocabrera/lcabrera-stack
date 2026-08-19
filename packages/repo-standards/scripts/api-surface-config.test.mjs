@@ -72,6 +72,29 @@ describe('readPublicPackages', () => {
     );
   });
 
+  // A single-entry roster never runs the sort comparator, so a nameless manifest
+  // used to travel on as `{ name: undefined }` with nothing said. Both sizes are
+  // asserted because only the two-entry one failed loudly before, and it failed
+  // as a bare `localeCompare` TypeError naming neither the config nor the file.
+  it('names the config and the manifest when a rostered package has no name', () => {
+    for (const publicPackageDirs of [['b'], ['a', 'b']]) {
+      const root = scaffold({
+        manifests: {
+          'packages/a': {
+            exports: { '.': './src/index.ts' },
+            name: '@scope/a',
+          },
+          'packages/b': { exports: { '.': './src/index.ts' } },
+        },
+        publishing: { publicPackageDirs },
+      });
+
+      expect(() => readPublicPackages(root)).toThrow(
+        /`publishing\.publicPackageDirs` names `b`.*`packages\/b\/package\.json` declares the name undefined.*`@scope\/name` or `name`/s,
+      );
+    }
+  });
+
   it('an empty roster reads as empty, for the callers that refuse it', () => {
     const root = scaffold({ publishing: { publicPackageDirs: [] } });
 

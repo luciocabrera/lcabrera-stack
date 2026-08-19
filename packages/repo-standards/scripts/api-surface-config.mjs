@@ -36,6 +36,19 @@ const shipsSource = (manifest) => manifest.scripts?.build === undefined;
 const entryForBuilt = (sourceTarget) => toBuiltPaths(sourceTarget).types;
 
 /**
+ * A package name, as npm defines one: `@scope/name` with exactly one separator,
+ * or a bare name with none. Backslash is excluded alongside `/` because the
+ * verdict must not depend on which platform reads it — npm allows neither, and
+ * `..\\..\\x` is a traversal on Windows while reading as an ordinary name here.
+ */
+const SCOPED_NAME = /^@[^@/\\]+\/[^@/\\]+$/;
+const BARE_NAME = /^[^@/\\]+$/;
+
+const isPackageName = (value) =>
+  typeof value === 'string' &&
+  (SCOPED_NAME.test(value) || BARE_NAME.test(value));
+
+/**
  * The manifest of a rostered package, or a failure that names the config.
  *
  * A roster entry is a directory name **under** `publishing.packagesDir`, not a
@@ -56,7 +69,13 @@ const readRosteredManifest = ({ directory, packagesDir, repoRoot }) => {
       `${CONFIG_FILE_NAME}: \`publishing.publicPackageDirs\` names \`${directory.slice(packagesDir.length + 1)}\`, but there is no manifest at \`${directory}/package.json\`. Each entry is a directory name under \`publishing.packagesDir\` (\`${packagesDir}\`), not a path from the repository root.`,
     );
   }
-  return JSON.parse(readFileSync(manifestPath, 'utf8'));
+  const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+  if (!isPackageName(manifest.name)) {
+    throw new Error(
+      `${CONFIG_FILE_NAME}: \`publishing.publicPackageDirs\` names \`${directory.slice(packagesDir.length + 1)}\`, but \`${directory}/package.json\` declares the name ${JSON.stringify(manifest.name)}. A rostered package is identified and filed by its name, so it must be \`@scope/name\` or \`name\`.`,
+    );
+  }
+  return manifest;
 };
 
 /**
@@ -100,15 +119,6 @@ export const readPublicPackages = (repoRoot) => {
 };
 
 /**
- * A package name, as npm defines one: `@scope/name` with exactly one separator,
- * or a bare name with none. Backslash is excluded alongside `/` because the
- * verdict must not depend on which platform reads it — npm allows neither, and
- * `..\\..\\x` is a traversal on Windows while reading as an ordinary name here.
- */
-const SCOPED_NAME = /^@[^@/\\]+\/[^@/\\]+$/;
-const BARE_NAME = /^[^@/\\]+$/;
-
-/**
  * The scope dropped from a package name, so `@scope/thing` files itself as
  * `thing` — any scope, not one this package knows.
  *
@@ -120,11 +130,10 @@ const BARE_NAME = /^[^@/\\]+$/;
  * npm's own rule, so there is nothing legitimate to accommodate.
  */
 const unscoped = (packageName) => {
-  if (typeof packageName === 'string' && SCOPED_NAME.test(packageName)) {
-    return packageName.slice(packageName.indexOf('/') + 1);
-  }
-  if (typeof packageName === 'string' && BARE_NAME.test(packageName)) {
-    return packageName;
+  if (isPackageName(packageName)) {
+    return packageName.startsWith('@')
+      ? packageName.slice(packageName.indexOf('/') + 1)
+      : packageName;
   }
   throw new Error(
     `a rostered package declares the name ${JSON.stringify(packageName)}, which is not a package name — a snapshot path is built from it, so it must be \`@scope/name\` or \`name\`, with no other separator.`,
