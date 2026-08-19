@@ -1,8 +1,10 @@
 import type { PaginatedFetchArgs } from '@lcabrera/api/http/http.types';
-import type { TableGroupRowSummary } from '@lcabrera/ui/components/Table/Table.types';
+import type { TableGroupDrillRequest } from '@lcabrera/ui/components/Table';
 
 import { buildPaginatedQueryParams } from '@lcabrera/api/http/build-paginated-query-params.util';
 import { fetchAndValidate } from '@lcabrera/api/http/fetch-and-validate.util';
+import { encodeDrillGroup } from '@lcabrera/api/olap/encode-drill-group.util';
+import { OLAP_DRILL_GROUP_PARAM } from '@lcabrera/api/olap/olap.constants';
 
 import type { EnterpriseOrdersResponse } from './config';
 
@@ -10,11 +12,8 @@ import { isEnterpriseOrdersResponse } from './config';
 
 const DRILL_PATH = '/_api/enterprise-orders/drill';
 
-export type FetchOrderDrillArgs = {
-  /** The applied group keys, in nesting order — what "complete" is measured against. */
-  readonly groupKeys: readonly string[];
-  readonly summary: TableGroupRowSummary;
-} & Omit<PaginatedFetchArgs, 'cursor' | 'skip'>;
+export type FetchOrderDrillArgs = Omit<PaginatedFetchArgs, 'cursor' | 'skip'> &
+  TableGroupDrillRequest;
 
 /**
  * Fetches one bounded page of the rows underneath a group row
@@ -33,17 +32,20 @@ export type FetchOrderDrillArgs = {
  * would be a parameter with no second call to use it — and accepting one would
  * advertise a second page this contract does not have.
  *
- * Only `columnKey` and `value` of each path entry are sent. `label` is a
- * formatted display string; what a drill is built from is the raw value, and
- * shipping the label would invite a filter built from the wrong one.
+ * **The group descriptor is encoded by `@lcabrera/api`, not here.** Its parser
+ * is the other half of one codec, and a request written by hand beside a reader
+ * written elsewhere is behaviour duplicated rather than a shape (ADR-081) —
+ * which is how the `undefined`-valued key that JSON silently drops went
+ * unnoticed. Dropping the display `label` is part of that contract: what a
+ * drill is built from is the raw value.
  */
 export const fetchOrderDrill = ({
   filter,
-  groupKeys,
+  groupingKeys,
   limit,
+  path,
   signal,
   sorting,
-  summary,
   timeoutMs,
 }: FetchOrderDrillArgs) => {
   // `skip: 0` because a drill reads from the start of its group and never pages
@@ -52,11 +54,14 @@ export const fetchOrderDrill = ({
   const params = buildPaginatedQueryParams({ filter, limit, skip: 0, sorting });
 
   params.set(
-    'group',
-    JSON.stringify({
-      isSubtotal: summary.isSubtotal,
-      keys: groupKeys,
-      path: summary.path.map(({ columnKey, value }) => ({ columnKey, value })),
+    OLAP_DRILL_GROUP_PARAM,
+    // `isSubtotal: false` is a statement, not a default: only a complete,
+    // non-subtotal grouping set is drillable, so a request that reaches here is
+    // never one. The server refuses a subtotal anyway, which is what makes this
+    // safe to state rather than to carry.
+    encodeDrillGroup({
+      group: { isSubtotal: false, path },
+      groupKeys: groupingKeys,
     }),
   );
 

@@ -68,6 +68,7 @@ export const loader = createTableRouteLoader<
   meta: {
     crud: CRUD,
     deleteActionPath: DELETE_ACTION_PATH,
+    isGroupDrillEnabled: true,
     isGroupingEnabled: true,
     isKeysetEnabled: true,
     isServerFilterEnabled: true,

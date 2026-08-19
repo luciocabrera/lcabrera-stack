@@ -20,9 +20,10 @@ import type { TableRouteViewProps } from './TableRouteView.types';
  * the loader `meta`, not here, so the loader and the load-more read one
  * declaration (ADR-063). The props this component does take are the pieces only
  * the component can supply: a fetcher, a toolbar node and the response
- * selectors — plus `onDrillGroup`, which is a second fetcher for the same
- * reason the first one is a prop: functions do not survive the loader boundary
- * (ADR-009).
+ * selectors — plus `fetchDrill`, which is a second fetcher for the same reason
+ * the first one is a prop: functions do not survive the loader boundary
+ * (ADR-009). The query it receives is composed by `useTableRoutePage`, so a
+ * drill inherits the view's filters and sort by construction.
  */
 export const TableRouteView = <
   TData extends Record<string, unknown>,
@@ -32,11 +33,11 @@ export const TableRouteView = <
   dataErrorSelector = (response) => response.error,
   dataSelector = (response) => response.data,
   dataTotalSelector = (response) => response.total,
+  fetchDrill,
   fetchPage,
-  onDrillGroup,
 }: TableRouteViewProps<TData, TResponse>) => {
-  const { columnsState, dataPromise, metaState, onLoadMore } =
-    useTableRoutePage<TData, TResponse>({ fetchPage });
+  const { columnsState, dataPromise, metaState, onDrillGroup, onLoadMore } =
+    useTableRoutePage<TData, TResponse>({ fetchDrill, fetchPage });
 
   return (
     <TableLayout<TData, TResponse>
