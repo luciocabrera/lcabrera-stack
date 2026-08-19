@@ -15,12 +15,23 @@
  * one feature — a second linked cell would otherwise arrive keyboard-dead and
  * nothing would say why.
  *
- * The first link wins. A cell holding two actions has no unambiguous "the"
- * action, and picking one silently is worse than the pattern not applying —
- * so a cell that needs two should not be reached this way at all.
+ * The first link wins **within one cell**. A cell holding two actions has no
+ * unambiguous "the" action, and picking one silently is worse than the pattern
+ * not applying — so a cell that needs two should not be reached this way at all.
  */
 export const activateGridCellLink = (target: EventTarget) => {
-  if (!(target instanceof HTMLElement)) return false;
+  // **A cell, and never the grid.** The key handler also fires with the grid
+  // element itself as the target — `getIsGridNavigationTarget` admits it, and
+  // the container holds the tab stop whenever the focused row is outside the
+  // virtualization window. Searching that subtree would find the first link in
+  // the whole table and follow it, so `Enter` with no cell focused would
+  // navigate into some unrelated group's hand-off.
+  if (
+    !(target instanceof HTMLElement) ||
+    target.getAttribute('role') !== 'gridcell'
+  ) {
+    return false;
+  }
 
   const link = target.querySelector('a[href]');
 
