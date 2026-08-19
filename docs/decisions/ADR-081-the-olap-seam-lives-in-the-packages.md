@@ -29,12 +29,12 @@ sorting, filtering and pagination are. Nothing about them is specific to
 enterprise orders — and the code says so plainly. Grepping the four seam files
 for any domain identifier at all, on the day this was written:
 
-| File                                                        | Domain identifiers                                                                    |
-| ----------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `config/toOrderGroupRow.util.ts`                            | none                                                                                  |
-| `config/toOrderGroupLabel.util.ts`                          | none                                                                                  |
-| `api/enterprise-orders-drill/parseOrderDrillParams.util.ts` | none                                                                                  |
-| `.server/toOrderDrillRead.util.ts`                          | `ENTERPRISE_ORDER_PRIMARY_KEY`, `MAX_ENTERPRISE_ORDERS_LIMIT`, `SelectOrdersPageArgs` |
+| File (in the app, before this)                              | Domain identifiers                                                                    | Becomes                                                                                       |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `config/toOrderGroupRow.util.ts`                            | none                                                                                  | `to-group-row.util.ts` in `@lcabrera/server`                                                  |
+| `config/toOrderGroupLabel.util.ts`                          | none                                                                                  | `to-group-label.util.ts` in `@lcabrera/server`                                                |
+| `api/enterprise-orders-drill/parseOrderDrillParams.util.ts` | none                                                                                  | `parse-drill-group.util.ts` in `@lcabrera/api`                                                |
+| `.server/toOrderDrillRead.util.ts`                          | `ENTERPRISE_ORDER_PRIMARY_KEY`, `MAX_ENTERPRISE_ORDERS_LIMIT`, `SelectOrdersPageArgs` | `to-drill-read.util.ts` in `@lcabrera/server`; the app keeps a six-line binding for the three |
 
 Three mention no order anywhere. The fourth mentions one three times, and each is
 a parameter wearing a constant's clothes: a primary key, a page ceiling, and the
