@@ -26,43 +26,61 @@ type ToGroupKeyColumnFilterArgs = {
  * which JSON does for `bigint` and `numeric` — must still produce a
  * `NumberFilter`, or the query compares a number column against text.
  */
-export const toGroupKeyColumnFilter = ({
-  dataType,
-  value,
-}: ToGroupKeyColumnFilterArgs): ColumnFilter | undefined => {
-  if (value === null || value === undefined) return;
+/** A boolean key. `pg` may hand it back as a string, and both spellings mean true. */
+const toBooleanFilter = (value: unknown): ColumnFilter => ({
+  type: 'boolean',
+  value: value === true || value === 'true',
+});
 
-  if (dataType === 'boolean')
-    return { type: 'boolean', value: value === true || value === 'true' };
+/**
+ * A numeric key. `currency` arrives here too: it is a presentation choice over a
+ * numeric column, and treating it as text would compare a numeric column against
+ * a formatted string and match nothing.
+ */
+const toNumberFilter = (value: unknown): ColumnFilter | undefined => {
+  const numeric = Number(value);
 
-  // `currency` is a presentation choice over a numeric column, so it takes the
-  // number filter — treating it as text would compare a numeric column against
-  // a formatted string and match nothing.
-  if (dataType === 'currency' || dataType === 'number') {
-    const numeric = Number(value);
+  return Number.isFinite(numeric)
+    ? { operator: 'equals', type: 'number', value: numeric }
+    : undefined;
+};
 
-    return Number.isFinite(numeric)
-      ? { operator: 'equals', type: 'number', value: numeric }
-      : undefined;
-  }
+/** A date key. Timestamps arrive parsed; ISO is what the URL codec round-trips. */
+const toDateFilter = (value: unknown): ColumnFilter | undefined => {
+  if (value instanceof Date)
+    return { operator: 'equals', type: 'date', value: value.toISOString() };
 
-  if (dataType === 'date') {
-    if (value instanceof Date)
-      return { operator: 'equals', type: 'date', value: value.toISOString() };
+  return typeof value === 'string'
+    ? { operator: 'equals', type: 'date', value }
+    : undefined;
+};
 
-    return typeof value === 'string'
-      ? { operator: 'equals', type: 'date', value }
-      : undefined;
-  }
-
-  // **An object-valued key produces no filter**, for the reason a NULL one does
-  // not. `String()` over one yields `[object Object]`, which is a filter that
-  // matches nothing and says nothing about why — and a `jsonb` or composite
-  // column is a legal group key, so this is reachable rather than defensive.
+/**
+ * Everything else, as text — and **an object-valued key produces no filter**,
+ * for the reason a NULL one does not. `String()` over one yields
+ * `[object Object]`, which is a filter that matches nothing and says nothing
+ * about why, and a `jsonb` or composite column is a legal group key, so this is
+ * reachable rather than defensive.
+ */
+const toTextFilter = (value: unknown): ColumnFilter | undefined => {
   if (typeof value === 'string')
     return { operator: 'equals', type: 'text', value };
 
   return typeof value === 'bigint' || typeof value === 'number'
     ? { operator: 'equals', type: 'text', value: String(value) }
     : undefined;
+};
+
+export const toGroupKeyColumnFilter = ({
+  dataType,
+  value,
+}: ToGroupKeyColumnFilterArgs): ColumnFilter | undefined => {
+  if (value === null || value === undefined) return;
+
+  if (dataType === 'boolean') return toBooleanFilter(value);
+
+  if (dataType === 'currency' || dataType === 'number')
+    return toNumberFilter(value);
+
+  return dataType === 'date' ? toDateFilter(value) : toTextFilter(value);
 };

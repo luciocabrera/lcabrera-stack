@@ -5,7 +5,8 @@ import { getTableGroupRowSummary } from '#ui/components/Table/utils/getTableGrou
 import type { GroupTreeNode } from './resolveGroupTreeNodes.util';
 
 import { isDrillableGroupRow } from './isDrillableGroupRow.util';
-import { resolveDrilledRows } from './resolveDrilledRows.util';
+import { resolveDrilledBlock } from './resolveDrilledBlock.util';
+import { resolveGroupRowIsExpanded } from './resolveGroupRowIsExpanded.util';
 import { resolveGroupTreeNodes } from './resolveGroupTreeNodes.util';
 
 /** One visible row's place in the tree, as ARIA needs it stated. */
@@ -171,49 +172,35 @@ export const resolveTableGroupTree = <TData extends Record<string, unknown>>({
     rowMeta.push({
       hasChildren,
       isDrillable,
-      // A drillable leaf is expanded only once something has been asked for.
-      // Its collapsed-set membership says nothing on its own: an untouched
-      // group is not in that set, so reading expansion from it alone would
-      // report every leaf open with nothing under it (ADR-079).
-      isExpanded: isDrillable
-        ? drill !== undefined && !isCollapsed
-        : node.pathKey !== undefined && !isCollapsed,
+      isExpanded: resolveGroupRowIsExpanded({
+        drill,
+        isCollapsed,
+        isDrillable,
+        pathKey: node.pathKey,
+      }),
       level: node.level,
       pathKey: node.pathKey,
       posInSet,
       setSize: setSizes.get(node.parentKey) ?? 1,
     });
 
-    if (!isDrillable || node.pathKey === undefined) continue;
-
-    const summary = getTableGroupRowSummary(row);
-
-    if (summary === undefined) continue;
-
-    // Spliced here rather than in a second pass, so `rows` and `rowMeta` cannot
-    // fall out of step — the identity `TableBody` sizes `<tbody>` from is over
-    // `rows.length`, and the focus model indexes both by the same number.
-    const drilled = resolveDrilledRows({
+    // Spliced in the same iteration that pushed the group row, so `rows` and
+    // `rowMeta` cannot fall out of step — the identity `TableBody` sizes
+    // `<tbody>` from is over `rows.length`, and the focus model indexes both by
+    // the same number. `resolveDrilledBlock` pairs each row with its meta for
+    // the same reason, one level down.
+    const drilledBlock = resolveDrilledBlock({
       drill,
       isCollapsed,
+      isDrillable,
+      level: node.level,
       pathKey: node.pathKey,
-      summary,
+      row,
     });
 
-    for (const [drilledIndex, drilledRow] of drilled.entries()) {
-      rows.push(drilledRow as TData);
-      rowMeta.push({
-        hasChildren: false,
-        isDrillable: false,
-        isExpanded: false,
-        // One level deeper than the group they were fetched for, and counted
-        // among each other: they are a set of siblings under it, not members of
-        // the group row's own set.
-        level: node.level + 1,
-        pathKey: undefined,
-        posInSet: drilledIndex + 1,
-        setSize: drilled.length,
-      });
+    for (const entry of drilledBlock) {
+      rows.push(entry.row as TData);
+      rowMeta.push(entry.meta);
     }
   }
 

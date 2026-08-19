@@ -12,11 +12,7 @@ import type { TableGroupDisclosureState } from '#ui/components/Table/TableGroupD
 import { DEFAULT_MIN_COLUMN_WIDTH } from '#ui/components/Table/Table.constants';
 import { TableRowActionsMenu } from '#ui/components/Table/TableRowActionsMenu';
 
-import { resolveDrillCellChildren } from './resolveDrillCellChildren.util';
-import {
-  EMPTY_CELL,
-  resolveGroupCellChildren,
-} from './resolveGroupCellChildren.util';
+import { resolveStructuralCellChildren } from './resolveStructuralCellChildren.util';
 
 /**
  * `kind` is a rendering decision, not a column type: `custom` for the actions
@@ -153,42 +149,21 @@ export const buildTableBodyCellDescriptor = <
     width,
   } as const;
 
-  // Before the group branch, and before the detail-row blanking below: a drill
-  // row carries neither a summary nor data, so both of those would read it as a
-  // detail row and blank every key column — including the one its chrome goes
-  // in.
-  if (drillRow !== undefined) {
-    return {
-      ...shared,
-      children: resolveDrillCellChildren({
-        columnKey,
-        groupingKeys,
-        marker: drillRow,
-      }),
-    };
-  }
+  // Grid-supplied content — drill chrome, a group row's own cells, or a detail
+  // row's blanked group column — all in one place, because the order among them
+  // matters and none of them looks at `row`. `undefined` means this is an
+  // ordinary data cell.
+  const structuralChildren = resolveStructuralCellChildren({
+    carriedGroupKeys,
+    columnKey,
+    disclosure,
+    drillRow,
+    groupingKeys,
+    groupSummary,
+  });
 
-  if (groupSummary !== undefined) {
-    return {
-      ...shared,
-      children: resolveGroupCellChildren({
-        carriedGroupKeys,
-        columnKey,
-        disclosure,
-        groupingKeys,
-        summary: groupSummary,
-      }),
-    };
-  }
-
-  // A detail row blanks the columns it is grouped by: the value is stated by
-  // the group row above it, in the same column, and repeating it down a column
-  // whose header already says it is a column of one word (ADR-065, ADR-080).
-  // `EMPTY_CELL` rather than `undefined`: see the note in
-  // `resolveGroupCellChildren.util.tsx` — `undefined` takes the default branch
-  // and puts an empty `<span title="">` in a cell that holds nothing.
-  if (groupingKeys.includes(columnKey)) {
-    return { ...shared, children: EMPTY_CELL };
+  if (structuralChildren !== undefined) {
+    return { ...shared, children: structuralChildren };
   }
 
   const customActions = col.render?.(row);
