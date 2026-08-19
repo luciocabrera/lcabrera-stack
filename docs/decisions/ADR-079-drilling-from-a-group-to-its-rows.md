@@ -2,6 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-08-18
+- **Amended:** 2026-08-19 (#777) — the primary decision is unchanged; the per-group fetch state gains a **fourth** member, `failed`, because the three named below cannot express a drill that was asked for and did not arrive. See [Amendments](#amendments).
 - **Scope:** `@lcabrera/ui` — `src/components/Table/` group rows and expansion; `@lcabrera/server` — the paginated read a drill reuses
 - **Issue:** #772 — constrains its children; parent epic #547
 - **Related:** [ADR-059](./ADR-059-aggregation-is-builder-generated.md) (a grouped read returns whole), [ADR-061](./ADR-061-grouping-config-in-url-expansion-in-store.md) (grouping config is URL state, expansion is client state), [ADR-065](./ADR-065-grouped-rows-render-a-hierarchy-column.md) (what a group row renders), [ADR-067](./ADR-067-expansion-is-the-collapsed-set-and-a-group-row-is-a-tree-node.md) (expansion is the collapsed set), [ADR-052](./ADR-052-keyset-pagination-for-infinite-scroll.md) (the keyset cursor a drill reuses), [ADR-066](./ADR-066-grouping-guard-rails-and-per-query-timeout.md) (what bounds a grouped read)
@@ -141,6 +142,11 @@ set in the expansion store — `idle | loading | loaded` — and three states
 suffice precisely because there is no fourth: `loaded` is terminal, since a
 drill never pages again.
 
+> **Amended 2026-08-19 (#777).** The count is wrong, and the reasoning it rests
+> on is about the wrong axis. `loaded` being terminal rules out a _fifth_ state
+> for paging; it says nothing about a fetch that fails. A fourth member,
+> `failed`, is added — see [Amendments](#amendments).
+
 ### What the user sees when there is more
 
 The group already knows its own row count (`summary.count`). Where that exceeds
@@ -205,6 +211,79 @@ them separate is what lets a drill inherit ADR-052's pagination unchanged.
 number of applied keys. Rejected: the table never asks the configuration what a
 row is (ADR-067), because the configuration and the rows it produced can differ
 for a render. The row's own path is the authority, and asking it costs the same.
+
+## Amendments
+
+**2026-08-19 — a drill can fail, and three states cannot say so (#777).** The
+primary decision is unchanged: one bounded page, spliced under its group, no
+second page, a hand-off for the rest. What changes is the fetch state that
+carries it.
+
+### What the original said, and why it was wrong
+
+The decision named `idle | loading | loaded` and justified the count directly:
+_"three states suffice precisely because there is no fourth: `loaded` is
+terminal, since a drill never pages again."_
+
+That argument is sound and answers a different question. `loaded` being terminal
+rules out a state for **paging further** — the drill equivalent of
+`isLoadingMore`, which this decision deliberately does not have. It says nothing
+about a request that was issued and did not come back. The two are independent
+axes, and the sentence collapsed them.
+
+The gap is not hypothetical. A drilled read is a network request against a
+route that can answer 400 — this decision gives it three distinct refusals of
+its own, `grand-total`, `subtotal` and `incomplete-path` — and a query that
+`ADR-066`'s per-query timeout can cut off. Every one of those outcomes has to
+land somewhere.
+
+### Why the three states cannot absorb it
+
+Each of them makes a claim that is false after a failure, and each is worse than
+the last:
+
+- **`loading`** — the row keeps a spinner that will never resolve, at the row
+  height every row paints at. The most visible failure and the least
+  recoverable: the affordance is spent and the group is stuck.
+- **`loaded`** with no rows — states that the group has no rows, which
+  contradicts the `summary.count` printed in the same row. Two numbers on one
+  screen disagreeing, with nothing saying which is wrong.
+- **Back to `idle`** (no entry) — the chevron returns to collapsed and nothing
+  else changes. After a spinner this reads as "the click did nothing", so the
+  user's next move is to click again, which is the same failing request. A
+  retry loop the interface invited.
+
+The third is the one to be explicit about, because it is what an implementation
+reaches for when the state model has no room: it is not a safe default, it is a
+silent failure with a retry built in.
+
+### The decision
+
+**A fourth member, `failed`, is added to the per-group fetch state.**
+
+- It is entered when the drilled read does not produce a page, whatever the
+  reason. The reason is **not** carried in the state: a refusal and a timeout
+  differ to the server and not to the reader of one group row, and a state that
+  fans out per cause is one every renderer has to exhaust.
+- The group stays **expanded** in it. Collapsing on failure would erase the only
+  evidence that anything happened.
+- It renders at the same `rowHeight` as every other row, which is the invariant
+  this whole path is held to — a failure state is not exempt from the identity
+  `<tbody>` is sized by.
+- It is **not terminal**. Toggling the group re-enters `loading`, which is the
+  retry, made explicit and asked for rather than inferred from a click on a
+  control that appeared to do nothing.
+
+`loaded` stays terminal, and the original reasoning for that is untouched: a
+drill still never pages again, and the answer where a group holds more rows than
+the page is still the hand-off row.
+
+### What this does not open
+
+It does not admit a per-cause state, a retry counter, or an automatic retry. A
+failed drill is one state that a deliberate gesture leaves. Anything that
+retries on the user's behalf turns a bounded read into an unbounded one, which
+is the property this decision exists to keep.
 
 ## References
 

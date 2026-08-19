@@ -4,13 +4,13 @@ import { useTableDataContextValue } from '#ui/components/Table/contexts/TableDat
 import { useTableFocusContextValue } from '#ui/components/Table/contexts/TableFocus/useTableFocusContextValue.hook';
 import { useTableContainerRef } from '#ui/components/Table/contexts/TableWrapper';
 import { resolveRowKey } from '#ui/components/Table/TableBodyRows/utils/resolveRowKey.util';
-import { getTableGroupRowSummary } from '#ui/components/Table/utils';
 
 import type { MoveTableGridFocusArgs } from './useMoveTableGridFocus.types';
 
 import {
   commitTableFocusTarget,
   getGridPageRows,
+  resolveFocusedGridCell,
   resolveGridFocusContext,
   resolveGridFocusMove,
   resolveGroupExpansionKey,
@@ -36,8 +36,13 @@ export const useMoveTableGridFocus = <
   TData extends Record<string, unknown>,
 >() => {
   const { focusStore } = useTableFocusContextValue();
-  const { columnsStore, expansionStore, metaStore } =
-    useTableConfigContextValue<TData>();
+  const {
+    columnsStore,
+    expansionStore,
+    groupingStore,
+    metaStore,
+    onDrillGroup,
+  } = useTableConfigContextValue<TData>();
   const { dataStore } = useTableDataContextValue<TData>();
   const containerRef = useTableContainerRef();
   const toggleGroupExpansion = useToggleTableGroupExpansion<TData>();
@@ -50,26 +55,27 @@ export const useMoveTableGridFocus = <
         dataState: dataStore.get(),
         expansionState: expansionStore.get(),
         focusState,
+        groupingState: groupingStore.get(),
         metaState: metaStore.get(),
+        onDrillGroup,
       });
 
-    const currentColumnIndex =
-      focusState.columnKey === undefined
-        ? -1
-        : columnKeys.indexOf(focusState.columnKey);
-    const hasFocusedCell =
-      focusedRowIndex !== undefined && currentColumnIndex >= 0;
-    const focusedMeta =
-      focusedRowIndex === undefined ? undefined : rowMeta?.[focusedRowIndex];
-    const focusedRow =
-      focusedRowIndex === undefined ? undefined : data[focusedRowIndex];
-    const focusedGroupPath =
-      focusedRow === undefined
-        ? undefined
-        : getTableGroupRowSummary(focusedRow)?.path;
+    const {
+      columnIndex: currentColumnIndex,
+      groupPath: focusedGroupPath,
+      hasFocusedCell,
+      meta: focusedMeta,
+    } = resolveFocusedGridCell({
+      columnKeys,
+      data,
+      focusedRowIndex,
+      focusState,
+      rowMeta,
+    });
 
     const expansion = resolveGroupExpansionKey({
       hasChildren: focusedMeta?.hasChildren ?? false,
+      isDrillable: focusedMeta?.isDrillable ?? false,
       isExpanded: focusedMeta?.isExpanded ?? false,
       isGroupRow: hasFocusedCell && focusedGroupPath !== undefined,
       key,

@@ -1,3 +1,4 @@
+export { useGetColumnFilters } from './useGetColumnFilters.hook';
 export { useGetColumns } from './useGetColumns.hook';
 export { useGetColumnSizing } from './useGetColumnSizing.hook';
 export { useGetColumnWidth } from './useGetColumnWidth.hook';

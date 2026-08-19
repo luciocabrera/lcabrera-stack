@@ -114,6 +114,32 @@ package ([ADR-039](../../../docs/decisions/ADR-039-duplicate-over-undeclared-edg
 and the app that depends on both pins the two together in
 `groupingContract.test.ts`.
 
+### `src/db/olap/` — see its own `ARCHITECTURE.md`
+
+The read half of the same protocol `group-query-builder/` writes, and the
+translation back out of it. Pure and DB-free like its two siblings.
+
+**Decoding a grouped read.** `toGroupRow` (`to-group-row.util.ts`) turns one row
+into the group summary a grid renders, reading the `GROUPING()` mask to tell a
+subtotal from a real NULL — the two are textually identical and nothing else
+separates them. It composes `toGroupLabel` (`to-group-label.util.ts`), which
+formats a key against the closed dimension vocabulary
+([ADR-058](../../../docs/decisions/ADR-058-grouping-legality-by-analytical-role.md))
+and answers `(empty)` rather than guessing at anything outside it.
+
+**Drilling back down.** `toDrillRead` (`to-drill-read.util.ts`) turns a group row
+into the paginated read of the rows underneath it, or a typed refusal for a
+grand total, a subtotal or an incomplete path
+([ADR-079](../../../docs/decisions/ADR-079-drilling-from-a-group-to-its-rows.md)).
+The route's primary key and page ceiling are arguments — only the route knows
+them — which is the whole of what a caller supplies.
+
+All of this lived in `apps/react-router` until
+[ADR-082](../../../docs/decisions/ADR-082-the-olap-seam-lives-in-the-packages.md);
+none of it ever referenced an order. The drill request's wire codec is the one
+piece that is **not** here: it is `@lcabrera/api`'s `olap/`, because the encoder
+runs in the browser.
+
 ---
 
 ## `src/errors/`

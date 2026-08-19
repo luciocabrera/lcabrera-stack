@@ -160,7 +160,9 @@ vi.mock('../contexts/TableData/data/selectors', () => ({
 vi.mock(
   '#ui/components/Table/contexts/TableConfig/expansion/selectors',
   () => ({
+    useGetTableCanDrillGroups: () => false,
     useGetTableCollapsedGroupPaths: useGetTableCollapsedGroupPathsMock,
+    useGetTableDrilledGroups: () => new Map(),
   }),
 );
 

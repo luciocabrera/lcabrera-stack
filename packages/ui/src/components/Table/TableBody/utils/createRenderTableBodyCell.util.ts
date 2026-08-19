@@ -3,6 +3,7 @@ import type {
   DataKey,
   PinnedColumnInfo,
   TableColumn,
+  TableDrillRowMarker,
   TableGroupRowSummary,
 } from '#ui/components/Table/Table.types';
 import type { TableGroupDisclosureState } from '#ui/components/Table/TableGroupDisclosure';
@@ -31,6 +32,8 @@ type RenderBodyCellArgs<TData extends Record<string, unknown>> = {
   readonly col: TableColumn<TData>;
   /** The row's place in the tree, when it is a group row — per row, like the summary. */
   readonly disclosure?: TableGroupDisclosureState;
+  /** The row's drill marker, when it is grid chrome — per row, like the summary. */
+  readonly drillRow?: TableDrillRowMarker;
   /** The row's group summary, when it has one — per row, like the row itself. */
   readonly groupSummary?: TableGroupRowSummary;
   readonly row: TData;
@@ -57,6 +60,7 @@ export const createRenderTableBodyCell =
     carriedGroupKeys,
     col,
     disclosure,
+    drillRow,
     groupSummary,
     row,
     rowIndex,
@@ -67,6 +71,7 @@ export const createRenderTableBodyCell =
       col,
       columnSizing,
       disclosure,
+      drillRow,
       groupingKeys,
       groupSummary,
       isLoadingState,

@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from 'vite-plus/test';
 
-import type { TableGroupKeyValue } from '#ui/components/Table/Table.types';
+import type {
+  TableGroupDrill,
+  TableGroupKeyValue,
+} from '#ui/components/Table/Table.types';
 
 import { resolveGroupPathKey } from '#ui/components/Table/contexts/TableConfig/grouping/utils/resolveGroupPathKey.util';
 import { TABLE_GROUP_ROW_FIELD } from '#ui/components/Table/Table.constants';
@@ -52,6 +55,14 @@ const rows: readonly Row[] = [
 ];
 
 const noneCollapsed = new Set<string>();
+
+const drilled = (rowsIn: readonly Row[]) =>
+  resolveTableGroupTree({
+    canDrill: true,
+    collapsedGroupPaths: noneCollapsed,
+    data: rowsIn,
+    groupingKeys: ['city', 'status'],
+  });
 
 describe('resolveTableGroupTree', () => {
   it('returns the caller data by reference when the rows are not a tree', () => {
@@ -247,5 +258,140 @@ describe('resolveTableGroupTree', () => {
     });
 
     expect(tree.rows).toHaveLength(rows.length);
+  });
+
+  describe('drillability', () => {
+    it('reports a leaf group drillable and its subtotal not', () => {
+      // The pair is disjoint, and that is the whole point of carrying both. In
+      // a rollup the row owning loaded children is the subtotal — precisely the
+      // row that may not drill — while the leaf that may drill owns nothing
+      // loaded. Reading one off the other puts the affordance on the wrong rows
+      // in both directions (ADR-079).
+      // No detail rows beneath the leaf, which is the shape a drill exists for:
+      // the group states a count and holds none of those rows in memory.
+      const { rowMeta } = drilled([groupRow(berlinOpen), subtotalRow(berlin)]);
+
+      expect(rowMeta?.[0]).toMatchObject({
+        hasChildren: false,
+        isDrillable: true,
+      });
+      expect(rowMeta?.[1]).toMatchObject({
+        hasChildren: true,
+        isDrillable: false,
+      });
+    });
+
+    it('refuses an incomplete path, whose children are group rows in memory', () => {
+      const { rowMeta } = drilled([groupRow(berlin), groupRow(berlinOpen)]);
+
+      expect(rowMeta?.[0]?.isDrillable).toBe(false);
+      expect(rowMeta?.[1]?.isDrillable).toBe(true);
+    });
+
+    it('reports nothing drillable when the route serves no drilled page', () => {
+      const { rowMeta } = resolveTableGroupTree({
+        collapsedGroupPaths: noneCollapsed,
+        data: [groupRow(berlinOpen)],
+        groupingKeys: ['city', 'status'],
+      });
+
+      expect(rowMeta?.[0]?.isDrillable).toBe(false);
+    });
+
+    it('leaves a detail row undrillable', () => {
+      const { rowMeta } = drilled([groupRow(berlinOpen), { id: 3 }]);
+
+      expect(rowMeta?.[1]?.isDrillable).toBe(false);
+    });
+  });
+
+  describe('splicing a drilled page', () => {
+    const leafKey = resolveGroupPathKey(berlinOpen);
+    const spliced = ({
+      collapsed = noneCollapsed,
+      drill,
+    }: {
+      readonly collapsed?: ReadonlySet<string>;
+      readonly drill: TableGroupDrill;
+    }) =>
+      resolveTableGroupTree({
+        canDrill: true,
+        collapsedGroupPaths: collapsed,
+        data: [groupRow(berlinOpen), subtotalRow(berlin)],
+        drilledGroups: new Map([[leafKey, drill]]),
+        groupingKeys: ['city', 'status'],
+      });
+
+    it('keeps rows and rowMeta the same length in every fetch state', () => {
+      // The identity `TableBody` sizes `<tbody>` from is over `rows.length`, and
+      // the focus model indexes both arrays by the same number — so a splice
+      // that fed one and not the other would desynchronise the declared height
+      // from what is painted, silently.
+      for (const drill of [
+        { rows: [], status: 'loading' },
+        { rows: [], status: 'failed' },
+        { rows: [{ id: 3 }], status: 'loaded' },
+      ] satisfies TableGroupDrill[]) {
+        const { rowMeta, rows } = spliced({ drill });
+
+        expect(rows).toHaveLength(rowMeta?.length ?? -1);
+      }
+    });
+
+    it('puts the page directly under its group, one level deeper', () => {
+      const { rowMeta, rows } = spliced({
+        drill: { rows: [{ id: 3 }, { id: 4 }], status: 'loaded' },
+      });
+
+      expect(rows).toHaveLength(4);
+      expect(rows[1]).toStrictEqual({ id: 3 });
+      expect(rowMeta?.[1]?.level).toBe((rowMeta?.[0]?.level ?? 0) + 1);
+    });
+
+    it('reports a drillable leaf collapsed until something is asked for', () => {
+      // Its collapsed-set membership says nothing on its own: an untouched group
+      // is not in that set, so reading expansion from it alone would report
+      // every leaf open with nothing under it.
+      const { rowMeta } = resolveTableGroupTree({
+        canDrill: true,
+        collapsedGroupPaths: noneCollapsed,
+        data: [groupRow(berlinOpen)],
+        groupingKeys: ['city', 'status'],
+      });
+
+      expect(rowMeta?.[0]).toMatchObject({
+        isDrillable: true,
+        isExpanded: false,
+      });
+    });
+
+    it('reports it expanded once a page has been asked for', () => {
+      expect(
+        spliced({ drill: { rows: [{ id: 3 }], status: 'loaded' } })
+          .rowMeta?.[0],
+      ).toMatchObject({ isExpanded: true });
+    });
+
+    it('hides a drilled page while its group is collapsed', () => {
+      const { rows } = spliced({
+        collapsed: new Set([leafKey]),
+        drill: { rows: [{ id: 3 }], status: 'loaded' },
+      });
+
+      expect(rows).toHaveLength(2);
+    });
+
+    it('splices nothing when the route serves no drilled page', () => {
+      const { rows } = resolveTableGroupTree({
+        collapsedGroupPaths: noneCollapsed,
+        data: [groupRow(berlinOpen), subtotalRow(berlin)],
+        drilledGroups: new Map([
+          [leafKey, { rows: [{ id: 3 }], status: 'loaded' }],
+        ]),
+        groupingKeys: ['city', 'status'],
+      });
+
+      expect(rows).toHaveLength(2);
+    });
   });
 });

@@ -374,6 +374,30 @@ export type TableDataState<TData> = {
 
 export type TableDensity = 'comfortable' | 'compact';
 
+export type TableDrillRow = Record<'tableDrill', TableDrillRowMarker>;
+
+/**
+ * What a grid-created drill row says.
+ *
+ * `failed` is one member and carries no reason: a refusal and a timeout differ
+ * to the server and not to the reader of one group row (ADR-079, amended).
+ */
+export type TableDrillRowKind = 'failed' | 'handoff' | 'loading';
+
+export type TableDrillRowMarker = {
+  /**
+   * `handoff` carries the shortfall — how many of the group's rows the fetched
+   * page did **not** include. It is `summary.count` minus the page, computed
+   * where both are known rather than recomputed at the cell.
+   */
+  readonly kind: TableDrillRowKind;
+  /** The group's own path, so a hand-off can rebuild the drill's filters. */
+  readonly path: readonly TableGroupKeyValue[];
+  /** The group this row belongs to, keyed as `resolveGroupPathKey` encodes it. */
+  readonly pathKey: string;
+  readonly shortfall: number;
+};
+
 /**
  * The focus store's state — where the grid's single tab stop points (ADR-062).
  *
@@ -454,6 +478,72 @@ export type TableGroupAggregateValue = {
  * type is the URL codec's and the loader's, and everything in it crosses the
  * single-fetch boundary where a `Set` cannot go (ADR-009).
  */
+/**
+ * One group's drilled page: the rows fetched for it, and how far that fetch got.
+ *
+ * `rows` is empty while `loading` and holds the page once `loaded` — the two
+ * travel together because a renderer asking "what do I paint under this group"
+ * needs both answers from one read, and a status without its rows invites a
+ * splice that reads them from somewhere else.
+ */
+export type TableGroupDrill = {
+  /** Empty while `loading` and after `failed`; the fetched page once `loaded`. */
+  readonly rows: readonly Record<string, unknown>[];
+  readonly status: TableGroupDrillStatus;
+};
+
+/**
+ * A row the **grid** creates to say something about a drill, rather than one a
+ * read returned (ADR-079).
+ *
+ * It is a row and not an overlay, and that is the height invariant rather than a
+ * stylistic call: `TableBody` sizes `<tbody>` from `rows.length` times the
+ * store's `rowHeight`, so anything occupying vertical space has to be in that
+ * array and paint at that height. A banner outside it desynchronises the
+ * declared height from what is painted, which is the defect ADR-065 removed for
+ * group rows and this must not reintroduce for drill chrome.
+ */
+/**
+ * What a route supplies so a group can fetch its own rows (ADR-079).
+ *
+ * A function rather than a serializable descriptor, and the asymmetry with
+ * `filterOptionsDescriptor` (ADR-009) is deliberate: that one travels **through
+ * the loader**, where single-fetch encoding silently replaces a function with
+ * `undefined`. This is a prop on a client component, exactly like `onLoadMore`,
+ * so it never crosses that boundary.
+ *
+ * It resolves to the group's rows or rejects. A rejection is one state here — a
+ * refusal and a timeout differ to the route and not to the reader of one group
+ * row — so the reason is not part of the contract.
+ */
+export type TableGroupDrillFetcher = (
+  args: TableGroupDrillRequest,
+) => Promise<readonly Record<string, unknown>[]>;
+
+/** The group a drill names: its complete path, and the keys it is complete against. */
+export type TableGroupDrillRequest = {
+  readonly groupingKeys: readonly string[];
+  readonly path: readonly TableGroupKeyValue[];
+};
+
+/**
+ * How far a group's drill has got (ADR-079, amended 2026-08-19).
+ *
+ * A group with no entry is `idle` — nothing has been asked for — so the union
+ * names only the states a drill actually occupies once it has been.
+ *
+ * **`failed` carries no reason.** A refusal and a timeout differ to the server
+ * and not to the reader of one group row, and a state that fans out per cause
+ * is one every renderer has to exhaust. What the row needs to say is that the
+ * rows were asked for and did not arrive.
+ *
+ * **`failed` is not terminal; `loaded` is.** Toggling a failed group re-enters
+ * `loading`, which is the retry — deliberate, and asked for. Returning it to
+ * `idle` instead would leave a chevron that appears to do nothing, so the next
+ * click repeats the same failing request: a retry loop the interface invited.
+ */
+export type TableGroupDrillStatus = 'failed' | 'loaded' | 'loading';
+
 export type TableGroupExpansionState = {
   /**
    * Group paths whose subtree is **hidden** — the tree's expansion state, held
@@ -469,6 +559,21 @@ export type TableGroupExpansionState = {
    * survive a sort (ADR-061).
    */
   readonly collapsedGroupPaths: ReadonlySet<string>;
+  /**
+   * Per-group drilled rows and fetch state, keyed by the same
+   * `resolveGroupPathKey` string the collapsed set uses (ADR-079).
+   *
+   * A group with no entry is `idle`: nothing has been asked for. Storing the
+   * absence rather than an explicit `idle` entry is what keeps an ungrouped or
+   * undrilled table's expansion state empty, which is the state that costs
+   * nothing to derive.
+   *
+   * `loaded` is **terminal**. A drill fetches one bounded page and never pages
+   * again, so there is no state for "loading more" — where the group holds more
+   * rows than the page, the answer is the hand-off row, not another request.
+   * `failed` is not terminal: toggling the group retries it.
+   */
+  readonly drilledGroups: ReadonlyMap<string, TableGroupDrill>;
 };
 
 /**
@@ -719,6 +824,13 @@ export type TableMetaState = {
    * means off — an endpoint that cannot group would be asked for a shape it
    * does not produce.
    */
+  /**
+   * Endpoint capability (ADR-063): the route serves a drilled page, so a leaf
+   * group offers the affordance that fetches its rows (ADR-079). Absent means
+   * off — a route with no drill endpoint would otherwise show a chevron whose
+   * every use fails.
+   */
+  readonly isGroupDrillEnabled?: boolean;
   readonly isGroupingEnabled?: boolean;
   /**
    * Endpoint capability (ADR-063): the load-more sends the last loaded row as a

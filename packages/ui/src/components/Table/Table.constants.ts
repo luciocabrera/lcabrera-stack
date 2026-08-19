@@ -1,5 +1,8 @@
+import { OLAP_GROUP_ROW_FIELD } from '@lcabrera/api/olap/olap.constants';
+
 import type {
   TableAggregateFn,
+  TableDrillRow,
   TableGroupingMode,
   TableGroupKeyRefusalReason,
   TableGroupRow,
@@ -69,13 +72,26 @@ export const ACTIONS_COLUMN_KEY = 'actions';
  * Deliberately not a column key and not derived from one: a grouped row carries
  * its summary beside the group key's own value, so the renderer asks the row
  * what it is instead of asking the grouping configuration what every row must
- * be. It is exported because the route's server-side read is what writes it.
+ * be.
  *
- * Typed `keyof TableGroupRow` rather than left to infer, so renaming the field
- * in one place and not the other is a compile error rather than a group header
- * that silently stops rendering.
+ * The literal comes from `@lcabrera/api`: a route's server-side read is what
+ * writes this field, so the name belongs to the wire rather than to either end
+ * (ADR-082). The `keyof TableGroupRow` annotation stays here and is the guard —
+ * a compile error the moment the wire name and this package's row shape
+ * disagree.
  */
-export const TABLE_GROUP_ROW_FIELD: keyof TableGroupRow = 'tableGroup';
+export const TABLE_GROUP_ROW_FIELD: keyof TableGroupRow = OLAP_GROUP_ROW_FIELD;
+
+/**
+ * The row field the **grid** attaches its drill chrome to — the loading state, a
+ * failure, and the hand-off past one page (ADR-079).
+ *
+ * Separate from `TABLE_GROUP_ROW_FIELD` rather than a further `kind` on it: that
+ * field is a **read's** output and this one never comes from a server, so
+ * sharing it would let a malformed response claim to be grid chrome. The reader
+ * asks the row which it is, exactly as it does for group rows.
+ */
+export const TABLE_DRILL_ROW_FIELD: keyof TableDrillRow = 'tableDrill';
 
 /**
  * How many group keys may be applied at once. A **duplicate** of
@@ -163,6 +179,24 @@ export const TABLE_GROUP_FILTERED_AGGREGATE_LABEL =
  * shallower indentation a subtotal sits at.
  */
 export const TABLE_GROUP_SUBTOTAL_SUFFIX = 'total';
+
+/**
+ * What a drill row says while its page is in flight.
+ *
+ * A drill fetches once and the row paints at the store's `rowHeight` like every
+ * other row, so this is one short line rather than a skeleton of the page to
+ * come — the page's size is not known until it arrives (ADR-079).
+ */
+export const TABLE_DRILL_LOADING_LABEL = 'Loading rows…';
+
+/**
+ * What a failed drill says. It names no cause: a refusal and a timeout differ to
+ * the server and not to the reader of one group row (ADR-079, amended). It names
+ * the gesture that retries instead, because `failed` is not terminal and nothing
+ * else on the row says so.
+ */
+export const TABLE_DRILL_FAILED_LABEL =
+  'Could not load these rows — close and reopen the group to try again';
 
 /**
  * The grouping modes in **menu order**, which a `Record` cannot express — the

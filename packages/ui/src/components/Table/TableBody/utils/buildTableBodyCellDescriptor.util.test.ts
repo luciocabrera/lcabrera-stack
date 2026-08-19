@@ -10,6 +10,7 @@ import type {
 import { DEFAULT_MIN_COLUMN_WIDTH } from '#ui/components/Table/Table.constants';
 
 import { buildTableBodyCellDescriptor } from './buildTableBodyCellDescriptor.util';
+import { EMPTY_CELL } from './resolveGroupCellChildren.util';
 
 type Row = {
   readonly amount?: number;
@@ -132,5 +133,55 @@ describe('buildTableBodyCellDescriptor', () => {
       value: '',
       width: 90,
     });
+  });
+});
+
+describe('buildTableBodyCellDescriptor — drill chrome rows', () => {
+  const DRILL_MARKER = {
+    kind: 'loading',
+    path: [{ columnKey: 'name', label: 'Ana', value: 'Ana' }],
+    pathKey: 'name:Ana',
+    shortfall: 0,
+  } as const;
+
+  const build = (key: RowKey) =>
+    buildTableBodyCellDescriptor({
+      carriedGroupKeys: new Set<string>(),
+      col: { key, label: String(key) } as TableColumn<Row>,
+      columnSizing: {} as ColumnSizingState<Row>,
+      drillRow: DRILL_MARKER,
+      groupingKeys: ['name'],
+      isLoadingState: false,
+      pinnedOffsets: {} as Record<RowKey, PinnedColumnInfo>,
+      row: {},
+      rowIndex: ROW_INDEX,
+      rowKey: ROW_KEY,
+    });
+
+  it('renders chrome in the first group-key column rather than blanking it', () => {
+    // The branch has to precede the detail-row blanking below it: a drill row
+    // carries neither a summary nor data, so the blanking rule would empty the
+    // one column its chrome goes in — and the row would occupy full height
+    // saying nothing.
+    const descriptor = build('name');
+
+    // Compared against `EMPTY_CELL` rather than against `undefined`: the
+    // blanking branch also returns a `custom` descriptor with defined
+    // `children`, so an `undefined` check would pass either way.
+    expect(descriptor.kind).toBe('custom');
+    expect(
+      'children' in descriptor ? descriptor.children : undefined,
+    ).not.toEqual(EMPTY_CELL);
+  });
+
+  it('keeps every cell of the row, so the gridcell count never varies', () => {
+    // One filled cell and a row of empty ones — not a colSpan (ADR-062).
+    const descriptor = build('amount');
+
+    expect(descriptor.kind).toBe('custom');
+    expect(descriptor.columnKey).toBe('amount');
+    expect('children' in descriptor ? descriptor.children : undefined).toEqual(
+      EMPTY_CELL,
+    );
   });
 });

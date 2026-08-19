@@ -76,6 +76,20 @@ GroupSort [type] { readonly aggregateAlias: string; readonly direction: 'asc' | 
 ## ./db/insert-row.util
 insertRow [const] <TRow extends QueryResultRow>({ tx, ...descriptor }: ExecutorOptions & InsertQueryDescriptor) => Promise<readonly TRow[]>
 
+## ./db/olap/olap.types
+OlapDrillRead [type] { readonly filters: readonly QueryFilter[]; readonly includeTotal: boolean; readonly limit: number; readonly offset: number; readonly sort: readonly QuerySort[]; }
+OlapDrillRefusal [type] 'grand-total' | 'incomplete-path' | 'subtotal'
+OlapDrillTranslation [type] { readonly kind: 'drillable'; readonly read: OlapDrillRead; } | { readonly kind: 'refused'; readonly reason: OlapDrillRefusal; }
+
+## ./db/olap/to-drill-read.util
+toDrillRead [const] ({ filters, group, groupKeys, limit, maxLimit, primaryKey, sort }: ToDrillReadArgs) => OlapDrillTranslation
+
+## ./db/olap/to-group-label.util
+toGroupLabel [const] (value: unknown) => string
+
+## ./db/olap/to-group-row.util
+toGroupRow [const] ({ aggregates, columnKeys, countAlias, maskAlias, row }: ToGroupRowArgs) => { tableGroup: { aggregates: { columnKey: string; fn: AggregateFn; value: unknown; }[]; count: number; isSubtotal: boolean; path: { columnKey: string; label: string; value: unknown; }[]; }; }
+
 ## ./db/query-builder/build-count-query.util
 buildCountQuery [const] ({ allowedColumns, column, filters, schema, table }: CountQueryDescriptor) => BuiltQuery
 

@@ -10,9 +10,13 @@ import type { TableGroupExpansionState } from '#ui/components/Table/Table.types'
  * and inventing a default depth here would make the recipient's grid differ
  * from the sender's for no stated reason.
  *
- * A fresh `Set` per call, never a shared constant: two tables mounted at once
- * would otherwise collapse each other's groups.
+ * Nothing is drilled either: a drill is a second read, asked for by expanding a
+ * leaf group, so a cold load has none by definition (ADR-079).
+ *
+ * A fresh `Set` and `Map` per call, never shared constants: two tables mounted
+ * at once would otherwise collapse and drill each other's groups.
  */
 export const getInitialExpansionState = (): TableGroupExpansionState => ({
   collapsedGroupPaths: new Set<string>(),
+  drilledGroups: new Map(),
 });

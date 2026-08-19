@@ -281,7 +281,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
     it('formats the key types Postgres actually returns for this table', async () => {
       // `pg` hands back a boolean for `bool`, a number for `int4`, a string for
       // `numeric` and a `Date` for `date`. Each takes a different branch of
-      // `toOrderGroupLabel`, and only a live read proves which branch is
+      // `toGroupLabel`, and only a live read proves which branch is
       // reachable — a fixture would just restate the branch it was written for.
       for (const key of [
         'is_vip_customer',
