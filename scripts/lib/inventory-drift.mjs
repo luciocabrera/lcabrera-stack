@@ -1,6 +1,7 @@
 /**
  * Pure half of the inventory-drift gate: which `*.util.ts`/`*.util.tsx`
- * exports are missing from their package's own `INVENTORY.md`.
+ * VALUE exports (`export const`/`export function`) are missing from their
+ * package's own `INVENTORY.md`.
  *
  * Scope is deliberately narrow. `INVENTORY.md` in `packages/ui/src`,
  * `packages/server/src` and `apps/react-router/src` differ on purpose —
@@ -9,9 +10,11 @@
  * appears in backticks somewhere in the file", not "the symbol has a row".
  * That rule was proven by the audit that closed #579/#811, and its own
  * retrospective is what asked for this gate. Hooks, constants, types and
- * components are NOT covered: those sections are curated by design (the
- * `ui` Types table is headed "Key Exports", not "Exports"), so a completeness
- * rule there would misreport correct documentation as drift. See #817.
+ * components are NOT covered — including a `export type`/`export interface`
+ * sitting inside an otherwise-governed `.util.ts` file — because those
+ * sections are curated by design (the `ui` Types table is headed "Key
+ * Exports", not "Exports"), so a completeness rule there would misreport
+ * correct documentation as drift. See #817.
  */
 
 /** Each tree this gate covers, and the `INVENTORY.md` that documents it. */

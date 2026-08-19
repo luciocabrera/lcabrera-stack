@@ -1,6 +1,8 @@
 /**
- * Fails the build when a `*.util.ts`/`*.util.tsx` export is not named
- * anywhere in its package's own `INVENTORY.md`.
+ * Fails the build when a `*.util.ts`/`*.util.tsx` value export (`export
+ * const`/`export function` — a type-only export is out of scope, see
+ * `lib/inventory-drift.mjs`) is not named anywhere in its package's own
+ * `INVENTORY.md`.
  *
  * Why this exists: AGENTS.md § "Reuse Before You Build" makes the three
  * inventories (`packages/ui/src`, `packages/server/src`,
@@ -21,8 +23,9 @@
  *   node scripts/verify-inventory.mjs            check, exit 1 on new drift
  *   node scripts/verify-inventory.mjs --write     regenerate the baseline
  *
- * Exit codes: 0 = every export is documented or grandfathered, 1 = a new,
- * undocumented export exists, or the tracked file list could not be read.
+ * Exit codes: 0 = every value export is documented or grandfathered, 1 = a
+ * new, undocumented value export exists, or the tracked file list could not
+ * be read.
  */
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';

@@ -231,11 +231,12 @@ jobs:
         # AGENTS.md makes the three INVENTORY.md files mandatory reading before
         # writing anything new, but nothing failed when an artifact was added
         # without its entry — closing #579 found nineteen such gaps, some a year
-        # old. This checks that every *.util.ts/*.util.tsx export is named (in
-        # backticks, not necessarily its own row — packages/server documents
-        # private helpers in prose) somewhere in its tree's INVENTORY.md.
-        # Pre-existing gaps beyond what #811 already closed are grandfathered in
-        # scripts/inventory-drift-baseline.json. See #817.
+        # old. This checks that every *.util.ts/*.util.tsx VALUE export
+        # (export const/export function — a type-only export is out of scope)
+        # is named (in backticks, not necessarily its own row — packages/server
+        # documents private helpers in prose) somewhere in its tree's
+        # INVENTORY.md. Pre-existing gaps beyond what #811 already closed are
+        # grandfathered in scripts/inventory-drift-baseline.json. See #817.
         run: vp run inventory:verify
 
       - name: ADR homes, numbering and indexes
