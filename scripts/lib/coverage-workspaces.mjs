@@ -66,6 +66,10 @@ export const COVERAGE_REPORT_WORKSPACES = [
   // configuration. The runners themselves shell out to lint tools and are
   // exercised by running them, not by a unit suite.
   { dir: 'packages/scan-report', name: '@repo/scan-report', run: true },
+  // Reference extraction, path classification and the manifest state machine
+  // are pure; the filesystem is reached only by the thin command shells around
+  // them, so the suite runs without one.
+  { dir: 'packages/devkit', name: '@repo/devkit', run: true },
   // The shell fragment the `start` task emits, and the React Router asset
   // plugin folded in from `@repo/plugins` — the plugin's filesystem calls are
   // an injected seam, so its suite runs against an in-memory one (ADR-069).
@@ -86,6 +90,7 @@ export const COVERAGE_REPORT_WORKSPACES = [
  */
 export const COVERAGE_MERGE_WORKSPACES = [
   { dir: 'packages/api', name: '@lcabrera/api' },
+  { dir: 'packages/devkit', name: '@repo/devkit' },
   { dir: 'packages/eslint-local-rules', name: '@lcabrera/eslint-plugin' },
   { dir: 'packages/node-runtime', name: '@lcabrera/node' },
   { dir: 'packages/scan-report', name: '@repo/scan-report' },

@@ -244,6 +244,17 @@ export const configs = [
     ),
   },
   {
+    // Genuinely Node-only: a CLI that copies files into a consumer repository
+    // and hashes what it wrote. Same shape as the scanners below — plain `.mjs`
+    // under scripts/, so what tsc checks is the hand-written `.d.mts`
+    // declarations and this workspace's own vite.config.ts.
+    config: createNodeTsConfig({
+      include: ['scripts', 'vite.config.ts'],
+      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
+    }),
+    filePath: path.resolve(workspaceRoot, 'packages/devkit/tsconfig.app.json'),
+  },
+  {
     // Genuinely Node-only: CLI scanners spawning lint/analysis tools. They live
     // under scripts/, the directory both shared eslint configs globally ignore,
     // because that is where this repo puts tooling scripts (.claude/rules/

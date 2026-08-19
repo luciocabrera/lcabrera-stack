@@ -133,7 +133,7 @@ project-specific belongs in that project's own `package.json`.
 | `vp run ready`               | `check:safe` + `build:all` — the full "is it shippable" check                                     |
 | `vp run check:safe`          | typegen → `vp check` → typecheck → eslint → biome → tests                                         |
 | `vp run check:push`          | the DB-free CI Quality Gate (no tests/fallow) — the `pre-push` hook runs this then `test:changed` |
-| `vp run typecheck:all`       | real tsc in all 11 workspaces, dependency order                                                   |
+| `vp run typecheck:all`       | real tsc in all 12 workspaces, dependency order                                                   |
 | `vp run typecheck:changed`   | real tsc for the changed workspaces + dependents only — see below                                 |
 | `vp run typegen:all`         | route types for both React Router apps                                                            |
 | `vp run lint:all`            | Oxlint + eslint + Biome **with autofix**, every workspace                                         |
@@ -180,7 +180,7 @@ Tests job (and its coverage report) scope to the diff on pull requests; pushes t
 `main` still run the full `test:ci`.
 
 `typecheck:changed` applies the same change-based selection to the Quality Gate's
-slowest per-workspace step — real `tsc` across all 11 workspaces. It runs
+slowest per-workspace step — real `tsc` across all 12 workspaces. It runs
 `typecheck` only for the changed workspaces plus their dependents (a type error a
 diff introduces surfaces where the type is used, which the dependents walk covers),
 falling back to the full run on the same shared/root triggers and on pushes to
@@ -445,6 +445,9 @@ is believed — the same property [`deps:audit`](#dependencies) is built around.
 | `vp run adr:verify`          | check ADR home, filename, heading and number uniqueness, and that each home's index is current; prints the next free number (`--write` regenerates the indexes)                                      |
 | `vp run adr:new`             | scaffold an ADR from [`_TEMPLATE.md`](docs/decisions/_TEMPLATE.md) with the next free number — `-- "<title>" [--home repo\|app] [--slug <s>] [--dry-run]`                                            |
 | `vp run adr:list`            | print every ADR with its title, per home — the listing each home's index deliberately does not carry ([ADR-075](docs/decisions/ADR-075-the-index-does-not-list-the-adrs.md))                         |
+| `vp run devkit:sync`         | materialise the shipped skills and rules into this repository from [`packages/devkit`](packages/devkit/CLASSIFICATION.md) — a locally modified file is reported and kept, never overwritten          |
+| `vp run devkit:doctor`       | report what differs between this repository's materialised copies and the package; `-- --check` makes a difference fail                                                                              |
+| `vp run devkit:closure`      | measure what a directory references but does not contain — `-- <dir> [<dir> ...]`; the instrument behind the classification table                                                                    |
 | `vp run viteplus:verify`     | check AGENTS.md has no Vite+ managed block rendering content — the markers are removed so `vp install` cannot refill them; this catches them coming back (`--write` re-empties a refilled one)       |
 | `vp run configs:verify`      | check no formatter/linter config file exists that no engine reads — fmt and lint are configured once in the root `vite.config.ts` (ADR-042), so a `.oxfmtrc.json`/`.prettierrc` beside it is a decoy |
 | `vp run skills:validate`     | validate skill definitions                                                                                                                                                                           |
@@ -661,7 +664,7 @@ file under `reports/sonar/runs/` ([ADR-049](docs/decisions/ADR-049-findings-repo
 
 ## 5. Per-workspace tasks
 
-**Every one of the 11 workspaces** defines these seven:
+**Every one of the 12 workspaces** defines these seven:
 
 `format` · `format:check` · `lint` · `lint:check` · `lint:eslint` ·
 `lint:eslint:check` · `typecheck`
@@ -679,6 +682,7 @@ Beyond that, tasks are per-workspace. `build` and `test` are common but come fro
 | `packages/tsconfig`           | `@lcabrera/tsconfig`      | `build`, `test:coverage`                                                                                               |
 | `packages/eslint-local-rules` | `@lcabrera/eslint-plugin` | —                                                                                                                      |
 | `packages/scan-report`        | `@repo/scan-report`       | `test`, `test:coverage`                                                                                                |
+| `packages/devkit`             | `@repo/devkit`            | `test`, `test:coverage`                                                                                                |
 | `packages/utils`              | `@lcabrera/utils`         | —                                                                                                                      |
 | `packages/vite-configs`       | `@lcabrera/vite-config`   | `build`, `test`, `test:coverage`                                                                                       |
 
