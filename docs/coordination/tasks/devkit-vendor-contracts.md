@@ -13,7 +13,7 @@ area:
 started: 2026-08-19
 updated: 2026-08-19
 plan: (none)
-pr: '#805'
+pr: '#804'
 issue: #797
 ---
 
