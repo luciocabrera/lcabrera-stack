@@ -68,11 +68,16 @@ const readableString = (value, fallback) =>
  * only joined onto a root: the ADR gate decides whether a file is a stray by
  * asking whether its directory is in the set of configured homes. Declare that
  * home as `docs/decisions/` rather than `docs/decisions` and every ADR in it is
- * reported as a stray — 66 passing became 54 violations, from a trailing slash.
+ * reported as a stray — from a trailing slash.
  */
 const canonical = (candidate) => {
+  // `normalize` has already collapsed any run of separators, so at most one
+  // trailing slash can be left — stripped by hand because the regex that does
+  // it rescans from every offset (Sonar S8786).
   const normalised = normalize(candidate.replaceAll('\\', '/'));
-  const trimmed = normalised.replace(/\/+$/, '');
+  const trimmed = normalised.endsWith('/')
+    ? normalised.slice(0, -1)
+    : normalised;
   return trimmed === '' ? '.' : trimmed;
 };
 

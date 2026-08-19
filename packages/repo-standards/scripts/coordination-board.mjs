@@ -50,7 +50,7 @@ export const renderBoard = (tasks, branches) => {
   const hasTasks = tasks.some(({ data }) => data !== undefined);
   const hasBranches = branches.some(({ data }) => data !== undefined);
   if (!hasTasks && !hasBranches) {
-    return `${HEADER}_No active tasks. Claim one by copying the register's \`_TEMPLATE.md\`._\n`;
+    return `${HEADER}_No active tasks. Claim one by copying the task \`_TEMPLATE.md\`._\n`;
   }
 
   const tasksSection = hasTasks
