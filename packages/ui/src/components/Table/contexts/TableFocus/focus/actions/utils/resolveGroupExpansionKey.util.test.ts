@@ -4,6 +4,7 @@ import { resolveGroupExpansionKey } from './resolveGroupExpansionKey.util';
 
 const groupRow = {
   hasChildren: true,
+  isDrillable: false,
   isGroupRow: true,
 };
 
@@ -49,6 +50,7 @@ describe('resolveGroupExpansionKey', () => {
     expect(
       resolveGroupExpansionKey({
         hasChildren: false,
+        isDrillable: false,
         isExpanded: false,
         isGroupRow: false,
         key: 'ArrowRight',
@@ -60,6 +62,7 @@ describe('resolveGroupExpansionKey', () => {
     expect(
       resolveGroupExpansionKey({
         hasChildren: false,
+        isDrillable: false,
         isExpanded: true,
         isGroupRow: true,
         key: 'ArrowLeft',
@@ -73,5 +76,49 @@ describe('resolveGroupExpansionKey', () => {
         resolveGroupExpansionKey({ ...groupRow, isExpanded: false, key }),
       ).toBeUndefined();
     }
+  });
+});
+
+describe('resolveGroupExpansionKey — a drillable leaf', () => {
+  // It owns no loaded children, so `hasChildren` is false; pressing Right on it
+  // fetches its rows, which is the same gesture the chevron performs. The two
+  // flags are disjoint in a rollup, so neither substitutes for the other
+  // (ADR-079).
+  const drillableLeaf = {
+    hasChildren: false,
+    isDrillable: true,
+    isGroupRow: true,
+  };
+
+  it('expands on Right even with no loaded children', () => {
+    expect(
+      resolveGroupExpansionKey({
+        ...drillableLeaf,
+        isExpanded: false,
+        key: 'ArrowRight',
+      }),
+    ).toBe('expand');
+  });
+
+  it('collapses an open drill on Left', () => {
+    expect(
+      resolveGroupExpansionKey({
+        ...drillableLeaf,
+        isExpanded: true,
+        key: 'ArrowLeft',
+      }),
+    ).toBe('collapse');
+  });
+
+  it('leaves a leaf that is neither alone', () => {
+    expect(
+      resolveGroupExpansionKey({
+        hasChildren: false,
+        isDrillable: false,
+        isExpanded: false,
+        isGroupRow: true,
+        key: 'ArrowRight',
+      }),
+    ).toBeUndefined();
   });
 });

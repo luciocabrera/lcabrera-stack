@@ -1,5 +1,7 @@
 import type { TableGroupRowSummary } from '#ui/components/Table/Table.types';
 
+import { isDrillableGroupPath } from './isDrillableGroupPath.util';
+
 type IsDrillableGroupRowArgs = {
   /** Whether the route serves a drilled page at all (ADR-063). */
   readonly canDrill: boolean;
@@ -36,8 +38,6 @@ export const isDrillableGroupRow = ({
   groupingKeys,
   summary,
 }: IsDrillableGroupRowArgs) =>
-  canDrill &&
   summary !== undefined &&
   !summary.isSubtotal &&
-  summary.path.length > 0 &&
-  summary.path.length === groupingKeys.length;
+  isDrillableGroupPath({ canDrill, groupingKeys, path: summary.path });

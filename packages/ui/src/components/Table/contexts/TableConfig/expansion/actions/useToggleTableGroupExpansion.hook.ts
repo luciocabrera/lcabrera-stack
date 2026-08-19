@@ -1,6 +1,8 @@
 import type { TableGroupKeyValue } from '#ui/components/Table/Table.types';
 
 import {
+  isDrillableGroupPath,
+  resolveGroupToggleAction,
   resolveTableGroupTree,
   toggleCollapsedGroupPath,
 } from '#ui/components/Table/contexts/TableConfig/expansion/utils';
@@ -11,6 +13,7 @@ import { moveTableFocusToRow } from '#ui/components/Table/contexts/TableFocus/fo
 import { useTableFocusContextValue } from '#ui/components/Table/contexts/TableFocus/useTableFocusContextValue.hook';
 import { useTableContainerRef } from '#ui/components/Table/contexts/TableWrapper';
 
+import { useDrillTableGroup } from './useDrillTableGroup.hook';
 import { resolveGroupCollapseFocusTarget } from './utils';
 
 /**
@@ -35,10 +38,38 @@ export const useToggleTableGroupExpansion = <
   const { dataStore } = useTableDataContextValue<TData>();
   const { focusStore } = useTableFocusContextValue();
   const containerRef = useTableContainerRef();
+  const drillTableGroup = useDrillTableGroup<TData>();
 
   return (path: readonly TableGroupKeyValue[]) => {
     const { collapsedGroupPaths, drilledGroups } = expansionStore.get();
     const groupPathKey = resolveGroupPathKey(path);
+    const action = resolveGroupToggleAction({
+      drill: drilledGroups.get(groupPathKey),
+      isCollapsed: collapsedGroupPaths.has(groupPathKey),
+      isDrillable: isDrillableGroupPath({
+        canDrill: metaStore.get().isGroupDrillEnabled ?? false,
+        groupingKeys: groupingStore.get().keys,
+        path,
+      }),
+    });
+
+    // A drill leaves the collapsed set alone in the ordinary case — the group
+    // is already expanded, since expansion is held by its complement — and
+    // clears the flag in the retry case, which reaches this from a group the
+    // user folded away (ADR-067, ADR-079).
+    if (action === 'drill') {
+      if (collapsedGroupPaths.has(groupPathKey)) {
+        const reopened = new Set(collapsedGroupPaths);
+
+        reopened.delete(groupPathKey);
+        expansionStore.set({ collapsedGroupPaths: reopened });
+      }
+
+      void drillTableGroup(path);
+
+      return;
+    }
+
     const nextCollapsed = toggleCollapsedGroupPath({
       collapsedGroupPaths,
       pathKey: groupPathKey,

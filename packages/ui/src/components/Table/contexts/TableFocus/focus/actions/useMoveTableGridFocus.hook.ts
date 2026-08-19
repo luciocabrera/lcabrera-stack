@@ -71,6 +71,7 @@ export const useMoveTableGridFocus = <
 
     const expansion = resolveGroupExpansionKey({
       hasChildren: focusedMeta?.hasChildren ?? false,
+      isDrillable: focusedMeta?.isDrillable ?? false,
       isExpanded: focusedMeta?.isExpanded ?? false,
       isGroupRow: hasFocusedCell && focusedGroupPath !== undefined,
       key,

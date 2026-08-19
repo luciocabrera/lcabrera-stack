@@ -26,7 +26,7 @@ describe('TableGroupDisclosure', () => {
   it('toggles the group it names when clicked', () => {
     render(
       <TableGroupDisclosure
-        disclosure={{ hasChildren: true, isExpanded: true }}
+        disclosure={{ hasChildren: true, isDrillable: false, isExpanded: true }}
         path={PATH}
       />,
     );
@@ -41,7 +41,7 @@ describe('TableGroupDisclosure', () => {
   it('states its direction from the row’s expansion', () => {
     const { rerender } = render(
       <TableGroupDisclosure
-        disclosure={{ hasChildren: true, isExpanded: true }}
+        disclosure={{ hasChildren: true, isDrillable: false, isExpanded: true }}
         path={PATH}
       />,
     );
@@ -52,7 +52,11 @@ describe('TableGroupDisclosure', () => {
 
     rerender(
       <TableGroupDisclosure
-        disclosure={{ hasChildren: true, isExpanded: false }}
+        disclosure={{
+          hasChildren: true,
+          isDrillable: false,
+          isExpanded: false,
+        }}
         path={PATH}
       />,
     );
@@ -65,7 +69,11 @@ describe('TableGroupDisclosure', () => {
   it('renders no control on a row with nothing to open', () => {
     render(
       <TableGroupDisclosure
-        disclosure={{ hasChildren: false, isExpanded: false }}
+        disclosure={{
+          hasChildren: false,
+          isDrillable: false,
+          isExpanded: false,
+        }}
         path={PATH}
       />,
     );
@@ -87,7 +95,11 @@ describe('TableGroupDisclosure', () => {
     // thing twice.
     render(
       <TableGroupDisclosure
-        disclosure={{ hasChildren: true, isExpanded: false }}
+        disclosure={{
+          hasChildren: true,
+          isDrillable: false,
+          isExpanded: false,
+        }}
         path={PATH}
       />,
     );

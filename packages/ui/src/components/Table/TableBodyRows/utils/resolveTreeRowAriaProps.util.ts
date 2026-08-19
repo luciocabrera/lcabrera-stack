@@ -20,7 +20,8 @@ export const resolveTreeRowAriaProps = (
   meta === undefined
     ? {}
     : {
-        'aria-expanded': meta.hasChildren ? meta.isExpanded : undefined,
+        'aria-expanded':
+          meta.hasChildren || meta.isDrillable ? meta.isExpanded : undefined,
         'aria-level': meta.level,
         'aria-posinset': meta.posInSet,
         'aria-setsize': meta.setSize,

@@ -24,6 +24,7 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
   children,
   columnsState,
   metaState,
+  onDrillGroup,
 }: TableConfigProviderProps<TData>) => {
   // All three stores seed purely from the loader's URL- and cookie-derived
   // state, so the client renders exactly what the server did — see
@@ -60,6 +61,7 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
     expansionStore,
     groupingStore,
     metaStore,
+    onDrillGroup,
   };
 
   // The context is declared non-generic; useTableConfigContextValue<TData>()

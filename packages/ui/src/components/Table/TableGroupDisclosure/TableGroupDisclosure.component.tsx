@@ -45,7 +45,13 @@ export const TableGroupDisclosure = ({
 }: TableGroupDisclosureProps) => {
   const toggleGroupExpansion = useToggleTableGroupExpansion();
 
-  if (disclosure?.hasChildren !== true) {
+  // Two ways to have something under you, and a rollup makes them disjoint:
+  // the subtotal owns loaded children and may not drill, the leaf may drill and
+  // owns nothing loaded. Either earns the chevron (ADR-079).
+  const isOpenable =
+    disclosure?.hasChildren === true || disclosure?.isDrillable === true;
+
+  if (!isOpenable) {
     return <span {...stylex.props(tableGroupDisclosureStyles.spacer)} />;
   }
 
@@ -53,10 +59,10 @@ export const TableGroupDisclosure = ({
     <span
       {...stylex.props(
         tableGroupDisclosureStyles.control,
-        disclosure.isExpanded && tableGroupDisclosureStyles.expanded,
+        disclosure?.isExpanded === true && tableGroupDisclosureStyles.expanded,
       )}
       aria-hidden='true'
-      data-expanded={disclosure.isExpanded}
+      data-expanded={disclosure?.isExpanded ?? false}
       data-testid='table-group-disclosure'
       onClick={() => toggleGroupExpansion(path)}
     >

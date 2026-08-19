@@ -374,17 +374,6 @@ export type TableDataState<TData> = {
 
 export type TableDensity = 'comfortable' | 'compact';
 
-/**
- * A row the **grid** creates to say something about a drill, rather than one a
- * read returned (ADR-079).
- *
- * It is a row and not an overlay, and that is the height invariant rather than a
- * stylistic call: `TableBody` sizes `<tbody>` from `rows.length` times the
- * store's `rowHeight`, so anything occupying vertical space has to be in that
- * array and paint at that height. A banner outside it desynchronises the
- * declared height from what is painted, which is the defect ADR-065 removed for
- * group rows and this must not reintroduce for drill chrome.
- */
 export type TableDrillRow = Record<'tableDrill', TableDrillRowMarker>;
 
 /**
@@ -501,6 +490,40 @@ export type TableGroupDrill = {
   /** Empty while `loading` and after `failed`; the fetched page once `loaded`. */
   readonly rows: readonly Record<string, unknown>[];
   readonly status: TableGroupDrillStatus;
+};
+
+/**
+ * A row the **grid** creates to say something about a drill, rather than one a
+ * read returned (ADR-079).
+ *
+ * It is a row and not an overlay, and that is the height invariant rather than a
+ * stylistic call: `TableBody` sizes `<tbody>` from `rows.length` times the
+ * store's `rowHeight`, so anything occupying vertical space has to be in that
+ * array and paint at that height. A banner outside it desynchronises the
+ * declared height from what is painted, which is the defect ADR-065 removed for
+ * group rows and this must not reintroduce for drill chrome.
+ */
+/**
+ * What a route supplies so a group can fetch its own rows (ADR-079).
+ *
+ * A function rather than a serializable descriptor, and the asymmetry with
+ * `filterOptionsDescriptor` (ADR-009) is deliberate: that one travels **through
+ * the loader**, where single-fetch encoding silently replaces a function with
+ * `undefined`. This is a prop on a client component, exactly like `onLoadMore`,
+ * so it never crosses that boundary.
+ *
+ * It resolves to the group's rows or rejects. A rejection is one state here — a
+ * refusal and a timeout differ to the route and not to the reader of one group
+ * row — so the reason is not part of the contract.
+ */
+export type TableGroupDrillFetcher = (
+  args: TableGroupDrillRequest,
+) => Promise<readonly Record<string, unknown>[]>;
+
+/** The group a drill names: its complete path, and the keys it is complete against. */
+export type TableGroupDrillRequest = {
+  readonly groupingKeys: readonly string[];
+  readonly path: readonly TableGroupKeyValue[];
 };
 
 /**

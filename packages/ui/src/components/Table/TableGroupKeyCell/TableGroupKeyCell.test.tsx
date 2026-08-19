@@ -35,7 +35,7 @@ const renderCell = ({ columnKey, isCarried = false }: RenderCellArgs) =>
   render(
     <TableGroupKeyCell
       columnKey={columnKey}
-      disclosure={{ hasChildren: true, isExpanded: true }}
+      disclosure={{ hasChildren: true, isDrillable: false, isExpanded: true }}
       groupingKeys={GROUPING_KEYS}
       isCarried={isCarried}
       summary={summaryOf(FULL_PATH)}

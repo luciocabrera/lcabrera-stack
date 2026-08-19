@@ -8,7 +8,11 @@ export type TableRouteViewProps<
   TResponse extends TablePageResponse<TData>,
 > = Pick<
   TableLayoutProps<TData, TResponse>,
-  'actions' | 'dataErrorSelector' | 'dataSelector' | 'dataTotalSelector'
+  | 'actions'
+  | 'dataErrorSelector'
+  | 'dataSelector'
+  | 'dataTotalSelector'
+  | 'onDrillGroup'
 > & {
   /** The route's paginated read — typically a `createPaginatedFetcher` result. */
   readonly fetchPage: (query: PaginatedQuery) => Promise<TResponse>;
