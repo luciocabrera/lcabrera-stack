@@ -11,7 +11,7 @@ area:
 started: 2026-08-19
 updated: 2026-08-19
 plan: (none)
-pr: (none)
+pr: '#808'
 issue: #798
 ---
 
@@ -21,6 +21,8 @@ Extract the publishing and API-surface gates into repo-standards
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: family 3 (publish surface, API surface, attw, release audit and
+  plan) extracted; the roster and the publishing paths are now configuration
 - Blockers: none
-- Next:
+- Next: family 4 — suppressions, docs-paths, script size, stray configs,
+  lint-plugin checks
