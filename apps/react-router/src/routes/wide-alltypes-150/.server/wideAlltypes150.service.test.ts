@@ -74,6 +74,30 @@ afterEach(() => {
   vi.unstubAllEnvs();
 });
 
+describe('a truncated group key on this route too', () => {
+  it('carries the granularity into the read and back into the decode', async () => {
+    // #786 landed on `enterprise-orders` first, and a second route wired to
+    // the same helpers is where "the seam is generic" stops being a claim.
+    // Without this the route silently groups by raw values and hits the
+    // cardinality refusal every date column on this table has.
+    await selectWideAlltypes150Page({
+      grouping: {
+        aggregates: {},
+        keys: ['c_001'],
+        mode: 'flat',
+        periods: { c_001: 'month' },
+      },
+      limit: 10,
+      offset: 0,
+      sorting: [],
+    });
+
+    expect(vi.mocked(selectGroupedRows)).toHaveBeenCalledWith(
+      expect.objectContaining({ periods: { c_001: 'month' } }),
+    );
+  });
+});
+
 describe('selectWideAlltypes150Page', () => {
   it('reads all 150 columns from public.wide_alltypes_150, bounded by the window', async () => {
     await selectWideAlltypes150Page({ limit: 50, offset: 100, sorting: [] });

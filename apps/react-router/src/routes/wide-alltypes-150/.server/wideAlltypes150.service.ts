@@ -69,6 +69,8 @@ export type SelectGroupedWideAlltypes150Args = {
   /** The columns the rows are grouped by, in nesting order. */
   readonly groupKeys: readonly string[];
   readonly groupMode: TableGroupingState['mode'];
+  /** The granularity each temporal key is grouped at, by column (ADR-084). */
+  readonly groupPeriods: TableGroupingState['periods'];
   readonly sort: readonly ColumnSort[];
 };
 
@@ -95,6 +97,7 @@ const selectGroupedWideAlltypes150 = async ({
   aggregates: selectedAggregates,
   groupKeys,
   groupMode,
+  groupPeriods,
   sort,
 }: SelectGroupedWideAlltypes150Args): Promise<WideAlltypes150TableResponse> => {
   const requested: readonly RequestedGroupAggregate[] = Object.entries(
@@ -102,24 +105,26 @@ const selectGroupedWideAlltypes150 = async ({
   ).map(([column, fn]) => ({ column, fn }));
 
   try {
-    const { aggregates, maskAlias, rows, warning } = await selectGroupedRows({
-      ...TARGET,
-      aggregates: toGroupAggregates({ requested }),
-      grouping: groupMode,
-      keys: groupKeys,
-      maxRows: WIDE_ALLTYPES_GROUP_MAX_ROWS,
-      // `resolveQuerySort` is the same adapter the paginated branch uses, so
-      // the two orderings come from one conversion. Its fallback tiebreaker is
-      // harmless here: `toGroupSort` keeps only terms naming a group key, and
-      // the primary key is never one.
-      sort: toGroupSort({
-        groupKeys,
-        sort: resolveQuerySort({
-          fallback: WIDE_ALLTYPES_FALLBACK_SORT,
-          sorting: sort,
+    const { aggregates, maskAlias, rows, truncations, warning } =
+      await selectGroupedRows({
+        ...TARGET,
+        aggregates: toGroupAggregates({ requested }),
+        grouping: groupMode,
+        keys: groupKeys,
+        maxRows: WIDE_ALLTYPES_GROUP_MAX_ROWS,
+        periods: groupPeriods,
+        // `resolveQuerySort` is the same adapter the paginated branch uses, so
+        // the two orderings come from one conversion. Its fallback tiebreaker is
+        // harmless here: `toGroupSort` keeps only terms naming a group key, and
+        // the primary key is never one.
+        sort: toGroupSort({
+          groupKeys,
+          sort: resolveQuerySort({
+            fallback: WIDE_ALLTYPES_FALLBACK_SORT,
+            sorting: sort,
+          }),
         }),
-      }),
-    });
+      });
 
     const data = decodeGroupedRows({
       aggregates,
@@ -127,6 +132,7 @@ const selectGroupedWideAlltypes150 = async ({
       maskAlias,
       requested,
       rows,
+      truncations,
     });
 
     return {
@@ -199,6 +205,7 @@ export const selectWideAlltypes150Page = async ({
       aggregates: grouping.aggregates,
       groupKeys: grouping.keys,
       groupMode: grouping.mode,
+      groupPeriods: grouping.periods,
       sort: sorting,
     });
   }

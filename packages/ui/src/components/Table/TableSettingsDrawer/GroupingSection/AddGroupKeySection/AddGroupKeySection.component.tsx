@@ -7,6 +7,7 @@ import { SidePanelSectionHeader } from '#ui/components/SidePanel';
 import { useGetColumns } from '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
 import { useGetTableGroupingCapabilities } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
+import { resolveGroupKeyAvailability } from '#ui/components/Table/utils/resolveGroupKeyAvailability.util';
 import { VirtualSelect } from '#ui/components/VirtualSelect';
 
 import type { AddGroupKeySectionProps } from './AddGroupKeySection.types';
@@ -59,7 +60,19 @@ export const AddGroupKeySection = ({
   const handleAddGroupKey = () => {
     if (!selectedColumn) return;
 
-    toggleGroupKey(selectedColumn);
+    // The granularity goes on with the key: a column the catalogue refuses raw
+    // is offered only truncated, so adding it without one stages a grouping the
+    // server would refuse (ADR-084). The list above admits such a column for
+    // exactly that reason, from the same resolver.
+    toggleGroupKey({
+      columnKey: selectedColumn,
+      period: resolveGroupKeyAvailability({
+        capability: capabilities[selectedColumn],
+        column: columns.find(
+          (candidate) => String(candidate.key) === selectedColumn,
+        ),
+      }).requiredPeriod,
+    });
     setSelectedColumn('');
   };
 

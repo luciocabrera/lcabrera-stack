@@ -41,6 +41,14 @@ type ResolveGroupKeyAvailabilityArgs<TData> = {
  * for a column that was never going to be on the menu. `undefined` is the
  * honest answer: the endpoint said nothing, and there is nothing to act on.
  *
+ * **A column the catalogue refuses raw can still be offerable**, and reading
+ * `canGroup` alone is what made period grouping unreachable from the UI: a date
+ * column is refused at one group per calendar day and legal at a month, so
+ * filtering it out of the add-key list left the granularity control with no way
+ * to ever be rendered (ADR-084). Such a column comes back groupable with a
+ * `requiredPeriod` — the granularity the caller **must** apply along with the
+ * key, because adding it raw produces a read the server refuses.
+ *
  * It cannot promise the read will succeed. The pre-flight row bound is a
  * property of the whole key combination rather than of any one column, and
  * statistics go stale, so a key that passes here can still be refused when the
@@ -52,10 +60,28 @@ export const resolveGroupKeyAvailability = <TData>({
 }: ResolveGroupKeyAvailabilityArgs<TData>) => {
   const { isGroupable } = resolveColumnCapabilities(column);
 
-  if (!isGroupable) return { isGroupable: false, refusal: undefined };
+  if (!isGroupable) {
+    return {
+      isGroupable: false,
+      refusal: undefined,
+      requiredPeriod: undefined,
+    };
+  }
 
-  if (capability?.canGroup === false)
-    return { isGroupable: false, refusal: capability.refusal };
+  if (capability?.canGroup !== false) {
+    return { isGroupable: true, refusal: undefined, requiredPeriod: undefined };
+  }
 
-  return { isGroupable: true, refusal: undefined };
+  // Refused raw, but legal at a granularity: offerable, and only at one. The
+  // finest on offer is the default because it is the most informative — a
+  // reader can coarsen a month to a year and cannot recover the month from it.
+  const [finest] = capability.periods;
+
+  return finest === undefined
+    ? {
+        isGroupable: false,
+        refusal: capability.refusal,
+        requiredPeriod: undefined,
+      }
+    : { isGroupable: true, refusal: undefined, requiredPeriod: finest };
 };

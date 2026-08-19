@@ -101,7 +101,16 @@ is the one direction an **upper** bound must not be wrong in.
 `ColumnGroupingCapability` gains `periods`, and it is **independent of
 `canGroup`**: a date column is routinely refused as a raw key and legal at a
 month, so a surface reading `canGroup` alone hides the dimension this exists to
-serve. The refusal ladder is otherwise unchanged — `resolveColumnPeriods` runs
+serve — which is not hypothetical. The first version of this change left
+`resolveGroupKeyAvailability` reading `canGroup` alone, so `order_date` never
+appeared in the add-key list, no key could carry a granularity, and the
+granularity control could never render: the whole feature was unreachable
+through the UI while every unit test passed.
+
+**A column offered only truncated is added _with_ its granularity**, in one
+edit. The finest on offer is the default, because a reader can coarsen a month
+into a year and cannot recover the month from one; adding the key without a
+granularity would apply a grouping the server refuses. The refusal ladder is otherwise unchanged — `resolveColumnPeriods` runs
 `refuseGroupKey` with the period's estimate substituted, so role, equality and
 the unique-ish rule do not become negotiable because a granularity was asked for.
 

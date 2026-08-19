@@ -1,10 +1,18 @@
-import type { TableGroupingState } from '#ui/components/Table/Table.types';
+import type {
+  TableGroupingState,
+  TableGroupPeriod,
+} from '#ui/components/Table/Table.types';
 
 import { pruneGroupPeriods } from '#ui/components/Table/contexts/TableConfig/grouping/utils';
 
 type ToggleTableGroupKeyArgs = {
   readonly columnKey: string;
   readonly grouping: TableGroupingState;
+  /**
+   * The granularity to add the key **with**, when the column is only groupable
+   * truncated. Ignored on removal, and absent for an ordinary column.
+   */
+  readonly period?: TableGroupPeriod;
 };
 
 /**
@@ -23,7 +31,14 @@ type ToggleTableGroupKeyArgs = {
  * and grouping by it are independent choices, and silently dropping the first
  * because the second changed would lose a selection the user made elsewhere.
  *
- * Its **granularity** is not, and the asymmetry is the point (#786). A
+ * A key may be **added with** a granularity, and for one kind of column it has
+ * to be: a date refused at one group per calendar day is offered only at a
+ * month or coarser, so adding it raw produces a read the server refuses.
+ * `resolveGroupKeyAvailability` is what says which granularity, and the
+ * surfaces pass it through (ADR-084).
+ *
+ * Its **granularity** is not carried across a removal, and the asymmetry is the
+ * point (#786). A
  * granularity is not an independent choice about the column — it says how that
  * column is grouped, so removing the key leaves it describing nothing. It is
  * also not inert: the server refuses a granularity whose column is not a group
@@ -34,15 +49,21 @@ type ToggleTableGroupKeyArgs = {
 export const toggleTableGroupKey = ({
   columnKey,
   grouping,
+  period,
 }: ToggleTableGroupKeyArgs): TableGroupingState => {
-  const keys = grouping.keys.includes(columnKey)
+  const isRemoval = grouping.keys.includes(columnKey);
+  const keys = isRemoval
     ? grouping.keys.filter((key) => key !== columnKey)
     : [...grouping.keys, columnKey];
+  const pruned = pruneGroupPeriods({ keys, periods: grouping.periods });
 
   return {
     aggregates: grouping.aggregates,
     keys,
     mode: grouping.mode,
-    periods: pruneGroupPeriods({ keys, periods: grouping.periods }),
+    periods:
+      isRemoval || period === undefined
+        ? pruned
+        : { ...pruned, [columnKey]: period },
   };
 };

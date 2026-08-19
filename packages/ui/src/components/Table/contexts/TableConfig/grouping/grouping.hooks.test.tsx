@@ -149,7 +149,7 @@ describe('TableConfig grouping hooks', () => {
     const { result } = renderHook(() => useToggleTableGroupKey());
 
     act(() => {
-      result.current('order_status');
+      result.current({ columnKey: 'order_status' });
     });
 
     expect(persistTableState).toHaveBeenCalledTimes(1);
@@ -166,7 +166,7 @@ describe('TableConfig grouping hooks', () => {
     const { result } = renderHook(() => useToggleTableGroupKey());
 
     act(() => {
-      result.current('shipping_country');
+      result.current({ columnKey: 'shipping_country' });
     });
 
     expect(storesRef.groupingStore.get().keys).toStrictEqual([
@@ -185,7 +185,7 @@ describe('TableConfig grouping hooks', () => {
     const { result } = renderHook(() => useToggleTableGroupKey());
 
     act(() => {
-      result.current('order_status');
+      result.current({ columnKey: 'order_status' });
     });
 
     expect(storesRef.groupingStore.get().keys).toStrictEqual([
@@ -203,7 +203,7 @@ describe('TableConfig grouping hooks', () => {
     const { result } = renderHook(() => useToggleTableGroupKey());
 
     act(() => {
-      result.current('one_too_many');
+      result.current({ columnKey: 'one_too_many' });
     });
 
     expect(storesRef.groupingStore.get().keys).toStrictEqual(appliedKeys);
@@ -252,7 +252,7 @@ describe('TableConfig grouping hooks', () => {
     expect(persistTableState).not.toHaveBeenCalled();
 
     act(() => {
-      result.current('order_status');
+      result.current({ columnKey: 'order_status' });
     });
 
     expect(persistTableState).toHaveBeenCalledTimes(1);
@@ -287,7 +287,7 @@ describe('TableConfig grouping hooks', () => {
     const { result } = renderHook(() => useToggleTableGroupKey());
 
     act(() => {
-      result.current('order_status');
+      result.current({ columnKey: 'order_status' });
     });
 
     expect(storesRef.groupingStore.get().keys).toStrictEqual([]);
@@ -326,7 +326,7 @@ describe('TableConfig grouping hooks', () => {
     const { result } = renderHook(() => useToggleTableGroupKey());
 
     act(() => {
-      result.current('order_status');
+      result.current({ columnKey: 'order_status' });
     });
 
     expect(storesRef.groupingStore.get()).toStrictEqual(NO_GROUPING);

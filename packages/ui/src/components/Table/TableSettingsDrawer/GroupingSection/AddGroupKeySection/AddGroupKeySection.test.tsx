@@ -131,7 +131,10 @@ describe('AddGroupKeySection', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Status' }));
     fireEvent.click(screen.getByRole('button', { name: 'Add' }));
 
-    expect(mockToggleGroupKey).toHaveBeenCalledWith('status');
+    expect(mockToggleGroupKey).toHaveBeenCalledWith({
+      columnKey: 'status',
+      period: undefined,
+    });
     expect(mockToggleGroupKey).toHaveBeenCalledTimes(1);
   });
 

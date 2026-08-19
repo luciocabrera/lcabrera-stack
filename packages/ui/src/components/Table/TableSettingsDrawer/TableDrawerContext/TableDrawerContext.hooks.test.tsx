@@ -149,8 +149,8 @@ describe('TableDrawerContext grouping draft hooks', () => {
     });
 
     act(() => {
-      toggle.current('status');
-      toggle.current('country');
+      toggle.current({ columnKey: 'status' });
+      toggle.current({ columnKey: 'country' });
       setKeys.current(['country', 'status']);
       setAggregate.current({ columnKey: 'total', fn: 'sum' });
     });
@@ -228,7 +228,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
     });
 
     act(() => {
-      result.current('one_too_many');
+      result.current({ columnKey: 'one_too_many' });
     });
 
     expect(groupingStore.get().keys).toStrictEqual(stagedKeys);
