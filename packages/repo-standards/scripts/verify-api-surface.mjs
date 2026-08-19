@@ -60,8 +60,13 @@ const REPO_ROOT = resolveHostRoot({
  * `main` would otherwise have every change measured against a ref that does
  * not exist — which resolves to no base snapshot, and so to no breaking change
  * ever being found.
+ *
+ * Read on use rather than at import, so that a malformed `devkit.config.json`
+ * is reported by the handler at the foot of this file. A read in the module
+ * body runs before that `try`, and a misconfigured host would get a stack
+ * trace where every other failure of this gate prints one formatted line.
  */
-const BASE_REF =
+const baseRef = () =>
   process.env.API_SURFACE_BASE ??
   `origin/${readConventions(REPO_ROOT).defaultBranch}`;
 
@@ -72,7 +77,7 @@ const readSnapshot = (relativePath) => {
 
 /** The snapshot as committed on the base ref, or undefined if it is new there. */
 const readBaseSnapshot = (relativePath) =>
-  runGit({ args: ['show', `${BASE_REF}:${relativePath}`], cwd: REPO_ROOT });
+  runGit({ args: ['show', `${baseRef()}:${relativePath}`], cwd: REPO_ROOT });
 
 const readChangesetContents = () => {
   const directory = join(REPO_ROOT, '.changeset');

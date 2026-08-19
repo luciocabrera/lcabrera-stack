@@ -16,6 +16,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { errorMessage } from './error-message.mjs';
 import { resolveHostRoot } from './host-root.mjs';
 
 export const CONFIG_FILE_NAME = 'devkit.config.json';
@@ -139,16 +140,32 @@ const repoRelative = (value, fallback, key) => {
 };
 
 /**
+ * The config as an object, or a failure that names the file.
+ *
  * A malformed config is a failure rather than a silent fallback: a consumer who
  * wrote one meant it, and quietly ignoring it would enforce a rule they did not
- * ask for while reporting success.
+ * ask for while reporting success. `JSON.parse` says what is wrong but not what
+ * it was reading, and the gates print a single line — so its message alone
+ * leaves a reader with nothing to open.
  */
-export const resolveConventions = (raw) => {
-  if (raw === undefined) return DEFAULT_CONVENTIONS;
-  const parsed = JSON.parse(raw);
+const parseConfig = (raw) => {
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (error) {
+    throw new Error(
+      `${CONFIG_FILE_NAME} is not valid JSON: ${errorMessage(error)}`,
+    );
+  }
   if (!isPlainObject(parsed)) {
     throw new Error(`${CONFIG_FILE_NAME} must contain a JSON object`);
   }
+  return parsed;
+};
+
+export const resolveConventions = (raw) => {
+  if (raw === undefined) return DEFAULT_CONVENTIONS;
+  const parsed = parseConfig(raw);
   const block = isPlainObject(parsed.conventions) ? parsed.conventions : {};
   return {
     defaultBranch: readableString(
@@ -185,10 +202,7 @@ const containedHome = (home) => ({
 
 export const resolveRegisters = (raw) => {
   if (raw === undefined) return DEFAULT_REGISTERS;
-  const parsed = JSON.parse(raw);
-  if (!isPlainObject(parsed)) {
-    throw new Error(`${CONFIG_FILE_NAME} must contain a JSON object`);
-  }
+  const parsed = parseConfig(raw);
   const block = isPlainObject(parsed.registers) ? parsed.registers : {};
   const homes = Array.isArray(block.adrHomes)
     ? block.adrHomes.filter(readableHome).map(containedHome)
@@ -229,10 +243,7 @@ const containedList = (value, fallback, key) => {
 
 export const resolvePublishing = (raw) => {
   if (raw === undefined) return DEFAULT_PUBLISHING;
-  const parsed = JSON.parse(raw);
-  if (!isPlainObject(parsed)) {
-    throw new Error(`${CONFIG_FILE_NAME} must contain a JSON object`);
-  }
+  const parsed = parseConfig(raw);
   const block = isPlainObject(parsed.publishing) ? parsed.publishing : {};
 
   return {

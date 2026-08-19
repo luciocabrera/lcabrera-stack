@@ -39,6 +39,7 @@ import {
   selectFirstPublish,
   selectPublishable,
 } from './release-publishable.mjs';
+import { errorMessage } from './error-message.mjs';
 import { fetchPackument } from './registry-packument.mjs';
 import { resolveHostRoot } from './host-root.mjs';
 
@@ -120,4 +121,13 @@ const main = async () => {
   }
 };
 
-await main();
+// This runs before `pnpm install` in the release workflow, where a stack trace
+// is all a maintainer would get. It reads `devkit.config.json` for the
+// workspaces to scan, so a malformed one is now among the ways it can fail; the
+// annotation is `::error::` so the failure lands on the workflow run itself.
+try {
+  await main();
+} catch (error) {
+  console.error(`::error::Cannot release: ${errorMessage(error)}`);
+  process.exitCode = 1;
+}

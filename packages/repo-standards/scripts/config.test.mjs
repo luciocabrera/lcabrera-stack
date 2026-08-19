@@ -50,6 +50,21 @@ describe('resolveConventions', () => {
       /JSON object/,
     );
   });
+
+  // The gates print a single line, so `Unexpected end of JSON input` on its own
+  // would leave a reader with nothing to open. Asserted for every block, since
+  // which one a consumer reaches first depends only on which gate they ran.
+  it('names the file when the config is not valid JSON at all', () => {
+    for (const resolve of [
+      resolveConventions,
+      resolvePublishing,
+      resolveRegisters,
+    ]) {
+      expect(() => resolve('{ "publishing": ')).toThrow(
+        /devkit\.config\.json is not valid JSON: /,
+      );
+    }
+  });
 });
 
 describe('resolveRegisters', () => {

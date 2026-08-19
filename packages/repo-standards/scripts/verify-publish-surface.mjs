@@ -59,21 +59,28 @@ import { releasePackerProblems } from './release-packer.mjs';
 const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),
 });
-const { packagesDir: PACKAGES_DIR, releaseWorkflow: RELEASE_WORKFLOW } =
-  readPublishing(REPO_ROOT);
+/**
+ * Reads every workspace manifest under the configured packages directory.
+ *
+ * The config is read here rather than in the module body, so that a malformed
+ * `devkit.config.json` is reported by the handler at the foot of this file. A
+ * read at import runs before that `try`, and a misconfigured host would get a
+ * stack trace where every other failure of this gate prints one formatted line.
+ */
+const readPackageManifests = () => {
+  const { packagesDir } = readPublishing(REPO_ROOT);
 
-/** Reads every workspace manifest under the configured packages directory. */
-const readPackageManifests = () =>
-  readdirSync(join(REPO_ROOT, PACKAGES_DIR))
+  return readdirSync(join(REPO_ROOT, packagesDir))
     .map((name) => ({
-      directory: `${PACKAGES_DIR}/${name}`,
-      manifestPath: join(REPO_ROOT, PACKAGES_DIR, name, 'package.json'),
+      directory: `${packagesDir}/${name}`,
+      manifestPath: join(REPO_ROOT, packagesDir, name, 'package.json'),
     }))
     .filter(({ manifestPath }) => existsSync(manifestPath))
     .map((entry) => ({
       ...entry,
       manifest: JSON.parse(readFileSync(entry.manifestPath, 'utf8')),
     }));
+};
 
 const checkSubpathCoverage = ({ directory, manifest }, problems) => {
   const { extra, missing } = diffSubpaths({
@@ -166,14 +173,17 @@ const checkArtifacts = (packages, problems) => {
   }
 };
 
-const releaseProblems = () =>
-  releasePackerProblems({
+const releaseProblems = () => {
+  const { releaseWorkflow } = readPublishing(REPO_ROOT);
+
+  return releasePackerProblems({
     lockfiles: readdirSync(REPO_ROOT),
     packageManager: JSON.parse(
       readFileSync(join(REPO_ROOT, 'package.json'), 'utf8'),
     ).packageManager,
-    workflowText: readFileSync(join(REPO_ROOT, RELEASE_WORKFLOW), 'utf8'),
-  }).map((problem) => `${RELEASE_WORKFLOW}: ${problem}`);
+    workflowText: readFileSync(join(REPO_ROOT, releaseWorkflow), 'utf8'),
+  }).map((problem) => `${releaseWorkflow}: ${problem}`);
+};
 
 const writePublishExports = ({ manifest, manifestPath }) => {
   const rebuilt = buildPublishExports(manifest.exports);
