@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 import { fetchWithRetry } from './lib/fetch-retry.mjs';
 import { readRepoSlug } from './lib/git-remote.mjs';
 import { buildLabelDefinitions } from './lib/labels.mjs';
-import { deriveWorkspaces } from '@repo/repo-standards/workspace-scopes';
+import { deriveWorkspaces } from '../packages/repo-standards/scripts/workspace-scopes.mjs';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
 const API = 'https://api.github.com';

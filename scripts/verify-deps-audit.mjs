@@ -36,7 +36,10 @@ import { dirname, join, resolve } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
-import { flagValue, readStdin } from '@repo/repo-standards/cli-input';
+import {
+  flagValue,
+  readStdin,
+} from '../packages/repo-standards/scripts/cli-input.mjs';
 import {
   auditDidRun,
   classifyAdvisories,

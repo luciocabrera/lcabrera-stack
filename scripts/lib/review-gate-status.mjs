@@ -22,7 +22,7 @@ import {
   flagValue,
   parsePullNumber,
   parseRepository,
-} from '@repo/repo-standards/cli-input';
+} from '../../packages/repo-standards/scripts/cli-input.mjs';
 import { runGh } from './gh-exec.mjs';
 import {
   publishedStatus,

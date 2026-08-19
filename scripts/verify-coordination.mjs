@@ -2,7 +2,7 @@
  * Verifies the in-git work register under `docs/coordination/` — the canonical
  * "who is working on what" for this monorepo. Keeps the register honest the same
  * way `verify-commands-doc.mjs` keeps COMMANDS.md honest. Pure parsing/rendering
- * live in `@repo/repo-standards/coordination-parse` and `./lib/coordination-board.mjs`; this
+ * live in `packages/repo-standards/scripts/coordination-parse.mjs` and `./lib/coordination-board.mjs`; this
  * file owns the effects (fs, git) and the checks.
  *
  * Two units of work:
@@ -80,10 +80,10 @@ import {
   branchSlug,
   NO_BRANCH,
   NO_PR,
-} from '@repo/repo-standards/coordination-parse';
+} from '../packages/repo-standards/scripts/coordination-parse.mjs';
 import { mergedTaskDriftWarnings } from './lib/coordination-reconcile.mjs';
 import { overlapWarnings } from './lib/coordination-overlap.mjs';
-import { readEntries } from '@repo/repo-standards/coordination-read';
+import { readEntries } from '../packages/repo-standards/scripts/coordination-read.mjs';
 import {
   readRemoteClaims,
   withoutLocalDuplicates,

@@ -53,6 +53,22 @@ files would drift. The readers are separate: each package reads only the block i
 owns, so neither depends on the other to answer a question about its own
 behaviour.
 
+## How this repository consumes it
+
+Two ways, deliberately:
+
+- **Through the package** — the root `commit:verify` / `branch:verify` /
+  `pr:verify` / `issue:verify` tasks call the bins, so the resolution a consumer
+  gets is exercised on every use.
+- **By path** — the pull-request, issue, labeler, changelog, coordination-close
+  and review-gate workflows do not install. They must be able to check a pull
+  request whose install is broken, which is when a malformed message is most
+  likely. Those, and the root scripts they run, reach the modules by path.
+
+Everything here imports nothing but node builtins and its own siblings, which is
+what makes the second form possible. Keep it that way: a dependency added here
+silently breaks six workflows that never run `install`.
+
 ## The one thing to know before moving a file here
 
 These gates find the repository by walking up from their own location, not by

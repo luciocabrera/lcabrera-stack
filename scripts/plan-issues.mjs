@@ -23,8 +23,8 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { flagValue } from '@repo/repo-standards/cli-input';
-import { validateIssueBody } from '@repo/repo-standards/commit-convention';
+import { flagValue } from '../packages/repo-standards/scripts/cli-input.mjs';
+import { validateIssueBody } from '../packages/repo-standards/scripts/commit-convention.mjs';
 import { buildLabelDefinitions } from './lib/labels.mjs';
 import {
   createIssue,
@@ -37,7 +37,7 @@ import {
   renderIssueBody,
   unknownLabels,
 } from './lib/plan-issues-render.mjs';
-import { deriveWorkspaces } from '@repo/repo-standards/workspace-scopes';
+import { deriveWorkspaces } from '../packages/repo-standards/scripts/workspace-scopes.mjs';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
 /**

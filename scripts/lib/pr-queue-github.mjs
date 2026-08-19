@@ -18,7 +18,7 @@
 import {
   validatePrBody,
   validatePrTitle,
-} from '@repo/repo-standards/commit-convention';
+} from '../../packages/repo-standards/scripts/commit-convention.mjs';
 import { runGh } from './gh-exec.mjs';
 
 const QUEUE_QUERY = `

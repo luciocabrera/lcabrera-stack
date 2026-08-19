@@ -29,7 +29,7 @@ import process from 'node:process';
 
 import { publicPackageDirs } from './lib/coverage-workspaces.mjs';
 import { parseJsonc } from './lib/jsonc.mjs';
-import { readTextWithin } from '@repo/repo-standards/safe-read';
+import { readTextWithin } from '../packages/repo-standards/scripts/safe-read.mjs';
 import { findReactDoctorSuppressions } from './lib/suppressions-react-doctor.mjs';
 import {
   DECLARABLE_STATUSES,

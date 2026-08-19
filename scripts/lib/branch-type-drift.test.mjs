@@ -8,7 +8,7 @@
  * should fail here, not show up as a rejected push after the branch already
  * exists.
  */
-import { validateBranchName } from '@repo/repo-standards/commit-convention';
+import { validateBranchName } from '../../packages/repo-standards/scripts/commit-convention.mjs';
 import { describe, expect, it } from 'vite-plus/test';
 
 import { readFileSync } from 'node:fs';

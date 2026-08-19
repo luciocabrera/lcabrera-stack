@@ -22,7 +22,7 @@
 import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { readTextWithin } from '@repo/repo-standards/safe-read';
+import { readTextWithin } from '../../packages/repo-standards/scripts/safe-read.mjs';
 
 /** Workspace roots that can hold a publishable package. */
 const WORKSPACE_ROOTS = ['packages', 'apps'];
