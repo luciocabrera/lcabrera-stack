@@ -15,6 +15,7 @@ const row = (overrides: Partial<ColumnCapabilityRow>): ColumnCapabilityRow => ({
   hasStats: true,
   nDistinct: 7,
   relTuples: 2000,
+  spanDays: undefined,
   typeCategory: 'S',
   typeName: 'text',
   typeNamespace: 'pg_catalog',
@@ -28,6 +29,7 @@ describe('resolveColumnCapability', () => {
       canGroup: true,
       column: 'country',
       distinctEstimate: 7,
+      periods: [],
       role: 'dimension',
       typeName: 'text',
     });
@@ -222,6 +224,7 @@ describe('resolveColumnCapability', () => {
       canGroup: true,
       column: 'tenant',
       distinctEstimate: 4,
+      periods: [],
       role: 'dimension',
       typeName: 'uuid',
     });
@@ -324,5 +327,104 @@ describe('resolveColumnCapability', () => {
 
     expect(capability.canGroup).toBe(false);
     expect(capability.refusal).toBeDefined();
+  });
+  describe('the granularities a temporal column offers', () => {
+    /** `order_date` on the seeded fixture: ~1800 daily values over 1799 days. */
+    const orderDate = row({
+      aggregates: ['count', 'max', 'min'],
+      column: 'order_date',
+      nDistinct: 1800,
+      relTuples: 500_000,
+      spanDays: 1799,
+      typeCategory: 'D',
+      typeName: 'date',
+    });
+
+    it('refuses the raw column and still offers the periods that clear the guard', () => {
+      // The whole point of #786, in one assertion: `canGroup` is false because
+      // one group per calendar day is exactly the tree the guard exists to
+      // refuse, and `periods` is non-empty because the same guard is
+      // comfortable at a month. A surface reading `canGroup` alone would hide
+      // the one dimension every report is organised by.
+      const capability = resolveColumnCapability(orderDate);
+
+      expect(capability.canGroup).toBe(false);
+      expect(capability.refusal).toBe('too-many-distinct');
+      expect(capability.periods).toEqual(['month', 'quarter', 'year']);
+    });
+
+    it('offers the day too once the range is short enough to hold one', () => {
+      expect(
+        resolveColumnCapability({ ...orderDate, nDistinct: 90, spanDays: 90 })
+          .periods,
+      ).toEqual(['day', 'month', 'quarter', 'year']);
+    });
+
+    it('offers nothing on a column no granularity applies to', () => {
+      // A `time` column is category `D` and `date_trunc` accepts it; truncating
+      // a time of day to a month is not a question anybody asked, so the gate
+      // is by type name rather than by category.
+      expect(
+        resolveColumnCapability({
+          ...orderDate,
+          typeName: 'time',
+        }).periods,
+      ).toEqual([]);
+      expect(resolveColumnCapability(row({})).periods).toEqual([]);
+    });
+
+    it('refuses a type name borrowed by another schema', () => {
+      // A composite `app.date` reports `typname = 'date'` exactly like the
+      // built-in, and `date_trunc` would be handed a record.
+      expect(
+        resolveColumnCapability({ ...orderDate, typeNamespace: 'app' }).periods,
+      ).toEqual([]);
+    });
+
+    it('measures the period rather than the raw column, and both bounds apply', () => {
+      // Five centuries of daily rows: the raw estimate is far above the guard
+      // at every granularity, and only the span says how few years there are.
+      // A quarter is still 2190 groups here, which is what makes this pair
+      // discriminating rather than a restatement of the guard.
+      expect(
+        resolveColumnCapability({
+          ...orderDate,
+          nDistinct: 200_000,
+          spanDays: 200_000,
+        }).periods,
+      ).toEqual(['year']);
+
+      // And the other bound, which the span alone gets wrong: one day of data,
+      // so every granularity collapses to a single group whatever the span
+      // arithmetic would allow.
+      expect(
+        resolveColumnCapability({ ...orderDate, nDistinct: 1, spanDays: 0 })
+          .periods,
+      ).toEqual(['day', 'month', 'quarter', 'year']);
+    });
+
+    it('offers every granularity when there is no span to measure', () => {
+      // Warn-and-proceed, the same answer the raw guard gives an unanalysed
+      // column (ADR-066) — grouping must not be dead on a fresh restore.
+      expect(
+        resolveColumnCapability({
+          ...orderDate,
+          hasStats: false,
+          spanDays: undefined,
+        }).periods,
+      ).toEqual(['day', 'month', 'quarter', 'year']);
+    });
+
+    it('never lets a granularity buy past a rule that is not about cardinality', () => {
+      // `n_distinct = 0` is Postgres saying the type has no equality operator.
+      // A period changes how many values there are, not whether they compare.
+      expect(
+        resolveColumnCapability({
+          ...orderDate,
+          hasEquality: false,
+          nDistinct: 0,
+        }).periods,
+      ).toEqual([]);
+    });
   });
 });

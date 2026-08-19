@@ -1,6 +1,7 @@
 import type {
   TableAggregateFn,
   TableGroupingMode,
+  TableGroupPeriod,
 } from '#ui/components/Table/Table.types';
 
 /**
@@ -8,8 +9,8 @@ import type {
  * `{"agg":{"total_amount":"sum"},"keys":["order_status"],"mode":"rollup"}`.
  * Plain JSON like `sorting` and `filters`, with no transport layer (ADR-061).
  *
- * The **envelope** is closed here — `keys`, `agg` and `mode` are the only
- * members the narrowing admits, every key must be a string, every aggregate
+ * The **envelope** is closed here — `keys`, `agg`, `gran` and `mode` are the
+ * only members the narrowing admits, every key must be a string, every aggregate
  * must be a `TableAggregateFn`, and the mode a `TableGroupingMode`. Which
  * columns are legal group keys, and which aggregates are legal for a column,
  * are questions about a route rather than about a URL: the first is answered
@@ -26,6 +27,12 @@ import type {
  */
 export type CompactGrouping = {
   readonly agg?: Readonly<Record<string, TableAggregateFn>>;
+  /**
+   * The granularity each temporal key is grouped at — a column-to-period map,
+   * the same shape as `agg` and per-key by construction, since a column can be
+   * a group key at most once (#786).
+   */
+  readonly gran?: Readonly<Record<string, TableGroupPeriod>>;
   readonly keys: readonly string[];
   readonly mode?: TableGroupingMode;
 };

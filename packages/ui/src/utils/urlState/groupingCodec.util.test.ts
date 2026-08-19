@@ -176,3 +176,65 @@ describe('groupingCodec', () => {
     });
   });
 });
+
+describe('the granularity map', () => {
+  it('round-trips beside the keys', () => {
+    const serialized = groupingCodec.serialize({
+      gran: { order_date: 'month' },
+      keys: ['order_date', 'status'],
+      mode: 'rollup',
+    });
+
+    expect(groupingCodec.deserialize(serialized)).toStrictEqual({
+      gran: { order_date: 'month' },
+      keys: ['order_date', 'status'],
+      mode: 'rollup',
+    });
+  });
+
+  it('drops an empty map, so an untruncated grouping is the param it always was', () => {
+    expect(
+      groupingCodec.serialize({ gran: {}, keys: ['status'] }),
+    ).toStrictEqual(groupingCodec.serialize({ keys: ['status'] }));
+  });
+
+  it('refuses the whole payload for a period outside the vocabulary', () => {
+    // Whole-state refusal (ADR-061): a partly-accepted configuration runs a
+    // query nobody asked for while the URL still reads as the one shared.
+    expect(
+      groupingCodec.deserialize(
+        JSON.stringify({
+          gran: { order_date: 'fortnight' },
+          keys: ['order_date'],
+        }),
+      ),
+    ).toStrictEqual({ keys: [] });
+  });
+
+  it('refuses a granularity naming a column that is not a key', () => {
+    // Not inert: the server refuses it too, so accepting it here would turn a
+    // shared link into a failed read rather than into a table.
+    expect(
+      groupingCodec.deserialize(
+        JSON.stringify({ gran: { order_date: 'month' }, keys: ['status'] }),
+      ),
+    ).toStrictEqual({ keys: [] });
+  });
+
+  it('refuses a granularity map that is not a map', () => {
+    expect(
+      groupingCodec.deserialize(
+        JSON.stringify({ gran: ['month'], keys: ['order_date'] }),
+      ),
+    ).toStrictEqual({ keys: [] });
+  });
+
+  it('still refuses a fifth member', () => {
+    // The envelope stays closed; `gran` widened it by exactly one.
+    expect(
+      groupingCodec.deserialize(
+        JSON.stringify({ keys: ['status'], somethingElse: 1 }),
+      ),
+    ).toStrictEqual({ keys: [] });
+  });
+});

@@ -51,6 +51,7 @@ const groupingStore = createMockStore<TableGroupingState>({
   aggregates: {},
   keys: [],
   mode: 'flat',
+  periods: {},
 });
 
 const contextValue: TableDrawerContextValue = {
@@ -125,7 +126,12 @@ describe('TableDrawerContext hooks', () => {
 
 describe('TableDrawerContext grouping draft hooks', () => {
   beforeEach(() => {
-    groupingStore.reset({ aggregates: {}, keys: [], mode: 'flat' });
+    groupingStore.reset({
+      aggregates: {},
+      keys: [],
+      mode: 'flat',
+      periods: {},
+    });
   });
 
   it('stages a key list, a reorder and an aggregate without any commit path', () => {
@@ -143,8 +149,8 @@ describe('TableDrawerContext grouping draft hooks', () => {
     });
 
     act(() => {
-      toggle.current('status');
-      toggle.current('country');
+      toggle.current({ columnKey: 'status' });
+      toggle.current({ columnKey: 'country' });
       setKeys.current(['country', 'status']);
       setAggregate.current({ columnKey: 'total', fn: 'sum' });
     });
@@ -153,6 +159,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
       aggregates: { total: 'sum' },
       keys: ['country', 'status'],
       mode: 'flat',
+      periods: {},
     });
   });
 
@@ -162,6 +169,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
         aggregates: useGetGroupingAggregates(),
         keys: useGetGroupingKeys(),
         mode: 'flat',
+        periods: {},
       }),
       { wrapper: Wrapper },
     );
@@ -171,6 +179,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
         aggregates: { total: 'avg' },
         keys: ['status'],
         mode: 'flat',
+        periods: {},
       });
     });
 
@@ -183,6 +192,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
       aggregates: { total: 'sum' },
       keys: ['status'],
       mode: 'flat',
+      periods: {},
     });
 
     const { result } = renderHook(() => useClearGrouping(), {
@@ -197,6 +207,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
       aggregates: {},
       keys: [],
       mode: 'flat',
+      periods: {},
     });
   });
 
@@ -205,14 +216,19 @@ describe('TableDrawerContext grouping draft hooks', () => {
       { length: MAX_TABLE_GROUP_KEYS },
       (_, index) => `key_${index}`,
     );
-    groupingStore.reset({ aggregates: {}, keys: stagedKeys, mode: 'flat' });
+    groupingStore.reset({
+      aggregates: {},
+      keys: stagedKeys,
+      mode: 'flat',
+      periods: {},
+    });
 
     const { result } = renderHook(() => useToggleGroupKey(), {
       wrapper: Wrapper,
     });
 
     act(() => {
-      result.current('one_too_many');
+      result.current({ columnKey: 'one_too_many' });
     });
 
     expect(groupingStore.get().keys).toStrictEqual(stagedKeys);
@@ -223,6 +239,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
       aggregates: { total: 'sum' },
       keys: ['status'],
       mode: 'flat',
+      periods: {},
     });
 
     const { result } = renderHook(() => useSetGroupKeys(), {
@@ -237,6 +254,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
       aggregates: {},
       keys: [],
       mode: 'flat',
+      periods: {},
     });
   });
 });

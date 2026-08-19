@@ -74,6 +74,30 @@ afterEach(() => {
   vi.unstubAllEnvs();
 });
 
+describe('a truncated group key on this route too', () => {
+  it('carries the granularity into the read and back into the decode', async () => {
+    // #786 landed on `enterprise-orders` first, and a second route wired to
+    // the same helpers is where "the seam is generic" stops being a claim.
+    // Without this the route silently groups by raw values and hits the
+    // cardinality refusal every date column on this table has.
+    await selectWideAlltypes150Page({
+      grouping: {
+        aggregates: {},
+        keys: ['c_001'],
+        mode: 'flat',
+        periods: { c_001: 'month' },
+      },
+      limit: 10,
+      offset: 0,
+      sorting: [],
+    });
+
+    expect(vi.mocked(selectGroupedRows)).toHaveBeenCalledWith(
+      expect.objectContaining({ periods: { c_001: 'month' } }),
+    );
+  });
+});
+
 describe('selectWideAlltypes150Page', () => {
   it('reads all 150 columns from public.wide_alltypes_150, bounded by the window', async () => {
     await selectWideAlltypes150Page({ limit: 50, offset: 100, sorting: [] });
@@ -211,7 +235,12 @@ describe('readWideAlltypes150Page', () => {
   describe('grouping', () => {
     it('reads the grouped branch when keys are applied, not the paginated one', async () => {
       await selectWideAlltypes150Page({
-        grouping: { aggregates: {}, keys: ['c_001'], mode: 'flat' },
+        grouping: {
+          aggregates: {},
+          keys: ['c_001'],
+          mode: 'flat',
+          periods: {},
+        },
         limit: 50,
         offset: 0,
         sorting: [],
@@ -227,6 +256,7 @@ describe('readWideAlltypes150Page', () => {
           aggregates: { c_002: 'sum' },
           keys: ['c_001'],
           mode: 'flat',
+          periods: {},
         },
         limit: 50,
         offset: 0,
@@ -242,7 +272,12 @@ describe('readWideAlltypes150Page', () => {
 
     it('bounds the grouped read by this table’s own row ceiling', async () => {
       await selectWideAlltypes150Page({
-        grouping: { aggregates: {}, keys: ['c_001'], mode: 'flat' },
+        grouping: {
+          aggregates: {},
+          keys: ['c_001'],
+          mode: 'flat',
+          periods: {},
+        },
         limit: 50,
         offset: 0,
         sorting: [],
@@ -255,7 +290,12 @@ describe('readWideAlltypes150Page', () => {
 
     it('orders by the group keys in nesting order, carrying the user’s direction', async () => {
       await selectWideAlltypes150Page({
-        grouping: { aggregates: {}, keys: ['c_001', 'c_002'], mode: 'rollup' },
+        grouping: {
+          aggregates: {},
+          keys: ['c_001', 'c_002'],
+          mode: 'rollup',
+          periods: {},
+        },
         limit: 50,
         offset: 0,
         sorting: [{ columnKey: 'c_002', direction: 'desc' }],
@@ -277,7 +317,12 @@ describe('readWideAlltypes150Page', () => {
       );
 
       const result = await selectWideAlltypes150Page({
-        grouping: { aggregates: {}, keys: ['c_014'], mode: 'flat' },
+        grouping: {
+          aggregates: {},
+          keys: ['c_014'],
+          mode: 'flat',
+          periods: {},
+        },
         limit: 50,
         offset: 0,
         sorting: [],

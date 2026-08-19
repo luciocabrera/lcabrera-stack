@@ -13,6 +13,7 @@ const NO_GROUPING: TableGroupingState = {
   aggregates: {},
   keys: [],
   mode: 'flat',
+  periods: {},
 };
 
 /**
@@ -43,6 +44,13 @@ const NO_GROUPING: TableGroupingState = {
  * checked for **existence** only — whether a given function is legal for it is a
  * catalogue answer (ADR-058) that no client-side column declaration can supply,
  * and the server's `assertGroupAggregates` is what enforces that half.
+ *
+ * A **granularity** splits along the same seam (#786). That it names one of the
+ * keys is structural, so it is refused here; that the column is a date at all,
+ * and that this granularity clears the cardinality guard, are catalogue answers,
+ * so `assertGroupKeys` refuses those. Checking only the half this side can see
+ * is what keeps a link naming an impossible granularity from turning into a
+ * silently different table rather than a stated refusal.
  */
 export const sanitizeGroupingByColumns = <
   TData extends Record<string, unknown>,
@@ -50,7 +58,7 @@ export const sanitizeGroupingByColumns = <
   columns,
   grouping,
 }: SanitizeGroupingByColumnsArgs<TData>): TableGroupingState => {
-  const { aggregates, keys, mode } = grouping;
+  const { aggregates, keys, mode, periods } = grouping;
 
   if (keys.length === 0 || keys.length > MAX_TABLE_GROUP_KEYS) {
     return NO_GROUPING;
@@ -68,10 +76,20 @@ export const sanitizeGroupingByColumns = <
   const isEveryAggregateColumnDeclared = Object.keys(aggregates).every(
     (column) => declaredKeys.has(column),
   );
+  const appliedKeys = new Set(keys);
+  const isEveryGranularityOnAKey = Object.keys(periods).every((column) =>
+    appliedKeys.has(column),
+  );
 
   return isEveryKeyGroupable &&
     areKeysDistinct &&
-    isEveryAggregateColumnDeclared
-    ? { aggregates: { ...aggregates }, keys: [...keys], mode }
+    isEveryAggregateColumnDeclared &&
+    isEveryGranularityOnAKey
+    ? {
+        aggregates: { ...aggregates },
+        keys: [...keys],
+        mode,
+        periods: { ...periods },
+      }
     : NO_GROUPING;
 };

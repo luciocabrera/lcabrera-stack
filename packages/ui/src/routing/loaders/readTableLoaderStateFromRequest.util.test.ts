@@ -261,6 +261,7 @@ describe('readTableLoaderStateFromRequest', () => {
         aggregates: {},
         keys: ['status'],
         mode: 'flat',
+        periods: {},
       });
       expect(result.standaloneGroupingParam).not.toBeNull();
     });
@@ -278,6 +279,7 @@ describe('readTableLoaderStateFromRequest', () => {
         aggregates: {},
         keys: [],
         mode: 'flat',
+        periods: {},
       });
       expect(result.standaloneGroupingParam).toBeUndefined();
     });
@@ -298,6 +300,7 @@ describe('readTableLoaderStateFromRequest', () => {
         aggregates: {},
         keys: [],
         mode: 'flat',
+        periods: {},
       });
     });
 
@@ -315,6 +318,7 @@ describe('readTableLoaderStateFromRequest', () => {
         aggregates: {},
         keys: [],
         mode: 'flat',
+        periods: {},
       });
       expect(result.standaloneGroupingParam).toBeNull();
     });

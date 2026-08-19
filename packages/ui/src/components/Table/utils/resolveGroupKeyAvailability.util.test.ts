@@ -16,6 +16,7 @@ const refused: TableColumnGroupingCapability = {
   canGroup: false,
   column: 'total_amount',
   distinctEstimate: 77_567,
+  periods: [],
   refusal: 'too-many-distinct',
   role: 'fact',
   typeName: 'numeric',
@@ -26,6 +27,7 @@ const allowed: TableColumnGroupingCapability = {
   canGroup: true,
   column: 'total_amount',
   distinctEstimate: 8,
+  periods: [],
   role: 'dimension',
   typeName: 'text',
 };
@@ -82,5 +84,82 @@ describe('resolveGroupKeyAvailability', () => {
         column: undefined,
       }),
     ).toEqual({ isGroupable: true, refusal: undefined });
+  });
+});
+
+describe('a column the catalogue refuses raw but offers truncated', () => {
+  const orderDate = {
+    aggregates: ['count'],
+    canGroup: false,
+    column: 'order_date',
+    distinctEstimate: 1800,
+    periods: ['month', 'quarter', 'year'],
+    refusal: 'too-many-distinct',
+    role: 'dimension',
+    typeName: 'date',
+  } as const satisfies TableColumnGroupingCapability;
+
+  it('is offerable, and names the granularity it must be added with', () => {
+    // The defect this exists to prevent: reading `canGroup` alone filtered
+    // `order_date` out of the add-key list, so the granularity control could
+    // never render and period grouping was unreachable from the UI (ADR-084).
+    expect(
+      resolveGroupKeyAvailability({
+        capability: orderDate,
+        column: { key: 'order_date', label: 'Order Date' },
+      }),
+    ).toStrictEqual({
+      isGroupable: true,
+      refusal: undefined,
+      requiredPeriod: 'month',
+    });
+  });
+
+  it('offers the finest granularity, which is the one a reader can coarsen from', () => {
+    expect(
+      resolveGroupKeyAvailability({
+        capability: { ...orderDate, periods: ['year'] },
+        column: { key: 'order_date', label: 'Order Date' },
+      }).requiredPeriod,
+    ).toBe('year');
+  });
+
+  it('stays refused when there is no granularity either', () => {
+    // A refusal that a granularity cannot answer — a unique-ish id column, or a
+    // date whose range is too wide for even a year.
+    expect(
+      resolveGroupKeyAvailability({
+        capability: { ...orderDate, periods: [] },
+        column: { key: 'order_date', label: 'Order Date' },
+      }),
+    ).toStrictEqual({
+      isGroupable: false,
+      refusal: 'too-many-distinct',
+      requiredPeriod: undefined,
+    });
+  });
+
+  it('requires no granularity for a column the catalogue accepts raw', () => {
+    expect(
+      resolveGroupKeyAvailability({
+        capability: { ...orderDate, canGroup: true, refusal: undefined },
+        column: { key: 'order_date', label: 'Order Date' },
+      }).requiredPeriod,
+    ).toBeUndefined();
+  });
+
+  it('still refuses a column the table itself declared ungroupable', () => {
+    // The consumer's opt-out is checked first and a granularity cannot buy past
+    // it: the table said no, which is a different fact from the database's.
+    expect(
+      resolveGroupKeyAvailability({
+        capability: orderDate,
+        column: { isGroupable: false, key: 'order_date', label: 'Order Date' },
+      }),
+    ).toStrictEqual({
+      isGroupable: false,
+      refusal: undefined,
+      requiredPeriod: undefined,
+    });
   });
 });

@@ -105,6 +105,7 @@ describe('AddGroupKeySection', () => {
       canGroup: false,
       column: 'id',
       distinctEstimate: 500_000,
+      periods: [],
       refusal: 'unique-ish',
       role: 'dimension',
       typeName: 'int4',
@@ -130,7 +131,10 @@ describe('AddGroupKeySection', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Status' }));
     fireEvent.click(screen.getByRole('button', { name: 'Add' }));
 
-    expect(mockToggleGroupKey).toHaveBeenCalledWith('status');
+    expect(mockToggleGroupKey).toHaveBeenCalledWith({
+      columnKey: 'status',
+      period: undefined,
+    });
     expect(mockToggleGroupKey).toHaveBeenCalledTimes(1);
   });
 

@@ -45,6 +45,7 @@ const NO_GROUPING: TableGroupingState = {
   aggregates: {},
   keys: [],
   mode: 'flat',
+  periods: {},
 };
 
 const groupingUrl = (param: string) =>
@@ -313,7 +314,12 @@ describe('createTableRouteLoader', () => {
 
       expect(fetchPage).toHaveBeenCalledWith(
         expect.objectContaining({
-          grouping: { aggregates: {}, keys: ['status'], mode: 'flat' },
+          grouping: {
+            aggregates: {},
+            keys: ['status'],
+            mode: 'flat',
+            periods: {},
+          },
         }),
       );
       expect(result.metaState.groupingKeys).toEqual(['status']);
@@ -444,7 +450,12 @@ describe('createTableRouteLoader', () => {
       expect(result.metaState.groupingKeys).toEqual(['status', 'name']);
       expect(fetchPage).toHaveBeenCalledWith(
         expect.objectContaining({
-          grouping: { aggregates: {}, keys: ['status', 'name'], mode: 'flat' },
+          grouping: {
+            aggregates: {},
+            keys: ['status', 'name'],
+            mode: 'flat',
+            periods: {},
+          },
         }),
       );
     });
@@ -462,6 +473,7 @@ describe('createTableRouteLoader', () => {
             aggregates: { id: 'sum' },
             keys: ['status'],
             mode: 'flat',
+            periods: {},
           },
         }),
       );
@@ -496,6 +508,7 @@ describe('createTableRouteLoader', () => {
         aggregates: ['avg', 'sum'],
         canGroup: false,
         column: 'quantity',
+        periods: [],
         refusal: 'too-many-distinct',
         role: 'fact',
         typeName: 'numeric',

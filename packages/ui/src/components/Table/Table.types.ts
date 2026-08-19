@@ -1,3 +1,4 @@
+import type { OlapGroupPeriod } from '@lcabrera/api/olap/olap.types';
 import type {
   CurrencyFormatOptions,
   DateFormatOptions,
@@ -641,6 +642,17 @@ export type TableGroupingState = {
   readonly keys: readonly string[];
   /** Which grouping sets the read emits. See `TableGroupingMode`. */
   readonly mode: TableGroupingMode;
+  /**
+   * The granularity each temporal key is grouped at, by column — a map beside
+   * the key list rather than a member of it.
+   *
+   * A key list of records would carry the granularity inside each key, and was
+   * rejected: `keys` is `readonly string[]` here, in `@lcabrera/server`, in the
+   * URL, in every group path and in the expansion store, so changing its element
+   * type moves a shape six unrelated things already agree on. A column can be a
+   * key at most once, so a column-keyed map is per-key by construction (#786).
+   */
+  readonly periods: Readonly<Record<string, TableGroupPeriod>>;
 };
 
 /**
@@ -695,6 +707,16 @@ export type TableGroupKeyValue = {
    */
   readonly value: unknown;
 };
+
+/**
+ * The granularity a date or timestamp group key is truncated to.
+ *
+ * An alias of the wire vocabulary, which `@lcabrera/api` owns and this package
+ * already depends on (ADR-082) — so unlike the aggregate and refusal unions
+ * beside it, this one is a single declaration rather than one of ADR-039's
+ * duplicated shapes. There is no undeclared edge to route around here.
+ */
+export type TableGroupPeriod = OlapGroupPeriod;
 
 /**
  * A row carrying a group summary — what a grouped read returns for each group.
@@ -813,6 +835,12 @@ export type TableMetaState = {
    * says, and what a route that never offers the choice keeps.
    */
   readonly groupingMode?: TableGroupingMode;
+  /**
+   * The granularity the loader applied to each temporal key, by column, from
+   * the same `grouping` param. Absent means every key is grouped at its raw
+   * values — what a link written before granularities existed says (#786).
+   */
+  readonly groupingPeriods?: Readonly<Record<string, TableGroupPeriod>>;
   /** Initial page size for first load */
   readonly initialPageSize: number;
   readonly isBordered: boolean;
@@ -988,6 +1016,18 @@ type TableColumnCapabilityShared = {
   readonly column: string;
   /** Resolved distinct-value estimate; absent when statistics are unavailable. */
   readonly distinctEstimate?: number;
+  /**
+   * The granularities this column may be grouped at, empty for anything that is
+   * not a date or a timestamp.
+   *
+   * **Read it instead of `canGroup`, not after it.** A date column is normally
+   * refused as a raw key — one group per calendar day is exactly the tree the
+   * cardinality guard exists to refuse — while `month` and above clear the same
+   * guard comfortably. So a refused column routinely carries a non-empty list,
+   * and a surface gating on `canGroup` alone hides the one dimension every
+   * report is organised by (#786).
+   */
+  readonly periods: readonly TableGroupPeriod[];
   readonly role: TableColumnAnalyticalRole;
   readonly typeName: string;
 };

@@ -30,19 +30,22 @@ const NO_GROUPING: TableGroupingState = {
   aggregates: {},
   keys: [],
   mode: 'flat',
+  periods: {},
 };
 
 type GroupingArgs = {
   readonly aggregates?: TableGroupingState['aggregates'];
   readonly keys: readonly string[];
   readonly mode?: TableGroupingState['mode'];
+  readonly periods?: TableGroupingState['periods'];
 };
 
 const grouping = ({
   aggregates = {},
   keys,
   mode = 'flat',
-}: GroupingArgs): TableGroupingState => ({ aggregates, keys, mode });
+  periods = {},
+}: GroupingArgs): TableGroupingState => ({ aggregates, keys, mode, periods });
 
 describe('sanitizeGroupingByColumns', () => {
   it('keeps keys that name a groupable column', () => {
@@ -71,10 +74,16 @@ describe('sanitizeGroupingByColumns', () => {
           aggregates: { id: 'sum' },
           keys: ['status'],
           mode: 'flat',
+          periods: {},
         }),
       }),
     ).toStrictEqual(
-      grouping({ aggregates: { id: 'sum' }, keys: ['status'], mode: 'flat' }),
+      grouping({
+        aggregates: { id: 'sum' },
+        keys: ['status'],
+        mode: 'flat',
+        periods: {},
+      }),
     );
   });
 
@@ -97,6 +106,7 @@ describe('sanitizeGroupingByColumns', () => {
           aggregates: { not_a_column: 'sum' },
           keys: ['status'],
           mode: 'flat',
+          periods: {},
         }),
       }),
     ).toStrictEqual(NO_GROUPING);

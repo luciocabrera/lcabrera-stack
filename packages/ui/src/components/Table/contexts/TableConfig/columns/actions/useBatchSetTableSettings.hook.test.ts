@@ -25,6 +25,7 @@ const NO_GROUPING: TableGroupingState = {
   aggregates: {},
   keys: [],
   mode: 'flat',
+  periods: {},
 };
 
 const {
@@ -64,7 +65,12 @@ const {
     },
     mockGroupingStore: {
       get: vi.fn(
-        (): TableGroupingState => ({ aggregates: {}, keys: [], mode: 'flat' }),
+        (): TableGroupingState => ({
+          aggregates: {},
+          keys: [],
+          mode: 'flat',
+          periods: {},
+        }),
       ),
       set: vi.fn(),
     },
@@ -171,6 +177,7 @@ describe('useBatchSetTableSettings', () => {
       aggregates: {},
       keys: [],
       mode: 'flat',
+      periods: {},
     });
     mockGroupingStore.set.mockClear();
     mockMetaStore.get.mockClear();
@@ -367,7 +374,12 @@ describe('useBatchSetTableSettings', () => {
 
     act(() => {
       result.current({
-        grouping: { aggregates: { age: 'sum' }, keys: ['name'], mode: 'flat' },
+        grouping: {
+          aggregates: { age: 'sum' },
+          keys: ['name'],
+          mode: 'flat',
+          periods: {},
+        },
         settings: {
           columnFilters: {} as ColumnFiltersState<Row>,
           columnOrder: ['id', 'age', 'name'],
@@ -398,6 +410,7 @@ describe('useBatchSetTableSettings', () => {
       aggregates: { age: 'sum' },
       keys: ['name'],
       mode: 'flat',
+      periods: {},
     });
     expect(mockDataStore.set).toHaveBeenCalledWith({ isLoading: true });
   });
@@ -407,13 +420,14 @@ describe('useBatchSetTableSettings', () => {
       aggregates: {},
       keys: ['name'],
       mode: 'flat',
+      periods: {},
     });
 
     const { result } = renderHook(() => useBatchSetTableSettings<Row>());
 
     act(() => {
       result.current({
-        grouping: { aggregates: {}, keys: ['name'], mode: 'flat' },
+        grouping: { aggregates: {}, keys: ['name'], mode: 'flat', periods: {} },
         settings: {
           columnFilters: {
             name: { operator: 'contains', type: 'text', value: 'ali' },
@@ -447,7 +461,7 @@ describe('useBatchSetTableSettings', () => {
 
     act(() => {
       result.current({
-        grouping: { aggregates: {}, keys: ['name'], mode: 'flat' },
+        grouping: { aggregates: {}, keys: ['name'], mode: 'flat', periods: {} },
         settings: {
           columnFilters: {} as ColumnFiltersState<Row>,
           columnOrder: ['id', 'age', 'name'],

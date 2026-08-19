@@ -6,3 +6,4 @@ export { useGetColumnVisibility } from './useGetColumnVisibility.hook';
 export { useGetGroupingAggregates } from './useGetGroupingAggregates.hook';
 export { useGetGroupingKeys } from './useGetGroupingKeys.hook';
 export { useGetGroupingMode } from './useGetGroupingMode.hook';
+export { useGetGroupingPeriods } from './useGetGroupingPeriods.hook';

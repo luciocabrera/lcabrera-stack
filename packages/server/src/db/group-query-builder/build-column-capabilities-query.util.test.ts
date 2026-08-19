@@ -3,6 +3,9 @@ import { describe, expect, it } from 'vite-plus/test';
 import { buildColumnCapabilitiesQuery } from './build-column-capabilities-query.util.ts';
 import { AGGREGATE_SQL_NAMES } from './group-query-builder.constants.ts';
 
+/** The bare names the `spanDays` branch is gated on, in the order the SQL binds them. */
+const PERIOD_TYPE_NAMES = ['date', 'timestamp', 'timestamptz'];
+
 const DESCRIPTOR = {
   columns: ['order_status', 'total_amount'],
   schema: 'public',
@@ -18,7 +21,40 @@ describe('buildColumnCapabilitiesQuery', () => {
       'enterprise_orders',
       ['order_status', 'total_amount'],
       AGGREGATE_SQL_NAMES,
+      PERIOD_TYPE_NAMES,
     ]);
+  });
+
+  it('measures a zone-free column in a zone-free frame', () => {
+    // Casting a `date` to `timestamptz` reads both endpoints through the
+    // session zone, and a range straddling a DST transition then measures an
+    // hour short — under `America/Santiago`, 1 June to 1 December is 182.958
+    // days rather than 183. The period count floors that number, so an
+    // under-measured range can offer a granularity the guard would have
+    // refused: the wrong direction for an upper bound.
+    const { text } = buildColumnCapabilitiesQuery(DESCRIPTOR);
+
+    expect(text).toContain("WHEN bt.typname = 'timestamptz'");
+    expect(text).toContain('max(b::timestamptz) - min(b::timestamptz)');
+    expect(text).toContain('max(b::timestamp) - min(b::timestamp)');
+    // The zoned arm is reached only by the one type that carries a zone.
+    expect(text.indexOf("WHEN bt.typname = 'timestamptz'")).toBeLessThan(
+      text.indexOf('max(b::timestamptz)'),
+    );
+  });
+
+  it('measures the histogram span only for a date or timestamp column', () => {
+    // The cast that reads `histogram_bounds` — an `anyarray` — has to go
+    // through text, and it fails on a type whose text form is not a timestamp.
+    // The `CASE` is what keeps it off those columns: Postgres does not evaluate
+    // an unselected branch, so the guard is the SQL's and not a JS caller's.
+    const { text } = buildColumnCapabilitiesQuery(DESCRIPTOR);
+
+    expect(text).toContain('WHEN bt.typname = ANY($5::text[])');
+    expect(text).toContain('unnest(s.histogram_bounds::text::text[])');
+    expect(text.indexOf('CASE WHEN bt.typname')).toBeLessThan(
+      text.indexOf('unnest(s.histogram_bounds'),
+    );
   });
 
   // The property that makes this query safe to run on request-derived input:

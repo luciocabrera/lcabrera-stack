@@ -54,6 +54,7 @@ const NO_GROUPING: TableGroupingState = {
   aggregates: {},
   keys: [],
   mode: 'flat',
+  periods: {},
 };
 
 const stores = {
@@ -256,6 +257,7 @@ describe('GroupingSection staging', () => {
       aggregates: { total_amount: 'sum' },
       keys: ['order_status'],
       mode: 'flat',
+      periods: {},
     });
   });
 
@@ -319,6 +321,7 @@ describe('GroupingSection staging', () => {
       aggregates: {},
       keys: ['shipping_country'],
       mode: 'flat',
+      periods: {},
     });
 
     renderDrawer();
@@ -336,6 +339,7 @@ describe('GroupingSection staging', () => {
       aggregates: {},
       keys: ['shipping_country'],
       mode: 'flat',
+      periods: {},
     });
     expect(screen.getByText('1. Country')).not.toBeNull();
   });
@@ -345,6 +349,7 @@ describe('GroupingSection staging', () => {
       aggregates: {},
       keys: ['shipping_country'],
       mode: 'flat',
+      periods: {},
     });
 
     const firstOpen = renderDrawer();
@@ -367,6 +372,7 @@ describe('GroupingSection staging', () => {
       aggregates: { total_amount: 'sum' },
       keys: ['order_status'],
       mode: 'flat',
+      periods: {},
     });
 
     renderDrawer();
@@ -391,6 +397,7 @@ describe('GroupingSection staging', () => {
       aggregates: {},
       keys: ['order_status'],
       mode: 'flat',
+      periods: {},
     });
 
     renderDrawer();

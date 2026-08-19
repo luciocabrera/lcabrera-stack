@@ -5,6 +5,7 @@ import type {
   GroupSort,
 } from '../group-query-builder/group-query-builder.types';
 import type { QuerySort } from '../query-builder/query-builder.types';
+import type { GroupKeyTruncation } from './olap.types';
 
 import { toGroupRow } from './to-group-row.util';
 
@@ -23,6 +24,8 @@ type DecodeGroupedRowsArgs = {
   /** The same list `toGroupAggregates` was given, in the same order. */
   readonly requested: readonly RequestedGroupAggregate[];
   readonly rows: readonly Record<string, unknown>[];
+  /** How each truncated key was derived, by column — what heads a period group (#786). */
+  readonly truncations?: Readonly<Record<string, GroupKeyTruncation>>;
 };
 
 type ToGroupSortArgs = {
@@ -85,6 +88,7 @@ export const decodeGroupedRows = ({
   maskAlias,
   requested,
   rows,
+  truncations,
 }: DecodeGroupedRowsArgs) => {
   const [count, ...selected] = aggregates;
 
@@ -125,6 +129,7 @@ export const decodeGroupedRows = ({
       countAlias: count.alias,
       maskAlias,
       row,
+      truncations,
     }),
   );
 };

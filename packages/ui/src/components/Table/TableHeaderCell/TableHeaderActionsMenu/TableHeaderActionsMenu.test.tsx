@@ -356,6 +356,7 @@ describe('TableHeaderActionsMenu', () => {
         aggregates: ['count', 'sum'],
         canGroup: false,
         column: 'name',
+        periods: [],
         refusal: 'too-many-distinct',
         role: 'fact',
         typeName: 'numeric',

@@ -1,6 +1,10 @@
+import { isOlapGroupPeriod } from '@lcabrera/api/olap/is-olap-group-period.util';
 import { isObject } from '@lcabrera/utils/guards/is-object.util';
 
-import type { TableAggregateFn } from '#ui/components/Table/Table.types';
+import type {
+  TableAggregateFn,
+  TableGroupPeriod,
+} from '#ui/components/Table/Table.types';
 
 import { isTableAggregateFn } from '#ui/components/Table/utils/isTableAggregateFn.util';
 import { isTableGroupingMode } from '#ui/components/Table/utils/isTableGroupingMode.util';
@@ -13,13 +17,14 @@ import { createUrlStateCodec } from './createUrlStateCodec.util';
 const NO_GROUPING: CompactGrouping = { keys: [] };
 
 /**
- * The envelope's **whole** vocabulary. Aggregate selection needed a second slot
- * and the grouping mode a third, so the closed set was extended twice; opening
- * it is what ADR-061 forbids, and a member outside these three still refuses
- * the payload.
+ * The envelope's **whole** vocabulary. Aggregate selection needed a second slot,
+ * the grouping mode a third and per-key granularity a fourth, so the closed set
+ * has been extended three times; opening it is what ADR-061 forbids, and a
+ * member outside these four still refuses the payload.
  */
 const COMPACT_GROUPING_MEMBERS: ReadonlySet<string> = new Set([
   'agg',
+  'gran',
   'keys',
   'mode',
 ]);
@@ -49,6 +54,44 @@ const narrowAggregates = (value: unknown) => {
 
   return Object.fromEntries(entries) as Readonly<
     Record<string, TableAggregateFn>
+  >;
+};
+
+/**
+ * The granularity map, or `undefined` when it is unreadable.
+ *
+ * A period outside the vocabulary refuses the **whole** payload rather than
+ * being dropped, and a granularity naming a column that is not a group key does
+ * too. Neither is inert: the first would run a grouping the link does not
+ * describe, and the second is refused by the server, so accepting it here would
+ * turn a shared link into a failed read rather than into a table (#786).
+ */
+const narrowGranularities = ({
+  keys,
+  value,
+}: {
+  readonly keys: readonly string[];
+  readonly value: unknown;
+}) => {
+  if (!isObject(value) || Array.isArray(value)) {
+    return;
+  }
+
+  const entries = Object.entries(value);
+  // A Set rather than `keys.includes` inside the predicate: the predicate is
+  // the loop, so an array scan per entry is quadratic.
+  const applied = new Set(keys);
+
+  if (
+    entries.some(
+      ([column, period]) => !isOlapGroupPeriod(period) || !applied.has(column),
+    )
+  ) {
+    return;
+  }
+
+  return Object.fromEntries(entries) as Readonly<
+    Record<string, TableGroupPeriod>
   >;
 };
 
@@ -83,6 +126,44 @@ const narrowAggregates = (value: unknown) => {
  * an object literal with fixed keys, and the aggregate map with
  * `Object.fromEntries` — neither reaches a prototype setter.
  */
+/**
+ * One optional member's outcome. `refused` is not `absent`: a member that is
+ * present and unreadable rejects the **whole** payload, and collapsing the two
+ * is how a partly-accepted configuration would get through (ADR-061).
+ */
+type NarrowedMember<TValue> =
+  | { readonly kind: 'absent' }
+  | { readonly kind: 'present'; readonly value: TValue }
+  | { readonly kind: 'refused' };
+
+const ABSENT = { kind: 'absent' } as const;
+const REFUSED = { kind: 'refused' } as const;
+
+type ReadOptionalMemberArgs<TValue> = {
+  readonly member: string;
+  readonly narrow: (value: unknown) => TValue | undefined;
+  readonly parsed: Record<string, unknown>;
+};
+
+/**
+ * Reads one optional member under the envelope's single rule, so `agg`, `gran`
+ * and `mode` cannot come to be refused on three slightly different terms.
+ */
+const readOptionalMember = <TValue>({
+  member,
+  narrow,
+  parsed,
+}: ReadOptionalMemberArgs<TValue>): NarrowedMember<TValue> => {
+  if (!Object.hasOwn(parsed, member)) return ABSENT;
+
+  const value = narrow(parsed[member]);
+
+  return value === undefined ? REFUSED : { kind: 'present', value };
+};
+
+const narrowMode = (value: unknown) =>
+  isTableGroupingMode(value) ? value : undefined;
+
 const narrowCompactGrouping = (parsed: unknown) => {
   if (!isObject(parsed) || Array.isArray(parsed)) {
     return;
@@ -102,26 +183,40 @@ const narrowCompactGrouping = (parsed: unknown) => {
     return;
   }
 
+  const agg = readOptionalMember({
+    member: 'agg',
+    narrow: narrowAggregates,
+    parsed,
+  });
+  const gran = readOptionalMember({
+    member: 'gran',
+    narrow: (value) => narrowGranularities({ keys, value }),
+    parsed,
+  });
   // A `mode` outside the union refuses the whole payload rather than falling
   // back to `flat`: the mode decides which grouping sets the read emits, so
   // substituting one answers a different question from the one the link
   // describes — the same whole-state rule the keys are refused under.
-  if (Object.hasOwn(parsed, 'mode') && !isTableGroupingMode(parsed.mode)) {
+  const mode = readOptionalMember({
+    member: 'mode',
+    narrow: narrowMode,
+    parsed,
+  });
+
+  if (
+    agg.kind === 'refused' ||
+    gran.kind === 'refused' ||
+    mode.kind === 'refused'
+  ) {
     return;
   }
 
-  const rawMode: unknown = parsed.mode;
-  const mode = isTableGroupingMode(rawMode) ? { mode: rawMode } : {};
-
-  if (!Object.hasOwn(parsed, 'agg')) {
-    return { keys, ...mode } satisfies CompactGrouping;
-  }
-
-  const agg = narrowAggregates(parsed.agg);
-
-  return agg === undefined
-    ? undefined
-    : ({ agg, keys, ...mode } satisfies CompactGrouping);
+  return {
+    ...(agg.kind === 'present' && { agg: agg.value }),
+    ...(gran.kind === 'present' && { gran: gran.value }),
+    keys,
+    ...(mode.kind === 'present' && { mode: mode.value }),
+  } satisfies CompactGrouping;
 };
 
 /** Codec for the compact `grouping` search param. */
@@ -130,8 +225,11 @@ export const groupingCodec = createUrlStateCodec<CompactGrouping>({
   // selected produces the same param it produced before aggregates existed —
   // `"agg":{}` in a shared link would say "aggregates considered and cleared",
   // which is not a state this table has.
-  compact: ({ agg, keys, mode }) => ({
+  compact: ({ agg, gran, keys, mode }) => ({
     ...(agg !== undefined && Object.keys(agg).length > 0 && { agg }),
+    // Dropped when empty, like `agg`: an untruncated grouping produces the
+    // param it produced before granularities existed.
+    ...(gran !== undefined && Object.keys(gran).length > 0 && { gran }),
     keys,
     // `flat` is dropped rather than emitted, so a table left on the default
     // produces the param it produced before rollup existed — and a link is

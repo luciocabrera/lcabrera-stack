@@ -17,6 +17,7 @@ const {
     aggregates: {},
     keys: [],
     mode: 'flat',
+    periods: {},
   };
 
   return {
@@ -46,7 +47,7 @@ vi.mock('#ui/components/Table/contexts/TableConfig/columns/actions', () => ({
 beforeEach(() => {
   batchSetTableSettings.mockClear();
   setDrawerState(undefined);
-  setDrawerGrouping({ aggregates: {}, keys: [], mode: 'flat' });
+  setDrawerGrouping({ aggregates: {}, keys: [], mode: 'flat', periods: {} });
 });
 
 describe('useBatchSetTableDrawerSettings', () => {
@@ -63,7 +64,7 @@ describe('useBatchSetTableDrawerSettings', () => {
     });
 
     expect(batchSetTableSettings).toHaveBeenCalledExactlyOnceWith({
-      grouping: { aggregates: {}, keys: [], mode: 'flat' },
+      grouping: { aggregates: {}, keys: [], mode: 'flat', periods: {} },
       settings: {
         columnFilters: {},
         columnOrder: ['id', 'name'],
@@ -83,7 +84,7 @@ describe('useBatchSetTableDrawerSettings', () => {
     });
 
     expect(batchSetTableSettings).toHaveBeenCalledExactlyOnceWith({
-      grouping: { aggregates: {}, keys: [], mode: 'flat' },
+      grouping: { aggregates: {}, keys: [], mode: 'flat', periods: {} },
       settings: {
         columnFilters: {},
         columnOrder: [],
@@ -101,6 +102,7 @@ describe('useBatchSetTableDrawerSettings', () => {
       aggregates: { total: 'sum' },
       keys: ['status'],
       mode: 'flat',
+      periods: {},
     });
 
     const { result } = renderHook(() => useBatchSetTableDrawerSettings());
@@ -116,6 +118,7 @@ describe('useBatchSetTableDrawerSettings', () => {
         aggregates: { total: 'sum' },
         keys: ['status'],
         mode: 'flat',
+        periods: {},
       },
       settings: {
         columnFilters: {},

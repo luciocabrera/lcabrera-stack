@@ -13,6 +13,7 @@ export { useSetColumnFilters } from './useSetColumnFilters.hook';
 export { useSetColumnsSizing } from './useSetColumnsSizing.hook';
 export { useSetColumnsSortings } from './useSetColumnsSortings.hook';
 export { useSetGroupingMode } from './useSetGroupingMode.hook';
+export { useSetGroupKeyPeriod } from './useSetGroupKeyPeriod.hook';
 export { useSetGroupKeys } from './useSetGroupKeys.hook';
 export { useSortByColumnOrder } from './useSortByColumnOrder.hook';
 export { useToggleGroupKey } from './useToggleGroupKey.hook';

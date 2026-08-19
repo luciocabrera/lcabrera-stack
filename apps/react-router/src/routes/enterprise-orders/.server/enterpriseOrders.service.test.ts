@@ -66,19 +66,22 @@ const NO_GROUPING: TableGroupingState = {
   aggregates: {},
   keys: [],
   mode: 'flat',
+  periods: {},
 };
 
 type GroupingArgs = {
   readonly aggregates?: TableGroupingState['aggregates'];
   readonly keys: readonly string[];
   readonly mode?: TableGroupingState['mode'];
+  readonly periods?: TableGroupingState['periods'];
 };
 
 const grouping = ({
   aggregates = {},
   keys,
   mode = 'flat',
-}: GroupingArgs): TableGroupingState => ({ aggregates, keys, mode });
+  periods = {},
+}: GroupingArgs): TableGroupingState => ({ aggregates, keys, mode, periods });
 
 beforeEach(() => {
   vi.mocked(selectRows).mockClear();
@@ -614,6 +617,7 @@ it('carries a stats-unavailable warning beside real rows', async () => {
     keys: ['order_status'],
     maskAlias: 'group_mask',
     rows: [{ count_rows: '12', group_mask: 0, order_status: 'Shipped' }],
+    truncations: {},
     warning: { columns: ['order_status'], kind: 'stats-unavailable' },
   });
 

@@ -57,10 +57,8 @@ export const GroupByColumnButton = <TData,>({
   const groupingKeys = useGetTableGroupingKeys();
   const column = useGetNormalizedColumn<TData>(columnKey);
   const capability = useGetTableColumnGroupingCapability(String(columnKey));
-  const { isGroupable, refusal } = resolveGroupKeyAvailability<TData>({
-    capability,
-    column,
-  });
+  const { isGroupable, refusal, requiredPeriod } =
+    resolveGroupKeyAvailability<TData>({ capability, column });
   const { icon: GroupByColumnCommandIcon, label } = GROUP_BY_COLUMN_COMMAND;
 
   const isApplied = groupingKeys.includes(String(columnKey));
@@ -72,7 +70,10 @@ export const GroupByColumnButton = <TData,>({
   });
 
   const handleGroupByColumn = () => {
-    toggleGroupKey(String(columnKey));
+    // The granularity goes on with the key: a column the catalogue refuses raw
+    // is offered only truncated, so adding it without one applies a grouping
+    // the server would refuse (ADR-084).
+    toggleGroupKey({ columnKey: String(columnKey), period: requiredPeriod });
     onClose();
   };
 

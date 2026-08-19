@@ -9,6 +9,7 @@ describe('serializeGroupingToURL', () => {
         aggregates: {},
         keys: ['order_status'],
         mode: 'flat',
+        periods: {},
       }),
     ).toBe('{"keys":["order_status"]}');
   });
@@ -19,6 +20,7 @@ describe('serializeGroupingToURL', () => {
         aggregates: {},
         keys: ['b', 'a'],
         mode: 'flat',
+        periods: {},
       }),
     ).toBe('{"keys":["b","a"]}');
   });
@@ -29,6 +31,7 @@ describe('serializeGroupingToURL', () => {
         aggregates: { total_amount: 'sum' },
         keys: ['order_status'],
         mode: 'flat',
+        periods: {},
       }),
     ).toBe('{"agg":{"total_amount":"sum"},"keys":["order_status"]}');
   });
@@ -37,13 +40,23 @@ describe('serializeGroupingToURL', () => {
     // A grouped table with no aggregate produces exactly the param it produced
     // before aggregates existed, so an old shared link and a new one agree.
     expect(
-      serializeGroupingToURL({ aggregates: {}, keys: ['a'], mode: 'flat' }),
+      serializeGroupingToURL({
+        aggregates: {},
+        keys: ['a'],
+        mode: 'flat',
+        periods: {},
+      }),
     ).toBe('{"keys":["a"]}');
   });
 
   it('returns undefined for no keys, so the param leaves the URL', () => {
     expect(
-      serializeGroupingToURL({ aggregates: {}, keys: [], mode: 'flat' }),
+      serializeGroupingToURL({
+        aggregates: {},
+        keys: [],
+        mode: 'flat',
+        periods: {},
+      }),
     ).toBeUndefined();
   });
 
@@ -53,6 +66,7 @@ describe('serializeGroupingToURL', () => {
         aggregates: { total_amount: 'sum' },
         keys: [],
         mode: 'flat',
+        periods: {},
       }),
     ).toBeUndefined();
   });

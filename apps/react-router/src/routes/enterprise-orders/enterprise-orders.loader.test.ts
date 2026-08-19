@@ -47,7 +47,7 @@ const invokeLoader = async (search = '') =>
     request: new Request(`http://localhost/enterprise-orders${search}`),
   } as LoaderFunctionArgs);
 
-const NO_GROUPING = { aggregates: {}, keys: [], mode: 'flat' };
+const NO_GROUPING = { aggregates: {}, keys: [], mode: 'flat', periods: {} };
 
 const sortKeys = (value: object) =>
   Object.keys(value).toSorted((a, b) => a.localeCompare(b));
@@ -133,7 +133,12 @@ describe('enterprise-orders loader', () => {
       expect(result.metaState.groupingKeys).toEqual(['order_status']);
       expect(selectOrdersPage).toHaveBeenCalledWith(
         expect.objectContaining({
-          grouping: { aggregates: {}, keys: ['order_status'], mode: 'flat' },
+          grouping: {
+            aggregates: {},
+            keys: ['order_status'],
+            mode: 'flat',
+            periods: {},
+          },
         }),
       );
     });
@@ -192,6 +197,7 @@ describe('enterprise-orders loader', () => {
             aggregates: {},
             keys: ['order_status', 'shipping_country'],
             mode: 'flat',
+            periods: {},
           },
         }),
       );
@@ -225,6 +231,7 @@ describe('enterprise-orders loader', () => {
             aggregates: { total_amount: 'sum' },
             keys: ['order_status'],
             mode: 'flat',
+            periods: {},
           },
         }),
       );

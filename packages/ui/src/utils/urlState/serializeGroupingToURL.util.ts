@@ -13,14 +13,17 @@ import { groupingCodec } from './groupingCodec.util';
  *
  * A selected aggregate is dropped with the keys for the same reason: an
  * aggregate is computed per group, so with no key there is nothing to aggregate
- * over and nothing to describe. The mode goes with them — which grouping sets a
+ * over and nothing to describe. A granularity goes the same way, and has to —
+ * it says how a key is grouped, so with no key it names nothing. The mode goes
+ * with them — which grouping sets a
  * read emits is not a state an ungrouped table has.
  */
 export const serializeGroupingToURL = ({
   aggregates,
   keys,
   mode,
+  periods,
 }: TableGroupingState) =>
   keys.length === 0
     ? undefined
-    : groupingCodec.serialize({ agg: aggregates, keys, mode });
+    : groupingCodec.serialize({ agg: aggregates, gran: periods, keys, mode });

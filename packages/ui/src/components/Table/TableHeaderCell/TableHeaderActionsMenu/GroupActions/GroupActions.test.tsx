@@ -94,6 +94,7 @@ const numericCapability: TableColumnGroupingCapability = {
   aggregates: ['avg', 'count', 'sum'],
   canGroup: false,
   column: 'total_amount',
+  periods: [],
   refusal: 'too-many-distinct',
   role: 'fact',
   typeName: 'numeric',
@@ -159,7 +160,10 @@ describe('GroupActions', () => {
 
     fireEvent.click(getButton('Group by This'));
 
-    expect(mockToggleGroupKey).toHaveBeenCalledWith('order_status');
+    expect(mockToggleGroupKey).toHaveBeenCalledWith({
+      columnKey: 'order_status',
+      period: undefined,
+    });
     expect(mockToggleGroupKey).toHaveBeenCalledTimes(1);
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
@@ -175,7 +179,10 @@ describe('GroupActions', () => {
 
     fireEvent.click(getButton('Group by This'));
 
-    expect(mockToggleGroupKey).toHaveBeenCalledWith('order_status');
+    expect(mockToggleGroupKey).toHaveBeenCalledWith({
+      columnKey: 'order_status',
+      period: undefined,
+    });
   });
 
   it('marks itself active when it is a *deeper* key, not only the first', () => {
@@ -262,7 +269,10 @@ describe('GroupActions', () => {
 
     fireEvent.click(button);
 
-    expect(mockToggleGroupKey).toHaveBeenCalledWith('total_amount');
+    expect(mockToggleGroupKey).toHaveBeenCalledWith({
+      columnKey: 'total_amount',
+      period: undefined,
+    });
   });
 
   it('quotes no catalogue reason for a column the table itself declared ungroupable', () => {
@@ -394,6 +404,7 @@ describe('GroupActions', () => {
         aggregates: [],
         canGroup: false,
         column: 'doc',
+        periods: [],
         refusal: 'not-a-dimension',
         role: 'unsupported',
         typeName: 'jsonb',

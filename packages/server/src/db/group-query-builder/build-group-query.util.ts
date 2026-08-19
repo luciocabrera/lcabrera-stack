@@ -17,6 +17,7 @@ import { expandGroupingSets } from './expand-grouping-sets.util.ts';
 import { GROUP_MASK_ALIAS } from './group-query-builder.constants.ts';
 import { resolveAggregateAlias } from './resolve-aggregate-alias.util.ts';
 import { resolveGroupGuardRails } from './resolve-group-guard-rails.util.ts';
+import { resolveGroupKeyExpression } from './resolve-group-key-expression.util.ts';
 import { toGroupingSetMask } from './to-grouping-set-mask.util.ts';
 
 /**
@@ -47,6 +48,7 @@ export const buildGroupQuery = ({
   grouping,
   keys,
   maxRows,
+  periods,
   schema,
   sort,
   subtotalPlacement,
@@ -54,7 +56,7 @@ export const buildGroupQuery = ({
 }: GroupQueryDescriptor): BuiltGroupQuery => {
   assertSafeIdentifier(schema);
   assertSafeIdentifier(table);
-  assertGroupKeys({ allowedColumns, capabilities, grouping, keys });
+  assertGroupKeys({ allowedColumns, capabilities, grouping, keys, periods });
   assertGroupAggregates({ aggregates, allowedColumns, capabilities });
 
   // After the legality gates and before anything is emitted: the catalogue's
@@ -80,7 +82,21 @@ export const buildGroupQuery = ({
   });
 
   const sets = expandGroupingSets({ grouping, keys });
-  const quotedKeys = keys.map((key) => quoteIdentifier(key));
+  // Resolved once and shared by the projection, `GROUPING()`, the grouping sets
+  // and the `ORDER BY` — Postgres matches a `GROUPING` argument against its
+  // `GROUP BY` expression syntactically, so a second spelling of the same
+  // truncation fails to plan (#786).
+  const expressionByKey = Object.fromEntries(
+    keys.map((key) => [
+      key,
+      resolveGroupKeyExpression({
+        key,
+        period: periods?.[key],
+        typeName: capabilities[key]?.typeName,
+      }),
+    ]),
+  );
+  const keyExpressions = keys.map((key) => expressionByKey[key] ?? key);
 
   const projection = buildAggregateProjection({
     aliased,
@@ -98,17 +114,25 @@ export const buildGroupQuery = ({
   });
 
   const selectList = [
-    ...quotedKeys,
-    `GROUPING(${quotedKeys.join(', ')}) AS ${quoteIdentifier(GROUP_MASK_ALIAS)}`,
+    // A truncated key is aliased back to its column name, so every consumer —
+    // the row decoder, the group path, the `ORDER BY` value term — keeps
+    // reading the key by the name it asked for.
+    ...keys.map((key, index) =>
+      periods?.[key] === undefined
+        ? keyExpressions[index]
+        : `${keyExpressions[index]} AS ${quoteIdentifier(key)}`,
+    ),
+    `GROUPING(${keyExpressions.join(', ')}) AS ${quoteIdentifier(GROUP_MASK_ALIAS)}`,
     projection.text,
   ].join(', ');
 
   const text = [
     `SELECT ${selectList} FROM ${quoteIdentifier(schema)}.${quoteIdentifier(table)}`,
     whereClause.text,
-    buildGroupingSetsClause({ sets }),
+    buildGroupingSetsClause({ expressionByKey, sets }),
     buildGroupOrderByClause({
       aggregateAliases,
+      expressionByKey,
       keys,
       sets,
       sort,

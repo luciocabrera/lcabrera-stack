@@ -18,6 +18,7 @@ const capability = ({
   canGroup: true,
   column,
   distinctEstimate,
+  periods: [],
   role: 'dimension',
   typeName: 'text',
 });

@@ -83,6 +83,21 @@ column may be a key. It composes `isUniqueIsh` (`is-unique-ish.util.ts`) — a
 column with about as many distinct values as the table has rows, which groups to
 one row per row and is the likeliest user mistake, so it earns its own message.
 
+**A temporal key's granularity** ([ADR-084](../../../docs/decisions/ADR-084-a-group-key-carries-its-granularity.md)).
+`resolveColumnPeriods` (`resolve-column-periods.util.ts`) answers which
+granularities a column may be grouped at, and is what a surface reads **instead
+of** `canGroup` for a date: one group per calendar day is exactly the tree the
+guard refuses, while a month clears it comfortably. It gates on
+`isPeriodCapableType` (`is-period-capable-type.util.ts`) and then runs the same
+`refuseGroupKey` ladder with `resolvePeriodDistinctEstimate`
+(`resolve-period-distinct-estimate.util.ts`) substituted — so role, equality and
+the unique-ish rule do not become negotiable because a granularity was asked for.
+That estimate is bounded twice, by the raw distinct count and by the column's
+`pg_stats` histogram range, because neither alone is enough.
+`resolveGroupKeyExpression` (`resolve-group-key-expression.util.ts`) is the SQL
+side: one spelling of the truncation for all four places it appears, with
+`timestamptz` pinned to a stated zone rather than the session's.
+
 **Emission (ADR-059).** `buildGroupQuery` (`build-group-query.util.ts`) turns a
 `GroupQueryDescriptor` into `GROUP BY GROUPING SETS` with a variadic
 `GROUPING()` mask, and is the only export of this half. It takes the capability
@@ -142,7 +157,10 @@ subtotal from a real NULL — the two are textually identical and nothing else
 separates them. It composes `toGroupLabel` (`to-group-label.util.ts`), which
 formats a key against the closed dimension vocabulary
 ([ADR-058](../../../docs/decisions/ADR-058-grouping-legality-by-analytical-role.md))
-and answers `(empty)` rather than guessing at anything outside it.
+and answers `(empty)` rather than guessing at anything outside it — and
+`toGroupPeriodLabel` (`to-group-period-label.util.ts`), which heads a truncated
+key by its period (`2021-Q2`) rather than by the instant it starts, reading the
+value back in the frame it was truncated in.
 
 **Issuing and decoding the read as one pair.** `toGroupAggregates` and
 `decodeGroupedRows` (`decode-grouped-rows.util.ts`) are the two halves of the
@@ -158,7 +176,17 @@ into the paginated read of the rows underneath it, or a typed refusal for a
 grand total, a subtotal or an incomplete path
 ([ADR-079](../../../docs/decisions/ADR-079-drilling-from-a-group-to-its-rows.md)).
 The route's primary key and page ceiling are arguments — only the route knows
-them — which is the whole of what a caller supplies.
+them — which is the whole of what a caller supplies. `resolveDrillRefusal`
+(`resolve-drill-refusal.util.ts`) is the refusal half on its own, so a route can
+ask before it pays: every reason is a property of the row and the applied keys,
+none of them needs the catalogue, and `toDrillRead` asks through the same
+function. A **truncated** key becomes
+a half-open range rather than an equality, since the group's value is a period
+start no row holds; `advanceGroupPeriod` (`advance-group-period.util.ts`)
+computes the upper bound by calendar arithmetic, and `toGroupKeyTruncations`
+(`to-group-key-truncations.util.ts`) is where the requested granularity meets the
+catalogue fact that decides which frame that arithmetic runs in
+([ADR-084](../../../docs/decisions/ADR-084-a-group-key-carries-its-granularity.md)).
 
 All of this lived in `apps/react-router` until
 [ADR-082](../../../docs/decisions/ADR-082-the-olap-seam-lives-in-the-packages.md);

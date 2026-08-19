@@ -2,20 +2,23 @@ import type {
   TableAggregateFn,
   TableGroupingMode,
   TableGroupingState,
+  TableGroupPeriod,
 } from '#ui/components/Table/Table.types';
 
-import { areGroupKeysLegal } from '../grouping/utils';
+import { areGroupKeysLegal, pruneGroupPeriods } from '../grouping/utils';
 
 type GetInitialGroupingStateArgs = {
   readonly groupingAggregates?: Readonly<Record<string, TableAggregateFn>>;
   readonly groupingKeys?: readonly string[];
   readonly groupingMode?: TableGroupingMode;
+  readonly groupingPeriods?: Readonly<Record<string, TableGroupPeriod>>;
 };
 
 const NO_GROUPING: TableGroupingState = {
   aggregates: {},
   keys: [],
   mode: 'flat',
+  periods: {},
 };
 
 /**
@@ -59,6 +62,7 @@ export const getInitialGroupingState = ({
   groupingAggregates = {},
   groupingKeys = [],
   groupingMode = 'flat',
+  groupingPeriods = {},
 }: GetInitialGroupingStateArgs): TableGroupingState => {
   if (groupingKeys.length === 0 || !areGroupKeysLegal(groupingKeys)) {
     return NO_GROUPING;
@@ -68,5 +72,11 @@ export const getInitialGroupingState = ({
     aggregates: { ...groupingAggregates },
     keys: [...groupingKeys],
     mode: groupingMode,
+    // Pruned to the keys that survived, so a granularity for a key the loader
+    // did not apply cannot reach the server, which refuses one (#786).
+    periods: pruneGroupPeriods({
+      keys: groupingKeys,
+      periods: groupingPeriods,
+    }),
   };
 };
