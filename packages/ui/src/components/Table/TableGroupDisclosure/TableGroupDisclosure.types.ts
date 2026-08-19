@@ -1,3 +1,4 @@
+import type { TableGroupLevelDisclosure } from '#ui/components/Table/contexts/TableConfig/expansion/utils/resolveGroupLevelDisclosures.util';
 import type { TableGroupKeyValue } from '#ui/components/Table/Table.types';
 
 export type TableGroupDisclosureProps = {
@@ -27,4 +28,11 @@ export type TableGroupDisclosureState = {
    */
   readonly isDrillable: boolean;
   readonly isExpanded: boolean;
+  /**
+   * The groups this row folds, keyed by the column stating each level (#802).
+   * It travels on the row's disclosure state rather than as a prop of its own
+   * because every key cell of the row needs it and they are all rendered from
+   * one descriptor — see `resolveGroupKeyCellDisclosure`.
+   */
+  readonly levelDisclosures: readonly TableGroupLevelDisclosure[];
 };

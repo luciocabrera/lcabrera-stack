@@ -26,7 +26,12 @@ describe('TableGroupDisclosure', () => {
   it('toggles the group it names when clicked', () => {
     render(
       <TableGroupDisclosure
-        disclosure={{ hasChildren: true, isDrillable: false, isExpanded: true }}
+        disclosure={{
+          hasChildren: true,
+          isDrillable: false,
+          isExpanded: true,
+          levelDisclosures: [],
+        }}
         path={PATH}
       />,
     );
@@ -41,7 +46,12 @@ describe('TableGroupDisclosure', () => {
   it('states its direction from the row’s expansion', () => {
     const { rerender } = render(
       <TableGroupDisclosure
-        disclosure={{ hasChildren: true, isDrillable: false, isExpanded: true }}
+        disclosure={{
+          hasChildren: true,
+          isDrillable: false,
+          isExpanded: true,
+          levelDisclosures: [],
+        }}
         path={PATH}
       />,
     );
@@ -56,6 +66,7 @@ describe('TableGroupDisclosure', () => {
           hasChildren: true,
           isDrillable: false,
           isExpanded: false,
+          levelDisclosures: [],
         }}
         path={PATH}
       />,
@@ -73,6 +84,7 @@ describe('TableGroupDisclosure', () => {
           hasChildren: false,
           isDrillable: false,
           isExpanded: false,
+          levelDisclosures: [],
         }}
         path={PATH}
       />,
@@ -99,6 +111,7 @@ describe('TableGroupDisclosure', () => {
           hasChildren: true,
           isDrillable: false,
           isExpanded: false,
+          levelDisclosures: [],
         }}
         path={PATH}
       />,

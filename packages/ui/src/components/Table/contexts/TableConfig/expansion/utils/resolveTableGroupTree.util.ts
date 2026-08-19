@@ -1,11 +1,16 @@
-import type { TableGroupDrill } from '#ui/components/Table/Table.types';
+import type {
+  TableGroupDrill,
+  TableGroupRowSummary,
+} from '#ui/components/Table/Table.types';
 
 import { getTableGroupRowSummary } from '#ui/components/Table/utils/getTableGroupRowSummary.util';
 
+import type { TableGroupLevelDisclosure } from './resolveGroupLevelDisclosures.util';
 import type { GroupTreeNode } from './resolveGroupTreeNodes.util';
 
 import { isDrillableGroupRow } from './isDrillableGroupRow.util';
 import { resolveDrilledBlock } from './resolveDrilledBlock.util';
+import { resolveGroupLevelDisclosures } from './resolveGroupLevelDisclosures.util';
 import { resolveGroupRowIsExpanded } from './resolveGroupRowIsExpanded.util';
 import { resolveGroupTreeNodes } from './resolveGroupTreeNodes.util';
 
@@ -32,6 +37,13 @@ export type TableGroupTreeRowMeta = {
   readonly isDrillable: boolean;
   readonly isExpanded: boolean;
   readonly level: number;
+  /**
+   * The groups this row can fold, each keyed by the column stating its level
+   * (#802). A row folds its ancestors, so this is empty on a detail row and on
+   * a group row every one of whose levels is either childless or its own open
+   * group — see `resolveGroupLevelDisclosures`.
+   */
+  readonly levelDisclosures: readonly TableGroupLevelDisclosure[];
   /** Present only on a group row; it is the key expansion is stored under. */
   readonly pathKey: string | undefined;
   readonly posInSet: number;
@@ -55,6 +67,7 @@ type VisibleRow<TData> = {
   readonly isDrillable: boolean;
   readonly node: GroupTreeNode;
   readonly row: TData;
+  readonly summary: TableGroupRowSummary | undefined;
 };
 
 /**
@@ -152,6 +165,7 @@ export const resolveTableGroupTree = <TData extends Record<string, unknown>>({
       }),
       node,
       row,
+      summary: summaries[index],
     });
   }
 
@@ -160,7 +174,7 @@ export const resolveTableGroupTree = <TData extends Record<string, unknown>>({
   const rowMeta: TableGroupTreeRowMeta[] = [];
   const rows: TData[] = [];
 
-  for (const { hasChildren, isDrillable, node, row } of visible) {
+  for (const { hasChildren, isDrillable, node, row, summary } of visible) {
     const posInSet = (positions.get(node.parentKey) ?? 0) + 1;
     const drill =
       node.pathKey === undefined ? undefined : drilledGroups?.get(node.pathKey);
@@ -179,6 +193,12 @@ export const resolveTableGroupTree = <TData extends Record<string, unknown>>({
         pathKey: node.pathKey,
       }),
       level: node.level,
+      levelDisclosures: resolveGroupLevelDisclosures({
+        collapsedGroupPaths,
+        parentKeys,
+        pathKey: node.pathKey,
+        summary,
+      }),
       pathKey: node.pathKey,
       posInSet,
       setSize: setSizes.get(node.parentKey) ?? 1,

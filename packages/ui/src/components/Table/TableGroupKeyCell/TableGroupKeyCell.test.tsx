@@ -2,12 +2,27 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
+import type { TableGroupLevelDisclosure } from '#ui/components/Table/contexts/TableConfig/expansion/utils/resolveGroupLevelDisclosures.util';
 import type { TableGroupRowSummary } from '#ui/components/Table/Table.types';
 
 import { TableGroupKeyCell } from './TableGroupKeyCell.component';
 
+// The box is always rendered so labels line up down a key column; what varies
+// is whether a control was handed to it, which is what these assertions read.
 vi.mock('#ui/components/Table/TableGroupDisclosure', () => ({
-  TableGroupDisclosure: () => <span data-testid='disclosure' />,
+  TableGroupDisclosure: ({
+    disclosure,
+    path,
+  }: {
+    readonly disclosure: unknown;
+    readonly path: readonly { readonly label: string }[];
+  }) => (
+    <span
+      data-controls={path.map(({ label }) => label).join('/')}
+      data-openable={String(disclosure !== undefined)}
+      data-testid='disclosure'
+    />
+  ),
 }));
 
 const GROUPING_KEYS = ['city', 'district'];
@@ -29,13 +44,25 @@ const FULL_PATH = [
 type RenderCellArgs = {
   readonly columnKey: string;
   readonly isCarried?: boolean;
+  readonly levelDisclosures?: readonly TableGroupLevelDisclosure[];
 };
 
-const renderCell = ({ columnKey, isCarried = false }: RenderCellArgs) =>
+const NO_LEVELS: readonly TableGroupLevelDisclosure[] = [];
+
+const renderCell = ({
+  columnKey,
+  isCarried = false,
+  levelDisclosures = NO_LEVELS,
+}: RenderCellArgs) =>
   render(
     <TableGroupKeyCell
       columnKey={columnKey}
-      disclosure={{ hasChildren: true, isDrillable: false, isExpanded: true }}
+      disclosure={{
+        hasChildren: true,
+        isDrillable: false,
+        isExpanded: true,
+        levelDisclosures,
+      }}
       groupingKeys={GROUPING_KEYS}
       isCarried={isCarried}
       summary={summaryOf(FULL_PATH)}
@@ -53,14 +80,43 @@ describe('TableGroupKeyCell', () => {
     );
   });
 
-  it('leads the innermost level with the disclosure, and nothing else', () => {
-    renderCell({ columnKey: 'district' });
-    expect(screen.getByTestId('disclosure')).toBeTruthy();
-
-    cleanup();
-
+  it('reserves the chevron box on every drawn key cell, control or not', () => {
+    // Only some rows of a key column offer a control — a subtotal does not fold
+    // the level it totals while that level is open — so a cell that dropped the
+    // box would sit a chevron's width off from its siblings in the same column.
     renderCell({ columnKey: 'city' });
-    expect(screen.queryByTestId('disclosure')).toBeNull();
+
+    expect(screen.getByTestId('disclosure').dataset.openable).toBe('false');
+  });
+
+  it('leads a foldable level with a control, in that level’s own column', () => {
+    // The defect this addresses: the control belongs where the level is stated,
+    // which for an ancestor is a column the row does not own (#802).
+    renderCell({
+      columnKey: 'city',
+      levelDisclosures: [
+        {
+          columnKey: 'city',
+          isExpanded: true,
+          path: [{ columnKey: 'city', label: 'Paris', value: 'Paris' }],
+        },
+      ],
+    });
+
+    const disclosure = screen.getByTestId('disclosure');
+
+    expect(disclosure.dataset.openable).toBe('true');
+    // The ancestor's own path, not the row's — folding `Paris` from a row
+    // inside it must not fold the row's own group instead.
+    expect(disclosure.dataset.controls).toBe('Paris');
+  });
+
+  it('leaves a level with no entry uncontrolled, innermost included', () => {
+    // Presence in `levelDisclosures` is the whole answer; the cell never
+    // re-derives whether a level has children.
+    renderCell({ columnKey: 'district' });
+
+    expect(screen.getByTestId('disclosure').dataset.openable).toBe('false');
   });
 
   it('renders a carried level as visually-hidden text, not as an empty cell', () => {

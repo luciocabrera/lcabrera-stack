@@ -16,6 +16,7 @@ TableGroupKeyCell/
 ├── TableGroupKeyCell.types.ts
 ├── TableGroupKeyCell.stylex.ts
 ├── utils/resolveGroupKeyCellText.util.ts  → Pure: what this column holds for this row, if anything
+├── utils/resolveGroupKeyCellDisclosure.util.ts → Pure: which control this cell draws — the fold for the level it holds, or the row's own drill (ADR-080 amendment)
 └── index.ts
 ```
 
