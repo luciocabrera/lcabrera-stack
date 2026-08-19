@@ -96,6 +96,33 @@ describe('decodeGroupedRows', () => {
     expect(decoded?.[OLAP_GROUP_ROW_FIELD]?.aggregates).toStrictEqual([]);
   });
 
+  it('throws rather than decoding a list that does not line up', () => {
+    // The quiet failure this refuses: an alias that is not there yields
+    // `row[undefined]`, so every group would report a count of NaN and
+    // aggregates of undefined — valid-looking rows carrying no data.
+    expect(() =>
+      decodeGroupedRows({
+        aggregates: emit(toGroupAggregates({ requested: [] })),
+        columnKeys: ['status'],
+        maskAlias: 'grouping_mask',
+        requested: REQUESTED,
+        rows: [{ count_all: '1', grouping_mask: 0, status: 'A' }],
+      }),
+    ).toThrow(/aggregate alias/);
+  });
+
+  it('throws when the read emitted no aggregates at all', () => {
+    expect(() =>
+      decodeGroupedRows({
+        aggregates: [],
+        columnKeys: ['status'],
+        maskAlias: 'grouping_mask',
+        requested: [],
+        rows: [{ count_all: '1', grouping_mask: 0, status: 'A' }],
+      }),
+    ).toThrow(/aggregate alias/);
+  });
+
   it('returns one decoded row per row read', () => {
     const built = emit(toGroupAggregates({ requested: [] }));
 

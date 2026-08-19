@@ -64,6 +64,14 @@ export const toGroupAggregates = ({
  *
  * The offset by one is `count(*)`, which `toGroupAggregates` puts first. See
  * there for why the two belong in one module.
+ *
+ * **A list that does not line up throws rather than decoding.** The failure this
+ * refuses is the quiet one: reading an alias that is not there yields
+ * `row[undefined]`, so every group would report a count of `NaN` and aggregates
+ * of `undefined` — valid-looking rows carrying no data, with nothing thrown and
+ * nothing logged. A caller who reached this state has passed a `requested` list
+ * that is not the one the read was issued with, which is a programming error and
+ * is worth saying so at the point it is detectable.
  */
 export const decodeGroupedRows = ({
   aggregates,
@@ -72,9 +80,18 @@ export const decodeGroupedRows = ({
   requested,
   rows,
 }: DecodeGroupedRowsArgs) => {
-  const countAlias = aggregates[0]?.alias ?? '';
+  const [count, ...selected] = aggregates;
+
+  if (count === undefined || selected.length !== requested.length) {
+    throw new Error(
+      `Grouped read emitted ${String(aggregates.length)} aggregate alias(es) but ${String(requested.length + 1)} were requested (count(*) plus ${String(requested.length)}); pass the same list \`toGroupAggregates\` was given.`,
+    );
+  }
+
+  // The guard above pins the two lists to the same length, so the fallback is
+  // unreachable and present only for `noUncheckedIndexedAccess`.
   const decoded = requested.map((aggregate, index) => ({
-    alias: aggregates[index + 1]?.alias ?? '',
+    alias: selected[index]?.alias ?? '',
     columnKey: aggregate.column,
     fn: aggregate.fn,
   }));
@@ -83,7 +100,7 @@ export const decodeGroupedRows = ({
     toGroupRow({
       aggregates: decoded,
       columnKeys,
-      countAlias,
+      countAlias: count.alias,
       maskAlias,
       row,
     }),
