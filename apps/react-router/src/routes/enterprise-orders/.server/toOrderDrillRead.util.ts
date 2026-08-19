@@ -23,6 +23,14 @@ export type OrderDrillRead =
  */
 export type OrderDrillRefusal = 'grand-total' | 'incomplete-path' | 'subtotal';
 
+/**
+ * Only what the translation reads. A whole `TableGroupRowSummary` satisfies it
+ * structurally, so every existing caller is unaffected — but a caller that has
+ * only a path and a flag, which is all an HTTP request can carry, does not have
+ * to fabricate a `count` and an `aggregates` list nobody looks at.
+ */
+export type OrderDrillGroup = Pick<TableGroupRowSummary, 'isSubtotal' | 'path'>;
+
 type ToOrderDrillReadArgs = {
   /** The filters the grouped view was read under, unchanged. */
   readonly filters: readonly QueryFilter[];
@@ -31,7 +39,7 @@ type ToOrderDrillReadArgs = {
   readonly limit: number;
   /** The sort the grouped view was read under. */
   readonly sort: readonly QuerySort[];
-  readonly summary: TableGroupRowSummary;
+  readonly summary: OrderDrillGroup;
 };
 
 /**
@@ -47,7 +55,7 @@ type ToOrderDrillReadArgs = {
 const toKeyFilter = ({
   columnKey,
   value,
-}: TableGroupRowSummary['path'][number]): QueryFilter =>
+}: OrderDrillGroup['path'][number]): QueryFilter =>
   value === null || value === undefined
     ? { column: columnKey, operator: 'isNull' }
     : { column: columnKey, operator: 'eq', value };
