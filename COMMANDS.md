@@ -826,7 +826,7 @@ Biome is **check-only** here on purpose: `vp check --fix` autofixes, but a Biome
 autofix could rewrite a staged file after you reviewed it, so a violation fails the
 commit and you apply the fix deliberately with `vp run lint:biome`.
 
-`.vite-hooks/commit-msg` runs `repo-verify-commit "$1"`, validating
+`.vite-hooks/commit-msg` runs `node packages/repo-standards/scripts/verify-commit-msg.mjs "$1"`, validating
 the commit message against the Conventional-Commit standard before the commit is
 created (merge/revert/`fixup!` messages are skipped). The `_/` shims are gitignored
 but the committed sibling hooks (`pre-commit`, `commit-msg`) persist across every

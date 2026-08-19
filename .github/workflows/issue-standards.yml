@@ -35,4 +35,4 @@ jobs:
         # untrusted text that anyone can author.
         env:
           ISSUE_BODY: ${{ github.event.issue.body }}
-        run: vp run issue:verify
+        run: node packages/repo-standards/scripts/verify-issue-body.mjs

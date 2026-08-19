@@ -41,7 +41,7 @@ jobs:
         # not the topic branch and would always read as exempt.
         env:
           BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
-        run: vp run branch:verify
+        run: node packages/repo-standards/scripts/verify-branch-name.mjs
 
       - name: Validate PR title, description and base branch
         # Title/body/base come in through env, never a shell interpolation, so no
@@ -51,7 +51,7 @@ jobs:
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_BODY: ${{ github.event.pull_request.body }}
           PR_BASE: ${{ github.event.pull_request.base.ref }}
-        run: vp run pr:verify
+        run: node packages/repo-standards/scripts/verify-pr.mjs
 
       - name: Validate every commit message in the PR
         # --no-merges drops the Merge commits; each surviving message is piped to
@@ -64,10 +64,10 @@ jobs:
           set -o pipefail
           status=0
           for sha in $(git rev-list --no-merges "$BASE_SHA..$HEAD_SHA"); do
-            # The bin directly rather than through the task runner: this runs
-            # once per commit in the range, and the runner would rebuild its
-            # task graph on every iteration.
-            if ! git log -1 --format=%B "$sha" | node_modules/.bin/repo-verify-commit -; then
+            # By path, not through the task runner or a bin: this workflow
+            # runs without installing, and these gates import nothing outside
+            # node builtins and their own siblings so they need no install.
+            if ! git log -1 --format=%B "$sha" | node packages/repo-standards/scripts/verify-commit-msg.mjs -; then
               echo "::error::commit $sha has a non-conforming message"
               status=1
             fi
