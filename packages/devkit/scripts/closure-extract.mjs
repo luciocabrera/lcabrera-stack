@@ -9,11 +9,6 @@
  * it is written as a markdown link, and only the link form was being read.
  */
 
-// Every quantified class here excludes the delimiter that ends it, so the match
-// is decided in one pass. Spelling the optional title as `(?:\s+"[^"]*")?` after
-// a `[^)\s]+` target reintroduces a choice at each position and is polynomial on
-// a line holding an unclosed link; the title is split off afterwards instead.
-const LINK_PATTERN = /\[[^\]]*\]\(([^)]*)\)/g;
 const FENCE_PATTERN = /^```([\w-]*)\s*$/;
 const INLINE_CODE_PATTERN = /`([^`\n]+)`/g;
 
@@ -72,14 +67,35 @@ const lineOf = (content, index) => content.slice(0, index).split('\n').length;
 /** `(path "title")` is one link; only the path travels. */
 const linkTargetOf = (raw) => raw.trim().split(/\s+/)[0] ?? '';
 
+/**
+ * Scanned with `indexOf` rather than matched with a pattern. Any regex looking
+ * for a delimiter pair rescans from every start offset, which is quadratic on a
+ * line of unclosed brackets — the shape CodeQL reports as polynomial. A cursor
+ * that only moves forward cannot do that.
+ *
+ * The opening `[` is not required: `](` is the part that marks a target, and
+ * accepting it costs at most a reference reported that a reader would have to
+ * dismiss, where demanding it costs a backward scan per match.
+ */
+const parseLinkTargets = (line) => {
+  const targets = [];
+  let cursor = 0;
+  for (;;) {
+    const marker = line.indexOf('](', cursor);
+    if (marker === -1) return targets;
+    const end = line.indexOf(')', marker + 2);
+    if (end === -1) return targets;
+    targets.push(line.slice(marker + 2, end));
+    cursor = end + 1;
+  }
+};
+
 export const extractLinkTargets = (content) =>
-  content
-    .split('\n')
-    .flatMap((line, index) =>
-      [...line.matchAll(LINK_PATTERN)]
-        .map((match) => ({ line: index + 1, target: linkTargetOf(match[1]) }))
-        .filter((entry) => entry.target !== ''),
-    );
+  content.split('\n').flatMap((line, index) =>
+    parseLinkTargets(line)
+      .map((raw) => ({ line: index + 1, target: linkTargetOf(raw) }))
+      .filter((entry) => entry.target !== ''),
+  );
 
 /** The fenced blocks whose language marks them as something a reader will run. */
 const shellBlockLines = (content) => {

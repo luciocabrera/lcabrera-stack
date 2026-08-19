@@ -22,8 +22,25 @@ import {
   extractPathTokens,
 } from './closure-extract.mjs';
 
+/**
+ * A scheme is at least two characters, which is what separates `mailto:` from a
+ * Windows drive letter. Treating `C:\\dir\\file.md` as a URL would silently drop
+ * the most non-portable path a shipped file can contain.
+ */
 const isExternalUrl = (target) =>
-  /^[a-z][a-z0-9+.-]*:/i.test(target) || target.startsWith('//');
+  /^[a-z][a-z0-9+.-]+:/i.test(target) || target.startsWith('//');
+
+/**
+ * A path anchored to a filesystem root — POSIX `/…`, a Windows drive, or a UNC
+ * share. It cannot resolve anywhere but the machine that wrote it, so it is
+ * reported rather than resolved: treating it as relative would quietly place it
+ * inside the shipped directory and call it internal, which is the most
+ * non-portable reference a shipped file can hold going unnoticed.
+ */
+const isAbsolutePath = (target) =>
+  target.startsWith('/') ||
+  target.startsWith('\\\\') ||
+  /^[a-z]:[/\\]/i.test(target);
 
 /** `path#section` and `#section` both point at a heading; only the path travels. */
 const withoutAnchor = (target) => {
@@ -63,6 +80,7 @@ const resolveFrom = (base, target) =>
  */
 export const classifyLink = ({ fromDirectory, rootDirectory, target }) => {
   if (isExternalUrl(target)) return { kind: 'url' };
+  if (isAbsolutePath(target)) return { kind: 'escape', resolved: target };
   const withoutFragment = withoutAnchor(target);
   if (withoutFragment === '') return { kind: 'anchor' };
 

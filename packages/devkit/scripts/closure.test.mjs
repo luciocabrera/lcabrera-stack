@@ -16,6 +16,17 @@ describe('extractLinkTargets', () => {
     ]);
   });
 
+  test('reads several links on one line, left to right', () => {
+    expect(extractLinkTargets('[a](one.md) and [b](two.md)')).toEqual([
+      { line: 1, target: 'one.md' },
+      { line: 1, target: 'two.md' },
+    ]);
+  });
+
+  test('stops cleanly on an unclosed link rather than scanning forever', () => {
+    expect(extractLinkTargets(`${'['.repeat(500)}a](`)).toEqual([]);
+  });
+
   test('reads a link whose text is itself code, the spelling skills use', () => {
     expect(
       extractLinkTargets('Read [`docs/a.md`](../../../docs/a.md)'),
@@ -64,6 +75,28 @@ describe('classifyLink', () => {
         target: '#section',
       }).kind,
     ).toBe('anchor');
+  });
+
+  test('an absolute path is reported, never resolved as if it were relative', () => {
+    for (const target of [
+      'C:/dir/file.md',
+      String.raw`C:\dir\file.md`,
+      '/etc/thing.md',
+      String.raw`\\share\thing.md`,
+    ]) {
+      expect(
+        classifyLink({ fromDirectory: 'skills/epic', rootDirectory, target }),
+      ).toEqual({ kind: 'escape', resolved: target });
+    }
+  });
+
+  test('a real scheme is still a url', () => {
+    for (const target of ['https://x/y.md', 'mailto:a@b.c', 'ftp://x/y']) {
+      expect(
+        classifyLink({ fromDirectory: 'skills/epic', rootDirectory, target })
+          .kind,
+      ).toBe('url');
+    }
   });
 
   test('a prefix match is not containment', () => {
