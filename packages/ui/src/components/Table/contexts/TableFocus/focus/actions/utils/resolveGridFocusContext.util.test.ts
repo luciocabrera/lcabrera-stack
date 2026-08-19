@@ -130,6 +130,7 @@ describe('resolveGridFocusContext', () => {
     }) as TableDataState<Row>;
     const collapsed: TableGroupExpansionState = {
       collapsedGroupPaths: new Set([resolveGroupPathKey(groupPath)]),
+      drilledGroups: new Map(),
     };
 
     const expanded = resolveGridFocusContext({

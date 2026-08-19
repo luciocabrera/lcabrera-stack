@@ -454,6 +454,26 @@ export type TableGroupAggregateValue = {
  * type is the URL codec's and the loader's, and everything in it crosses the
  * single-fetch boundary where a `Set` cannot go (ADR-009).
  */
+/**
+ * One group's drilled page: the rows fetched for it, and how far that fetch got.
+ *
+ * `rows` is empty while `loading` and holds the page once `loaded` — the two
+ * travel together because a renderer asking "what do I paint under this group"
+ * needs both answers from one read, and a status without its rows invites a
+ * splice that reads them from somewhere else.
+ */
+export type TableGroupDrill = {
+  readonly rows: readonly Record<string, unknown>[];
+  readonly status: TableGroupDrillStatus;
+};
+
+/**
+ * How far a group's drill has got (ADR-079). There is deliberately no `error`
+ * member: the ADR names three states, and a failed fetch returns the group to
+ * having no entry at all, which is the state it was in before it was asked.
+ */
+export type TableGroupDrillStatus = 'loaded' | 'loading';
+
 export type TableGroupExpansionState = {
   /**
    * Group paths whose subtree is **hidden** — the tree's expansion state, held
@@ -469,6 +489,21 @@ export type TableGroupExpansionState = {
    * survive a sort (ADR-061).
    */
   readonly collapsedGroupPaths: ReadonlySet<string>;
+  /**
+   * Per-group drilled rows and fetch state, keyed by the same
+   * `resolveGroupPathKey` string the collapsed set uses (ADR-079).
+   *
+   * A group with no entry is `idle`: nothing has been asked for. Storing the
+   * absence rather than an explicit `idle` entry is what keeps an ungrouped or
+   * undrilled table's expansion state empty, which is the state that costs
+   * nothing to derive.
+   *
+   * `loaded` is **terminal**. A drill fetches one bounded page and never pages
+   * again, so there is no fourth state for "loading more" — where the group
+   * holds more rows than the page, the answer is the hand-off row, not another
+   * request.
+   */
+  readonly drilledGroups: ReadonlyMap<string, TableGroupDrill>;
 };
 
 /**
@@ -719,6 +754,13 @@ export type TableMetaState = {
    * means off — an endpoint that cannot group would be asked for a shape it
    * does not produce.
    */
+  /**
+   * Endpoint capability (ADR-063): the route serves a drilled page, so a leaf
+   * group offers the affordance that fetches its rows (ADR-079). Absent means
+   * off — a route with no drill endpoint would otherwise show a chevron whose
+   * every use fails.
+   */
+  readonly isGroupDrillEnabled?: boolean;
   readonly isGroupingEnabled?: boolean;
   /**
    * Endpoint capability (ADR-063): the load-more sends the last loaded row as a

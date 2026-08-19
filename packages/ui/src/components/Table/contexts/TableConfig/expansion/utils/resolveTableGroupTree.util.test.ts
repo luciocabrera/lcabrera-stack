@@ -53,6 +53,14 @@ const rows: readonly Row[] = [
 
 const noneCollapsed = new Set<string>();
 
+const drilled = (rowsIn: readonly Row[]) =>
+  resolveTableGroupTree({
+    canDrill: true,
+    collapsedGroupPaths: noneCollapsed,
+    data: rowsIn,
+    groupingKeys: ['city', 'status'],
+  });
+
 describe('resolveTableGroupTree', () => {
   it('returns the caller data by reference when the rows are not a tree', () => {
     // The identity check is the point: an ungrouped grid re-derives this on
@@ -247,5 +255,50 @@ describe('resolveTableGroupTree', () => {
     });
 
     expect(tree.rows).toHaveLength(rows.length);
+  });
+
+  describe('drillability', () => {
+    it('reports a leaf group drillable and its subtotal not', () => {
+      // The pair is disjoint, and that is the whole point of carrying both. In
+      // a rollup the row owning loaded children is the subtotal — precisely the
+      // row that may not drill — while the leaf that may drill owns nothing
+      // loaded. Reading one off the other puts the affordance on the wrong rows
+      // in both directions (ADR-079).
+      // No detail rows beneath the leaf, which is the shape a drill exists for:
+      // the group states a count and holds none of those rows in memory.
+      const { rowMeta } = drilled([groupRow(berlinOpen), subtotalRow(berlin)]);
+
+      expect(rowMeta?.[0]).toMatchObject({
+        hasChildren: false,
+        isDrillable: true,
+      });
+      expect(rowMeta?.[1]).toMatchObject({
+        hasChildren: true,
+        isDrillable: false,
+      });
+    });
+
+    it('refuses an incomplete path, whose children are group rows in memory', () => {
+      const { rowMeta } = drilled([groupRow(berlin), groupRow(berlinOpen)]);
+
+      expect(rowMeta?.[0]?.isDrillable).toBe(false);
+      expect(rowMeta?.[1]?.isDrillable).toBe(true);
+    });
+
+    it('reports nothing drillable when the route serves no drilled page', () => {
+      const { rowMeta } = resolveTableGroupTree({
+        collapsedGroupPaths: noneCollapsed,
+        data: [groupRow(berlinOpen)],
+        groupingKeys: ['city', 'status'],
+      });
+
+      expect(rowMeta?.[0]?.isDrillable).toBe(false);
+    });
+
+    it('leaves a detail row undrillable', () => {
+      const { rowMeta } = drilled([groupRow(berlinOpen), { id: 3 }]);
+
+      expect(rowMeta?.[1]?.isDrillable).toBe(false);
+    });
   });
 });

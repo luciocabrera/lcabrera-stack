@@ -13,6 +13,7 @@ describe('resolveTreeRowAriaProps', () => {
     expect(
       resolveTreeRowAriaProps({
         hasChildren: false,
+        isDrillable: false,
         isExpanded: false,
         level: 2,
         pathKey: undefined,
@@ -31,6 +32,7 @@ describe('resolveTreeRowAriaProps', () => {
     expect(
       resolveTreeRowAriaProps({
         hasChildren: true,
+        isDrillable: false,
         isExpanded: false,
         level: 1,
         pathKey: 'grp:[["city","Paris"]]',

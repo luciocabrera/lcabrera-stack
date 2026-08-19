@@ -1,5 +1,7 @@
 import { useGetTableCollapsedGroupPaths } from '#ui/components/Table/contexts/TableConfig/expansion/selectors';
 import { resolveTableGroupTree } from '#ui/components/Table/contexts/TableConfig/expansion/utils';
+import { useGetTableGroupingKeys } from '#ui/components/Table/contexts/TableConfig/grouping/selectors';
+import { useGetTableIsGroupDrillEnabled } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 import { useGetTableData } from '#ui/components/Table/contexts/TableData/data/selectors';
 
 /**
@@ -19,6 +21,13 @@ export const useTableGroupTree = <
 >() => {
   const data = useGetTableData<TData>();
   const collapsedGroupPaths = useGetTableCollapsedGroupPaths();
+  const groupingKeys = useGetTableGroupingKeys();
+  const canDrill = useGetTableIsGroupDrillEnabled();
 
-  return resolveTableGroupTree({ collapsedGroupPaths, data });
+  return resolveTableGroupTree({
+    canDrill,
+    collapsedGroupPaths,
+    data,
+    groupingKeys,
+  });
 };

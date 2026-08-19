@@ -150,6 +150,10 @@ vi.mock('#ui/components/Table/contexts/TableConfig/grouping/selectors', () => ({
   useGetTableGroupingKeys: useGetTableGroupingKeysMock,
 }));
 
+vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
+  useGetTableIsGroupDrillEnabled: () => false,
+}));
+
 vi.mock('../contexts/TableData/data/selectors', () => ({
   useGetTableData: useGetTableDataMock,
 }));

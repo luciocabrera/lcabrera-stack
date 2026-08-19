@@ -2,12 +2,30 @@ import { getTableGroupRowSummary } from '#ui/components/Table/utils/getTableGrou
 
 import type { GroupTreeNode } from './resolveGroupTreeNodes.util';
 
+import { isDrillableGroupRow } from './isDrillableGroupRow.util';
 import { resolveGroupTreeNodes } from './resolveGroupTreeNodes.util';
 
 /** One visible row's place in the tree, as ARIA needs it stated. */
 export type TableGroupTreeRowMeta = {
-  /** Whether the row owns rows below it — what decides if `aria-expanded` applies at all. */
+  /**
+   * Whether the row owns rows below it — what decides if `aria-expanded`
+   * applies at all.
+   *
+   * **Loaded rows only.** A leaf group owns rows in the table and none of them
+   * in memory, so this is `false` for exactly the rows a drill exists to fetch
+   * — see `isDrillable`, which is the other half of the answer.
+   */
   readonly hasChildren: boolean;
+  /**
+   * Whether the row can fetch its own rows (ADR-079).
+   *
+   * Disjoint from `hasChildren` in practice, and the pair is why both exist: in
+   * a rollup the only row owning loaded children is the **subtotal**, which is
+   * precisely the row that may not drill, while the leaf that may drill owns
+   * nothing loaded. Collapsing one truth into the other would put the
+   * affordance on the wrong rows in both directions.
+   */
+  readonly isDrillable: boolean;
   readonly isExpanded: boolean;
   readonly level: number;
   /** Present only on a group row; it is the key expansion is stored under. */
@@ -17,13 +35,18 @@ export type TableGroupTreeRowMeta = {
 };
 
 type ResolveTableGroupTreeArgs<TData> = {
+  /** Whether the route serves a drilled page at all (ADR-063). Off by default. */
+  readonly canDrill?: boolean;
   readonly collapsedGroupPaths: ReadonlySet<string>;
   readonly data: readonly TData[];
+  /** The applied group keys — what a complete path is measured against. */
+  readonly groupingKeys?: readonly string[];
 };
 
 type VisibleRow<TData> = {
   /** Read from the **loaded** rows, so a collapsed group still reports the children it hides. */
   readonly hasChildren: boolean;
+  readonly isDrillable: boolean;
   readonly node: GroupTreeNode;
   readonly row: TData;
 };
@@ -94,8 +117,10 @@ const countSiblings = (parentKeys: readonly string[]) => {
  * full data would give, without having to say which hidden rows to skip.
  */
 export const resolveTableGroupTree = <TData extends Record<string, unknown>>({
+  canDrill = false,
   collapsedGroupPaths,
   data,
+  groupingKeys = [],
 }: ResolveTableGroupTreeArgs<TData>) => {
   if (data.every((row) => getTableGroupRowSummary(row) === undefined)) {
     return { isTreeGrid: false, rowMeta: undefined, rows: data };
@@ -113,6 +138,11 @@ export const resolveTableGroupTree = <TData extends Record<string, unknown>>({
 
     visible.push({
       hasChildren: node.pathKey !== undefined && parentKeys.has(node.pathKey),
+      isDrillable: isDrillableGroupRow({
+        canDrill,
+        groupingKeys,
+        summary: summaries[index],
+      }),
       node,
       row,
     });
@@ -123,13 +153,14 @@ export const resolveTableGroupTree = <TData extends Record<string, unknown>>({
   const rowMeta: TableGroupTreeRowMeta[] = [];
   const rows: TData[] = [];
 
-  for (const { hasChildren, node, row } of visible) {
+  for (const { hasChildren, isDrillable, node, row } of visible) {
     const posInSet = (positions.get(node.parentKey) ?? 0) + 1;
 
     positions.set(node.parentKey, posInSet);
     rows.push(row);
     rowMeta.push({
       hasChildren,
+      isDrillable,
       isExpanded:
         node.pathKey !== undefined && !collapsedGroupPaths.has(node.pathKey),
       level: node.level,
