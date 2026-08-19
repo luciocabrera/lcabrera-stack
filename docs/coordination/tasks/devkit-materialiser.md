@@ -12,7 +12,7 @@ area:
 started: 2026-08-19
 updated: 2026-08-19
 plan: (none)
-pr: (none)
+pr: '#803'
 issue: #797
 ---
 
@@ -22,6 +22,6 @@ Classify every skill and ship the devkit materialiser
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: probe, classification and materialiser landed on the branch; #803 up for review
 - Blockers: none
-- Next:
+- Next: vendor the epic and refactor-verified contract documents into the package, which relocates files under docs/agents/
