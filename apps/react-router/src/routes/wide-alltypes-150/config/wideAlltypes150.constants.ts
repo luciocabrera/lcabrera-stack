@@ -40,6 +40,15 @@ export const MAX_WIDE_ALLTYPES_SORT_RULES = 5;
  */
 export const MAX_WIDE_ALLTYPES_LIMIT = 200;
 
+/**
+ * The row ceiling a grouped read of this table is bounded by (ADR-066).
+ *
+ * Lower than the enterprise-orders ceiling, and for a reason specific to this
+ * table: it exists to be **wide**, so a group row here carries far more columns
+ * than one there and the same row count costs more to ship and to paint.
+ */
+export const WIDE_ALLTYPES_GROUP_MAX_ROWS = 2000;
+
 /** Every generated column of the table: `c_001` … `c_149`. */
 const GENERATED_COLUMNS = Array.from(
   { length: 149 },

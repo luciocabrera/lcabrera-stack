@@ -1,8 +1,21 @@
+import type { RequestedGroupAggregate } from '@lcabrera/server/db/olap/decode-grouped-rows.util';
 import type { ColumnSort } from '@lcabrera/server/sort/sort.types';
 import type { SortingState } from '@lcabrera/ui/components/Table';
+import type {
+  TableAggregateFn,
+  TableGroupingState,
+} from '@lcabrera/ui/components/Table/Table.types';
 
+import { getColumnGroupingCapabilities } from '@lcabrera/server/db/get-column-grouping-capabilities.util';
 import { getRowsCount } from '@lcabrera/server/db/get-rows-count.util';
+import {
+  decodeGroupedRows,
+  toGroupAggregates,
+  toGroupSort,
+} from '@lcabrera/server/db/olap/decode-grouped-rows.util';
+import { selectGroupedRows } from '@lcabrera/server/db/select-grouped-rows.util';
 import { selectRows } from '@lcabrera/server/db/select-rows.util';
+import { toSerializableDbError } from '@lcabrera/server/errors/to-serializable-db-error.util';
 import { resolveQuerySort } from '@lcabrera/server/sort/resolve-query-sort.util';
 import { sanitizeSorting } from '@lcabrera/ui/routing/shared/sanitizeSorting.util';
 
@@ -11,12 +24,15 @@ import type { WideAlltypes150 } from '@/services';
 import { fetchWideAlltypes150Page } from '@/services';
 import { isExternalApiEnabled } from '@/services/isExternalApiEnabled.util';
 
+import type { WideAlltypes150TableResponse } from '../config';
+
 import {
   MAX_WIDE_ALLTYPES_SORT_RULES,
   toWideAlltypes150Row,
   WIDE_ALLTYPES_ALLOWED_COLUMNS,
   WIDE_ALLTYPES_COLUMNS,
   WIDE_ALLTYPES_FALLBACK_SORT,
+  WIDE_ALLTYPES_GROUP_MAX_ROWS,
   WIDE_ALLTYPES_PRIMARY_KEY,
   WIDE_ALLTYPES_SCHEMA,
   WIDE_ALLTYPES_SORTABLE_COLUMNS,
@@ -40,7 +56,113 @@ const TARGET = {
   table: WIDE_ALLTYPES_TABLE,
 } as const;
 
+const NO_GROUPING: TableGroupingState = {
+  aggregates: {},
+  keys: [],
+  mode: 'flat',
+};
+
+export type SelectGroupedWideAlltypes150Args = {
+  /** The aggregate applied to each column, at most one per column. */
+  readonly aggregates: Readonly<Record<string, TableAggregateFn>>;
+  /** The columns the rows are grouped by, in nesting order. */
+  readonly groupKeys: readonly string[];
+  readonly groupMode: TableGroupingState['mode'];
+  readonly sort: readonly ColumnSort[];
+};
+
+/**
+ * Read one row per distinct combination of the group keys.
+ *
+ * **This function is the point of #575.** Every rule a grouped read depends on
+ * — the `count(*)`-first aggregate list, the alias pairing, the grouped
+ * `ORDER BY`, the `GROUPING()` decode — comes from `@lcabrera/server/db/olap`
+ * (ADR-082, #643). What is written here is this table's own: which table, which
+ * row ceiling, and turning the UI's aggregate record into a list, which reads a
+ * `@lcabrera/ui` type the server package may not depend on (ADR-038).
+ *
+ * Compare it against `enterpriseOrders.service.ts` and the two are the same
+ * eight lines around different constants. That is the genericity claim, and it
+ * is checkable by reading rather than asserted.
+ *
+ * **No error class leaves here**, for the same reason as the orders route:
+ * `@lcabrera/server` raises refusals and timeouts as classes, and single fetch
+ * strips their prototype without a word, so an `instanceof` on the client is
+ * always false (ADR-050, ADR-066).
+ */
+export const selectGroupedWideAlltypes150 = async ({
+  aggregates: selectedAggregates,
+  groupKeys,
+  groupMode,
+  sort,
+}: SelectGroupedWideAlltypes150Args): Promise<WideAlltypes150TableResponse> => {
+  const requested: readonly RequestedGroupAggregate[] = Object.entries(
+    selectedAggregates,
+  ).map(([column, fn]) => ({ column, fn }));
+
+  try {
+    const { aggregates, maskAlias, rows, warning } = await selectGroupedRows({
+      ...TARGET,
+      aggregates: toGroupAggregates({ requested }),
+      grouping: groupMode,
+      keys: groupKeys,
+      maxRows: WIDE_ALLTYPES_GROUP_MAX_ROWS,
+      // `resolveQuerySort` is the same adapter the paginated branch uses, so
+      // the two orderings come from one conversion. Its fallback tiebreaker is
+      // harmless here: `toGroupSort` keeps only terms naming a group key, and
+      // the primary key is never one.
+      sort: toGroupSort({
+        groupKeys,
+        sort: resolveQuerySort({
+          fallback: WIDE_ALLTYPES_FALLBACK_SORT,
+          sorting: sort,
+        }),
+      }),
+    });
+
+    const data = decodeGroupedRows({
+      aggregates,
+      columnKeys: groupKeys,
+      maskAlias,
+      requested,
+      rows,
+    });
+
+    return {
+      data,
+      hasMore: false,
+      total: data.length,
+      ...(warning !== undefined && { groupingWarning: warning }),
+    };
+  } catch (error) {
+    return {
+      data: [],
+      error: toSerializableDbError(error),
+      hasMore: false,
+      total: 0,
+    };
+  }
+};
+
+/**
+ * What each of this route's columns may do in a grouped read, from the pg
+ * catalogue (ADR-058).
+ *
+ * The wide table is where this matters most: 150 columns of deliberately mixed
+ * types, so the coarse `TableColumn.dataType` vocabulary — which reports
+ * `numeric`, `jsonb` and `point` alike as `string` (#550) — would offer the
+ * wrong aggregates on a large fraction of them.
+ */
+export const selectWideAlltypes150GroupingCapabilities = async () =>
+  getColumnGroupingCapabilities({
+    columns: WIDE_ALLTYPES_ALLOWED_COLUMNS,
+    schema: WIDE_ALLTYPES_SCHEMA,
+    table: WIDE_ALLTYPES_TABLE,
+  });
+
 export type SelectWideAlltypes150PageArgs = {
+  /** Absent or empty means an ordinary paginated read. */
+  readonly grouping?: TableGroupingState;
   readonly limit: number;
   readonly offset: number;
   /**
@@ -66,10 +188,20 @@ export type SelectWideAlltypes150PageArgs = {
  * they run concurrently rather than end to end.
  */
 export const selectWideAlltypes150Page = async ({
+  grouping = NO_GROUPING,
   limit,
   offset,
   sorting,
-}: SelectWideAlltypes150PageArgs) => {
+}: SelectWideAlltypes150PageArgs): Promise<WideAlltypes150TableResponse> => {
+  if (grouping.keys.length > 0) {
+    return selectGroupedWideAlltypes150({
+      aggregates: grouping.aggregates,
+      groupKeys: grouping.keys,
+      groupMode: grouping.mode,
+      sort: sorting,
+    });
+  }
+
   const sortableSorting = sorting
     .filter(({ columnKey }) => WIDE_ALLTYPES_SORTABLE_COLUMNS.has(columnKey))
     .slice(0, MAX_WIDE_ALLTYPES_SORT_RULES);
@@ -94,6 +226,8 @@ export const selectWideAlltypes150Page = async ({
 };
 
 export type ReadWideAlltypes150PageArgs = {
+  /** Absent or empty means an ordinary paginated read. */
+  readonly grouping?: TableGroupingState;
   readonly limit: number;
   /** The SSR request's URL — only the external branch has an origin to resolve. */
   readonly requestUrl: string;
@@ -112,16 +246,25 @@ export type ReadWideAlltypes150PageArgs = {
  *
  * The route calls this for its first page; the browser's load-more makes the
  * same choice for itself inside `fetchWideAlltypes150Page`.
+ *
+ * **`grouping` reaches only the self-hosted branch**, and the loader is what
+ * keeps that honest: it declares `isGroupingEnabled` from the same switch, so an
+ * external deployment never offers the control and never sends the param. The
+ * external endpoint has no grouping API to forward to, and answering a grouped
+ * request from this process while the rows came from another one would summarise
+ * a different result set than the page it sits above.
  */
 export const readWideAlltypes150Page = async ({
+  grouping,
   limit,
   requestUrl,
   skip,
   sorting,
-}: ReadWideAlltypes150PageArgs) =>
+}: ReadWideAlltypes150PageArgs): Promise<WideAlltypes150TableResponse> =>
   isExternalApiEnabled()
     ? fetchWideAlltypes150Page({ limit, requestUrl, skip, sorting })
     : selectWideAlltypes150Page({
+        grouping,
         limit,
         offset: skip,
         sorting: sanitizeSorting<WideAlltypes150>(sorting),

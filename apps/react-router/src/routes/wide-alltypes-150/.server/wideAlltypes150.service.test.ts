@@ -1,4 +1,6 @@
+import { getColumnGroupingCapabilities } from '@lcabrera/server/db/get-column-grouping-capabilities.util';
 import { getRowsCount } from '@lcabrera/server/db/get-rows-count.util';
+import { selectGroupedRows } from '@lcabrera/server/db/select-grouped-rows.util';
 import { selectRows } from '@lcabrera/server/db/select-rows.util';
 import {
   afterEach,
@@ -13,12 +15,15 @@ import { fetchWideAlltypes150Page } from '@/services';
 
 import {
   MAX_WIDE_ALLTYPES_SORT_RULES,
+  WIDE_ALLTYPES_ALLOWED_COLUMNS,
   WIDE_ALLTYPES_COLUMNS,
+  WIDE_ALLTYPES_GROUP_MAX_ROWS,
   WIDE_ALLTYPES_SCHEMA,
   WIDE_ALLTYPES_TABLE,
 } from '../config';
 import {
   readWideAlltypes150Page,
+  selectWideAlltypes150GroupingCapabilities,
   selectWideAlltypes150Page,
 } from './wideAlltypes150.service';
 
@@ -36,6 +41,17 @@ vi.mock('@lcabrera/server/db/select-rows.util', () => ({
     },
   ]),
 }));
+vi.mock('@lcabrera/server/db/select-grouped-rows.util', () => ({
+  selectGroupedRows: vi.fn(async () => ({
+    aggregates: [{ alias: 'count_all', fn: 'count' }],
+    keys: ['c_001'],
+    maskAlias: 'grouping_mask',
+    rows: [{ c_001: 'alpha', count_all: '3', grouping_mask: 0 }],
+  })),
+}));
+vi.mock('@lcabrera/server/db/get-column-grouping-capabilities.util', () => ({
+  getColumnGroupingCapabilities: vi.fn(async () => []),
+}));
 vi.mock('@/services', () => ({
   fetchWideAlltypes150Page: vi.fn(async () => ({
     data: [],
@@ -50,6 +66,8 @@ beforeEach(() => {
   vi.mocked(selectRows).mockClear();
   vi.mocked(getRowsCount).mockClear();
   vi.mocked(fetchWideAlltypes150Page).mockClear();
+  vi.mocked(selectGroupedRows).mockClear();
+  vi.mocked(getColumnGroupingCapabilities).mockClear();
 });
 
 afterEach(() => {
@@ -185,5 +203,101 @@ describe('readWideAlltypes150Page', () => {
       sorting: [],
     });
     expect(selectRows).not.toHaveBeenCalled();
+  });
+
+  // #575 — grouping on a *second* SQL-backed route. What is asserted here is
+  // the wiring this route owns; the rules themselves belong to
+  // `@lcabrera/server` and are tested there, which is the whole claim.
+  describe('grouping', () => {
+    it('reads the grouped branch when keys are applied, not the paginated one', async () => {
+      await selectWideAlltypes150Page({
+        grouping: { aggregates: {}, keys: ['c_001'], mode: 'flat' },
+        limit: 50,
+        offset: 0,
+        sorting: [],
+      });
+
+      expect(vi.mocked(selectGroupedRows)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(selectRows)).not.toHaveBeenCalled();
+    });
+
+    it('asks for count(*) first, from the package rather than by hand', async () => {
+      await selectWideAlltypes150Page({
+        grouping: {
+          aggregates: { c_002: 'sum' },
+          keys: ['c_001'],
+          mode: 'flat',
+        },
+        limit: 50,
+        offset: 0,
+        sorting: [],
+      });
+
+      // `toGroupAggregates` owns this order and its decode counterpart reads
+      // it back — the route states neither (ADR-082, #643).
+      expect(
+        vi.mocked(selectGroupedRows).mock.calls[0]?.[0]?.aggregates,
+      ).toEqual([{ fn: 'count' }, { column: 'c_002', fn: 'sum' }]);
+    });
+
+    it('bounds the grouped read by this table’s own row ceiling', async () => {
+      await selectWideAlltypes150Page({
+        grouping: { aggregates: {}, keys: ['c_001'], mode: 'flat' },
+        limit: 50,
+        offset: 0,
+        sorting: [],
+      });
+
+      expect(vi.mocked(selectGroupedRows).mock.calls[0]?.[0]?.maxRows).toBe(
+        WIDE_ALLTYPES_GROUP_MAX_ROWS,
+      );
+    });
+
+    it('orders by the group keys in nesting order, carrying the user’s direction', async () => {
+      await selectWideAlltypes150Page({
+        grouping: { aggregates: {}, keys: ['c_001', 'c_002'], mode: 'rollup' },
+        limit: 50,
+        offset: 0,
+        sorting: [{ columnKey: 'c_002', direction: 'desc' }],
+      });
+
+      expect(vi.mocked(selectGroupedRows).mock.calls[0]?.[0]?.sort).toEqual([
+        { direction: 'asc', key: 'c_001' },
+        { direction: 'desc', key: 'c_002' },
+      ]);
+    });
+
+    it('answers a refusal as plain data, never as a thrown class', async () => {
+      // A refused key is a refusal from `@lcabrera/server`, raised as a class
+      // whose prototype single fetch strips on the way to the client — so the
+      // loader edge has to map it (ADR-050, ADR-066). This is the route's half
+      // of AC "refused with the specific reason, not by failing at execution".
+      vi.mocked(selectGroupedRows).mockRejectedValueOnce(
+        new Error('column "c_014" is not a grouping dimension'),
+      );
+
+      const result = await selectWideAlltypes150Page({
+        grouping: { aggregates: {}, keys: ['c_014'], mode: 'flat' },
+        limit: 50,
+        offset: 0,
+        sorting: [],
+      });
+
+      expect(result.data).toEqual([]);
+      expect(result.error).toBeDefined();
+    });
+
+    it('resolves capability for every column it allows, from the catalogue', async () => {
+      // AC: a column whose real type supports aggregates the coarse vocabulary
+      // hides must be offered them. The route's job is to ask about all of its
+      // columns; deciding what each may do is the catalogue's (ADR-058, #550).
+      await selectWideAlltypes150GroupingCapabilities();
+
+      expect(vi.mocked(getColumnGroupingCapabilities)).toHaveBeenCalledWith({
+        columns: WIDE_ALLTYPES_ALLOWED_COLUMNS,
+        schema: WIDE_ALLTYPES_SCHEMA,
+        table: WIDE_ALLTYPES_TABLE,
+      });
+    });
   });
 });

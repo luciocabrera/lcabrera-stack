@@ -112,6 +112,45 @@ not to offer the sort at all. Making `isSortable` exclude `point` as well as
 in its own change rather than in the one that moved the data source (#687 §5).
 Until then, the divergence is the documented cost of the move.
 
+## Grouping, and what adopting it cost
+
+This route is the **second** SQL-backed route to group (#575), and it exists in
+that role to answer one question: how much does a route have to write to get
+grouping now that the seam lives in the packages (ADR-082)?
+
+The answer is a flag and a service function:
+
+- `wide-alltypes-150.loader.ts` declares `isGroupingEnabled` and points
+  `resolveGroupingCapabilities` at this route's catalogue lookup.
+- `.server/wideAlltypes150.service.ts` gains `selectGroupedWideAlltypes150`,
+  which supplies this table, its row ceiling and its aggregate record — and gets
+  the `count(*)`-first aggregate list, the alias pairing, the grouped `ORDER BY`
+  and the `GROUPING()` decode from `@lcabrera/server/db/olap`.
+
+Nothing else changed, and **no grouping shape is restated here**. Reading
+`selectGroupedWideAlltypes150` beside `selectGroupedOrders` is the check: they
+are the same call around different constants. Before #643 they could not have
+been — the alias lineup and the sort-term derivation were route-local, so a
+second route meant copying them.
+
+**Why this table is the useful second one.** It is 150 columns of deliberately
+mixed Postgres types, which is exactly where the grid's coarse
+`TableColumn.dataType` vocabulary is wrong most often — it reports `numeric`,
+`jsonb` and `point` alike as `string` (#550). Resolving capability from the pg
+catalogue (ADR-058) is therefore doing visible work here: a column the coarse
+reading would have offered `sum` on is refused by name, and one it would have
+hidden `avg` from is offered it.
+
+**Its row ceiling is lower than the orders route's**, and deliberately:
+`WIDE_ALLTYPES_GROUP_MAX_ROWS` is set below `ENTERPRISE_ORDER_GROUP_MAX_ROWS`
+because a group row here carries far more columns, so the same row count costs
+more to ship and to paint.
+
+**Grouping is declared from the self-hosted switch.** It is the one capability
+the external endpoint cannot serve, so `isGroupingEnabled` is
+`!isExternalApiEnabled()` — offering it while the rows came from another process
+would summarise a different result set than the page it sits above.
+
 ## Guardrails
 
 - Keep this route on the shared table stack so it remains the baseline for

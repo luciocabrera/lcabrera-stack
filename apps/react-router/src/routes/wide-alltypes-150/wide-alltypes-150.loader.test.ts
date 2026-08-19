@@ -5,23 +5,28 @@ import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { loader } from './wide-alltypes-150.loader';
 
-const { readWideAlltypes150PageMock } = vi.hoisted(() => ({
-  readWideAlltypes150PageMock: vi.fn(() =>
-    Promise.resolve({ data: [], hasMore: false, total: 0 }),
-  ),
-}));
+const { readWideAlltypes150PageMock, resolveCapabilitiesMock } = vi.hoisted(
+  () => ({
+    readWideAlltypes150PageMock: vi.fn(() =>
+      Promise.resolve({ data: [], hasMore: false, total: 0 }),
+    ),
+    resolveCapabilitiesMock: vi.fn(() => Promise.resolve([])),
+  }),
+);
 
 vi.mock('./.server/wideAlltypes150.service', () => ({
   readWideAlltypes150Page: readWideAlltypes150PageMock,
+  selectWideAlltypes150GroupingCapabilities: resolveCapabilitiesMock,
 }));
 
-const invokeLoader = async () =>
+const invokeLoader = async (search = '') =>
   loader({
-    request: new Request('http://localhost/wide-alltypes-150'),
+    request: new Request(`http://localhost/wide-alltypes-150${search}`),
   } as LoaderFunctionArgs);
 
 beforeEach(() => {
   readWideAlltypes150PageMock.mockClear();
+  resolveCapabilitiesMock.mockClear();
 });
 
 describe('wide-alltypes-150 loader', () => {
@@ -67,5 +72,52 @@ describe('wide-alltypes-150 loader', () => {
         sorting: [{ columnKey: 'id', direction: 'asc' }],
       }),
     );
+  });
+
+  // #575 — the genericity proof. Everything below is what a *second* SQL-backed
+  // route had to do to get grouping, and it is a flag plus a service.
+  describe('grouping', () => {
+    it('declares the capability so the table offers grouping at all', async () => {
+      const { metaState } = await invokeLoader();
+
+      expect(metaState.isGroupingEnabled).toBe(true);
+    });
+
+    it('forwards a sanitized grouping to its own server service', async () => {
+      await invokeLoader(
+        `?grouping=${encodeURIComponent('{"keys":["c_001"]}')}`,
+      );
+
+      expect(readWideAlltypes150PageMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          grouping: expect.objectContaining({ keys: ['c_001'] }),
+        }),
+      );
+    });
+
+    it('degrades a malformed param to grouping off, not to a half-applied read', async () => {
+      const { metaState } = await invokeLoader(
+        `?grouping=${encodeURIComponent('{"keys":["c_001",1]}')}`,
+      );
+
+      expect(metaState.groupingKeys).toEqual([]);
+    });
+
+    it('drops a key naming no column this route declares', async () => {
+      const { metaState } = await invokeLoader(
+        `?grouping=${encodeURIComponent('{"keys":["not_a_column"]}')}`,
+      );
+
+      expect(metaState.groupingKeys).toEqual([]);
+    });
+
+    it('resolves each column’s real capability from the catalogue', async () => {
+      // 150 columns of deliberately mixed types is exactly where the coarse
+      // `dataType` vocabulary is wrong most often (#550), so this route needs
+      // the catalogue answer more than the orders route does.
+      await invokeLoader();
+
+      expect(resolveCapabilitiesMock).toHaveBeenCalledTimes(1);
+    });
   });
 });
