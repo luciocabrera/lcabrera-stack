@@ -28,7 +28,7 @@ name: Release
 # and it was worse than the problem: several agents merge into this repo, so the
 # count is essentially never zero, and the job reported success through every
 # push while publishing nothing (#620). Calling the CLI directly removes the
-# reason the gate existed. `repo-plan-release` now asks the
+# reason the gate existed. The `Plan the release` step below now asks the
 # registry, per package, which is the same question `changeset publish` asks
 # itself — the gate only avoids a pointless build, and the CLI stays the
 # authority on what ships.
@@ -73,10 +73,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Runs before the toolchain is installed — plain node and npm, no deps —
-      # because when there is nothing to publish every step below is wasted
-      # work. It writes the per-package plan to the run summary, so "published
-      # nothing" is visible on the run page rather than buried in a log.
+      # This is `@repo/repo-standards`' `repo-plan-release`, run by path rather
+      # than by name: it goes before the toolchain is installed — plain node and
+      # npm, no deps — because when there is nothing to publish every step below
+      # is wasted work, and the bin shim does not exist until `vp install` has
+      # run. Grep for the path, not the command name. It writes the per-package
+      # plan to the run summary, so "published nothing" is visible on the run
+      # page rather than buried in a log.
       #
       # Permissive by design: anything it cannot resolve counts as publishable,
       # so the job proceeds and `changeset publish` decides. Over-reporting
