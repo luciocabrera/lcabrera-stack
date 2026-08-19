@@ -7,6 +7,7 @@ import type {
   TableAggregateFn,
   TableGroupingState,
   TableGroupPeriod,
+  TableTotalsPlacement,
 } from '@lcabrera/ui/components/Table/Table.types';
 
 import { deleteRows } from '@lcabrera/server/db/delete-rows.util';
@@ -86,6 +87,12 @@ export type SelectGroupedOrdersArgs = {
    * column's values.
    */
   readonly sort: readonly QuerySort[];
+  /**
+   * Where each subtotal sits relative to the rows it totals (#578). It only
+   * reaches SQL under `rollup` — a flat grouping emits no `GROUPING()` term for
+   * it to direct.
+   */
+  readonly subtotalPlacement: TableTotalsPlacement;
 };
 
 /**
@@ -121,6 +128,7 @@ const selectGroupedOrders = async ({
   groupMode,
   groupPeriods,
   sort,
+  subtotalPlacement,
 }: SelectGroupedOrdersArgs): Promise<EnterpriseOrdersResponse> => {
   // `satisfies` rather than an annotation: the narrow type keeps `column`
   // required for the decode below, while the check still proves the literal
@@ -140,6 +148,7 @@ const selectGroupedOrders = async ({
         maxRows: ENTERPRISE_ORDER_GROUP_MAX_ROWS,
         periods: groupPeriods,
         sort: toGroupSort({ groupKeys, sort }),
+        subtotalPlacement,
       });
 
     const data = decodeGroupedRows({
@@ -251,6 +260,13 @@ export type SelectOrdersPageArgs = {
    * `MAX_ENTERPRISE_ORDERS_SORT_RULES` here for the same reason as `limit`.
    */
   readonly sort: readonly QuerySort[];
+  /**
+   * Where totals sit, as the loader resolved it from the `totals` param and the
+   * UI-flags cookie. Optional so the ungrouped callers and the tests that
+   * predate it need no change; `last` is the default the query builder already
+   * applies (#578).
+   */
+  readonly totalsPlacement?: TableTotalsPlacement;
 };
 
 /**
@@ -314,6 +330,7 @@ export const selectOrdersPage = async ({
   limit,
   offset,
   sort,
+  totalsPlacement = 'last',
 }: SelectOrdersPageArgs): Promise<EnterpriseOrdersResponse> => {
   // Before the branch, so the grouped read orders by a bounded sort too, and
   // before the cursor is built, so the tuple is still checked against the sort
@@ -328,6 +345,7 @@ export const selectOrdersPage = async ({
       groupMode: grouping.mode,
       groupPeriods: grouping.periods,
       sort: boundedSort,
+      subtotalPlacement: totalsPlacement,
     });
   }
 

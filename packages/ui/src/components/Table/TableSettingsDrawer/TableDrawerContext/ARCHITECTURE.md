@@ -3,10 +3,13 @@
 Store-based context that manages local table settings state within the drawer.
 Changes are held locally until the user explicitly accepts or cancels.
 
-Two stores, split by **where each one commits** rather than by how it is edited:
-`columnsStore` commits to the cookie, `groupingStore` to the `grouping` search
-param ([ADR-061](../../../../../../../docs/decisions/ADR-061-grouping-config-in-url-expansion-in-store.md)).
-Both seed at mount — which is when the drawer opens, since `TableDrawersSection`
+Three stores, split by **where each one commits** rather than by how it is
+edited: `columnsStore` commits to the cookie, `groupingStore` to the `grouping`
+search param ([ADR-061](../../../../../../../docs/decisions/ADR-061-grouping-config-in-url-expansion-in-store.md)),
+and `totalsPlacementStore` to the `totals` search param **and** the cookie —
+it has to reach the emitted `ORDER BY` and outlive the session, and no single
+channel does both ([ADR-085](../../../../../../../docs/decisions/ADR-085-a-preset-makes-ungrouped-a-real-state.md)).
+All three seed at mount — which is when the drawer opens, since `TableDrawersSection`
 mounts the provider only while it is — so Cancel has a baseline to restore even
 when the user's first action is a removal.
 
@@ -20,6 +23,7 @@ TableDrawerContext/
 ├── useTableDrawerContextValue.hook.ts      → use(TableDrawerContext)
 ├── useColumnsStore.hook.ts                 → Resolves the drawer's columnsStore, delegates to useStoreSelector
 ├── useGroupingStore.hook.ts                → Resolves the drawer's groupingStore, delegates to useStoreSelector
+├── useTotalsPlacementStore.hook.ts         → Resolves the drawer's totalsPlacementStore, delegates to useStoreSelector
 │
 ├── actions/                                → Hooks that write to the drawer stores
 │   ├── buildBatchTableSettingsUpdate.util.ts → Normalize drawer snapshot into the table batch-update payload
@@ -149,30 +153,31 @@ Actions are hooks that return a callback. Each callback reads the store it owns
 and calls `set(partial)` on it — `columnsStore` for the column draft,
 `groupingStore` for the grouping one.
 
-| Hook                               | Reads From           | Writes To          | Side Effect                                                                  |
-| ---------------------------------- | -------------------- | ------------------ | ---------------------------------------------------------------------------- |
-| `useSetColumnFilters`              | —                    | `columnsStore`     | —                                                                            |
-| `useSetColumnsOrder`               | —                    | `columnsStore`     | —                                                                            |
-| `useSetColumnsSortings`            | —                    | `columnsStore`     | —                                                                            |
-| `useSetColumnPinning`              | —                    | `columnsStore`     | —                                                                            |
-| `useSetColumnsSizing`              | —                    | `columnsStore`     | —                                                                            |
-| `useSetColumnsVisibility`          | —                    | `columnsStore`     | —                                                                            |
-| `useClearFilters`                  | —                    | `columnsStore`     | Sets `columnFilters` to `{}`                                                 |
-| `useClearSorting`                  | —                    | `columnsStore`     | Sets `sorting` to `[]`                                                       |
-| `useClearColumnOrderSection`       | —                    | `columnsStore`     | Clears visibility + pinning                                                  |
-| `useClearAllSettings`              | —                    | `columnsStore`     | Clears all fields                                                            |
-| `useResetFilters`                  | `TableConfigContext` | `columnsStore`     | Restores filters from table                                                  |
-| `useResetSorting`                  | `TableConfigContext` | `columnsStore`     | Restores sorting from table                                                  |
-| `useResetColumnOrderAndVisibility` | `TableConfigContext` | `columnsStore`     | Restores order + visibility from table                                       |
-| `useResetTableSettings`            | `TableConfigContext` | both drawer stores | Restores all fields, grouping included, from the table                       |
-| `useOrderColumnsBySorting`         | `columnsStore`       | `columnsStore`     | Reorders columns by current sorting                                          |
-| `useSortByColumnOrder`             | `columnsStore`       | `columnsStore`     | Creates asc sorts from column order                                          |
-| `useSetGrouping` (internal)        | `groupingStore`      | `groupingStore`    | Resolves through `resolveTableGroupingUpdate`; no persistence, no navigation |
-| `useToggleGroupKey`                | —                    | `groupingStore`    | Stages a key added or removed                                                |
-| `useSetGroupKeys`                  | —                    | `groupingStore`    | Stages the whole ordered key list (reorder, remove)                          |
-| `useSetColumnAggregate`            | —                    | `groupingStore`    | Stages or clears one column's aggregate                                      |
-| `useClearGrouping`                 | —                    | `groupingStore`    | Stages no keys and no aggregates                                             |
-| `useBatchSetTableDrawerSettings`   | both drawer stores   | `TableConfig`      | Pushes both drafts to the table in **one** commit — see below                |
+| Hook                               | Reads From           | Writes To              | Side Effect                                                                  |
+| ---------------------------------- | -------------------- | ---------------------- | ---------------------------------------------------------------------------- |
+| `useSetColumnFilters`              | —                    | `columnsStore`         | —                                                                            |
+| `useSetColumnsOrder`               | —                    | `columnsStore`         | —                                                                            |
+| `useSetColumnsSortings`            | —                    | `columnsStore`         | —                                                                            |
+| `useSetColumnPinning`              | —                    | `columnsStore`         | —                                                                            |
+| `useSetColumnsSizing`              | —                    | `columnsStore`         | —                                                                            |
+| `useSetColumnsVisibility`          | —                    | `columnsStore`         | —                                                                            |
+| `useClearFilters`                  | —                    | `columnsStore`         | Sets `columnFilters` to `{}`                                                 |
+| `useClearSorting`                  | —                    | `columnsStore`         | Sets `sorting` to `[]`                                                       |
+| `useClearColumnOrderSection`       | —                    | `columnsStore`         | Clears visibility + pinning                                                  |
+| `useClearAllSettings`              | —                    | `columnsStore`         | Clears all fields                                                            |
+| `useResetFilters`                  | `TableConfigContext` | `columnsStore`         | Restores filters from table                                                  |
+| `useResetSorting`                  | `TableConfigContext` | `columnsStore`         | Restores sorting from table                                                  |
+| `useResetColumnOrderAndVisibility` | `TableConfigContext` | `columnsStore`         | Restores order + visibility from table                                       |
+| `useResetTableSettings`            | `TableConfigContext` | both drawer stores     | Restores all fields, grouping included, from the table                       |
+| `useOrderColumnsBySorting`         | `columnsStore`       | `columnsStore`         | Reorders columns by current sorting                                          |
+| `useSortByColumnOrder`             | `columnsStore`       | `columnsStore`         | Creates asc sorts from column order                                          |
+| `useSetGrouping` (internal)        | `groupingStore`      | `groupingStore`        | Resolves through `resolveTableGroupingUpdate`; no persistence, no navigation |
+| `useToggleGroupKey`                | —                    | `groupingStore`        | Stages a key added or removed                                                |
+| `useSetGroupKeys`                  | —                    | `groupingStore`        | Stages the whole ordered key list (reorder, remove)                          |
+| `useSetColumnAggregate`            | —                    | `groupingStore`        | Stages or clears one column's aggregate                                      |
+| `useClearGrouping`                 | —                    | `groupingStore`        | Stages no keys and no aggregates                                             |
+| `useSetTotalsPlacement`            | —                    | `totalsPlacementStore` | Stages where subtotals sit relative to the rows they total                   |
+| `useBatchSetTableDrawerSettings`   | every drawer store   | `TableConfig`          | Pushes all three drafts to the table in **one** commit — see below           |
 
 ## Selectors
 
@@ -185,6 +190,9 @@ and calls `set(partial)` on it — `columnsStore` for the column draft,
 | `useGetColumnVisibility`   | `Set<string>`                      | Set of hidden column keys         |
 | `useGetGroupingKeys`       | `readonly string[]`                | Staged group keys, nesting order  |
 | `useGetGroupingAggregates` | `Record<string, TableAggregateFn>` | Staged aggregates by column       |
+| `useGetGroupingMode`       | `TableGroupingMode`                | Staged grouping mode              |
+| `useGetGroupingPeriods`    | `Record<string, TableGroupPeriod>` | Staged per-key granularity        |
+| `useGetTotalsPlacement`    | `TableTotalsPlacement`             | Staged totals position            |
 
 ## One commit, one navigation
 

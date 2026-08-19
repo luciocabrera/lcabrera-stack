@@ -564,7 +564,20 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
     // all leave the SQL valid and only show up against a real database.
     const KEYS = ['order_status', 'shipping_country'] as const;
 
-    const rollupPage = (direction: 'asc' | 'desc' = 'asc') =>
+    type RollupPageArgs = {
+      readonly direction?: 'asc' | 'desc';
+      readonly totalsPlacement?: 'first' | 'last';
+    };
+
+    /**
+     * `totalsPlacement` is spread rather than defaulted, so omitting it really
+     * omits it: a default here would pass `'last'` explicitly and the
+     * default-placement case below would never exercise the absent one.
+     */
+    const rollupPage = ({
+      direction = 'asc',
+      totalsPlacement,
+    }: RollupPageArgs = {}) =>
       selectOrdersPage({
         filters: [],
         grouping: {
@@ -577,6 +590,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
         limit: 50,
         offset: 0,
         sort: [{ column: 'order_status', direction }],
+        ...(totalsPlacement !== undefined && { totalsPlacement }),
       });
 
     it('emits a subtotal per level and one grand total', async () => {
@@ -618,7 +632,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
     });
 
     it('does not invert the hierarchy under a descending key sort', async () => {
-      const { data } = await rollupPage('desc');
+      const { data } = await rollupPage({ direction: 'desc' });
       const summaries = data.map((row) => row[TABLE_GROUP_ROW_FIELD]);
 
       // The parents reverse; each parent's subtotal still follows its own
@@ -632,6 +646,43 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
 
         expect(summaries[index - 1]?.path).toHaveLength(2);
       }
+    });
+
+    it('puts every total above its rows when the placement says first', async () => {
+      // The live half of #578's fourth criterion. Placement is emitted as the
+      // direction of the `GROUPING()` term, so it can only be observed in the
+      // order Postgres returns — a setting that reached the renderer alone
+      // would leave this order untouched and every assertion below passing on
+      // the `last` arrangement.
+      const { data } = await rollupPage({ totalsPlacement: 'first' });
+      const summaries = data.map((row) => row[TABLE_GROUP_ROW_FIELD]);
+
+      expect(summaries.length).toBeGreaterThan(0);
+
+      // The mirror image of the `last` case above: the grand total leads, and
+      // each subtotal precedes the children it totals rather than following
+      // them.
+      expect(summaries[0]?.path).toStrictEqual([]);
+
+      for (const [index, summary] of summaries.entries()) {
+        if (summary === undefined || summary.path.length !== 1) continue;
+
+        const next = summaries[index + 1];
+
+        expect(next?.path).toHaveLength(2);
+        expect(next?.path[0]?.label).toBe(summary.path[0]?.label);
+      }
+    });
+
+    it('leaves the totals below their rows by default', async () => {
+      // Pins the default rather than assuming it: `last` is what the query
+      // builder applies for an absent placement, so a route that forwarded
+      // nothing would still have to produce this.
+      const { data } = await rollupPage();
+
+      expect(
+        data.map((row) => row[TABLE_GROUP_ROW_FIELD]).at(-1)?.path,
+      ).toStrictEqual([]);
     });
 
     it('reconciles the leaves, the subtotals and the grand total', async () => {

@@ -53,7 +53,7 @@ describe('deserializeGroupingFromURL', () => {
       mode: 'rollup',
       periods: {},
     } as const;
-    const param = serializeGroupingToURL(grouping);
+    const param = serializeGroupingToURL({ grouping });
 
     expect(param).toBeDefined();
     expect(deserializeGroupingFromURL(param ?? '')).toStrictEqual(grouping);

@@ -43,7 +43,7 @@ export const loader = createTableRouteLoader<
 >({
   appId: APP_ID,
   columns: COLUMNS,
-  fetchPage: ({ effectiveSorting, filters, grouping }) =>
+  fetchPage: ({ effectiveSorting, filters, grouping, totalsPlacement }) =>
     selectOrdersPage({
       filters: toQueryFilters({ filters }),
       // Already sanitized against this route's columns, and empty unless the
@@ -55,6 +55,11 @@ export const loader = createTableRouteLoader<
       limit: INITIAL_PAGE_SIZE,
       offset: 0,
       sort: toQuerySort({ sorting: effectiveSorting }),
+      // Resolved by the factory from the `totals` param and the UI-flags
+      // cookie. Forwarded rather than defaulted here: it is emitted as the
+      // direction of the `GROUPING()` term, so a route that drops it silently
+      // ignores the user's choice (#578).
+      totalsPlacement,
     }),
   filterOptions: { transport: 'loader' },
   // This endpoint filters server-side, seeks, and groups, so it declares all

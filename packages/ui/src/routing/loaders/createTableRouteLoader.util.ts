@@ -10,6 +10,7 @@ import type {
   TableColumnGroupingCapability,
   TableGroupingState,
   TableMetaState,
+  TableTotalsPlacement,
 } from '#ui/components/Table/Table.types';
 
 import { appendPrimaryKeySorting } from '../shared/appendPrimaryKeySorting.util';
@@ -36,6 +37,21 @@ type CreateTableRouteLoaderArgs<
 > = {
   readonly appId: string;
   readonly columns: TableColumn<TData>[];
+  /**
+   * The grouping this route applies when the URL carries no `grouping` param —
+   * a curated starting point rather than a free-form picker's empty state
+   * (#578). Sanitized against `columns` exactly as a URL-supplied one is.
+   *
+   * It is read only where the route also declared `isGroupingEnabled`, for the
+   * same reason the param is: a default on a route that cannot group would ask
+   * its endpoint for a shape it does not produce.
+   *
+   * Pair it with `meta.isGroupingLocked` to make it the only grouping the table
+   * offers. On its own it is a default the user may change — and clearing it is
+   * a change the URL then records explicitly, so it survives the next
+   * navigation.
+   */
+  readonly defaultGrouping?: TableGroupingState;
   /**
    * The route's data fetch. Return the promise **unawaited** — the factory
    * hands it straight back as `dataPromise` for Suspense streaming, so the
@@ -111,6 +127,13 @@ type TableRouteFetchPageArgs<TData extends Record<string, unknown>> = {
   readonly filters: ColumnFiltersState<TData>;
   readonly grouping: TableGroupingState;
   readonly request: Request;
+  /**
+   * Where subtotals go, resolved from the `totals` param and the UI-flags
+   * cookie. Forward it to the grouped read — it is emitted as the direction of
+   * the `GROUPING()` term, so a route that drops it silently ignores the
+   * setting rather than failing (#578).
+   */
+  readonly totalsPlacement: TableTotalsPlacement;
 };
 
 /**
@@ -139,6 +162,7 @@ export const createTableRouteLoader = <
 >({
   appId,
   columns,
+  defaultGrouping,
   fetchPage,
   filterOptions,
   includeFilters = true,
@@ -173,9 +197,11 @@ export const createTableRouteLoader = <
       grouping,
       metaUiFlags,
       sorting,
+      totalsPlacement,
     } = readTableLoaderStateFromRequest<TData>({
       appId,
       columns,
+      ...(defaultGrouping !== undefined && { defaultGrouping }),
       includeFilters,
       includeGrouping: capabilityMeta.isGroupingEnabled,
       persistenceKey,
@@ -197,6 +223,7 @@ export const createTableRouteLoader = <
       filters,
       grouping,
       request,
+      totalsPlacement,
     });
 
     const groupingCapabilities =
@@ -240,6 +267,13 @@ export const createTableRouteLoader = <
         groupingKeys: grouping.keys,
         groupingMode: grouping.mode,
         groupingPeriods: grouping.periods,
+        // Route-declared, so the client cannot claim it and cannot deny it: it
+        // is what tells the clear path to record "off" in the URL, and a cookie
+        // able to set it would make an ordinary table write an envelope no
+        // loader here reads back differently.
+        hasDefaultGrouping:
+          defaultGrouping !== undefined && capabilityMeta.isGroupingEnabled,
+        totalsPlacement,
         ...capabilityMeta,
       },
     };

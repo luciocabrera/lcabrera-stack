@@ -1,4 +1,5 @@
 import { CLEAR_GROUPING_COMMAND } from '#ui/components/Table/commands';
+import { useGetTableIsGroupingLocked } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 
 import type { SectionToolbarButton } from '../../SectionToolbar';
 import type { GroupingSectionToolbarProps } from './GroupingSectionToolbar.types';
@@ -26,7 +27,11 @@ export const GroupingSectionToolbar = ({
   variant = 'footer',
 }: GroupingSectionToolbarProps) => {
   const groupingKeys = useGetGroupingKeys();
+  const isGroupingLocked = useGetTableIsGroupingLocked();
   const clearGrouping = useClearGrouping();
+
+  // Clearing is the largest edit of all, so the lock reaches it first (#578).
+  if (isGroupingLocked) return;
 
   const buttons: readonly SectionToolbarButton[] = [
     {

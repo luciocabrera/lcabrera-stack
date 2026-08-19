@@ -6,6 +6,17 @@ import { areGroupKeysLegal } from '../../utils';
 
 type ResolveTableGroupingUpdateArgs = {
   readonly existingGrouping: TableGroupingState;
+  /**
+   * Whether this route declared a default grouping, from
+   * `TableMetaState.hasDefaultGrouping`. It changes only how an **empty**
+   * configuration is written: with a default in play "off" has to be recorded
+   * in the URL rather than dropped from it (#578).
+   *
+   * Optional because the drawer's draft path resolves changes through here too
+   * and never reads `persistenceEntry` — it stages, and Accept is what
+   * persists. Both paths that do persist pass it.
+   */
+  readonly hasDefaultGrouping?: boolean;
   readonly nextGrouping: TableGroupingState;
 };
 
@@ -23,7 +34,7 @@ type ResolveTableGroupingUpdateResult =
 const isSameGrouping = ({
   existingGrouping,
   nextGrouping,
-}: ResolveTableGroupingUpdateArgs) => {
+}: Omit<ResolveTableGroupingUpdateArgs, 'hasDefaultGrouping'>) => {
   const aggregateEntries = Object.entries(nextGrouping.aggregates);
 
   return (
@@ -71,6 +82,7 @@ const isSameGrouping = ({
  */
 export const resolveTableGroupingUpdate = ({
   existingGrouping,
+  hasDefaultGrouping = false,
   nextGrouping,
 }: ResolveTableGroupingUpdateArgs): ResolveTableGroupingUpdateResult => {
   if (!areGroupKeysLegal(nextGrouping.keys)) {
@@ -93,8 +105,13 @@ export const resolveTableGroupingUpdate = ({
       searchParamKey: 'grouping',
       // `undefined` drops the param from the URL, which is how clearing
       // grouping produces a link that reads as ungrouped rather than as
-      // "grouping considered and switched off".
-      searchParamValue: serializeGroupingToURL(grouping),
+      // "grouping considered and switched off" — except on a route whose
+      // default grouping makes that second state real, where the empty
+      // envelope is written instead (#578).
+      searchParamValue: serializeGroupingToURL({
+        grouping,
+        keepWhenEmpty: hasDefaultGrouping,
+      }),
     },
   };
 };
