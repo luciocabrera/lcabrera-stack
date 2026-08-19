@@ -165,6 +165,7 @@ vi.mock(
   '#ui/components/Table/contexts/TableConfig/expansion/selectors',
   () => ({
     useGetTableCollapsedGroupPaths: useGetTableCollapsedGroupPathsMock,
+    useGetTableDrilledGroups: () => new Map(),
   }),
 );
 

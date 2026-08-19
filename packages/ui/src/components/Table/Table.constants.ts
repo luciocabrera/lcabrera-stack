@@ -1,5 +1,6 @@
 import type {
   TableAggregateFn,
+  TableDrillRow,
   TableGroupingMode,
   TableGroupKeyRefusalReason,
   TableGroupRow,
@@ -76,6 +77,17 @@ export const ACTIONS_COLUMN_KEY = 'actions';
  * that silently stops rendering.
  */
 export const TABLE_GROUP_ROW_FIELD: keyof TableGroupRow = 'tableGroup';
+
+/**
+ * The row field the **grid** attaches its drill chrome to — the loading state, a
+ * failure, and the hand-off past one page (ADR-079).
+ *
+ * Separate from `TABLE_GROUP_ROW_FIELD` rather than a further `kind` on it: that
+ * field is a **read's** output and this one never comes from a server, so
+ * sharing it would let a malformed response claim to be grid chrome. The reader
+ * asks the row which it is, exactly as it does for group rows.
+ */
+export const TABLE_DRILL_ROW_FIELD: keyof TableDrillRow = 'tableDrill';
 
 /**
  * How many group keys may be applied at once. A **duplicate** of

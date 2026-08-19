@@ -375,6 +375,41 @@ export type TableDataState<TData> = {
 export type TableDensity = 'comfortable' | 'compact';
 
 /**
+ * A row the **grid** creates to say something about a drill, rather than one a
+ * read returned (ADR-079).
+ *
+ * It is a row and not an overlay, and that is the height invariant rather than a
+ * stylistic call: `TableBody` sizes `<tbody>` from `rows.length` times the
+ * store's `rowHeight`, so anything occupying vertical space has to be in that
+ * array and paint at that height. A banner outside it desynchronises the
+ * declared height from what is painted, which is the defect ADR-065 removed for
+ * group rows and this must not reintroduce for drill chrome.
+ */
+export type TableDrillRow = Record<'tableDrill', TableDrillRowMarker>;
+
+/**
+ * What a grid-created drill row says.
+ *
+ * `failed` is one member and carries no reason: a refusal and a timeout differ
+ * to the server and not to the reader of one group row (ADR-079, amended).
+ */
+export type TableDrillRowKind = 'failed' | 'handoff' | 'loading';
+
+export type TableDrillRowMarker = {
+  /**
+   * `handoff` carries the shortfall — how many of the group's rows the fetched
+   * page did **not** include. It is `summary.count` minus the page, computed
+   * where both are known rather than recomputed at the cell.
+   */
+  readonly kind: TableDrillRowKind;
+  /** The group's own path, so a hand-off can rebuild the drill's filters. */
+  readonly path: readonly TableGroupKeyValue[];
+  /** The group this row belongs to, keyed as `resolveGroupPathKey` encodes it. */
+  readonly pathKey: string;
+  readonly shortfall: number;
+};
+
+/**
  * The focus store's state — where the grid's single tab stop points (ADR-062).
  *
  * Focus is held here rather than read back from `document.activeElement`,

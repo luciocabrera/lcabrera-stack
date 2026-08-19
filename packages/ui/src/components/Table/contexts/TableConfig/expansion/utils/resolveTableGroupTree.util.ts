@@ -1,8 +1,11 @@
+import type { TableGroupDrill } from '#ui/components/Table/Table.types';
+
 import { getTableGroupRowSummary } from '#ui/components/Table/utils/getTableGroupRowSummary.util';
 
 import type { GroupTreeNode } from './resolveGroupTreeNodes.util';
 
 import { isDrillableGroupRow } from './isDrillableGroupRow.util';
+import { resolveDrilledRows } from './resolveDrilledRows.util';
 import { resolveGroupTreeNodes } from './resolveGroupTreeNodes.util';
 
 /** One visible row's place in the tree, as ARIA needs it stated. */
@@ -39,6 +42,8 @@ type ResolveTableGroupTreeArgs<TData> = {
   readonly canDrill?: boolean;
   readonly collapsedGroupPaths: ReadonlySet<string>;
   readonly data: readonly TData[];
+  /** Per-group drilled pages and fetch state. Absent means nothing is drilled. */
+  readonly drilledGroups?: ReadonlyMap<string, TableGroupDrill>;
   /** The applied group keys — what a complete path is measured against. */
   readonly groupingKeys?: readonly string[];
 };
@@ -120,6 +125,7 @@ export const resolveTableGroupTree = <TData extends Record<string, unknown>>({
   canDrill = false,
   collapsedGroupPaths,
   data,
+  drilledGroups,
   groupingKeys = [],
 }: ResolveTableGroupTreeArgs<TData>) => {
   if (data.every((row) => getTableGroupRowSummary(row) === undefined)) {
@@ -155,19 +161,60 @@ export const resolveTableGroupTree = <TData extends Record<string, unknown>>({
 
   for (const { hasChildren, isDrillable, node, row } of visible) {
     const posInSet = (positions.get(node.parentKey) ?? 0) + 1;
+    const drill =
+      node.pathKey === undefined ? undefined : drilledGroups?.get(node.pathKey);
+    const isCollapsed =
+      node.pathKey !== undefined && collapsedGroupPaths.has(node.pathKey);
 
     positions.set(node.parentKey, posInSet);
     rows.push(row);
     rowMeta.push({
       hasChildren,
       isDrillable,
-      isExpanded:
-        node.pathKey !== undefined && !collapsedGroupPaths.has(node.pathKey),
+      // A drillable leaf is expanded only once something has been asked for.
+      // Its collapsed-set membership says nothing on its own: an untouched
+      // group is not in that set, so reading expansion from it alone would
+      // report every leaf open with nothing under it (ADR-079).
+      isExpanded: isDrillable
+        ? drill !== undefined && !isCollapsed
+        : node.pathKey !== undefined && !isCollapsed,
       level: node.level,
       pathKey: node.pathKey,
       posInSet,
       setSize: setSizes.get(node.parentKey) ?? 1,
     });
+
+    if (!isDrillable || node.pathKey === undefined) continue;
+
+    const summary = getTableGroupRowSummary(row);
+
+    if (summary === undefined) continue;
+
+    // Spliced here rather than in a second pass, so `rows` and `rowMeta` cannot
+    // fall out of step — the identity `TableBody` sizes `<tbody>` from is over
+    // `rows.length`, and the focus model indexes both by the same number.
+    const drilled = resolveDrilledRows({
+      drill,
+      isCollapsed,
+      pathKey: node.pathKey,
+      summary,
+    });
+
+    for (const [drilledIndex, drilledRow] of drilled.entries()) {
+      rows.push(drilledRow as TData);
+      rowMeta.push({
+        hasChildren: false,
+        isDrillable: false,
+        isExpanded: false,
+        // One level deeper than the group they were fetched for, and counted
+        // among each other: they are a set of siblings under it, not members of
+        // the group row's own set.
+        level: node.level + 1,
+        pathKey: undefined,
+        posInSet: drilledIndex + 1,
+        setSize: drilled.length,
+      });
+    }
   }
 
   return { isTreeGrid: true, rowMeta, rows };
