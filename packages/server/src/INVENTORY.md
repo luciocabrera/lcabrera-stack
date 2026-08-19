@@ -73,17 +73,34 @@ bound-parameter catalogue query), `resolveDistinctEstimate` and
 `toRoleAggregates`. Run it through `getColumnGroupingCapabilities` above rather
 than by hand.
 
+`resolveAnalyticalRole` composes `isIdentifierType`
+(`is-identifier-type.util.ts`), which carries the named identifier types the
+category derivation would otherwise get wrong (`uuid`, `inet`, `interval` —
+ADR-058, #599). The refusal side is `refuseGroupKey` (`refuse-group-key.util.ts`),
+which applies the refusal rules **in priority order** so a rejected column gets
+exactly one message and it is the most useful one, answering `undefined` when the
+column may be a key. It composes `isUniqueIsh` (`is-unique-ish.util.ts`) — a
+column with about as many distinct values as the table has rows, which groups to
+one row per row and is the likeliest user mistake, so it earns its own message.
+
 **Emission (ADR-059).** `buildGroupQuery` (`build-group-query.util.ts`) turns a
 `GroupQueryDescriptor` into `GROUP BY GROUPING SETS` with a variadic
 `GROUPING()` mask, and is the only export of this half. It takes the capability
 map the legality half resolved and refuses anything the catalogue turned down,
 which is how a pure function enforces ADR-058. Everything it composes
-(`expandGroupingSets`, `toGroupingSetMask`, `assertGroupKeys`,
-`assertGroupAggregates`, `assertGroupAliases`, `resolveAggregateAlias`,
-`buildAggregateProjection`, `buildGroupingSetsClause`,
+(`expandGroupingSets`, `expandCubeSets`, `toGroupingSetMask`, `assertGroupKeys`,
+`assertGroupAggregates`, `assertGroupAliases`, `assertGroupSort`,
+`resolveAggregateAlias`, `buildAggregateProjection`, `buildGroupingSetsClause`,
 `buildGroupOrderByClause`, `collectCapabilityColumns`) is a private,
 individually-tested implementation detail — import those directly only from
 within `group-query-builder/`.
+
+Two of those are worth naming for what they own. `expandCubeSets`
+(`expand-cube-sets.util.ts`) produces every subset of the keys in the order
+`CUBE(k₁, …, kₙ)` emits them, which is the lattice `rollup`'s prefix expansion is
+not. `assertGroupSort` (`assert-group-sort.util.ts`) holds every rule a grouped
+`ORDER BY` clears before a single term is emitted, so an unorderable request is
+refused at construction rather than emitting a term that orders nothing.
 
 **Execution.** `selectGroupedRows` (`db/select-grouped-rows.util.ts`) is what
 joins the two halves to a connection: it resolves the capabilities, builds, and

@@ -91,7 +91,7 @@ graph LR
   subgraph "TableConfigProvider"
     CS["columnsStore<br/><small>columns, filters, sorting,<br/>pinning, sizing, visibility</small>"]
     GS["groupingStore<br/><small>applied group keys,<br/>aggregates, mode</small>"]
-    ES["expansionStore<br/><small>collapsed group paths</small>"]
+    ES["expansionStore<br/><small>collapsed group paths,<br/>drilled pages</small>"]
     MS["metaStore<br/><small>density, title, drawer toggles,<br/>row height, overscan</small>"]
   end
 
@@ -114,6 +114,17 @@ graph LR
 
 All stores use `useSyncExternalStore` for granular subscriptions.
 See [contexts/ARCHITECTURE.md](contexts/ARCHITECTURE.md) for details.
+
+**Grouping is split across two of them, and the split is the loader boundary.**
+`groupingStore` holds the applied keys, aggregates and mode — the _configuration_,
+which is URL state and travels through the loader
+([ADR-061](../../../../../docs/decisions/ADR-061-grouping-config-in-url-expansion-in-store.md)).
+`expansionStore` holds which paths are collapsed and which groups have drilled,
+which are _client_ state and do not: `TableGroupingState` is also the URL codec's
+and the loader's type, and a `Set` does not survive that boundary (ADR-009).
+Collapse is stored as the **collapsed** set rather than the expanded one, so a
+newly-arrived group is open by default and a refetch cannot silently fold rows
+([ADR-067](../../../../../docs/decisions/ADR-067-expansion-is-the-collapsed-set-and-a-group-row-is-a-tree-node.md)).
 
 ## Data Flow
 
@@ -199,6 +210,37 @@ one cell per rendered column, and therefore the same roving tab stop
 `Table.groupedGridSemantics.test.tsx` is where the two models meet.
 
 ## Grouped rows
+
+### Grouping requires a SQL-backed paginated endpoint
+
+**A `Table` handed an array cannot be grouped, and this is a precondition rather
+than an unfinished feature.** Every grouped row the grid renders is produced by
+the server: the grouping sets, the `GROUPING()` mask that separates a subtotal
+from a real NULL, the aggregates and the guard rails all come from
+`@lcabrera/server`'s `group-query-builder`
+([ADR-059](../../../../../docs/decisions/ADR-059-aggregation-is-builder-generated.md)).
+The grid renders a grouped result; it does not compute one.
+
+A route qualifies by serving a paginated read the grouping request can be sent
+to, and declares it with a **capability on the loader meta**
+([ADR-063](../../../../../docs/decisions/ADR-063-request-shaping-capabilities-on-the-loader-meta.md)).
+Without that declaration the grouping drawer is not offered, so an array-backed
+table never presents a control it could not honour.
+
+**Why no client-side path is offered.** Grouping an array in the browser would
+have to re-implement the parts that are not the `GROUP BY`: `rollup` and `cube`
+set expansion, subtotal disambiguation, the aggregate legality rules that come
+from the pg catalogue rather than from a column's TypeScript type
+([ADR-058](../../../../../docs/decisions/ADR-058-grouping-legality-by-analytical-role.md),
+and #550 settled that `TableColumnDataType` cannot answer it), and the
+cardinality guard rails. That is a second implementation of the same semantics
+with no way to hold the two in step — and it would still be wrong for the case
+the feature exists for, where the rows being summarised are the ones the client
+does **not** have. A consumer who genuinely needs to summarise an in-memory array
+should aggregate it before handing it to the `Table`, and render the result as
+ordinary rows.
+
+### Layout
 
 While grouping is applied the grid adds **no column of its own**. Each group key
 is hoisted to the head of the order and of the left pin, in key order, and forced
