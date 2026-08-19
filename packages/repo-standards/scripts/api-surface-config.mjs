@@ -17,7 +17,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { readPublishing } from './config.mjs';
+import { CONFIG_FILE_NAME, readPublishing } from './config.mjs';
 import { toBuiltPaths } from './publish-surface.mjs';
 
 /**
@@ -36,14 +36,36 @@ const shipsSource = (manifest) => manifest.scripts?.build === undefined;
 const entryForBuilt = (sourceTarget) => toBuiltPaths(sourceTarget).types;
 
 /**
+ * The manifest of a rostered package, or a failure that names the config.
+ *
+ * A roster entry is a directory name **under** `publishing.packagesDir`, not a
+ * path from the repository root, and spelling it the other way (`packages/ui`
+ * where `ui` was meant) is the mistake this catches: the entry is a valid
+ * repo-relative string, so validation passes, and the read then goes looking
+ * for `packages/packages/ui/package.json`. A bare ENOENT for that path sends
+ * the reader to check a directory rather than the line they mistyped.
+ *
+ * Named rather than tolerated. Accepting both spellings would put two names on
+ * one location, which is the failure the config already refuses everywhere else
+ * — these values are compared as strings, not only joined onto a root.
+ */
+const readRosteredManifest = ({ directory, packagesDir, repoRoot }) => {
+  const manifestPath = join(repoRoot, directory, 'package.json');
+  if (!existsSync(manifestPath)) {
+    throw new Error(
+      `${CONFIG_FILE_NAME}: \`publishing.publicPackageDirs\` names \`${directory.slice(packagesDir.length + 1)}\`, but there is no manifest at \`${directory}/package.json\`. Each entry is a directory name under \`publishing.packagesDir\` (\`${packagesDir}\`), not a path from the repository root.`,
+    );
+  }
+  return JSON.parse(readFileSync(manifestPath, 'utf8'));
+};
+
+/**
  * Resolves one package into the entries the extractor snapshots: its concrete
  * subpaths, each mapped to the type file a consumer would load.
  */
 const toPackageConfig = ({ dir, packagesDir, repoRoot }) => {
   const directory = `${packagesDir}/${dir}`;
-  const manifest = JSON.parse(
-    readFileSync(join(repoRoot, directory, 'package.json'), 'utf8'),
-  );
+  const manifest = readRosteredManifest({ directory, packagesDir, repoRoot });
   const source = shipsSource(manifest);
   const entries = Object.entries(manifest.exports ?? {})
     .filter(([subpath]) => isContractSubpath(subpath))

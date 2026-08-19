@@ -78,6 +78,13 @@ hand-publish, and the only one that cannot prevent anything.
 }
 ```
 
+Each `publicPackageDirs` entry is a **directory name under `packagesDir`** —
+`ui`, not `packages/ui`. Spelling it the second way is a valid repo-relative
+string, so it passes validation and fails at the read; the gate names the config
+key and the rule rather than reporting an ENOENT for a directory that was never
+meant to exist. The two spellings are not both accepted, because that would put
+two names on one location, which is what every other key here refuses.
+
 `publicPackageDirs` is the exception that defaults to nothing useful: the roster
 of packages under the API-surface ratchet is the repository's own data, and
 guessing it would point the gate at directories a consumer does not have. Empty
