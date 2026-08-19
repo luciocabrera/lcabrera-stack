@@ -22,6 +22,7 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vite-plus/test';
 
+import { readPublishing } from '../../packages/repo-standards/scripts/config.mjs';
 import {
   buildPublishExports,
   isBuiltPublicPackage,
@@ -31,18 +32,33 @@ import { releasePackerProblems } from '../../packages/repo-standards/scripts/rel
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const RELEASE_WORKFLOW = join(REPO_ROOT, '.github', 'workflows', 'release.yml');
 
+const { packagesDir, publicPackageDirs } = readPublishing(REPO_ROOT);
+
 const readManifest = (directory) =>
   JSON.parse(
     readFileSync(
-      join(REPO_ROOT, 'packages', directory, 'package.json'),
+      join(REPO_ROOT, packagesDir, directory, 'package.json'),
       'utf8',
     ),
   );
 
+/**
+ * Taken from the roster rather than written out, so a package is covered the
+ * day it is published rather than the day someone remembers this file. The
+ * hardcoded list this replaced named three of them and the test above it
+ * claimed to check every one.
+ */
+const builtPackages = publicPackageDirs.filter((directory) =>
+  isBuiltPublicPackage(readManifest(directory)),
+);
+
 describe('this repository publishes what it develops against', () => {
   it('reproduces every built package’s committed publishConfig.exports', () => {
+    // An empty roster would pass this silently, which reads the same as clean.
+    expect(builtPackages.length).toBeGreaterThan(0);
+
     // Catches a hand-edit to package.json that the generator would not produce.
-    for (const directory of ['api', 'server', 'utils']) {
+    for (const directory of builtPackages) {
       const manifest = readManifest(directory);
 
       expect(buildPublishExports(manifest.exports)).toEqual(
@@ -57,11 +73,14 @@ describe('this repository publishes what it develops against', () => {
     // so a consumer's own plugin has to compile it. If it ever gains a `build`
     // script this test should fail loudly rather than the gate silently
     // demanding a dist/ that must not exist.
-    expect(isBuiltPublicPackage(readManifest('ui'))).toBe(false);
+    //
+    // Asserted as the whole exception rather than one case, since `builtPackages`
+    // is derived by the same predicate and could not contradict itself.
+    const sourceShipping = publicPackageDirs.filter(
+      (directory) => !isBuiltPublicPackage(readManifest(directory)),
+    );
 
-    for (const directory of ['api', 'server', 'utils']) {
-      expect(isBuiltPublicPackage(readManifest(directory))).toBe(true);
-    }
+    expect(sourceShipping).toEqual(['ui']);
   });
 
   it('gitignores dist so a build is never committed', () => {

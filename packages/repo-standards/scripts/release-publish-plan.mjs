@@ -41,6 +41,7 @@ import {
 } from './release-publishable.mjs';
 import { errorMessage } from './error-message.mjs';
 import { fetchPackument } from './registry-packument.mjs';
+import { annotationData } from './workflow-annotation.mjs';
 import { resolveHostRoot } from './host-root.mjs';
 
 const REPO_ROOT = resolveHostRoot({
@@ -128,6 +129,8 @@ const main = async () => {
 try {
   await main();
 } catch (error) {
-  console.error(`::error::Cannot release: ${errorMessage(error)}`);
+  console.error(
+    `::error::Cannot release: ${annotationData(errorMessage(error))}`,
+  );
   process.exitCode = 1;
 }
