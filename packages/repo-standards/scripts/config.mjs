@@ -132,8 +132,8 @@ export const readRegisters = (root = hostRoot()) =>
 
 /**
  * The coordination register's three locations, absolute, from one read of the
- * config. Both commands that touch the register resolve them here rather than
- * each joining its own — which is how the closer came to delete from
+ * config. Every command that touches the register resolves them here rather
+ * than joining its own — which is how the closer came to delete from
  * `docs/coordination/tasks` while reporting the configured path.
  *
  * The relative forms travel with them because they are what a message should

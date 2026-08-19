@@ -21,18 +21,18 @@
  * With no PR JSON on stdin (no `gh`, no token, no open PRs) it still prints the
  * claims, just without live PR columns. Exit code is always 0 — it is a view.
  */
-import { dirname, resolve } from 'node:path';
+import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { readStdin } from './cli-input.mjs';
-import { readRegisters } from './config.mjs';
+import { readCoordinationPaths } from './config.mjs';
 import { readEntries } from './coordination-read.mjs';
 import { resolveHostRoot } from './host-root.mjs';
 
 const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),
 });
-const TASKS_DIR = resolve(REPO_ROOT, readRegisters().coordinationTasksDir);
+const { tasksDir: TASKS_DIR } = readCoordinationPaths(REPO_ROOT);
 
 const parsePullRequests = (raw) => {
   if (!raw.trim()) {
