@@ -6,6 +6,7 @@ import type {
   TableDataState,
   TableFocusState,
   TableGroupExpansionState,
+  TableGroupingState,
   TableMetaState,
 } from '#ui/components/Table/Table.types';
 
@@ -13,6 +14,7 @@ import { resolveGroupPathKey } from '#ui/components/Table/contexts/TableConfig/g
 import {
   getInitialColumnsState,
   getInitialExpansionState,
+  getInitialGroupingState,
   getInitialMetaState,
 } from '#ui/components/Table/contexts/TableConfig/utils';
 import { getInitialDataState } from '#ui/components/Table/contexts/TableData/utils';
@@ -34,6 +36,8 @@ const rows: readonly Row[] = [
   { city: 'B', id: 2 },
   { city: 'C', id: 3 },
 ];
+
+const groupingState: TableGroupingState = getInitialGroupingState({});
 
 const groupPath = [{ columnKey: 'city', label: 'A', value: 'A' }];
 
@@ -80,6 +84,7 @@ describe('resolveGridFocusContext', () => {
       dataState,
       expansionState,
       focusState: focusStateFor({}),
+      groupingState,
       metaState,
     });
 
@@ -97,6 +102,7 @@ describe('resolveGridFocusContext', () => {
       dataState,
       expansionState,
       focusState: focusStateFor({}),
+      groupingState,
       metaState,
     });
 
@@ -113,6 +119,7 @@ describe('resolveGridFocusContext', () => {
         rowIndex: 0,
         rowKey: rowKeyAt(2),
       }),
+      groupingState,
       metaState,
     });
 
@@ -138,6 +145,7 @@ describe('resolveGridFocusContext', () => {
       dataState: groupedDataState,
       expansionState,
       focusState: focusStateFor({}),
+      groupingState,
       metaState,
     });
     const context = resolveGridFocusContext({
@@ -145,11 +153,63 @@ describe('resolveGridFocusContext', () => {
       dataState: groupedDataState,
       expansionState: collapsed,
       focusState: focusStateFor({}),
+      groupingState,
       metaState,
     });
 
     expect(expanded.data).toHaveLength(3);
     expect(context.data).toHaveLength(1);
     expect(context.rowMeta?.[0]?.isExpanded).toBe(false);
+  });
+});
+
+describe('resolveGridFocusContext — a drilled group', () => {
+  // One leaf group over one key, so the group row is drillable and its page can
+  // be spliced under it.
+  const leafRow: Row = {
+    [TABLE_GROUP_ROW_FIELD]: {
+      aggregates: [],
+      count: 9,
+      isSubtotal: false,
+      path: groupPath,
+    },
+  };
+
+  const drilledState = getInitialDataState<Row>({
+    data: [leafRow],
+    totalRows: 1,
+  }) as TableDataState<Row>;
+
+  const withDrill = (expansion: TableGroupExpansionState) =>
+    resolveGridFocusContext({
+      columnsState,
+      dataState: drilledState,
+      expansionState: expansion,
+      focusState: focusStateFor({}),
+      groupingState: { ...groupingState, keys: ['city'] },
+      metaState: { ...metaState, isGroupDrillEnabled: true },
+    });
+
+  it('navigates the rows a drill added, not the rows without them', () => {
+    // The focus model and the body must derive the same array. Resolved without
+    // the drill inputs this returns one row, and every index past the open
+    // drill addresses a different row than the one painted there (ADR-079).
+    const drilled = withDrill({
+      ...expansionState,
+      drilledGroups: new Map([
+        [
+          resolveGroupPathKey(groupPath),
+          { rows: [{ city: 'A', id: 7 }], status: 'loaded' as const },
+        ],
+      ]),
+    });
+
+    // The group row, its one fetched row, and the hand-off for the other eight.
+    expect(drilled.data).toHaveLength(3);
+    expect(drilled.rowMeta).toHaveLength(3);
+  });
+
+  it('leaves the array alone when nothing has been drilled', () => {
+    expect(withDrill(expansionState).data).toHaveLength(1);
   });
 });

@@ -30,14 +30,14 @@ import { resolveGroupCollapseFocusTarget } from './utils';
 export const useToggleTableGroupExpansion = <
   TData extends Record<string, unknown>,
 >() => {
-  const { columnsStore, expansionStore, metaStore } =
+  const { columnsStore, expansionStore, groupingStore, metaStore } =
     useTableConfigContextValue<TData>();
   const { dataStore } = useTableDataContextValue<TData>();
   const { focusStore } = useTableFocusContextValue();
   const containerRef = useTableContainerRef();
 
   return (path: readonly TableGroupKeyValue[]) => {
-    const { collapsedGroupPaths } = expansionStore.get();
+    const { collapsedGroupPaths, drilledGroups } = expansionStore.get();
     const groupPathKey = resolveGroupPathKey(path);
     const nextCollapsed = toggleCollapsedGroupPath({
       collapsedGroupPaths,
@@ -46,9 +46,16 @@ export const useToggleTableGroupExpansion = <
 
     if (nextCollapsed.has(groupPathKey)) {
       const focusState = focusStore.get();
+      // The same inputs `useTableGroupTree` derives the painted rows from. A
+      // drilled page and its chrome are rows in that array, so a tree resolved
+      // without them would hand back an index into a grid that is not the one
+      // on screen (ADR-079).
       const { rows } = resolveTableGroupTree({
+        canDrill: metaStore.get().isGroupDrillEnabled,
         collapsedGroupPaths: nextCollapsed,
         data: dataStore.get().data,
+        drilledGroups,
+        groupingKeys: groupingStore.get().keys,
       });
       const target = resolveGroupCollapseFocusTarget({
         columns: columnsStore.get().columns,

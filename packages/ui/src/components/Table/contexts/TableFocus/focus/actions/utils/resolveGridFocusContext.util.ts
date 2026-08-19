@@ -3,6 +3,7 @@ import type {
   TableDataState,
   TableFocusState,
   TableGroupExpansionState,
+  TableGroupingState,
   TableMetaState,
 } from '#ui/components/Table/Table.types';
 
@@ -16,6 +17,7 @@ type ResolveGridFocusContextArgs<TData extends Record<string, unknown>> = {
   readonly dataState: TableDataState<TData>;
   readonly expansionState: TableGroupExpansionState;
   readonly focusState: TableFocusState;
+  readonly groupingState: TableGroupingState;
   readonly metaState: TableMetaState;
 };
 
@@ -36,18 +38,28 @@ type ResolveGridFocusContextArgs<TData extends Record<string, unknown>> = {
  * itself has while it registers no cell (#651). Collapsing changes the index
  * space the grid navigates, which is exactly why focus is keyed by row identity
  * and re-resolved here on every move (ADR-062, ADR-067).
+ *
+ * **The drill inputs are passed for the same reason `collapsedGroupPaths` is.**
+ * A drilled page and its chrome are rows in the array the body paints, so a
+ * derivation that omitted them would navigate a different grid from the one on
+ * screen — every index past the first open drill off by the size of its page
+ * (ADR-079). This must be given the same inputs as `useTableGroupTree`.
  */
 export const resolveGridFocusContext = <TData extends Record<string, unknown>>({
   columnsState,
   dataState,
   expansionState,
   focusState,
+  groupingState,
   metaState,
 }: ResolveGridFocusContextArgs<TData>) => {
   const { columns, pinnedColumnPartition } = columnsState;
   const { rowMeta, rows } = resolveTableGroupTree({
+    canDrill: metaState.isGroupDrillEnabled,
     collapsedGroupPaths: expansionState.collapsedGroupPaths,
     data: dataState.data,
+    drilledGroups: expansionState.drilledGroups,
+    groupingKeys: groupingState.keys,
   });
 
   return {
