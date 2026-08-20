@@ -19,6 +19,7 @@ import type {
 } from '#ui/components/Table/Table.types';
 
 import { createMockStore } from '#ui/utils/tests/createMockStore.util';
+import { deserializeGroupingFromURL } from '#ui/utils/urlState';
 
 type MockDraggableListProps = {
   readonly items: readonly {
@@ -198,6 +199,33 @@ const stageAggregate = ({
   fireEvent.click(getAddButtons().addAggregate as HTMLElement);
 };
 
+/**
+ * The two reverse controls the mocked `DraggableList` stands in for — group
+ * keys, then aggregates, in the order `GroupingSection` composes the two lists.
+ * Each list renders one only while it has rows, so the length assertion is
+ * what stops a click landing on the other list.
+ */
+const getReverseButtons = () => {
+  const reverseButtons = screen.getAllByRole('button', { name: 'Reverse' });
+
+  expect(reverseButtons).toHaveLength(2);
+
+  return {
+    reverseAggregates: reverseButtons[1],
+    reverseGroupKeys: reverseButtons[0],
+  };
+};
+
+/** The `grouping` param value the one commit wrote. */
+const getCommittedGroupingParam = () =>
+  (persistTableState.mock.calls[0]?.[0] ?? []).find(
+    (entry) => entry.searchParamKey === 'grouping',
+  )?.searchParamValue;
+
+/** The labelled aggregate rows, in the order the drawer renders them. */
+const getAggregateLabels = () =>
+  screen.getAllByText(/^\w+ of /).map((node) => node.textContent);
+
 beforeEach(() => {
   stores.columnsStore = createMockStore<Record<string, unknown>>({
     columnFilters: {},
@@ -238,7 +266,7 @@ describe('GroupingSection staging', () => {
     stageGroupKey('Status');
     stageGroupKey('Country');
     stageAggregate({ columnLabel: 'Total', fnLabel: 'Sum' });
-    fireEvent.click(screen.getByRole('button', { name: 'Reverse' }));
+    fireEvent.click(getReverseButtons().reverseGroupKeys as HTMLElement);
     fireEvent.click(
       screen.getByRole('button', { name: 'Remove Country group key' }),
     );
@@ -302,6 +330,120 @@ describe('GroupingSection staging', () => {
     expect(screen.getByText('Aggregates (1)')).not.toBeNull();
     expect(screen.getByText('Sum of Total')).not.toBeNull();
     expect(screen.queryByText('Average of Total')).toBeNull();
+  });
+
+  it('stages a drag ACROSS columns and commits the dragged order in one navigation', () => {
+    // Reordering happens across columns, which is the whole reason the wire
+    // format is an ordered array rather than a map of lists (#831/#832). The
+    // navigation count is asserted here too: the reorder is one more staged
+    // edit, not a commit path of its own.
+    renderDrawer();
+
+    stageGroupKey('Status');
+    stageAggregate({ columnLabel: 'Total', fnLabel: 'Average' });
+    stageAggregate({ columnLabel: 'Quantity', fnLabel: 'Sum' });
+
+    expect(getAggregateLabels()).toEqual([
+      'Average of Total',
+      'Sum of Quantity',
+    ]);
+
+    fireEvent.click(getReverseButtons().reverseAggregates as HTMLElement);
+
+    expect(getAggregateLabels()).toEqual([
+      'Sum of Quantity',
+      'Average of Total',
+    ]);
+    expect(persistTableState).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
+
+    expect(persistTableState).toHaveBeenCalledTimes(1);
+    expect(getCommittedGroupingParam()).toBe(
+      '{"agg":["quantity:sum","total_amount:avg"],"keys":["order_status"]}',
+    );
+    expect(stores.groupingStore.get().aggregates).toStrictEqual([
+      { columnKey: 'quantity', fn: 'sum' },
+      { columnKey: 'total_amount', fn: 'avg' },
+    ]);
+  });
+
+  it('reads the dragged order back out of the committed URL param', () => {
+    // The round trip a shared link takes: commit → `grouping` param → a fresh
+    // load seeding the store from it. Asserting the store alone would pass on
+    // an order the param cannot carry.
+    const firstOpen = renderDrawer();
+
+    stageGroupKey('Status');
+    stageAggregate({ columnLabel: 'Total', fnLabel: 'Average' });
+    stageAggregate({ columnLabel: 'Quantity', fnLabel: 'Sum' });
+    fireEvent.click(getReverseButtons().reverseAggregates as HTMLElement);
+    fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
+
+    const committedParam = getCommittedGroupingParam();
+
+    expect(committedParam).not.toBeUndefined();
+
+    firstOpen.unmount();
+    stores.groupingStore.reset(
+      deserializeGroupingFromURL(committedParam as string),
+    );
+    renderDrawer();
+
+    expect(getAggregateLabels()).toEqual([
+      'Sum of Quantity',
+      'Average of Total',
+    ]);
+  });
+
+  it('discards a reorder on Cancel, like every other staged edit', () => {
+    stores.groupingStore.reset({
+      aggregates: [
+        { columnKey: 'total_amount', fn: 'avg' },
+        { columnKey: 'quantity', fn: 'sum' },
+      ],
+      keys: ['order_status'],
+      mode: 'flat',
+      periods: {},
+      shares: [],
+    });
+
+    renderDrawer();
+    fireEvent.click(getReverseButtons().reverseAggregates as HTMLElement);
+
+    expect(getAggregateLabels()).toEqual([
+      'Sum of Quantity',
+      'Average of Total',
+    ]);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    expect(persistTableState).not.toHaveBeenCalled();
+    expect(stores.groupingStore.get().aggregates).toStrictEqual([
+      { columnKey: 'total_amount', fn: 'avg' },
+      { columnKey: 'quantity', fn: 'sum' },
+    ]);
+    expect(getAggregateLabels()).toEqual([
+      'Average of Total',
+      'Sum of Quantity',
+    ]);
+  });
+
+  it('keeps the share toggle on a row that is now a draggable item', () => {
+    renderDrawer();
+
+    stageGroupKey('Status');
+    stageAggregate({ columnLabel: 'Total', fnLabel: 'Sum' });
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: /Show share of grand total for Sum of Total/,
+      }),
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
+
+    expect(getCommittedGroupingParam()).toBe(
+      '{"agg":["total_amount:sum"],"keys":["order_status"],"share":["total_amount:sum"]}',
+    );
   });
 
   it('stages the totals mode and carries it in the same commit', () => {

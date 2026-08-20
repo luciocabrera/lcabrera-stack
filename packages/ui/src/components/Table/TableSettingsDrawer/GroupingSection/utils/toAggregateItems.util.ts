@@ -6,6 +6,8 @@ import type {
 import { TABLE_AGGREGATE_LABELS } from '#ui/components/Table/Table.constants';
 import { toTableAggregateToken } from '#ui/components/Table/utils/tableAggregateToken.util';
 
+import type { AggregateItem } from '../GroupingSection.types';
+
 type ToAggregateItemsArgs<TData extends Record<string, unknown>> = {
   readonly aggregates: TableGroupingState['aggregates'];
   readonly columns: readonly TableColumn<TData>[];
@@ -17,7 +19,7 @@ type ToAggregateItemsArgs<TData extends Record<string, unknown>> = {
  * The staged order rather than the table's column order, and the reason changed
  * with the shape: a column may now carry several aggregates, so column order no
  * longer orders the list at all — and the list's own order is state the user
- * arranged, carried in the `grouping` param and made draggable by #832.
+ * arranged by dragging these very rows (#832), carried in the `grouping` param.
  * Re-sorting here would silently discard it.
  *
  * `id` is the row's identity — the `(columnKey, fn)` pair as one string — since
@@ -28,12 +30,14 @@ type ToAggregateItemsArgs<TData extends Record<string, unknown>> = {
  * labelled with its key. It cannot be reached through the UI (both surfaces
  * build from the columns) and the loader's sanitizer refuses the whole grouping
  * when a URL carries one, so a row here would describe a state that does not
- * survive a reload.
+ * survive a reload. That drop is why a reorder is expressed as ids over the
+ * **staged** list (`reorderTableColumnAggregates`) rather than rebuilt from
+ * these rows: rebuilding would un-stage whatever this dropped.
  */
 export const toAggregateItems = <TData extends Record<string, unknown>>({
   aggregates,
   columns,
-}: ToAggregateItemsArgs<TData>) => {
+}: ToAggregateItemsArgs<TData>): readonly AggregateItem[] => {
   const columnByKey = new Map(
     columns.map((column) => [String(column.key), column]),
   );

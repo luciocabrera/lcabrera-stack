@@ -56,13 +56,14 @@ GroupingSection/
 ├── ARCHITECTURE.md
 ├── GroupingSection.component.tsx       → Shell: add-key, overlay, lists, toolbar
 ├── GroupingSection.test.tsx            → Staging + navigation-count integration test
-├── GroupingSection.types.ts            → GroupingSectionProps, GroupKeyItem
+├── GroupingSection.types.ts            → GroupingSectionProps, GroupKeyItem, AggregateItem
 ├── index.ts
 ├── AddGroupKeySection/                 → VirtualSelect for adding a group key
 ├── ActiveGroupKeyList/                 → DraggableList of staged keys
 │   └── GroupKeyItemContent/            → One key row: level, label, remove
 ├── AddAggregateSection/                → Column select → legal-function select
-├── ActiveAggregateList/                → Staged aggregates in staged order, each removable — one row per (column, function)
+├── ActiveAggregateList/                → DraggableList of staged aggregates — one row per (column, function)
+│   ├── AggregateItemContent/           → One measure row: label, share toggle, remove
 │   └── ShareOfTotalToggle/             → Share of the grand total, on the measures it is defined for
 ├── GroupingModeSection/                → Totals mode: groups only, or groups with subtotals
 ├── TotalsPlacementSection/             → Totals position: above or below their rows (rollup only)
@@ -93,6 +94,7 @@ flowchart TD
   F -->|reorder / remove| J["useSetGroupKeys"]
   G -->|add| K["useToggleGroupKey"]
   H -->|remove| L2["useRemoveColumnAggregate"]
+  H -->|reorder| L3["useReorderColumnAggregates"]
   I -->|add| L["useAddColumnAggregate"]
   M["GroupingSectionToolbar"] -->|clear| N["useClearGrouping"]
 
@@ -100,6 +102,7 @@ flowchart TD
   K --> O
   L --> O
   L2 --> O
+  L3 --> O
   N --> O
   O --> P["resolveTableGroupingUpdate<br/>(depth cap, unchanged check)"]
   P -->|updated| B2
@@ -113,19 +116,20 @@ flowchart TD
 
 ## Where each answer comes from
 
-| Question                                        | Answered by                                                                 | Not by                                |
-| ----------------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------- |
-| May this column be a group key at all?          | `resolveGroupKeyAvailability` — the declared flag narrowed by the catalogue | either gate alone (ADR-068)           |
-| Which aggregates does this column's type allow? | `metaState.groupingCapabilities[key].aggregates`                            | `TableColumn.dataType` (#550)         |
-| Which of those may be **offered** here?         | `resolveOfferableAggregates` — those, minus an active group key             | either half on its own (#830)         |
-| May this measure show a share?                  | `isShareableAggregate` — additive measures only (ADR-086)                   | the column, which has no say in it    |
-| Which measure does a share belong to?           | the `(columnKey, fn)` pair (#831)                                           | the column key alone                  |
-| How many keys may be applied?                   | `MAX_TABLE_GROUP_KEYS`                                                      | anything local to a component         |
-| Is this configuration a change at all?          | `resolveTableGroupingUpdate`                                                | the component                         |
-| What grouping is the section showing?           | `TableDrawerContext`'s `groupingStore` (the draft)                          | the live `TableConfig` grouping store |
-| What grouping is the **table** showing?         | `TableConfig`'s `groupingStore`                                             | the draft, until Accept commits it    |
-| Where do the totals go?                         | `TableDrawerContext`'s `totalsPlacementStore` (the draft)                   | the grouping draft — see below        |
-| May the user reshape the grouping?              | `metaState.isGroupingLocked`, read by each delegate itself                  | a prop drilled from the shell         |
+| Question                                        | Answered by                                                                 | Not by                                      |
+| ----------------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------- |
+| May this column be a group key at all?          | `resolveGroupKeyAvailability` — the declared flag narrowed by the catalogue | either gate alone (ADR-068)                 |
+| Which aggregates does this column's type allow? | `metaState.groupingCapabilities[key].aggregates`                            | `TableColumn.dataType` (#550)               |
+| Which of those may be **offered** here?         | `resolveOfferableAggregates` — those, minus an active group key             | either half on its own (#830)               |
+| May this measure show a share?                  | `isShareableAggregate` — additive measures only (ADR-086)                   | the column, which has no say in it          |
+| Which measure does a share belong to?           | the `(columnKey, fn)` pair (#831)                                           | the column key alone                        |
+| In what order are the measures listed?          | the staged `aggregates` order, dragged in this list (#832)                  | the column order, which no longer orders it |
+| How many keys may be applied?                   | `MAX_TABLE_GROUP_KEYS`                                                      | anything local to a component               |
+| Is this configuration a change at all?          | `resolveTableGroupingUpdate`                                                | the component                               |
+| What grouping is the section showing?           | `TableDrawerContext`'s `groupingStore` (the draft)                          | the live `TableConfig` grouping store       |
+| What grouping is the **table** showing?         | `TableConfig`'s `groupingStore`                                             | the draft, until Accept commits it          |
+| Where do the totals go?                         | `TableDrawerContext`'s `totalsPlacementStore` (the draft)                   | the grouping draft — see below              |
+| May the user reshape the grouping?              | `metaState.isGroupingLocked`, read by each delegate itself                  | a prop drilled from the shell               |
 
 `TableColumn.dataType` is a five-member presentation vocabulary that reports
 `numeric`, `jsonb` and `point` alike as `string`, so a menu built from it offers
@@ -185,7 +189,7 @@ this section:
   a column key repeats the moment a column carries two measures, and React would
   reconcile two distinct rows as one.
 - **The order is staged state**, not column order: it is what the `grouping` param
-  carries and what #832 makes draggable, so `toAggregateItems` preserves it
+  carries and what the user drags (#832), so `toAggregateItems` preserves it
   rather than sorting.
 - **Adding is an append with a duplicate guard**, not a replace. Re-adding an
   applied pair answers with the state it was handed, so the commit reports
@@ -195,6 +199,30 @@ The header menu writes the same shape live: `AggregateButton` derives its
 pressed state through `deriveAggregateCommandState` — the aggregates' **own**
 derivation, beside the shared `deriveToggleCommandState` rather than widening it,
 because several items can be active at once and sorting must not gain that state.
+
+## The aggregate order is dragged, and the drag names ids
+
+`ActiveAggregateList` renders through `DraggableList`, like the three staged
+lists beside it. Until the shape change there was nothing to drag: a
+column-to-function map has no order of its own, and a handle would have offered
+a choice with no effect. An ordered list makes the order a real choice, and the
+`agg` array is what carries it through the URL — so a reorder survives a shared
+link and a reload, and one that did not would be a defect here rather than in
+the format.
+
+**The reorder is a permutation named by row ids, not a whole-list write.** That
+is where `useReorderColumnAggregates` departs from `useSetGroupKeys`, whose
+reorder rebuilds the key list from the rows. It has to: `toGroupKeyItems` keeps
+a key whose column the route does not declare, labelling it by key, while
+`toAggregateItems` **drops** the equivalent aggregate — so rebuilding the
+aggregate list from what is on screen would un-stage an entry the user never saw
+and never touched. `reorderTableColumnAggregates` sorts the staged entries by
+the ids it was handed instead, which can neither invent an aggregate nor drop
+one; anything the ids do not name keeps its relative order after those they do.
+
+The row identity is the `(columnKey, fn)` token, not the column, for the same
+reason the list is one row per pair — by the time a column can appear twice, a
+column-keyed `DraggableItem.id` would make two rows one drag target.
 
 ## A share is chosen here and rendered elsewhere
 

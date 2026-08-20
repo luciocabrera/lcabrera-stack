@@ -140,8 +140,20 @@ All styles are local in `DraggableList.stylex.ts`. No shared variants or compose
 
 ## Consumers
 
-Used in Table settings:
+Every staged list in the Table settings drawer, and no other surface:
 
+- `ActiveGroupKeyList` (grouping section — the keys, in nesting order)
+- `ActiveAggregateList` (grouping section — the measures, in staged order)
 - `ActiveSortList` (sorting section)
-- `ColumnOrderSection` (column reordering)
+- `ColumnOrderSectionBody` (column reordering)
 - `useReorderColumns` hook (type import only)
+
+The list is the whole drawer's reorder affordance, so it is worth restating why
+it is the same primitive four times: each of those orders is **state the user
+arranged**, not a view preference — the sort precedence, the grouping's nesting
+order, the column order, and (since #832) the order the measures are listed in.
+A staged list that could not be reordered would be the odd one out in a single
+screenshot of the drawer, which is what #832 closed.
+
+Keep this list current when a fifth arrives. It named two consumers while there
+were three, which is how it came to be checked as part of adding the fourth.
