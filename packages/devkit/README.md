@@ -138,7 +138,7 @@ re-running `sync`. `peer:` states the range the file was written against.
 ```yaml
 ---
 name: epic
-peer: '@repo/repo-standards@>=0.1.0 <1.0.0'
+peer: '@repo/repo-standards@<1.0.0'
 ---
 ```
 
@@ -157,8 +157,13 @@ distinct peer is resolved once per run, so `sync` and `doctor` can never
 disagree about what is installed.
 
 It is declared in this package's `peerDependencies` as `@repo/repo-standards` —
-the name that resolves today. It becomes `@lcabrera/repo-standards` when #800
-publishes both packages.
+the name that resolves today, and it becomes `@lcabrera/repo-standards` when #800
+publishes both packages. That publish moves its version too, which is why the
+example bounds the whole pre-1.0 line rather than naming a floor: copied as it
+stands it is satisfied here now and still satisfied afterwards, so it cannot
+refuse a file for a reason the reader has no way to see. Read it as the syntax
+and not as advice on what to pin — a range is right only if the consumer's tree
+answers it, and `devkit doctor` is what says when it does not.
 
 ## What ships
 

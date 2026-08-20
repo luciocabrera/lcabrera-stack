@@ -25,6 +25,7 @@ Enforce a skill's declared gate-runtime version range
 
 - Current step: `peer:` gate implemented — the frontmatter reader, `peer.mjs`,
   the fold into `planSync`'s existing `unmet` state, and one peer resolution per
-  plan in `buildPlan`
+  plan in `buildPlan`. Verification passed; its one low finding (a README example
+  range this tree cannot satisfy) is fixed
 - Blockers: none
-- Next: verification round on PR #845
+- Next: PR #845 awaiting its owner
