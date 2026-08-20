@@ -38,7 +38,7 @@ import { appendFileSync } from 'node:fs';
 import process from 'node:process';
 
 import {
-  copilotReviews,
+  acceptedReviews,
   decideReviewStatus,
   STATUS_CONTEXT,
 } from './lib/copilot-review.mjs';
@@ -78,9 +78,26 @@ const triggeringReviewFrom = (payload) =>
 const fetchPullRequest = (repository, number) =>
   JSON.parse(runGh(['api', `repos/${repository}/pulls/${number}`]));
 
-/** What was read, so a `pending` status is diagnosable from the run log alone. */
-const describeReviews = (reviews) =>
-  `${reviews.length} review(s) on the pull request, ${copilotReviews(reviews).length} counted from Copilot`;
+/**
+ * What was read, so a `pending` status is diagnosable from the run log alone —
+ * and WHO satisfied it when someone did, so a reviewer monoculture is visible in
+ * the log as well as in the status description.
+ *
+ * Printed early on purpose. The last line this script writes is the one the
+ * reconcile sweep records as the gate's outcome, so nothing may be appended
+ * after it.
+ */
+const describeReviews = (reviews, verdict) => {
+  const counted = `${reviews.length} review(s) on the pull request, ${acceptedReviews(reviews).length} counted from an accepted reviewer`;
+  // `verdict.reviewer` is set on `failure` too, where that login is by definition
+  // the one whose review does NOT name the head — so the state is what gates this
+  // clause, not the presence of a login. Without it the log said
+  // "…; X covers the head" directly above "failure — X reviewed <old>, which is no
+  // longer the head".
+  return verdict.state === 'success'
+    ? `${counted}; ${verdict.reviewer} covers the head`
+    : counted;
+};
 
 /** Appends the suppressed-comment report where the runner shows it, if it can. */
 const writeSummary = (markdown) => {
@@ -153,7 +170,7 @@ const main = () => {
   const { state } = verdict;
 
   console.log(`${repository}#${number} head ${headSha}`);
-  console.log(describeReviews(reviews));
+  console.log(describeReviews(reviews, verdict));
   reportSuppressed(suppressed, number);
   console.log(verdictLine({ description, state }));
   console.log(
