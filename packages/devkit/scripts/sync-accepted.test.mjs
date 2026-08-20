@@ -36,6 +36,62 @@ describe('planSync surfaces the hash acceptance is keyed to', () => {
     const [entry] = planFor({ onDisk: 'epic body, locally edited' });
     expect(entry.onDiskHash).toBe(hashContent('epic body, locally edited'));
   });
+
+  /**
+   * Every shape `planSync` returns, not only the classified one — and a REFUSED
+   * entry is the shape that goes wrong quietly. Nothing reads its hash today, so
+   * omitting it there costs nothing until something does, and then it reads
+   * `undefined`, which `isAccepted` takes as "no match" for ever. Each of the
+   * three is refused by a different gate, so one of those gates silently
+   * ceasing to fire changes the state and fails the same test.
+   *
+   * `peerVersions` is left at its default, which reads the declared peer as
+   * absent; the range is unsatisfiable anyway, so the refusal does not depend on
+   * which of the two it is.
+   */
+  const REFUSED_DECLARATIONS = {
+    'unmet, on a config key': {
+      lines: ['requires: [config.commands.install]'],
+      state: 'unmet',
+    },
+    'unmet, on a peer range': {
+      lines: ["peer: '@repo/repo-standards@>=99.0.0'"],
+      state: 'unmet',
+    },
+    'unresolved, on a placeholder': {
+      lines: [],
+      state: 'unresolved',
+      body: 'Run {{commands.install}} first.',
+    },
+  };
+
+  for (const [
+    label,
+    { body = 'A demo skill.', lines, state },
+  ] of Object.entries(REFUSED_DECLARATIONS)) {
+    test(`a ${label} entry carries it too`, () => {
+      // The file is on disk because a previous sync wrote it and the asset only
+      // gained the declaration afterwards — the one situation in which a refused
+      // entry has anything to hash at all.
+      const onDisk = 'the copy a previous sync wrote';
+      const [entry] = planSync({
+        assets: [
+          {
+            content: ['---', 'name: demo', ...lines, '---', '', body].join(
+              '\n',
+            ),
+            path: 'skills/demo/SKILL.md',
+          },
+        ],
+        config: DEFAULT_CONFIG,
+        manifest: { files: {} },
+        onDiskHash: () => hashContent(onDisk),
+      });
+
+      expect(entry.state).toBe(state);
+      expect(entry.onDiskHash).toBe(hashContent(onDisk));
+    });
+  }
 });
 
 describe('withAcceptance', () => {
