@@ -11,7 +11,8 @@
  *
  * Usage:
  *   devkit sync [--profile <name>]
- *   devkit doctor [--check]
+ *   devkit doctor [--check] [--verbose]
+ *   devkit doctor --accept <path> --reason "<why>"
  *   devkit closure <directory> [<directory> ...]
  *
  * Exit codes: 0 = nothing to report, 1 = findings, drift under --check, or bad
@@ -24,7 +25,8 @@ import { runDoctor, runSync } from './command-sync.mjs';
 const USAGE = [
   'usage:',
   '  devkit sync [--profile <name>]',
-  '  devkit doctor [--check]',
+  '  devkit doctor [--check] [--verbose]',
+  '  devkit doctor --accept <path> --reason "<why>"',
   '  devkit closure <directory> [<directory> ...]',
 ].join('\n');
 

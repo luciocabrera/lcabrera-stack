@@ -80,6 +80,27 @@ const REPORTED_STATES = new Set([
 
 export const isReported = (state) => REPORTED_STATES.has(state);
 
+/**
+ * The state an acknowledgement applies to, and the state it produces. Both names
+ * live here with the rest of the vocabulary so neither can drift from the
+ * classifier that emits the first one.
+ */
+export const ACKNOWLEDGEABLE_STATE = 'modified';
+export const ACKNOWLEDGED_STATE = 'acknowledged';
+
+/**
+ * An acknowledged edit sits in NONE of the three sets above, which is the whole
+ * of what acknowledgement means. Not written: the edit stands, exactly as
+ * `modified` did. Not reported: that is the point of acknowledging it. And not
+ * recorded — recording the edited content's hash would make the next run compare
+ * the package against the consumer's edit rather than against the baseline it
+ * last wrote, so `updated` and `current` would swap places for that file.
+ *
+ * It gets its own predicate rather than joining a set, so `--verbose` can list
+ * it with the reason given for it: quiet is not the same as gone.
+ */
+export const isAcknowledged = (state) => state === ACKNOWLEDGED_STATE;
+
 export const emptyManifest = (version) => ({
   files: {},
   packageVersion: version,

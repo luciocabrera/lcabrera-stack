@@ -14,7 +14,8 @@ can travel, and **moving** it into a consumer's tree.
 | `frontmatter.mjs`                   | Read a shipped file's `requires:` and `peer:` declarations, however they are spelled. Pure.                       |
 | `peer.mjs`                          | Resolve an installed peer's version, and decide whether it answers a declared range. Pure but for the resolution. |
 | `manifest.mjs`                      | Hash files, and decide what happens to each on the next run. Pure.                                                |
-| `sync.mjs`                          | Turn assets plus a manifest into a plan, then apply it.                                                           |
+| `accepted.mjs`                      | The record of which local edits the consumer said they meant, and what may go into it. Pure.                      |
+| `sync.mjs`                          | Turn assets plus a manifest into a plan, layer acceptance over it, then apply it.                                 |
 | `command-materialise.mjs`           | The plan `sync` and `doctor` share.                                                                               |
 | `command-closure.mjs`, `devkit.mjs` | The commands, and the dispatcher.                                                                                 |
 
@@ -64,6 +65,25 @@ decision takes the version as an argument. That is what keeps the deciding half
 pure and testable with nothing on disk. Ranges are evaluated by `semver`: a
 hand-rolled comparator inside a compatibility gate fails silently in exactly the
 way the gate exists to prevent.
+
+**An acknowledged edit is keyed to the file's hash, and lives in its own file.**
+Keying it to the path alone would be a permanent opt-out: every later edit to
+that file silently unreported, which is the failure the manifest exists to catch.
+Keying it to the on-disk hash costs nothing to maintain — a further edit
+invalidates the entry by itself — and is why re-surfacing needs no command.
+It is `.devkit-accepted.json` rather than a field in `.devkit-manifest.json`
+because `sync` rewrites the manifest on every run through a reduce that knows
+only about `files`, so a field beside it is one unrelated change to manifest
+writing away from being dropped without a word.
+
+**Acceptance is layered over the classification, not folded into it.**
+`classifyMaterialisation` stays a function of three hashes, so the acceptance
+record cannot change what `modified` means and a consumer who has acknowledged
+nothing gets exactly the plan they got before — the same separation
+`manifestAfter` already keeps from `planSync`. The relabelling happens in
+`buildPlan`, which is what stops `sync` and `doctor` disagreeing about which
+files are quiet — the same place, and for the same reason, a peer's version is
+resolved once.
 
 ## Assets
 

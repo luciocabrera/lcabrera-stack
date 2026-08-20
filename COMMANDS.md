@@ -455,13 +455,21 @@ is believed — the same property [`deps:audit`](#dependencies) is built around.
 | `vp run adr:new`             | scaffold an ADR from [`_TEMPLATE.md`](docs/decisions/_TEMPLATE.md) with the next free number — `-- "<title>" [--home repo\|app] [--slug <s>] [--dry-run]`                                                                                                                            |
 | `vp run adr:list`            | print every ADR with its title, per home — the listing each home's index deliberately does not carry ([ADR-075](docs/decisions/ADR-075-the-index-does-not-list-the-adrs.md))                                                                                                         |
 | `vp run devkit:sync`         | materialise the shipped skills and rules into this repository from [`packages/devkit`](packages/devkit/CLASSIFICATION.md) — a locally modified file is reported and kept, never overwritten                                                                                          |
-| `vp run devkit:doctor`       | report what differs between this repository's materialised copies and the package; `-- --check` makes a difference fail                                                                                                                                                              |
+| `vp run devkit:doctor`       | report what differs between the materialised copies and the package; `-- --check` fails on a difference, `-- --verbose` also lists acknowledged edits, `-- --accept <path> --reason "…"` acknowledges ONE                                                                            |
 | `vp run devkit:closure`      | measure what a directory references but does not contain — `-- <dir> [<dir> ...]`, or `-- --shipped` for every file the package places; the instrument behind the classification table                                                                                               |
 | `vp run viteplus:verify`     | check AGENTS.md has no Vite+ managed block rendering content — the markers are removed so `vp install` cannot refill them; this catches them coming back (`--write` re-empties a refilled one)                                                                                       |
 | `vp run configs:verify`      | check no formatter/linter config file exists that no engine reads — fmt and lint are configured once in the root `vite.config.ts` (ADR-042), so a `.oxfmtrc.json`/`.prettierrc` beside it is a decoy                                                                                 |
 | `vp run skills:validate`     | validate skill definitions                                                                                                                                                                                                                                                           |
 | `vp run skills:report`       | skills compliance report                                                                                                                                                                                                                                                             |
 | `vp run prepare`             | `vp config` — runs automatically on install                                                                                                                                                                                                                                          |
+
+`devkit:doctor -- --accept` takes **one** file at a time and refuses a path the
+report does not currently call `modified`, or a missing `--reason` — the same
+discipline `docs:verify -- --accept` keeps, for the same reason. It records the
+edit's on-disk hash in `.devkit-accepted.json`, which is **tracked**: commit it
+alongside `.devkit-manifest.json`. Because the record is keyed to that hash,
+editing the file again re-reports it with no further command, and reverting to
+the acknowledged content quiets it again. Withdraw one by deleting its entry.
 
 ### Coordination register
 
