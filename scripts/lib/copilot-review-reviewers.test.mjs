@@ -15,11 +15,28 @@ import {
 // The reviewer set half of the gate, split from `./copilot-review.test.mjs` when
 // that file crossed the 350-line ceiling `vp run scripts:verify` enforces. The
 // seam is a real one rather than an arbitrary cut: everything here is about WHO
-// counts, and everything left there is about WHICH COMMIT was reviewed.
+// counts — including recognising each reviewer, and keeping `isCopilotReviewer`
+// narrower than the accepted set — and everything left there is about WHICH COMMIT
+// was reviewed.
 //
 // Both halves are written to be able to fail. Removing the second reviewer from
 // `ACCEPTED_REVIEWERS` fails nine of the assertions below; reverting the
 // per-reviewer comparison to newest-across-the-set fails two more.
+
+describe('recognising the reviewer', () => {
+  it('accepts both spellings of the Copilot reviewer login', () => {
+    expect(isCopilotReviewer('copilot-pull-request-reviewer[bot]')).toBe(true);
+    expect(isCopilotReviewer('copilot-pull-request-reviewer')).toBe(true);
+    expect(isCopilotReviewer('Copilot-Pull-Request-Reviewer[bot]')).toBe(true);
+  });
+
+  it('rejects everyone else, including a non-string login', () => {
+    expect(isCopilotReviewer('luciocabrera')).toBe(false);
+    expect(isCopilotReviewer('copilot')).toBe(false);
+    expect(isCopilotReviewer('not-copilot-pull-request-reviewer')).toBe(false);
+    expect(isCopilotReviewer(undefined)).toBe(false);
+  });
+});
 
 describe('which reviewers the gate accepts', () => {
   it('accepts both named reviewers, in either API spelling', () => {

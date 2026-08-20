@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vite-plus/test';
 import {
   acceptedReviews,
   decideReviewStatus,
-  isCopilotReviewer,
   latestAcceptedReview,
   reviewsFromPages,
   STATUS_CONTEXT,
@@ -24,21 +23,6 @@ import {
 
 /** GitHub's commit-status API truncates a description past this. */
 const DESCRIPTION_LIMIT = 140;
-
-describe('recognising the reviewer', () => {
-  it('accepts both spellings of the Copilot reviewer login', () => {
-    expect(isCopilotReviewer('copilot-pull-request-reviewer[bot]')).toBe(true);
-    expect(isCopilotReviewer('copilot-pull-request-reviewer')).toBe(true);
-    expect(isCopilotReviewer('Copilot-Pull-Request-Reviewer[bot]')).toBe(true);
-  });
-
-  it('rejects everyone else, including a non-string login', () => {
-    expect(isCopilotReviewer('luciocabrera')).toBe(false);
-    expect(isCopilotReviewer('copilot')).toBe(false);
-    expect(isCopilotReviewer('not-copilot-pull-request-reviewer')).toBe(false);
-    expect(isCopilotReviewer(undefined)).toBe(false);
-  });
-});
 
 describe('reading a paginated review list', () => {
   // The single-page case passes whether or not pagination is handled, so it

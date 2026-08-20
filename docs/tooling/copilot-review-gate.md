@@ -60,8 +60,15 @@ nothing further comes on its own". With two, one of them may be reviewing the he
 at the moment the other's stale review fires this gate — so `failure` now also
 requires that **every** accepted reviewer has a counted review on the pull request
 and none of them covers the head. The cases that gives up report `pending`, which
-also blocks and does not claim more than it knows. #671 is still the shape it is
-built for.
+also blocks and does not claim more than it knows.
+
+**Do not expect `failure` on #671's literal trace.** There only Copilot has
+reviewed, so not every accepted reviewer has spoken and the status is `pending`.
+Right now `failure` is unreachable altogether rather than merely narrow: the Claude
+leg cannot trigger this gate at all — no workflow run comes from a `GITHUB_TOKEN`
+event — and Copilot cannot review while its credits are exhausted. `pending` blocks
+just as firmly, so nothing is lost; but a `pending` someone was told to expect as
+`failure` is the kind of thing that gets "fixed" later.
 
 Dismissed and still-unsubmitted reviews are not counted, and an unrecognised
 review state is not counted either — the comparison is whitelisted so an

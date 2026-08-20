@@ -283,10 +283,14 @@ const pendingDescription = ({ headSha, isDraft, latest }) => {
  * across the set. Anything else is `pending`, because a review may still be on
  * its way, except the one case where waiting provably will not help: every
  * accepted reviewer has spoken, none of them covers the head, and one of them has
- * just submitted (`triggeringReview`). That is #671's shape, it is terminal until
- * someone acts, and `failure` says so where `pending` would imply patience is
- * enough. `everyReviewerHasSpoken` is what keeps that promise true now that a
- * second reviewer runs on every push.
+ * just submitted (`triggeringReview`). `everyReviewerHasSpoken` is what keeps that
+ * promise true now that a second reviewer runs on every push.
+ *
+ * #671's LITERAL trace does not reach it, and that is not an oversight: only
+ * Copilot had reviewed there, so not every accepted reviewer has spoken and the
+ * status is `pending`. Both states block; `failure` is the one that also says
+ * waiting cannot help, and with a second reviewer that is a claim it can rarely
+ * make honestly.
  *
  * `headSha` is a precondition, not an input to validate: the caller resolves it
  * from the API and cannot post a status without it.
