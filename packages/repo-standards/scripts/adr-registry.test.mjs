@@ -190,11 +190,28 @@ describe('looksLikeAdr', () => {
 });
 
 describe('renderIndex', () => {
-  it('links ADR-048 relative to the home it renders', () => {
+  it('links the template relative to the home it renders', () => {
     const [repo, app] = ADR_HOMES;
 
-    expect(renderIndex(repo)).toContain('](./ADR-048-');
-    expect(renderIndex(app)).toContain('](../../../../docs/decisions/ADR-048-');
+    expect(renderIndex(repo)).toContain('](./_TEMPLATE.md)');
+    expect(renderIndex(app)).toContain(
+      '](../../../../docs/decisions/_TEMPLATE.md)',
+    );
+  });
+
+  it('names nothing a repository generating its first index would not have', () => {
+    // The index is written INTO the repository being checked, and this package
+    // is meant to be installed into repositories that are not this one. A task
+    // name from one repository's runner, and a link to a decision record a fresh
+    // home does not hold, both read as instructions and are neither. The CQMS
+    // sentence is in the list because it was exactly this failure surviving in
+    // place: the flag choosing between its two spellings stopped being set, so
+    // every index printed the wrong half of a distinction that no longer existed.
+    const rendered = renderIndex(ADR_HOMES[0]);
+
+    for (const absent of ['vp run', 'CQMS', 'ADR-048', 'ADR-075']) {
+      expect(rendered).not.toContain(absent);
+    }
   });
 
   /**
