@@ -39,18 +39,23 @@ jobs:
       - name: Check out the merge ref for this pull request
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      # Fork pull requests receive an empty ANTHROPIC_API_KEY — secrets are not exposed to
-      # them — so the action exits without spending credits and no review is posted. That
+      # Fork pull requests receive an empty CLAUDE_CODE_OAUTH_TOKEN — secrets are not exposed
+      # to them — so the action exits without spending anything and no review is posted. That
       # is fail-closed and matches the gate's existing fork behaviour, where the status is
       # absent rather than red. It is NOT to be "fixed" with pull_request_target in this
       # change; that trades a documented absence for secret exposure on untrusted code.
       - name: Run the Claude review
         uses: anthropics/claude-code-action@5ee796a55f92566ecd7e39d70dd613abcbea0d7c # v1
         with:
+          # A subscription token, not an API key, and exactly one credential is passed on
+          # purpose: a static key takes precedence where both are given, so leaving the key
+          # here would route back to the balance that returned `Credit balance is too low`.
+          # The trade is that this one expires where a key does not — an auth failure, when
+          # it comes, will look like a broken workflow rather than a lapsed token.
           # PROBE ONLY — never cherry-pick back to the claim branch. The action hides the
           # CLI's output by default, so an is_error:true run says nothing about why.
           show_full_output: true
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ github.token }}
           # `/review` was the first shape tried and it posts nothing: the action carries no
           # `slash-commands` directory at this pin, so an unknown command expands to nothing
