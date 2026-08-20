@@ -574,12 +574,29 @@ first is generic and knows none of this repository's rules.
 
 **There used to be a third row, and it was the same reviewer twice.** This page
 was written for a reviewer hosted in GitHub Actions, listed separately from
-`refactor-verifier` running in a session. Epic #685 reversed that: no workflow in
-this repository calls a model, the repo-aware review already runs locally under
-`/epic` and `/refactor-verified`, and hosting a second copy in CI would have
-bought an API key and a per-PR bill to reproduce a review that had already
-happened. So CI validates rather than reviews, and the producer is the verifier
-that was already re-deriving every criterion.
+`refactor-verifier` running in a session. Epic #685 reversed that: the repo-aware
+review already runs locally under `/epic` and `/refactor-verified`, and hosting a
+second copy in CI would have bought an API key and a per-PR bill to reproduce a
+review that had already happened. So CI validates rather than reviews, and the
+producer of a **verdict** is the verifier that was already re-deriving every
+criterion.
+
+**A workflow does call a model again, and it is not that third row.** #836 added
+`claude-review.yml`, which reviews in CI and posts a pull-request review — so the
+sentence this paragraph used to carry, that no workflow in this repository calls a
+model, stopped being true on 2026-08-20 and has been removed rather than left to
+rot. What keeps it outside this contract is what it produces: a review comment
+read by `copilot-review-gate.yml`, never an `agent-review-verdict/v1` document.
+Nothing in CI emits a verdict, so §2.3's `absent` still means what it says.
+
+The distinction is worth holding on to, because the two reviewers answer different
+questions. `refactor-verifier` is criterion-bound and sees the issue; it can only
+run where an issue with acceptance criteria exists. `claude-review.yml` is generic
+and sees every pull request, including the hand-opened and bot-authored ones the
+local reviewer never meets. #685 weighed a CI reviewer that duplicated the local
+one; it did not weigh one that covers what the local one cannot. Whether that
+second reviewer should also produce verdicts — which is what would let §2.3's
+`absent` become blocking — is open, and the trade is recorded in #698.
 
 **What that costs, stated rather than buried:**
 

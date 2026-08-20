@@ -329,7 +329,9 @@ Three things recompute it that are not events on this pull request:
   failure behaviour, and why a sweep is not the polling the workflow header
   rejects (#737, [ADR-076](../decisions/ADR-076-reconcile-the-review-gate-statuses-on-a-schedule.md)).
 - **`workflow_dispatch`**, given a pull request number — the same recompute for
-  one pull request, attributed to whoever pressed it.
+  one pull request, attributed to whoever pressed it. Since #853 this is also
+  pulled automatically: `claude-review.yml` dispatches it after submitting a
+  review, because that review generates no event this workflow can subscribe to.
 - **`vp run copilot-review:status -- --pr <n>`**, which is the same script.
 
 The run reads the head **and** the reviews from the API and posts against the
@@ -606,7 +608,7 @@ rest of the preconditions.
 7. **Admin bypass of the ruleset**, once #698 has made the context required.
    `RepositoryRole` 5 keeps `bypass_mode: always` on ruleset `19141543`.
 
-## Known limitation: the Claude reviewer can never recompute this status
+## Known limitation: the Claude reviewer's review does not itself recompute this status
 
 **A review posted by `.github/workflows/claude-review.yml` creates no workflow run
 at all, and that is by design rather than by luck.** GitHub does not create workflow
@@ -616,19 +618,30 @@ fire for it, ever.
 
 This is a **stronger** claim than the one in the next section. Copilot's review
 events are _unreliable_ here and occasionally do arrive; this leg's are structurally
-absent. Two consequences, neither of them a bug:
+absent.
 
-- **The status is not corrected by the review itself.** It changes at the next push,
-  the next `review-gate-reconcile.yml` sweep (within one interval), or a manual
-  recompute from the break-glass ladder above. Expect the gate to sit `pending` for
-  a while after the review is visibly there.
+**What compensates is a request, not a trigger.** Since #853, `claude-review.yml`
+finishes by dispatching this workflow for the pull request it just reviewed
+(`gh workflow run copilot-review-gate.yml --field pr=<n>`), which is the same
+break-glass rung documented above, pulled automatically instead of by hand. The
+structural fact is unchanged — nothing woke the gate, the reviewer asked it to look
+— and the distinction matters when it fails: a dispatch can be refused or dropped,
+where a trigger that never fires cannot be retried.
+
+Three consequences, none of them a bug:
+
+- **The status is corrected seconds after the review, not at the next sweep.**
+  Before #853 it changed at the next push, the next `review-gate-reconcile.yml`
+  sweep (within one interval), or a manual recompute — so a reviewed pull request
+  could report `pending` for up to a full interval.
+- **The sweep is still the backstop, and still has to run.** It covers what the
+  dispatch cannot: a dispatch that failed, a run cancelled before it reached that
+  step, and Copilot's own reviews. The dispatch shortens the reliance on #737's
+  sweep; it does not remove it.
 - **The `failure` state is unreachable for this reviewer.** It requires a review to
-  have executed this job — `triggeringReview` — so it can only ever describe
-  Copilot. A stale review from the Claude leg reports `pending`, which also blocks.
-
-Once #698 makes the context required, this leg's freshness rests entirely on the
-reconcile sweep. That is the strongest reason the sweep has to stay running, and it
-is why #737 is a prerequisite rather than an adjacent nicety.
+  have executed this job — `triggeringReview` — and a `workflow_dispatch` run
+  carries no review, so `failure` can only ever describe Copilot. A stale review
+  from the Claude leg reports `pending`, which also blocks.
 
 ## Known limitation: a Copilot review usually does not recompute this status
 

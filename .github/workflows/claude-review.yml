@@ -44,6 +44,14 @@ concurrency:
 
 jobs:
   review:
+    # Replaces the workflow-level default above for this job, and the reason it exists is
+    # the last line: `actions: write` is what lets the final step ask copilot-review-gate.yml
+    # to recompute. It is scoped here rather than raised on the workflow so that a second job
+    # added later does not inherit the ability to start workflows without saying so.
+    permissions:
+      actions: write
+      contents: read
+      pull-requests: write
     # Drafts are skipped because a review of a draft is paid for twice — once now and again
     # when it is marked ready. This is NOT the gate's treatment of a draft, which is the
     # opposite: `copilot-review-gate.yml` subscribes to `converted_to_draft` precisely so a
@@ -144,6 +152,7 @@ jobs:
       #   of this file posted nothing and went green, which reads exactly like a review that
       #   found nothing. An empty file is not a clean bill of health.
       - name: Submit the review against the head this run was triggered for
+        id: submit
         env:
           GH_TOKEN: ${{ github.token }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
@@ -162,6 +171,7 @@ jobs:
           current=$(gh api "repos/$REPOSITORY/pulls/$PR_NUMBER" --jq .head.sha)
           if [ "$current" != "$HEAD_SHA" ]; then
             echo "::notice::Head moved from $HEAD_SHA to $current while this run was working — not posting a review of a superseded commit."
+            echo "posted=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -172,3 +182,42 @@ jobs:
             '{commit_id: $commit, event: "COMMENT", body: $body}' > review-payload.json
           gh api "repos/$REPOSITORY/pulls/$PR_NUMBER/reviews" --input review-payload.json \
             --jq '"submitted review \(.id) against \(.commit_id)"'
+          echo "posted=true" >> "$GITHUB_OUTPUT"
+
+      # Ask the gate to recompute, because it will not find out on its own.
+      #
+      # The structural fact above is unchanged and this step is not a discovery that it was
+      # false: a review authored by the default GITHUB_TOKEN still generates no
+      # `pull_request_review` run, so `copilot-review-gate.yml` never wakes for the review
+      # just posted. Left alone, `Copilot review complete` keeps the `pending` it was given
+      # at push time until `review-gate-reconcile.yml` sweeps at :07/:37 — up to half an hour
+      # during which a reviewed pull request reports as unreviewed. Advisory today; a merge
+      # block once #698 makes the context required.
+      #
+      # `workflow_dispatch` is the one trigger a token can pull deliberately, and the gate
+      # already exposes it as its break-glass path. Using it here is wiring, not new
+      # machinery.
+      #
+      # This does NOT replace the reconcile sweep, and #737 is why: the sweep still covers
+      # every path this step does not — a dispatch that fails, a run cancelled before it got
+      # here, and Copilot's own reviews, whose `pull_request_review` trigger is unreliable
+      # rather than absent.
+      - name: Ask the review gate to recompute now rather than at the next sweep
+        # A run whose head moved posted nothing, so there is nothing new for the gate to see
+        # and a dispatch would only republish the same pending.
+        if: steps.submit.outputs.posted == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+
+          # Deliberately not `set -e`-fatal: the review is already posted and is the thing
+          # this workflow exists to produce. Reporting the job as failed because the refresh
+          # could not be REQUESTED would turn a cosmetic delay into a red check on a pull
+          # request that was reviewed successfully — and the sweep still gets there.
+          if gh workflow run copilot-review-gate.yml --field "pr=$PR_NUMBER"; then
+            echo "::notice::Requested a recompute of the review gate for #$PR_NUMBER."
+          else
+            echo "::warning::Could not dispatch copilot-review-gate.yml for #$PR_NUMBER. The review is posted; review-gate-reconcile.yml will publish the status at its next sweep."
+          fi
