@@ -23,18 +23,17 @@ import {
   renderPlan,
 } from './command-materialise.mjs';
 import { MANIFEST_FILE, serialiseManifest } from './manifest.mjs';
+import { readProfileFlag } from './profile-flag.mjs';
 import { applySync } from './sync.mjs';
 
-const flagValue = (argv, name) => {
-  const index = argv.indexOf(name);
-  return index === -1 ? undefined : argv[index + 1];
-};
-
 export const runSync = (argv, root) => {
-  const { entries, manifest } = buildPlan({
-    profile: flagValue(argv, '--profile'),
-    root,
-  });
+  const { error, profile } = readProfileFlag(argv);
+  if (error !== undefined) {
+    console.error(error);
+    return 1;
+  }
+
+  const { entries, manifest } = buildPlan({ profile, root });
   const { reported } = countsFor(entries);
 
   console.log(renderPlan(entries));
@@ -110,17 +109,7 @@ const runAccept = ({ accept, accepted, entries, root }) => {
  * two cannot be asked for different things in the first place; the flag is what
  * makes a one-off `doctor` able to agree with a one-off `sync`.
  */
-export const runDoctor = (argv, root) => {
-  const { accepted, entries } = buildPlan({
-    profile: flagValue(argv, '--profile'),
-    root,
-  });
-
-  const accept = parseAcceptArgs(argv);
-  if (accept !== undefined) {
-    return runAccept({ accept, accepted, entries, root });
-  }
-
+const reportDrift = ({ argv, entries }) => {
   const { reported, written } = countsFor(entries);
 
   console.log(renderPlan(entries, { verbose: argv.includes('--verbose') }));
@@ -132,4 +121,21 @@ export const runDoctor = (argv, root) => {
     `\n${drifted} file(s) differ from the package. Run devkit sync.`,
   );
   return 1;
+};
+
+export const runDoctor = (argv, root) => {
+  const { error, profile } = readProfileFlag(argv);
+  if (error !== undefined) {
+    console.error(error);
+    return 1;
+  }
+
+  const { accepted, entries } = buildPlan({ profile, root });
+
+  const accept = parseAcceptArgs(argv);
+  if (accept !== undefined) {
+    return runAccept({ accept, accepted, entries, root });
+  }
+
+  return reportDrift({ argv, entries });
 };

@@ -70,3 +70,28 @@ describe('runCommand', () => {
     error.mockRestore();
   });
 });
+
+describe('the profile flag, on every command that takes it', () => {
+  // One reader, so the three cannot drift: `closure` was hardened against the
+  // valueless spelling while `sync` and `doctor` still read it as "absent",
+  // which means "use the configured profile" — a narrower check reporting a
+  // clean pass over a set it was asked to look at more widely.
+  for (const command of ['sync', 'doctor', 'closure']) {
+    test(`${command} refuses --profile with no name after it`, () => {
+      const error = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => undefined);
+
+      expect(
+        runCommand({
+          argv: [command, '--check', '--profile'],
+          root: '/nowhere',
+        }),
+      ).toBe(1);
+      expect(error).toHaveBeenCalledWith(
+        expect.stringContaining('--profile needs a profile name'),
+      );
+      error.mockRestore();
+    });
+  }
+});

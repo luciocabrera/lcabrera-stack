@@ -23,6 +23,7 @@ import {
   configuredCommandWords,
   PROFILES,
 } from './config.mjs';
+import { readProfileFlag } from './profile-flag.mjs';
 
 /**
  * Everything the package would place in this repository, the tools the
@@ -128,31 +129,6 @@ const runShippedClosure = ({ profile, root }) => {
   return 1;
 };
 
-/**
- * `--profile <name>` and its value, taken out of the positional arguments.
- *
- * It matters most for `--shipped`: a profile the repository does not itself use
- * places files it never materialises, and without naming that profile the gate
- * would report a clean pass over a set it never looked at — the same green run
- * as a set with no escapes in it.
- */
-const PROFILE_FLAG = '--profile';
-
-/**
- * A flag-shaped value is not consumed as the profile name. Swallowing it would
- * run the whole command against a profile called `--shipped`, which nothing
- * places; leaving it behind lets `runClosure` report the flag that has no value.
- */
-const withoutProfile = (argv) => {
-  const index = argv.indexOf(PROFILE_FLAG);
-  const value = index === -1 ? undefined : argv[index + 1];
-  if (value === undefined || value.startsWith('-')) return { rest: argv };
-  return {
-    profile: value,
-    rest: [...argv.slice(0, index), ...argv.slice(index + 2)],
-  };
-};
-
 const notADirectory = (root) => (directory) => {
   const path = resolve(root, directory);
   return !existsSync(path) || !statSync(path).isDirectory();
@@ -195,23 +171,21 @@ const runDirectoryClosure = ({ directories, profile, root }) => {
 };
 
 export const runClosure = (argv, root) => {
-  const { profile, rest } = withoutProfile(argv);
+  const { error, profile, rest } = readProfileFlag(argv);
+  if (error !== undefined) {
+    console.error(error);
+    return 1;
+  }
+
   const directories = rest.filter((entry) => entry !== '--shipped');
 
   // Checked BEFORE dispatching on `--shipped`, because that dispatch reads the
-  // rest as directories and never looks at them again. `devkit closure --profile
-  // --shipped` — the profile flag with its value dropped — would otherwise leave
-  // `--profile` in this list, be filtered away unexamined, and check every
-  // profile: a clean pass for a run that was asked to narrow to one and was told
-  // which one by nobody.
+  // rest as directories and never looks at them again — anything flag-shaped
+  // left here would be filtered away unexamined and the run would report on a
+  // set nobody asked for.
   const unusable = directories.filter((entry) => entry.startsWith('-'));
   if (unusable.length > 0) {
-    const hint = unusable.includes(PROFILE_FLAG)
-      ? ` — ${PROFILE_FLAG} needs a profile name after it`
-      : '';
-    console.error(
-      `not an argument this command takes: ${unusable.join(', ')}${hint}`,
-    );
+    console.error(`not an argument this command takes: ${unusable.join(', ')}`);
     return 1;
   }
 
