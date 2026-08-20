@@ -34,21 +34,77 @@ export const EXEMPTIONS = [
   },
 ];
 
+/** The `url =` of a config section, read one line at a time so no pattern can span sections. */
+const URL_LINE = /^[ \t]*url[ \t]*=[ \t]*(\S+)/;
+
+const ORIGIN_SECTION = '[remote "origin"]';
+
+const GIT_SUFFIX = '.git';
+
+/** The origin URL out of a git config, or nothing when there is no origin. */
+const originUrl = (gitConfig) => {
+  const lines = gitConfig.split('\n');
+  const start = lines.findIndex((line) => line.trim() === ORIGIN_SECTION);
+  if (start === -1) return undefined;
+
+  for (const line of lines.slice(start + 1)) {
+    if (line.trimStart().startsWith('[')) return undefined;
+    const match = URL_LINE.exec(line);
+    if (match) return match[1];
+  }
+  return undefined;
+};
+
 /**
- * What a seed may not contain. The repository's own package name covers its
- * slug, and any URL naming the owner names the repository too, so the owner
- * needs no entry of its own.
+ * The owner and repository name a remote URL names.
  *
- * @param {{ repositoryName: string, workspaceNames: string[],
+ * Read as the last two path segments rather than by matching a host, so the SSH
+ * (`git@host:owner/name.git`), HTTPS and `ssh://` spellings all answer the same
+ * and a self-hosted forge answers too.
+ *
+ * @returns {{ name: string, owner: string } | undefined}
+ */
+export const repositoryIdentity = (gitConfig) => {
+  const url = originUrl(gitConfig);
+  if (url === undefined) return undefined;
+
+  const trimmed = url.endsWith(GIT_SUFFIX)
+    ? url.slice(0, -GIT_SUFFIX.length)
+    : url;
+  const segments = trimmed.split(/[/:]/).filter((segment) => segment !== '');
+  if (segments.length < 2) return undefined;
+
+  const [owner, name] = segments.slice(-2);
+  return { name, owner };
+};
+
+/**
+ * What a seed may not contain.
+ *
+ * The owner and the repository slug are BOTH here, and neither is the manifest
+ * name. That was the assumption this list was first written on — that the
+ * package name covers the slug, and that a URL naming the owner names the
+ * repository too — and it is false in this repository twice over: the manifest
+ * is called `vite-monorepo` while the slug is something else, and the owner
+ * appears in no manifest at all. The shape it let through is the most ordinary
+ * leak a shipped markdown file has, a `https://github.com/<owner>/<repo>/...`
+ * link, which matched nothing and passed.
+ *
+ * @param {{ repositoryName: string, repositoryOwner: string,
+ *   repositorySlug: string, workspaceNames: string[],
  *   secretNames: string[] }} args
  */
 export const forbiddenWords = ({
   repositoryName,
+  repositoryOwner,
+  repositorySlug,
   secretNames,
   workspaceNames,
 }) => [
   ...new Set([
     repositoryName,
+    repositoryOwner,
+    repositorySlug,
     ...workspaceNames,
     ...secretNames
       .filter((name) => !UNIVERSAL_SECRETS.has(name))

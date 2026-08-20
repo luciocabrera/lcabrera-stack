@@ -26,6 +26,7 @@ import {
   EXEMPTIONS,
   findingsIn,
   forbiddenWords,
+  repositoryIdentity,
   reportFor,
 } from './devkit-seeds.mjs';
 
@@ -33,6 +34,8 @@ const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
 const words = forbiddenWords({
   repositoryName: 'vite-monorepo',
+  repositoryOwner: 'an-owner',
+  repositorySlug: 'a-slug',
   secretNames: ['GITHUB_TOKEN', 'SONAR_TOKEN'],
   workspaceNames: ['@lcabrera/ui', '@repo/devkit'],
 });
@@ -43,6 +46,16 @@ describe('forbiddenWords', () => {
     expect(words).toContain('@lcabrera/ui');
     expect(words).toContain('secrets.SONAR_TOKEN');
     expect(words).toContain('vp ');
+  });
+
+  it('carries the owner and the slug, which no manifest holds', () => {
+    // The list was first written believing the package name covered the slug
+    // and that an owner needed no entry. Both are false here — the manifest is
+    // named something else and no manifest holds the owner at all — so the
+    // commonest leak in a shipped markdown file, a
+    // `https://github.com/<owner>/<repo>/…` link, matched nothing and passed.
+    expect(words).toContain('an-owner');
+    expect(words).toContain('a-slug');
   });
 
   it('leaves the token every repository has', () => {
@@ -142,5 +155,55 @@ describe('the seeded decision index', () => {
       'utf8',
     );
     expect(seeded).toBe(renderIndex(DEFAULT_REGISTERS.adrHomes[0]));
+  });
+});
+
+describe('repositoryIdentity', () => {
+  const config = (url) =>
+    [
+      '[core]',
+      '\trepositoryformatversion = 0',
+      '[remote "origin"]',
+      `\turl = ${url}`,
+      '\tfetch = +refs/heads/*:refs/remotes/origin/*',
+    ].join('\n');
+
+  it('reads the owner and name out of every remote spelling', () => {
+    // Taken as the last two path segments rather than by matching a host, so the
+    // SSH, HTTPS and ssh:// forms answer alike and a self-hosted forge answers
+    // too. Guessing one spelling would drop the owner silently on the others.
+    for (const url of [
+      'https://github.com/an-owner/a-slug.git',
+      'https://github.com/an-owner/a-slug',
+      'git@github.com:an-owner/a-slug.git',
+      'ssh://git@git.example.com:2222/an-owner/a-slug.git',
+    ]) {
+      expect(repositoryIdentity(config(url))).toEqual({
+        name: 'a-slug',
+        owner: 'an-owner',
+      });
+    }
+  });
+
+  it('answers nothing when there is no origin, so the caller can refuse', () => {
+    // The caller turns this into a failure rather than an empty word list: a
+    // list missing the owner and slug reports a clean pass over the leak shape
+    // the gate exists to catch.
+    expect(repositoryIdentity('[core]\n\tbare = false\n')).toBeUndefined();
+    expect(repositoryIdentity(config('not-a-url'))).toBeUndefined();
+  });
+
+  it('does not read a url out of the section after origin', () => {
+    // Line by line, stopping at the next section header — otherwise a second
+    // remote listed below would answer for `origin` and the gate would forbid a
+    // name belonging to somewhere else entirely.
+    const twoRemotes = [
+      '[remote "origin"]',
+      '\tfetch = +refs/heads/*:refs/remotes/origin/*',
+      '[remote "upstream"]',
+      '\turl = https://github.com/someone-else/other.git',
+    ].join('\n');
+
+    expect(repositoryIdentity(twoRemotes)).toBeUndefined();
   });
 });

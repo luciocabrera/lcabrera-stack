@@ -48,9 +48,16 @@ jobs:
         # red X on a schedule nobody is watching. The step's own conclusion is
         # still recorded, and the last step below fails the run.
         continue-on-error: true
+        # The substitution is BRACED before the redirection and the pipe, because
+        # both bind to the last command of the value, not to the whole of it. A
+        # configured `npm audit … && npm run licenses:check` would otherwise pipe
+        # only the second half — so on the run that matters, where the audit
+        # itself fails, `tee` never runs, the output file is never written, and
+        # the issue-filing step below dies on ENOENT instead of reporting the
+        # advisory. A chained value is the ordinary thing to write in that key.
         run: |
           set -o pipefail
-          {{commands.audit}} 2>&1 | tee audit-output.txt
+          { {{commands.audit}}; } 2>&1 | tee audit-output.txt
 
       - name: File or update the tracking issue
         if: steps.audit.outcome == 'failure'
