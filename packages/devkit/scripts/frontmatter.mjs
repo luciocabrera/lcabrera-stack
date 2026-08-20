@@ -20,10 +20,14 @@
  * quoted or not. Comments and blank lines are dropped wherever YAML allows them,
  * which includes between the key and its items.
  *
- * Two YAML spellings are knowingly not read: a block scalar (`|`, `>`) and an
- * anchor or alias. Neither is a way anyone writes a list of short keys, so
- * neither is reachable by the edit this guards against — someone restyling a
- * declaration into another ordinary spelling.
+ * Those spellings are the whole of what it reads. Anything else — a block
+ * scalar, an anchor, a key quoted or held off its colon — reads as no
+ * declaration rather than as an empty one, and that complement is open: YAML
+ * admits more spellings than can be listed here, so what keeps the gate sound
+ * is not naming them but that none is reachable by the edit it guards against,
+ * someone restyling a declaration into another ordinary spelling. Widen it only
+ * for a shape a person would write in frontmatter, and pin the widening in
+ * `frontmatter.test.mjs`.
  *
  * Only `config.`-prefixed entries are claims on the consumer's configuration.
  * `requires:` already means other things in frontmatter written for humans — a
