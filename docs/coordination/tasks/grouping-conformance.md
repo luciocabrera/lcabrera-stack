@@ -5,8 +5,10 @@ owner: agent:claude
 status: review
 branch: chore/576-grouping-conformance
 area:
+  # The UI types were claimed in case a duplicated shape needed correcting;
+  # none did — the drift was in what the contract test failed to name, not in
+  # the declarations themselves.
   - apps/react-router/src/routes/enterprise-orders/**
-  - packages/ui/src/components/Table/Table.types.ts
 started: 2026-08-20
 updated: 2026-08-20
 plan: (none)
