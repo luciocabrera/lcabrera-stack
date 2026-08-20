@@ -49,5 +49,43 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ github.token }}
-          prompt: '/review'
-          claude_args: --model claude-opus-5
+          # `/review` was the first shape tried and it posts nothing: the action carries no
+          # `slash-commands` directory at this pin, so an unknown command expands to nothing
+          # and the run ends at `num_turns: 0` having spent nothing. A green check that
+          # reviewed nothing is the worst outcome available here — it reads exactly like a
+          # review that found nothing — so the prompt below is explicit that posting is the
+          # job, not a side effect of having found something.
+          prompt: |
+            Review the changes in pull request #${{ github.event.pull_request.number }}
+            of ${{ github.repository }}.
+
+            Read the diff with `gh pr diff ${{ github.event.pull_request.number }}`, and read
+            whatever else you need for context. Judge correctness first, then whether the
+            change fits the conventions the surrounding code already follows. This repository
+            states those conventions in AGENTS.md and in the rule files it points at; they are
+            available to you in the checkout and they are what a finding should be measured
+            against.
+
+            Then post the review. ALWAYS post it, whether or not you found anything.
+
+            Write the body to a file first and submit it as JSON, so that nothing in the body
+            has to survive shell quoting:
+
+                # /tmp/review.json
+                # { "commit_id": "<head sha>", "event": "COMMENT", "body": "<the review>" }
+                gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews \
+                  --input /tmp/review.json
+
+            `commit_id` must be exactly ${{ github.event.pull_request.head.sha }} — the head
+            this run was triggered for. A review carrying any other commit is a review of code
+            nobody asked about.
+
+            The body is a short paragraph saying what the change does, then the findings —
+            each naming a file and line, most important first. If you found nothing, say so in
+            those words and keep the summary: "no findings" and "never ran" have to be
+            distinguishable by anyone reading the pull request.
+
+            Post exactly one review. Do not push commits, edit files, or open issues.
+          claude_args: >-
+            --model claude-opus-5
+            --allowedTools "Read,Grep,Glob,Write,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh api:*)"
