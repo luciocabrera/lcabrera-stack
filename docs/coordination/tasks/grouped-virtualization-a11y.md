@@ -5,7 +5,10 @@ owner: agent:claude
 status: review
 branch: chore/577-grouped-virtualization-a11y
 area:
-  - packages/ui/src/components/Table/**
+  # Narrowed to what the audit turned out to need. The five criteria covering
+  # the Table tree were already met there, so nothing under it is being edited
+  # — and a glob claimed but not used is a lock nobody benefits from.
+  - packages/ui/src/components/Icons/**
 started: 2026-08-20
 updated: 2026-08-20
 plan: (none)

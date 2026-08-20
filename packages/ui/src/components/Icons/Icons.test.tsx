@@ -93,7 +93,7 @@ const iconComponents = [
 ] as const;
 
 /**
- * The icons this directory actually holds, read off disk.
+ * The `*Icon` components this directory holds, read off disk.
  *
  * The sweep below is a hand-written list, which is what lets it assert each
  * icon's own default size — but a hand-written list falls behind silently, and
@@ -101,6 +101,13 @@ const iconComponents = [
  * pair. So the list is checked against the directory rather than trusted, and a
  * new icon fails here on the day it lands instead of whenever someone notices
  * (#577).
+ *
+ * **The `*Icon` suffix is the scope, not a shorthand for everything here.**
+ * Three directories are deliberately outside it and stay outside it:
+ * `IconBase` is the shared primitive the icons are built from rather than one
+ * of them, and `ErrorDescriptive`/`NoDataDescriptive` are illustrations with a
+ * different contract — no `size` prop to default — each already covered by its
+ * own test. A future non-`*Icon` export here is **not** covered by this guard.
  */
 const iconDirectoryNames = readdirSync(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -110,7 +117,7 @@ const iconDirectoryNames = readdirSync(
   .map((entry) => entry.name);
 
 describe('Icons', () => {
-  it('sweeps every icon this directory holds', () => {
+  it('sweeps every *Icon component in this directory', () => {
     expect(
       iconComponents
         .map(({ name }) => name)
