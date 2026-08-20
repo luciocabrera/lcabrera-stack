@@ -15,7 +15,7 @@ published under the tagline "Skills For Real Engineers" — explicitly positione
 make bugs in the process hard to resolve"). It is not a framework or a runtime; it is prose plus a small amount
 of shell/YAML/JS scaffolding, distributed as either a Claude Code plugin or a set of copyable files.
 
-Scope, from `.claude-plugin/plugin.json`'s `skills` array at the researched commit: 24 promoted skills split into
+Scope, from `.claude-plugin/plugin.json`'s `skills` array at the researched commit (25 entries — `jq '.skills | length' .claude-plugin/plugin.json`): 25 promoted skills split into
 two buckets — `engineering/` (18 skills: daily code work — spec/ticket flows, TDD, code review, domain
 modeling, bug diagnosis, merge-conflict resolution, an interactive setup wizard generator) and `productivity/`
 (7 skills: non-code workflow tools — "grilling" interviews, handoff documents, teaching, questionnaires). The
@@ -250,7 +250,8 @@ scripts/sync-plugin-version.mjs`, and `CHANGELOG.md` is generated (v1.2.3 at the
   entirely in the third-party installer, outside this repo's control or documentation.
 
 This is the single sharpest contrast with `@lcabrera/devkit`'s design: devkit's own manifest
-(`.devkit-manifest.json`, per-file SHA-256, three-way classification on re-sync) is a first-party, in-repo
+(`.devkit-manifest.json`, per-file SHA-256, three-way classification on re-sync as ADR-081 describes it — six
+states as implemented, see [the comparison](./skills-distribution-comparison.md)) is a first-party, in-repo
 mechanism this project owns end to end. mattpocock/skills instead **delegates** that whole problem to whichever
 route the consumer picked — either "no drift possible, because nothing is copied" (plugin) or "drift is the
 consumer's to manage, and the tool that copied it is somebody else's product" (skills.sh). Neither route

@@ -187,7 +187,10 @@ than a merge; nothing in the docs or the repo describes what happens to a
 consumer's local edits to a previously-installed plugin file on re-install.
 This is the single largest asymmetry with the vite-react-compiler design under
 consideration: ADR-081's checksum-manifest tri-state (unchanged / locally
-modified / new-upstream) has no counterpart here at all.
+modified / new-upstream) has no counterpart here at all. That tri-state is
+ADR-081's wording; the shipped `devkit` classifies six — see
+[the comparison](./skills-distribution-comparison.md), which carries the
+divergence.
 
 ## 5. Configuration mechanism
 

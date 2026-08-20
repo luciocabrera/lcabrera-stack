@@ -30,16 +30,30 @@ resolves every root-anchored token against _this_ tree, and these documents are
 full of paths that belong to someone else's. Give the file its **real, full path
 inside its own repository**, with a leading `/` marking that repository's root:
 
-| Write                                           | Instead of                          | Why                                                          |
-| ----------------------------------------------- | ----------------------------------- | ------------------------------------------------------------ |
-| `/scripts/link-skills.sh`                       | the same path with no leading `/`   | it resolves against our own `scripts/`, and passes silently  |
-| `orchestrate/skills/orchestrate/scripts/cli.ts` | a shortened `orchestrate/scripts/…` | shortest prefix that clears the gate — and no such directory |
+| Write                                           | Instead of                          | What the gate does                                       |
+| ----------------------------------------------- | ----------------------------------- | -------------------------------------------------------- |
+| `/scripts/link-skills.sh`                       | the same path with no leading `/`   | a leading `/` is disqualified, so it is never classified |
+| `orchestrate/skills/orchestrate/scripts/cli.ts` | a shortened `orchestrate/scripts/…` | nothing — the first segment is not one of our repo roots |
 
-The failure this prevents is not a broken link — it is a **silent pass**: a
-foreign path that happens to match a directory we have reports exactly what a
-correct one does (AGENTS.md Rule 14). The second row is the trap worth naming:
-a prefix added only to escape the gate is a fabricated path, and worse than the
-bare form it replaced.
+The two rows fail differently, and only one of them is the gate's business.
+
+A **root-anchored** token — one whose first segment is a directory this repo has
+at its top level, enumerated as `REPO_ROOTS` in `scripts/lib/docs-paths.mjs` — is
+checked against this tree. Most
+foreign paths do not exist here, so the gate reports them loudly and you fix them
+on the spot. The hazard is the **collision**: a foreign path that happens to name
+something we also have — `docs/` is the live example — passes in silence and
+reads afterwards as verified. That is the case the leading `/` exists for, and
+why the rule is worth following even where a bare token would currently fail
+noisily. A clean pass that a wrong path would have produced identically is not
+evidence (AGENTS.md Rule 14).
+
+The second row was never gated at all: `orchestrate` is not a repo root, so both
+the long form and the shortened one sail through untouched. The discipline there
+is not the gate, it is **truthfulness** — a prefix invented so a path looks
+plausible is a fabricated path, and worse than the bare form it replaced, because
+it reads as verified detail. Both of these were shipped in this directory before
+review caught them.
 
 The one exception is a path inside a **verbatim quotation**, which stays exactly
 as quoted — rewriting it would falsify the quote. If the gate reports it, that is
@@ -49,7 +63,7 @@ what `scripts/docs-paths-baseline.json` is for, one entry at a time through
 ## Counts
 
 A count is the claim most likely to be wrong and least likely to be re-checked —
-this directory's first four documents shipped six wrong ones. AGENTS.md §7 bans
+this directory's first four documents shipped a run of them. AGENTS.md §7 bans
 a bare number in a live doc outright; a dated record may carry one, because it is
 pinned to a commit, but **name the command that produces it** so the next reader
 can re-run it rather than trust it.

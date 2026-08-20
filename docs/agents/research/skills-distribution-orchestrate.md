@@ -47,8 +47,8 @@ A real, runnable **TypeScript CLI** (`orchestrate/skills/orchestrate/scripts/cli
 the loop: `kickoff`, `run`, `spawn`, `respawn`, `kill`, `kill-tree`, `tail`,
 `comment`, `andon`, `tree`, `list`, `status`, `crawl`, `prompt`. This is not
 prose-only guidance; it is real code with a `package.json`, `bun.lock`,
-`biome.json`, `tsconfig.json`, and 26 files under
-`scripts/__tests__/*.test.ts`.
+`biome.json`, `tsconfig.json`, and 28 files under
+`scripts/__tests__/*.test.ts` (`find . -name '*.test.ts' | wc -l`).
 
 ## 2. Repository & package structure
 
@@ -201,7 +201,9 @@ the same git-versioned unit.
   plugin file is **at risk of silent overwrite** on the next marketplace
   refresh, with no classification (unchanged / locally-modified /
   new-upstream) offered anywhere in the tooling. This is the sharpest
-  contrast with `@lcabrera/devkit`'s explicit three-way manifest.
+  contrast with `@lcabrera/devkit`'s explicit manifest — three-way as ADR-081
+  describes it, six states as implemented; see
+  [the comparison](./skills-distribution-comparison.md).
 - One thing orchestrate _does_ version deliberately at the artifact level:
   `plan.schema.json`/`state.schema.json` are regenerated from the zod
   source and are meant to be regenerated per plugin-version bump — but
