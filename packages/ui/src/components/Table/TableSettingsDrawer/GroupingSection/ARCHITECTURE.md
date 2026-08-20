@@ -61,7 +61,7 @@ GroupingSection/
 ├── AddGroupKeySection/                 → VirtualSelect for adding a group key
 ├── ActiveGroupKeyList/                 → DraggableList of staged keys
 │   └── GroupKeyItemContent/            → One key row: level, label, remove
-├── AddAggregateSection/                → Column select → legal-function select
+├── AddAggregateSection/                → Column select → addable-function select
 ├── ActiveAggregateList/                → DraggableList of staged aggregates — one row per (column, function)
 │   ├── AggregateItemContent/           → One measure row: label, share toggle, remove
 │   └── ShareOfTotalToggle/             → Share of the grand total, on the measures it is defined for
@@ -72,6 +72,7 @@ GroupingSection/
     ├── toGroupKeyItems.util.ts         → Staged keys + labels, in nesting order
     ├── toAggregateItems.util.ts        → Staged aggregates + labels + a per-entry id, in staged order
     ├── toAggregatableColumnOptions.util.ts → Columns an aggregate may be offered on (resolveOfferableAggregates, in display order)
+    ├── resolveAddableAggregates.util.ts → Functions still offerable for the chosen column: the same predicate, minus what it already carries
     └── toGroupKeyColumnOptions.util.ts → Columns that may still be a group key (declared ∧ catalogue, minus staged)
 ```
 
@@ -88,7 +89,8 @@ flowchart TD
   C --> F["ActiveGroupKeyList"]
   C --> G["AddGroupKeySection"]
   D --> H["ActiveAggregateList"]
-  E --> I["AddAggregateSection"]
+  D --> I["AddAggregateSection"]
+  E --> I
   E --> G
 
   F -->|reorder / remove| J["useSetGroupKeys"]
@@ -121,6 +123,7 @@ flowchart TD
 | May this column be a group key at all?          | `resolveGroupKeyAvailability` — the declared flag narrowed by the catalogue | either gate alone (ADR-068)                 |
 | Which aggregates does this column's type allow? | `metaState.groupingCapabilities[key].aggregates`                            | `TableColumn.dataType` (#550)               |
 | Which of those may be **offered** here?         | `resolveOfferableAggregates` — those, minus an active group key             | either half on its own (#830)               |
+| Which of those may still be **added** here?     | `resolveAddableAggregates` — those, minus what the column carries (#841)    | the shared predicate, which the menu shares |
 | May this measure show a share?                  | `isShareableAggregate` — additive measures only (ADR-086)                   | the column, which has no say in it          |
 | Which measure does a share belong to?           | the `(columnKey, fn)` pair (#831)                                           | the column key alone                        |
 | In what order are the measures listed?          | the staged `aggregates` order, dragged in this list (#832)                  | the column order, which no longer orders it |
@@ -167,6 +170,40 @@ The picker is still not where the rule is enforced. The grouping configuration
 is URL state, so a request can always name one column as both key and measure,
 and `resolveGroupCellChildren` is where the key actually wins.
 
+### The one answer the picker and the menu give differently
+
+The function picker subtracts the aggregates the chosen column already carries;
+the header menu does not. That is the design, not drift (#841), and it is worth
+saying plainly because the two surfaces sharing one legality predicate is the
+whole point of the paragraph above.
+
+**Legality is a property of the column, so it is shared. What to do with an
+applied function is a property of the gesture, so it is not.** This picker only
+ever adds, and #831 made adding an append with a duplicate guard — so offering a
+function the column already carries offers a guarded no-op: Add accepts the
+choice, `addTableColumnAggregate` returns the state it was handed, and nothing
+moves. That is the very thing `commands/ARCHITECTURE.md` rules out, _"never
+offered rather than offered-and-disabled"_. The header menu **toggles**, so the
+applied item there is the only affordance that removes the aggregate; subtracting
+it would leave an aggregate that can be applied from the menu and not cleared
+from it.
+
+So the subtraction lives in `resolveAddableAggregates`, **beside**
+`resolveOfferableAggregates` rather than inside it. Giving the shared predicate
+the aggregate list would force one answer on both surfaces, and it is the menu
+that would lose. `resolveOfferableAggregates.surfaces.test.tsx` asserts both
+halves against the same applied aggregate, so a later "harmonisation" fails
+there rather than reaching a user.
+
+`isExhausted` is the second half of that util's answer, and it exists because an
+empty function list has two causes that must not read alike: every legal
+function is applied, or none was legal (an unaggregatable column, a staged group
+key, no column chosen yet). Only the first has anything to say, and it needs
+saying — the **column** list does not subtract exhausted columns (that list is
+#830's and stays as it is), so a fully-measured column is still offered and the
+picker has to explain why it went quiet. It shows an `InfoBox` in place of the
+control, the same shape `AddGroupKeySection` uses at the depth cap.
+
 ## Totals placement is staged here but is not part of the grouping
 
 `TotalsPlacementSection` sits beside the mode control and stages like everything
@@ -193,7 +230,8 @@ this section:
   rather than sorting.
 - **Adding is an append with a duplicate guard**, not a replace. Re-adding an
   applied pair answers with the state it was handed, so the commit reports
-  `unchanged` and nothing navigates.
+  `unchanged` and nothing navigates. The picker does not offer that pair in the
+  first place (#841, above) — the guard is the backstop, not the affordance.
 
 The header menu writes the same shape live: `AggregateButton` derives its
 pressed state through `deriveAggregateCommandState` — the aggregates' **own**

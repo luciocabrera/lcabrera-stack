@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import {
   afterEach,
   beforeEach,
@@ -16,6 +16,7 @@ import type {
 } from '../Table.types';
 
 type MockVirtualSelectProps = {
+  readonly onChange: (values: readonly string[]) => void;
   readonly options: readonly {
     readonly label: string;
     readonly value: string;
@@ -24,8 +25,9 @@ type MockVirtualSelectProps = {
 };
 
 const {
-  appliedAggregatesRef,
+  draftAggregatesRef,
   draftGroupingKeysRef,
+  liveAggregatesRef,
   liveGroupingKeysRef,
   mockResolveOfferableAggregates,
   offerRef,
@@ -33,13 +35,17 @@ const {
   const offer = { current: [] as readonly TableAggregateFn[] };
 
   return {
-    appliedAggregatesRef: {
-      current: [] as readonly { columnKey: string; fn: TableAggregateFn }[],
-    },
     // The drawer stages its grouping in a draft store and the header menu reads
     // the live one, so each surface feeds the predicate from its own commit
-    // context. Two refs, so a surface reading the wrong one is visible.
+    // context. Two refs per slice, so a surface reading the wrong one is
+    // visible.
+    draftAggregatesRef: {
+      current: [] as readonly { columnKey: string; fn: TableAggregateFn }[],
+    },
     draftGroupingKeysRef: { current: [] as readonly string[] },
+    liveAggregatesRef: {
+      current: [] as readonly { columnKey: string; fn: TableAggregateFn }[],
+    },
     liveGroupingKeysRef: { current: [] as readonly string[] },
     mockResolveOfferableAggregates: vi.fn(() => offer.current),
     offerRef: offer,
@@ -56,7 +62,7 @@ vi.mock('#ui/components/Table/contexts/TableConfig/grouping/actions', () => ({
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/grouping/selectors', () => ({
-  useGetTableGroupingAggregates: () => appliedAggregatesRef.current,
+  useGetTableGroupingAggregates: () => liveAggregatesRef.current,
   useGetTableGroupingKeys: () => liveGroupingKeysRef.current,
 }));
 
@@ -82,6 +88,7 @@ vi.mock(
 vi.mock(
   '#ui/components/Table/TableSettingsDrawer/TableDrawerContext/selectors',
   () => ({
+    useGetGroupingAggregates: () => draftAggregatesRef.current,
     useGetGroupingKeys: () => draftGroupingKeysRef.current,
   }),
 );
@@ -92,10 +99,23 @@ vi.mock('#ui/components/Table/TableActionsPopover', () => ({
 }));
 
 vi.mock('#ui/components/VirtualSelect', () => ({
-  VirtualSelect: ({ options, placeholder }: MockVirtualSelectProps) => (
+  VirtualSelect: ({
+    onChange,
+    options,
+    placeholder,
+  }: MockVirtualSelectProps) => (
     <ul data-testid={placeholder}>
       {options.map((option) => (
-        <li key={option.value}>{option.label}</li>
+        <li key={option.value}>
+          <button
+            onClick={() => {
+              onChange([option.value]);
+            }}
+            type='button'
+          >
+            {option.label}
+          </button>
+        </li>
       ))}
     </ul>
   ),
@@ -105,6 +125,7 @@ import { AggregateActions } from '#ui/components/Table/TableHeaderCell/TableHead
 import { AddAggregateSection } from '#ui/components/Table/TableSettingsDrawer/GroupingSection/AddAggregateSection';
 
 const COLUMN_PLACEHOLDER = 'Select a column...';
+const FUNCTION_PLACEHOLDER = 'Select a function...';
 
 const textCapability: TableColumnGroupingCapability = {
   aggregates: ['count', 'countDistinct'],
@@ -153,8 +174,14 @@ const listedColumns = () =>
     (node) => node.textContent,
   );
 
+const listedFunctions = () =>
+  [...screen.getByTestId(FUNCTION_PLACEHOLDER).children].map(
+    (node) => node.textContent,
+  );
+
 beforeEach(() => {
-  appliedAggregatesRef.current = [];
+  draftAggregatesRef.current = [];
+  liveAggregatesRef.current = [];
   offerRef.current = [];
   draftGroupingKeysRef.current = [];
   liveGroupingKeysRef.current = [];
@@ -245,5 +272,52 @@ describe('resolveOfferableAggregates across both offering surfaces', () => {
       capability: numericCapability,
       isGroupKey: false,
     });
+  });
+});
+
+/**
+ * The one answer the two surfaces give differently, kept here beside the ones
+ * they must give identically so the divergence reads as design (#841).
+ *
+ * Neither surface re-derives *legality* — that is the block above. What differs
+ * is what each does with a function the column already carries, and it differs
+ * because their gestures do. The picker only ever adds, so offering an applied
+ * function offers a guarded no-op: `addTableColumnAggregate` returns the state
+ * it was handed and the Add button appears to do nothing. The header menu
+ * toggles, so that same item is the only way to remove the aggregate — teaching
+ * the shared predicate to subtract applied functions would take the toggle-off
+ * away, which is why `resolveAddableAggregates` composes beside it instead.
+ *
+ * Both tests run against the same applied aggregate, staged and live, so the
+ * surfaces can only differ on the gesture. A change that "harmonised" them
+ * flips exactly one of the two.
+ */
+describe('what the two surfaces do with an applied aggregate', () => {
+  beforeEach(() => {
+    offerRef.current = ['count', 'sum'];
+    draftAggregatesRef.current = [{ columnKey: 'total_amount', fn: 'sum' }];
+    liveAggregatesRef.current = [{ columnKey: 'total_amount', fn: 'sum' }];
+  });
+
+  it('drops it from the drawer picker, which only adds', () => {
+    render(<AddAggregateSection />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Total' }));
+
+    expect(listedFunctions()).toEqual(['Count']);
+  });
+
+  it('keeps it on the header menu, which toggles it off', () => {
+    render(<AggregateActions columnKey='total_amount' onClose={vi.fn()} />);
+
+    // Offered *and* pressed: the item is the affordance that removes it.
+    expect(
+      screen.getByText('Sum').closest('button')?.getAttribute('aria-pressed'),
+    ).toBe('true');
+    // The unapplied one is still there too, so the menu is not simply showing
+    // everything the stub returned regardless of state.
+    expect(
+      screen.getByText('Count').closest('button')?.getAttribute('aria-pressed'),
+    ).toBe('false');
   });
 });
