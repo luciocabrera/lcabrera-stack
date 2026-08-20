@@ -5,7 +5,7 @@ owner: agent:claude
 status: review
 branch: docs/716-skills-distribution-research
 area:
-  - docs/agents/research/skills-distribution-*.md
+  - docs/agents/research/**
   - docs/README.md
   - scripts/docs-paths-baseline.json
 started: 2026-08-20

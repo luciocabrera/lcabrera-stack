@@ -363,8 +363,8 @@ built directly on Cursor's product surface:
   - `orchestrate/skills/orchestrate/scripts/package.json`,
     `orchestrate/skills/orchestrate/scripts/tsconfig.json`, `orchestrate/skills/orchestrate/scripts/cli.ts`, `orchestrate/skills/orchestrate/scripts/cli/index.ts`
   - Directory listing (`find`) of the entire `orchestrate/` tree to confirm
-    structure (prompts/, references/, schemas/, scripts/core, scripts/cli,
-    scripts/adapters, scripts/**tests**, scripts/tools)
+    structure (`prompts/, references/, schemas/, scripts/core, scripts/cli,
+scripts/adapters, scripts/__tests__, scripts/tools`)
   - `create-plugin/skills/create-plugin-scaffold/SKILL.md`,
     `create-plugin/rules/plugin-quality-gates.mdc` (for Cursor's own
     prescribed install-location convention)

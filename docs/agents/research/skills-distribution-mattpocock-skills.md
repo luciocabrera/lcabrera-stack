@@ -18,7 +18,7 @@ of shell/YAML/JS scaffolding, distributed as either a Claude Code plugin or a se
 Scope, from `.claude-plugin/plugin.json`'s `skills` array at the researched commit: 24 promoted skills split into
 two buckets — `engineering/` (18 skills: daily code work — spec/ticket flows, TDD, code review, domain
 modeling, bug diagnosis, merge-conflict resolution, an interactive setup wizard generator) and `productivity/`
-(6 skills: non-code workflow tools — "grilling" interviews, handoff documents, teaching, questionnaires). The
+(7 skills: non-code workflow tools — "grilling" interviews, handoff documents, teaching, questionnaires). The
 repo also carries three **non-promoted** buckets that exist on disk but ship in neither the plugin nor the
 `skills.sh` catalog: `misc/` (4 skills, "kept around but rarely used"), `in-progress/` (6 skills, "beta: public
 on purpose, feedback wanted, not shipped in the plugin"), and `deprecated/` (0 skills at this commit, just a
@@ -139,7 +139,7 @@ different harnesses' invocation-policy vocabularies — see §6.
   question-count cap for grilling sessions, a verify-mode for the setup skill), each with a "Prior requests"
   section citing the GitHub issue number that asked and was declined. This is a scope-fence mechanism, not a
   distribution mechanism, but it's a notable documentation pattern.
-- `docs/engineering/*.md`, `docs/productivity/*.md`: one human-facing page per promoted skill, mirroring the
+- `/docs/engineering/*.md`, `/docs/productivity/*.md`: one human-facing page per promoted skill, mirroring the
   bucket tree, republished on aihero.dev. `.agents/writing-docs.md` is an unusually detailed style guide for
   these — fixed section frame (`What it does` / `When to reach for it` / `Where it fits`), an explicit rule that
   the page "carries no install commands" because the hosting site (ai-hero) renders an install widget above the
@@ -455,7 +455,8 @@ doctor`: mattpocock/skills bets that natural-language reconciliation, invoked on
   - `skills/engineering/to-tickets/agents/openai.yaml`
   - `skills/engineering/code-review/SKILL.md` (frontmatter + opening) and directory listing
   - `skills/productivity/grilling/SKILL.md` (opening)
-  - `docs/` directory listing (full tree of 24 published docs pages)
+  - `/docs/` directory listing (full tree of 25 published docs pages —
+    `find docs -name "*.md" | wc -l`)
   - top-level directory tree (`skills/{engineering,productivity,misc,in-progress,deprecated}`)
 - Web sources (fetched/searched 2026-08-20):
   - [code.claude.com/docs/en/plugins](https://code.claude.com/docs/en/plugins) — Claude Code plugin manifest
