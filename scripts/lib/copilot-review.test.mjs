@@ -1,13 +1,21 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
-  copilotReviews,
+  acceptedReviews,
   decideReviewStatus,
+  isAcceptedReviewer,
   isCopilotReviewer,
-  latestCopilotReview,
+  latestAcceptedReview,
   reviewsFromPages,
   STATUS_CONTEXT,
 } from './copilot-review.mjs';
+import {
+  claudeReview,
+  EARLIER,
+  graphqlReview,
+  HEAD,
+  restReview,
+} from './copilot-review-fixtures.mjs';
 
 // The gate this file covers is fail-closed, so every assertion below is written
 // to be able to fail. The load-bearing one is the #671 sequence: a review of an
@@ -17,35 +25,6 @@ import {
 
 /** GitHub's commit-status API truncates a description past this. */
 const DESCRIPTION_LIMIT = 140;
-
-const HEAD = 'dd8fb7867fa4cc57044c6c6808313528d7d7e0d3';
-const EARLIER = 'ff868c68f40fcd9740ea16cb313b37e5f10cd9b5';
-
-/** A REST review — the shape `GET /pulls/{n}/reviews` returns. */
-const restReview = ({
-  commit = HEAD,
-  login = 'copilot-pull-request-reviewer[bot]',
-  state = 'COMMENTED',
-  submitted = '2026-08-14T08:20:53Z',
-} = {}) => ({
-  commit_id: commit,
-  state,
-  submitted_at: submitted,
-  user: { login },
-});
-
-/** The same review as `gh pr view --json reviews` prints it (the issue's repro). */
-const graphqlReview = ({
-  commit = HEAD,
-  login = 'copilot-pull-request-reviewer',
-  state = 'COMMENTED',
-  submitted = '2026-08-14T08:20:53Z',
-} = {}) => ({
-  author: { login },
-  commit: { oid: commit },
-  state,
-  submittedAt: submitted,
-});
 
 describe('recognising the reviewer', () => {
   it('accepts both spellings of the Copilot reviewer login', () => {
@@ -59,6 +38,35 @@ describe('recognising the reviewer', () => {
     expect(isCopilotReviewer('copilot')).toBe(false);
     expect(isCopilotReviewer('not-copilot-pull-request-reviewer')).toBe(false);
     expect(isCopilotReviewer(undefined)).toBe(false);
+  });
+});
+
+describe('which reviewers the gate accepts', () => {
+  it('accepts both named reviewers, in either API spelling', () => {
+    expect(isAcceptedReviewer('copilot-pull-request-reviewer[bot]')).toBe(true);
+    expect(isAcceptedReviewer('copilot-pull-request-reviewer')).toBe(true);
+    expect(isAcceptedReviewer('github-actions[bot]')).toBe(true);
+    expect(isAcceptedReviewer('github-actions')).toBe(true);
+  });
+
+  it('accepts nobody else — the set is names, not a shape', () => {
+    // Each of these would be admitted by a rule the accepted set deliberately
+    // does not use: a `[bot]` suffix test, a substring match, a regex over bot
+    // logins. A new reviewer has to be an edit someone made on purpose.
+    expect(isAcceptedReviewer('dependabot[bot]')).toBe(false);
+    expect(isAcceptedReviewer('sonarqubecloud[bot]')).toBe(false);
+    expect(isAcceptedReviewer('github-actions-runner[bot]')).toBe(false);
+    expect(isAcceptedReviewer('not-github-actions')).toBe(false);
+    expect(isAcceptedReviewer('luciocabrera')).toBe(false);
+    expect(isAcceptedReviewer(undefined)).toBe(false);
+  });
+
+  it('keeps the Copilot test narrow, because the suppressed reader depends on it', () => {
+    // `copilot-suppressed.mjs` parses Copilot's own review markup, which no other
+    // reviewer emits. Widening this would send it hunting for a `Suppressed
+    // comments` block in reviews that never contain one.
+    expect(isCopilotReviewer('copilot-pull-request-reviewer[bot]')).toBe(true);
+    expect(isCopilotReviewer('github-actions[bot]')).toBe(false);
   });
 });
 
@@ -103,15 +111,20 @@ describe('reading a paginated review list', () => {
 });
 
 describe('which reviews count', () => {
-  it('keeps only Copilot reviews that were actually submitted', () => {
+  it('keeps only accepted reviewers whose review was actually submitted', () => {
     const reviews = [
       restReview({ login: 'luciocabrera' }),
       restReview({ state: 'DISMISSED' }),
       restReview({ state: 'PENDING' }),
       restReview({ state: 'UNRECOGNISED_FUTURE_STATE' }),
       restReview(),
+      claudeReview(),
     ];
-    expect(copilotReviews(reviews)).toEqual([restReview()]);
+    expect(acceptedReviews(reviews)).toEqual([restReview(), claudeReview()]);
+  });
+
+  it('drops a dismissed review from either reviewer', () => {
+    expect(acceptedReviews([claudeReview({ state: 'DISMISSED' })])).toEqual([]);
   });
 
   it('takes the newest by submission time, not by array position', () => {
@@ -123,14 +136,24 @@ describe('which reviews count', () => {
       commit: EARLIER,
       submitted: '2026-08-14T08:20:53Z',
     });
-    expect(latestCopilotReview([newest, oldest])).toBe(newest);
-    expect(latestCopilotReview([oldest, newest])).toBe(newest);
+    expect(latestAcceptedReview([newest, oldest])).toBe(newest);
+    expect(latestAcceptedReview([oldest, newest])).toBe(newest);
+  });
+
+  it('takes the newest across BOTH reviewers, not the newest of each', () => {
+    const copilot = restReview({
+      commit: EARLIER,
+      submitted: '2026-08-20T09:00:00Z',
+    });
+    const claude = claudeReview({ submitted: '2026-08-20T10:15:11Z' });
+    expect(latestAcceptedReview([copilot, claude])).toBe(claude);
+    expect(latestAcceptedReview([claude, copilot])).toBe(claude);
   });
 
   it('breaks a timestamp tie on chronological array order', () => {
     const first = restReview({ commit: EARLIER });
     const second = restReview({ commit: HEAD });
-    expect(latestCopilotReview([first, second])).toBe(second);
+    expect(latestAcceptedReview([first, second])).toBe(second);
   });
 });
 
@@ -208,6 +231,119 @@ describe('the head-versus-review comparison', () => {
       ],
     });
     expect(status.state).toBe('pending');
+  });
+});
+
+describe('two accepted reviewers', () => {
+  it('is success when only Copilot has reviewed the head', () => {
+    const status = decideReviewStatus({
+      headSha: HEAD,
+      reviews: [restReview()],
+    });
+    expect(status.state).toBe('success');
+    expect(status.reviewer).toBe('copilot-pull-request-reviewer[bot]');
+  });
+
+  it('is success when only the Claude reviewer has reviewed the head', () => {
+    const status = decideReviewStatus({
+      headSha: HEAD,
+      reviews: [claudeReview()],
+    });
+    expect(status.state).toBe('success');
+    expect(status.reviewer).toBe('github-actions[bot]');
+  });
+
+  it('is success when both have reviewed and the newest names the head', () => {
+    const status = decideReviewStatus({
+      headSha: HEAD,
+      reviews: [
+        restReview({ commit: EARLIER, submitted: '2026-08-20T09:00:00Z' }),
+        claudeReview({ submitted: '2026-08-20T10:15:11Z' }),
+      ],
+    });
+    expect(status.state).toBe('success');
+    expect(status.reviewer).toBe('github-actions[bot]');
+  });
+
+  it('is PENDING, not success, when the newest review is stale and only an OLDER review by the other reviewer names the head', () => {
+    // The behaviour this pins down is the one worth arguing about, so it is in
+    // the name rather than left to be inferred. Copilot reviewed the head, then
+    // a push landed, then the Claude reviewer reviewed that new commit and found
+    // it wanting — no. Read it as the sequence it is: the OLDER review covers a
+    // commit that has since been superseded, and the newer verdict is the one
+    // that saw the head last. Taking the best of the two would let a
+    // reviewed-then-moved-on sequence pass on the strength of a review that
+    // predates the move, which is #671 exactly.
+    const status = decideReviewStatus({
+      headSha: HEAD,
+      reviews: [
+        restReview({ commit: HEAD, submitted: '2026-08-20T09:00:00Z' }),
+        claudeReview({ commit: EARLIER, submitted: '2026-08-20T10:15:11Z' }),
+      ],
+    });
+    expect(status.state).toBe('pending');
+    expect(status.reviewer).toBeUndefined();
+  });
+
+  it('is pending when neither reviewer has ever reviewed', () => {
+    const status = decideReviewStatus({ headSha: HEAD, reviews: [] });
+    expect(status.state).toBe('pending');
+    expect(status.reviewer).toBeUndefined();
+    expect(status.description).toContain('Waiting for a review');
+  });
+
+  it('is not satisfied by an unaccepted author who reviewed the head', () => {
+    // The whole point of a named set: a reviewer nobody chose does not count,
+    // however plausible its login looks next to one that does.
+    for (const login of [
+      'luciocabrera',
+      'dependabot[bot]',
+      'sonarqubecloud[bot]',
+      'github-actions-runner[bot]',
+    ]) {
+      expect(
+        decideReviewStatus({ headSha: HEAD, reviews: [restReview({ login })] })
+          .state,
+      ).toBe('pending');
+    }
+  });
+
+  it('names the reviewer that satisfied it, so a monoculture cannot go unnoticed', () => {
+    // If Copilot stops reviewing entirely, every pull request should say so on
+    // its face rather than reading the same as it always did.
+    expect(
+      decideReviewStatus({ headSha: HEAD, reviews: [claudeReview()] })
+        .description,
+    ).toBe('Reviewed by github-actions[bot] at dd8fb78, the current head.');
+    expect(
+      decideReviewStatus({ headSha: HEAD, reviews: [restReview()] })
+        .description,
+    ).toBe(
+      'Reviewed by copilot-pull-request-reviewer[bot] at dd8fb78, the current head.',
+    );
+  });
+
+  it('names the reviewer whose stale review is still waiting', () => {
+    expect(
+      decideReviewStatus({
+        headSha: HEAD,
+        reviews: [claudeReview({ commit: EARLIER })],
+      }).description,
+    ).toBe(
+      'github-actions[bot] last reviewed ff868c6; waiting for a review of dd8fb78.',
+    );
+  });
+
+  it('fails on a stale review from either reviewer that triggered the run', () => {
+    const stale = claudeReview({ commit: EARLIER });
+    const status = decideReviewStatus({
+      headSha: HEAD,
+      reviews: [stale],
+      triggeringReview: stale,
+    });
+    expect(status.state).toBe('failure');
+    expect(status.reviewer).toBe('github-actions[bot]');
+    expect(status.description).toContain('no longer the head');
   });
 });
 

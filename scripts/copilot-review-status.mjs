@@ -38,7 +38,7 @@ import { appendFileSync } from 'node:fs';
 import process from 'node:process';
 
 import {
-  copilotReviews,
+  acceptedReviews,
   decideReviewStatus,
   STATUS_CONTEXT,
 } from './lib/copilot-review.mjs';
@@ -80,7 +80,7 @@ const fetchPullRequest = (repository, number) =>
 
 /** What was read, so a `pending` status is diagnosable from the run log alone. */
 const describeReviews = (reviews) =>
-  `${reviews.length} review(s) on the pull request, ${copilotReviews(reviews).length} counted from Copilot`;
+  `${reviews.length} review(s) on the pull request, ${acceptedReviews(reviews).length} counted from an accepted reviewer`;
 
 /** Appends the suppressed-comment report where the runner shows it, if it can. */
 const writeSummary = (markdown) => {
