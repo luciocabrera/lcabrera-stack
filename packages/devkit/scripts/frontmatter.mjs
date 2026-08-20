@@ -41,8 +41,21 @@ const CONFIG_PREFIX = 'config.';
 
 const REQUIRES_KEY = /^requires:[ \t]*/;
 
-/** One item of a block sequence, at any indent YAML would accept for one. */
-const SEQUENCE_ITEM = /^[ \t]*-[ \t]+(.*)$/;
+/**
+ * One item of a block sequence, at any indent YAML would accept for one. The
+ * capture opens at the first space after the dash rather than after the whole
+ * run of them, so that no two quantifiers can split that run between them — the
+ * shape that costs an expression its linear runtime. `ITEM_SPACING` takes the
+ * rest of the run off in JS, where it is one pass.
+ */
+const SEQUENCE_ITEM = /^[ \t]*-([ \t].*)$/;
+
+/**
+ * The spaces or tabs a `SEQUENCE_ITEM` capture still opens with. Not
+ * `trimStart()`, which also takes non-breaking and vertical space — characters
+ * an item may open with and this reader has always kept.
+ */
+const ITEM_SPACING = /^[ \t]+/;
 
 const QUOTES = /^['"]|['"]$/g;
 
@@ -99,7 +112,7 @@ const flowArrayBody = (value) => {
 const blockSequenceBody = (lines) => {
   const end = lines.findIndex((line) => !SEQUENCE_ITEM.test(line));
   const items = (end === -1 ? lines : lines.slice(0, end)).map(
-    (line) => SEQUENCE_ITEM.exec(line)?.[1] ?? '',
+    (line) => SEQUENCE_ITEM.exec(line)?.[1].replace(ITEM_SPACING, '') ?? '',
   );
   return items.length === 0 ? undefined : items.join(',');
 };
