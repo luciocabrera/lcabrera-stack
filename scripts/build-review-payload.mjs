@@ -111,6 +111,7 @@ const main = () => {
     commitSha: values.commit,
     findings,
     index: diffIndex(readFiles(values.files)),
+    note,
   });
 
   writeTextWithin(values.out, JSON.stringify(payload), REPO_ROOT);

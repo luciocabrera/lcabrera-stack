@@ -134,6 +134,23 @@ ${rendered}`;
 };
 
 /**
+ * A degraded run, said on the pull request rather than only in the job log.
+ *
+ * It leads the body because it changes how everything under it should be read:
+ * without it, a review whose findings file was lost is a summary paragraph and
+ * nothing else, which is indistinguishable from a reviewer that found nothing.
+ * The body no longer carries a prose copy of the findings to fall back on — the
+ * prompt reserves it for what did *not* become a finding — so the log is the
+ * only other place this appears, and a log is not where a reader looks. (pure)
+ */
+export const bodyWithNote = (body, note) =>
+  note === undefined
+    ? body
+    : `> **Note:** the findings file could not be read — ${note}. Any findings this review made are missing from it; the summary below is all that survived.
+
+${body}`;
+
+/**
  * The whole request body for `POST /repos/{owner}/{repo}/pulls/{n}/reviews`.
  *
  * `event` stays `COMMENT`: this reviewer does not approve and must not request
@@ -141,11 +158,11 @@ ${rendered}`;
  * a workflow has no way to. Threads are what hold the merge, via the ruleset's
  * `required_review_thread_resolution`. (pure)
  */
-export const reviewPayload = ({ body, commitSha, findings, index }) => {
+export const reviewPayload = ({ body, commitSha, findings, index, note }) => {
   const { anchored, unanchored } = partitionFindings(findings, index);
   return {
     payload: {
-      body: bodyWithUnanchored(body, unanchored),
+      body: bodyWithNote(bodyWithUnanchored(body, unanchored), note),
       comments: anchored,
       commit_id: commitSha,
       event: 'COMMENT',

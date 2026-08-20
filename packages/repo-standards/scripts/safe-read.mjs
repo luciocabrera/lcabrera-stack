@@ -12,20 +12,16 @@
  * loosening the check, so traversal outside both roots is still refused.
  */
 import { readFileSync } from 'node:fs';
-import { resolve, sep } from 'node:path';
+
+import { resolveWithin } from './path-containment.mjs';
 
 export const readTextWithin = (path, repoRoot, extraRoots = []) => {
-  const resolved = resolve(path);
-  // The read lives inside the containment branch on purpose: the resolved path
-  // comes from argv, so it must be provably validated before it reaches the
-  // filesystem — for a reader and for taint analysis alike.
-  for (const root of [repoRoot, ...extraRoots]) {
-    if (typeof root !== 'string' || root === '') {
-      continue;
-    }
-    if (resolved === root || resolved.startsWith(root + sep)) {
-      return readFileSync(resolved, 'utf8');
-    }
+  // What reaches the filesystem is the value `resolveWithin` validated, not the
+  // argument it came from — provably so, for a reader and for taint analysis
+  // alike. The predicate itself is shared with `safe-write.mjs`.
+  const resolved = resolveWithin(path, [repoRoot, ...extraRoots]);
+  if (resolved === undefined) {
+    throw new Error(`refusing to read a file outside the repository: ${path}`);
   }
-  throw new Error(`refusing to read a file outside the repository: ${path}`);
+  return readFileSync(resolved, 'utf8');
 };

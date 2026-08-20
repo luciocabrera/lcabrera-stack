@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import { diffIndex } from './agent-review-diff.mjs';
 import {
+  bodyWithNote,
   bodyWithUnanchored,
   partitionFindings,
   reviewPayload,
@@ -160,5 +161,32 @@ describe('reviewPayload', () => {
     expect(payload.comments).toEqual([]);
     expect(payload.body).toBe('Nothing to flag.');
     expect(stats).toEqual({ anchored: 0, unanchored: 0 });
+  });
+});
+
+describe('bodyWithNote', () => {
+  it('leaves the body alone when the findings file was read', () => {
+    expect(bodyWithNote('summary', undefined)).toBe('summary');
+  });
+
+  // The failure this exists for: without the note, a review whose findings file
+  // was lost is a summary paragraph, which reads exactly like a clean review.
+  it('leads with the note so the summary is read in its light', () => {
+    const out = bodyWithNote('summary', 'it is not valid JSON');
+    expect(out.startsWith('> **Note:**')).toBe(true);
+    expect(out).toContain('it is not valid JSON');
+    expect(out).toContain('missing from it');
+    expect(out).toContain('summary');
+  });
+
+  it('is carried through reviewPayload onto the posted body', () => {
+    const { payload } = reviewPayload({
+      body: 'summary',
+      commitSha: 'd'.repeat(40),
+      findings: [],
+      index: INDEX,
+      note: 'the findings file is not a JSON array',
+    });
+    expect(payload.body).toContain('the findings file is not a JSON array');
   });
 });

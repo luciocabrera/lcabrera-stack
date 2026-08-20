@@ -5,23 +5,19 @@
  * (e.g. `--out ../../.git/hooks/pre-commit`), which is the write-side twin of
  * `safe-read.mjs` and is checked the same way for the same reason.
  *
- * The write lives inside the containment branch on purpose: the resolved path
- * comes from argv, so it must be provably validated before it reaches the
- * filesystem — for a reader and for taint analysis alike.
+ * What reaches the filesystem is the value `resolveWithin` validated, not the
+ * argument it came from — provably so, for a reader and for taint analysis
+ * alike. The predicate itself is shared with `safe-read.mjs`.
  */
 import { writeFileSync } from 'node:fs';
-import { resolve, sep } from 'node:path';
+
+import { resolveWithin } from './path-containment.mjs';
 
 export const writeTextWithin = (path, text, repoRoot, extraRoots = []) => {
-  const resolved = resolve(path);
-  for (const root of [repoRoot, ...extraRoots]) {
-    if (typeof root !== 'string' || root === '') {
-      continue;
-    }
-    if (resolved === root || resolved.startsWith(root + sep)) {
-      writeFileSync(resolved, text, 'utf8');
-      return resolved;
-    }
+  const resolved = resolveWithin(path, [repoRoot, ...extraRoots]);
+  if (resolved === undefined) {
+    throw new Error(`refusing to write a file outside the repository: ${path}`);
   }
-  throw new Error(`refusing to write a file outside the repository: ${path}`);
+  writeFileSync(resolved, text, 'utf8');
+  return resolved;
 };
