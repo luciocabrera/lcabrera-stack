@@ -94,6 +94,16 @@ because of where it lands. The bit is set _after_ the write rather than passed t
 it, because `writeFileSync`'s mode applies only when it creates the file: an
 update over a file that had lost the bit would otherwise keep it lost for ever.
 
+**Writing and setting the mode cover different sets, on purpose.** The mode is
+corrected on every `isRecorded` entry, not every `isWritten` one, because a
+`current` file has the package's exact bytes and may still have arrived without
+its bit — from a tarball, a copy, or a clone on a filesystem that carries none.
+Nothing else would put it back: the mode is not in the hash, so `sync` reports
+everything up to date and `doctor` reports nothing while git skips the hook.
+`isRecorded` is the right line because it is exactly the set whose content is
+provably the package's; a `conflict` or a `modified` file belongs to the
+consumer, and so does its mode.
+
 **The closure gate measures the plan, and every profile.** The content it reads is
 the plan's, not the copy on disk: they are the same file wherever this repository
 materialises a group, and only the plan exists for a group it does not — the

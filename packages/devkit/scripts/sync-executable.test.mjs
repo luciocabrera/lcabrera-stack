@@ -98,6 +98,54 @@ describe('applySync honours the mode', () => {
     expect(mode & EXECUTABLE_BITS).toBe(0);
   });
 
+  test('sets the bit on a hook whose bytes already match', () => {
+    // The case `isWritten` does not cover, and the one this feature is FOR: a
+    // consumer who unzipped a tarball, copied the tree, or cloned onto a
+    // filesystem with no exec bit has the package's exact bytes at mode 0644.
+    // `classifyMaterialisation` says `current`, so nothing is written — and the
+    // mode is not in the hash, so `sync` says everything is up to date and
+    // `doctor` reports nothing while git skips the hook. The chmod keys off
+    // `isRecorded`, which is exactly the set whose content is provably ours.
+    const root = scratch();
+    const path = '.githooks/pre-push';
+    const content = '#!/bin/sh\nexit 0\n';
+    mkdirSync(join(root, '.githooks'), { recursive: true });
+    writeFileSync(join(root, path), content, { mode: 0o644 });
+
+    const entries = plan(
+      [{ content, executable: true, path: 'hooks/pre-push' }],
+      {
+        manifest: { files: {} },
+        onDiskHash: () => hashContent(content),
+      },
+    );
+    expect(entries[0].state).toBe('current');
+    applySync({ entries, root });
+
+    expect(statSync(join(root, path)).mode & EXECUTABLE_BITS).not.toBe(0);
+  });
+
+  test('leaves the mode of a file the consumer owns alone', () => {
+    // A `conflict` is a file this kit never wrote. Correcting its mode would be
+    // adopting it, which is the one mistake a materialiser cannot undo — so the
+    // chmod stops at `isRecorded` rather than running on every entry.
+    const root = scratch();
+    const path = '.githooks/pre-push';
+    mkdirSync(join(root, '.githooks'), { recursive: true });
+    writeFileSync(join(root, path), 'the consumer wrote this\n', {
+      mode: 0o644,
+    });
+
+    const entries = plan(
+      [{ content: 'ours\n', executable: true, path: 'hooks/pre-push' }],
+      { onDiskHash: () => hashContent('the consumer wrote this\n') },
+    );
+    expect(entries[0].state).toBe('conflict');
+    applySync({ entries, root });
+
+    expect(statSync(join(root, path)).mode & EXECUTABLE_BITS).toBe(0);
+  });
+
   test('sets the bit when updating a hook that is already there', () => {
     // `writeFileSync`'s mode option applies only when it CREATES the file, so an
     // overwrite keeps whatever mode the file had. A consumer whose checkout lost

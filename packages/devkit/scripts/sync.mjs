@@ -20,6 +20,7 @@ import {
   ACKNOWLEDGED_STATE,
   classifyMaterialisation,
   hashContent,
+  isRecorded,
   isWritten,
   nextManifest,
 } from './manifest.mjs';
@@ -199,6 +200,21 @@ export const withAcceptance = ({ accepted, entries }) =>
  */
 const EXECUTABLE_MODE = 0o755;
 
+/**
+ * Writing is one question, the mode is another, and they cover different sets.
+ *
+ * The mode is corrected on every file the record calls ours — `isRecorded`, not
+ * `isWritten` — because a `current` file has the package's exact bytes and may
+ * still have arrived without its bit, through a tarball, a copy, or a clone on a
+ * filesystem that does not carry one. Nothing else would ever put it back: the
+ * mode is not in the hash, so `sync` says everything is up to date and `doctor`
+ * reports nothing while git skips the hook. Recorded is the right line because
+ * it is exactly the set whose content is provably the package's; a `conflict` or
+ * a `modified` file belongs to the consumer, and its mode is theirs too.
+ */
+const needsExecutableBit = (entry) =>
+  entry.executable === true && isRecorded(entry.state);
+
 export const applySync = ({ entries, root }) => {
   for (const entry of entries.filter((candidate) =>
     isWritten(candidate.state),
@@ -206,7 +222,11 @@ export const applySync = ({ entries, root }) => {
     const destination = join(root, entry.path);
     mkdirSync(dirname(destination), { recursive: true });
     writeFileSync(destination, entry.content);
-    if (entry.executable) chmodSync(destination, EXECUTABLE_MODE);
+  }
+
+  // After the writes, so a file created just above is included.
+  for (const entry of entries.filter(needsExecutableBit)) {
+    chmodSync(join(root, entry.path), EXECUTABLE_MODE);
   }
 };
 
