@@ -5,19 +5,33 @@
  * (e.g. `--out ../../.git/hooks/pre-commit`), which is the write-side twin of
  * `safe-read.mjs` and is checked the same way for the same reason.
  *
- * What reaches the filesystem is the value `resolveWithin` validated, not the
- * argument it came from — provably so, for a reader and for taint analysis
- * alike. The predicate itself is shared with `safe-read.mjs`.
+ * **The loop below is deliberately a copy of `safe-read.mjs`'s, not a shared
+ * helper, and that is the one thing to know before editing it.** Extracting the
+ * predicate was tried and reverted: `jssecurity:S8707` fires on both files the
+ * moment the containment moves behind a function call, because Sonar's taint
+ * analysis does not follow the validation across that boundary and the write
+ * stops being provably guarded. The divergence risk that extraction was meant to
+ * remove is covered instead by `safe-fs-agreement.test.mjs`, which fails if the
+ * two predicates ever stop accepting and refusing the same paths — so harden one
+ * and the gate makes you harden the other.
+ *
+ * The write lives inside the containment branch on purpose: the resolved path
+ * comes from argv, so it must be provably validated before it reaches the
+ * filesystem — for a reader and for taint analysis alike.
  */
 import { writeFileSync } from 'node:fs';
-
-import { resolveWithin } from './path-containment.mjs';
+import { resolve, sep } from 'node:path';
 
 export const writeTextWithin = (path, text, repoRoot, extraRoots = []) => {
-  const resolved = resolveWithin(path, [repoRoot, ...extraRoots]);
-  if (resolved === undefined) {
-    throw new Error(`refusing to write a file outside the repository: ${path}`);
+  const resolved = resolve(path);
+  for (const root of [repoRoot, ...extraRoots]) {
+    if (typeof root !== 'string' || root === '') {
+      continue;
+    }
+    if (resolved === root || resolved.startsWith(root + sep)) {
+      writeFileSync(resolved, text, 'utf8');
+      return resolved;
+    }
   }
-  writeFileSync(resolved, text, 'utf8');
-  return resolved;
+  throw new Error(`refusing to write a file outside the repository: ${path}`);
 };
