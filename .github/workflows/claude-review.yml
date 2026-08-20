@@ -91,12 +91,6 @@ jobs:
             Review the changes in pull request #${{ github.event.pull_request.number }}
             of ${{ github.repository }}.
 
-            First, check that this run is still current:
-            `gh pr view ${{ github.event.pull_request.number }} --json headRefOid`. If the head
-            is not ${{ github.event.pull_request.head.sha }}, stop and post nothing — another
-            push has superseded this run, and a review naming a commit that is no longer the
-            head is the exact confusion the review gate exists to remove.
-
             Read the diff with `gh pr diff ${{ github.event.pull_request.number }}`, then read
             the files it touches and what sits immediately around them. Judge correctness
             first, then whether the change fits the conventions the surrounding code already
@@ -109,36 +103,67 @@ jobs:
             Keep the review proportionate to the diff. A one-file change deserves a short
             review; length is not thoroughness.
 
-            Then post the review. ALWAYS post it, whether or not you found anything.
+            Then write the review to `claude-review-body.md` in the working directory. Writing
+            that file is the whole of your job here — you do not post anything, and you have no
+            tool that could. The step after this one submits what you wrote, against the head
+            this run was triggered for.
 
-            Write the body to a file first and submit it as JSON, so that nothing in the body
-            has to survive shell quoting:
-
-                # /tmp/review.json
-                # { "commit_id": "<head sha>", "event": "COMMENT", "body": "<the review>" }
-                gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews \
-                  --input /tmp/review.json
-
-            `commit_id` must be exactly ${{ github.event.pull_request.head.sha }} — the head
-            this run was triggered for. A review carrying any other commit is a review of code
-            nobody asked about.
-
-            The body is a short paragraph saying what the change does, then the findings —
-            each naming a file and line, most important first. If you found nothing, say so in
-            those words and keep the summary: "no findings" and "never ran" have to be
-            distinguishable by anyone reading the pull request.
-
-            Post exactly one review. Do not push commits, edit files, or open issues.
-          # `Bash(gh api:*)` was the first shape and it is a write-capable wildcard: the
-          # allowlist matches a command prefix, the session token carries `pull-requests:
-          # write`, and `gh api` reaches every endpoint that token covers with any method.
-          # The instruction in the prompt not to open issues is guidance to a model, not a
-          # constraint on a tool. Narrowing to this repository's pull requests keeps the
-          # review post and drops the rest of the surface.
+            The body is a short paragraph saying what the change does, then the findings — each
+            naming a file and line, most important first. WRITE THE FILE EVEN IF YOU FOUND
+            NOTHING, and say so in those words: "no findings" and "never ran" have to be
+            distinguishable by anyone reading the pull request, and an empty file is read here
+            as the second one.
+          # Read-only, and that is the point: nothing here can write to GitHub. `Bash(gh
+          # api:*)` was the first shape and it is a write-capable wildcard — a command-prefix
+          # match against a token carrying `pull-requests: write`, so it reached every endpoint
+          # that token covers with any method. Narrowing it to this repository's pull requests
+          # was the second shape, and it fails for a subtler reason worth recording: the
+          # pattern matches a command PREFIX, so `gh api --method POST repos/…` — flag before
+          # path, which is the model's choice to make — does not match and is denied. That run
+          # ended with `permission_denials_count: 6` and posted nothing.
           #
-          # The cost is real and worth knowing: it also stops the reviewer verifying a claim
-          # against a third-party source, which is how the first good review confirmed what
-          # the action does. Repository files stay readable through Read/Grep/Glob.
+          # So the model does not post at all. It writes a file, and the step below submits it.
+          # No pattern has to anticipate how a command will be spelled.
           claude_args: >-
             --model claude-opus-5
-            --allowedTools "Read,Grep,Glob,Write,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh api repos/${{ github.repository }}/pulls/:*)"
+            --allowedTools "Read,Grep,Glob,Write,Bash(gh pr diff:*),Bash(gh pr view:*)"
+
+      # Posting is a step, not a tool the model holds. Three things follow from that, and each
+      # one was a defect in an earlier shape of this file:
+      #
+      # - The model needs no write access to GitHub, so the allowlist above is read-only.
+      # - `commit_id` is the SHA this run was triggered for, taken from the event rather than
+      #   from anything the model produced, so a review can never name a commit nobody asked
+      #   about.
+      # - A run that produced no review FAILS. That is the one that matters: the first shape
+      #   of this file posted nothing and went green, which reads exactly like a review that
+      #   found nothing. An empty file is not a clean bill of health.
+      - name: Submit the review against the head this run was triggered for
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          if [ ! -s claude-review-body.md ]; then
+            echo "::error::The review step wrote no claude-review-body.md, so there is nothing to submit. A run that reviews nothing must not report success."
+            exit 1
+          fi
+
+          # A superseded run must not post. `cancel-in-progress` usually gets there first, but
+          # cancellation is not instantaneous and a run already inside a model turn survives it.
+          current=$(gh api "repos/$REPOSITORY/pulls/$PR_NUMBER" --jq .head.sha)
+          if [ "$current" != "$HEAD_SHA" ]; then
+            echo "::notice::Head moved from $HEAD_SHA to $current while this run was working — not posting a review of a superseded commit."
+            exit 0
+          fi
+
+          # Built with jq rather than interpolated: the body is model-written prose that may
+          # carry quotes, backticks and newlines, and --rawfile is the only form here where
+          # none of that has to survive a shell.
+          jq -n --arg commit "$HEAD_SHA" --rawfile body claude-review-body.md \
+            '{commit_id: $commit, event: "COMMENT", body: $body}' > review-payload.json
+          gh api "repos/$REPOSITORY/pulls/$PR_NUMBER/reviews" --input review-payload.json \
+            --jq '"submitted review \(.id) against \(.commit_id)"'
