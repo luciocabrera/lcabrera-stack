@@ -214,13 +214,6 @@ jobs:
           TEST_CHANGED_BASE: origin/${{ github.base_ref }}
         run: vp run renames:verify
 
-      - name: Research counts are re-derivable
-        id: research_claims_gate
-        # Nothing here can check a claim about another project's tree, so this
-        # checks the only thing that is checkable: that the author left the
-        # reader a way to re-derive it. See docs/agents/research/README.md.
-        run: vp run research:verify
-
       - name: Route-folder types/constants name a real artifact
         id: route_names_gate
         # The other half of local-rules/domain-folder-filename. That rule

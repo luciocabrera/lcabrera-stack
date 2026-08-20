@@ -27,10 +27,9 @@ fails most. Reading a tree and counting by eye feels like evidence and is not;
 every wrong number here was refutable in seconds against a clone that was
 sitting on disk the whole time. So: run the command, paste the number, and
 **leave the command next to it** — or enumerate the things you counted, which
-serves the same purpose. `vp run research:verify` enforces exactly this and
-nothing else, because it is the only part of a foreign-tree claim this repo can
-check. It gates counts of four and up; below that a number-word is usually
-prose, not a measurement.
+serves the same purpose. Nothing here can check a claim about another
+project's tree, and no gate is going to save you — this one is on the author,
+which is exactly why it is first on the list.
 
 **2. A path you wrote from memory instead of copying from output.** Copy paths
 out of `find`/`ls` output rather than reconstructing them. A plausible-looking

@@ -83,7 +83,7 @@ orchestrate/
 ├── assets/avatar.png
 └── skills/orchestrate/
     ├── SKILL.md                         # 47 lines: principles, node types, role dispatch
-    ├── prompts/*.md                     # 9 files — literal prompt templates spawned agents receive
+    ├── prompts/*.md                     # 9 files (ls prompts/) — literal prompt templates
     ├── references/*.md                  # 4 files — dispatcher.md, planner.md, spawning.md, handoffs.md
     ├── schemas/plan.schema.json, state.schema.json   # generated from scripts/schemas.ts (zod)
     └── scripts/                         # a full, separately-versioned bun/TS project

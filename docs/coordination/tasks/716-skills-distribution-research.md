@@ -8,8 +8,6 @@ area:
   - docs/agents/research/**
   - docs/README.md
   - scripts/docs-paths-baseline.json
-  - scripts/verify-research-claims.mjs
-  - scripts/lib/research-claims*.mjs
 started: 2026-08-20
 updated: 2026-08-20
 plan: (none)
