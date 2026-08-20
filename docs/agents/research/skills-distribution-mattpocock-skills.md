@@ -275,7 +275,7 @@ present what you found, confirm with the user, then write." It:
    ones, and single- vs multi-context domain-doc layout (skipped outright if there's no monorepo signal).
 3. **Writes** the result as: an `## Agent skills` block appended/updated in whichever of `CLAUDE.md`/`AGENTS.md`
    already exists in the consumer repo (never creates a second one if one already exists — "Never create
-   `AGENTS.md` when `CLAUDE.md` already exists"), plus separate prose files under `docs/agents/`:
+   `AGENTS.md` when `CLAUDE.md` already exists"), plus separate prose files under `/docs/agents/`:
    `/docs/agents/issue-tracker.md`, `/docs/agents/domain.md`, and (only if `triage` is installed)
    `/docs/agents/triage-labels.md`. These are seeded from templates that live _inside_ the setup skill's own
    directory (`issue-tracker-github.md`, `issue-tracker-gitlab.md`, `issue-tracker-local.md`,

@@ -66,11 +66,11 @@ the brief, where it is already stronger, stated honestly rather than manufacture
    own stated requirement that Copilot and Gemini, which have no skill
    mechanism at all, must be able to read the materialised files directly,
    which a Claude-Code-specific plugin cache cannot satisfy as the _primary_
-   path — but ADR-081 never states it. ADR-081 itself sets the bar this fails:
-   "a later reader must be able to tell 'considered and kept back' from 'not
-   looked at'" (quoted from `packages/devkit/CLASSIFICATION.md`, which ADR-081
-   governs). Right now a
-   reader cannot tell the two apart for this specific alternative.
+   path — but ADR-081 never states it. `packages/devkit/CLASSIFICATION.md`,
+   which ADR-081 governs, is what sets the bar ADR-081 fails here: "a later
+   reader must be able to tell 'considered and kept back' from 'not looked
+   at'". Right now a reader cannot tell the two apart for this specific
+   alternative.
 
 2. **No hard-dependency/soft-dependency classification for parameterised
    skills.** mattpocock/skills' ADR-0001 draws a line CLASSIFICATION.md does
