@@ -1,6 +1,7 @@
 export { addTableColumnAggregate } from './addTableColumnAggregate.util';
 export { applyGroupingReducer } from './applyGroupingReducer.util';
 export { removeTableColumnAggregate } from './removeTableColumnAggregate.util';
+export { reorderTableColumnAggregates } from './reorderTableColumnAggregates.util';
 export { resolveGroupingColumnsPatch } from './resolveGroupingColumnsPatch.util';
 export { resolveTableGroupingUpdate } from './resolveTableGroupingUpdate.util';
 export { setTableGroupingMode } from './setTableGroupingMode.util';

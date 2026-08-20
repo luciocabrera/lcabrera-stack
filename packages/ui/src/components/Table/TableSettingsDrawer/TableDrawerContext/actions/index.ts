@@ -6,6 +6,7 @@ export { useClearFilters } from './useClearFilters.hook';
 export { useClearGrouping } from './useClearGrouping.hook';
 export { useClearSorting } from './useClearSorting.hook';
 export { useRemoveColumnAggregate } from './useRemoveColumnAggregate.hook';
+export { useReorderColumnAggregates } from './useReorderColumnAggregates.hook';
 export { useResetColumnOrderAndVisibility } from './useResetColumnOrderAndVisibility.hook';
 export { useResetFilters } from './useResetFilters.hook';
 export { useResetSorting } from './useResetSorting.hook';

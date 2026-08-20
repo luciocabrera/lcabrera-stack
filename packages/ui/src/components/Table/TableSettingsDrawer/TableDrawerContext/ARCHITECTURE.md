@@ -40,6 +40,7 @@ TableDrawerContext/
 │   ├── useResetTableSettings               → Re-seed both drafts from the table
 │   ├── useAddColumnAggregate               → Stage one more aggregate for a column
 │   ├── useRemoveColumnAggregate            → Un-stage one of a column's aggregates, or all
+│   ├── useReorderColumnAggregates          → Stage the aggregates in a new order, named by row id
 │   ├── useSetColumnFilters                 → Set filters object
 │   ├── useSetColumnPinning                 → Set pinning state
 │   ├── useSetColumnsOrder                  → Set column order array
@@ -177,6 +178,7 @@ and calls `set(partial)` on it — `columnsStore` for the column draft,
 | `useSetGroupKeys`                  | —                    | `groupingStore`        | Stages the whole ordered key list (reorder, remove)                          |
 | `useAddColumnAggregate`            | —                    | `groupingStore`        | Stages one more aggregate for a column (#831)                                |
 | `useRemoveColumnAggregate`         | —                    | `groupingStore`        | Un-stages one of a column's aggregates, or every one of them                 |
+| `useReorderColumnAggregates`       | —                    | `groupingStore`        | Stages the aggregates in a new order, named by `(columnKey, fn)` id (#832)   |
 | `useClearGrouping`                 | —                    | `groupingStore`        | Stages no keys and no aggregates                                             |
 | `useSetTotalsPlacement`            | —                    | `totalsPlacementStore` | Stages where subtotals sit relative to the rows they total                   |
 | `useBatchSetTableDrawerSettings`   | every drawer store   | `TableConfig`          | Pushes all three drafts to the table in **one** commit — see below           |

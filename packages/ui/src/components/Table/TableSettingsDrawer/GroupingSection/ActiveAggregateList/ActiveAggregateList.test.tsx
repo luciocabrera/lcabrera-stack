@@ -16,12 +16,14 @@ const {
   aggregatesRef,
   columnsRef,
   mockRemoveColumnAggregate,
+  mockReorderColumnAggregates,
   mockToggleGroupShare,
   sharesRef,
 } = vi.hoisted(() => ({
   aggregatesRef: { current: [] as TableGroupingState['aggregates'] },
   columnsRef: { current: [] as readonly Record<string, unknown>[] },
   mockRemoveColumnAggregate: vi.fn(),
+  mockReorderColumnAggregates: vi.fn(),
   mockToggleGroupShare: vi.fn(),
   sharesRef: { current: [] as TableGroupingState['shares'] },
 }));
@@ -35,6 +37,7 @@ vi.mock(
 
 vi.mock('../../TableDrawerContext/actions', () => ({
   useRemoveColumnAggregate: () => mockRemoveColumnAggregate,
+  useReorderColumnAggregates: () => mockReorderColumnAggregates,
   useToggleGroupShare: () => mockToggleGroupShare,
 }));
 
@@ -44,6 +47,23 @@ vi.mock('../../TableDrawerContext/selectors', () => ({
 }));
 
 import { ActiveAggregateList } from './ActiveAggregateList.component';
+
+/**
+ * The real `DraggableList` is deliberately **not** mocked here: whether these
+ * rows carry a drag handle at all is the thing #832 changed, and a stubbed
+ * primitive answers that question with whatever the stub renders. jsdom
+ * implements none of the HTML5 drag behaviour, but the primitive reads no
+ * `dataTransfer` — it tracks the source and target ids from the events
+ * themselves — so a start/enter/end triple is the whole drop.
+ */
+const dragRowOnto = ({ from, onto }: { from: number; onto: number }) => {
+  const rows = screen.getAllByRole('listitem');
+  const source = rows[from] as HTMLElement;
+
+  fireEvent.dragStart(source);
+  fireEvent.dragEnter(rows[onto] as HTMLElement);
+  fireEvent.dragEnd(source);
+};
 
 beforeEach(() => {
   columnsRef.current = [
@@ -63,6 +83,7 @@ describe('ActiveAggregateList', () => {
   it('says so when nothing is selected', () => {
     render(<ActiveAggregateList />);
 
+    expect(screen.queryAllByRole('listitem')).toHaveLength(0);
     expect(screen.getByText(/No aggregates selected/)).not.toBeNull();
   });
 
@@ -72,6 +93,22 @@ describe('ActiveAggregateList', () => {
     render(<ActiveAggregateList />);
 
     expect(screen.getByText('Sum of Total')).not.toBeNull();
+  });
+
+  it('gives every row a drag handle, like the group key and sort rows', () => {
+    aggregatesRef.current = [
+      { columnKey: 'total_amount', fn: 'sum' },
+      { columnKey: 'quantity', fn: 'max' },
+    ];
+
+    render(<ActiveAggregateList />);
+
+    expect(screen.getAllByTestId('drag-handle')).toHaveLength(2);
+    expect(
+      screen
+        .getAllByRole('listitem')
+        .map((row) => row.getAttribute('draggable')),
+    ).toEqual(['true', 'true']);
   });
 
   it('lists two aggregates on ONE column as two rows', () => {
@@ -102,6 +139,38 @@ describe('ActiveAggregateList', () => {
     expect(
       screen.getAllByText(/^\w+ of /).map((node) => node.textContent),
     ).toEqual(['Sum of Total', 'Maximum of Quantity']);
+  });
+
+  it('writes a drag ACROSS columns through the grouping action, in row ids', () => {
+    aggregatesRef.current = [
+      { columnKey: 'total_amount', fn: 'sum' },
+      { columnKey: 'quantity', fn: 'max' },
+    ];
+
+    render(<ActiveAggregateList />);
+    dragRowOnto({ from: 1, onto: 0 });
+
+    expect(mockReorderColumnAggregates).toHaveBeenCalledWith([
+      'quantity:max',
+      'total_amount:sum',
+    ]);
+  });
+
+  it('reorders two measures of ONE column relative to each other', () => {
+    // The pair is the row identity, so a column's own measures can swap — the
+    // move a column-keyed shape had no way to express.
+    aggregatesRef.current = [
+      { columnKey: 'total_amount', fn: 'avg' },
+      { columnKey: 'total_amount', fn: 'min' },
+    ];
+
+    render(<ActiveAggregateList />);
+    dragRowOnto({ from: 1, onto: 0 });
+
+    expect(mockReorderColumnAggregates).toHaveBeenCalledWith([
+      'total_amount:min',
+      'total_amount:avg',
+    ]);
   });
 
   it('removes one aggregate without touching the column others', () => {
