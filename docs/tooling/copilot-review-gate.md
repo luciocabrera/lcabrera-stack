@@ -1,6 +1,6 @@
 # The `Copilot review complete` gate
 
-**What it asserts:** the newest review by an **accepted reviewer** names the pull
+**What it asserts:** some **accepted reviewer's** newest review names the pull
 request's **current head commit**. Nothing weaker — "someone has reviewed this PR
 at some point" is the state that let #671 look fully reviewed while two later
 pushes had been seen by nobody.
@@ -44,7 +44,7 @@ context required, that is the one that could satisfy it.
 
 | State     | When                                                                                    |
 | --------- | --------------------------------------------------------------------------------------- |
-| `success` | the newest submitted review by an accepted reviewer names the head commit               |
+| `success` | an accepted reviewer's own newest submitted review names the head commit                |
 | `pending` | it does not, and a review may still arrive                                              |
 | `failure` | an accepted reviewer has just submitted a review and it names something other than head |
 
@@ -82,6 +82,27 @@ exhausted `review_on_push: true` keeps requesting reviews that never arrive. Not
 about that configuration was changed, deliberately, so the Copilot half resumes with
 no config change the day credits return. A gate that is permanently non-green because
 its only reviewer cannot review is what this second reviewer answers.
+
+### Newest per reviewer, not newest overall
+
+Each accepted reviewer's **own** newest review is compared against the head, and the
+gate is green if any of them names it. That is not the same as taking the newest
+review overall, and the difference shows up on an ordinary sequence:
+
+1. a push lands; the in-workflow reviewer reviews the new head and posts
+2. Copilot — whose re-review was requested before that push — submits its review of
+   the previous commit half an hour later
+
+Newest-overall would then report `pending` (or `failure`) on a head that **has** been
+reviewed, because the most recent review names an older commit. Nothing superseded
+the review that covered the head, so calling it stale contradicts what this status
+asserts.
+
+Per reviewer still blocks #671, which is the case the gate exists for: there Copilot's
+own newest review names an earlier commit, so nothing covers the head and the status
+stays `pending`. A rewind needs no special case either — a force-push back to an
+already-reviewed commit leaves each reviewer's newest review naming the commit that
+was rewound away.
 
 ### OR, not AND — and why it cannot live in the ruleset
 

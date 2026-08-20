@@ -8,6 +8,7 @@ area:
   - .github/workflows/claude-review.yml
   - .github/workflows/copilot-review-gate.yml
   - scripts/lib/copilot-review*.mjs
+  - scripts/copilot-review-status.mjs
   - docs/tooling/copilot-review-gate.md
 started: 2026-08-20
 updated: 2026-08-20

@@ -10,9 +10,9 @@
  *
  * TWO REVIEWERS ARE ACCEPTED, not one — `ACCEPTED_REVIEWERS` below names them and
  * says why each is there. What the status asserts is unchanged and must stay
- * unchanged: it is green only while the newest accepted review names the current
- * head. It has never meant that a reviewer APPROVED, and it does not mean that
- * now; it means a reviewer ran against this head.
+ * unchanged: it is green only while some accepted reviewer's newest review names
+ * the current head. It has never meant that a reviewer APPROVED, and it does not
+ * mean that now; it means a reviewer ran against this head.
  *
  * The context is still called `Copilot review complete` while accepting two
  * reviewers. That mismatch is known and deliberately not fixed here: the name is
@@ -63,21 +63,15 @@ const BOT_SUFFIX = /\[bot\]$/;
  * this entry is replaced rather than extended.
  */
 const ACCEPTED_REVIEWERS = [
-  {
-    login: COPILOT_LOGIN,
-    // The Copilot code review bot ruleset 19141543 requests on every push
-    // (`review_on_push: true`). Dormant while credits are exhausted, not removed:
-    // the config is untouched, so this path resumes on its own when they return.
-    why: 'the Copilot code review bot requested by ruleset 19141543',
-  },
-  {
-    login: CLAUDE_REVIEW_LOGIN,
-    // `.github/workflows/claude-review.yml`, which submits through the reviews
-    // API from a workflow step. It authenticates with `github.token`, which is
-    // why this entry reads `github-actions` rather than something that names
-    // Claude — see the hole described above.
-    why: 'the in-workflow Claude reviewer (.github/workflows/claude-review.yml)',
-  },
+  // The Copilot code review bot ruleset 19141543 requests on every push
+  // (`review_on_push: true`). Dormant while credits are exhausted, not removed:
+  // the config is untouched, so this path resumes on its own when they return.
+  COPILOT_LOGIN,
+  // `.github/workflows/claude-review.yml`, which submits through the reviews API
+  // from a workflow step. It authenticates with `github.token`, which is why this
+  // entry reads `github-actions` rather than anything naming Claude — see the hole
+  // described above.
+  CLAUDE_REVIEW_LOGIN,
 ];
 
 /** One login's two API spellings reduced to the form the list is written in. */
@@ -110,9 +104,7 @@ export const isCopilotReviewer = (login) =>
 
 /** Whether this gate counts a review by `login` at all. */
 export const isAcceptedReviewer = (login) =>
-  ACCEPTED_REVIEWERS.some(
-    (reviewer) => reviewer.login === normalisedLogin(login),
-  );
+  ACCEPTED_REVIEWERS.includes(normalisedLogin(login));
 
 // Field readers accept both payload shapes: REST (`/pulls/{n}/reviews`, what the
 // workflow fetches) and GraphQL (`gh pr view --json reviews`, what the issue's
@@ -170,13 +162,8 @@ export const acceptedReviews = (reviews = []) =>
 /**
  * The newest counted review by ANY accepted reviewer, or `undefined`.
  *
- * Newest across the whole accepted set rather than newest per reviewer, and that
- * is the behaviour to be deliberate about: when the newest review is stale and an
- * OLDER review by the other reviewer names the head, this gate is NOT green. The
- * older review covers a commit that has since been superseded and reviewed again
- * — the newer verdict is the one that saw the head last, and taking the best of
- * the two would let a stale-then-fixed sequence pass on the strength of a review
- * that predates it. #671 is that shape.
+ * Used to SAY what is being waited on, never to decide — the decision is
+ * `coveringReview` below, which asks the question per reviewer.
  *
  * Ties resolve to the later array position, which is REST's chronological order —
  * so reviews submitted within the same second still order correctly.
@@ -190,12 +177,64 @@ export const latestAcceptedReview = (reviews = []) =>
     undefined,
   );
 
+/**
+ * Each accepted reviewer's newest counted review, keyed by normalised login.
+ *
+ * `for...of` because this builds a Map — the case the array-operation rule in
+ * `.claude/rules/typescript.md` names explicitly.
+ */
+const latestReviewPerReviewer = (reviews = []) => {
+  const newest = new Map();
+  for (const review of acceptedReviews(reviews)) {
+    const login = normalisedLogin(reviewerLogin(review));
+    const current = newest.get(login);
+    if (
+      current === undefined ||
+      submittedMillis(review) >= submittedMillis(current)
+    ) {
+      newest.set(login, review);
+    }
+  }
+  return newest;
+};
+
+/**
+ * The review that makes this gate green, or `undefined` — ANY accepted reviewer
+ * whose OWN newest review names the head.
+ *
+ * Per reviewer, not newest-across-the-set, and the difference is not academic. It
+ * was written across the set first, on the reasoning that an older review "covers
+ * a commit that has since been superseded" — which cannot be true of a review that
+ * names the CURRENT head, because by definition nothing superseded it. What that
+ * rule actually punished was one reviewer being slower than another:
+ *
+ *   1. push B; the in-workflow reviewer reviews B and posts     → head covered
+ *   2. Copilot, whose re-review was requested before that push, submits its
+ *      review of A half an hour later
+ *   3. across-the-set, the newest accepted review is now Copilot's, of A, so the
+ *      gate reports failure or pending on a head that HAS been reviewed
+ *
+ * That fires the day Copilot's credits return, on an ordinary sequence, and it
+ * contradicts what the status claims to assert — that a reviewer ran against this
+ * head. Per reviewer still blocks #671: there Copilot's own newest review names an
+ * earlier commit, so nothing covers the head and the gate stays pending, which is
+ * the whole point of it.
+ *
+ * A rewind needs no special case either: a force-push back to an already-reviewed
+ * commit leaves each reviewer's NEWEST review naming the commit that was rewound
+ * away, so the gate is pending until the rewound head is reviewed again.
+ */
+export const coveringReview = (reviews = [], headSha) =>
+  [...latestReviewPerReviewer(reviews).values()].find((review) =>
+    sameCommit(reviewedCommit(review), headSha),
+  );
+
 const pendingDescription = ({ headSha, isDraft, latest }) => {
   if (latest !== undefined) {
     return `${reviewerLogin(latest)} last reviewed ${shortSha(reviewedCommit(latest))}; waiting for a review of ${shortSha(headSha)}.`;
   }
   return isDraft
-    ? 'Draft — reviewed once the pull request is marked ready.'
+    ? `Draft — ${shortSha(headSha)} is reviewed once the pull request is marked ready.`
     : `Waiting for a review of ${shortSha(headSha)}.`;
 };
 
@@ -218,14 +257,15 @@ export const decideReviewStatus = ({
   reviews = [],
   triggeringReview,
 } = {}) => {
-  const latest = latestAcceptedReview(reviews);
-  if (sameCommit(reviewedCommit(latest), headSha)) {
+  const covering = coveringReview(reviews, headSha);
+  if (covering !== undefined) {
     return {
-      description: `Reviewed by ${reviewerLogin(latest)} at ${shortSha(headSha)}, the current head.`,
-      reviewer: reviewerLogin(latest),
+      description: `Reviewed by ${reviewerLogin(covering)} at ${shortSha(headSha)}, the current head.`,
+      reviewer: reviewerLogin(covering),
       state: 'success',
     };
   }
+  const latest = latestAcceptedReview(reviews);
   if (
     triggeringReview !== undefined &&
     isAcceptedReviewer(reviewerLogin(triggeringReview))

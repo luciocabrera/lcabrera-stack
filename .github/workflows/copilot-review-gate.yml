@@ -41,9 +41,11 @@ name: Copilot Review Gate
 # every pull request including the one that would fix it.
 #
 # THE ACCEPTED REVIEWER SET IS PLURAL. It is an explicit named list in
-# scripts/lib/copilot-review.mjs, and this status is green when the newest review
-# by ANY of them names the head — today the Copilot bot above, and the in-workflow
-# reviewer in claude-review.yml. Nothing else about this file changes: the status
+# scripts/lib/copilot-review.mjs, and this status is green when ANY of them has a
+# newest review naming the head — today the Copilot bot above, and the in-workflow
+# reviewer in claude-review.yml. Per reviewer rather than newest-across-the-set, so
+# that a slower reviewer arriving late with a review of an earlier commit cannot
+# un-green a head another accepted reviewer has already covered. Nothing else about this file changes: the status
 # still means "a reviewer ran against this head" and still never means "approved",
 # and this workflow is still the only writer of the context. Which reviewer
 # satisfied it is carried in the status description, so a monoculture is visible
