@@ -1,8 +1,13 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import type { TableGroupRowSummary } from '#ui/components/Table/Table.types';
+import type {
+  TableColumnAggregate,
+  TableGroupRowSummary,
+} from '#ui/components/Table/Table.types';
 
 import { resolveShareDenominators } from './resolveShareDenominators.util';
+
+const REVENUE_SUM: TableColumnAggregate = { columnKey: 'revenue', fn: 'sum' };
 
 type LeafArgs = {
   readonly label?: string;
@@ -24,7 +29,7 @@ const grandTotal = (value: number | string): TableGroupRowSummary => ({
 });
 
 describe('resolveShareDenominators', () => {
-  it('measures nothing when no column asked for a share', () => {
+  it('measures nothing when no measure asked for a share', () => {
     expect(
       resolveShareDenominators({
         shares: [],
@@ -38,25 +43,25 @@ describe('resolveShareDenominators', () => {
     // fallback is taken when a grand total is present.
     expect(
       resolveShareDenominators({
-        shares: ['revenue'],
+        shares: [REVENUE_SUM],
         summaries: [
           leaf({ label: 'a', value: 10 }),
           leaf({ label: 'b', value: 10 }),
           grandTotal(999),
         ],
-      }).get('revenue'),
+      }).get('revenue:sum'),
     ).toBe(999);
   });
 
   it('sums the leaves when there is no grand-total row', () => {
     expect(
       resolveShareDenominators({
-        shares: ['revenue'],
+        shares: [REVENUE_SUM],
         summaries: [
           leaf({ label: 'a', value: 10 }),
           leaf({ label: 'b', value: 30 }),
         ],
-      }).get('revenue'),
+      }).get('revenue:sum'),
     ).toBe(40);
   });
 
@@ -72,13 +77,13 @@ describe('resolveShareDenominators', () => {
 
     expect(
       resolveShareDenominators({
-        shares: ['revenue'],
+        shares: [REVENUE_SUM],
         summaries: [
           leaf({ label: 'a', value: 10 }),
           leaf({ label: 'b', value: 30 }),
           subtotal,
         ],
-      }).get('revenue'),
+      }).get('revenue:sum'),
     ).toBe(40);
   });
 
@@ -87,29 +92,29 @@ describe('resolveShareDenominators', () => {
     // strings so the displayed value stays lossless.
     expect(
       resolveShareDenominators({
-        shares: ['revenue'],
+        shares: [REVENUE_SUM],
         summaries: [grandTotal('21302893287.00')],
-      }).get('revenue'),
+      }).get('revenue:sum'),
     ).toBe(21_302_893_287);
   });
 
-  it('omits a column whose denominator is zero', () => {
+  it('omits a measure whose denominator is zero', () => {
     // Present-as-zero would divide to Infinity and render as a number nobody
     // computed; absent is what the cell turns into an explicit absence.
     expect(
       resolveShareDenominators({
-        shares: ['revenue'],
+        shares: [REVENUE_SUM],
         summaries: [grandTotal(0)],
-      }).has('revenue'),
+      }).has('revenue:sum'),
     ).toBe(false);
   });
 
-  it('omits a column whose total cannot be read', () => {
+  it('omits a measure whose total cannot be read', () => {
     expect(
       resolveShareDenominators({
-        shares: ['revenue'],
+        shares: [REVENUE_SUM],
         summaries: [grandTotal('not a number')],
-      }).has('revenue'),
+      }).has('revenue:sum'),
     ).toBe(false);
   });
 
@@ -118,22 +123,62 @@ describe('resolveShareDenominators', () => {
     // omitted rows — the failure this util exists to avoid.
     expect(
       resolveShareDenominators({
-        shares: ['revenue'],
+        shares: [REVENUE_SUM],
         summaries: [
           leaf({ label: 'a', value: 10 }),
           leaf({ label: 'b', value: 'nonsense' }),
         ],
-      }).has('revenue'),
+      }).has('revenue:sum'),
     ).toBe(false);
   });
 
-  it('omits a column no row carries an aggregate for', () => {
+  it('omits a measure no row carries an aggregate for', () => {
     expect(
       resolveShareDenominators({
-        shares: ['missing'],
+        shares: [{ columnKey: 'missing', fn: 'sum' }],
         summaries: [leaf({ value: 10 })],
-      }).has('missing'),
+      }).has('missing:sum'),
     ).toBe(false);
+  });
+
+  it('divides each of two measures on one column by its own total', () => {
+    // The failure a column-keyed denominator could not avoid: `count` and `sum`
+    // are both shareable, and taking whichever entry came first would divide one
+    // measure by the other's total (#831).
+    const both: TableGroupRowSummary = {
+      aggregates: [
+        { columnKey: 'revenue', fn: 'sum', value: 300 },
+        { columnKey: 'revenue', fn: 'count', value: 12 },
+      ],
+      count: 12,
+      isSubtotal: true,
+      path: [],
+    };
+
+    const denominators = resolveShareDenominators({
+      shares: [REVENUE_SUM, { columnKey: 'revenue', fn: 'count' }],
+      summaries: [both],
+    });
+
+    expect(denominators.get('revenue:sum')).toBe(300);
+    expect(denominators.get('revenue:count')).toBe(12);
+  });
+
+  it('omits a measure whose function no row carries, while its sibling stands', () => {
+    const onlySum: TableGroupRowSummary = {
+      aggregates: [{ columnKey: 'revenue', fn: 'sum', value: 300 }],
+      count: 3,
+      isSubtotal: true,
+      path: [],
+    };
+
+    const denominators = resolveShareDenominators({
+      shares: [REVENUE_SUM, { columnKey: 'revenue', fn: 'count' }],
+      summaries: [onlySum],
+    });
+
+    expect(denominators.get('revenue:sum')).toBe(300);
+    expect(denominators.has('revenue:count')).toBe(false);
   });
 
   it('refuses the sum when only some leaves carry the aggregate', () => {
@@ -149,9 +194,9 @@ describe('resolveShareDenominators', () => {
 
     expect(
       resolveShareDenominators({
-        shares: ['revenue'],
+        shares: [REVENUE_SUM],
         summaries: [leaf({ label: 'a', value: 10 }), bare],
-      }).has('revenue'),
+      }).has('revenue:sum'),
     ).toBe(false);
   });
 });

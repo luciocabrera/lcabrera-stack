@@ -82,6 +82,45 @@ describe('decodeGroupedRows', () => {
     ]);
   });
 
+  it('keeps two aggregates over ONE column apart', () => {
+    // The property `@lcabrera/ui` leans on since #831: a column may carry
+    // several measures, so the two must arrive as distinguishable fields.
+    // `resolveAggregateAlias` derives `${fn}_${column}`, which separates them,
+    // and `assertGroupAliases` refuses a projection where it did not.
+    const requested = [
+      { column: 'amount', fn: 'sum' },
+      { column: 'amount', fn: 'avg' },
+    ] as const;
+    const built = emit(toGroupAggregates({ requested }));
+
+    expect(built.map((aggregate) => aggregate.alias)).toStrictEqual([
+      'count_all',
+      'sum_amount',
+      'avg_amount',
+    ]);
+
+    const [decoded] = decodeGroupedRows({
+      aggregates: built,
+      columnKeys: ['status'],
+      maskAlias: 'grouping_mask',
+      requested,
+      rows: [
+        {
+          avg_amount: 250,
+          count_all: '4',
+          grouping_mask: 0,
+          status: 'Shipped',
+          sum_amount: 1000,
+        },
+      ],
+    });
+
+    expect(decoded?.[OLAP_GROUP_ROW_FIELD]?.aggregates).toStrictEqual([
+      { columnKey: 'amount', fn: 'sum', value: 1000 },
+      { columnKey: 'amount', fn: 'avg', value: 250 },
+    ]);
+  });
+
   it('decodes a read that selected no aggregate but still counts', () => {
     const built = emit(toGroupAggregates({ requested: [] }));
     const [decoded] = decodeGroupedRows({

@@ -1,7 +1,7 @@
 # TableGroupAggregate Architecture
 
-A group row's cell content in every column but the hierarchy one: the aggregate
-selected on that column, or a dash saying none was.
+A group row's cell content in every column but the hierarchy one: the aggregates
+selected on that column, or a dash saying none were.
 
 Private delegate of the body-cell descriptor, and the `children` of an ordinary
 `TableBodyCell` — so it renders content, never a cell
@@ -11,7 +11,7 @@ Private delegate of the body-cell descriptor, and the `children` of an ordinary
 
 ```
 TableGroupAggregate/
-├── TableGroupAggregate.component.tsx → Aggregate value, filter indicator, or the dash
+├── TableGroupAggregate.component.tsx → One span per selected measure, filter indicator, or the dash
 ├── TableGroupAggregate.types.ts      → TableGroupAggregateProps (columnKey, summary)
 ├── TableGroupAggregate.stylex.ts     → Value, dimmed absent state, indicator
 ├── TableGroupAggregate.test.tsx      → Formatting, zero, dash, filter indicator
@@ -37,6 +37,27 @@ TableGroupAggregate/
 Read here rather than passed in: the cell that renders the number is the one
 that answers for it, and the selector returns a boolean so the subscription is
 to the question actually being asked rather than to the filter's contents.
+
+## Several measures in one cell
+
+A column may carry any number of aggregates at once (#831), so this cell renders
+**every** entry the row holds for its column, in the order the read emitted
+them — which is the order the configuration lists them in.
+
+Where there is more than one, each is prefixed with its function's name. Two bare
+numbers side by side cannot say which is the sum and which the average, and
+position carries nothing here: the cell is one column wide and both measures sit
+in it. Where there is exactly one, the prefix is **absent** rather than
+redundant — it would otherwise be noise in every column of every group row.
+
+The **filter indicator is rendered once for the cell**, not once per measure. A
+`WHERE` filter belongs to the column and runs before aggregation, so every
+measure in the cell is computed over the same surviving rows.
+
+Each measure carries its own `TableGroupShare`, because a share names a
+`(columnKey, fn)` pair rather than a column — `sum` and `count` are both
+shareable, so a column carrying both takes two independent shares (ADR-086,
+widened by #831).
 
 ## The dash, and the three states it keeps apart
 

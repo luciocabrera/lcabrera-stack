@@ -248,7 +248,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
       const grouped = await selectOrdersPage({
         filters: [],
         grouping: {
-          aggregates: {},
+          aggregates: [],
           keys: [GROUP_KEY],
           mode: 'flat',
           periods: {},
@@ -304,7 +304,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
         const { data } = await selectOrdersPage({
           filters: [],
           grouping: {
-            aggregates: {},
+            aggregates: [],
             keys: [key],
             mode: 'flat',
             periods,
@@ -348,7 +348,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
       const { data } = await selectOrdersPage({
         filters: [],
         grouping: {
-          aggregates: {},
+          aggregates: [],
           keys: [...KEYS],
           mode: 'flat',
           periods: {},
@@ -381,7 +381,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
       const { data } = await selectOrdersPage({
         filters: [],
         grouping: {
-          aggregates: {},
+          aggregates: [],
           keys: [...KEYS],
           mode: 'flat',
           periods: {},
@@ -416,7 +416,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
       const { data } = await selectOrdersPage({
         filters: [],
         grouping: {
-          aggregates: {},
+          aggregates: [],
           keys: deepKeys,
           mode: 'flat',
           periods: {},
@@ -441,7 +441,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
       const page = await selectOrdersPage({
         filters: [],
         grouping: {
-          aggregates: {},
+          aggregates: [],
           keys: [
             'order_status',
             'shipping_country',
@@ -474,7 +474,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
       const { data } = await selectOrdersPage({
         filters: [],
         grouping: {
-          aggregates: { total_amount: 'sum' },
+          aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
           keys: ['order_status'],
           mode: 'flat',
           periods: {},
@@ -517,7 +517,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
         const { data } = await selectOrdersPage({
           filters: [],
           grouping: {
-            aggregates: { total_amount: fn },
+            aggregates: [{ columnKey: 'total_amount', fn }],
             keys: ['order_status'],
             mode: 'flat',
             periods: {},
@@ -541,7 +541,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
       const page = await selectOrdersPage({
         filters: [],
         grouping: {
-          aggregates: { customer_name: 'sum' },
+          aggregates: [{ columnKey: 'customer_name', fn: 'sum' }],
           keys: ['order_status'],
           mode: 'flat',
           periods: {},
@@ -600,7 +600,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
       selectOrdersPage({
         filters: [],
         grouping: {
-          aggregates: { total_amount: 'sum' },
+          aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
           keys: [...KEYS],
           mode: 'rollup',
           periods: {},
@@ -762,7 +762,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
       const { data } = await selectOrdersPage({
         filters: [],
         grouping: {
-          aggregates: { shipping_country: 'countDistinct' },
+          aggregates: [{ columnKey: 'shipping_country', fn: 'countDistinct' }],
           keys: ['order_status'],
           mode: 'rollup',
           periods: {},
@@ -828,7 +828,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
       const page = await selectOrdersPage({
         filters: [],
         grouping: {
-          aggregates: { total_amount: 'sum' },
+          aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
           keys: [...KEYS],
           mode: 'rollup',
           periods: {},

@@ -64,7 +64,7 @@ const TARGET = {
 } as const;
 
 const NO_GROUPING: TableGroupingState = {
-  aggregates: {},
+  aggregates: [],
   keys: [],
   mode: 'flat',
   periods: {},
@@ -72,8 +72,12 @@ const NO_GROUPING: TableGroupingState = {
 };
 
 export type SelectGroupedOrdersArgs = {
-  /** The aggregate applied to each column, at most one per column. */
-  readonly aggregates: Readonly<Record<string, TableAggregateFn>>;
+  /**
+   * The aggregates to project, in order. A column may appear more than once
+   * (#831); the builder derives a distinct `${fn}_${column}` alias per entry, so
+   * two measures over one column come back as two fields.
+   */
+  readonly aggregates: TableGroupingState['aggregates'];
   readonly filters: readonly QueryFilter[];
   /** The columns the rows are grouped by, in nesting order. */
   readonly groupKeys: readonly string[];
@@ -134,9 +138,10 @@ const selectGroupedOrders = async ({
   // `satisfies` rather than an annotation: the narrow type keeps `column`
   // required for the decode below, while the check still proves the literal
   // carries no filter or alias slot.
-  const requested: readonly OrderColumnAggregate[] = Object.entries(
-    selectedAggregates,
-  ).map(([column, fn]) => ({ column, fn }) satisfies UnfilteredOrderAggregate);
+  const requested: readonly OrderColumnAggregate[] = selectedAggregates.map(
+    ({ columnKey, fn }) =>
+      ({ column: columnKey, fn }) satisfies UnfilteredOrderAggregate,
+  );
 
   try {
     const { aggregates, maskAlias, rows, truncations, warning } =

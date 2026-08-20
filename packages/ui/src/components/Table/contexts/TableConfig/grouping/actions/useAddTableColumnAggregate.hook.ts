@@ -1,28 +1,28 @@
 import type { TableAggregateFn } from '#ui/components/Table/Table.types';
 
 import { useSetTableGrouping } from './useSetTableGrouping.hook';
-import { setTableColumnAggregate } from './utils';
+import { addTableColumnAggregate } from './utils';
 
-type SetTableColumnAggregateArgs = {
+type AddTableColumnAggregateArgs = {
   readonly columnKey: string;
-  /** The function to apply, or `undefined` to clear this column's aggregate. */
-  readonly fn: TableAggregateFn | undefined;
+  /** The function to apply, beside whatever the column already carries. */
+  readonly fn: TableAggregateFn;
 };
 
 /**
- * Apply an aggregate to a column, or clear the one applied.
+ * Apply one more aggregate to a column.
  *
  * Whether a given function is *legal* for the column is not decided here: that
  * is the catalogue's answer, shipped on the loader meta (ADR-058, ADR-063), and
  * the menus are built from it so an illegal one is never offered. This action
  * records a selection; the server's `assertGroupAggregates` is the backstop.
  */
-export const useSetTableColumnAggregate = () => {
+export const useAddTableColumnAggregate = () => {
   const setGrouping = useSetTableGrouping();
 
-  return ({ columnKey, fn }: SetTableColumnAggregateArgs) => {
+  return ({ columnKey, fn }: AddTableColumnAggregateArgs) => {
     setGrouping((grouping) =>
-      setTableColumnAggregate({ columnKey, fn, grouping }),
+      addTableColumnAggregate({ columnKey, fn, grouping }),
     );
   };
 };

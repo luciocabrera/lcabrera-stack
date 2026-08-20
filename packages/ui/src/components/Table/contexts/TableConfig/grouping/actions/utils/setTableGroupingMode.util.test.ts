@@ -5,7 +5,7 @@ import type { TableGroupingState } from '#ui/components/Table/Table.types';
 import { setTableGroupingMode } from './setTableGroupingMode.util';
 
 const grouping: TableGroupingState = {
-  aggregates: { total_amount: 'sum' },
+  aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
   keys: ['order_status', 'shipping_country'],
   mode: 'flat',
   periods: {},
@@ -41,7 +41,7 @@ describe('setTableGroupingMode', () => {
     expect(
       setTableGroupingMode({
         grouping: {
-          aggregates: {},
+          aggregates: [],
           keys: [],
           mode: 'flat',
           periods: {},
@@ -50,7 +50,7 @@ describe('setTableGroupingMode', () => {
         mode: 'rollup',
       }),
     ).toStrictEqual({
-      aggregates: {},
+      aggregates: [],
       keys: [],
       mode: 'rollup',
       periods: {},

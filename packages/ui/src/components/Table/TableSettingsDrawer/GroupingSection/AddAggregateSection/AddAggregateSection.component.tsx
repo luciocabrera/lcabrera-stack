@@ -12,7 +12,7 @@ import { VirtualSelect } from '#ui/components/VirtualSelect';
 
 import type { AddAggregateSectionProps } from './AddAggregateSection.types';
 
-import { useSetColumnAggregate } from '../../TableDrawerContext/actions';
+import { useAddColumnAggregate } from '../../TableDrawerContext/actions';
 import { useGetGroupingKeys } from '../../TableDrawerContext/selectors';
 import { toAggregatableColumnOptions } from '../utils';
 import { styles } from './AddAggregateSection.stylex';
@@ -29,6 +29,11 @@ import { styles } from './AddAggregateSection.stylex';
  * catalogue capability the loader shipped (ADR-058, ADR-063), minus any column
  * staged as a group key (ADR-080).
  *
+ * A column may be picked more than once, with a different function each time
+ * (#831). Adding a function already applied to the column is a no-op rather
+ * than a second row — `addTableColumnAggregate` guards the duplicate, so the
+ * pair cannot appear twice however the picker is driven.
+ *
  * There is deliberately no filter input beside them. A *filtered* aggregate has
  * no slot in the compact `grouping` param every piece of this configuration
  * round-trips through, so offering one would build a state a shared link
@@ -40,7 +45,7 @@ export const AddAggregateSection = ({
   const columns = useGetColumns();
   const capabilities = useGetTableGroupingCapabilities();
   const groupingKeys = useGetGroupingKeys();
-  const setColumnAggregate = useSetColumnAggregate();
+  const addColumnAggregate = useAddColumnAggregate();
 
   const [selectedColumn, setSelectedColumn] = useState('');
   const [selectedFn, setSelectedFn] = useState('');
@@ -66,7 +71,7 @@ export const AddAggregateSection = ({
   const handleAddAggregate = () => {
     if (!selectedColumn || !isTableAggregateFn(selectedFn)) return;
 
-    setColumnAggregate({ columnKey: selectedColumn, fn: selectedFn });
+    addColumnAggregate({ columnKey: selectedColumn, fn: selectedFn });
     setSelectedColumn('');
     setSelectedFn('');
   };

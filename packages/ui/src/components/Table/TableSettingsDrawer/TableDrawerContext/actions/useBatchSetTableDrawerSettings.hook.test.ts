@@ -16,7 +16,7 @@ const {
 } = vi.hoisted(() => {
   let drawerState: Record<string, unknown> | undefined;
   let drawerGrouping: Record<string, unknown> = {
-    aggregates: {},
+    aggregates: [],
     keys: [],
     mode: 'flat',
     periods: {},
@@ -59,7 +59,7 @@ beforeEach(() => {
   batchSetTableSettings.mockClear();
   setDrawerState(undefined);
   setDrawerGrouping({
-    aggregates: {},
+    aggregates: [],
     keys: [],
     mode: 'flat',
     periods: {},
@@ -83,7 +83,7 @@ describe('useBatchSetTableDrawerSettings', () => {
 
     expect(batchSetTableSettings).toHaveBeenCalledExactlyOnceWith({
       grouping: {
-        aggregates: {},
+        aggregates: [],
         keys: [],
         mode: 'flat',
         periods: {},
@@ -110,7 +110,7 @@ describe('useBatchSetTableDrawerSettings', () => {
 
     expect(batchSetTableSettings).toHaveBeenCalledExactlyOnceWith({
       grouping: {
-        aggregates: {},
+        aggregates: [],
         keys: [],
         mode: 'flat',
         periods: {},
@@ -131,7 +131,7 @@ describe('useBatchSetTableDrawerSettings', () => {
   it('sends the staged grouping and the column draft in one commit call', () => {
     setDrawerState({ columnOrder: ['id', 'name'] });
     setDrawerGrouping({
-      aggregates: { total: 'sum' },
+      aggregates: [{ columnKey: 'total', fn: 'sum' }],
       keys: ['status'],
       mode: 'flat',
       periods: {},
@@ -148,7 +148,7 @@ describe('useBatchSetTableDrawerSettings', () => {
     // the shared persist fetcher key, and the second would abort the first.
     expect(batchSetTableSettings).toHaveBeenCalledExactlyOnceWith({
       grouping: {
-        aggregates: { total: 'sum' },
+        aggregates: [{ columnKey: 'total', fn: 'sum' }],
         keys: ['status'],
         mode: 'flat',
         periods: {},

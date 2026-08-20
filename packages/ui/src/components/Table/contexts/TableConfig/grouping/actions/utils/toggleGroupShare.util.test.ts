@@ -6,11 +6,11 @@ import { toggleGroupShare } from './toggleGroupShare.util';
 
 type GroupingArgs = {
   readonly aggregates?: TableGroupingState['aggregates'];
-  readonly shares?: readonly string[];
+  readonly shares?: TableGroupingState['shares'];
 };
 
 const grouping = ({
-  aggregates = { revenue: 'sum' },
+  aggregates = [{ columnKey: 'revenue', fn: 'sum' }],
   shares = [],
 }: GroupingArgs = {}): TableGroupingState => ({
   aggregates,
@@ -23,15 +23,20 @@ const grouping = ({
 describe('toggleGroupShare', () => {
   it('turns a share on for an additive measure', () => {
     expect(
-      toggleGroupShare({ columnKey: 'revenue', grouping: grouping() }).shares,
-    ).toStrictEqual(['revenue']);
+      toggleGroupShare({
+        columnKey: 'revenue',
+        fn: 'sum',
+        grouping: grouping(),
+      }).shares,
+    ).toStrictEqual([{ columnKey: 'revenue', fn: 'sum' }]);
   });
 
   it('turns it off again', () => {
     expect(
       toggleGroupShare({
         columnKey: 'revenue',
-        grouping: grouping({ shares: ['revenue'] }),
+        fn: 'sum',
+        grouping: grouping({ shares: [{ columnKey: 'revenue', fn: 'sum' }] }),
       }).shares,
     ).toStrictEqual([]);
   });
@@ -40,9 +45,12 @@ describe('toggleGroupShare', () => {
     expect(
       toggleGroupShare({
         columnKey: 'orders',
-        grouping: grouping({ aggregates: { orders: 'count' } }),
+        fn: 'count',
+        grouping: grouping({
+          aggregates: [{ columnKey: 'orders', fn: 'count' }],
+        }),
       }).shares,
-    ).toStrictEqual(['orders']);
+    ).toStrictEqual([{ columnKey: 'orders', fn: 'count' }]);
   });
 
   it('refuses a share on an average', () => {
@@ -51,7 +59,10 @@ describe('toggleGroupShare', () => {
     expect(
       toggleGroupShare({
         columnKey: 'revenue',
-        grouping: grouping({ aggregates: { revenue: 'avg' } }),
+        fn: 'avg',
+        grouping: grouping({
+          aggregates: [{ columnKey: 'revenue', fn: 'avg' }],
+        }),
       }).shares,
     ).toStrictEqual([]);
   });
@@ -62,27 +73,81 @@ describe('toggleGroupShare', () => {
     expect(
       toggleGroupShare({
         columnKey: 'country',
-        grouping: grouping({ aggregates: { country: 'countDistinct' } }),
+        fn: 'countDistinct',
+        grouping: grouping({
+          aggregates: [{ columnKey: 'country', fn: 'countDistinct' }],
+        }),
       }).shares,
     ).toStrictEqual([]);
   });
 
   it('refuses a share on a column with no aggregate at all', () => {
     expect(
-      toggleGroupShare({ columnKey: 'unmeasured', grouping: grouping() })
-        .shares,
+      toggleGroupShare({
+        columnKey: 'unmeasured',
+        fn: 'sum',
+        grouping: grouping(),
+      }).shares,
     ).toStrictEqual([]);
   });
 
-  it('still removes a share whose aggregate has since changed', () => {
-    // The way out has to work whatever the aggregate now is, or a share applied
-    // under `sum` and then switched to `avg` would be stuck on.
+  it('refuses a share on a function that column does not carry', () => {
+    // The pair is the identity: `revenue` carries `sum`, so a share of
+    // `count(revenue)` names a measure the read will not produce.
     expect(
       toggleGroupShare({
         columnKey: 'revenue',
+        fn: 'count',
+        grouping: grouping(),
+      }).shares,
+    ).toStrictEqual([]);
+  });
+
+  it('toggles each of one column two shareable measures independently', () => {
+    const both = grouping({
+      aggregates: [
+        { columnKey: 'revenue', fn: 'sum' },
+        { columnKey: 'revenue', fn: 'count' },
+      ],
+    });
+
+    const withSum = toggleGroupShare({
+      columnKey: 'revenue',
+      fn: 'sum',
+      grouping: both,
+    });
+    const withBoth = toggleGroupShare({
+      columnKey: 'revenue',
+      fn: 'count',
+      grouping: withSum,
+    });
+
+    expect(withBoth.shares).toStrictEqual([
+      { columnKey: 'revenue', fn: 'sum' },
+      { columnKey: 'revenue', fn: 'count' },
+    ]);
+
+    // Turning one back off leaves the other exactly where it was — the failure a
+    // column-keyed share could not avoid (#831).
+    expect(
+      toggleGroupShare({
+        columnKey: 'revenue',
+        fn: 'sum',
+        grouping: withBoth,
+      }).shares,
+    ).toStrictEqual([{ columnKey: 'revenue', fn: 'count' }]);
+  });
+
+  it('still removes a share whose aggregate has since been removed', () => {
+    // The way out has to work whatever is applied now, or a share applied under
+    // `sum` and then left behind would be stuck on.
+    expect(
+      toggleGroupShare({
+        columnKey: 'revenue',
+        fn: 'sum',
         grouping: grouping({
-          aggregates: { revenue: 'avg' },
-          shares: ['revenue'],
+          aggregates: [{ columnKey: 'revenue', fn: 'avg' }],
+          shares: [{ columnKey: 'revenue', fn: 'sum' }],
         }),
       }).shares,
     ).toStrictEqual([]);
@@ -90,7 +155,11 @@ describe('toggleGroupShare', () => {
 
   it('leaves the rest of the configuration alone', () => {
     const before = grouping();
-    const after = toggleGroupShare({ columnKey: 'revenue', grouping: before });
+    const after = toggleGroupShare({
+      columnKey: 'revenue',
+      fn: 'sum',
+      grouping: before,
+    });
 
     expect(after.keys).toStrictEqual(before.keys);
     expect(after.mode).toBe(before.mode);

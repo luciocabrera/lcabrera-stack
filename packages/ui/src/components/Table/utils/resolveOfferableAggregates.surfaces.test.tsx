@@ -24,7 +24,7 @@ type MockVirtualSelectProps = {
 };
 
 const {
-  appliedAggregateRef,
+  appliedAggregatesRef,
   draftGroupingKeysRef,
   liveGroupingKeysRef,
   mockResolveOfferableAggregates,
@@ -33,9 +33,9 @@ const {
   const offer = { current: [] as readonly TableAggregateFn[] };
 
   return {
-    // A typed ref rather than `() => undefined`, which `unicorn/no-useless-undefined`
-    // rewrites into an empty block that reads like an empty object.
-    appliedAggregateRef: { current: undefined as TableAggregateFn | undefined },
+    appliedAggregatesRef: {
+      current: [] as readonly { columnKey: string; fn: TableAggregateFn }[],
+    },
     // The drawer stages its grouping in a draft store and the header menu reads
     // the live one, so each surface feeds the predicate from its own commit
     // context. Two refs, so a surface reading the wrong one is visible.
@@ -51,11 +51,12 @@ vi.mock('./resolveOfferableAggregates.util', () => ({
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/grouping/actions', () => ({
-  useSetTableColumnAggregate: () => vi.fn(),
+  useAddTableColumnAggregate: () => vi.fn(),
+  useRemoveTableColumnAggregate: () => vi.fn(),
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/grouping/selectors', () => ({
-  useGetTableColumnAggregate: () => appliedAggregateRef.current,
+  useGetTableGroupingAggregates: () => appliedAggregatesRef.current,
   useGetTableGroupingKeys: () => liveGroupingKeysRef.current,
 }));
 
@@ -74,7 +75,7 @@ vi.mock(
 vi.mock(
   '#ui/components/Table/TableSettingsDrawer/TableDrawerContext/actions',
   () => ({
-    useSetColumnAggregate: () => vi.fn(),
+    useAddColumnAggregate: () => vi.fn(),
   }),
 );
 
@@ -153,7 +154,7 @@ const listedColumns = () =>
   );
 
 beforeEach(() => {
-  appliedAggregateRef.current = undefined;
+  appliedAggregatesRef.current = [];
   offerRef.current = [];
   draftGroupingKeysRef.current = [];
   liveGroupingKeysRef.current = [];

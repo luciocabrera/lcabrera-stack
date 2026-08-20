@@ -44,7 +44,7 @@ const {
     },
     mockGroupingStore: {
       get: vi.fn(() => ({
-        aggregates: {},
+        aggregates: [],
         keys: [],
         mode: 'flat',
         periods: {},

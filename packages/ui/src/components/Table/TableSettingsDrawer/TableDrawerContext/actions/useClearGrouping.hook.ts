@@ -15,7 +15,7 @@ export const useClearGrouping = () => {
 
   return () => {
     setGrouping(() => ({
-      aggregates: {},
+      aggregates: [],
       keys: [],
       mode: 'flat',
       periods: {},

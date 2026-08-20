@@ -20,7 +20,7 @@ const COLUMNS: readonly TableColumn<Row>[] = [
 ];
 
 const DEFAULT_GROUPING: TableGroupingState = {
-  aggregates: {},
+  aggregates: [],
   keys: ['order_status'],
   mode: 'rollup',
   periods: {},
@@ -42,7 +42,7 @@ describe('resolveLoaderGrouping', () => {
     expect(
       resolveLoaderGrouping<Row>({ columns: COLUMNS, param: ABSENT_PARAM }),
     ).toStrictEqual({
-      aggregates: {},
+      aggregates: [],
       keys: [],
       mode: 'flat',
       periods: {},
@@ -63,7 +63,7 @@ describe('resolveLoaderGrouping', () => {
         param: '{"keys":[]}',
       }),
     ).toStrictEqual({
-      aggregates: {},
+      aggregates: [],
       keys: [],
       mode: 'flat',
       periods: {},
@@ -88,7 +88,7 @@ describe('resolveLoaderGrouping', () => {
       resolveLoaderGrouping<Row>({
         columns: COLUMNS,
         defaultGrouping: {
-          aggregates: {},
+          aggregates: [],
           keys: ['no_such_column'],
           mode: 'flat',
           periods: {},

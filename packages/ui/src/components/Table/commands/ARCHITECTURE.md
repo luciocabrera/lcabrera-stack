@@ -8,13 +8,14 @@ once.
 
 ## What lives here
 
-| Artifact                           | Kind      | Role                                                                                                                                                                                                                |
-| ---------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `CommandDescriptor` / `CommandId`  | type      | Presentation-neutral identity `{ id, label, icon }`. No handler, no enablement.                                                                                                                                     |
-| `deriveToggleCommandState.util.ts` | pure util | Capability-agnostic `{ isActive, isEnabled }` from `{ current, target, isDisabled }`; `isDisabled` comes from `resolveColumnCapabilities`                                                                           |
-| `pinning/pinningCommands.ts`       | constants | `PIN_LEFT_COMMAND`, `PIN_RIGHT_COMMAND`, `CLEAR_PINNING_COMMAND`                                                                                                                                                    |
-| `sorting/sortingCommands.ts`       | constants | `SORT_ASCENDING_COMMAND`, `SORT_DESCENDING_COMMAND`, `CLEAR_SORTING_COMMAND`                                                                                                                                        |
-| `grouping/groupingCommands.ts`     | constants | `GROUP_BY_COLUMN_COMMAND`, `CLEAR_GROUPING_COMMAND`, `EXPAND_ALL_GROUPS_COMMAND`, `COLLAPSE_ALL_GROUPS_COMMAND`, `AGGREGATE_COMMANDS` (a `Record` closed over `TableAggregateFn`), `CLEAR_COLUMN_AGGREGATE_COMMAND` |
+| Artifact                              | Kind      | Role                                                                                                                                                                                                                |
+| ------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CommandDescriptor` / `CommandId`     | type      | Presentation-neutral identity `{ id, label, icon }`. No handler, no enablement.                                                                                                                                     |
+| `deriveToggleCommandState.util.ts`    | pure util | Capability-agnostic `{ isActive, isEnabled }` from `{ current, target, isDisabled }`; `isDisabled` comes from `resolveColumnCapabilities`                                                                           |
+| `deriveAggregateCommandState.util.ts` | pure util | The aggregate commands' own `{ isActive, isEnabled }`, from `{ applied, columnKey, target, isDisabled }` — see below for why it is beside the toggle rather than inside it                                          |
+| `pinning/pinningCommands.ts`          | constants | `PIN_LEFT_COMMAND`, `PIN_RIGHT_COMMAND`, `CLEAR_PINNING_COMMAND`                                                                                                                                                    |
+| `sorting/sortingCommands.ts`          | constants | `SORT_ASCENDING_COMMAND`, `SORT_DESCENDING_COMMAND`, `CLEAR_SORTING_COMMAND`                                                                                                                                        |
+| `grouping/groupingCommands.ts`        | constants | `GROUP_BY_COLUMN_COMMAND`, `CLEAR_GROUPING_COMMAND`, `EXPAND_ALL_GROUPS_COMMAND`, `COLLAPSE_ALL_GROUPS_COMMAND`, `AGGREGATE_COMMANDS` (a `Record` closed over `TableAggregateFn`), `CLEAR_COLUMN_AGGREGATE_COMMAND` |
 
 ## What deliberately does **not** live here
 
@@ -40,6 +41,22 @@ once.
   aggregation-mode block).
 - Settings drawer (draft commit-context): `ColumnSettingsDrawer/PinningSection/`
   and `ColumnSettingsDrawer/SortingSection/`.
+
+## Two derivations, and the split is load-bearing
+
+`deriveToggleCommandState` answers "is the column's current value this command's
+target". That is exact for a **single-valued** capability: a column has one pin
+side and one sort direction, so picking `asc` un-picks `desc` and at most one
+item is ever active.
+
+An aggregate is not single-valued. A column may carry `sum` and `avg` at once
+(#831), so the same question is set membership and several items in one menu are
+active together — a state the toggle derivation cannot express. Widening the
+shared helper to take a set would have made **sorting** able to express it too,
+which is a state sorting does not have and must not gain. So the aggregates got
+`deriveAggregateCommandState` beside it, keeping everything else identical: the
+clear command is still `target: undefined`, `isDisabled` still comes from the
+surface, and the state source is still the surface's own selector.
 
 The fold pair is the one set here that asks nothing of a column. `EXPAND_ALL_`
 and `COLLAPSE_ALL_GROUPS_COMMAND` are commands of the grouped **body**, so their

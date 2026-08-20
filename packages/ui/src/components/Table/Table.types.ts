@@ -239,6 +239,23 @@ export type TableColumn<TData> = {
 };
 
 /**
+ * One aggregate applied to one column — the element of both of
+ * `TableGroupingState`'s aggregate lists (`aggregates` and `shares`).
+ *
+ * Neither half identifies an entry on its own, because a column may carry
+ * several aggregates at once (#831): the pair is the identity, and
+ * `toTableAggregateToken` is the one spelling of that identity as a string.
+ *
+ * A plain record rather than a tuple or a `Map` entry, because this crosses the
+ * loader boundary inside `TableGroupingState` and must stay plain and
+ * serializable (ADR-009).
+ */
+export type TableColumnAggregate = {
+  readonly columnKey: string;
+  readonly fn: TableAggregateFn;
+};
+
+/**
  * ADR-058's Gate 1, as the client sees it: a dimension is what you group by, a
  * fact is what you aggregate, and everything else is out of both. Duplicated
  * from `@lcabrera/server`'s `ColumnAnalyticalRole` for the reason
@@ -618,14 +635,18 @@ export type TableGroupingRefusalReason =
 /**
  * The grouping store's state — the config context's third store (ADR-061).
  *
- * `aggregates` is a **column-to-function** map, at most one aggregate per
- * column, which is what makes it expressible in the compact URL param the whole
- * configuration has to round-trip through. It is also the shape of the #569
- * deferral: there is no slot here for a filter, so no state this package can
- * hold describes a *filtered* aggregate and no interaction can produce one.
- * `@lcabrera/server`'s `GroupAggregate` still has the slot, so a consumer
- * calling its grouped read directly can build one — what is closed is every
- * path through this package, not the capability itself.
+ * `aggregates` is an **ordered list of `(columnKey, fn)` records**, so one
+ * column may carry several functions at once and the list's order is the order
+ * the user arranged them in (#831). It travels in the compact `grouping` param
+ * as an ordered array of `"<columnKey>:<fn>"` tokens, which is what keeps the
+ * whole configuration round-trippable — a state the transport cannot express is
+ * a state a shared link silently loses (ADR-061).
+ *
+ * It is still the shape of the #569 deferral: there is no slot here for a
+ * filter, so no state this package can hold describes a *filtered* aggregate and
+ * no interaction can produce one. `@lcabrera/server`'s `GroupAggregate` still
+ * has the slot, so a consumer calling its grouped read directly can build one —
+ * what is closed is every path through this package, not the capability itself.
  *
  * It is a store rather than a field on the columns store because expansion sits
  * beside it on the same context, and both must survive the data context being
@@ -637,7 +658,11 @@ export type TableGroupingRefusalReason =
  * `Set` is neither. See `TableGroupExpansionState` and ADR-067.
  */
 export type TableGroupingState = {
-  readonly aggregates: Readonly<Record<string, TableAggregateFn>>;
+  /**
+   * Ordered, and no `(columnKey, fn)` pair repeated. The order is the order the
+   * aggregates are listed and rendered in; it shapes no SQL.
+   */
+  readonly aggregates: readonly TableColumnAggregate[];
   /** Ordered — the order is the grouped query's nesting order. */
   readonly keys: readonly string[];
   /** Which grouping sets the read emits. See `TableGroupingMode`. */
@@ -654,17 +679,21 @@ export type TableGroupingState = {
    */
   readonly periods: Readonly<Record<string, TableGroupPeriod>>;
   /**
-   * The columns rendering their measure as a share of the grand total, as a
-   * list rather than a map: unlike an aggregate or a granularity a share
-   * carries no value of its own — the column either shows one or does not
-   * (#648).
+   * The **aggregates** rendering as a share of the grand total, as a list
+   * rather than a map: unlike an aggregate or a granularity a share carries no
+   * value of its own — the measure either shows one or does not (#648).
+   *
+   * It names an aggregate rather than a column, because `sum` and `count` are
+   * both shareable and a column may carry both at once — a bare column key
+   * could not say which measure's share was meant (#831, widening ADR-086).
+   * Every entry must also appear in `aggregates`.
    *
    * It changes no SQL. The denominator is derived from the rows the read
    * already returned (ADR-086), so this travels in the URL for the same reason
    * the rest of the configuration does — a shared link opens showing what its
    * author saw — and for no query-shaping reason at all.
    */
-  readonly shares: readonly string[];
+  readonly shares: readonly TableColumnAggregate[];
 };
 
 /**
@@ -810,10 +839,13 @@ export type TableMetaState = {
   /** Error message if data fetch failed */
   readonly error?: string;
   /**
-   * The per-column aggregate the loader actually applied, sanitized alongside
+   * The aggregates the loader actually applied, in order, sanitized alongside
    * `groupingKeys` from the same `grouping` param. Seeds the grouping store.
+   *
+   * A list of `(columnKey, fn)` pairs rather than a column-to-function map,
+   * because a column may carry several aggregates at once (#831).
    */
-  readonly groupingAggregates?: Readonly<Record<string, TableAggregateFn>>;
+  readonly groupingAggregates?: readonly TableColumnAggregate[];
   /**
    * What each of this route's columns may do in a grouped read, as the
    * catalogue answered it (ADR-058), keyed by column.
@@ -854,11 +886,14 @@ export type TableMetaState = {
    */
   readonly groupingPeriods?: Readonly<Record<string, TableGroupPeriod>>;
   /**
-   * The columns the loader applied a share of the grand total to, from the same
-   * `grouping` param. Seeds the grouping store; absent means none, which is
-   * what every link written before shares existed says (#648).
+   * The aggregates the loader applied a share of the grand total to, from the
+   * same `grouping` param. Seeds the grouping store; absent means none, which
+   * is what every link written before shares existed says (#648).
+   *
+   * It names an aggregate rather than a column for the reason
+   * `TableGroupingState.shares` does (#831).
    */
-  readonly groupingShares?: readonly string[];
+  readonly groupingShares?: readonly TableColumnAggregate[];
   /**
    * Whether this route declared a default grouping (#578). It is the client's
    * half of that declaration: with a default in play, clearing the grouping has

@@ -51,7 +51,7 @@ const CAPABILITIES = {
 };
 
 const NO_GROUPING: TableGroupingState = {
-  aggregates: {},
+  aggregates: [],
   keys: [],
   mode: 'flat',
   periods: {},
@@ -251,16 +251,57 @@ describe('GroupingSection staging', () => {
     expect(persistTableState).toHaveBeenCalledTimes(1);
     expect(persistTableState.mock.calls[0]?.[0]).toContainEqual({
       searchParamKey: 'grouping',
-      searchParamValue:
-        '{"agg":{"total_amount":"sum"},"keys":["order_status"]}',
+      searchParamValue: '{"agg":["total_amount:sum"],"keys":["order_status"]}',
     });
     expect(stores.groupingStore.get()).toStrictEqual({
-      aggregates: { total_amount: 'sum' },
+      aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
       keys: ['order_status'],
       mode: 'flat',
       periods: {},
       shares: [],
     });
+  });
+
+  it('stages TWO aggregates on one column and commits both', () => {
+    // The defect #831 exists for, end to end through the drawer: the second
+    // selection used to replace the first, and "Aggregates (1)" listed only the
+    // survivor with nothing saying the other had gone.
+    renderDrawer();
+
+    stageGroupKey('Status');
+    stageAggregate({ columnLabel: 'Total', fnLabel: 'Average' });
+    stageAggregate({ columnLabel: 'Total', fnLabel: 'Sum' });
+
+    expect(screen.getByText('Aggregates (2)')).not.toBeNull();
+    expect(screen.getByText('Average of Total')).not.toBeNull();
+    expect(screen.getByText('Sum of Total')).not.toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
+
+    expect(persistTableState.mock.calls[0]?.[0]).toContainEqual({
+      searchParamKey: 'grouping',
+      searchParamValue:
+        '{"agg":["total_amount:avg","total_amount:sum"],"keys":["order_status"]}',
+    });
+    expect(stores.groupingStore.get().aggregates).toStrictEqual([
+      { columnKey: 'total_amount', fn: 'avg' },
+      { columnKey: 'total_amount', fn: 'sum' },
+    ]);
+  });
+
+  it('removes one staged aggregate and leaves the column the other', () => {
+    renderDrawer();
+
+    stageGroupKey('Status');
+    stageAggregate({ columnLabel: 'Total', fnLabel: 'Average' });
+    stageAggregate({ columnLabel: 'Total', fnLabel: 'Sum' });
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Remove Average of Total' }),
+    );
+
+    expect(screen.getByText('Aggregates (1)')).not.toBeNull();
+    expect(screen.getByText('Sum of Total')).not.toBeNull();
+    expect(screen.queryByText('Average of Total')).toBeNull();
   });
 
   it('stages the totals mode and carries it in the same commit', () => {
@@ -320,7 +361,7 @@ describe('GroupingSection staging', () => {
 
   it('restores the applied grouping on Cancel, with no navigation', () => {
     stores.groupingStore.reset({
-      aggregates: {},
+      aggregates: [],
       keys: ['shipping_country'],
       mode: 'flat',
       periods: {},
@@ -339,7 +380,7 @@ describe('GroupingSection staging', () => {
 
     expect(persistTableState).not.toHaveBeenCalled();
     expect(stores.groupingStore.get()).toStrictEqual({
-      aggregates: {},
+      aggregates: [],
       keys: ['shipping_country'],
       mode: 'flat',
       periods: {},
@@ -350,7 +391,7 @@ describe('GroupingSection staging', () => {
 
   it('shows the live grouping when the drawer is re-opened after a Cancel', () => {
     stores.groupingStore.reset({
-      aggregates: {},
+      aggregates: [],
       keys: ['shipping_country'],
       mode: 'flat',
       periods: {},
@@ -374,7 +415,7 @@ describe('GroupingSection staging', () => {
 
   it('stages a clear from either toolbar placement', () => {
     stores.groupingStore.reset({
-      aggregates: { total_amount: 'sum' },
+      aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
       keys: ['order_status'],
       mode: 'flat',
       periods: {},
@@ -400,7 +441,7 @@ describe('GroupingSection staging', () => {
 
   it('stages a clear from the footer placement too', () => {
     stores.groupingStore.reset({
-      aggregates: {},
+      aggregates: [],
       keys: ['order_status'],
       mode: 'flat',
       periods: {},

@@ -25,6 +25,24 @@ export const tableGroupAggregateStyles = stylex.create({
     display: 'inline-flex',
     flexShrink: 0,
   },
+  /** One measure — its optional name, its value, and its share. */
+  measure: {
+    gap: spacing.xxs,
+    alignItems: 'center',
+    display: 'inline-flex',
+    minWidth: 0,
+  },
+  /**
+   * Which function this number is. Rendered only where the column carries more
+   * than one, because with a single measure the cell is unambiguous and the
+   * prefix would be noise in every column of every group row.
+   */
+  measureName: {
+    color: colors.textSecondary,
+    flexShrink: 0,
+    fontSize: typography.fontSizeXs,
+    whiteSpace: 'nowrap',
+  },
   value: {
     overflow: 'hidden',
     fontWeight: typography.fontWeightSemibold,

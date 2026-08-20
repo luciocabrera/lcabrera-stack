@@ -62,14 +62,14 @@ GroupingSection/
 ├── ActiveGroupKeyList/                 → DraggableList of staged keys
 │   └── GroupKeyItemContent/            → One key row: level, label, remove
 ├── AddAggregateSection/                → Column select → legal-function select
-├── ActiveAggregateList/                → Staged aggregates, each removable
-│   └── ShareOfTotalToggle/             → Share of the grand total, on the aggregates it is defined for
+├── ActiveAggregateList/                → Staged aggregates in staged order, each removable — one row per (column, function)
+│   └── ShareOfTotalToggle/             → Share of the grand total, on the measures it is defined for
 ├── GroupingModeSection/                → Totals mode: groups only, or groups with subtotals
 ├── TotalsPlacementSection/             → Totals position: above or below their rows (rollup only)
 ├── GroupingSectionToolbar/             → Clear grouping (toolbar + footer)
 └── utils/
     ├── toGroupKeyItems.util.ts         → Staged keys + labels, in nesting order
-    ├── toAggregateItems.util.ts        → Staged aggregates + labels, column order
+    ├── toAggregateItems.util.ts        → Staged aggregates + labels + a per-entry id, in staged order
     ├── toAggregatableColumnOptions.util.ts → Columns an aggregate may be offered on (resolveOfferableAggregates, in display order)
     └── toGroupKeyColumnOptions.util.ts → Columns that may still be a group key (declared ∧ catalogue, minus staged)
 ```
@@ -92,13 +92,14 @@ flowchart TD
 
   F -->|reorder / remove| J["useSetGroupKeys"]
   G -->|add| K["useToggleGroupKey"]
-  H -->|remove| L["useSetColumnAggregate"]
-  I -->|add| L
+  H -->|remove| L2["useRemoveColumnAggregate"]
+  I -->|add| L["useAddColumnAggregate"]
   M["GroupingSectionToolbar"] -->|clear| N["useClearGrouping"]
 
   J --> O["useSetGrouping (internal)"]
   K --> O
   L --> O
+  L2 --> O
   N --> O
   O --> P["resolveTableGroupingUpdate<br/>(depth cap, unchanged check)"]
   P -->|updated| B2
@@ -118,6 +119,7 @@ flowchart TD
 | Which aggregates does this column's type allow? | `metaState.groupingCapabilities[key].aggregates`                            | `TableColumn.dataType` (#550)         |
 | Which of those may be **offered** here?         | `resolveOfferableAggregates` — those, minus an active group key             | either half on its own (#830)         |
 | May this measure show a share?                  | `isShareableAggregate` — additive measures only (ADR-086)                   | the column, which has no say in it    |
+| Which measure does a share belong to?           | the `(columnKey, fn)` pair (#831)                                           | the column key alone                  |
 | How many keys may be applied?                   | `MAX_TABLE_GROUP_KEYS`                                                      | anything local to a component         |
 | Is this configuration a change at all?          | `resolveTableGroupingUpdate`                                                | the component                         |
 | What grouping is the section showing?           | `TableDrawerContext`'s `groupingStore` (the draft)                          | the live `TableConfig` grouping store |
@@ -173,10 +175,33 @@ on (ADR-085).
 It renders only under `rollup`. `flat` emits no subtotal and no grand total, so
 there would be nothing to position.
 
+## A column carries as many aggregates as the user asks for
+
+`aggregates` is an ordered list of `(columnKey, fn)` records, so `total_amount`
+can show its minimum and its average at once (#831). Three consequences land in
+this section:
+
+- **The list is one row per pair**, keyed by the pair rather than by the column —
+  a column key repeats the moment a column carries two measures, and React would
+  reconcile two distinct rows as one.
+- **The order is staged state**, not column order: it is what the `grouping` param
+  carries and what #832 makes draggable, so `toAggregateItems` preserves it
+  rather than sorting.
+- **Adding is an append with a duplicate guard**, not a replace. Re-adding an
+  applied pair answers with the state it was handed, so the commit reports
+  `unchanged` and nothing navigates.
+
+The header menu writes the same shape live: `AggregateButton` derives its
+pressed state through `deriveAggregateCommandState` — the aggregates' **own**
+derivation, beside the shared `deriveToggleCommandState` rather than widening it,
+because several items can be active at once and sorting must not gain that state.
+
 ## A share is chosen here and rendered elsewhere
 
-`ShareOfTotalToggle` sits on each applied aggregate and stages a column into the
-grouping draft's `shares`. What it turns on is rendered by `TableGroupShare`,
+`ShareOfTotalToggle` sits on each applied aggregate and stages that
+**`(columnKey, fn)` pair** into the grouping draft's `shares` — an aggregate
+rather than a column, because `sum` and `count` are both shareable and a column
+may carry both (#831, widening ADR-086). What it turns on is rendered by `TableGroupShare`,
 inside the measure's own cell in the grid — not by anything in this section, and
 not in a column of its own (ADR-086 §4 records why a derived column would undo
 ADR-080).

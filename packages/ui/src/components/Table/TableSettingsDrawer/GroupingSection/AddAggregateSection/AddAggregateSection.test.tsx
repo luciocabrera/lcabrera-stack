@@ -21,12 +21,12 @@ type MockVirtualSelectProps = {
   readonly placeholder: string;
 };
 
-const { capabilitiesRef, columnsRef, groupingKeysRef, mockSetColumnAggregate } =
+const { capabilitiesRef, columnsRef, groupingKeysRef, mockAddColumnAggregate } =
   vi.hoisted(() => ({
     capabilitiesRef: { current: {} as Record<string, unknown> },
     columnsRef: { current: [] as readonly Record<string, unknown>[] },
     groupingKeysRef: { current: [] as readonly string[] },
-    mockSetColumnAggregate: vi.fn(),
+    mockAddColumnAggregate: vi.fn(),
   }));
 
 vi.mock(
@@ -37,7 +37,7 @@ vi.mock(
 );
 
 vi.mock('../../TableDrawerContext/actions', () => ({
-  useSetColumnAggregate: () => mockSetColumnAggregate,
+  useAddColumnAggregate: () => mockAddColumnAggregate,
 }));
 
 vi.mock('../../TableDrawerContext/selectors', () => ({
@@ -172,7 +172,7 @@ describe('AddAggregateSection', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Sum' }));
     fireEvent.click(screen.getByRole('button', { name: 'Add' }));
 
-    expect(mockSetColumnAggregate).toHaveBeenCalledWith({
+    expect(mockAddColumnAggregate).toHaveBeenCalledWith({
       columnKey: 'total_amount',
       fn: 'sum',
     });

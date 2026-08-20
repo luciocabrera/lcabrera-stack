@@ -1,26 +1,27 @@
 import type {
-  TableAggregateFn,
+  TableColumnAggregate,
   TableGroupingMode,
   TableGroupingState,
   TableGroupPeriod,
 } from '#ui/components/Table/Table.types';
 
 import {
+  areGroupAggregatesLegal,
   areGroupKeysLegal,
   pruneGroupPeriods,
   pruneGroupShares,
 } from '../grouping/utils';
 
 type GetInitialGroupingStateArgs = {
-  readonly groupingAggregates?: Readonly<Record<string, TableAggregateFn>>;
+  readonly groupingAggregates?: readonly TableColumnAggregate[];
   readonly groupingKeys?: readonly string[];
   readonly groupingMode?: TableGroupingMode;
   readonly groupingPeriods?: Readonly<Record<string, TableGroupPeriod>>;
-  readonly groupingShares?: readonly string[];
+  readonly groupingShares?: readonly TableColumnAggregate[];
 };
 
 const NO_GROUPING: TableGroupingState = {
-  aggregates: {},
+  aggregates: [],
   keys: [],
   mode: 'flat',
   periods: {},
@@ -38,19 +39,28 @@ const NO_GROUPING: TableGroupingState = {
  * the rest of the loader's serializable state (ADR-009) at no cost to that
  * shape.
  *
- * **This is a write path, and it checks the same key-list invariants the update
- * path does** — `areGroupKeysLegal`: within the depth cap, and no key repeated.
+ * **This is a write path, and it checks the same shape invariants the outer
+ * boundaries do** — `areGroupKeysLegal` (within the depth cap, and no key
+ * repeated) and `areGroupAggregatesLegal` (no `(columnKey, fn)` pair repeated).
  * A route built on `createTableRouteLoader` cannot reach it with an illegal
  * list, because `sanitizeGroupingByColumns` already refused — but
  * `@lcabrera/ui` is published, and a consumer writing their own loader is the
- * intended use rather than an edge case. Without this guard such a route seeds a
- * store the package then renders as grouped, and the query throws at
- * `assertGroupKeys`: a 500 out of a state the package itself accepted.
+ * intended use rather than an edge case. Without these guards such a route seeds
+ * a store the package then renders as grouped, and the query throws at
+ * `assertGroupKeys` or at `assertGroupAliases`, which refuses two projections
+ * deriving one alias: a 500 out of a state the package itself accepted.
+ *
+ * The **aggregate** guard is newer than the key one and exists because the shape
+ * change removed an implicit check: while `aggregates` was a column-to-function
+ * map a repeated pair was unrepresentable, and a list admits it (#831).
  *
  * The refusal is **whole** — never truncated to the cap, never de-duplicated.
  * Keys are ordered and the order is the query's nesting order, so either repair
- * answers a different question from the one asked. That is the same reasoning
- * `resolveTableGroupingUpdate` and `sanitizeGroupingByColumns` refuse whole for.
+ * answers a different question from the one asked; a de-duplicated aggregate
+ * list is the same kind of silent correction, and a consumer who sent a
+ * duplicate asked for something this table cannot render and is better told than
+ * quietly fixed. That is the same reasoning `resolveTableGroupingUpdate` and
+ * `sanitizeGroupingByColumns` refuse whole for.
  *
  * The *question* is shared and the *answer* is not: an update on an illegal list
  * is `unchanged`, leaving the applied grouping alone, while a seed has no prior
@@ -65,18 +75,22 @@ const NO_GROUPING: TableGroupingState = {
  * `resolveTableGroupingUpdate` applies when the last key is removed.
  */
 export const getInitialGroupingState = ({
-  groupingAggregates = {},
+  groupingAggregates = [],
   groupingKeys = [],
   groupingMode = 'flat',
   groupingPeriods = {},
   groupingShares = [],
 }: GetInitialGroupingStateArgs): TableGroupingState => {
-  if (groupingKeys.length === 0 || !areGroupKeysLegal(groupingKeys)) {
+  if (
+    groupingKeys.length === 0 ||
+    !areGroupKeysLegal(groupingKeys) ||
+    !areGroupAggregatesLegal(groupingAggregates)
+  ) {
     return NO_GROUPING;
   }
 
   return {
-    aggregates: { ...groupingAggregates },
+    aggregates: [...groupingAggregates],
     keys: [...groupingKeys],
     mode: groupingMode,
     // Pruned to the keys that survived, so a granularity for a key the loader
@@ -85,9 +99,10 @@ export const getInitialGroupingState = ({
       keys: groupingKeys,
       periods: groupingPeriods,
     }),
-    // Pruned to the columns that still carry a shareable aggregate: a share is
-    // a ratio over a measure, so one naming a column the loader applied no
-    // aggregate to would divide nothing (#648).
+    // Pruned to the aggregates the loader actually applied, and only the
+    // shareable ones: a share is a ratio over a measure, so one naming a
+    // measure that is not there divides nothing (#648, per aggregate since
+    // #831).
     shares: pruneGroupShares({
       aggregates: groupingAggregates,
       shares: groupingShares,

@@ -1,5 +1,5 @@
 import { useGroupingStore } from '../useGroupingStore.hook';
 
-/** The columns whose measure the staged configuration shows as a share. */
+/** The aggregates the staged configuration shows as a share of the total. */
 export const useGetGroupingShares = () =>
   useGroupingStore((state) => state.shares);
