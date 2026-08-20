@@ -13,8 +13,9 @@
  *   node scripts/build-review-payload.mjs \
  *     --body <md> --findings <json> --files <json> --commit <sha> --out <json>
  *
- * Exit 0: a payload was written. Exit 1: the body was missing or empty, which
- * means no review was produced and the caller must fail.
+ * Exit 0: a payload was written. Exit 1: the body was missing or empty — no
+ * review was produced and the caller must fail — or the run could not proceed at
+ * all, which is reported in one line rather than as a stack trace.
  *
  * Governed by .claude/rules/scripts.md.
  */
@@ -22,6 +23,7 @@
 import { writeFileSync } from 'node:fs';
 import { parseArgs } from 'node:util';
 
+import { errorMessage } from '../packages/repo-standards/scripts/error-message.mjs';
 import { readTextWithin } from '../packages/repo-standards/scripts/safe-read.mjs';
 import { diffIndex } from './lib/agent-review-diff.mjs';
 import { reviewPayload } from './lib/review-inline-comments.mjs';
@@ -118,4 +120,9 @@ const main = () => {
   return 0;
 };
 
-process.exitCode = main();
+try {
+  process.exitCode = main();
+} catch (error) {
+  console.error(`::error::build-review-payload: ${errorMessage(error)}`);
+  process.exitCode = 1;
+}
