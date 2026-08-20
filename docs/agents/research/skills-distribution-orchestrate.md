@@ -43,7 +43,7 @@ verifier-blocked | verifier-failed`) against one target task's acceptance
   **substrate of truth** — "Git and disk are the substrate." Slack is
   optional, human-visible mirroring only, explicitly "not task state."
 
-A real, runnable **TypeScript CLI** (`scripts/cli.ts`, run under `bun`) drives
+A real, runnable **TypeScript CLI** (`orchestrate/scripts/cli.ts`, run under `bun`) drives
 the loop: `kickoff`, `run`, `spawn`, `respawn`, `kill`, `kill-tree`, `tail`,
 `comment`, `andon`, `tree`, `list`, `status`, `crawl`, `prompt`. This is not
 prose-only guidance; it is real code with a `package.json`, `bun.lock`,
@@ -111,7 +111,7 @@ has none. There is **no `dependencies` field anywhere in the schema** — see
 `plan.schema.json` and `state.schema.json` (the actual runtime data
 contract, not the plugin manifest) are **generated artifacts**: `bun run
 generate-schemas` in `scripts/` runs `tools/generate-json-schemas.ts`, which
-derives them from `zod` schemas in `scripts/schemas.ts` via
+derives them from `zod` schemas in `orchestrate/scripts/schemas.ts` via
 `zod-to-json-schema`. `references/planner.md` explicitly instructs
 regenerating them "after plan or state shape changes" — the zod source is
 canonical, the checked-in JSON is derived, same shape as
@@ -123,7 +123,7 @@ convention.
 This is the most load-bearing difference from vite-react-compiler's model,
 and it runs deeper than "npm vs. copy."
 
-**There is no npm package at all.** `scripts/package.json` is
+**There is no npm package at all.** `orchestrate/scripts/package.json` is
 `"@cursor-skill/orchestrate"`, `"private": true"`, `"version": "0.0.0"` — it
 is never published to a registry. The entire plugin (prose skill +
 TypeScript CLI source + its own lockfile) ships as **one git directory**,
@@ -255,7 +255,7 @@ built directly on Cursor's product surface:
   (`cursor.com/marketplace`, `/add-plugin`, `/plugin` in `cursor-agent`) —
   there is no generic "any agent that reads files" path documented.
 - The orchestration substrate is the **Cursor cloud-agent SDK**
-  (`@cursor/sdk` in `scripts/package.json`) — `Agent.create`,
+  (`@cursor/sdk` in `orchestrate/scripts/package.json`) — `Agent.create`,
   `Agent.getRun`, `Run.git.branches`, cloud-agent VMs. Workers/subplanners/verifiers
   are literally Cursor cloud agents, spawned and polled through that SDK.
   None of this has a Claude Code, Copilot, or Gemini equivalent — it is not
@@ -305,7 +305,7 @@ built directly on Cursor's product surface:
   filesystem operation. There is nothing resembling `devkit init` as a
   single CI-safe provisioning command for a fresh checkout.
 - **The "gate"-equivalent code ships as unpublished source, not a
-  registry package.** `scripts/package.json` is `private: true`,
+  registry package.** `orchestrate/scripts/package.json` is `private: true`,
   `version: "0.0.0"` — deliberately never published to npm. Correctness
   and updates for the CLI ride entirely on "whichever copy of the plugin
   directory you have installed," which is the same global/project
@@ -361,7 +361,7 @@ built directly on Cursor's product surface:
   - `orchestrate/skills/orchestrate/schemas/plan.schema.json`,
     `schemas/state.schema.json`
   - `orchestrate/skills/orchestrate/scripts/package.json`,
-    `scripts/tsconfig.json`, `scripts/cli.ts`, `scripts/cli/index.ts`
+    `orchestrate/scripts/tsconfig.json`, `orchestrate/scripts/cli.ts`, `orchestrate/scripts/cli/index.ts`
   - Directory listing (`find`) of the entire `orchestrate/` tree to confirm
     structure (prompts/, references/, schemas/, scripts/core, scripts/cli,
     scripts/adapters, scripts/**tests**, scripts/tools)

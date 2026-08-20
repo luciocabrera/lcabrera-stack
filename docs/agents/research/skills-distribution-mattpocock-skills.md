@@ -164,7 +164,7 @@ mechanism** (confirmed current as of 2026-08-20 via `code.claude.com/docs/en/dis
 `code.claude.com/docs/en/plugins`). The repo ships:
 
 - `.claude-plugin/plugin.json`: the plugin manifest — `name`, `version` (kept in sync with `package.json`'s
-  version by `scripts/sync-plugin-version.mjs`, run in the `version` npm script right after `changeset
+  version by `/scripts/sync-plugin-version.mjs`, run in the `version` npm script right after `changeset
 version`), `description`, `author`, `homepage`, `repository`, `license`, `keywords`, and a `skills` array
   listing the 24 promoted skill paths **explicitly, one by one** (`./skills/engineering/tdd`,
   `./skills/productivity/grill-me`, etc.) — not a directory glob.
@@ -212,7 +212,7 @@ your project, so you can hack on them and make them your own. Pick one: installi
 skill twice." This is stated as a hard constraint, not a suggestion — the two mechanisms are mutually exclusive
 by design, and the repo explicitly does not try to reconcile or dedupe them.
 
-### A third, undocumented route — `scripts/link-skills.sh`
+### A third, undocumented route — `/scripts/link-skills.sh`
 
 Not part of the public install story at all; it's a maintainer-only dev tool, explicitly marked as such in its
 own header comment: _"This is a dev-only script, intended for use by maintainers of this repo. It is not a
@@ -230,7 +230,7 @@ technique fails for Codex's plugin path specifically because "Codex copies the p
   substantive PR carries a changeset; `npm run version` runs `changeset version && node
 scripts/sync-plugin-version.mjs`, and `CHANGELOG.md` is generated (v1.2.3 at the researched commit — three
   patch entries, each linked to its PR and commit SHA, in the Changesets-standard format).
-- **`scripts/sync-plugin-version.mjs`**: a small guard whose whole job is keeping `plugin.json`'s `version` in
+- **`/scripts/sync-plugin-version.mjs`**: a small guard whose whole job is keeping `plugin.json`'s `version` in
   sync with `package.json`'s, because "Claude uses the plugin `version` to decide when installed users see an
   update" (ADR-0002). It has a `--check` mode (non-mutating, exits 1 on drift) as well as a write mode — the
   repo's CI presumably runs `--check`, though no workflow file was inspected to confirm this.
@@ -267,7 +267,7 @@ The user-invoked `setup-matt-pocock-skills` skill (`disable-model-invocation: tr
 its own `SKILL.md` says so directly: "This is a prompt-driven skill, not a deterministic script. Explore,
 present what you found, confirm with the user, then write." It:
 
-1. **Explores** the target repo (git remote, existing `AGENTS.md`/`CLAUDE.md`, `CONTEXT.md`, `docs/adr/`,
+1. **Explores** the target repo (git remote, existing `AGENTS.md`/`CLAUDE.md`, `CONTEXT.md`, `/docs/adr/`,
    `.scratch/`, whether the `triage` skill is even installed, monorepo signals) to infer sensible defaults rather
    than asking blind.
 2. **Asks**, section by section, only what genuinely branches: which issue tracker (GitHub / GitLab / local
@@ -276,8 +276,8 @@ present what you found, confirm with the user, then write." It:
 3. **Writes** the result as: an `## Agent skills` block appended/updated in whichever of `CLAUDE.md`/`AGENTS.md`
    already exists in the consumer repo (never creates a second one if one already exists — "Never create
    `AGENTS.md` when `CLAUDE.md` already exists"), plus separate prose files under `docs/agents/`:
-   `docs/agents/issue-tracker.md`, `docs/agents/domain.md`, and (only if `triage` is installed)
-   `docs/agents/triage-labels.md`. These are seeded from templates that live _inside_ the setup skill's own
+   `/docs/agents/issue-tracker.md`, `/docs/agents/domain.md`, and (only if `triage` is installed)
+   `/docs/agents/triage-labels.md`. These are seeded from templates that live _inside_ the setup skill's own
    directory (`issue-tracker-github.md`, `issue-tracker-gitlab.md`, `issue-tracker-local.md`,
    `triage-labels.md`, `domain.md`), then hand-edited into the specific repo's answers.
 
@@ -305,8 +305,8 @@ Two structural differences from `devkit.config.json` worth flagging for the ADR-
   surface area, on the theory that the skill doing the config-writing can also do the config-checking, in
   natural language, on demand.
 - **Config is scattered prose, not one file.** `devkit.config.json` is one JSON file both packages read.
-  mattpocock/skills spreads the equivalent data across up to four files (`docs/agents/issue-tracker.md`,
-  `docs/agents/domain.md`, `docs/agents/triage-labels.md`, plus the `## Agent skills` block inside
+  mattpocock/skills spreads the equivalent data across up to four files (`/docs/agents/issue-tracker.md`,
+  `/docs/agents/domain.md`, `/docs/agents/triage-labels.md`, plus the `## Agent skills` block inside
   `CLAUDE.md`/`AGENTS.md` itself), each human-readable and human-editable prose rather than structured data
   meant for a parser. That fits the project's premise (skills are read and interpreted by an LLM anyway, so
   structured data buys little) but forecloses anything wanting to _programmatically_ read "which issue tracker
@@ -370,7 +370,7 @@ phrasing is actively maintained, not just an initial design intent that then rot
   "Codex copies the plugin tree into its cache and drops symlinks, so the skills arrive empty" on install. That
   second failure mode (symlink-based curation silently producing empty directories under a _copying_ installer)
   is a sharp, concrete trap worth flagging for any distribution design that considers symlinks as a curation
-  shortcut — it works for `scripts/link-skills.sh`'s live-repo case (nothing ever copies those symlinks
+  shortcut — it works for `/scripts/link-skills.sh`'s live-repo case (nothing ever copies those symlinks
   elsewhere) and fails the moment something else materializes a snapshot of the tree.
 
 - **"Official marketplace" acceptance is itself a second, external distribution layer with its own update
@@ -446,9 +446,9 @@ doctor`: mattpocock/skills bets that natural-language reconciliation, invoked on
   - `.out-of-scope/mainstream-issue-trackers-only.md`
   - `.out-of-scope/question-limits.md`
   - `.out-of-scope/setup-skill-verify-mode.md`
-  - `scripts/link-skills.sh`
-  - `scripts/list-skills.sh`
-  - `scripts/sync-plugin-version.mjs`
+  - `/scripts/link-skills.sh`
+  - `/scripts/list-skills.sh`
+  - `/scripts/sync-plugin-version.mjs`
   - `skills/engineering/README.md`
   - `skills/engineering/setup-matt-pocock-skills/SKILL.md` (full)
   - `skills/engineering/tdd/` directory listing + `agents/openai.yaml`

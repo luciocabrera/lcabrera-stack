@@ -107,8 +107,8 @@ manifests read directly:
   playbook, referenced by relative path from the skill body rather than
   pasted in.
 
-- CI enforcement (`scripts/validate-plugins.mjs`, run by
-  `.github/workflows/validate-plugins.yml` on any PR touching
+- CI enforcement (`/scripts/validate-plugins.mjs`, run by
+  `/.github/workflows/validate-plugins.yml` on any PR touching
   `.cursor-plugin/marketplace.json`, `**/plugin.json`, or `schemas/**`) is
   **schema + cross-reference validation only**: both manifests parse against
   their JSON Schemas, every `marketplace.json` `source` directory and its
@@ -315,12 +315,12 @@ tree/main/pstack"`, while this research cloned `github.com/poteto/plugins`
   (`repo-standards`), because a gate has real logic and versioned semantics a
   copy-paste can't safely carry. pstack has no equivalent "gate" package at
   all — even its most code-like component, `create-plugin`'s CI validator
-  (`scripts/validate-plugins.mjs`), lives as a **plain script committed to
+  (`/scripts/validate-plugins.mjs`), lives as a **plain script committed to
   the marketplace repo itself**, run via `npm install --no-save ajv
 ajv-formats` in the consuming repo's own CI, not resolved from a published,
   versioned package. If pstack ever needed a real stateful gate (its
   `show-me-your-work` skill, for instance, writes a TSV decision log via a
-  bundled `scripts/log.sh` rather than any installed binary), it would face
+  bundled `pstack/scripts/log.sh` rather than any installed binary), it would face
   exactly the tension ADR-081 was written to resolve, and nothing in the repo
   suggests it has been.
 - **`automate-me` is a live counterpart to devkit's "profile" idea, done as a
@@ -343,8 +343,8 @@ ajv-formats` in the consuming repo's own CI, not resolved from a published,
   - `README.md` (repo root)
   - `.cursor-plugin/marketplace.json`
   - `schemas/plugin.schema.json`
-  - `scripts/validate-plugins.mjs`
-  - `.github/workflows/validate-plugins.yml`
+  - `/scripts/validate-plugins.mjs`
+  - `/.github/workflows/validate-plugins.yml`
   - `.gitignore`
   - `pstack/README.md`
   - `pstack/.cursor-plugin/plugin.json`
