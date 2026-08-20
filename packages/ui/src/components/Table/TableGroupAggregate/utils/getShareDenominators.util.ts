@@ -1,9 +1,8 @@
-import type {
-  TableGroupRow,
-  TableGroupRowSummary,
-} from '#ui/components/Table/Table.types';
+import { isObject } from '@lcabrera/utils/guards/is-object.util';
 
-import { TABLE_GROUP_ROW_FIELD } from '#ui/components/Table/Table.constants';
+import type { TableGroupRowSummary } from '#ui/components/Table/Table.types';
+
+import { getTableGroupRowSummary } from '#ui/components/Table/utils/getTableGroupRowSummary.util';
 
 import { resolveShareDenominators } from './resolveShareDenominators.util';
 
@@ -37,11 +36,23 @@ type GetShareDenominatorsArgs = {
  */
 const cache = new WeakMap<readonly unknown[], CacheEntry>();
 
+/**
+ * Validated rather than cast, through the same guard the render path uses.
+ *
+ * A cast would let a malformed summary reach `resolveShareDenominators`, which
+ * dereferences `isSubtotal` and `path` — so a row shaped wrongly throws inside a
+ * store snapshot, where a thrown error is a blank table rather than a missing
+ * percentage. The rest of the grid answers this question with
+ * `getTableGroupRowSummary`, and two answers to it could disagree about which
+ * rows exist.
+ */
 const toSummaries = (rows: readonly unknown[]) => {
   const summaries: TableGroupRowSummary[] = [];
 
   for (const row of rows) {
-    const summary = (row as Partial<TableGroupRow>)[TABLE_GROUP_ROW_FIELD];
+    if (!isObject(row)) continue;
+
+    const summary = getTableGroupRowSummary(row);
 
     if (summary !== undefined) summaries.push(summary);
   }

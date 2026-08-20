@@ -135,4 +135,23 @@ describe('resolveShareDenominators', () => {
       }).has('missing'),
     ).toBe(false);
   });
+
+  it('refuses the sum when only some leaves carry the aggregate', () => {
+    // The contract is an exact denominator or an explicit absence. Skipping a
+    // leaf that has no entry would total the rows that happened to have one and
+    // render a plausible percentage from a partial sum (#648).
+    const bare: TableGroupRowSummary = {
+      aggregates: [],
+      count: 1,
+      isSubtotal: false,
+      path: [{ columnKey: 'status', label: 'b', value: 'b' }],
+    };
+
+    expect(
+      resolveShareDenominators({
+        shares: ['revenue'],
+        summaries: [leaf({ label: 'a', value: 10 }), bare],
+      }).has('revenue'),
+    ).toBe(false);
+  });
 });

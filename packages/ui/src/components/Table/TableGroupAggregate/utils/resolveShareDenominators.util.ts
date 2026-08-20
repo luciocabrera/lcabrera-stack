@@ -38,9 +38,15 @@ const findAggregate = ({
 /**
  * The flat-mode denominator: every leaf's value added up.
  *
- * `undefined` the moment any leaf's value is unreadable, rather than a total
- * over the readable ones — a share of a denominator that silently omitted rows
- * is the failure this whole util exists to avoid.
+ * `undefined` the moment any leaf is unreadable — whether its value cannot be
+ * read **or** it carries no entry for this column at all. A total over the rows
+ * that happened to have one is a denominator that silently omitted the rest,
+ * which is the failure this whole util exists to avoid; skipping such a row
+ * would produce a plausible percentage from a partial sum.
+ *
+ * A column **no** row carries reaches the same answer by the same branch, so
+ * "nothing to measure" and "measured incompletely" are one refusal rather than
+ * two behaviours to keep in step.
  */
 const sumLeafAggregates = ({
   columnKey,
@@ -55,11 +61,7 @@ const sumLeafAggregates = ({
   for (const summary of summaries) {
     if (summary.isSubtotal) continue;
 
-    const entry = findAggregate({ columnKey, summary });
-
-    if (entry === undefined) continue;
-
-    const value = toFiniteNumber(entry.value);
+    const value = toFiniteNumber(findAggregate({ columnKey, summary })?.value);
 
     if (value === undefined) return;
 
