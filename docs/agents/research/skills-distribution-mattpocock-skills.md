@@ -59,7 +59,7 @@ from the clone:
 
 - `skills/engineering/tdd/`: `SKILL.md`, `agents/openai.yaml`, `mocking.md`, `tests.md` (reference docs the
   skill's own steps point into).
-- `skills/engineering/setup-matt-pocock-skills/`: `SKILL.md`, `agents/openai.yaml`, plus four **seed templates**
+- `skills/engineering/setup-matt-pocock-skills/`: `SKILL.md`, `agents/openai.yaml`, plus five **seed templates**
   it writes into a consumer repo: `domain.md`, `issue-tracker-github.md`, `issue-tracker-gitlab.md`,
   `issue-tracker-local.md`, `triage-labels.md`.
 - `skills/engineering/code-review/`: just `SKILL.md` + `agents/openai.yaml` — no extra files, everything inline.
@@ -388,7 +388,7 @@ phrasing is actively maintained, not just an initial design intent that then rot
   conversation, so a dedicated deterministic checker would be "duplicate work" and "a second skill drifting from
   the first as templates evolve." This is close to the opposite bet from devkit's SHA-256 manifest + `devkit
 doctor`: mattpocock/skills bets that natural-language reconciliation, invoked on demand, is cheaper to maintain
-  than a determinstic diff tool would be, for artifacts that are prose anyway. Whether that bet holds depends on
+  than a deterministic diff tool would be, for artifacts that are prose anyway. Whether that bet holds depends on
   how much the consumer trusts an LLM's self-report of drift versus a hash comparison — a real, arguable
   tradeoff, not obviously wrong.
 

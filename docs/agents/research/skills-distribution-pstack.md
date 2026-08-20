@@ -21,11 +21,12 @@ It is not a single skill but a **three-layer system** documented in its
 `README.md` and in `skills/poteto-mode/SKILL.md`:
 
 - **Top: a router skill** (`poteto-mode`, invoked as `/poteto-mode`) that reads
-  the user's request, matches it to one of fifteen bundled **playbooks**
+  the user's request, matches it to one of sixteen bundled **playbooks**
   (bug fix, feature, refactoring, perf issue, prototype, visual parity,
   multi-phase plan, session pickup, pause safely, authoring-a-skill, eval,
-  autonomous run, investigation, runtime/trace forensics, opening-a-pr), and
-  copies that playbook's steps into its todo list verbatim.
+  autonomous run, investigation, runtime forensics, trace forensics,
+  opening-a-pr — `ls pstack/skills/poteto-mode/playbooks/*.md`), and copies
+  that playbook's steps into its todo list verbatim.
 - **Middle: named workflow skills** invoked either directly (`/how`, `/why`,
   `/architect`, `/arena`, `/interrogate`, `/reflect`, `/tdd`,
   `/typescript-best-practices`, `/unslop`, `/show-me-your-work`,
@@ -275,9 +276,10 @@ parallel, separately-maintained repository with its own translation layer.
 ## 7. Notable design choices
 
 - **The repo the plugin.json points at is not the repo it was cloned from.**
-  `pstack/.cursor-plugin/plugin.json` sets `"repository":
-"https://github.com/cursor/plugins"` and `"homepage": ".../cursor/plugins/
-tree/main/pstack"`, while this research cloned `github.com/poteto/plugins`
+  `pstack/.cursor-plugin/plugin.json` sets
+  `"repository": "https://github.com/cursor/plugins"` and
+  `"homepage": ".../cursor/plugins/tree/main/pstack"`, while this research
+  cloned `github.com/poteto/plugins`
   per the task brief. Both repos exist and (at the commit cloned,
   `74dd2291e8e37b12fd6dc49b2acbd655c6bdaf12`) appear to carry identical
   content — `poteto/plugins` reads as Lauren Tan's personal copy/fork of what
@@ -320,7 +322,7 @@ tree/main/pstack"`, while this research cloned `github.com/poteto/plugins`
 ajv-formats` in the consuming repo's own CI, not resolved from a published,
   versioned package. If pstack ever needed a real stateful gate (its
   `show-me-your-work` skill, for instance, writes a TSV decision log via a
-  bundled `pstack/scripts/log.sh` rather than any installed binary), it would face
+  bundled `pstack/skills/show-me-your-work/scripts/log.sh` rather than any installed binary), it would face
   exactly the tension ADR-081 was written to resolve, and nothing in the repo
   suggests it has been.
 - **`automate-me` is a live counterpart to devkit's "profile" idea, done as a
