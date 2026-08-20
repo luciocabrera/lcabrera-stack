@@ -774,6 +774,17 @@ and a run triggered by Copilot's own review currently waits for approval before
 it executes — both caveats, and the way out of the second, are in
 [`docs/tooling/copilot-review-gate.md`](docs/tooling/copilot-review-gate.md).
 
+[`claude-review.yml`](.github/workflows/claude-review.yml) is what produces the
+second of those reviews. On every non-draft pull request it runs a model over the
+diff, has it write the review to a file, and submits that file as a `COMMENT`
+review from an ordinary shell step — the model is never handed a tool that can
+write to GitHub. It publishes **no** commit status, deliberately: two writers to
+one context can disagree about the head, which is the failure the gate exists to
+make visible, so publication stays single-writer in
+[`copilot-review-status.mjs`](scripts/copilot-review-status.mjs). It is the only
+job here that spends model tokens, which is why it skips drafts, bounds itself with
+`timeout-minutes`, and cancels superseded runs.
+
 [`agent-review-verdict.yml`](.github/workflows/agent-review-verdict.yml) runs
 `scripts/verify-agent-review.mjs` on every pull request and on every comment made
 on one, publishing an `Agent review verdict` commit status. It **validates** the

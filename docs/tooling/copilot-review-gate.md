@@ -393,10 +393,12 @@ gh api graphql -F n=<n> -f query='
   .data.repository.pullRequest as $pr
   | [ $pr.reviews.nodes[]
       | select(.author.login | IN("copilot-pull-request-reviewer", "github-actions"))
-      | select(.state | IN("APPROVED", "CHANGES_REQUESTED", "COMMENTED")) ] | last
-  | if . == null then "no accepted reviewer has reviewed this pull request yet — wait"
-    elif .commit.oid == $pr.headRefOid then "\(.author.login) reviewed the head (\($pr.headRefOid[0:8])) at \(.submittedAt) — if the pull request still shows pending, it is stale"
-    else "the newest accepted review is \(.author.login)'"'"'s, of \(.commit.oid[0:8]), not the head — wait"
+      | select(.state | IN("APPROVED", "CHANGES_REQUESTED", "COMMENTED")) ] as $counted
+  | ($counted | group_by(.author.login) | map(max_by(.submittedAt))) as $newest
+  | ($newest | map(select(.commit.oid == $pr.headRefOid)) | first) as $covering
+  | if ($counted | length) == 0 then "no accepted reviewer has reviewed this pull request yet — wait"
+    elif $covering != null then "\($covering.author.login) reviewed the head (\($pr.headRefOid[0:8])) at \($covering.submittedAt) — if the pull request still shows pending, it is stale"
+    else "no accepted reviewer'"'"'s newest review names \($pr.headRefOid[0:8]) — wait (newest: \($newest | map("\(.author.login)@\(.commit.oid[0:8])") | join(", ")))"
     end'
 ```
 
@@ -423,7 +425,16 @@ difference between an answer and a confident wrong one:
   passes 30 easily — at which point `last` is the thirtieth review rather than
   the newest one. `reviews(last: 100)` takes the newest hundred instead; beyond
   that, use the `--dry-run` form above.
-- **Two whitelists are the gate's own, and both have to match it.**
+- **It groups by author before taking the newest, exactly as the gate does.**
+  Asking for the newest review OVERALL is a different question, and it gives the
+  opposite answer in the sequence this gate is most often in: one reviewer covers
+  the head, the other's earlier-requested re-review lands afterwards naming the
+  previous commit. Newest-overall then says "not the head — wait" about a head that
+  is covered — and this is the section where a reader decides **wait** versus
+  **act**, so it would send them away from the recompute they need. That is the
+  same defect the author filter had one layer up.
+- **Two whitelists and one rule are the gate's own, and all three have to match
+  it.**
   `scripts/lib/copilot-review.mjs` counts the states `APPROVED`,
   `CHANGES_REQUESTED` and `COMMENTED` and drops everything else, so a probe that
   took the newest review of _any_ state would call a dismissed review a review of
@@ -434,7 +445,9 @@ difference between an answer and a confident wrong one:
   author login carries no `[bot]` suffix**, which is why these are the bare names;
   over REST the same reviewers are `…[bot]`. Keep both lists identical to the
   module's, whitelisted the same way round: an unfamiliar state or an unknown
-  author must fall out of the count, not into it.
+  author must fall out of the count, not into it. The third is the comparison
+  itself — per reviewer, never newest-overall — which is the divergence this probe
+  actually had.
 
 The third reading — the gate would publish `pending` while the pull request shows
 `success` — is in

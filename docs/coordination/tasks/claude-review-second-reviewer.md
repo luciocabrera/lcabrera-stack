@@ -9,6 +9,8 @@ area:
   - .github/workflows/copilot-review-gate.yml
   - scripts/lib/copilot-review*.mjs
   - scripts/copilot-review-status.mjs
+  - COMMANDS.md
+  - docs/agents/merge-checklist.md
   - docs/tooling/copilot-review-gate.md
 started: 2026-08-20
 updated: 2026-08-20
