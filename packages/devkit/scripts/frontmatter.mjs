@@ -1,6 +1,7 @@
 /*
- * Reading one declaration out of a shipped file's frontmatter: the config keys
- * it cannot run without.
+ * Reading the declarations a shipped file makes about what it needs: the config
+ * keys it cannot run without (`requires:`), and the peer package versions it
+ * cannot run against (`peer:`).
  *
  * Why: `sync` only refuses to write a file whose `{{commands.*}}` placeholders
  * cannot be substituted, and a skill can depend on a consumer's config without
@@ -8,7 +9,9 @@
  * document" reads the key without interpolating it. That dependency is invisible
  * to the placeholder gate, so the file lands in a consumer who cannot satisfy it
  * and fails at the moment an agent follows it. `requires:` makes the dependency
- * something a machine can check, here and in `closure`.
+ * something a machine can check, here and in `closure`. `peer:` makes the other
+ * half checkable — the gate runtime a skill's prose shells out to, which a
+ * consumer can upgrade or never install (ADR-081).
  *
  * Deliberately not a YAML parser. One key is read out of a block that is
  * otherwise none of this package's business, and a parser would buy a dependency
@@ -32,14 +35,34 @@
  * Only `config.`-prefixed entries are claims on the consumer's configuration.
  * `requires:` already means other things in frontmatter written for humans — a
  * shipped reference file names a library version range with it — and reading
- * those as config keys would refuse to write a file that needs nothing.
+ * those as config keys would refuse to write a file that needs nothing. `peer:`
+ * carries no competing meaning in the frontmatter this repository ships, so
+ * every entry under it is read; give it one and it needs the same filter.
+ *
+ * A peer is spelled `name@range`, one entry per package, rather than as a
+ * `{name: range}` flow map. The entry form costs no second parser: it travels
+ * through every spelling above unchanged, so the gate cannot be disabled by
+ * restyling a one-package declaration into a list. A map would need its own
+ * body reader and its own key/value split for the sake of one key, and would
+ * still have to be quoted — `@` and `>` are both YAML indicators, so neither
+ * spelling escapes quoting.
  */
 
 const FENCE = '---';
 
 const CONFIG_PREFIX = 'config.';
 
+/**
+ * The keys read here, one literal regex each rather than one built from a
+ * string: a computed pattern is both a lint finding and a way for a key to stop
+ * matching without the change looking like one.
+ */
 const REQUIRES_KEY = /^requires:[ \t]*/;
+
+const PEER_KEY = /^peer:[ \t]*/;
+
+/** What a peer entry declaring no range means: installed, at any version. */
+const ANY_VERSION = '*';
 
 /**
  * One item of a block sequence, at any indent YAML would accept for one. The
@@ -133,33 +156,69 @@ const declaredEntries = (inline, following) => {
     : blockSequenceBody(following);
 };
 
-/** The declaration's line in the file, and its entries as one delimited string. */
-const requiresDeclaration = (content) => {
+/**
+ * One key's declaration: its line in the file, and its entries as one delimited
+ * string. Taking the key as a parameter is what keeps `peer:` from growing a
+ * second reader — a spelling either key can be written in is read for both, so
+ * the two gates cannot drift apart in what they can see.
+ */
+const declarationFor = ({ content, key }) => {
   const lines = frontmatterLines(content);
-  const index = lines.findIndex((line) => REQUIRES_KEY.test(line));
+  const index = lines.findIndex((line) => key.test(line));
   if (index === -1) return undefined;
   const [declared = '', ...following] = significantLines(lines.slice(index));
-  const entries = declaredEntries(
-    declared.replace(REQUIRES_KEY, '').trim(),
-    following,
-  );
+  const entries = declaredEntries(declared.replace(key, '').trim(), following);
   return entries === undefined ? undefined : { entries, line: index + 2 };
 };
 
-/** The config keys a piece of content declares it cannot run without. */
-export const requiredConfigKeys = (content) => {
-  const declaration = requiresDeclaration(content);
-  if (declaration === undefined) return [];
-  return [
-    ...new Set(
-      declaration.entries
+/** The individual entries of a declaration, unquoted and stripped of padding. */
+const entriesOf = (declaration) =>
+  declaration === undefined
+    ? []
+    : declaration.entries
         .split(',')
         .map((entry) => entry.trim().replaceAll(QUOTES, ''))
-        .filter((entry) => entry.startsWith(CONFIG_PREFIX))
-        .map((entry) => entry.slice(CONFIG_PREFIX.length))
-        .filter((key) => key !== ''),
-    ),
-  ];
+        .filter((entry) => entry !== '');
+
+/** The config keys a piece of content declares it cannot run without. */
+export const requiredConfigKeys = (content) => [
+  ...new Set(
+    entriesOf(declarationFor({ content, key: REQUIRES_KEY }))
+      .filter((entry) => entry.startsWith(CONFIG_PREFIX))
+      .map((entry) => entry.slice(CONFIG_PREFIX.length))
+      .filter((key) => key !== ''),
+  ),
+];
+
+/**
+ * One `name@range` entry. Split at the LAST `@`, because a scoped package name
+ * opens with one and a semver range never contains one — `@repo/x@>=1 <2` has
+ * to read as that package and that range, not as a package called `repo/x@>=1`.
+ * An entry with no separator declares a package and no constraint, which still
+ * has to be installed for the file to be written.
+ */
+const peerFromEntry = (entry) => {
+  const separator = entry.lastIndexOf('@');
+  if (separator <= 0) return { name: entry, range: ANY_VERSION };
+  const range = entry.slice(separator + 1).trim();
+  return {
+    name: entry.slice(0, separator).trim(),
+    range: range === '' ? ANY_VERSION : range,
+  };
+};
+
+/**
+ * The peer packages, with their ranges, a piece of content declares it cannot
+ * run against. A name declared twice keeps its first range, matching how
+ * `requiredConfigKeys` keeps the first of a repeated key.
+ */
+export const requiredPeers = (content) => {
+  const byName = new Map();
+  for (const entry of entriesOf(declarationFor({ content, key: PEER_KEY }))) {
+    const peer = peerFromEntry(entry);
+    if (peer.name !== '' && !byName.has(peer.name)) byName.set(peer.name, peer);
+  }
+  return [...byName.values()];
 };
 
 /**
@@ -168,4 +227,4 @@ export const requiredConfigKeys = (content) => {
  * there is nothing to report.
  */
 export const requiresDeclarationLine = (content) =>
-  requiresDeclaration(content)?.line;
+  declarationFor({ content, key: REQUIRES_KEY })?.line;

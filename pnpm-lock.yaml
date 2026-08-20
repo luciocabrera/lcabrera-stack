@@ -141,6 +141,9 @@ catalogs:
     lighthouse:
       specifier: ^13.4.1
       version: 13.4.1
+    semver:
+      specifier: ^7.8.5
+      version: 7.8.5
     ts-morph:
       specifier: ^28.0.0
       version: 28.0.0
@@ -370,6 +373,13 @@ importers:
         version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.2.0)(@vitest/browser-preview@4.1.10)(@vitest/coverage-v8@4.1.10)(@voidzero-dev/vite-plus-core@0.2.6(@arethetypeswrong/core@0.18.5)(@types/node@26.2.0)(jiti@2.7.0)(typescript@6.0.3)(yaml@2.9.0))(jsdom@30.0.1)
 
   packages/devkit:
+    dependencies:
+      '@repo/repo-standards':
+        specifier: workspace:*
+        version: link:../repo-standards
+      semver:
+        specifier: catalog:tooling
+        version: 7.8.5
     devDependencies:
       '@lcabrera/vite-config':
         specifier: workspace:*
