@@ -132,7 +132,7 @@ graph TD
 | resolveCrudRowId                | row, columns                                  | string                                                                              | Build a CRUD row id from the primary-key column(s) (single = raw value, composite = encoded values joined by `_`)                                                                                                                                                   |
 | resolveGroupKeyAvailability     | column, catalogue capability                  | { isGroupable, refusal }                                                            | Whether a column may be **offered** as a group key: `resolveColumnCapabilities`' declared answer narrowed by the catalogue's (ADR-058/067). Absent capability leaves the declaration standing; a consumer opt-out wins and reports no reason                        |
 | orderLegalAggregates            | the catalogue's aggregate set                 | TableAggregateFn[]                                                                  | The aggregates legal for a column's real **type**, in menu order; also drops a SQL name this package has no label for                                                                                                                                               |
-| resolveOfferableAggregates      | catalogue capability, isGroupKey              | TableAggregateFn[]                                                                  | Which of those a surface may **offer**: the ordered legal set, and nothing at all while the column is an active group key (ADR-080). One predicate for the header menu and the drawer picker alike (#830)                                                           |
+| resolveOfferableAggregates      | catalogue capability, isGroupKey              | TableAggregateFn[]                                                                  | Which of those a surface may **offer**: the ordered legal set, and nothing at all while the column is an active group key (ADR-080). One predicate for the header menu and the drawer picker alike (#830); deliberately blind to what is already applied (#841)     |
 | toTableAggregateToken           | { columnKey, fn }                             | string                                                                              | One applied aggregate's identity as a single string (`"total_amount:sum"`). A column may carry several measures, so neither half identifies an entry alone (#831); one spelling serves the URL token, the share-denominator map key and the staged list's React key |
 | parseTableAggregateToken        | token                                         | TableColumnAggregate or undefined                                                   | The inverse, splitting on the **last** `:` and checking the suffix against the closed function vocabulary — which is what lets a consumer's column key contain a `:`. Lives beside the encoder (ADR-082); only the `grouping` codec calls it                        |
 | parseTableAggregateTokens       | tokens                                        | TableColumnAggregate[] or undefined                                                 | The same over a whole list and **all-or-nothing**: one unreadable token answers `undefined` for the lot, so a caller cannot accept a partly-read list (ADR-061's refuse-whole rule)                                                                                 |
@@ -178,6 +178,18 @@ command layer requires: the header menu passes the live grouping keys and the
 drawer passes its draft, so the picker reflects a key staged behind Accept while
 the menu reflects the one the table is grouped by. Sharing the predicate is not
 sharing the state.
+
+**It takes no account of which aggregates are already applied, and that omission
+is load-bearing** (#841). Legality is a property of the column, so both surfaces
+want the same answer; what to do about an _applied_ function is a property of the
+gesture, so they do not. The drawer's picker only adds, so offering a function the
+column already carries offers a guarded no-op — it composes this predicate with
+its staged aggregates in `GroupingSection/utils/resolveAddableAggregates.util.ts`
+and subtracts them there. The header menu toggles, so that same item is the only
+way to remove an aggregate and has to stay. Taking the aggregate list as an
+argument here would force one answer on both surfaces, and it is the menu that
+would lose. `resolveOfferableAggregates.surfaces.test.tsx` pins both halves
+against the same applied aggregate, so the divergence cannot be quietly closed.
 
 The **precedence** is the consumer's opt-out first, and it carries no reason.
 `isGroupable: false` and a catalogue refusal can both be true at once, and they

@@ -34,6 +34,17 @@ const NO_AGGREGATES: readonly TableAggregateFn[] = [];
  * Empty means "no aggregate is legal here", never "all of them are", so a
  * surface renders nothing rather than falling back to the whole vocabulary.
  *
+ * **It deliberately knows nothing about which aggregates are already applied**,
+ * and a reader who finds the two surfaces disagreeing on that has found the
+ * design rather than drift (#841). Legality is a property of the column, so it
+ * is shared; what a surface does with an applied function is a property of its
+ * gesture, so it is not. The header menu toggles, so an applied function has to
+ * stay on it — that item is the only way to remove one. The drawer's picker only
+ * adds, so an applied function there is a choice that cannot change anything,
+ * and `resolveAddableAggregates` subtracts them **beside** this predicate rather
+ * than inside it. Taking the aggregate list as an argument here would force one
+ * answer on both surfaces, and it is the menu that would lose.
+ *
  * **This is not where the rule is enforced.** The grouping configuration is URL
  * state, so a request can always name one column as both key and measure;
  * `resolveGroupCellChildren` is where the key actually wins. This only keeps a

@@ -157,6 +157,15 @@ The whole block leaves through **one** early return, whichever gate closed it.
 Splitting the two conditions into two exits is how the never-offered rule
 decays into a separator or a lone clear item with no functions above it.
 
+**The never-offered rule reaches the two surfaces differently, and only here does
+it leave an applied function standing** (#841). These commands toggle, so the item
+for an applied function is the only affordance that removes it — dropping it would
+make an aggregate applied from this menu unclearable from this menu. The drawer's
+"Add Aggregate" picker only adds, so there the same item is a guarded no-op, and
+it is subtracted by `resolveAddableAggregates` composing on top of the shared
+resolver rather than by changing it. Same rule, opposite conclusions, because the
+gestures differ.
+
 A new capability adds a sibling `*Commands.ts`. If it cannot reuse
 `deriveToggleCommandState` or `CommandDescriptor` unchanged, revise the shared
 shape before adding it — that is the signal it was over-fitted.
