@@ -7,7 +7,7 @@
  * would be worse than no doctor at all.
  */
 
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { chmodSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
 import { acceptedEntry, isAccepted } from './accepted.mjs';
@@ -52,14 +52,88 @@ const unmetDeclaration = ({ content, config, peerVersions }) => {
   return peers.length > 0 ? { missing: peers, unmetKind: 'peer' } : undefined;
 };
 
+/** What one asset becomes, or `undefined` when this config places it nowhere. */
+const planEntryFor = ({
+  asset,
+  config,
+  manifest,
+  onDiskHash,
+  peerVersions,
+}) => {
+  const targetPath = targetPathFor({ assetPath: asset.path, config });
+  if (targetPath === undefined) return undefined;
+
+  // Carried on the entry rather than consumed and dropped. Acknowledging an
+  // edit is keyed to what is actually on disk, so a further edit invalidates
+  // it on its own; a plan that discarded this hash could only offer a
+  // path-keyed acknowledgement, which never expires. Every entry carries it,
+  // including a refused one, so nothing downstream has to know which states
+  // happen to have a hash.
+  const onDisk = onDiskHash(targetPath);
+
+  const unmet = unmetDeclaration({
+    config,
+    content: asset.content,
+    peerVersions,
+  });
+
+  if (unmet !== undefined) {
+    return {
+      content: asset.content,
+      incomingHash: hashContent(asset.content),
+      missing: unmet.missing,
+      onDiskHash: onDisk,
+      path: targetPath,
+      state: 'unmet',
+      unmetKind: unmet.unmetKind,
+    };
+  }
+
+  // Substituted BEFORE hashing, so the record describes what is on disk
+  // rather than the template it came from.
+  const { content, missing } = substituteCommands({
+    commands: config.commands,
+    content: asset.content,
+  });
+  const incomingHash = hashContent(content);
+
+  if (missing.length > 0) {
+    return {
+      content,
+      incomingHash,
+      missing,
+      onDiskHash: onDisk,
+      path: targetPath,
+      state: 'unresolved',
+    };
+  }
+
+  return {
+    content,
+    incomingHash,
+    missing,
+    onDiskHash: onDisk,
+    path: targetPath,
+    state: classifyMaterialisation({
+      incomingHash,
+      onDiskHash: onDisk,
+      recordedHash: manifest.files[targetPath],
+    }),
+  };
+};
+
 /**
  * `peerVersions` is supplied rather than resolved here, so planning stays pure
  * and every asset naming the same peer is answered from one lookup. Its default
  * is empty, which reads every declared peer as absent — a plan built without it
  * refuses rather than writes.
  *
- * @param {{ assets: { path: string, content: string }[], config: object,
- *   manifest: { files: Record<string, string> },
+ * The asset's mode rides on the entry beside its content, so `applySync` never
+ * has to know which group a path came from: a hook is executable because the
+ * file this package ships is, not because it landed under the hooks directory.
+ *
+ * @param {{ assets: { path: string, content: string, executable?: boolean }[],
+ *   config: object, manifest: { files: Record<string, string> },
  *   onDiskHash: (targetPath: string) => string | undefined,
  *   peerVersions?: Map<string, string | undefined> }} args
  */
@@ -75,66 +149,16 @@ export const planSync = ({
   return assets
     .filter((asset) => groups.has(asset.path.split('/')[0]))
     .map((asset) => {
-      const targetPath = targetPathFor({ assetPath: asset.path, config });
-      if (targetPath === undefined) return undefined;
-
-      // Carried on the entry rather than consumed and dropped. Acknowledging an
-      // edit is keyed to what is actually on disk, so a further edit invalidates
-      // it on its own; a plan that discarded this hash could only offer a
-      // path-keyed acknowledgement, which never expires. Every entry carries it,
-      // including a refused one, so nothing downstream has to know which states
-      // happen to have a hash.
-      const onDisk = onDiskHash(targetPath);
-
-      const unmet = unmetDeclaration({
+      const entry = planEntryFor({
+        asset,
         config,
-        content: asset.content,
+        manifest,
+        onDiskHash,
         peerVersions,
       });
-
-      if (unmet !== undefined) {
-        return {
-          content: asset.content,
-          incomingHash: hashContent(asset.content),
-          missing: unmet.missing,
-          onDiskHash: onDisk,
-          path: targetPath,
-          state: 'unmet',
-          unmetKind: unmet.unmetKind,
-        };
-      }
-
-      // Substituted BEFORE hashing, so the record describes what is on disk
-      // rather than the template it came from.
-      const { content, missing } = substituteCommands({
-        commands: config.commands,
-        content: asset.content,
-      });
-      const incomingHash = hashContent(content);
-
-      if (missing.length > 0) {
-        return {
-          content,
-          incomingHash,
-          missing,
-          onDiskHash: onDisk,
-          path: targetPath,
-          state: 'unresolved',
-        };
-      }
-
-      return {
-        content,
-        incomingHash,
-        missing,
-        onDiskHash: onDisk,
-        path: targetPath,
-        state: classifyMaterialisation({
-          incomingHash,
-          onDiskHash: onDisk,
-          recordedHash: manifest.files[targetPath],
-        }),
-      };
+      return entry === undefined
+        ? undefined
+        : { ...entry, executable: asset.executable === true };
     })
     .filter((entry) => entry !== undefined);
 };
@@ -167,6 +191,14 @@ export const withAcceptance = ({ accepted, entries }) =>
     };
   });
 
+/**
+ * `writeFileSync`'s mode applies only when it CREATES the file, so an entry that
+ * already exists keeps whatever mode it had — which is why the bit is set
+ * explicitly afterwards rather than passed as an option. A hook restored over a
+ * non-executable file of the same name would otherwise stay silently inert.
+ */
+const EXECUTABLE_MODE = 0o755;
+
 export const applySync = ({ entries, root }) => {
   for (const entry of entries.filter((candidate) =>
     isWritten(candidate.state),
@@ -174,6 +206,7 @@ export const applySync = ({ entries, root }) => {
     const destination = join(root, entry.path);
     mkdirSync(dirname(destination), { recursive: true });
     writeFileSync(destination, entry.content);
+    if (entry.executable) chmodSync(destination, EXECUTABLE_MODE);
   }
 };
 

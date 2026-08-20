@@ -7,7 +7,7 @@
  * what counts as one.
  */
 
-import { existsSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import {
@@ -18,7 +18,11 @@ import {
 } from './closure-report.mjs';
 import { analyseClosure } from './closure.mjs';
 import { buildPlan } from './command-materialise.mjs';
-import { allowedConfigKeys, configuredCommandWords } from './config.mjs';
+import {
+  allowedConfigKeys,
+  configuredCommandWords,
+  PROFILES,
+} from './config.mjs';
 
 /**
  * Everything the package would place in this repository, the tools the
@@ -30,11 +34,12 @@ import { allowedConfigKeys, configuredCommandWords } from './config.mjs';
  * every contract and sibling-skill reference would start reporting as an escape.
  * A configuration fault must read as a configuration fault, not as findings.
  */
-const shippedContext = (root) => {
-  const { config, entries } = buildPlan({ root });
+const shippedContext = ({ profile, root }) => {
+  const { config, entries } = buildPlan({ profile, root });
   return {
     allowedCommands: [...BASELINE_COMMANDS, ...configuredCommandWords(config)],
     configKeys: allowedConfigKeys(config),
+    entries,
     shipped: new Set(entries.map((entry) => entry.path)),
   };
 };
@@ -47,16 +52,22 @@ const shippedContext = (root) => {
  * a directory holds both shipped and unshipped files, as `.claude/rules` does.
  * `rootDirectory` is empty on purpose: nothing is internal by virtue of where it
  * sits, only by being shipped.
+ *
+ * The content analysed is the PLAN's, not the copy on disk. They are the same
+ * file wherever this repository materialises a group, and only the plan exists
+ * for a group it does not — the scaffolding seeds, which this repository holds
+ * its own versions of and must not overwrite. Reading from disk there would
+ * measure the repository's file and report the seed as checked.
  */
-const runShippedClosure = (root) => {
-  const { allowedCommands, configKeys, shipped } = shippedContext(root);
-  const plan = buildPlan({ root }).entries;
-  const files = plan
-    .filter((entry) => existsSync(resolve(root, entry.path)))
-    .map((entry) => ({
-      content: readFileSync(resolve(root, entry.path), 'utf8'),
-      path: entry.path,
-    }));
+const shippedEscapes = ({ profile, root }) => {
+  const { allowedCommands, configKeys, entries, shipped } = shippedContext({
+    profile,
+    root,
+  });
+  const files = entries.map((entry) => ({
+    content: entry.content,
+    path: entry.path,
+  }));
 
   const { escapes } = analyseClosure({
     allowedCommands,
@@ -67,20 +78,77 @@ const runShippedClosure = (root) => {
     shipped,
   });
 
-  if (escapes.length === 0) {
-    console.log(`Closure gate passed: ${files.length} shipped file(s).`);
-    return 0;
+  return { escapes, fileCount: files.length };
+};
+
+/**
+ * Every profile, unless one is named.
+ *
+ * Checking only the profile this repository happens to use would leave the
+ * others measured by nothing, and a group that ships nowhere here is exactly
+ * where an escape survives — the seeds. It is also the only way to catch the
+ * mistake a profile makes possible: a file in one profile pointing at a file
+ * only a WIDER profile places. That reference resolves for a consumer who took
+ * everything and dangles for the one who took the smaller set, so it can only be
+ * seen by checking the smaller set on its own.
+ */
+const runShippedClosure = ({ profile, root }) => {
+  const names = profile === undefined ? Object.keys(PROFILES) : [profile];
+  const results = names.map((name) => ({
+    name,
+    ...shippedEscapes({ profile: name, root }),
+  }));
+
+  for (const result of results.filter((entry) => entry.escapes.length === 0)) {
+    console.log(
+      `✓ ${result.name} — ${result.fileCount} shipped file(s), self-contained`,
+    );
   }
 
-  for (const finding of escapes) {
-    console.error(`  ${describeEscape(finding)}`);
+  const dirty = results.filter((result) => result.escapes.length > 0);
+  if (dirty.length === 0) return 0;
+
+  for (const result of dirty) {
+    console.error(`✗ ${result.name} — ${result.fileCount} shipped file(s)`);
+    for (const finding of result.escapes) {
+      console.error(`    ${describeEscape(finding)}`);
+    }
   }
-  console.error(`\n${escapes.length} escape(s) in the shipped set.`);
+  const total = dirty.reduce((sum, result) => sum + result.escapes.length, 0);
+  console.error(`\n${total} escape(s) across ${dirty.length} profile(s).`);
   return 1;
 };
 
-export const runClosure = (directories, root) => {
-  if (directories.includes('--shipped')) return runShippedClosure(root);
+/**
+ * `--profile <name>` and its value, taken out of the positional arguments.
+ *
+ * It matters most for `--shipped`: a profile the repository does not itself use
+ * places files it never materialises, and without naming that profile the gate
+ * would report a clean pass over a set it never looked at — the same green run
+ * as a set with no escapes in it.
+ */
+const PROFILE_FLAG = '--profile';
+
+const withoutProfile = (argv) => {
+  const index = argv.indexOf(PROFILE_FLAG);
+  if (index === -1) return { rest: argv };
+  return {
+    profile: argv[index + 1],
+    rest: [...argv.slice(0, index), ...argv.slice(index + 2)],
+  };
+};
+
+export const runClosure = (argv, root) => {
+  const { profile, rest } = withoutProfile(argv);
+  if (profile !== undefined && profile.startsWith('-')) {
+    console.error(`${PROFILE_FLAG} needs a profile name`);
+    return 1;
+  }
+
+  const directories = rest.filter((entry) => entry !== '--shipped');
+  if (rest.length !== directories.length) {
+    return runShippedClosure({ profile, root });
+  }
 
   if (directories.length === 0) {
     console.error('closure needs at least one directory to analyse');
@@ -97,7 +165,10 @@ export const runClosure = (directories, root) => {
     return 1;
   }
 
-  const { allowedCommands, configKeys, shipped } = shippedContext(root);
+  const { allowedCommands, configKeys, shipped } = shippedContext({
+    profile,
+    root,
+  });
   const results = directories.map((directory) =>
     analyseDirectory({
       allowedCommands,

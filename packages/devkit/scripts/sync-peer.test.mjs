@@ -168,13 +168,13 @@ describe('renderPlan and an unmet peer', () => {
     expect(
       renderPlan([
         {
-          missing: ['paths.workflows'],
+          missing: ['paths.dashboards'],
           path: '.github/skills/demo/SKILL.md',
           state: 'unmet',
         },
       ]),
     ).toBe(
-      '  unmet        .github/skills/demo/SKILL.md  (not written — no config key set for paths.workflows)',
+      '  unmet        .github/skills/demo/SKILL.md  (not written — no config key set for paths.dashboards)',
     );
   });
 });

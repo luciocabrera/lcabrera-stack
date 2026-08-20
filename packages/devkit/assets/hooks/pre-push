@@ -1,0 +1,42 @@
+#!/usr/bin/env sh
+# pre-push: run the gate locally, before anything reaches CI.
+#
+# The branch name comes first, and not because it is the most important: it is
+# the one thing that cannot be corrected after the push without rewriting the
+# remote, so it is worth failing before a test suite runs rather than after.
+#
+# Then the repository's own check and test commands — the same two the check
+# workflow runs, from the same `devkit.config.json` entries, so a push that would
+# fail that job fails here first.
+#
+# Bypass for a work-in-progress push: git push --no-verify
+
+GATE="./node_modules/.bin/repo-verify-branch"
+
+if [ ! -x "$GATE" ]; then
+  echo "✗ pre-push: $GATE is missing."
+  echo "  Install the gate runtime package named in COMMANDS.md, or bypass this"
+  echo "  once with: git push --no-verify"
+  exit 1
+fi
+
+if ! "$GATE"; then
+  echo ""
+  echo "✗ pre-push: rename the branch, then push again."
+  echo "  To push work-in-progress anyway: git push --no-verify"
+  exit 1
+fi
+
+if ! {{commands.check}}; then
+  echo ""
+  echo "✗ pre-push: the check gate failed — fix the findings above; they would fail CI."
+  echo "  To push work-in-progress anyway: git push --no-verify"
+  exit 1
+fi
+
+if ! {{commands.test}}; then
+  echo ""
+  echo "✗ pre-push: the tests failed."
+  echo "  To push work-in-progress anyway: git push --no-verify"
+  exit 1
+fi

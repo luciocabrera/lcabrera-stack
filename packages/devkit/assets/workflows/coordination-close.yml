@@ -1,0 +1,104 @@
+name: Close coordination claim
+
+# Deletes the coordination task file a merged pull request claimed, so the last
+# step of the claim protocol stops depending on memory. It is forgotten
+# structurally, not carelessly: it lands after the satisfying part of the work,
+# on a branch that no longer exists, and nothing blocks on it — the register gate
+# warns rather than fails, on purpose. A claim nobody holds still reads as a live
+# soft lock and fences the next agent off finished work.
+#
+# Which files a pull request closed is decided by the gate runtime, from the
+# register directory `devkit.config.json` names. This file only commits the
+# result.
+#
+# It cannot retrigger itself: the only trigger is a closed pull request, and the
+# push below is a push event, which nothing here subscribes to. The push DOES
+# trigger the check workflow, which is intended — an automated commit is held to
+# the same gate as a human one.
+#
+# PRECONDITION — the push needs a token whose actor may bypass whatever protects
+# the default branch. A branch requiring status checks rejects a direct push made
+# with the default token, and a job that swallowed that rejection would report
+# success while the claim stayed behind. So the push is made with REPO_ADMIN_TOKEN
+# when the repository defines it, and the job fails loudly when the push fails.
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+
+# Two pull requests merging close together produce two runs, both pushing to the
+# default branch. Serialise them, and never cancel — a cancelled run leaves the
+# claim behind.
+concurrency:
+  group: coordination-close
+  cancel-in-progress: false
+
+jobs:
+  close:
+    name: Delete the merged PR's task file
+    runs-on: ubuntu-latest
+    # A fork's head cannot be trusted with a write token, and a pull request that
+    # was closed without merging claimed nothing.
+    if: >-
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.head.repo.full_name == github.repository
+
+    env:
+      GATES: ./node_modules/.bin
+
+    steps:
+      - name: Check out the default branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          # Full history: the commit below is rebased onto the branch before
+          # pushing, and a rebase inside a depth-1 clone has no common ancestor
+          # to work from.
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.base.ref }}
+          token: ${{ secrets.REPO_ADMIN_TOKEN || github.token }}
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version-file: .node-version
+
+      - name: Install dependencies
+        run: '{{commands.install}}'
+
+      - name: The gate runtime is installed
+        run: |
+          if [ ! -x "$GATES/repo-close-claim" ]; then
+            echo "::error::repo-close-claim is missing — install the gate runtime package named in COMMANDS.md."
+            exit 1
+          fi
+
+      - name: Resolve and delete the task file(s) this PR closed
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: '"$GATES/repo-close-claim" --pr "$PR_NUMBER" --branch "$HEAD_REF"'
+
+      - name: Commit the deletion, only when there was one
+        # The whole tree is inspected rather than the register directory, because
+        # the step above is the only thing that has touched this checkout — so
+        # whatever it changed is exactly what should be committed, and the
+        # register's location never has to be repeated here.
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "No task file matched PR #$PR_NUMBER — nothing to commit."
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m "chore(coordination): close the claim merged by #$PR_NUMBER"
+          # Rebase first: a run for another pull request may have pushed since
+          # this one checked out.
+          git pull --rebase origin "$BASE_REF"
+          git push origin "HEAD:$BASE_REF"

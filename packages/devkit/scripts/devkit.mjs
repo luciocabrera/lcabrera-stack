@@ -13,7 +13,8 @@
  *   devkit sync [--profile <name>]
  *   devkit doctor [--check] [--verbose]
  *   devkit doctor --accept <path> --reason "<why>"
- *   devkit closure <directory> [<directory> ...]
+ *   devkit closure [--profile <name>] <directory> [<directory> ...]
+ *   devkit closure [--profile <name>] --shipped
  *
  * Exit codes: 0 = nothing to report, 1 = findings, drift under --check, or bad
  * arguments.
@@ -27,7 +28,8 @@ const USAGE = [
   '  devkit sync [--profile <name>]',
   '  devkit doctor [--check] [--verbose]',
   '  devkit doctor --accept <path> --reason "<why>"',
-  '  devkit closure <directory> [<directory> ...]',
+  '  devkit closure [--profile <name>] <directory> [<directory> ...]',
+  '  devkit closure [--profile <name>] --shipped',
 ].join('\n');
 
 /**

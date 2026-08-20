@@ -12,14 +12,14 @@ describe('describeEscape', () => {
         file: 'a.md',
         kind: 'requires',
         line: 3,
-        reference: 'config.paths.workflows',
+        reference: 'config.paths.dashboards',
       },
     ];
     expect(findings.map(describeEscape)).toEqual([
       'a.md:4  needs docs/a.md',
       'a.md:7  runs vp',
       'a.mjs:1  imports ts-morph',
-      'a.md:3  declares config.paths.workflows',
+      'a.md:3  declares config.paths.dashboards',
     ]);
   });
 });
@@ -36,7 +36,7 @@ describe('renderClosureReport', () => {
               file: 'skills/epic/SKILL.md',
               kind: 'requires',
               line: 3,
-              reference: 'config.paths.workflows',
+              reference: 'config.paths.dashboards',
             },
           ],
           fileCount: 1,
@@ -46,7 +46,7 @@ describe('renderClosureReport', () => {
       [
         '✓ skills/react-19 — self-contained',
         '✗ skills/epic',
-        '    skills/epic/SKILL.md:3  declares config.paths.workflows',
+        '    skills/epic/SKILL.md:3  declares config.paths.dashboards',
       ].join('\n'),
     );
   });

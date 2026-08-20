@@ -85,7 +85,43 @@ nothing gets exactly the plan they got before — the same separation
 files are quiet — the same place, and for the same reason, a peer's version is
 resolved once.
 
+**A file's mode travels with its content.** A git hook that is not executable is
+not a hook: git skips it without a word, which is the same clean run as a hook
+that passed. So `readFilesUnder` reads the bit and every entry carries it,
+including a refused one — nothing downstream has to know which group a path came
+from, and a hook is executable because the file this package ships is, not
+because of where it lands. The bit is set _after_ the write rather than passed to
+it, because `writeFileSync`'s mode applies only when it creates the file: an
+update over a file that had lost the bit would otherwise keep it lost for ever.
+
+**The closure gate measures the plan, and every profile.** The content it reads is
+the plan's, not the copy on disk: they are the same file wherever this repository
+materialises a group, and only the plan exists for a group it does not — the
+scaffolding seeds, which this repository holds its own versions of and must never
+overwrite. Reading from disk there would measure the repository's file and report
+the seed as checked. Running it per profile catches the mistake profiles make
+possible: a file in the small profile pointing at one only the wider profile
+places resolves for a consumer who took everything and dangles for the one who
+did not, so it can only be seen by checking the smaller set on its own.
+
+**A seed refers to its own directory relatively, so the layout is never
+interpolated.** There is no `{{paths.*}}` placeholder and none is needed: the
+register's README ships _into_ the register, so it links `tasks/_TEMPLATE.md`;
+the close-claim workflow inspects the whole tree rather than the register
+directory, because the step before it is the only thing that touched the
+checkout. A second substitution namespace would need its own failure semantics —
+every path key has a default, so it could never be `unresolved` the way a command
+is — for a need no seed actually has.
+
 ## Assets
 
 `assets/<group>/…` where the group name is the `paths` key that places it, so
-adding a group is a data change rather than a code change.
+adding a group is a data change rather than a code change. `root` is the group
+that lands at the repository root; its base is `.`, normalised away in
+`targetPathFor` so one file cannot become two paths — the manifest key, the
+acceptance key and closure's containment check are all string comparisons.
+
+A profile is a list of those groups, and the split is by who reads the result:
+`agent` is what an agent reads, `full` adds what CI and git run. A group named by
+a profile with no `paths` entry is dropped from the plan without a word, which is
+why a test asserts every grouped name is placed.

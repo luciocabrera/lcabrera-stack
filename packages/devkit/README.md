@@ -1,7 +1,8 @@
 # @repo/devkit
 
-Materialises this repository's agent setup — skills, path rules and subagent
-definitions — into a consumer repository, and reports what has diverged.
+Materialises this repository's agent setup — skills, path rules, subagent
+definitions, and the workflows, hooks, templates and registers that make them run
+— into a consumer repository, and reports what has diverged.
 
 Private while the mechanism is being proved here. It publishes as
 `@lcabrera/devkit` ([ADR-081](../../docs/decisions/ADR-081-ship-the-repo-setup-as-two-packages.md)).
@@ -67,11 +68,47 @@ produces confident nonsense.
 devkit sync [--profile <name>]        # materialise into the current repository
 devkit doctor [--check] [--verbose]   # report divergence; --check makes it fail
 devkit doctor --accept <path> --reason "<why>"   # this edit is deliberate
-devkit closure <dir> [<dir>...]       # what does this directory need that it lacks
+devkit closure [--profile <name>] <dir> [<dir>...]   # what does this directory need that it lacks
+devkit closure [--profile <name>] --shipped          # the same, for everything the package places
 ```
 
 In this repository they are also `vp run devkit:sync`, `vp run devkit:doctor`
 and `vp run devkit:closure`.
+
+`--shipped` without a profile checks **every** profile in turn, and that is the
+form worth running. Checking only the one this repository happens to use leaves
+the rest measured by nothing, and it is the only way to catch a file in the small
+profile pointing at one the large profile places: that reference resolves for a
+consumer who took everything and dangles for the one who did not, so it can only
+be seen by checking the smaller set on its own.
+
+## Profiles
+
+A profile decides which groups of files a sync places, and the split is by who
+reads the result.
+
+| Profile | What it places                                                                                                                                   |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `agent` | What an agent reads: skills, path rules, subagent definitions, and the contracts and coordination register they bind to.                         |
+| `full`  | All of that, plus what CI and git run: the workflows, the git hooks, the pull-request and issue templates, the decision home, and `COMMANDS.md`. |
+
+A consumer who wants the prose and keeps their own process takes `agent` and
+receives none of the scaffolding. `full` is the whole setup.
+
+**Two things a sync cannot do for you**, because neither is a file:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+points git at the seeded hooks — without it they sit there and never run. And the
+seeded workflows read `.node-version`, so a repository without one fails its
+first run on the setup step. That is deliberate: failing there is loud, where
+silently using whatever Node the runner happened to have is not.
+
+The hooks arrive **executable**, because the mode travels with the content. A
+hook without the bit is skipped by git without a word, which reads exactly like a
+hook that ran and passed.
 
 ## Acknowledging a deliberate edit
 
@@ -118,15 +155,28 @@ moves on**. `--verbose` is how you find what is being held back.
   "paths": {
     "agents": ".claude/agents",
     "coordination": "docs/coordination",
+    "decisions": "docs/decisions",
     "docs": "docs/agents",
+    "hooks": ".githooks",
+    "root": ".",
     "rules": ".claude/rules",
-    "skills": ".github/skills"
+    "skills": ".github/skills",
+    "templates": ".github",
+    "workflows": ".github/workflows"
   },
   "commands": {
-    "install": "vp install"
+    "install": "vp install",
+    "check": "vp run check:push",
+    "test": "vp run test:changed",
+    "audit": "vp run deps:audit"
   }
 }
 ```
+
+Every `paths` key is a group of shipped files, and `hooks` defaults to
+`.githooks` rather than to any one toolchain's hook directory: git runs whatever
+`core.hooksPath` names, so naming the directory a particular runner owns would
+put the seeds where a consumer on another runner never looks.
 
 `commands` answers the placeholders a shipped file carries. A skill's procedure
 travels but the command carrying out each step does not, so the file says

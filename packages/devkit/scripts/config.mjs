@@ -18,28 +18,55 @@ export const CONFIG_FILE_NAME = 'devkit.config.json';
  * legitimately keep skills elsewhere; the commands are empty because there is
  * no honest default for another repository's toolchain, and a wrong one would
  * be worse than an absent one.
+ *
+ * `hooks` defaults to `.githooks` rather than to any one toolchain's hook
+ * directory: git runs whatever `core.hooksPath` names, so naming the directory a
+ * particular runner owns would put the seeds where a consumer on another runner
+ * never looks.
  */
 export const DEFAULT_CONFIG = {
   commands: {},
   paths: {
     agents: '.claude/agents',
     coordination: 'docs/coordination',
+    decisions: 'docs/decisions',
     docs: 'docs/agents',
+    hooks: '.githooks',
+    root: '.',
     rules: '.claude/rules',
     skills: '.github/skills',
+    templates: '.github',
+    workflows: '.github/workflows',
   },
   profile: 'agent',
 };
 
-/** Which asset groups a profile materialises. */
 /**
- * `docs` and `coordination` are in the agent profile because the skills cannot
- * run without them: an orchestration contract or a claim protocol that does not
- * arrive leaves a skill whose first instruction is to read a missing file.
+ * Which asset groups a profile materialises, split by who reads the result.
+ *
+ * `agent` is what an agent reads: the skills, the path rules, the subagent
+ * definitions, and the contracts they bind to. `docs` and `coordination` are in
+ * it because the skills cannot run without them — an orchestration contract or a
+ * claim protocol that does not arrive leaves a skill whose first instruction is
+ * to read a missing file.
+ *
+ * `full` adds what CI, git and the gates run: the workflows, the hooks, the
+ * templates those gates check against, the ADR home the ADR gate reads, and the
+ * command reference. A consumer who wants the prose and keeps their own process
+ * takes `agent` and gets none of it.
  */
+const AGENT_GROUPS = ['skills', 'rules', 'agents', 'docs', 'coordination'];
+
 export const PROFILES = {
-  agent: ['skills', 'rules', 'agents', 'docs', 'coordination'],
-  full: ['skills', 'rules', 'agents', 'docs', 'coordination'],
+  agent: AGENT_GROUPS,
+  full: [
+    ...AGENT_GROUPS,
+    'decisions',
+    'templates',
+    'workflows',
+    'hooks',
+    'root',
+  ],
 };
 
 const isPlainObject = (value) =>
@@ -75,6 +102,15 @@ export const resolveConfig = (raw) => {
 };
 
 /**
+ * A base of `.` — which is what places a file at the repository root — would
+ * otherwise produce `./COMMANDS.md`, and that is a DIFFERENT string from the
+ * `COMMANDS.md` every other part of this package resolves to: the manifest key,
+ * the acceptance key and closure's containment check are all string comparisons.
+ * Normalising here is what keeps one file from being two paths.
+ */
+const RELATIVE_PREFIX = /^\.\//;
+
+/**
  * Where one asset lands. Assets are stored under a group directory whose name
  * is the config key that places it, so adding a group is a data change rather
  * than a code change.
@@ -83,7 +119,7 @@ export const targetPathFor = ({ assetPath, config }) => {
   const [group, ...rest] = assetPath.split('/');
   const base = config.paths[group];
   if (base === undefined || rest.length === 0) return undefined;
-  return [base, ...rest].join('/');
+  return [base, ...rest].join('/').replace(RELATIVE_PREFIX, '');
 };
 
 export const groupsFor = (config) => PROFILES[config.profile] ?? [];

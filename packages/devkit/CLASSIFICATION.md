@@ -119,6 +119,48 @@ definition is executed, not read. Its commands and the paths it reads are its
 whole input, so an unanswered one leaves an agent that runs and reports without
 having examined anything — which reads exactly like a pass.
 
+## Scaffolding
+
+The gates a consumer installs are only half of what makes them run. The workflows
+that invoke them, the hooks that run them before a push, the templates they check
+against and the registers they read are path-discovered exactly like a skill, so
+they use the same mechanism and the same manifest — and they are the most
+repository-coupled material in the set, which is why every one is a rewrite
+rather than a copy.
+
+They ship under the **`full`** profile rather than `agent`, because that is where
+the line falls: `agent` is what an agent reads, `full` adds what CI and git run.
+
+| Seed                                                        | Verdict          | Dependency | Reason                                                                                                                                                                                                                 |
+| ----------------------------------------------------------- | ---------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `workflows/pr-standards.yml`                                | **parameterise** | **hard**   | The procedure is the gate runtime's; the install step is the consumer's. Refused outright without `commands.install`, since a workflow that cannot install cannot check anything.                                      |
+| `workflows/issue-standards.yml`                             | **parameterise** | **hard**   | Same shape, one gate.                                                                                                                                                                                                  |
+| `workflows/check.yml`                                       | **parameterise** | **hard**   | Format, lint, types and tests come from the command map; the register and decision gates come from the runtime. Needs `install`, `check` and `test`.                                                                   |
+| `workflows/coordination-close.yml`                          | **parameterise** | **hard**   | Deletes the task file a merged pull request claimed. The register's location comes from the runtime's own config, so the workflow never repeats it.                                                                    |
+| `workflows/dependency-audit.yml`                            | **parameterise** | **hard**   | The audit command is the consumer's; filing the finding as an issue against the seeded template is not.                                                                                                                |
+| `hooks/commit-msg`, `hooks/pre-push`                        | **parameterise** | **hard**   | Invoke the runtime's bins by install path, and the consumer's `check`/`test` for the rest. They arrive **executable** — a hook without the bit is skipped by git without a word, which reads like a hook that passed.  |
+| `templates/pull_request_template.md`                        | **portable**     | —          | The sections are the gate runtime's, and it names the allowed types itself when it rejects one.                                                                                                                        |
+| `templates/ISSUE_TEMPLATE/standard_issue.md`                | **portable**     | —          | Same.                                                                                                                                                                                                                  |
+| `coordination/README.md`, `coordination/tasks/_TEMPLATE.md` | **portable**     | —          | The claim protocol and the task schema, with this repository's board, its one-step claim command and its decision citations removed. In the `agent` profile, not `full`: the skills bind to it.                        |
+| `decisions/_TEMPLATE.md`                                    | **portable**     | —          | The record shape. The numbering rule travels; the taxonomy citation does not.                                                                                                                                          |
+| `decisions/README.md`                                       | **portable**     | —          | Generated, not authored: byte-identical to what the ADR gate renders for a default home, pinned by a drift test. Without it a fresh home fails its own gate; without the test it would drift into failing it silently. |
+| `root/COMMANDS.md`                                          | **portable**     | —          | Lists only what the two packages provide, and the config keys a consumer supplies.                                                                                                                                     |
+
+### Workflows deliberately not shipped
+
+Each is named so a later reader can tell "considered and kept back" from "not
+looked at".
+
+| Workflow                                                                                                       | Why not                                                                                                                                                                                                                              |
+| -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `sonar-issue-gate`, `lighthouse`                                                                               | Bound to an external account and its project keys. A seed carrying them is a workflow that fails on its first run.                                                                                                                   |
+| `claude-review`, `copilot-review-gate`, `copilot-setup-steps`, `agent-review-verdict`, `review-gate-reconcile` | Each needs a review integration and its credentials. A workflow that skips every step when a secret is absent reports success to a consumer who has nothing working, which is worse than not shipping it.                            |
+| `add-to-project`, `project-status`, `labeler`, `sync-labels`                                                   | This repository's planning board and label taxonomy. Useful, and true nowhere else.                                                                                                                                                  |
+| `release`, `release-audit`, `changelog`                                                                        | The Changesets flow of the `@lcabrera/*` packages specifically — the same verdict the `releasing` skill has.                                                                                                                         |
+| `secret-scan`                                                                                                  | Configured against this repository's scanner and its allowlist.                                                                                                                                                                      |
+| `validate-skills`                                                                                              | Checks the skills **this** repository authors, against its own layout. A consumer's skills are the ones it materialised, and the manifest already reports those.                                                                     |
+| `check-safe`                                                                                                   | Its shippable half is `workflows/check.yml`. The rest — four analysers, a coverage merge, the publishing gates and a long tail of verifiers reading this repository's own registers — is this repository's gate and travels nowhere. |
+
 ## What this means for the shipping order
 
 `codebase-explorer`, `react-19` and `react-router-framework-mode` need no
