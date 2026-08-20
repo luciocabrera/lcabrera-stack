@@ -1,14 +1,20 @@
 // @vitest-environment jsdom
 
 import { render } from '@testing-library/react';
+import { readdirSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vite-plus/test';
 
 import { BarChartIcon } from './BarChartIcon';
 import { CheckIcon } from './CheckIcon';
+import { CollapseAllIcon } from './CollapseAllIcon';
 import { ColumnsOrderIcon } from './ColumnsOrderIcon';
+import { CopyIcon } from './CopyIcon';
 import { DisclosureIcon } from './DisclosureIcon';
 import { EraserIcon } from './EraserIcon';
 import { ErrorIcon } from './ErrorIcon';
+import { ExpandAllIcon } from './ExpandAllIcon';
 import { EyeIcon } from './EyeIcon';
 import { EyeOffIcon } from './EyeOffIcon';
 import { FileTextIcon } from './FileTextIcon';
@@ -30,6 +36,7 @@ import { PinIcon } from './PinIcon';
 import { PinLeftIcon } from './PinLeftIcon';
 import { PinOffIcon } from './PinOffIcon';
 import { PinRightIcon } from './PinRightIcon';
+import { PlusIcon } from './PlusIcon';
 import { RefreshIcon } from './RefreshIcon';
 import { SettingsIcon } from './SettingsIcon';
 import { SortAscIcon } from './SortAscIcon';
@@ -76,12 +83,41 @@ const iconComponents = [
   { Component: SortDescIcon, defaultSize: 12, name: 'SortDescIcon' },
   { Component: SortNeutralIcon, defaultSize: 12, name: 'SortNeutralIcon' },
   { Component: SuccessIcon, defaultSize: 24, name: 'SuccessIcon' },
+  { Component: CollapseAllIcon, defaultSize: 16, name: 'CollapseAllIcon' },
+  { Component: CopyIcon, defaultSize: 24, name: 'CopyIcon' },
+  { Component: ExpandAllIcon, defaultSize: 16, name: 'ExpandAllIcon' },
+  { Component: PlusIcon, defaultSize: 24, name: 'PlusIcon' },
   { Component: UngroupRowsIcon, defaultSize: 16, name: 'UngroupRowsIcon' },
   { Component: UserIcon, defaultSize: 24, name: 'UserIcon' },
   { Component: WarningIcon, defaultSize: 24, name: 'WarningIcon' },
 ] as const;
 
+/**
+ * The icons this directory actually holds, read off disk.
+ *
+ * The sweep below is a hand-written list, which is what lets it assert each
+ * icon's own default size — but a hand-written list falls behind silently, and
+ * had: four icons were shipped uncovered, two of them added by the fold-all
+ * pair. So the list is checked against the directory rather than trusted, and a
+ * new icon fails here on the day it lands instead of whenever someone notices
+ * (#577).
+ */
+const iconDirectoryNames = readdirSync(
+  path.dirname(fileURLToPath(import.meta.url)),
+  { withFileTypes: true },
+)
+  .filter((entry) => entry.isDirectory() && entry.name.endsWith('Icon'))
+  .map((entry) => entry.name);
+
 describe('Icons', () => {
+  it('sweeps every icon this directory holds', () => {
+    expect(
+      iconComponents
+        .map(({ name }) => name)
+        .toSorted((a, b) => a.localeCompare(b)),
+    ).toStrictEqual(iconDirectoryNames.toSorted((a, b) => a.localeCompare(b)));
+  });
+
   it.each(iconComponents)('$name renders an svg element', ({ Component }) => {
     const { container } = render(<Component />);
     const svg = container.querySelector('svg');
