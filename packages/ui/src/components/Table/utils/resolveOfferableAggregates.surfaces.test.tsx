@@ -321,3 +321,55 @@ describe('what the two surfaces do with an applied aggregate', () => {
     ).toBe('false');
   });
 });
+
+/**
+ * The one rule neither surface can answer from a single column, and which both
+ * therefore compose on top of the stubbed predicate: a grouped read carries one
+ * `countDistinct` across every column together (#842).
+ *
+ * The stub still supplies legality, so these assertions cannot be satisfied by
+ * the catalogue — what is being exercised is `resolveAffordableAggregates`
+ * running for real on both surfaces. The applied aggregate sits on
+ * `order_status`, staged and live, so each surface withholds on the *other*
+ * column, and the header menu keeps it where it is applied.
+ */
+describe('the read-wide countDistinct budget on both surfaces', () => {
+  beforeEach(() => {
+    offerRef.current = ['count', 'countDistinct'];
+    draftAggregatesRef.current = [
+      { columnKey: 'order_status', fn: 'countDistinct' },
+    ];
+    liveAggregatesRef.current = [
+      { columnKey: 'order_status', fn: 'countDistinct' },
+    ];
+  });
+
+  it('withholds a second one from the drawer picker', () => {
+    render(<AddAggregateSection />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Total' }));
+
+    expect(listedFunctions()).toEqual(['Count']);
+  });
+
+  it('withholds it from another column menu and keeps it on the one carrying it', () => {
+    const { unmount } = render(
+      <AggregateActions columnKey='total_amount' onClose={vi.fn()} />,
+    );
+
+    expect(screen.queryByText('Distinct Count')).toBeNull();
+    // `getBy*` for the presence half: a menu that had lost `Count` as well
+    // should report what it did render, not merely that this was not null.
+    expect(screen.getByText('Count')).not.toBeNull();
+
+    unmount();
+    render(<AggregateActions columnKey='order_status' onClose={vi.fn()} />);
+
+    expect(
+      screen
+        .getByText('Distinct Count')
+        .closest('button')
+        ?.getAttribute('aria-pressed'),
+    ).toBe('true');
+  });
+});

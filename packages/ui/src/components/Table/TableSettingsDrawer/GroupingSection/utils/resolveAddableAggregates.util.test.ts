@@ -14,6 +14,22 @@ const numericCapability: TableColumnGroupingCapability = {
   typeName: 'numeric',
 };
 
+/** A dimension the catalogue offers both count flavours on. */
+const textCapability: TableColumnGroupingCapability = {
+  aggregates: ['count', 'countDistinct', 'max', 'min'],
+  canGroup: true,
+  column: 'order_status',
+  periods: [],
+  role: 'dimension',
+  typeName: 'text',
+};
+
+/** The same column narrowed to the two counts, so both gaps are reachable. */
+const countOnlyCapability: TableColumnGroupingCapability = {
+  ...textCapability,
+  aggregates: ['count', 'countDistinct'],
+};
+
 const unsupportedCapability: TableColumnGroupingCapability = {
   aggregates: [],
   canGroup: false,
@@ -34,7 +50,7 @@ describe('resolveAddableAggregates', () => {
         isGroupKey: false,
       }),
     ).toStrictEqual({
-      isExhausted: false,
+      gap: undefined,
       options: [
         { label: 'Count', value: 'count' },
         { label: 'Sum', value: 'sum' },
@@ -95,7 +111,7 @@ describe('resolveAddableAggregates', () => {
         columnKey: 'total_amount',
         isGroupKey: false,
       }),
-    ).toStrictEqual({ isExhausted: true, options: [] });
+    ).toStrictEqual({ gap: 'column-exhausted', options: [] });
   });
 
   it('does not call an empty list exhausted when nothing was legal', () => {
@@ -108,7 +124,7 @@ describe('resolveAddableAggregates', () => {
         columnKey: 'doc',
         isGroupKey: false,
       }),
-    ).toStrictEqual({ isExhausted: false, options: [] });
+    ).toStrictEqual({ gap: undefined, options: [] });
   });
 
   it('does not call an empty list exhausted while the column is a group key', () => {
@@ -119,7 +135,7 @@ describe('resolveAddableAggregates', () => {
         columnKey: 'total_amount',
         isGroupKey: true,
       }),
-    ).toStrictEqual({ isExhausted: false, options: [] });
+    ).toStrictEqual({ gap: undefined, options: [] });
   });
 
   it('does not call an empty list exhausted while no column is chosen', () => {
@@ -130,6 +146,81 @@ describe('resolveAddableAggregates', () => {
         columnKey: '',
         isGroupKey: false,
       }),
-    ).toStrictEqual({ isExhausted: false, options: [] });
+    ).toStrictEqual({ gap: undefined, options: [] });
+  });
+
+  it('omits a second distinct count while another column carries one', () => {
+    expect(
+      resolveAddableAggregates({
+        applied: [{ columnKey: 'shipped_city', fn: 'countDistinct' }],
+        capability: textCapability,
+        columnKey: 'order_status',
+        isGroupKey: false,
+      }).options.map(({ value }) => value),
+    ).toStrictEqual(['count', 'min', 'max']);
+  });
+
+  it('offers it again once that distinct count is cleared', () => {
+    expect(
+      resolveAddableAggregates({
+        applied: [{ columnKey: 'shipped_city', fn: 'count' }],
+        capability: textCapability,
+        columnKey: 'order_status',
+        isGroupKey: false,
+      }).options.map(({ value }) => value),
+    ).toStrictEqual(['count', 'countDistinct', 'min', 'max']);
+  });
+
+  it('reports the budget, not exhaustion, when that is what emptied the list', () => {
+    // Both gaps are reachable here and they send the user to different
+    // controls: this column is not fully measured — `countDistinct` is still
+    // legal on it — and the measure to remove is on another column entirely
+    // (#842).
+    expect(
+      resolveAddableAggregates({
+        applied: [
+          { columnKey: 'shipped_city', fn: 'countDistinct' },
+          { columnKey: 'order_status', fn: 'count' },
+        ],
+        capability: countOnlyCapability,
+        columnKey: 'order_status',
+        isGroupKey: false,
+      }),
+    ).toStrictEqual({ gap: 'count-distinct-spent', options: [] });
+  });
+
+  it('reports exhaustion when the column itself carries the distinct count', () => {
+    // The discriminating half: the same empty list, and the budget is spent —
+    // by this column. Nothing is withheld from it, so the answer is the #841
+    // message and the user is sent to this column's own measures.
+    expect(
+      resolveAddableAggregates({
+        applied: [
+          { columnKey: 'order_status', fn: 'count' },
+          { columnKey: 'order_status', fn: 'countDistinct' },
+        ],
+        capability: countOnlyCapability,
+        columnKey: 'order_status',
+        isGroupKey: false,
+      }),
+    ).toStrictEqual({ gap: 'column-exhausted', options: [] });
+  });
+
+  it('stays silent when the column was never offered a distinct count', () => {
+    // A column with nothing withheld has nothing to explain, so a spent budget
+    // elsewhere does not turn its ordinary exhaustion into the wrong message.
+    expect(
+      resolveAddableAggregates({
+        applied: [
+          { columnKey: 'shipped_city', fn: 'countDistinct' },
+          { columnKey: 'total_amount', fn: 'avg' },
+          { columnKey: 'total_amount', fn: 'count' },
+          { columnKey: 'total_amount', fn: 'sum' },
+        ],
+        capability: numericCapability,
+        columnKey: 'total_amount',
+        isGroupKey: false,
+      }),
+    ).toStrictEqual({ gap: 'column-exhausted', options: [] });
   });
 });

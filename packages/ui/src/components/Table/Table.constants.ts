@@ -108,6 +108,25 @@ export const TABLE_DRILL_ROW_FIELD: keyof TableDrillRow = 'tableDrill';
 export const MAX_TABLE_GROUP_KEYS = 4;
 
 /**
+ * How many `countDistinct` aggregates one grouped **read** may carry, across
+ * every column together. A duplicate of `MAX_COUNT_DISTINCT_AGGREGATES` in
+ * `@lcabrera/server` for the reason above, and pinned to it the same way, by
+ * `groupingContract.test.ts` in `apps/react-router`.
+ *
+ * **It is a budget, not a prohibition**, and the difference is what the surfaces
+ * withholding it have to say: `count(DISTINCT …)` costs a per-group tuplesort
+ * that is redone for every grouping set, so a second one repeats the most
+ * expensive part of the query. The SQL is legal; the cost is what is refused. A
+ * message reading "not allowed" would teach a user something false.
+ *
+ * Unlike `MAX_TABLE_GROUP_KEYS` this bounds the **whole request** rather than
+ * one column's answer, which is why no per-column predicate can enforce it —
+ * see `utils/isWithinCountDistinctBudget.util.ts` and its twin
+ * `utils/hasCountDistinctBudgetLeft.util.ts`.
+ */
+export const MAX_TABLE_COUNT_DISTINCT_AGGREGATES = 1;
+
+/**
  * Every aggregate's user-facing name, as a map **closed over the union** — so a
  * member added to `TableAggregateFn` is a compile error here rather than a menu
  * entry labelled with a SQL-ish token.

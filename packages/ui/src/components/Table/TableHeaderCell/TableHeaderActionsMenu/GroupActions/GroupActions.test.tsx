@@ -108,6 +108,16 @@ const numericCapability: TableColumnGroupingCapability = {
   typeName: 'numeric',
 };
 
+/** A dimension the catalogue offers both count flavours on. */
+const textCapability: TableColumnGroupingCapability = {
+  aggregates: ['count', 'countDistinct'],
+  canGroup: true,
+  column: 'order_status',
+  periods: [],
+  role: 'dimension',
+  typeName: 'text',
+};
+
 const GROUP_FIXTURE_KEYS = ['city', 'status'];
 
 const pathOf = (...labels: readonly string[]) =>
@@ -586,6 +596,75 @@ describe('GroupActions', () => {
       expect(mockRemoveColumnAggregate).toHaveBeenCalledWith({
         columnKey: 'total_amount',
       });
+    });
+
+    it('withholds a second Distinct Count while keeping the one that carries it', () => {
+      // Both halves in one test on purpose (#842): a rule that withheld the
+      // function everywhere would pass the first assertion and strand the user
+      // with a distinct count they cannot clear from the menu it was applied
+      // from — this menu toggles, so that item is the only way off.
+      capabilityRef.current = textCapability;
+      appliedAggregatesRef.current = [
+        { columnKey: 'order_status', fn: 'countDistinct' },
+      ];
+
+      const { unmount } = render(
+        <GroupActions columnKey='total_amount' onClose={mockOnClose} />,
+      );
+
+      expect(screen.queryByText('Distinct Count')).toBeNull();
+      // The rest of the same capability is untouched, so it is the budget doing
+      // the work and not the column falling out of the menu altogether.
+      expect(screen.getByText('Count')).not.toBeNull();
+      expect(screen.getByText('No Aggregate')).not.toBeNull();
+
+      unmount();
+      render(<GroupActions columnKey='order_status' onClose={mockOnClose} />);
+
+      expect(getButton('Distinct Count').getAttribute('aria-pressed')).toBe(
+        'true',
+      );
+
+      fireEvent.click(getButton('Distinct Count'));
+
+      expect(mockRemoveColumnAggregate).toHaveBeenCalledWith({
+        columnKey: 'order_status',
+        fn: 'countDistinct',
+      });
+    });
+
+    it('offers it again on every column once it is cleared', () => {
+      capabilityRef.current = textCapability;
+      appliedAggregatesRef.current = [
+        { columnKey: 'order_status', fn: 'countDistinct' },
+      ];
+
+      const { rerender } = render(
+        <GroupActions columnKey='total_amount' onClose={mockOnClose} />,
+      );
+
+      expect(screen.queryByText('Distinct Count')).toBeNull();
+
+      appliedAggregatesRef.current = [];
+      rerender(<GroupActions columnKey='total_amount' onClose={mockOnClose} />);
+
+      expect(getButton('Distinct Count').getAttribute('aria-pressed')).toBe(
+        'false',
+      );
+    });
+
+    it('is unmoved by another column carrying an aggregate that is not a distinct count', () => {
+      // The discriminating half: the withholding above is about `countDistinct`
+      // and the read's budget for it, not about the column being measured at
+      // all.
+      capabilityRef.current = textCapability;
+      appliedAggregatesRef.current = [
+        { columnKey: 'order_status', fn: 'count' },
+      ];
+
+      render(<GroupActions columnKey='total_amount' onClose={mockOnClose} />);
+
+      expect(screen.getByText('Distinct Count')).not.toBeNull();
     });
   });
   describe('folding every group at once', () => {

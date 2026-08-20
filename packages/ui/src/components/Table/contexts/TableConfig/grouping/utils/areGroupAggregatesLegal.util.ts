@@ -1,17 +1,20 @@
 import type { TableColumnAggregate } from '#ui/components/Table/Table.types';
 
+import { isWithinCountDistinctBudget } from '#ui/components/Table/utils/isWithinCountDistinctBudget.util';
 import { toTableAggregateToken } from '#ui/components/Table/utils/tableAggregateToken.util';
 
 /**
  * Whether an aggregate list is a legal **shape** for a grouping: no
- * `(columnKey, fn)` pair repeated.
+ * `(columnKey, fn)` pair repeated, and no more `countDistinct` aggregates than
+ * one read can carry.
  *
  * `areGroupKeysLegal` beside this one is the model, and the reason is the same:
  * the store is the boundary a published package exposes to a consumer writing
  * their own loader, and a shape the table cannot render must be refused there
- * rather than seeded. There is no depth cap to check — a column may carry as
- * many measures as the catalogue offers (#831) — so distinctness is the whole
- * question.
+ * rather than seeded. There is no cap on how many measures a column may carry —
+ * as many as the catalogue offers (#831) — but there is one on `countDistinct`
+ * across the whole list, and it is the same kind of answerable-from-the-list-alone
+ * question as the depth cap that predicate checks (#842).
  *
  * **This guard is new because the shape change removed the one that was
  * implicit.** While `aggregates` was a column-to-function map a repeated pair
@@ -26,8 +29,7 @@ import { toTableAggregateToken } from '#ui/components/Table/utils/tableAggregate
  * only: whether a column exists, and whether the catalogue permits the function
  * on it (ADR-058), are questions the store cannot answer and stay with
  * `sanitizeGroupingByColumns` and the server. `sanitizeGroupingByColumns` asks
- * this same distinctness question at the URL boundary and refuses whole there
- * too.
+ * these same two questions at the URL boundary and refuses whole there too.
  *
  * Comparing whole tokens is sound where **joining** them would not be (see
  * `getShareDenominators`): the token is injective over `(columnKey, fn)` because
@@ -38,4 +40,4 @@ export const areGroupAggregatesLegal = (
   aggregates: readonly TableColumnAggregate[],
 ) =>
   new Set(aggregates.map((entry) => toTableAggregateToken(entry))).size ===
-  aggregates.length;
+    aggregates.length && isWithinCountDistinctBudget(aggregates);

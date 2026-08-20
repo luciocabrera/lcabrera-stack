@@ -3,6 +3,7 @@ import type { TableGroupingState } from '#ui/components/Table/Table.types';
 
 import { isShareableAggregate } from '#ui/components/Table/contexts/TableConfig/grouping/utils';
 import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
+import { isWithinCountDistinctBudget } from '#ui/components/Table/utils/isWithinCountDistinctBudget.util';
 import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
 import { toTableAggregateToken } from '#ui/components/Table/utils/tableAggregateToken.util';
 
@@ -52,6 +53,13 @@ const NO_GROUPING: TableGroupingState = {
  * pair repeats, and it refuses a repeat whole for the reason it refuses a
  * duplicate key (#831).
  *
+ * It can see one thing more, and it is not a per-column question at all: how
+ * many `countDistinct` aggregates the list carries between them. The read takes
+ * `MAX_TABLE_COUNT_DISTINCT_AGGREGATES` of them, so a link naming two is refused
+ * here rather than sent and refused by `assertGroupAggregates` (#842). Whole,
+ * like the rest: which of the two to keep is a question the link never answered,
+ * and a table quietly showing one of them is not the table the link promised.
+ *
  * A **granularity** splits along the same seam (#786). That it names one of the
  * keys is structural, so it is refused here; that the column is a date at all,
  * and that this granularity clears the cardinality guard, are catalogue answers,
@@ -90,6 +98,7 @@ export const sanitizeGroupingByColumns = <
   // identity, so a repeated one gives the staged list two rows nothing can tell
   // apart and a share no way to say which of them it belongs to (#831).
   const areAggregatesDistinct = appliedAggregates.size === aggregates.length;
+  const isCountDistinctAffordable = isWithinCountDistinctBudget(aggregates);
   const appliedKeys = new Set(keys);
   const isEveryGranularityOnAKey = Object.keys(periods).every((column) =>
     appliedKeys.has(column),
@@ -120,6 +129,7 @@ export const sanitizeGroupingByColumns = <
     areKeysDistinct &&
     isEveryAggregateColumnDeclared &&
     areAggregatesDistinct &&
+    isCountDistinctAffordable &&
     isEveryGranularityOnAKey &&
     isEveryShareOnAShareableAggregate &&
     areSharesDistinct

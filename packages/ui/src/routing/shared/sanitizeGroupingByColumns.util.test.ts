@@ -286,6 +286,44 @@ describe('sanitizeGroupingByColumns', () => {
     ).toStrictEqual([]);
   });
 
+  it('refuses a URL naming two countDistinct aggregates', () => {
+    // Not a duplicated pair and not an undeclared column — two individually
+    // legal aggregates the *read* cannot carry together, because
+    // `count(DISTINCT …)` re-sorts every group and the builder budgets one
+    // (#842). Refused here so the link states a refusal instead of making a
+    // round trip that ends in one.
+    expect(
+      sanitizeGroupingByColumns({
+        columns,
+        grouping: grouping({
+          aggregates: [
+            { columnKey: 'name', fn: 'countDistinct' },
+            { columnKey: 'id', fn: 'countDistinct' },
+          ],
+          keys: ['status'],
+        }),
+      }),
+    ).toStrictEqual(NO_GROUPING);
+  });
+
+  it('keeps a single countDistinct beside other aggregates', () => {
+    // The discriminating half: a rule counting aggregates rather than
+    // *distinct-count* ones would refuse this too, and one keyed on the column
+    // would have let the pair above through, since those name two columns.
+    const applied = grouping({
+      aggregates: [
+        { columnKey: 'name', fn: 'countDistinct' },
+        { columnKey: 'id', fn: 'sum' },
+        { columnKey: 'name', fn: 'count' },
+      ],
+      keys: ['status'],
+    });
+
+    expect(
+      sanitizeGroupingByColumns({ columns, grouping: applied }),
+    ).toStrictEqual(applied);
+  });
+
   it('refuses a repeated share, as it refuses a repeated key', () => {
     // Every reader downstream treats the shares as a set, so a duplicate makes
     // the change detector compare a length against a set's size and report a

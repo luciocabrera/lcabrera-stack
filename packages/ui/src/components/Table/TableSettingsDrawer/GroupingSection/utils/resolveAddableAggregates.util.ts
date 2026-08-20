@@ -4,7 +4,9 @@ import type {
 } from '#ui/components/Table/Table.types';
 
 import { TABLE_AGGREGATE_LABELS } from '#ui/components/Table/Table.constants';
-import { resolveOfferableAggregates } from '#ui/components/Table/utils/resolveOfferableAggregates.util';
+import { resolveAffordableAggregates } from '#ui/components/Table/utils/resolveAffordableAggregates.util';
+
+import { resolveAggregatePickerGap } from './resolveAggregatePickerGap.util';
 
 type ResolveAddableAggregatesArgs = {
   /** Every aggregate staged in the drawer, across every column. */
@@ -19,8 +21,8 @@ type ResolveAddableAggregatesArgs = {
 
 /**
  * The functions the drawer's "Add Aggregate" picker may still offer for the
- * chosen column, as select options — the offerable set minus what the column
- * already carries.
+ * chosen column, as select options — what the request can afford, minus what
+ * the column already carries.
  *
  * **The subtraction lives here rather than in `resolveOfferableAggregates`, and
  * the asymmetry is deliberate** (#841). The shared predicate answers "may this
@@ -35,13 +37,21 @@ type ResolveAddableAggregatesArgs = {
  * toggle-off affordance away. Teaching the shared predicate about applied
  * aggregates would force one answer on both, so the picker composes instead.
  *
- * `isExhausted` separates the two ways the list can be empty, which the length
- * alone cannot: every legal function is already applied, versus none was legal
- * to begin with (an unaggregatable column, an active group key, or no column
- * chosen yet). Only the first has something to say — the column list still
- * offers such a column, by design (#830 owns that list and does not subtract),
- * so the picker has to explain why it went quiet rather than render an empty
- * control.
+ * The **whole-request** rule composes for the same reason, one layer further
+ * out: `resolveAffordableAggregates` withholds a second `countDistinct` from
+ * both surfaces (#842), and it stays there rather than being folded in here,
+ * because this util serves the picker alone and the header menu needs that rule
+ * too.
+ *
+ * `gap` separates the ways the list can be empty, which the length alone cannot:
+ * the read has no room for another distinct count, versus every legal function
+ * is already applied, versus none was legal to begin with (an unaggregatable
+ * column, an active group key, or no column chosen yet). Only the first two have
+ * anything to say, and they say different things — the column list still offers
+ * such a column, by design (#830 owns that list and does not subtract), so the
+ * picker has to explain why it went quiet rather than render an empty control.
+ * `resolveAggregatePickerGap` beside this file decides which cause it is, and
+ * carries the ordering that decision needs.
  */
 export const resolveAddableAggregates = ({
   applied,
@@ -49,18 +59,28 @@ export const resolveAddableAggregates = ({
   columnKey,
   isGroupKey,
 }: ResolveAddableAggregatesArgs) => {
-  const offered = resolveOfferableAggregates({ capability, isGroupKey });
+  const { affordable, withheld } = resolveAffordableAggregates({
+    applied,
+    capability,
+    columnKey,
+    isGroupKey,
+  });
   const appliedFns = new Set(
     applied
       .filter((aggregate) => aggregate.columnKey === columnKey)
       .map((aggregate) => aggregate.fn),
   );
-  const options = offered
+  const options = affordable
     .filter((fn) => !appliedFns.has(fn))
     .map((fn) => ({ label: TABLE_AGGREGATE_LABELS[fn], value: fn }));
 
   return {
-    isExhausted: options.length === 0 && offered.length > 0,
+    gap: resolveAggregatePickerGap({
+      affordable,
+      appliedFns,
+      hasOptions: options.length > 0,
+      withheld,
+    }),
     options,
   };
 };
