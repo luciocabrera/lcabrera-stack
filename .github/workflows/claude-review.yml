@@ -2,8 +2,16 @@ name: Claude Review
 
 # A second AI reviewer, running in-workflow, alongside the Copilot code review bot
 # requested by ruleset 19141543. Neither one supersedes the other: this file only posts a
-# review, and copilot-review-gate.yml decides — for both reviewers, identically — whether
-# the newest accepted review names the head.
+# review, and copilot-review-gate.yml is what decides whether the newest accepted review
+# names the head.
+#
+# THAT GATE DOES NOT ACCEPT THIS REVIEWER YET, and the sentence above is about where this
+# is going rather than where it is. `scripts/lib/copilot-review.mjs` filters the review
+# list through `isCopilotReviewer` before comparing heads, so a review posted here is
+# dropped before the comparison runs — #835 widens that set to an explicit named set, and
+# only then do the two reviewers get treated identically. The shape is already right:
+# `COMMENTED` is one of the states the gate counts, so nothing but the author filter
+# stands between this review and the verdict.
 #
 # Deliberately does NOT publish a commit status. Two writers to one status context can
 # disagree about the head, which is the exact failure the gate was built to make visible.
@@ -31,19 +39,38 @@ concurrency:
 
 jobs:
   review:
-    # Drafts are excluded to match the gate's treatment of `converted_to_draft`.
+    # Drafts are skipped because a review of a draft is paid for twice — once now and again
+    # when it is marked ready. This is NOT the gate's treatment of a draft, which is the
+    # opposite: `copilot-review-gate.yml` subscribes to `converted_to_draft` precisely so a
+    # pull request pulled back to draft still reports, and `copilot-review.mjs` carries a
+    # draft-specific pending description for it. Skipping here leaves that gate pending,
+    # which is correct — a draft cannot merge.
     if: github.event.pull_request.draft == false
     name: Review the pull request with Claude
     runs-on: ubuntu-latest
+    # The only job in this repository whose duration a model decides rather than a script.
+    # Without a bound a wedged run holds a runner for the 360-minute default and spends
+    # tokens the whole time — the cost the concurrency group above is otherwise careful
+    # about. `review-gate-reconcile.yml` bounds itself at 15 and `lighthouse.yml` at 30;
+    # this is sized for a large diff, not for the small ones it usually sees.
+    timeout-minutes: 20
     steps:
       - name: Check out the merge ref for this pull request
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       # Fork pull requests receive an empty CLAUDE_CODE_OAUTH_TOKEN — secrets are not exposed
-      # to them — so the action exits without spending anything and no review is posted. That
-      # is fail-closed and matches the gate's existing fork behaviour, where the status is
-      # absent rather than red. It is NOT to be "fixed" with pull_request_target in this
-      # change; that trades a documented absence for secret exposure on untrusted code.
+      # to them — so the action exits without spending anything and no review is posted.
+      #
+      # It ends RED here, not absent, and that is the one thing worth being precise about.
+      # The action calls `core.setFailed` on both fork paths — a non-write actor is refused
+      # before any credential is read, and a write actor with no secret fails validation —
+      # so the job fails and the check shows red. `copilot-review-gate.yml` is the one that
+      # is absent-rather-than-red: it warns and runs the script with `--dry-run`, exiting 0.
+      # Both are fail-closed and neither publishes a status from a fork, but they do not look
+      # the same on the pull request, and a reader who expects them to will misread this one.
+      #
+      # It is NOT to be "fixed" with pull_request_target; that trades a visible failure for
+      # secret exposure on untrusted code.
       - name: Run the Claude review
         uses: anthropics/claude-code-action@5ee796a55f92566ecd7e39d70dd613abcbea0d7c # v1
         with:
@@ -64,12 +91,23 @@ jobs:
             Review the changes in pull request #${{ github.event.pull_request.number }}
             of ${{ github.repository }}.
 
-            Read the diff with `gh pr diff ${{ github.event.pull_request.number }}`, and read
-            whatever else you need for context. Judge correctness first, then whether the
-            change fits the conventions the surrounding code already follows. This repository
-            states those conventions in AGENTS.md and in the rule files it points at; they are
-            available to you in the checkout and they are what a finding should be measured
-            against.
+            First, check that this run is still current:
+            `gh pr view ${{ github.event.pull_request.number }} --json headRefOid`. If the head
+            is not ${{ github.event.pull_request.head.sha }}, stop and post nothing — another
+            push has superseded this run, and a review naming a commit that is no longer the
+            head is the exact confusion the review gate exists to remove.
+
+            Read the diff with `gh pr diff ${{ github.event.pull_request.number }}`, then read
+            the files it touches and what sits immediately around them. Judge correctness
+            first, then whether the change fits the conventions the surrounding code already
+            follows. Consult AGENTS.md or a file under `.claude/rules/` when a specific line
+            makes you doubt a convention — do not survey the repository to build a picture
+            first. Every turn re-sends the whole context, so reading widely is paid for on
+            every turn that follows it, and a review is worth what it says rather than what
+            it read.
+
+            Keep the review proportionate to the diff. A one-file change deserves a short
+            review; length is not thoroughness.
 
             Then post the review. ALWAYS post it, whether or not you found anything.
 
@@ -91,6 +129,16 @@ jobs:
             distinguishable by anyone reading the pull request.
 
             Post exactly one review. Do not push commits, edit files, or open issues.
+          # `Bash(gh api:*)` was the first shape and it is a write-capable wildcard: the
+          # allowlist matches a command prefix, the session token carries `pull-requests:
+          # write`, and `gh api` reaches every endpoint that token covers with any method.
+          # The instruction in the prompt not to open issues is guidance to a model, not a
+          # constraint on a tool. Narrowing to this repository's pull requests keeps the
+          # review post and drops the rest of the surface.
+          #
+          # The cost is real and worth knowing: it also stops the reviewer verifying a claim
+          # against a third-party source, which is how the first good review confirmed what
+          # the action does. Repository files stay readable through Read/Grep/Glob.
           claude_args: >-
             --model claude-opus-5
-            --allowedTools "Read,Grep,Glob,Write,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh api:*)"
+            --allowedTools "Read,Grep,Glob,Write,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh api repos/${{ github.repository }}/pulls/:*)"
