@@ -10,15 +10,22 @@
 
 import { mkdirSync, mkdtempSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { describe, expect, test } from 'vite-plus/test';
 
 import { DEFAULT_CONFIG } from './config.mjs';
+import { readFilesUnder } from './files.mjs';
 import { hashContent } from './manifest.mjs';
 import { applySync, planSync } from './sync.mjs';
 
 const EXECUTABLE_BITS = 0o111;
+
+const ASSETS_DIR = join(
+  dirname(dirname(fileURLToPath(import.meta.url))),
+  'assets',
+);
 
 const scratch = () => mkdtempSync(join(tmpdir(), 'devkit-exec-'));
 
@@ -114,5 +121,35 @@ describe('applySync honours the mode', () => {
 
     const mode = statSync(join(root, path)).mode;
     expect(mode & EXECUTABLE_BITS).not.toBe(0);
+  });
+});
+
+describe('the mode this package ships its hooks with', () => {
+  // Everything above tests what happens once `executable` is true. This tests
+  // the one input it all reads: the mode the hook files are COMMITTED with.
+  // Nothing else in the tree asserts it, and if either is ever recreated,
+  // rewritten by a tool, or checked out with core.fileMode off, `executable`
+  // reads false, the chmod is skipped, and the consumer receives a hook git
+  // skips without a word — a clean `sync` either way.
+  const assets = readFilesUnder({ directory: ASSETS_DIR, root: ASSETS_DIR });
+
+  test('every hook is executable', () => {
+    const hooks = assets.filter((asset) => asset.path.startsWith('hooks/'));
+
+    expect(hooks.length).toBeGreaterThan(0);
+    expect(hooks.filter((hook) => !hook.executable)).toEqual([]);
+  });
+
+  test('nothing else is', () => {
+    // The other direction, because an accidental chmod on a document is how a
+    // consumer ends up with an executable markdown file and no reason for it.
+    // A future shipped script outside `hooks/` should fail here and be added
+    // deliberately rather than by a mode nobody looked at.
+    const stray = assets
+      .filter((asset) => !asset.path.startsWith('hooks/'))
+      .filter((asset) => asset.executable)
+      .map((asset) => asset.path);
+
+    expect(stray).toEqual([]);
   });
 });
