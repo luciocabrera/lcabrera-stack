@@ -22,11 +22,28 @@ import { resolveHostRoot } from './host-root.mjs';
 export const CONFIG_FILE_NAME = 'devkit.config.json';
 
 /**
+ * How a reader of a generated index is told to run these gates.
+ *
+ * Configuration rather than a constant, because the answer differs per
+ * repository and an index naming the wrong one is a page instructing its reader
+ * to run something that does not exist. `npx` is the default because it is the
+ * one spelling that resolves wherever the package is installed — a bare bin name
+ * does not, since `node_modules/.bin` is not on a plain shell's PATH. A
+ * repository that drives everything through a task runner declares its own.
+ */
+export const DEFAULT_ADR_COMMANDS = {
+  list: 'npx repo-verify-adrs --list',
+  new: 'npx repo-adr',
+  write: 'npx repo-verify-adrs --write',
+};
+
+/**
  * One home, because that is all a repository is assumed to have. A repository
  * that keeps a second — decisions internal to one app, say — declares both, and
  * the order it declares them in is the order they are reported.
  */
 export const DEFAULT_REGISTERS = {
+  adrCommands: DEFAULT_ADR_COMMANDS,
   adrHomes: [
     {
       blurb: 'Architecture decisions for this repository.',
@@ -200,6 +217,21 @@ const containedHome = (home) => ({
   tier: home.tier.trim(),
 });
 
+/**
+ * Each command taken on its own, so a repository that declares one still gets a
+ * working spelling for the two it did not — a half-declared block would
+ * otherwise leave the rest naming nothing.
+ */
+const resolveAdrCommands = (block) => {
+  const declared = isPlainObject(block) ? block : {};
+  return Object.fromEntries(
+    Object.entries(DEFAULT_ADR_COMMANDS).map(([key, fallback]) => [
+      key,
+      readableString(declared[key], fallback),
+    ]),
+  );
+};
+
 export const resolveRegisters = (raw) => {
   if (raw === undefined) return DEFAULT_REGISTERS;
   const parsed = parseConfig(raw);
@@ -207,8 +239,16 @@ export const resolveRegisters = (raw) => {
   const homes = Array.isArray(block.adrHomes)
     ? block.adrHomes.filter(readableHome).map(containedHome)
     : [];
+  const adrCommands = resolveAdrCommands(block.adrCommands);
+  const declaredHomes = homes.length > 0 ? homes : DEFAULT_REGISTERS.adrHomes;
+
   return {
-    adrHomes: homes.length > 0 ? homes : DEFAULT_REGISTERS.adrHomes,
+    adrCommands,
+    // Carried on every home, because the index renderer takes a home and
+    // nothing else: a repository's own spelling has to reach it that way, or it
+    // would have to be read from module state — and then anything rendering an
+    // index for somewhere else would silently get this repository's.
+    adrHomes: declaredHomes.map((home) => ({ ...home, commands: adrCommands })),
     adrDraftDir: repoRelative(
       block.adrDraftDir,
       DEFAULT_REGISTERS.adrDraftDir,

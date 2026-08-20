@@ -8,12 +8,17 @@
         "title": "Repository, packages & tooling"
       },
       {
-        "blurb": "Decisions internal to the `apps/react-router` showcase app — its components, routes and interaction model.",
+        "blurb": "Decisions internal to the `apps/react-router` showcase app \u2014 its components, routes and interaction model.",
         "dir": "apps/react-router/docs/decisions",
         "tier": "app",
         "title": "React Router showcase app"
       }
-    ]
+    ],
+    "adrCommands": {
+      "list": "vp run adr:list",
+      "new": "vp run adr:new",
+      "write": "vp run adr:verify -- --write"
+    }
   },
   "publishing": {
     "publicPackageDirs": [

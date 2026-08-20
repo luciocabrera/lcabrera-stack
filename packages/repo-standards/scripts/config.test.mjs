@@ -8,6 +8,7 @@ import {
   CONFIG_FILE_NAME,
   DEFAULT_CONVENTIONS,
   DEFAULT_PUBLISHING,
+  DEFAULT_ADR_COMMANDS,
   DEFAULT_REGISTERS,
   readCoordinationPaths,
   resolveConventions,
@@ -81,7 +82,11 @@ describe('resolveRegisters', () => {
     expect(
       resolveRegisters(JSON.stringify({ registers: { adrHomes: homes } }))
         .adrHomes,
-    ).toEqual(homes);
+    ).toEqual(
+      // Every home carries the repository's command spellings, because the index
+      // renderer takes a home and nothing else.
+      homes.map((home) => ({ ...home, commands: DEFAULT_ADR_COMMANDS })),
+    );
   });
 
   it('drops a home with nowhere to be or nothing to call itself', () => {
@@ -92,7 +97,12 @@ describe('resolveRegisters', () => {
         },
       }),
     );
-    expect(resolved.adrHomes).toEqual(DEFAULT_REGISTERS.adrHomes);
+    expect(resolved.adrHomes).toEqual(
+      DEFAULT_REGISTERS.adrHomes.map((home) => ({
+        ...home,
+        commands: DEFAULT_ADR_COMMANDS,
+      })),
+    );
   });
 
   it('overrides the template home and the tasks directory independently', () => {
