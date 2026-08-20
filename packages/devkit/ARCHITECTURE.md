@@ -5,16 +5,17 @@ can travel, and **moving** it into a consumer's tree.
 
 ## Modules
 
-| Module                              | Responsibility                                                                                               |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `closure-extract.mjs`               | Pull references out of a file: markdown links, prose and command-line paths, shell commands, module imports. |
-| `closure.mjs`                       | Decide whether each reference escapes the directory being shipped. Pure.                                     |
-| `closure-report.mjs`                | Walk a directory, run the analysis, render it.                                                               |
-| `config.mjs`                        | Resolve `devkit.config.json` and map an asset onto its destination. Pure.                                    |
-| `manifest.mjs`                      | Hash files, and decide what happens to each on the next run. Pure.                                           |
-| `sync.mjs`                          | Turn assets plus a manifest into a plan, then apply it.                                                      |
-| `command-materialise.mjs`           | The plan `sync` and `doctor` share.                                                                          |
-| `command-closure.mjs`, `devkit.mjs` | The commands, and the dispatcher.                                                                            |
+| Module                              | Responsibility                                                                                                |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `closure-extract.mjs`               | Pull references out of a file: markdown links, prose and command-line paths, shell commands, module imports.  |
+| `closure.mjs`                       | Decide whether each reference escapes the directory being shipped. Pure.                                      |
+| `closure-report.mjs`                | Walk a directory, run the analysis, render it.                                                                |
+| `config.mjs`                        | Resolve `devkit.config.json`, map an asset onto its destination, and answer both questions about a key. Pure. |
+| `frontmatter.mjs`                   | Read a shipped file's `requires:` declaration — the config keys it cannot run without. Pure.                  |
+| `manifest.mjs`                      | Hash files, and decide what happens to each on the next run. Pure.                                            |
+| `sync.mjs`                          | Turn assets plus a manifest into a plan, then apply it.                                                       |
+| `command-materialise.mjs`           | The plan `sync` and `doctor` share.                                                                           |
+| `command-closure.mjs`, `devkit.mjs` | The commands, and the dispatcher.                                                                             |
 
 ## Two decisions worth not undoing
 
@@ -34,6 +35,14 @@ real findings — a skill's own reference file reported as an escape.
 may point at anything the package also ships, wherever it lands. The alternative
 — every directory self-sufficient — forces a shared contract document to be
 copied into each skill that reads it, and then they drift.
+
+**A declared requirement is checked by two different questions, on purpose.**
+`sync` asks `hasConfigKey` — does _this_ consumer have that key, so should this
+file be written into _their_ tree. `closure` asks `allowedConfigKeys` — is the
+key even part of what `devkit.config.json` is for, so could _any_ consumer have
+it. A key that resolves here and sits outside the config's key space passes the
+first and fails the second, which is the case worth catching: it works in the
+repository that wrote it and travels nowhere.
 
 ## Assets
 

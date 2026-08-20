@@ -53,15 +53,30 @@ export const buildPlan = ({ profile, root }) => {
 export const nextManifestFor = ({ entries, manifest }) =>
   manifestAfter({ entries, previous: manifest, version: packageVersion() });
 
+/**
+ * The two refusals keep separate wording on purpose. A command the consumer has
+ * not mapped and a config key they have not set need different edits to
+ * `devkit.config.json`, so collapsing them into one label would name the file
+ * without naming what to do about it.
+ */
 const STATE_LABELS = {
   added: 'added',
   conflict: 'left alone — a file you wrote is already there',
   current: 'up to date',
   modified: 'left alone — locally modified',
   restored: 'restored',
+  unmet: 'not written — no config key set for',
   unresolved: 'not written — no command configured for',
   updated: 'updated',
 };
+
+/** States whose label is only actionable with the names that produced it. */
+const STATES_NAMING_WHAT_IS_MISSING = new Set(['unmet', 'unresolved']);
+
+const detailFor = (entry) =>
+  STATES_NAMING_WHAT_IS_MISSING.has(entry.state)
+    ? `${STATE_LABELS[entry.state]} ${entry.missing.join(', ')}`
+    : STATE_LABELS[entry.state];
 
 export const renderPlan = (entries) => {
   const notable = entries.filter(
@@ -69,13 +84,10 @@ export const renderPlan = (entries) => {
   );
   if (notable.length === 0) return 'Everything is up to date.';
   return notable
-    .map((entry) => {
-      const detail =
-        entry.state === 'unresolved'
-          ? `${STATE_LABELS[entry.state]} ${entry.missing.join(', ')}`
-          : STATE_LABELS[entry.state];
-      return `  ${entry.state.padEnd(10)} ${entry.path}  (${detail})`;
-    })
+    .map(
+      (entry) =>
+        `  ${entry.state.padEnd(10)} ${entry.path}  (${detailFor(entry)})`,
+    )
     .join('\n');
 };
 
