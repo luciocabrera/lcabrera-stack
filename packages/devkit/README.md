@@ -18,15 +18,15 @@ The record is what makes it distribution rather than copy-paste. Every
 materialised file is hashed into `.devkit-manifest.json`, and each subsequent
 run classifies it:
 
-| State                | What happens                                                    |
-| -------------------- | --------------------------------------------------------------- |
-| `added` / `restored` | written — the consumer does not have it                         |
-| `updated`            | written — untouched locally, and the package has moved on       |
-| `current`            | nothing written; adopted into the record                        |
-| `modified`           | **left alone** — edited locally, and reported on every run      |
-| `conflict`           | **left alone** — an unmanaged file already occupies that path   |
-| `unresolved`         | **refused** — a `{{commands.*}}` placeholder has no answer      |
-| `unmet`              | **refused** — a key the file declares in `requires:` is not set |
+| State                | What happens                                                               |
+| -------------------- | -------------------------------------------------------------------------- |
+| `added` / `restored` | written — the consumer does not have it                                    |
+| `updated`            | written — untouched locally, and the package has moved on                  |
+| `current`            | nothing written; adopted into the record                                   |
+| `modified`           | **left alone** — edited locally, and reported on every run                 |
+| `conflict`           | **left alone** — an unmanaged file already occupies that path              |
+| `unresolved`         | **refused** — a `{{commands.*}}` placeholder has no answer                 |
+| `unmet`              | **refused** — a `requires:` key is unset, or a `peer:` range is unanswered |
 
 A local edit is a supported state, not a defect. It survives every sync, which
 is what stops a consumer forking the kit to change one line.
@@ -128,6 +128,37 @@ scalar for the single-key case, quoted or not, with notes and blank lines
 wherever YAML allows them. Restyling a declaration from one spelling into
 another is not a behaviour change, and a spelling that read as no declaration
 would be — it would put the file in a consumer who cannot satisfy it, silently.
+
+### Declaring the runtime a file needs
+
+A skill's prose shells out to bins that live in a peer package, and prose and
+bins skew: a consumer can upgrade the runtime, or never install it, without ever
+re-running `sync`. `peer:` states the range the file was written against.
+
+```yaml
+---
+name: epic
+peer: '@repo/repo-standards@>=0.1.0 <1.0.0'
+---
+```
+
+One entry per package, spelled `name@range` — the same `name@range` a package
+manager takes, split at the **last** `@` so a scoped name survives. Every
+spelling `requires:` accepts works here too, and a name with no range means
+"installed, at any version". The range is evaluated by `semver`, which is why
+this package has a runtime dependency at all: a hand-rolled comparator inside a
+compatibility gate is wrong in exactly the way the gate exists to catch.
+
+The peer is **optional**, so a consumer who wants the prose and none of the
+gates just does not install it. A file is not written when the peer is absent
+**and** not written when the installed version falls outside the range; the
+report says which, because one is `install` and the other is `upgrade`. Each
+distinct peer is resolved once per run, so `sync` and `doctor` can never
+disagree about what is installed.
+
+It is declared in this package's `peerDependencies` as `@repo/repo-standards` —
+the name that resolves today. It becomes `@lcabrera/repo-standards` when #800
+publishes both packages.
 
 ## What ships
 
