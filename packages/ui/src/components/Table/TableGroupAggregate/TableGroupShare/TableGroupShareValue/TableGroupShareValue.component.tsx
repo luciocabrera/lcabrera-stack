@@ -12,6 +12,7 @@ import type { TableGroupShareValueProps } from './TableGroupShareValue.types';
 
 import { useGetTableShareDenominator } from '../../utils/useGetTableShareDenominator.hook';
 import { tableGroupShareStyles } from '../TableGroupShare.stylex';
+import { formatSharePercent } from '../utils/formatSharePercent.util';
 import { resolveShareRatio } from '../utils/resolveShareRatio.util';
 
 /**
@@ -58,11 +59,7 @@ export const TableGroupShareValue = ({
   // decision about the bar, not about the number, and the two read as one
   // expression when they are written as one.
   const barWidth = `${Math.min(Math.abs(ratio), 1) * 100}%`;
-  const formatted = new Intl.NumberFormat(locale, {
-    maximumFractionDigits: 1,
-    minimumFractionDigits: 1,
-    style: 'percent',
-  }).format(ratio);
+  const formatted = formatSharePercent({ locale, ratio });
 
   return (
     <span

@@ -232,4 +232,20 @@ describe('sanitizeGroupingByColumns', () => {
       }).keys,
     ).toStrictEqual([]);
   });
+
+  it('refuses a repeated share, as it refuses a repeated key', () => {
+    // Every reader downstream treats the shares as a set, so a duplicate makes
+    // the change detector compare a length against a set's size and report a
+    // change where there is none (#648).
+    expect(
+      sanitizeGroupingByColumns({
+        columns,
+        grouping: grouping({
+          aggregates: { name: 'count' },
+          keys: ['status'],
+          shares: ['name', 'name'],
+        }),
+      }).keys,
+    ).toStrictEqual([]);
+  });
 });

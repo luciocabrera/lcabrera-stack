@@ -91,12 +91,19 @@ export const sanitizeGroupingByColumns = <
   const isEveryShareOnAShareableAggregate = shares.every((column) =>
     isShareableAggregate(aggregates[column]),
   );
+  // Refused for the same reason a duplicate **key** is, and with a consequence
+  // of its own: every reader downstream treats the shares as a set, so a
+  // repeated entry makes `resolveTableGroupingUpdate` compare a length against
+  // a set's size and report a change where there is none — a navigation per
+  // click on a control that changed nothing (#648).
+  const areSharesDistinct = new Set(shares).size === shares.length;
 
   return isEveryKeyGroupable &&
     areKeysDistinct &&
     isEveryAggregateColumnDeclared &&
     isEveryGranularityOnAKey &&
-    isEveryShareOnAShareableAggregate
+    isEveryShareOnAShareableAggregate &&
+    areSharesDistinct
     ? {
         aggregates: { ...aggregates },
         keys: [...keys],
