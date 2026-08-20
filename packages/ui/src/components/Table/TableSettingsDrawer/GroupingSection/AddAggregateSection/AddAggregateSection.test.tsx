@@ -15,6 +15,10 @@ import type {
   TableColumnGroupingCapability,
 } from '#ui/components/Table/Table.types';
 
+import { MAX_TABLE_COUNT_DISTINCT_AGGREGATES } from '#ui/components/Table/Table.constants';
+
+import { AGGREGATE_PICKER_GAP_MESSAGES } from './AddAggregateSection.constants';
+
 type MockVirtualSelectProps = {
   readonly onChange: (values: readonly string[]) => void;
   readonly options: readonly {
@@ -376,7 +380,16 @@ describe('AddAggregateSection', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Status' }));
 
     expect(screen.queryByTestId(FUNCTION_PLACEHOLDER)).toBeNull();
-    expect(screen.getByText(/Distinct Count fits/)).not.toBeNull();
+    // Matched against the message constant rather than a sentence written out
+    // here, and the budget's value is pinned separately below: it is a duplicate
+    // of the server's and is expected to move, so this copy of it must not be
+    // one nothing checks (#842).
+    expect(
+      screen.getByText(AGGREGATE_PICKER_GAP_MESSAGES['count-distinct-spent']),
+    ).not.toBeNull();
+    expect(AGGREGATE_PICKER_GAP_MESSAGES['count-distinct-spent']).toContain(
+      String(MAX_TABLE_COUNT_DISTINCT_AGGREGATES),
+    );
     expect(screen.queryByText(/already applied/)).toBeNull();
     expect(
       screen.getByRole('button', { name: 'Add' }).hasAttribute('disabled'),
@@ -404,7 +417,7 @@ describe('AddAggregateSection', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Status' }));
 
     expect(screen.getByText(/already applied/)).not.toBeNull();
-    expect(screen.queryByText(/Distinct Count fits/)).toBeNull();
+    expect(screen.queryByText(/carries at most/)).toBeNull();
   });
 
   it('refuses to add a function that stopped being addable under it', () => {

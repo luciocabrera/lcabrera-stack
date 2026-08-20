@@ -37,9 +37,14 @@ import { ClearColumnAggregateButton } from './ClearColumnAggregateButton';
  * clear from the menu it was applied from.
  *
  * An empty answer renders nothing at all — no functions and no clear item —
- * because absent means "no aggregate is legal here", never "all of them are".
- * That single early return is the only exit for "nothing to offer", whichever
- * condition produced it.
+ * because absent means "there is nothing to offer here", never "offer all of
+ * them". That single early return is the only exit, whichever condition produced
+ * it, and since #842 one of those conditions is **affordability** rather than
+ * legality: a column whose only offerable function is `countDistinct` shows
+ * nothing while another column carries one. The clear item goes with it and
+ * costs the user nothing, because that case implies the column carries no
+ * aggregate — a column that carried the distinct count would count zero against
+ * itself and so always see room.
  */
 export const AggregateActions = <TData,>({
   columnKey,
