@@ -2,7 +2,7 @@
 id: claude-review-second-reviewer
 title: ci(repo): accept a Claude review alongside Copilot's on the review gate
 owner: agent:claude
-status: active
+status: review
 branch: ci/835-claude-review-second-reviewer
 area:
   - .github/workflows/claude-review.yml
@@ -12,7 +12,7 @@ area:
 started: 2026-08-20
 updated: 2026-08-20
 plan: (none)
-pr: (none)
+pr: 836
 issue: #835
 ---
 

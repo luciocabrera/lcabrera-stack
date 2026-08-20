@@ -1,9 +1,17 @@
 # The `Copilot review complete` gate
 
-**What it asserts:** Copilot's newest review names the pull request's **current
-head commit**. Nothing weaker — "Copilot has reviewed this PR at some point" is
-the state that let #671 look fully reviewed while two later pushes had been seen
-by nobody.
+**What it asserts:** the newest review by an **accepted reviewer** names the pull
+request's **current head commit**. Nothing weaker — "someone has reviewed this PR
+at some point" is the state that let #671 look fully reviewed while two later
+pushes had been seen by nobody.
+
+It does **not** mean a reviewer approved, and it never has. It means a reviewer
+ran against this head. Do not upgrade it.
+
+**There are two accepted reviewers, and the gate is green when EITHER has
+reviewed the head** — see [The two accepted reviewers](#the-two-accepted-reviewers).
+The context is still named `Copilot review complete`; that mismatch is known and
+is not a bug, see the same section.
 
 A review is attached to the commit it reviewed, and GitHub renders a completed
 review the same way whether or not that commit is still the head. Requiring
@@ -14,6 +22,7 @@ no review at all.
 | Piece                                                                                          | What it is                                                    |
 | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
 | [`.github/workflows/copilot-review-gate.yml`](../../.github/workflows/copilot-review-gate.yml) | when it recomputes                                            |
+| [`.github/workflows/claude-review.yml`](../../.github/workflows/claude-review.yml)             | the second reviewer — posts a review, publishes no status     |
 | [`scripts/copilot-review-status.mjs`](../../scripts/copilot-review-status.mjs)                 | the I/O — reads the PR, posts the status                      |
 | [`scripts/lib/copilot-review.mjs`](../../scripts/lib/copilot-review.mjs)                       | the comparison, pure and unit-tested                          |
 | [`scripts/lib/copilot-suppressed.mjs`](../../scripts/lib/copilot-suppressed.mjs)               | the suppressed-comment reader, pure and unit-tested           |
@@ -33,11 +42,16 @@ request, so a job named after the status would publish a second check under that
 name which is green whenever the workflow merely ran — and once #698 makes the
 context required, that is the one that could satisfy it.
 
-| State     | When                                                                           |
-| --------- | ------------------------------------------------------------------------------ |
-| `success` | Copilot's newest submitted review names the head commit                        |
-| `pending` | it does not, and a review may still arrive                                     |
-| `failure` | Copilot has just submitted a review and it names something other than the head |
+| State     | When                                                                                    |
+| --------- | --------------------------------------------------------------------------------------- |
+| `success` | the newest submitted review by an accepted reviewer names the head commit               |
+| `pending` | it does not, and a review may still arrive                                              |
+| `failure` | an accepted reviewer has just submitted a review and it names something other than head |
+
+`success` says **which** reviewer satisfied it — `Reviewed by <login> at <sha>` —
+and that is not decoration. If one reviewer stops reviewing entirely, every pull
+request says so on its face instead of reading exactly as it always did. A
+monoculture is the kind of thing nobody notices while it is happening.
 
 `failure` is narrow on purpose. Pending means "waiting is enough"; a review that
 lands against a superseded commit is the one case where waiting provably is not,
@@ -47,6 +61,65 @@ is #671's exact shape.
 Dismissed and still-unsubmitted reviews are not counted, and an unrecognised
 review state is not counted either — the comparison is whitelisted so an
 unfamiliar payload leaves the gate pending rather than passing it.
+
+## The two accepted reviewers
+
+The set lives in one place —
+[`scripts/lib/copilot-review.mjs`](../../scripts/lib/copilot-review.mjs), as an
+explicit named list — and adding to it is an edit someone makes on purpose. It is
+matched by equality, not by a regex over bot logins, not by a `[bot]` suffix test
+and not by a substring: each of those would admit reviewers nobody chose.
+
+| Reviewer                             | What it is                                                                                     |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| `copilot-pull-request-reviewer[bot]` | the Copilot code review bot ruleset `19141543` requests on every push (`review_on_push: true`) |
+| `github-actions[bot]`                | [`.github/workflows/claude-review.yml`](../../.github/workflows/claude-review.yml)             |
+
+**The Copilot path is dormant, not removed.** Copilot code review is a server-side
+Copilot feature and cannot be pointed at a personal Anthropic key — BYOK covers
+Copilot Chat, the CLI and the IDEs, not the pull request reviewer — so with credits
+exhausted `review_on_push: true` keeps requesting reviews that never arrive. Nothing
+about that configuration was changed, deliberately, so the Copilot half resumes with
+no config change the day credits return. A gate that is permanently non-green because
+its only reviewer cannot review is what this second reviewer answers.
+
+### OR, not AND — and why it cannot live in the ruleset
+
+Green when **either** accepted reviewer has reviewed the head.
+
+AND would block every pull request today, because Copilot cannot review at all. It
+would also make a merge depend on two vendors at once, which is a worse availability
+posture than the one this change fixes. What OR costs is that "Copilot specifically
+reviewed this" stops being enforceable; if that property is wanted back it belongs in
+a second, informational, non-required context — not in this one.
+
+**Rulesets AND their required contexts together**, so OR cannot be expressed at the
+ruleset level at all. It has to live inside the single status, which is why the change
+is in `copilot-review.mjs` and not in repository settings.
+
+### `github-actions[bot]` is a known hole
+
+The second entry names the **runner**, not the reviewer. `claude-review.yml`
+authenticates with the default `GITHUB_TOKEN`, so its review is authored by the same
+identity every other workflow here holds — which means **any** workflow in this
+repository that posts a review would satisfy this gate, not only that one.
+
+Nothing else posts a review today, so the hole is latent rather than open, and this
+context is advisory: nothing merges or fails on what it says. **#699 must land before
+#698 promotes it to required.** A Claude GitHub App gives the reviewer an identity of
+its own, and that entry is then replaced rather than extended. The constant carries
+the same warning, so nobody has to find this page first.
+
+### The name still says Copilot
+
+The context is `Copilot review complete` while it accepts two reviewers. That is
+known, and it is deliberately not fixed here.
+
+The name is the whole interface — ruleset contexts match by name, so renaming it
+detaches the gate silently — which makes a rename a ruleset edit plus a docs edit.
+That has no business riding along with a change to what the status _means_, so the
+two were kept apart. **Future work**, and a reader finding the mismatch has found a
+known trade rather than a bug.
 
 ### Reading it out of a status rollup
 
@@ -258,8 +331,8 @@ Answer this before picking a rung, because the two answers need opposite actions
 and **the status text does not separate them** — it says whatever the last run
 that executed computed, so a review that landed after that run is nowhere in it.
 
-- **Copilot has not reviewed this head yet** → wait. Nothing is wrong.
-- **Copilot has reviewed this head and nothing recomputed** → act. The status is
+- **No accepted reviewer has reviewed this head yet** → wait. Nothing is wrong.
+- **One of them has reviewed this head and nothing recomputed** → act. The status is
   not waiting for anything; it is stale, and it stays stale until something runs.
 
 One command answers it, from a checkout, posting nothing:
@@ -286,11 +359,11 @@ gh api graphql -F n=<n> -f query='
   }' --jq '
   .data.repository.pullRequest as $pr
   | [ $pr.reviews.nodes[]
-      | select(.author.login | test("[Cc]opilot"))
+      | select(.author.login | IN("copilot-pull-request-reviewer", "github-actions"))
       | select(.state | IN("APPROVED", "CHANGES_REQUESTED", "COMMENTED")) ] | last
-  | if . == null then "no Copilot review on this pull request yet — wait"
-    elif .commit.oid == $pr.headRefOid then "Copilot reviewed the head (\($pr.headRefOid[0:8])) at \(.submittedAt) — if the pull request still shows pending, it is stale"
-    else "the newest Copilot review is of \(.commit.oid[0:8]), not the head — wait"
+  | if . == null then "no accepted reviewer has reviewed this pull request yet — wait"
+    elif .commit.oid == $pr.headRefOid then "\(.author.login) reviewed the head (\($pr.headRefOid[0:8])) at \(.submittedAt) — if the pull request still shows pending, it is stale"
+    else "the newest accepted review is \(.author.login)'"'"'s, of \(.commit.oid[0:8]), not the head — wait"
     end'
 ```
 
@@ -317,12 +390,18 @@ difference between an answer and a confident wrong one:
   passes 30 easily — at which point `last` is the thirtieth review rather than
   the newest one. `reviews(last: 100)` takes the newest hundred instead; beyond
   that, use the `--dry-run` form above.
-- **The state whitelist is the gate's own.** `scripts/lib/copilot-review.mjs`
-  counts `APPROVED`, `CHANGES_REQUESTED` and `COMMENTED` and drops everything
-  else, so a probe that took the newest Copilot review of _any_ state would call
-  a dismissed review a review of the head and disagree with the status it is
-  meant to explain. Keep the two lists identical, whitelisted the same way
-  round: an unfamiliar state must fall out of the count, not into it.
+- **Two whitelists are the gate's own, and both have to match it.**
+  `scripts/lib/copilot-review.mjs` counts the states `APPROVED`,
+  `CHANGES_REQUESTED` and `COMMENTED` and drops everything else, so a probe that
+  took the newest review of _any_ state would call a dismissed review a review of
+  the head. It also counts only the reviewers in `ACCEPTED_REVIEWERS`, which is
+  why this filter names both logins rather than testing for "copilot" — written
+  the old way it reports `pending` on a pull request the Claude reviewer has
+  covered, and disagrees with the status it is meant to explain. **A GraphQL
+  author login carries no `[bot]` suffix**, which is why these are the bare names;
+  over REST the same reviewers are `…[bot]`. Keep both lists identical to the
+  module's, whitelisted the same way round: an unfamiliar state or an unknown
+  author must fall out of the count, not into it.
 
 The third reading — the gate would publish `pending` while the pull request shows
 `success` — is in
@@ -575,11 +654,32 @@ auto-approved its own gated runs would be a much worse thing to own.
 
 ## Known limitation: fork pull requests
 
-A pull request from a fork gets a read-only `GITHUB_TOKEN`, so no commit status
-can be published from **its own** run. The workflow detects this, prints the
-verdict it would have posted, and emits a warning rather than failing opaquely on
-a 403. This repository is single-owner, so the case is rare by construction; it is
-documented so that it is understood rather than discovered.
+**Both reviewers end in an absent check on a fork, and they get there differently.
+Read this before concluding that one of them is broken.**
+
+| Leg     | What happens on a fork                                                                         |
+| ------- | ---------------------------------------------------------------------------------------------- |
+| Copilot | reviews normally — it runs server-side — but this gate's own run cannot publish a status       |
+| Claude  | does not run at all: secrets are not exposed to fork pull requests, so the credential is empty |
+
+**The gate's own run is absent-rather-than-red.** A pull request from a fork gets a
+read-only `GITHUB_TOKEN`, so no commit status can be published from **its own** run.
+The workflow detects this, prints the verdict it would have posted, and emits a
+warning rather than failing opaquely on a 403. This repository is single-owner, so
+the case is rare by construction; it is documented so that it is understood rather
+than discovered.
+
+**`claude-review.yml` is RED, not absent, and that difference is the part worth
+knowing.** The action calls `core.setFailed` on both fork paths — an actor without
+write access is refused before any credential is read, and an actor with write access
+but no secret fails credential validation — so the job fails and the check shows red.
+Both behaviours are fail-closed and neither publishes a status from a fork, but they
+do not look the same on the pull request, and a reader expecting parity will misread
+one of them. It is **not** to be "fixed" with `pull_request_target`: that would trade
+a visible failure for secret exposure on untrusted code.
+
+Either way no review lands from the fork's own run, so the status is the honest
+`pending` until an accepted reviewer covers the head.
 
 The scheduled reconcile is not subject to this — it runs from the default branch
 with a token that can write statuses, so a fork pull request does get a status
@@ -598,7 +698,14 @@ Further things the notes assume:
 
 - **Until #698, nothing merges or fails on what this status says.** It is
   advisory, which is why the approval limitation above is a nuisance today and a
-  blocker the day the context becomes required.
+  blocker the day the context becomes required. It is also what makes the
+  `github-actions[bot]` hole tolerable rather than urgent — see
+  [the two accepted reviewers](#the-two-accepted-reviewers).
+- **The accepted reviewer set is two, and one of them is dormant.** Everything
+  above about Copilot describes a reviewer that currently cannot review, because
+  its credits are exhausted; the configuration is untouched, so it resumes on its
+  own. A reading of this page taken while only one reviewer was accepted will be
+  wrong about which reviews count.
 - **The Actions approval policy is `first_time_contributors_new_to_github`**
   (loosened from `first_time_contributors` on 2026-08-18, because holding every
   Copilot-triggered run meant a maintainer had to approve one before the status
