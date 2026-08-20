@@ -50,13 +50,14 @@ side and one sort direction, so picking `asc` un-picks `desc` and at most one
 item is ever active.
 
 An aggregate is not single-valued. A column may carry `sum` and `avg` at once
-(#831), so the same question is set membership and several items in one menu are
-active together — a state the toggle derivation cannot express. Widening the
-shared helper to take a set would have made **sorting** able to express it too,
-which is a state sorting does not have and must not gain. So the aggregates got
-`deriveAggregateCommandState` beside it, keeping everything else identical: the
-clear command is still `target: undefined`, `isDisabled` still comes from the
-surface, and the state source is still the surface's own selector.
+(#831), so the same question is membership rather than equality and several items
+in one menu are active together — a state the toggle derivation cannot express.
+Widening the shared helper to take a collection would have made **sorting** able
+to express it too, which is a state sorting does not have and must not gain. So
+the aggregates got `deriveAggregateCommandState` beside it, keeping everything
+else identical: the clear command is still `target: undefined`, `isDisabled`
+still comes from the surface, and the state source is still the surface's own
+selector.
 
 The fold pair is the one set here that asks nothing of a column. `EXPAND_ALL_`
 and `COLLAPSE_ALL_GROUPS_COMMAND` are commands of the grouped **body**, so their
@@ -109,7 +110,7 @@ Each renders from the shared descriptor + predicate and keeps only its own
 presentation and commit-context. The descriptor is an **overridable default** — a
 surface may substitute its own icon without forking the identity.
 
-## Generalization — validated (ADR-011 cross-capability check)
+## Generalization — validated, and where it forked (ADR-011 cross-capability check)
 
 Pinning, sorting and grouping reuse `CommandDescriptor` **and**
 `deriveToggleCommandState` **unchanged**: the enablement derivation is
@@ -125,21 +126,34 @@ state expressed through a per-column command, so `current` is the same value for
 every column's menu while `target` differs. The predicate answers that correctly
 without a change, which is the point.
 
-**The aggregation-mode commands are the fourth capability, and they too reuse
-`deriveToggleCommandState` unchanged.** An aggregate is a toggle-to-a-value
-command exactly as a sort direction is: `current` is the function applied to this
-column, `target` is the one this item applies, and `CLEAR_COLUMN_AGGREGATE_COMMAND`
-is the `target: undefined` clear. That is the reason the store holds **one**
-aggregate per column rather than a set — a set is not a toggle, and would have
-needed a derivation of its own beside the shared one.
+**The aggregation-mode commands are the fourth capability, and the one that
+forked.** They reuse `CommandDescriptor` unchanged, so the _identity_ half of the
+check holds for all four; their `{ isActive, isEnabled }` comes from
+**`deriveAggregateCommandState`** instead of the shared toggle predicate (#831).
+The store holds an **ordered list** of `(columnKey, fn)` records — not one
+function per column — so there is no single `current` for `target` to be compared
+against, and the derivation takes the whole list plus a `columnKey` and narrows
+it itself. That is why each surface can hand it its own store's list untouched,
+exactly as it hands the toggle helper its own `current`.
 
-Two things separate them from the grouping pair above. `CLEAR_COLUMN_AGGREGATE_COMMAND`
-**does** take a `columnKey`, unlike `CLEAR_GROUPING_COMMAND`, because an
-aggregate belongs to one column while grouping belongs to the table. And their
-`isDisabled` is not a column capability at all: _which_ commands are rendered is
-decided by **`resolveOfferableAggregates`** (`Table/utils/`), so an unofferable
-one is never offered rather than offered-and-disabled — the menu is shorter for
-a `text` column than for a `numeric` one (ADR-058, #550).
+The fork is a property of the capability, not a shortfall in the helper, and it
+is argued in full under "Two derivations, and the split is load-bearing" above:
+sorting and pinning are single-valued by their own semantics, and widening the
+shared predicate to a collection would have let sorting express a state it does
+not have and must not gain. So this is one function forking, not the layer —
+`CLEAR_COLUMN_AGGREGATE_COMMAND` is still the `target: undefined` clear,
+`isDisabled` still arrives from the surface, and the state still comes from the
+surface's own selector.
+
+Two further things separate the aggregation commands from the grouping pair
+above. `CLEAR_COLUMN_AGGREGATE_COMMAND` **does** take a `columnKey`, unlike
+`CLEAR_GROUPING_COMMAND`, because an aggregate belongs to one column while
+grouping belongs to the table — and it clears **every** function on that column,
+which the list shape makes a distinct act from toggling one of them off. And
+their `isDisabled` is not a column capability at all: _which_ commands are
+rendered is decided by **`resolveOfferableAggregates`** (`Table/utils/`), so an
+unofferable one is never offered rather than offered-and-disabled — the menu is
+shorter for a `text` column than for a `numeric` one (ADR-058, #550).
 
 That resolver is the aggregation counterpart of `resolveGroupKeyAvailability`
 above, and it exists for the same reason: two gates, composed once rather than
@@ -167,5 +181,14 @@ resolver rather than by changing it. Same rule, opposite conclusions, because th
 gestures differ.
 
 A new capability adds a sibling `*Commands.ts`. If it cannot reuse
-`deriveToggleCommandState` or `CommandDescriptor` unchanged, revise the shared
-shape before adding it — that is the signal it was over-fitted.
+`CommandDescriptor` unchanged, revise the shared shape before adding it — that is
+the signal the identity was over-fitted, and it has not happened yet.
+
+The derivation is where that rule has a second branch, which aggregation is the
+worked example of: reuse `deriveToggleCommandState` while the capability's state
+is single-valued, and when it is not, add a derivation beside it rather than
+widening the shared one. The test is what widening would cost the capabilities
+already using it — if it would hand one of them a state it must not be able to
+express, the answer is a second derivation, not a wider first. Keep everything
+around it identical, so the split stays confined to the one function that has to
+differ.
