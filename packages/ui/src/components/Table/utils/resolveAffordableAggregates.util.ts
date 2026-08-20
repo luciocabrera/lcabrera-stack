@@ -4,7 +4,7 @@ import type {
   TableColumnGroupingCapability,
 } from '../Table.types';
 
-import { hasCountDistinctBudgetLeft } from './countDistinctBudget.util';
+import { hasCountDistinctBudgetLeft } from './hasCountDistinctBudgetLeft.util';
 import { resolveOfferableAggregates } from './resolveOfferableAggregates.util';
 
 type ResolveAffordableAggregatesArgs = {

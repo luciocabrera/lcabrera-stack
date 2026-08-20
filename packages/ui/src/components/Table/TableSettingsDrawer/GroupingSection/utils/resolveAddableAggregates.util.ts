@@ -1,5 +1,4 @@
 import type {
-  TableAggregateFn,
   TableColumnAggregate,
   TableColumnGroupingCapability,
 } from '#ui/components/Table/Table.types';
@@ -7,7 +6,7 @@ import type {
 import { TABLE_AGGREGATE_LABELS } from '#ui/components/Table/Table.constants';
 import { resolveAffordableAggregates } from '#ui/components/Table/utils/resolveAffordableAggregates.util';
 
-import type { AggregatePickerGap } from '../GroupingSection.types';
+import { resolveAggregatePickerGap } from './resolveAggregatePickerGap.util';
 
 type ResolveAddableAggregatesArgs = {
   /** Every aggregate staged in the drawer, across every column. */
@@ -18,49 +17,6 @@ type ResolveAddableAggregatesArgs = {
   readonly columnKey: string;
   /** Whether that column is staged as a group key **in this drawer**. */
   readonly isGroupKey: boolean;
-};
-
-type ResolveGapArgs = {
-  readonly affordable: readonly TableAggregateFn[];
-  readonly appliedFns: ReadonlySet<TableAggregateFn>;
-  readonly hasOptions: boolean;
-  readonly withheld: readonly TableAggregateFn[];
-};
-
-/**
- * Why the picker has nothing to offer, or `undefined` while it has something —
- * the cause, never the fact, because an empty list is what every cause has in
- * common.
- *
- * Ordered by what the user can act on. A function withheld for the read's
- * `countDistinct` budget is a fact about the *rest* of the configuration, so it
- * outranks exhaustion: a column offered `count` and `countDistinct` that carries
- * `count` while another column carries the distinct count is not "fully
- * measured", and telling the user to remove one of this column's measures would
- * send them to the wrong control (#842). Exhaustion comes next (#841), and the
- * remaining empties — no column chosen, an unaggregatable column, a staged group
- * key — have nothing to say and answer `undefined`.
- *
- * Annotated, unlike almost everything here, because inference widens a returned
- * string literal to `string`: the annotation is what checks these tokens against
- * the vocabulary the message map is closed over, at the point they are written
- * rather than at the component that indexes with them.
- */
-const resolveGap = ({
-  affordable,
-  appliedFns,
-  hasOptions,
-  withheld,
-}: ResolveGapArgs): AggregatePickerGap | undefined => {
-  if (hasOptions) return;
-  // Only a withheld function this column could otherwise have *added*: one it
-  // already carries is not a gap, it is an entry in the staged list beside this
-  // control.
-  if (withheld.some((fn) => !appliedFns.has(fn))) return 'count-distinct-spent';
-  if (affordable.length > 0) return 'column-exhausted';
-
-  // No trailing `return`: falling off the end is already `undefined`, which the
-  // annotation admits, and every other empty is one of the cases above.
 };
 
 /**
@@ -94,6 +50,8 @@ const resolveGap = ({
  * anything to say, and they say different things — the column list still offers
  * such a column, by design (#830 owns that list and does not subtract), so the
  * picker has to explain why it went quiet rather than render an empty control.
+ * `resolveAggregatePickerGap` beside this file decides which cause it is, and
+ * carries the ordering that decision needs.
  */
 export const resolveAddableAggregates = ({
   applied,
@@ -117,7 +75,7 @@ export const resolveAddableAggregates = ({
     .map((fn) => ({ label: TABLE_AGGREGATE_LABELS[fn], value: fn }));
 
   return {
-    gap: resolveGap({
+    gap: resolveAggregatePickerGap({
       affordable,
       appliedFns,
       hasOptions: options.length > 0,

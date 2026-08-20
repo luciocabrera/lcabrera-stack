@@ -3,7 +3,7 @@ import type { TableGroupingState } from '#ui/components/Table/Table.types';
 
 import { isShareableAggregate } from '#ui/components/Table/contexts/TableConfig/grouping/utils';
 import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
-import { isWithinCountDistinctBudget } from '#ui/components/Table/utils/countDistinctBudget.util';
+import { isWithinCountDistinctBudget } from '#ui/components/Table/utils/isWithinCountDistinctBudget.util';
 import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
 import { toTableAggregateToken } from '#ui/components/Table/utils/tableAggregateToken.util';
 

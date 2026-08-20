@@ -34,7 +34,9 @@ utils/
 ├── resolveGroupKeyAvailability.util.ts            → Whether a column may be OFFERED as a group key: the declared flag narrowed by the catalogue
 ├── orderLegalAggregates.util.ts                   → The aggregates legal for a column's real type, in menu order
 ├── resolveOfferableAggregates.util.ts             → Which of those a surface may OFFER: none at all while the column is a group key
-├── countDistinctBudget.util.ts                    → The one whole-request grouping rail this side can breach by construction: is a list legal, and is there room for one more
+├── countCountDistinct.util.ts                     → How many countDistinct aggregates a list carries, across every column together
+├── isWithinCountDistinctBudget.util.ts            → Whether a list is one a grouped read can carry — the boundary's question
+├── hasCountDistinctBudgetLeft.util.ts             → Whether one MORE would fit — an offering surface's, and not the same answer
 ├── resolveAffordableAggregates.util.ts            → Which of the offerable ones the whole READ still has room for, and which were withheld
 ├── resolvePrimaryKeyColumnKeys.util.ts            → Keys of isPrimaryKey columns (declaration order, excludes 'actions')
 ├── resolveTableActionsColumn.util.ts              → Synthesize/merge the row-actions column from `crud` + any consumer override
@@ -135,6 +137,7 @@ graph TD
 | resolveGroupKeyAvailability     | column, catalogue capability                         | { isGroupable, refusal }                                                            | Whether a column may be **offered** as a group key: `resolveColumnCapabilities`' declared answer narrowed by the catalogue's (ADR-058/067). Absent capability leaves the declaration standing; a consumer opt-out wins and reports no reason                                                          |
 | orderLegalAggregates            | the catalogue's aggregate set                        | TableAggregateFn[]                                                                  | The aggregates legal for a column's real **type**, in menu order; also drops a SQL name this package has no label for                                                                                                                                                                                 |
 | resolveOfferableAggregates      | catalogue capability, isGroupKey                     | TableAggregateFn[]                                                                  | Which of those a surface may **offer**: the ordered legal set, and nothing at all while the column is an active group key (ADR-080). One predicate for the header menu and the drawer picker alike (#830); deliberately blind to what is already applied (#841) and to the whole-request rails (#842) |
+| countCountDistinct              | the whole aggregate list                             | number                                                                              | How many `countDistinct` aggregates it carries, across every column together — derived once, so the two predicates below differ only in how they compare it                                                                                                                                           |
 | isWithinCountDistinctBudget     | the whole aggregate list                             | boolean                                                                             | Whether a list is one a grouped read can carry — the boundary question, asked by `sanitizeGroupingByColumns` of a URL and `areGroupAggregatesLegal` of a store seed, and refused whole by both (#842)                                                                                                 |
 | hasCountDistinctBudgetLeft      | the aggregates applied elsewhere                     | boolean                                                                             | Whether one more would still fit — the **offering** question, deliberately not the one above: a list at the budget is legal and has no room, and a surface asking the wrong one offers the entry that breaks it                                                                                       |
 | resolveAffordableAggregates     | applied, catalogue capability, columnKey, isGroupKey | { affordable, withheld }                                                            | The offerable set narrowed by the read's `countDistinct` budget, plus what that narrowing took away. Both offering surfaces call this rather than the predicate above; the column's own entries are out of the count, so its applied item stays toggle-off-able (#842)                                |
@@ -215,11 +218,12 @@ the column's own entries answers "would one _more_ fit" from either side —
 the carrying column sees room, every other column sees none. The picker never
 notices the difference, since it subtracts what the column carries anyway.
 
-The rule reaches the two boundaries through `countDistinctBudget.util.ts`
-instead, which spells the offering question (`hasCountDistinctBudgetLeft`) apart
-from the legality one (`isWithinCountDistinctBudget`) precisely because they
-differ on the input that matters: a list holding exactly the budget is legal and
-has no room left.
+The rule reaches the two boundaries through `isWithinCountDistinctBudget`
+instead, which is a **separate file** from the offering question
+`hasCountDistinctBudgetLeft` precisely because the two differ on the input that
+matters: a list holding exactly the budget is legal and has no room left. Both
+count through `countCountDistinct`, so the number is derived once and only the
+comparison differs (`<=` versus `<`).
 
 The **precedence** is the consumer's opt-out first, and it carries no reason.
 `isGroupable: false` and a catalogue refusal can both be true at once, and they

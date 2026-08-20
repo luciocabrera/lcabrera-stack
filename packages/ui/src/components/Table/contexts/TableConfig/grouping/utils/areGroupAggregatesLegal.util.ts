@@ -1,6 +1,6 @@
 import type { TableColumnAggregate } from '#ui/components/Table/Table.types';
 
-import { isWithinCountDistinctBudget } from '#ui/components/Table/utils/countDistinctBudget.util';
+import { isWithinCountDistinctBudget } from '#ui/components/Table/utils/isWithinCountDistinctBudget.util';
 import { toTableAggregateToken } from '#ui/components/Table/utils/tableAggregateToken.util';
 
 /**

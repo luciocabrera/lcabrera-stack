@@ -73,6 +73,7 @@ GroupingSection/
     ├── toAggregateItems.util.ts        → Staged aggregates + labels + a per-entry id, in staged order
     ├── toAggregatableColumnOptions.util.ts → Columns an aggregate may be offered on (resolveOfferableAggregates, in display order)
     ├── resolveAddableAggregates.util.ts → Functions still ADDABLE on the chosen column: what the read affords, minus what it carries — with the cause when that is nothing
+    ├── resolveAggregatePickerGap.util.ts → Which cause emptied the function list, ordered by which control the user must act on
     └── toGroupKeyColumnOptions.util.ts → Columns that may still be a group key (declared ∧ catalogue, minus staged)
 ```
 
@@ -118,24 +119,24 @@ flowchart TD
 
 ## Where each answer comes from
 
-| Question                                        | Answered by                                                                            | Not by                                                          |
-| ----------------------------------------------- | -------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| May this column be a group key at all?          | `resolveGroupKeyAvailability` — the declared flag narrowed by the catalogue            | either gate alone (ADR-068)                                     |
-| Which aggregates does this column's type allow? | `metaState.groupingCapabilities[key].aggregates`                                       | `TableColumn.dataType` (#550)                                   |
-| Which of those may be **offered** here?         | `resolveOfferableAggregates` — those, minus an active group key                        | either half on its own (#830)                                   |
-| Which of those can the **read** still afford?   | `resolveAffordableAggregates` — those, minus a spent `countDistinct` budget (#842)     | any per-column answer, which cannot see the rest of the request |
-| Which of those may still be **added** here?     | `resolveAddableAggregates` — those, minus what the column carries (#841)               | the shared predicate, which the menu shares                     |
-| Why is there no function to offer?              | the `gap` that util returns, mapped to a message in `AddAggregateSection.constants.ts` | the empty list, which every cause produces                      |
-| May this measure show a share?                  | `isShareableAggregate` — additive measures only (ADR-086)                              | the column, which has no say in it                              |
-| Which measure does a share belong to?           | the `(columnKey, fn)` pair (#831)                                                      | the column key alone                                            |
-| In what order are the measures listed?          | the staged `aggregates` order, dragged in this list (#832)                             | the column order, which no longer orders it                     |
-| How many keys may be applied?                   | `MAX_TABLE_GROUP_KEYS`                                                                 | anything local to a component                                   |
-| How many distinct counts may a read carry?      | `MAX_TABLE_COUNT_DISTINCT_AGGREGATES`, via `countDistinctBudget.util.ts`               | anything local to a component                                   |
-| Is this configuration a change at all?          | `resolveTableGroupingUpdate`                                                           | the component                                                   |
-| What grouping is the section showing?           | `TableDrawerContext`'s `groupingStore` (the draft)                                     | the live `TableConfig` grouping store                           |
-| What grouping is the **table** showing?         | `TableConfig`'s `groupingStore`                                                        | the draft, until Accept commits it                              |
-| Where do the totals go?                         | `TableDrawerContext`'s `totalsPlacementStore` (the draft)                              | the grouping draft — see below                                  |
-| May the user reshape the grouping?              | `metaState.isGroupingLocked`, read by each delegate itself                             | a prop drilled from the shell                                   |
+| Question                                        | Answered by                                                                                             | Not by                                                          |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| May this column be a group key at all?          | `resolveGroupKeyAvailability` — the declared flag narrowed by the catalogue                             | either gate alone (ADR-068)                                     |
+| Which aggregates does this column's type allow? | `metaState.groupingCapabilities[key].aggregates`                                                        | `TableColumn.dataType` (#550)                                   |
+| Which of those may be **offered** here?         | `resolveOfferableAggregates` — those, minus an active group key                                         | either half on its own (#830)                                   |
+| Which of those can the **read** still afford?   | `resolveAffordableAggregates` — those, minus a spent `countDistinct` budget (#842)                      | any per-column answer, which cannot see the rest of the request |
+| Which of those may still be **added** here?     | `resolveAddableAggregates` — those, minus what the column carries (#841)                                | the shared predicate, which the menu shares                     |
+| Why is there no function to offer?              | `resolveAggregatePickerGap`, mapped to a message in `AddAggregateSection.constants.ts`                  | the empty list, which every cause produces                      |
+| May this measure show a share?                  | `isShareableAggregate` — additive measures only (ADR-086)                                               | the column, which has no say in it                              |
+| Which measure does a share belong to?           | the `(columnKey, fn)` pair (#831)                                                                       | the column key alone                                            |
+| In what order are the measures listed?          | the staged `aggregates` order, dragged in this list (#832)                                              | the column order, which no longer orders it                     |
+| How many keys may be applied?                   | `MAX_TABLE_GROUP_KEYS`                                                                                  | anything local to a component                                   |
+| How many distinct counts may a read carry?      | `MAX_TABLE_COUNT_DISTINCT_AGGREGATES`, via `isWithinCountDistinctBudget` / `hasCountDistinctBudgetLeft` | anything local to a component                                   |
+| Is this configuration a change at all?          | `resolveTableGroupingUpdate`                                                                            | the component                                                   |
+| What grouping is the section showing?           | `TableDrawerContext`'s `groupingStore` (the draft)                                                      | the live `TableConfig` grouping store                           |
+| What grouping is the **table** showing?         | `TableConfig`'s `groupingStore`                                                                         | the draft, until Accept commits it                              |
+| Where do the totals go?                         | `TableDrawerContext`'s `totalsPlacementStore` (the draft)                                               | the grouping draft — see below                                  |
+| May the user reshape the grouping?              | `metaState.isGroupingLocked`, read by each delegate itself                                              | a prop drilled from the shell                                   |
 
 `TableColumn.dataType` is a five-member presentation vocabulary that reports
 `numeric`, `jsonb` and `point` alike as `string`, so a menu built from it offers
@@ -349,7 +350,7 @@ pinned to it by `groupingContract.test.ts` in `apps/react-router`.
 
 `MAX_TABLE_COUNT_DISTINCT_AGGREGATES` is the second constant of that shape and is
 pinned in the same file (#842). It is not a depth cap: it bounds the **read**
-rather than the key list, so it is checked by `countDistinctBudget.util.ts`
+rather than the key list, so it is checked by `isWithinCountDistinctBudget.util.ts`
 rather than by `areGroupKeysLegal`, and the surfaces spend it by withholding an
 offer rather than by disabling a control.
 [`Table/ARCHITECTURE.md`](../../ARCHITECTURE.md) enumerates which of the

@@ -121,7 +121,8 @@ export const MAX_TABLE_GROUP_KEYS = 4;
  *
  * Unlike `MAX_TABLE_GROUP_KEYS` this bounds the **whole request** rather than
  * one column's answer, which is why no per-column predicate can enforce it —
- * see `utils/countDistinctBudget.util.ts`.
+ * see `utils/isWithinCountDistinctBudget.util.ts` and its twin
+ * `utils/hasCountDistinctBudgetLeft.util.ts`.
  */
 export const MAX_TABLE_COUNT_DISTINCT_AGGREGATES = 1;
 

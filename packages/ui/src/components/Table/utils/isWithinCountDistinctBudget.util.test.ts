@@ -3,10 +3,7 @@ import { describe, expect, it } from 'vite-plus/test';
 import type { TableColumnAggregate } from '../Table.types';
 
 import { MAX_TABLE_COUNT_DISTINCT_AGGREGATES } from '../Table.constants';
-import {
-  hasCountDistinctBudgetLeft,
-  isWithinCountDistinctBudget,
-} from './countDistinctBudget.util';
+import { isWithinCountDistinctBudget } from './isWithinCountDistinctBudget.util';
 
 /**
  * A list spending exactly the budget — derived from the constant rather than
@@ -57,21 +54,5 @@ describe('isWithinCountDistinctBudget', () => {
         { columnKey: 'total_amount', fn: 'avg' },
       ]),
     ).toBe(true);
-  });
-});
-
-describe('hasCountDistinctBudgetLeft', () => {
-  it('reports room while nothing has spent it', () => {
-    expect(
-      hasCountDistinctBudgetLeft([{ columnKey: 'name', fn: 'count' }]),
-    ).toBe(true);
-  });
-
-  it('reports none at the budget, where the legality predicate still says yes', () => {
-    // The pair that makes the two predicates worth spelling apart: a list at the
-    // budget is legal *and* has no room for another. A surface reaching for
-    // `isWithinCountDistinctBudget` would offer the entry that breaks it.
-    expect(hasCountDistinctBudgetLeft(atBudget)).toBe(false);
-    expect(isWithinCountDistinctBudget(atBudget)).toBe(true);
   });
 });

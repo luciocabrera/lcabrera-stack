@@ -26,11 +26,12 @@ import { styles } from './AddAggregateSection.stylex';
  * The drawer's "add an aggregate" control: a column, then a function that may
  * be offered for it.
  *
- * Both lists resolve through `resolveOfferableAggregates` — the column list via
- * `toAggregatableColumnOptions`, the function list via
- * `resolveAddableAggregates` — so the second cannot offer something the chosen
- * column does not support, whichever way the two are picked, and neither can
- * disagree with the column header menu, which calls the same predicate (#830).
+ * Both lists rest on `resolveOfferableAggregates` — the column list through
+ * `toAggregatableColumnOptions`, the function list through
+ * `resolveAddableAggregates`, which reaches it via `resolveAffordableAggregates`
+ * — so the second cannot offer something the chosen column does not support,
+ * whichever way the two are picked, and neither can disagree with the column
+ * header menu, which resolves through the same pair (#830, #842).
  * What that predicate answers with is the catalogue capability the loader
  * shipped (ADR-058, ADR-063), minus any column staged as a group key (ADR-080).
  *
