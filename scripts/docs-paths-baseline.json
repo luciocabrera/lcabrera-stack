@@ -1,1 +1,5 @@
-{}
+{
+  "docs/agents/research/skills-distribution-mattpocock-skills.md": {
+    "docs/agents/issue-tracker.md": "verbatim quotation from mattpocock/skills' code-review/SKILL.md — the path is inside the quote, so rewriting it to the /-prefixed form the rest of this doc uses would falsify the quote"
+  }
+}
