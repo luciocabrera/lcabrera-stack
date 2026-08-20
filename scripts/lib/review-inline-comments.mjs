@@ -87,11 +87,20 @@ export const partitionFindings = (findings, index) => {
   return { anchored, unanchored };
 };
 
+/** Where a finding pointed, as much of it as the finding actually gave. (pure) */
+const findingLocation = (finding) => {
+  if (!isFilledString(finding?.path)) {
+    return 'an unnamed location';
+  }
+  if (!Number.isInteger(finding?.line)) {
+    return `\`${finding.path}\``;
+  }
+  return `\`${finding.path}\` line ${finding.line}`;
+};
+
 /** One unanchored finding, rendered so a reader can still act on it. (pure) */
 const renderUnanchored = ({ finding, reason }, position) => {
-  const where = isFilledString(finding?.path)
-    ? `\`${finding.path}\`${Number.isInteger(finding?.line) ? ` line ${finding.line}` : ''}`
-    : 'an unnamed location';
+  const where = findingLocation(finding);
   const text = isFilledString(finding?.body)
     ? finding.body
     : '_(this finding carried no text)_';

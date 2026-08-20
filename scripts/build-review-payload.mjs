@@ -20,11 +20,11 @@
  * Governed by .claude/rules/scripts.md.
  */
 
-import { writeFileSync } from 'node:fs';
 import { parseArgs } from 'node:util';
 
 import { errorMessage } from '../packages/repo-standards/scripts/error-message.mjs';
 import { readTextWithin } from '../packages/repo-standards/scripts/safe-read.mjs';
+import { writeTextWithin } from '../packages/repo-standards/scripts/safe-write.mjs';
 import { diffIndex } from './lib/agent-review-diff.mjs';
 import { reviewPayload } from './lib/review-inline-comments.mjs';
 
@@ -113,7 +113,7 @@ const main = () => {
     index: diffIndex(readFiles(values.files)),
   });
 
-  writeFileSync(values.out, JSON.stringify(payload), 'utf8');
+  writeTextWithin(values.out, JSON.stringify(payload), REPO_ROOT);
   console.log(
     `${stats.anchored} inline comment(s) will open a thread; ${stats.unanchored} finding(s) moved into the body.`,
   );
