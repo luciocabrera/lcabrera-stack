@@ -38,6 +38,11 @@ export const SHARED_PLUGIN_RULE_SEVERITIES = {
   'unicorn/prefer-https': 'off',
   'unicorn/prefer-query-selector': 'off',
   'unicorn/prevent-abbreviations': 'off',
+  // The default `multiline` fix rewrites every one-line `/** … */` doc comment
+  // into an asterisk-less three-line block, which is not JSDoc and which no
+  // formatter here maintains. `single-line` enforces the same consistency in the
+  // direction this codebase already writes.
+  'unicorn/single-line-block-comment-style': ['error', 'single-line'],
 };
 
 /**
