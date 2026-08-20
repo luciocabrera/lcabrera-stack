@@ -45,6 +45,15 @@ const NO_AGGREGATES: readonly TableAggregateFn[] = [];
  * than inside it. Taking the aggregate list as an argument here would force one
  * answer on both surfaces, and it is the menu that would lose.
  *
+ * **It answers per column, and one grouping rule is not a per-column question
+ * at all** (#842). How many `countDistinct` aggregates a read may carry is a
+ * property of the whole request, so no answer shaped like this one could decide
+ * it — the same line `Table.types.ts` draws between `TableGroupKeyRefusalReason`
+ * and `TableGroupingRefusalReason`. That rule composes on top, in
+ * `resolveAffordableAggregates`, which both offering surfaces call *instead of*
+ * this one; taking the whole aggregate list here would make this predicate claim
+ * to answer something it cannot see.
+ *
  * **This is not where the rule is enforced.** The grouping configuration is URL
  * state, so a request can always name one column as both key and measure;
  * `resolveGroupCellChildren` is where the key actually wins. This only keeps a

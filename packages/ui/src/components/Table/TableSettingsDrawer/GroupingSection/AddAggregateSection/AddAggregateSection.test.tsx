@@ -315,6 +315,98 @@ describe('AddAggregateSection', () => {
     expect(listed(FUNCTION_PLACEHOLDER)).toEqual([]);
   });
 
+  it('does not offer a second distinct count while another column carries one', () => {
+    // The cap is per read rather than per column, so an aggregate staged on
+    // `total_amount` is what closes the offer on `order_status` (#842).
+    aggregatesRef.current = [
+      { columnKey: 'total_amount', fn: 'countDistinct' },
+    ];
+
+    render(<AddAggregateSection />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Status' }));
+
+    expect(listed(FUNCTION_PLACEHOLDER)).toEqual([
+      'Count',
+      'Minimum',
+      'Maximum',
+    ]);
+  });
+
+  it('offers the distinct count again once that one is cleared', () => {
+    aggregatesRef.current = [
+      { columnKey: 'total_amount', fn: 'countDistinct' },
+    ];
+
+    const { rerender } = render(<AddAggregateSection />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Status' }));
+
+    expect(listed(FUNCTION_PLACEHOLDER)).not.toContain('Distinct Count');
+
+    aggregatesRef.current = [];
+    rerender(<AddAggregateSection />);
+
+    expect(listed(FUNCTION_PLACEHOLDER)).toEqual([
+      'Count',
+      'Distinct Count',
+      'Minimum',
+      'Maximum',
+    ]);
+  });
+
+  it('says the read has no room when that is what emptied the list', () => {
+    // `Distinct Count` is still legal on this column, so it is not fully
+    // measured and the #841 message would send the user to the wrong control:
+    // the measure to remove is the one on `total_amount`.
+    capabilitiesRef.current = {
+      ...capabilitiesRef.current,
+      order_status: {
+        ...textCapability,
+        aggregates: ['count', 'countDistinct'],
+      },
+    };
+    aggregatesRef.current = [
+      { columnKey: 'total_amount', fn: 'countDistinct' },
+      { columnKey: 'order_status', fn: 'count' },
+    ];
+
+    render(<AddAggregateSection />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Status' }));
+
+    expect(screen.queryByTestId(FUNCTION_PLACEHOLDER)).toBeNull();
+    expect(screen.getByText(/Distinct Count fits/)).not.toBeNull();
+    expect(screen.queryByText(/already applied/)).toBeNull();
+    expect(
+      screen.getByRole('button', { name: 'Add' }).hasAttribute('disabled'),
+    ).toBe(true);
+  });
+
+  it('says the column is fully measured when it carries that distinct count itself', () => {
+    // The discriminating half of the pair above: the same two functions, both
+    // staged on the chosen column, so the budget is spent by the column asking.
+    // Nothing is withheld from it, and the user is sent to its own measures.
+    capabilitiesRef.current = {
+      ...capabilitiesRef.current,
+      order_status: {
+        ...textCapability,
+        aggregates: ['count', 'countDistinct'],
+      },
+    };
+    aggregatesRef.current = [
+      { columnKey: 'order_status', fn: 'countDistinct' },
+      { columnKey: 'order_status', fn: 'count' },
+    ];
+
+    render(<AddAggregateSection />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Status' }));
+
+    expect(screen.getByText(/already applied/)).not.toBeNull();
+    expect(screen.queryByText(/Distinct Count fits/)).toBeNull();
+  });
+
   it('refuses to add a function that stopped being addable under it', () => {
     // The staged list moves under a held selection — the list beside this
     // control removes and the header menu writes live — so the Add button acts

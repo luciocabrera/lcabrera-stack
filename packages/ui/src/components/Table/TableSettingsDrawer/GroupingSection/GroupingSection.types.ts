@@ -13,6 +13,18 @@ export type AggregateItem = {
   readonly label: string;
 } & TableColumnAggregate;
 
+/**
+ * Why the "Add Aggregate" picker has no function to offer for the chosen
+ * column — the two causes a user can act on, and they are acted on differently:
+ * `column-exhausted` sends them to this column's own measures (#841), while
+ * `count-distinct-spent` is about a measure on some other column (#842).
+ *
+ * Every other way the list can empty is `undefined` rather than a member here,
+ * because it has nothing to tell anyone: no column is chosen yet, the column
+ * takes no aggregate at all, or it is staged as a group key.
+ */
+export type AggregatePickerGap = 'column-exhausted' | 'count-distinct-spent';
+
 export type GroupingSectionProps = ComponentPropsWithoutRef<'div'> & {
   readonly isBusy?: boolean;
 };

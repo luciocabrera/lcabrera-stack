@@ -180,6 +180,17 @@ it is subtracted by `resolveAddableAggregates` composing on top of the shared
 resolver rather than by changing it. Same rule, opposite conclusions, because the
 gestures differ.
 
+Since #842 the block resolves through **`resolveAffordableAggregates`**, which
+calls that resolver and narrows its answer by a rule no per-column predicate can
+carry: a grouped read takes one `countDistinct` across every column together, so
+`Distinct Count` is withheld from every other column's menu while one is applied.
+Withheld, not disabled — the same never-offered rule. The column that **carries**
+it is the deliberate exception, and the exception is what keeps the rule safe
+here: it is the paragraph above repeating on a new axis, since a rule applied
+everywhere would leave an aggregate this menu can apply and cannot clear. Nothing
+else about the block changes — `isDisabled` still arrives from the surface and
+the single early return is still the only exit.
+
 A new capability adds a sibling `*Commands.ts`. If it cannot reuse
 `CommandDescriptor` unchanged, revise the shared shape before adding it — that is
 the signal the identity was over-fitted, and it has not happened yet.

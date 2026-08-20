@@ -19,6 +19,7 @@ import {
   resolveAddableAggregates,
   toAggregatableColumnOptions,
 } from '../utils';
+import { AGGREGATE_PICKER_GAP_MESSAGES } from './AddAggregateSection.constants';
 import { styles } from './AddAggregateSection.stylex';
 
 /**
@@ -38,6 +39,18 @@ import { styles } from './AddAggregateSection.stylex';
  * on the chosen column are subtracted here and **not** in the shared predicate,
  * which the header menu reads and which must keep offering an applied function
  * as its toggle-off. `resolveAddableAggregates` owns that asymmetry (#841).
+ *
+ * A second `Distinct Count` is withheld too, and for a rule of a different
+ * shape: the read carries one across every column together, so that answer
+ * comes from `resolveAffordableAggregates` — which both surfaces resolve
+ * through — rather than from anything per column (#842).
+ *
+ * **Where withholding empties the control, the control says why.** An empty
+ * `VirtualSelect` beside a live-looking Add is the failure both of those issues
+ * are about, and the two causes are not interchangeable: one is answered at this
+ * column, the other at whichever column holds the distinct count. So the gap
+ * carries its cause and the message is looked up from it, rather than the
+ * component inferring one from an empty list.
  *
  * Nothing is offered that would not change the grouping, so the Add button acts
  * on the current option list rather than on the raw selection: a function that
@@ -67,12 +80,14 @@ export const AddAggregateSection = ({
     groupingKeys,
   });
   const stagedGroupKeys = new Set(groupingKeys);
-  const { isExhausted, options: fnOptions } = resolveAddableAggregates({
+  const { gap, options: fnOptions } = resolveAddableAggregates({
     applied: aggregates,
     capability: capabilities[selectedColumn],
     columnKey: selectedColumn,
     isGroupKey: stagedGroupKeys.has(selectedColumn),
   });
+  const gapMessage =
+    gap === undefined ? undefined : AGGREGATE_PICKER_GAP_MESSAGES[gap];
   const selectedOption = fnOptions.find(
     (option) => option.value === selectedFn,
   );
@@ -103,12 +118,7 @@ export const AddAggregateSection = ({
         placeholder='Select a column...'
         selected={selectedColumn ? [selectedColumn] : []}
       />
-      {isExhausted ? (
-        <InfoBox>
-          Every function this column supports is already applied. Remove one to
-          add another.
-        </InfoBox>
-      ) : (
+      {gapMessage === undefined ? (
         <VirtualSelect
           isBusy={isBusy || !selectedColumn}
           mode='single'
@@ -119,6 +129,8 @@ export const AddAggregateSection = ({
           placeholder='Select a function...'
           selected={selectedOption ? [selectedOption.value] : []}
         />
+      ) : (
+        <InfoBox>{gapMessage}</InfoBox>
       )}
       <Button
         isBusy={isBusy}

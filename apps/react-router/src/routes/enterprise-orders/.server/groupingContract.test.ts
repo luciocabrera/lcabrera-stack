@@ -28,9 +28,11 @@ import type {
 import { OLAP_GROUP_PERIODS } from '@lcabrera/api/olap/olap.constants';
 import {
   GROUP_KEY_PERIODS,
+  MAX_COUNT_DISTINCT_AGGREGATES,
   MAX_GROUP_KEYS,
 } from '@lcabrera/server/db/group-query-builder/group-query-builder.constants';
 import {
+  MAX_TABLE_COUNT_DISTINCT_AGGREGATES,
   MAX_TABLE_GROUP_KEYS,
   TABLE_AGGREGATE_FNS,
 } from '@lcabrera/ui/components/Table/Table.constants';
@@ -251,6 +253,17 @@ describe('grouping contract between @lcabrera/ui and @lcabrera/server', () => {
     // throws past the server's. If these drift the UI offers a depth the query
     // then refuses — or hides one the query would have accepted.
     expect(MAX_TABLE_GROUP_KEYS).toBe(MAX_GROUP_KEYS);
+  });
+
+  it('pins the countDistinct budget to one value across both packages', () => {
+    // The same duplication and the same hazard, one issue later (#842): the UI
+    // withholds a second `countDistinct` at its own constant and
+    // `assertGroupAggregates` refuses past the server's. Drift either way is a
+    // silent contradiction — an offer the read refuses, or a measure the UI
+    // hides that the query would have run.
+    expect(MAX_TABLE_COUNT_DISTINCT_AGGREGATES).toBe(
+      MAX_COUNT_DISTINCT_AGGREGATES,
+    );
   });
 
   it('carries the same aggregate vocabulary in both directions', () => {

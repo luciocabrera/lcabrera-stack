@@ -240,6 +240,41 @@ does **not** have. A consumer who genuinely needs to summarise an in-memory arra
 should aggregate it before handing it to the `Table`, and render the result as
 ordinary rows.
 
+### Which guard rails this side can break by construction
+
+`@lcabrera/server`'s `group-query-builder.constants.ts` carries a family of guard
+rails ([ADR-066](../../../../../docs/decisions/ADR-066-grouping-guard-rails-and-per-query-timeout.md)),
+and they do not all stand in the same relation to the UI. Some are a property of
+the **request** — a configuration alone decides whether they hold, so a surface
+offering past one builds a state the read then refuses. Others are a property of
+the **data**, refused on an estimate at read time, and no configuration can
+predict them. The table below is that enumeration (#842), and the second group is
+named rather than left out: "not enforced here" and "not knowable here" are
+different facts, and only the first is a gap.
+
+| Rail (server)                                         | Predictable from a configuration?     | What holds it on this side                                                                                                                                                                                                                     |
+| ----------------------------------------------------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MAX_GROUP_KEYS` — group-key depth                    | Yes                                   | `MAX_TABLE_GROUP_KEYS` (a pinned duplicate), `areGroupKeysLegal`, `sanitizeGroupingByColumns`, and both add-key surfaces                                                                                                                       |
+| `MAX_KEYS_BY_GROUPING` — depth per mode               | Yes, and unreachable                  | Its lower bound is `cube`'s, and this package offers no `cube`; `groupingContract.test.ts` asserts that subset                                                                                                                                 |
+| `MAX_COUNT_DISTINCT_AGGREGATES` — per **read**        | Yes                                   | `MAX_TABLE_COUNT_DISTINCT_AGGREGATES` (pinned the same way), through `utils/countDistinctBudget.util.ts` — #842                                                                                                                                |
+| A repeated group key                                  | Yes                                   | `areGroupKeysLegal` and the sanitizer, both refusing whole                                                                                                                                                                                     |
+| A repeated `(columnKey, fn)` → `assertGroupAliases`   | Yes                                   | `areGroupAggregatesLegal` and the sanitizer (#831)                                                                                                                                                                                             |
+| A granularity naming a column that is not a key       | Yes                                   | The sanitizer, refusing whole (#786)                                                                                                                                                                                                           |
+| Group-key and aggregate legality by type              | Only because the verdict is shipped   | The catalogue's per-column answer on the loader meta (ADR-058/063), read through `resolveGroupKeyAvailability` and `resolveOfferableAggregates`. No threshold is duplicated here                                                               |
+| `MAX_GROUP_KEY_DISTINCT`, `UNIQUE_ISH_DISTINCT_RATIO` | The verdict, never the number         | Arrive pre-answered as `canGroup: false` plus a refusal reason; this side never evaluates the ratio                                                                                                                                            |
+| `MAX_IDENTIFIER_LENGTH` — alias length and collision  | In principle, deliberately not        | The alias is derived server-side from the function and the column name, and the way past it is an explicit `alias` the `grouping` param has no slot for (#569). Duplicating a name-building rule is not the trade that duplicating a number is |
+| `MAX_GROUP_ROWS_REFUSE` / `MAX_GROUP_ROWS_WARN`       | **No**                                | An estimate over the data, which ADR-066 lets answer `unknown` on an unanalysed table. Rendered as a refusal instead (ADR-068)                                                                                                                 |
+| The per-query statement timeout                       | **No**                                | Refuses on elapsed cost. Same treatment                                                                                                                                                                                                        |
+| "A grouped query needs at least one aggregate"        | Not reachable through the read helper | `toGroupAggregates` prepends `count(*)` to every grouped read, so a grouping carrying no measures still asks for one — a property of that helper rather than of this package                                                                   |
+
+The first group follows
+[ADR-039](../../../../../docs/decisions/ADR-039-duplicate-over-undeclared-edges.md)'s
+pattern, without exception: this package is client-safe and cannot import the
+Node-only builder, so a rail it must respect is **duplicated** and then pinned to
+the server's value by a contract test in `apps/react-router` — the one workspace
+that legitimately depends on both packages. Two constants and one assertion each,
+never a copy left to drift.
+
 ### Layout
 
 While grouping is applied the grid adds **no column of its own**. Each group key

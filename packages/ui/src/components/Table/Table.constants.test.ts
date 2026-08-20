@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
+  MAX_TABLE_COUNT_DISTINCT_AGGREGATES,
   MAX_TABLE_GROUP_KEYS,
   TABLE_AGGREGATE_FNS,
   TABLE_AGGREGATE_LABELS,
@@ -29,5 +30,18 @@ describe('group key depth cap', () => {
     // multi-key grouping built on top of it.
     expect(MAX_TABLE_GROUP_KEYS).toBeGreaterThan(1);
     expect(Number.isSafeInteger(MAX_TABLE_GROUP_KEYS)).toBe(true);
+  });
+});
+
+describe('countDistinct budget', () => {
+  it('admits at least one and stays finite', () => {
+    // Pinned against the server's in the app's conformance test, as the depth
+    // cap is. What belongs here is that the budget permits the aggregate at
+    // all: at zero the menus would withhold `countDistinct` from every column
+    // and the vocabulary above would carry a function nothing could ever apply.
+    expect(MAX_TABLE_COUNT_DISTINCT_AGGREGATES).toBeGreaterThan(0);
+    expect(Number.isSafeInteger(MAX_TABLE_COUNT_DISTINCT_AGGREGATES)).toBe(
+      true,
+    );
   });
 });

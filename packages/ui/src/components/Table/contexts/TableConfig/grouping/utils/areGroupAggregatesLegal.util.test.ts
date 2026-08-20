@@ -45,6 +45,29 @@ describe('areGroupAggregatesLegal', () => {
     ).toBe(false);
   });
 
+  it('accepts a single countDistinct beside other measures', () => {
+    expect(
+      areGroupAggregatesLegal([
+        { columnKey: 'order_status', fn: 'countDistinct' },
+        { columnKey: 'total_amount', fn: 'sum' },
+        { columnKey: 'order_status', fn: 'count' },
+      ]),
+    ).toBe(true);
+  });
+
+  it('refuses two countDistinct aggregates, which are not a repeated pair', () => {
+    // Two distinct pairs and two declared columns — legal by every other rule
+    // here, and a list the read cannot carry (#842). A consumer seeding it
+    // would get a table `@lcabrera/ui` renders as grouped and the query then
+    // refuses.
+    expect(
+      areGroupAggregatesLegal([
+        { columnKey: 'order_status', fn: 'countDistinct' },
+        { columnKey: 'shipped_city', fn: 'countDistinct' },
+      ]),
+    ).toBe(false);
+  });
+
   it('tells two pairs apart when a column key contains a colon', () => {
     // The identity is compared as a whole token, and the token is injective
     // because the function vocabulary is closed and contains no `:` — so these
