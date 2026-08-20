@@ -22,6 +22,8 @@ ci(repo): accept a Claude review alongside Copilot's on the review gate
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: in review on #836 — workflow, reviewer set, tests and docs all landed,
+  and the full gate is green locally
 - Blockers: none
-- Next:
+- Next: merge #836, then delete this file. #699 (a distinct identity for the reviewer)
+  is the follow-up that has to land before #698 promotes this context to required.

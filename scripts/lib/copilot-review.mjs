@@ -195,7 +195,7 @@ const pendingDescription = ({ headSha, isDraft, latest }) => {
     return `${reviewerLogin(latest)} last reviewed ${shortSha(reviewedCommit(latest))}; waiting for a review of ${shortSha(headSha)}.`;
   }
   return isDraft
-    ? `Draft — reviewed once the pull request is marked ready.`
+    ? 'Draft — reviewed once the pull request is marked ready.'
     : `Waiting for a review of ${shortSha(headSha)}.`;
 };
 
