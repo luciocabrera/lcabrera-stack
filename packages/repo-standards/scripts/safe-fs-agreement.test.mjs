@@ -59,19 +59,27 @@ describe('safe-read and safe-write agree on containment', () => {
       false,
     ],
     ['a path under an unrelated root', (r) => join(r.outside, 'f'), false],
-  ])('%s', (_label, build) => {
+  ])('%s', (_label, build, expected) => {
     const path = build({ outside, root });
-    // The file has to exist for the read to get past containment to the fs call;
-    // the write creates its own. Nested paths are expected to fail on ENOENT,
-    // which both helpers report as "accepted" — containment is what is compared.
-    if (!path.includes('..')) {
+    // The file has to exist for the read to get past containment to the fs call.
+    // Seed only what is genuinely inside the sandbox, decided from the RESOLVED
+    // path rather than the spelling: `join` normalises, so the traversal row
+    // arrives here already collapsed with no `..` left to test for — and seeding
+    // it would have this containment test write outside its own sandbox.
+    if (resolve(path).startsWith(root + sep)) {
       try {
         writeFileSync(path, 'seed', 'utf8');
       } catch {
         // The directory may not exist; the containment verdict is unaffected.
       }
     }
-    expect(readAccepts(path, [root])).toBe(writeAccepts(path, [root]));
+    const accepted = readAccepts(path, [root]);
+    // Agreement alone is not enough. Both copies losing their containment
+    // together would leave every row `true === true` and this file green, which
+    // is the clean-pass-from-either-cause failure AGENTS.md §7 names — so the
+    // row's own verdict is asserted too.
+    expect(accepted).toBe(writeAccepts(path, [root]));
+    expect(accepted).toBe(expected);
   });
 
   it('agree that an empty or absent root refuses everything', () => {
