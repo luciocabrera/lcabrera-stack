@@ -10,7 +10,8 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
-import { groupsFor, targetPathFor } from './config.mjs';
+import { groupsFor, hasConfigKey, targetPathFor } from './config.mjs';
+import { requiredConfigKeys } from './frontmatter.mjs';
 import { substituteCommands } from './placeholders.mjs';
 import {
   classifyMaterialisation,
@@ -32,6 +33,24 @@ export const planSync = ({ assets, config, manifest, onDiskHash }) => {
     .map((asset) => {
       const targetPath = targetPathFor({ assetPath: asset.path, config });
       if (targetPath === undefined) return undefined;
+
+      // Checked BEFORE substitution because a declared requirement is the wider
+      // failure: substituting would report only the keys the file happens to
+      // interpolate, and a file is refused for the first reason it cannot be
+      // honoured rather than for the most visible one.
+      const unmet = requiredConfigKeys(asset.content).filter(
+        (key) => !hasConfigKey({ config, path: key }),
+      );
+
+      if (unmet.length > 0) {
+        return {
+          content: asset.content,
+          incomingHash: hashContent(asset.content),
+          missing: unmet,
+          path: targetPath,
+          state: 'unmet',
+        };
+      }
 
       // Substituted BEFORE hashing, so the record describes what is on disk
       // rather than the template it came from.

@@ -9,10 +9,11 @@
  * answers "will this work once installed somewhere else".
  *
  * Pure by design: callers pass file contents in and get findings back, so the
- * walking, printing and exit code live in the CLI. Escapes come in three kinds
+ * walking, printing and exit code live in the CLI. Escapes come in four kinds
  * because they fail differently for a consumer — a `link` is a file they will
  * not have, a `command` is a tool their shell may not resolve, an `import` is a
- * module their install will not provide.
+ * module their install will not provide, and a `requires` is a config key no
+ * consumer could set because it is not part of what the config is for.
  */
 
 import {
@@ -21,6 +22,7 @@ import {
   extractLinkTargets,
   extractPathTokens,
 } from './closure-extract.mjs';
+import { requiredConfigKeys, requiresDeclarationLine } from './frontmatter.mjs';
 
 /**
  * A scheme is at least two characters, which is what separates `mailto:` from a
@@ -191,19 +193,37 @@ const toEscapes = ({ classified, file }) =>
     }));
 
 /**
+ * A declared requirement escapes when the key it names is outside the config's
+ * key space, because then no consumer can satisfy it — unlike a key that is
+ * merely unset here, which is `sync`'s question and not this one.
+ */
+const toRequiresEscapes = ({ allowedKeys, file }) =>
+  requiredConfigKeys(file.content)
+    .filter((key) => !allowedKeys.has(key))
+    .map((key) => ({
+      file: file.path,
+      kind: 'requires',
+      line: requiresDeclarationLine(file.content),
+      reference: `config.${key}`,
+    }));
+
+/**
  * @param {{ files: { path: string, content: string }[], rootDirectory: string,
  *   allowedCommands?: Iterable<string>,
+ *   allowedConfigKeys?: Iterable<string>,
  *   exists?: (repoRelativePath: string) => boolean,
  *   shipped?: Set<string> }} args
  */
 export const analyseClosure = ({
   allowedCommands = [],
+  allowedConfigKeys = [],
   exists,
   files,
   rootDirectory,
   shipped = new Set(),
 }) => {
   const allowed = new Set(allowedCommands);
+  const allowedKeys = new Set(allowedConfigKeys);
 
   const linkEscapes = files.flatMap((file) => {
     const fromDirectory = directoryOf(file.path);
@@ -271,10 +291,19 @@ export const analyseClosure = ({
         })),
     );
 
+  const requiresEscapes = files.flatMap((file) =>
+    toRequiresEscapes({ allowedKeys, file }),
+  );
+
   // A link whose text repeats its own target — the spelling these skills use —
   // is found twice, once as a link and once as a prose path. It is one
   // dependency, and reporting it twice makes a short list look like a long one.
   return {
-    escapes: dedupe([...linkEscapes, ...commandEscapes, ...importEscapes]),
+    escapes: dedupe([
+      ...linkEscapes,
+      ...commandEscapes,
+      ...importEscapes,
+      ...requiresEscapes,
+    ]),
   };
 };

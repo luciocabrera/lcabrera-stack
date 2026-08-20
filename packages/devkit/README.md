@@ -18,16 +18,22 @@ The record is what makes it distribution rather than copy-paste. Every
 materialised file is hashed into `.devkit-manifest.json`, and each subsequent
 run classifies it:
 
-| State                | What happens                                                  |
-| -------------------- | ------------------------------------------------------------- |
-| `added` / `restored` | written — the consumer does not have it                       |
-| `updated`            | written — untouched locally, and the package has moved on     |
-| `current`            | nothing written; adopted into the record                      |
-| `modified`           | **left alone** — edited locally, and reported on every run    |
-| `conflict`           | **left alone** — an unmanaged file already occupies that path |
+| State                | What happens                                                    |
+| -------------------- | --------------------------------------------------------------- |
+| `added` / `restored` | written — the consumer does not have it                         |
+| `updated`            | written — untouched locally, and the package has moved on       |
+| `current`            | nothing written; adopted into the record                        |
+| `modified`           | **left alone** — edited locally, and reported on every run      |
+| `conflict`           | **left alone** — an unmanaged file already occupies that path   |
+| `unresolved`         | **refused** — a `{{commands.*}}` placeholder has no answer      |
+| `unmet`              | **refused** — a key the file declares in `requires:` is not set |
 
 A local edit is a supported state, not a defect. It survives every sync, which
 is what stops a consumer forking the kit to change one line.
+
+The two refusals are never written **and never recorded**. Recording one would
+make the next run read the file's absence as a deletion the consumer chose,
+which is the one way a refused file could quietly stop being reported.
 
 ## What counts as self-contained
 
@@ -42,6 +48,13 @@ A command reached through `{{commands.*}}` counts as answered too — the tools
 your `commands` block invokes are added to the baseline for the run. Otherwise
 parameterising a command, the very thing that makes a file portable, would make
 the closure gate fail.
+
+It reports four kinds of escape, because they fail differently for a consumer: a
+**link** is a file they will not have, a **command** is a tool their shell may
+not resolve, an **import** is a module their install will not provide, and a
+**requires** is a config key outside what `devkit.config.json` is for — so no
+consumer could set it, however reliably it resolves in the repository that wrote
+the file.
 
 Run it against **materialised** output, never against `assets/`. A shipped file's
 links are written for where the file lands, so resolving them from the asset tree
@@ -88,6 +101,33 @@ This is the consumer's data, deliberately kept out of the files being shipped �
 the same split the toolchain packages made. A shipped file may reference only
 something inside its own package, a bin from a declared peer, or a key from
 here. `devkit closure` is what checks that.
+
+### Declaring what a file cannot run without
+
+A placeholder is only half the story: a file can depend on a config key while
+never interpolating it, and that dependency is invisible to the substitution
+above. `requires:` in the file's own frontmatter makes it visible.
+
+```yaml
+---
+name: epic
+requires: [config.commands.install, config.paths.docs]
+---
+```
+
+A file declaring a key the consumer has not set is **not written**, and is
+reported naming the key — the same refusal an unanswered placeholder gets, and
+for the same reason. Set the key and the next `sync` writes it.
+
+Only `config.`-prefixed entries are read. `requires:` already means other things
+in frontmatter written for people — a shipped reference file uses it for a
+library version range — and those are left alone.
+
+Write the list however you like: a flow array, a block sequence, or a lone
+scalar for the single-key case, quoted or not, with notes and blank lines
+wherever YAML allows them. Restyling a declaration from one spelling into
+another is not a behaviour change, and a spelling that read as no declaration
+would be — it would put the file in a consumer who cannot satisfy it, silently.
 
 ## What ships
 
