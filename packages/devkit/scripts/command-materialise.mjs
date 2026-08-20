@@ -126,6 +126,18 @@ const STATE_LABELS = {
   updated: 'updated',
 };
 
+/**
+ * The state column is as wide as the longest state there is, computed from the
+ * vocabulary rather than written down. A literal width is a guess that the next
+ * state name outgrows — `acknowledged` outgrew the last one, and every row after
+ * it sat two characters out of line. `STATE_LABELS` is the right thing to
+ * measure because a state without a label already renders `undefined`, so no
+ * state can reach here without passing through it.
+ */
+const STATE_COLUMN_WIDTH = Math.max(
+  ...Object.keys(STATE_LABELS).map((state) => state.length),
+);
+
 /** States whose label is only actionable with the names that produced it. */
 const STATES_NAMING_WHAT_IS_MISSING = new Set(['unmet', 'unresolved']);
 
@@ -163,7 +175,7 @@ export const renderPlan = (entries, { verbose = false } = {}) => {
   return notable
     .map(
       (entry) =>
-        `  ${entry.state.padEnd(10)} ${entry.path}  (${detailFor(entry)})`,
+        `  ${entry.state.padEnd(STATE_COLUMN_WIDTH)} ${entry.path}  (${detailFor(entry)})`,
     )
     .join('\n');
 };

@@ -160,7 +160,7 @@ describe('renderPlan and an unmet peer', () => {
         },
       ]),
     ).toBe(
-      '  unmet      .github/skills/demo/SKILL.md  (not written — no compatible peer for @repo/repo-standards@>=0.1.0 <1.0.0 (not installed))',
+      '  unmet        .github/skills/demo/SKILL.md  (not written — no compatible peer for @repo/repo-standards@>=0.1.0 <1.0.0 (not installed))',
     );
   });
 
@@ -174,7 +174,7 @@ describe('renderPlan and an unmet peer', () => {
         },
       ]),
     ).toBe(
-      '  unmet      .github/skills/demo/SKILL.md  (not written — no config key set for paths.workflows)',
+      '  unmet        .github/skills/demo/SKILL.md  (not written — no config key set for paths.workflows)',
     );
   });
 });

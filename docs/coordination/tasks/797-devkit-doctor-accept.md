@@ -34,6 +34,7 @@ returns — `unmet` included — carries `onDiskHash`.
 
 ## Status / next
 
-- Current step: rebased onto #845, gate re-run, awaiting verification
+- Current step: verified; rebased onto `origin/main` and gate re-run, with the
+  report's state column now sized from the state vocabulary rather than a literal
 - Blockers: none
 - Next: nothing — the PR is #848 and is owned by the dispatcher

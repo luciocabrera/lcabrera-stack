@@ -20,8 +20,8 @@ describe('renderPlan', () => {
       ]),
     ).toBe(
       [
-        '  unresolved .github/skills/demo/SKILL.md  (not written — no command configured for install)',
-        '  unmet      .github/skills/demo/SKILL.md  (not written — no config key set for paths.workflows)',
+        '  unresolved   .github/skills/demo/SKILL.md  (not written — no command configured for install)',
+        '  unmet        .github/skills/demo/SKILL.md  (not written — no config key set for paths.workflows)',
       ].join('\n'),
     );
   });

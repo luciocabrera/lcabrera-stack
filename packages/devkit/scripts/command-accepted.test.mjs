@@ -29,8 +29,18 @@ describe('renderPlan and an acknowledged edit', () => {
     // Otherwise "quiet under --verbose" and "quiet because acknowledged" would
     // be the same observation.
     expect(renderPlan([modified])).toBe(
-      `  modified   ${PATH}  (left alone — locally modified)`,
+      `  modified     ${PATH}  (left alone — locally modified)`,
     );
+  });
+
+  test('lines its path column up with the rows around it', () => {
+    // `acknowledged` is the longest state name there is, so a column sized to
+    // anything narrower puts every other row two characters out of true — in the
+    // one report that exists to be scanned.
+    const [first, second] = renderPlan([acknowledged, modified], {
+      verbose: true,
+    }).split('\n');
+    expect(first.indexOf(PATH)).toBe(second.indexOf(PATH));
   });
 });
 
