@@ -83,16 +83,17 @@ Any single mechanism gets one of the two wrong.
    break a major for the package that ships a React reference.
 5. **An editor-native plugin manifest** — shipping a `.claude-plugin/plugin.json`
    or the Cursor equivalent, and letting the host editor's own marketplace
-   install it. Rejected as the **primary** mechanism on §Problem's first
-   sentence: Copilot and Gemini have no plugin mechanism at all and read the
-   files directly, so a plugin cache reaches one of the three agents this repo
-   is worked by. It is not rejected as an _additional_ route — the two are
-   compatible, and a consumer who only uses Claude Code would gain a read-only
-   install with no drift to reconcile. Deferred rather than declined, on the
-   restraint this ADR already applies to `@lcabrera/scan-report`: no second
-   repository has asked. Recorded because it is what the comparable projects
-   surveyed in [#716](https://github.com/luciocabrera/vite-react-compiler/issues/716)
-   all chose, so its absence would otherwise read as an oversight.
+   install it. Rejected as the **primary** mechanism on the second paragraph of
+   §Problem: Copilot and Gemini have no skill mechanism at all and read the files
+   directly, so a plugin cache serves only the agents that have one. It is not
+   rejected as an _additional_ route — the two are compatible, and a consumer who
+   only uses Claude Code would gain a read-only install with no drift to
+   reconcile. Deferred rather than declined, on the restraint this ADR already
+   applies to `@lcabrera/scan-report`: no second repository has asked. Recorded
+   because it is what two of the three projects surveyed in
+   [#716](https://github.com/luciocabrera/vite-react-compiler/issues/716) chose
+   exclusively, and the third offers as one of two co-equal routes — so its
+   absence would otherwise read as an oversight.
 6. **Two packages split by delivery mechanism, plus a consumer config file.**
    `Chosen.`
 
@@ -196,19 +197,26 @@ into `repo-standards`.
 - **Bundle the prose and the runtime into one installable unit**, the shape
   Cursor's `orchestrate` plugin uses — a skill directory carrying its own
   TypeScript CLI, installed together. Already rejected as option 4 above on
-  semver grounds; the survey supplies what that argument lacked, which is a
-  consequence someone has actually lived with. That CLI is `private: true` at
-  `version: "0.0.0"` and has never been published, so it gets no dependency
-  resolution and no version a consumer can pin — correctness rides on whichever
-  copy of the directory happens to be installed. That is the failure mode
-  option 4 predicted, observed.
+  semver grounds. The survey adds a different argument rather than evidence for
+  that one: `orchestrate`'s CLI is `private: true` at `version: "0.0.0"` and has
+  never been published, so it gets no dependency resolution and no version a
+  consumer can pin — correctness rides on whichever copy of the directory
+  happens to be installed. Option 4 predicted versions _colliding_; what
+  bundling produced here is no versioning at all. Two ways to lose the same
+  property, and the second is the one observed.
 - **A personalisation flow that writes a consumer their own skill**, the shape of
   pstack's `automate-me`: mine the user's transcripts, then draft a routing skill
   layered over the shared base. A live counterpart to `--profile`, done
   generatively rather than by selection. Not rejected on merit — nothing in the
-  adoption plan asks for it, and the one consumer named in #800 wants the
-  defaults. If a later consumer needs more than `agent`/`full`, it is a `devkit`
-  subcommand, not a package.
+  adoption plan asks for it. If a later consumer needs more than `agent`/`full`,
+  it is a `devkit` subcommand, not a package.
+
+One finding runs the other way and belongs here rather than in a footnote:
+**materialisation is not unprecedented among the surveyed projects.**
+`mattpocock/skills` offers a copy-based route alongside its plugin one, and that
+route writes editable files into the consumer's own tree — the model chosen
+here. What it does not carry is any record of what it wrote, which is the half
+that turns a copy into a distribution (see §Decision on the manifest).
 
 ## References
 
