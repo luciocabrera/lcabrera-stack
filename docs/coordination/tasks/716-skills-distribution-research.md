@@ -5,7 +5,7 @@ owner: agent:claude
 status: review
 branch: docs/716-skills-distribution-research
 area:
-  - docs/agents/planning/skills-distribution-research-*.md
+  - docs/agents/research/skills-distribution-*.md
 started: 2026-08-20
 updated: 2026-08-20
 plan: (none)
@@ -19,7 +19,7 @@ Research how three external projects (poteto/plugins' `pstack` and `orchestrate`
 and mattpocock/skills) distribute, version and configure agent
 skills/plugins, to inform the `@lcabrera/devkit` / `@lcabrera/repo-standards`
 design (ADR-081) under epic #716. Persists three detailed analyses plus a
-comparison/gap-analysis doc under `docs/agents/planning/`, and publishes a
+comparison/gap-analysis doc under `docs/agents/research/`, and publishes a
 summary as an Artifact.
 
 ## Status / next

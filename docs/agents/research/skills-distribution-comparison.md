@@ -229,9 +229,9 @@ and that restraint should hold here too.
 
 ## Sources
 
-- `docs/agents/planning/skills-distribution-research-pstack.md`
-- `docs/agents/planning/skills-distribution-research-orchestrate.md`
-- `docs/agents/planning/skills-distribution-research-mattpocock-skills.md`
+- `docs/agents/research/skills-distribution-pstack.md`
+- `docs/agents/research/skills-distribution-orchestrate.md`
+- `docs/agents/research/skills-distribution-mattpocock-skills.md`
 - `docs/decisions/ADR-081-ship-the-repo-setup-as-two-packages.md`
 - `packages/devkit/CLASSIFICATION.md`, `packages/devkit/README.md`
 - GitHub issues #716, #797, #798, #799, #800, #801 (`gh issue view`)

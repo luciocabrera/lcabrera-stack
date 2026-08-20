@@ -1,9 +1,9 @@
 {
-  "docs/agents/planning/skills-distribution-research-comparison.md": {
+  "docs/agents/research/skills-distribution-comparison.md": {
     "docs/agents/issue-tracker.md": "path inside mattpocock/skills, quoted as evidence, not a claim about this repo",
     "scripts/package.json": "path inside orchestrate (poteto/plugins), quoted as evidence, not a claim about this repo"
   },
-  "docs/agents/planning/skills-distribution-research-mattpocock-skills.md": {
+  "docs/agents/research/skills-distribution-mattpocock-skills.md": {
     "docs/adr/": "path inside mattpocock/skills, quoted as evidence, not a claim about this repo",
     "docs/agents/domain.md": "path inside mattpocock/skills, quoted as evidence, not a claim about this repo",
     "docs/agents/issue-tracker.md": "path inside mattpocock/skills, quoted as evidence, not a claim about this repo",
@@ -12,14 +12,14 @@
     "scripts/list-skills.sh": "path inside mattpocock/skills, quoted as evidence, not a claim about this repo",
     "scripts/sync-plugin-version.mjs": "path inside mattpocock/skills, quoted as evidence, not a claim about this repo"
   },
-  "docs/agents/planning/skills-distribution-research-orchestrate.md": {
+  "docs/agents/research/skills-distribution-orchestrate.md": {
     "scripts/cli.ts": "path inside orchestrate (poteto/plugins), quoted as evidence, not a claim about this repo",
     "scripts/cli/index.ts": "path inside orchestrate (poteto/plugins), quoted as evidence, not a claim about this repo",
     "scripts/package.json": "path inside orchestrate (poteto/plugins), quoted as evidence, not a claim about this repo",
     "scripts/schemas.ts": "path inside orchestrate (poteto/plugins), quoted as evidence, not a claim about this repo",
     "scripts/tsconfig.json": "path inside orchestrate (poteto/plugins), quoted as evidence, not a claim about this repo"
   },
-  "docs/agents/planning/skills-distribution-research-pstack.md": {
+  "docs/agents/research/skills-distribution-pstack.md": {
     ".github/workflows/validate-plugins.yml": "path inside poteto/plugins (repo root), quoted as evidence, not a claim about this repo",
     "scripts/log.sh": "path inside pstack (poteto/plugins), quoted as evidence, not a claim about this repo",
     "scripts/validate-plugins.mjs": "path inside poteto/plugins (repo root), quoted as evidence, not a claim about this repo"
