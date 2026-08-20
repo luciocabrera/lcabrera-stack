@@ -2,14 +2,14 @@
 id: 716-skills-distribution-research
 title: Research external skill/plugin distribution mechanisms for #716
 owner: agent:claude
-status: active
+status: review
 branch: docs/716-skills-distribution-research
 area:
   - docs/agents/planning/skills-distribution-research-*.md
 started: 2026-08-20
 updated: 2026-08-20
 plan: (none)
-pr: (none)
+pr: #833
 issue: #716
 ---
 
@@ -24,8 +24,6 @@ summary as an Artifact.
 
 ## Status / next
 
-- Current step: dispatching three parallel research agents, then a synthesis
-  agent.
+- Current step: PR #833 open for review.
 - Blockers: none.
-- Next: write the comparison doc, then build the Artifact and open a docs-only
-  PR.
+- Next: merge, then delete this task file.
