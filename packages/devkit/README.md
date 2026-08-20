@@ -66,7 +66,7 @@ produces confident nonsense.
 
 ```bash
 devkit sync [--profile <name>]        # materialise into the current repository
-devkit doctor [--check] [--verbose]   # report divergence; --check makes it fail
+devkit doctor [--profile <name>] [--check] [--verbose]   # report divergence; --check makes it fail
 devkit doctor --accept <path> --reason "<why>"   # this edit is deliberate
 devkit closure [--profile <name>] <dir> [<dir>...]   # what does this directory need that it lacks
 devkit closure [--profile <name>] --shipped          # the same, for everything the package places
@@ -94,6 +94,13 @@ reads the result.
 
 A consumer who wants the prose and keeps their own process takes `agent` and
 receives none of the scaffolding. `full` is the whole setup.
+
+**Set it in `devkit.config.json` rather than passing `--profile`.** Every
+command takes the flag, and that is how the commands get out of step: sync the
+wider profile by flag, let CI run `doctor --check` without it, and every file
+outside the configured profile is dropped from the plan before anything counts
+it — so a deleted hook reports no drift. The flag is for a one-off; the config
+is what keeps the question from being asked two ways.
 
 **Two things a sync cannot do for you**, because neither is a file:
 

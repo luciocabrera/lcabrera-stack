@@ -97,8 +97,24 @@ const runAccept = ({ accept, accepted, entries, root }) => {
   return 0;
 };
 
+/**
+ * `doctor` takes the same `--profile` as `sync`, and has to.
+ *
+ * Without it the two commands read different sets: a consumer who syncs the
+ * wider profile records every file, then CI runs `doctor --check`, the plan is
+ * filtered back to the configured profile, and every file outside it is dropped
+ * before anything counts it. Delete a hook or hand-edit a workflow and the check
+ * exits 0 — the same clean run as a tree with nothing wrong in it.
+ *
+ * The durable answer is still to set `profile` in `devkit.config.json`, so the
+ * two cannot be asked for different things in the first place; the flag is what
+ * makes a one-off `doctor` able to agree with a one-off `sync`.
+ */
 export const runDoctor = (argv, root) => {
-  const { accepted, entries } = buildPlan({ root });
+  const { accepted, entries } = buildPlan({
+    profile: flagValue(argv, '--profile'),
+    root,
+  });
 
   const accept = parseAcceptArgs(argv);
   if (accept !== undefined) {

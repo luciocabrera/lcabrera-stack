@@ -11,7 +11,7 @@
  *
  * Usage:
  *   devkit sync [--profile <name>]
- *   devkit doctor [--check] [--verbose]
+ *   devkit doctor [--profile <name>] [--check] [--verbose]
  *   devkit doctor --accept <path> --reason "<why>"
  *   devkit closure [--profile <name>] <directory> [<directory> ...]
  *   devkit closure [--profile <name>] --shipped
@@ -26,7 +26,7 @@ import { runDoctor, runSync } from './command-sync.mjs';
 const USAGE = [
   'usage:',
   '  devkit sync [--profile <name>]',
-  '  devkit doctor [--check] [--verbose]',
+  '  devkit doctor [--profile <name>] [--check] [--verbose]',
   '  devkit doctor --accept <path> --reason "<why>"',
   '  devkit closure [--profile <name>] <directory> [<directory> ...]',
   '  devkit closure [--profile <name>] --shipped',

@@ -12,6 +12,7 @@ import {
   chmodSync,
   mkdirSync,
   mkdtempSync,
+  rmSync,
   statSync,
   writeFileSync,
 } from 'node:fs';
@@ -21,7 +22,7 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, test, vi } from 'vite-plus/test';
 
-import { runSync } from './command-sync.mjs';
+import { runDoctor, runSync } from './command-sync.mjs';
 import { DEFAULT_CONFIG } from './config.mjs';
 import { readFilesUnder } from './files.mjs';
 import { hashContent } from './manifest.mjs';
@@ -242,5 +243,39 @@ describe('through the command, not just the applier', () => {
 
     expect(statSync(hook).mode & EXECUTABLE_BITS).not.toBe(0);
     log.mockRestore();
+  });
+});
+
+describe('doctor reads the same set sync wrote', () => {
+  // Newly reachable in this change: the two profiles used to name the same
+  // groups, so a `doctor` that ignored `--profile` could not disagree with a
+  // `sync` that honoured it. Now it can, and the disagreement is silent — every
+  // file outside the configured profile is filtered out of the plan before
+  // anything counts it, so `--check` exits 0 over a tree it never looked at.
+  test('a file deleted from the wider profile is reported under that profile', () => {
+    const root = scratch();
+    const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    const error = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
+
+    writeFileSync(
+      join(root, 'devkit.config.json'),
+      JSON.stringify({
+        commands: { check: 'true', install: 'true', test: 'true' },
+        profile: 'full',
+      }),
+    );
+    runSync([], root);
+    rmSync(join(root, '.githooks/pre-push'));
+
+    expect(runDoctor(['--check', '--profile', 'full'], root)).toBe(1);
+    // …and the narrower profile does not place that file at all, so it has
+    // nothing to say about it. That is correct, and it is exactly why the two
+    // commands have to be asked the same question.
+    expect(runDoctor(['--check', '--profile', 'agent'], root)).toBe(0);
+
+    log.mockRestore();
+    error.mockRestore();
   });
 });

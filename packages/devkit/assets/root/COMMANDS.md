@@ -6,25 +6,47 @@ keep this file true, because it is the first thing a new agent reads.
 
 ## 1. The two packages
 
-| Package          | What it is                                                                         |
-| ---------------- | ---------------------------------------------------------------------------------- |
-| the materialiser | Puts the shipped files where they are discovered by path, and reports drift.       |
-| the gate runtime | The checks, as commands: commit messages, branch names, PRs, issues, the register. |
+| Role                 | Package name            | What it is                                                                                             |
+| -------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------ |
+| **the materialiser** | `FILL IN ON FIRST SYNC` | Puts the shipped files where they are discovered by path, and reports drift. Invoked as `devkit`.      |
+| **the gate runtime** | `FILL IN ON FIRST SYNC` | The checks, as commands: commit messages, branch names, pull requests, issues, the register, the ADRs. |
 
-The materialiser is invoked as `devkit`. The gate runtime installs one bin per
-check; each is named in the table below. Both are ordinary dependencies — nothing
-is global, and nothing is vendored into this repository.
+**Write both names in, once, right after your first sync.** They are blank on
+purpose: this file is shipped BY the materialiser, and a shipped file may not
+name the repository it came from — so the package cannot introduce itself here.
+Filling them in is the one thing that makes the rest of this setup
+self-explaining.
+
+It is not cosmetic. Every git hook and every gate-checking workflow fails with
+_"install the gate runtime package named in COMMANDS.md"_ when that package is
+missing — which is the moment someone is reading this file to find out what to
+install. Left blank, the loudest, most deliberate failure in the whole setup
+points at a table that cannot answer.
+
+Both are ordinary dependencies. Nothing is global, and nothing is vendored into
+this repository.
 
 ## 2. Materialising and re-materialising
 
-| Command                      | What it does                                                                                                   |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `devkit sync`                | Write the shipped files into this repository. A locally modified file is reported and kept, never overwritten. |
-| `devkit sync --profile full` | The same, plus the workflows, hooks, templates and registers.                                                  |
-| `devkit doctor`              | Report what differs between your copies and the package, writing nothing.                                      |
-| `devkit doctor --check`      | The same, failing when anything differs — the form for CI.                                                     |
-| `devkit doctor --verbose`    | Also list the edits you have acknowledged, with the reason each was given.                                     |
-| `devkit closure --shipped`   | Measure whether the shipped set references anything it does not carry.                                         |
+| Command                    | What it does                                                                                                   |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `devkit sync`              | Write the shipped files into this repository. A locally modified file is reported and kept, never overwritten. |
+| `devkit doctor`            | Report what differs between your copies and the package, writing nothing.                                      |
+| `devkit doctor --check`    | The same, failing when anything differs — the form for CI.                                                     |
+| `devkit doctor --verbose`  | Also list the edits you have acknowledged, with the reason each was given.                                     |
+| `devkit closure --shipped` | Measure whether the shipped set references anything it does not carry.                                         |
+
+**Choose your profile in `devkit.config.json`, not on the command line.**
+`"profile": "agent"` places the skills, the path rules, the subagent definitions
+and the coordination register; `"profile": "full"` adds the workflows, the git
+hooks, the templates, the decision home and this file.
+
+Every command accepts `--profile <name>` as a one-off, and using it is how the
+two get out of step: sync the wider profile by flag, let CI run
+`devkit doctor --check` without it, and every file outside the configured profile
+is dropped from the plan before anything counts it — so deleting a hook or
+editing a workflow reports no drift at all. Set it once in the config and the
+question cannot be asked two different ways.
 
 Two files record the result and both are **tracked** — commit them.
 `.devkit-manifest.json` is what the kit last wrote, which is how an upstream fix
@@ -84,12 +106,19 @@ default, so a repository that follows the layout configures nothing.
 
 ## 5. After a fresh sync
 
-Two things are not files, so nothing can materialise them:
+Three things no sync can do for you, in the order they will bite:
 
-```bash
-git config core.hooksPath .githooks
-```
+1. **Fill in the two package names in §1.** Every hook and workflow that fails
+   for a missing gate runtime sends its reader here.
+2. **Point git at the hooks.** They are materialised, executable and inert until
+   you do:
 
-points git at the seeded hooks — without it they sit there and never run. And the
-workflows read `.node-version`, so a repository without one fails its first run
-on the setup step rather than silently using whatever the runner had.
+   ```bash
+   git config core.hooksPath .githooks
+   ```
+
+3. **Add a `.node-version`.** The workflows read it, so a repository without one
+   fails its first run on the setup step — deliberately, rather than silently
+   using whatever Node the runner happened to have.
+
+Each is loud when it is missing except the first, which is why it is first.
