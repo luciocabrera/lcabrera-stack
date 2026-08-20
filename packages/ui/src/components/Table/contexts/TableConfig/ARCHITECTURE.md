@@ -98,6 +98,7 @@ TableConfig/
 │   │  read live there rather than here.
 │   │
 │   ├── utils/areGroupKeysLegal.util.ts      → Pure predicate shared by both write paths: within the depth cap, and no key repeated
+│   ├── utils/areGroupAggregatesLegal.util.ts → Pure predicate at the seed boundary: no (columnKey, fn) pair repeated — the guard the map shape used to make unnecessary
 │   │
 │   ├── actions/
 │   │   ├── utils/applyGroupingReducer.util.ts       → Pure: apply an action's reducer to the caller's snapshot and resolve the result; shared with the drawer's draft write path

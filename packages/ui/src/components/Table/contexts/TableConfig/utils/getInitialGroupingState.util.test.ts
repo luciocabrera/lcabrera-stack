@@ -168,4 +168,55 @@ describe('getInitialGroupingState', () => {
       );
     });
   });
+
+  // The map shape made a repeated pair unrepresentable, so nothing had to check
+  // for one; the list shape admits it (#831). This is the same boundary the
+  // duplicate-key guard above sits at, and the same refusal.
+  describe('duplicate aggregates', () => {
+    it('refuses a repeated (columnKey, fn) pair, whole rather than de-duplicated', () => {
+      // De-duplicating would silently correct a request the consumer made.
+      // Left unchecked it gives `toAggregateItems` two rows sharing the id
+      // `total_amount:sum`, which React reconciles as one, and reaches the
+      // server as two projections deriving one alias, which it refuses.
+      expect(
+        getInitialGroupingState({
+          groupingAggregates: [
+            { columnKey: 'total_amount', fn: 'sum' },
+            { columnKey: 'total_amount', fn: 'sum' },
+          ],
+          groupingKeys: ['order_status'],
+        }),
+      ).toStrictEqual(NO_GROUPING);
+    });
+
+    it('refuses a repeat buried among distinct pairs', () => {
+      expect(
+        getInitialGroupingState({
+          groupingAggregates: [
+            { columnKey: 'total_amount', fn: 'sum' },
+            { columnKey: 'quantity', fn: 'max' },
+            { columnKey: 'total_amount', fn: 'sum' },
+          ],
+          groupingKeys: ['order_status'],
+        }),
+      ).toStrictEqual(NO_GROUPING);
+    });
+
+    it('still seeds several functions on ONE column', () => {
+      // The discriminating case: this is what #831 exists to allow, so a guard
+      // that refused it would pass the two assertions above and break the
+      // feature.
+      const groupingAggregates = [
+        { columnKey: 'total_amount', fn: 'sum' },
+        { columnKey: 'total_amount', fn: 'avg' },
+      ] as const;
+
+      expect(
+        getInitialGroupingState({
+          groupingAggregates,
+          groupingKeys: ['order_status'],
+        }).aggregates,
+      ).toStrictEqual(groupingAggregates);
+    });
+  });
 });

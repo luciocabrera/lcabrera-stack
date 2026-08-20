@@ -6,6 +6,7 @@ import type {
 } from '#ui/components/Table/Table.types';
 
 import {
+  areGroupAggregatesLegal,
   areGroupKeysLegal,
   pruneGroupPeriods,
   pruneGroupShares,
@@ -38,19 +39,28 @@ const NO_GROUPING: TableGroupingState = {
  * the rest of the loader's serializable state (ADR-009) at no cost to that
  * shape.
  *
- * **This is a write path, and it checks the same key-list invariants the update
- * path does** — `areGroupKeysLegal`: within the depth cap, and no key repeated.
+ * **This is a write path, and it checks the same shape invariants the outer
+ * boundaries do** — `areGroupKeysLegal` (within the depth cap, and no key
+ * repeated) and `areGroupAggregatesLegal` (no `(columnKey, fn)` pair repeated).
  * A route built on `createTableRouteLoader` cannot reach it with an illegal
  * list, because `sanitizeGroupingByColumns` already refused — but
  * `@lcabrera/ui` is published, and a consumer writing their own loader is the
- * intended use rather than an edge case. Without this guard such a route seeds a
- * store the package then renders as grouped, and the query throws at
- * `assertGroupKeys`: a 500 out of a state the package itself accepted.
+ * intended use rather than an edge case. Without these guards such a route seeds
+ * a store the package then renders as grouped, and the query throws at
+ * `assertGroupKeys` or at `assertGroupAliases`, which refuses two projections
+ * deriving one alias: a 500 out of a state the package itself accepted.
+ *
+ * The **aggregate** guard is newer than the key one and exists because the shape
+ * change removed an implicit check: while `aggregates` was a column-to-function
+ * map a repeated pair was unrepresentable, and a list admits it (#831).
  *
  * The refusal is **whole** — never truncated to the cap, never de-duplicated.
  * Keys are ordered and the order is the query's nesting order, so either repair
- * answers a different question from the one asked. That is the same reasoning
- * `resolveTableGroupingUpdate` and `sanitizeGroupingByColumns` refuse whole for.
+ * answers a different question from the one asked; a de-duplicated aggregate
+ * list is the same kind of silent correction, and a consumer who sent a
+ * duplicate asked for something this table cannot render and is better told than
+ * quietly fixed. That is the same reasoning `resolveTableGroupingUpdate` and
+ * `sanitizeGroupingByColumns` refuse whole for.
  *
  * The *question* is shared and the *answer* is not: an update on an illegal list
  * is `unchanged`, leaving the applied grouping alone, while a seed has no prior
@@ -71,7 +81,11 @@ export const getInitialGroupingState = ({
   groupingPeriods = {},
   groupingShares = [],
 }: GetInitialGroupingStateArgs): TableGroupingState => {
-  if (groupingKeys.length === 0 || !areGroupKeysLegal(groupingKeys)) {
+  if (
+    groupingKeys.length === 0 ||
+    !areGroupKeysLegal(groupingKeys) ||
+    !areGroupAggregatesLegal(groupingAggregates)
+  ) {
     return NO_GROUPING;
   }
 
