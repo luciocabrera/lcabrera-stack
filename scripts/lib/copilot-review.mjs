@@ -62,7 +62,7 @@ const BOT_SUFFIX = /\[bot\]$/;
  * which point the Claude GitHub App gives the reviewer an identity of its own and
  * this entry is replaced rather than extended.
  */
-const ACCEPTED_REVIEWERS = [
+const ACCEPTED_REVIEWERS = new Set([
   // The Copilot code review bot ruleset 19141543 requests on every push
   // (`review_on_push: true`). Dormant while credits are exhausted, not removed:
   // the config is untouched, so this path resumes on its own when they return.
@@ -72,7 +72,7 @@ const ACCEPTED_REVIEWERS = [
   // entry reads `github-actions` rather than anything naming Claude — see the hole
   // described above.
   CLAUDE_REVIEW_LOGIN,
-];
+]);
 
 /** One login's two API spellings reduced to the form the list is written in. */
 const normalisedLogin = (login) =>
@@ -104,7 +104,7 @@ export const isCopilotReviewer = (login) =>
 
 /** Whether this gate counts a review by `login` at all. */
 export const isAcceptedReviewer = (login) =>
-  ACCEPTED_REVIEWERS.includes(normalisedLogin(login));
+  ACCEPTED_REVIEWERS.has(normalisedLogin(login));
 
 // Field readers accept both payload shapes: REST (`/pulls/{n}/reviews`, what the
 // workflow fetches) and GraphQL (`gh pr view --json reviews`, what the issue's
@@ -224,7 +224,7 @@ const latestReviewPerReviewer = (reviews = []) => {
  * commit leaves each reviewer's NEWEST review naming the commit that was rewound
  * away, so the gate is pending until the rewound head is reviewed again.
  */
-export const coveringReview = (reviews = [], headSha) =>
+const coveringReview = (reviews, headSha) =>
   [...latestReviewPerReviewer(reviews).values()].find((review) =>
     sameCommit(reviewedCommit(review), headSha),
   );
