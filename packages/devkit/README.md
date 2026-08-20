@@ -121,8 +121,13 @@ for the same reason. Set the key and the next `sync` writes it.
 
 Only `config.`-prefixed entries are read. `requires:` already means other things
 in frontmatter written for people — a shipped reference file uses it for a
-library version range — and those are left alone. Either YAML spelling of the
-list works, flow array or block sequence.
+library version range — and those are left alone.
+
+Write the list however you like: a flow array, a block sequence, or a lone
+scalar for the single-key case, quoted or not, with notes and blank lines
+wherever YAML allows them. Restyling a declaration from one spelling into
+another is not a behaviour change, and a spelling that read as no declaration
+would be — it would put the file in a consumer who cannot satisfy it, silently.
 
 ## What ships
 

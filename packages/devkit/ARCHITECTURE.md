@@ -5,19 +5,19 @@ can travel, and **moving** it into a consumer's tree.
 
 ## Modules
 
-| Module                              | Responsibility                                                                                                |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `closure-extract.mjs`               | Pull references out of a file: markdown links, prose and command-line paths, shell commands, module imports.  |
-| `closure.mjs`                       | Decide whether each reference escapes the directory being shipped. Pure.                                      |
-| `closure-report.mjs`                | Walk a directory, run the analysis, render it.                                                                |
-| `config.mjs`                        | Resolve `devkit.config.json`, map an asset onto its destination, and answer both questions about a key. Pure. |
-| `frontmatter.mjs`                   | Read a shipped file's `requires:` declaration — the config keys it cannot run without. Pure.                  |
-| `manifest.mjs`                      | Hash files, and decide what happens to each on the next run. Pure.                                            |
-| `sync.mjs`                          | Turn assets plus a manifest into a plan, then apply it.                                                       |
-| `command-materialise.mjs`           | The plan `sync` and `doctor` share.                                                                           |
-| `command-closure.mjs`, `devkit.mjs` | The commands, and the dispatcher.                                                                             |
+| Module                              | Responsibility                                                                                                      |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `closure-extract.mjs`               | Pull references out of a file: markdown links, prose and command-line paths, shell commands, module imports.        |
+| `closure.mjs`                       | Decide whether each reference escapes the directory being shipped. Pure.                                            |
+| `closure-report.mjs`                | Walk a directory, run the analysis, render it.                                                                      |
+| `config.mjs`                        | Resolve `devkit.config.json`, map an asset onto its destination, and answer both questions about a key. Pure.       |
+| `frontmatter.mjs`                   | Read a shipped file's `requires:` declaration, however it is spelled — the config keys it cannot run without. Pure. |
+| `manifest.mjs`                      | Hash files, and decide what happens to each on the next run. Pure.                                                  |
+| `sync.mjs`                          | Turn assets plus a manifest into a plan, then apply it.                                                             |
+| `command-materialise.mjs`           | The plan `sync` and `doctor` share.                                                                                 |
+| `command-closure.mjs`, `devkit.mjs` | The commands, and the dispatcher.                                                                                   |
 
-## Two decisions worth not undoing
+## Decisions worth not undoing
 
 **Planning is pure and separate from writing**, so `doctor` predicts exactly what
 `sync` would do. A doctor computing its answer by a different route than the

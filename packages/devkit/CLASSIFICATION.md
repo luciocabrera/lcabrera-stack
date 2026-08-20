@@ -76,13 +76,13 @@ parameterisation, not this table's job — the table says which rows will need o
 | `code-smell-shared`           | **blocked**       | —          | The shared half of the two `code-smell` skills; it ships if and when they do.                                                                                                                                                             |
 | `app-graph`                   | **blocked**       | —          | Not prose at all — a report generator importing the unpublished package and `ts-morph`.                                                                                                                                                   |
 
-Reading the four **hard** rows: `epic` names the consumer's root agent document
+Reading the **hard** rows: `epic` names the consumer's root agent document
 through config, so without it an orchestrator is told to read a file nobody
 named. `commit-and-pr` and `quality-gate-workflow` each drive the toolchain, and
 a gate procedure whose stages resolve to nothing reports a clean pass that means
 nothing. `health-swarm`'s scouts write to report locations that come from config;
-unset, a scout produces its findings nowhere. The **soft** four all lose
-specificity and keep every instruction followable.
+unset, a scout produces its findings nowhere. Every **soft** row loses
+specificity and keeps every instruction followable.
 
 The blocked group is one decision, not six: it is the scanner runtime, kept
 private in ADR-081 because publishing it would be justified by these skills
@@ -100,9 +100,9 @@ runtime package, and this whole group moves with it.
 | `react-components.md` | **parameterise** | **soft**   | The component conventions travel; the inventory paths they point at are per-repository and belong in config.                                         |
 | `scripts.md`          | **parameterise** | **soft**   | The structure, purity and size standards are general. The exemplar it names and the gate that enforces the ceiling move to the gate runtime package. |
 
-`testing.md` is the hard one: its import convention names the module tests must
+`testing.md` is the hard row: its import convention names the module tests must
 import from, so a consumer without that key is left with a rule instructing them
-to import from nowhere. The other three lose a citation or a pointer.
+to import from nowhere. The **soft** rows lose a citation or a pointer.
 
 ## Subagent definitions
 
@@ -114,10 +114,10 @@ to import from nowhere. The other three lose a citation or a pointer.
 | `architecture-guard` | **parameterise** | **hard**   | The procedure is general; the inventory paths it reads are per-repository config.                              |
 | `fallow-scan`        | **blocked**      | —          | Binds to `fallow-code-checker`, and inherits its verdict.                                                      |
 
-All four are hard, and for one reason: a subagent definition is executed, not
-read. Its commands and the paths it reads are its whole input, so an unanswered
-one leaves an agent that runs and reports without having examined anything —
-which reads exactly like a pass.
+Every **parameterise** row here is hard, and for one reason: a subagent
+definition is executed, not read. Its commands and the paths it reads are its
+whole input, so an unanswered one leaves an agent that runs and reports without
+having examined anything — which reads exactly like a pass.
 
 ## What this means for the shipping order
 

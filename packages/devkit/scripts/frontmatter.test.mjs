@@ -55,6 +55,91 @@ describe('requiredConfigKeys', () => {
     ).toEqual(['commands.install', 'paths.rules']);
   });
 
+  test('reads a lone scalar, however it is quoted', () => {
+    // Valid YAML for the single-key case, and the shape an author reaches for
+    // first. Reading only the two list spellings would leave this one silently
+    // requiring nothing, which is a gate that has stopped firing.
+    expect(
+      requiredConfigKeys(withFrontmatter('requires: config.commands.install')),
+    ).toEqual(['commands.install']);
+    expect(
+      requiredConfigKeys(withFrontmatter('requires: "config.paths.docs"')),
+    ).toEqual(['paths.docs']);
+    expect(
+      requiredConfigKeys(withFrontmatter("requires: 'config.profile'")),
+    ).toEqual(['profile']);
+  });
+
+  test('reads the same list however the spelling is styled', () => {
+    // The gate must not depend on how the list is written: restyling a
+    // declaration from one valid spelling into another is an edit nobody would
+    // review as a behaviour change, and it must not be one.
+    const spellings = {
+      'block sequence': [
+        'requires:',
+        '  - config.paths.docs',
+        '  - config.commands.install',
+      ],
+      'block sequence at the key indent': [
+        'requires:',
+        '- config.paths.docs',
+        '- config.commands.install',
+      ],
+      'block sequence behind a blank line and a note': [
+        'requires:',
+        '',
+        '  # what it cannot run without',
+        '  - config.paths.docs',
+        '  - config.commands.install',
+      ],
+      'flow array': ['requires: [config.paths.docs, config.commands.install]'],
+      'flow array opening on the next line': [
+        'requires:',
+        "  ['config.paths.docs',",
+        "   'config.commands.install']",
+      ],
+    };
+    const read = Object.entries(spellings).map(([spelling, lines]) => [
+      spelling,
+      requiredConfigKeys(withFrontmatter(...lines, 'name: demo')),
+    ]);
+    expect(Object.fromEntries(read)).toEqual(
+      Object.fromEntries(
+        Object.keys(spellings).map((spelling) => [
+          spelling,
+          ['paths.docs', 'commands.install'],
+        ]),
+      ),
+    );
+  });
+
+  test('reads past a note between items, and drops one trailing an entry', () => {
+    expect(
+      requiredConfigKeys(
+        withFrontmatter(
+          'requires:',
+          '  - config.paths.docs # where they land',
+          '  # and the command it shells out to',
+          '  - config.commands.install',
+        ),
+      ),
+    ).toEqual(['paths.docs', 'commands.install']);
+    expect(
+      requiredConfigKeys(withFrontmatter('requires: config.profile # the one')),
+    ).toEqual(['profile']);
+  });
+
+  test('declares nothing when the value is absent or only a note', () => {
+    expect(
+      requiredConfigKeys(withFrontmatter('requires:', 'name: demo')),
+    ).toEqual([]);
+    expect(
+      requiredConfigKeys(
+        withFrontmatter('requires:', '  # nothing yet', 'name: demo'),
+      ),
+    ).toEqual([]);
+  });
+
   test('names each key once however often it is declared', () => {
     expect(
       requiredConfigKeys(
@@ -107,10 +192,24 @@ describe('requiredConfigKeys', () => {
     ).toEqual([]);
   });
 
-  test('never adopts a bracket that belongs to another key', () => {
+  test('never adopts a value that belongs to another key', () => {
     expect(
       requiredConfigKeys(
         withFrontmatter('requires: react-router', "paths: ['config.profile']"),
+      ),
+    ).toEqual([]);
+    expect(
+      requiredConfigKeys(
+        withFrontmatter(
+          'requires: react-router',
+          'paths:',
+          '  - config.profile',
+        ),
+      ),
+    ).toEqual([]);
+    expect(
+      requiredConfigKeys(
+        withFrontmatter('requires:', 'paths:', '  - config.profile'),
       ),
     ).toEqual([]);
   });

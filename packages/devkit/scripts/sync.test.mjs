@@ -144,6 +144,40 @@ describe('planSync and a declared config requirement', () => {
     expect(entry.missing).toEqual(['paths.workflows']);
   });
 
+  test('refuses it in every spelling of the same declaration', () => {
+    // The refusal must not depend on how the author wrote the list. A spelling
+    // the extractor cannot see reads as no declaration at all, so the file is
+    // written into a consumer who cannot satisfy it and nothing says so — the
+    // gate failing open, which is indistinguishable from it passing.
+    const spellings = {
+      'block sequence': ['requires:', '  - config.commands.install'],
+      'flow array': ['requires: [config.commands.install]'],
+      scalar: ['requires: config.commands.install'],
+    };
+    const outcome = ([spelling, lines]) => {
+      const [entry] = planSync({
+        assets: [
+          {
+            content: ['---', ...lines, '---', '', 'Body.'].join('\n'),
+            path: 'skills/demo/SKILL.md',
+          },
+        ],
+        config: DEFAULT_CONFIG,
+        manifest: emptyManifest,
+        onDiskHash: () => undefined,
+      });
+      return [spelling, { missing: entry.missing, state: entry.state }];
+    };
+    expect(Object.fromEntries(Object.entries(spellings).map(outcome))).toEqual(
+      Object.fromEntries(
+        Object.keys(spellings).map((spelling) => [
+          spelling,
+          { missing: ['commands.install'], state: 'unmet' },
+        ]),
+      ),
+    );
+  });
+
   test('an unmet asset never reaches the record sync writes', () => {
     // What makes `sync` and `doctor` agree: both classify through planSync, and
     // the only thing sync does extra is gated on these two predicates.

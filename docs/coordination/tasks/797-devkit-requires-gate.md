@@ -28,9 +28,11 @@ two of wave 2's three sequenced changes.
 
 ## Status / next
 
-- Current step: implemented, gate green, in review
+- Current step: verified; the two non-blocking findings from that round are
+  fixed — the frontmatter extractor now reads every ordinary YAML spelling of
+  the list, and the counts written into `CLASSIFICATION.md` prose are gone
 - Blockers: none
-- Next: verification
+- Next: review
 
 ## Coordination
 

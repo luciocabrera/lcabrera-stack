@@ -15,6 +15,15 @@
  * and a large surface for a single list. The narrow form is the same bargain
  * `placeholders.mjs` makes — narrow in what it reads, not in how the list may be
  * spelled, since a spelling this cannot see is a gate that stops firing quietly.
+ * So every shape a person writes a short list in is read: a flow array, on the
+ * key's own line or opening on the next; a block sequence; and a lone scalar,
+ * quoted or not. Comments and blank lines are dropped wherever YAML allows them,
+ * which includes between the key and its items.
+ *
+ * Two YAML spellings are knowingly not read: a block scalar (`|`, `>`) and an
+ * anchor or alias. Neither is a way anyone writes a list of short keys, so
+ * neither is reachable by the edit this guards against — someone restyling a
+ * declaration into another ordinary spelling.
  *
  * Only `config.`-prefixed entries are claims on the consumer's configuration.
  * `requires:` already means other things in frontmatter written for humans — a
@@ -33,6 +42,9 @@ const SEQUENCE_ITEM = /^[ \t]*-[ \t]+(.*)$/;
 
 const QUOTES = /^['"]|['"]$/g;
 
+/** A `# comment` running to end of line, which YAML does not read as value. */
+const COMMENT = /(?:^|[ \t])#.*$/;
+
 /**
  * The frontmatter body, line by line, or nothing when the file does not open
  * with a fence. The first line must be exactly the fence so that a horizontal
@@ -49,27 +61,37 @@ const frontmatterLines = (content) => {
 };
 
 /**
- * The comma-separated body of a flow array, wherever it starts.
- *
- * Bracket-hunting begins only once the value is known to open with one, so a
- * `requires:` holding something else cannot reach forward and adopt a bracket
- * belonging to a later key. The array is read across lines because a formatter
- * breaks a long one over several — `.claude/rules/routes-data.md` is already
- * written that way — and a matcher bound to a single line would read such a
- * declaration as absent, which is the silent form of this gate not firing.
+ * The lines that carry value: comments removed, then anything left blank
+ * dropped. Done once, up front, so every spelling below reads a declaration the
+ * same way — a note above the first item of a block sequence is where an author
+ * most naturally puts one, and it would otherwise separate the key from its own
+ * list.
+ */
+const significantLines = (lines) =>
+  lines
+    .map((line) => line.replace(COMMENT, ''))
+    .filter((line) => line.trim() !== '');
+
+/** Whether a line's first non-space character is the given one. */
+const opensWith = (line, character) =>
+  (line ?? '').trimStart().startsWith(character);
+
+/**
+ * The comma-separated body of a flow array. The caller establishes that the
+ * value opens with a bracket before calling, so this cannot reach forward and
+ * adopt a bracket belonging to a later key. It is read across lines because a
+ * formatter breaks a long array over several — `.claude/rules/routes-data.md` is
+ * already written that way — and a matcher bound to a single line would read
+ * such a declaration as absent, which is the silent form of this gate not
+ * firing.
  */
 const flowArrayBody = (value) => {
-  if (!value.trimStart().startsWith('[')) return undefined;
   const open = value.indexOf('[');
   const close = value.indexOf(']', open + 1);
   return close === -1 ? undefined : value.slice(open + 1, close);
 };
 
-/**
- * The same body from the block spelling. Both are accepted because they are the
- * two ways a person writes this list, and reading only one of them would let a
- * rewrite of the other turn the gate off without anything saying so.
- */
+/** The same body from the block spelling, up to the next key. */
 const blockSequenceBody = (lines) => {
   const end = lines.findIndex((line) => !SEQUENCE_ITEM.test(line));
   const items = (end === -1 ? lines : lines.slice(0, end)).map(
@@ -78,14 +100,32 @@ const blockSequenceBody = (lines) => {
   return items.length === 0 ? undefined : items.join(',');
 };
 
+/**
+ * The entries a declaration holds, whichever way it is spelled. A scalar is its
+ * own single entry; anything the value cannot be read out of is undefined,
+ * which is also how "no declaration" is reported.
+ */
+const declaredEntries = (inline, following) => {
+  if (inline !== '') {
+    return opensWith(inline, '[')
+      ? flowArrayBody([inline, ...following].join('\n'))
+      : inline;
+  }
+  return opensWith(following[0], '[')
+    ? flowArrayBody(following.join('\n'))
+    : blockSequenceBody(following);
+};
+
 /** The declaration's line in the file, and its entries as one delimited string. */
 const requiresDeclaration = (content) => {
   const lines = frontmatterLines(content);
   const index = lines.findIndex((line) => REQUIRES_KEY.test(line));
   if (index === -1) return undefined;
-  const value = lines.slice(index).join('\n').replace(REQUIRES_KEY, '');
-  const entries =
-    flowArrayBody(value) ?? blockSequenceBody(lines.slice(index + 1));
+  const [declared = '', ...following] = significantLines(lines.slice(index));
+  const entries = declaredEntries(
+    declared.replace(REQUIRES_KEY, '').trim(),
+    following,
+  );
   return entries === undefined ? undefined : { entries, line: index + 2 };
 };
 
