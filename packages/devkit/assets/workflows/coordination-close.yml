@@ -82,23 +82,30 @@ jobs:
         run: '"$GATES/repo-close-claim" --pr "$PR_NUMBER" --branch "$HEAD_REF"'
 
       - name: Commit the deletion, only when there was one
-        # The whole tree is inspected rather than the register directory, because
-        # the step above is the only thing that has touched this checkout — so
-        # whatever it changed is exactly what should be committed, and the
-        # register's location never has to be repeated here.
+        # DELETIONS only, never `git add -A`. The step above removes files and
+        # does nothing else, but it is not the only thing that has touched this
+        # checkout: the install two steps earlier may have refreshed a lockfile,
+        # rewritten a manifest or dropped an artefact. Staging the whole tree
+        # would carry that into a commit headed "close the claim" and push it to
+        # the default branch with a token chosen for its power to bypass branch
+        # protection — the one place nothing downstream would catch it.
+        #
+        # Reading deletions is also what keeps the register's location out of
+        # this file: the close step is the only thing here that deletes.
         env:
           BASE_REF: ${{ github.event.pull_request.base.ref }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          if [ -z "$(git status --porcelain)" ]; then
+          if [ -z "$(git ls-files --deleted)" ]; then
             echo "No task file matched PR #$PR_NUMBER — nothing to commit."
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -A
+          git ls-files --deleted -z | xargs -0 git add -u --
           git commit -m "chore(coordination): close the claim merged by #$PR_NUMBER"
           # Rebase first: a run for another pull request may have pushed since
-          # this one checked out.
-          git pull --rebase origin "$BASE_REF"
+          # this one checked out. `--autostash` because whatever the install left
+          # behind is still unstaged, and a rebase refuses to start on top of it.
+          git pull --rebase --autostash origin "$BASE_REF"
           git push origin "HEAD:$BASE_REF"

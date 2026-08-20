@@ -9,6 +9,14 @@
 # workflow runs, from the same `devkit.config.json` entries, so a push that would
 # fail that job fails here first.
 #
+# Each of those runs as its own statement and is judged by `$?`, NOT inside
+# `if ! …; then`. In POSIX sh the `!` binds to the first pipeline rather than to
+# the whole and-or list, so a configured command like `npm run lint && npm test`
+# would become `(! npm run lint) && npm test` — which never runs the second half
+# when the first passes, and reports the gate as clear when BOTH fail. A chained
+# value is the ordinary thing to write in that config key, and nothing constrains
+# it to one command.
+#
 # Bypass for a work-in-progress push: git push --no-verify
 
 GATE="./node_modules/.bin/repo-verify-branch"
@@ -27,14 +35,16 @@ if ! "$GATE"; then
   exit 1
 fi
 
-if ! {{commands.check}}; then
+{{commands.check}}
+if [ $? -ne 0 ]; then
   echo ""
   echo "✗ pre-push: the check gate failed — fix the findings above; they would fail CI."
   echo "  To push work-in-progress anyway: git push --no-verify"
   exit 1
 fi
 
-if ! {{commands.test}}; then
+{{commands.test}}
+if [ $? -ne 0 ]; then
   echo ""
   echo "✗ pre-push: the tests failed."
   echo "  To push work-in-progress anyway: git push --no-verify"
