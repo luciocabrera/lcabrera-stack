@@ -35,9 +35,10 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          # The register gate reads every live branch on the remote to tell a
-          # claim held elsewhere from one nobody holds, so a shallow clone would
-          # report the whole register as unclaimed.
+          # The register gate reads the task files on OTHER live branches, to
+          # tell a claim someone else holds from one nobody does. Those refs are
+          # only present when the whole remote was fetched; at the default depth
+          # it reads this branch's claims and reports the rest as unreachable.
           fetch-depth: 0
 
       - name: Set up Node

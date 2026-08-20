@@ -40,6 +40,25 @@ describe('runCommand', () => {
     error.mockRestore();
   });
 
+  test('refuses a flag-shaped argument instead of filtering it away', () => {
+    // `closure --profile --shipped` is the profile flag with its value dropped.
+    // It has to be caught before the `--shipped` dispatch, because that dispatch
+    // reads the rest as directories and never looks at them again: `--profile`
+    // would be filtered out unexamined and every profile checked — a clean pass
+    // for a run that asked to narrow to one and was told which one by nobody.
+    const error = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
+    expect(
+      runCommand({
+        argv: ['closure', '--profile', '--shipped'],
+        root: '/nowhere',
+      }),
+    ).toBe(1);
+    expect(error).toHaveBeenCalledWith(expect.stringContaining('--profile'));
+    error.mockRestore();
+  });
+
   test('reports rather than analyses when closure is given nothing to analyse', () => {
     const error = vi
       .spyOn(console, 'error')

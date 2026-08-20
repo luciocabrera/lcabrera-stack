@@ -135,12 +135,25 @@ jobs:
               '```',
             ].join('\n');
 
-            const { data: open } = await github.rest.issues.listForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'open',
-            });
-            const match = open.find((issue) => issue.title === title);
+            // Paginated, and pull requests filtered out. This endpoint returns
+            // both, thirty per page, so a single unpaged call finds the tracking
+            // issue only while the repository has few enough open items for it
+            // to be on page one. Past that the match fails, a second issue is
+            // opened, and every later run opens another — each one pushing the
+            // originals further out of reach, so it never recovers. The promise
+            // in section 7 of the body above is that this stays one thread.
+            const open = await github.paginate(
+              github.rest.issues.listForRepo,
+              {
+                owner: context.repo.owner,
+                per_page: 100,
+                repo: context.repo.repo,
+                state: 'open',
+              },
+            );
+            const match = open.find(
+              (issue) => issue.pull_request === undefined && issue.title === title,
+            );
 
             if (match) {
               await github.rest.issues.createComment({

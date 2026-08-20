@@ -139,10 +139,9 @@ const runShippedClosure = ({ profile, root }) => {
 const PROFILE_FLAG = '--profile';
 
 /**
- * A flag-shaped value is not consumed as the profile name, so `--profile
- * --shipped` leaves `--profile` among the positional arguments and is reported
- * as the unusable directory it is. Swallowing it instead would run the whole
- * command against a profile called `--shipped`, which nothing places.
+ * A flag-shaped value is not consumed as the profile name. Swallowing it would
+ * run the whole command against a profile called `--shipped`, which nothing
+ * places; leaving it behind lets `runClosure` report the flag that has no value.
  */
 const withoutProfile = (argv) => {
   const index = argv.indexOf(PROFILE_FLAG);
@@ -198,6 +197,24 @@ const runDirectoryClosure = ({ directories, profile, root }) => {
 export const runClosure = (argv, root) => {
   const { profile, rest } = withoutProfile(argv);
   const directories = rest.filter((entry) => entry !== '--shipped');
+
+  // Checked BEFORE dispatching on `--shipped`, because that dispatch reads the
+  // rest as directories and never looks at them again. `devkit closure --profile
+  // --shipped` — the profile flag with its value dropped — would otherwise leave
+  // `--profile` in this list, be filtered away unexamined, and check every
+  // profile: a clean pass for a run that was asked to narrow to one and was told
+  // which one by nobody.
+  const unusable = directories.filter((entry) => entry.startsWith('-'));
+  if (unusable.length > 0) {
+    const hint = unusable.includes(PROFILE_FLAG)
+      ? ` — ${PROFILE_FLAG} needs a profile name after it`
+      : '';
+    console.error(
+      `not an argument this command takes: ${unusable.join(', ')}${hint}`,
+    );
+    return 1;
+  }
+
   if (rest.length !== directories.length) {
     return runShippedClosure({ profile, root });
   }
