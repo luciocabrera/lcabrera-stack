@@ -16,6 +16,51 @@ this page deliberately lists none of them — the directory is the listing.
 | What **we** intend to do — a plan, a planning summary, a draft | [`../planning/`](../planning/)                 |
 | The decision itself, once made                                 | an ADR ([`docs/decisions/`](../../decisions/)) |
 
+## Before you write: four ways a write-up goes wrong
+
+Every one of these was shipped by the first set of documents filed here, caught
+in review rather than in writing, and each is cheap to prevent and expensive to
+find. This is AGENTS.md §7 narrowed to the shapes that actually rot.
+
+**1. A count you did not just produce with a command.** This is the one that
+fails most. Reading a tree and counting by eye feels like evidence and is not;
+every wrong number here was refutable in seconds against a clone that was
+sitting on disk the whole time. So: run the command, paste the number, and
+**leave the command next to it** — or enumerate the things you counted, which
+serves the same purpose. `vp run research:verify` enforces exactly this and
+nothing else, because it is the only part of a foreign-tree claim this repo can
+check. It gates counts of four and up; below that a number-word is usually
+prose, not a measurement.
+
+**2. A path you wrote from memory instead of copying from output.** Copy paths
+out of `find`/`ls` output rather than reconstructing them. A plausible-looking
+path is worse than an obviously vague one, because it reads as verified detail —
+and if a gate is pushing you toward a prefix, giving it the _shortest_ prefix
+that clears the gate rather than the real one turns a hedge into a fabrication.
+
+**3. A conclusion the evidence cannot discriminate.** Before writing a verdict,
+ask what _else_ would produce the observation you are standing on. A local
+authoring path does not tell you what a marketplace install does; if copy, cache
+and symlink would all leave the same trace, the finding is "undocumented", not
+"it is copied". Hedge in the write-up and hedge in the comparison — a verdict
+that outruns its probe is the failure Rule 14 exists to name.
+
+**4. The same fact told twice, in two documents.** A research _set_ is
+especially prone to this: each document restates the others' context, and then
+one of them is corrected. Every contradiction found in the first set here was of
+this shape. Apply the repo's own rule — **one canonical home per fact, everything
+else links to it** ([`docs/README.md`](../../README.md)). Where two write-ups
+must both touch a fact, one states it and the other links; where a comparison
+summarises a per-project document, the per-project document wins and the
+comparison cites it.
+
+**And one rule for claims about _us_.** A research doc that describes this
+repository's own tooling — how a gate behaves, what a package does — must cite
+the `file:line` that implements it, read at the time of writing. Those claims
+look incidental next to the external research and are the most likely to be
+acted on without re-derivation. Two of them shipped here explaining a gate
+backwards.
+
 ## Two rules that are easy to get wrong
 
 **Amend above the body; never rewrite it.** When the decision a write-up fed
