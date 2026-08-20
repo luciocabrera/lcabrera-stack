@@ -1,7 +1,9 @@
 name: Copilot Review Gate
 
 # Publishes the `Copilot review complete` commit status, which is green only
-# while Copilot's newest review names the pull request's current head commit.
+# while an ACCEPTED REVIEWER's own newest review names the pull request's current
+# head commit. Two reviewers are accepted; the block below says which, and why the
+# comparison is per reviewer.
 #
 # Why a workflow at all, when ruleset `19141543` already carries
 # `copilot_code_review` with `review_on_push: true`: that setting REQUESTS a
@@ -40,9 +42,8 @@ name: Copilot Review Gate
 # deliberately separate, because a required check that has never reported blocks
 # every pull request including the one that would fix it.
 #
-# THE ACCEPTED REVIEWER SET IS PLURAL. It is an explicit named list in
-# scripts/lib/copilot-review.mjs, and this status is green when ANY of them has a
-# newest review naming the head — today the Copilot bot above, and the in-workflow
+# WHICH REVIEWERS, AND WHY PER REVIEWER. The set is an explicit named list in
+# scripts/lib/copilot-review.mjs — today the Copilot bot above, and the in-workflow
 # reviewer in claude-review.yml. Per reviewer rather than newest-across-the-set, so
 # that a slower reviewer arriving late with a review of an earlier commit cannot
 # un-green a head another accepted reviewer has already covered. Nothing else about this file changes: the status

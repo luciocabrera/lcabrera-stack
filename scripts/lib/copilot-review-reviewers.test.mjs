@@ -171,6 +171,23 @@ describe('two accepted reviewers', () => {
     );
   });
 
+  it('names the most recent coverer when both reviewers covered the head', () => {
+    // Deterministic on purpose: the named reviewer is the monoculture signal, and
+    // a name that depends on the order the API returned reviews in is one nobody
+    // can act on. Asserted from both array orders so the fetch order cannot be
+    // what makes it pass.
+    const copilot = restReview({ submitted: '2026-08-20T09:00:00Z' });
+    const claude = claudeReview({ submitted: '2026-08-20T10:15:11Z' });
+    for (const reviews of [
+      [copilot, claude],
+      [claude, copilot],
+    ]) {
+      expect(decideReviewStatus({ headSha: HEAD, reviews }).reviewer).toBe(
+        'github-actions[bot]',
+      );
+    }
+  });
+
   it('names the reviewer whose stale review is still waiting', () => {
     expect(
       decideReviewStatus({

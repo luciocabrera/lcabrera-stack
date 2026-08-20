@@ -514,13 +514,16 @@ runs both in CI. See the [`commit-and-pr`](.github/skills/commit-and-pr/SKILL.md
 
 Two checks that judge the **review** rather than the code, and so are recomputed
 by review and head-commit events rather than by the gate command. One mechanism,
-two subjects: did Copilot review _this_ head, and does a valid agent-review
-verdict exist for _this_ head?
+two subjects: has an accepted reviewer reviewed _this_ head, and does a valid
+agent-review verdict exist for _this_ head?
 
-`Copilot review complete` is a commit status that is green only while Copilot's
-newest review names the pull request's **current head commit** — a review of a
-superseded commit looks identical in the UI to a review of the head, which is how
-a PR reaches a mergeable state unreviewed.
+`Copilot review complete` is a commit status that is green only while some
+**accepted reviewer's** own newest review names the pull request's **current head
+commit** — a review of a superseded commit looks identical in the UI to a review of
+the head, which is how a PR reaches a mergeable state unreviewed. Two reviewers are
+accepted, named in
+[`scripts/lib/copilot-review.mjs`](scripts/lib/copilot-review.mjs); the context
+keeps its original name.
 [`copilot-review-gate.yml`](.github/workflows/copilot-review-gate.yml) recomputes
 it on every push and every review; the command below is the same comparison run
 by hand. The states and the break-glass path are in
@@ -762,8 +765,8 @@ pushes it to `main`.
 
 [`copilot-review-gate.yml`](.github/workflows/copilot-review-gate.yml) judges the
 **review** rather than the code: it publishes the `Copilot review complete`
-commit status against the head SHA, green only while Copilot's newest review
-names that commit. It is the only workflow here triggered by
+commit status against the head SHA, green only while some accepted reviewer's own
+newest review names that commit. It is the only workflow here triggered by
 `pull_request_review` as well as `pull_request`, because its verdict changes when
 the diff has not — a review landing flips it, and a push takes it back to
 `pending`. It reports but does not block until #698 makes the context required,

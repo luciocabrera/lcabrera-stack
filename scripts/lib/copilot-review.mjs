@@ -223,11 +223,23 @@ const latestReviewPerReviewer = (reviews = []) => {
  * A rewind needs no special case either: a force-push back to an already-reviewed
  * commit leaves each reviewer's NEWEST review naming the commit that was rewound
  * away, so the gate is pending until the rewound head is reviewed again.
+ *
+ * When BOTH have covered the head, the most recent of them is named. The state is
+ * the same either way, so this is about the description: it is what makes a
+ * reviewer monoculture visible, and a name that depends on the order the API
+ * happened to return reviews in is a signal nobody can act on.
  */
 const coveringReview = (reviews, headSha) =>
-  [...latestReviewPerReviewer(reviews).values()].find((review) =>
-    sameCommit(reviewedCommit(review), headSha),
-  );
+  [...latestReviewPerReviewer(reviews).values()]
+    .filter((review) => sameCommit(reviewedCommit(review), headSha))
+    .reduce(
+      (latest, review) =>
+        latest === undefined ||
+        submittedMillis(review) >= submittedMillis(latest)
+          ? review
+          : latest,
+      undefined,
+    );
 
 /**
  * Whether every accepted reviewer has a counted review on this pull request.

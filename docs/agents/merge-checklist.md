@@ -30,12 +30,14 @@ trust the check and look at its output.
       **[judgement; auto for paths: `docs:verify`]**
 - [ ] **No conflicting approaches introduced** — no second way to do something
       the repo already does one way **[judgement]**
-- [ ] **Copilot has reviewed the current head commit** — not merely the pull
-      request at some earlier point **[auto: `Copilot review complete`]**. The
-      status is green only while Copilot's newest review names the head SHA, so
-      a push after a review takes it back to `pending`. What each state means,
-      why a review that arrives already stale reports `failure`, and the
-      break-glass path for when Copilot never reviews are in
+- [ ] **An accepted reviewer has reviewed the current head commit** — not merely
+      the pull request at some earlier point **[auto: `Copilot review complete`]**.
+      The status is green only while some accepted reviewer's own newest review
+      names the head SHA, so a push after a review takes it back to `pending`. Two
+      reviewers are accepted and either one covering the head is enough; the
+      context keeps its original name. What each state means, when a stale review
+      reports `failure` rather than `pending` — it needs every accepted reviewer to
+      have spoken — and the break-glass path for when nobody reviews are in
       [`copilot-review-gate.md`](../tooling/copilot-review-gate.md). It reports
       but does not block until #698 promotes it to a required context.
 - [ ] **Every review thread is addressed and resolved** — whoever opened it
