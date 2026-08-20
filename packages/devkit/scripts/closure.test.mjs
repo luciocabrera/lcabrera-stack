@@ -28,6 +28,35 @@ describe('classifyLink', () => {
     ).toEqual({ kind: 'escape', resolved: 'docs/agents/orchestration.md' });
   });
 
+  test('a link to a directory the package fills travels with it', () => {
+    // `[in this directory](./)` is the ordinary way a page points at the folder
+    // it sits in. Containment is judged against the shipped FILES, and a
+    // directory is in no set of files, so without this a page is reported as an
+    // escape for naming its own home.
+    expect(
+      classifyLink({
+        fromDirectory: 'docs/decisions',
+        rootDirectory: '',
+        shipped: new Set(['docs/decisions/README.md']),
+        target: './',
+      }),
+    ).toEqual({ kind: 'internal', resolved: 'docs/decisions' });
+  });
+
+  test('a directory the package fills nothing of still escapes', () => {
+    // The prefix has to end at a directory boundary rather than anywhere in a
+    // name: `docs/dec` must not read as internal because a shipped path happens
+    // to start with those characters.
+    expect(
+      classifyLink({
+        fromDirectory: '',
+        rootDirectory: 'skills/epic',
+        shipped: new Set(['docs/decisions/README.md']),
+        target: 'docs/dec',
+      }),
+    ).toEqual({ kind: 'escape', resolved: 'docs/dec' });
+  });
+
   test('a url and a bare anchor resolve to nothing on disk', () => {
     expect(
       classifyLink({

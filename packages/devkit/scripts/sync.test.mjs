@@ -29,7 +29,7 @@ describe('planSync', () => {
   test('skips a group the profile does not include', () => {
     const config = { ...DEFAULT_CONFIG, profile: 'agent' };
     const plan = planSync({
-      assets: [{ content: 'x', path: 'workflows/ci.yml' }],
+      assets: [{ content: 'x', path: 'hooks/pre-push' }],
       config,
       manifest: emptyManifest,
       onDiskHash: () => undefined,
@@ -127,7 +127,7 @@ describe('planSync and a declared config requirement', () => {
     const asset = {
       content: [
         '---',
-        'requires: [config.paths.workflows]',
+        'requires: [config.paths.dashboards]',
         '---',
         '',
         'Run {{commands.install}}.',
@@ -141,7 +141,7 @@ describe('planSync and a declared config requirement', () => {
       onDiskHash: () => undefined,
     });
     expect(entry.state).toBe('unmet');
-    expect(entry.missing).toEqual(['paths.workflows']);
+    expect(entry.missing).toEqual(['paths.dashboards']);
   });
 
   test('refuses it in every spelling of the same declaration', () => {

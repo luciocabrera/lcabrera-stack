@@ -63,6 +63,23 @@ const normalise = (segments) => {
 };
 
 /**
+ * A directory the package puts at least one file into. The consumer will have
+ * it, so a link to it travels — `[in this directory](./)` is the ordinary
+ * markdown way to point at the folder a file sits in, and reading it as an
+ * escape reports a page for naming its own home.
+ *
+ * Judged from the shipped files rather than from a separate list of directories,
+ * so it cannot say a directory exists that nothing lands in.
+ */
+const holdsShippedFile = (path, shipped) => {
+  const prefix = `${path}/`;
+  for (const entry of shipped) {
+    if (entry.startsWith(prefix)) return true;
+  }
+  return false;
+};
+
+/**
  * Whether a resolved path travels with the file that named it.
  *
  * The unit is the PACKAGE, not the directory. A skill legitimately points at a
@@ -72,7 +89,7 @@ const normalise = (segments) => {
  * avoid. So a path the package ships is internal wherever it sits.
  */
 const travelsWith = ({ path, rootDirectory, shipped }) => {
-  if (shipped.has(path)) return true;
+  if (shipped.has(path) || holdsShippedFile(path, shipped)) return true;
   const root = rootDirectory.replace(/\/$/, '');
   return path === root || path.startsWith(`${root}/`);
 };

@@ -16,12 +16,12 @@ describe('renderPlan', () => {
     expect(
       renderPlan([
         entry('unresolved', ['install']),
-        entry('unmet', ['paths.workflows']),
+        entry('unmet', ['paths.dashboards']),
       ]),
     ).toBe(
       [
         '  unresolved   .github/skills/demo/SKILL.md  (not written — no command configured for install)',
-        '  unmet        .github/skills/demo/SKILL.md  (not written — no config key set for paths.workflows)',
+        '  unmet        .github/skills/demo/SKILL.md  (not written — no config key set for paths.dashboards)',
       ].join('\n'),
     );
   });
@@ -34,7 +34,7 @@ describe('renderPlan', () => {
 describe('countsFor', () => {
   test('a refused asset counts as reported and never as written', () => {
     expect(
-      countsFor([entry('unmet', ['paths.workflows']), entry('added')]),
+      countsFor([entry('unmet', ['paths.dashboards']), entry('added')]),
     ).toEqual({ reported: 1, written: 1 });
   });
 });

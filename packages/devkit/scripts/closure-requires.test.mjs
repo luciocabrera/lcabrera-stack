@@ -22,7 +22,7 @@ describe('analyseClosure and declared config requirements', () => {
   test('a key outside the config key space is an escape of its own kind', () => {
     const { escapes } = analyseClosure({
       allowedConfigKeys: ['profile', 'paths.skills'],
-      files: declaring('config.paths.workflows'),
+      files: declaring('config.paths.dashboards'),
       rootDirectory,
     });
     expect(escapes).toEqual([
@@ -30,7 +30,7 @@ describe('analyseClosure and declared config requirements', () => {
         file: 'skills/epic/SKILL.md',
         kind: 'requires',
         line: 3,
-        reference: 'config.paths.workflows',
+        reference: 'config.paths.dashboards',
       },
     ]);
   });
@@ -62,7 +62,7 @@ describe('analyseClosure and declared config requirements', () => {
       {
         content: [
           '---',
-          'requires: [config.paths.workflows]',
+          'requires: [config.paths.dashboards]',
           '---',
           '',
           'Read [the contract](../../docs/agents/contract.md).',

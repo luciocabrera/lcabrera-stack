@@ -1,0 +1,97 @@
+name: PR Standards
+
+# Enforces the commit, branch and pull-request conventions on every pull request.
+#
+# The commit-msg and pre-push hooks give the same feedback locally, but both can
+# be skipped with --no-verify, so this job is the real wall. Three checks, one
+# spec — the gate runtime decides what conforms; nothing here restates it.
+#
+# `edited` re-runs the check when the title or description changes after opening.
+# Without it, a bad title fixed by an edit would keep a stale red check.
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  pr-standards:
+    name: Commit + PR standards
+    runs-on: ubuntu-latest
+
+    # The gates are invoked by path rather than by bare name. A `run:` step does
+    # not inherit node_modules/.bin the way a package script does, so a bare name
+    # would resolve only by accident; a path that is not there fails loudly, and
+    # the step below turns that into a message naming what to install.
+    env:
+      GATES: ./node_modules/.bin
+
+    steps:
+      # The merge ref (actions/checkout's default for pull_request), not the PR
+      # head: GitHub runs this workflow file from the merge result, so pinning
+      # the checkout to the head would put the YAML and the gates it invokes on
+      # different commits. Nothing here needs HEAD to be the PR head — the commit
+      # range comes from the event payload below, and fetch-depth 0 makes both
+      # ends reachable.
+      - name: Check out the merge ref (full history for the commit range)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version-file: .node-version
+
+      - name: Install dependencies
+        run: |
+          {{commands.install}}
+
+      - name: The gate runtime is installed
+        # Checked once, by name, so a repository that has not installed it fails
+        # here with something to act on rather than three steps later with
+        # "No such file or directory". A gate that cannot run must never read as
+        # a gate that passed.
+        run: |
+          if [ ! -x "$GATES/repo-verify-pr" ]; then
+            echo "::error::repo-verify-pr is missing — install the gate runtime package named in COMMANDS.md."
+            exit 1
+          fi
+
+      - name: Validate the branch name
+        # The pre-push hook checks this too, but --no-verify skips it. The head
+        # ref comes from the event payload rather than from git, because the
+        # checkout above is the MERGE ref — HEAD there is not the topic branch
+        # and would always read as exempt.
+        env:
+          BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
+        run: '$GATES/repo-verify-branch'
+
+      - name: Validate PR title, description and base branch
+        # Title, body and base arrive through env, never through a shell
+        # interpolation, so no untrusted pull-request text can be executed.
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_BASE: ${{ github.event.pull_request.base.ref }}
+        run: '$GATES/repo-verify-pr'
+
+      - name: Validate every commit message in the PR
+        # --no-merges drops the merge commits; each surviving message is piped to
+        # the same validator the commit-msg hook uses. Every bad commit is
+        # reported before the step fails.
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -o pipefail
+          status=0
+          for sha in $(git rev-list --no-merges "$BASE_SHA..$HEAD_SHA"); do
+            if ! git log -1 --format=%B "$sha" | "$GATES/repo-verify-commit" -; then
+              echo "::error::commit $sha has a non-conforming message"
+              status=1
+            fi
+          done
+          exit $status

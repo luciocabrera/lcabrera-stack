@@ -1,0 +1,109 @@
+name: Check
+
+# The gate every pull request has to clear, and the same gate on every push to
+# the default branch — so a merge that lands broken is caught rather than only a
+# proposal to merge.
+#
+# Two jobs rather than one, because each becomes its own status context: a
+# repository can require them separately, and a reader can tell a failing test
+# from a failing type-check without opening the log.
+#
+# What runs here is deliberately split in two kinds. The repository's own
+# toolchain answers for format, lint, types and tests — those come from
+# devkit.config.json, because no package can know how another repository builds.
+# The register and decision-record gates come from the gate runtime package, and
+# are the same code the local hooks run.
+
+# GitHub evaluates no expressions in `on:`, so a branch filter here would have to
+# name one — and a seed naming `main` gives a repository whose default branch is
+# called anything else no push coverage at all, silently, while the promise above
+# still reads as kept. There is no red X for a trigger that never fires. So the
+# trigger is unfiltered and the JOBS decide, from the default branch the event
+# already carries.
+on:
+  pull_request:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  quality-gate:
+    name: Quality Gate (Format · Lint · Types)
+    runs-on: ubuntu-latest
+    # Pull requests always; pushes only on the default branch. A push to a topic
+    # branch that has a pull request open is already covered by the event above,
+    # and running both would double the cost of every push for nothing. A job
+    # skipped this way reports as skipped, which branch protection accepts — so
+    # this context is still safe to require.
+    if: >-
+      github.event_name == 'pull_request' ||
+      github.ref_name == github.event.repository.default_branch
+
+    env:
+      GATES: ./node_modules/.bin
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          # The register gate reads the task files on OTHER live branches, to
+          # tell a claim someone else holds from one nobody does. Those refs are
+          # only present when the whole remote was fetched; at the default depth
+          # it reads this branch's claims and reports the rest as unreachable.
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version-file: .node-version
+
+      - name: Install dependencies
+        run: |
+          {{commands.install}}
+
+      - name: The gate runtime is installed
+        run: |
+          if [ ! -x "$GATES/repo-verify-claims" ]; then
+            echo "::error::repo-verify-claims is missing — install the gate runtime package named in COMMANDS.md."
+            exit 1
+          fi
+
+      - name: Format, lint and type-check
+        run: |
+          {{commands.check}}
+
+      - name: Coordination register is consistent
+        # Fails only on register integrity — a malformed task file, which the
+        # author of the pull request controls. Overlap, staleness and a missing
+        # branch are emitted as annotations instead, so they surface without
+        # blocking an unrelated change.
+        run: '$GATES/repo-verify-claims'
+
+      - name: Decision records are numbered and homed
+        run: '$GATES/repo-verify-adrs'
+
+  tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    # Same condition, same reason as the job above.
+    if: >-
+      github.event_name == 'pull_request' ||
+      github.ref_name == github.event.repository.default_branch
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version-file: .node-version
+
+      - name: Install dependencies
+        run: |
+          {{commands.install}}
+
+      - name: Run the test suite
+        run: |
+          {{commands.test}}

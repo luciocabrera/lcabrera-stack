@@ -40,6 +40,25 @@ describe('runCommand', () => {
     error.mockRestore();
   });
 
+  test('refuses a flag-shaped argument instead of filtering it away', () => {
+    // `closure --profile --shipped` is the profile flag with its value dropped.
+    // It has to be caught before the `--shipped` dispatch, because that dispatch
+    // reads the rest as directories and never looks at them again: `--profile`
+    // would be filtered out unexamined and every profile checked — a clean pass
+    // for a run that asked to narrow to one and was told which one by nobody.
+    const error = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
+    expect(
+      runCommand({
+        argv: ['closure', '--profile', '--shipped'],
+        root: '/nowhere',
+      }),
+    ).toBe(1);
+    expect(error).toHaveBeenCalledWith(expect.stringContaining('--profile'));
+    error.mockRestore();
+  });
+
   test('reports rather than analyses when closure is given nothing to analyse', () => {
     const error = vi
       .spyOn(console, 'error')
@@ -50,4 +69,29 @@ describe('runCommand', () => {
     );
     error.mockRestore();
   });
+});
+
+describe('the profile flag, on every command that takes it', () => {
+  // One reader, so the three cannot drift: `closure` was hardened against the
+  // valueless spelling while `sync` and `doctor` still read it as "absent",
+  // which means "use the configured profile" — a narrower check reporting a
+  // clean pass over a set it was asked to look at more widely.
+  for (const command of ['sync', 'doctor', 'closure']) {
+    test(`${command} refuses --profile with no name after it`, () => {
+      const error = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => undefined);
+
+      expect(
+        runCommand({
+          argv: [command, '--check', '--profile'],
+          root: '/nowhere',
+        }),
+      ).toBe(1);
+      expect(error).toHaveBeenCalledWith(
+        expect.stringContaining('--profile needs a profile name'),
+      );
+      error.mockRestore();
+    });
+  }
 });

@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+# commit-msg: hold every commit message to the repository's one convention.
+#
+# Why here as well as in CI: a message cannot be corrected after the fact without
+# rewriting history, so the cheapest place to catch it is before the commit
+# exists. CI checks it again, because `--no-verify` skips this.
+#
+# Git runs a hook from the top of the working tree, so the gate is invoked by the
+# path an install puts it at. If that path is missing the hook fails rather than
+# passing: a check that cannot run must not read as a check that passed.
+
+GATE="./node_modules/.bin/repo-verify-commit"
+
+if [ ! -x "$GATE" ]; then
+  echo "✗ commit-msg: $GATE is missing."
+  echo "  Install the gate runtime package named in COMMANDS.md, or bypass this"
+  echo "  once with: git commit --no-verify"
+  exit 1
+fi
+
+exec "$GATE" "$1"

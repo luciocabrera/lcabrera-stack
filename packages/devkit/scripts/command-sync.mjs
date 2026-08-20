@@ -23,23 +23,30 @@ import {
   renderPlan,
 } from './command-materialise.mjs';
 import { MANIFEST_FILE, serialiseManifest } from './manifest.mjs';
+import { readProfileFlag } from './profile-flag.mjs';
 import { applySync } from './sync.mjs';
 
-const flagValue = (argv, name) => {
-  const index = argv.indexOf(name);
-  return index === -1 ? undefined : argv[index + 1];
-};
-
 export const runSync = (argv, root) => {
-  const { entries, manifest } = buildPlan({
-    profile: flagValue(argv, '--profile'),
-    root,
-  });
-  const { reported, written } = countsFor(entries);
+  const { error, profile } = readProfileFlag(argv);
+  if (error !== undefined) {
+    console.error(error);
+    return 1;
+  }
+
+  const { entries, manifest } = buildPlan({ profile, root });
+  const { reported } = countsFor(entries);
 
   console.log(renderPlan(entries));
 
-  if (written > 0) applySync({ entries, root });
+  // Called unconditionally. It used to be gated on there being something to
+  // write, and that quietly cancelled the wider rule `applySync` follows for a
+  // file's MODE: a hook whose bytes still match is `current`, so nothing is
+  // written, so the guard skipped the call, so the bit it lost — to a clone with
+  // `core.fileMode` off, an unzipped archive, a copy — was never put back. `sync`
+  // printed "Everything is up to date", `doctor` reported nothing because the
+  // mode is not in the hash, and no command repaired it. Deciding here what
+  // `applySync` is for is what made that possible; it decides for itself now.
+  applySync({ entries, root });
 
   // The record is written even when nothing was — a file already identical to
   // the package is adopted into it, and without that a later edit to one reads
@@ -89,14 +96,20 @@ const runAccept = ({ accept, accepted, entries, root }) => {
   return 0;
 };
 
-export const runDoctor = (argv, root) => {
-  const { accepted, entries } = buildPlan({ root });
-
-  const accept = parseAcceptArgs(argv);
-  if (accept !== undefined) {
-    return runAccept({ accept, accepted, entries, root });
-  }
-
+/**
+ * `doctor` takes the same `--profile` as `sync`, and has to.
+ *
+ * Without it the two commands read different sets: a consumer who syncs the
+ * wider profile records every file, then CI runs `doctor --check`, the plan is
+ * filtered back to the configured profile, and every file outside it is dropped
+ * before anything counts it. Delete a hook or hand-edit a workflow and the check
+ * exits 0 — the same clean run as a tree with nothing wrong in it.
+ *
+ * The durable answer is still to set `profile` in `devkit.config.json`, so the
+ * two cannot be asked for different things in the first place; the flag is what
+ * makes a one-off `doctor` able to agree with a one-off `sync`.
+ */
+const reportDrift = ({ argv, entries }) => {
   const { reported, written } = countsFor(entries);
 
   console.log(renderPlan(entries, { verbose: argv.includes('--verbose') }));
@@ -108,4 +121,21 @@ export const runDoctor = (argv, root) => {
     `\n${drifted} file(s) differ from the package. Run devkit sync.`,
   );
   return 1;
+};
+
+export const runDoctor = (argv, root) => {
+  const { error, profile } = readProfileFlag(argv);
+  if (error !== undefined) {
+    console.error(error);
+    return 1;
+  }
+
+  const { accepted, entries } = buildPlan({ profile, root });
+
+  const accept = parseAcceptArgs(argv);
+  if (accept !== undefined) {
+    return runAccept({ accept, accepted, entries, root });
+  }
+
+  return reportDrift({ argv, entries });
 };

@@ -12,9 +12,16 @@ import { relative, resolve } from 'node:path';
 import { analyseClosure } from './closure.mjs';
 import { readFilesUnder } from './files.mjs';
 
-/** Commands a consumer's shell is expected to provide regardless of this kit. */
+/**
+ * Commands a consumer can be expected to resolve: the ones any shell provides,
+ * plus this kit's own bin. `devkit` is on the list for the opposite reason to
+ * the rest — not because a consumer already had it, but because installing the
+ * package that ships these files is what puts it there, so a shipped file
+ * telling a reader to run it names something they have by construction.
+ */
 export const BASELINE_COMMANDS = [
   'bash',
+  'devkit',
   'gh',
   'git',
   'node',

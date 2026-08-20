@@ -1,0 +1,55 @@
+name: Issue Standards
+
+# Enforces the issue template on every issue, from the same spec as commits,
+# branches and pull requests.
+#
+# Why it exists: an issue body nothing checks arrives with no reproduction, no
+# scope and no acceptance criteria, and then has to be re-investigated from
+# scratch before anyone can act on it — repeating the work the issue was supposed
+# to have recorded.
+#
+# `edited` re-runs the check, so an issue opened thin and filled in afterwards
+# goes green without anyone reopening it. The result is a failed check on the
+# issue, never a closed issue: this reports, it does not edit.
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  contents: read
+
+jobs:
+  issue-standards:
+    name: Issue standards
+    runs-on: ubuntu-latest
+
+    env:
+      GATES: ./node_modules/.bin
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version-file: .node-version
+
+      - name: Install dependencies
+        run: |
+          {{commands.install}}
+
+      - name: The gate runtime is installed
+        run: |
+          if [ ! -x "$GATES/repo-verify-issue" ]; then
+            echo "::error::repo-verify-issue is missing — install the gate runtime package named in COMMANDS.md."
+            exit 1
+          fi
+
+      - name: Validate the issue description
+        # The body arrives through env, never through a shell interpolation — an
+        # issue body is untrusted text that anyone can author.
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: '$GATES/repo-verify-issue'

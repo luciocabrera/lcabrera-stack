@@ -157,6 +157,25 @@ jobs:
         # .claude/rules/scripts.md.
         run: vp run scripts:verify
 
+      - name: Shipped seeds name no repository fact
+        id: seeds_gate
+        # The files packages/devkit ships are meant to land in someone else's
+        # repository, so a workspace name, a secret name or this repo's task
+        # runner inside one is a file that arrives broken. The forbidden words
+        # are derived from the repository on every run rather than listed, so a
+        # new workspace or secret is covered the day it is added. See
+        # scripts/verify-devkit-seeds.mjs.
+        run: vp run seeds:verify
+
+      - name: Shipped files reference only what ships with them
+        id: devkit_closure_gate
+        # The other half of the same question, by a different instrument: this
+        # resolves the references a shipped file makes and reports the ones that
+        # leave the shipped set. It runs per PROFILE, because a file in the small
+        # profile pointing at one only the large profile places resolves for a
+        # consumer who took everything and dangles for the one who did not.
+        run: vp run devkit:closure -- --shipped
+
       - name: Oxlint plugin families are loaded
         id: lint_plugins_gate
         # Naming `lint.plugins` REPLACES Oxlint's default set, so dropping an

@@ -1,0 +1,184 @@
+name: Dependency Audit
+
+# Watches the dependency tree for newly published advisories.
+#
+# A per-pull-request gate catches what a change introduces. It cannot catch what
+# nobody introduced: an advisory published overnight against a tree that has not
+# moved is invisible until somebody happens to open a pull request. On a quiet
+# week that is the whole week. This is the run that finds it.
+#
+# It opens or updates a single tracking issue rather than failing only into a
+# workflow log nobody reads — a scheduled red X is exactly the kind of signal
+# that becomes wallpaper. The run still fails afterwards, so the signal exists in
+# both places.
+
+on:
+  schedule:
+    # Daily. Advisories are published continuously; a daily read is frequent
+    # enough to matter and infrequent enough not to become noise.
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: Dependency advisories
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version-file: .node-version
+
+      - name: Install dependencies
+        run: |
+          {{commands.install}}
+
+      - name: Audit dependencies
+        id: audit
+        # `continue-on-error` so a finding becomes an issue rather than only a
+        # red X on a schedule nobody is watching. The step's own conclusion is
+        # still recorded, and the last step below fails the run.
+        continue-on-error: true
+        # The substitution is BRACED before the redirection and the pipe, because
+        # both bind to the last command of the value, not to the whole of it. A
+        # configured `npm audit … && npm run licenses:check` would otherwise pipe
+        # only the second half — so on the run that matters, where the audit
+        # itself fails, `tee` never runs, the output file is never written, and
+        # the issue-filing step below dies on ENOENT instead of reporting the
+        # advisory. A chained value is the ordinary thing to write in that key.
+        run: |
+          set -o pipefail
+          { {{commands.audit}}; } 2>&1 | tee audit-output.txt
+
+      - name: File or update the tracking issue
+        if: steps.audit.outcome == 'failure'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        with:
+          script: |
+            const fs = require('node:fs');
+            const output = fs.readFileSync('audit-output.txt', 'utf8').trim();
+            const title = 'chore(deps): dependency advisory found by the scheduled audit';
+
+            // Fills the issue template. The issue-standards workflow checks
+            // every issue and grants automation no exemption, so an auto-filed
+            // issue that skipped the template would open already failing its own
+            // gate.
+            const body = [
+              '## 1. Problem Statement',
+              '',
+              'The scheduled dependency audit found an advisory in the dependency tree.',
+              'Left alone it ships, and the per-pull-request gate will fail every open',
+              'pull request until it is resolved.',
+              '',
+              '```',
+              output,
+              '```',
+              '',
+              `Run: ${process.env.RUN_URL}`,
+              '',
+              '## 2. Objective / Desired Outcome',
+              '',
+              'The audit exits 0 — either because the dependency was updated, or because',
+              'a dated, justified allowance records why it cannot be.',
+              '',
+              '## 3. Context & Background',
+              '',
+              'Fix the dependency where nothing declared blocks the patched version; that',
+              'is usually the case. Where it genuinely is blocked, record an allowance',
+              'with a reason and an expiry date rather than muting the gate.',
+              '',
+              '## 4. Reproduction Steps',
+              '',
+              '1. Install dependencies.',
+              '2. Run the dependency audit.',
+              '3. Expected: exit 0. Actual: the advisory above, exit 1.',
+              '',
+              'Preconditions: network access to the registry.',
+              '',
+              '## 5. Scope Definition',
+              '',
+              '### In Scope',
+              '',
+              '- Resolving the advisory above, by upgrade, override, or a dated allowance.',
+              '',
+              '### Out of Scope',
+              '',
+              '- Unrelated dependency currency work.',
+              '',
+              '## 6. Acceptance Criteria',
+              '',
+              '- [ ] The dependency audit exits 0',
+              '- [ ] The fix is an upgrade/override, or an allowance with a reason and a date',
+              '- [ ] No regressions',
+              '',
+              '## 7. Implementation Notes',
+              '',
+              'Opened automatically by the scheduled dependency audit. Later runs comment',
+              'on this issue rather than opening another, so it stays one thread.',
+              '',
+              '## 8. Related Work',
+              '',
+              'None.',
+              '',
+              '## 9. Planning Metadata',
+              '',
+              '```yaml',
+              'dependencies:',
+              '  blocking: []',
+              '  blockedBy: []',
+              '  parent: null',
+              '  children: []',
+              '```',
+            ].join('\n');
+
+            // Paginated, and pull requests filtered out. This endpoint returns
+            // both, thirty per page, so a single unpaged call finds the tracking
+            // issue only while the repository has few enough open items for it
+            // to be on page one. Past that the match fails, a second issue is
+            // opened, and every later run opens another — each one pushing the
+            // originals further out of reach, so it never recovers. The promise
+            // in section 7 of the body above is that this stays one thread.
+            const open = await github.paginate(
+              github.rest.issues.listForRepo,
+              {
+                owner: context.repo.owner,
+                per_page: 100,
+                repo: context.repo.repo,
+                state: 'open',
+              },
+            );
+            const match = open.find(
+              (issue) => issue.pull_request === undefined && issue.title === title,
+            );
+
+            if (match) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: match.number,
+                body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+              });
+            }
+
+      - name: Fail the run when the audit did
+        if: steps.audit.outcome == 'failure'
+        run: exit 1

@@ -4,10 +4,9 @@
 
 Decisions internal to the `apps/react-router` showcase app — its components, routes and interaction model.
 
-**Moves with CQMS when it is extracted.**
-
-Numbers are unique across every ADR home in this repo — see [ADR-048](../../../../docs/decisions/ADR-048-adr-taxonomy-and-one-sequence.md)
-for why, and for what to do with a decision that spans two tiers.
+Numbers are unique across every ADR home in this repository, so a decision
+that spans two of them is still one record and no two homes can reuse a
+number.
 
 Writing one: start from [`_TEMPLATE.md`](../../../../docs/decisions/_TEMPLATE.md)
 or run `vp run adr:new`, which takes the next free number for you.
@@ -15,6 +14,5 @@ or run `vp run adr:new`, which takes the next free number for you.
 The ADRs are the `ADR-NNN-*.md` files [in this directory](./), whose names
 carry their titles; this page does not list them on purpose, because a
 committed list is one region every ADR branch appends to, so any two
-concurrent ADRs would conflict on it even when their
-numbers are correctly sequenced — see [ADR-075](../../../../docs/decisions/ADR-075-the-index-does-not-list-the-adrs.md).
-Run `vp run adr:list` for every ADR with its title.
+concurrent ADRs would conflict on it even when their numbers are correctly
+sequenced. Run `vp run adr:list` for every ADR with its title.

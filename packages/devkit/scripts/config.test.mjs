@@ -50,7 +50,7 @@ describe('targetPathFor', () => {
 
   test('returns nothing for an unknown group or a bare group directory', () => {
     expect(
-      targetPathFor({ assetPath: 'workflows/ci.yml', config }),
+      targetPathFor({ assetPath: 'dashboards/ci.json', config }),
     ).toBeUndefined();
     expect(targetPathFor({ assetPath: 'skills', config })).toBeUndefined();
   });
@@ -97,7 +97,7 @@ describe('hasConfigKey', () => {
 
   test('reports a key the consumer has not set', () => {
     expect(hasConfigKey({ config, path: 'commands.claim' })).toBe(false);
-    expect(hasConfigKey({ config, path: 'paths.workflows' })).toBe(false);
+    expect(hasConfigKey({ config, path: 'paths.dashboards' })).toBe(false);
     expect(hasConfigKey({ config, path: '' })).toBe(false);
   });
 

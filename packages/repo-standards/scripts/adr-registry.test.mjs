@@ -18,6 +18,7 @@ import {
   renderIndex,
   renderListing,
 } from './adr-registry.mjs';
+import { DEFAULT_REGISTERS } from './config.mjs';
 
 const home = (dir, filenames) => ({
   dir,
@@ -190,11 +191,41 @@ describe('looksLikeAdr', () => {
 });
 
 describe('renderIndex', () => {
-  it('links ADR-048 relative to the home it renders', () => {
+  it('links the template relative to the home it renders', () => {
     const [repo, app] = ADR_HOMES;
 
-    expect(renderIndex(repo)).toContain('](./ADR-048-');
-    expect(renderIndex(app)).toContain('](../../../../docs/decisions/ADR-048-');
+    expect(renderIndex(repo)).toContain('](./_TEMPLATE.md)');
+    expect(renderIndex(app)).toContain(
+      '](../../../../docs/decisions/_TEMPLATE.md)',
+    );
+  });
+
+  it('names nothing a repository generating its first index would not have', () => {
+    // Rendered from a home carrying NO command spellings — a fresh consumer's,
+    // and the shape the seed ships. This package is installed into repositories
+    // that are not this one: a task name from one repository's runner, and a
+    // link to a decision record a fresh home does not hold, both read as
+    // instructions and are neither. The CQMS sentence is in the list because it
+    // was exactly this failure surviving in place — the flag choosing between
+    // its two spellings stopped being set, so every index printed the wrong half
+    // of a distinction that no longer existed.
+    const rendered = renderIndex(DEFAULT_REGISTERS.adrHomes[0]);
+
+    for (const absent of ['vp run', 'CQMS', 'ADR-048', 'ADR-075']) {
+      expect(rendered).not.toContain(absent);
+    }
+    expect(rendered).toContain('npx repo-adr');
+  });
+
+  it("names a repository's own commands when it declares them", () => {
+    // The other half, and the reason the spellings ride on the home: this
+    // repository's readers cannot run a bare bin name — `node_modules/.bin` is
+    // not on a plain shell's PATH — so an index telling them to would be
+    // portable and wrong in the other direction.
+    const rendered = renderIndex(ADR_HOMES[0]);
+
+    expect(rendered).toContain(ADR_HOMES[0].commands.new);
+    expect(rendered).not.toContain('npx repo-adr');
   });
 
   /**
