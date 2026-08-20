@@ -92,5 +92,27 @@ the odd one out: it judges the **review**, not the code, so it is recomputed by
 review and head-commit events rather than by the gate command, and its verdict
 changes when nothing in the diff has.
 
+### The two review checks cover different pull requests
+
+They look like a pair and are not interchangeable. Which one answers for your pull
+request depends on how it was opened.
+
+| Check                     | Covers                                                                                                       | Green means                                                                     |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------- |
+| `Copilot review complete` | **every ready pull request** — `claude-review.yml` reviews all of them, skipping drafts (which cannot merge) | some accepted reviewer reviewed **this head commit**. Not that anyone approved. |
+| `Agent review verdict`    | only pull requests carrying acceptance criteria — `/epic` and `/refactor-verified`                           | where criteria existed, each was met and carries a falsifier                    |
+
+**A pull request with no verdict merges, and that is deliberate.** Open one by hand
+— a docs fix, a dependency refresh, a coordination claim — and `Agent review verdict`
+reports `absent` and does not stop you. It is a stated bypass rather than an
+oversight: making every pull request carry a verdict would mean inventing acceptance
+criteria for pull requests that have none, which costs more than the coverage is
+worth. The reasoning is
+[§2.3 of the review contract](agent-review-contract.md) and the decision is #855.
+
+What that leaves uncovered is narrower than it sounds: the review those pull requests
+do get is the one `Copilot review complete` reads. The verdict check adds criterion
+evidence on top; it is not the only thing looking.
+
 A green PR means those ran — it does not mean the **[judgement]** items were
 considered. That is the gap this checklist covers.

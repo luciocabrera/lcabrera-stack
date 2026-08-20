@@ -157,7 +157,7 @@ would either block every hand-opened pull request or excuse every crash.
 | `pass`      | A review ran and found no admissible blocking finding                 | success                                                 |
 | `fail`      | A review ran and found one                                            | failure, once the check is blocking                     |
 | `error`     | A review was attempted and could not conclude, or broke this contract | failure, once the check is blocking — **never** success |
-| `absent`    | No review answers for this commit                                     | **not blocking** — decided in #697                      |
+| `absent`    | No review answers for this commit                                     | **not blocking** — settled in #698, see below           |
 
 `absent` covers two cases, and the check's description separates them because
 they need different responses: nothing was ever posted, or everything posted names
@@ -178,8 +178,31 @@ only field carrying why.
 **Known limitation, stated rather than papered over:** a local reviewer that dies
 hard posts nothing, so it is indistinguishable from one that never ran. The
 orchestrator emitting an `error` verdict when its verifier fails covers the
-in-process crash; nothing covers nobody running the process. Whether `absent`
-should block is #698's decision.
+in-process crash; nothing covers nobody running the process.
+
+**`absent` does not block, and that is settled rather than deferred.** The
+alternative — block it, so nothing merges without a verdict — was considered under
+#698 and declined for a reason that is about this contract rather than about
+convenience. §2.2 requires a `pass` to carry non-empty `criteria`. A dependency
+refresh or a docs fix has no acceptance criteria, so making every pull request carry
+a verdict means synthesising them, in practice from the pull request's own
+`## Verification` section. That converts `criteria` from _the issue's criteria,
+re-derived blind_ into _whatever the pull request claimed about itself_, and §9 says
+what that costs: `criteria` is what makes forging a pass cost what earning one costs.
+A universal verdict would be a cheaper document, not a wider guarantee.
+
+**What covers the pull requests this one does not** is the other gate, not a wider
+version of this one. `Copilot review complete` is satisfied by a review of the head
+from any accepted reviewer, and `claude-review.yml` runs on every pull request that
+is not a draft — including the hand-opened ones that never reach `/epic` or
+`/refactor-verified`. A draft is skipped and cannot merge, so for merge purposes the
+coverage is total. "Nothing merges unreviewed" is therefore that gate's guarantee
+once #698 promotes it; this one adds "and where criteria existed, they were met."
+
+**The bypass this admits, stated plainly** (#698: a gate with an undocumented bypass
+is worse than one that admits it): a pull request that never runs a reviewer carries
+no verdict, and this check does not stop it. `merge-checklist.md` says so where a
+contributor will meet it.
 
 Whether the check is _allowed_ to block is a property of the check's promotion
 state, not of the verdict: the same document is emitted during the advisory
@@ -594,9 +617,14 @@ questions. `refactor-verifier` is criterion-bound and sees the issue; it can onl
 run where an issue with acceptance criteria exists. `claude-review.yml` is generic
 and sees every pull request, including the hand-opened and bot-authored ones the
 local reviewer never meets. #685 weighed a CI reviewer that duplicated the local
-one; it did not weigh one that covers what the local one cannot. Whether that
-second reviewer should also produce verdicts — which is what would let §2.3's
-`absent` become blocking — is open, and the trade is recorded in #698.
+one; it did not weigh one that covers what the local one cannot.
+
+**That second reviewer does not produce verdicts, and will not.** Making it do so
+was the obvious way to let §2.3's `absent` become blocking, and #855 declined it:
+it would reverse this paragraph's decision, and it would have to invent `criteria`
+for pull requests that have none, which costs this contract more than the wider
+coverage is worth. §2.3 carries the reasoning. The two reviewers keep different
+scopes on purpose.
 
 **What that costs, stated rather than buried:**
 
