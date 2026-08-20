@@ -3,8 +3,10 @@ import type {
   AggregateFn,
   ColumnAnalyticalRole,
   ColumnGroupingCapability,
+  GroupingMode,
   GroupKeyPeriod,
   GroupKeyRefusalReason,
+  GroupQueryDescriptor,
 } from '@lcabrera/server/db/group-query-builder/group-query-builder.types';
 import type {
   GroupingRefusalReason,
@@ -14,10 +16,13 @@ import type {
   TableAggregateFn,
   TableColumnAnalyticalRole,
   TableColumnGroupingCapability,
+  TableGroupingMode,
   TableGroupingRefusalReason,
+  TableGroupingState,
   TableGroupKeyRefusalReason,
   TableGroupPeriod,
   TableResponseError,
+  TableTotalsPlacement,
 } from '@lcabrera/ui/components/Table/Table.types';
 
 import { OLAP_GROUP_PERIODS } from '@lcabrera/api/olap/olap.constants';
@@ -125,6 +130,71 @@ const serverPeriods: readonly GroupKeyPeriod[] = uiPeriods;
 const backToUiPeriods: readonly TableGroupPeriod[] = serverPeriods;
 const wirePeriods: readonly OlapGroupPeriod[] = backToUiPeriods;
 
+/**
+ * The grouping **mode**, in one direction only — and the direction is the
+ * point.
+ *
+ * `GroupingMode` carries a third member the UI does not: `cube`. That is a
+ * deliberate asymmetry rather than drift (#574 is unbuilt on the client), so
+ * asserting both directions here would fail on a difference that is meant to
+ * exist, and asserting neither would let a mode the server cannot expand reach
+ * it. What must hold is the subset: every mode the UI can *send* is one the
+ * builder has an expansion for.
+ *
+ * Adding `cube` to `TableGroupingMode` alone therefore passes here — correctly,
+ * because the server would accept it. Adding a mode to the UI that the server
+ * lacks fails to compile, which is the failure worth catching.
+ */
+const uiModes: readonly TableGroupingMode[] = ['flat', 'rollup'];
+const serverModes: readonly GroupingMode[] = uiModes;
+
+/**
+ * Where a subtotal sits, both directions.
+ *
+ * The server spells this inline on `GroupQueryDescriptor` rather than as a named
+ * export, so it is reached through the field's own type — which is what keeps
+ * the assertion honest if that field is ever renamed or widened. `NonNullable`
+ * because the descriptor's member is optional (an omitted placement means
+ * `last`) while the UI's union is not, and the two tokens are what must agree
+ * (#578, ADR-085).
+ */
+type ServerSubtotalPlacement = NonNullable<
+  GroupQueryDescriptor['subtotalPlacement']
+>;
+
+const uiPlacements: readonly TableTotalsPlacement[] = ['first', 'last'];
+const serverPlacements: readonly ServerSubtotalPlacement[] = uiPlacements;
+const backToUiPlacements: readonly TableTotalsPlacement[] = serverPlacements;
+
+/**
+ * The grouping **state**, member for member against the descriptor it becomes.
+ *
+ * Every member of `TableGroupingState` that the server consumes is assigned to
+ * the descriptor field it ends up in, so a type change on either side fails to
+ * compile here. `aggregates` is absent on purpose: the two sides genuinely
+ * differ in shape — a column-keyed map on the client, a list of aggregate
+ * descriptors on the server — and the app translates between them, so there is
+ * nothing to pin. `shares` is absent for a different reason: it never leaves the
+ * client, because a share is derived from rows the read already returned
+ * (ADR-086).
+ *
+ * This guarantee did exist before, implicitly, in `selectGroupedOrders`'s
+ * argument types. That is a weaker place for it: a refactor that loosened those
+ * arguments would drop the check without touching anything named "contract".
+ */
+const uiGroupingState: TableGroupingState = {
+  aggregates: { total_amount: 'sum' },
+  keys: ['order_status'],
+  mode: 'rollup',
+  periods: { order_date: 'month' },
+  shares: ['total_amount'],
+};
+
+const descriptorKeys: GroupQueryDescriptor['keys'] = uiGroupingState.keys;
+const descriptorMode: GroupQueryDescriptor['grouping'] = uiGroupingState.mode;
+const descriptorPeriods: GroupQueryDescriptor['periods'] =
+  uiGroupingState.periods;
+
 const uiCapability: TableColumnGroupingCapability = serverCapability;
 const backToServerCapability: ColumnGroupingCapability = uiCapability;
 
@@ -190,6 +260,28 @@ describe('grouping contract between @lcabrera/ui and @lcabrera/server', () => {
     expect([...uiAggregates].toSorted((a, b) => a.localeCompare(b))).toEqual(
       [...serverAggregates].toSorted((a, b) => a.localeCompare(b)),
     );
+  });
+
+  it('carries the same totals-placement vocabulary in both directions', () => {
+    // The assignments above are the compile-time check; this makes a reordered
+    // or misspelled token a test failure rather than only a type error
+    // somewhere downstream (#578).
+    expect(backToUiPlacements).toStrictEqual(uiPlacements);
+  });
+
+  it('offers no grouping mode the builder has no expansion for', () => {
+    // One direction only — `cube` exists on the server and deliberately not
+    // here, so this asserts the subset rather than equality.
+    expect(serverModes).toStrictEqual(uiModes);
+    expect(uiModes.every((mode) => serverModes.includes(mode))).toBe(true);
+  });
+
+  it('hands every state member to the descriptor field it becomes', () => {
+    // The assignments above are the check; these read them back so the mapping
+    // is visible as data rather than only as types that happened to compile.
+    expect(descriptorKeys).toStrictEqual(uiGroupingState.keys);
+    expect(descriptorMode).toBe(uiGroupingState.mode);
+    expect(descriptorPeriods).toStrictEqual(uiGroupingState.periods);
   });
 
   it('carries the same role and refusal vocabularies', () => {
