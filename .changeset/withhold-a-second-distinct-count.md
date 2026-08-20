@@ -1,5 +1,5 @@
 ---
-'@lcabrera/ui': patch
+'@lcabrera/ui': minor
 ---
 
 The aggregation surfaces stop offering a second Distinct Count, which a grouped

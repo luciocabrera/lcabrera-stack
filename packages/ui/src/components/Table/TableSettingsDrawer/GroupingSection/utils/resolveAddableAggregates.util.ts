@@ -59,7 +59,8 @@ const resolveGap = ({
   if (withheld.some((fn) => !appliedFns.has(fn))) return 'count-distinct-spent';
   if (affordable.length > 0) return 'column-exhausted';
 
-  return;
+  // No trailing `return`: falling off the end is already `undefined`, which the
+  // annotation admits, and every other empty is one of the cases above.
 };
 
 /**

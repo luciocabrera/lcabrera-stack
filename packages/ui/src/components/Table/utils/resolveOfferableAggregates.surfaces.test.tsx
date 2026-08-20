@@ -358,7 +358,9 @@ describe('the read-wide countDistinct budget on both surfaces', () => {
     );
 
     expect(screen.queryByText('Distinct Count')).toBeNull();
-    expect(screen.queryByText('Count')).not.toBeNull();
+    // `getBy*` for the presence half: a menu that had lost `Count` as well
+    // should report what it did render, not merely that this was not null.
+    expect(screen.getByText('Count')).not.toBeNull();
 
     unmount();
     render(<AggregateActions columnKey='order_status' onClose={vi.fn()} />);
