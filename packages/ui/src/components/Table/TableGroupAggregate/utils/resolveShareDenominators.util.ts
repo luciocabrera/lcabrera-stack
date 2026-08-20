@@ -56,7 +56,7 @@ const sumLeafAggregates = ({
   readonly summaries: readonly TableGroupRowSummary[];
 }) => {
   let total = 0;
-  let isSawOne = false;
+  let hasSeenLeaf = false;
 
   for (const summary of summaries) {
     if (summary.isSubtotal) continue;
@@ -66,10 +66,10 @@ const sumLeafAggregates = ({
     if (value === undefined) return;
 
     total += value;
-    isSawOne = true;
+    hasSeenLeaf = true;
   }
 
-  return isSawOne ? total : undefined;
+  return hasSeenLeaf ? total : undefined;
 };
 
 /**
