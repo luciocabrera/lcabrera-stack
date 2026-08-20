@@ -33,6 +33,16 @@ describe('resolveAggregateAlias', () => {
     ).toBe('count_distinct_total_amount');
   });
 
+  it('keeps two different functions apart on the same column', () => {
+    // What `@lcabrera/ui` leans on since #831: a column may carry several
+    // measures, so the projection has to give each one a field of its own.
+    const aliases = (['avg', 'max', 'min', 'sum'] as const).map((fn) =>
+      resolveAggregateAlias({ column: 'total_amount', fn }),
+    );
+
+    expect(new Set(aliases).size).toBe(aliases.length);
+  });
+
   it('lets an explicit alias win, which is the escape hatch for a long column', () => {
     expect(
       resolveAggregateAlias({

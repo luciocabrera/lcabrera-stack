@@ -50,7 +50,7 @@ export const createTableConfigColumnsActionMocks = <
   // column slices carry the hierarchy column while grouping is on (ADR-065).
   const mockGroupingStore = {
     get: vi.fn(() => ({
-      aggregates: {},
+      aggregates: [],
       keys: groupingKeys,
       mode: 'flat',
       periods: {},

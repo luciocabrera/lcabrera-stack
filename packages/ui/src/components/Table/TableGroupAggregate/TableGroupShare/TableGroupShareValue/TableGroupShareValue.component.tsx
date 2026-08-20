@@ -34,9 +34,10 @@ import { resolveShareRatio } from '../utils/resolveShareRatio.util';
  */
 export const TableGroupShareValue = ({
   columnKey,
+  fn,
   value,
 }: TableGroupShareValueProps) => {
-  const denominator = useGetTableShareDenominator(columnKey);
+  const denominator = useGetTableShareDenominator({ columnKey, fn });
   const locale = useGetTableLocale();
 
   const ratio = resolveShareRatio({ denominator, value });

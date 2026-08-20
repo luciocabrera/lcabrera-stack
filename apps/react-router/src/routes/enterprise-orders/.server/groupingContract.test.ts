@@ -172,22 +172,22 @@ const backToUiPlacements: readonly TableTotalsPlacement[] = serverPlacements;
  * Every member of `TableGroupingState` that the server consumes is assigned to
  * the descriptor field it ends up in, so a type change on either side fails to
  * compile here. `aggregates` is absent on purpose: the two sides genuinely
- * differ in shape — a column-keyed map on the client, a list of aggregate
- * descriptors on the server — and the app translates between them, so there is
- * nothing to pin. `shares` is absent for a different reason: it never leaves the
- * client, because a share is derived from rows the read already returned
- * (ADR-086).
+ * differ in shape — a `(columnKey, fn)` list on the client, a list of aggregate
+ * descriptors carrying an optional filter and alias on the server — and the app
+ * translates between them, so there is nothing to pin. `shares` is absent for a
+ * different reason: it never leaves the client, because a share is derived from
+ * rows the read already returned (ADR-086).
  *
  * This guarantee did exist before, implicitly, in `selectGroupedOrders`'s
  * argument types. That is a weaker place for it: a refactor that loosened those
  * arguments would drop the check without touching anything named "contract".
  */
 const uiGroupingState: TableGroupingState = {
-  aggregates: { total_amount: 'sum' },
+  aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
   keys: ['order_status'],
   mode: 'rollup',
   periods: { order_date: 'month' },
-  shares: ['total_amount'],
+  shares: [{ columnKey: 'total_amount', fn: 'sum' }],
 };
 
 const descriptorKeys: GroupQueryDescriptor['keys'] = uiGroupingState.keys;

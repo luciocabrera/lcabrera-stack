@@ -7,7 +7,7 @@ import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
 import { applyGroupingReducer } from './applyGroupingReducer.util';
 
 const NO_GROUPING: TableGroupingState = {
-  aggregates: {},
+  aggregates: [],
   keys: [],
   mode: 'flat',
   periods: {},
@@ -26,7 +26,7 @@ describe('applyGroupingReducer', () => {
           shares: [],
         }),
         existingGrouping: {
-          aggregates: {},
+          aggregates: [],
           keys: ['order_status'],
           mode: 'flat',
           periods: {},
@@ -35,7 +35,7 @@ describe('applyGroupingReducer', () => {
       }),
     ).toStrictEqual({
       grouping: {
-        aggregates: {},
+        aggregates: [],
         keys: ['order_status', 'shipping_country'],
         mode: 'flat',
         periods: {},
@@ -61,7 +61,7 @@ describe('applyGroupingReducer', () => {
         return grouping;
       },
       existingGrouping: {
-        aggregates: { total_amount: 'sum' },
+        aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
         keys: ['a'],
         mode: 'flat',
         periods: {},
@@ -71,7 +71,7 @@ describe('applyGroupingReducer', () => {
 
     expect(seen).toStrictEqual([
       {
-        aggregates: { total_amount: 'sum' },
+        aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
         keys: ['a'],
         mode: 'flat',
         periods: {},
@@ -85,7 +85,7 @@ describe('applyGroupingReducer', () => {
       applyGroupingReducer({
         deriveNextGrouping: (grouping) => grouping,
         existingGrouping: {
-          aggregates: {},
+          aggregates: [],
           keys: ['order_status'],
           mode: 'flat',
           periods: {},
@@ -99,7 +99,7 @@ describe('applyGroupingReducer', () => {
     expect(
       applyGroupingReducer({
         deriveNextGrouping: () => ({
-          aggregates: {},
+          aggregates: [],
           keys: Array.from(
             { length: MAX_TABLE_GROUP_KEYS + 1 },
             (_, index) => `key_${index}`,

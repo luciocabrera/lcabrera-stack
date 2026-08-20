@@ -1,5 +1,5 @@
 import type {
-  TableAggregateFn,
+  TableColumnAggregate,
   TableGroupingMode,
   TableGroupingState,
   TableGroupPeriod,
@@ -12,15 +12,15 @@ import {
 } from '../grouping/utils';
 
 type GetInitialGroupingStateArgs = {
-  readonly groupingAggregates?: Readonly<Record<string, TableAggregateFn>>;
+  readonly groupingAggregates?: readonly TableColumnAggregate[];
   readonly groupingKeys?: readonly string[];
   readonly groupingMode?: TableGroupingMode;
   readonly groupingPeriods?: Readonly<Record<string, TableGroupPeriod>>;
-  readonly groupingShares?: readonly string[];
+  readonly groupingShares?: readonly TableColumnAggregate[];
 };
 
 const NO_GROUPING: TableGroupingState = {
-  aggregates: {},
+  aggregates: [],
   keys: [],
   mode: 'flat',
   periods: {},
@@ -65,7 +65,7 @@ const NO_GROUPING: TableGroupingState = {
  * `resolveTableGroupingUpdate` applies when the last key is removed.
  */
 export const getInitialGroupingState = ({
-  groupingAggregates = {},
+  groupingAggregates = [],
   groupingKeys = [],
   groupingMode = 'flat',
   groupingPeriods = {},
@@ -76,7 +76,7 @@ export const getInitialGroupingState = ({
   }
 
   return {
-    aggregates: { ...groupingAggregates },
+    aggregates: [...groupingAggregates],
     keys: [...groupingKeys],
     mode: groupingMode,
     // Pruned to the keys that survived, so a granularity for a key the loader
@@ -85,9 +85,10 @@ export const getInitialGroupingState = ({
       keys: groupingKeys,
       periods: groupingPeriods,
     }),
-    // Pruned to the columns that still carry a shareable aggregate: a share is
-    // a ratio over a measure, so one naming a column the loader applied no
-    // aggregate to would divide nothing (#648).
+    // Pruned to the aggregates the loader actually applied, and only the
+    // shareable ones: a share is a ratio over a measure, so one naming a
+    // measure that is not there divides nothing (#648, per aggregate since
+    // #831).
     shares: pruneGroupShares({
       aggregates: groupingAggregates,
       shares: groupingShares,

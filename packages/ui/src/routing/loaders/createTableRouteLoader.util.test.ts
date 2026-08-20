@@ -43,7 +43,7 @@ type FetchPageArgs = {
 };
 
 const NO_GROUPING: TableGroupingState = {
-  aggregates: {},
+  aggregates: [],
   keys: [],
   mode: 'flat',
   periods: {},
@@ -317,7 +317,7 @@ describe('createTableRouteLoader', () => {
       expect(fetchPage).toHaveBeenCalledWith(
         expect.objectContaining({
           grouping: {
-            aggregates: {},
+            aggregates: [],
             keys: ['status'],
             mode: 'flat',
             periods: {},
@@ -455,7 +455,7 @@ describe('createTableRouteLoader', () => {
       expect(fetchPage).toHaveBeenCalledWith(
         expect.objectContaining({
           grouping: {
-            aggregates: {},
+            aggregates: [],
             keys: ['status', 'name'],
             mode: 'flat',
             periods: {},
@@ -468,14 +468,16 @@ describe('createTableRouteLoader', () => {
     it('carries the selected aggregates alongside the keys', async () => {
       const { fetchPage, result } = await invoke({
         config: { meta: { isGroupingEnabled: true } },
-        url: groupingUrl('{"agg":{"id":"sum"},"keys":["status"]}'),
+        url: groupingUrl('{"agg":["id:sum"],"keys":["status"]}'),
       });
 
-      expect(result.metaState.groupingAggregates).toEqual({ id: 'sum' });
+      expect(result.metaState.groupingAggregates).toEqual([
+        { columnKey: 'id', fn: 'sum' },
+      ]);
       expect(fetchPage).toHaveBeenCalledWith(
         expect.objectContaining({
           grouping: {
-            aggregates: { id: 'sum' },
+            aggregates: [{ columnKey: 'id', fn: 'sum' }],
             keys: ['status'],
             mode: 'flat',
             periods: {},
@@ -488,20 +490,22 @@ describe('createTableRouteLoader', () => {
     it('degrades an unrecognised aggregate token to grouping off, keys included', async () => {
       const { result } = await invoke({
         config: { meta: { isGroupingEnabled: true } },
-        url: groupingUrl('{"agg":{"id":"median"},"keys":["status"]}'),
+        url: groupingUrl('{"agg":["id:median"],"keys":["status"]}'),
       });
 
       expect(result.metaState.groupingKeys).toEqual([]);
-      expect(result.metaState.groupingAggregates).toEqual({});
+      expect(result.metaState.groupingAggregates).toEqual([]);
     });
 
     it('cannot have its applied aggregates forged through the UI-flags cookie', async () => {
       const { result } = await invoke({
         config: { meta: { isGroupingEnabled: true } },
-        cookie: uiFlagsCookie({ groupingAggregates: { id: 'sum' } }),
+        cookie: uiFlagsCookie({
+          groupingAggregates: [{ columnKey: 'id', fn: 'sum' }],
+        }),
       });
 
-      expect(result.metaState.groupingAggregates).toEqual({});
+      expect(result.metaState.groupingAggregates).toEqual([]);
     });
   });
 
@@ -589,7 +593,7 @@ describe('createTableRouteLoader', () => {
 
   describe('a route-declared default grouping (#578)', () => {
     const defaultGrouping: TableGroupingState = {
-      aggregates: {},
+      aggregates: [],
       keys: ['status'],
       mode: 'rollup',
       periods: {},

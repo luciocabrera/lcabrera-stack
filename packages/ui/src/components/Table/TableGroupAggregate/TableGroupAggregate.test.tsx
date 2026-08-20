@@ -166,3 +166,67 @@ describe('TableGroupAggregate', () => {
     expect(useGetHasColumnFilterMock).toHaveBeenCalledWith('total_amount');
   });
 });
+
+describe('TableGroupAggregate with several measures on one column', () => {
+  const multiSummary: TableGroupRowSummary = {
+    aggregates: [
+      { columnKey: 'total_amount', fn: 'avg', value: '2503.3168' },
+      { columnKey: 'total_amount', fn: 'sum', value: '302540833.38' },
+    ],
+    count: 12,
+    isSubtotal: false,
+    path: [{ columnKey: 'order_status', label: 'Shipped', value: 'Shipped' }],
+  };
+
+  const renderMulti = () => {
+    useGetNormalizedColumnMock.mockImplementation(
+      (key: unknown) => COLUMNS[key as string],
+    );
+
+    return render(
+      <TableGroupAggregate columnKey='total_amount' summary={multiSummary} />,
+    );
+  };
+
+  afterEach(() => {
+    cleanup();
+    useGetHasColumnFilterMock.mockReturnValue(false);
+    useGetNormalizedColumnMock.mockReset();
+  });
+
+  it('renders every measure the row carries for the column', () => {
+    renderMulti();
+
+    expect(screen.getByText(/2,503\.32/u)).toBeTruthy();
+    expect(screen.getByText(/302,540,833\.38/u)).toBeTruthy();
+  });
+
+  it('names each measure, so two numbers side by side are readable', () => {
+    // Without this the cell shows two bare figures and nothing says which is
+    // the average and which the sum (#831).
+    renderMulti();
+
+    expect(screen.getByText('Average')).toBeTruthy();
+    expect(screen.getByText('Sum')).toBeTruthy();
+  });
+
+  it('names nothing when the column carries a single measure', () => {
+    // The prefix earns its place only where the cell is ambiguous; on every
+    // other column of every group row it would be noise.
+    renderAggregate('unit_price');
+
+    expect(screen.queryByText('Average')).toBeNull();
+  });
+
+  it('renders the filter indicator once for the cell, not once per measure', () => {
+    // The filter belongs to the column, and every measure in the cell is
+    // computed over the same surviving rows.
+    useGetHasColumnFilterMock.mockReturnValue(true);
+
+    renderMulti();
+
+    expect(
+      screen.getAllByTestId('table-group-aggregate-filtered'),
+    ).toHaveLength(1);
+  });
+});

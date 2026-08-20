@@ -33,12 +33,14 @@ const { NO_COLLAPSED_GROUP_PATHS, NO_DRILLED_GROUPS, NO_ROWS } = vi.hoisted(
 );
 
 const {
-  appliedAggregateRef,
+  appliedAggregatesRef,
   capabilityRef,
   groupingKeysRef,
   isGroupingEnabledRef,
 } = vi.hoisted(() => ({
-  appliedAggregateRef: { current: undefined as TableAggregateFn | undefined },
+  appliedAggregatesRef: {
+    current: [] as readonly { columnKey: string; fn: TableAggregateFn }[],
+  },
   capabilityRef: {
     current: undefined as TableColumnGroupingCapability | undefined,
   },
@@ -53,13 +55,14 @@ vi.mock('#ui/components/Table/contexts/TableConfig/columns/actions', () => ({
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/grouping/actions', () => ({
+  useAddTableColumnAggregate: () => vi.fn(),
   useClearTableGrouping: () => vi.fn(),
-  useSetTableColumnAggregate: () => vi.fn(),
+  useRemoveTableColumnAggregate: () => vi.fn(),
   useToggleTableGroupKey: () => vi.fn(),
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/grouping/selectors', () => ({
-  useGetTableColumnAggregate: () => appliedAggregateRef.current,
+  useGetTableGroupingAggregates: () => appliedAggregatesRef.current,
   useGetTableGroupingKeys: () => groupingKeysRef.current,
 }));
 
@@ -120,7 +123,7 @@ import { TableHeaderActionsMenu } from './TableHeaderActionsMenu.component';
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
-  appliedAggregateRef.current = undefined;
+  appliedAggregatesRef.current = [];
   capabilityRef.current = undefined;
   groupingKeysRef.current = [];
   isGroupingEnabledRef.current = false;

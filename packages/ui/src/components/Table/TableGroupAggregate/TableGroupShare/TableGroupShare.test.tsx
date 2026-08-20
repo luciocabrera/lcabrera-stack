@@ -33,7 +33,7 @@ describe('TableGroupShare', () => {
     isSharedRef.current = false;
     denominatorRef.current = 200;
 
-    render(<TableGroupShare columnKey='revenue' value={50} />);
+    render(<TableGroupShare columnKey='revenue' fn='sum' value={50} />);
 
     expect(screen.queryByTestId('table-group-share')).toBeNull();
     expect(screen.queryByTestId('table-group-share-absent')).toBeNull();
@@ -42,7 +42,7 @@ describe('TableGroupShare', () => {
   it('renders the measure as a percentage of the grand total', () => {
     denominatorRef.current = 200;
 
-    render(<TableGroupShare columnKey='revenue' value={50} />);
+    render(<TableGroupShare columnKey='revenue' fn='sum' value={50} />);
 
     expect(screen.getByText('25.0%')).toBeTruthy();
   });
@@ -52,7 +52,7 @@ describe('TableGroupShare', () => {
     // carry which total a percentage is of (ADR-086).
     denominatorRef.current = 200;
 
-    render(<TableGroupShare columnKey='revenue' value={50} />);
+    render(<TableGroupShare columnKey='revenue' fn='sum' value={50} />);
 
     expect(screen.getByText('25.0% of the grand total')).toBeTruthy();
   });
@@ -62,7 +62,7 @@ describe('TableGroupShare', () => {
     // would read the same quantity twice.
     denominatorRef.current = 200;
 
-    render(<TableGroupShare columnKey='revenue' value={50} />);
+    render(<TableGroupShare columnKey='revenue' fn='sum' value={50} />);
 
     expect(
       screen.getByTestId('table-group-share-bar').getAttribute('aria-hidden'),
@@ -73,7 +73,7 @@ describe('TableGroupShare', () => {
     denominatorRef.current = 200;
 
     const { container } = render(
-      <TableGroupShare columnKey='revenue' value={50} />,
+      <TableGroupShare columnKey='revenue' fn='sum' value={50} />,
     );
     const fill = container.querySelector(
       ':scope [data-testid="table-group-share-bar"] > span',
@@ -90,7 +90,7 @@ describe('TableGroupShare', () => {
     denominatorRef.current = 50;
 
     const { container } = render(
-      <TableGroupShare columnKey='revenue' value={200} />,
+      <TableGroupShare columnKey='revenue' fn='sum' value={200} />,
     );
     const fill = container.querySelector(
       ':scope [data-testid="table-group-share-bar"] > span',
@@ -103,7 +103,7 @@ describe('TableGroupShare', () => {
   it('renders an explicit absence when there is no denominator', () => {
     // Never `0.0%` and never `NaN` — a share nobody could compute is not a
     // share of nothing.
-    render(<TableGroupShare columnKey='revenue' value={50} />);
+    render(<TableGroupShare columnKey='revenue' fn='sum' value={50} />);
 
     expect(screen.getByTestId('table-group-share-absent')).toBeTruthy();
     expect(screen.getByText('No share available')).toBeTruthy();
@@ -113,7 +113,7 @@ describe('TableGroupShare', () => {
   it('renders a genuine zero as a share, not as an absence', () => {
     denominatorRef.current = 200;
 
-    render(<TableGroupShare columnKey='revenue' value={0} />);
+    render(<TableGroupShare columnKey='revenue' fn='sum' value={0} />);
 
     expect(screen.getByText('0.0%')).toBeTruthy();
     expect(screen.queryByTestId('table-group-share-absent')).toBeNull();

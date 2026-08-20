@@ -1,5 +1,6 @@
 import type { TableGroupingState } from '#ui/components/Table/Table.types';
 
+import { toTableAggregateToken } from '#ui/components/Table/utils/tableAggregateToken.util';
 import { serializeGroupingToURL } from '#ui/utils/urlState';
 
 import { areGroupKeysLegal } from '../../utils';
@@ -35,8 +36,12 @@ const isSameGrouping = ({
   existingGrouping,
   nextGrouping,
 }: Omit<ResolveTableGroupingUpdateArgs, 'hasDefaultGrouping'>) => {
-  const aggregateEntries = Object.entries(nextGrouping.aggregates);
-  const existingShares = new Set(existingGrouping.shares);
+  const existingAggregates = existingGrouping.aggregates.map((entry) =>
+    toTableAggregateToken(entry),
+  );
+  const existingShares = new Set(
+    existingGrouping.shares.map((entry) => toTableAggregateToken(entry)),
+  );
 
   return (
     nextGrouping.mode === existingGrouping.mode &&
@@ -44,16 +49,23 @@ const isSameGrouping = ({
     nextGrouping.keys.every(
       (key, index) => key === existingGrouping.keys[index],
     ) &&
-    aggregateEntries.length ===
-      Object.keys(existingGrouping.aggregates).length &&
-    aggregateEntries.every(
-      ([column, fn]) => existingGrouping.aggregates[column] === fn,
+    // Compared **in order**, unlike the shares below: the aggregate list's order
+    // is the order it renders and serializes in, so a reorder that changed no
+    // member is still a change the URL has to record (#831, and the precondition
+    // #832's drag affordance needs).
+    nextGrouping.aggregates.length === existingAggregates.length &&
+    nextGrouping.aggregates.every(
+      (aggregate, index) =>
+        toTableAggregateToken(aggregate) === existingAggregates[index],
     ) &&
     // Compared, and it has to be: a share changes no key, mode or aggregate, so
     // without this a share toggle resolves to `unchanged` and never navigates —
-    // the control would appear inert (#648).
+    // the control would appear inert (#648). As a set, because a share carries
+    // no order of its own — it is rendered where its aggregate is.
     nextGrouping.shares.length === existingShares.size &&
-    nextGrouping.shares.every((column) => existingShares.has(column))
+    nextGrouping.shares.every((share) =>
+      existingShares.has(toTableAggregateToken(share)),
+    )
   );
 };
 
@@ -97,7 +109,7 @@ export const resolveTableGroupingUpdate = ({
 
   const grouping: TableGroupingState =
     nextGrouping.keys.length === 0
-      ? { aggregates: {}, keys: [], mode: 'flat', periods: {}, shares: [] }
+      ? { aggregates: [], keys: [], mode: 'flat', periods: {}, shares: [] }
       : nextGrouping;
 
   if (isSameGrouping({ existingGrouping, nextGrouping: grouping })) {

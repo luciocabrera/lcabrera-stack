@@ -1,6 +1,6 @@
 # ADR-061 — Grouping configuration is URL state; expansion is client state
 
-- **Status:** Accepted; extended by [ADR-080](./ADR-080-a-group-key-renders-in-its-own-column.md) (2026-08-18, #789) — the grouping param also carries the layout overrides a grouped view implies, and the layout cookie is never written while grouping is applied
+- **Status:** Accepted; extended by [ADR-080](./ADR-080-a-group-key-renders-in-its-own-column.md) (2026-08-18, #789) — the grouping param also carries the layout overrides a grouped view implies, and the layout cookie is never written while grouping is applied; widened by #831 (2026-08-20) — `agg` and `share` carry an ordered list of `"<columnKey>:<fn>"` tokens, so a column may carry several aggregates (see "What `agg` and `share` carry" below)
 - **Date:** 2026-08-12
 - **Scope:** `@lcabrera/ui` (the Table store and the routing/persistence path), the grouped-read routes in `apps/react-router`
 - **Issue:** #553 — blocks #561. It also blocked #557, which was resolved by #612 while this ADR was in draft; the outcome is recorded below rather than left open.
@@ -137,6 +137,48 @@ consumed by `use()`. A slow grouped query shows the existing skeleton. Do **not*
 introduce `<Await>` or `defer` to solve a grouping problem — neither appears
 anywhere in this repo today, and adding one here would create a second streaming
 idiom for one caller.
+
+### What `agg` and `share` carry (widened by #831, 2026-08-20)
+
+The original shape was a **column-to-function map**, and that map was the reason
+a column could carry at most one aggregate: a user applying `avg` to a column
+already carrying `min` silently replaced it, because the transport had nowhere to
+put the second. That cap is gone. `agg` is now an **ordered array of compact
+`"<columnKey>:<fn>"` strings**, and `share` takes the same element, so a share
+names an aggregate rather than a column:
+
+```jsonc
+{
+  "keys": ["order_status"],
+  "agg": ["total_amount:sum", "total_amount:avg"],
+  "share": ["total_amount:sum"],
+}
+```
+
+**Why strings and not a list of records.** Every URL-borne slice in this repo is
+a map or a list of plain strings, and `keys` is already an ordered list whose
+order is load-bearing — so an ordered aggregate list is a richer element rather
+than a new kind of param. A record list would also cost roughly half again the
+characters against the shared `MAX_COOKIE_ENTRY_VALUE_LENGTH` budget. A **map of
+lists** (`{"total_amount":["sum","avg"]}`) was rejected for a different reason: it
+cannot express order _across_ columns, and object key order is not a contract
+worth leaning on.
+
+**The parse rule is not `split(':')`.** It splits on the **last** `:` and
+validates the suffix against `TableAggregateFn`. A column key is a consumer's
+identifier and this package is published, so one may legitimately contain a `:`;
+splitting from the right is total because the function vocabulary is closed and
+contains no `:`, so `"odd:col:sum"` reads as `("odd:col", "sum")` unambiguously.
+A token whose suffix names no legal function refuses the **whole** payload, like
+every other malformed member.
+
+Nothing else about this decision moves. The refusal contract is unchanged, the
+store still holds records rather than tokens (`toTableAggregateToken` and its
+inverse live at the codec's edge and nowhere else), and a **filtered** aggregate
+still has no slot to travel in — the #569 deferral is where it was.
+
+Ordering was not free-standing either: an ordered list is the precondition the
+drag-reorder child (#832) is blocked on.
 
 **A new failure mode enters through the URL.** The `grouping` param is
 request-derived and reaches SQL emission, where an unrecognised aggregate token

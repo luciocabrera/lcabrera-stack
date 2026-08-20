@@ -10,8 +10,10 @@ import { TABLE_SHAREABLE_AGGREGATE_FNS } from '#ui/components/Table/Table.consta
  * `rollup` it is the grand-total row, and under `flat` it is the leaves added
  * up — which is the true total only where adding the parts gives the whole.
  *
- * `undefined` — no aggregate applied — is not shareable either: there is no
- * measure to take a share of.
+ * It takes a function alone and no column, because the answer depends on
+ * nothing else — and since a column may carry several aggregates at once, "the
+ * column's aggregate" is no longer a question with one answer (#831). Whether
+ * the aggregate is *applied* at all is `pruneGroupShares`' half.
  */
-export const isShareableAggregate = (fn: TableAggregateFn | undefined) =>
-  fn !== undefined && TABLE_SHAREABLE_AGGREGATE_FNS.includes(fn);
+export const isShareableAggregate = (fn: TableAggregateFn) =>
+  TABLE_SHAREABLE_AGGREGATE_FNS.includes(fn);

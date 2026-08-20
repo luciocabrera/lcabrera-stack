@@ -9,8 +9,8 @@ import { groupingCodec } from './groupingCodec.util';
  * rollup existed means, and the default the mode control starts from.
  *
  * Only the envelope, the aggregate vocabulary and the mode are closed here — the keys are
- * still arbitrary strings, and nothing in this step checks them against a
- * table's real columns. That is `sanitizeGroupingByColumns`'s job in the loader
+ * still arbitrary strings, an aggregate token's column half is any string at
+ * all, and nothing in this step checks either against a table's real columns. That is `sanitizeGroupingByColumns`'s job in the loader
  * path, and the server's `assertGroupKeys` / `assertGroupAggregates` behind it;
  * the three together are why an unusable key never reaches SQL as an identifier.
  */
@@ -20,7 +20,7 @@ export const deserializeGroupingFromURL = (
   const { agg, gran, keys, mode, share } = groupingCodec.deserialize(param);
 
   return {
-    aggregates: agg ?? {},
+    aggregates: agg ?? [],
     keys,
     mode: mode ?? 'flat',
     periods: gran ?? {},

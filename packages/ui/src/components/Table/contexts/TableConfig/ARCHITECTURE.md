@@ -103,19 +103,21 @@ TableConfig/
 │   │   ├── utils/applyGroupingReducer.util.ts       → Pure: apply an action's reducer to the caller's snapshot and resolve the result; shared with the drawer's draft write path
 │   │   ├── utils/resolveTableGroupingUpdate.util.ts → Pure: one interaction's grouping change as data (updated / unchanged); refuses an illegal key list whole
 │   │   ├── utils/toggleTableGroupKey.util.ts        → Pure: append a key at the tail, or remove it
-│   │   ├── utils/setTableColumnAggregate.util.ts    → Pure: set or clear one column's aggregate
+│   │   ├── utils/addTableColumnAggregate.util.ts    → Pure: append one (columnKey, fn) pair, guarded against a duplicate
+│   │   ├── utils/removeTableColumnAggregate.util.ts → Pure: remove one pair, or every aggregate on a column
 │   │   ├── utils/setTableGroupingMode.util.ts       → Pure: set which grouping sets the read emits, keys and aggregates untouched (the drawer's `useSetGroupingMode` is its only caller — the mode has no apply-immediately surface)
 │   │   ├── utils/resolveGroupingColumnsPatch.util.ts → Pure: the derived columns-store patch a grouping change produces — the key hoist follows the keys (ADR-080)
 │   │   ├── useSetTableGrouping.hook.ts      → **Internal**: the single write path, taking a reducer so the store is read once
 │   │   ├── useToggleTableGroupKey.hook.ts   → Add/remove one key (header menu)
-│   │   ├── useSetTableColumnAggregate.hook.ts → Apply or clear one column's aggregate
+│   │   ├── useAddTableColumnAggregate.hook.ts → Apply one more aggregate to a column
+│   │   ├── useRemoveTableColumnAggregate.hook.ts → Remove one of a column's aggregates, or all of them
 │   │   └── useClearTableGrouping.hook.ts    → Clear every key and every aggregate
 │   │
 │   ├── utils/resolveGroupPathKey.util.ts    → Pure: a group's identity as one string — the key expansion is stored under, and the one `resolveRowKey` gives a group row
 │   │
 │   └── selectors/
 │       ├── useGetTableGroupingKeys.hook.ts       → The applied group keys, in nesting order
-│       └── useGetTableColumnAggregate.hook.ts    → The aggregate applied to one column
+│       └── useGetTableGroupingAggregates.hook.ts  → Every applied (columnKey, fn) aggregate, in order — the state's own array, so the snapshot is stable
 │
 ├── expansion/                               → Which group rows are collapsed, and which have fetched their own rows (ADR-061, ADR-067, ADR-079)
 │   ├── useExpansionStore.hook.ts            → Resolves the config expansionStore, delegates to useStoreSelector
@@ -218,7 +220,8 @@ TableColumnsState<TData> = {
 
 ```typescript
 TableGroupingState = {
-  aggregates: Readonly<Record<string, TableAggregateFn>>; // At most one aggregate per column — the whole shape the compact URL param can carry, and the shape of the #569 deferral: no state here describes a *filtered* aggregate
+  aggregates: readonly TableColumnAggregate[]; // Ordered (columnKey, fn) pairs, no pair repeated — a column may carry several measures at once (#831). It travels in the compact URL param as an ordered array of `"<columnKey>:<fn>"` tokens, and is still the shape of the #569 deferral: no state here describes a *filtered* aggregate
+  shares: readonly TableColumnAggregate[];     // Which measures render as a share of the grand total. It names an aggregate rather than a column, because `sum` and `count` are both shareable and a column may carry both (ADR-086, widened by #831)
   keys: readonly string[];           // Applied group keys, in the query's nesting order
   mode: TableGroupingMode;           // `flat` (one set) or `rollup` (one per prefix, plus the grand total). Duplicated from `@lcabrera/server`'s `GroupingMode`; `cube` is deliberately absent because its sets are not prefixes and nothing renders a lattice as a tree (#574)
 };

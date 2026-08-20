@@ -10,7 +10,7 @@ describe('toggleTableGroupKey', () => {
       toggleTableGroupKey({
         columnKey: 'ship_country',
         grouping: {
-          aggregates: {},
+          aggregates: [],
           keys: ['order_status'],
           mode: 'flat',
           periods: {},
@@ -18,7 +18,7 @@ describe('toggleTableGroupKey', () => {
         },
       }),
     ).toStrictEqual({
-      aggregates: {},
+      aggregates: [],
       keys: ['order_status', 'ship_country'],
       mode: 'flat',
       periods: {},
@@ -31,7 +31,7 @@ describe('toggleTableGroupKey', () => {
       toggleTableGroupKey({
         columnKey: 'ship_country',
         grouping: {
-          aggregates: {},
+          aggregates: [],
           keys: ['a', 'ship_country', 'b'],
           mode: 'flat',
           periods: {},
@@ -39,7 +39,7 @@ describe('toggleTableGroupKey', () => {
         },
       }),
     ).toStrictEqual({
-      aggregates: {},
+      aggregates: [],
       keys: ['a', 'b'],
       mode: 'flat',
       periods: {},
@@ -52,7 +52,7 @@ describe('toggleTableGroupKey', () => {
     // the over-long list and the resolver refuses it. Two enforcers could
     // disagree; one cannot.
     const grouping: TableGroupingState = {
-      aggregates: {},
+      aggregates: [],
       keys: ['a', 'b', 'c', 'd', 'e', 'f'],
       mode: 'flat',
       periods: {},
@@ -65,7 +65,7 @@ describe('toggleTableGroupKey', () => {
   });
 
   it('leaves the aggregates untouched in both directions', () => {
-    const aggregates = { total_amount: 'sum' } as const;
+    const aggregates = [{ columnKey: 'total_amount', fn: 'sum' }] as const;
 
     expect(
       toggleTableGroupKey({
@@ -96,7 +96,7 @@ describe('toggleTableGroupKey', () => {
   it('never mutates the grouping it was handed', () => {
     const keys = ['order_status'];
     const grouping: TableGroupingState = {
-      aggregates: {},
+      aggregates: [],
       keys,
       mode: 'flat',
       periods: {},

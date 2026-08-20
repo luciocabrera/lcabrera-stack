@@ -1,14 +1,15 @@
+export { useAddColumnAggregate } from './useAddColumnAggregate.hook';
 export { useBatchSetTableDrawerSettings } from './useBatchSetTableDrawerSettings.hook';
 export { useClearAllSettings } from './useClearAllSettings.hook';
 export { useClearColumnOrderSection } from './useClearColumnOrderSection.hook';
 export { useClearFilters } from './useClearFilters.hook';
 export { useClearGrouping } from './useClearGrouping.hook';
 export { useClearSorting } from './useClearSorting.hook';
+export { useRemoveColumnAggregate } from './useRemoveColumnAggregate.hook';
 export { useResetColumnOrderAndVisibility } from './useResetColumnOrderAndVisibility.hook';
 export { useResetFilters } from './useResetFilters.hook';
 export { useResetSorting } from './useResetSorting.hook';
 export { useResetTableSettings } from './useResetTableSettings.hook';
-export { useSetColumnAggregate } from './useSetColumnAggregate.hook';
 export { useSetColumnFilters } from './useSetColumnFilters.hook';
 export { useSetColumnsSizing } from './useSetColumnsSizing.hook';
 export { useSetColumnsSortings } from './useSetColumnsSortings.hook';

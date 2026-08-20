@@ -46,7 +46,8 @@ TableSettingsDrawer/
 │   │   ├── useResetFilters                → Reset filters from table
 │   │   ├── useResetSorting                → Reset sorting from table
 │   │   ├── useResetTableSettings          → Re-seed both drafts from the table
-│   │   ├── useSetColumnAggregate          → Stage / clear one column's aggregate
+│   │   ├── useAddColumnAggregate          → Stage one more aggregate for a column
+│   │   ├── useRemoveColumnAggregate       → Un-stage one of a column's aggregates, or all
 │   │   ├── useSetColumnFilters            → Set filters object
 │   │   ├── useSetColumnPinning            → Set pinning state + sync draft order
 │   │   ├── useSetColumnsOrder             → Set column order array

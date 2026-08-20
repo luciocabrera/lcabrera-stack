@@ -1,10 +1,7 @@
 import type { RequestedGroupAggregate } from '@lcabrera/server/db/olap/decode-grouped-rows.util';
 import type { ColumnSort } from '@lcabrera/server/sort/sort.types';
 import type { SortingState } from '@lcabrera/ui/components/Table';
-import type {
-  TableAggregateFn,
-  TableGroupingState,
-} from '@lcabrera/ui/components/Table/Table.types';
+import type { TableGroupingState } from '@lcabrera/ui/components/Table/Table.types';
 
 import { getColumnGroupingCapabilities } from '@lcabrera/server/db/get-column-grouping-capabilities.util';
 import { getRowsCount } from '@lcabrera/server/db/get-rows-count.util';
@@ -57,7 +54,7 @@ const TARGET = {
 } as const;
 
 const NO_GROUPING: TableGroupingState = {
-  aggregates: {},
+  aggregates: [],
   keys: [],
   mode: 'flat',
   periods: {},
@@ -65,8 +62,8 @@ const NO_GROUPING: TableGroupingState = {
 };
 
 export type SelectGroupedWideAlltypes150Args = {
-  /** The aggregate applied to each column, at most one per column. */
-  readonly aggregates: Readonly<Record<string, TableAggregateFn>>;
+  /** The aggregates to project, in order; a column may appear more than once (#831). */
+  readonly aggregates: TableGroupingState['aggregates'];
   /** The columns the rows are grouped by, in nesting order. */
   readonly groupKeys: readonly string[];
   readonly groupMode: TableGroupingState['mode'];
@@ -101,9 +98,9 @@ const selectGroupedWideAlltypes150 = async ({
   groupPeriods,
   sort,
 }: SelectGroupedWideAlltypes150Args): Promise<WideAlltypes150TableResponse> => {
-  const requested: readonly RequestedGroupAggregate[] = Object.entries(
-    selectedAggregates,
-  ).map(([column, fn]) => ({ column, fn }));
+  const requested: readonly RequestedGroupAggregate[] = selectedAggregates.map(
+    ({ columnKey, fn }) => ({ column: columnKey, fn }),
+  );
 
   try {
     const { aggregates, maskAlias, rows, truncations, warning } =

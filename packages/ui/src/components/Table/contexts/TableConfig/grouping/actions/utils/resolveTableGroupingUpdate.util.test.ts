@@ -7,7 +7,7 @@ import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
 import { resolveTableGroupingUpdate } from './resolveTableGroupingUpdate.util';
 
 const NO_GROUPING: TableGroupingState = {
-  aggregates: {},
+  aggregates: [],
   keys: [],
   mode: 'flat',
   periods: {},
@@ -19,7 +19,7 @@ describe('resolveTableGroupingUpdate', () => {
     const result = resolveTableGroupingUpdate({
       existingGrouping: NO_GROUPING,
       nextGrouping: {
-        aggregates: {},
+        aggregates: [],
         keys: ['order_status'],
         mode: 'flat',
         periods: {},
@@ -29,7 +29,7 @@ describe('resolveTableGroupingUpdate', () => {
 
     expect(result).toStrictEqual({
       grouping: {
-        aggregates: {},
+        aggregates: [],
         keys: ['order_status'],
         mode: 'flat',
         periods: {},
@@ -46,14 +46,14 @@ describe('resolveTableGroupingUpdate', () => {
   it('applies several keys in the order given, which is the nesting order', () => {
     const result = resolveTableGroupingUpdate({
       existingGrouping: {
-        aggregates: {},
+        aggregates: [],
         keys: ['order_status'],
         mode: 'flat',
         periods: {},
         shares: [],
       },
       nextGrouping: {
-        aggregates: {},
+        aggregates: [],
         keys: ['order_status', 'ship_country'],
         mode: 'flat',
         periods: {},
@@ -63,7 +63,7 @@ describe('resolveTableGroupingUpdate', () => {
 
     expect(result).toStrictEqual({
       grouping: {
-        aggregates: {},
+        aggregates: [],
         keys: ['order_status', 'ship_country'],
         mode: 'flat',
         periods: {},
@@ -80,14 +80,14 @@ describe('resolveTableGroupingUpdate', () => {
   it('carries the selected aggregates into the param beside the keys', () => {
     const result = resolveTableGroupingUpdate({
       existingGrouping: {
-        aggregates: {},
+        aggregates: [],
         keys: ['order_status'],
         mode: 'flat',
         periods: {},
         shares: [],
       },
       nextGrouping: {
-        aggregates: { total_amount: 'sum' },
+        aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
         keys: ['order_status'],
         mode: 'flat',
         periods: {},
@@ -97,7 +97,7 @@ describe('resolveTableGroupingUpdate', () => {
 
     expect(result).toStrictEqual({
       grouping: {
-        aggregates: { total_amount: 'sum' },
+        aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
         keys: ['order_status'],
         mode: 'flat',
         periods: {},
@@ -107,7 +107,7 @@ describe('resolveTableGroupingUpdate', () => {
       persistenceEntry: {
         searchParamKey: 'grouping',
         searchParamValue:
-          '{"agg":{"total_amount":"sum"},"keys":["order_status"]}',
+          '{"agg":["total_amount:sum"],"keys":["order_status"]}',
       },
     });
   });
@@ -124,7 +124,7 @@ describe('resolveTableGroupingUpdate', () => {
       resolveTableGroupingUpdate({
         existingGrouping: NO_GROUPING,
         nextGrouping: {
-          aggregates: {},
+          aggregates: [],
           keys: tooManyKeys,
           mode: 'flat',
           periods: {},
@@ -144,7 +144,7 @@ describe('resolveTableGroupingUpdate', () => {
       resolveTableGroupingUpdate({
         existingGrouping: NO_GROUPING,
         nextGrouping: {
-          aggregates: {},
+          aggregates: [],
           keys: maximumKeys,
           mode: 'flat',
           periods: {},
@@ -157,14 +157,14 @@ describe('resolveTableGroupingUpdate', () => {
   it('drops the param and the aggregates when the last key goes', () => {
     const result = resolveTableGroupingUpdate({
       existingGrouping: {
-        aggregates: { total_amount: 'sum' },
+        aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
         keys: ['order_status'],
         mode: 'flat',
         periods: {},
         shares: [],
       },
       nextGrouping: {
-        aggregates: { total_amount: 'sum' },
+        aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
         keys: [],
         mode: 'flat',
         periods: {},
@@ -184,7 +184,7 @@ describe('resolveTableGroupingUpdate', () => {
 
   it('answers unchanged for a repeat of the applied configuration', () => {
     const applied: TableGroupingState = {
-      aggregates: { total_amount: 'sum' },
+      aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
       keys: ['order_status'],
       mode: 'flat',
       periods: {},
@@ -195,7 +195,7 @@ describe('resolveTableGroupingUpdate', () => {
       resolveTableGroupingUpdate({
         existingGrouping: applied,
         nextGrouping: {
-          aggregates: { total_amount: 'sum' },
+          aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
           keys: ['order_status'],
           mode: 'flat',
           periods: {},
@@ -211,14 +211,14 @@ describe('resolveTableGroupingUpdate', () => {
     expect(
       resolveTableGroupingUpdate({
         existingGrouping: {
-          aggregates: {},
+          aggregates: [],
           keys: ['a', 'b'],
           mode: 'flat',
           periods: {},
           shares: [],
         },
         nextGrouping: {
-          aggregates: {},
+          aggregates: [],
           keys: ['b', 'a'],
           mode: 'flat',
           periods: {},
@@ -232,14 +232,14 @@ describe('resolveTableGroupingUpdate', () => {
     expect(
       resolveTableGroupingUpdate({
         existingGrouping: {
-          aggregates: { amount: 'sum' },
+          aggregates: [{ columnKey: 'amount', fn: 'sum' }],
           keys: ['a'],
           mode: 'flat',
           periods: {},
           shares: [],
         },
         nextGrouping: {
-          aggregates: { amount: 'avg' },
+          aggregates: [{ columnKey: 'amount', fn: 'avg' }],
           keys: ['a'],
           mode: 'flat',
           periods: {},
@@ -257,7 +257,7 @@ describe('resolveTableGroupingUpdate', () => {
       resolveTableGroupingUpdate({
         existingGrouping: NO_GROUPING,
         nextGrouping: {
-          aggregates: {},
+          aggregates: [],
           keys: ['order_status', 'order_status'],
           mode: 'flat',
           periods: {},
@@ -271,7 +271,7 @@ describe('resolveTableGroupingUpdate', () => {
     // The refusal an *update* can make: the previous grouping stands, which is
     // what distinguishes it from the seed path's "no grouping".
     const applied: TableGroupingState = {
-      aggregates: {},
+      aggregates: [],
       keys: ['order_status'],
       mode: 'flat',
       periods: {},
@@ -282,7 +282,7 @@ describe('resolveTableGroupingUpdate', () => {
       resolveTableGroupingUpdate({
         existingGrouping: applied,
         nextGrouping: {
-          aggregates: {},
+          aggregates: [],
           keys: ['priority', 'priority'],
           mode: 'flat',
           periods: {},
@@ -297,7 +297,7 @@ describe('resolveTableGroupingUpdate', () => {
       resolveTableGroupingUpdate({
         existingGrouping: NO_GROUPING,
         nextGrouping: {
-          aggregates: {},
+          aggregates: [],
           keys: ['order_status', 'priority'],
           mode: 'flat',
           periods: {},
@@ -320,14 +320,14 @@ describe('resolveTableGroupingUpdate', () => {
     expect(
       resolveTableGroupingUpdate({
         existingGrouping: {
-          aggregates: {},
+          aggregates: [],
           keys: ['order_status'],
           mode: 'flat',
           periods: {},
           shares: [],
         },
         nextGrouping: {
-          aggregates: {},
+          aggregates: [],
           keys: [],
           mode: 'flat',
           periods: {},
@@ -350,7 +350,7 @@ describe('resolveTableGroupingUpdate', () => {
     expect(
       resolveTableGroupingUpdate({
         existingGrouping: {
-          aggregates: {},
+          aggregates: [],
           keys: ['order_status'],
           mode: 'flat',
           periods: {},
@@ -358,7 +358,7 @@ describe('resolveTableGroupingUpdate', () => {
         },
         hasDefaultGrouping: true,
         nextGrouping: {
-          aggregates: {},
+          aggregates: [],
           keys: [],
           mode: 'flat',
           periods: {},

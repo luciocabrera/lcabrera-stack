@@ -27,7 +27,7 @@ const columns: TableColumn<Row>[] = [
 ];
 
 const NO_GROUPING: TableGroupingState = {
-  aggregates: {},
+  aggregates: [],
   keys: [],
   mode: 'flat',
   periods: {},
@@ -43,7 +43,7 @@ type GroupingArgs = {
 };
 
 const grouping = ({
-  aggregates = {},
+  aggregates = [],
   keys,
   mode = 'flat',
   periods = {},
@@ -80,7 +80,7 @@ describe('sanitizeGroupingByColumns', () => {
       sanitizeGroupingByColumns({
         columns,
         grouping: grouping({
-          aggregates: { id: 'sum' },
+          aggregates: [{ columnKey: 'id', fn: 'sum' }],
           keys: ['status'],
           mode: 'flat',
           periods: {},
@@ -89,7 +89,7 @@ describe('sanitizeGroupingByColumns', () => {
       }),
     ).toStrictEqual(
       grouping({
-        aggregates: { id: 'sum' },
+        aggregates: [{ columnKey: 'id', fn: 'sum' }],
         keys: ['status'],
         mode: 'flat',
         periods: {},
@@ -114,7 +114,7 @@ describe('sanitizeGroupingByColumns', () => {
       sanitizeGroupingByColumns({
         columns,
         grouping: grouping({
-          aggregates: { not_a_column: 'sum' },
+          aggregates: [{ columnKey: 'not_a_column', fn: 'sum' }],
           keys: ['status'],
           mode: 'flat',
           periods: {},
@@ -199,12 +199,12 @@ describe('sanitizeGroupingByColumns', () => {
       sanitizeGroupingByColumns({
         columns,
         grouping: grouping({
-          aggregates: { name: 'count' },
+          aggregates: [{ columnKey: 'name', fn: 'count' }],
           keys: ['status'],
-          shares: ['name'],
+          shares: [{ columnKey: 'name', fn: 'count' }],
         }),
       }).shares,
-    ).toStrictEqual(['name']);
+    ).toStrictEqual([{ columnKey: 'name', fn: 'count' }]);
   });
 
   it('refuses the whole configuration for a share on a non-additive one', () => {
@@ -216,19 +216,72 @@ describe('sanitizeGroupingByColumns', () => {
       sanitizeGroupingByColumns({
         columns,
         grouping: grouping({
-          aggregates: { name: 'avg' },
+          aggregates: [{ columnKey: 'name', fn: 'avg' }],
           keys: ['status'],
-          shares: ['name'],
+          shares: [{ columnKey: 'name', fn: 'avg' }],
         }),
       }).keys,
     ).toStrictEqual([]);
   });
 
-  it('refuses a share on a column carrying no aggregate', () => {
+  it('refuses a share naming an aggregate that is not applied', () => {
     expect(
       sanitizeGroupingByColumns({
         columns,
-        grouping: grouping({ keys: ['status'], shares: ['name'] }),
+        grouping: grouping({
+          keys: ['status'],
+          shares: [{ columnKey: 'name', fn: 'count' }],
+        }),
+      }).keys,
+    ).toStrictEqual([]);
+  });
+
+  it('refuses a share whose function the column does not carry', () => {
+    // The pair is the identity: `count(name)` is applied and `sum(name)` is not,
+    // so a share of the second names a measure the read will not produce (#831).
+    expect(
+      sanitizeGroupingByColumns({
+        columns,
+        grouping: grouping({
+          aggregates: [{ columnKey: 'name', fn: 'count' }],
+          keys: ['status'],
+          shares: [{ columnKey: 'name', fn: 'sum' }],
+        }),
+      }).keys,
+    ).toStrictEqual([]);
+  });
+
+  it('keeps two aggregates on one column, in order', () => {
+    expect(
+      sanitizeGroupingByColumns({
+        columns,
+        grouping: grouping({
+          aggregates: [
+            { columnKey: 'name', fn: 'count' },
+            { columnKey: 'name', fn: 'max' },
+          ],
+          keys: ['status'],
+        }),
+      }).aggregates,
+    ).toStrictEqual([
+      { columnKey: 'name', fn: 'count' },
+      { columnKey: 'name', fn: 'max' },
+    ]);
+  });
+
+  it('refuses a repeated aggregate pair, as it refuses a repeated key', () => {
+    // The pair is an aggregate's identity, so a repeat gives the staged list two
+    // rows nothing can tell apart (#831).
+    expect(
+      sanitizeGroupingByColumns({
+        columns,
+        grouping: grouping({
+          aggregates: [
+            { columnKey: 'name', fn: 'count' },
+            { columnKey: 'name', fn: 'count' },
+          ],
+          keys: ['status'],
+        }),
       }).keys,
     ).toStrictEqual([]);
   });
@@ -241,9 +294,12 @@ describe('sanitizeGroupingByColumns', () => {
       sanitizeGroupingByColumns({
         columns,
         grouping: grouping({
-          aggregates: { name: 'count' },
+          aggregates: [{ columnKey: 'name', fn: 'count' }],
           keys: ['status'],
-          shares: ['name', 'name'],
+          shares: [
+            { columnKey: 'name', fn: 'count' },
+            { columnKey: 'name', fn: 'count' },
+          ],
         }),
       }).keys,
     ).toStrictEqual([]);

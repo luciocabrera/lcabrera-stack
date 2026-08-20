@@ -7,11 +7,13 @@ import {
 } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
 import { useGetTableLocale } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 import {
+  TABLE_AGGREGATE_LABELS,
   TABLE_GROUP_FILTERED_AGGREGATE_LABEL,
   TABLE_GROUP_NO_AGGREGATE_GLYPH,
   TABLE_GROUP_NO_AGGREGATE_LABEL,
 } from '#ui/components/Table/Table.constants';
 import { renderCellContent } from '#ui/components/Table/TableBodyCell/utils/renderCellContent.util';
+import { toTableAggregateToken } from '#ui/components/Table/utils/tableAggregateToken.util';
 import { accessibility } from '#ui/design-system/tokens/commons.stylex';
 
 import type { TableGroupAggregateProps } from './TableGroupAggregate.types';
@@ -22,7 +24,13 @@ import { resolveAggregateDataType } from './utils/resolveAggregateDataType.util'
 
 /**
  * A group row's cell content in every column but the hierarchy one: the
- * aggregate selected on that column, or a dash saying none was.
+ * aggregates selected on that column, or a dash saying none were.
+ *
+ * **A column may carry several measures at once** (#831), so this renders every
+ * entry the row holds for its column, in the order the read emitted them — which
+ * is the order the configuration lists them in. Each one names its function
+ * where there is more than one, because two bare numbers side by side cannot say
+ * which is the sum and which is the average.
  *
  * **The dash is a rendered character with a spoken equivalent beside it.** A
  * standalone em dash may or may not be announced depending on the reader's
@@ -37,7 +45,9 @@ import { resolveAggregateDataType } from './utils/resolveAggregateDataType.util'
  * rows that survived the filter — correct SQL, and a label that lies by
  * omission unless the cell states it. The indicator is read from the columns
  * store here rather than passed in, so the cell that renders the number is the
- * one that answers for it.
+ * one that answers for it. It is rendered once for the cell rather than once per
+ * measure: the filter belongs to the column, and every measure in the cell is
+ * computed over the same surviving rows.
  *
  * **The value is formatted here, by the same call a data cell makes.** The
  * aggregate arrives raw and this cell resolves its own column from the store,
@@ -54,11 +64,11 @@ export const TableGroupAggregate = ({
   const hasColumnFilter = useGetHasColumnFilter(columnKey);
   const column = useGetNormalizedColumn<Record<string, unknown>>(columnKey);
   const locale = useGetTableLocale();
-  const aggregate = summary.aggregates.find(
+  const aggregates = summary.aggregates.filter(
     (entry) => entry.columnKey === columnKey,
   );
 
-  if (aggregate === undefined) {
+  if (aggregates.length === 0) {
     return (
       <span
         {...stylex.props(tableGroupAggregateStyles.absent)}
@@ -72,21 +82,39 @@ export const TableGroupAggregate = ({
     );
   }
 
+  const isMultiMeasure = aggregates.length > 1;
+
   return (
     <span {...stylex.props(tableGroupAggregateStyles.container)}>
-      <span {...stylex.props(tableGroupAggregateStyles.value)}>
-        {renderCellContent({
-          dataType: resolveAggregateDataType({
-            columnDataType: column?.dataType,
-            fn: aggregate.fn,
-          }),
-          format: column?.format,
-          label: column?.label,
-          locale,
-          value: aggregate.value,
-        })}
-      </span>
-      <TableGroupShare columnKey={columnKey} value={aggregate.value} />
+      {aggregates.map((aggregate) => (
+        <span
+          {...stylex.props(tableGroupAggregateStyles.measure)}
+          key={toTableAggregateToken(aggregate)}
+        >
+          {isMultiMeasure && (
+            <span {...stylex.props(tableGroupAggregateStyles.measureName)}>
+              {TABLE_AGGREGATE_LABELS[aggregate.fn]}
+            </span>
+          )}
+          <span {...stylex.props(tableGroupAggregateStyles.value)}>
+            {renderCellContent({
+              dataType: resolveAggregateDataType({
+                columnDataType: column?.dataType,
+                fn: aggregate.fn,
+              }),
+              format: column?.format,
+              label: column?.label,
+              locale,
+              value: aggregate.value,
+            })}
+          </span>
+          <TableGroupShare
+            columnKey={columnKey}
+            fn={aggregate.fn}
+            value={aggregate.value}
+          />
+        </span>
+      ))}
       {hasColumnFilter && (
         <span
           {...stylex.props(tableGroupAggregateStyles.filterIndicator)}

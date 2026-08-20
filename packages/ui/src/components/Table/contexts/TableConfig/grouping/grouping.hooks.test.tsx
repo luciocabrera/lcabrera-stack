@@ -14,7 +14,7 @@ import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
 import { createMockStore } from '#ui/utils/tests/createMockStore.util';
 
 const NO_GROUPING: TableGroupingState = {
-  aggregates: {},
+  aggregates: [],
   keys: [],
   mode: 'flat',
   periods: {},
@@ -97,10 +97,11 @@ vi.mock(
   () => ({ usePersistTableStateAction: () => persistTableState }),
 );
 
+import { useAddTableColumnAggregate } from './actions/useAddTableColumnAggregate.hook';
 import { useClearTableGrouping } from './actions/useClearTableGrouping.hook';
-import { useSetTableColumnAggregate } from './actions/useSetTableColumnAggregate.hook';
+import { useRemoveTableColumnAggregate } from './actions/useRemoveTableColumnAggregate.hook';
 import { useToggleTableGroupKey } from './actions/useToggleTableGroupKey.hook';
-import { useGetTableColumnAggregate } from './selectors/useGetTableColumnAggregate.hook';
+import { useGetTableGroupingAggregates } from './selectors/useGetTableGroupingAggregates.hook';
 import { useGetTableGroupingKeys } from './selectors/useGetTableGroupingKeys.hook';
 import { useGroupingStore } from './useGroupingStore.hook';
 
@@ -139,16 +140,34 @@ describe('TableConfig grouping hooks', () => {
     ]);
   });
 
-  it('exposes the aggregate applied to one column', () => {
-    storesRef.groupingStore.set({ aggregates: { total_amount: 'sum' } });
+  it('exposes every applied aggregate, in order', () => {
+    const applied = [
+      { columnKey: 'total_amount', fn: 'sum' },
+      { columnKey: 'total_amount', fn: 'avg' },
+    ] as const;
+
+    storesRef.groupingStore.set({ aggregates: applied });
 
     expect(
-      renderHook(() => useGetTableColumnAggregate('total_amount')).result
-        .current,
-    ).toBe('sum');
-    expect(
-      renderHook(() => useGetTableColumnAggregate('quantity')).result.current,
-    ).toBeUndefined();
+      renderHook(() => useGetTableGroupingAggregates()).result.current,
+    ).toStrictEqual(applied);
+  });
+
+  it('hands back the stored array itself, so a re-read is a stable snapshot', () => {
+    // Load-bearing: `useSyncExternalStore` compares with `Object.is`, so a
+    // selector that built a fresh array per read would re-render forever.
+    storesRef.groupingStore.set({
+      aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
+    });
+
+    const { rerender, result } = renderHook(() =>
+      useGetTableGroupingAggregates(),
+    );
+    const first = result.current;
+
+    rerender();
+
+    expect(result.current).toBe(first);
   });
 
   it('writes the grouping param and the store on one interaction', () => {
@@ -219,30 +238,77 @@ describe('TableConfig grouping hooks', () => {
   it('applies and clears a column aggregate', () => {
     storesRef.groupingStore.set({ keys: ['order_status'] });
 
-    const { result } = renderHook(() => useSetTableColumnAggregate());
+    const { result: add } = renderHook(() => useAddTableColumnAggregate());
+    const { result: remove } = renderHook(() =>
+      useRemoveTableColumnAggregate(),
+    );
 
     act(() => {
-      result.current({ columnKey: 'total_amount', fn: 'sum' });
+      add.current({ columnKey: 'total_amount', fn: 'sum' });
     });
 
-    expect(storesRef.groupingStore.get().aggregates).toStrictEqual({
-      total_amount: 'sum',
-    });
+    expect(storesRef.groupingStore.get().aggregates).toStrictEqual([
+      { columnKey: 'total_amount', fn: 'sum' },
+    ]);
     expect(persistTableState).toHaveBeenLastCalledWith({
       searchParamKey: 'grouping',
-      searchParamValue:
-        '{"agg":{"total_amount":"sum"},"keys":["order_status"]}',
+      searchParamValue: '{"agg":["total_amount:sum"],"keys":["order_status"]}',
     });
 
     act(() => {
-      result.current({ columnKey: 'total_amount', fn: undefined });
+      remove.current({ columnKey: 'total_amount' });
     });
 
-    expect(storesRef.groupingStore.get().aggregates).toStrictEqual({});
+    expect(storesRef.groupingStore.get().aggregates).toStrictEqual([]);
     expect(persistTableState).toHaveBeenLastCalledWith({
       searchParamKey: 'grouping',
       searchParamValue: '{"keys":["order_status"]}',
     });
+  });
+
+  it('adds a second aggregate to a column that already carries one', () => {
+    // The live half of #831: the header menu writes immediately, so it has to
+    // append here exactly as the drawer stages.
+    storesRef.groupingStore.set({
+      aggregates: [{ columnKey: 'total_amount', fn: 'avg' }],
+      keys: ['order_status'],
+    });
+
+    const { result } = renderHook(() => useAddTableColumnAggregate());
+
+    act(() => {
+      result.current({ columnKey: 'total_amount', fn: 'min' });
+    });
+
+    expect(storesRef.groupingStore.get().aggregates).toStrictEqual([
+      { columnKey: 'total_amount', fn: 'avg' },
+      { columnKey: 'total_amount', fn: 'min' },
+    ]);
+    expect(persistTableState).toHaveBeenLastCalledWith({
+      searchParamKey: 'grouping',
+      searchParamValue:
+        '{"agg":["total_amount:avg","total_amount:min"],"keys":["order_status"]}',
+    });
+  });
+
+  it('removes one of a column aggregates and leaves the rest', () => {
+    storesRef.groupingStore.set({
+      aggregates: [
+        { columnKey: 'total_amount', fn: 'avg' },
+        { columnKey: 'total_amount', fn: 'min' },
+      ],
+      keys: ['order_status'],
+    });
+
+    const { result } = renderHook(() => useRemoveTableColumnAggregate());
+
+    act(() => {
+      result.current({ columnKey: 'total_amount', fn: 'avg' });
+    });
+
+    expect(storesRef.groupingStore.get().aggregates).toStrictEqual([
+      { columnKey: 'total_amount', fn: 'min' },
+    ]);
   });
 
   it('fires one navigation per interaction, not one per re-render', () => {
@@ -272,14 +338,14 @@ describe('TableConfig grouping hooks', () => {
 
   it('issues no navigation when the requested state is already applied', () => {
     storesRef.groupingStore.set({
-      aggregates: { total_amount: 'sum' },
+      aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
       keys: ['order_status'],
       mode: 'flat',
       periods: {},
       shares: [],
     });
 
-    const { result } = renderHook(() => useSetTableColumnAggregate());
+    const { result } = renderHook(() => useAddTableColumnAggregate());
 
     act(() => {
       result.current({ columnKey: 'total_amount', fn: 'sum' });
@@ -303,7 +369,7 @@ describe('TableConfig grouping hooks', () => {
 
   it('clears every key and every aggregate, and drops the param', () => {
     storesRef.groupingStore.set({
-      aggregates: { total_amount: 'sum' },
+      aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
       keys: ['order_status', 'shipping_country'],
       mode: 'flat',
       periods: {},
@@ -325,7 +391,7 @@ describe('TableConfig grouping hooks', () => {
 
   it('drops the aggregates when the last key is removed', () => {
     storesRef.groupingStore.set({
-      aggregates: { total_amount: 'sum' },
+      aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
       keys: ['order_status'],
       mode: 'flat',
       periods: {},

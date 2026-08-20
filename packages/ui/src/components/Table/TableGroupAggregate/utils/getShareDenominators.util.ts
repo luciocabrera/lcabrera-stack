@@ -1,8 +1,12 @@
 import { isObject } from '@lcabrera/utils/guards/is-object.util';
 
-import type { TableGroupRowSummary } from '#ui/components/Table/Table.types';
+import type {
+  TableColumnAggregate,
+  TableGroupRowSummary,
+} from '#ui/components/Table/Table.types';
 
 import { getTableGroupRowSummary } from '#ui/components/Table/utils/getTableGroupRowSummary.util';
+import { toTableAggregateToken } from '#ui/components/Table/utils/tableAggregateToken.util';
 
 import { resolveShareDenominators } from './resolveShareDenominators.util';
 
@@ -19,7 +23,7 @@ type GetShareDenominatorsArgs = {
    * site is what keeps that true.
    */
   readonly rows: readonly unknown[];
-  readonly shares: readonly string[];
+  readonly shares: readonly TableColumnAggregate[];
 };
 
 /**
@@ -61,7 +65,8 @@ const toSummaries = (rows: readonly unknown[]) => {
 };
 
 /**
- * The grand total each shared column divides by, computed once per data set.
+ * The grand total each shared measure divides by, computed once per data set
+ * and keyed by the measure's `(columnKey, fn)` token (#831).
  *
  * `sharesKey` is compared alongside the array identity because the two change
  * independently: turning a share on leaves the rows exactly as they were, so an
@@ -71,7 +76,9 @@ export const getShareDenominators = ({
   rows,
   shares,
 }: GetShareDenominatorsArgs) => {
-  const sharesKey = shares.join(' ');
+  const sharesKey = shares
+    .map((entry) => toTableAggregateToken(entry))
+    .join(' ');
   const cached = cache.get(rows);
 
   if (cached?.sharesKey === sharesKey) {

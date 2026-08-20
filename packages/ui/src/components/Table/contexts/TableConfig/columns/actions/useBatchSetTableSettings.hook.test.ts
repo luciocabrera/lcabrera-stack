@@ -22,7 +22,7 @@ type Row = {
 };
 
 const NO_GROUPING: TableGroupingState = {
-  aggregates: {},
+  aggregates: [],
   keys: [],
   mode: 'flat',
   periods: {},
@@ -67,7 +67,7 @@ const {
     mockGroupingStore: {
       get: vi.fn(
         (): TableGroupingState => ({
-          aggregates: {},
+          aggregates: [],
           keys: [],
           mode: 'flat',
           periods: {},
@@ -176,7 +176,7 @@ describe('useBatchSetTableSettings', () => {
     mockDataStore.set.mockClear();
     mockGroupingStore.get.mockClear();
     mockGroupingStore.get.mockReturnValue({
-      aggregates: {},
+      aggregates: [],
       keys: [],
       mode: 'flat',
       periods: {},
@@ -385,7 +385,7 @@ describe('useBatchSetTableSettings', () => {
     act(() => {
       result.current({
         grouping: {
-          aggregates: { age: 'sum' },
+          aggregates: [{ columnKey: 'age', fn: 'sum' }],
           keys: ['name'],
           mode: 'flat',
           periods: {},
@@ -415,11 +415,11 @@ describe('useBatchSetTableSettings', () => {
       },
       {
         searchParamKey: 'grouping',
-        searchParamValue: '{"agg":{"age":"sum"},"keys":["name"]}',
+        searchParamValue: '{"agg":["age:sum"],"keys":["name"]}',
       },
     ]);
     expect(mockGroupingStore.set).toHaveBeenCalledWith({
-      aggregates: { age: 'sum' },
+      aggregates: [{ columnKey: 'age', fn: 'sum' }],
       keys: ['name'],
       mode: 'flat',
       periods: {},
@@ -430,7 +430,7 @@ describe('useBatchSetTableSettings', () => {
 
   it('adds no grouping entry when the staged grouping is the applied one', () => {
     mockGroupingStore.get.mockReturnValue({
-      aggregates: {},
+      aggregates: [],
       keys: ['name'],
       mode: 'flat',
       periods: {},
@@ -442,7 +442,7 @@ describe('useBatchSetTableSettings', () => {
     act(() => {
       result.current({
         grouping: {
-          aggregates: {},
+          aggregates: [],
           keys: ['name'],
           mode: 'flat',
           periods: {},
@@ -483,7 +483,7 @@ describe('useBatchSetTableSettings', () => {
     act(() => {
       result.current({
         grouping: {
-          aggregates: {},
+          aggregates: [],
           keys: ['name'],
           mode: 'flat',
           periods: {},

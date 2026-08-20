@@ -4,6 +4,7 @@ import type { TableGroupingState } from '#ui/components/Table/Table.types';
 import { isShareableAggregate } from '#ui/components/Table/contexts/TableConfig/grouping/utils';
 import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
 import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
+import { toTableAggregateToken } from '#ui/components/Table/utils/tableAggregateToken.util';
 
 type SanitizeGroupingByColumnsArgs<TData extends Record<string, unknown>> = {
   readonly columns: readonly TableColumn<TData>[];
@@ -11,7 +12,7 @@ type SanitizeGroupingByColumnsArgs<TData extends Record<string, unknown>> = {
 };
 
 const NO_GROUPING: TableGroupingState = {
-  aggregates: {},
+  aggregates: [],
   keys: [],
   mode: 'flat',
   periods: {},
@@ -47,6 +48,10 @@ const NO_GROUPING: TableGroupingState = {
  * catalogue answer (ADR-058) that no client-side column declaration can supply,
  * and the server's `assertGroupAggregates` is what enforces that half.
  *
+ * What this side *can* see about the aggregate list is that no `(columnKey, fn)`
+ * pair repeats, and it refuses a repeat whole for the reason it refuses a
+ * duplicate key (#831).
+ *
  * A **granularity** splits along the same seam (#786). That it names one of the
  * keys is structural, so it is refused here; that the column is a date at all,
  * and that this granularity clears the cardinality guard, are catalogue answers,
@@ -75,9 +80,16 @@ export const sanitizeGroupingByColumns = <
 
   const isEveryKeyGroupable = keys.every((key) => groupableKeys.has(key));
   const areKeysDistinct = new Set(keys).size === keys.length;
-  const isEveryAggregateColumnDeclared = Object.keys(aggregates).every(
-    (column) => declaredKeys.has(column),
+  const isEveryAggregateColumnDeclared = aggregates.every(({ columnKey }) =>
+    declaredKeys.has(columnKey),
   );
+  const appliedAggregates = new Set(
+    aggregates.map((entry) => toTableAggregateToken(entry)),
+  );
+  // Refused for the reason a duplicate **key** is: the pair is an aggregate's
+  // identity, so a repeated one gives the staged list two rows nothing can tell
+  // apart and a share no way to say which of them it belongs to (#831).
+  const areAggregatesDistinct = appliedAggregates.size === aggregates.length;
   const appliedKeys = new Set(keys);
   const isEveryGranularityOnAKey = Object.keys(periods).every((column) =>
     appliedKeys.has(column),
@@ -85,27 +97,34 @@ export const sanitizeGroupingByColumns = <
   // A share divides a measure by a total the client derives, and only an
   // additive measure has one it can derive correctly — so a share on any other
   // aggregate is not a rounding difference but a wrong number that still sums
-  // to 100% (#648). Refused with the rest rather than dropped, because a link
-  // promising a percentage column that silently does not appear is the failure
-  // ADR-061 refuses whole configurations to avoid.
-  const isEveryShareOnAShareableAggregate = shares.every((column) =>
-    isShareableAggregate(aggregates[column]),
+  // to 100% (#648). It must also name an aggregate this configuration actually
+  // applies, since a share of a measure nobody asked for divides nothing.
+  // Refused with the rest rather than dropped, because a link promising a
+  // percentage that silently does not appear is the failure ADR-061 refuses
+  // whole configurations to avoid.
+  const isEveryShareOnAShareableAggregate = shares.every(
+    (share) =>
+      isShareableAggregate(share.fn) &&
+      appliedAggregates.has(toTableAggregateToken(share)),
   );
-  // Refused for the same reason a duplicate **key** is, and with a consequence
-  // of its own: every reader downstream treats the shares as a set, so a
-  // repeated entry makes `resolveTableGroupingUpdate` compare a length against
-  // a set's size and report a change where there is none — a navigation per
-  // click on a control that changed nothing (#648).
-  const areSharesDistinct = new Set(shares).size === shares.length;
+  // Refused for the same reason a duplicate aggregate is, and with a
+  // consequence of its own: every reader downstream treats the shares as a set,
+  // so a repeated entry makes `resolveTableGroupingUpdate` compare a length
+  // against a set's size and report a change where there is none — a navigation
+  // per click on a control that changed nothing (#648).
+  const areSharesDistinct =
+    new Set(shares.map((entry) => toTableAggregateToken(entry))).size ===
+    shares.length;
 
   return isEveryKeyGroupable &&
     areKeysDistinct &&
     isEveryAggregateColumnDeclared &&
+    areAggregatesDistinct &&
     isEveryGranularityOnAKey &&
     isEveryShareOnAShareableAggregate &&
     areSharesDistinct
     ? {
-        aggregates: { ...aggregates },
+        aggregates: [...aggregates],
         keys: [...keys],
         mode,
         periods: { ...periods },

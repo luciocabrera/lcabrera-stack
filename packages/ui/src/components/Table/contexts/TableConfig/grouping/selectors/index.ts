@@ -1,3 +1,3 @@
-export { useGetTableColumnAggregate } from './useGetTableColumnAggregate.hook';
 export { useGetTableColumnShare } from './useGetTableColumnShare.hook';
+export { useGetTableGroupingAggregates } from './useGetTableGroupingAggregates.hook';
 export { useGetTableGroupingKeys } from './useGetTableGroupingKeys.hook';

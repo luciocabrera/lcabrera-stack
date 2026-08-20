@@ -5,7 +5,7 @@ import type { TableGroupingState } from '#ui/components/Table/Table.types';
 import { setTableGroupKeyPeriod } from './setTableGroupKeyPeriod.util';
 
 const grouping: TableGroupingState = {
-  aggregates: { total_amount: 'sum' },
+  aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
   keys: ['order_date', 'status'],
   mode: 'rollup',
   periods: { order_date: 'month' },

@@ -7,7 +7,7 @@ describe('serializeGroupingToURL', () => {
     expect(
       serializeGroupingToURL({
         grouping: {
-          aggregates: {},
+          aggregates: [],
           keys: ['order_status'],
           mode: 'flat',
           periods: {},
@@ -21,7 +21,7 @@ describe('serializeGroupingToURL', () => {
     expect(
       serializeGroupingToURL({
         grouping: {
-          aggregates: {},
+          aggregates: [],
           keys: ['b', 'a'],
           mode: 'flat',
           periods: {},
@@ -35,14 +35,14 @@ describe('serializeGroupingToURL', () => {
     expect(
       serializeGroupingToURL({
         grouping: {
-          aggregates: { total_amount: 'sum' },
+          aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
           keys: ['order_status'],
           mode: 'flat',
           periods: {},
           shares: [],
         },
       }),
-    ).toBe('{"agg":{"total_amount":"sum"},"keys":["order_status"]}');
+    ).toBe('{"agg":["total_amount:sum"],"keys":["order_status"]}');
   });
 
   it('leaves `agg` out entirely when nothing is selected', () => {
@@ -51,7 +51,7 @@ describe('serializeGroupingToURL', () => {
     expect(
       serializeGroupingToURL({
         grouping: {
-          aggregates: {},
+          aggregates: [],
           keys: ['a'],
           mode: 'flat',
           periods: {},
@@ -65,7 +65,7 @@ describe('serializeGroupingToURL', () => {
     expect(
       serializeGroupingToURL({
         grouping: {
-          aggregates: {},
+          aggregates: [],
           keys: [],
           mode: 'flat',
           periods: {},
@@ -79,7 +79,7 @@ describe('serializeGroupingToURL', () => {
     expect(
       serializeGroupingToURL({
         grouping: {
-          aggregates: { total_amount: 'sum' },
+          aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
           keys: [],
           mode: 'flat',
           periods: {},
@@ -93,7 +93,7 @@ describe('serializeGroupingToURL', () => {
     expect(
       serializeGroupingToURL({
         grouping: {
-          aggregates: {},
+          aggregates: [],
           keys: [],
           mode: 'flat',
           periods: {},
@@ -111,7 +111,7 @@ describe('serializeGroupingToURL', () => {
     expect(
       serializeGroupingToURL({
         grouping: {
-          aggregates: {},
+          aggregates: [],
           keys: [],
           mode: 'flat',
           periods: {},
@@ -126,7 +126,7 @@ describe('serializeGroupingToURL', () => {
     expect(
       serializeGroupingToURL({
         grouping: {
-          aggregates: {},
+          aggregates: [],
           keys: ['order_status'],
           mode: 'flat',
           periods: {},
@@ -145,14 +145,14 @@ describe('serializeGroupingToURL', () => {
     expect(
       serializeGroupingToURL({
         grouping: {
-          aggregates: { revenue: 'sum' },
+          aggregates: [{ columnKey: 'revenue', fn: 'sum' }],
           keys: ['status'],
           mode: 'flat',
           periods: {},
-          shares: ['revenue'],
+          shares: [{ columnKey: 'revenue', fn: 'sum' }],
         },
       }),
-    ).toBe('{"agg":{"revenue":"sum"},"keys":["status"],"share":["revenue"]}');
+    ).toBe('{"agg":["revenue:sum"],"keys":["status"],"share":["revenue:sum"]}');
   });
 
   it('leaves `share` out entirely when nothing is showing one', () => {
@@ -161,7 +161,7 @@ describe('serializeGroupingToURL', () => {
     expect(
       serializeGroupingToURL({
         grouping: {
-          aggregates: {},
+          aggregates: [],
           keys: ['status'],
           mode: 'flat',
           periods: {},

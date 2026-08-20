@@ -12,7 +12,7 @@ import { ICON_SIZE_MD } from '#ui/design-system/constants';
 
 import type { ActiveAggregateListProps } from './ActiveAggregateList.types';
 
-import { useSetColumnAggregate } from '../../TableDrawerContext/actions';
+import { useRemoveColumnAggregate } from '../../TableDrawerContext/actions';
 import { useGetGroupingAggregates } from '../../TableDrawerContext/selectors';
 import { toAggregateItems } from '../utils';
 import { styles } from './ActiveAggregateList.stylex';
@@ -21,17 +21,21 @@ import { ShareOfTotalToggle } from './ShareOfTotalToggle';
 /**
  * The aggregates currently staged, one row each, with a remove control.
  *
- * Not draggable, unlike the group-key list beside it: the key order is the
- * query's nesting order and means something, where the aggregate order means
- * nothing at all — offering a drag handle would imply a choice that has no
- * effect.
+ * One column may appear several times, once per function applied to it (#831),
+ * so each row is keyed by the `(columnKey, fn)` pair rather than by the column —
+ * a column key alone would repeat, and React would reconcile two distinct rows
+ * as one.
+ *
+ * The rows are in staged order, which is state: it is what the `grouping` param
+ * carries and what #832 makes draggable. Not draggable **yet**, so the handle is
+ * absent rather than inert.
  */
 export const ActiveAggregateList = ({
   isBusy = false,
 }: ActiveAggregateListProps) => {
   const columns = useGetColumns();
   const aggregates = useGetGroupingAggregates();
-  const setColumnAggregate = useSetColumnAggregate();
+  const removeColumnAggregate = useRemoveColumnAggregate();
 
   const aggregateItems = toAggregateItems({ aggregates, columns });
 
@@ -45,12 +49,13 @@ export const ActiveAggregateList = ({
         </InfoBox>
       ) : (
         <div {...stylex.props(styles.aggregateList)}>
-          {aggregateItems.map(({ columnKey, label }) => (
-            <div key={columnKey} {...stylex.props(styles.aggregateItem)}>
+          {aggregateItems.map(({ columnKey, fn, id, label }) => (
+            <div key={id} {...stylex.props(styles.aggregateItem)}>
               <span {...stylex.props(styles.aggregateItemLabel)}>{label}</span>
               <div {...stylex.props(styles.aggregateItemControls)}>
                 <ShareOfTotalToggle
                   columnKey={columnKey}
+                  fn={fn}
                   isBusy={isBusy}
                   label={label}
                 />
@@ -59,7 +64,7 @@ export const ActiveAggregateList = ({
                   icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
                   isBusy={isBusy}
                   onClick={() => {
-                    setColumnAggregate({ columnKey, fn: undefined });
+                    removeColumnAggregate({ columnKey, fn });
                   }}
                   size='mini'
                   tooltipContent={`Remove ${label}`}

@@ -1,13 +1,13 @@
 import { isOlapGroupPeriod } from '@lcabrera/api/olap/is-olap-group-period.util';
 import { isObject } from '@lcabrera/utils/guards/is-object.util';
 
-import type {
-  TableAggregateFn,
-  TableGroupPeriod,
-} from '#ui/components/Table/Table.types';
+import type { TableGroupPeriod } from '#ui/components/Table/Table.types';
 
-import { isTableAggregateFn } from '#ui/components/Table/utils/isTableAggregateFn.util';
 import { isTableGroupingMode } from '#ui/components/Table/utils/isTableGroupingMode.util';
+import {
+  parseTableAggregateTokens,
+  toTableAggregateToken,
+} from '#ui/components/Table/utils/tableAggregateToken.util';
 
 import type { CompactGrouping } from './urlState.types';
 
@@ -42,20 +42,24 @@ const narrowKeys = (value: unknown) => {
   return keys.every(isString) ? [...keys] : undefined;
 };
 
-const narrowAggregates = (value: unknown) => {
-  if (!isObject(value) || Array.isArray(value)) {
-    return;
-  }
+/**
+ * An ordered aggregate list, or `undefined` when it is unreadable.
+ *
+ * Each element is a `"<columnKey>:<fn>"` token, **split on the last `:`** and
+ * checked against the closed function vocabulary — see
+ * `parseTableAggregateToken` for why splitting from the right is what makes a
+ * consumer's column key containing a `:` round-trip. A token whose suffix names
+ * no legal function refuses the **whole** payload rather than being dropped,
+ * like every other malformed member (ADR-061): a link promising two measures
+ * that opened showing one would be worse than a flat table.
+ *
+ * Serves `agg` and `share` alike, because a share names an aggregate rather
+ * than a column (#831) and the two therefore carry the same element.
+ */
+const narrowAggregateTokens = (value: unknown) => {
+  const tokens = narrowKeys(value);
 
-  const entries = Object.entries(value);
-
-  if (entries.some(([, fn]) => !isTableAggregateFn(fn))) {
-    return;
-  }
-
-  return Object.fromEntries(entries) as Readonly<
-    Record<string, TableAggregateFn>
-  >;
+  return tokens === undefined ? undefined : parseTableAggregateTokens(tokens);
 };
 
 /**
@@ -97,37 +101,6 @@ const narrowGranularities = ({
 };
 
 /**
- * Accepts `{"keys":["order_status"]}` and, optionally beside it,
- * `{"agg":{"total_amount":"sum"}}` — a **column-to-function** map, at most one
- * aggregate per column — and `{"mode":"rollup"}`. Nothing else: a fourth
- * member, a missing `keys`, a misspelling, one non-string key, an aggregate
- * token outside `TableAggregateFn`, or a mode outside `TableGroupingMode`
- * refuses the **whole** payload.
- *
- * Refusing whole is the point (ADR-061): grouping changes the SQL a route
- * emits, so a partly-accepted configuration would run a query nobody asked for
- * while the URL still reads as the one that was shared. Group keys are ordered
- * and the order is the query's nesting order, so dropping one silently answers
- * a different question from the one the URL describes. A flat table is the
- * honest answer to a param that cannot be read.
- *
- * **A filtered aggregate cannot be expressed here, deliberately** (#569). A
- * per-aggregate filter or alias needs a slot this map has none of, so deferring
- * filtered aggregates is not an unimplemented option: the transport every piece
- * of grouping configuration must round-trip through cannot carry one, and no
- * interaction can produce what it cannot serialize.
- * `@lcabrera/server`'s `GroupAggregate` still has the slot, so a consumer
- * calling its grouped read directly can build one — what is closed is every
- * path through this package, not the capability itself. Lifting the deferral
- * starts here, by giving this param somewhere to put a filter.
- *
- * The member check is what makes `__proto__` a non-issue without special
- * handling: `JSON.parse` gives it as an own property, so a payload carrying one
- * has a member outside the set and is refused. The accepted shape is rebuilt as
- * an object literal with fixed keys, and the aggregate map with
- * `Object.fromEntries` — neither reaches a prototype setter.
- */
-/**
  * One optional member's outcome. `refused` is not `absent`: a member that is
  * present and unreadable rejects the **whole** payload, and collapsing the two
  * is how a partly-accepted configuration would get through (ADR-061).
@@ -165,6 +138,39 @@ const readOptionalMember = <TValue>({
 const narrowMode = (value: unknown) =>
   isTableGroupingMode(value) ? value : undefined;
 
+/**
+ * Accepts `{"keys":["order_status"]}` and, optionally beside it,
+ * `{"agg":["total_amount:sum","total_amount:avg"]}` — an **ordered array of
+ * `"<columnKey>:<fn>"` tokens**, any number of them per column — plus
+ * `{"gran":…}`, `{"mode":"rollup"}` and `{"share":[…]}` in the same token form.
+ * Nothing else: a sixth member, a missing `keys`, a misspelling, one non-string
+ * element, an aggregate token whose suffix is outside `TableAggregateFn`, or a
+ * mode outside `TableGroupingMode` refuses the **whole** payload.
+ *
+ * Refusing whole is the point (ADR-061): grouping changes the SQL a route
+ * emits, so a partly-accepted configuration would run a query nobody asked for
+ * while the URL still reads as the one that was shared. Group keys are ordered
+ * and the order is the query's nesting order, so dropping one silently answers
+ * a different question from the one the URL describes. A flat table is the
+ * honest answer to a param that cannot be read.
+ *
+ * **A filtered aggregate cannot be expressed here, deliberately** (#569). A
+ * per-aggregate filter or alias needs a slot a two-part token has none of, so
+ * deferring filtered aggregates is not an unimplemented option: the transport
+ * every piece of grouping configuration must round-trip through cannot carry
+ * one, and no interaction can produce what it cannot serialize.
+ * `@lcabrera/server`'s `GroupAggregate` still has the slot, so a consumer
+ * calling its grouped read directly can build one — what is closed is every
+ * path through this package, not the capability itself. Lifting the deferral
+ * starts here, by giving this param somewhere to put a filter.
+ *
+ * The member check is what makes `__proto__` a non-issue without special
+ * handling: `JSON.parse` gives it as an own property, so a payload carrying one
+ * has a member outside the set and is refused. The accepted shape is rebuilt as
+ * an object literal with fixed keys, the granularity map with
+ * `Object.fromEntries`, and the aggregate lists as arrays — none of them reaches
+ * a prototype setter.
+ */
 const narrowCompactGrouping = (parsed: unknown) => {
   if (!isObject(parsed) || Array.isArray(parsed)) {
     return;
@@ -186,7 +192,7 @@ const narrowCompactGrouping = (parsed: unknown) => {
 
   const agg = readOptionalMember({
     member: 'agg',
-    narrow: narrowAggregates,
+    narrow: narrowAggregateTokens,
     parsed,
   });
   const gran = readOptionalMember({
@@ -204,11 +210,13 @@ const narrowCompactGrouping = (parsed: unknown) => {
     parsed,
   });
   // Refused rather than filtered for the same reason as the rest: a share names
-  // a column, and one this envelope cannot read is a percentage the link
-  // promised and the table would not show.
+  // an aggregate, and one this envelope cannot read is a percentage the link
+  // promised and the table would not show. It takes `agg`'s narrower because it
+  // takes `agg`'s element — a column carrying both `sum` and `count` needs the
+  // function to say which measure's share is meant (#831).
   const share = readOptionalMember({
     member: 'share',
-    narrow: narrowKeys,
+    narrow: narrowAggregateTokens,
     parsed,
   });
 
@@ -234,10 +242,17 @@ const narrowCompactGrouping = (parsed: unknown) => {
 export const groupingCodec = createUrlStateCodec<CompactGrouping>({
   // An empty `agg` is dropped rather than emitted, so a table with no aggregate
   // selected produces the same param it produced before aggregates existed —
-  // `"agg":{}` in a shared link would say "aggregates considered and cleared",
+  // `"agg":[]` in a shared link would say "aggregates considered and cleared",
   // which is not a state this table has.
+  //
+  // The token form is written **here and nowhere else**, so the string shape and
+  // the right-split that reads it back stay one decision (`narrowAggregateTokens`
+  // above). No component ever builds or parses one.
   compact: ({ agg, gran, keys, mode, share }) => ({
-    ...(agg !== undefined && Object.keys(agg).length > 0 && { agg }),
+    ...(agg !== undefined &&
+      agg.length > 0 && {
+        agg: agg.map((entry) => toTableAggregateToken(entry)),
+      }),
     // Dropped when empty, like `agg`: an untruncated grouping produces the
     // param it produced before granularities existed.
     ...(gran !== undefined && Object.keys(gran).length > 0 && { gran }),
@@ -248,7 +263,10 @@ export const groupingCodec = createUrlStateCodec<CompactGrouping>({
     ...(mode !== undefined && mode !== 'flat' && { mode }),
     // Dropped when empty, like `agg` and `gran`: a table with no share showing
     // produces the param it produced before shares existed.
-    ...(share !== undefined && share.length > 0 && { share }),
+    ...(share !== undefined &&
+      share.length > 0 && {
+        share: share.map((entry) => toTableAggregateToken(entry)),
+      }),
   }),
   fallback: NO_GROUPING,
   label: 'grouping',

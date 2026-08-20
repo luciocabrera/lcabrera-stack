@@ -5,7 +5,7 @@ import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
 import { getInitialGroupingState } from './getInitialGroupingState.util';
 
 const NO_GROUPING = {
-  aggregates: {},
+  aggregates: [],
   keys: [],
   mode: 'flat',
   periods: {},
@@ -35,7 +35,7 @@ describe('getInitialGroupingState', () => {
     expect(
       getInitialGroupingState({ groupingKeys: ['order_status'] }),
     ).toStrictEqual({
-      aggregates: {},
+      aggregates: [],
       keys: ['order_status'],
       mode: 'flat',
       periods: {},
@@ -46,11 +46,11 @@ describe('getInitialGroupingState', () => {
   it('seeds the aggregates the loader applied', () => {
     expect(
       getInitialGroupingState({
-        groupingAggregates: { total_amount: 'sum' },
+        groupingAggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
         groupingKeys: ['order_status'],
       }),
     ).toStrictEqual({
-      aggregates: { total_amount: 'sum' },
+      aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
       keys: ['order_status'],
       mode: 'flat',
       periods: {},
@@ -60,7 +60,7 @@ describe('getInitialGroupingState', () => {
 
   it('defaults to no grouping when the loader supplied none', () => {
     expect(getInitialGroupingState({})).toStrictEqual({
-      aggregates: {},
+      aggregates: [],
       keys: [],
       mode: 'flat',
       periods: {},
@@ -69,7 +69,9 @@ describe('getInitialGroupingState', () => {
   });
 
   it('copies the loader state rather than aliasing it', () => {
-    const groupingAggregates = { total_amount: 'sum' } as const;
+    const groupingAggregates = [
+      { columnKey: 'total_amount', fn: 'sum' },
+    ] as const;
     const groupingKeys = ['order_status'];
     const state = getInitialGroupingState({ groupingAggregates, groupingKeys });
 
@@ -111,7 +113,7 @@ describe('getInitialGroupingState', () => {
       // next grouping the user applies.
       expect(
         getInitialGroupingState({
-          groupingAggregates: { total_amount: 'sum' },
+          groupingAggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
           groupingKeys: keysOfLength(MAX_TABLE_GROUP_KEYS + 1),
         }),
       ).toStrictEqual(NO_GROUPING);
@@ -120,7 +122,7 @@ describe('getInitialGroupingState', () => {
     it('drops an aggregate the loader supplied with no key at all', () => {
       expect(
         getInitialGroupingState({
-          groupingAggregates: { total_amount: 'sum' },
+          groupingAggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
           groupingKeys: [],
         }),
       ).toStrictEqual(NO_GROUPING);
@@ -152,7 +154,7 @@ describe('getInitialGroupingState', () => {
     it('drops the aggregates with the refused keys', () => {
       expect(
         getInitialGroupingState({
-          groupingAggregates: { total_amount: 'sum' },
+          groupingAggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
           groupingKeys: ['order_status', 'order_status'],
         }),
       ).toStrictEqual(NO_GROUPING);
