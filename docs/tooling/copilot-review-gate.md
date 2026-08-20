@@ -311,6 +311,32 @@ That prints one entry of that file. They are frozen bodies and cannot notice a
 format change on their own; what notices is the declared-count check, running
 against real bodies every time this gate does.
 
+### The Claude reviewer has the same two tiers, and it is deliberate
+
+Since #857 that reviewer files each finding as an **inline comment**, so it opens a
+thread and conversation resolution holds the merge on it — the thing that was true of
+Copilot and not of this leg. Before that its whole review was body prose, which held
+nothing: #833 carried an unanswered review of `fa0c852a` and still reported
+`mergeStateStatus: CLEAN`.
+
+But a finding is only posted inline if its line is one **the diff added**, checked
+against GitHub's per-file patch list by `scripts/lib/review-inline-comments.mjs`. One
+that misses is rendered into the body under _Findings that could not be anchored to
+the diff_, with the reason — and, exactly like a suppressed comment, it **does not
+block**.
+
+**That reproduces the hazard this section is about, and it is the lesser of two.**
+The reviews API rejects a comment whose line is not in the diff by rejecting the
+whole review, not the comment. Submitting unvalidated anchors would mean one bad line
+costs every finding beside it, and `claude-review.yml`'s "a run that reviews nothing
+must fail" guard would then turn a correct review into a red check. So the choice is
+between a finding that does not block and a review that does not arrive.
+
+The tell is different from Copilot's, and better: an unanchored finding says on its
+face why it could not be placed, where a suppressed comment gives no reason and hides
+inside a collapsed block. `#750`'s failure mode — real defects riding along unseen —
+is narrower here but not gone. **Read that section of the body.**
+
 ## What recomputes it
 
 `opened`, `reopened`, `synchronize`, `ready_for_review`, `converted_to_draft`,

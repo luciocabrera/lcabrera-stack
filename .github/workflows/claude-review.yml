@@ -121,11 +121,26 @@ jobs:
             tool that could. The step after this one submits what you wrote, against the head
             this run was triggered for.
 
-            The body is a short paragraph saying what the change does, then the findings — each
-            naming a file and line, most important first. WRITE THE FILE EVEN IF YOU FOUND
-            NOTHING, and say so in those words: "no findings" and "never ran" have to be
-            distinguishable by anyone reading the pull request, and an empty file is read here
-            as the second one.
+            The body is a short paragraph saying what the change does, then anything that did
+            not fit a finding below. WRITE THE FILE EVEN IF YOU FOUND NOTHING, and say so in
+            those words: "no findings" and "never ran" have to be distinguishable by anyone
+            reading the pull request, and an empty file is read here as the second one.
+
+            Also write `claude-review-findings.json` — a JSON array, one entry per finding,
+            most important first:
+
+                [{ "path": "src/thing.ts", "line": 42, "body": "What is wrong and why." }]
+
+            Write `[]` when you found nothing. Each of these becomes an inline comment that
+            opens a review thread, and an unresolved thread BLOCKS THE MERGE until a person
+            resolves it — so a finding here is a claim that this line should not merge as
+            written. Anything weaker than that belongs in the body instead.
+
+            `line` must be a line THIS DIFF ADDED, on the right-hand side, as numbered in the
+            file after the change. The step after this one checks every anchor against the
+            diff and moves the ones that miss into the body, so a wrong line costs the
+            finding its thread rather than costing the review — but it still costs it, so
+            take the number from the diff rather than estimating it.
           # Read-only, and that is the point: nothing here can write to GitHub. `Bash(gh
           # api:*)` was the first shape and it is a write-capable wildcard — a command-prefix
           # match against a token carrying `pull-requests: write`, so it reached every endpoint
@@ -175,11 +190,25 @@ jobs:
             exit 0
           fi
 
-          # Built with jq rather than interpolated: the body is model-written prose that may
-          # carry quotes, backticks and newlines, and --rawfile is the only form here where
-          # none of that has to survive a shell.
-          jq -n --arg commit "$HEAD_SHA" --rawfile body claude-review-body.md \
-            '{commit_id: $commit, event: "COMMENT", body: $body}' > review-payload.json
+          # The diff, as GitHub's per-file patch list rather than `git diff`, because that is
+          # what `agent-review-diff.mjs` indexes — the same anchoring the verdict contract's
+          # §2.4 step 5 uses. `--paginate` emits one array per page, which is not valid JSON
+          # on its own, so the elements are streamed and re-slurped into a single array.
+          gh api "repos/$REPOSITORY/pulls/$PR_NUMBER/files" --paginate --jq '.[]' \
+            | jq -s '.' > pull-request-files.json
+
+          # Anchors are validated here rather than at the API. The reviews endpoint rejects a
+          # comment whose line is not in the diff by rejecting the WHOLE review, so one bad
+          # line would lose every finding submitted with it — and the guard above would then
+          # report a red check on a pull request that was reviewed correctly. Findings that
+          # miss are moved into the body instead of being dropped.
+          node scripts/build-review-payload.mjs \
+            --body claude-review-body.md \
+            --findings claude-review-findings.json \
+            --files pull-request-files.json \
+            --commit "$HEAD_SHA" \
+            --out review-payload.json
+
           gh api "repos/$REPOSITORY/pulls/$PR_NUMBER/reviews" --input review-payload.json \
             --jq '"submitted review \(.id) against \(.commit_id)"'
           echo "posted=true" >> "$GITHUB_OUTPUT"
