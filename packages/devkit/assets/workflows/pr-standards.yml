@@ -46,7 +46,8 @@ jobs:
           node-version-file: .node-version
 
       - name: Install dependencies
-        run: '{{commands.install}}'
+        run: |
+          {{commands.install}}
 
       - name: The gate runtime is installed
         # Checked once, by name, so a repository that has not installed it fails

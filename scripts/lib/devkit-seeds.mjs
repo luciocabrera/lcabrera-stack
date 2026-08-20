@@ -148,6 +148,39 @@ const countOf = (line, pattern) => (line.match(pattern) ?? []).length;
  * names nothing. Quoting the scalar is the fix; this is what says when one has
  * lost its quotes again.
  */
+/** A step whose command sits on the `run:` line rather than in a block below it. */
+const INLINE_RUN = /^[ \t]*run:[ \t]*\S/;
+
+const YAML_SUFFIXES = ['.yml', '.yaml'];
+
+/**
+ * A placeholder sharing its line with `run:` in a YAML seed.
+ *
+ * Substitution is a plain `replaceAll` with no escaping, so whatever the
+ * consumer configured lands verbatim. On a `run:` line that value is inside a
+ * YAML scalar, and a command containing a quote — `pnpm --filter '!./e2e' check`
+ * is an ordinary thing to configure — ends the scalar early and makes the file
+ * unparseable. GitHub then refuses the whole workflow and EVERY job in it stops
+ * running, while `sync` reports the file materialised and `doctor` reports no
+ * drift: a gate that cannot run and never says so.
+ *
+ * A block scalar (`run: |` with the placeholder on the next line) is immune to
+ * quoting, and to the formatter rewrite `brokenPlaceholdersIn` catches. So the
+ * rule is simply that the two never share a line.
+ */
+export const inlinePlaceholdersIn = ({ content, path }) => {
+  if (!YAML_SUFFIXES.some((suffix) => path.endsWith(suffix))) return [];
+
+  return content
+    .split('\n')
+    .map((line, index) => ({ line, number: index + 1 }))
+    .filter(
+      (entry) =>
+        INLINE_RUN.test(entry.line) && entry.line.includes('{{commands.'),
+    )
+    .map((entry) => ({ line: entry.number, path }));
+};
+
 export const brokenPlaceholdersIn = ({ content, path }) =>
   content
     .split('\n')

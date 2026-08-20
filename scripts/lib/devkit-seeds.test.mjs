@@ -26,6 +26,7 @@ import {
   EXEMPTIONS,
   findingsIn,
   forbiddenWords,
+  inlinePlaceholdersIn,
   repositoryIdentity,
   reportFor,
 } from './devkit-seeds.mjs';
@@ -137,6 +138,39 @@ describe('brokenPlaceholdersIn', () => {
 
   it('says nothing about a line that names no command key', () => {
     expect(at('run: npm ci')).toEqual([]);
+  });
+});
+
+describe('inlinePlaceholdersIn', () => {
+  const at = (line, path = 'workflows/check.yml') =>
+    inlinePlaceholdersIn({ content: line, path });
+
+  it('reports a placeholder sharing its line with run:', () => {
+    // Substitution does not escape, so on a `run:` line the consumer's value
+    // lands inside a YAML scalar. A command with a quote in it — an ordinary
+    // thing to configure — ends the scalar early, GitHub refuses the whole
+    // workflow, and every job in it stops running while `sync` and `doctor` both
+    // report the file as fine.
+    expect(at("        run: '{{commands.install}}'")).toEqual([
+      { line: 1, path: 'workflows/check.yml' },
+    ]);
+    expect(at('        run: {{commands.install}}')).toEqual([
+      { line: 1, path: 'workflows/check.yml' },
+    ]);
+  });
+
+  it('accepts a block scalar, which no quoting can break', () => {
+    expect(at('        run: |\n          {{commands.install}}')).toEqual([]);
+  });
+
+  it('says nothing about a run: line with no placeholder', () => {
+    expect(at("        run: '$GATES/repo-verify-pr'")).toEqual([]);
+  });
+
+  it('leaves a non-YAML seed alone', () => {
+    // The hook seeds are shell, where a placeholder on its own line is exactly
+    // right and there is no scalar to break.
+    expect(at('{{commands.check}}', 'hooks/pre-push')).toEqual([]);
   });
 });
 

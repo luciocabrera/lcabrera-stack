@@ -25,6 +25,7 @@ import {
   EXEMPTIONS,
   findingsIn,
   forbiddenWords,
+  inlinePlaceholdersIn,
   repositoryIdentity,
   reportFor,
 } from './lib/devkit-seeds.mjs';
@@ -141,9 +142,10 @@ const main = () => {
     ),
   });
 
-  const broken = seeds.flatMap((seed) =>
-    brokenPlaceholdersIn({ content: seed.content, path: seed.path }),
-  );
+  const broken = seeds.flatMap((seed) => [
+    ...brokenPlaceholdersIn({ content: seed.content, path: seed.path }),
+    ...inlinePlaceholdersIn({ content: seed.content, path: seed.path }),
+  ]);
 
   for (const finding of reported) {
     console.error(
@@ -157,7 +159,7 @@ const main = () => {
   }
   for (const finding of broken) {
     console.error(
-      `  ${finding.path}:${finding.line}  names a command key the substituter cannot read — quote the scalar so the formatter leaves it alone`,
+      `  ${finding.path}:${finding.line}  a placeholder here does not survive to the consumer — put the command in a block scalar (\`run: |\`) on its own line`,
     );
   }
 

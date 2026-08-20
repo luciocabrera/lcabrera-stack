@@ -59,7 +59,8 @@ jobs:
           node-version-file: .node-version
 
       - name: Install dependencies
-        run: '{{commands.install}}'
+        run: |
+          {{commands.install}}
 
       - name: The gate runtime is installed
         run: |
@@ -69,7 +70,8 @@ jobs:
           fi
 
       - name: Format, lint and type-check
-        run: '{{commands.check}}'
+        run: |
+          {{commands.check}}
 
       - name: Coordination register is consistent
         # Fails only on register integrity — a malformed task file, which the
@@ -99,7 +101,9 @@ jobs:
           node-version-file: .node-version
 
       - name: Install dependencies
-        run: '{{commands.install}}'
+        run: |
+          {{commands.install}}
 
       - name: Run the test suite
-        run: '{{commands.test}}'
+        run: |
+          {{commands.test}}
