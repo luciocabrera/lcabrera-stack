@@ -10,6 +10,13 @@ import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import {
+  ACCEPTED_FILE,
+  acceptDecision,
+  parseAcceptArgs,
+  serialiseAccepted,
+  withAccepted,
+} from './accepted.mjs';
+import {
   buildPlan,
   countsFor,
   nextManifestFor,
@@ -50,11 +57,49 @@ export const runSync = (argv, root) => {
   return 0;
 };
 
+/**
+ * Records exactly one acknowledgement. The decision is taken in `accepted.mjs`
+ * against the plan `doctor` prints, so the refusals are a pure function of that
+ * plan and this shell only writes the file.
+ */
+const runAccept = ({ accept, accepted, entries, root }) => {
+  const decision = acceptDecision({
+    entries,
+    path: accept.path,
+    reason: accept.reason,
+  });
+  if (decision.error !== undefined) {
+    console.error(decision.error);
+    return 1;
+  }
+
+  writeFileSync(
+    join(root, ACCEPTED_FILE),
+    serialiseAccepted(
+      withAccepted(accepted, {
+        hash: decision.hash,
+        path: accept.path,
+        reason: decision.reason,
+      }),
+    ),
+  );
+  console.log(
+    `Acknowledged ${accept.path} — ${decision.reason}\nEdit it again and it is reported again; ${ACCEPTED_FILE} is a tracked record, so commit it.`,
+  );
+  return 0;
+};
+
 export const runDoctor = (argv, root) => {
-  const { entries } = buildPlan({ root });
+  const { accepted, entries } = buildPlan({ root });
+
+  const accept = parseAcceptArgs(argv);
+  if (accept !== undefined) {
+    return runAccept({ accept, accepted, entries, root });
+  }
+
   const { reported, written } = countsFor(entries);
 
-  console.log(renderPlan(entries));
+  console.log(renderPlan(entries, { verbose: argv.includes('--verbose') }));
 
   const drifted = written + reported;
   if (drifted === 0 || !argv.includes('--check')) return 0;

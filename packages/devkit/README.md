@@ -18,15 +18,16 @@ The record is what makes it distribution rather than copy-paste. Every
 materialised file is hashed into `.devkit-manifest.json`, and each subsequent
 run classifies it:
 
-| State                | What happens                                                               |
-| -------------------- | -------------------------------------------------------------------------- |
-| `added` / `restored` | written — the consumer does not have it                                    |
-| `updated`            | written — untouched locally, and the package has moved on                  |
-| `current`            | nothing written; adopted into the record                                   |
-| `modified`           | **left alone** — edited locally, and reported on every run                 |
-| `conflict`           | **left alone** — an unmanaged file already occupies that path              |
-| `unresolved`         | **refused** — a `{{commands.*}}` placeholder has no answer                 |
-| `unmet`              | **refused** — a `requires:` key is unset, or a `peer:` range is unanswered |
+| State                | What happens                                                                 |
+| -------------------- | ---------------------------------------------------------------------------- |
+| `added` / `restored` | written — the consumer does not have it                                      |
+| `updated`            | written — untouched locally, and the package has moved on                    |
+| `current`            | nothing written; adopted into the record                                     |
+| `modified`           | **left alone** — edited locally, and reported on every run                   |
+| `acknowledged`       | **left alone** — an edit you said you meant; reported only under `--verbose` |
+| `conflict`           | **left alone** — an unmanaged file already occupies that path                |
+| `unresolved`         | **refused** — a `{{commands.*}}` placeholder has no answer                   |
+| `unmet`              | **refused** — a `requires:` key is unset, or a `peer:` range is unanswered   |
 
 A local edit is a supported state, not a defect. It survives every sync, which
 is what stops a consumer forking the kit to change one line.
@@ -63,13 +64,49 @@ produces confident nonsense.
 ## Commands
 
 ```bash
-devkit sync [--profile <name>]   # materialise into the current repository
-devkit doctor [--check]          # report divergence; --check makes it fail
-devkit closure <dir> [<dir>...]  # what does this directory need that it lacks
+devkit sync [--profile <name>]        # materialise into the current repository
+devkit doctor [--check] [--verbose]   # report divergence; --check makes it fail
+devkit doctor --accept <path> --reason "<why>"   # this edit is deliberate
+devkit closure <dir> [<dir>...]       # what does this directory need that it lacks
 ```
 
 In this repository they are also `vp run devkit:sync`, `vp run devkit:doctor`
 and `vp run devkit:closure`.
+
+## Acknowledging a deliberate edit
+
+A locally modified file is reported on every run, for ever. That is the right
+default — never overwriting your edit is the whole point of the record — but it
+makes a permanent customisation indistinguishable from a stale accident, and it
+leaves `doctor --check` red in CI for a repository that meant every line of it.
+
+```bash
+devkit doctor --accept .claude/rules/routes-data.md \
+  --reason "our loaders are tRPC, not React Router"
+```
+
+That records the edit in **`.devkit-accepted.json`**, which is a tracked file:
+commit it, the same way you commit the manifest. Afterwards the default report
+omits that file and `--check` passes; `devkit doctor --verbose` still lists it
+with the reason you gave.
+
+`--accept` takes **one file at a time**, refuses a path the report does not
+currently call `modified`, and refuses a missing or blank `--reason`. An
+acknowledgement nobody had to justify is the one that rots into a line nobody
+dares delete.
+
+The entry is keyed to the file's **on-disk hash**, not just its path, and that is
+what makes it safe: edit the file again and the hash no longer matches, so it is
+reported as locally modified again — no command to run, and no way to forget.
+Reverting back to the acknowledged content quiets it again. To withdraw an
+acknowledgement, delete its entry from `.devkit-accepted.json`.
+
+An acknowledged file is never written and never recorded. Recording the edited
+content's hash would make the next run compare the package against your edit
+rather than against the copy `sync` last wrote, so `updated` and `current` would
+swap places for that file. One consequence follows from that and is worth
+knowing: an acknowledgement quiets the file **even when the package's own copy
+moves on**. `--verbose` is how you find what is being held back.
 
 ## Configuration
 

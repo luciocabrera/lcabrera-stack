@@ -10,11 +10,14 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
+import { acceptedEntry, isAccepted } from './accepted.mjs';
 import { groupsFor, hasConfigKey, targetPathFor } from './config.mjs';
 import { requiredConfigKeys, requiredPeers } from './frontmatter.mjs';
 import { unmetPeers } from './peer.mjs';
 import { substituteCommands } from './placeholders.mjs';
 import {
+  ACKNOWLEDGEABLE_STATE,
+  ACKNOWLEDGED_STATE,
   classifyMaterialisation,
   hashContent,
   isWritten,
@@ -75,6 +78,14 @@ export const planSync = ({
       const targetPath = targetPathFor({ assetPath: asset.path, config });
       if (targetPath === undefined) return undefined;
 
+      // Carried on the entry rather than consumed and dropped. Acknowledging an
+      // edit is keyed to what is actually on disk, so a further edit invalidates
+      // it on its own; a plan that discarded this hash could only offer a
+      // path-keyed acknowledgement, which never expires. Every entry carries it,
+      // including a refused one, so nothing downstream has to know which states
+      // happen to have a hash.
+      const onDisk = onDiskHash(targetPath);
+
       const unmet = unmetDeclaration({
         config,
         content: asset.content,
@@ -86,6 +97,7 @@ export const planSync = ({
           content: asset.content,
           incomingHash: hashContent(asset.content),
           missing: unmet.missing,
+          onDiskHash: onDisk,
           path: targetPath,
           state: 'unmet',
           unmetKind: unmet.unmetKind,
@@ -105,6 +117,7 @@ export const planSync = ({
           content,
           incomingHash,
           missing,
+          onDiskHash: onDisk,
           path: targetPath,
           state: 'unresolved',
         };
@@ -114,16 +127,45 @@ export const planSync = ({
         content,
         incomingHash,
         missing,
+        onDiskHash: onDisk,
         path: targetPath,
         state: classifyMaterialisation({
           incomingHash,
-          onDiskHash: onDiskHash(targetPath),
+          onDiskHash: onDisk,
           recordedHash: manifest.files[targetPath],
         }),
       };
     })
     .filter((entry) => entry !== undefined);
 };
+
+/**
+ * The plan with each acknowledged edit relabelled, layered OVER the
+ * classification rather than folded into it — the same separation `manifestAfter`
+ * already keeps from `planSync`. `classifyMaterialisation` stays a function of
+ * three hashes, so the acceptance record can never change what `modified` means
+ * and a consumer with no record gets exactly the plan they got before.
+ *
+ * Only `modified` is relabelled. A `conflict` is an unmanaged file the consumer
+ * wrote themselves; quieting that would be adopting it, which is a different
+ * decision and the one mistake a materialiser cannot undo.
+ *
+ * Both commands read the plan through this, because `sync` and `doctor` must not
+ * disagree about which files are quiet. It costs `sync` nothing: `acknowledged`
+ * is in neither the written nor the recorded set, exactly as `modified` was.
+ */
+export const withAcceptance = ({ accepted, entries }) =>
+  entries.map((entry) => {
+    if (entry.state !== ACKNOWLEDGEABLE_STATE) return entry;
+    if (!isAccepted({ accepted, hash: entry.onDiskHash, path: entry.path })) {
+      return entry;
+    }
+    return {
+      ...entry,
+      reason: acceptedEntry({ accepted, path: entry.path }).reason,
+      state: ACKNOWLEDGED_STATE,
+    };
+  });
 
 export const applySync = ({ entries, root }) => {
   for (const entry of entries.filter((candidate) =>

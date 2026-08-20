@@ -8,16 +8,23 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { ACCEPTED_FILE, parseAccepted } from './accepted.mjs';
 import { CONFIG_FILE_NAME, resolveConfig } from './config.mjs';
 import { readFilesUnder } from './files.mjs';
 import {
   MANIFEST_FILE,
+  isAcknowledged,
   isReported,
   isWritten,
   parseManifest,
 } from './manifest.mjs';
 import { declaredPeerNames, installedPeerVersion } from './peer.mjs';
-import { manifestAfter, onDiskHasher, planSync } from './sync.mjs';
+import {
+  manifestAfter,
+  onDiskHasher,
+  planSync,
+  withAcceptance,
+} from './sync.mjs';
 
 const packageRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 
@@ -69,14 +76,21 @@ export const buildPlan = ({ profile, root }) => {
     packageVersion(),
   );
   const assets = readAssets();
-  const entries = planSync({
-    assets,
-    config,
-    manifest,
-    onDiskHash: onDiskHasher(root),
-    peerVersions: resolvePeerVersions(assets),
+  // Acceptance is applied here rather than in either command, so `sync` and
+  // `doctor` cannot disagree about which edits are quiet — the same reason the
+  // peer resolution below happens once, here, rather than per command.
+  const accepted = parseAccepted(readIfPresent(join(root, ACCEPTED_FILE)));
+  const entries = withAcceptance({
+    accepted,
+    entries: planSync({
+      assets,
+      config,
+      manifest,
+      onDiskHash: onDiskHasher(root),
+      peerVersions: resolvePeerVersions(assets),
+    }),
   });
-  return { config, entries, manifest };
+  return { accepted, config, entries, manifest };
 };
 
 export const nextManifestFor = ({ entries, manifest }) =>
@@ -101,6 +115,7 @@ const UNMET_LABELS = {
  * three different edits.
  */
 const STATE_LABELS = {
+  acknowledged: 'left alone — acknowledged',
   added: 'added',
   conflict: 'left alone — a file you wrote is already there',
   current: 'up to date',
@@ -111,6 +126,18 @@ const STATE_LABELS = {
   updated: 'updated',
 };
 
+/**
+ * The state column is as wide as the longest state there is, computed from the
+ * vocabulary rather than written down. A literal width is a guess that the next
+ * state name outgrows — `acknowledged` outgrew the last one, and every row after
+ * it sat two characters out of line. `STATE_LABELS` is the right thing to
+ * measure because a state without a label already renders `undefined`, so no
+ * state can reach here without passing through it.
+ */
+const STATE_COLUMN_WIDTH = Math.max(
+  ...Object.keys(STATE_LABELS).map((state) => state.length),
+);
+
 /** States whose label is only actionable with the names that produced it. */
 const STATES_NAMING_WHAT_IS_MISSING = new Set(['unmet', 'unresolved']);
 
@@ -119,20 +146,36 @@ const labelFor = (entry) =>
     ? UNMET_LABELS.peer
     : STATE_LABELS[entry.state];
 
-const detailFor = (entry) =>
-  STATES_NAMING_WHAT_IS_MISSING.has(entry.state)
-    ? `${labelFor(entry)} ${entry.missing.join(', ')}`
-    : labelFor(entry);
+const detailFor = (entry) => {
+  if (STATES_NAMING_WHAT_IS_MISSING.has(entry.state)) {
+    return `${labelFor(entry)} ${entry.missing.join(', ')}`;
+  }
+  // The reason travels with the listing because an acknowledgement nobody can
+  // read is one nobody can revisit, and revisiting it is the only way it ever
+  // gets removed.
+  if (isAcknowledged(entry.state)) {
+    return `${labelFor(entry)}: ${entry.reason}`;
+  }
+  return labelFor(entry);
+};
 
-export const renderPlan = (entries) => {
+/**
+ * The default report is the actionable one: an acknowledged edit is deliberate,
+ * so repeating it every run is the noise acknowledgement exists to remove.
+ * `--verbose` brings it back with its reason, so quiet never means gone.
+ */
+export const renderPlan = (entries, { verbose = false } = {}) => {
   const notable = entries.filter(
-    (entry) => isWritten(entry.state) || isReported(entry.state),
+    (entry) =>
+      isWritten(entry.state) ||
+      isReported(entry.state) ||
+      (verbose && isAcknowledged(entry.state)),
   );
   if (notable.length === 0) return 'Everything is up to date.';
   return notable
     .map(
       (entry) =>
-        `  ${entry.state.padEnd(10)} ${entry.path}  (${detailFor(entry)})`,
+        `  ${entry.state.padEnd(STATE_COLUMN_WIDTH)} ${entry.path}  (${detailFor(entry)})`,
     )
     .join('\n');
 };
