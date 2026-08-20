@@ -32,6 +32,8 @@ utils/
 ├── resolveFetchMoreState.util.ts                 → Shared append/hasMore/total resolution for paginated fetch actions
 ├── resolveGridRowIndexing.util.ts                 → aria-rowcount and a body row's aria-rowindex, from one base (not exported from the barrel)
 ├── resolveGroupKeyAvailability.util.ts            → Whether a column may be OFFERED as a group key: the declared flag narrowed by the catalogue
+├── orderLegalAggregates.util.ts                   → The aggregates legal for a column's real type, in menu order
+├── resolveOfferableAggregates.util.ts             → Which of those a surface may OFFER: none at all while the column is a group key
 ├── resolvePrimaryKeyColumnKeys.util.ts            → Keys of isPrimaryKey columns (declaration order, excludes 'actions')
 ├── resolveTableActionsColumn.util.ts              → Synthesize/merge the row-actions column from `crud` + any consumer override
 ├── serializeStateSlice.util.ts                   → JSON serialize a state slice
@@ -128,6 +130,8 @@ graph TD
 | resolveColumnCapabilities       | column (or undefined)                         | { isFilterable, isResizable, isSortable, isStatic }                                 | Materialize a column's capability defaults in one place; the only reader of the optional flags in the component tree                                                                                                                         |
 | resolveCrudRowId                | row, columns                                  | string                                                                              | Build a CRUD row id from the primary-key column(s) (single = raw value, composite = encoded values joined by `_`)                                                                                                                            |
 | resolveGroupKeyAvailability     | column, catalogue capability                  | { isGroupable, refusal }                                                            | Whether a column may be **offered** as a group key: `resolveColumnCapabilities`' declared answer narrowed by the catalogue's (ADR-058/067). Absent capability leaves the declaration standing; a consumer opt-out wins and reports no reason |
+| orderLegalAggregates            | the catalogue's aggregate set                 | TableAggregateFn[]                                                                  | The aggregates legal for a column's real **type**, in menu order; also drops a SQL name this package has no label for                                                                                                                        |
+| resolveOfferableAggregates      | catalogue capability, isGroupKey              | TableAggregateFn[]                                                                  | Which of those a surface may **offer**: the ordered legal set, and nothing at all while the column is an active group key (ADR-080). One predicate for the header menu and the drawer picker alike (#830)                                    |
 | resolvePrimaryKeyColumnKeys     | columns                                       | DataKey[]                                                                           | Keys of `isPrimaryKey` columns in declaration order (excludes `actions`)                                                                                                                                                                     |
 | resolveTableActionsColumn       | columns, crud                                 | { columns, hasActionsColumn }                                                       | Adds/merges the synthetic `actions` column when `crud.read/update/delete` is enabled or the consumer declared one                                                                                                                            |
 | resolveFetchMoreState           | currentData, selectors, response, totals      | { combinedData, hasMore, totalLoadedRows, totalRows }                               | Shared pagination merge logic used by table rows and filter-options load-more                                                                                                                                                                |
@@ -154,6 +158,22 @@ to `true`. Every surface that offers a group key goes through it — the header
 menu item and the drawer's add-key list — so the two cannot disagree. An absent
 capability leaves the declared answer standing: a route may group without
 shipping a map at all.
+
+**Aggregation has a second gate too, and `resolveOfferableAggregates` is where
+it composes.** The catalogue answers which functions a column's real type
+supports; the grouping keys answer whether the column is currently rendering a
+key's value instead of a measure (ADR-080), in which case none of them may be
+offered. Both surfaces that offer an aggregate — the column header menu's
+aggregation block and the drawer's "Add Aggregate" picker — call it, and the
+composition is the point: they had a gate each, the picker knew about group keys
+and the menu did not, so the menu offered functions that wrote the store and
+changed nothing on screen (#830).
+
+Each surface still feeds it from its **own** commit context, exactly as the
+command layer requires: the header menu passes the live grouping keys and the
+drawer passes its draft, so the picker reflects a key staged behind Accept while
+the menu reflects the one the table is grouped by. Sharing the predicate is not
+sharing the state.
 
 The **precedence** is the consumer's opt-out first, and it carries no reason.
 `isGroupable: false` and a catalogue refusal can both be true at once, and they
