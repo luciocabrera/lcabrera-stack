@@ -13,15 +13,17 @@ import { resolve } from 'node:path';
 import {
   analyseDirectory,
   BASELINE_COMMANDS,
+  describeEscape,
   renderClosureReport,
 } from './closure-report.mjs';
 import { analyseClosure } from './closure.mjs';
 import { buildPlan } from './command-materialise.mjs';
-import { configuredCommandWords } from './config.mjs';
+import { allowedConfigKeys, configuredCommandWords } from './config.mjs';
 
 /**
- * Everything the package would place in this repository, and the tools the
- * consumer's config answers for. A reference to either travels.
+ * Everything the package would place in this repository, the tools the
+ * consumer's config answers for, and the keys that config is able to carry. A
+ * reference to any of them travels.
  *
  * Deliberately not guarded: `buildPlan` throws on a malformed config, and
  * catching that here would substitute an empty shipped set for an error, so
@@ -32,6 +34,7 @@ const shippedContext = (root) => {
   const { config, entries } = buildPlan({ root });
   return {
     allowedCommands: [...BASELINE_COMMANDS, ...configuredCommandWords(config)],
+    configKeys: allowedConfigKeys(config),
     shipped: new Set(entries.map((entry) => entry.path)),
   };
 };
@@ -46,7 +49,7 @@ const shippedContext = (root) => {
  * sits, only by being shipped.
  */
 const runShippedClosure = (root) => {
-  const { allowedCommands, shipped } = shippedContext(root);
+  const { allowedCommands, configKeys, shipped } = shippedContext(root);
   const plan = buildPlan({ root }).entries;
   const files = plan
     .filter((entry) => existsSync(resolve(root, entry.path)))
@@ -57,6 +60,7 @@ const runShippedClosure = (root) => {
 
   const { escapes } = analyseClosure({
     allowedCommands,
+    allowedConfigKeys: configKeys,
     exists: (path) => existsSync(resolve(root, path)),
     files,
     rootDirectory: '',
@@ -69,9 +73,7 @@ const runShippedClosure = (root) => {
   }
 
   for (const finding of escapes) {
-    console.error(
-      `  ${finding.file}:${finding.line}  ${finding.resolved ?? finding.reference}`,
-    );
+    console.error(`  ${describeEscape(finding)}`);
   }
   console.error(`\n${escapes.length} escape(s) in the shipped set.`);
   return 1;
@@ -95,10 +97,11 @@ export const runClosure = (directories, root) => {
     return 1;
   }
 
-  const { allowedCommands, shipped } = shippedContext(root);
+  const { allowedCommands, configKeys, shipped } = shippedContext(root);
   const results = directories.map((directory) =>
     analyseDirectory({
       allowedCommands,
+      allowedConfigKeys: configKeys,
       directory: resolve(root, directory),
       root,
       shipped,

@@ -1,3 +1,4 @@
+export { deriveAggregateCommandState } from './deriveAggregateCommandState.util';
 export { deriveToggleCommandState } from './deriveToggleCommandState.util';
 export {
   AGGREGATE_COMMANDS,

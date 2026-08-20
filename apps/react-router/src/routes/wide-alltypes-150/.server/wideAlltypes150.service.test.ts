@@ -82,7 +82,7 @@ describe('a truncated group key on this route too', () => {
     // cardinality refusal every date column on this table has.
     await selectWideAlltypes150Page({
       grouping: {
-        aggregates: {},
+        aggregates: [],
         keys: ['c_001'],
         mode: 'flat',
         periods: { c_001: 'month' },
@@ -237,7 +237,7 @@ describe('readWideAlltypes150Page', () => {
     it('reads the grouped branch when keys are applied, not the paginated one', async () => {
       await selectWideAlltypes150Page({
         grouping: {
-          aggregates: {},
+          aggregates: [],
           keys: ['c_001'],
           mode: 'flat',
           periods: {},
@@ -255,7 +255,7 @@ describe('readWideAlltypes150Page', () => {
     it('asks for count(*) first, from the package rather than by hand', async () => {
       await selectWideAlltypes150Page({
         grouping: {
-          aggregates: { c_002: 'sum' },
+          aggregates: [{ columnKey: 'c_002', fn: 'sum' }],
           keys: ['c_001'],
           mode: 'flat',
           periods: {},
@@ -276,7 +276,7 @@ describe('readWideAlltypes150Page', () => {
     it('bounds the grouped read by this table’s own row ceiling', async () => {
       await selectWideAlltypes150Page({
         grouping: {
-          aggregates: {},
+          aggregates: [],
           keys: ['c_001'],
           mode: 'flat',
           periods: {},
@@ -295,7 +295,7 @@ describe('readWideAlltypes150Page', () => {
     it('orders by the group keys in nesting order, carrying the user’s direction', async () => {
       await selectWideAlltypes150Page({
         grouping: {
-          aggregates: {},
+          aggregates: [],
           keys: ['c_001', 'c_002'],
           mode: 'rollup',
           periods: {},
@@ -323,7 +323,7 @@ describe('readWideAlltypes150Page', () => {
 
       const result = await selectWideAlltypes150Page({
         grouping: {
-          aggregates: {},
+          aggregates: [],
           keys: ['c_014'],
           mode: 'flat',
           periods: {},

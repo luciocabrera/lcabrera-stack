@@ -5,7 +5,7 @@ import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
 import { getInitialGroupingState } from './getInitialGroupingState.util';
 
 const NO_GROUPING = {
-  aggregates: {},
+  aggregates: [],
   keys: [],
   mode: 'flat',
   periods: {},
@@ -35,7 +35,7 @@ describe('getInitialGroupingState', () => {
     expect(
       getInitialGroupingState({ groupingKeys: ['order_status'] }),
     ).toStrictEqual({
-      aggregates: {},
+      aggregates: [],
       keys: ['order_status'],
       mode: 'flat',
       periods: {},
@@ -46,11 +46,11 @@ describe('getInitialGroupingState', () => {
   it('seeds the aggregates the loader applied', () => {
     expect(
       getInitialGroupingState({
-        groupingAggregates: { total_amount: 'sum' },
+        groupingAggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
         groupingKeys: ['order_status'],
       }),
     ).toStrictEqual({
-      aggregates: { total_amount: 'sum' },
+      aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
       keys: ['order_status'],
       mode: 'flat',
       periods: {},
@@ -60,7 +60,7 @@ describe('getInitialGroupingState', () => {
 
   it('defaults to no grouping when the loader supplied none', () => {
     expect(getInitialGroupingState({})).toStrictEqual({
-      aggregates: {},
+      aggregates: [],
       keys: [],
       mode: 'flat',
       periods: {},
@@ -69,7 +69,9 @@ describe('getInitialGroupingState', () => {
   });
 
   it('copies the loader state rather than aliasing it', () => {
-    const groupingAggregates = { total_amount: 'sum' } as const;
+    const groupingAggregates = [
+      { columnKey: 'total_amount', fn: 'sum' },
+    ] as const;
     const groupingKeys = ['order_status'];
     const state = getInitialGroupingState({ groupingAggregates, groupingKeys });
 
@@ -111,7 +113,7 @@ describe('getInitialGroupingState', () => {
       // next grouping the user applies.
       expect(
         getInitialGroupingState({
-          groupingAggregates: { total_amount: 'sum' },
+          groupingAggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
           groupingKeys: keysOfLength(MAX_TABLE_GROUP_KEYS + 1),
         }),
       ).toStrictEqual(NO_GROUPING);
@@ -120,7 +122,7 @@ describe('getInitialGroupingState', () => {
     it('drops an aggregate the loader supplied with no key at all', () => {
       expect(
         getInitialGroupingState({
-          groupingAggregates: { total_amount: 'sum' },
+          groupingAggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
           groupingKeys: [],
         }),
       ).toStrictEqual(NO_GROUPING);
@@ -152,7 +154,7 @@ describe('getInitialGroupingState', () => {
     it('drops the aggregates with the refused keys', () => {
       expect(
         getInitialGroupingState({
-          groupingAggregates: { total_amount: 'sum' },
+          groupingAggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
           groupingKeys: ['order_status', 'order_status'],
         }),
       ).toStrictEqual(NO_GROUPING);
@@ -164,6 +166,57 @@ describe('getInitialGroupingState', () => {
       expect(getInitialGroupingState({ groupingKeys }).keys).toStrictEqual(
         groupingKeys,
       );
+    });
+  });
+
+  // The map shape made a repeated pair unrepresentable, so nothing had to check
+  // for one; the list shape admits it (#831). This is the same boundary the
+  // duplicate-key guard above sits at, and the same refusal.
+  describe('duplicate aggregates', () => {
+    it('refuses a repeated (columnKey, fn) pair, whole rather than de-duplicated', () => {
+      // De-duplicating would silently correct a request the consumer made.
+      // Left unchecked it gives `toAggregateItems` two rows sharing the id
+      // `total_amount:sum`, which React reconciles as one, and reaches the
+      // server as two projections deriving one alias, which it refuses.
+      expect(
+        getInitialGroupingState({
+          groupingAggregates: [
+            { columnKey: 'total_amount', fn: 'sum' },
+            { columnKey: 'total_amount', fn: 'sum' },
+          ],
+          groupingKeys: ['order_status'],
+        }),
+      ).toStrictEqual(NO_GROUPING);
+    });
+
+    it('refuses a repeat buried among distinct pairs', () => {
+      expect(
+        getInitialGroupingState({
+          groupingAggregates: [
+            { columnKey: 'total_amount', fn: 'sum' },
+            { columnKey: 'quantity', fn: 'max' },
+            { columnKey: 'total_amount', fn: 'sum' },
+          ],
+          groupingKeys: ['order_status'],
+        }),
+      ).toStrictEqual(NO_GROUPING);
+    });
+
+    it('still seeds several functions on ONE column', () => {
+      // The discriminating case: this is what #831 exists to allow, so a guard
+      // that refused it would pass the two assertions above and break the
+      // feature.
+      const groupingAggregates = [
+        { columnKey: 'total_amount', fn: 'sum' },
+        { columnKey: 'total_amount', fn: 'avg' },
+      ] as const;
+
+      expect(
+        getInitialGroupingState({
+          groupingAggregates,
+          groupingKeys: ['order_status'],
+        }).aggregates,
+      ).toStrictEqual(groupingAggregates);
     });
   });
 });

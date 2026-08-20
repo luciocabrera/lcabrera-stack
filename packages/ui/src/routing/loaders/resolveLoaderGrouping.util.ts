@@ -22,7 +22,7 @@ type ResolveLoaderGroupingArgs<TData extends Record<string, unknown>> = {
 };
 
 const NO_GROUPING: TableGroupingState = {
-  aggregates: {},
+  aggregates: [],
   keys: [],
   mode: 'flat',
   periods: {},

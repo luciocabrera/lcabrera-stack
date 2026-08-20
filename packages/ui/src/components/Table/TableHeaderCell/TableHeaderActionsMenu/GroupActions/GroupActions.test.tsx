@@ -11,21 +11,24 @@ import {
 } from '#ui/components/Table/Table.constants';
 
 const {
-  appliedAggregateRef,
+  appliedAggregatesRef,
   capabilityRef,
   collapsedGroupPathsRef,
   dataRef,
   groupingKeysRef,
   isGroupingEnabledRef,
   isGroupingLockedRef,
+  mockAddColumnAggregate,
   mockClearGrouping,
+  mockRemoveColumnAggregate,
   mockSetAllGroupsExpanded,
-  mockSetColumnAggregate,
   mockToggleGroupKey,
   NO_DRILLED_GROUPS,
   normalizedColumnRef,
 } = vi.hoisted(() => ({
-  appliedAggregateRef: { current: undefined as string | undefined },
+  appliedAggregatesRef: {
+    current: [] as readonly { columnKey: string; fn: string }[],
+  },
   capabilityRef: { current: undefined as unknown },
   collapsedGroupPathsRef: { current: new Set<string>() },
   dataRef: { current: [] as readonly Record<string, unknown>[] },
@@ -33,22 +36,24 @@ const {
   groupingKeysRef: { current: [] as readonly string[] },
   isGroupingEnabledRef: { current: true },
   isGroupingLockedRef: { current: false },
+  mockAddColumnAggregate: vi.fn(),
   mockClearGrouping: vi.fn(),
+  mockRemoveColumnAggregate: vi.fn(),
   mockSetAllGroupsExpanded: vi.fn(),
-  mockSetColumnAggregate: vi.fn(),
   mockToggleGroupKey: vi.fn(),
   NO_DRILLED_GROUPS: new Map<string, never>(),
   normalizedColumnRef: { current: {} as Record<string, unknown> },
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/grouping/actions', () => ({
+  useAddTableColumnAggregate: () => mockAddColumnAggregate,
   useClearTableGrouping: () => mockClearGrouping,
-  useSetTableColumnAggregate: () => mockSetColumnAggregate,
+  useRemoveTableColumnAggregate: () => mockRemoveColumnAggregate,
   useToggleTableGroupKey: () => mockToggleGroupKey,
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/grouping/selectors', () => ({
-  useGetTableColumnAggregate: () => appliedAggregateRef.current,
+  useGetTableGroupingAggregates: () => appliedAggregatesRef.current,
   useGetTableGroupingKeys: () => groupingKeysRef.current,
 }));
 
@@ -141,7 +146,7 @@ const getButton = (label: string) => {
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
-  appliedAggregateRef.current = undefined;
+  appliedAggregatesRef.current = [];
   capabilityRef.current = undefined;
   collapsedGroupPathsRef.current = new Set<string>();
   dataRef.current = [];
@@ -403,6 +408,75 @@ describe('GroupActions', () => {
       expect(screen.queryByText('All True')).toBeNull();
     });
 
+    it('offers nothing at all while the column is an applied group key', () => {
+      // The same capability that offers three functions above offers none here,
+      // so it is the key membership doing the work and not the type. A grouped
+      // column renders its key's value rather than a measure (ADR-080), so the
+      // click wrote the grouping store and changed nothing on screen (#830).
+      capabilityRef.current = numericCapability;
+      groupingKeysRef.current = ['total_amount'];
+
+      render(<GroupActions columnKey='total_amount' onClose={mockOnClose} />);
+
+      expect(screen.queryByText('Sum')).toBeNull();
+      expect(screen.queryByText('Average')).toBeNull();
+      expect(screen.queryByText('Count')).toBeNull();
+      // The clear item goes with them: "nothing to offer" has one exit.
+      expect(screen.queryByText('No Aggregate')).toBeNull();
+      expect(screen.queryByTestId('separator')).toBeNull();
+    });
+
+    it('leaves the rest of the grouping section untouched by that suppression', () => {
+      capabilityRef.current = numericCapability;
+      groupingKeysRef.current = ['total_amount'];
+
+      render(<GroupActions columnKey='total_amount' onClose={mockOnClose} />);
+
+      expect(screen.getByText('Group by This')).not.toBeNull();
+      expect(screen.getByText('Clear Grouping')).not.toBeNull();
+      expect(screen.getByText('Expand All Groups')).not.toBeNull();
+      expect(screen.getByText('Collapse All Groups')).not.toBeNull();
+    });
+
+    it('restores the functions when the column leaves the grouping', () => {
+      capabilityRef.current = numericCapability;
+      groupingKeysRef.current = ['total_amount'];
+
+      const { rerender } = render(
+        <GroupActions columnKey='total_amount' onClose={mockOnClose} />,
+      );
+
+      expect(screen.queryByText('Sum')).toBeNull();
+
+      groupingKeysRef.current = [];
+      rerender(<GroupActions columnKey='total_amount' onClose={mockOnClose} />);
+
+      expect(screen.getByText('Sum')).not.toBeNull();
+      expect(screen.getByText('Average')).not.toBeNull();
+      expect(screen.getByText('Count')).not.toBeNull();
+      expect(screen.getByText('No Aggregate')).not.toBeNull();
+    });
+
+    it('is unmoved when a *different* column joins or leaves the grouping', () => {
+      // The condition is "this column is a key", not "the table is grouped" —
+      // a predicate reading the key list's length would pass the test above and
+      // fail this one.
+      capabilityRef.current = numericCapability;
+      groupingKeysRef.current = ['priority'];
+
+      const { rerender } = render(
+        <GroupActions columnKey='total_amount' onClose={mockOnClose} />,
+      );
+
+      expect(screen.getByText('Sum')).not.toBeNull();
+
+      groupingKeysRef.current = [];
+      rerender(<GroupActions columnKey='total_amount' onClose={mockOnClose} />);
+
+      expect(screen.getByText('Sum')).not.toBeNull();
+      expect(screen.getByText('No Aggregate')).not.toBeNull();
+    });
+
     it('offers nothing for a column the catalogue can aggregate in no way', () => {
       capabilityRef.current = {
         aggregates: [],
@@ -426,16 +500,32 @@ describe('GroupActions', () => {
       render(<GroupActions columnKey='total_amount' onClose={mockOnClose} />);
       fireEvent.click(getButton('Sum'));
 
-      expect(mockSetColumnAggregate).toHaveBeenCalledWith({
+      expect(mockAddColumnAggregate).toHaveBeenCalledWith({
         columnKey: 'total_amount',
         fn: 'sum',
       });
       expect(mockOnClose).toHaveBeenCalledTimes(1);
     });
 
+    it('adds a second function beside the one already applied', () => {
+      // The header half of #831: choosing `count` on a column carrying `avg`
+      // used to swap them, and the earlier selection vanished with no message.
+      capabilityRef.current = numericCapability;
+      appliedAggregatesRef.current = [{ columnKey: 'total_amount', fn: 'avg' }];
+
+      render(<GroupActions columnKey='total_amount' onClose={mockOnClose} />);
+      fireEvent.click(getButton('Count'));
+
+      expect(mockAddColumnAggregate).toHaveBeenCalledWith({
+        columnKey: 'total_amount',
+        fn: 'count',
+      });
+      expect(mockRemoveColumnAggregate).not.toHaveBeenCalled();
+    });
+
     it('marks the applied function active and toggles it off on a second click', () => {
       capabilityRef.current = numericCapability;
-      appliedAggregateRef.current = 'sum';
+      appliedAggregatesRef.current = [{ columnKey: 'total_amount', fn: 'sum' }];
 
       render(<GroupActions columnKey='total_amount' onClose={mockOnClose} />);
 
@@ -444,10 +534,35 @@ describe('GroupActions', () => {
 
       fireEvent.click(getButton('Sum'));
 
-      expect(mockSetColumnAggregate).toHaveBeenCalledWith({
+      expect(mockRemoveColumnAggregate).toHaveBeenCalledWith({
         columnKey: 'total_amount',
-        fn: undefined,
+        fn: 'sum',
       });
+    });
+
+    it('marks SEVERAL functions active at once on one column', () => {
+      // The state a toggle derivation cannot express, which is why aggregates
+      // got their own beside the shared one (#831).
+      capabilityRef.current = numericCapability;
+      appliedAggregatesRef.current = [
+        { columnKey: 'total_amount', fn: 'sum' },
+        { columnKey: 'total_amount', fn: 'avg' },
+      ];
+
+      render(<GroupActions columnKey='total_amount' onClose={mockOnClose} />);
+
+      expect(getButton('Sum').getAttribute('aria-pressed')).toBe('true');
+      expect(getButton('Average').getAttribute('aria-pressed')).toBe('true');
+      expect(getButton('Count').getAttribute('aria-pressed')).toBe('false');
+    });
+
+    it('reads the pressed state per column, not per table', () => {
+      capabilityRef.current = numericCapability;
+      appliedAggregatesRef.current = [{ columnKey: 'quantity', fn: 'sum' }];
+
+      render(<GroupActions columnKey='total_amount' onClose={mockOnClose} />);
+
+      expect(getButton('Sum').getAttribute('aria-pressed')).toBe('false');
     });
 
     it('disables No Aggregate until one is applied', () => {
@@ -459,16 +574,17 @@ describe('GroupActions', () => {
 
       expect(getButton('No Aggregate').disabled).toBe(true);
 
-      appliedAggregateRef.current = 'avg';
+      appliedAggregatesRef.current = [{ columnKey: 'total_amount', fn: 'avg' }];
       rerender(<GroupActions columnKey='total_amount' onClose={mockOnClose} />);
 
       expect(getButton('No Aggregate').disabled).toBe(false);
 
       fireEvent.click(getButton('No Aggregate'));
 
-      expect(mockSetColumnAggregate).toHaveBeenCalledWith({
+      // No function named: "No Aggregate" clears every measure on the column,
+      // not only the last one chosen.
+      expect(mockRemoveColumnAggregate).toHaveBeenCalledWith({
         columnKey: 'total_amount',
-        fn: undefined,
       });
     });
   });

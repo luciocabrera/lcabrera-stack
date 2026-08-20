@@ -29,12 +29,18 @@ const {
       };
 
   let grouping: {
-    readonly aggregates: Record<string, string>;
+    readonly aggregates: readonly {
+      readonly columnKey: string;
+      readonly fn: string;
+    }[];
     readonly keys: readonly string[];
     readonly mode: string;
     readonly periods: Record<string, string>;
-    readonly shares: readonly string[];
-  } = { aggregates: {}, keys: [], mode: 'flat', periods: {}, shares: [] };
+    readonly shares: readonly {
+      readonly columnKey: string;
+      readonly fn: string;
+    }[];
+  } = { aggregates: [], keys: [], mode: 'flat', periods: {}, shares: [] };
 
   return {
     drawerColumnsStore: {
@@ -80,7 +86,7 @@ describe('useResetTableSettings', () => {
   beforeEach(() => {
     setTableColumnsState(undefined);
     setTableGrouping({
-      aggregates: {},
+      aggregates: [],
       keys: [],
       mode: 'flat',
       periods: {},
@@ -135,7 +141,7 @@ describe('useResetTableSettings', () => {
   });
   it('re-seeds the grouping draft from the live grouping, discarding what was staged', () => {
     setTableGrouping({
-      aggregates: { total: 'sum' },
+      aggregates: [{ columnKey: 'total', fn: 'sum' }],
       keys: ['status'],
       mode: 'flat',
       periods: {},
@@ -149,7 +155,7 @@ describe('useResetTableSettings', () => {
     });
 
     expect(drawerGroupingStore.set).toHaveBeenCalledWith({
-      aggregates: { total: 'sum' },
+      aggregates: [{ columnKey: 'total', fn: 'sum' }],
       keys: ['status'],
       mode: 'flat',
       periods: {},

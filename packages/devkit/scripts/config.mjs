@@ -101,3 +101,51 @@ export const configuredCommandWords = (config) =>
     .filter((command) => typeof command === 'string')
     .map((command) => command.trim().split(/\s+/)[0] ?? '')
     .filter((word) => word !== '');
+
+/**
+ * A dotted lookup that stops at the first segment the config does not own, so a
+ * key never resolves through the prototype chain: `commands.constructor` names
+ * nothing a consumer configured, and reading it as configured would let an asset
+ * declaring it be written to a repository that has no commands at all.
+ */
+const valueAt = ({ config, path }) =>
+  path.split('.').reduce((cursor, segment) => {
+    if (!isPlainObject(cursor) || !Object.hasOwn(cursor, segment)) {
+      return undefined;
+    }
+    return cursor[segment];
+  }, config);
+
+/**
+ * Does THIS consumer have that key? The question `sync` asks before writing a
+ * file that declares it needs one.
+ *
+ * A null or empty value counts as unset, matching what `substituteCommands`
+ * already does with an empty command: a key present but blank leaves the shipped
+ * file's instruction just as unfollowable as an absent one, and writing it
+ * anyway is the failure this gate exists to stop.
+ */
+export const hasConfigKey = ({ config, path }) => {
+  const value = valueAt({ config, path });
+  return value !== undefined && value !== null && value !== '';
+};
+
+/**
+ * The key SPACE this config defines — which is a different question from
+ * whether one key is set, and the one `closure` needs: could ANY consumer
+ * satisfy this declaration, or does it name something outside what
+ * `devkit.config.json` is for? A consumer's file may carry blocks other tools
+ * read, and a shipped asset binding to one of those is an escape however
+ * reliably it resolves in the repository that wrote it.
+ *
+ * The command map is open-ended, exactly as `configuredCommandWords` treats it:
+ * there is no fixed vocabulary of command names, so the space is whatever the
+ * consumer configured rather than a list held here.
+ */
+export const allowedConfigKeys = (config) => [
+  'profile',
+  ...Object.keys(config.paths ?? {}).map((key) => `paths.${key}`),
+  ...Object.entries(config.commands ?? {})
+    .filter(([, command]) => typeof command === 'string' && command !== '')
+    .map(([key]) => `commands.${key}`),
+];

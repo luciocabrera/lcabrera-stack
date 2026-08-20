@@ -63,9 +63,20 @@ export const isRecorded = (state) => RECORDED_STATES.has(state);
 
 /**
  * The states a consumer needs to see: their edit survived, the path was already
- * taken, or the file asks for a command they have not configured.
+ * taken, or the file asks for something they have not configured — a command it
+ * interpolates (`unresolved`) or a config key it declares (`unmet`).
+ *
+ * Both of the last two are reported here and in neither set above, which is the
+ * whole of what "refused" means: a file that could not be honoured is never
+ * written, and never recorded either — recording it would make the next run read
+ * its absence as a deletion the consumer chose.
  */
-const REPORTED_STATES = new Set(['conflict', 'modified', 'unresolved']);
+const REPORTED_STATES = new Set([
+  'conflict',
+  'modified',
+  'unmet',
+  'unresolved',
+]);
 
 export const isReported = (state) => REPORTED_STATES.has(state);
 

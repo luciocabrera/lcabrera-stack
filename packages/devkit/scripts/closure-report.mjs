@@ -24,10 +24,12 @@ export const BASELINE_COMMANDS = [
 ];
 
 /**
- * @param {{ allowedCommands?: string[], directory: string, root: string }} args
+ * @param {{ allowedCommands?: string[], allowedConfigKeys?: string[],
+ *   directory: string, root: string }} args
  */
 export const analyseDirectory = ({
   allowedCommands = BASELINE_COMMANDS,
+  allowedConfigKeys = [],
   directory,
   root,
   shipped = new Set(),
@@ -36,6 +38,7 @@ export const analyseDirectory = ({
   const rootDirectory = relative(root, directory).replaceAll('\\', '/');
   const { escapes } = analyseClosure({
     allowedCommands,
+    allowedConfigKeys,
     exists: (path) => existsSync(resolve(root, path)),
     files,
     rootDirectory,
@@ -48,9 +51,15 @@ const ESCAPE_VERBS = {
   command: 'runs',
   import: 'imports',
   link: 'needs',
+  requires: 'declares',
 };
 
-const describeEscape = (finding) =>
+/**
+ * One wording for every mode. The verb is what separates the four kinds for a
+ * reader, and a finding printed without it says only that something escaped —
+ * which does not tell anyone what to do about it.
+ */
+export const describeEscape = (finding) =>
   `${finding.file}:${finding.line}  ${ESCAPE_VERBS[finding.kind]} ${finding.resolved ?? finding.reference}`;
 
 /** @param {ReturnType<typeof analyseDirectory>[]} results */

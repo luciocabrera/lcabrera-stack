@@ -3,41 +3,43 @@ import * as stylex from '@stylexjs/stylex';
 import { Button } from '#ui/components/Button';
 import {
   CLEAR_COLUMN_AGGREGATE_COMMAND,
-  deriveToggleCommandState,
+  deriveAggregateCommandState,
 } from '#ui/components/Table/commands';
-import { useSetTableColumnAggregate } from '#ui/components/Table/contexts/TableConfig/grouping/actions';
-import { useGetTableColumnAggregate } from '#ui/components/Table/contexts/TableConfig/grouping/selectors';
+import { useRemoveTableColumnAggregate } from '#ui/components/Table/contexts/TableConfig/grouping/actions';
+import { useGetTableGroupingAggregates } from '#ui/components/Table/contexts/TableConfig/grouping/selectors';
 import { tableActionsPopoverStyles } from '#ui/components/Table/TableActionsPopover';
 
 import type { ClearColumnAggregateButtonProps } from './ClearColumnAggregateButton.types';
 
 /**
- * "No Aggregate" item: removes whatever aggregate is applied to this column.
+ * "No Aggregate" item: removes **every** aggregate applied to this column, not
+ * just the last one chosen (#831).
  *
  * It **does** take a `columnKey`, unlike `ClearGroupingButton` beside it, and
  * the difference is not an oversight: an aggregate belongs to one column, so
- * clearing it is a question about that column, where clearing grouping is a
+ * clearing is a question about that column, where clearing grouping is a
  * whole-table action that asks about none.
  *
- * `target: undefined` is `deriveToggleCommandState`'s clear command, so "is
+ * `target: undefined` is `deriveAggregateCommandState`'s clear command, so "is
  * there anything to clear" is answered there rather than restated here.
  */
 export const ClearColumnAggregateButton = ({
   columnKey,
   onClose,
 }: ClearColumnAggregateButtonProps) => {
-  const setColumnAggregate = useSetTableColumnAggregate();
-  const appliedFn = useGetTableColumnAggregate(columnKey);
+  const removeColumnAggregate = useRemoveTableColumnAggregate();
+  const applied = useGetTableGroupingAggregates();
   const { icon: ClearAggregateCommandIcon, label } =
     CLEAR_COLUMN_AGGREGATE_COMMAND;
-  const { isEnabled } = deriveToggleCommandState({
-    current: appliedFn,
+  const { isEnabled } = deriveAggregateCommandState({
+    applied,
+    columnKey,
     isDisabled: false,
     target: undefined,
   });
 
   const handleClearAggregate = () => {
-    setColumnAggregate({ columnKey, fn: undefined });
+    removeColumnAggregate({ columnKey });
     onClose();
   };
 

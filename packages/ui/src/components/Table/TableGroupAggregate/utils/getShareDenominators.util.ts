@@ -1,6 +1,9 @@
 import { isObject } from '@lcabrera/utils/guards/is-object.util';
 
-import type { TableGroupRowSummary } from '#ui/components/Table/Table.types';
+import type {
+  TableColumnAggregate,
+  TableGroupRowSummary,
+} from '#ui/components/Table/Table.types';
 
 import { getTableGroupRowSummary } from '#ui/components/Table/utils/getTableGroupRowSummary.util';
 
@@ -19,7 +22,7 @@ type GetShareDenominatorsArgs = {
    * site is what keeps that true.
    */
   readonly rows: readonly unknown[];
-  readonly shares: readonly string[];
+  readonly shares: readonly TableColumnAggregate[];
 };
 
 /**
@@ -61,17 +64,35 @@ const toSummaries = (rows: readonly unknown[]) => {
 };
 
 /**
- * The grand total each shared column divides by, computed once per data set.
+ * The grand total each shared measure divides by, computed once per data set
+ * and keyed by the measure's `(columnKey, fn)` token (#831).
  *
  * `sharesKey` is compared alongside the array identity because the two change
  * independently: turning a share on leaves the rows exactly as they were, so an
  * entry keyed on the rows alone would answer for the previous selection.
+ *
+ * **It is `JSON.stringify` over the tuples rather than a delimiter join** — the
+ * same encoding and the same reason as `resolveGroupPathKey`: a column key is a
+ * consumer's identifier and may contain any character, so a joined form collides
+ * the moment one contains the delimiter. Under a space join,
+ * `[('x','sum'), ('y','avg')]` and `[('x:sum y','avg')]` both key as
+ * `x:sum y:avg`, so the second read against the same rows array comes back with
+ * the *first* selection's denominators — a wrong percentage on screen, with
+ * nothing thrown and nothing logged. No separator is safe against an arbitrary
+ * column key, which is why there is none.
+ *
+ * The right-split token is still the right key *inside* the map: it is injective
+ * over `(columnKey, fn)` because the function vocabulary is closed and contains
+ * no `:`, and every lookup compares one whole token rather than a run of them.
+ * Concatenation is what this key had to be protected from.
  */
 export const getShareDenominators = ({
   rows,
   shares,
 }: GetShareDenominatorsArgs) => {
-  const sharesKey = shares.join(' ');
+  const sharesKey = JSON.stringify(
+    shares.map(({ columnKey, fn }) => [columnKey, fn]),
+  );
   const cached = cache.get(rows);
 
   if (cached?.sharesKey === sharesKey) {

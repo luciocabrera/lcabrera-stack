@@ -4,6 +4,9 @@ import type {
 } from '#ui/components/Table/Table.types';
 
 import { TABLE_AGGREGATE_LABELS } from '#ui/components/Table/Table.constants';
+import { toTableAggregateToken } from '#ui/components/Table/utils/tableAggregateToken.util';
+
+import type { AggregateItem } from '../GroupingSection.types';
 
 type ToAggregateItemsArgs<TData extends Record<string, unknown>> = {
   readonly aggregates: TableGroupingState['aggregates'];
@@ -11,40 +14,40 @@ type ToAggregateItemsArgs<TData extends Record<string, unknown>> = {
 };
 
 /**
- * The selected aggregates as labelled rows, in the table's own column order.
+ * The selected aggregates as labelled rows, **in the order they are staged**.
  *
- * Column order rather than insertion order, because the map has none worth
- * showing: unlike the group keys, aggregates are unordered — nothing about the
- * query depends on which was picked first — so the order the user already reads
- * the table in is the useful one.
+ * The staged order rather than the table's column order, and the reason changed
+ * with the shape: a column may now carry several aggregates, so column order no
+ * longer orders the list at all — and the list's own order is state the user
+ * arranged by dragging these very rows (#832), carried in the `grouping` param.
+ * Re-sorting here would silently discard it.
+ *
+ * `id` is the row's identity — the `(columnKey, fn)` pair as one string — since
+ * neither half is unique on its own and a React key has to be. It is the same
+ * spelling the URL token uses, from the same function, so the two cannot drift.
  *
  * An aggregate on a column this route does not declare is dropped rather than
  * labelled with its key. It cannot be reached through the UI (both surfaces
  * build from the columns) and the loader's sanitizer refuses the whole grouping
  * when a URL carries one, so a row here would describe a state that does not
- * survive a reload.
+ * survive a reload. That drop is why a reorder is expressed as ids over the
+ * **staged** list (`reorderTableColumnAggregates`) rather than rebuilt from
+ * these rows: rebuilding would un-stage whatever this dropped.
  */
 export const toAggregateItems = <TData extends Record<string, unknown>>({
   aggregates,
   columns,
-}: ToAggregateItemsArgs<TData>) => {
+}: ToAggregateItemsArgs<TData>): readonly AggregateItem[] => {
   const columnByKey = new Map(
     columns.map((column) => [String(column.key), column]),
   );
-  // Straight off `columns`, which is already declaration order — reading the
-  // keys back out of the Map would be a round trip through a structure built
-  // only for the lookups below.
-  const columnOrder = columns.map((column) => String(column.key));
 
-  return Object.entries(aggregates)
-    .filter(([columnKey]) => columnByKey.has(columnKey))
-    .map(([columnKey, fn]) => ({
+  return aggregates
+    .filter(({ columnKey }) => columnByKey.has(columnKey))
+    .map(({ columnKey, fn }) => ({
       columnKey,
       fn,
+      id: toTableAggregateToken({ columnKey, fn }),
       label: `${TABLE_AGGREGATE_LABELS[fn]} of ${columnByKey.get(columnKey)?.label ?? columnKey}`,
-    }))
-    .toSorted(
-      (a, b) =>
-        columnOrder.indexOf(a.columnKey) - columnOrder.indexOf(b.columnKey),
-    );
+    }));
 };

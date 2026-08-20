@@ -57,8 +57,8 @@ describe('groupingCodec', () => {
   });
 
   it('refuses a member outside the envelope', () => {
-    // The vocabulary was *extended* twice — to admit `agg`, then `mode` — not
-    // opened: a fourth member still refuses the payload (ADR-061).
+    // The vocabulary was *extended*, member by member, never opened: one outside
+    // the closed set still refuses the payload (ADR-061).
     expect(groupingCodec.deserialize('{"keys":["a"],"depth":2}')).toStrictEqual(
       { keys: [] },
     );
@@ -66,19 +66,57 @@ describe('groupingCodec', () => {
       keys: [],
     });
     expect(groupingCodec.deserialize('{}')).toStrictEqual({ keys: [] });
-    expect(groupingCodec.deserialize('{"agg":{"amount":"sum"}}')).toStrictEqual(
-      { keys: [] },
-    );
+    expect(groupingCodec.deserialize('{"agg":["amount:sum"]}')).toStrictEqual({
+      keys: [],
+    });
   });
 
-  it('round-trips an aggregate map beside the keys', () => {
+  it('round-trips an ordered aggregate list beside the keys', () => {
     const compact = {
-      agg: { total_amount: 'sum' },
+      agg: [
+        { columnKey: 'total_amount', fn: 'sum' },
+        { columnKey: 'total_amount', fn: 'avg' },
+      ],
       keys: ['order_status'],
     } as const;
 
+    // The wire form is an ordered array of compact `"<columnKey>:<fn>"`
+    // strings, asserted exactly rather than only round-tripped: any other
+    // encoding would round-trip just as well (#831).
     expect(groupingCodec.serialize(compact)).toBe(
-      '{"agg":{"total_amount":"sum"},"keys":["order_status"]}',
+      '{"agg":["total_amount:sum","total_amount:avg"],"keys":["order_status"]}',
+    );
+    expect(
+      groupingCodec.deserialize(groupingCodec.serialize(compact)),
+    ).toStrictEqual(compact);
+  });
+
+  it('preserves the aggregate order across the round trip', () => {
+    // The list order is state — it is what the drawer renders and what #832
+    // makes draggable — so a codec that treated it as a set would lose it.
+    const reversed = {
+      agg: [
+        { columnKey: 'total_amount', fn: 'avg' },
+        { columnKey: 'total_amount', fn: 'sum' },
+      ],
+      keys: ['order_status'],
+    } as const;
+
+    expect(
+      groupingCodec.deserialize(groupingCodec.serialize(reversed)).agg,
+    ).toStrictEqual(reversed.agg);
+  });
+
+  it('round-trips a column key that contains a colon', () => {
+    // The right-split rule is the only thing that makes this work, and a naive
+    // `split(':')` passes every other assertion in this file.
+    const compact = {
+      agg: [{ columnKey: 'odd:col', fn: 'sum' }],
+      keys: ['odd:col'],
+    } as const;
+
+    expect(groupingCodec.serialize(compact)).toBe(
+      '{"agg":["odd:col:sum"],"keys":["odd:col"]}',
     );
     expect(
       groupingCodec.deserialize(groupingCodec.serialize(compact)),
@@ -90,53 +128,106 @@ describe('groupingCodec', () => {
     // the SQL aggregate map and resolve to `undefined` (ADR-061).
     expect(
       groupingCodec.deserialize(
-        '{"agg":{"total_amount":"median"},"keys":["order_status"]}',
+        '{"agg":["total_amount:median"],"keys":["order_status"]}',
       ),
     ).toStrictEqual({ keys: [] });
     expect(
       groupingCodec.deserialize(
-        '{"agg":{"total_amount":"toString"},"keys":["a"]}',
+        '{"agg":["total_amount:toString"],"keys":["a"]}',
       ),
     ).toStrictEqual({ keys: [] });
     expect(
-      groupingCodec.deserialize('{"agg":{"total_amount":7},"keys":["a"]}'),
+      groupingCodec.deserialize('{"agg":["total_amount"],"keys":["a"]}'),
+    ).toStrictEqual({ keys: [] });
+    expect(
+      groupingCodec.deserialize('{"agg":[":sum"],"keys":["a"]}'),
     ).toStrictEqual({ keys: [] });
   });
 
-  it('refuses an `agg` that is not an object', () => {
+  it('refuses the whole list when only one of its tokens is bad', () => {
+    // Refused, not filtered: a link promising two measures must not open
+    // showing one.
     expect(
-      groupingCodec.deserialize('{"agg":["sum"],"keys":["a"]}'),
+      groupingCodec.deserialize(
+        '{"agg":["total_amount:sum","total_amount:median"],"keys":["a"]}',
+      ),
+    ).toStrictEqual({ keys: [] });
+  });
+
+  it('refuses an `agg` that is not an array of strings', () => {
+    expect(
+      groupingCodec.deserialize('{"agg":{"total_amount":"sum"},"keys":["a"]}'),
     ).toStrictEqual({ keys: [] });
     expect(
       groupingCodec.deserialize('{"agg":null,"keys":["a"]}'),
     ).toStrictEqual({ keys: [] });
+    expect(groupingCodec.deserialize('{"agg":[7],"keys":["a"]}')).toStrictEqual(
+      {
+        keys: [],
+      },
+    );
   });
 
-  it('accepts an empty aggregate map', () => {
-    expect(groupingCodec.deserialize('{"agg":{},"keys":["a"]}')).toStrictEqual({
-      agg: {},
+  it('accepts an empty aggregate list', () => {
+    expect(groupingCodec.deserialize('{"agg":[],"keys":["a"]}')).toStrictEqual({
+      agg: [],
       keys: ['a'],
     });
   });
 
-  it('drops an empty aggregate map on the way out', () => {
-    expect(groupingCodec.serialize({ agg: {}, keys: ['a'] })).toBe(
+  it('drops an empty aggregate list on the way out', () => {
+    expect(groupingCodec.serialize({ agg: [], keys: ['a'] })).toBe(
       '{"keys":["a"]}',
     );
   });
 
-  it('carries an aggregate column named __proto__ as an own property', () => {
-    // `agg` is rebuilt with `Object.fromEntries`, so a `__proto__` column name
-    // survives as data rather than reaching the prototype setter — the
+  it('carries an aggregate column named __proto__ as data', () => {
+    // The token list is an array, so a `__proto__` column name is a string
+    // inside it rather than anything that reaches a prototype setter — the
     // per-field drop the refusal contract exists to rule out. The loader's
     // sanitizer is what then refuses it for not being a column.
     const result = groupingCodec.deserialize(
-      '{"agg":{"__proto__":"sum"},"keys":["a"]}',
+      '{"agg":["__proto__:sum"],"keys":["a"]}',
     );
 
     expect(result.keys).toStrictEqual(['a']);
-    expect(Object.hasOwn(result.agg ?? {}, '__proto__')).toBe(true);
-    expect(Object.getPrototypeOf(result.agg)).toBe(Object.prototype);
+    expect(result.agg).toStrictEqual([{ columnKey: '__proto__', fn: 'sum' }]);
+  });
+
+  it('round-trips a share naming one of two measures on a column', () => {
+    const compact = {
+      agg: [
+        { columnKey: 'total_amount', fn: 'sum' },
+        { columnKey: 'total_amount', fn: 'count' },
+      ],
+      keys: ['order_status'],
+      share: [{ columnKey: 'total_amount', fn: 'count' }],
+    } as const;
+
+    expect(groupingCodec.serialize(compact)).toBe(
+      '{"agg":["total_amount:sum","total_amount:count"],"keys":["order_status"],"share":["total_amount:count"]}',
+    );
+    expect(
+      groupingCodec.deserialize(groupingCodec.serialize(compact)),
+    ).toStrictEqual(compact);
+  });
+
+  it('refuses a share token outside the vocabulary', () => {
+    expect(
+      groupingCodec.deserialize(
+        '{"agg":["total_amount:sum"],"keys":["a"],"share":["total_amount:median"]}',
+      ),
+    ).toStrictEqual({ keys: [] });
+  });
+
+  it('drops an empty share list on the way out', () => {
+    expect(
+      groupingCodec.serialize({
+        agg: [{ columnKey: 'a', fn: 'sum' }],
+        keys: ['b'],
+        share: [],
+      }),
+    ).toBe('{"agg":["a:sum"],"keys":["b"]}');
   });
 
   it('refuses a `keys` that is not an array', () => {
@@ -229,7 +320,7 @@ describe('the granularity map', () => {
     ).toStrictEqual({ keys: [] });
   });
 
-  it('still refuses a fifth member', () => {
+  it('still refuses a member outside the envelope', () => {
     // The envelope stays closed; `gran` widened it by exactly one.
     expect(
       groupingCodec.deserialize(

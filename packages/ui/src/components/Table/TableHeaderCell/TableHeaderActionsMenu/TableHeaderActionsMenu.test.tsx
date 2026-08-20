@@ -32,15 +32,21 @@ const { NO_COLLAPSED_GROUP_PATHS, NO_DRILLED_GROUPS, NO_ROWS } = vi.hoisted(
   }),
 );
 
-const { appliedAggregateRef, capabilityRef, isGroupingEnabledRef } = vi.hoisted(
-  () => ({
-    appliedAggregateRef: { current: undefined as TableAggregateFn | undefined },
-    capabilityRef: {
-      current: undefined as TableColumnGroupingCapability | undefined,
-    },
-    isGroupingEnabledRef: { current: false },
-  }),
-);
+const {
+  appliedAggregatesRef,
+  capabilityRef,
+  groupingKeysRef,
+  isGroupingEnabledRef,
+} = vi.hoisted(() => ({
+  appliedAggregatesRef: {
+    current: [] as readonly { columnKey: string; fn: TableAggregateFn }[],
+  },
+  capabilityRef: {
+    current: undefined as TableColumnGroupingCapability | undefined,
+  },
+  groupingKeysRef: { current: [] as readonly string[] },
+  isGroupingEnabledRef: { current: false },
+}));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/columns/actions', () => ({
   useSetColumnPinning: () => vi.fn(),
@@ -49,14 +55,15 @@ vi.mock('#ui/components/Table/contexts/TableConfig/columns/actions', () => ({
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/grouping/actions', () => ({
+  useAddTableColumnAggregate: () => vi.fn(),
   useClearTableGrouping: () => vi.fn(),
-  useSetTableColumnAggregate: () => vi.fn(),
+  useRemoveTableColumnAggregate: () => vi.fn(),
   useToggleTableGroupKey: () => vi.fn(),
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/grouping/selectors', () => ({
-  useGetTableColumnAggregate: () => appliedAggregateRef.current,
-  useGetTableGroupingKeys: () => [],
+  useGetTableGroupingAggregates: () => appliedAggregatesRef.current,
+  useGetTableGroupingKeys: () => groupingKeysRef.current,
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
@@ -116,8 +123,9 @@ import { TableHeaderActionsMenu } from './TableHeaderActionsMenu.component';
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
-  appliedAggregateRef.current = undefined;
+  appliedAggregatesRef.current = [];
   capabilityRef.current = undefined;
+  groupingKeysRef.current = [];
   isGroupingEnabledRef.current = false;
 });
 
@@ -378,6 +386,57 @@ describe('TableHeaderActionsMenu', () => {
       expect(screen.getByText('No Aggregate')).not.toBeNull();
       // One more boundary than the absent-capability case above.
       expect(screen.getAllByRole('separator')).toHaveLength(5);
+    });
+
+    it('drops only the aggregation block once the column becomes a group key', () => {
+      // The suppression is surgical: this is the same menu as the test above,
+      // with the column applied as a key. Every other item has to survive it,
+      // or the fix for #830 has taken the column's sort/pin/hide/manage
+      // affordances down with the aggregates it meant to remove.
+      isGroupingEnabledRef.current = true;
+      capabilityRef.current = {
+        aggregates: ['count', 'sum'],
+        canGroup: false,
+        column: 'name',
+        periods: [],
+        refusal: 'too-many-distinct',
+        role: 'fact',
+        typeName: 'numeric',
+      };
+      groupingKeysRef.current = ['name'];
+
+      render(
+        <TableHeaderActionsMenu
+          columnKey='name'
+          columnLabel='Name'
+          hasSettings
+          isSortable
+          isStatic={false}
+        />,
+      );
+
+      for (const label of [
+        'Ascending',
+        'Descending',
+        'Clear Sorting',
+        'Group by This',
+        'Clear Grouping',
+        'Expand All Groups',
+        'Collapse All Groups',
+        'Pin Left',
+        'Pin Right',
+        'Clear Pinning',
+        'Hide Column',
+        'Manage Column',
+      ]) {
+        expect(screen.getByText(label)).not.toBeNull();
+      }
+
+      expect(screen.queryByText('Sum')).toBeNull();
+      expect(screen.queryByText('Count')).toBeNull();
+      expect(screen.queryByText('No Aggregate')).toBeNull();
+      // Back to the four boundaries the block-less grouping menu renders.
+      expect(screen.getAllByRole('separator')).toHaveLength(4);
     });
 
     it('renders a trigger for a locked column that has nothing else to offer', () => {

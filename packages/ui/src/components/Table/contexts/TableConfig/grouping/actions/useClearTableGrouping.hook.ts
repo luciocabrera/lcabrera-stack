@@ -11,7 +11,7 @@ export const useClearTableGrouping = () => {
 
   return () => {
     setGrouping(() => ({
-      aggregates: {},
+      aggregates: [],
       keys: [],
       mode: 'flat',
       periods: {},

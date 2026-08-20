@@ -63,7 +63,7 @@ const sortKeys = (value: object) =>
   Object.keys(value).toSorted((a, b) => a.localeCompare(b));
 
 const NO_GROUPING: TableGroupingState = {
-  aggregates: {},
+  aggregates: [],
   keys: [],
   mode: 'flat',
   periods: {},
@@ -79,7 +79,7 @@ type GroupingArgs = {
 };
 
 const grouping = ({
-  aggregates = {},
+  aggregates = [],
   keys,
   mode = 'flat',
   periods = {},
@@ -487,7 +487,7 @@ it('requests the selected aggregates beside the row count, and never a filtered 
   await selectOrdersPage({
     filters: [],
     grouping: grouping({
-      aggregates: { total_amount: 'sum' },
+      aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
       keys: ['order_status'],
     }),
     includeTotal: true,

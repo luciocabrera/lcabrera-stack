@@ -16,8 +16,8 @@ import type {
   TableDrawerTotalsPlacementState,
 } from './TableDrawerContext.types';
 
+import { useAddColumnAggregate } from './actions/useAddColumnAggregate.hook';
 import { useClearGrouping } from './actions/useClearGrouping.hook';
-import { useSetColumnAggregate } from './actions/useSetColumnAggregate.hook';
 import { useSetColumnsOrder } from './actions/useSetColumnsOrder.hook';
 import { useSetGroupKeys } from './actions/useSetGroupKeys.hook';
 import { useToggleGroupKey } from './actions/useToggleGroupKey.hook';
@@ -51,7 +51,7 @@ const columnsStore = createMockStore({
 });
 
 const groupingStore = createMockStore<TableGroupingState>({
-  aggregates: {},
+  aggregates: [],
   keys: [],
   mode: 'flat',
   periods: {},
@@ -136,7 +136,7 @@ describe('TableDrawerContext hooks', () => {
 describe('TableDrawerContext grouping draft hooks', () => {
   beforeEach(() => {
     groupingStore.reset({
-      aggregates: {},
+      aggregates: [],
       keys: [],
       mode: 'flat',
       periods: {},
@@ -154,7 +154,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
     const { result: setKeys } = renderHook(() => useSetGroupKeys(), {
       wrapper: Wrapper,
     });
-    const { result: setAggregate } = renderHook(() => useSetColumnAggregate(), {
+    const { result: addAggregate } = renderHook(() => useAddColumnAggregate(), {
       wrapper: Wrapper,
     });
 
@@ -162,11 +162,11 @@ describe('TableDrawerContext grouping draft hooks', () => {
       toggle.current({ columnKey: 'status' });
       toggle.current({ columnKey: 'country' });
       setKeys.current(['country', 'status']);
-      setAggregate.current({ columnKey: 'total', fn: 'sum' });
+      addAggregate.current({ columnKey: 'total', fn: 'sum' });
     });
 
     expect(groupingStore.get()).toEqual({
-      aggregates: { total: 'sum' },
+      aggregates: [{ columnKey: 'total', fn: 'sum' }],
       keys: ['country', 'status'],
       mode: 'flat',
       periods: {},
@@ -188,7 +188,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
 
     act(() => {
       groupingStore.set({
-        aggregates: { total: 'avg' },
+        aggregates: [{ columnKey: 'total', fn: 'avg' }],
         keys: ['status'],
         mode: 'flat',
         periods: {},
@@ -197,12 +197,14 @@ describe('TableDrawerContext grouping draft hooks', () => {
     });
 
     expect(result.current.keys).toEqual(['status']);
-    expect(result.current.aggregates).toEqual({ total: 'avg' });
+    expect(result.current.aggregates).toEqual([
+      { columnKey: 'total', fn: 'avg' },
+    ]);
   });
 
   it('stages a clear rather than applying one', () => {
     groupingStore.reset({
-      aggregates: { total: 'sum' },
+      aggregates: [{ columnKey: 'total', fn: 'sum' }],
       keys: ['status'],
       mode: 'flat',
       periods: {},
@@ -218,7 +220,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
     });
 
     expect(groupingStore.get()).toEqual({
-      aggregates: {},
+      aggregates: [],
       keys: [],
       mode: 'flat',
       periods: {},
@@ -232,7 +234,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
       (_, index) => `key_${index}`,
     );
     groupingStore.reset({
-      aggregates: {},
+      aggregates: [],
       keys: stagedKeys,
       mode: 'flat',
       periods: {},
@@ -252,7 +254,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
 
   it('drops the staged aggregates with the last staged key', () => {
     groupingStore.reset({
-      aggregates: { total: 'sum' },
+      aggregates: [{ columnKey: 'total', fn: 'sum' }],
       keys: ['status'],
       mode: 'flat',
       periods: {},
@@ -268,7 +270,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
     });
 
     expect(groupingStore.get()).toEqual({
-      aggregates: {},
+      aggregates: [],
       keys: [],
       mode: 'flat',
       periods: {},

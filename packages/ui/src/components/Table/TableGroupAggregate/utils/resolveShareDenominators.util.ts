@@ -1,11 +1,15 @@
 import type {
+  TableAggregateFn,
+  TableColumnAggregate,
   TableGroupAggregateValue,
   TableGroupRowSummary,
 } from '#ui/components/Table/Table.types';
 
+import { toTableAggregateToken } from '#ui/components/Table/utils/tableAggregateToken.util';
+
 type ResolveShareDenominatorsArgs = {
-  /** The columns a share was asked for. Nothing else is measured. */
-  readonly shares: readonly string[];
+  /** The measures a share was asked for. Nothing else is measured. */
+  readonly shares: readonly TableColumnAggregate[];
   readonly summaries: readonly TableGroupRowSummary[];
 };
 
@@ -27,32 +31,46 @@ const toFiniteNumber = (value: TableGroupAggregateValue['value']) => {
     : undefined;
 };
 
+/**
+ * The row's entry for one measure, matched on the `(columnKey, fn)` pair.
+ *
+ * The function is part of the match, not decoration: a column may carry both
+ * `sum` and `count`, and taking whichever entry came first would divide one
+ * measure by the other's total (#831).
+ */
 const findAggregate = ({
   columnKey,
+  fn,
   summary,
 }: {
   readonly columnKey: string;
+  readonly fn: TableAggregateFn;
   readonly summary: TableGroupRowSummary;
-}) => summary.aggregates.find((entry) => entry.columnKey === columnKey);
+}) =>
+  summary.aggregates.find(
+    (entry) => entry.columnKey === columnKey && entry.fn === fn,
+  );
 
 /**
  * The flat-mode denominator: every leaf's value added up.
  *
  * `undefined` the moment any leaf is unreadable — whether its value cannot be
- * read **or** it carries no entry for this column at all. A total over the rows
+ * read **or** it carries no entry for this measure at all. A total over the rows
  * that happened to have one is a denominator that silently omitted the rest,
  * which is the failure this whole util exists to avoid; skipping such a row
  * would produce a plausible percentage from a partial sum.
  *
- * A column **no** row carries reaches the same answer by the same branch, so
+ * A measure **no** row carries reaches the same answer by the same branch, so
  * "nothing to measure" and "measured incompletely" are one refusal rather than
  * two behaviours to keep in step.
  */
 const sumLeafAggregates = ({
   columnKey,
+  fn,
   summaries,
 }: {
   readonly columnKey: string;
+  readonly fn: TableAggregateFn;
   readonly summaries: readonly TableGroupRowSummary[];
 }) => {
   let total = 0;
@@ -61,7 +79,9 @@ const sumLeafAggregates = ({
   for (const summary of summaries) {
     if (summary.isSubtotal) continue;
 
-    const value = toFiniteNumber(findAggregate({ columnKey, summary })?.value);
+    const value = toFiniteNumber(
+      findAggregate({ columnKey, fn, summary })?.value,
+    );
 
     if (value === undefined) return;
 
@@ -73,7 +93,9 @@ const sumLeafAggregates = ({
 };
 
 /**
- * The grand total a share divides by, per column.
+ * The grand total a share divides by, per **measure** — keyed by the
+ * `(columnKey, fn)` token, since a column may carry two shareable aggregates
+ * and each has its own total (#831).
  *
  * **Two sources, and both are exact for the measures a share is offered on.**
  * Under `rollup` the read already emitted the grand total as a row — keyed by
@@ -87,7 +109,7 @@ const sumLeafAggregates = ({
  * interleaves subtotals with the leaves they total, so counting them would
  * multiply the denominator by the depth of the tree.
  *
- * A column with no usable denominator is **absent from the map** rather than
+ * A measure with no usable denominator is **absent from the map** rather than
  * present as zero. Division is the caller's job and the caller renders an
  * explicit absence for a missing entry — `0` would divide to `Infinity` and
  * render as a number nobody computed (#648).
@@ -112,19 +134,20 @@ export const resolveShareDenominators = ({
     (summary) => summary.isSubtotal && summary.path.length === 0,
   );
 
-  for (const columnKey of shares) {
+  for (const share of shares) {
+    const { columnKey, fn } = share;
     const fromGrandTotal =
       grandTotal === undefined
         ? undefined
-        : findAggregate({ columnKey, summary: grandTotal })?.value;
+        : findAggregate({ columnKey, fn, summary: grandTotal })?.value;
 
     const total =
       fromGrandTotal === undefined
-        ? sumLeafAggregates({ columnKey, summaries })
+        ? sumLeafAggregates({ columnKey, fn, summaries })
         : toFiniteNumber(fromGrandTotal);
 
     if (total !== undefined && total !== 0) {
-      denominators.set(columnKey, total);
+      denominators.set(toTableAggregateToken(share), total);
     }
   }
 

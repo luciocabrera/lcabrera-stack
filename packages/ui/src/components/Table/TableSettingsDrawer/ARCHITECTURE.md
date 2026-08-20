@@ -46,7 +46,9 @@ TableSettingsDrawer/
 │   │   ├── useResetFilters                → Reset filters from table
 │   │   ├── useResetSorting                → Reset sorting from table
 │   │   ├── useResetTableSettings          → Re-seed both drafts from the table
-│   │   ├── useSetColumnAggregate          → Stage / clear one column's aggregate
+│   │   ├── useAddColumnAggregate          → Stage one more aggregate for a column
+│   │   ├── useRemoveColumnAggregate       → Un-stage one of a column's aggregates, or all
+│   │   ├── useReorderColumnAggregates     → Stage the aggregates in a new order, by row id
 │   │   ├── useSetColumnFilters            → Set filters object
 │   │   ├── useSetColumnPinning            → Set pinning state + sync draft order
 │   │   ├── useSetColumnsOrder             → Set column order array
@@ -106,7 +108,7 @@ TableSettingsDrawer/
 │   ├── AddGroupKeySection/                → VirtualSelect for adding a group key
 │   ├── ActiveGroupKeyList/                → DraggableList of applied keys
 │   ├── AddAggregateSection/               → Column → legal-function selects
-│   ├── ActiveAggregateList/               → Selected aggregates, each removable
+│   ├── ActiveAggregateList/               → DraggableList of staged aggregates
 │   ├── GroupingSectionToolbar/            → Clear grouping (toolbar + footer)
 │   └── utils/
 │
@@ -174,6 +176,11 @@ graph LR
   SortingSection --> TableConfigContext
   SortingSection --> DraggableList
   SortingSection --> VirtualSelect2["VirtualSelect"]
+
+  GroupingSection --> TableDrawerContext
+  GroupingSection --> TableConfigContext
+  GroupingSection --> DraggableList3["DraggableList (keys and aggregates)"]
+  GroupingSection --> VirtualSelect3["VirtualSelect"]
 
   ColumnOrderSection --> TableDrawerContext
   ColumnOrderSection --> TableConfigContext

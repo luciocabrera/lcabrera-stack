@@ -1,39 +1,59 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { Button } from '#ui/components/Button';
-import { MenuCloseIcon } from '#ui/components/Icons';
+import type { DraggableItem } from '#ui/components/DraggableList';
+
+import { DraggableList } from '#ui/components/DraggableList';
 import { InfoBox } from '#ui/components/InfoBox';
 import {
   SidePanelSection,
   SidePanelSectionHeader,
 } from '#ui/components/SidePanel';
 import { useGetColumns } from '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
-import { ICON_SIZE_MD } from '#ui/design-system/constants';
 
 import type { ActiveAggregateListProps } from './ActiveAggregateList.types';
 
-import { useSetColumnAggregate } from '../../TableDrawerContext/actions';
+import { useReorderColumnAggregates } from '../../TableDrawerContext/actions';
 import { useGetGroupingAggregates } from '../../TableDrawerContext/selectors';
 import { toAggregateItems } from '../utils';
 import { styles } from './ActiveAggregateList.stylex';
-import { ShareOfTotalToggle } from './ShareOfTotalToggle';
+import { AggregateItemContent } from './AggregateItemContent';
 
 /**
- * The aggregates currently staged, one row each, with a remove control.
+ * The aggregates currently staged, one draggable row each, with a share toggle
+ * and a remove control.
  *
- * Not draggable, unlike the group-key list beside it: the key order is the
- * query's nesting order and means something, where the aggregate order means
- * nothing at all — offering a drag handle would imply a choice that has no
- * effect.
+ * One column may appear several times, once per function applied to it (#831),
+ * so each row is keyed by the `(columnKey, fn)` pair rather than by the column —
+ * a column key alone would repeat, and both React and the reorder below would
+ * conflate two distinct rows.
+ *
+ * **The order is a choice, so it is draggable** (#832). It is the order the
+ * measures are listed in, and it is state rather than a view preference: the
+ * `grouping` param's `agg` array carries it, so a shared link and a reload read
+ * back what was dragged. The drag stages like every other drawer edit and
+ * applies on Accept, so it costs no loader run of its own.
+ *
+ * A self-connected delegate: it reads the staged aggregates and the route's
+ * columns from their stores itself, so the section shell above it forwards only
+ * `isBusy`. Each row does the same for its own removal and share.
  */
 export const ActiveAggregateList = ({
   isBusy = false,
 }: ActiveAggregateListProps) => {
   const columns = useGetColumns();
   const aggregates = useGetGroupingAggregates();
-  const setColumnAggregate = useSetColumnAggregate();
+  const reorderColumnAggregates = useReorderColumnAggregates();
 
   const aggregateItems = toAggregateItems({ aggregates, columns });
+
+  const handleReorder = (reorderedItems: DraggableItem[]) => {
+    reorderColumnAggregates(reorderedItems.map((item) => item.id));
+  };
+
+  const draggableItems: DraggableItem[] = aggregateItems.map((item) => ({
+    content: <AggregateItemContent isBusy={isBusy} item={item} />,
+    id: item.id,
+  }));
 
   return (
     <SidePanelSection>
@@ -45,29 +65,11 @@ export const ActiveAggregateList = ({
         </InfoBox>
       ) : (
         <div {...stylex.props(styles.aggregateList)}>
-          {aggregateItems.map(({ columnKey, label }) => (
-            <div key={columnKey} {...stylex.props(styles.aggregateItem)}>
-              <span {...stylex.props(styles.aggregateItemLabel)}>{label}</span>
-              <div {...stylex.props(styles.aggregateItemControls)}>
-                <ShareOfTotalToggle
-                  columnKey={columnKey}
-                  isBusy={isBusy}
-                  label={label}
-                />
-                <Button
-                  aria-label={`Remove ${label}`}
-                  icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
-                  isBusy={isBusy}
-                  onClick={() => {
-                    setColumnAggregate({ columnKey, fn: undefined });
-                  }}
-                  size='mini'
-                  tooltipContent={`Remove ${label}`}
-                  variant='ghost'
-                />
-              </div>
-            </div>
-          ))}
+          <DraggableList
+            isBusy={isBusy}
+            items={draggableItems}
+            onOrderChange={handleReorder}
+          />
         </div>
       )}
     </SidePanelSection>

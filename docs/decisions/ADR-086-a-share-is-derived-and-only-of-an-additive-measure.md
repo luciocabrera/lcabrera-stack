@@ -1,6 +1,6 @@
 # ADR-086 — A share of the total is derived from the rows, and offered only on an additive measure
 
-- **Status:** Accepted
+- **Status:** Accepted; widened by #831 (2026-08-20) — a share names an **aggregate**, not a column (see "A share names a measure" below)
 - **Date:** 2026-08-20
 - **Scope:** `@lcabrera/ui` — the share selection, its denominator and its rendering
 - **Issue:** #648 — share-of-total measure and its proportional bar
@@ -96,6 +96,27 @@ So the share renders beside the number it is a share of, in
 divides a filtered measure by a filtered total**, and that cell already renders
 `TABLE_GROUP_FILTERED_AGGREGATE_LABEL` when its column carries a filter, so the
 obligation #570 established is inherited rather than restated.
+
+### 5. A share names a measure, not a column (widened by #831, 2026-08-20)
+
+This decision was taken while a column could carry at most one aggregate, so
+every site identified a share by **column key alone**: `pruneGroupShares` looked
+up one function per column, `ShareOfTotalToggle` took a `columnKey` and read the
+column's aggregate itself, and `share` was narrowed by the plain key-array
+narrower.
+
+#831 lets one column carry several aggregates, and `sum` and `count` are **both**
+shareable — so a bare column key can no longer say which measure's share is
+meant. `TableGroupingState.shares` is therefore a list of `(columnKey, fn)`
+records, encoded in the `grouping` param as the same `"<columnKey>:<fn>"` tokens
+`agg` uses (ADR-061). Every site follows: the toggle takes the pair, the
+denominator map is keyed by it, and `pruneGroupShares` matches on it, so removing
+one of a column's measures prunes only that measure's share.
+
+Nothing in §1–§4 changes. The denominator is still the grand total, still derived
+client-side, still offered only on an additive measure, and still rendered inside
+the measure's own cell — where it now sits beside its own number rather than
+beside the column's only one.
 
 ## Consequences
 

@@ -258,7 +258,7 @@ describe('readTableLoaderStateFromRequest', () => {
       });
 
       expect(result.grouping).toEqual({
-        aggregates: {},
+        aggregates: [],
         keys: ['status'],
         mode: 'flat',
         periods: {},
@@ -277,7 +277,7 @@ describe('readTableLoaderStateFromRequest', () => {
       });
 
       expect(result.grouping).toEqual({
-        aggregates: {},
+        aggregates: [],
         keys: [],
         mode: 'flat',
         periods: {},
@@ -299,7 +299,7 @@ describe('readTableLoaderStateFromRequest', () => {
       });
 
       expect(result.grouping).toEqual({
-        aggregates: {},
+        aggregates: [],
         keys: [],
         mode: 'flat',
         periods: {},
@@ -318,7 +318,7 @@ describe('readTableLoaderStateFromRequest', () => {
       });
 
       expect(result.grouping).toEqual({
-        aggregates: {},
+        aggregates: [],
         keys: [],
         mode: 'flat',
         periods: {},

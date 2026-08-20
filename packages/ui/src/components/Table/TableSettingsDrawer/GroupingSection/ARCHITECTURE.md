@@ -56,21 +56,23 @@ GroupingSection/
 ├── ARCHITECTURE.md
 ├── GroupingSection.component.tsx       → Shell: add-key, overlay, lists, toolbar
 ├── GroupingSection.test.tsx            → Staging + navigation-count integration test
-├── GroupingSection.types.ts            → GroupingSectionProps, GroupKeyItem
+├── GroupingSection.types.ts            → GroupingSectionProps, GroupKeyItem, AggregateItem
 ├── index.ts
 ├── AddGroupKeySection/                 → VirtualSelect for adding a group key
 ├── ActiveGroupKeyList/                 → DraggableList of staged keys
 │   └── GroupKeyItemContent/            → One key row: level, label, remove
-├── AddAggregateSection/                → Column select → legal-function select
-├── ActiveAggregateList/                → Staged aggregates, each removable
-│   └── ShareOfTotalToggle/             → Share of the grand total, on the aggregates it is defined for
+├── AddAggregateSection/                → Column select → addable-function select
+├── ActiveAggregateList/                → DraggableList of staged aggregates — one row per (column, function)
+│   ├── AggregateItemContent/           → One measure row: label, share toggle, remove
+│   └── ShareOfTotalToggle/             → Share of the grand total, on the measures it is defined for
 ├── GroupingModeSection/                → Totals mode: groups only, or groups with subtotals
 ├── TotalsPlacementSection/             → Totals position: above or below their rows (rollup only)
 ├── GroupingSectionToolbar/             → Clear grouping (toolbar + footer)
 └── utils/
     ├── toGroupKeyItems.util.ts         → Staged keys + labels, in nesting order
-    ├── toAggregateItems.util.ts        → Staged aggregates + labels, column order
-    ├── toAggregatableColumnOptions.util.ts → Columns the catalogue can aggregate
+    ├── toAggregateItems.util.ts        → Staged aggregates + labels + a per-entry id, in staged order
+    ├── toAggregatableColumnOptions.util.ts → Columns an aggregate may be offered on (resolveOfferableAggregates, in display order)
+    ├── resolveAddableAggregates.util.ts → Functions still offerable for the chosen column: the same predicate, minus what it already carries
     └── toGroupKeyColumnOptions.util.ts → Columns that may still be a group key (declared ∧ catalogue, minus staged)
 ```
 
@@ -87,18 +89,22 @@ flowchart TD
   C --> F["ActiveGroupKeyList"]
   C --> G["AddGroupKeySection"]
   D --> H["ActiveAggregateList"]
-  E --> I["AddAggregateSection"]
+  D --> I["AddAggregateSection"]
+  E --> I
   E --> G
 
   F -->|reorder / remove| J["useSetGroupKeys"]
   G -->|add| K["useToggleGroupKey"]
-  H -->|remove| L["useSetColumnAggregate"]
-  I -->|add| L
+  H -->|remove| L2["useRemoveColumnAggregate"]
+  H -->|reorder| L3["useReorderColumnAggregates"]
+  I -->|add| L["useAddColumnAggregate"]
   M["GroupingSectionToolbar"] -->|clear| N["useClearGrouping"]
 
   J --> O["useSetGrouping (internal)"]
   K --> O
   L --> O
+  L2 --> O
+  L3 --> O
   N --> O
   O --> P["resolveTableGroupingUpdate<br/>(depth cap, unchanged check)"]
   P -->|updated| B2
@@ -112,17 +118,21 @@ flowchart TD
 
 ## Where each answer comes from
 
-| Question                                | Answered by                                                                 | Not by                                |
-| --------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------- |
-| May this column be a group key at all?  | `resolveGroupKeyAvailability` — the declared flag narrowed by the catalogue | either gate alone (ADR-068)           |
-| Which aggregates may this column take?  | `metaState.groupingCapabilities[key].aggregates`                            | `TableColumn.dataType` (#550)         |
-| May this measure show a share?          | `isShareableAggregate` — additive measures only (ADR-086)                   | the column, which has no say in it    |
-| How many keys may be applied?           | `MAX_TABLE_GROUP_KEYS`                                                      | anything local to a component         |
-| Is this configuration a change at all?  | `resolveTableGroupingUpdate`                                                | the component                         |
-| What grouping is the section showing?   | `TableDrawerContext`'s `groupingStore` (the draft)                          | the live `TableConfig` grouping store |
-| What grouping is the **table** showing? | `TableConfig`'s `groupingStore`                                             | the draft, until Accept commits it    |
-| Where do the totals go?                 | `TableDrawerContext`'s `totalsPlacementStore` (the draft)                   | the grouping draft — see below        |
-| May the user reshape the grouping?      | `metaState.isGroupingLocked`, read by each delegate itself                  | a prop drilled from the shell         |
+| Question                                        | Answered by                                                                 | Not by                                      |
+| ----------------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------- |
+| May this column be a group key at all?          | `resolveGroupKeyAvailability` — the declared flag narrowed by the catalogue | either gate alone (ADR-068)                 |
+| Which aggregates does this column's type allow? | `metaState.groupingCapabilities[key].aggregates`                            | `TableColumn.dataType` (#550)               |
+| Which of those may be **offered** here?         | `resolveOfferableAggregates` — those, minus an active group key             | either half on its own (#830)               |
+| Which of those may still be **added** here?     | `resolveAddableAggregates` — those, minus what the column carries (#841)    | the shared predicate, which the menu shares |
+| May this measure show a share?                  | `isShareableAggregate` — additive measures only (ADR-086)                   | the column, which has no say in it          |
+| Which measure does a share belong to?           | the `(columnKey, fn)` pair (#831)                                           | the column key alone                        |
+| In what order are the measures listed?          | the staged `aggregates` order, dragged in this list (#832)                  | the column order, which no longer orders it |
+| How many keys may be applied?                   | `MAX_TABLE_GROUP_KEYS`                                                      | anything local to a component               |
+| Is this configuration a change at all?          | `resolveTableGroupingUpdate`                                                | the component                               |
+| What grouping is the section showing?           | `TableDrawerContext`'s `groupingStore` (the draft)                          | the live `TableConfig` grouping store       |
+| What grouping is the **table** showing?         | `TableConfig`'s `groupingStore`                                             | the draft, until Accept commits it          |
+| Where do the totals go?                         | `TableDrawerContext`'s `totalsPlacementStore` (the draft)                   | the grouping draft — see below              |
+| May the user reshape the grouping?              | `metaState.isGroupingLocked`, read by each delegate itself                  | a prop drilled from the shell               |
 
 `TableColumn.dataType` is a five-member presentation vocabulary that reports
 `numeric`, `jsonb` and `point` alike as `string`, so a menu built from it offers
@@ -141,6 +151,59 @@ A refused column is **left out** here rather than listed and disabled: a
 `VirtualSelect` option carries no room for a reason, and the header menu is where
 a user asks about one specific column.
 
+The **aggregate** lists reached the same shape one issue later, and for the
+mirror-image reason. Both of them —
+`toAggregatableColumnOptions`' column list and `AddAggregateSection`'s function
+list — resolve through
+[`resolveOfferableAggregates`](../../utils/ARCHITECTURE.md), which composes the
+catalogue's type legality with "is this column an active group key" and answers
+with nothing at all in the second case: under one column per key that column
+renders its key's value, so an aggregate chosen on it could never be shown
+([ADR-080](../../../../../../../docs/decisions/ADR-080-a-group-key-renders-in-its-own-column.md)).
+This picker had that second condition and the column header menu did not, so the
+menu offered functions on a column this list had already dropped and clicking
+one wrote the grouping store and changed nothing on screen (#830). One predicate
+now serves both, each fed from its own commit context — the draft keys here, the
+live ones there.
+
+The picker is still not where the rule is enforced. The grouping configuration
+is URL state, so a request can always name one column as both key and measure,
+and `resolveGroupCellChildren` is where the key actually wins.
+
+### The one answer the picker and the menu give differently
+
+The function picker subtracts the aggregates the chosen column already carries;
+the header menu does not. That is the design, not drift (#841), and it is worth
+saying plainly because the two surfaces sharing one legality predicate is the
+whole point of the paragraph above.
+
+**Legality is a property of the column, so it is shared. What to do with an
+applied function is a property of the gesture, so it is not.** This picker only
+ever adds, and #831 made adding an append with a duplicate guard — so offering a
+function the column already carries offers a guarded no-op: Add accepts the
+choice, `addTableColumnAggregate` returns the state it was handed, and nothing
+moves. That is the very thing `commands/ARCHITECTURE.md` rules out, _"never
+offered rather than offered-and-disabled"_. The header menu **toggles**, so the
+applied item there is the only affordance that removes the aggregate; subtracting
+it would leave an aggregate that can be applied from the menu and not cleared
+from it.
+
+So the subtraction lives in `resolveAddableAggregates`, **beside**
+`resolveOfferableAggregates` rather than inside it. Giving the shared predicate
+the aggregate list would force one answer on both surfaces, and it is the menu
+that would lose. `resolveOfferableAggregates.surfaces.test.tsx` asserts both
+halves against the same applied aggregate, so a later "harmonisation" fails
+there rather than reaching a user.
+
+`isExhausted` is the second half of that util's answer, and it exists because an
+empty function list has two causes that must not read alike: every legal
+function is applied, or none was legal (an unaggregatable column, a staged group
+key, no column chosen yet). Only the first has anything to say, and it needs
+saying — the **column** list does not subtract exhausted columns (that list is
+#830's and stays as it is), so a fully-measured column is still offered and the
+picker has to explain why it went quiet. It shows an `InfoBox` in place of the
+control, the same shape `AddGroupKeySection` uses at the depth cap.
+
 ## Totals placement is staged here but is not part of the grouping
 
 `TotalsPlacementSection` sits beside the mode control and stages like everything
@@ -153,10 +216,58 @@ on (ADR-085).
 It renders only under `rollup`. `flat` emits no subtotal and no grand total, so
 there would be nothing to position.
 
+## A column carries as many aggregates as the user asks for
+
+`aggregates` is an ordered list of `(columnKey, fn)` records, so `total_amount`
+can show its minimum and its average at once (#831). Three consequences land in
+this section:
+
+- **The list is one row per pair**, keyed by the pair rather than by the column —
+  a column key repeats the moment a column carries two measures, and React would
+  reconcile two distinct rows as one.
+- **The order is staged state**, not column order: it is what the `grouping` param
+  carries and what the user drags (#832), so `toAggregateItems` preserves it
+  rather than sorting.
+- **Adding is an append with a duplicate guard**, not a replace. Re-adding an
+  applied pair answers with the state it was handed, so the commit reports
+  `unchanged` and nothing navigates. The picker does not offer that pair in the
+  first place (#841, above) — the guard is the backstop, not the affordance.
+
+The header menu writes the same shape live: `AggregateButton` derives its
+pressed state through `deriveAggregateCommandState` — the aggregates' **own**
+derivation, beside the shared `deriveToggleCommandState` rather than widening it,
+because several items can be active at once and sorting must not gain that state.
+
+## The aggregate order is dragged, and the drag names ids
+
+`ActiveAggregateList` renders through `DraggableList`, like the three staged
+lists beside it. Until the shape change there was nothing to drag: a
+column-to-function map has no order of its own, and a handle would have offered
+a choice with no effect. An ordered list makes the order a real choice, and the
+`agg` array is what carries it through the URL — so a reorder survives a shared
+link and a reload, and one that did not would be a defect here rather than in
+the format.
+
+**The reorder is a permutation named by row ids, not a whole-list write.** That
+is where `useReorderColumnAggregates` departs from `useSetGroupKeys`, whose
+reorder rebuilds the key list from the rows. It has to: `toGroupKeyItems` keeps
+a key whose column the route does not declare, labelling it by key, while
+`toAggregateItems` **drops** the equivalent aggregate — so rebuilding the
+aggregate list from what is on screen would un-stage an entry the user never saw
+and never touched. `reorderTableColumnAggregates` sorts the staged entries by
+the ids it was handed instead, which can neither invent an aggregate nor drop
+one; anything the ids do not name keeps its relative order after those they do.
+
+The row identity is the `(columnKey, fn)` token, not the column, for the same
+reason the list is one row per pair — by the time a column can appear twice, a
+column-keyed `DraggableItem.id` would make two rows one drag target.
+
 ## A share is chosen here and rendered elsewhere
 
-`ShareOfTotalToggle` sits on each applied aggregate and stages a column into the
-grouping draft's `shares`. What it turns on is rendered by `TableGroupShare`,
+`ShareOfTotalToggle` sits on each applied aggregate and stages that
+**`(columnKey, fn)` pair** into the grouping draft's `shares` — an aggregate
+rather than a column, because `sum` and `count` are both shareable and a column
+may carry both (#831, widening ADR-086). What it turns on is rendered by `TableGroupShare`,
 inside the measure's own cell in the grid — not by anything in this section, and
 not in a column of its own (ADR-086 §4 records why a derived column would undo
 ADR-080).

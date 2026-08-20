@@ -1,7 +1,9 @@
+export { addTableColumnAggregate } from './addTableColumnAggregate.util';
 export { applyGroupingReducer } from './applyGroupingReducer.util';
+export { removeTableColumnAggregate } from './removeTableColumnAggregate.util';
+export { reorderTableColumnAggregates } from './reorderTableColumnAggregates.util';
 export { resolveGroupingColumnsPatch } from './resolveGroupingColumnsPatch.util';
 export { resolveTableGroupingUpdate } from './resolveTableGroupingUpdate.util';
-export { setTableColumnAggregate } from './setTableColumnAggregate.util';
 export { setTableGroupingMode } from './setTableGroupingMode.util';
 export { setTableGroupKeyPeriod } from './setTableGroupKeyPeriod.util';
 export { toggleGroupShare } from './toggleGroupShare.util';

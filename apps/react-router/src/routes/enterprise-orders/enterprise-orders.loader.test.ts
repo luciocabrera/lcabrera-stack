@@ -48,7 +48,7 @@ const invokeLoader = async (search = '') =>
   } as LoaderFunctionArgs);
 
 const NO_GROUPING = {
-  aggregates: {},
+  aggregates: [],
   keys: [],
   mode: 'flat',
   periods: {},
@@ -140,7 +140,7 @@ describe('enterprise-orders loader', () => {
       expect(selectOrdersPage).toHaveBeenCalledWith(
         expect.objectContaining({
           grouping: {
-            aggregates: {},
+            aggregates: [],
             keys: ['order_status'],
             mode: 'flat',
             periods: {},
@@ -201,7 +201,7 @@ describe('enterprise-orders loader', () => {
       expect(selectOrdersPage).toHaveBeenCalledWith(
         expect.objectContaining({
           grouping: {
-            aggregates: {},
+            aggregates: [],
             keys: ['order_status', 'shipping_country'],
             mode: 'flat',
             periods: {},
@@ -225,23 +225,46 @@ describe('enterprise-orders loader', () => {
 
     it('applies a selected aggregate from the URL', async () => {
       const result = await invokeLoader(
-        groupingSearch(
-          '{"agg":{"total_amount":"sum"},"keys":["order_status"]}',
-        ),
+        groupingSearch('{"agg":["total_amount:sum"],"keys":["order_status"]}'),
       );
 
-      expect(result.metaState.groupingAggregates).toEqual({
-        total_amount: 'sum',
-      });
+      expect(result.metaState.groupingAggregates).toEqual([
+        { columnKey: 'total_amount', fn: 'sum' },
+      ]);
       expect(selectOrdersPage).toHaveBeenCalledWith(
         expect.objectContaining({
           grouping: {
-            aggregates: { total_amount: 'sum' },
+            aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
             keys: ['order_status'],
             mode: 'flat',
             periods: {},
             shares: [],
           },
+        }),
+      );
+    });
+
+    it('applies two aggregates on one column from the URL', async () => {
+      // The whole point of #831, through the route's real loader: the param
+      // carries both and the grouped read is issued for both.
+      const result = await invokeLoader(
+        groupingSearch(
+          '{"agg":["total_amount:sum","total_amount:avg"],"keys":["order_status"]}',
+        ),
+      );
+
+      expect(result.metaState.groupingAggregates).toEqual([
+        { columnKey: 'total_amount', fn: 'sum' },
+        { columnKey: 'total_amount', fn: 'avg' },
+      ]);
+      expect(selectOrdersPage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          grouping: expect.objectContaining({
+            aggregates: [
+              { columnKey: 'total_amount', fn: 'sum' },
+              { columnKey: 'total_amount', fn: 'avg' },
+            ],
+          }),
         }),
       );
     });

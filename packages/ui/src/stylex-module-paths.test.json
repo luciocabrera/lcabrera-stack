@@ -101,6 +101,7 @@
   "src/components/Table/TableSettingsDrawer/GeneralSettingsSection/AllSettingsSection/AllSettingsSection.stylex.ts",
   "src/components/Table/TableSettingsDrawer/GeneralSettingsSection/ColumnWidthsSection/ColumnWidthsSection.stylex.ts",
   "src/components/Table/TableSettingsDrawer/GroupingSection/ActiveAggregateList/ActiveAggregateList.stylex.ts",
+  "src/components/Table/TableSettingsDrawer/GroupingSection/ActiveAggregateList/AggregateItemContent/AggregateItemContent.stylex.ts",
   "src/components/Table/TableSettingsDrawer/GroupingSection/ActiveGroupKeyList/ActiveGroupKeyList.stylex.ts",
   "src/components/Table/TableSettingsDrawer/GroupingSection/ActiveGroupKeyList/GroupKeyItemContent/GroupKeyItemContent.stylex.ts",
   "src/components/Table/TableSettingsDrawer/GroupingSection/ActiveGroupKeyList/GroupKeyPeriodSelect/GroupKeyPeriodSelect.stylex.ts",

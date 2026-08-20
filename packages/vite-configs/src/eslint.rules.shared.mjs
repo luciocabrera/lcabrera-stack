@@ -38,6 +38,14 @@ export const SHARED_PLUGIN_RULE_SEVERITIES = {
   'unicorn/prefer-https': 'off',
   'unicorn/prefer-query-selector': 'off',
   'unicorn/prevent-abbreviations': 'off',
+  // New in unicorn 73's recommended set. Off deliberately and temporarily, not
+  // as a verdict on the rule: its default `multiline` fixer rewrites every
+  // one-line `/** … */` doc comment into an asterisk-less three-line block,
+  // which is not JSDoc, and choosing between that, `single-line` and off is a
+  // house-style call that should not be made under release pressure. #828
+  // decides it; an off-switch with no expiry is how `minimumReleaseAgeExclude`
+  // rotted.
+  'unicorn/single-line-block-comment-style': 'off',
 };
 
 /**
