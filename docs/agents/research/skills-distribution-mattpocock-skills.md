@@ -166,7 +166,7 @@ mechanism** (confirmed current as of 2026-08-20 via `code.claude.com/docs/en/dis
 - `.claude-plugin/plugin.json`: the plugin manifest — `name`, `version` (kept in sync with `package.json`'s
   version by `/scripts/sync-plugin-version.mjs`, run in the `version` npm script right after `changeset
 version`), `description`, `author`, `homepage`, `repository`, `license`, `keywords`, and a `skills` array
-  listing the 24 promoted skill paths **explicitly, one by one** (`./skills/engineering/tdd`,
+  listing the 25 promoted skill paths **explicitly, one by one** (`./skills/engineering/tdd`,
   `./skills/productivity/grill-me`, etc.) — not a directory glob.
 - `.claude-plugin/marketplace.json`: makes the repo its own single-plugin marketplace (fallback path,
   `/plugin marketplace add mattpocock/skills` then `/plugin install mattpocock-skills@mattpocock`) — explicitly

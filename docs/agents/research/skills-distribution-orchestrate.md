@@ -62,7 +62,7 @@ plugins/
 ├── scripts/validate-plugins.mjs         # ajv-validates every plugin.json + the marketplace.json
 ├── .github/workflows/validate-plugins.yml  # CI: runs validate-plugins.mjs on PRs touching manifests/schemas
 ├── orchestrate/                         # one plugin = one top-level directory
-├── pstack/, thermos/, create-plugin/, cursor-sdk/, ...  # 12 sibling plugins, same shape
+├── pstack/, thermos/, create-plugin/, cursor-sdk/, ...  # 12 siblings (13 dirs hold .cursor-plugin)
 └── README.md
 ```
 

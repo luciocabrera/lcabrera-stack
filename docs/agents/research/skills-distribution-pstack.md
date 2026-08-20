@@ -32,7 +32,8 @@ It is not a single skill but a **three-layer system** documented in its
   `/typescript-best-practices`, `/unslop`, `/show-me-your-work`,
   `/figure-it-out`, `/automate-me`, `/setup-pstack`) or as steps a playbook
   fires into.
-- **Bottom: twenty single-rule "principle" skills** (`principle-*`, e.g.
+- **Bottom: twenty single-rule "principle" skills**
+  (`ls -d pstack/skills/principle-*/ | wc -l`) — `principle-*`, e.g.
   `principle-laziness-protocol`, `principle-fix-root-causes`,
   `principle-boundary-discipline`), each a short leaf `SKILL.md`. `poteto-mode`
   inlines a Principles index that names when each applies and requires the
@@ -121,7 +122,9 @@ manifests read directly:
 
 There is **no npm package, no CLI installer script, and no `package.json`**
 anywhere under `pstack/` (the only `package.json` in the whole monorepo
-belongs to an unrelated helper script inside the `orchestrate` plugin). The
+belongs to the `orchestrate` plugin's bundled bun/TypeScript CLI — a full
+project, not a helper; see
+[the orchestrate write-up](./skills-distribution-orchestrate.md) §1). The
 entire distribution surface is **Cursor's own native plugin system**, reading
 plain files out of a git-hosted marketplace repo.
 
@@ -144,12 +147,18 @@ is the only concrete filesystem location documented anywhere in the repo:
 > `~/.cursor/plugins/local/<plugin-name>/` ... This path makes the plugin
 > immediately available to Cursor without any install step."
 
-So content is materialized onto disk (copied or synced into a
-`~/.cursor/plugins/...` tree, scoped per-user or per-project), not resolved
-live from a remote reference at prompt time the way an npm dependency would
-be. That answers the parent question directly: **it is copied**, the same
-broad shape as `@lcabrera/devkit`'s `init`/`sync`, just performed by the IDE's
-own built-in command instead of an npm-published CLI.
+That path is about **authoring** a plugin locally, so it does not settle what a
+_marketplace install_ does: it cannot discriminate between copying, caching and
+symlinking, and Cursor documents none of the three. The defensible reading is
+the one the orchestrate write-up reaches from the same clone — content ends up
+on disk under a `~/.cursor/plugins/...` tree rather than being resolved live
+from a remote reference at prompt time, and **the mechanism that puts it there
+is undocumented** (see
+[the orchestrate write-up](./skills-distribution-orchestrate.md) §4, which
+states the same limit). That is the same broad shape as `@lcabrera/devkit`'s
+`init`/`sync`, performed by the IDE's own built-in command rather than an
+npm-published CLI — but a flat "it is copied" claims more than the evidence
+carries.
 
 Team/enterprise marketplaces get one more mechanism Cursor's docs do mention
 by name — an auto-refresh toggle:
@@ -319,9 +328,9 @@ parallel, separately-maintained repository with its own translation layer.
   (`devkit`), but resolve invoked, code-dependent gates from `node_modules`
   (`repo-standards`), because a gate has real logic and versioned semantics a
   copy-paste can't safely carry. pstack has no equivalent "gate" package at
-  all — even its most code-like component, `create-plugin`'s CI validator
-  (`/scripts/validate-plugins.mjs`), lives as a **plain script committed to
-  the marketplace repo itself**, run via `npm install --no-save ajv
+  all — even its most code-like component, the CI validator
+  (`/scripts/validate-plugins.mjs`), lives as a **plain script committed to the
+  marketplace repo root itself**, run via `npm install --no-save ajv
 ajv-formats` in the consuming repo's own CI, not resolved from a published,
   versioned package. If pstack ever needed a real stateful gate (its
   `show-me-your-work` skill, for instance, writes a TSV decision log via a
