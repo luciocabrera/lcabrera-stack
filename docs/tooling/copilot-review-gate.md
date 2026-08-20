@@ -53,10 +53,15 @@ and that is not decoration. If one reviewer stops reviewing entirely, every pull
 request says so on its face instead of reading exactly as it always did. A
 monoculture is the kind of thing nobody notices while it is happening.
 
-`failure` is narrow on purpose. Pending means "waiting is enough"; a review that
-lands against a superseded commit is the one case where waiting provably is not,
-because Copilot has already spoken and nothing further happens on its own. That
-is #671's exact shape.
+`failure` is narrow on purpose, and narrower still since a second reviewer
+arrived. Pending means "waiting is enough"; `failure` is for the one case where
+waiting provably is not. With a single reviewer that was simply "it has spoken and
+nothing further comes on its own". With two, one of them may be reviewing the head
+at the moment the other's stale review fires this gate — so `failure` now also
+requires that **every** accepted reviewer has a counted review on the pull request
+and none of them covers the head. The cases that gives up report `pending`, which
+also blocks and does not claim more than it knows. #671 is still the shape it is
+built for.
 
 Dismissed and still-unsubmitted reviews are not counted, and an unrecognised
 review state is not counted either — the comparison is whitelisted so an

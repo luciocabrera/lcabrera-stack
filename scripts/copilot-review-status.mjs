@@ -78,9 +78,21 @@ const triggeringReviewFrom = (payload) =>
 const fetchPullRequest = (repository, number) =>
   JSON.parse(runGh(['api', `repos/${repository}/pulls/${number}`]));
 
-/** What was read, so a `pending` status is diagnosable from the run log alone. */
-const describeReviews = (reviews) =>
-  `${reviews.length} review(s) on the pull request, ${acceptedReviews(reviews).length} counted from an accepted reviewer`;
+/**
+ * What was read, so a `pending` status is diagnosable from the run log alone —
+ * and WHO satisfied it when someone did, so a reviewer monoculture is visible in
+ * the log as well as in the status description.
+ *
+ * Printed early on purpose. The last line this script writes is the one the
+ * reconcile sweep records as the gate's outcome, so nothing may be appended
+ * after it.
+ */
+const describeReviews = (reviews, reviewer) => {
+  const counted = `${reviews.length} review(s) on the pull request, ${acceptedReviews(reviews).length} counted from an accepted reviewer`;
+  return reviewer === undefined
+    ? counted
+    : `${counted}; ${reviewer} covers the head`;
+};
 
 /** Appends the suppressed-comment report where the runner shows it, if it can. */
 const writeSummary = (markdown) => {
@@ -153,7 +165,7 @@ const main = () => {
   const { state } = verdict;
 
   console.log(`${repository}#${number} head ${headSha}`);
-  console.log(describeReviews(reviews));
+  console.log(describeReviews(reviews, verdict.reviewer));
   reportSuppressed(suppressed, number);
   console.log(verdictLine({ description, state }));
   console.log(

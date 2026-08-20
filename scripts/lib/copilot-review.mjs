@@ -229,6 +229,30 @@ const coveringReview = (reviews, headSha) =>
     sameCommit(reviewedCommit(review), headSha),
   );
 
+/**
+ * Whether every accepted reviewer has a counted review on this pull request.
+ *
+ * The precondition for `failure`, and it is a real narrowing rather than caution.
+ * `failure` asserts something strong — waiting will not help — and with a single
+ * reviewer that held: Copilot had spoken and nothing further was coming on its
+ * own. A second reviewer that runs on every push breaks it, in the ordering the
+ * per-reviewer comparison does not already cover:
+ *
+ *   1. push C; the in-workflow reviewer starts, and may take minutes
+ *   2. Copilot, re-requested before that push, submits its review of B, which
+ *      fires this gate
+ *   3. nothing covers C yet, so `failure` is published — on a head that is being
+ *      reviewed right now
+ *   4. the review of C lands and creates no workflow run at all, so the status
+ *      stays `failure` until the next push or the reconcile sweep
+ *
+ * Waiting was exactly what would have helped. Requiring every accepted reviewer
+ * to have spoken makes `failure` mean what it says; the cases it gives up are
+ * reported `pending`, which also blocks and is honest about why.
+ */
+const everyReviewerHasSpoken = (reviews) =>
+  latestReviewPerReviewer(reviews).size === ACCEPTED_REVIEWERS.size;
+
 const pendingDescription = ({ headSha, isDraft, latest }) => {
   if (latest !== undefined) {
     return `${reviewerLogin(latest)} last reviewed ${shortSha(reviewedCommit(latest))}; waiting for a review of ${shortSha(headSha)}.`;
@@ -239,14 +263,18 @@ const pendingDescription = ({ headSha, isDraft, latest }) => {
 };
 
 /**
- * The commit status for one pull request, as `{ description, state }`.
+ * The commit status for one pull request, as `{ description, reviewer, state }`.
+ * `reviewer` is the login that satisfied it, or `undefined` when none did.
  *
- * `success` requires the newest counted Copilot review to name the head commit.
- * Anything else is `pending` — a review may still be on its way — except the one
- * case where waiting provably will not help: Copilot has just submitted a review
- * (`triggeringReview`) and it is against something other than the head. That is
- * #671's shape exactly, it is terminal until someone acts, and `failure` says so
- * where `pending` would imply patience is enough.
+ * `success` requires SOME accepted reviewer's OWN newest review to name the head
+ * commit — see `coveringReview` for why it is per reviewer rather than newest
+ * across the set. Anything else is `pending`, because a review may still be on
+ * its way, except the one case where waiting provably will not help: every
+ * accepted reviewer has spoken, none of them covers the head, and one of them has
+ * just submitted (`triggeringReview`). That is #671's shape, it is terminal until
+ * someone acts, and `failure` says so where `pending` would imply patience is
+ * enough. `everyReviewerHasSpoken` is what keeps that promise true now that a
+ * second reviewer runs on every push.
  *
  * `headSha` is a precondition, not an input to validate: the caller resolves it
  * from the API and cannot post a status without it.
@@ -268,7 +296,8 @@ export const decideReviewStatus = ({
   const latest = latestAcceptedReview(reviews);
   if (
     triggeringReview !== undefined &&
-    isAcceptedReviewer(reviewerLogin(triggeringReview))
+    isAcceptedReviewer(reviewerLogin(triggeringReview)) &&
+    everyReviewerHasSpoken(reviews)
   ) {
     return {
       description: `${reviewerLogin(triggeringReview)} reviewed ${shortSha(reviewedCommit(triggeringReview))}, which is no longer the head (${shortSha(headSha)}).`,

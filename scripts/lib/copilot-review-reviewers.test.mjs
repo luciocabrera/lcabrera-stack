@@ -182,15 +182,31 @@ describe('two accepted reviewers', () => {
     );
   });
 
-  it('fails on a stale review from either reviewer that triggered the run', () => {
+  it('fails on a stale trigger only once BOTH reviewers have spoken', () => {
     const stale = claudeReview({ commit: EARLIER });
     const status = decideReviewStatus({
       headSha: HEAD,
-      reviews: [stale],
+      reviews: [restReview({ commit: EARLIER }), stale],
       triggeringReview: stale,
     });
     expect(status.state).toBe('failure');
     expect(status.reviewer).toBe('github-actions[bot]');
     expect(status.description).toContain('no longer the head');
+  });
+
+  it('waits instead of failing while an accepted reviewer has not spoken yet', () => {
+    // The ordering the per-reviewer comparison does not cover, and the reason
+    // `failure` needs the extra precondition: a push lands, the in-workflow
+    // reviewer is still running, and Copilot's re-review of the PREVIOUS commit
+    // arrives first and fires the gate. Reporting `failure` there would claim
+    // waiting cannot help while the review that helps is being written — and it
+    // would stick, because the review that follows creates no workflow run.
+    const staleCopilot = restReview({ commit: EARLIER });
+    const status = decideReviewStatus({
+      headSha: HEAD,
+      reviews: [staleCopilot],
+      triggeringReview: staleCopilot,
+    });
+    expect(status.state).toBe('pending');
   });
 });

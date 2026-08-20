@@ -206,10 +206,13 @@ describe('the head-versus-review comparison', () => {
 
 describe('a review arriving against a commit that is no longer the head', () => {
   it('fails rather than waits — nothing further is coming on its own', () => {
+    // #671's shape, with the precondition a second reviewer added: `failure`
+    // claims waiting will not help, so it needs EVERY accepted reviewer to have
+    // spoken. Both are stale here, and the trigger is one of them.
     const stale = restReview({ commit: EARLIER });
     const status = decideReviewStatus({
       headSha: HEAD,
-      reviews: [stale],
+      reviews: [stale, claudeReview({ commit: EARLIER })],
       triggeringReview: stale,
     });
     expect(status.state).toBe('failure');
