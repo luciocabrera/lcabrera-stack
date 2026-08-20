@@ -120,9 +120,25 @@ Two things separate them from the grouping pair above. `CLEAR_COLUMN_AGGREGATE_C
 **does** take a `columnKey`, unlike `CLEAR_GROUPING_COMMAND`, because an
 aggregate belongs to one column while grouping belongs to the table. And their
 `isDisabled` is not a column capability at all: _which_ commands are rendered is
-decided by the catalogue answer on `metaState.groupingCapabilities`, so an
-illegal one is never offered rather than offered-and-disabled — the menu is
-shorter for a `text` column than for a `numeric` one (ADR-058, #550).
+decided by **`resolveOfferableAggregates`** (`Table/utils/`), so an unofferable
+one is never offered rather than offered-and-disabled — the menu is shorter for
+a `text` column than for a `numeric` one (ADR-058, #550).
+
+That resolver is the aggregation counterpart of `resolveGroupKeyAvailability`
+above, and it exists for the same reason: two gates, composed once rather than
+spelled per surface. It narrows the catalogue's type answer by whether the
+column is an **active group key**, in which case it offers nothing at all — a
+grouped column renders its key's value rather than a measure, so an aggregate
+chosen on it could never be shown (ADR-080). `AggregateActions` had only the
+first gate while the drawer's "Add Aggregate" picker had both, so the menu went
+on offering functions the picker had already dropped, and clicking one wrote the
+grouping store and changed nothing on screen (#830). Both call the resolver now,
+each feeding it its own commit context's grouping keys — the live ones in the
+header, the draft in the drawer.
+
+The whole block leaves through **one** early return, whichever gate closed it.
+Splitting the two conditions into two exits is how the never-offered rule
+decays into a separator or a lone clear item with no functions above it.
 
 A new capability adds a sibling `*Commands.ts`. If it cannot reuse
 `deriveToggleCommandState` or `CommandDescriptor` unchanged, revise the shared

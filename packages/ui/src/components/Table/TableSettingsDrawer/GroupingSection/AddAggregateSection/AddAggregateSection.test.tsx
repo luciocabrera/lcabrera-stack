@@ -99,6 +99,7 @@ const textCapability: TableColumnGroupingCapability = {
 };
 
 beforeEach(() => {
+  groupingKeysRef.current = [];
   columnsRef.current = [
     { key: 'order_status', label: 'Status' },
     // Declared `string` on purpose: this is the `numeric` column the
@@ -197,5 +198,32 @@ describe('AddAggregateSection', () => {
     render(<AddAggregateSection />);
 
     expect(listed(COLUMN_PLACEHOLDER)).toEqual([]);
+  });
+
+  it('does not offer a column staged as a group key', () => {
+    // A grouped column renders its key's value rather than a measure
+    // (ADR-080), so an aggregate chosen on it could never be shown.
+    groupingKeysRef.current = ['order_status'];
+
+    render(<AddAggregateSection />);
+
+    expect(listed(COLUMN_PLACEHOLDER)).toEqual(['Total']);
+  });
+
+  it('empties the function list when the chosen column becomes a group key', () => {
+    // Both lists ask the same question of the same predicate, so staging the
+    // selected column as a key has to close both — leaving the functions up
+    // would offer an aggregate on a column the picker no longer offers.
+    const { rerender } = render(<AddAggregateSection />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Total' }));
+
+    expect(listed(FUNCTION_PLACEHOLDER)).toEqual(['Count', 'Sum']);
+
+    groupingKeysRef.current = ['total_amount'];
+    rerender(<AddAggregateSection />);
+
+    expect(listed(COLUMN_PLACEHOLDER)).toEqual(['Status']);
+    expect(listed(FUNCTION_PLACEHOLDER)).toEqual([]);
   });
 });

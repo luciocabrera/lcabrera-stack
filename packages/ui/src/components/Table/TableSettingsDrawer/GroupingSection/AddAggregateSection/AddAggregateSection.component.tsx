@@ -6,10 +6,8 @@ import { SidePanelSectionHeader } from '#ui/components/SidePanel';
 import { useGetColumns } from '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
 import { useGetTableGroupingCapabilities } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 import { TABLE_AGGREGATE_LABELS } from '#ui/components/Table/Table.constants';
-import {
-  isTableAggregateFn,
-  orderLegalAggregates,
-} from '#ui/components/Table/utils';
+import { isTableAggregateFn } from '#ui/components/Table/utils';
+import { resolveOfferableAggregates } from '#ui/components/Table/utils/resolveOfferableAggregates.util';
 import { VirtualSelect } from '#ui/components/VirtualSelect';
 
 import type { AddAggregateSectionProps } from './AddAggregateSection.types';
@@ -20,13 +18,16 @@ import { toAggregatableColumnOptions } from '../utils';
 import { styles } from './AddAggregateSection.stylex';
 
 /**
- * The drawer's "add an aggregate" control: a column, then a function that is
- * legal for that column's **real** type.
+ * The drawer's "add an aggregate" control: a column, then a function that may
+ * be offered for it.
  *
- * Both lists come from the catalogue capability the loader shipped (ADR-058,
- * ADR-063) and from nothing else, and the second is derived from the first — so
- * the function list cannot offer something the chosen column does not support,
- * whichever way the two are picked.
+ * Both lists resolve through `resolveOfferableAggregates` — the column list via
+ * `toAggregatableColumnOptions`, the function list directly — so the second
+ * cannot offer something the chosen column does not support, whichever way the
+ * two are picked, and neither can disagree with the column header menu, which
+ * calls the same predicate (#830). What that predicate answers with is the
+ * catalogue capability the loader shipped (ADR-058, ADR-063), minus any column
+ * staged as a group key (ADR-080).
  *
  * There is deliberately no filter input beside them. A *filtered* aggregate has
  * no slot in the compact `grouping` param every piece of this configuration
@@ -49,8 +50,10 @@ export const AddAggregateSection = ({
     columns,
     groupingKeys,
   });
-  const fnOptions = orderLegalAggregates({
-    legal: capabilities[selectedColumn]?.aggregates ?? [],
+  const stagedGroupKeys = new Set(groupingKeys);
+  const fnOptions = resolveOfferableAggregates({
+    capability: capabilities[selectedColumn],
+    isGroupKey: stagedGroupKeys.has(selectedColumn),
   }).map((fn) => ({ label: TABLE_AGGREGATE_LABELS[fn], value: fn }));
 
   const handleColumnChange = (values: readonly string[]) => {
