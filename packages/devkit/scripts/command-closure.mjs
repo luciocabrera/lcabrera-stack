@@ -92,30 +92,39 @@ const shippedEscapes = ({ profile, root }) => {
  * everything and dangles for the one who took the smaller set, so it can only be
  * seen by checking the smaller set on its own.
  */
-const runShippedClosure = ({ profile, root }) => {
-  const names = profile === undefined ? Object.keys(PROFILES) : [profile];
-  const results = names.map((name) => ({
+const shippedResults = ({ profile, root }) =>
+  (profile === undefined ? Object.keys(PROFILES) : [profile]).map((name) => ({
     name,
     ...shippedEscapes({ profile: name, root }),
   }));
 
-  for (const result of results.filter((entry) => entry.escapes.length === 0)) {
+const reportClean = (results) => {
+  for (const result of results) {
     console.log(
       `✓ ${result.name} — ${result.fileCount} shipped file(s), self-contained`,
     );
   }
+};
 
-  const dirty = results.filter((result) => result.escapes.length > 0);
-  if (dirty.length === 0) return 0;
-
-  for (const result of dirty) {
+const reportEscapes = (results) => {
+  for (const result of results) {
     console.error(`✗ ${result.name} — ${result.fileCount} shipped file(s)`);
     for (const finding of result.escapes) {
       console.error(`    ${describeEscape(finding)}`);
     }
   }
-  const total = dirty.reduce((sum, result) => sum + result.escapes.length, 0);
-  console.error(`\n${total} escape(s) across ${dirty.length} profile(s).`);
+  const total = results.reduce((sum, result) => sum + result.escapes.length, 0);
+  console.error(`\n${total} escape(s) across ${results.length} profile(s).`);
+};
+
+const runShippedClosure = ({ profile, root }) => {
+  const results = shippedResults({ profile, root });
+  const dirty = results.filter((result) => result.escapes.length > 0);
+
+  reportClean(results.filter((result) => result.escapes.length === 0));
+  if (dirty.length === 0) return 0;
+
+  reportEscapes(dirty);
   return 1;
 };
 
@@ -129,37 +138,29 @@ const runShippedClosure = ({ profile, root }) => {
  */
 const PROFILE_FLAG = '--profile';
 
+/**
+ * A flag-shaped value is not consumed as the profile name, so `--profile
+ * --shipped` leaves `--profile` among the positional arguments and is reported
+ * as the unusable directory it is. Swallowing it instead would run the whole
+ * command against a profile called `--shipped`, which nothing places.
+ */
 const withoutProfile = (argv) => {
   const index = argv.indexOf(PROFILE_FLAG);
-  if (index === -1) return { rest: argv };
+  const value = index === -1 ? undefined : argv[index + 1];
+  if (value === undefined || value.startsWith('-')) return { rest: argv };
   return {
-    profile: argv[index + 1],
+    profile: value,
     rest: [...argv.slice(0, index), ...argv.slice(index + 2)],
   };
 };
 
-export const runClosure = (argv, root) => {
-  const { profile, rest } = withoutProfile(argv);
-  if (profile !== undefined && profile.startsWith('-')) {
-    console.error(`${PROFILE_FLAG} needs a profile name`);
-    return 1;
-  }
+const notADirectory = (root) => (directory) => {
+  const path = resolve(root, directory);
+  return !existsSync(path) || !statSync(path).isDirectory();
+};
 
-  const directories = rest.filter((entry) => entry !== '--shipped');
-  if (rest.length !== directories.length) {
-    return runShippedClosure({ profile, root });
-  }
-
-  if (directories.length === 0) {
-    console.error('closure needs at least one directory to analyse');
-    return 1;
-  }
-
-  const missing = directories.filter((directory) => {
-    const path = resolve(root, directory);
-    return !existsSync(path) || !statSync(path).isDirectory();
-  });
-
+const runDirectoryClosure = ({ directories, profile, root }) => {
+  const missing = directories.filter(notADirectory(root));
   if (missing.length > 0) {
     console.error(`not a directory: ${missing.join(', ')}`);
     return 1;
@@ -192,4 +193,19 @@ export const runClosure = (argv, root) => {
     `\n${escapes.length} finding(s) across ${dirty} directory(ies).`,
   );
   return 1;
+};
+
+export const runClosure = (argv, root) => {
+  const { profile, rest } = withoutProfile(argv);
+  const directories = rest.filter((entry) => entry !== '--shipped');
+  if (rest.length !== directories.length) {
+    return runShippedClosure({ profile, root });
+  }
+
+  if (directories.length === 0) {
+    console.error('closure needs at least one directory to analyse');
+    return 1;
+  }
+
+  return runDirectoryClosure({ directories, profile, root });
 };

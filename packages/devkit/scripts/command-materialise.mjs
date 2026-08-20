@@ -9,7 +9,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { ACCEPTED_FILE, parseAccepted } from './accepted.mjs';
-import { CONFIG_FILE_NAME, resolveConfig } from './config.mjs';
+import { CONFIG_FILE_NAME, resolveConfig, withProfile } from './config.mjs';
 import { readFilesUnder } from './files.mjs';
 import {
   MANIFEST_FILE,
@@ -69,8 +69,13 @@ const resolvePeerVersions = (assets) =>
 
 export const buildPlan = ({ profile, root }) => {
   const configured = resolveConfig(readIfPresent(join(root, CONFIG_FILE_NAME)));
+  // Validated rather than spread in: `groupsFor` answers `[]` for a profile it
+  // does not know, so a typo would place nothing and every command would report
+  // success — the same clean run as a repository with nothing left to do.
   const config =
-    profile === undefined ? configured : { ...configured, profile };
+    profile === undefined
+      ? configured
+      : withProfile({ config: configured, profile });
   const manifest = parseManifest(
     readIfPresent(join(root, MANIFEST_FILE)),
     packageVersion(),

@@ -73,6 +73,26 @@ const isPlainObject = (value) =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
 /**
+ * The config with a profile applied, refusing one this package does not know.
+ *
+ * `groupsFor` answers `[]` for a name it has never heard of, so an unchecked
+ * profile places nothing and every command reports success — the same clean run
+ * as a repository with nothing left to materialise. Both routes a profile can
+ * arrive by go through here: the config file, and the `--profile` flag that
+ * overrides it.
+ *
+ * @param {{ config: object, profile: string, source?: string }} args
+ */
+export const withProfile = ({ config, profile, source = '--profile' }) => {
+  if (!Object.hasOwn(PROFILES, profile)) {
+    throw new Error(
+      `${source}: unknown profile "${profile}" — expected one of ${Object.keys(PROFILES).join(', ')}`,
+    );
+  }
+  return { ...config, profile };
+};
+
+/**
  * A malformed config is a failure, not a silent fallback: a consumer who wrote
  * one meant it, and quietly ignoring it would materialise into the wrong
  * directories while reporting success.
@@ -83,12 +103,11 @@ export const resolveConfig = (raw) => {
   if (!isPlainObject(parsed)) {
     throw new Error(`${CONFIG_FILE_NAME} must contain a JSON object`);
   }
-  const profile = parsed.profile ?? DEFAULT_CONFIG.profile;
-  if (!Object.hasOwn(PROFILES, profile)) {
-    throw new Error(
-      `${CONFIG_FILE_NAME}: unknown profile "${profile}" — expected one of ${Object.keys(PROFILES).join(', ')}`,
-    );
-  }
+  const profile = withProfile({
+    config: DEFAULT_CONFIG,
+    profile: parsed.profile ?? DEFAULT_CONFIG.profile,
+    source: CONFIG_FILE_NAME,
+  }).profile;
   return {
     commands: isPlainObject(parsed.commands)
       ? parsed.commands

@@ -1,6 +1,11 @@
 import { describe, expect, test } from 'vite-plus/test';
 
-import { DEFAULT_CONFIG, PROFILES, targetPathFor } from './config.mjs';
+import {
+  DEFAULT_CONFIG,
+  PROFILES,
+  targetPathFor,
+  withProfile,
+} from './config.mjs';
 
 describe('profiles', () => {
   test('every group any profile names has a directory to land in', () => {
@@ -31,6 +36,30 @@ describe('profiles', () => {
       expect(PROFILES.full).toContain(group);
       expect(PROFILES.agent).not.toContain(group);
     }
+  });
+});
+
+describe('withProfile', () => {
+  test('applies a profile this package knows', () => {
+    expect(
+      withProfile({ config: DEFAULT_CONFIG, profile: 'full' }).profile,
+    ).toBe('full');
+  });
+
+  test('refuses one it does not, rather than placing nothing', () => {
+    // `groupsFor` answers `[]` for an unknown name, so an unchecked profile
+    // materialises no file and every command reports success — the same clean
+    // run as a repository with nothing left to do. Both routes a profile arrives
+    // by go through here, which is why `--profile typo` cannot be a quiet no-op.
+    expect(() =>
+      withProfile({ config: DEFAULT_CONFIG, profile: 'agnet' }),
+    ).toThrow(/unknown profile "agnet"/);
+  });
+
+  test('names where the bad value came from', () => {
+    expect(() =>
+      withProfile({ config: DEFAULT_CONFIG, profile: 'x', source: 'a.json' }),
+    ).toThrow(/^a\.json:/);
   });
 });
 
