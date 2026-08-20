@@ -20,6 +20,7 @@ const {
     keys: [],
     mode: 'flat',
     periods: {},
+    shares: [],
   };
   let drawerTotalsPlacement = 'last';
 
@@ -57,7 +58,13 @@ vi.mock('#ui/components/Table/contexts/TableConfig/columns/actions', () => ({
 beforeEach(() => {
   batchSetTableSettings.mockClear();
   setDrawerState(undefined);
-  setDrawerGrouping({ aggregates: {}, keys: [], mode: 'flat', periods: {} });
+  setDrawerGrouping({
+    aggregates: {},
+    keys: [],
+    mode: 'flat',
+    periods: {},
+    shares: [],
+  });
   setDrawerTotalsPlacement('last');
 });
 
@@ -75,7 +82,13 @@ describe('useBatchSetTableDrawerSettings', () => {
     });
 
     expect(batchSetTableSettings).toHaveBeenCalledExactlyOnceWith({
-      grouping: { aggregates: {}, keys: [], mode: 'flat', periods: {} },
+      grouping: {
+        aggregates: {},
+        keys: [],
+        mode: 'flat',
+        periods: {},
+        shares: [],
+      },
       settings: {
         columnFilters: {},
         columnOrder: ['id', 'name'],
@@ -96,7 +109,13 @@ describe('useBatchSetTableDrawerSettings', () => {
     });
 
     expect(batchSetTableSettings).toHaveBeenCalledExactlyOnceWith({
-      grouping: { aggregates: {}, keys: [], mode: 'flat', periods: {} },
+      grouping: {
+        aggregates: {},
+        keys: [],
+        mode: 'flat',
+        periods: {},
+        shares: [],
+      },
       settings: {
         columnFilters: {},
         columnOrder: [],
@@ -116,6 +135,7 @@ describe('useBatchSetTableDrawerSettings', () => {
       keys: ['status'],
       mode: 'flat',
       periods: {},
+      shares: [],
     });
 
     const { result } = renderHook(() => useBatchSetTableDrawerSettings());
@@ -132,6 +152,7 @@ describe('useBatchSetTableDrawerSettings', () => {
         keys: ['status'],
         mode: 'flat',
         periods: {},
+        shares: [],
       },
       settings: {
         columnFilters: {},

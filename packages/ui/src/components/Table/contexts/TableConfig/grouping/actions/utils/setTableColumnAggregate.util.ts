@@ -3,6 +3,8 @@ import type {
   TableGroupingState,
 } from '#ui/components/Table/Table.types';
 
+import { pruneGroupShares } from '../../utils';
+
 type SetTableColumnAggregateArgs = {
   readonly columnKey: string;
   /** The function to apply, or `undefined` to clear this column's aggregate. */
@@ -30,12 +32,18 @@ export const setTableColumnAggregate = ({
     ([column]) => column !== columnKey,
   );
 
+  const aggregates = Object.fromEntries(
+    fn === undefined ? remaining : [...remaining, [columnKey, fn]],
+  );
+
   return {
-    aggregates: Object.fromEntries(
-      fn === undefined ? remaining : [...remaining, [columnKey, fn]],
-    ),
+    aggregates,
     keys: grouping.keys,
     mode: grouping.mode,
     periods: grouping.periods,
+    // Pruned against the **new** aggregate map, not cleared: changing one
+    // column's measure says nothing about any other column's share, and a share
+    // whose own measure just became non-additive has to go with it (#648).
+    shares: pruneGroupShares({ aggregates, shares: grouping.shares }),
   };
 };

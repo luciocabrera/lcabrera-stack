@@ -262,6 +262,7 @@ describe('readTableLoaderStateFromRequest', () => {
         keys: ['status'],
         mode: 'flat',
         periods: {},
+        shares: [],
       });
       expect(result.standaloneGroupingParam).not.toBeNull();
     });
@@ -280,6 +281,7 @@ describe('readTableLoaderStateFromRequest', () => {
         keys: [],
         mode: 'flat',
         periods: {},
+        shares: [],
       });
       expect(result.standaloneGroupingParam).toBeUndefined();
     });
@@ -301,6 +303,7 @@ describe('readTableLoaderStateFromRequest', () => {
         keys: [],
         mode: 'flat',
         periods: {},
+        shares: [],
       });
     });
 
@@ -319,6 +322,7 @@ describe('readTableLoaderStateFromRequest', () => {
         keys: [],
         mode: 'flat',
         periods: {},
+        shares: [],
       });
       expect(result.standaloneGroupingParam).toBeNull();
     });

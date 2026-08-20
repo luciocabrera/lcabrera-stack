@@ -11,6 +11,7 @@ describe('serializeGroupingToURL', () => {
           keys: ['order_status'],
           mode: 'flat',
           periods: {},
+          shares: [],
         },
       }),
     ).toBe('{"keys":["order_status"]}');
@@ -24,6 +25,7 @@ describe('serializeGroupingToURL', () => {
           keys: ['b', 'a'],
           mode: 'flat',
           periods: {},
+          shares: [],
         },
       }),
     ).toBe('{"keys":["b","a"]}');
@@ -37,6 +39,7 @@ describe('serializeGroupingToURL', () => {
           keys: ['order_status'],
           mode: 'flat',
           periods: {},
+          shares: [],
         },
       }),
     ).toBe('{"agg":{"total_amount":"sum"},"keys":["order_status"]}');
@@ -52,6 +55,7 @@ describe('serializeGroupingToURL', () => {
           keys: ['a'],
           mode: 'flat',
           periods: {},
+          shares: [],
         },
       }),
     ).toBe('{"keys":["a"]}');
@@ -65,6 +69,7 @@ describe('serializeGroupingToURL', () => {
           keys: [],
           mode: 'flat',
           periods: {},
+          shares: [],
         },
       }),
     ).toBeUndefined();
@@ -78,6 +83,7 @@ describe('serializeGroupingToURL', () => {
           keys: [],
           mode: 'flat',
           periods: {},
+          shares: [],
         },
       }),
     ).toBeUndefined();
@@ -86,7 +92,13 @@ describe('serializeGroupingToURL', () => {
   it('drops the param entirely for an empty grouping', () => {
     expect(
       serializeGroupingToURL({
-        grouping: { aggregates: {}, keys: [], mode: 'flat', periods: {} },
+        grouping: {
+          aggregates: {},
+          keys: [],
+          mode: 'flat',
+          periods: {},
+          shares: [],
+        },
       }),
     ).toBeUndefined();
   });
@@ -98,7 +110,13 @@ describe('serializeGroupingToURL', () => {
     // (#578).
     expect(
       serializeGroupingToURL({
-        grouping: { aggregates: {}, keys: [], mode: 'flat', periods: {} },
+        grouping: {
+          aggregates: {},
+          keys: [],
+          mode: 'flat',
+          periods: {},
+          shares: [],
+        },
         keepWhenEmpty: true,
       }),
     ).toBe('{"keys":[]}');
@@ -112,9 +130,44 @@ describe('serializeGroupingToURL', () => {
           keys: ['order_status'],
           mode: 'flat',
           periods: {},
+          shares: [],
         },
         keepWhenEmpty: true,
       }),
     ).toBe('{"keys":["order_status"]}');
+  });
+
+  it('carries the shares beside the keys', () => {
+    // Round-tripped rather than asserted piecewise: the narrowing accepting a
+    // member and the serializer emitting it are two different halves, and a
+    // share that never reaches the URL never reaches the loader either — so the
+    // selection would survive exactly until the next navigation (#648).
+    expect(
+      serializeGroupingToURL({
+        grouping: {
+          aggregates: { revenue: 'sum' },
+          keys: ['status'],
+          mode: 'flat',
+          periods: {},
+          shares: ['revenue'],
+        },
+      }),
+    ).toBe('{"agg":{"revenue":"sum"},"keys":["status"],"share":["revenue"]}');
+  });
+
+  it('leaves `share` out entirely when nothing is showing one', () => {
+    // A grouped table with no share produces exactly the param it produced
+    // before shares existed.
+    expect(
+      serializeGroupingToURL({
+        grouping: {
+          aggregates: {},
+          keys: ['status'],
+          mode: 'flat',
+          periods: {},
+          shares: [],
+        },
+      }),
+    ).toBe('{"keys":["status"]}');
   });
 });

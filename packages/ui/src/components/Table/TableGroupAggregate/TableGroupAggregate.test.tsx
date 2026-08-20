@@ -26,6 +26,13 @@ vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
   useGetTableLocale: () => 'en-US',
 }));
 
+// The share is a delegate of this cell with its own suite; these cases are
+// about the aggregate, so it is switched off rather than stubbed out — the cell
+// still renders it, and it still decides for itself to render nothing.
+vi.mock('#ui/components/Table/contexts/TableConfig/grouping/selectors', () => ({
+  useGetTableColumnShare: () => false,
+}));
+
 /**
  * The columns the summary below is read against. `total_amount` is money,
  * `unit_price` is a plain number capped at two decimals, and `order_count` is

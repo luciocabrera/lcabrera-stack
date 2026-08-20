@@ -14,6 +14,7 @@ describe('toggleTableGroupKey', () => {
           keys: ['order_status'],
           mode: 'flat',
           periods: {},
+          shares: [],
         },
       }),
     ).toStrictEqual({
@@ -21,6 +22,7 @@ describe('toggleTableGroupKey', () => {
       keys: ['order_status', 'ship_country'],
       mode: 'flat',
       periods: {},
+      shares: [],
     });
   });
 
@@ -33,6 +35,7 @@ describe('toggleTableGroupKey', () => {
           keys: ['a', 'ship_country', 'b'],
           mode: 'flat',
           periods: {},
+          shares: [],
         },
       }),
     ).toStrictEqual({
@@ -40,6 +43,7 @@ describe('toggleTableGroupKey', () => {
       keys: ['a', 'b'],
       mode: 'flat',
       periods: {},
+      shares: [],
     });
   });
 
@@ -52,6 +56,7 @@ describe('toggleTableGroupKey', () => {
       keys: ['a', 'b', 'c', 'd', 'e', 'f'],
       mode: 'flat',
       periods: {},
+      shares: [],
     };
 
     expect(toggleTableGroupKey({ columnKey: 'g', grouping }).keys).toHaveLength(
@@ -65,7 +70,13 @@ describe('toggleTableGroupKey', () => {
     expect(
       toggleTableGroupKey({
         columnKey: 'total_amount',
-        grouping: { aggregates, keys: [], mode: 'flat', periods: {} },
+        grouping: {
+          aggregates,
+          keys: [],
+          mode: 'flat',
+          periods: {},
+          shares: [],
+        },
       }).aggregates,
     ).toStrictEqual(aggregates);
     expect(
@@ -76,6 +87,7 @@ describe('toggleTableGroupKey', () => {
           keys: ['total_amount'],
           mode: 'flat',
           periods: {},
+          shares: [],
         },
       }).aggregates,
     ).toStrictEqual(aggregates);
@@ -88,6 +100,7 @@ describe('toggleTableGroupKey', () => {
       keys,
       mode: 'flat',
       periods: {},
+      shares: [],
     };
 
     toggleTableGroupKey({ columnKey: 'ship_country', grouping });

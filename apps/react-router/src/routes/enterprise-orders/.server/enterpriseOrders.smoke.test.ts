@@ -252,6 +252,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
           keys: [GROUP_KEY],
           mode: 'flat',
           periods: {},
+          shares: [],
         },
         includeTotal: true,
         limit: 50,
@@ -302,7 +303,13 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
       ] as const) {
         const { data } = await selectOrdersPage({
           filters: [],
-          grouping: { aggregates: {}, keys: [key], mode: 'flat', periods },
+          grouping: {
+            aggregates: {},
+            keys: [key],
+            mode: 'flat',
+            periods,
+            shares: [],
+          },
           includeTotal: true,
           limit: 50,
           offset: 0,
@@ -345,6 +352,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
           keys: [...KEYS],
           mode: 'flat',
           periods: {},
+          shares: [],
         },
         includeTotal: true,
         limit: 50,
@@ -377,6 +385,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
           keys: [...KEYS],
           mode: 'flat',
           periods: {},
+          shares: [],
         },
         includeTotal: true,
         limit: 50,
@@ -406,7 +415,13 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
 
       const { data } = await selectOrdersPage({
         filters: [],
-        grouping: { aggregates: {}, keys: deepKeys, mode: 'flat', periods: {} },
+        grouping: {
+          aggregates: {},
+          keys: deepKeys,
+          mode: 'flat',
+          periods: {},
+          shares: [],
+        },
         includeTotal: true,
         limit: 50,
         offset: 0,
@@ -436,6 +451,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
           ],
           mode: 'flat',
           periods: {},
+          shares: [],
         },
         includeTotal: true,
         limit: 50,
@@ -462,6 +478,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
           keys: ['order_status'],
           mode: 'flat',
           periods: {},
+          shares: [],
         },
         includeTotal: true,
         limit: 50,
@@ -504,6 +521,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
             keys: ['order_status'],
             mode: 'flat',
             periods: {},
+            shares: [],
           },
           includeTotal: true,
           limit: 50,
@@ -527,6 +545,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
           keys: ['order_status'],
           mode: 'flat',
           periods: {},
+          shares: [],
         },
         includeTotal: true,
         limit: 50,
@@ -585,6 +604,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
           keys: [...KEYS],
           mode: 'rollup',
           periods: {},
+          shares: [],
         },
         includeTotal: true,
         limit: 50,
@@ -685,6 +705,91 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
       ).toStrictEqual([]);
     });
 
+    it('gives a grand total the leaves add up to, at every level', async () => {
+      // #648's second criterion, and the half a fixture cannot supply. The
+      // client's derivation picks the grand-total row where a rollup emitted
+      // one and sums the non-subtotal rows where it did not
+      // (`resolveShareDenominators`, unit-tested against fixtures); what only a
+      // real database can show is that those two rules agree, and that the
+      // shares they produce sum to one at every level. A denominator drawn from
+      // the wrong scope fails this and passes every mocked test.
+      const { data } = await rollupPage();
+      const summaries = data
+        .map((row) => row[TABLE_GROUP_ROW_FIELD])
+        .filter((summary) => summary !== undefined);
+      const amountOf = (summary: (typeof summaries)[number] | undefined) =>
+        Number(
+          summary?.aggregates.find(
+            (entry) => entry.columnKey === 'total_amount',
+          )?.value,
+        );
+
+      // Rule one: the row the read emitted keyed by nothing.
+      const fromGrandTotalRow = amountOf(
+        summaries.find(
+          (summary) => summary.isSubtotal && summary.path.length === 0,
+        ),
+      );
+      // Rule two: every row that totals nothing below it.
+      const fromSummedLeaves = summaries
+        .filter((summary) => !summary.isSubtotal)
+        .reduce((acc, summary) => acc + amountOf(summary), 0);
+
+      expect(fromGrandTotalRow).toBeGreaterThan(0);
+      expect(fromSummedLeaves / fromGrandTotalRow).toBeCloseTo(1, 10);
+
+      // And the shares that denominator produces sum to one per level — the
+      // property that fails when the denominator comes from one level only.
+      const shareAtDepth = (depth: number) =>
+        summaries
+          .filter((summary) => summary.path.length === depth)
+          .reduce(
+            (acc, summary) => acc + amountOf(summary) / fromGrandTotalRow,
+            0,
+          );
+
+      expect(shareAtDepth(2)).toBeCloseTo(1, 10);
+      expect(shareAtDepth(1)).toBeCloseTo(1, 10);
+      expect(shareAtDepth(0)).toBeCloseTo(1, 10);
+    });
+
+    it('cannot derive a share from a non-additive measure', async () => {
+      // Why the share is offered on `sum` and `count` alone. Summing each
+      // group's `countDistinct` counts a country once per group it appears in,
+      // so the "shares" it yields still add to one while being wrong — the
+      // failure that reads as correct, and the reason this is a legality rule
+      // rather than a rounding note (#648).
+      const { data } = await selectOrdersPage({
+        filters: [],
+        grouping: {
+          aggregates: { shipping_country: 'countDistinct' },
+          keys: ['order_status'],
+          mode: 'rollup',
+          periods: {},
+          shares: [],
+        },
+        includeTotal: true,
+        limit: 50,
+        offset: 0,
+        sort: [],
+      });
+      const summaries = data.map((row) => row[TABLE_GROUP_ROW_FIELD]);
+      const distinctCountOf = (summary: (typeof summaries)[number]) =>
+        Number(
+          summary?.aggregates.find((e) => e.columnKey === 'shipping_country')
+            ?.value,
+        );
+      const trueTotal = distinctCountOf(
+        summaries.find((summary) => summary?.path.length === 0),
+      );
+      const summedLeaves = summaries
+        .filter((summary) => summary?.path.length === 1)
+        .reduce((acc, summary) => acc + distinctCountOf(summary), 0);
+
+      expect(trueTotal).toBeGreaterThan(0);
+      expect(summedLeaves).toBeGreaterThan(trueTotal);
+    });
+
     it('reconciles the leaves, the subtotals and the grand total', async () => {
       // Arithmetic Postgres itself settles: the same rows summed three ways.
       const { data } = await rollupPage();
@@ -727,6 +832,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
           keys: [...KEYS],
           mode: 'rollup',
           periods: {},
+          shares: [],
         },
         includeTotal: true,
         limit: 50,

@@ -18,3 +18,4 @@ export { useSetGroupKeys } from './useSetGroupKeys.hook';
 export { useSetTotalsPlacement } from './useSetTotalsPlacement.hook';
 export { useSortByColumnOrder } from './useSortByColumnOrder.hook';
 export { useToggleGroupKey } from './useToggleGroupKey.hook';
+export { useToggleGroupShare } from './useToggleGroupShare.hook';

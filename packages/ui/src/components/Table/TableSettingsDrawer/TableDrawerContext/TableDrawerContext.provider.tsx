@@ -35,7 +35,7 @@ export const TableDrawerProvider = ({ children }: TableDrawerProviderProps) => {
     columnVisibility,
     sorting,
   } = tableColumnsState;
-  const { aggregates, keys, mode, periods } = tableGroupingStore.get();
+  const { aggregates, keys, mode, periods, shares } = tableGroupingStore.get();
 
   const columnsStore = useStore<
     TableDrawerColumnsState<Record<string, unknown>>
@@ -52,6 +52,7 @@ export const TableDrawerProvider = ({ children }: TableDrawerProviderProps) => {
     keys,
     mode,
     periods,
+    shares,
   });
   // Seeded from the applied placement, defaulting the way every other reader of
   // it does — absent is `last`, the order the rows on screen are already in.

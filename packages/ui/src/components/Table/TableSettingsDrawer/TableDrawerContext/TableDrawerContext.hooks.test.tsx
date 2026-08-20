@@ -55,6 +55,7 @@ const groupingStore = createMockStore<TableGroupingState>({
   keys: [],
   mode: 'flat',
   periods: {},
+  shares: [],
 });
 
 const totalsPlacementStore = createMockStore<TableDrawerTotalsPlacementState>({
@@ -139,6 +140,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
       keys: [],
       mode: 'flat',
       periods: {},
+      shares: [],
     });
   });
 
@@ -168,6 +170,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
       keys: ['country', 'status'],
       mode: 'flat',
       periods: {},
+      shares: [],
     });
   });
 
@@ -178,6 +181,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
         keys: useGetGroupingKeys(),
         mode: 'flat',
         periods: {},
+        shares: [],
       }),
       { wrapper: Wrapper },
     );
@@ -188,6 +192,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
         keys: ['status'],
         mode: 'flat',
         periods: {},
+        shares: [],
       });
     });
 
@@ -201,6 +206,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
       keys: ['status'],
       mode: 'flat',
       periods: {},
+      shares: [],
     });
 
     const { result } = renderHook(() => useClearGrouping(), {
@@ -216,6 +222,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
       keys: [],
       mode: 'flat',
       periods: {},
+      shares: [],
     });
   });
 
@@ -229,6 +236,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
       keys: stagedKeys,
       mode: 'flat',
       periods: {},
+      shares: [],
     });
 
     const { result } = renderHook(() => useToggleGroupKey(), {
@@ -248,6 +256,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
       keys: ['status'],
       mode: 'flat',
       periods: {},
+      shares: [],
     });
 
     const { result } = renderHook(() => useSetGroupKeys(), {
@@ -263,6 +272,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
       keys: [],
       mode: 'flat',
       periods: {},
+      shares: [],
     });
   });
 });

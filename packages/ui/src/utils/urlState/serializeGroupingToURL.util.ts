@@ -36,7 +36,7 @@ type SerializeGroupingToURLArgs = {
  * disappears.
  */
 export const serializeGroupingToURL = ({
-  grouping: { aggregates, keys, mode, periods },
+  grouping: { aggregates, keys, mode, periods, shares },
   keepWhenEmpty = false,
 }: SerializeGroupingToURLArgs) => {
   if (keys.length > 0) {
@@ -45,6 +45,7 @@ export const serializeGroupingToURL = ({
       gran: periods,
       keys,
       mode,
+      share: shares,
     });
   }
 

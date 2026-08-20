@@ -21,6 +21,9 @@ export const useSetGroupKeys = () => {
       keys,
       mode: grouping.mode,
       periods: pruneGroupPeriods({ keys, periods: grouping.periods }),
+      // Carried, not pruned: a share belongs to an aggregate, and removing a
+      // group key removes no aggregate.
+      shares: grouping.shares,
     }));
   };
 };

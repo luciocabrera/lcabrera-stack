@@ -19,6 +19,7 @@ export const useClearGrouping = () => {
       keys: [],
       mode: 'flat',
       periods: {},
+      shares: [],
     }));
   };
 };

@@ -36,6 +36,7 @@ const isSameGrouping = ({
   nextGrouping,
 }: Omit<ResolveTableGroupingUpdateArgs, 'hasDefaultGrouping'>) => {
   const aggregateEntries = Object.entries(nextGrouping.aggregates);
+  const existingShares = new Set(existingGrouping.shares);
 
   return (
     nextGrouping.mode === existingGrouping.mode &&
@@ -47,7 +48,12 @@ const isSameGrouping = ({
       Object.keys(existingGrouping.aggregates).length &&
     aggregateEntries.every(
       ([column, fn]) => existingGrouping.aggregates[column] === fn,
-    )
+    ) &&
+    // Compared, and it has to be: a share changes no key, mode or aggregate, so
+    // without this a share toggle resolves to `unchanged` and never navigates —
+    // the control would appear inert (#648).
+    nextGrouping.shares.length === existingShares.size &&
+    nextGrouping.shares.every((column) => existingShares.has(column))
   );
 };
 
@@ -91,7 +97,7 @@ export const resolveTableGroupingUpdate = ({
 
   const grouping: TableGroupingState =
     nextGrouping.keys.length === 0
-      ? { aggregates: {}, keys: [], mode: 'flat', periods: {} }
+      ? { aggregates: {}, keys: [], mode: 'flat', periods: {}, shares: [] }
       : nextGrouping;
 
   if (isSameGrouping({ existingGrouping, nextGrouping: grouping })) {

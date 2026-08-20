@@ -18,15 +18,16 @@ const NO_GROUPING: CompactGrouping = { keys: [] };
 
 /**
  * The envelope's **whole** vocabulary. Aggregate selection needed a second slot,
- * the grouping mode a third and per-key granularity a fourth, so the closed set
- * has been extended three times; opening it is what ADR-061 forbids, and a
- * member outside these four still refuses the payload.
+ * the grouping mode a third, per-key granularity a fourth and the share a
+ * fifth, so the closed set has been extended four times; opening it is what
+ * ADR-061 forbids, and a member outside these five still refuses the payload.
  */
 const COMPACT_GROUPING_MEMBERS: ReadonlySet<string> = new Set([
   'agg',
   'gran',
   'keys',
   'mode',
+  'share',
 ]);
 
 const isString = (value: unknown): value is string => typeof value === 'string';
@@ -202,11 +203,20 @@ const narrowCompactGrouping = (parsed: unknown) => {
     narrow: narrowMode,
     parsed,
   });
+  // Refused rather than filtered for the same reason as the rest: a share names
+  // a column, and one this envelope cannot read is a percentage the link
+  // promised and the table would not show.
+  const share = readOptionalMember({
+    member: 'share',
+    narrow: narrowKeys,
+    parsed,
+  });
 
   if (
     agg.kind === 'refused' ||
     gran.kind === 'refused' ||
-    mode.kind === 'refused'
+    mode.kind === 'refused' ||
+    share.kind === 'refused'
   ) {
     return;
   }
@@ -216,6 +226,7 @@ const narrowCompactGrouping = (parsed: unknown) => {
     ...(gran.kind === 'present' && { gran: gran.value }),
     keys,
     ...(mode.kind === 'present' && { mode: mode.value }),
+    ...(share.kind === 'present' && { share: share.value }),
   } satisfies CompactGrouping;
 };
 
@@ -225,7 +236,7 @@ export const groupingCodec = createUrlStateCodec<CompactGrouping>({
   // selected produces the same param it produced before aggregates existed —
   // `"agg":{}` in a shared link would say "aggregates considered and cleared",
   // which is not a state this table has.
-  compact: ({ agg, gran, keys, mode }) => ({
+  compact: ({ agg, gran, keys, mode, share }) => ({
     ...(agg !== undefined && Object.keys(agg).length > 0 && { agg }),
     // Dropped when empty, like `agg`: an untruncated grouping produces the
     // param it produced before granularities existed.
@@ -235,6 +246,9 @@ export const groupingCodec = createUrlStateCodec<CompactGrouping>({
     // produces the param it produced before rollup existed — and a link is
     // shorter by the member nobody chose.
     ...(mode !== undefined && mode !== 'flat' && { mode }),
+    // Dropped when empty, like `agg` and `gran`: a table with no share showing
+    // produces the param it produced before shares existed.
+    ...(share !== undefined && share.length > 0 && { share }),
   }),
   fallback: NO_GROUPING,
   label: 'grouping',

@@ -47,7 +47,13 @@ const invokeLoader = async (search = '') =>
     request: new Request(`http://localhost/enterprise-orders${search}`),
   } as LoaderFunctionArgs);
 
-const NO_GROUPING = { aggregates: {}, keys: [], mode: 'flat', periods: {} };
+const NO_GROUPING = {
+  aggregates: {},
+  keys: [],
+  mode: 'flat',
+  periods: {},
+  shares: [],
+};
 
 const sortKeys = (value: object) =>
   Object.keys(value).toSorted((a, b) => a.localeCompare(b));
@@ -138,6 +144,7 @@ describe('enterprise-orders loader', () => {
             keys: ['order_status'],
             mode: 'flat',
             periods: {},
+            shares: [],
           },
         }),
       );
@@ -198,6 +205,7 @@ describe('enterprise-orders loader', () => {
             keys: ['order_status', 'shipping_country'],
             mode: 'flat',
             periods: {},
+            shares: [],
           },
         }),
       );
@@ -232,6 +240,7 @@ describe('enterprise-orders loader', () => {
             keys: ['order_status'],
             mode: 'flat',
             periods: {},
+            shares: [],
           },
         }),
       );

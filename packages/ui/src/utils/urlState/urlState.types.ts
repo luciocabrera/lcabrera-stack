@@ -35,6 +35,11 @@ export type CompactGrouping = {
   readonly gran?: Readonly<Record<string, TableGroupPeriod>>;
   readonly keys: readonly string[];
   readonly mode?: TableGroupingMode;
+  /**
+   * The columns rendering their measure as a share of the grand total — a list,
+   * because a share carries no value of its own (#648).
+   */
+  readonly share?: readonly string[];
 };
 
 /**

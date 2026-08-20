@@ -65,5 +65,6 @@ export const toggleTableGroupKey = ({
       isRemoval || period === undefined
         ? pruned
         : { ...pruned, [columnKey]: period },
+    shares: grouping.shares,
   };
 };

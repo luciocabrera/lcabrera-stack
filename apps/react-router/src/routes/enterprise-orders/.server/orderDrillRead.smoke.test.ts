@@ -85,6 +85,7 @@ const readGroups = async ({ filters, keys, periods = {} }: ReadGroupsArgs) =>
       keys,
       mode: 'flat',
       periods,
+      shares: [],
     },
     includeTotal: false,
     limit: 1,

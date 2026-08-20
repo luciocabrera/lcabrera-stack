@@ -31,6 +31,7 @@ const NO_GROUPING: TableGroupingState = {
   keys: [],
   mode: 'flat',
   periods: {},
+  shares: [],
 };
 
 type GroupingArgs = {
@@ -38,6 +39,7 @@ type GroupingArgs = {
   readonly keys: readonly string[];
   readonly mode?: TableGroupingState['mode'];
   readonly periods?: TableGroupingState['periods'];
+  readonly shares?: TableGroupingState['shares'];
 };
 
 const grouping = ({
@@ -45,7 +47,14 @@ const grouping = ({
   keys,
   mode = 'flat',
   periods = {},
-}: GroupingArgs): TableGroupingState => ({ aggregates, keys, mode, periods });
+  shares = [],
+}: GroupingArgs): TableGroupingState => ({
+  aggregates,
+  keys,
+  mode,
+  periods,
+  shares,
+});
 
 describe('sanitizeGroupingByColumns', () => {
   it('keeps keys that name a groupable column', () => {
@@ -75,6 +84,7 @@ describe('sanitizeGroupingByColumns', () => {
           keys: ['status'],
           mode: 'flat',
           periods: {},
+          shares: [],
         }),
       }),
     ).toStrictEqual(
@@ -83,6 +93,7 @@ describe('sanitizeGroupingByColumns', () => {
         keys: ['status'],
         mode: 'flat',
         periods: {},
+        shares: [],
       }),
     );
   });
@@ -107,6 +118,7 @@ describe('sanitizeGroupingByColumns', () => {
           keys: ['status'],
           mode: 'flat',
           periods: {},
+          shares: [],
         }),
       }),
     ).toStrictEqual(NO_GROUPING);
@@ -180,5 +192,60 @@ describe('sanitizeGroupingByColumns', () => {
         grouping: grouping({ keys: ['status'] }),
       }),
     ).toStrictEqual(NO_GROUPING);
+  });
+
+  it('keeps a share on an additive measure', () => {
+    expect(
+      sanitizeGroupingByColumns({
+        columns,
+        grouping: grouping({
+          aggregates: { name: 'count' },
+          keys: ['status'],
+          shares: ['name'],
+        }),
+      }).shares,
+    ).toStrictEqual(['name']);
+  });
+
+  it('refuses the whole configuration for a share on a non-additive one', () => {
+    // Whole-state refusal, like every other illegal member (ADR-061): a link
+    // promising a percentage column that silently does not appear is the
+    // failure that rule exists to avoid — and here the percentage it promised
+    // would have been wrong rather than merely missing (#648).
+    expect(
+      sanitizeGroupingByColumns({
+        columns,
+        grouping: grouping({
+          aggregates: { name: 'avg' },
+          keys: ['status'],
+          shares: ['name'],
+        }),
+      }).keys,
+    ).toStrictEqual([]);
+  });
+
+  it('refuses a share on a column carrying no aggregate', () => {
+    expect(
+      sanitizeGroupingByColumns({
+        columns,
+        grouping: grouping({ keys: ['status'], shares: ['name'] }),
+      }).keys,
+    ).toStrictEqual([]);
+  });
+
+  it('refuses a repeated share, as it refuses a repeated key', () => {
+    // Every reader downstream treats the shares as a set, so a duplicate makes
+    // the change detector compare a length against a set's size and report a
+    // change where there is none (#648).
+    expect(
+      sanitizeGroupingByColumns({
+        columns,
+        grouping: grouping({
+          aggregates: { name: 'count' },
+          keys: ['status'],
+          shares: ['name', 'name'],
+        }),
+      }).keys,
+    ).toStrictEqual([]);
   });
 });

@@ -43,5 +43,6 @@ export const setTableGroupKeyPeriod = ({
     periods: Object.fromEntries(
       period === undefined ? remaining : [...remaining, [columnKey, period]],
     ),
+    shares: grouping.shares,
   };
 };
