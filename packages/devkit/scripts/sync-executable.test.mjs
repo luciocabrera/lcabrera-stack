@@ -8,13 +8,20 @@
  * else in the tree would report it.
  */
 
-import { mkdirSync, mkdtempSync, statSync, writeFileSync } from 'node:fs';
+import {
+  chmodSync,
+  mkdirSync,
+  mkdtempSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { describe, expect, test } from 'vite-plus/test';
+import { describe, expect, test, vi } from 'vite-plus/test';
 
+import { runSync } from './command-sync.mjs';
 import { DEFAULT_CONFIG } from './config.mjs';
 import { readFilesUnder } from './files.mjs';
 import { hashContent } from './manifest.mjs';
@@ -199,5 +206,41 @@ describe('the mode this package ships its hooks with', () => {
       .map((asset) => asset.path);
 
     expect(stray).toEqual([]);
+  });
+});
+
+describe('through the command, not just the applier', () => {
+  // The tests above call `applySync` directly, so none of them crosses the
+  // caller — and the caller is where the mode repair was cancelled: `runSync`
+  // used to skip `applySync` entirely when nothing needed writing, which is
+  // precisely the second run of a sync whose files are all `current`. A test
+  // that cannot reach that guard cannot tell this working from not working.
+  const scratchRepo = () => {
+    const root = scratch();
+    writeFileSync(
+      join(root, 'devkit.config.json'),
+      JSON.stringify({
+        commands: { check: 'true', install: 'true', test: 'true' },
+        profile: 'full',
+      }),
+    );
+    return root;
+  };
+
+  test('a second sync puts back a bit the tree lost', () => {
+    const root = scratchRepo();
+    const hook = join(root, '.githooks/pre-push');
+    const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+
+    runSync([], root);
+    expect(statSync(hook).mode & EXECUTABLE_BITS).not.toBe(0);
+
+    // What a clone with core.fileMode off, an unzip, or a copy leaves behind:
+    // the right bytes, the wrong mode.
+    chmodSync(hook, 0o644);
+    runSync([], root);
+
+    expect(statSync(hook).mode & EXECUTABLE_BITS).not.toBe(0);
+    log.mockRestore();
   });
 });
