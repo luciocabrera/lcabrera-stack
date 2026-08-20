@@ -110,3 +110,20 @@ So the order inverts: the **documents** gate the prose, not the other way round.
 seeds, and after the claim protocol is split from this repository's register —
 the generic half is what a consumer needs, and it is currently interleaved with
 ADR citations and gate wiring that are ours alone.
+
+## Mechanisms considered and not adopted
+
+Surveying how comparable projects distribute their skills
+([#716](https://github.com/luciocabrera/vite-react-compiler/issues/716)) turned
+up three shapes worth a verdict here, so a later reader can tell them from
+mechanisms nobody looked at. ADR-081 carries the reasoning; this is the pointer.
+
+| Mechanism                                                             | Verdict      | Where it is decided              |
+| --------------------------------------------------------------------- | ------------ | -------------------------------- |
+| An editor-native plugin manifest, alongside materialisation           | **deferred** | ADR-081, option 5                |
+| Bundling the prose and the gate runtime into one installable unit     | **rejected** | ADR-081, option 4 + Alternatives |
+| A personalisation flow that drafts a consumer their own routing skill | **deferred** | ADR-081, Alternatives            |
+
+The first two are about this package's shape and are settled. The third is a
+feature request nobody has made; it is recorded so that "we never thought of it"
+and "we thought of it and are waiting for a consumer" stay distinguishable.
