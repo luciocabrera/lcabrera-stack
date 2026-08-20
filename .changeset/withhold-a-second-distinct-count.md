@@ -39,5 +39,5 @@ which is the boundary a consumer's own loader reaches directly.
 The published surface gains one constant and loses nothing:
 `MAX_TABLE_COUNT_DISTINCT_AGGREGATES`, beside `MAX_TABLE_GROUP_KEYS` on
 `./components/Table/Table.constants`, so a consumer can read the budget its own
-surfaces have to respect. Both new utils behind it are internal to the Table and
-are not exported.
+surfaces have to respect. Every util behind it is internal to the Table and none
+is exported.

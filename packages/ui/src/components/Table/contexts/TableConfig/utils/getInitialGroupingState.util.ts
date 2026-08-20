@@ -41,7 +41,8 @@ const NO_GROUPING: TableGroupingState = {
  *
  * **This is a write path, and it checks the same shape invariants the outer
  * boundaries do** — `areGroupKeysLegal` (within the depth cap, and no key
- * repeated) and `areGroupAggregatesLegal` (no `(columnKey, fn)` pair repeated).
+ * repeated) and `areGroupAggregatesLegal` (no `(columnKey, fn)` pair repeated,
+ * and no more `countDistinct` aggregates than one read can carry).
  * A route built on `createTableRouteLoader` cannot reach it with an illegal
  * list, because `sanitizeGroupingByColumns` already refused — but
  * `@lcabrera/ui` is published, and a consumer writing their own loader is the
@@ -52,7 +53,13 @@ const NO_GROUPING: TableGroupingState = {
  *
  * The **aggregate** guard is newer than the key one and exists because the shape
  * change removed an implicit check: while `aggregates` was a column-to-function
- * map a repeated pair was unrepresentable, and a list admits it (#831).
+ * map a repeated pair was unrepresentable, and a list admits it (#831). It has a
+ * second half since #842, and that one is a **whole-request** rule rather than a
+ * shape one: a grouped read carries at most
+ * `MAX_TABLE_COUNT_DISTINCT_AGGREGATES` `countDistinct` aggregates, counted
+ * across every column together, so a seed naming two is refused here exactly as
+ * a duplicate pair is. Both surfaces withhold the second offer, but a
+ * hand-written loader reaches this function without passing either.
  *
  * The refusal is **whole** — never truncated to the cap, never de-duplicated.
  * Keys are ordered and the order is the query's nesting order, so either repair
