@@ -121,13 +121,18 @@ export const resolveConfig = (raw) => {
 };
 
 /**
- * A base of `.` — which is what places a file at the repository root — would
- * otherwise produce `./COMMANDS.md`, and that is a DIFFERENT string from the
- * `COMMANDS.md` every other part of this package resolves to: the manifest key,
- * the acceptance key and closure's containment check are all string comparisons.
- * Normalising here is what keeps one file from being two paths.
+ * The three ways a consumer writes "the repository root" — the default, and the
+ * two an editor or a person would plausibly leave behind.
+ *
+ * Every one of them has to produce a bare `COMMANDS.md`, because the manifest
+ * key, the acceptance key and closure's containment check are all string
+ * comparisons. Joined naively they produce `./COMMANDS.md` and `/COMMANDS.md`,
+ * which are two more spellings of one file — and the leading-slash form is the
+ * silent one: `join` still writes it to the right place, while closure resolves
+ * a link to it as `COMMANDS.md`, matches nothing in the shipped set, and reports
+ * the page as an escape.
  */
-const RELATIVE_PREFIX = /^\.\//;
+const ROOT_BASES = new Set(['', '.', './']);
 
 /**
  * Where one asset lands. Assets are stored under a group directory whose name
@@ -138,7 +143,7 @@ export const targetPathFor = ({ assetPath, config }) => {
   const [group, ...rest] = assetPath.split('/');
   const base = config.paths[group];
   if (base === undefined || rest.length === 0) return undefined;
-  return [base, ...rest].join('/').replace(RELATIVE_PREFIX, '');
+  return ROOT_BASES.has(base) ? rest.join('/') : [base, ...rest].join('/');
 };
 
 export const groupsFor = (config) => PROFILES[config.profile] ?? [];

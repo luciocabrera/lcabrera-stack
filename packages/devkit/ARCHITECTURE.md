@@ -117,9 +117,12 @@ is — for a need no seed actually has.
 
 `assets/<group>/…` where the group name is the `paths` key that places it, so
 adding a group is a data change rather than a code change. `root` is the group
-that lands at the repository root; its base is `.`, normalised away in
-`targetPathFor` so one file cannot become two paths — the manifest key, the
-acceptance key and closure's containment check are all string comparisons.
+that lands at the repository root, and every spelling of that — `.`, `""`, `./` —
+resolves to a bare path, because the manifest key, the acceptance key and
+closure's containment check are all string comparisons and one file must not
+become two. The `/`-prefixed form is the one worth naming: `join` still writes it
+where it belongs, so the only symptom is closure reporting the file as an escape
+from a shipped set it is in.
 
 A profile is a list of those groups, and the split is by who reads the result:
 `agent` is what an agent reads, `full` adds what CI and git run. A group named by

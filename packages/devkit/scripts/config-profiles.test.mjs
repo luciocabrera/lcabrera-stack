@@ -74,6 +74,25 @@ describe('targetPathFor', () => {
     ).toBe('COMMANDS.md');
   });
 
+  test('reads every spelling of the repository root the same way', () => {
+    // `""` is how a person writes "no directory", and `"./"` is what an editor
+    // leaves behind. Both joined naively give `/COMMANDS.md`, and that one is
+    // silent: `join` still writes the file to the right place, while closure
+    // resolves a link to it as `COMMANDS.md`, matches nothing shipped, and
+    // reports the page as an escape.
+    for (const root of ['', '.', './']) {
+      expect(
+        targetPathFor({
+          assetPath: 'root/COMMANDS.md',
+          config: {
+            ...DEFAULT_CONFIG,
+            paths: { ...DEFAULT_CONFIG.paths, root },
+          },
+        }),
+      ).toBe('COMMANDS.md');
+    }
+  });
+
   test('leaves an ordinary group prefixed by its configured directory', () => {
     expect(
       targetPathFor({
