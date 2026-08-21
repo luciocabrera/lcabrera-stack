@@ -20,6 +20,70 @@ describe('runCommand', () => {
     error.mockRestore();
   });
 
+  for (const request of ['--help', '-h', 'help']) {
+    test(`answers ${request} on stdout, and succeeds`, () => {
+      // It is the first command a consumer runs and the cheapest liveness check
+      // a smoke test can make. Answering it on stderr with a failing code reads
+      // as a broken install and aborts a caller running under `set -e`.
+      const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+      const error = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => undefined);
+
+      expect(runCommand({ argv: [request], root: '/nowhere' })).toBe(0);
+      expect(log).toHaveBeenCalledWith(expect.stringContaining('devkit sync'));
+      expect(error).not.toHaveBeenCalled();
+
+      log.mockRestore();
+      error.mockRestore();
+    });
+  }
+
+  for (const command of ['sync', 'doctor', 'closure']) {
+    test(`answers ${command} --help instead of running ${command}`, () => {
+      // Recognising help only in the command position left `sync --help`
+      // building a plan and applying it: a consumer asking what the command
+      // does got their tree written to, and exit 0. `root` here is a path that
+      // does not exist, so anything that actually dispatched would throw rather
+      // than return 0.
+      const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+      const error = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => undefined);
+
+      expect(runCommand({ argv: [command, '--help'], root: '/nowhere' })).toBe(
+        0,
+      );
+      expect(log).toHaveBeenCalledWith(expect.stringContaining('devkit sync'));
+      expect(error).not.toHaveBeenCalled();
+
+      log.mockRestore();
+      error.mockRestore();
+    });
+  }
+
+  test('treats the bare word as a value everywhere but the command position', () => {
+    // `--reason` takes free text and `closure` takes directory names, so
+    // matching `help` anywhere turned `doctor --accept <path> --reason help`
+    // into a usage page that recorded nothing, and `closure help` into a
+    // success that analysed nothing. `/nowhere` does not exist, so a command
+    // that really dispatches throws or fails rather than returning 0.
+    const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    const error = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
+
+    expect(
+      runCommand({ argv: ['closure', 'help'], root: '/nowhere' }),
+    ).not.toBe(0);
+    expect(log).not.toHaveBeenCalledWith(
+      expect.stringContaining('devkit sync'),
+    );
+
+    log.mockRestore();
+    error.mockRestore();
+  });
+
   test('does not treat an inherited Object property as a command', () => {
     const error = vi
       .spyOn(console, 'error')

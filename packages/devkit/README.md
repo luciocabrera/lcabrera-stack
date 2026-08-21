@@ -7,6 +7,15 @@ definitions, and the workflows, hooks, templates and registers that make them ru
 Private while the mechanism is being proved here. It publishes as
 `@lcabrera/devkit` ([ADR-081](../../docs/decisions/ADR-081-ship-the-repo-setup-as-two-packages.md)).
 
+**It has no `build` script, and that is not an omission.** The publishing
+contract in [`packages/CLAUDE.md`](../CLAUDE.md) says every public package but
+`@lcabrera/ui` builds, because a `.ts` file inside `node_modules` cannot be
+loaded at all. This package's sources are `.mjs` — already loadable — so there is
+nothing to compile and `exports` can point straight at what ships. Adding a build
+step would put a `dist` between the bin and the assets it reads for no gain.
+Verify what a consumer receives by packing and reading the tarball, not by
+reading the manifest; `files` carries a negated pattern that only pnpm honours.
+
 ## Why a command rather than an import
 
 This material is discovered by **path**: an agent reads the skills directory,
