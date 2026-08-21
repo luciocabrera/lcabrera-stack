@@ -91,9 +91,7 @@ to be noticed.
 It is deliberately **not** a required context. The ruleset is the enforcement;
 this is the report, so a stale status can never be the thing that stops a merge.
 That stays true after the first half of #698, which promoted
-`Copilot review complete` and left this one alone, deliberately — see
-[`review-gate-reconcile.md`](../tooling/review-gate-reconcile.md) for why the
-sweep treats the two differently.
+`Copilot review complete` and left this one alone.
 
 A draft never fails the status. Draft is the author's own "not yet" — policy E1
 and A9 — so open threads on work in progress are expected; the count still shows

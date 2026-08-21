@@ -607,10 +607,12 @@ is the schedule; the interval, the recovery and what it does on failure are in
 | `vp run review-gates:reconcile -- --pr <n> --dry-run` | print what it would publish, posting nothing           |
 
 **Both posting forms post as you, not as a workflow**, so neither satisfies
-`Copilot review complete` — and because each posts the state and description the
-scheduled sweep computes, the sweep then withholds on that head from then on. The
-bare form does it to every open pull request at once. To clear that gate, dispatch
-**Copilot Review Gate**; `review-gate-reconcile.md` has the detail.
+`Copilot review complete`. A locally-posted **`success`** is the one to avoid: it
+is terminal, so no later sweep ever computes anything different, and the gate is
+never cleared by an app-backed status — on every open pull request at once, in the
+bare form. A locally-posted `pending` is harmless; the sweep publishes over it as
+Actions once a review lands. To clear that gate, dispatch **Copilot Review Gate**;
+`review-gate-reconcile.md` has the detail.
 
 ### Autonomous PR queue
 

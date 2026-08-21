@@ -668,9 +668,14 @@ rest of the preconditions.
    this rung is often being used to recover from. Naming the branch runs the code
    the pull request actually proposes.
 
-   **It cannot be done for a fork pull request**, whose branch is not in this
-   repository, so `gh workflow run --ref` fails outright. The sweep is the path
-   there — see [fork pull requests](#known-limitation-fork-pull-requests).
+   **On a fork pull request, drop `--ref` rather than the dispatch.** The fork's
+   branch is not in this repository, so `--ref` pointing at it fails outright —
+   but the ref-less dispatch runs and publishes for real, as
+   `github-actions[bot]`. That is deliberate: `IS_FORK` is computed from an
+   emptiness test precisely so a `workflow_dispatch`, which carries no
+   `pull_request` object, is not treated as a fork and turned into a dry run. The
+   trade is that you get `main`'s copy of the gate code — the ordinary refless
+   caveat, and usually the right one to accept on a fork.
 
    Both re-derive the verdict rather than asserting one, so neither leaves a
    status a later reader cannot reproduce — which is what separates them from
@@ -685,12 +690,14 @@ rest of the preconditions.
    `integration_id` 15368, a status you post from a checkout has no app behind it
    and does not satisfy the required check — the same limit as rung 6. It is
    worse than rung 6 here, because it also silences the scheduled sweep, which
-   would otherwise have cleared the bar on its own: `shouldPublishStatus` withholds a post when the state and the
+   would otherwise have cleared the bar on its own: `shouldPublishStatus`
+   withholds a post when the state and the
    description both match what is already there, and the local form computes both
    with the code in _your_ checkout. When that agrees with `main` — the ordinary
    case — a locally-posted `success` makes every later sweep a no-op on that head.
    On a branch that edits the gate the description may differ and the sweep will
-   still publish, but that is the case you can least afford to be guessing about. The dispatch form escapes this — the
+   still publish, but that is the case you can least afford to be guessing
+   about. The dispatch form escapes this — the
    gate workflow invokes the script without `--if-changed`, so it publishes
    unconditionally, as `github-actions[bot]`.
 
@@ -949,10 +956,13 @@ The scheduled reconcile is not subject to this — it runs from the default bran
 with a token that can write statuses, so a fork pull request does get a status
 from it, within one interval. That is the same verdict the fork's own run
 computed and could not post, so nothing weaker is being asserted: `pending` until
-an accepted reviewer reviews the head, exactly as for any other pull request. If
-that is needed sooner, **the admin bypass is the way through** — the hand-posted
-status (rung 6) stopped being one when the context was pinned to
-`integration_id` 15368.
+an accepted reviewer reviews the head, exactly as for any other pull request.
+
+If that is needed sooner, **dispatch the gate without `--ref`** — rung 3. It runs
+as Actions and publishes a real status, because a dispatch is deliberately not
+treated as a fork. The admin bypass is the rung after it, for when the verdict
+itself is the problem rather than its absence. The hand-posted status (rung 6)
+stopped being a way through when the context was pinned to `integration_id` 15368.
 
 ## Preconditions these notes depend on
 
@@ -973,7 +983,8 @@ Further things the notes assume:
   ```
 
   It is pinned to `integration_id` 15368, the way its Actions siblings are, so
-  **only a status posted by a workflow satisfies it**. That is what demotes break-glass rung 6 to a record-keeping step and makes
+  **only a status posted by a workflow satisfies it**. That is what demotes
+  break-glass rung 6 to a record-keeping step and makes
   [the admin bypass](#break-glass) the rung that merges. The approval limitation
   above is a blocker rather than a nuisance for the same reason, and the
   `github-actions[bot]` hole that used to ride on this reasoning is closed — see
