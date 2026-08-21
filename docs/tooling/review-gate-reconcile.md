@@ -286,12 +286,20 @@ Waiting up to one interval is the ordinary answer. When that is too long:
    required context — and because it posts the same state and description the
    schedule would, every later sweep sees no change and withholds.
 
-   For that gate, dispatch **Copilot Review Gate** (step 2) — **not** the
-   **Review Gate Reconcile** dispatch, which is this same sweep and would withhold
-   for the same reason, going green while posting nothing. The distinction is
-   `--if-changed`: `gateArgs` always appends it, and `copilot-review-gate.yml`
-   invokes its script without it. This step stays the right one for the two
-   contexts that are advisory, and for reading what the sweep thinks.
+   **The trap is what that leaves behind, and it closes the reconcile dispatch
+   too.** A _Review Gate Reconcile_ dispatch would ordinarily clear the bar — it
+   runs in Actions with `github.token`, so its status has an app behind it, and
+   `--if-changed` withholds only when the state _and_ the description both match
+   what is already there, which a stale `pending` does not. But once this local
+   step has posted, the head carries exactly the state and description the sweep
+   computes, so every later sweep — scheduled or dispatched — withholds, and that
+   dispatch goes green while posting nothing.
+
+   **Copilot Review Gate** (step 2) is the dispatch that clears the bar either
+   way, because `copilot-review-gate.yml` invokes its script without
+   `--if-changed` and so publishes unconditionally. Reach for it when the merge
+   is what you need. This step stays the right one for the two contexts that are
+   advisory, and for reading what the sweep thinks.
 
 2. **Dispatch the gate from Actions**, which needs no checkout — pick
    **Copilot Review Gate**, **Agent Review Gate** or **Review Gate Reconcile**,

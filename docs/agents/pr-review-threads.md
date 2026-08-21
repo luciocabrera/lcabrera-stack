@@ -90,8 +90,8 @@ to be noticed.
 
 It is deliberately **not** a required context. The ruleset is the enforcement;
 this is the report, so a stale status can never be the thing that stops a merge.
-That stays true after #698: it promoted `Copilot review complete` and left this
-one alone, deliberately — see
+That stays true after the first half of #698, which promoted
+`Copilot review complete` and left this one alone, deliberately — see
 [`review-gate-reconcile.md`](../tooling/review-gate-reconcile.md) for why the
 sweep treats the two differently.
 
