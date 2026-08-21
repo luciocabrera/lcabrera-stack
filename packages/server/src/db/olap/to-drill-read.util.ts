@@ -6,6 +6,7 @@ import type {
 } from '../query-builder/query-builder.types';
 import type { GroupKeyTruncation, OlapDrillTranslation } from './olap.types';
 
+import { AGGREGATE_SQL } from '../group-query-builder/group-query-builder.constants.ts';
 import { advanceGroupPeriod } from './advance-group-period.util.ts';
 import { resolveDrillRefusal } from './resolve-drill-refusal.util.ts';
 
@@ -131,11 +132,42 @@ const toPeriodFilters = ({
  * is a period start that no row holds, so equality returns the boundary row and
  * nothing else — see `toPeriodFilters`.
  *
- * **Group-key terms are dropped from the sort** because they are constant within
- * a group and order nothing; the caller's primary key is appended so the page is
+ * **Group-key terms and measure terms are dropped from the sort** — the first
+ * because they are constant within a group and order nothing, the second
+ * because the column they name exists only in the grouped view (see
+ * `isMeasureSortTerm`); the caller's primary key is appended so the page is
  * deterministic (ADR-008). Without it two rows equal on every remaining term can
  * come back in any order, which repeats and skips rows across pages.
  */
+/**
+ * Whether a sort term names a **measure column** rather than a real column.
+ *
+ * The grid renders one column per applied aggregate and keys it `column:fn`
+ * (`total_amount:avg`), and that key is ordinary sort state that travels with
+ * the request. A grouped read can honour it — `toGroupSort` maps it onto the
+ * aggregate's alias — but a drill is an **ungrouped** read of one group's rows,
+ * where no such column exists: `buildOrderByClause` validates every term
+ * against `allowedColumns` and refuses the whole query, so the drill fails
+ * rather than the term being ignored.
+ *
+ * Dropped here for the same reason group-key terms are: this function's job is
+ * translating grouped-view state into a read that has no grouping in it, and a
+ * measure term is grouped-view state by construction.
+ *
+ * `AGGREGATE_SQL` is the closed exhaustive map, so a new `AggregateFn` is
+ * covered the day it is added. The split is on the **last** colon because the
+ * function name never contains one. This is the third place the `column:fn`
+ * spelling is written — see #876, which moves the codec somewhere both packages
+ * can depend on instead.
+ */
+const isMeasureSortTerm = (column: string) => {
+  const separator = column.lastIndexOf(':');
+
+  return (
+    separator > 0 && Object.hasOwn(AGGREGATE_SQL, column.slice(separator + 1))
+  );
+};
+
 export const toDrillRead = ({
   filters,
   group,
@@ -157,7 +189,7 @@ export const toDrillRead = ({
 
   const groupedColumns = new Set(group.path.map(({ columnKey }) => columnKey));
   const remainingSort = sort.filter(
-    ({ column }) => !groupedColumns.has(column),
+    ({ column }) => !groupedColumns.has(column) && !isMeasureSortTerm(column),
   );
   const hasTiebreaker = remainingSort.some(
     ({ column }) => column === primaryKey,

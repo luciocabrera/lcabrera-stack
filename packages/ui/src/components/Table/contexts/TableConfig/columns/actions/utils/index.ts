@@ -9,4 +9,5 @@ export { resolveColumnFilterUpdate } from './resolveColumnFilterUpdate.util';
 export { resolveColumnPinningUpdate } from './resolveColumnPinningUpdate.util';
 export { resolveColumnSortingUpdate } from './resolveColumnSortingUpdate.util';
 export { resolveColumnVisibilityUpdate } from './resolveColumnVisibilityUpdate.util';
+export { toDeclaredColumnKey } from './toDeclaredColumnKey.util';
 export { writeColumnSizing } from './writeColumnSizing.util';

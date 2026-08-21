@@ -32,18 +32,20 @@ const noPinning: ColumnPinningState<Row> = { left: [], right: [] };
 
 type RunArgs = {
   readonly aggregates: readonly TableColumnAggregate[];
+  readonly columnOrder?: readonly string[];
   readonly columnPinning?: ColumnPinningState<Row>;
   readonly groupingKeys?: readonly string[];
 };
 
 const run = ({
   aggregates,
+  columnOrder = ['order_id', 'customer_type', 'total_amount', 'order_count'],
   columnPinning = noPinning,
   groupingKeys = ['customer_type'],
 }: RunArgs) =>
   withAggregateColumns<Row>({
     aggregates,
-    columnOrder: ['order_id', 'customer_type', 'total_amount', 'order_count'],
+    columnOrder: columnOrder as never,
     columnPinning,
     columns,
     groupingKeys,
@@ -217,6 +219,55 @@ describe('withAggregateColumns', () => {
       'customer_type',
       'total_amount',
       'order_count',
+    ]);
+  });
+});
+
+describe('a persisted layout that already names a measure column', () => {
+  const aggregates: readonly TableColumnAggregate[] = [
+    { columnKey: 'total_amount', fn: 'avg' },
+    { columnKey: 'total_amount', fn: 'min' },
+  ];
+
+  it('does not emit the same column twice in the order', () => {
+    // Reachable by pinning a measure before this was fixed, and reachable
+    // forever after through a cookie written by an older build: the order
+    // names `total_amount:avg` *and* the source column it comes from.
+    // `orderColumnsByKeys` resolves both entries to the same column object, so
+    // without deduplication two identical `Average` columns render with
+    // duplicate React keys.
+    const result = run({
+      aggregates,
+      columnOrder: [
+        'total_amount:avg',
+        'order_id',
+        'customer_type',
+        'total_amount',
+        'order_count',
+      ],
+    });
+
+    expect(result.columnOrder).toStrictEqual([
+      'total_amount:avg',
+      'order_id',
+      'customer_type',
+      'total_amount:min',
+      'order_count',
+    ]);
+  });
+
+  it('does not emit the same column twice in a pin list', () => {
+    const result = run({
+      aggregates,
+      columnPinning: {
+        left: ['total_amount:avg', 'total_amount'] as never,
+        right: [],
+      },
+    });
+
+    expect(result.columnPinning.left).toStrictEqual([
+      'total_amount:avg',
+      'total_amount:min',
     ]);
   });
 });

@@ -20,17 +20,19 @@ export const useSetColumnSorting = <TData>() => {
       columnSizing,
       columnVisibility,
       drawersSyncNonce,
+      sorting: existingSorting,
     } = getPinningActionContext<TData>({ columnsStore, metaStore });
+    const grouping = groupingStore.get();
 
     const result = resolveColumnSortingUpdate<TData>({
-      aggregates: groupingStore.get().aggregates,
+      aggregates: grouping.aggregates,
       columnOrder,
       columnPinning,
       columns,
       columnSizing,
       columnVisibility,
-      existingSorting: columnsStore.get()?.sorting,
-      groupingKeys: groupingStore.get().keys,
+      existingSorting,
+      groupingKeys: grouping.keys,
       sort: { columnKey, direction },
     });
 

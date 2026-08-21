@@ -288,6 +288,24 @@ layout persists through nor the list the drawer offers — which is what makes
 ungrouping free, and what means a deselected aggregate needs no pruning: the
 next derivation simply does not produce its column.
 
+**Keeping that true takes work at the two edges where a user acts on a measure
+column.** Pinning one resolves to the column it measures (`toDeclaredColumnKey`),
+so `columnOrder` and `columnPinning` stay declared-only and a whole band travels
+together rather than half of it; without that the derived key entered the
+declared order, where `syncColumnOrderWithPinning`'s removal filter could not
+find it, and the next derivation produced the same column from both entries —
+two identical headers with duplicate React keys. And the expansion
+**deduplicates**, because these lists are restored from a cookie that outlives
+any invariant this code holds today. Hiding is deliberately _not_ mapped: one
+measure hidden independently is useful, cannot duplicate anything, and an
+unknown key in a visibility map is simply never consulted.
+
+Sorting is the third edge and it is handled server-side, because a measure sort
+is legitimate on the grouped read — `toGroupSort` maps it onto the aggregate's
+alias — and meaningless on any ungrouped one. `toDrillRead` drops measure terms
+alongside the group-key terms it already dropped; `pruneSortingToColumns` covers
+the other direction, when the grouping clears while such a sort is applied.
+
 The two cannot conflict, because an aggregate naming a group key is dropped —
 that column already carries its key's value. One column is never replaced,
 though: a **primary-key** column is measured _beside_ itself, because

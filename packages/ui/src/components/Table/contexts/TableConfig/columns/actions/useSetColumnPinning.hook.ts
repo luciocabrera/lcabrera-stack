@@ -7,6 +7,7 @@ import {
   commitResolvedPinningState,
   getPinningActionContext,
   resolveColumnPinningUpdate,
+  toDeclaredColumnKey,
 } from './utils';
 
 type SetColumnPinningArgs<TData> = {
@@ -30,9 +31,14 @@ export const useSetColumnPinning = <TData>() => {
       persistenceKey,
       staticKeys,
     } = getPinningActionContext<TData>({ columnsStore, metaStore });
+    const grouping = groupingStore.get();
 
     const { newColumnOrder, newPinning } = resolveColumnPinningUpdate<TData>({
-      columnKey,
+      // A measure column pins the column it measures — see
+      // `toDeclaredColumnKey`. Order and pinning are persisted layout state and
+      // stay declared-only, or they accumulate keys that mean nothing without
+      // the grouping that produced them.
+      columnKey: toDeclaredColumnKey<TData>({ columnKey, columns }),
       columns,
       currentOrder: columnOrder,
       currentPinning: columnPinning,
@@ -41,7 +47,7 @@ export const useSetColumnPinning = <TData>() => {
     });
 
     commitResolvedPinningState<TData>({
-      aggregates: groupingStore.get().aggregates,
+      aggregates: grouping.aggregates,
       columnOrder: newColumnOrder,
       columnPinning: newPinning,
       columns,
@@ -49,7 +55,7 @@ export const useSetColumnPinning = <TData>() => {
       columnsStore,
       columnVisibility,
       drawersSyncNonce,
-      groupingKeys: groupingStore.get().keys,
+      groupingKeys: grouping.keys,
       metaStore,
       persistenceKey,
       persistTableState,

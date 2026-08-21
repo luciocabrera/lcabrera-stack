@@ -130,11 +130,29 @@ export const withAggregateColumns = <TData>({
     return derived === undefined ? [key] : derived.map((column) => column.key);
   };
 
+  /**
+   * Expand a key list and keep the **first** occurrence of each result.
+   *
+   * The order and pin lists are user state restored from a cookie, so they can
+   * name a measure column directly — an older build could persist one, and a
+   * consumer's stored layout outlives any invariant this module holds today.
+   * Expanding without deduplicating then yields the same key twice (once as
+   * itself, once from its source column), and `orderColumnsByKeys` resolves
+   * both to the *same* column object: two identical columns render, with
+   * duplicate React keys on the header and body maps. First-wins because the
+   * earlier position is the one the user last put it in.
+   */
+  const expandKeys = (
+    keys: readonly DataKey<TData>[],
+  ): readonly DataKey<TData>[] => [
+    ...new Set(keys.flatMap((key) => expandKey(key))),
+  ];
+
   return {
-    columnOrder: columnOrder.flatMap((key) => expandKey(key)),
+    columnOrder: expandKeys(columnOrder),
     columnPinning: {
-      left: columnPinning.left.flatMap((key) => expandKey(key)),
-      right: columnPinning.right.flatMap((key) => expandKey(key)),
+      left: expandKeys(columnPinning.left),
+      right: expandKeys(columnPinning.right),
     },
     columns: columns.flatMap(
       (column) => derivedBySource.get(String(column.key)) ?? [column],

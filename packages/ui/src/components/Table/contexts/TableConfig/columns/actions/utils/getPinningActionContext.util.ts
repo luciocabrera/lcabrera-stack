@@ -35,6 +35,10 @@ export const getPinningActionContext = <TData>({
     columnVisibility: columnsState?.columnVisibility,
     drawersSyncNonce: metaState?.drawersSyncNonce ?? 0,
     persistenceKey: metaState?.persistenceKey ?? '',
+    // Carried here so an action never re-reads the store for one more field:
+    // a single snapshot per execution is a mandatory rule, and these fields
+    // are only coherent read together.
+    sorting: columnsState?.sorting,
     staticKeys: columnsState?.staticKeys,
   };
 };

@@ -28,7 +28,9 @@ const {
   mockUsePersistTableStateAction,
   mockUseTableConfigContextValue,
   resetMocks,
+  setAggregates,
   setColumnsState,
+  setGroupingKeys,
 } = createTableConfigColumnsActionMocks({
   initialColumnsState: createInitialColumnsState(),
   persistenceKey: 'orders-table',
@@ -124,5 +126,53 @@ describe('useSetColumnPinning', () => {
       }),
     );
     expect(mockMetaStore.set).toHaveBeenCalledWith({ drawersSyncNonce: 1 });
+  });
+});
+
+describe('pinning a measure column', () => {
+  beforeEach(() => {
+    setColumnsState({
+      columnOrder: ['name', 'id', 'age', 'amount'],
+      columnPinning: { left: [], right: [] },
+      columns: [
+        { key: 'id', label: 'ID' },
+        { key: 'name', label: 'Name' },
+        { key: 'age', label: 'Age' },
+        { key: 'amount', label: 'Amount' },
+      ],
+      columnSizing: {},
+      columnVisibility: new Set<string>(),
+    });
+    resetMocks();
+    setGroupingKeys(['name']);
+    setAggregates([
+      { columnKey: 'amount', fn: 'avg' },
+      { columnKey: 'amount', fn: 'min' },
+    ]);
+  });
+
+  it('pins the column it measures, not the derived key', () => {
+    // Column order and pinning are the user's persisted layout, restored into
+    // a grid that may carry no grouping at all — so a measure key written
+    // there is a preference about a column that will not exist next time.
+    // It also duplicated the column: the derived key is not in the declared
+    // order, so `syncColumnOrderWithPinning`'s removal filter was a no-op and
+    // the next derivation produced `amount:avg` from both entries.
+    const { result } = renderHook(() =>
+      useSetColumnPinning<Record<string, unknown>>(),
+    );
+
+    act(() => {
+      result.current({ columnKey: 'amount:avg', side: 'left' });
+    });
+
+    expect(mockColumnsStore.set).toHaveBeenCalledWith(
+      expect.objectContaining({
+        // The declared key throughout — no measure key reaches either list,
+        // and neither list repeats a key.
+        columnOrder: ['amount', 'name', 'id', 'age'],
+        columnPinning: { left: ['amount'], right: [] },
+      }),
+    );
   });
 });

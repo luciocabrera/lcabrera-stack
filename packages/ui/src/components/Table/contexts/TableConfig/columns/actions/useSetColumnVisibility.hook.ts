@@ -37,8 +37,9 @@ export const useSetColumnVisibility = <TData>() => {
       persistenceKey,
       staticKeys,
     } = getPinningActionContext<TData>({ columnsStore, metaStore });
-
     if (staticKeys?.has(columnKey)) return;
+
+    const grouping = groupingStore.get();
 
     const columnVisibility = resolveColumnVisibilityUpdate<TData>({
       columnKey,
@@ -47,7 +48,7 @@ export const useSetColumnVisibility = <TData>() => {
     });
 
     commitResolvedVisibilityState<TData>({
-      aggregates: groupingStore.get().aggregates,
+      aggregates: grouping.aggregates,
       columnOrder,
       columnPinning,
       columns,
@@ -55,7 +56,7 @@ export const useSetColumnVisibility = <TData>() => {
       columnsStore,
       columnVisibility,
       drawersSyncNonce,
-      groupingKeys: groupingStore.get().keys,
+      groupingKeys: grouping.keys,
       metaStore,
       persistenceKey,
       persistTableState,
