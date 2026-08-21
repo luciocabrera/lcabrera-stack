@@ -50,7 +50,8 @@ const { mockDeriveColumnViewState } = vi.hoisted(() => ({
   })),
 }));
 
-vi.mock('#ui/components/Table/utils', () => ({
+vi.mock('#ui/components/Table/utils', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('#ui/components/Table/utils')>()),
   deriveColumnViewState: mockDeriveColumnViewState,
 }));
 

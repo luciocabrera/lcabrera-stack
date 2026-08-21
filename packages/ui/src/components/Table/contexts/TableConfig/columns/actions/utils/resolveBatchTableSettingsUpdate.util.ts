@@ -9,7 +9,10 @@ import type {
   TableColumnAggregate,
 } from '#ui/components/Table/Table.types';
 
-import { deriveColumnViewState } from '#ui/components/Table/utils';
+import {
+  deriveColumnViewState,
+  pruneSortingToColumns,
+} from '#ui/components/Table/utils';
 
 export type BatchTableSettingsUpdate<TData> = {
   readonly columnFilters: ColumnFiltersState<TData>;
@@ -65,5 +68,12 @@ export const resolveBatchTableSettingsUpdate = <TData>({
     normalizedColumns,
     pinnedColumnOffsets,
     pinnedColumnPartition,
+    // A measure column exists only while its aggregate is applied, so this
+    // Accept can take away the very column the sort names — and the ungrouped
+    // read refuses an unknown column rather than ignoring it.
+    sorting: pruneSortingToColumns<TData>({
+      columns: effectiveColumns,
+      sorting: settings.sorting,
+    }),
   };
 };

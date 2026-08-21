@@ -90,10 +90,16 @@ describe('resolveGroupingColumnsPatch', () => {
     ).not.toContain('order_status');
   });
 
-  it('patches only the derived slices, never the state the user owns', () => {
+  it('patches the derived slices and the sort, never the layout the user owns', () => {
     // The grouped layout is a rendering of the grouping configuration, so it
     // must not reach the cookie the layout persists through or the list the
     // settings drawer offers — which is what makes ungrouping free.
+    //
+    // `sorting` is the one exception and it is a correction rather than a
+    // preference: a measure column exists only while its aggregate is applied,
+    // so a grouping change can take away the column the sort names, and the
+    // ungrouped read refuses an unknown column rather than ignoring it.
+    // `columns`, `columnOrder` and `columnPinning` stay out.
     expect(
       Object.keys(patch(['order_status'])).toSorted((a, b) =>
         a.localeCompare(b),
@@ -103,6 +109,7 @@ describe('resolveGroupingColumnsPatch', () => {
       'normalizedColumns',
       'pinnedColumnOffsets',
       'pinnedColumnPartition',
+      'sorting',
       'staticKeys',
     ]);
   });

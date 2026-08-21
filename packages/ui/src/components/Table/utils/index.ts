@@ -11,6 +11,7 @@ export { getTableDrillRow } from './getTableDrillRow.util';
 export { getTableGroupRowSummary } from './getTableGroupRowSummary.util';
 export { isTableAggregateFn } from './isTableAggregateFn.util';
 export { orderLegalAggregates } from './orderLegalAggregates.util';
+export { pruneSortingToColumns } from './pruneSortingToColumns.util';
 export { readPersistedStateFromCookie } from './readPersistedStateFromCookie.util';
 export { readPersistedUiFlagsFromCookie } from './readPersistedUiFlagsFromCookie.util';
 export { resolveColumnWidthBounds } from './resolveColumnWidthBounds.util';
