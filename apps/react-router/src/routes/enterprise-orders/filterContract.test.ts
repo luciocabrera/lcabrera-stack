@@ -35,6 +35,7 @@ const uiFilters: Record<string, ColumnFilter> = {
   is_vip_customer: { type: 'boolean', value: true },
   order_status: { type: 'multiSelect', values: ['Pending'] },
   quantity: { operator: 'greaterThan', type: 'number', value: 2 },
+  shipping_country: { operator: 'isEmpty', type: 'empty' },
 };
 
 describe('column-filter contract between @lcabrera/ui and @lcabrera/server', () => {
@@ -45,6 +46,12 @@ describe('column-filter contract between @lcabrera/ui and @lcabrera/server', () 
       { column: 'is_vip_customer', operator: 'eq', value: true },
       { column: 'order_status', operator: 'in', value: ['Pending'] },
       { column: 'quantity', operator: 'gt', value: 2 },
+      // No `value` key at all — the one variant that carries none. A `value:
+      // undefined` here would still be a bound parameter's worth of shape, and
+      // `appendFilterClause` reads the operator rather than the presence of a
+      // value, so the difference would go unnoticed until the parameter
+      // indexes of later filters shifted.
+      { column: 'shipping_country', operator: 'isNull' },
     ]);
   });
 

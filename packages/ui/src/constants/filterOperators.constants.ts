@@ -1,5 +1,6 @@
 import type {
   DateOperatorType,
+  EmptyOperatorType,
   NumberOperatorType,
   OperatorOption,
   TextOperatorType,
@@ -15,6 +16,8 @@ export const OPERATOR_TO_SHORT: Record<string, string> = {
   equals: 'eq',
   greaterThan: 'gt',
   greaterThanOrEqual: 'gte',
+  isEmpty: 'ie',
+  isNotEmpty: 'nie',
   lessThan: 'lt',
   lessThanOrEqual: 'lte',
   notContains: 'nct',
@@ -22,7 +25,16 @@ export const OPERATOR_TO_SHORT: Record<string, string> = {
   startsWith: 'sw',
 };
 
-/** Short code → full operator name for URL deserialization */
+/**
+ * Short code → full operator name for URL deserialization.
+ *
+ * The empty-operator codes live here and **deliberately not** in the per-type
+ * sets below. Those gate the value-carrying parsers, which read `arr[1]` as
+ * their value — admitting a value-less operator there let `parseTextFilter`
+ * mint `{type: 'text', operator: 'isEmpty', value: …}`, a shape `TextFilter`
+ * does not have and only survives because that parser casts its operator.
+ * `parseEmptyFilter` claims these codes instead.
+ */
 export const SHORT_TO_OPERATOR = new Map([
   ['af', 'after'],
   ['bf', 'before'],
@@ -32,10 +44,12 @@ export const SHORT_TO_OPERATOR = new Map([
   ['ew', 'endsWith'],
   ['gt', 'greaterThan'],
   ['gte', 'greaterThanOrEqual'],
+  ['ie', 'isEmpty'],
   ['lt', 'lessThan'],
   ['lte', 'lessThanOrEqual'],
   ['nct', 'notContains'],
   ['neq', 'notEquals'],
+  ['nie', 'isNotEmpty'],
   ['sw', 'startsWith'],
 ]);
 
@@ -83,4 +97,18 @@ export const TEXT_OPERATORS: OperatorOption<TextOperatorType>[] = [
   { label: 'Ends with', value: 'endsWith' },
   { label: 'Equals', value: 'equals' },
   { label: 'Starts with', value: 'startsWith' },
+];
+
+/**
+ * Offered for every column type, because any column can hold no value — so
+ * these are appended to each list below rather than being a list anyone selects
+ * on its own.
+ *
+ * The labels say "empty" rather than "null": a person filtering a table is
+ * asking which rows have nothing in this column, and `NULL` is the storage
+ * answer to that question rather than the question.
+ */
+export const EMPTY_OPERATORS: OperatorOption<EmptyOperatorType>[] = [
+  { label: 'Is empty', value: 'isEmpty' },
+  { label: 'Is not empty', value: 'isNotEmpty' },
 ];

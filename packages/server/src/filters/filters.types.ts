@@ -27,6 +27,7 @@ export type BooleanFilter = {
 export type ColumnFilter =
   | BooleanFilter
   | DateFilter
+  | EmptyFilter
   | NumberFilter
   | SelectFilter
   | TextFilter;
@@ -38,6 +39,19 @@ export type DateFilter = {
   readonly value: string;
   /** Second date for 'between' operator (ISO string) */
   readonly value2?: string;
+};
+
+/**
+ * Selects the rows where a column holds no value — the one filter carrying no
+ * value of its own. Translated to the unary `isNull`/`isNotNull` the query
+ * builder already emits as `IS NULL`/`IS NOT NULL`, with no bound parameter.
+ *
+ * Empty is SQL NULL and deliberately not the empty string; see the mirror of
+ * this type in `@lcabrera/ui` for why.
+ */
+export type EmptyFilter = {
+  readonly operator: 'isEmpty' | 'isNotEmpty';
+  readonly type: 'empty';
 };
 
 export type NumberFilter = {

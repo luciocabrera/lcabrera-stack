@@ -30,6 +30,7 @@ export type BooleanFilter = {
 export type ColumnFilter =
   | BooleanFilter
   | DateFilter
+  | EmptyFilter
   | NumberFilter
   | SelectFilter
   | TextFilter;
@@ -44,6 +45,30 @@ export type DateFilter = {
 };
 
 export type DateOperatorType = DateFilter['operator'];
+
+/**
+ * Selects the rows where a column **holds no value** — the one filter that
+ * takes no value of its own.
+ *
+ * **It is its own `type`, not an operator on the value-carrying filters.**
+ * Emptiness is not a comparison: adding `isEmpty` to `TextFilter` and its
+ * siblings would put a `value` on every such filter that must then be ignored,
+ * and force each editor to hide its own input. One value-less member keeps
+ * "carries a value" true of every other member of the union, and gives
+ * `toQueryFilters` a single arm to dispatch.
+ *
+ * **Empty means SQL NULL, and deliberately not the empty string.** A text
+ * column can hold both and they are different facts — `''` is a value someone
+ * stored. Folding them together would need a second clause per filter, and
+ * would quietly answer a different question than the one the label asks. A
+ * column where `''` is meaningful wants a `TextFilter` with `equals ''`.
+ */
+export type EmptyFilter = {
+  readonly operator: 'isEmpty' | 'isNotEmpty';
+  readonly type: 'empty';
+};
+
+export type EmptyOperatorType = EmptyFilter['operator'];
 
 export type NumberFilter = {
   readonly operator:
@@ -70,6 +95,7 @@ export type OperatorOption<T extends string = string> = {
 
 export type OperatorType =
   | DateOperatorType
+  | EmptyOperatorType
   | NumberOperatorType
   | TextOperatorType;
 

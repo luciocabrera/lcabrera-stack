@@ -28,6 +28,17 @@ export const toQueryFilters = ({
       if (filter.type === 'date') {
         return toDateQueryFilters({ column, filter });
       }
+      if (filter.type === 'empty') {
+        // The one arm producing a **unary** filter: `appendFilterClause` gives
+        // it a branch that binds no parameter, so it must not be handed a
+        // `value` slot here either.
+        return [
+          {
+            column,
+            operator: filter.operator === 'isEmpty' ? 'isNull' : 'isNotNull',
+          },
+        ];
+      }
       if (filter.type === 'number') {
         return toNumberQueryFilters({ column, filter });
       }

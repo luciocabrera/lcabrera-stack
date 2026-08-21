@@ -114,6 +114,8 @@ describe('OperatorSelect', () => {
         'Ends with',
         'Equals',
         'Starts with',
+        'Is empty',
+        'Is not empty',
       ]);
     });
 
@@ -134,6 +136,8 @@ describe('OperatorSelect', () => {
         'Less than',
         'Less than or equal',
         'Not equals',
+        'Is empty',
+        'Is not empty',
       ]);
     });
 
@@ -151,6 +155,8 @@ describe('OperatorSelect', () => {
         'Before',
         'Between',
         'Equals',
+        'Is empty',
+        'Is not empty',
       ]);
     });
   });

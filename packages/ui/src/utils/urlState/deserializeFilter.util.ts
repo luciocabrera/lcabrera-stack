@@ -146,6 +146,28 @@ const parseKnownOperatorFilter = (
   );
 };
 
+/**
+ * A one-element array holding an empty-operator code.
+ *
+ * **Tried before `parseEqualsSelectFilter`, which would otherwise swallow it.**
+ * That fallback accepts any all-string array, so `['ie']` comes back as a
+ * select filter matching the literal `"ie"` — plausible-looking, matching
+ * nothing, and silent about being the wrong filter. The length check is what
+ * keeps this from claiming `['ie', 'x']`, which is not a shape this codec
+ * writes.
+ */
+const parseEmptyFilter = (
+  arr: readonly unknown[],
+): ColumnFilter | undefined => {
+  if (arr.length !== 1) return undefined;
+
+  const operator = expandOperator(arr[0] as string);
+
+  return operator === 'isEmpty' || operator === 'isNotEmpty'
+    ? { operator, type: 'empty' }
+    : undefined;
+};
+
 const parseEqualsSelectFilter = (
   arr: readonly unknown[],
 ): ColumnFilter | undefined => {
@@ -179,6 +201,7 @@ export const deserializeFilter = (value: unknown): ColumnFilter | undefined => {
 
   return (
     parseNotEqualsSelectFilter(arr) ??
+    parseEmptyFilter(arr) ??
     parseKnownOperatorFilter(arr) ??
     parseEqualsSelectFilter(arr)
   );

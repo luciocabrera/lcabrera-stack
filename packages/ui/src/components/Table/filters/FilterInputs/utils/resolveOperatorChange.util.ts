@@ -30,6 +30,15 @@ export const resolveOperatorChange = ({
   filter,
   operator,
 }: ResolveOperatorChangeArgs) => {
+  // Ahead of the data-type dispatch, because emptiness is not a comparison and
+  // has no family: the same filter answers it for a date, a number and a text
+  // column. Any drafted value is dropped with the old filter, which is correct
+  // — this operator takes none, and keeping one would leave a value in the
+  // state that nothing reads and the URL would not carry.
+  if (operator === 'isEmpty' || operator === 'isNotEmpty') {
+    return { operator, type: 'empty' } as const;
+  }
+
   if (dataType === 'currency' || dataType === 'number') {
     return resolveNumberOperatorChange({ filter, operator });
   }

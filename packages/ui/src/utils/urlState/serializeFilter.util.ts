@@ -2,6 +2,7 @@ import type { ColumnFilter } from '#ui/types/filterOperators.types';
 
 import { serializeBooleanFilter } from './serializeBooleanFilter.util';
 import { serializeDateFilter } from './serializeDateFilter.util';
+import { serializeEmptyFilter } from './serializeEmptyFilter.util';
 import { serializeNumberFilter } from './serializeNumberFilter.util';
 import { serializeSelectFilter } from './serializeSelectFilter.util';
 import { serializeTextFilter } from './serializeTextFilter.util';
@@ -21,6 +22,9 @@ export const serializeFilter = ({ filter }: SerializeFilterArgs) => {
     }
     case 'date': {
       return serializeDateFilter({ filter });
+    }
+    case 'empty': {
+      return serializeEmptyFilter({ filter });
     }
     case 'multiSelect':
     case 'select': {

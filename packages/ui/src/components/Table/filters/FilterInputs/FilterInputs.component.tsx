@@ -38,6 +38,21 @@ export const FilterInputs = <TData = Record<string, unknown>,>({
     );
   }
 
+  // A filter that takes no value has nothing to render an input for, and an
+  // empty one would invite a value the operator cannot carry.
+  if (filter?.type === 'empty') {
+    return (
+      <div {...stylex.props(styles.container)}>
+        <OperatorSelect
+          dataType={column.dataType}
+          filter={filter}
+          onChange={onChange}
+          onOpenChange={setIsOperatorOpen}
+        />
+      </div>
+    );
+  }
+
   const inputComponent = (
     <InputContent
       columnKey={columnKey}
