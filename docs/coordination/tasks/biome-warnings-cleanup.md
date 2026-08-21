@@ -10,7 +10,7 @@ area:
 started: 2026-08-21
 updated: 2026-08-21
 plan: (none)
-pr: '#874'
+pr: #874
 issue: #873
 ---
 
@@ -20,8 +20,13 @@ Clear the biome findings standing on `main`. `lint:biome:check` is `biome lint .
 which exits 0 on warnings, so these never failed a push or a CI run and accumulated
 unremarked — see #875 for whether that should change.
 
-Nine of the ten were warnings; eight of those were introduced by #866, merged the same
-day, and are the reason this exists.
+Measured in this worktree, at the merge base and at HEAD, so both numbers come from one
+tree: **9 warnings + 2 infos → 0 warnings + 2 infos.** Eight of the nine warnings were
+introduced by #866, merged the same day, and are the reason this exists.
+
+(An earlier note here said "nine of the ten", pairing a count taken in the primary
+checkout — which carries the `$schema` bump and so does not report the `deserialize`
+info — with one taken here. Two trees, so the arithmetic could not close.)
 
 ## Not in scope — the third file, deliberately
 
