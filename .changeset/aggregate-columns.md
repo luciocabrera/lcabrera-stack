@@ -47,6 +47,14 @@ Two additive changes to the published type surface:
   pruning against the painted list alone would discard a sort on a column that
   is merely not on screen.
 
+A measure **inherits its source column's layout locks**. `isStatic` and
+`isResizable` carry onto the derived columns, so a column you froze cannot be
+pinned, hidden or resized through the measures that replace it — every layout
+action on a measure acts on the column it measures, which would otherwise have
+made a measure a way around the lock. The flags describing the _data_ do not
+carry: a measure is never filterable or groupable and always sortable,
+whatever its source allows.
+
 **One known limitation.** A measured column is replaced, and every row renders
 over the same columns — so a **drilled detail row** has no cell for its own raw
 value while an aggregate is applied to that column. Keeping the source column
