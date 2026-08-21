@@ -14,18 +14,24 @@
  */
 
 /**
- * Directories a scan must never descend into.
+ * Directories no scan of a repository's own files should ever descend into.
+ *
+ * Deliberately the SMALLEST defensible set: version control, installed
+ * dependencies, and build output. Everything else a particular gate wants to
+ * skip is that gate's judgement and belongs in its own configuration, because
+ * the two gates reading this list do not agree about the rest — the size gate
+ * skips a generated reports directory and an agent-config directory, and the
+ * stray-config gate must walk both, since a config file nothing reads is exactly
+ * the sort of thing that turns up in a repo-authored agent directory.
  *
  * Configuration EXTENDS this rather than replacing it. A consumer who wrote
  * their own list and forgot `node_modules` would not get a narrower gate, they
  * would get one that walks their whole dependency tree — a hang rather than a
  * verdict, and one that reads as the gate being slow rather than misconfigured.
  *
- * Only what every repository has is here. A framework's generated output
- * directory and an agent-config directory are the common additions, and the
- * second is worth declaring even when it looks empty: an isolation worktree
- * placed under one is a whole second copy of the repository, so every script in
- * it would be measured twice.
+ * Adding an entry here narrows every gate at once, silently. A gate reading
+ * fewer files reports exactly the same clean pass as a clean tree, so widening
+ * this set is the one change in this module that cannot be caught by running it.
  */
 export const ALWAYS_SKIPPED = [
   '.git',
@@ -33,7 +39,6 @@ export const ALWAYS_SKIPPED = [
   'build',
   'dist',
   'coverage',
-  'reports',
   '.tmp',
 ];
 

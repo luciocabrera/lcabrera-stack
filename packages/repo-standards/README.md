@@ -148,6 +148,20 @@ repository that declared its own and forgot `node_modules` would not get a
 narrower gate; it would get one walking its whole dependency tree, which reads as
 slowness rather than as misconfiguration.
 
+The built-in list is deliberately the smallest defensible one — version control,
+installed dependencies, build output — because the gates do **not** agree about
+the rest, and a shared list is a silent way to narrow all of them at once. This
+repository's two differ exactly where they should:
+
+| Gate           | Also skips                               | Why                                                                                                                                                                                                                          |
+| -------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `scriptSize`   | `reports/`, `.react-router/`, `.claude/` | The first two are generated. `.claude/` is skipped because an isolation worktree placed under it is a whole second copy of the repository, so every script in it would be measured twice.                                    |
+| `strayConfigs` | `.react-router/`                         | Generated. It **walks** `reports/` and `.claude/` on purpose: a config file no engine reads is exactly the sort of thing that turns up in a repo-authored agent directory, and skipping it would drop the coverage silently. |
+
+That asymmetry is worth preserving whenever one of these gates is copied to
+another: a gate reading fewer files reports the same clean pass as a clean tree,
+so nothing will ever tell you the coverage was dropped.
+
 Note which of these are **paths** and which are **match fragments**.
 `baselineFile`, `expectedAbsent` and `onDemandReportDirs` are repo-relative paths
 and are validated as such. `ignoredDocs`, `expectedAbsentPrefixes`, `unreadNames`,
