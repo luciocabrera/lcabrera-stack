@@ -7,6 +7,7 @@ import {
   commitResolvedVisibilityState,
   getPinningActionContext,
   resolveColumnVisibilityUpdate,
+  toDeclaredColumnKey,
 } from './utils';
 
 type SetColumnVisibilityArgs<TData> = {
@@ -42,7 +43,15 @@ export const useSetColumnVisibility = <TData>() => {
     const grouping = groupingStore.get();
 
     const columnVisibility = resolveColumnVisibilityUpdate<TData>({
-      columnKey,
+      // The declared column, symmetric with `useSetColumnPinning`. Hiding a
+      // measure through the header menu used to write its derived key into the
+      // visibility set, and that set is persisted — but the settings drawer
+      // lists the **declared** columns, so nothing in the UI could take the key
+      // back out again except the blanket "Clear Visibility & Pinning", which
+      // discards every other preference with it. Hiding `Average` hides
+      // `Total Amount`, which `withAggregateColumns` expands back into both of
+      // its measures.
+      columnKey: toDeclaredColumnKey<TData>({ columnKey, columns }),
       columnVisibility: existingColumnVisibility,
       isVisible,
     });

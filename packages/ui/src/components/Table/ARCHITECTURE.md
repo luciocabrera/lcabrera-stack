@@ -296,13 +296,25 @@ declared order, where `syncColumnOrderWithPinning`'s removal filter could not
 find it, and the next derivation produced the same column from both entries —
 two identical headers with duplicate React keys. And the expansion
 **deduplicates**, because these lists are restored from a cookie that outlives
-any invariant this code holds today. Hiding is deliberately _not_ mapped: one
-measure hidden independently is useful, cannot duplicate anything, and an
-unknown key in a visibility map is simply never consulted. Hiding a **source**
-column is expanded, though, and that asymmetry is the whole of it: the settings
-drawer builds its rows from the declared list, so `Total Amount` is the only key
-it can write, and a key `gridColumns` no longer holds filters nothing — the
-drawer drew the column as hidden while the grid kept painting both measures.
+any invariant this code holds today.
+
+**Hiding is mapped the same way, and it has to be**, because the layout is
+_persisted_ and the settings drawer builds its rows from the **declared**
+columns. A derived key written into `columnVisibility` therefore reaches the
+cookie with nothing in the per-column UI able to take it out again: the drawer
+lists `Total Amount`, never `Average`, so toggling it writes the declared key
+and leaves the derived one hidden. Only the drawer's blanket "Clear Visibility &
+Pinning" clears it, along with every other preference. So hiding `Average` hides
+`Total Amount`, and the derivation expands that back into both measures — which
+is also what makes the drawer's own toggle work, since a key `gridColumns` no
+longer holds would otherwise filter nothing while the drawer drew the column as
+hidden. The mapping and the expansion are the two halves of one rule; either
+alone leaves the two write paths disagreeing about the same column.
+
+The cost is that a band hides whole. Hiding one measure and keeping its
+siblings would need the drawer to offer the derived columns as rows of their
+own — a real feature, tracked separately, not something to be had by writing an
+unreachable key into a cookie.
 
 Sorting is the third edge and it is handled server-side, because a measure sort
 is legitimate on the grouped read — `toGroupSort` maps it onto the aggregate's

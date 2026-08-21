@@ -29,7 +29,9 @@ const {
   mockUsePersistTableStateAction,
   mockUseTableConfigContextValue,
   resetMocks,
+  setAggregates,
   setColumnsState,
+  setGroupingKeys,
 } = createTableConfigColumnsActionMocks({
   initialColumnsState: createInitialColumnsState(),
   persistenceKey: 'orders-table',
@@ -118,5 +120,51 @@ describe('useSetColumnVisibility', () => {
 
     expect(mockColumnsStore.set).not.toHaveBeenCalled();
     expect(mockMetaStore.set).not.toHaveBeenCalled();
+  });
+});
+
+describe('hiding a measure column', () => {
+  beforeEach(() => {
+    setColumnsState({
+      columnOrder: ['id', 'name', 'amount'],
+      columnPinning: { left: [], right: [] },
+      columns: [
+        { key: 'id', label: 'ID' },
+        { key: 'name', label: 'Name' },
+        { key: 'amount', label: 'Amount' },
+      ],
+      columnSizing: {},
+      columnVisibility: new Set<string>(),
+      staticKeys: new Set<string>(['id']),
+    });
+    resetMocks();
+    setGroupingKeys(['name']);
+    setAggregates([
+      { columnKey: 'amount', fn: 'avg' },
+      { columnKey: 'amount', fn: 'min' },
+    ]);
+  });
+
+  it('hides the column it measures, so the drawer can bring it back', () => {
+    // Writing the derived key here was a trap state: `columnVisibility` is
+    // persisted to the layout cookie, but the settings drawer lists the
+    // **declared** columns, so nothing in the UI could remove `amount:avg`
+    // again except the blanket "Clear Visibility & Pinning" — which discards
+    // every other hidden column and every pin with it. Symmetric with
+    // `useSetColumnPinning`, and it is what `toDeclaredColumnKey`'s own rule
+    // says: the layout state stays declared-only.
+    const { result } = renderHook(() =>
+      useSetColumnVisibility<Record<string, unknown>>(),
+    );
+
+    act(() => {
+      result.current({ columnKey: 'amount:avg', isVisible: false });
+    });
+
+    expect(mockColumnsStore.set).toHaveBeenCalledWith(
+      expect.objectContaining({
+        columnVisibility: new Set(['amount']),
+      }),
+    );
   });
 });

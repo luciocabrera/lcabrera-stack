@@ -25,6 +25,14 @@ type ToDeclaredColumnKeyArgs<TData> = {
  * half is not what "pin this column" means to the person clicking it. Pinning
  * `Average` pins `Total Amount`, so the whole band travels together.
  *
+ * **Hiding needs it for a sharper reason than pinning does.** The settings
+ * drawer builds its rows from the declared columns, so a derived key written
+ * into the persisted `columnVisibility` is one nothing in the per-column UI can
+ * remove again — only the blanket "Clear Visibility & Pinning", which discards
+ * every other preference too. Hiding a band whole is the cost; #883 adds
+ * per-measure hiding the way it has to be added, by teaching the drawer to
+ * offer those columns rather than by writing an unreachable key.
+ *
  * **A key that is itself a declared column always wins**, so a consumer whose
  * own column is literally named `total_amount:avg` is unaffected — the token
  * grammar never overrides a real column.
