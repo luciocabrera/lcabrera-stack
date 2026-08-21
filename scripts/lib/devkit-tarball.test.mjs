@@ -5,6 +5,7 @@ import {
   binStartupFailure,
   declaredBins,
   failureLine,
+  inertHooks,
   materialisationFailure,
   noCommandsDeclared,
   missingFromTarball,
@@ -12,6 +13,62 @@ import {
   strayFromTarball,
   tarballFindings,
 } from './devkit-tarball.mjs';
+
+describe('inertHooks', () => {
+  const hooksPath = '.githooks';
+
+  it('accepts hooks that arrived executable', () => {
+    expect(
+      inertHooks({
+        hooksPath,
+        materialised: [
+          { executable: true, path: '.githooks/commit-msg' },
+          { executable: false, path: 'docs/agents/workflow.md' },
+        ],
+      }),
+    ).toEqual([]);
+  });
+
+  it('reports a hook without the bit, which git skips without a word', () => {
+    // The real defect: `pnpm pack` writes every entry 0644, so consumers got a
+    // `commit-msg` git ignored. A message violating every rule was committed
+    // with exit 0 — the gate was simply absent.
+    expect(
+      inertHooks({
+        hooksPath,
+        materialised: [{ executable: false, path: '.githooks/commit-msg' }],
+      }),
+    ).toEqual([
+      '`.githooks/commit-msg` arrived without the executable bit — git skips it silently, so the gate it carries is absent',
+    ]);
+  });
+
+  it('treats finding no hooks at all as a finding, not a pass', () => {
+    // The vacuous case. Run against the `agent` profile — which carries no
+    // hooks — this checked nothing and read afterwards as hooks that were fine.
+    // That is exactly how the defect above survived every packed-tarball run.
+    expect(
+      inertHooks({
+        hooksPath,
+        materialised: [{ executable: false, path: 'docs/agents/workflow.md' }],
+      }),
+    ).toEqual([
+      'no hooks were materialised under `.githooks/`, so their executability was never checked',
+    ]);
+  });
+
+  it('matches on the directory, not on a name that merely starts the same', () => {
+    expect(
+      inertHooks({
+        hooksPath,
+        materialised: [
+          { executable: true, path: '.githooks/pre-push' },
+          { executable: false, path: '.githooks-backup/pre-push' },
+        ],
+      }),
+    ).toEqual([]);
+  });
+});
 
 const MANIFEST = {
   bin: { 'kit-doctor': './scripts/doctor.mjs', kit: './scripts/kit.mjs' },

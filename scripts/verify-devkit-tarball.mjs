@@ -26,6 +26,7 @@ import {
   readdirSync,
   readFileSync,
   rmSync,
+  statSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -37,6 +38,7 @@ import {
   binStartupFailure,
   declaredBins,
   failureLine,
+  inertHooks,
   materialisationFailure,
   noCommandsDeclared,
   tarballFindings,
@@ -122,9 +124,42 @@ const scratchConsumer = () => {
     join(root, 'package.json'),
     `${JSON.stringify({ name: 'consumer', private: true, type: 'module', version: '1.0.0' }, undefined, 2)}\n`,
   );
-  writeFileSync(join(root, 'devkit.config.json'), '{ "profile": "agent" }\n');
+  // `full`, not `agent`, and with a command map: the narrower profile carries no
+  // hooks and no workflows, so this gate ran over a set that could not exhibit
+  // either failure those files have — an inert hook, and a placeholder nobody
+  // answered. The commands are npm's because npm is what installs this scratch
+  // consumer; any complete map would do, and an incomplete one leaves the files
+  // that need it unwritten.
+  writeFileSync(
+    join(root, 'devkit.config.json'),
+    `${JSON.stringify(
+      {
+        commands: {
+          audit: 'npm audit --audit-level moderate',
+          check: 'npm run check',
+          install: 'npm ci',
+          test: 'npm test',
+        },
+        profile: 'full',
+      },
+      undefined,
+      2,
+    )}\n`,
+  );
   return root;
 };
+
+/** The hooks directory this scratch consumer's config leaves at its default. */
+const HOOKS_PATH = '.githooks';
+
+/** Owner, group or other — any of them is what git accepts as executable. */
+const EXECUTABLE_BITS = 0o111;
+
+const materialisedModes = (consumer) =>
+  materialisedFiles(consumer).map((path) => ({
+    executable: (statSync(path).mode & EXECUTABLE_BITS) !== 0,
+    path: toPosix(relative(consumer, path)),
+  }));
 
 /** Each declared bin, executed by name through the consumer's own resolution. */
 const binFailures = ({ consumer, manifest }) =>
@@ -247,6 +282,10 @@ const main = () => {
       }),
       ...survivingPlaceholders(consumer),
       ...materialisedFailure(consumer),
+      ...inertHooks({
+        hooksPath: HOOKS_PATH,
+        materialised: materialisedModes(consumer),
+      }),
     ];
 
     const findings = [...contents, ...bins, ...materialised];

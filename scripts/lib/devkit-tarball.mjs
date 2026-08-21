@@ -230,3 +230,38 @@ export const noCommandsDeclared = (manifest) =>
   declaredBins(manifest).length === 0
     ? `${manifest.name} declares no bins in the packed manifest, so there is nothing for a consumer to run`
     : undefined;
+
+/**
+ * Hooks a consumer received without the executable bit.
+ *
+ * git skips a non-executable hook, and the skip is the failure mode this has to
+ * catch: the repository still commits, still exits 0, and the gate the hook was
+ * carrying is simply not there. Nothing in a workspace can observe it, because
+ * `workspace:*` resolves the source directory where the bit is set — and
+ * `pnpm pack` writes every entry 0644, so an installed copy has none.
+ *
+ * Checked by directory rather than by asking the kit which files it considers
+ * executable: a gate that re-derives the answer from the thing it is checking
+ * agrees with it by construction. What matters here is only what git will do.
+ *
+ * The empty case is a finding, not a pass. A run that found no hooks at all
+ * checked nothing, and read afterwards as a consumer whose hooks were fine.
+ *
+ * @param {{ hooksPath: string, materialised: { executable: boolean, path: string }[] }} args
+ */
+export const inertHooks = ({ hooksPath, materialised }) => {
+  const hooks = materialised.filter((file) =>
+    file.path.startsWith(`${hooksPath}/`),
+  );
+  if (hooks.length === 0) {
+    return [
+      `no hooks were materialised under \`${hooksPath}/\`, so their executability was never checked`,
+    ];
+  }
+  return hooks
+    .filter((file) => !file.executable)
+    .map(
+      (file) =>
+        `\`${file.path}\` arrived without the executable bit — git skips it silently, so the gate it carries is absent`,
+    );
+};

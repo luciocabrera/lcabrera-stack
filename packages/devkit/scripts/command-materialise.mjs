@@ -9,7 +9,12 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { ACCEPTED_FILE, parseAccepted } from './accepted.mjs';
-import { CONFIG_FILE_NAME, resolveConfig, withProfile } from './config.mjs';
+import {
+  CONFIG_FILE_NAME,
+  isExecutableAsset,
+  resolveConfig,
+  withProfile,
+} from './config.mjs';
 import { readFilesUnder } from './files.mjs';
 import {
   MANIFEST_FILE,
@@ -34,11 +39,20 @@ const readIfPresent = (path) =>
 const packageVersion = () =>
   JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf8')).version;
 
-/** The shipped files, addressed by their group-prefixed path. */
+/**
+ * The shipped files, addressed by their group-prefixed path.
+ *
+ * The mode is decided here rather than read off the file, because the file's own
+ * mode is gone by the time a consumer sees it — see `isExecutableAsset`. Reading
+ * it from disk worked in this repository and in no installed copy of the
+ * package, which is the one shape of failure nothing here could observe.
+ */
 const readAssets = () => {
   const assetsRoot = join(packageRoot, 'assets');
   if (!existsSync(assetsRoot)) return [];
-  return readFilesUnder({ directory: assetsRoot, root: assetsRoot });
+  return readFilesUnder({ directory: assetsRoot, root: assetsRoot }).map(
+    (asset) => ({ ...asset, executable: isExecutableAsset(asset.path) }),
+  );
 };
 
 /**

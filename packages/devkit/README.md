@@ -71,9 +71,54 @@ Run it against **materialised** output, never against `assets/`. A shipped file'
 links are written for where the file lands, so resolving them from the asset tree
 produces confident nonsense.
 
+## Installing
+
+```bash
+npm install --save-dev @lcabrera/devkit @lcabrera/repo-standards
+```
+
+`@lcabrera/repo-standards` is optional and worth having: it carries the gate
+binaries the seeded workflows and hooks invoke. Without it the prose still
+materialises, and `init` writes no task pointing at a binary you do not have.
+
+Until both are published, install the packed tarballs — which is also the only
+way to see what a consumer actually receives:
+
+```bash
+pnpm pack --pack-destination /tmp/kit   # in each package directory
+npm install --save-dev /tmp/kit/*.tgz   # in the consumer
+```
+
+## Setting up a repository
+
+```bash
+devkit init [--profile <name>] [--force]
+```
+
+`init` is `sync` plus the wiring a repository does not have yet: it writes
+`devkit.config.json` with a command map inferred from your lockfile, adds the
+gate tasks whose binaries are actually installed, and then materialises the
+selected profile.
+
+It **refuses** rather than proceeding when the repository is already set up — a
+config or a manifest already present means `sync` is the command you want, and it
+is the one that knows to leave your edits alone. `--force` rewrites the config
+anyway; nothing overrides the check that this is a git repository, since the
+manifest is a tracked file and the hooks are only ever run by git.
+
+It **fails** when the run did not set the repository up: any file held back for
+an unanswered `{{commands.*}}` placeholder, or a profile that placed nothing at
+all, exits non-zero and says which command keys to add. A partial materialisation
+that exited 0 would read afterwards as a working repository whose CI workflows
+are simply absent.
+
+The inferred commands are a starting point, not a verdict — `init` names the
+runner it guessed so you can correct it. Check them before you rely on them.
+
 ## Commands
 
 ```bash
+devkit init [--profile <name>] [--force]   # set up a repository that has none of this
 devkit sync [--profile <name>]        # materialise into the current repository
 devkit doctor [--profile <name>] [--check] [--verbose]   # report divergence; --check makes it fail
 devkit doctor --accept <path> --reason "<why>"   # this edit is deliberate
@@ -122,9 +167,13 @@ seeded workflows read `.node-version`, so a repository without one fails its
 first run on the setup step. That is deliberate: failing there is loud, where
 silently using whatever Node the runner happened to have is not.
 
-The hooks arrive **executable**, because the mode travels with the content. A
-hook without the bit is skipped by git without a word, which reads exactly like a
-hook that ran and passed.
+The hooks arrive **executable**, and the mode is decided by the group the asset
+sits in rather than read off the shipped file. It has to be: `pnpm pack` writes
+every entry `0644`, so an installed copy of this package holds no executable file
+at all. Reading the mode from disk worked in this repository — `workspace:*`
+resolves the source directory, where the bit is set — and produced inert hooks
+for every consumer, which git skips without a word. The packed-tarball gate now
+asserts it, because no test run from a workspace can.
 
 ## Acknowledging a deliberate edit
 

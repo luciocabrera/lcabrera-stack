@@ -24,11 +24,16 @@ const listFilesUnder = (directory) =>
     });
 
 /**
- * The mode travels with the content, because a git hook that is not executable
- * is not a hook: git skips it without a word, which reads exactly like a hook
- * that ran and passed. Taken from the file rather than inferred from its group,
- * so a consumer receives what this package committed — npm and pnpm both keep
- * the bit through a pack.
+ * The mode is reported beside the content, because a git hook that is not
+ * executable is not a hook: git skips it without a word, which reads exactly
+ * like a hook that ran and passed.
+ *
+ * What is reported here is what is on disk — the honest answer for a general
+ * file reader, and the wrong one for deciding what a consumer receives.
+ * `pnpm pack` writes every entry 0644, so an installed copy of this package
+ * holds no executable file at all. Callers materialising shipped assets take
+ * the mode from `isExecutableAsset` instead. This claimed to be the source of
+ * truth for that, and was believed for as long as nothing installed the package.
  *
  * @param {{ directory: string, root: string }} args
  * @returns {{ path: string, content: string, executable: boolean }[]}

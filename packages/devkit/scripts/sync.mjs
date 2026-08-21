@@ -130,8 +130,9 @@ const planEntryFor = ({
  * refuses rather than writes.
  *
  * The asset's mode rides on the entry beside its content, so `applySync` never
- * has to know which group a path came from: a hook is executable because the
- * file this package ships is, not because it landed under the hooks directory.
+ * has to know which group a path came from. Which group it came from is exactly
+ * what decides the mode — see `isExecutableAsset` — but that is settled before a
+ * plan is built, so applying one stays a matter of reading the entry.
  *
  * @param {{ assets: { path: string, content: string, executable?: boolean }[],
  *   config: object, manifest: { files: Record<string, string> },
