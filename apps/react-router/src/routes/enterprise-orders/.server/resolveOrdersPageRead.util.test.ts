@@ -6,17 +6,21 @@ vi.mock('./enterpriseOrders.service', () => ({
   selectOrderGroupKeyTruncations: vi.fn(async () => ({})),
 }));
 
-const groupToken = (
-  group: Record<string, unknown>,
-  overrides: Record<string, unknown> = {},
-) =>
+const groupToken = (group: Record<string, unknown> = {}) =>
   JSON.stringify({
     isSubtotal: false,
     keys: ['shipping_country'],
     path: [{ columnKey: 'shipping_country', value: 'France' }],
     ...group,
-    ...overrides,
   });
+
+/**
+ * Written as wire text rather than built from an object: a JSON `null` is the
+ * NULL key, and `parseDrillGroup` separates it from a malformed entry by
+ * whether `value` is present at all.
+ */
+const NULL_KEY_TOKEN =
+  '{"isSubtotal":false,"keys":["shipping_country"],"path":[{"columnKey":"shipping_country","value":null}]}';
 
 const paramsFor = (entries: Record<string, string>) =>
   new URLSearchParams({ limit: '25', skip: '0', ...entries });
@@ -37,7 +41,7 @@ describe('resolveOrdersPageRead', () => {
 
   it('scopes the read to a named group', async () => {
     const resolved = await resolveOrdersPageRead(
-      paramsFor({ group: groupToken({}) }),
+      paramsFor({ group: groupToken() }),
     );
 
     expect(resolved.kind).toBe('read');
@@ -50,11 +54,7 @@ describe('resolveOrdersPageRead', () => {
     // SQL equality against NULL is never true, so the wrong spelling here shows
     // an empty modal for the group a reader is most likely to click into.
     const resolved = await resolveOrdersPageRead(
-      paramsFor({
-        group: groupToken({
-          path: [{ columnKey: 'shipping_country', value: null }],
-        }),
-      }),
+      paramsFor({ group: NULL_KEY_TOKEN }),
     );
 
     expect(resolved.kind === 'read' && resolved.read.filters).toStrictEqual([
@@ -100,10 +100,10 @@ describe('resolveOrdersPageRead', () => {
     // page beside a group row that already stated the count. This read pages,
     // so it has to say how far it goes — and only the first page pays for it.
     const first = await resolveOrdersPageRead(
-      paramsFor({ group: groupToken({}), skip: '0' }),
+      paramsFor({ group: groupToken(), skip: '0' }),
     );
     const second = await resolveOrdersPageRead(
-      paramsFor({ group: groupToken({}), skip: '25' }),
+      paramsFor({ group: groupToken(), skip: '25' }),
     );
 
     expect(first.kind === 'read' && first.read.includeTotal).toBe(true);
@@ -119,7 +119,7 @@ describe('resolveOrdersPageRead', () => {
         filter: JSON.stringify({
           status: { operator: 'equals', type: 'text', value: 'shipped' },
         }),
-        group: groupToken({}),
+        group: groupToken(),
       }),
     );
 

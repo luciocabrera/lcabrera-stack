@@ -82,12 +82,19 @@ export const resolveOrdersGroupRead = async ({
   skip,
   sort,
 }: ResolveOrdersGroupReadArgs): Promise<OrdersReadResolution> => {
-  const includeTotal = skip === 0;
+  const isFirstPage = skip === 0;
 
   if (!params.has(OLAP_DRILL_GROUP_PARAM)) {
     return {
       kind: 'read',
-      read: { cursor, filters, includeTotal, limit, offset: skip, sort },
+      read: {
+        cursor,
+        filters,
+        includeTotal: isFirstPage,
+        limit,
+        offset: skip,
+        sort,
+      },
     };
   }
 
@@ -111,6 +118,6 @@ export const resolveOrdersGroupRead = async ({
     // `includeTotal` is re-asserted over the translation's `false`: a drill
     // served one bounded page beside a group row that already stated the count,
     // where this read pages and has to say how far it goes.
-    read: { ...drill.read, cursor, includeTotal, offset: skip },
+    read: { ...drill.read, cursor, includeTotal: isFirstPage, offset: skip },
   };
 };
