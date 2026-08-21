@@ -334,10 +334,13 @@ before relying on it again.
 
 ## Preconditions these notes depend on
 
-- The reconcile is **advisory today**, because every gate it drives is (#698
-  promotes them). Nothing merges or fails on what it publishes. `Review threads
-resolved` is the report; `required_review_thread_resolution` on the `main`
-  ruleset is what actually holds the merge.
+- **One of the three gates it drives is required, the other two are not.**
+  `Copilot review complete` became a required context on 2026-08-21 (the first
+  half of #698), so a status this sweep publishes for that gate does decide a
+  merge — which is the reason it is also the one gate that opts in to the
+  no-downgrade rule. `Agent review verdict` is still advisory. `Review threads
+resolved` is a report either way: `required_review_thread_resolution` on the
+  `main` ruleset is what actually holds that merge, not this status.
 - The Actions approval policy is `first_time_contributors_new_to_github`
   (loosened 2026-08-18; see
   [`copilot-review-gate.md`](./copilot-review-gate.md)). The sweep is

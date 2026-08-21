@@ -137,7 +137,9 @@ is in `copilot-review.mjs` and not in repository settings.
 `claude-review.yml` authenticated with the default `GITHUB_TOKEN`, so its review was
 authored by `github-actions[bot]` — the identity **every** workflow here holds. Any
 workflow in this repository that posted a review satisfied this gate, not only that
-one. It stayed tolerable because nothing else posted one and the context is advisory.
+one. It stayed tolerable because nothing else posted one and the context was still
+advisory — it is required now, so the same hole would be a merge bar anything in
+Actions could clear.
 
 It now posts under the **Claude General Reviewer** GitHub App, and the entry was
 **replaced rather than extended**. Keeping both would have left the hole open while
@@ -921,11 +923,20 @@ Everything above describes the repository **after** #694 added
 `review_draft_pull_requests: false`) and `pull_request` to ruleset `19141543`.
 Further things the notes assume:
 
-- **Until #698, nothing merges or fails on what this status says.** It is
-  advisory, which is why the approval limitation above is a nuisance today and a
-  blocker the day the context becomes required. The `github-actions[bot]` hole that
-  used to ride on the same reasoning is closed — see
+- **This status is a required context, and a merge fails on what it says.** It was
+  advisory until 2026-08-21, when the first half of #698 added
+  `Copilot review complete` to ruleset `19141543` (pinned to `integration_id`
+  15368, the way its five Actions siblings are, so a status posted by anything
+  other than a workflow does not satisfy it). The approval limitation above is
+  therefore a blocker rather than a nuisance: a pull request whose head carries no
+  accepted review cannot merge, and the break-glass path is
+  [the admin bypass](#break-glass). The `github-actions[bot]` hole that used to
+  ride on the same reasoning is closed — see
   [the two accepted reviewers](#the-two-accepted-reviewers).
+- **`Agent review verdict` is still advisory**, and #698 stays open for it. It
+  reports `success — absent` when no verdict was posted, so requiring it today
+  would assert nothing; the second half of #698 is what decides whether absence
+  should fail.
 - **The accepted reviewer set is two, and one of them is dormant.** Everything
   above about Copilot describes a reviewer that currently cannot review, because
   its credits are exhausted; the configuration is untouched, so it resumes on its
