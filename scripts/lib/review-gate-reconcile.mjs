@@ -95,7 +95,7 @@ const postedMillis = (status) => Date.parse(status?.created_at ?? '') || 0;
  * the head it read the reviews for, and the comparison is meaningless across
  * heads.
  *
- * Two rules, and both are load-bearing:
+ * Three rules, and all three are load-bearing:
  *
  * - **Identical is a no-op.** This is what makes the sweep idempotent, and what
  *   makes a pull request nobody has reviewed genuinely unaffected: the event

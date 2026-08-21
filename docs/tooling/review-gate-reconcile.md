@@ -154,6 +154,28 @@ dismissed]`, and the gate workflows invoke the scripts without `--if-changed`, s
   an event recomputes it, instead of being undone by a sweep minutes later. That is an
   improvement, not a cost.
 
+### The rule is one-directional; the reasoning behind it is not
+
+The sweep still publishes `pending` → `success`. The argument for the rule — _the sweep
+runs default-branch gate code, so it is not the better-informed opinion_ — applies just
+as well to that direction, and it is not blocked there.
+
+That leaves the **mirror of #866**, on a pull request that makes a gate _stricter_: its
+own run posts `pending` (correct under the new, tighter rule), the sweep recomputes with
+the lenient code being replaced, gets `success`, and publishes it. Same head, same cause,
+opposite direction — and a false green under #698.
+
+**Deliberately not blocked.** Correcting a `pending` that a missed event left behind is
+the sweep's entire job, and it is the very same transition; refusing it would stop the
+sweep doing what it exists for while still looking like it worked. That is the trap the
+rejected "only fill absence" option fell into.
+
+**It is closer to reachable than the dismissal case below**, and worth saying plainly:
+it needs only a pull request that tightens a gate, which is an ordinary change — no
+missing event required. What limits the damage is that it lasts until the pull request
+merges, after which both copies agree. If a way to tell "stale code disagrees" from
+"a missed event left this stale" is ever wanted, it has to serve both directions.
+
 ### The residual case, and what currently keeps it unreachable
 
 A dismissal whose event goes missing leaves a `success` on an **unchanged head** that

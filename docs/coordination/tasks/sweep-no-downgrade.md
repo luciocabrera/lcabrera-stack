@@ -14,7 +14,7 @@ area:
 started: 2026-08-21
 updated: 2026-08-21
 plan: (none)
-pr: '#880'
+pr: #880
 issue: #868
 ---
 
