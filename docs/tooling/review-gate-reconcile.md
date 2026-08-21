@@ -134,14 +134,20 @@ It prints the head, how many reviews it counted, and the state it _would_
 publish, without touching anything. Compare that to what the pull request is
 showing:
 
-| It would publish | The PR shows | Reading                                                                                                                                                                                      |
-| ---------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pending`        | `pending`    | not reviewed yet — the gate is right, wait                                                                                                                                                   |
-| `success`        | `pending`    | reviewed, and the event that should have recomputed it went missing                                                                                                                          |
-| `pending`        | `success`    | the head moved after the review (a push corrects it), **or** the sweep is running older gate code than the run that posted the `success` — either way the sweep will not overwrite it (#868) |
+| It would publish | The PR shows | Reading                                                                                                                                                                                                                                                             |
+| ---------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pending`        | `pending`    | not reviewed yet — the gate is right, wait                                                                                                                                                                                                                          |
+| `success`        | `pending`    | reviewed, and the event that should have recomputed it went missing                                                                                                                                                                                                 |
+| `pending`        | `success`    | the head moved after the review (a push corrects it), **or** the sweep is running older gate code than the run that posted the `success`. For `Copilot review complete` the sweep leaves it alone either way (#868); for a gate that does not opt in, it overwrites |
 
-The same holds for the other gate with
-`vp run agent-review:verify -- --pr <n> --dry-run`.
+The same command shape works for the other gate,
+`vp run agent-review:verify -- --pr <n> --dry-run`, but **the last row does not carry
+over**: `agent-review` does not opt in, so nothing stops the sweep replacing that
+context's `success`. It cannot today for a second reason — `verify-agent-review.mjs`
+pins `state=success` in both the status it posts and the one it compares against, so
+during the advisory period it never offers a downgrade to withhold. Unpinning it (#698)
+is what makes the row's exception live, and is the point at which this gate has to
+decide whether it wants the opt-in.
 
 ## What the no-downgrade rule gives up
 

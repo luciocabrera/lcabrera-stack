@@ -2,7 +2,7 @@
 id: sweep-no-downgrade
 title: stop the sweep downgrading a status it did not compute
 owner: agent:claude
-status: active
+status: review
 branch: chore/868-sweep-no-downgrade
 area:
   - scripts/lib/review-gate-status.mjs
@@ -51,4 +51,4 @@ keeps a dismissed review working.
 
 - Current step: implemented, tests pinned from both directions, docs updated
 - Blockers: none
-- Next: push, flip #880 out of draft, drive to merged
+- Next: drive #880 to merged
