@@ -211,7 +211,10 @@ rejected "only fill absence" option fell into.
 
 **It is closer to reachable than the dismissal case below**, and worth saying plainly:
 it needs only a pull request that tightens a gate, which is an ordinary change — no
-missing event required, and #866 is that shape having actually happened. What limits the
+missing event required — and a pull request whose own gate code disagrees with `main`'s
+is not hypothetical, because #866 was one. What #866 does **not** evidence is this
+polarity: what was measured there is `main`'s code overwriting a `success` with
+`pending`, and no instance of the reverse has been observed. What limits the
 damage is that the green is not arbitrary — the head really was reviewed under the rule
 `main` still holds — and that it lasts only until the pull request merges, after which
 both copies agree. If a way to tell "stale code disagrees" from

@@ -196,8 +196,9 @@ version of this one. `Copilot review complete` is satisfied by a review of the h
 from any accepted reviewer, and `claude-review.yml` runs on every pull request that
 is not a draft — including the hand-opened ones that never reach `/epic` or
 `/refactor-verified`. A draft is skipped and cannot merge, so for merge purposes the
-coverage is total. "Nothing merges unreviewed" is therefore that gate's guarantee
-once #698 promotes it; this one adds "and where criteria existed, they were met."
+coverage is total. "Nothing merges unreviewed" is therefore that gate's guarantee,
+since the first half of #698 made `Copilot review complete` a required context on
+2026-08-21; this one adds "and where criteria existed, they were met."
 
 **The bypass this admits, stated plainly** (#698: a gate with an undocumented bypass
 is worse than one that admits it): a pull request that never runs a reviewer carries

@@ -13,6 +13,8 @@ area:
   - COMMANDS.md
   - docs/agents/pr-review-threads.md
   - .github/workflows/review-gate-reconcile.yml
+  - docs/agents/agent-review-contract.md
+  - scripts/copilot-review-status.mjs
 started: 2026-08-21
 updated: 2026-08-21
 plan: (none)

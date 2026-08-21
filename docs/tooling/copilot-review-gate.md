@@ -659,8 +659,14 @@ rest of the preconditions.
    ```bash
    vp run review-gates:reconcile -- --pr <n>          # from a checkout
    gh workflow run copilot-review-gate.yml -f pr=<n> \
+     --ref <the pull request's branch> \
      -R luciocabrera/vite-react-compiler          # or press it in Actions
    ```
+
+   **`--ref` is not optional on a pull request that edits the gate.** A dispatch
+   naming no ref runs `main`'s copy of the workflow, which is #866 — the failure
+   this rung is often being used to recover from. Naming the branch runs the code
+   the pull request actually proposes.
 
    Both re-derive the verdict rather than asserting one, so neither leaves a
    status a later reader cannot reproduce — which is what separates them from
