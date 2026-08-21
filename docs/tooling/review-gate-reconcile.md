@@ -284,9 +284,14 @@ Waiting up to one interval is the ordinary answer. When that is too long:
    **For `Copilot review complete` this reports rather than recovers.** The status
    it posts is attributed to you, not to an app, so it does not satisfy that
    required context — and because it posts the same state and description the
-   schedule would, every later sweep sees no change and withholds. Use step 2 for
-   that gate; this step is the right one for the two contexts that are advisory,
-   and for reading what the sweep thinks.
+   schedule would, every later sweep sees no change and withholds.
+
+   For that gate, dispatch **Copilot Review Gate** (step 2) — **not** the
+   **Review Gate Reconcile** dispatch, which is this same sweep and would withhold
+   for the same reason, going green while posting nothing. The distinction is
+   `--if-changed`: `gateArgs` always appends it, and `copilot-review-gate.yml`
+   invokes its script without it. This step stays the right one for the two
+   contexts that are advisory, and for reading what the sweep thinks.
 
 2. **Dispatch the gate from Actions**, which needs no checkout — pick
    **Copilot Review Gate**, **Agent Review Gate** or **Review Gate Reconcile**,

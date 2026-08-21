@@ -11,10 +11,12 @@ area:
   - docs/agents/merge-checklist.md
   - scripts/lib/review-gate-reconcile-workflow.test.mjs
   - COMMANDS.md
+  - docs/agents/pr-review-threads.md
+  - .github/workflows/review-gate-reconcile.yml
 started: 2026-08-21
 updated: 2026-08-21
 plan: (none)
-pr: (none)
+pr: #882
 issue: #698
 ---
 

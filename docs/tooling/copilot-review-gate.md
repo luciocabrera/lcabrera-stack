@@ -951,13 +951,22 @@ Further things the notes assume:
 
 - **This status is a required context** (2026-08-21, the first half of #698) — the
   body above says what that means for a merge. What belongs here is the detail a
-  reader cannot see from the check: it is pinned to `integration_id` 15368, the way
-  its Actions siblings are, so **only a status posted by a workflow satisfies
-  it**. That is what demotes break-glass rung 6 to a record-keeping step and makes
+  reader cannot see from the check, and which nothing in the tree asserts — read
+  it rather than trusting this line:
+
+  ```bash
+  gh api repos/luciocabrera/vite-react-compiler/rulesets/19141543 \
+    --jq '.rules[] | select(.type=="required_status_checks")
+          | .parameters.required_status_checks[]'
+  ```
+
+  It is pinned to `integration_id` 15368, the way its Actions siblings are, so
+  **only a status posted by a workflow satisfies it**. That is what demotes break-glass rung 6 to a record-keeping step and makes
   [the admin bypass](#break-glass) the rung that merges. The approval limitation
   above is a blocker rather than a nuisance for the same reason, and the
   `github-actions[bot]` hole that used to ride on this reasoning is closed — see
   [the two accepted reviewers](#the-two-accepted-reviewers).
+
 - **`Agent review verdict` is still advisory**, and #698 stays open for it. It
   reports `success — absent` when no verdict was posted, so requiring it today
   would assert nothing; the second half of #698 is what decides whether absence
