@@ -428,14 +428,16 @@ judging a pull request by the branch it is replacing is not. (A branch cut befor
 this workflow carried `workflow_dispatch` 404s the dispatch instead, landing on the
 warning path with the sweep as backstop.)
 
-It does **not** fix the scheduled sweep,
-which GitHub always runs from the default branch — so a pull request editing the
-gate still has its status flapped every half hour until it merges. That is
-tolerable only while this context was not required, because under a required
-context the same flap is an unmergeable pull request. **#868 closed it** before
-the promotion: the sweep no longer replaces a `success` for this context.
-[`review-gate-reconcile.md`](./review-gate-reconcile.md) owns that rule, what it
-gives up, and why it is per gate rather than sweep-wide.
+It does **not** change the scheduled sweep, which GitHub always runs from the
+default branch — so on a pull request editing the gate, the sweep still judges it
+with `main`'s copy of the gate code. **#868 closed the direction that would have
+made a required context unmergeable**: the sweep no longer replaces a `success`
+here, so the status is not flapped away every half hour any more. The opposite
+direction is open by design — the sweep can still publish `pending` → `success`
+from the code being replaced, which on a pull request that _tightens_ the gate is
+a false green on a merge bar.
+[`review-gate-reconcile.md`](./review-gate-reconcile.md) owns the rule, that
+residual case, and why it is per gate rather than sweep-wide.
 
 **This gate blocks.** `Copilot review complete` became a required context on
 ruleset `19141543` on 2026-08-21 — the first half of #698 — so a pull request

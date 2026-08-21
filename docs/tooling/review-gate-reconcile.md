@@ -28,9 +28,14 @@ issue #737. Do not copy the ratio into this file: it moves, and nothing here
 would notice.
 
 For `Copilot review complete` — required since 2026-08-21 — a stale status is a
-pull request that cannot merge, whose only recovery is re-running an _earlier_
-workflow run, a step no author finds unaided. For the two still advisory the
-consequence is latency. This landing first is what made that promotion safe.
+pull request that cannot merge. The recovery is the gate's own `workflow_dispatch`
+(break-glass rung 5 in
+[`copilot-review-gate.md`](./copilot-review-gate.md#break-glass)), which exists
+so nobody has to hunt for an earlier run to re-run; the caveat worth knowing
+before pressing it is that a dispatch naming no ref runs `main`'s copy of the
+gate, which is the #866 failure. For the two contexts still advisory the
+consequence is only latency. This sweep landing first is what made the promotion
+safe.
 
 ## It is not the polling the gate header rejects
 
@@ -195,7 +200,8 @@ as well to that direction, and it is not blocked there.
 That leaves the **mirror of #866**, on a pull request that makes a gate _stricter_: its
 own run posts `pending` (correct under the new, tighter rule), the sweep recomputes with
 the lenient code being replaced, gets `success`, and publishes it. Same head, same cause,
-opposite direction — and a false green under #698.
+opposite direction — and, since `Copilot review complete` became a required context on
+2026-08-21, **a false green on a live merge bar** rather than a hypothetical one.
 
 **Deliberately not blocked.** Correcting a `pending` that a missed event left behind is
 the sweep's entire job, and it is the very same transition; refusing it would stop the
@@ -204,8 +210,10 @@ rejected "only fill absence" option fell into.
 
 **It is closer to reachable than the dismissal case below**, and worth saying plainly:
 it needs only a pull request that tightens a gate, which is an ordinary change — no
-missing event required. What limits the damage is that it lasts until the pull request
-merges, after which both copies agree. If a way to tell "stale code disagrees" from
+missing event required, and #866 is that shape having actually happened. What limits the
+damage is that the green is not arbitrary — the head really was reviewed under the rule
+`main` still holds — and that it lasts only until the pull request merges, after which
+both copies agree. If a way to tell "stale code disagrees" from
 "a missed event left this stale" is ever wanted, it has to serve both directions.
 
 ### The residual case, and what currently keeps it unreachable
@@ -219,8 +227,8 @@ gates is pinned by a test rather than left to a config nobody reads.
 
 A dismissal whose event goes missing leaves a `success` on an **unchanged head** that
 nothing revisits. That is a **false green**, not a stale one — a worse failure than the
-flap this rule fixes, because under #698 it merges a pull request whose review was
-withdrawn.
+flap this rule fixes, because the context is required, so it merges a pull request whose
+review was withdrawn.
 
 It needs three things at once, and the first does not hold today:
 
@@ -342,6 +350,12 @@ before relying on it again.
   merge. `Agent review verdict` is still advisory. `Review threads
 resolved` is a report either way: `required_review_thread_resolution` on the
   `main` ruleset is what actually holds that merge, not this status.
+- **The promotion activated one hazard this file already describes.** The
+  `pending` → `success` direction above — the mirror of #866, on a pull request
+  that tightens a gate — was written while every gate here was advisory, so it
+  cost a stale status. It now greens a required check. It is tracked, not
+  accepted: #884. The dismissal case further down
+  is still held shut by its own preconditions.
 - **Requiredness is not why a gate opts in to the no-downgrade rule.** The two sit
   next to each other here only by timing — #868 shipped the opt-in before the
   promotion, so being required cannot have been its reason. The reason is the one
