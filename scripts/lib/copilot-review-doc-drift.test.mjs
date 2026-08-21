@@ -3,25 +3,14 @@ import { describe, expect, it } from 'vite-plus/test';
 import { ACCEPTED_REVIEWER_LOGINS } from './copilot-review.mjs';
 import { readRepoFile } from './workflow-inspect.mjs';
 
-// `docs/tooling/copilot-review-gate.md` carries a copy-pasteable GraphQL command for
-// answering "has an accepted reviewer covered this head?" without a checkout. To do
-// that it repeats `ACCEPTED_REVIEWERS` as a jq `IN(...)` list — a second copy of the
-// roster, in a file no test read until this one.
+// `docs/tooling/copilot-review-gate.md` repeats the roster twice — a reviewer table,
+// and a copy-pasteable GraphQL diagnostic that filters on the same logins. Both are
+// checked here, because a drifted copy is wrong in BOTH directions and is read exactly
+// when the published status looks wrong, which is when it is believed. #866 drifted
+// both; review caught it.
 //
-// It drifted immediately: #866 swapped `github-actions` for `claude-general-reviewer`
-// in the code and left the snippet naming the old login. A drifted copy is wrong in
-// both directions — it reports "no accepted reviewer has reviewed this pull request
-// yet — wait" for a head the gate has already passed, and counts a reviewer the gate
-// rejects — and someone runs it precisely when the published status looks wrong, which
-// is when a confident wrong answer does the most damage.
-//
-// Comparing the whole list rather than checking for one bad login is deliberate: a
-// roster that GAINS a reviewer drifts the same way and would pass a
-// `not.toContain('github-actions')` check unchanged.
-//
-// The file holds the roster TWICE: the jq filter, and the reviewer table a person
-// reads first. Both are checked — the table is the one a human trusts, so leaving it
-// ungated would police the copy nobody looks at (#866 review).
+// Whole-list comparison, not a check for one bad name: a roster that GAINS a reviewer
+// drifts identically and would pass `not.toContain('github-actions')` unchanged.
 const DOC = 'docs/tooling/copilot-review-gate.md';
 
 /** Order-independent comparison; the two lists need not be written in one order. */

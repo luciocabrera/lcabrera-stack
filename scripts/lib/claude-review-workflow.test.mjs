@@ -2,26 +2,14 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import { readRepoFile, stepBlock, stepEnvValue } from './workflow-inspect.mjs';
 
-// `ACCEPTED_REVIEWERS` names the reviewer by login, and the login follows from the
-// credential the review is posted with. The unit tests around that set prove the
-// SET is right; nothing there can see which token the workflow actually uses.
+// The reviewer's login follows from the credential the review is posted with, so a
+// submit step that fell back to `github.token` would author every review as
+// `github-actions[bot]` — which `ACCEPTED_REVIEWERS` no longer accepts — and the gate
+// would sit at `pending` forever with a green build. The reviewer-set unit tests pass
+// identically either way, so this reads the workflow instead (#866, AGENTS.md Rule 14).
 //
-// That gap has a specific failure mode, and it is the quiet one. If the submit step
-// fell back to `github.token`, the review would be authored by `github-actions[bot]`
-// again — which the set no longer accepts — so every review would stop matching and
-// the status would sit at `pending` forever. Green build, green tests, and a gate
-// that never goes green for a reason nothing reports. AGENTS.md Rule 14: a clean
-// pass has to be evidence, and the reviewer-set tests pass identically either way.
-//
-// So this reads the workflow. The comment on that test used to claim it covered
-// this case; it did not, and a comment promising a check that does not exist is
-// worse than no comment (#866 review).
-//
-// The credential is read POSITIVELY, per key, rather than asserted absent over the
-// step's text. `stepBlock` runs to the next `- name:`, so the submit step's text
-// includes the comment block introducing the dispatch step — and a sentence there
-// mentioning `github.token` would fail a negative assertion for a reason that has
-// nothing to do with which token is used. See `stepEnvValue`.
+// The credential is read per env key rather than asserted absent over the step's text;
+// `stepEnvValue` carries why.
 const WORKFLOW = '.github/workflows/claude-review.yml';
 const SUBMIT_STEP =
   'Submit the review against the head this run was triggered for';
@@ -62,6 +50,29 @@ describe('the review is posted under the reviewer’s own identity', () => {
       '${{ steps.reviewer-token.outputs.token }}',
     );
     expect(stepEnvValue(step, 'NOT_SET')).toBeUndefined();
+  });
+
+  // The scoping the JSDoc promises. Without it the `run:` line below is read as the
+  // credential, and the assertion above would pass against a shell variable rather
+  // than the step's env — the check would still be green and would mean nothing.
+  it('reads the env mapping only, not a run: line that starts with the key', () => {
+    const step = [
+      '      - name: Example',
+      '        env:',
+      '          GH_TOKEN: ${{ steps.reviewer-token.outputs.token }}',
+      '        run: |',
+      '          GH_TOKEN: not-the-credential',
+    ].join('\n');
+    expect(stepEnvValue(step, 'GH_TOKEN')).toBe(
+      '${{ steps.reviewer-token.outputs.token }}',
+    );
+
+    const noEnv = [
+      '      - name: Example',
+      '        run: |',
+      '          GH_TOKEN: not-the-credential',
+    ].join('\n');
+    expect(stepEnvValue(noEnv, 'GH_TOKEN')).toBeUndefined();
   });
 
   // The dispatch legitimately keeps `github.token` — it needs `actions: write`,

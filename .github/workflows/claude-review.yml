@@ -175,13 +175,10 @@ jobs:
       # right direction — a review that cannot be attributed to the reviewer should not be
       # posted under a name that means "some workflow".
       #
-      # It sits AFTER the paid model turn, so a missing secret burns a full review before
-      # failing, and that ordering is a trade rather than an oversight. Minting first would
-      # fail fast; it would also take over as the job's first failure point on a fork, where
-      # `Run the Claude review` holds that role today and is the reason the dispatch step
-      # below is unreachable there. Nothing is posted from a fork either way — what moves is
-      # which step the red X names, and one comment already leans on that being the review
-      # action. Worth revisiting deliberately rather than as a side effect of this change.
+      # It sits AFTER the paid model turn, so a missing secret burns a review before failing.
+      # That ordering is a trade, not an oversight: minting first would fail fast, but would
+      # also take over as the fork's first failure point from `Run the Claude review`, which
+      # is what makes the dispatch step below unreachable there.
       - name: Mint a token for the reviewer's own identity
         id: reviewer-token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
@@ -271,31 +268,13 @@ jobs:
       # here, and Copilot's own reviews, whose `pull_request_review` trigger is unreliable
       # rather than absent.
       #
-      # `--ref` is load-bearing, because the gate's verdict depends on the code it runs and a
-      # refless dispatch runs the DEFAULT BRANCH's copy. Measured on #866, which is a pull
-      # request that edits `ACCEPTED_REVIEWERS`: at 08:43:12Z the `pull_request_review` run,
-      # which checks out the merge ref and so the pull request's own gate code, posted
-      # `success — Reviewed by claude-general-reviewer[bot] at a46eaf8`; at 08:43:15Z the
-      # refless dispatch from this step, running main's older copy, read the same head and
-      # the same reviews, computed `0 counted from an accepted reviewer`, and overwrote it
-      # with `pending`. Opposite verdicts, and the wrong one won by landing last.
-      #
-      # That is the code/YAML skew `copilot-review-gate.yml` takes deliberate care to avoid
-      # on its other two triggers (the #177 comment there); a refless dispatch reintroduced
-      # it through the back door.
-      #
-      # Naming the head ref narrows that skew rather than closing it: the event-driven
-      # triggers check out the pull request's MERGE ref, while a dispatch checks out the ref
-      # it was given — the branch TIP. Those differ whenever `main` has moved since the branch
-      # point, so the two can still run different gate code. What changes is that both copies
-      # are the pull request's own, instead of one being the branch it is trying to replace.
-      # A branch cut before the gate carried `workflow_dispatch` 404s here, which lands on the
-      # warning below with the sweep as backstop.
-      #
-      # It outlives the pull request that found it: a pull request editing the gate is
-      # precisely the one the stale copy judges wrongly, and once `Copilot review complete`
-      # is a required context (#698) that is an unmergeable pull request rather than a
-      # cosmetic flap.
+      # `--ref` is load-bearing: a refless dispatch runs the DEFAULT BRANCH's copy of the
+      # gate, which is the wrong code to judge a pull request that edits the gate — on #866 it
+      # overwrote a correct `success` with `pending`. It narrows the skew rather than closing
+      # it, since the event triggers take the merge ref and a dispatch takes the branch tip;
+      # what changes is that both are then the pull request's own code. The scheduled sweep
+      # has the same skew and no ref that could fix it — #868. A branch predating the gate's
+      # `workflow_dispatch` 404s here and lands on the warning below.
       - name: Ask the review gate to recompute now rather than at the next sweep
         # A run whose head moved posted nothing, so there is nothing new for the gate to see
         # and a dispatch would only republish the same pending.
@@ -303,13 +282,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-          # On a fork this is the fork's branch name, which does not exist in this
-          # repository — and it is never read, because this step is unreachable there. The
-          # job fails at `Run the Claude review`, which calls `core.setFailed` on both fork
-          # paths, and nothing here carries `continue-on-error`; so `submit` never runs,
-          # `posted` is never `'true'`, and the `if:` above skips this step. Fork behaviour
-          # is decided at that step, not here — nothing is submitted from a fork, so there
-          # is no recompute to lose.
+          # Never read on a fork: `Run the Claude review` calls `core.setFailed` there and
+          # nothing carries `continue-on-error`, so `submit` never runs and the `if:` above
+          # skips this step. Fork behaviour is decided at that step, not here.
           HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
           set -euo pipefail

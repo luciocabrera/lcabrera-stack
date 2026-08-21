@@ -76,28 +76,41 @@ export const stepBlock = (source, name) => {
   );
 };
 
+/** How deep a line is indented; blank lines report -1 so they never end a block. */
+const depthOf = (line) =>
+  line.trim() === '' ? -1 : line.length - line.trimStart().length;
+
 /**
- * The value of one `env:` key inside a step, comment lines removed.
+ * The value of one key in a step's `env:` mapping, or `undefined`.
  *
- * `stepBlock` runs to the next `- name:`, so a step's text also contains the comment
- * block that introduces the step after it. A NEGATIVE assertion over that text — "this
- * step must not mention `github.token`" — is therefore governed by prose about a
- * different step, and breaks the day someone writes an ordinary sentence nearby. That
- * is a test failing for a reason unrelated to what it protects, which costs the same
- * trust as one passing for the wrong reason. Reading the key positively says the same
- * thing about the credential and cannot be tripped by prose (#866 review).
+ * Scoped to the mapping rather than scanning the step, so it cannot read a `run:` line
+ * or a comment that happens to start with the key. Callers assert on `undefined` rather
+ * than defaulting — a value that was never set must fail, not compare equal to nothing.
  *
- * Returns `undefined` when the step does not set the key, so a caller asserts on it
- * rather than comparing against a value that was never there.
+ * Why a test reads the key instead of asserting a credential absent from the step:
+ * `stepBlock` runs to the next `- name:`, so a step's text includes the comment block
+ * introducing the step after it, and a negative assertion over that text is governed by
+ * prose about a different step. Measured on #866 — a sentence naming `github.token`
+ * pasted into the submit step's span fails the negative form and not this one.
  */
 export const stepEnvValue = (step, key) => {
-  const prefix = `${key}:`;
-  const line = (step ?? '')
+  const lines = (step ?? '')
     .split('\n')
-    .map((text) => text.trim())
-    .filter((text) => !text.startsWith('#'))
-    .find((text) => text.startsWith(prefix));
-  return line === undefined ? undefined : line.slice(prefix.length).trim();
+    .filter((line) => !line.trim().startsWith('#'));
+  const start = lines.findIndex((line) => line.trim() === 'env:');
+  if (start === -1) {
+    return undefined;
+  }
+  const prefix = `${key}:`;
+  for (const line of lines.slice(start + 1)) {
+    if (depthOf(line) !== -1 && depthOf(line) <= depthOf(lines[start])) {
+      return undefined;
+    }
+    if (line.trim().startsWith(prefix)) {
+      return line.trim().slice(prefix.length).trim();
+    }
+  }
+  return undefined;
 };
 
 /**

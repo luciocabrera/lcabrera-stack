@@ -2,7 +2,7 @@
 id: reviewer-own-identity
 title: give the in-workflow reviewer its own identity
 owner: agent:claude
-status: active
+status: review
 branch: chore/865-reviewer-own-identity
 area:
   - .github/workflows/claude-review.yml
