@@ -58,11 +58,17 @@ export const resolveGroupingColumnsPatch = <TData>({
 
   return {
     ...derived,
-    // `normalizedColumns` rather than `effectiveColumns`: the latter is
-    // visibility-filtered, so pruning against it would drop the sort of a
-    // column the user merely hid.
+    // The declared columns beside the painted ones, because a measured column
+    // is *replaced* while grouped: pruning against the grid alone would take a
+    // pre-existing sort on `total_amount` with it, and the caller writes the
+    // result into the URL. `normalizedColumns` rather than `effectiveColumns`
+    // for the painted half: the latter is visibility-filtered, so pruning
+    // against it would drop the sort of a column the user merely hid.
     sorting: pruneSortingToColumns<TData>({
-      columnKeys: Object.keys(derived.normalizedColumns),
+      declaredColumnKeys: columnsState.columns.map((column) =>
+        String(column.key),
+      ),
+      gridColumnKeys: Object.keys(derived.normalizedColumns),
       sorting: columnsState.sorting,
     }),
   };

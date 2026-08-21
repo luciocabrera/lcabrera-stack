@@ -118,28 +118,6 @@ const toPeriodFilters = ({
 };
 
 /**
- * Turns a group row into the paginated read of the rows underneath it (ADR-079).
- *
- * **Filter inheritance is the correctness criterion, and it fails quietly.** A
- * drilled read that drops the grouped view's filters returns rows that are true
- * facts about the table and wrong under the heading they appear beneath — a
- * group stating 214 orders with 1,008 rows under it, dated outside the range the
- * user set. Both render, neither throws, and every number is individually
- * correct. So the view's filters go in first and unchanged, and the group's own
- * keys are appended to them rather than replacing them.
- *
- * **A truncated key becomes a range, not an equality** (#786). The group's value
- * is a period start that no row holds, so equality returns the boundary row and
- * nothing else — see `toPeriodFilters`.
- *
- * **Group-key terms and measure terms are dropped from the sort** — the first
- * because they are constant within a group and order nothing, the second
- * because the column they name exists only in the grouped view (see
- * `isMeasureSortTerm`); the caller's primary key is appended so the page is
- * deterministic (ADR-008). Without it two rows equal on every remaining term can
- * come back in any order, which repeats and skips rows across pages.
- */
-/**
  * Whether a sort term names a **measure column** rather than a real column.
  *
  * The grid renders one column per applied aggregate and keys it `column:fn`
@@ -168,6 +146,28 @@ const isMeasureSortTerm = (column: string) => {
   );
 };
 
+/**
+ * Turns a group row into the paginated read of the rows underneath it (ADR-079).
+ *
+ * **Filter inheritance is the correctness criterion, and it fails quietly.** A
+ * drilled read that drops the grouped view's filters returns rows that are true
+ * facts about the table and wrong under the heading they appear beneath — a
+ * group stating 214 orders with 1,008 rows under it, dated outside the range the
+ * user set. Both render, neither throws, and every number is individually
+ * correct. So the view's filters go in first and unchanged, and the group's own
+ * keys are appended to them rather than replacing them.
+ *
+ * **A truncated key becomes a range, not an equality** (#786). The group's value
+ * is a period start that no row holds, so equality returns the boundary row and
+ * nothing else — see `toPeriodFilters`.
+ *
+ * **Group-key terms and measure terms are dropped from the sort** — the first
+ * because they are constant within a group and order nothing, the second
+ * because the column they name exists only in the grouped view (see
+ * `isMeasureSortTerm`); the caller's primary key is appended so the page is
+ * deterministic (ADR-008). Without it two rows equal on every remaining term can
+ * come back in any order, which repeats and skips rows across pages.
+ */
 export const toDrillRead = ({
   filters,
   group,

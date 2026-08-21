@@ -72,11 +72,16 @@ export const resolveBatchTableSettingsUpdate = <TData>({
     // Accept can take away the very column the sort names — and the ungrouped
     // read refuses an unknown column rather than ignoring it.
     //
-    // `normalizedColumns` rather than `effectiveColumns`: the latter is
-    // visibility-filtered, so pruning against it would drop the sort of a
-    // column this same Accept merely hid.
+    // The declared columns go in beside the painted ones: a measured column is
+    // *replaced* while grouped, so pruning against the grid alone would discard
+    // a pre-existing sort on a perfectly ordinary column.
+    //
+    // `normalizedColumns` rather than `effectiveColumns` for the painted half:
+    // the latter is visibility-filtered, so pruning against it would drop the
+    // sort of a column this same Accept merely hid.
     sorting: pruneSortingToColumns<TData>({
-      columnKeys: Object.keys(normalizedColumns),
+      declaredColumnKeys: columns.map((column) => String(column.key)),
+      gridColumnKeys: Object.keys(normalizedColumns),
       sorting: settings.sorting,
     }),
   };

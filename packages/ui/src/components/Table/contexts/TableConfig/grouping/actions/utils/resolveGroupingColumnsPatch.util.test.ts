@@ -141,4 +141,30 @@ describe('resolveGroupingColumnsPatch', () => {
       { columnKey: 'ship_country', direction: 'asc' },
     ]);
   });
+  it('keeps the sort of a column an aggregate replaced in the grid', () => {
+    // The data-loss case: sort by `Amount`, *then* group with `avg(Amount)`.
+    // `withAggregateColumns` replaces the measured column, so the painted list
+    // loses `total_amount` — but it is still an ordinary column the read orders
+    // by fine. Pruning against the grid alone dropped the sort here, and the
+    // caller writes the pruned value into the `sorting` search param, so it was
+    // gone from the URL and did not return on ungrouping.
+    //
+    // Asserted at the call site rather than only on the util, because the
+    // util cannot see which lists the caller hands it — the defect was in the
+    // argument, not the algorithm.
+    const sortedByMeasuredColumn = getInitialColumnsState<Row>({
+      columns,
+      sorting: [{ columnKey: 'total_amount', direction: 'desc' }],
+    }) as TableColumnsState<Row>;
+
+    const next = resolveGroupingColumnsPatch<Row>({
+      aggregates: [{ columnKey: 'total_amount', fn: 'avg' }],
+      columnsState: sortedByMeasuredColumn,
+      groupingKeys: ['order_status'],
+    });
+
+    expect(next.sorting).toStrictEqual([
+      { columnKey: 'total_amount', direction: 'desc' },
+    ]);
+  });
 });

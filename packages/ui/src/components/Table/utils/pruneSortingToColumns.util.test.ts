@@ -9,8 +9,28 @@ type Row = {
   readonly total_amount: number;
 };
 
-/** What the grid has, before visibility is applied. */
+/** What the consumer declared — orderable whether or not the grid paints it. */
+const declared = ['customer_type', 'total_amount'];
+
+/**
+ * What the grid paints while `avg` is applied to `total_amount`. Note what is
+ * **missing**: `withAggregateColumns` replaces a measured column, so the
+ * painted list has no `total_amount` in it at all.
+ */
 const painted = ['customer_type', 'total_amount:avg'];
+
+type PruneArgs = {
+  readonly declaredColumnKeys?: readonly string[];
+  readonly gridColumnKeys?: readonly string[];
+  readonly sorting: SortingState<Row>;
+};
+
+const prune = ({
+  declaredColumnKeys = declared,
+  gridColumnKeys = painted,
+  sorting,
+}: PruneArgs) =>
+  pruneSortingToColumns<Row>({ declaredColumnKeys, gridColumnKeys, sorting });
 
 describe('pruneSortingToColumns', () => {
   it('keeps a sort on a column the grid still paints', () => {
@@ -18,9 +38,7 @@ describe('pruneSortingToColumns', () => {
       { columnKey: 'total_amount:avg', direction: 'desc' },
     ] as SortingState<Row>;
 
-    expect(
-      pruneSortingToColumns<Row>({ columnKeys: painted, sorting }),
-    ).toStrictEqual(sorting);
+    expect(prune({ sorting })).toStrictEqual(sorting);
   });
 
   it('drops a sort naming a measure column the grouping took away', () => {
@@ -33,9 +51,23 @@ describe('pruneSortingToColumns', () => {
       { columnKey: 'total_amount:min', direction: 'desc' },
     ] as SortingState<Row>;
 
-    expect(
-      pruneSortingToColumns<Row>({ columnKeys: painted, sorting }),
-    ).toStrictEqual([{ columnKey: 'customer_type', direction: 'asc' }]);
+    expect(prune({ sorting })).toStrictEqual([
+      { columnKey: 'customer_type', direction: 'asc' },
+    ]);
+  });
+
+  it('keeps a sort on a measured column the grid stopped painting', () => {
+    // The data-loss bug this shape exists to prevent. Sorting by
+    // `Total Amount` and *then* grouping with `avg(Total Amount)` replaces the
+    // column in the grid — but it is still an ordinary column the read orders
+    // by fine. Pruning against the painted list alone discarded the sort, and
+    // the caller writes the pruned value into the `sorting` search param, so
+    // it was gone from the URL and never came back on ungrouping.
+    const sorting = [
+      { columnKey: 'total_amount', direction: 'desc' },
+    ] as SortingState<Row>;
+
+    expect(prune({ sorting })).toBe(sorting);
   });
 
   it('returns the same array when nothing was pruned', () => {
@@ -45,9 +77,7 @@ describe('pruneSortingToColumns', () => {
       { columnKey: 'customer_type', direction: 'asc' },
     ] as SortingState<Row>;
 
-    expect(pruneSortingToColumns<Row>({ columnKeys: painted, sorting })).toBe(
-      sorting,
-    );
+    expect(prune({ sorting })).toBe(sorting);
   });
 
   it('keeps a sort on a column the user merely hid', () => {
@@ -58,20 +88,25 @@ describe('pruneSortingToColumns', () => {
       { columnKey: 'total_amount:avg', direction: 'desc' },
     ] as SortingState<Row>;
 
-    // `painted` is the pre-visibility list, so a hidden `total_amount:avg` is
-    // still in it and its sort survives.
-    expect(pruneSortingToColumns<Row>({ columnKeys: painted, sorting })).toBe(
-      sorting,
-    );
+    expect(prune({ sorting })).toBe(sorting);
   });
 
-  it('drops everything when the grid paints nothing', () => {
+  it('drops a key that is neither declared nor painted', () => {
+    // A hand-edited URL, or a column the consumer removed between releases.
+    const sorting = [
+      { columnKey: 'gone_entirely', direction: 'asc' },
+    ] as unknown as SortingState<Row>;
+
+    expect(prune({ sorting })).toStrictEqual([]);
+  });
+
+  it('drops everything when there is nothing to order by', () => {
     const sorting = [
       { columnKey: 'customer_type', direction: 'asc' },
     ] as SortingState<Row>;
 
     expect(
-      pruneSortingToColumns<Row>({ columnKeys: [], sorting }),
+      prune({ declaredColumnKeys: [], gridColumnKeys: [], sorting }),
     ).toStrictEqual([]);
   });
 });
