@@ -982,6 +982,8 @@ export type TableMetaState = {
    */
   readonly isServerFilterEnabled?: boolean;
   readonly isStriped: boolean;
+  readonly isTableSettingsOpen: boolean;
+  readonly isTableSettingsPinned: boolean;
   /**
    * This table shares its URL with another table's route, so it **reads** the
    * URL's filter/sort state as its starting floor but never writes back to it
@@ -1001,8 +1003,6 @@ export type TableMetaState = {
    * `group`.
    */
   readonly isUrlStateReadOnly?: boolean;
-  readonly isTableSettingsOpen: boolean;
-  readonly isTableSettingsPinned: boolean;
   /** Page size for subsequent loads */
   readonly loadMorePageSize: number;
   /** Locale for formatting (defaults to navigator.language) */
