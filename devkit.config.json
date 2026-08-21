@@ -1,7 +1,8 @@
 {
   "gates": {
     "scriptSize": {
-      "skipDirs": [".claude", ".react-router"]
+      "skipDirs": [".claude", ".react-router"],
+      "guideDoc": ".claude/rules/scripts.md"
     },
     "strayConfigs": {
       "configuredIn": "the root `vite.config.ts` (ADR-042)",
