@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /**
  * Answer "does the Release workflow have anything to publish?" per package,
  * by asking the registry rather than counting files in `.changeset/`.

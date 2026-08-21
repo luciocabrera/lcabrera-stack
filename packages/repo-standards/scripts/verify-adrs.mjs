@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /**
  * Fails the build when an ADR is in the wrong place, badly named, or reuses a
  * number — and keeps each home's index in step with its directory.

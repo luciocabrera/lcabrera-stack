@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /**
  * Fails the build when a document names a repository path that does not exist.
  *

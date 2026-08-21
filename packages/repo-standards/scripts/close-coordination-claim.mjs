@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /**
  * Deletes the coordination task file(s) a merged PR closed, so nobody has to
  * remember Rule 12's last step. A claim outliving its merge is read as a live

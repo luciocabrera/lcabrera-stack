@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /**
  * Fails when a built package's published types don't resolve for a consumer
  * (Are The Types Wrong?).

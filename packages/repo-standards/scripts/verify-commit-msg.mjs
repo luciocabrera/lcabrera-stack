@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /**
  * Validates a commit message against the repo's Conventional-Commit standard —
  * the single spec in `./lib/commit-convention.mjs`. One validator, two callers:

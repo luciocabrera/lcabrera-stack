@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /**
  * Validates a git branch name against the repo standard — the single spec in
  * `./lib/commit-convention.mjs`, the same file the commit-msg hook and the PR

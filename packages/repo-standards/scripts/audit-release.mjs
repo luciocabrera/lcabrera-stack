@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /**
  * Audits the manifests that actually shipped, against the registry.
  *

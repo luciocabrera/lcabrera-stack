@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /**
  * Refuses a silent breaking change to the configured packages' API surface.
  *
