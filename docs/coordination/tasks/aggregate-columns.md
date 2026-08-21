@@ -2,14 +2,15 @@
 id: aggregate-columns
 title: Render each selected aggregate as its own column
 owner: agent:claude
-status: active
+status: review
 branch: chore/869-aggregate-columns
 area:
   - packages/ui/src/components/Table/**
+  - packages/server/src/db/olap/**
 started: 2026-08-21
 updated: 2026-08-21
 plan: (none)
-pr: (none)
+pr: 872
 issue: #869
 ---
 
