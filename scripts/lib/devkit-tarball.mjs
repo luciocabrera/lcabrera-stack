@@ -85,6 +85,9 @@ export const declaredBins = (manifest) =>
  * Invisible in a workspace, which is why it survived: pnpm links a bin through a
  * wrapper that invokes node explicitly, while npm symlinks the target and relies
  * on the shebang. The failing path is exactly the one no in-repository run takes.
+ *
+ * Grepping each package's scripts directory for files lacking a leading `#!`
+ * names any that regress.
  */
 export const binsWithoutShebang = ({ manifest, readPackedFile }) =>
   declaredBins(manifest)

@@ -221,10 +221,10 @@ describe('binsWithoutShebang', () => {
   const manifest = { bin: { kit: './scripts/kit.mjs' }, name: '@scope/kit' };
 
   it('reports a bin the shell would be handed', () => {
-    // The failure this replaced a coincidence with. Fifteen of seventeen bins
-    // were in this state and every in-repository run passed, because pnpm links
-    // a bin through a wrapper that invokes node while npm symlinks the target
-    // and relies on the shebang.
+    // The failure this replaced a coincidence with. Every in-repository run
+    // passes whether or not a bin has one, because pnpm links a bin through a
+    // wrapper that invokes node while npm symlinks the target and relies on the
+    // shebang — so the failing path is the one nothing here takes.
     expect(
       binsWithoutShebang({
         manifest,
