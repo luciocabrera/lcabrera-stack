@@ -149,6 +149,27 @@ export const targetPathFor = ({ assetPath, config }) => {
 export const groupsFor = (config) => PROFILES[config.profile] ?? [];
 
 /**
+ * Groups whose files have to arrive executable.
+ *
+ * This is decided by the group and not by the mode of the shipped file, and the
+ * reason is that the mode does not survive the journey. `pnpm pack` writes every
+ * entry as 0644 — `npm pack` keeps 0755, but pnpm is the packer this kit must
+ * use, because `publishConfig` and `catalog:` are pnpm rewrites and a tarball
+ * built without them is not the artifact a consumer installs.
+ *
+ * So a consumer received hooks without the bit, and git skips a non-executable
+ * hook: the `commit-msg` gate accepted a message violating every rule and the
+ * commit landed with exit 0. Nothing in this repository could see it, because
+ * `workspace:*` resolves the source directory, where the bit is set.
+ *
+ * The group name travels inside the path, so this survives any packer.
+ */
+const EXECUTABLE_GROUPS = new Set(['hooks']);
+
+export const isExecutableAsset = (assetPath) =>
+  EXECUTABLE_GROUPS.has(assetPath.split('/')[0]);
+
+/**
  * The tools the consumer's own command map invokes.
  *
  * A command reached through a placeholder is one of the reference forms a

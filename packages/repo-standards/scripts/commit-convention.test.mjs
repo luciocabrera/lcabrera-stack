@@ -221,6 +221,30 @@ describe('validateBranchName', () => {
     expect(validateBranchName('').exempt).toBe(false);
     expect(errorsOf(validateBranchName(''))).not.toEqual([]);
   });
+
+  it('exempts the configured trunk, not the word `main`', () => {
+    // `git init` still produces `master` unless `init.defaultBranch` says
+    // otherwise, so a consumer who installed this package failed the branch
+    // gate on their own trunk with no name that could have passed.
+    const onMaster = validateBranchName('master', { defaultBranch: 'master' });
+    expect(onMaster.exempt).toBe(true);
+    expect(errorsOf(onMaster)).toEqual([]);
+  });
+
+  it('stops exempting `main` once the trunk is named something else', () => {
+    // The other direction, which is what makes the option load-bearing rather
+    // than merely permissive: in a repository whose trunk is `master`, a branch
+    // literally called `main` is a topic branch like any other.
+    expect(validateBranchName('main', { defaultBranch: 'master' }).exempt).toBe(
+      false,
+    );
+  });
+
+  it('still exempts release branches whatever the trunk is called', () => {
+    expect(
+      validateBranchName('release-1.2', { defaultBranch: 'master' }).exempt,
+    ).toBe(true);
+  });
 });
 
 describe('validatePrBase — the #367 stacked-merge guard', () => {

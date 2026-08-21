@@ -28,7 +28,7 @@ import {
   validatePrTitle,
 } from './commit-convention.mjs';
 import { flagValue } from './cli-input.mjs';
-import { readCoordinationPaths } from './config.mjs';
+import { readConventions, readCoordinationPaths } from './config.mjs';
 import { readEntries } from './coordination-read.mjs';
 import { reportWarnings } from './report-warnings.mjs';
 import { readTextWithin } from './safe-read.mjs';
@@ -63,8 +63,16 @@ const main = () => {
 
   const titleResult = validatePrTitle(title, { workspaces });
   const bodyResult = validatePrBody(body);
+  // The trunk and the shared-branch home are the consumer's to name, and read
+  // here rather than at module scope so importing this file touches nothing
+  // (#807). Left unpassed, this gate told a consumer whose trunk is `master` to
+  // "retarget to `main`" — a branch that does not exist — on every PR they
+  // opened, and pointed the remedy at the wrong directory.
+  const { defaultBranch, sharedBranchesDir } = readConventions(REPO_ROOT);
   const baseResult = validatePrBase(base, {
     allowedBases: declaredSharedBranches(),
+    defaultBranch,
+    sharedBranchesDir,
   });
   const errors = [
     ...titleResult.errors,

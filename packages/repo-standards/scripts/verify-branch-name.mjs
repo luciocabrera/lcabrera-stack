@@ -28,6 +28,7 @@ import { fileURLToPath } from 'node:url';
 
 import { flagValue } from './cli-input.mjs';
 import { validateBranchName } from './commit-convention.mjs';
+import { readConventions } from './config.mjs';
 import { resolveHostRoot } from './host-root.mjs';
 
 const REPO_ROOT = resolveHostRoot({
@@ -69,7 +70,10 @@ const currentBranch = () => {
 const main = () => {
   const branch =
     flagValue('--branch') ?? process.env.BRANCH_NAME ?? currentBranch();
-  const { errors, exempt } = validateBranchName(branch);
+  // Read here rather than at module scope: the trunk's name is the consumer's
+  // to choose, and importing this file must still touch nothing (#807).
+  const { defaultBranch } = readConventions(REPO_ROOT);
+  const { errors, exempt } = validateBranchName(branch, { defaultBranch });
 
   if (errors.length > 0) {
     console.error('Branch name does not follow the repo standard:\n');

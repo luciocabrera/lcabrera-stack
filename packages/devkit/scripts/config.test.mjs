@@ -6,9 +6,34 @@ import {
   DEFAULT_CONFIG,
   groupsFor,
   hasConfigKey,
+  isExecutableAsset,
   resolveConfig,
   targetPathFor,
 } from './config.mjs';
+
+describe('isExecutableAsset', () => {
+  test('a hook is executable, wherever it sits under the group', () => {
+    expect(isExecutableAsset('hooks/commit-msg')).toBe(true);
+    expect(isExecutableAsset('hooks/nested/thing')).toBe(true);
+  });
+
+  test('prose is not, however it was committed', () => {
+    expect(isExecutableAsset('skills/react-19/SKILL.md')).toBe(false);
+    expect(isExecutableAsset('workflows/check.yml')).toBe(false);
+    expect(isExecutableAsset('rules/routes-data.md')).toBe(false);
+  });
+
+  test('decides on the group rather than on the shipped file, which loses the bit', () => {
+    // The regression this replaced: the mode was read with `statSync` off the
+    // asset, which is 0755 in this repository and 0644 in every tarball `pnpm
+    // pack` writes. Consumers got hooks git skips without a word. Nothing here
+    // could see it — `workspace:*` resolves the source directory.
+    //
+    // Only the packed-tarball gate can prove the fix; this pins the rule it
+    // now depends on.
+    expect(isExecutableAsset('hooks/pre-push')).toBe(true);
+  });
+});
 
 describe('resolveConfig', () => {
   test('an absent config is the documented default, not an error', () => {

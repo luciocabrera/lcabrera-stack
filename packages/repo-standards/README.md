@@ -18,6 +18,45 @@ to be **resolved** from `node_modules` rather than copied — it is code, invoke
 by name, and copying it would put it outside node's resolution graph where no
 upgrade can reach it.
 
+## Installing
+
+```bash
+npm install --save-dev @lcabrera/repo-standards
+```
+
+Every entry in the table below is a bin, so it is on the path once installed and
+is invoked by name — from a task, from a git hook, from a workflow step. There is
+nothing to import and nothing to copy.
+
+It pairs with [`@lcabrera/devkit`](../devkit/README.md), which materialises the
+prose that invokes these gates and, with `devkit init`, writes the tasks that
+reach them. Neither needs the other to be useful: this package is gates without
+the prose, and `devkit` alone is prose that names commands you would supply
+yourself.
+
+Until both are published, install the packed tarballs — and pack with **pnpm**,
+because `publishConfig` and `catalog:` are pnpm rewrites and an `npm pack`
+tarball is not the artifact a consumer receives:
+
+```bash
+pnpm pack --pack-destination /tmp/kit    # in this package's directory
+npm install --save-dev /tmp/kit/*.tgz    # in the consumer
+```
+
+## Syncing and diverging
+
+This package is **resolved**, not materialised — it is code, invoked by name, so
+it stays in `node_modules` where an upgrade can reach it. That means there is
+nothing here to diverge from: `npm update` is the whole story, and a local change
+to a gate is a change to a file inside `node_modules` that the next install
+discards.
+
+Where a gate needs to behave differently for your repository, the answer is
+`devkit.config.json` below rather than an edit. Divergence as a supported state
+belongs to the half that gets copied into your tree — see
+[`@lcabrera/devkit`](../devkit/README.md), where a materialised file you edit is
+left alone on every subsequent sync and reported until you acknowledge it.
+
 ## Commands
 
 | Bin                                          | Checks                                                        |
