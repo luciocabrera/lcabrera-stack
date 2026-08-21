@@ -86,7 +86,7 @@ insertRow [const] <TRow extends QueryResultRow>({ tx, ...descriptor }: ExecutorO
 decodeGroupedRows [const] ({ aggregates, columnKeys, maskAlias, requested, rows, truncations }: DecodeGroupedRowsArgs) => { tableGroup: { aggregates: { columnKey: string; fn: AggregateFn; value: unknown; }[]; count: number; isSubtotal: boolean; path: { columnKey: string; label: string; value: unknown; }[]; }; }[]
 RequestedGroupAggregate [type] { readonly column: string; readonly fn: AggregateFn; }
 toGroupAggregates [const] ({ requested }: { readonly requested: readonly RequestedGroupAggregate[]; }) => readonly GroupAggregate[]
-toGroupSort [const] ({ groupKeys, sort }: ToGroupSortArgs) => readonly GroupSort[]
+toGroupSort [const] ({ groupKeys, requested, sort }: ToGroupSortArgs) => readonly GroupSort[]
 
 ## ./db/olap/olap.types
 GroupKeyTruncation [type] { readonly isZoned: boolean; readonly period: GroupKeyPeriod; }

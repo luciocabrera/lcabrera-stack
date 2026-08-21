@@ -48,6 +48,19 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
     // All three are set after `{...rest}` so a caller cannot replace them.
     <th
       {...rest}
+      // A derived measure column draws only its function — `Average` — with the
+      // source column's name stated once above it by the header band. That band
+      // is decorative, so without a name stated here a screen-reader user gets a
+      // column called `Average` with nothing saying of what. It is an
+      // `aria-label` rather than a visually-hidden span because the two spans
+      // concatenate with no separator between them — `Total AmountAverage` —
+      // and because the name of a column header should be the column's name,
+      // not its name followed by its menu button's.
+      aria-label={
+        column.headerGroupLabel === undefined
+          ? undefined
+          : `${column.headerGroupLabel} ${label}`
+      }
       aria-sort={resolveAriaSort({ isSortable, sortDirection })}
       role='columnheader'
       scope='col'
@@ -65,7 +78,12 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
       )}
       {!isHeaderHidden && (
         <>
-          <span {...stylex.props(tableHeaderCellStyles.content)}>{label}</span>
+          <span
+            data-testid='table-header-label'
+            {...stylex.props(tableHeaderCellStyles.content)}
+          >
+            {label}
+          </span>
           {Boolean(isResizable) && (
             <ResizeHandle columnKey={columnKey} columnLabel={label} />
           )}

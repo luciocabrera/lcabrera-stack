@@ -178,10 +178,12 @@ describe('TableConfig grouping hooks', () => {
     });
 
     expect(persistTableState).toHaveBeenCalledTimes(1);
-    expect(persistTableState).toHaveBeenCalledWith({
-      searchParamKey: 'grouping',
-      searchParamValue: '{"keys":["order_status"]}',
-    });
+    expect(persistTableState).toHaveBeenCalledWith([
+      {
+        searchParamKey: 'grouping',
+        searchParamValue: '{"keys":["order_status"]}',
+      },
+    ]);
     expect(storesRef.groupingStore.get().keys).toStrictEqual(['order_status']);
   });
 
@@ -198,10 +200,12 @@ describe('TableConfig grouping hooks', () => {
       'order_status',
       'shipping_country',
     ]);
-    expect(persistTableState).toHaveBeenCalledWith({
-      searchParamKey: 'grouping',
-      searchParamValue: '{"keys":["order_status","shipping_country"]}',
-    });
+    expect(persistTableState).toHaveBeenCalledWith([
+      {
+        searchParamKey: 'grouping',
+        searchParamValue: '{"keys":["order_status","shipping_country"]}',
+      },
+    ]);
   });
 
   it('removes a key that is already applied', () => {
@@ -250,20 +254,25 @@ describe('TableConfig grouping hooks', () => {
     expect(storesRef.groupingStore.get().aggregates).toStrictEqual([
       { columnKey: 'total_amount', fn: 'sum' },
     ]);
-    expect(persistTableState).toHaveBeenLastCalledWith({
-      searchParamKey: 'grouping',
-      searchParamValue: '{"agg":["total_amount:sum"],"keys":["order_status"]}',
-    });
+    expect(persistTableState).toHaveBeenLastCalledWith([
+      {
+        searchParamKey: 'grouping',
+        searchParamValue:
+          '{"agg":["total_amount:sum"],"keys":["order_status"]}',
+      },
+    ]);
 
     act(() => {
       remove.current({ columnKey: 'total_amount' });
     });
 
     expect(storesRef.groupingStore.get().aggregates).toStrictEqual([]);
-    expect(persistTableState).toHaveBeenLastCalledWith({
-      searchParamKey: 'grouping',
-      searchParamValue: '{"keys":["order_status"]}',
-    });
+    expect(persistTableState).toHaveBeenLastCalledWith([
+      {
+        searchParamKey: 'grouping',
+        searchParamValue: '{"keys":["order_status"]}',
+      },
+    ]);
   });
 
   it('adds a second aggregate to a column that already carries one', () => {
@@ -284,11 +293,13 @@ describe('TableConfig grouping hooks', () => {
       { columnKey: 'total_amount', fn: 'avg' },
       { columnKey: 'total_amount', fn: 'min' },
     ]);
-    expect(persistTableState).toHaveBeenLastCalledWith({
-      searchParamKey: 'grouping',
-      searchParamValue:
-        '{"agg":["total_amount:avg","total_amount:min"],"keys":["order_status"]}',
-    });
+    expect(persistTableState).toHaveBeenLastCalledWith([
+      {
+        searchParamKey: 'grouping',
+        searchParamValue:
+          '{"agg":["total_amount:avg","total_amount:min"],"keys":["order_status"]}',
+      },
+    ]);
   });
 
   it('removes one of a column aggregates and leaves the rest', () => {
@@ -367,6 +378,67 @@ describe('TableConfig grouping hooks', () => {
     expect(storesRef.dataStore.get().isLoading).toBeUndefined();
   });
 
+  it('drops a measure sort from the URL, not only from the store', () => {
+    // The failure this closes: sorting travels in the `sorting` search param,
+    // so pruning the store alone left the loader still reading
+    // `total_amount:sum` after the measure column stopped existing —
+    // `sanitizeSorting` passes it through and the ungrouped read refuses an
+    // unknown column outright. Both params have to be written, in one call, so
+    // it stays one navigation.
+    storesRef.groupingStore.set({
+      aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
+      keys: ['order_status'],
+      mode: 'flat',
+      periods: {},
+      shares: [],
+    });
+    storesRef.columnsStore.set({
+      columns: [
+        { key: 'order_status', label: 'Status' },
+        { key: 'total_amount', label: 'Total Amount' },
+      ],
+      sorting: [{ columnKey: 'total_amount:sum', direction: 'desc' }],
+    } as unknown as Partial<TableColumnsState<Record<string, unknown>>>);
+
+    const { result } = renderHook(() => useClearTableGrouping());
+
+    act(() => {
+      result.current();
+    });
+
+    expect(persistTableState).toHaveBeenCalledWith([
+      { searchParamKey: 'grouping', searchParamValue: undefined },
+      { searchParamKey: 'sorting', searchParamValue: undefined },
+    ]);
+    expect(storesRef.columnsStore.get().sorting).toStrictEqual([]);
+  });
+
+  it('leaves the sorting param alone when the sort survives the change', () => {
+    // The common case must still write exactly one param: `pruneSortingToColumns`
+    // returns the same array when it removed nothing, and that identity is what
+    // this branch reads.
+    storesRef.columnsStore.set({
+      columns: [
+        { key: 'order_status', label: 'Status' },
+        { key: 'priority', label: 'Priority' },
+      ],
+      sorting: [{ columnKey: 'priority', direction: 'asc' }],
+    } as unknown as Partial<TableColumnsState<Record<string, unknown>>>);
+
+    const { result } = renderHook(() => useToggleTableGroupKey());
+
+    act(() => {
+      result.current({ columnKey: 'order_status' });
+    });
+
+    expect(persistTableState).toHaveBeenCalledWith([
+      {
+        searchParamKey: 'grouping',
+        searchParamValue: '{"keys":["order_status"]}',
+      },
+    ]);
+  });
+
   it('clears every key and every aggregate, and drops the param', () => {
     storesRef.groupingStore.set({
       aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
@@ -382,10 +454,12 @@ describe('TableConfig grouping hooks', () => {
       result.current();
     });
 
-    expect(persistTableState).toHaveBeenCalledWith({
-      searchParamKey: 'grouping',
-      searchParamValue: undefined,
-    });
+    expect(persistTableState).toHaveBeenCalledWith([
+      {
+        searchParamKey: 'grouping',
+        searchParamValue: undefined,
+      },
+    ]);
     expect(storesRef.groupingStore.get()).toStrictEqual(NO_GROUPING);
   });
 

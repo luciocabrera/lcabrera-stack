@@ -1,5 +1,7 @@
 import { vi } from 'vite-plus/test';
 
+import type { TableColumnAggregate } from '#ui/components/Table/Table.types';
+
 type ColumnsStore<TState extends Record<string, unknown>> = {
   readonly get: () => TState;
   readonly set: (value: Partial<TState>) => void;
@@ -8,6 +10,12 @@ type ColumnsStore<TState extends Record<string, unknown>> = {
 type CreateTableConfigColumnsActionMocksArgs<
   TState extends Record<string, unknown>,
 > = {
+  /**
+   * The applied aggregates the fake grouping store reports. Defaults to none,
+   * for the same reason the group keys do — a table carrying measure columns is
+   * its own scenario.
+   */
+  readonly initialAggregates?: readonly TableColumnAggregate[];
   readonly initialColumnsState: TState;
   /**
    * The applied group keys the fake grouping store reports. Defaults to none —
@@ -21,10 +29,12 @@ type CreateTableConfigColumnsActionMocksArgs<
 export const createTableConfigColumnsActionMocks = <
   TState extends Record<string, unknown>,
 >({
+  initialAggregates = [],
   initialColumnsState,
   initialGroupingKeys = [],
   persistenceKey,
 }: CreateTableConfigColumnsActionMocksArgs<TState>) => {
+  let aggregates = initialAggregates;
   let columnsState = initialColumnsState;
   let groupingKeys = initialGroupingKeys;
 
@@ -50,7 +60,7 @@ export const createTableConfigColumnsActionMocks = <
   // column slices carry the hierarchy column while grouping is on (ADR-065).
   const mockGroupingStore = {
     get: vi.fn(() => ({
-      aggregates: [],
+      aggregates,
       keys: groupingKeys,
       mode: 'flat',
       periods: {},
@@ -77,6 +87,9 @@ export const createTableConfigColumnsActionMocks = <
       mockMetaStore.set.mockClear();
       mockPersistTableState.mockClear();
       mockPersistTableState.mockReturnValue(true);
+    },
+    setAggregates: (nextAggregates: readonly TableColumnAggregate[]) => {
+      aggregates = nextAggregates;
     },
     setColumnsState: (nextState: TState) => {
       columnsState = nextState;

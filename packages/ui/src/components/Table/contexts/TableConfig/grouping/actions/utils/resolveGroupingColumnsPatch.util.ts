@@ -1,8 +1,16 @@
-import type { TableColumnsState } from '#ui/components/Table/Table.types';
+import type {
+  TableColumnAggregate,
+  TableColumnsState,
+} from '#ui/components/Table/Table.types';
 
-import { deriveColumnViewState } from '#ui/components/Table/utils';
+import {
+  deriveColumnViewState,
+  pruneSortingToColumns,
+} from '#ui/components/Table/utils';
 
 type ResolveGroupingColumnsPatchArgs<TData> = {
+  /** The aggregates about to be applied, not the ones currently applied. */
+  readonly aggregates: readonly TableColumnAggregate[];
   /** The snapshot the caller already read — never a second `store.get()`. */
   readonly columnsState: TableColumnsState<TData>;
   /** The group keys about to be applied, not the ones currently applied. */
@@ -20,17 +28,25 @@ type ResolveGroupingColumnsPatchArgs<TData> = {
  * that store has to be written even though the user's own column state is
  * untouched.
  *
- * Only the derived members are returned. `columns`, `columnOrder` and
- * `columnPinning` come back out of the snapshot unchanged and are deliberately
- * not in the patch: the hierarchy column is never state, so the cookie the
+ * Only the derived members are returned, **plus one correction**. `columns`,
+ * `columnOrder` and `columnPinning` come back out of the snapshot unchanged and
+ * are deliberately not in the patch: none of them is state, so the cookie the
  * layout persists through and the list the settings drawer offers both stay
  * exactly as the user left them.
+ *
+ * `sorting` is the exception, and it is a correction rather than a preference.
+ * A measure column exists only while its aggregate is applied, so a grouping
+ * change can take away the very column the sort names — and the ungrouped read
+ * refuses an unknown column rather than ignoring it, failing the whole table.
+ * See `pruneSortingToColumns`.
  */
 export const resolveGroupingColumnsPatch = <TData>({
+  aggregates,
   columnsState,
   groupingKeys,
-}: ResolveGroupingColumnsPatchArgs<TData>) =>
-  deriveColumnViewState<TData>({
+}: ResolveGroupingColumnsPatchArgs<TData>) => {
+  const derived = deriveColumnViewState<TData>({
+    aggregates,
     columnOrder: columnsState.columnOrder,
     columnPinning: columnsState.columnPinning,
     columns: columnsState.columns,
@@ -39,3 +55,21 @@ export const resolveGroupingColumnsPatch = <TData>({
     groupingKeys,
     sorting: columnsState.sorting,
   });
+
+  return {
+    ...derived,
+    // The declared columns beside the painted ones, because a measured column
+    // is *replaced* while grouped: pruning against the grid alone would take a
+    // pre-existing sort on `total_amount` with it, and the caller writes the
+    // result into the URL. `normalizedColumns` rather than `effectiveColumns`
+    // for the painted half: the latter is visibility-filtered, so pruning
+    // against it would drop the sort of a column the user merely hid.
+    sorting: pruneSortingToColumns<TData>({
+      declaredColumnKeys: columnsState.columns.map((column) =>
+        String(column.key),
+      ),
+      gridColumnKeys: Object.keys(derived.normalizedColumns),
+      sorting: columnsState.sorting,
+    }),
+  };
+};

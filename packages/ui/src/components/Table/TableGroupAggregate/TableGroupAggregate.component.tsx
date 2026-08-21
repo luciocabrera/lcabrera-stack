@@ -7,7 +7,6 @@ import {
 } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
 import { useGetTableLocale } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 import {
-  TABLE_AGGREGATE_LABELS,
   TABLE_GROUP_FILTERED_AGGREGATE_LABEL,
   TABLE_GROUP_NO_AGGREGATE_GLYPH,
   TABLE_GROUP_NO_AGGREGATE_LABEL,
@@ -23,14 +22,26 @@ import { TableGroupShare } from './TableGroupShare';
 import { resolveAggregateDataType } from './utils/resolveAggregateDataType.util';
 
 /**
- * A group row's cell content in every column but the hierarchy one: the
- * aggregates selected on that column, or a dash saying none were.
+ * A group row's cell content in every column but a group-key one: **the single
+ * measure that column is**, or a dash saying the column carries none.
  *
- * **A column may carry several measures at once** (#831), so this renders every
- * entry the row holds for its column, in the order the read emitted them — which
- * is the order the configuration lists them in. Each one names its function
- * where there is more than one, because two bare numbers side by side cannot say
- * which is the sum and which is the average.
+ * **One cell, one measure** (#869). A column carrying several aggregates used
+ * to render all of them here, side by side in the source column's one cell —
+ * two truncated numbers under a header that named neither, sortable and
+ * resizable neither separately nor at all. `withAggregateColumns` now replaces
+ * a measured column with one derived column per aggregate, so this cell asks
+ * which measure it *is* rather than which measures its column has.
+ *
+ * **The match is by token, never by parsing the key.** A derived column's key
+ * is `toTableAggregateToken`'s spelling of the aggregate it carries, so
+ * comparing tokens answers exactly. Reading the key apart instead would have to
+ * guess where the column key ends, and a consumer's key may legitimately
+ * contain the separator — the parser exists for the URL, where the surrounding
+ * vocabulary is closed, and its ambiguity is real here where it is not.
+ *
+ * **The measure's own name is not repeated in the cell.** The header states it
+ * now, once, under the source column's label — which is the whole point of
+ * giving each measure a column of its own.
  *
  * **The dash is a rendered character with a spoken equivalent beside it.** A
  * standalone em dash may or may not be announced depending on the reader's
@@ -40,35 +51,36 @@ import { resolveAggregateDataType } from './utils/resolveAggregateDataType.util'
  * no value here" — a claim about the data — and zero would state a number
  * nobody computed.
  *
- * **A filtered column's aggregate says so.** A `WHERE` filter on a column runs
- * before aggregation, so a total over a filtered column is a total over the
- * rows that survived the filter — correct SQL, and a label that lies by
- * omission unless the cell states it. The indicator is read from the columns
- * store here rather than passed in, so the cell that renders the number is the
- * one that answers for it. It is rendered once for the cell rather than once per
- * measure: the filter belongs to the column, and every measure in the cell is
- * computed over the same surviving rows.
+ * **A filtered column's aggregate says so, and the filter belongs to the
+ * source column.** A `WHERE` filter runs before aggregation, so a total over a
+ * filtered column is a total over the rows that survived it — correct SQL, and
+ * a label that lies by omission unless the cell states it. The indicator is
+ * read for the aggregate's own column rather than for this cell's derived key,
+ * which holds no filter and never could.
  *
  * **The value is formatted here, by the same call a data cell makes.** The
- * aggregate arrives raw and this cell resolves its own column from the store,
- * so a `sum` under a currency header renders as currency and an `avg` honours
- * that column's fraction digits — without the grouped service knowing anything
- * about presentation. Sharing `renderCellContent` rather than reimplementing it
- * is what keeps a group row's number and the numbers beneath it in one format;
- * two formatters drift the first time either gains an option.
+ * aggregate arrives raw and the derived column already carries the `dataType`
+ * an aggregate answers in — `count` over a currency column is a tally, not
+ * money — so a `sum` under a currency header renders as currency without the
+ * grouped service knowing anything about presentation. Sharing
+ * `renderCellContent` rather than reimplementing it is what keeps a group row's
+ * number and the numbers beneath it in one format; two formatters drift the
+ * first time either gains an option.
  */
 export const TableGroupAggregate = ({
   columnKey,
   summary,
 }: TableGroupAggregateProps) => {
-  const hasColumnFilter = useGetHasColumnFilter(columnKey);
-  const column = useGetNormalizedColumn<Record<string, unknown>>(columnKey);
-  const locale = useGetTableLocale();
-  const aggregates = summary.aggregates.filter(
-    (entry) => entry.columnKey === columnKey,
+  const aggregate = summary.aggregates.find(
+    (entry) => toTableAggregateToken(entry) === columnKey,
   );
+  const column = useGetNormalizedColumn<Record<string, unknown>>(columnKey);
+  const hasColumnFilter = useGetHasColumnFilter(
+    aggregate?.columnKey ?? columnKey,
+  );
+  const locale = useGetTableLocale();
 
-  if (aggregates.length === 0) {
+  if (aggregate === undefined) {
     return (
       <span
         {...stylex.props(tableGroupAggregateStyles.absent)}
@@ -82,39 +94,33 @@ export const TableGroupAggregate = ({
     );
   }
 
-  const isMultiMeasure = aggregates.length > 1;
-
   return (
     <span {...stylex.props(tableGroupAggregateStyles.container)}>
-      {aggregates.map((aggregate) => (
-        <span
-          {...stylex.props(tableGroupAggregateStyles.measure)}
-          key={toTableAggregateToken(aggregate)}
-        >
-          {isMultiMeasure && (
-            <span {...stylex.props(tableGroupAggregateStyles.measureName)}>
-              {TABLE_AGGREGATE_LABELS[aggregate.fn]}
-            </span>
-          )}
-          <span {...stylex.props(tableGroupAggregateStyles.value)}>
-            {renderCellContent({
-              dataType: resolveAggregateDataType({
-                columnDataType: column?.dataType,
+      <span {...stylex.props(tableGroupAggregateStyles.measure)}>
+        <span {...stylex.props(tableGroupAggregateStyles.value)}>
+          {renderCellContent({
+            // The derived column already carries the type an aggregate answers
+            // in. The fallback is for a lookup that missed, and resolves from
+            // the function alone so a `count` stays a tally rather than
+            // inheriting a column type it never had.
+            dataType:
+              column?.dataType ??
+              resolveAggregateDataType({
+                columnDataType: undefined,
                 fn: aggregate.fn,
               }),
-              format: column?.format,
-              label: column?.label,
-              locale,
-              value: aggregate.value,
-            })}
-          </span>
-          <TableGroupShare
-            columnKey={columnKey}
-            fn={aggregate.fn}
-            value={aggregate.value}
-          />
+            format: column?.format,
+            label: column?.label,
+            locale,
+            value: aggregate.value,
+          })}
         </span>
-      ))}
+        <TableGroupShare
+          columnKey={aggregate.columnKey}
+          fn={aggregate.fn}
+          value={aggregate.value}
+        />
+      </span>
       {hasColumnFilter && (
         <span
           {...stylex.props(tableGroupAggregateStyles.filterIndicator)}

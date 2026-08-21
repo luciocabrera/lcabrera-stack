@@ -2,6 +2,7 @@ import type { TableGroupingState } from '#ui/components/Table/Table.types';
 
 import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useTableDataContextValue } from '#ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
+import { serializeSortingToURL } from '#ui/utils/urlState/serializeSortingToURL.util';
 
 import { usePersistTableStateAction } from '../../columns/actions/hooks/usePersistTableStateAction.hook';
 import { applyGroupingReducer, resolveGroupingColumnsPatch } from './utils';
@@ -60,21 +61,43 @@ export const useSetTableGrouping = () => {
 
     if (result.kind !== 'updated') return;
 
+    // Resolved before persisting, because the patch is what says whether the
+    // sort survived — and the sort has to be written in the same call.
+    const columnsState = columnsStore.get();
+    const columnsPatch = resolveGroupingColumnsPatch({
+      aggregates: result.grouping.aggregates,
+      columnsState,
+      groupingKeys: result.grouping.keys,
+    });
+
+    // **A pruned sort has to reach the URL, not just the store.** Sorting is a
+    // search param, so clearing a grouping while sorted by one of its measure
+    // columns leaves the loader reading a column the grid no longer has —
+    // `sanitizeSorting` passes it through and the ungrouped read refuses it
+    // outright. Writing it beside the grouping entry keeps this one navigation;
+    // `pruneSortingToColumns` returns the same array when it removed nothing,
+    // so an ordinary grouping change still writes exactly one param.
+    const entries =
+      columnsPatch.sorting === columnsState.sorting
+        ? [result.persistenceEntry]
+        : [
+            result.persistenceEntry,
+            {
+              searchParamKey: 'sorting',
+              searchParamValue: serializeSortingToURL(columnsPatch.sorting),
+            },
+          ];
+
     // Abort before any state change when persistence would be oversized, so the
     // store never holds grouping the URL failed to record.
-    if (!persistTableState(result.persistenceEntry)) return;
+    if (!persistTableState(entries)) return;
 
     dataStore.set({ isLoading: true });
-    // The columns store carries the derived view state, and the hierarchy
-    // column is part of it while grouping is on (ADR-065) — so a grouping
+    // The columns store carries the derived view state, and the measure columns
+    // are part of it while grouping is on (ADR-065, #869) — so a grouping
     // change writes both stores, in the same interaction, from one snapshot
     // each.
-    columnsStore.set(
-      resolveGroupingColumnsPatch({
-        columnsState: columnsStore.get(),
-        groupingKeys: result.grouping.keys,
-      }),
-    );
+    columnsStore.set(columnsPatch);
     groupingStore.set(result.grouping);
   };
 };

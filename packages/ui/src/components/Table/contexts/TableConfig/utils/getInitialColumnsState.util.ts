@@ -3,6 +3,7 @@ import type {
   ColumnPinningState,
   ColumnSizingState,
   DataKey,
+  TableColumnAggregate,
   TableColumnsState,
   TableCrudConfig,
 } from '#ui/components/Table/Table.types';
@@ -16,6 +17,12 @@ import {
 type GetInitialTableStateArgs<TData extends Record<string, unknown>> = Partial<
   TableColumnsState<TData>
 > & {
+  /**
+   * The aggregates the loader applied, already sanitized. Each one becomes a
+   * derived measure column, so seeding it here is what makes the server's first
+   * paint and the client's agree about how many columns there are.
+   */
+  readonly aggregates?: readonly TableColumnAggregate[];
   readonly crud?: TableCrudConfig;
   /**
    * The group keys the loader applied, already sanitized. The derived slices
@@ -32,6 +39,7 @@ type GetInitialTableStateArgs<TData extends Record<string, unknown>> = Partial<
  * contradict the markup already painted and shift the columns at hydration.
  */
 export const getInitialColumnsState = <TData extends Record<string, unknown>>({
+  aggregates = [],
   columnFilters = {} as ColumnFiltersState<TData>,
   columnOrder = [],
   columnPinning = { left: [], right: [] },
@@ -72,6 +80,7 @@ export const getInitialColumnsState = <TData extends Record<string, unknown>>({
     pinnedColumnPartition,
     staticKeys,
   } = deriveColumnViewState<TData>({
+    aggregates,
     columnOrder: nextColumnOrder,
     columnPinning: nextColumnPinning,
     columns: resolvedColumns,

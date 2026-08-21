@@ -278,3 +278,59 @@ describe('a truncated group key', () => {
     ]);
   });
 });
+
+describe('a sort naming a measure column', () => {
+  it('is dropped, because a drill is an ungrouped read', () => {
+    // The grid keys a measure column `column:fn` and that key is ordinary sort
+    // state, so it travels with the request. A grouped read honours it —
+    // `toGroupSort` maps it onto the aggregate's alias — but a drill reads the
+    // group's rows with no grouping at all, where no such column exists.
+    // `buildOrderByClause` validates every term against `allowedColumns` and
+    // refuses the whole query, so leaving it in fails the drill outright
+    // rather than ignoring the term.
+    const result = drill({
+      sort: [
+        { column: 'total_amount:avg', direction: 'desc' },
+        { column: 'order_date', direction: 'asc' },
+      ],
+    });
+
+    if (result.kind !== 'drillable') throw new Error('expected a drillable');
+
+    expect(result.read.sort).toStrictEqual([
+      { column: 'order_date', direction: 'asc' },
+      { column: PRIMARY_KEY, direction: 'asc' },
+    ]);
+  });
+
+  it('covers every function in the vocabulary, not just the common ones', () => {
+    const result = drill({
+      sort: [
+        { column: 'a:boolAnd', direction: 'asc' },
+        { column: 'b:countDistinct', direction: 'asc' },
+        { column: 'c:sum', direction: 'asc' },
+      ],
+    });
+
+    if (result.kind !== 'drillable') throw new Error('expected a drillable');
+
+    expect(result.read.sort).toStrictEqual([
+      { column: PRIMARY_KEY, direction: 'asc' },
+    ]);
+  });
+
+  it('keeps a real column whose name merely contains a colon', () => {
+    // The split is on the last colon and the suffix must be a known function,
+    // so an ordinary column is never mistaken for a measure.
+    const result = drill({
+      sort: [{ column: 'odd:column', direction: 'asc' }],
+    });
+
+    if (result.kind !== 'drillable') throw new Error('expected a drillable');
+
+    expect(result.read.sort).toStrictEqual([
+      { column: 'odd:column', direction: 'asc' },
+      { column: PRIMARY_KEY, direction: 'asc' },
+    ]);
+  });
+});

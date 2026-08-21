@@ -5,6 +5,7 @@ import type {
   ColumnVisibilityState,
   SortingState,
   TableColumn,
+  TableColumnAggregate,
 } from '#ui/components/Table/Table.types';
 
 import { getNormalizedColumns } from './getNormalizedColumns.util';
@@ -12,6 +13,8 @@ import { getPinnedDerivedColumnsState } from './getPinnedDerivedColumnsState.uti
 import { getStaticColumnKeys } from './getStaticColumnKeys.util';
 
 type DeriveColumnViewStateArgs<TData> = {
+  /** The applied aggregates — see `getPinnedDerivedColumnsState`. */
+  readonly aggregates: readonly TableColumnAggregate[];
   readonly columnOrder: ColumnOrderState<TData>;
   readonly columnPinning: ColumnPinningState<TData>;
   readonly columns: readonly TableColumn<TData>[];
@@ -30,6 +33,7 @@ type DeriveColumnViewStateArgs<TData> = {
  * restored around, which the grid's own column is not part of.
  */
 export const deriveColumnViewState = <TData>({
+  aggregates,
   columnOrder,
   columnPinning,
   columns,
@@ -44,6 +48,7 @@ export const deriveColumnViewState = <TData>({
     pinnedColumnOffsets,
     pinnedColumnPartition,
   } = getPinnedDerivedColumnsState<TData>({
+    aggregates,
     columnOrder,
     columnPinning,
     columns,

@@ -42,6 +42,7 @@ describe('commitResolvedPinningState', () => {
     const persistTableState = vi.fn();
 
     commitResolvedPinningState<TData>({
+      aggregates: [],
       columnOrder: ['id', 'name'],
       columnPinning: { left: ['id'], right: [] },
       columns: [
@@ -63,6 +64,7 @@ describe('commitResolvedPinningState', () => {
     });
 
     expect(mockGetPinnedDerivedColumnsState).toHaveBeenCalledWith({
+      aggregates: [],
       columnOrder: ['id', 'name'],
       columnPinning: { left: ['id'], right: [] },
       columns: [

@@ -277,16 +277,115 @@ never a copy left to drift.
 
 ### Layout
 
-While grouping is applied the grid adds **no column of its own**. Each group key
-is hoisted to the head of the order and of the left pin, in key order, and forced
-visible ([ADR-080](../../../../../docs/decisions/ADR-080-a-group-key-renders-in-its-own-column.md)).
-That is a derivation and never state, so it reaches neither the cookie the column
+While grouping is applied, two derivations reshape the column list, in an order
+that matters. `withAggregateColumns` runs first and replaces each **measured**
+column with one column per aggregate applied to it; `withGroupedColumnLayout`
+then hoists each group key to the head of the order and of the left pin, in key
+order, and forces it visible
+([ADR-080](../../../../../docs/decisions/ADR-080-a-group-key-renders-in-its-own-column.md)).
+Both are derivations and never state, so neither reaches the cookie the column
 layout persists through nor the list the drawer offers — which is what makes
-ungrouping free.
+ungrouping free, and what means a deselected aggregate needs no pruning: the
+next derivation simply does not produce its column.
 
-A group row renders **each key's value in that key's own column**, and every
-other column renders that group's selected aggregate under its own header — an em
-dash where none was selected. **Depth is read from which key columns are filled**,
+**Keeping that true takes work at the two edges where a user acts on a measure
+column.** Pinning one resolves to the column it measures (`toDeclaredColumnKey`),
+so `columnOrder` and `columnPinning` stay declared-only and a whole band travels
+together rather than half of it; without that the derived key entered the
+declared order, where `syncColumnOrderWithPinning`'s removal filter could not
+find it, and the next derivation produced the same column from both entries —
+two identical headers with duplicate React keys. And the expansion
+**deduplicates**, because these lists are restored from a cookie that outlives
+any invariant this code holds today.
+
+**Hiding is mapped the same way, and it has to be**, because the layout is
+_persisted_ and the settings drawer builds its rows from the **declared**
+columns. A derived key written into `columnVisibility` therefore reaches the
+cookie with nothing in the per-column UI able to take it out again: the drawer
+lists `Total Amount`, never `Average`, so toggling it writes the declared key
+and leaves the derived one hidden. Only the drawer's blanket "Clear Visibility &
+Pinning" clears it, along with every other preference. So hiding `Average` hides
+`Total Amount`, and the derivation expands that back into both measures — which
+is also what makes the drawer's own toggle work, since a key `gridColumns` no
+longer holds would otherwise filter nothing while the drawer drew the column as
+hidden. The mapping and the expansion are the two halves of one rule; either
+alone leaves the two write paths disagreeing about the same column.
+
+The cost is that a band hides whole. Hiding one measure and keeping its
+siblings would need the drawer to offer the derived columns as rows of their
+own — a real feature, tracked separately, not something to be had by writing an
+unreachable key into a cookie.
+
+**A column's locks carry onto its measures, and the guard runs after the
+mapping.** Both follow from the same fact: every layout action on a measure
+acts on the column it measures. So a measure must not resolve
+`isStatic: false` while its source is locked — `withAggregateColumns` copies
+`isStatic` and `isResizable` across, which is what stops the header menu
+offering Pin/Hide and the header cell drawing a resize handle on a column the
+consumer froze. And a permission check must test the **declared** key, because
+`staticKeys` is built from the consumer's own column list and can never contain
+`total_amount:avg`: a guard placed before `toDeclaredColumnKey` tests a key no
+permission set was ever built for, passes, and then writes the source key
+anyway. `useSetColumnPinning` cannot get this wrong — `resolveColumnPinningUpdate`
+receives the mapped key and guards inside — while `useSetColumnVisibility` orders
+the two by hand.
+
+Sorting is the third edge and it is handled server-side, because a measure sort
+is legitimate on the grouped read — `toGroupSort` maps it onto the aggregate's
+alias — and meaningless on any ungrouped one. `toDrillRead` drops measure terms
+alongside the group-key terms it already dropped; `pruneSortingToColumns` covers
+the other direction, when the grouping clears while such a sort is applied.
+
+**Replacement costs a detail row its raw value, and that is a known
+limitation rather than an oversight.** Every row renders over the same
+partition (ADR-065), so taking `total_amount` off the grid takes it off the
+drilled rows too — they hold no `total_amount:avg` field, so both measure
+columns are blank on them and the order's own amount is unreachable without
+deselecting the aggregate. Keeping the source column alongside its measures
+would fix it and cost more than it saves: that column can carry no aggregate,
+so it would draw the em-dash on every group row of every grouped view, to serve
+rows that only a drill produces. #870 removes the inline drill for a modal route
+that applies no grouping — where the declared columns are all present and the
+question does not arise — and carries this as an acceptance criterion.
+`Table.aggregateColumns.test.tsx` pins the current behaviour so it stays a
+decision on record.
+
+The two cannot conflict, because an aggregate naming a group key is dropped —
+that column already carries its key's value. One column is never replaced,
+though: a **primary-key** column is measured _beside_ itself, because
+`resolveCrudRowId` throws when no column carries `isPrimaryKey`, and substituting
+the only one would take out the row-actions menu of every row for a grouping
+settable from the URL.
+
+A measure column's key is the aggregate's token — `total_amount:avg` — which
+`DataKey` admits for the same reason it admits `'actions'`: a column identity
+that names no field of the row. Its header draws the function alone, with the
+source column's name stated once above it by a decorative band row
+(`TableHeaderBand`). The band is `aria-hidden`, so the name reaches the
+accessibility tree through each measure header's own `aria-label` instead — one
+announcement per column rather than a second header row in the sequence
+`aria-rowindex` counts through.
+
+**The store's derived column fields are only valid derived together.**
+`normalizedColumns`, `effectiveColumns`, `pinnedColumnPartition` and
+`pinnedColumnOffsets` all come out of one `deriveColumnViewState` call, and an
+action writing a subset of them writes a state no derivation would have
+produced. That was survivable while every derivation added no column: the
+consumer's declared list and the painted list held the same keys, so rebuilding
+one field from the wrong list happened to agree. `withAggregateColumns` ends
+that, because it paints columns the declared list has never heard of.
+`useSetColumnSorting` was the one action still writing a subset, and once
+measures existed a sort click rebuilt `normalizedColumns` without them while
+`pinnedColumnPartition` still asked for them to be rendered — so
+`TableHeaderCell` destructured `undefined` (#872). Every column-mutating action
+now re-derives the whole view state, and `aggregates`/`groupingKeys` are
+**required** arguments so a new derivation site fails to compile rather than
+silently deriving from the declared list. That requirement is also what this
+site evaded: it reached past `deriveColumnViewState` to the `getNormalizedColumns`
+primitive underneath, and so had nothing to fail on.
+
+A group row renders **each key's value in that key's own column**, one measure
+per measure column, and an em dash on a column carrying no aggregate at all. **Depth is read from which key columns are filled**,
 not from a pixel offset: a rollup fills a prefix, a cube fills an arbitrary
 subset, and neither needs the other's reading. A key column renders **blank** on
 its detail rows: the value is stated once, by the group row directly above them,

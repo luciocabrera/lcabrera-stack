@@ -7,6 +7,7 @@ import type {
 import type { QuerySort } from '../query-builder/query-builder.types';
 import type { GroupKeyTruncation } from './olap.types';
 
+import { resolveAggregateAlias } from '../group-query-builder/resolve-aggregate-alias.util';
 import { toGroupRow } from './to-group-row.util';
 
 /** One aggregate a route asked for, before the builder has aliased it. */
@@ -31,6 +32,11 @@ type DecodeGroupedRowsArgs = {
 type ToGroupSortArgs = {
   /** The group keys, in nesting order. */
   readonly groupKeys: readonly string[];
+  /**
+   * The aggregates this read requests — the same list `toGroupAggregates` is
+   * given. A sort naming one of them is what becomes an aggregate term.
+   */
+  readonly requested?: readonly RequestedGroupAggregate[];
   /** The table's applied sort, over its own columns. */
   readonly sort: readonly QuerySort[];
 };
@@ -135,6 +141,30 @@ export const decodeGroupedRows = ({
 };
 
 /**
+ * A measure column's key as the grid spells it: `"total_amount:avg"`.
+ *
+ * **Duplicated from `@lcabrera/ui`'s `toTableAggregateToken`** rather than
+ * imported, for the reason every grouping shape in this package is
+ * ([ADR-039](../../../../docs/decisions/ADR-039-duplicate-over-undeclared-edges.md)):
+ * a client-safe package and a Node-only one may not depend on each other, and a
+ * shared contracts package needs a third *consumer*, not a third copy.
+ *
+ * **Unlike those shapes, this one is not yet pinned by a cross-package test,
+ * and that is a real gap** (#876). `groupingContract.test.ts` pins the
+ * aggregate vocabulary, the depth cap and the refusal unions; it says nothing
+ * about this format, because neither half is reachable from it —
+ * `toTableAggregateToken` is not on `@lcabrera/ui`'s export map and this is
+ * module-private. Each side is tested against the literal independently
+ * (`decode-grouped-rows.util.test.ts` here, `tableAggregateToken.util.test.ts`
+ * there), which catches a change to either but not a divergence between them.
+ * The format became a wire convention the moment a sort on a measure column
+ * started crossing the boundary, so it wants the same guard the other shapes
+ * have.
+ */
+const toAggregateSortKey = ({ column, fn }: RequestedGroupAggregate) =>
+  `${column}:${fn}`;
+
+/**
  * The grouped read's ORDER BY, derived from the table's own sort.
  *
  * **One term per key, in nesting order**, carrying the user's direction where
@@ -144,17 +174,45 @@ export const decodeGroupedRows = ({
  * keeps its own placement so a subtotal stays a footer whichever way its key
  * runs (#570).
  *
+ * **A sort naming a measure column becomes an aggregate term, and every one of
+ * them lands after the keys** (#869). Position is what decides which level an
+ * aggregate term acts on, and `assertGroupSort` refuses one placed ahead of a
+ * key rather than quietly demoting it: an aggregate can order the innermost
+ * siblings within their parent, and ranking an ancestor by its own total needs
+ * a window function this does not emit. Appending is therefore the only
+ * placement that both means something and is accepted.
+ *
+ * The alias is derived by `resolveAggregateAlias` — the builder's own function,
+ * not a second spelling of its rule — so the term the sort emits and the column
+ * the projection emits cannot come to disagree.
+ *
  * A sort on any other column is dropped rather than passed through, because a
  * grouped result has one row per group and no row of that column's values.
- * Aggregate sorts are a different shape (`GroupSort`'s `aggregateAlias` arm) and
- * are not derivable from a table sort, so a caller offering one builds it
- * itself.
  */
 export const toGroupSort = ({
   groupKeys,
+  requested = [],
   sort,
-}: ToGroupSortArgs): readonly GroupSort[] =>
-  groupKeys.map((key) => ({
+}: ToGroupSortArgs): readonly GroupSort[] => {
+  const keyTerms: GroupSort[] = groupKeys.map((key) => ({
     direction: sort.find((entry) => entry.column === key)?.direction ?? 'asc',
     key,
   }));
+
+  const aggregateTerms = sort.flatMap((entry) => {
+    const measure = requested.find(
+      (aggregate) => toAggregateSortKey(aggregate) === entry.column,
+    );
+
+    return measure === undefined
+      ? []
+      : [
+          {
+            aggregateAlias: resolveAggregateAlias(measure),
+            direction: entry.direction,
+          },
+        ];
+  });
+
+  return [...keyTerms, ...aggregateTerms];
+};

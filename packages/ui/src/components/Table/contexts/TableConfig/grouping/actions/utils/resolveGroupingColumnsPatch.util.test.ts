@@ -27,7 +27,11 @@ const columnsState = getInitialColumnsState<Row>({
 }) as TableColumnsState<Row>;
 
 const patch = (groupingKeys: readonly string[]) =>
-  resolveGroupingColumnsPatch<Row>({ columnsState, groupingKeys });
+  resolveGroupingColumnsPatch<Row>({
+    aggregates: [],
+    columnsState,
+    groupingKeys,
+  });
 
 describe('resolveGroupingColumnsPatch', () => {
   it('hoists the group keys to the head of the painted grid, in key order', () => {
@@ -73,6 +77,7 @@ describe('resolveGroupingColumnsPatch', () => {
       columns,
     }) as TableColumnsState<Row>;
     const grouped = resolveGroupingColumnsPatch<Row>({
+      aggregates: [],
       columnsState: pinnedRight,
       groupingKeys: ['order_status'],
     });
@@ -85,10 +90,16 @@ describe('resolveGroupingColumnsPatch', () => {
     ).not.toContain('order_status');
   });
 
-  it('patches only the derived slices, never the state the user owns', () => {
+  it('patches the derived slices and the sort, never the layout the user owns', () => {
     // The grouped layout is a rendering of the grouping configuration, so it
     // must not reach the cookie the layout persists through or the list the
     // settings drawer offers — which is what makes ungrouping free.
+    //
+    // `sorting` is the one exception and it is a correction rather than a
+    // preference: a measure column exists only while its aggregate is applied,
+    // so a grouping change can take away the column the sort names, and the
+    // ungrouped read refuses an unknown column rather than ignoring it.
+    // `columns`, `columnOrder` and `columnPinning` stay out.
     expect(
       Object.keys(patch(['order_status'])).toSorted((a, b) =>
         a.localeCompare(b),
@@ -98,7 +109,62 @@ describe('resolveGroupingColumnsPatch', () => {
       'normalizedColumns',
       'pinnedColumnOffsets',
       'pinnedColumnPartition',
+      'sorting',
       'staticKeys',
+    ]);
+  });
+
+  it('keeps the sort of a hidden column while dropping one the grid lost', () => {
+    // Two claims in one state, because either alone passes a defect. Pruning
+    // against `effectiveColumns` — which `getEffectiveColumns` filters by
+    // visibility first — drops the hidden column's sort, and pruning against
+    // nothing keeps the measure's.
+    const hiddenAndMeasured = getInitialColumnsState<Row>({
+      aggregates: [{ columnKey: 'total_amount', fn: 'avg' }],
+      columns,
+      columnVisibility: new Set(['ship_country']),
+      groupingKeys: ['order_status'],
+      sorting: [
+        { columnKey: 'ship_country', direction: 'asc' },
+        { columnKey: 'total_amount:avg', direction: 'desc' },
+      ],
+    }) as TableColumnsState<Row>;
+
+    const next = resolveGroupingColumnsPatch<Row>({
+      // Grouping cleared: the measure column goes with it, the hidden one stays.
+      aggregates: [],
+      columnsState: hiddenAndMeasured,
+      groupingKeys: [],
+    });
+
+    expect(next.sorting).toStrictEqual([
+      { columnKey: 'ship_country', direction: 'asc' },
+    ]);
+  });
+  it('keeps the sort of a column an aggregate replaced in the grid', () => {
+    // The data-loss case: sort by `Amount`, *then* group with `avg(Amount)`.
+    // `withAggregateColumns` replaces the measured column, so the painted list
+    // loses `total_amount` — but it is still an ordinary column the read orders
+    // by fine. Pruning against the grid alone dropped the sort here, and the
+    // caller writes the pruned value into the `sorting` search param, so it was
+    // gone from the URL and did not return on ungrouping.
+    //
+    // Asserted at the call site rather than only on the util, because the
+    // util cannot see which lists the caller hands it — the defect was in the
+    // argument, not the algorithm.
+    const sortedByMeasuredColumn = getInitialColumnsState<Row>({
+      columns,
+      sorting: [{ columnKey: 'total_amount', direction: 'desc' }],
+    }) as TableColumnsState<Row>;
+
+    const next = resolveGroupingColumnsPatch<Row>({
+      aggregates: [{ columnKey: 'total_amount', fn: 'avg' }],
+      columnsState: sortedByMeasuredColumn,
+      groupingKeys: ['order_status'],
+    });
+
+    expect(next.sorting).toStrictEqual([
+      { columnKey: 'total_amount', direction: 'desc' },
     ]);
   });
 });

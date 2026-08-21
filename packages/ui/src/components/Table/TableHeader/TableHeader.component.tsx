@@ -9,9 +9,11 @@ import { HEADER_ARIA_ROW_INDEX } from '#ui/components/Table/utils/resolveGridRow
 
 import type { TableHeaderProps } from './TableHeader.types';
 
+import { TableHeaderBand } from '../TableHeaderBand';
 import { TableHeaderCell } from '../TableHeaderCell';
 import { TableRow } from '../TableRow';
 import { tableHeaderStyles } from './TableHeader.stylex';
+import { hasHeaderBands, resolveHeaderBands } from './utils';
 
 /**
  * "Manage Column" opens the per-column settings drawer — filter and width — so
@@ -35,12 +37,34 @@ export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
   const isLoadingMore = useGetTableIsLoadingMore();
   const isLoadingState = isLoading || isLoadingMore;
 
+  const partitions = [leftPinnedCols, centerCols, rightPinnedCols];
+  const isShowsBands = partitions.some((partition) =>
+    hasHeaderBands(partition),
+  );
+
   return (
     <thead
       data-testid='table-header'
       {...rest}
       {...stylex.props(tableHeaderStyles.container, customStylex)}
     >
+      {isShowsBands && (
+        // Decorative, and hidden from assistive technology on purpose — the
+        // group name reaches the tree through each measure column's own
+        // accessible name instead, so it is announced once rather than as a
+        // second header row in the `aria-rowindex` sequence.
+        <TableRow aria-hidden='true' isHeader isStriped={false}>
+          {partitions.flatMap((partition) =>
+            resolveHeaderBands({ columns: partition }).map((band) => (
+              <TableHeaderBand
+                columns={band.columns}
+                key={String(band.columns[0]?.key)}
+                label={band.label}
+              />
+            )),
+          )}
+        </TableRow>
+      )}
       <TableRow aria-rowindex={HEADER_ARIA_ROW_INDEX} isHeader>
         {leftPinnedCols.map((col) => (
           <TableHeaderCell

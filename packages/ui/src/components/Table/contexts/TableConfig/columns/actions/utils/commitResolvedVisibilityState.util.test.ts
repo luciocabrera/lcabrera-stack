@@ -35,6 +35,7 @@ describe('commitResolvedVisibilityState', () => {
     const columnVisibility = new Set<keyof TData>(['name']);
 
     const result = commitResolvedVisibilityState<TData>({
+      aggregates: [],
       columnOrder: ['id', 'name'],
       columnPinning: { left: ['id'], right: [] },
       columns: [
@@ -52,6 +53,7 @@ describe('commitResolvedVisibilityState', () => {
     });
 
     expect(mockGetPinnedDerivedColumnsState).toHaveBeenCalledWith({
+      aggregates: [],
       columnOrder: ['id', 'name'],
       columnPinning: { left: ['id'], right: [] },
       columns: [
@@ -99,6 +101,7 @@ describe('commitResolvedVisibilityState', () => {
     const persistTableState = vi.fn(() => false);
 
     const result = commitResolvedVisibilityState<TData>({
+      aggregates: [],
       columnOrder: ['id', 'name'],
       columnPinning: { left: [], right: [] },
       columns: [

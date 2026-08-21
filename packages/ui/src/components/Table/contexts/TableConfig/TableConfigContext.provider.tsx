@@ -37,12 +37,13 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
     groupingPeriods: metaState?.groupingPeriods,
     groupingShares: metaState?.groupingShares,
   });
-  // Seeded from the grouping state rather than from the raw meta, so the
-  // hierarchy column appears under exactly the key list the grouping store
-  // accepted — an illegal one is refused there, and a column injected for a
-  // grouping that was refused would be a column labelling nothing.
+  // Seeded from the grouping state rather than from the raw meta, so the keys
+  // are hoisted and the measure columns derived under exactly the configuration
+  // the grouping store accepted — an illegal one is refused there, and columns
+  // derived for a grouping that was refused would label nothing.
   const normalizedColumnsState = getInitialColumnsState<TData>({
     ...columnsState,
+    aggregates: normalizedGroupingState.aggregates,
     crud: metaState?.crud,
     groupingKeys: normalizedGroupingState.keys,
   });

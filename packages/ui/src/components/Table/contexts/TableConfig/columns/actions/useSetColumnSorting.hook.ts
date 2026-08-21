@@ -4,19 +4,35 @@ import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableC
 import { useTableDataContextValue } from '#ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
 
 import { usePersistTableStateAction } from './hooks/usePersistTableStateAction.hook';
-import { resolveColumnSortingUpdate } from './utils';
+import { getPinningActionContext, resolveColumnSortingUpdate } from './utils';
 
 export const useSetColumnSorting = <TData>() => {
-  const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
+  const { columnsStore, groupingStore, metaStore } =
+    useTableConfigContextValue<TData>();
   const { dataStore } = useTableDataContextValue();
   const persistTableState = usePersistTableStateAction();
 
   return ({ columnKey, direction }: Sorting<TData>) => {
-    const columnsState = columnsStore.get();
-    const metaState = metaStore.get();
+    const {
+      columnOrder,
+      columnPinning,
+      columns,
+      columnSizing,
+      columnVisibility,
+      drawersSyncNonce,
+      sorting: existingSorting,
+    } = getPinningActionContext<TData>({ columnsStore, metaStore });
+    const grouping = groupingStore.get();
+
     const result = resolveColumnSortingUpdate<TData>({
-      columns: columnsState?.columns ?? [],
-      existingSorting: columnsState?.sorting,
+      aggregates: grouping.aggregates,
+      columnOrder,
+      columnPinning,
+      columns,
+      columnSizing,
+      columnVisibility,
+      existingSorting,
+      groupingKeys: grouping.keys,
       sort: { columnKey, direction },
     });
 
@@ -29,12 +45,11 @@ export const useSetColumnSorting = <TData>() => {
     // Show loading feedback immediately
     dataStore.set({ isLoading: true });
 
-    // Update table context state
-    columnsStore.set({
-      normalizedColumns: result.normalizedColumns,
-      sorting: result.sorting,
-    });
+    // Every derived field at once. A partial write here is what let
+    // `normalizedColumns` fall out of step with `pinnedColumnPartition` once
+    // measure columns existed — see `resolveColumnSortingUpdate`.
+    columnsStore.set({ ...result.viewState, sorting: result.sorting });
 
-    metaStore.set({ drawersSyncNonce: (metaState?.drawersSyncNonce ?? 0) + 1 });
+    metaStore.set({ drawersSyncNonce: drawersSyncNonce + 1 });
   };
 };

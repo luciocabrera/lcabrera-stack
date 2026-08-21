@@ -153,7 +153,7 @@ const selectGroupedOrders = async ({
         keys: groupKeys,
         maxRows: ENTERPRISE_ORDER_GROUP_MAX_ROWS,
         periods: groupPeriods,
-        sort: toGroupSort({ groupKeys, sort }),
+        sort: toGroupSort({ groupKeys, requested, sort }),
         subtotalPlacement,
       });
 

@@ -236,6 +236,7 @@ describe('useBatchSetTableSettings', () => {
     });
     expect(mockColumnsStore.get).toHaveBeenCalledTimes(1);
     expect(mockResolveBatchTableSettingsUpdate).toHaveBeenCalledWith({
+      aggregates: [],
       columns: [
         { key: 'id', label: 'ID' },
         { key: 'name', label: 'Name' },
@@ -255,7 +256,11 @@ describe('useBatchSetTableSettings', () => {
       columnSizing: { actions: 0, age: 80, id: 100, name: 220 },
       columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
       persistenceKey: 'orders-table',
-      sorting: [{ columnKey: 'name', direction: 'desc' }],
+      // The **resolved** sorting, not the staged `settings.sorting` (`desc`):
+      // this Accept may have deselected the aggregate whose measure column the
+      // sort names, and the sort travels in the URL — persisting the staged
+      // value would leave the loader reading a column the grid no longer has.
+      sorting: [{ columnKey: 'name', direction: 'asc' }],
     });
     expect(mockPersistTableState).toHaveBeenCalledWith([
       {

@@ -111,6 +111,7 @@ const Harness = () => {
     <TableConfigProvider<TestRow>
       columnsState={{ columns }}
       metaState={{
+        groupingAggregates: [{ columnKey: 'id', fn: 'sum' }],
         groupingKeys: GROUPING_KEYS,
         overscan: 2,
         rowHeight: ROW_HEIGHT,
@@ -302,10 +303,14 @@ describe('a grouped table under the grid ARIA model', () => {
     // cell fewer per row than before (ADR-080).
     render(<Harness />);
 
-    expect(getGrid().querySelectorAll('[role="gridcell"]')).toHaveLength(21);
+    // Seven rows across four columns: the two declared keys, the primary key,
+    // and the measure column derived from the aggregate on it (#869). The
+    // primary key is measured *beside* itself rather than replaced, because
+    // `resolveCrudRowId` throws when no column carries `isPrimaryKey`.
+    expect(getGrid().querySelectorAll('[role="gridcell"]')).toHaveLength(28);
 
     for (const row of screen.getAllByRole('row')) {
-      expect(row.querySelectorAll('[role="gridcell"]')).toHaveLength(3);
+      expect(row.querySelectorAll('[role="gridcell"]')).toHaveLength(4);
     }
   });
 
@@ -375,12 +380,23 @@ describe('a grouped table under the grid ARIA model', () => {
     const detailRow = screen.getAllByRole('row')[1];
     const cells = [...(detailRow?.querySelectorAll('[role="gridcell"]') ?? [])];
 
-    // City, District, Id — both keys are hoisted to the head and blank here.
-    expect(cells.map((cell) => cell.textContent)).toStrictEqual(['', '', '1']);
+    // City, District, Id, Id·Sum — both keys are hoisted to the head and blank
+    // here. The measure column is blank too, and for a different reason: a
+    // detail row holds no aggregate, so there is nothing for it to state.
+    expect(cells.map((cell) => cell.textContent)).toStrictEqual([
+      '',
+      '',
+      '1',
+      '',
+    ]);
 
     // Empty means *empty*, not an empty `<span title="">`. The descriptor hands
-    // these cells a fragment rather than `undefined` precisely so the cell
-    // holds no element at all — text content alone cannot tell the two apart.
-    expect(cells.map((cell) => cell.children.length)).toStrictEqual([0, 0, 1]);
+    // the two key cells a fragment rather than `undefined` precisely so the
+    // cell holds no element at all — text content alone cannot tell the two
+    // apart. The measure cell is an ordinary data cell with no field behind it,
+    // so it takes the default branch and does render a span.
+    expect(cells.map((cell) => cell.children.length)).toStrictEqual([
+      0, 0, 1, 1,
+    ]);
   });
 });

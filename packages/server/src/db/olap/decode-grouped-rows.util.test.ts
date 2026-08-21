@@ -220,6 +220,59 @@ describe('decodeGroupedRows', () => {
 });
 
 describe('toGroupSort', () => {
+  it('turns a sort on a measure column into an aggregate term, after the keys', () => {
+    // Position decides which level an aggregate orders, and `assertGroupSort`
+    // refuses one placed ahead of a key rather than quietly demoting it — so
+    // appending is the only placement that both means something and is
+    // accepted (#869).
+    expect(
+      toGroupSort({
+        groupKeys: ['status'],
+        requested: REQUESTED,
+        sort: [{ column: 'amount:sum', direction: 'desc' }],
+      }),
+    ).toStrictEqual([
+      { direction: 'asc', key: 'status' },
+      { aggregateAlias: 'sum_amount', direction: 'desc' },
+    ]);
+  });
+
+  it('derives the alias with the builder’s own rule', () => {
+    // Re-spelling it here would let the ORDER BY term and the projected column
+    // drift apart, which Postgres reports as an unknown identifier rather than
+    // as the mistake it is.
+    expect(
+      toGroupSort({
+        groupKeys: [],
+        requested: REQUESTED,
+        sort: [{ column: 'quantity:avg', direction: 'asc' }],
+      }),
+    ).toStrictEqual([{ aggregateAlias: 'avg_quantity', direction: 'asc' }]);
+  });
+
+  it('drops a measure sort naming an aggregate this read did not request', () => {
+    // The grouping configuration is URL state, so it can name anything; an
+    // alias the query does not project would reach Postgres as an unknown
+    // identifier.
+    expect(
+      toGroupSort({
+        groupKeys: ['status'],
+        requested: REQUESTED,
+        sort: [{ column: 'amount:avg', direction: 'desc' }],
+      }),
+    ).toStrictEqual([{ direction: 'asc', key: 'status' }]);
+  });
+
+  it('keeps a plain column sort dropped even when aggregates are requested', () => {
+    expect(
+      toGroupSort({
+        groupKeys: ['status'],
+        requested: REQUESTED,
+        sort: [{ column: 'amount', direction: 'desc' }],
+      }),
+    ).toStrictEqual([{ direction: 'asc', key: 'status' }]);
+  });
+
   it('emits one term per key, in nesting order', () => {
     // The nesting order is the tree, so a user's sort sets a level's direction
     // rather than reordering the levels.

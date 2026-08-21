@@ -1,6 +1,7 @@
 import type {
   DataKey,
   TableColumn,
+  TableColumnAggregate,
   TableColumnsState,
 } from '#ui/components/Table/Table.types';
 import type { ColumnFilter } from '#ui/types/filterOperators.types';
@@ -25,6 +26,8 @@ export type BatchColumnSettingsUpdate<TData> = {
 };
 
 type ResolveBatchColumnSettingsUpdateArgs<TData> = {
+  /** The applied aggregates — see `getPinnedDerivedColumnsState`. */
+  readonly aggregates: readonly TableColumnAggregate[];
   readonly columnsState?: Partial<TableColumnsState<TData>>;
   /** The applied group keys — see `getPinnedDerivedColumnsState`. */
   readonly groupingKeys: readonly string[];
@@ -32,6 +35,7 @@ type ResolveBatchColumnSettingsUpdateArgs<TData> = {
 };
 
 export const resolveBatchColumnSettingsUpdate = <TData>({
+  aggregates,
   columnsState,
   groupingKeys,
   settings,
@@ -89,6 +93,7 @@ export const resolveBatchColumnSettingsUpdate = <TData>({
     pinnedColumnOffsets,
     pinnedColumnPartition,
   } = deriveColumnViewState<TData>({
+    aggregates,
     columnOrder: newColumnOrder,
     columnPinning: newPinning,
     columns,

@@ -23,11 +23,13 @@ export const useBatchSetColumnSettings = <TData>() => {
 
   return (settings: BatchColumnSettingsUpdate<TData>) => {
     const columnsState = columnsStore.get();
+    const grouping = groupingStore.get();
     const metaState = metaStore.get();
     const persistenceKey = metaState?.persistenceKey ?? '';
     const resolvedUpdate = resolveBatchColumnSettingsUpdate<TData>({
+      aggregates: grouping.aggregates,
       columnsState,
-      groupingKeys: groupingStore.get().keys,
+      groupingKeys: grouping.keys,
       settings,
     });
     const hasQueryChanged = getHasQueryChanged<TData>({
