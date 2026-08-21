@@ -222,11 +222,11 @@ not narrow must still refuse the whole summary, because a group described by som
 of its keys is not the group the row holds.
 
 **Nothing on the render path may throw, and sharing a derivation is not sharing a
-failure mode.** ADR-062 settled this for row identity — `resolveRowKey` degrades
-to the row's index where `resolveCrudRowId` throws, because the same throw on the
-render path empties the table — but the row-actions menu, equally on the render
-path, kept the throwing call until #887. A row with no resolvable id gets no
-menu. The rule generalises past these two: a derivation may be shared by a link
+failure mode.** ADR-062 settled this for row identity: `resolveRowKey` degrades
+to the row's index rather than reusing `resolveCrudRowId`, because a throw on the
+render path empties the table. The row-actions menu was equally on the render
+path and kept the throwing call until #887, so `resolveCrudRowId` no longer
+throws at all — it answers `undefined` and the menu renders nothing. The rule generalises past these two: a derivation may be shared by a link
 builder and a renderer, and each owns what it does when the derivation fails.
 
 **A per-row field forwarded by name is a field that can be dropped by name.**
@@ -381,9 +381,9 @@ decision on record.
 The two cannot conflict, because an aggregate naming a group key is dropped —
 that column already carries its key's value. One column is never replaced,
 though: a **primary-key** column is measured _beside_ itself, because
-`resolveCrudRowId` throws when no column carries `isPrimaryKey`, and substituting
-the only one would take out the row-actions menu of every row for a grouping
-settable from the URL.
+`resolveCrudRowId` answers `undefined` when no column carries `isPrimaryKey`, so
+substituting the only one silently strips the row-actions menu from every row,
+for a grouping settable from the URL.
 
 A measure column's key is the aggregate's token — `total_amount:avg` — which
 `DataKey` admits for the same reason it admits `'actions'`: a column identity
