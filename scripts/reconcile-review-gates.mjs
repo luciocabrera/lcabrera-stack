@@ -53,7 +53,17 @@ const SCRIPTS_DIR = dirname(fileURLToPath(import.meta.url));
  * from the ruleset name that has to match it.
  */
 const GATES = [
-  { name: 'copilot-review', script: 'copilot-review-status.mjs' },
+  // `protectSuccess` says this gate has ANOTHER publisher, so a `success` on the
+  // head may have come from better-informed code than this sweep is running (#868).
+  // Only true where a workflow also runs the gate: `copilot-review-gate.yml` runs
+  // this one on events. `verify-review-threads.mjs` is invoked by nothing else, so
+  // the sweep is its only publisher AND its verdict legitimately changes under a
+  // fixed head — it must keep its downgrade.
+  {
+    name: 'copilot-review',
+    protectSuccess: true,
+    script: 'copilot-review-status.mjs',
+  },
   { name: 'agent-review', script: 'verify-agent-review.mjs' },
   { name: 'review-threads', script: 'verify-review-threads.mjs' },
 ];
@@ -94,6 +104,7 @@ const runGate = ({ extraArgs, gate, number, repository }) => {
   const args = gateArgs({
     extraArgs,
     number,
+    protectSuccess: gate.protectSuccess === true,
     repository,
     script: join(SCRIPTS_DIR, gate.script),
   });

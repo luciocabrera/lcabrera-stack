@@ -851,9 +851,11 @@ Consequences while this stands:
   which one you are looking at.
 
   **That soundness claim has one stated precondition since #868**, and it is worth
-  reading before relying on it. The sweep no longer replaces a `success` it may not
-  have computed, so it no longer corrects a `success` left standing by a **dismissed**
-  review whose event went missing — which would be green when it should be red. The
+  reading before relying on it. For this context the sweep no longer replaces a
+  `success` it may not have computed, so it no longer corrects one left standing by a
+  **dismissed** review whose event went missing — which would be green when it should
+  be red. (The rule is per gate: `Review threads resolved` keeps its downgrade, because
+  the sweep is that context's only publisher.) The
   case is unreachable today only because no accepted reviewer posts a dismissible
   review (both are `COMMENTED`, and GitHub dismisses only `APPROVED` /
   `CHANGES_REQUESTED`). #699 would change that.

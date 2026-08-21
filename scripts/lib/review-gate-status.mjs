@@ -156,6 +156,9 @@ export const publishGateStatus = ({
     !shouldPublishStatus({
       current: fetchPublishedStatus({ context, repository, sha }),
       next: { description, state },
+      // Opt-in, and only a gate that has another publisher may ask for it — see
+      // `shouldPublishStatus`. `verify-review-threads.mjs` must never pass it.
+      protectSuccess: process.argv.includes('--protect-success'),
     })
   ) {
     return `Unchanged on ${sha}: nothing was posted.`;

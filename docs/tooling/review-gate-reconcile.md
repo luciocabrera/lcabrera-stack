@@ -97,15 +97,29 @@ together and posts against **the head it read**. Three consequences:
   red check yellow and read as progress. For the same reason the sweep never
   _publishes_ `failure`: that state needs a review submission event behind it,
   and `pending` is what it reports instead. Both block.
-- **It never weakens a `success`, only re-describes it (#868).** GitHub always
-  runs a `schedule` from the default branch, so on a pull request that changes
-  what a gate decides, the sweep is judging that pull request with the code it is
-  replacing. Measured on #866: one head, one review list, and the two copies of
-  the gate computed opposite verdicts. The published `success` came from a run
-  that had the pull request's own code; the sweep, by construction, does not — so
-  it is not the better-informed opinion, and must not win by landing last. A
-  description change under an unchanged `success` still posts, because naming
-  which reviewer satisfied the gate is what makes a reviewer monoculture visible.
+- **For `Copilot review complete` only, it never weakens a `success` — it only
+  re-describes it (#868).** GitHub always runs a `schedule` from the default
+  branch, so on a pull request that changes what a gate decides, the sweep is
+  judging that pull request with the code it is replacing. Measured on #866: one
+  head, one review list, and the two copies of the gate computed opposite
+  verdicts. The published `success` came from a run that had the pull request's
+  own code; the sweep, by construction, does not — so it is not the
+  better-informed opinion, and must not win by landing last. A description change
+  under an unchanged `success` still posts, because naming which reviewer
+  satisfied the gate is what makes a reviewer monoculture visible.
+
+  **Per gate, not sweep-wide, and the distinction is load-bearing.** The argument
+  above needs some OTHER publisher to have posted the `success` from
+  better-informed code. That holds for `Copilot review complete`, which
+  `copilot-review-gate.yml` also runs on events, and it is the only gate that opts
+  in (`protectSuccess` in the sweep's `GATES`). It is **false** for
+  `Review threads resolved`: nothing in `.github/workflows/` invokes
+  `verify-review-threads.mjs`, so the sweep is that context's only publisher and
+  therefore always its best-informed one — and `decideThreadStatus` legitimately
+  moves `success` → `failure` under an **unchanged head**, when a reviewer opens a
+  thread or an author marks a draft ready. Protecting it would freeze that gate
+  green for the life of a head while threads sat open, which is the opposite of
+  what it exists to say.
 
 ## Telling "not reviewed yet" from "reviewed, but not recomputed"
 
@@ -131,24 +145,34 @@ The same holds for the other gate with
 
 ## What the no-downgrade rule gives up
 
-The sweep can no longer correct a **wrongly green** status. That is a real loss and
-worth stating rather than leaving to be discovered, but it is smaller than it sounds,
-because the sweep was never the only path:
+**Which gate this is about: `Copilot review complete`, and only that one.** The other
+two contexts the sweep publishes are unaffected — `Agent review verdict` and
+`Review threads resolved` do not opt in, so the sweep still downgrades them exactly as
+before. Read every claim below as scoped to the one gate; that scoping is itself the
+fix for the first shape this rule was written in, which applied to all three.
+
+For `Copilot review complete`, the sweep can no longer correct a **wrongly green**
+status. That is a real loss and worth stating rather than leaving to be discovered, but
+it is smaller than it sounds, because for that gate the sweep was never the only path:
 
 - **A push** moves the head, so no status exists on the new one and the sweep posts
   there normally — "same head" is what the comparison is about. This path has no
   precondition; it is the reliable one.
 - **A dismissed review** downgrades **when its event produces a run.** The wiring is
-  there: `copilot-review-gate.yml` has `pull_request_review: types: [submitted,
-dismissed]`, and the gate workflows invoke the scripts without `--if-changed`, so an
-  event-driven run publishes whatever it computes, downgrades included. (This rule
-  lives in `shouldPublishStatus`, which only `--if-changed` consults, and `gateArgs`
-  is its only caller — so it is scoped to the sweep without needing a flag.) But a
-  subscription is not a delivery guarantee, and `pull_request_review` is the exact
-  half [ADR-076](../decisions/ADR-076-reconcile-the-review-gate-statuses-on-a-schedule.md)
+  there: `copilot-review-gate.yml` has
+  `pull_request_review: types: [submitted, dismissed]`, and it invokes
+  `copilot-review-status.mjs` without `--if-changed`, so an event-driven run publishes
+  whatever it computes, downgrades included. But a subscription is not a delivery
+  guarantee, and `pull_request_review` is the exact half
+  [ADR-076](../decisions/ADR-076-reconcile-the-review-gate-statuses-on-a-schedule.md)
   measured as unreliable — _"a review submitted by Copilot usually creates no workflow
   run at all"_. This sweep exists **because** of that, so the precondition has to be
   stated rather than implied: the mitigation is real, and it is not guaranteed.
+
+  This is also precisely why the rule is opt-in. `verify-review-threads.mjs` has **no**
+  event-driven run at all, so for that context the mitigation would not be merely
+  unguaranteed — it would be absent, and the gate would be frozen green.
+
 - **A hand-posted break-glass `success`** (rung 6 in
   [`copilot-review-gate.md`](./copilot-review-gate.md#break-glass)) now survives until
   an event recomputes it, instead of being undone by a sweep minutes later. That is an
@@ -177,6 +201,13 @@ merges, after which both copies agree. If a way to tell "stale code disagrees" f
 "a missed event left this stale" is ever wanted, it has to serve both directions.
 
 ### The residual case, and what currently keeps it unreachable
+
+**Scoped to `Copilot review complete`.** The first shape of this rule applied to every
+gate the sweep drives, and that had a false green reachable _today_, needing none of the
+three conditions below: `Review threads resolved` has no publisher but the sweep, and its
+verdict flips `success` → `failure` under a fixed head the moment a reviewer opens a
+thread. Making the rule opt-in is what removed that, and it is why the roster of opting-in
+gates is pinned by a test rather than left to a config nobody reads.
 
 A dismissal whose event goes missing leaves a `success` on an **unchanged head** that
 nothing revisits. That is a **false green**, not a stale one — a worse failure than the

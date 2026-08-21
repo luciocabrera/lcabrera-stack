@@ -277,17 +277,24 @@ describe('deciding whether to publish', () => {
   // is replacing — measured on #866, where one head and one review list produced
   // opposite verdicts from the two copies. These pin the asymmetry: a `success`
   // can be re-described but not weakened.
+  const failure = {
+    description: 'Copilot reviewed a08de9e, no longer the head.',
+    state: 'failure',
+  };
+
   it('never weakens a success it may not have computed', () => {
-    expect(shouldPublishStatus({ current: success, next: pending })).toBe(
-      false,
-    );
     expect(
       shouldPublishStatus({
         current: success,
-        next: {
-          description: 'Copilot reviewed a08de9e, no longer the head.',
-          state: 'failure',
-        },
+        next: pending,
+        protectSuccess: true,
+      }),
+    ).toBe(false);
+    expect(
+      shouldPublishStatus({
+        current: success,
+        next: failure,
+        protectSuccess: true,
       }),
     ).toBe(false);
   });
@@ -303,8 +310,45 @@ describe('deciding whether to publish', () => {
             'Reviewed by copilot-pull-request-reviewer[bot] at a08de9e.',
           state: 'success',
         },
+        protectSuccess: true,
       }),
     ).toBe(true);
+  });
+
+  // The protection is OPT-IN, and this is the case that made it so. The sweep
+  // publishes `Review threads resolved` and NOTHING else does — no workflow invokes
+  // `verify-review-threads.mjs` — while `decideThreadStatus` legitimately moves
+  // `success` to `failure` under an UNCHANGED head: a reviewer opens a thread, or a
+  // draft is marked ready. Neither moves the SHA. Protecting that gate's `success`
+  // would freeze it green for the life of the head with threads open, which is the
+  // opposite of what it exists to say.
+  it('leaves a gate that did not ask for it free to downgrade', () => {
+    expect(shouldPublishStatus({ current: success, next: pending })).toBe(true);
+    expect(shouldPublishStatus({ current: success, next: failure })).toBe(true);
+  });
+
+  // WHICH gates opt in, pinned against the sweep's own source. The rule is only
+  // sound for a gate that has another publisher; `review-threads` has none, and its
+  // verdict legitimately changes under a fixed head, so opting it in would freeze
+  // `Review threads resolved` green while threads sat open. Nothing else fails if
+  // this roster regresses — the unit tests above all pass `protectSuccess`
+  // explicitly, so they cannot see the wiring.
+  it('protects a success only for the gate that has another publisher', () => {
+    const source = readRepoFile('scripts/reconcile-review-gates.mjs');
+    const block = /const GATES = \[([\s\S]*?)\n\];/u.exec(source);
+    expect(block).not.toBeNull();
+
+    const optIns = Object.fromEntries(
+      [...block[1].matchAll(/\{[^}]*name:\s*'([a-z-]+)'[^}]*\}/gu)].map(
+        (entry) => [entry[1], entry[0].includes('protectSuccess')],
+      ),
+    );
+
+    expect(optIns).toEqual({
+      'agent-review': false,
+      'copilot-review': true,
+      'review-threads': false,
+    });
   });
 
   it('notices a description change under an unchanged state', () => {

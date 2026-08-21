@@ -106,16 +106,32 @@ const postedMillis = (status) => Date.parse(status?.created_at ?? '') || 0;
  *   witness that — it sees only that the newest review names something other
  *   than the head, which is what produced the `failure` in the first place.
  *   Replacing it would turn a red check yellow and read as progress.
- * - **A `success` is never weakened, only re-described (#868).** A `schedule` always
- *   runs from the default branch, so on a pull request that changes what a gate
- *   decides the sweep is judging it with the code it is replacing — this verdict is
- *   not the better-informed one and must not win by landing last. Only the sweep is
- *   affected: `--if-changed` is the only path here, and `gateArgs` is its only caller.
+ * - **A `success` is never weakened, only re-described — but only for a gate that
+ *   asks (`protectSuccess`, #868).** A `schedule` always runs from the default
+ *   branch, so on a pull request that changes what a gate decides the sweep is
+ *   judging it with the code it is replacing; that verdict is not the
+ *   better-informed one and must not win by landing last.
  *
- *   What it gives up, and the residual false-green case it leaves behind, are in
+ *   **Opt-in rather than universal, because the argument is not true of every gate
+ *   this sweep drives.** It holds where some OTHER publisher may have posted the
+ *   `success` from better-informed code — `copilot-review-status.mjs`, which
+ *   `copilot-review-gate.yml` also runs on events. It is false for
+ *   `verify-review-threads.mjs`: nothing in `.github/workflows/` invokes that
+ *   script, so the sweep is its ONLY publisher and therefore always the
+ *   best-informed one. Worse, `decideThreadStatus` legitimately moves
+ *   `success` → `failure` on an UNCHANGED head — a reviewer opens a thread, or a
+ *   draft is marked ready, neither of which moves the SHA. Applying this rule there
+ *   would freeze `Review threads resolved` green for the life of a head while
+ *   threads sat open.
+ *
+ *   What it gives up, and the residual false-green cases, are in
  *   `docs/tooling/review-gate-reconcile.md` — read that before relaxing this.
  */
-export const shouldPublishStatus = ({ current, next } = {}) => {
+export const shouldPublishStatus = ({
+  current,
+  next,
+  protectSuccess = false,
+} = {}) => {
   if (next === undefined) {
     return false;
   }
@@ -128,7 +144,11 @@ export const shouldPublishStatus = ({ current, next } = {}) => {
   ) {
     return false;
   }
-  if (current.state === 'success' && next.state !== 'success') {
+  if (
+    protectSuccess &&
+    current.state === 'success' &&
+    next.state !== 'success'
+  ) {
     return false;
   }
   return !(TERMINAL_STATES.has(current.state) && next.state === 'pending');
@@ -153,13 +173,20 @@ export const shouldPublishStatus = ({ current, next } = {}) => {
  * `--pr` is stringified here rather than at the call site so a number and a
  * numeric string produce the same argv.
  */
-export const gateArgs = ({ extraArgs = [], number, repository, script }) => [
+export const gateArgs = ({
+  extraArgs = [],
+  number,
+  protectSuccess = false,
+  repository,
+  script,
+}) => [
   script,
   '--pr',
   String(number),
   '--repo',
   repository,
   '--if-changed',
+  ...(protectSuccess ? ['--protect-success'] : []),
   ...extraArgs,
 ];
 
