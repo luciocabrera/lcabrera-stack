@@ -59,7 +59,7 @@ import {
 
 const USAGE =
   'usage: node scripts/copilot-review-status.mjs --pr <number> ' +
-  '[--repo <owner/name>] [--dry-run] [--if-changed]';
+  '[--repo <owner/name>] [--dry-run] [--if-changed] [--protect-success]';
 
 /**
  * The review that triggered this run, when one did.

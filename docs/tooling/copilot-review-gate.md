@@ -849,6 +849,18 @@ Consequences while this stands:
   should be red, it is late when it should be green. What it costs is that
   `pending` means two different things, which is why the ladder starts by asking
   which one you are looking at.
+
+  **That soundness claim has one stated precondition since #868**, and it is worth
+  reading before relying on it. For this context the sweep no longer replaces a
+  `success` it may not have computed, so it no longer corrects one left standing by a
+  **dismissed** review whose event went missing — which would be green when it should
+  be red. (The rule is per gate: `Review threads resolved` keeps its downgrade, because
+  the sweep is that context's only publisher.) The
+  case is unreachable today only because no accepted reviewer posts a dismissible
+  review (both are `COMMENTED`, and GitHub dismisses only `APPROVED` /
+  `CHANGES_REQUESTED`). #699 would change that.
+  [`review-gate-reconcile.md`](./review-gate-reconcile.md) owns the detail.
+
 - It reaches `success` when the **next** handled recompute happens — the next
   push, a human review, a released or re-run job, or the scheduled reconcile. It
   does not reach `success` on the Copilot review alone.

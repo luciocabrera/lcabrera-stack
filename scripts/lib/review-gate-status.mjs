@@ -25,6 +25,7 @@ import {
 } from '../../packages/repo-standards/scripts/cli-input.mjs';
 import { runGh } from './gh-exec.mjs';
 import {
+  PROTECT_SUCCESS_FLAG,
   publishedStatus,
   shouldPublishStatus,
 } from './review-gate-reconcile.mjs';
@@ -156,6 +157,9 @@ export const publishGateStatus = ({
     !shouldPublishStatus({
       current: fetchPublishedStatus({ context, repository, sha }),
       next: { description, state },
+      // Opt-in, and only a gate that has another publisher may ask for it — see
+      // `shouldPublishStatus`. `verify-review-threads.mjs` must never pass it.
+      protectSuccess: process.argv.includes(PROTECT_SUCCESS_FLAG),
     })
   ) {
     return `Unchanged on ${sha}: nothing was posted.`;
