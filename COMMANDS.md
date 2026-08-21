@@ -546,6 +546,16 @@ by hand. The states and the break-glass path are in
 | `vp run copilot-review:status -- --pr <n> --dry-run` | print the state the gate would publish for a PR, posting nothing |
 | `vp run copilot-review:status -- --pr <n>`           | publish that state against the PR's current head commit          |
 
+**Publishing this one from a checkout is a trap, and it is the command most
+likely to be reached for.** `Copilot review complete` is a required context
+pinned to `integration_id` 15368, so a status you post yourself does not satisfy
+it — and it leaves the head carrying the state and description the scheduled
+sweep computes, after which the sweep withholds and no app-backed status arrives
+either. Use `--dry-run` to read the verdict; dispatch **Copilot Review Gate** to
+publish one that counts. Break-glass rung 3 in
+[`docs/tooling/copilot-review-gate.md`](docs/tooling/copilot-review-gate.md)
+owns the mechanism and its exceptions.
+
 That gate also reports the findings Copilot **suppressed** — the low-confidence
 ones it puts in the review body instead of filing as threads, which conversation
 resolution therefore never sees. They are reported and never block
@@ -600,11 +610,24 @@ is the schedule; the interval, the recovery and what it does on failure are in
 [`docs/tooling/review-gate-reconcile.md`](docs/tooling/review-gate-reconcile.md)
 ([ADR-076](docs/decisions/ADR-076-reconcile-the-review-gate-statuses-on-a-schedule.md)).
 
-| Command                                               | Does                                                             |
-| ----------------------------------------------------- | ---------------------------------------------------------------- |
-| `vp run review-gates:reconcile`                       | republish every status for every open PR that needs it           |
-| `vp run review-gates:reconcile -- --pr <n>`           | the same for one PR — the local form of the break-glass dispatch |
-| `vp run review-gates:reconcile -- --pr <n> --dry-run` | print what it would publish, posting nothing                     |
+| Command                                               | Does                                                   |
+| ----------------------------------------------------- | ------------------------------------------------------ |
+| `vp run review-gates:reconcile`                       | republish every status for every open PR that needs it |
+| `vp run review-gates:reconcile -- --pr <n>`           | the same for one PR                                    |
+| `vp run review-gates:reconcile -- --pr <n> --dry-run` | print what it would publish, posting nothing           |
+
+**Any status posted from a checkout is posted as you, not as a workflow**, so
+none of them satisfies `Copilot review complete` — these two forms and
+`copilot-review:status` above alike. A locally-posted **`success`** is the one to
+avoid:
+the sweep withholds when the state and description it computes match what is
+already posted, and for this gate it never weakens a `success` (#868) — so the
+bar can stop being cleared by an app-backed status, on every open pull request at
+once in the bare form. A locally-posted `pending` is harmless; the sweep
+publishes over it as Actions once a review lands. Break-glass rung 3 in
+[`docs/tooling/copilot-review-gate.md`](docs/tooling/copilot-review-gate.md)
+owns the mechanism and its exceptions; to clear the gate, dispatch **Copilot
+Review Gate**.
 
 ### Autonomous PR queue
 
@@ -781,9 +804,9 @@ commit status against the head SHA, green only while some accepted reviewer's ow
 newest review names that commit. It is the only workflow here triggered by
 `pull_request_review` as well as `pull_request`, because its verdict changes when
 the diff has not — a review landing flips it, and a push takes it back to
-`pending`. It reports but does not block until #698 makes the context required,
-and a run triggered by Copilot's own review currently waits for approval before
-it executes — both caveats, and the way out of the second, are in
+`pending`. It is a required context (2026-08-21), so it blocks the merge. A run
+triggered by Copilot's own review currently waits for approval before it
+executes; that caveat, and the way out of it, are in
 [`docs/tooling/copilot-review-gate.md`](docs/tooling/copilot-review-gate.md).
 
 [`claude-review.yml`](.github/workflows/claude-review.yml) is what produces the

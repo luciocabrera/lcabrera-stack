@@ -27,10 +27,16 @@ The measurement, and the two commands that reproduce it against live data, are i
 issue #737. Do not copy the ratio into this file: it moves, and nothing here
 would notice.
 
-Today the consequence of a stale status is latency. Once #698 promotes either
-context to a required check, it is a pull request that cannot merge, whose only
-recovery is re-running an _earlier_ workflow run — a step no author finds
-unaided. That is why this lands first.
+For `Copilot review complete` — required since 2026-08-21 — a stale status is a
+pull request that cannot merge. The recovery is the gate's own `workflow_dispatch`
+— **break-glass rung 3**, its `gh workflow run` form, in
+[`copilot-review-gate.md`](./copilot-review-gate.md#break-glass) — which exists so
+nobody has to hunt for an earlier run to re-run. Two caveats before pressing it: a
+dispatch naming no ref runs `main`'s copy of the gate, which is the #866 failure;
+and rung 3's _local_ form does not clear a required context, for the reason that
+rung records. For the two contexts still advisory the
+consequence is only latency. This sweep landing first is what made the promotion
+safe.
 
 ## It is not the polling the gate header rejects
 
@@ -182,7 +188,10 @@ it is smaller than it sounds, because for that gate the sweep was never the only
 - **A hand-posted break-glass `success`** (rung 6 in
   [`copilot-review-gate.md`](./copilot-review-gate.md#break-glass)) now survives until
   an event recomputes it, instead of being undone by a sweep minutes later. That is an
-  improvement, not a cost.
+  improvement, but a smaller one than it was: since the context was pinned to
+  `integration_id` 15368 on 2026-08-21, a status posted by hand does not satisfy
+  the required check at all, so what survives is the record rather than the
+  merge.
 
 ### The rule is one-directional; the reasoning behind it is not
 
@@ -193,7 +202,9 @@ as well to that direction, and it is not blocked there.
 That leaves the **mirror of #866**, on a pull request that makes a gate _stricter_: its
 own run posts `pending` (correct under the new, tighter rule), the sweep recomputes with
 the lenient code being replaced, gets `success`, and publishes it. Same head, same cause,
-opposite direction — and a false green under #698.
+opposite direction — and, since `Copilot review complete` became a required
+context on
+2026-08-21, **a false green on a live merge bar** rather than a hypothetical one.
 
 **Deliberately not blocked.** Correcting a `pending` that a missed event left behind is
 the sweep's entire job, and it is the very same transition; refusing it would stop the
@@ -202,7 +213,13 @@ rejected "only fill absence" option fell into.
 
 **It is closer to reachable than the dismissal case below**, and worth saying plainly:
 it needs only a pull request that tightens a gate, which is an ordinary change — no
-missing event required. What limits the damage is that it lasts until the pull request
+missing event required — and a pull request whose own gate code disagrees with
+`main`'s
+is not hypothetical, because #866 was one. What #866 does **not** evidence is this
+polarity: what was measured there is `main`'s code overwriting a `success` with
+`pending`, and no instance of the reverse has been observed. What limits the
+damage is that the green is not arbitrary — the head really was reviewed under
+the rule `main` still holds — and that it lasts only until the pull request
 merges, after which both copies agree. If a way to tell "stale code disagrees" from
 "a missed event left this stale" is ever wanted, it has to serve both directions.
 
@@ -216,9 +233,9 @@ thread. Making the rule opt-in is what removed that, and it is why the roster of
 gates is pinned by a test rather than left to a config nobody reads.
 
 A dismissal whose event goes missing leaves a `success` on an **unchanged head** that
-nothing revisits. That is a **false green**, not a stale one — a worse failure than the
-flap this rule fixes, because under #698 it merges a pull request whose review was
-withdrawn.
+nothing revisits. That is a **false green**, not a stale one — a worse failure
+than the flap this rule fixes, because the context is required, so it merges a
+pull request whose review was withdrawn.
 
 It needs three things at once, and the first does not hold today:
 
@@ -270,6 +287,26 @@ Waiting up to one interval is the ordinary answer. When that is too long:
    It is the same code the schedule runs, and it posts only if the head does not
    already carry the verdict it computes.
 
+   **For `Copilot review complete` this reports rather than recovers.** The status
+   it posts is attributed to you, not to an app, so it does not satisfy that
+   required context — and because it posts the same state and description the
+   schedule would, every later sweep sees no change and withholds.
+
+   **The trap is what that leaves behind, and it closes the reconcile dispatch
+   too.** A _Review Gate Reconcile_ dispatch would ordinarily clear the bar — it
+   runs in Actions with `github.token`, so its status has an app behind it, and
+   `--if-changed` withholds only when the state _and_ the description both match
+   what is already there, which a stale `pending` does not. But once this local
+   step has posted, the head carries exactly the state and description the sweep
+   computes, so every later sweep — scheduled or dispatched — withholds, and that
+   dispatch goes green while posting nothing.
+
+   **Copilot Review Gate** (step 2) is the dispatch that clears the bar either
+   way, because `copilot-review-gate.yml` invokes its script without
+   `--if-changed` and so publishes unconditionally. Reach for it when the merge
+   is what you need. This step stays the right one for the two contexts that are
+   advisory, and for reading what the sweep thinks.
+
 2. **Dispatch the gate from Actions**, which needs no checkout — pick
    **Copilot Review Gate**, **Agent Review Gate** or **Review Gate Reconcile**,
    press **Run workflow**, and give the pull request number. A dispatch is
@@ -278,12 +315,28 @@ Waiting up to one interval is the ordinary answer. When that is too long:
 
    ```bash
    gh workflow run copilot-review-gate.yml -f pr=<n> \
+     --ref <the pull request's branch> \
      -R luciocabrera/vite-react-compiler
    gh workflow run agent-review-verdict.yml -f pr=<n> \
+     --ref <the pull request's branch> \
      -R luciocabrera/vite-react-compiler
    gh workflow run review-gate-reconcile.yml -f pr=<n> \
-     -R luciocabrera/vite-react-compiler
+     -R luciocabrera/vite-react-compiler   # the sweep is default-branch by design
    ```
+
+   **`--ref` on the two gate dispatches is not optional when the pull request
+   edits the gate.** Without it `gh` runs the default branch's copy of the
+   workflow, which is #866 — the failure these are often being used to recover
+   from. **On a fork pull request, drop `--ref`**: the fork's branch is not in
+   this repository so naming it fails outright, while the ref-less dispatch runs
+   and publishes for real. For the Copilot gate that is deliberate — its
+   `IS_FORK` test is written so a dispatch is not mistaken for a fork; see rung 3
+   in [`copilot-review-gate.md`](./copilot-review-gate.md#break-glass). The agent
+   gate reaches the same outcome for a duller reason: it has no fork branch at
+   all. The
+   reconcile dispatch is deliberately left without one: it is the sweep,
+   and the sweep is default-branch by design, which is the whole of what #868 and
+   #884 are about.
 
    `-R` is what makes "needs no checkout" true. `gh` infers the repository from a
    git remote, so without it these fail with `not a git repository` before any
@@ -334,10 +387,25 @@ before relying on it again.
 
 ## Preconditions these notes depend on
 
-- The reconcile is **advisory today**, because every gate it drives is (#698
-  promotes them). Nothing merges or fails on what it publishes. `Review threads
-resolved` is the report; `required_review_thread_resolution` on the `main`
-  ruleset is what actually holds the merge.
+- **One of the three gates it drives is required, the other two are not.**
+  `Copilot review complete` became a required context on 2026-08-21 (the first
+  half of #698), so a status this sweep publishes for that gate now decides a
+  merge. `Agent review verdict` is still advisory. `Review threads
+resolved` is a report either way: `required_review_thread_resolution` on the
+  `main` ruleset is what actually holds that merge, not this status.
+- **The promotion activated one hazard this file already describes.** The
+  `pending` → `success` direction above — the mirror of #866, on a pull request
+  that tightens a gate — was written while every gate here was advisory, so it
+  cost a stale status. It now greens a required check. It is tracked, not
+  accepted: #884. The dismissal case further down
+  is still held shut by its own preconditions.
+- **Requiredness is not why a gate opts in to the no-downgrade rule.** The two sit
+  next to each other here only by timing — #868 shipped the opt-in before the
+  promotion, so being required cannot have been its reason. The reason is the one
+  in **Per gate, not sweep-wide** above: another publisher posts that `success`
+  from better-informed code. So making `Agent review verdict` required would
+  **not** imply opting it in; what governs that is `verify-agent-review.mjs`
+  unpinning `state=success`, so it has a downgrade to withhold at all.
 - The Actions approval policy is `first_time_contributors_new_to_github`
   (loosened 2026-08-18; see
   [`copilot-review-gate.md`](./copilot-review-gate.md)). The sweep is
@@ -352,4 +420,5 @@ resolved` is the report; `required_review_thread_resolution` on the `main`
 - [`copilot-review-gate.md`](./copilot-review-gate.md) — the Copilot gate's states and its break-glass ladder
 - [`docs/agents/agent-review-contract.md`](../agents/agent-review-contract.md) — what the other gate validates
 - [ADR-076](../decisions/ADR-076-reconcile-the-review-gate-statuses-on-a-schedule.md) — why a sweep rather than a fix to the trigger
-- #737 — the measurement; #698 — the promotion this unblocks
+- #737 — the measurement; #698 — the promotion this unblocked, done 2026-08-21
+  for `Copilot review complete`; #884 — the false green that promotion made live

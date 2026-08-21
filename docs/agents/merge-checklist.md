@@ -38,8 +38,9 @@ trust the check and look at its output.
       context keeps its original name. What each state means, when a stale review
       reports `failure` rather than `pending` — it needs every accepted reviewer to
       have spoken — and the break-glass path for when nobody reviews are in
-      [`copilot-review-gate.md`](../tooling/copilot-review-gate.md). It reports
-      but does not block until #698 promotes it to a required context.
+      [`copilot-review-gate.md`](../tooling/copilot-review-gate.md). It is a
+      required context, so it blocks the merge — a head with no accepted review
+      does not go in.
 - [ ] **Every review thread is addressed and resolved** — whoever opened it
       **[auto: `Review threads resolved`; `vp run pr:threads -- --pr <n>` exits 0]**.
       Each ends with a fix naming its commit, or a reply refuting the finding

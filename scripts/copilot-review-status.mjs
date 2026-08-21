@@ -4,7 +4,8 @@
  * Why it exists: GitHub attaches a review to the commit it reviewed and then
  * shows it the same way forever, so a pull request whose head has moved past
  * Copilot's review looks fully reviewed and is not (#671). This turns "is the
- * head reviewed?" into a status anyone — and eventually the ruleset — can read.
+ * head reviewed?" into a status anyone can read — and, since the first half of
+ * #698, one the ruleset requires.
  *
  * Head and reviews are both read from the API at call time and the status is
  * posted against the head that read returns, never against the SHA in the event

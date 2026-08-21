@@ -10,8 +10,9 @@ name: Review Gate Reconcile
 # comment, the same actor class. The status then keeps reporting the previous
 # commit, and a status nobody recomputed is indistinguishable from one that is
 # honestly still waiting. #737 carries the measurement and the two commands that
-# reproduce it. #698 is why it has to be fixed before promotion: a required check
-# that only a missing event would refresh makes break-glass the normal path.
+# reproduce it. Fixing it was the prerequisite for promotion, and #698 promoted
+# `Copilot review complete` on 2026-08-21: a required check that only a missing
+# event would refresh makes break-glass the normal path.
 #
 # THIS IS NOT THE POLLING `copilot-review-gate.yml` REJECTS, and the distinction
 # is mechanical rather than a matter of degree. What that header rules out is a
@@ -189,7 +190,8 @@ jobs:
               '',
               '### Out of Scope',
               '',
-              '- Promoting either review gate to a required context (#698).',
+              '- Which contexts are required. `Copilot review complete` is (#698);',
+              '  the other two are not, and that is not what this issue is about.',
               '',
               '## 6. Acceptance Criteria',
               '',
@@ -208,7 +210,8 @@ jobs:
               '## 8. Related Work',
               '',
               '- #737 — the reconcile sweep and the measurement behind it',
-              '- #698 — promotion, which depends on this staying green',
+              '- #698 — promotion; `Copilot review complete` is required, so this',
+              '  staying green is what keeps that gate correctable',
               '',
               '## 9. Planning Metadata',
               '',

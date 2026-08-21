@@ -39,8 +39,8 @@ match by name, so renaming it detaches the gate silently.
 For the same reason the workflow's **job** is deliberately called something
 else. A job's check run and a commit status share one namespace on a pull
 request, so a job named after the status would publish a second check under that
-name which is green whenever the workflow merely ran — and once #698 makes the
-context required, that is the one that could satisfy it.
+name which is green whenever the workflow merely ran — and now that the context
+is required, that is the one that could satisfy it.
 
 | State     | When                                                                                    |
 | --------- | --------------------------------------------------------------------------------------- |
@@ -137,7 +137,9 @@ is in `copilot-review.mjs` and not in repository settings.
 `claude-review.yml` authenticated with the default `GITHUB_TOKEN`, so its review was
 authored by `github-actions[bot]` — the identity **every** workflow here holds. Any
 workflow in this repository that posted a review satisfied this gate, not only that
-one. It stayed tolerable because nothing else posted one and the context is advisory.
+one. It stayed tolerable because nothing else posted one and the context was still
+advisory — it is required now, so the same hole would be a merge bar anything in
+Actions could clear.
 
 It now posts under the **Claude General Reviewer** GitHub App, and the entry was
 **replaced rather than extended**. Keeping both would have left the hole open while
@@ -426,18 +428,23 @@ judging a pull request by the branch it is replacing is not. (A branch cut befor
 this workflow carried `workflow_dispatch` 404s the dispatch instead, landing on the
 warning path with the sweep as backstop.)
 
-It does **not** fix the scheduled sweep,
-which GitHub always runs from the default branch — so a pull request editing the
-gate still has its status flapped every half hour until it merges. That is
-tolerable only while this context is not required; it is a prerequisite to close
-before #698 promotes it, because under a required context the same flap is an
-unmergeable pull request. Tracked as #868 rather than fixed here — the sweep's
-correct behaviour when it disagrees with a pull request's own code is a design
-question, not a one-line ref.
+It does **not** change the scheduled sweep, which GitHub always runs from the
+default branch — so on a pull request editing the gate, the sweep still judges it
+with `main`'s copy of the gate code. **#868 closed the direction that would have
+made a required context unmergeable**: the sweep no longer replaces a `success`
+here, so the status is not flapped away every half hour any more. The opposite
+direction is open by design — the sweep can still publish `pending` → `success`
+from the code being replaced, which on a pull request that _tightens_ the gate is
+a false green on a merge bar.
+[`review-gate-reconcile.md`](./review-gate-reconcile.md) owns the rule, that
+residual case, and why it is per gate rather than sweep-wide.
 
-This gate reports; it does not yet block. Promotion to a required context on
-`main` is #698, deliberately separate: a required check that has never reported
-blocks every pull request, including the one that would fix it.
+**This gate blocks.** `Copilot review complete` became a required context on
+ruleset `19141543` on 2026-08-21 — the first half of #698 — so a pull request
+whose head carries no accepted review does not merge, and `pending` is the state
+it sits in while it waits. Promotion was kept separate from the work that built
+the gate for a reason worth keeping in view: a required check that has never
+reported blocks every pull request, including the one that would fix it.
 
 ## When the status stays pending
 
@@ -652,8 +659,23 @@ rest of the preconditions.
    ```bash
    vp run review-gates:reconcile -- --pr <n>          # from a checkout
    gh workflow run copilot-review-gate.yml -f pr=<n> \
+     --ref <the pull request's branch> \
      -R luciocabrera/vite-react-compiler          # or press it in Actions
    ```
+
+   **`--ref` is not optional on a pull request that edits the gate.** A dispatch
+   naming no ref runs `main`'s copy of the workflow, which is #866 — the failure
+   this rung is often being used to recover from. Naming the branch runs the code
+   the pull request actually proposes.
+
+   **On a fork pull request, drop `--ref` rather than the dispatch.** The fork's
+   branch is not in this repository, so `--ref` pointing at it fails outright —
+   but the ref-less dispatch runs and publishes for real, as
+   `github-actions[bot]`. That is deliberate: `IS_FORK` is computed from an
+   emptiness test precisely so a `workflow_dispatch`, which carries no
+   `pull_request` object, is not treated as a fork and turned into a dry run. The
+   trade is that you get `main`'s copy of the gate code — the ordinary refless
+   caveat, and usually the right one to accept on a fork.
 
    Both re-derive the verdict rather than asserting one, so neither leaves a
    status a later reader cannot reproduce — which is what separates them from
@@ -662,6 +684,22 @@ rest of the preconditions.
    `creator: luciocabrera` with no `target_url` under
    `gh api repos/luciocabrera/vite-react-compiler/commits/<sha>/statuses`, which
    is how to tell a local recompute from a workflow one afterwards.
+
+   **Use the dispatch form to clear a merge. The local form cannot, and it can
+   stop anything else from doing so.** Since the context was pinned to
+   `integration_id` 15368, a status you post from a checkout has no app behind it
+   and does not satisfy the required check — the same limit as rung 6. It is
+   worse than rung 6 here, because it also silences the scheduled sweep, which
+   would otherwise have cleared the bar on its own: `shouldPublishStatus`
+   withholds a post when the state and the
+   description both match what is already there, and the local form computes both
+   with the code in _your_ checkout. When that agrees with `main` — the ordinary
+   case — a locally-posted `success` makes every later sweep a no-op on that head.
+   On a branch that edits the gate the description may differ and the sweep will
+   still publish, but that is the case you can least afford to be guessing
+   about. The dispatch form escapes this — the
+   gate workflow invokes the script without `--if-changed`, so it publishes
+   unconditionally, as `github-actions[bot]`.
 
 4. **Re-request the review** from the pull request's Reviewers panel — for the
    **other** case, a head Copilot has not reviewed at all. This is what unstuck
@@ -697,10 +735,19 @@ rest of the preconditions.
      -f 'description=break-glass: <reason>'
    ```
 
-   This is the same call the workflow makes. It is overwritten by the next event
-   the workflow handles, so post it once the head has settled.
+   This is the same call the workflow makes — but **not from the same identity,
+   and since 2026-08-21 that is what decides whether it counts.** The required
+   context is pinned to `integration_id` 15368 (GitHub Actions); a status posted
+   with a personal token has no app behind it, so this rung clears the _report_
+   without clearing the _merge bar_. Still worth posting — it records the reason
+   and stops the sweep re-deriving a `pending` over it — but to actually merge,
+   go to rung 7.
 
-7. **Admin bypass of the ruleset**, once #698 has made the context required.
+   It is overwritten by the next event the workflow handles, so post it once the
+   head has settled.
+
+7. **Admin bypass of the ruleset.** The context is required, so this is the rung
+   that merges.
    `RepositoryRole` 5 keeps `bypass_mode: always` on ruleset `19141543`.
 
    **Rehearsed on #877, 2026-08-21 — the only rung here that has been exercised
@@ -909,10 +956,13 @@ The scheduled reconcile is not subject to this — it runs from the default bran
 with a token that can write statuses, so a fork pull request does get a status
 from it, within one interval. That is the same verdict the fork's own run
 computed and could not post, so nothing weaker is being asserted: `pending` until
-an accepted reviewer reviews the head, exactly as for any other pull request. The
-last two
-break-glass rungs — the hand-posted status, and the admin bypass — remain the way
-through if it is needed sooner.
+an accepted reviewer reviews the head, exactly as for any other pull request.
+
+If that is needed sooner, **dispatch the gate without `--ref`** — rung 3. It runs
+as Actions and publishes a real status, because a dispatch is deliberately not
+treated as a fork. The admin bypass is the rung after it, for when the verdict
+itself is the problem rather than its absence. The hand-posted status (rung 6)
+stopped being a way through when the context was pinned to `integration_id` 15368.
 
 ## Preconditions these notes depend on
 
@@ -921,11 +971,29 @@ Everything above describes the repository **after** #694 added
 `review_draft_pull_requests: false`) and `pull_request` to ruleset `19141543`.
 Further things the notes assume:
 
-- **Until #698, nothing merges or fails on what this status says.** It is
-  advisory, which is why the approval limitation above is a nuisance today and a
-  blocker the day the context becomes required. The `github-actions[bot]` hole that
-  used to ride on the same reasoning is closed — see
+- **This status is a required context** (2026-08-21, the first half of #698) — the
+  body above says what that means for a merge. What belongs here is the detail a
+  reader cannot see from the check, and which nothing in the tree asserts — read
+  it rather than trusting this line:
+
+  ```bash
+  gh api repos/luciocabrera/vite-react-compiler/rulesets/19141543 \
+    --jq '.rules[] | select(.type=="required_status_checks")
+          | .parameters.required_status_checks[]'
+  ```
+
+  It is pinned to `integration_id` 15368, the way its Actions siblings are, so
+  **only a status posted by a workflow satisfies it**. That is what demotes
+  break-glass rung 6 to a record-keeping step and makes
+  [the admin bypass](#break-glass) the rung that merges. The approval limitation
+  above is a blocker rather than a nuisance for the same reason, and the
+  `github-actions[bot]` hole that used to ride on this reasoning is closed — see
   [the two accepted reviewers](#the-two-accepted-reviewers).
+
+- **`Agent review verdict` is still advisory**, and #698 stays open for it. It
+  reports `success — absent` when no verdict was posted, so requiring it today
+  would assert nothing; the second half of #698 is what decides whether absence
+  should fail.
 - **The accepted reviewer set is two, and one of them is dormant.** Everything
   above about Copilot describes a reviewer that currently cannot review, because
   its credits are exhausted; the configuration is untouched, so it resumes on its
