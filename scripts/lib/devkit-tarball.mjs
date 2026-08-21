@@ -6,7 +6,7 @@
  * repository consumes these packages as `workspace:*`, which resolves the source
  * directory and ignores `files` entirely — so the whole `files` list is exercised
  * by nothing here, and a wrong one is invisible until someone installs the
- * package. `@repo/devkit` shipped its entire test suite that way until a pack
+ * package. `@lcabrera/devkit` shipped its entire test suite that way until a pack
  * showed it.
  *
  * Pure: callers hand in manifests and file lists. The packing, installing and

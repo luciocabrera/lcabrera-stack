@@ -55,7 +55,7 @@ describe('planSync surfaces the hash acceptance is keyed to', () => {
       state: 'unmet',
     },
     'unmet, on a peer range': {
-      lines: ["peer: '@repo/repo-standards@>=99.0.0'"],
+      lines: ["peer: '@lcabrera/repo-standards@>=99.0.0'"],
       state: 'unmet',
     },
     'unresolved, on a placeholder': {

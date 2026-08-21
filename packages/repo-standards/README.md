@@ -1,4 +1,4 @@
-# @repo/repo-standards
+# @lcabrera/repo-standards
 
 The gates that keep a repository's commits, branches, pull requests, issues,
 coordination register, architecture decisions and published packages to one
@@ -34,9 +34,10 @@ reach them. Neither needs the other to be useful: this package is gates without
 the prose, and `devkit` alone is prose that names commands you would supply
 yourself.
 
-Until both are published, install the packed tarballs — and pack with **pnpm**,
-because `publishConfig` and `catalog:` are pnpm rewrites and an `npm pack`
-tarball is not the artifact a consumer receives:
+To install an unreleased change, or to see what a consumer actually receives,
+install the packed tarball instead — and pack with **pnpm**, because
+`publishConfig` and `catalog:` are pnpm rewrites and an `npm pack` tarball is not
+the artifact a consumer receives:
 
 ```bash
 pnpm pack --pack-destination /tmp/kit    # in this package's directory
@@ -228,7 +229,7 @@ names a register directory names a path a consumer may not have. Everything else
 — the type vocabulary, the required sections, the grammar — is the standard
 itself and travels unchanged.
 
-The file is shared with `@repo/devkit`, because it is the consumer's data and two
+The file is shared with `@lcabrera/devkit`, because it is the consumer's data and two
 files would drift. The readers are separate: each package reads only the block it
 owns, so neither depends on the other to answer a question about its own
 behaviour.

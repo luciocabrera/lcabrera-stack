@@ -73,7 +73,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      # This is `@repo/repo-standards`' `repo-plan-release`, run by path rather
+      # This is `@lcabrera/repo-standards`' `repo-plan-release`, run by path rather
       # than by name: it goes before the toolchain is installed — plain node and
       # npm, no deps — because when there is nothing to publish every step below
       # is wasted work, and the bin shim does not exist until `vp install` has

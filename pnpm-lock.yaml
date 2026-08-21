@@ -183,15 +183,15 @@ importers:
       '@changesets/cli':
         specifier: catalog:tooling
         version: 2.31.1(@types/node@26.2.0)
+      '@lcabrera/devkit':
+        specifier: workspace:*
+        version: link:packages/devkit
+      '@lcabrera/repo-standards':
+        specifier: workspace:*
+        version: link:packages/repo-standards
       '@lcabrera/vite-config':
         specifier: workspace:*
         version: link:packages/vite-configs
-      '@repo/devkit':
-        specifier: workspace:*
-        version: link:packages/devkit
-      '@repo/repo-standards':
-        specifier: workspace:*
-        version: link:packages/repo-standards
       '@repo/scan-report':
         specifier: workspace:*
         version: link:packages/scan-report
@@ -374,7 +374,7 @@ importers:
 
   packages/devkit:
     dependencies:
-      '@repo/repo-standards':
+      '@lcabrera/repo-standards':
         specifier: workspace:*
         version: link:../repo-standards
       semver:
@@ -491,7 +491,7 @@ importers:
 
   packages/scan-report:
     dependencies:
-      '@repo/repo-standards':
+      '@lcabrera/repo-standards':
         specifier: workspace:*
         version: link:../repo-standards
     devDependencies:

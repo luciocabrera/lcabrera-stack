@@ -1,4 +1,4 @@
-# @repo/devkit
+# @lcabrera/devkit
 
 Materialises this repository's agent setup — skills, path rules, subagent
 definitions, and the workflows, hooks, templates and registers that make them run
@@ -81,13 +81,17 @@ npm install --save-dev @lcabrera/devkit @lcabrera/repo-standards
 binaries the seeded workflows and hooks invoke. Without it the prose still
 materialises, and `init` writes no task pointing at a binary you do not have.
 
-Until both are published, install the packed tarballs — which is also the only
-way to see what a consumer actually receives:
+To install an unreleased change, or to see what a consumer actually receives,
+install the packed tarballs instead:
 
 ```bash
 pnpm pack --pack-destination /tmp/kit   # in each package directory
 npm install --save-dev /tmp/kit/*.tgz   # in the consumer
 ```
+
+`pnpm`, not `npm` — pnpm rewrites `workspace:*` and `catalog:` specifiers to real
+ranges at pack time, and an `npm pack` tarball carries the literal strings, which
+resolve for nobody.
 
 ## Setting up a repository
 
@@ -298,7 +302,7 @@ re-running `sync`. `peer:` states the range the file was written against.
 ```yaml
 ---
 name: epic
-peer: '@repo/repo-standards@<1.0.0'
+peer: '@lcabrera/repo-standards@<1.0.0'
 ---
 ```
 
@@ -316,7 +320,7 @@ report says which, because one is `install` and the other is `upgrade`. Each
 distinct peer is resolved once per run, so `sync` and `doctor` can never
 disagree about what is installed.
 
-It is declared in this package's `peerDependencies` as `@repo/repo-standards` —
+It is declared in this package's `peerDependencies` as `@lcabrera/repo-standards` —
 the name that resolves today, and it becomes `@lcabrera/repo-standards` when #800
 publishes both packages. That publish moves its version too, which is why the
 example bounds the whole pre-1.0 line rather than naming a floor: copied as it

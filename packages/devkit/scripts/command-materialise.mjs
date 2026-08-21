@@ -68,7 +68,7 @@ const readAssets = () => {
  * resolving from wherever the command was invoked would report an installed peer
  * as absent whenever `devkit` is run from a subdirectory.
  *
- * The peer is declared in `package.json` as `@repo/repo-standards`, the name
+ * The peer is declared in `package.json` as `@lcabrera/repo-standards`, the name
  * that resolves TODAY. It becomes `@lcabrera/repo-standards` when #800 publishes
  * both packages; a peer entry naming the unpublished name would be unresolvable
  * for every consumer until then.

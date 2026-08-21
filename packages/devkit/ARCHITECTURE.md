@@ -1,4 +1,4 @@
-# `@repo/devkit` — architecture
+# `@lcabrera/devkit` — architecture
 
 Two capabilities that share nothing but a CLI: **measuring** whether a directory
 can travel, and **moving** it into a consumer's tree.

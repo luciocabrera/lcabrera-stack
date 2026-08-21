@@ -81,8 +81,10 @@
   "publishing": {
     "publicPackageDirs": [
       "api",
+      "devkit",
       "eslint-local-rules",
       "node-runtime",
+      "repo-standards",
       "server",
       "tsconfig",
       "ui",

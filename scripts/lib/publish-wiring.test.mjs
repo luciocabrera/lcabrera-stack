@@ -2,7 +2,7 @@
  * The publishing assumptions this repository has to keep, asserted against this
  * repository — not against the package that encodes them.
  *
- * `@repo/repo-standards` owns the rules (`publish-surface.mjs` derives what a
+ * `@lcabrera/repo-standards` owns the rules (`publish-surface.mjs` derives what a
  * tarball must expose; `release-packer.mjs` states what a pnpm publish depends
  * on). Neither can assert that THIS tree still satisfies them without naming a
  * repository fact, which is the one thing a package meant for other
@@ -69,10 +69,15 @@ describe('this repository publishes what it develops against', () => {
   });
 
   it('classifies each package the way its manifest says', () => {
-    // ui cannot be prebuilt: StyleX derives theme identity from the source path,
-    // so a consumer's own plugin has to compile it. If it ever gains a `build`
-    // script this test should fail loudly rather than the gate silently
-    // demanding a dist/ that must not exist.
+    // Three packages ship source, for two unrelated reasons, and the difference
+    // is what the next test checks.
+    //
+    // `ui` cannot be prebuilt: StyleX derives theme identity from the source
+    // path, so a consumer's own plugin has to compile it. `devkit` and
+    // `repo-standards` need no build at all — they are `.mjs`, which loads from
+    // `node_modules` as it is. If any of them gains a `build` script this test
+    // should fail loudly rather than the gate silently demanding a dist/ that
+    // must not exist.
     //
     // Asserted as the whole exception rather than one case, since `builtPackages`
     // is derived by the same predicate and could not contradict itself.
@@ -80,7 +85,35 @@ describe('this repository publishes what it develops against', () => {
       (directory) => !isBuiltPublicPackage(readManifest(directory)),
     );
 
-    expect(sourceShipping).toEqual(['ui']);
+    expect(sourceShipping).toEqual(['devkit', 'repo-standards', 'ui']);
+  });
+
+  it('ships no TypeScript from a package that does not build', () => {
+    // What makes "no build needed" true for `devkit` and `repo-standards` is
+    // the extension, not the intention: Node refuses to strip types inside
+    // `node_modules` (ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING), so a `.ts`
+    // target in either map would be unloadable for every consumer while
+    // resolving perfectly in this repo, where nothing reads the published maps.
+    //
+    // `ui` is excluded because it is the opposite case — it ships `.ts`
+    // deliberately, and its consumer compiles it.
+    const unbuilt = publicPackageDirs
+      .filter((directory) => directory !== 'ui')
+      .filter((directory) => !isBuiltPublicPackage(readManifest(directory)));
+
+    // An empty list would pass having checked nothing.
+    expect(unbuilt.length).toBeGreaterThan(0);
+
+    for (const directory of unbuilt) {
+      const manifest = readManifest(directory);
+      const targets = [
+        ...Object.values(manifest.exports ?? {}),
+        ...Object.values(manifest.bin ?? {}),
+      ].filter((target) => target !== './package.json');
+
+      expect(targets.length).toBeGreaterThan(0);
+      expect(targets.filter((target) => !target.endsWith('.mjs'))).toEqual([]);
+    }
   });
 
   it('gitignores dist so a build is never committed', () => {

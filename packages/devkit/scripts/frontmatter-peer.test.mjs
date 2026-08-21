@@ -9,9 +9,9 @@ describe('requiredPeers', () => {
   test('reads a scoped name and its range out of a lone scalar', () => {
     expect(
       requiredPeers(
-        withFrontmatter("peer: '@repo/repo-standards@>=0.1.0 <1.0.0'"),
+        withFrontmatter("peer: '@lcabrera/repo-standards@>=0.1.0 <1.0.0'"),
       ),
-    ).toEqual([{ name: '@repo/repo-standards', range: '>=0.1.0 <1.0.0' }]);
+    ).toEqual([{ name: '@lcabrera/repo-standards', range: '>=0.1.0 <1.0.0' }]);
   });
 
   test('splits at the last @, so a scoped name survives', () => {

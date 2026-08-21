@@ -9,16 +9,26 @@ const packageDirectory = path.dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = path.resolve(packageDirectory, '..', '..');
 
 /**
- * `@lcabrera/vite-config` is the one workspace here that ships JavaScript
- * sources: ESLint flat config is `.mjs`, and it is published, so `vp pack` has
- * to emit a `.d.mts` beside each one or the subpath resolves untyped and
- * `attw:verify` fails. `rolldown-plugin-dts` reads that flag from the tsconfig
- * on disk — passing it through the `dts` build option instead is silently
- * ignored, and the build fails with "tsgo did not generate dts file".
+ * The published workspaces whose sources are JavaScript, not TypeScript. Two
+ * different tools need the flag, for two different reasons, and both read it
+ * from the tsconfig on disk rather than from an option passed to them.
  *
- * A local merge rather than a `createNodeTsConfig` option: it is one workspace's
- * fact, and `@lcabrera/tsconfig` is the half of this split that must not carry
- * this repo's specifics (ADR-069).
+ * `@lcabrera/vite-config` **builds**: ESLint flat config is `.mjs`, so `vp pack`
+ * has to emit a `.d.mts` beside each one or the subpath resolves untyped and
+ * `attw:verify` fails. Passing the flag through the `dts` build option instead
+ * is silently ignored, and the build fails with "tsgo did not generate dts
+ * file".
+ *
+ * `@lcabrera/devkit` and `@lcabrera/repo-standards` **ship their `.mjs` source**
+ * — loadable from `node_modules` as-is, so they need no build — but they are on
+ * the API-surface ratchet, and ts-morph resolves the entry file through this
+ * config. Without the flag it loads no `.mjs` at all and every subpath
+ * snapshots as an empty surface: a ratchet over nothing, which passes exactly
+ * like a correct one.
+ *
+ * A local merge rather than a `createNodeTsConfig` option: it is this repo's own
+ * fact about its own workspaces, and `@lcabrera/tsconfig` is the half of the
+ * split that must not carry those (ADR-069).
  */
 const withAllowJs = (config: ReturnType<typeof createNodeTsConfig>) => ({
   ...config,
@@ -247,10 +257,14 @@ export const configs = [
     // Genuinely Node-only: the repository gates, which read git, the filesystem
     // and GitHub. Same shape as the other tooling workspaces — plain `.mjs`
     // under scripts/, so tsc checks this workspace's own vite.config.ts.
-    config: createNodeTsConfig({
-      include: ['scripts', 'vite.config.ts'],
-      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
-    }),
+    // `allowJs` because the package is published and its `.mjs` exports are on
+    // the API-surface ratchet — see `withAllowJs`.
+    config: withAllowJs(
+      createNodeTsConfig({
+        include: ['scripts', 'vite.config.ts'],
+        tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
+      }),
+    ),
     filePath: path.resolve(
       workspaceRoot,
       'packages/repo-standards/tsconfig.app.json',
@@ -260,11 +274,15 @@ export const configs = [
     // Genuinely Node-only: a CLI that copies files into a consumer repository
     // and hashes what it wrote. Same shape as the scanners below — plain `.mjs`
     // under scripts/, so what tsc checks is the hand-written `.d.mts`
-    // declarations and this workspace's own vite.config.ts.
-    config: createNodeTsConfig({
-      include: ['scripts', 'vite.config.ts'],
-      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
-    }),
+    // declarations and this workspace's own vite.config.ts. `allowJs` because
+    // the package is published and its `.mjs` exports are on the API-surface
+    // ratchet — see `withAllowJs`.
+    config: withAllowJs(
+      createNodeTsConfig({
+        include: ['scripts', 'vite.config.ts'],
+        tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
+      }),
+    ),
     filePath: path.resolve(workspaceRoot, 'packages/devkit/tsconfig.app.json'),
   },
   {

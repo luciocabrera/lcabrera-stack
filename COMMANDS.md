@@ -344,7 +344,7 @@ its `ui`-vs-built split are
 
 **Which packages these watch is `publishing.publicPackageDirs` in
 [`devkit.config.json`](devkit.config.json)**, not a list inside the gate: they
-run from `@repo/repo-standards`, which ships to other repositories and cannot
+run from `@lcabrera/repo-standards`, which ships to other repositories and cannot
 carry this one's roster. A new public package is added there in the same commit
 as its manifest — until it is, its surface is not under the ratchet and nothing
 says so. Deleting the roster does not quietly disable them: both gates refuse an
@@ -696,20 +696,20 @@ file under `reports/sonar/runs/` ([ADR-049](docs/decisions/ADR-049-findings-repo
 Beyond that, tasks are per-workspace. `build` and `test` are common but come from
 `vite.config.ts` rather than `scripts` in most workspaces (see §1).
 
-| Workspace                     | Package name              | Notable extra tasks                                                                                                    |
-| ----------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `apps/react-router`           | `vite-react-compiler`     | `typegen`, `test:ci`, `test:watch`, `preview`, `knip`, `seed`, `db:seed`, `audit:lighthouse`, `audit:lighthouse:check` |
-| `packages/ui`                 | `@lcabrera/ui`            | `check:public-api`, `test:coverage`, `bench`                                                                           |
-| `packages/server`             | `@lcabrera/server`        | `test:coverage`                                                                                                        |
-| `packages/node-runtime`       | `@lcabrera/node`          | `build`, `test:coverage`                                                                                               |
-| `packages/ts-configs`         | `@repo/ts-configs`        | `generate`                                                                                                             |
-| `packages/tsconfig`           | `@lcabrera/tsconfig`      | `build`, `test:coverage`                                                                                               |
-| `packages/eslint-local-rules` | `@lcabrera/eslint-plugin` | —                                                                                                                      |
-| `packages/scan-report`        | `@repo/scan-report`       | `test`, `test:coverage`                                                                                                |
-| `packages/devkit`             | `@repo/devkit`            | `test`, `test:coverage`                                                                                                |
-| `packages/repo-standards`     | `@repo/repo-standards`    | `test`, `test:coverage`                                                                                                |
-| `packages/utils`              | `@lcabrera/utils`         | —                                                                                                                      |
-| `packages/vite-configs`       | `@lcabrera/vite-config`   | `build`, `test`, `test:coverage`                                                                                       |
+| Workspace                     | Package name               | Notable extra tasks                                                                                                    |
+| ----------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `apps/react-router`           | `vite-react-compiler`      | `typegen`, `test:ci`, `test:watch`, `preview`, `knip`, `seed`, `db:seed`, `audit:lighthouse`, `audit:lighthouse:check` |
+| `packages/ui`                 | `@lcabrera/ui`             | `check:public-api`, `test:coverage`, `bench`                                                                           |
+| `packages/server`             | `@lcabrera/server`         | `test:coverage`                                                                                                        |
+| `packages/node-runtime`       | `@lcabrera/node`           | `build`, `test:coverage`                                                                                               |
+| `packages/ts-configs`         | `@repo/ts-configs`         | `generate`                                                                                                             |
+| `packages/tsconfig`           | `@lcabrera/tsconfig`       | `build`, `test:coverage`                                                                                               |
+| `packages/eslint-local-rules` | `@lcabrera/eslint-plugin`  | —                                                                                                                      |
+| `packages/scan-report`        | `@repo/scan-report`        | `test`, `test:coverage`                                                                                                |
+| `packages/devkit`             | `@lcabrera/devkit`         | `test`, `test:coverage`                                                                                                |
+| `packages/repo-standards`     | `@lcabrera/repo-standards` | `test`, `test:coverage`                                                                                                |
+| `packages/utils`              | `@lcabrera/utils`          | —                                                                                                                      |
+| `packages/vite-configs`       | `@lcabrera/vite-config`    | `build`, `test`, `test:coverage`                                                                                       |
 
 Notes on the non-obvious ones:
 
