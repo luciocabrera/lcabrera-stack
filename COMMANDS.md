@@ -546,6 +546,16 @@ by hand. The states and the break-glass path are in
 | `vp run copilot-review:status -- --pr <n> --dry-run` | print the state the gate would publish for a PR, posting nothing |
 | `vp run copilot-review:status -- --pr <n>`           | publish that state against the PR's current head commit          |
 
+**Publishing this one from a checkout is a trap, and it is the command most
+likely to be reached for.** `Copilot review complete` is a required context
+pinned to `integration_id` 15368, so a status you post yourself does not satisfy
+it — and it leaves the head carrying the state and description the scheduled
+sweep computes, after which the sweep withholds and no app-backed status arrives
+either. Use `--dry-run` to read the verdict; dispatch **Copilot Review Gate** to
+publish one that counts. Break-glass rung 3 in
+[`docs/tooling/copilot-review-gate.md`](docs/tooling/copilot-review-gate.md)
+owns the mechanism and its exceptions.
+
 That gate also reports the findings Copilot **suppressed** — the low-confidence
 ones it puts in the review body instead of filing as threads, which conversation
 resolution therefore never sees. They are reported and never block
@@ -606,8 +616,10 @@ is the schedule; the interval, the recovery and what it does on failure are in
 | `vp run review-gates:reconcile -- --pr <n>`           | the same for one PR                                    |
 | `vp run review-gates:reconcile -- --pr <n> --dry-run` | print what it would publish, posting nothing           |
 
-**Both posting forms post as you, not as a workflow**, so neither satisfies
-`Copilot review complete`. A locally-posted **`success`** is the one to avoid:
+**Any status posted from a checkout is posted as you, not as a workflow**, so
+none of them satisfies `Copilot review complete` — these two forms and
+`copilot-review:status` above alike. A locally-posted **`success`** is the one to
+avoid:
 the sweep withholds when the state and description it computes match what is
 already posted, and for this gate it never weakens a `success` (#868) — so the
 bar can stop being cleared by an app-backed status, on every open pull request at

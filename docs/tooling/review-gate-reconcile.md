@@ -190,8 +190,8 @@ it is smaller than it sounds, because for that gate the sweep was never the only
   an event recomputes it, instead of being undone by a sweep minutes later. That is an
   improvement, but a smaller one than it was: since the context was pinned to
   `integration_id` 15368 on 2026-08-21, a status posted by hand does not satisfy
-  the
-  required check at all, so what survives is the record rather than the merge.
+  the required check at all, so what survives is the record rather than the
+  merge.
 
 ### The rule is one-directional; the reasoning behind it is not
 
@@ -219,10 +219,8 @@ is not hypothetical, because #866 was one. What #866 does **not** evidence is th
 polarity: what was measured there is `main`'s code overwriting a `success` with
 `pending`, and no instance of the reverse has been observed. What limits the
 damage is that the green is not arbitrary — the head really was reviewed under
-the rule
-`main` still holds — and that it lasts only until the pull request merges, after
-which
-both copies agree. If a way to tell "stale code disagrees" from
+the rule `main` still holds — and that it lasts only until the pull request
+merges, after which both copies agree. If a way to tell "stale code disagrees" from
 "a missed event left this stale" is ever wanted, it has to serve both directions.
 
 ### The residual case, and what currently keeps it unreachable
@@ -235,10 +233,9 @@ thread. Making the rule opt-in is what removed that, and it is why the roster of
 gates is pinned by a test rather than left to a config nobody reads.
 
 A dismissal whose event goes missing leaves a `success` on an **unchanged head** that
-nothing revisits. That is a **false green**, not a stale one — a worse failure than the
-flap this rule fixes, because the context is required, so it merges a pull
-request whose
-review was withdrawn.
+nothing revisits. That is a **false green**, not a stale one — a worse failure
+than the flap this rule fixes, because the context is required, so it merges a
+pull request whose review was withdrawn.
 
 It needs three things at once, and the first does not hold today:
 
@@ -332,8 +329,11 @@ Waiting up to one interval is the ordinary answer. When that is too long:
    workflow, which is #866 — the failure these are often being used to recover
    from. **On a fork pull request, drop `--ref`**: the fork's branch is not in
    this repository so naming it fails outright, while the ref-less dispatch runs
-   and publishes for real, which is deliberate — see rung 3 in
-   [`copilot-review-gate.md`](./copilot-review-gate.md#break-glass). The
+   and publishes for real. For the Copilot gate that is deliberate — its
+   `IS_FORK` test is written so a dispatch is not mistaken for a fork; see rung 3
+   in [`copilot-review-gate.md`](./copilot-review-gate.md#break-glass). The agent
+   gate reaches the same outcome for a duller reason: it has no fork branch at
+   all. The
    reconcile dispatch is deliberately left without one: it is the sweep,
    and the sweep is default-branch by design, which is the whole of what #868 and
    #884 are about.
