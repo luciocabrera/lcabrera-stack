@@ -97,6 +97,15 @@ together and posts against **the head it read**. Three consequences:
   red check yellow and read as progress. For the same reason the sweep never
   _publishes_ `failure`: that state needs a review submission event behind it,
   and `pending` is what it reports instead. Both block.
+- **It never weakens a `success`, only re-describes it (#868).** GitHub always
+  runs a `schedule` from the default branch, so on a pull request that changes
+  what a gate decides, the sweep is judging that pull request with the code it is
+  replacing. Measured on #866: one head, one review list, and the two copies of
+  the gate computed opposite verdicts. The published `success` came from a run
+  that had the pull request's own code; the sweep, by construction, does not — so
+  it is not the better-informed opinion, and must not win by landing last. A
+  description change under an unchanged `success` still posts, because naming
+  which reviewer satisfied the gate is what makes a reviewer monoculture visible.
 
 ## Telling "not reviewed yet" from "reviewed, but not recomputed"
 
@@ -111,14 +120,37 @@ It prints the head, how many reviews it counted, and the state it _would_
 publish, without touching anything. Compare that to what the pull request is
 showing:
 
-| It would publish | The PR shows | Reading                                                             |
-| ---------------- | ------------ | ------------------------------------------------------------------- |
-| `pending`        | `pending`    | not reviewed yet — the gate is right, wait                          |
-| `success`        | `pending`    | reviewed, and the event that should have recomputed it went missing |
-| `pending`        | `success`    | the head moved after the review; a push is what will correct it     |
+| It would publish | The PR shows | Reading                                                                                                              |
+| ---------------- | ------------ | -------------------------------------------------------------------------------------------------------------------- |
+| `pending`        | `pending`    | not reviewed yet — the gate is right, wait                                                                           |
+| `success`        | `pending`    | reviewed, and the event that should have recomputed it went missing                                                  |
+| `pending`        | `success`    | the head moved after the review; a push is what will correct it                                                      |
+| `pending`        | `success`    | **or** the sweep is running older gate code than the run that posted the `success` — it will not overwrite it (#868) |
 
 The same holds for the other gate with
 `vp run agent-review:verify -- --pr <n> --dry-run`.
+
+## What the no-downgrade rule gives up
+
+The sweep can no longer correct a **wrongly green** status. That is a real loss and
+worth stating rather than leaving to be discovered, but it is smaller than it sounds,
+because the sweep was never the only path:
+
+- **A dismissed review** still downgrades. `copilot-review-gate.yml` subscribes to
+  `pull_request_review.dismissed`, and the gate workflows invoke the gate scripts
+  **without** `--if-changed`, so an event-driven run publishes whatever it computes.
+  This rule lives inside `shouldPublishStatus`, which only `--if-changed` consults,
+  and `gateArgs` is its only caller — so it is scoped to the sweep without needing a
+  flag.
+- **A push** moves the head, and no status exists on the new one, so the sweep posts
+  normally there. "Same head" is what the comparison is about.
+- **A hand-posted break-glass `success`** (rung 6 in
+  [`copilot-review-gate.md`](./copilot-review-gate.md#break-glass)) now survives until
+  an event recomputes it, instead of being undone by a sweep minutes later. That is an
+  improvement, not a cost.
+
+What is genuinely given up is a `success` that was wrong when it was published and
+that no event ever revisits. Nothing in this repository is known to produce one.
 
 ## Recovery, when the status is wrong right now
 

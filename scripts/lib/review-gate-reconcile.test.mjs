@@ -272,6 +272,41 @@ describe('deciding whether to publish', () => {
     );
   });
 
+  // #868. The sweep runs from the default branch, so on a pull request that
+  // changes what a gate decides it is judging that pull request with the code it
+  // is replacing — measured on #866, where one head and one review list produced
+  // opposite verdicts from the two copies. These pin the asymmetry: a `success`
+  // can be re-described but not weakened.
+  it('never weakens a success it may not have computed', () => {
+    expect(shouldPublishStatus({ current: success, next: pending })).toBe(
+      false,
+    );
+    expect(
+      shouldPublishStatus({
+        current: success,
+        next: {
+          description: 'Copilot reviewed a08de9e, no longer the head.',
+          state: 'failure',
+        },
+      }),
+    ).toBe(false);
+  });
+
+  it('still refreshes a success whose description went stale', () => {
+    // Not blanket-frozen: naming a different reviewer is the signal that makes a
+    // reviewer monoculture visible, so it must survive the rule above.
+    expect(
+      shouldPublishStatus({
+        current: success,
+        next: {
+          description:
+            'Reviewed by copilot-pull-request-reviewer[bot] at a08de9e.',
+          state: 'success',
+        },
+      }),
+    ).toBe(true);
+  });
+
   it('notices a description change under an unchanged state', () => {
     expect(
       shouldPublishStatus({
