@@ -288,9 +288,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-          # A fork pull request has no head ref in this repository, so the dispatch fails and
-          # the warning below fires. That is already correct there: a fork's GITHUB_TOKEN is
-          # read-only, so no status could be published from this run either way.
+          # On a fork this is the fork's branch name, which does not exist in this
+          # repository — and it is never read, because this step is unreachable there. The
+          # job fails at `Run the Claude review`, which calls `core.setFailed` on both fork
+          # paths, and nothing here carries `continue-on-error`; so `submit` never runs,
+          # `posted` is never `'true'`, and the `if:` above skips this step. Fork behaviour
+          # is decided at that step, not here — nothing is submitted from a fork, so there
+          # is no recompute to lose.
           HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
           set -euo pipefail
