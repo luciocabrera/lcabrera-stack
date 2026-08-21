@@ -668,6 +668,10 @@ rest of the preconditions.
    this rung is often being used to recover from. Naming the branch runs the code
    the pull request actually proposes.
 
+   **It cannot be done for a fork pull request**, whose branch is not in this
+   repository, so `gh workflow run --ref` fails outright. The sweep is the path
+   there — see [fork pull requests](#known-limitation-fork-pull-requests).
+
    Both re-derive the verdict rather than asserting one, so neither leaves a
    status a later reader cannot reproduce — which is what separates them from
    rung 6. The local form posts as you and leaves no workflow run behind: on #738
@@ -683,8 +687,10 @@ rest of the preconditions.
    worse than rung 6 here, because it also silences the scheduled sweep, which
    would otherwise have cleared the bar on its own: `shouldPublishStatus` withholds a post when the state and the
    description both match what is already there, and the local form computes both
-   with the code the scheduled sweep runs. So a locally-posted `success` makes
-   every later sweep a no-op on that head. The dispatch form escapes this — the
+   with the code in _your_ checkout. When that agrees with `main` — the ordinary
+   case — a locally-posted `success` makes every later sweep a no-op on that head.
+   On a branch that edits the gate the description may differ and the sweep will
+   still publish, but that is the case you can least afford to be guessing about. The dispatch form escapes this — the
    gate workflow invokes the script without `--if-changed`, so it publishes
    unconditionally, as `github-actions[bot]`.
 

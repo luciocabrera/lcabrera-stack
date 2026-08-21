@@ -322,9 +322,10 @@ Waiting up to one interval is the ordinary answer. When that is too long:
    ```
 
    **`--ref` on the two gate dispatches is not optional when the pull request
-   edits the gate.** Without it `gh` runs the default branch's copy of the
-   workflow, which is #866 — the failure these are often being used to recover
-   from. The reconcile dispatch is deliberately left without one: it is the sweep,
+   edits the gate** — and **impossible on a fork pull request**, whose branch is
+   not in this repository, so `--ref` fails outright and the sweep is the path
+   instead. Without it `gh` runs the default branch's copy of the workflow, which
+   is #866 — the failure these are often being used to recover from. The reconcile dispatch is deliberately left without one: it is the sweep,
    and the sweep is default-branch by design, which is the whole of what #868 and
    #884 are about.
 
@@ -410,4 +411,5 @@ resolved` is a report either way: `required_review_thread_resolution` on the
 - [`copilot-review-gate.md`](./copilot-review-gate.md) — the Copilot gate's states and its break-glass ladder
 - [`docs/agents/agent-review-contract.md`](../agents/agent-review-contract.md) — what the other gate validates
 - [ADR-076](../decisions/ADR-076-reconcile-the-review-gate-statuses-on-a-schedule.md) — why a sweep rather than a fix to the trigger
-- #737 — the measurement; #698 — the promotion this unblocks
+- #737 — the measurement; #698 — the promotion this unblocked, done 2026-08-21
+  for `Copilot review complete`; #884 — the false green that promotion made live
