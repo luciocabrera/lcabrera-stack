@@ -103,7 +103,10 @@ const ACKNOWLEDGEABLE_STATES = new Set(['conflict', 'modified']);
 export const isAcknowledgeable = (state) => ACKNOWLEDGEABLE_STATES.has(state);
 
 /** For a message that has to name them; sorted so the wording cannot reorder. */
-export const acknowledgeableStates = () => [...ACKNOWLEDGEABLE_STATES].sort();
+export const acknowledgeableStates = () =>
+  [...ACKNOWLEDGEABLE_STATES].toSorted((left, right) =>
+    left.localeCompare(right),
+  );
 
 export const ACKNOWLEDGED_STATE = 'acknowledged';
 

@@ -167,8 +167,10 @@ const main = () => {
     try {
       run(devkitBin, ['closure', '--shipped'], consumer);
     } catch (error) {
+      const output = `${error.stdout ?? ''}${error.stderr ?? ''}`;
+      const lastLine = output.trim().split('\n').at(-1);
       materialised.push(
-        `devkit closure --shipped failed in the consumer: ${`${error.stdout ?? ''}${error.stderr ?? ''}`.trim().split('\n').at(-1)}`,
+        `devkit closure --shipped failed in the consumer: ${lastLine}`,
       );
     }
     materialised.push(...survivingPlaceholders(consumer));
