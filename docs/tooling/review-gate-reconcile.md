@@ -312,12 +312,21 @@ Waiting up to one interval is the ordinary answer. When that is too long:
 
    ```bash
    gh workflow run copilot-review-gate.yml -f pr=<n> \
+     --ref <the pull request's branch> \
      -R luciocabrera/vite-react-compiler
    gh workflow run agent-review-verdict.yml -f pr=<n> \
+     --ref <the pull request's branch> \
      -R luciocabrera/vite-react-compiler
    gh workflow run review-gate-reconcile.yml -f pr=<n> \
-     -R luciocabrera/vite-react-compiler
+     -R luciocabrera/vite-react-compiler   # the sweep is default-branch by design
    ```
+
+   **`--ref` on the two gate dispatches is not optional when the pull request
+   edits the gate.** Without it `gh` runs the default branch's copy of the
+   workflow, which is #866 — the failure these are often being used to recover
+   from. The reconcile dispatch is deliberately left without one: it is the sweep,
+   and the sweep is default-branch by design, which is the whole of what #868 and
+   #884 are about.
 
    `-R` is what makes "needs no checkout" true. `gh` infers the repository from a
    git remote, so without it these fail with `not a git repository` before any

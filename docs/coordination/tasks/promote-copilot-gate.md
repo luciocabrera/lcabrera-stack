@@ -2,7 +2,7 @@
 id: promote-copilot-gate
 title: record that Copilot review complete is now a required context
 owner: agent:claude
-status: active
+status: review
 branch: chore/698-promote-copilot-gate
 area:
   - docs/tooling/copilot-review-gate.md
@@ -28,6 +28,6 @@ record that Copilot review complete is now a required context
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: in review on #882
 - Blockers: none
-- Next:
+- Next: drive #882 to merged, then delete this file

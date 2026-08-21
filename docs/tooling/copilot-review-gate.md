@@ -680,8 +680,8 @@ rest of the preconditions.
    stop anything else from doing so.** Since the context was pinned to
    `integration_id` 15368, a status you post from a checkout has no app behind it
    and does not satisfy the required check — the same limit as rung 6. It is
-   worse than rung 6 here, because it also silences the one thing that could have
-   cleared the bar: `shouldPublishStatus` withholds a post when the state and the
+   worse than rung 6 here, because it also silences the scheduled sweep, which
+   would otherwise have cleared the bar on its own: `shouldPublishStatus` withholds a post when the state and the
    description both match what is already there, and the local form computes both
    with the code the scheduled sweep runs. So a locally-posted `success` makes
    every later sweep a no-op on that head. The dispatch form escapes this — the

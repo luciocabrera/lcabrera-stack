@@ -668,7 +668,8 @@ rule, from there.
   whose events go missing in this repository (#737). So the check can report
   `absent` on a pull request that has just been reviewed. A scheduled sweep
   revalidates every open pull request half-hourly, and
-  `gh workflow run agent-review-verdict.yml -f pr=<n>` revalidates one on demand.
+  `gh workflow run agent-review-verdict.yml -f pr=<n> --ref <branch>` revalidates
+  one on demand — name the ref, or `gh` runs the default branch's copy (#866).
   Locally, `vp run agent-review:verify -- --pr <n> --dry-run` prints what the
   check would report right now, which is how "no verdict yet" is told apart from
   "verdict posted, check not recomputed".
