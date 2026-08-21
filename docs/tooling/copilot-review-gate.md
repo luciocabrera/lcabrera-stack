@@ -380,13 +380,37 @@ Three things recompute it that are not events on this pull request:
   one pull request, attributed to whoever pressed it. Since #853 this is also
   pulled automatically: `claude-review.yml` dispatches it after submitting a
   review, because that review generates no event this workflow can subscribe to.
+  That dispatch names the pull request's head ref (#866); dispatching without one
+  runs the **default branch's** copy of the gate, which is the wrong code to judge
+  a pull request that edits the gate — see the next paragraph.
 - **`vp run copilot-review:status -- --pr <n>`**, which is the same script.
 
 The run reads the head **and** the reviews from the API and posts against the
 head it read, never against the SHA in the event payload. Two runs racing then
-agree instead of publishing verdicts about different commits, which is why the
-workflow has no `concurrency` group — cancelling a superseded run would leave an
-event with no status at all.
+agree about **which commit** they are judging instead of publishing verdicts
+about different ones, which is why the workflow has no `concurrency` group —
+cancelling a superseded run would leave an event with no status at all.
+
+**Agreeing on the commit is not agreeing on the verdict, and the difference is
+the code each run executes.** A `pull_request` or `pull_request_review` run
+checks out that pull request's merge ref; a `workflow_dispatch` run checks out
+the ref the dispatch named, and a schedule always runs the default branch. So on
+a pull request that changes what the gate accepts, two runs read one head and one
+review list and still disagree. Measured on #866, which widens
+`ACCEPTED_REVIEWERS`: at 08:43:12Z the merge-ref run posted `success — Reviewed
+by claude-general-reviewer[bot] at a46eaf8`, and at 08:43:15Z a refless dispatch
+running `main`'s older copy computed `0 counted from an accepted reviewer` and
+overwrote it with `pending`. The last writer wins, and nothing reports the
+disagreement.
+
+Naming the head ref fixes the dispatch. It does **not** fix the scheduled sweep,
+which GitHub always runs from the default branch — so a pull request editing the
+gate still has its status flapped every half hour until it merges. That is
+tolerable only while this context is not required; it is a prerequisite to close
+before #698 promotes it, because under a required context the same flap is an
+unmergeable pull request. Tracked separately rather than fixed here — the sweep's
+correct behaviour when it disagrees with a pull request's own code is a design
+question, not a one-line ref.
 
 This gate reports; it does not yet block. Promotion to a required context on
 `main` is #698, deliberately separate: a required check that has never reported

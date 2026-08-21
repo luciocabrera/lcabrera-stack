@@ -20,6 +20,8 @@ const WORKFLOW = '.github/workflows/claude-review.yml';
 const SUBMIT_STEP =
   'Submit the review against the head this run was triggered for';
 const MINT_STEP = "Mint a token for the reviewer's own identity";
+const DISPATCH_STEP =
+  'Ask the review gate to recompute now rather than at the next sweep';
 
 describe('the review is posted under the reviewer’s own identity', () => {
   it('submits with the App installation token, not the default GITHUB_TOKEN', () => {
@@ -43,11 +45,21 @@ describe('the review is posted under the reviewer’s own identity', () => {
   // which the App does not hold. Asserted so the step above's `not.toContain` is
   // not read as "this workflow must never use github.token".
   it('leaves the gate dispatch on github.token, which the App cannot replace', () => {
-    const step = stepBlock(
-      readRepoFile(WORKFLOW),
-      'Ask the review gate to recompute now rather than at the next sweep',
-    );
+    const step = stepBlock(readRepoFile(WORKFLOW), DISPATCH_STEP);
     expect(step).toBeDefined();
     expect(step).toContain('github.token');
+  });
+
+  // `gh workflow run` with no `--ref` runs the DEFAULT BRANCH's copy of the gate,
+  // so a pull request that edits the gate gets judged by the code it is replacing.
+  // On #866 that overwrote a correct `success` with `pending` three seconds later.
+  // Nothing else here would notice: the dispatch succeeds, the run is green, and
+  // only the published status is wrong.
+  it('dispatches the gate against the pull request’s own ref', () => {
+    const step = stepBlock(readRepoFile(WORKFLOW), DISPATCH_STEP);
+    expect(step).toContain('--ref "$HEAD_REF"');
+    expect(step).toContain(
+      'HEAD_REF: ${{ github.event.pull_request.head.ref }}',
+    );
   });
 });

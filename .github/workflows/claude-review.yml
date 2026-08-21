@@ -264,6 +264,23 @@ jobs:
       # every path this step does not — a dispatch that fails, a run cancelled before it got
       # here, and Copilot's own reviews, whose `pull_request_review` trigger is unreliable
       # rather than absent.
+      # `--ref` is load-bearing, because the gate's verdict depends on the code it runs and a
+      # refless dispatch runs the DEFAULT BRANCH's copy. Measured on #866, which is a pull
+      # request that edits `ACCEPTED_REVIEWERS`: at 08:43:12Z the `pull_request_review` run,
+      # which checks out the merge ref and so the pull request's own gate code, posted
+      # `success — Reviewed by claude-general-reviewer[bot] at a46eaf8`; at 08:43:15Z the
+      # refless dispatch from this step, running main's older copy, read the same head and
+      # the same reviews, computed `0 counted from an accepted reviewer`, and overwrote it
+      # with `pending`. Opposite verdicts, and the wrong one won by landing last.
+      #
+      # That is the code/YAML skew `copilot-review-gate.yml` takes deliberate care to avoid
+      # on its other two triggers (the #177 comment there); a refless dispatch reintroduced
+      # it through the back door. Naming the head ref puts all three on one commit's code.
+      #
+      # It outlives the pull request that found it: a pull request editing the gate is
+      # precisely the one the stale copy judges wrongly, and once `Copilot review complete`
+      # is a required context (#698) that is an unmergeable pull request rather than a
+      # cosmetic flap.
       - name: Ask the review gate to recompute now rather than at the next sweep
         # A run whose head moved posted nothing, so there is nothing new for the gate to see
         # and a dispatch would only republish the same pending.
@@ -271,6 +288,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          # A fork pull request has no head ref in this repository, so the dispatch fails and
+          # the warning below fires. That is already correct there: a fork's GITHUB_TOKEN is
+          # read-only, so no status could be published from this run either way.
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
           set -euo pipefail
 
@@ -278,7 +299,7 @@ jobs:
           # this workflow exists to produce. Reporting the job as failed because the refresh
           # could not be REQUESTED would turn a cosmetic delay into a red check on a pull
           # request that was reviewed successfully — and the sweep still gets there.
-          if gh workflow run copilot-review-gate.yml --field "pr=$PR_NUMBER"; then
+          if gh workflow run copilot-review-gate.yml --ref "$HEAD_REF" --field "pr=$PR_NUMBER"; then
             echo "::notice::Requested a recompute of the review gate for #$PR_NUMBER."
           else
             echo "::warning::Could not dispatch copilot-review-gate.yml for #$PR_NUMBER. The review is posted; review-gate-reconcile.yml will publish the status at its next sweep."
