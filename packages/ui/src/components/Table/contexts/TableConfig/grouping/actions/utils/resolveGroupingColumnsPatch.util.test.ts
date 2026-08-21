@@ -113,4 +113,32 @@ describe('resolveGroupingColumnsPatch', () => {
       'staticKeys',
     ]);
   });
+
+  it('keeps the sort of a hidden column while dropping one the grid lost', () => {
+    // Two claims in one state, because either alone passes a defect. Pruning
+    // against `effectiveColumns` — which `getEffectiveColumns` filters by
+    // visibility first — drops the hidden column's sort, and pruning against
+    // nothing keeps the measure's.
+    const hiddenAndMeasured = getInitialColumnsState<Row>({
+      aggregates: [{ columnKey: 'total_amount', fn: 'avg' }],
+      columns,
+      columnVisibility: new Set(['ship_country']),
+      groupingKeys: ['order_status'],
+      sorting: [
+        { columnKey: 'ship_country', direction: 'asc' },
+        { columnKey: 'total_amount:avg', direction: 'desc' },
+      ],
+    }) as TableColumnsState<Row>;
+
+    const next = resolveGroupingColumnsPatch<Row>({
+      // Grouping cleared: the measure column goes with it, the hidden one stays.
+      aggregates: [],
+      columnsState: hiddenAndMeasured,
+      groupingKeys: [],
+    });
+
+    expect(next.sorting).toStrictEqual([
+      { columnKey: 'ship_country', direction: 'asc' },
+    ]);
+  });
 });
