@@ -67,6 +67,7 @@ export const getPinnedDerivedColumnsState = <TData>({
     columnOrder,
     columnPinning,
     columns,
+    columnVisibility,
     groupingKeys,
   });
 
@@ -79,7 +80,7 @@ export const getPinnedDerivedColumnsState = <TData>({
     columnOrder: measured.columnOrder,
     columnPinning: measured.columnPinning,
     columns: measured.columns,
-    columnVisibility,
+    columnVisibility: measured.columnVisibility,
     groupingKeys,
   });
 

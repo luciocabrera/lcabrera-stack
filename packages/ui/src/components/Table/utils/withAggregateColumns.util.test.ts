@@ -34,6 +34,7 @@ type RunArgs = {
   readonly aggregates: readonly TableColumnAggregate[];
   readonly columnOrder?: readonly string[];
   readonly columnPinning?: ColumnPinningState<Row>;
+  readonly columnVisibility?: ReadonlySet<string>;
   readonly groupingKeys?: readonly string[];
 };
 
@@ -41,6 +42,7 @@ const run = ({
   aggregates,
   columnOrder = ['order_id', 'customer_type', 'total_amount', 'order_count'],
   columnPinning = noPinning,
+  columnVisibility = new Set<string>(),
   groupingKeys = ['customer_type'],
 }: RunArgs) =>
   withAggregateColumns<Row>({
@@ -48,6 +50,7 @@ const run = ({
     columnOrder: columnOrder as never,
     columnPinning,
     columns,
+    columnVisibility: columnVisibility as never,
     groupingKeys,
   });
 
@@ -269,5 +272,49 @@ describe('a persisted layout that already names a measure column', () => {
       'total_amount:avg',
       'total_amount:min',
     ]);
+  });
+});
+
+describe('hiding a measured column', () => {
+  const aggregates: readonly TableColumnAggregate[] = [
+    { columnKey: 'total_amount', fn: 'avg' },
+    { columnKey: 'total_amount', fn: 'min' },
+  ];
+
+  it('hides the measures that replaced it', () => {
+    // The settings drawer builds its rows from the **declared** columns, which
+    // this derivation deliberately never rewrites — so hiding `Total Amount`
+    // writes `total_amount`, a key `gridColumns` no longer holds. Before this,
+    // `getEffectiveColumns` filtered nothing and the drawer drew the column as
+    // hidden while the grid kept painting both measures under its band.
+    const result = run({
+      aggregates,
+      columnVisibility: new Set(['total_amount']),
+    });
+
+    expect([...result.columnVisibility]).toStrictEqual([
+      'total_amount:avg',
+      'total_amount:min',
+    ]);
+  });
+
+  it('leaves a directly-hidden measure hidden', () => {
+    // The header menu writes the derived key, and that path already worked.
+    // A key that is not a source column passes through as itself.
+    const result = run({
+      aggregates,
+      columnVisibility: new Set(['total_amount:avg']),
+    });
+
+    expect([...result.columnVisibility]).toStrictEqual(['total_amount:avg']);
+  });
+
+  it('leaves an unrelated hidden column alone', () => {
+    const result = run({
+      aggregates,
+      columnVisibility: new Set(['order_count']),
+    });
+
+    expect([...result.columnVisibility]).toStrictEqual(['order_count']);
   });
 });

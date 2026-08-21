@@ -298,7 +298,11 @@ two identical headers with duplicate React keys. And the expansion
 **deduplicates**, because these lists are restored from a cookie that outlives
 any invariant this code holds today. Hiding is deliberately _not_ mapped: one
 measure hidden independently is useful, cannot duplicate anything, and an
-unknown key in a visibility map is simply never consulted.
+unknown key in a visibility map is simply never consulted. Hiding a **source**
+column is expanded, though, and that asymmetry is the whole of it: the settings
+drawer builds its rows from the declared list, so `Total Amount` is the only key
+it can write, and a key `gridColumns` no longer holds filters nothing — the
+drawer drew the column as hidden while the grid kept painting both measures.
 
 Sorting is the third edge and it is handled server-side, because a measure sort
 is legitimate on the grouped read — `toGroupSort` maps it onto the aggregate's

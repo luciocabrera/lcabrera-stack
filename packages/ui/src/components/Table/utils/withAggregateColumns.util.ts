@@ -1,6 +1,7 @@
 import type {
   ColumnOrderState,
   ColumnPinningState,
+  ColumnVisibilityState,
   DataKey,
   TableColumn,
   TableColumnAggregate,
@@ -16,6 +17,12 @@ type WithAggregateColumnsArgs<TData> = {
   readonly columnOrder: ColumnOrderState<TData>;
   readonly columnPinning: ColumnPinningState<TData>;
   readonly columns: readonly TableColumn<TData>[];
+  /**
+   * The hidden columns. Expanded like the order and the pin lists, so hiding a
+   * **source** column hides the measures that replaced it — the drawer offers
+   * the declared list, so that is the only key it can write.
+   */
+  readonly columnVisibility: ColumnVisibilityState<TData>;
   /** The applied group keys — a key column carries its key, never a measure. */
   readonly groupingKeys: readonly string[];
 };
@@ -70,9 +77,10 @@ export const withAggregateColumns = <TData>({
   columnOrder,
   columnPinning,
   columns,
+  columnVisibility,
   groupingKeys,
 }: WithAggregateColumnsArgs<TData>) => {
-  const unchanged = { columnOrder, columnPinning, columns };
+  const unchanged = { columnOrder, columnPinning, columns, columnVisibility };
 
   if (aggregates.length === 0) return unchanged;
 
@@ -157,5 +165,12 @@ export const withAggregateColumns = <TData>({
     columns: columns.flatMap(
       (column) => derivedBySource.get(String(column.key)) ?? [column],
     ),
+    // A `Set` rather than a list, but the same expansion and the same reason:
+    // the settings drawer builds its rows from the **declared** columns, so
+    // hiding `Total Amount` writes `total_amount` — a key `gridColumns` no
+    // longer holds, which would filter nothing while the drawer drew the
+    // column as hidden. Expanding here also leaves a directly-hidden measure
+    // key working, since a key that is not a source passes through as itself.
+    columnVisibility: new Set(expandKeys([...columnVisibility])),
   };
 };
