@@ -261,8 +261,11 @@ const coveringReview = (reviews, headSha) =>
  *      fires this gate
  *   3. nothing covers C yet, so `failure` is published — on a head that is being
  *      reviewed right now
- *   4. the review of C lands and creates no workflow run at all, so the status
- *      stays `failure` until the next push or the reconcile sweep
+ *   4. the review of C lands and does not clear it: before #865 that was because
+ *      a GITHUB_TOKEN review created no workflow run at all, so nothing recomputed
+ *      until the next push or the reconcile sweep. It now posts under a GitHub App
+ *      and the run does happen — but a `failure` already published is still wrong
+ *      for however long step 3 to step 4 takes, and that window is a model turn.
  *
  * Waiting was exactly what would have helped. Requiring every accepted reviewer
  * to have spoken makes `failure` mean what it says; the cases it gives up are
