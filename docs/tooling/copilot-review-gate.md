@@ -408,7 +408,7 @@ which GitHub always runs from the default branch — so a pull request editing t
 gate still has its status flapped every half hour until it merges. That is
 tolerable only while this context is not required; it is a prerequisite to close
 before #698 promotes it, because under a required context the same flap is an
-unmergeable pull request. Tracked separately rather than fixed here — the sweep's
+unmergeable pull request. Tracked as #868 rather than fixed here — the sweep's
 correct behaviour when it disagrees with a pull request's own code is a design
 question, not a one-line ref.
 
