@@ -149,4 +149,12 @@ describe('isFilterValid', () => {
       }),
     ).toBe(true);
   });
+
+  it('treats an empty filter as complete', () => {
+    // It has no field left to populate — the operator is the whole filter. The
+    // default arm returns false, so a missing case makes it permanently
+    // invalid and unremovable from the drawer's staged state.
+    expect(isFilterValid({ operator: 'isEmpty', type: 'empty' })).toBe(true);
+    expect(isFilterValid({ operator: 'isNotEmpty', type: 'empty' })).toBe(true);
+  });
 });

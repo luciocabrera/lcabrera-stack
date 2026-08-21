@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vite-plus/test';
 
+import type { TableColumnDataType } from '#ui/components/Table/Table.types';
+
 import {
   DATE_OPERATORS,
+  EMPTY_OPERATORS,
   NUMBER_OPERATORS,
   TEXT_OPERATORS,
 } from '#ui/constants/filterOperators.constants';
@@ -9,27 +12,60 @@ import {
 import { getOperatorOptions } from './getOperatorOptions.util';
 
 describe('getOperatorOptions', () => {
-  it('returns NUMBER_OPERATORS for number dataType', () => {
-    expect(getOperatorOptions({ dataType: 'number' })).toBe(NUMBER_OPERATORS);
+  it('offers the number operators for number and currency columns', () => {
+    for (const dataType of ['currency', 'number'] as const) {
+      expect(getOperatorOptions({ dataType })).toStrictEqual([
+        ...NUMBER_OPERATORS,
+        ...EMPTY_OPERATORS,
+      ]);
+    }
   });
 
-  it('returns NUMBER_OPERATORS for currency dataType', () => {
-    expect(getOperatorOptions({ dataType: 'currency' })).toBe(NUMBER_OPERATORS);
+  it('offers the date operators for date columns', () => {
+    expect(getOperatorOptions({ dataType: 'date' })).toStrictEqual([
+      ...DATE_OPERATORS,
+      ...EMPTY_OPERATORS,
+    ]);
   });
 
-  it('returns DATE_OPERATORS for date dataType', () => {
-    expect(getOperatorOptions({ dataType: 'date' })).toBe(DATE_OPERATORS);
+  it('falls back to the text operators for everything else', () => {
+    const fallbackTypes: readonly (TableColumnDataType | undefined)[] = [
+      'boolean',
+      'string',
+      undefined,
+    ];
+
+    for (const dataType of fallbackTypes) {
+      expect(getOperatorOptions({ dataType })).toStrictEqual([
+        ...TEXT_OPERATORS,
+        ...EMPTY_OPERATORS,
+      ]);
+    }
   });
 
-  it('returns TEXT_OPERATORS for string dataType', () => {
-    expect(getOperatorOptions({ dataType: 'string' })).toBe(TEXT_OPERATORS);
-  });
+  it('offers the empty operators for every operator family', () => {
+    // Emptiness is not a comparison and has no family: the data type decides
+    // which comparisons make sense, not whether a column can hold nothing. A
+    // list missing these is a column a user cannot ask the question of.
+    //
+    // `'boolean'` is deliberately absent. `FilterInputs` returns
+    // `BooleanFilterInput` for a boolean column before any `OperatorSelect` is
+    // rendered, so nothing ever reads this list for one — asserting it here
+    // would pass whether or not a boolean column offered the operators, which
+    // is no assertion at all. `BooleanFilterInput`'s own test covers that path.
+    const dataTypes: readonly (TableColumnDataType | undefined)[] = [
+      'currency',
+      'date',
+      'number',
+      'string',
+      undefined,
+    ];
 
-  it('returns TEXT_OPERATORS for undefined dataType', () => {
-    expect(getOperatorOptions({ dataType: undefined })).toBe(TEXT_OPERATORS);
-  });
+    for (const dataType of dataTypes) {
+      const values = getOperatorOptions({ dataType }).map((op) => op.value);
 
-  it('returns TEXT_OPERATORS for boolean dataType', () => {
-    expect(getOperatorOptions({ dataType: 'boolean' })).toBe(TEXT_OPERATORS);
+      expect(values).toContain('isEmpty');
+      expect(values).toContain('isNotEmpty');
+    }
   });
 });

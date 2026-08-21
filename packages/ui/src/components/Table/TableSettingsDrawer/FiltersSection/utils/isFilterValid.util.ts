@@ -16,6 +16,12 @@ export const isFilterValid = (filter?: ColumnFilter | null) => {
     case 'date': {
       return isDateFilterValid(filter);
     }
+    // Nothing left to populate: the operator is the whole filter. Falling to
+    // the default would make it permanently invalid and silently undroppable
+    // from the drawer's staged state.
+    case 'empty': {
+      return true;
+    }
     case 'multiSelect':
     case 'select': {
       return isSelectFilterValid(filter);

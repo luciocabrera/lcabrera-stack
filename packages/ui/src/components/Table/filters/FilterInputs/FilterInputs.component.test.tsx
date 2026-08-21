@@ -161,6 +161,21 @@ describe('FilterInputs', () => {
       );
     });
 
+    it('forwards an empty filter to the boolean input', () => {
+      // A boolean column has no operator dropdown, so the boolean input is the
+      // only surface that can show or clear an empty filter on one. Dropping it
+      // here left the control reading "All" while the table was filtered to the
+      // null rows — the wrong rows under a control that denied filtering them.
+      renderFilterInputs({
+        column: booleanColumn,
+        filter: { operator: 'isEmpty', type: 'empty' },
+      });
+
+      expect(screen.getByTestId('boolean-input').textContent).toBe(
+        JSON.stringify({ operator: 'isEmpty', type: 'empty' }),
+      );
+    });
+
     it('drops a non-boolean filter on a boolean column', () => {
       renderFilterInputs({
         column: booleanColumn,

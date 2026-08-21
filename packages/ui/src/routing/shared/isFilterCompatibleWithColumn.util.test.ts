@@ -212,4 +212,30 @@ describe('isFilterCompatibleWithColumn', () => {
       ).toBe(false);
     });
   });
+
+  it('accepts an empty filter against every column type', () => {
+    // The arm exists because a `false` here drops the filter from the URL
+    // silently — which reads to a user as a shared link opening on the wrong
+    // rows, with nothing saying a filter was discarded.
+    //
+    // `'boolean'` included: a boolean column can hold NULL like any other, and
+    // `BooleanFilterInput` renders and clears the filter once it arrives.
+    const dataTypes = [
+      'boolean',
+      'currency',
+      'date',
+      'number',
+      'string',
+      undefined,
+    ] as const;
+
+    for (const dataType of dataTypes) {
+      expect(
+        isFilterCompatibleWithColumn({
+          column: { dataType, key: 'shipping_country', label: 'Country' },
+          filter: { operator: 'isEmpty', type: 'empty' },
+        }),
+      ).toBe(true);
+    }
+  });
 });

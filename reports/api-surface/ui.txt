@@ -452,13 +452,15 @@ createHandleRequest [const] ({ stylexCssHref, }: CreateHandleRequestArgs) => { h
 
 ## ./types/filterOperators.types
 BooleanFilter [type] { readonly type: 'boolean'; readonly value: boolean; }
-ColumnFilter [type] | BooleanFilter | DateFilter | NumberFilter | SelectFilter | TextFilter
+ColumnFilter [type] | BooleanFilter | DateFilter | EmptyFilter | NumberFilter | SelectFilter | TextFilter
 DateFilter [type] { readonly operator: 'after' | 'before' | 'between' | 'equals'; readonly type: 'date'; /** ISO date string */ readonly value: string; /** Second date for 'between' operator (ISO string) */ readonly value2?: string; }
 DateOperatorType [type] DateFilter['operator']
+EmptyFilter [type] { readonly operator: 'isEmpty' | 'isNotEmpty'; readonly type: 'empty'; }
+EmptyOperatorType [type] EmptyFilter['operator']
 NumberFilter [type] { readonly operator: | 'between' | 'equals' | 'greaterThan' | 'greaterThanOrEqual' | 'lessThan' | 'lessThanOrEqual' | 'notEquals'; readonly type: 'number'; /** Undefined while the user is drafting the filter (empty input) */ readonly value: number | undefined; /** Second value for 'between' operator */ readonly value2?: number; }
 NumberOperatorType [type] NumberFilter['operator']
 OperatorOption [type] { readonly label: string; readonly value: T; }
-OperatorType [type] | DateOperatorType | NumberOperatorType | TextOperatorType
+OperatorType [type] | DateOperatorType | EmptyOperatorType | NumberOperatorType | TextOperatorType
 SelectFilter [type] { /** Operator for select filter (defaults to 'equals' if not specified) */ readonly operator?: 'equals' | 'notEquals'; readonly type: 'multiSelect' | 'select'; /** Single value for 'select' type */ readonly value?: string; /** Multiple values for 'multiSelect' type */ readonly values?: readonly string[]; }
 TextFilter [type] { readonly operator: | 'contains' | 'endsWith' | 'equals' | 'notContains' | 'notEquals' | 'startsWith'; readonly type: 'text'; readonly value: string; }
 TextOperatorType [type] TextFilter['operator']

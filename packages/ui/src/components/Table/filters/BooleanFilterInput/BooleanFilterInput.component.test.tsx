@@ -3,7 +3,10 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
-import type { BooleanFilter } from '#ui/types/filterOperators.types';
+import type {
+  BooleanFilter,
+  EmptyFilter,
+} from '#ui/types/filterOperators.types';
 
 import { BooleanFilterInput } from './BooleanFilterInput.component';
 
@@ -63,5 +66,59 @@ describe('BooleanFilterInput', () => {
     fireEvent.click(button('True'));
 
     expect(onChange).toHaveBeenCalledWith({ type: 'boolean', value: true });
+  });
+
+  it('emits an empty filter when "Is empty" is picked', () => {
+    // A boolean column reaches this control instead of the operator dropdown,
+    // so these two buttons are the only way to build an empty filter on one.
+    const onChange = vi.fn();
+
+    render(<BooleanFilterInput filter={undefined} onChange={onChange} />);
+
+    fireEvent.click(button('Is empty'));
+
+    expect(onChange).toHaveBeenCalledWith({
+      operator: 'isEmpty',
+      type: 'empty',
+    });
+  });
+
+  it('emits a not-empty filter when "Is not empty" is picked', () => {
+    const onChange = vi.fn();
+
+    render(<BooleanFilterInput filter={undefined} onChange={onChange} />);
+
+    fireEvent.click(button('Is not empty'));
+
+    expect(onChange).toHaveBeenCalledWith({
+      operator: 'isNotEmpty',
+      type: 'empty',
+    });
+  });
+
+  it('marks the active empty operator rather than falling back to "All"', () => {
+    // What a filter restored from a URL has to look like. Reading "All" while
+    // the table is filtered is the failure this control exists to rule out, and
+    // "All" is what it showed before the filter reached it.
+    const filter: EmptyFilter = { operator: 'isNotEmpty', type: 'empty' };
+    const onChange = vi.fn();
+
+    render(<BooleanFilterInput filter={filter} onChange={onChange} />);
+
+    expect(button('Is not empty').className).not.toBe(
+      button('Is empty').className,
+    );
+    expect(button('All').className).toBe(button('Is empty').className);
+  });
+
+  it('clears an empty filter through "All"', () => {
+    const filter: EmptyFilter = { operator: 'isEmpty', type: 'empty' };
+    const onChange = vi.fn();
+
+    render(<BooleanFilterInput filter={filter} onChange={onChange} />);
+
+    fireEvent.click(button('All'));
+
+    expect(onChange).toHaveBeenCalledWith();
   });
 });
