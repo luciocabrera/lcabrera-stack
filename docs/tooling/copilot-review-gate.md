@@ -403,7 +403,18 @@ running `main`'s older copy computed `0 counted from an accepted reviewer` and
 overwrote it with `pending`. The last writer wins, and nothing reports the
 disagreement.
 
-Naming the head ref fixes the dispatch. It does **not** fix the scheduled sweep,
+Naming the head ref narrows the dispatch's skew rather than closing it, and the
+remainder is a different order of problem. The event-driven triggers check out the
+pull request's **merge ref**; a dispatch checks out the ref it was given, which is
+the branch **tip**. Those are different commits whenever `main` has moved since the
+branch point, so the two runs can still execute different gate code — but both
+copies are now the pull request's own, which is the part that decided the verdict
+above. A merge-ref/tip difference is the ordinary staleness every CI run carries;
+judging a pull request by the branch it is replacing is not. (A branch cut before
+this workflow carried `workflow_dispatch` 404s the dispatch instead, landing on the
+warning path with the sweep as backstop.)
+
+It does **not** fix the scheduled sweep,
 which GitHub always runs from the default branch — so a pull request editing the
 gate still has its status flapped every half hour until it merges. That is
 tolerable only while this context is not required; it is a prerequisite to close
@@ -466,7 +477,7 @@ gh api graphql -F n=<n> -f query='
   }' --jq '
   .data.repository.pullRequest as $pr
   | [ $pr.reviews.nodes[]
-      | select(.author.login | IN("copilot-pull-request-reviewer", "github-actions"))
+      | select(.author.login | IN("copilot-pull-request-reviewer", "claude-general-reviewer"))
       | select(.state | IN("APPROVED", "CHANGES_REQUESTED", "COMMENTED")) ] as $counted
   | ($counted | group_by(.author.login) | map(max_by(.submittedAt))) as $newest
   | ($newest | map(select(.commit.oid == $pr.headRefOid)) | first) as $covering
@@ -482,7 +493,7 @@ difference between an answer and a confident wrong one:
 - **The `null` arm.** `last` of an empty array is `null`, and jq reads a field
   off `null` and slices it without complaining, so the obvious form —
   `… | last | "\(.commit.oid[0:8])"` — prints `null null` and exits 0 for a pull
-  request Copilot has not reviewed at all. That is precisely the state this
+  request no accepted reviewer has reviewed at all. That is precisely the state this
   command exists to name, and the one where a reader is least able to tell
   nonsense from an answer.
 - **The repository is named in the query**, which is why this one command needs

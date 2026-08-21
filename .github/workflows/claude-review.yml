@@ -173,9 +173,15 @@ jobs:
       #
       # A missing secret or an uninstalled App fails here, which fails the job. That is the
       # right direction — a review that cannot be attributed to the reviewer should not be
-      # posted under a name that means "some workflow". It is also the same place a fork
-      # pull request already fails, secrets not being available to one, so this adds a
-      # failure mode to a path that had one rather than to a path that did not.
+      # posted under a name that means "some workflow".
+      #
+      # It sits AFTER the paid model turn, so a missing secret burns a full review before
+      # failing, and that ordering is a trade rather than an oversight. Minting first would
+      # fail fast; it would also take over as the job's first failure point on a fork, where
+      # `Run the Claude review` holds that role today and is the reason the dispatch step
+      # below is unreachable there. Nothing is posted from a fork either way — what moves is
+      # which step the red X names, and one comment already leans on that being the review
+      # action. Worth revisiting deliberately rather than as a side effect of this change.
       - name: Mint a token for the reviewer's own identity
         id: reviewer-token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
@@ -275,7 +281,15 @@ jobs:
       #
       # That is the code/YAML skew `copilot-review-gate.yml` takes deliberate care to avoid
       # on its other two triggers (the #177 comment there); a refless dispatch reintroduced
-      # it through the back door. Naming the head ref puts all three on one commit's code.
+      # it through the back door.
+      #
+      # Naming the head ref narrows that skew rather than closing it: the event-driven
+      # triggers check out the pull request's MERGE ref, while a dispatch checks out the ref
+      # it was given — the branch TIP. Those differ whenever `main` has moved since the branch
+      # point, so the two can still run different gate code. What changes is that both copies
+      # are the pull request's own, instead of one being the branch it is trying to replace.
+      # A branch cut before the gate carried `workflow_dispatch` 404s here, which lands on the
+      # warning below with the sweep as backstop.
       #
       # It outlives the pull request that found it: a pull request editing the gate is
       # precisely the one the stale copy judges wrongly, and once `Copilot review complete`

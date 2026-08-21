@@ -80,6 +80,20 @@ const ACCEPTED_REVIEWERS = new Set([
   CLAUDE_REVIEW_LOGIN,
 ]);
 
+/**
+ * The same roster as a frozen list, for checks that need to compare the whole set
+ * rather than ask about one login.
+ *
+ * It exists because the set is copied: `docs/tooling/copilot-review-gate.md` carries
+ * a copy-pasteable GraphQL diagnostic that filters on the same logins, and #866 shipped
+ * with that copy still naming `github-actions` after this file had stopped accepting it.
+ * The two then disagree in both directions — the snippet says "wait" on a head the gate
+ * has already passed, and counts a reviewer the gate rejects — and it is reached for
+ * exactly when the status looks wrong, so it is believed. `copilot-review-doc-drift.test.mjs`
+ * compares them; this export is what it compares against.
+ */
+export const ACCEPTED_REVIEWER_LOGINS = Object.freeze([...ACCEPTED_REVIEWERS]);
+
 /** One login's two API spellings reduced to the form the list is written in. */
 const normalisedLogin = (login) =>
   typeof login === 'string' ? login.toLowerCase().replace(BOT_SUFFIX, '') : '';
