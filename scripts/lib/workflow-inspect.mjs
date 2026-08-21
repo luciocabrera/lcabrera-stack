@@ -76,6 +76,43 @@ export const stepBlock = (source, name) => {
   );
 };
 
+/** How deep a line is indented; blank lines report -1 so they never end a block. */
+const depthOf = (line) =>
+  line.trim() === '' ? -1 : line.length - line.trimStart().length;
+
+/**
+ * The value of one key in a step's `env:` mapping, or `undefined`.
+ *
+ * Scoped to the mapping rather than scanning the step, so it cannot read a `run:` line
+ * or a comment that happens to start with the key. Callers assert on `undefined` rather
+ * than defaulting — a value that was never set must fail, not compare equal to nothing.
+ *
+ * Why a test reads the key instead of asserting a credential absent from the step:
+ * `stepBlock` runs to the next `- name:`, so a step's text includes the comment block
+ * introducing the step after it, and a negative assertion over that text is governed by
+ * prose about a different step. Measured on #866 — a sentence naming `github.token`
+ * pasted into the submit step's span fails the negative form and not this one.
+ */
+export const stepEnvValue = (step, key) => {
+  const lines = (step ?? '')
+    .split('\n')
+    .filter((line) => !line.trim().startsWith('#'));
+  const start = lines.findIndex((line) => line.trim() === 'env:');
+  if (start === -1) {
+    return undefined;
+  }
+  const prefix = `${key}:`;
+  for (const line of lines.slice(start + 1)) {
+    if (depthOf(line) !== -1 && depthOf(line) <= depthOf(lines[start])) {
+      return undefined;
+    }
+    if (line.trim().startsWith(prefix)) {
+      return line.trim().slice(prefix.length).trim();
+    }
+  }
+  return undefined;
+};
+
 /**
  * The value of a single-quoted `const NAME = '…'` in a script, so a test
  * compares against the one definition rather than a second copy of the string.

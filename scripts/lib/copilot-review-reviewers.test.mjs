@@ -42,8 +42,22 @@ describe('which reviewers the gate accepts', () => {
   it('accepts both named reviewers, in either API spelling', () => {
     expect(isAcceptedReviewer('copilot-pull-request-reviewer[bot]')).toBe(true);
     expect(isAcceptedReviewer('copilot-pull-request-reviewer')).toBe(true);
-    expect(isAcceptedReviewer('github-actions[bot]')).toBe(true);
-    expect(isAcceptedReviewer('github-actions')).toBe(true);
+    expect(isAcceptedReviewer('claude-general-reviewer[bot]')).toBe(true);
+    expect(isAcceptedReviewer('claude-general-reviewer')).toBe(true);
+  });
+
+  // The hole #865 closed, kept as a gate rather than a note. `github-actions` is
+  // the identity EVERY workflow here shares, so accepting it means any workflow
+  // that posts a review satisfies the gate. Re-adding it to the set fails this.
+  //
+  // It catches an EDIT TO THE SET and nothing else — this reads the constant, not
+  // the workflow. A submit step falling back to `github.token` leaves the set
+  // correct and this test green, while every review stops matching and the status
+  // sticks at `pending`. That case is `claude-review-workflow.test.mjs`, which
+  // reads the step.
+  it('no longer accepts the shared GITHUB_TOKEN identity', () => {
+    expect(isAcceptedReviewer('github-actions[bot]')).toBe(false);
+    expect(isAcceptedReviewer('github-actions')).toBe(false);
   });
 
   it('accepts nobody else — the set is names, not a shape', () => {
@@ -63,7 +77,7 @@ describe('which reviewers the gate accepts', () => {
     // reviewer emits. Widening this would send it hunting for a `Suppressed
     // comments` block in reviews that never contain one.
     expect(isCopilotReviewer('copilot-pull-request-reviewer[bot]')).toBe(true);
-    expect(isCopilotReviewer('github-actions[bot]')).toBe(false);
+    expect(isCopilotReviewer('claude-general-reviewer[bot]')).toBe(false);
   });
 });
 
@@ -83,7 +97,7 @@ describe('two accepted reviewers', () => {
       reviews: [claudeReview()],
     });
     expect(status.state).toBe('success');
-    expect(status.reviewer).toBe('github-actions[bot]');
+    expect(status.reviewer).toBe('claude-general-reviewer[bot]');
   });
 
   it('is success when both have reviewed and the newest names the head', () => {
@@ -95,7 +109,7 @@ describe('two accepted reviewers', () => {
       ],
     });
     expect(status.state).toBe('success');
-    expect(status.reviewer).toBe('github-actions[bot]');
+    expect(status.reviewer).toBe('claude-general-reviewer[bot]');
   });
 
   it('is SUCCESS when one reviewer covered the head and the OTHER later reviewed an older commit', () => {
@@ -179,7 +193,9 @@ describe('two accepted reviewers', () => {
     expect(
       decideReviewStatus({ headSha: HEAD, reviews: [claudeReview()] })
         .description,
-    ).toBe('Reviewed by github-actions[bot] at dd8fb78, the current head.');
+    ).toBe(
+      'Reviewed by claude-general-reviewer[bot] at dd8fb78, the current head.',
+    );
     expect(
       decideReviewStatus({ headSha: HEAD, reviews: [restReview()] })
         .description,
@@ -200,7 +216,7 @@ describe('two accepted reviewers', () => {
       [claude, copilot],
     ]) {
       expect(decideReviewStatus({ headSha: HEAD, reviews }).reviewer).toBe(
-        'github-actions[bot]',
+        'claude-general-reviewer[bot]',
       );
     }
   });
@@ -212,7 +228,7 @@ describe('two accepted reviewers', () => {
         reviews: [claudeReview({ commit: EARLIER })],
       }).description,
     ).toBe(
-      'github-actions[bot] last reviewed ff868c6; waiting for a review of dd8fb78.',
+      'claude-general-reviewer[bot] last reviewed ff868c6; waiting for a review of dd8fb78.',
     );
   });
 
@@ -224,7 +240,7 @@ describe('two accepted reviewers', () => {
       triggeringReview: stale,
     });
     expect(status.state).toBe('failure');
-    expect(status.reviewer).toBe('github-actions[bot]');
+    expect(status.reviewer).toBe('claude-general-reviewer[bot]');
     expect(status.description).toContain('no longer the head');
   });
 

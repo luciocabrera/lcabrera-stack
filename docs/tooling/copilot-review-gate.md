@@ -64,9 +64,11 @@ also blocks and does not claim more than it knows.
 
 **Do not expect `failure` on #671's literal trace.** There only Copilot has
 reviewed, so not every accepted reviewer has spoken and the status is `pending`.
-Right now `failure` is unreachable altogether rather than merely narrow: the Claude
-leg cannot trigger this gate at all — no workflow run comes from a `GITHUB_TOKEN`
-event — and Copilot cannot review while its credits are exhausted. `pending` blocks
+Right now `failure` is unreachable altogether rather than merely narrow, though the
+reason changed with #865: the Claude leg can now trigger this gate (it posts under a
+GitHub App, not the `GITHUB_TOKEN`), so what makes `failure` unreachable is the other
+half — `everyReviewerHasSpoken`, and Copilot cannot review while its credits are
+exhausted. `pending` blocks
 just as firmly, so nothing is lost; but a `pending` someone was told to expect as
 `failure` is the kind of thing that gets "fixed" later.
 
@@ -82,10 +84,10 @@ explicit named list — and adding to it is an edit someone makes on purpose. It
 matched by equality, not by a regex over bot logins, not by a `[bot]` suffix test
 and not by a substring: each of those would admit reviewers nobody chose.
 
-| Reviewer                             | What it is                                                                                     |
-| ------------------------------------ | ---------------------------------------------------------------------------------------------- |
-| `copilot-pull-request-reviewer[bot]` | the Copilot code review bot ruleset `19141543` requests on every push (`review_on_push: true`) |
-| `github-actions[bot]`                | [`.github/workflows/claude-review.yml`](../../.github/workflows/claude-review.yml)             |
+| Reviewer                             | What it is                                                                                                           |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| `copilot-pull-request-reviewer[bot]` | the Copilot code review bot ruleset `19141543` requests on every push (`review_on_push: true`)                       |
+| `claude-general-reviewer[bot]`       | [`.github/workflows/claude-review.yml`](../../.github/workflows/claude-review.yml), posting under its own GitHub App |
 
 **The Copilot path is dormant, not removed.** Copilot code review is a server-side
 Copilot feature and cannot be pointed at a personal Anthropic key — BYOK covers
@@ -130,18 +132,38 @@ a second, informational, non-required context — not in this one.
 ruleset level at all. It has to live inside the single status, which is why the change
 is in `copilot-review.mjs` and not in repository settings.
 
-### `github-actions[bot]` is a known hole
+### The second entry used to name the runner, and #865 closed that
 
-The second entry names the **runner**, not the reviewer. `claude-review.yml`
-authenticates with the default `GITHUB_TOKEN`, so its review is authored by the same
-identity every other workflow here holds — which means **any** workflow in this
-repository that posts a review would satisfy this gate, not only that one.
+`claude-review.yml` authenticated with the default `GITHUB_TOKEN`, so its review was
+authored by `github-actions[bot]` — the identity **every** workflow here holds. Any
+workflow in this repository that posted a review satisfied this gate, not only that
+one. It stayed tolerable because nothing else posted one and the context is advisory.
 
-Nothing else posts a review today, so the hole is latent rather than open, and this
-context is advisory: nothing merges or fails on what it says. **#699 must land before
-#698 promotes it to required.** A Claude GitHub App gives the reviewer an identity of
-its own, and that entry is then replaced rather than extended. The constant carries
-the same warning, so nobody has to find this page first.
+It now posts under the **Claude General Reviewer** GitHub App, and the entry was
+**replaced rather than extended**. Keeping both would have left the hole open while
+making `everyReviewerHasSpoken` require three reviewers — weaker in two directions at
+once.
+
+**The sharper reason is that it unblocks a second in-workflow reviewer.**
+`latestReviewPerReviewer` keys by login, so two reviewers sharing `github-actions[bot]`
+collapse into one bucket and the newest wins: reviewer A's review of the current head
+is discarded when reviewer B posts later against a stale one. Distinct identities are a
+precondition for the roster growing, not tidiness.
+
+Two tests hold this, and they cover different failures — worth separating, because one
+of them was originally claimed by the other and is not something it can see.
+
+- `copilot-review-reviewers.test.mjs` asserts `github-actions` is **not** accepted, so
+  re-adding it **to the set** fails the build rather than silently widening the gate. It
+  reads the constant, so that is all it covers.
+- `claude-review-workflow.test.mjs` asserts the submit step uses the App token. Without
+  it, a fallback to `github.token` would leave the set correct and every reviewer test
+  green while **every review stopped matching** — the status stuck at `pending` for a
+  reason nothing reports. Planting that fallback fails this test and no other.
+
+Rotation is manual and unowned by automation: the App's private key does not expire,
+but if it is regenerated, `REVIEWER_APP_PRIVATE_KEY` must be replaced by hand or every
+review stops posting.
 
 ### The name still says Copilot
 
@@ -358,13 +380,60 @@ Three things recompute it that are not events on this pull request:
   one pull request, attributed to whoever pressed it. Since #853 this is also
   pulled automatically: `claude-review.yml` dispatches it after submitting a
   review, because that review generates no event this workflow can subscribe to.
+  That dispatch names the pull request's head ref (#866); dispatching without one
+  runs the **default branch's** copy of the gate, which is the wrong code to judge
+  a pull request that edits the gate — see the next paragraph.
 - **`vp run copilot-review:status -- --pr <n>`**, which is the same script.
 
 The run reads the head **and** the reviews from the API and posts against the
 head it read, never against the SHA in the event payload. Two runs racing then
-agree instead of publishing verdicts about different commits, which is why the
-workflow has no `concurrency` group — cancelling a superseded run would leave an
-event with no status at all.
+agree about **which commit** they are judging instead of publishing verdicts
+about different ones, which is why the workflow has no `concurrency` group —
+cancelling a superseded run would leave an event with no status at all.
+
+**Agreeing on the commit is not agreeing on the verdict, and the difference is
+the code each run executes.** A `pull_request` or `pull_request_review` run
+checks out that pull request's merge ref; a `workflow_dispatch` run checks out
+the ref the dispatch named, and a schedule always runs the default branch. So on
+a pull request that changes what the gate accepts, two runs read one head and one
+review list and still disagree. Measured on #866, which **replaces** an entry in
+`ACCEPTED_REVIEWERS` rather than adding one: at 08:43:12Z the merge-ref run posted
+`success — Reviewed by claude-general-reviewer[bot] at a46eaf8`, and at 08:43:15Z a
+refless dispatch running `main`'s older copy computed `0 counted from an accepted
+reviewer` and overwrote it with `pending`. The last writer wins, and nothing reports
+the disagreement.
+
+Replacement is the precondition, not merely a change to the set. A **widened** set
+still contains every login the older copy accepts, so both copies would count the
+same review and agree; the disagreement needs the two sets to be **disjoint on the
+reviewer that reviewed**. A pull request that only adds a reviewer does not
+reproduce this.
+
+Naming the head ref narrows the dispatch's skew rather than closing it, and the
+remainder is a different order of problem. The event-driven triggers check out the
+pull request's **merge ref**; a dispatch checks out the ref it was given, which is
+the branch **tip**. Those are different commits whenever `main` has moved since the
+branch point, so the two runs can still execute different gate code — but both
+copies are now the pull request's own, which is the part that decided the verdict
+above. It inverts the staleness rather than removing it, and that is a trade worth
+naming: before, every dispatch ran `main`'s gate, wrong only for a pull request that
+edits the gate — loud, and confined to one class. Now every dispatch runs the branch
+tip's gate, which is wrong whenever `main` has fixed the gate and the branch has not
+rebased — quieter, and possible on any stale branch. Taken deliberately, because the
+loud case is the one that blocks a merge. A merge-ref/tip difference is the ordinary
+staleness every CI run carries;
+judging a pull request by the branch it is replacing is not. (A branch cut before
+this workflow carried `workflow_dispatch` 404s the dispatch instead, landing on the
+warning path with the sweep as backstop.)
+
+It does **not** fix the scheduled sweep,
+which GitHub always runs from the default branch — so a pull request editing the
+gate still has its status flapped every half hour until it merges. That is
+tolerable only while this context is not required; it is a prerequisite to close
+before #698 promotes it, because under a required context the same flap is an
+unmergeable pull request. Tracked as #868 rather than fixed here — the sweep's
+correct behaviour when it disagrees with a pull request's own code is a design
+question, not a one-line ref.
 
 This gate reports; it does not yet block. Promotion to a required context on
 `main` is #698, deliberately separate: a required check that has never reported
@@ -420,7 +489,7 @@ gh api graphql -F n=<n> -f query='
   }' --jq '
   .data.repository.pullRequest as $pr
   | [ $pr.reviews.nodes[]
-      | select(.author.login | IN("copilot-pull-request-reviewer", "github-actions"))
+      | select(.author.login | IN("copilot-pull-request-reviewer", "claude-general-reviewer"))
       | select(.state | IN("APPROVED", "CHANGES_REQUESTED", "COMMENTED")) ] as $counted
   | ($counted | group_by(.author.login) | map(max_by(.submittedAt))) as $newest
   | ($newest | map(select(.commit.oid == $pr.headRefOid)) | first) as $covering
@@ -436,7 +505,7 @@ difference between an answer and a confident wrong one:
 - **The `null` arm.** `last` of an empty array is `null`, and jq reads a field
   off `null` and slices it without complaining, so the obvious form —
   `… | last | "\(.commit.oid[0:8])"` — prints `null null` and exits 0 for a pull
-  request Copilot has not reviewed at all. That is precisely the state this
+  request no accepted reviewer has reviewed at all. That is precisely the state this
   command exists to name, and the one where a reader is least able to tell
   nonsense from an answer.
 - **The repository is named in the query**, which is why this one command needs
@@ -634,25 +703,23 @@ rest of the preconditions.
 7. **Admin bypass of the ruleset**, once #698 has made the context required.
    `RepositoryRole` 5 keeps `bypass_mode: always` on ruleset `19141543`.
 
-## Known limitation: the Claude reviewer's review does not itself recompute this status
+## The Claude reviewer's review recomputes this status — since #865
 
-**A review posted by `.github/workflows/claude-review.yml` creates no workflow run
-at all, and that is by design rather than by luck.** GitHub does not create workflow
-runs from events generated by the default `GITHUB_TOKEN`, and that workflow submits
-its review with `github.token` — so this gate's `pull_request_review` trigger cannot
-fire for it, ever.
+**It did not until #865, and the reason it does now is the credential rather than
+anything about the workflow.** GitHub creates no workflow run from an event generated
+by the default `GITHUB_TOKEN`, and `claude-review.yml` used to submit with
+`github.token` — so this gate's `pull_request_review` trigger could not fire for that
+leg at all. It now submits under the Claude General Reviewer GitHub App, whose
+installation token is not that token, and the event is delivered.
 
-This is a **stronger** claim than the one in the next section. Copilot's review
-events are _unreliable_ here and occasionally do arrive; this leg's are structurally
-absent.
+Measured on #866: review submitted `07:55:45Z`, this workflow ran on
+`pull_request_review` at `07:55:48Z`.
 
-**What compensates is a request, not a trigger.** Since #853, `claude-review.yml`
-finishes by dispatching this workflow for the pull request it just reviewed
-(`gh workflow run copilot-review-gate.yml --field pr=<n>`), which is the same
-break-glass rung documented above, pulled automatically instead of by hand. The
-structural fact is unchanged — nothing woke the gate, the reviewer asked it to look
-— and the distinction matters when it fails: a dispatch can be refused or dropped,
-where a trigger that never fires cannot be retried.
+**The #853 dispatch stays anyway, and the two are now redundant on purpose.** On that
+same run it fired at `07:55:47Z`, a second ahead of the trigger. One measurement is not
+a reliability claim; Copilot's trigger on the same endpoint is documented as unreliable
+(see the next section); and a dispatch can be retried where a trigger that never
+arrives cannot. The sweep remains the backstop if both fail.
 
 Three consequences, none of them a bug:
 
@@ -664,10 +731,13 @@ Three consequences, none of them a bug:
   dispatch cannot: a dispatch that failed, a run cancelled before it reached that
   step, and Copilot's own reviews. The dispatch shortens the reliance on #737's
   sweep; it does not remove it.
-- **The `failure` state is unreachable for this reviewer.** It requires a review to
-  have executed this job — `triggeringReview` — and a `workflow_dispatch` run
-  carries no review, so `failure` can only ever describe Copilot. A stale review
-  from the Claude leg reports `pending`, which also blocks.
+- **`failure` is still unreachable, but no longer for this reason.** It used to be
+  that no run for this leg could carry a `triggeringReview` at all, a
+  `workflow_dispatch` run having no review attached. Since #865 the
+  `pull_request_review` run does carry one — so what blocks `failure` now is
+  `everyReviewerHasSpoken`, and Copilot cannot speak while its credits are exhausted.
+  Same outcome, different cause: a stale review from this leg reports `pending`,
+  which also blocks.
 
 ## Known limitation: a Copilot review usually does not recompute this status
 
@@ -808,8 +878,8 @@ Further things the notes assume:
 
 - **Until #698, nothing merges or fails on what this status says.** It is
   advisory, which is why the approval limitation above is a nuisance today and a
-  blocker the day the context becomes required. It is also what makes the
-  `github-actions[bot]` hole tolerable rather than urgent — see
+  blocker the day the context becomes required. The `github-actions[bot]` hole that
+  used to ride on the same reasoning is closed — see
   [the two accepted reviewers](#the-two-accepted-reviewers).
 - **The accepted reviewer set is two, and one of them is dormant.** Everything
   above about Copilot describes a reviewer that currently cannot review, because

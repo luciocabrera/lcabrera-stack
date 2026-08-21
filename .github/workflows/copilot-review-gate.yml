@@ -50,8 +50,9 @@ name: Copilot Review Gate
 # still means "a reviewer ran against this head" and still never means "approved",
 # and this workflow is still the only writer of the context. Which reviewer
 # satisfied it is carried in the status description, so a monoculture is visible
-# rather than silent. The list, why it is OR rather than AND, and the known hole
-# in the second entry are in that module and in the doc below.
+# rather than silent. The list, why it is OR rather than AND, and why the second
+# entry is the reviewer's own App identity rather than the shared runner one are in
+# that module and in the doc below.
 #
 # The decision logic is scripts/lib/copilot-review.mjs (pure, unit-tested); the
 # behaviour, the never-reviewed case and the break-glass path are documented in
