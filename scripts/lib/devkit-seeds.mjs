@@ -26,13 +26,7 @@ export const UNIVERSAL_SECRETS = new Set(['GITHUB_TOKEN']);
  * quietly stops covering what it was written for, and it is the same rule the
  * dependency-advisory allowances follow.
  */
-export const EXEMPTIONS = [
-  {
-    path: 'rules/routes-data.md',
-    reason:
-      "names this repository's UI and server packages in prose; making it portable needs a mechanism for package names that does not exist yet — tracked in #860",
-  },
-];
+export const EXEMPTIONS = [];
 
 /** The `url =` of a config section, read one line at a time so no pattern can span sections. */
 const URL_LINE = /^[ \t]*url[ \t]*=[ \t]*(\S+)/;
@@ -90,9 +84,15 @@ export const repositoryIdentity = (gitConfig) => {
  * leak a shipped markdown file has, a `https://github.com/<owner>/<repo>/...`
  * link, which matched nothing and passed.
  *
+ * `workspacePaths` is separate from `workspaceNames` because a workspace's
+ * directory and its package name are independent strings, and a seed can leak
+ * either. This repository proves it: the showcase app is named
+ * `vite-react-compiler` and lives in `apps/react-router`, so a blueprint path
+ * naming the directory matched no package name and shipped clean (#860).
+ *
  * @param {{ repositoryName: string, repositoryOwner: string,
  *   repositorySlug: string, workspaceNames: string[],
- *   secretNames: string[] }} args
+ *   workspacePaths: string[], secretNames: string[] }} args
  */
 export const forbiddenWords = ({
   repositoryName,
@@ -100,12 +100,14 @@ export const forbiddenWords = ({
   repositorySlug,
   secretNames,
   workspaceNames,
+  workspacePaths,
 }) => [
   ...new Set([
     repositoryName,
     repositoryOwner,
     repositorySlug,
     ...workspaceNames,
+    ...workspacePaths,
     ...secretNames
       .filter((name) => !UNIVERSAL_SECRETS.has(name))
       .map((name) => `secrets.${name}`),
