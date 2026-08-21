@@ -607,12 +607,15 @@ is the schedule; the interval, the recovery and what it does on failure are in
 | `vp run review-gates:reconcile -- --pr <n> --dry-run` | print what it would publish, posting nothing           |
 
 **Both posting forms post as you, not as a workflow**, so neither satisfies
-`Copilot review complete`. A locally-posted **`success`** is the one to avoid: it
-is terminal, so no later sweep ever computes anything different, and the gate is
-never cleared by an app-backed status — on every open pull request at once, in the
-bare form. A locally-posted `pending` is harmless; the sweep publishes over it as
-Actions once a review lands. To clear that gate, dispatch **Copilot Review Gate**;
-`review-gate-reconcile.md` has the detail.
+`Copilot review complete`. A locally-posted **`success`** is the one to avoid:
+the sweep withholds when the state and description it computes match what is
+already posted, and for this gate it never weakens a `success` (#868) — so the
+bar can stop being cleared by an app-backed status, on every open pull request at
+once in the bare form. A locally-posted `pending` is harmless; the sweep
+publishes over it as Actions once a review lands. Break-glass rung 3 in
+[`docs/tooling/copilot-review-gate.md`](docs/tooling/copilot-review-gate.md)
+owns the mechanism and its exceptions; to clear the gate, dispatch **Copilot
+Review Gate**.
 
 ### Autonomous PR queue
 
