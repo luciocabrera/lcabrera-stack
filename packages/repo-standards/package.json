@@ -3,6 +3,12 @@
   "version": "0.0.0",
   "private": true,
   "description": "The gates that keep a repository's commits, branches, pull requests, issues, coordination register, architecture decisions and published packages to one enforced shape — as commands, so any repository can run them.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luciocabrera/vite-react-compiler.git",
+    "directory": "packages/repo-standards"
+  },
   "bin": {
     "repo-adr": "./scripts/new-adr.mjs",
     "repo-audit-release": "./scripts/audit-release.mjs",
@@ -22,6 +28,11 @@
     "repo-verify-stray-configs": "./scripts/verify-stray-configs.mjs",
     "repo-verify-types": "./scripts/verify-attw.mjs"
   },
+  "files": [
+    "scripts",
+    "CHANGELOG.md",
+    "!scripts/**/*.test.mjs"
+  ],
   "type": "module",
   "exports": {
     "./adr-registry": "./scripts/adr-registry.mjs",
@@ -48,6 +59,9 @@
     "./report-warnings": "./scripts/report-warnings.mjs",
     "./safe-read": "./scripts/safe-read.mjs",
     "./workspace-scopes": "./scripts/workspace-scopes.mjs"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "format": "vp fmt .",
