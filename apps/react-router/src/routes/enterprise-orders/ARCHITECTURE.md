@@ -243,9 +243,16 @@ that key and ascending where they did not. Nesting order is not the sort's to
 change — it is the tree — so a sort sets a level's direction rather than
 reordering the levels, and a sort on a column the grouped read does not project
 is dropped, because a grouped result has no row of that column's values to
-order. This route requests key sorts only; an aggregate sort would be legal at
-the innermost level, and one that would rank an ancestor is refused at
-construction rather than emitted as a term that orders nothing.
+order.
+
+**An aggregate sort is a term of its own, appended after the keys** (#869).
+Each selected aggregate renders as its own grid column, so clicking that
+column's header sorts by the measure: `toGroupSort` turns a sort naming one of
+this read's requested aggregates into `GroupSort`'s `aggregateAlias` arm and
+places it last. Position is what decides which level an aggregate orders — after
+every key it orders the innermost siblings within their parent — and one that
+would rank an ancestor is refused at construction rather than emitted as a term
+that orders nothing.
 
 **The aggregate menu is the catalogue's answer, not the column's declared type.**
 `selectOrderGroupingCapabilities` resolves what every allowed column may do from
