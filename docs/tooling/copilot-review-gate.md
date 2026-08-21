@@ -703,6 +703,39 @@ rest of the preconditions.
 7. **Admin bypass of the ruleset**, once #698 has made the context required.
    `RepositoryRole` 5 keeps `bypass_mode: always` on ruleset `19141543`.
 
+   **Rehearsed on #877, 2026-08-21 — the only rung here that has been exercised
+   deliberately rather than in an incident.** It was worth doing: the rung was one
+   sentence asserting a capability nobody had used, and #698 makes every stuck pull
+   request depend on it. A bypass that turns out not to reach the person holding the
+   merge button is an unmergeable pull request with no way out, which is a worse
+   position than the gate this ladder exists to escape.
+
+   What the UI actually does, because "there is an admin bypass" does not tell you
+   what to look for:
+
+   - The control is a **checkbox**, not a button — red text, unticked by default, below
+     the checks list: _"Merge without waiting for requirements to be met (bypass
+     rules)"_. Under pressure it is easy to hunt for a differently-worded button and
+     conclude there is no way out.
+   - While it is unticked the merge button reads **`Squash and merge`** and is
+     **disabled**. Ticking it relabels the button to **`Bypass rules and merge
+(squash)`** and enables it. That relabel is the confirmation the override actually
+     applies to you, as distinct from merely being displayed.
+   - No second confirmation, no typed-name prompt.
+
+   How it was rehearsed, since the method generalises: the failing check was
+   **`Commit + PR standards`**, made to fail by omitting required sections from the pull
+   request **description** while keeping a conforming **title**. That is the cheapest
+   deliberate failure available — no code change, and because the squash subject comes
+   from the title, `main`'s history is unaffected. The change carried was one the
+   repository wanted anyway, so nothing needed reverting. The other 18 checks were left
+   to go green first, so the bypass skipped exactly one check whose failure was known.
+
+   **Say so in the commit.** `4a1bd2b5` records that it merged through the bypass and
+   why, for the same reason rung 6 puts the reason in the status description: a merge
+   past a red required check is a state nobody can re-derive later from the repository
+   alone.
+
 ## The Claude reviewer's review recomputes this status — since #865
 
 **It did not until #865, and the reason it does now is the credential rather than
