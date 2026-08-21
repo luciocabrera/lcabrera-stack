@@ -277,16 +277,35 @@ never a copy left to drift.
 
 ### Layout
 
-While grouping is applied the grid adds **no column of its own**. Each group key
-is hoisted to the head of the order and of the left pin, in key order, and forced
-visible ([ADR-080](../../../../../docs/decisions/ADR-080-a-group-key-renders-in-its-own-column.md)).
-That is a derivation and never state, so it reaches neither the cookie the column
+While grouping is applied, two derivations reshape the column list, in an order
+that matters. `withAggregateColumns` runs first and replaces each **measured**
+column with one column per aggregate applied to it; `withGroupedColumnLayout`
+then hoists each group key to the head of the order and of the left pin, in key
+order, and forces it visible
+([ADR-080](../../../../../docs/decisions/ADR-080-a-group-key-renders-in-its-own-column.md)).
+Both are derivations and never state, so neither reaches the cookie the column
 layout persists through nor the list the drawer offers — which is what makes
-ungrouping free.
+ungrouping free, and what means a deselected aggregate needs no pruning: the
+next derivation simply does not produce its column.
 
-A group row renders **each key's value in that key's own column**, and every
-other column renders that group's selected aggregate under its own header — an em
-dash where none was selected. **Depth is read from which key columns are filled**,
+The two cannot conflict, because an aggregate naming a group key is dropped —
+that column already carries its key's value. One column is never replaced,
+though: a **primary-key** column is measured _beside_ itself, because
+`resolveCrudRowId` throws when no column carries `isPrimaryKey`, and substituting
+the only one would take out the row-actions menu of every row for a grouping
+settable from the URL.
+
+A measure column's key is the aggregate's token — `total_amount:avg` — which
+`DataKey` admits for the same reason it admits `'actions'`: a column identity
+that names no field of the row. Its header draws the function alone, with the
+source column's name stated once above it by a decorative band row
+(`TableHeaderBand`). The band is `aria-hidden`, so the name reaches the
+accessibility tree through each measure header's own `aria-label` instead — one
+announcement per column rather than a second header row in the sequence
+`aria-rowindex` counts through.
+
+A group row renders **each key's value in that key's own column**, one measure
+per measure column, and an em dash on a column carrying no aggregate at all. **Depth is read from which key columns are filled**,
 not from a pixel offset: a rollup fills a prefix, a cube fills an arbitrary
 subset, and neither needs the other's reading. A key column renders **blank** on
 its detail rows: the value is stated once, by the group row directly above them,

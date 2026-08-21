@@ -113,10 +113,11 @@ const selectGroupedWideAlltypes150 = async ({
         periods: groupPeriods,
         // `resolveQuerySort` is the same adapter the paginated branch uses, so
         // the two orderings come from one conversion. Its fallback tiebreaker is
-        // harmless here: `toGroupSort` keeps only terms naming a group key, and
-        // the primary key is never one.
+        // harmless here: `toGroupSort` keeps only terms naming a group key or
+        // one of the requested aggregates, and the primary key is neither.
         sort: toGroupSort({
           groupKeys,
+          requested,
           sort: resolveQuerySort({
             fallback: WIDE_ALLTYPES_FALLBACK_SORT,
             sorting: sort,
