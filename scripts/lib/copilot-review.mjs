@@ -29,7 +29,7 @@
 
 /** REST spells the reviewer `…[bot]`, GraphQL drops the suffix. Both appear. */
 const COPILOT_LOGIN = 'copilot-pull-request-reviewer';
-const CLAUDE_REVIEW_LOGIN = 'github-actions';
+const CLAUDE_REVIEW_LOGIN = 'claude-general-reviewer';
 const BOT_SUFFIX = /\[bot\]$/;
 
 /**
@@ -53,14 +53,19 @@ const BOT_SUFFIX = /\[bot\]$/;
  * non-required context. Rulesets AND their required contexts together, so OR
  * cannot be expressed at the ruleset level and has to live inside this one status.
  *
- * `github-actions` IS A KNOWN HOLE, and it is here with its eyes open. It is the
- * default `GITHUB_TOKEN` identity, so it names the RUNNER rather than the
- * reviewer: any workflow in this repository that posts a review would satisfy this
- * gate, not only `.github/workflows/claude-review.yml`. Nothing else posts one
- * today, so the hole is latent rather than open, and this context is advisory —
- * nothing merges or fails on it. **#699 must land before #698 promotes it**, at
- * which point the Claude GitHub App gives the reviewer an identity of its own and
- * this entry is replaced rather than extended.
+ * **That hole is closed (#865), and the shape of the fix is worth keeping.** This
+ * entry used to read `github-actions` — the default `GITHUB_TOKEN` identity, which
+ * names the RUNNER rather than the reviewer, so any workflow here that posted a
+ * review satisfied this gate. It was replaced, not extended: leaving both would
+ * have kept the hole open while making `everyReviewerHasSpoken` need three
+ * reviewers, so the set would have grown weaker in two directions at once.
+ *
+ * The replacement is what makes a SECOND in-workflow reviewer possible at all, and
+ * that is the sharper reason than tidiness. `latestReviewPerReviewer` keys by
+ * login, so two reviewers sharing `github-actions[bot]` collapse into one bucket
+ * and the newest wins — reviewer A's review of the current head is discarded when
+ * reviewer B posts later against a stale one. Distinct identities are a
+ * precondition for the roster growing, not a cosmetic improvement to it.
  */
 const ACCEPTED_REVIEWERS = new Set([
   // The Copilot code review bot ruleset 19141543 requests on every push
@@ -68,9 +73,10 @@ const ACCEPTED_REVIEWERS = new Set([
   // the config is untouched, so this path resumes on its own when they return.
   COPILOT_LOGIN,
   // `.github/workflows/claude-review.yml`, which submits through the reviews API
-  // from a workflow step. It authenticates with `github.token`, which is why this
-  // entry reads `github-actions` rather than anything naming Claude — see the hole
-  // described above.
+  // from a workflow step using an installation token from the Claude General
+  // Reviewer GitHub App. The login is the App's, looked up rather than derived
+  // from its display name: `gh api "/users/claude-general-reviewer%5Bbot%5D"`.
+  // A guess here fails silently — the gate simply never matches.
   CLAUDE_REVIEW_LOGIN,
 ]);
 

@@ -82,10 +82,10 @@ explicit named list — and adding to it is an edit someone makes on purpose. It
 matched by equality, not by a regex over bot logins, not by a `[bot]` suffix test
 and not by a substring: each of those would admit reviewers nobody chose.
 
-| Reviewer                             | What it is                                                                                     |
-| ------------------------------------ | ---------------------------------------------------------------------------------------------- |
-| `copilot-pull-request-reviewer[bot]` | the Copilot code review bot ruleset `19141543` requests on every push (`review_on_push: true`) |
-| `github-actions[bot]`                | [`.github/workflows/claude-review.yml`](../../.github/workflows/claude-review.yml)             |
+| Reviewer                             | What it is                                                                                                           |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| `copilot-pull-request-reviewer[bot]` | the Copilot code review bot ruleset `19141543` requests on every push (`review_on_push: true`)                       |
+| `claude-general-reviewer[bot]`       | [`.github/workflows/claude-review.yml`](../../.github/workflows/claude-review.yml), posting under its own GitHub App |
 
 **The Copilot path is dormant, not removed.** Copilot code review is a server-side
 Copilot feature and cannot be pointed at a personal Anthropic key — BYOK covers
@@ -130,18 +130,31 @@ a second, informational, non-required context — not in this one.
 ruleset level at all. It has to live inside the single status, which is why the change
 is in `copilot-review.mjs` and not in repository settings.
 
-### `github-actions[bot]` is a known hole
+### The second entry used to name the runner, and #865 closed that
 
-The second entry names the **runner**, not the reviewer. `claude-review.yml`
-authenticates with the default `GITHUB_TOKEN`, so its review is authored by the same
-identity every other workflow here holds — which means **any** workflow in this
-repository that posts a review would satisfy this gate, not only that one.
+`claude-review.yml` authenticated with the default `GITHUB_TOKEN`, so its review was
+authored by `github-actions[bot]` — the identity **every** workflow here holds. Any
+workflow in this repository that posted a review satisfied this gate, not only that
+one. It stayed tolerable because nothing else posted one and the context is advisory.
 
-Nothing else posts a review today, so the hole is latent rather than open, and this
-context is advisory: nothing merges or fails on what it says. **#699 must land before
-#698 promotes it to required.** A Claude GitHub App gives the reviewer an identity of
-its own, and that entry is then replaced rather than extended. The constant carries
-the same warning, so nobody has to find this page first.
+It now posts under the **Claude General Reviewer** GitHub App, and the entry was
+**replaced rather than extended**. Keeping both would have left the hole open while
+making `everyReviewerHasSpoken` require three reviewers — weaker in two directions at
+once.
+
+**The sharper reason is that it unblocks a second in-workflow reviewer.**
+`latestReviewPerReviewer` keys by login, so two reviewers sharing `github-actions[bot]`
+collapse into one bucket and the newest wins: reviewer A's review of the current head
+is discarded when reviewer B posts later against a stale one. Distinct identities are a
+precondition for the roster growing, not tidiness.
+
+A test asserts `github-actions` is **not** accepted, so re-adding it — by edit, or by a
+workflow quietly falling back to `github.token` — fails the build rather than silently
+widening the gate.
+
+Rotation is manual and unowned by automation: the App's private key does not expire,
+but if it is regenerated, `REVIEWER_APP_PRIVATE_KEY` must be replaced by hand or every
+review stops posting.
 
 ### The name still says Copilot
 
@@ -808,8 +821,8 @@ Further things the notes assume:
 
 - **Until #698, nothing merges or fails on what this status says.** It is
   advisory, which is why the approval limitation above is a nuisance today and a
-  blocker the day the context becomes required. It is also what makes the
-  `github-actions[bot]` hole tolerable rather than urgent — see
+  blocker the day the context becomes required. The `github-actions[bot]` hole that
+  used to ride on the same reasoning is closed — see
   [the two accepted reviewers](#the-two-accepted-reviewers).
 - **The accepted reviewer set is two, and one of them is dormant.** Everything
   above about Copilot describes a reviewer that currently cannot review, because

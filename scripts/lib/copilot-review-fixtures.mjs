@@ -49,13 +49,18 @@ export const graphqlReview = ({
 /**
  * A review from the in-workflow Claude reviewer.
  *
- * `github-actions[bot]` is the default GITHUB_TOKEN identity rather than a name
- * that says "Claude" — the known hole `ACCEPTED_REVIEWERS` documents, and the
- * reason the tests read `claudeReview` where the login does not.
+ * The login is the Claude General Reviewer GitHub App's own, which is the point
+ * of #865: it used to be `github-actions[bot]`, the default GITHUB_TOKEN
+ * identity, shared with every other workflow here.
  */
 export const claudeReview = ({
   commit = HEAD,
   state = 'COMMENTED',
   submitted = '2026-08-20T10:15:11Z',
 } = {}) =>
-  restReview({ commit, login: 'github-actions[bot]', state, submitted });
+  restReview({
+    commit,
+    login: 'claude-general-reviewer[bot]',
+    state,
+    submitted,
+  });
