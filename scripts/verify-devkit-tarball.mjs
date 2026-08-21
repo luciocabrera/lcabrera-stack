@@ -51,8 +51,6 @@ const run = (command, args, cwd) =>
     stdio: ['ignore', 'pipe', 'pipe'],
   });
 
-const readJson = (path) => JSON.parse(readFileSync(path, 'utf8'));
-
 /** Every file devkit placed, ignoring the install it placed them beside. */
 const materialisedFiles = (directory) =>
   readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -61,7 +59,26 @@ const materialisedFiles = (directory) =>
     return entry.isDirectory() ? materialisedFiles(path) : [path];
   });
 
-/** Pack with pnpm, not npm: `publishConfig` and `catalog:` are pnpm rewrites. */
+/** One file out of a tarball, without unpacking the whole thing. */
+const packedFileReader = (tarball) => (target) => {
+  try {
+    return run('tar', ['-xzOf', tarball, `package/${target}`], REPO_ROOT);
+  } catch {
+    return undefined;
+  }
+};
+
+/**
+ * Pack with pnpm, not npm: `publishConfig` and `catalog:` are pnpm rewrites.
+ *
+ * The manifest comes back OUT of the tarball rather than off disk, which is the
+ * whole point of packing. pnpm substitutes `publishConfig` at pack time, so a
+ * package using the built shape has `exports` pointing at `./src/*` on disk and
+ * `./dist/*` in the artifact — comparing the on-disk map against the packed files
+ * would report every export missing while the artifact is fine, and, more quietly,
+ * would report green for a subpath present in `exports` and forgotten in
+ * `publishConfig.exports`. `publish-pack.mjs` reads it back for the same reason.
+ */
 const packOne = ({ directory, into }) => {
   const packageDir = join(REPO_ROOT, 'packages', directory);
   const output = run('pnpm', ['pack', '--pack-destination', into], packageDir);
@@ -73,16 +90,12 @@ const packOne = ({ directory, into }) => {
   if (tarball === undefined) {
     throw new Error(`pnpm pack produced no tarball for packages/${directory}`);
   }
-  return { manifest: readJson(join(packageDir, 'package.json')), tarball };
-};
 
-/** One file out of a tarball, without unpacking the whole thing. */
-const packedFileReader = (tarball) => (target) => {
-  try {
-    return run('tar', ['-xzOf', tarball, `package/${target}`], REPO_ROOT);
-  } catch {
-    return undefined;
+  const packed = packedFileReader(tarball)('package.json');
+  if (packed === undefined) {
+    throw new Error(`the tarball for packages/${directory} holds no manifest`);
   }
+  return { manifest: JSON.parse(packed), tarball };
 };
 
 const packedPathsOf = (tarball) =>
