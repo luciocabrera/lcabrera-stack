@@ -46,21 +46,38 @@ describe('resolveCrudRowId', () => {
     expect(result).toBe('123_ORD%209');
   });
 
-  it('throws when no primary-key column is defined', () => {
-    expect(() =>
+  it('answers undefined when no primary-key column is declared', () => {
+    // Not a throw: the only caller renders, and a throw there empties the grid
+    // rather than protecting a route (ADR-062, #887). The caller renders no
+    // menu, so no bad id reaches a route either way.
+    expect(
       resolveCrudRowId<Row>({
         columns: [col({ key: 'order_id' }), col({ key: 'order_number' })],
         row: { order_id: 123, order_number: 'ORD-9' },
       }),
-    ).toThrow(TypeError);
+    ).toBeUndefined();
   });
 
-  it('throws when a primary-key value is neither string nor number', () => {
-    expect(() =>
+  it('answers undefined when a primary-key value is neither string nor number', () => {
+    expect(
       resolveCrudRowId<Row>({
         columns: [col({ isPrimaryKey: true, key: 'order_id' })],
         row: { order_id: undefined as unknown as number, order_number: 'x' },
       }),
-    ).toThrow(TypeError);
+    ).toBeUndefined();
+  });
+
+  it('answers undefined when only one half of a composite key resolves', () => {
+    // A partial id would address a different row, so the whole answer is
+    // withheld rather than the resolvable half being joined alone.
+    expect(
+      resolveCrudRowId<Row>({
+        columns: [
+          col({ isPrimaryKey: true, key: 'order_id' }),
+          col({ isPrimaryKey: true, key: 'order_number' }),
+        ],
+        row: { order_id: 123, order_number: undefined as unknown as string },
+      }),
+    ).toBeUndefined();
   });
 });

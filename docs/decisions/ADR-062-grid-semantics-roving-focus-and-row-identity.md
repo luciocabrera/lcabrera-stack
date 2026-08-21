@@ -224,6 +224,15 @@ a route — and wrong on the render path, where the same throw empties the table
 The two callers want opposite failure modes from the same derivation, so the
 derivation is shared and the failure handling is not.
 
+> **Note, 2026-08-21 (#887):** the reasoning above was right and was applied to
+> only one of the two render-path callers. `TableRowActionsMenu` kept the
+> throwing call, and a group row misclassified as a data row duly emptied the
+> table. `resolveCrudRowId` no longer throws — it answers `undefined` and the
+> menu renders nothing — so the throwing form this paragraph rejects no longer
+> exists anywhere. Nothing wanted it: after the fix it had no callers at all.
+> The decision stands; what changed is that "the failure handling is not
+> shared" now covers every caller rather than one.
+
 **Rejected: deriving `aria-rowindex` from the rendered window.** It is the
 cheaper implementation and it is wrong: a screen reader would announce "row 3 of
 50" for a row far down a large dataset. The window index is an implementation

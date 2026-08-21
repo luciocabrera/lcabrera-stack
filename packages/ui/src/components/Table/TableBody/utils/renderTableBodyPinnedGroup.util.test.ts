@@ -5,6 +5,19 @@ import { renderTableBodyPinnedGroup } from './renderTableBodyPinnedGroup.util';
 const ROW_INDEX = 7;
 const ROW_KEY = 'pk:[7]';
 
+/**
+ * This function drops any per-row field its signature does not destructure —
+ * excess properties survive the caller's spread — so `drillRow` went missing
+ * here and every drill chrome row was read as a data row (#887).
+ *
+ * **A field is only pinned by a case that actually passes one.** These
+ * assertions name the whole payload, but `toHaveBeenNthCalledWith` compares
+ * with `toEqual` semantics, and those treat an absent key and an `undefined`
+ * key as equal — so a case whose input leaves a field `undefined` passes
+ * whether or not the field is forwarded, and could never have caught the
+ * original bug. The last case below passes a real marker for exactly that
+ * reason; the grid-level guard is `Table.groupedCrud.test.tsx`.
+ */
 describe('renderTableBodyPinnedGroup', () => {
   it('maps each column in order using shared row data', () => {
     const row = { amount: 10, name: 'A' };
@@ -15,6 +28,7 @@ describe('renderTableBodyPinnedGroup', () => {
     const result = renderTableBodyPinnedGroup({
       carriedGroupKeys: new Set<string>(),
       columns: ['name', 'amount'],
+      hasStructuralMarker: false,
       renderCell,
       row,
       rowIndex: ROW_INDEX,
@@ -25,6 +39,10 @@ describe('renderTableBodyPinnedGroup', () => {
     expect(renderCell).toHaveBeenNthCalledWith(1, {
       carriedGroupKeys: new Set<string>(),
       col: 'name',
+      disclosure: undefined,
+      drillRow: undefined,
+      groupSummary: undefined,
+      hasStructuralMarker: false,
       row,
       rowIndex: ROW_INDEX,
       rowKey: ROW_KEY,
@@ -32,6 +50,10 @@ describe('renderTableBodyPinnedGroup', () => {
     expect(renderCell).toHaveBeenNthCalledWith(2, {
       carriedGroupKeys: new Set<string>(),
       col: 'amount',
+      disclosure: undefined,
+      drillRow: undefined,
+      groupSummary: undefined,
+      hasStructuralMarker: false,
       row,
       rowIndex: ROW_INDEX,
       rowKey: ROW_KEY,
@@ -42,6 +64,7 @@ describe('renderTableBodyPinnedGroup', () => {
     const result = renderTableBodyPinnedGroup({
       carriedGroupKeys: new Set<string>(),
       columns: [],
+      hasStructuralMarker: false,
       renderCell: vi.fn(),
       row: {},
       rowIndex: ROW_INDEX,
@@ -61,6 +84,7 @@ describe('renderTableBodyPinnedGroup', () => {
     const result = renderTableBodyPinnedGroup({
       carriedGroupKeys: new Set<string>(),
       columns,
+      hasStructuralMarker: false,
       renderCell,
       row,
       rowIndex: ROW_INDEX,
@@ -71,6 +95,10 @@ describe('renderTableBodyPinnedGroup', () => {
     expect(renderCell).toHaveBeenCalledWith({
       carriedGroupKeys: new Set<string>(),
       col: columns[0],
+      disclosure: undefined,
+      drillRow: undefined,
+      groupSummary: undefined,
+      hasStructuralMarker: false,
       row,
       rowIndex: ROW_INDEX,
       rowKey: ROW_KEY,
@@ -78,9 +106,42 @@ describe('renderTableBodyPinnedGroup', () => {
     expect(renderCell).toHaveBeenCalledWith({
       carriedGroupKeys: new Set<string>(),
       col: columns[1],
+      disclosure: undefined,
+      drillRow: undefined,
+      groupSummary: undefined,
+      hasStructuralMarker: false,
       row,
       rowIndex: ROW_INDEX,
       rowKey: ROW_KEY,
     });
+  });
+
+  it('forwards a drill marker rather than dropping it', () => {
+    // The regression case. With `drillRow` missing from this function's
+    // destructuring the call object has no such key, and every other case here
+    // passes whether or not it does — an `undefined` expectation cannot tell
+    // "not forwarded" from "forwarded as undefined".
+    const drillRow = {
+      kind: 'loading',
+      path: [{ columnKey: 'name', label: 'Ana', value: 'Ana' }],
+      pathKey: 'name:Ana',
+      shortfall: 0,
+    } as const;
+    const renderCell = vi.fn(({ col }: { readonly col: string }) => col);
+
+    renderTableBodyPinnedGroup({
+      carriedGroupKeys: new Set<string>(),
+      columns: ['name'],
+      drillRow,
+      hasStructuralMarker: true,
+      renderCell,
+      row: {},
+      rowIndex: ROW_INDEX,
+      rowKey: ROW_KEY,
+    });
+
+    expect(renderCell).toHaveBeenCalledWith(
+      expect.objectContaining({ drillRow, hasStructuralMarker: true }),
+    );
   });
 });

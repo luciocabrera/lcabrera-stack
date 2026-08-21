@@ -182,12 +182,18 @@ that same key, so a collapse could not be re-applied after a refetch if the two
 drifted (ADR-067).
 
 The two helpers share which columns they read and nothing else — not the
-encoding, and not the failure handling. `resolveCrudRowId` throws a `TypeError`
-when no column is marked `isPrimaryKey`, and again when a primary-key value is
-neither string nor number; that is correct for a CRUD link, where a bad id must
-not reach a route. `resolveRowKey` **never throws**, because a key is needed for
-every row on every render and a throw here would take the whole table to an error
-boundary.
+encoding, and not what they answer when the read fails. `resolveCrudRowId`
+returns `undefined` when no column is marked `isPrimaryKey`, or when a
+primary-key value is neither string nor number, and its caller renders no menu;
+`resolveRowKey` degrades to the row's index, because a key is needed for every
+row on every render.
+
+**Neither throws, and that is a correction rather than a coincidence.**
+`resolveCrudRowId` did throw, which ADR-062 defended as right for a CRUD link
+where a bad id must not reach a route — and then rejected for row keys, since
+the same throw on the render path empties the table. Both callers turned out to
+be on the render path, so in #887 the throw did exactly that. Nothing reaches a
+route either way: a menu that does not render builds no link.
 
 | Case                                                                 | Key shape                        |
 | -------------------------------------------------------------------- | -------------------------------- |

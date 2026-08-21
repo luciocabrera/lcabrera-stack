@@ -209,6 +209,34 @@ one cell per rendered column, and therefore the same roving tab stop
 ([ADR-065](../../../../../docs/decisions/ADR-065-grouped-rows-render-a-hierarchy-column.md)).
 `Table.groupedGridSemantics.test.tsx` is where the two models meet.
 
+**Asking a row what it is has two different questions in it, and the render path
+needs both.** `getTableGroupRowSummary` and `getTableDrillRow` answer whether a
+marker is well-formed enough to render from; `hasTableStructuralMarker` answers
+whether the row carries one at all. The first two return `undefined` for a data
+row and for an unreadable marker alike, so on their own the grid cannot tell
+those apart — and it read the second as the first, handing a group row to the
+detail-row path where the actions column asked it for a primary key it was never
+going to have. A row that claims to be chrome is now blanked rather than
+reclassified, which is what lets the validators stay strict: one member that does
+not narrow must still refuse the whole summary, because a group described by some
+of its keys is not the group the row holds.
+
+**Nothing on the render path may throw, and sharing a derivation is not sharing a
+failure mode.** ADR-062 settled this for row identity: `resolveRowKey` degrades
+to the row's index rather than reusing `resolveCrudRowId`, because a throw on the
+render path empties the table. The row-actions menu was equally on the render
+path and kept the throwing call until #887, so `resolveCrudRowId` no longer
+throws at all — it answers `undefined` and the menu renders nothing. The rule generalises past these two: a derivation may be shared by a link
+builder and a renderer, and each owns what it does when the derivation fails.
+
+**A per-row field forwarded by name is a field that can be dropped by name.**
+`renderTableBodyPinnedGroup` receives one spread object and destructures the
+fields it passes on, so a field missing from its signature vanishes without a
+type error — excess properties survive a spread. `drillRow` was built per row and
+lost exactly this way, which is what made every drill chrome row a data row.
+Adding a per-row field means adding it to that signature too, and
+`Table.groupedCrud.test.tsx` is what notices when it is not.
+
 ## Grouped rows
 
 ### Grouping requires a SQL-backed paginated endpoint
@@ -353,9 +381,9 @@ decision on record.
 The two cannot conflict, because an aggregate naming a group key is dropped —
 that column already carries its key's value. One column is never replaced,
 though: a **primary-key** column is measured _beside_ itself, because
-`resolveCrudRowId` throws when no column carries `isPrimaryKey`, and substituting
-the only one would take out the row-actions menu of every row for a grouping
-settable from the URL.
+`resolveCrudRowId` answers `undefined` when no column carries `isPrimaryKey`, so
+substituting the only one silently strips the row-actions menu from every row,
+for a grouping settable from the URL.
 
 A measure column's key is the aggregate's token — `total_amount:avg` — which
 `DataKey` admits for the same reason it admits `'actions'`: a column identity

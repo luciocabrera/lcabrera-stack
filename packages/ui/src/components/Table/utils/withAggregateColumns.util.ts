@@ -58,13 +58,15 @@ type WithAggregateColumnsArgs<TData> = {
  * answer to a column this route does not render is to render nothing rather
  * than to invent a header for it.
  *
- * **A primary-key column is measured *beside* itself, never replaced**, and
- * this is a crash rather than a preference. `resolveCrudRowId` resolves a row's
- * id from the columns carrying `isPrimaryKey`, and throws a `TypeError` when
- * none does — so replacing the only such column takes out the row-actions menu
- * of every row on the grid, for a grouping the user can set from the URL. The
- * measure is inserted after it instead, which costs one column on a table that
- * asked to aggregate its own identifier and keeps CRUD working.
+ * **A primary-key column is measured *beside* itself, never replaced.**
+ * `resolveCrudRowId` builds a row's id from the columns carrying
+ * `isPrimaryKey` and answers `undefined` when none does, so replacing the only
+ * such column silently strips the row-actions menu from every row on the grid,
+ * for a grouping the user can set from the URL. It used to take the whole grid
+ * to an error boundary instead (#887); a menu that quietly disappears is the
+ * better failure and still not one to ship. The measure is inserted after it
+ * instead, which costs one column on a table that asked to aggregate its own
+ * identifier and keeps CRUD working.
  *
  * **This is a derivation, never state.** Nothing here reaches the store or the
  * cookie the layout persists through, so clearing the grouping restores the

@@ -65,6 +65,7 @@ describe('createRenderTableBodyCell', () => {
             {renderBodyCell({
               carriedGroupKeys: new Set<string>(),
               col,
+              hasStructuralMarker: false,
               row: { amount: 12 },
               rowIndex: ROW_INDEX,
               rowKey: ROW_KEY,
@@ -97,6 +98,7 @@ describe('createRenderTableBodyCell', () => {
             {renderBodyCell({
               carriedGroupKeys: new Set<string>(),
               col,
+              hasStructuralMarker: false,
               row: { name: 'Z' },
               rowIndex: ROW_INDEX,
               rowKey: ROW_KEY,
@@ -136,6 +138,7 @@ describe('createRenderTableBodyCell', () => {
             {renderBodyCell({
               carriedGroupKeys: new Set<string>(),
               col,
+              hasStructuralMarker: false,
               row: { name: 'A' },
               rowIndex: ROW_INDEX,
               rowKey: ROW_KEY,

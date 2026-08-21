@@ -13,6 +13,7 @@ import {
   getTableDrillRow,
   getTableGroupRowSummary,
 } from '#ui/components/Table/utils';
+import { hasTableStructuralMarker } from '#ui/components/Table/utils/hasTableStructuralMarker.util';
 import { resolveCarriedGroupKeys } from '#ui/components/Table/utils/resolveCarriedGroupKeys.util';
 import { resolveDeclaredGroupingKeys } from '#ui/components/Table/utils/resolveDeclaredGroupingKeys.util';
 import { resolveBodyAriaRowIndex } from '#ui/components/Table/utils/resolveGridRowIndexing.util';
@@ -100,6 +101,10 @@ export const TableBodyRows = <TData extends Record<string, unknown>>({
           disclosure: rowMeta?.[rowIndex],
           drillRow: getTableDrillRow(row),
           groupSummary,
+          // Asked of the row, not of the two values above: neither can tell a
+          // malformed marker from an absent one, and that gap is what let a
+          // group row reach the detail-row path (ADR-062).
+          hasStructuralMarker: hasTableStructuralMarker(row),
           renderCell: renderBodyCell,
           row,
           rowIndex,
