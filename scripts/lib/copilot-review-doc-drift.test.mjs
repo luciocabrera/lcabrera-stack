@@ -16,12 +16,14 @@ const DOC = 'docs/tooling/copilot-review-gate.md';
 /** Order-independent comparison; the two lists need not be written in one order. */
 const byName = (left, right) => left.localeCompare(right);
 
-/** The logins the doc's jq filter names, in the order it names them. */
-const loginsInDiagnostic = (markdown) => {
-  const filter = /select\(\.author\.login \| IN\(([^)]*)\)\)/.exec(markdown);
-  if (filter === null) return undefined;
-  return [...filter[1].matchAll(/"([^"]+)"/g)].map((match) => match[1]);
-};
+/** Every jq author filter in the doc — plural, so a second one cannot slip past. */
+const diagnosticFilters = (markdown) => [
+  ...markdown.matchAll(/select\(\.author\.login \| IN\(([^)]*)\)\)/gu),
+];
+
+/** The logins one such filter names, in the order it names them. */
+const loginsIn = (filter) =>
+  [...filter[1].matchAll(/"([^"]+)"/gu)].map((match) => match[1]);
 
 /**
  * The logins the reviewer table names, `[bot]` suffix dropped so it compares against
@@ -41,14 +43,19 @@ describe('the doc’s copies of the accepted-reviewer set', () => {
   // spreading `undefined` somewhere else.
   it('both copies are still shaped the way the extractors expect', () => {
     const markdown = readRepoFile(DOC);
-    expect(loginsInDiagnostic(markdown)).toBeDefined();
+    expect(diagnosticFilters(markdown).length).toBeGreaterThan(0);
     expect(loginsInTable(markdown)).toBeDefined();
   });
 
-  it('the GraphQL diagnostic names exactly the reviewers the gate accepts', () => {
-    const logins = loginsInDiagnostic(readRepoFile(DOC));
-    expect(logins).toBeDefined();
-    expect([...logins].sort(byName)).toEqual(expected());
+  // EVERY filter, not the first one. A second GraphQL snippet added later is another
+  // ungated copy — the failure this file exists for — and a check that reads only the
+  // first would stay green while it drifted.
+  it('every GraphQL diagnostic names exactly the reviewers the gate accepts', () => {
+    const filters = diagnosticFilters(readRepoFile(DOC));
+    expect(filters.length).toBeGreaterThan(0);
+    for (const filter of filters) {
+      expect(loginsIn(filter).sort(byName)).toEqual(expected());
+    }
   });
 
   it('the reviewer table names exactly the reviewers the gate accepts', () => {

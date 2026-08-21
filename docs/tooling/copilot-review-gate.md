@@ -396,12 +396,18 @@ the code each run executes.** A `pull_request` or `pull_request_review` run
 checks out that pull request's merge ref; a `workflow_dispatch` run checks out
 the ref the dispatch named, and a schedule always runs the default branch. So on
 a pull request that changes what the gate accepts, two runs read one head and one
-review list and still disagree. Measured on #866, which widens
-`ACCEPTED_REVIEWERS`: at 08:43:12Z the merge-ref run posted `success — Reviewed
-by claude-general-reviewer[bot] at a46eaf8`, and at 08:43:15Z a refless dispatch
-running `main`'s older copy computed `0 counted from an accepted reviewer` and
-overwrote it with `pending`. The last writer wins, and nothing reports the
-disagreement.
+review list and still disagree. Measured on #866, which **replaces** an entry in
+`ACCEPTED_REVIEWERS` rather than adding one: at 08:43:12Z the merge-ref run posted
+`success — Reviewed by claude-general-reviewer[bot] at a46eaf8`, and at 08:43:15Z a
+refless dispatch running `main`'s older copy computed `0 counted from an accepted
+reviewer` and overwrote it with `pending`. The last writer wins, and nothing reports
+the disagreement.
+
+Replacement is the precondition, not merely a change to the set. A **widened** set
+still contains every login the older copy accepts, so both copies would count the
+same review and agree; the disagreement needs the two sets to be **disjoint on the
+reviewer that reviewed**. A pull request that only adds a reviewer does not
+reproduce this.
 
 Naming the head ref narrows the dispatch's skew rather than closing it, and the
 remainder is a different order of problem. The event-driven triggers check out the
@@ -409,7 +415,13 @@ pull request's **merge ref**; a dispatch checks out the ref it was given, which 
 the branch **tip**. Those are different commits whenever `main` has moved since the
 branch point, so the two runs can still execute different gate code — but both
 copies are now the pull request's own, which is the part that decided the verdict
-above. A merge-ref/tip difference is the ordinary staleness every CI run carries;
+above. It inverts the staleness rather than removing it, and that is a trade worth
+naming: before, every dispatch ran `main`'s gate, wrong only for a pull request that
+edits the gate — loud, and confined to one class. Now every dispatch runs the branch
+tip's gate, which is wrong whenever `main` has fixed the gate and the branch has not
+rebased — quieter, and possible on any stale branch. Taken deliberately, because the
+loud case is the one that blocks a merge. A merge-ref/tip difference is the ordinary
+staleness every CI run carries;
 judging a pull request by the branch it is replacing is not. (A branch cut before
 this workflow carried `workflow_dispatch` 404s the dispatch instead, landing on the
 warning path with the sweep as backstop.)
