@@ -16,7 +16,7 @@ import { requiredConfigKeys, requiredPeers } from './frontmatter.mjs';
 import { unmetPeers } from './peer.mjs';
 import { substituteCommands } from './placeholders.mjs';
 import {
-  ACKNOWLEDGEABLE_STATE,
+  isAcknowledgeable,
   ACKNOWLEDGED_STATE,
   classifyMaterialisation,
   hashContent,
@@ -171,17 +171,22 @@ export const planSync = ({
  * three hashes, so the acceptance record can never change what `modified` means
  * and a consumer with no record gets exactly the plan they got before.
  *
- * Only `modified` is relabelled. A `conflict` is an unmanaged file the consumer
- * wrote themselves; quieting that would be adopting it, which is a different
- * decision and the one mistake a materialiser cannot undo.
+ * `modified` and `conflict` are both relabelled, and quieting a conflict is not
+ * adopting it — the package's version is still never written over the consumer's
+ * file, so the one mistake a materialiser cannot undo remains impossible. What
+ * changes is only whether a deliberate, permanent divergence is reported on
+ * every run forever. A repository that authored its own register before adopting
+ * the kit holds exactly that state, which is why `doctor --check` could not be a
+ * gate until this: it was red on a correct tree.
  *
  * Both commands read the plan through this, because `sync` and `doctor` must not
  * disagree about which files are quiet. It costs `sync` nothing: `acknowledged`
- * is in neither the written nor the recorded set, exactly as `modified` was.
+ * is in neither the written nor the recorded set, exactly as the two states it
+ * replaces were.
  */
 export const withAcceptance = ({ accepted, entries }) =>
   entries.map((entry) => {
-    if (entry.state !== ACKNOWLEDGEABLE_STATE) return entry;
+    if (!isAcknowledgeable(entry.state)) return entry;
     if (!isAccepted({ accepted, hash: entry.onDiskHash, path: entry.path })) {
       return entry;
     }

@@ -459,6 +459,8 @@ is believed — the same property [`deps:audit`](#dependencies) is built around.
 | `vp run devkit:sync`         | materialise the shipped files into this repository from [`packages/devkit`](packages/devkit/CLASSIFICATION.md) — a locally modified file is reported and kept, never overwritten; `-- --profile full` also places the workflows, hooks, templates and registers                      |
 | `vp run devkit:doctor`       | report what differs between the materialised copies and the package; `-- --check` fails on a difference, `-- --verbose` also lists acknowledged edits, `-- --profile <name>` reads a profile other than the configured one, `-- --accept <path> --reason "…"` acknowledges ONE       |
 | `vp run devkit:closure`      | measure what a directory references but does not contain — `-- <dir> [<dir> ...]`, or `-- --shipped` for every file the package places, in every profile (`-- --profile <name>` narrows it to one); the instrument behind the classification table                                   |
+| `vp run devkit:check`        | fail when this repository's materialised copies differ from the package — the drift gate, since consuming the kit's own output is only a guarantee if something checks it                                                                                                            |
+| `vp run tarball:verify`      | pack both distributed packages, install them into a scratch repository outside this tree, and run every declared bin — the only check that sees what a consumer actually receives                                                                                                    |
 | `vp run viteplus:verify`     | check AGENTS.md has no Vite+ managed block rendering content — the markers are removed so `vp install` cannot refill them; this catches them coming back (`--write` re-empties a refilled one)                                                                                       |
 | `vp run configs:verify`      | check no formatter/linter config file exists that no engine reads — fmt and lint are configured once in the root `vite.config.ts` (ADR-042), so a `.oxfmtrc.json`/`.prettierrc` beside it is a decoy                                                                                 |
 | `vp run skills:validate`     | validate skill definitions                                                                                                                                                                                                                                                           |
@@ -466,7 +468,7 @@ is believed — the same property [`deps:audit`](#dependencies) is built around.
 | `vp run prepare`             | `vp config` — runs automatically on install                                                                                                                                                                                                                                          |
 
 `devkit:doctor -- --accept` takes **one** file at a time and refuses a path the
-report does not currently call `modified`, or a missing `--reason` — the same
+report does not currently call `modified` or `conflict`, or a missing `--reason` — the same
 discipline `docs:verify -- --accept` keeps, for the same reason. It records the
 edit's on-disk hash in `.devkit-accepted.json`, which is **tracked**: commit it
 alongside `.devkit-manifest.json`. Because the record is keyed to that hash,

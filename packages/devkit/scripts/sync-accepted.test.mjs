@@ -135,9 +135,10 @@ describe('withAcceptance', () => {
     expect(isReported(resurfaced.state)).toBe(true);
   });
 
-  test('does not quieten a state that is not a local edit', () => {
-    // A `conflict` is a file the consumer wrote themselves. Quieting it would
-    // be adopting it, which is a different decision entirely.
+  test('quietens an acknowledged conflict without adopting it', () => {
+    // Quieting a conflict is not adopting it: the package's version is still
+    // never written over the consumer's file. What changes is only whether a
+    // deliberate, permanent divergence is reported on every run forever.
     const unmanaged = 'a file the consumer wrote';
     const [entry] = withAcceptance({
       accepted: withAccepted(
@@ -151,6 +152,22 @@ describe('withAcceptance', () => {
         onDiskHash: () => hashContent(unmanaged),
       }),
     });
+    expect(entry.state).toBe('acknowledged');
+    expect(isWritten(entry.state)).toBe(false);
+  });
+
+  test('leaves a conflict reported when nothing acknowledged it', () => {
+    const unmanaged = 'a file the consumer wrote';
+    const [entry] = withAcceptance({
+      accepted: {},
+      entries: planSync({
+        assets: [ASSET],
+        config: DEFAULT_CONFIG,
+        manifest: { files: {} },
+        onDiskHash: () => hashContent(unmanaged),
+      }),
+    });
+
     expect(entry.state).toBe('conflict');
   });
 });
