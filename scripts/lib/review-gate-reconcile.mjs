@@ -106,27 +106,14 @@ const postedMillis = (status) => Date.parse(status?.created_at ?? '') || 0;
  *   witness that — it sees only that the newest review names something other
  *   than the head, which is what produced the `failure` in the first place.
  *   Replacing it would turn a red check yellow and read as progress.
- * - **A `success` is never weakened, only re-described (#868).** The sweep runs
- *   from the DEFAULT BRANCH — GitHub always runs a `schedule` from there — so on
- *   a pull request that changes what a gate decides, it is judging that pull
- *   request with the code it is replacing. Measured on #866: one head, one review
- *   list, and the two copies computed opposite verdicts. The published `success`
- *   came from a run that had the pull request's own code; this one, by
- *   construction, does not, so it is not the better-informed opinion and must not
- *   win by landing last.
+ * - **A `success` is never weakened, only re-described (#868).** A `schedule` always
+ *   runs from the default branch, so on a pull request that changes what a gate
+ *   decides the sweep is judging it with the code it is replacing — this verdict is
+ *   not the better-informed one and must not win by landing last. Only the sweep is
+ *   affected: `--if-changed` is the only path here, and `gateArgs` is its only caller.
  *
- *   Scoped to the sweep without a flag, because `shouldPublishStatus` is only
- *   consulted under `--if-changed` and `gateArgs` is its only caller — the gate
- *   workflows invoke the scripts bare, so an event-driven run still publishes
- *   whatever it computes, including a downgrade. That is what keeps the two real
- *   downgrades working: a dismissed review (`copilot-review-gate.yml` subscribes
- *   to `pull_request_review.dismissed`) and a push, which moves the head so no
- *   status exists on it yet.
- *
- *   What it gives up is the sweep correcting a wrongly-green status. That is a
- *   smaller loss than it sounds: a hand-posted break-glass `success` (rung 6 of
- *   the ladder in `copilot-review-gate.md`) now survives until an event
- *   recomputes it, rather than being undone by a sweep minutes later.
+ *   What it gives up, and the residual false-green case it leaves behind, are in
+ *   `docs/tooling/review-gate-reconcile.md` — read that before relaxing this.
  */
 export const shouldPublishStatus = ({ current, next } = {}) => {
   if (next === undefined) {

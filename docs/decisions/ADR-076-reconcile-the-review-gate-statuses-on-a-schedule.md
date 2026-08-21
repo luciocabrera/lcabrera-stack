@@ -121,6 +121,18 @@ tighter bound anyway, because scheduled delivery is best-effort.
    of the head", which a sweep cannot witness. It would be inferring a submission
    event from its aftermath, and re-inferring it on every pass.
 
+## Amendments
+
+> **Narrowed by #868 / [#880](https://github.com/luciocabrera/vite-react-compiler/pull/880)**
+> (2026-08-21). Property 2 above — _"It publishes only a change"_ — now has a second
+> half: the sweep publishes only a change **and never a weaker state than a published
+> `success`**, though it still re-describes one. A `schedule` always runs from the
+> default branch, so on a pull request that changes what a gate decides the sweep judges
+> it with the code it is replacing; measured on #866, where one head and one review list
+> produced opposite verdicts from the two copies. The decision here is unchanged —
+> `docs/tooling/review-gate-reconcile.md` carries the rule, what it gives up, and the
+> residual false-green case that #699 would make reachable.
+
 ## References
 
 - #737 — the measurement, the reproduction commands and the acceptance criteria

@@ -120,12 +120,11 @@ It prints the head, how many reviews it counted, and the state it _would_
 publish, without touching anything. Compare that to what the pull request is
 showing:
 
-| It would publish | The PR shows | Reading                                                                                                              |
-| ---------------- | ------------ | -------------------------------------------------------------------------------------------------------------------- |
-| `pending`        | `pending`    | not reviewed yet — the gate is right, wait                                                                           |
-| `success`        | `pending`    | reviewed, and the event that should have recomputed it went missing                                                  |
-| `pending`        | `success`    | the head moved after the review; a push is what will correct it                                                      |
-| `pending`        | `success`    | **or** the sweep is running older gate code than the run that posted the `success` — it will not overwrite it (#868) |
+| It would publish | The PR shows | Reading                                                                                                                                                                                      |
+| ---------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pending`        | `pending`    | not reviewed yet — the gate is right, wait                                                                                                                                                   |
+| `success`        | `pending`    | reviewed, and the event that should have recomputed it went missing                                                                                                                          |
+| `pending`        | `success`    | the head moved after the review (a push corrects it), **or** the sweep is running older gate code than the run that posted the `success` — either way the sweep will not overwrite it (#868) |
 
 The same holds for the other gate with
 `vp run agent-review:verify -- --pr <n> --dry-run`.
@@ -136,21 +135,53 @@ The sweep can no longer correct a **wrongly green** status. That is a real loss 
 worth stating rather than leaving to be discovered, but it is smaller than it sounds,
 because the sweep was never the only path:
 
-- **A dismissed review** still downgrades. `copilot-review-gate.yml` subscribes to
-  `pull_request_review.dismissed`, and the gate workflows invoke the gate scripts
-  **without** `--if-changed`, so an event-driven run publishes whatever it computes.
-  This rule lives inside `shouldPublishStatus`, which only `--if-changed` consults,
-  and `gateArgs` is its only caller — so it is scoped to the sweep without needing a
-  flag.
-- **A push** moves the head, and no status exists on the new one, so the sweep posts
-  normally there. "Same head" is what the comparison is about.
+- **A push** moves the head, so no status exists on the new one and the sweep posts
+  there normally — "same head" is what the comparison is about. This path has no
+  precondition; it is the reliable one.
+- **A dismissed review** downgrades **when its event produces a run.** The wiring is
+  there: `copilot-review-gate.yml` has `pull_request_review: types: [submitted,
+dismissed]`, and the gate workflows invoke the scripts without `--if-changed`, so an
+  event-driven run publishes whatever it computes, downgrades included. (This rule
+  lives in `shouldPublishStatus`, which only `--if-changed` consults, and `gateArgs`
+  is its only caller — so it is scoped to the sweep without needing a flag.) But a
+  subscription is not a delivery guarantee, and `pull_request_review` is the exact
+  half [ADR-076](../decisions/ADR-076-reconcile-the-review-gate-statuses-on-a-schedule.md)
+  measured as unreliable — _"a review submitted by Copilot usually creates no workflow
+  run at all"_. This sweep exists **because** of that, so the precondition has to be
+  stated rather than implied: the mitigation is real, and it is not guaranteed.
 - **A hand-posted break-glass `success`** (rung 6 in
   [`copilot-review-gate.md`](./copilot-review-gate.md#break-glass)) now survives until
   an event recomputes it, instead of being undone by a sweep minutes later. That is an
   improvement, not a cost.
 
-What is genuinely given up is a `success` that was wrong when it was published and
-that no event ever revisits. Nothing in this repository is known to produce one.
+### The residual case, and what currently keeps it unreachable
+
+A dismissal whose event goes missing leaves a `success` on an **unchanged head** that
+nothing revisits. That is a **false green**, not a stale one — a worse failure than the
+flap this rule fixes, because under #698 it merges a pull request whose review was
+withdrawn.
+
+It needs three things at once, and the first does not hold today:
+
+1. **An accepted reviewer posts a dismissible review.** GitHub offers dismissal only
+   for `APPROVED` and `CHANGES_REQUESTED`. The Claude reviewer hard-codes
+   `event: 'COMMENT'` in `scripts/lib/review-inline-comments.mjs`, under a comment
+   forbidding the other two, and Copilot's reviews are `COMMENTED` as well — so there
+   is no dismissible review from an accepted reviewer to dismiss.
+2. Someone dismisses it.
+3. The `dismissed` event produces no run.
+
+**What holds this shut is a constant in an unrelated file, not anything in this rule** —
+which is worth knowing rather than assuming. **#699 is the change that would open it:**
+it proposes a reviewer that can `REQUEST_CHANGES`, which is dismissible. If that lands,
+this becomes live, and the fix is most likely to give the sweep enough context to tell a
+dismissal apart from a disagreement with older gate code — which two status objects
+alone cannot do.
+
+One more thing worth knowing: **the sweep's own log will not show you when this rule
+fires.** `publishGateStatus` reports every withheld post as `Unchanged on <sha>: nothing
+was posted.`, so a declined downgrade reads the same as a genuine no-op. Use `--dry-run`
+to see the verdict it would have published.
 
 ## Recovery, when the status is wrong right now
 

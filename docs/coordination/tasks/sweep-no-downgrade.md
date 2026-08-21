@@ -6,6 +6,8 @@ status: active
 branch: chore/868-sweep-no-downgrade
 area:
   - scripts/lib/review-gate-status.mjs
+  - docs/tooling/copilot-review-gate.md
+  - docs/decisions/ADR-076-reconcile-the-review-gate-statuses-on-a-schedule.md
   - scripts/lib/review-gate-reconcile.mjs
   - scripts/reconcile-review-gates.mjs
   - docs/tooling/review-gate-reconcile.md
