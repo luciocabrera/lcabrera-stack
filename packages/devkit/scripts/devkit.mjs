@@ -60,15 +60,28 @@ const withoutSeparator = (argv) => argv.filter((entry) => entry !== '--');
  */
 const HELP_REQUESTS = new Set(['--help', '-h', 'help']);
 
+/**
+ * Anywhere in argv, not just the command position. `sync` reads the flags it
+ * knows and ignores the rest, so recognising help only as the first word left
+ * `devkit sync --help` building a plan and writing it: a consumer asking what a
+ * command does had their tree materialised into instead, and got exit 0 for it.
+ *
+ * Nothing legitimate is swallowed, because `--help` is not a valid value for any
+ * flag or positional these commands take — `--profile --help` is already refused
+ * by the flag-shaped-value guard rather than reaching here as a profile name.
+ */
+const asksForHelp = (argv) => argv.some((entry) => HELP_REQUESTS.has(entry));
+
 /** @param {{ argv: string[], root: string }} args */
 export const runCommand = ({ argv, root }) => {
-  const [command, ...rest] = withoutSeparator(argv);
+  const entries = withoutSeparator(argv);
 
-  if (command !== undefined && HELP_REQUESTS.has(command)) {
+  if (asksForHelp(entries)) {
     console.log(USAGE);
     return 0;
   }
 
+  const [command, ...rest] = entries;
   const handler = Object.hasOwn(COMMANDS, command ?? '')
     ? COMMANDS[command]
     : undefined;

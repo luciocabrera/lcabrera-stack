@@ -39,6 +39,29 @@ describe('runCommand', () => {
     });
   }
 
+  for (const command of ['sync', 'doctor', 'closure']) {
+    test(`answers ${command} --help instead of running ${command}`, () => {
+      // Recognising help only in the command position left `sync --help`
+      // building a plan and applying it: a consumer asking what the command
+      // does got their tree written to, and exit 0. `root` here is a path that
+      // does not exist, so anything that actually dispatched would throw rather
+      // than return 0.
+      const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+      const error = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => undefined);
+
+      expect(runCommand({ argv: [command, '--help'], root: '/nowhere' })).toBe(
+        0,
+      );
+      expect(log).toHaveBeenCalledWith(expect.stringContaining('devkit sync'));
+      expect(error).not.toHaveBeenCalled();
+
+      log.mockRestore();
+      error.mockRestore();
+    });
+  }
+
   test('does not treat an inherited Object property as a command', () => {
     const error = vi
       .spyOn(console, 'error')
