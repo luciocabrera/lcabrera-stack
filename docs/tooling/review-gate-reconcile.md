@@ -233,8 +233,22 @@ alone cannot do.
 
 One more thing worth knowing: **the sweep's own log will not show you when this rule
 fires.** `publishGateStatus` reports every withheld post as `Unchanged on <sha>: nothing
-was posted.`, so a declined downgrade reads the same as a genuine no-op. Use `--dry-run`
-to see the verdict it would have published.
+was posted.`, so a declined downgrade reads the same as a genuine no-op — and adding
+`--dry-run` to the sweep does not separate them either. `--if-changed` is checked first
+and `gateArgs` always passes it, so the same `Unchanged` line comes back; the sweep then
+keeps only that last line per gate, so the verdict the gate printed never reaches you.
+
+Run the one gate directly instead — it prints its verdict before it decides whether to
+publish, so that line survives whatever the decision was:
+
+```bash
+vp run copilot-review:status -- --pr <n> --dry-run
+```
+
+That is the same command as ["Telling 'not reviewed yet' from 'reviewed, but not
+recomputed'"](#telling-not-reviewed-yet-from-reviewed-but-not-recomputed) above, read for
+a different purpose: there to find a status nobody recomputed, here to find one the sweep
+declined to move.
 
 ## Recovery, when the status is wrong right now
 

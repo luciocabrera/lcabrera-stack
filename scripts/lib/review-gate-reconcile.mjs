@@ -155,6 +155,15 @@ export const shouldPublishStatus = ({
 };
 
 /**
+ * The one spelling of the opt-in flag. `gateArgs` writes it and
+ * `publishGateStatus` reads it, and a run where only one of them was renamed is
+ * invisible: the gate stays unprotected, every test still passes, and the log
+ * says `Unchanged` either way. So the two sides share the string rather than
+ * each carrying their own copy of it.
+ */
+export const PROTECT_SUCCESS_FLAG = '--protect-success';
+
+/**
  * The argv the sweep runs one gate script with.
  *
  * Here rather than inline at the spawn, because two of these entries are
@@ -186,7 +195,7 @@ export const gateArgs = ({
   '--repo',
   repository,
   '--if-changed',
-  ...(protectSuccess ? ['--protect-success'] : []),
+  ...(protectSuccess ? [PROTECT_SUCCESS_FLAG] : []),
   ...extraArgs,
 ];
 
