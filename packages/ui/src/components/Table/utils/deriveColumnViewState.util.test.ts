@@ -29,6 +29,7 @@ const columnSizing = {
 describe('deriveColumnViewState', () => {
   it('returns normalized columns plus pinned derived slices in one result', () => {
     const result = deriveColumnViewState<Row>({
+      aggregates: [],
       columnOrder: ['id', 'name', 'age'],
       columnPinning: { left: ['id'], right: ['age'] },
       columns,
@@ -59,6 +60,7 @@ describe('deriveColumnViewState', () => {
 
   it('applies hidden-column filtering before grouping', () => {
     const result = deriveColumnViewState<Row>({
+      aggregates: [],
       columnOrder: ['id', 'name', 'age'],
       columnPinning: { left: ['id'], right: ['age'] },
       columns,

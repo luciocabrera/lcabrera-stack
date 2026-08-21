@@ -26,6 +26,7 @@ export const useBatchSetColumnSettings = <TData>() => {
     const metaState = metaStore.get();
     const persistenceKey = metaState?.persistenceKey ?? '';
     const resolvedUpdate = resolveBatchColumnSettingsUpdate<TData>({
+      aggregates: groupingStore.get().aggregates,
       columnsState,
       groupingKeys: groupingStore.get().keys,
       settings,

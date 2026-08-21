@@ -41,6 +41,7 @@ export const useSetColumnPinning = <TData>() => {
     });
 
     commitResolvedPinningState<TData>({
+      aggregates: groupingStore.get().aggregates,
       columnOrder: newColumnOrder,
       columnPinning: newPinning,
       columns,

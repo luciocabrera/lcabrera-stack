@@ -195,6 +195,7 @@ describe('useBatchSetColumnSettings', () => {
     });
     expect(mockColumnsStore.get).toHaveBeenCalledTimes(1);
     expect(mockResolveBatchColumnSettingsUpdate).toHaveBeenCalledWith({
+      aggregates: [],
       columnsState: {
         columnFilters: {},
         columnOrder: ['id', 'name', 'age'],

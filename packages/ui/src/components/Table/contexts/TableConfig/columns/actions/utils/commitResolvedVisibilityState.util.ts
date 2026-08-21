@@ -13,6 +13,7 @@ type CommitResolvedVisibilityStateArgs<TData> = CommitResolvedColumnStateArgs<
 };
 
 export const commitResolvedVisibilityState = <TData>({
+  aggregates,
   columnOrder,
   columnPinning,
   columns,
@@ -27,6 +28,7 @@ export const commitResolvedVisibilityState = <TData>({
 }: CommitResolvedVisibilityStateArgs<TData>) => {
   const { effectiveColumns, pinnedColumnOffsets, pinnedColumnPartition } =
     getPinnedDerivedColumnsState<TData>({
+      aggregates,
       columnOrder,
       columnPinning,
       columns,

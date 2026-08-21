@@ -236,6 +236,7 @@ describe('useBatchSetTableSettings', () => {
     });
     expect(mockColumnsStore.get).toHaveBeenCalledTimes(1);
     expect(mockResolveBatchTableSettingsUpdate).toHaveBeenCalledWith({
+      aggregates: [],
       columns: [
         { key: 'id', label: 'ID' },
         { key: 'name', label: 'Name' },

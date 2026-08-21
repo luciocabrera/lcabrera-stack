@@ -71,6 +71,7 @@ export const useSetTableGrouping = () => {
     // each.
     columnsStore.set(
       resolveGroupingColumnsPatch({
+        aggregates: result.grouping.aggregates,
         columnsState: columnsStore.get(),
         groupingKeys: result.grouping.keys,
       }),

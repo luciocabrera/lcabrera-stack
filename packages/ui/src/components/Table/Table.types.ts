@@ -11,6 +11,18 @@ import type { ColumnFilter } from '#ui/types/filterOperators.types';
 import type { InfiniteScroll, Sorting } from '#ui/types/ui.types';
 
 /**
+ * The key of a **derived** measure column: one applied aggregate, spelled by
+ * `toTableAggregateToken` (`"total_amount:avg"`).
+ *
+ * These columns are not declared by the consumer and hold no field of `TData` —
+ * `withAggregateColumns` produces them while a grouping is applied and they
+ * disappear when it clears. The template literal is what keeps the widening
+ * honest: the function half is a closed vocabulary, so this admits far less
+ * than `string` would while still admitting every key the derivation emits.
+ */
+export type AggregateColumnKey = `${string}:${TableAggregateFn}`;
+
+/**
  * Column filters state - maps column key to filter configuration
  */
 export type ColumnFiltersState<TData = Record<string, unknown>> = Record<
@@ -23,7 +35,6 @@ export type ColumnFiltersState<TData = Record<string, unknown>> = Record<
  */
 export type ColumnOrderState<TData = Record<string, unknown>> =
   readonly DataKey<TData>[];
-
 /**
  * Column pinning state
  */
@@ -33,6 +44,7 @@ export type ColumnPinningState<TData = Record<string, unknown>> = {
   /** Columns pinned to the right */
   readonly right: readonly DataKey<TData>[];
 };
+
 /**
  * Column sizing state - maps column key to custom width
  */
@@ -53,7 +65,20 @@ export type ColumnVisibilityState<TData = Record<string, unknown>> = Set<
   DataKey<TData>
 >;
 
-export type DataKey<TData> = 'actions' | (keyof TData & string);
+/**
+ * Every key the grid can address a column by.
+ *
+ * Two members name no field of `TData`, by the same precedent: `'actions'` is
+ * the grid's own command column, and `AggregateColumnKey` is a derived measure
+ * column. A key here is a **column identity**, not a data path —
+ * `buildTableBodyCellDescriptor` already reads a row through `Object.hasOwn`
+ * and renders nothing where the field is absent, so a key with no field behind
+ * it is an ordinary case rather than a special one.
+ */
+export type DataKey<TData> =
+  | 'actions'
+  | AggregateColumnKey
+  | (keyof TData & string);
 
 /**
  * Serializable "tool call" describing how the client fetches distinct
@@ -202,6 +227,17 @@ export type TableColumn<TData> = {
   readonly filterOptionsDescriptor?: FilterOptionsDescriptor;
   /** Format options for the column based on data type */
   readonly format?: TableColumnFormat;
+  /**
+   * The label of the column this one was derived **from**, when it was derived
+   * at all — the source column of a measure column, so the header can state
+   * `Total Amount` once above `Average` and `Minimum` rather than repeating it
+   * in each.
+   *
+   * Absent on a declared column, which is its own source. Set only by
+   * `withAggregateColumns`, and read only by the header — a body cell renders
+   * the measure, which the label below already names.
+   */
+  readonly headerGroupLabel?: string;
   /** Whether this column can be filtered. */
   readonly isFilterable?: boolean;
   /**

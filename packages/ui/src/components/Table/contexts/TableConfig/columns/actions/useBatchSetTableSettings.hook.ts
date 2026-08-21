@@ -71,12 +71,12 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
     // Accept is about to apply rather than the applied one: the hierarchy
     // column belongs to the configuration being committed, so deriving from
     // the old keys would leave it a render behind the grouping it renders.
+    const nextGrouping =
+      groupingUpdate.kind === 'updated' ? groupingUpdate.grouping : grouping;
     const resolvedUpdate = resolveBatchTableSettingsUpdate<TData>({
+      aggregates: nextGrouping.aggregates,
       columns: columnsState?.columns ?? [],
-      groupingKeys:
-        groupingUpdate.kind === 'updated'
-          ? groupingUpdate.grouping.keys
-          : grouping.keys,
+      groupingKeys: nextGrouping.keys,
       settings,
     });
     const persistenceEntries = buildPersistencePayload<TData>({

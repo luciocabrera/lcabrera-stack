@@ -34,24 +34,34 @@ vi.mock('#ui/components/Table/contexts/TableConfig/grouping/selectors', () => ({
 }));
 
 /**
- * The columns the summary below is read against. `total_amount` is money,
- * `unit_price` is a plain number capped at two decimals, and `order_count` is
- * money that will be asked for a tally — which is what makes three near
- * identical raw inputs render three different ways.
+ * The **derived** measure columns the summary below is read against — what
+ * `withAggregateColumns` puts in the store, keyed by aggregate token (#869).
+ * `total_amount:sum` is money, `unit_price:avg` is a plain number capped at two
+ * decimals, and `order_count:count` is a tally over a column declared as money
+ * — which is what makes three near identical raw inputs render three different
+ * ways.
  */
 const COLUMNS: Record<string, TableColumn<Record<string, unknown>>> = {
-  order_count: { dataType: 'currency', key: 'order_count', label: 'Orders' },
-  total_amount: {
+  'order_count:count': {
+    // Resolved by the derivation, not inherited: a tally is never money.
+    dataType: 'number',
+    headerGroupLabel: 'Orders',
+    key: 'order_count:count',
+    label: 'Count',
+  },
+  'total_amount:sum': {
     dataType: 'currency',
     format: { currency: { currency: 'USD', locale: 'en-US' } },
-    key: 'total_amount',
-    label: 'Total Amount',
+    headerGroupLabel: 'Total Amount',
+    key: 'total_amount:sum',
+    label: 'Sum',
   },
-  unit_price: {
+  'unit_price:avg': {
     dataType: 'number',
     format: { number: { maximumFractionDigits: 2, minimumFractionDigits: 2 } },
-    key: 'unit_price',
-    label: 'Unit Price',
+    headerGroupLabel: 'Unit Price',
+    key: 'unit_price:avg',
+    label: 'Average',
   },
 };
 
@@ -94,7 +104,7 @@ describe('TableGroupAggregate', () => {
     // stringified by the group-KEY formatter, so a `numeric` sum rendered as
     // the raw `302540833.38` under a currency header and was then ellipsized
     // by the column.
-    renderAggregate('total_amount');
+    renderAggregate('total_amount:sum');
 
     expect(screen.getByText(/302,540,833\.38/u)).toBeTruthy();
     expect(screen.queryByText('302540833.38')).toBeNull();
@@ -103,16 +113,17 @@ describe('TableGroupAggregate', () => {
   it('honours the column’s fraction digits on an average', () => {
     // `avg` over `numeric` comes back at full scale. Nothing but the column's
     // own format descriptor says how much of that to show.
-    renderAggregate('unit_price');
+    renderAggregate('unit_price:avg');
 
     expect(screen.getByText('2,503.32')).toBeTruthy();
   });
 
   it('renders a count as a tally even on a currency column', () => {
-    // The discriminating case for `resolveAggregateDataType`: `count` answers
-    // "how many rows", not "how many dollars". Inheriting the column's type
-    // here would put a currency symbol and two decimals on an integer.
-    renderAggregate('order_count');
+    // The discriminating case for `resolveAggregateDataType`, now resolved by
+    // the derivation rather than here: `count` answers "how many rows", not
+    // "how many dollars", so the derived column is a number even though the
+    // column it measures is money.
+    renderAggregate('order_count:count');
 
     expect(screen.getByText('1,380')).toBeTruthy();
     expect(screen.queryByText(/\$/u)).toBeNull();
@@ -123,7 +134,7 @@ describe('TableGroupAggregate', () => {
     // with no discounts is a computed number, and must not read like a column
     // nobody asked for an aggregate on. The column is undeclared here, so it
     // falls back to `string` and the raw text is what renders.
-    renderAggregate('discount');
+    renderAggregate('discount:sum');
 
     expect(screen.getByText('0.00')).toBeTruthy();
     expect(screen.queryByTestId('table-group-aggregate-absent')).toBeNull();
@@ -146,7 +157,7 @@ describe('TableGroupAggregate', () => {
     // cell says so.
     useGetHasColumnFilterMock.mockReturnValue(true);
 
-    renderAggregate('total_amount');
+    renderAggregate('total_amount:sum');
 
     expect(screen.getByTestId('table-group-aggregate-filtered')).toBeTruthy();
     expect(
@@ -155,15 +166,20 @@ describe('TableGroupAggregate', () => {
   });
 
   it('leaves an unfiltered column unmarked', () => {
-    renderAggregate('total_amount');
+    renderAggregate('total_amount:sum');
 
     expect(screen.queryByTestId('table-group-aggregate-filtered')).toBeNull();
   });
 
-  it('asks about its own column, not about the table', () => {
-    renderAggregate('total_amount');
+  it('asks about the measured column, not about its own derived key', () => {
+    // A derived key holds no filter and never could — the filter belongs to
+    // the column the measure summarises.
+    renderAggregate('total_amount:sum');
 
     expect(useGetHasColumnFilterMock).toHaveBeenCalledWith('total_amount');
+    expect(useGetHasColumnFilterMock).not.toHaveBeenCalledWith(
+      'total_amount:sum',
+    );
   });
 });
 
@@ -178,13 +194,30 @@ describe('TableGroupAggregate with several measures on one column', () => {
     path: [{ columnKey: 'order_status', label: 'Shipped', value: 'Shipped' }],
   };
 
-  const renderMulti = () => {
+  const MULTI_COLUMNS: Record<string, TableColumn<Record<string, unknown>>> = {
+    'total_amount:avg': {
+      dataType: 'currency',
+      format: { currency: { currency: 'USD', locale: 'en-US' } },
+      headerGroupLabel: 'Total Amount',
+      key: 'total_amount:avg',
+      label: 'Average',
+    },
+    'total_amount:sum': {
+      dataType: 'currency',
+      format: { currency: { currency: 'USD', locale: 'en-US' } },
+      headerGroupLabel: 'Total Amount',
+      key: 'total_amount:sum',
+      label: 'Sum',
+    },
+  };
+
+  const renderMeasure = (columnKey: string) => {
     useGetNormalizedColumnMock.mockImplementation(
-      (key: unknown) => COLUMNS[key as string],
+      (key: unknown) => MULTI_COLUMNS[key as string],
     );
 
     return render(
-      <TableGroupAggregate columnKey='total_amount' summary={multiSummary} />,
+      <TableGroupAggregate columnKey={columnKey} summary={multiSummary} />,
     );
   };
 
@@ -194,36 +227,51 @@ describe('TableGroupAggregate with several measures on one column', () => {
     useGetNormalizedColumnMock.mockReset();
   });
 
-  it('renders every measure the row carries for the column', () => {
-    renderMulti();
+  it('renders only the measure its own column is', () => {
+    // The defect this replaces: both measures landed in the source column's
+    // one cell, truncated together under a header that named neither (#869).
+    renderMeasure('total_amount:avg');
 
     expect(screen.getByText(/2,503\.32/u)).toBeTruthy();
+    expect(screen.queryByText(/302,540,833\.38/u)).toBeNull();
+  });
+
+  it('renders the other measure in the other column', () => {
+    renderMeasure('total_amount:sum');
+
     expect(screen.getByText(/302,540,833\.38/u)).toBeTruthy();
+    expect(screen.queryByText(/2,503\.32/u)).toBeNull();
   });
 
-  it('names each measure, so two numbers side by side are readable', () => {
-    // Without this the cell shows two bare figures and nothing says which is
-    // the average and which the sum (#831).
-    renderMulti();
-
-    expect(screen.getByText('Average')).toBeTruthy();
-    expect(screen.getByText('Sum')).toBeTruthy();
-  });
-
-  it('names nothing when the column carries a single measure', () => {
-    // The prefix earns its place only where the cell is ambiguous; on every
-    // other column of every group row it would be noise.
-    renderAggregate('unit_price');
+  it('does not repeat the measure name in the cell', () => {
+    // The header states it now, once, under the source column's label — which
+    // is the whole point of giving each measure a column.
+    renderMeasure('total_amount:avg');
 
     expect(screen.queryByText('Average')).toBeNull();
   });
 
-  it('renders the filter indicator once for the cell, not once per measure', () => {
-    // The filter belongs to the column, and every measure in the cell is
-    // computed over the same surviving rows.
+  it('matches by token rather than by splitting the key', () => {
+    // A consumer's column key may legitimately contain the separator, so the
+    // cell compares tokens instead of guessing where the key ends.
+    const oddSummary: TableGroupRowSummary = {
+      ...multiSummary,
+      aggregates: [{ columnKey: 'odd:col', fn: 'sum', value: '7' }],
+    };
+
+    useGetNormalizedColumnMock.mockImplementation(() => {});
+
+    render(
+      <TableGroupAggregate columnKey='odd:col:sum' summary={oddSummary} />,
+    );
+
+    expect(screen.getByText('7')).toBeTruthy();
+  });
+
+  it('marks a measure whose source column carries an active filter', () => {
     useGetHasColumnFilterMock.mockReturnValue(true);
 
-    renderMulti();
+    renderMeasure('total_amount:sum');
 
     expect(
       screen.getAllByTestId('table-group-aggregate-filtered'),

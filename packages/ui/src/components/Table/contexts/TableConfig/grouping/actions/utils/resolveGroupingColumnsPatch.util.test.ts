@@ -27,7 +27,11 @@ const columnsState = getInitialColumnsState<Row>({
 }) as TableColumnsState<Row>;
 
 const patch = (groupingKeys: readonly string[]) =>
-  resolveGroupingColumnsPatch<Row>({ columnsState, groupingKeys });
+  resolveGroupingColumnsPatch<Row>({
+    aggregates: [],
+    columnsState,
+    groupingKeys,
+  });
 
 describe('resolveGroupingColumnsPatch', () => {
   it('hoists the group keys to the head of the painted grid, in key order', () => {
@@ -73,6 +77,7 @@ describe('resolveGroupingColumnsPatch', () => {
       columns,
     }) as TableColumnsState<Row>;
     const grouped = resolveGroupingColumnsPatch<Row>({
+      aggregates: [],
       columnsState: pinnedRight,
       groupingKeys: ['order_status'],
     });

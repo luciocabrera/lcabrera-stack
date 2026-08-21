@@ -10,6 +10,7 @@ type CommitResolvedPinningStateArgs<TData> = CommitResolvedColumnStateArgs<
 >;
 
 export const commitResolvedPinningState = <TData>({
+  aggregates,
   columnOrder,
   columnPinning,
   columns,
@@ -24,6 +25,7 @@ export const commitResolvedPinningState = <TData>({
 }: CommitResolvedPinningStateArgs<TData>) => {
   const { effectiveColumns, pinnedColumnOffsets, pinnedColumnPartition } =
     getPinnedDerivedColumnsState<TData>({
+      aggregates,
       columnOrder,
       columnPinning,
       columns,

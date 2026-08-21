@@ -4,6 +4,7 @@ import type {
   ColumnSizingState,
   ColumnVisibilityState,
   TableColumn,
+  TableColumnAggregate,
   TableColumnsState,
   TableMetaState,
   TablePersistenceConfig,
@@ -22,6 +23,13 @@ export type CommitResolvedColumnStateArgs<
   TData,
   TSlice extends keyof TablePersistenceConfig,
 > = {
+  /**
+   * The applied aggregates, read from the grouping store by the action hook.
+   * The derived slices carry one measure column per aggregate, so a commit that
+   * did not know about them would collapse them back into their source column
+   * on the next pin or hide.
+   */
+  readonly aggregates: readonly TableColumnAggregate[];
   readonly columnOrder: ColumnOrderState<TData>;
   readonly columnPinning: ColumnPinningState<TData>;
   readonly columns: readonly TableColumn<TData>[];

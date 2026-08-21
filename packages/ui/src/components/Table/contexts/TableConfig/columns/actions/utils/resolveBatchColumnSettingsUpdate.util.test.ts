@@ -136,6 +136,7 @@ describe('resolveBatchColumnSettingsUpdate', () => {
       readonly id: string;
       readonly name: string;
     }>({
+      aggregates: [],
       columnsState,
       groupingKeys: [],
       settings: {
@@ -181,6 +182,7 @@ describe('resolveBatchColumnSettingsUpdate', () => {
       previousPinning: { left: ['id'], right: [] },
     });
     expect(mockDeriveColumnViewState).toHaveBeenCalledWith({
+      aggregates: [],
       columnOrder: ['id', 'age', 'name'],
       columnPinning: { left: ['id'], right: ['name'] },
       columns: [
@@ -268,6 +270,7 @@ describe('resolveBatchColumnSettingsUpdate', () => {
       readonly id: string;
       readonly name: string;
     }>({
+      aggregates: [],
       columnsState,
       groupingKeys: [],
       settings: {
@@ -278,6 +281,7 @@ describe('resolveBatchColumnSettingsUpdate', () => {
 
     expect(mockSyncColumnOrderWithPinning).not.toHaveBeenCalled();
     expect(mockDeriveColumnViewState).toHaveBeenCalledWith({
+      aggregates: [],
       columnOrder: ['name', 'id', 'age'],
       columnPinning: { left: ['id'], right: [] },
       columns: [

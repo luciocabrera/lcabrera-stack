@@ -6,6 +6,7 @@ import type {
   ColumnVisibilityState,
   SortingState,
   TableColumn,
+  TableColumnAggregate,
 } from '#ui/components/Table/Table.types';
 
 import { deriveColumnViewState } from '#ui/components/Table/utils';
@@ -20,6 +21,12 @@ export type BatchTableSettingsUpdate<TData> = {
 };
 
 type ResolveBatchTableSettingsUpdateArgs<TData> = {
+  /**
+   * The aggregates the same Accept is committing — the **next** ones, so the
+   * measure columns appear and disappear in the same write that turns grouping
+   * on or off.
+   */
+  readonly aggregates: readonly TableColumnAggregate[];
   readonly columns: readonly TableColumn<TData>[];
   /**
    * The group keys the same Accept is committing — the **next** ones, not the
@@ -31,6 +38,7 @@ type ResolveBatchTableSettingsUpdateArgs<TData> = {
 };
 
 export const resolveBatchTableSettingsUpdate = <TData>({
+  aggregates,
   columns,
   groupingKeys,
   settings,
@@ -41,6 +49,7 @@ export const resolveBatchTableSettingsUpdate = <TData>({
     pinnedColumnOffsets,
     pinnedColumnPartition,
   } = deriveColumnViewState<TData>({
+    aggregates,
     columnOrder: settings.columnOrder,
     columnPinning: settings.columnPinning,
     columns,

@@ -1,8 +1,13 @@
-import type { TableColumnsState } from '#ui/components/Table/Table.types';
+import type {
+  TableColumnAggregate,
+  TableColumnsState,
+} from '#ui/components/Table/Table.types';
 
 import { deriveColumnViewState } from '#ui/components/Table/utils';
 
 type ResolveGroupingColumnsPatchArgs<TData> = {
+  /** The aggregates about to be applied, not the ones currently applied. */
+  readonly aggregates: readonly TableColumnAggregate[];
   /** The snapshot the caller already read — never a second `store.get()`. */
   readonly columnsState: TableColumnsState<TData>;
   /** The group keys about to be applied, not the ones currently applied. */
@@ -27,10 +32,12 @@ type ResolveGroupingColumnsPatchArgs<TData> = {
  * exactly as the user left them.
  */
 export const resolveGroupingColumnsPatch = <TData>({
+  aggregates,
   columnsState,
   groupingKeys,
 }: ResolveGroupingColumnsPatchArgs<TData>) =>
   deriveColumnViewState<TData>({
+    aggregates,
     columnOrder: columnsState.columnOrder,
     columnPinning: columnsState.columnPinning,
     columns: columnsState.columns,

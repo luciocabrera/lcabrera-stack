@@ -47,6 +47,7 @@ export const useSetColumnVisibility = <TData>() => {
     });
 
     commitResolvedVisibilityState<TData>({
+      aggregates: groupingStore.get().aggregates,
       columnOrder,
       columnPinning,
       columns,

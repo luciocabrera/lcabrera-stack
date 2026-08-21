@@ -5,14 +5,22 @@ import type {
   ColumnVisibilityState,
   DataKey,
   TableColumn,
+  TableColumnAggregate,
 } from '#ui/components/Table/Table.types';
 
 import { getEffectiveColumns } from './getEffectiveColumns.util';
 import { getPinnedColumnOffsets } from './getPinnedColumnOffsets.util';
 import { splitColumnsByPinning } from './splitColumnsByPinning.util';
+import { withAggregateColumns } from './withAggregateColumns.util';
 import { withGroupedColumnLayout } from './withGroupedColumnLayout.util';
 
 type GetPinnedDerivedColumnsStateArgs<TData> = {
+  /**
+   * The applied aggregates. **Required** for the reason `groupingKeys` is: a
+   * caller free to omit it would silently paint the source column instead of
+   * its measures on the next column change.
+   */
+  readonly aggregates: readonly TableColumnAggregate[];
   readonly columnOrder: ColumnOrderState<TData>;
   readonly columnPinning: ColumnPinningState<TData>;
   readonly columns: readonly TableColumn<TData>[];
@@ -32,13 +40,21 @@ type GetPinnedDerivedColumnsStateArgs<TData> = {
  *
  * The grouped layout is derived here, at the one point all the slices are
  * computed from (ADR-080): the group keys are hoisted to the head of the order
- * and the left pin, and forced visible. No column is added — a group row states
- * each key's value in that key's own column — so `gridColumns` is the
- * consumer's own list, and comes back beside the slices because the
- * normalized-column map has to be built from the same list the header reads its
- * labels out of.
+ * and the left pin, and forced visible.
+ *
+ * **Two derivations, in an order that matters.** `withAggregateColumns` runs
+ * first and replaces each measured column with one column per aggregate applied
+ * to it, so the hoist that follows sees the final column list. They cannot
+ * conflict — an aggregate naming a group key is dropped by the first, because
+ * that column already carries its key's value — but running the hoist first
+ * would leave the second rewriting a list the slices were already derived from.
+ *
+ * `gridColumns` is therefore the consumer's list **with its measured columns
+ * expanded**, and comes back beside the slices because the normalized-column
+ * map has to be built from the same list the header reads its labels out of.
  */
 export const getPinnedDerivedColumnsState = <TData>({
+  aggregates,
   columnOrder,
   columnPinning,
   columns,
@@ -46,15 +62,23 @@ export const getPinnedDerivedColumnsState = <TData>({
   columnVisibility = new Set<DataKey<TData>>(),
   groupingKeys,
 }: GetPinnedDerivedColumnsStateArgs<TData>) => {
+  const measured = withAggregateColumns<TData>({
+    aggregates,
+    columnOrder,
+    columnPinning,
+    columns,
+    groupingKeys,
+  });
+
   const {
     columnOrder: gridColumnOrder,
     columnPinning: gridColumnPinning,
     columns: gridColumns,
     columnVisibility: gridColumnVisibility,
   } = withGroupedColumnLayout<TData>({
-    columnOrder,
-    columnPinning,
-    columns,
+    columnOrder: measured.columnOrder,
+    columnPinning: measured.columnPinning,
+    columns: measured.columns,
     columnVisibility,
     groupingKeys,
   });
