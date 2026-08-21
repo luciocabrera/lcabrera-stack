@@ -63,14 +63,14 @@ const REPO_ROOT = resolveHostRoot({
 const GATES = readGates(REPO_ROOT).docsPaths;
 const BASELINE_PATH = join(REPO_ROOT, GATES.baselineFile);
 
+const governedDocs = () =>
+  documentedFiles({ ignoredDocs: GATES.ignoredDocs, repoRoot: REPO_ROOT });
+
 /**
  * The anchors that make a token unambiguously a path. Declared when a repository
  * wants to narrow them; otherwise every top-level directory that is not build
  * output, which is the honest reading of "a real top-level directory".
  */
-const governedDocs = () =>
-  documentedFiles({ ignoredDocs: GATES.ignoredDocs, repoRoot: REPO_ROOT });
-
 const REPO_ROOTS =
   GATES.repoRoots.length > 0
     ? GATES.repoRoots

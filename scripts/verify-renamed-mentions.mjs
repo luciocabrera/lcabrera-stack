@@ -34,8 +34,8 @@ import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { runGit } from '../packages/repo-standards/scripts/git-exec.mjs';
 import { readGates } from '../packages/repo-standards/scripts/config.mjs';
+import { runGit } from '../packages/repo-standards/scripts/git-exec.mjs';
 import { documentedFiles } from '../packages/repo-standards/scripts/markdown-corpus.mjs';
 import {
   describeFinding,

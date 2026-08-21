@@ -23,13 +23,8 @@
  * Everything else is left to review. Widening this is safe to do later; the
  * baseline exists so a widening can land without a cleanup blocking it.
  *
- * A third shape used to be claimed here and never worked: a workspace specifier
- * (`@scope/pkg/sub`) resolved through that package's `exports` map. Nothing
- * could reach it — a specifier is not root-anchored, so the extractor filtered
- * it out first, and across the whole tracked corpus not one of 1792 candidate
- * tokens ever arrived at it. Removed rather than carried into a package as code
- * that reads like a live check. Implementing it properly, with the references it
- * turns out to have, is #864.
+ * A third shape — a workspace specifier resolved through the package's `exports`
+ * map — was claimed here and unreachable; making it real is #864.
  */
 
 /** Shapes that are never a path: globs, regexes, placeholders, commands. */
