@@ -52,8 +52,7 @@ export const parseRenameDiff = (output) =>
     .map((line) => line.split('\t'))
     .filter(
       ([status, from, to]) =>
-        status !== undefined &&
-        status.startsWith('R') &&
+        status?.startsWith('R') === true &&
         from !== undefined &&
         to !== undefined,
     )

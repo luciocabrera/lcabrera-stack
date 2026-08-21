@@ -17,13 +17,23 @@ const MINT_STEP = "Mint a token for the reviewer's own identity";
 const DISPATCH_STEP =
   'Ask the review gate to recompute now rather than at the next sweep';
 
+/**
+ * A GitHub Actions expression as YAML spells it — `${{ inner }}`.
+ *
+ * Built rather than written literally. `${…}` inside a plain string is what a
+ * mistyped template literal looks like, so biome's `noTemplateCurlyInString`
+ * flags it and is right to in general; here the literal text is the subject of
+ * the assertion, so the answer is to construct it rather than silence the rule.
+ */
+const expr = (inner) => `\${{ ${inner} }}`;
+
 describe('the review is posted under the reviewer’s own identity', () => {
   it('submits with the App installation token, not the default GITHUB_TOKEN', () => {
     const step = stepBlock(readRepoFile(WORKFLOW), SUBMIT_STEP);
     expect(step).toBeDefined();
     // The whole point: a fallback here silently unmatches every review.
     expect(stepEnvValue(step, 'GH_TOKEN')).toBe(
-      '${{ steps.reviewer-token.outputs.token }}',
+      expr('steps.reviewer-token.outputs.token'),
     );
   });
 
@@ -42,12 +52,12 @@ describe('the review is posted under the reviewer’s own identity', () => {
   it('reads env keys past comment lines, and reports an absent key as undefined', () => {
     const step = [
       '      - name: Example',
-      '        # GH_TOKEN: ${{ github.token }} — a comment, not the setting',
+      `        # GH_TOKEN: ${expr('github.token')} — a comment, not the setting`,
       '        env:',
-      '          GH_TOKEN: ${{ steps.reviewer-token.outputs.token }}',
+      `          GH_TOKEN: ${expr('steps.reviewer-token.outputs.token')}`,
     ].join('\n');
     expect(stepEnvValue(step, 'GH_TOKEN')).toBe(
-      '${{ steps.reviewer-token.outputs.token }}',
+      expr('steps.reviewer-token.outputs.token'),
     );
     expect(stepEnvValue(step, 'NOT_SET')).toBeUndefined();
   });
@@ -59,12 +69,12 @@ describe('the review is posted under the reviewer’s own identity', () => {
     const step = [
       '      - name: Example',
       '        env:',
-      '          GH_TOKEN: ${{ steps.reviewer-token.outputs.token }}',
+      `          GH_TOKEN: ${expr('steps.reviewer-token.outputs.token')}`,
       '        run: |',
       '          GH_TOKEN: not-the-credential',
     ].join('\n');
     expect(stepEnvValue(step, 'GH_TOKEN')).toBe(
-      '${{ steps.reviewer-token.outputs.token }}',
+      expr('steps.reviewer-token.outputs.token'),
     );
 
     const noEnv = [
@@ -81,7 +91,7 @@ describe('the review is posted under the reviewer’s own identity', () => {
   it('leaves the gate dispatch on github.token, which the App cannot replace', () => {
     const step = stepBlock(readRepoFile(WORKFLOW), DISPATCH_STEP);
     expect(step).toBeDefined();
-    expect(stepEnvValue(step, 'GH_TOKEN')).toBe('${{ github.token }}');
+    expect(stepEnvValue(step, 'GH_TOKEN')).toBe(expr('github.token'));
   });
 
   // `gh workflow run` with no `--ref` runs the DEFAULT BRANCH's copy of the gate,
@@ -94,7 +104,7 @@ describe('the review is posted under the reviewer’s own identity', () => {
     expect(step).toBeDefined();
     expect(step).toContain('--ref "$HEAD_REF"');
     expect(step).toContain(
-      'HEAD_REF: ${{ github.event.pull_request.head.ref }}',
+      `HEAD_REF: ${expr('github.event.pull_request.head.ref')}`,
     );
   });
 });
