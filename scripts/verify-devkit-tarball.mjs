@@ -38,6 +38,7 @@ import {
   declaredBins,
   failureLine,
   materialisationFailure,
+  noCommandsDeclared,
   tarballFindings,
 } from './lib/devkit-tarball.mjs';
 
@@ -221,8 +222,15 @@ const main = () => {
       consumer,
     );
 
-    const bins = packed.flatMap(({ manifest }) =>
-      binFailures({ consumer, manifest }),
+    const bins = packed.flatMap(({ manifest }) => [
+      ...(noCommandsDeclared(manifest) === undefined
+        ? []
+        : [noCommandsDeclared(manifest)]),
+      ...binFailures({ consumer, manifest }),
+    ]);
+    const ran = packed.reduce(
+      (total, { manifest }) => total + declaredBins(manifest).length,
+      0,
     );
 
     // Each consumer-side step is collected rather than thrown, so one broken
@@ -257,7 +265,7 @@ const main = () => {
     ).length;
 
     process.stdout.write(
-      `Packed-tarball gate passed: ${packed.length} package(s) packed, installed into a scratch repository, every declared bin ran, and \`devkit sync\` placed ${placed} file(s).\n`,
+      `Packed-tarball gate passed: ${packed.length} package(s) packed, installed into a scratch repository, ${ran} declared bin(s) ran, and \`devkit sync\` placed ${placed} file(s).\n`,
     );
   } finally {
     rmSync(staging, { force: true, recursive: true });

@@ -212,3 +212,21 @@ export const materialisationFailure = ({ manifestFiles, presentPaths }) => {
     ? undefined
     : `\`devkit sync\` recorded ${absent.length} file(s) the tree does not hold, starting with \`${absent.toSorted((left, right) => left.localeCompare(right))[0]}\``;
 };
+
+/**
+ * Why a distributed package exposes no commands, or undefined when it does.
+ *
+ * The same vacuous case `materialisationFailure` closes, in the other half: a
+ * report that "every declared bin ran" is trivially true of a package that
+ * declares none, and the gate would exit 0 having executed nothing.
+ *
+ * It is reachable rather than theoretical. pnpm substitutes `publishConfig` at
+ * pack time and `bin` is one of the fields it substitutes, so an empty or
+ * misspelled `publishConfig.bin` empties the packed map while the workspace
+ * keeps working — pnpm links its bins from the on-disk manifest. Both of these
+ * packages exist to be invoked by name, so none is never correct for them.
+ */
+export const noCommandsDeclared = (manifest) =>
+  declaredBins(manifest).length === 0
+    ? `${manifest.name} declares no bins in the packed manifest, so there is nothing for a consumer to run`
+    : undefined;

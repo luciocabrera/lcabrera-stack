@@ -6,6 +6,7 @@ import {
   declaredBins,
   failureLine,
   materialisationFailure,
+  noCommandsDeclared,
   missingFromTarball,
   promisedPaths,
   strayFromTarball,
@@ -311,5 +312,27 @@ describe('materialisationFailure', () => {
     expect(
       materialisationFailure({ manifestFiles: undefined, presentPaths: [] }),
     ).toContain('recorded no files');
+  });
+});
+
+describe('noCommandsDeclared', () => {
+  it('reports a distributed package that exposes nothing to run', () => {
+    // The vacuous half of "every declared bin ran": trivially true of a package
+    // declaring none. Reachable rather than theoretical — pnpm substitutes
+    // `publishConfig` at pack time and `bin` is one of the substituted fields,
+    // so an emptied `publishConfig.bin` empties the packed map while the
+    // workspace keeps working, since pnpm links its bins from the on-disk one.
+    expect(noCommandsDeclared({ bin: {}, name: '@scope/kit' })).toContain(
+      'declares no bins',
+    );
+    expect(noCommandsDeclared({ name: '@scope/kit' })).toContain(
+      'declares no bins',
+    );
+  });
+
+  it('accepts a package that declares at least one', () => {
+    expect(
+      noCommandsDeclared({ bin: { kit: './scripts/kit.mjs' }, name: 'p' }),
+    ).toBeUndefined();
   });
 });
