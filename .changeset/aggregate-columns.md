@@ -40,3 +40,5 @@ Two additive changes to the published type surface:
   no field of the row.
 - `TableColumn` gains an optional `headerGroupLabel`, the name stated above a
   derived column in the header band.
+- `pruneSortingToColumns` is exported: it drops a sort naming a column the grid
+  no longer paints, which is what stops a measure sort outliving its column.

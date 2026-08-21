@@ -9,6 +9,7 @@ import { DEFAULT_MIN_COLUMN_WIDTH } from '#ui/components/Table/Table.constants';
 import type { TableHeaderBandProps } from './TableHeaderBand.types';
 
 import { tableHeaderBandStyles } from './TableHeaderBand.stylex';
+import { resolveBandPinnedStyle } from './utils';
 
 /**
  * One cell of the header's upper row: the name of the group its columns belong
@@ -55,17 +56,10 @@ export const TableHeaderBand = <TData extends Record<string, unknown>>({
     0,
   );
 
-  // A left-pinned band starts where its FIRST column starts; a right-pinned one
-  // ends where its LAST column ends. Taking the wrong edge slides the band by
-  // the width of the rest of the run.
-  const leading = pinnedOffsets[columns[0]?.key as 'actions'];
-  const trailing = pinnedOffsets[columns.at(-1)?.key as 'actions'];
-  const pinnedStylex =
-    leading?.side === 'left'
-      ? tableHeaderBandStyles.pinnedLeft(leading.offset)
-      : trailing?.side === 'right'
-        ? tableHeaderBandStyles.pinnedRight(trailing.offset)
-        : undefined;
+  const pinnedStylex = resolveBandPinnedStyle({
+    leading: pinnedOffsets[columns[0]?.key as 'actions'],
+    trailing: pinnedOffsets[columns.at(-1)?.key as 'actions'],
+  });
 
   return (
     <th
