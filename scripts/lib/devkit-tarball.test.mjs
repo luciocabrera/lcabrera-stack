@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
+  binsWithoutShebang,
   binStartupFailure,
   declaredBins,
   missingFromTarball,
@@ -198,5 +199,37 @@ describe('tarballFindings', () => {
         ],
       }),
     ).toEqual([]);
+  });
+});
+
+describe('binsWithoutShebang', () => {
+  const manifest = { bin: { kit: './scripts/kit.mjs' }, name: '@scope/kit' };
+
+  it('reports a bin the shell would be handed', () => {
+    // The failure this replaced a coincidence with. Fifteen of seventeen bins
+    // were in this state and every in-repository run passed, because pnpm links
+    // a bin through a wrapper that invokes node while npm symlinks the target
+    // and relies on the shebang.
+    expect(
+      binsWithoutShebang({
+        manifest,
+        readPackedFile: () => '/**\n * A header.\n */\nconsole.log(1);\n',
+      }),
+    ).toEqual([expect.stringContaining('has no shebang')]);
+  });
+
+  it('accepts a bin that declares its interpreter', () => {
+    expect(
+      binsWithoutShebang({
+        manifest,
+        readPackedFile: () => '#!/usr/bin/env node\nconsole.log(1);\n',
+      }),
+    ).toEqual([]);
+  });
+
+  it('reports a bin the tarball does not hold at all', () => {
+    expect(
+      binsWithoutShebang({ manifest, readPackedFile: () => undefined }),
+    ).toEqual([expect.stringContaining('has no shebang')]);
   });
 });

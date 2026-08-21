@@ -32,6 +32,7 @@ import { join, relative } from 'node:path';
 import process from 'node:process';
 
 import {
+  binsWithoutShebang,
   binStartupFailure,
   declaredBins,
   tarballFindings,
@@ -72,6 +73,15 @@ const packOne = ({ directory, into }) => {
     throw new Error(`pnpm pack produced no tarball for packages/${directory}`);
   }
   return { manifest: readJson(join(packageDir, 'package.json')), tarball };
+};
+
+/** One file out of a tarball, without unpacking the whole thing. */
+const packedFileReader = (tarball) => (target) => {
+  try {
+    return run('tar', ['-xzOf', tarball, `package/${target}`], REPO_ROOT);
+  } catch {
+    return undefined;
+  }
 };
 
 const packedPathsOf = (tarball) =>
@@ -141,11 +151,18 @@ const main = () => {
       packOne({ directory, into: staging }),
     );
 
-    const contents = packed.flatMap(({ manifest, tarball }) =>
-      tarballFindings({ manifest, packedPaths: packedPathsOf(tarball) }).map(
-        (finding) => finding.detail,
-      ),
-    );
+    const contents = packed.flatMap(({ manifest, tarball }) => [
+      ...tarballFindings({
+        manifest,
+        packedPaths: packedPathsOf(tarball),
+      }).map((finding) => finding.detail),
+      // Checked against the tarball rather than the working tree: the shebang
+      // has to be in what a consumer receives, not merely in what we edited.
+      ...binsWithoutShebang({
+        manifest,
+        readPackedFile: packedFileReader(tarball),
+      }),
+    ]);
 
     run(
       'npm',

@@ -73,6 +73,28 @@ export const declaredBins = (manifest) =>
   }));
 
 /**
+ * Bins whose file does not begin with a shebang.
+ *
+ * Read statically rather than inferred from a failed run, because the runtime
+ * symptom is misleading in both directions. Nothing in the file says what should
+ * interpret it, so the kernel hands it to the shell — and `sh` reading a JSDoc
+ * header emits a page of `command not found` and exits non-zero, which reads as
+ * a gate that ran and found something. It can even match a startup signature by
+ * coincidence, when the comment it is echoing happens to name one.
+ *
+ * Invisible in a workspace, which is why it survived: pnpm links a bin through a
+ * wrapper that invokes node explicitly, while npm symlinks the target and relies
+ * on the shebang. The failing path is exactly the one no in-repository run takes.
+ */
+export const binsWithoutShebang = ({ manifest, readPackedFile }) =>
+  declaredBins(manifest)
+    .filter(({ target }) => !(readPackedFile(target) ?? '').startsWith('#!'))
+    .map(
+      ({ name, target }) =>
+        `${manifest.name}: \`${name}\` (${target}) has no shebang, so an npm install hands it to the shell`,
+    );
+
+/**
  * Signatures of a bin that could not START, as opposed to one that ran and
  * reported a finding.
  *
