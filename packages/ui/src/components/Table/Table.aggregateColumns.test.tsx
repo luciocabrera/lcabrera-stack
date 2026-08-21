@@ -212,8 +212,12 @@ describe('a column carrying several measures', () => {
     renderGrid();
 
     // The visible label is the function alone; the source column reaches the
-    // tree through a visually-hidden span in the same cell, so the header
-    // announces `Total Amount Average` rather than a bare `Average`.
+    // tree through this cell's `aria-label`, so the header announces
+    // `Total Amount Average` rather than a bare `Average`. Deliberately not a
+    // visually-hidden span — see `TableHeaderCell`, which rejects that for two
+    // reasons: the spans concatenate without a separator
+    // (`Total AmountAverage`), and a header's accessible name should be the
+    // column's name rather than its name plus its menu button's.
     expect(headerAriaLabels()).toStrictEqual([
       // A plain column is its own name; only a derived one has to state two.
       undefined,
@@ -326,7 +330,26 @@ describe('a column carrying several measures', () => {
     expect(cells).toStrictEqual(['', '7', '', '']);
   });
 
-  it('draws no band row at all when no column carries several measures', () => {
+  it('bands a single measure too, since its header states only the function', () => {
+    // The band is not a multi-measure affordance. `hasHeaderBands` asks whether
+    // any column carries a `headerGroupLabel`, and `withAggregateColumns` sets
+    // one on every derived column — so one aggregate draws a band over one
+    // measure. That is the intended behaviour rather than an accident of the
+    // predicate: the visible header reads `Average` whether it has siblings or
+    // not, so the source column still has to be stated somewhere.
+    renderGrid({ aggregates: [{ columnKey: 'total_amount', fn: 'avg' }] });
+
+    const labelled = screen
+      .getAllByTestId('table-header-band')
+      .filter((band) => band.textContent !== '');
+
+    expect(labelled.map((band) => band.textContent)).toStrictEqual([
+      'Total Amount',
+    ]);
+    expect(headerLabels()).toStrictEqual(['Customer Type', 'Id', 'Average']);
+  });
+
+  it('draws no band row at all when no aggregate is applied', () => {
     renderGrid({ aggregates: [] });
 
     expect(screen.queryAllByTestId('table-header-band')).toHaveLength(0);
