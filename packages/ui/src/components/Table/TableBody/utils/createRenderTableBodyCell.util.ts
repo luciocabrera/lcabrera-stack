@@ -36,6 +36,8 @@ type RenderBodyCellArgs<TData extends Record<string, unknown>> = {
   readonly drillRow?: TableDrillRowMarker;
   /** The row's group summary, when it has one — per row, like the row itself. */
   readonly groupSummary?: TableGroupRowSummary;
+  /** Whether the row claims to be chrome — see `hasTableStructuralMarker`. */
+  readonly hasStructuralMarker?: boolean;
   readonly row: TData;
   readonly rowIndex: number;
   readonly rowKey: string;
@@ -62,6 +64,7 @@ export const createRenderTableBodyCell =
     disclosure,
     drillRow,
     groupSummary,
+    hasStructuralMarker,
     row,
     rowIndex,
     rowKey,
@@ -74,6 +77,7 @@ export const createRenderTableBodyCell =
       drillRow,
       groupingKeys,
       groupSummary,
+      hasStructuralMarker,
       isLoadingState,
       pinnedOffsets,
       row,

@@ -56,6 +56,8 @@ type BuildTableBodyCellDescriptorArgs<TData extends Record<string, unknown>> = {
    * row and a detail row can sit in one result.
    */
   readonly groupSummary?: TableGroupRowSummary;
+  /** See `hasTableStructuralMarker` — a row that claims to be chrome. */
+  readonly hasStructuralMarker?: boolean;
   readonly isLoadingState: boolean;
   readonly pinnedOffsets: Partial<Record<DataKey<TData>, PinnedColumnInfo>>;
   readonly row: TData;
@@ -126,6 +128,7 @@ export const buildTableBodyCellDescriptor = <
   drillRow,
   groupingKeys,
   groupSummary,
+  hasStructuralMarker = false,
   isLoadingState,
   pinnedOffsets,
   row,
@@ -160,6 +163,7 @@ export const buildTableBodyCellDescriptor = <
     drillRow,
     groupingKeys,
     groupSummary,
+    hasStructuralMarker,
   });
 
   if (structuralChildren !== undefined) {

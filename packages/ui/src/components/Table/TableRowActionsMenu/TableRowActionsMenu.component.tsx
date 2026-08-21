@@ -10,7 +10,7 @@ import {
   useGetTableDeleteActionPath,
   useGetTableTitleSingular,
 } from '../contexts/TableConfig/meta/selectors';
-import { resolveCrudRowId } from '../utils/resolveCrudRowId.util';
+import { tryResolveCrudRowId } from '../utils/resolveCrudRowId.util';
 import { TableActionMenu } from './TableActionMenu';
 
 const DEFAULT_TITLE_SINGULAR = 'Record';
@@ -31,7 +31,16 @@ export const TableRowActionsMenu = <TData extends Record<string, unknown>>({
   }
 
   const resolvedTitleSingular = titleSingular ?? DEFAULT_TITLE_SINGULAR;
-  const rowId = resolveCrudRowId({ columns, row });
+  const rowId = tryResolveCrudRowId({ columns, row });
+
+  // A row with no resolvable id gets no CRUD menu rather than no application.
+  // This runs during render, so the throwing form would take the whole grid to
+  // an error boundary — which is exactly what a misclassified group row did
+  // (ADR-062). Any custom actions still render: they act on the row, not on an
+  // id.
+  if (rowId === undefined) {
+    return customActions;
+  }
 
   return (
     <TableActionsPopover

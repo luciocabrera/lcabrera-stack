@@ -17,6 +17,12 @@ type ResolveStructuralCellChildrenArgs = {
   readonly drillRow: TableDrillRowMarker | undefined;
   readonly groupingKeys: readonly string[];
   readonly groupSummary: TableGroupRowSummary | undefined;
+  /**
+   * Whether the row carries a structural marker field at all — see
+   * `hasTableStructuralMarker`. Separate from the two narrowed values above
+   * because they cannot distinguish a malformed marker from an absent one.
+   */
+  readonly hasStructuralMarker: boolean;
 };
 
 /**
@@ -31,7 +37,14 @@ type ResolveStructuralCellChildrenArgs = {
  *    column its chrome goes in — leaving a row at full height saying nothing.
  * 2. **A group row's own cells**, asked of the row and never of the grouping
  *    configuration, so a group row and a detail row can arrive in one result.
- * 3. **A detail row's grouped-by columns, blanked.** The value is stated by the
+ * 3. **A row that claims to be chrome but did not narrow**, blanked whole. It
+ *    is a malformed group or drill row, never a data row, and saying so here is
+ *    what keeps a bad marker inside the branch that knows what to do with it.
+ *    Falling through instead handed it to the detail-row path, where the
+ *    actions column asked it for a primary key and `resolveCrudRowId` threw
+ *    during render — emptying the whole table for one unnarrowable field
+ *    (ADR-062).
+ * 4. **A detail row's grouped-by columns, blanked.** The value is stated by the
  *    group row above it, in the same column, and repeating it down a column
  *    whose header already says it is a column of one word (ADR-065, ADR-080).
  *
@@ -48,6 +61,7 @@ export const resolveStructuralCellChildren = ({
   drillRow,
   groupingKeys,
   groupSummary,
+  hasStructuralMarker,
 }: ResolveStructuralCellChildrenArgs) => {
   if (drillRow !== undefined)
     return resolveDrillCellChildren({
@@ -64,6 +78,10 @@ export const resolveStructuralCellChildren = ({
       groupingKeys,
       summary: groupSummary,
     });
+
+  // Fails closed: the row said it was chrome and neither validator could read
+  // it, so it is blanked rather than read as data.
+  if (hasStructuralMarker) return EMPTY_CELL;
 
   return groupingKeys.includes(columnKey) ? EMPTY_CELL : undefined;
 };
