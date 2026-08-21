@@ -316,6 +316,20 @@ siblings would need the drawer to offer the derived columns as rows of their
 own — a real feature, tracked separately, not something to be had by writing an
 unreachable key into a cookie.
 
+**A column's locks carry onto its measures, and the guard runs after the
+mapping.** Both follow from the same fact: every layout action on a measure
+acts on the column it measures. So a measure must not resolve
+`isStatic: false` while its source is locked — `withAggregateColumns` copies
+`isStatic` and `isResizable` across, which is what stops the header menu
+offering Pin/Hide and the header cell drawing a resize handle on a column the
+consumer froze. And a permission check must test the **declared** key, because
+`staticKeys` is built from the consumer's own column list and can never contain
+`total_amount:avg`: a guard placed before `toDeclaredColumnKey` tests a key no
+permission set was ever built for, passes, and then writes the source key
+anyway. `useSetColumnPinning` cannot get this wrong — `resolveColumnPinningUpdate`
+receives the mapped key and guards inside — while `useSetColumnVisibility` orders
+the two by hand.
+
 Sorting is the third edge and it is handled server-side, because a measure sort
 is legitimate on the grouped read — `toGroupSort` maps it onto the aggregate's
 alias — and meaningless on any ungrouped one. `toDrillRead` drops measure terms

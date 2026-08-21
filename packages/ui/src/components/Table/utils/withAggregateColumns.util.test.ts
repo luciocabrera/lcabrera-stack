@@ -318,3 +318,47 @@ describe('hiding a measured column', () => {
     expect([...result.columnVisibility]).toStrictEqual(['order_count']);
   });
 });
+
+describe('a measured column the consumer locked', () => {
+  const lockedColumns: readonly TableColumn<Row>[] = [
+    { key: 'customer_type', label: 'Customer Type' },
+    {
+      isResizable: false,
+      isStatic: true,
+      key: 'total_amount',
+      label: 'Total Amount',
+    },
+  ];
+
+  const measureOfLocked = () =>
+    withAggregateColumns<Row>({
+      aggregates: [{ columnKey: 'total_amount', fn: 'avg' }],
+      columnOrder: ['customer_type', 'total_amount'] as never,
+      columnPinning: noPinning,
+      columns: lockedColumns,
+      columnVisibility: new Set<string>() as never,
+      groupingKeys: ['customer_type'],
+    }).columns.find(({ key }) => String(key) === 'total_amount:avg');
+
+  it('carries the lock onto the measure that replaced it', () => {
+    // Every layout action on a measure resolves to the source column, so a
+    // measure that resolves `isStatic: false` is a lock with a way around it:
+    // the header menu offered Pin/Hide on the measure, and the write landed on
+    // the locked source. `staticKeys` is built from the declared columns and
+    // could never have caught it.
+    expect(measureOfLocked()).toMatchObject({
+      isResizable: false,
+      isStatic: true,
+    });
+  });
+
+  it('still describes the measure’s own data, not the source’s', () => {
+    // The locks carry; the data capabilities do not. A measure summarises rows
+    // the grid does not hold whatever its source allows.
+    expect(measureOfLocked()).toMatchObject({
+      isFilterable: false,
+      isGroupable: false,
+      isSortable: true,
+    });
+  });
+});

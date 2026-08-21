@@ -111,6 +111,18 @@ export const withAggregateColumns = <TData>({
       key: toTableAggregateToken(aggregate) as DataKey<TData>,
       label: TABLE_AGGREGATE_LABELS[aggregate.fn],
       ...(source.format !== undefined && { format: source.format }),
+      ...(source.isResizable !== undefined && {
+        isResizable: source.isResizable,
+      }),
+      // The source's **layout locks** carry, because every layout action on a
+      // measure resolves to the source column anyway (`toDeclaredColumnKey`).
+      // Without this the derived column resolved `isStatic: false`, so
+      // `TableHeaderActionsMenu` offered Pin/Hide and `TableHeaderCell` drew a
+      // resize handle on a column the consumer had locked — a lock bypassed
+      // through the measure that replaced it. Capability flags that describe
+      // the *data* are set above instead, since a measure is not the source's
+      // data: it is never filterable or groupable, and always sortable.
+      ...(source.isStatic !== undefined && { isStatic: source.isStatic }),
       ...(source.maxWidth !== undefined && { maxWidth: source.maxWidth }),
       ...(source.minWidth !== undefined && { minWidth: source.minWidth }),
     };

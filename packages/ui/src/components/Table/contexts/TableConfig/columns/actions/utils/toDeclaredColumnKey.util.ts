@@ -36,6 +36,16 @@ type ToDeclaredColumnKeyArgs<TData> = {
  * **A key that is itself a declared column always wins**, so a consumer whose
  * own column is literally named `total_amount:avg` is unaffected — the token
  * grammar never overrides a real column.
+ *
+ * **Guard on the result, never on the argument.** Every per-column permission
+ * in the table is keyed by declared column — `staticKeys` is built from the
+ * consumer's own list and cannot contain a derived key — so a check that runs
+ * before this mapping tests a key no permission set was ever built for, passes
+ * whatever the answer should be, and then acts on the source column anyway.
+ * That is a lock with a way around it rather than a lock. `useSetColumnPinning`
+ * gets it right by construction, since `resolveColumnPinningUpdate` receives
+ * the already-mapped key; `useSetColumnVisibility` has to order the two by
+ * hand, and once did not.
  */
 export const toDeclaredColumnKey = <TData>({
   columnKey,
