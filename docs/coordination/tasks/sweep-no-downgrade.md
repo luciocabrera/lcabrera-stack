@@ -11,6 +11,9 @@ area:
   - scripts/lib/review-gate-reconcile.mjs
   - scripts/reconcile-review-gates.mjs
   - docs/tooling/review-gate-reconcile.md
+  - scripts/copilot-review-status.mjs
+  - scripts/lib/review-gate-argv.test.mjs
+  - scripts/lib/review-gate-reconcile.test.mjs
 started: 2026-08-21
 updated: 2026-08-21
 plan: (none)

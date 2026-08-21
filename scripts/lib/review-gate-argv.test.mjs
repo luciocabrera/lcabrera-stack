@@ -97,6 +97,23 @@ describe('the argv the sweep hands each gate', () => {
     expect(source).not.toMatch(/'--protect-success'/);
   });
 
+  it('only lets a gate opt in if its script can read the flag', () => {
+    // `--protect-success` is read inside `publishGateStatus`. A gate that posts
+    // its own status instead — `verify-agent-review.mjs` does — would take the
+    // flag and ignore it, which is the same silent no-op this flag already had
+    // once. The roster test next door pins WHICH gates opt in; this pins that
+    // opting in can do anything at all.
+    const sweep = readRepoFile('scripts/reconcile-review-gates.mjs');
+    const optedIn = [...sweep.matchAll(/\{[^}]*script:\s*'([\w.-]+)'[^}]*\}/gu)]
+      .filter((entry) => entry[0].includes('protectSuccess'))
+      .map((entry) => entry[1]);
+
+    expect(optedIn).not.toHaveLength(0);
+    for (const script of optedIn) {
+      expect(readRepoFile(`scripts/${script}`)).toContain('publishGateStatus');
+    }
+  });
+
   it('is what the sweep actually spawns — not a parallel definition', () => {
     // The assertions above are worth nothing if the sweep builds its own argv
     // beside them, so this pins the wiring: one child spawn in that file, and it
