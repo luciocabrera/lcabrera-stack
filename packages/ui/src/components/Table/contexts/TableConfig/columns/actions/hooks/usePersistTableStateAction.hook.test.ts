@@ -205,6 +205,47 @@ describe('usePersistTableStateAction', () => {
     expect(submitMock).not.toHaveBeenCalled();
   });
 
+  it('writes no search params for a table sharing another route URL', () => {
+    // The group-details modal renders over the grouped list as a child route,
+    // so both tables see one `?filters`. Persisting the modal's own would
+    // overwrite the list's — the very state the modal inherited as its floor —
+    // and reconfigure the page underneath from a dialog on top of it.
+    metaStoreGetMock.mockReturnValue({ isUrlStateReadOnly: true });
+    serializeStateSliceMock.mockReturnValue({
+      key: 'orders-group:filters',
+      value: '{"status":"active"}',
+    });
+
+    const { result } = renderHook(() => usePersistTableStateAction());
+
+    act(() => {
+      result.current({
+        persistenceKey: 'orders-group',
+        searchParamKey: 'filters',
+        searchParamValue: '{"status":"active"}',
+        slice: 'columnFilters',
+        valueSlice: { status: 'active' },
+      });
+    });
+
+    // The cookie write survives — what is suppressed is the URL half alone, so
+    // the modal still remembers its own column layout.
+    expect(submitMock).toHaveBeenCalledWith(
+      {
+        currentUrl: '/enterprise-orders?page=2',
+        entries: JSON.stringify([
+          {
+            key: 'orders-group:filters',
+            searchParamKey: '',
+            searchParamValue: '',
+            value: '{"status":"active"}',
+          },
+        ]),
+      },
+      { action: '/_action/persist-cookie', method: 'POST' },
+    );
+  });
+
   it('scopes serialization with the appId from the meta store', () => {
     metaStoreGetMock.mockReturnValue({ appId: 'admin-system' });
     serializeStateSliceMock.mockReturnValue({

@@ -982,6 +982,25 @@ export type TableMetaState = {
    */
   readonly isServerFilterEnabled?: boolean;
   readonly isStriped: boolean;
+  /**
+   * This table shares its URL with another table's route, so it **reads** the
+   * URL's filter/sort state as its starting floor but never writes back to it
+   * (#870).
+   *
+   * The group-details modal is why it exists: it renders over the grouped list
+   * as a child route, so both tables see one `?filters`. Without this the
+   * modal's own filter drawer would overwrite the grouped view's filters —
+   * which are the very state the modal inherited — and the list underneath
+   * would be reconfigured by a change made in a dialog on top of it.
+   *
+   * Absent means off, so an ordinary table owns its URL exactly as before. What
+   * a read-only table changes is durability, not capability: its own sort and
+   * filters live in the store for the life of the dialog, and a refresh returns
+   * to the inherited floor. Anything the URL must survive a refresh with
+   * belongs in a param of its own — the modal keeps the group it opened in
+   * `group`.
+   */
+  readonly isUrlStateReadOnly?: boolean;
   readonly isTableSettingsOpen: boolean;
   readonly isTableSettingsPinned: boolean;
   /** Page size for subsequent loads */

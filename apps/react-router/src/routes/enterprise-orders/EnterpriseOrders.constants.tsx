@@ -17,6 +17,14 @@ export const SCHEMA_NAME = 'public';
 
 export const PERSISTENCE_KEY = 'enterprise-orders-table';
 
+/**
+ * The group-details modal's own persistence key, deliberately not the list's.
+ * The two tables show the same columns but are configured independently, and a
+ * shared key would let a column hidden in the dialog disappear from the list
+ * behind it.
+ */
+export const GROUP_DETAILS_PERSISTENCE_KEY = 'enterprise-orders-group-table';
+
 export const DELETE_ACTION_PATH = '/_action/enterprise-orders/delete';
 
 export const CRUD: TableCrudConfig = {

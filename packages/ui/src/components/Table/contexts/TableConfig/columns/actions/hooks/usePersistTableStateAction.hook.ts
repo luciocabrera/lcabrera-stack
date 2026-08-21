@@ -37,6 +37,12 @@ export const usePersistTableStateAction = () => {
     // Scope keys to the current app so tables in different apps that reuse the
     // same persistenceKey never share cookies / storage entries.
     const appId = metaStore.get()?.appId;
+    // A table sharing another route's URL contributes no param updates at all.
+    // Dropped here rather than at each of the four builders because this is the
+    // one place every entry passes through, and `applySearchParamUpdates`
+    // already ignores an empty key — so one check covers filters, sorting,
+    // grouping and the batched settings write.
+    const isUrlStateReadOnly = metaStore.get()?.isUrlStateReadOnly === true;
 
     const serializedEntries = entries.map(
       ({
@@ -58,8 +64,8 @@ export const usePersistTableStateAction = () => {
 
         return {
           key,
-          searchParamKey: searchParamKey ?? '',
-          searchParamValue: searchParamValue ?? '',
+          searchParamKey: isUrlStateReadOnly ? '' : (searchParamKey ?? ''),
+          searchParamValue: isUrlStateReadOnly ? '' : (searchParamValue ?? ''),
           value,
         };
       },
