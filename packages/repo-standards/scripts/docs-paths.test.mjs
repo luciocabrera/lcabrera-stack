@@ -5,8 +5,20 @@ import {
   extractCandidates,
   isDatedRecord,
   isRootAnchored,
-  parseWorkspaceSpecifier,
 } from './docs-paths.mjs';
+
+/** A stand-in for whatever layout a consumer declares. */
+const REPO_ROOTS = [
+  '.claude',
+  '.github',
+  '.vite-hooks',
+  'apps',
+  'docker',
+  'docs',
+  'packages',
+  'reports',
+  'scripts',
+];
 
 // This module's whole job is PRECISION. A naive "resolve every backticked
 // token" pass reports ~830 hits on this repo against ~19 real ones, and a gate
@@ -16,45 +28,51 @@ import {
 
 describe('isRootAnchored', () => {
   it('accepts a token starting at a real top-level directory', () => {
-    expect(isRootAnchored('packages/ui/src/INVENTORY.md')).toBe(true);
-    expect(isRootAnchored('apps/react-router')).toBe(true);
-    expect(isRootAnchored('.github/skills/react-19/SKILL.md')).toBe(true);
-    expect(isRootAnchored('.vite-hooks/commit-msg')).toBe(true);
+    expect(isRootAnchored('packages/ui/src/INVENTORY.md', REPO_ROOTS)).toBe(
+      true,
+    );
+    expect(isRootAnchored('apps/react-router', REPO_ROOTS)).toBe(true);
+    expect(isRootAnchored('.github/skills/react-19/SKILL.md', REPO_ROOTS)).toBe(
+      true,
+    );
+    expect(isRootAnchored('.vite-hooks/commit-msg', REPO_ROOTS)).toBe(true);
   });
 
   it('rejects a directory that is not a real repo root', () => {
-    expect(isRootAnchored('src/components/Button')).toBe(false);
-    expect(isRootAnchored('node_modules/vitest')).toBe(false);
+    expect(isRootAnchored('src/components/Button', REPO_ROOTS)).toBe(false);
+    expect(isRootAnchored('node_modules/vitest', REPO_ROOTS)).toBe(false);
   });
 
   it('rejects a bare name with no slash', () => {
     // `packages` alone is prose, not a pointer at anything checkable.
-    expect(isRootAnchored('packages')).toBe(false);
-    expect(isRootAnchored('AGENTS.md')).toBe(false);
+    expect(isRootAnchored('packages', REPO_ROOTS)).toBe(false);
+    expect(isRootAnchored('AGENTS.md', REPO_ROOTS)).toBe(false);
   });
 
   it('rejects globs, placeholders and regex-ish tokens', () => {
     // The disqualifiers that keep teaching material out of the gate.
-    expect(isRootAnchored('apps/*/config/**')).toBe(false);
-    expect(isRootAnchored('.claude/rules/<topic>.md')).toBe(false);
-    expect(isRootAnchored('packages/{ui,server}/src')).toBe(false);
-    expect(isRootAnchored(String.raw`scripts\lib`)).toBe(false);
-    expect(isRootAnchored('docs/a|b')).toBe(false);
+    expect(isRootAnchored('apps/*/config/**', REPO_ROOTS)).toBe(false);
+    expect(isRootAnchored('.claude/rules/<topic>.md', REPO_ROOTS)).toBe(false);
+    expect(isRootAnchored('packages/{ui,server}/src', REPO_ROOTS)).toBe(false);
+    expect(isRootAnchored(String.raw`scripts\lib`, REPO_ROOTS)).toBe(false);
+    expect(isRootAnchored('docs/a|b', REPO_ROOTS)).toBe(false);
   });
 
   it('rejects URLs, absolute paths, anchors and whitespace', () => {
-    expect(isRootAnchored('https://example.com/docs/x.md')).toBe(false);
-    expect(isRootAnchored('/etc/passwd')).toBe(false);
-    expect(isRootAnchored('#section-heading')).toBe(false);
-    expect(isRootAnchored('docs/a b.md')).toBe(false);
-    expect(isRootAnchored('')).toBe(false);
+    expect(isRootAnchored('https://example.com/docs/x.md', REPO_ROOTS)).toBe(
+      false,
+    );
+    expect(isRootAnchored('/etc/passwd', REPO_ROOTS)).toBe(false);
+    expect(isRootAnchored('#section-heading', REPO_ROOTS)).toBe(false);
+    expect(isRootAnchored('docs/a b.md', REPO_ROOTS)).toBe(false);
+    expect(isRootAnchored('', REPO_ROOTS)).toBe(false);
   });
 });
 
 describe('extractCandidates', () => {
   it('picks up root-anchored tokens in inline code spans', () => {
     expect(
-      extractCandidates('See `packages/ui/src/PATTERNS.md` first.'),
+      extractCandidates('See `packages/ui/src/PATTERNS.md` first.', REPO_ROOTS),
     ).toEqual(['packages/ui/src/PATTERNS.md']);
   });
 
@@ -63,13 +81,13 @@ describe('extractCandidates', () => {
     // .tsx was never a candidate and could rot indefinitely (#756). Both
     // spellings of the SAME dead pointer must be picked up, or the gate's
     // verdict depends on the file type rather than on whether it resolves.
-    expect(extractCandidates('[a](../../apps/x/Nope.tsx)')).toEqual([
-      '../../apps/x/Nope.tsx',
-    ]);
-    expect(extractCandidates('[a](../../apps/x/Nope.md)')).toEqual([
+    expect(extractCandidates('[a](../../apps/x/Nope.tsx)', REPO_ROOTS)).toEqual(
+      ['../../apps/x/Nope.tsx'],
+    );
+    expect(extractCandidates('[a](../../apps/x/Nope.md)', REPO_ROOTS)).toEqual([
       '../../apps/x/Nope.md',
     ]);
-    expect(extractCandidates('[a](./Sibling.util.ts)')).toEqual([
+    expect(extractCandidates('[a](./Sibling.util.ts)', REPO_ROOTS)).toEqual([
       './Sibling.util.ts',
     ]);
   });
@@ -77,10 +95,16 @@ describe('extractCandidates', () => {
   it('still ignores anchors, URLs and bare parenthesised prose', () => {
     // The counterweight: widening to relative links must not start reporting
     // things that were never paths, or the gate cries wolf and gets bypassed.
-    expect(extractCandidates('[a](#section)')).toEqual([]);
-    expect(extractCandidates('[a](https://example.com/x.tsx)')).toEqual([]);
-    expect(extractCandidates('some prose (Foo.tsx) inline')).toEqual([]);
-    expect(extractCandidates('[a](mailto:someone@example.com)')).toEqual([]);
+    expect(extractCandidates('[a](#section)', REPO_ROOTS)).toEqual([]);
+    expect(
+      extractCandidates('[a](https://example.com/x.tsx)', REPO_ROOTS),
+    ).toEqual([]);
+    expect(
+      extractCandidates('some prose (Foo.tsx) inline', REPO_ROOTS),
+    ).toEqual([]);
+    expect(
+      extractCandidates('[a](mailto:someone@example.com)', REPO_ROOTS),
+    ).toEqual([]);
   });
 
   it('ignores everything inside a fenced block', () => {
@@ -94,7 +118,7 @@ describe('extractCandidates', () => {
       '```',
     ].join('\n');
 
-    expect(extractCandidates(markdown)).toEqual([
+    expect(extractCandidates(markdown, REPO_ROOTS)).toEqual([
       'scripts/verify-docs-paths.mjs',
     ]);
   });
@@ -109,7 +133,7 @@ describe('extractCandidates', () => {
     ].join('\n');
 
     expect(
-      extractCandidates(markdown).toSorted((left, right) =>
+      extractCandidates(markdown, REPO_ROOTS).toSorted((left, right) =>
         left.localeCompare(right),
       ),
     ).toEqual([
@@ -123,7 +147,7 @@ describe('extractCandidates', () => {
       'See [the README](../coordination/README.md) and [rules](.claude/rules/typescript.md).';
 
     expect(
-      extractCandidates(markdown).toSorted((left, right) =>
+      extractCandidates(markdown, REPO_ROOTS).toSorted((left, right) =>
         left.localeCompare(right),
       ),
     ).toEqual(['../coordination/README.md', '.claude/rules/typescript.md']);
@@ -132,7 +156,7 @@ describe('extractCandidates', () => {
   it('ignores link targets that are neither anchored nor markdown', () => {
     const markdown =
       '[site](https://example.com) [anchor](#heading) [img](logo.png)';
-    expect(extractCandidates(markdown)).toEqual([]);
+    expect(extractCandidates(markdown, REPO_ROOTS)).toEqual([]);
   });
 
   it('strips heading anchors and trailing sentence punctuation', () => {
@@ -142,7 +166,7 @@ describe('extractCandidates', () => {
       'Read `docs/README.md`, then `scripts/lib/labels.mjs`. Also [x](../a/b.md#why).';
 
     expect(
-      extractCandidates(markdown).toSorted((left, right) =>
+      extractCandidates(markdown, REPO_ROOTS).toSorted((left, right) =>
         left.localeCompare(right),
       ),
     ).toEqual(['../a/b.md', 'docs/README.md', 'scripts/lib/labels.mjs']);
@@ -150,47 +174,16 @@ describe('extractCandidates', () => {
 
   it('deduplicates a path named several times', () => {
     const markdown = 'Both `docs/README.md` and `docs/README.md` again.';
-    expect(extractCandidates(markdown)).toEqual(['docs/README.md']);
+    expect(extractCandidates(markdown, REPO_ROOTS)).toEqual(['docs/README.md']);
   });
 
   it('returns nothing for a document with no paths at all', () => {
     expect(
-      extractCandidates('# Title\n\nSome prose with `try/catch` in it.'),
+      extractCandidates(
+        '# Title\n\nSome prose with `try/catch` in it.',
+        REPO_ROOTS,
+      ),
     ).toEqual([]);
-  });
-});
-
-describe('parseWorkspaceSpecifier', () => {
-  it('splits a package specifier into name and subpath', () => {
-    expect(
-      parseWorkspaceSpecifier('@lcabrera/ui/design-system/tokens'),
-    ).toEqual({
-      packageName: 'ui',
-      subpath: 'design-system/tokens',
-    });
-  });
-
-  it('leaves the subpath undefined for a bare package', () => {
-    expect(parseWorkspaceSpecifier('@lcabrera/server')).toEqual({
-      packageName: 'server',
-      subpath: undefined,
-    });
-  });
-
-  it('returns undefined for anything not a workspace specifier', () => {
-    expect(parseWorkspaceSpecifier('packages/ui/src')).toBeUndefined();
-    expect(parseWorkspaceSpecifier('@stylexjs/stylex')).toBeUndefined();
-    expect(parseWorkspaceSpecifier('react')).toBeUndefined();
-  });
-
-  // The repo has two scopes — @lcabrera/* ships, @repo/* is internal tooling —
-  // and the docs name both. A parser that understood only one would quietly
-  // validate half of them while still reporting a clean pass.
-  it('parses the internal @repo scope too', () => {
-    expect(parseWorkspaceSpecifier('@repo/ts-configs/entries')).toEqual({
-      packageName: 'ts-configs',
-      subpath: 'entries',
-    });
   });
 });
 
@@ -217,36 +210,61 @@ describe('enforcedTokens', () => {
 
   it('enforces every token in an ordinary document', () => {
     const tokens = ['packages/ui/src/gone.ts', '../sibling.md'];
-    expect(enforcedTokens(tokens, ordinary)).toEqual(tokens);
+    expect(
+      enforcedTokens({
+        docPath: ordinary,
+        repoRoots: REPO_ROOTS,
+        tokens: tokens,
+      }),
+    ).toEqual(tokens);
   });
 
   it('still enforces a relative link inside an ADR', () => {
     // Navigational: the reader is invited to follow it, so it resolves or it
     // is dead. This is the case the old blanket exemption hid — four links
     // broke when 20 ADRs moved up a directory level and nothing reported it.
-    expect(enforcedTokens(['../coordination/README.md'], adr)).toEqual([
-      '../coordination/README.md',
-    ]);
+    expect(
+      enforcedTokens({
+        docPath: adr,
+        repoRoots: REPO_ROOTS,
+        tokens: ['../coordination/README.md'],
+      }),
+    ).toEqual(['../coordination/README.md']);
   });
 
   it('exempts a root-anchored path named inside an ADR', () => {
     // Descriptive: ADR-008 IS the record of the @repo/api -> data-access
     // rename, so naming the old path is its content, not a dead reference.
-    expect(enforcedTokens(['packages/data-access'], adr)).toEqual([]);
+    expect(
+      enforcedTokens({
+        docPath: adr,
+        repoRoots: REPO_ROOTS,
+        tokens: ['packages/data-access'],
+      }),
+    ).toEqual([]);
   });
 
   it('splits a mixed ADR, keeping only the navigational half', () => {
     expect(
-      enforcedTokens(
-        ['packages/data-access', '../cqms/STATUS.md', 'docs/agents/gone/'],
-        adr,
-      ),
+      enforcedTokens({
+        docPath: adr,
+        repoRoots: REPO_ROOTS,
+        tokens: [
+          'packages/data-access',
+          '../cqms/STATUS.md',
+          'docs/agents/gone/',
+        ],
+      }),
     ).toEqual(['../cqms/STATUS.md']);
   });
 
   it('is empty for an ADR that only names historical paths', () => {
-    expect(enforcedTokens(['packages/gone/', 'apps/also-gone/'], adr)).toEqual(
-      [],
-    );
+    expect(
+      enforcedTokens({
+        docPath: adr,
+        repoRoots: REPO_ROOTS,
+        tokens: ['packages/gone/', 'apps/also-gone/'],
+      }),
+    ).toEqual([]);
   });
 });

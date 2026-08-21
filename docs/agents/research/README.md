@@ -82,7 +82,8 @@ inside its own repository**, with a leading `/` marking that repository's root:
 The two rows fail differently, and only one of them is the gate's business.
 
 A **root-anchored** token — one whose first segment is a directory this repo has
-at its top level, enumerated as `REPO_ROOTS` in `scripts/lib/docs-paths.mjs` — is
+at its top level, declared as `gates.docsPaths.repoRoots` in `devkit.config.json`
+and applied by `packages/repo-standards/scripts/docs-paths.mjs` — is
 checked against this tree. Most
 foreign paths do not exist here, so the gate reports them loudly and you fix them
 on the spot. The hazard is the **collision**: a foreign path that happens to name
@@ -102,7 +103,7 @@ review caught them.
 The one exception is a path inside a **verbatim quotation**, which stays exactly
 as quoted — rewriting it would falsify the quote. If the gate reports it, that is
 what `scripts/docs-paths-baseline.json` is for, one entry at a time through
-`node scripts/verify-docs-paths.mjs --accept … --reason "…"`.
+`vp run docs:verify -- --accept … --reason "…"`.
 
 ## Counts
 

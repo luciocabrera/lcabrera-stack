@@ -14,6 +14,7 @@
     "repo-verify-branch": "./scripts/verify-branch-name.mjs",
     "repo-verify-claims": "./scripts/verify-coordination.mjs",
     "repo-verify-commit": "./scripts/verify-commit-msg.mjs",
+    "repo-verify-docs-paths": "./scripts/verify-docs-paths.mjs",
     "repo-verify-issue": "./scripts/verify-issue-body.mjs",
     "repo-verify-pr": "./scripts/verify-pr.mjs",
     "repo-verify-publish": "./scripts/verify-publish-surface.mjs",

@@ -155,6 +155,26 @@ repository root's `node_modules` and every gate passes. The same walk from
 `node_modules/<name>/scripts/` reaches the consumer's tree instead, which under
 pnpm carries nothing nobody declared. `ts-morph` sat undeclared exactly that way.
 
+## What stays behind, and why
+
+Not every gate belongs here. A gate travels when its **rule** is a property of
+repositories and only its **names** are local — that is what configuration is
+for. A gate stays when its whole subject is one repository's toolchain, because
+parameterising it would mean shipping an abstraction over "which analysers you
+run", and a consumer could not use the result without reproducing this
+repository's exact setup.
+
+| Gate                                                    | Why it stays                                                                                                                                                                                                                                                                                             |
+| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `verify-lint-plugins.mjs`                               | Its subject _is_ the Oxlint topology: it imports the root `vite.config.ts` for `WORKSPACE_RUNTIMES` and `lintConfig.plugins`, shells out to this toolchain's runner, and proves each plugin family live by planting a violation per family. None of that is a repository fact wrapped in a general rule. |
+| `verify-suppressions.mjs`                               | The same subject from the other side — which of four analysers wrote a suppression, in which file format, and whether the public-package register argues for it. It also reads the React Doctor triage and the coverage workspace roster, which #798 already places out of scope.                        |
+| `verify-react-doctor.mjs`, `verify-route-artifacts.mjs` | Named in #798 as inherently this repository's: one analyser's triage, and one framework's generated route artifacts.                                                                                                                                                                                     |
+
+The prose side already reads it the same way: `lint-toolchain` is classified
+**repo-specific** in `packages/devkit/CLASSIFICATION.md` because "it documents
+_this_ repository's analyser topology". A gate and the document describing it
+should not disagree about whether they travel.
+
 ## The one thing to know before moving a file here
 
 These gates find the repository by walking up from their own location, not by

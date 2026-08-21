@@ -35,7 +35,8 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { runGit } from '../packages/repo-standards/scripts/git-exec.mjs';
-import { documentedFiles } from './lib/markdown-corpus.mjs';
+import { readGates } from '../packages/repo-standards/scripts/config.mjs';
+import { documentedFiles } from '../packages/repo-standards/scripts/markdown-corpus.mjs';
 import {
   describeFinding,
   parseRenameDiff,
@@ -110,7 +111,13 @@ const trackedPaths = () => {
 };
 
 const corpus = () =>
-  documentedFiles(REPO_ROOT).map((path) => ({
+  documentedFiles({
+    // The same corpus the documented-path gate reads. Two walkers drift, and a
+    // doc gate quietly reading fewer files reports the same clean pass as a
+    // corpus with nothing wrong in it.
+    ignoredDocs: readGates(REPO_ROOT).docsPaths.ignoredDocs,
+    repoRoot: REPO_ROOT,
+  }).map((path) => ({
     markdown: readFileSync(join(REPO_ROOT, path), 'utf8'),
     path,
   }));

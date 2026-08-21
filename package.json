@@ -37,7 +37,7 @@
     "devkit:closure": "devkit closure",
     "devkit:doctor": "devkit doctor",
     "devkit:sync": "devkit sync",
-    "docs:verify": "node scripts/verify-docs-paths.mjs",
+    "docs:verify": "repo-verify-docs-paths",
     "fallow:audit": "fallow audit",
     "fallow:dead-code": "fallow dead-code",
     "fallow:dupes": "fallow dupes",

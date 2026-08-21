@@ -37,7 +37,10 @@
  *      pair `*.constants.ts` with an example in the next cell, and a rename that
  *      happens to match the example is not a broken pointer.
  */
-import { inlineCodeTokens, normaliseToken } from './docs-paths.mjs';
+import {
+  inlineCodeTokens,
+  normaliseToken,
+} from '../../packages/repo-standards/scripts/docs-paths.mjs';
 
 /** Git reports `/`-separated paths on every platform, so this needs no `path`. */
 const basenameOf = (filePath) => filePath.slice(filePath.lastIndexOf('/') + 1);

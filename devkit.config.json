@@ -14,6 +14,46 @@
         ".prettierignore"
       ],
       "unreadPrefixes": [".prettierrc"]
+    },
+    "docsPaths": {
+      "baselineFile": "scripts/docs-paths-baseline.json",
+      "expectedAbsent": [
+        ".claude/settings.local.json",
+        "docs/coordination/BOARD.md",
+        "reports/fallow/coverage/coverage-final.json"
+      ],
+      "expectedAbsentPrefixes": [
+        "docker/local/",
+        "reports/fallow/runs/",
+        "reports/sonar/runs/"
+      ],
+      "ignoredDocs": [
+        "reports/",
+        "docs/coordination/PLAN_TRIAGE.md",
+        "_PLAN.md",
+        ".github/skills/react-router-framework-mode/",
+        ".github/skills/store-pattern/references/architecture-templates/"
+      ],
+      "onDemandReportDirs": [
+        "reports/biome",
+        "reports/eslint",
+        "reports/fallow",
+        "reports/oxlint",
+        "reports/react-doctor",
+        "reports/skills",
+        "reports/sonar"
+      ],
+      "repoRoots": [
+        ".claude",
+        ".github",
+        ".vite-hooks",
+        "apps",
+        "docker",
+        "docs",
+        "packages",
+        "reports",
+        "scripts"
+      ]
     }
   },
   "registers": {
