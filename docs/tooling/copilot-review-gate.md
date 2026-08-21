@@ -670,6 +670,18 @@ rest of the preconditions.
    `gh api repos/luciocabrera/vite-react-compiler/commits/<sha>/statuses`, which
    is how to tell a local recompute from a workflow one afterwards.
 
+   **Use the dispatch form to clear a merge. The local form cannot, and it can
+   stop anything else from doing so.** Since the context was pinned to
+   `integration_id` 15368, a status you post from a checkout has no app behind it
+   and does not satisfy the required check — the same limit as rung 6. It is
+   worse than rung 6 here, because it also silences the one thing that could have
+   cleared the bar: `shouldPublishStatus` withholds a post when the state and the
+   description both match what is already there, and the local form computes both
+   with the code the scheduled sweep runs. So a locally-posted `success` makes
+   every later sweep a no-op on that head. The dispatch form escapes this — the
+   gate workflow invokes the script without `--if-changed`, so it publishes
+   unconditionally, as `github-actions[bot]`.
+
 4. **Re-request the review** from the pull request's Reviewers panel — for the
    **other** case, a head Copilot has not reviewed at all. This is what unstuck
    #671, and it is still the right move there.
@@ -925,10 +937,10 @@ The scheduled reconcile is not subject to this — it runs from the default bran
 with a token that can write statuses, so a fork pull request does get a status
 from it, within one interval. That is the same verdict the fork's own run
 computed and could not post, so nothing weaker is being asserted: `pending` until
-an accepted reviewer reviews the head, exactly as for any other pull request. The
-last two
-break-glass rungs — the hand-posted status, and the admin bypass — remain the way
-through if it is needed sooner.
+an accepted reviewer reviews the head, exactly as for any other pull request. If
+that is needed sooner, **the admin bypass is the way through** — the hand-posted
+status (rung 6) stopped being one when the context was pinned to
+`integration_id` 15368.
 
 ## Preconditions these notes depend on
 

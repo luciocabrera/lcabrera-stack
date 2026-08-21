@@ -600,11 +600,11 @@ is the schedule; the interval, the recovery and what it does on failure are in
 [`docs/tooling/review-gate-reconcile.md`](docs/tooling/review-gate-reconcile.md)
 ([ADR-076](docs/decisions/ADR-076-reconcile-the-review-gate-statuses-on-a-schedule.md)).
 
-| Command                                               | Does                                                             |
-| ----------------------------------------------------- | ---------------------------------------------------------------- |
-| `vp run review-gates:reconcile`                       | republish every status for every open PR that needs it           |
-| `vp run review-gates:reconcile -- --pr <n>`           | the same for one PR — the local form of the break-glass dispatch |
-| `vp run review-gates:reconcile -- --pr <n> --dry-run` | print what it would publish, posting nothing                     |
+| Command                                               | Does                                                                                 |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `vp run review-gates:reconcile`                       | republish every status for every open PR that needs it                               |
+| `vp run review-gates:reconcile -- --pr <n>`           | the same for one PR, posting as you — reports, but does not clear a required context |
+| `vp run review-gates:reconcile -- --pr <n> --dry-run` | print what it would publish, posting nothing                                         |
 
 ### Autonomous PR queue
 

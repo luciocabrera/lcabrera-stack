@@ -29,11 +29,12 @@ would notice.
 
 For `Copilot review complete` — required since 2026-08-21 — a stale status is a
 pull request that cannot merge. The recovery is the gate's own `workflow_dispatch`
-(break-glass rung 5 in
-[`copilot-review-gate.md`](./copilot-review-gate.md#break-glass)), which exists
-so nobody has to hunt for an earlier run to re-run; the caveat worth knowing
-before pressing it is that a dispatch naming no ref runs `main`'s copy of the
-gate, which is the #866 failure. For the two contexts still advisory the
+— **break-glass rung 3**, its `gh workflow run` form, in
+[`copilot-review-gate.md`](./copilot-review-gate.md#break-glass) — which exists so
+nobody has to hunt for an earlier run to re-run. Two caveats before pressing it: a
+dispatch naming no ref runs `main`'s copy of the gate, which is the #866 failure;
+and rung 3's _local_ form does not clear a required context, for the reason that
+rung records. For the two contexts still advisory the
 consequence is only latency. This sweep landing first is what made the promotion
 safe.
 
@@ -279,6 +280,13 @@ Waiting up to one interval is the ordinary answer. When that is too long:
 
    It is the same code the schedule runs, and it posts only if the head does not
    already carry the verdict it computes.
+
+   **For `Copilot review complete` this reports rather than recovers.** The status
+   it posts is attributed to you, not to an app, so it does not satisfy that
+   required context — and because it posts the same state and description the
+   schedule would, every later sweep sees no change and withholds. Use step 2 for
+   that gate; this step is the right one for the two contexts that are advisory,
+   and for reading what the sweep thinks.
 
 2. **Dispatch the gate from Actions**, which needs no checkout — pick
    **Copilot Review Gate**, **Agent Review Gate** or **Review Gate Reconcile**,
