@@ -67,6 +67,9 @@ const rows: readonly TestRow[] = [
       ],
     },
   },
+  // A drilled detail row: a real order, carrying the raw column values. It
+  // renders over the same partition as the group row above it (ADR-065).
+  { customer_type: 'Business', id: 7, total_amount: 4200 },
 ];
 
 const attachScrollMetrics = (container: HTMLDivElement | null) => {
@@ -252,8 +255,9 @@ describe('a column carrying several measures', () => {
     const band = screen.getAllByTestId('table-header-band')[0];
 
     expect(band?.closest('tr')?.getAttribute('aria-hidden')).toBe('true');
-    // One header row in the accessibility tree, plus the one group row.
-    expect(screen.getAllByRole('row')).toHaveLength(2);
+    // One header row in the accessibility tree, plus the group row and the
+    // detail row beneath it — the band row is not among them.
+    expect(screen.getAllByRole('row')).toHaveLength(3);
   });
 
   it('puts one measure in each cell', () => {
@@ -294,6 +298,32 @@ describe('a column carrying several measures', () => {
         .getByRole('columnheader', { name: 'Total Amount Average' })
         .getAttribute('aria-sort'),
     ).toBe('ascending');
+  });
+
+  it('leaves a drilled detail row no cell for its raw measured value', () => {
+    // **A known limitation, pinned so it is a decision rather than a surprise.**
+    // Every row renders over the same partition (ADR-065), and replacing the
+    // measured column takes `total_amount` off the grid entirely — so a detail
+    // row, which holds no `total_amount:avg` field, has nowhere to show its own
+    // amount. Only the primary key survives, because that column is measured
+    // beside itself rather than replaced.
+    //
+    // Not fixed by keeping the source column alongside its measures: that
+    // column can hold no aggregate, so it would draw the em-dash on every group
+    // row of every grouped view, to serve detail rows that only a drill
+    // produces. #870 removes the inline drill for a modal route that applies no
+    // grouping, where the declared columns are all present and the question
+    // does not arise.
+    renderGrid();
+
+    const detail = screen.getAllByRole('row').at(-1);
+    const cells = [
+      ...(detail?.querySelectorAll('[role="gridcell"]') ?? []),
+    ].map((cell) => cell.textContent);
+
+    // `customer_type` blanks because the group row above states it; `id` is the
+    // primary key; both measure columns are empty. `4200` is unreachable.
+    expect(cells).toStrictEqual(['', '7', '', '']);
   });
 
   it('draws no band row at all when no column carries several measures', () => {

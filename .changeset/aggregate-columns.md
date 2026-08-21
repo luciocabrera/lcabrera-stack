@@ -40,5 +40,17 @@ Two additive changes to the published type surface:
   no field of the row.
 - `TableColumn` gains an optional `headerGroupLabel`, the name stated above a
   derived column in the header band.
-- `pruneSortingToColumns` is exported: it drops a sort naming a column the grid
-  no longer paints, which is what stops a measure sort outliving its column.
+- `pruneSortingToColumns` is exported: it drops a sort naming a column
+  **nothing can order by**, which is what stops a measure sort outliving its
+  column. It takes the declared column keys and the painted ones as two
+  separate arguments, because a measured column is replaced while grouped —
+  pruning against the painted list alone would discard a sort on a column that
+  is merely not on screen.
+
+**One known limitation.** A measured column is replaced, and every row renders
+over the same columns — so a **drilled detail row** has no cell for its own raw
+value while an aggregate is applied to that column. Keeping the source column
+alongside its measures would fix it at the cost of an empty column on every
+group row of every grouped view, to serve rows only a drill produces. The
+inline drill is being replaced by a modal route that applies no grouping, where
+every declared column is present and the question does not arise.

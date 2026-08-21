@@ -310,6 +310,20 @@ alias — and meaningless on any ungrouped one. `toDrillRead` drops measure term
 alongside the group-key terms it already dropped; `pruneSortingToColumns` covers
 the other direction, when the grouping clears while such a sort is applied.
 
+**Replacement costs a detail row its raw value, and that is a known
+limitation rather than an oversight.** Every row renders over the same
+partition (ADR-065), so taking `total_amount` off the grid takes it off the
+drilled rows too — they hold no `total_amount:avg` field, so both measure
+columns are blank on them and the order's own amount is unreachable without
+deselecting the aggregate. Keeping the source column alongside its measures
+would fix it and cost more than it saves: that column can carry no aggregate,
+so it would draw the em-dash on every group row of every grouped view, to serve
+rows that only a drill produces. #870 removes the inline drill for a modal route
+that applies no grouping — where the declared columns are all present and the
+question does not arise — and carries this as an acceptance criterion.
+`Table.aggregateColumns.test.tsx` pins the current behaviour so it stays a
+decision on record.
+
 The two cannot conflict, because an aggregate naming a group key is dropped —
 that column already carries its key's value. One column is never replaced,
 though: a **primary-key** column is measured _beside_ itself, because
