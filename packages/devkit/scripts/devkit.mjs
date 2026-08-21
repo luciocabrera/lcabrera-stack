@@ -50,9 +50,25 @@ const COMMANDS = {
  */
 const withoutSeparator = (argv) => argv.filter((entry) => entry !== '--');
 
+/**
+ * Asking for help is not a usage error, and the difference is not cosmetic:
+ * `--help` is the first thing a consumer runs and the cheapest liveness check a
+ * smoke test can make, so answering it on stderr with a failing code reads as a
+ * broken install and aborts any caller running under `set -e`. An unrecognised
+ * command still fails — the separation is between "you asked what this does" and
+ * "you asked for something that is not here".
+ */
+const HELP_REQUESTS = new Set(['--help', '-h', 'help']);
+
 /** @param {{ argv: string[], root: string }} args */
 export const runCommand = ({ argv, root }) => {
   const [command, ...rest] = withoutSeparator(argv);
+
+  if (command !== undefined && HELP_REQUESTS.has(command)) {
+    console.log(USAGE);
+    return 0;
+  }
+
   const handler = Object.hasOwn(COMMANDS, command ?? '')
     ? COMMANDS[command]
     : undefined;

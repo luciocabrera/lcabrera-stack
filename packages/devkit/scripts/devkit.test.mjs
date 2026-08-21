@@ -20,6 +20,25 @@ describe('runCommand', () => {
     error.mockRestore();
   });
 
+  for (const request of ['--help', '-h', 'help']) {
+    test(`answers ${request} on stdout, and succeeds`, () => {
+      // It is the first command a consumer runs and the cheapest liveness check
+      // a smoke test can make. Answering it on stderr with a failing code reads
+      // as a broken install and aborts a caller running under `set -e`.
+      const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+      const error = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => undefined);
+
+      expect(runCommand({ argv: [request], root: '/nowhere' })).toBe(0);
+      expect(log).toHaveBeenCalledWith(expect.stringContaining('devkit sync'));
+      expect(error).not.toHaveBeenCalled();
+
+      log.mockRestore();
+      error.mockRestore();
+    });
+  }
+
   test('does not treat an inherited Object property as a command', () => {
     const error = vi
       .spyOn(console, 'error')
