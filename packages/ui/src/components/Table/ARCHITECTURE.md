@@ -304,6 +304,24 @@ accessibility tree through each measure header's own `aria-label` instead — on
 announcement per column rather than a second header row in the sequence
 `aria-rowindex` counts through.
 
+**The store's derived column fields are only valid derived together.**
+`normalizedColumns`, `effectiveColumns`, `pinnedColumnPartition` and
+`pinnedColumnOffsets` all come out of one `deriveColumnViewState` call, and an
+action writing a subset of them writes a state no derivation would have
+produced. That was survivable while every derivation added no column: the
+consumer's declared list and the painted list held the same keys, so rebuilding
+one field from the wrong list happened to agree. `withAggregateColumns` ends
+that, because it paints columns the declared list has never heard of.
+`useSetColumnSorting` was the one action still writing a subset, and once
+measures existed a sort click rebuilt `normalizedColumns` without them while
+`pinnedColumnPartition` still asked for them to be rendered — so
+`TableHeaderCell` destructured `undefined` (#872). Every column-mutating action
+now re-derives the whole view state, and `aggregates`/`groupingKeys` are
+**required** arguments so a new derivation site fails to compile rather than
+silently deriving from the declared list. That requirement is also what this
+site evaded: it reached past `deriveColumnViewState` to the `getNormalizedColumns`
+primitive underneath, and so had nothing to fail on.
+
 A group row renders **each key's value in that key's own column**, one measure
 per measure column, and an em dash on a column carrying no aggregate at all. **Depth is read from which key columns are filled**,
 not from a pixel offset: a rollup fills a prefix, a cube fills an arbitrary

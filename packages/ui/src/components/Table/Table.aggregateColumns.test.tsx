@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { useRef } from 'react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
@@ -15,11 +15,13 @@ import {
   TableDataProvider,
   TableFocusProvider,
 } from '#ui/components/Table/contexts';
+import { useSetColumnSorting } from '#ui/components/Table/contexts/TableConfig/columns/actions/useSetColumnSorting.hook';
 import { TableWrapperContext } from '#ui/components/Table/contexts/TableWrapper/TableWrapperContext.context';
 import { TABLE_GROUP_ROW_FIELD } from '#ui/components/Table/Table.constants';
 import { TableBase } from '#ui/components/Table/TableBase';
 import { TableBody } from '#ui/components/Table/TableBody';
 import { TableHeader } from '#ui/components/Table/TableHeader';
+import { NotificationProvider } from '#ui/contexts/NotificationContext';
 
 /**
  * Several measures on one column, end to end against real stores (#869).
@@ -78,6 +80,29 @@ const attachScrollMetrics = (container: HTMLDivElement | null) => {
   });
 };
 
+/**
+ * Sorts a measure column from **inside** the provider tree, the way the header
+ * actions menu does. A button rather than a `renderHook`, because the point is
+ * that the grid re-renders afterwards against the store the action wrote.
+ */
+const SortProbe = () => {
+  const setColumnSorting = useSetColumnSorting<TestRow>();
+
+  return (
+    <button
+      onClick={() =>
+        setColumnSorting({
+          columnKey: 'total_amount:avg' as never,
+          direction: 'asc',
+        })
+      }
+      type='button'
+    >
+      sort by average
+    </button>
+  );
+};
+
 type HarnessProps = {
   readonly aggregates?: readonly TableColumnAggregate[];
 };
@@ -92,47 +117,56 @@ const Harness = ({ aggregates = AGGREGATES }: HarnessProps) => {
   };
 
   return (
-    <TableConfigProvider<TestRow>
-      columnsState={{ columns }}
-      metaState={{
-        groupingAggregates: aggregates,
-        groupingKeys: GROUPING_KEYS,
-        overscan: 2,
-        rowHeight: ROW_HEIGHT,
-      }}
-    >
-      <TableFocusProvider>
-        <TableDataProvider<TestRow>
-          dataState={{
-            data: rows,
-            isLoading: false,
-            isLoadingMore: false,
-            totalRows: rows.length,
-          }}
-        >
-          <TableWrapperContext value={{ containerRef, wrapperRef }}>
-            <div data-testid='scroll-container' ref={setContainer}>
-              <TableBase>
-                <TableHeader />
-                <TableBody tableContainerRef={containerRef} />
-              </TableBase>
-            </div>
-          </TableWrapperContext>
-        </TableDataProvider>
-      </TableFocusProvider>
-    </TableConfigProvider>
+    <NotificationProvider>
+      <TableConfigProvider<TestRow>
+        columnsState={{ columns }}
+        metaState={{
+          groupingAggregates: aggregates,
+          groupingKeys: GROUPING_KEYS,
+          overscan: 2,
+          rowHeight: ROW_HEIGHT,
+        }}
+      >
+        <TableFocusProvider>
+          <TableDataProvider<TestRow>
+            dataState={{
+              data: rows,
+              isLoading: false,
+              isLoadingMore: false,
+              totalRows: rows.length,
+            }}
+          >
+            <TableWrapperContext value={{ containerRef, wrapperRef }}>
+              <div data-testid='scroll-container' ref={setContainer}>
+                <SortProbe />
+                <TableBase>
+                  <TableHeader />
+                  <TableBody tableContainerRef={containerRef} />
+                </TableBase>
+              </div>
+            </TableWrapperContext>
+          </TableDataProvider>
+        </TableFocusProvider>
+      </TableConfigProvider>
+    </NotificationProvider>
   );
 };
 
 /**
  * A data router, because the header's resize handle reaches `useFetcher` to
- * persist a width. Nothing here exercises that path; it just has to exist.
+ * persist a width, and the sort action posts the new sorting to the
+ * persist-cookie route. The route has to exist rather than merely be
+ * unexercised: a `useFetcher` submit to a path the router does not know 404s,
+ * and React Router hands that to its default error boundary, which replaces the
+ * grid with `Unexpected Application Error!` — a whole-tree failure that would
+ * mask whatever the assertion was about to check.
  */
 const renderGrid = (props: HarnessProps = {}) =>
   render(
     <RouterProvider
       router={createMemoryRouter([
         { element: <Harness {...props} />, path: '/' },
+        { action: () => ({ ok: true }), path: '/_action/persist-cookie' },
       ])}
     />,
   );
@@ -232,6 +266,34 @@ describe('a column carrying several measures', () => {
 
     // `Id` shows the no-aggregate dash: it is neither a key nor measured.
     expect(cells).toStrictEqual(['Business', '—No aggregate', '2,503', '17']);
+  });
+
+  it('survives a sort on a measure column', () => {
+    // The regression this pins (#872 review): the sort action rebuilt
+    // `normalizedColumns` from the consumer's **declared** column list, which
+    // has no measure columns in it, while leaving `pinnedColumnPartition` —
+    // which does — untouched. `TableHeaderCell` then looked up
+    // `total_amount:avg`, got `undefined`, and destructured it.
+    //
+    // Sorting a measure is the feature this PR ships, so the crash sat on its
+    // own headline path. A unit test over the sort resolver cannot see it: the
+    // two lists only diverge once an aggregate is applied, which is state the
+    // resolver never receives.
+    renderGrid();
+
+    fireEvent.click(screen.getByRole('button', { name: 'sort by average' }));
+
+    expect(headerLabels()).toStrictEqual([
+      'Customer Type',
+      'Id',
+      'Average',
+      'Minimum',
+    ]);
+    expect(
+      screen
+        .getByRole('columnheader', { name: 'Total Amount Average' })
+        .getAttribute('aria-sort'),
+    ).toBe('ascending');
   });
 
   it('draws no band row at all when no column carries several measures', () => {
