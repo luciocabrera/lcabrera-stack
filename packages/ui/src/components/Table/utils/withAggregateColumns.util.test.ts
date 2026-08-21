@@ -196,7 +196,7 @@ describe('withAggregateColumns', () => {
 
   it('measures a primary-key column beside it rather than replacing it', () => {
     // Replacing it would leave no column carrying `isPrimaryKey`, and
-    // `resolveCrudRowId` throws a TypeError when none does — taking out the
+    // `resolveCrudRowId` answers undefined when none does — taking out the
     // row-actions menu of every row for a grouping settable from the URL.
     const result = run({
       aggregates: [{ columnKey: 'order_id', fn: 'count' }],

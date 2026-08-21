@@ -56,8 +56,16 @@ type BuildTableBodyCellDescriptorArgs<TData extends Record<string, unknown>> = {
    * row and a detail row can sit in one result.
    */
   readonly groupSummary?: TableGroupRowSummary;
-  /** See `hasTableStructuralMarker` — a row that claims to be chrome. */
-  readonly hasStructuralMarker?: boolean;
+  /**
+   * See `hasTableStructuralMarker` — a row that claims to be chrome.
+   *
+   * **Required, not optional.** It is always computable and there is one call
+   * site; an optional flag defaulting to `false` would let a caller that
+   * forgets it compile cleanly and silently disable the fail-closed branch in
+   * `resolveStructuralCellChildren` — the same silent-drop shape as the
+   * `drillRow` bug this exists to fix.
+   */
+  readonly hasStructuralMarker: boolean;
   readonly isLoadingState: boolean;
   readonly pinnedOffsets: Partial<Record<DataKey<TData>, PinnedColumnInfo>>;
   readonly row: TData;
@@ -128,7 +136,7 @@ export const buildTableBodyCellDescriptor = <
   drillRow,
   groupingKeys,
   groupSummary,
-  hasStructuralMarker = false,
+  hasStructuralMarker,
   isLoadingState,
   pinnedOffsets,
   row,

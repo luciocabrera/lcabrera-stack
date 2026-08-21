@@ -10,7 +10,7 @@ import {
   useGetTableDeleteActionPath,
   useGetTableTitleSingular,
 } from '../contexts/TableConfig/meta/selectors';
-import { tryResolveCrudRowId } from '../utils/resolveCrudRowId.util';
+import { resolveCrudRowId } from '../utils/resolveCrudRowId.util';
 import { TableActionMenu } from './TableActionMenu';
 
 const DEFAULT_TITLE_SINGULAR = 'Record';
@@ -31,7 +31,7 @@ export const TableRowActionsMenu = <TData extends Record<string, unknown>>({
   }
 
   const resolvedTitleSingular = titleSingular ?? DEFAULT_TITLE_SINGULAR;
-  const rowId = tryResolveCrudRowId({ columns, row });
+  const rowId = resolveCrudRowId({ columns, row });
 
   // A row with no resolvable id gets no CRUD menu rather than no application.
   // This runs during render, so the throwing form would take the whole grid to

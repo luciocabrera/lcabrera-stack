@@ -10,14 +10,14 @@ type RenderTableBodyPinnedGroupArgs<TData, TColumn, TResult> = {
   readonly disclosure?: TableGroupDisclosureState;
   readonly drillRow?: TableDrillRowMarker;
   readonly groupSummary?: TableGroupRowSummary;
-  readonly hasStructuralMarker?: boolean;
+  readonly hasStructuralMarker: boolean;
   readonly renderCell: (args: {
     readonly carriedGroupKeys: ReadonlySet<string>;
     readonly col: TColumn;
     readonly disclosure?: TableGroupDisclosureState;
     readonly drillRow?: TableDrillRowMarker;
     readonly groupSummary?: TableGroupRowSummary;
-    readonly hasStructuralMarker?: boolean;
+    readonly hasStructuralMarker: boolean;
     readonly row: TData;
     readonly rowIndex: number;
     readonly rowKey: string;

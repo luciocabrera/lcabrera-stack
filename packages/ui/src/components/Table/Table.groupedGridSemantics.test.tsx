@@ -306,7 +306,8 @@ describe('a grouped table under the grid ARIA model', () => {
     // Seven rows across four columns: the two declared keys, the primary key,
     // and the measure column derived from the aggregate on it (#869). The
     // primary key is measured *beside* itself rather than replaced, because
-    // `resolveCrudRowId` throws when no column carries `isPrimaryKey`.
+    // `resolveCrudRowId` answers undefined when no column carries
+    // `isPrimaryKey`, which would strip the row-actions menu from every row.
     expect(getGrid().querySelectorAll('[role="gridcell"]')).toHaveLength(28);
 
     for (const row of screen.getAllByRole('row')) {

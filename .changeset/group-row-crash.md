@@ -29,10 +29,15 @@ The reachable trigger for that one is serialization: an aggregate whose value is
 `undefined` loses its `value` key entirely to `JSON.stringify`, and the
 presence check that correctly admits `null` then refuses the whole summary.
 
-**Resolving a row id no longer throws during render.** ADR-062 had already drawn
-this line for row keys — a throw is right for a CRUD link, where a bad id must
-not reach a route, and wrong where the same throw empties the table — and the
-row-actions menu, also on the render path, kept the throwing call. It now uses a
-non-throwing form and renders no menu for a row with no resolvable id; any
-custom actions still render, since they act on the row rather than on an id.
-`resolveCrudRowId` is unchanged for callers that want the strict contract.
+**`resolveCrudRowId` no longer throws.** ADR-062 had already drawn this line for
+row keys — a throw is right for a CRUD link, where a bad id must not reach a
+route, and wrong where the same throw empties the table — and the row-actions
+menu, also on the render path, kept the throwing call. It now answers
+`undefined`, and the menu renders nothing for a row with no resolvable id; any
+custom actions still render, since they act on the row rather than on an id. No
+bad id reaches a route either way, which is the guarantee the throw existed for.
+
+There is no throwing variant left, because nothing wanted one: the menu is its
+only caller. Consumers reaching for it through a deep import get `undefined`
+where they previously got an exception — it is not part of the published
+surface.
