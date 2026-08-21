@@ -48,7 +48,25 @@ const readJson = (path) => JSON.parse(readFileSync(path, 'utf8'));
 const isDirectory = (path) =>
   statSync(path, { throwIfNoEntry: false })?.isDirectory() === true;
 
-/** Every workspace's package name, from the manifests rather than from a list. */
+/** The workspace directories themselves, as a shipped file would spell them. */
+const workspaceDirectories = () =>
+  WORKSPACE_DIRS.filter((group) => isDirectory(join(REPO_ROOT, group))).flatMap(
+    (group) =>
+      readdirSync(join(REPO_ROOT, group), { withFileTypes: true })
+        .filter((entry) => entry.isDirectory())
+        .map((entry) => `${group}/${entry.name}`),
+  );
+
+/**
+ * Every workspace's package name, from the manifests rather than from a list.
+ *
+ * Read alongside `workspaceDirectories`, because the two do not imply each
+ * other: this repository's showcase app is called `vite-react-compiler` and
+ * lives in `apps/react-router`, so a seed naming the directory matches no
+ * package name. Lifting `rules/routes-data.md`'s exemption is what showed it —
+ * the gate reported that file's three package-name lines and left its blueprint
+ * path alone (#860).
+ */
 const workspacePackageNames = () =>
   WORKSPACE_DIRS.filter((group) => isDirectory(join(REPO_ROOT, group))).flatMap(
     (group) =>
@@ -132,6 +150,7 @@ const main = () => {
     repositorySlug: slug,
     secretNames: configuredSecretNames(),
     workspaceNames: workspacePackageNames(),
+    workspacePaths: workspaceDirectories(),
   });
 
   const seeds = readSeeds();

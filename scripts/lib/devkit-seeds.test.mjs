@@ -39,6 +39,7 @@ const words = forbiddenWords({
   repositorySlug: 'a-slug',
   secretNames: ['GITHUB_TOKEN', 'SONAR_TOKEN'],
   workspaceNames: ['@lcabrera/ui', '@repo/devkit'],
+  workspacePaths: ['apps/react-router', 'packages/ui'],
 });
 
 describe('forbiddenWords', () => {
@@ -47,6 +48,15 @@ describe('forbiddenWords', () => {
     expect(words).toContain('@lcabrera/ui');
     expect(words).toContain('secrets.SONAR_TOKEN');
     expect(words).toContain('vp ');
+  });
+
+  it('carries a workspace directory whose package name is spelled differently', () => {
+    // The two are independent strings: this repository's showcase app is named
+    // `vite-react-compiler` and sits in `apps/react-router`. Reading only the
+    // manifests leaves the directory unwatched — lifting `routes-data.md`'s
+    // exemption showed exactly that, with the gate reporting its three
+    // package-name lines and not its blueprint path (#860).
+    expect(words).toContain('apps/react-router');
   });
 
   it('carries the owner and the slug, which no manifest holds', () => {

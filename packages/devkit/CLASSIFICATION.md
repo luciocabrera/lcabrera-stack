@@ -92,17 +92,25 @@ runtime package, and this whole group moves with it.
 
 ## Path rules
 
-| Rule                  | Verdict          | Dependency | Reason                                                                                                                                               |
-| --------------------- | ---------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `routes-data.md`      | **portable**     | —          | Closure is empty. Loader/action data flow, framework-level.                                                                                          |
-| `typescript.md`       | **parameterise** | **soft**   | The standards are general; the ADR citations, the benchmark script and the generated-tsconfig reference are this repository's.                       |
-| `testing.md`          | **parameterise** | **hard**   | General except its toolchain import convention, which is an ADR here and a config key in a consumer.                                                 |
-| `react-components.md` | **parameterise** | **soft**   | The component conventions travel; the inventory paths they point at are per-repository and belong in config.                                         |
-| `scripts.md`          | **parameterise** | **soft**   | The structure, purity and size standards are general. The exemplar it names and the gate that enforces the ceiling move to the gate runtime package. |
+| Rule                  | Verdict          | Dependency | Reason                                                                                                                                                                   |
+| --------------------- | ---------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `routes-data.md`      | **portable**     | —          | Loader/action data flow, framework-level. Portable since #860 rewrote its examples to name the concept; before that its closure was empty and it was still not portable. |
+| `typescript.md`       | **parameterise** | **soft**   | The standards are general; the ADR citations, the benchmark script and the generated-tsconfig reference are this repository's.                                           |
+| `testing.md`          | **parameterise** | **hard**   | General except its toolchain import convention, which is an ADR here and a config key in a consumer.                                                                     |
+| `react-components.md` | **parameterise** | **soft**   | The component conventions travel; the inventory paths they point at are per-repository and belong in config.                                                             |
+| `scripts.md`          | **parameterise** | **soft**   | The structure, purity and size standards are general. The exemplar it names and the gate that enforces the ceiling move to the gate runtime package.                     |
 
 `testing.md` is the hard row: its import convention names the module tests must
 import from, so a consumer without that key is left with a rule instructing them
 to import from nowhere. The **soft** rows lose a citation or a pointer.
+
+`routes-data.md` is worth reading as a warning about the instrument. It earned
+**portable** on an empty closure, and an empty closure is a true answer to the
+wrong question: the probe resolves links, fenced commands and inline paths, and
+a package name written in prose is none of the three. The rule named this
+repository's UI and server packages in four sentences and read clean anyway
+(#860). A verdict of portable now needs the seed gate to agree, since that one
+reads words rather than structure.
 
 ## Subagent definitions
 

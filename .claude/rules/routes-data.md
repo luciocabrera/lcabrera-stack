@@ -20,7 +20,7 @@ paths:
 
 - **Read operations:** `loader` functions → consumed via `useLoaderData<typeof loader>()`
 - **Write operations:** `action` functions → triggered via `useFetcher` or `<Form>`
-- **Loader data must be fully serializable (promises excepted).** Server loader results cross the single-fetch turbo-stream boundary, and functions are **silently** replaced with `undefined` on the client (`SingleFetchFallback` — no error, no warning). Never return function-carrying values from a loader. The sanctioned path for column filter-option fetching is the **serializable descriptor** (ADR-009): loaders call `appendDistinctFilterDescriptors` (`@lcabrera/ui/routing`) / `createStaticFilterOptions` and return descriptor-bearing `columns` directly; the client tool `resolveFilterOptionsDescriptor` executes them. Only columns carrying `render` functions still require the component-side re-attach workaround.
+- **Loader data must be fully serializable (promises excepted).** Server loader results cross the single-fetch turbo-stream boundary, and functions are **silently** replaced with `undefined` on the client (`SingleFetchFallback` — no error, no warning). Never return function-carrying values from a loader. When the client genuinely has to _run_ something the loader chose, return a **serializable descriptor** — a plain object naming the operation and its arguments — and resolve it client-side, rather than returning the function itself. Values that can only be functions have to be re-attached in the component.
 
 ```typescript
 // Route loader
@@ -38,8 +38,8 @@ const MyPage = () => {
 
 ## Server-Only Modules (`.server`)
 
-Code that must never reach the browser — database access (`getPool`, `pg`, the
-`@lcabrera/server/db` executors), secret handling, `node:*` builtins — belongs in a
+Code that must never reach the browser — database access (the driver, the connection
+pool, the query executors), secret handling, `node:*` builtins — belongs in a
 **server-only module** ([RR framework convention](https://reactrouter.com/api/framework-conventions/server-modules)).
 Two equivalent forms; both make the build **fail** if a client-reachable module imports
 them (RR 8's plugin matches `/\.server\//` on the resolved path **and** the `.server.<ext>`
@@ -48,7 +48,7 @@ suffix, so a nested `.server/` under `routes/` is enforced too):
 - **`.server.ts` file suffix** — a single leaf module (e.g. `auth/signAuthPayload.server.ts`
   wrapping `node:crypto`).
 - **`.server/` directory** — every file inside is server-only regardless of its own name, so
-  files keep their semantic suffix (e.g. `enterprise-orders/.server/enterpriseOrders.service.ts`).
+  files keep their semantic suffix (e.g. `orders/.server/orders.service.ts`).
   Prefer this when several server-only modules cluster together.
 
 Rules:
@@ -59,15 +59,14 @@ Rules:
   module and the loader/action **imports** it (it does not `getPool()` directly).
 - **`.clientAction` runs in the browser** — it must not import a `.server` module.
 - A plain `server/` folder gives **no** guarantee — it is just a folder. Use `.server/`.
-- **Lint catches it before the build.** The RR apps opt into `enforceServerClientImportBoundary`
-  (shared eslint config), which fails the gate when a non-`.server` file makes a runtime import of
-  a server-only primitive — `node:*`, `pg`, or anything under `@lcabrera/server/db` (the pool +
-  executors). Matched by path, so new db utils are covered automatically; type-only imports stay
-  allowed (e.g. the erasable `db/query-builder` `*.types`). So the boundary is enforced twice: fast
-  at lint time, and definitively at build time.
-- **Blueprint:** `apps/react-router/src/routes/enterprise-orders/.server/` is the reference; new
-  apps and features follow it. All tooling (vitest, oxlint, eslint, oxfmt) still discovers and
-  checks files inside `.server/` — the dot does not exempt them.
+- **Have lint catch it before the build.** A rule that fails when a non-`.server` file makes a
+  **runtime** import of a server-only primitive — `node:*`, the database driver, anything under the
+  data-access directory — answers in a second rather than a build. Match by path, so new modules in
+  that directory are covered without anyone maintaining a list, and keep type-only imports allowed:
+  they erase, so they never reach the client bundle. The boundary is then enforced twice — fast at
+  lint time, definitively at build time.
+- **The dot does not exempt the files.** Test runners, linters and formatters still discover and
+  check everything inside a `.server/` directory. It is a bundler boundary, not a hiding place.
 
 ## Client State
 
