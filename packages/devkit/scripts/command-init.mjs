@@ -17,7 +17,12 @@ import {
   countsFor,
   renderPlan,
 } from './command-materialise.mjs';
-import { CONFIG_FILE_NAME, DEFAULT_CONFIG, withProfile } from './config.mjs';
+import {
+  CONFIG_FILE_NAME,
+  DEFAULT_CONFIG,
+  resolveConfig,
+  withProfile,
+} from './config.mjs';
 import {
   declaredDependencies,
   initFailure,
@@ -25,6 +30,7 @@ import {
   initSummary,
   inferRunner,
   initialConfig,
+  placedHooksPath,
   scriptsAfter,
   tasksFor,
   unmetCommandKeys,
@@ -36,6 +42,9 @@ const MANIFEST = 'package.json';
 
 const readJsonIfPresent = (path) =>
   existsSync(path) ? JSON.parse(readFileSync(path, 'utf8')) : undefined;
+
+const readTextIfPresent = (path) =>
+  existsSync(path) ? readFileSync(path, 'utf8') : undefined;
 
 /** Trailing newline included: every other file this kit writes has one. */
 const writeJson = (path, value) =>
@@ -131,7 +140,7 @@ const materialise = ({ profile, root }) => {
  * and the outcome handling. The refusals come first and independently, because
  * a refusal must leave the tree exactly as it found it.
  */
-const applyInit = ({ profile, root }) => {
+const applyInit = ({ hooksPath, profile, root }) => {
   const runner = writeConfig({ profile, root });
   const { added, skipped, warning } = writeTasks({ profile, root });
   const entries = materialise({ profile, root });
@@ -153,6 +162,7 @@ const applyInit = ({ profile, root }) => {
     `\n${initSummary({
       added,
       defaultBranch: runner.defaultBranch,
+      hooksPath: placedHooksPath({ entries, hooksPath }),
       profile,
       runner: runner.name,
       skipped,
@@ -169,14 +179,25 @@ export const runInit = (argv, root) => {
     return 1;
   }
 
+  // The default is the profile ALREADY configured, not this package's. `--force`
+  // rewrites the config; it does not re-choose the profile. Reading the built-in
+  // default instead silently downgraded a `full` repository to `agent` — again
+  // reachable from this command's own advice to create a `package.json` and
+  // "re-run with --force" — and the workflows and hooks then stayed on disk
+  // while dropping out of every later plan, so `doctor --check` reported clean
+  // over a repository whose hooks could be deleted without a word.
+  //
   // Validated BEFORE anything is written. `readProfileFlag` only checks that a
   // value follows the flag, so `--profile fulll` used to reach `writeConfig`,
   // land in `devkit.config.json`, and only then throw from `buildPlan` — leaving
   // a repository where `sync` and `doctor` throw the same error and `init`
   // refuses because a config it never chose to create is already there.
+  const configured = resolveConfig(
+    readTextIfPresent(join(root, CONFIG_FILE_NAME)),
+  );
   const profile = withProfile({
     config: DEFAULT_CONFIG,
-    profile: flagged ?? DEFAULT_CONFIG.profile,
+    profile: flagged ?? configured.profile,
   }).profile;
 
   const refusal = initRefusal({
@@ -190,5 +211,5 @@ export const runInit = (argv, root) => {
     return 1;
   }
 
-  return applyInit({ profile, root });
+  return applyInit({ hooksPath: configured.paths.hooks, profile, root });
 };

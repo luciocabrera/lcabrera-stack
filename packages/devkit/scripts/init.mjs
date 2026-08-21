@@ -332,9 +332,22 @@ export const initFailure = ({ planned, unmet }) => {
  * @param {{ added: string[], defaultBranch?: string, profile: string,
  *           runner: string, skipped: string[], written: number }} args
  */
+/**
+ * The hooks directory this plan actually placed files into, or `undefined`.
+ *
+ * Asked of the plan rather than of the profile, so a profile that carries hooks
+ * but placed none — every one already `unresolved`, say — does not produce an
+ * instruction about files that are not there.
+ */
+export const placedHooksPath = ({ entries, hooksPath }) =>
+  entries.some((entry) => entry.path.startsWith(`${hooksPath}/`))
+    ? hooksPath
+    : undefined;
+
 export const initSummary = ({
   added,
   defaultBranch,
+  hooksPath,
   profile,
   runner,
   skipped,
@@ -344,6 +357,15 @@ export const initSummary = ({
     `Initialised for the "${profile}" profile: ${written} file(s) materialised, ${added.length} task(s) added.`,
     `Commands were inferred for ${runner} — check them in devkit.config.json and correct any that are wrong.`,
   ];
+  // Said here because an unwired hook and a passing hook produce the identical
+  // exit 0 — the same silent absence this kit had to fix in the executable bit.
+  // The README documents the step and `COMMANDS.md` repeats it; neither is in
+  // front of the person who just ran the command that placed them.
+  if (hooksPath !== undefined) {
+    lines.push(
+      `The hooks are in \`${hooksPath}/\` and git will NOT run them until you point it there:\n  git config core.hooksPath ${hooksPath}\nUntil you do, they are silently skipped and the gates they carry are absent.`,
+    );
+  }
   if (defaultBranch !== undefined && defaultBranch !== '') {
     lines.push(
       `Recorded \`${defaultBranch}\` as this repository's trunk. If you initialised from a topic branch, fix conventions.defaultBranch before the branch gate runs.`,

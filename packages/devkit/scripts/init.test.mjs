@@ -8,6 +8,7 @@ import {
   initSummary,
   inferRunner,
   initialConfig,
+  placedHooksPath,
   scriptsAfter,
   tasksFor,
   unmetCommandKeys,
@@ -293,7 +294,66 @@ describe('initFailure', () => {
   });
 });
 
+describe('placedHooksPath', () => {
+  test('reports the directory when the plan actually placed a hook there', () => {
+    expect(
+      placedHooksPath({
+        entries: [{ path: '.githooks/commit-msg' }, { path: 'docs/a.md' }],
+        hooksPath: '.githooks',
+      }),
+    ).toBe('.githooks');
+  });
+
+  test('says nothing when no hook was placed', () => {
+    // A profile that carries no hooks, or one whose hooks were all held back.
+    // Naming a directory that is not there would be an instruction about files
+    // the consumer does not have.
+    expect(
+      placedHooksPath({
+        entries: [{ path: 'docs/a.md' }],
+        hooksPath: '.githooks',
+      }),
+    ).toBeUndefined();
+  });
+
+  test('matches the directory, not a name that merely starts the same', () => {
+    expect(
+      placedHooksPath({
+        entries: [{ path: '.githooks-backup/commit-msg' }],
+        hooksPath: '.githooks',
+      }),
+    ).toBeUndefined();
+  });
+});
+
 describe('initSummary', () => {
+  test('tells the consumer git will not run the hooks until pointed at them', () => {
+    // An unwired hook and a passing hook produce the identical exit 0 — the
+    // same silent absence the executable-bit fix closed. The README says it and
+    // COMMANDS.md repeats it; neither is in front of whoever just ran init.
+    const summary = initSummary({
+      added: [],
+      hooksPath: '.githooks',
+      profile: 'full',
+      runner: 'npm',
+      skipped: [],
+      written: 31,
+    });
+    expect(summary).toMatch(/git config core\.hooksPath \.githooks/);
+  });
+
+  test('stays quiet about hooks when none were placed', () => {
+    expect(
+      initSummary({
+        added: [],
+        profile: 'agent',
+        runner: 'npm',
+        skipped: [],
+        written: 19,
+      }),
+    ).not.toMatch(/hooksPath/);
+  });
+
   test('names the inferred runner so a wrong guess can be corrected', () => {
     const summary = initSummary({
       added: ['devkit:sync'],
