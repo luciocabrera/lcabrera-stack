@@ -42,6 +42,7 @@ import {
   materialisationFailure,
   noCommandsDeclared,
   tarballFindings,
+  taskFindings,
 } from './lib/devkit-tarball.mjs';
 
 const REPO_ROOT = process.cwd();
@@ -124,33 +125,27 @@ const scratchConsumer = () => {
     join(root, 'package.json'),
     `${JSON.stringify({ name: 'consumer', private: true, type: 'module', version: '1.0.0' }, undefined, 2)}\n`,
   );
-  // `full`, not `agent`, and with a command map: the narrower profile carries no
-  // hooks and no workflows, so this gate ran over a set that could not exhibit
-  // either failure those files have — an inert hook, and a placeholder nobody
-  // answered. The commands are npm's because npm is what installs this scratch
-  // consumer; any complete map would do, and an incomplete one leaves the files
-  // that need it unwritten.
-  writeFileSync(
-    join(root, 'devkit.config.json'),
-    `${JSON.stringify(
-      {
-        commands: {
-          audit: 'npm audit --audit-level moderate',
-          check: 'npm run check',
-          install: 'npm ci',
-          test: 'npm test',
-        },
-        profile: 'full',
-      },
-      undefined,
-      2,
-    )}\n`,
-  );
+  // No `devkit.config.json`. `init` writes it, and having the gate hand-write
+  // one would be the gate supplying the half it is meant to be checking — the
+  // same shape as reading a manifest off disk while claiming to check a tarball.
   return root;
 };
 
 /** The hooks directory this scratch consumer's config leaves at its default. */
 const HOOKS_PATH = '.githooks';
+
+/**
+ * What `init` wired up, read back from the consumer's own manifest and its own
+ * link directory rather than from what `init` said it did.
+ */
+const initTaskFindings = (consumer) => {
+  const binDir = join(consumer, 'node_modules', '.bin');
+  return taskFindings({
+    availableBins: existsSync(binDir) ? readdirSync(binDir) : [],
+    scripts: JSON.parse(readFileSync(join(consumer, 'package.json'), 'utf8'))
+      .scripts,
+  });
+};
 
 /** Owner, group or other — any of them is what git accepts as executable. */
 const EXECUTABLE_BITS = 0o111;
@@ -274,6 +269,17 @@ const main = () => {
     // trace where the answer should be.
     const devkitBin = join(consumer, 'node_modules', '.bin', 'devkit');
     const materialised = [
+      // `init` first, and with `--profile full`: it is the command a consumer
+      // reaches for before any other, and the only one that can be checked from
+      // a repository holding none of this. `sync` after it is the idempotent
+      // re-run, which is where an init that recorded what it did not write shows
+      // up as drift on a tree nobody touched.
+      ...consumerStepFailure({
+        args: ['init', '--profile', 'full'],
+        bin: devkitBin,
+        consumer,
+      }),
+      ...initTaskFindings(consumer),
       ...consumerStepFailure({ args: ['sync'], bin: devkitBin, consumer }),
       ...consumerStepFailure({
         args: ['closure', '--shipped'],
@@ -302,9 +308,13 @@ const main = () => {
       JSON.parse(readFileSync(join(consumer, '.devkit-manifest.json'), 'utf8'))
         .files,
     ).length;
+    const tasks = Object.keys(
+      JSON.parse(readFileSync(join(consumer, 'package.json'), 'utf8'))
+        .scripts ?? {},
+    ).length;
 
     process.stdout.write(
-      `Packed-tarball gate passed: ${packed.length} package(s) packed, installed into a scratch repository, ${ran} declared bin(s) ran, and \`devkit sync\` placed ${placed} file(s).\n`,
+      `Packed-tarball gate passed: ${packed.length} package(s) packed, installed into a scratch repository, ${ran} declared bin(s) ran, and \`devkit init\` set up a repository holding none of this — ${placed} file(s) placed, ${tasks} runnable task(s) wired.\n`,
     );
   } finally {
     rmSync(staging, { force: true, recursive: true });

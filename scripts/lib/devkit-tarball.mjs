@@ -232,6 +232,39 @@ export const noCommandsDeclared = (manifest) =>
     : undefined;
 
 /**
+ * Whether `init` left the consumer with gate tasks they can actually run.
+ *
+ * Two failures, and the first is the one this kit keeps shipping: `init`
+ * reporting that it added tasks over a manifest it wrote none into. The count is
+ * asserted rather than printed, because "13 task(s) added" and "0 task(s) added"
+ * are the same clean exit otherwise.
+ *
+ * The second is a task naming a binary that is not there. That is what a
+ * consumer meets as `command not found` on their first run, and it is invisible
+ * from any workspace, where every binary resolves whether or not the package
+ * declaring it was installed.
+ *
+ * @param {{ availableBins: Iterable<string>, scripts?: Record<string, string> }} args
+ */
+export const taskFindings = ({ availableBins, scripts = {} }) => {
+  const known = new Set(availableBins);
+  const written = Object.entries(scripts).filter(([, command]) =>
+    known.has(command.split(' ')[0]),
+  );
+  if (written.length === 0) {
+    return [
+      '`devkit init` left no runnable gate task in the consumer manifest, so nothing it set up can be invoked',
+    ];
+  }
+  return Object.entries(scripts)
+    .filter(([, command]) => !known.has(command.split(' ')[0]))
+    .map(
+      ([name, command]) =>
+        `task \`${name}\` runs \`${command}\`, and no such binary was installed`,
+    );
+};
+
+/**
  * Hooks a consumer received without the executable bit.
  *
  * git skips a non-executable hook, and the skip is the failure mode this has to
