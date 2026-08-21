@@ -659,13 +659,17 @@ This is a **stronger** claim than the one in the next section. Copilot's review
 events are _unreliable_ here and occasionally do arrive; this leg's are structurally
 absent.
 
-**What compensates is a request, not a trigger.** Since #853, `claude-review.yml`
-finishes by dispatching this workflow for the pull request it just reviewed
-(`gh workflow run copilot-review-gate.yml --field pr=<n>`), which is the same
-break-glass rung documented above, pulled automatically instead of by hand. The
-structural fact is unchanged — nothing woke the gate, the reviewer asked it to look
-— and the distinction matters when it fails: a dispatch can be refused or dropped,
-where a trigger that never fires cannot be retried.
+**Since #865 the trigger fires, and the structural claim above is now about the
+credential rather than the workflow.** The review is posted under the Claude General
+Reviewer GitHub App, and an App installation token is not the default `GITHUB_TOKEN`,
+so `pull_request_review` is delivered. Measured on #866 — review submitted at
+`07:55:45Z`, this workflow ran on `pull_request_review` at `07:55:48Z`.
+
+**The #853 dispatch stays anyway, and the two are now deliberately redundant.** On that
+same run it fired at `07:55:47Z`, a second ahead of the trigger. One measurement is not
+a reliability claim; Copilot's equivalent trigger is documented as unreliable (#737);
+and a dispatch can be retried where a trigger that never arrives cannot. The sweep
+remains the backstop if both fail.
 
 Three consequences, none of them a bug:
 
