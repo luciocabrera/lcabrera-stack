@@ -139,6 +139,39 @@ describe('this repository publishes what it develops against', () => {
     }
   });
 
+  it('bumps a peer dependent only when the new version leaves its range', () => {
+    // Changesets bumps a package that PEERS on another workspace package to
+    // `major` whenever that dependency gets anything above a patch — and by
+    // default it does so without consulting the declared range, so a range
+    // written to let the two move independently buys nothing. Left at the
+    // default, `@lcabrera/devkit` planned `1.0.0` off its own `minor`
+    // changeset, and every later minor of `@lcabrera/repo-standards` would
+    // force another devkit major.
+    //
+    // Invisible until this repository had two published packages with a peer
+    // edge between them: `privatePackages: false` kept them out of the release
+    // plan entirely while they were private.
+    const config = JSON.parse(
+      readFileSync(join(REPO_ROOT, '.changeset', 'config.json'), 'utf8'),
+    );
+
+    expect(
+      config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+        ?.onlyUpdatePeerDependentsWhenOutOfRange,
+    ).toBe(true);
+
+    // The same name at the top level parses without complaint and does
+    // nothing — changesets reads it only from the nested object. A reader who
+    // "fixes" this by hoisting it would get a green config and the old plan.
+    expect(config.onlyUpdatePeerDependentsWhenOutOfRange).toBeUndefined();
+
+    // The key's own name warns that it can move in a patch release, and this
+    // test would still pass if changesets stopped reading it. What checks the
+    // behaviour is `pnpm exec changeset status --verbose`: no published package
+    // should be listed under "bumped at major" without a changeset asking for
+    // one.
+  });
+
   it('gitignores dist so a build is never committed', () => {
     const ignored = readFileSync(join(REPO_ROOT, '.gitignore'), 'utf8');
 
