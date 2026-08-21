@@ -21,6 +21,7 @@
 
 import { execFileSync } from 'node:child_process';
 import {
+  existsSync,
   mkdtempSync,
   readdirSync,
   readFileSync,
@@ -36,6 +37,7 @@ import {
   binStartupFailure,
   declaredBins,
   failureLine,
+  materialisationFailure,
   tarballFindings,
 } from './lib/devkit-tarball.mjs';
 
@@ -50,6 +52,8 @@ const run = (command, args, cwd) =>
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'pipe'],
   });
+
+const toPosix = (value) => value.replaceAll('\\', '/');
 
 /** Every file devkit placed, ignoring the install it placed them beside. */
 const materialisedFiles = (directory) =>
@@ -152,6 +156,27 @@ const consumerStepFailure = ({ args, bin, consumer }) => {
   }
 };
 
+/**
+ * Whether the kit actually placed anything, read from its own record.
+ *
+ * Asserted rather than assumed: the success line used to claim `devkit sync`
+ * materialised while nothing here had checked it, and a kit that placed every
+ * file produced identical output to one that placed none.
+ */
+const materialisedFailure = (consumer) => {
+  const manifestPath = join(consumer, '.devkit-manifest.json');
+  const manifest = existsSync(manifestPath)
+    ? JSON.parse(readFileSync(manifestPath, 'utf8'))
+    : {};
+  const failure = materialisationFailure({
+    manifestFiles: manifest.files,
+    presentPaths: materialisedFiles(consumer).map((path) =>
+      toPosix(relative(consumer, path)),
+    ),
+  });
+  return failure === undefined ? [] : [failure];
+};
+
 /** Nothing the consumer received may still carry an unanswered placeholder. */
 const survivingPlaceholders = (consumer) =>
   materialisedFiles(consumer)
@@ -213,6 +238,7 @@ const main = () => {
         consumer,
       }),
       ...survivingPlaceholders(consumer),
+      ...materialisedFailure(consumer),
     ];
 
     const findings = [...contents, ...bins, ...materialised];
@@ -225,8 +251,13 @@ const main = () => {
       return;
     }
 
+    const placed = Object.keys(
+      JSON.parse(readFileSync(join(consumer, '.devkit-manifest.json'), 'utf8'))
+        .files,
+    ).length;
+
     process.stdout.write(
-      `Packed-tarball gate passed: ${packed.length} package(s) packed, installed into a scratch repository, every declared bin ran, and \`devkit sync\` materialised.\n`,
+      `Packed-tarball gate passed: ${packed.length} package(s) packed, installed into a scratch repository, every declared bin ran, and \`devkit sync\` placed ${placed} file(s).\n`,
     );
   } finally {
     rmSync(staging, { force: true, recursive: true });

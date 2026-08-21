@@ -184,3 +184,31 @@ export const failureLine = (output) => {
     'no output'
   );
 };
+
+/**
+ * Why the materialisation did not happen, or undefined when it did.
+ *
+ * Read from the kit's own record and checked against the tree, because the
+ * commands cannot answer it: an empty plan is not an error, so `sync` returns 0
+ * having written nothing and the closure probe reports a self-contained set of
+ * none. Drop the assets directory from the package's `files` and every step of
+ * this gate goes green while the artifact ships no kit at all — the same class
+ * of mistake the gate exists for, in the direction that shipping too little
+ * rather than too much.
+ *
+ * Both halves are needed. A record with no entries means nothing was placed; a
+ * record naming a file the tree does not hold means the record is describing
+ * writes that did not land.
+ */
+export const materialisationFailure = ({ manifestFiles, presentPaths }) => {
+  const recorded = Object.keys(manifestFiles ?? {});
+  if (recorded.length === 0) {
+    return '`devkit sync` recorded no files — the package carries no assets a consumer would receive';
+  }
+
+  const present = new Set(presentPaths);
+  const absent = recorded.filter((path) => !present.has(path));
+  return absent.length === 0
+    ? undefined
+    : `\`devkit sync\` recorded ${absent.length} file(s) the tree does not hold, starting with \`${absent.toSorted((left, right) => left.localeCompare(right))[0]}\``;
+};

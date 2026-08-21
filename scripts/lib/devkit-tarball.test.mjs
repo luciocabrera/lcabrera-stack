@@ -5,6 +5,7 @@ import {
   binStartupFailure,
   declaredBins,
   failureLine,
+  materialisationFailure,
   missingFromTarball,
   promisedPaths,
   strayFromTarball,
@@ -274,5 +275,41 @@ describe('failureLine', () => {
 
   it('says so rather than returning nothing for empty output', () => {
     expect(failureLine('')).toBe('no output');
+  });
+});
+
+describe('materialisationFailure', () => {
+  it('reports a kit that placed nothing', () => {
+    // The gate used to claim `devkit sync` materialised while asserting
+    // nothing about it: drop the assets directory from the package's `files`
+    // and every step went green, because an empty plan is not an error and a
+    // closure probe over no files reports a self-contained set of none.
+    expect(
+      materialisationFailure({ manifestFiles: {}, presentPaths: [] }),
+    ).toContain('recorded no files');
+  });
+
+  it('reports a record naming a file the tree does not hold', () => {
+    expect(
+      materialisationFailure({
+        manifestFiles: { '.claude/rules/a.md': 'h1', 'docs/b.md': 'h2' },
+        presentPaths: ['docs/b.md'],
+      }),
+    ).toContain('.claude/rules/a.md');
+  });
+
+  it('accepts a record whose files are all present', () => {
+    expect(
+      materialisationFailure({
+        manifestFiles: { 'docs/b.md': 'h2' },
+        presentPaths: ['docs/b.md', 'package.json'],
+      }),
+    ).toBeUndefined();
+  });
+
+  it('treats an absent record as having placed nothing', () => {
+    expect(
+      materialisationFailure({ manifestFiles: undefined, presentPaths: [] }),
+    ).toContain('recorded no files');
   });
 });
