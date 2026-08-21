@@ -38,6 +38,29 @@ describe('checkoutIsolationFinding', () => {
     expect(finding?.message).toContain('feat/123-something');
   });
 
+  it('treats the configured trunk as an anchor, not only `main`', () => {
+    // Hardcoded as `main`, this reported every consumer whose git produced
+    // `master` as parked on a feature branch — on their own trunk, with a clean
+    // tree, as a `problem`, advising `git checkout main` to a branch that does
+    // not exist.
+    expect(
+      checkoutIsolationFinding({
+        ...facts({ branch: 'master' }),
+        defaultBranch: 'master',
+      }),
+    ).toBeUndefined();
+  });
+
+  it('names the configured trunk in its remedy', () => {
+    const finding = checkoutIsolationFinding({
+      ...facts(),
+      defaultBranch: 'trunk',
+    });
+
+    expect(finding?.message).toContain('git checkout trunk');
+    expect(finding?.message).not.toContain('git checkout main');
+  });
+
   it('only warns when the tree is dirty, so it cannot strand uncommitted work', () => {
     const finding = checkoutIsolationFinding(facts({ isDirty: true }));
 

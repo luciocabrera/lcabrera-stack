@@ -30,34 +30,32 @@
 import { existsSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { isExemptBranch } from './branch-exemption.mjs';
 import { runGit } from './git-exec.mjs';
-
-/** Branches that are not topic branches, so not a violation to sit on. */
-const ANCHOR_BRANCHES = [/^main$/, /^release-/];
-
-/** A detached HEAD reports as empty; it is nobody's feature branch. */
-const isAnchor = (branch) =>
-  branch === '' || ANCHOR_BRANCHES.some((re) => re.test(branch));
 
 /**
  * @param {object} facts
  * @param {boolean} facts.isPrimary   `.git` is a directory (see git-dir.mjs)
  * @param {string}  facts.branch      current branch, '' when detached
+ * @param {string} [facts.defaultBranch]  the configured trunk; `main` when the
+ *   caller has no config to read, which is the value every gate defaulted to
+ *   before it was configurable
  * @param {boolean} facts.isDirty     any uncommitted tracked change
  * @param {boolean} facts.underCI     running on a CI runner
  * @returns {{severity: 'problem'|'warning', message: string} | undefined}
  */
 export const checkoutIsolationFinding = ({
   branch,
+  defaultBranch = 'main',
   isDirty,
   isPrimary,
   underCI,
 }) => {
-  if (underCI || !isPrimary || isAnchor(branch)) {
+  if (underCI || !isPrimary || isExemptBranch({ branch, defaultBranch })) {
     return undefined;
   }
 
-  const shared = `the primary checkout is on \`${branch}\`, not \`main\``;
+  const shared = `the primary checkout is on \`${branch}\`, not \`${defaultBranch}\``;
   const why =
     'a feature branch here moves HEAD under every other agent in this clone';
 
@@ -65,13 +63,13 @@ export const checkoutIsolationFinding = ({
     ? {
         message:
           `${shared} — ${why}. It has uncommitted changes, so switching is not ` +
-          'safe to do for you: commit or stash them, then `git checkout main` ' +
+          `safe to do for you: commit or stash them, then \`git checkout ${defaultBranch}\` ` +
           'and redo the work in a worktree (`coordination:claim` makes one).',
         severity: 'warning',
       }
     : {
         message:
-          `${shared} — ${why}. The tree is clean, so \`git checkout main\` is ` +
+          `${shared} — ${why}. The tree is clean, so \`git checkout ${defaultBranch}\` is ` +
           'safe. Work in a worktree instead: `vp run coordination:claim -- ' +
           '<id> "<title>" --new-issue` (worktrees are the default).',
         severity: 'problem',

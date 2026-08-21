@@ -25,6 +25,7 @@
  * See `.claude/rules/scripts.md` for the standards this file follows.
  */
 
+import { isExemptBranch } from './branch-exemption.mjs';
 import { DEFAULT_CONVENTIONS } from './config.mjs';
 
 /** Allowed commit/PR-title types. Includes `revert` (git history uses it) and
@@ -157,10 +158,6 @@ const dependencyErrors = (body) => {
 const BRANCH_RE = new RegExp(
   String.raw`^(?:${ALLOWED_TYPES.join('|')})/\d+-[a-z0-9]+(?:-[a-z0-9]+)*$`,
 );
-
-/** Not topic branches, so not subject to the rule: the trunk, and the release
- *  branches a version bump is cut on. */
-const EXEMPT_BRANCHES = [/^main$/, /^release-/, /^HEAD$/];
 
 /** Subject words that describe nothing. A vague subject is cheap to write and
  *  expensive to read later, when it is the only surviving record of intent. */
@@ -430,7 +427,7 @@ export const validatePrBase = (
   } = {},
 ) => {
   const name = (base ?? '').trim();
-  if (name === '' || EXEMPT_BRANCHES.some((re) => re.test(name))) {
+  if (name === '' || isExemptBranch({ branch: name, defaultBranch })) {
     return { errors: [], warnings: [] };
   }
   if (allowedBases.includes(name)) {
@@ -455,13 +452,18 @@ export const validatePrBase = (
 };
 
 /** Validates a git branch name against `<type>/<issue>-<kebab-slug>`.
- *  `main` and `release-*` are exempt; they are not topic branches. */
-export const validateBranchName = (branch) => {
+ *  The configured trunk and `release-*` are exempt; they are not topic branches.
+ *  `defaultBranch` is passed in rather than read here, so importing this module
+ *  still touches nothing (#807). */
+export const validateBranchName = (
+  branch,
+  { defaultBranch = DEFAULT_CONVENTIONS.defaultBranch } = {},
+) => {
   const name = (branch ?? '').trim();
   if (name === '') {
     return { errors: ['Branch name is empty.'], exempt: false, warnings: [] };
   }
-  if (EXEMPT_BRANCHES.some((re) => re.test(name))) {
+  if (isExemptBranch({ branch: name, defaultBranch })) {
     return { errors: [], exempt: true, warnings: [] };
   }
   if (BRANCH_RE.test(name)) {

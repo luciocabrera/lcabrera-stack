@@ -59,17 +59,38 @@ const declaredDependencies = (manifest) => [
   ...Object.keys(manifest?.devDependencies ?? {}),
 ];
 
+/**
+ * The branch this repository is on, read from `.git/HEAD` rather than by
+ * shelling out — no subprocess means no PATH to trust, the same reasoning
+ * `verify-branch-name.mjs` records for the same read.
+ *
+ * At init time this is the trunk: init runs before any topic branch exists, and
+ * a consumer adopting the kit from a feature branch is told which name was
+ * recorded so they can correct it.
+ */
+const currentBranch = (root) => {
+  try {
+    const head = readFileSync(join(root, '.git', 'HEAD'), 'utf8').trim();
+    return (
+      /^ref:\s*refs\/heads\/(?<branch>.+)$/.exec(head)?.groups.branch ?? ''
+    );
+  } catch {
+    return '';
+  }
+};
+
 const writeConfig = ({ profile, root }) => {
   const manifest = readJsonIfPresent(join(root, MANIFEST));
   const runner = inferRunner({
     dependencies: declaredDependencies(manifest),
     files: readdirSync(root),
   });
+  const defaultBranch = currentBranch(root);
   writeJson(
     join(root, CONFIG_FILE_NAME),
-    initialConfig({ commands: runner.commands, profile }),
+    initialConfig({ commands: runner.commands, defaultBranch, profile }),
   );
-  return runner;
+  return { ...runner, defaultBranch };
 };
 
 /**
@@ -148,7 +169,14 @@ export const runInit = (argv, root) => {
   }
 
   console.log(
-    `\n${initSummary({ added, profile, runner: runner.name, skipped, written })}`,
+    `\n${initSummary({
+      added,
+      defaultBranch: runner.defaultBranch,
+      profile,
+      runner: runner.name,
+      skipped,
+      written,
+    })}`,
   );
   return 0;
 };

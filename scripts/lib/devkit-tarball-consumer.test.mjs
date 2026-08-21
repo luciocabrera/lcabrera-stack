@@ -9,7 +9,52 @@
 
 import { describe, expect, it } from 'vite-plus/test';
 
-import { inertHooks, taskFindings } from './devkit-tarball.mjs';
+import {
+  bareTaskFindings,
+  inertHooks,
+  taskFindings,
+} from './devkit-tarball.mjs';
+
+describe('bareTaskFindings', () => {
+  const expected = ['adr:verify', 'devkit:check'];
+  const scripts = { 'adr:verify': 'repo-verify-adrs', 'devkit:check': 'x' };
+
+  it('accepts tasks that are present and ran clean', () => {
+    expect(bareTaskFindings({ expected, failures: [], scripts })).toEqual([]);
+  });
+
+  it('reports a task that runs but fails on a fresh repository', () => {
+    // The real finding: `configs:verify` resolved perfectly and exited 1,
+    // because its gate refuses a roster nobody has written yet. "The binary
+    // resolves" and "the task runs" are different claims, and the count was
+    // making the weaker one while sounding like the stronger.
+    expect(
+      bareTaskFindings({
+        expected,
+        failures: [
+          { detail: 'names no unread config files', name: 'x:verify' },
+        ],
+        scripts,
+      }),
+    ).toEqual([
+      'task `x:verify` is wired but does not run on a freshly initialised repository: names no unread config files',
+    ]);
+  });
+
+  it('reports a task that quietly stopped being written', () => {
+    // Otherwise a task disappearing from `init` turns this gate into a smaller
+    // check that still reports a pass.
+    expect(
+      bareTaskFindings({
+        expected,
+        failures: [],
+        scripts: { 'devkit:check': 'x' },
+      }),
+    ).toEqual([
+      '`devkit init` wrote no `adr:verify` task, so this gate no longer runs it',
+    ]);
+  });
+});
 
 describe('taskFindings', () => {
   const availableBins = ['devkit', 'repo-verify-commit'];

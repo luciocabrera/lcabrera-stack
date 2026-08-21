@@ -40,6 +40,7 @@ import {
   failureLine,
   inertHooks,
   materialisationFailure,
+  bareTaskFindings,
   noCommandsDeclared,
   tarballFindings,
   taskFindings,
@@ -146,6 +147,42 @@ const initTaskFindings = (consumer) => {
       .scripts,
   });
 };
+
+/**
+ * The tasks `init` wires that take no arguments, so a freshly initialised
+ * repository can run them as they stand.
+ *
+ * The rest of what it writes — `commit:verify`, `pr:verify`, `issue:verify`,
+ * `coordination:close`, `adr:new` — take arguments and print usage without
+ * them. Those are invoked by the hook and the workflow `init` places, not by a
+ * person typing the task name.
+ */
+const BARE_TASKS = [
+  'adr:list',
+  'adr:verify',
+  'branch:verify',
+  'coordination:verify',
+  'devkit:check',
+  'scripts:verify',
+];
+
+/**
+ * Runs them where a consumer would, through the manifest rather than by calling
+ * the binary directly — the task line is part of what `init` wrote, so a task
+ * whose arguments are wrong has to be able to fail here.
+ */
+const bareTaskFailures = (consumer) =>
+  BARE_TASKS.flatMap((name) => {
+    try {
+      run('npm', ['run', '--silent', name], consumer);
+      return [];
+    } catch (error) {
+      const output = `${error.stdout ?? ''}${error.stderr ?? ''}`.trim();
+      return [
+        { detail: output === '' ? error.message : failureLine(output), name },
+      ];
+    }
+  });
 
 /** Owner, group or other — any of them is what git accepts as executable. */
 const EXECUTABLE_BITS = 0o111;
@@ -291,6 +328,17 @@ const main = () => {
       ...inertHooks({
         hooksPath: HOOKS_PATH,
         materialised: materialisedModes(consumer),
+      }),
+      // Last, because it runs `devkit:check`: a drift report is only meaningful
+      // once the sync above has had its turn, and it is the assertion that
+      // `init` leaves a repository clean rather than one reporting drift on the
+      // day it was set up.
+      ...bareTaskFindings({
+        expected: BARE_TASKS,
+        failures: bareTaskFailures(consumer),
+        scripts: JSON.parse(
+          readFileSync(join(consumer, 'package.json'), 'utf8'),
+        ).scripts,
       }),
     ];
 

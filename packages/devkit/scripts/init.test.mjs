@@ -118,6 +118,39 @@ describe('initialConfig', () => {
       profile: 'full',
     });
   });
+
+  test('records the trunk it was given, because the default is often wrong', () => {
+    // `git init` still produces `master` unless `init.defaultBranch` says
+    // otherwise, and the shipped gates default to `main` — so a consumer who
+    // took the default failed the branch gate and the coordination gate on
+    // their own trunk, on day one.
+    expect(
+      initialConfig({
+        commands: { install: 'npm ci' },
+        defaultBranch: 'master',
+        profile: 'agent',
+      }),
+    ).toEqual({
+      commands: { install: 'npm ci' },
+      conventions: { defaultBranch: 'master' },
+      profile: 'agent',
+    });
+  });
+
+  test('writes no conventions block when the branch could not be read', () => {
+    // A detached HEAD, or a `.git` this command cannot read. Writing an empty
+    // string would be worse than writing nothing: it names a trunk no branch can
+    // ever match, so every branch becomes a topic branch.
+    for (const defaultBranch of ['', undefined]) {
+      expect(
+        initialConfig({
+          commands: { install: 'npm ci' },
+          defaultBranch,
+          profile: 'agent',
+        }),
+      ).toEqual({ commands: { install: 'npm ci' }, profile: 'agent' });
+    }
+  });
 });
 
 describe('tasksFor', () => {

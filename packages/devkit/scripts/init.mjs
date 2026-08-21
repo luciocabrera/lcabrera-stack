@@ -127,19 +127,30 @@ export const inferRunner = ({ dependencies = [], files = [] } = {}) => {
 /**
  * The config `init` writes.
  *
- * Only `commands` and `profile` are written. The path layout is left out on
- * purpose: every key in it already has a default, and writing the defaults back
- * out as if they were choices turns a later change to one of them into a silent
- * no-op for every repository init ever touched.
+ * The path layout is left out on purpose: every key in it already has a
+ * default, and writing the defaults back out as if they were choices turns a
+ * later change to one of them into a silent no-op for every repository init
+ * ever touched.
  *
- * @param {{ commands: Record<string, string>, profile: string }} args
+ * `conventions.defaultBranch` is the exception, and it is written **because**
+ * it has a default. That default is `main`, and `git init` still produces
+ * `master` unless `init.defaultBranch` says otherwise — so a consumer who took
+ * the default failed the branch gate and the coordination gate on their own
+ * trunk, on day one. Recording the branch that is actually there costs one line
+ * and removes both.
+ *
+ * @param {{ commands: Record<string, string>, defaultBranch?: string,
+ *           profile: string }} args
  */
-export const initialConfig = ({ commands, profile }) => ({
+export const initialConfig = ({ commands, defaultBranch, profile }) => ({
   commands: Object.fromEntries(
     Object.entries(commands).toSorted(([left], [right]) =>
       left.localeCompare(right),
     ),
   ),
+  ...(defaultBranch === undefined || defaultBranch === ''
+    ? {}
+    : { conventions: { defaultBranch } }),
   profile,
 });
 
@@ -156,6 +167,17 @@ export const initialConfig = ({ commands, profile }) => ({
  * The release and publishing gates are deliberately absent. They are meaningful
  * only in a repository that publishes, and this command cannot tell whether
  * this is one.
+ *
+ * So are the two whose input is data no one can infer. `repo-verify-stray-configs`
+ * needs the roster of config files your toolchain does not read, and
+ * `repo-verify-docs-paths` needs a baseline; both refuse an empty roster rather
+ * than pass over nothing, which is right, and which makes them a task that fails
+ * on the day it is written. Add them once you have written the roster.
+ *
+ * Several of these take arguments — `commit:verify` wants a message file,
+ * `pr:verify` a title and a body. Bare, they print usage and exit non-zero, and
+ * that is correct: the hook and the workflow `init` also places are what invoke
+ * them with the arguments.
  */
 export const GATE_TASKS = {
   'adr:list': { args: ['--list'], bin: 'repo-verify-adrs', profiles: ['full'] },
@@ -168,10 +190,6 @@ export const GATE_TASKS = {
   'commit:verify': {
     bin: 'repo-verify-commit',
     profiles: ['agent', 'full'],
-  },
-  'configs:verify': {
-    bin: 'repo-verify-stray-configs',
-    profiles: ['full'],
   },
   'coordination:close': {
     bin: 'repo-close-claim',
@@ -290,14 +308,26 @@ export const initFailure = ({ unmet, written }) => {
 };
 
 /**
- * @param {{ added: string[], profile: string, runner: string, skipped: string[],
- *           written: number }} args
+ * @param {{ added: string[], defaultBranch?: string, profile: string,
+ *           runner: string, skipped: string[], written: number }} args
  */
-export const initSummary = ({ added, profile, runner, skipped, written }) => {
+export const initSummary = ({
+  added,
+  defaultBranch,
+  profile,
+  runner,
+  skipped,
+  written,
+}) => {
   const lines = [
     `Initialised for the "${profile}" profile: ${written} file(s) materialised, ${added.length} task(s) added.`,
     `Commands were inferred for ${runner} — check them in devkit.config.json and correct any that are wrong.`,
   ];
+  if (defaultBranch !== undefined && defaultBranch !== '') {
+    lines.push(
+      `Recorded \`${defaultBranch}\` as this repository's trunk. If you initialised from a topic branch, fix conventions.defaultBranch before the branch gate runs.`,
+    );
+  }
   if (skipped.length > 0) {
     lines.push(
       `Left your own task(s) alone: ${skipped.join(', ')}. Wire them to the gates yourself if you want them checked.`,

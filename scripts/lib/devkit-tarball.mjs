@@ -265,6 +265,36 @@ export const taskFindings = ({ availableBins, scripts = {} }) => {
 };
 
 /**
+ * Whether the tasks that should run bare are present, and what running them
+ * found.
+ *
+ * "Runnable" was previously read as "the binary resolves", and that is not the
+ * same claim: `configs:verify` resolved perfectly and exited 1 on a fresh
+ * repository, because its gate refuses a roster nobody has written yet. The
+ * count said 13 wired while one of them could not run — the same overstated
+ * success this gate keeps having to close.
+ *
+ * The expected list is held here rather than read from the kit, so that a task
+ * quietly disappearing from `init` is a finding instead of a smaller check. The
+ * absent half is checked first for exactly that reason.
+ *
+ * @param {{ expected: string[], failures: { name: string, detail: string }[],
+ *           scripts?: Record<string, string> }} args
+ */
+export const bareTaskFindings = ({ expected, failures, scripts = {} }) => [
+  ...expected
+    .filter((name) => !Object.hasOwn(scripts, name))
+    .map(
+      (name) =>
+        `\`devkit init\` wrote no \`${name}\` task, so this gate no longer runs it`,
+    ),
+  ...failures.map(
+    ({ detail, name }) =>
+      `task \`${name}\` is wired but does not run on a freshly initialised repository: ${detail}`,
+  ),
+];
+
+/**
  * Hooks a consumer received without the executable bit.
  *
  * git skips a non-executable hook, and the skip is the failure mode this has to

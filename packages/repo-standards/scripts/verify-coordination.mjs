@@ -87,7 +87,7 @@ import {
   withoutLocalDuplicates,
 } from './coordination-remote.mjs';
 import { branchErrors, ISO_DATE, taskErrors } from './coordination-schema.mjs';
-import { readCoordinationPaths } from './config.mjs';
+import { readConventions, readCoordinationPaths } from './config.mjs';
 import { resolveHostRoot } from './host-root.mjs';
 
 const REPO_ROOT = resolveHostRoot({
@@ -364,7 +364,12 @@ const main = () => {
   checkStale(tasks, warnings);
   checkTaskBranches(tasks, warnings);
   checkGhostTasks(tasks, warnings);
-  const isolation = checkoutIsolationFinding(readCheckoutFacts(REPO_ROOT));
+  // The trunk is the consumer's to name, and read here rather than at module
+  // scope so importing this file still touches nothing (#807).
+  const isolation = checkoutIsolationFinding({
+    ...readCheckoutFacts(REPO_ROOT),
+    defaultBranch: readConventions(REPO_ROOT).defaultBranch,
+  });
   if (isolation !== undefined) {
     (isolation.severity === 'problem' ? problems : warnings).push(
       isolation.message,
