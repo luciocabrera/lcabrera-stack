@@ -176,6 +176,27 @@ jobs:
         # consumer who took everything and dangles for the one who did not.
         run: vp run devkit:closure -- --shipped
 
+      - name: This repository's materialised files match the package
+        id: devkit_check_gate
+        # Consumer #1 is only a guarantee if something checks it. Without this,
+        # a hand-edit here silently makes this repository's copy diverge from the
+        # package that is supposed to be its only source, and whoever adopts the
+        # kit next is the one who finds out.
+        #
+        # A deliberate, permanent divergence is acknowledged with a stated reason
+        # (`devkit doctor --accept`) rather than left to fail forever: a gate that
+        # is always red is read exactly like one that is always green.
+        run: vp run devkit:check
+
+      - name: A packed tarball is one a consumer could install
+        id: devkit_tarball_gate
+        # Every workspace here consumes these packages as `workspace:*`, which
+        # resolves the source directory and ignores `files` entirely — so the
+        # packed artifact, the only thing a consumer ever sees, is exercised by
+        # nothing else in this repository. This packs both, installs them into a
+        # scratch repository under the OS temp root, and runs every declared bin.
+        run: vp run tarball:verify
+
       - name: Oxlint plugin families are loaded
         id: lint_plugins_gate
         # Naming `lint.plugins` REPLACES Oxlint's default set, so dropping an

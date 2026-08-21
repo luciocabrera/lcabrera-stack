@@ -191,10 +191,11 @@ describe('acceptDecision', () => {
     expect(decision.error).toContain('README.md');
   });
 
-  test('refuses every state that is not a local edit, naming the one it found', () => {
-    // A gate that accepted anything would pass the first case above and this
-    // one too, so both directions are asserted.
-    const refusals = ['acknowledged', 'added', 'conflict', 'current', 'unmet']
+  test('refuses every state that is not a live divergence, naming the one it found', () => {
+    // A gate that accepted anything would pass the accepting cases too, so both
+    // directions are asserted. `acknowledged` is refused because it is already
+    // acknowledged; the rest are nothing a consumer diverged on.
+    const refusals = ['acknowledged', 'added', 'current', 'unmet', 'unresolved']
       .map((state) =>
         acceptDecision({
           entries: [{ ...modified, state }],
@@ -205,5 +206,20 @@ describe('acceptDecision', () => {
       .map((decision) => decision.error);
     expect(refusals.every((error) => error !== undefined)).toBe(true);
     expect(refusals[0]).toContain('acknowledged');
+  });
+
+  test('accepts a conflict, which is the state that made --check unusable', () => {
+    // A repository that authored its own register before adopting the kit holds
+    // `conflict` permanently and legitimately. Refusing it left `doctor --check`
+    // red on a correct tree, and a gate that is always red is read exactly like
+    // one that is always green.
+    const decision = acceptDecision({
+      entries: [{ ...modified, state: 'conflict' }],
+      path: PATH,
+      reason: 'ours predates the kit',
+    });
+
+    expect(decision.error).toBeUndefined();
+    expect(decision.hash).toBe(modified.onDiskHash);
   });
 });

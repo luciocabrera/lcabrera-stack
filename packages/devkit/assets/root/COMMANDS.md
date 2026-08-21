@@ -58,7 +58,9 @@ devkit doctor --accept .claude/rules/routes-data.md --reason "our loaders return
 ```
 
 It takes one file at a time and refuses a path that is not currently reported as
-modified, so it cannot silence something that is not a live finding. The record
+`modified` or `conflict`, so it cannot silence something that is not a live
+finding. Acknowledging a conflict does not adopt it — the package's version is
+still never written over yours. The record
 is keyed to that file's content — edit it again and it is reported again.
 
 ## 3. The gates

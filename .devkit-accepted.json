@@ -1,0 +1,10 @@
+{
+  "docs/coordination/README.md": {
+    "hash": "dd9f74f52f9b830aec93751aad8f827fe6a499775382b45c3dd5075380f3879e",
+    "reason": "this repository authored its register before the kit existed; the seed is the generalised version and this one deliberately names vp tasks and ADR-037"
+  },
+  "docs/coordination/tasks/_TEMPLATE.md": {
+    "hash": "7bf2308868195293cfc120229c19e3f0d9575637087ee94a9595f124a965fb61",
+    "reason": "same divergence as the register README: the seed's field guidance is generic, this one names this repository's gate and board commands"
+  }
+}

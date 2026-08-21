@@ -28,16 +28,16 @@ The record is what makes it distribution rather than copy-paste. Every
 materialised file is hashed into `.devkit-manifest.json`, and each subsequent
 run classifies it:
 
-| State                | What happens                                                                 |
-| -------------------- | ---------------------------------------------------------------------------- |
-| `added` / `restored` | written — the consumer does not have it                                      |
-| `updated`            | written — untouched locally, and the package has moved on                    |
-| `current`            | nothing written; adopted into the record                                     |
-| `modified`           | **left alone** — edited locally, and reported on every run                   |
-| `acknowledged`       | **left alone** — an edit you said you meant; reported only under `--verbose` |
-| `conflict`           | **left alone** — an unmanaged file already occupies that path                |
-| `unresolved`         | **refused** — a `{{commands.*}}` placeholder has no answer                   |
-| `unmet`              | **refused** — a `requires:` key is unset, or a `peer:` range is unanswered   |
+| State                | What happens                                                                   |
+| -------------------- | ------------------------------------------------------------------------------ |
+| `added` / `restored` | written — the consumer does not have it                                        |
+| `updated`            | written — untouched locally, and the package has moved on                      |
+| `current`            | nothing written; adopted into the record                                       |
+| `modified`           | **left alone** — edited locally, and reported on every run                     |
+| `acknowledged`       | **left alone** — an edit you said you meant; reported only under `--verbose`   |
+| `conflict`           | **left alone** — an unmanaged file already occupies that path; acknowledgeable |
+| `unresolved`         | **refused** — a `{{commands.*}}` placeholder has no answer                     |
+| `unmet`              | **refused** — a `requires:` key is unset, or a `peer:` range is unanswered     |
 
 A local edit is a supported state, not a defect. It survives every sync, which
 is what stops a consumer forking the kit to change one line.
@@ -144,9 +144,17 @@ omits that file and `--check` passes; `devkit doctor --verbose` still lists it
 with the reason you gave.
 
 `--accept` takes **one file at a time**, refuses a path the report does not
-currently call `modified`, and refuses a missing or blank `--reason`. An
-acknowledgement nobody had to justify is the one that rots into a line nobody
-dares delete.
+currently call `modified` or `conflict`, and refuses a missing or blank
+`--reason`. An acknowledgement nobody had to justify is the one that rots into a
+line nobody dares delete.
+
+A `conflict` is acknowledgeable for the same reason a `modified` file is, and
+acknowledging one is **not** adopting it: the package's version is still never
+written over yours. A repository that authored its own version of a file before
+adopting the kit holds that state permanently and legitimately, and without a way
+to say so, `devkit doctor --check` can never be green there — which makes it
+useless as a gate, since a check that is always red is read exactly like one that
+is always green.
 
 The entry is keyed to the file's **on-disk hash**, not just its path, and that is
 what makes it safe: edit the file again and the hash no longer matches, so it is

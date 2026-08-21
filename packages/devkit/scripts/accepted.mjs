@@ -28,7 +28,7 @@
  * keyed by path, because the unit being acknowledged is one materialised file.
  */
 
-import { ACKNOWLEDGEABLE_STATE } from './manifest.mjs';
+import { acknowledgeableStates, isAcknowledgeable } from './manifest.mjs';
 
 export const ACCEPTED_FILE = '.devkit-accepted.json';
 
@@ -147,9 +147,9 @@ export const acceptDecision = ({ entries, path, reason }) => {
       error: `Not a file this kit materialises: ${path}. Only a path devkit placed can be acknowledged.`,
     };
   }
-  if (entry.state !== ACKNOWLEDGEABLE_STATE) {
+  if (!isAcknowledgeable(entry.state)) {
     return {
-      error: `Not locally modified: ${path} is ${entry.state}. Only an edit doctor reports as ${ACKNOWLEDGEABLE_STATE} can be acknowledged.`,
+      error: `Nothing to acknowledge: ${path} is ${entry.state}. Only a file doctor reports as ${acknowledgeableStates().join(' or ')} can be acknowledged.`,
     };
   }
   return { hash: entry.onDiskHash, reason: stated };

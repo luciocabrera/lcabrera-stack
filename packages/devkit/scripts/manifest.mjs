@@ -81,11 +81,33 @@ const REPORTED_STATES = new Set([
 export const isReported = (state) => REPORTED_STATES.has(state);
 
 /**
- * The state an acknowledgement applies to, and the state it produces. Both names
- * live here with the rest of the vocabulary so neither can drift from the
- * classifier that emits the first one.
+ * The states an acknowledgement applies to, and the state it produces. All of it
+ * lives here with the rest of the vocabulary so none of it can drift from the
+ * classifier that emits the first ones.
+ *
+ * `conflict` belongs here alongside `modified`, and leaving it out is what made
+ * `doctor --check` unusable as a gate. The two differ in bookkeeping — a
+ * `modified` file has a recorded hash because devkit wrote it, a `conflict` has
+ * none because the consumer's file was already there — but they are the same
+ * human situation: this file is mine on purpose, stop reporting it. A repository
+ * that authored its own register before adopting the kit holds that state
+ * permanently and legitimately, so without this the check is red on a correct
+ * tree, and a gate that is always red is read exactly like one that is always
+ * green.
+ *
+ * Acknowledging a conflict is not adopting it. The package's version is still
+ * never written over the consumer's file.
  */
-export const ACKNOWLEDGEABLE_STATE = 'modified';
+const ACKNOWLEDGEABLE_STATES = new Set(['conflict', 'modified']);
+
+export const isAcknowledgeable = (state) => ACKNOWLEDGEABLE_STATES.has(state);
+
+/** For a message that has to name them; sorted so the wording cannot reorder. */
+export const acknowledgeableStates = () =>
+  [...ACKNOWLEDGEABLE_STATES].toSorted((left, right) =>
+    left.localeCompare(right),
+  );
+
 export const ACKNOWLEDGED_STATE = 'acknowledged';
 
 /**
