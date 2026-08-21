@@ -431,15 +431,18 @@ warning path with the sweep as backstop.)
 It does **not** fix the scheduled sweep,
 which GitHub always runs from the default branch — so a pull request editing the
 gate still has its status flapped every half hour until it merges. That is
-tolerable only while this context is not required; it is a prerequisite to close
-before #698 promotes it, because under a required context the same flap is an
-unmergeable pull request. Tracked as #868 rather than fixed here — the sweep's
-correct behaviour when it disagrees with a pull request's own code is a design
-question, not a one-line ref.
+tolerable only while this context was not required, because under a required
+context the same flap is an unmergeable pull request. **#868 closed it** before
+the promotion: the sweep no longer replaces a `success` for this context.
+[`review-gate-reconcile.md`](./review-gate-reconcile.md) owns that rule, what it
+gives up, and why it is per gate rather than sweep-wide.
 
-This gate reports; it does not yet block. Promotion to a required context on
-`main` is #698, deliberately separate: a required check that has never reported
-blocks every pull request, including the one that would fix it.
+**This gate blocks.** `Copilot review complete` became a required context on
+ruleset `19141543` on 2026-08-21 — the first half of #698 — so a pull request
+whose head carries no accepted review does not merge, and `pending` is the state
+it sits in while it waits. Promotion was kept separate from the work that built
+the gate for a reason worth keeping in view: a required check that has never
+reported blocks every pull request, including the one that would fix it.
 
 ## When the status stays pending
 
@@ -699,8 +702,16 @@ rest of the preconditions.
      -f 'description=break-glass: <reason>'
    ```
 
-   This is the same call the workflow makes. It is overwritten by the next event
-   the workflow handles, so post it once the head has settled.
+   This is the same call the workflow makes — but **not from the same identity,
+   and since 2026-08-21 that is what decides whether it counts.** The required
+   context is pinned to `integration_id` 15368 (GitHub Actions); a status posted
+   with a personal token has no app behind it, so this rung clears the _report_
+   without clearing the _merge bar_. Still worth posting — it records the reason
+   and stops the sweep re-deriving a `pending` over it — but to actually merge,
+   go to rung 7.
+
+   It is overwritten by the next event the workflow handles, so post it once the
+   head has settled.
 
 7. **Admin bypass of the ruleset**, once #698 has made the context required.
    `RepositoryRole` 5 keeps `bypass_mode: always` on ruleset `19141543`.
@@ -923,15 +934,14 @@ Everything above describes the repository **after** #694 added
 `review_draft_pull_requests: false`) and `pull_request` to ruleset `19141543`.
 Further things the notes assume:
 
-- **This status is a required context, and a merge fails on what it says.** It was
-  advisory until 2026-08-21, when the first half of #698 added
-  `Copilot review complete` to ruleset `19141543` (pinned to `integration_id`
-  15368, the way its five Actions siblings are, so a status posted by anything
-  other than a workflow does not satisfy it). The approval limitation above is
-  therefore a blocker rather than a nuisance: a pull request whose head carries no
-  accepted review cannot merge, and the break-glass path is
-  [the admin bypass](#break-glass). The `github-actions[bot]` hole that used to
-  ride on the same reasoning is closed — see
+- **This status is a required context** (2026-08-21, the first half of #698) — the
+  body above says what that means for a merge. What belongs here is the detail a
+  reader cannot see from the check: it is pinned to `integration_id` 15368, the way
+  its five Actions siblings are, so **only a status posted by a workflow satisfies
+  it**. That is what demotes break-glass rung 6 to a record-keeping step and makes
+  [the admin bypass](#break-glass) the rung that merges. The approval limitation
+  above is a blocker rather than a nuisance for the same reason, and the
+  `github-actions[bot]` hole that used to ride on this reasoning is closed — see
   [the two accepted reviewers](#the-two-accepted-reviewers).
 - **`Agent review verdict` is still advisory**, and #698 stays open for it. It
   reports `success — absent` when no verdict was posted, so requiring it today

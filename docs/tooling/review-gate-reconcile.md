@@ -182,7 +182,9 @@ it is smaller than it sounds, because for that gate the sweep was never the only
 - **A hand-posted break-glass `success`** (rung 6 in
   [`copilot-review-gate.md`](./copilot-review-gate.md#break-glass)) now survives until
   an event recomputes it, instead of being undone by a sweep minutes later. That is an
-  improvement, not a cost.
+  improvement, but a smaller one than it was: since the context was pinned to
+  `integration_id` 15368 on 2026-08-21, a status posted by hand does not satisfy the
+  required check at all, so what survives is the record rather than the merge.
 
 ### The rule is one-directional; the reasoning behind it is not
 
@@ -336,11 +338,17 @@ before relying on it again.
 
 - **One of the three gates it drives is required, the other two are not.**
   `Copilot review complete` became a required context on 2026-08-21 (the first
-  half of #698), so a status this sweep publishes for that gate does decide a
-  merge — which is the reason it is also the one gate that opts in to the
-  no-downgrade rule. `Agent review verdict` is still advisory. `Review threads
+  half of #698), so a status this sweep publishes for that gate now decides a
+  merge. `Agent review verdict` is still advisory. `Review threads
 resolved` is a report either way: `required_review_thread_resolution` on the
   `main` ruleset is what actually holds that merge, not this status.
+- **Requiredness is not why a gate opts in to the no-downgrade rule.** The two sit
+  next to each other here only by timing — #868 shipped the opt-in before the
+  promotion, so being required cannot have been its reason. The reason is the one
+  in **Per gate, not sweep-wide** above: another publisher posts that `success`
+  from better-informed code. So making `Agent review verdict` required would
+  **not** imply opting it in; what governs that is `verify-agent-review.mjs`
+  unpinning `state=success`, so it has a downgrade to withhold at all.
 - The Actions approval policy is `first_time_contributors_new_to_github`
   (loosened 2026-08-18; see
   [`copilot-review-gate.md`](./copilot-review-gate.md)). The sweep is
