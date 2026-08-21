@@ -88,7 +88,10 @@ export const repositoryIdentity = (gitConfig) => {
  * directory and its package name are independent strings, and a seed can leak
  * either. This repository proves it: the showcase app is named
  * `vite-react-compiler` and lives in `apps/react-router`, so a blueprint path
- * naming the directory matched no package name and shipped clean (#860).
+ * naming the directory matches nothing derived from the manifests. That file
+ * did not ship clean — it was exempted outright — but lifting the exemption is
+ * what exposed the hole: the gate reported its three package-name lines and
+ * left the blueprint path alone (#860).
  *
  * @param {{ repositoryName: string, repositoryOwner: string,
  *   repositorySlug: string, workspaceNames: string[],

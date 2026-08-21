@@ -53,8 +53,9 @@ describe('forbiddenWords', () => {
   it('carries a workspace directory whose package name is spelled differently', () => {
     // The two are independent strings: this repository's showcase app is named
     // `vite-react-compiler` and sits in `apps/react-router`. Reading only the
-    // manifests left the directory unwatched, which is how a shipped rule kept
-    // a blueprint path into an app no consumer has (#860).
+    // manifests leaves the directory unwatched — lifting `routes-data.md`'s
+    // exemption showed exactly that, with the gate reporting its three
+    // package-name lines and not its blueprint path (#860).
     expect(words).toContain('apps/react-router');
   });
 
