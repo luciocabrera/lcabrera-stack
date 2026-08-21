@@ -33,7 +33,9 @@ export const OPERATOR_TO_SHORT: Record<string, string> = {
  * their value — admitting a value-less operator there let `parseTextFilter`
  * mint `{type: 'text', operator: 'isEmpty', value: …}`, a shape `TextFilter`
  * does not have and only survives because that parser casts its operator.
- * `parseEmptyFilter` claims these codes instead.
+ * `parseEmptyFilter` reads them instead — but only inside the object form
+ * `{ op: 'ie' }`, never as a bare array element, which is already how a select
+ * filter carries a value someone typed.
  */
 export const SHORT_TO_OPERATOR = new Map([
   ['af', 'after'],

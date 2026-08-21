@@ -1,3 +1,5 @@
+import { isObject } from '@lcabrera/utils/guards/is-object.util';
+
 import type {
   ColumnFilter,
   NumberOperatorType,
@@ -34,6 +36,34 @@ const parseBooleanFilter = (value: unknown): ColumnFilter | undefined => {
   }
 
   return { type: 'boolean', value };
+};
+
+/**
+ * `{ op: 'ie' }` — the one compact filter that is an object rather than an
+ * array, and read here **before** the `Array.isArray` guard below because of it.
+ *
+ * The shape is the whole point. `parseEqualsSelectFilter` accepts any all-string
+ * array, so a one-element `['ie']` is already a select filter over the literal
+ * value `ie` and has to stay one; an object cannot collide with it, or with any
+ * other shape this codec writes. See `serializeEmptyFilter` for what claiming
+ * the array form would have cost.
+ */
+const parseEmptyFilter = (value: unknown): ColumnFilter | undefined => {
+  if (!isObject(value) || Array.isArray(value)) {
+    return undefined;
+  }
+
+  const { op } = value;
+
+  if (typeof op !== 'string') {
+    return undefined;
+  }
+
+  const operator = expandOperator(op);
+
+  return operator === 'isEmpty' || operator === 'isNotEmpty'
+    ? { operator, type: 'empty' }
+    : undefined;
 };
 
 const parseNotEqualsSelectFilter = (
@@ -146,28 +176,6 @@ const parseKnownOperatorFilter = (
   );
 };
 
-/**
- * A one-element array holding an empty-operator code.
- *
- * **Tried before `parseEqualsSelectFilter`, which would otherwise swallow it.**
- * That fallback accepts any all-string array, so `['ie']` comes back as a
- * select filter matching the literal `"ie"` — plausible-looking, matching
- * nothing, and silent about being the wrong filter. The length check is what
- * keeps this from claiming `['ie', 'x']`, which is not a shape this codec
- * writes.
- */
-const parseEmptyFilter = (
-  arr: readonly unknown[],
-): ColumnFilter | undefined => {
-  if (arr.length !== 1) return undefined;
-
-  const operator = expandOperator(arr[0] as string);
-
-  return operator === 'isEmpty' || operator === 'isNotEmpty'
-    ? { operator, type: 'empty' }
-    : undefined;
-};
-
 const parseEqualsSelectFilter = (
   arr: readonly unknown[],
 ): ColumnFilter | undefined => {
@@ -192,6 +200,11 @@ export const deserializeFilter = (value: unknown): ColumnFilter | undefined => {
     return booleanFilter;
   }
 
+  const emptyFilter = parseEmptyFilter(value);
+  if (emptyFilter) {
+    return emptyFilter;
+  }
+
   if (!Array.isArray(value)) return undefined;
 
   const arr = value as unknown[];
@@ -201,7 +214,6 @@ export const deserializeFilter = (value: unknown): ColumnFilter | undefined => {
 
   return (
     parseNotEqualsSelectFilter(arr) ??
-    parseEmptyFilter(arr) ??
     parseKnownOperatorFilter(arr) ??
     parseEqualsSelectFilter(arr)
   );

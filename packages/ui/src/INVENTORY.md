@@ -607,7 +607,7 @@ inventory and is not backfilled here.
 | `serializeFilter` | `utils/urlState/serializeFilter.util.ts` | Dispatches a single `ColumnFilter` to the matching leaf serializer |
 | `serializeBooleanFilter` | `utils/urlState/serializeBooleanFilter.util.ts` | Serializes boolean filters as bare booleans |
 | `serializeDateFilter` | `utils/urlState/serializeDateFilter.util.ts` | Serializes date filters using compact operator codes and optional range values |
-| `serializeEmptyFilter` | `utils/urlState/serializeEmptyFilter.util.ts` | Serializes an empty-value filter as its operator code alone, in a one-element array — the array form matters, since `parseEqualsSelectFilter` would otherwise read a bare code back as a select filter matching that literal |
+| `serializeEmptyFilter` | `utils/urlState/serializeEmptyFilter.util.ts` | Serializes an empty-value filter as `{ op: <code> }` — an object, and the only compact filter that is not an array, because `serializeSelectFilter` already writes `['ie']` for a select filter on the literal value `ie` |
 | `serializeSelectFilter` | `utils/urlState/serializeSelectFilter.util.ts` | Serializes select and multi-select filters to compact arrays |
 | `serializeNumberFilter` | `utils/urlState/serializeNumberFilter.util.ts` | Serializes number filters using compact operator codes and optional range values |
 | `serializeTextFilter` | `utils/urlState/serializeTextFilter.util.ts` | Serializes text filters to compact operator/value arrays |

@@ -32,6 +32,16 @@ The operators are offered for **every** column type, because any column can hold
 nothing; the data type decides which comparisons make sense, not whether
 emptiness does.
 
+**In the URL it is an object, `{"op":"ie"}`, not an array.** Every other
+compact filter is an array, and a select filter is written as its bare values —
+so `["ie"]` already means "this column equals the value `ie`". Claiming that
+form would have made `ie` and `nie` reserved words in a position holding
+arbitrary user data, turning a consumer's "country is ie" link into "country is
+empty" with nothing to say so.
+
+A boolean column gets these operators from `BooleanFilterInput` rather than the
+operator dropdown, which `FilterInputs` does not render for one.
+
 For consumers: `ColumnFilter` gains a variant, so an exhaustive `switch` over
 `filter.type` that previously compiled may now need an arm. Three such
 dispatches inside these packages did — the URL serializer, the drawer's

@@ -1,36 +1,36 @@
 import * as stylex from '@stylexjs/stylex';
 
 import { Button } from '#ui/components/Button';
+import { EMPTY_OPERATORS } from '#ui/constants/filterOperators.constants';
 
 import type { BooleanFilterInputProps } from './BooleanFilterInput.types';
 
 import { styles } from './BooleanFilterInput.stylex';
 
+/**
+ * All / True / False, plus the empty operators.
+ *
+ * A boolean column is the one type `FilterInputs` gives no operator dropdown —
+ * these buttons *are* its operator — so this is the only place the empty
+ * operators can be offered for one, and the only place an empty filter restored
+ * from a URL can be shown or cleared.
+ */
 export const BooleanFilterInput = ({
   filter,
   onChange,
 }: BooleanFilterInputProps) => {
   // Derive selected value directly from filter prop (no local state needed)
-  const getSelectedValue = (): 'all' | 'false' | 'true' => {
+  const getSelectedValue = () => {
     if (!filter) return 'all';
+    if (filter.type === 'empty') return filter.operator;
+
     return filter.value ? 'true' : 'false';
   };
   const selectedValue = getSelectedValue();
 
-  const handleChange = (newValue: 'all' | 'false' | 'true') => {
-    if (newValue === 'all') {
-      onChange();
-    } else {
-      onChange({
-        type: 'boolean' as const,
-        value: newValue === 'true',
-      });
-    }
-  };
-
-  const handleSelectAll = () => handleChange('all');
-  const handleSelectFalse = () => handleChange('false');
-  const handleSelectTrue = () => handleChange('true');
+  const handleSelectAll = () => onChange();
+  const handleSelectFalse = () => onChange({ type: 'boolean', value: false });
+  const handleSelectTrue = () => onChange({ type: 'boolean', value: true });
 
   return (
     <div {...stylex.props(styles.container)}>
@@ -55,6 +55,18 @@ export const BooleanFilterInput = ({
       >
         False
       </Button>
+      {EMPTY_OPERATORS.map(({ label, value }) => (
+        <Button
+          key={value}
+          onClick={() => {
+            onChange({ operator: value, type: 'empty' });
+          }}
+          size='sm'
+          variant={selectedValue === value ? 'primary' : 'outline'}
+        >
+          {label}
+        </Button>
+      ))}
     </div>
   );
 };
