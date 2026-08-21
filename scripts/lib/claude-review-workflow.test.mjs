@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { readRepoFile, stepBlock } from './workflow-inspect.mjs';
+import { readRepoFile, stepBlock, stepEnvValue } from './workflow-inspect.mjs';
 
 // `ACCEPTED_REVIEWERS` names the reviewer by login, and the login follows from the
 // credential the review is posted with. The unit tests around that set prove the
@@ -16,6 +16,12 @@ import { readRepoFile, stepBlock } from './workflow-inspect.mjs';
 // So this reads the workflow. The comment on that test used to claim it covered
 // this case; it did not, and a comment promising a check that does not exist is
 // worse than no comment (#866 review).
+//
+// The credential is read POSITIVELY, per key, rather than asserted absent over the
+// step's text. `stepBlock` runs to the next `- name:`, so the submit step's text
+// includes the comment block introducing the dispatch step — and a sentence there
+// mentioning `github.token` would fail a negative assertion for a reason that has
+// nothing to do with which token is used. See `stepEnvValue`.
 const WORKFLOW = '.github/workflows/claude-review.yml';
 const SUBMIT_STEP =
   'Submit the review against the head this run was triggered for';
@@ -27,9 +33,10 @@ describe('the review is posted under the reviewer’s own identity', () => {
   it('submits with the App installation token, not the default GITHUB_TOKEN', () => {
     const step = stepBlock(readRepoFile(WORKFLOW), SUBMIT_STEP);
     expect(step).toBeDefined();
-    expect(step).toContain('steps.reviewer-token.outputs.token');
     // The whole point: a fallback here silently unmatches every review.
-    expect(step).not.toContain('github.token');
+    expect(stepEnvValue(step, 'GH_TOKEN')).toBe(
+      '${{ steps.reviewer-token.outputs.token }}',
+    );
   });
 
   it('mints that token from the App rather than hardcoding a login', () => {
@@ -41,13 +48,29 @@ describe('the review is posted under the reviewer’s own identity', () => {
     expect(step).toContain('id: reviewer-token');
   });
 
+  // `stepEnvValue`'s own two claims, since the assertions above rest on them and this
+  // file is its only caller. Both are the difference between reading the credential
+  // and reading prose about it.
+  it('reads env keys past comment lines, and reports an absent key as undefined', () => {
+    const step = [
+      '      - name: Example',
+      '        # GH_TOKEN: ${{ github.token }} — a comment, not the setting',
+      '        env:',
+      '          GH_TOKEN: ${{ steps.reviewer-token.outputs.token }}',
+    ].join('\n');
+    expect(stepEnvValue(step, 'GH_TOKEN')).toBe(
+      '${{ steps.reviewer-token.outputs.token }}',
+    );
+    expect(stepEnvValue(step, 'NOT_SET')).toBeUndefined();
+  });
+
   // The dispatch legitimately keeps `github.token` — it needs `actions: write`,
-  // which the App does not hold. Asserted so the step above's `not.toContain` is
-  // not read as "this workflow must never use github.token".
+  // which the App does not hold. Asserted so the assertion above is not read as
+  // "this workflow must never use github.token".
   it('leaves the gate dispatch on github.token, which the App cannot replace', () => {
     const step = stepBlock(readRepoFile(WORKFLOW), DISPATCH_STEP);
     expect(step).toBeDefined();
-    expect(step).toContain('github.token');
+    expect(stepEnvValue(step, 'GH_TOKEN')).toBe('${{ github.token }}');
   });
 
   // `gh workflow run` with no `--ref` runs the DEFAULT BRANCH's copy of the gate,

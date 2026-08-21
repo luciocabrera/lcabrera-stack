@@ -85,8 +85,9 @@ const ACCEPTED_REVIEWERS = new Set([
  * rather than ask about one login.
  *
  * It exists because the set is copied: `docs/tooling/copilot-review-gate.md` carries
- * a copy-pasteable GraphQL diagnostic that filters on the same logins, and #866 shipped
- * with that copy still naming `github-actions` after this file had stopped accepting it.
+ * a copy-pasteable GraphQL diagnostic that filters on the same logins, and review caught
+ * #866 with that copy still naming `github-actions` after this file had stopped accepting
+ * it — the drift was real, and was found by a reader rather than by anything automatic.
  * The two then disagree in both directions — the snippet says "wait" on a head the gate
  * has already passed, and counts a reviewer the gate rejects — and it is reached for
  * exactly when the status looks wrong, so it is believed. `copilot-review-doc-drift.test.mjs`

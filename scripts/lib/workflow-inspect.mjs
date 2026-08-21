@@ -77,6 +77,30 @@ export const stepBlock = (source, name) => {
 };
 
 /**
+ * The value of one `env:` key inside a step, comment lines removed.
+ *
+ * `stepBlock` runs to the next `- name:`, so a step's text also contains the comment
+ * block that introduces the step after it. A NEGATIVE assertion over that text — "this
+ * step must not mention `github.token`" — is therefore governed by prose about a
+ * different step, and breaks the day someone writes an ordinary sentence nearby. That
+ * is a test failing for a reason unrelated to what it protects, which costs the same
+ * trust as one passing for the wrong reason. Reading the key positively says the same
+ * thing about the credential and cannot be tripped by prose (#866 review).
+ *
+ * Returns `undefined` when the step does not set the key, so a caller asserts on it
+ * rather than comparing against a value that was never there.
+ */
+export const stepEnvValue = (step, key) => {
+  const prefix = `${key}:`;
+  const line = (step ?? '')
+    .split('\n')
+    .map((text) => text.trim())
+    .filter((text) => !text.startsWith('#'))
+    .find((text) => text.startsWith(prefix));
+  return line === undefined ? undefined : line.slice(prefix.length).trim();
+};
+
+/**
  * The value of a single-quoted `const NAME = '…'` in a script, so a test
  * compares against the one definition rather than a second copy of the string.
  *
