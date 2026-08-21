@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /**
  * Scaffolds a new ADR: next free number, the home you name, the shape in
  * `docs/decisions/_TEMPLATE.md`.

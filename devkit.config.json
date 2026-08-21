@@ -1,4 +1,62 @@
 {
+  "gates": {
+    "scriptSize": {
+      "skipDirs": [".claude", ".react-router", "reports"],
+      "guideDoc": ".claude/rules/scripts.md"
+    },
+    "strayConfigs": {
+      "configuredIn": "the root `vite.config.ts` (ADR-042)",
+      "skipDirs": [".react-router"],
+      "unreadNames": [
+        ".claudelintignore",
+        ".eslintignore",
+        ".oxfmtrc.json",
+        ".oxlintrc.json",
+        ".prettierignore"
+      ],
+      "unreadPrefixes": [".prettierrc"]
+    },
+    "docsPaths": {
+      "baselineFile": "scripts/docs-paths-baseline.json",
+      "expectedAbsent": [
+        ".claude/settings.local.json",
+        "docs/coordination/BOARD.md",
+        "reports/fallow/coverage/coverage-final.json"
+      ],
+      "expectedAbsentPrefixes": [
+        "docker/local/",
+        "reports/fallow/runs/",
+        "reports/sonar/runs/"
+      ],
+      "ignoredDocs": [
+        "reports/",
+        "docs/coordination/PLAN_TRIAGE.md",
+        "_PLAN.md",
+        ".github/skills/react-router-framework-mode/",
+        ".github/skills/store-pattern/references/architecture-templates/"
+      ],
+      "onDemandReportDirs": [
+        "reports/biome",
+        "reports/eslint",
+        "reports/fallow",
+        "reports/oxlint",
+        "reports/react-doctor",
+        "reports/skills",
+        "reports/sonar"
+      ],
+      "repoRoots": [
+        ".claude",
+        ".github",
+        ".vite-hooks",
+        "apps",
+        "docker",
+        "docs",
+        "packages",
+        "reports",
+        "scripts"
+      ]
+    }
+  },
   "registers": {
     "adrHomes": [
       {
@@ -8,7 +66,7 @@
         "title": "Repository, packages & tooling"
       },
       {
-        "blurb": "Decisions internal to the `apps/react-router` showcase app \u2014 its components, routes and interaction model.",
+        "blurb": "Decisions internal to the `apps/react-router` showcase app — its components, routes and interaction model.",
         "dir": "apps/react-router/docs/decisions",
         "tier": "app",
         "title": "React Router showcase app"

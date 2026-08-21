@@ -11,26 +11,27 @@
 import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-/** Documents whose paths are illustrative or forward-looking by design. */
-const IGNORED_DOCS = [
-  'CHANGELOG.md',
-  'reports/',
-  // NOT `/decisions/`. ADRs used to be exempted wholesale by that fragment,
-  // which hid every dead link in the corpus; they are now filtered per TOKEN by
-  // `enforcedTokens` instead — the paths an ADR *names* stay exempt as dated
-  // record, the links it asks you to *follow* do not. See lib/docs-paths.mjs.
-  'docs/coordination/PLAN_TRIAGE.md',
-  '_PLAN.md', // approved-but-unbuilt specs name files that do not exist yet
-  '_TEMPLATE.md', // a template's paths are placeholders to be replaced
-  '.github/skills/react-router-framework-mode/', // upstream framework docs
-  // Architecture *templates* — they describe a shape to copy, so their paths
-  // are illustrative by construction.
-  '.github/skills/store-pattern/references/architecture-templates/',
-  'node_modules/',
-];
+/**
+ * Documents whose paths are illustrative or forward-looking by design.
+ *
+ * Universal entries only. A changelog names paths as they were, a report is
+ * generated, and a template's paths are placeholders to be replaced — those hold
+ * anywhere. Everything else a repository exempts is its own, and arrives as
+ * configuration, because a wrong entry here does not make the gate stricter or
+ * looser: it makes it silently read fewer documents, and a doc gate reading less
+ * reports the same clean pass as a corpus with nothing wrong in it.
+ *
+ * Deliberately NOT a `/decisions/` fragment. Exempting dated records wholesale
+ * hid every dead link in them; they are filtered per TOKEN by `enforcedTokens`
+ * instead, so the paths an ADR *names* stay exempt as historical record while
+ * the links it asks you to *follow* do not.
+ */
+const ALWAYS_IGNORED = ['CHANGELOG.md', 'node_modules/', '_TEMPLATE.md'];
 
-export const isIgnoredDoc = (docPath) =>
-  IGNORED_DOCS.some((fragment) => docPath.includes(fragment));
+export const isIgnoredDoc = ({ docPath, ignoredDocs }) =>
+  [...ALWAYS_IGNORED, ...ignoredDocs].some((fragment) =>
+    docPath.includes(fragment),
+  );
 
 /** Directories that never contain governed documentation. */
 const SKIPPED_DIRS = new Set([
@@ -93,5 +94,7 @@ const walkMarkdown = (dir, prefix = '') => {
 };
 
 /** Repo-relative paths of every governed document. */
-export const documentedFiles = (repoRoot) =>
-  walkMarkdown(repoRoot).filter((docPath) => !isIgnoredDoc(docPath));
+export const documentedFiles = ({ ignoredDocs = [], repoRoot }) =>
+  walkMarkdown(repoRoot).filter(
+    (docPath) => !isIgnoredDoc({ docPath, ignoredDocs }),
+  );

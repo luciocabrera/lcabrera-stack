@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /**
  * Keeps a built package's published surface honest — against the artifact, not
  * against the manifest's intentions.

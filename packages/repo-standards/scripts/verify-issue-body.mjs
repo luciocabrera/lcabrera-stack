@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /**
  * Validates a GitHub issue description against the repo standard — the single
  * spec in `./lib/commit-convention.mjs`, which also holds the commit, PR and

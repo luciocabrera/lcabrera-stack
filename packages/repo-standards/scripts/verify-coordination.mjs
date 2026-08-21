@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /**
  * Verifies the in-git work register `devkit.config.json` names — the canonical
  * "who is working on what" for this monorepo. Keeps the register honest the same

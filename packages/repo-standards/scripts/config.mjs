@@ -281,6 +281,164 @@ const containedList = (value, fallback, key) => {
   return entries.length > 0 ? entries : fallback;
 };
 
+/**
+ * A list of MATCH FRAGMENTS — substrings, name prefixes, bare directory names —
+ * kept exactly as written.
+ *
+ * Not the same thing as `containedList`, and confusing the two silently narrows
+ * a gate. These values are never joined onto the root; they are compared against
+ * paths that have already been collected, so there is nothing to escape and
+ * nothing to canonicalise. Canonicalising them anyway strips a trailing slash,
+ * and that slash is the whole meaning: `reports/` excludes a directory, while
+ * `reports` excludes every file whose NAME happens to contain the word — which
+ * is how `ADR-049-findings-reports-are-produced-on-demand.md` dropped out of the
+ * corpus, taking its checks with it and reporting a clean pass for it.
+ */
+const verbatimList = (value, fallback) => {
+  if (!Array.isArray(value)) return fallback;
+  const entries = value.filter(
+    (entry) => typeof entry === 'string' && entry.trim() !== '',
+  );
+  return entries.length > 0 ? entries : fallback;
+};
+
+/**
+ * The gates that measure a repository rather than describe it.
+ *
+ * `skipDirs` EXTENDS the scanner's built-in list rather than replacing it. A
+ * consumer who declared their own and forgot `node_modules` would not get a
+ * narrower gate; they would get one walking their whole dependency tree, which
+ * reads as the gate being slow rather than misconfigured.
+ *
+ * `guideDoc` is empty by default because the pointer is the one part of a
+ * finding that cannot be guessed — this repository sends readers to its script
+ * rules, and a consumer's equivalent is named by them or by nobody.
+ */
+export const DEFAULT_GATES = {
+  scriptSize: {
+    baselineFile: 'scripts/script-size-baseline.json',
+    ceiling: 350,
+    guideDoc: '',
+    skipDirs: [],
+  },
+  strayConfigs: {
+    configuredIn: '',
+    skipDirs: [],
+    unreadNames: [],
+    unreadPrefixes: [],
+  },
+  docsPaths: {
+    baselineFile: 'scripts/docs-paths-baseline.json',
+    expectedAbsent: [],
+    expectedAbsentPrefixes: [],
+    ignoredDocs: [],
+    onDemandReportDirs: [],
+    repoRoots: [],
+  },
+};
+
+/** A ceiling has to be a positive whole number of lines; anything else is a typo. */
+const positiveInteger = (value, fallback, key) => {
+  if (value === undefined) return fallback;
+  if (!Number.isInteger(value) || value <= 0) {
+    throw new Error(
+      `${CONFIG_FILE_NAME}: \`${key}\` must be a positive whole number, but is \`${JSON.stringify(value)}\`.`,
+    );
+  }
+  return value;
+};
+
+export const resolveGates = (raw) => {
+  if (raw === undefined) return DEFAULT_GATES;
+  const parsed = parseConfig(raw);
+  const block = isPlainObject(parsed.gates) ? parsed.gates : {};
+  const scriptSize = isPlainObject(block.scriptSize) ? block.scriptSize : {};
+  const strayConfigs = isPlainObject(block.strayConfigs)
+    ? block.strayConfigs
+    : {};
+  const docsPaths = isPlainObject(block.docsPaths) ? block.docsPaths : {};
+
+  return {
+    scriptSize: {
+      baselineFile: repoRelative(
+        scriptSize.baselineFile,
+        DEFAULT_GATES.scriptSize.baselineFile,
+        'gates.scriptSize.baselineFile',
+      ),
+      ceiling: positiveInteger(
+        scriptSize.ceiling,
+        DEFAULT_GATES.scriptSize.ceiling,
+        'gates.scriptSize.ceiling',
+      ),
+      guideDoc: readableString(
+        scriptSize.guideDoc,
+        DEFAULT_GATES.scriptSize.guideDoc,
+      ),
+      skipDirs: verbatimList(
+        scriptSize.skipDirs,
+        DEFAULT_GATES.scriptSize.skipDirs,
+      ),
+    },
+    // Which config filenames are decoys is a per-toolchain answer, never a
+    // guessable one: `.prettierrc` is a decoy in a repository formatted by
+    // something else and the live policy in a repository formatted by Prettier.
+    // So the roster is empty by default and the gate refuses rather than
+    // reporting a clean pass over a list it was never given — the same shape
+    // `publishing.publicPackageDirs` takes.
+    strayConfigs: {
+      configuredIn: readableString(
+        strayConfigs.configuredIn,
+        DEFAULT_GATES.strayConfigs.configuredIn,
+      ),
+      skipDirs: verbatimList(
+        strayConfigs.skipDirs,
+        DEFAULT_GATES.strayConfigs.skipDirs,
+      ),
+      unreadNames: verbatimList(
+        strayConfigs.unreadNames,
+        DEFAULT_GATES.strayConfigs.unreadNames,
+      ),
+      unreadPrefixes: verbatimList(
+        strayConfigs.unreadPrefixes,
+        DEFAULT_GATES.strayConfigs.unreadPrefixes,
+      ),
+    },
+    // `repoRoots` empty means "derive them from the tree" rather than "check
+    // nothing" — the CLI reads the top-level directories instead. Every other
+    // list here is an exemption, so empty is the strict end of the range and a
+    // consumer who configures nothing gets the gate at its most demanding.
+    docsPaths: {
+      baselineFile: repoRelative(
+        docsPaths.baselineFile,
+        DEFAULT_GATES.docsPaths.baselineFile,
+        'gates.docsPaths.baselineFile',
+      ),
+      expectedAbsent: containedList(
+        docsPaths.expectedAbsent,
+        DEFAULT_GATES.docsPaths.expectedAbsent,
+        'gates.docsPaths.expectedAbsent[]',
+      ),
+      expectedAbsentPrefixes: verbatimList(
+        docsPaths.expectedAbsentPrefixes,
+        DEFAULT_GATES.docsPaths.expectedAbsentPrefixes,
+      ),
+      ignoredDocs: verbatimList(
+        docsPaths.ignoredDocs,
+        DEFAULT_GATES.docsPaths.ignoredDocs,
+      ),
+      onDemandReportDirs: containedList(
+        docsPaths.onDemandReportDirs,
+        DEFAULT_GATES.docsPaths.onDemandReportDirs,
+        'gates.docsPaths.onDemandReportDirs[]',
+      ),
+      repoRoots: verbatimList(
+        docsPaths.repoRoots,
+        DEFAULT_GATES.docsPaths.repoRoots,
+      ),
+    },
+  };
+};
+
 export const resolvePublishing = (raw) => {
   if (raw === undefined) return DEFAULT_PUBLISHING;
   const parsed = parseConfig(raw);
@@ -339,6 +497,8 @@ export const readRegisters = (root = hostRoot()) =>
 
 export const readPublishing = (root = hostRoot()) =>
   resolvePublishing(readRaw(root));
+
+export const readGates = (root = hostRoot()) => resolveGates(readRaw(root));
 
 /**
  * The coordination register's three locations, absolute, from one read of the

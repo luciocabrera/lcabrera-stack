@@ -99,6 +99,78 @@ it is the one key where configuring too little is the dangerous direction:
 `changeset publish` walks every non-private workspace regardless of directory,
 so a directory left out here under-reports what a release would publish.
 
+The `gates` block carries the rosters the three measuring gates would otherwise
+hardcode:
+
+```json
+{
+  "gates": {
+    "scriptSize": {
+      "ceiling": 350,
+      "baselineFile": "scripts/script-size-baseline.json",
+      "skipDirs": [],
+      "guideDoc": ""
+    },
+    "strayConfigs": {
+      "unreadNames": [],
+      "unreadPrefixes": [],
+      "skipDirs": [],
+      "configuredIn": ""
+    },
+    "docsPaths": {
+      "repoRoots": [],
+      "ignoredDocs": [],
+      "expectedAbsent": [],
+      "expectedAbsentPrefixes": [],
+      "onDemandReportDirs": [],
+      "baselineFile": "scripts/docs-paths-baseline.json"
+    }
+  }
+}
+```
+
+Three things about it are easy to get wrong.
+
+`strayConfigs` has **no useful default**, for the same reason `publicPackageDirs`
+does not: which config filenames are decoys is a per-toolchain answer, and
+`.prettierrc` is a decoy in a repository formatted by something else and the live
+policy in one formatted by Prettier. So an empty roster is **refused** rather than
+passed — comparing every file against an empty list reports the same success as a
+clean tree.
+
+`docsPaths.repoRoots` empty means "derive them from the tree", not "check
+nothing": the gate reads the top-level directories instead. Every other list in
+that block is an exemption, so empty is the _strict_ end of the range and a
+repository that configures nothing gets the gate at its most demanding.
+
+Every `skipDirs` **extends** the built-in list rather than replacing it. A
+repository that declared its own and forgot `node_modules` would not get a
+narrower gate; it would get one walking its whole dependency tree, which reads as
+slowness rather than as misconfiguration.
+
+The built-in list is deliberately the smallest defensible one — version control,
+installed dependencies, build output — because the gates do **not** agree about
+the rest, and a shared list is a silent way to narrow all of them at once. This
+repository's two differ exactly where they should:
+
+| Gate           | Also skips                               | Why                                                                                                                                                                                                                          |
+| -------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `scriptSize`   | `reports/`, `.react-router/`, `.claude/` | The first two are generated. `.claude/` is skipped because an isolation worktree placed under it is a whole second copy of the repository, so every script in it would be measured twice.                                    |
+| `strayConfigs` | `.react-router/`                         | Generated. It **walks** `reports/` and `.claude/` on purpose: a config file no engine reads is exactly the sort of thing that turns up in a repo-authored agent directory, and skipping it would drop the coverage silently. |
+
+That asymmetry is worth preserving whenever one of these gates is copied to
+another: a gate reading fewer files reports the same clean pass as a clean tree,
+so nothing will ever tell you the coverage was dropped.
+
+Note which of these are **paths** and which are **match fragments**.
+`baselineFile`, `expectedAbsent` and `onDemandReportDirs` are repo-relative paths
+and are validated as such. `ignoredDocs`, `expectedAbsentPrefixes`, `unreadNames`,
+`unreadPrefixes`, `repoRoots` and `skipDirs` are compared as substrings, prefixes
+or bare names against paths already collected, so they are kept exactly as
+written — nothing joins them onto a root, and canonicalising them would strip a
+trailing slash that carries the meaning. `reports/` excludes a directory;
+`reports` excludes every document whose _name_ contains the word.
+
 Every path here is relative to the repository root and must stay inside it: an
 absolute value or one that climbs out is refused by name rather than normalised,
 because these gates write and delete — the ADR scaffolder writes a file, the
@@ -154,6 +226,26 @@ by walking up from the module, so an undeclared import quietly finds the
 repository root's `node_modules` and every gate passes. The same walk from
 `node_modules/<name>/scripts/` reaches the consumer's tree instead, which under
 pnpm carries nothing nobody declared. `ts-morph` sat undeclared exactly that way.
+
+## What stays behind, and why
+
+Not every gate belongs here. A gate travels when its **rule** is a property of
+repositories and only its **names** are local — that is what configuration is
+for. A gate stays when its whole subject is one repository's toolchain, because
+parameterising it would mean shipping an abstraction over "which analysers you
+run", and a consumer could not use the result without reproducing this
+repository's exact setup.
+
+| Gate                                                    | Why it stays                                                                                                                                                                                                                                                                                             |
+| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `verify-lint-plugins.mjs`                               | Its subject _is_ the Oxlint topology: it imports the root `vite.config.ts` for `WORKSPACE_RUNTIMES` and `lintConfig.plugins`, shells out to this toolchain's runner, and proves each plugin family live by planting a violation per family. None of that is a repository fact wrapped in a general rule. |
+| `verify-suppressions.mjs`                               | The same subject from the other side — which of four analysers wrote a suppression, in which file format, and whether the public-package register argues for it. It also reads the React Doctor triage and the coverage workspace roster, which #798 already places out of scope.                        |
+| `verify-react-doctor.mjs`, `verify-route-artifacts.mjs` | Named in #798 as inherently this repository's: one analyser's triage, and one framework's generated route artifacts.                                                                                                                                                                                     |
+
+The prose side already reads it the same way: `lint-toolchain` is classified
+**repo-specific** in `packages/devkit/CLASSIFICATION.md` because "it documents
+_this_ repository's analyser topology". A gate and the document describing it
+should not disagree about whether they travel.
 
 ## The one thing to know before moving a file here
 

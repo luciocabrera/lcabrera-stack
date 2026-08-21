@@ -22,20 +22,10 @@
  *
  * Everything else is left to review. Widening this is safe to do later; the
  * baseline exists so a widening can land without a cleanup blocking it.
+ *
+ * A third shape — a workspace specifier resolved through the package's `exports`
+ * map — was claimed here and unreachable; making it real is #864.
  */
-
-/** Real top-level directories — the anchor that makes a token unambiguous. */
-const REPO_ROOTS = new Set([
-  '.claude',
-  '.github',
-  '.vite-hooks',
-  'apps',
-  'docker',
-  'docs',
-  'packages',
-  'reports',
-  'scripts',
-]);
 
 /** Shapes that are never a path: globs, regexes, placeholders, commands. */
 const isDisqualified = (token) =>
@@ -46,12 +36,19 @@ const isDisqualified = (token) =>
   token.startsWith('#') ||
   /^[a-z]+:\/\//i.test(token);
 
-/** A token anchored at a real top-level directory. */
-export const isRootAnchored = (token) => {
+/**
+ * A token anchored at a real top-level directory.
+ *
+ * The roster arrives from the caller because it is the consumer's layout — and
+ * it is the precision mechanism itself, not a detail. It is what separates
+ * `apps/web/foo.ts` from `try/catch`, so a repository given the wrong roots does
+ * not get a stricter or a looser gate; it gets one reading a different corpus.
+ */
+export const isRootAnchored = (token, repoRoots) => {
   if (isDisqualified(token) || !token.includes('/')) {
     return false;
   }
-  return REPO_ROOTS.has(token.split('/')[0]);
+  return repoRoots.includes(token.split('/')[0]);
 };
 
 /**
@@ -101,7 +98,7 @@ export const inlineCodeTokens = (text) =>
  * markdown links. Fenced code blocks are skipped — they are examples, and the
  * paths inside them are illustrative far more often than not.
  */
-export const extractCandidates = (markdown) => {
+export const extractCandidates = (markdown, repoRoots) => {
   // Odd-indexed segments sit between a pair of fences; keep the even ones.
   const prose = markdown
     .split('```')
@@ -110,14 +107,14 @@ export const extractCandidates = (markdown) => {
 
   const backticked = inlineCodeTokens(prose)
     .map((token) => normaliseToken(token))
-    .filter((token) => isRootAnchored(token));
+    .filter((token) => isRootAnchored(token, repoRoots));
 
   const linked = [...prose.matchAll(/\]\(([^)\s]{1,512})\)/g)]
     .map((match) => normaliseToken(match[1]))
     .filter(
       (token) =>
         !isDisqualified(token) &&
-        (isRootAnchored(token) ||
+        (isRootAnchored(token, repoRoots) ||
           isExplicitlyRelative(token) ||
           token.endsWith('.md')),
     );
@@ -156,24 +153,7 @@ export const isDatedRecord = (docPath) => docPath.includes('/decisions/');
  * exactly the failure that motivated this: 20 ADRs moved up one directory level
  * and took four now-unresolvable relative links with them.
  */
-export const enforcedTokens = (tokens, docPath) =>
+export const enforcedTokens = ({ docPath, repoRoots, tokens }) =>
   isDatedRecord(docPath)
-    ? tokens.filter((token) => !isRootAnchored(token))
+    ? tokens.filter((token) => !isRootAnchored(token, repoRoots))
     : tokens;
-
-/**
- * `@lcabrera/pkg/sub` or `@repo/pkg/sub` → its parts, so the caller can check
- * the exports map.
- *
- * Two scopes on purpose: `@lcabrera/*` is the published product (ui, api,
- * server, utils) and `@repo/*` is internal tooling that never ships. Both live
- * at `packages/<name>`, so one pattern covers them. Matching only one scope
- * would silently stop validating half the specifiers the docs name — which
- * reports exactly the same clean pass as having nothing to validate.
- */
-export const parseWorkspaceSpecifier = (token) => {
-  const match = /^@(?:lcabrera|repo)\/([^/]+)(?:\/(.+))?$/.exec(token);
-  return match === null
-    ? undefined
-    : { packageName: match[1], subpath: match[2] };
-};

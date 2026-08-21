@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /**
  * A LIVE coordination view: joins the static claims (task files) with the real
  * state of open pull requests from GitHub. Where `BOARD.md` answers "who claimed

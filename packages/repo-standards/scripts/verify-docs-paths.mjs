@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /**
  * Fails the build when a document names a repository path that does not exist.
  *
@@ -13,7 +15,7 @@
  * token" pass yields roughly ten times more noise than signal — teaching
  * examples, suffix conventions, framework docs, forward-looking specs — and a
  * gate that cries wolf gets bypassed. So the classification rules live in
- * `lib/docs-paths.mjs`, a token must look like a path and survive those filters,
+ * `./docs-paths.mjs`, a token must look like a path and survive those filters,
  * and it is resolved against the doc's own directory and its workspace before
  * the repo root, because a doc pointing at a sibling or a cross-package file is
  * correct in context.
@@ -21,122 +23,97 @@
  * Inherited breakage is grandfathered in `scripts/docs-paths-baseline.json` so
  * the gate can land without a cleanup blocking it. The baseline may SHRINK
  * freely and may only GROW one reference at a time, with a stated reason —
- * `--write` can no longer absorb a new failure. See `lib/docs-paths-baseline.mjs`
+ * `--write` can no longer absorb a new failure. See `./docs-paths-baseline.mjs`
  * for why the hatches are this narrow; the short version is that the first cut
  * offered only all-or-nothing exemptions, and four of the five references it
  * grandfathered turned out to be real broken links rather than illustrations.
  *
  * Usage:
- *   node scripts/verify-docs-paths.mjs            check, exit 1 on new breakage
- *   node scripts/verify-docs-paths.mjs --write    prune entries that now resolve
- *   node scripts/verify-docs-paths.mjs --accept <doc> <ref> --reason "<why>"
- *                                                 grandfather ONE reference
+ *   repo-verify-docs-paths            check, exit 1 on new breakage
+ *   repo-verify-docs-paths --write    prune entries that now resolve
+ *   repo-verify-docs-paths --accept <doc> <ref> --reason "<why>"
+ *                                     grandfather ONE reference
  *
  * Exit codes: 0 = clean or baselined, 1 = a document names a missing path.
  */
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { readGates, readPublishing } from './config.mjs';
 import {
   isBaselined,
   prunedBaseline,
   prunedCount,
   sortBaseline,
   withAccepted,
-} from './lib/docs-paths-baseline.mjs';
+} from './docs-paths-baseline.mjs';
 import {
   enforcedTokens,
   extractCandidates,
   isRootAnchored,
-  parseWorkspaceSpecifier,
-} from './lib/docs-paths.mjs';
-import { documentedFiles } from './lib/markdown-corpus.mjs';
+} from './docs-paths.mjs';
+import { resolveHostRoot } from './host-root.mjs';
+import { documentedFiles } from './markdown-corpus.mjs';
+import { ALWAYS_SKIPPED } from './script-size.mjs';
 
-const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
-const BASELINE_PATH = join(REPO_ROOT, 'scripts', 'docs-paths-baseline.json');
+const REPO_ROOT = resolveHostRoot({
+  moduleDirectory: dirname(fileURLToPath(import.meta.url)),
+});
+const GATES = readGates(REPO_ROOT).docsPaths;
+const BASELINE_PATH = join(REPO_ROOT, GATES.baselineFile);
+
+const governedDocs = () =>
+  documentedFiles({ ignoredDocs: GATES.ignoredDocs, repoRoot: REPO_ROOT });
+
+/**
+ * The anchors that make a token unambiguously a path. Declared when a repository
+ * wants to narrow them; otherwise every top-level directory that is not build
+ * output, which is the honest reading of "a real top-level directory".
+ */
+const REPO_ROOTS =
+  GATES.repoRoots.length > 0
+    ? GATES.repoRoots
+    : readdirSync(REPO_ROOT, { withFileTypes: true })
+        .filter((entry) => entry.isDirectory())
+        .map((entry) => entry.name)
+        .filter((name) => !ALWAYS_SKIPPED.includes(name));
 
 /**
  * Paths that are generated or local-only and therefore *expected* to be absent
- * from a fresh checkout — documenting them is correct, not a broken link. Kept
- * as an explicit list so the exemptions are reviewable in one place. (Asking
- * `git check-ignore` would be more general but needs a subprocess, and it
- * disagrees with CI for anything ignored via a developer's *global* gitignore.)
- */
-const GENERATED_OR_LOCAL = new Set([
-  '.claude/settings.local.json',
-  'docs/coordination/BOARD.md',
-  'reports/fallow/coverage/coverage-final.json',
-]);
-
-/** Report directories whose contents are produced on demand (ADR-049). */
-const ON_DEMAND_REPORT_DIRS = new Set([
-  'biome',
-  'eslint',
-  'fallow',
-  'oxlint',
-  'react-doctor',
-  'skills',
-  'sonar',
-]);
-
-/**
- * A findings report produced on demand. Documenting the path is correct — that is
- * where the command writes — but a fresh checkout has none of them, so resolving
- * one would fail everywhere except a machine that has just run the tool.
+ * from a fresh checkout — documenting them is correct, not a broken link.
  *
- * Matched at exactly one level below the tool directory, which is what keeps the
- * tracked gate BASELINES out of the exemption: `reports/fallow/baselines/…` is a
- * level deeper, so a doc naming a missing baseline is still a real broken link.
+ * Declared rather than detected. Asking the VCS what it ignores would be more
+ * general but needs a subprocess, and it disagrees with CI for anything ignored
+ * through a developer's *global* config — so the gate would pass locally and
+ * fail on the runner, or the reverse.
  */
 const isOnDemandReport = (token) => {
   const parts = token.split('/');
   return (
-    (parts.length === 3 &&
-      parts[0] === 'reports' &&
-      ON_DEMAND_REPORT_DIRS.has(parts[1])) ||
-    token.startsWith('reports/sonar/runs/')
+    parts.length > 1 &&
+    GATES.onDemandReportDirs.includes(parts.slice(0, -1).join('/'))
   );
 };
 
 const isExpectedAbsent = (token) =>
-  GENERATED_OR_LOCAL.has(token) ||
+  GATES.expectedAbsent.includes(token) ||
   isOnDemandReport(token) ||
-  token.startsWith('docker/local/') ||
-  token.startsWith('reports/fallow/runs/');
+  GATES.expectedAbsentPrefixes.some((prefix) => token.startsWith(prefix));
 
-/** The workspace directory owning a doc, if any (apps/x or packages/x). */
+/**
+ * The workspace directory owning a doc, if any.
+ *
+ * A doc inside a workspace may point at a file relative to that workspace's own
+ * root, which is correct in context and would otherwise be reported broken.
+ */
+const WORKSPACE_DIRS = readPublishing(REPO_ROOT).workspaceDirs;
+
 const workspaceOf = (docPath) => {
-  const match = /^((?:apps|packages)\/[^/]+)\//.exec(docPath);
-  return match === null ? undefined : join(REPO_ROOT, match[1]);
-};
-
-/** A `@repo/pkg/sub` specifier resolves through that package's exports map. */
-const workspaceSpecifierExists = (token) => {
-  const parsed = parseWorkspaceSpecifier(token);
-  if (parsed === undefined) {
-    return undefined;
-  }
-  const manifest = join(
-    REPO_ROOT,
-    'packages',
-    parsed.packageName,
-    'package.json',
-  );
-  if (!existsSync(manifest)) {
-    return false;
-  }
-  if (parsed.subpath === undefined) {
-    return true;
-  }
-  const exported = JSON.parse(readFileSync(manifest, 'utf8')).exports ?? {};
-  const keys = Object.keys(exported);
-  return keys.some((key) => {
-    const pattern = key.replace(/^\.\/?/, '');
-    return pattern.includes('*')
-      ? new RegExp(`^${pattern.replaceAll('*', '.*')}$`).test(parsed.subpath)
-      : pattern === parsed.subpath;
-  });
+  const parts = docPath.split('/');
+  return parts.length > 2 && WORKSPACE_DIRS.includes(parts[0])
+    ? join(REPO_ROOT, parts[0], parts[1])
+    : undefined;
 };
 
 /**
@@ -145,11 +122,7 @@ const workspaceSpecifierExists = (token) => {
  * inside its own workspace, so that root is tried too.
  */
 const resolvesSomewhere = (token, docPath) => {
-  const viaWorkspace = workspaceSpecifierExists(token);
-  if (viaWorkspace !== undefined) {
-    return viaWorkspace;
-  }
-  const roots = isRootAnchored(token)
+  const roots = isRootAnchored(token, REPO_ROOTS)
     ? [REPO_ROOT, workspaceOf(docPath)]
     : [join(REPO_ROOT, dirname(docPath)), workspaceOf(docPath), REPO_ROOT];
   return roots
@@ -159,8 +132,8 @@ const resolvesSomewhere = (token, docPath) => {
 
 const findingsFor = (docPath) => {
   const markdown = readFileSync(join(REPO_ROOT, docPath), 'utf8');
-  const unique = [...new Set(extractCandidates(markdown))];
-  return enforcedTokens(unique, docPath)
+  const unique = [...new Set(extractCandidates(markdown, REPO_ROOTS))];
+  return enforcedTokens({ docPath, repoRoots: REPO_ROOTS, tokens: unique })
     .filter((token) => !resolvesSomewhere(token, docPath))
     .map((token) => ({ doc: docPath, token }));
 };
@@ -261,12 +234,12 @@ const reportIntroduced = (introduced) => {
   );
   const [first] = introduced;
   console.error(
-    `  node scripts/verify-docs-paths.mjs --accept ${first.doc} ${first.token} --reason "..."`,
+    `  repo-verify-docs-paths --accept ${first.doc} ${first.token} --reason "..."`,
   );
 };
 
 const main = () => {
-  const findings = documentedFiles(REPO_ROOT)
+  const findings = governedDocs()
     .flatMap((doc) => findingsFor(doc))
     .filter((finding) => !isExpectedAbsent(finding.token));
   const baseline = readBaseline();
@@ -294,7 +267,7 @@ const main = () => {
 
   const grandfathered = Object.values(baseline).flatMap(Object.keys).length;
   console.log(
-    `Documented-path gate passed: ${documentedFiles(REPO_ROOT).length} doc(s) checked, ${grandfathered} grandfathered.`,
+    `Documented-path gate passed: ${governedDocs().length} doc(s) checked, ${grandfathered} grandfathered.`,
   );
 };
 

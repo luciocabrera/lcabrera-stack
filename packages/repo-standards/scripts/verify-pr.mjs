@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /**
  * Validates a pull request's title and description against the repo standard —
  * the single spec in `./lib/commit-convention.mjs`, the same one the commit-msg
