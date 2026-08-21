@@ -281,6 +281,105 @@ const containedList = (value, fallback, key) => {
   return entries.length > 0 ? entries : fallback;
 };
 
+/**
+ * The gates that measure a repository rather than describe it.
+ *
+ * `skipDirs` EXTENDS the scanner's built-in list rather than replacing it. A
+ * consumer who declared their own and forgot `node_modules` would not get a
+ * narrower gate; they would get one walking their whole dependency tree, which
+ * reads as the gate being slow rather than misconfigured.
+ *
+ * `guideDoc` is empty by default because the pointer is the one part of a
+ * finding that cannot be guessed — this repository sends readers to its script
+ * rules, and a consumer's equivalent is named by them or by nobody.
+ */
+export const DEFAULT_GATES = {
+  scriptSize: {
+    baselineFile: 'scripts/script-size-baseline.json',
+    ceiling: 350,
+    guideDoc: '',
+    skipDirs: [],
+  },
+  strayConfigs: {
+    configuredIn: '',
+    skipDirs: [],
+    unreadNames: [],
+    unreadPrefixes: [],
+  },
+};
+
+/** A ceiling has to be a positive whole number of lines; anything else is a typo. */
+const positiveInteger = (value, fallback, key) => {
+  if (value === undefined) return fallback;
+  if (!Number.isInteger(value) || value <= 0) {
+    throw new Error(
+      `${CONFIG_FILE_NAME}: \`${key}\` must be a positive whole number, but is \`${JSON.stringify(value)}\`.`,
+    );
+  }
+  return value;
+};
+
+export const resolveGates = (raw) => {
+  if (raw === undefined) return DEFAULT_GATES;
+  const parsed = parseConfig(raw);
+  const block = isPlainObject(parsed.gates) ? parsed.gates : {};
+  const scriptSize = isPlainObject(block.scriptSize) ? block.scriptSize : {};
+  const strayConfigs = isPlainObject(block.strayConfigs)
+    ? block.strayConfigs
+    : {};
+
+  return {
+    scriptSize: {
+      baselineFile: repoRelative(
+        scriptSize.baselineFile,
+        DEFAULT_GATES.scriptSize.baselineFile,
+        'gates.scriptSize.baselineFile',
+      ),
+      ceiling: positiveInteger(
+        scriptSize.ceiling,
+        DEFAULT_GATES.scriptSize.ceiling,
+        'gates.scriptSize.ceiling',
+      ),
+      guideDoc: readableString(
+        scriptSize.guideDoc,
+        DEFAULT_GATES.scriptSize.guideDoc,
+      ),
+      skipDirs: containedList(
+        scriptSize.skipDirs,
+        DEFAULT_GATES.scriptSize.skipDirs,
+        'gates.scriptSize.skipDirs[]',
+      ),
+    },
+    // Which config filenames are decoys is a per-toolchain answer, never a
+    // guessable one: `.prettierrc` is a decoy in a repository formatted by
+    // something else and the live policy in a repository formatted by Prettier.
+    // So the roster is empty by default and the gate refuses rather than
+    // reporting a clean pass over a list it was never given — the same shape
+    // `publishing.publicPackageDirs` takes.
+    strayConfigs: {
+      configuredIn: readableString(
+        strayConfigs.configuredIn,
+        DEFAULT_GATES.strayConfigs.configuredIn,
+      ),
+      skipDirs: containedList(
+        strayConfigs.skipDirs,
+        DEFAULT_GATES.strayConfigs.skipDirs,
+        'gates.strayConfigs.skipDirs[]',
+      ),
+      unreadNames: containedList(
+        strayConfigs.unreadNames,
+        DEFAULT_GATES.strayConfigs.unreadNames,
+        'gates.strayConfigs.unreadNames[]',
+      ),
+      unreadPrefixes: containedList(
+        strayConfigs.unreadPrefixes,
+        DEFAULT_GATES.strayConfigs.unreadPrefixes,
+        'gates.strayConfigs.unreadPrefixes[]',
+      ),
+    },
+  };
+};
+
 export const resolvePublishing = (raw) => {
   if (raw === undefined) return DEFAULT_PUBLISHING;
   const parsed = parseConfig(raw);
@@ -339,6 +438,8 @@ export const readRegisters = (root = hostRoot()) =>
 
 export const readPublishing = (root = hostRoot()) =>
   resolvePublishing(readRaw(root));
+
+export const readGates = (root = hostRoot()) => resolveGates(readRaw(root));
 
 /**
  * The coordination register's three locations, absolute, from one read of the

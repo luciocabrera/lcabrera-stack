@@ -17,6 +17,8 @@
     "repo-verify-issue": "./scripts/verify-issue-body.mjs",
     "repo-verify-pr": "./scripts/verify-pr.mjs",
     "repo-verify-publish": "./scripts/verify-publish-surface.mjs",
+    "repo-verify-script-size": "./scripts/verify-script-size.mjs",
+    "repo-verify-stray-configs": "./scripts/verify-stray-configs.mjs",
     "repo-verify-types": "./scripts/verify-attw.mjs"
   },
   "type": "module",

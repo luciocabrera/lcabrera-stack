@@ -1,4 +1,21 @@
 {
+  "gates": {
+    "scriptSize": {
+      "skipDirs": [".claude", ".react-router"]
+    },
+    "strayConfigs": {
+      "configuredIn": "the root `vite.config.ts` (ADR-042)",
+      "skipDirs": [".claude", ".react-router"],
+      "unreadNames": [
+        ".claudelintignore",
+        ".eslintignore",
+        ".oxfmtrc.json",
+        ".oxlintrc.json",
+        ".prettierignore"
+      ],
+      "unreadPrefixes": [".prettierrc"]
+    }
+  },
   "registers": {
     "adrHomes": [
       {
@@ -8,7 +25,7 @@
         "title": "Repository, packages & tooling"
       },
       {
-        "blurb": "Decisions internal to the `apps/react-router` showcase app \u2014 its components, routes and interaction model.",
+        "blurb": "Decisions internal to the `apps/react-router` showcase app — its components, routes and interaction model.",
         "dir": "apps/react-router/docs/decisions",
         "tier": "app",
         "title": "React Router showcase app"
