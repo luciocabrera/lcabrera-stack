@@ -16,7 +16,9 @@ can travel, and **moving** it into a consumer's tree.
 | `manifest.mjs`                      | Hash files, and decide what happens to each on the next run. Pure.                                                |
 | `accepted.mjs`                      | The record of which local edits the consumer said they meant, and what may go into it. Pure.                      |
 | `sync.mjs`                          | Turn assets plus a manifest into a plan, layer acceptance over it, then apply it.                                 |
-| `command-materialise.mjs`           | The plan `sync` and `doctor` share.                                                                               |
+| `init.mjs`                          | What `init` refuses, infers and wires, and when the run failed. Pure.                                             |
+| `command-materialise.mjs`           | The plan `sync`, `doctor` and `init` share, and the writer the latter two share.                                  |
+| `command-init.mjs`                  | `init`'s filesystem half: read the repository, write the config and the tasks, apply the plan.                    |
 | `command-closure.mjs`, `devkit.mjs` | The commands, and the dispatcher.                                                                                 |
 
 ## Decisions worth not undoing
@@ -24,6 +26,14 @@ can travel, and **moving** it into a consumer's tree.
 **Planning is pure and separate from writing**, so `doctor` predicts exactly what
 `sync` would do. A doctor computing its answer by a different route than the
 command it describes is worse than no doctor, because it is believed.
+
+**`init` is `sync` plus wiring, and shares its writer.** Both go through
+`applyPlan`, rather than each applying its own plan. Written twice the two
+drift, and the way that shows up is an `init` whose files a later `doctor` does
+not recognise: a repository reporting drift on the day it was set up. What
+`init` adds is the config, the gate tasks, and a refusal to report success over
+a repository it did not set up — a plan that placed nothing, or a file held back
+for a command the consumer never configured.
 
 **The existence check is injected, not performed.** A path written in prose
 carries no convention saying what it is relative to: `packages/devkit/CLASSIFICATION.md` means the
@@ -85,14 +95,27 @@ nothing gets exactly the plan they got before — the same separation
 files are quiet — the same place, and for the same reason, a peer's version is
 resolved once.
 
-**A file's mode travels with its content.** A git hook that is not executable is
-not a hook: git skips it without a word, which is the same clean run as a hook
-that passed. So `readFilesUnder` reads the bit and every entry carries it,
-including a refused one — nothing downstream has to know which group a path came
-from, and a hook is executable because the file this package ships is, not
-because of where it lands. The bit is set _after_ the write rather than passed to
-it, because `writeFileSync`'s mode applies only when it creates the file: an
-update over a file that had lost the bit would otherwise keep it lost for ever.
+**A file's mode is decided by its group, not read off the shipped file.** A git
+hook that is not executable is not a hook: git skips it without a word, which is
+the same clean run as a hook that passed. The mode therefore has to survive the
+journey, and the file's own mode does not — `pnpm pack` writes every entry
+`0644`, so an installed copy of this package holds no executable file at all.
+`isExecutableAsset` answers from the group directory in the asset's path, which
+is inside the tarball and survives any packer; `readAssets` applies it, and every
+entry carries the result, including a refused one, so nothing downstream has to
+know which group a path came from.
+
+This was the other way round, reading the bit with `statSync` in
+`readFilesUnder`. That worked in this repository and in no installed copy:
+`workspace:*` resolves the source directory, where the bit is set. Consumers
+received hooks git silently skipped — a `commit-msg` accepted a message
+violating every rule and the commit landed with exit 0. Only the packed-tarball
+gate can see it, which is why that gate now asserts the mode and treats finding
+no hooks at all as a finding.
+
+The bit is set _after_ the write rather than passed to it, because
+`writeFileSync`'s mode applies only when it creates the file: an update over a
+file that had lost the bit would otherwise keep it lost for ever.
 
 **Writing and setting the mode cover different sets, on purpose.** The mode is
 corrected on every `isRecorded` entry, not every `isWritten` one, because a
