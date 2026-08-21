@@ -1,11 +1,13 @@
-import type {
-  SortingState,
-  TableColumn,
-} from '#ui/components/Table/Table.types';
+import type { SortingState } from '#ui/components/Table/Table.types';
 
 type PruneSortingToColumnsArgs<TData> = {
-  /** The columns the grid is about to paint — derived measures included. */
-  readonly columns: readonly TableColumn<TData>[];
+  /**
+   * Every column key the grid **has**, derived measures included and **before**
+   * visibility is applied. Keys rather than columns because that is the whole
+   * question, and because the pre-visibility list is available as the keys of
+   * `normalizedColumns` where the painted column array is not.
+   */
+  readonly columnKeys: readonly string[];
   readonly sorting: SortingState<TData>;
 };
 
@@ -28,18 +30,20 @@ type PruneSortingToColumnsArgs<TData> = {
  *
  * **Only a sort whose column has vanished is dropped**, never one the user
  * merely cannot see: a hidden column keeps its sort, because hiding is a view
- * preference and the column is still there to order by. The test is membership
- * of the painted column list, which is what `withAggregateColumns` and
- * `withGroupedColumnLayout` have already resolved by the time this runs.
+ * preference and the column is still there to order by. That is why the caller
+ * must pass the **pre-visibility** list. `effectiveColumns` is the wrong one and
+ * silently breaks this promise — `getEffectiveColumns` filters by visibility
+ * first, so sorting a column and then hiding it would drop its sort. Pass the
+ * keys of `normalizedColumns`, which is built from `gridColumns`.
  *
  * The identity of the array is preserved when nothing was pruned, so a grouping
  * change that touches no sort does not invalidate a memo downstream.
  */
 export const pruneSortingToColumns = <TData>({
-  columns,
+  columnKeys,
   sorting,
 }: PruneSortingToColumnsArgs<TData>): SortingState<TData> => {
-  const present = new Set(columns.map((column) => String(column.key)));
+  const present = new Set(columnKeys);
   const kept = sorting.filter((entry) => present.has(String(entry.columnKey)));
 
   return kept.length === sorting.length ? sorting : kept;

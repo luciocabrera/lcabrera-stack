@@ -71,8 +71,12 @@ export const resolveBatchTableSettingsUpdate = <TData>({
     // A measure column exists only while its aggregate is applied, so this
     // Accept can take away the very column the sort names — and the ungrouped
     // read refuses an unknown column rather than ignoring it.
+    //
+    // `normalizedColumns` rather than `effectiveColumns`: the latter is
+    // visibility-filtered, so pruning against it would drop the sort of a
+    // column this same Accept merely hid.
     sorting: pruneSortingToColumns<TData>({
-      columns: effectiveColumns,
+      columnKeys: Object.keys(normalizedColumns),
       sorting: settings.sorting,
     }),
   };

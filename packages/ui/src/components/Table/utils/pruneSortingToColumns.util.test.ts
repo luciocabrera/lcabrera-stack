@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import type {
-  SortingState,
-  TableColumn,
-} from '#ui/components/Table/Table.types';
+import type { SortingState } from '#ui/components/Table/Table.types';
 
 import { pruneSortingToColumns } from './pruneSortingToColumns.util';
 
@@ -12,10 +9,8 @@ type Row = {
   readonly total_amount: number;
 };
 
-const painted = [
-  { key: 'customer_type', label: 'Customer Type' },
-  { key: 'total_amount:avg', label: 'Average' },
-] as TableColumn<Row>[];
+/** What the grid has, before visibility is applied. */
+const painted = ['customer_type', 'total_amount:avg'];
 
 describe('pruneSortingToColumns', () => {
   it('keeps a sort on a column the grid still paints', () => {
@@ -24,7 +19,7 @@ describe('pruneSortingToColumns', () => {
     ] as SortingState<Row>;
 
     expect(
-      pruneSortingToColumns<Row>({ columns: painted, sorting }),
+      pruneSortingToColumns<Row>({ columnKeys: painted, sorting }),
     ).toStrictEqual(sorting);
   });
 
@@ -39,7 +34,7 @@ describe('pruneSortingToColumns', () => {
     ] as SortingState<Row>;
 
     expect(
-      pruneSortingToColumns<Row>({ columns: painted, sorting }),
+      pruneSortingToColumns<Row>({ columnKeys: painted, sorting }),
     ).toStrictEqual([{ columnKey: 'customer_type', direction: 'asc' }]);
   });
 
@@ -50,7 +45,22 @@ describe('pruneSortingToColumns', () => {
       { columnKey: 'customer_type', direction: 'asc' },
     ] as SortingState<Row>;
 
-    expect(pruneSortingToColumns<Row>({ columns: painted, sorting })).toBe(
+    expect(pruneSortingToColumns<Row>({ columnKeys: painted, sorting })).toBe(
+      sorting,
+    );
+  });
+
+  it('keeps a sort on a column the user merely hid', () => {
+    // The promise this pins: hiding is a view preference and the column is
+    // still there to order by. Pruning against `effectiveColumns` — which is
+    // visibility-filtered — would break exactly this case.
+    const sorting = [
+      { columnKey: 'total_amount:avg', direction: 'desc' },
+    ] as SortingState<Row>;
+
+    // `painted` is the pre-visibility list, so a hidden `total_amount:avg` is
+    // still in it and its sort survives.
+    expect(pruneSortingToColumns<Row>({ columnKeys: painted, sorting })).toBe(
       sorting,
     );
   });
@@ -60,8 +70,8 @@ describe('pruneSortingToColumns', () => {
       { columnKey: 'customer_type', direction: 'asc' },
     ] as SortingState<Row>;
 
-    expect(pruneSortingToColumns<Row>({ columns: [], sorting })).toStrictEqual(
-      [],
-    );
+    expect(
+      pruneSortingToColumns<Row>({ columnKeys: [], sorting }),
+    ).toStrictEqual([]);
   });
 });

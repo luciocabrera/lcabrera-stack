@@ -58,8 +58,11 @@ export const resolveGroupingColumnsPatch = <TData>({
 
   return {
     ...derived,
+    // `normalizedColumns` rather than `effectiveColumns`: the latter is
+    // visibility-filtered, so pruning against it would drop the sort of a
+    // column the user merely hid.
     sorting: pruneSortingToColumns<TData>({
-      columns: derived.effectiveColumns,
+      columnKeys: Object.keys(derived.normalizedColumns),
       sorting: columnsState.sorting,
     }),
   };

@@ -57,11 +57,6 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
     const columnsState = columnsStore.get();
     const metaState = metaStore.get();
     const persistenceKey = metaState?.persistenceKey ?? '';
-    const hasQueryChanged = getHasQueryChanged<TData>({
-      columnsState,
-      nextColumnFilters: settings.columnFilters,
-      nextSorting: settings.sorting,
-    });
     const groupingUpdate = resolveTableGroupingUpdate({
       existingGrouping: groupingStore.get(),
       hasDefaultGrouping: metaState?.hasDefaultGrouping === true,
@@ -79,6 +74,11 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
       groupingKeys: nextGrouping.keys,
       settings,
     });
+    // `resolvedUpdate.sorting`, not `settings.sorting`: this Accept may have
+    // deselected the aggregate whose measure column the sort names, and the
+    // sort travels in the URL — persisting the unpruned value would leave the
+    // loader reading a column the grid no longer has, which the ungrouped read
+    // refuses outright rather than ignores.
     const persistenceEntries = buildPersistencePayload<TData>({
       columnFilters: settings.columnFilters,
       columnOrder: settings.columnOrder,
@@ -86,7 +86,16 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
       columnSizing: settings.columnSizing,
       columnVisibility: settings.columnVisibility,
       persistenceKey,
-      sorting: settings.sorting,
+      sorting: resolvedUpdate.sorting,
+    });
+    // Asked of the sorting that will actually be sent, not of the one the
+    // drawer staged: a prune changes the order the server returns even when the
+    // user touched no sort control, and reading the staged value there would
+    // report no change and skip the reload.
+    const hasQueryChanged = getHasQueryChanged<TData>({
+      columnsState,
+      nextColumnFilters: settings.columnFilters,
+      nextSorting: resolvedUpdate.sorting,
     });
 
     // Absent reads as `last` on every other side of this, so comparing against
