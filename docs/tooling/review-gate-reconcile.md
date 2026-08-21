@@ -27,10 +27,10 @@ The measurement, and the two commands that reproduce it against live data, are i
 issue #737. Do not copy the ratio into this file: it moves, and nothing here
 would notice.
 
-Today the consequence of a stale status is latency. Once #698 promotes either
-context to a required check, it is a pull request that cannot merge, whose only
-recovery is re-running an _earlier_ workflow run — a step no author finds
-unaided. That is why this lands first.
+For `Copilot review complete` — required since 2026-08-21 — a stale status is a
+pull request that cannot merge, whose only recovery is re-running an _earlier_
+workflow run, a step no author finds unaided. For the two still advisory the
+consequence is latency. This landing first is what made that promotion safe.
 
 ## It is not the polling the gate header rejects
 

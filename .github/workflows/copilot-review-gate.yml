@@ -38,9 +38,11 @@ name: Copilot Review Gate
 # author looking at a stale status has something to press instead of having to
 # find and re-run an earlier workflow run.
 #
-# It is NOT yet a required context — promotion to the ruleset is #698,
-# deliberately separate, because a required check that has never reported blocks
-# every pull request including the one that would fix it.
+# It IS a required context on ruleset `19141543` (2026-08-21, the first half of
+# #698), so what this workflow publishes decides whether a pull request merges.
+# Promotion was kept separate from building the gate because a required check
+# that has never reported blocks every pull request including the one that would
+# fix it. `Agent review verdict` is the half still advisory.
 #
 # WHICH REVIEWERS, AND WHY PER REVIEWER. The set is an explicit named list in
 # scripts/lib/copilot-review.mjs — today the Copilot bot above, and the in-workflow
@@ -92,7 +94,7 @@ jobs:
     # This name must NOT be `Copilot review complete`. A job's check run and a
     # commit status share one namespace on the PR, and ruleset contexts match by
     # name — so a job named after the status would put a second, always-green
-    # check under that name, and the gate #698 promotes could be satisfied by
+    # check under that name, and this required gate could then be satisfied by
     # "the workflow ran" instead of "Copilot reviewed the head".
     name: Publish the Copilot review status
     runs-on: ubuntu-latest

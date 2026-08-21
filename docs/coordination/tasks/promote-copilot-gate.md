@@ -7,6 +7,10 @@ branch: chore/698-promote-copilot-gate
 area:
   - docs/tooling/copilot-review-gate.md
   - docs/tooling/review-gate-reconcile.md
+  - .github/workflows/copilot-review-gate.yml
+  - docs/agents/merge-checklist.md
+  - scripts/lib/review-gate-reconcile-workflow.test.mjs
+  - COMMANDS.md
 started: 2026-08-21
 updated: 2026-08-21
 plan: (none)

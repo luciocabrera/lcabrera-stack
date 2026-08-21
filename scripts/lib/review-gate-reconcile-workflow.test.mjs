@@ -93,7 +93,7 @@ describe('the reconcile workflow — that it does not contradict the gates', () 
   it('names no job after either status context', () => {
     // A job's check run and a commit status share one namespace on a pull
     // request, so a job named after a context would publish a second row under
-    // it — green because the sweep ran. #698 promotes those contexts.
+    // it — green because the sweep ran. One of them is a required context.
     const names = declaredNames(readRepoFile(RECONCILE));
     expect(names.length).toBeGreaterThan(1);
     for (const context of statusContexts()) {

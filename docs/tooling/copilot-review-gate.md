@@ -39,8 +39,8 @@ match by name, so renaming it detaches the gate silently.
 For the same reason the workflow's **job** is deliberately called something
 else. A job's check run and a commit status share one namespace on a pull
 request, so a job named after the status would publish a second check under that
-name which is green whenever the workflow merely ran — and once #698 makes the
-context required, that is the one that could satisfy it.
+name which is green whenever the workflow merely ran — and now that the context
+is required, that is the one that could satisfy it.
 
 | State     | When                                                                                    |
 | --------- | --------------------------------------------------------------------------------------- |
@@ -713,7 +713,8 @@ rest of the preconditions.
    It is overwritten by the next event the workflow handles, so post it once the
    head has settled.
 
-7. **Admin bypass of the ruleset**, once #698 has made the context required.
+7. **Admin bypass of the ruleset.** The context is required, so this is the rung
+   that merges.
    `RepositoryRole` 5 keeps `bypass_mode: always` on ruleset `19141543`.
 
    **Rehearsed on #877, 2026-08-21 — the only rung here that has been exercised
@@ -937,7 +938,7 @@ Further things the notes assume:
 - **This status is a required context** (2026-08-21, the first half of #698) — the
   body above says what that means for a merge. What belongs here is the detail a
   reader cannot see from the check: it is pinned to `integration_id` 15368, the way
-  its five Actions siblings are, so **only a status posted by a workflow satisfies
+  its Actions siblings are, so **only a status posted by a workflow satisfies
   it**. That is what demotes break-glass rung 6 to a record-keeping step and makes
   [the admin bypass](#break-glass) the rung that merges. The approval limitation
   above is a blocker rather than a nuisance for the same reason, and the

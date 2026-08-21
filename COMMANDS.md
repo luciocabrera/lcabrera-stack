@@ -781,7 +781,7 @@ commit status against the head SHA, green only while some accepted reviewer's ow
 newest review names that commit. It is the only workflow here triggered by
 `pull_request_review` as well as `pull_request`, because its verdict changes when
 the diff has not — a review landing flips it, and a push takes it back to
-`pending`. It reports but does not block until #698 makes the context required,
+`pending`. It is a required context (2026-08-21), so it blocks the merge,
 and a run triggered by Copilot's own review currently waits for approval before
 it executes — both caveats, and the way out of the second, are in
 [`docs/tooling/copilot-review-gate.md`](docs/tooling/copilot-review-gate.md).
