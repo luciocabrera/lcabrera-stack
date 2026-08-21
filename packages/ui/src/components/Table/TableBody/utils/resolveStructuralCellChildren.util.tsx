@@ -30,7 +30,7 @@ type ResolveStructuralCellChildrenArgs = {
  * the row's own data — or `undefined` when it does not, which is the ordinary
  * data cell every other branch of the descriptor handles.
  *
- * Three cases, in an order that is load-bearing:
+ * Four cases, in an order that is load-bearing:
  *
  * 1. **Drill chrome first.** A drill row carries neither a summary nor data, so
  *    either of the two below would read it as a detail row and blank the one
