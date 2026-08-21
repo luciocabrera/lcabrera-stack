@@ -148,9 +148,18 @@ export const decodeGroupedRows = ({
  * ([ADR-039](../../../../docs/decisions/ADR-039-duplicate-over-undeclared-edges.md)):
  * a client-safe package and a Node-only one may not depend on each other, and a
  * shared contracts package needs a third *consumer*, not a third copy.
- * `groupingContract.test.ts` pins the two spellings together — this format is a
- * wire convention the moment a sort on a measure column crosses the boundary,
- * and two spellings of it drift the first time either gains a character.
+ *
+ * **Unlike those shapes, this one is not yet pinned by a cross-package test,
+ * and that is a real gap** (#876). `groupingContract.test.ts` pins the
+ * aggregate vocabulary, the depth cap and the refusal unions; it says nothing
+ * about this format, because neither half is reachable from it —
+ * `toTableAggregateToken` is not on `@lcabrera/ui`'s export map and this is
+ * module-private. Each side is tested against the literal independently
+ * (`decode-grouped-rows.util.test.ts` here, `tableAggregateToken.util.test.ts`
+ * there), which catches a change to either but not a divergence between them.
+ * The format became a wire convention the moment a sort on a measure column
+ * started crossing the boundary, so it wants the same guard the other shapes
+ * have.
  */
 const toAggregateSortKey = ({ column, fn }: RequestedGroupAggregate) =>
   `${column}:${fn}`;
