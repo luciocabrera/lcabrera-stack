@@ -37,6 +37,15 @@ route by default and the external API only under the `VITE_API_URL` override.
 | `isExternalApiEnabled`     | `services/isExternalApiEnabled.util.ts` | **Whether** the external path is taken — the app's only read of `VITE_API_URL`, treating an empty value as unset. **Where** it goes is `getApiBaseUrl` (#705) |
 | `fakeDelay`                | `services/fakeDelay.util.ts`            | Artificial `VITE_API_DELAY_MS` delay so the loading skeleton is visible against a local data source; no-ops when unset                                        |
 
+### Server-side route helpers (`routes/enterprise-orders/.server/`)
+
+Read by the domain's own loaders **and** by the resource routes that serve it,
+so they live with the domain rather than inside one of its callers.
+
+| Artifact                | Location                                | Description                                                                                                                                                                                 |
+| ----------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `parseOrdersPageParams` | `.server/parseOrdersPageParams.util.ts` | Turns this table's filter/sort/paging search params into query-descriptor pieces. Deliberately does **not** clamp — both bounds live in `selectOrdersPage`, which every entry point reaches |
+
 ---
 
 ## Database setup (`db/`, `scripts/`)

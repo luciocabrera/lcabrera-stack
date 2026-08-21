@@ -6,12 +6,11 @@ import {
   selectOrderGroupKeyTruncations,
   selectOrdersPage,
 } from '@/routes/enterprise-orders/.server/enterpriseOrders.service';
+import { parseOrdersPageParams } from '@/routes/enterprise-orders/.server/parseOrdersPageParams.util';
 import {
   resolveDrillRefusal,
   toOrderDrillRead,
 } from '@/routes/enterprise-orders/.server/toOrderDrillRead.util';
-
-import { parseOrdersPageParams } from '../enterprise-orders-paginated/parseOrdersPageParams.util';
 
 /**
  * Resource route serving one bounded page of the rows underneath a group row

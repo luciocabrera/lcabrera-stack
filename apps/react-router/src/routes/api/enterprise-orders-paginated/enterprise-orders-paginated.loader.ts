@@ -1,8 +1,7 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
 import { selectOrdersPage } from '@/routes/enterprise-orders/.server/enterpriseOrders.service';
-
-import { parseOrdersPageParams } from './parseOrdersPageParams.util';
+import { parseOrdersPageParams } from '@/routes/enterprise-orders/.server/parseOrdersPageParams.util';
 
 /**
  * Resource route serving a page of enterprise orders for the table's

@@ -38,6 +38,11 @@ export type ParsedOrdersPageParams = {
  * but this is a public URL, and a caller that is not that client would otherwise
  * get a paginated read with no ORDER BY, which repeats and skips rows.
  *
+ * **It lives with the domain, not with one of its callers.** Both the paginated
+ * resource route and the group-details modal read the same params, and the
+ * parser sitting inside one caller's folder made the other import sideways out
+ * of a sibling route — one route wearing two hats (#870).
+ *
  * **`limit` and the sort length are bounded — deliberately not here** (#706).
  * The sibling parsers clamp `limit` themselves; this route's SSR loader reads
  * the same table through `selectOrdersPage` **without** passing through this
