@@ -18,6 +18,10 @@ import { readRepoFile } from './workflow-inspect.mjs';
 // Comparing the whole list rather than checking for one bad login is deliberate: a
 // roster that GAINS a reviewer drifts the same way and would pass a
 // `not.toContain('github-actions')` check unchanged.
+//
+// The file holds the roster TWICE: the jq filter, and the reviewer table a person
+// reads first. Both are checked — the table is the one a human trusts, so leaving it
+// ungated would police the copy nobody looks at (#866 review).
 const DOC = 'docs/tooling/copilot-review-gate.md';
 
 /** Order-independent comparison; the two lists need not be written in one order. */
@@ -30,14 +34,37 @@ const loginsInDiagnostic = (markdown) => {
   return [...filter[1].matchAll(/"([^"]+)"/g)].map((match) => match[1]);
 };
 
-describe('the doc’s copy of the accepted-reviewer set', () => {
-  it('still exists to be compared — the filter has not been reworded away', () => {
-    expect(loginsInDiagnostic(readRepoFile(DOC))).toBeDefined();
+/**
+ * The logins the reviewer table names, `[bot]` suffix dropped so it compares against
+ * the roster's spelling. REST and GraphQL disagree on that suffix, and the doc writes
+ * the REST one.
+ */
+const loginsInTable = (markdown) => {
+  const rows = [...markdown.matchAll(/^\| `([a-z\d-]+)\[bot\]` +\|/gmu)];
+  return rows.length === 0 ? undefined : rows.map((row) => row[1]);
+};
+
+const expected = () => [...ACCEPTED_REVIEWER_LOGINS].sort(byName);
+
+describe('the doc’s copies of the accepted-reviewer set', () => {
+  // Guarded separately, and asserted again at each use: an extractor that stops
+  // matching should fail on the assertion written for it, not throw a TypeError from
+  // spreading `undefined` somewhere else.
+  it('both copies are still shaped the way the extractors expect', () => {
+    const markdown = readRepoFile(DOC);
+    expect(loginsInDiagnostic(markdown)).toBeDefined();
+    expect(loginsInTable(markdown)).toBeDefined();
   });
 
-  it('names exactly the reviewers the gate accepts', () => {
-    expect([...loginsInDiagnostic(readRepoFile(DOC))].sort(byName)).toEqual(
-      [...ACCEPTED_REVIEWER_LOGINS].sort(byName),
-    );
+  it('the GraphQL diagnostic names exactly the reviewers the gate accepts', () => {
+    const logins = loginsInDiagnostic(readRepoFile(DOC));
+    expect(logins).toBeDefined();
+    expect([...logins].sort(byName)).toEqual(expected());
+  });
+
+  it('the reviewer table names exactly the reviewers the gate accepts', () => {
+    const logins = loginsInTable(readRepoFile(DOC));
+    expect(logins).toBeDefined();
+    expect([...logins].sort(byName)).toEqual(expected());
   });
 });

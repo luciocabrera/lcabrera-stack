@@ -270,6 +270,7 @@ jobs:
       # every path this step does not — a dispatch that fails, a run cancelled before it got
       # here, and Copilot's own reviews, whose `pull_request_review` trigger is unreliable
       # rather than absent.
+      #
       # `--ref` is load-bearing, because the gate's verdict depends on the code it runs and a
       # refless dispatch runs the DEFAULT BRANCH's copy. Measured on #866, which is a pull
       # request that edits `ACCEPTED_REVIEWERS`: at 08:43:12Z the `pull_request_review` run,

@@ -80,6 +80,7 @@ describe('the review is posted under the reviewer’s own identity', () => {
   // only the published status is wrong.
   it('dispatches the gate against the pull request’s own ref', () => {
     const step = stepBlock(readRepoFile(WORKFLOW), DISPATCH_STEP);
+    expect(step).toBeDefined();
     expect(step).toContain('--ref "$HEAD_REF"');
     expect(step).toContain(
       'HEAD_REF: ${{ github.event.pull_request.head.ref }}',

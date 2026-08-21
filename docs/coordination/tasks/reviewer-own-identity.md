@@ -6,7 +6,10 @@ status: active
 branch: chore/865-reviewer-own-identity
 area:
   - .github/workflows/claude-review.yml
+  - .github/workflows/copilot-review-gate.yml
   - scripts/lib/copilot-review*
+  - scripts/lib/claude-review-workflow.test.mjs
+  - scripts/lib/workflow-inspect.mjs
   - docs/tooling/copilot-review-gate.md
 started: 2026-08-21
 updated: 2026-08-21
