@@ -35,6 +35,7 @@ import {
   binsWithoutShebang,
   binStartupFailure,
   declaredBins,
+  failureLine,
   tarballFindings,
 } from './lib/devkit-tarball.mjs';
 
@@ -126,6 +127,18 @@ const binFailures = ({ consumer, manifest }) =>
     return failure === undefined ? [] : [`${manifest.name}: ${failure}`];
   });
 
+/** One consumer-side command, as a finding rather than as an exception. */
+const consumerStepFailure = ({ args, bin, consumer }) => {
+  try {
+    run(bin, args, consumer);
+    return [];
+  } catch (error) {
+    const output = `${error.stdout ?? ''}${error.stderr ?? ''}`.trim();
+    const detail = output === '' ? error.message : failureLine(output);
+    return [`\`devkit ${args.join(' ')}\` failed in the consumer: ${detail}`];
+  }
+};
+
 /** Nothing the consumer received may still carry an unanswered placeholder. */
 const survivingPlaceholders = (consumer) =>
   materialisedFiles(consumer)
@@ -174,23 +187,20 @@ const main = () => {
       binFailures({ consumer, manifest }),
     );
 
+    // Each consumer-side step is collected rather than thrown, so one broken
+    // command still yields the whole report. A gate that dies on its first
+    // finding tells you less than one that lists them: the crash is a stack
+    // trace where the answer should be.
     const devkitBin = join(consumer, 'node_modules', '.bin', 'devkit');
-    run(devkitBin, ['sync'], consumer);
-
-    // The materialised tree has to survive its own closure probe, and hold no
-    // placeholder nobody answered — both are consumer-side failures this
-    // repository cannot see, because it has every path a shipped file names.
-    const materialised = [];
-    try {
-      run(devkitBin, ['closure', '--shipped'], consumer);
-    } catch (error) {
-      const output = `${error.stdout ?? ''}${error.stderr ?? ''}`;
-      const lastLine = output.trim().split('\n').at(-1);
-      materialised.push(
-        `devkit closure --shipped failed in the consumer: ${lastLine}`,
-      );
-    }
-    materialised.push(...survivingPlaceholders(consumer));
+    const materialised = [
+      ...consumerStepFailure({ args: ['sync'], bin: devkitBin, consumer }),
+      ...consumerStepFailure({
+        args: ['closure', '--shipped'],
+        bin: devkitBin,
+        consumer,
+      }),
+      ...survivingPlaceholders(consumer),
+    ];
 
     const findings = [...contents, ...bins, ...materialised];
     if (findings.length > 0) {

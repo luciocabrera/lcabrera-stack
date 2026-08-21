@@ -163,3 +163,21 @@ export const tarballFindings = ({ manifest, packedPaths }) => {
       })),
   ];
 };
+
+/**
+ * The line of a command's failure output worth printing.
+ *
+ * Not the last one, which is the obvious choice and wrong: node's crash output
+ * ends with its own version banner, so taking the tail reports `Node.js v26.7.0`
+ * as the reason a command failed. The `Error [...]` line is the one naming what
+ * happened, and for a resolution failure it also names the module and the file
+ * that imported it.
+ */
+export const failureLine = (output) => {
+  const lines = output.split('\n').filter((line) => line.trim() !== '');
+  return (
+    lines.find((line) => line.trimStart().startsWith('Error')) ??
+    lines.at(0) ??
+    'no output'
+  );
+};

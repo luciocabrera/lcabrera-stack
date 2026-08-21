@@ -4,6 +4,7 @@ import {
   binsWithoutShebang,
   binStartupFailure,
   declaredBins,
+  failureLine,
   missingFromTarball,
   promisedPaths,
   strayFromTarball,
@@ -245,5 +246,33 @@ describe('binsWithoutShebang', () => {
     expect(
       binsWithoutShebang({ manifest, readPackedFile: () => undefined }),
     ).toEqual([expect.stringContaining('has no shebang')]);
+  });
+});
+
+describe('failureLine', () => {
+  it('names the error rather than the version banner', () => {
+    // Taking the last line is the obvious choice and reports `Node.js v26.7.0`
+    // as the reason a command failed, which tells a reader nothing.
+    const output = [
+      'node:internal/modules/esm/resolve:272',
+      '    throw new ERR_MODULE_NOT_FOUND(',
+      '',
+      "Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/x/command-sync.mjs' imported from /x/devkit.mjs",
+      '    at finalizeResolution (node:internal/modules/esm/resolve:272:11)',
+      'Node.js v26.7.0',
+    ].join('\n');
+
+    expect(failureLine(output)).toContain('Cannot find module');
+    expect(failureLine(output)).not.toContain('Node.js v');
+  });
+
+  it('falls back to the first line when nothing announces itself as an error', () => {
+    expect(failureLine('\n  something went wrong\nand more\n')).toBe(
+      '  something went wrong',
+    );
+  });
+
+  it('says so rather than returning nothing for empty output', () => {
+    expect(failureLine('')).toBe('no output');
   });
 });
