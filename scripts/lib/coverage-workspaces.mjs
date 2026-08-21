@@ -69,10 +69,14 @@ export const COVERAGE_REPORT_WORKSPACES = [
   // Reference extraction, path classification and the manifest state machine
   // are pure; the filesystem is reached only by the thin command shells around
   // them, so the suite runs without one.
-  { dir: 'packages/devkit', name: '@repo/devkit', run: true },
+  { dir: 'packages/devkit', name: '@lcabrera/devkit', run: true },
   // The convention spec and the four gates built on it: pure parsing and
   // validation, with the git and filesystem reads at the command edges.
-  { dir: 'packages/repo-standards', name: '@repo/repo-standards', run: true },
+  {
+    dir: 'packages/repo-standards',
+    name: '@lcabrera/repo-standards',
+    run: true,
+  },
   // The shell fragment the `start` task emits, and the React Router asset
   // plugin folded in from `@repo/plugins` — the plugin's filesystem calls are
   // an injected seam, so its suite runs against an in-memory one (ADR-069).
@@ -93,8 +97,8 @@ export const COVERAGE_REPORT_WORKSPACES = [
  */
 export const COVERAGE_MERGE_WORKSPACES = [
   { dir: 'packages/api', name: '@lcabrera/api' },
-  { dir: 'packages/devkit', name: '@repo/devkit' },
-  { dir: 'packages/repo-standards', name: '@repo/repo-standards' },
+  { dir: 'packages/devkit', name: '@lcabrera/devkit' },
+  { dir: 'packages/repo-standards', name: '@lcabrera/repo-standards' },
   { dir: 'packages/eslint-local-rules', name: '@lcabrera/eslint-plugin' },
   { dir: 'packages/node-runtime', name: '@lcabrera/node' },
   { dir: 'packages/scan-report', name: '@repo/scan-report' },

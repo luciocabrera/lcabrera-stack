@@ -1,5 +1,5 @@
 /*
- * The branch-type vocabulary is defined once, in `@repo/repo-standards`, and
+ * The branch-type vocabulary is defined once, in `@lcabrera/repo-standards`, and
  * repeated once — `coordination-claim.sh` is bash and cannot import it.
  *
  * This check belongs to the REPOSITORY rather than to the package: it asserts

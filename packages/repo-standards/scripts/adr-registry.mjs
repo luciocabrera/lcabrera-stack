@@ -38,7 +38,7 @@ export const TEMPLATE_HOME = registers.adrTemplateHome;
  * module state, for two reasons that pull the same way.
  *
  * Module state would read this repository's config at load, so anything
- * rendering an index for somewhere else — the seed `@repo/devkit` ships — would
+ * rendering an index for somewhere else — the seed `@lcabrera/devkit` ships — would
  * silently get this repository's task runner in it, which is the exact leak the
  * seed gate exists to catch. And a home is already `renderIndex`'s one argument,
  * so carrying it here costs nothing: the signature stays arity 1, which is the

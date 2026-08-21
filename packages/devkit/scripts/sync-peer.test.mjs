@@ -14,7 +14,7 @@ const declaringAsset = {
   content: [
     '---',
     'name: demo',
-    "peer: '@repo/repo-standards@>=0.1.0 <1.0.0'",
+    "peer: '@lcabrera/repo-standards@>=0.1.0 <1.0.0'",
     '---',
     '',
     'Run the claim gate before starting.',
@@ -37,7 +37,7 @@ describe('planSync and a declared peer', () => {
     expect(entry.state).toBe('unmet');
     expect(entry.unmetKind).toBe('peer');
     expect(entry.missing).toEqual([
-      '@repo/repo-standards@>=0.1.0 <1.0.0 (not installed)',
+      '@lcabrera/repo-standards@>=0.1.0 <1.0.0 (not installed)',
     ]);
     expect(isWritten(entry.state)).toBe(false);
     expect(isReported(entry.state)).toBe(true);
@@ -45,17 +45,17 @@ describe('planSync and a declared peer', () => {
   });
 
   test('refuses to write it when the installed version is outside the range', () => {
-    const [entry] = planFor(new Map([['@repo/repo-standards', '2.0.0']]));
+    const [entry] = planFor(new Map([['@lcabrera/repo-standards', '2.0.0']]));
     expect(entry.state).toBe('unmet');
     expect(entry.unmetKind).toBe('peer');
     expect(entry.missing).toEqual([
-      '@repo/repo-standards@>=0.1.0 <1.0.0 (installed 2.0.0)',
+      '@lcabrera/repo-standards@>=0.1.0 <1.0.0 (installed 2.0.0)',
     ]);
     expect(isWritten(entry.state)).toBe(false);
   });
 
   test('writes the same asset when the installed version answers the range', () => {
-    const [entry] = planFor(new Map([['@repo/repo-standards', '0.4.1']]));
+    const [entry] = planFor(new Map([['@lcabrera/repo-standards', '0.4.1']]));
     expect(entry.state).toBe('added');
     expect(isWritten(entry.state)).toBe(true);
   });
@@ -79,9 +79,12 @@ describe('planSync and a declared peer', () => {
     // written into a consumer whose runtime cannot run it and nothing says so —
     // the gate failing open, which is indistinguishable from it passing.
     const spellings = {
-      'block sequence': ['peer:', "  - '@repo/repo-standards@>=0.1.0 <1.0.0'"],
-      'flow array': ["peer: ['@repo/repo-standards@>=0.1.0 <1.0.0']"],
-      scalar: ["peer: '@repo/repo-standards@>=0.1.0 <1.0.0'"],
+      'block sequence': [
+        'peer:',
+        "  - '@lcabrera/repo-standards@>=0.1.0 <1.0.0'",
+      ],
+      'flow array': ["peer: ['@lcabrera/repo-standards@>=0.1.0 <1.0.0']"],
+      scalar: ["peer: '@lcabrera/repo-standards@>=0.1.0 <1.0.0'"],
     };
     const outcome = ([spelling, lines]) => {
       const [entry] = planSync({
@@ -94,7 +97,7 @@ describe('planSync and a declared peer', () => {
         config: DEFAULT_CONFIG,
         manifest: emptyManifest,
         onDiskHash: () => undefined,
-        peerVersions: new Map([['@repo/repo-standards', '2.0.0']]),
+        peerVersions: new Map([['@lcabrera/repo-standards', '2.0.0']]),
       });
       return [spelling, { missing: entry.missing, state: entry.state }];
     };
@@ -103,7 +106,9 @@ describe('planSync and a declared peer', () => {
         Object.keys(spellings).map((spelling) => [
           spelling,
           {
-            missing: ['@repo/repo-standards@>=0.1.0 <1.0.0 (installed 2.0.0)'],
+            missing: [
+              '@lcabrera/repo-standards@>=0.1.0 <1.0.0 (installed 2.0.0)',
+            ],
             state: 'unmet',
           },
         ]),
@@ -130,7 +135,7 @@ describe('planSync and a declared peer', () => {
           content: [
             '---',
             'requires: [config.commands.install]',
-            "peer: '@repo/repo-standards@>=0.1.0'",
+            "peer: '@lcabrera/repo-standards@>=0.1.0'",
             '---',
           ].join('\n'),
           path: 'skills/demo/SKILL.md',
@@ -153,14 +158,14 @@ describe('renderPlan and an unmet peer', () => {
     expect(
       renderPlan([
         {
-          missing: ['@repo/repo-standards@>=0.1.0 <1.0.0 (not installed)'],
+          missing: ['@lcabrera/repo-standards@>=0.1.0 <1.0.0 (not installed)'],
           path: '.github/skills/demo/SKILL.md',
           state: 'unmet',
           unmetKind: 'peer',
         },
       ]),
     ).toBe(
-      '  unmet        .github/skills/demo/SKILL.md  (not written — no compatible peer for @repo/repo-standards@>=0.1.0 <1.0.0 (not installed))',
+      '  unmet        .github/skills/demo/SKILL.md  (not written — no compatible peer for @lcabrera/repo-standards@>=0.1.0 <1.0.0 (not installed))',
     );
   });
 

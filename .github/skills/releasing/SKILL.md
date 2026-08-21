@@ -51,6 +51,18 @@ Everything below is deliberate, and each one cost something to learn:
   reading `⏸ first publish — needs a manual npm publish`. So the answer comes from
   the roster rather than from a list here that a new package would not be on.
 
+- **A peer edge between two published packages forces a major, unless it is
+  turned off.** Changesets bumps a package that declares a `peerDependencies`
+  entry on another workspace package to `major` whenever that dependency takes
+  anything above a patch — and by default it does that _without_ consulting the
+  declared range, so writing a wide range to let the two move independently buys
+  nothing. `@lcabrera/devkit` peers on `@lcabrera/repo-standards`, and at the
+  default it planned `1.0.0` off a `minor` changeset. `.changeset/config.json`
+  therefore sets `onlyUpdatePeerDependentsWhenOutOfRange`, which lives **inside**
+  `___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH` — the same name at the top
+  level parses without complaint and does nothing. `publish-wiring.test.mjs`
+  gates both halves; `pnpm exec changeset status --verbose` is what checks the
+  behaviour, since that key can move in a patch release.
 - **`private: true` is what keeps a workspace out of the registry.**
   `changeset publish` skips private packages. The public ones no longer
   carry it, so nothing but the version number decides whether a merge publishes.

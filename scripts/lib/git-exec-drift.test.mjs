@@ -1,6 +1,6 @@
 /*
  * The set of git variables that select a repository is defined once, in
- * `@repo/repo-standards`, and copied wherever the definition cannot reach — the
+ * `@lcabrera/repo-standards`, and copied wherever the definition cannot reach — the
  * pre-push hook is shell, and the scanners carry their own runner.
  *
  * These checks belong to the REPOSITORY: each asserts that one of this repo's

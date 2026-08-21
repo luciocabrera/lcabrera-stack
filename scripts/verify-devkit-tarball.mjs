@@ -7,7 +7,7 @@
  * as `workspace:*`, which resolves the source directory and ignores `files`
  * entirely. So the packed artifact — the only thing a consumer ever sees — is
  * exercised by nothing in this repository, and a wrong `files` list is invisible
- * until someone installs it. `@repo/devkit` shipped its whole test suite that
+ * until someone installs it. `@lcabrera/devkit` shipped its whole test suite that
  * way. The scratch directory is under the OS temp root for the same reason: one
  * inside this tree, or inside a worktree of it, inherits the parent's
  * `node_modules` and root config and reports a success it has not earned.

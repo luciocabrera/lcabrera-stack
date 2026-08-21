@@ -40,7 +40,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
   "dependencies": {
-    "@repo/repo-standards": "workspace:*"
+    "@lcabrera/repo-standards": "workspace:*"
   },
   "devDependencies": {
     "@lcabrera/vite-config": "workspace:*",

@@ -1,0 +1,145 @@
+# @lcabrera/repo-standards — public API surface
+# Generated. Regenerate with: repo-verify-api-surface --write
+# One line per export: <name> <signature>. Do not edit by hand.
+
+## ./adr-registry
+ADR_HOMES [const] any
+adrFindings [const] ({ drafts, homes, strays }: { drafts: any; homes: any; strays: any; }) => any[]
+DRAFT_DIR [const] string
+headingNumber [const] (markdown: any) => number | undefined
+headingTitle [const] (markdown: any) => any
+looksLikeAdr [const] (filename: any) => boolean
+nextFreeNumber [const] (homes: any) => number
+NON_ADR_FILES [const] Set<string>
+normalizeIndex [const] (markdown: any) => any
+parseAdrFilename [const] (filename: any) => { number: number; slug: string | undefined; } | undefined
+renderIndex [const] (home: any) => string
+renderListing [const] (homes: any) => any
+TEMPLATE_FILE [const] "_TEMPLATE.md"
+TEMPLATE_HOME [const] string
+
+## ./adr-scaffold
+adrFilename [const] (number: any, title: any) => string
+pad [const] (number: any) => string
+renderAdr [const] ({ number, template, title }: { number: any; template: any; title: any; }) => any
+resolveHome [const] (homes: any, tier: any) => any
+slugify [const] (title: any) => any
+
+## ./cli-input
+flagValue [const] (name: any, argv?: string[]) => string | undefined
+parsePullNumber [const] (raw: any) => number
+parseRepository [const] (raw: any) => string
+positional [const] (index: any, argv?: string[]) => string | undefined
+readStdin [const] (stream?: NodeJS.ReadStream & { fd: 0; }) => Promise<string>
+withoutSeparator [const] (argv?: string[]) => string[]
+
+## ./commit-convention
+parseCommitHeader [const] (header: any) => { type: any; scope: any; breaking: boolean; subject: any; } | null
+validateBranchName [const] (branch: any, { defaultBranch }?: { defaultBranch?: string | undefined; }) => { errors: string[]; exempt: boolean; warnings: never[]; }
+validateCommitMessage [const] (raw: any, { workspaces }: { workspaces: any; }) => { errors: string[]; warnings: string[]; skipped: boolean; }
+validateIssueBody [const] (body: any) => { errors: string[]; warnings: never[]; }
+validatePrBase [const] (base: any, { allowedBases, defaultBranch, sharedBranchesDir, }?: { allowedBases?: never[] | undefined; defaultBranch?: string | undefined; sharedBranchesDir?: string | undefined; }) => { errors: never[]; warnings: string[]; } | { errors: string[]; warnings: never[]; }
+validatePrBody [const] (body: any) => { errors: string[]; warnings: never[]; }
+validatePrTitle [const] (title: any, { workspaces }: { workspaces: any; }) => { errors: string[]; warnings: string[]; }
+
+## ./config
+CONFIG_FILE_NAME [const] "devkit.config.json"
+DEFAULT_ADR_COMMANDS [const] { list: string; new: string; write: string; }
+DEFAULT_CONVENTIONS [const] { defaultBranch: string; sharedBranchesDir: string; }
+DEFAULT_GATES [const] { scriptSize: { baselineFile: string; ceiling: number; guideDoc: string; skipDirs: never[]; }; strayConfigs: { configuredIn: string; skipDirs: never[]; unreadNames: never[]; unreadPrefixes: never[]; }; docsPaths: { baselineFile: string; expectedAbsent: never[]; expectedAbsentPrefixes: never[]; ignoredDocs: never[]; onDemandReportDirs: never[]; repoRoots: never[]; }; }
+DEFAULT_PUBLISHING [const] { apiSurfaceDir: string; packagesDir: string; publicPackageDirs: never[]; releaseWorkflow: string; workspaceDirs: string[]; }
+DEFAULT_REGISTERS [const] { adrCommands: { list: string; new: string; write: string; }; adrHomes: { blurb: string; dir: string; tier: string; title: string; }[]; adrDraftDir: string; adrTemplateHome: string; coordinationBoardDoc: string; coordinationTasksDir: string; }
+readConventions [const] (root?: any) => { defaultBranch: any; sharedBranchesDir: string; }
+readCoordinationPaths [const] (root?: any) => { boardDoc: string; boardRel: string; branchesDir: string; branchesRel: string; tasksDir: string; tasksRel: string; }
+readGates [const] (root?: any) => { scriptSize: { baselineFile: string; ceiling: any; guideDoc: any; skipDirs: any; }; strayConfigs: { configuredIn: any; skipDirs: any; unreadNames: any; unreadPrefixes: any; }; docsPaths: { baselineFile: string; expectedAbsent: any; expectedAbsentPrefixes: any; ignoredDocs: any; onDemandReportDirs: any; repoRoots: any; }; }
+readPublishing [const] (root?: any) => { apiSurfaceDir: string; packagesDir: string; publicPackageDirs: any; releaseWorkflow: string; workspaceDirs: any; }
+readRegisters [const] (root?: any) => { adrCommands: { list: string; new: string; write: string; }; adrHomes: { blurb: string; dir: string; tier: string; title: string; }[]; adrDraftDir: string; adrTemplateHome: string; coordinationBoardDoc: string; coordinationTasksDir: string; } | { adrCommands: { [k: string]: any; }; adrHomes: any; adrDraftDir: string; adrTemplateHome: string; coordinationBoardDoc: string; coordinationTasksDir: string; }
+resolveConventions [const] (raw: any) => { defaultBranch: any; sharedBranchesDir: string; }
+resolveGates [const] (raw: any) => { scriptSize: { baselineFile: string; ceiling: any; guideDoc: any; skipDirs: any; }; strayConfigs: { configuredIn: any; skipDirs: any; unreadNames: any; unreadPrefixes: any; }; docsPaths: { baselineFile: string; expectedAbsent: any; expectedAbsentPrefixes: any; ignoredDocs: any; onDemandReportDirs: any; repoRoots: any; }; }
+resolvePublishing [const] (raw: any) => { apiSurfaceDir: string; packagesDir: string; publicPackageDirs: any; releaseWorkflow: string; workspaceDirs: any; }
+resolveRegisters [const] (raw: any) => { adrCommands: { list: string; new: string; write: string; }; adrHomes: { blurb: string; dir: string; tier: string; title: string; }[]; adrDraftDir: string; adrTemplateHome: string; coordinationBoardDoc: string; coordinationTasksDir: string; } | { adrCommands: { [k: string]: any; }; adrHomes: any; adrDraftDir: string; adrTemplateHome: string; coordinationBoardDoc: string; coordinationTasksDir: string; }
+
+## ./coordination-board
+renderBoard [const] (tasks: any, branches: any, { tasksRel }?: {}) => string
+
+## ./coordination-close
+prNumberOf [const] (value: any) => number | undefined
+tasksClosedBy [const] ({ entries, headRef, prNumber }: { entries: any; headRef: any; prNumber: any; }) => any
+
+## ./coordination-overlap
+NO_BRANCH [const] Set<string>
+overlapWarnings [const] (tasks: any) => string[]
+
+## ./coordination-parse
+branchSlug [const] (branch: any) => any
+globsOverlap [const] (x: any, y: any) => any
+NO_BRANCH [const] Set<string>
+NO_PR [const] Set<string>
+parseFrontmatter [const] (source: any) => {} | undefined
+
+## ./coordination-read
+readEntries [const] (dir: any) => { name: string; slug: string; data: {} | undefined; }[]
+
+## ./coordination-reconcile
+mergedTaskDriftWarnings [const] ({ liveBranches, noBranch, noPr, refExists, tasks, }: { liveBranches: any; noBranch: any; noPr: any; refExists: any; tasks: any; }) => string[]
+
+## ./coordination-remote
+dedupeById [const] (claims: any) => any[]
+parseLsRemoteHeads [const] (stdout: any, defaultBranch?: any) => { branch: string; sha: string | undefined; }[]
+readRemoteClaims [const] ({ cwd, git }: { cwd: any; git?: (({ args, cwd }: { args: any; cwd: any; }) => string | undefined) | undefined; }) => { claims: any[]; readBranches: any[]; unavailable: boolean; unreadBranches: any[]; }
+withoutLocalDuplicates [const] ({ localTasks, remoteClaims }: { localTasks: any; remoteClaims: any; }) => any
+withoutMergedBranches [const] ({ claims, liveBranches }: { claims: any; liveBranches: any; }) => any
+
+## ./coordination-schema
+branchErrors [const] ({ slug, data }: { slug: any; data: any; }) => any[]
+ISO_DATE [const] RegExp
+taskErrors [const] ({ slug, data }: { slug: any; data: any; }, seen: any) => any[]
+
+## ./error-message
+errorMessage [const] (value: any) => string
+
+## ./git-dir
+resolveGitDir [const] (repoRoot: any) => any
+
+## ./host-root
+findRepositoryRoot [const] (startDirectory: any) => any
+HOST_ROOT_ENV [const] "REPO_STANDARDS_HOST_ROOT"
+resolveHostRoot [const] ({ env, envName, moduleDirectory, }: { env?: NodeJS.ProcessEnv | undefined; envName?: string | undefined; moduleDirectory: any; }) => any
+rootFromInstallPath [const] (moduleDirectory: any) => any
+
+## ./publish-surface
+buildPublishExports [const] (exports_: any) => { [k: string]: { types: string; default: string; }; }
+collectTargets [const] (target: any) => any
+diffSubpaths [const] ({ published, source }: { published: any; source: any; }) => { extra: any; missing: any; }
+isBuiltPublicPackage [const] (manifest: any) => boolean
+isPublishedTargetCorrect [const] ({ published, sourceTarget }: { published: any; sourceTarget: any; }) => boolean
+isSourceTarget [const] (target: any) => any
+packedSurfaceProblems [const] ({ files, label, packedExports, sourceExports, }: { files: any; label: any; packedExports: any; sourceExports: any; }) => any[]
+toBuiltPaths [const] (sourceTarget: any) => { types: string; default: string; }
+
+## ./publishable-workspaces
+readPublishableManifests [const] (repoRoot: any) => any
+
+## ./registry-packument
+fetchPackument [const] (name: any, { fetchImpl, full }?: { fetchImpl?: ((input: string | URL | Request, init?: RequestInit) => Promise<Response>) | undefined; full?: boolean | undefined; }) => Promise<unknown>
+registryOrigin [const] () => string
+registryUrl [const] (name: any) => string
+
+## ./release-publishable
+classifyRelease [const] ({ packageExists, versionExists }: { packageExists: any; versionExists: any; }) => "first-publish" | "up-to-date" | "publish"
+extractChangelogSection [const] ({ changelog, version }: { changelog: any; version: any; }) => any
+findBlockingFirstPublish [const] ({ firstPublish, publishable }: { firstPublish: any; publishable: any; }) => any
+renderSummary [const] (classified: any) => string
+selectFirstPublish [const] (classified: any) => any
+selectPublishable [const] (classified: any) => any
+
+## ./report-warnings
+reportWarnings [const] (warnings: any) => void
+
+## ./safe-read
+readTextWithin [const] (path: any, repoRoot: any, extraRoots?: any[]) => string
+
+## ./workspace-scopes
+deriveWorkspaces [const] (repoRoot: any) => { name: string; kind: string; }[]
+deriveWorkspaceScopes [const] (repoRoot: any) => Set<string>
+workspacesForFiles [const] (files: any, workspaces: any) => any

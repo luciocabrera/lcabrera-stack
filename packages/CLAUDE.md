@@ -6,10 +6,10 @@ are the product, the `@lcabrera/` vs `@repo/` scope split, the never-baseline ru
 **publishing contract** for the public packages: `@lcabrera/ui`,
 `@lcabrera/api`, `@lcabrera/server`, `@lcabrera/utils`,
 `@lcabrera/eslint-plugin`, `@lcabrera/tsconfig`, `@lcabrera/node`,
-`@lcabrera/vite-config`.
+`@lcabrera/vite-config`, `@lcabrera/devkit` and `@lcabrera/repo-standards`.
 
 A published package's npm name and its workspace directory need not match, and
-three of them already do not: `@lcabrera/eslint-plugin` lives in
+several already do not: `@lcabrera/eslint-plugin` lives in
 `packages/eslint-local-rules`, `@lcabrera/node` in `packages/node-runtime` and
 `@lcabrera/vite-config` in `packages/vite-configs`. Read the manifest, not the
 path.
@@ -31,16 +31,29 @@ pnpm on PATH itself.
 What holds, verified by packing each package and reading the tarball rather than
 by inspection:
 
-- **All but `@lcabrera/ui` build; `ui` alone ships source.** A `.ts` file inside
-  `node_modules` is not loadable at all — Node refuses to strip types there
-  (`ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`) — and Vite externalizes
-  dependencies for SSR by default, so a source-shipping package fails when a
-  consumer's server _starts_, not when it typechecks. Every other public package
-  therefore runs `vp pack` (tsdown) to `dist` with `.d.mts` and sourcemaps —
-  which is also how you tell the two apart in a manifest, since a `build` script
-  is exactly what `publish:verify` and the API-surface gate key on. `ui`
+- **Every package whose source is TypeScript builds, except `@lcabrera/ui`.** A
+  `.ts` file inside `node_modules` is not loadable at all — Node refuses to strip
+  types there (`ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`) — and Vite
+  externalizes dependencies for SSR by default, so a source-shipping TypeScript
+  package fails when a consumer's server _starts_, not when it typechecks. Those
+  packages therefore run `vp pack` (tsdown) to `dist` with `.d.mts` and
+  sourcemaps — which is also how you tell them apart in a manifest, since a
+  `build` script is exactly what `publish:verify` and `attw:verify` key on. `ui`
   cannot: StyleX derives theme identity from the source path, so a consumer's own
   plugin has to compile it.
+- **`@lcabrera/devkit` and `@lcabrera/repo-standards` ship `.mjs` source and do
+  not build**, and that is not the `ui` exemption in another form. The hazard
+  above is specific to type stripping; an `.mjs` file loads from `node_modules`
+  as it is, so there is nothing for a build to fix. Having no `build` script puts
+  them outside `publish:verify` and `attw:verify` by those gates' own filter —
+  `vp run tarball:verify` is what answers for their packed artifact instead, and
+  it goes further than either, running `devkit init` out of the tarball in a
+  scratch repository. What still reaches them is the API-surface ratchet, and it
+  only does because their generated tsconfig sets `allowJs`: ts-morph resolves
+  the entry file through that config, and without the flag it loads no `.mjs`,
+  snapshots an empty surface, and passes. Untyped JavaScript still yields a real
+  surface — export names, arity and inferred shapes — so the ratchet catches a
+  removed or reshaped export.
 - **Shipping source changes how `@lcabrera/ui` may import itself, and the rule is
   not cosmetic.** A consumer compiles _our_ files, so every self-reference in
   them resolves through our own `exports` map. A wildcard target is a directory
@@ -91,13 +104,14 @@ by inspection:
   deliberate duplication, same reasoning as
   [ADR-039](../docs/decisions/ADR-039-duplicate-over-undeclared-edges.md).
 - **`files` is `["src", "!src/**/*.test.*"]`**, with `"dist"` added for every
-  built package (all but `ui`, which ships source). Without it npm ships
-  whatever is in the directory:
-  `@lcabrera/server` was shipping its whole test suite plus its tsconfigs and
-  `eslint.config.mjs`. The negated pattern is honoured by pnpm pack. `src` stays
-  in the built packages only because they emit sourcemaps — it is unreachable
-  through the published `exports` map, so it exists purely to let a consumer step
-  into the original TypeScript.
+  built package, and the source directory named as it actually is — the two
+  `.mjs` packages keep theirs under `scripts`, and `@lcabrera/devkit` adds
+  `assets`, the files it exists to copy. Without `files` npm ships whatever is in
+  the directory: `@lcabrera/server` was shipping its whole test suite plus its
+  tsconfigs and `eslint.config.mjs`. The negated pattern is honoured by pnpm
+  pack. `src` stays in the built packages only because they emit sourcemaps — it
+  is unreachable through the published `exports` map, so it exists purely to let
+  a consumer step into the original TypeScript.
 - **Framework singletons are `peerDependencies`, not `dependencies`** — `react`,
   `react-dom`, `react-router`, `@stylexjs/stylex` in `@lcabrera/ui`. As ordinary
   dependencies a consumer would resolve a second copy of React, which breaks

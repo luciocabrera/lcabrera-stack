@@ -1,0 +1,38 @@
+# @lcabrera/devkit — public API surface
+# Generated. Regenerate with: repo-verify-api-surface --write
+# One line per export: <name> <signature>. Do not edit by hand.
+
+## ./closure
+analyseClosure [const] ({ allowedCommands, allowedConfigKeys, exists, files, rootDirectory, shipped, }: { files: { path: string; content: string; }[]; rootDirectory: string; allowedCommands?: Iterable<string>; allowedConfigKeys?: Iterable<string>; exists?: (repoRelativePath: string) => boolean; shipped?: Set<string>; }) => { escapes: any; }
+classifyLink [const] ({ fromDirectory, rootDirectory, shipped, target, }: { fromDirectory: any; rootDirectory: any; shipped?: Set<any> | undefined; target: any; }) => { kind: string; resolved?: undefined; } | { kind: string; resolved: any; }
+classifyPathToken [const] ({ exists, fromDirectory, rootDirectory, shipped, token, }: { exists: any; fromDirectory: any; rootDirectory: any; shipped?: Set<any> | undefined; token: any; }) => { kind: string; resolved?: undefined; } | { kind: string; resolved: string; }
+
+## ./config
+allowedConfigKeys [const] (config: any) => string[]
+CONFIG_FILE_NAME [const] "devkit.config.json"
+configuredCommandWords [const] (config: any) => string[]
+DEFAULT_CONFIG [const] { commands: {}; paths: { agents: string; coordination: string; decisions: string; docs: string; hooks: string; root: string; rules: string; skills: string; templates: string; workflows: string; }; profile: string; }
+groupsFor [const] (config: any) => any
+hasConfigKey [const] ({ config, path }: { config: any; path: any; }) => boolean
+isExecutableAsset [const] (assetPath: any) => boolean
+PROFILES [const] { agent: string[]; full: string[]; }
+resolveConfig [const] (raw: any) => { commands: any; paths: any; profile: string; }
+targetPathFor [const] ({ assetPath, config }: { assetPath: any; config: any; }) => any
+withProfile [const] ({ config, profile, source }: { config: object; profile: string; source?: string; }) => { profile: string; }
+
+## ./manifest
+acknowledgeableStates [const] () => string[]
+ACKNOWLEDGED_STATE [const] "acknowledged"
+classifyMaterialisation [const] ({ incomingHash, onDiskHash, recordedHash, }: { incomingHash: any; onDiskHash: any; recordedHash: any; }) => "added" | "current" | "conflict" | "restored" | "modified" | "updated"
+emptyManifest [const] (version: any) => { files: {}; packageVersion: any; version: number; }
+hashContent [const] (content: any) => string
+isAcknowledgeable [const] (state: any) => boolean
+isAcknowledged [const] (state: any) => boolean
+isRecorded [const] (state: any) => boolean
+isReported [const] (state: any) => boolean
+isWritten [const] (state: any) => boolean
+MANIFEST_FILE [const] ".devkit-manifest.json"
+MANIFEST_VERSION [const] 1
+nextManifest [const] ({ entries, previous, version }: { entries: any; previous: any; version: any; }) => { files: any; packageVersion: any; version: number; }
+parseManifest [const] (raw: any, version: any) => { files: {}; packageVersion: any; version: number; }
+serialiseManifest [const] (manifest: any) => string

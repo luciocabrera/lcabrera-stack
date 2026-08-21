@@ -1,16 +1,18 @@
-# @repo/devkit
+# @lcabrera/devkit
 
 Materialises this repository's agent setup — skills, path rules, subagent
 definitions, and the workflows, hooks, templates and registers that make them run
 — into a consumer repository, and reports what has diverged.
 
-Private while the mechanism is being proved here. It publishes as
-`@lcabrera/devkit` ([ADR-081](../../docs/decisions/ADR-081-ship-the-repo-setup-as-two-packages.md)).
+Published from
+[`vite-react-compiler`](https://github.com/luciocabrera/vite-react-compiler),
+which is also its first consumer
+([ADR-081](../../docs/decisions/ADR-081-ship-the-repo-setup-as-two-packages.md)).
 
 **It has no `build` script, and that is not an omission.** The publishing
-contract in [`packages/CLAUDE.md`](../CLAUDE.md) says every public package but
-`@lcabrera/ui` builds, because a `.ts` file inside `node_modules` cannot be
-loaded at all. This package's sources are `.mjs` — already loadable — so there is
+contract in [`packages/CLAUDE.md`](../CLAUDE.md) has every package whose sources
+are TypeScript build, because a `.ts` file inside `node_modules` cannot be loaded
+at all. This package's sources are `.mjs` — already loadable — so there is
 nothing to compile and `exports` can point straight at what ships. Adding a build
 step would put a `dist` between the bin and the assets it reads for no gain.
 Verify what a consumer receives by packing and reading the tarball, not by
@@ -81,13 +83,17 @@ npm install --save-dev @lcabrera/devkit @lcabrera/repo-standards
 binaries the seeded workflows and hooks invoke. Without it the prose still
 materialises, and `init` writes no task pointing at a binary you do not have.
 
-Until both are published, install the packed tarballs — which is also the only
-way to see what a consumer actually receives:
+To install an unreleased change, or to see what a consumer actually receives,
+install the packed tarballs instead:
 
 ```bash
 pnpm pack --pack-destination /tmp/kit   # in each package directory
 npm install --save-dev /tmp/kit/*.tgz   # in the consumer
 ```
+
+`pnpm`, not `npm` — pnpm rewrites `workspace:*` and `catalog:` specifiers to real
+ranges at pack time, and an `npm pack` tarball carries the literal strings, which
+resolve for nobody.
 
 ## Setting up a repository
 
@@ -298,7 +304,7 @@ re-running `sync`. `peer:` states the range the file was written against.
 ```yaml
 ---
 name: epic
-peer: '@repo/repo-standards@<1.0.0'
+peer: '@lcabrera/repo-standards@<1.0.0'
 ---
 ```
 
@@ -316,14 +322,23 @@ report says which, because one is `install` and the other is `upgrade`. Each
 distinct peer is resolved once per run, so `sync` and `doctor` can never
 disagree about what is installed.
 
-It is declared in this package's `peerDependencies` as `@repo/repo-standards` —
-the name that resolves today, and it becomes `@lcabrera/repo-standards` when #800
-publishes both packages. That publish moves its version too, which is why the
-example bounds the whole pre-1.0 line rather than naming a floor: copied as it
-stands it is satisfied here now and still satisfied afterwards, so it cannot
-refuse a file for a reason the reader has no way to see. Read it as the syntax
-and not as advice on what to pin — a range is right only if the consumer's tree
-answers it, and `devkit doctor` is what says when it does not.
+It is declared in this package's `peerDependencies` as
+`@lcabrera/repo-standards: >=0.1.0 <1.0.0`, and the example above bounds the same
+pre-1.0 line for the same reason. The two packages are versioned independently,
+so a narrower bound starts refusing a file the moment one of them moves without
+the other — and below `1.0.0` a caret is narrower than it looks, since `^0.2.0`
+does not admit `0.3.0`. Read it as the syntax and not as advice on what to pin: a
+range is right only if the consumer's tree answers it, and `devkit doctor` is
+what says when it does not.
+
+The range is written out rather than spelled `workspace:*`, which is the form
+this repository uses everywhere it _consumes_ the package. pnpm substitutes the
+workspace protocol at pack time, and for `peerDependencies` too — `workspace:*`
+would publish as an exact pin on whatever version happened to be current, so the
+first release that moved only one of the two would leave every consumer with an
+unmet peer. This package still resolves the workspace copy locally; it declares
+it as a `devDependency` to do that, which is the same split
+`@lcabrera/ui` makes for `react`.
 
 ## What ships
 

@@ -82,8 +82,8 @@ the listing cannot tell you is below.
 
 `packages/ui`,
 `packages/api`, `packages/server`, `packages/utils`,
-`packages/eslint-local-rules`, `packages/tsconfig`, `packages/node-runtime` and
-`packages/vite-configs`
+`packages/eslint-local-rules`, `packages/tsconfig`, `packages/node-runtime`,
+`packages/vite-configs`, `packages/devkit` and `packages/repo-standards`
 are public packages and are held strictest: never baseline, scope, or
 inline-disable a finding in any of them. The authority on that list is not this
 sentence — it is which workspaces gitignore `eslint-suppressions.json`, which
@@ -97,6 +97,15 @@ rule above requires: it and the plugins workspace it absorbed each committed an
 gitignoring the file — not being named here. `packages/node-runtime` joined the
 same way under #676, more cheaply: it carried no suppressions to clear, so
 publishing it as `@lcabrera/node` was a manifest, a `.gitignore` and a README.
+`packages/devkit` and `packages/repo-standards` joined under #800, as
+`@lcabrera/devkit` and `@lcabrera/repo-standards` — the setup this repository
+hands to another repository, which is the one thing that cannot be shipped by
+being described. They are the first public packages that ship **`.mjs` source
+and do not build**: unlike a `.ts` file, an `.mjs` one loads from
+`node_modules` as it is. That has a cost the built packages do not pay — the
+API-surface extractor reads the entry through the workspace's tsconfig, so
+without `allowJs` it loads no `.mjs` at all and snapshots an empty surface,
+which passes exactly like a correct one.
 `packages/ts-configs` is not
 on that list because it never joins it: it is the split, so what became public is
 the new `packages/tsconfig` above, and the surviving workspace stays private.

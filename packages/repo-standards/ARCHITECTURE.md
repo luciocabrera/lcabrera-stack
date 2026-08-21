@@ -1,4 +1,4 @@
-# `@repo/repo-standards` — architecture
+# `@lcabrera/repo-standards` — architecture
 
 One spec, four commands, and the small readers they share.
 
