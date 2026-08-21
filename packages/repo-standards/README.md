@@ -99,6 +99,64 @@ it is the one key where configuring too little is the dangerous direction:
 `changeset publish` walks every non-private workspace regardless of directory,
 so a directory left out here under-reports what a release would publish.
 
+The `gates` block carries the rosters the three measuring gates would otherwise
+hardcode:
+
+```json
+{
+  "gates": {
+    "scriptSize": {
+      "ceiling": 350,
+      "baselineFile": "scripts/script-size-baseline.json",
+      "skipDirs": [],
+      "guideDoc": ""
+    },
+    "strayConfigs": {
+      "unreadNames": [],
+      "unreadPrefixes": [],
+      "skipDirs": [],
+      "configuredIn": ""
+    },
+    "docsPaths": {
+      "repoRoots": [],
+      "ignoredDocs": [],
+      "expectedAbsent": [],
+      "expectedAbsentPrefixes": [],
+      "onDemandReportDirs": [],
+      "baselineFile": "scripts/docs-paths-baseline.json"
+    }
+  }
+}
+```
+
+Three things about it are easy to get wrong.
+
+`strayConfigs` has **no useful default**, for the same reason `publicPackageDirs`
+does not: which config filenames are decoys is a per-toolchain answer, and
+`.prettierrc` is a decoy in a repository formatted by something else and the live
+policy in one formatted by Prettier. So an empty roster is **refused** rather than
+passed — comparing every file against an empty list reports the same success as a
+clean tree.
+
+`docsPaths.repoRoots` empty means "derive them from the tree", not "check
+nothing": the gate reads the top-level directories instead. Every other list in
+that block is an exemption, so empty is the _strict_ end of the range and a
+repository that configures nothing gets the gate at its most demanding.
+
+Every `skipDirs` **extends** the built-in list rather than replacing it. A
+repository that declared its own and forgot `node_modules` would not get a
+narrower gate; it would get one walking its whole dependency tree, which reads as
+slowness rather than as misconfiguration.
+
+Note which of these are **paths** and which are **match fragments**.
+`baselineFile`, `expectedAbsent` and `onDemandReportDirs` are repo-relative paths
+and are validated as such. `ignoredDocs`, `expectedAbsentPrefixes`, `unreadNames`,
+`unreadPrefixes`, `repoRoots` and `skipDirs` are compared as substrings, prefixes
+or bare names against paths already collected, so they are kept exactly as
+written — nothing joins them onto a root, and canonicalising them would strip a
+trailing slash that carries the meaning. `reports/` excludes a directory;
+`reports` excludes every document whose _name_ contains the word.
+
 Every path here is relative to the repository root and must stay inside it: an
 absolute value or one that climbs out is refused by name rather than normalised,
 because these gates write and delete — the ADR scaffolder writes a file, the
