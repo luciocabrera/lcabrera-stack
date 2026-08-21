@@ -295,6 +295,38 @@ export const bareTaskFindings = ({ expected, failures, scripts = {} }) => [
 ];
 
 /**
+ * Blocks of the shared config that a re-init destroyed.
+ *
+ * `devkit.config.json` is one file read by both distributed packages — devkit
+ * takes `commands`, `paths` and `profile`, the gate runtime takes `conventions`,
+ * `registers`, `gates` and `publishing`. A command that writes a freshly-built
+ * object over it does not rewrite its own part; it deletes everyone else's, and
+ * `--force` is documented for exactly the repository most likely to have
+ * customised them.
+ *
+ * The empty case is a finding for the usual reason: comparing a config that was
+ * never customised proves nothing and reads afterwards as a config that
+ * survived.
+ *
+ * @param {{ after: object, before: object }} args
+ */
+export const clobberedConfigKeys = ({ after, before }) => {
+  const owned = new Set(['commands', 'profile']);
+  const checked = Object.keys(before).filter((key) => !owned.has(key));
+  if (checked.length === 0) {
+    return [
+      'the scratch config carried no block for `devkit init --force` to preserve, so nothing about it was checked',
+    ];
+  }
+  return checked
+    .filter((key) => !Object.hasOwn(after, key))
+    .map(
+      (key) =>
+        `\`devkit init --force\` deleted \`${key}\` from devkit.config.json — that file is shared with the gate runtime, which reads it`,
+    );
+};
+
+/**
  * Hooks a consumer received without the executable bit.
  *
  * git skips a non-executable hook, and the skip is the failure mode this has to

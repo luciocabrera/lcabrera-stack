@@ -11,9 +11,55 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import {
   bareTaskFindings,
+  clobberedConfigKeys,
   inertHooks,
   taskFindings,
 } from './devkit-tarball.mjs';
+
+describe('clobberedConfigKeys', () => {
+  const before = {
+    commands: { install: 'npm ci' },
+    gates: { strayConfigs: {} },
+    profile: 'full',
+    publishing: { publicPackageDirs: ['ui'] },
+  };
+
+  it('accepts a re-init that kept every block it does not own', () => {
+    expect(
+      clobberedConfigKeys({
+        after: { ...before, commands: { install: 'pnpm i' } },
+        before,
+      }),
+    ).toEqual([]);
+  });
+
+  it('reports a block the command deleted', () => {
+    // `devkit.config.json` is one file read by both distributed packages.
+    // Writing a freshly-built object over it does not rewrite devkit's part of
+    // the config; it deletes the gate runtime's.
+    expect(
+      clobberedConfigKeys({
+        after: { commands: {}, profile: 'full', publishing: before.publishing },
+        before,
+      }),
+    ).toEqual([
+      '`devkit init --force` deleted `gates` from devkit.config.json — that file is shared with the gate runtime, which reads it',
+    ]);
+  });
+
+  it('treats a config with nothing to preserve as a finding', () => {
+    // Comparing a config that was never customised proves nothing, and reads
+    // afterwards as a config that survived.
+    expect(
+      clobberedConfigKeys({
+        after: { commands: {}, profile: 'agent' },
+        before: { commands: {}, profile: 'agent' },
+      }),
+    ).toEqual([
+      'the scratch config carried no block for `devkit init --force` to preserve, so nothing about it was checked',
+    ]);
+  });
+});
 
 describe('bareTaskFindings', () => {
   const expected = ['adr:verify', 'devkit:check'];

@@ -138,34 +138,55 @@ export const inferRunner = ({ dependencies = [], files = [] } = {}) => {
 };
 
 /**
- * The config `init` writes.
+ * The config `init` writes, layered OVER whatever is already there.
  *
- * The path layout is left out on purpose: every key in it already has a
- * default, and writing the defaults back out as if they were choices turns a
- * later change to one of them into a silent no-op for every repository init
- * ever touched.
+ * `devkit.config.json` is **shared** with the gate runtime — `@lcabrera/repo-standards`
+ * reads `conventions`, `registers`, `gates` and `publishing` from the same file,
+ * deliberately, because it is one consumer's data and two files invite drift.
+ * So writing a freshly-built object over it does not rewrite devkit's part of
+ * the config; it deletes everyone else's. A consumer who had set
+ * `registers.adrHomes` or `gates.strayConfigs.unreadNames` lost them to a
+ * `--force` re-init — on exactly the repository the flag is documented for, the
+ * one that has had time to be customised.
  *
- * `conventions.defaultBranch` is the exception, and it is written **because**
- * it has a default. That default is `main`, and `git init` still produces
- * `master` unless `init.defaultBranch` says otherwise — so a consumer who took
- * the default failed the branch gate and the coordination gate on their own
- * trunk, on day one. Recording the branch that is actually there costs one line
- * and removes both.
+ * `paths` is preserved for the same reason even though devkit owns it: nothing
+ * here writes it, so replacing the file would silently return a custom layout to
+ * the defaults.
+ *
+ * What `--force` does rewrite is `commands`, `profile`, and the trunk — devkit's
+ * own answers, which is what the flag is for.
+ *
+ * `conventions.defaultBranch` is written **because** it has a default. That
+ * default is `main`, and `git init` still produces `master` unless
+ * `init.defaultBranch` says otherwise — so a consumer who took the default
+ * failed the branch gate and the coordination gate on their own trunk, on day
+ * one. Recording the branch that is actually there costs one line and removes
+ * both. It is merged into any existing `conventions` rather than replacing it,
+ * so `sharedBranchesDir` survives beside it.
  *
  * @param {{ commands: Record<string, string>, defaultBranch?: string,
- *           profile: string }} args
+ *           existing?: object, profile: string }} args
  */
-export const initialConfig = ({ commands, defaultBranch, profile }) => ({
-  commands: Object.fromEntries(
-    Object.entries(commands).toSorted(([left], [right]) =>
-      left.localeCompare(right),
-    ),
-  ),
-  ...(defaultBranch === undefined || defaultBranch === ''
-    ? {}
-    : { conventions: { defaultBranch } }),
+export const initialConfig = ({
+  commands,
+  defaultBranch,
+  existing = {},
   profile,
-});
+}) => {
+  const named = defaultBranch !== undefined && defaultBranch !== '';
+  return {
+    ...existing,
+    commands: Object.fromEntries(
+      Object.entries(commands).toSorted(([left], [right]) =>
+        left.localeCompare(right),
+      ),
+    ),
+    ...(named
+      ? { conventions: { ...existing.conventions, defaultBranch } }
+      : {}),
+    profile,
+  };
+};
 
 /**
  * The tasks a consumer reaches the gates through, and the profile each one is
@@ -329,10 +350,6 @@ export const initFailure = ({ planned, unmet }) => {
 };
 
 /**
- * @param {{ added: string[], defaultBranch?: string, profile: string,
- *           runner: string, skipped: string[], written: number }} args
- */
-/**
  * The hooks directory this plan actually placed files into, or `undefined`.
  *
  * Asked of the plan rather than of the profile, so a profile that carries hooks
@@ -344,6 +361,11 @@ export const placedHooksPath = ({ entries, hooksPath }) =>
     ? hooksPath
     : undefined;
 
+/**
+ * @param {{ added: string[], defaultBranch?: string, hooksPath?: string,
+ *           profile: string, runner: string, skipped: string[],
+ *           written: number }} args
+ */
 export const initSummary = ({
   added,
   defaultBranch,

@@ -89,9 +89,18 @@ const writeConfig = ({ profile, root }) => {
     files: readdirSync(root),
   });
   const defaultBranch = currentBranch(root);
+  // Layered over what is already there, not written over it: this file is shared
+  // with the gate runtime, so replacing it deletes that package's blocks. Read
+  // RAW rather than through `resolveConfig`, which answers with devkit's keys
+  // resolved and every other package's dropped.
   writeJson(
     join(root, CONFIG_FILE_NAME),
-    initialConfig({ commands: runner.commands, defaultBranch, profile }),
+    initialConfig({
+      commands: runner.commands,
+      defaultBranch,
+      existing: readJsonIfPresent(join(root, CONFIG_FILE_NAME)),
+      profile,
+    }),
   );
   return { ...runner, defaultBranch };
 };
@@ -140,11 +149,19 @@ const materialise = ({ profile, root }) => {
  * and the outcome handling. The refusals come first and independently, because
  * a refusal must leave the tree exactly as it found it.
  */
-const applyInit = ({ hooksPath, profile, root }) => {
+const applyInit = ({ profile, root }) => {
   const runner = writeConfig({ profile, root });
   const { added, skipped, warning } = writeTasks({ profile, root });
   const entries = materialise({ profile, root });
   const { written } = countsFor(entries);
+
+  // Read AFTER the write, so it is the same layout `materialise` just used.
+  // Taken from the pre-write config, a custom `paths.hooks` made this compare
+  // the entries against the old directory, match nothing, and drop the one
+  // instruction without which the hooks never run.
+  const hooksPath = resolveConfig(
+    readTextIfPresent(join(root, CONFIG_FILE_NAME)),
+  ).paths.hooks;
 
   console.log(renderPlan(entries));
   if (warning !== undefined) console.error(warning);
@@ -211,5 +228,5 @@ export const runInit = (argv, root) => {
     return 1;
   }
 
-  return applyInit({ hooksPath: configured.paths.hooks, profile, root });
+  return applyInit({ profile, root });
 };

@@ -161,6 +161,39 @@ describe('initialConfig', () => {
     });
   });
 
+  test('preserves every block it does not own', () => {
+    // `devkit.config.json` is shared with the gate runtime, which reads
+    // `registers`, `gates`, `publishing` and `conventions` from it. Written as a
+    // fresh object, a `--force` re-init deleted all of them — on exactly the
+    // repository the flag is documented for, the one customised over time.
+    expect(
+      initialConfig({
+        commands: { install: 'npm ci' },
+        defaultBranch: 'master',
+        existing: {
+          commands: { install: 'stale' },
+          conventions: { defaultBranch: 'main', sharedBranchesDir: 'docs/sb' },
+          gates: { strayConfigs: { unreadNames: ['.eslintignore'] } },
+          paths: { hooks: '.husky' },
+          profile: 'agent',
+          publishing: { publicPackageDirs: ['ui'] },
+          registers: { adrHomes: [{ dir: 'docs/decisions' }] },
+        },
+        profile: 'full',
+      }),
+    ).toEqual({
+      // devkit's own answers are rewritten — that is what --force is for
+      commands: { install: 'npm ci' },
+      conventions: { defaultBranch: 'master', sharedBranchesDir: 'docs/sb' },
+      // everything else survives, including the layout nothing here writes
+      gates: { strayConfigs: { unreadNames: ['.eslintignore'] } },
+      paths: { hooks: '.husky' },
+      profile: 'full',
+      publishing: { publicPackageDirs: ['ui'] },
+      registers: { adrHomes: [{ dir: 'docs/decisions' }] },
+    });
+  });
+
   test('writes no conventions block when the branch could not be read', () => {
     // A detached HEAD, or a `.git` this command cannot read. Writing an empty
     // string would be worse than writing nothing: it names a trunk no branch can

@@ -41,6 +41,7 @@ import {
   inertHooks,
   materialisationFailure,
   bareTaskFindings,
+  clobberedConfigKeys,
   noCommandsDeclared,
   tarballFindings,
   taskFindings,
@@ -183,6 +184,36 @@ const bareTaskFailures = (consumer) =>
       ];
     }
   });
+
+/**
+ * Customise the shared config the way a real consumer would, re-init over it,
+ * and report what the command destroyed.
+ *
+ * Only reachable here: the scratch consumer starts with no config at all, so
+ * without deliberately writing one there is nothing for `--force` to preserve
+ * and the check would pass over a command that deletes everything.
+ */
+const reinitConfigFindings = (consumer) => {
+  const path = join(consumer, 'devkit.config.json');
+  const before = {
+    ...JSON.parse(readFileSync(path, 'utf8')),
+    gates: { strayConfigs: { unreadNames: ['.eslintignore'] } },
+    publishing: { publicPackageDirs: ['ui'] },
+  };
+  writeFileSync(path, `${JSON.stringify(before, undefined, 2)}\n`);
+
+  const failure = consumerStepFailure({
+    args: ['init', '--force'],
+    bin: join(consumer, 'node_modules', '.bin', 'devkit'),
+    consumer,
+  });
+  if (failure.length > 0) return failure;
+
+  return clobberedConfigKeys({
+    after: JSON.parse(readFileSync(path, 'utf8')),
+    before,
+  });
+};
 
 /** Owner, group or other — any of them is what git accepts as executable. */
 const EXECUTABLE_BITS = 0o111;
@@ -333,6 +364,7 @@ const main = () => {
       // once the sync above has had its turn, and it is the assertion that
       // `init` leaves a repository clean rather than one reporting drift on the
       // day it was set up.
+      ...reinitConfigFindings(consumer),
       ...bareTaskFindings({
         expected: BARE_TASKS,
         failures: bareTaskFailures(consumer),
