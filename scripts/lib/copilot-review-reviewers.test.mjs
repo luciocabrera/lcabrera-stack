@@ -48,8 +48,13 @@ describe('which reviewers the gate accepts', () => {
 
   // The hole #865 closed, kept as a gate rather than a note. `github-actions` is
   // the identity EVERY workflow here shares, so accepting it means any workflow
-  // that posts a review satisfies the gate. Re-adding it — by edit or by a
-  // workflow quietly falling back to `github.token` — fails this.
+  // that posts a review satisfies the gate. Re-adding it to the set fails this.
+  //
+  // It catches an EDIT TO THE SET and nothing else — this reads the constant, not
+  // the workflow. A submit step falling back to `github.token` leaves the set
+  // correct and this test green, while every review stops matching and the status
+  // sticks at `pending`. That case is `claude-review-workflow.test.mjs`, which
+  // reads the step.
   it('no longer accepts the shared GITHUB_TOKEN identity', () => {
     expect(isAcceptedReviewer('github-actions[bot]')).toBe(false);
     expect(isAcceptedReviewer('github-actions')).toBe(false);

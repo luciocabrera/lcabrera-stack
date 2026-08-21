@@ -150,9 +150,16 @@ collapse into one bucket and the newest wins: reviewer A's review of the current
 is discarded when reviewer B posts later against a stale one. Distinct identities are a
 precondition for the roster growing, not tidiness.
 
-A test asserts `github-actions` is **not** accepted, so re-adding it — by edit, or by a
-workflow quietly falling back to `github.token` — fails the build rather than silently
-widening the gate.
+Two tests hold this, and they cover different failures — worth separating, because one
+of them was originally claimed by the other and is not something it can see.
+
+- `copilot-review-reviewers.test.mjs` asserts `github-actions` is **not** accepted, so
+  re-adding it **to the set** fails the build rather than silently widening the gate. It
+  reads the constant, so that is all it covers.
+- `claude-review-workflow.test.mjs` asserts the submit step uses the App token. Without
+  it, a fallback to `github.token` would leave the set correct and every reviewer test
+  green while **every review stopped matching** — the status stuck at `pending` for a
+  reason nothing reports. Planting that fallback fails this test and no other.
 
 Rotation is manual and unowned by automation: the App's private key does not expire,
 but if it is regenerated, `REVIEWER_APP_PRIVATE_KEY` must be replaced by hand or every
