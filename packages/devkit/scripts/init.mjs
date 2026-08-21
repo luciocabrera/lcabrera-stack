@@ -112,6 +112,19 @@ const RUNNERS = [
 ];
 
 /**
+ * Both spellings of a dependency, because either one puts a bin on the path and
+ * a runner is just as declared in one as in the other.
+ *
+ * Here rather than beside the manifest read it serves, so that the branches —
+ * an absent manifest, an absent block, either block alone — are reachable from
+ * a test that passes literal objects.
+ */
+export const declaredDependencies = (manifest) => [
+  ...Object.keys(manifest?.dependencies ?? {}),
+  ...Object.keys(manifest?.devDependencies ?? {}),
+];
+
+/**
  * @param {{ dependencies?: Iterable<string>, files?: Iterable<string> }} args
  * @returns {{ commands: Record<string, string>, name: string }}
  */
@@ -294,14 +307,22 @@ export const unmetCommandKeys = (entries) =>
  * a clean run. An `init` that reports success over a repository it did not set
  * up is the same failure, and it is the one nobody would go back and check.
  *
- * @param {{ unmet: string[], written: number }} args
+ * The vacuous test is `planned`, not `written`, and the difference is a real
+ * case rather than a nicety: on a `--force` re-init every file already matches,
+ * so each entry classifies `current` and nothing is written. Reading that as
+ * failure reported "this repository has not been set up" over one that is fully
+ * set up — reachable straight from this command's own advice to create a
+ * `package.json` and "re-run with --force". `planned` is zero only when the
+ * profile placed nothing at all, which is the failure meant here.
+ *
+ * @param {{ planned: number, unmet: string[] }} args
  * @returns {string | undefined}
  */
-export const initFailure = ({ unmet, written }) => {
+export const initFailure = ({ planned, unmet }) => {
   if (unmet.length > 0) {
     return `init: ${unmet.length} command(s) the selected profile needs are not configured: ${unmet.join(', ')}.\nThe files that use them were not written. Add them to devkit.config.json under "commands", then run devkit sync.`;
   }
-  if (written === 0) {
+  if (planned === 0) {
     return 'init: nothing was materialised. The selected profile placed no files, so this repository has not been set up.';
   }
   return undefined;

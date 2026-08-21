@@ -1,10 +1,15 @@
 /*
- * The one place sync and doctor agree on: read the package's assets and the
- * consumer's state, and produce the plan. Both commands render the same plan;
- * only one of them writes.
+ * The one place sync, doctor and init agree on: read the package's assets and
+ * the consumer's state, produce the plan, and — for the two commands that
+ * write — apply it and record what was written. All three render the same plan.
+ *
+ * Applying lives here rather than in each command because `init` is `sync` plus
+ * wiring. Written twice, the two drift, and the way that shows up is an `init`
+ * whose files a later `doctor` does not recognise: a repository reporting drift
+ * on the day it was set up.
  */
 
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -22,9 +27,11 @@ import {
   isReported,
   isWritten,
   parseManifest,
+  serialiseManifest,
 } from './manifest.mjs';
 import { declaredPeerNames, installedPeerVersion } from './peer.mjs';
 import {
+  applySync,
   manifestAfter,
   onDiskHasher,
   planSync,
@@ -114,6 +121,25 @@ export const buildPlan = ({ profile, root }) => {
 
 export const nextManifestFor = ({ entries, manifest }) =>
   manifestAfter({ entries, previous: manifest, version: packageVersion() });
+
+/**
+ * Write what the plan says, then record it.
+ *
+ * `applySync` is called unconditionally, and the record is written even when no
+ * content was: a file already identical to the package is adopted into the
+ * record, and without that a later edit to one reads as an untracked file rather
+ * than as drift. The mode is `applySync`'s to decide for the same reason — a
+ * hook whose bytes still match is `current`, so gating the call on there being
+ * something to write silently stopped restoring its executable bit.
+ */
+export const applyPlan = ({ entries, manifest, root }) => {
+  applySync({ entries, root });
+
+  const updated = serialiseManifest(nextManifestFor({ entries, manifest }));
+  if (updated !== serialiseManifest(manifest)) {
+    writeFileSync(join(root, MANIFEST_FILE), updated);
+  }
+};
 
 /**
  * `unmet` is one state with two remediations, so its wording is chosen from the

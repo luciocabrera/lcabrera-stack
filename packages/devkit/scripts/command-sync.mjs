@@ -17,14 +17,12 @@ import {
   withAccepted,
 } from './accepted.mjs';
 import {
+  applyPlan,
   buildPlan,
   countsFor,
-  nextManifestFor,
   renderPlan,
 } from './command-materialise.mjs';
-import { MANIFEST_FILE, serialiseManifest } from './manifest.mjs';
 import { readProfileFlag } from './profile-flag.mjs';
-import { applySync } from './sync.mjs';
 
 export const runSync = (argv, root) => {
   const { error, profile } = readProfileFlag(argv);
@@ -38,23 +36,7 @@ export const runSync = (argv, root) => {
 
   console.log(renderPlan(entries));
 
-  // Called unconditionally. It used to be gated on there being something to
-  // write, and that quietly cancelled the wider rule `applySync` follows for a
-  // file's MODE: a hook whose bytes still match is `current`, so nothing is
-  // written, so the guard skipped the call, so the bit it lost — to a clone with
-  // `core.fileMode` off, an unzipped archive, a copy — was never put back. `sync`
-  // printed "Everything is up to date", `doctor` reported nothing because the
-  // mode is not in the hash, and no command repaired it. Deciding here what
-  // `applySync` is for is what made that possible; it decides for itself now.
-  applySync({ entries, root });
-
-  // The record is written even when nothing was — a file already identical to
-  // the package is adopted into it, and without that a later edit to one reads
-  // as an untracked file rather than as drift.
-  const updated = serialiseManifest(nextManifestFor({ entries, manifest }));
-  if (updated !== serialiseManifest(manifest)) {
-    writeFileSync(join(root, MANIFEST_FILE), updated);
-  }
+  applyPlan({ entries, manifest, root });
 
   if (reported > 0) {
     console.log(

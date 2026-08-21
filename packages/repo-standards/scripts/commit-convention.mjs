@@ -435,7 +435,7 @@ export const validatePrBase = (
       errors: [],
       warnings: [
         `PR base is the shared branch \`${name}\` — allowed while it is a declared, ` +
-          'active shared branch (docs/coordination/branches/), which must itself merge to `main`.',
+          `active shared branch (${sharedBranchesDir}/), which must itself merge to \`${defaultBranch}\`.`,
       ],
     };
   }

@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vite-plus/test';
 
 import {
+  declaredDependencies,
   GATE_TASKS,
   initFailure,
   initRefusal,
@@ -52,6 +53,28 @@ describe('initRefusal', () => {
     expect(
       initRefusal({ ...clean, force: true, isGitRepository: false }),
     ).toMatch(/not a git repository/);
+  });
+});
+
+describe('declaredDependencies', () => {
+  test('reads both blocks, since either puts a bin on the path', () => {
+    expect(
+      declaredDependencies({
+        dependencies: { react: '19' },
+        devDependencies: { 'vite-plus': '1' },
+      }),
+    ).toEqual(['react', 'vite-plus']);
+  });
+
+  test('an absent manifest or an absent block reads as none', () => {
+    expect(declaredDependencies(undefined)).toEqual([]);
+    expect(declaredDependencies({})).toEqual([]);
+    expect(declaredDependencies({ dependencies: { react: '19' } })).toEqual([
+      'react',
+    ]);
+    expect(
+      declaredDependencies({ devDependencies: { 'vite-plus': '1' } }),
+    ).toEqual(['vite-plus']);
   });
 });
 
@@ -236,29 +259,37 @@ describe('unmetCommandKeys', () => {
 });
 
 describe('initFailure', () => {
-  test('a run that wrote files and left nothing unresolved succeeded', () => {
-    expect(initFailure({ unmet: [], written: 19 })).toBeUndefined();
+  test('a run that planned files and left nothing unresolved succeeded', () => {
+    expect(initFailure({ planned: 19, unmet: [] })).toBeUndefined();
   });
 
-  test('names the unconfigured commands and the file they hold back', () => {
-    expect(initFailure({ unmet: ['check', 'test'], written: 25 })).toMatch(
+  test('names the unconfigured commands and the files they hold back', () => {
+    expect(initFailure({ planned: 31, unmet: ['check', 'test'] })).toMatch(
       /check, test/,
     );
   });
 
-  test('a run that materialised nothing is a failure, not a clean pass', () => {
+  test('a profile that planned nothing is a failure, not a clean pass', () => {
     // The shape this kit has shipped twice: a command that asserts nothing
     // passes over an empty result, and reads afterwards as a repository that
     // was set up.
-    expect(initFailure({ unmet: [], written: 0 })).toMatch(
+    expect(initFailure({ planned: 0, unmet: [] })).toMatch(
       /nothing was materialised/,
     );
   });
 
-  test('unresolved commands are reported even when files were written', () => {
+  test('a --force re-init that wrote nothing is a success, not a failure', () => {
+    // On an already-materialised tree every entry classifies `current`, so
+    // nothing is written. Judged on writes, this reported "this repository has
+    // not been set up" over one that is fully set up — reachable straight from
+    // this command's own advice to create a package.json and re-run --force.
+    expect(initFailure({ planned: 31, unmet: [] })).toBeUndefined();
+  });
+
+  test('unresolved commands are reported even when files were planned', () => {
     // The partial success is the dangerous one: 25 of 31 files is a repository
     // whose CI workflows are simply absent, with a zero exit over it.
-    expect(initFailure({ unmet: ['install'], written: 25 })).toBeDefined();
+    expect(initFailure({ planned: 31, unmet: ['install'] })).toBeDefined();
   });
 });
 

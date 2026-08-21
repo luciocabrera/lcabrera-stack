@@ -12,13 +12,14 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import {
+  applyPlan,
   buildPlan,
   countsFor,
-  nextManifestFor,
   renderPlan,
 } from './command-materialise.mjs';
-import { CONFIG_FILE_NAME, DEFAULT_CONFIG } from './config.mjs';
+import { CONFIG_FILE_NAME, DEFAULT_CONFIG, withProfile } from './config.mjs';
 import {
+  declaredDependencies,
   initFailure,
   initRefusal,
   initSummary,
@@ -28,9 +29,8 @@ import {
   tasksFor,
   unmetCommandKeys,
 } from './init.mjs';
-import { MANIFEST_FILE, serialiseManifest } from './manifest.mjs';
+import { MANIFEST_FILE } from './manifest.mjs';
 import { readProfileFlag } from './profile-flag.mjs';
-import { applySync } from './sync.mjs';
 
 const MANIFEST = 'package.json';
 
@@ -52,12 +52,6 @@ const installedBins = (root) => {
   if (!existsSync(binDir)) return [];
   return readdirSync(binDir);
 };
-
-/** Both spellings of a dependency, since either one puts a bin on the path. */
-const declaredDependencies = (manifest) => [
-  ...Object.keys(manifest?.dependencies ?? {}),
-  ...Object.keys(manifest?.devDependencies ?? {}),
-];
 
 /**
  * The branch this repository is on, read from `.git/HEAD` rather than by
@@ -118,51 +112,38 @@ const writeTasks = ({ profile, root }) => {
 };
 
 /**
- * The same three steps `sync` takes, in the same order and through the same
- * plan. Kept here rather than delegating to `runSync` because `init` needs the
- * plan itself to decide whether the run succeeded, and a command that re-derived
+ * The same steps `sync` takes, through the same plan and the same writer — see
+ * `applyPlan`. The plan is returned rather than only applied, because `init`
+ * decides whether the run succeeded from the plan itself; a command re-deriving
  * that from its own printed output would be reading its own guess.
  */
 const materialise = ({ profile, root }) => {
   const { entries, manifest } = buildPlan({ profile, root });
-  applySync({ entries, root });
-
-  const updated = serialiseManifest(nextManifestFor({ entries, manifest }));
-  if (updated !== serialiseManifest(manifest)) {
-    writeFileSync(join(root, MANIFEST_FILE), updated);
-  }
+  applyPlan({ entries, manifest, root });
   return entries;
 };
 
-export const runInit = (argv, root) => {
-  const { error, profile: flagged } = readProfileFlag(argv);
-  if (error !== undefined) {
-    console.error(error);
-    return 1;
-  }
-  const profile = flagged ?? DEFAULT_CONFIG.profile;
-
-  const refusal = initRefusal({
-    configExists: existsSync(join(root, CONFIG_FILE_NAME)),
-    force: argv.includes('--force'),
-    isGitRepository: existsSync(join(root, '.git')),
-    manifestExists: existsSync(join(root, MANIFEST_FILE)),
-  });
-  if (refusal !== undefined) {
-    console.error(refusal);
-    return 1;
-  }
-
+/**
+ * Everything past the refusals: write the config and the tasks, materialise,
+ * then decide whether that amounted to setting the repository up.
+ *
+ * Separate from `runInit` so neither half carries both the argument handling
+ * and the outcome handling. The refusals come first and independently, because
+ * a refusal must leave the tree exactly as it found it.
+ */
+const applyInit = ({ profile, root }) => {
   const runner = writeConfig({ profile, root });
   const { added, skipped, warning } = writeTasks({ profile, root });
-
   const entries = materialise({ profile, root });
   const { written } = countsFor(entries);
 
   console.log(renderPlan(entries));
   if (warning !== undefined) console.error(warning);
 
-  const failure = initFailure({ unmet: unmetCommandKeys(entries), written });
+  const failure = initFailure({
+    planned: entries.length,
+    unmet: unmetCommandKeys(entries),
+  });
   if (failure !== undefined) {
     console.error(`\n${failure}`);
     return 1;
@@ -179,4 +160,35 @@ export const runInit = (argv, root) => {
     })}`,
   );
   return 0;
+};
+
+export const runInit = (argv, root) => {
+  const { error, profile: flagged } = readProfileFlag(argv);
+  if (error !== undefined) {
+    console.error(error);
+    return 1;
+  }
+
+  // Validated BEFORE anything is written. `readProfileFlag` only checks that a
+  // value follows the flag, so `--profile fulll` used to reach `writeConfig`,
+  // land in `devkit.config.json`, and only then throw from `buildPlan` — leaving
+  // a repository where `sync` and `doctor` throw the same error and `init`
+  // refuses because a config it never chose to create is already there.
+  const profile = withProfile({
+    config: DEFAULT_CONFIG,
+    profile: flagged ?? DEFAULT_CONFIG.profile,
+  }).profile;
+
+  const refusal = initRefusal({
+    configExists: existsSync(join(root, CONFIG_FILE_NAME)),
+    force: argv.includes('--force'),
+    isGitRepository: existsSync(join(root, '.git')),
+    manifestExists: existsSync(join(root, MANIFEST_FILE)),
+  });
+  if (refusal !== undefined) {
+    console.error(refusal);
+    return 1;
+  }
+
+  return applyInit({ profile, root });
 };
