@@ -137,6 +137,20 @@ describe('binStartupFailure', () => {
     ).toContain('did not execute at all');
   });
 
+  it('accepts a gate that REPORTS a resolution problem it found', () => {
+    // These gates are allowed to talk about resolution: the publishing gate
+    // says so in its own words when a package cannot be imported. Matching the
+    // words alone would fail the build for a gate doing its job.
+    expect(
+      binStartupFailure({
+        name: 'repo-verify-publish',
+        output:
+          '  • @scope/x: Cannot find module ./dist/index.mjs in the tarball\n',
+        spawned: true,
+      }),
+    ).toBeUndefined();
+  });
+
   it('reports a bin that started and could not resolve its own code', () => {
     // The subtle one: the executable was packed and something it imports was
     // not. That writes a resolution error to stderr, which a naive "did it
@@ -150,7 +164,7 @@ describe('binStartupFailure', () => {
       expect(
         binStartupFailure({
           name: 'kit',
-          output: `node:internal/x\nError [${marker}]: something\n`,
+          output: `node:internal/modules/esm/resolve\nError [${marker}]: something imported from /x\n`,
           spawned: true,
         }),
       ).toContain('could not resolve its own code');

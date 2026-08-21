@@ -114,6 +114,16 @@ const STARTUP_FAILURES = [
 ];
 
 /**
+ * Markers that the text came from node itself rather than from a gate's report.
+ *
+ * Required alongside a signature, because these bins are allowed to TALK about
+ * resolution: a publishing gate that finds a package cannot be imported says so
+ * in its own words, and matching the words alone would fail the build for a gate
+ * doing its job. Node's own failures carry a frame or a bracketed error code.
+ */
+const NODE_ERROR_MARKERS = ['node:internal/', 'imported from', 'Error ['];
+
+/**
  * Why a bin is unusable, or undefined when it ran.
  *
  * `spawned` is false when the executable itself was not there — the bin was
@@ -124,7 +134,8 @@ export const binStartupFailure = ({ name, output, spawned }) => {
   if (!spawned) return `\`${name}\` is declared but did not execute at all`;
 
   const signature = STARTUP_FAILURES.find((marker) => output.includes(marker));
-  return signature === undefined
+  const fromNode = NODE_ERROR_MARKERS.some((marker) => output.includes(marker));
+  return signature === undefined || !fromNode
     ? undefined
     : `\`${name}\` started and could not resolve its own code (${signature})`;
 };
