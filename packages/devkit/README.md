@@ -320,11 +320,11 @@ report says which, because one is `install` and the other is `upgrade`. Each
 distinct peer is resolved once per run, so `sync` and `doctor` can never
 disagree about what is installed.
 
-It is declared in this package's `peerDependencies` as `@lcabrera/repo-standards` —
-the name that resolves today, and it becomes `@lcabrera/repo-standards` when #800
-publishes both packages. That publish moves its version too, which is why the
-example bounds the whole pre-1.0 line rather than naming a floor: copied as it
-stands it is satisfied here now and still satisfied afterwards, so it cannot
+It is declared in this package's `peerDependencies` as
+`@lcabrera/repo-standards`. The example bounds the whole pre-1.0 line rather
+than naming a floor, because that package is early in its own versioning and a
+floor written today would start refusing files the moment it moves: copied as it
+stands the range is satisfied by every version published so far, so it cannot
 refuse a file for a reason the reader has no way to see. Read it as the syntax
 and not as advice on what to pin — a range is right only if the consumer's tree
 answers it, and `devkit doctor` is what says when it does not.
