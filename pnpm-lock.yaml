@@ -374,13 +374,13 @@ importers:
 
   packages/devkit:
     dependencies:
-      '@lcabrera/repo-standards':
-        specifier: workspace:*
-        version: link:../repo-standards
       semver:
         specifier: catalog:tooling
         version: 7.8.5
     devDependencies:
+      '@lcabrera/repo-standards':
+        specifier: workspace:*
+        version: link:../repo-standards
       '@lcabrera/vite-config':
         specifier: workspace:*
         version: link:../vite-configs

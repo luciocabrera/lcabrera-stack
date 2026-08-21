@@ -52,6 +52,7 @@
     "semver": "catalog:tooling"
   },
   "devDependencies": {
+    "@lcabrera/repo-standards": "workspace:*",
     "@lcabrera/vite-config": "workspace:*",
     "@types/node": "catalog:types",
     "eslint": "catalog:lint",
@@ -61,7 +62,7 @@
     "vitest": "catalog:test"
   },
   "peerDependencies": {
-    "@lcabrera/repo-standards": "workspace:*"
+    "@lcabrera/repo-standards": ">=0.1.0 <1.0.0"
   },
   "peerDependenciesMeta": {
     "@lcabrera/repo-standards": {

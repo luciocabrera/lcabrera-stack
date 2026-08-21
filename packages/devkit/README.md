@@ -4,13 +4,15 @@ Materialises this repository's agent setup — skills, path rules, subagent
 definitions, and the workflows, hooks, templates and registers that make them run
 — into a consumer repository, and reports what has diverged.
 
-Private while the mechanism is being proved here. It publishes as
-`@lcabrera/devkit` ([ADR-081](../../docs/decisions/ADR-081-ship-the-repo-setup-as-two-packages.md)).
+Published from
+[`vite-react-compiler`](https://github.com/luciocabrera/vite-react-compiler),
+which is also its first consumer
+([ADR-081](../../docs/decisions/ADR-081-ship-the-repo-setup-as-two-packages.md)).
 
 **It has no `build` script, and that is not an omission.** The publishing
-contract in [`packages/CLAUDE.md`](../CLAUDE.md) says every public package but
-`@lcabrera/ui` builds, because a `.ts` file inside `node_modules` cannot be
-loaded at all. This package's sources are `.mjs` — already loadable — so there is
+contract in [`packages/CLAUDE.md`](../CLAUDE.md) has every package whose sources
+are TypeScript build, because a `.ts` file inside `node_modules` cannot be loaded
+at all. This package's sources are `.mjs` — already loadable — so there is
 nothing to compile and `exports` can point straight at what ships. Adding a build
 step would put a `dist` between the bin and the assets it reads for no gain.
 Verify what a consumer receives by packing and reading the tarball, not by
@@ -321,13 +323,22 @@ distinct peer is resolved once per run, so `sync` and `doctor` can never
 disagree about what is installed.
 
 It is declared in this package's `peerDependencies` as
-`@lcabrera/repo-standards`. The example bounds the whole pre-1.0 line rather
-than naming a floor, because that package is early in its own versioning and a
-floor written today would start refusing files the moment it moves: copied as it
-stands the range is satisfied by every version published so far, so it cannot
-refuse a file for a reason the reader has no way to see. Read it as the syntax
-and not as advice on what to pin — a range is right only if the consumer's tree
-answers it, and `devkit doctor` is what says when it does not.
+`@lcabrera/repo-standards: >=0.1.0 <1.0.0`, and the example above bounds the same
+pre-1.0 line for the same reason. The two packages are versioned independently,
+so a narrower bound starts refusing a file the moment one of them moves without
+the other — and below `1.0.0` a caret is narrower than it looks, since `^0.2.0`
+does not admit `0.3.0`. Read it as the syntax and not as advice on what to pin: a
+range is right only if the consumer's tree answers it, and `devkit doctor` is
+what says when it does not.
+
+The range is written out rather than spelled `workspace:*`, which is the form
+this repository uses everywhere it _consumes_ the package. pnpm substitutes the
+workspace protocol at pack time, and for `peerDependencies` too — `workspace:*`
+would publish as an exact pin on whatever version happened to be current, so the
+first release that moved only one of the two would leave every consumer with an
+unmet peer. This package still resolves the workspace copy locally; it declares
+it as a `devDependency` to do that, which is the same split
+`@lcabrera/ui` makes for `react`.
 
 ## What ships
 

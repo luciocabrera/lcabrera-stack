@@ -5,8 +5,9 @@ coordination register, architecture decisions and published packages to one
 enforced shape — as commands, so a repository that installs this package can run
 them.
 
-Private while the first family is being proved here. It publishes as
-`@lcabrera/repo-standards`
+Published from
+[`vite-react-compiler`](https://github.com/luciocabrera/vite-react-compiler),
+which is also its first consumer
 ([ADR-081](../../docs/decisions/ADR-081-ship-the-repo-setup-as-two-packages.md)).
 
 ## Why a package rather than scripts

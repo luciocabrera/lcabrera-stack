@@ -88,6 +88,29 @@ describe('this repository publishes what it develops against', () => {
     expect(sourceShipping).toEqual(['devkit', 'repo-standards', 'ui']);
   });
 
+  it('declares no workspace-protocol peer on a published package', () => {
+    // pnpm substitutes `workspace:*` at pack time in `peerDependencies` too, and
+    // the substitution is to the EXACT current version — so a workspace-protocol
+    // peer publishes as a pin, not a range. These packages are versioned
+    // independently by Changesets, so the first release that moves one and not
+    // the other leaves every consumer with an unmet peer, and `npm install`
+    // resolving the peer to `latest` fails outright.
+    //
+    // Invisible in this repo, where `workspace:*` resolves the sibling directory
+    // and the pin never exists. An npm version is permanent, so it has to be
+    // caught before the publish rather than after.
+    //
+    // `dependencies` are deliberately not checked: there the substitution is
+    // what makes a workspace dependency resolvable at all.
+    const workspacePeers = publicPackageDirs.flatMap((directory) =>
+      Object.entries(readManifest(directory).peerDependencies ?? {})
+        .filter(([, range]) => range.startsWith('workspace:'))
+        .map(([name, range]) => `${directory}: ${name}@${range}`),
+    );
+
+    expect(workspacePeers).toEqual([]);
+  });
+
   it('ships no TypeScript from a package that does not build', () => {
     // What makes "no build needed" true for `devkit` and `repo-standards` is
     // the extension, not the intention: Node refuses to strip types inside
