@@ -1,6 +1,21 @@
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
 import { describe, expect, it } from 'vite-plus/test';
 
-import { isIgnoredDoc } from './markdown-corpus.mjs';
+import { documentedFiles, isIgnoredDoc } from './markdown-corpus.mjs';
+
+/** A throwaway tree, since the walk is the half a pure test cannot reach. */
+const treeWith = (files) => {
+  const root = mkdtempSync(join(tmpdir(), 'corpus-'));
+  for (const [path, contents] of Object.entries(files)) {
+    const full = join(root, path);
+    mkdirSync(join(full, '..'), { recursive: true });
+    writeFileSync(full, contents);
+  }
+  return root;
+};
 
 describe('isIgnoredDoc', () => {
   it('ignores what every repository generates, with no configuration', () => {
@@ -53,5 +68,58 @@ describe('isIgnoredDoc', () => {
         ignoredDocs: [],
       }),
     ).toBe(false);
+  });
+});
+
+describe('documentedFiles', () => {
+  it('finds markdown at any depth and nothing else', () => {
+    const root = treeWith({
+      'README.md': '# root',
+      'docs/guide/deep/NOTES.md': '# deep',
+      'docs/not-markdown.txt': 'ignored',
+      'src/index.ts': 'export const a = 1;',
+    });
+
+    expect(documentedFiles({ repoRoot: root }).toSorted()).toEqual([
+      'README.md',
+      'docs/guide/deep/NOTES.md',
+    ]);
+  });
+
+  it('does not descend into build output or dependencies', () => {
+    const root = treeWith({
+      'KEEP.md': '# keep',
+      'node_modules/pkg/README.md': '# dep',
+      'dist/GENERATED.md': '# built',
+      'coverage/REPORT.md': '# report',
+    });
+
+    expect(documentedFiles({ repoRoot: root })).toEqual(['KEEP.md']);
+  });
+
+  it('does not descend into a separate checkout', () => {
+    // A linked worktree beside the repository is a second full copy. Walking
+    // into it scans every document twice and resolves its relative references
+    // against THIS root, so a doc that is correct in its own tree is reported
+    // broken here — and because that path is gitignored, the gate failed only
+    // on the machine that ran the recommended claim command and nowhere else.
+    const root = treeWith({
+      'KEEP.md': '# keep',
+      'sibling-checkout/.git': 'gitdir: /elsewhere',
+      'sibling-checkout/DOC.md': '# theirs',
+    });
+
+    expect(documentedFiles({ repoRoot: root })).toEqual(['KEEP.md']);
+  });
+
+  it('applies the configured exemptions to what it found', () => {
+    const root = treeWith({
+      'KEEP.md': '# keep',
+      'vendor/THEIRS.md': '# vendored',
+    });
+
+    expect(
+      documentedFiles({ ignoredDocs: ['vendor/'], repoRoot: root }),
+    ).toEqual(['KEEP.md']);
   });
 });
