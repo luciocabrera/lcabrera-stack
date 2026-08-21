@@ -58,19 +58,28 @@ const withoutSeparator = (argv) => argv.filter((entry) => entry !== '--');
  * command still fails — the separation is between "you asked what this does" and
  * "you asked for something that is not here".
  */
-const HELP_REQUESTS = new Set(['--help', '-h', 'help']);
+const HELP_FLAGS = new Set(['--help', '-h']);
+const HELP_COMMAND = 'help';
 
 /**
- * Anywhere in argv, not just the command position. `sync` reads the flags it
- * knows and ignores the rest, so recognising help only as the first word left
- * `devkit sync --help` building a plan and writing it: a consumer asking what a
- * command does had their tree materialised into instead, and got exit 0 for it.
+ * The two spellings are recognised in different places, and the asymmetry is the
+ * whole point.
  *
- * Nothing legitimate is swallowed, because `--help` is not a valid value for any
- * flag or positional these commands take — `--profile --help` is already refused
- * by the flag-shaped-value guard rather than reaching here as a profile name.
+ * A **flag** counts anywhere, because recognising it only in the command
+ * position left `devkit sync --help` building a plan and applying it: a consumer
+ * asking what a command does had their tree materialised into, and got exit 0
+ * for it. `--help` and `-h` are not valid values for anything these commands
+ * take, so nothing legitimate is lost by scanning for them.
+ *
+ * The bare **word** counts only in the command position, because it is an
+ * ordinary string everywhere else. `--reason` takes free text and `closure`
+ * takes directory names, so a wider scan turned
+ * `doctor --accept <path> --reason help` into a usage page that recorded
+ * nothing, and `closure help` into a success that analysed nothing — both the
+ * silent-success failure the rest of this file exists to prevent.
  */
-const asksForHelp = (argv) => argv.some((entry) => HELP_REQUESTS.has(entry));
+const asksForHelp = (entries) =>
+  entries[0] === HELP_COMMAND || entries.some((entry) => HELP_FLAGS.has(entry));
 
 /** @param {{ argv: string[], root: string }} args */
 export const runCommand = ({ argv, root }) => {

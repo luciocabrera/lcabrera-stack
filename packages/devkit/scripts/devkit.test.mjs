@@ -62,6 +62,28 @@ describe('runCommand', () => {
     });
   }
 
+  test('treats the bare word as a value everywhere but the command position', () => {
+    // `--reason` takes free text and `closure` takes directory names, so
+    // matching `help` anywhere turned `doctor --accept <path> --reason help`
+    // into a usage page that recorded nothing, and `closure help` into a
+    // success that analysed nothing. `/nowhere` does not exist, so a command
+    // that really dispatches throws or fails rather than returning 0.
+    const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    const error = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
+
+    expect(
+      runCommand({ argv: ['closure', 'help'], root: '/nowhere' }),
+    ).not.toBe(0);
+    expect(log).not.toHaveBeenCalledWith(
+      expect.stringContaining('devkit sync'),
+    );
+
+    log.mockRestore();
+    error.mockRestore();
+  });
+
   test('does not treat an inherited Object property as a command', () => {
     const error = vi
       .spyOn(console, 'error')
