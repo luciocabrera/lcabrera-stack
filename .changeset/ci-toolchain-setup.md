@@ -25,6 +25,17 @@ The value is YAML lines, indented into place wherever a workflow carries
 `{{ci.setup}}`. An absent value resolves to no steps rather than to a missing
 key, so no file is ever held back for it.
 
-**If you already ran `init`,** re-run `devkit sync` to take the corrected
-workflows, and add the `ci` block by hand if your runner needs one — `init` does
-not run again over a repository it has already set up.
+**If you already ran `init`,** the upgrade path is now one command:
+
+```bash
+devkit init --upgrade && devkit sync
+```
+
+`--upgrade` gets past the already-initialised refusal and adds only what is
+missing — here, the `ci` block your runner needs — while keeping every command
+you corrected and every block another package owns. It reports which of your
+values it left alone.
+
+Use `--upgrade`, not `--force`. `--force` also gets past the refusal, but it
+rewrites the config from the current inference: it would re-guess the commands
+this same command told you to check and correct.

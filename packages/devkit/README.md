@@ -98,7 +98,7 @@ resolve for nobody.
 ## Setting up a repository
 
 ```bash
-devkit init [--profile <name>] [--force]
+devkit init [--profile <name>] [--force] [--upgrade]
 ```
 
 `init` is `sync` plus the wiring a repository does not have yet: it writes
@@ -108,9 +108,27 @@ selected profile.
 
 It **refuses** rather than proceeding when the repository is already set up — a
 config or a manifest already present means `sync` is the command you want, and it
-is the one that knows to leave your edits alone. `--force` rewrites the config
-anyway; nothing overrides the check that this is a git repository, since the
-manifest is a tracked file and the hooks are only ever run by git.
+is the one that knows to leave your edits alone. Nothing overrides the check that
+this is a git repository, since the manifest is a tracked file and the hooks are
+only ever run by git.
+
+Two flags get past that refusal, and they are not interchangeable:
+
+|                                   | `--upgrade`        | `--force`       |
+| --------------------------------- | ------------------ | --------------- |
+| A command you corrected           | kept, and reported | **re-inferred** |
+| A config key a newer version adds | added              | added           |
+| Another package's block           | kept               | kept            |
+| Your `ci` block, edited           | kept               | rewritten       |
+
+**`--upgrade` is the one you want after upgrading this package.** A new version
+can infer config an older one did not — that is how the CI setup hook arrived —
+and `sync` will not add it, because `devkit.config.json` is yours. `--upgrade`
+fills in only what is missing and says which of your values it left alone.
+
+`--force` rewrites the config from the current inference. It is for starting
+over, not for upgrading: this command tells you to check the commands it guessed
+and correct the wrong ones, and `--force` is what silently un-corrects them.
 
 It **fails** when the run did not set the repository up: any file held back for
 an unanswered `{{commands.*}}` placeholder, or a profile that placed nothing at

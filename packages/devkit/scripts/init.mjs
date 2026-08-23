@@ -31,16 +31,17 @@ export const initRefusal = ({
   force = false,
   isGitRepository,
   manifestExists,
+  upgrade = false,
 }) => {
   if (!isGitRepository) {
     return 'init: not a git repository — run `git init` first, or run init in the repository root.';
   }
-  if (force) return undefined;
+  if (force || upgrade) return undefined;
   if (configExists) {
-    return 'init: devkit.config.json is already here — this repository is initialised. Run `devkit sync` to materialise, or pass --force to rewrite the config.';
+    return 'init: devkit.config.json is already here — this repository is initialised. Run `devkit sync` to materialise, `devkit init --upgrade` to add config a newer version infers, or --force to rewrite it.';
   }
   if (manifestExists) {
-    return 'init: a devkit manifest is already here — this repository is initialised. Run `devkit sync` to materialise, or pass --force to start over.';
+    return 'init: a devkit manifest is already here — this repository is initialised. Run `devkit sync` to materialise, `devkit init --upgrade` to add config a newer version infers, or --force to start over.';
   }
   return undefined;
 };
@@ -194,24 +195,56 @@ export const initialConfig = ({
   defaultBranch,
   existing = {},
   profile,
+  upgrade = false,
 }) => {
   const named = defaultBranch !== undefined && defaultBranch !== '';
+  const merged = upgrade
+    ? { ...commands, ...existing.commands }
+    : { ...commands };
   return {
     ...existing,
     // Only written when the runner needs one, so a repository whose CI needs
     // nothing extra is not left with an empty block inviting someone to fill it.
-    ...(ciSetup.length > 0 ? { ci: { ...existing.ci, setup: ciSetup } } : {}),
+    // Under --upgrade an existing block is left exactly as it is: a consumer who
+    // edited the steps meant to.
+    ...(ciSetup.length > 0 && !(upgrade && existing.ci !== undefined)
+      ? { ci: { ...existing.ci, setup: ciSetup } }
+      : {}),
     commands: Object.fromEntries(
-      Object.entries(commands).toSorted(([left], [right]) =>
+      Object.entries(merged).toSorted(([left], [right]) =>
         left.localeCompare(right),
       ),
     ),
-    ...(named
+    ...(named && !(upgrade && existing.conventions?.defaultBranch !== undefined)
       ? { conventions: { ...existing.conventions, defaultBranch } }
       : {}),
     profile,
   };
 };
+
+/**
+ * What an upgrade deliberately did not touch, so the run can say so.
+ *
+ * `init` tells a consumer to check the commands it guessed and correct the ones
+ * that are wrong, so an upgrade that silently re-guessed them would undo the one
+ * thing it asked for — and `--force` does exactly that, which is why it is not
+ * the upgrade path. Reported rather than merely skipped: a key kept at a value
+ * the current version would no longer infer is the one place a consumer might
+ * genuinely want to look.
+ *
+ * @param {{ commands: Record<string, string>, existing?: object }} args
+ * @returns {string[]} `key: kept "…" (would infer "…")`, in key order
+ */
+export const upgradeKeptCommands = ({ commands, existing = {} }) =>
+  Object.entries(existing.commands ?? {})
+    .filter(
+      ([key, value]) => commands[key] !== undefined && commands[key] !== value,
+    )
+    .map(
+      ([key, value]) =>
+        `${key}: kept "${value}" (would infer "${commands[key]}")`,
+    )
+    .toSorted((left, right) => left.localeCompare(right));
 
 /**
  * The tasks a consumer reaches the gates through, and the profile each one is
@@ -398,11 +431,17 @@ export const initSummary = ({
   profile,
   runner,
   skipped,
+  upgrade = false,
   written,
 }) => {
   const lines = [
-    `Initialised for the "${profile}" profile: ${written} file(s) materialised, ${added.length} task(s) added.`,
-    `Commands were inferred for ${runner} — check them in devkit.config.json and correct any that are wrong.`,
+    `${upgrade ? 'Upgraded' : 'Initialised'} for the "${profile}" profile: ${written} file(s) materialised, ${added.length} task(s) added.`,
+    // An upgrade fills in only what is missing, so telling a consumer their
+    // commands "were inferred" would describe a rewrite that did not happen —
+    // and point them at the one thing this path exists to leave alone.
+    upgrade
+      ? `Only what was missing was added; anything already in devkit.config.json was kept as you wrote it.`
+      : `Commands were inferred for ${runner} — check them in devkit.config.json and correct any that are wrong.`,
   ];
   // Said here because an unwired hook and a passing hook produce the identical
   // exit 0 — the same silent absence this kit had to fix in the executable bit.
@@ -413,7 +452,7 @@ export const initSummary = ({
       `The hooks are in \`${hooksPath}/\` and git will NOT run them until you point it there:\n  git config core.hooksPath ${hooksPath}\nUntil you do, they are silently skipped and the gates they carry are absent.`,
     );
   }
-  if (defaultBranch !== undefined && defaultBranch !== '') {
+  if (!upgrade && defaultBranch !== undefined && defaultBranch !== '') {
     lines.push(
       `Recorded \`${defaultBranch}\` as this repository's trunk. If you initialised from a topic branch, fix conventions.defaultBranch before the branch gate runs.`,
     );

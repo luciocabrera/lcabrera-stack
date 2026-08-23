@@ -10,7 +10,7 @@
  * package have diverged, and measure whether a directory can travel at all.
  *
  * Usage:
- *   devkit init [--profile <name>] [--force]
+ *   devkit init [--profile <name>] [--force] [--upgrade]
  *   devkit sync [--profile <name>]
  *   devkit doctor [--profile <name>] [--check] [--verbose]
  *   devkit doctor --accept <path> --reason "<why>"
@@ -27,7 +27,7 @@ import { runDoctor, runSync } from './command-sync.mjs';
 
 const USAGE = [
   'usage:',
-  '  devkit init [--profile <name>] [--force]',
+  '  devkit init [--profile <name>] [--force] [--upgrade]',
   '  devkit sync [--profile <name>]',
   '  devkit doctor [--profile <name>] [--check] [--verbose]',
   '  devkit doctor --accept <path> --reason "<why>"',
