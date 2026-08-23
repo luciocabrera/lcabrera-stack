@@ -14,6 +14,7 @@ import { acceptedEntry, isAccepted } from './accepted.mjs';
 import { groupsFor, hasConfigKey, targetPathFor } from './config.mjs';
 import { requiredConfigKeys, requiredPeers } from './frontmatter.mjs';
 import { unmetPeers } from './peer.mjs';
+import { substituteCiSetup } from './ci-setup.mjs';
 import { substituteCommands } from './placeholders.mjs';
 import {
   isAcknowledgeable,
@@ -92,9 +93,17 @@ const planEntryFor = ({
 
   // Substituted BEFORE hashing, so the record describes what is on disk
   // rather than the template it came from.
+  //
+  // The CI hook goes first and cannot fail: unlike a command, an absent value
+  // is the ordinary case, and it resolves to no steps rather than to a missing
+  // key. A workflow that needed one and got none fails on the runner, where it
+  // is visible; one held back here would leave the repository with no CI at all.
   const { content, missing } = substituteCommands({
     commands: config.commands,
-    content: asset.content,
+    content: substituteCiSetup({
+      content: asset.content,
+      setup: config.ci?.setup,
+    }),
   });
   const incomingHash = hashContent(content);
 

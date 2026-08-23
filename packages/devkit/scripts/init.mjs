@@ -59,6 +59,18 @@ export const initRefusal = ({
  */
 const RUNNERS = [
   {
+    // `vp` is a project dependency, so installing it is the step that was about
+    // to run. The action resolves the version from the repository's own
+    // manifest and lockfile, which is why it is preferred to a pinned global
+    // install: a version written here would go stale the day the consumer bumps
+    // theirs, silently and with nothing to catch it. `run-install: false`
+    // because the install step below is the one that runs.
+    ciSetup: [
+      '- name: Set up Vite+',
+      '  uses: voidzero-dev/setup-vp@8ecb39174989ce55af90f45cf55b02738599831d',
+      '  with:',
+      '    run-install: false',
+    ],
     commands: {
       audit: 'vp run deps:audit',
       check: 'vp check',
@@ -96,6 +108,11 @@ const RUNNERS = [
       install: 'bun install --frozen-lockfile',
       test: 'bun test',
     },
+    // Not on the runner image, and corepack does not provide it.
+    ciSetup: [
+      '- name: Set up Bun',
+      '  uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0',
+    ],
     detect: ({ files }) => files.has('bun.lockb') || files.has('bun.lock'),
     name: 'bun',
   },
@@ -134,7 +151,11 @@ export const inferRunner = ({ dependencies = [], files = [] } = {}) => {
     files: new Set(files),
   };
   const runner = RUNNERS.find((candidate) => candidate.detect(context));
-  return { commands: { ...runner.commands }, name: runner.name };
+  return {
+    ciSetup: [...(runner.ciSetup ?? [])],
+    commands: { ...runner.commands },
+    name: runner.name,
+  };
 };
 
 /**
@@ -168,6 +189,7 @@ export const inferRunner = ({ dependencies = [], files = [] } = {}) => {
  *           existing?: object, profile: string }} args
  */
 export const initialConfig = ({
+  ciSetup = [],
   commands,
   defaultBranch,
   existing = {},
@@ -176,6 +198,9 @@ export const initialConfig = ({
   const named = defaultBranch !== undefined && defaultBranch !== '';
   return {
     ...existing,
+    // Only written when the runner needs one, so a repository whose CI needs
+    // nothing extra is not left with an empty block inviting someone to fill it.
+    ...(ciSetup.length > 0 ? { ci: { ...existing.ci, setup: ciSetup } } : {}),
     commands: Object.fromEntries(
       Object.entries(commands).toSorted(([left], [right]) =>
         left.localeCompare(right),

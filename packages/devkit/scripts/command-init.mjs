@@ -96,6 +96,7 @@ const writeConfig = ({ profile, root }) => {
   writeJson(
     join(root, CONFIG_FILE_NAME),
     initialConfig({
+      ciSetup: runner.ciSetup,
       commands: runner.commands,
       defaultBranch,
       existing: readJsonIfPresent(join(root, CONFIG_FILE_NAME)),

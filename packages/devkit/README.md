@@ -268,6 +268,40 @@ the same split the toolchain packages made. A shipped file may reference only
 something inside its own package, a bin from a declared peer, or a key from
 here. `devkit closure` is what checks that.
 
+### Giving a workflow the toolchain it needs
+
+A shipped workflow starts on an empty runner, so `{{commands.install}}` is only
+runnable there if the tool it names is already present. That is not something
+the command itself can express: `vp install` is exactly right in your terminal
+and impossible on a fresh runner, because `vp` is a project dependency and
+installing it is the step that was about to run.
+
+Every shipped workflow therefore enables corepack — which supplies the package
+manager `packageManager` pins, at that version — and leaves one hook for the
+runners corepack cannot reach:
+
+```json
+{
+  "ci": {
+    "setup": [
+      "- name: Set up Vite+",
+      "  uses: voidzero-dev/setup-vp@<sha>",
+      "  with:",
+      "    run-install: false"
+    ]
+  }
+}
+```
+
+`init` fills this in for the runners that need it and leaves it out for the
+rest, so most repositories never see the key. The value is YAML **lines**,
+indented into place wherever a workflow carries `{{ci.setup}}` — verbatim,
+because a step schema in JSON would only ever render back into YAML while
+bounding what you can express to whatever this package anticipated.
+
+Unlike a command, an absent value is the ordinary case: it resolves to no steps
+rather than to a missing key, so a file is never held back for it.
+
 ### Declaring what a file cannot run without
 
 A placeholder is only half the story: a file can depend on a config key while

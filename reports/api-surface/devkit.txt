@@ -11,12 +11,12 @@ classifyPathToken [const] ({ exists, fromDirectory, rootDirectory, shipped, toke
 allowedConfigKeys [const] (config: any) => string[]
 CONFIG_FILE_NAME [const] "devkit.config.json"
 configuredCommandWords [const] (config: any) => string[]
-DEFAULT_CONFIG [const] { commands: {}; paths: { agents: string; coordination: string; decisions: string; docs: string; hooks: string; root: string; rules: string; skills: string; templates: string; workflows: string; }; profile: string; }
+DEFAULT_CONFIG [const] { ci: { setup: never[]; }; commands: {}; paths: { agents: string; coordination: string; decisions: string; docs: string; hooks: string; root: string; rules: string; skills: string; templates: string; workflows: string; }; profile: string; }
 groupsFor [const] (config: any) => any
 hasConfigKey [const] ({ config, path }: { config: any; path: any; }) => boolean
 isExecutableAsset [const] (assetPath: any) => boolean
 PROFILES [const] { agent: string[]; full: string[]; }
-resolveConfig [const] (raw: any) => { commands: any; paths: any; profile: string; }
+resolveConfig [const] (raw: any) => { ci: { setup: any; }; commands: any; paths: any; profile: string; }
 targetPathFor [const] ({ assetPath, config }: { assetPath: any; config: any; }) => any
 withProfile [const] ({ config, profile, source }: { config: object; profile: string; source?: string; }) => { profile: string; }
 

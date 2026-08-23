@@ -25,6 +25,7 @@ export const CONFIG_FILE_NAME = 'devkit.config.json';
  * never looks.
  */
 export const DEFAULT_CONFIG = {
+  ci: { setup: [] },
   commands: {},
   paths: {
     agents: '.claude/agents',
@@ -97,6 +98,19 @@ export const withProfile = ({ config, profile, source = '--profile' }) => {
  * one meant it, and quietly ignoring it would materialise into the wrong
  * directories while reporting success.
  */
+/**
+ * The consumer's extra CI steps, as verbatim YAML lines.
+ *
+ * Absent, malformed or non-string entries all resolve to "no extra steps"
+ * rather than throwing: this is an optional hook, and a repository whose
+ * runner needs nothing must not be made to declare that it needs nothing.
+ * A wrong value fails where it is read — in the workflow run — not here.
+ */
+const ciSetupLines = (ci) =>
+  isPlainObject(ci) && Array.isArray(ci.setup)
+    ? ci.setup.filter((line) => typeof line === 'string')
+    : [];
+
 export const resolveConfig = (raw) => {
   if (raw === undefined) return DEFAULT_CONFIG;
   const parsed = JSON.parse(raw);
@@ -109,6 +123,7 @@ export const resolveConfig = (raw) => {
     source: CONFIG_FILE_NAME,
   }).profile;
   return {
+    ci: { setup: ciSetupLines(parsed.ci) },
     commands: isPlainObject(parsed.commands)
       ? parsed.commands
       : DEFAULT_CONFIG.commands,
