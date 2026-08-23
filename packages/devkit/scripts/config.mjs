@@ -94,11 +94,6 @@ export const withProfile = ({ config, profile, source = '--profile' }) => {
 };
 
 /**
- * A malformed config is a failure, not a silent fallback: a consumer who wrote
- * one meant it, and quietly ignoring it would materialise into the wrong
- * directories while reporting success.
- */
-/**
  * The consumer's extra CI steps, as verbatim YAML lines.
  *
  * Absent, malformed or non-string entries all resolve to "no extra steps"
@@ -111,6 +106,11 @@ const ciSetupLines = (ci) =>
     ? ci.setup.filter((line) => typeof line === 'string')
     : [];
 
+/**
+ * A malformed config is a failure, not a silent fallback: a consumer who wrote
+ * one meant it, and quietly ignoring it would materialise into the wrong
+ * directories while reporting success.
+ */
 export const resolveConfig = (raw) => {
   if (raw === undefined) return DEFAULT_CONFIG;
   const parsed = JSON.parse(raw);

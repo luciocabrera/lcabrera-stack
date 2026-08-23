@@ -33,12 +33,6 @@
 const PLACEHOLDER =
   /^([ \t]*)#[ \t]*\{\{[ \t]*ci\.setup[ \t]*\}\}[ \t]*\r?\n/gm;
 
-/** Whether content asks for the consumer's CI setup steps. */
-export const needsCiSetup = (content) => {
-  PLACEHOLDER.lastIndex = 0;
-  return PLACEHOLDER.test(content);
-};
-
 /**
  * The lines indented to sit where the placeholder sat.
  *
