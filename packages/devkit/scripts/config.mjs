@@ -25,6 +25,7 @@ export const CONFIG_FILE_NAME = 'devkit.config.json';
  * never looks.
  */
 export const DEFAULT_CONFIG = {
+  ci: { setup: [] },
   commands: {},
   paths: {
     agents: '.claude/agents',
@@ -93,6 +94,46 @@ export const withProfile = ({ config, profile, source = '--profile' }) => {
 };
 
 /**
+ * The consumer's extra CI steps, as verbatim YAML lines.
+ *
+ * **Absent** resolves to "no extra steps" and says nothing: this is an optional
+ * hook, and a repository whose runner needs nothing must not be made to declare
+ * that it needs nothing.
+ *
+ * **Present but wrongly shaped throws**, and the distinction is not pedantry —
+ * resolving it quietly to `[]` reproduces the bug this hook exists to remove.
+ * The steps are verbatim YAML lines, so the natural JSON spelling of a step
+ * (`{ "name": …, "uses": … }`) is wrong here and is the mistake a consumer will
+ * actually make. Dropped silently, the placeholder line is deleted from every
+ * workflow, `sync` reports success, the files record clean — and each job fails
+ * at `{{commands.install}}` with `exit 127`, indistinguishable from having
+ * declared no `ci` block at all, with nothing pointing back at this file.
+ *
+ * `commands` falling back beside it is not a precedent: a missing command still
+ * surfaces, because `substituteCommands` holds the file back and names the key.
+ * There is no such backstop here, precisely because absent has to stay silent.
+ */
+const ciSetupLines = (ci) => {
+  if (ci === undefined) return [];
+  if (!isPlainObject(ci)) {
+    throw new TypeError(`${CONFIG_FILE_NAME}: "ci" must be a JSON object`);
+  }
+  if (ci.setup === undefined) return [];
+  if (!Array.isArray(ci.setup)) {
+    throw new TypeError(
+      `${CONFIG_FILE_NAME}: "ci.setup" must be an array of strings — verbatim YAML lines, not step objects`,
+    );
+  }
+  const wrong = ci.setup.findIndex((line) => typeof line !== 'string');
+  if (wrong !== -1) {
+    throw new TypeError(
+      `${CONFIG_FILE_NAME}: "ci.setup[${wrong}]" must be a string — the steps are verbatim YAML lines, so a step is written as the lines that spell it, not as an object`,
+    );
+  }
+  return ci.setup;
+};
+
+/**
  * A malformed config is a failure, not a silent fallback: a consumer who wrote
  * one meant it, and quietly ignoring it would materialise into the wrong
  * directories while reporting success.
@@ -101,7 +142,7 @@ export const resolveConfig = (raw) => {
   if (raw === undefined) return DEFAULT_CONFIG;
   const parsed = JSON.parse(raw);
   if (!isPlainObject(parsed)) {
-    throw new Error(`${CONFIG_FILE_NAME} must contain a JSON object`);
+    throw new TypeError(`${CONFIG_FILE_NAME} must contain a JSON object`);
   }
   const profile = withProfile({
     config: DEFAULT_CONFIG,
@@ -109,6 +150,7 @@ export const resolveConfig = (raw) => {
     source: CONFIG_FILE_NAME,
   }).profile;
   return {
+    ci: { setup: ciSetupLines(parsed.ci) },
     commands: isPlainObject(parsed.commands)
       ? parsed.commands
       : DEFAULT_CONFIG.commands,

@@ -31,16 +31,17 @@ export const initRefusal = ({
   force = false,
   isGitRepository,
   manifestExists,
+  upgrade = false,
 }) => {
   if (!isGitRepository) {
     return 'init: not a git repository — run `git init` first, or run init in the repository root.';
   }
-  if (force) return undefined;
+  if (force || upgrade) return undefined;
   if (configExists) {
-    return 'init: devkit.config.json is already here — this repository is initialised. Run `devkit sync` to materialise, or pass --force to rewrite the config.';
+    return 'init: devkit.config.json is already here — this repository is initialised. Run `devkit sync` to materialise, `devkit init --upgrade` to add config a newer version infers, or --force to rewrite it.';
   }
   if (manifestExists) {
-    return 'init: a devkit manifest is already here — this repository is initialised. Run `devkit sync` to materialise, or pass --force to start over.';
+    return 'init: a devkit manifest is already here — this repository is initialised. Run `devkit sync` to materialise, `devkit init --upgrade` to add config a newer version infers, or --force to start over.';
   }
   return undefined;
 };
@@ -59,6 +60,18 @@ export const initRefusal = ({
  */
 const RUNNERS = [
   {
+    // `vp` is a project dependency, so installing it is the step that was about
+    // to run. The action resolves the version from the repository's own
+    // manifest and lockfile, which is why it is preferred to a pinned global
+    // install: a version written here would go stale the day the consumer bumps
+    // theirs, silently and with nothing to catch it. `run-install: false`
+    // because the install step below is the one that runs.
+    ciSetup: [
+      '- name: Set up Vite+',
+      '  uses: voidzero-dev/setup-vp@8ecb39174989ce55af90f45cf55b02738599831d',
+      '  with:',
+      '    run-install: false',
+    ],
     commands: {
       audit: 'vp run deps:audit',
       check: 'vp check',
@@ -96,6 +109,11 @@ const RUNNERS = [
       install: 'bun install --frozen-lockfile',
       test: 'bun test',
     },
+    // Not on the runner image, and corepack does not provide it.
+    ciSetup: [
+      '- name: Set up Bun',
+      '  uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0',
+    ],
     detect: ({ files }) => files.has('bun.lockb') || files.has('bun.lock'),
     name: 'bun',
   },
@@ -134,8 +152,35 @@ export const inferRunner = ({ dependencies = [], files = [] } = {}) => {
     files: new Set(files),
   };
   const runner = RUNNERS.find((candidate) => candidate.detect(context));
-  return { commands: { ...runner.commands }, name: runner.name };
+  return {
+    ciSetup: [...(runner.ciSetup ?? [])],
+    commands: { ...runner.commands },
+    name: runner.name,
+  };
 };
+
+/**
+ * Whether this run records `conventions.defaultBranch`.
+ *
+ * One predicate, asked by both the write and the notice that reports it, because
+ * the two disagreeing is the bug it was extracted for: an upgrade whose config
+ * has no `defaultBranch` — a hand-written one, or any config predating the key —
+ * DOES record the branch it is standing on, and a notice keyed on `--upgrade`
+ * withheld the sentence saying so. That consumer is necessarily on a topic
+ * branch, since a config change arrives by PR under the standards this kit
+ * ships, so the branch recorded as the trunk is the wrong one and the gates then
+ * fail against it.
+ *
+ * @param {{ defaultBranch?: string, existing?: object, upgrade?: boolean }} args
+ */
+export const recordsDefaultBranch = ({
+  defaultBranch,
+  existing = {},
+  upgrade = false,
+}) =>
+  defaultBranch !== undefined &&
+  defaultBranch !== '' &&
+  !(upgrade && existing.conventions?.defaultBranch !== undefined);
 
 /**
  * The config `init` writes, layered OVER whatever is already there.
@@ -168,24 +213,97 @@ export const inferRunner = ({ dependencies = [], files = [] } = {}) => {
  *           existing?: object, profile: string }} args
  */
 export const initialConfig = ({
+  ciSetup = [],
   commands,
   defaultBranch,
   existing = {},
   profile,
+  upgrade = false,
 }) => {
-  const named = defaultBranch !== undefined && defaultBranch !== '';
+  const merged = upgrade
+    ? { ...commands, ...existing.commands }
+    : { ...commands };
   return {
     ...existing,
+    // Only written when the runner needs one, so a repository whose CI needs
+    // nothing extra is not left with an empty block inviting someone to fill it.
+    // Under --upgrade an existing `setup` is left exactly as it is: a consumer
+    // who edited the steps meant to.
+    //
+    // Keyed on `ci.setup`, not on `ci`: this run owns that key alone, and the
+    // file is shared. A `ci` block carrying only a sibling another package owns
+    // would otherwise block the write and leave the placeholder resolving to no
+    // steps — the exit 127 this hook exists to remove. The spread keeps that
+    // sibling.
+    ...(ciSetup.length > 0 && !(upgrade && existing.ci?.setup !== undefined)
+      ? { ci: { ...existing.ci, setup: ciSetup } }
+      : {}),
     commands: Object.fromEntries(
-      Object.entries(commands).toSorted(([left], [right]) =>
+      Object.entries(merged).toSorted(([left], [right]) =>
         left.localeCompare(right),
       ),
     ),
-    ...(named
+    ...(recordsDefaultBranch({ defaultBranch, existing, upgrade })
       ? { conventions: { ...existing.conventions, defaultBranch } }
       : {}),
     profile,
   };
+};
+
+/**
+ * What an upgrade deliberately did not touch, so the run can say so.
+ *
+ * `init` tells a consumer to check the commands it guessed and correct the ones
+ * that are wrong, so an upgrade that silently re-guessed them would undo the one
+ * thing it asked for — and `--force` does exactly that, which is why it is not
+ * the upgrade path. Reported rather than merely skipped: a key kept at a value
+ * the current version would no longer infer is the one place a consumer might
+ * genuinely want to look.
+ *
+ * @param {{ commands: Record<string, string>, existing?: object }} args
+ * @returns {string[]} `key: kept "…" (would infer "…")`, in key order
+ */
+export const upgradeKeptCommands = ({ commands, existing = {} }) =>
+  Object.entries(existing.commands ?? {})
+    .filter(
+      ([key, value]) => commands[key] !== undefined && commands[key] !== value,
+    )
+    .map(
+      ([key, value]) =>
+        `${key}: kept "${value}" (would infer "${commands[key]}")`,
+    )
+    .toSorted((left, right) => left.localeCompare(right));
+
+/**
+ * The `ci.setup` an upgrade left as the consumer wrote it, beside the steps this
+ * version would have set up.
+ *
+ * Printed in full rather than named, because the difference that matters is
+ * invisible in a summary: the steps pin their actions by commit sha, so a later
+ * devkit shipping a new sha — a supply-chain fix being the likely reason — is a
+ * change a consumer keeping their own block would otherwise never be shown.
+ *
+ * @param {{ ciSetup?: string[], existing?: object }} args
+ * @returns {string[]} the report lines, empty when nothing was kept
+ */
+export const upgradeKeptCiSetup = ({ ciSetup = [], existing = {} }) => {
+  const kept = existing.ci?.setup;
+  // Present-or-absent, the same question `initialConfig` asks. The two keyed on
+  // different things is how a `ci` block with no `setup` came to be neither
+  // written nor reported.
+  if (
+    ciSetup.length === 0 ||
+    kept === undefined ||
+    (Array.isArray(kept) &&
+      kept.length === ciSetup.length &&
+      kept.every((line, index) => line === ciSetup[index]))
+  ) {
+    return [];
+  }
+  return [
+    'ci.setup: kept your steps. This version would have set up:',
+    ...ciSetup.map((line) => `  ${line}`),
+  ];
 };
 
 /**
@@ -363,21 +481,28 @@ export const placedHooksPath = ({ entries, hooksPath }) =>
 
 /**
  * @param {{ added: string[], defaultBranch?: string, hooksPath?: string,
- *           profile: string, runner: string, skipped: string[],
- *           written: number }} args
+ *           profile: string, recordedTrunk?: boolean, runner: string,
+ *           skipped: string[], written: number }} args
  */
 export const initSummary = ({
   added,
   defaultBranch,
   hooksPath,
   profile,
+  recordedTrunk = false,
   runner,
   skipped,
+  upgrade = false,
   written,
 }) => {
   const lines = [
-    `Initialised for the "${profile}" profile: ${written} file(s) materialised, ${added.length} task(s) added.`,
-    `Commands were inferred for ${runner} — check them in devkit.config.json and correct any that are wrong.`,
+    `${upgrade ? 'Upgraded' : 'Initialised'} for the "${profile}" profile: ${written} file(s) materialised, ${added.length} task(s) added.`,
+    // An upgrade fills in only what is missing, so telling a consumer their
+    // commands "were inferred" would describe a rewrite that did not happen —
+    // and point them at the one thing this path exists to leave alone.
+    upgrade
+      ? `Only what was missing was added; anything already in devkit.config.json was kept as you wrote it.`
+      : `Commands were inferred for ${runner} — check them in devkit.config.json and correct any that are wrong.`,
   ];
   // Said here because an unwired hook and a passing hook produce the identical
   // exit 0 — the same silent absence this kit had to fix in the executable bit.
@@ -388,7 +513,9 @@ export const initSummary = ({
       `The hooks are in \`${hooksPath}/\` and git will NOT run them until you point it there:\n  git config core.hooksPath ${hooksPath}\nUntil you do, they are silently skipped and the gates they carry are absent.`,
     );
   }
-  if (defaultBranch !== undefined && defaultBranch !== '') {
+  // Asked of `recordsDefaultBranch`, not of `--upgrade`: an upgrade that finds no
+  // recorded trunk writes one, and that is the run that most needs telling.
+  if (recordedTrunk) {
     lines.push(
       `Recorded \`${defaultBranch}\` as this repository's trunk. If you initialised from a topic branch, fix conventions.defaultBranch before the branch gate runs.`,
     );

@@ -30,6 +30,9 @@ import {
   initSummary,
   inferRunner,
   initialConfig,
+  recordsDefaultBranch,
+  upgradeKeptCiSetup,
+  upgradeKeptCommands,
   placedHooksPath,
   scriptsAfter,
   tasksFor,
@@ -82,13 +85,14 @@ const currentBranch = (root) => {
   }
 };
 
-const writeConfig = ({ profile, root }) => {
+const writeConfig = ({ profile, root, upgrade }) => {
   const manifest = readJsonIfPresent(join(root, MANIFEST));
   const runner = inferRunner({
     dependencies: declaredDependencies(manifest),
     files: readdirSync(root),
   });
   const defaultBranch = currentBranch(root);
+  const existing = readJsonIfPresent(join(root, CONFIG_FILE_NAME));
   // Layered over what is already there, not written over it: this file is shared
   // with the gate runtime, so replacing it deletes that package's blocks. Read
   // RAW rather than through `resolveConfig`, which answers with devkit's keys
@@ -96,13 +100,25 @@ const writeConfig = ({ profile, root }) => {
   writeJson(
     join(root, CONFIG_FILE_NAME),
     initialConfig({
+      ciSetup: runner.ciSetup,
       commands: runner.commands,
       defaultBranch,
-      existing: readJsonIfPresent(join(root, CONFIG_FILE_NAME)),
+      existing,
       profile,
+      upgrade,
     }),
   );
-  return { ...runner, defaultBranch };
+  return {
+    ...runner,
+    defaultBranch,
+    kept: upgrade
+      ? [
+          ...upgradeKeptCommands({ commands: runner.commands, existing }),
+          ...upgradeKeptCiSetup({ ciSetup: runner.ciSetup, existing }),
+        ]
+      : [],
+    recordedTrunk: recordsDefaultBranch({ defaultBranch, existing, upgrade }),
+  };
 };
 
 /**
@@ -149,8 +165,8 @@ const materialise = ({ profile, root }) => {
  * and the outcome handling. The refusals come first and independently, because
  * a refusal must leave the tree exactly as it found it.
  */
-const applyInit = ({ profile, root }) => {
-  const runner = writeConfig({ profile, root });
+const applyInit = ({ profile, root, upgrade }) => {
+  const runner = writeConfig({ profile, root, upgrade });
   const { added, skipped, warning } = writeTasks({ profile, root });
   const entries = materialise({ profile, root });
   const { written } = countsFor(entries);
@@ -175,14 +191,24 @@ const applyInit = ({ profile, root }) => {
     return 1;
   }
 
+  // Said out loud, because the whole point of --upgrade over --force is that it
+  // does NOT re-guess these, and a consumer who corrected one needs to know it
+  // survived rather than assume it did.
+  if (runner.kept.length > 0) {
+    const kept = runner.kept.map((line) => `  ${line}`).join('\n');
+    console.log(`\nLeft alone, because you set them:\n${kept}`);
+  }
+
   console.log(
     `\n${initSummary({
       added,
       defaultBranch: runner.defaultBranch,
       hooksPath: placedHooksPath({ entries, hooksPath }),
       profile,
+      recordedTrunk: runner.recordedTrunk,
       runner: runner.name,
       skipped,
+      upgrade,
       written,
     })}`,
   );
@@ -217,16 +243,18 @@ export const runInit = (argv, root) => {
     profile: flagged ?? configured.profile,
   }).profile;
 
+  const upgrade = argv.includes('--upgrade');
   const refusal = initRefusal({
     configExists: existsSync(join(root, CONFIG_FILE_NAME)),
     force: argv.includes('--force'),
     isGitRepository: existsSync(join(root, '.git')),
     manifestExists: existsSync(join(root, MANIFEST_FILE)),
+    upgrade,
   });
   if (refusal !== undefined) {
     console.error(refusal);
     return 1;
   }
 
-  return applyInit({ profile, root });
+  return applyInit({ profile, root, upgrade });
 };

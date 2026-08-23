@@ -45,6 +45,16 @@ jobs:
         with:
           node-version-file: .node-version
 
+      # A runner image does not carry every package manager, and which ones it
+      # does carry is not a promise. Corepack is bundled with Node and supplies
+      # the one `packageManager` pins, at that exact version — so this covers
+      # the gap without naming a manager or a version anywhere. Harmless when
+      # the manager is the one Node already ships, which is why it is
+      # unconditional rather than another thing a consumer has to turn on.
+      - name: Enable the pinned package manager
+        run: corepack enable
+
+      # {{ci.setup}}
       - name: Install dependencies
         run: |
           {{commands.install}}
