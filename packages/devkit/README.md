@@ -119,12 +119,18 @@ Two flags get past that refusal, and they are not interchangeable:
 | A command you corrected           | kept, and reported | **re-inferred** |
 | A config key a newer version adds | added              | added           |
 | Another package's block           | kept               | kept            |
-| Your `ci` block, edited           | kept               | rewritten       |
+| Your `ci` block, edited           | kept, and reported | rewritten       |
 
 **`--upgrade` is the one you want after upgrading this package.** A new version
 can infer config an older one did not — that is how the CI setup hook arrived —
 and `sync` will not add it, because `devkit.config.json` is yours. `--upgrade`
 fills in only what is missing and says which of your values it left alone.
+
+That report is the point, not a courtesy. The CI setup steps pin their actions by
+commit sha, so a version that ships a new one — a supply-chain fix being the
+likely reason — changes nothing for a consumer holding their own `ci` block. The
+run prints the steps it would have set up, beside the ones it kept, so that
+difference is visible rather than inferred.
 
 `--force` rewrites the config from the current inference. It is for starting
 over, not for upgrading: this command tells you to check the commands it guessed

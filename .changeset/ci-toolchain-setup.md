@@ -34,7 +34,8 @@ devkit init --upgrade && devkit sync
 `--upgrade` gets past the already-initialised refusal and adds only what is
 missing — here, the `ci` block your runner needs — while keeping every command
 you corrected and every block another package owns. It reports which of your
-values it left alone.
+values it left alone, printing what it would have inferred beside them — which is
+how a bumped action sha reaches a consumer who keeps their own `ci` block.
 
 Use `--upgrade`, not `--force`. `--force` also gets past the refusal, but it
 rewrites the config from the current inference: it would re-guess the commands

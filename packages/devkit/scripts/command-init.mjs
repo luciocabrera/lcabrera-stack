@@ -30,6 +30,8 @@ import {
   initSummary,
   inferRunner,
   initialConfig,
+  recordsDefaultBranch,
+  upgradeKeptCiSetup,
   upgradeKeptCommands,
   placedHooksPath,
   scriptsAfter,
@@ -110,8 +112,12 @@ const writeConfig = ({ profile, root, upgrade }) => {
     ...runner,
     defaultBranch,
     kept: upgrade
-      ? upgradeKeptCommands({ commands: runner.commands, existing })
+      ? [
+          ...upgradeKeptCommands({ commands: runner.commands, existing }),
+          ...upgradeKeptCiSetup({ ciSetup: runner.ciSetup, existing }),
+        ]
       : [],
+    recordedTrunk: recordsDefaultBranch({ defaultBranch, existing, upgrade }),
   };
 };
 
@@ -199,6 +205,7 @@ const applyInit = ({ profile, root, upgrade }) => {
       defaultBranch: runner.defaultBranch,
       hooksPath: placedHooksPath({ entries, hooksPath }),
       profile,
+      recordedTrunk: runner.recordedTrunk,
       runner: runner.name,
       skipped,
       upgrade,

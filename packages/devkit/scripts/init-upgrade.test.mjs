@@ -4,6 +4,8 @@ import {
   initialConfig,
   initRefusal,
   initSummary,
+  recordsDefaultBranch,
+  upgradeKeptCiSetup,
   upgradeKeptCommands,
 } from './init.mjs';
 
@@ -142,12 +144,116 @@ describe('upgradeKeptCommands', () => {
   });
 });
 
+describe('upgradeKeptCiSetup', () => {
+  const inferred = ['- name: Set up Vite+', '  uses: o/setup-vp@newsha'];
+
+  // The case the sha pinning exists for: a later devkit bumps the pinned action
+  // and a consumer with their own block keeps the superseded one. Kept silently,
+  // that is a supply-chain fix they are never shown.
+  test('prints the steps this version would have set up', () => {
+    expect(
+      upgradeKeptCiSetup({
+        ciSetup: inferred,
+        existing: {
+          ci: { setup: ['- name: Set up Vite+', '  uses: o/setup-vp@oldsha'] },
+        },
+      }),
+    ).toEqual([
+      'ci.setup: kept your steps. This version would have set up:',
+      '  - name: Set up Vite+',
+      '    uses: o/setup-vp@newsha',
+    ]);
+  });
+
+  test('says nothing when the kept block is the inferred one', () => {
+    expect(
+      upgradeKeptCiSetup({
+        ciSetup: inferred,
+        existing: { ci: { setup: inferred } },
+      }),
+    ).toEqual([]);
+  });
+
+  test('says nothing when the consumer has no ci block to keep', () => {
+    expect(
+      upgradeKeptCiSetup({ ciSetup: inferred, existing: settled }),
+    ).toEqual([]);
+  });
+
+  // A runner that needs no setup steps infers nothing, so there is no
+  // alternative to report a hand-written block against.
+  test('says nothing when this version would set up no steps', () => {
+    expect(
+      upgradeKeptCiSetup({ existing: { ci: { setup: ['- name: Mine'] } } }),
+    ).toEqual([]);
+  });
+
+  test('tolerates a hand-written ci block that is not a list of steps', () => {
+    expect(
+      upgradeKeptCiSetup({
+        ciSetup: inferred,
+        existing: { ci: { setup: 'nope' } },
+      }),
+    ).toEqual([]);
+  });
+});
+
+describe('recordsDefaultBranch', () => {
+  // The regression: an upgrade whose config predates `conventions.defaultBranch`
+  // DOES record the branch it is standing on — and a consumer taking a new
+  // version by PR is standing on a topic branch when they run it.
+  test('records when an upgrade finds no trunk recorded', () => {
+    expect(
+      recordsDefaultBranch({
+        defaultBranch: 'fix/123-take-devkit-0.2.0',
+        existing: { conventions: { sharedBranchesDir: 'docs/branches' } },
+        upgrade: true,
+      }),
+    ).toBe(true);
+  });
+
+  test('leaves a trunk the consumer already recorded', () => {
+    expect(
+      recordsDefaultBranch({
+        defaultBranch: 'fix/123-take-devkit-0.2.0',
+        existing: settled,
+        upgrade: true,
+      }),
+    ).toBe(false);
+  });
+
+  test('records on a fresh init', () => {
+    expect(recordsDefaultBranch({ defaultBranch: 'main' })).toBe(true);
+  });
+
+  // `currentBranch` answers '' on a detached HEAD, and '' is not a branch name.
+  test('records nothing when the branch could not be read', () => {
+    expect(recordsDefaultBranch({ defaultBranch: '' })).toBe(false);
+  });
+
+  // The predicate and the write must not drift: this is the same question asked
+  // of the config `initialConfig` produced from the same inputs.
+  test('agrees with what initialConfig wrote', () => {
+    const args = {
+      defaultBranch: 'fix/123-take-devkit-0.2.0',
+      existing: { conventions: { sharedBranchesDir: 'docs/branches' } },
+      upgrade: true,
+    };
+    expect(
+      initialConfig({ ...args, commands: INFERRED, profile: 'full' })
+        .conventions.defaultBranch,
+    ).toBe('fix/123-take-devkit-0.2.0');
+    expect(recordsDefaultBranch(args)).toBe(true);
+  });
+});
+
 describe('initSummary under --upgrade', () => {
-  const summary = (upgrade) =>
+  const summary = ({ recordedTrunk = false, upgrade }) =>
     initSummary({
       added: [],
       defaultBranch: 'main',
       profile: 'full',
+      recordedTrunk,
       runner: 'vite-plus',
       skipped: [],
       upgrade,
@@ -155,14 +261,23 @@ describe('initSummary under --upgrade', () => {
     });
 
   test('does not claim commands were inferred', () => {
-    expect(summary(true)).toContain('kept as you wrote it');
-    expect(summary(true)).not.toContain('were inferred');
+    expect(summary({ upgrade: true })).toContain('kept as you wrote it');
+    expect(summary({ upgrade: true })).not.toContain('were inferred');
   });
 
-  // Recording the current branch as the trunk is an init-time decision; on an
-  // upgrade the consumer already has one and it is not being re-recorded.
-  test('does not claim to have recorded a trunk', () => {
-    expect(summary(true)).not.toContain("repository's trunk");
-    expect(summary(false)).toContain("repository's trunk");
+  // Keyed on the write, not on the flag. Keyed on `!upgrade`, the one upgrade
+  // that records a trunk was the one told nothing about it.
+  test('warns whenever a trunk was recorded', () => {
+    expect(summary({ recordedTrunk: true, upgrade: true })).toContain(
+      "repository's trunk",
+    );
+    expect(summary({ recordedTrunk: true, upgrade: false })).toContain(
+      "repository's trunk",
+    );
+  });
+
+  test('stays quiet when no trunk was recorded', () => {
+    expect(summary({ upgrade: true })).not.toContain("repository's trunk");
+    expect(summary({ upgrade: false })).not.toContain("repository's trunk");
   });
 });

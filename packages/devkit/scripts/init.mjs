@@ -160,6 +160,29 @@ export const inferRunner = ({ dependencies = [], files = [] } = {}) => {
 };
 
 /**
+ * Whether this run records `conventions.defaultBranch`.
+ *
+ * One predicate, asked by both the write and the notice that reports it, because
+ * the two disagreeing is the bug it was extracted for: an upgrade whose config
+ * has no `defaultBranch` — a hand-written one, or any config predating the key —
+ * DOES record the branch it is standing on, and a notice keyed on `--upgrade`
+ * withheld the sentence saying so. That consumer is necessarily on a topic
+ * branch, since a config change arrives by PR under the standards this kit
+ * ships, so the branch recorded as the trunk is the wrong one and the gates then
+ * fail against it.
+ *
+ * @param {{ defaultBranch?: string, existing?: object, upgrade?: boolean }} args
+ */
+export const recordsDefaultBranch = ({
+  defaultBranch,
+  existing = {},
+  upgrade = false,
+}) =>
+  defaultBranch !== undefined &&
+  defaultBranch !== '' &&
+  !(upgrade && existing.conventions?.defaultBranch !== undefined);
+
+/**
  * The config `init` writes, layered OVER whatever is already there.
  *
  * `devkit.config.json` is **shared** with the gate runtime — `@lcabrera/repo-standards`
@@ -197,7 +220,6 @@ export const initialConfig = ({
   profile,
   upgrade = false,
 }) => {
-  const named = defaultBranch !== undefined && defaultBranch !== '';
   const merged = upgrade
     ? { ...commands, ...existing.commands }
     : { ...commands };
@@ -215,7 +237,7 @@ export const initialConfig = ({
         left.localeCompare(right),
       ),
     ),
-    ...(named && !(upgrade && existing.conventions?.defaultBranch !== undefined)
+    ...(recordsDefaultBranch({ defaultBranch, existing, upgrade })
       ? { conventions: { ...existing.conventions, defaultBranch } }
       : {}),
     profile,
@@ -245,6 +267,34 @@ export const upgradeKeptCommands = ({ commands, existing = {} }) =>
         `${key}: kept "${value}" (would infer "${commands[key]}")`,
     )
     .toSorted((left, right) => left.localeCompare(right));
+
+/**
+ * The `ci.setup` an upgrade left as the consumer wrote it, beside the steps this
+ * version would have set up.
+ *
+ * Printed in full rather than named, because the difference that matters is
+ * invisible in a summary: the steps pin their actions by commit sha, so a later
+ * devkit shipping a new sha — a supply-chain fix being the likely reason — is a
+ * change a consumer keeping their own block would otherwise never be shown.
+ *
+ * @param {{ ciSetup?: string[], existing?: object }} args
+ * @returns {string[]} the report lines, empty when nothing was kept
+ */
+export const upgradeKeptCiSetup = ({ ciSetup = [], existing = {} }) => {
+  const kept = existing.ci?.setup;
+  if (
+    ciSetup.length === 0 ||
+    !Array.isArray(kept) ||
+    (kept.length === ciSetup.length &&
+      kept.every((line, index) => line === ciSetup[index]))
+  ) {
+    return [];
+  }
+  return [
+    'ci.setup: kept your steps. This version would have set up:',
+    ...ciSetup.map((line) => `  ${line}`),
+  ];
+};
 
 /**
  * The tasks a consumer reaches the gates through, and the profile each one is
@@ -421,14 +471,15 @@ export const placedHooksPath = ({ entries, hooksPath }) =>
 
 /**
  * @param {{ added: string[], defaultBranch?: string, hooksPath?: string,
- *           profile: string, runner: string, skipped: string[],
- *           written: number }} args
+ *           profile: string, recordedTrunk?: boolean, runner: string,
+ *           skipped: string[], written: number }} args
  */
 export const initSummary = ({
   added,
   defaultBranch,
   hooksPath,
   profile,
+  recordedTrunk = false,
   runner,
   skipped,
   upgrade = false,
@@ -452,7 +503,9 @@ export const initSummary = ({
       `The hooks are in \`${hooksPath}/\` and git will NOT run them until you point it there:\n  git config core.hooksPath ${hooksPath}\nUntil you do, they are silently skipped and the gates they carry are absent.`,
     );
   }
-  if (!upgrade && defaultBranch !== undefined && defaultBranch !== '') {
+  // Asked of `recordsDefaultBranch`, not of `--upgrade`: an upgrade that finds no
+  // recorded trunk writes one, and that is the run that most needs telling.
+  if (recordedTrunk) {
     lines.push(
       `Recorded \`${defaultBranch}\` as this repository's trunk. If you initialised from a topic branch, fix conventions.defaultBranch before the branch gate runs.`,
     );
