@@ -318,7 +318,12 @@ runners corepack cannot reach:
 ```
 
 `init` fills this in for the runners that need it and leaves it out for the
-rest, so most repositories never see the key. The value is YAML **lines**,
+rest, so most repositories never see the key. Leaving it out is the normal case
+and says nothing; writing it wrongly is an error — `ci.setup` must be an array
+of strings, and anything else fails here, naming the entry. Resolved quietly to
+"no steps" it would delete the hook from every workflow and each job would fail
+at `{{commands.install}}` instead, looking exactly like a repository that
+declared no setup at all. The value is YAML **lines**,
 indented into place wherever a workflow carries `{{ci.setup}}` — verbatim,
 because a step schema in JSON would only ever render back into YAML while
 bounding what you can express to whatever this package anticipated.

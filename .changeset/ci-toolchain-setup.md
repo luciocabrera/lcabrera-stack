@@ -23,7 +23,9 @@ Two changes fix it:
 
 The value is YAML lines, indented into place wherever a workflow carries
 `{{ci.setup}}`. An absent value resolves to no steps rather than to a missing
-key, so no file is ever held back for it.
+key, so no file is ever held back for it — but a `ci.setup` that is present and
+is not an array of strings now fails when the config is read, naming the entry,
+rather than resolving to no steps and taking the hook out of every workflow.
 
 **If you already ran `init`,** the upgrade path is now one command:
 

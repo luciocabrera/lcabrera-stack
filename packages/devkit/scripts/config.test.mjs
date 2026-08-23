@@ -178,3 +178,50 @@ describe('allowedConfigKeys', () => {
     expect(allowedConfigKeys(config)).not.toContain('registers.adrHomes');
   });
 });
+
+describe('resolveConfig on the ci block', () => {
+  const raw = (ci) => JSON.stringify({ ci });
+
+  test('reads the setup lines as written', () => {
+    const setup = ['- name: Set up Vite+', '  uses: voidzero-dev/setup-vp@sha'];
+    expect(resolveConfig(raw({ setup })).ci.setup).toEqual(setup);
+  });
+
+  // The hook is optional, and a repository whose runner needs nothing must not
+  // be made to declare that it needs nothing.
+  test('stays silent when the block is absent', () => {
+    expect(resolveConfig('{}').ci.setup).toEqual([]);
+    expect(resolveConfig(raw({})).ci.setup).toEqual([]);
+  });
+
+  // Resolved quietly to [], each of these deletes the placeholder from every
+  // workflow and the jobs then fail at {{commands.install}} with exit 127 —
+  // indistinguishable from having declared no ci block at all.
+  test('refuses the JSON-object spelling of a step', () => {
+    expect(() =>
+      resolveConfig(
+        raw({ setup: [{ name: 'Set up Vite+', uses: 'o/a@sha' }] }),
+      ),
+    ).toThrow(/"ci\.setup\[0\]" must be a string/);
+  });
+
+  test('refuses a setup that is not a list', () => {
+    expect(() => resolveConfig(raw({ setup: '- name: Set up Vite+' }))).toThrow(
+      /"ci\.setup" must be an array of strings/,
+    );
+  });
+
+  test('refuses a ci block that is not an object', () => {
+    expect(() => resolveConfig(raw('vite-plus'))).toThrow(
+      /"ci" must be a JSON object/,
+    );
+  });
+
+  // Named so the consumer can find it: the whole failure this replaces was one
+  // that pointed nowhere.
+  test('names the offending entry', () => {
+    expect(() => resolveConfig(raw({ setup: ['- name: A', 7] }))).toThrow(
+      /"ci\.setup\[1\]"/,
+    );
+  });
+});
