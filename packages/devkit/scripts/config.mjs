@@ -116,17 +116,17 @@ export const withProfile = ({ config, profile, source = '--profile' }) => {
 const ciSetupLines = (ci) => {
   if (ci === undefined) return [];
   if (!isPlainObject(ci)) {
-    throw new Error(`${CONFIG_FILE_NAME}: "ci" must be a JSON object`);
+    throw new TypeError(`${CONFIG_FILE_NAME}: "ci" must be a JSON object`);
   }
   if (ci.setup === undefined) return [];
   if (!Array.isArray(ci.setup)) {
-    throw new Error(
+    throw new TypeError(
       `${CONFIG_FILE_NAME}: "ci.setup" must be an array of strings — verbatim YAML lines, not step objects`,
     );
   }
   const wrong = ci.setup.findIndex((line) => typeof line !== 'string');
   if (wrong !== -1) {
-    throw new Error(
+    throw new TypeError(
       `${CONFIG_FILE_NAME}: "ci.setup[${wrong}]" must be a string — the steps are verbatim YAML lines, so a step is written as the lines that spell it, not as an object`,
     );
   }
@@ -142,7 +142,7 @@ export const resolveConfig = (raw) => {
   if (raw === undefined) return DEFAULT_CONFIG;
   const parsed = JSON.parse(raw);
   if (!isPlainObject(parsed)) {
-    throw new Error(`${CONFIG_FILE_NAME} must contain a JSON object`);
+    throw new TypeError(`${CONFIG_FILE_NAME} must contain a JSON object`);
   }
   const profile = withProfile({
     config: DEFAULT_CONFIG,

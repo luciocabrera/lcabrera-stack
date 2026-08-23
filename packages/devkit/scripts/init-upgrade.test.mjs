@@ -188,13 +188,37 @@ describe('upgradeKeptCiSetup', () => {
     ).toEqual([]);
   });
 
-  test('tolerates a hand-written ci block that is not a list of steps', () => {
+  // A `ci` block carrying only a sibling another package owns is not a kept
+  // setup — the block gets filled in, so there is nothing to report.
+  test('says nothing about a ci block that has no setup key', () => {
     expect(
-      upgradeKeptCiSetup({
-        ciSetup: inferred,
-        existing: { ci: { setup: 'nope' } },
-      }),
+      upgradeKeptCiSetup({ ciSetup: inferred, existing: { ci: { other: 1 } } }),
     ).toEqual([]);
+  });
+});
+
+// The two halves must ask the same question. Keyed differently, a `ci` block
+// with no `setup` was neither written nor reported: `devkit init --upgrade &&
+// devkit sync` reported success, the placeholder was deleted from every
+// workflow, and every job failed at {{commands.install}} with exit 127.
+describe('a ci block that carries no setup key', () => {
+  const existing = { ...settled, ci: { registry: 'ghcr.io' } };
+  const ciSetup = ['- name: Set up Vite+', '  uses: o/setup-vp@sha'];
+
+  test('is filled in rather than left as it is', () => {
+    expect(
+      initialConfig({
+        ciSetup,
+        commands: INFERRED,
+        existing,
+        profile: 'full',
+        upgrade: true,
+      }).ci,
+    ).toEqual({ registry: 'ghcr.io', setup: ciSetup });
+  });
+
+  test('reports nothing kept, because nothing was kept', () => {
+    expect(upgradeKeptCiSetup({ ciSetup, existing })).toEqual([]);
   });
 });
 

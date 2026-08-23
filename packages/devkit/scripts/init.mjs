@@ -227,9 +227,15 @@ export const initialConfig = ({
     ...existing,
     // Only written when the runner needs one, so a repository whose CI needs
     // nothing extra is not left with an empty block inviting someone to fill it.
-    // Under --upgrade an existing block is left exactly as it is: a consumer who
-    // edited the steps meant to.
-    ...(ciSetup.length > 0 && !(upgrade && existing.ci !== undefined)
+    // Under --upgrade an existing `setup` is left exactly as it is: a consumer
+    // who edited the steps meant to.
+    //
+    // Keyed on `ci.setup`, not on `ci`: this run owns that key alone, and the
+    // file is shared. A `ci` block carrying only a sibling another package owns
+    // would otherwise block the write and leave the placeholder resolving to no
+    // steps — the exit 127 this hook exists to remove. The spread keeps that
+    // sibling.
+    ...(ciSetup.length > 0 && !(upgrade && existing.ci?.setup !== undefined)
       ? { ci: { ...existing.ci, setup: ciSetup } }
       : {}),
     commands: Object.fromEntries(
@@ -282,10 +288,14 @@ export const upgradeKeptCommands = ({ commands, existing = {} }) =>
  */
 export const upgradeKeptCiSetup = ({ ciSetup = [], existing = {} }) => {
   const kept = existing.ci?.setup;
+  // Present-or-absent, the same question `initialConfig` asks. The two keyed on
+  // different things is how a `ci` block with no `setup` came to be neither
+  // written nor reported.
   if (
     ciSetup.length === 0 ||
-    !Array.isArray(kept) ||
-    (kept.length === ciSetup.length &&
+    kept === undefined ||
+    (Array.isArray(kept) &&
+      kept.length === ciSetup.length &&
       kept.every((line, index) => line === ciSetup[index]))
   ) {
     return [];
