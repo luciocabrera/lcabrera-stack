@@ -189,9 +189,8 @@ const applyInit = ({ profile, root, upgrade }) => {
   // does NOT re-guess these, and a consumer who corrected one needs to know it
   // survived rather than assume it did.
   if (runner.kept.length > 0) {
-    console.log(
-      `\nLeft alone, because you set them:\n${runner.kept.map((line) => `  ${line}`).join('\n')}`,
-    );
+    const kept = runner.kept.map((line) => `  ${line}`).join('\n');
+    console.log(`\nLeft alone, because you set them:\n${kept}`);
   }
 
   console.log(
