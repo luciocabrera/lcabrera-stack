@@ -190,6 +190,18 @@ Your task:
 
 Return only the structured decision.`;
 
+const MODEL_NAME = /^[A-Za-z0-9][A-Za-z0-9._[\]-]*$/;
+
+export const parseModelName = (raw) => {
+  const text = String(raw ?? '').trim();
+  if (!MODEL_NAME.test(text)) {
+    throw new Error(
+      `--model must be a model alias or id such as sonnet or claude-opus-5 — got ${JSON.stringify(raw)}`,
+    );
+  }
+  return text;
+};
+
 /** argv for the decide pass. The prompt goes on stdin — it is far past ARG_MAX. */
 export const decideArgs = ({ model }) => [
   '--print',
@@ -200,7 +212,7 @@ export const decideArgs = ({ model }) => [
   '--allowedTools',
   DECIDE_TOOLS.join(','),
   '--model',
-  model,
+  parseModelName(model),
   '--no-session-persistence',
 ];
 

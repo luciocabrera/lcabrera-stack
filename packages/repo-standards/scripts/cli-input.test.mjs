@@ -6,6 +6,7 @@ import {
   flagValue,
   parsePullNumber,
   parseRepository,
+  parseThreadId,
   readStdin,
 } from './cli-input.mjs';
 
@@ -146,5 +147,41 @@ describe('flagValue and the runner separator', () => {
 
   it('is undefined when the flag is absent', () => {
     expect(flagValue('--body-file', ['node', 'x'])).toBeUndefined();
+  });
+});
+
+describe('parseThreadId — what it accepts', () => {
+  it('takes the node id format GitHub issues today', () => {
+    expect(parseThreadId('PRRT_kwDOJq8Ows5abcDE')).toBe(
+      'PRRT_kwDOJq8Ows5abcDE',
+    );
+  });
+
+  it('takes the legacy base64 ids still in circulation, padding included', () => {
+    expect(parseThreadId('MDEyOklzc3VlQ29tbWVudDE=')).toBe(
+      'MDEyOklzc3VlQ29tbWVudDE=',
+    );
+  });
+
+  it('trims a pasted id rather than refusing it', () => {
+    expect(parseThreadId('  PRRT_kwDOAbCd \n')).toBe('PRRT_kwDOAbCd');
+  });
+});
+
+describe('parseThreadId — what it refuses', () => {
+  it('refuses a value the child would read as a flag, not a value', () => {
+    expect(() => parseThreadId('--paginate')).toThrow('--resolve must be');
+  });
+
+  for (const bad of ['', '   ', undefined, null, 'a b', 'a;b', 'a/b', 'a$b']) {
+    it(`refuses ${JSON.stringify(bad)}`, () => {
+      expect(() => parseThreadId(bad)).toThrow('--resolve must be');
+    });
+  }
+
+  it('names the value it was given, so a paste error is visible', () => {
+    expect(() => parseThreadId('not an id')).toThrow(
+      JSON.stringify('not an id'),
+    );
   });
 });

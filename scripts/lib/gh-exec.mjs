@@ -10,6 +10,8 @@
  *
  * Unlike git, gh needs its own credentials, so `GH_TOKEN`/`GITHUB_TOKEN` and
  * the rest of the environment pass through untouched — only PATH is replaced.
+ *
+ * Argument-vector validation is ADR-089.
  */
 import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
@@ -23,12 +25,33 @@ export const ghBinary = () =>
     existsSync(path),
   );
 
+const ALLOWED_SUBCOMMANDS = new Set(['api', 'issue', 'pr', 'repo']);
+
+export const assertGhArguments = (args) => {
+  if (!Array.isArray(args) || args.length === 0) {
+    throw new Error('gh needs a non-empty argument vector');
+  }
+  const stray = args.findIndex((argument) => typeof argument !== 'string');
+  if (stray !== -1) {
+    throw new Error(
+      `gh arguments must all be strings — index ${stray} is ${typeof args[stray]}`,
+    );
+  }
+  if (!ALLOWED_SUBCOMMANDS.has(args[0])) {
+    throw new Error(
+      `gh ${args[0]} is not one of the subcommands this tooling spawns (${[...ALLOWED_SUBCOMMANDS].join(', ')}) — add it to ALLOWED_SUBCOMMANDS in gh-exec.mjs if it should be`,
+    );
+  }
+  return args;
+};
+
 /**
  * Trimmed stdout on success. Throws on failure, carrying gh's stderr — a
  * caller creating issues needs to know which call failed and why, unlike the
  * read-only probes `runGit` serves.
  */
 export const runGh = (args) => {
+  assertGhArguments(args);
   const binary = ghBinary();
   if (binary === undefined) {
     throw new Error('gh is not installed — see https://cli.github.com');

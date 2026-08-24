@@ -103,6 +103,18 @@ export const parseRepository = (raw) => {
   return text;
 };
 
+const NODE_ID = /^[A-Za-z0-9_][A-Za-z0-9_-]*={0,2}$/;
+
+export const parseThreadId = (raw) => {
+  const text = String(raw ?? '').trim();
+  if (text === '' || !NODE_ID.test(text)) {
+    throw new Error(
+      `--resolve must be a GitHub thread node id such as PRRT_kwDOAbCd — got ${JSON.stringify(raw)}`,
+    );
+  }
+  return text;
+};
+
 /**
  * Everything piped in, or `''` when nothing is.
  *
