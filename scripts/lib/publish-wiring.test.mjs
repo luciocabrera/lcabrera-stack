@@ -34,6 +34,18 @@ const RELEASE_WORKFLOW = join(REPO_ROOT, '.github', 'workflows', 'release.yml');
 
 const { packagesDir, publicPackageDirs } = readPublishing(REPO_ROOT);
 
+/**
+ * A `major` declared against a package, in any spelling a changeset can carry.
+ *
+ * Both quoting styles are matched because both reach a release: `vp fmt`
+ * rewrites a double-quoted name to a single-quoted one, so matching one style
+ * would leave the gate below depending on the formatter having already run —
+ * a clean pass would then mean "formatted", not "no promotion". A bare name is
+ * matched too, though YAML reserves `@` as an indicator and Changesets refuses
+ * to parse one, so that spelling fails loudly rather than silently.
+ */
+const MAJOR_DECLARATION = /['"]?(?<name>@[^'"\s:]+)['"]?\s*:\s*major/gu;
+
 const readManifest = (directory) =>
   JSON.parse(
     readFileSync(
@@ -196,7 +208,7 @@ describe('this repository publishes what it develops against', () => {
         const front = readFileSync(join(changesetDir, file), 'utf8').split(
           '---',
         )[1];
-        return [...(front ?? '').matchAll(/'(?<name>[^']+)':\s*major/gu)]
+        return [...(front ?? '').matchAll(MAJOR_DECLARATION)]
           .map((match) => match.groups.name)
           .filter((name) => preRelease.has(name) && !stable.has(name))
           .map(
@@ -206,6 +218,19 @@ describe('this repository publishes what it develops against', () => {
       });
 
     expect(promotions).toEqual([]);
+  });
+
+  it('sees a major declaration in every spelling that reaches a release', () => {
+    // A narrowed pattern reports the same clean pass as a repository with no
+    // promotion pending — which is how the single-quote-only first draft passed
+    // over a double-quoted `major` that Changesets honours.
+    const seen = [
+      "'@lcabrera/ui': major",
+      '"@lcabrera/ui": major',
+      '@lcabrera/ui: major',
+    ].map((line) => [...line.matchAll(MAJOR_DECLARATION)][0]?.groups.name);
+
+    expect(seen).toEqual(['@lcabrera/ui', '@lcabrera/ui', '@lcabrera/ui']);
   });
 
   it('gitignores dist so a build is never committed', () => {
