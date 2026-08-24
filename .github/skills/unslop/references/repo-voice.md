@@ -1,10 +1,10 @@
 # Default voice: this repository
 
-Used when `references/style-profile.md` does not exist. Derived from how
-this repo's durable prose is already written (`AGENTS.md`, the epic
-contract, `docs/agents/workflow.md`), not from a guess at Lucio's private
-register. A personal profile overrides this file on conventions; it cannot
-override epistemics.
+Derived from how this repo's durable prose is already written
+(`AGENTS.md`, the epic contract, `docs/agents/workflow.md`), not from a
+guess at Lucio's private register. A personal profile overrides this
+file on conventions for the genres listed below. It cannot override
+epistemics.
 
 ## Typography
 
@@ -49,10 +49,9 @@ drifts"). Prefer a link to the home over a restatement.
 
 ## Genres
 
-- **Chat reply:** complete sentences, no telegraphic fragments, no coined
-  acronyms. Answer first.
-- **PR/issue prose:** fill the template; unslop the sentences inside, not
-  the headings.
+- **Chat reply / PR/issue prose:** complete sentences, no coined acronyms,
+  answer first. Fill the template; unslop the sentences inside, not the
+  headings. Which voice file to read is [`SKILL.md`](../SKILL.md) step 1.
 - **ADR / architecture:** constraints and consequences. No soul, no slack
   that reads as uncertainty about a decided rule.
 - **Skill / contract:** outline is the point; the outline test is exempt.
