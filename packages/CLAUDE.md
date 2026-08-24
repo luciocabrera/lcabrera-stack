@@ -29,9 +29,22 @@ still belongs in the changeset body, spelled out for the consumer who has to act
 on it; `1.0.0` is a separate decision, taken deliberately for that package, not
 the automatic consequence of having broken something.
 
-`publish-wiring.test.mjs` gates this: a `major` declared on a package still at
-`0.x` fails the suite, naming the changeset. Take a package to `1.0.0` by
-deciding to, and update that test's exemption in the same commit.
+`publish-wiring.test.mjs` gates this, and it asks the **planned release** rather
+than the changeset text — so no spelling evades it, and it also catches a
+promotion nothing declares: a peer dependent dragged to `1.0.0` by the package it
+peers on. A failure names the package, both versions, and the changeset that
+declared the `major`, or says the promotion arrives through a peer edge when none
+did:
+
+```
+@lcabrera/ui: 0.3.0 would become 1.0.0 — declared major in aggregate-columns
+@lcabrera/devkit: 0.1.0 would become 1.0.0 — declared by no changeset, so it arrives through a peer edge
+```
+
+Taking a package to `1.0.0` is therefore a two-part change: make the declaration,
+and add the package to `STABLE_PACKAGES` in that test **with the reason**. The
+reason is the point — an allowlist entry records why a package left beta, where
+an edited assertion would record nothing.
 
 ## Publishing invariants
 

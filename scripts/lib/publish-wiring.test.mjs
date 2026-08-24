@@ -35,6 +35,21 @@ const RELEASE_WORKFLOW = join(REPO_ROOT, '.github', 'workflows', 'release.yml');
 
 const { packagesDir, publicPackageDirs } = readPublishing(REPO_ROOT);
 
+/**
+ * Packages that have deliberately left beta, and why.
+ *
+ * The gate below refuses to take any package out of `0.x`, because Changesets
+ * turns a `major` on a `0.x` package into `1.0.0` and an npm version is
+ * permanent. Promoting one is a decision, so it is recorded here with its
+ * reason rather than made by editing an assertion — an edited assertion leaves
+ * no trace of why, which is the whole thing this gate exists to prevent.
+ *
+ * Empty on purpose: nothing here has left beta yet.
+ */
+const STABLE_PACKAGES = new Map([
+  // ['@lcabrera/example', 'promoted in #000 — the API has not moved since …'],
+]);
+
 const readManifest = (directory) =>
   JSON.parse(
     readFileSync(
@@ -194,18 +209,36 @@ describe('this repository publishes what it develops against', () => {
     // asks git which packages changed since the trunk, and CI checks out
     // without a local `main`, so it fails there while passing on any developer
     // machine. `getReleasePlan` touches no git at all.
-    const { releases } = await getReleasePlan(REPO_ROOT);
+    const { changesets, releases } = await getReleasePlan(REPO_ROOT);
+
+    // Only the changesets that declared the `major`, not every changeset that
+    // touches the package — `release.changesets` is the latter, and for a busy
+    // package that is a list too long to act on. An empty answer is the useful
+    // one: nothing declared it, so it arrives through a peer edge.
+    const declaredIn = (name) =>
+      changesets
+        .filter((changeset) =>
+          changeset.releases.some(
+            (release) => release.name === name && release.type === 'major',
+          ),
+        )
+        .map((changeset) => changeset.id);
 
     const promotions = releases
       .filter(
         (release) =>
           release.oldVersion.startsWith('0.') &&
-          !release.newVersion.startsWith('0.'),
+          !release.newVersion.startsWith('0.') &&
+          !STABLE_PACKAGES.has(release.name),
       )
-      .map(
-        (release) =>
-          `${release.name}: ${release.oldVersion} would become ${release.newVersion}`,
-      );
+      .map((release) => {
+        const sources = declaredIn(release.name);
+        const origin =
+          sources.length > 0
+            ? `declared major in ${sources.join(', ')}`
+            : 'declared by no changeset, so it arrives through a peer edge';
+        return `${release.name}: ${release.oldVersion} would become ${release.newVersion} — ${origin}`;
+      });
 
     expect(promotions).toEqual([]);
   });
