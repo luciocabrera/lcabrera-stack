@@ -221,17 +221,19 @@ type OrderColumnAggregate = {
 };
 
 /**
- * The compact `grouping` URL param the configuration arrives through has nowhere to carry
- * one either.
+ * `GroupAggregate` with the filter and alias slots removed, so no path here can construct
+ * a filtered aggregate (#569). The compact `grouping` URL param has nowhere to carry one
+ * either.
  */
 type UnfilteredOrderAggregate = Omit<GroupAggregate, 'alias' | 'filters'>;
 
 /**
  * `getRowsCount` takes the data query's own `filters`/`allowedColumns`, so the two still
  * cannot drift.
- * `LIMIT 0` is floored to 1 for a different reason: it is a page with no rows and a
- * `hasMore` that says the set is exhausted — a scroll session that silently ends.
- * `offset` is deliberately **not** bounded.
+ * `LIMIT 0` is floored to 1: a page with no rows and a `hasMore` that says the set is
+ * exhausted — a scroll session that silently ends.
+ * `offset` is not bounded: one past the end of the table returns an empty page after work
+ * bounded by the table rather than by the request.
  */
 export const selectOrdersPage = async ({
   cursor,

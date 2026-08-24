@@ -3,6 +3,8 @@
  * import resolved only through a tsconfig `paths` alias — `@lcabrera/ui` must not depend
  * on `@lcabrera/server` (ADR-039). Duplication is structural: a filter built here is
  * assignable there with no adapter, and neither package knows the other exists.
+ * This union is the editing contract (a filter the user is still typing), not the query
+ * one — that is why `NumberFilter.value` is `number | undefined`.
  */
 
 export type BooleanFilter = {
@@ -48,6 +50,7 @@ export type NumberFilter = {
     | 'lessThanOrEqual'
     | 'notEquals';
   readonly type: 'number';
+  /** Undefined while the user is drafting — this union is the editing contract, not the query one. */
   readonly value: number | undefined;
   readonly value2?: number;
 };
