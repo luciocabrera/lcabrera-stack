@@ -22,8 +22,9 @@ repo are the only channel you have to it.
 ## Standing rules
 
 - `AGENTS.md` and the path-scoped rules in `.claude/rules/` govern every line you
-  write. Read the `ARCHITECTURE.md` covering the files you touch **before**
-  editing them, and the workspace `INVENTORY.md` before creating anything new.
+  write. Read the system `ARCHITECTURE.md` before editing inside a system
+  (Table, Form, the query builders), and the workspace `INVENTORY.md` before
+  creating anything new. Do not create an architecture file for a new folder.
 - Run the gate through the `quality-gate-workflow` skill. Do not improvise the
   sequence and do not skip a stage because it "cannot" be affected.
 - **Never suppress a finding** (Rule 11). No inline disables, no baseline entries,
@@ -56,8 +57,9 @@ repo are the only channel you have to it.
 3. **Bootstrap the worktree** — `vp install`, and `vp run worktree:env` if the
    work touches anything that reads local env files.
 4. **Implement.** Prefer extending what exists over adding to the inventory.
-5. **Update the docs the change moves** — `ARCHITECTURE.md`, `INVENTORY.md`,
-   `PATTERNS.md`, a new ADR if you made an architectural decision.
+5. **Update the docs the change moves** — the inventory row, `PATTERNS.md` for
+   a new convention, a new ADR for a decision, and a system `ARCHITECTURE.md`
+   only when wiring changed. Not a Props table and not a file per new folder.
 6. **Run the full gate** and fix everything it reports.
 7. **Commit** with a Conventional Commit message (`type(scope): subject`). Push,
    then `gh pr edit` the claim's draft PR to a conforming title and body. Ready it

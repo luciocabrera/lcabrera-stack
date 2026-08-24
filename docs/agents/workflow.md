@@ -59,8 +59,10 @@ ambiguity introduced for the next one.
 
 Follow the **Documentation Update Rule** in the
 [`quality-gate-workflow` skill](../../.github/skills/quality-gate-workflow/SKILL.md#documentation-update-rule):
-docs change in the _same commit_ as the code. It names the specific homes —
-`ARCHITECTURE.md`, `INVENTORY.md`, `PATTERNS.md`, ADRs, `COMMANDS.md`.
+docs change in the _same commit_ as the code. The homes are the inventory, a
+new ADR, `PATTERNS.md` for a new convention, and a **system**
+`ARCHITECTURE.md` only when system wiring changed
+([ADR-088](../decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md)).
 
 Update **this** page only when the workflow itself changes, and
 `merge-checklist.md` only when the merge bar changes. Neither is a general
@@ -73,8 +75,8 @@ changelog.
 - Never switch approaches (A → B) without recording why in the PR, and in an ADR
   when the decision outlives the PR.
 - Add tests for new logic, and check they fail without the change.
-- Read the `ARCHITECTURE.md` covering the files you are touching **before**
-  editing.
+- Read the system `ARCHITECTURE.md` before editing inside a system (Table,
+  Form, the query builders). Do not create one for a leaf folder.
 
 ## 6. When something is ambiguous
 

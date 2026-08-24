@@ -45,9 +45,8 @@
 
 ## Documentation Updates
 
-<!-- Docs changed: ARCHITECTURE.md, INVENTORY.md, PATTERNS.md, ADRs, COMMANDS.md.
-     See the Documentation Update Rule in
-     .github/skills/quality-gate-workflow/SKILL.md -->
+<!-- Docs changed: inventory row, PATTERNS, ADR, system ARCHITECTURE.md only
+     when wiring changed. See the Documentation Update Rule and ADR-088. -->
 
 ## Linked Issues
 

@@ -154,7 +154,8 @@ Selection guideline:
 - **Working in complex UI state?** Start with `store-pattern`.
 - **Creating a component, hook, util, or context?** Spawn the
   `architecture-guard` agent first — it reads the inventories, PATTERNS.md,
-  ARCHITECTURE.md and ADRs and returns a reuse brief.
+  the system `ARCHITECTURE.md` if the area has one, and ADRs, and returns a
+  reuse brief.
 - **Finishing any code change?** Run `quality-gate-workflow`.
 - **Committing or opening a PR?** Use `commit-and-pr`.
 - **Routing/data mutations?** Use `react-router-framework-mode`.
@@ -380,8 +381,9 @@ pass is only evidence if something else would have produced a different one.
 
 ## 7. Documentation & Workflow
 
-- Each feature directory should have a README.
-- Architecture docs live in `apps/react-router/docs/` and component-level `ARCHITECTURE.md` files.
+- Architecture docs live on **systems** whose wiring is not visible from one
+  file (Table, Form, the query builders), not on every component folder
+  ([ADR-088](docs/decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md)).
 
 ### Verifying a claim
 
@@ -484,23 +486,43 @@ are in the coordination README. Historical scratch plans are catalogued in
 
 ### Architecture-First Workflow
 
-Before making **any** code change, read every `ARCHITECTURE.md` that covers the files you are about to touch. These files document intent, data flow, and constraints that are not always visible from the code alone.
+Before making a code change, read the docs that actually apply — not every
+markdown file that sits nearby. The map is in [`docs/README.md`](docs/README.md);
+the decision that architecture files describe systems, not folders, is
+[ADR-088](docs/decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md).
 
 **Where to look:**
 
-- The component/hook/util directory being modified (e.g. `packages/ui/src/components/Table/ARCHITECTURE.md`)
-- Parent directories if the change crosses boundaries (e.g. `packages/ui/src/hooks/ARCHITECTURE.md`)
-- `packages/ui/src/PATTERNS.md` — always read this before creating or modifying any component; it defines naming conventions, StyleX composition order, the drawer-section pattern, filter contract, context+store pattern, and props-forwarding rules
-- **The ADRs covering the area** — `vp run adr:list` prints every one with its title; if you cannot run a command, **list the home's directory** (`ls docs/decisions/`, or open the directory rather than the file on GitHub) — the filenames carry the titles in kebab case. What no longer works is opening a home's `README.md` expecting an index: it says what the home holds and deliberately lists no ADRs, because a committed list is one region every ADR branch appends to ([ADR-075](docs/decisions/ADR-075-the-index-does-not-list-the-adrs.md)). The homes are [`docs/decisions/`](docs/decisions/) (repo, packages, toolchain) and [`apps/react-router/docs/decisions/`](apps/react-router/docs/decisions/) (showcase app); the CQMS home left with #683. In the app home: Modal → ADR-001, Tooltip → ADR-002, store → ADR-003, memoization/React Compiler → ADR-004, styling → ADR-005, infinite-scroll prefetch → ADR-006, barrel-export boundaries → ADR-007, primary-key sort tiebreaker / columns-derived id → ADR-008, filter-options fetch descriptors → ADR-009, cookie persistence via `/_action/persist-cookie` → ADR-010, grid interaction architecture (capability/command/surface) → ADR-011, column width → ADR-012
+- The owning workspace's `INVENTORY.md` — does an artifact already cover this?
+- `packages/ui/src/PATTERNS.md` when creating or modifying a UI component
+- The **system** `ARCHITECTURE.md` only when the change is inside a system
+  whose wiring is not visible from one file (Table and its stores, Form, the
+  query builders). Do not read, create, or update a per-leaf architecture file
+  for a component whose name and types already say what it is.
+- **The ADRs covering the area** — `vp run adr:list` prints every one with its
+  title; if you cannot run a command, **list the home's directory**
+  (`ls docs/decisions/`, or open the directory rather than the file on GitHub)
+  — the filenames carry the titles in kebab case. What no longer works is
+  opening a home's `README.md` expecting an index: it says what the home holds
+  and deliberately lists no ADRs, because a committed list is one region every
+  ADR branch appends to
+  ([ADR-075](docs/decisions/ADR-075-the-index-does-not-list-the-adrs.md)). The
+  homes are [`docs/decisions/`](docs/decisions/) (repo, packages, toolchain)
+  and [`apps/react-router/docs/decisions/`](apps/react-router/docs/decisions/)
+  (showcase app); the CQMS home left with #683. Numbers 001–012 in the app home
+  collide with the repo home — cite those by path.
 
-If no `ARCHITECTURE.md` exists yet for the area you are changing, create one **before** implementing.
+Do **not** create an `ARCHITECTURE.md` because the directory is new. Create one
+only for a system: multiple files, non-local data flow, constraints the code
+cannot say. A Props table, a file-tree listing, and a mermaid of the function
+body are copies of the code — they belong nowhere.
 
 ### Reuse Before You Build
 
 Before creating any new component, hook, utility, constant, or type, **consult `src/INVENTORY.md`** first.
 
 1. If an artifact already exists that covers the need — **use it**.
-2. If an artifact almost covers the need but is too specific — **enhance it to be more generic** rather than creating a new one. Update its `ARCHITECTURE.md` row and `INVENTORY.md` description after.
+2. If an artifact almost covers the need but is too specific — **enhance it to be more generic** rather than creating a new one. Update its `INVENTORY.md` description after (one sentence).
 3. Only create something new when nothing in the inventory is a reasonable fit.
 
 When in doubt: a codebase with 18 components and 25 utilities that each do one thing well is better than 40 components and 50 utilities with overlapping concerns.

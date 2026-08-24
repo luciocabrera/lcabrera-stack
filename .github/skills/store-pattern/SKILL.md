@@ -88,9 +88,9 @@ Reusable local templates:
 - `references/architecture-templates/table-contexts/table-data.ARCHITECTURE.md`
 - `references/architecture-templates/table-contexts/filters-data.ARCHITECTURE.md`
 
-Documentation structure benchmark:
+System architecture (Table, not a leaf component):
 
-- `packages/ui/src/components/Button/ARCHITECTURE.md`
+- `packages/ui/src/components/Table/ARCHITECTURE.md`
 
 ## Review Checklist
 

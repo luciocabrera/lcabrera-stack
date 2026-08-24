@@ -100,17 +100,26 @@ gate the way CI does.
 
 ## Documentation Update Rule
 
-Once the gate is green, update every doc the change affected — **in the same
-commit as the code**:
+Once the gate is green, update the **canonical** doc the change affected — **in
+the same commit as the code**. One home per fact
+([`docs/README.md`](../../../docs/README.md);
+[ADR-088](../../../docs/decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md)).
+Do not copy the same fact into an architecture file, a JSDoc essay, and an ADR.
 
-- **Props added/removed** → update the Props table in the component's `ARCHITECTURE.md`.
-- **Render flow changed** → update the relevant Mermaid diagram.
-- **New hook/util introduced** → add it to the parent directory `ARCHITECTURE.md` and create its own if the directory is new.
-- **Type added/changed** → update the `ARCHITECTURE.md` of the directory that owns the type.
-- **New dependency added** → update the Dependencies diagram in the affected `ARCHITECTURE.md`.
-- **New naming/structural convention established** → update `packages/ui/src/PATTERNS.md` and the matching `.claude/rules/` file.
-- **New architectural decision made** → add a new ADR (see below).
-- **New artifact created or existing artifact enhanced/renamed** → update the relevant row in the owning workspace's `INVENTORY.md` (`packages/ui/src/`, `packages/server/src/`, `apps/react-router/src/`, …).
+- **New artifact created, enhanced, or renamed** → one sentence in the owning
+  workspace's `INVENTORY.md` (`packages/ui/src/`, `packages/server/src/`,
+  `apps/react-router/src/`, …).
+- **New naming/structural convention** → `packages/ui/src/PATTERNS.md` and the
+  matching `.claude/rules/` file.
+- **New architectural decision** → a new ADR (see below).
+- **System wiring changed** — data flow, store ownership, a constraint the
+  code cannot say — → that **system's** `ARCHITECTURE.md` (Table, Form, the
+  query builders). Not a Props table, not a file tree, not a mermaid of the
+  function body, and not a new file because a folder is new.
+- **A trap on a specific line** → a short comment on that line, or nothing if
+  the name already says it. Do not add JSDoc that restates a name, a type, or
+  an ADR. Scripts keep the short "why" header in
+  [`.claude/rules/scripts.md`](../../../.claude/rules/scripts.md).
 
 ### Where a new ADR goes
 
