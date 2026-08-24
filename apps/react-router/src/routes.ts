@@ -16,10 +16,6 @@ export default [
     '_api/enterprise-orders/paginated',
     'routes/api/enterprise-orders-paginated/root.ts',
   ),
-  route(
-    '_api/enterprise-orders/drill',
-    'routes/api/enterprise-orders-drill/root.ts',
-  ),
   route('_api/car-sales/paginated', 'routes/api/car-sales-paginated/root.ts'),
   route(
     '_api/wide-alltypes-150/paginated',
@@ -35,6 +31,7 @@ export default [
       'view/:orderId',
       'routes/enterprise-orders/order-detail-view/root.ts',
     ),
+    route('group', 'routes/enterprise-orders/group-details/root.ts'),
     route(':orderId', 'routes/enterprise-orders/order-detail/root.ts'),
   ]),
   route('wide-alltypes-150', 'routes/wide-alltypes-150/layout.ts', [

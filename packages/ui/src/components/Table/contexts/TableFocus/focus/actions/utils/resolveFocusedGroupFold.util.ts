@@ -28,9 +28,9 @@ type ResolveFocusedGroupFoldArgs = {
  * *does* draw the chevron is in the same column one block up, and the subtotal
  * regains it the moment the group folds.
  *
- * The innermost key column of a **drillable** leaf is the exception, and it is
- * the drill rather than a fold: it opens rows that are not loaded, so it has no
- * level entry by construction (ADR-079).
+ * A row's own innermost key column has no level entry by construction: the row
+ * *is* that level, so there is nothing under it to fold. It carries the link to
+ * the group's rows instead (ADR-087).
  *
  * A column that is not a key column falls back to the row, which keeps the
  * treegrid pattern's row-scoped `ArrowLeft`/`ArrowRight` everywhere the question
@@ -49,14 +49,12 @@ export const resolveFocusedGroupFold = ({
   if (level !== undefined)
     return {
       hasChildren: true,
-      isDrillable: false,
       isExpanded: level.isExpanded,
       path: level.path,
     };
 
   const fromRow = {
     hasChildren: meta?.hasChildren ?? false,
-    isDrillable: meta?.isDrillable ?? false,
     isExpanded: meta?.isExpanded ?? false,
     path: groupPath,
   };
@@ -69,7 +67,7 @@ export const resolveFocusedGroupFold = ({
 
   const isInnermost = groupPath?.at(-1)?.columnKey === columnKey;
 
-  return isInnermost && fromRow.isDrillable
-    ? fromRow
-    : { ...fromRow, hasChildren: false, isDrillable: false };
+  // A key cell folds the level it names and nothing else, so the innermost one
+  // — the level the row *is* — has nothing under it to fold (#870).
+  return isInnermost ? { ...fromRow, hasChildren: false } : fromRow;
 };

@@ -1,34 +1,27 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
 import { selectOrdersPage } from '@/routes/enterprise-orders/.server/enterpriseOrders.service';
-
-import { parseOrdersPageParams } from './parseOrdersPageParams.util';
+import { resolveOrdersPageRead } from '@/routes/enterprise-orders/.server/resolveOrdersPageRead.util';
 
 /**
- * Resource route serving a page of enterprise orders for the table's
- * infinite-scroll load-more. Runs the query server-side via the generic
- * /server executors and returns a raw JSON `{ data, hasMore, total? }`
- * Response — the client consumes it with plain `fetch`, not the single-fetch
- * protocol.
+ * A page of enterprise orders for the table's infinite scroll — the whole
+ * table, or one group's rows when a `group` param names one (ADR-087).
  *
- * `skip === 0` is the first page of a scroll session, and the only page that
- * pays for the `COUNT` (#402): the total cannot change while the session runs,
- * so every later page would be re-deriving a number the client already holds.
+ * A refusal is a page carrying an error rather than a `400`, so the table can
+ * say which group could not be opened and why (ADR-068).
  */
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
-  const { cursor, filters, limit, skip, sort } = parseOrdersPageParams(
-    url.searchParams,
-  );
+  const resolved = await resolveOrdersPageRead(url.searchParams);
 
-  const page = await selectOrdersPage({
-    cursor,
-    filters,
-    includeTotal: skip === 0,
-    limit,
-    offset: skip,
-    sort,
-  });
+  if (resolved.kind === 'refused') {
+    return Response.json({
+      data: [],
+      error: { kind: 'unexpected', message: resolved.message },
+      hasMore: false,
+      total: 0,
+    });
+  }
 
-  return Response.json(page);
+  return Response.json(await selectOrdersPage(resolved.read));
 };

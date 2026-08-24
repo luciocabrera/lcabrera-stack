@@ -1,6 +1,5 @@
 import {
   areAllGroupsCollapsed,
-  canDrillGroups,
   resolveTableGroupTree,
 } from '#ui/components/Table/contexts/TableConfig/expansion/utils';
 import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
@@ -22,9 +21,7 @@ const NOTHING_COLLAPSED: ReadonlySet<string> = new Set<string>();
  *
  * Local, like the per-row toggle it generalises: expansion changes nothing
  * server-side, so this touches no URL param and triggers no revalidation
- * (ADR-061). Drilled pages are left alone — a fold hides rows, and discarding a
- * page the user fetched is a different decision, owned by the read that
- * invalidated it (ADR-079).
+ * (ADR-061).
  *
  * **What it collapses is the tree's own foldable set**, not a second
  * enumeration of it: the same `foldableGroupPaths` every chevron is drawn from,
@@ -48,19 +45,14 @@ const NOTHING_COLLAPSED: ReadonlySet<string> = new Set<string>();
 export const useSetAllTableGroupsExpanded = <
   TData extends Record<string, unknown>,
 >() => {
-  const {
-    columnsStore,
-    expansionStore,
-    groupingStore,
-    metaStore,
-    onDrillGroup,
-  } = useTableConfigContextValue<TData>();
+  const { columnsStore, expansionStore, metaStore } =
+    useTableConfigContextValue<TData>();
   const { dataStore } = useTableDataContextValue<TData>();
   const { focusStore } = useTableFocusContextValue();
   const containerRef = useTableContainerRef();
 
   return (isExpanded: boolean) => {
-    const { collapsedGroupPaths, drilledGroups } = expansionStore.get();
+    const { collapsedGroupPaths } = expansionStore.get();
 
     if (isExpanded) {
       if (collapsedGroupPaths.size === 0) return;
@@ -70,15 +62,7 @@ export const useSetAllTableGroupsExpanded = <
       return;
     }
 
-    const treeArgs = {
-      canDrill: canDrillGroups({
-        isGroupDrillEnabled: metaStore.get().isGroupDrillEnabled,
-        onDrillGroup,
-      }),
-      data: dataStore.get().data,
-      drilledGroups,
-      groupingKeys: groupingStore.get().keys,
-    };
+    const treeArgs = { data: dataStore.get().data };
     const { foldableGroupPaths, rows } = resolveTableGroupTree({
       ...treeArgs,
       collapsedGroupPaths,

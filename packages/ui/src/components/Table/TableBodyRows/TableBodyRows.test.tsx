@@ -162,7 +162,6 @@ vi.mock(
   () => ({
     useGetTableCanDrillGroups: () => false,
     useGetTableCollapsedGroupPaths: useGetTableCollapsedGroupPathsMock,
-    useGetTableDrilledGroups: () => new Map(),
   }),
 );
 
@@ -503,7 +502,7 @@ describe('TableBodyRows', () => {
 
   it('blanks a grouped-by column on a detail row, leaving the ungrouped ones', () => {
     // The value is stated once, by the group row above, in the same column —
-    // which is what a drilled group reads as, with no rule of its own
+    // which is what a group row after a block of detail rows reads as
     // (ADR-065 sub-decision 2, ADR-080).
     setupGroupedMocks();
     useGetTableDataMock.mockReturnValue([{ amount: 10, name: 'A' }]);

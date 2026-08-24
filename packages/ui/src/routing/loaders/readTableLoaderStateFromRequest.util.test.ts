@@ -37,6 +37,24 @@ const groupingRequest = () =>
     `https://example.com/orders?grouping=${encodeURIComponent('{"keys":["status"]}')}`,
   );
 
+const filtersFor = (value: string) =>
+  serializeFiltersToURL({
+    status: { operator: 'equals', type: 'text', value },
+  }) ?? '';
+
+const sortingFor = (columnKey: 'amount' | 'status') =>
+  serializeSortingToURL([{ columnKey, direction: 'asc' }]) ?? '';
+
+const nestedRequest = () =>
+  new Request(
+    `https://example.com/orders/group?${new URLSearchParams({
+      filters: filtersFor('list'),
+      'nested.filters': filtersFor('nested'),
+      'nested.sorting': sortingFor('status'),
+      sorting: sortingFor('amount'),
+    }).toString()}`,
+  );
+
 describe('readTableLoaderStateFromRequest', () => {
   it('merges the URL sorting and filter params with persisted cookie state', () => {
     vi.mocked(readPersistedStateFromCookie).mockReturnValue({
@@ -325,6 +343,46 @@ describe('readTableLoaderStateFromRequest', () => {
         shares: [],
       });
       expect(result.standaloneGroupingParam).toBeNull();
+    });
+  });
+
+  describe('a table nested in another route’s URL', () => {
+    it('reads its own prefixed params, not the ones belonging to the table it sits over', () => {
+      // The half that makes the write side worth doing: without it the nested
+      // table writes `nested.filters` and its loader keeps answering from the
+      // list's `filters` — the drawer updates and the rows never do.
+      const state = readTableLoaderStateFromRequest<TestRow>({
+        appId: 'test-app',
+        columns: testColumns,
+        includeFilters: true,
+        isUrlStateNested: true,
+        persistenceKey: 'orders',
+        request: nestedRequest(),
+      });
+
+      expect(state.filters).toStrictEqual({
+        status: { operator: 'equals', type: 'text', value: 'nested' },
+      });
+      expect(state.sorting).toStrictEqual([
+        { columnKey: 'status', direction: 'asc' },
+      ]);
+    });
+
+    it('reads the unprefixed params when it is not nested', () => {
+      const state = readTableLoaderStateFromRequest<TestRow>({
+        appId: 'test-app',
+        columns: testColumns,
+        includeFilters: true,
+        persistenceKey: 'orders',
+        request: nestedRequest(),
+      });
+
+      expect(state.filters).toStrictEqual({
+        status: { operator: 'equals', type: 'text', value: 'list' },
+      });
+      expect(state.sorting).toStrictEqual([
+        { columnKey: 'amount', direction: 'asc' },
+      ]);
     });
   });
 });

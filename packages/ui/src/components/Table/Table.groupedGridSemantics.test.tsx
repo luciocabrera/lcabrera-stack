@@ -375,7 +375,7 @@ describe('a grouped table under the grid ARIA model', () => {
     // `city` is the group key, so the group row above states it — in this very
     // column — and the detail rows below leave it blank. Under one column per
     // key that blank sits directly beneath the value explaining it, which is
-    // what a drilled group reads as with no rule of its own (ADR-080).
+    // what a group row after a block of detail rows reads as (ADR-080).
     render(<Harness />);
 
     const detailRow = screen.getAllByRole('row')[1];

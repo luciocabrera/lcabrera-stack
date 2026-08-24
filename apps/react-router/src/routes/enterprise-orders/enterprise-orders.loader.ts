@@ -14,6 +14,7 @@ import {
   selectOrderGroupingCapabilities,
   selectOrdersPage,
 } from './.server/enterpriseOrders.service';
+import { ENTERPRISE_ORDERS_GROUP_PATH } from './config';
 import {
   COLUMNS,
   CRUD,
@@ -73,7 +74,7 @@ export const loader = createTableRouteLoader<
   meta: {
     crud: CRUD,
     deleteActionPath: DELETE_ACTION_PATH,
-    isGroupDrillEnabled: true,
+    groupDetailsPath: ENTERPRISE_ORDERS_GROUP_PATH,
     isGroupingEnabled: true,
     isKeysetEnabled: true,
     isServerFilterEnabled: true,

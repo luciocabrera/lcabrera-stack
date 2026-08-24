@@ -7,12 +7,12 @@ export { useGetTableDeleteActionPath } from './useGetTableDeleteActionPath.hook'
 export { useGetTableDensity } from './useGetTableDensity.hook';
 export { useGetTableDrawersSyncNonce } from './useGetTableDrawersSyncNonce.hook';
 export { useGetTableEnablePrefetch } from './useGetTableEnablePrefetch.hook';
+export { useGetTableGroupDetailsPath } from './useGetTableGroupDetailsPath.hook';
 export { useGetTableGroupingCapabilities } from './useGetTableGroupingCapabilities.hook';
 export { useGetTableInitialPageSize } from './useGetTableInitialPageSize.hook';
 export { useGetTableIsBordered } from './useGetTableIsBordered.hook';
 export { useGetTableIsColumnSettingsOpen } from './useGetTableIsColumnSettingsOpen.hook';
 export { useGetTableIsColumnSettingsPinned } from './useGetTableIsColumnSettingsPinned.hook';
-export { useGetTableIsGroupDrillEnabled } from './useGetTableIsGroupDrillEnabled.hook';
 export { useGetTableIsGroupingEnabled } from './useGetTableIsGroupingEnabled.hook';
 export { useGetTableIsGroupingLocked } from './useGetTableIsGroupingLocked.hook';
 export { useGetTableIsRounded } from './useGetTableIsRounded.hook';

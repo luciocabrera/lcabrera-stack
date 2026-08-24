@@ -6,7 +6,6 @@ describe('getInitialExpansionState', () => {
   it('starts with nothing collapsed, so a grouped read paints every level it returned', () => {
     expect(getInitialExpansionState()).toStrictEqual({
       collapsedGroupPaths: new Set<string>(),
-      drilledGroups: new Map(),
     });
   });
 

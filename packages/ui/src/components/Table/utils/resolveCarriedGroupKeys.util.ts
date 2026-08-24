@@ -31,9 +31,9 @@ const NOTHING_CARRIED: ReadonlySet<string> = new Set();
  * something. That is also what keeps the disclosure chevron on a drawn cell.
  *
  * **A detail row above refills the run.** A detail row has no path, so nothing
- * above states the level — "changes from the row above" is true by default.
- * This is what makes a drilled group (ADR-079) read correctly with no rule of
- * its own: the group row after a block of drilled rows restates its ancestry.
+ * above states the level — "changes from the row above" is true by default, and
+ * the group row after a block of detail rows restates its ancestry with no rule
+ * of its own.
  *
  * The walk stops at the first level that differs, because equality below a
  * changed ancestor is coincidence — two `Accessories` under different

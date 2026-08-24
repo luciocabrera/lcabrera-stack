@@ -1,7 +1,5 @@
 type ResolveGroupExpansionKeyArgs = {
   readonly hasChildren: boolean;
-  /** Whether the row can fetch its own rows — the other way to have something under you. */
-  readonly isDrillable: boolean;
   readonly isExpanded: boolean;
   readonly isGroupRow: boolean;
   readonly key: string;
@@ -27,20 +25,16 @@ type ResolveGroupExpansionKeyArgs = {
  *
  * A group row with nothing under it is not a tree node to open, so both keys
  * stay navigation there rather than toggling a state with no visible effect.
- *
- * **A drillable leaf counts as having something under it**, even though it owns
- * no loaded children — pressing `Right` on it fetches its rows, which is a
- * visible effect and the same gesture the chevron performs (ADR-079). The two
- * flags are disjoint in a rollup, so neither substitutes for the other.
+ * A leaf group is one of those: its rows live in their own route rather than
+ * under it (#870), and `Enter` on the cell follows that link.
  */
 export const resolveGroupExpansionKey = ({
   hasChildren,
-  isDrillable,
   isExpanded,
   isGroupRow,
   key,
 }: ResolveGroupExpansionKeyArgs) => {
-  if (!isGroupRow || !(hasChildren || isDrillable)) return;
+  if (!isGroupRow || !hasChildren) return;
 
   if (key === 'ArrowRight' && !isExpanded) return 'expand' as const;
 

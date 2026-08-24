@@ -19,14 +19,6 @@ export type TableGroupDisclosureProps = {
  */
 export type TableGroupDisclosureState = {
   readonly hasChildren: boolean;
-  /**
-   * Whether the row can fetch its own rows (ADR-079). Disjoint from
-   * `hasChildren` in practice: in a rollup the only row owning loaded children
-   * is the subtotal, which may not drill, while the leaf that may drill owns
-   * nothing loaded. Either one earns a chevron; they are the two ways a row can
-   * have something under it.
-   */
-  readonly isDrillable: boolean;
   readonly isExpanded: boolean;
   /**
    * The groups this row folds, keyed by the column stating each level (#802).

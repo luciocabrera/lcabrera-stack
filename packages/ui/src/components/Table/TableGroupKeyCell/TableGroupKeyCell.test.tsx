@@ -25,6 +25,14 @@ vi.mock('#ui/components/Table/TableGroupDisclosure', () => ({
   ),
 }));
 
+// Rendered as its no-path behaviour — the bare text. Which route serves a
+// group's rows is meta this cell reads from the store, and these cases are
+// about which control the cell draws; the link is covered where a grid is
+// actually mounted, in `Table.groupDetails.test.tsx`.
+vi.mock('./TableGroupKeyLink', () => ({
+  TableGroupKeyLink: ({ text }: { readonly text: string }) => text,
+}));
+
 const GROUPING_KEYS = ['city', 'district'];
 
 const summaryOf = (
@@ -59,7 +67,6 @@ const renderCell = ({
       columnKey={columnKey}
       disclosure={{
         hasChildren: true,
-        isDrillable: false,
         isExpanded: true,
         levelDisclosures,
       }}

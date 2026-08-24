@@ -3,7 +3,6 @@ import type {
   DataKey,
   PinnedColumnInfo,
   TableColumn,
-  TableDrillRowMarker,
   TableGroupRowSummary,
 } from '#ui/components/Table/Table.types';
 import type { TableBodyCellProps } from '#ui/components/Table/TableBodyCell/TableBodyCell.types';
@@ -39,12 +38,6 @@ type BuildTableBodyCellDescriptorArgs<TData extends Record<string, unknown>> = {
    */
   readonly disclosure?: TableGroupDisclosureState;
   /**
-   * Present when the row is grid-created drill chrome — a page in flight, a
-   * failure, or the hand-off past one page (ADR-079). Asked of the **row**, like
-   * the group summary beside it, so all three kinds of row arrive in one array.
-   */
-  readonly drillRow?: TableDrillRowMarker;
-  /**
    * The applied group keys. A detail row blanks the columns it is grouped by:
    * the value is stated once by the group row above it, and repeating it down a
    * column whose header already says it is a column of one word (ADR-065).
@@ -62,8 +55,8 @@ type BuildTableBodyCellDescriptorArgs<TData extends Record<string, unknown>> = {
    * **Required, not optional.** It is always computable and there is one call
    * site; an optional flag defaulting to `false` would let a caller that
    * forgets it compile cleanly and silently disable the fail-closed branch in
-   * `resolveStructuralCellChildren` — the same silent-drop shape as the
-   * `drillRow` bug this exists to fix.
+   * `resolveStructuralCellChildren` — the same silent-drop shape as the marker
+   * loss this exists to fix (#887).
    */
   readonly hasStructuralMarker: boolean;
   readonly isLoadingState: boolean;
@@ -133,7 +126,6 @@ export const buildTableBodyCellDescriptor = <
   col,
   columnSizing,
   disclosure,
-  drillRow,
   groupingKeys,
   groupSummary,
   hasStructuralMarker,
@@ -160,15 +152,14 @@ export const buildTableBodyCellDescriptor = <
     width,
   } as const;
 
-  // Grid-supplied content — drill chrome, a group row's own cells, or a detail
-  // row's blanked group column — all in one place, because the order among them
+  // Grid-supplied content — a group row's own cells, or a detail row's blanked
+  // group column — both in one place, because the order among them
   // matters and none of them looks at `row`. `undefined` means this is an
   // ordinary data cell.
   const structuralChildren = resolveStructuralCellChildren({
     carriedGroupKeys,
     columnKey,
     disclosure,
-    drillRow,
     groupingKeys,
     groupSummary,
     hasStructuralMarker,

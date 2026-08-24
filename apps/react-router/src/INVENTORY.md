@@ -37,6 +37,18 @@ route by default and the external API only under the `VITE_API_URL` override.
 | `isExternalApiEnabled`     | `services/isExternalApiEnabled.util.ts` | **Whether** the external path is taken — the app's only read of `VITE_API_URL`, treating an empty value as unset. **Where** it goes is `getApiBaseUrl` (#705) |
 | `fakeDelay`                | `services/fakeDelay.util.ts`            | Artificial `VITE_API_DELAY_MS` delay so the loading skeleton is visible against a local data source; no-ops when unset                                        |
 
+### Server-side route helpers (`routes/enterprise-orders/.server/`)
+
+Read by the domain's own loaders **and** by the resource routes that serve it,
+so they live with the domain rather than inside one of its callers.
+
+| Artifact                 | Location                                 | Description                                                                                                                                                                                                                                        |
+| ------------------------ | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `parseOrdersPageParams`  | `.server/parseOrdersPageParams.util.ts`  | Turns this table's filter/sort/paging search params into query-descriptor pieces. Deliberately does **not** clamp — both bounds live in `selectOrdersPage`, which every entry point reaches                                                        |
+| `toOrderGroupHeading`    | `.server/toOrderGroupHeading.util.ts`    | This route's binding of `@lcabrera/server`'s `toGroupHeading` — the catalogue lookup a truncated key's label needs, which only the route can resolve against its own table                                                                         |
+| `resolveOrdersGroupRead` | `.server/resolveOrdersGroupRead.util.ts` | This route's binding of `@lcabrera/server`'s `resolveGroupRead` — its page ceiling, its tiebreaker column and its truncation lookup, and nothing else. The decision itself lives in the package, because every consumer would otherwise rewrite it |
+| `resolveOrdersPageRead`  | `.server/resolveOrdersPageRead.util.ts`  | `/paginated`'s fetch-vocabulary params parsed once, then handed to `resolveOrdersGroupRead`. The modal route skips this half — the table factory has already parsed the page vocabulary — so the group rule is stated once for both                |
+
 ---
 
 ## Database setup (`db/`, `scripts/`)

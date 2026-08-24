@@ -42,6 +42,9 @@ export const ENTERPRISE_ORDER_FALLBACK_SORT = [
 /** The list route the create/edit/view modals overlay and return to. */
 export const ENTERPRISE_ORDERS_PATH = '/enterprise-orders';
 
+/** Where one group's rows open, as a modal route over the list (#870). */
+export const ENTERPRISE_ORDERS_GROUP_PATH = `${ENTERPRISE_ORDERS_PATH}/group`;
+
 /**
  * The row ceiling a grouped read is built with — a safety belt, not a page: a
  * grouped result is returned whole because there is nothing to scroll into

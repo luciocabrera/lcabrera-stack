@@ -22,17 +22,11 @@
   "apps/react-router/src/routes/api/enterprise-orders-delete/parseOrderId.util.ts": [
     "parseOrderId"
   ],
-  "apps/react-router/src/routes/api/enterprise-orders-paginated/parseOrdersPageParams.util.ts": [
-    "parseOrdersPageParams"
-  ],
   "apps/react-router/src/routes/api/wide-alltypes-150-paginated/parseWideAlltypes150PageParams.util.ts": [
     "parseWideAlltypes150PageParams"
   ],
   "apps/react-router/src/routes/car-sales/config/toCarSaleRow.util.ts": [
     "toCarSaleRow"
-  ],
-  "apps/react-router/src/routes/enterprise-orders/.server/toOrderDrillRead.util.ts": [
-    "toOrderDrillRead"
   ],
   "apps/react-router/src/routes/enterprise-orders/config/deriveOrderTotals.util.ts": [
     "deriveOrderTotals"
@@ -303,9 +297,6 @@
   "packages/ui/src/components/Table/filters/NumberFilterInput/utils/computeInitialValue.util.ts": [
     "computeInitialValue"
   ],
-  "packages/ui/src/components/Table/hooks/utils/activateGridCellLink.util.ts": [
-    "activateGridCellLink"
-  ],
   "packages/ui/src/components/Table/hooks/utils/createResizeStartData.util.ts": [
     "createResizeStartData"
   ],
@@ -339,9 +330,6 @@
   "packages/ui/src/components/Table/TableActionsPopover/utils/resolveOpenMenuReposition.util.ts": [
     "resolveOpenMenuReposition"
   ],
-  "packages/ui/src/components/Table/TableBody/utils/resolveDrillCellChildren.util.tsx": [
-    "resolveDrillCellChildren"
-  ],
   "packages/ui/src/components/Table/TableBody/utils/resolveGroupCellChildren.util.tsx": [
     "EMPTY_CELL",
     "resolveGroupCellChildren"
@@ -360,12 +348,6 @@
   ],
   "packages/ui/src/components/Table/TableBodyCell/utils/renderDisplayedContent.util.tsx": [
     "renderDisplayedContent"
-  ],
-  "packages/ui/src/components/Table/TableDrillRowCell/utils/resolveDrillHandoffSearch.util.ts": [
-    "resolveDrillHandoffSearch"
-  ],
-  "packages/ui/src/components/Table/TableDrillRowCell/utils/resolveDrillShortfallText.util.ts": [
-    "resolveDrillShortfallText"
   ],
   "packages/ui/src/components/Table/TableGroupAggregate/utils/resolveAggregateDataType.util.ts": [
     "resolveAggregateDataType"
@@ -472,9 +454,6 @@
   "packages/ui/src/components/Table/TableSettingsDrawer/FiltersSection/utils/isTextFilterValid.util.ts": [
     "isTextFilterValid"
   ],
-  "packages/ui/src/components/Table/TableSettingsDrawer/GroupingSection/utils/toAggregateItems.util.ts": [
-    "toAggregateItems"
-  ],
   "packages/ui/src/components/Table/TableSettingsDrawer/GroupingSection/utils/toGroupKeyItems.util.ts": [
     "toGroupKeyItems"
   ],
@@ -496,17 +475,11 @@
   "packages/ui/src/components/Table/utils/getRequiredOnLoadMore.util.ts": [
     "getRequiredOnLoadMore"
   ],
-  "packages/ui/src/components/Table/utils/getTableDrillRow.util.ts": [
-    "getTableDrillRow"
-  ],
   "packages/ui/src/components/Table/utils/isTableTotalsPlacement.util.ts": [
     "isTableTotalsPlacement"
   ],
   "packages/ui/src/components/Table/utils/resolveGridRowIndexing.util.ts": [
     "HEADER_ARIA_ROW_INDEX"
-  ],
-  "packages/ui/src/components/Table/utils/toGroupKeyColumnFilter.util.ts": [
-    "toGroupKeyColumnFilter"
   ],
   "packages/ui/src/components/Tooltip/TooltipContent/utils/getArrowStyle.util.ts": [
     "getArrowStyle"

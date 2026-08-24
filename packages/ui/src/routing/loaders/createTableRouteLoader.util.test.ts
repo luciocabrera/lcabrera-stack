@@ -270,6 +270,37 @@ describe('createTableRouteLoader', () => {
       expect(result.metaState.isServerFilterEnabled).toBe(false);
     });
 
+    it('ignores a groupDetailsPath injected through the UI-flags cookie', async () => {
+      // `groupDetailsPath` becomes the `to` of a rendered link on every complete
+      // group row, so a cookie able to seed it is a cookie able to navigate a
+      // reader somewhere the route never named.
+      const { result } = await invoke({
+        cookie: uiFlagsCookie({ groupDetailsPath: '/somewhere-else' }),
+      });
+
+      expect(result.metaState.groupDetailsPath).toBeUndefined();
+    });
+
+    it('ignores an isUrlStateNested injected through the UI-flags cookie', async () => {
+      // It decides which params this table's own state is written under, so a
+      // cookie able to set it detaches a table's state from the loader reading
+      // it — the drawer updates and the rows do not.
+      const { result } = await invoke({
+        cookie: uiFlagsCookie({ isUrlStateNested: true }),
+      });
+
+      expect(result.metaState.isUrlStateNested).toBe(false);
+    });
+
+    it('takes groupDetailsPath from the route meta, over any cookie value', async () => {
+      const { result } = await invoke({
+        config: { meta: { groupDetailsPath: '/declared' } },
+        cookie: uiFlagsCookie({ groupDetailsPath: '/somewhere-else' }),
+      });
+
+      expect(result.metaState.groupDetailsPath).toBe('/declared');
+    });
+
     it('still reads the UI flags the cookie legitimately carries', async () => {
       const { result } = await invoke({
         cookie: uiFlagsCookie({

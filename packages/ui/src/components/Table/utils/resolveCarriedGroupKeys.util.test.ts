@@ -66,8 +66,9 @@ describe('resolveCarriedGroupKeys', () => {
   });
 
   it('refills after a detail row, which states no level of its own', () => {
-    // This is what makes a drilled group read correctly with no rule of its
-    // own: the group row after a block of drilled rows restates its ancestry.
+    // A group row after a block of detail rows restates its ancestry with no
+    // rule of its own — a detail row has no path, so nothing above states the
+    // level and every level counts as changed.
     expect(
       resolveCarriedGroupKeys({
         isWindowFirst: false,

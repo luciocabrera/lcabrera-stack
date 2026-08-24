@@ -112,7 +112,7 @@ const serverCapability: ColumnGroupingCapability = {
  * The granularity vocabulary, both directions — and the one union here that
  * cannot drift by construction.
  *
- * It travels in the grouping param and again in the drill param, so it is wire
+ * It travels in the grouping param and again in the group token, so it is wire
  * vocabulary and lives in `@lcabrera/api`, which **both** packages already
  * declare (ADR-082). `GroupKeyPeriod` and `TableGroupPeriod` are aliases of that
  * one declaration rather than two of ADR-039's duplicated shapes, because there

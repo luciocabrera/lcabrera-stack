@@ -1,25 +1,12 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import {
-  TABLE_DRILL_ROW_FIELD,
-  TABLE_GROUP_ROW_FIELD,
-} from '../Table.constants';
+import { TABLE_GROUP_ROW_FIELD } from '../Table.constants';
 import { hasTableStructuralMarker } from './hasTableStructuralMarker.util';
 
 describe('hasTableStructuralMarker', () => {
   it('recognises a group row by its marker field', () => {
     expect(
       hasTableStructuralMarker({ [TABLE_GROUP_ROW_FIELD]: { count: 4 } }),
-    ).toBe(true);
-  });
-
-  it('recognises a drill row by its marker field', () => {
-    // The other half of the `||`, which the grid-level test does not reach:
-    // there a drill row narrows successfully and never gets this far.
-    expect(
-      hasTableStructuralMarker({
-        [TABLE_DRILL_ROW_FIELD]: { kind: 'loading' },
-      }),
     ).toBe(true);
   });
 

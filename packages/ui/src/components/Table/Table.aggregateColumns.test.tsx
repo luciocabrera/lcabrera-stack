@@ -67,7 +67,7 @@ const rows: readonly TestRow[] = [
       ],
     },
   },
-  // A drilled detail row: a real order, carrying the raw column values. It
+  // A detail row: a real order, carrying the raw column values. It
   // renders over the same partition as the group row above it (ADR-065).
   { customer_type: 'Business', id: 7, total_amount: 4200 },
 ];
@@ -304,7 +304,7 @@ describe('a column carrying several measures', () => {
     ).toBe('ascending');
   });
 
-  it('leaves a drilled detail row no cell for its raw measured value', () => {
+  it('leaves a detail row no cell for its raw measured value', () => {
     // **A known limitation, pinned so it is a decision rather than a surprise.**
     // Every row renders over the same partition (ADR-065), and replacing the
     // measured column takes `total_amount` off the grid entirely — so a detail
@@ -314,8 +314,8 @@ describe('a column carrying several measures', () => {
     //
     // Not fixed by keeping the source column alongside its measures: that
     // column can hold no aggregate, so it would draw the em-dash on every group
-    // row of every grouped view, to serve detail rows that only a drill
-    // produces. #870 removes the inline drill for a modal route that applies no
+    // row of every grouped view, to serve detail rows the inline drill spliced
+    // in. #870 replaced that with a modal route that applies no
     // grouping, where the declared columns are all present and the question
     // does not arise.
     renderGrid();

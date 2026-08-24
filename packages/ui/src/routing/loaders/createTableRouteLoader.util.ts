@@ -186,6 +186,11 @@ export const createTableRouteLoader = <
   // declaration, and both the gate below and the meta spread must read the same
   // answer.
   const capabilityMeta = resolveTableCapabilityMeta({ meta });
+  // Read out of the route's own declaration for the same reason the two below
+  // are re-asserted unconditionally: both are route facts a persisted cookie
+  // must not be able to claim.
+  const isUrlStateNested = meta?.isUrlStateNested === true;
+  const groupDetailsPath = meta?.groupDetailsPath;
 
   return async ({ request }: LoaderFunctionArgs) => {
     const {
@@ -204,6 +209,7 @@ export const createTableRouteLoader = <
       ...(defaultGrouping !== undefined && { defaultGrouping }),
       includeFilters,
       includeGrouping: capabilityMeta.isGroupingEnabled,
+      isUrlStateNested,
       persistenceKey,
       request,
     });
@@ -262,6 +268,13 @@ export const createTableRouteLoader = <
         // entry stand in for one — and `groupingCapabilities` is the one that
         // decides which aggregates the menu offers, so a cookie able to seed it
         // would be a cookie able to widen what the client asks for.
+        // Route-declared, and re-asserted here for the reason above:
+        // `groupDetailsPath` becomes the `to` of a rendered link on every
+        // complete group row, so a cookie able to seed it is a cookie able to
+        // navigate a reader somewhere the route never named. Unconditional,
+        // `undefined` included — a conditional spread is exactly what would let
+        // the cookie's value stand when the route declares none.
+        groupDetailsPath,
         groupingAggregates: grouping.aggregates,
         groupingCapabilities,
         groupingKeys: grouping.keys,
@@ -274,6 +287,10 @@ export const createTableRouteLoader = <
         // loader here reads back differently.
         hasDefaultGrouping:
           defaultGrouping !== undefined && capabilityMeta.isGroupingEnabled,
+        // Same rule: it decides which params this table's own state is written
+        // under, so a cookie able to set it detaches a table's state from the
+        // loader that reads it — the drawer updates and the rows do not.
+        isUrlStateNested,
         totalsPlacement,
         ...capabilityMeta,
       },

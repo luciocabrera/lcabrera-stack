@@ -29,7 +29,6 @@ const DATA: readonly Row[] = [
 const META: readonly TableGroupTreeRowMeta[] = [
   {
     hasChildren: true,
-    isDrillable: false,
     isExpanded: true,
     level: 1,
     levelDisclosures: [],

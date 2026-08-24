@@ -86,7 +86,6 @@ describe('resolveGridFocusContext', () => {
       focusState: focusStateFor({}),
       groupingState,
       metaState,
-      onDrillGroup: undefined,
     });
 
     expect(context.columnKeys).toEqual(['id', 'city']);
@@ -105,7 +104,6 @@ describe('resolveGridFocusContext', () => {
       focusState: focusStateFor({}),
       groupingState,
       metaState,
-      onDrillGroup: undefined,
     });
 
     expect(context.focusedRowIndex).toBeUndefined();
@@ -123,7 +121,6 @@ describe('resolveGridFocusContext', () => {
       }),
       groupingState,
       metaState,
-      onDrillGroup: undefined,
     });
 
     // The stored index is stale — identity is what decides, not position.
@@ -140,7 +137,6 @@ describe('resolveGridFocusContext', () => {
     }) as TableDataState<Row>;
     const collapsed: TableGroupExpansionState = {
       collapsedGroupPaths: new Set([resolveGroupPathKey(groupPath)]),
-      drilledGroups: new Map(),
     };
 
     const expanded = resolveGridFocusContext({
@@ -150,7 +146,6 @@ describe('resolveGridFocusContext', () => {
       focusState: focusStateFor({}),
       groupingState,
       metaState,
-      onDrillGroup: undefined,
     });
     const context = resolveGridFocusContext({
       columnsState,
@@ -159,86 +154,10 @@ describe('resolveGridFocusContext', () => {
       focusState: focusStateFor({}),
       groupingState,
       metaState,
-      onDrillGroup: undefined,
     });
 
     expect(expanded.data).toHaveLength(3);
     expect(context.data).toHaveLength(1);
     expect(context.rowMeta?.[0]?.isExpanded).toBe(false);
-  });
-});
-
-describe('resolveGridFocusContext — a drilled group', () => {
-  // One leaf group over one key, so the group row is drillable and its page can
-  // be spliced under it.
-  const leafRow: Row = {
-    [TABLE_GROUP_ROW_FIELD]: {
-      aggregates: [],
-      count: 9,
-      isSubtotal: false,
-      path: groupPath,
-    },
-  };
-
-  const drilledState = getInitialDataState<Row>({
-    data: [leafRow],
-    totalRows: 1,
-  }) as TableDataState<Row>;
-
-  const withDrill = (expansion: TableGroupExpansionState) =>
-    resolveGridFocusContext({
-      columnsState,
-      dataState: drilledState,
-      expansionState: expansion,
-      focusState: focusStateFor({}),
-      groupingState: { ...groupingState, keys: ['city'] },
-      metaState: { ...metaState, isGroupDrillEnabled: true },
-      // Both halves must be present for a row to be drillable — the flag alone
-      // would leave the affordance offered and permanently inert.
-      onDrillGroup: async () => [],
-    });
-
-  it('navigates the rows a drill added, not the rows without them', () => {
-    // The focus model and the body must derive the same array. Resolved without
-    // the drill inputs this returns one row, and every index past the open
-    // drill addresses a different row than the one painted there (ADR-079).
-    const drilled = withDrill({
-      ...expansionState,
-      drilledGroups: new Map([
-        [
-          resolveGroupPathKey(groupPath),
-          { rows: [{ city: 'A', id: 7 }], status: 'loaded' as const },
-        ],
-      ]),
-    });
-
-    // The group row, its one fetched row, and the hand-off for the other eight.
-    expect(drilled.data).toHaveLength(3);
-    expect(drilled.rowMeta).toHaveLength(3);
-  });
-
-  it('leaves the array alone when nothing has been drilled', () => {
-    expect(withDrill(expansionState).data).toHaveLength(1);
-  });
-
-  it('marks no row drillable when the route declared the capability but no fetcher', () => {
-    // The flag says the endpoint exists; the fetcher is the call that reaches
-    // it. With only the first, every leaf would carry a chevron and an
-    // `aria-expanded` whose every use does nothing.
-    const context = resolveGridFocusContext({
-      columnsState,
-      dataState: drilledState,
-      expansionState,
-      focusState: focusStateFor({}),
-      groupingState: { ...groupingState, keys: ['city'] },
-      metaState: { ...metaState, isGroupDrillEnabled: true },
-      onDrillGroup: undefined,
-    });
-
-    expect(context.rowMeta?.[0]?.isDrillable).toBe(false);
-  });
-
-  it('marks the leaf drillable once both halves are present', () => {
-    expect(withDrill(expansionState).rowMeta?.[0]?.isDrillable).toBe(true);
   });
 });
