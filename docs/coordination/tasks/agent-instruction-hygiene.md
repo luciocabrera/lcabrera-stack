@@ -2,7 +2,7 @@
 id: agent-instruction-hygiene
 title: tighten skills, rules, and always-on agent instructions
 owner: agent:claude
-status: active
+status: review
 branch: docs/894-agent-instruction-hygiene
 area:
   - AGENTS.md
@@ -15,7 +15,7 @@ area:
 started: 2026-08-24
 updated: 2026-08-24
 plan: (none)
-pr: (none)
+pr: https://github.com/luciocabrera/vite-react-compiler/pull/896
 issue: #894
 ---
 
@@ -25,6 +25,6 @@ tighten skills, rules, and always-on agent instructions
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implemented; quality gate green; awaiting verifier
 - Blockers: none
-- Next:
+- Next: verifier + PR review

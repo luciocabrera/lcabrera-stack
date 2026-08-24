@@ -24,8 +24,8 @@ Facing that call — promote it into a package, or write it twice?
 walks the decision in order and links the ADR that owns each step.
 
 **Two scopes, and the split carries meaning.** The publishable packages are
-**`@lcabrera/*`**; the internal ones (`vite-configs`, `ts-configs`, `plugins`,
-`scan-report`) stay **`@repo/*`**. So the
+**`@lcabrera/*`**; the internal ones (`ts-configs`, `scan-report`) stay
+**`@repo/*`**. So the
 import line tells you which side of the product boundary you are on: `@lcabrera/`
 means it ships and has consumers outside this repo, `@repo/` means internal, change
 it freely. A new package picks its scope by one question — does it ship? — and a
@@ -35,29 +35,15 @@ A package in **neither** scope means that question was never asked — that is h
 the custom lint rules sat unscoped until they became `@lcabrera/eslint-plugin`
 ([ADR-057](docs/decisions/ADR-057-publish-the-custom-lint-rules.md)).
 
-**Three packages come out of that `@repo/*` list, and two of them are
-renames.**
-[ADR-069](docs/decisions/ADR-069-publish-the-shared-toolchain.md) publishes
-`packages/node-runtime` as `@lcabrera/node` (done, #676) and
-`packages/vite-configs`, with the one-plugin workspace folded in and deleted, as
-`@lcabrera/vite-config` (done, #675). Those workspaces **became** the published
-package — the directory keeps its name, the npm name is the one that changes —
-and the repo data they carried left for a repo-owned home: the Oxlint workspace
-roster now lives in the root `vite.config.ts`, and the
-`@lcabrera/ui`/`@lcabrera/server` import boundaries in the root
-`eslint.restrictions.repo.mjs`.
-**`packages/ts-configs` is the one split, not a rename**:
-`@lcabrera/tsconfig` is a new package (`packages/tsconfig`) holding the factories
-and the writer, while `@repo/ts-configs` survives — still `@repo/*`, still
-`private: true` — as the host of `tsconfig.entries.ts`, this repo's own workspace
-roster, which the published package must never carry. So
-`vp run --filter @repo/ts-configs generate` keeps working unchanged, and that
-name is not on its way anywhere. #674–#677 do the work; until one lands, its
-package is `@repo/*` and `private: true` in fact. What makes all three
-publishable is that this repo's own data — the Oxlint workspace roster, the
-`@lcabrera/ui`/`@lcabrera/server` boundary tables, the `docker/local` env path,
-the tsconfig entry table — comes out of them and becomes configuration, so
-adding a new hardcoded repo fact to one of them now works against that.
+**The toolchain packages that used to sit in `@repo/*` publish, with this
+repo's data taken out of them.**
+[ADR-069](docs/decisions/ADR-069-publish-the-shared-toolchain.md) is that
+history: `packages/node-runtime` is `@lcabrera/node`, `packages/vite-configs`
+(with the one-plugin workspace folded in) is `@lcabrera/vite-config`, and
+`packages/ts-configs` is the one **split** — `@lcabrera/tsconfig` holds the
+factories and the writer, while `@repo/ts-configs` survives as the host of
+`tsconfig.entries.ts`, this repo's own workspace roster. Adding a new hardcoded
+repo fact to a published package now works against that.
 
 **They are published on npm, and nothing but the version number stands between
 a mistake and the registry** — `private` is off and each has a trusted publisher,
@@ -90,15 +76,7 @@ sentence — it is which workspaces gitignore `eslint-suppressions.json`, which
 `vp run suppressions:verify` reads at runtime, so a new public package is
 covered the day it is added; keep the prose in step.
 
-`packages/vite-configs` joined that list as `@lcabrera/vite-config` under #675
-([ADR-069](docs/decisions/ADR-069-publish-the-shared-toolchain.md)), the way the
-rule above requires: it and the plugins workspace it absorbed each committed an
-`eslint-suppressions.json`, and admission meant _clearing_ those findings and
-gitignoring the file — not being named here. `packages/node-runtime` joined the
-same way under #676, more cheaply: it carried no suppressions to clear, so
-publishing it as `@lcabrera/node` was a manifest, a `.gitignore` and a README.
-`packages/devkit` and `packages/repo-standards` joined under #800, as
-`@lcabrera/devkit` and `@lcabrera/repo-standards` — the setup this repository
+`packages/devkit` and `packages/repo-standards` are the setup this repository
 hands to another repository, which is the one thing that cannot be shipped by
 being described. They are the first public packages that ship **`.mjs` source
 and do not build**: unlike a `.ts` file, an `.mjs` one loads from
@@ -109,26 +87,11 @@ which passes exactly like a correct one.
 `packages/ts-configs` is not
 on that list because it never joins it: it is the split, so what became public is
 the new `packages/tsconfig` above, and the surviving workspace stays private.
-`packages/scan-report` is not on it either, and for a different reason: it was
-built under #677 from the scan-report skills' shared scripts, so it stays
-`@repo/scan-report` and `private: true`. It was expected to leave with the CQMS
-extraction, on the reasoning that every consumer it has is CQMS. **That was
-wrong, and #683 found out by trying**: the root manifest declares it, and the
-`app-graph`, `linter-checker` and `fallow-code-checker` skills import and execute
-its scripts to scan _this_ repo. So it stayed when the CQMS workspaces left, and
-it is not going anywhere on its own.
-
-**#682 is not what unblocks it** — that publishes CQMS's _ingestion_ CLI, the
-command `ingest-report.mjs` forwards to. The half that pins the package here is
-the other one: the report **generators** those skills execute, and the
-`deterministic-scan` module `app-graph` imports. Neither is ingestion, and #682
-never proposed to publish them. The decision that would move it is **#716**
-(make the agent skills reusable), because the package and the skills are one
-problem — #677 built it out of their shared scripts, so shipping a skill whose
-first instruction runs a generator from `packages/scan-report/scripts` hands a
-consumer a path it does not have. #716 had excluded these three skills on the same "every
-consumer is CQMS" premise and has been corrected. ADR-069's note of 2026-08-14
-records the original reasoning.
+`packages/scan-report` is not on it either: it stays `@repo/scan-report` and
+`private: true` because the `app-graph`, `linter-checker` and
+`fallow-code-checker` skills import and execute its scripts to scan this repo.
+The publishing history and the scan-report amendment live in
+[ADR-069](docs/decisions/ADR-069-publish-the-shared-toolchain.md).
 
 `api` and `server` split on **runtime**, and the split is load-bearing, not
 cosmetic — the two names say which runtime each one is for, and the tsconfigs
@@ -189,11 +152,18 @@ stop for implementation patterns.
 Selection guideline:
 
 - **Working in complex UI state?** Start with `store-pattern`.
+- **Creating a component, hook, util, or context?** Spawn the
+  `architecture-guard` agent first — it reads the inventories, PATTERNS.md,
+  ARCHITECTURE.md and ADRs and returns a reuse brief.
 - **Finishing any code change?** Run `quality-gate-workflow`.
 - **Committing or opening a PR?** Use `commit-and-pr`.
 - **Routing/data mutations?** Use `react-router-framework-mode`.
 - **React component implementation?** Use `react-19`.
 - **Understanding unfamiliar code before changing it?** Use `codebase-explorer`.
+- **Picking a scan?** `linter-checker` (mechanical lint),
+  `fallow-code-checker` (fallow), `code-smell-zen` (diff smells),
+  `code-smell-checker` (full-tree smells), `health-swarm` (repo-wide rot with
+  evidence).
 - **Auditing what has rotted repo-wide?** Use `health-swarm` — six read-mostly
   scouts in parallel (duplication, dead code, perf, deps, doc drift, lint
   coherence), each held to a probe that could have disproved its own finding.

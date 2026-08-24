@@ -10,10 +10,15 @@ Shared repository-level automation scripts.
 
 ## Current Scripts
 
-- `validate-skills.cjs` - validates agent skill contracts in `.github/skills`.
-  - Checks required frontmatter fields (`name`, `description`, `license`).
+- `validate-skills.cjs` - validates agent skill contracts in `.github/skills`
+  (implementation in `lib/validate-skills-contract.cjs`).
+  - Every directory under `.github/skills/` must have a `SKILL.md`, unless it
+    is on the explicit support allowlist (`code-smell-shared`).
+  - Checks required frontmatter fields (`name`, `description`).
   - Verifies frontmatter `name` matches the skill folder.
   - Verifies relative markdown links in each `SKILL.md` resolve.
+  - Verifies relative script paths named from a `SKILL.md` or
+    `.claude/agents/*.md` exist.
 - `generate-skills-compliance-report.cjs` - emits markdown compliance artifacts from skill validation.
   - Writes `reports/skills/code-smell-compliance-report.md`.
   - Appends run history to `reports/skills/agenting-plan-progress.md`.

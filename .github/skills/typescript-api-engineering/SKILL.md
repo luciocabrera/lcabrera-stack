@@ -12,8 +12,16 @@ description: |
   - AI-friendly APIs
   - Long-term maintainability
 user-invocable: true
-paths: ['**/routes/api/**']
 ---
+
+# This repository first
+
+**This repo's data path is React Router loaders/actions + `@lcabrera/server`,
+not a standalone Express/OpenAPI service.** Before applying anything below,
+read [project-architecture-standards.md](project-architecture-standards.md).
+[generic-architecture-standards.md](generic-architecture-standards.md) is the
+portable Express-style blueprint; where the two disagree, the project edition
+wins for code in this repo.
 
 # Core Philosophy
 

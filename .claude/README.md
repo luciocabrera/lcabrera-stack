@@ -14,7 +14,7 @@ This document describes every layer of the AI config for this project — what e
 ├── rules/                  ← path-specific rules, loaded only when editing matching files
 │   ├── typescript.md       ← paths: **/*.ts, **/*.tsx
 │   ├── react-components.md ← paths: **/*.tsx, **/*.jsx, **/*.stylex.ts
-│   ├── testing.md          ← paths: **/*.test.*, **/*.spec.*
+│   ├── testing.md          ← paths: **/*.test.ts, .tsx, .mjs, .cjs; **/*.spec.ts(x)
 │   ├── routes-data.md      ← paths: **/routes/**, **/services/**, **/*.api.ts, …
 │   └── scripts.md          ← paths: **/*.mjs, **/*.cjs, **/scripts/**/*.js
 ├── skills → ../.github/skills   ← symlink (canonical source is .github/skills/)
@@ -53,13 +53,13 @@ Detailed per-file-type conventions intentionally do **not** live here — they l
 
 Each rule file has a `paths:` frontmatter with glob patterns. Claude Code loads a rule **only when editing files that match its globs** — TypeScript rules don't load while editing docs, React rules don't load while working in `packages/server`, etc.
 
-| Rule file             | Loads when editing                              | Owns                                                                         |
-| --------------------- | ----------------------------------------------- | ---------------------------------------------------------------------------- |
-| `typescript.md`       | any `.ts` / `.tsx`                              | strict TS rules, naming conventions, file suffixes, FP/immutability, imports |
-| `react-components.md` | any `.tsx` / `.jsx` / `.stylex.ts`              | component bundle pattern, props naming, React 19 rules, StyleX-only styling  |
-| `testing.md`          | any `.test.*` / `.spec.*`                       | Vitest/Testing Library conventions, `vp run test`, coverage target           |
-| `routes-data.md`      | routes, services, `.api.ts`, RR config, entries | loader/action data flow, store-pattern rule, error handling, Zod             |
-| `scripts.md`          | any `.mjs` / `.cjs` / `scripts/**/*.js`         | JSDoc "why" header, small pure functions, `node:` builtins, 350-line ceiling |
+| Rule file             | Loads when editing                                   | Owns                                                                         |
+| --------------------- | ---------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `typescript.md`       | any `.ts` / `.tsx`                                   | strict TS rules, naming conventions, file suffixes, FP/immutability, imports |
+| `react-components.md` | any `.tsx` / `.jsx` / `.stylex.ts`                   | component bundle pattern, props naming, React 19 rules, StyleX-only styling  |
+| `testing.md`          | `.test.ts` / `.tsx` / `.mjs` / `.cjs`; `.spec.ts(x)` | Vitest/Testing Library conventions, `vp run test`, coverage target           |
+| `routes-data.md`      | routes, services, `.api.ts`, RR config, entries      | loader/action data flow, store-pattern rule, error handling, Zod             |
+| `scripts.md`          | any `.mjs` / `.cjs` / `scripts/**/*.js`              | JSDoc "why" header, small pure functions, `node:` builtins, 350-line ceiling |
 
 **Non-Claude agents** (Copilot, Gemini) don't auto-load these — AGENTS.md §2 tells them to read the matching rule file before editing covered files.
 
@@ -73,29 +73,30 @@ Skills are on-demand task workflows. `.claude/skills` is a **symlink** to `.gith
 
 Auto-invocation is driven by the `description` field (Claude matches it against user intent) and, where present, the `paths` frontmatter (skill surfaces when editing matching files). `user-invocable: true` skills can also be triggered explicitly with `/skill-name`.
 
-| Skill                         | Purpose                                                    | Auto-invokes via                                  |
-| ----------------------------- | ---------------------------------------------------------- | ------------------------------------------------- |
-| `react-19`                    | React 19 patterns, hooks, compiler rules                   | description + `paths: **/*.tsx, **/*.jsx`         |
-| `react-router-framework-mode` | Loaders, actions, forms, navigation                        | description + `paths: **/routes/**, routes.ts, …` |
-| `store-pattern`               | Split-context external store architecture                  | description + `paths: **/contexts/**`             |
-| `quality-gate-workflow`       | **Canonical** post-change validation sequence              | description (after finishing a code change)       |
-| `codebase-explorer`           | Phased investigation; owns `.tmp/exploration/` scratchpads | description (understand/trace/investigate)        |
-| `code-smell-checker`          | Maintainability audits (runs in forked context)            | description                                       |
-| `code-smell-zen`              | Diff-based smell review (runs in forked context)           | description                                       |
-| `fallow-code-checker`         | Fallow static hygiene scan (runs in forked context)        | description                                       |
-| `linter-checker`              | Deterministic oxlint + eslint report (forked context)      | description                                       |
-| `commit-and-pr`               | Commit message + PR body that pass the enforced standard   | description (before committing / opening a PR)    |
-| `refactor-verified`           | One issue: builder subagent + blind verifier subagent      | description (implementing an issue with criteria) |
-| `epic`                        | A whole epic: waves of builders, a blind reviewer per PR   | description, or `/epic <n>`                       |
-| `health-swarm`                | Six parallel scouts auditing repo-wide rot                 | description (periodic audit / "what has rotted")  |
-| `lint-toolchain`              | Configure or debug Oxlint / eslint / Biome / Sonar         | description + `paths`                             |
-| `releasing`                   | Changesets release, changelog, PR label taxonomy           | description (cutting a release)                   |
-| `typescript-api-engineering`  | API-layer architecture standards                           | description + `paths: **/routes/api/**`           |
+| Skill                         | Purpose                                                    | Auto-invokes via                                   |
+| ----------------------------- | ---------------------------------------------------------- | -------------------------------------------------- |
+| `react-19`                    | React 19 patterns, hooks, compiler rules                   | description + `paths: **/*.tsx, **/*.jsx`          |
+| `react-router-framework-mode` | Loaders, actions, forms, navigation                        | description + `paths: **/routes/**, routes.ts, …`  |
+| `store-pattern`               | Split-context external store architecture                  | description + `paths: **/contexts/**`, store hooks |
+| `quality-gate-workflow`       | **Canonical** post-change validation sequence              | description (after finishing a code change)        |
+| `codebase-explorer`           | Phased investigation; owns `.tmp/exploration/` scratchpads | description (understand/trace/investigate)         |
+| `code-smell-checker`          | Maintainability audits (runs in forked context)            | description                                        |
+| `code-smell-zen`              | Diff-based smell review (runs in forked context)           | description                                        |
+| `fallow-code-checker`         | Fallow static hygiene scan (runs in forked context)        | description                                        |
+| `linter-checker`              | Deterministic oxlint + eslint report (forked context)      | description                                        |
+| `commit-and-pr`               | Commit message + PR body that pass the enforced standard   | description (before committing / opening a PR)     |
+| `refactor-verified`           | One issue: builder subagent + blind verifier subagent      | description (implementing an issue with criteria)  |
+| `epic`                        | A whole epic: waves of builders, a blind reviewer per PR   | description, or `/epic <n>`                        |
+| `health-swarm`                | Six parallel scouts auditing repo-wide rot                 | description (periodic audit / "what has rotted")   |
+| `lint-toolchain`              | Configure or debug Oxlint / eslint / Biome / Sonar         | description + `paths`                              |
+| `releasing`                   | Changesets release, changelog, PR label taxonomy           | description (cutting a release)                    |
+| `typescript-api-engineering`  | API-layer architecture standards                           | description (not RR `routes/api/` resource routes) |
+| `app-graph`                   | Deterministic folder/file inventory scanner                | description                                        |
 
 A skill with `paths:` frontmatter is **not** in an agent's skill listing until it
-opens a matching file. That is the intended economy, but it has one sharp edge:
-Non-Negotiable Rule 5 tells you to invoke `store-pattern` _before_ touching a
-store, and the skill does not appear until you already have. Invoke it by name.
+opens a matching file. That is the intended economy. `store-pattern` also
+matches the store/selector hooks under `packages/ui/src/hooks/`, so Rule 5
+does not depend on already having a `contexts/` file open.
 
 **Skill anatomy:**
 
@@ -106,7 +107,15 @@ skill-name/
 └── scripts/          ← executable shell scripts invoked from SKILL.md
 ```
 
-**Frontmatter contract** (enforced by `scripts/validate-skills.cjs`): `name` (must match folder) and `description` (must contain trigger phrases — it drives auto-invocation) are required. Optional: `argument-hint`, `user-invocable`, `allowed-tools`, `paths` (globs for file-scoped auto-invoke), `context: fork` (isolates verbose output in a sub-agent — used by the three scan/report skills).
+**Frontmatter contract** (enforced by `scripts/validate-skills.cjs`): every
+directory under `.github/skills/` must have a `SKILL.md` unless it is on the
+explicit support allowlist (`code-smell-shared`). `name` (must match folder) and
+`description` (must contain trigger phrases — it drives auto-invocation) are
+required. Relative markdown links must resolve, and a relative script path
+named from a `SKILL.md` or `.claude/agents/*.md` must exist. Optional:
+`argument-hint`, `user-invocable`, `allowed-tools`, `paths` (globs for
+file-scoped auto-invoke), `context: fork` (isolates verbose output in a
+sub-agent — used by the scan/report skills).
 
 ---
 
@@ -114,13 +123,13 @@ skill-name/
 
 Agents are sub-agents spawned explicitly by Claude (or by you) for isolated, heavy, or parallelisable work. They start with no conversation context — their markdown file is their full system prompt. Filenames must match the `name:` frontmatter field (`<name>.md`).
 
-| Agent                | Purpose                                                                        | Tools                               | When to use                                    |
-| -------------------- | ------------------------------------------------------------------------------ | ----------------------------------- | ---------------------------------------------- |
-| `quality-gate`       | Runs fmt→lint→check→test, returns pass/fail table                              | Bash, Read                          | Mid-session validation or structured report    |
-| `architecture-guard` | Reads INVENTORY.md, ARCHITECTURE.md, PATTERNS.md, ADRs — returns reuse brief   | Read, Glob, Grep                    | Before implementing anything new               |
-| `fallow-scan`        | Runs full fallow pipeline in background, saves JSON + report                   | Bash, Read, Write                   | Before large refactors or after big merges     |
-| `refactor-builder`   | Implements one issue in its own worktree; never certifies or merges it         | Bash, Read, Write, Edit, Glob, Grep | Dispatched by `/refactor-verified` and `/epic` |
-| `refactor-verifier`  | Certifies a diff against acceptance criteria, blind to the builder's reasoning | Bash, Read, Write, Edit, Glob, Grep | Dispatched by the same two                     |
+| Agent                | Purpose                                                                        | Tools                               | When to use                                                            |
+| -------------------- | ------------------------------------------------------------------------------ | ----------------------------------- | ---------------------------------------------------------------------- |
+| `quality-gate`       | Runs fmt→lint→check→test, returns pass/fail table                              | Bash, Read                          | Mid-session validation; scope is the changed workspace or `check:safe` |
+| `architecture-guard` | Reads INVENTORY.md, ARCHITECTURE.md, PATTERNS.md, ADRs — returns reuse brief   | Read, Glob, Grep                    | Before implementing anything new                                       |
+| `fallow-scan`        | Runs full fallow pipeline in background, saves JSON + report                   | Bash, Read, Write                   | Before large refactors or after big merges                             |
+| `refactor-builder`   | Implements one issue in its own worktree; never certifies or merges it         | Bash, Read, Write, Edit, Glob, Grep | Dispatched by `/refactor-verified` and `/epic`                         |
+| `refactor-verifier`  | Certifies a diff against acceptance criteria, blind to the builder's reasoning | Bash, Read, Write, Edit, Glob, Grep | Dispatched by the same two                                             |
 
 The last two take **dispatch parameters** — whether to ready the PR, whether to
 post findings to GitHub — because `/refactor-verified` and `/epic` want opposite

@@ -24,9 +24,10 @@ This skill defines the mandatory validation sequence after code changes.
 
 ## Canonical Gate Order
 
-> **Default working directory: `apps/react-router/`.** `vp run test`, `vp check` and
-> `vp run typecheck` resolve per workspace, so running them from the monorepo root
-> checks something other than the workspace you changed.
+> **Default working directory: the workspace whose files changed.** `vp run test`,
+> `vp check` and `vp run typecheck` resolve per workspace. From the repo root,
+> `vp run check:safe` chains the entire gate the way CI does. `apps/react-router/`
+> is an example of a workspace, not the implicit default.
 >
 > **Stages 4 and 5 are the exceptions** — both are root-only, repo-wide passes and
 > are marked as such below. `cd` to the repo root for those two, then come back.
@@ -52,8 +53,8 @@ only `vp lint .` will report clean on code that fails CI, which now runs
 
 **Stage 4 is not covered by stage 6 either, and it is root-only.** `vp check` does
 not run Biome. Unlike stages 2 and 3 there is no per-workspace variant: `biome.jsonc`
-lives at the repo root and its `overrides` scope the react domain to the three React
-workspaces (`apps/react-router`, `packages/ui`), so one
+lives at the repo root and its `overrides` scope the react domain to the React
+workspaces that exist (`apps/react-router`, `packages/ui`), so one
 repo-wide pass covers everything. `cd` to the root for this stage, then come back.
 Biome is the only linter here carrying the React-domain rules the other two miss
 (`noNestedComponentDefinitions`, `noDuplicatedSpreadProps`). CI runs
@@ -113,13 +114,15 @@ commit as the code**:
 
 ### Where a new ADR goes
 
-There are three ADR homes on **one** number sequence, and
+There are two ADR homes on **one** number sequence
+([`docs/README.md`](../../../docs/README.md)), and
 [ADR-048](../../../docs/decisions/ADR-048-adr-taxonomy-and-one-sequence.md) owns
 the rule for picking between them — read it rather than a summary here, so this
-does not become a fourth place the taxonomy is written down.
+does not become another place the taxonomy is written down. The CQMS home is
+gone.
 
 The one mechanic you need at gate time: take the number `vp run adr:verify`
-reports as free (it is global across all three homes, whichever you are writing
+reports as free (it is global across both homes, whichever you are writing
 in). That gate fails a stray, a reused number, a malformed name and a stale
 index.
 

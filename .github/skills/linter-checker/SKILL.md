@@ -38,7 +38,7 @@ Both runners ship in [`@repo/scan-report`](../../../packages/scan-report/README.
 3. Maps every diagnostic/message directly into the canonical finding shape: `severity` (oxlint `error`/`warning` and eslint `2`/`1` → `HIGH`/`MEDIUM`), `confidence: "high"` always, `effort: "small"` always, `rule_id`/`location_path`/`location_hint`/`why`/`fix` from the tool's own output.
 4. Builds `report.json` directly (this IS the report — there is no separate LLM-authored version to reconcile against) and renders `report.md` mechanically from it.
 5. Saves all three files to `.tmp/oxlint-checker/{timestamp}/` or `.tmp/eslint-checker/{timestamp}/`.
-6. Hands the run to the ingestion command configured in `scan-report.config.json` at the repo root, as its own scanner. With nothing configured it says so and exits 0 — the three artifacts are the deliverable either way. In this repo that command is CQMS's ingest CLI, which also explodes the raw output into the `cqms.oxlint_runs`/`cqms.eslint_runs` masters and `cqms.lint_violations` detail rows (including eslint's suppressed messages, tracked as baselined debt).
+6. Hands the run to the ingestion command configured in `scan-report.config.json` at the repo root, as its own scanner. Unconfigured ingest (`scan-report.config.json` missing / skip) is the documented normal state in this repository — the three artifacts are the deliverable. A configured command that fails is a different outcome: it exits non-zero.
 
 ## After Running
 
