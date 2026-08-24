@@ -109,6 +109,8 @@ Do not copy the same fact into an architecture file, a JSDoc essay, and an ADR.
 - **New artifact created, enhanced, or renamed** → one sentence in the owning
   workspace's `INVENTORY.md` (`packages/ui/src/`, `packages/server/src/`,
   `apps/react-router/src/`, …).
+- **New or changed command** → [`COMMANDS.md`](../../../COMMANDS.md) in the
+  same commit (`vp run commands:verify` fails a miss).
 - **New naming/structural convention** → `packages/ui/src/PATTERNS.md` and the
   matching `.claude/rules/` file.
 - **New architectural decision** → a new ADR (see below).

@@ -60,8 +60,8 @@ ambiguity introduced for the next one.
 Follow the **Documentation Update Rule** in the
 [`quality-gate-workflow` skill](../../.github/skills/quality-gate-workflow/SKILL.md#documentation-update-rule):
 docs change in the _same commit_ as the code. The homes are the inventory, a
-new ADR, `PATTERNS.md` for a new convention, and a **system**
-`ARCHITECTURE.md` only when system wiring changed
+new ADR, `PATTERNS.md` for a new convention, `COMMANDS.md` when a command
+changes, and a **system** `ARCHITECTURE.md` only when system wiring changed
 ([ADR-088](../decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md)).
 
 Update **this** page only when the workflow itself changes, and
