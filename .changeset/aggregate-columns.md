@@ -1,6 +1,6 @@
 ---
 '@lcabrera/server': minor
-'@lcabrera/ui': major
+'@lcabrera/ui': minor
 ---
 
 Each aggregate selected on a grouped Table now renders as **its own column**,

@@ -14,6 +14,38 @@ several already do not: `@lcabrera/eslint-plugin` lives in
 `@lcabrera/vite-config` in `packages/vite-configs`. Read the manifest, not the
 path.
 
+## Every one of these is pre-1.0, and that decides the bump
+
+They are **beta**: still `0.x`, and the API of any of them can still change.
+That is a statement about the release phase, not about the code's quality — it
+says a consumer should expect breaks between releases and pin accordingly.
+
+The rule it produces, when you write a changeset: **while a package is `0.x`, a
+breaking change is a `minor`, never a `major`.** Changesets takes `major` on a
+`0.x` package straight to `1.0.0`, so declaring one does not merely say "this
+breaks" — it promotes the package out of beta and claims its API is stable, and
+**an npm version is permanent**, so the claim cannot be walked back. The break
+still belongs in the changeset body, spelled out for the consumer who has to act
+on it; `1.0.0` is a separate decision, taken deliberately for that package, not
+the automatic consequence of having broken something.
+
+`publish-wiring.test.mjs` gates this, and it asks the **planned release** rather
+than the changeset text — so no spelling evades it, and it also catches a
+promotion nothing declares: a peer dependent dragged to `1.0.0` by the package it
+peers on. A failure names the package, both versions, and the changeset that
+declared the `major`, or says the promotion arrives through a peer edge when none
+did:
+
+```
+@lcabrera/ui: 0.3.0 would become 1.0.0 — declared major in aggregate-columns
+@lcabrera/devkit: 0.1.0 would become 1.0.0 — declared by no changeset, so it arrives through a peer edge
+```
+
+Taking a package to `1.0.0` is therefore a two-part change: make the declaration,
+and add the package to `STABLE_PACKAGES` in that test **with the reason**. The
+reason is the point — an allowlist entry records why a package left beta, where
+an edited assertion would record nothing.
+
 ## Publishing invariants
 
 All of them are **published on npm**. `private` is off and each has a configured

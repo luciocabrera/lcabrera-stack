@@ -132,6 +132,9 @@ catalogs:
     '@changesets/cli':
       specifier: ^2.31.1
       version: 2.31.1
+    '@changesets/get-release-plan':
+      specifier: ^4.0.16
+      version: 4.0.16
     fallow:
       specifier: ^3.17.0
       version: 3.17.0
@@ -183,6 +186,9 @@ importers:
       '@changesets/cli':
         specifier: catalog:tooling
         version: 2.31.1(@types/node@26.2.0)
+      '@changesets/get-release-plan':
+        specifier: catalog:tooling
+        version: 4.0.16
       '@lcabrera/devkit':
         specifier: workspace:*
         version: link:packages/devkit

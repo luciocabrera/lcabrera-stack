@@ -20,6 +20,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import getReleasePlan from '@changesets/get-release-plan';
 import { describe, expect, it } from 'vite-plus/test';
 
 import { readPublishing } from '../../packages/repo-standards/scripts/config.mjs';
@@ -33,6 +34,21 @@ const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const RELEASE_WORKFLOW = join(REPO_ROOT, '.github', 'workflows', 'release.yml');
 
 const { packagesDir, publicPackageDirs } = readPublishing(REPO_ROOT);
+
+/**
+ * Packages that have deliberately left beta, and why.
+ *
+ * The gate below refuses to take any package out of `0.x`, because Changesets
+ * turns a `major` on a `0.x` package into `1.0.0` and an npm version is
+ * permanent. Promoting one is a decision, so it is recorded here with its
+ * reason rather than made by editing an assertion — an edited assertion leaves
+ * no trace of why, which is the whole thing this gate exists to prevent.
+ *
+ * Empty on purpose: nothing here has left beta yet.
+ */
+const STABLE_PACKAGES = new Map([
+  // ['@lcabrera/example', 'promoted in #000 — the API has not moved since …'],
+]);
 
 const readManifest = (directory) =>
   JSON.parse(
@@ -170,6 +186,61 @@ describe('this repository publishes what it develops against', () => {
     // behaviour is `pnpm exec changeset status --verbose`: no published package
     // should be listed under "bumped at major" without a changeset asking for
     // one.
+  });
+
+  it('plans no release that takes a package out of pre-1.0', async () => {
+    // Asked of the PLANNED RELEASE, not of the changeset text. Every public
+    // package here is beta, and Changesets takes `major` on a `0.x` package
+    // straight to `1.0.0` — so a promotion is not "this breaks", it is "this
+    // API is now stable", and an npm version is permanent.
+    //
+    // Scanning declarations was tried and was wrong twice: first matching only
+    // a single-quoted package name, then only a bare bump value. YAML also
+    // admits `'@lcabrera/ui': 'major'`, `{ '@lcabrera/ui': major }` and a
+    // trailing comment, and Changesets honours every one — so a pattern keeps
+    // reporting the same clean pass a repository with no promotion gets.
+    //
+    // The plan cannot be spelled around: it is the tool's own resolution. It
+    // also catches a promotion nothing declares — a peer dependent dragged to
+    // `1.0.0` by the package it peers on, which is the trap
+    // `onlyUpdatePeerDependentsWhenOutOfRange` exists to disarm.
+    //
+    // Read through the API, not the `changeset status` CLI: that command also
+    // asks git which packages changed since the trunk, and CI checks out
+    // without a local `main`, so it fails there while passing on any developer
+    // machine. `getReleasePlan` touches no git at all.
+    const { changesets, releases } = await getReleasePlan(REPO_ROOT);
+
+    // Only the changesets that declared the `major`, not every changeset that
+    // touches the package — `release.changesets` is the latter, and for a busy
+    // package that is a list too long to act on. An empty answer is the useful
+    // one: nothing declared it, so it arrives through a peer edge.
+    const declaredIn = (name) =>
+      changesets
+        .filter((changeset) =>
+          changeset.releases.some(
+            (release) => release.name === name && release.type === 'major',
+          ),
+        )
+        .map((changeset) => changeset.id);
+
+    const promotions = releases
+      .filter(
+        (release) =>
+          release.oldVersion.startsWith('0.') &&
+          !release.newVersion.startsWith('0.') &&
+          !STABLE_PACKAGES.has(release.name),
+      )
+      .map((release) => {
+        const sources = declaredIn(release.name);
+        const origin =
+          sources.length > 0
+            ? `declared major in ${sources.join(', ')}`
+            : 'declared by no changeset, so it arrives through a peer edge';
+        return `${release.name}: ${release.oldVersion} would become ${release.newVersion} — ${origin}`;
+      });
+
+    expect(promotions).toEqual([]);
   });
 
   it('gitignores dist so a build is never committed', () => {
