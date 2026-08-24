@@ -1,5 +1,643 @@
 # @lcabrera/ui
 
+## 0.4.0
+
+### Minor Changes
+
+- 4911e39: Each aggregate selected on a grouped Table now renders as **its own column**,
+  under a two-level header naming the source column above the function.
+
+  Previously every aggregate applied to a column landed in that column's single
+  cell, so two measures on `Total Amount` rendered as one cell reading
+  `Average … Minimum …` — truncated together, under a header that named neither,
+  and sortable, resizable and pinnable neither separately nor at all. A measure is
+  a column's worth of data; giving it a column puts it inside the machinery every
+  other column already has.
+
+  The columns are **derived, not declared**: they appear when a grouping is
+  applied and vanish when it clears, and nothing about them reaches the persisted
+  column layout — so a deselected aggregate needs no cleanup, and ungrouping
+  restores your own columns exactly. A **primary-key** column is measured beside
+  itself rather than replaced, because a table with no column carrying
+  `isPrimaryKey` cannot resolve a row id for its CRUD links.
+
+  Sorting a measure column now reaches the query. `toGroupSort` turns a sort
+  naming a measure into an aggregate `ORDER BY` term and places it after the key
+  terms, which is the one position that both orders something and is accepted —
+  an aggregate ahead of a key is refused rather than quietly demoted.
+
+  **Breaking, for a consumer calling the column derivations directly.**
+  `deriveColumnViewState` and `getPinnedDerivedColumnsState` now require an
+  `aggregates` argument. It is required rather than defaulted on purpose: these
+  functions are re-run on every column change, and a caller free to omit it would
+  silently paint the source column instead of its measures on the next pin, hide
+  or resize. Pass the applied `aggregates` from the grouping state — `[]` where
+  nothing is grouped.
+
+  Two additive changes to the published type surface:
+
+  - `DataKey` admits `AggregateColumnKey` (`` `${string}:${TableAggregateFn}` ``),
+    by the same precedent that admits `'actions'` — a column identity that names
+    no field of the row.
+  - `TableColumn` gains an optional `headerGroupLabel`, the name stated above a
+    derived column in the header band.
+  - `pruneSortingToColumns` is exported: it drops a sort naming a column
+    **nothing can order by**, which is what stops a measure sort outliving its
+    column. It takes the declared column keys and the painted ones as two
+    separate arguments, because a measured column is replaced while grouped —
+    pruning against the painted list alone would discard a sort on a column that
+    is merely not on screen.
+
+  A measure **inherits its source column's layout locks**. `isStatic` and
+  `isResizable` carry onto the derived columns, so a column you froze cannot be
+  pinned, hidden or resized through the measures that replace it — every layout
+  action on a measure acts on the column it measures, which would otherwise have
+  made a measure a way around the lock. The flags describing the _data_ do not
+  carry: a measure is never filterable or groupable and always sortable,
+  whatever its source allows.
+
+  **One known limitation.** A measured column is replaced, and every row renders
+  over the same columns — so a **drilled detail row** has no cell for its own raw
+  value while an aggregate is applied to that column. Keeping the source column
+  alongside its measures would fix it at the cost of an empty column on every
+  group row of every grouped view, to serve rows only a drill produces. The
+  inline drill is being replaced by a modal route that applies no grouping, where
+  every declared column is present and the question does not arise.
+
+- ae3022a: A date or timestamp column can now be a group key at a chosen granularity —
+  year, quarter, month or day — instead of being refused for holding one value per
+  calendar day.
+
+  ```ts
+  await selectGroupedRows({
+    aggregates: [{ fn: 'count' }, { column: 'total_amount', fn: 'sum' }],
+    allowedColumns: ['order_date', 'total_amount'],
+    grouping: 'rollup',
+    keys: ['order_date'],
+    maxRows: 5000,
+    periods: { order_date: 'month' }, // ← new
+    schema: 'public',
+    table: 'orders',
+  });
+  ```
+
+  The granularity is a **column-keyed map beside** the key list, not a member of
+  it: a column can be a group key at most once, so a map is per-key by
+  construction and `keys` stays `readonly string[]` in both packages, in the URL
+  and in every group path. `OlapGroupPeriod` lives in `@lcabrera/api` and both
+  other packages alias it — it travels in two params, so it is wire vocabulary.
+
+  **`ColumnGroupingCapability` gains `periods`, and it is independent of
+  `canGroup`.** A date column is routinely refused as a raw key and legal at a
+  month, so read `periods` _instead of_ `canGroup` for a temporal column rather
+  than after it:
+
+  ```ts
+  { column: 'order_date', typeName: 'date', role: 'dimension',
+    canGroup: false, refusal: 'too-many-distinct', distinctEstimate: 1800,
+    periods: ['month', 'quarter', 'year'] }
+  ```
+
+  The cardinality guard measures the **truncated** expression. `pg_stats` has no
+  distinct count for `date_trunc('month', c)`, so the capabilities query now reads
+  the column's histogram range and the estimate is bounded by both that range and
+  the raw distinct count.
+
+  **Truncation is performed in a stated time zone.** `date_trunc(field,
+timestamptz)` resolves against the session `TimeZone`, so the same order falls in
+  December for one caller and January for another. `timestamptz` keys are pinned to
+  UTC; `date` and `timestamp` are cast so the call cannot promote them through the
+  session zone.
+
+  **Drilling a truncated group is a half-open range**, `gte` the period start and
+  `lt` the next — the group's value is a period start no row holds, so an equality
+  returns the boundary row alone. `toDrillRead` takes a new `truncations` argument
+  for this; `toGroupKeyTruncations` builds it from the capabilities. `toGroupRow`
+  and `decodeGroupedRows` take the same argument, and use it to head a period group
+  `2021-06` rather than with an ISO instant.
+
+  In `@lcabrera/ui`, an applied temporal key in the settings drawer carries a
+  granularity control offering exactly the periods the route reports. The
+  `grouping` URL param gains a `gran` member beside `agg`; it is dropped when
+  empty, so an untruncated grouping produces the link it always did.
+
+  **Breaking for anyone constructing these types by hand.**
+  `ColumnGroupingCapability.periods` and `TableGroupingState.periods` are required
+  rather than optional — a surface that omitted one would silently offer nothing.
+  Values produced by `getColumnGroupingCapabilities` and the loader are unaffected.
+
+- dd82183: A grouped table can now drill a leaf group into its own rows.
+
+  A group row states how many rows it holds; until now there was no way to see
+  them without ungrouping the whole table and rebuilding the filters by hand.
+  Clicking the chevron on a **leaf** group — one whose path names every applied
+  group key — fetches one bounded page of its rows and splices them underneath it
+  (ADR-079).
+
+  **Wiring it takes two things, and both are deliberate.** The route declares
+  `isGroupDrillEnabled` on its loader `meta` (ADR-063), and supplies `fetchDrill`
+  to `TableRouteView`. The flag says the endpoint exists; the fetcher is the call
+  that reaches it, and it is a prop because a function does not survive the loader
+  boundary. `useTableRoutePage` composes the query, so a drill inherits the
+  grouped view's filters and sort by construction — a drilled page read under
+  different filters returns rows that are individually true and wrong under the
+  heading above them.
+
+  **One page, then a hand-off.** Where a group holds more rows than the page
+  fetched, the last row states the shortfall and links to the same table
+  ungrouped, filtered to that group. There is deliberately no second page: the
+  hand-off exists so nobody has to build in-place paging inside a group.
+
+  **A drill can fail, and says so.** A rejection renders a row that names no cause
+  and names the gesture that retries — closing and reopening the group. Nothing
+  retries on the user's behalf, which is what keeps a bounded read bounded.
+
+  **Accessibility.** A drillable leaf now carries `aria-expanded`, reading `false`
+  until the group has been opened — it flips when the drill is asked for, not when
+  the rows land, because the loading and failure rows are themselves content under
+  it — and responds to `ArrowRight`/`ArrowLeft` like any other tree node. The hand-off is a real link but is **not** a tab stop — the
+  grid has exactly one (ADR-062) — and is reached with `Enter` on the focused
+  cell, which now follows any linked cell's link.
+
+  The hand-off is withheld where a group key cannot be expressed as a filter, such
+  as a NULL key: a partial filter selects a larger set than the group, so the link
+  would open a table showing the wrong rows under the right heading.
+
+  `TableGroupDrillFetcher` and `TableGroupDrillRequest` are exported for typing a
+  route's fetcher. A table that declares no drill behaves exactly as before.
+
+- f85324d: Adds a column filter that selects the rows where a column **holds no value**.
+
+  Until now every member of `ColumnFilter` carried a value and mapped to a
+  comparison, and SQL equality against NULL is never true — so there was no
+  filter a user could build, or a URL could carry, that selected null rows. The
+  gap was load-bearing: `resolveDrillHandoffSearch` refuses to offer its link at
+  all when a group's key is NULL, because "the filter vocabulary has no 'is null'
+  member", and the NULL group is the one a reader is most likely to click into.
+
+  **The query layer already emitted `IS NULL`.** `QueryFilter` has a unary arm and
+  `appendFilterClause` gives it a branch that binds no parameter. What was missing
+  was a vocabulary that could reach it, so this adds the span between: an
+  `EmptyFilter` in both packages' `ColumnFilter` unions, a `toQueryFilters` arm
+  producing the unary filter, a URL codec, and the operators in the filter editor.
+
+  **It is its own `type`, not an operator on the value-carrying filters.**
+  Emptiness is not a comparison: adding `isEmpty` to `TextFilter` and its siblings
+  would put a `value` on every one of them that must then be ignored, and force
+  each editor to hide its own input. One value-less member keeps "carries a value"
+  true of every other member of the union.
+
+  **Empty means SQL NULL and deliberately not the empty string.** A text column
+  can hold both and they are different facts — `''` is a value someone stored.
+  A column where `''` is meaningful wants a text `equals ''`.
+
+  The operators are offered for **every** column type, because any column can hold
+  nothing; the data type decides which comparisons make sense, not whether
+  emptiness does.
+
+  **In the URL it is an object, `{"op":"ie"}`, not an array.** Every other
+  compact filter is an array, and a select filter is written as its bare values —
+  so `["ie"]` already means "this column equals the value `ie`". Claiming that
+  form would have made `ie` and `nie` reserved words in a position holding
+  arbitrary user data, turning a consumer's "country is ie" link into "country is
+  empty" with nothing to say so.
+
+  A boolean column gets these operators from `BooleanFilterInput` rather than the
+  operator dropdown, which `FilterInputs` does not render for one.
+
+  For consumers: `ColumnFilter` gains a variant, so an exhaustive `switch` over
+  `filter.type` that previously compiled may now need an arm. Three such
+  dispatches inside these packages did — the URL serializer, the drawer's
+  validity check, and the URL-restore compatibility check — and each would have
+  dropped the filter silently rather than failing.
+
+- 5f43ece: A grouped grid folds a group from the row that starts it, not the subtotal that
+  ends it.
+
+  The chevron sat on whichever row owned loaded children, which under a rollup is
+  the **subtotal** — and a subtotal is emitted after the rows it totals. So a
+  group's label appeared at the top of its block and the control for it at the
+  bottom: to collapse a group you had to scroll to its end first, and on a group
+  longer than the viewport the control for the block you were looking at was
+  off-screen entirely.
+
+  The control now renders in the cell where its level's key is **drawn**. A row
+  states its ancestors and does not own them, so those are the levels it folds,
+  each in that key's own column; a carried cell renders no control, exactly as it
+  renders no label. `ArrowLeft`/`ArrowRight` act on the level the focused column
+  holds, so the keyboard folds what the chevron in the same cell folds.
+
+  Two rules keep it coherent, and both are stated in the ADR-080 amendment:
+
+  - **A row skips its own group only when it is a subtotal, and only while that
+    group is open.** Every other group row precedes what it owns, so folding
+    itself already puts the control at the top. Once a group folds, its subtotal
+    is the only row left, so the control returns there and the group can be
+    reopened.
+  - **A leaf that has already drilled answers with its drill**, not a fold, because
+    the drill reports a group as open from the moment the fetch starts rather than
+    when its rows arrive.
+
+  No tab stops and no ARIA are added. The chevron is still `aria-hidden` and still
+  not a button, and `aria-expanded` stays on the row describing that row's own
+  group — a row does not report its ancestors' states.
+
+  The published surface is unchanged — `reports/api-surface/ui.txt` is
+  byte-identical, because the types this moves through (`TableGroupDisclosureState`
+  and the new `TableGroupLevelDisclosure`) are internal to the Table and are not
+  exported from the package. What a consumer sees is the behaviour: where the
+  chevron is, and which group it folds.
+
+- f608a76: A grouped Table can open or fold **every** group in one action, and a fold that
+  could not be undone is no longer offered at all.
+
+  The column header's grouping section gains **Expand All Groups** and **Collapse
+  All Groups**, beside "Clear Grouping" and gated the same way — always shown so
+  the menu keeps its shape, disabled when there is nothing to do. They are ordinary
+  menu items, so they are reachable by keyboard, and they take effect immediately
+  rather than being staged behind the settings drawer's Accept: expansion is client
+  state, not a setting.
+
+  **"Collapse all" folds to the outermost level, never to nothing**, because a
+  collapse hides a group's **descendants** and never the group row itself. Folding
+  every group therefore leaves one row per top-level group, plus the grand total —
+  so there is always something left to expand back from.
+
+  ```
+  Cancelled  Business  Critical            Cancelled ·total·
+  Cancelled  Business  ·total·             Active    ·total·
+  Cancelled  Retail    ·total·      →      ·total·
+  Cancelled  ·total·
+  Active     ·total·
+  ·total·
+  ```
+
+  **Breaking in effect for `flat` grouping, though the API is unchanged.** A row
+  could previously fold an ancestor level — `(Berlin)` in a `city › status`
+  grouping — that a flat read never emits a row for. Folding it hid every row of
+  the group and left nothing behind carrying the control, so the group could not be
+  reopened from the grid at all. A group is now foldable only where a row survives
+  the fold to undo it, which under `rollup` and `cube` is always its subtotal.
+  Under `flat` the chevrons are therefore gone and both new menu items are
+  disabled — a flat result has no hierarchy on screen to fold.
+
+  For consumers reading the group tree directly, `resolveTableGroupTree` now also
+  returns `foldableGroupPaths`: the one set every chevron, the keyboard fold and
+  the two menu items are derived from.
+
+  Focus follows the fold. Collapsing every level at once moves the grid's focus
+  target to the top-level group containing the focused row, rather than to whatever
+  row shifted into its index — which after a collapse-all is usually the grand
+  total.
+
+- bd7b00c: A grouped row can now be expanded and collapsed with a pointer.
+
+  Group expansion has worked since the treegrid slice, but the only thing wired to
+  it was the arrow-key handler — so to anyone using a mouse the feature did not
+  exist. The hierarchy column now leads with a disclosure chevron that toggles the
+  group it sits on, and reserves the same space on rows with nothing to open so
+  sibling labels stay aligned. The chevron replaces the decorative group icon that
+  used to occupy that spot.
+
+  **The chevron is deliberately not a button.** The grid has a single roving tab
+  stop addressed by row key plus column key; a button here would add a second one
+  inside a cell that already owns one. Expansion state stays on the row, where
+  `aria-expanded` already carries it, and the keyboard path is unchanged —
+  `ArrowRight` expands, `ArrowLeft` collapses, exactly as before.
+
+  Adds `DisclosureIcon` to the icon set.
+
+- 41314fe: A grouped Table now renders each group key's value in that key's **own column**
+  rather than in a grid-owned hierarchy column, and reads a row's level from which
+  key columns are filled rather than from an indent
+  ([ADR-080](https://github.com/luciocabrera/vite-react-compiler/blob/main/docs/decisions/ADR-080-a-group-key-renders-in-its-own-column.md)).
+
+  Four things this fixes, three of them visible before:
+
+  - A `flat` grouping rendered no hierarchy at all — every row sat at the same
+    depth and only the innermost key was drawn, so grouping by four keys showed
+    one.
+  - A `rollup` stated a group's identity _after_ the rows it totalled.
+  - A key column had no header of its own, so sorting or filtering by a group key
+    had no in-grid home.
+  - A lattice result could not be rendered at all, which is why `cube` is absent
+    from `TableGroupingMode` while `@lcabrera/server` has emitted it since #574.
+    Nothing in the rendering stands in the way now; admitting the mode is separate
+    work.
+
+  While grouping is applied the key columns are hoisted to the head of the column
+  order and the left pin, in key order, and forced visible. That is a derivation
+  and never state — your `columns`, `columnOrder`, `columnPinning` and
+  `columnVisibility` are untouched, so ungrouping restores the layout exactly. A
+  group key is locked against dragging and hiding while grouped, but keeps its
+  width and its header menu.
+
+  **Breaking for anyone reaching past the public surface:** the synthetic
+  hierarchy column is gone, along with `TABLE_GROUP_HIERARCHY_COLUMN_KEY` and the
+  `table-group-label` test id. A grouped row now paints exactly the columns you
+  declared — one cell fewer per row.
+
+- 3ee47e8: A group's path now carries its key **values**, not only their labels.
+
+  `TableGroupKeyValue` gains `readonly value: unknown` beside its existing
+  `label`. The label is unchanged and stays formatted — it is what the hierarchy
+  column renders, and only the service that read the row can produce it, since
+  nothing downstream resolves a path entry back to a column descriptor.
+
+  **Why both.** Formatting is lossy in exactly the direction a query needs. A NULL
+  group key renders as `(empty)`, a date as an ISO string, a boolean as `'true'` —
+  so a filter built from the label reads `category = '(empty)'` and matches
+  nothing, silently, on the group a user is most likely to click into. The raw
+  value is what a drill turns back into the restriction the group came from
+  (ADR-079). This is the same split `TableGroupAggregateValue` already carries
+  after the aggregate fix: the display string and the datum answer two questions.
+
+  **Breaking for anyone building a `TableGroupRowSummary`.** Supply the raw column
+  value alongside the label you already produce:
+
+  ```diff
+   path: groupedKeys.map((columnKey) => ({
+     columnKey,
+     label: toGroupLabel(row[columnKey]),
+  +  value: row[columnKey],
+   }))
+  ```
+
+  The summary guard checks `value` for **presence**, not type — `null` is a
+  legitimate key and a NULL group is a group, while an entry carrying no `value`
+  key at all is malformed and refuses the whole summary.
+
+  **Stored expansion state is unaffected.** `resolveGroupPathKey` still encodes
+  `[columnKey, label]` only, so a collapse persisted before this change still
+  matches its row. That is pinned by a test rather than left to inspection —
+  adding `value` to the encoding would silently re-expand every stored collapse.
+
+- 8460f5b: A grouped row now reads as a total rather than as a styled data row.
+
+  **Aggregates are formatted by the grid, and travel raw.**
+  `TableGroupAggregateValue.label: string` is replaced by
+  `value: unknown`. A grouped service no longer formats its measures — it passes
+  the value through as the database returned it, and the cell renders it with the
+  column's own `dataType`, `format` descriptor and locale, exactly as a data cell
+  in that column is rendered. A `sum` under a currency column now renders as
+  currency instead of as the raw Postgres `numeric` string, and an `avg` honours
+  that column's fraction digits. `count` renders as a tally even on a currency
+  column, since it answers "how many rows" rather than an amount.
+
+  **Breaking for anyone building a `TableGroupRowSummary`.** Replace each
+  aggregate's `label` with `value`, and drop the formatting that produced it:
+
+  ```diff
+   aggregates: rows.map(({ columnKey, fn, alias }) => ({
+     columnKey,
+     fn,
+  -  label: formatValue(row[alias]),
+  +  value: row[alias],
+   }))
+  ```
+
+  `path` entries are unchanged and still carry a formatted `label` — a key cannot
+  be resolved back to its column client-side, so it has to arrive rendered.
+
+  **The hierarchy label no longer prints the group's row count.** A count belongs
+  in the column it aggregates, under that column's header; select a `count`
+  aggregate on a column to show it. `TableGroupRowSummary.count` is unchanged and
+  still carried.
+
+  **Group, subtotal and grand-total rows now paint on three different grounds**,
+  so a total is a different kind of row before its label is read.
+
+- c5e58c8: A table route can declare a default grouping and lock it, and where totals sit is now a user setting that reaches the query.
+
+  `createTableRouteLoader` takes `defaultGrouping`, applied when the URL carries no `grouping` param, and `meta.isGroupingLocked`, which fixes the grouping's shape — keys, mode and per-key granularity — while leaving the aggregates editable. The lock is honoured at every surface that reshapes a grouping, the column-header menu included, not only in the settings drawer.
+
+  Totals placement is chosen in the drawer beside the grouping mode, persists across sessions in the UI-flags cookie, and travels in a `totals` search param so it reaches the emitted `ORDER BY` rather than only the rendering. Absent, it is `last` — the placement the query builder already applied, so a route that never offers the choice emits unchanged SQL.
+
+  One behaviour changes for routes that declare a default grouping: clearing the grouping now writes an explicit empty `grouping` param instead of dropping it, so "ungrouped" survives the next navigation. Routes without a default produce byte-identical URLs.
+
+  `isGroupDrillEnabled` is now resolved from the route's own `meta` alongside the other capabilities, so the persisted UI-flags cookie can no longer seed it — its documented contract all along.
+
+- 80be943: The staged aggregates in the settings drawer's Grouping tab can now be dragged
+  into any order.
+
+  Each measure gets a drag handle, the same one the Group Keys, Sort and Column
+  Order lists have carried all along — the aggregate list was the only staged list
+  in the drawer a user could not reorder. The drag stages like every other edit in
+  that drawer: nothing navigates until Accept, and Accept still costs a single
+  navigation however many edits were staged. Cancel discards a reorder along with
+  the rest.
+
+  The order is real state, not a view preference. It rides in the `grouping`
+  search param's `agg` array, so a reordered list survives a shared link and a
+  reload — including a move that takes one column's measure above another's, which
+  is the case the ordered wire format exists for.
+
+  The order a reorder produces is a **permutation** of what was applied: dragging
+  can neither introduce an aggregate nor drop one. That matters for a consumer
+  seeding the grouping store from a hand-written loader, where an aggregate on a
+  column the route does not declare is staged but not rendered — such an entry
+  keeps its place rather than being silently un-staged by someone dragging a row
+  they can see.
+
+  Each row keeps its share toggle and its remove control, and two measures on one
+  column still remove independently: a row is identified by its `(columnKey, fn)`
+  pair, which is also what the reorder names.
+
+- 4f8beaa: A Table column can now carry **several aggregate functions at once**. Applying
+  `avg` to a column already showing `min` adds to it rather than replacing it, from
+  the settings drawer's "Add Aggregate" panel and from the column-header menu
+  alike, and the group rows show both — each named, so two numbers in one cell are
+  readable.
+
+  Previously the second selection silently discarded the first, and nothing said
+  so. The cap was not an oversight: `TableGroupingState.aggregates` was a
+  column-to-function map because that was the shape the compact `grouping` URL
+  param could carry, and a state the transport cannot express is a state a shared
+  link silently loses.
+
+  **The shapes that changed.** `TableGroupingState.aggregates` and `.shares` are
+  now ordered lists of `{ columnKey, fn }` records, as are
+  `TableMetaState.groupingAggregates` and `.groupingShares`. On the wire, the
+  `grouping` param's `agg` and `share` members are ordered arrays of compact
+  `"<columnKey>:<fn>"` strings. A consumer building either of those by hand — a
+  route with a `defaultGrouping`, or a hand-written loader seeding the grouping
+  store — has to move with them.
+
+  **A link written before this reads as ungrouped.** The old `{"agg":{…}}` map is
+  outside the new vocabulary, so it refuses the whole payload and the table opens
+  flat — the same whole-state refusal every other unreadable `grouping` param gets,
+  rather than a half-applied query. Only the `agg` and `share` members are
+  affected; a `grouping` param with neither is unchanged.
+
+  **A share names a measure now, not a column.** `sum` and `count` are both
+  shareable, so on a column carrying both, a bare column key could not say which
+  measure's percentage was meant. Each measure takes its own share toggle, and
+  removing one measure prunes only that measure's share.
+
+  **Order is now state.** The aggregate list keeps the order it was built in, that
+  order survives the URL round trip, and it is what the staged list renders. A
+  column key containing a `:` round-trips correctly: the token is split on its last
+  separator and the suffix checked against the closed function vocabulary.
+
+  Sorting and pinning are untouched. They remain single-valued, and keep the
+  shared `deriveToggleCommandState`; the aggregate commands got their own
+  derivation beside it rather than widening one that sorting also uses.
+
+- 3523f02: A grouped measure can now be shown as a share of the grand total, with a proportional bar.
+
+  Turn it on per aggregate in the settings drawer. Each group row then shows its measure as a percentage beside the number, at every level of a multi-key grouping — leaves, subtotals, and the grand total reading 100%.
+
+  The share is offered on `sum` and `count` and on no other aggregate. The denominator is derived from the rows the read already returned rather than asked of the server, and that is only correct where adding the parts gives the whole: summing each group's `avg` is not the set's average, and summing each group's `count(DISTINCT …)` counts a value once per group it appears in — which would produce shares that still add to 100% while being wrong several times over. ADR-086 carries the measurements.
+
+  Nothing about a share changes the SQL the route emits, so turning one on costs no round trip. It travels in the `grouping` search param with the rest of the configuration, so a shared link opens showing what its author saw; a link naming a share on an aggregate that cannot carry one is refused whole, as every other illegal member of that param already is.
+
+  An absent or zero denominator renders an explicit absence rather than `0.0%` or `NaN`, and the bar is hidden from the accessibility tree because the value it depicts is already text beside it.
+
+- 4a7d18a: The aggregation surfaces stop offering a second Distinct Count, which a grouped
+  read cannot carry.
+
+  `@lcabrera/server` budgets a grouped query at one `countDistinct` — it costs a
+  per-group tuplesort redone for every grouping set, so a second one repeats the
+  most expensive part of the query — and refuses a read carrying more. Nothing on
+  this side knew that, so both surfaces let a user apply `Distinct Count` on one
+  column and then on another, and answered the second choice with a refused read
+  instead of rows. The refusal rendering was working (ADR-068); the offer should
+  never have been made.
+
+  **Withheld rather than offered-and-disabled**, the rule the aggregation commands
+  already keep — with one deliberate exception. The column that **carries** the
+  distinct count goes on being offered it in its own header menu, because that menu
+  toggles and the item is the only way to remove it; a rule applied everywhere
+  would strand a user with a measure they could apply from the menu and not clear
+  from it. The drawer's picker never sees that exception, since it subtracts what
+  the column already carries anyway.
+
+  **Where withholding empties the drawer's function control, the control says
+  why** — and says something different from the message a fully-measured column
+  gets. "This column has them all" sends the user to this column's measures; "only
+  one Distinct Count fits in a grouped read" sends them to whichever other column
+  holds one, and names a **cost** rather than a prohibition, which is what the cap
+  actually is.
+
+  The rule is a property of the whole request rather than of any column, so it does
+  not go into the shared per-column predicate: `resolveOfferableAggregates` is
+  unchanged, and `resolveAffordableAggregates` composes on top of it, counting
+  every column's aggregates together. A `grouping` URL naming two distinct counts
+  is now refused by this package's own sanitizer, whole, rather than travelling to
+  the server to be refused there — and the store's seed guard refuses the same list,
+  which is the boundary a consumer's own loader reaches directly.
+
+  The published surface gains one constant and loses nothing:
+  `MAX_TABLE_COUNT_DISTINCT_AGGREGATES`, beside `MAX_TABLE_GROUP_KEYS` on
+  `./components/Table/Table.constants`, so a consumer can read the budget its own
+  surfaces have to respect. Every util behind it is internal to the Table and none
+  is exported.
+
+### Patch Changes
+
+- 7977fd0: A Table column that is currently a **group key** no longer offers aggregation
+  functions in its header actions menu.
+
+  A grouped column renders its key's value rather than a measure
+  ([ADR-080](https://github.com/luciocabrera/vite-react-compiler/blob/main/docs/decisions/ADR-080-a-group-key-renders-in-its-own-column.md)),
+  so the aggregate a user picked there was written to the grouping state and then
+  dropped by the rendering — the menu item looked broken. The settings drawer's
+  "Add Aggregate" picker already left those columns out, so the two surfaces
+  disagreed in the same session.
+
+  Both now resolve "may this column be aggregated, and with what" through one
+  predicate, `resolveOfferableAggregates`, which composes the loader-shipped
+  catalogue's type legality with group-key membership. Each surface still feeds it
+  from its own state — the header menu from the applied grouping, the drawer from
+  its staged draft — so the picker keeps reflecting an edit that has not been
+  accepted yet.
+
+  Suppression follows the menu's existing shape for an illegal command: the
+  functions **and** the "No Aggregate" clear item are absent while the column is a
+  key, exactly as they already were for a column the catalogue can aggregate in no
+  way. Everything else in that column's menu — sorting, grouping, pinning, hiding
+  and Manage Column — is unchanged, and removing the column from the grouping
+  brings its aggregation items back.
+
+  This constrains what is _offered_ and nothing else. The grouping configuration
+  travels in the URL, so a request can still name one column as both key and
+  measure; there the key wins, as it already did.
+
+- 24f6cb8: Fixes a crash that emptied a grouped Table to its error boundary — the grid
+  vanished and the route showed its load-failure state, for data that had loaded
+  fine.
+
+  Three defects composed, and each is fixed on its own terms.
+
+  **A drill row's marker never reached the cell that renders it.**
+  `renderTableBodyPinnedGroup` takes one spread object of per-row fields and
+  names each one it forwards; `drillRow` was not among them, so it was dropped
+  silently — an excess property survives a spread rather than being rejected.
+  Every drill chrome row was therefore read as an ordinary data row, and the
+  actions column asked it for a primary key it does not carry. That is the crash
+  on the first click of a chevron.
+
+  **A malformed structural row was reclassified as data.**
+  `getTableGroupRowSummary` and `getTableDrillRow` answer `undefined` both when a
+  row is not chrome and when its marker is chrome but unreadable, and the render
+  path could not tell those apart. One member that fails to narrow now blanks the
+  row instead of turning a group row into a data row. The validators stay strict
+  — a group described by some of its keys is not the group the row holds — and
+  `hasTableStructuralMarker` answers the separate question of what the row claims
+  to be.
+
+  The reachable trigger for that one is serialization: an aggregate whose value is
+  `undefined` loses its `value` key entirely to `JSON.stringify`, and the
+  presence check that correctly admits `null` then refuses the whole summary.
+
+  **`resolveCrudRowId` no longer throws.** ADR-062 had already drawn this line for
+  row keys — a throw is right for a CRUD link, where a bad id must not reach a
+  route, and wrong where the same throw empties the table — and the row-actions
+  menu, also on the render path, kept the throwing call. It now answers
+  `undefined`, and the menu renders nothing for a row with no resolvable id; any
+  custom actions still render, since they act on the row rather than on an id. No
+  bad id reaches a route either way, which is the guarantee the throw existed for.
+
+  There is no throwing variant left, because nothing wanted one: the menu is its
+  only caller. Consumers reaching for it through a deep import get `undefined`
+  where they previously got an exception — it is not part of the published
+  surface.
+
+- e50618b: The settings drawer's "Add Aggregate" **function** picker no longer offers a
+  function the chosen column already carries.
+
+  Since a column began carrying several aggregates at once, adding one has been an
+  append with a duplicate guard, so re-picking an applied function was accepted and
+  then changed nothing: the aggregate list stayed as it was and no message
+  explained why. That is the same shape as the header-menu defect just fixed — a
+  control that takes a choice and does nothing reads as a bug — and the house rule
+  is that an illegal command is never offered rather than offered-and-disabled.
+
+  The subtraction is a new drawer-owned derivation, `resolveAddableAggregates`,
+  composed **on top of** the shared `resolveOfferableAggregates` rather than folded
+  into it. The two offering surfaces deliberately diverge here: the picker only
+  ever adds, so an applied function is a choice that cannot change anything, while
+  the column header menu **toggles** — there the applied item is the only way to
+  remove that aggregate, so it must keep being offered. Teaching the shared
+  predicate about applied aggregates would have forced one answer on both, and the
+  menu would have lost its clear affordance. Legality still comes from the one
+  predicate, so neither surface can disagree about which functions a column
+  supports at all.
+
+  Clearing an aggregate puts its function straight back in the picker. A column
+  that already carries every function its type supports now says so, in place of
+  the function control, instead of presenting an empty list — the column list still
+  offers such a column, because that list excludes group keys and unaggregatable
+  columns, not exhausted ones. The Add button acts on what the picker currently
+  offers, so a selection that stops being addable underneath it — the column is
+  staged as a group key, or the function gets applied from elsewhere — can no
+  longer be submitted.
+
+- Updated dependencies [ae3022a]
+- Updated dependencies [dd82183]
+  - @lcabrera/api@0.4.0
+  - @lcabrera/utils@0.2.0
+
 ## 0.3.0
 
 ### Minor Changes

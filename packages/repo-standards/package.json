@@ -1,6 +1,6 @@
 {
   "name": "@lcabrera/repo-standards",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": false,
   "description": "The gates that keep a repository's commits, branches, pull requests, issues, coordination register, architecture decisions and published packages to one enforced shape — as commands, so any repository can run them.",
   "keywords": [

@@ -1,6 +1,6 @@
 {
   "name": "@lcabrera/vite-config",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": false,
   "description": "Vite+ fmt/lint/pack/run config factories and shareable ESLint flat configs for TypeScript and React workspaces.",
   "keywords": [
