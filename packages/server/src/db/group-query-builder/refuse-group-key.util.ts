@@ -18,9 +18,12 @@ type RefuseGroupKeyArgs = {
 };
 
 /**
- * That ordering also gives `no-equality-operator` its real job — it fires for a type whose
- * category says dimension or fact but which still resolves no operator, which is exactly
- * the extension or domain type the role gate cannot know about.
+ * Refusal rules run in priority order so a refused column gets the most useful message.
+ * The role check comes first on purpose: for a `point` column both role and equality fail,
+ * and "not a dimension" is the sentence a user understands. That ordering also gives
+ * `no-equality-operator` its real job — it fires for a type whose category says dimension
+ * or fact but which still resolves no operator, which is the extension or domain type the
+ * role gate cannot know about.
  */
 export const refuseGroupKey = ({
   estimate,

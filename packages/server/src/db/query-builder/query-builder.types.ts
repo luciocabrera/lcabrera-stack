@@ -20,6 +20,10 @@ export type ComparisonOperator = BinaryOperator | UnaryOperator;
 
 export type CountQueryDescriptor = {
   readonly allowedColumns?: readonly string[];
+  /**
+   * Column passed to `count()`; defaults to `*` (count every matching row). Pass a
+   * specific column when NULLs in that column should not be counted.
+   */
   readonly column?: string;
   readonly filters?: readonly QueryFilter[];
   readonly schema: string;
@@ -29,6 +33,7 @@ export type CountQueryDescriptor = {
 export type DeleteQueryDescriptor = {
   /** Same opt-in authorization semantics as `SelectQueryDescriptor`. */
   readonly allowedColumns?: readonly string[];
+  /** At least one filter is required — an unfiltered DELETE is refused. */
   readonly filters: readonly QueryFilter[];
   readonly returning?: readonly string[];
   readonly schema: string;
@@ -58,7 +63,9 @@ export type MaxValueQueryDescriptor = {
  * O(limit) rather than walking and discarding `offset` rows (ADR-052).
  */
 export type QueryCursor = {
+  /** Must be the last `sort` entry; `assertKeysetCursor` throws otherwise. */
   readonly uniqueColumn: string;
+  /** One value per `sort` entry, in `sort` order. */
   readonly values: readonly unknown[];
 };
 
@@ -117,6 +124,7 @@ export type UnaryOperator = 'isNotNull' | 'isNull';
 export type UpdateQueryDescriptor = {
   /** Same opt-in authorization semantics as `SelectQueryDescriptor`. */
   readonly allowedColumns?: readonly string[];
+  /** At least one filter is required — an unfiltered UPDATE is refused. */
   readonly filters: readonly QueryFilter[];
   readonly returning?: readonly string[];
   readonly schema: string;

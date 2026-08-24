@@ -1,8 +1,8 @@
 /**
- * `@lcabrera/ui` used to import these, resolving only through a tsconfig `paths` alias,
- * which made a client-safe package depend on a Node-only one whose graph includes the
- * Postgres driver — fine while both are private, unresolvable the moment `@lcabrera/ui` is
- * published.
+ * Duplicated with `@lcabrera/ui` on purpose (ADR-039): structural typing is what makes it
+ * work without an adapter. `NumberFilter.value` admitting `undefined` and
+ * `SelectFilter.operator` being optional are laxities held for assignability from the UI's
+ * drafting shape — tightening them is a behaviour change, not a type-only edit.
  */
 
 export type BooleanFilter = {

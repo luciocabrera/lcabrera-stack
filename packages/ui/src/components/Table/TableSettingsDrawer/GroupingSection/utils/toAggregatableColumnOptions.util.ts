@@ -14,6 +14,7 @@ type ToAggregatableColumnOptionsArgs<TData extends Record<string, unknown>> = {
 };
 
 /**
+ * The columns an aggregate may be applied to, as select options.
  * Which columns those are is `resolveOfferableAggregates`' answer and nothing this util
  * decides — the same call the column header menu builds its aggregation block from, so the
  * picker cannot drop a column the menu still offers functions on (#830).

@@ -27,6 +27,7 @@ type GetInitialTableStateArgs<TData extends Record<string, unknown>> = Partial<
 };
 
 /**
+ * Builds the columns store's initial state from what the loader read out of the cookie.
  * That is the only source: the server renders from it, so anything the client preferred
  * over it (sessionStorage, which SSR cannot see) could only contradict the markup already
  * painted and shift the columns at hydration.

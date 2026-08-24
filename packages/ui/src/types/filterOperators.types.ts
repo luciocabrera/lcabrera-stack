@@ -1,9 +1,8 @@
 /**
- * That import resolved only through a tsconfig `paths` alias — `@lcabrera/ui` does not and
- * must not depend on `@lcabrera/server`, a Node-only package whose dependency graph pulls
- * in the Postgres driver.
- * A published `@lcabrera/ui` would have emitted declarations referencing a specifier its
- * consumers cannot resolve.
+ * Declared here rather than imported from `@lcabrera/server/filters/filters.types`. That
+ * import resolved only through a tsconfig `paths` alias — `@lcabrera/ui` must not depend
+ * on `@lcabrera/server` (ADR-039). Duplication is structural: a filter built here is
+ * assignable there with no adapter, and neither package knows the other exists.
  */
 
 export type BooleanFilter = {
