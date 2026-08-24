@@ -133,13 +133,18 @@ export const MAX_KEYS_BY_GROUPING: Readonly<Record<GroupingMode, number>> = {
  */
 export const MAX_GROUP_ROWS_REFUSE = 50_000;
 
+/**
+ * Estimated result rows past which a grouped read is warned about but still run.
+ * Also the row ceiling when the estimate could not be computed at all: an unanalysed table
+ * proceeds under a `LIMIT` of this plus one, and hitting that limit converts the warning
+ * into a refusal.
+ */
 export const MAX_GROUP_ROWS_WARN = 5000;
 
 /**
- * Past it Postgres truncates with only a `NOTICE`, and `pg` then folds two
- * truncation-equal aliases into one row key holding the second value — losing the first
- * column with no error anywhere.
- * Probed; see ADR-059.
+ * `NAMEDATALEN - 1`. Past it Postgres truncates with only a `NOTICE`, and `pg` then folds
+ * two truncation-equal aliases into one row key holding the second value — losing the
+ * first column with no error anywhere. Probed; see ADR-059.
  */
 export const MAX_IDENTIFIER_LENGTH = 63;
 

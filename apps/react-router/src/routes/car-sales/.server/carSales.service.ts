@@ -25,7 +25,10 @@ import {
   toCarSaleRow,
 } from '../config';
 
-/** It reaches the pool via `getPool`, so it must never enter the client bundle. */
+/**
+ * Server-only Postgres access for `car_sales`. Lives in `.server/`, so the build fails if
+ * client code imports it. Reaches the pool via `getPool`.
+ */
 
 const TARGET = {
   allowedColumns: CAR_SALES_ALLOWED_COLUMNS,

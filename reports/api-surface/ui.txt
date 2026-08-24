@@ -444,7 +444,7 @@ DateFilter [type] { readonly operator: 'after' | 'before' | 'between' | 'equals'
 DateOperatorType [type] DateFilter['operator']
 EmptyFilter [type] { readonly operator: 'isEmpty' | 'isNotEmpty'; readonly type: 'empty'; }
 EmptyOperatorType [type] EmptyFilter['operator']
-NumberFilter [type] { readonly operator: | 'between' | 'equals' | 'greaterThan' | 'greaterThanOrEqual' | 'lessThan' | 'lessThanOrEqual' | 'notEquals'; readonly type: 'number'; readonly value: number | undefined; readonly value2?: number; }
+NumberFilter [type] { readonly operator: | 'between' | 'equals' | 'greaterThan' | 'greaterThanOrEqual' | 'lessThan' | 'lessThanOrEqual' | 'notEquals'; readonly type: 'number'; /** Undefined while the user is drafting — this union is the editing contract, not the query one. */ readonly value: number | undefined; readonly value2?: number; }
 NumberOperatorType [type] NumberFilter['operator']
 OperatorOption [type] { readonly label: string; readonly value: T; }
 OperatorType [type] | DateOperatorType | EmptyOperatorType | NumberOperatorType | TextOperatorType

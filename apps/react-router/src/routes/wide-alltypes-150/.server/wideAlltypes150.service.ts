@@ -36,7 +36,10 @@ import {
   WIDE_ALLTYPES_TABLE,
 } from '../config';
 
-/** It reaches the pool via `getPool`, so it must never enter the client bundle. */
+/**
+ * Server-only Postgres access for `wide_alltypes_150`. Lives in `.server/`, so the build
+ * fails if client code imports it. Reaches the pool via `getPool`.
+ */
 
 const TARGET = {
   allowedColumns: WIDE_ALLTYPES_ALLOWED_COLUMNS,

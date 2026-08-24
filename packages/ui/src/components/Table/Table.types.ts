@@ -228,8 +228,9 @@ export type TableColumnsStateInput<TData = Record<string, unknown>> = Omit<
 >;
 
 /**
- * Auto-adds the row-actions column (pinned right) when `read`, `update`, or
- * `delete` is enabled. `create` alone never does.
+ * Auto-adds the row-actions column (pinned right) when `read`, `update`, or `delete` is
+ * enabled. `create` alone never does. A column declared with `key: 'actions'` is still
+ * allowed and is merged onto the auto-generated defaults rather than replacing them.
  */
 export type TableCrudConfig = {
   readonly create?: boolean;

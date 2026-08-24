@@ -11,8 +11,9 @@ type ParseAuthTokenArgs = {
  * Splits a signed auth token (`<payload>.<signature>`) into its halves, returning
  * undefined — never throwing — for anything malformed, so a garbage cookie simply fails to
  * authenticate.
- * Deliberately NOT `parseApiToken`, which this used to borrow because the `.` separator
- * matched.
+ * Deliberately NOT `parseApiToken`. This used to borrow it because the `.` separator
+ * matched, but the contracts differ: a bearer token's second half is a looked-up secret;
+ * here it is a recomputed signature. Borrowing left `parsed.secret` holding a signature.
  */
 export const parseAuthToken = ({
   token,

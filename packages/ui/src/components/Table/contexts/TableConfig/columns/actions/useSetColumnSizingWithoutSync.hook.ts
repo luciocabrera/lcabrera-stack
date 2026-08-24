@@ -9,6 +9,7 @@ export type ColumnSizingArgs<TData> = {
   readonly width: number | undefined;
 };
 
+/** Width write without cookie persist — only `useColumnDragSession` (per-frame). */
 export const useSetColumnSizingWithoutSync = <TData>() => {
   const { columnsStore } = useTableConfigContextValue<TData>();
 
